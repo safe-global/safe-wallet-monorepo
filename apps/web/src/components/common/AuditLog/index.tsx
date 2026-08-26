@@ -72,7 +72,7 @@ export const AuditLogHeader = ({ chip, actions }: { chip?: ReactNode; actions?: 
       {chip}
       {actions && <div className="ml-auto flex items-center gap-1">{actions}</div>}
     </div>
-    <Separator className="mb-4" />
+    <Separator bleed="6" className="mb-4" />
   </>
 )
 

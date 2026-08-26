@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`./index.stories Default 1`] = `
 <div
@@ -15,6 +15,7 @@ exports[`./index.stories Default 1`] = `
         data-radius="lg"
         data-size="none"
         data-slot="card"
+        data-surface="default"
         data-variant="default"
       >
         <div
@@ -24,7 +25,7 @@ exports[`./index.stories Default 1`] = `
             class="mb-4 w-full"
           >
             <div
-              class="w-full overflow-x-auto bg-[var(--color-background-paper)] md:overflow-x-hidden rounded-b-3xl"
+              class="w-full overflow-x-auto rounded-t-3xl bg-[var(--color-background-paper)] md:overflow-x-hidden rounded-b-3xl"
               data-testid="table-container"
             >
               <div
@@ -45,7 +46,7 @@ exports[`./index.stories Default 1`] = `
                       data-slot="table-row"
                     >
                       <th
-                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
                         data-slot="table-head"
                         style="width: 35%;"
                       >
@@ -58,7 +59,7 @@ exports[`./index.stories Default 1`] = `
                         </span>
                       </th>
                       <th
-                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
                         data-slot="table-head"
                         style="width: 16%; text-align: right;"
                       >
@@ -71,7 +72,7 @@ exports[`./index.stories Default 1`] = `
                         </span>
                       </th>
                       <th
-                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
                         data-slot="table-head"
                         style="width: 16%; text-align: right;"
                       >
@@ -84,7 +85,7 @@ exports[`./index.stories Default 1`] = `
                         </span>
                       </th>
                       <th
-                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
                         data-slot="table-head"
                         style="width: 16%; text-align: right;"
                       >
@@ -102,7 +103,7 @@ exports[`./index.stories Default 1`] = `
                         </span>
                       </th>
                       <th
-                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
                         data-slot="table-head"
                         style="width: 17%; text-align: right;"
                       >
@@ -115,7 +116,7 @@ exports[`./index.stories Default 1`] = `
                         </span>
                       </th>
                       <th
-                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
                         data-slot="table-head"
                         style="width: 86px; text-align: right;"
                       >
@@ -138,7 +139,7 @@ exports[`./index.stories Default 1`] = `
                       tabindex="-1"
                     >
                       <td
-                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                         data-slot="table-cell"
                         data-testid="table-cell-asset"
                       >
@@ -166,7 +167,7 @@ exports[`./index.stories Default 1`] = `
                         </div>
                       </td>
                       <td
-                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                         data-slot="table-cell"
                         data-testid="table-cell-price"
                       >
@@ -186,7 +187,7 @@ exports[`./index.stories Default 1`] = `
                         </div>
                       </td>
                       <td
-                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                         data-slot="table-cell"
                         data-testid="table-cell-balance"
                       >
@@ -206,7 +207,7 @@ exports[`./index.stories Default 1`] = `
                         </div>
                       </td>
                       <td
-                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                         data-slot="table-cell"
                         data-testid="table-cell-weight"
                       >
@@ -226,7 +227,7 @@ exports[`./index.stories Default 1`] = `
                         </div>
                       </td>
                       <td
-                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                         data-slot="table-cell"
                         data-testid="table-cell-value"
                       >
@@ -246,7 +247,7 @@ exports[`./index.stories Default 1`] = `
                         </div>
                       </td>
                       <td
-                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                         data-slot="table-cell"
                         data-testid="table-cell-actions"
                       >
@@ -279,7 +280,7 @@ exports[`./index.stories Default 1`] = `
                       tabindex="-1"
                     >
                       <td
-                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                         data-slot="table-cell"
                         data-testid="table-cell-asset"
                       >
@@ -307,7 +308,7 @@ exports[`./index.stories Default 1`] = `
                         </div>
                       </td>
                       <td
-                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                         data-slot="table-cell"
                         data-testid="table-cell-price"
                       >
@@ -327,7 +328,7 @@ exports[`./index.stories Default 1`] = `
                         </div>
                       </td>
                       <td
-                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                         data-slot="table-cell"
                         data-testid="table-cell-balance"
                       >
@@ -347,7 +348,7 @@ exports[`./index.stories Default 1`] = `
                         </div>
                       </td>
                       <td
-                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                         data-slot="table-cell"
                         data-testid="table-cell-weight"
                       >
@@ -367,7 +368,7 @@ exports[`./index.stories Default 1`] = `
                         </div>
                       </td>
                       <td
-                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                         data-slot="table-cell"
                         data-testid="table-cell-value"
                       >
@@ -387,7 +388,7 @@ exports[`./index.stories Default 1`] = `
                         </div>
                       </td>
                       <td
-                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                         data-slot="table-cell"
                         data-testid="table-cell-actions"
                       >
@@ -420,7 +421,7 @@ exports[`./index.stories Default 1`] = `
                       tabindex="-1"
                     >
                       <td
-                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                         data-slot="table-cell"
                         data-testid="table-cell-asset"
                       >
@@ -448,7 +449,7 @@ exports[`./index.stories Default 1`] = `
                         </div>
                       </td>
                       <td
-                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                         data-slot="table-cell"
                         data-testid="table-cell-price"
                       >
@@ -468,7 +469,7 @@ exports[`./index.stories Default 1`] = `
                         </div>
                       </td>
                       <td
-                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                         data-slot="table-cell"
                         data-testid="table-cell-balance"
                       >
@@ -488,7 +489,7 @@ exports[`./index.stories Default 1`] = `
                         </div>
                       </td>
                       <td
-                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                         data-slot="table-cell"
                         data-testid="table-cell-weight"
                       >
@@ -508,7 +509,7 @@ exports[`./index.stories Default 1`] = `
                         </div>
                       </td>
                       <td
-                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                         data-slot="table-cell"
                         data-testid="table-cell-value"
                       >
@@ -528,7 +529,7 @@ exports[`./index.stories Default 1`] = `
                         </div>
                       </td>
                       <td
-                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                         data-slot="table-cell"
                         data-testid="table-cell-actions"
                       >
@@ -587,6 +588,7 @@ exports[`./index.stories EmptyBalance 1`] = `
           data-radius="lg"
           data-size="none"
           data-slot="card"
+          data-surface="default"
           data-variant="default"
         >
           <div
@@ -596,7 +598,7 @@ exports[`./index.stories EmptyBalance 1`] = `
               class="mb-4 w-full"
             >
               <div
-                class="w-full overflow-x-auto bg-[var(--color-background-paper)] md:overflow-x-hidden rounded-b-3xl"
+                class="w-full overflow-x-auto rounded-t-3xl bg-[var(--color-background-paper)] md:overflow-x-hidden rounded-b-3xl"
                 data-testid="table-container"
               >
                 <div
@@ -617,7 +619,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                         data-slot="table-row"
                       >
                         <th
-                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
                           data-slot="table-head"
                           style="width: 35%;"
                         >
@@ -630,7 +632,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                           </span>
                         </th>
                         <th
-                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
                           data-slot="table-head"
                           style="width: 16%; text-align: right;"
                         >
@@ -643,7 +645,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                           </span>
                         </th>
                         <th
-                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
                           data-slot="table-head"
                           style="width: 16%; text-align: right;"
                         >
@@ -656,7 +658,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                           </span>
                         </th>
                         <th
-                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
                           data-slot="table-head"
                           style="width: 16%; text-align: right;"
                         >
@@ -674,7 +676,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                           </span>
                         </th>
                         <th
-                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
                           data-slot="table-head"
                           style="width: 17%; text-align: right;"
                         >
@@ -687,7 +689,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                           </span>
                         </th>
                         <th
-                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
                           data-slot="table-head"
                           style="width: 86px; text-align: right;"
                         >
@@ -710,7 +712,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                         tabindex="-1"
                       >
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-asset"
                         >
@@ -738,7 +740,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-price"
                         >
@@ -758,7 +760,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-balance"
                         >
@@ -778,7 +780,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-weight"
                         >
@@ -798,7 +800,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-value"
                         >
@@ -818,7 +820,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-actions"
                         >
@@ -851,7 +853,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                         tabindex="-1"
                       >
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-asset"
                         >
@@ -879,7 +881,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-price"
                         >
@@ -899,7 +901,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-balance"
                         >
@@ -919,7 +921,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-weight"
                         >
@@ -939,7 +941,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-value"
                         >
@@ -959,7 +961,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-actions"
                         >
@@ -992,7 +994,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                         tabindex="-1"
                       >
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-asset"
                         >
@@ -1020,7 +1022,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-price"
                         >
@@ -1040,7 +1042,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-balance"
                         >
@@ -1060,7 +1062,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-weight"
                         >
@@ -1080,7 +1082,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-value"
                         >
@@ -1100,7 +1102,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-actions"
                         >
@@ -1160,6 +1162,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
           data-radius="lg"
           data-size="none"
           data-slot="card"
+          data-surface="default"
           data-variant="default"
         >
           <div
@@ -1169,7 +1172,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
               class="mb-4 w-full"
             >
               <div
-                class="w-full overflow-x-auto bg-[var(--color-background-paper)] md:overflow-x-hidden rounded-b-3xl"
+                class="w-full overflow-x-auto rounded-t-3xl bg-[var(--color-background-paper)] md:overflow-x-hidden rounded-b-3xl"
                 data-testid="table-container"
               >
                 <div
@@ -1190,7 +1193,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
                         data-slot="table-row"
                       >
                         <th
-                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
                           data-slot="table-head"
                           style="width: 35%;"
                         >
@@ -1203,7 +1206,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
                           </span>
                         </th>
                         <th
-                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
                           data-slot="table-head"
                           style="width: 16%; text-align: right;"
                         >
@@ -1216,7 +1219,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
                           </span>
                         </th>
                         <th
-                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
                           data-slot="table-head"
                           style="width: 16%; text-align: right;"
                         >
@@ -1229,7 +1232,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
                           </span>
                         </th>
                         <th
-                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
                           data-slot="table-head"
                           style="width: 16%; text-align: right;"
                         >
@@ -1247,7 +1250,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
                           </span>
                         </th>
                         <th
-                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
                           data-slot="table-head"
                           style="width: 17%; text-align: right;"
                         >
@@ -1260,7 +1263,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
                           </span>
                         </th>
                         <th
-                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm"
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
                           data-slot="table-head"
                           style="width: 86px; text-align: right;"
                         >
@@ -1283,7 +1286,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
                         tabindex="-1"
                       >
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-asset"
                         >
@@ -1311,7 +1314,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-price"
                         >
@@ -1331,7 +1334,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-balance"
                         >
@@ -1351,7 +1354,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-weight"
                         >
@@ -1371,7 +1374,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-value"
                         >
@@ -1391,7 +1394,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-actions"
                         >
@@ -1424,7 +1427,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
                         tabindex="-1"
                       >
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-asset"
                         >
@@ -1452,7 +1455,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-price"
                         >
@@ -1472,7 +1475,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-balance"
                         >
@@ -1492,7 +1495,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-weight"
                         >
@@ -1512,7 +1515,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-value"
                         >
@@ -1532,7 +1535,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-actions"
                         >
@@ -1565,7 +1568,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
                         tabindex="-1"
                       >
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-asset"
                         >
@@ -1593,7 +1596,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-price"
                         >
@@ -1613,7 +1616,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-balance"
                         >
@@ -1633,7 +1636,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-weight"
                         >
@@ -1653,7 +1656,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-value"
                         >
@@ -1673,7 +1676,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
                           </div>
                         </td>
                         <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0"
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
                           data-slot="table-cell"
                           data-testid="table-cell-actions"
                         >

@@ -39,7 +39,11 @@
   padding-top: 0;
 }
 
+/* Positioned so the icons paint over `.signers::before`, which is absolute and would otherwise strike
+   through them. Not `z-index: -1` on the line: `.signers` makes no stacking context, so the line would
+   drop behind the enclosing InfoBox fill and vanish between the icons too. */
 .listItemIcon {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;

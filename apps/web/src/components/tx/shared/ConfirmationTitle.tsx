@@ -1,6 +1,7 @@
 import { Typography } from '@/components/ui/typography'
 import EditIcon from '@/public/images/common/edit.svg'
 import css from './styles.module.css'
+import TxSectionTitle from '@/components/tx-flow/common/TxSectionTitle'
 
 export enum ConfirmationTitleTypes {
   sign = 'confirm',
@@ -14,9 +15,7 @@ const ConfirmationTitle = ({ isCreation, variant }: { isCreation?: boolean; vari
         <EditIcon className="size-4" />
       </div>
       <div>
-        <Typography variant="h4" className="capitalize">
-          {variant}
-        </Typography>
+        <TxSectionTitle className="capitalize">{variant}</TxSectionTitle>
         <Typography variant="paragraph-small">
           You&apos;re about to {isCreation ? 'create and ' : ''}
           {variant} this transaction.

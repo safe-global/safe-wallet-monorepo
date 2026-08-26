@@ -144,41 +144,37 @@ const AddFundsWidget = ({ completed }: { completed: boolean }) => {
             dialogTitle="Add funds to your Safe account"
             hideChainIndicator
           >
-            <div className="px-8 pb-10 pt-8">
-              <div className="mb-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <div data-testid="qr-code" className="text-center">
-                  <div className="inline-flex rounded-md border border-[var(--color-border-light)] p-2">
-                    <QRCode value={qrCode} size={132} />
-                  </div>
-                  <div>
-                    <Label className="justify-center">
-                      <Switch
-                        data-testid="qr-code-switch"
-                        checked={settings.shortName.qr}
-                        onCheckedChange={(checked) => dispatch(setQrShortName(checked))}
-                      />
-                      <span>
-                        QR code with chain prefix (<b>{chain?.shortName}:</b>)
-                      </span>
-                    </Label>
-                  </div>
+            <div className="flex flex-col gap-6 px-8 pb-10 pt-2">
+              <div data-testid="qr-code" className="flex flex-col items-center gap-4">
+                <div className="inline-flex rounded-md border border-[var(--color-border-light)] p-2">
+                  <QRCode value={qrCode} size={160} />
                 </div>
-                <div className="flex-1">
-                  <Typography className="mb-4">Copy your address to send tokens from a different account.</Typography>
+                <Label className="justify-center">
+                  <Switch
+                    data-testid="qr-code-switch"
+                    checked={settings.shortName.qr}
+                    onCheckedChange={(checked) => dispatch(setQrShortName(checked))}
+                  />
+                  <span>
+                    QR code with chain prefix (<b>{chain?.shortName}:</b>)
+                  </span>
+                </Label>
+              </div>
 
-                  <div
-                    data-testid="address-info"
-                    className="self-start rounded-md bg-[var(--color-background-main)] p-4 text-sm"
-                  >
-                    <EthHashInfo
-                      address={safeAddress}
-                      showName={false}
-                      shortAddress={false}
-                      showCopyButton
-                      hasExplorer
-                      avatarSize={24}
-                    />
-                  </div>
+              <div className="flex flex-col gap-4">
+                <Typography className="text-center">
+                  Copy your address to send tokens from a different account.
+                </Typography>
+
+                <div data-testid="address-info" className="rounded-md bg-[var(--color-background-main)] p-4 text-sm">
+                  <EthHashInfo
+                    address={safeAddress}
+                    showName={false}
+                    shortAddress={false}
+                    showCopyButton
+                    hasExplorer
+                    avatarSize={24}
+                  />
                 </div>
               </div>
             </div>
