@@ -7,35 +7,35 @@ import * as createtx from '../pages/create_tx.pages.js'
 import * as tx from '../pages/transactions.page.js'
 import * as owner from '../pages/owners.pages'
 import * as navigation from '../pages/navigation.page.js'
+import { getSafeSingletonDeployment } from '@safe-global/safe-deployments'
 
 let staticSafes = []
 
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
-// The networks selected in the creation flow below. A multichain safe is created at the
-// lowest recommendedMasterCopyVersion across the selected networks, so the expected
-// version comes from the same config the app reads (staging CGW) instead of a hardcode.
+// The networks selected in the creation flow below, in selection order.
 const selectedChainIds = ['11155111', '1', '137'] // sepolia, ethereum, polygon
 
-// Negative = a is lower, positive = b is lower, 0 = equal
-const compareVersions = (a, b) => {
+// true if a <= b, comparing major, then minor, then patch
+const isLowerOrEqualVersion = (a, b) => {
   const [x, y] = [a, b].map((v) => v.split('.').map(Number))
-  return x[0] - y[0] || x[1] - y[1] || x[2] - y[2]
+  return (x[0] - y[0] || x[1] - y[1] || x[2] - y[2]) <= 0
 }
 
-const lowestVersion = (versions) => [...versions].sort(compareVersions)[0]
-
-const fetchRecommendedVersion = (chainId) =>
-  cy
-    .request(`${constants.stagingCGWUrlv1}${constants.stagingCGWChains}${chainId}`)
+// Same rule as the app (getLatestSafeVersion in packages/utils/src/utils/chains.ts):
+// use the FIRST selected network's recommendedMasterCopyVersion, but never a version
+// newer than what safe-deployments ships. Other networks can't lower the version —
+// networks that don't support it just can't be selected.
+const getExpectedMultichainVersion = () => {
+  const firstSelectedChainId = selectedChainIds[0]
+  return cy
+    .request(`${constants.stagingCGWUrlv1}${constants.stagingCGWChains}${firstSelectedChainId}`)
     .its('body.recommendedMasterCopyVersion')
-
-const getExpectedMultichainVersion = (chainIds = selectedChainIds) => {
-  const versions = []
-  chainIds.forEach((chainId) => fetchRecommendedVersion(chainId).then((v) => versions.push(v)))
-  // Queued after the requests above — runs once `versions` holds one entry per chain.
-  return cy.then(() => lowestVersion(versions))
+    .then((recommended) => {
+      const deployed = getSafeSingletonDeployment({ network: firstSelectedChainId, released: true })?.version
+      return deployed && isLowerOrEqualVersion(deployed, recommended) ? deployed : recommended
+    })
 }
 
 describe('Happy path Multichain safe creation tests', { defaultCommandTimeout: 60000 }, () => {
