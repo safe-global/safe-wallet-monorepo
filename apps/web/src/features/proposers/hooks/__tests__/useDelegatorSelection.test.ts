@@ -2,11 +2,9 @@ import { renderHook } from '@/tests/test-utils'
 import { useDelegatorSelection } from '../useDelegatorSelection'
 import {
   buildDelegatorOptions,
-  resolveEffectiveDelegator,
   resolveParentSafeAddress,
   isWalletDirectOwner,
   checkMultiSigRequired,
-  checkCanEdit,
 } from '../useDelegatorSelection'
 import * as useWalletModule from '@/hooks/wallets/useWallet'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
@@ -18,41 +16,20 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 
 describe('useDelegatorSelection pure functions', () => {
   describe('buildDelegatorOptions', () => {
-    it('should return empty array when editing', () => {
-      expect(buildDelegatorOptions(true, true, '0xWallet', ['0xNested'])).toEqual([])
-    })
-
     it('should include wallet address when direct owner', () => {
-      expect(buildDelegatorOptions(false, true, '0xWallet', null)).toEqual(['0xWallet'])
+      expect(buildDelegatorOptions(true, '0xWallet', null)).toEqual(['0xWallet'])
     })
 
     it('should include nested owners', () => {
-      expect(buildDelegatorOptions(false, false, '0xWallet', ['0xNested1', '0xNested2'])).toEqual([
-        '0xNested1',
-        '0xNested2',
-      ])
+      expect(buildDelegatorOptions(false, '0xWallet', ['0xNested1', '0xNested2'])).toEqual(['0xNested1', '0xNested2'])
     })
 
     it('should include both wallet and nested owners', () => {
-      expect(buildDelegatorOptions(false, true, '0xWallet', ['0xNested'])).toEqual(['0xWallet', '0xNested'])
+      expect(buildDelegatorOptions(true, '0xWallet', ['0xNested'])).toEqual(['0xWallet', '0xNested'])
     })
 
     it('should not include wallet when not direct owner', () => {
-      expect(buildDelegatorOptions(false, false, '0xWallet', null)).toEqual([])
-    })
-  })
-
-  describe('resolveEffectiveDelegator', () => {
-    it('should return proposer delegator when editing', () => {
-      expect(resolveEffectiveDelegator(true, '0xProposer', '0xSelected', '0xDefault')).toBe('0xProposer')
-    })
-
-    it('should return selected delegator when not editing', () => {
-      expect(resolveEffectiveDelegator(false, undefined, '0xSelected', '0xDefault')).toBe('0xSelected')
-    })
-
-    it('should fall back to default when no selection', () => {
-      expect(resolveEffectiveDelegator(false, undefined, undefined, '0xDefault')).toBe('0xDefault')
+      expect(buildDelegatorOptions(false, '0xWallet', null)).toEqual([])
     })
   })
 
@@ -103,24 +80,6 @@ describe('useDelegatorSelection pure functions', () => {
       expect(checkMultiSigRequired('0xParent', 2)).toBe(true)
     })
   })
-
-  describe('checkCanEdit', () => {
-    const wallet = checksumAddress(faker.finance.ethereumAddress())
-    const nested = checksumAddress(faker.finance.ethereumAddress())
-
-    it('should return true when wallet matches delegator', () => {
-      expect(checkCanEdit(wallet, wallet, null)).toBe(true)
-    })
-
-    it('should return true when delegator is a nested owner', () => {
-      expect(checkCanEdit(wallet, nested, [nested])).toBe(true)
-    })
-
-    it('should return false otherwise', () => {
-      const other = checksumAddress(faker.finance.ethereumAddress())
-      expect(checkCanEdit(wallet, other, null)).toBe(false)
-    })
-  })
 })
 
 describe('useDelegatorSelection hook', () => {
@@ -162,7 +121,7 @@ describe('useDelegatorSelection hook', () => {
       isLoading: false,
     })
 
-    const { result } = renderHook(() => useDelegatorSelection(undefined))
+    const { result } = renderHook(() => useDelegatorSelection())
 
     expect(result.current.isParentLoading).toBe(false)
     expect(result.current.isMultiSigRequired).toBe(false)
@@ -182,7 +141,7 @@ describe('useDelegatorSelection hook', () => {
       isLoading: true,
     })
 
-    const { result } = renderHook(() => useDelegatorSelection(undefined))
+    const { result } = renderHook(() => useDelegatorSelection())
 
     expect(result.current.isParentLoading).toBe(true)
     // Key: isMultiSigRequired is false while loading, so consumers must
@@ -207,7 +166,7 @@ describe('useDelegatorSelection hook', () => {
       isLoading: false,
     })
 
-    const { result } = renderHook(() => useDelegatorSelection(undefined))
+    const { result } = renderHook(() => useDelegatorSelection())
 
     expect(result.current.isParentLoading).toBe(false)
     expect(result.current.isMultiSigRequired).toBe(true)
@@ -228,7 +187,7 @@ describe('useDelegatorSelection hook', () => {
       isLoading: false,
     })
 
-    const { result } = renderHook(() => useDelegatorSelection(undefined))
+    const { result } = renderHook(() => useDelegatorSelection())
 
     expect(result.current.isParentLoading).toBe(false)
     expect(result.current.isMultiSigRequired).toBe(false)
