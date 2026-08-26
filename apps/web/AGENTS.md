@@ -11,7 +11,25 @@ Web-specific guidance for the Next.js app under `apps/web/`. For monorepo-wide r
 - Use theme variables from vars.css instead of hard-coded CSS values
 - Build UI from the shadcn/ui primitives in `@/components/ui/*` (Tailwind); MUI/Emotion are removed
 - **Never hand-roll a modal scrim.** Anything that dims the page behind it — a dialog, alert dialog, sheet, drawer, backdrop-ed select — renders `overlayVariants()` from [`@/components/ui/overlay`](src/components/ui/overlay.ts). Tint lives in the `--backdrop` token, the blur and the stacking layer live in that one cva. `overlay.test.tsx` fails if a surface drifts. Anchored surfaces (popovers, dropdowns, menus, tooltips) have no scrim by design.
-- **Prefer a component's variant/size prop over one-off `className` overrides.** If you find yourself hand-rolling padding, height, border color, or hover on a `Button`/`Input`/etc., there is probably a variant for it — and if a pattern recurs, add a variant rather than repeating the classes. Watch the tokens: `--input` is white in light mode, so a visible field border needs `border-border`, not `border-input`. The `Button` and `Input` stories are the canonical variant reference; see [.storybook/AGENTS.md](.storybook/AGENTS.md#component-variants-over-custom-styling).
+- **Prefer a component's variant/size prop over one-off `className` overrides.** See [Component variants over custom styling](#component-variants-over-custom-styling) below.
+
+## Component variants over custom styling
+
+Reach for a component's **variant/size prop before a one-off `className`**. If you're hand-rolling
+padding/height/border/hover on a primitive, a variant probably exists; if the pattern recurs (~3 places),
+add a variant or a preset instead of pasting the classes again. The **`UI/Button` → Guidelines and
+`UI/Input` stories are the canonical variant/size reference** — this section only states the rule.
+
+- **On `<Button>`, `className` is LAYOUT-ONLY** (`w-full`, margins, grid placement); size/skin utilities are
+  **ESLint-enforced errors** (`no-restricted-syntax` in `eslint.config.mjs`). The only sanctioned escape is a
+  justified `// eslint-disable-next-line no-restricted-syntax -- <reason>` — when a pattern recurs, add a
+  size/variant to `components/ui/button.tsx` rather than disabling.
+- **Prefer the closed presets in `components/common/`** (`SubmitButton`, `ActionBar`+`ActionButton`,
+  `DialogActions`, `OnboardingFooter`, `IconAction`) over the raw primitive — they take semantic props and
+  reject styling `className` at the type level.
+- **Token gotcha (bit you):** `--input` is the field **fill** token, not a border colour — a visible
+  field/button border must use `border-border`, never `border-input` or hard-coded `border-gray-*`. The field
+  primitives already default correctly; don't re-declare borders/backgrounds on them.
 
 ## Feature Architecture Import Rules
 
