@@ -123,24 +123,21 @@ describe('AssetsTable', () => {
     })
   })
 
-  describe('breakpoint gap regression (AUD-48)', () => {
-    // Between 600px and 767.98px, styles.module.css's `@media (max-width: 767.98px)` hides the
-    // desktop `.container` and shows `.mobileContainer` — so whichever branch is built must be the
-    // mobile one once `useIsMobile()` (the shadcn 768px hook, matching that CSS threshold) says so.
-    // Regression: this used to be gated by `useIsBelowSm()` (600px), so nothing was ever built for
-    // CSS to reveal in that 168px gap and the list rendered blank.
-    it('builds the mobile list once useIsMobile reports true, so the CSS-visible branch actually exists', async () => {
+  describe('breakpoint gap regression (WA-3437)', () => {
+    // The built branch must match the one CSS shows: styles.module.css swaps at 767.98px, so the
+    // gate has to be useIsMobile() (768px), not useIsBelowSm() (600px).
+    it('builds the mobile list when useIsMobile is true', async () => {
       mockUseIsMobile.mockReturnValue(true)
 
       const { container } = renderAssetsTable({ balances: balancesFixtures.efSafe })
 
       await waitFor(() => {
-        expect(screen.queryAllByTestId('token-balance')).toHaveLength(0) // desktop cells not built
+        expect(screen.queryAllByTestId('token-balance')).toHaveLength(0)
         expect(container.querySelector('.mobileContainer')).toBeInTheDocument()
       })
     })
 
-    it('builds the desktop table once useIsMobile reports false', async () => {
+    it('builds the desktop table when useIsMobile is false', async () => {
       mockUseIsMobile.mockReturnValue(false)
 
       const { container } = renderAssetsTable({ balances: balancesFixtures.efSafe })
