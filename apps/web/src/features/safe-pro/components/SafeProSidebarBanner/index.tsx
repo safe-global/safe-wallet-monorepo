@@ -20,7 +20,7 @@ const SafeProSidebarBanner = ({ className }: { className?: string }) => (
         Your Workspace moves to Pro on Oct 1, 2026
       </Typography>
       <Typography variant="paragraph-mini" className="text-secondary-foreground">
-        Your Safe accounts stay available outside the Workspace.
+        Your Safe accounts remain available outside the Workspace.
       </Typography>
     </div>
 

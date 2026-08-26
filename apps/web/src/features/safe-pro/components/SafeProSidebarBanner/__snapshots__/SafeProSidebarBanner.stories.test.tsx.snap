@@ -39,7 +39,7 @@ exports[`./SafeProSidebarBanner.stories Default 1`] = `
               data-slot="typography"
               data-variant="paragraph-mini"
             >
-              Your Safe accounts stay available outside the Workspace.
+              Your Safe accounts remain available outside the Workspace.
             </span>
           </div>
           <a

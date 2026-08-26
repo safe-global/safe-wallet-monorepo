@@ -13,7 +13,7 @@ const SafeProAnnouncementModal = ({
       <DialogTitle className="sr-only" render={<div />}>
         Your Workspace moves to Pro on Oct 1, 2026
       </DialogTitle>
-      <SafeProAnnouncement />
+      <SafeProAnnouncement onDismiss={() => onOpenChange?.(false)} />
     </DialogContent>
   </Dialog>
 )

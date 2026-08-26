@@ -5,7 +5,7 @@ import { Typography } from '@/components/ui/typography'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
 import css from './styles.module.css'
 
-const SafeProAnnouncement = () => (
+const SafeProAnnouncement = ({ onDismiss }: { onDismiss?: () => void }) => (
   <div className="p-1">
     <div className="relative aspect-[1058/369] w-full overflow-hidden rounded-t-[calc(var(--radius-xl)-4px)]">
       <Image
@@ -23,19 +23,24 @@ const SafeProAnnouncement = () => (
         </Typography>
 
         <Typography variant="paragraph-large" color="muted" align="center" className="max-w-[590px]">
-          Pro adds policies, advanced security checks and sponsored transactions. Your Safe accounts stay available
-          outside the Workspace.
+          Pro will add advanced security checks, sponsored transactions and policies. Your Safe accounts remain
+          available outside of the Workspace. Starting October 1, you can claim up to two months of Safe Pro for free
+          for this Workspace.
         </Typography>
       </div>
 
-      <Button
-        size="lg"
-        render={<a href={SAFE_PRO_ANNOUNCEMENT_URL} target="_blank" rel="noopener noreferrer" />}
-        className="shrink-0"
-      >
-        Learn more
-        <ArrowUpRight data-icon="inline-end" className="text-green-400" />
-      </Button>
+      <div className="flex shrink-0 gap-3">
+        {onDismiss && (
+          <Button size="lg" variant="outline" onClick={onDismiss}>
+            Got it
+          </Button>
+        )}
+
+        <Button size="lg" render={<a href={SAFE_PRO_ANNOUNCEMENT_URL} target="_blank" rel="noopener noreferrer" />}>
+          Learn more
+          <ArrowUpRight data-icon="inline-end" className="text-green-400" />
+        </Button>
+      </div>
     </div>
   </div>
 )

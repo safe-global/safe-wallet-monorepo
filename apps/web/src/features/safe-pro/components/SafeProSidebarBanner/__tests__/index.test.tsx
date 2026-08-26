@@ -7,7 +7,7 @@ describe('SafeProSidebarBanner', () => {
     render(<SafeProSidebarBanner />)
 
     expect(screen.getByText('Your Workspace moves to Pro on Oct 1, 2026')).toBeInTheDocument()
-    expect(screen.getByText('Your Safe accounts stay available outside the Workspace.')).toBeInTheDocument()
+    expect(screen.getByText('Your Safe accounts remain available outside the Workspace.')).toBeInTheDocument()
   })
 
   it('points the Learn more CTA at the announcement in a safe new tab', () => {
