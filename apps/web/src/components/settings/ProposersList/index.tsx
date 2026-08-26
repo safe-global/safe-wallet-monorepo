@@ -3,10 +3,11 @@ import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import CheckWallet from '@/components/common/CheckWallet'
 import Track from '@/components/common/Track'
 import {
-  UpsertProposer,
+  AddProposer,
   DeleteProposerDialog,
   EditProposerDialog,
   PendingDelegationsList,
+  useMigrateProposerLabels,
   useParentSafeThreshold,
 } from '@/features/proposers'
 import { useHasFeature } from '@/hooks/useChains'
@@ -76,6 +77,7 @@ const ProposersList = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState<boolean>()
   const proposers = useProposers()
   const isEnabled = useHasFeature(FEATURES.PROPOSERS)
+  useMigrateProposerLabels()
   const { safe } = useSafeInfo()
   const isUndeployedSafe = !safe.deployed
   const isNestedSafeOwner = useIsNestedSafeOwner()
@@ -91,15 +93,7 @@ const ProposersList = () => {
         cells: {
           proposer: {
             rawValue: proposer.delegate,
-            content: (
-              <NamedAddressInfo
-                address={proposer.delegate}
-                showCopyButton
-                hasExplorer
-                name={proposer.label || undefined}
-                shortAddress
-              />
-            ),
+            content: <NamedAddressInfo address={proposer.delegate} showCopyButton hasExplorer shortAddress />,
           },
 
           creator: {
@@ -147,7 +141,7 @@ const ProposersList = () => {
       {rows.length > 0 && <EnhancedTable rows={rows} headCells={headCells} />}
 
       {isAddDialogOpen && (
-        <UpsertProposer onClose={() => setIsAddDialogOpen(false)} onSuccess={() => setIsAddDialogOpen(false)} />
+        <AddProposer onClose={() => setIsAddDialogOpen(false)} onSuccess={() => setIsAddDialogOpen(false)} />
       )}
     </div>
   )

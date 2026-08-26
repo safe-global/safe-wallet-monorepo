@@ -32,9 +32,8 @@ describe('Onchain Messages tests', () => {
     cy.visit(constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_10)
     createTx.verifySummaryByName(
       typeMessagesOnchain.contractName,
-      null,
       [typeMessagesOnchain.oneOftwo, typeMessagesOnchain.signMessage],
-      typeMessagesOnchain.altImage,
+      { alt: typeMessagesOnchain.altImage },
     )
   })
 
@@ -42,9 +41,8 @@ describe('Onchain Messages tests', () => {
   it('Verify summary for signed on-chain message', () => {
     createTx.verifySummaryByName(
       typeMessagesOnchain.contractName,
-      null,
       [(typeMessagesOnchain.success, typeMessagesOnchain.signMessage)],
-      typeMessagesOnchain.altImage,
+      { alt: typeMessagesOnchain.altImage },
     )
   })
 })

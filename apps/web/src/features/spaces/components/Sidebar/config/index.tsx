@@ -116,12 +116,12 @@ export const safeDefiGroup: SidebarGroupConfig = {
       href: AppRoutes.bridge,
     },
     {
-      icon: Database,
+      icon: TrendingUp,
       label: 'Earn',
       href: AppRoutes.earn,
     },
     {
-      icon: TrendingUp,
+      icon: Database,
       label: 'Stake',
       href: AppRoutes.stake,
     },
