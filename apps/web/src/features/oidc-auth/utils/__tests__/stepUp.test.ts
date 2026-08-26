@@ -43,8 +43,6 @@ describe('startStepUp', () => {
     )
   })
 
-  // Otherwise the return leg would read a previous attempt's error and report a
-  // failure that did not happen this time round.
   it('should, when the current URL carries stale error params, strip them from the return URL', () => {
     setLocation('https://app.safe.global/spaces/members?spaceId=42&error=access_denied&error_description=nope')
 
@@ -56,10 +54,6 @@ describe('startStepUp', () => {
     expect(returnUrl.searchParams.get('spaceId')).toBe('42')
   })
 
-  // Regression: a persistent marker here wedged the tab — backing out of the
-  // challenge page left it set, and every later attempt refused to navigate.
-  // Nothing that outlives the page load may gate a redirect. The sign-in flow's
-  // own marker must stay untouched, so a step-up is never read as a login.
   it('should, when called, write nothing to sessionStorage', () => {
     startStepUp()
 
@@ -74,8 +68,6 @@ describe('startStepUp', () => {
     expect(new URL(window.location.href).searchParams.get('elevate')).toBe('true')
   })
 
-  // A replayed action that is itself rejected must surface as an error rather
-  // than bouncing the user back out to the provider indefinitely.
   it('should, when a return is being processed, not redirect', () => {
     markStepUpReturnHandled()
 
@@ -83,8 +75,6 @@ describe('startStepUp', () => {
     expect(window.location.href).toBe('https://app.safe.global/spaces/members?spaceId=42')
   })
 
-  // Regression: the guard once outlived the return processing, so the SECOND
-  // gated action of a session failed with an inline error and no redirect.
   it('should, when the return has been processed, redirect again', () => {
     markStepUpReturnHandled()
     resetStepUpReturnGuard()

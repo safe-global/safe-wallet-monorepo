@@ -134,7 +134,7 @@ test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
     expect(url.searchParams.get('redirect_url')).toContain('/spaces/safe-accounts')
   })
 
-  // Regression: a leftover record used to suppress every later redirect, so the
+  // A leftover record must not suppress the next redirect: that leaves the
   // tab was dead for step-up until it was closed. Backing out of the challenge
   // page is how a user reaches that state — the browser restores the frozen page
   // and nothing consumes the record — but bfcache cannot be driven from a test

@@ -89,9 +89,6 @@ describe('useStepUpCallback', () => {
     })
   })
 
-  // Regression: the in-flight marker and the payload lived in separate keys, so
-  // a return could consume one and strand the other for an unrelated trip to
-  // execute. One record cannot disagree with itself.
   it('should, when a trip is processed, consume the whole record so nothing is left behind', async () => {
     saveStepUpTrip(TRIP_ACTION)
 
@@ -162,8 +159,6 @@ describe('useStepUpCallback', () => {
     })
   })
 
-  // Regression: the guard once stayed set for the whole SPA session, so the
-  // second gated action after a step-up silently never redirected.
   it('should, when the challenge failed, still release the redirect guard', async () => {
     saveStepUpTrip(TRIP_ACTION)
     setSearch('?error=access_denied')
@@ -175,9 +170,6 @@ describe('useStepUpCallback', () => {
     })
   })
 
-  // Regression: a throw (e.g. the gateway unreachable during the return) once
-  // skipped the release, so no step-up in the tab could redirect again until a
-  // full reload.
   it('should, when processing the return throws, still release the redirect guard', async () => {
     saveStepUpTrip(TRIP_ACTION)
     mockReconcileAuth.mockRejectedValue(new Error('fetch failed'))

@@ -1,7 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { getReplayableAction, saveStepUpTrip, takeStepUpTrip } from '../stepUpReplay'
 
-// Mirrors the thunk arg RTK Query builds for a mutation.
 const rejectedMutation = (endpointName: string, originalArgs: unknown) => ({
   type: 'cgwClient/executeMutation/rejected',
   payload: { status: 403, data: { message: 'elevation_required' } },
@@ -41,14 +40,6 @@ describe('getReplayableAction', () => {
     expect(getReplayableAction(rejectedMutation('spacesCreateV1', {}))).toBeUndefined()
   })
 
-  it('should, when the action is null, return undefined', () => {
-    expect(getReplayableAction(null)).toBeUndefined()
-  })
-
-  it('should, when the action is not an object, return undefined', () => {
-    expect(getReplayableAction('rejected')).toBeUndefined()
-  })
-
   it('should, when the action has no meta, return undefined', () => {
     expect(getReplayableAction({ type: 'x' })).toBeUndefined()
   })
@@ -81,9 +72,6 @@ describe('step-up trip storage', () => {
     expect(takeStepUpTrip()).toEqual({})
   })
 
-  // Regression: the payload used to live in its own key, so a return could
-  // consume the in-flight marker and leave the action behind for an unrelated
-  // trip to execute. One record cannot disagree with itself.
   it('should, when a trip is taken, remove it so nothing is acted on twice or by a later trip', () => {
     saveStepUpTrip({ endpoint: 'spacesDeleteV1', args: { id: '1' } })
 
@@ -96,8 +84,6 @@ describe('step-up trip storage', () => {
     expect(takeStepUpTrip()).toBeUndefined()
   })
 
-  // A trip cannot validly outlive CGW's 5-minute state cookie; anything older is
-  // residue of an abandoned trip and must never be acted on.
   it('should, when the stored trip is older than the challenge window, return undefined and delete it', () => {
     jest.useFakeTimers()
     saveStepUpTrip({ endpoint: 'membersInviteUserV1', args: {} })

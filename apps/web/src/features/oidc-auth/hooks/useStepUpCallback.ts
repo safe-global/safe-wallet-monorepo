@@ -9,16 +9,11 @@ import { markStepUpReturnHandled, resetStepUpReturnGuard } from '../utils/stepUp
 import { replayStepUpAction, takeStepUpTrip } from '../utils/stepUpReplay'
 
 /**
- * Handles the return leg of a step-up authentication redirect.
+ * Handles the return leg of a step-up redirect. CGW has already replaced the
+ * session cookie by the time the browser lands here, so there is nothing to
+ * exchange — only a new expiry to reconcile into Redux.
  *
- * CGW has already replaced the session cookie with an elevated one by the time
- * the browser lands back here, so there is nothing to exchange — but the new
- * cookie carries a new expiry, so the session is reconciled to keep Redux in
- * step. The step-up prompt is cleared either way: on success it is satisfied,
- * and on failure the user is told what happened rather than left looking at a
- * dialog that no longer reflects an in-flight request.
- *
- * Should be called once globally (from `InitApp`) so it runs on page load.
+ * Call once globally, from `InitApp`, so it runs on page load.
  */
 export const useStepUpCallback = () => {
   const dispatch = useAppDispatch()
@@ -30,23 +25,18 @@ export const useStepUpCallback = () => {
 
   useEffect(() => {
     if (hasProcessed.current) return
-    // Consumed — read and deleted — before anything happens, so a record can
-    // never be acted on twice, later, or by another trip. Absent or expired
-    // records mean there is nothing to do.
+
     const trip = takeStepUpTrip()
     if (!trip) return
 
     hasProcessed.current = true
-    // While this return is being processed, a replay that is itself rejected must
-    // surface as an error rather than redirecting out again.
     markStepUpReturnHandled()
-    // The first render races the replay: lists paint pre-mutation data until the
-    // refetches land. The splash stays up until the world is consistent.
+    // Held until the replay's refetches land, or lists paint pre-mutation data
+    // next to a success toast and then visibly jump.
     dispatch(stepUpReturning())
 
     const processCallback = async () => {
-      // Read from `window.location` rather than `router.query`, which can still
-      // be empty before `router.isReady` on the first render.
+      // `router.query` can still be empty before `router.isReady` on first render.
       const params = new URLSearchParams(window.location.search)
 
       if (params.has('error')) {
@@ -70,17 +60,13 @@ export const useStepUpCallback = () => {
       }
     }
 
-    // The guard covers only the processing above and must be released even when
-    // it throws (e.g. the gateway was unreachable during the return). Left set,
-    // it would swallow every later challenge in this tab until a full reload —
-    // the second gated action of a session would fail with an inline error and
-    // no redirect.
+    // Released even on a throw — left set, it suppresses every later challenge
+    // in the tab until a full reload.
     void processCallback()
       .finally(() => {
         resetStepUpReturnGuard()
         dispatch(stepUpSettled())
       })
-      // The next attempt surfaces the failure through its own error handling.
       .catch(() => undefined)
   }, [dispatch])
 }

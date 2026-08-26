@@ -3,11 +3,9 @@ import { GATEWAY_URL } from '@/config/gateway'
 const AUTHORIZE_PATH = '/v1/auth/oidc/authorize'
 
 /**
- * Set while a step-up return is being processed, so an `elevation_required`
- * raised by the replayed action itself cannot bounce the user straight back out
- * to the provider. `useStepUpCallback` sets it before replaying and resets it
- * once processing ends — left set, it would swallow every later challenge in
- * the tab until a full reload.
+ * Set while a return is being processed, so an `elevation_required` raised by
+ * the replayed action itself cannot bounce the user straight back out to the
+ * provider. Module state, not storage: it must not survive the page load.
  */
 let isHandlingStepUpReturn = false
 
@@ -22,27 +20,17 @@ export const resetStepUpReturnGuard = (): void => {
 export const isStepUpReturnInFlight = (): boolean => isHandlingStepUpReturn
 
 /**
- * Sends the user to the provider's hosted page to confirm a second factor.
+ * A `window.location.href` navigation rather than RTK Query: the endpoint
+ * answers with a redirect to the provider's own HTML pages, which `fetch` would
+ * follow and then fail to parse as JSON.
  *
- * Goes through CGW's `/v1/auth/oidc/authorize?elevate=true`, which asks the
- * provider for a fresh multi-factor challenge and, on the way back, mints an
- * elevated session cookie. This has to be a `window.location.href` navigation
- * and not RTK Query: the endpoint answers with a redirect to the provider's own
- * HTML pages, which `fetch` would follow and then fail to parse as JSON.
- *
- * Writes nothing persistent: the trip record is the listener's job, and nothing
- * that outlives this page load may gate a redirect. A persistent gate here was
- * reproducibly a wedged tab — backing out of the challenge page left the marker
- * set, and every later attempt then refused to navigate.
- *
- * Returns whether the navigation was started, so callers can tell a suppressed
+ * Returns whether the navigation started, so callers can tell a suppressed
  * attempt from a real one.
  */
 export const startStepUp = (redirectUrl?: string): boolean => {
   if (isHandlingStepUpReturn) return false
 
-  // Strip any stale `error` param so the return leg can trust that an `error` in
-  // the URL genuinely came from the provider this time round.
+  // A stale `error` here would be read on the return leg as this attempt's.
   const returnUrl = new URL(redirectUrl ?? window.location.href)
   returnUrl.searchParams.delete('error')
   returnUrl.searchParams.delete('error_description')

@@ -84,8 +84,6 @@ const TargetedOutreachPopupLoader = () => {
   return <OutreachPopup />
 }
 
-// Holds the branded launch screen open across a step-up round-trip, and fires
-// the redirect once painted. Inside the Redux provider, so the phase is readable.
 const StepUpSplash = (): ReactElement | null => {
   const stepUpCaption = useStepUpSplash()
 
