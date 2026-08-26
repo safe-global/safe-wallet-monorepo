@@ -75,11 +75,12 @@ export function clickOnActivateAccountBtn(index) {
 }
 
 const submitErrorMsg = 'Could not submit the transaction. Try again.'
+const errorMessage = '[data-testid="error-message"]'
 
 export function clickOnFinalActivateAccountBtn(retriesLeft = 2) {
   cy.get(activateFlowAccountBtn).should('be.enabled').click()
-  // Wait for the submission to resolve: on success the tx-flow modal closes; on RPC
-  // throttling (429) the app shows a retryable submission error and re-enables the button.
+  // Wait for the submission to resolve: on success the tx-flow modal closes; on a
+  // retryable RPC error the app shows a submission error and re-enables the button.
   cy.get('body', { timeout: 180000 }).should(($body) => {
     const flowStillOpen = $body.find(activateFlowAccountBtn).length > 0
     const hasSubmitError = $body.text().includes(submitErrorMsg)
@@ -89,7 +90,23 @@ export function clickOnFinalActivateAccountBtn(retriesLeft = 2) {
     const needsRetry = $body.find(activateFlowAccountBtn).length > 0 && $body.text().includes(submitErrorMsg)
     if (!needsRetry) return
     if (retriesLeft === 0) {
-      throw new Error('Safe activation kept failing to submit — likely RPC rate limiting (429)')
+      // Expand the error's Details section (when present) and include its text in the failure.
+      cy.get(errorMessage)
+        .last()
+        .then(($err) => {
+          if ($err.find('button:contains("Details")').length) {
+            cy.wrap($err).contains('button', 'Details').click()
+          }
+        })
+      cy.get(errorMessage)
+        .last()
+        .invoke('text')
+        .then((details) => {
+          throw new Error(
+            `Safe activation kept failing to submit after 3 attempts. Error shown: ${details || submitErrorMsg}`,
+          )
+        })
+      return
     }
     cy.wait(10000)
     clickOnFinalActivateAccountBtn(retriesLeft - 1)
