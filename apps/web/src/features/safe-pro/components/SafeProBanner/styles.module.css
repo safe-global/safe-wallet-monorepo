@@ -1,9 +1,6 @@
 .banner {
-  background-image: radial-gradient(
-    ellipse 143% 250% at 100% 0%,
-    color-mix(in srgb, var(--color-static-text-brand) 14%, transparent) 0%,
-    transparent 100%
-  );
+  --pro-glow: color-mix(in srgb, var(--color-static-text-brand) 14%, transparent);
+  background-image: radial-gradient(ellipse 143% 250% at 100% 0%, var(--pro-glow) 0%, transparent 100%);
   padding-left: 12px;
   padding-right: 8px;
   border: 1px solid transparent;
@@ -11,6 +8,20 @@
   box-shadow:
     0 1px 2px rgb(0 0 0 / 0.04),
     0 4px 12px rgb(0 0 0 / 0.05);
+}
+
+:global(.dark) .banner {
+  --pro-mint: #7ffab7;
+  --pro-glow: color-mix(in srgb, var(--pro-mint) 11%, transparent);
+}
+
+:global(.dark) .tag.tag {
+  background-color: var(--pro-mint);
+  color: var(--primary-foreground);
+}
+
+:global(.dark) .arrow {
+  color: var(--pro-mint);
 }
 
 .banner:hover {

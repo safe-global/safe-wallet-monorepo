@@ -278,6 +278,7 @@ const SpacesList = () => {
           </>
         ) : (
           <>
+            {isSafeProEnabled && <SafeProWorkspacesBanner className="mb-4" />}
             {pendingInviteBanners}
             <NoSpacesState isAtLimit={isAtSpacesLimit} />
           </>

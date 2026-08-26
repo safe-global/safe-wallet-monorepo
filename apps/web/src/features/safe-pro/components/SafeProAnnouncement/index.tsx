@@ -2,6 +2,7 @@ import Image from 'next/image'
 import { ArrowUpRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
+import { cn } from '@/utils/cn'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
 import css from './styles.module.css'
 
@@ -12,7 +13,13 @@ const SafeProAnnouncement = ({ onDismiss }: { onDismiss?: () => void }) => (
         src="/images/safe-pro/pro-announcement-hero.jpg"
         alt="A Workspace on the Pro plan, with its accounts, members and transactions"
         fill
-        className="object-cover"
+        className="object-cover dark:hidden"
+      />
+      <Image
+        src="/images/safe-pro/pro-announcement-hero-dark.jpg"
+        alt="A Workspace on the Pro plan, with its accounts, members and transactions"
+        fill
+        className="hidden object-cover dark:block"
       />
     </div>
 
@@ -38,7 +45,7 @@ const SafeProAnnouncement = ({ onDismiss }: { onDismiss?: () => void }) => (
 
         <Button size="lg" render={<a href={SAFE_PRO_ANNOUNCEMENT_URL} target="_blank" rel="noopener noreferrer" />}>
           Learn more
-          <ArrowUpRight data-icon="inline-end" className="text-green-400" />
+          <ArrowUpRight data-icon="inline-end" className={cn('text-green-400', css.arrow)} />
         </Button>
       </div>
     </div>

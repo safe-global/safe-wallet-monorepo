@@ -25,7 +25,7 @@ const SafeProBanner = ({ className }: { className?: string }) => (
         <Typography variant="paragraph-small-bold">Workspaces move to Pro on Oct 1, 2026</Typography>
       </div>
 
-      <span aria-hidden className="flex size-8 shrink-0 items-center justify-center">
+      <span aria-hidden className={cn('flex size-8 shrink-0 items-center justify-center', css.arrow)}>
         <ArrowUpRight className="size-4" />
       </span>
     </div>

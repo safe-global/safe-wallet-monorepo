@@ -11,7 +11,7 @@ const SafeProSidebarBanner = ({ className }: { className?: string }) => (
     className={cn('flex w-full flex-col items-start gap-3 rounded-xl bg-muted p-4 shadow-lg', css.banner, className)}
     data-testid="safe-pro-sidebar-banner"
   >
-    <span className={cn('flex shrink-0 items-center rounded-md px-2 py-1.5 text-foreground', css.proChip)}>
+    <span className={cn('flex shrink-0 items-center rounded-md px-2 py-1.5', css.proChip)}>
       <ProWordmark className="h-2 w-[21px]" />
     </span>
 
@@ -24,9 +24,13 @@ const SafeProSidebarBanner = ({ className }: { className?: string }) => (
       </Typography>
     </div>
 
-    <Button size="xs" render={<a href={SAFE_PRO_ANNOUNCEMENT_URL} target="_blank" rel="noopener noreferrer" />}>
+    <Button
+      size="xs"
+      render={<a href={SAFE_PRO_ANNOUNCEMENT_URL} target="_blank" rel="noopener noreferrer" />}
+      className={css.learnMore}
+    >
       Learn more
-      <ArrowUpRight data-icon="inline-end" className="text-green-400" />
+      <ArrowUpRight data-icon="inline-end" className={cn('text-green-400', css.arrow)} />
     </Button>
   </div>
 )

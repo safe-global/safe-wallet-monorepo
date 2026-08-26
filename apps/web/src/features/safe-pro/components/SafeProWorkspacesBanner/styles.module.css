@@ -16,5 +16,23 @@
 
 .proChip {
   padding: 9px 12px;
+  color: var(--foreground);
   background-color: color-mix(in srgb, var(--color-static-text-brand) 20%, transparent);
+}
+
+:global(.dark) .banner {
+  background-image: radial-gradient(ellipse 100% 155% at 100% 0%, rgb(127 250 183 / 11%) 0%, transparent 100%);
+}
+
+:global(.dark) .proChip {
+  color: #7ffab7;
+  background-color: #2e2e2e;
+}
+
+:global(.dark) .learnMore {
+  background-color: #7ffab7;
+}
+
+:global(.dark) .arrow {
+  color: var(--primary-foreground);
 }

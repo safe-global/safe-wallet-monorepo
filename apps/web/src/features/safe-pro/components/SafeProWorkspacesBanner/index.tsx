@@ -16,7 +16,7 @@ const SafeProWorkspacesBanner = ({ className }: { className?: string }) => {
     <ShadcnProvider dark={isDarkMode} className={className}>
       <Card size="none" radius="xl" className={cn('w-full', css.banner)}>
         <div className="flex items-center gap-3">
-          <span className={cn('flex shrink-0 items-center rounded-md text-foreground', css.proChip)}>
+          <span className={cn('flex shrink-0 items-center rounded-md', css.proChip)}>
             <ProWordmark />
           </span>
 
@@ -30,10 +30,10 @@ const SafeProWorkspacesBanner = ({ className }: { className?: string }) => {
 
             <Button
               render={<a href={SAFE_PRO_ANNOUNCEMENT_URL} target="_blank" rel="noopener noreferrer" />}
-              className="shrink-0"
+              className={cn('shrink-0', css.learnMore)}
             >
               Learn more
-              <ArrowUpRight data-icon="inline-end" className="text-green-400" />
+              <ArrowUpRight data-icon="inline-end" className={cn('text-green-400', css.arrow)} />
             </Button>
           </div>
         </div>

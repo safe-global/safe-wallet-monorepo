@@ -145,6 +145,18 @@ describe('SpacesList — auth/expiry state rendering', () => {
       expect(screen.getByTestId('safe-pro-workspaces-banner')).toBeInTheDocument()
     })
 
+    it('shows the wide Pro banner above the empty state when signed in with no workspaces', () => {
+      mockUseAppSelector.mockReturnValue(true)
+      mockUseIsSafeProEnabled.mockReturnValue(true)
+      mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+      mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
+
+      render(<SpacesList />)
+
+      expect(screen.getByTestId('safe-pro-workspaces-banner')).toBeInTheDocument()
+      expect(screen.getByText(/create your first workspace/i)).toBeInTheDocument()
+    })
+
     it('hides the wide Pro banner when signed in and the flag is off', () => {
       mockUseAppSelector.mockReturnValue(true)
       mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })

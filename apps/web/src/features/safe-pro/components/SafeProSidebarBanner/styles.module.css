@@ -13,5 +13,23 @@
 }
 
 .proChip {
+  color: var(--foreground);
   background-color: color-mix(in srgb, var(--color-static-text-brand) 20%, transparent);
+}
+
+:global(.dark) .banner {
+  background-color: var(--card);
+}
+
+:global(.dark) .proChip {
+  color: #7ffab7;
+  background-color: #2e2e2e;
+}
+
+:global(.dark) .learnMore {
+  background-color: #7ffab7;
+}
+
+:global(.dark) .arrow {
+  color: var(--primary-foreground);
 }

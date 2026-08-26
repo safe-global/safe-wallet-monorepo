@@ -60,13 +60,24 @@ exports[`./SafeProAnnouncementModal.stories Default 1`] = `
           >
             <img
               alt="A Workspace on the Pro plan, with its accounts, members and transactions"
-              class="object-cover"
+              class="object-cover dark:hidden"
               data-nimg="fill"
               decoding="async"
               loading="lazy"
               sizes="100vw"
               src="/_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=3840&q=75"
               srcset="/_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=640&q=75 640w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=750&q=75 750w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=828&q=75 828w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=1080&q=75 1080w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=1200&q=75 1200w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=1920&q=75 1920w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=2048&q=75 2048w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=3840&q=75 3840w"
+              style="position: absolute; height: 100%; width: 100%; left: 0px; top: 0px; right: 0px; bottom: 0px; color: transparent;"
+            />
+            <img
+              alt="A Workspace on the Pro plan, with its accounts, members and transactions"
+              class="hidden object-cover dark:block"
+              data-nimg="fill"
+              decoding="async"
+              loading="lazy"
+              sizes="100vw"
+              src="/_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero-dark.jpg&w=3840&q=75"
+              srcset="/_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero-dark.jpg&w=640&q=75 640w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero-dark.jpg&w=750&q=75 750w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero-dark.jpg&w=828&q=75 828w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero-dark.jpg&w=1080&q=75 1080w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero-dark.jpg&w=1200&q=75 1200w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero-dark.jpg&w=1920&q=75 1920w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero-dark.jpg&w=2048&q=75 2048w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero-dark.jpg&w=3840&q=75 3840w"
               style="position: absolute; height: 100%; width: 100%; left: 0px; top: 0px; right: 0px; bottom: 0px; color: transparent;"
             />
           </div>
@@ -118,7 +129,7 @@ exports[`./SafeProAnnouncementModal.stories Default 1`] = `
                 Learn more
                 <svg
                   aria-hidden="true"
-                  class="lucide lucide-arrow-up-right text-green-400"
+                  class="lucide lucide-arrow-up-right text-green-400 arrow"
                   data-icon="inline-end"
                   fill="none"
                   height="24"
