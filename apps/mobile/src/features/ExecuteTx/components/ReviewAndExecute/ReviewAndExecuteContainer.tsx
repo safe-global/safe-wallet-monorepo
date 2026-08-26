@@ -70,12 +70,21 @@ export function ReviewAndExecuteContainer() {
   // WalletConnect provider
   const wcContext = useOptionalWalletConnectContext()
 
+  // Signers that already confirmed, for the pre-broadcast threshold check
+  const confirmedSigners = useMemo(() => {
+    const executionInfo = txDetails?.detailedExecutionInfo
+    return isMultisigDetailedExecutionInfo(executionInfo)
+      ? executionInfo.confirmations.map((confirmation) => confirmation.signer.value)
+      : []
+  }, [txDetails])
+
   // Execution
   const { execute } = useTransactionExecution({
     txId: txId || '',
     executionMethod,
     signerAddress: activeSigner?.value || '',
     feeParams,
+    confirmedSigners,
     wcProvider: wcContext?.provider,
   })
 

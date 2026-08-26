@@ -35,9 +35,12 @@ jest.mock('@safe-global/utils/services/RelayTxWatcher', () => ({
   },
 }))
 
+const DEFAULT_SAFE_INFO = { address: { value: '0xSafe' }, chainId: '137' }
+let mockSafeInfo: Record<string, unknown> = DEFAULT_SAFE_INFO
+
 jest.mock('@/src/hooks/useSafeInfo', () => ({
   __esModule: true,
-  default: () => ({ safe: { address: { value: '0xSafe' }, chainId: '137' } }),
+  default: () => ({ safe: mockSafeInfo }),
 }))
 
 jest.mock('@/src/store/hooks/activeSafe', () => ({
@@ -60,11 +63,12 @@ jest.mock('@/src/store/hooks', () => {
 import { makeStore } from '@/src/store'
 import { useTransactionExecution, ExecutionStatus } from './useTransactionExecution'
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
+import { CONTRACT_ERROR_FALLBACK, getContractErrorMessage } from '@safe-global/utils/services/exceptions/contractErrors'
 
 describe('useTransactionExecution', () => {
   let store: ReturnType<typeof makeStore>
 
-  const renderExecution = () =>
+  const renderExecution = (overrides: { confirmedSigners?: string[] } = {}) =>
     renderHook(
       () =>
         useTransactionExecution({
@@ -72,12 +76,16 @@ describe('useTransactionExecution', () => {
           signerAddress: '0xSigner',
           feeParams: null,
           executionMethod: ExecutionMethod.WITH_RELAY,
+          ...overrides,
         }),
       { wrapper: ({ children }: { children: React.ReactNode }) => <Provider store={store}>{children}</Provider> },
     )
 
+  const getStoredError = () => store.getState().executingState.executions['tx123']?.error
+
   beforeEach(() => {
     jest.clearAllMocks()
+    mockSafeInfo = DEFAULT_SAFE_INFO
     store = makeStore()
     mockExecuteRelayTx.mockResolvedValue({
       type: ExecutionMethod.WITH_RELAY,
@@ -120,5 +128,98 @@ describe('useTransactionExecution', () => {
     })
 
     expect(mockExecuteRelayTx).toHaveBeenCalledWith(expect.objectContaining({ acceptUnverifiedSimulation: true }))
+  })
+
+  describe('contract revert classification (WA-2297)', () => {
+    const viemDump = () =>
+      Object.assign(
+        new Error(
+          [
+            'The contract function "execTransaction" reverted with the following reason:',
+            'GS013',
+            '',
+            'Contract Call:',
+            '  function:  execTransaction(address to, uint256 value, bytes data)',
+            '  args:            (0x94Bb1a1d1b0dEE1F0e3d1234567890abcdef1234, 0, 0xeb37acfc)',
+            '',
+            'Version: viem@2.21.54',
+          ].join('\n'),
+        ),
+        { name: 'ContractFunctionExecutionError' },
+      )
+
+    it('never stores the raw viem dump for a GS revert', async () => {
+      mockExecuteRelayTx.mockRejectedValue(viemDump())
+
+      const { result } = renderExecution()
+
+      await act(async () => {
+        await expect(result.current.execute()).rejects.toThrow(CONTRACT_ERROR_FALLBACK)
+      })
+
+      const stored = getStoredError()
+      expect(stored).toBe(CONTRACT_ERROR_FALLBACK)
+      expect(stored).not.toMatch(/ContractFunctionExecutionError|execTransaction|args:|viem/)
+    })
+
+    it('stores an actionable message when the signer cannot cover the network fee', async () => {
+      mockExecuteRelayTx.mockRejectedValue(
+        new Error('The total cost (gas * gas fee + value) of executing this transaction exceeds the balance.'),
+      )
+
+      const { result } = renderExecution()
+
+      await act(async () => {
+        await expect(result.current.execute()).rejects.toThrow(/Add funds and try again/)
+      })
+
+      expect(getStoredError()).toMatch(/^Not enough funds in your signer wallet to cover the network fee\./)
+    })
+
+    it('leaves an app-level error untouched', async () => {
+      mockExecuteRelayTx.mockRejectedValue(new Error('Private key not found'))
+
+      const { result } = renderExecution()
+
+      await act(async () => {
+        await expect(result.current.execute()).rejects.toThrow('Private key not found')
+      })
+
+      expect(getStoredError()).toBe('Private key not found')
+    })
+  })
+
+  describe('missing signatures pre-check (WA-2297)', () => {
+    const OWNER_A = '0xAAaAaA2A6E1B1c2d3E4f5061728394A5b6C7d8E9'
+    const OWNER_B = '0xBbBBbB2A6E1B1c2d3E4f5061728394A5b6C7d8E9'
+
+    beforeEach(() => {
+      mockSafeInfo = {
+        ...DEFAULT_SAFE_INFO,
+        threshold: 2,
+        owners: [{ value: OWNER_A }, { value: OWNER_B }],
+      }
+    })
+
+    it('blocks before broadcasting when the threshold cannot be met', async () => {
+      const { result } = renderExecution({ confirmedSigners: [OWNER_A] })
+
+      await act(async () => {
+        await expect(result.current.execute()).rejects.toThrow(getContractErrorMessage('GS025'))
+      })
+
+      expect(mockExecuteRelayTx).not.toHaveBeenCalled()
+      expect(getStoredError()).toBe(getContractErrorMessage('GS025'))
+    })
+
+    it('executes once enough signers have confirmed', async () => {
+      const { result } = renderExecution({ confirmedSigners: [OWNER_A, OWNER_B] })
+
+      await act(async () => {
+        await result.current.execute()
+      })
+
+      expect(mockExecuteRelayTx).toHaveBeenCalled()
+    })
   })
 })
