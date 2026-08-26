@@ -2,20 +2,21 @@ import type { ReactElement, ReactNode } from 'react'
 import { faker } from '@faker-js/faker'
 import { render, fakerChecksummedAddress } from '@/tests/test-utils'
 import {
-  SMART_CONTRACT_PROPOSER_EDIT_ERROR,
+  PROPOSER_LABEL_PLACEHOLDER,
   SMART_CONTRACT_PROPOSER_ERROR,
   SMART_CONTRACT_PROPOSER_INFO,
 } from '@/features/proposers/constants'
 import { act, fireEvent, waitFor } from '@testing-library/react'
 import * as proposerUtils from '@/features/proposers/utils/utils'
 import * as walletUtils from '@/utils/wallets'
-import UpsertProposer from './UpsertProposer'
+import AddProposer from './AddProposer'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useDelegatorSelection } from '../hooks/useDelegatorSelection'
 import { getAssertedChainSigner } from '@/services/tx/tx-sender/sdk'
 import { useDelegatesPostDelegateV2Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { MockEip1193Provider } from '@/tests/mocks/providers'
 import { ZERO_ADDRESS, SENTINEL_ADDRESS } from '@safe-global/utils/utils/constants'
+import { getStoreInstance } from '@/store'
 
 jest.mock('@/hooks/wallets/useWallet')
 jest.mock('../hooks/useDelegatorSelection')
@@ -38,9 +39,28 @@ jest.mock('@/components/ui/tooltip', () => ({
 
 const { useDelegatesPostDelegateV1Mutation } = jest.requireMock('@safe-global/store/gateway/AUTO_GENERATED/delegates')
 
-describe('UpsertProposer signing logic', () => {
+// Chain-agnostic so the assertions need no useChainId mock
+const addressBookName = (address: string): string | undefined =>
+  Object.values(getStoreInstance().getState().addressBook)
+    .map((book) => book[address])
+    .find(Boolean)
+
+const mockDelegatorSelection = (): ReturnType<typeof useDelegatorSelection> => ({
+  delegatorOptions: [],
+  setSelectedDelegator: jest.fn(),
+  effectiveDelegator: undefined,
+  parentSafeAddress: undefined,
+  parentThreshold: undefined,
+  parentOwners: undefined,
+  isMultiSigRequired: false,
+  isParentLoading: false,
+})
+
+describe('AddProposer signing logic', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    // test-utils hydrates the store from localStorage, and the address book is persisted there
+    localStorage.clear()
   })
 
   describe('signProposerTypedDataForSafe', () => {
@@ -64,7 +84,7 @@ describe('UpsertProposer signing logic', () => {
     })
   })
 
-  describe('name sanitization on submit', () => {
+  describe('the name stays on the device', () => {
     const mockUseWallet = useWallet as jest.MockedFunction<typeof useWallet>
     const mockUseDelegatorSelection = useDelegatorSelection as jest.MockedFunction<typeof useDelegatorSelection>
     const mockGetSigner = getAssertedChainSigner as jest.MockedFunction<typeof getAssertedChainSigner>
@@ -82,17 +102,7 @@ describe('UpsertProposer signing logic', () => {
         provider: MockEip1193Provider,
       })
 
-      mockUseDelegatorSelection.mockReturnValue({
-        delegatorOptions: [],
-        setSelectedDelegator: jest.fn(),
-        effectiveDelegator: undefined,
-        parentSafeAddress: undefined,
-        parentThreshold: undefined,
-        parentOwners: undefined,
-        isMultiSigRequired: false,
-        isParentLoading: false,
-        canEdit: true,
-      })
+      mockUseDelegatorSelection.mockReturnValue(mockDelegatorSelection())
 
       mockGetSigner.mockResolvedValue({} as Awaited<ReturnType<typeof getAssertedChainSigner>>)
       jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(false)
@@ -102,8 +112,8 @@ describe('UpsertProposer signing logic', () => {
       useDelegatesPostDelegateV1Mutation.mockReturnValue([jest.fn(), {}])
     })
 
-    it('sends a sanitized label to the delegate API when the raw name has smart punctuation', async () => {
-      const { getByLabelText, getByTestId } = render(<UpsertProposer onClose={jest.fn()} onSuccess={jest.fn()} />)
+    it('sends a placeholder label to the delegate API, never the entered name', async () => {
+      const { getByLabelText, getByTestId } = render(<AddProposer onClose={jest.fn()} onSuccess={jest.fn()} />)
 
       const address = fakerChecksummedAddress()
 
@@ -118,23 +128,21 @@ describe('UpsertProposer signing logic', () => {
         fireEvent.click(getByTestId('submit-proposer-btn'))
       })
 
-      await waitFor(() =>
-        expect(addDelegateV2).toHaveBeenCalledWith(
-          expect.objectContaining({
-            createDelegateDto: expect.objectContaining({ label: 'Foo-Bar' }),
-          }),
-        ),
-      )
+      await waitFor(() => expect(addDelegateV2).toHaveBeenCalled())
+
+      const { label } = addDelegateV2.mock.calls[0][0].createDelegateDto
+      expect(label).toBe(PROPOSER_LABEL_PLACEHOLDER)
+      expect(label).not.toContain('Foo')
     })
 
-    it('trims surrounding whitespace from the label before calling the delegate API', async () => {
-      const { getByLabelText, getByTestId } = render(<UpsertProposer onClose={jest.fn()} onSuccess={jest.fn()} />)
+    it('saves the sanitized name to the local address book instead', async () => {
+      const { getByLabelText, getByTestId } = render(<AddProposer onClose={jest.fn()} onSuccess={jest.fn()} />)
 
       const address = fakerChecksummedAddress()
 
       act(() => {
         fireEvent.change(getByLabelText(/Address/i), { target: { value: address } })
-        fireEvent.change(getByLabelText(/Name/i), { target: { value: `  ${faker.person.firstName()}  ` } })
+        fireEvent.change(getByLabelText(/Name/i), { target: { value: '  Foo—Bar  ' } })
       })
 
       await waitFor(() => expect(getByTestId('submit-proposer-btn')).not.toBeDisabled())
@@ -144,8 +152,34 @@ describe('UpsertProposer signing logic', () => {
       })
 
       await waitFor(() => expect(addDelegateV2).toHaveBeenCalled())
-      const label = addDelegateV2.mock.calls[0][0].createDelegateDto.label
-      expect(label).toBe(label.trim())
+      await waitFor(() => expect(addressBookName(address)).toBe('Foo-Bar'))
+    })
+
+    it('does not save the name locally when the delegate request fails', async () => {
+      const failingAddDelegate = jest
+        .fn()
+        .mockReturnValue({ unwrap: () => Promise.reject(new Error('delegate rejected')) })
+      mockUseAddDelegateV2.mockReturnValue([failingAddDelegate, {} as never])
+
+      const { getByLabelText, getByTestId, findByText } = render(
+        <AddProposer onClose={jest.fn()} onSuccess={jest.fn()} />,
+      )
+
+      const address = fakerChecksummedAddress()
+
+      act(() => {
+        fireEvent.change(getByLabelText(/Address/i), { target: { value: address } })
+        fireEvent.change(getByLabelText(/Name/i), { target: { value: faker.person.firstName() } })
+      })
+
+      await waitFor(() => expect(getByTestId('submit-proposer-btn')).not.toBeDisabled())
+
+      act(() => {
+        fireEvent.click(getByTestId('submit-proposer-btn'))
+      })
+
+      expect(await findByText('Error adding proposer')).toBeInTheDocument()
+      expect(addressBookName(address)).toBeUndefined()
     })
   })
 
@@ -166,17 +200,7 @@ describe('UpsertProposer signing logic', () => {
         provider: MockEip1193Provider,
       })
 
-      mockUseDelegatorSelection.mockReturnValue({
-        delegatorOptions: [],
-        setSelectedDelegator: jest.fn(),
-        effectiveDelegator: undefined,
-        parentSafeAddress: undefined,
-        parentThreshold: undefined,
-        parentOwners: undefined,
-        isMultiSigRequired: false,
-        isParentLoading: false,
-        canEdit: true,
-      })
+      mockUseDelegatorSelection.mockReturnValue(mockDelegatorSelection())
 
       mockUseAddDelegateV2.mockReturnValue([addDelegateV2, {} as never])
       useDelegatesPostDelegateV1Mutation.mockReturnValue([jest.fn(), {}])
@@ -191,7 +215,7 @@ describe('UpsertProposer signing logic', () => {
       jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(false)
 
       const { getByLabelText, getByTestId, findByText } = render(
-        <UpsertProposer onClose={jest.fn()} onSuccess={jest.fn()} />,
+        <AddProposer onClose={jest.fn()} onSuccess={jest.fn()} />,
       )
 
       act(() => {
@@ -208,7 +232,7 @@ describe('UpsertProposer signing logic', () => {
       jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(true)
 
       const { getByLabelText, getByTestId, findByText } = render(
-        <UpsertProposer onClose={jest.fn()} onSuccess={jest.fn()} />,
+        <AddProposer onClose={jest.fn()} onSuccess={jest.fn()} />,
       )
 
       act(() => {
@@ -225,7 +249,7 @@ describe('UpsertProposer signing logic', () => {
       jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(false)
 
       const { getByLabelText, getByTestId, queryByText } = render(
-        <UpsertProposer onClose={jest.fn()} onSuccess={jest.fn()} />,
+        <AddProposer onClose={jest.fn()} onSuccess={jest.fn()} />,
       )
 
       act(() => {
@@ -240,7 +264,7 @@ describe('UpsertProposer signing logic', () => {
     it('explains on the disabled button why a smart contract cannot be a proposer', async () => {
       jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(true)
 
-      const { getByLabelText, findByText } = render(<UpsertProposer onClose={jest.fn()} onSuccess={jest.fn()} />)
+      const { getByLabelText, findByText } = render(<AddProposer onClose={jest.fn()} onSuccess={jest.fn()} />)
 
       act(() => {
         fireEvent.change(getByLabelText(/Address/i), { target: { value: fakerChecksummedAddress() } })
@@ -255,7 +279,7 @@ describe('UpsertProposer signing logic', () => {
       jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(false)
 
       const { getByLabelText, getByTestId, queryByText } = render(
-        <UpsertProposer onClose={jest.fn()} onSuccess={jest.fn()} />,
+        <AddProposer onClose={jest.fn()} onSuccess={jest.fn()} />,
       )
 
       act(() => {
@@ -265,91 +289,6 @@ describe('UpsertProposer signing logic', () => {
 
       await waitFor(() => expect(getByTestId('submit-proposer-btn')).not.toBeDisabled())
       expect(queryByText(SMART_CONTRACT_PROPOSER_INFO)).toBeNull()
-    })
-  })
-
-  describe('smart contract guard on submit (edit flow)', () => {
-    const mockUseWallet = useWallet as jest.MockedFunction<typeof useWallet>
-    const mockUseDelegatorSelection = useDelegatorSelection as jest.MockedFunction<typeof useDelegatorSelection>
-    const mockGetSigner = getAssertedChainSigner as jest.MockedFunction<typeof getAssertedChainSigner>
-    const mockUseAddDelegateV2 = useDelegatesPostDelegateV2Mutation as jest.MockedFunction<
-      typeof useDelegatesPostDelegateV2Mutation
-    >
-
-    const addDelegateV2 = jest.fn().mockReturnValue({ unwrap: () => Promise.resolve() })
-
-    const proposer = {
-      delegate: fakerChecksummedAddress(),
-      delegator: fakerChecksummedAddress(),
-      safe: fakerChecksummedAddress(),
-      label: 'Existing proposer',
-    }
-
-    beforeEach(() => {
-      mockUseWallet.mockReturnValue({
-        address: fakerChecksummedAddress(),
-        chainId: '1',
-        label: 'MetaMask',
-        provider: MockEip1193Provider,
-      })
-
-      mockUseDelegatorSelection.mockReturnValue({
-        delegatorOptions: [],
-        setSelectedDelegator: jest.fn(),
-        effectiveDelegator: undefined,
-        parentSafeAddress: undefined,
-        parentThreshold: undefined,
-        parentOwners: undefined,
-        isMultiSigRequired: false,
-        isParentLoading: false,
-        canEdit: true,
-      })
-
-      mockGetSigner.mockResolvedValue({} as Awaited<ReturnType<typeof getAssertedChainSigner>>)
-      jest.spyOn(proposerUtils, 'signProposerTypedData').mockResolvedValue('0xsignature')
-
-      mockUseAddDelegateV2.mockReturnValue([addDelegateV2, {} as never])
-      useDelegatesPostDelegateV1Mutation.mockReturnValue([jest.fn(), {}])
-    })
-
-    it('blocks submitting an edit when the existing proposer is a smart contract', async () => {
-      jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(true)
-
-      const { getByTestId, findByText } = render(
-        <UpsertProposer onClose={jest.fn()} onSuccess={jest.fn()} proposer={proposer} />,
-      )
-
-      await waitFor(() => expect(getByTestId('submit-proposer-btn')).not.toBeDisabled())
-
-      act(() => {
-        fireEvent.click(getByTestId('submit-proposer-btn'))
-      })
-
-      expect(await findByText(SMART_CONTRACT_PROPOSER_EDIT_ERROR)).toBeInTheDocument()
-      expect(addDelegateV2).not.toHaveBeenCalled()
-    })
-
-    it('submits an edit when the existing proposer is an EOA', async () => {
-      jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(false)
-
-      const { getByTestId, queryByText } = render(
-        <UpsertProposer onClose={jest.fn()} onSuccess={jest.fn()} proposer={proposer} />,
-      )
-
-      await waitFor(() => expect(getByTestId('submit-proposer-btn')).not.toBeDisabled())
-
-      act(() => {
-        fireEvent.click(getByTestId('submit-proposer-btn'))
-      })
-
-      await waitFor(() =>
-        expect(addDelegateV2).toHaveBeenCalledWith(
-          expect.objectContaining({
-            createDelegateDto: expect.objectContaining({ delegate: proposer.delegate }),
-          }),
-        ),
-      )
-      expect(queryByText(SMART_CONTRACT_PROPOSER_EDIT_ERROR)).toBeNull()
     })
   })
 })

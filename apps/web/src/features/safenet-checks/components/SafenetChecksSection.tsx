@@ -12,8 +12,8 @@ import { resolvePresentation } from '../statusPresentation'
 /**
  * Safenet check state as a section in the Safe Shield widget. Subscribes only
  * for confirm/execute flows of an already-proposed transaction, and only once
- * the submission time is known — the shared cache keys by hash, so a fetch
- * aimed without it would cache a mis-aimed read for every surface.
+ * the submission time is known — `submittedAt` is the transaction's submission
+ * date, the aim the shared read window wants.
  */
 export const SafenetChecksSection = (): ReactElement | null => {
   const { txId, txDetails } = useContext(TxFlowContext)
