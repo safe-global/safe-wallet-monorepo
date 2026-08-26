@@ -84,6 +84,7 @@ const AddManually = ({
         dialogTitle="Add safe account"
         onClose={onClose}
         hideChainIndicator
+        forceBackdrop
         PaperProps={{ sx: { maxWidth: '760px' } }}
       >
         <FormProvider {...formMethods}>
@@ -94,7 +95,7 @@ const AddManually = ({
             }}
           >
             <div className="px-6 py-4">
-              <div className="flex flex-col gap-4 md:flex-row">
+              <div className="flex flex-col gap-4 md:flex-row md:items-end">
                 <AddressInput
                   data-testid="add-address-input"
                   label="Safe account"
@@ -112,7 +113,7 @@ const AddManually = ({
                   >
                     {/* eslint-disable-next-line no-restricted-syntax -- h-full/w-full fill the row cell (layout); skin is variant="ghost" */}
                     <SelectTrigger variant="ghost" className="h-full w-full">
-                      <SelectValue />
+                      <SelectValue>{(value) => <ChainIndicator chainId={value} />}</SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {configs.map((chain) => (
