@@ -1,4 +1,4 @@
-import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
+import { render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import SafeAccountSelector, { type SafeAccountSelectorProps } from '..'
 import {
@@ -51,8 +51,12 @@ const renderSelector = (props: Partial<Parameters<typeof SafeAccountSelector>[0]
     <SafeAccountSelector accounts={[singleChainAccount, multiChainGroup]} onChange={jest.fn()} {...props} />,
   )
 
+// Base UI pre-mounts the popup before opening it, so its content is in the DOM — but hidden from the
+// accessibility tree — while the select is still closed. Wait for the open state, or role queries race it.
 const openSelector = async (user: ReturnType<typeof renderSelector>['user']) => {
-  await user.click(screen.getByRole('combobox'))
+  const trigger = screen.getByRole('combobox')
+  await user.click(trigger)
+  await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'true'))
 }
 
 describe('SafeAccountSelector', () => {
@@ -311,11 +315,13 @@ describe('SafeAccountSelector', () => {
     expect(screen.queryByText(NO_ELIGIBLE_ACCOUNTS_TEXT)).not.toBeInTheDocument()
   })
 
+  // Not `openSelector`: that one waits for the popup to open, which is the very thing under test here.
   it('does not open when disabled', async () => {
     const { user } = renderSelector({ disabled: true })
 
-    await openSelector(user)
+    await user.click(screen.getByRole('combobox'))
 
+    expect(screen.getByRole('combobox')).toHaveAttribute('aria-expanded', 'false')
     expect(screen.queryAllByRole('option')).toHaveLength(0)
   })
 
