@@ -24,7 +24,7 @@ const SafeProWorkspacesBanner = ({ className }: { className?: string }) => {
             <div className="flex min-w-0 flex-1 flex-col items-start">
               <Typography variant="paragraph-large-bold">Workspaces move to Pro on Oct 1, 2026</Typography>
               <Typography variant="paragraph-small" color="muted">
-                Your Safe accounts stay free in My accounts.
+                Your Safe accounts remain free in My accounts.
               </Typography>
             </div>
 

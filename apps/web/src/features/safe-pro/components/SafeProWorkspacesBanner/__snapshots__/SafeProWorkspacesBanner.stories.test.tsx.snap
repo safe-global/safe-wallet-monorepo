@@ -50,7 +50,7 @@ exports[`./SafeProWorkspacesBanner.stories Default 1`] = `
                     data-slot="typography"
                     data-variant="paragraph-small"
                   >
-                    Your Safe accounts stay free in My accounts.
+                    Your Safe accounts remain free in My accounts.
                   </span>
                 </div>
                 <a

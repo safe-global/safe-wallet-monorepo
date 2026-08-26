@@ -7,7 +7,7 @@ describe('SafeProWorkspacesBanner', () => {
     render(<SafeProWorkspacesBanner />)
 
     expect(screen.getByText('Workspaces move to Pro on Oct 1, 2026')).toBeInTheDocument()
-    expect(screen.getByText('Your Safe accounts stay free in My accounts.')).toBeInTheDocument()
+    expect(screen.getByText('Your Safe accounts remain free in My accounts.')).toBeInTheDocument()
   })
 
   it('points the Learn more CTA at the announcement in a safe new tab', () => {
