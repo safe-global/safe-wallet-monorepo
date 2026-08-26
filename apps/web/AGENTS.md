@@ -7,6 +7,7 @@ Web-specific guidance for the Next.js app under `apps/web/`. For monorepo-wide r
 - New features must be created in a separate folder inside `src/features/` – only components, hooks, and services used globally across many features belong in top-level folders inside `src/`
 - **All features must follow the standard feature architecture pattern** – See [docs/feature-architecture.md](docs/feature-architecture.md) for the complete guide including folder structure, feature flags, lazy loading, and public API patterns
 - Each new feature must be behind a feature flag (stored on the CGW API in chains configs); read it in code with `useHasFeature(FEATURES.X)` from `src/hooks/useChains.ts`
+- A new Redux slice must be exported from `src/store/slices.ts` and registered in the `rootReducer` in `src/store/index.ts`; adding it to `persistedSlices` there both persists it to localStorage **and** syncs it across tabs (`persistStore.ts` and `broadcast.ts` share that list)
 - Use theme variables from vars.css instead of hard-coded CSS values
 - Build UI from the shadcn/ui primitives in `@/components/ui/*` (Tailwind); MUI/Emotion are removed
 - **Never hand-roll a modal scrim.** Anything that dims the page behind it — a dialog, alert dialog, sheet, drawer, backdrop-ed select — renders `overlayVariants()` from [`@/components/ui/overlay`](src/components/ui/overlay.ts). Tint lives in the `--backdrop` token, the blur and the stacking layer live in that one cva. `overlay.test.tsx` fails if a surface drifts. Anchored surfaces (popovers, dropdowns, menus, tooltips) have no scrim by design.
@@ -98,6 +99,16 @@ Cross-cutting unit-test conventions live in the root [AGENTS.md](../../AGENTS.md
 - Auto-generated files (`AUTO_GENERATED/`, contract types)
 - Storybook stories themselves (covered by snapshot workflow)
 
+### Developer-owned tests rule
+
+Always consider what developers should test before QA automation. For every changed feature, suggest developer-owned tests first:
+
+- **Unit tests** — pure functions, parsers, validators, formatters, hooks
+- **Component tests** — React components render correctly with props
+- **Integration tests** — hooks + stores + API mocks wired together
+
+If a feature lacks unit and component coverage, the correct response is to flag missing developer tests — not to write a Playwright test that compensates for them. Playwright tests are the top of the pyramid, not the foundation. Full QA-developer agreement: [Developer Testability Contract](e2e/docs/developer-testability-contract.md).
+
 ## Storybook
 
 Run: `yarn workspace @safe-global/web storybook` (port 6006). Every new component gets a story, colocated with it and with an explicit `meta.title`. Full reference — title taxonomy, fixtures, MSW patterns, decorator stacking, Argos: [docs/storybook-guide.md](docs/storybook-guide.md).
@@ -121,7 +132,7 @@ Don't add `loaders: [mswLoader]` — it is global in `preview.tsx`. Don't overri
 
 ## Web-specific common pitfalls
 
-1. **Never use `lazy()`/`dynamic()` anywhere inside a feature** – the whole feature is already lazy via `createFeatureHandle` (flat `feature.ts`; naming determines stub behavior: `PascalCase` → component, `camelCase` → service, no hooks — see Feature Architecture above).
+1. **Never use `lazy()`/`dynamic()` anywhere inside a feature** – the whole feature is already lazy via `createFeatureHandle` (see [Feature Architecture Import Rules](#feature-architecture-import-rules) above).
 2. **CSS-module padding silently beaten by variant utilities** – shadcn primitives ship group-data
    variant utilities (e.g. Card's `group-data-[size=none]/card:px-0`) whose two-class selectors
    outrank a single CSS-module class. If a module style "mysteriously doesn't apply", check for a
@@ -133,10 +144,10 @@ Don't add `loaders: [mswLoader]` — it is global in `preview.tsx`. Don't overri
    (`className="h-6 w-auto"`), never attributes.
 4. **Unit tests don't see layout** – 6,600 green tests said nothing while the send-tokens form
    rendered with zero padding (ISSUE-050). Any UI-affecting change must be verified visually:
-   check the component's story (or the live page) yourself — the Argos Storybook workflow does
-   NOT auto-run on PRs (trigger it manually or run `storybook:sweep` locally). Never ship a story
-   that permanently renders skeletons/blank without a doc comment saying so — a broken story that
-   "passes" is worse than no story.
+   check the component's story (or the live page) yourself — Argos does not auto-run on PRs
+   (see [Storybook](#storybook) above). Never ship a story that permanently renders
+   skeletons/blank without a doc comment saying so — a broken story that "passes" is worse
+   than no story.
 5. **Don't rebuild field chrome out of raw divs + CSS modules** – `NumberField`/`Field`/
    `InputGroup` already provide the label (with error coloring), the outline, focus ring, and
    inline-start/end adornment slots. The migrated amount field hand-rolled its own outline box,

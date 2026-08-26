@@ -4,7 +4,7 @@ This repository is the Safe{Wallet} monorepo, containing both web and mobile app
 
 ## Nested guidance
 
-This monorepo uses nested AGENTS.md files. Agents working in a subtree automatically load the nearest one. Start at root for cross-cutting rules, then drop into the relevant subtree:
+This monorepo uses nested AGENTS.md files. Agents working in a subtree automatically load the nearest one — for Claude Code this works via a one-line pointer `CLAUDE.md` next to each AGENTS.md, so every new AGENTS.md needs one. Start at root for cross-cutting rules, then drop into the relevant subtree:
 
 | Subtree                | File                                                           | Covers                                                                                 |
 | ---------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
@@ -16,6 +16,7 @@ This monorepo uses nested AGENTS.md files. Agents working in a subtree automatic
 | `apps/tx-builder/`     | [apps/tx-builder/AGENTS.md](apps/tx-builder/AGENTS.md)         | Safe App (iframe), **MUI v6 + Vite — web styling rules do not apply**                  |
 | `apps/mobile/`         | [apps/mobile/AGENTS.md](apps/mobile/AGENTS.md)                 | Expo + Tamagui                                                                         |
 | `packages/`            | [packages/AGENTS.md](packages/AGENTS.md)                       | Shared packages: verification, codegen, dual env vars, theme workflow                  |
+| `config/`              | [config/AGENTS.md](config/AGENTS.md)                           | Shared test workspace (`@safe-global/test`): MSW fixtures/scenarios, verify caveat     |
 
 When adding new guidance, place it in the most-specific subtree it applies to. When a workspace, script, generated path, test framework, or architecture boundary changes, update the nearest AGENTS.md in the same PR — and prefer replacing old rules over appending exceptions.
 
@@ -24,7 +25,8 @@ When adding new guidance, place it in the most-specific subtree it applies to. W
 Common commands for getting started:
 
 ```bash
-# Install dependencies (uses Yarn 4 via corepack)
+# Install dependencies (Yarn 4 via corepack; also runs `after-install` for web,
+# which generates TypeScript types from contract ABIs)
 yarn install
 
 # Run web app in development mode
@@ -40,7 +42,7 @@ yarn workspace @safe-global/web test
 yarn workspace @safe-global/web storybook
 ```
 
-Workspace-scoped scripts (`pw:*`, `test:scaffold`, `css-vars`, `storybook`, …) must be run via `yarn workspace @safe-global/<name> …`; only `verify:*`, `knip`, and `prettier:fix` live in the root package.json.
+Workspace-scoped scripts (`pw:*`, `test:scaffold`, `css-vars`, `storybook`, …) must be run via `yarn workspace @safe-global/<name> …`; the root package.json only adds `verify:*`, `knip`, `prettier:fix`, and the Turborepo-backed `lint`/`type-check`/`test`.
 
 ## Turborepo
 
@@ -57,11 +59,13 @@ Cache directory is `.turbo/` (gitignored). Task definitions live in `turbo.json`
 ## Architecture Overview
 
 - **apps/web** – Next.js web application (the main app)
-- **apps/web-tanstack** – in-progress TanStack Router + Vite runtime that **reuses `apps/web/src`** — see its AGENTS.md before touching it
+- **apps/web-tanstack** – TanStack Router + Vite runtime reusing `apps/web/src`
 - **apps/mobile** – Expo/React Native mobile application
-- **apps/tx-builder** – Safe App (runs in an iframe), **MUI v6 + Vite — web styling rules do not apply there**
+- **apps/tx-builder** – Safe App (runs in an iframe), MUI v6 + Vite
 - **packages/** – shared libraries (`store`, `theme`, `utils`) used by web and mobile
 - **config/**, `expo-plugins/*`, `tools/codemods/*` – shared configuration and tooling workspaces
+
+Subtree-specific caveats live in the Nested guidance table above.
 
 ### Key Entry Points
 
@@ -85,12 +89,7 @@ For "who uses this symbol?" questions, prefer the `LSP` tool (`findReferences`, 
 
 ## Unified Theme System
 
-`@safe-global/theme` is the single source of truth for all design tokens (colors, spacing, typography, radius) across web and mobile. The package has no barrel export — always import from a sub-path.
-
-- **Web** consumes the theme as CSS variables, not a JS theme object: `packages/theme` → `yarn css-vars` → `src/styles/vars.css` → `src/styles/shadcn.css` → Tailwind utilities. Read a palette in JS (`@safe-global/theme/palettes`) only for non-CSS consumers (canvas, QR codes, meta tags, third-party widgets).
-- **Mobile** consumes Tamagui tokens via `@safe-global/theme/generators/tamagui`.
-- Never edit `apps/web/src/styles/vars.css` directly (auto-generated); always use theme tokens instead of hard-coded colors; light and dark palettes change together.
-- Token modification workflow (edit → type-check → regenerate): [packages/AGENTS.md](packages/AGENTS.md).
+`@safe-global/theme` is the single source of truth for all design tokens (colors, spacing, typography, radius) across web and mobile — always use theme tokens instead of hard-coded values. Web consumes the theme as CSS variables (→ Tailwind utilities), not a JS theme object; read a palette in JS (`@safe-global/theme/palettes`) only for non-CSS consumers (canvas, QR codes, meta tags, third-party widgets). Mobile consumes Tamagui tokens. Token rules and the modification workflow: [packages/AGENTS.md](packages/AGENTS.md).
 
 ## General Principles
 
@@ -103,7 +102,7 @@ Web-specific principles live in [apps/web/AGENTS.md](apps/web/AGENTS.md); mobile
 
 ## Testing Requirements
 
-Every behavioral change must include tests — each platform's file defines the exact matrix and exemptions (see the Test Decision Matrix in [apps/web/AGENTS.md](apps/web/AGENTS.md) for web). Web conventions, templates, and mock patterns: [apps/web/docs/TESTING.md](apps/web/docs/TESTING.md).
+Every behavioral change must include tests — each platform's file defines the exact matrix and exemptions (see the Test Decision Matrix in [apps/web/AGENTS.md](apps/web/AGENTS.md) for web). Suggest developer-owned tests (unit / component / integration) before reaching for QA automation — the full rule lives in the Web Testing section of [apps/web/AGENTS.md](apps/web/AGENTS.md). Web conventions, templates, and mock patterns: [apps/web/docs/TESTING.md](apps/web/docs/TESTING.md).
 
 ## Workflow
 
@@ -111,7 +110,7 @@ Every behavioral change must include tests — each platform's file defines the 
 
 Verify your changes with the repo's `verify` scripts before committing — running them is your responsibility:
 
-1. **Scoped check**: `yarn verify:changed` type-checks, lints, prettier-checks and tests changed files — **for `apps/web/` only. It does not auto-detect the workspace**: it defaults to web and silently skips files outside `apps/<workspace>/`, so a mobile-, web-tanstack-, or packages-only change gets a false green pass. Other workspaces: `node scripts/verify.mjs --changed --workspace=mobile|web-tanstack`. For `packages/` changes see [packages/AGENTS.md](packages/AGENTS.md). (`SKIP_VERIFY=1` skips verify entirely — only with the user's explicit say-so.)
+1. **Scoped check**: `yarn verify:changed` type-checks, lints, prettier-checks and tests changed files — **for `apps/web/` only. It does not auto-detect the workspace**: it defaults to web and silently skips files outside `apps/<workspace>/`, so a mobile-, web-tanstack-, packages-, or config-only change gets a false green pass. Other workspaces: `node scripts/verify.mjs --changed --workspace=mobile|web-tanstack`. For `packages/` changes see [packages/AGENTS.md](packages/AGENTS.md); for `config/` changes see [config/AGENTS.md](config/AGENTS.md). (`SKIP_VERIFY=1` skips verify entirely — only with the user's explicit say-so.)
 
 2. **Full check**: Run `yarn verify:web` for a full check before committing.
 
@@ -121,7 +120,7 @@ Verify your changes with the repo's `verify` scripts before committing — runni
 
 - Run the scoped check for the workspace you changed and fix all errors before moving on
 - If a significant code change has no colocated unit test, write one before committing
-- Do NOT run type-check, lint, prettier, and test separately — `verify` runs them all; if it reports formatting errors, run `yarn prettier:fix` once and re-check
+- Do NOT run type-check, lint, prettier, and test separately — `verify` runs them all; it only **checks** formatting (never writes), so if it reports formatting errors, run `yarn prettier:fix` once and re-check. **CI rejects unformatted code.**
 - Do NOT commit without a clean scoped-check pass
 
 ### Pre-implementation regression checklist (REQUIRED)
@@ -131,7 +130,7 @@ Before writing code for any non-trivial change (anything beyond a typo, doc twea
 **Build the checklist in this order:**
 
 1. **Map the surface.** Identify what you are touching: the primary file(s), plus any shared hooks, components, selectors, Redux slices, RTK Query endpoints, feature flags, routes, or persisted state involved.
-2. **Find consumers with symbol-aware search.** For "who uses this symbol?" questions, prefer the `LSP` tool's `findReferences` (see [docs/ai/code-navigation.md](docs/ai/code-navigation.md)) — it follows imports, re-exports, and module resolution across the whole monorepo. Use `ast-grep` for structural pattern questions. Fall back to plain `grep` only for strings, comments, config, or UI copy.
+2. **Find consumers with symbol-aware search** — LSP `findReferences`, not plain text search (see [Code search](#code-search) above).
 3. **Translate consumers into flows.** For each consumer, name the user journey it belongs to (create / edit / delete / retry / empty / error / offline / permission / feature-flag-off / mobile variant).
 4. **List tests to add or run.** Happy path, each neighbouring flow, regression-sensitive paths, and invariant properties. Prefer targeted tests around shared contracts over broad E2E sweeps.
 5. **State what you will NOT verify.** Be explicit. This exposes false confidence.
@@ -163,49 +162,25 @@ Before writing code for any non-trivial change (anything beyond a typo, doc twea
 - When you open the PR, carry the relevant lines into the "Affected flows", "Blast radius", and "Risks / not checked" fields of the PR template.
 - If the checklist reveals that a shared abstraction has many unknown consumers, slow down and investigate before coding — that is the signal this process is designed to surface.
 
-1. **Install dependencies**: `yarn install` (from the repository root).
-   - Uses Yarn 4 (managed via `corepack`)
-   - Automatically runs `yarn after-install` for the web workspace, which generates TypeScript types from contract ABIs
+### Commit and PR conventions
 
-2. **Pre-commit hooks**: The repository uses Husky for git hooks:
-   - **pre-commit**: runs `lint-staged` (**prettier only — no type-check at commit time**)
-   - **pre-push**: runs linting (set `RUN_TESTS_ON_PUSH=true` to also run tests)
-   - **If hooks fail**: Fix the reported issues and try committing again. Common issues:
-     - Type errors: Run `yarn workspace @safe-global/web type-check` to see all errors
-     - Formatting: Run `yarn prettier:fix` to auto-fix
-     - Linting: Run `yarn workspace @safe-global/web lint:fix` to auto-fix where possible
+1. **Pre-commit hooks** (Husky): **pre-commit** runs `lint-staged` (**prettier only — no type-check at commit time**); **pre-push** runs linting (set `RUN_TESTS_ON_PUSH=true` to also run tests).
 
-3. **Formatting**: `verify` **checks** formatting; it never writes. If it reports formatting errors, run `yarn prettier:fix` once, then re-run the check. **CI rejects unformatted code.**
-
-4. **Linting and tests**: covered by the verify scripts — see the "Fast Feedback Loop" section above.
-
-5. **Commit messages**: use [semantic commit messages](https://www.conventionalcommits.org/en/v1.0.0/) as described in `CONTRIBUTING.md`.
+2. **Commit messages**: use [semantic commit messages](https://www.conventionalcommits.org/en/v1.0.0/) as described in `CONTRIBUTING.md`.
    - Examples: `feat: add transaction history`, `fix: resolve wallet connection bug`, `refactor: simplify address validation`
    - **CI/CD changes**: Always use `chore:` prefix for CI, workflows, build configs (NEVER `feat:` or `fix:`)
    - **Test changes**: Always use `tests:` prefix for changes in unit or e2e tests (NEVER `feat:` or `fix:`)
 
-6. **Code style**: follow the guidelines in:
+3. **Code style**: follow the guidelines in:
    - `apps/web/docs/code-style.md` for the web app.
    - `apps/mobile/docs/code-style.md` for the mobile app.
 
-7. **Pull requests**: fill out the GitHub PR template (`.github/PULL_REQUEST_TEMPLATE.md`) completely — "What it solves", "How this PR fixes it", "How to test it", and the checklist — and ensure all checks pass.
+4. **Pull requests**: fill out the GitHub PR template (`.github/PULL_REQUEST_TEMPLATE.md`) completely — "What it solves", "How this PR fixes it", "How to test it", and the checklist — and ensure all checks pass.
 
-8. **PR visual summary (required)**: Every PR must include a visual in the `## Visual summary` section. This is mandatory, not optional.
-   - **Architecture/logic changes** → Mermaid diagram (flowchart, sequence, or class diagram) showing what changed
+5. **PR visual summary (required)**: Every PR must include a visual in the `## Visual summary` section. This is mandatory, not optional.
+   - **Architecture/logic changes** → Mermaid diagram (flowchart, sequence, or class diagram) showing what changed — GitHub renders mermaid natively
    - **UI changes** → Screenshot of the result (use Chrome DevTools MCP if the app is running, or describe how to capture manually)
    - **Both** if the PR includes UI + logic changes
-
-   Mermaid diagrams are rendered natively by GitHub. Example:
-
-   ````markdown
-   ```mermaid
-   flowchart LR
-     A[useSafeInfo hook] --> B[New validation logic]
-     B --> C{Is owner?}
-     C -->|Yes| D[Show actions]
-     C -->|No| E[Show read-only]
-   ```
-   ````
 
 ## Testing Guidelines
 
@@ -217,18 +192,6 @@ Before writing code for any non-trivial change (anything beyond a typo, doc twea
 - Create test data with helpers using [faker](https://fakerjs.dev/)
 - Test files should be colocated with source files using the `*.test.ts(x)` naming convention
 
-### Developer-Owned Tests Rule
-
-AI agents must always consider what developers should test before QA automation. For every changed feature, AI should suggest developer-owned tests first:
-
-- **Unit tests** — pure functions, parsers, validators, formatters, hooks
-- **Component tests** — React components render correctly with props
-- **Integration tests** — hooks + stores + API mocks wired together
-
-If a feature lacks unit and component coverage, the correct response is to flag missing developer tests — not to write a Playwright test that compensates for them. Playwright tests are the top of the pyramid, not the foundation.
-
-See [Developer Testability Contract](apps/web/e2e/docs/developer-testability-contract.md) for the full QA-developer agreement.
-
 ## Security & Safe Wallet Patterns
 
 Safe is a smart contract wallet requiring M-of-N owner signatures (the **threshold**) to execute transactions.
@@ -236,13 +199,6 @@ Safe is a smart contract wallet requiring M-of-N owner signatures (the **thresho
 - **Chain-Specific Safes** – Safe addresses are unique per chain; always include chainId when referencing a Safe
 - **Transaction Building** – Use the Safe SDK (`@safe-global/protocol-kit`, `@safe-global/api-kit`) for transaction creation; validate addresses with ethers.js `isAddress`
 - **Never hardcode private keys or sensitive data** – Use environment variables and secure key management
-
-## Environment Configuration
-
-- **Local Development** – Points to staging backend by default
-- **Environment Branches** – PRs get deployed automatically for testing
-- **RPC Configuration** – Infura integration for Web3 RPC calls (requires `INFURA_TOKEN`)
-- **Chain Configuration** – Chain configs are managed through the Safe Config Service
 
 ## Common Pitfalls
 
