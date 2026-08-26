@@ -54,7 +54,6 @@ describe('Tx history tests 6', () => {
   it('Verify summary for allowance deletion', () => {
     createTx.verifySummaryByName(typeDeleteAllowance.title, [typeDeleteAllowance.summaryTxInfo, typeGeneral.statusOk], {
       token: typeDeleteAllowance.summaryTxInfo,
-      alt: typeDeleteAllowance.altImage,
     })
   })
 

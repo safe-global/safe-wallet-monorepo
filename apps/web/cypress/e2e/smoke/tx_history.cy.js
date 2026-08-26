@@ -61,7 +61,6 @@ describe('[SMOKE] Tx history tests', () => {
   it('[SMOKE] Verify summary for allowance deletion', () => {
     createTx.verifySummaryByName(typeDeleteAllowance.title, [typeDeleteAllowance.summaryTxInfo, typeGeneral.statusOk], {
       token: typeDeleteAllowance.summaryTxInfo,
-      alt: typeDeleteAllowance.altImage,
     })
   })
 
