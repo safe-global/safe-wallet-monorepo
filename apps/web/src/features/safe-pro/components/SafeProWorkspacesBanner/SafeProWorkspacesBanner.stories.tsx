@@ -8,7 +8,7 @@ const meta = {
   tags: ['autodocs'],
   decorators: [
     (Story, context) => (
-      <StoreDecorator initialState={{}} context={context}>
+      <StoreDecorator initialState={{ settings: { theme: {} } }} context={context}>
         <div className="flex justify-center bg-background p-6">
           <div className="w-full max-w-[991px]">
             <Story />

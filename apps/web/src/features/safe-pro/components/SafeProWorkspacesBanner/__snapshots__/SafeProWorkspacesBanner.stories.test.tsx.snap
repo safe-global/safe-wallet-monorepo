@@ -21,6 +21,7 @@ exports[`./SafeProWorkspacesBanner.stories Default 1`] = `
             data-radius="xl"
             data-size="none"
             data-slot="card"
+            data-surface="default"
             data-variant="default"
           >
             <div

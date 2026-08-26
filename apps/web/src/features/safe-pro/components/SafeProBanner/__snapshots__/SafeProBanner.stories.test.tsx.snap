@@ -18,6 +18,7 @@ exports[`./SafeProBanner.stories Default 1`] = `
           data-radius="lg"
           data-size="none"
           data-slot="card"
+          data-surface="default"
           data-variant="default"
           href="https://safe.global/pro"
           rel="noopener noreferrer"
