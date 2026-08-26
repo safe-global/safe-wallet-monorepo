@@ -37,4 +37,5 @@ export const {
   useGetMultipleSafeOverviewsQuery,
   useGetGtfFeePreviewQuery,
   useGetProposerSafesQuery,
+  useGetGtfFeeSnapshotQuery,
 } = gatewayApi

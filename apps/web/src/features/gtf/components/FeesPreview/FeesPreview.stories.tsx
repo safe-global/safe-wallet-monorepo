@@ -188,3 +188,18 @@ export const SafenetFee: Story = {
   },
   parameters: { msw: { handlers: safenetChainHandlers } },
 }
+
+/**
+ * A co-signer on an already-signed payload. The row comes from the stored quote read back by
+ * `safeTxHash`, so it reports what the signers signed; the opt-in checkbox stays hidden.
+ */
+export const ConfirmationWithSafenetFee: Story = {
+  args: {
+    ...defaultArgs,
+    isConfirmation: true,
+    safenetFee: { label: 'Safenet fee', amount: '$\u200A1.00' },
+    gasFee: { label: 'Max gas fee', amount: '0.02733', currency: 'ETH', fiatAmount: '$\u200A97.30' },
+    onGasTokenChange: undefined,
+  },
+  parameters: { msw: { handlers: safenetChainHandlers } },
+}
