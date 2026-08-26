@@ -11,4 +11,4 @@ All new web E2E tests are written here. (Cypress in `../cypress/` is legacy — 
 
 ## Commands
 
-The `pw:*` scripts live in the web workspace — run as `yarn workspace @safe-global/web <script>`: `pw:test` (all), `pw:test:smoke` (`@smoke` tag), `pw:test:api` (`@api` tag), `pw:test:ui` (interactive), `pw:report` (HTML report), `pw:ci` (CI mode — smoke with retries).
+The `pw:*` scripts live in the web workspace — run as `yarn workspace @safe-global/web <script>`: `pw:test` (all), `pw:test:smoke` (`@smoke` tag), `pw:test:api` (`@api` tag), `pw:test:ui` (`@ui` tag), `pw:report` (HTML report), `pw:ci` (CI mode — smoke with retries).
