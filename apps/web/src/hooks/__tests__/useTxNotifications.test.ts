@@ -1,6 +1,9 @@
 import { act } from 'react'
 import { renderHook, waitFor } from '@/tests/test-utils'
+import { BaseError } from 'viem'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { RATE_LIMIT_USER_MESSAGE } from '@/utils/transaction-errors'
+import { CGW_ERROR_FALLBACK } from '@safe-global/utils/services/exceptions/gatewayErrors'
 import useTxNotifications from '../useTxNotifications'
 import { showNotification } from '@/store/notificationsSlice'
 import { TxEvent, txDispatch } from '@/services/tx/txEvents'
@@ -84,14 +87,14 @@ describe('useTxNotifications — CGW response states (WA-3252)', () => {
     expect(JSON.stringify(notification)).not.toContain('<html')
   })
 
-  it('shows a 422 once and does not loop', async () => {
-    // A 422 is our bug, not a transient failure: it is surfaced a single time.
-    // Nothing retries CGW requests today, so this pins the AC against the
-    // baseline rather than against a fix.
+  it('surfaces exactly one toast per 422, carrying the agreed copy', async () => {
+    // A 422 is our bug, not a transient failure. This pins one dispatch to one
+    // toast with the agreed copy; it does not — and cannot — observe whether a
+    // caller re-issues the request, so it says nothing about looping.
     await dispatchProposeFailure(asError({ status: 422, data: {} }))
 
     expect(showNotification).toHaveBeenCalledTimes(1)
-    expect(lastNotification().message).toBe('Something went wrong on our end. Try again.')
+    expect(lastNotification().message).toBe(CGW_ERROR_FALLBACK)
   })
 
   it('shows the banned-Safe copy for a 451', async () => {
@@ -106,5 +109,21 @@ describe('useTxNotifications — CGW response states (WA-3252)', () => {
     const notification = lastNotification()
     expect(notification.message).toContain('Failed to add to queue')
     expect(notification.detailedMessage).toBe('Not found')
+  })
+
+  it('prefers the rate-limit copy over the CGW copy for a 429-carrying error, as the inline alert does', async () => {
+    // A throttled request matches both classifiers: it is a viem rate-limit
+    // error AND an HTTP 429 the CGW map covers. `TxSubmitError` answers with
+    // the rate-limit copy, so the toast must too — otherwise one failure reads
+    // two different ways depending on where the user sees it (WA-3252).
+    // Swapping these two branches back breaks this test.
+    await dispatchProposeFailure(Object.assign(new BaseError('HTTP request failed.'), { status: 429 }))
+
+    const notification = lastNotification()
+    expect(notification.message).toBe(RATE_LIMIT_USER_MESSAGE)
+    expect(notification.message).not.toBe(CGW_ERROR_FALLBACK)
+    // The support reference still carries the status, exactly as the inline
+    // alert's code-only reference does.
+    expect(notification.detailedMessage).toBe('Error code CGW-429')
   })
 })

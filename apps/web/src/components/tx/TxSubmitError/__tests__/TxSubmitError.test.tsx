@@ -2,7 +2,9 @@ import { render } from '@/tests/test-utils'
 import type { EthersError } from '@/utils/ethers-utils'
 import type { TransactionReceipt } from 'ethers'
 import { Gs026PreCheckError } from '@/services/tx/executionPreChecks'
+import { BaseError } from 'viem'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { RATE_LIMIT_USER_MESSAGE } from '@/utils/transaction-errors'
 import TxSubmitError from '..'
 
 const HTML_502 =
@@ -126,6 +128,18 @@ describe('TxSubmitError', () => {
       const { getByText, queryByText } = render(<TxSubmitError error={error} />)
 
       expect(getByText('Could not submit the transaction. Try again.')).toBeInTheDocument()
+      expect(queryByText(/on our end/)).not.toBeInTheDocument()
+    })
+
+    it('prefers the rate-limit copy over the CGW copy for a 429-carrying error, as the toast does', () => {
+      // Counterpart of the same-named test in `useTxNotifications`: a throttled
+      // request matches both classifiers, and both surfaces must resolve it the
+      // same way (WA-3252).
+      const error = Object.assign(new BaseError('HTTP request failed.'), { status: 429 })
+
+      const { getByText, queryByText } = render(<TxSubmitError error={error} />)
+
+      expect(getByText(RATE_LIMIT_USER_MESSAGE)).toBeInTheDocument()
       expect(queryByText(/on our end/)).not.toBeInTheDocument()
     })
   })

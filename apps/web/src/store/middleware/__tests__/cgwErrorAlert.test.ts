@@ -1,6 +1,6 @@
 import type { MiddlewareAPI, UnknownAction } from '@reduxjs/toolkit'
 import { cgwErrorAlert } from '../cgwErrorAlert'
-import { Errors, logError } from '@/services/exceptions'
+import { CodedException, Errors, logError } from '@/services/exceptions'
 
 jest.mock('@/services/exceptions', () => ({
   ...jest.requireActual('@/services/exceptions'),
@@ -66,7 +66,15 @@ describe('cgwErrorAlert', () => {
     run(rejected({ status: 'PARSING_ERROR', originalStatus: 422, data: HTML_502, error: 'SyntaxError' }))
 
     expect(logError).toHaveBeenCalledTimes(1)
-    const [code] = (logError as jest.Mock).mock.calls[0]
+    const [code, thrown] = (logError as jest.Mock).mock.calls[0]
     expect(code).toBe(Errors._622)
+
+    // What actually reaches Datadog is the `CodedException` message, which
+    // interpolates `asError(thrown).message`. Assert on that: asserting the
+    // code alone would still pass if the HTML body leaked into the message.
+    const { message } = new CodedException(code, thrown)
+    expect(message).toContain('Request failed with status 422')
+    expect(message).not.toContain('<html')
+    expect(message).not.toContain('Bad Gateway')
   })
 })

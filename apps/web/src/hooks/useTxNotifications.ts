@@ -89,14 +89,16 @@ const useTxNotifications = (): void => {
           // RPC rejected it pre-mining (no gas spent). Same user story as a
           // stale Safe nonce, so show the same message.
           message = getGs026Message('STALE_NONCE')
-        } else if (cgwError) {
-          message = cgwError.message
         } else if (isError && isRateLimitError(detail.error)) {
           // Translate transient RPC rate-limit failures into friendly copy.
           // The raw error from viem looks like a contract revert ("Request is
           // being rate limited"); we replace the message but keep the original
           // in detailedMessage for debugging.
+          // Checked before the CGW classification so a 429-carrying error reads
+          // the same here as it does inline in `TxSubmitError` (WA-3252).
           message = RATE_LIMIT_USER_MESSAGE
+        } else if (cgwError) {
+          message = cgwError.message
         }
 
         const txId = 'txId' in detail ? detail.txId : undefined
