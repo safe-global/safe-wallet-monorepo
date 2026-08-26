@@ -22,6 +22,8 @@ import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { LS_KEY } from '@/config/gateway'
 import HelpMenu from '@/components/common/HelpMenu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { useRouter } from 'next/router'
+import { AppRoutes } from '@/config/routes'
 
 export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?: boolean }): ReactElement => {
   const dispatch = useAppDispatch()
@@ -31,8 +33,9 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
   const [helpMenuAnchor, setHelpMenuAnchor] = useState<HTMLElement | null>(null)
   const { SafeProSidebarBanner } = useLoadFeature(SafeProFeature)
   const isSafeProEnabled = useIsSafeProEnabled()
-  // Workspace announcement: the Safe sidebar has no Workspace to move.
-  const showSafeProBanner = isSafeProEnabled && !isSafeSidebar
+  const { pathname } = useRouter()
+  // Workspace announcement: the Safe sidebar has no Workspace to move, and the Plans page is the banner's destination.
+  const showSafeProBanner = isSafeProEnabled && !isSafeSidebar && pathname !== AppRoutes.spaces.plans
 
   const onToggleGateway = (checked: boolean) => {
     setIsProdGateway(checked)

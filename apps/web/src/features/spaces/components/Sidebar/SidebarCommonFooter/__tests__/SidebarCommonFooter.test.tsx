@@ -137,6 +137,11 @@ jest.mock('../../SidebarIndexingStatus', () => ({
   SidebarIndexingStatus: () => <div data-testid="indexing-status" />,
 }))
 
+let mockPathname = '/spaces'
+jest.mock('next/router', () => ({
+  useRouter: () => ({ pathname: mockPathname }),
+}))
+
 jest.mock('@/services/beamer', () => ({
   BEAMER_SELECTOR: 'whats-new-button',
 }))
@@ -149,6 +154,7 @@ describe('SidebarCommonFooter', () => {
     mockUseAppDispatch.mockReturnValue(jest.fn())
     mockUseDarkMode.mockReturnValue(false)
     mockIsSafeProEnabled = false
+    mockPathname = '/spaces'
   })
 
   describe('Safe Pro banner', () => {
@@ -162,6 +168,14 @@ describe('SidebarCommonFooter', () => {
     it('hides the banner on the Safe sidebar, which has no Workspace to move', () => {
       mockIsSafeProEnabled = true
       render(<SidebarCommonFooter isSafeSidebar />)
+
+      expect(screen.queryByTestId('safe-pro-sidebar-banner')).not.toBeInTheDocument()
+    })
+
+    it('hides the banner on the Plans page, which is where it links to', () => {
+      mockIsSafeProEnabled = true
+      mockPathname = '/spaces/plans'
+      render(<SidebarCommonFooter />)
 
       expect(screen.queryByTestId('safe-pro-sidebar-banner')).not.toBeInTheDocument()
     })
