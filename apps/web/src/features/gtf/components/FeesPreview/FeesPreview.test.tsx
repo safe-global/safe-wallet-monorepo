@@ -2,9 +2,16 @@ import { screen, fireEvent } from '@testing-library/react'
 import { render } from '@/tests/test-utils'
 import FeesPreview from './index'
 import type { FeesPreviewData } from '../../hooks/useFeesPreview'
+import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
+// Safenet-check availability is a chain feature, so the suite drives it per test.
+let mockChainFeatures: string[] = []
 jest.mock('@/hooks/useChains', () => ({
-  useCurrentChain: () => ({ nativeCurrency: { symbol: 'ETH', logoUri: 'https://example/eth.svg' } }),
+  useCurrentChain: () => ({
+    nativeCurrency: { symbol: 'ETH', logoUri: 'https://example/eth.svg' },
+    features: mockChainFeatures,
+  }),
 }))
 
 // Keeps the Safe-pays suite below as live-relaying coverage; the last describe flips it off.
@@ -18,6 +25,7 @@ jest.mock('../../constants', () => ({
 
 afterEach(() => {
   mockRelayingLive = true
+  mockChainFeatures = []
 })
 
 const defaultProps: FeesPreviewData = {
@@ -64,6 +72,32 @@ describe('FeesPreview', () => {
 
     expect(screen.getByText('Max gas fee')).toBeInTheDocument()
     expect(screen.getByText('$97.30')).toBeInTheDocument()
+  })
+
+  it('renders the Safenet fee row between Execution fee and Max gas fee with its tooltip', () => {
+    const { container } = render(
+      <FeesPreview {...defaultProps} safenetFee={{ label: 'Safenet fee', amount: '$\u200A1.00' }} />,
+    )
+
+    const rows = Array.from(container.querySelectorAll('.feeRow'))
+    expect(rows).toHaveLength(3)
+    expect(rows[0].textContent).toContain('Execution fee')
+    expect(rows[1].textContent).toContain('Safenet fee')
+    // Exact, not `toContain`: a currency-less amount must not leave a trailing space behind.
+    expect(rows[1].querySelector('.feeAmount')?.textContent).toBe('$\u200A1.00')
+    expect(rows[2].textContent).toContain('Max gas fee')
+
+    // The tooltip trigger renders only when the tooltip prop is wired through.
+    expect(rows[1].querySelector('.tooltipIcon')).toBeInTheDocument()
+  })
+
+  it('renders exactly two fee rows when safenetFee is absent', () => {
+    const { container } = render(<FeesPreview {...defaultProps} />)
+
+    const rows = Array.from(container.querySelectorAll('.feeRow'))
+    expect(rows).toHaveLength(2)
+    expect(rows[0].textContent).toContain('Execution fee')
+    expect(rows[1].textContent).toContain('Max gas fee')
   })
 
   it('renders total outgoing when Safe wallet selected', () => {
@@ -260,6 +294,94 @@ describe('FeesPreview', () => {
       render(<FeesPreview {...defaultProps} isConfirmation totalOutgoing={twoCurrencyOutgoing} />)
 
       expect(screen.getByText('3.50 USDC')).toBeInTheDocument()
+    })
+  })
+
+  describe('Safenet check opt-in', () => {
+    const CHECKBOX_LABEL = 'Run a Safenet check on this transaction'
+
+    // Only the fields the card actually reads; the rest of the flow context is irrelevant here.
+    const renderWithContext = (
+      props: Partial<FeesPreviewData>,
+      { gtfPaymentMode = 'safe', setSafenetCheckEnabled = jest.fn() } = {},
+    ) => {
+      const value = {
+        gtfPaymentMode,
+        setGtfPaymentMode: jest.fn(),
+        safenetCheckEnabled: false,
+        setSafenetCheckEnabled,
+      } as unknown as SafeTxContextParams
+      render(
+        <SafeTxContext.Provider value={value}>
+          <FeesPreview {...defaultProps} {...props} />
+        </SafeTxContext.Provider>,
+      )
+      return setSafenetCheckEnabled
+    }
+
+    it('offers the checkbox, unchecked, on a chain with the feature', () => {
+      mockChainFeatures = [FEATURES.SAFENET_CHECKS]
+      renderWithContext({})
+
+      expect(screen.getByLabelText(CHECKBOX_LABEL)).not.toBeChecked()
+    })
+
+    it('hides the checkbox on a chain without the feature', () => {
+      renderWithContext({})
+
+      expect(screen.queryByLabelText(CHECKBOX_LABEL)).not.toBeInTheDocument()
+    })
+
+    it('hides the checkbox for confirmers — the choice is pinned at the first signature', () => {
+      mockChainFeatures = [FEATURES.SAFENET_CHECKS]
+      renderWithContext({ isConfirmation: true })
+
+      expect(screen.queryByLabelText(CHECKBOX_LABEL)).not.toBeInTheDocument()
+    })
+
+    it('hides the checkbox on a legacy-signed payload', () => {
+      mockChainFeatures = [FEATURES.SAFENET_CHECKS]
+      renderWithContext({ isLegacySigned: true })
+
+      expect(screen.queryByLabelText(CHECKBOX_LABEL)).not.toBeInTheDocument()
+    })
+
+    it('hides the checkbox while relaying is switched off', () => {
+      mockChainFeatures = [FEATURES.SAFENET_CHECKS]
+      mockRelayingLive = false
+      renderWithContext({})
+
+      expect(screen.queryByLabelText(CHECKBOX_LABEL)).not.toBeInTheDocument()
+    })
+
+    it('hides the checkbox in signer-pays mode — no Safe quote to carry the fee', () => {
+      mockChainFeatures = [FEATURES.SAFENET_CHECKS]
+      renderWithContext({}, { gtfPaymentMode: 'signer' })
+
+      expect(screen.queryByLabelText(CHECKBOX_LABEL)).not.toBeInTheDocument()
+    })
+
+    it('hides the checkbox when the Safe holds no eligible gas token', () => {
+      mockChainFeatures = [FEATURES.SAFENET_CHECKS]
+      renderWithContext({ availableGasTokens: [] })
+
+      expect(screen.queryByLabelText(CHECKBOX_LABEL)).not.toBeInTheDocument()
+    })
+
+    it('hides the checkbox when the Safe cannot cover the fees', () => {
+      mockChainFeatures = [FEATURES.SAFENET_CHECKS]
+      renderWithContext({ canCoverFees: false })
+
+      expect(screen.queryByLabelText(CHECKBOX_LABEL)).not.toBeInTheDocument()
+    })
+
+    it('reports the new value to the context when toggled', () => {
+      mockChainFeatures = [FEATURES.SAFENET_CHECKS]
+      const setSafenetCheckEnabled = renderWithContext({})
+
+      fireEvent.click(screen.getByLabelText(CHECKBOX_LABEL))
+
+      expect(setSafenetCheckEnabled).toHaveBeenCalledWith(true, expect.anything())
     })
   })
 })

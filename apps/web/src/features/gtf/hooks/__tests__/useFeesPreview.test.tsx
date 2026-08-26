@@ -135,6 +135,18 @@ const mockSuccessfulPreview = {
   refetch: jest.fn(),
 } as unknown as ReturnType<typeof gatewayApi.useGetGtfFeePreviewQuery>
 
+// GTF-arm response: `feeBreakdown` only, no `relayCost` — the disjoint shape the CGW
+// sends for chains with a GTF relayer. Everything on this arm is USD.
+const gtfArmPreview = (feeBreakdown: {
+  relayCostUsd?: number
+  totalUsd?: number
+  safenetFeeUsd?: number
+}): typeof mockSuccessfulPreview =>
+  ({
+    ...mockSuccessfulPreview,
+    data: mockSuccessfulPreview.data && { txData: mockSuccessfulPreview.data.txData, feeBreakdown },
+  }) as typeof mockSuccessfulPreview
+
 const emptyPreview = {
   data: undefined,
   isLoading: false,
@@ -265,6 +277,61 @@ describe('useFeesPreview', () => {
     expect(result.current.gasFee.currency).toBe('ETH')
     expect(result.current.gasFee.amount).toMatch(/^0\.00005/)
     expect(result.current.gasFee.fiatAmount).toBeDefined()
+  })
+
+  it('itemizes safenetFee on the GTF arm and prices gasFee fiat from totalUsd (USD)', () => {
+    jest
+      .spyOn(gatewayApi, 'useGetGtfFeePreviewQuery')
+      .mockReturnValue(gtfArmPreview({ relayCostUsd: 0.12, totalUsd: 1.12, safenetFeeUsd: 1 }))
+
+    const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx) })
+
+    // formatCurrencyPrecise separates the symbol with a hair space, not U+0020.
+    expect(result.current.safenetFee).toEqual({ label: 'Safenet fee', amount: '$\u200A1.00' })
+    expect(result.current.gasFee.fiatAmount).toBe('$\u200A1.12')
+    expect(result.current.canCoverFees).toBe(true)
+    expect(result.current.loading).toBe(false)
+  })
+
+  it('shows "< $ 0.01" for a sub-cent Safenet fee', () => {
+    jest
+      .spyOn(gatewayApi, 'useGetGtfFeePreviewQuery')
+      .mockReturnValue(gtfArmPreview({ totalUsd: 0.13, safenetFeeUsd: 0.004 }))
+
+    const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx) })
+
+    expect(result.current.safenetFee).toEqual({ label: 'Safenet fee', amount: '< $\u200A0.01' })
+  })
+
+  it('omits safenetFee when the reported Safenet fee is zero (unchecked chain)', () => {
+    jest
+      .spyOn(gatewayApi, 'useGetGtfFeePreviewQuery')
+      .mockReturnValue(gtfArmPreview({ totalUsd: 0.12, safenetFeeUsd: 0 }))
+
+    const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx) })
+
+    expect(result.current.safenetFee).toBeUndefined()
+  })
+
+  it('omits safenetFee on the RELAY_FEE arm (relayCost, no feeBreakdown) and keeps its fiat source', () => {
+    jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
+
+    const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx) })
+
+    expect(result.current.safenetFee).toBeUndefined()
+    // Relay cost 0.12410833692950203 USD from the existing mock — unchanged behavior.
+    expect(result.current.gasFee.fiatAmount).toBe('$\u200A0.12')
+  })
+
+  it('falls through to the fallback branch for a breakdown without totalUsd (old gateway)', () => {
+    jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(gtfArmPreview({ safenetFeeUsd: 1 }))
+
+    const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx) })
+
+    // No usable quote: multi-sig fallback renders the note, never NaN, and no safenet row.
+    expect(result.current.safenetFee).toBeUndefined()
+    expect(result.current.canCoverFees).toBe(false)
+    expect(result.current.gasFee).toEqual({ label: 'Max gas fee', note: 'Calculated at execution' })
   })
 
   it('computes single-currency totalOutgoing for native transfer (send + gas in ETH)', () => {

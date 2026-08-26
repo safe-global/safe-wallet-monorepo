@@ -6,6 +6,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import ArrowUpRightIcon from '@/public/images/common/arrow-up-right.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { Checkbox } from '@/components/ui/checkbox'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -19,8 +20,9 @@ import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import type { GtfPaymentMode } from '@/features/gtf/types'
 import type { FeesPreviewData, TotalOutgoing } from '../../hooks/useFeesPreview'
 import { FeeBreakdownRow } from '../shared/FeeBreakdownRow'
-import { GAS_FEE_TOOLTIP } from '../shared/tooltips'
+import { GAS_FEE_TOOLTIP, SAFENET_FEE_TOOLTIP } from '../shared/tooltips'
 import { IS_RELAYING_LIVE } from '../../constants'
+import { isSafenetCheckAvailable } from '../../utils/isSafenetCheckAvailable'
 import css from './styles.module.css'
 
 const SIGNER_FEE_TOOLTIP = 'Fees will be paid from the connected signer wallet when executing this transaction.'
@@ -208,13 +210,14 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
     isConfirmation,
     isLegacySigned,
     executionFee,
+    safenetFee,
     gasFee,
     totalOutgoing,
     availableGasTokens,
     selectedGasToken,
     safeHasEnoughGas,
   } = props
-  const { gtfPaymentMode, setGtfPaymentMode } = useContext(SafeTxContext)
+  const { gtfPaymentMode, setGtfPaymentMode, safenetCheckEnabled, setSafenetCheckEnabled } = useContext(SafeTxContext)
   const chain = useCurrentChain()
   const nativeDisplay = {
     symbol: chain?.nativeCurrency.symbol ?? '',
@@ -233,6 +236,12 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
     (IS_RELAYING_LIVE ? gtfPaymentMode === 'safe' : !!isConfirmation && !isLegacySigned && canCoverFees) &&
     !noEligibleGasToken
   const displayedOutgoing = totalOutgoing && !isSafeWallet ? { ...totalOutgoing, fees: undefined } : totalOutgoing
+
+  // The opt-in rides the pay-from-Safe quote, so it is only offered when that quote is the
+  // active fee path. In signer-pays there is no fee vehicle to carry it. The chain feature
+  // gates availability, and the choice is pinned once a signature bakes the fee in.
+  const canOfferSafenetCheck =
+    isSafeWallet && canCoverFees && !isConfirmation && !isLegacySigned && isSafenetCheckAvailable(chain)
 
   const handlePaymentSourceChange = (source: GtfPaymentMode) => {
     setGtfPaymentMode(source)
@@ -311,10 +320,30 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
                 <Separator bleed="4" />
               </>
             )}
+
+            {canOfferSafenetCheck && (
+              <>
+                <div className={css.paymentRowGroup}>
+                  <Checkbox id="safenet-check" checked={safenetCheckEnabled} onCheckedChange={setSafenetCheckEnabled} />
+                  <label htmlFor="safenet-check">
+                    <Typography variant="paragraph-small">Run a Safenet check on this transaction</Typography>
+                  </label>
+                  <Tooltip>
+                    <TooltipTrigger render={<span className={css.tooltipIcon} />}>
+                      <InfoIcon className="size-4 text-[var(--color-border-main)]" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top">{SAFENET_FEE_TOOLTIP}</TooltipContent>
+                  </Tooltip>
+                </div>
+
+                <Separator bleed="4" />
+              </>
+            )}
           </>
         )}
 
         <FeeBreakdownRow {...executionFee} loading={props.loading} />
+        {safenetFee && <FeeBreakdownRow {...safenetFee} loading={props.loading} tooltip={SAFENET_FEE_TOOLTIP} />}
         <FeeBreakdownRow {...gasFee} loading={props.loading} error={props.error} tooltip={GAS_FEE_TOOLTIP} />
       </div>
 

@@ -4,6 +4,7 @@ import SafeTxProvider, { SafeTxContext } from '../SafeTxProvider'
 import { getTxOrigin } from '@/utils/transactions'
 import { gtfPaymentSourcePreferenceSlice } from '@/features/gtf/store'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 jest.mock('@/components/tx/shared/hooks', () => ({
   useRecommendedNonce: () => undefined,
@@ -17,6 +18,13 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   useSigner: () => null,
   useWalletContext: () => null,
 }))
+
+const mockUseCurrentChain = jest.fn()
+jest.mock('@/hooks/useChains', () => ({
+  useCurrentChain: () => mockUseCurrentChain(),
+}))
+
+const buildChain = (features: string[]) => ({ chainId: '1', features })
 
 const SIGNER_A = '0xAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAa'
 const SIGNER_B = '0xBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBb'
@@ -37,6 +45,7 @@ const PaymentModeReader = () => {
 describe('SafeTxProvider', () => {
   beforeEach(() => {
     mockUseWallet.mockReturnValue(null)
+    mockUseCurrentChain.mockReturnValue(buildChain([]))
   })
 
   it('should set a default txOrigin with the app URL and brand name', () => {
@@ -175,6 +184,51 @@ describe('SafeTxProvider', () => {
       )
 
       expect(() => screen.getByText('toggle').click()).not.toThrow()
+    })
+  })
+
+  describe('safenetCheckEnabled availability gate', () => {
+    const SafenetReader = () => {
+      const { safenetCheckEnabled, setSafenetCheckEnabled } = useContext(SafeTxContext)
+      return (
+        <>
+          <div data-testid="safenet">{String(safenetCheckEnabled)}</div>
+          <button onClick={() => setSafenetCheckEnabled(true)}>opt in</button>
+        </>
+      )
+    }
+
+    const renderReader = () =>
+      render(
+        <SafeTxProvider>
+          <SafenetReader />
+        </SafeTxProvider>,
+      )
+
+    it('defaults to off — the check is opt-in per transaction', () => {
+      mockUseCurrentChain.mockReturnValue(buildChain([FEATURES.SAFENET_CHECKS]))
+      renderReader()
+
+      expect(screen.getByTestId('safenet')).toHaveTextContent('false')
+    })
+
+    it('reports the opt-in on a chain that supports the check', () => {
+      mockUseCurrentChain.mockReturnValue(buildChain([FEATURES.SAFENET_CHECKS]))
+      renderReader()
+
+      act(() => screen.getByText('opt in').click())
+
+      expect(screen.getByTestId('safenet')).toHaveTextContent('true')
+    })
+
+    it('suppresses an opt-in carried over to a chain without the feature', () => {
+      mockUseCurrentChain.mockReturnValue(buildChain([]))
+      renderReader()
+
+      act(() => screen.getByText('opt in').click())
+
+      // The request must never reach a chain that cannot run the check.
+      expect(screen.getByTestId('safenet')).toHaveTextContent('false')
     })
   })
 })

@@ -804,6 +804,8 @@ describe('SignOrExecute hooks', () => {
         setGtfPaymentMode: jest.fn(),
         gtfSelectedGasToken: GAS_TOKEN,
         setGtfSelectedGasToken: jest.fn(),
+        safenetCheckEnabled: false,
+        setSafenetCheckEnabled: jest.fn(),
         ...overrides,
       }
       const Harness = () => {
@@ -875,6 +877,22 @@ describe('SignOrExecute hooks', () => {
         expect.objectContaining({ gasToken: GAS_TOKEN, numberSignatures: 2 }),
       )
       expect(signSpy).toHaveBeenCalledWith(mergedTx, expect.anything(), undefined)
+    })
+
+    it('carries the Safenet opt-in into the sign-time quote', async () => {
+      setupGtfChain()
+      jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(false))
+
+      const mergedTx = createSafeTx()
+      const resolveFeeParams = jest.fn().mockResolvedValue(mergedTx)
+      mockFeatureResolve(resolveFeeParams)
+
+      jest.spyOn(txSender, 'dispatchTxSigning').mockResolvedValue(mergedTx)
+
+      const ref = captureActions({ safenetCheckEnabled: true })
+      await ref.current!.signTx(createSafeTx())
+
+      expect(resolveFeeParams).toHaveBeenCalledWith(expect.objectContaining({ safenetCheck: true }))
     })
 
     it('skips the merge for confirmers (safeTx already has a signature)', async () => {

@@ -1,6 +1,6 @@
 import type { fakeBaseQuery } from '@reduxjs/toolkit/query/react'
 import { type EndpointBuilder } from '@reduxjs/toolkit/query/react'
-import type { OperationType } from '@safe-global/types-kit'
+import type { OperationType, SafeTransaction } from '@safe-global/types-kit'
 
 import { GATEWAY_URL } from '@/config/gateway'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
@@ -35,7 +35,38 @@ export type FeePreviewTransactionDto = {
   nonce: number
   fiatCode?: string
   origin?: string
+  safenetCheck?: boolean
 }
+
+/**
+ * Single source for the preview payload. The live preview and the sign-time refetch MUST
+ * send byte-identical bodies: the quote is folded into the signed fee fields, so any
+ * divergence makes the user sign a different `safeTxHash` than the one previewed.
+ */
+export const buildFeePreviewTx = ({
+  safeTx,
+  gasToken,
+  numberSignatures,
+  currency,
+  safenetCheck,
+}: {
+  safeTx: SafeTransaction
+  gasToken: string
+  numberSignatures: number
+  currency: string | undefined
+  safenetCheck: boolean
+}): FeePreviewTransactionDto => ({
+  to: safeTx.data.to,
+  value: safeTx.data.value,
+  data: safeTx.data.data,
+  operation: safeTx.data.operation,
+  gasToken,
+  numberSignatures,
+  nonce: safeTx.data.nonce,
+  fiatCode: toSupportedFiatCode(currency),
+  // Sent only when on, mirroring the gateway's own convention. Absent means no check.
+  ...(safenetCheck && { safenetCheck: true }),
+})
 
 export type FeePreviewTxData = {
   chainId: string
@@ -53,9 +84,19 @@ export type FeePreviewRelayCost = {
   fiatValue: string
 }
 
+/**
+ * The CGW switches the response shape on `chain.relayer.type`: the RELAY_FEE arm sends
+ * `relayCost`, the GTF arm sends `feeBreakdown` (USD end-to-end) and no `relayCost`.
+ * Only the consumed fields are typed.
+ */
 export type FeePreviewResponse = {
   txData: FeePreviewTxData
-  relayCost: FeePreviewRelayCost
+  relayCost?: FeePreviewRelayCost
+  feeBreakdown?: {
+    relayCostUsd?: number
+    totalUsd?: number
+    safenetFeeUsd?: number
+  }
 }
 
 export type FeePreviewArg = {
@@ -65,7 +106,7 @@ export type FeePreviewArg = {
 }
 
 const isFeePreviewResponse = (value: unknown): value is FeePreviewResponse =>
-  typeof value === 'object' && value !== null && 'txData' in value && 'relayCost' in value
+  typeof value === 'object' && value !== null && 'txData' in value && ('relayCost' in value || 'feeBreakdown' in value)
 
 export const gtfFeePreviewEndpoints = (builder: GatewayEndpointBuilder) => ({
   getGtfFeePreview: builder.query<FeePreviewResponse, FeePreviewArg>({
