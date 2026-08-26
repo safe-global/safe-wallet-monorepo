@@ -917,10 +917,28 @@ export function verifyAndSubmitExecutionParams() {
 
 export function setAdvancedExecutionParams() {
   cy.contains(executionParamsStr).parents('form').as('Paramsform')
-  cy.get('@Paramsform').find(gasLimitInput).clear().type(advancedParametersValues.gasLimit)
-  cy.get('@Paramsform').find(maxPriorityFee).clear().type(advancedParametersValues.maxPriorityFee)
-  cy.get('@Paramsform').find(maxFee).clear().type(advancedParametersValues.maxFee)
-  cy.get('@Paramsform').find(walletNonceInput).clear().type(advancedParametersValues.walletNonce)
+  // The fee/nonce inputs stay disabled until gas estimation resolves, which can take
+  // well over the 10s default on slow CI runners — wait for each field to enable.
+  cy.get('@Paramsform')
+    .find(gasLimitInput, { timeout: 60000 })
+    .should('not.be.disabled')
+    .clear()
+    .type(advancedParametersValues.gasLimit)
+  cy.get('@Paramsform')
+    .find(maxPriorityFee, { timeout: 60000 })
+    .should('not.be.disabled')
+    .clear()
+    .type(advancedParametersValues.maxPriorityFee)
+  cy.get('@Paramsform')
+    .find(maxFee, { timeout: 60000 })
+    .should('not.be.disabled')
+    .clear()
+    .type(advancedParametersValues.maxFee)
+  cy.get('@Paramsform')
+    .find(walletNonceInput, { timeout: 60000 })
+    .should('not.be.disabled')
+    .clear()
+    .type(advancedParametersValues.walletNonce)
   cy.get('@Paramsform').submit()
 }
 
