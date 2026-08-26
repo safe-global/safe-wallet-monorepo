@@ -53,7 +53,10 @@ jest.mock('@/features/safe-pro', () => ({
 }))
 jest.mock('@/features/__core__', () => ({
   ...jest.requireActual('@/features/__core__'),
-  useLoadFeature: () => ({ SafeProWorkspacesBanner: () => <div data-testid="safe-pro-workspaces-banner" /> }),
+  useLoadFeature: () => ({
+    SafeProBanner: () => <div data-testid="safe-pro-banner" />,
+    SafeProWorkspacesBanner: () => <div data-testid="safe-pro-workspaces-banner" />,
+  }),
 }))
 jest.mock('@/components/common/AddTrustedSafesCard', () => ({
   __esModule: true,
@@ -81,17 +84,17 @@ describe('MyAccountsV2', () => {
 
   describe('SAFE_PRO banner', () => {
     it.each([
-      ['Get started', null, { hasPinnedSafes: false }],
-      ['empty', {}, { hasPinnedSafes: false }],
-      ['list', {}, { hasPinnedSafes: true }],
-    ])('renders above the %s state when the flag is on', (_label, wallet, migration) => {
+      ['Get started', null, { hasPinnedSafes: false }, 'safe-pro-banner'],
+      ['empty', {}, { hasPinnedSafes: false }, 'safe-pro-banner'],
+      ['list', {}, { hasPinnedSafes: true }, 'safe-pro-workspaces-banner'],
+    ])('renders above the %s state when the flag is on', (_label, wallet, migration, testId) => {
       mockWallet.mockReturnValue(wallet)
       mockMigration.mockReturnValue(migrationState(migration))
       mockUseIsSafeProEnabled.mockReturnValue(true)
 
       render(<MyAccountsV2 />)
 
-      expect(screen.getByTestId('safe-pro-workspaces-banner')).toBeInTheDocument()
+      expect(screen.getByTestId(testId)).toBeInTheDocument()
     })
 
     it('stays hidden when the flag is off', () => {

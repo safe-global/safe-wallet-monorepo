@@ -29,7 +29,7 @@ type MyAccountsProps = {
 const MyAccountsV2 = ({ safes, onLinkClick }: MyAccountsProps) => {
   const wallet = useWallet()
   const isDarkMode = useDarkMode()
-  const { SafeProWorkspacesBanner } = useLoadFeature(SafeProFeature)
+  const { SafeProBanner, SafeProWorkspacesBanner } = useLoadFeature(SafeProFeature)
   const isSafeProEnabled = useIsSafeProEnabled()
   const [searchQuery, setSearchQuery] = useState('')
   const modal = useTrustedSafesModal()
@@ -47,7 +47,12 @@ const MyAccountsV2 = ({ safes, onLinkClick }: MyAccountsProps) => {
           <AccountsNavigation />
         </div>
 
-        {isSafeProEnabled && <SafeProWorkspacesBanner className="mb-4" />}
+        {isSafeProEnabled &&
+          (showList ? (
+            <SafeProWorkspacesBanner className="mb-4" />
+          ) : (
+            <SafeProBanner className="mx-auto -mb-6 w-full max-w-[440px]" />
+          ))}
 
         {showGetStarted && <GetStartedCard />}
 
