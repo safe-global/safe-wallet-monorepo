@@ -3,6 +3,7 @@ import { formatUnits } from 'ethers'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
+import { skipToken } from '@reduxjs/toolkit/query'
 
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useAppSelector } from '@/store'
@@ -12,6 +13,8 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import useBalances from '@/hooks/useBalances'
 import useGasLimit from '@/hooks/useGasLimit'
 import useGasPrice from '@/hooks/useGasPrice'
+import { useSafeTxHash } from '@/components/transactions/TxDetails/Summary/SafeTxHashDataRow'
+import { useGetGtfFeeSnapshotQuery } from '@/store/api/gateway'
 import { useGtfFeePreview } from './useGtfFeePreview'
 import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPrice'
 import { formatCurrencyMinimal } from '@safe-global/utils/utils/formatNumber'
@@ -178,6 +181,18 @@ export const useFeesPreview = (): FeesPreviewData => {
     safenetCheck: safenetCheckEnabled,
   })
 
+  // Confirmation only: the stored quote is immutable, so reading it back reports exactly what
+  // the first signer signed. Display-only — a 404, an error or a pending fetch must leave the
+  // card exactly as it renders today and must never gate submit.
+  // `safe.chainId`, not `chain.chainId`: the hash is keyed to the same domain, and during a
+  // chain switch the two sources disagree for a render.
+  const signedSafeTxHash = useSafeTxHash({ safeTxData: isConfirmation ? safeTx?.data : undefined })
+  const snapshot = useGetGtfFeeSnapshotQuery(
+    isConfirmation && feePreviewAvailable && safeAddress && signedSafeTxHash
+      ? { chainId: safe.chainId, safeAddress, safeTxHash: signedSafeTxHash }
+      : skipToken,
+  )
+
   // Sync `gtfSelectedGasToken` with the latest preview state
   //  - preview unavailable (errored / no eligible token after settling): drop the persisted
   //    selection so `mergeGtfFeeParams` bails and the tx is signed as signer-pays.
@@ -269,9 +284,16 @@ export const useFeesPreview = (): FeesPreviewData => {
       balances,
     })
 
+    // Already inside the signed `baseGas`, so this row itemizes it in USD only — never a total.
+    const snapshotSafenetFeeUsd = snapshot.data?.feeBreakdown?.safenetFeeUsd ?? 0
+
     return {
       ...base,
       canCoverFees: true,
+      safenetFee:
+        snapshotSafenetFeeUsd > 0
+          ? { label: 'Safenet fee', amount: formatCurrencyMinimal(snapshotSafenetFeeUsd, 'USD') }
+          : undefined,
       gasFee: {
         label: 'Max gas fee',
         amount: gasAmount,

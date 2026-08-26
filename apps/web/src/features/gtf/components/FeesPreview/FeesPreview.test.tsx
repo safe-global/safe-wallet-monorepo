@@ -383,5 +383,20 @@ describe('FeesPreview', () => {
 
       expect(setSafenetCheckEnabled).toHaveBeenCalledWith(true, expect.anything())
     })
+
+    it('renders the read-back fee row on the confirmation card, checkbox still hidden', () => {
+      mockChainFeatures = [FEATURES.SAFENET_CHECKS]
+      const { container } = render(
+        <FeesPreview {...defaultProps} isConfirmation safenetFee={{ label: 'Safenet fee', amount: '$\u200A1.00' }} />,
+      )
+
+      const rows = Array.from(container.querySelectorAll('.feeRow'))
+      expect(rows).toHaveLength(3)
+      expect(rows[0].textContent).toContain('Execution fee')
+      expect(rows[1].textContent).toContain('Safenet fee')
+      expect(rows[1].querySelector('.feeAmount')?.textContent).toBe('$\u200A1.00')
+      expect(rows[2].textContent).toContain('Max gas fee')
+      expect(screen.queryByLabelText(CHECKBOX_LABEL)).not.toBeInTheDocument()
+    })
   })
 })
