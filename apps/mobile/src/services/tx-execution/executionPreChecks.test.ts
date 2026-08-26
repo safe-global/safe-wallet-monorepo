@@ -40,6 +40,7 @@ describe('getMissingSignaturesError', () => {
 
     expect(result).toBeInstanceOf(ExecutionError)
     expect(result?.message).toBe(getContractErrorMessage('GS025'))
+    expect(result?.code).toBe('GS025')
   })
 
   it('blocks a non-signer executor with the invalid-signer message', () => {
@@ -51,6 +52,7 @@ describe('getMissingSignaturesError', () => {
     })
 
     expect(result?.message).toBe(getGs026Message('NOT_SIGNER'))
+    expect(result?.code).toBe('GS026')
   })
 
   it('blocks a relayed execution that is short of confirmations', () => {
@@ -103,6 +105,27 @@ describe('getMissingSignaturesError', () => {
     ).toBeUndefined()
     expect(
       getMissingSignaturesError({ confirmedSigners: [], threshold: 0, owners: [], executorAddress: OWNER_A }),
+    ).toBeUndefined()
+  })
+
+  it('does not block when the confirmations are unknown', () => {
+    // "Unknown" is not "none": a caller that cannot resolve the confirmations
+    // must not have a fully confirmed transaction blocked.
+    expect(
+      getMissingSignaturesError({
+        confirmedSigners: undefined,
+        threshold: 2,
+        owners: OWNERS,
+        executorAddress: OWNER_A,
+      }),
+    ).toBeUndefined()
+    expect(
+      getMissingSignaturesError({
+        confirmedSigners: undefined,
+        threshold: 2,
+        owners: OWNERS,
+        executorAddress: undefined,
+      }),
     ).toBeUndefined()
   })
 

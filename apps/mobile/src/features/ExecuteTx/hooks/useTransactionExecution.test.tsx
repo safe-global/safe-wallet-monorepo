@@ -9,7 +9,10 @@ const mockRelayMutation = jest.fn()
 jest.mock('@/src/services/tx-execution/relayExecutor', () => ({
   executeRelayTx: (...args: unknown[]) => mockExecuteRelayTx(...args),
 }))
-jest.mock('@/src/services/tx-execution/privateKeyExecutor', () => ({ executePrivateKeyTx: jest.fn() }))
+const mockExecutePrivateKeyTx = jest.fn()
+jest.mock('@/src/services/tx-execution/privateKeyExecutor', () => ({
+  executePrivateKeyTx: (...args: unknown[]) => mockExecutePrivateKeyTx(...args),
+}))
 jest.mock('@/src/services/tx-execution/ledgerExecutor', () => ({ executeLedgerTx: jest.fn() }))
 jest.mock('@/src/services/tx-execution/walletConnectExecutor', () => ({ executeWalletConnectTx: jest.fn() }))
 
@@ -63,12 +66,15 @@ jest.mock('@/src/store/hooks', () => {
 import { makeStore } from '@/src/store'
 import { useTransactionExecution, ExecutionStatus } from './useTransactionExecution'
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
-import { CONTRACT_ERROR_FALLBACK, getContractErrorMessage } from '@safe-global/utils/services/exceptions/contractErrors'
+import { getContractErrorMessage, getGs026Message } from '@safe-global/utils/services/exceptions/contractErrors'
+import { UNREFERENCED_ERROR_FALLBACK } from '@/src/services/tx-execution/executionErrors'
 
 describe('useTransactionExecution', () => {
   let store: ReturnType<typeof makeStore>
 
-  const renderExecution = (overrides: { confirmedSigners?: string[] } = {}) =>
+  const renderExecution = (
+    overrides: { confirmedSigners?: string[]; executionMethod?: ExecutionMethod; signerAddress?: string } = {},
+  ) =>
     renderHook(
       () =>
         useTransactionExecution({
@@ -93,6 +99,15 @@ describe('useTransactionExecution', () => {
       taskId: 'task456',
       chainId: '137',
       safeAddress: '0xSafe',
+    })
+    mockExecutePrivateKeyTx.mockResolvedValue({
+      type: ExecutionMethod.WITH_PK,
+      txId: 'tx123',
+      chainId: '137',
+      safeAddress: '0xSafe',
+      txHash: '0xhash',
+      walletAddress: '0xSigner',
+      walletNonce: 1,
     })
   })
 
@@ -154,12 +169,14 @@ describe('useTransactionExecution', () => {
       const { result } = renderExecution()
 
       await act(async () => {
-        await expect(result.current.execute()).rejects.toThrow(CONTRACT_ERROR_FALLBACK)
+        await expect(result.current.execute()).rejects.toThrow(getContractErrorMessage('GS013'))
       })
 
       const stored = getStoredError()
-      expect(stored).toBe(CONTRACT_ERROR_FALLBACK)
+      expect(stored).toBe(getContractErrorMessage('GS013'))
       expect(stored).not.toMatch(/ContractFunctionExecutionError|execTransaction|args:|viem/)
+      // The shared copy points at a reference, so the code has to be stored too.
+      expect(store.getState().executingState.executions['tx123']?.errorCode).toBe('GS013')
     })
 
     it('stores an actionable message when the signer cannot cover the network fee', async () => {
@@ -174,6 +191,19 @@ describe('useTransactionExecution', () => {
       })
 
       expect(getStoredError()).toMatch(/^Not enough funds in your signer wallet to cover the network fee\./)
+    })
+
+    it('stores a reference-free fallback for a revert with no GS code', async () => {
+      mockExecuteRelayTx.mockRejectedValue(new Error('execution reverted (unknown custom error)'))
+
+      const { result } = renderExecution()
+
+      await act(async () => {
+        await expect(result.current.execute()).rejects.toThrow(UNREFERENCED_ERROR_FALLBACK)
+      })
+
+      expect(getStoredError()).toBe(UNREFERENCED_ERROR_FALLBACK)
+      expect(store.getState().executingState.executions['tx123']?.errorCode).toBeUndefined()
     })
 
     it('leaves an app-level error untouched', async () => {
@@ -220,6 +250,51 @@ describe('useTransactionExecution', () => {
       })
 
       expect(mockExecuteRelayTx).toHaveBeenCalled()
+    })
+
+    it('blocks a signer-sent execution when the executor is not a signer of the Safe', async () => {
+      const { result } = renderExecution({
+        executionMethod: ExecutionMethod.WITH_PK,
+        signerAddress: '0xCcCcCc2A6E1B1c2d3E4f5061728394A5b6C7d8E9',
+        confirmedSigners: [OWNER_A],
+      })
+
+      await act(async () => {
+        await expect(result.current.execute()).rejects.toThrow(getGs026Message('NOT_SIGNER'))
+      })
+
+      expect(mockExecutePrivateKeyTx).not.toHaveBeenCalled()
+      expect(store.getState().executingState.executions['tx123']?.errorCode).toBe('GS026')
+    })
+
+    it('lets a signer executor cover the last confirmation with its pre-validated signature', async () => {
+      const { result } = renderExecution({
+        executionMethod: ExecutionMethod.WITH_PK,
+        signerAddress: OWNER_B,
+        confirmedSigners: [OWNER_A],
+      })
+
+      await act(async () => {
+        await result.current.execute()
+      })
+
+      expect(mockExecutePrivateKeyTx).toHaveBeenCalled()
+    })
+
+    it('does not block when the caller omits confirmedSigners (the Ledger review shape)', async () => {
+      // LedgerReviewExecuteContainer used to call the hook without them; an
+      // unknown confirmation set must never be read as an empty one.
+      const { result } = renderExecution({
+        executionMethod: ExecutionMethod.WITH_PK,
+        signerAddress: OWNER_B,
+      })
+
+      await act(async () => {
+        await result.current.execute()
+      })
+
+      expect(mockExecutePrivateKeyTx).toHaveBeenCalled()
+      expect(getStoredError()).toBeUndefined()
     })
   })
 })

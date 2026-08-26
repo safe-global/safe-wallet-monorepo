@@ -2,24 +2,43 @@ import {
   CONTRACT_ERROR_FALLBACK,
   getContractErrorMessage,
   getGsCodeFromError,
+  type GsCode,
 } from '@safe-global/utils/services/exceptions/contractErrors'
+import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
 
 /**
  * A failure the user is allowed to read. `message` is always copy we own —
  * never a library message, a function signature, calldata or a GS code — so it
  * can be routed straight to `/execution-error` or a toast.
  *
+ * `code` is the GS code behind the failure, when known. It is a support
+ * reference only: the UI renders it next to the message, never inside it. The
+ * shared fallback copy points at that reference, so any error carrying the
+ * fallback must also carry a code.
+ *
  * The original throwable stays on `cause` for logging only.
  */
 export class ExecutionError extends Error {
-  constructor(message: string, cause?: unknown) {
+  readonly code?: GsCode
+
+  constructor(message: string, options: { code?: GsCode; cause?: unknown } = {}) {
     super(message)
     this.name = 'ExecutionError'
-    this.cause = cause
+    this.code = options.code
+    this.cause = options.cause
   }
 }
 
 export const isExecutionError = (error: unknown): error is ExecutionError => error instanceof ExecutionError
+
+/**
+ * `CONTRACT_ERROR_FALLBACK` ends with "contact support with the reference
+ * below", which is only true when there is a GS code to render beneath the
+ * message. A revert we cannot pin to a code has no reference to show, so it
+ * gets the same copy without that promise. A test pins the two together so
+ * they cannot drift apart.
+ */
+export const UNREFERENCED_ERROR_FALLBACK = 'Something went wrong. Try again, or contact support.'
 
 export const getInsufficientFeeFundsMessage = (nativeAsset?: string): string =>
   `Not enough ${nativeAsset ?? 'funds'} in your signer wallet to cover the network fee. Add funds and try again.`
@@ -29,10 +48,28 @@ const TEXT_KEYS = ['code', 'shortMessage', 'details', 'reason', 'message'] as co
 
 const MAX_CAUSE_DEPTH = 10
 
+const readTextKeys = (record: Record<string, unknown>): string[] => {
+  const parts: string[] = []
+  const name = record.name
+  if (typeof name === 'string') {
+    parts.push(name)
+  }
+  for (const key of TEXT_KEYS) {
+    const value = record[key]
+    if (typeof value === 'string') {
+      parts.push(value)
+    }
+  }
+  return parts
+}
+
 /**
  * viem and ethers both nest the real failure several `cause` levels below the
- * error we catch, and spread the useful text across different keys. Collect all
- * of it into one blob so the matchers below only have to look in one place.
+ * error we catch, and spread the useful text across different keys. RTK Query
+ * hides it one level deeper again, on `data` — which is the text `asError`
+ * surfaces, so it has to be classified too or the displayed string would not be
+ * the classified one. Collect all of it into one blob so the matchers below
+ * only have to look in one place.
  */
 const collectErrorText = (error: unknown): string => {
   const parts: string[] = []
@@ -48,16 +85,15 @@ const collectErrorText = (error: unknown): string => {
     }
 
     const record = current as Record<string, unknown>
-    const name = record.name
-    if (typeof name === 'string') {
-      parts.push(name)
+    parts.push(...readTextKeys(record))
+
+    const data = record.data
+    if (typeof data === 'string') {
+      parts.push(data)
+    } else if (typeof data === 'object' && data !== null) {
+      parts.push(...readTextKeys(data as Record<string, unknown>))
     }
-    for (const key of TEXT_KEYS) {
-      const value = record[key]
-      if (typeof value === 'string') {
-        parts.push(value)
-      }
-    }
+
     current = record.cause
   }
 
@@ -120,6 +156,13 @@ export const classifyExecutionError = (
     return error
   }
 
+  // CGW's pre-relay simulation outcome is a typed error the execution flow
+  // branches on (retry vs. terminal). The caller guards this too — this check
+  // keeps the classifier safe to call on any throwable.
+  if (error instanceof RelaySimulationError) {
+    return undefined
+  }
+
   const text = collectErrorText(error)
   if (!text) {
     return undefined
@@ -130,15 +173,18 @@ export const classifyExecutionError = (
   const gsCode = getGsCodeFromError({ message: text })
   if (gsCode) {
     const message = getContractErrorMessage(gsCode, { nativeAsset })
-    return new ExecutionError(hasUnresolvedPlaceholder(message) ? CONTRACT_ERROR_FALLBACK : message, error)
+    return new ExecutionError(hasUnresolvedPlaceholder(message) ? CONTRACT_ERROR_FALLBACK : message, {
+      code: gsCode,
+      cause: error,
+    })
   }
 
   if (matchesAny(INSUFFICIENT_FUNDS_PATTERNS, text)) {
-    return new ExecutionError(getInsufficientFeeFundsMessage(nativeAsset), error)
+    return new ExecutionError(getInsufficientFeeFundsMessage(nativeAsset), { cause: error })
   }
 
   if (matchesAny(CONTRACT_ERROR_PATTERNS, text)) {
-    return new ExecutionError(CONTRACT_ERROR_FALLBACK, error)
+    return new ExecutionError(UNREFERENCED_ERROR_FALLBACK, { cause: error })
   }
 
   return undefined

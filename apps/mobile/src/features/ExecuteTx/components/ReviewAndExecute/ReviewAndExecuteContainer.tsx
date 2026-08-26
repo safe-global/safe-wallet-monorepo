@@ -17,7 +17,7 @@ import { selectExecutionMethod } from '@/src/store/executionMethodSlice'
 import { selectActiveChain } from '@/src/store/chains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
-import { getExecutionMethod } from './helpers'
+import { getConfirmedSigners, getExecutionMethod } from './helpers'
 import { isMultisigDetailedExecutionInfo } from '@/src/utils/transaction-guards'
 import { parseFeeParams } from '@/src/utils/feeParams'
 import { useOptionalWalletConnectContext } from '@/src/features/WalletConnect/Signer/context/WalletConnectContext'
@@ -71,12 +71,7 @@ export function ReviewAndExecuteContainer() {
   const wcContext = useOptionalWalletConnectContext()
 
   // Signers that already confirmed, for the pre-broadcast threshold check
-  const confirmedSigners = useMemo(() => {
-    const executionInfo = txDetails?.detailedExecutionInfo
-    return isMultisigDetailedExecutionInfo(executionInfo)
-      ? executionInfo.confirmations.map((confirmation) => confirmation.signer.value)
-      : []
-  }, [txDetails])
+  const confirmedSigners = useMemo(() => getConfirmedSigners(txDetails), [txDetails])
 
   // Execution
   const { execute } = useTransactionExecution({

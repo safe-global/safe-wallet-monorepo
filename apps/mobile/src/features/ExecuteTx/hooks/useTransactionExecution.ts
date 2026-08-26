@@ -33,7 +33,10 @@ interface UseTransactionExecutionProps {
   signerAddress: string
   feeParams: EstimatedFeeValues | null
   executionMethod: ExecutionMethod
-  /** Signers that already confirmed the transaction, used by the pre-broadcast threshold check. */
+  /**
+   * Signers that already confirmed the transaction, for the pre-broadcast
+   * threshold check. `undefined` skips the check — unknown is not none.
+   */
   confirmedSigners?: string[]
   wcProvider?: Provider
 }
@@ -115,7 +118,7 @@ export function useTransactionExecution({
         // A relayer sends the transaction from its own EOA, so it can never add
         // a pre-validated signature of its own.
         const missingSignatures = getMissingSignaturesError({
-          confirmedSigners: confirmedSigners ?? [],
+          confirmedSigners,
           threshold: safe.threshold,
           owners: safe.owners?.map((owner) => owner.value) ?? [],
           executorAddress: executionMethod === ExecutionMethod.WITH_RELAY ? undefined : signerAddress,
@@ -143,7 +146,13 @@ export function useTransactionExecution({
             ? undefined
             : classifyExecutionError(error, { nativeAsset: activeChain?.nativeCurrency?.symbol })
 
-        dispatch(setExecutingError({ txId, error: (executionError ?? asError(error)).message }))
+        dispatch(
+          setExecutingError({
+            txId,
+            error: (executionError ?? asError(error)).message,
+            code: executionError?.code,
+          }),
+        )
 
         throw executionError ?? error
       }

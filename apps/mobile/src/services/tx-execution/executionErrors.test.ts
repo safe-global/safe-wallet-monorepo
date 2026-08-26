@@ -1,6 +1,11 @@
 import { CONTRACT_ERROR_FALLBACK, getContractErrorMessage } from '@safe-global/utils/services/exceptions/contractErrors'
 import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
-import { ExecutionError, classifyExecutionError, getInsufficientFeeFundsMessage } from './executionErrors'
+import {
+  ExecutionError,
+  UNREFERENCED_ERROR_FALLBACK,
+  classifyExecutionError,
+  getInsufficientFeeFundsMessage,
+} from './executionErrors'
 
 /**
  * The multi-line viem dump users reported on `/review-and-execute` (WA-2297).
@@ -45,9 +50,8 @@ const TECHNICAL_LEAKS: [string, RegExp][] = [
 ]
 
 const expectNoTechnicalContent = (message: string) => {
-  for (const [, pattern] of TECHNICAL_LEAKS) {
-    expect(message).not.toMatch(pattern)
-  }
+  const leaks = TECHNICAL_LEAKS.filter(([, pattern]) => pattern.test(message)).map(([label]) => label)
+  expect(leaks).toEqual([])
   expect(message).not.toMatch(/\bplease\b/i)
   expect(message).not.toContain('!')
 }
@@ -59,6 +63,8 @@ describe('classifyExecutionError', () => {
 
       expect(result).toBeInstanceOf(ExecutionError)
       expect(result?.message).toBe(getContractErrorMessage('GS013'))
+      // The shared fallback points at a reference, so the code must travel with it.
+      expect(result?.code).toBe('GS013')
       expectNoTechnicalContent(result?.message ?? '')
     })
 
@@ -66,6 +72,7 @@ describe('classifyExecutionError', () => {
       const result = classifyExecutionError(makeViemRevertError('GS026'))
 
       expect(result?.message).toBe(getContractErrorMessage('GS026'))
+      expect(result?.code).toBe('GS026')
       expectNoTechnicalContent(result?.message ?? '')
     })
 
@@ -142,17 +149,52 @@ describe('classifyExecutionError', () => {
   })
 
   describe('unknown reverts', () => {
-    it('falls back cleanly for a revert with no known GS code', () => {
+    it('falls back without promising a reference it cannot show', () => {
       const result = classifyExecutionError(makeViemRevertError('GS999'))
 
-      expect(result?.message).toBe(CONTRACT_ERROR_FALLBACK)
+      expect(result?.message).toBe(UNREFERENCED_ERROR_FALLBACK)
+      expect(result?.code).toBeUndefined()
       expectNoTechnicalContent(result?.message ?? '')
     })
 
     it('falls back cleanly for a bare CALL_EXCEPTION', () => {
       const result = classifyExecutionError({ code: 'CALL_EXCEPTION', message: 'missing revert data' })
 
-      expect(result?.message).toBe(CONTRACT_ERROR_FALLBACK)
+      expect(result?.message).toBe(UNREFERENCED_ERROR_FALLBACK)
+    })
+
+    it('keeps the unreferenced fallback in step with the shared copy', () => {
+      // The mobile variant is the shared string minus its "reference below"
+      // clause; if the shared copy is reworded, this pins the two together.
+      expect(UNREFERENCED_ERROR_FALLBACK).toBe('Something went wrong. Try again, or contact support.')
+      expect(CONTRACT_ERROR_FALLBACK.startsWith('Something went wrong. Try again, or contact support')).toBe(true)
+    })
+  })
+
+  describe('RTK Query failures (the shape asError unwraps)', () => {
+    it('classifies a revert carried on data.message', () => {
+      // asError() surfaces `data.message` as the displayed string, so the
+      // classifier has to look there too or the raw text would win.
+      const result = classifyExecutionError({
+        status: 500,
+        data: { message: 'execution reverted: GS026' },
+      })
+
+      expect(result?.message).toBe(getContractErrorMessage('GS026'))
+      expect(result?.code).toBe('GS026')
+    })
+
+    it('classifies node output carried on data.message', () => {
+      const result = classifyExecutionError(
+        { status: 422, data: { message: 'err: insufficient funds for gas * price + value: address 0xabc' } },
+        { nativeAsset: 'ETH' },
+      )
+
+      expect(result?.message).toBe(getInsufficientFeeFundsMessage('ETH'))
+    })
+
+    it('leaves an unrelated gateway failure alone', () => {
+      expect(classifyExecutionError({ status: 503, data: { message: 'Service unavailable' } })).toBeUndefined()
     })
   })
 
@@ -168,9 +210,16 @@ describe('classifyExecutionError', () => {
     })
 
     it('returns undefined for a relay simulation error so the caller can branch on it', () => {
-      const error = new RelaySimulationError('INDETERMINATE_SIMULATION', 'Simulation could not be completed')
-
-      expect(classifyExecutionError(error)).toBeUndefined()
+      // Guarded by an explicit instanceof check, so it holds even when CGW's
+      // message happens to contain revert wording.
+      expect(
+        classifyExecutionError(new RelaySimulationError('INDETERMINATE_SIMULATION', 'Simulation incomplete')),
+      ).toBeUndefined()
+      expect(
+        classifyExecutionError(
+          new RelaySimulationError('SIMULATION_FAILED', 'execution reverted: GS013 (insufficient funds)'),
+        ),
+      ).toBeUndefined()
     })
 
     it('passes an already user-facing ExecutionError through unchanged', () => {
