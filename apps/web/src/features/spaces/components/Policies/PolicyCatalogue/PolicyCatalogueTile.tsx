@@ -20,8 +20,8 @@ const PolicyCatalogueTile = ({ id, title, description, Icon, isAvailable, onClic
     aria-disabled={isAvailable ? undefined : true}
     onClick={onClick}
     className={cn(
-      'flex h-full flex-col items-start gap-2 rounded-xl border border-transparent bg-card p-4 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-      isAvailable ? 'cursor-pointer hover:border-border' : 'cursor-default',
+      'flex h-full flex-col items-start gap-2 rounded-xl bg-card p-4 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+      isAvailable ? 'cursor-pointer hover:bg-[var(--color-background-secondary)]' : 'cursor-default',
     )}
   >
     <div className={cn('flex size-10 items-center justify-center rounded-md bg-accent', !isAvailable && 'opacity-60')}>
