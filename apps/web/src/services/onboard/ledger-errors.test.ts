@@ -197,23 +197,47 @@ describe('ledger-errors', () => {
     it('never emits the literal "unknown" for an InvalidStatusWordError', () => {
       const error = mapLedgerError(invalidStatusWord('no signature returned')) as MappedError
 
+      expect(error.message).toBe('Your Ledger could not complete the request.')
       expect(error.shortMessage).toBe('Your Ledger could not complete the request.')
       expect(error.code).toBe('UNKNOWN_ERROR')
-      expect(error.message).not.toContain('unknown (')
     })
 
-    it('keeps the device reason on the error for the debugging sinks', () => {
+    it('keeps the device reason on the error, and out of its message', () => {
       const error = mapLedgerError(invalidStatusWord('V is missing'))
 
       expect(getLedgerDeviceError(error)).toMatchObject({
         tag: 'InvalidStatusWordError',
         deviceMessage: 'V is missing',
       })
-      // The raw evidence must survive serialisation into `error.message`, which
-      // is what Datadog records — an `Error` in `originalError` serialised to
-      // `{}` and lost it (WA-3243).
-      expect(error.message).toContain('V is missing')
-      expect(error.message).toContain('InvalidStatusWordError')
+      // The evidence travels on the error, never in its message: `message` is
+      // what gets rendered, including by third-party UI we cannot intercept.
+      // `CodedException` reads it off the error and tags Datadog with it.
+      expect(error.message).not.toContain('V is missing')
+      expect(error.message).not.toContain('InvalidStatusWordError')
+    })
+
+    it('renders as the plain sentence wherever the raw message is shown', () => {
+      // `@web3-onboard/hw-common`'s account picker prints `err.message`
+      // verbatim, so the message itself has to be user-ready — ethers'
+      // `makeError` appended `info={…}, code=…, version=…` to it (WA-3243).
+      const errors = [
+        invalidStatusWord('no signature returned'),
+        invalidStatusWord(),
+        deviceExchangeError('DeviceLockedError', '5515', 'Device is locked.'),
+        deviceExchangeError('EthAppCommandError', '6a80', 'Invalid data'),
+        deviceExchangeError('OpenAppCommandError', '6807', 'Unknown application name'),
+        { _tag: 'WebHidSendReportError', originalError: new Error('The device is not connected') },
+        {} as DmkError,
+      ]
+
+      for (const dmkError of errors) {
+        const { message } = mapLedgerError(dmkError)
+
+        expect(message).toBe(getLedgerUserMessage(readLedgerDeviceError(dmkError)))
+        for (const forbidden of FORBIDDEN_IN_UI) {
+          expect(message).not.toContain(forbidden)
+        }
+      }
     })
 
     it('classifies a device failure as a Ledger error rather than unknown', () => {
@@ -241,6 +265,22 @@ describe('ledger-errors', () => {
 
       expect(error.code).toBe('ACTION_REJECTED')
       expect(matchUserOutcome(error.message)).toBe(ErrorType.USER_REJECTED)
+    })
+
+    it('states a rejection in words a user can read, and analytics still counts it as one', () => {
+      // The account picker prints this message raw, so it cannot be ethers'
+      // `user rejected action`; `matchUserOutcome` keys off the wording, so it
+      // must still carry a phrase the matcher knows (WA-2950 / WA-3243).
+      const error = mapLedgerError({ _tag: 'RefusedByUserDAError' }) as MappedError
+
+      expect(error.message).toBe('You rejected the request on your Ledger.')
+      for (const forbidden of FORBIDDEN_IN_UI) {
+        expect(error.message).not.toContain(forbidden)
+      }
+      expect(matchUserOutcome(`Code 804: Error executing a transaction (${error.message})`)).toBe(
+        ErrorType.USER_REJECTED,
+      )
+      expect(isWalletRejection(wrapLikeViem(error))).toBe(true)
     })
 
     it('does not report a locked device as a rejection', () => {

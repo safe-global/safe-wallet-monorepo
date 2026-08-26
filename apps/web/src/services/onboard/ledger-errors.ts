@@ -11,7 +11,6 @@
  * rendered.
  */
 
-import { makeError } from 'ethers'
 import type { DmkError } from '@ledgerhq/device-management-kit'
 
 import type { LedgerDeviceErrorInfo, LedgerDeviceErrorReason } from './types'
@@ -93,12 +92,16 @@ const USER_MESSAGES: Record<LedgerDeviceErrorReason, string> = {
 }
 
 /**
- * ethers' message for a rejection. `isWalletRejection` and `matchUserOutcome`
- * both key off this wording, so a cancellation is suppressed in the UI and
- * never counted as an error in analytics (WA-2950). The user-facing sentence
- * for a rejection comes from `USER_MESSAGES`, not from here.
+ * The message a rejection carries. Two constraints meet here: `matchUserOutcome`
+ * classifies purely on wording, so the phrase "rejected the request" has to
+ * survive verbatim or a cancellation starts counting as a failure (WA-2950) —
+ * and the account picker renders this string raw, so it also has to read as
+ * copy. ethers' own `user rejected action` satisfied only the first.
+ *
+ * The tx and message flows show `USER_MESSAGES.rejected` instead; they resolve
+ * the sentence from the reason rather than from this message.
  */
-const REJECTION_MESSAGE = 'user rejected action'
+const REJECTION_MESSAGE = 'You rejected the request on your Ledger.'
 
 const readString = (source: unknown, key: string): string | undefined => {
   if (typeof source !== 'object' || source === null) return undefined
@@ -193,21 +196,50 @@ export const getLedgerDeviceError = (error: unknown): LedgerDeviceErrorInfo | un
   return undefined
 }
 
+/** ethers error codes our consumers key off. */
+type LedgerErrorCode = 'ACTION_REJECTED' | 'UNKNOWN_ERROR'
+
+interface LedgerErrorFields {
+  readonly code: LedgerErrorCode
+  /** ethers' own name for the untouched sentence; kept so `isError`-style consumers still find it. */
+  readonly shortMessage: string
+  readonly info: LedgerDeviceErrorInfo
+  /** ethers' `ActionRejectedError` shape, preserved for anything matching on it. */
+  readonly action?: 'unknown'
+  readonly reason?: 'rejected'
+}
+
 /**
- * Converts a DMK failure into the ethers error the EIP-1193 provider must
- * reject with.
+ * Builds the error by hand rather than with ethers' `makeError`, which appends
+ * every `info` key plus `code=` and `version=` to `message` and keeps the clean
+ * sentence only in `shortMessage`. `message` is what gets rendered — the
+ * wallet-connect account picker (`@web3-onboard/hw-common`) prints it verbatim
+ * and we cannot intercept it — so the sentence has to BE the message, and the
+ * evidence has to ride on fields nothing renders (WA-3243).
+ */
+const buildLedgerError = (message: string, fields: LedgerErrorFields): Error =>
+  Object.assign(new Error(message), fields)
+
+/**
+ * Converts a DMK failure into the error the EIP-1193 provider must reject with.
  *
- * The message is the user-facing sentence rather than a raw dump, so the
- * error classifies as a Ledger failure (or a rejection) instead of `unknown`;
- * the device's own words ride along in `info`, which reaches Datadog but is
- * never rendered.
+ * The message is the user-facing sentence and nothing else, so it reads
+ * correctly wherever it is rendered raw; the device's own words ride along in
+ * `info`, which the debugging sinks read and no renderer touches.
  */
 export const mapLedgerError = (error: DmkError): Error => {
   const info = readLedgerDeviceError(error)
 
   if (info.reason === 'rejected') {
-    return makeError(REJECTION_MESSAGE, 'ACTION_REJECTED', { action: 'unknown', reason: 'rejected', info })
+    return buildLedgerError(REJECTION_MESSAGE, {
+      code: 'ACTION_REJECTED',
+      shortMessage: REJECTION_MESSAGE,
+      action: 'unknown',
+      reason: 'rejected',
+      info,
+    })
   }
 
-  return makeError(getLedgerUserMessage(info), 'UNKNOWN_ERROR', { info })
+  const message = getLedgerUserMessage(info)
+  return buildLedgerError(message, { code: 'UNKNOWN_ERROR', shortMessage: message, info })
 }
