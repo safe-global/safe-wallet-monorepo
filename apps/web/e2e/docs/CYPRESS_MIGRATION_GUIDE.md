@@ -107,7 +107,7 @@ Once the target is clear, follow the [AI Test Output Format](./AI_TEST_OUTPUT_FO
 
 ## Migration Tracking
 
-Record every migration in [MIGRATION_STATUS.md](./MIGRATION_STATUS.md) — the live queue and the source of truth for stage membership. **Update it in the same PR as the migration.**
+Record every migration in [CYPRESS_PW_MIGRATION_STATUS.md](./CYPRESS_PW_MIGRATION_STATUS.md) — the live queue and the source of truth for stage membership. **Update it in the same PR as the migration.**
 
 For each test, document:
 
@@ -138,7 +138,7 @@ The same applies to `won't-migrate`: it is a legitimate and common outcome, but 
 
 Migration runs as **one stage per PR**, easiest feature area first. Do not open a PR that spans stages.
 
-**Scope: 122 specs.** The 31 Argos `visual/` specs are excluded — see [MIGRATION_STATUS.md](./MIGRATION_STATUS.md).
+**Scope: 122 specs.** The 31 Argos `visual/` specs are excluded — see [CYPRESS_PW_MIGRATION_STATUS.md](./CYPRESS_PW_MIGRATION_STATUS.md).
 
 ### Why staged
 
@@ -150,7 +150,7 @@ Three reasons, all of them load-bearing:
 
 ### Stage order
 
-Counts are from `MIGRATION_STATUS.md`; consult it for exact membership.
+Counts are from `CYPRESS_PW_MIGRATION_STATUS.md`; consult it for exact membership.
 
 | #   | Area                         | Specs | Why here                                                     | Main page object to port                   |
 | --- | ---------------------------- | ----- | ------------------------------------------------------------ | ------------------------------------------ |
@@ -173,13 +173,13 @@ Counts are from `MIGRATION_STATUS.md`; consult it for exact membership.
 
 One stage = one PR. All eight steps, every time.
 
-1. **Classify** every spec in the area against the 8 questions in Step 1 above. Write the verdict into `MIGRATION_STATUS.md` **before writing code**. Expect some specs to be deleted, some demoted to unit/component tests, some turned into `@api` tests.
+1. **Classify** every spec in the area against the 8 questions in Step 1 above. Write the verdict into `CYPRESS_PW_MIGRATION_STATUS.md` **before writing code**. Expect some specs to be deleted, some demoted to unit/component tests, some turned into `@api` tests.
    > A stage that migrates fewer specs than it started with is a success, not a shortfall. Migrate business value, not code.
 2. **Write** the Playwright specs per [AI_TEST_OUTPUT_FORMAT.md](./AI_TEST_OUTPUT_FORMAT.md). Tag `@migration` plus the category tag; the tag must match the directory.
 3. **Stability gate** — `--repeat-each=10` must be 10/10. This is the README's existing rule, not a new one.
 4. **No regression in already-migrated work** — the full Playwright suite must be green.
 5. **Prove the Cypress spec still passes** before deleting it. Never delete an already-broken spec: the diff would hide a real failure, and you would not know whether the new test is weaker.
-6. **Delete** the Cypress spec and any page-object functions it alone used. Update `MIGRATION_STATUS.md` to `deleted`.
+6. **Delete** the Cypress spec and any page-object functions it alone used. Update `CYPRESS_PW_MIGRATION_STATUS.md` to `deleted`.
 7. **Re-run the Cypress suite.** ← _the real hazard in this migration._ Page objects are shared across specs, including with the excluded `visual/` specs, so removing helpers can break tests you never touched. **Non-negotiable.**
 8. **Add unit/component tests** for whatever step 1 pushed down the pyramid, plus a unit guard for any new `data-testid` you add to app source (see Known hazards).
 

@@ -46,7 +46,7 @@ e2e/
 │   ├── README.md              # This file — philosophy, rules, patterns
 │   ├── AI_TEST_OUTPUT_FORMAT.md   # 12-step protocol for AI test generation
 │   ├── CYPRESS_MIGRATION_GUIDE.md # Cypress → Playwright protocol + staged programme
-│   ├── MIGRATION_STATUS.md    # Live migration queue — source of truth for stage membership
+│   ├── CYPRESS_PW_MIGRATION_STATUS.md # Live migration queue — source of truth for stage membership
 │   └── developer-testability-contract.md  # What QA needs from dev code
 └── reports/                   # Generated — gitignored
 ```
