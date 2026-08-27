@@ -7,20 +7,17 @@ import Track from '@/components/common/Track'
 import Link from 'next/link'
 import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'
-import useLocalStorage from '@/services/local-storage/useLocalStorage'
-import { useIsSwapFeatureEnabled } from '@/features/swap'
 
-const SWAPS_APP_CARD_STORAGE_KEY = 'showSwapsAppCard'
+type NativeSwapsCardProps = {
+  onDismiss: () => void
+}
 
-const NativeSwapsCard = () => {
+const NativeSwapsCard = ({ onDismiss }: NativeSwapsCardProps) => {
   const router = useRouter()
-  const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
-  const [isSwapsCardVisible = true, setIsSwapsCardVisible] = useLocalStorage<boolean>(SWAPS_APP_CARD_STORAGE_KEY)
-  if (!isSwapFeatureEnabled || !isSwapsCardVisible) return null
 
   return (
     // eslint-disable-next-line no-restricted-syntax -- h-full fills the dashboard grid cell (layout); the hover tint is a bespoke affordance with no variant
-    <Card size="none" className="h-full transition-colors hover:bg-muted">
+    <Card size="none" className="h-full transition-colors">
       <div className="flex items-start justify-between px-4 pt-4 pb-2">
         <div className="rounded-full bg-[var(--color-secondary-light)] p-2">
           <SafeAppIconCard src="/images/common/swap.svg" alt="Swap Icon" width={24} height={24} />
@@ -36,15 +33,15 @@ const NativeSwapsCard = () => {
           Experience seamless trading with better decoding and security in native swaps.
         </Typography>
 
-        <div className="mt-auto flex flex-row flex-wrap gap-2 pt-2">
+        <div className="mt-auto flex flex-row flex-wrap justify-end gap-2 pt-2">
+          <Button onClick={onDismiss} size="sm" variant="ghost" className="mr-auto">
+            Don&apos;t show
+          </Button>
           <Track {...SWAP_EVENTS.OPEN_SWAPS} label={SWAP_LABELS.safeAppsPromoWidget}>
             <Button size="sm" render={<Link href={{ pathname: AppRoutes.swap, query: { safe: router.query.safe } }} />}>
               Try now
             </Button>
           </Track>
-          <Button onClick={() => setIsSwapsCardVisible(false)} size="sm" variant="ghost">
-            Don&apos;t show
-          </Button>
         </div>
       </div>
     </Card>
