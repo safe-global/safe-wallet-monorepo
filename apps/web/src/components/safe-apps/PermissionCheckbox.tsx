@@ -15,7 +15,7 @@ const PermissionsCheckbox = ({ label, checked, onChange, name }: PermissionsChec
   const id = useId()
 
   return (
-    <Field orientation="horizontal" className="flex-1">
+    <Field orientation="horizontal" className="cursor-pointer">
       <Checkbox
         id={id}
         name={name}
@@ -25,7 +25,7 @@ const PermissionsCheckbox = ({ label, checked, onChange, name }: PermissionsChec
         checked={checked}
         onCheckedChange={(value) => onChange({} as React.ChangeEvent<HTMLInputElement>, value)}
       />
-      <FieldLabel htmlFor={id} className="font-normal">
+      <FieldLabel htmlFor={id} className="cursor-pointer font-normal">
         {label}
       </FieldLabel>
     </Field>
