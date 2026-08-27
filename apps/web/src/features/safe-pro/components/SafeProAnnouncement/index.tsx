@@ -11,7 +11,7 @@ const SafeProAnnouncement = ({ onDismiss }: { onDismiss?: () => void }) => (
     <div className="relative aspect-[1058/369] w-full overflow-hidden rounded-t-[calc(var(--radius-xl)-4px)]">
       <Image
         src="/images/safe-pro/pro-announcement-hero.jpg"
-        alt="A Workspace on the Pro plan, with its accounts, members and transactions"
+        alt="A Workspace from Safe Pro, with its accounts, members and transactions"
         fill
         className="object-cover dark:hidden"
       />
