@@ -105,7 +105,7 @@ exports[`./SafeProAnnouncementModal.stories Default 1`] = `
                 data-slot="typography"
                 data-variant="paragraph-large"
               >
-                Pro will add advanced security checks, sponsored transactions and policies. Your Safe accounts remain available outside of the Workspace. Starting October 1, you can claim up to two months of Safe Pro for free for this Workspace.
+                Safe Pro will add advanced security checks, sponsored transactions and policies. Your Safe accounts remain available outside of the Workspace. Starting October 6, you can claim up to two months of Safe Pro for free for this Workspace.
               </p>
             </div>
             <div
