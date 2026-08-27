@@ -1,5 +1,6 @@
 import { ArrowUpRight, Sparkles } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { ICON_STROKE } from '@/components/common/iconStroke'
 import { Card } from '@/components/ui/card'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
@@ -19,7 +20,7 @@ const SafeProBanner = ({ className }: { className?: string }) => (
     <div className="flex items-center gap-3">
       <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
         <Badge variant="subtle" shape="tag" className={css.tag}>
-          <Sparkles />
+          <Sparkles strokeWidth={ICON_STROKE} />
           New
         </Badge>
         <Typography variant="paragraph-small-bold">Workspaces move to Pro on Oct 1, 2026</Typography>
