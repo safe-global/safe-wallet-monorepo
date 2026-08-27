@@ -224,9 +224,19 @@ export class DatadogProvider implements IObservabilityProvider {
         trackResources: DATADOG_RUM_TRACK_RESOURCES,
         trackLongTasks: DATADOG_RUM_TRACK_LONG_TASKS,
         defaultPrivacyLevel: DATADOG_RUM_DEFAULT_PRIVACY_LEVEL,
+        // Pinned to the v6 default. v7 flipped this to `true`, which routes
+        // auto-collected click action names through the privacy tree walker:
+        // under our `defaultPrivacyLevel: 'mask'`, `shouldMaskNode` rejects
+        // every node, so every action name would resolve to an empty string.
+        enablePrivacyForActionName: false,
         beforeSend: filterRumEvent,
         ...(DATADOG_RUM_TRACING_ENABLED && {
           traceSampleRate: DATADOG_RUM_TRACE_SAMPLE_RATE,
+          // Pinned to the v6 default. v7 flipped this to `true`, adding a
+          // `baggage` header to every traced request — CGW would have to
+          // allowlist it in `Access-Control-Allow-Headers` or all preflights
+          // to the gateway start failing. Flip back on once CGW accepts it.
+          propagateTraceBaggage: false,
           allowedTracingUrls: [
             { match: GATEWAY_URL_PRODUCTION, propagatorTypes: ['tracecontext', 'datadog'] },
             { match: GATEWAY_URL_STAGING, propagatorTypes: ['tracecontext', 'datadog'] },
