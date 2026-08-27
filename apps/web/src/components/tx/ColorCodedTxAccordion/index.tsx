@@ -31,8 +31,8 @@ const TX_INFO_LEVEL = {
  */
 const TxInfoColors: Record<ColorLevel, { main: string; mainDark?: string; border: string; background: string }> = {
   [ColorLevel.info]: { main: 'info.dark', border: 'info.dark', background: 'info.background' },
-  // The shadcn warning pair, which light mode pins to the Figma yellows rather than the brand coral.
-  [ColorLevel.warning]: { main: '--warning-strong', border: '--warning-accent', background: '--warning-subtle' },
+  // The shadcn warning trio, which light mode pins to the Figma yellows rather than the brand coral.
+  [ColorLevel.warning]: { main: '--warning-strong', border: '--warning-outline', background: '--warning-subtle' },
   [ColorLevel.success]: {
     main: 'success.main',
     mainDark: 'primary.main',
