@@ -31,6 +31,29 @@ export const Permissions: Story = {
   },
 }
 
+// A manifest may request any of the 31 `FEATURES`.
+export const ManyPermissions: Story = {
+  args: {
+    isPermissionsReviewCompleted: false,
+    features: [
+      'accelerometer',
+      'ambient-light-sensor',
+      'autoplay',
+      'battery',
+      'camera',
+      'clipboard-read',
+      'clipboard-write',
+      'display-capture',
+      'fullscreen',
+      'geolocation',
+      'gyroscope',
+      'microphone',
+      'payment',
+      'usb',
+    ] as AllowedFeatures[],
+  },
+}
+
 export const Disclaimer: Story = {
   args: {
     isConsentAccepted: false,
