@@ -14,7 +14,7 @@ exports[`./SafeProAnnouncement.stories Default 1`] = `
         class="relative aspect-[1058/369] w-full overflow-hidden rounded-t-[calc(var(--radius-xl)-4px)]"
       >
         <img
-          alt="A Workspace on the Pro plan, with its accounts, members and transactions"
+          alt="A Workspace from Safe Pro, with its accounts, members and transactions"
           class="object-cover dark:hidden"
           data-nimg="fill"
           decoding="async"
