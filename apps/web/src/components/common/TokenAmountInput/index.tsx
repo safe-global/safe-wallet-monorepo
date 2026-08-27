@@ -168,8 +168,7 @@ const TokenAmountInput = ({
                       )}
                     </SelectValue>
                   </SelectTrigger>
-                  {/* w-auto: size to the token names instead of the compact trigger (base w-(--anchor-width)) */}
-                  <SelectContent className="w-auto min-w-44">
+                  <SelectContent className="w-auto min-w-44 max-w-[var(--available-width)]">
                     {balances.map((item) => (
                       <SelectItem data-testid="token-item" key={item.tokenInfo.address} value={item.tokenInfo.address}>
                         <AutocompleteItem {...item} />
