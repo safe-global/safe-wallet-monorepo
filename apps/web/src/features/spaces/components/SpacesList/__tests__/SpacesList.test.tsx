@@ -163,6 +163,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     // Sign in card must NOT render in this branch.
     expect(screen.queryByTestId('sign-in-options')).not.toBeInTheDocument()
+    expect(screen.queryByRole('status', { name: /loading/i })).not.toBeInTheDocument()
   })
 
   it('renders the No-spaces empty state Card with size="none" so the default gap does not inflate its height', () => {
@@ -243,6 +244,54 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     await userEvent.click(screen.getByRole('button', { name: /try again/i }))
     expect(refetch).toHaveBeenCalled()
+  })
+
+  it('keeps showing the cached spaces list, not the error state, when a refetch errors but cached spaces remain', () => {
+    setAuth(true)
+    mockUseSpacesGetV1Query.mockReturnValue({
+      currentData: [{ uuid: 'uuid-1', name: 'Cached Space', memberStatus: 'ACTIVE' }],
+      isFetching: false,
+      isUninitialized: false,
+      error: { status: 500, data: 'boom' },
+    })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    expect(screen.getByTestId('space-row')).toBeInTheDocument()
+    expect(screen.queryByText(/couldn't load your workspaces/i)).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /try again/i })).not.toBeInTheDocument()
+  })
+
+  it('shows the error state, not a stale empty state, when the query errors with no cached spaces', () => {
+    setAuth(true)
+    mockUseSpacesGetV1Query.mockReturnValue({
+      currentData: [],
+      isFetching: false,
+      isUninitialized: false,
+      error: { status: 500, data: 'boom' },
+    })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    expect(screen.getByText(/couldn't load your workspaces/i)).toBeInTheDocument()
+    expect(screen.queryByText(/create your first workspace/i)).not.toBeInTheDocument()
+  })
+
+  it('shows a loading spinner, not the spaces list, when the user is signed in but the store is not yet hydrated', () => {
+    setAuth(true, false)
+    mockUseSpacesGetV1Query.mockReturnValue({
+      currentData: [{ uuid: 'uuid-1', name: 'Space 1', memberStatus: 'ACTIVE' }],
+      isFetching: false,
+      error: undefined,
+    })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument()
+    expect(screen.queryByTestId('space-row')).not.toBeInTheDocument()
   })
 
   // Regression: on re-login after logout the spaces RTK Query cache entry

@@ -251,7 +251,7 @@ const SpacesList = () => {
           </div>
         ) : !isUserSignedIn ? (
           <SignedOutState afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
-        ) : error ? (
+        ) : error && !spaces?.length ? (
           <div className="flex flex-col items-center gap-3 py-10 text-center">
             <Typography color="muted">Couldn&apos;t load your workspaces. Try again, or contact support.</Typography>
             <Button variant="outline" onClick={() => refetch()}>
