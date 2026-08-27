@@ -91,9 +91,7 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
     <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
       {/* The page keeps its Topbar + Accounts/Workspaces tabs, so the sign-in
           card renders inline rather than as a full-screen takeover. */}
-      <div
-        className={cn('relative flex items-center justify-center p-6 pb-10', isSafeProEnabled ? 'pt-[19px]' : 'pt-10')}
-      >
+      <div className={cn('relative flex items-center justify-center p-6 pb-10', isSafeProEnabled ? 'pt-0' : 'pt-10')}>
         <div className="flex w-full max-w-[440px] flex-col items-center">
           {isSafeProEnabled ? <SafeProBanner className="mb-4" /> : <WorkspaceBanner className="mb-3" />}
 
