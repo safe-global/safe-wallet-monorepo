@@ -15,6 +15,11 @@
 .proChip {
   color: var(--foreground);
   background-color: color-mix(in srgb, var(--color-static-text-brand) 20%, transparent);
+  transition: background-color 150ms ease;
+}
+
+.banner:hover .proChip {
+  background-color: color-mix(in srgb, var(--color-static-text-brand) 55%, transparent);
 }
 
 :global(.dark) .banner {
@@ -24,6 +29,11 @@
 :global(.dark) .proChip {
   color: #7ffab7;
   background-color: #2e2e2e;
+}
+
+:global(.dark) .banner:hover .proChip {
+  color: var(--primary-foreground);
+  background-color: #7ffab7;
 }
 
 :global(.dark) .learnMore {
