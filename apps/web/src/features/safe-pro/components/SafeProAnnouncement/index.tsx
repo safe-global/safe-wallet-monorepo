@@ -31,7 +31,7 @@ const SafeProAnnouncement = ({ onDismiss }: { onDismiss?: () => void }) => (
 
         <Typography variant="paragraph-large" color="muted" align="center">
           Safe Pro will add advanced security checks, sponsored transactions and policies. Your Safe accounts remain
-          available outside of the Workspace. Starting October 1, you can claim up to two months of Safe Pro for free
+          available outside of the Workspace. Starting October 6, you can claim up to two months of Safe Pro for free
           for this Workspace.
         </Typography>
       </div>
