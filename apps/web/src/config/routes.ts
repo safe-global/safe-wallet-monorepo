@@ -65,6 +65,7 @@ export const AppRoutes = {
     transactions: '/spaces/transactions',
     security: '/spaces/security',
     activity: '/spaces/activity',
+    policies: '/spaces/policies',
   },
   transactions: {
     tx: '/transactions/tx',
