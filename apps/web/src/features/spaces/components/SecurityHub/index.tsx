@@ -34,8 +34,8 @@ const SecurityHub = (): ReactElement => {
     <div data-testid="security-hub">
       <div className="mb-6 flex items-center justify-between gap-4">
         <div>
-          <Typography variant="h1" className="mb-1">
-            Security
+          <Typography variant="h1" className="mb-1 text-[32px] leading-9">
+            Security hub
           </Typography>
           <Typography variant="paragraph-small" color="muted">
             Overview of security checks across your accounts.
