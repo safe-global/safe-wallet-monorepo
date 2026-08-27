@@ -158,9 +158,13 @@ const TokenAmountInput = ({
                   {/* size="sm" lines the trigger up with the Max button and the h-8 divider beside it;
                       min-h still lets it grow for the rich token row. */}
                   <SelectTrigger size="sm">
+                    {/* Always pass a non-null child: with no child, base-ui's SelectValue falls back to
+                        rendering the raw address (e.g. in a new Safe with no funds). */}
                     <SelectValue>
-                      {selectedBalance && (
+                      {selectedBalance ? (
                         <AutocompleteItem tokenInfo={selectedBalance.tokenInfo} balance={selectedBalance.balance} />
+                      ) : (
+                        ''
                       )}
                     </SelectValue>
                   </SelectTrigger>

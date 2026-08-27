@@ -12,15 +12,20 @@ describe('CreateSpendingLimit', () => {
     })
 
     it('should return an error is the amount if too big', () => {
-      const result = _validateSpendingLimit('100000000000')
+      const result = _validateSpendingLimit('100000000000000000000', 18)
 
       expect(result).toEqual('Amount is too big')
     })
 
     it('should return an error if the amount is too small', () => {
-      const result = _validateSpendingLimit('0.0000000000000000001')
+      const result = _validateSpendingLimit('0.0000000000000000001', 18)
 
       expect(result).toEqual('Amount is too small')
+    })
+
+    it('should return no error when the token decimals are unknown', () => {
+      expect(_validateSpendingLimit('1')).toBeUndefined()
+      expect(_validateSpendingLimit('1.1')).toBeUndefined()
     })
   })
 })
