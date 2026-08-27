@@ -32,8 +32,9 @@ on:
   schedule:
     - cron: '0 3 * * 1-5'
 
+# Scheduled runs on the same ref still replace each other; manual runs never cancel one another.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'workflow_dispatch' && github.run_id || 'schedule' }}
   cancel-in-progress: true
 
 jobs:
@@ -84,12 +85,12 @@ jobs:
               specs+="${path}"$'\n'
             done
           fi
-          shopt -s globstar nullglob
+          # Specs live exactly one directory below cypress/e2e, so "**" can be checked as "*".
           missing=""
           while IFS= read -r pattern; do
             [ -z "$pattern" ] && continue
-            matches=( apps/web/$pattern )
-            [ ${#matches[@]} -eq 0 ] && missing+="  $pattern"$'\n'
+            check=$(printf '%s' "$pattern" | sed 's#\*\*#*#g')
+            compgen -G "apps/web/$check" > /dev/null || missing+="  $pattern"$'\n'
           done <<< "$specs"
           if [ -n "$missing" ]; then
             echo "::error::No spec file matches:"$'\n'"$missing"
