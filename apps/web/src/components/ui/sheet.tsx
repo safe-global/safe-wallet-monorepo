@@ -68,8 +68,8 @@ const sheetContentVariants = cva(
       surface: {
         card: 'bg-card',
         paper: 'bg-[var(--color-background-paper)]',
-        // Recessed #fafafa (light) surface so white `bg-card` panels inside stand out.
-        muted: 'bg-zinc-50 dark:bg-card',
+        // Recessed surface, a step darker than `bg-card` in both themes so the cards inside stand out.
+        muted: 'bg-zinc-50 dark:bg-[var(--color-background-main)]',
       },
       padding: {
         none: 'p-0',
