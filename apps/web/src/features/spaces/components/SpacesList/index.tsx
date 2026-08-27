@@ -6,10 +6,11 @@ import WorkspaceBanner from '../WorkspaceBanner'
 import SpacesIcon from '@/public/images/spaces/spaces.svg'
 import SafeMarkIcon from '@/public/images/logo-no-text.svg'
 import { useAppSelector } from '@/store'
-import { isAuthenticated } from '@/store/authSlice'
+import { isAuthenticated, selectIsStoreHydrated } from '@/store/authSlice'
 import { Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { Spinner } from '@/components/ui/spinner'
 import { Link } from '@/components/ui/link'
 import { Typography } from '@/components/ui/typography'
 import { type GetSpaceResponse, useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
@@ -186,12 +187,14 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
 const SpacesList = () => {
   const { AccountsNavigation } = useLoadFeature(MyAccountsFeature)
   const isUserSignedIn = useAppSelector(isAuthenticated)
+  const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const {
     currentData: spaces,
     isFetching,
     isUninitialized,
     error,
+    refetch,
   } = useSpacesGetV1Query(undefined, { skip: !isUserSignedIn })
   const pendingInvites = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.INVITED)
   const activeSpaces = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.ACTIVE)
@@ -199,18 +202,20 @@ const SpacesList = () => {
 
   const singleSpaceId = activeSpaces.length === 1 ? activeSpaces[0].uuid : null
 
+  // Treat any state without a definitive answer as still loading. The
+  // skip→unskip transition (re-login after logout) returns isFetching=false
+  // and isUninitialized=false on the render where skip flips — RTK Query
+  // dispatches the refetch in a useEffect, so the loading flags lag one
+  // render behind. Without the `spaces === undefined && !error` clause an
+  // existing user gets bounced into /welcome/create-space because the hook
+  // reads spacesAmount=0 with isSpacesLoading=false. Once spaces or error
+  // resolves, this clause becomes false and the normal redirect logic runs.
+  const isSpacesLoading = isFetching || isUninitialized || (spaces === undefined && !error)
+
   const { setHasSignedIn, redirectLoading } = useSignInRedirect({
     spacesAmount: spaces?.length || 0,
     inviteAmount: pendingInvites.length,
-    // Treat any state without a definitive answer as still loading. The
-    // skip→unskip transition (re-login after logout) returns isFetching=false
-    // and isUninitialized=false on the render where skip flips — RTK Query
-    // dispatches the refetch in a useEffect, so the loading flags lag one
-    // render behind. Without the `spaces === undefined && !error` clause an
-    // existing user gets bounced into /welcome/create-space because the hook
-    // reads spacesAmount=0 with isSpacesLoading=false. Once spaces or error
-    // resolves, this clause becomes false and the normal redirect logic runs.
-    isSpacesLoading: isFetching || isUninitialized || (spaces === undefined && !error),
+    isSpacesLoading,
     error: error || undefined,
     singleSpaceId,
   })
@@ -240,8 +245,19 @@ const SpacesList = () => {
           <AccountsNavigation />
         </div>
 
-        {!isUserSignedIn ? (
+        {!isStoreHydrated || (isUserSignedIn && isSpacesLoading) ? (
+          <div className="flex justify-center py-10">
+            <Spinner className="size-6 text-muted-foreground" />
+          </div>
+        ) : !isUserSignedIn ? (
           <SignedOutState afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
+        ) : error ? (
+          <div className="flex flex-col items-center gap-3 py-10 text-center">
+            <Typography color="muted">Couldn&apos;t load your workspaces. Try again, or contact support.</Typography>
+            <Button variant="outline" onClick={() => refetch()}>
+              Try again
+            </Button>
+          </div>
         ) : activeSpaces.length > 0 ? (
           <WelcomeContentCard className="flex flex-col gap-4">
             <div className="flex justify-end">
