@@ -197,7 +197,7 @@ exports[`./SecurityReportDrawer.stories OpenWithContext 1`] = `
               </button>
             </div>
             <div
-              class="min-h-0 flex-1 overflow-y-auto"
+              class="min-h-0 flex-1 overflow-y-auto overscroll-y-none pr-1 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
             >
               <div
                 aria-labelledby="base-ui-_r_b_"
