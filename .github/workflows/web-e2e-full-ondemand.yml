@@ -1,12 +1,12 @@
 name: Web Full Regression on demand tests
+run-name: ${{ inputs.spec != '' && format('E2E {0} — {1}', inputs.suite, inputs.spec) || (inputs.suite != '' && inputs.suite != 'full-regression') && format('E2E {0} suite', inputs.suite) || 'Web Full Regression on demand tests' }}
 
 # Manual runs can be narrowed down; leave both inputs untouched for the full regression.
 #   suite  = full-regression (default) | smoke | regression | happypath_2 | safe-apps
 #   spec   = spec file name(s) without path or .cy.js, comma-separated, e.g.
 #              create_tx_2                 -> cypress/e2e/<suite>/create_tx_2.cy.js
 #              create_tx_2, portfolio      -> both, inside <suite>
-#              regression/create_tx_2      -> exact directory, ignores <suite>
-#            with suite=full-regression a bare name matches every directory (21 names exist twice).
+#            with suite=full-regression a name matches every directory it exists in (21 names exist twice).
 # Partial runs use 2 containers, are tagged "partial" in Cypress Cloud and skip the TestRail upload.
 # Scheduled runs have no inputs and always run the full regression.
 
@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       suite:
-        description: 'Directory to run. Default = the full regression, same as today.'
+        description: 'Directory to run. Default = the full regression (all four directories).'
         type: choice
         default: full-regression
         options:
@@ -24,7 +24,7 @@ on:
           - happypath_2
           - safe-apps
       spec:
-        description: 'Optional. Spec names, comma-separated, e.g. create_tx_2, portfolio (no path, no .cy.js). Use dir/name to pin a directory.'
+        description: 'Optional. Spec names, comma-separated, e.g. create_tx_2, portfolio (no path, no .cy.js).'
         type: string
         required: false
         default: ''
@@ -39,7 +39,7 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 40
-    name: Cypress Full Regression on demand tests
+    name: ${{ inputs.spec != '' && 'Cypress e2e (selected specs)' || (inputs.suite != '' && inputs.suite != 'full-regression') && format('Cypress e2e ({0})', inputs.suite) || 'Cypress Full Regression on demand tests' }}
     permissions:
       contents: read
     strategy:
@@ -74,11 +74,8 @@ jobs:
             for raw in "${names[@]}"; do
               name="$(printf '%s' "$raw" | xargs)"
               [ -z "$name" ] && continue
-              name="${name#cypress/e2e/}"
               name="${name%.cy.js}"
-              if [[ "$name" == */* ]]; then
-                path="cypress/e2e/${name}.cy.js"
-              elif [ "$suite" = "full-regression" ]; then
+              if [ "$suite" = "full-regression" ]; then
                 path="cypress/e2e/**/${name}.cy.js"
               else
                 path="cypress/e2e/${suite}/${name}.cy.js"
