@@ -20,7 +20,7 @@ import {
 import { getContractErrorMessage } from '@safe-global/utils/services/exceptions/contractErrors'
 import type { AddOwnerFlowProps } from '.'
 import type { ReplaceOwnerFlowProps } from '../ReplaceOwner'
-import TxCard from '../../common/TxCard'
+import TxCard, { TxCardActions } from '../../common/TxCard'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { TOOLTIP_TITLES } from '@/components/tx-flow/common/constants'
@@ -132,7 +132,7 @@ export const ChooseOwner = ({
             />
           </div>
 
-          <Separator className={commonCss.nestedDivider} />
+          <Separator bleed="6" />
 
           {mode === ChooseOwnerMode.ADD && (
             <div className="mb-7 w-full">
@@ -194,13 +194,13 @@ export const ChooseOwner = ({
               threshold selector, so the gate below must never be silent. */}
           {thresholdError && <Typography className="mb-2 text-destructive">{thresholdError}</Typography>}
 
-          <Separator className={commonCss.nestedDivider} />
+          <Separator bleed="6" />
 
-          <div className="flex items-center p-2">
+          <TxCardActions>
             <Button data-testid="add-owner-next-btn" type="submit" disabled={!isValid || resolving || !!thresholdError}>
               Next
             </Button>
-          </div>
+          </TxCardActions>
         </form>
       </FormProvider>
     </TxCard>

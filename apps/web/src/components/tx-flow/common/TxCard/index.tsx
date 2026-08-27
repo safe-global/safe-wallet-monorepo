@@ -32,7 +32,10 @@ export const TxCardActions = ({
 }) => {
   void sx
   return (
-    <div className={cn('txCardActions flex items-center', className)}>
+    /* justify-end so the primary action is right-aligned on its own, per WA-3234, and not only
+       when TxLayoutBase's `.step` happens to be an ancestor. Inside `.step` the module flips this
+       row to a column and right-aligns the child with `align-self`, so justify-end is inert there. */
+    <div className={cn('txCardActions flex items-center justify-end', className)}>
       <div className="flex w-full flex-col-reverse gap-4 lg:w-auto lg:flex-row">{children}</div>
     </div>
   )

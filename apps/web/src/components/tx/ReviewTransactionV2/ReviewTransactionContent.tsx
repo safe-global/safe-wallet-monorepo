@@ -73,7 +73,7 @@ export const ReviewTransactionContent = ({
 
         <Slot name={SlotName.Main} />
 
-        <Separator className="mt-4 -mx-6" />
+        <Separator bleed="6" className="mt-4" />
 
         {safeTxError && <TxCheckError error={safeTxError} />}
 

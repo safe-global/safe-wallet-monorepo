@@ -13,12 +13,14 @@ export const RequiredConfirmation = ({ threshold, owners }: { threshold: number;
 
   return (
     <div className="mt-12">
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_2fr]">
-        <div>
-          <Typography variant="h4">Required confirmations</Typography>
+      <div className="flex flex-col justify-between gap-6 lg:flex-row">
+        <div className="lg:w-1/5 lg:shrink-0">
+          <Typography variant="h4" className="font-bold">
+            Required confirmations
+          </Typography>
         </div>
 
-        <div>
+        <div className="lg:min-w-0 lg:flex-1">
           <Typography className="pb-4">Any transaction requires the confirmation of:</Typography>
 
           <Typography className="inline pr-4">

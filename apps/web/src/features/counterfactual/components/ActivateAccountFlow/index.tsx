@@ -160,7 +160,7 @@ const ActivateAccountFlow = () => {
           wallet.
         </Typography>
 
-        <Separator className="-mx-6 my-4 w-auto" />
+        <Separator bleed="6" className="my-4" />
 
         <SafeSetupOverview
           owners={owners.map((owner) => ({ name: '', address: owner }))}
@@ -168,7 +168,7 @@ const ActivateAccountFlow = () => {
           networks={chain ? [chain] : []}
         />
 
-        {showGasFeeEstimation && <Separator className="-mx-6 mt-4 mb-2 w-auto" />}
+        {showGasFeeEstimation && <Separator bleed="6" className="mt-4 mb-2" />}
         <div className="flex flex-col gap-6">
           {canRelay && (
             <div>
@@ -219,7 +219,7 @@ const ActivateAccountFlow = () => {
           )}
         </div>
 
-        <Separator className="-mx-6 mt-4 mb-2 w-auto" />
+        <Separator bleed="6" className="mt-4 mb-2" />
 
         <div className="flex flex-row justify-end gap-6">
           <CheckWallet checkNetwork={!submitDisabled} allowNonOwner allowUndeployedSafe>

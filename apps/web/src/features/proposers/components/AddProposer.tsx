@@ -1,6 +1,5 @@
 import AddressBookInput from '@/components/common/AddressBookInput'
 import DialogActions from '@/components/common/DialogActions'
-import EthHashInfo from '@/components/common/EthHashInfo'
 import NameInput from '@/components/common/NameInput'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import ErrorMessage from '@/components/tx/ErrorMessage'
@@ -12,7 +11,7 @@ import {
   signProposerTypedDataForSafe,
 } from '@/features/proposers/utils/utils'
 import {
-  SMART_CONTRACT_PROPOSER_EDIT_ERROR,
+  PROPOSER_LABEL_PLACEHOLDER,
   SMART_CONTRACT_PROPOSER_ERROR,
   SMART_CONTRACT_PROPOSER_INFO,
 } from '@/features/proposers/constants'
@@ -24,6 +23,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
 import { getAssertedChainSigner } from '@/services/tx/tx-sender/sdk'
 import { useAppDispatch } from '@/store'
+import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
@@ -41,7 +41,6 @@ import {
   useDelegatesPostDelegateV1Mutation,
   useDelegatesPostDelegateV2Mutation,
   type CreateDelegateDto,
-  type Delegate,
 } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
 import { type BaseSyntheticEvent, useCallback, useMemo, useState } from 'react'
@@ -52,10 +51,9 @@ import InfoIcon from '@/public/images/notifications/info.svg'
 import SignatureIcon from '@/public/images/transactions/signature.svg'
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 
-type UpsertProposerProps = {
+type AddProposerProps = {
   onClose: () => void
   onSuccess: () => void
-  proposer?: Delegate
 }
 
 enum ProposerEntryFields {
@@ -68,7 +66,7 @@ type ProposerEntry = {
   [ProposerEntryFields.address]: string
 }
 
-const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) => {
+const AddProposer = ({ onClose, onSuccess }: AddProposerProps) => {
   const [error, setError] = useState<Error>()
   const [blockedReason, setBlockedReason] = useState<string>()
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -82,8 +80,6 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
   const safeAddress = useSafeAddress()
   const { safe } = useSafeInfo()
 
-  const isEditing = !!proposer
-
   const {
     delegatorOptions,
     setSelectedDelegator,
@@ -93,13 +89,12 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
     parentOwners,
     isMultiSigRequired,
     isParentLoading,
-    canEdit,
-  } = useDelegatorSelection(proposer)
+  } = useDelegatorSelection()
 
   const methods = useForm<ProposerEntry>({
     defaultValues: {
-      [ProposerEntryFields.address]: proposer?.delegate,
-      [ProposerEntryFields.name]: proposer?.label,
+      [ProposerEntryFields.address]: '',
+      [ProposerEntryFields.name]: '',
     },
     mode: 'onChange',
   })
@@ -128,15 +123,19 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
 
     const name = sanitizeName(data.name)
 
+    // The name is deliberately never sent to the backend; it lives only in this device's address book.
+    const saveNameLocally = () =>
+      dispatch(upsertAddressBookEntries({ chainIds: [chainId], address: data.address, name }))
+
     setError(undefined)
     setBlockedReason(undefined)
     setIsLoading(true)
 
     try {
-      // Backstop for the edit flow, where the address field (and its validator) is not rendered
+      // Backstop in case the field validator has not settled by the time the form is submitted
       const smartContractError = await addressIsNotSmartContract(chainId, SMART_CONTRACT_PROPOSER_ERROR)(data.address)
       if (smartContractError) {
-        setBlockedReason(isEditing ? SMART_CONTRACT_PROPOSER_EDIT_ERROR : smartContractError)
+        setBlockedReason(smartContractError)
         return
       }
 
@@ -151,10 +150,11 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
           // Multi-sig flow: create off-chain message on parent Safe for signature collection
           const eoaSignature = await signProposerTypedDataForSafe(chainId, data.address, parentSafeAddress, signer)
           const delegateTypedData = getDelegateTypedData(chainId, data.address) as TypedData
-          const origin = buildDelegationOrigin(proposer ? 'edit' : 'add', data.address, safeAddress, name)
+          const origin = buildDelegationOrigin('add', data.address, safeAddress)
 
           await createDelegationMessage(dispatch, chainId, parentSafeAddress, delegateTypedData, eoaSignature, origin)
 
+          saveNameLocally()
           setMultiSigInitiated(true)
           trackEvent(SETTINGS_EVENTS.PROPOSERS.SUBMIT_ADD_PROPOSER)
           setIsLoading(false)
@@ -177,7 +177,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
       const createDelegateDto: CreateDelegateDto = {
         delegate: data.address,
         delegator,
-        label: name,
+        label: PROPOSER_LABEL_PLACEHOLDER,
         signature,
         safe: safeAddress,
       }
@@ -188,9 +188,9 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
         await addDelegateV2({ chainId, createDelegateDto }).unwrap()
       }
 
-      trackEvent(
-        isEditing ? SETTINGS_EVENTS.PROPOSERS.SUBMIT_EDIT_PROPOSER : SETTINGS_EVENTS.PROPOSERS.SUBMIT_ADD_PROPOSER,
-      )
+      saveNameLocally()
+
+      trackEvent(SETTINGS_EVENTS.PROPOSERS.SUBMIT_ADD_PROPOSER)
 
       dispatch(
         showNotification({
@@ -216,9 +216,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
   }
 
   const onCancel = () => {
-    trackEvent(
-      isEditing ? SETTINGS_EVENTS.PROPOSERS.CANCEL_EDIT_PROPOSER : SETTINGS_EVENTS.PROPOSERS.CANCEL_ADD_PROPOSER,
-    )
+    trackEvent(SETTINGS_EVENTS.PROPOSERS.CANCEL_ADD_PROPOSER)
     onClose()
   }
 
@@ -269,7 +267,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
         <FormProvider {...methods}>
           <form onSubmit={onSubmit}>
             <DialogHeader className="flex-row items-center justify-between">
-              <DialogTitle data-testid="untrusted-token-warning">{isEditing ? 'Edit' : 'Add'} proposer</DialogTitle>
+              <DialogTitle data-testid="untrusted-token-warning">Add proposer</DialogTitle>
 
               <Button variant="ghost" size="icon-sm" aria-label="close" onClick={onCancel}>
                 <XIcon />
@@ -298,24 +296,20 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
 
               <Alert variant="info">
                 <AlertSeverityIcon variant="info" />
-                <AlertDescription>Proposer&apos;s name and address are publicly visible.</AlertDescription>
+                <AlertDescription>
+                  The proposer&apos;s address is publicly visible. The name is saved on this device only.
+                </AlertDescription>
               </Alert>
 
               <div className="my-4">
-                {isEditing ? (
-                  <div className="mb-6 text-sm [&_svg]:size-4">
-                    <EthHashInfo address={proposer?.delegate} showCopyButton hasExplorer shortAddress={false} />
-                  </div>
-                ) : (
-                  <AddressBookInput
-                    name="address"
-                    label="Address"
-                    validate={validateAddress}
-                    variant="outlined"
-                    fullWidth
-                    required
-                  />
-                )}
+                <AddressBookInput
+                  name="address"
+                  label="Address"
+                  validate={validateAddress}
+                  variant="outlined"
+                  fullWidth
+                  required
+                />
               </div>
 
               <div className="mb-4">
@@ -336,7 +330,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
 
               <NetworkWarning action="sign" />
 
-              {!isEditing && delegatorOptions.length > 1 && (
+              {delegatorOptions.length > 1 && (
                 <div className="mt-4">
                   <Typography variant="h4" className="mb-2 flex items-center gap-2">
                     <SignatureIcon className="size-4" />
@@ -376,7 +370,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
                 confirmTestId="submit-proposer-btn"
                 confirmType="submit"
                 confirmLoading={isLoading}
-                confirmDisabled={isParentLoading || (isEditing && !canEdit) || !formState.isValid}
+                confirmDisabled={isParentLoading || !formState.isValid}
                 confirmCheckWallet={{ checkNetwork: !isLoading, allowProposer: false }}
                 confirmTooltip={isSmartContractError ? SMART_CONTRACT_PROPOSER_INFO : undefined}
               />
@@ -388,4 +382,4 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
   )
 }
 
-export default UpsertProposer
+export default AddProposer

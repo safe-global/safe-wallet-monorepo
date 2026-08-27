@@ -22,11 +22,6 @@
   background-color: var(--color-background-light);
 }
 
-.container .withExecutionMethod {
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
 .error :global [data-slot='accordion-item'] {
   border-color: var(--color-error-light);
 }

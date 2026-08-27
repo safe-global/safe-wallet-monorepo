@@ -41,7 +41,11 @@ describe('SafenetChecksSection', () => {
 
     renderInFlow({ txId: TX_ID, txDetails })
 
-    expect(mockUseSafenetCheck).toHaveBeenCalledWith(HASH, SUBMITTED_AT)
+    expect(mockUseSafenetCheck).toHaveBeenCalledWith(
+      HASH,
+      SUBMITTED_AT,
+      expect.objectContaining({ chainId: expect.any(String) }),
+    )
   })
 
   it('renders nothing for a creation flow (no txId, no canonical hash)', () => {
@@ -49,25 +53,97 @@ describe('SafenetChecksSection', () => {
 
     const { container } = renderInFlow({})
 
-    expect(mockUseSafenetCheck).toHaveBeenCalledWith(undefined, undefined)
+    expect(mockUseSafenetCheck).toHaveBeenCalledWith(
+      undefined,
+      undefined,
+      expect.objectContaining({ chainId: expect.any(String) }),
+    )
     expect(container).toBeEmptyDOMElement()
   })
 
-  it('never subscribes before the submission time is known (shared cache aims by the last args)', () => {
+  it('never subscribes before the submission time is known (nothing else aims the shared read)', () => {
     mockUseSafenetCheck.mockReturnValue(buildCheckView())
 
     const { container } = renderInFlow({ txId: TX_ID })
 
-    expect(mockUseSafenetCheck).toHaveBeenCalledWith(undefined, undefined)
+    expect(mockUseSafenetCheck).toHaveBeenCalledWith(
+      undefined,
+      undefined,
+      expect.objectContaining({ chainId: expect.any(String) }),
+    )
     expect(container).toBeEmptyDOMElement()
   })
 
-  it('renders nothing when no check was observed', () => {
-    mockUseSafenetCheck.mockReturnValue(buildCheckView())
+  it('renders nothing while the first read is still in flight', () => {
+    mockUseSafenetCheck.mockReturnValue(buildCheckView({ isLoading: true, isFetching: true }))
 
     const { container } = renderInFlow({ txId: TX_ID, txDetails })
 
     expect(container).toBeEmptyDOMElement()
+  })
+
+  it('renders the no-check copy when no check was requested', () => {
+    const snapshot = buildSnapshot({
+      safeTxHash: HASH as `0x${string}`,
+      status: CheckStatus.UNAVAILABLE,
+      windowCoverage: 'proven',
+    })
+    mockUseSafenetCheck.mockReturnValue(
+      buildCheckView({
+        snapshot,
+        status: CheckStatus.UNAVAILABLE,
+        publicStatus: CheckStatus.UNAVAILABLE,
+        unavailableReason: 'NO_CHECK',
+      }),
+    )
+
+    renderInFlow({ txId: TX_ID, txDetails })
+
+    const section = screen.getByTestId('safenet-checks-section')
+    expect(section).toHaveAttribute('data-reason', 'NO_CHECK')
+    expect(section).toHaveTextContent('Not checked')
+    expect(section).toHaveTextContent('No Safenet check was requested for this transaction.')
+  })
+
+  it('never claims an absent check when the read window could not cover one', () => {
+    const snapshot = buildSnapshot({
+      safeTxHash: HASH as `0x${string}`,
+      status: CheckStatus.UNAVAILABLE,
+      windowCoverage: 'heuristic',
+    })
+    mockUseSafenetCheck.mockReturnValue(
+      buildCheckView({
+        snapshot,
+        status: CheckStatus.UNAVAILABLE,
+        publicStatus: CheckStatus.UNAVAILABLE,
+        unavailableReason: 'WINDOW_UNCERTAIN',
+      }),
+    )
+
+    renderInFlow({ txId: TX_ID, txDetails })
+
+    const section = screen.getByTestId('safenet-checks-section')
+    expect(section).toHaveAttribute('data-reason', 'WINDOW_UNCERTAIN')
+    expect(section).toHaveTextContent('Status unavailable')
+    expect(section).toHaveTextContent('The Safenet check status could not be read. Retry later.')
+    expect(section).not.toHaveTextContent('No Safenet check was requested')
+  })
+
+  it('renders the read-failed copy when the status could not be read', () => {
+    mockUseSafenetCheck.mockReturnValue(
+      buildCheckView({
+        status: CheckStatus.UNAVAILABLE,
+        publicStatus: CheckStatus.UNAVAILABLE,
+        unavailableReason: 'READ_FAILED',
+      }),
+    )
+
+    renderInFlow({ txId: TX_ID, txDetails })
+
+    const section = screen.getByTestId('safenet-checks-section')
+    expect(section).toHaveAttribute('data-reason', 'READ_FAILED')
+    expect(section).toHaveTextContent('Status unavailable')
+    expect(section).toHaveTextContent('The Safenet check status could not be read. Retry later.')
   })
 
   it.each<[Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>, string]>([
@@ -76,7 +152,7 @@ describe('SafenetChecksSection', () => {
     [CheckStatus.BENIGN, 'Safenet found no issues'],
     [CheckStatus.MALICIOUS, 'Safenet flagged this address/transaction as malicious'],
     [CheckStatus.TIMED_OUT, 'Safenet check is unavailable. You can still continue.'],
-  ])('renders %s with the PRD copy', (status, copy) => {
+  ])('renders %s copy', (status, copy) => {
     const snapshot = buildSnapshot({ safeTxHash: HASH as `0x${string}`, status })
     mockUseSafenetCheck.mockReturnValue(buildCheckView({ snapshot, status, publicStatus: status }))
 

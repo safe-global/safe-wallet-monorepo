@@ -6,7 +6,6 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import type { NarrowConfirmationViewProps } from '../types'
 import { OwnerList } from '@/components/tx-flow/common/OwnerList'
 import MinusIcon from '@/public/images/common/minus.svg'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { ChangeSignerSetupWarning } from '@/features/multichain'
 import { useContext } from 'react'
@@ -52,7 +51,7 @@ const SettingsChange: React.FC<SettingsChangeProps> = ({ txInfo: { settingsInfo 
 
       {'threshold' in settingsInfo && (
         <>
-          <Separator className={commonCss.nestedDivider} />
+          <Separator bleed="6" />
 
           <div>
             <Typography variant="paragraph-small">Any transaction requires the confirmation of:</Typography>
@@ -65,7 +64,7 @@ const SettingsChange: React.FC<SettingsChangeProps> = ({ txInfo: { settingsInfo 
           </div>
         </>
       )}
-      <Separator className={commonCss.nestedDivider} />
+      <Separator bleed="6" />
     </>
   )
 }

@@ -19,6 +19,10 @@ const meta = {
       control: 'select',
       options: ['default', 'outlined', 'muted'],
     },
+    surface: {
+      control: 'select',
+      options: ['default', 'sunken'],
+    },
     radius: {
       control: 'select',
       options: ['lg', 'xl', 'none'],
@@ -63,7 +67,8 @@ export const AllVariants: Story = {
               </li>
               <li>
                 Surface → <code>variant</code>: <code>outlined</code> (hairline border) · <code>muted</code> (inset
-                tint). Never hand-roll <code>border</code>/<code>bg-*</code>/<code>rounded-*</code>.
+                tint); <code>surface</code>: <code>sunken</code> (page-surface bg, composes with <code>variant</code>).
+                Never hand-roll <code>border</code>/<code>bg-*</code>/<code>rounded-*</code>.
               </li>
             </ul>
           </CardContent>
@@ -172,6 +177,17 @@ export const AllVariants: Story = {
               </CardHeader>
               <CardContent>
                 <p>Use for compact previews and decoded transaction lists.</p>
+              </CardContent>
+            </Card>
+          </div>
+          <div style={{ maxWidth: '100%', width: '300px' }}>
+            <Card surface="sunken">
+              <CardHeader>
+                <CardTitle>Sunken</CardTitle>
+                <CardDescription>Inset card nested on the page surface</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p>Composes with variant, e.g. outlined + sunken for nested transactions.</p>
               </CardContent>
             </Card>
           </div>

@@ -19,6 +19,7 @@ import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import { HelpCenterArticle, HelperCenterArticleTitles } from '@safe-global/utils/config/constants'
 import { TxModalContext } from '@/components/tx-flow'
 import UpsertRecoveryFlow from '@/components/tx-flow/flows/UpsertRecovery'
+import SettingsCard from '@/components/settings/SettingsCard'
 
 enum HeadCells {
   Recoverer = 'recoverer',
@@ -103,38 +104,28 @@ function RecoverySettings(): ReactElement {
   }, [recovery])
 
   return (
-    <div className="bg-card rounded-lg p-8">
-      <div className="grid grid-cols-12 gap-6">
-        <div className="col-span-12 lg:col-span-4">
-          <div className="mb-2 flex items-center gap-2">
-            <Typography variant="h4">Account recovery</Typography>
-          </div>
-        </div>
+    <SettingsCard title="Account recovery" titleClassName="mb-2">
+      <Typography className="mb-4">
+        {isRecoveryEnabled
+          ? 'The trusted Recoverer will be able to recover your Safe account if you ever lose access. You can change Recoverers or alter your recovery setup at any time.'
+          : 'Choose a trusted Recoverer to recover your Safe account if you ever lose access. Enabling the Account recovery module will require a transaction.'}{' '}
+        <Track {...RECOVERY_EVENTS.LEARN_MORE} label="settings">
+          <ExternalLink
+            className="font-bold hover:text-muted-foreground"
+            href={HelpCenterArticle.RECOVERY}
+            title={HelperCenterArticleTitles.RECOVERY}
+          >
+            Learn more
+          </ExternalLink>
+        </Track>
+      </Typography>
 
-        <div className="col-span-12 lg:col-span-8">
-          <Typography className="mb-4">
-            {isRecoveryEnabled
-              ? 'The trusted Recoverer will be able to recover your Safe account if you ever lose access. You can change Recoverers or alter your recovery setup at any time.'
-              : 'Choose a trusted Recoverer to recover your Safe account if you ever lose access. Enabling the Account recovery module will require a transaction.'}{' '}
-            <Track {...RECOVERY_EVENTS.LEARN_MORE} label="settings">
-              <ExternalLink
-                className="font-bold hover:text-muted-foreground"
-                href={HelpCenterArticle.RECOVERY}
-                title={HelperCenterArticleTitles.RECOVERY}
-              >
-                Learn more
-              </ExternalLink>
-            </Track>
-          </Typography>
-
-          {!isRecoveryEnabled ? (
-            <SetupRecoveryButton eventLabel="settings" />
-          ) : rows ? (
-            <EnhancedTable rows={rows} headCells={headCells} />
-          ) : null}
-        </div>
-      </div>
-    </div>
+      {!isRecoveryEnabled ? (
+        <SetupRecoveryButton eventLabel="settings" />
+      ) : rows ? (
+        <EnhancedTable rows={rows} headCells={headCells} />
+      ) : null}
+    </SettingsCard>
   )
 }
 

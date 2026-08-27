@@ -25,13 +25,12 @@ export const RiskConfirmation = () => {
   }
 
   return (
-    // eslint-disable-next-line no-restricted-syntax -- inset risk banner on the page (main) surface with tight px-2; nested-surface token, pending a `surface` variant
-    <Card size="none" className="bg-[var(--color-background-main)] px-2">
+    <Card size="none" surface="sunken">
       <Track {...MODALS_EVENTS.ACCEPT_RISK}>
         <Label
           htmlFor="risk-confirmation"
           data-testid="risk-confirmation-checkbox"
-          className="cursor-pointer gap-3 py-2"
+          className="cursor-pointer gap-3 px-2 py-2"
         >
           <Checkbox id="risk-confirmation" checked={isRiskConfirmed} onCheckedChange={toggleConfirmation} />
           <Typography variant="paragraph-small" data-testid="risk-confirmation-text">

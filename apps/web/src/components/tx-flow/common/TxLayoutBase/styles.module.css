@@ -39,7 +39,11 @@
   bottom: var(--space-3);
 }
 
-.step > :global(.txCardRoot:first-child) {
+/* Squares the step's first card against the header. The second selector reaches through a `<form>`
+   wrapper (ReviewSpendingLimitTx, RecoverAccountFlowSetup). Not a descendant combinator on purpose:
+   that would also square any card sitting first inside an arbitrary wrapper deeper in the step. */
+.step > :global(.txCardRoot:first-child),
+.step > form:first-child > :global(.txCardRoot:first-child) {
   border-top-right-radius: 0;
   border-top-left-radius: 0;
   margin-top: 0;

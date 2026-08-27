@@ -40,7 +40,7 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
   const { isHypernativeGuard } = useIsHypernativeGuard()
 
   return (
-    <div className="flex items-center gap-2 w-full">
+    <div className="flex items-center gap-2 w-full" data-testid="safe-header-info">
       <div className="relative shrink-0">
         <Avatar size="sm" data-testid="safe-icon">
           <AvatarImage src={blo(selectedItem.address as `0x${string}`)} alt={displayName} />

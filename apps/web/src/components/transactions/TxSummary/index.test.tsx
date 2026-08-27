@@ -89,12 +89,42 @@ describe('TxSummary', () => {
     expect(queryByText('7')).not.toBeInTheDocument()
   })
 
-  it('should not display a nonce for items in bulk execution group', () => {
-    const { queryByText } = render(
+  it('should display a nonce for items in a bulk execution group', () => {
+    const { getByTestId } = render(<TxSummary item={mockTransaction} isBulkGroup={true} isConflictGroup={false} />)
+
+    expect(getByTestId('nonce')).toHaveTextContent('7')
+  })
+
+  it('should not display a nonce for items in a bulk execution group without executionInfo', () => {
+    const { queryByTestId } = render(
       <TxSummary item={mockTransactionWithoutExecutionInfo} isBulkGroup={true} isConflictGroup={false} />,
     )
 
-    expect(queryByText('7')).not.toBeInTheDocument()
+    expect(queryByTestId('nonce')).not.toBeInTheDocument()
+  })
+
+  it('should show the imitation warning instead of the nonce, not on top of it', () => {
+    const imitationTx = {
+      ...mockTransaction,
+      transaction: {
+        ...mockTransaction.transaction,
+        txInfo: {
+          type: TransactionInfoType.TRANSFER,
+          direction: TransferDirection.INCOMING,
+          transferInfo: {
+            type: TransactionTokenType.ERC20,
+            value: '1000000',
+            trusted: false,
+            imitation: true,
+          },
+        },
+      } as unknown as Transaction,
+    }
+
+    const { getByTestId, queryByTestId } = render(<TxSummary item={imitationTx} isConflictGroup={false} />)
+
+    expect(getByTestId('warning')).toBeInTheDocument()
+    expect(queryByTestId('nonce')).not.toBeInTheDocument()
   })
 
   it('should display confirmations if transactions is in queue', () => {
@@ -178,7 +208,11 @@ describe('TxSummary', () => {
 
       // The feature chunk loads lazily.
       await waitFor(() => expect(getByTestId('safenet-queue-status')).toHaveTextContent('No issues found'))
-      expect(useSafenetCheck).toHaveBeenCalledWith(safenetTxHash, 1_700_000_000_000)
+      expect(useSafenetCheck).toHaveBeenCalledWith(
+        safenetTxHash,
+        1_700_000_000_000,
+        expect.objectContaining({ chainId: expect.any(String) }),
+      )
     })
 
     it('never mounts the indicator on a history row', async () => {
