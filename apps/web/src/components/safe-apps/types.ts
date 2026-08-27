@@ -6,7 +6,7 @@ export enum PermissionStatus {
   DENIED = 'denied',
 }
 
-const FEATURES = [
+export const FEATURES = [
   'accelerometer',
   'ambient-light-sensor',
   'autoplay',

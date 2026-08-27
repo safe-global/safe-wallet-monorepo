@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import SafeAppsInfoModal from './index'
+import { FEATURES } from '../types'
 import type { AllowedFeatures } from '../types'
 
 const meta = {
@@ -31,26 +32,18 @@ export const Permissions: Story = {
   },
 }
 
-// A manifest may request any of the 31 `FEATURES`.
 export const ManyPermissions: Story = {
   args: {
     isPermissionsReviewCompleted: false,
-    features: [
-      'accelerometer',
-      'ambient-light-sensor',
-      'autoplay',
-      'battery',
-      'camera',
-      'clipboard-read',
-      'clipboard-write',
-      'display-capture',
-      'fullscreen',
-      'geolocation',
-      'gyroscope',
-      'microphone',
-      'payment',
-      'usb',
-    ] as AllowedFeatures[],
+    features: FEATURES.slice(0, 14) as AllowedFeatures[],
+  },
+}
+
+// The ceiling: every feature a manifest can request.
+export const AllPermissions: Story = {
+  args: {
+    isPermissionsReviewCompleted: false,
+    features: FEATURES as AllowedFeatures[],
   },
 }
 

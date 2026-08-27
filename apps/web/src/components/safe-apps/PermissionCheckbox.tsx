@@ -15,17 +15,18 @@ const PermissionsCheckbox = ({ label, checked, onChange, name }: PermissionsChec
   const id = useId()
 
   return (
-    <Field orientation="horizontal" className="cursor-pointer">
+    <Field orientation="horizontal" className="cursor-pointer items-start">
       <Checkbox
         id={id}
         name={name}
         // base-ui puts `id` on the hidden input, so the visible role="checkbox" needs an
         // explicit accessible name (the htmlFor label only names the hidden input).
         aria-label={label}
+        className="mt-1"
         checked={checked}
         onCheckedChange={(value) => onChange({} as React.ChangeEvent<HTMLInputElement>, value)}
       />
-      <FieldLabel htmlFor={id} className="cursor-pointer font-normal">
+      <FieldLabel htmlFor={id} className="cursor-pointer font-normal leading-6">
         {label}
       </FieldLabel>
     </Field>
