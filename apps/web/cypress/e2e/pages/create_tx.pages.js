@@ -778,14 +778,10 @@ export function verifyTooltipMessage(message) {
 }
 
 export function selectCurrentWallet() {
-  // GTF (unlimited relay) chains hide the execution-method selector in the execute flow and the
-  // connected wallet is the implicit executor, so only click the option when it is rendered.
   cy.contains(estimatedFeeStr).should('be.visible')
-  cy.get('body').then(($body) => {
-    if ($body.find(connectedWalletExecMethod).length) {
-      cy.get(connectedWalletExecMethod).click()
-    }
-  })
+  // The option only renders once the relay quota has loaded — wait for it, then confirm it is selected.
+  cy.get(connectedWalletExecMethod, { timeout: 30000 }).click()
+  cy.get(connectedWalletExecMethod).find('[role="radio"]').should('have.attr', 'aria-checked', 'true')
 }
 
 export function verifyRelayerAttemptsAvailable() {
@@ -917,8 +913,7 @@ export function verifyAndSubmitExecutionParams() {
 
 export function setAdvancedExecutionParams() {
   cy.contains(executionParamsStr).parents('form').as('Paramsform')
-  // The fee/nonce inputs stay disabled until gas estimation resolves, which can take
-  // well over the 10s default on slow CI runners — wait for each field to enable.
+  // Fields are disabled while relay is the execution method; the 60s is only a ceiling for slow renders.
   const typeWhenEnabled = (selector, value) =>
     cy.get('@Paramsform').find(selector, { timeout: 60000 }).should('not.be.disabled').clear().type(value)
 
