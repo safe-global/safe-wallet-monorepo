@@ -5,12 +5,13 @@ import { isSwapTransferOrderTxInfo } from '@/utils/transaction-guards'
 import { Typography } from '@/components/ui/typography'
 import { Card } from '@/components/ui/card'
 import ExpandableTransactionItem from '@/components/transactions/TxListItem/ExpandableTransactionItem'
-import BatchIcon from '@/public/images/common/batch.svg'
 import css from './styles.module.css'
 import ExplorerButton from '@/components/common/ExplorerButton'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getOrderClass } from '@/features/swap'
+import { Layers } from 'lucide-react'
+import { ICON_STROKE } from '@/components/common/iconStroke'
 
 const orderClassTitles: Record<string, string> = {
   limit: 'Limit order settlement',
@@ -42,7 +43,7 @@ const GroupedTxListItems = ({
   return (
     <Card data-testid="grouped-items" size="none" className={css.container}>
       <div style={{ gridArea: 'icon' }}>
-        <BatchIcon className="size-6" />
+        <Layers className="size-4" strokeWidth={ICON_STROKE} />
       </div>
       <div style={{ gridArea: 'info' }}>
         <Typography className="truncate">{title}</Typography>

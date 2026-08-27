@@ -20,6 +20,8 @@ import useIsSpendingLimitSupported from '../../hooks/useIsSpendingLimitSupported
 import SpendingLimitNotSupported from './SpendingLimitNotSupported'
 
 export const _validateSpendingLimit = (val: string, decimals?: number | null) => {
+  // Without a selected token we don't know the decimals, so the amount can't be range-checked yet.
+  if (decimals == null) return
   // Allowance amount is uint96 https://github.com/safe-global/safe-modules/blob/main/modules/allowances/contracts/AllowanceModule.sol#L52
   try {
     const amount = parseUnits(val, decimals ?? 'Gwei')
