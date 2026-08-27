@@ -7,7 +7,7 @@ describe('SafeProAnnouncementModal', () => {
   it('announces the move date and what Pro adds', () => {
     render(<SafeProAnnouncementModal open />)
 
-    expect(screen.getByRole('heading', { name: 'Your Workspace moves to Pro on Oct 1, 2026' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Your Workspace moves to Safe Pro on Oct 1, 2026' })).toBeInTheDocument()
     expect(
       screen.getByText(
         /Pro will add advanced security checks, sponsored transactions and policies\. Your Safe accounts remain available outside of the Workspace\. Starting October 6, you can claim up to two months of Safe Pro for free for this Workspace\./,
