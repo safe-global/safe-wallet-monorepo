@@ -1,4 +1,8 @@
-import type { DmkError, ExecuteDeviceActionReturnType } from '@ledgerhq/device-management-kit'
+import type {
+  DmkError,
+  ExecuteDeviceActionReturnType,
+  UserInteractionRequired as UserInteraction,
+} from '@ledgerhq/device-management-kit'
 import { mapLedgerError } from './ledger-errors'
 import { styleAccountSelectAlert } from './accountSelectAlert'
 import type {
@@ -364,7 +368,7 @@ async function getLedgerSdk() {
       return dmk.disconnect({ sessionId })
     },
     getAddress: async (derivationPath: string): Promise<GetAddressDAOutput> => {
-      return waitForAction(signer.getAddress(derivationPath, { checkOnDevice: false }))
+      return waitForAction(signer.getAddress(derivationPath, { checkOnDevice: false }), { rejectWhenLocked: true })
     },
     signMessage: async (derivationPath: string, message: string | Uint8Array): Promise<SignPersonalMessageDAOutput> => {
       return waitForAction(signer.signMessage(derivationPath, message))
@@ -378,10 +382,32 @@ async function getLedgerSdk() {
   }
 }
 
-async function waitForAction<Output, Error extends DmkError, IntermediateValue>({
-  observable,
-}: ExecuteDeviceActionReturnType<Output, Error, IntermediateValue>): Promise<Output> {
-  const { DeviceActionStatus } = await import('@ledgerhq/device-management-kit')
+type WaitForActionOptions = {
+  /**
+   * Reject as soon as the device reports being locked, instead of waiting for the kit to
+   * give up. A locked device answers `GetAppAndVersion` with status word `5515` straight
+   * away, but the kit then sits in `UserActionUnlockDevice` for its full 60s
+   * `DEFAULT_UNLOCK_TIMEOUT_MS` before it emits an error — so the user watches a spinner
+   * for a minute before being told to unlock anything (WA-3455).
+   *
+   * Only correct where unlocking is the whole of what we are waiting for. A signing
+   * request keeps waiting: unlocking the device is a legitimate step towards signing, and
+   * failing the request out from under a user who is mid-PIN would be worse than the wait.
+   */
+  rejectWhenLocked?: boolean
+}
+
+async function waitForAction<
+  Output,
+  Error extends DmkError,
+  IntermediateValue extends { requiredUserInteraction: UserInteraction },
+>(
+  { observable }: ExecuteDeviceActionReturnType<Output, Error, IntermediateValue>,
+  { rejectWhenLocked = false }: WaitForActionOptions = {},
+): Promise<Output> {
+  const { DeviceActionStatus, DeviceLockedError, UserInteractionRequired } = await import(
+    '@ledgerhq/device-management-kit'
+  )
 
   let subscription: Subscription | undefined
 
@@ -393,6 +419,15 @@ async function waitForAction<Output, Error extends DmkError, IntermediateValue>(
             resolve(actionState.output)
           } else if (actionState.status === DeviceActionStatus.Error) {
             reject(mapLedgerError(actionState.error))
+          } else if (
+            rejectWhenLocked &&
+            actionState.status === DeviceActionStatus.Pending &&
+            actionState.intermediateValue.requiredUserInteraction === UserInteractionRequired.UnlockDevice
+          ) {
+            // Raise the kit's own error rather than one of ours: the user gets the same
+            // mapped sentence and the debugging sinks the same payload the timeout would
+            // have produced, a minute earlier
+            reject(mapLedgerError(new DeviceLockedError()))
           } else {
             // Awaiting user action, e.g. device to be unlocked. We could throw
             // an explicit error message but we keep the signing request alive
