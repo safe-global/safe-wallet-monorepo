@@ -7,6 +7,7 @@ import {
   isNonceTooLowError,
   isRateLimitError,
   isRevertError,
+  isExpectedEstimationError,
   GUARD_ERROR_CODES,
 } from '../transaction-errors'
 
@@ -172,6 +173,29 @@ describe('transaction-errors', () => {
       const inner = Object.assign(new BaseError('inner'), { code: -32602 })
       const outer = new BaseError('outer', { cause: inner })
       expect(isRateLimitError(outer)).toBe(false)
+    })
+  })
+
+  describe('isExpectedEstimationError', () => {
+    it("treats a revert as expected — it is the estimate's answer, not a fault", () => {
+      expect(isExpectedEstimationError(new Error('execution reverted: "GS013"'))).toBe(true)
+      expect(isExpectedEstimationError(Object.assign(new Error('call failed'), { code: 'CALL_EXCEPTION' }))).toBe(true)
+    })
+
+    it('treats a transient throttle as expected — viem already retried it', () => {
+      const inner = Object.assign(new BaseError('inner'), { code: -32005 })
+      expect(isExpectedEstimationError(new BaseError('outer', { cause: inner }))).toBe(true)
+    })
+
+    it('treats an infrastructure failure as unexpected, so it still gets logged', () => {
+      expect(isExpectedEstimationError(new Error('HTTP request failed. Status: 500'))).toBe(false)
+      expect(isExpectedEstimationError(Object.assign(new Error('timeout'), { code: 'TIMEOUT' }))).toBe(false)
+      expect(isExpectedEstimationError(Object.assign(new Error('network error'), { code: 'SERVER_ERROR' }))).toBe(false)
+    })
+
+    it('returns false for no error', () => {
+      expect(isExpectedEstimationError(null)).toBe(false)
+      expect(isExpectedEstimationError(undefined)).toBe(false)
     })
   })
 })

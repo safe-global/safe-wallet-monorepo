@@ -9,6 +9,7 @@ import { useSigner } from './wallets/useWallet'
 import { useSafeSDK } from './coreSDK/safeCoreSDK'
 import useIsSafeOwner from './useIsSafeOwner'
 import { Errors, logError } from '@/services/exceptions'
+import { isExpectedEstimationError } from '@/utils/transaction-errors'
 import useSafeInfo from './useSafeInfo'
 import {
   getEncodedSafeTx,
@@ -83,9 +84,13 @@ const useGasLimit = (
   ])
 
   useEffect(() => {
-    if (gasLimitError) {
-      logError(Errors._612, gasLimitError.message, getRpcErrorContext(web3ReadOnly))
-    }
+    if (!gasLimitError) return
+    // A revert is the estimate's answer, not a fault, and a throttle is
+    // transient — both already have their own UI copy. Only a genuine
+    // infrastructure failure is worth a coded log.
+    if (isExpectedEstimationError(gasLimitError)) return
+
+    logError(Errors._612, gasLimitError.message, getRpcErrorContext(web3ReadOnly))
   }, [gasLimitError, web3ReadOnly])
 
   return { gasLimit, gasLimitError, gasLimitLoading }

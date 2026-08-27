@@ -4,6 +4,7 @@ import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
 import { Errors, logError } from '@/services/exceptions'
 import { getModuleTransactionId } from '@/services/transactions'
+import { isExpectedEstimationError } from '@/utils/transaction-errors'
 import { backOff } from 'exponential-backoff'
 import { useEffect, useMemo } from 'react'
 import {
@@ -331,9 +332,13 @@ export const useGasLimit = (
   }, [web3ReadOnly, tx])
 
   useEffect(() => {
-    if (gasLimitError) {
-      logError(Errors._612, gasLimitError.message, getRpcErrorContext(web3ReadOnly))
-    }
+    if (!gasLimitError) return
+    // A revert is the estimate's answer, not a fault, and a throttle is
+    // transient — both already have their own UI copy. Only a genuine
+    // infrastructure failure is worth a coded log.
+    if (isExpectedEstimationError(gasLimitError)) return
+
+    logError(Errors._612, gasLimitError.message, getRpcErrorContext(web3ReadOnly))
   }, [gasLimitError, web3ReadOnly])
 
   return { gasLimit, gasLimitError, gasLimitLoading }

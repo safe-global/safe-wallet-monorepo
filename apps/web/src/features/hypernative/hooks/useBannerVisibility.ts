@@ -59,12 +59,18 @@ export const useBannerVisibility = (bannerType: BannerType): BannerVisibilityRes
   const isTxReportButton = bannerType === BannerType.TxReportButton
   const skipBalanceCheck = bannerType === BannerType.NoBalanceCheck
 
+  // `isEnabled` is already a hard precondition of every `showBanner` branch
+  // below, so with HYPERNATIVE off on the chain the outreach answer cannot
+  // change the outcome. Skip the request: CGW replies with a documented 404
+  // ("Safe not targeted") for every Safe outside the outreach, and the browser
+  // writes that 404 to the console itself — no client-side filter can suppress
+  // it (WA-2991).
   const { isTargeted: isPromoTargeted, loading: outreachLoading } = useIsOutreachSafe(HYPERNATIVE_OUTREACH_ID, {
-    skip: isTxReportButton,
+    skip: !isEnabled || isTxReportButton,
   })
   const { isTargeted: isAllowlistedSafe, loading: allowlistLoading } = useIsOutreachSafe(
     HYPERNATIVE_ALLOWLIST_OUTREACH_ID,
-    { skip: !isTxReportButton },
+    { skip: !isEnabled || !isTxReportButton },
   )
 
   const hasEnoughBalance = hasSufficientBalance(balances.fiatTotal)

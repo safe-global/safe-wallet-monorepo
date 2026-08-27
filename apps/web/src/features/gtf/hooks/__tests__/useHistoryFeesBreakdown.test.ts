@@ -7,6 +7,14 @@ import * as web3Module from '@/hooks/wallets/web3'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { DetailedExecutionInfoType } from '@safe-global/store/gateway/types'
 import { chainBuilder } from '@/tests/builders/chains'
+import { Errors } from '@/services/exceptions'
+import { BaseError } from 'viem'
+
+const mockLogError = jest.fn()
+jest.mock('@/services/exceptions', () => ({
+  ...jest.requireActual('@/services/exceptions'),
+  logError: (...args: unknown[]) => mockLogError(...args),
+}))
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 const WETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
@@ -86,6 +94,11 @@ const mockModuleTx = {
 
 const buildProvider = (receipt: { gasUsed: bigint; gasPrice: bigint } | null) =>
   ({ getTransactionReceipt: jest.fn().mockResolvedValue(receipt) }) as unknown as ReturnType<
+    typeof web3Module.useWeb3ReadOnly
+  > & { getTransactionReceipt: jest.Mock }
+
+const buildFailingProvider = (error: unknown) =>
+  ({ getTransactionReceipt: jest.fn().mockRejectedValue(error) }) as unknown as ReturnType<
     typeof web3Module.useWeb3ReadOnly
   > & { getTransactionReceipt: jest.Mock }
 
@@ -217,5 +230,34 @@ describe('useHistoryFeesBreakdown', () => {
     const { result } = renderHook(() => useHistoryFeesBreakdown(queuedTx))
 
     await waitFor(() => expect(result.current).toBeNull())
+  })
+
+  describe('receipt-fetch logging', () => {
+    it('logs a failed receipt fetch as 623, not as a gas-estimation failure', async () => {
+      // The call is `getTransactionReceipt`, which cannot revert — 612
+      // ("Error estimating gas") mislabelled it and polluted the
+      // gas_estimation_failed facet.
+      jest
+        .spyOn(web3Module, 'useWeb3ReadOnly')
+        .mockReturnValue(buildFailingProvider(new Error('HTTP request failed. Status: 500')))
+
+      const { result } = renderHook(() => useHistoryFeesBreakdown(mockSignerPaysTx))
+
+      await waitFor(() => expect(mockLogError).toHaveBeenCalled())
+      expect(mockLogError).toHaveBeenCalledWith(Errors._623, 'HTTP request failed. Status: 500', expect.anything())
+      expect(result.current).toBeNull()
+    })
+
+    it('does not log a transient throttle', async () => {
+      const inner = Object.assign(new BaseError('inner'), { code: -32005 })
+      jest
+        .spyOn(web3Module, 'useWeb3ReadOnly')
+        .mockReturnValue(buildFailingProvider(new BaseError('outer', { cause: inner })))
+
+      const { result } = renderHook(() => useHistoryFeesBreakdown(mockSignerPaysTx))
+
+      await waitFor(() => expect(result.current).toBeNull())
+      expect(mockLogError).not.toHaveBeenCalled()
+    })
   })
 })
