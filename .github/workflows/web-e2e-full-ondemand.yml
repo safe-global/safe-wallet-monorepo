@@ -1,5 +1,5 @@
 name: Web Full Regression on demand tests
-run-name: ${{ inputs.spec != '' && format('E2E {0} — {1}', inputs.suite, inputs.spec) || (inputs.suite != '' && inputs.suite != 'full-regression') && format('E2E {0} suite', inputs.suite) || 'Web Full Regression on demand tests' }}
+run-name: ${{ inputs.spec != '' && inputs.suite == 'full-regression' && format('E2E regression — **/{0}', inputs.spec) || inputs.spec != '' && format('E2E regression — {0}/{1}', inputs.suite, inputs.spec) || (inputs.suite != '' && inputs.suite != 'full-regression') && format('E2E regression — {0}/*', inputs.suite) || 'Web Full Regression on demand tests' }}
 
 # Manual runs can be narrowed down; leave both inputs untouched for the full regression.
 #   suite  = full-regression (default) | smoke | regression | happypath_2 | safe-apps
@@ -8,6 +8,7 @@ run-name: ${{ inputs.spec != '' && format('E2E {0} — {1}', inputs.suite, input
 #              create_tx_2, portfolio      -> both, inside <suite>
 #            with suite=full-regression a name matches every directory it exists in (21 names exist twice).
 # Partial runs use 2 containers, are tagged "partial" in Cypress Cloud and skip the TestRail upload.
+# A spec name that matches no file fails the run right after checkout, before the app build.
 # Scheduled runs have no inputs and always run the full regression.
 
 on:
@@ -24,7 +25,7 @@ on:
           - happypath_2
           - safe-apps
       spec:
-        description: 'Optional. Spec names, comma-separated, e.g. create_tx_2, portfolio (no path, no .cy.js).'
+        description: 'Spec names (optional), comma-separated, e.g. create_tx_2, portfolio (no path, no .cy.js).'
         type: string
         required: false
         default: ''
@@ -39,7 +40,7 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 40
-    name: ${{ inputs.spec != '' && 'Cypress e2e (selected specs)' || (inputs.suite != '' && inputs.suite != 'full-regression') && format('Cypress e2e ({0})', inputs.suite) || 'Cypress Full Regression on demand tests' }}
+    name: ${{ inputs.spec != '' && inputs.suite == 'full-regression' && format('Cypress **/{0}', inputs.spec) || inputs.spec != '' && format('Cypress {0}/{1}', inputs.suite, inputs.spec) || (inputs.suite != '' && inputs.suite != 'full-regression') && format('Cypress {0}/*', inputs.suite) || 'Cypress Full Regression on demand tests' }}
     permissions:
       contents: read
     strategy:
@@ -82,6 +83,18 @@ jobs:
               fi
               specs+="${path}"$'\n'
             done
+          fi
+          shopt -s globstar nullglob
+          missing=""
+          while IFS= read -r pattern; do
+            [ -z "$pattern" ] && continue
+            matches=( apps/web/$pattern )
+            [ ${#matches[@]} -eq 0 ] && missing+="  $pattern"$'\n'
+          done <<< "$specs"
+          if [ -n "$missing" ]; then
+            echo "::error::No spec file matches:"$'\n'"$missing"
+            echo "Check the spec names (file name only, no path, no .cy.js) and the selected suite."
+            exit 1
           fi
           echo "Specs to run:"; echo "$specs"
           { echo "specs<<EOF"; echo "$specs"; echo "EOF"; echo "partial=$partial"; } >> "$GITHUB_OUTPUT"
