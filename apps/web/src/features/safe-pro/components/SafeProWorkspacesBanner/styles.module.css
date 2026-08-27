@@ -18,6 +18,11 @@
   padding: 6px 8px;
   color: var(--foreground);
   background-color: color-mix(in srgb, var(--color-static-text-brand) 20%, transparent);
+  transition: background-color 150ms ease;
+}
+
+.banner:hover .proChip {
+  background-color: #7ffab7;
 }
 
 @media (min-width: 40rem) {
@@ -33,6 +38,10 @@
 :global(.dark) .proChip {
   color: #7ffab7;
   background-color: #2e2e2e;
+}
+
+:global(.dark) .banner:hover .proChip {
+  color: var(--primary-foreground);
 }
 
 :global(.dark) .learnMore {
