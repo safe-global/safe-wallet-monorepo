@@ -386,7 +386,7 @@ All new E2E tests must be written in Playwright (`apps/web/e2e/`). Cypress is le
 
 **Before writing any Playwright test, AI agents must follow the [12-step AI Test Output Format](apps/web/e2e/docs/AI_TEST_OUTPUT_FORMAT.md).** Code is step 11 of 12.
 
-For Cypress → Playwright migration, follow the [Cypress Migration Guide](apps/web/e2e/docs/CYPRESS_MIGRATION_GUIDE.md).
+For Cypress → Playwright migration, follow the [Cypress Migration Guide](apps/web/e2e/docs/CYPRESS_MIGRATION_GUIDE.md) — it defines the mandatory per-test classification **and** the staged programme (one stage per PR, easiest area first). Pick up work from [CYPRESS_PW_MIGRATION_STATUS.md](apps/web/e2e/docs/CYPRESS_PW_MIGRATION_STATUS.md), the live queue, and update it in the same PR.
 
 ### Developer-Owned Tests Rule
 

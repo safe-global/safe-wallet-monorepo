@@ -6,6 +6,7 @@ export const buildCheckView = (over: Partial<SafenetCheckView> = {}): SafenetChe
   snapshot: undefined,
   status: CheckStatus.UNAVAILABLE,
   publicStatus: CheckStatus.UNAVAILABLE,
+  unavailableReason: undefined,
   isLoading: false,
   isFetching: false,
   isStale: false,

@@ -11,7 +11,7 @@ import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShi
 import useChainId from '@/hooks/useChainId'
 import { getResetTimeOptions } from '../../constants'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
-import TxCard from '@/components/tx-flow/common/TxCard'
+import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import TokenAmountInput from '@/components/common/TokenAmountInput'
 import { validateAmount, validateDecimalLength } from '@safe-global/utils/utils/validation'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
@@ -20,6 +20,8 @@ import useIsSpendingLimitSupported from '../../hooks/useIsSpendingLimitSupported
 import SpendingLimitNotSupported from './SpendingLimitNotSupported'
 
 export const _validateSpendingLimit = (val: string, decimals?: number | null) => {
+  // Without a selected token we don't know the decimals, so the amount can't be range-checked yet.
+  if (decimals == null) return
   // Allowance amount is uint96 https://github.com/safe-global/safe-modules/blob/main/modules/allowances/contracts/AllowanceModule.sol#L52
   try {
     const amount = parseUnits(val, decimals ?? 'Gwei')
@@ -111,11 +113,11 @@ const CreateSpendingLimit = () => {
             />
           </div>
 
-          <div className="flex justify-end p-2">
+          <TxCardActions>
             <Button data-testid="next-btn" type="submit">
               Next
             </Button>
-          </div>
+          </TxCardActions>
         </form>
       </FormProvider>
     </TxCard>

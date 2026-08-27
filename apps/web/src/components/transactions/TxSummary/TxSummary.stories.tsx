@@ -34,7 +34,7 @@ import {
  */
 const TxCard = ({ children, width }: { children: ReactNode; width?: number }) => (
   <div className="bg-card overflow-hidden rounded-lg border border-transparent" style={{ width, maxWidth: '100%' }}>
-    <div className="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-md border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6">
+    <div className="@container relative flex cursor-pointer items-center justify-start overflow-x-auto rounded-none border border-transparent px-4 py-3 text-left text-sm font-medium sm:px-6">
       {children}
       <ChevronDownIcon className="text-muted-foreground pointer-events-none ml-auto size-4 shrink-0" />
     </div>

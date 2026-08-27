@@ -186,7 +186,7 @@ exports[`./TransactionQueueBar.stories Collapsed 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -217,12 +217,26 @@ exports[`./TransactionQueueBar.stories Collapsed 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -355,7 +369,7 @@ exports[`./TransactionQueueBar.stories Collapsed 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -386,12 +400,26 @@ exports[`./TransactionQueueBar.stories Collapsed 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -524,7 +552,7 @@ exports[`./TransactionQueueBar.stories Collapsed 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -555,12 +583,26 @@ exports[`./TransactionQueueBar.stories Collapsed 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -872,7 +914,7 @@ exports[`./TransactionQueueBar.stories Expanded 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -903,12 +945,26 @@ exports[`./TransactionQueueBar.stories Expanded 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -1041,7 +1097,7 @@ exports[`./TransactionQueueBar.stories Expanded 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -1072,12 +1128,26 @@ exports[`./TransactionQueueBar.stories Expanded 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -1210,7 +1280,7 @@ exports[`./TransactionQueueBar.stories Expanded 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -1241,12 +1311,26 @@ exports[`./TransactionQueueBar.stories Expanded 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -1562,7 +1646,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -1593,12 +1677,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -1731,7 +1829,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -1762,12 +1860,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -1900,7 +2012,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -1931,12 +2043,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -2069,7 +2195,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -2100,12 +2226,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -2238,7 +2378,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -2269,12 +2409,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -2407,7 +2561,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -2438,12 +2592,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -2576,7 +2744,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -2607,12 +2775,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -2745,7 +2927,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -2776,12 +2958,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -2914,7 +3110,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -2945,12 +3141,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -3083,7 +3293,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -3114,12 +3324,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -3252,7 +3476,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -3283,12 +3507,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -3421,7 +3659,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -3452,12 +3690,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -3590,7 +3842,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -3621,12 +3873,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -3759,7 +4025,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -3790,12 +4056,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -3928,7 +4208,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -3959,12 +4239,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -4097,7 +4391,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -4128,12 +4422,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -4266,7 +4574,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -4297,12 +4605,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -4435,7 +4757,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -4466,12 +4788,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -4604,7 +4940,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -4635,12 +4971,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -4773,7 +5123,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -4804,12 +5154,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -4942,7 +5306,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -4973,12 +5337,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -5111,7 +5489,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -5142,12 +5520,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -5280,7 +5672,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -5311,12 +5703,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -5449,7 +5855,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -5480,12 +5886,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -5618,7 +6038,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -5649,12 +6069,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -5787,7 +6221,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -5818,12 +6252,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -5956,7 +6404,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -5987,12 +6435,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -6125,7 +6587,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -6156,12 +6618,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -6294,7 +6770,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -6325,12 +6801,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"
@@ -6463,7 +6953,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                             >
                               <div
                                 aria-expanded="false"
-                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
+                                class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 @container cursor-pointer items-center justify-start overflow-x-auto rounded-none py-3 px-4 sm:px-6"
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
@@ -6494,12 +6984,26 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                       <div
                                         class="txType"
                                       >
-                                        <img
-                                          alt="Contract interaction"
-                                          height="16"
-                                          src="/images/transactions/custom.svg"
-                                          width="16"
-                                        />
+                                        <svg
+                                          aria-hidden="true"
+                                          class="lucide lucide-code size-4"
+                                          fill="none"
+                                          height="24"
+                                          stroke="currentColor"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="1.5"
+                                          viewBox="0 0 24 24"
+                                          width="24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m16 18 6-6-6-6"
+                                          />
+                                          <path
+                                            d="m8 6-6 6 6 6"
+                                          />
+                                        </svg>
                                       </div>
                                       <span
                                         class="typeLabel"

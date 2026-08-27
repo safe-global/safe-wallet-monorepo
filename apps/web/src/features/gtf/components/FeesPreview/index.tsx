@@ -261,7 +261,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
             {isConfirmation && canCoverFees && !isLegacySigned && (
               <>
                 <ConfirmationFeeNotice availableGasTokens={availableGasTokens} selectedGasToken={selectedGasToken} />
-                <Separator className="-mx-4 w-auto" />
+                <Separator bleed="4" />
               </>
             )}
 
@@ -270,7 +270,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
             {(isLegacySigned || noEligibleGasToken) && (
               <>
                 <SignerFeeNotice isLocked />
-                <Separator className="-mx-4 w-auto" />
+                <Separator bleed="4" />
               </>
             )}
 
@@ -300,7 +300,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
                   </div>
                 </div>
 
-                <Separator className="-mx-4 w-auto" />
+                <Separator bleed="4" />
               </>
             )}
 
@@ -308,7 +308,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
             {!canCoverFees && (
               <>
                 <SignerFeeNotice />
-                <Separator className="-mx-4 w-auto" />
+                <Separator bleed="4" />
               </>
             )}
           </>

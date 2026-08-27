@@ -189,7 +189,13 @@ const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElemen
               <>
                 <div className="flex flex-row items-center justify-between">
                   <Track {...MODALS_EVENTS.ADD_RECIPIENT}>
-                    <Button data-testid="add-recipient-btn" onClick={addRecipient} disabled={!canAddMoreRecipients}>
+                    <Button
+                      data-testid="add-recipient-btn"
+                      variant="ghost"
+                      size="lg"
+                      onClick={addRecipient}
+                      disabled={!canAddMoreRecipients}
+                    >
                       <AddIcon className="size-4" />
                       Add recipient
                     </Button>
@@ -257,7 +263,7 @@ const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElemen
             )}
 
             <div>
-              <Separator className={commonCss.nestedDivider} />
+              <Separator bleed="6" />
 
               <TxCardActions>
                 <Button type="submit" size="submit" disabled={!formState.isValid} className="w-full lg:w-auto">

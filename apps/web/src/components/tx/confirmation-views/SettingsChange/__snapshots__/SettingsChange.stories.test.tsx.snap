@@ -110,7 +110,7 @@ exports[`./SettingsChange.stories AddOwner 1`] = `
       </div>
       <div
         aria-orientation="horizontal"
-        class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch nestedDivider"
+        class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:-mx-6 data-[orientation=horizontal]:w-[calc(100%+(2*(var(--spacing)*6)))]"
         data-orientation="horizontal"
         data-slot="separator"
         role="separator"
@@ -141,7 +141,7 @@ exports[`./SettingsChange.stories AddOwner 1`] = `
       </div>
       <div
         aria-orientation="horizontal"
-        class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch nestedDivider"
+        class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:-mx-6 data-[orientation=horizontal]:w-[calc(100%+(2*(var(--spacing)*6)))]"
         data-orientation="horizontal"
         data-slot="separator"
         role="separator"
@@ -258,7 +258,7 @@ exports[`./SettingsChange.stories SwapOwner 1`] = `
       </div>
       <div
         aria-orientation="horizontal"
-        class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch nestedDivider"
+        class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:-mx-6 data-[orientation=horizontal]:w-[calc(100%+(2*(var(--spacing)*6)))]"
         data-orientation="horizontal"
         data-slot="separator"
         role="separator"

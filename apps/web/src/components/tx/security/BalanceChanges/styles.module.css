@@ -33,12 +33,13 @@
   text-overflow: ellipsis;
 }
 
+/* Radius and inset track ColorCodedTxAccordion, the block this is stacked under, so labels line up. */
 .box {
-  border-radius: 6px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--color-border-light);
   display: grid;
   grid-template-columns: 35% auto;
-  padding: var(--space-2) 12px;
+  padding: var(--space-2);
 }
 
 @keyframes popup {

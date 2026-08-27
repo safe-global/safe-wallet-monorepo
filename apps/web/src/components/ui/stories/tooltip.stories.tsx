@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../tooltip'
 import { Button } from '../button'
+import { Link } from '../link'
 
 /**
  * Tooltip Component Stories
@@ -98,6 +99,24 @@ export const AllVariants: Story = {
           </Tooltip>
         </div>
       </div>
+    </div>
+  ),
+}
+
+/**
+ * The tooltip is an inverted surface (`bg-foreground text-background`), so `Link`'s default
+ * `text-primary` would be near-invisible on it in both themes. Keeps that regression covered.
+ */
+export const WithLink: Story = {
+  render: () => (
+    <div className="flex min-h-32 items-end justify-center pb-2">
+      <Tooltip open>
+        <TooltipTrigger render={<Button variant="outline">Tooltip with a link</Button>} />
+        <TooltipContent side="bottom">
+          A standard transaction requires the signatures of other signers.{' '}
+          <Link href="https://help.safe.global">Learn more about spending limits</Link>.
+        </TooltipContent>
+      </Tooltip>
     </div>
   ),
 }

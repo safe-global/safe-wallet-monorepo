@@ -683,9 +683,21 @@ describe('TxSigners (Audit Log)', () => {
       useHasFeature.mockReturnValue(true)
       mockSafeInfo({ chainId: '1', threshold: 1, owners: [{ value: ownerAddress, name: null, logoUri: null }] })
       const { CheckStatus } = jest.requireActual('@safe-global/utils/features/safenet-checks')
-      const { buildBenignSnapshot } = jest.requireActual('@safe-global/utils/features/safenet-checks/builders')
+      const { buildBenignSnapshot, plainAttestedEvent } = jest.requireActual(
+        '@safe-global/utils/features/safenet-checks/builders',
+      )
+      const { AttestationVerificationStatus } = jest.requireActual('@safe-global/utils/features/safenet-checks')
+      const attested = plainAttestedEvent({ safeTxHash: safenetTxHash })
       useSafenetCheck.mockReturnValue({
-        snapshot: buildBenignSnapshot({ safeTxHash: safenetTxHash }),
+        snapshot: buildBenignSnapshot({
+          safeTxHash: safenetTxHash,
+          events: [attested],
+          attestation: {
+            status: AttestationVerificationStatus.VERIFIED,
+            signatureId: attested.signatureId,
+            message: null,
+          },
+        }),
         status: CheckStatus.BENIGN,
         publicStatus: CheckStatus.BENIGN,
         isLoading: false,
@@ -704,7 +716,11 @@ describe('TxSigners (Audit Log)', () => {
       })
       expect(screen.getByText('No issues found')).toBeInTheDocument()
       // The hook watches THIS transaction's hash, aimed at its submission time.
-      expect(useSafenetCheck).toHaveBeenCalledWith(safenetTxHash, 1_700_000_000_000)
+      expect(useSafenetCheck).toHaveBeenCalledWith(
+        safenetTxHash,
+        1_700_000_000_000,
+        expect.objectContaining({ chainId: expect.any(String) }),
+      )
       expect(screen.getByTestId('safenet-attestation-link')).toHaveAttribute(
         'href',
         `https://explorer.safenet-beta.eth.limo/#/safeTx?chainId=1&safeTxHash=${safenetTxHash}`,

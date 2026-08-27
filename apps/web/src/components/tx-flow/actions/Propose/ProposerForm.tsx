@@ -8,7 +8,6 @@ import { Typography } from '@/components/ui/typography'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import CheckWallet from '@/components/common/CheckWallet'
 import { TxModalContext } from '@/components/tx-flow'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { useTxActions } from '@/components/tx/shared/hooks'
 import type { SignOrExecuteProps } from '@/components/tx/shared/types'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -82,7 +81,7 @@ export const ProposerForm = ({
       )}
 
       <div className="pt-6">
-        <Separator className={commonCss.nestedDivider} />
+        <Separator bleed="6" />
       </div>
 
       <TxCardActions>

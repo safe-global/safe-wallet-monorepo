@@ -160,7 +160,8 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
               data-testid="remove-recipient-btn"
               onClick={onRemove}
               aria-label="Remove recipient"
-              variant="destructive"
+              variant="ghost"
+              size="lg"
             >
               <DeleteIcon className="size-4" />
               Remove recipient

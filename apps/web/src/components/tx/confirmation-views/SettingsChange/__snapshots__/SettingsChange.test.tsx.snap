@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`SettingsChange should display the SettingsChange component with newOwner details 1`] = `
 <div>
@@ -163,7 +163,7 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
   </div>
   <div
     aria-orientation="horizontal"
-    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch nestedDivider"
+    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:-mx-6 data-[orientation=horizontal]:w-[calc(100%+(2*(var(--spacing)*6)))]"
     data-orientation="horizontal"
     data-slot="separator"
     role="separator"
@@ -254,7 +254,7 @@ exports[`SettingsChange should display the SettingsChange component with owner d
   </div>
   <div
     aria-orientation="horizontal"
-    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch nestedDivider"
+    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:-mx-6 data-[orientation=horizontal]:w-[calc(100%+(2*(var(--spacing)*6)))]"
     data-orientation="horizontal"
     data-slot="separator"
     role="separator"
@@ -285,7 +285,7 @@ exports[`SettingsChange should display the SettingsChange component with owner d
   </div>
   <div
     aria-orientation="horizontal"
-    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch nestedDivider"
+    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:-mx-6 data-[orientation=horizontal]:w-[calc(100%+(2*(var(--spacing)*6)))]"
     data-orientation="horizontal"
     data-slot="separator"
     role="separator"

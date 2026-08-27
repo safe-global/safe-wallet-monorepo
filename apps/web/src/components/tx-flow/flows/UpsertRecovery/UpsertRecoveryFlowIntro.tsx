@@ -7,7 +7,6 @@ import RecoveryDelay from '@/public/images/settings/spending-limit/time.svg'
 import RecoveryExecution from '@/public/images/transactions/recovery-execution.svg'
 
 import css from './styles.module.css'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { useContext } from 'react'
 import { TxFlowContext } from '../../TxFlowProvider'
 import { Typography } from '@/components/ui/typography'
@@ -62,7 +61,7 @@ export function UpsertRecoveryFlowIntro(): ReactElement {
           </div>
         ))}
       </div>
-      <Separator className={commonCss.nestedDivider} />
+      <Separator bleed="6" />
       <TxCardActions>
         <Button data-testid="next-btn" variant="default" onClick={() => onNext(data)}>
           Next

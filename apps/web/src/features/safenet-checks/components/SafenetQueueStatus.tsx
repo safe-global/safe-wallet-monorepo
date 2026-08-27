@@ -9,9 +9,9 @@ import { STATUS_PRESENTATION } from '../statusPresentation'
 export type SafenetQueueStatusProps = {
   safeTxHash: string
   /**
-   * Submission time from the queue summary; aims the reader's block window.
-   * Required: the cache keys by hash and the last fetch's args aim every
-   * later poll, so an unaimed subscription would poison every surface.
+   * The queued transaction's submission date, offered to the shared aim
+   * registry, which aims the read window with the earliest time any surface
+   * knows. The confirm flow offers the same value from `submittedAt`.
    */
   timestampMs: number
 }

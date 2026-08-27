@@ -21,6 +21,10 @@ export const buildSnapshot = (over: Partial<SafenetCheckSnapshot> = {}): Safenet
   headBlock: null,
   attestation: UNVERIFIED_ATTESTATION,
   attestedAtMs: null,
+  aimedAtMs: null,
+  // The claim-gated default: a test asserting NO_CHECK must state the coverage
+  // that licenses it.
+  windowCoverage: 'heuristic',
   events: [],
   ...over,
 })

@@ -25,7 +25,8 @@ import { cn } from '@/utils/cn'
  * @remarks
  * Key Props:
  * - Card: `as`, `size` ('default' | 'sm' | 'lg' | 'none'), `variant` ('default' | 'outlined' | 'muted'),
- *   `radius` ('lg' | 'xl' | 'none', default 'lg'), `className` (layout-only: w-*, margins, flex/grid)
+ *   `surface` ('default' | 'sunken', default 'default'), `radius` ('lg' | 'xl' | 'none', default 'lg'),
+ *   `className` (layout-only: w-*, margins, flex/grid)
  * - CardHeader / CardTitle / CardDescription / CardAction / CardContent / CardFooter: `className`
  *
  * `className` is layout-only. Padding, gap, radius, background and borders belong to `size`/`variant`/`radius`.
@@ -39,7 +40,9 @@ import { cn } from '@/utils/cn'
  *
  * Changelog:
  * - 2026-01-29: Removed shadow-xs and ring-1 to match Figma (no elevation/border)
- * - 2026-07-10: Added `size="lg"` (gap-8/py-8, slot px-8); flipped the default `radius` xl→lg (8px, MUI parity)
+ * - 2026-07-10: Added `size="lg"` (gap-8/py-8, slot px-8); flipped the default `radius` xl→lg (`--radius-lg`, 16px)
+ * - 2026-08-25: Added `surface="sunken"` (bg-surface-sunken) for inset cards nested on the page surface;
+ *   orthogonal to `variant`, so it composes with `outlined`
  */
 const cardVariants = cva(
   'bg-card text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col',
@@ -49,6 +52,10 @@ const cardVariants = cva(
         default: '',
         outlined: 'border border-border',
         muted: 'bg-muted',
+      },
+      surface: {
+        default: '',
+        sunken: 'bg-surface-sunken',
       },
       size: {
         default: 'gap-6 py-6',
@@ -64,6 +71,7 @@ const cardVariants = cva(
     },
     defaultVariants: {
       variant: 'default',
+      surface: 'default',
       size: 'default',
       radius: 'lg',
     },
@@ -80,6 +88,7 @@ function Card<TElement extends React.ElementType = 'div'>({
   className,
   size = 'default',
   variant = 'default',
+  surface = 'default',
   radius = 'lg',
   ...props
 }: CardProps<TElement>) {
@@ -90,8 +99,9 @@ function Card<TElement extends React.ElementType = 'div'>({
       data-slot="card"
       data-size={size}
       data-variant={variant}
+      data-surface={surface}
       data-radius={radius}
-      className={cn(cardVariants({ size, variant, radius }), className)}
+      className={cn(cardVariants({ size, variant, surface, radius }), className)}
       {...props}
     />
   )
