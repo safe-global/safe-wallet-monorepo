@@ -25,7 +25,7 @@ exports[`./SafeProAnnouncement.stories Default 1`] = `
           style="position: absolute; height: 100%; width: 100%; left: 0px; top: 0px; right: 0px; bottom: 0px; color: transparent;"
         />
         <img
-          alt="A Workspace on the Pro plan, with its accounts, members and transactions"
+          alt="A Workspace from Safe Pro, with its accounts, members and transactions"
           class="hidden object-cover dark:block"
           data-nimg="fill"
           decoding="async"
