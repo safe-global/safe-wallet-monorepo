@@ -17,7 +17,7 @@ const SafeProAnnouncement = ({ onDismiss }: { onDismiss?: () => void }) => (
       />
       <Image
         src="/images/safe-pro/pro-announcement-hero-dark.jpg"
-        alt="A Workspace on the Pro plan, with its accounts, members and transactions"
+        alt="A Workspace from Safe Pro, with its accounts, members and transactions"
         fill
         className="hidden object-cover dark:block"
       />
