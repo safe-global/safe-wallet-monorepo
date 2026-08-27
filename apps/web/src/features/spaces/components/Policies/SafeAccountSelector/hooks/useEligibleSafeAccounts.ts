@@ -21,7 +21,11 @@ const getEligibility = (isSigner: boolean, isProposer: boolean): SafeAccountElig
 }
 
 /**
- * Safes in the current Space the connected wallet may set a policy on — signer or proposer — grouped by
+ /**
+ * Safes in the current Space on which the connected wallet is a signer or a proposer, grouped by
+ * address. Ineligible Safes are absent rather than disabled.
+ */
+
  * address. Ineligible Safes are absent rather than disabled.
  */
 export const useEligibleSafeAccounts = () => {
