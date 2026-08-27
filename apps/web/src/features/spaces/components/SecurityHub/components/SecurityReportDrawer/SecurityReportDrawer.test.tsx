@@ -7,13 +7,13 @@ import * as stories from './SecurityReportDrawer.stories'
 const { OpenWithContext } = composeStories(stories)
 
 describe('SecurityReportDrawer surface', () => {
-  it('renders the drawer on the muted #fafafa surface, not white bg-card, so inner cards stay visible', () => {
+  it('renders the drawer on a recessed surface, not bg-card, so inner cards stay visible in both themes', () => {
     render(<OpenWithContext />)
 
     const content = screen.getByLabelText('Security report')
 
     expect(content).toHaveClass('bg-zinc-50')
-    expect(content).toHaveClass('dark:bg-card')
+    expect(content).toHaveClass('dark:bg-[var(--color-background-main)]')
     expect(content).not.toHaveClass('bg-card')
   })
 })
