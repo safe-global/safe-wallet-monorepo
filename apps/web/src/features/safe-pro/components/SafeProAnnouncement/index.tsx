@@ -38,7 +38,7 @@ const SafeProAnnouncement = ({ onDismiss }: { onDismiss?: () => void }) => (
 
       <div className="flex shrink-0 gap-3">
         {onDismiss && (
-          <Button size="lg" variant="outline" onClick={onDismiss}>
+          <Button size="lg" variant="secondary" onClick={onDismiss}>
             Got it
           </Button>
         )}
