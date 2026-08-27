@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       suite:
-        description: 'Which directory to run. full-regression = the four directories the scheduled run covers (identical to today).'
+        description: 'Directory to run. Default = the full regression, same as today.'
         type: choice
         default: full-regression
         options:
@@ -24,7 +24,7 @@ on:
           - happypath_2
           - safe-apps
       spec:
-        description: 'Optional: only these spec files. Names only, no path or .cy.js, comma-separated. e.g. create_tx_2  |  create_tx_2, portfolio  |  regression/create_tx_2 (pins the directory). Empty = the whole suite above.'
+        description: 'Optional. Spec names, comma-separated, e.g. create_tx_2, portfolio (no path, no .cy.js). Use dir/name to pin a directory.'
         type: string
         required: false
         default: ''
