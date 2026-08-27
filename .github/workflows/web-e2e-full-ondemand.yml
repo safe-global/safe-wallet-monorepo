@@ -1,7 +1,33 @@
 name: Web Full Regression on demand tests
 
+# Manual runs can be narrowed down; leave both inputs untouched for the full regression.
+#   suite  = full-regression (default) | smoke | regression | happypath_2 | safe-apps
+#   spec   = spec file name(s) without path or .cy.js, comma-separated, e.g.
+#              create_tx_2                 -> cypress/e2e/<suite>/create_tx_2.cy.js
+#              create_tx_2, portfolio      -> both, inside <suite>
+#              regression/create_tx_2      -> exact directory, ignores <suite>
+#            with suite=full-regression a bare name matches every directory (21 names exist twice).
+# Partial runs use 2 containers, are tagged "partial" in Cypress Cloud and skip the TestRail upload.
+# Scheduled runs have no inputs and always run the full regression.
+
 on:
   workflow_dispatch:
+    inputs:
+      suite:
+        description: 'Which directory to run. full-regression = the four directories the scheduled run covers (identical to today).'
+        type: choice
+        default: full-regression
+        options:
+          - full-regression
+          - smoke
+          - regression
+          - happypath_2
+          - safe-apps
+      spec:
+        description: 'Optional: only these spec files. Names only, no path or .cy.js, comma-separated. e.g. create_tx_2  |  create_tx_2, portfolio  |  regression/create_tx_2 (pins the directory). Empty = the whole suite above.'
+        type: string
+        required: false
+        default: ''
   schedule:
     - cron: '0 3 * * 1-5'
 
@@ -19,9 +45,50 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        containers: [1, 2, 3, 4, 5, 6, 7, 8]
+        # A handful of named specs does not need the full fleet.
+        containers: ${{ fromJSON(inputs.spec != '' && '[1, 2]' || '[1, 2, 3, 4, 5, 6, 7, 8]') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # Scheduled runs have no inputs and fall through to the full regression.
+      - name: Resolve specs to run
+        id: specs
+        shell: bash
+        env:
+          SUITE: ${{ inputs.suite || 'full-regression' }}
+          SPEC: ${{ inputs.spec || '' }}
+        run: |
+          set -euo pipefail
+          suite="${SUITE:-full-regression}"
+          specs=""
+          partial=true
+          if [ -z "${SPEC// /}" ]; then
+            if [ "$suite" = "full-regression" ]; then
+              specs=$'cypress/e2e/happypath_2/*.cy.js\ncypress/e2e/regression/*.cy.js\ncypress/e2e/safe-apps/*.cy.js\ncypress/e2e/smoke/*.cy.js'
+              partial=false
+            else
+              specs="cypress/e2e/${suite}/*.cy.js"
+            fi
+          else
+            IFS=',' read -ra names <<< "$(printf '%s' "$SPEC" | tr '\n' ',')"
+            for raw in "${names[@]}"; do
+              name="$(printf '%s' "$raw" | xargs)"
+              [ -z "$name" ] && continue
+              name="${name#cypress/e2e/}"
+              name="${name%.cy.js}"
+              if [[ "$name" == */* ]]; then
+                path="cypress/e2e/${name}.cy.js"
+              elif [ "$suite" = "full-regression" ]; then
+                path="cypress/e2e/**/${name}.cy.js"
+              else
+                path="cypress/e2e/${suite}/${name}.cy.js"
+              fi
+              specs+="${path}"$'\n'
+            done
+          fi
+          echo "Specs to run:"; echo "$specs"
+          { echo "specs<<EOF"; echo "$specs"; echo "EOF"; echo "partial=$partial"; } >> "$GITHUB_OUTPUT"
+          { echo "### Specs to run"; echo '```'; echo "$specs"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
 
       - uses: ./.github/actions/cypress
         env:
@@ -86,32 +153,28 @@ jobs:
           NEXT_PUBLIC_WC_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_WC_PROJECT_ID }}
           NEXT_PUBLIC_ZODIAC_SECURITY_CHECK_URL: ${{ secrets.NEXT_PUBLIC_ZODIAC_SECURITY_CHECK_URL }}
         with:
-          spec: |
-            cypress/e2e/happypath_2/*.cy.js
-            cypress/e2e/regression/*.cy.js
-            cypress/e2e/safe-apps/*.cy.js
-            cypress/e2e/smoke/*.cy.js
-          group: 'Full Regression on demand tests'
-          tag: 'full_regression'
+          spec: ${{ steps.specs.outputs.specs }}
+          group: ${{ steps.specs.outputs.partial == 'true' && 'Partial regression on demand tests' || 'Full Regression on demand tests' }}
+          tag: ${{ steps.specs.outputs.partial == 'true' && 'partial' || 'full_regression' }}
 
       - name: Python setup
-        if: always()
+        if: always() && steps.specs.outputs.partial != 'true'
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.x'
 
       - name: Install junitparser
-        if: always()
+        if: always() && steps.specs.outputs.partial != 'true'
         run: |
           pip install 'junitparser==5.0.1'
 
       - name: Merge JUnit reports for TestRail
-        if: always()
+        if: always() && steps.specs.outputs.partial != 'true'
         run: |
           junitparser merge --suite-name "Root Suite" --glob "apps/web/reports/junit-*" "apps/web/reports/junit-report.xml"
 
       - name: TestRail CLI upload results
-        if: always()
+        if: always() && steps.specs.outputs.partial != 'true'
         env:
           TESTRAIL_USERNAME: ${{ secrets.TESTRAIL_USERNAME }}
           TESTRAIL_PASSWORD: ${{ secrets.TESTRAIL_PASSWORD }}
