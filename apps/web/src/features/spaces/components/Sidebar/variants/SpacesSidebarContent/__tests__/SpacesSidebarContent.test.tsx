@@ -38,6 +38,12 @@ jest.mock('../../../config', () => ({
       href: '/spaces/transactions',
     },
     {
+      icon: () => <div>Policies</div>,
+      label: 'Policies',
+      href: '/spaces/policies',
+      activeMemberOnly: true,
+    },
+    {
       icon: () => <div>Activity</div>,
       label: 'Activity',
       href: '/spaces/activity',
@@ -209,8 +215,12 @@ describe('SpacesSidebarContent', () => {
       render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
 
       const [mainNav] = mockUseResolvedSidebarNav.mock.calls[0]
-      // The mocked config has Home + Transactions + Activity; Activity should be dropped.
-      expect(mainNav.map((i: { href: string }) => i.href)).toEqual(['/spaces', '/spaces/transactions'])
+      // The mocked config has Home + Transactions + Policies + Activity; Activity should be dropped.
+      expect(mainNav.map((i: { href: string }) => i.href)).toEqual([
+        '/spaces',
+        '/spaces/transactions',
+        '/spaces/policies',
+      ])
     })
 
     it('keeps the Activity entry while the flag is undefined (chain config still loading)', () => {
@@ -219,7 +229,7 @@ describe('SpacesSidebarContent', () => {
       render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
 
       const [mainNav] = mockUseResolvedSidebarNav.mock.calls[0]
-      expect(mainNav).toHaveLength(3)
+      expect(mainNav).toHaveLength(4)
     })
 
     it('keeps the Activity entry when the flag is enabled', () => {
@@ -228,7 +238,50 @@ describe('SpacesSidebarContent', () => {
       render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
 
       const [mainNav] = mockUseResolvedSidebarNav.mock.calls[0]
-      expect(mainNav).toHaveLength(3)
+      expect(mainNav).toHaveLength(4)
+    })
+  })
+
+  describe('POLICIES feature flag', () => {
+    it('hides the Policies entry when the flag is explicitly off', () => {
+      mockUseHasFeature.mockImplementation((feature) => feature !== FEATURES.POLICIES)
+
+      render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
+
+      const [mainNav] = mockUseResolvedSidebarNav.mock.calls[0]
+      expect(mainNav.map((i: { href: string }) => i.href)).toEqual([
+        '/spaces',
+        '/spaces/transactions',
+        '/spaces/activity',
+      ])
+    })
+
+    it('keeps the Policies entry while the flag is undefined (chain config still loading)', () => {
+      mockUseHasFeature.mockImplementation((feature) => (feature === FEATURES.POLICIES ? undefined : true))
+
+      render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
+
+      const [mainNav] = mockUseResolvedSidebarNav.mock.calls[0]
+      expect(mainNav.map((i: { href: string }) => i.href)).toContain('/spaces/policies')
+    })
+
+    it('keeps the Policies entry when the flag is enabled', () => {
+      mockUseHasFeature.mockReturnValue(true)
+
+      render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
+
+      const [mainNav] = mockUseResolvedSidebarNav.mock.calls[0]
+      expect(mainNav.map((i: { href: string }) => i.href)).toContain('/spaces/policies')
+    })
+
+    it('leaves the Security and Activity gates untouched when only POLICIES is off', () => {
+      mockUseHasFeature.mockImplementation((feature) => feature !== FEATURES.POLICIES)
+
+      render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
+
+      const [mainNav, setupGroup] = mockUseResolvedSidebarNav.mock.calls[0]
+      expect(mainNav.map((i: { href: string }) => i.href)).toContain('/spaces/activity')
+      expect(setupGroup.items.map((i: { href: string }) => i.href)).toContain('/spaces/security')
     })
   })
 
@@ -240,7 +293,7 @@ describe('SpacesSidebarContent', () => {
     )
 
     const [mainNav, setupGroup] = mockUseResolvedSidebarNav.mock.calls[0]
-    expect(mainNav).toHaveLength(3)
+    expect(mainNav).toHaveLength(4)
     expect(setupGroup.items).toHaveLength(2)
   })
 })
