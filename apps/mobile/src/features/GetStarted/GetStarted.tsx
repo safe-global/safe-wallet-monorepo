@@ -106,11 +106,11 @@ export const GetStarted = () => {
           justifyContent="center"
         >
           <StyledText>By continuing, you agree to our </StyledText>
-          <Link href={TERMS_OF_USE_URL} target={'_blank'} asChild>
+          <Link href={TERMS_OF_USE_URL} target={'_blank'} rel="noreferrer" asChild>
             <StyledText textDecorationLine={'underline'}>User Terms</StyledText>
           </Link>
           <StyledText> and </StyledText>
-          <Link href={PRIVACY_POLICY_URL} target={'_blank'} asChild>
+          <Link href={PRIVACY_POLICY_URL} target={'_blank'} rel="noreferrer" asChild>
             <StyledText textDecorationLine={'underline'}>Privacy Policy</StyledText>
           </Link>
           <StyledText>.</StyledText>
