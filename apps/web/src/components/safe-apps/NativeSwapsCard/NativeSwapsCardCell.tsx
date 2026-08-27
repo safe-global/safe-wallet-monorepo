@@ -1,10 +1,7 @@
 import NativeSwapsCard from './index'
 import { useNativeSwapsCard } from './useNativeSwapsCard'
 
-/**
- * The promo card as a list item. Owns both the visibility decision and the `li`
- * wrapper so a dismissed card leaves no empty cell behind in the apps grid.
- */
+// Owns the visibility decision and the `li`, so a hidden card leaves no empty grid cell.
 const NativeSwapsCardCell = () => {
   const { isVisible, dismiss } = useNativeSwapsCard()
 

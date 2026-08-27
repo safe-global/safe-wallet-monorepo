@@ -4,10 +4,7 @@ import { useIsSwapFeatureEnabled } from '@/features/swap'
 
 export const SWAPS_APP_CARD_STORAGE_KEY = 'showSwapsAppCard'
 
-/**
- * Owns the promo card's visibility so a parent can skip its grid cell entirely
- * instead of laying out an empty one around a card that renders `null`.
- */
+/** Visibility and dismissal for the native swaps promo card. */
 export const useNativeSwapsCard = () => {
   const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
   const [isCardVisible = true, setIsCardVisible] = useLocalStorage<boolean>(SWAPS_APP_CARD_STORAGE_KEY)
