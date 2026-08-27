@@ -18,7 +18,7 @@ exports[`./SafeProSidebarBanner.stories Default 1`] = `
           data-testid="safe-pro-sidebar-banner"
         >
           <span
-            class="flex shrink-0 items-center rounded-md px-2 py-1.5 proChip"
+            class="flex shrink-0 items-center rounded-sm px-2 py-1.5 proChip"
           >
             <mock-icon
               class="h-2 w-[21px]"
