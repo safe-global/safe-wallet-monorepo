@@ -129,7 +129,7 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
   )
 }
 
-const WORKSPACE_BENEFITS = [
+export const WORKSPACE_BENEFITS = [
   'Organize multiple Safe accounts in one place',
   'Invite members and manage their roles',
   'Share an address book across your team',
@@ -140,41 +140,42 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
 
   return (
     <>
-      {/* eslint-disable-next-line no-restricted-syntax -- 40px empty-state padding; no p-10 Card size variant */}
-      <Card className="w-full p-10 text-center">
-        <div className="mb-4 flex justify-center">
-          <SpacesIcon />
-        </div>
+      <Card size="none" className="w-full">
+        <div className="flex flex-col p-10 text-center">
+          <div className="mb-4 flex justify-center">
+            <SpacesIcon />
+          </div>
 
-        <Typography variant="h4" className="mb-2 font-bold">
-          Create your first workspace
-        </Typography>
-        <Typography color="muted" className="mb-3">
-          Collaborate on your Safe accounts with your team.
-        </Typography>
+          <Typography variant="h4" className="mb-2 font-bold">
+            Create your first workspace
+          </Typography>
+          <Typography color="muted" className="mb-3">
+            Collaborate on your Safe accounts with your team.
+          </Typography>
 
-        <div className="mx-auto mb-4 flex max-w-[360px] flex-col gap-1.5 text-left">
-          {WORKSPACE_BENEFITS.map((benefit) => (
-            <div key={benefit} className="flex flex-row items-center gap-1.5">
-              <Check className="size-4 shrink-0 text-primary" />
-              <Typography variant="paragraph-small">{benefit}</Typography>
-            </div>
-          ))}
-        </div>
+          <div className="mx-auto mt-2 mb-6 flex max-w-[360px] flex-col gap-3 text-left">
+            {WORKSPACE_BENEFITS.map((benefit) => (
+              <div key={benefit} className="flex flex-row items-center gap-1.5">
+                <Check className="size-4 shrink-0 text-primary" />
+                <Typography variant="paragraph-small">{benefit}</Typography>
+              </div>
+            ))}
+          </div>
 
-        <div className="h-12">
-          <AddSpaceButton
-            disabled={isAtLimit}
-            onClick={() =>
-              trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
-            }
-          />
-        </div>
+          <div className="h-12">
+            <AddSpaceButton
+              disabled={isAtLimit}
+              onClick={() =>
+                trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
+              }
+            />
+          </div>
 
-        <div className="mt-2">
-          <Link onClick={() => setIsInfoOpen(true)} href="#">
-            What are workspaces?
-          </Link>
+          <div className="mt-2">
+            <Link onClick={() => setIsInfoOpen(true)} href="#">
+              What are workspaces?
+            </Link>
+          </div>
         </div>
       </Card>
       {isInfoOpen && <SpaceInfoModal onClose={() => setIsInfoOpen(false)} />}

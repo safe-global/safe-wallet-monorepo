@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
-import SpacesList from '../index'
+import SpacesList, { WORKSPACE_BENEFITS } from '../index'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
@@ -149,6 +149,30 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     // Sign in card must NOT render in this branch.
     expect(screen.queryByTestId('sign-in-options')).not.toBeInTheDocument()
+  })
+
+  it('renders the No-spaces empty state Card with size="none" so the default gap does not inflate its height', () => {
+    mockUseAppSelector.mockReturnValue(true)
+    mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    const { container } = render(<SpacesList />)
+
+    const card = container.querySelector('[data-slot="card"]')
+    expect(card).toHaveAttribute('data-size', 'none')
+  })
+
+  it('renders the workspace-benefits bullet list with 12px spacing (gap-3)', () => {
+    mockUseAppSelector.mockReturnValue(true)
+    mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    const firstBullet = screen.getByText(WORKSPACE_BENEFITS[0])
+    const list = firstBullet.closest('.gap-3')
+    expect(list).toBeInTheDocument()
+    expect(list).not.toHaveClass('gap-1.5')
   })
 
   // Regression: on re-login after logout the spaces RTK Query cache entry
