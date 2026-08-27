@@ -46,6 +46,22 @@ const inputVariants = cva(
 )
 
 /**
+ * The error message rendered under the field. `sm` is the design-system default (matches
+ * `FieldError`); `xs` is for compact rows where a full-size message would crowd the layout.
+ */
+const inputErrorVariants = cva('mt-1 text-destructive', {
+  variants: {
+    errorSize: {
+      sm: 'text-sm',
+      xs: 'text-xs',
+    },
+  },
+  defaultVariants: {
+    errorSize: 'sm',
+  },
+})
+
+/**
  * Input Component
  *
  * Displays a form input field.
@@ -60,6 +76,7 @@ const inputVariants = cva(
  * @remarks
  * Key Props:
  * - `type`, `placeholder`, `disabled`, `className` — extends native input props, see Base UI
+ * - `error`, `errorSize` ('sm' | 'xs') — message rendered under the field
  */
 
 const SCRIPT_TAG_REGEX = /<script[\s>][\s\S]*?(?:<\/script>|$)/gi
@@ -99,13 +116,16 @@ function Input({
   onChange,
   onPaste,
   error,
+  errorSize,
   address,
   // Destructured so the `{...props}` spread below cannot overwrite the computed attribute: a caller
   // passing `aria-invalid={undefined}` (or `false`) alongside `error` would otherwise erase the
   // invalid state the error or the script-injection guard had set.
   'aria-invalid': ariaInvalid,
   ...props
-}: React.ComponentProps<'input'> & VariantProps<typeof inputVariants> & { error?: string; address?: boolean }) {
+}: React.ComponentProps<'input'> &
+  VariantProps<typeof inputVariants> &
+  VariantProps<typeof inputErrorVariants> & { error?: string; address?: boolean }) {
   const [hasScriptInjection, setHasScriptInjection] = React.useState(false)
 
   const handleChange = React.useCallback(
@@ -139,6 +159,8 @@ function Input({
     [address, onPaste],
   )
 
+  const errorMessage = hasScriptInjection ? SCRIPT_INJECTION_ERROR : error
+
   return (
     <div className="w-full">
       <InputPrimitive
@@ -150,13 +172,9 @@ function Input({
         onChange={handleChange}
         onPaste={handlePaste}
       />
-      {hasScriptInjection ? (
-        <p role="alert" data-slot="field-error" className="mt-1 text-sm text-destructive">
-          {SCRIPT_INJECTION_ERROR}
-        </p>
-      ) : error ? (
-        <p role="alert" data-slot="field-error" className="mt-1 text-sm text-destructive">
-          {error}
+      {errorMessage ? (
+        <p role="alert" data-slot="field-error" className={inputErrorVariants({ errorSize })}>
+          {errorMessage}
         </p>
       ) : null}
     </div>
