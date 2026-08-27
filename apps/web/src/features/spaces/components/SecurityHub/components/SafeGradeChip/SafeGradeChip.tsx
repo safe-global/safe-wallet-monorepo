@@ -62,7 +62,7 @@ const SafeGradeChip = ({
       aria-label={ariaLabel}
       className={cn(
         'gap-1.5',
-        // eslint-disable-next-line no-restricted-syntax
+
         GRADE_PILL_STYLES[grade],
         onClick && 'cursor-pointer transition-opacity hover:opacity-80',
         active && 'ring-1 ring-inset ring-current',
