@@ -202,14 +202,11 @@ const SpacesList = () => {
 
   const singleSpaceId = activeSpaces.length === 1 ? activeSpaces[0].uuid : null
 
-  // Treat any state without a definitive answer as still loading. The
-  // skip→unskip transition (re-login after logout) returns isFetching=false
-  // and isUninitialized=false on the render where skip flips — RTK Query
-  // dispatches the refetch in a useEffect, so the loading flags lag one
-  // render behind. Without the `spaces === undefined && !error` clause an
-  // existing user gets bounced into /welcome/create-space because the hook
-  // reads spacesAmount=0 with isSpacesLoading=false. Once spaces or error
-  // resolves, this clause becomes false and the normal redirect logic runs.
+  // Treat any indefinite state as loading. On the skip→unskip flip (re-login
+  // after logout) RTK Query lags one render — isFetching/isUninitialized are
+  // both false while spaces is still undefined. The `spaces === undefined &&
+  // !error` clause covers that gap so an existing user isn't bounced into
+  // /welcome/create-space on a stale spacesAmount=0.
   const isSpacesLoading = isFetching || isUninitialized || (spaces === undefined && !error)
 
   const { setHasSignedIn, redirectLoading } = useSignInRedirect({
