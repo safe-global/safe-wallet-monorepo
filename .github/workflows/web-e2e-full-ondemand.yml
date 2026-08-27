@@ -7,8 +7,9 @@ run-name: ${{ inputs.spec != '' && inputs.suite == 'full-regression' && format('
 #              create_tx_2                 -> cypress/e2e/<suite>/create_tx_2.cy.js
 #              create_tx_2, portfolio      -> both, inside <suite>
 #            with suite=full-regression a name matches every directory it exists in (21 names exist twice).
-# Partial runs use 2 containers, are tagged "partial" in Cypress Cloud and skip the TestRail upload.
-# A spec name that matches no file fails the run right after checkout, before the app build.
+# Partial runs are tagged "partial" in Cypress Cloud, skip the TestRail upload and use one container
+# per named spec (max 8; whole directories keep 8).
+# A spec name that matches no file fails the small "plan" job in seconds; no e2e container is started.
 # Scheduled runs have no inputs and always run the full regression.
 
 on:
@@ -38,17 +39,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  e2e:
+  plan:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
-    name: ${{ inputs.spec != '' && inputs.suite == 'full-regression' && format('Cypress **/{0}', inputs.spec) || inputs.spec != '' && format('Cypress {0}/{1}', inputs.suite, inputs.spec) || (inputs.suite != '' && inputs.suite != 'full-regression') && format('Cypress {0}/*', inputs.suite) || 'Cypress Full Regression on demand tests' }}
+    timeout-minutes: 5
+    name: Resolve specs
     permissions:
       contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        # A handful of named specs does not need the full fleet.
-        containers: ${{ fromJSON(inputs.spec != '' && '[1, 2]' || '[1, 2, 3, 4, 5, 6, 7, 8]') }}
+    outputs:
+      specs: ${{ steps.specs.outputs.specs }}
+      partial: ${{ steps.specs.outputs.partial }}
+      containers: ${{ steps.specs.outputs.containers }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -97,9 +97,27 @@ jobs:
             echo "Check the spec names (file name only, no path, no .cy.js) and the selected suite."
             exit 1
           fi
-          echo "Specs to run:"; echo "$specs"
-          { echo "specs<<EOF"; echo "$specs"; echo "EOF"; echo "partial=$partial"; } >> "$GITHUB_OUTPUT"
+          # One container per named spec (max 8); whole directories and the full regression use 8.
+          if [ -z "${SPEC// /}" ]; then n=8; else n=$(printf '%s' "$specs" | grep -c .); [ "$n" -gt 8 ] && n=8; fi
+          list=""; for ((i = 1; i <= n; i++)); do list+="$i,"; done
+          containers="[${list%,}]"
+          echo "Specs to run:"; echo "$specs"; echo "Containers: $containers"
+          { echo "specs<<EOF"; echo "$specs"; echo "EOF"; echo "partial=$partial"; echo "containers=$containers"; } >> "$GITHUB_OUTPUT"
           { echo "### Specs to run"; echo '```'; echo "$specs"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+  e2e:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    name: ${{ inputs.spec != '' && inputs.suite == 'full-regression' && format('Cypress **/{0}', inputs.spec) || inputs.spec != '' && format('Cypress {0}/{1}', inputs.suite, inputs.spec) || (inputs.suite != '' && inputs.suite != 'full-regression') && format('Cypress {0}/*', inputs.suite) || 'Cypress Full Regression on demand tests' }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        containers: ${{ fromJSON(needs.plan.outputs.containers) }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - uses: ./.github/actions/cypress
         env:
@@ -164,28 +182,28 @@ jobs:
           NEXT_PUBLIC_WC_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_WC_PROJECT_ID }}
           NEXT_PUBLIC_ZODIAC_SECURITY_CHECK_URL: ${{ secrets.NEXT_PUBLIC_ZODIAC_SECURITY_CHECK_URL }}
         with:
-          spec: ${{ steps.specs.outputs.specs }}
-          group: ${{ steps.specs.outputs.partial == 'true' && 'Partial regression on demand tests' || 'Full Regression on demand tests' }}
-          tag: ${{ steps.specs.outputs.partial == 'true' && 'partial' || 'full_regression' }}
+          spec: ${{ needs.plan.outputs.specs }}
+          group: ${{ needs.plan.outputs.partial == 'true' && 'Partial regression on demand tests' || 'Full Regression on demand tests' }}
+          tag: ${{ needs.plan.outputs.partial == 'true' && 'partial' || 'full_regression' }}
 
       - name: Python setup
-        if: always() && steps.specs.outputs.partial != 'true'
+        if: always() && needs.plan.outputs.partial != 'true'
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.x'
 
       - name: Install junitparser
-        if: always() && steps.specs.outputs.partial != 'true'
+        if: always() && needs.plan.outputs.partial != 'true'
         run: |
           pip install 'junitparser==5.0.1'
 
       - name: Merge JUnit reports for TestRail
-        if: always() && steps.specs.outputs.partial != 'true'
+        if: always() && needs.plan.outputs.partial != 'true'
         run: |
           junitparser merge --suite-name "Root Suite" --glob "apps/web/reports/junit-*" "apps/web/reports/junit-report.xml"
 
       - name: TestRail CLI upload results
-        if: always() && steps.specs.outputs.partial != 'true'
+        if: always() && needs.plan.outputs.partial != 'true'
         env:
           TESTRAIL_USERNAME: ${{ secrets.TESTRAIL_USERNAME }}
           TESTRAIL_PASSWORD: ${{ secrets.TESTRAIL_PASSWORD }}
