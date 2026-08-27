@@ -29,7 +29,7 @@ const SafeProAnnouncement = ({ onDismiss }: { onDismiss?: () => void }) => (
           Your Workspace moves to <span className={css.highlight}>Pro</span> on Oct 1, 2026
         </Typography>
 
-        <Typography variant="paragraph-large" color="muted" align="center" className="max-w-[590px]">
+        <Typography variant="paragraph-large" color="muted" align="center">
           Pro will add advanced security checks, sponsored transactions and policies. Your Safe accounts remain
           available outside of the Workspace. Starting October 1, you can claim up to two months of Safe Pro for free
           for this Workspace.

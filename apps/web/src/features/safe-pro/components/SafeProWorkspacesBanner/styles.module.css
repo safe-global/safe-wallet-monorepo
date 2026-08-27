@@ -15,9 +15,15 @@
 }
 
 .proChip {
-  padding: 9px 12px;
+  padding: 6px 8px;
   color: var(--foreground);
   background-color: color-mix(in srgb, var(--color-static-text-brand) 20%, transparent);
+}
+
+@media (min-width: 40rem) {
+  .proChip {
+    padding: 9px 12px;
+  }
 }
 
 :global(.dark) .banner {

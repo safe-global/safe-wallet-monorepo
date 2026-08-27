@@ -15,12 +15,12 @@ const SafeProWorkspacesBanner = ({ className }: { className?: string }) => {
   return (
     <ShadcnProvider dark={isDarkMode} className={className}>
       <Card size="none" radius="xl" className={cn('w-full', css.banner)}>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
           <span className={cn('flex shrink-0 items-center rounded-md', css.proChip)}>
             <ProWordmark />
           </span>
 
-          <div className="flex min-w-0 flex-1 items-center gap-4">
+          <div className="flex w-full min-w-0 flex-1 flex-col items-start gap-3 sm:w-auto sm:flex-row sm:items-center sm:gap-4">
             <div className="flex min-w-0 flex-1 flex-col items-start">
               <Typography variant="paragraph-large-bold">Workspaces move to Pro on Oct 1, 2026</Typography>
               <Typography variant="paragraph-small" color="muted">
