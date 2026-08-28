@@ -9,6 +9,7 @@ import {
 } from '@/utils/transaction-errors'
 import { didRevert, type EthersError } from '@/utils/ethers-utils'
 import { isGs026PreCheckError } from '@/services/tx/executionPreChecks'
+import { getCgwErrorInfo } from '@/utils/cgw-errors'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { getLedgerDeviceError, getLedgerUserMessage } from '@/services/onboard/ledger-errors'
 
@@ -74,6 +75,18 @@ const TxSubmitError = ({
     return (
       <ErrorMessage error={error} level="warning" context={context}>
         {RATE_LIMIT_USER_MESSAGE}
+      </ErrorMessage>
+    )
+  }
+
+  // The Safe Client Gateway answered with a known response state. Show the
+  // agreed copy — never the response body, which can be an HTML error page —
+  // and let ErrorMessage render the code-only support reference (WA-3252).
+  const cgwError = getCgwErrorInfo(error)
+  if (cgwError) {
+    return (
+      <ErrorMessage error={error} level="error" context={context}>
+        {cgwError.message}
       </ErrorMessage>
     )
   }

@@ -18,16 +18,16 @@ const AllowedFeaturesList: React.FC<SafeAppsInfoAllowedFeaturesProps> = ({
 }): React.ReactElement => {
   return (
     <>
-      <ShieldIcon className="size-6 text-[var(--color-primary-main)]" />
+      <ShieldIcon className="mx-auto mb-2 size-6 text-[var(--color-primary-main)]" />
 
-      <Typography variant="paragraph-small" className="mx-[75px] text-center text-[var(--color-text-secondary)]">
+      <Typography variant="paragraph-small" className="text-center text-[var(--color-text-secondary)]">
         Manage the features Safe Apps can use
       </Typography>
 
       <div className="mx-2 my-6 text-left">
         <Typography>This Safe App is requesting permission to use:</Typography>
 
-        <div className="mt-2 ml-4 flex flex-col">
+        <div className="m-4 flex flex-col gap-4">
           {features
             .filter(({ feature }) => isBrowserFeature(feature))
             .map(({ feature, checked }, index) => (
