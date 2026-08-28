@@ -1,7 +1,12 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import useWallet from '@/hooks/wallets/useWallet'
 import { asActivePolicy, mockPolicies, mockProposerPolicy } from '../mocks/policies'
 import Policies from '../index'
+
+jest.mock('@/hooks/wallets/useWallet')
+
+const mockUseWallet = useWallet as jest.MockedFunction<typeof useWallet>
 
 /**
  * The page must render a title, a one-line description and a `Learn more` link to documentation,
@@ -57,6 +62,32 @@ describe('Policies', () => {
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Create policy/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('searchbox')).not.toBeInTheDocument()
+  })
+
+  /**
+   * Reviewing what governs a workspace's Safes requires no signing capability, so the page is
+   * readable without a connected wallet. This is what makes the page usable by someone auditing
+   * the workspace rather than operating it.
+   */
+  describe('without a connected wallet', () => {
+    it('should, when no wallet is connected and the space has no policies, render the catalogue', () => {
+      mockUseWallet.mockReturnValue(null)
+
+      render(<Policies />)
+
+      expect(screen.getByTestId('policy-catalogue')).toBeInTheDocument()
+    })
+
+    it('should, when no wallet is connected and the space has policies, render the whole table', () => {
+      mockUseWallet.mockReturnValue(null)
+      const policies = mockPolicies()
+
+      render(<Policies policies={policies} />)
+
+      expect(screen.getByTestId('policies-list')).toBeInTheDocument()
+      expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(policies.length)
+      expect(screen.getByPlaceholderText('by name, address or network')).toBeInTheDocument()
+    })
   })
 
   describe('populated mode', () => {
