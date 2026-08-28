@@ -11,6 +11,11 @@ jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
   default: jest.fn(() => ({ configs: [] })),
   useHasFeature: jest.fn(() => true),
+  useChain: jest.fn(() => ({
+    chainId: '1',
+    shortName: 'eth',
+    blockExplorerUriTemplate: { address: 'https://etherscan.io/address/{{address}}', txHash: '', api: '' },
+  })),
 }))
 
 jest.mock('@/hooks/useSafeInfo')
@@ -18,6 +23,13 @@ jest.mock('@/hooks/useSafeInfo')
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/owners', () => ({
   useOwnersGetSafesByOwnerV1Query: jest.fn(),
 }))
+
+const mockWriteScope: jest.Mock = jest.fn(() => ({ scope: 'local', canRename: true }))
+jest.mock('@/features/spaces/hooks/useAddressBookWriteScope', () => ({
+  useAddressBookWriteScope: (...args: unknown[]) => mockWriteScope(...args),
+}))
+
+jest.mock('@/hooks/useSafeDisplayName', () => ({ useSafeDisplayName: () => 'Nested name' }))
 
 jest.mock('@/components/common/CheckWallet', () => ({
   __esModule: true,
@@ -56,7 +68,16 @@ describe('NestedSafesList', () => {
     ;(useOwnersGetSafesByOwnerV1Query as jest.MockedFunction<typeof useOwnersGetSafesByOwnerV1Query>).mockReturnValue({
       currentData: { safes: [] },
     } as unknown as ReturnType<typeof useOwnersGetSafesByOwnerV1Query>)
+    mockWriteScope.mockReturnValue({ scope: 'local', canRename: true })
   })
+
+  const withNestedSafe = () => {
+    ;(useOwnersGetSafesByOwnerV1Query as jest.MockedFunction<typeof useOwnersGetSafesByOwnerV1Query>).mockReturnValue({
+      currentData: { safes: [faker.finance.ethereumAddress()] },
+    } as unknown as ReturnType<typeof useOwnersGetSafesByOwnerV1Query>)
+  }
+
+  const renameButton = () => screen.getByTestId('rename-nested-safe-btn')
 
   it('renders the nested Safes empty state', () => {
     renderWithTxFlow()
@@ -64,5 +85,20 @@ describe('NestedSafesList', () => {
     expect(screen.getByText('Nested Safes')).toBeInTheDocument()
     expect(screen.getByText(/You don't have any Nested Safes yet/)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Add nested Safe/i })).toBeEnabled()
+  })
+
+  it('enables rename for a Safe the viewer may rename', () => {
+    withNestedSafe()
+    renderWithTxFlow()
+
+    expect(renameButton()).toBeEnabled()
+  })
+
+  it('disables rename for a member looking at a workspace Safe', () => {
+    withNestedSafe()
+    mockWriteScope.mockReturnValue({ scope: 'local', canRename: false })
+    renderWithTxFlow()
+
+    expect(renameButton()).toBeDisabled()
   })
 })

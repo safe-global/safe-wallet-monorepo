@@ -17,11 +17,12 @@ import NotActivatedBadge from '@/components/common/NotActivatedBadge'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useChain } from '@/hooks/useChains'
+import { useAddressBookWriteScope } from '@/features/spaces'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { cn } from '@/utils/cn'
 import { AccountItem as BaseAccountItem } from '../AccountItem'
 import { NetworkLogosPill } from '@/features/multichain'
-import type { AccountLine } from './useSafeAccountRows'
+import { getContextMenuChainIds, type AccountLine } from './useSafeAccountRows'
 import type { SafeAccountColumn } from './columns'
 import { PendingBadge, ThresholdBadge, formatPendingLabel } from '@/components/common/AccountBadges'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -82,6 +83,7 @@ const NameCellContent = ({
   nameLink?: { href: LinkProps['href']; onClick?: () => void; testId?: string }
 }) => {
   const chainConfig = useChain(line.chainId)
+  const { canRename } = useAddressBookWriteScope(line.address, getContextMenuChainIds(line.contextMenu))
   // Explorer links are per-chain, so only single safes and per-chain child rows get one — never the
   // multi-chain parent, whose chainId is just the first network's. On child rows (address hidden) the
   // link rides next to the chain name; SafeInfoDisplay places it there.
@@ -99,7 +101,7 @@ const NameCellContent = ({
       leading={<span className="flex w-10 items-center">{leading}</span>}
       hideAddress={!line.showAddress}
       explorerLink={explorerLink}
-      onRename={onRename}
+      onRename={canRename ? onRename : undefined}
       nameAdornment={warning ? <SimilarityWarningIcon warning={warning} /> : undefined}
       nameVariant="paragraph-bold"
       className="min-w-0"

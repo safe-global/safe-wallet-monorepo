@@ -8,6 +8,7 @@ import { cn } from '@/utils/cn'
 import { SAFE_ACCOUNT_COLUMNS, SELECT_COLUMN, type SafeAccountColumnId } from './columns'
 import {
   compareGroups,
+  getContextMenuChainIds,
   overviewKey,
   useSafeAccountRows,
   type AccountGroup,
@@ -21,6 +22,7 @@ import { orderGroupsBySimilarity } from './orderGroupsBySimilarity'
 import { weaveReorderedKeys } from '@/utils/reorder'
 import type { SimilarWarning } from '@/features/address-poisoning'
 import EntryDialog from '@/components/address-book/EntryDialog'
+import { useAddressBookWriteScope } from '@/features/spaces'
 
 /** Renaming a safe = editing its address-book entry across every chain it lives on. */
 type RenameTarget = { name: string; address: string; chainIds: string[] }
@@ -28,7 +30,7 @@ type RenameTarget = { name: string; address: string; chainIds: string[] }
 const toRenameTarget = (line: AccountLine): RenameTarget => ({
   name: line.contextMenu.name,
   address: line.contextMenu.address,
-  chainIds: line.contextMenu.type === 'multi' ? line.contextMenu.chainIds : [line.contextMenu.chainId],
+  chainIds: getContextMenuChainIds(line.contextMenu),
 })
 
 type SortState = { orderBy: SafeSortColumn | null; order: 'asc' | 'desc' }
@@ -188,6 +190,7 @@ export default function SafeAccountsTable({
   // "Manage my account list" modal opts back in via `allowRenameInDialog`.
   const canRename = allowRenameInDialog || !selection
   const onRename = canRename ? (line: AccountLine) => setRenameTarget(toRenameTarget(line)) : undefined
+  const { scope: renameScope } = useAddressBookWriteScope(renameTarget?.address ?? '', renameTarget?.chainIds ?? [])
 
   const visibleColumns = useMemo(() => {
     const base = columns ? SAFE_ACCOUNT_COLUMNS.filter((c) => columns.includes(c.id)) : SAFE_ACCOUNT_COLUMNS
@@ -399,6 +402,8 @@ export default function SafeAccountsTable({
           handleClose={() => setRenameTarget(null)}
           defaultValues={{ name: renameTarget.name, address: renameTarget.address }}
           chainIds={renameTarget.chainIds}
+          scope={renameScope}
+          disableAddressInput
           // In a modal surface, sit above the shadcn Dialog (--z-overlay) instead of behind it.
           className={allowRenameInDialog ? 'z-[var(--z-nested-overlay)]' : undefined}
           overlayClassName={allowRenameInDialog ? 'z-[var(--z-nested-overlay)]' : undefined}

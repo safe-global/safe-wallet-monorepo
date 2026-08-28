@@ -5,6 +5,8 @@ import { EllipsisVertical } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import EntryDialog from '@/components/address-book/EntryDialog'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { useAddressBookWriteScope } from '@/features/spaces'
 import SafeListRemoveDialog from '@/components/common/SafeListRemoveDialog'
 import NestedSafesIcon from '@/public/images/sidebar/nested-safes-icon.svg'
 import EditIcon from '@/public/images/common/edit.svg'
@@ -68,6 +70,7 @@ const SafeListContextMenu = ({
   )
   const addressBook = useAddressBook()
   const hasName = address in addressBook
+  const { scope, canRename } = useAddressBookWriteScope(address, [chainId])
 
   const nestedSafesForChain = ownedSafes?.safes ?? []
   const { allSafesWithStatus, visibleSafes, hasCompletedCuration, isLoading, startFiltering } =
@@ -136,10 +139,19 @@ const SafeListContextMenu = ({
             )}
 
           {rename && (
-            <DropdownMenuItem onClick={handleOpenModal(ModalType.RENAME, OVERVIEW_EVENTS.SIDEBAR_RENAME)}>
-              <EditIcon className="text-foreground" />
-              <span data-testid="rename-btn">{hasName ? 'Rename' : 'Give name'}</span>
-            </DropdownMenuItem>
+            <Tooltip>
+              <TooltipTrigger render={<div />}>
+                <DropdownMenuItem
+                  disabled={!canRename}
+                  onClick={canRename ? handleOpenModal(ModalType.RENAME, OVERVIEW_EVENTS.SIDEBAR_RENAME) : undefined}
+                  onSelect={(e) => e.stopPropagation()}
+                >
+                  <EditIcon className="text-foreground" />
+                  <span data-testid="rename-btn">{hasName ? 'Rename' : 'Give name'}</span>
+                </DropdownMenuItem>
+              </TooltipTrigger>
+              {!canRename && <TooltipContent>Only ADMINs can edit</TooltipContent>}
+            </Tooltip>
           )}
 
           {undeployedSafe && (
@@ -179,6 +191,7 @@ const SafeListContextMenu = ({
           handleClose={handleCloseModal}
           defaultValues={{ name, address }}
           chainIds={[chainId]}
+          scope={scope}
           disableAddressInput
           // Above shadcn's overlay layer (--z-overlay) so Rename shows over the Trusted Safes modal
           className="z-[var(--z-nested-overlay)]"
