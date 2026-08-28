@@ -7,16 +7,14 @@ import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { STEP_UP_FAILED_MESSAGE } from '../constants'
 import { isElevationRequiredError } from './elevation'
 
-/** One key: a separate marker and payload are written and cleared at different times, and can then disagree. */
 const STEP_UP_KEY = 'oidc_step_up'
 
-/** A saved request is no longer usable once CGW's one-time state cookie has expired. */
 const STEP_UP_MAX_AGE_MS = 5 * 60 * 1_000
 
 /**
  * A replay sends a request again without the user clicking anything, so the
- * endpoints this may happen to are listed here instead of taken from whatever
- * request failed.
+ * endpoints it can do that to are listed here rather than taken from whichever
+ * request was rejected.
  *
  * @see https://github.com/safe-global/safe-client-gateway/pull/3315
  */
@@ -90,23 +88,23 @@ export const takeStepUpTrip = (): StepUpTrip | undefined => {
 type ReplayOutcome = { error?: FetchBaseQueryError | SerializedError }
 
 /**
- * A union of endpoint names gives a union of `initiate` thunks, which `dispatch`
- * will not accept, and `args` lost its type when it was stored as JSON. Both are
- * collapsed to one signature. This is safe because the endpoint and its
- * arguments are only ever saved together, from the one request that failed.
+ * `cgwApi.endpoints[name].initiate` is a different signature per endpoint, so a
+ * union of names gives a union of thunks that `dispatch` rejects, and `args` lost
+ * its type when it went through JSON. Collapsing both to one signature is safe
+ * because an endpoint and its arguments are only ever stored together, taken from
+ * the single request that was rejected.
  */
 type ReplayInitiator = (args: unknown) => ThunkAction<Promise<ReplayOutcome>, RootState, unknown, UnknownAction>
 
 const asReplayInitiator = (endpoint: ReplayableEndpoint): ReplayInitiator =>
   cgwApi.endpoints[endpoint].initiate as unknown as ReplayInitiator
 
-/** Uses the endpoint's own `initiate` thunk, so this runs outside React and still fires `invalidatesTags`. */
 export const replayStepUpAction = async (dispatch: AppDispatch, pending: PendingStepUpAction): Promise<void> => {
   const result = await dispatch(asReplayInitiator(pending.endpoint)(pending.args))
 
   if (result.error) {
-    // Still rejected means the user never finished verifying, so the usual
-    // "verify your identity" text would ask them to do what they just left.
+    // Rejected again means the user never finished verifying, so the usual
+    // "verify your identity" text would ask them to redo what they walked away from.
     const message = isElevationRequiredError(result.error)
       ? STEP_UP_FAILED_MESSAGE
       : getRtkQueryErrorMessage(result.error) || REPLAY_FAILED_MESSAGE
@@ -121,8 +119,8 @@ export const replayStepUpAction = async (dispatch: AppDispatch, pending: Pending
     return
   }
 
-  // Awaited so the success message appears after the refetches, not next to old
-  // data. The thunk returns one promise per running query, so `all` is needed.
+  // The success message must not appear while the lists still show the old data.
+  // This thunk returns one promise per running query, not a single promise.
   await Promise.all(dispatch(cgwApi.util.getRunningQueriesThunk()))
 
   dispatch(

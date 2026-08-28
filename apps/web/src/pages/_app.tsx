@@ -173,7 +173,7 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
   return <ObservabilityErrorBoundary onError={handleError}>{content}</ObservabilityErrorBoundary>
 }
 
-// Inside the Redux provider, so the step-up phase can be read.
+// Must render inside the Redux provider to read the step-up phase.
 const AppLaunchScreen = (): ReactElement | null => {
   const stepUpCaption = useStepUpSplash()
 

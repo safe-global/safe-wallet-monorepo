@@ -69,8 +69,8 @@ const rootReducer = combineReducers({
   [slices.spaceNavigationSlice.name]: slices.spaceNavigationSlice.reducer,
   [slices.gtfPaymentSourcePreferenceSlice.name]: slices.gtfPaymentSourcePreferenceSlice.reducer,
   [slices.featureFlagOverridesSlice.name]: slices.featureFlagOverridesSlice.reducer,
-  // Not added to `persistedSlices`: a step-up belongs to the session in flight,
-  // so a stale phase must never survive a reload and trap the user behind a splash.
+  // Deliberately absent from `persistedSlices`: a phase restored from a previous
+  // page load would leave the user on a splash screen with nothing in flight.
   [slices.stepUpSlice.name]: slices.stepUpSlice.reducer,
   [ofacApi.reducerPath]: ofacApi.reducer,
   [safePassApi.reducerPath]: safePassApi.reducer,

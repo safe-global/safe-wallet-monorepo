@@ -13,9 +13,9 @@ const STEP_INTERVAL_MS = 700
 const EXIT_DURATION_MS = 300
 
 /**
- * App-boot launch screen: a full-screen branded splash shown from first mount until the app
- * shell is ready (see {@link useLaunchScreen}), then faded out and unmounted. Mounted once in
- * `_app`, so it never replays on client-side navigations.
+ * Mounted once in `_app` so it never replays on a client-side navigation.
+ *
+ * @see {@link useLaunchScreen} for when it hides.
  */
 function LaunchScreen({ stepUpCaption }: { stepUpCaption?: string }): ReactElement | null {
   const { visible } = useLaunchScreen()
@@ -37,8 +37,6 @@ function LaunchScreen({ stepUpCaption }: { stepUpCaption?: string }): ReactEleme
     return () => clearTimeout(id)
   }, [visible])
 
-  // A step-up round-trip holds the splash open past app boot, with its own copy
-  // and no progress bar — the wait has no measurable progress.
   const heldForStepUp = Boolean(stepUpCaption)
 
   if (!rendered && !heldForStepUp) return null

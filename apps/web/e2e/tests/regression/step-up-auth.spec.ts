@@ -3,17 +3,11 @@ import { test, expect } from '../../src/fixtures/test.fixture'
 import { LS_NAMESPACE } from '../../src/data/constants'
 
 /**
- * Step-up (elevation) auth: what happens around the round-trip to the provider.
- *
- * These live in a browser because the whole defect class is the page lifecycle —
- * a page frozen in the back-forward cache, a full navigation away and back, and
- * `sessionStorage` outliving both. The storage helpers themselves are unit-tested;
- * none of that can reproduce a bfcache restore.
- *
- * Both stubs below are the sanctioned kind: `FF_MFA_STEP_UP` is off on staging, so
- * a `403 elevation_required` is a state the real API cannot produce, and the
- * provider's hosted OTP page cannot be driven from a test. Completing a real
- * challenge stays manual — it needs a live authenticator.
+ * When a sensitive action needs a fresh second factor, the user is sent to Auth0,
+ * and the state of the action they were trying to perform has to be preserved
+ * until they come back. That state is kept in sessionStorage. There are many ways
+ * for it to become corrupted during this interaction, so this file tests the
+ * unhappy paths.
  */
 
 const SIGNER = '0x1234567890123456789012345678901234567890'
@@ -22,8 +16,6 @@ const SAFE_ADDRESS = '0x1111111111111111111111111111111111111111'
 const STEP_UP_KEY = 'oidc_step_up'
 const AUTHORIZE_PATTERN = /\/v1\/auth\/oidc\/authorize/
 
-// Shape mirrors the proven spaces pattern: the pages gate on membership, so an
-// ADMIN member has to be present or the app redirects to /welcome/spaces.
 const SPACE = {
   id: 1,
   uuid: SPACE_ID,
@@ -33,7 +25,6 @@ const SPACE = {
   members: [{ id: 1, role: 'ADMIN', name: 'Admin', status: 'ACTIVE', user: { id: 1, status: 'ACTIVE' } }],
 }
 
-/** Minimum session + spaces mocks for the workspace pages to render. */
 async function seedWorkspaceSession(page: Page): Promise<void> {
   await page.addInitScript(
     ({ ns, spaceId }) => {
@@ -67,7 +58,6 @@ async function seedWorkspaceSession(page: Page): Promise<void> {
   await page.route(/\/v1\/spaces(\?.*)?$/, (route) => route.fulfill({ json: [SPACE] }))
 }
 
-/** The gated route answers as CGW's ElevationGuard does when the session lacks a fresh factor. */
 async function gateSafeRemoval(page: Page): Promise<void> {
   await page.route(/\/v1\/spaces\/[^/]+\/safes$/, async (route) => {
     if (route.request().method() !== 'DELETE') return route.fallback()
@@ -76,12 +66,6 @@ async function gateSafeRemoval(page: Page): Promise<void> {
   })
 }
 
-/**
- * Stands in for the provider's hosted page and *stays* there, so the tests can
- * act on "the user is sitting on the challenge" — backing out of it, or walking
- * away from it. Without this the browser follows CGW's redirect to the real
- * Auth0 tenant, which is neither reachable nor stable from a test.
- */
 async function stubProviderChallengePage(page: Page): Promise<void> {
   await page.route(AUTHORIZE_PATTERN, (route) =>
     route.fulfill({
@@ -92,7 +76,6 @@ async function stubProviderChallengePage(page: Page): Promise<void> {
   )
 }
 
-/** Stands in for a *completed* challenge: bounces straight back to the app's return URL. */
 async function stubCompletedChallenge(page: Page): Promise<void> {
   await page.route(AUTHORIZE_PATTERN, (route) => {
     const returnUrl = new URL(route.request().url()).searchParams.get('redirect_url')
@@ -101,7 +84,6 @@ async function stubCompletedChallenge(page: Page): Promise<void> {
   })
 }
 
-/** The elevate request itself is the assertion target — where the provider sends the user afterwards is its business. */
 function captureAuthorizeRequest(page: Page) {
   return page.waitForRequest((request) => AUTHORIZE_PATTERN.test(request.url()))
 }
@@ -118,8 +100,6 @@ test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
   test.beforeEach(async ({ safePage }) => {
     await seedWorkspaceSession(safePage)
     await gateSafeRemoval(safePage)
-    // Never reach the real tenant. Tests that need a *completed* challenge
-    // register `stubCompletedChallenge` afterwards, which takes precedence.
     await stubProviderChallengePage(safePage)
   })
 
@@ -134,13 +114,6 @@ test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
     expect(url.searchParams.get('redirect_url')).toContain('/spaces/safe-accounts')
   })
 
-  // A leftover record must not suppress the next redirect: that leaves the
-  // tab was dead for step-up until it was closed. Backing out of the challenge
-  // page is how a user reaches that state — the browser restores the frozen page
-  // and nothing consumes the record — but bfcache cannot be driven from a test
-  // (this app holds connections that disqualify it), so the residue is planted
-  // directly after load instead. What matters is the invariant: nothing that
-  // outlives a page load may block a redirect.
   test('that it still redirects when a leftover trip record is present', async ({ safePage }) => {
     await openRemoveDialog(safePage)
 
@@ -164,9 +137,6 @@ test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
     expect(new URL((await authorizeRequest).url()).searchParams.get('elevate')).toBe('true')
   })
 
-  // Regression: the pending marker and the payload lived in separate keys, so a
-  // return could consume one and strand the other for an unrelated round-trip to
-  // execute — a deletion nobody pressed at that moment.
   test('that it discards the pending action and reports failure when the challenge is abandoned', async ({
     safePage,
   }) => {
@@ -174,7 +144,6 @@ test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
     await safePage.getByRole('button', { name: 'Remove' }).click()
     await expect(safePage.getByRole('heading', { name: 'Provider challenge' })).toBeVisible()
 
-    // Abandon: walk back into the app without completing the challenge.
     await safePage.goto(`/spaces/safe-accounts?spaceId=${SPACE_ID}`)
 
     await expect(safePage.getByRole('alert')).toContainText('Verification was not completed')
@@ -189,7 +158,6 @@ test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
           JSON.stringify({
             endpoint: 'spaceSafesDeleteV1',
             args: { spaceId, deleteSpaceSafesDto: { safes: [{ chainId: '1', address }] } },
-            // Older than the 5-minute window the provider's own state cookie allows.
             createdAt: Date.now() - 6 * 60 * 1000,
           }),
         )
@@ -213,7 +181,6 @@ test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
   test('that it completes the interrupted action when the challenge succeeds', async ({ safePage }) => {
     await stubCompletedChallenge(safePage)
 
-    // The gate lifts once the provider has been through: the replay must succeed.
     let removalCalls = 0
     await safePage.route(/\/v1\/spaces\/[^/]+\/safes$/, async (route) => {
       if (route.request().method() !== 'DELETE') return route.fallback()

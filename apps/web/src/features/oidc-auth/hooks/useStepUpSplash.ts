@@ -24,8 +24,6 @@ export const useStepUpSplash = (): string | undefined => {
   useEffect(() => {
     if (phase === 'idle') return
 
-    // If the gateway never answers, the user is left on a splash screen that has
-    // no way to continue.
     const id = setTimeout(() => dispatch(stepUpSettled()), MAX_DISPLAY_MS)
     return () => clearTimeout(id)
   }, [phase, dispatch])

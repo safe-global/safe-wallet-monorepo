@@ -11,10 +11,9 @@ jest.mock('../../utils/stepUpReplay', () => ({
   saveStepUpTrip: (action: unknown) => mockSaveStepUpTrip(action),
 }))
 
-// Copies how RTK Query reports a baseQuery failure: a rejected thunk action whose
-// payload is the FetchBaseQueryError. RTK's `isRejectedWithValue` matcher checks
-// `requestId` and `requestStatus`, so leaving them out makes the listener never
-// fire, without any error.
+// RTK's `isRejectedWithValue` matcher checks `requestId` and `requestStatus` as
+// well as the payload, so a hand-written action without them makes the listener
+// silently never fire.
 const rejectedWithValue = (payload: unknown, endpointName = 'spaceSafesCreateV1', originalArgs: unknown = {}) =>
   ({
     type: 'cgwClient/executeMutation/rejected',
@@ -64,9 +63,7 @@ describe('elevationListener', () => {
     expect(mockSaveStepUpTrip).toHaveBeenCalledWith({ endpoint: 'spaceSafesCreateV1', args: originalArgs })
   })
 
-  // An endpoint that is not in the replay list must not be sent again, but the
-  // user still has to verify before they can continue.
-  it('should, when the endpoint is outside the gated set, record a bare trip and still elevate', () => {
+  it('should, when the endpoint is outside the gated set, record a trip with no request but still elevate', () => {
     const store = createTestStore()
 
     store.dispatch(rejectedWithValue(ELEVATION_REQUIRED, 'spacesGetOneV1'))
@@ -75,9 +72,7 @@ describe('elevationListener', () => {
     expect(phaseOf(store)).toBe('leaving')
   })
 
-  // If the replayed request is rejected again, the error belongs in the app.
-  // Saving another trip would send the user back to Auth0 in a loop.
-  it('should, when a return is being processed, do nothing', () => {
+  it('should, when a return is being processed, record nothing rather than redirect again', () => {
     const store = createTestStore()
     store.dispatch(stepUpSlice.actions.stepUpReturning())
 

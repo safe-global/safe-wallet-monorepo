@@ -14,9 +14,7 @@ describe('isElevationRequiredError', () => {
     ).toBe(true)
   })
 
-  // A plain "you are not an admin of this space" rejection is also a 403 and
-  // must keep rendering as an authorization failure, not send the user to MFA.
-  it('should, when a 403 carries an unrelated message, return false', () => {
+  it('should, when a 403 carries an unrelated message such as a plain authorization failure, return false', () => {
     expect(isElevationRequiredError({ status: 403, data: { message: 'Signer address not authorized' } })).toBe(false)
   })
 

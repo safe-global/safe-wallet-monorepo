@@ -24,8 +24,6 @@ jest.mock('@/store/notificationsSlice', () => ({
 
 const mockReplayStepUpAction = jest.fn()
 
-// The storage functions are not mocked: these tests check the resulting
-// sessionStorage state, not which helper was called.
 jest.mock('../../utils/stepUpReplay', () => ({
   ...jest.requireActual('../../utils/stepUpReplay'),
   replayStepUpAction: (...args: unknown[]) => mockReplayStepUpAction(...args),
@@ -113,8 +111,6 @@ describe('useStepUpCallback', () => {
     })
   })
 
-  // While the phase is `returning`, the listener ignores an `elevation_required`
-  // from the replayed request, which would otherwise start another redirect.
   it('should, when processing a return, enter `returning` before the replay and settle after it', async () => {
     saveStepUpTrip(TRIP_ACTION)
     const order: string[] = []
@@ -135,8 +131,6 @@ describe('useStepUpCallback', () => {
     })
   })
 
-  // The first render races the replay. Without the splash screen held up, the
-  // lists show old data next to a success message and then jump.
   it('should, when a return is in flight, hold the splash until it is fully processed', async () => {
     saveStepUpTrip(TRIP_ACTION)
     let resolveReplay: () => void = () => {}
@@ -178,8 +172,6 @@ describe('useStepUpCallback', () => {
     })
   })
 
-  // The whole point: the request that was interrupted has to actually run, not
-  // drop the user back into the app with nothing done.
   it('should, when the return succeeds, complete the interrupted action', async () => {
     saveStepUpTrip(TRIP_ACTION)
 
@@ -190,8 +182,6 @@ describe('useStepUpCallback', () => {
     })
   })
 
-  // An endpoint outside the replay list saves a trip with no request in it. The
-  // session is still reconciled, but nothing is sent again.
   it('should, when the trip is bare, reconcile without replaying', async () => {
     saveStepUpTrip(undefined)
 

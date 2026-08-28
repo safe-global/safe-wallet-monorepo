@@ -25,7 +25,6 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
 
-/** Held open during a step-up round-trip: step-up copy, and no progress bar. */
 export const StepUpLeaving: Story = {
   args: { stepUpCaption: 'Verifying your identity…' },
 }

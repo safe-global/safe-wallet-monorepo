@@ -23,8 +23,6 @@ export const useStepUpCallback = () => {
     if (!trip) return
 
     hasProcessed.current = true
-    // Held until the refetches finish. Otherwise the lists still show the old
-    // data next to a success message, then jump once the refetch arrives.
     dispatch(stepUpReturning())
 
     const processCallback = async () => {
@@ -52,8 +50,6 @@ export const useStepUpCallback = () => {
       }
     }
 
-    // Settled even if this throws. Left in `returning`, the phase would block
-    // every later verification in this tab and keep the splash screen up.
     void processCallback()
       .finally(() => dispatch(stepUpSettled()))
       .catch(() => undefined)

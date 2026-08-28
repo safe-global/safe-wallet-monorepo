@@ -11,7 +11,6 @@ const initialState: StepUpState = {
   phase: 'idle',
 }
 
-/** Not persisted: an old phase surviving a reload would leave the user stuck on the splash screen. */
 export const stepUpSlice = createSlice({
   name: 'stepUp',
   initialState,

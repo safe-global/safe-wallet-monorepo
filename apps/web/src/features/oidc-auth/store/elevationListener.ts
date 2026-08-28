@@ -10,14 +10,12 @@ import { selectStepUpPhase, stepUpLeaving } from './stepUpSlice'
  */
 export const elevationListener = (listenerMiddleware: typeof listenerMiddlewareInstance) => {
   listenerMiddleware.startListening({
-    // RTK Query reports a baseQuery failure with `rejectWithValue`, so the
-    // FetchBaseQueryError is the action payload.
     matcher: isRejectedWithValue(),
     effect: (action, { dispatch, getState }) => {
       if (!isElevationRequiredError(action.payload)) return
 
-      // If the replayed request is itself rejected, show that error in the app.
-      // Saving another trip here would send the user back to Auth0 in a loop.
+      // Without this, a rejection from the replayed request would save another
+      // trip and send the user to Auth0 again, without end.
       if (selectStepUpPhase(getState()) === 'returning') return
 
       saveStepUpTrip(getReplayableAction(action))
