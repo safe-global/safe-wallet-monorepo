@@ -6,7 +6,7 @@ Web-specific guidance for the Next.js app under `apps/web/`. For monorepo-wide r
 
 - New features must be created in a separate folder inside `src/features/` – only components, hooks, and services used globally across many features belong in top-level folders inside `src/`
 - **All features must follow the standard feature architecture pattern** – See [docs/feature-architecture.md](docs/feature-architecture.md) for the complete guide including folder structure, feature flags, lazy loading, and public API patterns
-- Each new feature must be behind a feature flag (stored on the CGW API in chains configs); read it in code with `useHasFeature(FEATURES.X)` from `src/hooks/useChains.ts`
+- Each new feature must be behind a feature flag (stored on the CGW API in chains configs); read it in code with `useHasFeature` from `src/hooks/useChains.ts`, passing a flag from `FEATURES` (imported from `@safe-global/utils/utils/chains`)
 - A new Redux slice must be exported from `src/store/slices.ts` and registered in the `rootReducer` in `src/store/index.ts`; adding it to `persistedSlices` there both persists it to localStorage **and** syncs it across tabs (`persistStore.ts` and `broadcast.ts` share that list)
 - Use theme variables from vars.css instead of hard-coded CSS values
 - Build UI from the shadcn/ui primitives in `@/components/ui/*` (Tailwind); MUI/Emotion are removed
