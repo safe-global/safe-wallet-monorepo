@@ -8,18 +8,42 @@ import { StoreDecorator } from '@/stories/storeDecorator'
 import { RouterDecorator } from '@/stories/routerDecorator'
 import { createInitialState } from '@/stories/mocks/defaults'
 import { safeFixtures } from '@safe-global/test/msw/fixtures'
+import { http, HttpResponse } from 'msw'
+import { createChainData, createChainsPageDataV2 } from '@/stories/mocks/chains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+
+// The checkbox is gated on a chain feature the shared fixtures do not carry, and
+// `useCurrentChain` resolves through the v2 chains list. Enable it across that list for the
+// opt-in stories rather than editing the shared fixture.
+const withSafenetChecks = (chain: Chain): Chain => ({
+  ...chain,
+  features: [...chain.features, FEATURES.SAFENET_CHECKS],
+})
+
+const safenetChainsPage = () => {
+  const page = createChainsPageDataV2(withSafenetChecks(createChainData()))
+  return { ...page, results: page.results.map(withSafenetChecks) }
+}
+
+const safenetChainHandlers = [http.get(/\/v2\/chains$/, () => HttpResponse.json(safenetChainsPage()))]
 
 /**
- * The panel reads the chain and the display currency from the store, and the payment mode from
- * SafeTxContext — so the story holds that mode in state, which makes the "Pay fees from" selector
- * actually switch between Safe-pays and signer-pays rather than snapping back.
+ * The panel reads the chain and the display currency from the store, and both the payment mode
+ * and the Safenet opt-in from SafeTxContext — so the story holds those in state, which makes the
+ * "Pay fees from" selector and the Safenet checkbox actually switch rather than snapping back.
  */
-const PaymentModeHarness = (props: FeesPreviewData) => {
+type HarnessProps = FeesPreviewData & { initialSafenetCheck?: boolean }
+
+const PaymentModeHarness = ({ initialSafenetCheck = false, ...props }: HarnessProps) => {
   const defaults = useContext(SafeTxContext)
   const [gtfPaymentMode, setGtfPaymentMode] = useState<GtfPaymentMode>('safe')
+  const [safenetCheckEnabled, setSafenetCheckEnabled] = useState(initialSafenetCheck)
 
   return (
-    <SafeTxContext.Provider value={{ ...defaults, gtfPaymentMode, setGtfPaymentMode }}>
+    <SafeTxContext.Provider
+      value={{ ...defaults, gtfPaymentMode, setGtfPaymentMode, safenetCheckEnabled, setSafenetCheckEnabled }}
+    >
       <div className="w-[420px]">
         <FeesPreview {...props} />
       </div>
@@ -139,4 +163,28 @@ export const FallbackNoGtfAmount: Story = {
     executionFee: { label: 'Execution fee', isFree: true },
     gasFee: { label: 'Gas fee', amount: '3.50', currency: 'ETH', fiatAmount: '$3.50' },
   },
+}
+
+/**
+ * A Safenet chain, check not requested: the checkbox is offered and off, so no fee is quoted
+ * and the card keeps its two rows.
+ */
+export const SafenetCheckAvailable: Story = {
+  args: defaultArgs,
+  parameters: { msw: { handlers: safenetChainHandlers } },
+}
+
+/**
+ * The checked result. The CGW answers on the GTF arm — `feeBreakdown` (USD end-to-end) and no
+ * `relayCost` — so the Safenet fee renders in the primary slot and the gas fiat comes from
+ * `totalUsd`.
+ */
+export const SafenetFee: Story = {
+  args: {
+    ...defaultArgs,
+    initialSafenetCheck: true,
+    safenetFee: { label: 'Safenet fee', amount: '$\u200A1.00' },
+    gasFee: { label: 'Max gas fee', amount: '0.02733', currency: 'ETH', fiatAmount: '$\u200A97.30' },
+  },
+  parameters: { msw: { handlers: safenetChainHandlers } },
 }

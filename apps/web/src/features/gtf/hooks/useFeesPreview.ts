@@ -50,6 +50,11 @@ export type FeesPreviewData = {
    */
   isLegacySigned?: boolean
   executionFee: FeeRow
+  /**
+   * USD fee for the Safenet check, itemized only when the gateway reports a non-zero amount.
+   * Absent in every other branch.
+   */
+  safenetFee?: FeeRow
   gasFee: FeeRow
   totalOutgoing?: TotalOutgoing
   availableGasTokens?: Array<{ address: string; symbol: string; logoUri: string; fiatBalance?: string }>
@@ -78,7 +83,8 @@ export type FeesPreviewData = {
 const EXECUTION_FEE: FeeRow = { label: 'Execution fee', isFree: true }
 
 export const useFeesPreview = (): FeesPreviewData => {
-  const { safeTx, gtfPaymentMode, gtfSelectedGasToken, setGtfSelectedGasToken } = useContext(SafeTxContext)
+  const { safeTx, gtfPaymentMode, gtfSelectedGasToken, setGtfSelectedGasToken, safenetCheckEnabled } =
+    useContext(SafeTxContext)
   const { safe, safeAddress } = useSafeInfo()
   const chain = useCurrentChain()
   const { balances } = useBalances()
@@ -169,6 +175,7 @@ export const useFeesPreview = (): FeesPreviewData => {
     safeAddress,
     gasToken: selectedAddress,
     numberSignatures: safe.threshold,
+    safenetCheck: safenetCheckEnabled,
   })
 
   // Sync `gtfSelectedGasToken` with the latest preview state
@@ -364,42 +371,56 @@ export const useFeesPreview = (): FeesPreviewData => {
 
   // Happy path — fresh, error-free response.
   if (preview.data && !preview.error && safeTx) {
-    const { txData, relayCost } = preview.data
-    const relayCostFiat = Number(relayCost.fiatValue)
-    const relayCostFiatCode = relayCost.fiatCode
-    const gasWei = (BigInt(txData.safeTxGas) + BigInt(txData.baseGas)) * BigInt(txData.gasPrice)
-    const gasAmount = formatVisualAmount(gasWei, gasDecimals)
-    const gasTokenBalance = balances.items.find((b) => sameAddress(b.tokenInfo.address, selectedAddress))
-    const safeHasEnoughGas = gasTokenBalance
-      ? BigInt(gasTokenBalance.balance) >= gasWei + getSendInGasToken(safeTx, selectedAddress)
-      : false
-    const totalOutgoing = computeTotalOutgoing({
-      safeTx,
-      gasWei,
-      relayCostFiat,
-      relayCostFiatCode,
-      nativeSymbol,
-      nativeDecimals,
-      gasTokenAddress: selectedAddress,
-      gasSymbol,
-      gasDecimals,
-      balances,
-    })
+    const { txData, relayCost, feeBreakdown } = preview.data
+    // RELAY_FEE arm: the relay cost in the requested fiat. GTF arm: the full USD refund
+    // (`totalUsd`), which is the fiat equivalent of the on-chain gas amount below.
+    const gasFiatValue = relayCost ? Number(relayCost.fiatValue) : feeBreakdown?.totalUsd
+    const gasFiatCode = relayCost?.fiatCode ?? 'USD'
 
-    return {
-      ...base,
-      canCoverFees: true,
-      gasFee: {
-        label: 'Max gas fee',
-        amount: gasAmount,
-        currency: gasSymbol,
-        fiatAmount: formatCurrencyMinimal(relayCostFiat, relayCostFiatCode),
-      },
-      totalOutgoing,
-      safeHasEnoughGas,
-      previewedSafeTx,
-      loading: false,
-      error: false,
+    // A breakdown without totalUsd (old gateway) passes the shape guard but carries no
+    // usable quote — fall through to the fallback branch instead of rendering NaN.
+    if (typeof gasFiatValue === 'number' && Number.isFinite(gasFiatValue)) {
+      const gasWei = (BigInt(txData.safeTxGas) + BigInt(txData.baseGas)) * BigInt(txData.gasPrice)
+      const gasAmount = formatVisualAmount(gasWei, gasDecimals)
+      const gasTokenBalance = balances.items.find((b) => sameAddress(b.tokenInfo.address, selectedAddress))
+      const safeHasEnoughGas = gasTokenBalance
+        ? BigInt(gasTokenBalance.balance) >= gasWei + getSendInGasToken(safeTx, selectedAddress)
+        : false
+      const totalOutgoing = computeTotalOutgoing({
+        safeTx,
+        gasWei,
+        relayCostFiat: gasFiatValue,
+        relayCostFiatCode: gasFiatCode,
+        nativeSymbol,
+        nativeDecimals,
+        gasTokenAddress: selectedAddress,
+        gasSymbol,
+        gasDecimals,
+        balances,
+      })
+
+      // The "Max gas fee" token amount already covers this fee — the gateway encodes it into
+      // `baseGas`. This row only itemizes it in USD, so it must not be added to any total.
+      const safenetFeeUsd = feeBreakdown?.safenetFeeUsd ?? 0
+      const safenetFee: FeeRow | undefined =
+        safenetFeeUsd > 0 ? { label: 'Safenet fee', amount: formatCurrencyMinimal(safenetFeeUsd, 'USD') } : undefined
+
+      return {
+        ...base,
+        canCoverFees: true,
+        safenetFee,
+        gasFee: {
+          label: 'Max gas fee',
+          amount: gasAmount,
+          currency: gasSymbol,
+          fiatAmount: formatCurrencyMinimal(gasFiatValue, gasFiatCode),
+        },
+        totalOutgoing,
+        safeHasEnoughGas,
+        previewedSafeTx,
+        loading: false,
+        error: false,
+      }
     }
   }
 

@@ -48,6 +48,8 @@ const defaultSafeTxContext: SafeTxContextParams = {
   setGtfPaymentMode: jest.fn(),
   gtfSelectedGasToken: undefined,
   setGtfSelectedGasToken: jest.fn(),
+  safenetCheckEnabled: false,
+  setSafenetCheckEnabled: jest.fn(),
 }
 
 const renderTxNonce = (contextOverrides: Partial<SafeTxContextParams> = {}) =>

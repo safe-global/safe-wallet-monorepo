@@ -367,6 +367,8 @@ const overflowSafeTxContextValue: SafeTxContextParams = {
   gtfPaymentMode: 'safe',
   setGtfPaymentMode: () => {},
   setGtfSelectedGasToken: () => {},
+  safenetCheckEnabled: false,
+  setSafenetCheckEnabled: () => {},
 }
 
 const overflowStore = makeStore({
