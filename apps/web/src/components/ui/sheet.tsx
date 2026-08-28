@@ -35,7 +35,7 @@ import { XIcon } from 'lucide-react'
  * @remarks
  * Key Props:
  * - SheetContent: `side` ('top' | 'right' | 'bottom' | 'left'), `variant` ('default' | 'floating'),
- *   `size` ('sm' | 'md' | 'lg' | 'auto'), `surface` ('card' | 'paper'), `padding` ('none' | 'md'), `showCloseButton`
+ *   `size` ('sm' | 'md' | 'lg' | 'auto'), `surface` ('card' | 'paper' | 'muted'), `padding` ('none' | 'md'), `showCloseButton`
  * - SheetHeader / SheetFooter: `divided` (true = full border, 'subtle' = border-border/50)
  * - Root / Trigger / Close: see Base UI dialog
  *
@@ -68,6 +68,8 @@ const sheetContentVariants = cva(
       surface: {
         card: 'bg-card',
         paper: 'bg-[var(--color-background-paper)]',
+        // For panels that stack `bg-card` blocks on a recessed ground, e.g. the policy detail panel.
+        muted: 'bg-muted',
       },
       padding: {
         none: 'p-0',

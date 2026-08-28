@@ -113,14 +113,24 @@ describe('Policies', () => {
       expect(screen.queryByTestId('policy-catalogue')).not.toBeInTheDocument()
     })
 
-    it('should, when a table row is clicked, report the policy it belongs to', () => {
-      const onSelectPolicy = jest.fn()
-      const proposerPolicy = asActivePolicy(mockProposerPolicy())
+    it('should, when a table row is clicked, open the detail panel while the list stays visible', () => {
+      render(<Policies policies={[asActivePolicy(mockProposerPolicy())]} />)
 
-      render(<Policies policies={[proposerPolicy]} onSelectPolicy={onSelectPolicy} />)
+      expect(screen.queryByTestId('policy-detail-panel')).not.toBeInTheDocument()
+
       fireEvent.click(screen.getByRole('button', { name: 'Open proposer policy details' }))
 
-      expect(onSelectPolicy).toHaveBeenCalledWith(proposerPolicy)
+      expect(screen.getByTestId('policy-detail-panel')).toBeInTheDocument()
+      expect(screen.getByTestId('policies-list')).toBeInTheDocument()
+    })
+
+    it('should, when the detail panel is closed, remove it and leave the list in place', () => {
+      render(<Policies policies={[asActivePolicy(mockProposerPolicy())]} />)
+      fireEvent.click(screen.getByRole('button', { name: 'Open proposer policy details' }))
+      fireEvent.click(screen.getByRole('button', { name: /close/i }))
+
+      expect(screen.queryByTestId('policy-detail-panel')).not.toBeInTheDocument()
+      expect(screen.getByTestId('policies-list')).toBeInTheDocument()
     })
   })
 })

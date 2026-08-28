@@ -1,9 +1,10 @@
-import { type ReactElement } from 'react'
+import { useState, type ReactElement } from 'react'
 import { Typography } from '@/components/ui/typography'
 import ExternalLink from '@/components/common/ExternalLink'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import PolicyCatalogue from './PolicyCatalogue'
 import PoliciesList from './PoliciesList'
+import PolicyDetailPanel from './PolicyDetailPanel'
 import { type PolicyCatalogueId } from './PolicyCatalogue/catalogue'
 import type { Policy } from './types'
 
@@ -16,7 +17,6 @@ interface PoliciesProps {
   /** Opens the catalogue picker from the populated mode's `Add policy` button. */
   onAddPolicy?: () => void
   onSelectPolicyType?: (id: PolicyCatalogueId) => void
-  onSelectPolicy?: (policy: Policy) => void
 }
 
 /**
@@ -31,8 +31,8 @@ const Policies = ({
   onRetry,
   onAddPolicy,
   onSelectPolicyType,
-  onSelectPolicy,
 }: PoliciesProps): ReactElement => {
+  const [selectedPolicy, setSelectedPolicy] = useState<Policy | null>(null)
   const isPopulated = isLoading || isError || policies.length > 0
 
   return (
@@ -58,11 +58,13 @@ const Policies = ({
           isError={isError}
           onRetry={onRetry}
           onAddPolicy={onAddPolicy}
-          onSelectPolicy={onSelectPolicy}
+          onSelectPolicy={setSelectedPolicy}
         />
       ) : (
         <PolicyCatalogue onSelect={onSelectPolicyType} />
       )}
+
+      <PolicyDetailPanel policy={selectedPolicy} onClose={() => setSelectedPolicy(null)} />
     </div>
   )
 }
