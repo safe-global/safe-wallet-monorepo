@@ -168,9 +168,9 @@ const SpaceAddressBook = () => {
           <TableCard>
             <TabsContent value="workspace">
               {searchQuery && filteredAll.length === 0 ? (
-                <p className="text-muted-foreground mb-2 text-sm">Found 0 results</p>
+                <p className="text-muted-foreground mb-2 p-4 text-sm">Found 0 results</p>
               ) : addressBookItems.length === 0 ? (
-                <p className="text-muted-foreground text-sm">No contacts in this workspace yet.</p>
+                <p className="text-muted-foreground p-4 text-sm">No contacts in this workspace yet.</p>
               ) : (
                 <SpaceAddressBookTable entries={filteredAll} />
               )}
@@ -180,9 +180,9 @@ const SpaceAddressBook = () => {
               <>
                 <TabsContent value="mine">
                   {searchQuery && filteredMine.length === 0 ? (
-                    <p className="text-muted-foreground mb-2 text-sm">Found 0 results</p>
+                    <p className="text-muted-foreground mb-2 p-4 text-sm">Found 0 results</p>
                   ) : filteredMine.length === 0 ? (
-                    <p className="text-muted-foreground text-sm">You haven&apos;t added any contacts yet.</p>
+                    <p className="text-muted-foreground p-4 text-sm">You haven&apos;t added any contacts yet.</p>
                   ) : (
                     <SpaceAddressBookTable
                       entries={filteredMine}

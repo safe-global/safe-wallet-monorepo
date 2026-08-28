@@ -69,7 +69,7 @@ export const SimilarityWarningIcon = ({ warning }: { warning: SimilarWarning }) 
  * hover/separator machinery there.
  */
 const SimilarityBandHeader = ({ colSpan }: { colSpan: number }) => (
-  <TableRow data-band-header="">
+  <TableRow data-band-header="" data-no-hover="" data-no-divider="">
     {/* pl-[26px] aligns the label with the checkbox column; the vertical padding overrides the
         primitive's own p-2 so the head zone hugs its label. */}
     <TableCell colSpan={colSpan} className="pt-2 pr-4 pb-0.5 pl-[26px]">

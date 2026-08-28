@@ -22,10 +22,10 @@ exports[`./index.stories Default 1`] = `
           class="container"
         >
           <div
-            class="mb-4 w-full"
+            class="w-full mb-4"
           >
             <div
-              class="w-full overflow-x-auto rounded-t-3xl bg-[var(--color-background-paper)] md:overflow-x-hidden rounded-b-3xl"
+              class="w-full overflow-x-auto md:overflow-x-hidden rounded-t-lg bg-[var(--color-background-paper)] rounded-b-lg"
               data-testid="table-container"
             >
               <div
@@ -51,11 +51,37 @@ exports[`./index.stories Default 1`] = `
                         style="width: 35%;"
                       >
                         <span
-                          class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                          class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
                           role="button"
                           tabindex="0"
                         >
                           Asset
+                          <svg
+                            aria-hidden="true"
+                            class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                            fill="none"
+                            height="24"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                            width="24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="m21 16-4 4-4-4"
+                            />
+                            <path
+                              d="M17 20V4"
+                            />
+                            <path
+                              d="m3 8 4-4 4 4"
+                            />
+                            <path
+                              d="M7 4v16"
+                            />
+                          </svg>
                         </span>
                       </th>
                       <th
@@ -64,11 +90,37 @@ exports[`./index.stories Default 1`] = `
                         style="width: 16%; text-align: right;"
                       >
                         <span
-                          class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                          class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
                           role="button"
                           tabindex="0"
                         >
                           Price
+                          <svg
+                            aria-hidden="true"
+                            class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                            fill="none"
+                            height="24"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                            width="24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="m21 16-4 4-4-4"
+                            />
+                            <path
+                              d="M17 20V4"
+                            />
+                            <path
+                              d="m3 8 4-4 4 4"
+                            />
+                            <path
+                              d="M7 4v16"
+                            />
+                          </svg>
                         </span>
                       </th>
                       <th
@@ -77,11 +129,37 @@ exports[`./index.stories Default 1`] = `
                         style="width: 16%; text-align: right;"
                       >
                         <span
-                          class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                          class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
                           role="button"
                           tabindex="0"
                         >
                           Balance
+                          <svg
+                            aria-hidden="true"
+                            class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                            fill="none"
+                            height="24"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                            width="24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="m21 16-4 4-4-4"
+                            />
+                            <path
+                              d="M17 20V4"
+                            />
+                            <path
+                              d="m3 8 4-4 4 4"
+                            />
+                            <path
+                              d="M7 4v16"
+                            />
+                          </svg>
                         </span>
                       </th>
                       <th
@@ -90,7 +168,7 @@ exports[`./index.stories Default 1`] = `
                         style="width: 16%; text-align: right;"
                       >
                         <span
-                          class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                          class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
                           role="button"
                           tabindex="0"
                         >
@@ -100,6 +178,32 @@ exports[`./index.stories Default 1`] = `
                           >
                             Weight
                           </span>
+                          <svg
+                            aria-hidden="true"
+                            class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                            fill="none"
+                            height="24"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                            width="24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="m21 16-4 4-4-4"
+                            />
+                            <path
+                              d="M17 20V4"
+                            />
+                            <path
+                              d="m3 8 4-4 4 4"
+                            />
+                            <path
+                              d="M7 4v16"
+                            />
+                          </svg>
                         </span>
                       </th>
                       <th
@@ -108,11 +212,37 @@ exports[`./index.stories Default 1`] = `
                         style="width: 17%; text-align: right;"
                       >
                         <span
-                          class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                          class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
                           role="button"
                           tabindex="0"
                         >
                           Value
+                          <svg
+                            aria-hidden="true"
+                            class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                            fill="none"
+                            height="24"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                            width="24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="m21 16-4 4-4-4"
+                            />
+                            <path
+                              d="M17 20V4"
+                            />
+                            <path
+                              d="m3 8 4-4 4 4"
+                            />
+                            <path
+                              d="M7 4v16"
+                            />
+                          </svg>
                         </span>
                       </th>
                       <th
@@ -560,7 +690,7 @@ exports[`./index.stories Default 1`] = `
               </div>
             </div>
             <div
-              class="flex h-[52px] items-center rounded-b-3xl rounded-t-none border-t border-[var(--color-background-main)] bg-[var(--color-background-paper)] px-4"
+              class="flex h-[52px] items-center border-t border-[var(--color-background-main)] px-4 rounded-b-lg rounded-t-none bg-[var(--color-background-paper)]"
             />
           </div>
         </div>
@@ -595,10 +725,10 @@ exports[`./index.stories EmptyBalance 1`] = `
             class="container"
           >
             <div
-              class="mb-4 w-full"
+              class="w-full mb-4"
             >
               <div
-                class="w-full overflow-x-auto rounded-t-3xl bg-[var(--color-background-paper)] md:overflow-x-hidden rounded-b-3xl"
+                class="w-full overflow-x-auto md:overflow-x-hidden rounded-t-lg bg-[var(--color-background-paper)] rounded-b-lg"
                 data-testid="table-container"
               >
                 <div
@@ -624,11 +754,37 @@ exports[`./index.stories EmptyBalance 1`] = `
                           style="width: 35%;"
                         >
                           <span
-                            class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                            class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
                             role="button"
                             tabindex="0"
                           >
                             Asset
+                            <svg
+                              aria-hidden="true"
+                              class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                              fill="none"
+                              height="24"
+                              stroke="currentColor"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              viewBox="0 0 24 24"
+                              width="24"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="m21 16-4 4-4-4"
+                              />
+                              <path
+                                d="M17 20V4"
+                              />
+                              <path
+                                d="m3 8 4-4 4 4"
+                              />
+                              <path
+                                d="M7 4v16"
+                              />
+                            </svg>
                           </span>
                         </th>
                         <th
@@ -637,11 +793,37 @@ exports[`./index.stories EmptyBalance 1`] = `
                           style="width: 16%; text-align: right;"
                         >
                           <span
-                            class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                            class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
                             role="button"
                             tabindex="0"
                           >
                             Price
+                            <svg
+                              aria-hidden="true"
+                              class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                              fill="none"
+                              height="24"
+                              stroke="currentColor"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              viewBox="0 0 24 24"
+                              width="24"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="m21 16-4 4-4-4"
+                              />
+                              <path
+                                d="M17 20V4"
+                              />
+                              <path
+                                d="m3 8 4-4 4 4"
+                              />
+                              <path
+                                d="M7 4v16"
+                              />
+                            </svg>
                           </span>
                         </th>
                         <th
@@ -650,11 +832,37 @@ exports[`./index.stories EmptyBalance 1`] = `
                           style="width: 16%; text-align: right;"
                         >
                           <span
-                            class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                            class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
                             role="button"
                             tabindex="0"
                           >
                             Balance
+                            <svg
+                              aria-hidden="true"
+                              class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                              fill="none"
+                              height="24"
+                              stroke="currentColor"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              viewBox="0 0 24 24"
+                              width="24"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="m21 16-4 4-4-4"
+                              />
+                              <path
+                                d="M17 20V4"
+                              />
+                              <path
+                                d="m3 8 4-4 4 4"
+                              />
+                              <path
+                                d="M7 4v16"
+                              />
+                            </svg>
                           </span>
                         </th>
                         <th
@@ -663,7 +871,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                           style="width: 16%; text-align: right;"
                         >
                           <span
-                            class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                            class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
                             role="button"
                             tabindex="0"
                           >
@@ -673,6 +881,32 @@ exports[`./index.stories EmptyBalance 1`] = `
                             >
                               Weight
                             </span>
+                            <svg
+                              aria-hidden="true"
+                              class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                              fill="none"
+                              height="24"
+                              stroke="currentColor"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              viewBox="0 0 24 24"
+                              width="24"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="m21 16-4 4-4-4"
+                              />
+                              <path
+                                d="M17 20V4"
+                              />
+                              <path
+                                d="m3 8 4-4 4 4"
+                              />
+                              <path
+                                d="M7 4v16"
+                              />
+                            </svg>
                           </span>
                         </th>
                         <th
@@ -681,11 +915,37 @@ exports[`./index.stories EmptyBalance 1`] = `
                           style="width: 17%; text-align: right;"
                         >
                           <span
-                            class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                            class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
                             role="button"
                             tabindex="0"
                           >
                             Value
+                            <svg
+                              aria-hidden="true"
+                              class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                              fill="none"
+                              height="24"
+                              stroke="currentColor"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              viewBox="0 0 24 24"
+                              width="24"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="m21 16-4 4-4-4"
+                              />
+                              <path
+                                d="M17 20V4"
+                              />
+                              <path
+                                d="m3 8 4-4 4 4"
+                              />
+                              <path
+                                d="M7 4v16"
+                              />
+                            </svg>
                           </span>
                         </th>
                         <th
@@ -1133,7 +1393,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                 </div>
               </div>
               <div
-                class="flex h-[52px] items-center rounded-b-3xl rounded-t-none border-t border-[var(--color-background-main)] bg-[var(--color-background-paper)] px-4"
+                class="flex h-[52px] items-center border-t border-[var(--color-background-main)] px-4 rounded-b-lg rounded-t-none bg-[var(--color-background-paper)]"
               />
             </div>
           </div>
@@ -1169,10 +1429,10 @@ exports[`./index.stories WhalePortfolio 1`] = `
             class="container"
           >
             <div
-              class="mb-4 w-full"
+              class="w-full mb-4"
             >
               <div
-                class="w-full overflow-x-auto rounded-t-3xl bg-[var(--color-background-paper)] md:overflow-x-hidden rounded-b-3xl"
+                class="w-full overflow-x-auto md:overflow-x-hidden rounded-t-lg bg-[var(--color-background-paper)] rounded-b-lg"
                 data-testid="table-container"
               >
                 <div
@@ -1198,11 +1458,37 @@ exports[`./index.stories WhalePortfolio 1`] = `
                           style="width: 35%;"
                         >
                           <span
-                            class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                            class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
                             role="button"
                             tabindex="0"
                           >
                             Asset
+                            <svg
+                              aria-hidden="true"
+                              class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                              fill="none"
+                              height="24"
+                              stroke="currentColor"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              viewBox="0 0 24 24"
+                              width="24"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="m21 16-4 4-4-4"
+                              />
+                              <path
+                                d="M17 20V4"
+                              />
+                              <path
+                                d="m3 8 4-4 4 4"
+                              />
+                              <path
+                                d="M7 4v16"
+                              />
+                            </svg>
                           </span>
                         </th>
                         <th
@@ -1211,11 +1497,37 @@ exports[`./index.stories WhalePortfolio 1`] = `
                           style="width: 16%; text-align: right;"
                         >
                           <span
-                            class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                            class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
                             role="button"
                             tabindex="0"
                           >
                             Price
+                            <svg
+                              aria-hidden="true"
+                              class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                              fill="none"
+                              height="24"
+                              stroke="currentColor"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              viewBox="0 0 24 24"
+                              width="24"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="m21 16-4 4-4-4"
+                              />
+                              <path
+                                d="M17 20V4"
+                              />
+                              <path
+                                d="m3 8 4-4 4 4"
+                              />
+                              <path
+                                d="M7 4v16"
+                              />
+                            </svg>
                           </span>
                         </th>
                         <th
@@ -1224,11 +1536,37 @@ exports[`./index.stories WhalePortfolio 1`] = `
                           style="width: 16%; text-align: right;"
                         >
                           <span
-                            class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                            class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
                             role="button"
                             tabindex="0"
                           >
                             Balance
+                            <svg
+                              aria-hidden="true"
+                              class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                              fill="none"
+                              height="24"
+                              stroke="currentColor"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              viewBox="0 0 24 24"
+                              width="24"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="m21 16-4 4-4-4"
+                              />
+                              <path
+                                d="M17 20V4"
+                              />
+                              <path
+                                d="m3 8 4-4 4 4"
+                              />
+                              <path
+                                d="M7 4v16"
+                              />
+                            </svg>
                           </span>
                         </th>
                         <th
@@ -1237,7 +1575,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
                           style="width: 16%; text-align: right;"
                         >
                           <span
-                            class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                            class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
                             role="button"
                             tabindex="0"
                           >
@@ -1247,6 +1585,32 @@ exports[`./index.stories WhalePortfolio 1`] = `
                             >
                               Weight
                             </span>
+                            <svg
+                              aria-hidden="true"
+                              class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                              fill="none"
+                              height="24"
+                              stroke="currentColor"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              viewBox="0 0 24 24"
+                              width="24"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="m21 16-4 4-4-4"
+                              />
+                              <path
+                                d="M17 20V4"
+                              />
+                              <path
+                                d="m3 8 4-4 4 4"
+                              />
+                              <path
+                                d="M7 4v16"
+                              />
+                            </svg>
                           </span>
                         </th>
                         <th
@@ -1255,11 +1619,37 @@ exports[`./index.stories WhalePortfolio 1`] = `
                           style="width: 17%; text-align: right;"
                         >
                           <span
-                            class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                            class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
                             role="button"
                             tabindex="0"
                           >
                             Value
+                            <svg
+                              aria-hidden="true"
+                              class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                              fill="none"
+                              height="24"
+                              stroke="currentColor"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              viewBox="0 0 24 24"
+                              width="24"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="m21 16-4 4-4-4"
+                              />
+                              <path
+                                d="M17 20V4"
+                              />
+                              <path
+                                d="m3 8 4-4 4 4"
+                              />
+                              <path
+                                d="M7 4v16"
+                              />
+                            </svg>
                           </span>
                         </th>
                         <th
@@ -1707,7 +2097,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
                 </div>
               </div>
               <div
-                class="flex h-[52px] items-center rounded-b-3xl rounded-t-none border-t border-[var(--color-background-main)] bg-[var(--color-background-paper)] px-4"
+                class="flex h-[52px] items-center border-t border-[var(--color-background-main)] px-4 rounded-b-lg rounded-t-none bg-[var(--color-background-paper)]"
               />
             </div>
           </div>
