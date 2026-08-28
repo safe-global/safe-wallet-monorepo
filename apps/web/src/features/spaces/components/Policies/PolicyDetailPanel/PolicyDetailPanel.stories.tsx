@@ -96,3 +96,33 @@ export const OrphanedProposerGrant: Story = {
 export const ExhaustedLimit: Story = {
   args: { policy: asActivePolicy(mockMultiSpenderPolicy()) },
 }
+
+/** A signer who has not signed yet. */
+export const PendingAwaitingSignature: Story = {
+  args: { policy: mockPendingPolicy({ missingSigners: [MOCK_ADDRESSES.bob] }) },
+}
+
+/** The signer has signed and one signature is still outstanding. */
+export const PendingWaitingForOthers: Story = {
+  args: { policy: mockPendingPolicy({ confirmationsSubmitted: 1, confirmationsRequired: 2 }) },
+}
+
+/** Every required signature is in and the transaction can be executed. */
+export const PendingReadyToExecute: Story = {
+  args: {
+    policy: mockPendingPolicy({ confirmationsSubmitted: 2, confirmationsRequired: 2, missingSigners: [] }),
+  },
+}
+
+/**
+ * A queued removal leaves the policy active until the transaction executes, so the banner must not
+ * reuse the wording of a queued creation.
+ */
+export const PendingRemoval: Story = {
+  args: { policy: mockPendingPolicy({ operation: 'remove', missingSigners: [MOCK_ADDRESSES.bob] }) },
+}
+
+/** The queued transaction was rejected or replaced, so no action would succeed. */
+export const PendingTransactionUnavailable: Story = {
+  args: { policy: mockPendingPolicy(), isTransactionUnavailable: true },
+}

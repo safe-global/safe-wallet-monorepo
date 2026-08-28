@@ -1,18 +1,23 @@
 import type { ReactNode } from 'react'
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
 import EthHashInfo from '@/components/common/EthHashInfo'
+import useWallet from '@/hooks/wallets/useWallet'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { Typography } from '@/components/ui/typography'
 import PolicyStatusChip from '../PoliciesTable/components/PolicyStatusChip'
 import AllowanceUsage from './components/AllowanceUsage'
 import PolicyActiveFooter from './components/PolicyActiveFooter'
 import PolicyEnforcement from './components/PolicyEnforcement'
+import PolicyPendingBanner from './components/PolicyPendingBanner'
+import PolicyPendingFooter from './components/PolicyPendingFooter'
 import PolicyLimits, { type AllowanceDetail } from './components/PolicyLimits'
 import PolicyMetadataRow from './components/PolicyMetadataRow'
 import PolicyTypeDetails from './components/PolicyTypeDetails'
 import { getPolicyLabel } from '../utils/policyLabel'
 import { getPolicyIcon } from '../utils/policyIcon'
 import { formatPolicyDateTime } from '../utils/policyTime'
+import { getPolicyPendingState } from '../utils/policyPendingState'
+import { getPolicyActiveState } from '../utils/policyActiveState'
 import { getPolicyStatus, hasSpendingLimitData, isPendingPolicy, type Policy } from '../types'
 
 export type PolicyDetailPanelProps = {
@@ -22,6 +27,12 @@ export type PolicyDetailPanelProps = {
   signers?: string[]
   onEdit?: (policy: Policy) => void
   onDelete?: (policy: Policy) => void
+  onSign?: (policy: Policy) => void
+  onExecute?: (policy: Policy) => void
+  /** Link to the queued transaction, for a signer to pass to the signers still outstanding. */
+  transactionLink?: string
+  /** True when the queued transaction was rejected, replaced, or lost its nonce. */
+  isTransactionUnavailable?: boolean
   /** Replaces the usage rendered under each allowance. */
   renderAllowanceDetail?: AllowanceDetail
   /** Rendered above the content. WA-3460 supplies it for pending policies. */
@@ -43,10 +54,16 @@ const PolicyDetailPanel = ({
   signers = [],
   onEdit,
   onDelete,
+  onSign,
+  onExecute,
+  transactionLink = '',
+  isTransactionUnavailable = false,
   renderAllowanceDetail,
   banner,
   footer,
 }: PolicyDetailPanelProps) => {
+  const wallet = useWallet()
+
   if (!policy) return null
 
   const Icon = getPolicyIcon(policy.type)
@@ -57,9 +74,23 @@ const PolicyDetailPanel = ({
     renderAllowanceDetail ??
     (isPending ? undefined : (allowance) => <AllowanceUsage key={allowance.token.address} allowance={allowance} />)
 
+  const isSigner = getPolicyActiveState(wallet?.address, signers) === 'signer'
+
+  const pendingState = isPending
+    ? getPolicyPendingState(policy, wallet?.address, isSigner, isTransactionUnavailable)
+    : 'no-wallet'
+
   const resolvedFooter =
     footer ??
-    (isPending ? null : (
+    (isPending ? (
+      <PolicyPendingFooter
+        policy={policy}
+        state={pendingState}
+        transactionLink={transactionLink}
+        onSign={onSign && (() => onSign(policy))}
+        onExecute={onExecute && (() => onExecute(policy))}
+      />
+    ) : (
       <PolicyActiveFooter
         policy={policy}
         signers={signers}
@@ -94,7 +125,7 @@ const PolicyDetailPanel = ({
           <PolicyStatusChip status={getPolicyStatus(policy)} />
         </header>
 
-        {banner}
+        {banner ?? (isPending ? <PolicyPendingBanner policy={policy} state={pendingState} /> : null)}
 
         <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 pb-4">
           {hasSpendingLimitData(policy) && (
