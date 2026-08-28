@@ -31,6 +31,8 @@ cypress/
 | Happy path   | `e2e/happypath/`   | On-demand + Wed cron (04:00 UTC)     | `Verify ...`              |
 | Happy path 2 | `e2e/happypath_2/` | Runs with the full on-demand suite   | `Verify ...`              |
 
+The full on-demand workflow (`web-e2e-full-ondemand.yml`) runs smoke + regression + happypath_2 + safe-apps; via `workflow_dispatch` inputs it can be narrowed to a single suite or named specs (comma-separated, no path/extension).
+
 ## Visual regression tests (Argos E2E)
 
 All visual tests in `e2e/visual/`. Argos captures screenshots via `afterEach` hook in `support/e2e.js`.
