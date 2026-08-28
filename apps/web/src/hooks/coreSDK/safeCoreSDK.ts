@@ -20,6 +20,7 @@ import {
   resolveChainAgnosticContractAddresses,
 } from '@safe-global/utils/services/contracts/deployments'
 import { logError, Errors } from '@/services/exceptions'
+import { useSafeScope } from '@/components/tx-flow/safe-scope/context'
 
 export const initSafeSDK = async ({
   provider,
@@ -165,8 +166,14 @@ export const initSafeSDK = async ({
   })
 }
 
-export const {
-  getStore: getSafeSDK,
-  setStore: setSafeSDK,
-  useStore: useSafeSDK,
-} = new ExternalStore<Safe | undefined>()
+const safeSDKStore = new ExternalStore<Safe | undefined>()
+
+export const getSafeSDK = safeSDKStore.getStore
+export const setSafeSDK = safeSDKStore.setStore
+
+/** The Safe-level singleton, or the scoped instance inside a Space-level flow (`undefined` while it initialises). */
+export const useSafeSDK = (): Safe | undefined => {
+  const scope = useSafeScope()
+  const singleton = safeSDKStore.useStore()
+  return scope ? scope.sdk : singleton
+}
