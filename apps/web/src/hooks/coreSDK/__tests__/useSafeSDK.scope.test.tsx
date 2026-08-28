@@ -1,4 +1,4 @@
-import { renderHook } from '@/tests/test-utils'
+import { renderHook, act } from '@/tests/test-utils'
 import type { ReactNode } from 'react'
 import type Safe from '@safe-global/protocol-kit'
 import { setSafeSDK, useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
@@ -31,7 +31,7 @@ const withScope = (sdk: Safe | undefined) =>
 
 describe('useSafeSDK', () => {
   beforeEach(() => setSafeSDK(singleton))
-  afterEach(() => setSafeSDK(undefined))
+  afterEach(() => act(() => setSafeSDK(undefined)))
 
   it('returns the singleton without a scope (regression baseline)', () => {
     const { result } = renderHook(() => useSafeSDK())

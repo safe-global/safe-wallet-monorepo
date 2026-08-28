@@ -1,4 +1,4 @@
-import { renderHook } from '@/tests/test-utils'
+import { renderHook, act } from '@/tests/test-utils'
 import type { ReactNode } from 'react'
 import type { JsonRpcProvider } from 'ethers'
 import { setWeb3ReadOnly, useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
@@ -31,7 +31,7 @@ const withScope = (web3ReadOnly: JsonRpcProvider | undefined) =>
 
 describe('useWeb3ReadOnly', () => {
   beforeEach(() => setWeb3ReadOnly(singleton))
-  afterEach(() => setWeb3ReadOnly(undefined))
+  afterEach(() => act(() => setWeb3ReadOnly(undefined)))
 
   it('returns the singleton without a scope (regression baseline)', () => {
     const { result } = renderHook(() => useWeb3ReadOnly())
