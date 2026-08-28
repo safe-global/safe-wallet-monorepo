@@ -5,6 +5,7 @@ import { Typography } from '@/components/ui/typography'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import PoliciesList from './PoliciesList'
 import { PoliciesLoadError, PoliciesLoading } from './PoliciesLoadState'
+import PolicyDetailPanel from './PolicyDetailPanel'
 import PolicyCatalogue from './PolicyCatalogue'
 import type { PolicyCatalogueId } from './PolicyCatalogue/catalogue'
 import ProposerIntroDialog from './ProposerIntroDialog'
@@ -21,7 +22,6 @@ interface PoliciesProps {
   onRetry?: () => void
   /** Opens the catalogue picker from the populated mode's `Add policy` button. */
   onAddPolicy?: () => void
-  onSelectPolicy?: (policy: Policy) => void
 }
 
 /**
@@ -36,8 +36,8 @@ const Policies = ({
   isError = false,
   onRetry,
   onAddPolicy,
-  onSelectPolicy,
 }: PoliciesProps): ReactElement => {
+  const [selectedPolicy, setSelectedPolicy] = useState<Policy | null>(null)
   const isSettled = !isLoading && !isError
 
   const [hasSeenSpendingLimitIntro = false, setHasSeenSpendingLimitIntro] =
@@ -134,10 +134,12 @@ const Policies = ({
       ) : isError ? (
         <PoliciesLoadError onReload={onRetry} />
       ) : policies.length > 0 ? (
-        <PoliciesList policies={policies} onAddPolicy={onAddPolicy} onSelectPolicy={onSelectPolicy} />
+        <PoliciesList policies={policies} onAddPolicy={onAddPolicy} onSelectPolicy={setSelectedPolicy} />
       ) : (
         <PolicyCatalogue onSelect={handleSelect} />
       )}
+
+      <PolicyDetailPanel policy={selectedPolicy} onClose={() => setSelectedPolicy(null)} />
 
       <SpendingLimitIntroDialog
         open={isSpendingLimitIntroOpen}
