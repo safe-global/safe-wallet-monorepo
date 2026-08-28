@@ -29,7 +29,6 @@ const meta = {
     layout: 'fullscreen',
     ...defaultSetup.parameters,
   },
-  decorators: [defaultSetup.decorator],
   argTypes: {
     showHiddenAssets: {
       control: { type: 'boolean' },
@@ -50,6 +49,7 @@ export const Default: Story = {
   args: {
     showHiddenAssets: false,
   },
+  decorators: [defaultSetup.decorator],
 }
 
 /**
