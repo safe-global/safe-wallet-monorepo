@@ -15,6 +15,9 @@ import { executeRelayTx } from '@/src/services/tx-execution/relayExecutor'
 import { executeLedgerTx } from '@/src/services/tx-execution/ledgerExecutor'
 import { executeWalletConnectTx } from '@/src/services/tx-execution/walletConnectExecutor'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
+import { classifyExecutionError } from '@/src/services/tx-execution/executionErrors'
+import { getMissingSignaturesError } from '@/src/services/tx-execution/executionPreChecks'
 import type { Provider } from '@reown/appkit-common-react-native'
 
 export enum ExecutionStatus {
@@ -30,6 +33,11 @@ interface UseTransactionExecutionProps {
   signerAddress: string
   feeParams: EstimatedFeeValues | null
   executionMethod: ExecutionMethod
+  /**
+   * Signers that already confirmed the transaction, for the pre-broadcast
+   * threshold check. `undefined` skips the check — unknown is not none.
+   */
+  confirmedSigners?: string[]
   wcProvider?: Provider
 }
 
@@ -38,6 +46,7 @@ export function useTransactionExecution({
   signerAddress,
   executionMethod,
   feeParams,
+  confirmedSigners,
   wcProvider,
 }: UseTransactionExecutionProps) {
   const [status, setStatus] = useState<ExecutionStatus>(ExecutionStatus.IDLE)
@@ -106,6 +115,19 @@ export function useTransactionExecution({
           throw new Error(`No executor found for execution method: ${executionMethod}`)
         }
 
+        // A relayer sends the transaction from its own EOA, so it can never add
+        // a pre-validated signature of its own.
+        const missingSignatures = getMissingSignaturesError({
+          confirmedSigners,
+          threshold: safe.threshold,
+          owners: safe.owners?.map((owner) => owner.value) ?? [],
+          executorAddress: executionMethod === ExecutionMethod.WITH_RELAY ? undefined : signerAddress,
+        })
+
+        if (missingSignatures) {
+          throw missingSignatures
+        }
+
         const pendingTxPayload = await executor(acceptUnverifiedSimulation)
 
         dispatch(setExecutingSuccess(txId))
@@ -115,12 +137,24 @@ export function useTransactionExecution({
       } catch (error) {
         logger.error('Error executing transaction:', error)
         setStatus(ExecutionStatus.ERROR)
-        dispatch(setExecutingError({ txId, error: asError(error).message }))
 
         // CGW's pre-relay simulation surfaces SIMULATION_FAILED / INDETERMINATE_SIMULATION as a typed
         // RelaySimulationError. It's re-thrown unchanged so useExecutionFlow can branch on it
         // (SIMULATION_FAILED is terminal, INDETERMINATE offers an explicit retry).
-        throw error
+        const executionError =
+          error instanceof RelaySimulationError
+            ? undefined
+            : classifyExecutionError(error, { nativeAsset: activeChain?.nativeCurrency?.symbol })
+
+        dispatch(
+          setExecutingError({
+            txId,
+            error: (executionError ?? asError(error)).message,
+            code: executionError?.code,
+          }),
+        )
+
+        throw executionError ?? error
       }
     },
     [
@@ -130,6 +164,7 @@ export function useTransactionExecution({
       safe,
       txId,
       signerAddress,
+      confirmedSigners,
       feeParams,
       relayMutation,
       wcProvider,

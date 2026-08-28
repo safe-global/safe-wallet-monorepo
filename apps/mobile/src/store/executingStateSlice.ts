@@ -8,6 +8,8 @@ interface ExecutingState {
   completedAt?: number
   executionMethod: ExecutionMethod
   error?: string
+  /** GS code behind the failure, shown as a support reference. */
+  errorCode?: string
 }
 
 interface ExecutingStateSlice {
@@ -39,12 +41,13 @@ export const executingStateSlice = createSlice({
       }
     },
 
-    setExecutingError: (state, action: PayloadAction<{ txId: string; error: string }>) => {
-      const { txId, error } = action.payload
+    setExecutingError: (state, action: PayloadAction<{ txId: string; error: string; code?: string }>) => {
+      const { txId, error, code } = action.payload
       if (state.executions[txId]) {
         state.executions[txId].status = 'error'
         state.executions[txId].completedAt = Date.now()
         state.executions[txId].error = error
+        state.executions[txId].errorCode = code
       }
     },
 
