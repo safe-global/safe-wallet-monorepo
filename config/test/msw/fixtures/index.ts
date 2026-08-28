@@ -9,7 +9,7 @@
  * - Scenario (ef-safe, vitalik, spam-tokens, safe-token-holder, empty)
  *
  * To refresh fixtures, run:
- *   npx tsx config/test/msw/scripts/fetch-fixtures.ts
+ *   node config/test/msw/scripts/fetch-fixtures.ts
  */
 
 import type { Portfolio } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
