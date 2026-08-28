@@ -133,3 +133,5 @@ todos/*
 # Claude Code worktrees
 .claude/worktrees/
 .claude/settings.local.json
+# Ledger Ethereum app binary built for the Speculos emulator (see apps/web/docs/ledger-emulator.md)
+apps/web/.speculos/

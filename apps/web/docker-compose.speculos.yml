@@ -1,0 +1,30 @@
+# Speculos — Ledger's own device emulator. It runs a real Ledger Ethereum app binary and speaks
+# the same APDU protocol a physical device does, so the app under test signs against it without
+# knowing the difference.
+#
+# The app binary is not included here. See docs/ledger-emulator.md for how to produce
+# ./.speculos/app.elf before starting this.
+services:
+  speculos:
+    # 0.26.9 ships the api_level 26 shared libraries. A Speculos older than the api_level the
+    # Ethereum app was built against exits at startup with "invalid SDK api_level".
+    image: ghcr.io/ledgerhq/speculos:0.26.9
+    ports:
+      # APDU port — the transport the Device Management Kit sends commands over.
+      - '9999:9999'
+      # REST API — what Cypress uses to read the screen and press the buttons.
+      - '5000:5000'
+    volumes:
+      - ./.speculos:/speculos/apps:ro
+    command:
+      - --model
+      - nanosp
+      - ./apps/app.elf
+      - --display
+      - headless
+      - --apdu-port
+      - '9999'
+      - --api-port
+      - '5000'
+      - --seed
+      - ${LEDGER_EMULATOR_SEED:?set LEDGER_EMULATOR_SEED to the test mnemonic}

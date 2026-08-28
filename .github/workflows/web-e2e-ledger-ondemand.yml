@@ -1,0 +1,90 @@
+name: Web Ledger emulator on demand tests
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    name: Cypress Ledger emulator on demand tests
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # The emulator runs a real Ledger Ethereum app. Building it takes several minutes, so the
+      # result is cached on the app's commit — it only rebuilds when that pin moves.
+      - name: Cache Ledger Ethereum app
+        id: cache-ledger-app
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: apps/web/.speculos
+          key: ledger-app-ethereum-${{ vars.LEDGER_APP_ETHEREUM_REF || 'master' }}-nanosp
+
+      - name: Build Ledger Ethereum app
+        if: steps.cache-ledger-app.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p apps/web/.speculos
+          git clone --depth 1 --branch "${{ vars.LEDGER_APP_ETHEREUM_REF || 'master' }}" \
+            https://github.com/LedgerHQ/app-ethereum /tmp/app-ethereum
+          docker run --rm -v /tmp/app-ethereum:/app \
+            ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder-lite:latest \
+            bash -c 'cd /app && make BOLOS_SDK=$NANOSP_SDK'
+          cp /tmp/app-ethereum/build/nanos2/bin/app.elf apps/web/.speculos/app.elf
+
+      - name: Start Speculos
+        env:
+          LEDGER_EMULATOR_SEED: ${{ secrets.LEDGER_EMULATOR_SEED }}
+        run: docker compose -f apps/web/docker-compose.speculos.yml up -d
+
+      # Speculos accepts the port before the app inside it is ready to answer APDUs. Without this
+      # the first test can start scanning against an emulator that is still booting.
+      - name: Wait for Speculos
+        run: |
+          for _ in $(seq 1 30); do
+            if curl -sf http://localhost:5000/events >/dev/null; then
+              echo "Speculos is up"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Speculos did not become ready"
+          docker compose -f apps/web/docker-compose.speculos.yml logs
+          exit 1
+
+      # Safe signs a SafeTx as EIP-712 typed data, which the Ethereum app refuses outright
+      # (0x6a80) until blind signing is switched on in its settings menu.
+      - name: Enable blind signing on the emulator
+        run: apps/web/scripts/enable-ledger-blind-signing.sh
+
+      - uses: ./.github/actions/cypress
+        env:
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          CYPRESS_WALLET_CREDENTIALS: ${{ secrets.CYPRESS_WALLET_CREDENTIALS }}
+          CYPRESS_LEDGER_SPECULOS_URL: http://localhost:5000
+          # Read at build time — this is what swaps the WebHID transport for Speculos.
+          NEXT_PUBLIC_LEDGER_SPECULOS_URL: http://localhost:9999
+          NEXT_PUBLIC_CONFIG_SERVICE_KEY: ${{ secrets.NEXT_PUBLIC_CONFIG_SERVICE_KEY }}
+          NEXT_PUBLIC_GATEWAY_URL_PRODUCTION: ${{ secrets.NEXT_PUBLIC_GATEWAY_URL_PRODUCTION }}
+          NEXT_PUBLIC_GATEWAY_URL_STAGING: ${{ secrets.NEXT_PUBLIC_GATEWAY_URL_STAGING }}
+          NEXT_PUBLIC_INFURA_TOKEN: ${{ secrets.NEXT_PUBLIC_INFURA_TOKEN }}
+          NEXT_PUBLIC_WC_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_WC_PROJECT_ID }}
+        with:
+          spec: |
+            cypress/e2e/hardware-wallet/*.cy.js
+          group: 'Ledger emulator on demand tests'
+          tag: 'ledger'
+          parallel: 'false'
+
+      - name: Speculos logs
+        if: failure()
+        run: docker compose -f apps/web/docker-compose.speculos.yml logs
+
+      - name: Stop Speculos
+        if: always()
+        run: docker compose -f apps/web/docker-compose.speculos.yml down
