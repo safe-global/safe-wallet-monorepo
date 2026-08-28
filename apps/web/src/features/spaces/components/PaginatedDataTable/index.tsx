@@ -1,9 +1,9 @@
 import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { cva } from 'class-variance-authority'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableSortIcon } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { useIsMobile } from '@/hooks/use-mobile'
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
+import { ChevronDown, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import { cn } from '@/utils/cn'
 
 // Bounded design-system styling for columns. Consumers pick from these variant
@@ -112,12 +112,6 @@ const compareNullable = (
 const ariaSortValue = (direction?: SortDirection): 'ascending' | 'descending' | 'none' =>
   direction === 'asc' ? 'ascending' : direction === 'desc' ? 'descending' : 'none'
 
-const SortIcon = ({ direction }: { direction?: SortDirection }) => {
-  if (direction === 'asc') return <ArrowUp className="size-3.5" />
-  if (direction === 'desc') return <ArrowDown className="size-3.5" />
-  return <ArrowUpDown className="size-3.5 opacity-50" />
-}
-
 function PaginatedDataTable<T>({
   columns,
   rows,
@@ -218,10 +212,10 @@ function PaginatedDataTable<T>({
                     <button
                       type="button"
                       onClick={() => handleSort(column.id)}
-                      className="hover:text-foreground inline-flex cursor-pointer items-center gap-1"
+                      className="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1"
                     >
                       {column.header}
-                      <SortIcon direction={direction} />
+                      <TableSortIcon direction={direction} />
                     </button>
                   ) : (
                     column.header

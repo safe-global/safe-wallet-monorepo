@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react'
 import React, { useState } from 'react'
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import classNames from 'classnames'
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableSortIcon } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Typography } from '@/components/ui/typography'
@@ -14,7 +14,6 @@ type SortDirection = 'asc' | 'desc'
 type EnhancedCell = {
   content: ReactNode
   rawValue: string | number | null
-  sticky?: boolean
 }
 
 type EnhancedRow = {
@@ -100,19 +99,13 @@ function EnhancedTableHead(props: EnhancedTableHeadProps) {
                     }
                   }}
                   className={classNames(
-                    'inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap',
+                    'hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap',
                     { 'text-sm': !panel },
                     'select-none',
                   )}
                 >
                   {headCell.label}
-                  {isActive ? (
-                    order === 'desc' ? (
-                      <ChevronDown className="size-4" aria-hidden />
-                    ) : (
-                      <ChevronUp className="size-4" aria-hidden />
-                    )
-                  ) : null}
+                  <TableSortIcon direction={isActive ? order : undefined} />
                   {isActive ? (
                     <span className="sr-only">{order === 'desc' ? 'sorted descending' : 'sorted ascending'}</span>
                   ) : null}

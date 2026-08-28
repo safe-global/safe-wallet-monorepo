@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
+import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
 
 import { cn } from '@/utils/cn'
 import css from './table.module.css'
@@ -87,6 +88,22 @@ function TableRow({ className, ...props }: React.ComponentProps<'tr'>) {
   )
 }
 
+/**
+ * Sort affordance for a header label: the direction when the column is sorted, otherwise a hint that
+ * fades in on hover or keyboard focus. The hint holds its space either way, so a header never
+ * reflows as it appears. Put `group/sort` on the control that wraps the label and this icon.
+ */
+function TableSortIcon({ direction }: { direction?: 'asc' | 'desc' }) {
+  if (direction === 'asc') return <ArrowUp className="size-3.5" aria-hidden />
+  if (direction === 'desc') return <ArrowDown className="size-3.5" aria-hidden />
+  return (
+    <ArrowUpDown
+      className="size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+      aria-hidden
+    />
+  )
+}
+
 function TableHead({ className, ...props }: React.ComponentProps<'th'>) {
   return (
     <th
@@ -116,4 +133,15 @@ function TableCaption({ className, ...props }: React.ComponentProps<'caption'>) 
   )
 }
 
-export { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption, tableVariants }
+export {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableCaption,
+  TableSortIcon,
+  tableVariants,
+}

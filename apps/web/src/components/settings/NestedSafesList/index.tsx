@@ -46,7 +46,6 @@ export function NestedSafesList(): ReactElement | null {
           },
           actions: {
             rawValue: '',
-            sticky: true,
             content: (
               <div className={tableCss.actions}>
                 <CheckWallet>

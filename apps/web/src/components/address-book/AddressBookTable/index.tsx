@@ -167,7 +167,6 @@ function AddressBookTable({ chain, setTxFlow }: AddressBookTableProps) {
       },
       actions: {
         rawValue: '',
-        sticky: true,
         content: <div className={tableCss.actions}>{renderActionButtons(address, name)}</div>,
       },
     },

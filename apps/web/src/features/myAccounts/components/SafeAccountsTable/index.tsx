@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { ChevronDown, ChevronUp } from 'lucide-react'
-import { TableBody, TableHead, TableHeader, TableRow, tableVariants } from '@/components/ui/table'
+import { TableBody, TableHead, TableHeader, TableRow, TableSortIcon, tableVariants } from '@/components/ui/table'
 import tableCss from './styles.module.css'
 import type { AllSafeItems } from '@/hooks/safes'
 import { cn } from '@/utils/cn'
@@ -312,16 +311,10 @@ export default function SafeAccountsTable({
                             }
                           }}
                           data-testid={`account-sort-${column.id}`}
-                          className="inline-flex cursor-pointer items-center gap-0.5 select-none uppercase"
+                          className="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 uppercase select-none"
                         >
                           {column.label}
-                          {active ? (
-                            sort.order === 'desc' ? (
-                              <ChevronDown className="size-4" aria-hidden />
-                            ) : (
-                              <ChevronUp className="size-4" aria-hidden />
-                            )
-                          ) : null}
+                          <TableSortIcon direction={active ? sort.order : undefined} />
                         </span>
                       ) : (
                         column.label
