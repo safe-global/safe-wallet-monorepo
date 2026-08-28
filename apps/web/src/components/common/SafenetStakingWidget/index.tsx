@@ -1,4 +1,4 @@
-import { SAFE_TOKEN_ADDRESSES } from '@/config/constants'
+import { isSafeToken } from '@/utils/safe-token'
 import useBalances from '@/hooks/useBalances'
 import useChainId from '@/hooks/useChainId'
 import { useOpenSafenetStakingApp } from '@/hooks/useOpenSafenetStakingApp'
@@ -15,10 +15,7 @@ const SafenetStakingWidget = () => {
   const { balances, loading } = useBalances()
   const { openSafenetStakingApp, isNavigating } = useOpenSafenetStakingApp()
 
-  const safeTokenAddress = SAFE_TOKEN_ADDRESSES[chainId]
-  const safeTokenItem = balances.items.find(
-    (item) => item.tokenInfo.address.toLowerCase() === safeTokenAddress?.toLowerCase(),
-  )
+  const safeTokenItem = balances.items.find((item) => isSafeToken(chainId, item.tokenInfo.address))
   const safeBalance = safeTokenItem
     ? formatVisualAmount(safeTokenItem.balance, safeTokenItem.tokenInfo.decimals, 0)
     : '0'

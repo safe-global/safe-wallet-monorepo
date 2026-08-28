@@ -29,7 +29,6 @@ const meta = {
     layout: 'fullscreen',
     ...defaultSetup.parameters,
   },
-  decorators: [defaultSetup.decorator],
   argTypes: {
     showHiddenAssets: {
       control: { type: 'boolean' },
@@ -50,6 +49,7 @@ export const Default: Story = {
   args: {
     showHiddenAssets: false,
   },
+  decorators: [defaultSetup.decorator],
 }
 
 /**
@@ -80,6 +80,27 @@ export const EmptyBalance: Story = (() => {
     scenario: 'empty',
     wallet: 'owner',
     layout: 'paper',
+  })
+  return {
+    args: {
+      showHiddenAssets: false,
+    },
+    parameters: { ...setup.parameters },
+    decorators: [setup.decorator],
+  }
+})()
+
+/**
+ * AssetsTable for a Safe holding SAFE tokens on a chain where Safenet staking is available.
+ * The SAFE row carries a staking icon that opens the Safenet Safe App; the native token row
+ * carries none.
+ */
+export const SafenetStaking: Story = (() => {
+  const setup = createMockStory({
+    scenario: 'safeTokenHolder',
+    wallet: 'owner',
+    layout: 'paper',
+    features: { safeStaking: true },
   })
   return {
     args: {
