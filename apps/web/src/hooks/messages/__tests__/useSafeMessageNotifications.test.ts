@@ -6,6 +6,7 @@ import { showNotification } from '@/store/notificationsSlice'
 import { renderHook } from '@/tests/test-utils'
 import useSafeMessageNotifications, { _getSafeMessagesAwaitingConfirmations } from '../useSafeMessageNotifications'
 import type { PendingSafeMessagesState } from '@/store/pendingSafeMessagesSlice'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 jest.mock('@/store/notificationsSlice', () => {
   const original = jest.requireActual('@/store/notificationsSlice')
@@ -166,6 +167,48 @@ describe('useSafeMessageNotifications', () => {
       message: 'The message was successfully confirmed.',
       groupKey: '0x012',
       variant: 'success',
+    })
+  })
+
+  describe('CGW response states (WA-3252)', () => {
+    const HTML_502 =
+      '<html><head><title>502 Bad Gateway</title></head><body><center><h1>502 Bad Gateway</h1></center><hr><center>nginx</center></body></html>'
+
+    it('shows the agreed copy and no raw HTML for a 502 from CGW', () => {
+      renderHook(() => useSafeMessageNotifications())
+
+      safeMsgDispatch(SafeMsgEvent.PROPOSE_FAILED, {
+        messageHash: '0x345',
+        error: asError({
+          status: 'PARSING_ERROR',
+          originalStatus: 502,
+          data: HTML_502,
+          error: "SyntaxError: Unexpected token '<'",
+        }),
+      })
+
+      expect(showNotification).toHaveBeenCalledWith({
+        message: 'Something went wrong on our end. Try again.',
+        detailedMessage: 'Error code CGW-502',
+        groupKey: '0x345',
+        variant: 'error',
+      })
+    })
+
+    it('shows the banned-Safe copy for a 451', () => {
+      renderHook(() => useSafeMessageNotifications())
+
+      safeMsgDispatch(SafeMsgEvent.PROPOSE_FAILED, {
+        messageHash: '0x346',
+        error: asError({ status: 451, data: {} }),
+      })
+
+      expect(showNotification).toHaveBeenCalledWith({
+        message: 'This Safe Account is not available.',
+        detailedMessage: 'Error code CGW-451',
+        groupKey: '0x346',
+        variant: 'error',
+      })
     })
   })
 })

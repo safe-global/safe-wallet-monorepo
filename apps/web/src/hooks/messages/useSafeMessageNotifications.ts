@@ -15,6 +15,7 @@ import { useCurrentChain } from '@/hooks/useChains'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import type { PendingSafeMessagesState } from '@/store/pendingSafeMessagesSlice'
 import { isWalletRejection } from '@/utils/wallets'
+import { getCgwErrorInfo } from '@/utils/cgw-errors'
 
 const SafeMessageNotifications: Partial<Record<SafeMsgEvent, string>> = {
   [SafeMsgEvent.PROPOSE]: 'You successfully signed the message.',
@@ -52,12 +53,19 @@ const useSafeMessageNotifications = () => {
         const isError = 'error' in detail
         if (isError && isWalletRejection(detail.error)) return
         const isSuccess = event === SafeMsgEvent.PROPOSE || event === SafeMsgEvent.SIGNATURE_PREPARED
-        const message = isError ? `${baseMessage}${formatError(detail.error)}` : baseMessage
+        // A known CGW response state replaces both the copy and the details:
+        // the response body can be a gateway HTML error page (WA-3252).
+        const cgwError = isError ? getCgwErrorInfo(detail.error) : undefined
+        const message = cgwError
+          ? cgwError.message
+          : isError
+            ? `${baseMessage}${formatError(detail.error)}`
+            : baseMessage
 
         dispatch(
           showNotification({
             message,
-            detailedMessage: isError ? detail.error.message : undefined,
+            detailedMessage: cgwError ? `Error code ${cgwError.code}` : isError ? detail.error.message : undefined,
             groupKey: detail.messageHash,
             variant: isError ? 'error' : isSuccess ? 'success' : 'info',
           }),

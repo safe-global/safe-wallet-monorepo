@@ -1,6 +1,7 @@
 import { type ReactElement, type ReactNode, type SyntheticEvent, useState } from 'react'
 import { getGsCodeFromError } from '@safe-global/utils/services/exceptions/contractErrors'
 import { getGuardErrorInfo, isRevertError } from '@/utils/transaction-errors'
+import { getCgwSupportCode } from '@/utils/cgw-errors'
 import { decodeCustomError } from '@/utils/customErrorRegistry'
 import { getBlockExplorerLink } from '@/utils/chains'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -52,6 +53,11 @@ const ErrorMessage = ({
     error && (gsCode === 'GS013' || (!gsCode && isRevertError(error))) ? decodeCustomError(error) : undefined
   const effectiveGsCode = gsCode ?? (customError ? 'GS013' : undefined)
 
+  // A known CGW response state (429/422/451/5xx) gets the same code-only
+  // support reference, so the raw response body — which can be a gateway's HTML
+  // error page — is never rendered in Details (WA-3252).
+  const supportCode = effectiveGsCode ?? (error ? getCgwSupportCode(error) : undefined)
+
   // Check if this is a Guard error that should get special treatment
   const guardErrorName = error && context ? getGuardErrorInfo(error) : undefined
   const guardExplorerLink =
@@ -92,7 +98,7 @@ const ErrorMessage = ({
             </span>
           )}
 
-          {error && !effectiveGsCode && (
+          {error && !supportCode && (
             <Link
               render={<button type="button" />}
               onClick={onDetailsToggle}
@@ -103,8 +109,8 @@ const ErrorMessage = ({
           )}
         </span>
 
-        {effectiveGsCode ? (
-          <ErrorDetails code={effectiveGsCode} customError={customError} />
+        {supportCode ? (
+          <ErrorDetails code={supportCode} customError={customError} />
         ) : (
           error &&
           showDetails && (

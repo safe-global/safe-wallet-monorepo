@@ -22,6 +22,7 @@ import {
   RATE_LIMIT_USER_MESSAGE,
 } from '@/utils/transaction-errors'
 import { getGs026Message } from '@safe-global/utils/services/exceptions/contractErrors'
+import { getCgwErrorInfo } from '@/utils/cgw-errors'
 
 const TxNotifications = {
   [TxEvent.SIGN_FAILED]: 'Failed to sign. Please try again.',
@@ -72,6 +73,9 @@ const useTxNotifications = (): void => {
 
         // Check if this is a Guard error
         const guardErrorName = isError ? getGuardErrorInfo(detail.error) : undefined
+        // A known CGW response state replaces both the copy and the details:
+        // the response body can be a gateway HTML error page (WA-3252).
+        const cgwError = isError ? getCgwErrorInfo(detail.error) : undefined
         let message = isError ? `${baseMessage} ${formatError(detail.error)}` : baseMessage
 
         // Override message for Guard errors
@@ -90,7 +94,11 @@ const useTxNotifications = (): void => {
           // The raw error from viem looks like a contract revert ("Request is
           // being rate limited"); we replace the message but keep the original
           // in detailedMessage for debugging.
+          // Checked before the CGW classification so a 429-carrying error reads
+          // the same here as it does inline in `TxSubmitError` (WA-3252).
           message = RATE_LIMIT_USER_MESSAGE
+        } else if (cgwError) {
+          message = cgwError.message
         }
 
         const txId = 'txId' in detail ? detail.txId : undefined
@@ -110,7 +118,7 @@ const useTxNotifications = (): void => {
           showNotification({
             title: humanDescription,
             message,
-            detailedMessage: isError ? detail.error.message : undefined,
+            detailedMessage: cgwError ? `Error code ${cgwError.code}` : isError ? detail.error.message : undefined,
             groupKey,
             variant: isError ? Variant.ERROR : isSuccess ? Variant.SUCCESS : Variant.INFO,
             link: txId
