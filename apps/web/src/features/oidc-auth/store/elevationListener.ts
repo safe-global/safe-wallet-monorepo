@@ -6,7 +6,10 @@ import { selectStepUpPhase, stepUpLeaving } from './stepUpSlice'
 
 /**
  * Lives on the store rather than in the ten places that call a gated endpoint,
- * so when CGW gates another route it works without a frontend change.
+ * so a newly gated route starts the step-up without a frontend change. The
+ * replay is separate: only the endpoints in `REPLAYABLE_ENDPOINTS` are sent
+ * again, and a route missing from that list leaves the user to click a second
+ * time once the session is elevated.
  */
 export const elevationListener = (listenerMiddleware: typeof listenerMiddlewareInstance) => {
   listenerMiddleware.startListening({
