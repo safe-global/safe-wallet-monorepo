@@ -76,7 +76,7 @@ For "who uses this symbol?" questions, prefer the `LSP` tool (`findReferences`, 
 ## General Principles
 
 - Never use the `any` type!
-- Treat code comments as tech debt! Add them only when really necessary & the code at hand is hard to understand.
+- **Comments are tech debt — default to writing none.** AI agents habitually over-comment; this codebase already carries too many long comments. Write a comment only for what the code cannot express (a non-obvious why, an invariant, a workaround and its reason) and keep it to one line — never narrate what the next line does, restate the diff, justify a change to the reviewer, or write multi-paragraph comment blocks.
 - **Use sentence case for UI text** – Buttons, headings, labels, warnings, and other UI copy should use sentence case (e.g., "Add new owner") not Title Case (e.g., "Add New Owner")
 
 Web-specific principles live in [apps/web/AGENTS.md](apps/web/AGENTS.md); mobile-specific ones in [apps/mobile/AGENTS.md](apps/mobile/AGENTS.md).
@@ -171,6 +171,7 @@ Before writing code for any non-trivial change (anything beyond a typo, doc twea
 - Use [Mock Service Worker](https://mswjs.io/) (MSW) for tests involving network requests instead of mocking `fetch`. Use MSW for mocking blockchain RPC calls instead of mocking ethers.js directly
 - Create test data with helpers using [faker](https://fakerjs.dev/)
 - Test files should be colocated with source files using the `*.test.ts(x)` naming convention
+- No comments above test cases — the `it(...)` name carries the intent, even for regression tests
 
 ## Security & Safe Wallet Patterns
 
