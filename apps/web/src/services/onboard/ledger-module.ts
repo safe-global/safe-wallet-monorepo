@@ -10,6 +10,7 @@ import type {
 import type { Chain, WalletInit, WalletInterface } from '@web3-onboard/common'
 import type { Account, Asset, BasePath, DerivationPath, ScanAccountsOptions } from '@web3-onboard/hw-common'
 import type { Subscription } from 'rxjs'
+import { LEDGER_SPECULOS_URL } from '@/config/constants'
 
 const LEDGER_LIVE_PATH: DerivationPath = "44'/60'"
 const LEDGER_LEGACY_PATH: DerivationPath = "44'/60'/0'"
@@ -343,16 +344,36 @@ const enum LedgerErrorCode {
   REJECTED = '6985',
 }
 
+/**
+ * Picks the transport the Device Management Kit talks to the device over.
+ *
+ * WebHID is the only transport a browser has to a physical Ledger, but it needs a real device
+ * plugged in and a user gesture to grant access, so a headless e2e browser can never satisfy it.
+ * Setting LEDGER_SPECULOS_URL swaps in Ledger's Speculos emulator, which speaks the same APDU
+ * protocol over HTTP. The constant is empty unless the app was built for e2e, so every other
+ * build resolves to WebHID.
+ */
+export async function getLedgerTransport() {
+  if (LEDGER_SPECULOS_URL) {
+    const { speculosTransportFactory, speculosIdentifier } = await import('@ledgerhq/device-transport-kit-speculos')
+    return { factory: speculosTransportFactory(LEDGER_SPECULOS_URL), identifier: speculosIdentifier }
+  }
+
+  const { webHidTransportFactory, webHidIdentifier } = await import('@ledgerhq/device-transport-kit-web-hid')
+  return { factory: webHidTransportFactory, identifier: webHidIdentifier }
+}
+
 // Promisified Ledger SDK
 async function getLedgerSdk() {
   const { DeviceManagementKitBuilder } = await import('@ledgerhq/device-management-kit')
-  const { webHidTransportFactory, webHidIdentifier } = await import('@ledgerhq/device-transport-kit-web-hid')
   const { SignerEthBuilder } = await import('@ledgerhq/device-signer-kit-ethereum')
   const { lastValueFrom } = await import('rxjs')
 
+  const { factory: transportFactory, identifier: transportIdentifier } = await getLedgerTransport()
+
   // Get connected device and create signer
-  const dmk = new DeviceManagementKitBuilder().addTransport(webHidTransportFactory).build()
-  const device = await lastValueFrom(dmk.startDiscovering({ transport: webHidIdentifier }))
+  const dmk = new DeviceManagementKitBuilder().addTransport(transportFactory).build()
+  const device = await lastValueFrom(dmk.startDiscovering({ transport: transportIdentifier }))
   const sessionId = await dmk.connect({ device })
   const signer = new SignerEthBuilder({ dmk, sessionId, originToken: 'your-origin-token' }).build()
 

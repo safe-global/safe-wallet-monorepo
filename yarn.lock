@@ -9654,6 +9654,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ledgerhq/device-transport-kit-speculos@npm:1.0.1":
+  version: 1.0.1
+  resolution: "@ledgerhq/device-transport-kit-speculos@npm:1.0.1"
+  dependencies:
+    "@sentry/minimal": "npm:6.19.7"
+    axios: "npm:1.8.2"
+    purify-ts: "npm:2.1.0"
+  peerDependencies:
+    "@ledgerhq/device-management-kit": 0.9.1
+    rxjs: 7.8.2
+  checksum: 10/d4e15025cb5e690ebc1345e687b2d9f7e89f5e1f99dab78fe994ab8f64405c205c2e8668a48b3c9fed268c6eead6d0bbdb971e5d19162c7dee755ff88fd592c1
+  languageName: node
+  linkType: hard
+
 "@ledgerhq/device-transport-kit-web-hid@npm:^1.2.0":
   version: 1.2.0
   resolution: "@ledgerhq/device-transport-kit-web-hid@npm:1.2.0"
@@ -13780,6 +13794,7 @@ __metadata:
     "@ledgerhq/context-module": "npm:^1.8.0"
     "@ledgerhq/device-management-kit": "npm:^0.9.1"
     "@ledgerhq/device-signer-kit-ethereum": "npm:^1.8.0"
+    "@ledgerhq/device-transport-kit-speculos": "npm:1.0.1"
     "@ledgerhq/device-transport-kit-web-hid": "npm:^1.2.0"
     "@mdx-js/loader": "npm:^3.0.1"
     "@mdx-js/react": "npm:^3.0.1"

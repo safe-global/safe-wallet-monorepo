@@ -12,6 +12,9 @@ export const IS_DEV = APP_ENV === 'development'
 // we also honour an explicit NEXT_PUBLIC_IS_TEST_E2E flag, which survives the
 // build because of its NEXT_PUBLIC_ prefix.
 export const IS_TEST_E2E = APP_ENV === 'cypress' || process.env.NEXT_PUBLIC_IS_TEST_E2E === 'true'
+// Points Ledger signing at a Speculos emulator over HTTP instead of a physical device over WebHID.
+// Gated on IS_TEST_E2E so it can only take effect in an e2e build, and empty everywhere else.
+export const LEDGER_SPECULOS_URL = IS_TEST_E2E ? process.env.NEXT_PUBLIC_LEDGER_SPECULOS_URL || '' : ''
 export const COMMIT_HASH = process.env.NEXT_PUBLIC_COMMIT_HASH || ''
 
 // default chain ID's as provided to the environment

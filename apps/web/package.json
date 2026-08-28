@@ -67,6 +67,7 @@
     "@ledgerhq/context-module": "^1.8.0",
     "@ledgerhq/device-management-kit": "^0.9.1",
     "@ledgerhq/device-signer-kit-ethereum": "^1.8.0",
+    "@ledgerhq/device-transport-kit-speculos": "1.0.1",
     "@ledgerhq/device-transport-kit-web-hid": "^1.2.0",
     "@next/third-parties": "^15.2.0",
     "@reduxjs/toolkit": "^2.11.0",
