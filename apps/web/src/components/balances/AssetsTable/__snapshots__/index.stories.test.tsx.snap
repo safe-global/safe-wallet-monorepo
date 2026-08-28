@@ -1144,6 +1144,580 @@ exports[`./index.stories EmptyBalance 1`] = `
 </div>
 `;
 
+exports[`./index.stories SafenetStaking 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 0px;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="bg-card rounded-lg p-4"
+    >
+      <div
+        class="bg-card rounded-lg p-4"
+      >
+        <div
+          class="bg-card text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col gap-0 py-0 rounded-lg mb-4 border-4 border-transparent"
+          data-radius="lg"
+          data-size="none"
+          data-slot="card"
+          data-surface="default"
+          data-variant="default"
+        >
+          <div
+            class="container"
+          >
+            <div
+              class="mb-4 w-full"
+            >
+              <div
+                class="w-full overflow-x-auto rounded-t-3xl bg-[var(--color-background-paper)] md:overflow-x-hidden rounded-b-3xl"
+                data-testid="table-container"
+              >
+                <div
+                  class="relative w-full overflow-x-auto"
+                  data-slot="table-container"
+                >
+                  <table
+                    aria-labelledby="tableTitle"
+                    class="w-full caption-bottom text-sm compactTable"
+                    data-slot="table"
+                  >
+                    <thead
+                      class="[&_tr]:border-b"
+                      data-slot="table-header"
+                    >
+                      <tr
+                        class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                        data-slot="table-row"
+                      >
+                        <th
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
+                          data-slot="table-head"
+                          style="width: 35%;"
+                        >
+                          <span
+                            class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                            role="button"
+                            tabindex="0"
+                          >
+                            Asset
+                          </span>
+                        </th>
+                        <th
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
+                          data-slot="table-head"
+                          style="width: 16%; text-align: right;"
+                        >
+                          <span
+                            class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                            role="button"
+                            tabindex="0"
+                          >
+                            Price
+                          </span>
+                        </th>
+                        <th
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
+                          data-slot="table-head"
+                          style="width: 16%; text-align: right;"
+                        >
+                          <span
+                            class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                            role="button"
+                            tabindex="0"
+                          >
+                            Balance
+                          </span>
+                        </th>
+                        <th
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
+                          data-slot="table-head"
+                          style="width: 16%; text-align: right;"
+                        >
+                          <span
+                            class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                            role="button"
+                            tabindex="0"
+                          >
+                            <span
+                              data-slot="tooltip-trigger"
+                              id="base-ui-_r_5_"
+                            >
+                              Weight
+                            </span>
+                          </span>
+                        </th>
+                        <th
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
+                          data-slot="table-head"
+                          style="width: 17%; text-align: right;"
+                        >
+                          <span
+                            class="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                            role="button"
+                            tabindex="0"
+                          >
+                            Value
+                          </span>
+                        </th>
+                        <th
+                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
+                          data-slot="table-head"
+                          style="width: 86px; text-align: right;"
+                        >
+                          <span
+                            class="text-sm"
+                          >
+                            Actions
+                          </span>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody
+                      class="[&_tr:last-child]:border-0 tableBody"
+                      data-slot="table-body"
+                    >
+                      <tr
+                        class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                        data-slot="table-row"
+                        data-testid="table-row"
+                        tabindex="-1"
+                      >
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                          data-slot="table-cell"
+                          data-testid="table-cell-asset"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="token"
+                            >
+                              <div
+                                class="bg-muted animate-pulse h-[26px] w-[26px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                              <div
+                                class="m-0 text-base leading-6 font-normal"
+                                data-slot="typography"
+                                data-variant="paragraph"
+                              >
+                                <div
+                                  class="bg-muted rounded-md animate-pulse h-4 w-[80px]"
+                                  data-slot="skeleton"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                          data-slot="table-cell"
+                          data-testid="table-cell-price"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                          data-slot="table-cell"
+                          data-testid="table-cell-balance"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                          data-slot="table-cell"
+                          data-testid="table-cell-weight"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                          data-slot="table-cell"
+                          data-testid="table-cell-value"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                          data-slot="table-cell"
+                          data-testid="table-cell-actions"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="flex flex-row justify-end gap-2"
+                            >
+                              <div
+                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                              <div
+                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                              <div
+                                class="bg-muted animate-pulse h-[24px] w-[24px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr
+                        class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                        data-slot="table-row"
+                        data-testid="table-row"
+                        tabindex="-1"
+                      >
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                          data-slot="table-cell"
+                          data-testid="table-cell-asset"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="token"
+                            >
+                              <div
+                                class="bg-muted animate-pulse h-[26px] w-[26px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                              <div
+                                class="m-0 text-base leading-6 font-normal"
+                                data-slot="typography"
+                                data-variant="paragraph"
+                              >
+                                <div
+                                  class="bg-muted rounded-md animate-pulse h-4 w-[80px]"
+                                  data-slot="skeleton"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                          data-slot="table-cell"
+                          data-testid="table-cell-price"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                          data-slot="table-cell"
+                          data-testid="table-cell-balance"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                          data-slot="table-cell"
+                          data-testid="table-cell-weight"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                          data-slot="table-cell"
+                          data-testid="table-cell-value"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                          data-slot="table-cell"
+                          data-testid="table-cell-actions"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="flex flex-row justify-end gap-2"
+                            >
+                              <div
+                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                              <div
+                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                              <div
+                                class="bg-muted animate-pulse h-[24px] w-[24px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr
+                        class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                        data-slot="table-row"
+                        data-testid="table-row"
+                        tabindex="-1"
+                      >
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                          data-slot="table-cell"
+                          data-testid="table-cell-asset"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="token"
+                            >
+                              <div
+                                class="bg-muted animate-pulse h-[26px] w-[26px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                              <div
+                                class="m-0 text-base leading-6 font-normal"
+                                data-slot="typography"
+                                data-variant="paragraph"
+                              >
+                                <div
+                                  class="bg-muted rounded-md animate-pulse h-4 w-[80px]"
+                                  data-slot="skeleton"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                          data-slot="table-cell"
+                          data-testid="table-cell-price"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                          data-slot="table-cell"
+                          data-testid="table-cell-balance"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                          data-slot="table-cell"
+                          data-testid="table-cell-weight"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                          data-slot="table-cell"
+                          data-testid="table-cell-value"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                          data-slot="table-cell"
+                          data-testid="table-cell-actions"
+                        >
+                          <div
+                            class="overflow-hidden transition-all"
+                          >
+                            <div
+                              class="flex flex-row justify-end gap-2"
+                            >
+                              <div
+                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                              <div
+                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                              <div
+                                class="bg-muted animate-pulse h-[24px] w-[24px] rounded-md"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div
+                class="flex h-[52px] items-center rounded-b-3xl rounded-t-none border-t border-[var(--color-background-main)] bg-[var(--color-background-paper)] px-4"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
 exports[`./index.stories WhalePortfolio 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 0px;"

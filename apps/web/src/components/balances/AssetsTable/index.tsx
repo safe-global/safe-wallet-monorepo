@@ -15,7 +15,7 @@ import { useHideAssets, useVisibleAssets } from './useHideAssets'
 import AddFundsCTA from '@/components/common/AddFunds'
 import { useIsSwapFeatureEnabled } from '@/features/swap'
 import { useIsEarnPromoEnabled } from '@/features/earn'
-import { useIsStakingBannerEnabled as useIsStakingPromoEnabled } from '@/features/stake'
+import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
 import { FiatChange } from './FiatChange'
 import { FiatBalance } from './FiatBalance'
 import useChainId from '@/hooks/useChainId'
@@ -127,7 +127,7 @@ const AssetsTable = ({
 
   const chainId = useChainId()
   const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
-  const isStakingPromoEnabled = useIsStakingPromoEnabled()
+  const isSafenetStakingEnabled = useSafeTokenEnabled()
   const isEarnPromoEnabled = useIsEarnPromoEnabled()
 
   const { isAssetSelected, toggleAsset, cancel, deselectAll, saveChanges } = useHideAssets(() =>
@@ -161,7 +161,7 @@ const AssetsTable = ({
                   <AssetRowContent
                     item={item}
                     chainId={chainId}
-                    isStakingPromoEnabled={isStakingPromoEnabled ?? false}
+                    isSafenetStakingEnabled={isSafenetStakingEnabled}
                     isEarnPromoEnabled={isEarnPromoEnabled ?? false}
                     showMobileValue
                     showMobileBalance
@@ -270,7 +270,7 @@ const AssetsTable = ({
                     <AssetRowContent
                       item={item}
                       chainId={chainId}
-                      isStakingPromoEnabled={isStakingPromoEnabled ?? false}
+                      isSafenetStakingEnabled={isSafenetStakingEnabled}
                       isEarnPromoEnabled={isEarnPromoEnabled ?? false}
                       showMobileValue
                       showMobileBalance
