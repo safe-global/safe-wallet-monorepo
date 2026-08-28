@@ -1,5 +1,5 @@
 import { GATEWAY_URL } from '@/config/gateway'
-import { markStepUpReturnHandled, resetStepUpReturnGuard, startStepUp } from '../stepUp'
+import { startStepUp } from '../stepUp'
 import { OIDC_AUTH_PENDING_KEY } from '../../constants'
 
 describe('startStepUp', () => {
@@ -11,7 +11,6 @@ describe('startStepUp', () => {
 
   beforeEach(() => {
     sessionStorage.clear()
-    resetStepUpReturnGuard()
     setLocation('https://app.safe.global/spaces/members?spaceId=42')
   })
 
@@ -64,22 +63,8 @@ describe('startStepUp', () => {
   it('should, when an abandoned attempt left residue behind, redirect again', () => {
     sessionStorage.setItem('oidc_step_up', JSON.stringify({ endpoint: 'spacesDeleteV1', createdAt: Date.now() }))
 
-    expect(startStepUp()).toBe(true)
-    expect(new URL(window.location.href).searchParams.get('elevate')).toBe('true')
-  })
+    startStepUp()
 
-  it('should, when a return is being processed, not redirect', () => {
-    markStepUpReturnHandled()
-
-    expect(startStepUp()).toBe(false)
-    expect(window.location.href).toBe('https://app.safe.global/spaces/members?spaceId=42')
-  })
-
-  it('should, when the return has been processed, redirect again', () => {
-    markStepUpReturnHandled()
-    resetStepUpReturnGuard()
-
-    expect(startStepUp()).toBe(true)
     expect(new URL(window.location.href).searchParams.get('elevate')).toBe('true')
   })
 })

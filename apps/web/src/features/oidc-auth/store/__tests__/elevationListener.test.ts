@@ -5,21 +5,16 @@ import { stepUpSlice } from '../stepUpSlice'
 import { ELEVATION_REQUIRED_ERROR } from '../../utils/elevation'
 
 const mockSaveStepUpTrip = jest.fn()
-const mockIsStepUpReturnInFlight = jest.fn()
 
 jest.mock('../../utils/stepUpReplay', () => ({
   getReplayableAction: jest.requireActual('../../utils/stepUpReplay').getReplayableAction,
   saveStepUpTrip: (action: unknown) => mockSaveStepUpTrip(action),
 }))
 
-jest.mock('../../utils/stepUp', () => ({
-  isStepUpReturnInFlight: () => mockIsStepUpReturnInFlight(),
-}))
-
-// Mirrors how RTK Query reports a baseQuery failure: a rejected thunk action
-// whose payload is the FetchBaseQueryError. `requestId` and `requestStatus` are
-// part of the shape RTK's `isRejectedWithValue` matcher keys on, so omitting
-// them would make the listener silently never fire.
+// Copies how RTK Query reports a baseQuery failure: a rejected thunk action whose
+// payload is the FetchBaseQueryError. RTK's `isRejectedWithValue` matcher checks
+// `requestId` and `requestStatus`, so leaving them out makes the listener never
+// fire, without any error.
 const rejectedWithValue = (payload: unknown, endpointName = 'spaceSafesCreateV1', originalArgs: unknown = {}) =>
   ({
     type: 'cgwClient/executeMutation/rejected',
@@ -51,7 +46,6 @@ const ELEVATION_REQUIRED = { status: 403, data: { message: ELEVATION_REQUIRED_ER
 describe('elevationListener', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockIsStepUpReturnInFlight.mockReturnValue(false)
   })
 
   it('should, when a request needs a fresh second factor, start a step-up', () => {
@@ -70,8 +64,8 @@ describe('elevationListener', () => {
     expect(mockSaveStepUpTrip).toHaveBeenCalledWith({ endpoint: 'spaceSafesCreateV1', args: originalArgs })
   })
 
-  // A route CGW does not gate has no business being replayed on a redirect, but
-  // the user still needs elevating to get anywhere.
+  // An endpoint that is not in the replay list must not be sent again, but the
+  // user still has to verify before they can continue.
   it('should, when the endpoint is outside the gated set, record a bare trip and still elevate', () => {
     const store = createTestStore()
 
@@ -81,16 +75,16 @@ describe('elevationListener', () => {
     expect(phaseOf(store)).toBe('leaving')
   })
 
-  // A challenge raised by the replayed action itself must surface inline, not
-  // record a new trip and bounce back out to the provider.
+  // If the replayed request is rejected again, the error belongs in the app.
+  // Saving another trip would send the user back to Auth0 in a loop.
   it('should, when a return is being processed, do nothing', () => {
-    mockIsStepUpReturnInFlight.mockReturnValue(true)
     const store = createTestStore()
+    store.dispatch(stepUpSlice.actions.stepUpReturning())
 
     store.dispatch(rejectedWithValue(ELEVATION_REQUIRED))
 
     expect(mockSaveStepUpTrip).not.toHaveBeenCalled()
-    expect(phaseOf(store)).toBe('idle')
+    expect(phaseOf(store)).toBe('returning')
   })
 
   it('should, when the rejection is an unrelated 403, ignore it', () => {

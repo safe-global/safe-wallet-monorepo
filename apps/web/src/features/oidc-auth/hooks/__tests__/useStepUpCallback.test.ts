@@ -23,16 +23,9 @@ jest.mock('@/store/notificationsSlice', () => ({
 }))
 
 const mockReplayStepUpAction = jest.fn()
-const mockMarkStepUpReturnHandled = jest.fn()
-const mockResetStepUpReturnGuard = jest.fn()
 
-jest.mock('../../utils/stepUp', () => ({
-  markStepUpReturnHandled: () => mockMarkStepUpReturnHandled(),
-  resetStepUpReturnGuard: () => mockResetStepUpReturnGuard(),
-}))
-
-// The storage half stays real: these tests assert the resulting sessionStorage
-// state rather than which helper was called.
+// The storage functions are not mocked: these tests check the resulting
+// sessionStorage state, not which helper was called.
 jest.mock('../../utils/stepUpReplay', () => ({
   ...jest.requireActual('../../utils/stepUpReplay'),
   replayStepUpAction: (...args: unknown[]) => mockReplayStepUpAction(...args),
@@ -60,6 +53,7 @@ describe('useStepUpCallback', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockDispatch.mockImplementation((action) => action)
     sessionStorage.clear()
     mockReconcileAuth.mockResolvedValue('authenticated')
     mockReplayStepUpAction.mockResolvedValue(undefined)
@@ -119,27 +113,30 @@ describe('useStepUpCallback', () => {
     })
   })
 
-  // Without this, an `elevation_required` raised by the replayed action would
-  // send the user straight back out to the provider, on and on.
-  it('should, when processing a return, hold the redirect guard and release it after the replay', async () => {
+  // While the phase is `returning`, the listener ignores an `elevation_required`
+  // from the replayed request, which would otherwise start another redirect.
+  it('should, when processing a return, enter `returning` before the replay and settle after it', async () => {
     saveStepUpTrip(TRIP_ACTION)
     const order: string[] = []
-    mockMarkStepUpReturnHandled.mockImplementation(() => order.push('mark'))
+    mockDispatch.mockImplementation((action: { type: string }) => {
+      if (action.type === stepUpReturning().type) order.push('returning')
+      if (action.type === stepUpSettled().type) order.push('settled')
+      return action
+    })
     mockReplayStepUpAction.mockImplementation(() => {
       order.push('replay')
       return Promise.resolve()
     })
-    mockResetStepUpReturnGuard.mockImplementation(() => order.push('reset'))
 
     renderHook(() => useStepUpCallback())
 
     await waitFor(() => {
-      expect(order).toEqual(['mark', 'replay', 'reset'])
+      expect(order).toEqual(['returning', 'replay', 'settled'])
     })
   })
 
-  // The first render races the replay: without the splash held up, lists paint
-  // pre-mutation data next to a success toast, then visibly jump.
+  // The first render races the replay. Without the splash screen held up, the
+  // lists show old data next to a success message and then jump.
   it('should, when a return is in flight, hold the splash until it is fully processed', async () => {
     saveStepUpTrip(TRIP_ACTION)
     let resolveReplay: () => void = () => {}
@@ -159,30 +156,30 @@ describe('useStepUpCallback', () => {
     })
   })
 
-  it('should, when the challenge failed, still release the redirect guard', async () => {
+  it('should, when the challenge failed, still settle', async () => {
     saveStepUpTrip(TRIP_ACTION)
     setSearch('?error=access_denied')
 
     renderHook(() => useStepUpCallback())
 
     await waitFor(() => {
-      expect(mockResetStepUpReturnGuard).toHaveBeenCalledTimes(1)
+      expect(mockDispatch).toHaveBeenCalledWith(stepUpSettled())
     })
   })
 
-  it('should, when processing the return throws, still release the redirect guard', async () => {
+  it('should, when processing the return throws, still settle', async () => {
     saveStepUpTrip(TRIP_ACTION)
     mockReconcileAuth.mockRejectedValue(new Error('fetch failed'))
 
     renderHook(() => useStepUpCallback())
 
     await waitFor(() => {
-      expect(mockResetStepUpReturnGuard).toHaveBeenCalledTimes(1)
+      expect(mockDispatch).toHaveBeenCalledWith(stepUpSettled())
     })
   })
 
-  // The point of the round-trip: the action the challenge interrupted has to
-  // actually happen, not leave the user back in the app with nothing done.
+  // The whole point: the request that was interrupted has to actually run, not
+  // drop the user back into the app with nothing done.
   it('should, when the return succeeds, complete the interrupted action', async () => {
     saveStepUpTrip(TRIP_ACTION)
 
@@ -193,8 +190,8 @@ describe('useStepUpCallback', () => {
     })
   })
 
-  // A gated endpoint outside the replay allowlist records a bare trip: the
-  // session is still reconciled, but nothing is re-fired blindly.
+  // An endpoint outside the replay list saves a trip with no request in it. The
+  // session is still reconciled, but nothing is sent again.
   it('should, when the trip is bare, reconcile without replaying', async () => {
     saveStepUpTrip(undefined)
 

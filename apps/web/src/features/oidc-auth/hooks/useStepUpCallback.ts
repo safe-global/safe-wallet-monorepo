@@ -5,16 +5,9 @@ import { showNotification } from '@/store/notificationsSlice'
 import reconcileAuth from '@/store/reconcileAuth'
 import { STEP_UP_FAILED_MESSAGE } from '../constants'
 import { stepUpReturning, stepUpSettled } from '../store'
-import { markStepUpReturnHandled, resetStepUpReturnGuard } from '../utils/stepUp'
 import { replayStepUpAction, takeStepUpTrip } from '../utils/stepUpReplay'
 
-/**
- * Handles the return leg of a step-up redirect. CGW has already replaced the
- * session cookie by the time the browser lands here, so there is nothing to
- * exchange — only a new expiry to reconcile into Redux.
- *
- * Call once globally, from `InitApp`, so it runs on page load.
- */
+/** Call once globally, from `InitApp`, so it runs on page load. */
 export const useStepUpCallback = () => {
   const dispatch = useAppDispatch()
   const router = useRouter()
@@ -30,9 +23,8 @@ export const useStepUpCallback = () => {
     if (!trip) return
 
     hasProcessed.current = true
-    markStepUpReturnHandled()
-    // Held until the replay's refetches land, or lists paint pre-mutation data
-    // next to a success toast and then visibly jump.
+    // Held until the refetches finish. Otherwise the lists still show the old
+    // data next to a success message, then jump once the refetch arrives.
     dispatch(stepUpReturning())
 
     const processCallback = async () => {
@@ -60,13 +52,10 @@ export const useStepUpCallback = () => {
       }
     }
 
-    // Released even on a throw — left set, it suppresses every later challenge
-    // in the tab until a full reload.
+    // Settled even if this throws. Left in `returning`, the phase would block
+    // every later verification in this tab and keep the splash screen up.
     void processCallback()
-      .finally(() => {
-        resetStepUpReturnGuard()
-        dispatch(stepUpSettled())
-      })
+      .finally(() => dispatch(stepUpSettled()))
       .catch(() => undefined)
   }, [dispatch])
 }

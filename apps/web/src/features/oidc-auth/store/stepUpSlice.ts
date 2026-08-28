@@ -1,11 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import type { RootState } from '@/store/index'
 
-/**
- * `leaving` covers the moment between CGW rejecting a gated action and the
- * browser actually navigating to the provider; `returning` covers reconciling
- * the elevated session and completing the interrupted action on the way back.
- */
 export type StepUpPhase = 'idle' | 'leaving' | 'returning'
 
 type StepUpState = {
@@ -16,11 +11,7 @@ const initialState: StepUpState = {
   phase: 'idle',
 }
 
-/**
- * Drives the step-up splash screen. Intentionally not persisted: a step-up
- * belongs to the session in flight, so a stale phase must never survive a
- * reload and leave the user behind a splash.
- */
+/** Not persisted: an old phase surviving a reload would leave the user stuck on the splash screen. */
 export const stepUpSlice = createSlice({
   name: 'stepUp',
   initialState,

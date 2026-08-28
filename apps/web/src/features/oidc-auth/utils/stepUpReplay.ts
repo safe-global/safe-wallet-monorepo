@@ -7,20 +7,16 @@ import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { STEP_UP_FAILED_MESSAGE } from '../constants'
 import { isElevationRequiredError } from './elevation'
 
-/**
- * One key rather than a separate in-flight marker and payload. Split across two
- * keys they are written and cleared at different moments and can disagree: a
- * leftover marker suppresses every later redirect in the tab, and a leftover
- * payload is executed by an unrelated return.
- */
+/** One key: a separate marker and payload are written and cleared at different times, and can then disagree. */
 const STEP_UP_KEY = 'oidc_step_up'
 
-/** A trip cannot validly outlive CGW's one-time state cookie. */
+/** A saved request is no longer usable once CGW's one-time state cookie has expired. */
 const STEP_UP_MAX_AGE_MS = 5 * 60 * 1_000
 
 /**
- * Replay re-fires a request without the user pressing anything, so the endpoints
- * that can happen to are pinned here rather than derived from whatever failed.
+ * A replay sends a request again without the user clicking anything, so the
+ * endpoints this may happen to are listed here instead of taken from whatever
+ * request failed.
  *
  * @see https://github.com/safe-global/safe-client-gateway/pull/3315
  */
@@ -50,14 +46,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> => typeof va
 
 const isReplayableEndpoint = (value: string): value is ReplayableEndpoint => value in REPLAYABLE_ENDPOINTS
 
-/**
- * Rebuilds the failed request from the rejection itself, so no call site has to
- * hand its payload over before redirecting. Anything off the allowlist returns
- * undefined, which also filters out queries and non-CGW rejections.
- *
- * Narrowed by hand because the listener middleware hands the effect an
- * `UnknownAction` and RTK types `meta.arg` as `unknown`.
- */
+/** Checked field by field: the listener passes an `UnknownAction`, and RTK types `meta.arg` as `unknown`. */
 export const getReplayableAction = (action: UnknownAction): PendingStepUpAction | undefined => {
   const arg = isRecord(action.meta) ? action.meta.arg : undefined
   if (!isRecord(arg) || typeof arg.endpointName !== 'string') return undefined
@@ -67,7 +56,7 @@ export const getReplayableAction = (action: UnknownAction): PendingStepUpAction 
 }
 
 export type StepUpTrip = {
-  /** Absent when the gated endpoint is not on the replay allowlist. */
+  /** Missing when the endpoint that was rejected is not in the list above. */
   action?: PendingStepUpAction
 }
 
@@ -79,11 +68,7 @@ export const saveStepUpTrip = (action?: PendingStepUpAction): void => {
   }
 }
 
-/**
- * Reads and removes in one step, so a record can never be acted on twice, later,
- * or by a different trip's return — and a request that keeps failing is not
- * retried on every subsequent page load.
- */
+/** Reads and removes in one step, so a saved request cannot run twice, or on a later return. */
 export const takeStepUpTrip = (): StepUpTrip | undefined => {
   const raw = sessionStorage.getItem(STEP_UP_KEY)
   if (!raw) return undefined
@@ -105,27 +90,23 @@ export const takeStepUpTrip = (): StepUpTrip | undefined => {
 type ReplayOutcome = { error?: FetchBaseQueryError | SerializedError }
 
 /**
- * Indexing `cgwApi.endpoints` with a union of endpoint names produces a union of
- * `initiate` thunks that `dispatch` cannot accept, and `args` has lost its type
- * to JSON. Collapsed to one signature: endpoint and args are only ever stored
- * together, from the single request that failed.
+ * A union of endpoint names gives a union of `initiate` thunks, which `dispatch`
+ * will not accept, and `args` lost its type when it was stored as JSON. Both are
+ * collapsed to one signature. This is safe because the endpoint and its
+ * arguments are only ever saved together, from the one request that failed.
  */
 type ReplayInitiator = (args: unknown) => ThunkAction<Promise<ReplayOutcome>, RootState, unknown, UnknownAction>
 
 const asReplayInitiator = (endpoint: ReplayableEndpoint): ReplayInitiator =>
   cgwApi.endpoints[endpoint].initiate as unknown as ReplayInitiator
 
-/**
- * Dispatches the endpoint's own `initiate` thunk rather than calling a component
- * hook, so this is runnable from the callback and still fires the endpoint's
- * `invalidatesTags`.
- */
+/** Uses the endpoint's own `initiate` thunk, so this runs outside React and still fires `invalidatesTags`. */
 export const replayStepUpAction = async (dispatch: AppDispatch, pending: PendingStepUpAction): Promise<void> => {
   const result = await dispatch(asReplayInitiator(pending.endpoint)(pending.args))
 
   if (result.error) {
-    // Still gated means the challenge was never completed, so the inline "verify
-    // your identity" copy would instruct the user to do what they just abandoned.
+    // Still rejected means the user never finished verifying, so the usual
+    // "verify your identity" text would ask them to do what they just left.
     const message = isElevationRequiredError(result.error)
       ? STEP_UP_FAILED_MESSAGE
       : getRtkQueryErrorMessage(result.error) || REPLAY_FAILED_MESSAGE
@@ -140,8 +121,8 @@ export const replayStepUpAction = async (dispatch: AppDispatch, pending: Pending
     return
   }
 
-  // Awaited so the success toast lands after the refetches, not next to stale
-  // lists. The thunk returns one promise per running query, hence `all`.
+  // Awaited so the success message appears after the refetches, not next to old
+  // data. The thunk returns one promise per running query, so `all` is needed.
   await Promise.all(dispatch(cgwApi.util.getRunningQueriesThunk()))
 
   dispatch(
