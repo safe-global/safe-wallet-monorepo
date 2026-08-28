@@ -7,18 +7,20 @@ Guidance for the workspaces under `config/` (`test`, `eslint`, `tsconfig`). For 
 `yarn verify:changed` only checks files under `apps/<workspace>/` — changed files under `config/` are **silently skipped**, so a green verify run says nothing about a config/ change. `@safe-global/test` has no test/lint/type-check scripts of its own; verify through its consumers instead:
 
 ```bash
-yarn turbo run test --filter=@safe-global/web --filter=@safe-global/mobile
+yarn turbo run test --filter=@safe-global/web --filter=@safe-global/mobile --force
 ```
 
-A change here can break both platforms' test suites at once.
+`--force` is required: turbo's `test` task doesn't hash `config/test` files, so without it a cached green pass can hide a breaking change. A change here can break both platforms' test suites at once.
 
 ## MSW fixtures are generated (never edit by hand)
 
 The JSON files under `test/msw/fixtures/` are downloaded from the staging CGW by `test/msw/scripts/fetch-fixtures.ts` — treat them like `AUTO_GENERATED/` output. To refresh or add one:
 
 ```bash
-npx ts-node config/test/msw/scripts/fetch-fixtures.ts [--safe ef-safe] [--endpoint portfolio]
+node config/test/msw/scripts/fetch-fixtures.ts [--safe=ef-safe]
 ```
+
+Without `--safe=<key>` it re-fetches and overwrites **all** fixtures. The flag only accepts the `=` form.
 
 ## Scenario names are a cross-workspace contract
 

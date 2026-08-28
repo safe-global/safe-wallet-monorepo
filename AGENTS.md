@@ -33,7 +33,7 @@ Root-level `lint`, `type-check`, and `test` run through [Turborepo](https://turb
 ```bash
 yarn type-check                                        # all workspaces (cached)
 yarn turbo run type-check --filter=@safe-global/web    # scoped
-yarn turbo run test --filter=@safe-global/utils...     # package + dependents
+yarn turbo run test --filter=...@safe-global/utils     # package + dependents
 ```
 
 Cache directory is `.turbo/` (gitignored). Task definitions live in `turbo.json`. Remote-cache setup (one-time, per team): [docs/turbo-remote-cache.md](docs/turbo-remote-cache.md).
