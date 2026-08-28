@@ -4,6 +4,7 @@ import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { withMockProvider } from '@/storybook/preview'
 import { PROPOSER_INTRO_SEEN_KEY } from './ProposerIntroDialog/constants'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from './SpendingLimitIntroDialog/constants'
+import { mockPolicies } from './mocks/policies'
 import Policies from './index'
 
 const meta = {
@@ -52,4 +53,17 @@ export const ProposerIntro: Story = {
       </div>
     )
   },
+}
+
+/** With policies the page becomes the list of what is set up. */
+export const Populated: Story = {
+  args: { policies: mockPolicies() },
+}
+
+export const Loading: Story = {
+  args: { policies: [], isLoading: true },
+}
+
+export const Error: Story = {
+  args: { policies: [], isError: true, onRetry: () => {} },
 }

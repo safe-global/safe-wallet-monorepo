@@ -3,14 +3,41 @@ import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import ExternalLink from '@/components/common/ExternalLink'
 import { Typography } from '@/components/ui/typography'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import PoliciesList from './PoliciesList'
 import PolicyCatalogue from './PolicyCatalogue'
 import type { PolicyCatalogueId } from './PolicyCatalogue/catalogue'
 import ProposerIntroDialog from './ProposerIntroDialog'
 import { PROPOSER_INTRO_SEEN_KEY } from './ProposerIntroDialog/constants'
 import SpendingLimitIntroDialog from './SpendingLimitIntroDialog'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from './SpendingLimitIntroDialog/constants'
+import type { Policy } from './types'
 
-const Policies = (): ReactElement => {
+interface PoliciesProps {
+  /** Fixtures until WA-3451 connects CGW. */
+  policies?: Policy[]
+  isLoading?: boolean
+  isError?: boolean
+  onRetry?: () => void
+  /** Opens the catalogue picker from the populated mode's `Add policy` button. */
+  onAddPolicy?: () => void
+  onSelectPolicy?: (policy: Policy) => void
+}
+
+/**
+ * The page has two modes. With no policies it shows the catalogue of policies that can be set up.
+ * With policies it shows the list of policies already set up. Revoking the last policy removes it
+ * from the CGW response, so the page returns to the catalogue.
+ */
+const Policies = ({
+  policies = [],
+  isLoading = false,
+  isError = false,
+  onRetry,
+  onAddPolicy,
+  onSelectPolicy,
+}: PoliciesProps): ReactElement => {
+  const isPopulated = isLoading || isError || policies.length > 0
+
   const [hasSeenSpendingLimitIntro = false, setHasSeenSpendingLimitIntro] =
     useLocalStorage<boolean>(SPENDING_LIMIT_INTRO_SEEN_KEY)
   const [isSpendingLimitIntroOpen, setIsSpendingLimitIntroOpen] = useState(false)
@@ -102,7 +129,18 @@ const Policies = (): ReactElement => {
         </Typography>
       </div>
 
-      <PolicyCatalogue onSelect={handleSelect} />
+      {isPopulated ? (
+        <PoliciesList
+          policies={policies}
+          isLoading={isLoading}
+          isError={isError}
+          onRetry={onRetry}
+          onAddPolicy={onAddPolicy}
+          onSelectPolicy={onSelectPolicy}
+        />
+      ) : (
+        <PolicyCatalogue onSelect={handleSelect} />
+      )}
 
       <SpendingLimitIntroDialog
         open={isSpendingLimitIntroOpen}

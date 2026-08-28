@@ -1,8 +1,9 @@
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
-import { render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
+import { fireEvent, render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { PROPOSER_INTRO_SEEN_KEY } from '../ProposerIntroDialog/constants'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from '../SpendingLimitIntroDialog/constants'
+import { asActivePolicy, mockPolicies, mockProposerPolicy } from '../mocks/policies'
 import Policies from '../index'
 
 let mockHasSeenSpendingLimitIntro: boolean | undefined = false
@@ -217,5 +218,39 @@ describe('Policies', () => {
 
     expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument()
     expect(screen.queryByTestId('spending-limit-intro-dialog')).not.toBeInTheDocument()
+  })
+
+  describe('populated mode', () => {
+    it('should, when the space has policies, render the list instead of the catalogue', () => {
+      render(<Policies policies={mockPolicies()} />)
+
+      expect(screen.getByTestId('policies-list')).toBeInTheDocument()
+      expect(screen.queryByTestId('policy-catalogue')).not.toBeInTheDocument()
+    })
+
+    it('should, when the last policy is revoked, render the catalogue again', () => {
+      const { rerender } = render(<Policies policies={mockPolicies()} />)
+      rerender(<Policies policies={[]} />)
+
+      expect(screen.getByTestId('policy-catalogue')).toBeInTheDocument()
+      expect(screen.queryByTestId('policies-list')).not.toBeInTheDocument()
+    })
+
+    it('should, when the policies are still loading, render the list rather than the catalogue', () => {
+      render(<Policies policies={[]} isLoading />)
+
+      expect(screen.getByTestId('policies-loading')).toBeInTheDocument()
+      expect(screen.queryByTestId('policy-catalogue')).not.toBeInTheDocument()
+    })
+
+    it('should, when a table row is clicked, report the policy it belongs to', () => {
+      const onSelectPolicy = jest.fn()
+      const proposerPolicy = asActivePolicy(mockProposerPolicy())
+
+      render(<Policies policies={[proposerPolicy]} onSelectPolicy={onSelectPolicy} />)
+      fireEvent.click(screen.getByRole('button', { name: 'Open proposer policy details' }))
+
+      expect(onSelectPolicy).toHaveBeenCalledWith(proposerPolicy)
+    })
   })
 })
