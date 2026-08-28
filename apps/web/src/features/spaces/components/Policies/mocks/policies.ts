@@ -195,3 +195,10 @@ export const mockLongPolicyList = (count = 30): Policy[] =>
       }),
     ),
   )
+
+/** Owners of the mock Safes, keyed as the panel looks them up. */
+export const MOCK_SIGNERS_BY_SAFE: Record<string, string[]> = {
+  [`${MOCK_SAFES.treasury.chainId}:${MOCK_SAFES.treasury.address}`]: [MOCK_ADDRESSES.alice, MOCK_ADDRESSES.bob],
+  [`${MOCK_SAFES.payroll.chainId}:${MOCK_SAFES.payroll.address}`]: [MOCK_ADDRESSES.alice, MOCK_ADDRESSES.bob],
+  [`${MOCK_SAFES.grants.chainId}:${MOCK_SAFES.grants.address}`]: [MOCK_ADDRESSES.alice],
+}

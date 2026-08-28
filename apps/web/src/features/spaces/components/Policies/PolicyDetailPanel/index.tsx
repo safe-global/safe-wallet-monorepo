@@ -4,6 +4,8 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { Typography } from '@/components/ui/typography'
 import PolicyStatusChip from '../PoliciesTable/components/PolicyStatusChip'
+import AllowanceUsage from './components/AllowanceUsage'
+import PolicyActiveFooter from './components/PolicyActiveFooter'
 import PolicyEnforcement from './components/PolicyEnforcement'
 import PolicyLimits, { type AllowanceDetail } from './components/PolicyLimits'
 import PolicyMetadataRow from './components/PolicyMetadataRow'
@@ -11,16 +13,20 @@ import PolicyTypeDetails from './components/PolicyTypeDetails'
 import { getPolicyLabel } from '../utils/policyLabel'
 import { getPolicyIcon } from '../utils/policyIcon'
 import { formatPolicyDateTime } from '../utils/policyTime'
-import { getPolicyStatus, hasSpendingLimitData, type Policy } from '../types'
+import { getPolicyStatus, hasSpendingLimitData, isPendingPolicy, type Policy } from '../types'
 
 export type PolicyDetailPanelProps = {
   policy: Policy | null
   onClose: () => void
-  /** Rendered under each allowance. WA-3461 supplies the usage for active policies. */
+  /** The owners of the Safe the policy applies to, used to decide which active state applies. */
+  signers?: string[]
+  onEdit?: (policy: Policy) => void
+  onDelete?: (policy: Policy) => void
+  /** Replaces the usage rendered under each allowance. */
   renderAllowanceDetail?: AllowanceDetail
   /** Rendered above the content. WA-3460 supplies it for pending policies. */
   banner?: ReactNode
-  /** The actions for the policy's state, supplied by WA-3460 and WA-3461. */
+  /** Replaces the footer this component resolves, for example with the pending states. */
   footer?: ReactNode
 }
 
@@ -31,10 +37,36 @@ export type PolicyDetailPanelProps = {
  * This component owns the layout only. The banner and the footer differ per policy state and are
  * passed in by WA-3460 and WA-3461, which keeps one layout instead of one per state.
  */
-const PolicyDetailPanel = ({ policy, onClose, renderAllowanceDetail, banner, footer }: PolicyDetailPanelProps) => {
+const PolicyDetailPanel = ({
+  policy,
+  onClose,
+  signers = [],
+  onEdit,
+  onDelete,
+  renderAllowanceDetail,
+  banner,
+  footer,
+}: PolicyDetailPanelProps) => {
   if (!policy) return null
 
   const Icon = getPolicyIcon(policy.type)
+  const isPending = isPendingPolicy(policy)
+
+  // A pending policy enforces nothing yet, so no amount has been spent against it.
+  const allowanceDetail =
+    renderAllowanceDetail ??
+    (isPending ? undefined : (allowance) => <AllowanceUsage key={allowance.token.address} allowance={allowance} />)
+
+  const resolvedFooter =
+    footer ??
+    (isPending ? null : (
+      <PolicyActiveFooter
+        policy={policy}
+        signers={signers}
+        onEdit={onEdit && (() => onEdit(policy))}
+        onDelete={onDelete && (() => onDelete(policy))}
+      />
+    ))
 
   return (
     <Sheet
@@ -69,7 +101,7 @@ const PolicyDetailPanel = ({ policy, onClose, renderAllowanceDetail, banner, foo
             <PolicyLimits
               spenders={policy.data.spenders}
               chainId={policy.safe.chainId}
-              renderAllowanceDetail={renderAllowanceDetail}
+              renderAllowanceDetail={allowanceDetail}
             />
           )}
 
@@ -112,7 +144,7 @@ const PolicyDetailPanel = ({ policy, onClose, renderAllowanceDetail, banner, foo
           </section>
         </div>
 
-        {footer}
+        {resolvedFooter}
       </SheetContent>
     </Sheet>
   )

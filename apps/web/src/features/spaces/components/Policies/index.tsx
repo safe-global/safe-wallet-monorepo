@@ -16,6 +16,10 @@ interface PoliciesProps {
   onRetry?: () => void
   /** Opens the catalogue picker from the populated mode's `Add policy` button. */
   onAddPolicy?: () => void
+  /** Owners of the Safes in this Space, keyed by `${chainId}:${address}`. Wired by WA-3451. */
+  signersBySafe?: Record<string, string[]>
+  onEditPolicy?: (policy: Policy) => void
+  onDeletePolicy?: (policy: Policy) => void
   onSelectPolicyType?: (id: PolicyCatalogueId) => void
 }
 
@@ -30,6 +34,9 @@ const Policies = ({
   isError = false,
   onRetry,
   onAddPolicy,
+  signersBySafe = {},
+  onEditPolicy,
+  onDeletePolicy,
   onSelectPolicyType,
 }: PoliciesProps): ReactElement => {
   const [selectedPolicy, setSelectedPolicy] = useState<Policy | null>(null)
@@ -64,7 +71,15 @@ const Policies = ({
         <PolicyCatalogue onSelect={onSelectPolicyType} />
       )}
 
-      <PolicyDetailPanel policy={selectedPolicy} onClose={() => setSelectedPolicy(null)} />
+      <PolicyDetailPanel
+        policy={selectedPolicy}
+        onClose={() => setSelectedPolicy(null)}
+        signers={
+          selectedPolicy ? signersBySafe[`${selectedPolicy.safe.chainId}:${selectedPolicy.safe.address}`] : undefined
+        }
+        onEdit={onEditPolicy}
+        onDelete={onDeletePolicy}
+      />
     </div>
   )
 }
