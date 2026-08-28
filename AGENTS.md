@@ -22,25 +22,7 @@ When adding new guidance, place it in the most-specific subtree it applies to. W
 
 ## Quick Start
 
-Common commands for getting started:
-
-```bash
-# Install dependencies (Yarn 4 via corepack; also runs `after-install` for web,
-# which generates TypeScript types from contract ABIs)
-yarn install
-
-# Run web app in development mode
-yarn workspace @safe-global/web dev
-
-# Run mobile app in development mode
-yarn workspace @safe-global/mobile start
-
-# Run tests for web
-yarn workspace @safe-global/web test
-
-# Run Storybook for web
-yarn workspace @safe-global/web storybook
-```
+`yarn install` (Yarn 4 via corepack) — also runs `after-install` for web, which generates TypeScript types from contract ABIs. Per-workspace `dev`/`start`/`test` scripts follow the usual names in each workspace's package.json.
 
 Workspace-scoped scripts (`pw:*`, `test:scaffold`, `css-vars`, `storybook`, …) must be run via `yarn workspace @safe-global/<name> …`; the root package.json only adds `verify:*`, `knip`, `prettier:fix`, and the Turborepo-backed `lint`/`type-check`/`test`.
 
@@ -58,12 +40,12 @@ Cache directory is `.turbo/` (gitignored). Task definitions live in `turbo.json`
 
 ## Architecture Overview
 
-- **apps/web** – Next.js web application (the main app)
-- **apps/web-tanstack** – TanStack Router + Vite runtime reusing `apps/web/src`
-- **apps/mobile** – Expo/React Native mobile application
-- **apps/tx-builder** – Safe App (runs in an iframe), MUI v6 + Vite
-- **packages/** – shared libraries (`store`, `theme`, `utils`) used by web and mobile
-- **config/**, `expo-plugins/*`, `tools/codemods/*` – shared configuration and tooling workspaces
+- **apps/web** – the main app (Next.js)
+- **apps/web-tanstack** – second runtime for the same code: reuses `apps/web/src` via Vite aliases
+- **apps/mobile** – Expo/React Native
+- **apps/tx-builder** – Safe App running in an iframe — MUI v6, not shadcn
+- **packages/** – `store`, `theme`, `utils` shared by web **and** mobile
+- **config/**, `expo-plugins/*`, `tools/codemods/*` – shared config and tooling workspaces
 
 Subtree-specific caveats live in the Nested guidance table above.
 
@@ -93,7 +75,6 @@ For "who uses this symbol?" questions, prefer the `LSP` tool (`findReferences`, 
 
 ## General Principles
 
-- Prefer DRY, functional, declarative code – pure functions, derived state, and `map`/`filter`/`reduce` over duplication, side effects, and manual state synchronization
 - Never use the `any` type!
 - Treat code comments as tech debt! Add them only when really necessary & the code at hand is hard to understand.
 - **Use sentence case for UI text** – Buttons, headings, labels, warnings, and other UI copy should use sentence case (e.g., "Add new owner") not Title Case (e.g., "Add New Owner")
@@ -167,7 +148,6 @@ Before writing code for any non-trivial change (anything beyond a typo, doc twea
 1. **Pre-commit hooks** (Husky): **pre-commit** runs `lint-staged` (**prettier only — no type-check at commit time**); **pre-push** runs linting (set `RUN_TESTS_ON_PUSH=true` to also run tests).
 
 2. **Commit messages**: use [semantic commit messages](https://www.conventionalcommits.org/en/v1.0.0/) as described in `CONTRIBUTING.md`.
-   - Examples: `feat: add transaction history`, `fix: resolve wallet connection bug`, `refactor: simplify address validation`
    - **CI/CD changes**: Always use `chore:` prefix for CI, workflows, build configs (NEVER `feat:` or `fix:`)
    - **Test changes**: Always use `tests:` prefix for changes in unit or e2e tests (NEVER `feat:` or `fix:`)
 
