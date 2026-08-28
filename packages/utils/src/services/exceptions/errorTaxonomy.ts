@@ -113,6 +113,8 @@ export const ERROR_CODE_MAP: Record<number, ErrorClassification> = {
   616: { domain: ErrorDomain.API, type: ErrorType.API_ERROR, layer: ErrorLayer.OFF_CHAIN },
   619: { domain: ErrorDomain.DATA_LOADING, type: ErrorType.FETCH_FAILED, layer: ErrorLayer.OFF_CHAIN },
   621: { domain: ErrorDomain.DATA_LOADING, type: ErrorType.FETCH_FAILED, layer: ErrorLayer.OFF_CHAIN },
+  622: { domain: ErrorDomain.API, type: ErrorType.API_ERROR, layer: ErrorLayer.OFF_CHAIN },
+  623: { domain: ErrorDomain.RPC, type: ErrorType.RPC_ERROR, layer: ErrorLayer.OFF_CHAIN },
   633: { domain: ErrorDomain.DATA_LOADING, type: ErrorType.NOTIFICATION_ERROR, layer: ErrorLayer.OFF_CHAIN },
   640: { domain: ErrorDomain.AUTH, type: ErrorType.AUTH_FAILED, layer: ErrorLayer.OFF_CHAIN },
   650: { domain: ErrorDomain.DATA_LOADING, type: ErrorType.FETCH_FAILED, layer: ErrorLayer.OFF_CHAIN },

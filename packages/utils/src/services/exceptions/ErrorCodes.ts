@@ -40,6 +40,8 @@ enum ErrorCodes {
   _619 = '619: Error fetching data from master-copies',
   _620 = '620: Error loading chains',
   _621 = '621: Error checking modules for known vulnerabilities',
+  _622 = '622: CGW rejected our request as unprocessable',
+  _623 = '623: Error fetching transaction receipt',
   _630 = '630: Error fetching remaining daily relays',
   _631 = '631: Transaction failed to be relayed',
   _632 = '632: Error fetching relay task status',

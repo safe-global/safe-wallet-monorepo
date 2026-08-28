@@ -147,3 +147,17 @@ export const isRevertError = (error: unknown): boolean => {
 
   return false
 }
+
+/**
+ * Detects a gas-estimation failure that we asked for and already answer in the
+ * UI, as opposed to a fault worth a coded log.
+ *
+ * `estimateGas` has two normal negative outcomes. A revert is the estimate's
+ * *answer* — the node told us the transaction fails, and the UI renders the
+ * mapped `contractErrors` copy for it (WA-3005). A throttle is transient —
+ * viem's transport has already retried it, and the UI shows
+ * `RATE_LIMIT_USER_MESSAGE`. Neither is actionable for us, and logging both on
+ * every estimate buries the failures that are: an unreachable RPC, a timeout,
+ * a malformed response.
+ */
+export const isExpectedEstimationError = (error: unknown): boolean => isRevertError(error) || isRateLimitError(error)

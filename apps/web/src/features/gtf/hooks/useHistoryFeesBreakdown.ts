@@ -15,6 +15,7 @@ import { selectCurrency } from '@/store/settingsSlice'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
 import { Errors, logError } from '@/services/exceptions'
+import { isRateLimitError } from '@/utils/transaction-errors'
 import type { FeeRow } from './useFeesPreview'
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 
@@ -120,7 +121,11 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
   }, [isGtfEnabled, executedAt, !!exec, isSafePaid, txHash, provider])
 
   useEffect(() => {
-    if (receiptError) logError(Errors._612, receiptError.message, getRpcErrorContext(provider))
+    // A receipt fetch never reverts, so only a transient throttle is expected
+    // here — everything else is a real RPC failure.
+    if (!receiptError || isRateLimitError(receiptError)) return
+
+    logError(Errors._623, receiptError.message, getRpcErrorContext(provider))
   }, [receiptError, provider])
 
   const signerPaidData = useMemo<HistoryFeesData | null>(() => {

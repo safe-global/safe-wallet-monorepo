@@ -1144,6 +1144,60 @@ describe('useBannerVisibility', () => {
       })
     })
 
+    describe('outreach probes when the Hypernative feature is disabled', () => {
+      // The targeted-messaging probe answers 404 for every Safe that is not in
+      // the outreach, and the browser logs that 404 to the console itself — no
+      // JS filter can suppress it (WA-2991). When HYPERNATIVE is off on the
+      // chain the answer cannot change the outcome, so we must not ask.
+      const mockBaseline = () => {
+        jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
+        jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
+        jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
+        jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
+          balances: { fiatTotal: '2000000', items: [] },
+          loaded: true,
+          loading: false,
+        })
+        jest.spyOn(useIsHypernativeGuardHook, 'useIsHypernativeGuard').mockReturnValue({
+          isHypernativeGuard: false,
+          loading: false,
+        })
+        return jest
+          .spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe')
+          .mockReturnValue({ isTargeted: false, loading: false })
+      }
+
+      it('skips both probes for Promo when the feature is disabled', () => {
+        jest.spyOn(useIsHypernativeFeatureHook, 'useIsHypernativeFeature').mockReturnValue(false)
+        const useIsOutreachSafeSpy = mockBaseline()
+
+        renderHook(() => useBannerVisibility(BannerType.Promo))
+
+        expect(useIsOutreachSafeSpy).toHaveBeenNthCalledWith(1, HYPERNATIVE_OUTREACH_ID, { skip: true })
+        expect(useIsOutreachSafeSpy).toHaveBeenNthCalledWith(2, HYPERNATIVE_ALLOWLIST_OUTREACH_ID, { skip: true })
+      })
+
+      it('skips both probes for TxReportButton when the feature is disabled', () => {
+        jest.spyOn(useIsHypernativeFeatureHook, 'useIsHypernativeFeature').mockReturnValue(false)
+        const useIsOutreachSafeSpy = mockBaseline()
+
+        renderHook(() => useBannerVisibility(BannerType.TxReportButton))
+
+        expect(useIsOutreachSafeSpy).toHaveBeenNthCalledWith(1, HYPERNATIVE_OUTREACH_ID, { skip: true })
+        expect(useIsOutreachSafeSpy).toHaveBeenNthCalledWith(2, HYPERNATIVE_ALLOWLIST_OUTREACH_ID, { skip: true })
+      })
+
+      it('still probes the banner-relevant outreach when the feature is enabled', () => {
+        jest.spyOn(useIsHypernativeFeatureHook, 'useIsHypernativeFeature').mockReturnValue(true)
+        const useIsOutreachSafeSpy = mockBaseline()
+
+        renderHook(() => useBannerVisibility(BannerType.Promo))
+
+        expect(useIsOutreachSafeSpy).toHaveBeenNthCalledWith(1, HYPERNATIVE_OUTREACH_ID, { skip: false })
+        expect(useIsOutreachSafeSpy).toHaveBeenNthCalledWith(2, HYPERNATIVE_ALLOWLIST_OUTREACH_ID, { skip: true })
+      })
+    })
+
     describe('TxReportButton with targeted Safe', () => {
       it('should show button when Safe is targeted, even with insufficient balance and no guard', () => {
         jest.spyOn(useIsHypernativeFeatureHook, 'useIsHypernativeFeature').mockReturnValue(true)
