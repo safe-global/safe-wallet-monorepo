@@ -79,6 +79,25 @@ describe('DatadogProvider', () => {
     })
   }
 
+  const mockTracingEnabledDatadogConstants = (): void => {
+    jest.doMock('@/config/constants', () => {
+      const actualConstants = jest.requireActual<typeof ConstantsModule>('@/config/constants')
+
+      return {
+        ...actualConstants,
+        DATADOG_RUM_APPLICATION_ID: 'test-app-id',
+        DATADOG_RUM_CLIENT_TOKEN: 'test-client-token',
+        DATADOG_RUM_TRACING_ENABLED: true,
+      }
+    })
+  }
+
+  const getInitConfig = (): Record<string, unknown> => {
+    expect(mockInit).toHaveBeenCalledTimes(1)
+    const [config] = mockInit.mock.calls[0] as [Record<string, unknown>]
+    return config
+  }
+
   const importProvider = async () => {
     const { DatadogProvider } = await import('../datadog')
     return DatadogProvider as unknown as DatadogProviderConstructor
@@ -210,6 +229,50 @@ describe('DatadogProvider', () => {
 
       expect(mockAddError).not.toHaveBeenCalled()
       expect(mockAddAction).not.toHaveBeenCalled()
+    })
+  })
+
+  // The SDK v7 defaults for both of these flipped to `true`. Pinned back to the
+  // v6 values in init() — see the comments there for what each one would break.
+  describe('SDK v7 defaults pinned to v6 behaviour', () => {
+    it('keeps action names out of the privacy tree walker', async () => {
+      mockEnabledDatadogConstants()
+      mockGetInitConfiguration.mockReturnValue(undefined)
+      const Provider = await importProvider()
+
+      await new Provider().init()
+
+      expect(getInitConfig()).toMatchObject({
+        enablePrivacyForActionName: false,
+        defaultPrivacyLevel: 'mask',
+      })
+    })
+
+    it('does not add a baggage header to gateway requests when tracing is on', async () => {
+      mockTracingEnabledDatadogConstants()
+      mockGetInitConfiguration.mockReturnValue(undefined)
+      const Provider = await importProvider()
+
+      await new Provider().init()
+
+      const config = getInitConfig()
+      expect(config.propagateTraceBaggage).toBe(false)
+      expect(config.allowedTracingUrls).toEqual([
+        expect.objectContaining({ propagatorTypes: ['tracecontext', 'datadog'] }),
+        expect.objectContaining({ propagatorTypes: ['tracecontext', 'datadog'] }),
+      ])
+    })
+
+    it('omits the tracing options entirely when tracing is off', async () => {
+      mockEnabledDatadogConstants()
+      mockGetInitConfiguration.mockReturnValue(undefined)
+      const Provider = await importProvider()
+
+      await new Provider().init()
+
+      const config = getInitConfig()
+      expect(config).not.toHaveProperty('propagateTraceBaggage')
+      expect(config).not.toHaveProperty('allowedTracingUrls')
     })
   })
 
