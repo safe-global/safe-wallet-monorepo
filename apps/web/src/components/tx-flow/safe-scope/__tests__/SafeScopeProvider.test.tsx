@@ -1,0 +1,159 @@
+// SPDX-License-Identifier: FSL-1.1-MIT
+
+import { act, renderHook, waitFor } from '@/tests/test-utils'
+import { faker } from '@faker-js/faker'
+import type { ReactNode } from 'react'
+import { addressExBuilder, safeInfoBuilder } from '@/tests/builders/safe'
+import { chainBuilder } from '@/tests/builders/chains'
+import { SafeScopeProvider } from '../SafeScopeProvider'
+import { useSafeScope, useSafeScopeControls } from '../context'
+import { hasActiveScope } from '../activeScope'
+import * as safesApi from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import * as useChainsHooks from '@/hooks/useChains'
+import * as safeCoreSDK from '@/hooks/coreSDK/safeCoreSDK'
+import * as web3 from '@/hooks/wallets/web3'
+
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/safes', () => ({
+  ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/safes'),
+  useSafesGetSafeV1Query: jest.fn(),
+}))
+jest.mock('@/hooks/wallets/web3', () => ({ createWeb3ReadOnly: jest.fn() }))
+
+// `trackError` is exported as a live binding, which `jest.spyOn` can't redefine on the required
+// module object — mock it at module scope the same way `useInitSafeCoreSDK.test.ts` does.
+const mockTrackError = jest.fn()
+jest.mock('@/services/exceptions', () => ({
+  ...jest.requireActual('@/services/exceptions'),
+  trackError: (...args: unknown[]) => mockTrackError(...args),
+}))
+
+const sepolia = chainBuilder().with({ chainId: '11155111', l2: false, zk: false }).build()
+const polygon = chainBuilder().with({ chainId: '137', l2: true, zk: false }).build()
+const chainsById: Record<string, typeof sepolia> = { [sepolia.chainId]: sepolia, [polygon.chainId]: polygon }
+
+// `implementation` is non-optional on `SafeState`, but `safeInfoBuilder()`'s default leaves it
+// `undefined` — override it so `safe.implementation.value` (mirroring `useInitSafeCoreSDK`) doesn't crash.
+const safeA = safeInfoBuilder().with({ chainId: sepolia.chainId, implementation: addressExBuilder().build() }).build()
+const safeB = safeInfoBuilder().with({ chainId: polygon.chainId, implementation: addressExBuilder().build() }).build()
+const safesByAddress: Record<string, typeof safeA> = { [safeA.address.value]: safeA, [safeB.address.value]: safeB }
+
+const mockQuery = safesApi.useSafesGetSafeV1Query as jest.Mock
+const mockCreateProvider = web3.createWeb3ReadOnly as jest.Mock
+let initSafeSDKSpy: jest.SpyInstance
+
+const useProbe = () => ({ scope: useSafeScope(), controls: useSafeScopeControls() })
+
+const wrapperWith = (initial?: { chainId: string; safeAddress: string }) =>
+  function Wrapper({ children }: { children: ReactNode }) {
+    return <SafeScopeProvider initial={initial}>{children}</SafeScopeProvider>
+  }
+
+describe('SafeScopeProvider', () => {
+  beforeEach(() => {
+    jest.spyOn(useChainsHooks, 'useChain').mockImplementation((chainId: string) => chainsById[chainId])
+    mockQuery.mockImplementation((args: { chainId: string; safeAddress: string } | symbol) =>
+      typeof args === 'symbol'
+        ? { currentData: undefined, error: undefined, isLoading: false }
+        : { currentData: safesByAddress[args.safeAddress], error: undefined, isLoading: false },
+    )
+    mockCreateProvider.mockImplementation((chain: { chainId: string }) => ({ chainId: chain.chainId }))
+    initSafeSDKSpy = jest
+      .spyOn(safeCoreSDK, 'initSafeSDK')
+      .mockImplementation(async ({ address }) => ({ sdkFor: address }) as never)
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+    mockTrackError.mockClear()
+  })
+
+  it('has no scope until setScope is called', () => {
+    const { result } = renderHook(useProbe, { wrapper: wrapperWith() })
+    expect(result.current.scope).toBeUndefined()
+    expect(mockQuery).toHaveBeenLastCalledWith(expect.any(Symbol), expect.anything())
+  })
+
+  it('resolves SafeState, provider and SDK for the initial target', async () => {
+    const { result } = renderHook(useProbe, {
+      wrapper: wrapperWith({ chainId: safeA.chainId, safeAddress: safeA.address.value }),
+    })
+
+    await waitFor(() => expect(result.current.scope?.sdk).toEqual({ sdkFor: safeA.address.value }))
+
+    expect(result.current.scope).toMatchObject({
+      chainId: safeA.chainId,
+      safeAddress: safeA.address.value,
+      scopeKey: `${safeA.chainId}:${safeA.address.value}`,
+      safeLoaded: true,
+      safeLoading: false,
+      safe: { ...safeA, deployed: true },
+      chain: sepolia,
+      web3ReadOnly: { chainId: sepolia.chainId },
+    })
+    expect(initSafeSDKSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        chainId: safeA.chainId,
+        address: safeA.address.value,
+        version: safeA.version,
+        isL2Chain: false,
+        isZkChain: false,
+      }),
+    )
+  })
+
+  it('switching to a Safe on another chain rebuilds everything and never serves the old Safe (C17e)', async () => {
+    const { result } = renderHook(useProbe, {
+      wrapper: wrapperWith({ chainId: safeA.chainId, safeAddress: safeA.address.value }),
+    })
+    await waitFor(() => expect(result.current.scope?.sdk).toEqual({ sdkFor: safeA.address.value }))
+    const firstProvider = result.current.scope?.web3ReadOnly
+
+    act(() => result.current.controls.setScope(safeB.chainId, safeB.address.value))
+
+    // Synchronously after the switch: key and target already point at B, A's SDK is gone.
+    expect(result.current.scope?.scopeKey).toBe(`${safeB.chainId}:${safeB.address.value}`)
+    expect(result.current.scope?.sdk).toBeUndefined()
+    expect(result.current.scope?.safe?.address.value).not.toBe(safeA.address.value)
+
+    await waitFor(() => expect(result.current.scope?.sdk).toEqual({ sdkFor: safeB.address.value }))
+    expect(result.current.scope?.web3ReadOnly).not.toBe(firstProvider)
+    expect(result.current.scope?.web3ReadOnly).toEqual({ chainId: polygon.chainId })
+    expect(initSafeSDKSpy).toHaveBeenLastCalledWith(
+      expect.objectContaining({ address: safeB.address.value, isL2Chain: true }),
+    )
+  })
+
+  it('passes the custom RPC for the scope chain to the provider', async () => {
+    const customUrl = faker.internet.url()
+    const { result } = renderHook(useProbe, {
+      wrapper: wrapperWith({ chainId: safeB.chainId, safeAddress: safeB.address.value }),
+      initialReduxState: {
+        settings: { env: { rpc: { [safeB.chainId]: customUrl }, tenderly: { url: '', accessToken: '' } } } as never,
+      },
+    })
+    await waitFor(() => expect(result.current.scope?.web3ReadOnly).toBeDefined())
+    expect(mockCreateProvider).toHaveBeenCalledWith(polygon, customUrl)
+  })
+
+  it('reports an SDK init failure via safeError-free sdk=undefined and tracks it', async () => {
+    initSafeSDKSpy.mockRejectedValue(new Error('boom'))
+    const { result } = renderHook(useProbe, {
+      wrapper: wrapperWith({ chainId: safeA.chainId, safeAddress: safeA.address.value }),
+    })
+    await waitFor(() => expect(mockTrackError).toHaveBeenCalledWith('105: Error connecting to the blockchain', 'boom'))
+    expect(result.current.scope?.sdk).toBeUndefined()
+    expect(result.current.scope?.safeLoaded).toBe(true)
+  })
+
+  it('clearScope drops the scope and the active counter follows mount/unmount', () => {
+    expect(hasActiveScope()).toBe(false)
+    const { result, unmount } = renderHook(useProbe, {
+      wrapper: wrapperWith({ chainId: safeA.chainId, safeAddress: safeA.address.value }),
+    })
+    expect(hasActiveScope()).toBe(true)
+    act(() => result.current.controls.clearScope())
+    expect(result.current.scope).toBeUndefined()
+    unmount()
+    expect(hasActiveScope()).toBe(false)
+  })
+})
