@@ -1,6 +1,23 @@
-import { render, screen } from '@/tests/test-utils'
+import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
+import useWallet from '@/hooks/wallets/useWallet'
+import { mockConnectedWallet } from '../mocks/wallet'
 import Policies from '../index'
+
+jest.mock('@/hooks/wallets/useWallet')
+jest.mock('@/components/common/ConnectWallet/useConnectWallet')
+
+const mockUseWallet = useWallet as jest.MockedFunction<typeof useWallet>
+const mockUseConnectWallet = useConnectWallet as jest.MockedFunction<typeof useConnectWallet>
+
+const connectWallet = jest.fn()
+
+beforeEach(() => {
+  jest.clearAllMocks()
+  mockUseWallet.mockReturnValue(mockConnectedWallet('0x0000000000000000000000000000000000000A11'))
+  mockUseConnectWallet.mockReturnValue(connectWallet)
+})
 
 /**
  * The page must render a title, a one-line description and a `Learn more` link to documentation,
@@ -56,5 +73,60 @@ describe('Policies', () => {
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Create policy/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('searchbox')).not.toBeInTheDocument()
+  })
+
+  describe('wallet gate', () => {
+    it('should, when no wallet is connected, still render the catalogue', () => {
+      mockUseWallet.mockReturnValue(null)
+
+      render(<Policies />)
+
+      expect(screen.getByTestId('policy-catalogue')).toBeInTheDocument()
+      expect(screen.getByText('Proposer')).toBeInTheDocument()
+    })
+
+    it('should, when a wallet is connected, open the flow without opening the connect dialog', async () => {
+      const onOpenFlow = jest.fn()
+
+      render(<Policies onOpenFlow={onOpenFlow} />)
+      fireEvent.click(screen.getByTestId('policy-catalogue-tile-proposer'))
+
+      await waitFor(() => expect(onOpenFlow).toHaveBeenCalledWith('proposer'))
+      expect(connectWallet).not.toHaveBeenCalled()
+    })
+
+    it('should, when no wallet is connected, open the connect dialog instead of the flow', async () => {
+      mockUseWallet.mockReturnValue(null)
+      connectWallet.mockResolvedValue([])
+      const onOpenFlow = jest.fn()
+
+      render(<Policies onOpenFlow={onOpenFlow} />)
+      fireEvent.click(screen.getByTestId('policy-catalogue-tile-proposer'))
+
+      await waitFor(() => expect(connectWallet).toHaveBeenCalled())
+      expect(onOpenFlow).not.toHaveBeenCalled()
+    })
+
+    it('should, when the user connects a wallet, open the flow for the tile they clicked', async () => {
+      mockUseWallet.mockReturnValue(null)
+      connectWallet.mockResolvedValue([{ label: 'MetaMask' }])
+      const onOpenFlow = jest.fn()
+
+      render(<Policies onOpenFlow={onOpenFlow} />)
+      fireEvent.click(screen.getByTestId('policy-catalogue-tile-proposer'))
+
+      await waitFor(() => expect(onOpenFlow).toHaveBeenCalledWith('proposer'))
+    })
+
+    it('should, when the clicked policy type is unavailable, neither open a flow nor prompt to connect', async () => {
+      mockUseWallet.mockReturnValue(null)
+      const onOpenFlow = jest.fn()
+
+      render(<Policies onOpenFlow={onOpenFlow} />)
+      fireEvent.click(screen.getByTestId('policy-catalogue-tile-spending-limit'))
+
+      await waitFor(() => expect(onOpenFlow).not.toHaveBeenCalled())
+      expect(connectWallet).not.toHaveBeenCalled()
+    })
   })
 })
