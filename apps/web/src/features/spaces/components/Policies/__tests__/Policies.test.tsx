@@ -1,5 +1,6 @@
-import { render, screen } from '@/tests/test-utils'
+import { fireEvent, render, screen } from '@/tests/test-utils'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import { asActivePolicy, mockPolicies, mockProposerPolicy } from '../mocks/policies'
 import Policies from '../index'
 
 /**
@@ -56,5 +57,39 @@ describe('Policies', () => {
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Create policy/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('searchbox')).not.toBeInTheDocument()
+  })
+
+  describe('populated mode', () => {
+    it('should, when the space has policies, render the list instead of the catalogue', () => {
+      render(<Policies policies={mockPolicies()} />)
+
+      expect(screen.getByTestId('policies-list')).toBeInTheDocument()
+      expect(screen.queryByTestId('policy-catalogue')).not.toBeInTheDocument()
+    })
+
+    it('should, when the last policy is revoked, render the catalogue again', () => {
+      const { rerender } = render(<Policies policies={mockPolicies()} />)
+      rerender(<Policies policies={[]} />)
+
+      expect(screen.getByTestId('policy-catalogue')).toBeInTheDocument()
+      expect(screen.queryByTestId('policies-list')).not.toBeInTheDocument()
+    })
+
+    it('should, when the policies are still loading, render the list rather than the catalogue', () => {
+      render(<Policies policies={[]} isLoading />)
+
+      expect(screen.getByTestId('policies-loading')).toBeInTheDocument()
+      expect(screen.queryByTestId('policy-catalogue')).not.toBeInTheDocument()
+    })
+
+    it('should, when a table row is clicked, report the policy it belongs to', () => {
+      const onSelectPolicy = jest.fn()
+      const proposerPolicy = asActivePolicy(mockProposerPolicy())
+
+      render(<Policies policies={[proposerPolicy]} onSelectPolicy={onSelectPolicy} />)
+      fireEvent.click(screen.getByRole('button', { name: 'Open proposer policy details' }))
+
+      expect(onSelectPolicy).toHaveBeenCalledWith(proposerPolicy)
+    })
   })
 })

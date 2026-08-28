@@ -78,6 +78,10 @@ type PaginatedDataTableProps<T> = {
   getRowKey: (row: T) => string
   getRowClassName?: (row: T) => string
   pageSize?: number
+  /** Makes the whole row activatable. Rows become keyboard-reachable buttons when supplied. */
+  onRowClick?: (row: T) => void
+  /** Accessible name for an activatable row. Required in spirit whenever `onRowClick` is set. */
+  getRowAriaLabel?: (row: T) => string
 }
 
 // Flash guard: hides secondary columns on small viewports during the first render,
@@ -125,6 +129,8 @@ function PaginatedDataTable<T>({
   getRowKey,
   getRowClassName,
   pageSize = DEFAULT_PAGE_SIZE,
+  onRowClick,
+  getRowAriaLabel,
 }: PaginatedDataTableProps<T>) {
   const isMobile = useIsMobile()
   const [page, setPage] = useState(0)
@@ -241,7 +247,23 @@ function PaginatedDataTable<T>({
 
             return (
               <Fragment key={key}>
-                <TableRow className={getRowClassName?.(row)}>
+                <TableRow
+                  className={cn(getRowClassName?.(row), onRowClick && 'cursor-pointer')}
+                  role={onRowClick ? 'button' : undefined}
+                  tabIndex={onRowClick ? 0 : undefined}
+                  aria-label={onRowClick ? getRowAriaLabel?.(row) : undefined}
+                  onClick={onRowClick ? () => onRowClick(row) : undefined}
+                  onKeyDown={
+                    onRowClick
+                      ? (event) => {
+                          if (event.key !== 'Enter' && event.key !== ' ') return
+                          // Space would otherwise scroll the page out from under the row.
+                          event.preventDefault()
+                          onRowClick(row)
+                        }
+                      : undefined
+                  }
+                >
                   {visibleColumns.map((column) => (
                     <TableCell
                       key={column.id}
@@ -265,7 +287,10 @@ function PaginatedDataTable<T>({
                         aria-expanded={isOpen}
                         aria-controls={isOpen ? detailId : undefined}
                         aria-label={isOpen ? 'Hide details' : 'Show details'}
-                        onClick={() => toggleExpanded(key)}
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          toggleExpanded(key)
+                        }}
                       >
                         <ChevronDown className={cn('size-4 transition-transform', isOpen && 'rotate-180')} />
                       </Button>
