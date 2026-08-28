@@ -6,9 +6,9 @@ describe('[LEDGER] Ledger emulator connect tests', { defaultCommandTimeout: 6000
     cy.visit(constants.welcomeUrl)
   })
 
-  it('should, when an emulated Ledger is scanned, connect the first derived account', () => {
+  it('Verify that scanning an emulated Ledger connects the first derived account', () => {
     hardwareWallet.connectLedgerSigner()
 
-    cy.get('[data-testid="open-account-center"]').should('be.visible')
+    hardwareWallet.verifySignerConnected()
   })
 })

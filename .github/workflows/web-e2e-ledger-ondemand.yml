@@ -57,6 +57,11 @@ jobs:
           docker compose -f apps/web/docker-compose.speculos.yml logs
           exit 1
 
+      # Safe signs a SafeTx as EIP-712 typed data, which the Ethereum app refuses outright
+      # (0x6a80) until blind signing is switched on in its settings menu.
+      - name: Enable blind signing on the emulator
+        run: apps/web/scripts/enable-ledger-blind-signing.sh
+
       - uses: ./.github/actions/cypress
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}

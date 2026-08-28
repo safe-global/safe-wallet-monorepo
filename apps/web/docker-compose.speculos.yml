@@ -6,7 +6,9 @@
 # ./.speculos/app.elf before starting this.
 services:
   speculos:
-    image: ghcr.io/ledgerhq/speculos:0.25.13
+    # 0.26.9 ships the api_level 26 shared libraries. A Speculos older than the api_level the
+    # Ethereum app was built against exits at startup with "invalid SDK api_level".
+    image: ghcr.io/ledgerhq/speculos:0.26.9
     ports:
       # APDU port — the transport the Device Management Kit sends commands over.
       - '9999:9999'

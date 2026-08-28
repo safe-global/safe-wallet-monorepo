@@ -37,6 +37,10 @@ docker run --rm -v /tmp/app-ethereum:/app \
 cp /tmp/app-ethereum/build/nanos2/bin/app.elf apps/web/.speculos/app.elf
 ```
 
+The build targets an SDK API level, and Speculos refuses to start against an app built for a newer
+one ("invalid SDK api_level"). A master build currently needs api_level 26, which is why the compose
+file pins Speculos 0.26.9. If you bump one, check the other.
+
 Then start the emulator:
 
 ```bash
@@ -47,7 +51,26 @@ LEDGER_EMULATOR_SEED="<test mnemonic>" docker compose -f docker-compose.speculos
 The seed decides which addresses the emulator derives. Any Safe used in a signing test needs the
 address derived from that seed as an owner, so the seed has to stay stable once tests depend on it.
 
-## 3. Run the tests
+## 3. Enable blind signing
+
+Safe signs a SafeTx as EIP-712 typed data. With blind signing off — how the app boots — the device
+does not prompt, it refuses: the screen reads "Blind signing must be enabled in settings" and the
+APDU comes back `0x6a80`. Every signing test fails until it is on.
+
+There is no APDU for the setting, so it has to be driven through the buttons:
+
+```bash
+apps/web/scripts/enable-ledger-blind-signing.sh
+```
+
+The setting lives in NVRAM and is lost on restart unless Speculos runs with `--save-nvram`, so run
+this again after every restart of the container.
+
+Once it is on, the device still asks the user to accept the risk before each signature: it shows
+"Blind signing ahead — To accept risk, press both buttons", then paginates the domain hash and the
+message hash, then offers "Sign message". `approveOnDevice()` walks that sequence.
+
+## 4. Run the tests
 
 ```bash
 cd apps/web

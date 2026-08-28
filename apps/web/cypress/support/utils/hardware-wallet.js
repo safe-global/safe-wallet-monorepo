@@ -20,16 +20,27 @@
 const onboardv2 = 'onboard-v2'
 const accountSelect = 'account-select'
 const connectWalletBtn = '[data-testid="connect-wallet-btn"]'
+const accountCenter = '[data-testid="open-account-center"]'
 
 const ledgerStr = 'Ledger'
 const scanAccountsStr = 'Scan Accounts'
 const connectStr = 'Connect'
 
-/** Screen text the Ethereum app shows when a transaction or message is ready to be approved. */
+/**
+ * Screen text the Ethereum app shows when it is ready to be approved. Observed on the nanosp
+ * Ethereum app 1.23.0 running under Speculos; a firmware bump can reword these.
+ */
 export const DEVICE_APPROVAL_SCREENS = {
+  signTypedData: 'Sign message',
   signTransaction: 'Accept',
-  signMessage: 'Sign message',
 }
+
+/**
+ * Shown before a signature the device cannot clear-sign, once blind signing is enabled in the
+ * app's settings. With the setting off the device does not prompt at all — it answers the APDU
+ * with 0x6a80 and shows "Blind signing must be enabled in settings" instead.
+ */
+const BLIND_SIGNING_WARNING = 'To accept risk'
 
 function speculosUrl() {
   return Cypress.env('LEDGER_SPECULOS_URL') || 'http://localhost:5000'
@@ -90,7 +101,16 @@ export function pressRightUntilScreen(text, attemptsLeft = 40) {
  * @param {string} approvalScreen One of DEVICE_APPROVAL_SCREENS.
  */
 export function approveOnDevice(approvalScreen) {
-  return pressRightUntilScreen(approvalScreen).then(() => pressDeviceButton('both'))
+  return readDeviceScreens()
+    .then((screens) => {
+      // The risk warning takes both buttons, not the right one. Paging past it with the right
+      // button walks into "Reject transaction" and the signature comes back 0x6980.
+      if (screens.includes(BLIND_SIGNING_WARNING)) {
+        return pressDeviceButton('both')
+      }
+    })
+    .then(() => pressRightUntilScreen(approvalScreen))
+    .then(() => pressDeviceButton('both'))
 }
 
 /**
@@ -113,5 +133,10 @@ export function connectLedgerSigner() {
 
   cy.get(accountSelect).shadow().find('button').contains(connectStr).click()
 
-  cy.get('[data-testid="open-account-center"]', { timeout: 30000 }).should('be.visible')
+  cy.get(accountCenter, { timeout: 30000 }).should('be.visible')
+}
+
+/** Assert a signer is connected — the header's account-center chip is on screen. */
+export function verifySignerConnected() {
+  cy.get(accountCenter).should('be.visible')
 }
