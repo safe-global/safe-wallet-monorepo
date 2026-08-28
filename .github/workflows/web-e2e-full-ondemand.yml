@@ -93,8 +93,8 @@ jobs:
               [ "$found" -eq 0 ] && missing+="  $name"$'\n'
             done <<< "$(printf '%s' "$SPEC" | tr ',' '\n')"
 
-            if [ -n "$missing" ]; then
-              echo "::error::No spec file matches:"$'\n'"$missing"
+            if [ -n "$missing" ] || [ "$n" -eq 0 ]; then
+              echo "::error::No spec file matches:"$'\n'"${missing:-  (the 'spec' input contained no names)}"
               echo "Check the spec names (file name only, no path, no .cy.js) and the selected suite."
               exit 1
             fi
