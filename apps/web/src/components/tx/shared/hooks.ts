@@ -12,6 +12,7 @@ import { useContext, useMemo } from 'react'
 import { type TransactionOptions, type SafeTransaction } from '@safe-global/types-kit'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import { useSafeScope } from '@/components/tx-flow/safe-scope/context'
 import useWallet, { useSigner } from '@/hooks/wallets/useWallet'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import { isSmartContractWallet } from '@/utils/wallets'
@@ -58,6 +59,7 @@ type TxActions = {
  */
 export const useTxActions = (): TxActions => {
   const { safe } = useSafeInfo()
+  const scope = useSafeScope()
   const onboard = useOnboard()
   const signer = useSigner()
   const wallet = useWallet()
@@ -94,6 +96,7 @@ export const useTxActions = (): TxActions => {
         safeTx,
         txId,
         origin,
+        scope,
       })
     }
 
@@ -122,7 +125,7 @@ export const useTxActions = (): TxActions => {
       if (await isSmartContractWallet(signer.chainId, signer.address)) {
         throw new Error('Cannot relay an unsigned transaction from a smart contract wallet')
       }
-      return await dispatchTxSigning(safeTx, signer.provider, txId)
+      return await dispatchTxSigning(safeTx, signer.provider, txId, scope)
     }
 
     const signTx: TxActions['signTx'] = async (safeTx, txId, origin) => {
@@ -146,12 +149,13 @@ export const useTxActions = (): TxActions => {
           signer.address,
           safeAddress,
           Boolean(signer.isSafe),
+          scope,
         )
         return id
       }
 
       // Otherwise, sign off-chain
-      const signedTx = await dispatchTxSigning(safeTx, signer.provider, txId)
+      const signedTx = await dispatchTxSigning(safeTx, signer.provider, txId, scope)
       const tx = await _propose(signer.address, signedTx, txId, origin)
       return tx.txId
     }
@@ -161,7 +165,7 @@ export const useTxActions = (): TxActions => {
       assertProvider(wallet?.provider)
       assertOnboard(onboard)
 
-      const signedTx = await dispatchProposerTxSigning(safeTx, wallet)
+      const signedTx = await dispatchProposerTxSigning(safeTx, wallet, scope)
 
       const tx = await _propose(wallet.address, signedTx, undefined, origin)
       return tx.txId
@@ -183,7 +187,7 @@ export const useTxActions = (): TxActions => {
       // Catch the three GS026 causes (stale nonce, non-signer executor, bad
       // signature) before anything is signed or broadcast — an on-chain GS026
       // revert would cost the user gas for a guaranteed failure (WA-3005).
-      await runExecutionPreChecks({ safeTx, safe, signerAddress: signer.address })
+      await runExecutionPreChecks({ safeTx, safe, signerAddress: signer.address, scope })
 
       let tx: TransactionDetails | undefined
       let rePropose = false
@@ -213,6 +217,7 @@ export const useTxActions = (): TxActions => {
           signer.address,
           safeAddress,
           isSmartAccount,
+          scope,
         )
       }
 
@@ -222,6 +227,7 @@ export const useTxActions = (): TxActions => {
     return { addToBatch, signTx, executeTx, signProposerTx, proposeTx }
   }, [
     safe,
+    scope,
     wallet,
     signer?.provider,
     signer?.address,
