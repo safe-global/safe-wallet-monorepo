@@ -205,7 +205,7 @@ export const useTxActions = (): TxActions => {
 
       // Relay or execute the tx via connected wallet
       if (isRelayed) {
-        await dispatchTxRelay(safeTx, safe, txId, chain, txOptions.gasLimit, acceptUnverifiedSimulation)
+        await dispatchTxRelay(safeTx, safe, txId, chain, txOptions.gasLimit, acceptUnverifiedSimulation, scope)
       } else {
         const isSmartAccount = await isSmartContractWallet(signer.chainId, signer.address)
         await dispatchTxExecution(

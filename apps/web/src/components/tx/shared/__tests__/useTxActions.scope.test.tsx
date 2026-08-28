@@ -5,21 +5,28 @@ import type { ReactNode } from 'react'
 import type Safe from '@safe-global/protocol-kit'
 import { safeTxBuilder } from '@/tests/builders/safeTx'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
+import { chainBuilder } from '@/tests/builders/chains'
 import { SafeScopeContext } from '@/components/tx-flow/safe-scope/context'
 import * as txSender from '@/services/tx/tx-sender'
 import * as useWalletHooks from '@/hooks/wallets/useWallet'
 import * as useOnboardHooks from '@/hooks/wallets/useOnboard'
+import * as useChains from '@/hooks/useChains'
 import { useTxActions } from '../hooks'
 
 jest.mock('@/services/tx/tx-sender', () => ({
   ...jest.requireActual('@/services/tx/tx-sender'),
   dispatchTxProposal: jest.fn(),
   dispatchTxSigning: jest.fn(),
+  dispatchTxRelay: jest.fn(),
 }))
 
 jest.mock('@/utils/wallets', () => ({
   ...jest.requireActual('@/utils/wallets'),
   isSmartContractWallet: jest.fn().mockResolvedValue(false),
+}))
+
+jest.mock('@/services/tx/executionPreChecks', () => ({
+  runExecutionPreChecks: jest.fn().mockResolvedValue(undefined),
 }))
 
 const scopedSafe = extendedSafeInfoBuilder().build()
@@ -34,6 +41,25 @@ const scope = {
 }
 const wrapper = ({ children }: { children: ReactNode }) => (
   <SafeScopeContext.Provider value={{ scope, setScope: jest.fn(), clearScope: jest.fn() }}>
+    {children}
+  </SafeScopeContext.Provider>
+)
+
+// Threshold pinned to 1 and a pre-signed tx so `executeTx`'s `isRelayed` branch skips
+// `signRelayedTx` and goes straight to `dispatchTxRelay` — keeps the relay assertion
+// independent of the random threshold on the shared `scopedSafe` fixture above.
+const relaySafe = extendedSafeInfoBuilder().with({ threshold: 1 }).build()
+const relayScope = {
+  chainId: relaySafe.chainId,
+  safeAddress: relaySafe.address.value,
+  scopeKey: `${relaySafe.chainId}:${relaySafe.address.value}`,
+  safe: relaySafe,
+  safeLoaded: true,
+  safeLoading: false,
+  sdk: { id: 'scoped-relay' } as unknown as Safe,
+}
+const relayWrapper = ({ children }: { children: ReactNode }) => (
+  <SafeScopeContext.Provider value={{ scope: relayScope, setScope: jest.fn(), clearScope: jest.fn() }}>
     {children}
   </SafeScopeContext.Provider>
 )
@@ -53,8 +79,12 @@ describe('useTxActions under a SafeScope', () => {
       isSafe: false,
     } as never)
     jest.spyOn(useOnboardHooks, 'default').mockReturnValue({} as never)
+    jest
+      .spyOn(useChains, 'useCurrentChain')
+      .mockReturnValue(chainBuilder().with({ chainId: scopedSafe.chainId }).build())
     ;(txSender.dispatchTxSigning as jest.Mock).mockImplementation(async (tx) => tx)
     ;(txSender.dispatchTxProposal as jest.Mock).mockResolvedValue({ txId: 'multisig_0x_0x' })
+    ;(txSender.dispatchTxRelay as jest.Mock).mockResolvedValue(undefined)
   })
   afterEach(() => jest.restoreAllMocks())
 
@@ -73,5 +103,33 @@ describe('useTxActions under a SafeScope', () => {
     const { result } = renderHook(() => useTxActions())
     await result.current.proposeTx(safeTxBuilder().build())
     expect(txSender.dispatchTxProposal).toHaveBeenCalledWith(expect.objectContaining({ scope: undefined }))
+  })
+
+  it('executeTx (relayed) passes the scope to dispatchTxRelay', async () => {
+    jest
+      .spyOn(useChains, 'useCurrentChain')
+      .mockReturnValue(chainBuilder().with({ chainId: relaySafe.chainId }).build())
+
+    const { result } = renderHook(() => useTxActions(), { wrapper: relayWrapper })
+    const safeTx = safeTxBuilder().build()
+    safeTx.addSignature({
+      signer: '0x0000000000000000000000000000000000000001',
+      data: '0x0001',
+      staticPart: () => '',
+      dynamicPart: () => '',
+      isContractSignature: false,
+    })
+
+    await result.current.executeTx({ gasLimit: 100000 }, safeTx, 'multisig_0x1', undefined, true, true)
+
+    expect(txSender.dispatchTxRelay).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      'multisig_0x1',
+      expect.anything(),
+      100000,
+      true,
+      relayScope,
+    )
   })
 })

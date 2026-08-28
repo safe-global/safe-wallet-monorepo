@@ -487,10 +487,11 @@ export const dispatchTxRelay = async (
   chain: Chain,
   gasLimit?: string | number | bigint,
   acceptUnverifiedSimulation?: boolean,
+  scope?: TxSenderScope,
 ) => {
   const store = getStoreInstance()
   const readOnlySafeContract = await getReadOnlyCurrentGnosisSafeContract(safe)
-  const safeSDK = getAndValidateSafeSDK()
+  const safeSDK = getAndValidateSafeSDK(scope)
   const safeTxHash = await safeSDK.getTransactionHash(safeTx)
 
   let transactionToRelay = safeTx
