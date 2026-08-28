@@ -10,7 +10,7 @@ import useSafeAppPreviewDrawer from '@/hooks/safe-apps/useSafeAppPreviewDrawer'
 import css from './styles.module.css'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useOpenedSafeApps } from '@/hooks/safe-apps/useOpenedSafeApps'
-import NativeSwapsCard from '@/components/safe-apps/NativeSwapsCard'
+import NativeSwapsCardCell from '@/components/safe-apps/NativeSwapsCard/NativeSwapsCardCell'
 import { SAFE_APPS_EVENTS, SAFE_APPS_LABELS, trackSafeAppEvent, SafeAppLaunchLocation } from '@/services/analytics'
 import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
 
@@ -83,11 +83,7 @@ const SafeAppList = ({
             </li>
           ))}
 
-        {!isFiltered && showNativeSwapsCard && (
-          <li>
-            <NativeSwapsCard />
-          </li>
-        )}
+        {!isFiltered && showNativeSwapsCard && <NativeSwapsCardCell />}
 
         {/* Flat list filtered by search query */}
         {safeAppsList.map((safeApp) => (

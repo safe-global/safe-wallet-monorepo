@@ -15,6 +15,7 @@ import { SAFE_SHIELD_EVENTS } from './events/safe-shield'
 import { HYPERNATIVE_EVENTS } from './events/hypernative'
 import { TX_EVENTS } from './events/transactions'
 import { SPACE_EVENTS } from './events/spaces'
+import { POLICY_EVENTS } from './events/policies'
 
 // If an event is mapped here, it will be tracked in Mixpanel
 export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
@@ -71,6 +72,7 @@ export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
   [TX_EVENTS.EXECUTE_VIA_SPENDING_LIMIT.action]: MixpanelEvent.TRANSACTION_EXECUTED,
   [OVERVIEW_EVENTS.TRUSTED_SAFES_ADDED.action]: MixpanelEvent.TRUSTED_SAFE_ADDED,
   [OVERVIEW_EVENTS.TRUSTED_SAFES_REMOVED.action]: MixpanelEvent.TRUSTED_SAFE_REMOVED,
+  [POLICY_EVENTS.POLICY_CATALOGUE_TILE_CLICKED.action]: MixpanelEvent.POLICY_CATALOGUE_TILE_CLICKED,
   [SPACE_EVENTS.WORKSPACE_CREATED.action]: MixpanelEvent.WORKSPACE_CREATED,
   [SPACE_EVENTS.WORKSPACE_DASHBOARD_VIEWED.action]: MixpanelEvent.WORKSPACE_DASHBOARD_VIEWED,
   [SPACE_EVENTS.AUTH_LOGIN_SUCCEEDED.action]: MixpanelEvent.AUTH_LOGIN_SUCCEEDED,

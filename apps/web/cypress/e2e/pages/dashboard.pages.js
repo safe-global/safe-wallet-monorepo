@@ -37,9 +37,9 @@ export const reviewSignersTestId = '[data-testid="review-signers-btn"]'
 // Case #2 & #3 — Unsupported mastercopy (Warning)
 export const unsupportedMastercopyTitle = 'This Safe is running an unsupported version'
 export const unsupportedMigratableContent =
-  'and may miss security fixes and improvements. You should migrate it to a compatible version.'
+  'It may miss security fixes and improvements. You should migrate it to a compatible version.'
 export const unsupportedCliContent =
-  'and may miss security fixes and improvements. You must use our CLI tool to migrate.'
+  'It may miss security fixes and improvements. You must use our CLI tool to migrate.'
 
 const migrateSafeSubtitle = 'Update Safe account base contract'
 export const nonPinnedWarningTitle = 'Not in your accounts'

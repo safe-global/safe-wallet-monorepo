@@ -1,4 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { transactionDetailsBuilder } from '@/tests/builders/transactionDetails'
 import HistoryFeesAccordion from './index'
 import type { HistoryFeesData } from '../../hooks/useHistoryFeesBreakdown'
 
@@ -8,6 +10,16 @@ const defaultData: HistoryFeesData = {
   gasFee: { label: 'Max gas fee', amount: '0.005', currency: 'ETH', fiatAmount: '$15.12' },
   paidFrom: 'signer',
 }
+
+type TxInfo = TransactionDetails['txInfo']
+
+const transferTxInfo = () => transactionDetailsBuilder().build().txInfo
+
+const settingsChangeTxInfo = (): TxInfo => ({
+  type: 'SettingsChange',
+  dataDecoded: { method: 'changeThreshold', parameters: null },
+  settingsInfo: { type: 'CHANGE_THRESHOLD', threshold: 2 },
+})
 
 describe('HistoryFeesAccordion', () => {
   it('renders collapsed state with total fee', () => {
@@ -100,5 +112,19 @@ describe('HistoryFeesAccordion', () => {
     expect(screen.queryByText('FREE')).not.toBeInTheDocument()
     expect(screen.getByText('0.002730 ETH')).toBeInTheDocument()
     expect(screen.getByText('0.002730 ETH').tagName).not.toBe('DEL')
+  })
+
+  // Must stay in step with ColorCodedTxAccordion's TxInfoColors — the two accordions stack and share
+  // an outline, so a token that drifts here shows up as two different borders on one tx.
+  it.each([
+    ['transfer', transferTxInfo(), 'var(--color-success-light)', 'var(--color-background-light)'],
+    ['settings change', settingsChangeTxInfo(), 'var(--warning-outline)', 'var(--warning-subtle)'],
+    ['unknown type', undefined, 'var(--color-info-dark)', 'var(--color-info-background)'],
+  ])('gives %s its border and fill tokens', (_name, txInfo, expectedBorder, expectedFill) => {
+    const { container } = render(<HistoryFeesAccordion data={defaultData} txInfo={txInfo} />)
+    const root = container.firstElementChild as HTMLElement
+
+    expect(root.style.getPropertyValue('--fees-accordion-border').trim()).toBe(expectedBorder)
+    expect(root.style.getPropertyValue('--fees-accordion-bg').trim()).toBe(expectedFill)
   })
 })

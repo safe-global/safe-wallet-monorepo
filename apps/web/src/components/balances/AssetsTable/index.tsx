@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Typography } from '@/components/ui/typography'
-import { useIsBelowSm } from '@/hooks/useMediaQuery'
+import { useIsMobile } from '@/hooks/use-mobile'
 import classNames from 'classnames'
 import css from './styles.module.css'
 import EnhancedTable, { type EnhancedTableProps } from '@/components/common/EnhancedTable'
@@ -231,7 +231,7 @@ const AssetsTable = ({
         }
       })
 
-  const isMobile = useIsBelowSm()
+  const isMobile = useIsMobile()
 
   return (
     <>
