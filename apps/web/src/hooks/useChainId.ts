@@ -3,6 +3,7 @@ import { parse, type ParsedUrlQuery } from 'querystring'
 import { DEFAULT_CHAIN_ID } from '@/config/constants'
 import chains from '@safe-global/utils/config/chains'
 import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
+import { useSafeScope } from '@/components/tx-flow/safe-scope/context'
 import useWallet from './wallets/useWallet'
 import useChains from './useChains'
 
@@ -39,10 +40,11 @@ const useWalletChainId = (): string | undefined => {
 }
 
 const useChainId = (): string => {
+  const scope = useSafeScope()
   const urlChainId = useUrlChainId()
   const walletChainId = useWalletChainId()
 
-  return urlChainId || walletChainId || String(DEFAULT_CHAIN_ID)
+  return scope?.chainId || urlChainId || walletChainId || String(DEFAULT_CHAIN_ID)
 }
 
 export default useChainId
