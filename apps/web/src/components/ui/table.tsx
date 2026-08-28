@@ -1,8 +1,10 @@
 'use client'
 
 import * as React from 'react'
+import { cva, type VariantProps } from 'class-variance-authority'
 
 import { cn } from '@/utils/cn'
+import css from './table.module.css'
 
 /**
  * Table Component
@@ -34,10 +36,25 @@ import { cn } from '@/utils/cn'
  * - All components: `className` — see Base UI
  */
 
-function Table({ className, ...props }: React.ComponentProps<'table'>) {
+/**
+ * `panel`: grey rounded header bar, inset rounded hover pills painted on the cells, gradient row
+ * dividers. Renders inside a surface its parent draws — it brings its own edge insets, so the
+ * surface must not pad it a second time. Exported for tables that assemble their own `<table>`.
+ */
+const tableVariants = cva('w-full caption-bottom text-sm', {
+  variants: {
+    variant: {
+      default: '',
+      panel: css.table,
+    },
+  },
+  defaultVariants: { variant: 'default' },
+})
+
+function Table({ className, variant, ...props }: React.ComponentProps<'table'> & VariantProps<typeof tableVariants>) {
   return (
     <div data-slot="table-container" className="relative w-full overflow-x-auto">
-      <table data-slot="table" className={cn('w-full caption-bottom text-sm', className)} {...props} />
+      <table data-slot="table" className={cn(tableVariants({ variant }), className)} {...props} />
     </div>
   )
 }
@@ -99,4 +116,4 @@ function TableCaption({ className, ...props }: React.ComponentProps<'caption'>) 
   )
 }
 
-export { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption }
+export { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption, tableVariants }

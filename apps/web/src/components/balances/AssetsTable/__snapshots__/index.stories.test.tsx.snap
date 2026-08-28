@@ -22,10 +22,10 @@ exports[`./index.stories Default 1`] = `
           class="container"
         >
           <div
-            class="mb-4 w-full"
+            class="w-full mb-4"
           >
             <div
-              class="w-full overflow-x-auto rounded-t-3xl bg-[var(--color-background-paper)] md:overflow-x-hidden rounded-b-3xl"
+              class="w-full overflow-x-auto md:overflow-x-hidden rounded-t-lg bg-[var(--color-background-paper)] rounded-b-lg"
               data-testid="table-container"
             >
               <div
@@ -560,7 +560,7 @@ exports[`./index.stories Default 1`] = `
               </div>
             </div>
             <div
-              class="flex h-[52px] items-center rounded-b-3xl rounded-t-none border-t border-[var(--color-background-main)] bg-[var(--color-background-paper)] px-4"
+              class="flex h-[52px] items-center border-t border-[var(--color-background-main)] px-4 rounded-b-lg rounded-t-none bg-[var(--color-background-paper)]"
             />
           </div>
         </div>
@@ -595,10 +595,10 @@ exports[`./index.stories EmptyBalance 1`] = `
             class="container"
           >
             <div
-              class="mb-4 w-full"
+              class="w-full mb-4"
             >
               <div
-                class="w-full overflow-x-auto rounded-t-3xl bg-[var(--color-background-paper)] md:overflow-x-hidden rounded-b-3xl"
+                class="w-full overflow-x-auto md:overflow-x-hidden rounded-t-lg bg-[var(--color-background-paper)] rounded-b-lg"
                 data-testid="table-container"
               >
                 <div
@@ -1133,7 +1133,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                 </div>
               </div>
               <div
-                class="flex h-[52px] items-center rounded-b-3xl rounded-t-none border-t border-[var(--color-background-main)] bg-[var(--color-background-paper)] px-4"
+                class="flex h-[52px] items-center border-t border-[var(--color-background-main)] px-4 rounded-b-lg rounded-t-none bg-[var(--color-background-paper)]"
               />
             </div>
           </div>
@@ -1169,10 +1169,10 @@ exports[`./index.stories WhalePortfolio 1`] = `
             class="container"
           >
             <div
-              class="mb-4 w-full"
+              class="w-full mb-4"
             >
               <div
-                class="w-full overflow-x-auto rounded-t-3xl bg-[var(--color-background-paper)] md:overflow-x-hidden rounded-b-3xl"
+                class="w-full overflow-x-auto md:overflow-x-hidden rounded-t-lg bg-[var(--color-background-paper)] rounded-b-lg"
                 data-testid="table-container"
               >
                 <div
@@ -1707,7 +1707,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
                 </div>
               </div>
               <div
-                class="flex h-[52px] items-center rounded-b-3xl rounded-t-none border-t border-[var(--color-background-main)] bg-[var(--color-background-paper)] px-4"
+                class="flex h-[52px] items-center border-t border-[var(--color-background-main)] px-4 rounded-b-lg rounded-t-none bg-[var(--color-background-paper)]"
               />
             </div>
           </div>

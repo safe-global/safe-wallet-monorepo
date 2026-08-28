@@ -940,14 +940,14 @@ export const Tables: Story = {
         >
           <Swatch
             label="TableCard › EnhancedTable"
-            use="Untyped rows + headCells. ~9 consumers (AssetsTable, OwnerList, ProposersList, NestedSafesList…). Always wrapped in a card surface — never rendered bare."
-            review="Is the newer PaginatedDataTable its successor? If yes, ~9 consumers need migrating; if no, draw a clear boundary — and their pagination differs, so pick one."
+            use="Untyped rows + headCells. ~9 consumers (AssetsTable, OwnerList, ProposersList, NestedSafesList…). Always wrapped in a card surface — never rendered bare. `panel` opts into the shared panel look (grey header bar, hover pills, dividers); the address book uses it."
+            review="Is the newer PaginatedDataTable its successor? They already share the panel stylesheet, so the split is now behavioural: if yes, ~9 consumers need migrating; if no, draw a clear boundary — and their pagination differs, so pick one."
             to="Components/Common/EnhancedTable"
             toLabel="EnhancedTable"
           >
             <div className="w-full max-w-2xl rounded-lg bg-[var(--color-background-main)] p-6">
               <TableCard>
-                <EnhancedTable headCells={headCells} rows={rows} />
+                <EnhancedTable headCells={headCells} rows={rows} panel />
               </TableCard>
             </div>
           </Swatch>

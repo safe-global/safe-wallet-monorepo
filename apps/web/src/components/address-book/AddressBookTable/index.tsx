@@ -207,7 +207,7 @@ function AddressBookTable({ chain, setTxFlow }: AddressBookTableProps) {
             </div>
 
             <div className={css.desktopCard}>
-              <EnhancedTable rows={rows} headCells={headCells} />
+              <EnhancedTable rows={rows} headCells={headCells} panel />
             </div>
           </TableCard>
         ) : (

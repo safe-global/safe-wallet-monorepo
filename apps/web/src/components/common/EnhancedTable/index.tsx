@@ -15,12 +15,10 @@ type EnhancedCell = {
   content: ReactNode
   rawValue: string | number | null
   sticky?: boolean
-  mobileLabel?: string
 }
 
 type EnhancedRow = {
   selected?: boolean
-  collapsed?: boolean
   key?: string
   cells: Record<string, EnhancedCell>
 }
@@ -64,10 +62,11 @@ type EnhancedTableHeadProps = {
   onRequestSort: (property: string) => void
   order: SortDirection
   orderBy: string
+  panel?: boolean
 }
 
 function EnhancedTableHead(props: EnhancedTableHeadProps) {
-  const { headCells, order, orderBy, onRequestSort } = props
+  const { headCells, order, orderBy, onRequestSort, panel } = props
   const createSortHandler = (property: string) => () => {
     onRequestSort(property)
   }
@@ -85,10 +84,10 @@ function EnhancedTableHead(props: EnhancedTableHeadProps) {
                 width: headCell.width ? headCell.width : undefined,
                 textAlign: headCell.align ? (headCell.align as React.CSSProperties['textAlign']) : undefined,
               }}
-              className={classNames('text-sm first:pl-3', { sticky: headCell.sticky })}
+              className={classNames({ 'text-sm': !panel }, 'first:pl-3', { sticky: headCell.sticky })}
             >
               {headCell.disableSort ? (
-                <span className="text-sm">{headCell.label}</span>
+                <span className={classNames({ 'text-sm': !panel })}>{headCell.label}</span>
               ) : (
                 <span
                   role="button"
@@ -100,7 +99,11 @@ function EnhancedTableHead(props: EnhancedTableHeadProps) {
                       createSortHandler(headCell.id)()
                     }
                   }}
-                  className="inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap text-sm select-none"
+                  className={classNames(
+                    'inline-flex cursor-pointer items-center gap-0.5 whitespace-nowrap',
+                    { 'text-sm': !panel },
+                    'select-none',
+                  )}
                 >
                   {headCell.label}
                   {isActive ? (
@@ -126,16 +129,23 @@ function EnhancedTableHead(props: EnhancedTableHeadProps) {
 export type EnhancedTableProps = {
   rows: EnhancedRow[]
   headCells: EnhancedHeadCell[]
-  mobileVariant?: boolean
   compact?: boolean
-  fixedLayout?: boolean
   footer?: ReactNode
+  /** Renders in the shared panel look: grey header bar, inset hover pills, gradient row dividers. */
+  panel?: boolean
 }
 
 const pageSizes = [10, 25, 100]
 const pageSizeItems = Object.fromEntries(pageSizes.map((size) => [String(size), String(size)]))
 
-function EnhancedTable({ rows, headCells, mobileVariant, compact, fixedLayout, footer }: EnhancedTableProps) {
+/**
+ * @deprecated Use `PaginatedDataTable` (features/spaces/components/PaginatedDataTable) for new
+ * tables — it takes typed columns instead of untyped cell maps, and bounds width/alignment to the
+ * design system. This one stays for its nine existing consumers; it is missing typed columns and
+ * responsive column dropping, and `PaginatedDataTable` is missing rows-per-page pagination and a
+ * footer slot, so the two converge one consumer at a time rather than in a single sweep.
+ */
+function EnhancedTable({ rows, headCells, compact, footer, panel }: EnhancedTableProps) {
   const [order, setOrder] = useState<SortDirection>('asc')
   const [orderBy, setOrderBy] = useState<string>('')
   const [page, setPage] = useState<number>(0)
@@ -166,28 +176,32 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact, fixedLayout, f
   const isFirstPage = page === 0
   const isLastPage = to >= rows.length
 
+  // `panel` renders inside a surface its parent draws (TableCard), so it brings no card chrome of
+  // its own — the shared module's insets are the only ones.
   return (
-    <div className="mb-4 w-full">
+    <div className={classNames('w-full', { 'mb-4': !panel })}>
       <div
         data-testid="table-container"
-        className={classNames(
-          'w-full overflow-x-auto rounded-t-3xl bg-[var(--color-background-paper)] md:overflow-x-hidden',
-          {
-            'rounded-b-none': showPagination,
-            'rounded-b-3xl': !showPagination,
-          },
-        )}
+        className={classNames('w-full overflow-x-auto md:overflow-x-hidden', {
+          'rounded-t-lg bg-[var(--color-background-paper)]': !panel,
+          'rounded-b-none': !panel && showPagination,
+          'rounded-b-lg': !panel && !showPagination,
+        })}
       >
         <Table
           aria-labelledby="tableTitle"
-          className={classNames({
-            [css.mobileColumn]: mobileVariant,
-            [css.compactTable]: compact,
-            [css.fixedLayout]: fixedLayout,
-          })}
+          variant={panel ? 'panel' : 'default'}
+          className={classNames({ [css.compactTable]: compact })}
         >
-          <EnhancedTableHead headCells={headCells} order={order} orderBy={orderBy} onRequestSort={handleRequestSort} />
-          <TableBody className={css.tableBody}>
+          <EnhancedTableHead
+            headCells={headCells}
+            order={order}
+            orderBy={orderBy}
+            onRequestSort={handleRequestSort}
+            panel={panel}
+          />
+          {/* `tableBody` only clears the last row's border, which the panel look draws itself. */}
+          <TableBody className={panel ? undefined : css.tableBody}>
             {pagedRows.length > 0 ? (
               pagedRows.map((row, index) => {
                 const rowKey = row.key ?? index
@@ -198,25 +212,10 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact, fixedLayout, f
                     tabIndex={-1}
                     key={rowKey}
                     data-state={row.selected ? 'selected' : undefined}
-                    className={row.collapsed ? css.collapsedRow : undefined}
                   >
                     {Object.entries(row.cells).map(([key, cell]) => (
-                      <TableCell
-                        key={key}
-                        data-testid={`table-cell-${key}`}
-                        className={classNames('first:pl-3', {
-                          [css.collapsedCell]: row.collapsed,
-                        })}
-                      >
-                        <div className={classNames('overflow-hidden transition-all', { 'h-0': row.collapsed })}>
-                          {cell.mobileLabel ? (
-                            <Typography variant="paragraph-small" color="muted" className={css.mobileLabel}>
-                              {cell.mobileLabel}
-                            </Typography>
-                          ) : null}
-
-                          {cell.content}
-                        </div>
+                      <TableCell key={key} data-testid={`table-cell-${key}`} className="first:pl-3">
+                        <div className="overflow-hidden transition-all">{cell.content}</div>
                       </TableCell>
                     ))}
                   </TableRow>
@@ -233,7 +232,11 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact, fixedLayout, f
       </div>
 
       {showPagination && (
-        <div className="flex items-center justify-between rounded-b-3xl rounded-t-none border-t border-[var(--color-border-light)] bg-[var(--color-background-paper)]">
+        <div
+          className={classNames('flex items-center justify-between border-t border-[var(--color-border-light)]', {
+            'rounded-b-lg rounded-t-none bg-[var(--color-background-paper)]': !panel,
+          })}
+        >
           {footer && <div className="flex h-[52px] items-center px-4">{footer}</div>}
           <div data-testid="table-pagination" className="flex h-[52px] flex-1 items-center justify-end gap-4 px-4">
             <Typography variant="paragraph-small" color="muted">
@@ -280,7 +283,11 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact, fixedLayout, f
         </div>
       )}
       {!showPagination && footer && (
-        <div className="flex h-[52px] items-center rounded-b-3xl rounded-t-none border-t border-[var(--color-background-main)] bg-[var(--color-background-paper)] px-4">
+        <div
+          className={classNames('flex h-[52px] items-center border-t border-[var(--color-background-main)] px-4', {
+            'rounded-b-lg rounded-t-none bg-[var(--color-background-paper)]': !panel,
+          })}
+        >
           {footer}
         </div>
       )}

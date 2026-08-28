@@ -38,7 +38,7 @@ jest.mock('../SafeAccountTableRow', () => ({
     <tr
       data-testid="row"
       data-key={line.key}
-      data-divider={showDivider ? '' : undefined}
+      data-show-divider={showDivider ? '' : undefined}
       ref={rowRef}
       {...rowDraggableProps}
     >
@@ -221,13 +221,13 @@ describe('SafeAccountsTable', () => {
 
   it('draws dividers between groups, but not after the last row', () => {
     render(<SafeAccountsTable items={items} />)
-    const dividers = screen.getAllByTestId('row').map((row) => row.hasAttribute('data-divider'))
+    const dividers = screen.getAllByTestId('row').map((row) => row.hasAttribute('data-show-divider'))
     expect(dividers).toEqual([true, true, false])
   })
 
   it('draws no dividers in embedded mode', () => {
     render(<SafeAccountsTable items={items} embedded columns={['name', 'threshold', 'networks', 'balance']} />)
-    const dividers = screen.getAllByTestId('row').map((row) => row.hasAttribute('data-divider'))
+    const dividers = screen.getAllByTestId('row').map((row) => row.hasAttribute('data-show-divider'))
     expect(dividers).toEqual([false, false, false])
   })
 })

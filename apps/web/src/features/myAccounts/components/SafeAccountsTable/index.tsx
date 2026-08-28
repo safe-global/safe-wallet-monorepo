@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { ChevronDown, ChevronUp } from 'lucide-react'
-import { TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { TableBody, TableHead, TableHeader, TableRow, tableVariants } from '@/components/ui/table'
 import tableCss from './styles.module.css'
 import type { AllSafeItems } from '@/hooks/safes'
 import { cn } from '@/utils/cn'
@@ -270,13 +270,8 @@ export default function SafeAccountsTable({
             above so `embedded` tables can opt out of it. The shadcn table sub-components are used
             throughout. */}
         <table
-          className={cn('w-full caption-bottom text-sm', tableCss.table)}
-          style={{
-            tableLayout: 'fixed',
-            minWidth: embedded ? undefined : minWidth,
-            borderCollapse: 'separate',
-            borderSpacing: 0,
-          }}
+          className={cn(tableVariants({ variant: 'panel' }), tableCss.accounts)}
+          style={{ tableLayout: 'fixed', minWidth: embedded ? undefined : minWidth }}
         >
           {/* Embedded (headerless) tables need a colgroup to keep fixed-layout column widths; the Name
               column is left unsized so it flexes to fill the card, while the stat columns stay fixed. */}
@@ -290,8 +285,8 @@ export default function SafeAccountsTable({
 
           {!embedded && (
             <TableHeader>
-              <TableRow className="border-0 hover:bg-transparent">
-                {visibleColumns.map((column, index) => {
+              <TableRow>
+                {visibleColumns.map((column) => {
                   const active = sort.orderBy === column.sortKey
                   const canSort = column.sortable && column.sortKey && sortableColumns
                   return (
@@ -299,14 +294,10 @@ export default function SafeAccountsTable({
                       key={column.id}
                       aria-sort={active ? (sort.order === 'asc' ? 'ascending' : 'descending') : undefined}
                       // Indents the NAME label so it sits above the account name text rather than the
-                      // avatar (see styles.module.css) — a leading checkbox column already offsets the
-                      // cell, so it needs less.
+                      // avatar (see styles.module.css) — a leading checkbox column already offsets
+                      // the cell, so it needs less.
                       data-name-head={column.id === 'name' ? (selection ? 'selection' : 'default') : undefined}
-                      className={cn(
-                        'bg-muted whitespace-nowrap px-2 py-2.5 text-xs font-semibold uppercase leading-4 tracking-normal text-muted-foreground',
-                        index === 0 && 'rounded-l-lg',
-                        index === visibleColumns.length - 1 && 'rounded-r-lg',
-                      )}
+                      className="px-2 py-2.5"
                       style={{ width: column.width, textAlign: column.align ?? 'left' }}
                     >
                       {canSort ? (

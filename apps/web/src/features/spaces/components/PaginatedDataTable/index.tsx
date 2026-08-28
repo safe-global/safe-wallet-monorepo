@@ -195,7 +195,7 @@ function PaginatedDataTable<T>({
     <div ref={containerRef}>
       {/* Fixed layout on regular desktop preserves column proportions and lets `truncate` cells
           clip; compact mode falls back to auto layout so the remaining columns size to content. */}
-      <Table className={cn(!isCompact && 'md:table-fixed')}>
+      <Table variant="panel" className={cn(!isCompact && 'md:table-fixed')}>
         <TableHeader>
           <TableRow>
             {visibleColumns.map((column) => {
@@ -218,7 +218,7 @@ function PaginatedDataTable<T>({
                     <button
                       type="button"
                       onClick={() => handleSort(column.id)}
-                      className="hover:text-foreground inline-flex cursor-pointer items-center gap-1 font-medium"
+                      className="hover:text-foreground inline-flex cursor-pointer items-center gap-1"
                     >
                       {column.header}
                       <SortIcon direction={direction} />
@@ -238,10 +238,13 @@ function PaginatedDataTable<T>({
             const key = getRowKey(row)
             const isOpen = expanded.has(key)
             const detailId = `data-table-detail-${key}`
+            // The variant draws a divider under every row but the last; an expanded row hands its
+            // own to the detail row below, which closes the pair.
+            const showDetail = showDetailToggle && isOpen
 
             return (
               <Fragment key={key}>
-                <TableRow className={getRowClassName?.(row)}>
+                <TableRow data-no-divider={showDetail ? '' : undefined} className={getRowClassName?.(row)}>
                   {visibleColumns.map((column) => (
                     <TableCell
                       key={column.id}
@@ -273,7 +276,7 @@ function PaginatedDataTable<T>({
                   )}
                 </TableRow>
 
-                {showDetailToggle && isOpen && (
+                {showDetail && (
                   <TableRow className={getRowClassName?.(row)}>
                     <TableCell id={detailId} colSpan={totalColumns} className="bg-muted/30">
                       {renderRowDetail?.(row)}
@@ -287,7 +290,7 @@ function PaginatedDataTable<T>({
       </Table>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between pt-4 pr-16">
+        <div className="flex items-center justify-between px-4 pt-4">
           <p className="text-muted-foreground text-sm">
             {currentPage * pageSize + 1}&ndash;{Math.min((currentPage + 1) * pageSize, sortedRows.length)} of{' '}
             {sortedRows.length}

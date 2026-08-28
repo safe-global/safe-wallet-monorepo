@@ -209,4 +209,33 @@ describe('PaginatedDataTable', () => {
       expect(screen.queryByText('detail-Alice')).not.toBeInTheDocument()
     })
   })
+
+  // The panel variant draws a divider under every row but the last; rows opt out.
+  describe('row dividers', () => {
+    const suppressed = (container: HTMLElement) =>
+      Array.from(container.querySelectorAll('tbody tr')).map((row) => row.hasAttribute('data-no-divider'))
+
+    it('leaves every row to the variant by default', () => {
+      const { container } = render(tableElement(['a', 'b', 'c']))
+
+      expect(suppressed(container)).toEqual([false, false, false])
+    })
+
+    it("hands an expanded row's divider to its detail row", () => {
+      mockUseIsMobile.mockReturnValue(true)
+      const { container } = render(
+        <PaginatedDataTable
+          columns={columns}
+          rows={['a', 'b']}
+          getRowKey={(row) => row}
+          renderRowDetail={(row) => <span>detail-{row}</span>}
+        />,
+      )
+
+      fireEvent.click(screen.getAllByRole('button', { name: 'Show details' })[0]!)
+
+      // The pair renders as [row a, detail a, row b] — only the detail row closes it.
+      expect(suppressed(container)).toEqual([true, false, false])
+    })
+  })
 })
