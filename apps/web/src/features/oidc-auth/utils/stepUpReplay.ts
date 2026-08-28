@@ -106,12 +106,9 @@ type ReplayOutcome = { error?: FetchBaseQueryError | SerializedError }
 
 /**
  * Indexing `cgwApi.endpoints` with a union of endpoint names produces a union of
- * `initiate` thunks — one per argument type — which `dispatch` cannot accept, and
- * `args` has lost its compile-time type to JSON by the time it is read back.
- *
- * Both are collapsed to one signature here. The endpoint and its arguments are
- * only ever stored together, taken from the single request that failed, so
- * re-pairing them is sound.
+ * `initiate` thunks that `dispatch` cannot accept, and `args` has lost its type
+ * to JSON. Collapsed to one signature: endpoint and args are only ever stored
+ * together, from the single request that failed.
  */
 type ReplayInitiator = (args: unknown) => ThunkAction<Promise<ReplayOutcome>, RootState, unknown, UnknownAction>
 
@@ -119,20 +116,16 @@ const asReplayInitiator = (endpoint: ReplayableEndpoint): ReplayInitiator =>
   cgwApi.endpoints[endpoint].initiate as unknown as ReplayInitiator
 
 /**
- * Completes the action the step-up challenge interrupted.
- *
- * Dispatching the endpoint's own `initiate` thunk rather than calling a
- * component hook keeps this runnable from the callback, and still runs the
- * endpoint's `invalidatesTags` so the lists on screen refresh.
+ * Dispatches the endpoint's own `initiate` thunk rather than calling a component
+ * hook, so this is runnable from the callback and still fires the endpoint's
+ * `invalidatesTags`.
  */
 export const replayStepUpAction = async (dispatch: AppDispatch, pending: PendingStepUpAction): Promise<void> => {
   const result = await dispatch(asReplayInitiator(pending.endpoint)(pending.args))
 
   if (result.error) {
-    // Still gated means the challenge was never completed — the user backed out
-    // of the provider's page and came back. Say that, rather than the inline
-    // "verify your identity" copy, which reads as an instruction with nothing to
-    // act on for an action they walked away from.
+    // Still gated means the challenge was never completed, so the inline "verify
+    // your identity" copy would instruct the user to do what they just abandoned.
     const message = isElevationRequiredError(result.error)
       ? STEP_UP_FAILED_MESSAGE
       : getRtkQueryErrorMessage(result.error) || REPLAY_FAILED_MESSAGE
@@ -147,9 +140,8 @@ export const replayStepUpAction = async (dispatch: AppDispatch, pending: Pending
     return
   }
 
-  // The mutation's `invalidatesTags` has started refetches by now; the success
-  // toast must not appear while lists still show pre-mutation data. Dispatching
-  // the thunk returns one promise per running query, not a single promise.
+  // Awaited so the success toast lands after the refetches, not next to stale
+  // lists. The thunk returns one promise per running query, hence `all`.
   await Promise.all(dispatch(cgwApi.util.getRunningQueriesThunk()))
 
   dispatch(

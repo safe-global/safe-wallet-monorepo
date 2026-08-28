@@ -23,9 +23,6 @@ export const isStepUpReturnInFlight = (): boolean => isHandlingStepUpReturn
  * A `window.location.href` navigation rather than RTK Query: the endpoint
  * answers with a redirect to the provider's own HTML pages, which `fetch` would
  * follow and then fail to parse as JSON.
- *
- * Returns whether the navigation started, so callers can tell a suppressed
- * attempt from a real one.
  */
 export const startStepUp = (redirectUrl?: string): boolean => {
   if (isHandlingStepUpReturn) return false
