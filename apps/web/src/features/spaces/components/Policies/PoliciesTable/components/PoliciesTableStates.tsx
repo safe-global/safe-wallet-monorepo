@@ -27,7 +27,7 @@ export const PoliciesTableLoading = () => (
  */
 export const PoliciesTableError = ({ onRetry }: { onRetry?: () => void }) => (
   <div className="flex flex-col items-center gap-3 py-10 text-center" data-testid="policies-error" role="alert">
-    <AlertTriangle className="size-6 text-warning" aria-hidden />
+    <AlertTriangle className="size-6 text-warning-strong" aria-hidden />
 
     <div className="flex flex-col gap-1">
       <Typography variant="paragraph-bold">Couldn&apos;t load policies</Typography>

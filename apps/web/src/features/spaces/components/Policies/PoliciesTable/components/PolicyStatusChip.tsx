@@ -1,23 +1,22 @@
-import { Chip } from '@/components/ui/chip'
-import { cn } from '@/utils/cn'
+import { Badge, BadgeDot } from '@/components/ui/badge'
 import type { PolicyStatus } from '../../types'
 
-const STATUS_CONFIG: Record<PolicyStatus, { label: string; variant: 'success' | 'warning' | 'default'; dot: string }> =
-  {
-    active: { label: 'Active', variant: 'success', dot: 'bg-accent-success' },
-    pending: { label: 'Pending', variant: 'warning', dot: 'bg-warning' },
-    // A configured module that is not enabled enforces nothing, so it is not called active.
-    unenforced: { label: 'Not enforced', variant: 'default', dot: 'bg-muted-foreground' },
-  }
+const BADGE_BY_STATUS: Record<PolicyStatus, { label: string; variant: 'success' | 'warning' | 'secondary' }> = {
+  active: { label: 'Active', variant: 'success' },
+  pending: { label: 'Pending', variant: 'warning' },
+  // A configured module that is not enabled enforces nothing, so it is not called active.
+  unenforced: { label: 'Not enforced', variant: 'secondary' },
+}
 
+/** Status of a policy, matching the 2FA status badges on the Team table. */
 const PolicyStatusChip = ({ status }: { status: PolicyStatus }) => {
-  const { label, variant, dot } = STATUS_CONFIG[status]
+  const { label, variant } = BADGE_BY_STATUS[status]
 
   return (
-    <Chip variant={variant} size="default" data-testid={`policy-status-${status}`}>
-      <span className={cn('size-1.5 shrink-0 rounded-full', dot)} aria-hidden />
+    <Badge variant={variant} size="status" shape="status" data-testid={`policy-status-${status}`}>
+      <BadgeDot />
       {label}
-    </Chip>
+    </Badge>
   )
 }
 
