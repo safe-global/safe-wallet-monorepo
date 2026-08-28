@@ -8,6 +8,8 @@ import { registerActiveScope } from '@/components/tx-flow/safe-scope/activeScope
 import type { TxSenderScope } from '@/components/tx-flow/safe-scope/types'
 import { getAndValidateSafeSDK, getSafeProvider, getSafeSDKWithSigner } from '../sdk'
 import { createMultiSendCallOnlyTx, createTx } from '../create'
+import { getReadOnlyCurrentGnosisSafeContract } from '@/services/contracts/safeContracts'
+import { safeInfoBuilder } from '@/tests/builders/safe'
 
 // `jest.spyOn(exceptions, 'logError')` throws "Cannot redefine property" under the
 // Next.js/SWC jest transform for this module (reproduced standalone), so this file
@@ -15,6 +17,14 @@ import { createMultiSendCallOnlyTx, createTx } from '../create'
 // (see e.g. hypernativeGuardCheck.test.ts) instead of spying on the real module.
 jest.mock('@/services/exceptions', () => ({
   logError: jest.fn(),
+}))
+
+// `getReadOnlyCurrentGnosisSafeContract` builds a real ethers contract from the SDK's
+// SafeProvider; only its choice of *which* SDK to read matters here, so the actual
+// contract construction is stubbed out.
+jest.mock('@safe-global/protocol-kit', () => ({
+  ...jest.requireActual('@safe-global/protocol-kit'),
+  getSafeContract: jest.fn().mockResolvedValue({}),
 }))
 
 const mockLogError = logError as jest.MockedFunction<typeof logError>
@@ -53,10 +63,12 @@ describe('tx-sender scope handling', () => {
       )
     })
 
-    it('logs once when the singleton is reached while a SafeScope is mounted', () => {
+    it('throws and logs once when the singleton is reached while a SafeScope is mounted', () => {
       const unregister = registerActiveScope()
       try {
-        expect(getAndValidateSafeSDK()).toBe(singletonSdk)
+        expect(() => getAndValidateSafeSDK()).toThrow(
+          'A Safe account must be selected before transacting in this flow.',
+        )
         expect(mockLogError).toHaveBeenCalledTimes(1)
         expect(mockLogError).toHaveBeenCalledWith(ErrorCodes._822, expect.any(String))
       } finally {
@@ -69,6 +81,12 @@ describe('tx-sender scope handling', () => {
     jest.spyOn(web3ReadOnly, 'getWeb3ReadOnly').mockReturnValue(undefined)
     expect(() => getSafeProvider()).toThrow('Provider not found.')
     expect(getSafeProvider(scope)).toBeDefined()
+  })
+
+  it('getSafeProvider throws instead of falling back when the scope has no provider yet', () => {
+    expect(() => getSafeProvider({ ...scope, web3ReadOnly: undefined })).toThrow(
+      'The provider for the selected Safe account is not initialized yet.',
+    )
   })
 
   it('getSafeSDKWithSigner connects the scoped SDK', async () => {
@@ -85,5 +103,16 @@ describe('tx-sender scope handling', () => {
     await createMultiSendCallOnlyTx([txParams], scope)
     expect(scopedSdk.createTransaction).toHaveBeenCalledWith({ transactions: [txParams], onlyCalls: true })
     expect(singletonSdk.createTransaction).not.toHaveBeenCalled()
+  })
+
+  it('getReadOnlyCurrentGnosisSafeContract (relay path) uses the scoped SDK and never touches the singleton', async () => {
+    const scopedGetSafeProvider = jest.fn().mockReturnValue({})
+    const scopedSdkWithProvider = { ...scopedSdk, getSafeProvider: scopedGetSafeProvider } as unknown as Safe
+    const safe = safeInfoBuilder().with({ version: '1.4.1' }).build()
+
+    await getReadOnlyCurrentGnosisSafeContract(safe, { ...scope, sdk: scopedSdkWithProvider })
+
+    expect(scopedGetSafeProvider).toHaveBeenCalledTimes(1)
+    expect(safeCoreSDK.getSafeSDK).not.toHaveBeenCalled()
   })
 })

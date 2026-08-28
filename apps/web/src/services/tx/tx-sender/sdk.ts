@@ -30,7 +30,9 @@ import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
  * The SDK for the Safe being transacted on.
  *
  * With a `scope` (Space-level flow) it is that Safe's instance — never the singleton, even if the
- * scoped one is not ready yet. Without one it is the Safe-level singleton bound to the URL Safe.
+ * scoped one is not ready yet. Without one it is the Safe-level singleton bound to the URL Safe —
+ * unless a `SafeScopeProvider` is mounted and the caller simply forgot to pass its scope, in which
+ * case using the singleton would silently sign for the wrong (URL) Safe, so this throws instead.
  */
 export const getAndValidateSafeSDK = (scope?: TxSenderScope): Safe => {
   if (scope) {
@@ -44,6 +46,7 @@ export const getAndValidateSafeSDK = (scope?: TxSenderScope): Safe => {
     // A Space-level flow is open but this caller did not pass its scope: it is about to use the URL
     // Safe's SDK. Safe-level routes never hit this (no provider mounted).
     logError(ErrorCodes._822, 'getAndValidateSafeSDK called without a scope while a SafeScopeProvider is mounted')
+    throw new Error('A Safe account must be selected before transacting in this flow.')
   }
 
   const safeSDK = getSafeSDK()
@@ -56,7 +59,14 @@ export const getAndValidateSafeSDK = (scope?: TxSenderScope): Safe => {
 }
 
 export const getSafeProvider = (scope?: TxSenderScope) => {
-  const provider = scope?.web3ReadOnly ?? getWeb3ReadOnly()
+  if (scope) {
+    if (!scope.web3ReadOnly) {
+      throw new Error('The provider for the selected Safe account is not initialized yet.')
+    }
+    return new SafeProvider({ provider: scope.web3ReadOnly._getConnection().url })
+  }
+
+  const provider = getWeb3ReadOnly()
   if (!provider) {
     throw new Error('Provider not found.')
   }

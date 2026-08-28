@@ -1,5 +1,3 @@
-// SPDX-License-Identifier: FSL-1.1-MIT
-
 import { createContext, useContext } from 'react'
 import type { SafeScope, SafeScopeContextValue, SafeScopeControls } from './types'
 

@@ -1,5 +1,3 @@
-// SPDX-License-Identifier: FSL-1.1-MIT
-
 import { useCallback, useEffect, useMemo, useState, type ReactElement, type ReactNode } from 'react'
 import { skipToken } from '@reduxjs/toolkit/query'
 import type Safe from '@safe-global/protocol-kit'
@@ -40,7 +38,10 @@ export const SafeScopeProvider = ({ initial, children }: SafeScopeProviderProps)
   useEffect(() => registerActiveScope(), [])
 
   // 1. SafeState for the target. `currentData` (not `data`) so a previous target's result never shows.
-  const { currentData, error, isLoading } = useSafesGetSafeV1Query(
+  // `isFetching` is included because RTK Query's `isLoading` is false once ANY result exists — after
+  // Safe A resolves and the user switches to B, `isLoading` alone would falsely report `safeLoading=false`
+  // while B is still in flight.
+  const { currentData, error, isLoading, isFetching } = useSafesGetSafeV1Query(
     target ? { chainId: target.chainId, safeAddress: target.safeAddress } : skipToken,
     { pollingInterval: POLLING_INTERVAL },
   )
@@ -126,13 +127,13 @@ export const SafeScopeProvider = ({ initial, children }: SafeScopeProviderProps)
       scopeKey,
       safe,
       safeLoaded: safe !== undefined,
-      safeLoading: isLoading,
+      safeLoading: isLoading || isFetching,
       safeError,
       chain,
       web3ReadOnly,
       sdk,
     }
-  }, [target, scopeKey, safe, isLoading, safeError, chain, web3ReadOnly, sdk])
+  }, [target, scopeKey, safe, isLoading, isFetching, safeError, chain, web3ReadOnly, sdk])
 
   const value = useMemo<SafeScopeContextValue>(() => ({ scope, setScope, clearScope }), [scope, setScope, clearScope])
 

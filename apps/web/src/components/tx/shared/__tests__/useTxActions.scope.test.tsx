@@ -1,5 +1,3 @@
-// SPDX-License-Identifier: FSL-1.1-MIT
-
 import { renderHook } from '@/tests/test-utils'
 import type { ReactNode } from 'react'
 import type Safe from '@safe-global/protocol-kit'
@@ -96,6 +94,29 @@ describe('useTxActions under a SafeScope', () => {
     expect(txSender.dispatchTxSigning).toHaveBeenCalledWith(expect.anything(), expect.anything(), undefined, scope)
     expect(txSender.dispatchTxProposal).toHaveBeenCalledWith(
       expect.objectContaining({ chainId: scopedSafe.chainId, safeAddress: scopedSafe.address.value, scope }),
+    )
+  })
+
+  it('proposeTx reads chainId/safeAddress from the scope target while its SafeState is still loading (F6)', async () => {
+    const loadingScope = {
+      chainId: '137',
+      safeAddress: '0x0000000000000000000000000000000000000789',
+      scopeKey: '137:0x0000000000000000000000000000000000000789',
+      safe: undefined,
+      safeLoaded: false,
+      safeLoading: true,
+    }
+    const loadingWrapper = ({ children }: { children: ReactNode }) => (
+      <SafeScopeContext.Provider value={{ scope: loadingScope, setScope: jest.fn(), clearScope: jest.fn() }}>
+        {children}
+      </SafeScopeContext.Provider>
+    )
+
+    const { result } = renderHook(() => useTxActions(), { wrapper: loadingWrapper })
+    await result.current.proposeTx(safeTxBuilder().build())
+
+    expect(txSender.dispatchTxProposal).toHaveBeenCalledWith(
+      expect.objectContaining({ chainId: loadingScope.chainId, safeAddress: loadingScope.safeAddress }),
     )
   })
 

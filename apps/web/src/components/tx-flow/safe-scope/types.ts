@@ -1,5 +1,3 @@
-// SPDX-License-Identifier: FSL-1.1-MIT
-
 import type Safe from '@safe-global/protocol-kit'
 import type { JsonRpcProvider } from 'ethers'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'

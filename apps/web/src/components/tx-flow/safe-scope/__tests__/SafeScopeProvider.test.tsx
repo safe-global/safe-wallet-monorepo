@@ -1,5 +1,3 @@
-// SPDX-License-Identifier: FSL-1.1-MIT
-
 import { act, renderHook, waitFor } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
 import type { ReactNode } from 'react'
@@ -35,7 +33,13 @@ const chainsById: Record<string, typeof sepolia> = { [sepolia.chainId]: sepolia,
 // `undefined` — override it so `safe.implementation.value` (mirroring `useInitSafeCoreSDK`) doesn't crash.
 const safeA = safeInfoBuilder().with({ chainId: sepolia.chainId, implementation: addressExBuilder().build() }).build()
 const safeB = safeInfoBuilder().with({ chainId: polygon.chainId, implementation: addressExBuilder().build() }).build()
-const safesByAddress: Record<string, typeof safeA> = { [safeA.address.value]: safeA, [safeB.address.value]: safeB }
+// Same chain as `safeA`, different address — for the same-chain switch test.
+const safeC = safeInfoBuilder().with({ chainId: sepolia.chainId, implementation: addressExBuilder().build() }).build()
+const safesByAddress: Record<string, typeof safeA> = {
+  [safeA.address.value]: safeA,
+  [safeB.address.value]: safeB,
+  [safeC.address.value]: safeC,
+}
 
 const mockQuery = safesApi.useSafesGetSafeV1Query as jest.Mock
 const mockCreateProvider = web3.createWeb3ReadOnly as jest.Mock
@@ -53,8 +57,8 @@ describe('SafeScopeProvider', () => {
     jest.spyOn(useChainsHooks, 'useChain').mockImplementation((chainId: string) => chainsById[chainId])
     mockQuery.mockImplementation((args: { chainId: string; safeAddress: string } | symbol) =>
       typeof args === 'symbol'
-        ? { currentData: undefined, error: undefined, isLoading: false }
-        : { currentData: safesByAddress[args.safeAddress], error: undefined, isLoading: false },
+        ? { currentData: undefined, error: undefined, isLoading: false, isFetching: false }
+        : { currentData: safesByAddress[args.safeAddress], error: undefined, isLoading: false, isFetching: false },
     )
     mockCreateProvider.mockImplementation((chain: { chainId: string }) => ({ chainId: chain.chainId }))
     initSafeSDKSpy = jest
@@ -121,6 +125,53 @@ describe('SafeScopeProvider', () => {
     expect(initSafeSDKSpy).toHaveBeenLastCalledWith(
       expect.objectContaining({ address: safeB.address.value, isL2Chain: true }),
     )
+  })
+
+  it('reports safeLoading=true while a mid-flow switch is in flight, even though isLoading alone is false (F3)', async () => {
+    const { result } = renderHook(useProbe, {
+      wrapper: wrapperWith({ chainId: safeA.chainId, safeAddress: safeA.address.value }),
+    })
+    await waitFor(() => expect(result.current.scope?.sdk).toEqual({ sdkFor: safeA.address.value }))
+
+    // RTK Query reports `isLoading: false` once any result has ever resolved — simulate the
+    // mid-flow switch to B: no data yet, but `isFetching: true`.
+    mockQuery.mockImplementation((args: { chainId: string; safeAddress: string } | symbol) =>
+      typeof args === 'symbol' || args.safeAddress !== safeB.address.value
+        ? {
+            currentData: safesByAddress[(args as { safeAddress: string }).safeAddress],
+            error: undefined,
+            isLoading: false,
+            isFetching: false,
+          }
+        : { currentData: undefined, error: undefined, isLoading: false, isFetching: true },
+    )
+
+    act(() => result.current.controls.setScope(safeB.chainId, safeB.address.value))
+
+    expect(result.current.scope?.safeLoading).toBe(true)
+    expect(result.current.scope?.safeLoaded).toBe(false)
+    expect(result.current.scope?.safe).toBeUndefined()
+  })
+
+  it('switching to a Safe on the SAME chain reuses the provider instance and only resets the SDK', async () => {
+    const { result } = renderHook(useProbe, {
+      wrapper: wrapperWith({ chainId: safeA.chainId, safeAddress: safeA.address.value }),
+    })
+    await waitFor(() => expect(result.current.scope?.sdk).toEqual({ sdkFor: safeA.address.value }))
+    const firstProvider = result.current.scope?.web3ReadOnly
+    const createProviderCallsBeforeSwitch = mockCreateProvider.mock.calls.length
+
+    act(() => result.current.controls.setScope(safeC.chainId, safeC.address.value))
+
+    // Same chain, same custom-RPC lookup → the provider effect's deps are unchanged, so it never
+    // re-runs (no new `createWeb3ReadOnly` call): the SDK still resets for the new address though.
+    expect(result.current.scope?.web3ReadOnly).toBe(firstProvider)
+    expect(mockCreateProvider.mock.calls.length).toBe(createProviderCallsBeforeSwitch)
+    expect(result.current.scope?.sdk).toBeUndefined()
+
+    await waitFor(() => expect(result.current.scope?.sdk).toEqual({ sdkFor: safeC.address.value }))
+    expect(result.current.scope?.web3ReadOnly).toBe(firstProvider)
+    expect(initSafeSDKSpy).toHaveBeenLastCalledWith(expect.objectContaining({ address: safeC.address.value }))
   })
 
   it('passes the custom RPC for the scope chain to the provider', async () => {

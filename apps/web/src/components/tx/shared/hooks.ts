@@ -71,8 +71,10 @@ export const useTxActions = (): TxActions => {
   const currency = useAppSelector(selectCurrency)
 
   return useMemo<TxActions>(() => {
-    const safeAddress = safe.address.value
-    const { chainId } = safe
+    // While a scoped Safe's SafeState is still loading, `safe` is `defaultSafeInfo` — the scope's own
+    // chainId/safeAddress are already known, so prefer them over the placeholder.
+    const safeAddress = scope?.safeAddress ?? safe.address.value
+    const chainId = scope?.chainId ?? safe.chainId
 
     const withGtfFeeParams = (safeTx: SafeTransaction) =>
       mergeGtfFeeParams({

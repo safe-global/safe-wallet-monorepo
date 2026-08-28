@@ -1,5 +1,3 @@
-// SPDX-License-Identifier: FSL-1.1-MIT
-
 import type { SafeScopeTarget } from './types'
 
 /** Same shape as `SafeAccountSelector`'s `buildSafeAccountId`, so the selector's value can be passed straight through. */

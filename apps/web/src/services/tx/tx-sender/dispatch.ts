@@ -490,7 +490,7 @@ export const dispatchTxRelay = async (
   scope?: TxSenderScope,
 ) => {
   const store = getStoreInstance()
-  const readOnlySafeContract = await getReadOnlyCurrentGnosisSafeContract(safe)
+  const readOnlySafeContract = await getReadOnlyCurrentGnosisSafeContract(safe, scope)
   const safeSDK = getAndValidateSafeSDK(scope)
   const safeTxHash = await safeSDK.getTransactionHash(safeTx)
 

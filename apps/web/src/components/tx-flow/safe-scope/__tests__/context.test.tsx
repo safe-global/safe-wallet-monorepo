@@ -1,5 +1,3 @@
-// SPDX-License-Identifier: FSL-1.1-MIT
-
 import { renderHook } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
 import type { ReactNode } from 'react'

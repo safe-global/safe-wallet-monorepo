@@ -45,6 +45,13 @@ describe('ConfirmProposedTx under a SafeScope', () => {
       </SafeScopeContext.Provider>,
     )
 
-    await waitFor(() => expect(txSender.createExistingTx).toHaveBeenCalledWith(scopeChainId, txId))
+    await waitFor(() =>
+      expect(txSender.createExistingTx).toHaveBeenCalledWith(
+        scopeChainId,
+        txId,
+        undefined,
+        expect.objectContaining({ chainId: scopeChainId }),
+      ),
+    )
   })
 })

@@ -1,5 +1,3 @@
-// SPDX-License-Identifier: FSL-1.1-MIT
-
 /**
  * Process-wide count of mounted `SafeScopeProvider`s.
  *
