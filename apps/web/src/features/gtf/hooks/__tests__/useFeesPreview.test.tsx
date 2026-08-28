@@ -13,6 +13,7 @@ import * as useGasTokenCandidatesModule from '../useGasTokenCandidates'
 import * as gatewayApi from '@/store/api/gateway'
 import { chainBuilder } from '@/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
+import { eip712SafeTxHash } from '@/tests/eip712SafeTx'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { SafeTransaction, SafeTransactionData } from '@safe-global/types-kit'
 
@@ -163,6 +164,27 @@ const loadingPreview = {
   refetch: jest.fn(),
 } as unknown as ReturnType<typeof gatewayApi.useGetGtfFeePreviewQuery>
 
+// Read-back of the stored quote — confirmation only. `emptySnapshot` is the default so the
+// unrelated confirmation cases below never reach the real RTK endpoint.
+const emptySnapshot = {
+  data: undefined,
+  isLoading: false,
+  isFetching: false,
+  error: undefined,
+  refetch: jest.fn(),
+} as unknown as ReturnType<typeof gatewayApi.useGetGtfFeeSnapshotQuery>
+
+const snapshotWith = (safenetFeeUsd: number): typeof emptySnapshot =>
+  ({
+    ...emptySnapshot,
+    data: { txData: mockSuccessfulPreview.data?.txData, feeBreakdown: { totalUsd: 1.12, safenetFeeUsd } },
+  }) as typeof emptySnapshot
+
+const notFoundSnapshot = {
+  ...emptySnapshot,
+  error: new Error('Fee snapshot failed with status 404'),
+} as unknown as ReturnType<typeof gatewayApi.useGetGtfFeeSnapshotQuery>
+
 const withSafeTx = (safeTx: SafeTransaction | undefined, gtfPaymentMode: 'safe' | 'signer' = 'safe') => {
   const SafeTxWrapper = ({ children }: { children: ReactNode }) => {
     const [gtfSelectedGasToken, setGtfSelectedGasToken] = useState<string | undefined>(undefined)
@@ -232,6 +254,7 @@ describe('useFeesPreview', () => {
     jest
       .spyOn(useGasPriceModule, 'default')
       .mockReturnValue([{ maxFeePerGas: BigInt(20000000000), maxPriorityFeePerGas: undefined }, undefined, false])
+    jest.spyOn(gatewayApi, 'useGetGtfFeeSnapshotQuery').mockReturnValue(emptySnapshot)
   })
 
   it('returns execution fee as FREE with no amount/currency/percentage label', () => {
@@ -734,6 +757,84 @@ describe('useFeesPreview', () => {
       expect(result.current.totalOutgoing).toBeDefined()
       expect(result.current.totalOutgoing?.primary[0].currency).toBe('WETH')
       expect(result.current.totalOutgoing?.fees).toBeUndefined()
+    })
+
+    describe('stored-quote read-back', () => {
+      const signedNativeGasSafeTx = buildSafeTx(
+        { to: mockSafe.address.value, value: '100000000000000', data: '0x', gasToken: ETH_ADDRESS, ...SAFE_PAYS },
+        new Map([['0xSigner', {}]]),
+      )
+
+      it('itemizes the Safenet fee the first signer signed', () => {
+        jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(emptyPreview)
+        const spy = jest.spyOn(gatewayApi, 'useGetGtfFeeSnapshotQuery').mockReturnValue(snapshotWith(1))
+
+        const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(signedNativeGasSafeTx) })
+
+        expect(result.current.safenetFee).toEqual({ label: 'Safenet fee', amount: '$\u200A1.00' })
+        // The exact hash of the signed payload, computed by an ethers-only oracle so a wrong
+        // hash input cannot pass by agreeing with the implementation's own library.
+        expect(spy.mock.calls.at(-1)?.[0]).toEqual({
+          chainId: mockSafe.chainId,
+          safeAddress: mockSafe.address.value,
+          safeTxHash: eip712SafeTxHash(signedNativeGasSafeTx.data, mockSafe.chainId, mockSafe.address.value),
+        })
+      })
+
+      it('renders exactly today\u2019s card when no quote is stored (404)', () => {
+        jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(emptyPreview)
+        jest.spyOn(gatewayApi, 'useGetGtfFeeSnapshotQuery').mockReturnValue(notFoundSnapshot)
+
+        const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(signedNativeGasSafeTx) })
+
+        expect(result.current.safenetFee).toBeUndefined()
+        expect(result.current.error).toBe(false)
+        expect(result.current.loading).toBe(false)
+        expect(result.current.gasFee.amount).toMatch(/^0\.00005/)
+      })
+
+      it('omits the row when the stored quote carries no Safenet fee', () => {
+        jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(emptyPreview)
+        jest.spyOn(gatewayApi, 'useGetGtfFeeSnapshotQuery').mockReturnValue(snapshotWith(0))
+
+        const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(signedNativeGasSafeTx) })
+
+        expect(result.current.safenetFee).toBeUndefined()
+      })
+
+      it('skips the read-back on a chain that cannot quote fees', () => {
+        jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(
+          chainBuilder()
+            .with({ ...mockChain, relayer: null })
+            .build(),
+        )
+        jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(emptyPreview)
+        const spy = jest
+          .spyOn(gatewayApi, 'useGetGtfFeeSnapshotQuery')
+          .mockImplementation((arg) => (arg === skipToken ? emptySnapshot : snapshotWith(1)))
+
+        const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(signedNativeGasSafeTx) })
+
+        expect(spy.mock.calls.length).toBeGreaterThan(0)
+        spy.mock.calls.forEach(([arg]) => expect(arg).toBe(skipToken))
+        expect(result.current.safenetFee).toBeUndefined()
+      })
+
+      it.each([
+        ['first signer', nativeSafeTx],
+        ['legacy-signed payload', buildSafeTx({ gasToken: ETH_ADDRESS }, new Map([['0xSigner', {}]]))],
+      ])('never subscribes outside the confirmation branch (%s)', (_label, tx) => {
+        jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
+        const spy = jest
+          .spyOn(gatewayApi, 'useGetGtfFeeSnapshotQuery')
+          .mockImplementation((arg) => (arg === skipToken ? emptySnapshot : snapshotWith(1)))
+
+        const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(tx) })
+
+        expect(spy.mock.calls.length).toBeGreaterThan(0)
+        spy.mock.calls.forEach(([arg]) => expect(arg).toBe(skipToken))
+        expect(result.current.safenetFee).toBeUndefined()
+      })
     })
   })
 

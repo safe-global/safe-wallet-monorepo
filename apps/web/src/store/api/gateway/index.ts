@@ -30,4 +30,9 @@ export const gatewayApi = createApi({
   }),
 })
 
-export const { useGetSafeOverviewQuery, useGetMultipleSafeOverviewsQuery, useGetGtfFeePreviewQuery } = gatewayApi
+export const {
+  useGetSafeOverviewQuery,
+  useGetMultipleSafeOverviewsQuery,
+  useGetGtfFeePreviewQuery,
+  useGetGtfFeeSnapshotQuery,
+} = gatewayApi
