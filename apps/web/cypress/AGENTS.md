@@ -75,7 +75,7 @@ Use `wallet.connectSignerViaStorage(signer, url)` in `beforeEach` — it seeds s
 
 ### API mocking for visual tests
 
-All visual tests call `mockVisualTestApis()` in `beforeEach()` to intercept CGW API endpoints with deterministic fixture data. This prevents flaky visual diffs caused by changing token prices, balances, and fiat values.
+Visual tests call `mockVisualTestApis()` in `beforeEach()` to intercept CGW API endpoints with deterministic fixture data — except the `spaces_*.cy.js` specs, which sign in via `signInToSpaces()` and run unmocked against the live spaces backend. The mocks prevent flaky visual diffs caused by changing token prices, balances, and fiat values.
 
 - Fixtures are shared with Storybook MSW via symlink: `fixtures/msw → config/test/msw/fixtures`
 - Uses the `safe-token-holder` scenario for balances/portfolio/positions

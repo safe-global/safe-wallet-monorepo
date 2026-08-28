@@ -10,7 +10,7 @@ Guidance for shared libraries under `packages/` (`store`, `theme`, `utils`) cons
 yarn workspace @safe-global/<pkg> test|lint|type-check
 ```
 
-To also cover dependents, use the turbo `--filter` command from the root AGENTS.md "Turborepo" section. CI runs package suites separately (`.github/workflows/package-utils-unit-tests.yml`) — a locally skipped check surfaces only in CI.
+To also cover dependents, use the turbo `--filter` command from the root AGENTS.md "Turborepo" section. CI only runs the `utils` suite (`.github/workflows/package-utils-unit-tests.yml`) — `store` and `theme` tests run in **no** CI workflow, so for those the local run above is the only gate.
 
 ## Cross-platform constraints
 

@@ -87,7 +87,14 @@ http.get('*/v1/chains/:chainId/safes/:address/balances/:currency', handler)
 http.get(/\/v1\/chains\/\d+\/safes\/0x[a-fA-F0-9]+\/balances\/[a-z]+/, () => HttpResponse.json(balancesFixtures.efSafe))
 ```
 
-Handler order matters — MSW matches in order, so place specific handlers first (and to override a `createMockStory` default, pass yours via its `handlers` option).
+Handler order matters — MSW resolves first-match-wins. `createMockStory`'s `handlers` option is **appended after the defaults**, so it can only add handlers for routes the defaults don't mock — it cannot override a default. To override one, compose the msw parameter yourself with your handler first:
+
+```typescript
+export const Overridden: Story = {
+  parameters: { ...setup.parameters, msw: { handlers: [myHandler, ...setup.handlers] } },
+  decorators: [setup.decorator],
+}
+```
 
 > **There is no `chains` Redux slice.** Chain config was migrated to RTK Query in Nov 2025 — preloading `chains: { data: [...] }` initialState is silently dropped by the store. Mock `/v1/chains` and `/v2/chains` via MSW instead (`createMockStory` does this for you). Several older story files still cargo-cult the dead pattern; don't copy them.
 

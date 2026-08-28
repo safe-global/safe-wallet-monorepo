@@ -27,5 +27,7 @@ Without `--safe=<key>` it re-fetches and overwrites **all** fixtures. The flag o
 The fixture scenario ids (`efSafe`, `vitalik`, `empty`, `spamTokens`, `safeTokenHolder`, defined in `test/msw/fixtures/index.ts` and `test/msw/handlers/fromFixtures.ts`) are consumed by name in three places — renaming or adding one touches all of them:
 
 - `createMockStory` in web Storybook (`apps/web/src/stories/mocks/`)
-- `apps/web/src/tests/scenario-utils.tsx` (+ `server.ts`)
-- `apps/mobile/src/tests/server.ts` (+ `mocks.ts`)
+- `apps/web/src/tests/scenario-utils.tsx`
+- the web tests under `apps/web/src/tests/__tests__/`
+
+Mobile consumes only the static default handlers from `test/msw/handlers.ts` (scenario-agnostic), so scenario renames don't reach it — handler changes do.
