@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { withMockProvider } from '@/storybook/preview'
 import {
   MOCK_ADDRESSES,
+  MOCK_SIGNERS_BY_SAFE,
   asActivePolicy,
   mockMultiSpenderPolicy,
   mockPendingPolicy,
@@ -18,7 +19,10 @@ const meta = {
   decorators: [withMockProvider()],
   tags: ['autodocs'],
   parameters: { layout: 'fullscreen' },
-  args: { onClose: () => {} },
+  args: {
+    onClose: () => {},
+    signers: MOCK_SIGNERS_BY_SAFE['1:0x8675B754342754A30A2AeF474D114d8460bca19b'],
+  },
 } satisfies Meta<typeof PolicyDetailPanel>
 
 export default meta
@@ -72,4 +76,23 @@ export const Overflowing: Story = {
       }),
     ),
   },
+}
+
+/**
+ * Connected wallet is a signer: `Delete` and `Edit` are enabled and there is nothing to explain.
+ * The story renders whatever wallet the mock provider supplies — see the unit tests for the
+ * per-state assertions.
+ */
+export const ActiveNotASigner: Story = {
+  args: { policy: asActivePolicy(mockSpendingLimitPolicy()), signers: [MOCK_ADDRESSES.unresolved] },
+}
+
+/** Nobody can revoke this grant: the owner who granted it is no longer an owner (WA-1026). */
+export const OrphanedProposerGrant: Story = {
+  args: { policy: asActivePolicy(mockProposerPolicy()), signers: [MOCK_ADDRESSES.bob] },
+}
+
+/** A limit with nothing left reads differently from an untouched one. */
+export const ExhaustedLimit: Story = {
+  args: { policy: asActivePolicy(mockMultiSpenderPolicy()) },
 }
