@@ -1817,7 +1817,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
                           >
                             <span
                               data-slot="tooltip-trigger"
-                              id="base-ui-_r_5_"
+                              id="base-ui-_r_7_"
                             >
                               Weight
                             </span>
