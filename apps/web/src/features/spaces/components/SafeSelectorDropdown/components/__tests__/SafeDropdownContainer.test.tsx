@@ -477,7 +477,7 @@ describe('SafeDropdownContainer', () => {
       expect(screen.getAllByTestId('select-item')).toHaveLength(2)
     })
 
-    it('falls back to the normal list while a search is active (never persists a partial order)', () => {
+    it('keeps the reorder list mounted while searching but disables dragging (no partial-order drop)', () => {
       render(
         <SafeDropdownContainer
           items={[itemA, itemB]}
@@ -489,8 +489,46 @@ describe('SafeDropdownContainer', () => {
         />,
       )
 
-      expect(screen.queryByTestId('safe-selector-reorder-list')).not.toBeInTheDocument()
-      expect(screen.getByTestId('select-item')).toBeInTheDocument()
+      // The list component stays the same across search (no swap to plain Select rows), so the base-ui
+      // rows aren't remounted and focus stays in the search input.
+      expect(screen.getByTestId('safe-selector-reorder-list')).toBeInTheDocument()
+      expect(screen.queryByTestId('select-item')).not.toBeInTheDocument()
+      // Only the match is shown, and its grip is hidden (dragging disabled while searching).
+      expect(screen.getByText('Alpha')).toBeInTheDocument()
+      expect(screen.queryByText('Beta')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('safe-drag-handle')).not.toBeInTheDocument()
+    })
+
+    it('does not swap the list component when a search transitions from empty to non-empty', () => {
+      const { rerender } = render(
+        <SafeDropdownContainer
+          items={[itemA, itemB]}
+          onItemSelect={jest.fn()}
+          closeDropdown={jest.fn()}
+          onReorder={jest.fn()}
+          searchValue=""
+          onSearchValueChange={jest.fn()}
+        />,
+      )
+
+      expect(screen.getByTestId('safe-selector-reorder-list')).toBeInTheDocument()
+      expect(screen.getAllByTestId('safe-drag-handle')).toHaveLength(2)
+
+      rerender(
+        <SafeDropdownContainer
+          items={[itemA, itemB]}
+          onItemSelect={jest.fn()}
+          closeDropdown={jest.fn()}
+          onReorder={jest.fn()}
+          searchValue="alpha"
+          onSearchValueChange={jest.fn()}
+        />,
+      )
+
+      // Same list component, just filtered + grips hidden — never the plain Select-item fallback.
+      expect(screen.getByTestId('safe-selector-reorder-list')).toBeInTheDocument()
+      expect(screen.queryByTestId('select-item')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('safe-drag-handle')).not.toBeInTheDocument()
     })
 
     it('navigates and closes the dropdown when a reorder row is clicked', () => {

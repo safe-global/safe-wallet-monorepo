@@ -220,11 +220,12 @@ function SpaceSafeBar() {
 
   // Manual sort turns the active tab's list into a drag-to-reorder list. The order persists to the
   // same scope the welcome/workspace tables use — trusted for My accounts, this space for the
-  // workspace tab — so every surface stays in sync. Disabled while searching (a drop would persist a
-  // partial order). The Workspace tab has no scope outside a space, so it isn't reorderable there.
+  // workspace tab — so every surface stays in sync. The Workspace tab has no scope outside a space,
+  // so it isn't reorderable there. Kept defined while searching so the dropdown doesn't swap the list
+  // component (which steals focus from the search input); dragging is disabled there instead.
   const reorderScope = activeTab === 'local' ? TRUSTED_ORDER_SCOPE : spaceId ? getSpaceOrderScope(spaceId) : undefined
   const handleReorder =
-    orderBy === OrderByOption.MANUAL && !search.trim() && reorderScope
+    orderBy === OrderByOption.MANUAL && reorderScope
       ? (order: string[]) => dispatch(setManualOrder({ scope: reorderScope, order }))
       : undefined
 
