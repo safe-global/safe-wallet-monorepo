@@ -209,4 +209,78 @@ describe('PaginatedDataTable', () => {
       expect(screen.queryByText('detail-Alice')).not.toBeInTheDocument()
     })
   })
+
+  describe('activatable rows', () => {
+    const activatableTable = (onRowClick: (row: string) => void, rows = ['a', 'b']) => (
+      <PaginatedDataTable
+        columns={columns}
+        rows={rows}
+        getRowKey={(row) => row}
+        onRowClick={onRowClick}
+        getRowAriaLabel={(row) => `Open ${row}`}
+      />
+    )
+
+    it('should, when no click handler is given, leave the rows inactive', () => {
+      render(tableElement(['a']))
+
+      expect(screen.queryByRole('button')).not.toBeInTheDocument()
+    })
+
+    it('should, when a row is clicked, report that row', () => {
+      const onRowClick = jest.fn()
+
+      render(activatableTable(onRowClick))
+      fireEvent.click(screen.getByRole('button', { name: 'Open b' }))
+
+      expect(onRowClick).toHaveBeenCalledWith('b')
+    })
+
+    it('should, when a row is activated with Enter, report that row', () => {
+      const onRowClick = jest.fn()
+
+      render(activatableTable(onRowClick, ['a']))
+      fireEvent.keyDown(screen.getByRole('button', { name: 'Open a' }), { key: 'Enter' })
+
+      expect(onRowClick).toHaveBeenCalledWith('a')
+    })
+
+    it('should, when a row is activated with Space, report that row', () => {
+      const onRowClick = jest.fn()
+
+      render(activatableTable(onRowClick, ['a']))
+      fireEvent.keyDown(screen.getByRole('button', { name: 'Open a' }), { key: ' ' })
+
+      expect(onRowClick).toHaveBeenCalledWith('a')
+    })
+
+    it('should, when another key is pressed on a row, report nothing', () => {
+      const onRowClick = jest.fn()
+
+      render(activatableTable(onRowClick, ['a']))
+      fireEvent.keyDown(screen.getByRole('button', { name: 'Open a' }), { key: 'Escape' })
+
+      expect(onRowClick).not.toHaveBeenCalled()
+    })
+
+    it('should, when the mobile detail toggle is used, expand the row without reporting a click', () => {
+      mockUseIsMobile.mockReturnValue(true)
+      const onRowClick = jest.fn()
+
+      render(
+        <PaginatedDataTable
+          columns={columns}
+          rows={['a']}
+          getRowKey={(row) => row}
+          renderRowDetail={(row) => <span>{`detail-${row}`}</span>}
+          onRowClick={onRowClick}
+          getRowAriaLabel={(row) => `Open ${row}`}
+        />,
+      )
+      fireEvent.click(screen.getByRole('button', { name: 'Show details' }))
+
+      expect(screen.getByText('detail-a')).toBeInTheDocument()
+      expect(onRowClick).not.toHaveBeenCalled()
+    })
+  })
 })
