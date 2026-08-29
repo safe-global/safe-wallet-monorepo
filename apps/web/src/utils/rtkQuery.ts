@@ -1,5 +1,6 @@
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
+import { ELEVATION_REQUIRED_MESSAGE, isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 const HTTP_TOO_MANY_REQUESTS = 429
 export const HTTP_UNAVAILABLE_FOR_LEGAL_REASONS = 451
@@ -59,6 +60,8 @@ export const getRtkQueryErrorMessage = (error: FetchBaseQueryError | SerializedE
         ? RTK_QUERY_ERROR_MESSAGES.rateLimit
         : RTK_QUERY_ERROR_MESSAGES.generic
     }
+
+    if (isElevationRequiredError(error)) return ELEVATION_REQUIRED_MESSAGE
 
     // HTTP error response: prefer the backend's own message when present.
     const backendMessage = getBackendMessage(error)

@@ -38,6 +38,7 @@ export type { OidcAuthContract } from './contract'
 export { useOidcLogin } from './hooks/useOidcLogin'
 export { useOidcLoginCallback } from './hooks/useOidcLoginCallback'
 export { useAuthenticators } from './hooks/useAuthenticators'
+export { useStepUpCallback } from './hooks/useStepUpCallback'
 
 // Direct (non-lazy) component export: the spaces account settings page is
 // user-scoped, so the chain-based OIDC_AUTH flag gating of the feature
@@ -46,6 +47,14 @@ export { default as SwitchAuthenticatorSection } from './components/SwitchAuthen
 export { default as WalletTwoFactorSection } from './components/WalletTwoFactorSection'
 export { default as WorkspaceTwoFactorSection } from './components/WorkspaceTwoFactorSection'
 export { default as MemberTwoFactorBadge } from './components/MemberTwoFactorBadge'
+
+// ─────────────────────────────────────────────────────────────────
+// STEP-UP AUTHENTICATION (elevation)
+// ─────────────────────────────────────────────────────────────────
+
+export { ELEVATION_REQUIRED_ERROR, ELEVATION_REQUIRED_MESSAGE, isElevationRequiredError } from './utils/elevation'
+export { startStepUp } from './utils/stepUp'
+export { useStepUpSplash } from './hooks/useStepUpSplash'
 
 // ─────────────────────────────────────────────────────────────────
 // 2FA STATUS DERIVATION (shared with the spaces Team page)
