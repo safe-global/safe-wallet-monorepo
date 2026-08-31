@@ -6,7 +6,7 @@ describe('SafeProWorkspacesBanner', () => {
   it('renders the headline and the supporting line', () => {
     render(<SafeProWorkspacesBanner />)
 
-    expect(screen.getByText('Workspaces move to Pro on Oct 1, 2026')).toBeInTheDocument()
+    expect(screen.getByText('Workspaces move to Safe Pro on Oct 6, 2026')).toBeInTheDocument()
     expect(screen.getByText('Your Safe accounts remain free in My accounts.')).toBeInTheDocument()
   })
 

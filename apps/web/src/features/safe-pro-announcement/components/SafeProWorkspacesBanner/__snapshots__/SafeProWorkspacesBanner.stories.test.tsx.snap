@@ -43,7 +43,7 @@ exports[`./SafeProWorkspacesBanner.stories Default 1`] = `
                     data-slot="typography"
                     data-variant="paragraph-large-bold"
                   >
-                    Workspaces move to Pro on Oct 1, 2026
+                    Workspaces move to Safe Pro on Oct 6, 2026
                   </p>
                   <span
                     class="m-0 text-sm leading-5 font-normal text-muted-foreground"

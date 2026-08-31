@@ -23,7 +23,7 @@ const SafeProBanner = ({ className }: { className?: string }) => (
           <Sparkles strokeWidth={ICON_STROKE} />
           New
         </Badge>
-        <Typography variant="paragraph-small-bold">Workspaces move to Pro on Oct 1, 2026</Typography>
+        <Typography variant="paragraph-small-bold">Workspaces move to Safe Pro on Oct 6, 2026</Typography>
       </div>
 
       <span aria-hidden className={cn('flex size-8 shrink-0 items-center justify-center', css.arrow)}>
