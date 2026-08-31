@@ -6,7 +6,7 @@ describe('SafeProSidebarBanner', () => {
   it('renders the headline and the supporting line', () => {
     render(<SafeProSidebarBanner />)
 
-    expect(screen.getByText('Your Workspace moves to Pro on Oct 1, 2026')).toBeInTheDocument()
+    expect(screen.getByText('Your Workspace moves to Safe Pro on Oct 6, 2026')).toBeInTheDocument()
     expect(screen.getByText('Your Safe accounts remain available outside the Workspace.')).toBeInTheDocument()
   })
 

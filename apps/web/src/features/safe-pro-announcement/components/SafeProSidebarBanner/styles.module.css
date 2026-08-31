@@ -1,7 +1,7 @@
 .banner {
   background-image: radial-gradient(
-    ellipse 150% 159% at 119% -13%,
-    color-mix(in srgb, var(--color-static-text-brand) 17.8%, transparent) 0%,
+    ellipse 86% 110% at 96% 6%,
+    color-mix(in srgb, var(--color-static-text-brand) 18%, transparent) 0%,
     transparent 100%
   );
   border: 1px solid transparent;
@@ -14,12 +14,7 @@
 
 .proChip {
   color: var(--foreground);
-  background-color: color-mix(in srgb, var(--color-static-text-brand) 20%, transparent);
-  transition: background-color 150ms ease;
-}
-
-.banner:hover .proChip {
-  background-color: color-mix(in srgb, var(--color-static-text-brand) 55%, transparent);
+  background-color: #7ffab7;
 }
 
 :global(.dark) .banner {

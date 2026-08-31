@@ -8,18 +8,18 @@ import css from './styles.module.css'
 
 const SafeProSidebarBanner = ({ className }: { className?: string }) => (
   <div
-    className={cn('flex w-full flex-col items-start gap-3 rounded-xl bg-muted p-4 shadow-lg', css.banner, className)}
+    className={cn('flex w-full flex-col items-start gap-3 rounded-lg bg-muted p-4 shadow-lg', css.banner, className)}
     data-testid="safe-pro-sidebar-banner"
   >
     <span className={cn('flex shrink-0 items-center rounded-sm px-2 py-1.5', css.proChip)}>
       <ProWordmark className="h-2 w-[21px]" />
     </span>
 
-    <div className="flex flex-col gap-1">
+    <div className="flex w-full flex-col gap-1">
       <Typography variant="paragraph-small-bold" className="text-foreground">
-        Your Workspace moves to Pro on Oct 1, 2026
+        Your Workspace moves to Safe Pro on Oct 6, 2026
       </Typography>
-      <Typography variant="paragraph-mini" className="text-secondary-foreground">
+      <Typography variant="paragraph-mini" color="muted">
         Your Safe accounts remain available outside the Workspace.
       </Typography>
     </div>

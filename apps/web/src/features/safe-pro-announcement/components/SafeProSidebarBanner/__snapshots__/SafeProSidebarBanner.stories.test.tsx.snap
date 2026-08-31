@@ -14,7 +14,7 @@ exports[`./SafeProSidebarBanner.stories Default 1`] = `
         class="w-[226px]"
       >
         <div
-          class="flex w-full flex-col items-start gap-3 rounded-xl bg-muted p-4 shadow-lg banner"
+          class="flex w-full flex-col items-start gap-3 rounded-lg bg-muted p-4 shadow-lg banner"
           data-testid="safe-pro-sidebar-banner"
         >
           <span
@@ -25,17 +25,17 @@ exports[`./SafeProSidebarBanner.stories Default 1`] = `
             />
           </span>
           <div
-            class="flex flex-col gap-1"
+            class="flex w-full flex-col gap-1"
           >
             <span
               class="m-0 text-sm leading-5 font-semibold text-foreground"
               data-slot="typography"
               data-variant="paragraph-small-bold"
             >
-              Your Workspace moves to Pro on Oct 1, 2026
+              Your Workspace moves to Safe Pro on Oct 6, 2026
             </span>
             <span
-              class="m-0 text-xs leading-4 font-normal text-secondary-foreground"
+              class="m-0 text-xs leading-4 font-normal text-muted-foreground"
               data-slot="typography"
               data-variant="paragraph-mini"
             >
