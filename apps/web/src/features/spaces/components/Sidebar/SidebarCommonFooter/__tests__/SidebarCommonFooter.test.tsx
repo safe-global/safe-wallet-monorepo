@@ -165,11 +165,11 @@ describe('SidebarCommonFooter', () => {
       expect(screen.getByTestId('safe-pro-sidebar-banner')).toBeInTheDocument()
     })
 
-    it('hides the banner on the Safe sidebar, which has no Workspace to move', () => {
+    it('shows the banner on the Safe sidebar when the flag is on', () => {
       mockIsSafeProEnabled = true
       render(<SidebarCommonFooter isSafeSidebar />)
 
-      expect(screen.queryByTestId('safe-pro-sidebar-banner')).not.toBeInTheDocument()
+      expect(screen.getByTestId('safe-pro-sidebar-banner')).toBeInTheDocument()
     })
 
     it('hides the banner on the Plans page, which is where it links to', () => {

@@ -34,8 +34,8 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
   const { SafeProSidebarBanner } = useLoadFeature(SafeProFeature)
   const isSafeProEnabled = useIsSafeProEnabled()
   const { pathname } = useRouter()
-  // Workspace announcement: the Safe sidebar has no Workspace to move, and the Plans page is the banner's destination.
-  const showSafeProBanner = isSafeProEnabled && !isSafeSidebar && pathname !== AppRoutes.spaces.plans
+  // The Plans page is the banner's own link destination, so hide it there.
+  const showSafeProBanner = isSafeProEnabled && pathname !== AppRoutes.spaces.plans
 
   const onToggleGateway = (checked: boolean) => {
     setIsProdGateway(checked)
