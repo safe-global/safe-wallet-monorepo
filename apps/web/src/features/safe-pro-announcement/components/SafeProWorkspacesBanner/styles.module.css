@@ -27,20 +27,21 @@
 }
 
 :global(.dark) .banner {
-  background-image: radial-gradient(ellipse 100% 155% at 100% 0%, rgb(127 250 183 / 11%) 0%, transparent 100%);
+  background-image: radial-gradient(
+    ellipse 100% 155% at 100% 0%,
+    color-mix(in srgb, var(--color-static-text-brand) 11%, transparent) 0%,
+    transparent 100%
+  );
 }
 
 :global(.dark) .proChip {
-  color: #7ffab7;
-  background-color: #2e2e2e;
-}
-
-:global(.dark) .banner:hover .proChip {
-  color: var(--primary-foreground);
+  color: var(--color-static-text-brand);
+  background-color: transparent;
+  border: 1px solid var(--color-static-text-brand);
 }
 
 :global(.dark) .learnMore {
-  background-color: #7ffab7;
+  background-color: var(--color-static-text-brand);
 }
 
 :global(.dark) .arrow {
