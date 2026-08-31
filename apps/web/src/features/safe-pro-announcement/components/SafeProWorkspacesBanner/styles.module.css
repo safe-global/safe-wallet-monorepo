@@ -16,12 +16,7 @@
 
 .proChip {
   padding: 6px 8px;
-  color: var(--foreground);
-  background-color: color-mix(in srgb, var(--color-static-text-brand) 20%, transparent);
-  transition: background-color 150ms ease;
-}
-
-.banner:hover .proChip {
+  color: #1f2937;
   background-color: #7ffab7;
 }
 
