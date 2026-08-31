@@ -3,7 +3,7 @@ import { Typography } from '@/components/ui/typography'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { cn } from '@/utils/cn'
 import { useLoadFeature } from '@/features/__core__'
-import { SafeProFeature } from '@/features/safe-pro'
+import { SafeProFeature } from '@/features/safe-pro-announcement'
 import AuthState from '../AuthState'
 
 export default function SpacePlansPage({ spaceId }: { spaceId: string }) {

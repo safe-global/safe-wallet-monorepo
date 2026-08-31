@@ -50,7 +50,7 @@ jest.mock('@/features/myAccounts', () => ({
 
 const mockUseIsSafeProEnabled = jest.fn()
 
-jest.mock('@/features/safe-pro', () => ({
+jest.mock('@/features/safe-pro-announcement', () => ({
   SafeProFeature: { name: 'SafeProFeature' },
   useIsSafeProEnabled: () => mockUseIsSafeProEnabled(),
 }))

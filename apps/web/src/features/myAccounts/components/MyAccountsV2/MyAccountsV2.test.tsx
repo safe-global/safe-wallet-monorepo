@@ -47,7 +47,7 @@ jest.mock('@/components/common/TrustedSafesModal', () => ({
 jest.mock('../DataWidget', () => ({ DataWidget: () => <div data-testid="data-widget" /> }))
 
 const mockUseIsSafeProEnabled = jest.fn()
-jest.mock('@/features/safe-pro', () => ({
+jest.mock('@/features/safe-pro-announcement', () => ({
   SafeProFeature: { name: 'SafeProFeature' },
   useIsSafeProEnabled: () => mockUseIsSafeProEnabled(),
 }))

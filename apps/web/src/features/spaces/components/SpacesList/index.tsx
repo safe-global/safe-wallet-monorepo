@@ -1,6 +1,6 @@
 import { useLoadFeature } from '@/features/__core__'
 import { MyAccountsFeature } from '@/features/myAccounts'
-import { SafeProFeature, useIsSafeProEnabled } from '@/features/safe-pro'
+import { SafeProFeature, useIsSafeProEnabled } from '@/features/safe-pro-announcement'
 import SpaceRow from './SpaceRow'
 import SignInOptions from '../SignInOptions'
 import WorkspaceBanner from '../WorkspaceBanner'

@@ -19,7 +19,7 @@ import TrustedSafesModal from '@/components/common/TrustedSafesModal'
 import WelcomeContentCard from '@/components/common/WelcomeContentCard'
 import { DataWidget } from '../DataWidget'
 import { useLoadFeature } from '@/features/__core__'
-import { SafeProFeature, useIsSafeProEnabled } from '@/features/safe-pro'
+import { SafeProFeature, useIsSafeProEnabled } from '@/features/safe-pro-announcement'
 
 type MyAccountsProps = {
   safes: AllSafeItemsGrouped

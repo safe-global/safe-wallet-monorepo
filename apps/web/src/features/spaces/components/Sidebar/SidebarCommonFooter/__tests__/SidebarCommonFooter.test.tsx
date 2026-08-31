@@ -122,8 +122,8 @@ jest.mock('../../ApiCtaSidebar', () => ({
 }))
 
 let mockIsSafeProEnabled = false
-jest.mock('@/features/safe-pro', () => ({
-  SafeProFeature: { name: 'safe-pro' },
+jest.mock('@/features/safe-pro-announcement', () => ({
+  SafeProFeature: { name: 'safe-pro-announcement' },
   useIsSafeProEnabled: () => mockIsSafeProEnabled,
 }))
 
