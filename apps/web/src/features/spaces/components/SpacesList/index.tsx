@@ -6,6 +6,7 @@ import SignInOptions from '../SignInOptions'
 import WorkspaceBanner from '../WorkspaceBanner'
 import SpacesIcon from '@/public/images/spaces/spaces.svg'
 import SafeMarkIcon from '@/public/images/logo-no-text.svg'
+import SafeProLockup from '@/public/images/safe-pro/safe-pro-lockup.svg'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { Check } from 'lucide-react'
@@ -97,8 +98,8 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
 
           <div className="relative w-full">
             <div className="relative w-full rounded-lg bg-card p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]">
-              <div className="mx-auto mb-6 flex size-10 items-center justify-center text-foreground">
-                <SafeMarkIcon className="size-10" />
+              <div className="mx-auto mb-6 flex h-10 items-center justify-center text-foreground">
+                {isSafeProEnabled ? <SafeProLockup className="h-10 w-auto" /> : <SafeMarkIcon className="size-10" />}
               </div>
 
               <Typography variant="h3" className="mb-6 text-center">
