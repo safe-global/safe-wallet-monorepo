@@ -111,7 +111,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
   })
 
   describe('SAFE_PRO_ANNOUNCEMENT banner gating', () => {
-    it('keeps the pre-Pro Workspace banner when the flag is off', () => {
+    it('keeps the pre-Pro workspace banner when the flag is off', () => {
       mockUseAppSelector.mockReturnValue(false)
 
       render(<SpacesList />)
@@ -154,7 +154,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
       render(<SpacesList />)
 
       expect(screen.getByTestId('safe-pro-workspaces-banner')).toBeInTheDocument()
-      expect(screen.getByText(/create your first workspace/i)).toBeInTheDocument()
+      expect(screen.getByText(/create your first Workspace/i)).toBeInTheDocument()
     })
 
     it('hides the wide Pro banner when signed in and the flag is off', () => {
@@ -180,12 +180,12 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     // The signed-out card with the "Sign in to your workspace" heading +
     // SignInOptions must render…
-    expect(screen.getByRole('heading', { name: /sign in to your workspace/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /sign in to your Workspace/i })).toBeInTheDocument()
     expect(screen.getByTestId('sign-in-options')).toBeInTheDocument()
 
     // …and the Create workspace CTA / no-workspaces empty state must NOT.
-    expect(screen.queryByText(/^create workspace$/i)).not.toBeInTheDocument()
-    expect(screen.queryByText(/create your first workspace/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/^create Workspace$/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/create your first Workspace/i)).not.toBeInTheDocument()
   })
 
   // /welcome/spaces keeps its Topbar + tabbed layout. The Accounts/Workspaces
@@ -217,8 +217,8 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     render(<SpacesList />)
 
-    expect(screen.getByText(/create your first workspace/i)).toBeInTheDocument()
-    const cta = screen.getByRole('link', { name: /create workspace/i })
+    expect(screen.getByText(/create your first Workspace/i)).toBeInTheDocument()
+    const cta = screen.getByRole('link', { name: /create Workspace/i })
     expect(cta).toHaveAttribute('href')
 
     // Sign in card must NOT render in this branch.
@@ -324,7 +324,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     render(<SpacesList />)
 
-    const heading = screen.getByRole('heading', { name: /sign in to your workspace/i })
+    const heading = screen.getByRole('heading', { name: /sign in to your Workspace/i })
     expect(heading.className).toContain('text-center')
   })
 
@@ -373,7 +373,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     // The header button is absent; only the empty-state CTA inside the
     // No-workspaces card renders (it lives outside the spacesHeader).
-    expect(screen.getByText(/create your first workspace/i)).toBeInTheDocument()
+    expect(screen.getByText(/create your first Workspace/i)).toBeInTheDocument()
     expect(screen.getAllByTestId('create-space-button')).toHaveLength(1)
   })
 

@@ -39,7 +39,7 @@ const AddSpaceButton = ({
   disabled,
   size = 'lg',
   variant = 'default',
-  label = 'Create workspace',
+  label = 'Create Workspace',
 }: {
   onClick?: () => void
   disabled?: boolean
@@ -77,7 +77,7 @@ const AddSpaceButton = ({
   return (
     <Tooltip>
       <TooltipTrigger render={<div className="inline-flex" />}>{button}</TooltipTrigger>
-      <TooltipContent>Limit of {SPACES_LIMIT} workspaces reached</TooltipContent>
+      <TooltipContent>Limit of {SPACES_LIMIT} Workspaces reached</TooltipContent>
     </Tooltip>
   )
 }
@@ -102,7 +102,7 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
               </div>
 
               <Typography variant="h3" className="mb-6 text-center">
-                Sign in to your workspace
+                Sign in to your Workspace
               </Typography>
 
               <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
@@ -150,7 +150,7 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
         </div>
 
         <Typography variant="h4" className="mb-2 font-bold">
-          Create your first workspace
+          Create your first Workspace
         </Typography>
         <Typography color="muted" className="mb-3">
           Collaborate on your Safe accounts with your team.
@@ -176,7 +176,7 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
 
         <div className="mt-2">
           <Link onClick={() => setIsInfoOpen(true)} href="#">
-            What are workspaces?
+            What are Workspaces?
           </Link>
         </div>
       </Card>
