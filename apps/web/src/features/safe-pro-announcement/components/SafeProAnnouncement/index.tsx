@@ -8,7 +8,7 @@ import css from './styles.module.css'
 
 const SafeProAnnouncement = ({ onDismiss }: { onDismiss?: () => void }) => (
   <div className="p-1">
-    <div className="relative aspect-[1058/369] w-full overflow-hidden rounded-t-[calc(var(--radius-xl)-4px)]">
+    <div className="relative aspect-[1141/326] w-full overflow-hidden rounded-t-[calc(var(--radius-xl)-4px)]">
       <Image
         src="/images/safe-pro/pro-announcement-hero.jpg"
         alt="A Workspace from Safe Pro, with its accounts, members and transactions"
@@ -23,8 +23,8 @@ const SafeProAnnouncement = ({ onDismiss }: { onDismiss?: () => void }) => (
       />
     </div>
 
-    <div className="flex flex-col items-center gap-8 px-8 pt-9 pb-4">
-      <div className="flex flex-col items-center gap-3">
+    <div className="flex flex-col items-center gap-6 px-8 py-6">
+      <div className="flex flex-col items-center gap-2">
         <Typography variant="h3" align="center">
           Your Workspace moves to <span className={css.highlight}>Safe Pro</span> on Oct 6, 2026
         </Typography>
