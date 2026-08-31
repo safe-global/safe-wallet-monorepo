@@ -57,9 +57,9 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 /**
- * Editable allowance. The trigger opens a single preset — "Unlimited amount" — which only shows
- * because selection is bound via `value`: Base UI's default single-selection filter otherwise
- * treats the typed amount as a search query and filters the preset out.
+ * Editable allowance. The trigger opens a single preset — "Unlimited amount" — which stays listed
+ * even once an amount is typed, because filtering is disabled. Base UI's default filter would treat
+ * the amount as a search query and leave the popup open around an empty list.
  */
 export const Editable: Story = {
   args: { amount: '420.0' },
