@@ -82,7 +82,7 @@ describe('MyAccountsV2', () => {
     mockUseIsSafeProEnabled.mockReturnValue(false)
   })
 
-  describe('SAFE_PRO banner', () => {
+  describe('SAFE_PRO_ANNOUNCEMENT banner', () => {
     it.each([
       ['Get started', null, { hasPinnedSafes: false }, 'safe-pro-banner'],
       ['empty', {}, { hasPinnedSafes: false }, 'safe-pro-banner'],

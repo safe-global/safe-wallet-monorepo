@@ -20,7 +20,7 @@ export const SpacesSidebarContent = ({
   const isSecurityHubEnabled = useHasFeature(FEATURES.SECURITY_HUB)
   const isAuditLogEnabled = useHasFeature(FEATURES.SPACE_AUDIT_LOG)
   const isPoliciesEnabled = useHasFeature(FEATURES.POLICIES)
-  const isSafeProEnabled = useHasFeature(FEATURES.SAFE_PRO)
+  const isSafeProEnabled = useHasFeature(FEATURES.SAFE_PRO_ANNOUNCEMENT)
 
   const getLink = (item: SidebarItemConfig) => ({
     pathname: item.href,
@@ -40,7 +40,7 @@ export const SpacesSidebarContent = ({
 
   // Drop flag-gated entries when their chain feature flag is explicitly off. `undefined` means
   // the chain config is still loading — keep the item to avoid flicker. Plans is the inverse: it
-  // shows only once SAFE_PRO is known to be on, so a slow chain config can't flash it in and out.
+  // shows only once SAFE_PRO_ANNOUNCEMENT is known to be on, so a slow chain config can't flash it in and out.
   const gatedOffHrefs = useMemo(
     () =>
       new Set(

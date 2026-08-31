@@ -11,7 +11,7 @@ export default function SpacePlansPage() {
   const { spaceId } = router.query
   const spaces = useLoadFeature(SpacesFeature)
   useFeatureFlagRedirect()
-  useFeatureRedirect(FEATURES.SAFE_PRO, AppRoutes.spaces.index)
+  useFeatureRedirect(FEATURES.SAFE_PRO_ANNOUNCEMENT, AppRoutes.spaces.index)
 
   if (!router.isReady || !spaceId) return null
 

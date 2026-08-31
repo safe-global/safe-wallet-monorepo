@@ -213,9 +213,9 @@ describe('SpacesSidebarContent', () => {
     })
   })
 
-  describe('SAFE_PRO feature flag', () => {
+  describe('SAFE_PRO_ANNOUNCEMENT feature flag', () => {
     it.each([false, undefined])('hides the Plans entry when the flag is %s', (flag) => {
-      mockUseHasFeature.mockImplementation((feature) => (feature === FEATURES.SAFE_PRO ? flag : true))
+      mockUseHasFeature.mockImplementation((feature) => (feature === FEATURES.SAFE_PRO_ANNOUNCEMENT ? flag : true))
 
       render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
 

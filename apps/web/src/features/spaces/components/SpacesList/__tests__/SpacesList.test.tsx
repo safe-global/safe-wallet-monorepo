@@ -110,7 +110,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
     mockUseIsSafeProEnabled.mockReturnValue(false)
   })
 
-  describe('SAFE_PRO banner gating', () => {
+  describe('SAFE_PRO_ANNOUNCEMENT banner gating', () => {
     it('keeps the pre-Pro Workspace banner when the flag is off', () => {
       mockUseAppSelector.mockReturnValue(false)
 
