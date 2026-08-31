@@ -8,7 +8,7 @@ import css from './styles.module.css'
 
 const SafeProAnnouncement = ({ onDismiss }: { onDismiss?: () => void }) => (
   <div className="p-1">
-    <div className="relative aspect-[1141/326] w-full overflow-hidden rounded-t-[calc(var(--radius-xl)-4px)]">
+    <div className="relative aspect-[1056/369] w-full overflow-hidden rounded-t-[calc(var(--radius-xl)-4px)]">
       <Image
         src="/images/safe-pro/pro-announcement-hero.jpg"
         alt="A Workspace from Safe Pro, with its accounts, members and transactions"
@@ -16,9 +16,10 @@ const SafeProAnnouncement = ({ onDismiss }: { onDismiss?: () => void }) => (
         className="object-cover dark:hidden"
       />
       <Image
-        src="/images/safe-pro/pro-announcement-hero-dark.jpg"
+        src="/images/safe-pro/pro-announcement-hero-dark.svg"
         alt="A Workspace from Safe Pro, with its accounts, members and transactions"
         fill
+        unoptimized
         className="hidden object-cover dark:block"
       />
     </div>
