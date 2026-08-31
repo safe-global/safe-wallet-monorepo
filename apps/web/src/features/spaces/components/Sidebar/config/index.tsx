@@ -18,17 +18,10 @@ import {
   Shield,
   History,
   Landmark,
+  ListChecks,
 } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
-import ProWordmark from '@/public/images/safe-pro/pro-wordmark.svg'
 import type { SidebarItemConfig, SidebarGroupConfig } from '../types'
-import css from '../styles.module.css'
-
-export const ProChip = () => (
-  <span className={`-mx-1 flex h-4 w-6 shrink-0 items-center justify-center ${css.proChip}`}>
-    <ProWordmark className="text-foreground! h-auto! w-[15px]! stroke-none!" />
-  </span>
-)
 
 export const spacesMainNavigation: SidebarItemConfig[] = [
   {
@@ -70,7 +63,7 @@ export const spacesSetupGroup: SidebarGroupConfig = {
   label: 'Setup',
   items: [
     {
-      icon: ProChip,
+      icon: ListChecks,
       label: 'Plans',
       href: AppRoutes.spaces.plans,
     },

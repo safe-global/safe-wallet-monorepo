@@ -474,8 +474,3 @@
     width: 3rem !important;
   }
 }
-
-.proChip {
-  border-radius: 4.36px;
-  background-color: color-mix(in srgb, var(--color-static-text-brand) 20%, transparent);
-}
