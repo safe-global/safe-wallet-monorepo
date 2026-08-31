@@ -37,7 +37,7 @@ export const ApprovalValueField = ({ name, tx, readOnly }: { name: string; tx: A
   const hasError = !!fieldState.error
 
   const symbol = tx.tokenInfo?.symbol ?? ''
-  const labelText = approvalMethodDescription[tx.method](symbol)
+  const labelText = approvalMethodDescription[tx.method](symbol, tx.tokenInfo?.type)
   const showAmountTooltip = tx.tokenInfo?.type === TokenType.ERC20
   const inputId = `${name}-approval-amount`
 
@@ -50,13 +50,15 @@ export const ApprovalValueField = ({ name, tx, readOnly }: { name: string; tx: A
     <Combobox
       items={selectValues}
       // `value` must be bound alongside `inputValue`: Base UI resets the input to the selected
-      // value when the popup closes, so leaving selection uncontrolled wipes a typed amount. It
-      // also feeds the default single-selection filter, which otherwise treats the typed amount as
-      // a search query and hides every preset.
+      // value when the popup closes, so leaving selection uncontrolled wipes a typed amount.
       value={value ?? ''}
       onValueChange={(next) => handleInputChange(typeof next === 'string' ? next : '')}
       inputValue={value ?? ''}
       onInputValueChange={handleInputChange}
+      // Always surface the presets regardless of the typed value. The default filter treats the
+      // amount as a search query, which matches no preset and leaves the popup open around an
+      // empty list — a stray hairline on screen and an expanded listbox with nothing in it.
+      filter={() => true}
       readOnly={readOnly}
       inputRef={ref}
     >
