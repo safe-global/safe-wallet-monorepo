@@ -11,17 +11,17 @@
 }
 
 :global(.dark) .banner {
-  --pro-mint: #7ffab7;
-  --pro-glow: color-mix(in srgb, var(--pro-mint) 11%, transparent);
+  --pro-glow: color-mix(in srgb, var(--color-static-text-brand) 11%, transparent);
+  background-color: var(--muted);
 }
 
 :global(.dark) .tag.tag {
-  background-color: var(--pro-mint);
+  background-color: var(--color-static-text-brand);
   color: var(--primary-foreground);
 }
 
 :global(.dark) .arrow {
-  color: var(--pro-mint);
+  color: var(--color-static-text-brand);
 }
 
 .banner:hover {
