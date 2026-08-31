@@ -217,8 +217,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     render(<SpacesList />)
 
-    expect(screen.getByText(/create your first Workspace/i)).toBeInTheDocument()
-    const cta = screen.getByRole('link', { name: /create Workspace/i })
+    const cta = screen.getByRole('link', { name: /create your first workspace/i })
     expect(cta).toHaveAttribute('href')
 
     // Sign in card must NOT render in this branch.
