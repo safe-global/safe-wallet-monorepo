@@ -26,7 +26,7 @@ const SafeProAnnouncement = ({ onDismiss }: { onDismiss?: () => void }) => (
     <div className="flex flex-col items-center gap-8 px-8 pt-9 pb-4">
       <div className="flex flex-col items-center gap-3">
         <Typography variant="h3" align="center">
-          Your Workspace moves to <span className={css.highlight}>Safe Pro</span> on Oct 1, 2026
+          Your Workspace moves to <span className={css.highlight}>Safe Pro</span> on Oct 6, 2026
         </Typography>
 
         <Typography variant="paragraph-large" color="muted" align="center">

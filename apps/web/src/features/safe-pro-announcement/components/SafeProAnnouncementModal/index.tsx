@@ -9,9 +9,9 @@ const SafeProAnnouncementModal = ({
   onOpenChange?: (open: boolean) => void
 }) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogContent size="md" surface="card" padding="none">
+    <DialogContent size="lg" surface="card" padding="none">
       <DialogTitle className="sr-only" render={<div />}>
-        Your Workspace moves to Pro on Oct 1, 2026
+        Your Workspace moves to Pro on Oct 6, 2026
       </DialogTitle>
       <SafeProAnnouncement onDismiss={() => onOpenChange?.(false)} />
     </DialogContent>
