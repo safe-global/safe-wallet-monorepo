@@ -41,7 +41,7 @@ const UsageMeter = ({
       <CardContent className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Avatar>
-            <AvatarFallback className="bg-card">{icon}</AvatarFallback>
+            <AvatarFallback surface="card">{icon}</AvatarFallback>
           </Avatar>
           <Typography variant="paragraph-medium">{label}</Typography>
           <InfoTip text={tooltip} />

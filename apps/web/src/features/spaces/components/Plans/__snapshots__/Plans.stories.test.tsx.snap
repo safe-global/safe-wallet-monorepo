@@ -84,8 +84,9 @@ exports[`./Plans.stories ActivePlan 1`] = `
                     data-slot="avatar"
                   >
                     <span
-                      class="text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs bg-card"
+                      class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                       data-slot="avatar-fallback"
+                      data-surface="card"
                     >
                       <svg
                         aria-hidden="true"
@@ -194,8 +195,9 @@ exports[`./Plans.stories ActivePlan 1`] = `
                     data-slot="avatar"
                   >
                     <span
-                      class="text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs bg-card"
+                      class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                       data-slot="avatar-fallback"
+                      data-surface="card"
                     >
                       <svg
                         aria-hidden="true"
@@ -459,11 +461,12 @@ exports[`./Plans.stories ActivePlan 1`] = `
                         />
                       </div>
                       <ul
-                        class="m-0 flex list-none flex-col p-0 gap-1"
+                        class="m-0 flex list-none flex-col p-0"
                         data-slot="list"
                       >
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -472,8 +475,9 @@ exports[`./Plans.stories ActivePlan 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -506,7 +510,8 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -515,8 +520,9 @@ exports[`./Plans.stories ActivePlan 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -549,7 +555,8 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -558,8 +565,9 @@ exports[`./Plans.stories ActivePlan 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -592,7 +600,8 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -601,8 +610,9 @@ exports[`./Plans.stories ActivePlan 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -635,7 +645,8 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -644,8 +655,9 @@ exports[`./Plans.stories ActivePlan 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -678,7 +690,8 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -687,8 +700,9 @@ exports[`./Plans.stories ActivePlan 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -721,7 +735,8 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -730,8 +745,9 @@ exports[`./Plans.stories ActivePlan 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -885,11 +901,12 @@ exports[`./Plans.stories ActivePlan 1`] = `
                         value="10 Safe accounts"
                       />
                       <ul
-                        class="m-0 flex list-none flex-col p-0 gap-1"
+                        class="m-0 flex list-none flex-col p-0"
                         data-slot="list"
                       >
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -898,8 +915,9 @@ exports[`./Plans.stories ActivePlan 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -932,7 +950,8 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -941,8 +960,9 @@ exports[`./Plans.stories ActivePlan 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -975,7 +995,8 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -984,8 +1005,9 @@ exports[`./Plans.stories ActivePlan 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -1018,7 +1040,8 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -1027,8 +1050,9 @@ exports[`./Plans.stories ActivePlan 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -1061,7 +1085,8 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -1070,8 +1095,9 @@ exports[`./Plans.stories ActivePlan 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -1104,7 +1130,8 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -1113,8 +1140,9 @@ exports[`./Plans.stories ActivePlan 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -1147,7 +1175,8 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -1156,8 +1185,9 @@ exports[`./Plans.stories ActivePlan 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -1190,7 +1220,8 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -1199,8 +1230,9 @@ exports[`./Plans.stories ActivePlan 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -1233,7 +1265,8 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -1242,8 +1275,9 @@ exports[`./Plans.stories ActivePlan 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -1355,11 +1389,12 @@ exports[`./Plans.stories ActivePlan 1`] = `
                         />
                       </div>
                       <ul
-                        class="m-0 flex list-none flex-col p-0 gap-1"
+                        class="m-0 flex list-none flex-col p-0"
                         data-slot="list"
                       >
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -1368,8 +1403,9 @@ exports[`./Plans.stories ActivePlan 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -1402,7 +1438,8 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -1411,8 +1448,9 @@ exports[`./Plans.stories ActivePlan 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -1445,7 +1483,8 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -1454,8 +1493,9 @@ exports[`./Plans.stories ActivePlan 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -1488,7 +1528,8 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -1497,8 +1538,9 @@ exports[`./Plans.stories ActivePlan 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -1531,7 +1573,8 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -1540,8 +1583,9 @@ exports[`./Plans.stories ActivePlan 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -1574,7 +1618,8 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -1583,8 +1628,9 @@ exports[`./Plans.stories ActivePlan 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -1617,7 +1663,8 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -1626,8 +1673,9 @@ exports[`./Plans.stories ActivePlan 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -1660,7 +1708,8 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -1669,8 +1718,9 @@ exports[`./Plans.stories ActivePlan 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -1703,7 +1753,8 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -1712,8 +1763,9 @@ exports[`./Plans.stories ActivePlan 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -1837,8 +1889,9 @@ exports[`./Plans.stories Free 1`] = `
                     data-slot="avatar"
                   >
                     <span
-                      class="text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs bg-card"
+                      class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                       data-slot="avatar-fallback"
+                      data-surface="card"
                     >
                       <svg
                         aria-hidden="true"
@@ -1947,8 +2000,9 @@ exports[`./Plans.stories Free 1`] = `
                     data-slot="avatar"
                   >
                     <span
-                      class="text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs bg-card"
+                      class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                       data-slot="avatar-fallback"
+                      data-surface="card"
                     >
                       <svg
                         aria-hidden="true"
@@ -2203,11 +2257,12 @@ exports[`./Plans.stories Free 1`] = `
                         />
                       </div>
                       <ul
-                        class="m-0 flex list-none flex-col p-0 gap-1"
+                        class="m-0 flex list-none flex-col p-0"
                         data-slot="list"
                       >
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -2216,8 +2271,9 @@ exports[`./Plans.stories Free 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -2250,7 +2306,8 @@ exports[`./Plans.stories Free 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -2259,8 +2316,9 @@ exports[`./Plans.stories Free 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -2293,7 +2351,8 @@ exports[`./Plans.stories Free 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -2302,8 +2361,9 @@ exports[`./Plans.stories Free 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -2336,7 +2396,8 @@ exports[`./Plans.stories Free 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -2345,8 +2406,9 @@ exports[`./Plans.stories Free 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -2379,7 +2441,8 @@ exports[`./Plans.stories Free 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -2388,8 +2451,9 @@ exports[`./Plans.stories Free 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -2422,7 +2486,8 @@ exports[`./Plans.stories Free 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -2431,8 +2496,9 @@ exports[`./Plans.stories Free 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -2465,7 +2531,8 @@ exports[`./Plans.stories Free 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -2474,8 +2541,9 @@ exports[`./Plans.stories Free 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -2622,11 +2690,12 @@ exports[`./Plans.stories Free 1`] = `
                         value="10 Safe accounts"
                       />
                       <ul
-                        class="m-0 flex list-none flex-col p-0 gap-1"
+                        class="m-0 flex list-none flex-col p-0"
                         data-slot="list"
                       >
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -2635,8 +2704,9 @@ exports[`./Plans.stories Free 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -2669,7 +2739,8 @@ exports[`./Plans.stories Free 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -2678,8 +2749,9 @@ exports[`./Plans.stories Free 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -2712,7 +2784,8 @@ exports[`./Plans.stories Free 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -2721,8 +2794,9 @@ exports[`./Plans.stories Free 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -2755,7 +2829,8 @@ exports[`./Plans.stories Free 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -2764,8 +2839,9 @@ exports[`./Plans.stories Free 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -2798,7 +2874,8 @@ exports[`./Plans.stories Free 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -2807,8 +2884,9 @@ exports[`./Plans.stories Free 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -2841,7 +2919,8 @@ exports[`./Plans.stories Free 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -2850,8 +2929,9 @@ exports[`./Plans.stories Free 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -2884,7 +2964,8 @@ exports[`./Plans.stories Free 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -2893,8 +2974,9 @@ exports[`./Plans.stories Free 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -2927,7 +3009,8 @@ exports[`./Plans.stories Free 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -2936,8 +3019,9 @@ exports[`./Plans.stories Free 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -2970,7 +3054,8 @@ exports[`./Plans.stories Free 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -2979,8 +3064,9 @@ exports[`./Plans.stories Free 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -3092,11 +3178,12 @@ exports[`./Plans.stories Free 1`] = `
                         />
                       </div>
                       <ul
-                        class="m-0 flex list-none flex-col p-0 gap-1"
+                        class="m-0 flex list-none flex-col p-0"
                         data-slot="list"
                       >
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -3105,8 +3192,9 @@ exports[`./Plans.stories Free 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -3139,7 +3227,8 @@ exports[`./Plans.stories Free 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -3148,8 +3237,9 @@ exports[`./Plans.stories Free 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -3182,7 +3272,8 @@ exports[`./Plans.stories Free 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -3191,8 +3282,9 @@ exports[`./Plans.stories Free 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -3225,7 +3317,8 @@ exports[`./Plans.stories Free 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -3234,8 +3327,9 @@ exports[`./Plans.stories Free 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -3268,7 +3362,8 @@ exports[`./Plans.stories Free 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -3277,8 +3372,9 @@ exports[`./Plans.stories Free 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -3311,7 +3407,8 @@ exports[`./Plans.stories Free 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -3320,8 +3417,9 @@ exports[`./Plans.stories Free 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -3354,7 +3452,8 @@ exports[`./Plans.stories Free 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -3363,8 +3462,9 @@ exports[`./Plans.stories Free 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -3397,7 +3497,8 @@ exports[`./Plans.stories Free 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -3406,8 +3507,9 @@ exports[`./Plans.stories Free 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -3440,7 +3542,8 @@ exports[`./Plans.stories Free 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -3449,8 +3552,9 @@ exports[`./Plans.stories Free 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -3627,8 +3731,9 @@ exports[`./Plans.stories Trial 1`] = `
                     data-slot="avatar"
                   >
                     <span
-                      class="text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs bg-card"
+                      class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                       data-slot="avatar-fallback"
+                      data-surface="card"
                     >
                       <svg
                         aria-hidden="true"
@@ -3737,8 +3842,9 @@ exports[`./Plans.stories Trial 1`] = `
                     data-slot="avatar"
                   >
                     <span
-                      class="text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs bg-card"
+                      class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                       data-slot="avatar-fallback"
+                      data-surface="card"
                     >
                       <svg
                         aria-hidden="true"
@@ -4002,11 +4108,12 @@ exports[`./Plans.stories Trial 1`] = `
                         />
                       </div>
                       <ul
-                        class="m-0 flex list-none flex-col p-0 gap-1"
+                        class="m-0 flex list-none flex-col p-0"
                         data-slot="list"
                       >
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -4015,8 +4122,9 @@ exports[`./Plans.stories Trial 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -4049,7 +4157,8 @@ exports[`./Plans.stories Trial 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -4058,8 +4167,9 @@ exports[`./Plans.stories Trial 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -4092,7 +4202,8 @@ exports[`./Plans.stories Trial 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -4101,8 +4212,9 @@ exports[`./Plans.stories Trial 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -4135,7 +4247,8 @@ exports[`./Plans.stories Trial 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -4144,8 +4257,9 @@ exports[`./Plans.stories Trial 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -4178,7 +4292,8 @@ exports[`./Plans.stories Trial 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -4187,8 +4302,9 @@ exports[`./Plans.stories Trial 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -4221,7 +4337,8 @@ exports[`./Plans.stories Trial 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -4230,8 +4347,9 @@ exports[`./Plans.stories Trial 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -4264,7 +4382,8 @@ exports[`./Plans.stories Trial 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -4273,8 +4392,9 @@ exports[`./Plans.stories Trial 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -4428,11 +4548,12 @@ exports[`./Plans.stories Trial 1`] = `
                         value="10 Safe accounts"
                       />
                       <ul
-                        class="m-0 flex list-none flex-col p-0 gap-1"
+                        class="m-0 flex list-none flex-col p-0"
                         data-slot="list"
                       >
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -4441,8 +4562,9 @@ exports[`./Plans.stories Trial 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -4475,7 +4597,8 @@ exports[`./Plans.stories Trial 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -4484,8 +4607,9 @@ exports[`./Plans.stories Trial 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -4518,7 +4642,8 @@ exports[`./Plans.stories Trial 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -4527,8 +4652,9 @@ exports[`./Plans.stories Trial 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -4561,7 +4687,8 @@ exports[`./Plans.stories Trial 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -4570,8 +4697,9 @@ exports[`./Plans.stories Trial 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -4604,7 +4732,8 @@ exports[`./Plans.stories Trial 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -4613,8 +4742,9 @@ exports[`./Plans.stories Trial 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -4647,7 +4777,8 @@ exports[`./Plans.stories Trial 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -4656,8 +4787,9 @@ exports[`./Plans.stories Trial 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -4690,7 +4822,8 @@ exports[`./Plans.stories Trial 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -4699,8 +4832,9 @@ exports[`./Plans.stories Trial 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -4733,7 +4867,8 @@ exports[`./Plans.stories Trial 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -4742,8 +4877,9 @@ exports[`./Plans.stories Trial 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -4776,7 +4912,8 @@ exports[`./Plans.stories Trial 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -4785,8 +4922,9 @@ exports[`./Plans.stories Trial 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -4898,11 +5036,12 @@ exports[`./Plans.stories Trial 1`] = `
                         />
                       </div>
                       <ul
-                        class="m-0 flex list-none flex-col p-0 gap-1"
+                        class="m-0 flex list-none flex-col p-0"
                         data-slot="list"
                       >
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -4911,8 +5050,9 @@ exports[`./Plans.stories Trial 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -4945,7 +5085,8 @@ exports[`./Plans.stories Trial 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -4954,8 +5095,9 @@ exports[`./Plans.stories Trial 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -4988,7 +5130,8 @@ exports[`./Plans.stories Trial 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -4997,8 +5140,9 @@ exports[`./Plans.stories Trial 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -5031,7 +5175,8 @@ exports[`./Plans.stories Trial 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -5040,8 +5185,9 @@ exports[`./Plans.stories Trial 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -5074,7 +5220,8 @@ exports[`./Plans.stories Trial 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -5083,8 +5230,9 @@ exports[`./Plans.stories Trial 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -5117,7 +5265,8 @@ exports[`./Plans.stories Trial 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -5126,8 +5275,9 @@ exports[`./Plans.stories Trial 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -5160,7 +5310,8 @@ exports[`./Plans.stories Trial 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -5169,8 +5320,9 @@ exports[`./Plans.stories Trial 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -5203,7 +5355,8 @@ exports[`./Plans.stories Trial 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -5212,8 +5365,9 @@ exports[`./Plans.stories Trial 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"
@@ -5246,7 +5400,8 @@ exports[`./Plans.stories Trial 1`] = `
                           </div>
                         </li>
                         <li
-                          class="flex items-center gap-2 py-0"
+                          class="flex items-center gap-2 py-0.5"
+                          data-size="sm"
                           data-slot="list-item"
                         >
                           <span
@@ -5255,8 +5410,9 @@ exports[`./Plans.stories Trial 1`] = `
                             data-slot="avatar"
                           >
                             <span
-                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs"
+                              class="bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card"
                               data-slot="avatar-fallback"
+                              data-surface="muted"
                             >
                               <svg
                                 aria-hidden="true"

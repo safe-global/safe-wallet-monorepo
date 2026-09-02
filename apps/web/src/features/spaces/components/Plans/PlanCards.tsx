@@ -71,9 +71,9 @@ const PlanCard = ({ tier, currentBadge }: { tier: PlanTier; currentBadge: string
           <div className="flex flex-col gap-4">
             <Seats options={tier.seats} />
 
-            <List className="gap-1">
+            <List>
               {tier.features.map((feature) => (
-                <ListItem key={feature} className="gap-2 py-0">
+                <ListItem key={feature} size="sm">
                   <Avatar size="xs">
                     <AvatarFallback>
                       <Check className="size-4" strokeWidth={1.5} />
