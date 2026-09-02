@@ -1,6 +1,6 @@
 import { render, screen } from '@/tests/test-utils'
 import Plans from '../index'
-import { remaining } from '../PlanStatusCard'
+import { remaining, seatsTooltip } from '../PlanStatusCard'
 import { yearlyDiscount } from '../PlanCards'
 import { TIERS, TRIAL_PLANS } from '../fixtures'
 
@@ -11,6 +11,11 @@ describe('Plans', () => {
     [{ used: 3, quota: null }, null],
   ])('remaining(%p) → %p', (meter, expected) => {
     expect(remaining(meter)).toBe(expected)
+  })
+
+  it('adapts the seats tooltip to the tier and quota', () => {
+    expect(seatsTooltip('Business', 10)).toMatch(/^Business includes 10 Safe accounts/)
+    expect(seatsTooltip(undefined, null)).toMatch(/^Your plan includes unlimited Safe accounts/)
   })
 
   it('derives the yearly discount from the plan prices, or null without a yearly plan', () => {

@@ -14,6 +14,9 @@ const TRIAL_TOOLTIP =
 
 export const remaining = ({ used, quota }: Meter): number | null => (quota === null ? null : Math.max(quota - used, 0))
 
+export const seatsTooltip = (tierName: string | undefined, quota: number | null) =>
+  `${tierName ?? 'Your plan'} includes ${quota ?? 'unlimited'} Safe accounts in the Workspace. Safe accounts you create outside the Workspace remain available in My accounts.`
+
 const InfoTip = ({ text }: { text: string }) => (
   <Tooltip>
     <TooltipTrigger render={<span className="inline-flex" />}>
@@ -63,7 +66,12 @@ const UsageMeter = ({
   )
 }
 
-export default function PlanStatusCard({ plan, safeAccounts, sponsoredTxs }: Omit<PlansData, 'tiers'>) {
+export default function PlanStatusCard({
+  plan,
+  safeAccounts,
+  sponsoredTxs,
+  tierName,
+}: Omit<PlansData, 'tiers'> & { tierName?: string }) {
   const isTrial = plan?.status === 'trialing'
   const endDate = plan?.periodEndsAt ? formatDate(new Date(plan.periodEndsAt).getTime()) : null
 
@@ -98,13 +106,13 @@ export default function PlanStatusCard({ plan, safeAccounts, sponsoredTxs }: Omi
           <UsageMeter
             icon={<WalletCards className="size-5" strokeWidth={1.5} />}
             label="Safe accounts available"
-            tooltip="Safe accounts your plan lets you add to this Workspace."
+            tooltip={seatsTooltip(tierName, safeAccounts.quota)}
             meter={safeAccounts}
           />
           <UsageMeter
             icon={<Fuel className="size-5" strokeWidth={1.5} />}
             label="Sponsored transactions remaining"
-            tooltip="Sponsored transactions left in the current billing period."
+            tooltip="Transactions above the limit bill at pay-as-you-go rates."
             meter={sponsoredTxs}
           />
         </div>
