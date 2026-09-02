@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ArrowUpRight, Check } from 'lucide-react'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -43,39 +44,49 @@ const Seats = ({ options }: { options: string[] }) =>
   )
 
 const PlanCard = ({ tier, currentBadge }: { tier: PlanTier; currentBadge: string }) => (
-  <Card variant="outlined" radius="xl" className="flex-1">
+  <Card variant="muted" radius="xl" className="flex-1">
     <CardContent className="flex flex-1 flex-col">
       <div className="flex h-full flex-col gap-4">
-        <div className="flex items-center gap-2">
-          <Typography variant="h4">{tier.name}</Typography>
-          {tier.isCurrent && (
-            <Badge variant="brand" size="status" shape="status">
-              {currentBadge}
-            </Badge>
-          )}
+        <div className="flex flex-1 flex-col gap-6">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-2">
+              <Typography variant="h3">{tier.name}</Typography>
+              {tier.isCurrent && (
+                <Badge variant="brand" size="status" shape="status">
+                  {currentBadge}
+                </Badge>
+              )}
+            </div>
+
+            <div className="flex items-baseline gap-1">
+              <Typography variant="h2">
+                {tier.price === null ? 'Custom' : formatPrice(tier.price, tier.currency)}
+              </Typography>
+              <Typography color="muted">
+                {tier.price === null ? 'Annual term' : tier.billingCycle === 'year' ? '/yr' : '/mo'}
+              </Typography>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <Seats options={tier.seats} />
+
+            <List className="gap-1">
+              {tier.features.map((feature) => (
+                <ListItem key={feature} className="gap-2 py-0">
+                  <Avatar size="xs">
+                    <AvatarFallback>
+                      <Check className="size-4" strokeWidth={1.5} />
+                    </AvatarFallback>
+                  </Avatar>
+                  <ListItemText primary={feature} />
+                </ListItem>
+              ))}
+            </List>
+          </div>
         </div>
 
-        <div className="flex items-baseline gap-1">
-          <Typography variant="h2">
-            {tier.price === null ? 'Custom' : formatPrice(tier.price, tier.currency)}
-          </Typography>
-          <Typography color="muted">
-            {tier.price === null ? 'Annual term' : tier.billingCycle === 'year' ? '/yr' : '/mo'}
-          </Typography>
-        </div>
-
-        <Seats options={tier.seats} />
-
-        <List className="flex-1">
-          {tier.features.map((feature) => (
-            <ListItem key={feature}>
-              <Check className="size-4 shrink-0 text-muted-foreground" />
-              <ListItemText primary={feature} />
-            </ListItem>
-          ))}
-        </List>
-
-        <Button variant="outline" disabled className="w-full">
+        <Button variant="outline" size="lg" className="w-full">
           Coming soon
         </Button>
       </div>
