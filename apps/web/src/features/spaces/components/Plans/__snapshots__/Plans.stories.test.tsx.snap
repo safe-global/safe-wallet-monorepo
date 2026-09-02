@@ -84,7 +84,7 @@ exports[`./Plans.stories ActivePlan 1`] = `
                     data-slot="avatar"
                   >
                     <span
-                      class="rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs bg-card text-foreground"
+                      class="text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs bg-card"
                       data-slot="avatar-fallback"
                     >
                       <svg
@@ -95,7 +95,7 @@ exports[`./Plans.stories ActivePlan 1`] = `
                         stroke="currentColor"
                         stroke-linecap="round"
                         stroke-linejoin="round"
-                        stroke-width="2"
+                        stroke-width="1.5"
                         viewBox="0 0 24 24"
                         width="24"
                         xmlns="http://www.w3.org/2000/svg"
@@ -194,7 +194,7 @@ exports[`./Plans.stories ActivePlan 1`] = `
                     data-slot="avatar"
                   >
                     <span
-                      class="rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs bg-card text-foreground"
+                      class="text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs bg-card"
                       data-slot="avatar-fallback"
                     >
                       <svg
@@ -205,7 +205,7 @@ exports[`./Plans.stories ActivePlan 1`] = `
                         stroke="currentColor"
                         stroke-linecap="round"
                         stroke-linejoin="round"
-                        stroke-width="2"
+                        stroke-width="1.5"
                         viewBox="0 0 24 24"
                         width="24"
                         xmlns="http://www.w3.org/2000/svg"
@@ -1532,7 +1532,7 @@ exports[`./Plans.stories Free 1`] = `
                     data-slot="avatar"
                   >
                     <span
-                      class="rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs bg-card text-foreground"
+                      class="text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs bg-card"
                       data-slot="avatar-fallback"
                     >
                       <svg
@@ -1543,7 +1543,7 @@ exports[`./Plans.stories Free 1`] = `
                         stroke="currentColor"
                         stroke-linecap="round"
                         stroke-linejoin="round"
-                        stroke-width="2"
+                        stroke-width="1.5"
                         viewBox="0 0 24 24"
                         width="24"
                         xmlns="http://www.w3.org/2000/svg"
@@ -1642,7 +1642,7 @@ exports[`./Plans.stories Free 1`] = `
                     data-slot="avatar"
                   >
                     <span
-                      class="rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs bg-card text-foreground"
+                      class="text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs bg-card"
                       data-slot="avatar-fallback"
                     >
                       <svg
@@ -1653,7 +1653,7 @@ exports[`./Plans.stories Free 1`] = `
                         stroke="currentColor"
                         stroke-linecap="round"
                         stroke-linejoin="round"
-                        stroke-width="2"
+                        stroke-width="1.5"
                         viewBox="0 0 24 24"
                         width="24"
                         xmlns="http://www.w3.org/2000/svg"
@@ -3017,7 +3017,7 @@ exports[`./Plans.stories Trial 1`] = `
                     data-slot="avatar"
                   >
                     <span
-                      class="rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs bg-card text-foreground"
+                      class="text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs bg-card"
                       data-slot="avatar-fallback"
                     >
                       <svg
@@ -3028,7 +3028,7 @@ exports[`./Plans.stories Trial 1`] = `
                         stroke="currentColor"
                         stroke-linecap="round"
                         stroke-linejoin="round"
-                        stroke-width="2"
+                        stroke-width="1.5"
                         viewBox="0 0 24 24"
                         width="24"
                         xmlns="http://www.w3.org/2000/svg"
@@ -3127,7 +3127,7 @@ exports[`./Plans.stories Trial 1`] = `
                     data-slot="avatar"
                   >
                     <span
-                      class="rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs bg-card text-foreground"
+                      class="text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs bg-card"
                       data-slot="avatar-fallback"
                     >
                       <svg
@@ -3138,7 +3138,7 @@ exports[`./Plans.stories Trial 1`] = `
                         stroke="currentColor"
                         stroke-linecap="round"
                         stroke-linejoin="round"
-                        stroke-width="2"
+                        stroke-width="1.5"
                         viewBox="0 0 24 24"
                         width="24"
                         xmlns="http://www.w3.org/2000/svg"

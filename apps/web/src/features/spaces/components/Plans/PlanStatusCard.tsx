@@ -41,7 +41,7 @@ const UsageMeter = ({
       <CardContent className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Avatar>
-            <AvatarFallback className="bg-card text-foreground">{icon}</AvatarFallback>
+            <AvatarFallback className="bg-card">{icon}</AvatarFallback>
           </Avatar>
           <Typography variant="paragraph-medium">{label}</Typography>
           <InfoTip text={tooltip} />
@@ -96,13 +96,13 @@ export default function PlanStatusCard({ plan, safeAccounts, sponsoredTxs }: Omi
       <CardContent>
         <div className="flex flex-col gap-4 md:flex-row">
           <UsageMeter
-            icon={<WalletCards className="size-5" />}
+            icon={<WalletCards className="size-5" strokeWidth={1.5} />}
             label="Safe accounts available"
             tooltip="Safe accounts your plan lets you add to this Workspace."
             meter={safeAccounts}
           />
           <UsageMeter
-            icon={<Fuel className="size-5" />}
+            icon={<Fuel className="size-5" strokeWidth={1.5} />}
             label="Sponsored transactions remaining"
             tooltip="Sponsored transactions left in the current billing period."
             meter={sponsoredTxs}
