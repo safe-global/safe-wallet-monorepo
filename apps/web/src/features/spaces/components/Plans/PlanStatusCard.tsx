@@ -69,7 +69,7 @@ export default function PlanStatusCard({ plan, safeAccounts, sponsoredTxs }: Omi
             <div className="flex items-center gap-2">
               <Typography variant="h4">{plan?.name ?? 'Free'}</Typography>
               {plan && (
-                <Badge variant="success" size="sm">
+                <Badge variant="success" size="status" shape="status">
                   {isTrial ? 'Free trial' : 'Active'}
                 </Badge>
               )}
