@@ -3,7 +3,9 @@ import { ArrowUpRight, Check } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { Link } from '@/components/ui/link'
+import { List, ListItem, ListItemText } from '@/components/ui/list'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Typography } from '@/components/ui/typography'
@@ -37,9 +39,7 @@ const Seats = ({ options }: { options: string[] }) =>
       </SelectContent>
     </Select>
   ) : (
-    <div className="rounded-lg border border-border px-3 py-2">
-      <Typography variant="paragraph-small-medium">{options[0]}</Typography>
-    </div>
+    <Input readOnly value={options[0]} />
   )
 
 const PlanCard = ({ tier, currentBadge }: { tier: PlanTier; currentBadge: string }) => (
@@ -66,14 +66,14 @@ const PlanCard = ({ tier, currentBadge }: { tier: PlanTier; currentBadge: string
 
         <Seats options={tier.seats} />
 
-        <ul className="flex flex-1 flex-col gap-3">
+        <List className="flex-1">
           {tier.features.map((feature) => (
-            <li key={feature} className="flex items-center gap-2">
+            <ListItem key={feature}>
               <Check className="size-4 shrink-0 text-muted-foreground" />
-              <Typography variant="paragraph-small">{feature}</Typography>
-            </li>
+              <ListItemText primary={feature} />
+            </ListItem>
           ))}
-        </ul>
+        </List>
 
         <Button variant="outline" disabled className="w-full">
           Coming soon

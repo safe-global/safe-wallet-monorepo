@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Fuel, Info, WalletCards } from 'lucide-react'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -39,7 +40,9 @@ const UsageMeter = ({
     <Card variant="muted" size="sm" className="flex-1">
       <CardContent className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-card">{icon}</span>
+          <Avatar>
+            <AvatarFallback className="bg-card text-foreground">{icon}</AvatarFallback>
+          </Avatar>
           <Typography variant="paragraph-medium">{label}</Typography>
           <InfoTip text={tooltip} />
         </div>
@@ -48,7 +51,10 @@ const UsageMeter = ({
             'Unlimited'
           ) : (
             <>
-              {left} <span className="font-normal text-muted-foreground">/ {meter.quota}</span>
+              {left}{' '}
+              <Typography variant="paragraph-small" color="muted">
+                / {meter.quota}
+              </Typography>
             </>
           )}
         </Typography>

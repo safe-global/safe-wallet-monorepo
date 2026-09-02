@@ -79,35 +79,42 @@ exports[`./Plans.stories ActivePlan 1`] = `
                   class="flex items-center gap-3"
                 >
                   <span
-                    class="flex size-10 shrink-0 items-center justify-center rounded-full bg-card"
+                    class="size-10 rounded-full data-[size=sm]:size-8 data-[size=xs]:size-6 group/avatar relative flex shrink-0 select-none"
+                    data-size="default"
+                    data-slot="avatar"
                   >
-                    <svg
-                      aria-hidden="true"
-                      class="lucide lucide-wallet-cards size-5"
-                      fill="none"
-                      height="24"
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      viewBox="0 0 24 24"
-                      width="24"
-                      xmlns="http://www.w3.org/2000/svg"
+                    <span
+                      class="rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs bg-card text-foreground"
+                      data-slot="avatar-fallback"
                     >
-                      <rect
-                        height="18"
-                        rx="2"
-                        width="18"
-                        x="3"
-                        y="3"
-                      />
-                      <path
-                        d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2"
-                      />
-                      <path
-                        d="M3 11h3c.8 0 1.6.3 2.1.9l1.1.9c1.6 1.6 4.1 1.6 5.7 0l1.1-.9c.5-.5 1.3-.9 2.1-.9H21"
-                      />
-                    </svg>
+                      <svg
+                        aria-hidden="true"
+                        class="lucide lucide-wallet-cards size-5"
+                        fill="none"
+                        height="24"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <rect
+                          height="18"
+                          rx="2"
+                          width="18"
+                          x="3"
+                          y="3"
+                        />
+                        <path
+                          d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2"
+                        />
+                        <path
+                          d="M3 11h3c.8 0 1.6.3 2.1.9l1.1.9c1.6 1.6 4.1 1.6 5.7 0l1.1-.9c.5-.5 1.3-.9 2.1-.9H21"
+                        />
+                      </svg>
+                    </span>
                   </span>
                   <p
                     class="m-0 text-base leading-6 font-medium"
@@ -156,7 +163,9 @@ exports[`./Plans.stories ActivePlan 1`] = `
                   4
                    
                   <span
-                    class="font-normal text-muted-foreground"
+                    class="m-0 text-sm leading-5 font-normal text-muted-foreground"
+                    data-slot="typography"
+                    data-variant="paragraph-small"
                   >
                     / 
                     10
@@ -180,34 +189,41 @@ exports[`./Plans.stories ActivePlan 1`] = `
                   class="flex items-center gap-3"
                 >
                   <span
-                    class="flex size-10 shrink-0 items-center justify-center rounded-full bg-card"
+                    class="size-10 rounded-full data-[size=sm]:size-8 data-[size=xs]:size-6 group/avatar relative flex shrink-0 select-none"
+                    data-size="default"
+                    data-slot="avatar"
                   >
-                    <svg
-                      aria-hidden="true"
-                      class="lucide lucide-fuel size-5"
-                      fill="none"
-                      height="24"
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      viewBox="0 0 24 24"
-                      width="24"
-                      xmlns="http://www.w3.org/2000/svg"
+                    <span
+                      class="rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs bg-card text-foreground"
+                      data-slot="avatar-fallback"
                     >
-                      <path
-                        d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0v-6.998a2 2 0 0 0-.59-1.42L18 5"
-                      />
-                      <path
-                        d="M14 21V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v16"
-                      />
-                      <path
-                        d="M2 21h13"
-                      />
-                      <path
-                        d="M3 9h11"
-                      />
-                    </svg>
+                      <svg
+                        aria-hidden="true"
+                        class="lucide lucide-fuel size-5"
+                        fill="none"
+                        height="24"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0v-6.998a2 2 0 0 0-.59-1.42L18 5"
+                        />
+                        <path
+                          d="M14 21V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v16"
+                        />
+                        <path
+                          d="M2 21h13"
+                        />
+                        <path
+                          d="M3 9h11"
+                        />
+                      </svg>
+                    </span>
                   </span>
                   <p
                     class="m-0 text-base leading-6 font-medium"
@@ -256,7 +272,9 @@ exports[`./Plans.stories ActivePlan 1`] = `
                   0
                    
                   <span
-                    class="font-normal text-muted-foreground"
+                    class="m-0 text-sm leading-5 font-normal text-muted-foreground"
+                    data-slot="typography"
+                    data-variant="paragraph-small"
                   >
                     / 
                     50
@@ -420,21 +438,23 @@ exports[`./Plans.stories ActivePlan 1`] = `
                     </p>
                   </div>
                   <div
-                    class="rounded-lg border border-border px-3 py-2"
+                    class="w-full"
                   >
-                    <span
-                      class="m-0 text-sm leading-5 font-medium"
-                      data-slot="typography"
-                      data-variant="paragraph-small-medium"
-                    >
-                      10 Safe accounts
-                    </span>
+                    <input
+                      class="border-border border shadow-none focus-visible:ring-0 focus-visible:border-border aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md py-1.5 text-base text-foreground transition-[color,box-shadow] file:h-7 file:text-sm file:font-medium md:text-sm file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 h-9 px-3 bg-input"
+                      data-slot="input"
+                      id="base-ui-_r_6_"
+                      readonly=""
+                      value="10 Safe accounts"
+                    />
                   </div>
                   <ul
-                    class="flex flex-1 flex-col gap-3"
+                    class="m-0 flex list-none flex-col p-0 flex-1"
+                    data-slot="list"
                   >
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -453,16 +473,20 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        10 sponsored transactions / month
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          10 sponsored transactions / month
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -481,16 +505,20 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Unlimited Workspace members
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Unlimited Workspace members
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -509,16 +537,20 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Advanced threat analysis
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Advanced threat analysis
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -537,16 +569,20 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Transaction simulation
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Transaction simulation
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -565,16 +601,20 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Shared address book
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Shared address book
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -593,16 +633,20 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        MFA Authentication
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          MFA Authentication
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -621,13 +665,16 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Builder API access
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Builder API access
+                        </span>
+                      </div>
                     </li>
                   </ul>
                   <button
@@ -700,7 +747,7 @@ exports[`./Plans.stories ActivePlan 1`] = `
                     class="data-[placeholder]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 gap-2 text-sm transition-[color,box-shadow] focus-visible:ring-[3px] aria-invalid:ring-[3px] *:data-[slot=select-value]:gap-2 [&_svg:not([class*='size-'])]:size-4 flex items-center justify-between whitespace-nowrap outline-none disabled:cursor-not-allowed disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:opacity-50 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:items-center [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border hover:bg-muted/50 rounded-md border bg-input px-3 shadow-xs data-[size=default]:min-h-9 py-1.5 w-full"
                     data-size="default"
                     data-slot="select-trigger"
-                    id="base-ui-_r_6_"
+                    id="base-ui-_r_7_"
                     role="combobox"
                     tabindex="0"
                     type="button"
@@ -741,10 +788,12 @@ exports[`./Plans.stories ActivePlan 1`] = `
                     value="10 Safe accounts"
                   />
                   <ul
-                    class="flex flex-1 flex-col gap-3"
+                    class="m-0 flex list-none flex-col p-0 flex-1"
+                    data-slot="list"
                   >
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -763,16 +812,20 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        50 sponsored transactions / month
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          50 sponsored transactions / month
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -791,16 +844,20 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Unlimited Workspace members
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Unlimited Workspace members
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -819,16 +876,20 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Advanced threat analysis
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Advanced threat analysis
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -847,16 +908,20 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Transaction simulation
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Transaction simulation
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -875,16 +940,20 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Shared address book
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Shared address book
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -903,16 +972,20 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        MFA Authentication
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          MFA Authentication
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -931,16 +1004,20 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Growth API access
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Growth API access
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -959,16 +1036,20 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Pay fees from Safe accounts
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Pay fees from Safe accounts
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -987,13 +1068,16 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Policy engine
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Policy engine
+                        </span>
+                      </div>
                     </li>
                   </ul>
                   <button
@@ -1054,21 +1138,23 @@ exports[`./Plans.stories ActivePlan 1`] = `
                     </p>
                   </div>
                   <div
-                    class="rounded-lg border border-border px-3 py-2"
+                    class="w-full"
                   >
-                    <span
-                      class="m-0 text-sm leading-5 font-medium"
-                      data-slot="typography"
-                      data-variant="paragraph-small-medium"
-                    >
-                      20+ Safe accounts
-                    </span>
+                    <input
+                      class="border-border border shadow-none focus-visible:ring-0 focus-visible:border-border aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md py-1.5 text-base text-foreground transition-[color,box-shadow] file:h-7 file:text-sm file:font-medium md:text-sm file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 h-9 px-3 bg-input"
+                      data-slot="input"
+                      id="base-ui-_r_a_"
+                      readonly=""
+                      value="20+ Safe accounts"
+                    />
                   </div>
                   <ul
-                    class="flex flex-1 flex-col gap-3"
+                    class="m-0 flex list-none flex-col p-0 flex-1"
+                    data-slot="list"
                   >
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -1087,16 +1173,20 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Unlimited sponsored transactions
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Unlimited sponsored transactions
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -1115,16 +1205,20 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Unlimited Workspace members
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Unlimited Workspace members
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -1143,16 +1237,20 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Advanced threat analysis
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Advanced threat analysis
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -1171,16 +1269,20 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Transaction simulation
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Transaction simulation
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -1199,16 +1301,20 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Shared address book
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Shared address book
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -1227,16 +1333,20 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        MFA Authentication
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          MFA Authentication
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -1255,16 +1365,20 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Scale API access
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Scale API access
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -1283,16 +1397,20 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Pay fees from Safe accounts
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Pay fees from Safe accounts
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -1311,13 +1429,16 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Policy engine
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Policy engine
+                        </span>
+                      </div>
                     </li>
                   </ul>
                   <button
@@ -1406,35 +1527,42 @@ exports[`./Plans.stories Free 1`] = `
                   class="flex items-center gap-3"
                 >
                   <span
-                    class="flex size-10 shrink-0 items-center justify-center rounded-full bg-card"
+                    class="size-10 rounded-full data-[size=sm]:size-8 data-[size=xs]:size-6 group/avatar relative flex shrink-0 select-none"
+                    data-size="default"
+                    data-slot="avatar"
                   >
-                    <svg
-                      aria-hidden="true"
-                      class="lucide lucide-wallet-cards size-5"
-                      fill="none"
-                      height="24"
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      viewBox="0 0 24 24"
-                      width="24"
-                      xmlns="http://www.w3.org/2000/svg"
+                    <span
+                      class="rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs bg-card text-foreground"
+                      data-slot="avatar-fallback"
                     >
-                      <rect
-                        height="18"
-                        rx="2"
-                        width="18"
-                        x="3"
-                        y="3"
-                      />
-                      <path
-                        d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2"
-                      />
-                      <path
-                        d="M3 11h3c.8 0 1.6.3 2.1.9l1.1.9c1.6 1.6 4.1 1.6 5.7 0l1.1-.9c.5-.5 1.3-.9 2.1-.9H21"
-                      />
-                    </svg>
+                      <svg
+                        aria-hidden="true"
+                        class="lucide lucide-wallet-cards size-5"
+                        fill="none"
+                        height="24"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <rect
+                          height="18"
+                          rx="2"
+                          width="18"
+                          x="3"
+                          y="3"
+                        />
+                        <path
+                          d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2"
+                        />
+                        <path
+                          d="M3 11h3c.8 0 1.6.3 2.1.9l1.1.9c1.6 1.6 4.1 1.6 5.7 0l1.1-.9c.5-.5 1.3-.9 2.1-.9H21"
+                        />
+                      </svg>
+                    </span>
                   </span>
                   <p
                     class="m-0 text-base leading-6 font-medium"
@@ -1446,7 +1574,7 @@ exports[`./Plans.stories Free 1`] = `
                   <span
                     class="inline-flex"
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_a_"
+                    id="base-ui-_r_c_"
                   >
                     <svg
                       aria-hidden="true"
@@ -1483,7 +1611,9 @@ exports[`./Plans.stories Free 1`] = `
                   0
                    
                   <span
-                    class="font-normal text-muted-foreground"
+                    class="m-0 text-sm leading-5 font-normal text-muted-foreground"
+                    data-slot="typography"
+                    data-variant="paragraph-small"
                   >
                     / 
                     1
@@ -1507,34 +1637,41 @@ exports[`./Plans.stories Free 1`] = `
                   class="flex items-center gap-3"
                 >
                   <span
-                    class="flex size-10 shrink-0 items-center justify-center rounded-full bg-card"
+                    class="size-10 rounded-full data-[size=sm]:size-8 data-[size=xs]:size-6 group/avatar relative flex shrink-0 select-none"
+                    data-size="default"
+                    data-slot="avatar"
                   >
-                    <svg
-                      aria-hidden="true"
-                      class="lucide lucide-fuel size-5"
-                      fill="none"
-                      height="24"
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      viewBox="0 0 24 24"
-                      width="24"
-                      xmlns="http://www.w3.org/2000/svg"
+                    <span
+                      class="rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs bg-card text-foreground"
+                      data-slot="avatar-fallback"
                     >
-                      <path
-                        d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0v-6.998a2 2 0 0 0-.59-1.42L18 5"
-                      />
-                      <path
-                        d="M14 21V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v16"
-                      />
-                      <path
-                        d="M2 21h13"
-                      />
-                      <path
-                        d="M3 9h11"
-                      />
-                    </svg>
+                      <svg
+                        aria-hidden="true"
+                        class="lucide lucide-fuel size-5"
+                        fill="none"
+                        height="24"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0v-6.998a2 2 0 0 0-.59-1.42L18 5"
+                        />
+                        <path
+                          d="M14 21V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v16"
+                        />
+                        <path
+                          d="M2 21h13"
+                        />
+                        <path
+                          d="M3 9h11"
+                        />
+                      </svg>
+                    </span>
                   </span>
                   <p
                     class="m-0 text-base leading-6 font-medium"
@@ -1546,7 +1683,7 @@ exports[`./Plans.stories Free 1`] = `
                   <span
                     class="inline-flex"
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_c_"
+                    id="base-ui-_r_e_"
                   >
                     <svg
                       aria-hidden="true"
@@ -1625,7 +1762,7 @@ exports[`./Plans.stories Free 1`] = `
                   data-composite-item-active=""
                   data-orientation="horizontal"
                   data-slot="tabs-trigger"
-                  id="base-ui-_r_d_"
+                  id="base-ui-_r_f_"
                   role="tab"
                   tabindex="0"
                   type="button"
@@ -1638,7 +1775,7 @@ exports[`./Plans.stories Free 1`] = `
                   class="cursor-pointer gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium [&_svg:not([class*='size-'])]:size-4 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring text-foreground/60 hover:text-foreground dark:text-muted-foreground dark:hover:text-foreground relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center whitespace-nowrap transition-all group-data-[orientation=vertical]/tabs:w-full group-data-[orientation=vertical]/tabs:justify-start focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 group-data-[variant=default]/tabs-list:data-active:bg-background group-data-[variant=default]/tabs-list:data-active:text-foreground group-data-[variant=default]/tabs-list:data-active:shadow-sm dark:group-data-[variant=default]/tabs-list:data-active:border-border dark:group-data-[variant=default]/tabs-list:data-active:bg-input/30 dark:group-data-[variant=default]/tabs-list:data-active:text-foreground group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-active:bg-transparent group-data-[variant=line]/tabs-list:data-active:shadow-none dark:group-data-[variant=line]/tabs-list:data-active:border-transparent dark:group-data-[variant=line]/tabs-list:data-active:bg-transparent dark:group-data-[variant=line]/tabs-list:data-active:text-foreground group-data-[variant=line]/tabs-list:data-active:text-foreground group-data-[variant=nav]/tabs-list:h-auto group-data-[variant=nav]/tabs-list:flex-none group-data-[variant=nav]/tabs-list:px-6 group-data-[variant=nav]/tabs-list:first:pl-0 group-data-[variant=nav]/tabs-list:pb-2 group-data-[variant=nav]/tabs-list:font-bold group-data-[variant=nav]/tabs-list:bg-transparent group-data-[variant=nav]/tabs-list:text-[var(--color-primary-light)] group-data-[variant=nav]/tabs-list:hover:text-[var(--color-primary-main)] group-data-[variant=nav]/tabs-list:data-active:text-[var(--color-primary-main)] group-data-[variant=nav]/tabs-list:data-active:bg-transparent group-data-[variant=nav]/tabs-list:data-active:shadow-none after:bg-foreground after:absolute after:opacity-0 after:transition-opacity group-data-[orientation=horizontal]/tabs:after:inset-x-0 group-data-[orientation=horizontal]/tabs:after:h-0.5 group-data-[orientation=vertical]/tabs:after:inset-y-0 group-data-[orientation=vertical]/tabs:after:-right-1 group-data-[orientation=vertical]/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:after:bottom-[-5px] group-data-[variant=line]/tabs-list:data-active:after:opacity-100 group-data-[variant=nav]/tabs-list:after:bottom-0 group-data-[variant=nav]/tabs-list:after:bg-[var(--color-primary-main)] group-data-[variant=nav]/tabs-list:data-active:after:opacity-100 group-data-[variant=segmented]/tabs-list:h-[38px] group-data-[variant=segmented]/tabs-list:rounded-lg group-data-[variant=segmented]/tabs-list:px-2.5 group-data-[variant=segmented]/tabs-list:text-base group-data-[variant=segmented]/tabs-list:font-normal group-data-[variant=segmented]/tabs-list:text-muted-foreground group-data-[variant=segmented]/tabs-list:hover:text-foreground group-data-[variant=segmented]/tabs-list:data-active:bg-background group-data-[variant=segmented]/tabs-list:data-active:font-semibold group-data-[variant=segmented]/tabs-list:data-active:text-foreground group-data-[variant=segmented]/tabs-list:data-active:shadow-sm dark:group-data-[variant=segmented]/tabs-list:data-active:border-input dark:group-data-[variant=segmented]/tabs-list:data-active:bg-input/30 dark:group-data-[variant=segmented]/tabs-list:data-active:text-foreground"
                   data-orientation="horizontal"
                   data-slot="tabs-trigger"
-                  id="base-ui-_r_e_"
+                  id="base-ui-_r_g_"
                   role="tab"
                   tabindex="-1"
                   type="button"
@@ -1740,21 +1877,23 @@ exports[`./Plans.stories Free 1`] = `
                     </p>
                   </div>
                   <div
-                    class="rounded-lg border border-border px-3 py-2"
+                    class="w-full"
                   >
-                    <span
-                      class="m-0 text-sm leading-5 font-medium"
-                      data-slot="typography"
-                      data-variant="paragraph-small-medium"
-                    >
-                      10 Safe accounts
-                    </span>
+                    <input
+                      class="border-border border shadow-none focus-visible:ring-0 focus-visible:border-border aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md py-1.5 text-base text-foreground transition-[color,box-shadow] file:h-7 file:text-sm file:font-medium md:text-sm file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 h-9 px-3 bg-input"
+                      data-slot="input"
+                      id="base-ui-_r_h_"
+                      readonly=""
+                      value="10 Safe accounts"
+                    />
                   </div>
                   <ul
-                    class="flex flex-1 flex-col gap-3"
+                    class="m-0 flex list-none flex-col p-0 flex-1"
+                    data-slot="list"
                   >
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -1773,16 +1912,20 @@ exports[`./Plans.stories Free 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        10 sponsored transactions / month
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          10 sponsored transactions / month
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -1801,16 +1944,20 @@ exports[`./Plans.stories Free 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Unlimited Workspace members
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Unlimited Workspace members
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -1829,16 +1976,20 @@ exports[`./Plans.stories Free 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Advanced threat analysis
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Advanced threat analysis
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -1857,16 +2008,20 @@ exports[`./Plans.stories Free 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Transaction simulation
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Transaction simulation
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -1885,16 +2040,20 @@ exports[`./Plans.stories Free 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Shared address book
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Shared address book
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -1913,16 +2072,20 @@ exports[`./Plans.stories Free 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        MFA Authentication
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          MFA Authentication
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -1941,13 +2104,16 @@ exports[`./Plans.stories Free 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Builder API access
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Builder API access
+                        </span>
+                      </div>
                     </li>
                   </ul>
                   <button
@@ -2013,7 +2179,7 @@ exports[`./Plans.stories Free 1`] = `
                     class="data-[placeholder]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 gap-2 text-sm transition-[color,box-shadow] focus-visible:ring-[3px] aria-invalid:ring-[3px] *:data-[slot=select-value]:gap-2 [&_svg:not([class*='size-'])]:size-4 flex items-center justify-between whitespace-nowrap outline-none disabled:cursor-not-allowed disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:opacity-50 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:items-center [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border hover:bg-muted/50 rounded-md border bg-input px-3 shadow-xs data-[size=default]:min-h-9 py-1.5 w-full"
                     data-size="default"
                     data-slot="select-trigger"
-                    id="base-ui-_r_f_"
+                    id="base-ui-_r_i_"
                     role="combobox"
                     tabindex="0"
                     type="button"
@@ -2054,10 +2220,12 @@ exports[`./Plans.stories Free 1`] = `
                     value="10 Safe accounts"
                   />
                   <ul
-                    class="flex flex-1 flex-col gap-3"
+                    class="m-0 flex list-none flex-col p-0 flex-1"
+                    data-slot="list"
                   >
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -2076,16 +2244,20 @@ exports[`./Plans.stories Free 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        50 sponsored transactions / month
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          50 sponsored transactions / month
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -2104,16 +2276,20 @@ exports[`./Plans.stories Free 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Unlimited Workspace members
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Unlimited Workspace members
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -2132,16 +2308,20 @@ exports[`./Plans.stories Free 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Advanced threat analysis
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Advanced threat analysis
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -2160,16 +2340,20 @@ exports[`./Plans.stories Free 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Transaction simulation
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Transaction simulation
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -2188,16 +2372,20 @@ exports[`./Plans.stories Free 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Shared address book
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Shared address book
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -2216,16 +2404,20 @@ exports[`./Plans.stories Free 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        MFA Authentication
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          MFA Authentication
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -2244,16 +2436,20 @@ exports[`./Plans.stories Free 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Growth API access
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Growth API access
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -2272,16 +2468,20 @@ exports[`./Plans.stories Free 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Pay fees from Safe accounts
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Pay fees from Safe accounts
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -2300,13 +2500,16 @@ exports[`./Plans.stories Free 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Policy engine
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Policy engine
+                        </span>
+                      </div>
                     </li>
                   </ul>
                   <button
@@ -2367,21 +2570,23 @@ exports[`./Plans.stories Free 1`] = `
                     </p>
                   </div>
                   <div
-                    class="rounded-lg border border-border px-3 py-2"
+                    class="w-full"
                   >
-                    <span
-                      class="m-0 text-sm leading-5 font-medium"
-                      data-slot="typography"
-                      data-variant="paragraph-small-medium"
-                    >
-                      20+ Safe accounts
-                    </span>
+                    <input
+                      class="border-border border shadow-none focus-visible:ring-0 focus-visible:border-border aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md py-1.5 text-base text-foreground transition-[color,box-shadow] file:h-7 file:text-sm file:font-medium md:text-sm file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 h-9 px-3 bg-input"
+                      data-slot="input"
+                      id="base-ui-_r_l_"
+                      readonly=""
+                      value="20+ Safe accounts"
+                    />
                   </div>
                   <ul
-                    class="flex flex-1 flex-col gap-3"
+                    class="m-0 flex list-none flex-col p-0 flex-1"
+                    data-slot="list"
                   >
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -2400,16 +2605,20 @@ exports[`./Plans.stories Free 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Unlimited sponsored transactions
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Unlimited sponsored transactions
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -2428,16 +2637,20 @@ exports[`./Plans.stories Free 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Unlimited Workspace members
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Unlimited Workspace members
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -2456,16 +2669,20 @@ exports[`./Plans.stories Free 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Advanced threat analysis
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Advanced threat analysis
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -2484,16 +2701,20 @@ exports[`./Plans.stories Free 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Transaction simulation
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Transaction simulation
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -2512,16 +2733,20 @@ exports[`./Plans.stories Free 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Shared address book
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Shared address book
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -2540,16 +2765,20 @@ exports[`./Plans.stories Free 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        MFA Authentication
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          MFA Authentication
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -2568,16 +2797,20 @@ exports[`./Plans.stories Free 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Scale API access
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Scale API access
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -2596,16 +2829,20 @@ exports[`./Plans.stories Free 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Pay fees from Safe accounts
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Pay fees from Safe accounts
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -2624,13 +2861,16 @@ exports[`./Plans.stories Free 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Policy engine
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Policy engine
+                        </span>
+                      </div>
                     </li>
                   </ul>
                   <button
@@ -2709,7 +2949,7 @@ exports[`./Plans.stories Trial 1`] = `
                 <span
                   class="inline-flex"
                   data-slot="tooltip-trigger"
-                  id="base-ui-_r_j_"
+                  id="base-ui-_r_n_"
                 >
                   <svg
                     aria-hidden="true"
@@ -2772,35 +3012,42 @@ exports[`./Plans.stories Trial 1`] = `
                   class="flex items-center gap-3"
                 >
                   <span
-                    class="flex size-10 shrink-0 items-center justify-center rounded-full bg-card"
+                    class="size-10 rounded-full data-[size=sm]:size-8 data-[size=xs]:size-6 group/avatar relative flex shrink-0 select-none"
+                    data-size="default"
+                    data-slot="avatar"
                   >
-                    <svg
-                      aria-hidden="true"
-                      class="lucide lucide-wallet-cards size-5"
-                      fill="none"
-                      height="24"
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      viewBox="0 0 24 24"
-                      width="24"
-                      xmlns="http://www.w3.org/2000/svg"
+                    <span
+                      class="rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs bg-card text-foreground"
+                      data-slot="avatar-fallback"
                     >
-                      <rect
-                        height="18"
-                        rx="2"
-                        width="18"
-                        x="3"
-                        y="3"
-                      />
-                      <path
-                        d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2"
-                      />
-                      <path
-                        d="M3 11h3c.8 0 1.6.3 2.1.9l1.1.9c1.6 1.6 4.1 1.6 5.7 0l1.1-.9c.5-.5 1.3-.9 2.1-.9H21"
-                      />
-                    </svg>
+                      <svg
+                        aria-hidden="true"
+                        class="lucide lucide-wallet-cards size-5"
+                        fill="none"
+                        height="24"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <rect
+                          height="18"
+                          rx="2"
+                          width="18"
+                          x="3"
+                          y="3"
+                        />
+                        <path
+                          d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2"
+                        />
+                        <path
+                          d="M3 11h3c.8 0 1.6.3 2.1.9l1.1.9c1.6 1.6 4.1 1.6 5.7 0l1.1-.9c.5-.5 1.3-.9 2.1-.9H21"
+                        />
+                      </svg>
+                    </span>
                   </span>
                   <p
                     class="m-0 text-base leading-6 font-medium"
@@ -2812,7 +3059,7 @@ exports[`./Plans.stories Trial 1`] = `
                   <span
                     class="inline-flex"
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_l_"
+                    id="base-ui-_r_p_"
                   >
                     <svg
                       aria-hidden="true"
@@ -2849,7 +3096,9 @@ exports[`./Plans.stories Trial 1`] = `
                   4
                    
                   <span
-                    class="font-normal text-muted-foreground"
+                    class="m-0 text-sm leading-5 font-normal text-muted-foreground"
+                    data-slot="typography"
+                    data-variant="paragraph-small"
                   >
                     / 
                     10
@@ -2873,34 +3122,41 @@ exports[`./Plans.stories Trial 1`] = `
                   class="flex items-center gap-3"
                 >
                   <span
-                    class="flex size-10 shrink-0 items-center justify-center rounded-full bg-card"
+                    class="size-10 rounded-full data-[size=sm]:size-8 data-[size=xs]:size-6 group/avatar relative flex shrink-0 select-none"
+                    data-size="default"
+                    data-slot="avatar"
                   >
-                    <svg
-                      aria-hidden="true"
-                      class="lucide lucide-fuel size-5"
-                      fill="none"
-                      height="24"
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      viewBox="0 0 24 24"
-                      width="24"
-                      xmlns="http://www.w3.org/2000/svg"
+                    <span
+                      class="rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs bg-card text-foreground"
+                      data-slot="avatar-fallback"
                     >
-                      <path
-                        d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0v-6.998a2 2 0 0 0-.59-1.42L18 5"
-                      />
-                      <path
-                        d="M14 21V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v16"
-                      />
-                      <path
-                        d="M2 21h13"
-                      />
-                      <path
-                        d="M3 9h11"
-                      />
-                    </svg>
+                      <svg
+                        aria-hidden="true"
+                        class="lucide lucide-fuel size-5"
+                        fill="none"
+                        height="24"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0v-6.998a2 2 0 0 0-.59-1.42L18 5"
+                        />
+                        <path
+                          d="M14 21V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v16"
+                        />
+                        <path
+                          d="M2 21h13"
+                        />
+                        <path
+                          d="M3 9h11"
+                        />
+                      </svg>
+                    </span>
                   </span>
                   <p
                     class="m-0 text-base leading-6 font-medium"
@@ -2912,7 +3168,7 @@ exports[`./Plans.stories Trial 1`] = `
                   <span
                     class="inline-flex"
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_n_"
+                    id="base-ui-_r_r_"
                   >
                     <svg
                       aria-hidden="true"
@@ -2949,7 +3205,9 @@ exports[`./Plans.stories Trial 1`] = `
                   4
                    
                   <span
-                    class="font-normal text-muted-foreground"
+                    class="m-0 text-sm leading-5 font-normal text-muted-foreground"
+                    data-slot="typography"
+                    data-variant="paragraph-small"
                   >
                     / 
                     15
@@ -2998,7 +3256,7 @@ exports[`./Plans.stories Trial 1`] = `
                   data-composite-item-active=""
                   data-orientation="horizontal"
                   data-slot="tabs-trigger"
-                  id="base-ui-_r_o_"
+                  id="base-ui-_r_s_"
                   role="tab"
                   tabindex="0"
                   type="button"
@@ -3011,7 +3269,7 @@ exports[`./Plans.stories Trial 1`] = `
                   class="cursor-pointer gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium [&_svg:not([class*='size-'])]:size-4 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring text-foreground/60 hover:text-foreground dark:text-muted-foreground dark:hover:text-foreground relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center whitespace-nowrap transition-all group-data-[orientation=vertical]/tabs:w-full group-data-[orientation=vertical]/tabs:justify-start focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 group-data-[variant=default]/tabs-list:data-active:bg-background group-data-[variant=default]/tabs-list:data-active:text-foreground group-data-[variant=default]/tabs-list:data-active:shadow-sm dark:group-data-[variant=default]/tabs-list:data-active:border-border dark:group-data-[variant=default]/tabs-list:data-active:bg-input/30 dark:group-data-[variant=default]/tabs-list:data-active:text-foreground group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-active:bg-transparent group-data-[variant=line]/tabs-list:data-active:shadow-none dark:group-data-[variant=line]/tabs-list:data-active:border-transparent dark:group-data-[variant=line]/tabs-list:data-active:bg-transparent dark:group-data-[variant=line]/tabs-list:data-active:text-foreground group-data-[variant=line]/tabs-list:data-active:text-foreground group-data-[variant=nav]/tabs-list:h-auto group-data-[variant=nav]/tabs-list:flex-none group-data-[variant=nav]/tabs-list:px-6 group-data-[variant=nav]/tabs-list:first:pl-0 group-data-[variant=nav]/tabs-list:pb-2 group-data-[variant=nav]/tabs-list:font-bold group-data-[variant=nav]/tabs-list:bg-transparent group-data-[variant=nav]/tabs-list:text-[var(--color-primary-light)] group-data-[variant=nav]/tabs-list:hover:text-[var(--color-primary-main)] group-data-[variant=nav]/tabs-list:data-active:text-[var(--color-primary-main)] group-data-[variant=nav]/tabs-list:data-active:bg-transparent group-data-[variant=nav]/tabs-list:data-active:shadow-none after:bg-foreground after:absolute after:opacity-0 after:transition-opacity group-data-[orientation=horizontal]/tabs:after:inset-x-0 group-data-[orientation=horizontal]/tabs:after:h-0.5 group-data-[orientation=vertical]/tabs:after:inset-y-0 group-data-[orientation=vertical]/tabs:after:-right-1 group-data-[orientation=vertical]/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:after:bottom-[-5px] group-data-[variant=line]/tabs-list:data-active:after:opacity-100 group-data-[variant=nav]/tabs-list:after:bottom-0 group-data-[variant=nav]/tabs-list:after:bg-[var(--color-primary-main)] group-data-[variant=nav]/tabs-list:data-active:after:opacity-100 group-data-[variant=segmented]/tabs-list:h-[38px] group-data-[variant=segmented]/tabs-list:rounded-lg group-data-[variant=segmented]/tabs-list:px-2.5 group-data-[variant=segmented]/tabs-list:text-base group-data-[variant=segmented]/tabs-list:font-normal group-data-[variant=segmented]/tabs-list:text-muted-foreground group-data-[variant=segmented]/tabs-list:hover:text-foreground group-data-[variant=segmented]/tabs-list:data-active:bg-background group-data-[variant=segmented]/tabs-list:data-active:font-semibold group-data-[variant=segmented]/tabs-list:data-active:text-foreground group-data-[variant=segmented]/tabs-list:data-active:shadow-sm dark:group-data-[variant=segmented]/tabs-list:data-active:border-input dark:group-data-[variant=segmented]/tabs-list:data-active:bg-input/30 dark:group-data-[variant=segmented]/tabs-list:data-active:text-foreground"
                   data-orientation="horizontal"
                   data-slot="tabs-trigger"
-                  id="base-ui-_r_p_"
+                  id="base-ui-_r_t_"
                   role="tab"
                   tabindex="-1"
                   type="button"
@@ -3113,21 +3371,23 @@ exports[`./Plans.stories Trial 1`] = `
                     </p>
                   </div>
                   <div
-                    class="rounded-lg border border-border px-3 py-2"
+                    class="w-full"
                   >
-                    <span
-                      class="m-0 text-sm leading-5 font-medium"
-                      data-slot="typography"
-                      data-variant="paragraph-small-medium"
-                    >
-                      10 Safe accounts
-                    </span>
+                    <input
+                      class="border-border border shadow-none focus-visible:ring-0 focus-visible:border-border aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md py-1.5 text-base text-foreground transition-[color,box-shadow] file:h-7 file:text-sm file:font-medium md:text-sm file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 h-9 px-3 bg-input"
+                      data-slot="input"
+                      id="base-ui-_r_u_"
+                      readonly=""
+                      value="10 Safe accounts"
+                    />
                   </div>
                   <ul
-                    class="flex flex-1 flex-col gap-3"
+                    class="m-0 flex list-none flex-col p-0 flex-1"
+                    data-slot="list"
                   >
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -3146,16 +3406,20 @@ exports[`./Plans.stories Trial 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        10 sponsored transactions / month
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          10 sponsored transactions / month
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -3174,16 +3438,20 @@ exports[`./Plans.stories Trial 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Unlimited Workspace members
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Unlimited Workspace members
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -3202,16 +3470,20 @@ exports[`./Plans.stories Trial 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Advanced threat analysis
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Advanced threat analysis
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -3230,16 +3502,20 @@ exports[`./Plans.stories Trial 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Transaction simulation
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Transaction simulation
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -3258,16 +3534,20 @@ exports[`./Plans.stories Trial 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Shared address book
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Shared address book
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -3286,16 +3566,20 @@ exports[`./Plans.stories Trial 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        MFA Authentication
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          MFA Authentication
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -3314,13 +3598,16 @@ exports[`./Plans.stories Trial 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Builder API access
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Builder API access
+                        </span>
+                      </div>
                     </li>
                   </ul>
                   <button
@@ -3393,7 +3680,7 @@ exports[`./Plans.stories Trial 1`] = `
                     class="data-[placeholder]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 gap-2 text-sm transition-[color,box-shadow] focus-visible:ring-[3px] aria-invalid:ring-[3px] *:data-[slot=select-value]:gap-2 [&_svg:not([class*='size-'])]:size-4 flex items-center justify-between whitespace-nowrap outline-none disabled:cursor-not-allowed disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:opacity-50 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:items-center [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border hover:bg-muted/50 rounded-md border bg-input px-3 shadow-xs data-[size=default]:min-h-9 py-1.5 w-full"
                     data-size="default"
                     data-slot="select-trigger"
-                    id="base-ui-_r_q_"
+                    id="base-ui-_r_v_"
                     role="combobox"
                     tabindex="0"
                     type="button"
@@ -3434,10 +3721,12 @@ exports[`./Plans.stories Trial 1`] = `
                     value="10 Safe accounts"
                   />
                   <ul
-                    class="flex flex-1 flex-col gap-3"
+                    class="m-0 flex list-none flex-col p-0 flex-1"
+                    data-slot="list"
                   >
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -3456,16 +3745,20 @@ exports[`./Plans.stories Trial 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        50 sponsored transactions / month
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          50 sponsored transactions / month
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -3484,16 +3777,20 @@ exports[`./Plans.stories Trial 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Unlimited Workspace members
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Unlimited Workspace members
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -3512,16 +3809,20 @@ exports[`./Plans.stories Trial 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Advanced threat analysis
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Advanced threat analysis
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -3540,16 +3841,20 @@ exports[`./Plans.stories Trial 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Transaction simulation
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Transaction simulation
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -3568,16 +3873,20 @@ exports[`./Plans.stories Trial 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Shared address book
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Shared address book
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -3596,16 +3905,20 @@ exports[`./Plans.stories Trial 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        MFA Authentication
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          MFA Authentication
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -3624,16 +3937,20 @@ exports[`./Plans.stories Trial 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Growth API access
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Growth API access
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -3652,16 +3969,20 @@ exports[`./Plans.stories Trial 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Pay fees from Safe accounts
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Pay fees from Safe accounts
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -3680,13 +4001,16 @@ exports[`./Plans.stories Trial 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Policy engine
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Policy engine
+                        </span>
+                      </div>
                     </li>
                   </ul>
                   <button
@@ -3747,21 +4071,23 @@ exports[`./Plans.stories Trial 1`] = `
                     </p>
                   </div>
                   <div
-                    class="rounded-lg border border-border px-3 py-2"
+                    class="w-full"
                   >
-                    <span
-                      class="m-0 text-sm leading-5 font-medium"
-                      data-slot="typography"
-                      data-variant="paragraph-small-medium"
-                    >
-                      20+ Safe accounts
-                    </span>
+                    <input
+                      class="border-border border shadow-none focus-visible:ring-0 focus-visible:border-border aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md py-1.5 text-base text-foreground transition-[color,box-shadow] file:h-7 file:text-sm file:font-medium md:text-sm file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 h-9 px-3 bg-input"
+                      data-slot="input"
+                      id="base-ui-_r_12_"
+                      readonly=""
+                      value="20+ Safe accounts"
+                    />
                   </div>
                   <ul
-                    class="flex flex-1 flex-col gap-3"
+                    class="m-0 flex list-none flex-col p-0 flex-1"
+                    data-slot="list"
                   >
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -3780,16 +4106,20 @@ exports[`./Plans.stories Trial 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Unlimited sponsored transactions
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Unlimited sponsored transactions
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -3808,16 +4138,20 @@ exports[`./Plans.stories Trial 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Unlimited Workspace members
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Unlimited Workspace members
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -3836,16 +4170,20 @@ exports[`./Plans.stories Trial 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Advanced threat analysis
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Advanced threat analysis
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -3864,16 +4202,20 @@ exports[`./Plans.stories Trial 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Transaction simulation
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Transaction simulation
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -3892,16 +4234,20 @@ exports[`./Plans.stories Trial 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Shared address book
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Shared address book
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -3920,16 +4266,20 @@ exports[`./Plans.stories Trial 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        MFA Authentication
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          MFA Authentication
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -3948,16 +4298,20 @@ exports[`./Plans.stories Trial 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Scale API access
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Scale API access
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -3976,16 +4330,20 @@ exports[`./Plans.stories Trial 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Pay fees from Safe accounts
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Pay fees from Safe accounts
+                        </span>
+                      </div>
                     </li>
                     <li
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-3 py-2"
+                      data-slot="list-item"
                     >
                       <svg
                         aria-hidden="true"
@@ -4004,13 +4362,16 @@ exports[`./Plans.stories Trial 1`] = `
                           d="M20 6 9 17l-5-5"
                         />
                       </svg>
-                      <span
-                        class="m-0 text-sm leading-5 font-normal"
-                        data-slot="typography"
-                        data-variant="paragraph-small"
+                      <div
+                        class="flex min-w-0 flex-col"
+                        data-slot="list-item-text"
                       >
-                        Policy engine
-                      </span>
+                        <span
+                          class="truncate text-sm text-foreground"
+                        >
+                          Policy engine
+                        </span>
+                      </div>
                     </li>
                   </ul>
                   <button
