@@ -15,11 +15,15 @@ import { CookieAndTermType, hasConsentFor } from '@/store/cookiesAndTermsSlice'
 import { openCookieBanner } from '@/store/popupSlice'
 import { BEAMER_SELECTOR } from '@/services/beamer'
 import { ApiCtaSidebar } from '../ApiCtaSidebar'
+import { SafeProFeature, useIsSafeProEnabled } from '@/features/safe-pro-announcement'
+import { useLoadFeature } from '@/features/__core__'
 import { SidebarIndexingStatus } from '../SidebarIndexingStatus'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { LS_KEY } from '@/config/gateway'
 import HelpMenu from '@/components/common/HelpMenu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { useRouter } from 'next/router'
+import { AppRoutes } from '@/config/routes'
 
 export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?: boolean }): ReactElement => {
   const dispatch = useAppDispatch()
@@ -27,6 +31,11 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
   const isDarkMode = useDarkMode()
   const [isProdGateway = false, setIsProdGateway] = useLocalStorage<boolean>(LS_KEY)
   const [helpMenuAnchor, setHelpMenuAnchor] = useState<HTMLElement | null>(null)
+  const { SafeProSidebarBanner } = useLoadFeature(SafeProFeature)
+  const isSafeProEnabled = useIsSafeProEnabled()
+  const { pathname } = useRouter()
+  // The Plans page is the banner's own link destination, so hide it there.
+  const showSafeProBanner = isSafeProEnabled && pathname !== AppRoutes.spaces.plans
 
   const onToggleGateway = (checked: boolean) => {
     setIsProdGateway(checked)
@@ -72,6 +81,12 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
       )}
 
       <SidebarMenu className="gap-0.5">
+        {showSafeProBanner && (
+          <SidebarMenuItem className="group-data-[collapsible=icon]:hidden">
+            <SafeProSidebarBanner className="mb-2" />
+          </SidebarMenuItem>
+        )}
+
         <ApiCtaSidebar />
 
         <SidebarMenuItem

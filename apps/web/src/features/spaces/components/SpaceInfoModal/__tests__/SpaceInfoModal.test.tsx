@@ -5,7 +5,7 @@ describe('SpaceInfoModal', () => {
   it('renders the workspaces headline and benefits', () => {
     render(<SpaceInfoModal onClose={jest.fn()} />)
 
-    expect(screen.getByText('One workspace for your team.')).toBeInTheDocument()
+    expect(screen.getByText('One Workspace for your team.')).toBeInTheDocument()
     expect(screen.getByText('Every Safe in one view')).toBeInTheDocument()
     expect(screen.getByText('Access by role')).toBeInTheDocument()
     expect(screen.getByText('Security & audit in one view')).toBeInTheDocument()

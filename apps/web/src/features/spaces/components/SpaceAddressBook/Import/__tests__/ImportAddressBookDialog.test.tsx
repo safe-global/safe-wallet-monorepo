@@ -242,7 +242,7 @@ describe('ImportAddressBookDialog', () => {
 
     await userEvent.hover(screen.getByText('Bad/Name').closest('[role="button"]')?.parentElement as HTMLElement)
 
-    await waitFor(() => expect(screen.getByText(/Rename this contact to add it to the workspace/)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/Rename this contact to add it to the Workspace/)).toBeInTheDocument())
   })
 
   it('filters the contact list based on the search input', async () => {

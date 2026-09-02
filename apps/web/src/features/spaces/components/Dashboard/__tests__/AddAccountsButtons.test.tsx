@@ -53,6 +53,12 @@ jest.mock('@/features/__core__', () => ({
   useLoadFeature: jest.fn(),
 }))
 
+jest.mock('@/features/safe-pro-announcement', () => ({
+  SafeProFeature: { name: 'safe-pro-announcement' },
+  useIsSafeProEnabled: () => false,
+  useSafeProAnnouncement: () => ({ isOpen: false, setIsOpen: jest.fn() }),
+}))
+
 jest.mock('@/services/local-storage/useLocalStorage', () => jest.fn(() => [{}, jest.fn()]))
 
 jest.mock('@/hooks/safes', () => ({

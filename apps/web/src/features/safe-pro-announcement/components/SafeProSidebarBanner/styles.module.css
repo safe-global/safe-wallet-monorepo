@@ -1,0 +1,40 @@
+.banner {
+  background-image: radial-gradient(
+    ellipse 86% 110% at 96% 6%,
+    color-mix(in srgb, var(--color-static-text-brand) 18%, transparent) 0%,
+    transparent 100%
+  );
+  border: 1px solid transparent;
+  transition: border-color 150ms ease;
+}
+
+.banner:hover {
+  border-color: color-mix(in srgb, var(--color-static-text-brand) 55%, var(--card));
+}
+
+.proChip {
+  color: var(--foreground);
+  background-color: #7ffab7;
+}
+
+:global(.dark) .banner {
+  background-color: var(--card);
+}
+
+:global(.dark) .proChip {
+  color: #7ffab7;
+  background-color: #2e2e2e;
+}
+
+:global(.dark) .banner:hover .proChip {
+  color: var(--primary-foreground);
+  background-color: #7ffab7;
+}
+
+:global(.dark) .learnMore {
+  background-color: #7ffab7;
+}
+
+:global(.dark) .arrow {
+  color: var(--primary-foreground);
+}
