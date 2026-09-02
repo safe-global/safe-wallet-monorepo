@@ -193,6 +193,7 @@
   --color-success-subtle: var(--color-success-background);
   --color-success-muted: var(--color-success-light);
   --color-success-strong: var(--color-success-dark);
+  --color-success-tint: var(--color-background-light);
   --color-error-strong: var(--color-error-dark);
   --color-error-subtle: var(--error-subtle);
   --color-warning-subtle: var(--warning-subtle);

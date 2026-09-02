@@ -49,7 +49,7 @@ const PlanCard = ({ tier, currentBadge }: { tier: PlanTier; currentBadge: string
         <div className="flex items-center gap-2">
           <Typography variant="h4">{tier.name}</Typography>
           {tier.isCurrent && (
-            <Badge variant="success" size="status" shape="status">
+            <Badge variant="brand" size="status" shape="status">
               {currentBadge}
             </Badge>
           )}
@@ -98,7 +98,7 @@ export default function PlanCards({ tiers, currentBadge }: { tiers: PlanTier[]; 
               <TabsTrigger value="year">
                 Yearly
                 {discount !== null && (
-                  <Badge variant="success" size="status" shape="status">
+                  <Badge variant="brand" size="status" shape="status">
                     -{discount}%
                   </Badge>
                 )}
