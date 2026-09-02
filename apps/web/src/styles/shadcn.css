@@ -32,6 +32,7 @@
   --secondary-foreground: #171717;
   --secondary-hover: var(--border);
   --muted: #f5f5f5;
+  --muted-secondary: #fafafa;
   --muted-foreground: #737373;
   /* A well sunk *into* a card, holding sibling rows (nested items of a bulk/conflict group).
      `--muted` can't express this: it sits darker than `--card` in light mode but lighter in dark, so
@@ -110,6 +111,7 @@
   --secondary-foreground: #f5f5f5;
   --secondary-hover: rgba(255, 255, 255, 0.12);
   --muted: #262626;
+  --muted-secondary: #1c1c1c;
   --muted-foreground: #a3a3a3;
   --surface-sunken: var(--color-background-main);
   --accent: #052e16;
@@ -194,6 +196,7 @@
   --color-success-muted: var(--color-success-light);
   --color-success-strong: var(--color-success-dark);
   --color-success-tint: var(--color-background-light);
+  --color-muted-secondary: var(--muted-secondary);
   --color-error-strong: var(--color-error-dark);
   --color-error-subtle: var(--error-subtle);
   --color-warning-subtle: var(--warning-subtle);
@@ -215,6 +218,7 @@
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
+  --radius-lg-xl: 1.25rem;
   --radius-xl: 1.5rem;
   --radius-2xl: 1.5rem;
   --radius-infinite: 9999px;

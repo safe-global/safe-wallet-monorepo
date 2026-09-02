@@ -44,7 +44,7 @@ const Seats = ({ options }: { options: string[] }) =>
   )
 
 const PlanCard = ({ tier, currentBadge }: { tier: PlanTier; currentBadge: string }) => (
-  <Card variant="muted" radius="xl" className="flex-1">
+  <Card variant="muted-secondary" radius="lg-xl" className="flex-1">
     <CardContent className="flex flex-1 flex-col">
       <div className="flex h-full flex-col gap-4">
         <div className="flex flex-1 flex-col gap-6">

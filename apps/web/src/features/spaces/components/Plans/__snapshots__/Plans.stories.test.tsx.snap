@@ -394,12 +394,12 @@ exports[`./Plans.stories ActivePlan 1`] = `
             class="flex flex-col gap-4 md:flex-row"
           >
             <div
-              class="text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col bg-muted gap-6 py-6 rounded-xl flex-1"
-              data-radius="xl"
+              class="text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col bg-muted-secondary gap-6 py-6 rounded-lg-xl flex-1"
+              data-radius="lg-xl"
               data-size="default"
               data-slot="card"
               data-surface="default"
-              data-variant="muted"
+              data-variant="muted-secondary"
             >
               <div
                 class="px-6 group-data-[size=sm]/card:px-4 group-data-[size=lg]/card:px-8 group-data-[size=none]/card:px-0 flex flex-1 flex-col"
@@ -778,12 +778,12 @@ exports[`./Plans.stories ActivePlan 1`] = `
               </div>
             </div>
             <div
-              class="text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col bg-muted gap-6 py-6 rounded-xl flex-1"
-              data-radius="xl"
+              class="text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col bg-muted-secondary gap-6 py-6 rounded-lg-xl flex-1"
+              data-radius="lg-xl"
               data-size="default"
               data-slot="card"
               data-surface="default"
-              data-variant="muted"
+              data-variant="muted-secondary"
             >
               <div
                 class="px-6 group-data-[size=sm]/card:px-4 group-data-[size=lg]/card:px-8 group-data-[size=none]/card:px-0 flex flex-1 flex-col"
@@ -1290,12 +1290,12 @@ exports[`./Plans.stories ActivePlan 1`] = `
               </div>
             </div>
             <div
-              class="text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col bg-muted gap-6 py-6 rounded-xl flex-1"
-              data-radius="xl"
+              class="text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col bg-muted-secondary gap-6 py-6 rounded-lg-xl flex-1"
+              data-radius="lg-xl"
               data-size="default"
               data-slot="card"
               data-surface="default"
-              data-variant="muted"
+              data-variant="muted-secondary"
             >
               <div
                 class="px-6 group-data-[size=sm]/card:px-4 group-data-[size=lg]/card:px-8 group-data-[size=none]/card:px-0 flex flex-1 flex-col"
@@ -2138,12 +2138,12 @@ exports[`./Plans.stories Free 1`] = `
             class="flex flex-col gap-4 md:flex-row"
           >
             <div
-              class="text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col bg-muted gap-6 py-6 rounded-xl flex-1"
-              data-radius="xl"
+              class="text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col bg-muted-secondary gap-6 py-6 rounded-lg-xl flex-1"
+              data-radius="lg-xl"
               data-size="default"
               data-slot="card"
               data-surface="default"
-              data-variant="muted"
+              data-variant="muted-secondary"
             >
               <div
                 class="px-6 group-data-[size=sm]/card:px-4 group-data-[size=lg]/card:px-8 group-data-[size=none]/card:px-0 flex flex-1 flex-col"
@@ -2522,12 +2522,12 @@ exports[`./Plans.stories Free 1`] = `
               </div>
             </div>
             <div
-              class="text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col bg-muted gap-6 py-6 rounded-xl flex-1"
-              data-radius="xl"
+              class="text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col bg-muted-secondary gap-6 py-6 rounded-lg-xl flex-1"
+              data-radius="lg-xl"
               data-size="default"
               data-slot="card"
               data-surface="default"
-              data-variant="muted"
+              data-variant="muted-secondary"
             >
               <div
                 class="px-6 group-data-[size=sm]/card:px-4 group-data-[size=lg]/card:px-8 group-data-[size=none]/card:px-0 flex flex-1 flex-col"
@@ -3027,12 +3027,12 @@ exports[`./Plans.stories Free 1`] = `
               </div>
             </div>
             <div
-              class="text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col bg-muted gap-6 py-6 rounded-xl flex-1"
-              data-radius="xl"
+              class="text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col bg-muted-secondary gap-6 py-6 rounded-lg-xl flex-1"
+              data-radius="lg-xl"
               data-size="default"
               data-slot="card"
               data-surface="default"
-              data-variant="muted"
+              data-variant="muted-secondary"
             >
               <div
                 class="px-6 group-data-[size=sm]/card:px-4 group-data-[size=lg]/card:px-8 group-data-[size=none]/card:px-0 flex flex-1 flex-col"
@@ -3937,12 +3937,12 @@ exports[`./Plans.stories Trial 1`] = `
             class="flex flex-col gap-4 md:flex-row"
           >
             <div
-              class="text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col bg-muted gap-6 py-6 rounded-xl flex-1"
-              data-radius="xl"
+              class="text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col bg-muted-secondary gap-6 py-6 rounded-lg-xl flex-1"
+              data-radius="lg-xl"
               data-size="default"
               data-slot="card"
               data-surface="default"
-              data-variant="muted"
+              data-variant="muted-secondary"
             >
               <div
                 class="px-6 group-data-[size=sm]/card:px-4 group-data-[size=lg]/card:px-8 group-data-[size=none]/card:px-0 flex flex-1 flex-col"
@@ -4321,12 +4321,12 @@ exports[`./Plans.stories Trial 1`] = `
               </div>
             </div>
             <div
-              class="text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col bg-muted gap-6 py-6 rounded-xl flex-1"
-              data-radius="xl"
+              class="text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col bg-muted-secondary gap-6 py-6 rounded-lg-xl flex-1"
+              data-radius="lg-xl"
               data-size="default"
               data-slot="card"
               data-surface="default"
-              data-variant="muted"
+              data-variant="muted-secondary"
             >
               <div
                 class="px-6 group-data-[size=sm]/card:px-4 group-data-[size=lg]/card:px-8 group-data-[size=none]/card:px-0 flex flex-1 flex-col"
@@ -4833,12 +4833,12 @@ exports[`./Plans.stories Trial 1`] = `
               </div>
             </div>
             <div
-              class="text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col bg-muted gap-6 py-6 rounded-xl flex-1"
-              data-radius="xl"
+              class="text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col bg-muted-secondary gap-6 py-6 rounded-lg-xl flex-1"
+              data-radius="lg-xl"
               data-size="default"
               data-slot="card"
               data-surface="default"
-              data-variant="muted"
+              data-variant="muted-secondary"
             >
               <div
                 class="px-6 group-data-[size=sm]/card:px-4 group-data-[size=lg]/card:px-8 group-data-[size=none]/card:px-0 flex flex-1 flex-col"
