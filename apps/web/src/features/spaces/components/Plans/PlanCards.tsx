@@ -86,7 +86,7 @@ const PlanCard = ({ tier, currentBadge }: { tier: PlanTier; currentBadge: string
           </div>
         </div>
 
-        <Button variant="outline" size="lg" className="w-full">
+        <Button variant="outline" size="lg" weight="semibold" className="w-full">
           Coming soon
         </Button>
       </div>
