@@ -126,7 +126,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
   describe('SAFE_PRO_ANNOUNCEMENT banner gating', () => {
     it('keeps the pre-Pro workspace banner when the flag is off', () => {
-      mockUseAppSelector.mockReturnValue(false)
+      setAuth(false)
 
       render(<SpacesList />)
 
@@ -135,7 +135,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
     })
 
     it('swaps in the Safe Pro banner when the flag is on', () => {
-      mockUseAppSelector.mockReturnValue(false)
+      setAuth(false)
       mockUseIsSafeProEnabled.mockReturnValue(true)
 
       render(<SpacesList />)
@@ -231,7 +231,8 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     render(<SpacesList />)
 
-    const cta = screen.getByRole('link', { name: /create your first workspace/i })
+    expect(screen.getByText(/create your first workspace/i)).toBeInTheDocument()
+    const cta = screen.getByRole('link', { name: /create workspace/i })
     expect(cta).toHaveAttribute('href')
 
     // Sign in card must NOT render in this branch.
