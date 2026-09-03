@@ -81,6 +81,13 @@ jest.mock('@/features/safe-pro-announcement', () => ({
 
 jest.mock('@/services/local-storage/useLocalStorage', () => jest.fn(() => [{}, jest.fn()]))
 
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
+  useSpacesGetOneV1Query: () => ({ currentData: { name: 'Acme Inc' } }),
+}))
+
+const mockUseHasFeature = jest.fn()
+jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
+
 jest.mock('@/hooks/safes', () => ({
   flattenSafeItems: jest.fn((items: unknown[]) => items),
 }))
@@ -124,6 +131,7 @@ function setupUseLoadFeature(txEntries: Array<{ safeAddress: string; txId: strin
     PendingTxWidget: makeMockPendingTxWidget(txEntries),
     AccountsWidget: () => null,
     SafeProAnnouncementModal: () => <div data-testid="safe-pro-announcement-modal" />,
+    SafeProLockedWorkspace: () => <div data-testid="safe-pro-locked-workspace" />,
     $isReady: true,
   })
 }
@@ -152,6 +160,7 @@ const restoreDefaultMocks = () => {
   })
   useSpaceAccountsDataMock.mockReturnValue({ accounts: [], isLoading: false, error: null, refetch: jest.fn() })
   mockUseIsSafeProEnabled.mockReturnValue(false)
+  mockUseHasFeature.mockReturnValue(false)
   mockUseSafeProAnnouncement.mockReturnValue({ isOpen: false, setIsOpen: jest.fn() })
 }
 
@@ -374,5 +383,34 @@ describe('SpaceDashboard – Safe Pro announcement', () => {
     render(<SpaceDashboard />)
 
     expect(mockUseSafeProAnnouncement).toHaveBeenCalledWith(false)
+  })
+})
+
+describe('SpaceDashboard – locked Workspace (SAFE_PRO)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    restoreDefaultMocks()
+    setupUseLoadFeature([{ safeAddress: MOCK_SAFE_ADDRESS, txId: MOCK_TX_ID }])
+    mockUseHasFeature.mockReturnValue(true)
+    mockUseIsSafeProEnabled.mockReturnValue(true)
+  })
+
+  it('replaces the dashboard with the locked card and silences the announcement', () => {
+    render(<SpaceDashboard />)
+
+    expect(screen.getByTestId('safe-pro-locked-workspace')).toBeInTheDocument()
+    expect(screen.getByText('Acme Inc')).toBeInTheDocument()
+    expect(screen.queryByTestId(`pending-tx-row-${MOCK_TX_ID}`)).not.toBeInTheDocument()
+    expect(screen.queryByTestId('safe-pro-announcement-modal')).not.toBeInTheDocument()
+    expect(mockUseSafeProAnnouncement).toHaveBeenCalledWith(false)
+  })
+
+  it('keeps the invite preview unlocked', () => {
+    ;(useIsInvited as jest.Mock).mockReturnValue(true)
+
+    render(<SpaceDashboard />)
+
+    expect(screen.queryByTestId('safe-pro-locked-workspace')).not.toBeInTheDocument()
+    expect(screen.getByTestId(`pending-tx-row-${MOCK_TX_ID}`)).toBeInTheDocument()
   })
 })
