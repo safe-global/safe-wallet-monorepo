@@ -36,6 +36,7 @@ const NO_HEADER_ROUTES = [
   AppRoutes.welcome.inviteMembers,
   AppRoutes.welcome.survey,
   AppRoutes.spaces.createSpace,
+  AppRoutes.towerDefense,
   ...STATIC_PAGE_ROUTES,
 ]
 

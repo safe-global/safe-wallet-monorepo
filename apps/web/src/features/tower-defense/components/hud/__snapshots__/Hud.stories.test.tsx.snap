@@ -1,0 +1,6469 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./Hud.stories BuildPhase 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 0px;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="root"
+      style="position: relative; height: 100vh;"
+    >
+      <div
+        class="hud"
+      >
+        <div
+          class="panel topBar"
+          data-testid="td-topbar"
+        >
+          <div
+            class="stat"
+          >
+            <span
+              class="statLabel"
+            >
+              Treasury
+            </span>
+            <span
+              class="statValue"
+              data-testid="td-treasury"
+            >
+              18
+               ETH
+            </span>
+            <div
+              aria-hidden="true"
+              class="treasuryBar"
+            >
+              <div
+                class="treasuryFill "
+                style="width: 90%;"
+              />
+            </div>
+          </div>
+          <div
+            class="stat"
+          >
+            <span
+              class="statLabel"
+            >
+              SAFE
+            </span>
+            <span
+              class="statValue gold"
+              data-testid="td-gold"
+            >
+              245
+            </span>
+          </div>
+          <div
+            class="waveBadge"
+          >
+            <span
+              class="statLabel"
+            >
+              Wave
+            </span>
+            <span
+              class="waveBadgeValue"
+              data-testid="td-wave"
+            >
+              3
+              /
+              30
+            </span>
+          </div>
+          <div
+            class="stat"
+          >
+            <span
+              class="statLabel"
+            >
+              Threats
+            </span>
+            <span
+              class="statValue"
+            >
+              0
+            </span>
+          </div>
+          <div
+            class="stat"
+          >
+            <span
+              class="statLabel"
+            >
+              Neutralised
+            </span>
+            <span
+              class="statValue"
+            >
+              42
+            </span>
+          </div>
+          <div
+            class="controls"
+          >
+            <div
+              aria-label="Game speed"
+              class="speedGroup"
+              role="group"
+            >
+              <button
+                aria-pressed="true"
+                class="iconButton iconButtonActive"
+                type="button"
+              >
+                1
+                x
+              </button>
+              <button
+                aria-pressed="false"
+                class="iconButton "
+                type="button"
+              >
+                2
+                x
+              </button>
+              <button
+                aria-pressed="false"
+                class="iconButton "
+                type="button"
+              >
+                3
+                x
+              </button>
+            </div>
+            <button
+              class="iconButton "
+              title="Pause (P)"
+              type="button"
+            >
+              Pause
+            </button>
+            <button
+              class="iconButton"
+              title="Toggle sound (M)"
+              type="button"
+            >
+              Sound on
+            </button>
+            <button
+              class="iconButton iconButtonActive"
+              title="Toggle bloom post-processing (B)"
+              type="button"
+            >
+              Glow
+            </button>
+            <button
+              class="iconButton"
+              title="Help (H)"
+              type="button"
+            >
+              ?
+            </button>
+            <button
+              class="iconButton"
+              title="Back to menu"
+              type="button"
+            >
+              Menu
+            </button>
+          </div>
+        </div>
+        <div
+          class="panel wavePanel"
+          data-testid="td-wave-panel"
+        >
+          <div>
+            <div
+              class="panelKicker"
+            >
+              Incoming · wave 4
+            </div>
+            <div
+              class="waveTitle"
+            >
+              Poisoned history
+            </div>
+          </div>
+          <div
+            class="waveIntel"
+          >
+            Address poisoners split into dust when scanned. Splash damage helps.
+          </div>
+          <div
+            class="enemyList"
+          >
+            <span
+              class="enemyChip"
+              title="Spams look-alike addresses into your history. Splits into dust when scanned."
+            >
+              <span
+                class="enemyDot"
+                style="background: rgb(200, 109, 215); color: rgb(200, 109, 215);"
+              />
+              Address poisoner
+              <span
+                class="enemyCount"
+              >
+                ×
+                8
+              </span>
+            </span>
+            <span
+              class="enemyChip"
+              title="Mass-mailed "verify your wallet" links with legs. Weak alone, annoying in numbers."
+            >
+              <span
+                class="enemyDot"
+                style="background: rgb(255, 95, 114); color: rgb(255, 95, 114);"
+              />
+              Phishing bot
+              <span
+                class="enemyCount"
+              >
+                ×
+                6
+              </span>
+            </span>
+          </div>
+          <div
+            class="countdown"
+          >
+            <div>
+              <div
+                class="panelKicker"
+              >
+                Next wave in
+              </div>
+              <div
+                class="countdownValue"
+              >
+                18s
+              </div>
+            </div>
+            <button
+              class="primaryButton"
+              data-testid="td-call-wave"
+              type="button"
+            >
+              Send wave
+              <span
+                class="kbd"
+              >
+                Space
+              </span>
+            </button>
+          </div>
+        </div>
+        <div
+          class="panel buildBar"
+          data-testid="td-build-bar"
+        >
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-shield"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              1
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(18, 255, 128);"
+            >
+              S
+            </span>
+            <span
+              class="towerName"
+            >
+              Safe{Shield}
+            </span>
+            <span
+              class="towerCost "
+            >
+              60
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Safe{Shield}
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Transaction scanner
+              </div>
+              Scans every incoming transaction and flags malicious calldata. Cheap, fast and hits both ground and air.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    14
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    3
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    0.55
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    25
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Scan
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Reliable single target
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-hypernative"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              2
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(0, 191, 229);"
+            >
+              H
+            </span>
+            <span
+              class="towerName"
+            >
+              Hypernative Guard
+            </span>
+            <span
+              class="towerCost "
+            >
+              90
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Hypernative Guard
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Real-time threat detection
+              </div>
+              Emits detection pulses that damage and slow every attacker in range. The Guardian is active on every pulse.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    11
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    2.8
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    1.2
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    9
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Slows to 55% for 2s
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-multisig"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              3
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(255, 140, 0);"
+            >
+              M
+            </span>
+            <span
+              class="towerName"
+            >
+              Multisig Cannon
+            </span>
+            <span
+              class="towerCost "
+            >
+              120
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Multisig Cannon
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Threshold enforcement
+              </div>
+              Fires heavy signature bundles that explode on impact. Slow to reload but devastating against armored attackers. Ground only.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    54
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    3.2
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    2
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    27
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Impact
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground only
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Splash 1.1 tiles
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-simulator"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              4
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(132, 217, 160);"
+            >
+              T
+            </span>
+            <span
+              class="towerName"
+            >
+              Tx Simulator
+            </span>
+            <span
+              class="towerCost "
+            >
+              130
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Tx Simulator
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Simulate before you sign
+              </div>
+              Long range, high damage single shots. Its simulation runs reveal stealthy social engineers so other towers can target them.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    90
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    5.5
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    1.8
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    50
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Scan
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Reveals stealth
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-safenet"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              5
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(179, 136, 255);"
+            >
+              S
+            </span>
+            <span
+              class="towerName"
+            >
+              Safenet Relay
+            </span>
+            <span
+              class="towerCost "
+            >
+              140
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Safenet Relay
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Cross-chain guarantees
+              </div>
+              Arcs validator consensus between attackers. Each jump hits another target for slightly less damage.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    29
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    3.4
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    1
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    29
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Chains to 3 targets
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-timelock"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              6
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(214, 161, 0);"
+            >
+              T
+            </span>
+            <span
+              class="towerName"
+            >
+              Timelock Module
+            </span>
+            <span
+              class="towerCost "
+            >
+              110
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Timelock Module
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Zodiac delay modifier
+              </div>
+              Deals no damage but periodically freezes every attacker in range. Buys your signers time to react.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    0
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    2.6
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    5
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    —
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Freezes for 1s
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-recovery"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              7
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(234, 255, 242);"
+            >
+              R
+            </span>
+            <span
+              class="towerName"
+            >
+              Recovery Module
+            </span>
+            <span
+              class="towerCost "
+            >
+              100
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Recovery Module
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Signer support aura
+              </div>
+              Does not attack. Boosts the damage of every tower in its aura and pays out SAFE at the end of each wave.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    0
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    2.2
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    1
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    —
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Support
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                +15% damage aura · +12 SAFE per wave
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-guard"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              8
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(157, 255, 0);"
+            >
+              S
+            </span>
+            <span
+              class="towerName"
+            >
+              Spending Guard
+            </span>
+            <span
+              class="towerCost "
+            >
+              80
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Spending Guard
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Allowance enforcement
+              </div>
+              Fires allowance darts that keep draining an attacker after impact. Excellent against regenerating threats.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    8
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    3
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    0.9
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    9
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Drains 9/s for 3s
+              </div>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./Hud.stories Defeat 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 0px;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="root"
+      style="position: relative; height: 100vh;"
+    >
+      <div
+        class="hud"
+      >
+        <div
+          class="panel topBar"
+          data-testid="td-topbar"
+        >
+          <div
+            class="stat"
+          >
+            <span
+              class="statLabel"
+            >
+              Treasury
+            </span>
+            <span
+              class="statValue"
+              data-testid="td-treasury"
+            >
+              0
+               ETH
+            </span>
+            <div
+              aria-hidden="true"
+              class="treasuryBar"
+            >
+              <div
+                class="treasuryFill treasuryLow"
+                style="width: 0%;"
+              />
+            </div>
+          </div>
+          <div
+            class="stat"
+          >
+            <span
+              class="statLabel"
+            >
+              SAFE
+            </span>
+            <span
+              class="statValue gold"
+              data-testid="td-gold"
+            >
+              245
+            </span>
+          </div>
+          <div
+            class="waveBadge"
+          >
+            <span
+              class="statLabel"
+            >
+              Wave
+            </span>
+            <span
+              class="waveBadgeValue"
+              data-testid="td-wave"
+            >
+              17
+              /
+              30
+            </span>
+          </div>
+          <div
+            class="stat"
+          >
+            <span
+              class="statLabel"
+            >
+              Threats
+            </span>
+            <span
+              class="statValue"
+            >
+              0
+            </span>
+          </div>
+          <div
+            class="stat"
+          >
+            <span
+              class="statLabel"
+            >
+              Neutralised
+            </span>
+            <span
+              class="statValue"
+            >
+              301
+            </span>
+          </div>
+          <div
+            class="controls"
+          >
+            <div
+              aria-label="Game speed"
+              class="speedGroup"
+              role="group"
+            >
+              <button
+                aria-pressed="true"
+                class="iconButton iconButtonActive"
+                type="button"
+              >
+                1
+                x
+              </button>
+              <button
+                aria-pressed="false"
+                class="iconButton "
+                type="button"
+              >
+                2
+                x
+              </button>
+              <button
+                aria-pressed="false"
+                class="iconButton "
+                type="button"
+              >
+                3
+                x
+              </button>
+            </div>
+            <button
+              class="iconButton "
+              title="Pause (P)"
+              type="button"
+            >
+              Pause
+            </button>
+            <button
+              class="iconButton"
+              title="Toggle sound (M)"
+              type="button"
+            >
+              Sound on
+            </button>
+            <button
+              class="iconButton iconButtonActive"
+              title="Toggle bloom post-processing (B)"
+              type="button"
+            >
+              Glow
+            </button>
+            <button
+              class="iconButton"
+              title="Help (H)"
+              type="button"
+            >
+              ?
+            </button>
+            <button
+              class="iconButton"
+              title="Back to menu"
+              type="button"
+            >
+              Menu
+            </button>
+          </div>
+        </div>
+        <div
+          class="panel wavePanel"
+          data-testid="td-wave-panel"
+        >
+          <div>
+            <div
+              class="panelKicker"
+            >
+              Incoming · wave 4
+            </div>
+            <div
+              class="waveTitle"
+            >
+              Poisoned history
+            </div>
+          </div>
+          <div
+            class="waveIntel"
+          >
+            Address poisoners split into dust when scanned. Splash damage helps.
+          </div>
+          <div
+            class="enemyList"
+          >
+            <span
+              class="enemyChip"
+              title="Spams look-alike addresses into your history. Splits into dust when scanned."
+            >
+              <span
+                class="enemyDot"
+                style="background: rgb(200, 109, 215); color: rgb(200, 109, 215);"
+              />
+              Address poisoner
+              <span
+                class="enemyCount"
+              >
+                ×
+                8
+              </span>
+            </span>
+            <span
+              class="enemyChip"
+              title="Mass-mailed "verify your wallet" links with legs. Weak alone, annoying in numbers."
+            >
+              <span
+                class="enemyDot"
+                style="background: rgb(255, 95, 114); color: rgb(255, 95, 114);"
+              />
+              Phishing bot
+              <span
+                class="enemyCount"
+              >
+                ×
+                6
+              </span>
+            </span>
+          </div>
+          <div
+            class="countdown"
+          >
+            <div>
+              <div
+                class="panelKicker"
+              >
+                Next wave in
+              </div>
+              <div
+                class="countdownValue"
+              >
+                18s
+              </div>
+            </div>
+            <button
+              class="primaryButton"
+              data-testid="td-call-wave"
+              type="button"
+            >
+              Send wave
+              <span
+                class="kbd"
+              >
+                Space
+              </span>
+            </button>
+          </div>
+        </div>
+        <div
+          class="panel buildBar"
+          data-testid="td-build-bar"
+        >
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-shield"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              1
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(18, 255, 128);"
+            >
+              S
+            </span>
+            <span
+              class="towerName"
+            >
+              Safe{Shield}
+            </span>
+            <span
+              class="towerCost "
+            >
+              60
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Safe{Shield}
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Transaction scanner
+              </div>
+              Scans every incoming transaction and flags malicious calldata. Cheap, fast and hits both ground and air.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    14
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    3
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    0.55
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    25
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Scan
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Reliable single target
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-hypernative"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              2
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(0, 191, 229);"
+            >
+              H
+            </span>
+            <span
+              class="towerName"
+            >
+              Hypernative Guard
+            </span>
+            <span
+              class="towerCost "
+            >
+              90
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Hypernative Guard
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Real-time threat detection
+              </div>
+              Emits detection pulses that damage and slow every attacker in range. The Guardian is active on every pulse.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    11
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    2.8
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    1.2
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    9
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Slows to 55% for 2s
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-multisig"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              3
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(255, 140, 0);"
+            >
+              M
+            </span>
+            <span
+              class="towerName"
+            >
+              Multisig Cannon
+            </span>
+            <span
+              class="towerCost "
+            >
+              120
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Multisig Cannon
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Threshold enforcement
+              </div>
+              Fires heavy signature bundles that explode on impact. Slow to reload but devastating against armored attackers. Ground only.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    54
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    3.2
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    2
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    27
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Impact
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground only
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Splash 1.1 tiles
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-simulator"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              4
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(132, 217, 160);"
+            >
+              T
+            </span>
+            <span
+              class="towerName"
+            >
+              Tx Simulator
+            </span>
+            <span
+              class="towerCost "
+            >
+              130
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Tx Simulator
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Simulate before you sign
+              </div>
+              Long range, high damage single shots. Its simulation runs reveal stealthy social engineers so other towers can target them.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    90
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    5.5
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    1.8
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    50
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Scan
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Reveals stealth
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-safenet"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              5
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(179, 136, 255);"
+            >
+              S
+            </span>
+            <span
+              class="towerName"
+            >
+              Safenet Relay
+            </span>
+            <span
+              class="towerCost "
+            >
+              140
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Safenet Relay
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Cross-chain guarantees
+              </div>
+              Arcs validator consensus between attackers. Each jump hits another target for slightly less damage.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    29
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    3.4
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    1
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    29
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Chains to 3 targets
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-timelock"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              6
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(214, 161, 0);"
+            >
+              T
+            </span>
+            <span
+              class="towerName"
+            >
+              Timelock Module
+            </span>
+            <span
+              class="towerCost "
+            >
+              110
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Timelock Module
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Zodiac delay modifier
+              </div>
+              Deals no damage but periodically freezes every attacker in range. Buys your signers time to react.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    0
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    2.6
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    5
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    —
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Freezes for 1s
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-recovery"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              7
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(234, 255, 242);"
+            >
+              R
+            </span>
+            <span
+              class="towerName"
+            >
+              Recovery Module
+            </span>
+            <span
+              class="towerCost "
+            >
+              100
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Recovery Module
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Signer support aura
+              </div>
+              Does not attack. Boosts the damage of every tower in its aura and pays out SAFE at the end of each wave.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    0
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    2.2
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    1
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    —
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Support
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                +15% damage aura · +12 SAFE per wave
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-guard"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              8
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(157, 255, 0);"
+            >
+              S
+            </span>
+            <span
+              class="towerName"
+            >
+              Spending Guard
+            </span>
+            <span
+              class="towerCost "
+            >
+              80
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Spending Guard
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Allowance enforcement
+              </div>
+              Fires allowance darts that keep draining an attacker after impact. Excellent against regenerating threats.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    8
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    3
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    0.9
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    9
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Drains 9/s for 3s
+              </div>
+            </span>
+          </button>
+        </div>
+        <div
+          class="overlay"
+          data-testid="td-end-screen"
+        >
+          <div
+            class="panel overlayCard"
+          >
+            <div>
+              <div
+                class="title lost"
+              >
+                Safe drained
+              </div>
+              <div
+                class="subtitle"
+              >
+                The attackers emptied the vault during wave 17 on Mainnet.
+              </div>
+            </div>
+            <div
+              class="endStats"
+            >
+              <div
+                class="endStat"
+              >
+                <div
+                  class="statCellLabel"
+                >
+                  Score
+                </div>
+                <div
+                  class="endStatValue"
+                >
+                  9,020
+                </div>
+                <div
+                  class="newBest"
+                >
+                  New personal best
+                </div>
+              </div>
+              <div
+                class="endStat"
+              >
+                <div
+                  class="statCellLabel"
+                >
+                  Waves survived
+                </div>
+                <div
+                  class="endStatValue"
+                >
+                  16
+                  /
+                  30
+                </div>
+              </div>
+              <div
+                class="endStat"
+              >
+                <div
+                  class="statCellLabel"
+                >
+                  Threats neutralised
+                </div>
+                <div
+                  class="endStatValue"
+                >
+                  301
+                </div>
+              </div>
+              <div
+                class="endStat"
+              >
+                <div
+                  class="statCellLabel"
+                >
+                  ETH remaining
+                </div>
+                <div
+                  class="endStatValue"
+                >
+                  0
+                </div>
+              </div>
+              <div
+                class="endStat"
+              >
+                <div
+                  class="statCellLabel"
+                >
+                  Leaks
+                </div>
+                <div
+                  class="endStatValue"
+                >
+                  2
+                </div>
+              </div>
+              <div
+                class="endStat"
+              >
+                <div
+                  class="statCellLabel"
+                >
+                  Time
+                </div>
+                <div
+                  class="endStatValue"
+                >
+                  3:04
+                </div>
+              </div>
+            </div>
+            <div
+              class="startRow"
+            >
+              <button
+                class="primaryButton"
+                data-testid="td-restart"
+                type="button"
+              >
+                Play again
+              </button>
+              <button
+                class="secondaryButton"
+                type="button"
+              >
+                Back to menu
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./Hud.stories TowerSelected 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 0px;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="root"
+      style="position: relative; height: 100vh;"
+    >
+      <div
+        class="hud"
+      >
+        <div
+          class="panel topBar"
+          data-testid="td-topbar"
+        >
+          <div
+            class="stat"
+          >
+            <span
+              class="statLabel"
+            >
+              Treasury
+            </span>
+            <span
+              class="statValue"
+              data-testid="td-treasury"
+            >
+              18
+               ETH
+            </span>
+            <div
+              aria-hidden="true"
+              class="treasuryBar"
+            >
+              <div
+                class="treasuryFill "
+                style="width: 90%;"
+              />
+            </div>
+          </div>
+          <div
+            class="stat"
+          >
+            <span
+              class="statLabel"
+            >
+              SAFE
+            </span>
+            <span
+              class="statValue gold"
+              data-testid="td-gold"
+            >
+              80
+            </span>
+          </div>
+          <div
+            class="waveBadge"
+          >
+            <span
+              class="statLabel"
+            >
+              Wave
+            </span>
+            <span
+              class="waveBadgeValue"
+              data-testid="td-wave"
+            >
+              3
+              /
+              30
+            </span>
+          </div>
+          <div
+            class="stat"
+          >
+            <span
+              class="statLabel"
+            >
+              Threats
+            </span>
+            <span
+              class="statValue"
+            >
+              0
+            </span>
+          </div>
+          <div
+            class="stat"
+          >
+            <span
+              class="statLabel"
+            >
+              Neutralised
+            </span>
+            <span
+              class="statValue"
+            >
+              42
+            </span>
+          </div>
+          <div
+            class="controls"
+          >
+            <div
+              aria-label="Game speed"
+              class="speedGroup"
+              role="group"
+            >
+              <button
+                aria-pressed="true"
+                class="iconButton iconButtonActive"
+                type="button"
+              >
+                1
+                x
+              </button>
+              <button
+                aria-pressed="false"
+                class="iconButton "
+                type="button"
+              >
+                2
+                x
+              </button>
+              <button
+                aria-pressed="false"
+                class="iconButton "
+                type="button"
+              >
+                3
+                x
+              </button>
+            </div>
+            <button
+              class="iconButton "
+              title="Pause (P)"
+              type="button"
+            >
+              Pause
+            </button>
+            <button
+              class="iconButton"
+              title="Toggle sound (M)"
+              type="button"
+            >
+              Sound on
+            </button>
+            <button
+              class="iconButton iconButtonActive"
+              title="Toggle bloom post-processing (B)"
+              type="button"
+            >
+              Glow
+            </button>
+            <button
+              class="iconButton"
+              title="Help (H)"
+              type="button"
+            >
+              ?
+            </button>
+            <button
+              class="iconButton"
+              title="Back to menu"
+              type="button"
+            >
+              Menu
+            </button>
+          </div>
+        </div>
+        <div
+          class="panel wavePanel"
+          data-testid="td-wave-panel"
+        >
+          <div>
+            <div
+              class="panelKicker"
+            >
+              Incoming · wave 4
+            </div>
+            <div
+              class="waveTitle"
+            >
+              Poisoned history
+            </div>
+          </div>
+          <div
+            class="waveIntel"
+          >
+            Address poisoners split into dust when scanned. Splash damage helps.
+          </div>
+          <div
+            class="enemyList"
+          >
+            <span
+              class="enemyChip"
+              title="Spams look-alike addresses into your history. Splits into dust when scanned."
+            >
+              <span
+                class="enemyDot"
+                style="background: rgb(200, 109, 215); color: rgb(200, 109, 215);"
+              />
+              Address poisoner
+              <span
+                class="enemyCount"
+              >
+                ×
+                8
+              </span>
+            </span>
+            <span
+              class="enemyChip"
+              title="Mass-mailed "verify your wallet" links with legs. Weak alone, annoying in numbers."
+            >
+              <span
+                class="enemyDot"
+                style="background: rgb(255, 95, 114); color: rgb(255, 95, 114);"
+              />
+              Phishing bot
+              <span
+                class="enemyCount"
+              >
+                ×
+                6
+              </span>
+            </span>
+          </div>
+          <div
+            class="countdown"
+          >
+            <div>
+              <div
+                class="panelKicker"
+              >
+                Next wave in
+              </div>
+              <div
+                class="countdownValue"
+              >
+                18s
+              </div>
+            </div>
+            <button
+              class="primaryButton"
+              data-testid="td-call-wave"
+              type="button"
+            >
+              Send wave
+              <span
+                class="kbd"
+              >
+                Space
+              </span>
+            </button>
+          </div>
+        </div>
+        <div
+          class="panel towerPanel"
+          data-testid="td-tower-panel"
+        >
+          <div
+            class="panelHeader"
+          >
+            <div>
+              <div
+                class="panelTitle"
+              >
+                Hypernative Guard
+              </div>
+              <div
+                class="panelTagline"
+              >
+                Real-time threat detection
+              </div>
+            </div>
+            <button
+              aria-label="Close tower panel"
+              class="closeButton"
+              type="button"
+            >
+              ×
+            </button>
+          </div>
+          <div
+            class="levelPips"
+          >
+            <span
+              class="pip pipActive"
+            />
+            <span
+              class="pip pipActive"
+            />
+            <span
+              class="pip "
+            />
+            <span>
+              Level 
+              2
+            </span>
+            <span
+              class="statCellDelta"
+            >
+              +
+              28
+              % aura
+            </span>
+          </div>
+          <div
+            class="statsGrid"
+          >
+            <div
+              class="statCell"
+            >
+              <div
+                class="statCellLabel"
+              >
+                Damage
+              </div>
+              <div
+                class="statCellValue"
+              >
+                28
+                 
+                <span
+                  class="statCellDelta"
+                >
+                  → 
+                  55
+                </span>
+              </div>
+            </div>
+            <div
+              class="statCell"
+            >
+              <div
+                class="statCellLabel"
+              >
+                DPS
+              </div>
+              <div
+                class="statCellValue"
+              >
+                26
+                 
+                <span
+                  class="statCellDelta"
+                >
+                  → 
+                  55
+                </span>
+              </div>
+            </div>
+            <div
+              class="statCell"
+            >
+              <div
+                class="statCellLabel"
+              >
+                Range
+              </div>
+              <div
+                class="statCellValue"
+              >
+                3.1
+                 
+                <span
+                  class="statCellDelta"
+                >
+                  → 
+                  3.4
+                </span>
+              </div>
+            </div>
+            <div
+              class="statCell"
+            >
+              <div
+                class="statCellLabel"
+              >
+                Reload
+              </div>
+              <div
+                class="statCellValue"
+              >
+                1.1s
+                 
+                <span
+                  class="statCellDelta"
+                >
+                  → 
+                  1s
+                </span>
+              </div>
+            </div>
+            <div
+              class="statCell"
+            >
+              <div
+                class="statCellLabel"
+              >
+                Attack
+              </div>
+              <div
+                class="statCellValue"
+              >
+                Consensus
+                 
+              </div>
+            </div>
+            <div
+              class="statCell"
+            >
+              <div
+                class="statCellLabel"
+              >
+                Targets
+              </div>
+              <div
+                class="statCellValue"
+              >
+                Ground & air
+                 
+              </div>
+            </div>
+            <div
+              class="statCell"
+            >
+              <div
+                class="statCellLabel"
+              >
+                Kills
+              </div>
+              <div
+                class="statCellValue"
+              >
+                31
+                 
+              </div>
+            </div>
+            <div
+              class="statCell"
+            >
+              <div
+                class="statCellLabel"
+              >
+                Damage dealt
+              </div>
+              <div
+                class="statCellValue"
+              >
+                8,120
+                 
+              </div>
+            </div>
+          </div>
+          <div
+            class="special"
+          >
+            <strong>
+              Now:
+            </strong>
+             
+            Slows to 50% for 2.4s
+            <br />
+            <strong>
+              Next:
+            </strong>
+             
+            Slows to 42% for 2.8s
+          </div>
+          <div
+            class="actions"
+          >
+            <button
+              class="secondaryButton"
+              data-testid="td-upgrade"
+              disabled=""
+              type="button"
+            >
+              Upgrade · 150
+              <span
+                class="kbd"
+              >
+                U
+              </span>
+            </button>
+            <button
+              class="dangerButton"
+              data-testid="td-sell"
+              type="button"
+            >
+              Sell · 
+              133
+              <span
+                class="kbd"
+              >
+                X
+              </span>
+            </button>
+          </div>
+        </div>
+        <div
+          class="panel buildBar"
+          data-testid="td-build-bar"
+        >
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-shield"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              1
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(18, 255, 128);"
+            >
+              S
+            </span>
+            <span
+              class="towerName"
+            >
+              Safe{Shield}
+            </span>
+            <span
+              class="towerCost "
+            >
+              60
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Safe{Shield}
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Transaction scanner
+              </div>
+              Scans every incoming transaction and flags malicious calldata. Cheap, fast and hits both ground and air.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    14
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    3
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    0.55
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    25
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Scan
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Reliable single target
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  towerCardDisabled"
+            data-testid="td-build-hypernative"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              2
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(0, 191, 229);"
+            >
+              H
+            </span>
+            <span
+              class="towerName"
+            >
+              Hypernative Guard
+            </span>
+            <span
+              class="towerCost towerCostUnaffordable"
+            >
+              90
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Hypernative Guard
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Real-time threat detection
+              </div>
+              Emits detection pulses that damage and slow every attacker in range. The Guardian is active on every pulse.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    11
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    2.8
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    1.2
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    9
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Slows to 55% for 2s
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  towerCardDisabled"
+            data-testid="td-build-multisig"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              3
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(255, 140, 0);"
+            >
+              M
+            </span>
+            <span
+              class="towerName"
+            >
+              Multisig Cannon
+            </span>
+            <span
+              class="towerCost towerCostUnaffordable"
+            >
+              120
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Multisig Cannon
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Threshold enforcement
+              </div>
+              Fires heavy signature bundles that explode on impact. Slow to reload but devastating against armored attackers. Ground only.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    54
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    3.2
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    2
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    27
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Impact
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground only
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Splash 1.1 tiles
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  towerCardDisabled"
+            data-testid="td-build-simulator"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              4
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(132, 217, 160);"
+            >
+              T
+            </span>
+            <span
+              class="towerName"
+            >
+              Tx Simulator
+            </span>
+            <span
+              class="towerCost towerCostUnaffordable"
+            >
+              130
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Tx Simulator
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Simulate before you sign
+              </div>
+              Long range, high damage single shots. Its simulation runs reveal stealthy social engineers so other towers can target them.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    90
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    5.5
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    1.8
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    50
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Scan
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Reveals stealth
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  towerCardDisabled"
+            data-testid="td-build-safenet"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              5
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(179, 136, 255);"
+            >
+              S
+            </span>
+            <span
+              class="towerName"
+            >
+              Safenet Relay
+            </span>
+            <span
+              class="towerCost towerCostUnaffordable"
+            >
+              140
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Safenet Relay
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Cross-chain guarantees
+              </div>
+              Arcs validator consensus between attackers. Each jump hits another target for slightly less damage.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    29
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    3.4
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    1
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    29
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Chains to 3 targets
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  towerCardDisabled"
+            data-testid="td-build-timelock"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              6
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(214, 161, 0);"
+            >
+              T
+            </span>
+            <span
+              class="towerName"
+            >
+              Timelock Module
+            </span>
+            <span
+              class="towerCost towerCostUnaffordable"
+            >
+              110
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Timelock Module
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Zodiac delay modifier
+              </div>
+              Deals no damage but periodically freezes every attacker in range. Buys your signers time to react.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    0
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    2.6
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    5
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    —
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Freezes for 1s
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  towerCardDisabled"
+            data-testid="td-build-recovery"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              7
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(234, 255, 242);"
+            >
+              R
+            </span>
+            <span
+              class="towerName"
+            >
+              Recovery Module
+            </span>
+            <span
+              class="towerCost towerCostUnaffordable"
+            >
+              100
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Recovery Module
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Signer support aura
+              </div>
+              Does not attack. Boosts the damage of every tower in its aura and pays out SAFE at the end of each wave.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    0
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    2.2
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    1
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    —
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Support
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                +15% damage aura · +12 SAFE per wave
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-guard"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              8
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(157, 255, 0);"
+            >
+              S
+            </span>
+            <span
+              class="towerName"
+            >
+              Spending Guard
+            </span>
+            <span
+              class="towerCost "
+            >
+              80
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Spending Guard
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Allowance enforcement
+              </div>
+              Fires allowance darts that keep draining an attacker after impact. Excellent against regenerating threats.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    8
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    3
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    0.9
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    9
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Drains 9/s for 3s
+              </div>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./Hud.stories TreasuryLow 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 0px;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="root"
+      style="position: relative; height: 100vh;"
+    >
+      <div
+        class="hud"
+      >
+        <div
+          class="panel topBar"
+          data-testid="td-topbar"
+        >
+          <div
+            class="stat"
+          >
+            <span
+              class="statLabel"
+            >
+              Treasury
+            </span>
+            <span
+              class="statValue"
+              data-testid="td-treasury"
+            >
+              3
+               ETH
+            </span>
+            <div
+              aria-hidden="true"
+              class="treasuryBar"
+            >
+              <div
+                class="treasuryFill treasuryLow"
+                style="width: 15%;"
+              />
+            </div>
+          </div>
+          <div
+            class="stat"
+          >
+            <span
+              class="statLabel"
+            >
+              SAFE
+            </span>
+            <span
+              class="statValue gold"
+              data-testid="td-gold"
+            >
+              12
+            </span>
+          </div>
+          <div
+            class="waveBadge"
+          >
+            <span
+              class="statLabel"
+            >
+              Wave
+            </span>
+            <span
+              class="waveBadgeValue"
+              data-testid="td-wave"
+            >
+              3
+              /
+              30
+            </span>
+          </div>
+          <div
+            class="stat"
+          >
+            <span
+              class="statLabel"
+            >
+              Threats
+            </span>
+            <span
+              class="statValue"
+            >
+              0
+            </span>
+          </div>
+          <div
+            class="stat"
+          >
+            <span
+              class="statLabel"
+            >
+              Neutralised
+            </span>
+            <span
+              class="statValue"
+            >
+              42
+            </span>
+          </div>
+          <div
+            class="controls"
+          >
+            <div
+              aria-label="Game speed"
+              class="speedGroup"
+              role="group"
+            >
+              <button
+                aria-pressed="true"
+                class="iconButton iconButtonActive"
+                type="button"
+              >
+                1
+                x
+              </button>
+              <button
+                aria-pressed="false"
+                class="iconButton "
+                type="button"
+              >
+                2
+                x
+              </button>
+              <button
+                aria-pressed="false"
+                class="iconButton "
+                type="button"
+              >
+                3
+                x
+              </button>
+            </div>
+            <button
+              class="iconButton iconButtonActive"
+              title="Pause (P)"
+              type="button"
+            >
+              Resume
+            </button>
+            <button
+              class="iconButton"
+              title="Toggle sound (M)"
+              type="button"
+            >
+              Sound on
+            </button>
+            <button
+              class="iconButton iconButtonActive"
+              title="Toggle bloom post-processing (B)"
+              type="button"
+            >
+              Glow
+            </button>
+            <button
+              class="iconButton"
+              title="Help (H)"
+              type="button"
+            >
+              ?
+            </button>
+            <button
+              class="iconButton"
+              title="Back to menu"
+              type="button"
+            >
+              Menu
+            </button>
+          </div>
+        </div>
+        <div
+          class="panel wavePanel"
+          data-testid="td-wave-panel"
+        >
+          <div>
+            <div
+              class="panelKicker"
+            >
+              Incoming · wave 4
+            </div>
+            <div
+              class="waveTitle"
+            >
+              Poisoned history
+            </div>
+          </div>
+          <div
+            class="waveIntel"
+          >
+            Address poisoners split into dust when scanned. Splash damage helps.
+          </div>
+          <div
+            class="enemyList"
+          >
+            <span
+              class="enemyChip"
+              title="Spams look-alike addresses into your history. Splits into dust when scanned."
+            >
+              <span
+                class="enemyDot"
+                style="background: rgb(200, 109, 215); color: rgb(200, 109, 215);"
+              />
+              Address poisoner
+              <span
+                class="enemyCount"
+              >
+                ×
+                8
+              </span>
+            </span>
+            <span
+              class="enemyChip"
+              title="Mass-mailed "verify your wallet" links with legs. Weak alone, annoying in numbers."
+            >
+              <span
+                class="enemyDot"
+                style="background: rgb(255, 95, 114); color: rgb(255, 95, 114);"
+              />
+              Phishing bot
+              <span
+                class="enemyCount"
+              >
+                ×
+                6
+              </span>
+            </span>
+          </div>
+          <div
+            class="countdown"
+          >
+            <div>
+              <div
+                class="panelKicker"
+              >
+                Next wave in
+              </div>
+              <div
+                class="countdownValue"
+              >
+                18s
+              </div>
+            </div>
+            <button
+              class="primaryButton"
+              data-testid="td-call-wave"
+              type="button"
+            >
+              Send wave
+              <span
+                class="kbd"
+              >
+                Space
+              </span>
+            </button>
+          </div>
+        </div>
+        <div
+          class="panel buildBar"
+          data-testid="td-build-bar"
+        >
+          <button
+            aria-pressed="false"
+            class="towerCard  towerCardDisabled"
+            data-testid="td-build-shield"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              1
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(18, 255, 128);"
+            >
+              S
+            </span>
+            <span
+              class="towerName"
+            >
+              Safe{Shield}
+            </span>
+            <span
+              class="towerCost towerCostUnaffordable"
+            >
+              60
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Safe{Shield}
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Transaction scanner
+              </div>
+              Scans every incoming transaction and flags malicious calldata. Cheap, fast and hits both ground and air.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    14
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    3
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    0.55
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    25
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Scan
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Reliable single target
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  towerCardDisabled"
+            data-testid="td-build-hypernative"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              2
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(0, 191, 229);"
+            >
+              H
+            </span>
+            <span
+              class="towerName"
+            >
+              Hypernative Guard
+            </span>
+            <span
+              class="towerCost towerCostUnaffordable"
+            >
+              90
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Hypernative Guard
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Real-time threat detection
+              </div>
+              Emits detection pulses that damage and slow every attacker in range. The Guardian is active on every pulse.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    11
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    2.8
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    1.2
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    9
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Slows to 55% for 2s
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  towerCardDisabled"
+            data-testid="td-build-multisig"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              3
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(255, 140, 0);"
+            >
+              M
+            </span>
+            <span
+              class="towerName"
+            >
+              Multisig Cannon
+            </span>
+            <span
+              class="towerCost towerCostUnaffordable"
+            >
+              120
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Multisig Cannon
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Threshold enforcement
+              </div>
+              Fires heavy signature bundles that explode on impact. Slow to reload but devastating against armored attackers. Ground only.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    54
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    3.2
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    2
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    27
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Impact
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground only
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Splash 1.1 tiles
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  towerCardDisabled"
+            data-testid="td-build-simulator"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              4
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(132, 217, 160);"
+            >
+              T
+            </span>
+            <span
+              class="towerName"
+            >
+              Tx Simulator
+            </span>
+            <span
+              class="towerCost towerCostUnaffordable"
+            >
+              130
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Tx Simulator
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Simulate before you sign
+              </div>
+              Long range, high damage single shots. Its simulation runs reveal stealthy social engineers so other towers can target them.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    90
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    5.5
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    1.8
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    50
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Scan
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Reveals stealth
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  towerCardDisabled"
+            data-testid="td-build-safenet"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              5
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(179, 136, 255);"
+            >
+              S
+            </span>
+            <span
+              class="towerName"
+            >
+              Safenet Relay
+            </span>
+            <span
+              class="towerCost towerCostUnaffordable"
+            >
+              140
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Safenet Relay
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Cross-chain guarantees
+              </div>
+              Arcs validator consensus between attackers. Each jump hits another target for slightly less damage.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    29
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    3.4
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    1
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    29
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Chains to 3 targets
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  towerCardDisabled"
+            data-testid="td-build-timelock"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              6
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(214, 161, 0);"
+            >
+              T
+            </span>
+            <span
+              class="towerName"
+            >
+              Timelock Module
+            </span>
+            <span
+              class="towerCost towerCostUnaffordable"
+            >
+              110
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Timelock Module
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Zodiac delay modifier
+              </div>
+              Deals no damage but periodically freezes every attacker in range. Buys your signers time to react.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    0
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    2.6
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    5
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    —
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Freezes for 1s
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  towerCardDisabled"
+            data-testid="td-build-recovery"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              7
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(234, 255, 242);"
+            >
+              R
+            </span>
+            <span
+              class="towerName"
+            >
+              Recovery Module
+            </span>
+            <span
+              class="towerCost towerCostUnaffordable"
+            >
+              100
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Recovery Module
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Signer support aura
+              </div>
+              Does not attack. Boosts the damage of every tower in its aura and pays out SAFE at the end of each wave.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    0
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    2.2
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    1
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    —
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Support
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                +15% damage aura · +12 SAFE per wave
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  towerCardDisabled"
+            data-testid="td-build-guard"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              8
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(157, 255, 0);"
+            >
+              S
+            </span>
+            <span
+              class="towerName"
+            >
+              Spending Guard
+            </span>
+            <span
+              class="towerCost towerCostUnaffordable"
+            >
+              80
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Spending Guard
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Allowance enforcement
+              </div>
+              Fires allowance darts that keep draining an attacker after impact. Excellent against regenerating threats.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    8
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    3
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    0.9
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    9
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Drains 9/s for 3s
+              </div>
+            </span>
+          </button>
+        </div>
+        <div
+          class="toast toastDanger"
+          role="status"
+        >
+          2 ETH drained from the treasury!
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./Hud.stories Victory 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 0px;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="root"
+      style="position: relative; height: 100vh;"
+    >
+      <div
+        class="hud"
+      >
+        <div
+          class="panel topBar"
+          data-testid="td-topbar"
+        >
+          <div
+            class="stat"
+          >
+            <span
+              class="statLabel"
+            >
+              Treasury
+            </span>
+            <span
+              class="statValue"
+              data-testid="td-treasury"
+            >
+              11
+               ETH
+            </span>
+            <div
+              aria-hidden="true"
+              class="treasuryBar"
+            >
+              <div
+                class="treasuryFill "
+                style="width: 55.00000000000001%;"
+              />
+            </div>
+          </div>
+          <div
+            class="stat"
+          >
+            <span
+              class="statLabel"
+            >
+              SAFE
+            </span>
+            <span
+              class="statValue gold"
+              data-testid="td-gold"
+            >
+              245
+            </span>
+          </div>
+          <div
+            class="waveBadge"
+          >
+            <span
+              class="statLabel"
+            >
+              Wave
+            </span>
+            <span
+              class="waveBadgeValue"
+              data-testid="td-wave"
+            >
+              30
+              /
+              30
+            </span>
+          </div>
+          <div
+            class="stat"
+          >
+            <span
+              class="statLabel"
+            >
+              Threats
+            </span>
+            <span
+              class="statValue"
+            >
+              0
+            </span>
+          </div>
+          <div
+            class="stat"
+          >
+            <span
+              class="statLabel"
+            >
+              Neutralised
+            </span>
+            <span
+              class="statValue"
+            >
+              812
+            </span>
+          </div>
+          <div
+            class="controls"
+          >
+            <div
+              aria-label="Game speed"
+              class="speedGroup"
+              role="group"
+            >
+              <button
+                aria-pressed="true"
+                class="iconButton iconButtonActive"
+                type="button"
+              >
+                1
+                x
+              </button>
+              <button
+                aria-pressed="false"
+                class="iconButton "
+                type="button"
+              >
+                2
+                x
+              </button>
+              <button
+                aria-pressed="false"
+                class="iconButton "
+                type="button"
+              >
+                3
+                x
+              </button>
+            </div>
+            <button
+              class="iconButton "
+              title="Pause (P)"
+              type="button"
+            >
+              Pause
+            </button>
+            <button
+              class="iconButton"
+              title="Toggle sound (M)"
+              type="button"
+            >
+              Sound on
+            </button>
+            <button
+              class="iconButton iconButtonActive"
+              title="Toggle bloom post-processing (B)"
+              type="button"
+            >
+              Glow
+            </button>
+            <button
+              class="iconButton"
+              title="Help (H)"
+              type="button"
+            >
+              ?
+            </button>
+            <button
+              class="iconButton"
+              title="Back to menu"
+              type="button"
+            >
+              Menu
+            </button>
+          </div>
+        </div>
+        <div
+          class="panel wavePanel"
+          data-testid="td-wave-panel"
+        >
+          <div>
+            <div
+              class="panelKicker"
+            >
+              Final wave in progress
+            </div>
+            <div
+              class="waveTitle"
+            >
+              Drainers
+            </div>
+          </div>
+          <div
+            class="waveIntel"
+          >
+            Drainer scripts sprint for the vault and steal double when they leak.
+          </div>
+          <div
+            class="enemyList"
+          >
+            <span
+              class="enemyChip"
+              title="Sweeps approvals the moment a signature lands. Very fast and steals extra when it leaks."
+            >
+              <span
+                class="enemyDot"
+                style="background: rgb(255, 176, 32); color: rgb(255, 176, 32);"
+              />
+              Drainer script
+              <span
+                class="enemyCount"
+              >
+                ×
+                8
+              </span>
+            </span>
+          </div>
+        </div>
+        <div
+          class="panel buildBar"
+          data-testid="td-build-bar"
+        >
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-shield"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              1
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(18, 255, 128);"
+            >
+              S
+            </span>
+            <span
+              class="towerName"
+            >
+              Safe{Shield}
+            </span>
+            <span
+              class="towerCost "
+            >
+              60
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Safe{Shield}
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Transaction scanner
+              </div>
+              Scans every incoming transaction and flags malicious calldata. Cheap, fast and hits both ground and air.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    14
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    3
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    0.55
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    25
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Scan
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Reliable single target
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-hypernative"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              2
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(0, 191, 229);"
+            >
+              H
+            </span>
+            <span
+              class="towerName"
+            >
+              Hypernative Guard
+            </span>
+            <span
+              class="towerCost "
+            >
+              90
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Hypernative Guard
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Real-time threat detection
+              </div>
+              Emits detection pulses that damage and slow every attacker in range. The Guardian is active on every pulse.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    11
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    2.8
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    1.2
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    9
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Slows to 55% for 2s
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-multisig"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              3
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(255, 140, 0);"
+            >
+              M
+            </span>
+            <span
+              class="towerName"
+            >
+              Multisig Cannon
+            </span>
+            <span
+              class="towerCost "
+            >
+              120
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Multisig Cannon
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Threshold enforcement
+              </div>
+              Fires heavy signature bundles that explode on impact. Slow to reload but devastating against armored attackers. Ground only.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    54
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    3.2
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    2
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    27
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Impact
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground only
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Splash 1.1 tiles
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-simulator"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              4
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(132, 217, 160);"
+            >
+              T
+            </span>
+            <span
+              class="towerName"
+            >
+              Tx Simulator
+            </span>
+            <span
+              class="towerCost "
+            >
+              130
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Tx Simulator
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Simulate before you sign
+              </div>
+              Long range, high damage single shots. Its simulation runs reveal stealthy social engineers so other towers can target them.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    90
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    5.5
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    1.8
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    50
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Scan
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Reveals stealth
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-safenet"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              5
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(179, 136, 255);"
+            >
+              S
+            </span>
+            <span
+              class="towerName"
+            >
+              Safenet Relay
+            </span>
+            <span
+              class="towerCost "
+            >
+              140
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Safenet Relay
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Cross-chain guarantees
+              </div>
+              Arcs validator consensus between attackers. Each jump hits another target for slightly less damage.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    29
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    3.4
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    1
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    29
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Chains to 3 targets
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-timelock"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              6
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(214, 161, 0);"
+            >
+              T
+            </span>
+            <span
+              class="towerName"
+            >
+              Timelock Module
+            </span>
+            <span
+              class="towerCost "
+            >
+              110
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Timelock Module
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Zodiac delay modifier
+              </div>
+              Deals no damage but periodically freezes every attacker in range. Buys your signers time to react.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    0
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    2.6
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    5
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    —
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Freezes for 1s
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-recovery"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              7
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(234, 255, 242);"
+            >
+              R
+            </span>
+            <span
+              class="towerName"
+            >
+              Recovery Module
+            </span>
+            <span
+              class="towerCost "
+            >
+              100
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Recovery Module
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Signer support aura
+              </div>
+              Does not attack. Boosts the damage of every tower in its aura and pays out SAFE at the end of each wave.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    0
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    2.2
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    1
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    —
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Support
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                +15% damage aura · +12 SAFE per wave
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-guard"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              8
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(157, 255, 0);"
+            >
+              S
+            </span>
+            <span
+              class="towerName"
+            >
+              Spending Guard
+            </span>
+            <span
+              class="towerCost "
+            >
+              80
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Spending Guard
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Allowance enforcement
+              </div>
+              Fires allowance darts that keep draining an attacker after impact. Excellent against regenerating threats.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    8
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    3
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    0.9
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    9
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Drains 9/s for 3s
+              </div>
+            </span>
+          </button>
+        </div>
+        <div
+          class="overlay"
+          data-testid="td-end-screen"
+        >
+          <div
+            class="panel overlayCard"
+          >
+            <div>
+              <div
+                class="title won"
+              >
+                Treasury secured
+              </div>
+              <div
+                class="subtitle"
+              >
+                Every attacker was neutralised on Mainnet. The signers can sleep.
+              </div>
+            </div>
+            <div
+              class="endStats"
+            >
+              <div
+                class="endStat"
+              >
+                <div
+                  class="statCellLabel"
+                >
+                  Score
+                </div>
+                <div
+                  class="endStatValue"
+                >
+                  48,210
+                </div>
+                <div
+                  class="newBest"
+                >
+                  New personal best
+                </div>
+              </div>
+              <div
+                class="endStat"
+              >
+                <div
+                  class="statCellLabel"
+                >
+                  Waves survived
+                </div>
+                <div
+                  class="endStatValue"
+                >
+                  30
+                  /
+                  30
+                </div>
+              </div>
+              <div
+                class="endStat"
+              >
+                <div
+                  class="statCellLabel"
+                >
+                  Threats neutralised
+                </div>
+                <div
+                  class="endStatValue"
+                >
+                  812
+                </div>
+              </div>
+              <div
+                class="endStat"
+              >
+                <div
+                  class="statCellLabel"
+                >
+                  ETH remaining
+                </div>
+                <div
+                  class="endStatValue"
+                >
+                  11
+                </div>
+              </div>
+              <div
+                class="endStat"
+              >
+                <div
+                  class="statCellLabel"
+                >
+                  Leaks
+                </div>
+                <div
+                  class="endStatValue"
+                >
+                  2
+                </div>
+              </div>
+              <div
+                class="endStat"
+              >
+                <div
+                  class="statCellLabel"
+                >
+                  Time
+                </div>
+                <div
+                  class="endStatValue"
+                >
+                  3:04
+                </div>
+              </div>
+            </div>
+            <div
+              class="startRow"
+            >
+              <button
+                class="primaryButton"
+                data-testid="td-restart"
+                type="button"
+              >
+                Play again
+              </button>
+              <button
+                class="secondaryButton"
+                type="button"
+              >
+                Back to menu
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./Hud.stories WaveInProgress 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 0px;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="root"
+      style="position: relative; height: 100vh;"
+    >
+      <div
+        class="hud"
+      >
+        <div
+          class="panel topBar"
+          data-testid="td-topbar"
+        >
+          <div
+            class="stat"
+          >
+            <span
+              class="statLabel"
+            >
+              Treasury
+            </span>
+            <span
+              class="statValue"
+              data-testid="td-treasury"
+            >
+              18
+               ETH
+            </span>
+            <div
+              aria-hidden="true"
+              class="treasuryBar"
+            >
+              <div
+                class="treasuryFill "
+                style="width: 90%;"
+              />
+            </div>
+          </div>
+          <div
+            class="stat"
+          >
+            <span
+              class="statLabel"
+            >
+              SAFE
+            </span>
+            <span
+              class="statValue gold"
+              data-testid="td-gold"
+            >
+              245
+            </span>
+          </div>
+          <div
+            class="waveBadge"
+          >
+            <span
+              class="statLabel"
+            >
+              Wave
+            </span>
+            <span
+              class="waveBadgeValue"
+              data-testid="td-wave"
+            >
+              10
+              /
+              30
+            </span>
+          </div>
+          <div
+            class="stat"
+          >
+            <span
+              class="statLabel"
+            >
+              Threats
+            </span>
+            <span
+              class="statValue"
+            >
+              14
+            </span>
+          </div>
+          <div
+            class="stat"
+          >
+            <span
+              class="statLabel"
+            >
+              Neutralised
+            </span>
+            <span
+              class="statValue"
+            >
+              42
+            </span>
+          </div>
+          <div
+            class="controls"
+          >
+            <div
+              aria-label="Game speed"
+              class="speedGroup"
+              role="group"
+            >
+              <button
+                aria-pressed="false"
+                class="iconButton "
+                type="button"
+              >
+                1
+                x
+              </button>
+              <button
+                aria-pressed="true"
+                class="iconButton iconButtonActive"
+                type="button"
+              >
+                2
+                x
+              </button>
+              <button
+                aria-pressed="false"
+                class="iconButton "
+                type="button"
+              >
+                3
+                x
+              </button>
+            </div>
+            <button
+              class="iconButton "
+              title="Pause (P)"
+              type="button"
+            >
+              Pause
+            </button>
+            <button
+              class="iconButton"
+              title="Toggle sound (M)"
+              type="button"
+            >
+              Sound on
+            </button>
+            <button
+              class="iconButton iconButtonActive"
+              title="Toggle bloom post-processing (B)"
+              type="button"
+            >
+              Glow
+            </button>
+            <button
+              class="iconButton"
+              title="Help (H)"
+              type="button"
+            >
+              ?
+            </button>
+            <button
+              class="iconButton"
+              title="Back to menu"
+              type="button"
+            >
+              Menu
+            </button>
+          </div>
+        </div>
+        <div
+          class="panel wavePanel"
+          data-testid="td-wave-panel"
+        >
+          <div>
+            <div
+              class="panelKicker"
+            >
+              Incoming · wave 4
+            </div>
+            <div
+              class="waveTitle"
+            >
+              Poisoned history
+            </div>
+          </div>
+          <div
+            class="waveIntel"
+          >
+            Address poisoners split into dust when scanned. Splash damage helps.
+          </div>
+          <div
+            class="enemyList"
+          >
+            <span
+              class="enemyChip"
+              title="Spams look-alike addresses into your history. Splits into dust when scanned."
+            >
+              <span
+                class="enemyDot"
+                style="background: rgb(200, 109, 215); color: rgb(200, 109, 215);"
+              />
+              Address poisoner
+              <span
+                class="enemyCount"
+              >
+                ×
+                8
+              </span>
+            </span>
+            <span
+              class="enemyChip"
+              title="Mass-mailed "verify your wallet" links with legs. Weak alone, annoying in numbers."
+            >
+              <span
+                class="enemyDot"
+                style="background: rgb(255, 95, 114); color: rgb(255, 95, 114);"
+              />
+              Phishing bot
+              <span
+                class="enemyCount"
+              >
+                ×
+                6
+              </span>
+            </span>
+          </div>
+          <div
+            class="countdown"
+          >
+            <div>
+              <div
+                class="panelKicker"
+              >
+                Next wave in
+              </div>
+              <div
+                class="countdownValue"
+              >
+                18s
+              </div>
+            </div>
+            <button
+              class="primaryButton"
+              data-testid="td-call-wave"
+              disabled=""
+              type="button"
+            >
+              Send wave
+              <span
+                class="kbd"
+              >
+                Space
+              </span>
+            </button>
+          </div>
+        </div>
+        <div
+          class="panel buildBar"
+          data-testid="td-build-bar"
+        >
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-shield"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              1
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(18, 255, 128);"
+            >
+              S
+            </span>
+            <span
+              class="towerName"
+            >
+              Safe{Shield}
+            </span>
+            <span
+              class="towerCost "
+            >
+              60
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Safe{Shield}
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Transaction scanner
+              </div>
+              Scans every incoming transaction and flags malicious calldata. Cheap, fast and hits both ground and air.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    14
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    3
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    0.55
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    25
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Scan
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Reliable single target
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-hypernative"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              2
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(0, 191, 229);"
+            >
+              H
+            </span>
+            <span
+              class="towerName"
+            >
+              Hypernative Guard
+            </span>
+            <span
+              class="towerCost "
+            >
+              90
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Hypernative Guard
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Real-time threat detection
+              </div>
+              Emits detection pulses that damage and slow every attacker in range. The Guardian is active on every pulse.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    11
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    2.8
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    1.2
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    9
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Slows to 55% for 2s
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-multisig"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              3
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(255, 140, 0);"
+            >
+              M
+            </span>
+            <span
+              class="towerName"
+            >
+              Multisig Cannon
+            </span>
+            <span
+              class="towerCost "
+            >
+              120
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Multisig Cannon
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Threshold enforcement
+              </div>
+              Fires heavy signature bundles that explode on impact. Slow to reload but devastating against armored attackers. Ground only.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    54
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    3.2
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    2
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    27
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Impact
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground only
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Splash 1.1 tiles
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-simulator"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              4
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(132, 217, 160);"
+            >
+              T
+            </span>
+            <span
+              class="towerName"
+            >
+              Tx Simulator
+            </span>
+            <span
+              class="towerCost "
+            >
+              130
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Tx Simulator
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Simulate before you sign
+              </div>
+              Long range, high damage single shots. Its simulation runs reveal stealthy social engineers so other towers can target them.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    90
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    5.5
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    1.8
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    50
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Scan
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Reveals stealth
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="true"
+            class="towerCard towerCardActive "
+            data-testid="td-build-safenet"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              5
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(179, 136, 255);"
+            >
+              S
+            </span>
+            <span
+              class="towerName"
+            >
+              Safenet Relay
+            </span>
+            <span
+              class="towerCost "
+            >
+              140
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Safenet Relay
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Cross-chain guarantees
+              </div>
+              Arcs validator consensus between attackers. Each jump hits another target for slightly less damage.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    29
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    3.4
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    1
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    29
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Chains to 3 targets
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-timelock"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              6
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(214, 161, 0);"
+            >
+              T
+            </span>
+            <span
+              class="towerName"
+            >
+              Timelock Module
+            </span>
+            <span
+              class="towerCost "
+            >
+              110
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Timelock Module
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Zodiac delay modifier
+              </div>
+              Deals no damage but periodically freezes every attacker in range. Buys your signers time to react.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    0
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    2.6
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    5
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    —
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Freezes for 1s
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-recovery"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              7
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(234, 255, 242);"
+            >
+              R
+            </span>
+            <span
+              class="towerName"
+            >
+              Recovery Module
+            </span>
+            <span
+              class="towerCost "
+            >
+              100
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Recovery Module
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Signer support aura
+              </div>
+              Does not attack. Boosts the damage of every tower in its aura and pays out SAFE at the end of each wave.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    0
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    2.2
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    1
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    —
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Support
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                +15% damage aura · +12 SAFE per wave
+              </div>
+            </span>
+          </button>
+          <button
+            aria-pressed="false"
+            class="towerCard  "
+            data-testid="td-build-guard"
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              8
+            </span>
+            <span
+              class="towerIconFallback"
+              style="background: rgb(157, 255, 0);"
+            >
+              S
+            </span>
+            <span
+              class="towerName"
+            >
+              Spending Guard
+            </span>
+            <span
+              class="towerCost "
+            >
+              80
+               SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Spending Guard
+              </div>
+              <div
+                class="tooltipTagline"
+              >
+                Allowance enforcement
+              </div>
+              Fires allowance darts that keep draining an attacker after impact. Excellent against regenerating threats.
+              <div
+                class="tooltipStats"
+              >
+                <span>
+                  Damage 
+                  <strong>
+                    8
+                  </strong>
+                </span>
+                <span>
+                  Range 
+                  <strong>
+                    3
+                  </strong>
+                </span>
+                <span>
+                  Reload 
+                  <strong>
+                    0.9
+                    s
+                  </strong>
+                </span>
+                <span>
+                  DPS 
+                  <strong>
+                    9
+                  </strong>
+                </span>
+                <span>
+                  Type 
+                  <strong>
+                    Consensus
+                  </strong>
+                </span>
+                <span>
+                  Hits 
+                  <strong>
+                    Ground & air
+                  </strong>
+                </span>
+              </div>
+              <div
+                style="margin-top: 6px;"
+              >
+                Drains 9/s for 3s
+              </div>
+            </span>
+          </button>
+        </div>
+        <div
+          class="toast toastInfo"
+          role="status"
+        >
+          Wave 10: BOSS: Rug pull whale
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

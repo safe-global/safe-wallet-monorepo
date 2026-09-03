@@ -1,0 +1,746 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./StartScreen.stories Default 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 0px;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="root"
+      style="position: relative; height: 100vh;"
+    >
+      <div
+        class="overlay"
+        data-testid="td-start-screen"
+      >
+        <div
+          class="panel overlayCard"
+        >
+          <div>
+            <div
+              class="title"
+            >
+              Safe
+              <span
+                class="titleBrace"
+              >
+                {
+              </span>
+              Defense
+              <span
+                class="titleBrace"
+              >
+                }
+              </span>
+            </div>
+            <div
+              class="subtitle"
+            >
+              Hold the threshold. Defend the treasury.
+            </div>
+          </div>
+          <p
+            class="lore"
+          >
+            Your Safe holds the treasury. Every attacker in the mempool wants it: phishing bots, address poisoners, drainer scripts, blind signers, spoofed frontends and the 
+            <strong>
+              Lazarus Group
+            </strong>
+             itself. Stack
+             
+            <strong>
+              Safe
+              {
+              Shield
+              }
+            </strong>
+             
+            scanners, 
+            <strong>
+              Hypernative Guards
+            </strong>
+            , 
+            <strong>
+              Multisig Cannons
+            </strong>
+            ,
+             
+            <strong>
+              Tx Simulators
+            </strong>
+             and 
+            <strong>
+              Safenet Relays
+            </strong>
+             along the attack path and survive all
+             
+            30
+             waves. Every leaked attacker drains ETH from the vault. When the treasury hits zero, the Safe is gone.
+          </p>
+          <div>
+            <div
+              class="sectionTitle"
+            >
+              Choose your network
+            </div>
+            <div
+              class="difficultyGrid"
+            >
+              <button
+                aria-pressed="false"
+                class="difficultyCard "
+                data-testid="td-difficulty-testnet"
+                type="button"
+              >
+                <span
+                  class="difficultyName"
+                >
+                  Testnet
+                </span>
+                <span
+                  class="difficultyDesc"
+                >
+                  Relaxed. Attackers are weaker and you start with extra SAFE and a deeper treasury.
+                </span>
+                <span
+                  class="difficultyMeta"
+                >
+                  <span>
+                    25
+                     ETH
+                  </span>
+                  <span>
+                    360
+                     SAFE
+                  </span>
+                  <span>
+                    HP ×
+                    0.8
+                  </span>
+                </span>
+              </button>
+              <button
+                aria-pressed="true"
+                class="difficultyCard difficultyCardActive"
+                data-testid="td-difficulty-mainnet"
+                type="button"
+              >
+                <span
+                  class="difficultyName"
+                >
+                  Mainnet
+                </span>
+                <span
+                  class="difficultyDesc"
+                >
+                  The intended experience. Real funds, real attackers.
+                </span>
+                <span
+                  class="difficultyMeta"
+                >
+                  <span>
+                    20
+                     ETH
+                  </span>
+                  <span>
+                    300
+                     SAFE
+                  </span>
+                  <span>
+                    HP ×
+                    1
+                  </span>
+                </span>
+              </button>
+              <button
+                aria-pressed="false"
+                class="difficultyCard "
+                data-testid="td-difficulty-darkForest"
+                type="button"
+              >
+                <span
+                  class="difficultyName"
+                >
+                  Dark forest
+                </span>
+                <span
+                  class="difficultyDesc"
+                >
+                  Every mempool is hostile. Tougher attackers, tighter budgets and less time between waves.
+                </span>
+                <span
+                  class="difficultyMeta"
+                >
+                  <span>
+                    15
+                     ETH
+                  </span>
+                  <span>
+                    250
+                     SAFE
+                  </span>
+                  <span>
+                    HP ×
+                    1.3
+                  </span>
+                </span>
+              </button>
+            </div>
+          </div>
+          <div
+            class="startRow"
+          >
+            <button
+              class="primaryButton"
+              data-testid="td-start"
+              type="button"
+            >
+              Deploy on 
+              Mainnet
+            </button>
+            <span
+              class="footerNote"
+            >
+              Best played on desktop with a mouse. Sound starts on your first click.
+            </span>
+          </div>
+          <div>
+            <div
+              class="sectionTitle"
+            >
+              Controls
+            </div>
+            <ul
+              class="controlsList"
+            >
+              <li>
+                <span>
+                  Select tower
+                </span>
+                <span
+                  class="kbd"
+                >
+                  1 – 8
+                </span>
+              </li>
+              <li>
+                <span>
+                  Place tower
+                </span>
+                <span
+                  class="kbd"
+                >
+                  Left click
+                </span>
+              </li>
+              <li>
+                <span>
+                  Keep placing
+                </span>
+                <span
+                  class="kbd"
+                >
+                  Shift + click
+                </span>
+              </li>
+              <li>
+                <span>
+                  Cancel / deselect
+                </span>
+                <span
+                  class="kbd"
+                >
+                  Esc or right click
+                </span>
+              </li>
+              <li>
+                <span>
+                  Upgrade selected
+                </span>
+                <span
+                  class="kbd"
+                >
+                  U
+                </span>
+              </li>
+              <li>
+                <span>
+                  Sell selected
+                </span>
+                <span
+                  class="kbd"
+                >
+                  X
+                </span>
+              </li>
+              <li>
+                <span>
+                  Send next wave
+                </span>
+                <span
+                  class="kbd"
+                >
+                  Space
+                </span>
+              </li>
+              <li>
+                <span>
+                  Pause
+                </span>
+                <span
+                  class="kbd"
+                >
+                  P
+                </span>
+              </li>
+              <li>
+                <span>
+                  Game speed
+                </span>
+                <span
+                  class="kbd"
+                >
+                  F
+                </span>
+              </li>
+              <li>
+                <span>
+                  Pan camera
+                </span>
+                <span
+                  class="kbd"
+                >
+                  WASD / arrows / middle drag
+                </span>
+              </li>
+              <li>
+                <span>
+                  Rotate camera
+                </span>
+                <span
+                  class="kbd"
+                >
+                  Q / E / right drag
+                </span>
+              </li>
+              <li>
+                <span>
+                  Zoom
+                </span>
+                <span
+                  class="kbd"
+                >
+                  Mouse wheel
+                </span>
+              </li>
+              <li>
+                <span>
+                  Toggle sound
+                </span>
+                <span
+                  class="kbd"
+                >
+                  M
+                </span>
+              </li>
+              <li>
+                <span>
+                  Help
+                </span>
+                <span
+                  class="kbd"
+                >
+                  H
+                </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./StartScreen.stories WithBestScores 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 0px;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="root"
+      style="position: relative; height: 100vh;"
+    >
+      <div
+        class="overlay"
+        data-testid="td-start-screen"
+      >
+        <div
+          class="panel overlayCard"
+        >
+          <div>
+            <div
+              class="title"
+            >
+              Safe
+              <span
+                class="titleBrace"
+              >
+                {
+              </span>
+              Defense
+              <span
+                class="titleBrace"
+              >
+                }
+              </span>
+            </div>
+            <div
+              class="subtitle"
+            >
+              Hold the threshold. Defend the treasury.
+            </div>
+          </div>
+          <p
+            class="lore"
+          >
+            Your Safe holds the treasury. Every attacker in the mempool wants it: phishing bots, address poisoners, drainer scripts, blind signers, spoofed frontends and the 
+            <strong>
+              Lazarus Group
+            </strong>
+             itself. Stack
+             
+            <strong>
+              Safe
+              {
+              Shield
+              }
+            </strong>
+             
+            scanners, 
+            <strong>
+              Hypernative Guards
+            </strong>
+            , 
+            <strong>
+              Multisig Cannons
+            </strong>
+            ,
+             
+            <strong>
+              Tx Simulators
+            </strong>
+             and 
+            <strong>
+              Safenet Relays
+            </strong>
+             along the attack path and survive all
+             
+            30
+             waves. Every leaked attacker drains ETH from the vault. When the treasury hits zero, the Safe is gone.
+          </p>
+          <div>
+            <div
+              class="sectionTitle"
+            >
+              Choose your network
+            </div>
+            <div
+              class="difficultyGrid"
+            >
+              <button
+                aria-pressed="false"
+                class="difficultyCard "
+                data-testid="td-difficulty-testnet"
+                type="button"
+              >
+                <span
+                  class="difficultyName"
+                >
+                  Testnet
+                </span>
+                <span
+                  class="difficultyDesc"
+                >
+                  Relaxed. Attackers are weaker and you start with extra SAFE and a deeper treasury.
+                </span>
+                <span
+                  class="difficultyMeta"
+                >
+                  <span>
+                    25
+                     ETH
+                  </span>
+                  <span>
+                    360
+                     SAFE
+                  </span>
+                  <span>
+                    HP ×
+                    0.8
+                  </span>
+                </span>
+                <span
+                  class="bestScore"
+                >
+                  Best: 
+                  9,800
+                   · wave 
+                  30
+                   · defended
+                </span>
+              </button>
+              <button
+                aria-pressed="true"
+                class="difficultyCard difficultyCardActive"
+                data-testid="td-difficulty-mainnet"
+                type="button"
+              >
+                <span
+                  class="difficultyName"
+                >
+                  Mainnet
+                </span>
+                <span
+                  class="difficultyDesc"
+                >
+                  The intended experience. Real funds, real attackers.
+                </span>
+                <span
+                  class="difficultyMeta"
+                >
+                  <span>
+                    20
+                     ETH
+                  </span>
+                  <span>
+                    300
+                     SAFE
+                  </span>
+                  <span>
+                    HP ×
+                    1
+                  </span>
+                </span>
+                <span
+                  class="bestScore"
+                >
+                  Best: 
+                  4,321
+                   · wave 
+                  12
+                </span>
+              </button>
+              <button
+                aria-pressed="false"
+                class="difficultyCard "
+                data-testid="td-difficulty-darkForest"
+                type="button"
+              >
+                <span
+                  class="difficultyName"
+                >
+                  Dark forest
+                </span>
+                <span
+                  class="difficultyDesc"
+                >
+                  Every mempool is hostile. Tougher attackers, tighter budgets and less time between waves.
+                </span>
+                <span
+                  class="difficultyMeta"
+                >
+                  <span>
+                    15
+                     ETH
+                  </span>
+                  <span>
+                    250
+                     SAFE
+                  </span>
+                  <span>
+                    HP ×
+                    1.3
+                  </span>
+                </span>
+              </button>
+            </div>
+          </div>
+          <div
+            class="startRow"
+          >
+            <button
+              class="primaryButton"
+              data-testid="td-start"
+              type="button"
+            >
+              Deploy on 
+              Mainnet
+            </button>
+            <span
+              class="footerNote"
+            >
+              Best played on desktop with a mouse. Sound starts on your first click.
+            </span>
+          </div>
+          <div>
+            <div
+              class="sectionTitle"
+            >
+              Controls
+            </div>
+            <ul
+              class="controlsList"
+            >
+              <li>
+                <span>
+                  Select tower
+                </span>
+                <span
+                  class="kbd"
+                >
+                  1 – 8
+                </span>
+              </li>
+              <li>
+                <span>
+                  Place tower
+                </span>
+                <span
+                  class="kbd"
+                >
+                  Left click
+                </span>
+              </li>
+              <li>
+                <span>
+                  Keep placing
+                </span>
+                <span
+                  class="kbd"
+                >
+                  Shift + click
+                </span>
+              </li>
+              <li>
+                <span>
+                  Cancel / deselect
+                </span>
+                <span
+                  class="kbd"
+                >
+                  Esc or right click
+                </span>
+              </li>
+              <li>
+                <span>
+                  Upgrade selected
+                </span>
+                <span
+                  class="kbd"
+                >
+                  U
+                </span>
+              </li>
+              <li>
+                <span>
+                  Sell selected
+                </span>
+                <span
+                  class="kbd"
+                >
+                  X
+                </span>
+              </li>
+              <li>
+                <span>
+                  Send next wave
+                </span>
+                <span
+                  class="kbd"
+                >
+                  Space
+                </span>
+              </li>
+              <li>
+                <span>
+                  Pause
+                </span>
+                <span
+                  class="kbd"
+                >
+                  P
+                </span>
+              </li>
+              <li>
+                <span>
+                  Game speed
+                </span>
+                <span
+                  class="kbd"
+                >
+                  F
+                </span>
+              </li>
+              <li>
+                <span>
+                  Pan camera
+                </span>
+                <span
+                  class="kbd"
+                >
+                  WASD / arrows / middle drag
+                </span>
+              </li>
+              <li>
+                <span>
+                  Rotate camera
+                </span>
+                <span
+                  class="kbd"
+                >
+                  Q / E / right drag
+                </span>
+              </li>
+              <li>
+                <span>
+                  Zoom
+                </span>
+                <span
+                  class="kbd"
+                >
+                  Mouse wheel
+                </span>
+              </li>
+              <li>
+                <span>
+                  Toggle sound
+                </span>
+                <span
+                  class="kbd"
+                >
+                  M
+                </span>
+              </li>
+              <li>
+                <span>
+                  Help
+                </span>
+                <span
+                  class="kbd"
+                >
+                  H
+                </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
