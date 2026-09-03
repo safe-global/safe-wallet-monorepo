@@ -1,0 +1,107 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./SafeProBanner.stories Default 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="flex justify-center bg-background p-6"
+    >
+      <div
+        class="w-full max-w-[440px]"
+      >
+        <a
+          class="bg-card text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col gap-0 py-0 rounded-lg min-h-[46px] w-full justify-center banner"
+          data-radius="lg"
+          data-size="none"
+          data-slot="card"
+          data-surface="default"
+          data-variant="default"
+          href="https://safe.global/blog/safe-pro-early-partner-program"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          <div
+            class="flex items-center gap-3"
+          >
+            <div
+              class="flex min-w-0 flex-1 flex-wrap items-center gap-2"
+            >
+              <span
+                class="gap-1 border font-medium transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge bg-foreground/5 text-muted-foreground border-transparent h-5 px-2 py-0.5 text-xs rounded-sm tag"
+                data-slot="badge"
+                data-variant="subtle"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-sparkles"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.5"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"
+                  />
+                  <path
+                    d="M20 2v4"
+                  />
+                  <path
+                    d="M22 4h-4"
+                  />
+                  <circle
+                    cx="4"
+                    cy="20"
+                    r="2"
+                  />
+                </svg>
+                New
+              </span>
+              <span
+                class="m-0 text-sm leading-5 font-semibold"
+                data-slot="typography"
+                data-variant="paragraph-small-bold"
+              >
+                Workspaces move to Safe Pro on Oct 6, 2026
+              </span>
+            </div>
+            <span
+              aria-hidden="true"
+              class="flex size-8 shrink-0 items-center justify-center arrow"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-arrow-up-right size-4"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M7 7h10v10"
+                />
+                <path
+                  d="M7 17 17 7"
+                />
+              </svg>
+            </span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+`;

@@ -20,6 +20,7 @@ import { cn } from '@/utils/cn'
  * Key Props:
  * - `variant` ('default' | 'outline' | 'secondary' | 'ghost' | 'destructive' | 'surface')
  * - `size` ('default' | 'xs' | 'sm' | 'lg' | 'action' | 'submit' | 'xl' | 'icon' | 'icon-xs' | 'icon-sm')
+ * - `weight` ('medium' | 'semibold')
  * - `render`
  * - `className`
  */
@@ -86,10 +87,15 @@ const buttonVariants = cva(
         'icon-xs': "size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3",
         'icon-sm': 'size-8 in-data-[slot=button-group]:rounded-sm',
       },
+      weight: {
+        medium: '',
+        semibold: 'font-semibold',
+      },
     },
     defaultVariants: {
       variant: 'default',
       size: 'default',
+      weight: 'medium',
     },
   },
 )
@@ -110,13 +116,14 @@ function Button({
   className,
   variant = 'default',
   size = 'default',
+  weight = 'medium',
   render,
   nativeButton,
   disabled,
   focusableWhenDisabled,
   ...props
 }: ButtonProps) {
-  const buttonClassName = cn(buttonVariants({ variant, size, className }))
+  const buttonClassName = cn(buttonVariants({ variant, size, weight, className }))
 
   if (isAnchorRender(render)) {
     const anchorProps = props as React.ComponentPropsWithoutRef<'a'>

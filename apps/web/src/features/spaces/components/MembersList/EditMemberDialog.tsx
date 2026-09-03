@@ -151,7 +151,7 @@ const EditMemberDialog = ({ member, handleClose }: { member: MemberDto; handleCl
           <form onSubmit={onSubmit}>
             <div className="p-6">
               <Typography variant="paragraph" className="mb-4">
-                Edit <b>{displayName}</b> in this workspace.
+                Edit <b>{displayName}</b> in this Workspace.
               </Typography>
 
               <MemberInfoForm

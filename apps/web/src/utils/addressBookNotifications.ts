@@ -25,6 +25,6 @@ export const getImportSuccessMessage = ({
 
 export const PERSONAL_ADDRESS_BOOK_LABEL = 'your address book'
 
-export const WORKSPACE_ADDRESS_BOOK_FALLBACK_LABEL = 'the workspace address book'
+export const WORKSPACE_ADDRESS_BOOK_FALLBACK_LABEL = 'the Workspace address book'
 
 export const getWorkspaceAddressBookLabel = (spaceName: string): string => `${spaceName} address book`

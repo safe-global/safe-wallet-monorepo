@@ -37,6 +37,7 @@ import SurveyOnboarding from './components/SurveyOnboarding'
 import SelectSafeModal from './components/SelectSafeModal'
 import SecurityHubPage from './components/SecurityHub/Page'
 import SpaceActivityLogPage from './components/SpaceActivityLog/Page'
+import SpacePlansPage from './components/Plans/Page'
 import SpacePoliciesPage from './components/Policies/Page'
 
 // Service imports
@@ -77,6 +78,7 @@ const feature: SpacesContract = {
   SpaceSettingsPage,
   SecurityHubPage,
   SpaceActivityLogPage,
+  SpacePlansPage,
   SpacePoliciesPage,
 
   // Services

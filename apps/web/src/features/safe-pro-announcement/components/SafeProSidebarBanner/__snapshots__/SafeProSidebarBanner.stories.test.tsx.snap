@@ -1,0 +1,80 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./SafeProSidebarBanner.stories Default 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="flex justify-center bg-sidebar p-6"
+    >
+      <div
+        class="w-[226px]"
+      >
+        <div
+          class="flex w-full flex-col items-start gap-3 rounded-lg bg-muted p-4 shadow-lg banner"
+          data-testid="safe-pro-sidebar-banner"
+        >
+          <span
+            class="flex shrink-0 items-center rounded-sm px-2 py-1.5 proChip"
+          >
+            <mock-icon
+              class="h-2 w-[21px]"
+            />
+          </span>
+          <div
+            class="flex w-full flex-col gap-1"
+          >
+            <span
+              class="m-0 text-sm leading-5 font-semibold text-foreground"
+              data-slot="typography"
+              data-variant="paragraph-small-bold"
+            >
+              Your Workspace moves to Safe Pro on Oct 6, 2026
+            </span>
+            <span
+              class="m-0 text-xs leading-4 font-normal text-muted-foreground"
+              data-slot="typography"
+              data-variant="paragraph-mini"
+            >
+              Your Safe accounts remain available outside the Workspace.
+            </span>
+          </div>
+          <a
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-8 gap-1 px-4 text-xs in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 learnMore"
+            data-slot="button"
+            href="https://safe.global/blog/safe-pro-early-partner-program"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Learn more
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-arrow-up-right text-green-400 arrow"
+              data-icon="inline-end"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M7 7h10v10"
+              />
+              <path
+                d="M7 17 17 7"
+              />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

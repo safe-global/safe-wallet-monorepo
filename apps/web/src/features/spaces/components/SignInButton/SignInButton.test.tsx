@@ -171,7 +171,7 @@ describe('SignInButton error messages', () => {
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'notifications/show',
         payload: expect.objectContaining({
-          message: 'Safe{Wallet} for logging into workspace is not supported at the moment.',
+          message: 'Safe{Wallet} for logging into Workspace is not supported at the moment.',
           variant: 'error',
         }),
       })
@@ -190,7 +190,7 @@ describe('SignInButton error messages', () => {
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'notifications/show',
         payload: expect.objectContaining({
-          message: 'MetaMask for logging into workspace is not supported at the moment.',
+          message: 'MetaMask for logging into Workspace is not supported at the moment.',
           variant: 'error',
         }),
       })
@@ -208,7 +208,7 @@ describe('SignInButton error messages', () => {
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'notifications/show',
         payload: expect.objectContaining({
-          message: 'Ledger for logging into workspace is not supported at the moment.',
+          message: 'Ledger for logging into Workspace is not supported at the moment.',
           variant: 'error',
         }),
       })

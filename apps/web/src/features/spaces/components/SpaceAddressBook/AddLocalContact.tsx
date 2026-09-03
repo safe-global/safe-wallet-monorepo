@@ -9,7 +9,7 @@ const AddLocalContact = () => {
     <AddContactDialog
       triggerLabel="Add contact"
       dialogTitle="Add contact"
-      intro="This contact is stored locally in this browser. You can propose adding it to the shared workspace address book later."
+      intro="This contact is stored locally in this browser. You can propose adding it to the shared Workspace address book later."
       successMessage="Contact added"
       successGroupKey="add-local-contact-success"
       submit={(item) => {

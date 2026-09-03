@@ -9,7 +9,7 @@ import { AppRoutes } from '@/config/routes'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 
 const BENEFITS = [
-  'Keep all related Safes in one shared workspace',
+  'Keep all related Safes in one shared Workspace',
   'Give teams shared context around transactions and activity',
   'Streamline coordination across initiators, approvers, and executors',
 ]
@@ -23,7 +23,7 @@ export const AddToSpacePopupModal = (): ReactElement => {
     <div className="flex flex-col w-full">
       <div className="flex items-center justify-between px-5 py-5">
         <DialogTitle>
-          <Typography variant="h4">Add to workspace</Typography>
+          <Typography variant="h4">Add to Workspace</Typography>
         </DialogTitle>
         <DialogClose aria-label="Close" className="text-muted-foreground hover:text-foreground transition-colors">
           <X className="size-4" />
@@ -32,13 +32,13 @@ export const AddToSpacePopupModal = (): ReactElement => {
 
       <div className="flex flex-col gap-4 sm:gap-6 px-6 pb-6 pt-2.5">
         <Typography variant="paragraph" color="muted">
-          Bring related Safes into a shared workspace and collaborate with your team — all in one place.
+          Bring related Safes into a shared Workspace and collaborate with your team — all in one place.
         </Typography>
 
         <div className="relative h-[140px] sm:h-[200px] w-full rounded-3xl bg-secondary overflow-hidden flex items-center justify-center shrink-0">
           <Image
             src="/images/spaces/empty_dashboard.png"
-            alt="Add to workspace illustration"
+            alt="Add to Workspace illustration"
             fill
             className="object-contain"
           />
@@ -59,7 +59,7 @@ export const AddToSpacePopupModal = (): ReactElement => {
 
         <DialogClose render={<Button className="w-full gap-2" />} onClick={() => void router.push(createSpaceHref)}>
           <Plus className="size-5" />
-          Create a workspace
+          Create a Workspace
         </DialogClose>
       </div>
     </div>

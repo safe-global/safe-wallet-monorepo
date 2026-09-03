@@ -8,6 +8,7 @@ const SPACES_EXACT_ROUTES = [AppRoutes.spaces.index]
 const SPACES_PREFIX_ROUTES = [
   AppRoutes.spaces.settings,
   AppRoutes.spaces.members,
+  AppRoutes.spaces.plans,
   AppRoutes.spaces.safeAccounts,
   AppRoutes.spaces.addressBook,
   AppRoutes.spaces.security,

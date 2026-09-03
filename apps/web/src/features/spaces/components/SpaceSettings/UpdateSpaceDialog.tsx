@@ -11,11 +11,11 @@ const UpdateSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse; onClos
   const isDarkMode = useDarkMode()
 
   return (
-    <ModalDialog dialogTitle="Update workspace" hideChainIndicator open onClose={onClose}>
+    <ModalDialog dialogTitle="Update Workspace" hideChainIndicator open onClose={onClose}>
       <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
         <div className="mt-4 px-6 pb-6">
           <Typography className="mb-4">
-            The workspace name is visible in the sidebar menu, headings to all its members. Usually it&apos;s a name of
+            The Workspace name is visible in the sidebar menu, headings to all its members. Usually it&apos;s a name of
             the company or a business. <ExternalLink href={AppRoutes.privacy}>How is this data stored?</ExternalLink>
           </Typography>
           <UpdateSpaceForm space={space} onClose={onClose} />
