@@ -5,17 +5,15 @@ import OnboardingFooter from '@/components/common/OnboardingFooter'
 import { Typography } from '@/components/ui/typography'
 import { SearchInput } from '@/components/ui/search-input'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Info } from 'lucide-react'
 import SimilarityConfirmDialog from '@/components/common/TrustedSafesModal/SimilarityConfirmDialog'
 import { OnboardingLayout, StepCounter, SafeAppMockup, deriveSidePanelAccountsFromSpace } from '../OnboardingLayout'
 import useWallet from '@/hooks/wallets/useWallet'
 import { type AllSafeItems } from '@/hooks/safes'
-import { cn } from '@/utils/cn'
 import { SAFE_ACCOUNTS_LIMIT } from '../../constants'
 import { useSpaceSafes } from '../../hooks/useSpaceSafes'
 import { useOnboardingStepCount } from '../../hooks/useOnboardingStepCount'
 import OnboardingSafesList from './components/OnboardingSafesList'
+import SelectedCounter from './components/SelectedCounter'
 import ConnectWalletHint from '../ConnectWalletHint'
 import useOnboardingNavigation from './hooks/useOnboardingNavigation'
 import useOnboardingSafes from './hooks/useOnboardingSafes'
@@ -102,25 +100,12 @@ const SelectSafesOnboarding = (): ReactElement => {
       ) : (
         <>
           <div className="flex shrink-0 items-center gap-3">
-            <div
-              data-testid="selected-count"
-              className={cn(
-                'flex shrink-0 items-center gap-1.5 whitespace-nowrap text-sm',
-                isAtLimit ? 'font-semibold text-yellow-700' : 'text-muted-foreground',
-              )}
-            >
-              <span>
-                {/* Fixed-width, right-aligned digit cell so the row doesn't shift when the count changes width. */}
-                <span className="inline-block min-w-[2ch] text-right tabular-nums">{selectedKeys.size}</span> of{' '}
-                {SAFE_ACCOUNTS_LIMIT} selected
-              </span>
-              <Tooltip>
-                <TooltipTrigger render={<span className="inline-flex cursor-help" />}>
-                  <Info className="size-4" />
-                </TooltipTrigger>
-                <TooltipContent>You can add up to {SAFE_ACCOUNTS_LIMIT} Safe accounts per Workspace</TooltipContent>
-              </Tooltip>
-            </div>
+            <SelectedCounter
+              count={selectedKeys.size}
+              limit={SAFE_ACCOUNTS_LIMIT}
+              isAtLimit={isAtLimit}
+              tooltip={`You can add up to ${SAFE_ACCOUNTS_LIMIT} Safe accounts per Workspace`}
+            />
             <SearchInput
               className="flex-1"
               placeholder="by name, address or network"

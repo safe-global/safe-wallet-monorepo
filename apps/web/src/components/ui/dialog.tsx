@@ -34,8 +34,8 @@ import { XIcon } from 'lucide-react'
  *
  * @remarks
  * Key Props:
- * - DialogContent: `size` ('default' | 'xs' | 'sm' | 'md' | 'lg' | 'xl', default 'default' = max-w-[500px];
- *   mirrors ModalDialog's MAX_WIDTH_MAP), `padding` ('none' | 'md'; Content has no body padding by default),
+ * - DialogContent: `size` ('default' | 'xs' | 'sm' | 'sm-md' | 'md' | 'lg' | 'xl', default 'default' = max-w-[500px];
+ *   mirrors ModalDialog's MAX_WIDTH_MAP), `padding` ('none' | 'sm' | 'md'; Content has no body padding by default),
  *   `surface` ('default' | 'card' | 'paper'), `showCloseButton`, `keepMounted`, `overlayClassName`
  * - DialogHeader / DialogFooter: `divided` (true = full border, 'subtle' = border-border/50)
  *
@@ -50,12 +50,14 @@ const dialogContentVariants = cva(
         default: 'max-w-[500px]',
         xs: 'max-w-[444px]',
         sm: 'max-w-[600px]',
+        'sm-md': 'max-w-[764px]',
         md: 'max-w-[900px]',
         lg: 'max-w-[1200px]',
         xl: 'max-w-[1536px]',
       },
       padding: {
         none: 'p-0',
+        sm: 'p-5',
         md: 'p-6',
       },
       surface: {

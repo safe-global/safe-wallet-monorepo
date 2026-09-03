@@ -53,6 +53,8 @@ const cardVariants = cva(
         outlined: 'border border-border',
         muted: 'bg-muted',
         'muted-secondary': 'bg-muted-secondary',
+        brand:
+          'bg-muted-secondary bg-[linear-gradient(90deg,color-mix(in_srgb,var(--mint)_40%,var(--muted-secondary)),color-mix(in_srgb,var(--mint)_8%,var(--muted-secondary)))]',
       },
       surface: {
         default: '',
@@ -69,6 +71,10 @@ const cardVariants = cva(
         'lg-xl': 'rounded-lg-xl',
         xl: 'rounded-xl',
         none: 'rounded-none',
+      },
+      selected: {
+        true: 'border-2 border-mint shadow-lg',
+        false: 'border-2 border-transparent',
       },
     },
     defaultVariants: {
@@ -92,6 +98,7 @@ function Card<TElement extends React.ElementType = 'div'>({
   variant = 'default',
   surface = 'default',
   radius = 'lg',
+  selected,
   ...props
 }: CardProps<TElement>) {
   const Component = as ?? 'div'
@@ -103,7 +110,7 @@ function Card<TElement extends React.ElementType = 'div'>({
       data-variant={variant}
       data-surface={surface}
       data-radius={radius}
-      className={cn(cardVariants({ size, variant, surface, radius }), className)}
+      className={cn(cardVariants({ size, variant, surface, radius, selected }), className)}
       {...props}
     />
   )
