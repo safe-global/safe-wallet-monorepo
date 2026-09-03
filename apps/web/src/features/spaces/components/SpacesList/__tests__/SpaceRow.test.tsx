@@ -6,6 +6,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import userEvent from '@testing-library/user-event'
 
+jest.mock('@/public/images/safe-pro/pro-chip.svg', () => 'svg')
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
   trackEvent: jest.fn(),
@@ -33,6 +34,14 @@ describe('SpaceRow', () => {
 
     const link = screen.getByRole('link')
     expect(link).toHaveAttribute('href', `${AppRoutes.spaces.index}?spaceId=${space.uuid}`)
+  })
+
+  it('shows the PRO pill with the tier only for paid workspaces', () => {
+    const { rerender } = render(<SpaceRow space={space} planName="Business" />)
+    expect(screen.getByTestId('space-row-pro-badge')).toHaveTextContent('· Business')
+
+    rerender(<SpaceRow space={space} />)
+    expect(screen.queryByTestId('space-row-pro-badge')).not.toBeInTheDocument()
   })
 
   it('tracks the workspace switch when the row is clicked', async () => {

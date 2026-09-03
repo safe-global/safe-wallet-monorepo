@@ -5,6 +5,7 @@ import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
 import TrialFlow from '../Plans/TrialFlow'
+import { useSpacePlan } from '../../hooks/useSpacePlan'
 import SpaceRow from './SpaceRow'
 import SignInOptions from '../SignInOptions'
 import WorkspaceBanner from '../WorkspaceBanner'
@@ -213,6 +214,7 @@ const SpacesList = () => {
   const { SafeProWorkspacesBanner } = useLoadFeature(SafeProFeature)
   const isSafeProEnabled = useIsSafeProEnabled()
   const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
+  const { plan, tierName } = useSpacePlan()
   const isDarkMode = useDarkMode()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
@@ -308,6 +310,7 @@ const SpacesList = () => {
                     space={space}
                     currentUserId={currentUser?.id}
                     showDivider={index < activeSpaces.length - 1}
+                    planName={isSafePro && plan?.status === 'active' ? tierName : undefined}
                   />
                 ))}
               </div>

@@ -77,6 +77,12 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
   useSafeAddressFromUrl: () => mockSafeAddressFromUrl,
 }))
 
+const mockUseHasFeature = jest.fn()
+jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
+jest.mock('@/public/images/safe-pro/pro-chip.svg', () => 'svg')
+const mockPlans = { plan: { status: 'trialing' }, tierName: 'Business' }
+jest.mock('../../../../../hooks/useSpacePlan', () => ({ useSpacePlan: () => mockPlans }))
+
 jest.mock('@/hooks/useChainId', () => ({
   __esModule: true,
   default: () => mockChainId,
@@ -1065,6 +1071,23 @@ describe('SpaceSelectorDropdown', () => {
       fireEvent.click(trigger)
 
       expect(screen.getByText(`Limit of ${SPACES_LIMIT} Workspaces reached`)).toBeInTheDocument()
+    })
+  })
+
+  describe('plan label under the workspace name', () => {
+    it.each([
+      [false, 'trialing', 'Workspace', false],
+      [true, 'trialing', 'Free trial', true],
+      [true, 'active', 'Business', false],
+    ])('SAFE_PRO=%s status=%s → "%s", chip=%s', (isSafePro, status, label, hasChip) => {
+      mockUseHasFeature.mockReturnValue(isSafePro)
+      mockPlans.plan.status = status
+      const spaces = [{ uuid: 'uuid-1', name: 'Alpha', safeCount: 0 }]
+
+      render(<SpaceSelectorDropdown spaces={spaces} selectedSpace={spaces[0]} />)
+
+      expect(screen.getByText(label)).toBeInTheDocument()
+      expect(screen.queryByTestId('space-selector-pro-chip') !== null).toBe(hasChip)
     })
   })
 })

@@ -7,7 +7,8 @@ import { trackEvent } from '@/services/analytics'
 import type { AnalyticsEvent } from '@/services/analytics/types'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import ProWordmark from '@/public/images/safe-pro/pro-wordmark.svg'
+import SafeProLockup from '@/components/common/SafeProLockup'
+import SafeWalletLockup from '@/public/images/safe-wallet-lockup.svg'
 
 type Item = {
   label: string
@@ -51,17 +52,15 @@ const AccountsNavigation = () => {
             nativeButton={false}
             render={<NextLink href={item.url} onClick={handleClick(item)} />}
           >
-            {item.pro && isSafePro && (
-              <span
-                data-testid="pro-chip"
-                className="rounded-md bg-accent-secondary px-2 py-1.5 text-accent-secondary-foreground dark:bg-accent-secondary/20 dark:text-accent-success"
-              >
-                <span className="block h-2 w-[21px]">
-                  <ProWordmark className="size-full" />
-                </span>
+            {!isSafePro ? (
+              item.label
+            ) : item.pro ? (
+              <SafeProLockup className="text-[1.25rem]" />
+            ) : (
+              <span className="block h-7 w-[140px]">
+                <SafeWalletLockup role="img" aria-label="Safe{Wallet}" className="size-full" />
               </span>
             )}
-            {item.label}
           </TabsTrigger>
         ))}
       </TabsList>
