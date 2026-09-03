@@ -24,6 +24,10 @@ import AggregatedBalance from './AggregatedBalances'
 import SafeWidget from '../SafeWidget'
 import SetupWidget from '../SetupWidget'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import { useHasFeature } from '@/hooks/useChains'
+import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { Typography } from '@/components/ui/typography'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const EmptyStateAddAction = () => {
   return (
@@ -39,7 +43,7 @@ const PENDING_TX_DISPLAY_LIMIT = 4
 const SpaceDashboard = () => {
   const { AccountsWidget, $isReady } = useLoadFeature(MyAccountsFeature)
   const { PendingTxWidget } = useLoadFeature(SpacesFeature)
-  const { SafeProAnnouncementModal } = useLoadFeature(SafeProFeature)
+  const { SafeProAnnouncementModal, SafeProLockedWorkspace } = useLoadFeature(SafeProFeature)
   const { allSafes: safes, isLoading: isSafesLoading } = useSpaceSafes()
   const safeItems = flattenSafeItems(safes)
   const spaceId = useCurrentSpaceId()
@@ -58,9 +62,10 @@ const SpaceDashboard = () => {
   useTrackSpace(safes, activeMembers)
   const router = useRouter()
   const isSafeProEnabled = useIsSafeProEnabled()
-  // Not shown over an invite preview: there is no Workspace of theirs to move yet.
+  const isLocked = useHasFeature(FEATURES.SAFE_PRO) === true && !isInvited
+  const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !isLocked || !spaceId })
   const { isOpen: isAnnouncementOpen, setIsOpen: setIsAnnouncementOpen } = useSafeProAnnouncement(
-    isSafeProEnabled && Boolean(spaceId) && !isInvited,
+    isSafeProEnabled && !isLocked && Boolean(spaceId) && !isInvited,
   )
 
   useEffect(() => {
@@ -116,6 +121,17 @@ const SpaceDashboard = () => {
   }
 
   const showSetupWidget = safeItems.length === 0 && !isSafesLoading && !setupDismissed && !isSetupDismissedForSpace
+
+  if (isLocked) {
+    return (
+      <div className="pt-6">
+        <Typography variant="h2" className="mb-6 font-bold leading-[1] tracking-tight">
+          {space?.name}
+        </Typography>
+        <SafeProLockedWorkspace plansHref={{ pathname: AppRoutes.spaces.plans, query: { spaceId } }} />
+      </div>
+    )
+  }
 
   return (
     <>

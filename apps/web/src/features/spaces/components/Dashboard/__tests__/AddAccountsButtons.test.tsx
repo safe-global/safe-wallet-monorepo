@@ -11,6 +11,11 @@ import {
 import { useSpaceAccountsData } from '@/features/myAccounts'
 import type { ReactNode } from 'react'
 
+jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => false }))
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
+  useSpacesGetOneV1Query: () => ({ currentData: undefined }),
+}))
+
 jest.mock('next/router', () => ({
   useRouter: () => ({ push: jest.fn() }),
 }))
