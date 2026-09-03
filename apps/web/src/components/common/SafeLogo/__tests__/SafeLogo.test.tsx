@@ -2,6 +2,10 @@ import { render, screen } from '@testing-library/react'
 import SafeLogo from '../index'
 import { AppRoutes } from '@/config/routes'
 
+jest.mock('@/public/images/safe-pro/safe-mark.svg', () => 'svg')
+jest.mock('@/public/images/safe-pro/safe-wordmark.svg', () => 'svg')
+jest.mock('@/public/images/safe-pro/pro-chip.svg', () => 'svg')
+
 jest.mock('next/link', () => {
   const MockLink = ({ href, children, ...props }: { href: string; children: React.ReactNode }) => (
     <a href={href} {...props}>
@@ -35,5 +39,11 @@ describe('SafeLogo', () => {
     expect(link).toHaveAttribute('href', AppRoutes.welcome.accounts)
     expect(link).toHaveTextContent('Home')
     expect(screen.getByTestId('logo-image')).toBeInTheDocument()
+  })
+
+  it('renders the Safe PRO lockup in the pill for paid workspaces', () => {
+    render(<SafeLogo showHomeLabel showProLockup />)
+    expect(screen.getByRole('img', { name: 'Safe Pro' })).toBeInTheDocument()
+    expect(screen.getByRole('link')).not.toHaveTextContent('Home')
   })
 })

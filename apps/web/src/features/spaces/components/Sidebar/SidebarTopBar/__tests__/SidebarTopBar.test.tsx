@@ -14,6 +14,11 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
   useSafeAddressFromUrl: () => mockUseSafeAddressFromUrl(),
 }))
 
+const mockUseHasFeature = jest.fn()
+jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
+jest.mock('../../../Plans/fixtures', () => ({ TRIAL_PLANS: { plan: null } }))
+const mockPlans: { plan: { status: string } | null } = jest.requireMock('../../../Plans/fixtures').TRIAL_PLANS
+
 jest.mock('@/hooks/useIsSpaceRoute', () => ({
   useIsSpaceRoute: () => mockUseIsSpaceRoute(),
 }))
@@ -33,12 +38,21 @@ jest.mock('@/components/common/SafeLogo', () => {
   const MockSafeLogo = ({
     href,
     showHomeLabel,
+    showProLockup,
     'data-testid': testId,
   }: {
     href?: string
     showHomeLabel?: boolean
+    showProLockup?: boolean
     'data-testid'?: string
-  }) => <a data-testid={testId} href={href} data-home-label={String(Boolean(showHomeLabel))} />
+  }) => (
+    <a
+      data-testid={testId}
+      href={href}
+      data-home-label={String(Boolean(showHomeLabel))}
+      data-pro-lockup={String(Boolean(showProLockup))}
+    />
+  )
   MockSafeLogo.displayName = 'SafeLogo'
   return { __esModule: true, default: MockSafeLogo }
 })
@@ -107,6 +121,21 @@ describe('SidebarTopBar', () => {
     const logo = screen.getByTestId('logo-container')
     expect(logo).toHaveAttribute('data-home-label', 'true')
     expect(logo).toHaveAttribute('href', AppRoutes.welcome.accounts)
+  })
+
+  it('swaps the Home pill for the Safe PRO lockup on a paid Pro workspace', () => {
+    mockUseRouter.mockReturnValue({ pathname: AppRoutes.spaces.index })
+    mockUseIsSpaceRoute.mockReturnValue(true)
+    mockUseHasFeature.mockReturnValue(true)
+    mockPlans.plan = { status: 'active' }
+
+    render(<SidebarTopBar />)
+
+    expect(screen.getByTestId('logo-container')).toHaveAttribute('data-pro-lockup', 'true')
+
+    mockPlans.plan = { status: 'trialing' }
+    render(<SidebarTopBar />)
+    expect(screen.getAllByTestId('logo-container')[1]).toHaveAttribute('data-pro-lockup', 'false')
   })
 
   it('does not show the Home label pill when the sidebar is collapsed', () => {
