@@ -44,6 +44,7 @@ const typographyVariants = cva('m-0', {
       default: '',
       muted: 'text-muted-foreground',
       success: 'text-badge-dot-success',
+      warning: 'text-warning-strong',
     },
   },
   defaultVariants: {

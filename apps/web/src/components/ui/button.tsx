@@ -94,6 +94,10 @@ const buttonVariants = cva(
         medium: '',
         semibold: 'font-semibold',
       },
+      // Brand-green icon on a primary CTA (Safe Pro "Start free trial" pattern).
+      accentIcon: {
+        true: '[&_svg]:text-green-400 dark:[&_svg]:text-primary-foreground',
+      },
     },
     defaultVariants: {
       variant: 'default',
@@ -120,13 +124,14 @@ function Button({
   variant = 'default',
   size = 'default',
   weight = 'medium',
+  accentIcon,
   render,
   nativeButton,
   disabled,
   focusableWhenDisabled,
   ...props
 }: ButtonProps) {
-  const buttonClassName = cn(buttonVariants({ variant, size, weight, className }))
+  const buttonClassName = cn(buttonVariants({ variant, size, weight, accentIcon, className }))
 
   if (isAnchorRender(render)) {
     const anchorProps = props as React.ComponentPropsWithoutRef<'a'>
