@@ -16,7 +16,15 @@ type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
 // We store UUID locally to track device registration
 export type NotificationRegistration = WithRequired<RegisterDeviceDto, 'uuid'>
 
+export const isPermissionBlocked = (): boolean => {
+  return typeof Notification !== 'undefined' && Notification.permission === 'denied'
+}
+
 export const requestNotificationPermission = async (): Promise<boolean> => {
+  if (typeof Notification === 'undefined') {
+    return false
+  }
+
   if (Notification.permission === 'granted') {
     return true
   }

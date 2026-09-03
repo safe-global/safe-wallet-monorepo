@@ -1,4 +1,6 @@
 import { render, fireEvent } from '@/tests/test-utils'
+import type { DmkError } from '@ledgerhq/device-management-kit'
+import { mapLedgerError } from '@/services/onboard/ledger-errors'
 import ErrorMessage from '..'
 
 describe('ErrorMessage', () => {
@@ -32,6 +34,38 @@ describe('ErrorMessage', () => {
 
     // No GS code → the original raw-message Details is kept (unchanged by this ticket).
     expect(queryByText(/rpc\.example\.org/)).toBeInTheDocument()
+  })
+
+  it('withholds the raw message of a Ledger device failure, mapped or not', () => {
+    const cause = mapLedgerError({
+      _tag: 'DeviceLockedError',
+      errorCode: '5515',
+      message: 'Device is locked.',
+    } as DmkError)
+    const error = Object.assign(new Error(`An unknown RPC error occurred. Details: ${cause.message}`), { cause })
+
+    const { getByText, queryByText, container } = render(
+      <ErrorMessage error={error}>Unlock your Ledger and try again.</ErrorMessage>,
+    )
+
+    expect(getByText('Unlock your Ledger and try again.')).toBeInTheDocument()
+    // A mapped state needs no support reference, and never the raw payload
+    expect(queryByText('Details')).not.toBeInTheDocument()
+    expect(container.textContent).not.toContain('DeviceLockedError')
+    expect(container.textContent).not.toContain('UNKNOWN_ERROR')
+  })
+
+  it('shows a support reference for a Ledger state we have no sentence for', () => {
+    const cause = mapLedgerError({ _tag: 'InvalidStatusWordError', originalError: new Error('V is missing') })
+    const error = Object.assign(new Error('An unknown RPC error occurred.'), { cause })
+
+    const { getByText, queryByText, container } = render(
+      <ErrorMessage error={error}>Your Ledger could not complete the request.</ErrorMessage>,
+    )
+
+    expect(getByText('LEDGER-UNKNOWN')).toBeInTheDocument()
+    expect(queryByText('Details')).not.toBeInTheDocument()
+    expect(container.textContent).not.toContain('V is missing')
   })
 
   it('treats a custom-error revert as GS013 and decodes a known selector', () => {

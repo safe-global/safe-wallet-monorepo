@@ -1,12 +1,14 @@
 import { type ReactElement, type ReactNode, type SyntheticEvent, useState } from 'react'
 import { getGsCodeFromError } from '@safe-global/utils/services/exceptions/contractErrors'
 import { getGuardErrorInfo, isRevertError } from '@/utils/transaction-errors'
+import { getCgwSupportCode } from '@/utils/cgw-errors'
 import { decodeCustomError } from '@/utils/customErrorRegistry'
 import { getBlockExplorerLink } from '@/utils/chains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useCurrentChain } from '@/hooks/useChains'
 import ExternalLink from '@/components/common/ExternalLink'
 import ErrorDetails from '@/components/common/ErrorDetails'
+import { getLedgerDeviceError, getLedgerSupportReference } from '@/services/onboard/ledger-errors'
 import { Alert, AlertDescription, AlertTitle, AlertSeverityIcon } from '@/components/ui/alert'
 import { Typography } from '@/components/ui/typography'
 import { Link } from '@/components/ui/link'
@@ -44,6 +46,14 @@ const ErrorMessage = ({
   // before (WA-3005 is on-chain-scoped).
   const gsCode = error ? getGsCodeFromError(error) : undefined
 
+  // A Ledger device failure carries its own translated sentence, so the raw
+  // message must never be offered: by the time it reaches us it has been
+  // re-wrapped by ethers and viem and reads as a dump of class names, codes and
+  // library versions (WA-3243). An unmapped device state gets a support
+  // reference instead — the device's own words stay in telemetry.
+  const ledgerError = error ? getLedgerDeviceError(error) : undefined
+  const ledgerReference = ledgerError?.reason === 'unknown' ? getLedgerSupportReference(ledgerError) : undefined
+
   // GS013 family: the inner call reverted with a module/guard custom error. A
   // custom-error revert without a GS string is still a GS013 — decode its
   // selector against the known ABIs; undecodable ones keep the raw selector in
@@ -51,6 +61,11 @@ const ErrorMessage = ({
   const customError =
     error && (gsCode === 'GS013' || (!gsCode && isRevertError(error))) ? decodeCustomError(error) : undefined
   const effectiveGsCode = gsCode ?? (customError ? 'GS013' : undefined)
+
+  // A known CGW response state (429/422/451/5xx) gets the same code-only
+  // support reference, so the raw response body — which can be a gateway's HTML
+  // error page — is never rendered in Details (WA-3252).
+  const supportCode = effectiveGsCode ?? (error ? getCgwSupportCode(error) : undefined)
 
   // Check if this is a Guard error that should get special treatment
   const guardErrorName = error && context ? getGuardErrorInfo(error) : undefined
@@ -92,7 +107,7 @@ const ErrorMessage = ({
             </span>
           )}
 
-          {error && !effectiveGsCode && (
+          {error && !supportCode && !ledgerError && (
             <Link
               render={<button type="button" />}
               onClick={onDetailsToggle}
@@ -103,8 +118,10 @@ const ErrorMessage = ({
           )}
         </span>
 
-        {effectiveGsCode ? (
-          <ErrorDetails code={effectiveGsCode} customError={customError} />
+        {supportCode ? (
+          <ErrorDetails code={supportCode} customError={customError} />
+        ) : ledgerError ? (
+          ledgerReference && <ErrorDetails code={ledgerReference} />
         ) : (
           error &&
           showDetails && (

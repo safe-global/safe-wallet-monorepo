@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import NativeSwapsCard from './index'
-import { StoreDecorator } from '@/stories/storeDecorator'
 
 const meta = {
   title: 'Components/SafeApps/NativeSwapsCard',
@@ -10,15 +9,11 @@ const meta = {
   },
 
   decorators: [
-    (Story) => {
-      return (
-        <StoreDecorator initialState={{ chains: { data: [{ chainId: '11155111', features: ['NATIVE_SWAPS'] }] } }}>
-          <div className="max-w-[500px]">
-            <Story />
-          </div>
-        </StoreDecorator>
-      )
-    },
+    (Story) => (
+      <div className="max-w-[500px]">
+        <Story />
+      </div>
+    ),
   ],
   tags: ['autodocs'],
 } satisfies Meta<typeof NativeSwapsCard>
@@ -27,5 +22,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
-  args: {},
+  args: {
+    onDismiss: () => {},
+  },
 }

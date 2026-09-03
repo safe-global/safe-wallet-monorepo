@@ -193,6 +193,71 @@ describe('CodedException', () => {
       )
     })
 
+    it('tags the Datadog error with what the Ledger actually said (WA-3243)', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockCaptureError = jest.fn()
+      mockObservability(mockCaptureError)
+
+      const { trackError, Errors } = await import('..')
+      const { mapLedgerError } = await import('@/services/onboard/ledger-errors')
+
+      // As the UI sees it: viem re-wraps the device error before it is tracked.
+      const deviceError = mapLedgerError({
+        _tag: 'InvalidStatusWordError',
+        originalError: new Error('no signature returned'),
+      })
+      const wrapped = Object.assign(
+        new Error(`An unknown RPC error occurred.\n\nDetails: ${deviceError.message}\n\nVersion: viem@2.52.2`),
+        { cause: deviceError },
+      )
+
+      const err = trackError(Errors._804, wrapped)
+
+      // The device's own words are the point of the tags: they are deliberately
+      // absent from the message, which is the sentence the user reads.
+      expect(err.message).not.toContain('no signature returned')
+      expect(mockCaptureError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tags: expect.objectContaining({
+            error_type: ErrorType.LEDGER_ERROR,
+            ledger_reason: 'unknown',
+            ledger_tag: 'InvalidStatusWordError',
+            ledger_device_message: 'no signature returned',
+          }),
+        }),
+      )
+    })
+
+    it('tags the status word a device exchange error reports', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockCaptureError = jest.fn()
+      mockObservability(mockCaptureError)
+
+      const { trackError, Errors } = await import('..')
+      const { mapLedgerError } = await import('@/services/onboard/ledger-errors')
+
+      trackError(Errors._804, mapLedgerError({ _tag: 'DeviceLockedError', errorCode: '5515' } as never))
+
+      expect(mockCaptureError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tags: expect.objectContaining({ ledger_reason: 'locked', ledger_status_word: '5515' }),
+        }),
+      )
+    })
+
+    it('leaves the Ledger tags off an error no device raised', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockCaptureError = jest.fn()
+      mockObservability(mockCaptureError)
+
+      const { trackError, Errors } = await import('..')
+
+      trackError(Errors._804, new Error('execution reverted'))
+
+      const [{ tags }] = mockCaptureError.mock.calls[0]
+      expect(Object.keys(tags).some((key) => key.startsWith('ledger_'))).toBe(false)
+    })
+
     it('merges RPC endpoint context into the Datadog tags', async () => {
       process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
       const mockCaptureError = jest.fn()

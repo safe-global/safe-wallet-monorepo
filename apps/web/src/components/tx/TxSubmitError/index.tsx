@@ -9,7 +9,9 @@ import {
 } from '@/utils/transaction-errors'
 import { didRevert, type EthersError } from '@/utils/ethers-utils'
 import { isGs026PreCheckError } from '@/services/tx/executionPreChecks'
+import { getCgwErrorInfo } from '@/utils/cgw-errors'
 import ErrorMessage from '@/components/tx/ErrorMessage'
+import { getLedgerDeviceError, getLedgerUserMessage } from '@/services/onboard/ledger-errors'
 
 export const COULD_NOT_SUBMIT_MESSAGE = 'Could not submit the transaction.'
 export const COULD_NOT_SUBMIT_RETRY_MESSAGE = 'Could not submit the transaction. Try again.'
@@ -34,6 +36,18 @@ const TxSubmitError = ({
   context?: 'estimation' | 'execution'
 }): ReactElement => {
   const chain = useCurrentChain()
+
+  // The Ledger refused before anything was broadcast, and it said why. Its own
+  // reason beats every generic classification below — matching on the wrapped
+  // message would only rediscover viem's "unknown RPC error" (WA-3243).
+  const ledgerError = getLedgerDeviceError(error)
+  if (ledgerError) {
+    return (
+      <ErrorMessage error={error} level="error" context={context}>
+        {getLedgerUserMessage(ledgerError)}
+      </ErrorMessage>
+    )
+  }
 
   // A failed GS026 pre-check blocked the broadcast — show its specific,
   // cause-aware message (stale nonce / not a signer / bad signature).
@@ -61,6 +75,18 @@ const TxSubmitError = ({
     return (
       <ErrorMessage error={error} level="warning" context={context}>
         {RATE_LIMIT_USER_MESSAGE}
+      </ErrorMessage>
+    )
+  }
+
+  // The Safe Client Gateway answered with a known response state. Show the
+  // agreed copy — never the response body, which can be an HTML error page —
+  // and let ErrorMessage render the code-only support reference (WA-3252).
+  const cgwError = getCgwErrorInfo(error)
+  if (cgwError) {
+    return (
+      <ErrorMessage error={error} level="error" context={context}>
+        {cgwError.message}
       </ErrorMessage>
     )
   }
