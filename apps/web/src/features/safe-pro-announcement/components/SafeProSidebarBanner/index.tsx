@@ -12,7 +12,7 @@ const SafeProSidebarBanner = ({ className }: { className?: string }) => (
     data-testid="safe-pro-sidebar-banner"
   >
     <span className={cn('flex shrink-0 items-center rounded-sm px-2 py-1.5', css.proChip)}>
-      <ProWordmark className="h-2 w-[21px]" />
+      <ProWordmark className="h-2 w-[21px] overflow-visible" />
     </span>
 
     <div className="flex w-full flex-col gap-1">
