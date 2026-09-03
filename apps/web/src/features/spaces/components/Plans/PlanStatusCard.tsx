@@ -7,10 +7,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Typography } from '@/components/ui/typography'
 import { formatDate } from '@safe-global/utils/utils/date'
+import { TRIAL_DISCLAIMER } from '@/features/safe-pro-announcement'
 import type { Meter, PlansData } from './types'
-
-export const TRIAL_TOOLTIP =
-  "Your paid subscription only starts after you add billing details. If you don't add them before the trial ends, your Workspace will be locked. Your Safe accounts remain available outside the Workspace."
 
 export const remaining = ({ used, quota }: Meter): number | null => (quota === null ? null : Math.max(quota - used, 0))
 
@@ -93,7 +91,7 @@ export default function PlanStatusCard({
                 {isTrial
                   ? `Your free trial is active until ${endDate}. Add billing details before then to keep your Workspace.`
                   : `Your plan renews on ${endDate}.`}
-                {isTrial && <InfoTip text={TRIAL_TOOLTIP} />}
+                {isTrial && <InfoTip text={TRIAL_DISCLAIMER} />}
               </Typography>
             )}
           </div>

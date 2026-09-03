@@ -39,12 +39,15 @@ const EmptyStateAddAction = () => {
 }
 
 const DASHBOARD_LIST_DISPLAY_LIMIT = 5
+const TRIAL_DAYS = 60
+const DAY_MS = 24 * 60 * 60 * 1000
 const PENDING_TX_DISPLAY_LIMIT = 4
 
 const SpaceDashboard = () => {
   const { AccountsWidget, $isReady } = useLoadFeature(MyAccountsFeature)
   const { PendingTxWidget } = useLoadFeature(SpacesFeature)
-  const { SafeProAnnouncementModal, SafeProLockedWorkspace } = useLoadFeature(SafeProFeature)
+  const { SafeProAnnouncementModal, SafeProLockedWorkspace, SafeProTrialActivatedModal } =
+    useLoadFeature(SafeProFeature)
   const { allSafes: safes, isLoading: isSafesLoading } = useSpaceSafes()
   const safeItems = flattenSafeItems(safes)
   const spaceId = useCurrentSpaceId()
@@ -59,6 +62,7 @@ const SpaceDashboard = () => {
   } = useSpacePendingTransactions(PENDING_TX_DISPLAY_LIMIT)
   const [setupDismissed, setSetupDismissed] = useState(false)
   const [isTrialOpen, setIsTrialOpen] = useState(false)
+  const [trialEndsAt, setTrialEndsAt] = useState<number>()
   const [dismissedSpaces = {}] = useLocalStorage<Record<string, number>>('setupWidgetDismissed')
   const isSetupDismissedForSpace = spaceId ? (dismissedSpaces[spaceId] ?? 0) > Date.now() : false
   useTrackSpace(safes, activeMembers)
@@ -132,10 +136,18 @@ const SpaceDashboard = () => {
         </Typography>
         <SafeProLockedWorkspace onStartTrial={() => setIsTrialOpen(true)} />
         <StartTrialModal
-          trialDays={60}
+          trialDays={TRIAL_DAYS}
           open={isTrialOpen}
           onOpenChange={setIsTrialOpen}
-          onContinue={() => setIsTrialOpen(false)}
+          onContinue={() => {
+            setIsTrialOpen(false)
+            setTrialEndsAt(Date.now() + TRIAL_DAYS * DAY_MS)
+          }}
+        />
+        <SafeProTrialActivatedModal
+          open={trialEndsAt !== undefined}
+          onOpenChange={() => setTrialEndsAt(undefined)}
+          trialEndsAt={trialEndsAt ?? 0}
         />
       </div>
     )

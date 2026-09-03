@@ -7,3 +7,4 @@ export type { SafeProContract } from './contract'
 
 export { useIsSafeProEnabled } from './hooks/useIsSafeProEnabled'
 export { useSafeProAnnouncement } from './hooks/useSafeProAnnouncement'
+export { TRIAL_DISCLAIMER } from './constants'

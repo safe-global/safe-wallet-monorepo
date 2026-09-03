@@ -6,8 +6,8 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { List, ListItem } from '@/components/ui/list'
 import { Typography } from '@/components/ui/typography'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
+import { TRIAL_DISCLAIMER } from '@/features/safe-pro-announcement'
 import { PlanCard } from './PlanCards'
-import { TRIAL_TOOLTIP } from './PlanStatusCard'
 import { RECOMMENDED_TRIAL_TIER, TRIAL_TIERS } from './fixtures'
 import SelectAccountsStep from './SelectAccountsStep'
 
@@ -110,7 +110,7 @@ const StartTrialSteps = ({
       </div>
 
       <Typography variant="paragraph-small" color="muted" align="center">
-        {TRIAL_TOOLTIP}
+        {TRIAL_DISCLAIMER}
       </Typography>
 
       <Button size="action" accentIcon className="self-center" onClick={() => setStep('accounts')}>

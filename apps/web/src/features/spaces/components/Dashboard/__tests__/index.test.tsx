@@ -132,6 +132,7 @@ function setupUseLoadFeature(txEntries: Array<{ safeAddress: string; txId: strin
     AccountsWidget: () => null,
     SafeProAnnouncementModal: () => <div data-testid="safe-pro-announcement-modal" />,
     SafeProLockedWorkspace: () => <div data-testid="safe-pro-locked-workspace" />,
+    SafeProTrialActivatedModal: () => null,
     $isReady: true,
   })
 }
