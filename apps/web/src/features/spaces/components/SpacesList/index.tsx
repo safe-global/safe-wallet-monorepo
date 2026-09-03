@@ -1,6 +1,10 @@
 import { useLoadFeature } from '@/features/__core__'
 import { MyAccountsFeature } from '@/features/myAccounts'
-import { SafeProFeature, useIsSafeProEnabled } from '@/features/safe-pro-announcement'
+import { SafeProFeature, useIsSafeProEnabled, useSafeProTrialPrompt } from '@/features/safe-pro-announcement'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
+import TrialFlow from '../Plans/TrialFlow'
 import SpaceRow from './SpaceRow'
 import SignInOptions from '../SignInOptions'
 import WorkspaceBanner from '../WorkspaceBanner'
@@ -203,6 +207,8 @@ const SpacesList = () => {
   const { AccountsNavigation } = useLoadFeature(MyAccountsFeature)
   const { SafeProWorkspacesBanner } = useLoadFeature(SafeProFeature)
   const isSafeProEnabled = useIsSafeProEnabled()
+  const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
+  const isDarkMode = useDarkMode()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
@@ -233,6 +239,9 @@ const SpacesList = () => {
     error: error || undefined,
     singleSpaceId,
   })
+
+  const hasNoSpaces = isUserSignedIn && !isSpacesLoading && !error && activeSpaces.length === 0
+  const { isOpen: isTrialOpen, setIsOpen: setIsTrialOpen } = useSafeProTrialPrompt(isSafePro && hasNoSpaces)
 
   const afterSignIn = useCallback(() => {
     setHasSignedIn(true)
@@ -305,6 +314,11 @@ const SpacesList = () => {
             {isSafeProEnabled && <SafeProWorkspacesBanner className="mb-4" />}
             {pendingInviteBanners}
             <NoSpacesState isAtLimit={isAtSpacesLimit} />
+            {isSafePro && (
+              <ShadcnProvider dark={isDarkMode}>
+                <TrialFlow trialDays={30} open={isTrialOpen} onOpenChange={setIsTrialOpen} />
+              </ShadcnProvider>
+            )}
           </>
         )}
       </div>

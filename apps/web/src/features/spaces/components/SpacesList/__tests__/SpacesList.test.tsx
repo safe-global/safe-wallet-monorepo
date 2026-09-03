@@ -51,10 +51,21 @@ jest.mock('@/features/myAccounts', () => ({
 }))
 
 const mockUseIsSafeProEnabled = jest.fn()
+const mockUseHasFeature = jest.fn()
 
 jest.mock('@/features/safe-pro-announcement', () => ({
   SafeProFeature: { name: 'SafeProFeature' },
   useIsSafeProEnabled: () => mockUseIsSafeProEnabled(),
+  useSafeProTrialPrompt: (isReady: boolean) => ({ isOpen: isReady, setIsOpen: jest.fn() }),
+}))
+
+jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
+
+jest.mock('../../Plans/TrialFlow', () => ({
+  __esModule: true,
+  default: ({ trialDays, open }: { trialDays: number; open: boolean }) => (
+    <div data-testid="trial-flow" data-days={trialDays} data-open={open} />
+  ),
 }))
 
 jest.mock('@/features/spaces', () => ({
@@ -122,6 +133,27 @@ describe('SpacesList — auth/expiry state rendering', () => {
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: undefined })
     mockUseSignInRedirect.mockReturnValue({ setHasSignedIn: jest.fn(), redirectLoading: false })
     mockUseIsSafeProEnabled.mockReturnValue(false)
+    mockUseHasFeature.mockReturnValue(false)
+  })
+
+  it('opens the 30-day trial prompt over the empty state once SAFE_PRO is on', () => {
+    mockUseHasFeature.mockReturnValue(true)
+    mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    const flow = screen.getByTestId('trial-flow')
+    expect(flow).toHaveAttribute('data-days', '30')
+    expect(flow).toHaveAttribute('data-open', 'true')
+  })
+
+  it('does not mount the trial flow while SAFE_PRO is off', () => {
+    mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
+
+    render(<SpacesList />)
+
+    expect(screen.queryByTestId('trial-flow')).not.toBeInTheDocument()
   })
 
   describe('SAFE_PRO_ANNOUNCEMENT banner gating', () => {

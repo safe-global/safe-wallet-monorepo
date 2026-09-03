@@ -28,7 +28,7 @@ import { useHasFeature } from '@/hooks/useChains'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { Typography } from '@/components/ui/typography'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import StartTrialModal from '../Plans/StartTrialModal'
+import TrialFlow from '../Plans/TrialFlow'
 
 const EmptyStateAddAction = () => {
   return (
@@ -39,15 +39,12 @@ const EmptyStateAddAction = () => {
 }
 
 const DASHBOARD_LIST_DISPLAY_LIMIT = 5
-const TRIAL_DAYS = 60
-const DAY_MS = 24 * 60 * 60 * 1000
 const PENDING_TX_DISPLAY_LIMIT = 4
 
 const SpaceDashboard = () => {
   const { AccountsWidget, $isReady } = useLoadFeature(MyAccountsFeature)
   const { PendingTxWidget } = useLoadFeature(SpacesFeature)
-  const { SafeProAnnouncementModal, SafeProLockedWorkspace, SafeProTrialActivatedModal } =
-    useLoadFeature(SafeProFeature)
+  const { SafeProAnnouncementModal, SafeProLockedWorkspace } = useLoadFeature(SafeProFeature)
   const { allSafes: safes, isLoading: isSafesLoading } = useSpaceSafes()
   const safeItems = flattenSafeItems(safes)
   const spaceId = useCurrentSpaceId()
@@ -62,7 +59,6 @@ const SpaceDashboard = () => {
   } = useSpacePendingTransactions(PENDING_TX_DISPLAY_LIMIT)
   const [setupDismissed, setSetupDismissed] = useState(false)
   const [isTrialOpen, setIsTrialOpen] = useState(false)
-  const [trialEndsAt, setTrialEndsAt] = useState<number>()
   const [dismissedSpaces = {}] = useLocalStorage<Record<string, number>>('setupWidgetDismissed')
   const isSetupDismissedForSpace = spaceId ? (dismissedSpaces[spaceId] ?? 0) > Date.now() : false
   useTrackSpace(safes, activeMembers)
@@ -135,20 +131,7 @@ const SpaceDashboard = () => {
           {space?.name}
         </Typography>
         <SafeProLockedWorkspace onStartTrial={() => setIsTrialOpen(true)} />
-        <StartTrialModal
-          trialDays={TRIAL_DAYS}
-          open={isTrialOpen}
-          onOpenChange={setIsTrialOpen}
-          onContinue={() => {
-            setIsTrialOpen(false)
-            setTrialEndsAt(Date.now() + TRIAL_DAYS * DAY_MS)
-          }}
-        />
-        <SafeProTrialActivatedModal
-          open={trialEndsAt !== undefined}
-          onOpenChange={() => setTrialEndsAt(undefined)}
-          trialEndsAt={trialEndsAt ?? 0}
-        />
+        <TrialFlow trialDays={60} open={isTrialOpen} onOpenChange={setIsTrialOpen} />
       </div>
     )
   }
