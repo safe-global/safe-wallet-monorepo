@@ -45,7 +45,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",
-    "@faker-js/faker": "^9.3.0",
+    "@faker-js/faker": "^10.5.0",
     "@hookform/devtools": "^4.3.2",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
