@@ -6840,17 +6840,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@faker-js/faker@npm:^9.0.3":
-  version: 9.3.0
-  resolution: "@faker-js/faker@npm:9.3.0"
-  checksum: 10/fa0718766dc46dea06602b1acdccdf3714e5a076f02eab6dbe26d7dc421ccc43a2e7e08767f7832de963fa2a273c2d9e5d4a2a504247ea5fba119a713efc145c
-  languageName: node
-  linkType: hard
-
-"@faker-js/faker@npm:^9.2.0, @faker-js/faker@npm:^9.3.0":
-  version: 9.9.0
-  resolution: "@faker-js/faker@npm:9.9.0"
-  checksum: 10/b24b1be0fb3090d54abaaa3a814f37d1a7551f1207dcd330a1af2c70f6312a8b95ebb82653577757dd62f4cbbb56caa3c83513053253654dc3e286a05040ecbe
+"@faker-js/faker@npm:^10.5.0":
+  version: 10.5.0
+  resolution: "@faker-js/faker@npm:10.5.0"
+  checksum: 10/1f83f46bf4dd0aa4197b72b289d5a73706b0150c9ce2c93066bf4282db8c6f4af19e5da73f62819813cfa4134083ce3a6e708e875fb7e6da745e23a0558b6550
   languageName: node
   linkType: hard
 
@@ -13283,7 +13276,7 @@ __metadata:
     "@eslint/js": "npm:^9.18.0"
     "@ethersproject/shims": "npm:^5.7.0"
     "@expo/vector-icons": "npm:^15.1.1"
-    "@faker-js/faker": "npm:^9.0.3"
+    "@faker-js/faker": "npm:^10.5.0"
     "@formatjs/intl-displaynames": "npm:^6.8.11"
     "@formatjs/intl-getcanonicallocales": "npm:^2.5.4"
     "@formatjs/intl-locale": "npm:^4.2.10"
@@ -13571,7 +13564,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@safe-global/test@workspace:config/test"
   dependencies:
-    "@faker-js/faker": "npm:^9.2.0"
+    "@faker-js/faker": "npm:^10.5.0"
     "@safe-global/store": "workspace:^"
     "@safe-global/types-kit": "npm:^4.0.1"
     ethers: "npm:6.17.0"
@@ -13622,7 +13615,7 @@ __metadata:
     "@emotion/react": "npm:^11.14.0"
     "@emotion/styled": "npm:^11.14.0"
     "@eslint/js": "npm:^9.18.0"
-    "@faker-js/faker": "npm:^9.3.0"
+    "@faker-js/faker": "npm:^10.5.0"
     "@hello-pangea/dnd": "npm:^18.0.1"
     "@hookform/devtools": "npm:^4.3.2"
     "@mui/icons-material": "npm:^6.5.0"
@@ -13690,7 +13683,7 @@ __metadata:
   dependencies:
     "@cowprotocol/sdk-app-data": "npm:5.3.2"
     "@eslint/js": "npm:^9.18.0"
-    "@faker-js/faker": "npm:^9.0.3"
+    "@faker-js/faker": "npm:^10.5.0"
     "@noble/curves": "npm:1.9.7"
     "@noble/hashes": "npm:1.8.0"
     "@testing-library/react": "npm:^16.3.0"
@@ -13774,7 +13767,7 @@ __metadata:
     "@ducanh2912/next-pwa": "npm:^10.2.9"
     "@eslint/eslintrc": "npm:^3.3.1"
     "@eslint/js": "npm:^9.18.0"
-    "@faker-js/faker": "npm:^9.0.3"
+    "@faker-js/faker": "npm:^10.5.0"
     "@gnosis.pm/zodiac": "npm:^4.0.3"
     "@hello-pangea/dnd": "npm:^18.0.1"
     "@ledgerhq/context-module": "npm:^1.8.0"

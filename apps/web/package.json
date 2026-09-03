@@ -134,7 +134,7 @@
     "@cowprotocol/sdk-app-data": "5.3.2",
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.18.0",
-    "@faker-js/faker": "^9.0.3",
+    "@faker-js/faker": "^10.5.0",
     "@mdx-js/loader": "^3.0.1",
     "@mdx-js/react": "^3.0.1",
     "@next/bundle-analyzer": "^15.0.4",
