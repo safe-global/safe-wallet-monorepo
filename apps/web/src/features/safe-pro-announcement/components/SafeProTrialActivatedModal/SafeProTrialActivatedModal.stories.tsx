@@ -11,3 +11,5 @@ const meta = {
 export default meta
 
 export const Default: StoryObj<typeof meta> = {}
+
+export const NewWorkspace: StoryObj<typeof meta> = { args: { ctaHref: '/welcome/create-space' } }

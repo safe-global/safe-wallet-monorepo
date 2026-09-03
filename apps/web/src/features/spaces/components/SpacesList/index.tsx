@@ -316,7 +316,12 @@ const SpacesList = () => {
             <NoSpacesState isAtLimit={isAtSpacesLimit} />
             {isSafePro && (
               <ShadcnProvider dark={isDarkMode}>
-                <TrialFlow trialDays={30} open={isTrialOpen} onOpenChange={setIsTrialOpen} />
+                <TrialFlow
+                  trialDays={30}
+                  activatedHref={AppRoutes.welcome.createSpace}
+                  open={isTrialOpen}
+                  onOpenChange={setIsTrialOpen}
+                />
               </ShadcnProvider>
             )}
           </>

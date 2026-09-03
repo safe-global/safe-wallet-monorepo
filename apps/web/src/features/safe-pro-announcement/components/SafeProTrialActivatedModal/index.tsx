@@ -1,3 +1,5 @@
+import NextLink from 'next/link'
+import type { LinkProps } from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Typography } from '@/components/ui/typography'
@@ -10,10 +12,13 @@ const SafeProTrialActivatedModal = ({
   open,
   onOpenChange,
   trialEndsAt,
+  ctaHref,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   trialEndsAt: number
+  /** Where "Go to Workspace" leads; without it the CTA just closes. */
+  ctaHref?: LinkProps['href']
 }) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent size="sm" surface="card" padding="none">
@@ -30,7 +35,12 @@ const SafeProTrialActivatedModal = ({
             </Typography>
           </div>
 
-          <Button size="lg" className="w-full" onClick={() => onOpenChange(false)}>
+          <Button
+            size="lg"
+            className="w-full"
+            render={ctaHref ? <NextLink href={ctaHref} /> : undefined}
+            onClick={() => onOpenChange(false)}
+          >
             Go to Workspace
           </Button>
         </div>

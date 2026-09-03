@@ -11,4 +11,10 @@ describe('SafeProTrialActivatedModal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Go to Workspace' }))
     expect(onOpenChange).toHaveBeenCalledWith(false)
   })
+
+  it('links the CTA to the create-workspace flow when given a href', () => {
+    render(<SafeProTrialActivatedModal open onOpenChange={jest.fn()} trialEndsAt={0} ctaHref="/welcome/create-space" />)
+
+    expect(screen.getByRole('link', { name: 'Go to Workspace' })).toHaveAttribute('href', '/welcome/create-space')
+  })
 })

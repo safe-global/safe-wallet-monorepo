@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { LinkProps } from 'next/link'
 import { useLoadFeature } from '@/features/__core__'
 import { SafeProFeature } from '@/features/safe-pro-announcement'
 import StartTrialModal from './StartTrialModal'
@@ -9,10 +10,13 @@ export default function TrialFlow({
   trialDays,
   open,
   onOpenChange,
+  activatedHref,
 }: {
   trialDays: 30 | 60
   open: boolean
   onOpenChange: (open: boolean) => void
+  /** Where the confirmation's CTA leads; the locked dashboard just closes it. */
+  activatedHref?: LinkProps['href']
 }) {
   const { SafeProTrialActivatedModal } = useLoadFeature(SafeProFeature)
   const [trialEndsAt, setTrialEndsAt] = useState<number>()
@@ -32,6 +36,7 @@ export default function TrialFlow({
         open={trialEndsAt !== undefined}
         onOpenChange={() => setTrialEndsAt(undefined)}
         trialEndsAt={trialEndsAt ?? 0}
+        ctaHref={activatedHref}
       />
     </>
   )
