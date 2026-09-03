@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
 import { TOWERS } from '../../game/config/towers'
 import type { SelectedTowerInfo } from '../../game/GameApp'
+import type { TargetingMode } from '../../game/config/types'
 import { dps, formatNumber } from '../formatters'
 import { attackTypeLabel, describeSpecial, TARGET_LABEL } from '../towerText'
 import css from '../styles.module.css'
@@ -11,7 +12,15 @@ interface TowerPanelProps {
   onUpgrade: () => void
   onSell: () => void
   onClose: () => void
+  onTargeting: (mode: TargetingMode) => void
 }
+
+const TARGETING_MODES: Array<[TargetingMode, string]> = [
+  ['first', 'First'],
+  ['strongest', 'Strongest'],
+  ['weakest', 'Weakest'],
+  ['closest', 'Closest'],
+]
 
 const Stat = ({ label, value, next }: { label: string; value: string; next?: string }): ReactElement => (
   <div className={css.statCell}>
@@ -22,7 +31,7 @@ const Stat = ({ label, value, next }: { label: string; value: string; next?: str
   </div>
 )
 
-const TowerPanel = ({ selected, gold, onUpgrade, onSell, onClose }: TowerPanelProps): ReactElement => {
+const TowerPanel = ({ selected, gold, onUpgrade, onSell, onClose, onTargeting }: TowerPanelProps): ReactElement => {
   const def = TOWERS[selected.towerId]
   const lvl = def.levels[selected.level - 1]
   const next = selected.level < 3 ? def.levels[selected.level] : undefined
@@ -70,6 +79,27 @@ const TowerPanel = ({ selected, gold, onUpgrade, onSell, onClose }: TowerPanelPr
           </>
         )}
       </div>
+      {def.targets !== 'none' && (
+        <div>
+          <div className={css.statCellLabel}>
+            Targeting <span className={css.kbd}>T</span>
+          </div>
+          <div className={css.speedGroup} role="group" aria-label="Targeting mode" style={{ marginTop: 6 }}>
+            {TARGETING_MODES.map(([mode, label]) => (
+              <button
+                key={mode}
+                type="button"
+                className={`${css.iconButton} ${selected.targeting === mode ? css.iconButtonActive : ''}`}
+                onClick={() => onTargeting(mode)}
+                aria-pressed={selected.targeting === mode}
+                data-testid={`td-targeting-${mode}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       <div className={css.actions}>
         <button
           type="button"

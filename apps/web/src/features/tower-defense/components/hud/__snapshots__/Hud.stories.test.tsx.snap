@@ -2043,8 +2043,7 @@ exports[`./Hud.stories Defeat 1`] = `
                   class="endStatValue"
                 >
                   16
-                  /
-                  30
+                  /30
                 </div>
               </div>
               <div
@@ -2601,6 +2600,57 @@ exports[`./Hud.stories TowerSelected 1`] = `
             </strong>
              
             Slows to 42% for 2.8s
+          </div>
+          <div>
+            <div
+              class="statCellLabel"
+            >
+              Targeting 
+              <span
+                class="kbd"
+              >
+                T
+              </span>
+            </div>
+            <div
+              aria-label="Targeting mode"
+              class="speedGroup"
+              role="group"
+              style="margin-top: 6px;"
+            >
+              <button
+                aria-pressed="true"
+                class="iconButton iconButtonActive"
+                data-testid="td-targeting-first"
+                type="button"
+              >
+                First
+              </button>
+              <button
+                aria-pressed="false"
+                class="iconButton "
+                data-testid="td-targeting-strongest"
+                type="button"
+              >
+                Strongest
+              </button>
+              <button
+                aria-pressed="false"
+                class="iconButton "
+                data-testid="td-targeting-weakest"
+                type="button"
+              >
+                Weakest
+              </button>
+              <button
+                aria-pressed="false"
+                class="iconButton "
+                data-testid="td-targeting-closest"
+                type="button"
+              >
+                Closest
+              </button>
+            </div>
           </div>
           <div
             class="actions"
@@ -5377,8 +5427,7 @@ exports[`./Hud.stories Victory 1`] = `
                   class="endStatValue"
                 >
                   30
-                  /
-                  30
+                  /30
                 </div>
               </div>
               <div
@@ -5443,6 +5492,13 @@ exports[`./Hud.stories Victory 1`] = `
             >
               <button
                 class="primaryButton"
+                data-testid="td-endless"
+                type="button"
+              >
+                Continue in endless mode
+              </button>
+              <button
+                class="secondaryButton"
                 data-testid="td-restart"
                 type="button"
               >

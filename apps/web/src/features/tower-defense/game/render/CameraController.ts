@@ -22,6 +22,7 @@ export class CameraController {
   pitch = 0.98
   distance = 24
   readonly keys = new Set<string>()
+  private shakeAmount = 0
   private drag: { button: number; x: number; y: number; moved: number } | null = null
   private readonly bounds: CameraBounds
   private readonly forward = new THREE.Vector3()
@@ -93,9 +94,15 @@ export class CameraController {
     if (this.keys.has('KeyA') || this.keys.has('ArrowLeft')) dx -= speed
     if (this.keys.has('KeyD') || this.keys.has('ArrowRight')) dx += speed
     if (dx !== 0 || dz !== 0) this.pan(dx, dz)
+    this.shakeAmount = Math.max(0, this.shakeAmount - dt * 2.5)
     if (this.keys.has('KeyQ')) this.yaw += ROTATE_SPEED * dt
     if (this.keys.has('KeyE')) this.yaw -= ROTATE_SPEED * dt
     this.apply()
+  }
+
+  /** Kicks off a decaying camera shake (used when the treasury takes a hit). */
+  shake(strength = 1): void {
+    this.shakeAmount = Math.min(1.5, this.shakeAmount + strength)
   }
 
   focus(x: number, z: number): void {
@@ -111,5 +118,11 @@ export class CameraController {
       this.target.z + Math.cos(this.yaw) * horizontal,
     )
     this.camera.lookAt(this.target)
+    if (this.shakeAmount > 0) {
+      const k = this.shakeAmount * this.shakeAmount * 0.35
+      this.camera.position.x += (Math.random() - 0.5) * k
+      this.camera.position.y += (Math.random() - 0.5) * k
+      this.camera.position.z += (Math.random() - 0.5) * k
+    }
   }
 }

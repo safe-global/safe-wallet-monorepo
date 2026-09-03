@@ -63,6 +63,7 @@ export class GameRenderer {
   private readonly pulses = new PulseSystem()
   private readonly floating: FloatingTextLayer
   private readonly textLayer: HTMLDivElement
+  private readonly flashLayer: HTMLDivElement
   private readonly towerViews = new Map<number, TowerView>()
   private readonly enemyViews = new Map<number, EnemyView>()
   private readonly projectileViews = new Map<number, THREE.Object3D>()
@@ -106,6 +107,15 @@ export class GameRenderer {
     this.textLayer.style.overflow = 'hidden'
     container.appendChild(this.textLayer)
     this.floating = new FloatingTextLayer(this.textLayer, options.floatingTextClasses)
+
+    this.flashLayer = document.createElement('div')
+    this.flashLayer.style.position = 'absolute'
+    this.flashLayer.style.inset = '0'
+    this.flashLayer.style.pointerEvents = 'none'
+    this.flashLayer.style.background =
+      'radial-gradient(ellipse at center, rgba(255,95,114,0) 45%, rgba(255,95,114,0.85) 100%)'
+    this.flashLayer.style.opacity = '0'
+    container.appendChild(this.flashLayer)
 
     this.scene.background = new THREE.Color(COLORS.background)
     this.scene.fog = new THREE.FogExp2(COLORS.background, 0.016)
@@ -272,6 +282,7 @@ export class GameRenderer {
     this.syncEnemies(dt)
     this.syncProjectiles()
     this.env.update(dt, this.time, this.sim.treasury / this.sim.maxTreasury, this.damageFlash)
+    this.flashLayer.style.opacity = String(Math.min(1, this.damageFlash * 0.9))
     this.particles.update(dt)
     this.beams.update(dt)
     this.pulses.update(dt)
@@ -341,6 +352,7 @@ export class GameRenderer {
       }
       case 'leak':
         this.damageFlash = 1
+        this.camera.shake(0.8)
         this.particles.emit(
           { x: event.pos.x, y: 1.4, z: event.pos.z },
           { count: 30, color: COLORS.danger, speed: 3.5, life: 0.9, size: 0.24 },
@@ -348,6 +360,10 @@ export class GameRenderer {
         this.floating.add({ x: event.pos.x, y: 3.2, z: event.pos.z }, `-${event.drain} ETH`, 'danger', 1.4)
         break
       case 'spawn':
+        if (event.boss) {
+          this.camera.shake(1.2)
+          this.pulses.add(event.pos, 4, COLORS.danger, 1.4)
+        }
         this.particles.emit(
           { x: event.pos.x, y: 1, z: event.pos.z },
           {
@@ -595,5 +611,6 @@ export class GameRenderer {
     this.renderer.dispose()
     this.renderer.domElement.remove()
     this.textLayer.remove()
+    this.flashLayer.remove()
   }
 }

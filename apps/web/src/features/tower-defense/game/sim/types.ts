@@ -1,5 +1,6 @@
 import type {
   AttackType,
+  TargetingMode,
   DotEffect,
   EnemyDef,
   EnemyId,
@@ -51,6 +52,7 @@ export interface TowerState {
   kills: number
   damageDealt: number
   builtAt: number
+  targeting: TargetingMode
 }
 
 export interface ProjectileState {

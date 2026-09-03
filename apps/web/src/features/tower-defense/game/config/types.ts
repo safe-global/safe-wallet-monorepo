@@ -32,6 +32,8 @@ export type EnemyId =
 
 export type ProjectileKind = 'bolt' | 'shell' | 'tracer' | 'dart'
 
+export type TargetingMode = 'first' | 'strongest' | 'weakest' | 'closest'
+
 export interface GridCell {
   c: number
   r: number

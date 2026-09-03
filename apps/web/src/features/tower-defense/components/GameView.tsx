@@ -63,7 +63,11 @@ const Hud = ({
 
   const isOver = snapshot.phase === 'won' || snapshot.phase === 'lost'
   useEffect(() => {
-    if (!isOver || recorded.current) return
+    if (!isOver) {
+      recorded.current = false
+      return
+    }
+    if (recorded.current) return
     recorded.current = true
     const result = recordScore(snapshot.difficulty, {
       score: snapshot.score,
@@ -92,13 +96,22 @@ const Hud = ({
           onUpgrade={() => controller.upgradeSelected()}
           onSell={() => controller.sellSelected()}
           onClose={() => controller.selectTower(null)}
+          onTargeting={(mode) => controller.setTargeting(mode)}
         />
       )}
       <BuildBar snapshot={snapshot} onSelect={(id) => controller.setBuildTower(id)} />
       <Toast toast={snapshot.toast} />
       {snapshot.paused && !isOver && <div className={css.pausedBanner}>Paused</div>}
       {helpOpen && <HelpOverlay onClose={() => setHelpOpen(false)} />}
-      {isOver && <EndScreen snapshot={snapshot} isNewBest={isNewBest} onRestart={onRestart} onMenu={onExit} />}
+      {isOver && (
+        <EndScreen
+          snapshot={snapshot}
+          isNewBest={isNewBest}
+          onRestart={onRestart}
+          onMenu={onExit}
+          onContinueEndless={snapshot.endless ? undefined : () => controller.continueEndless()}
+        />
+      )}
     </div>
   )
 }

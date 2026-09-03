@@ -26,6 +26,7 @@ export const makeSnapshot = (overrides: Partial<GameSnapshot> = {}): GameSnapsho
   paused: false,
   muted: false,
   bloom: true,
+  endless: false,
   buildTowerId: null,
   selected: null,
   nextWave: preview(4),

@@ -42,7 +42,7 @@ const TopBar = ({ snapshot, onSpeed, onPause, onMute, onBloom, onHelp, onExit }:
       <div className={css.waveBadge}>
         <span className={css.statLabel}>Wave</span>
         <span className={css.waveBadgeValue} data-testid="td-wave">
-          {snapshot.wave}/{snapshot.totalWaves}
+          {snapshot.wave}/{snapshot.endless ? '∞' : snapshot.totalWaves}
         </span>
       </div>
 

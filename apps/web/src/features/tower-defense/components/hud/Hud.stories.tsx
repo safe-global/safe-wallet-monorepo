@@ -27,12 +27,19 @@ const HudPreview = ({ snapshot }: { snapshot: GameSnapshot }): ReactElement => (
       />
       <WavePanel snapshot={snapshot} onCallWave={noop} />
       {snapshot.selected && (
-        <TowerPanel selected={snapshot.selected} gold={snapshot.gold} onUpgrade={noop} onSell={noop} onClose={noop} />
+        <TowerPanel
+          selected={snapshot.selected}
+          gold={snapshot.gold}
+          onUpgrade={noop}
+          onSell={noop}
+          onClose={noop}
+          onTargeting={noop}
+        />
       )}
       <BuildBar snapshot={snapshot} onSelect={noop} />
       <Toast toast={snapshot.toast} />
       {(snapshot.phase === 'won' || snapshot.phase === 'lost') && (
-        <EndScreen snapshot={snapshot} isNewBest onRestart={noop} onMenu={noop} />
+        <EndScreen snapshot={snapshot} isNewBest onRestart={noop} onMenu={noop} onContinueEndless={noop} />
       )}
     </div>
   </div>
@@ -76,6 +83,7 @@ export const TowerSelected: Story = {
         upgradeCost: 150,
         sellValue: 133,
         auraBonus: 1.28,
+        targeting: 'first',
       },
     }),
   },

@@ -17,6 +17,7 @@ export type SoundName =
   | 'select'
   | 'error'
   | 'waveStart'
+  | 'boss'
   | 'waveCleared'
   | 'won'
   | 'lost'
@@ -213,6 +214,10 @@ export class SoundEngine {
       case 'waveStart':
         ;[220, 220, 330].forEach((f, i) => this.tone(f, f * 0.98, 0.35, 'sawtooth', 0.25, t + i * 0.22))
         this.noise(0.6, 0.12, 800, t)
+        break
+      case 'boss':
+        ;[110, 110, 82.4, 110].forEach((f, i) => this.tone(f, f * 0.97, 0.6, 'sawtooth', 0.35, t + i * 0.35))
+        this.noise(1.2, 0.18, 300, t)
         break
       case 'waveCleared':
         ;[523, 659, 784].forEach((f, i) => this.tone(f, f, 0.3, 'triangle', 0.2, t + i * 0.1))

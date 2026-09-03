@@ -17,6 +17,7 @@ export const CONTROLS: Array<[string, string]> = [
   ['Cancel / deselect', 'Esc or right click'],
   ['Upgrade selected', 'U'],
   ['Sell selected', 'X'],
+  ['Cycle targeting', 'T'],
   ['Send next wave', 'Space'],
   ['Pause', 'P'],
   ['Game speed', 'F'],

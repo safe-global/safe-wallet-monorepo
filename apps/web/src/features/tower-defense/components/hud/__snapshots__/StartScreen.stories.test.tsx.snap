@@ -277,6 +277,16 @@ exports[`./StartScreen.stories Default 1`] = `
               </li>
               <li>
                 <span>
+                  Cycle targeting
+                </span>
+                <span
+                  class="kbd"
+                >
+                  T
+                </span>
+              </li>
+              <li>
+                <span>
                   Send next wave
                 </span>
                 <span
@@ -654,6 +664,16 @@ exports[`./StartScreen.stories WithBestScores 1`] = `
                   class="kbd"
                 >
                   X
+                </span>
+              </li>
+              <li>
+                <span>
+                  Cycle targeting
+                </span>
+                <span
+                  class="kbd"
+                >
+                  T
                 </span>
               </li>
               <li>

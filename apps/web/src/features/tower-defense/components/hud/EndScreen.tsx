@@ -9,9 +9,10 @@ interface EndScreenProps {
   isNewBest: boolean
   onRestart: () => void
   onMenu: () => void
+  onContinueEndless?: () => void
 }
 
-const EndScreen = ({ snapshot, isNewBest, onRestart, onMenu }: EndScreenProps): ReactElement => {
+const EndScreen = ({ snapshot, isNewBest, onRestart, onMenu, onContinueEndless }: EndScreenProps): ReactElement => {
   const won = snapshot.phase === 'won'
   return (
     <div className={css.overlay} data-testid="td-end-screen">
@@ -33,7 +34,8 @@ const EndScreen = ({ snapshot, isNewBest, onRestart, onMenu }: EndScreenProps): 
           <div className={css.endStat}>
             <div className={css.statCellLabel}>Waves survived</div>
             <div className={css.endStatValue}>
-              {won ? snapshot.totalWaves : Math.max(0, snapshot.wave - 1)}/{snapshot.totalWaves}
+              {won ? snapshot.totalWaves : Math.max(0, snapshot.wave - 1)}
+              {Number.isFinite(snapshot.totalWaves) ? `/${snapshot.totalWaves}` : ''}
             </div>
           </div>
           <div className={css.endStat}>
@@ -54,7 +56,17 @@ const EndScreen = ({ snapshot, isNewBest, onRestart, onMenu }: EndScreenProps): 
           </div>
         </div>
         <div className={css.startRow}>
-          <button type="button" className={css.primaryButton} onClick={onRestart} data-testid="td-restart">
+          {won && onContinueEndless && (
+            <button type="button" className={css.primaryButton} onClick={onContinueEndless} data-testid="td-endless">
+              Continue in endless mode
+            </button>
+          )}
+          <button
+            type="button"
+            className={won && onContinueEndless ? css.secondaryButton : css.primaryButton}
+            onClick={onRestart}
+            data-testid="td-restart"
+          >
             Play again
           </button>
           <button type="button" className={css.secondaryButton} onClick={onMenu}>

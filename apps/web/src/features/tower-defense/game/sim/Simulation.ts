@@ -1,6 +1,6 @@
 import { computeDamage } from '../config/combat'
 import type { DifficultyDef } from '../config/types'
-import type { Difficulty, EnemyId, GridCell, ProjectileKind, TowerId, Vec2 } from '../config/types'
+import type { Difficulty, EnemyId, GridCell, ProjectileKind, TargetingMode, TowerId, Vec2 } from '../config/types'
 import { DIFFICULTIES } from '../config/difficulty'
 import { ENEMIES } from '../config/enemies'
 import {
@@ -63,6 +63,7 @@ export class Simulation {
   readonly maxTreasury: number
   waveIndex = 0
   kills = 0
+  endless = false
   leaked = 0
   nextWaveAt: number | null
   lastWaveSpawnEnd = 0
@@ -109,7 +110,12 @@ export class Simulation {
   }
 
   get canCallNextWave(): boolean {
-    return (this.phase === 'building' || this.phase === 'wave') && this.waveIndex < TOTAL_WAVES && !this.isSpawning
+    return (this.phase === 'building' || this.phase === 'wave') && this.waveIndex < this.totalWaves && !this.isSpawning
+  }
+
+  /** Number of waves in this run; infinite once endless mode is on. */
+  get totalWaves(): number {
+    return this.endless ? Infinity : TOTAL_WAVES
   }
 
   get wavesCleared(): number {
@@ -159,6 +165,7 @@ export class Simulation {
       pos: cellToWorld(this.map, cell),
       cooldownLeft: 0,
       targetUid: null,
+      targeting: 'first',
       kills: 0,
       damageDealt: 0,
       builtAt: this.time,
@@ -168,6 +175,23 @@ export class Simulation {
     this.towerByCell.set(cellKey(cell.c, cell.r), tower.uid)
     this.events.push({ type: 'build', pos: tower.pos, towerId })
     return tower
+  }
+
+  setTargeting(uid: number, mode: TargetingMode): boolean {
+    const tower = this.towers.get(uid)
+    if (!tower) return false
+    tower.targeting = mode
+    tower.targetUid = null
+    return true
+  }
+
+  /** After beating wave 30 the player may keep going against generated waves. */
+  continueEndless(): boolean {
+    if (this.phase !== 'won') return false
+    this.endless = true
+    this.phase = 'building'
+    this.nextWaveAt = this.time + this.difficulty.buildTime
+    return true
   }
 
   upgradeCost(tower: TowerState): number | null {
@@ -208,7 +232,7 @@ export class Simulation {
   }
 
   private startWave(earlyBonus: number): void {
-    const wave = getWave(this.waveIndex + 1)
+    const wave = getWave(this.waveIndex + 1, this.endless)
     if (!wave) return
     this.waveIndex = wave.index
     this.phase = 'wave'
@@ -226,7 +250,8 @@ export class Simulation {
     this.spawnQueue.sort((a, b) => a.time - b.time)
     this.waveRemaining.set(wave.index, total)
     this.lastWaveSpawnEnd = lastSpawn
-    this.nextWaveAt = this.waveIndex < TOTAL_WAVES ? lastSpawn + this.difficulty.buildTime * WAVE_GAP_RATIO + 3 : null
+    this.nextWaveAt =
+      this.waveIndex < this.totalWaves ? lastSpawn + this.difficulty.buildTime * WAVE_GAP_RATIO + 3 : null
     this.events.push({ type: 'waveStart', index: wave.index, title: wave.title, earlyBonus })
   }
 
@@ -279,7 +304,7 @@ export class Simulation {
     if (this.isOver) return
     this.time += dt
 
-    if (this.nextWaveAt !== null && this.time >= this.nextWaveAt && this.waveIndex < TOTAL_WAVES) {
+    if (this.nextWaveAt !== null && this.time >= this.nextWaveAt && this.waveIndex < this.totalWaves) {
       this.startWave(0)
     }
 
@@ -396,12 +421,8 @@ export class Simulation {
       const current = tower.targetUid === null ? undefined : this.enemies.get(tower.targetUid)
       const keepTarget = current && this.isTargetable(tower, current) && distance2(tower.pos, current.pos) <= lvl.range
       if (!keepTarget) {
-        const candidates = this.enemiesInRange(tower, lvl.range)
-        tower.targetUid = candidates.length
-          ? candidates.reduce((best, e) =>
-              e.dist / this.routeLength(e) > best.dist / this.routeLength(best) ? e : best,
-            ).uid
-          : null
+        const picked = this.pickTarget(tower, this.enemiesInRange(tower, lvl.range))
+        tower.targetUid = picked ? picked.uid : null
       }
       if (tower.cooldownLeft > 0 || tower.targetUid === null) continue
       const target = this.enemies.get(tower.targetUid)
@@ -412,6 +433,22 @@ export class Simulation {
       if (projectile === 'beam') this.fireBeam(tower, target, bonus)
       else if (projectile === 'pulse') this.firePulse(tower, bonus)
       else if (projectile !== 'none') this.fireProjectile(tower, target, bonus, projectile)
+    }
+  }
+
+  /** Chooses a target according to the tower's targeting mode. */
+  pickTarget(tower: TowerState, candidates: EnemyState[]): EnemyState | undefined {
+    if (candidates.length === 0) return undefined
+    const progress = (e: EnemyState): number => e.dist / this.routeLength(e)
+    switch (tower.targeting) {
+      case 'strongest':
+        return candidates.reduce((best, e) => (e.hp > best.hp ? e : best))
+      case 'weakest':
+        return candidates.reduce((best, e) => (e.hp < best.hp ? e : best))
+      case 'closest':
+        return candidates.reduce((best, e) => (distance2(tower.pos, e.pos) < distance2(tower.pos, best.pos) ? e : best))
+      default:
+        return candidates.reduce((best, e) => (progress(e) > progress(best) ? e : best))
     }
   }
 
@@ -607,7 +644,7 @@ export class Simulation {
   /** Once nothing is alive or queued the map is calm again; after the last wave that means victory. */
   private checkWaveProgress(): void {
     if (this.waveIndex === 0 || this.isSpawning || this.enemies.size > 0 || this.isOver) return
-    if (this.waveIndex >= TOTAL_WAVES && this.clearedWaves.size >= TOTAL_WAVES) {
+    if (!this.endless && this.waveIndex >= TOTAL_WAVES && this.clearedWaves.size >= TOTAL_WAVES) {
       this.phase = 'won'
       this.nextWaveAt = null
       this.events.push({ type: 'won' })

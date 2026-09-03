@@ -252,6 +252,82 @@ describe('Simulation', () => {
     })
   })
 
+  describe('targeting modes', () => {
+    const spawnAt = (sim: Simulation, id: string, dist: number, hpScale = 1) => {
+      const spawnEnemy = (
+        sim as unknown as { spawnEnemy: (id: string, mult: number, wave: number, dist: number) => { uid: number } }
+      ).spawnEnemy.bind(sim)
+      return spawnEnemy(id, hpScale, 1, dist)
+    }
+
+    it('picks first, strongest, weakest or closest attackers', () => {
+      const sim = new Simulation({ difficulty: 'mainnet' })
+      const tower = sim.placeTower('shield', NEAR_PATH)
+      if (!tower) throw new Error('tower not placed')
+      const weakFar = spawnAt(sim, 'phisher', 4.4, 0.5)
+      const strongNear = spawnAt(sim, 'blindSigner', 2.6, 1)
+      const midLead = spawnAt(sim, 'drainer', 5.2, 1)
+      const all = Array.from(sim.enemies.values())
+      expect(sim.pickTarget(tower, all)?.uid).toBe(midLead.uid)
+      sim.setTargeting(tower.uid, 'strongest')
+      expect(tower.targeting).toBe('strongest')
+      expect(tower.targetUid).toBeNull()
+      expect(sim.pickTarget(tower, all)?.uid).toBe(strongNear.uid)
+      sim.setTargeting(tower.uid, 'weakest')
+      expect(sim.pickTarget(tower, all)?.uid).toBe(weakFar.uid)
+      sim.setTargeting(tower.uid, 'closest')
+      const closest = all.reduce((best, e) =>
+        Math.hypot(e.pos.x - tower.pos.x, e.pos.z - tower.pos.z) <
+        Math.hypot(best.pos.x - tower.pos.x, best.pos.z - tower.pos.z)
+          ? e
+          : best,
+      )
+      expect(sim.pickTarget(tower, all)?.uid).toBe(closest.uid)
+      expect(sim.pickTarget(tower, [])).toBeUndefined()
+      expect(sim.setTargeting(999, 'first')).toBe(false)
+    })
+  })
+
+  describe('endless mode', () => {
+    it('continues past wave 30 with generated waves and no victory', () => {
+      const sim = new Simulation({ difficulty: 'testnet' })
+      sim.gold = 1e9
+      let guard = 0
+      const killEverything = (): void => {
+        for (const enemy of Array.from(sim.enemies.values())) {
+          enemy.shieldHits = 0
+          sim.applyDamage(enemy, 1e9, null, 1)
+        }
+      }
+      while (sim.phase !== 'won' && guard++ < 100000) {
+        if (sim.canCallNextWave) sim.callNextWave()
+        sim.step(STEP)
+        sim.drainEvents()
+        killEverything()
+      }
+      expect(sim.phase).toBe('won')
+      expect(sim.continueEndless()).toBe(true)
+      expect(sim.continueEndless()).toBe(false)
+      expect(sim.endless).toBe(true)
+      expect(sim.phase).toBe('building')
+      expect(sim.totalWaves).toBe(Infinity)
+      expect(sim.canCallNextWave).toBe(true)
+      sim.callNextWave()
+      expect(sim.waveIndex).toBe(31)
+      const events = advance(sim, 1)
+      expect(events).toContainEqual(expect.objectContaining({ type: 'waveStart', index: 31 }))
+      guard = 0
+      while (sim.wavesCleared < 31 && guard++ < 20000) {
+        sim.step(STEP)
+        sim.drainEvents()
+        killEverything()
+      }
+      expect(sim.wavesCleared).toBe(31)
+      expect(sim.phase).not.toBe('won')
+      expect(sim.waveCountdown).not.toBeNull()
+    })
+  })
+
   describe('overlapping waves', () => {
     it('clears each wave independently when its last attacker is gone', () => {
       const sim = new Simulation({ difficulty: 'mainnet' })

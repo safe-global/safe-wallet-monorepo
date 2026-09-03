@@ -53,6 +53,12 @@ class FakeController implements GameController {
   toggleBloom = (): void => {
     this.calls.push('bloom')
   }
+  setTargeting = (mode: string): void => {
+    this.calls.push(`targeting:${mode}`)
+  }
+  continueEndless = (): void => {
+    this.calls.push('endless')
+  }
   cancel = (): void => {
     this.calls.push('cancel')
   }
@@ -115,6 +121,7 @@ describe('TowerDefensePage', () => {
           upgradeCost: 200,
           sellValue: 182,
           auraBonus: 1.15,
+          targeting: 'first',
         },
       })
     })
@@ -125,7 +132,8 @@ describe('TowerDefensePage', () => {
     expect(panel).toHaveTextContent('+15% aura')
     fireEvent.click(screen.getByTestId('td-upgrade'))
     fireEvent.click(screen.getByTestId('td-sell'))
-    expect(controller.calls).toEqual(['upgrade', 'sell'])
+    fireEvent.click(screen.getByTestId('td-targeting-strongest'))
+    expect(controller.calls).toEqual(['upgrade', 'sell', 'targeting:strongest'])
   })
 
   it('shows the end screen, records the best score and can return to the menu', async () => {
@@ -146,6 +154,23 @@ describe('TowerDefensePage', () => {
     await waitFor(() => expect(screen.getByTestId('td-start-screen')).toBeInTheDocument())
     expect(controller.disposed).toBe(true)
     expect(screen.getByTestId('td-difficulty-mainnet')).toHaveTextContent('Best: 4,321 · wave 12')
+  })
+
+  it('offers endless mode after a victory', async () => {
+    const { controller } = setup()
+    fireEvent.click(screen.getByTestId('td-start'))
+    await waitFor(() => expect(screen.getByTestId('td-topbar')).toBeInTheDocument())
+    act(() => {
+      controller.update({ phase: 'won', wave: 30, score: 9999 })
+    })
+    expect(screen.getByTestId('td-end-screen')).toHaveTextContent('Treasury secured')
+    fireEvent.click(screen.getByTestId('td-endless'))
+    expect(controller.calls).toEqual(['endless'])
+    act(() => {
+      controller.update({ phase: 'building', endless: true, totalWaves: Infinity, wave: 30 })
+    })
+    expect(screen.queryByTestId('td-end-screen')).not.toBeInTheDocument()
+    expect(screen.getByTestId('td-wave')).toHaveTextContent('30/∞')
   })
 
   it('toggles the help overlay with the H key', async () => {

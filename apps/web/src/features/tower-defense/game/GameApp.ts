@@ -1,6 +1,7 @@
-import type { Difficulty, EnemyId, GridCell, TowerId } from './config/types'
+import type { Difficulty, EnemyId, GridCell, TargetingMode, TowerId } from './config/types'
 import { TOWERS, sellValue } from './config/towers'
-import { getWave, TOTAL_WAVES, waveEnemyCounts } from './config/waves'
+import { ENEMIES } from './config/enemies'
+import { getWave, waveEnemyCounts } from './config/waves'
 import { Simulation } from './sim/Simulation'
 import type { Phase, SimEvent, TowerState } from './sim/types'
 import { SoundEngine } from './audio/SoundEngine'
@@ -17,6 +18,7 @@ export interface SelectedTowerInfo {
   upgradeCost: number | null
   sellValue: number
   auraBonus: number
+  targeting: TargetingMode
 }
 
 export interface WavePreview {
@@ -44,6 +46,7 @@ export interface GameSnapshot {
   paused: boolean
   muted: boolean
   bloom: boolean
+  endless: boolean
   buildTowerId: TowerId | null
   selected: SelectedTowerInfo | null
   nextWave: WavePreview | null
@@ -132,7 +135,8 @@ export class GameApp {
       phase: sim.phase,
       difficulty: sim.difficulty.id,
       wave: sim.waveIndex,
-      totalWaves: TOTAL_WAVES,
+      totalWaves: sim.totalWaves,
+      endless: sim.endless,
       waveCountdown: sim.waveCountdown,
       canCallWave: sim.canCallNextWave,
       gold: Math.floor(sim.gold),
@@ -166,11 +170,12 @@ export class GameApp {
       upgradeCost: this.sim.upgradeCost(tower),
       sellValue: sellValue(tower.def.id, tower.level),
       auraBonus: this.sim.auraBonus(tower),
+      targeting: tower.targeting,
     }
   }
 
   private previewWave(index: number): WavePreview | null {
-    const wave = getWave(index)
+    const wave = getWave(index, this.sim.endless)
     if (!wave) return null
     return { index: wave.index, title: wave.title, intel: wave.intel, enemies: waveEnemyCounts(wave) }
   }
@@ -273,6 +278,30 @@ export class GameApp {
     this.sound.unlock()
     this.sound.toggleMuted()
     this.emit()
+  }
+
+  setTargeting(mode: TargetingMode): void {
+    if (this.selectedUid === null) return
+    if (this.sim.setTargeting(this.selectedUid, mode)) {
+      this.sound.play('select')
+      this.emit()
+    }
+  }
+
+  cycleTargeting(): void {
+    if (this.selectedUid === null) return
+    const tower = this.sim.towers.get(this.selectedUid)
+    if (!tower) return
+    const modes: TargetingMode[] = ['first', 'strongest', 'weakest', 'closest']
+    this.setTargeting(modes[(modes.indexOf(tower.targeting) + 1) % modes.length])
+  }
+
+  continueEndless(): void {
+    if (this.sim.continueEndless()) {
+      this.sound.play('waveStart')
+      this.showToast('Endless mode: the mempool never sleeps', 'success')
+      this.emit()
+    }
   }
 
   toggleBloom(): void {
@@ -388,6 +417,9 @@ export class GameApp {
       case 'KeyF':
         this.cycleSpeed()
         break
+      case 'KeyT':
+        this.cycleTargeting()
+        break
       case 'KeyB':
         this.toggleBloom()
         break
@@ -460,6 +492,13 @@ export class GameApp {
         break
       case 'death':
         this.sound.play(event.boss ? 'bossDeath' : 'death')
+        if (event.boss) this.showToast(`${ENEMIES[event.enemyId].name} neutralised!`, 'success')
+        break
+      case 'spawn':
+        if (event.boss) {
+          this.sound.play('boss')
+          this.showToast(`BOSS: ${ENEMIES[event.enemyId].name} has entered the mempool`, 'danger')
+        }
         break
       case 'leak':
         this.sound.play('leak')

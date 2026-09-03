@@ -1,5 +1,5 @@
 import { ENEMIES } from '../enemies'
-import { getWave, TOTAL_WAVES, waveEnemyCounts, waveHpMultiplier, WAVES } from '../waves'
+import { generateEndlessWave, getWave, TOTAL_WAVES, waveEnemyCounts, waveHpMultiplier, WAVES } from '../waves'
 
 describe('waves', () => {
   it('defines 30 sequentially indexed waves', () => {
@@ -54,5 +54,19 @@ describe('waves', () => {
     ])
     expect(getWave(0)).toBeUndefined()
     expect(getWave(31)).toBeUndefined()
+  })
+
+  it('generates deterministic endless waves past the scripted ones', () => {
+    expect(getWave(31, true)).toEqual(generateEndlessWave(31))
+    expect(getWave(30, true)).toBe(WAVES[29])
+    const w31 = generateEndlessWave(31)
+    const w45 = generateEndlessWave(45)
+    expect(w31.index).toBe(31)
+    expect(w31.hpMultiplier).toBeGreaterThan(waveHpMultiplier(30))
+    w31.groups.forEach((group) => expect(ENEMIES[group.enemy]).toBeDefined())
+    expect(w31.groups.some((g) => ENEMIES[g.enemy].boss)).toBe(false)
+    expect(generateEndlessWave(35).groups.some((g) => ENEMIES[g.enemy].boss)).toBe(true)
+    const total = (wave: typeof w31): number => wave.groups.reduce((sum, g) => sum + g.count, 0)
+    expect(total(w45)).toBeGreaterThan(total(w31))
   })
 })

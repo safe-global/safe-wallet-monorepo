@@ -154,7 +154,40 @@ export const WAVES: WaveDef[] = RAW_WAVES.map((wave, i) => ({
 
 export const TOTAL_WAVES = WAVES.length
 
-export const getWave = (index: number): WaveDef | undefined => WAVES[index - 1]
+const ENDLESS_POOL: EnemyId[] = [
+  'phisher',
+  'drainer',
+  'poisoner',
+  'blindSigner',
+  'lazarus',
+  'socialEngineer',
+  'delegatecall',
+  'mevBot',
+  'spoofedUi',
+  'approvalHijacker',
+]
+const ENDLESS_BOSSES: EnemyId[] = ['rugWhale', 'supplyWorm', 'lazarusCommander']
+
+/** Procedurally composed waves past the scripted 30, for endless mode. Deterministic per index. */
+export const generateEndlessWave = (index: number): WaveDef => {
+  const n = index - TOTAL_WAVES
+  const pick = (k: number): EnemyId => ENDLESS_POOL[(index * 7 + k * 3) % ENDLESS_POOL.length]
+  const groups: WaveGroup[] = [g(pick(0), 12 + n * 2, 0.5), g(pick(1), 8 + n, 0.8, 4), g(pick(2), 6 + n, 1.0, 8)]
+  const isBossWave = n % 5 === 0
+  if (isBossWave) groups.push(g(ENDLESS_BOSSES[(n / 5 - 1) % ENDLESS_BOSSES.length], 1 + Math.floor(n / 15), 6, 10))
+  return {
+    index,
+    title: isBossWave ? `Endless ${n}: boss assault` : `Endless ${n}`,
+    intel: isBossWave
+      ? 'The mempool never sleeps. A boss leads this endless assault.'
+      : 'Beyond the scripted attacks. Every wave is stronger than the last.',
+    hpMultiplier: waveHpMultiplier(index),
+    groups,
+  }
+}
+
+export const getWave = (index: number, endless = false): WaveDef | undefined =>
+  index <= TOTAL_WAVES ? WAVES[index - 1] : endless && index > 0 ? generateEndlessWave(index) : undefined
 
 export const waveEnemyCounts = (wave: WaveDef): Array<{ enemy: EnemyId; count: number }> => {
   const counts = new Map<EnemyId, number>()
