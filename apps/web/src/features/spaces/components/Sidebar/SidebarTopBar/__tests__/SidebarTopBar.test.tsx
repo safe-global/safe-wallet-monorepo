@@ -16,8 +16,8 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
 
 const mockUseHasFeature = jest.fn()
 jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
-jest.mock('../../../Plans/fixtures', () => ({ TRIAL_PLANS: { plan: null } }))
-const mockPlans: { plan: { status: string } | null } = jest.requireMock('../../../Plans/fixtures').TRIAL_PLANS
+const mockPlans: { plan: { status: string } | null } = { plan: null }
+jest.mock('../../../../hooks/useSpacePlan', () => ({ useSpacePlan: () => mockPlans }))
 
 jest.mock('@/hooks/useIsSpaceRoute', () => ({
   useIsSpaceRoute: () => mockUseIsSpaceRoute(),

@@ -9,11 +9,13 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import AuthState from '../AuthState'
 import Plans from './index'
 import { TRIAL_PLANS } from './fixtures'
+import { useSpacePlan } from '../../hooks/useSpacePlan'
 
 export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
   const isDarkMode = useDarkMode()
   const isSafePro = useHasFeature(FEATURES.SAFE_PRO)
   const { SafeProAnnouncement } = useLoadFeature(SafeProFeature)
+  const { plan } = useSpacePlan()
 
   return (
     <AuthState spaceId={spaceId}>
@@ -23,7 +25,7 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
         </Typography>
 
         {isSafePro ? (
-          <Plans data={TRIAL_PLANS} />
+          <Plans data={{ ...TRIAL_PLANS, plan }} />
         ) : (
           <Card size="none" radius="xl" className="w-full">
             <SafeProAnnouncement />

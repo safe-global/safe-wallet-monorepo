@@ -8,7 +8,7 @@ import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { useIsHydrated } from '@/hooks/useIsHydrated'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { TRIAL_PLANS } from '../../Plans/fixtures'
+import { useSpacePlan } from '../../../hooks/useSpacePlan'
 
 export const SidebarTopBar = (): ReactElement => {
   const { state } = useSidebar()
@@ -16,7 +16,9 @@ export const SidebarTopBar = (): ReactElement => {
   const safeAddress = useSafeAddressFromUrl()
   const isSpaceRoute = useIsSpaceRoute()
   const isHydrated = useIsHydrated()
-  const isPaidPro = useHasFeature(FEATURES.SAFE_PRO) === true && TRIAL_PLANS.plan?.status === 'active'
+  const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
+  const { plan } = useSpacePlan()
+  const isPaidPro = isSafePro && plan?.status === 'active'
 
   // Inside a space or an individual safe the logo turns into a "Home" label pill that returns to the
   // top-level accounts view; elsewhere it stays a plain logo linking to that same view.
