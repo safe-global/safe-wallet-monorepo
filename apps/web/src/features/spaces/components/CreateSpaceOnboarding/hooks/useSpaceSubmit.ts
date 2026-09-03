@@ -75,7 +75,7 @@ const useSpaceSubmit = (
       const errorMessage =
         error instanceof Error
           ? error.message
-          : `Failed ${isEditMode ? 'updating' : 'creating'} the workspace. Please try again.`
+          : `Failed ${isEditMode ? 'updating' : 'creating'} the Workspace. Please try again.`
       setError(errorMessage)
       setIsSubmitting(false)
     }

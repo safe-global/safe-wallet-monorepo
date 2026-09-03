@@ -114,7 +114,7 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
         <div className="px-6 py-4">
           <div className="flex flex-col gap-4">
             <Typography variant="paragraph-small" color="muted">
-              An admin has to approve the request before the contact appears in the workspace address book.
+              An admin has to approve the request before the contact appears in the Workspace address book.
             </Typography>
 
             <div className="flex flex-col gap-1">
@@ -149,7 +149,7 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
             {nameError && (
               <Alert variant="warning" outlined={false}>
                 <AlertSeverityIcon variant="warning" />
-                <AlertDescription>Rename this contact to share it with the workspace. {nameError}.</AlertDescription>
+                <AlertDescription>Rename this contact to share it with the Workspace. {nameError}.</AlertDescription>
               </Alert>
             )}
           </div>

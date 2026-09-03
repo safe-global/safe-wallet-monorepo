@@ -1,9 +1,8 @@
-import type { ReactNode } from 'react'
-import type { LucideIcon } from 'lucide-react'
+import type { ComponentType, ReactNode } from 'react'
 import type { SpaceMemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
 interface SidebarItemBase {
-  icon: LucideIcon
+  icon: ComponentType<{ className?: string }>
   label: string
   badge?: number | string
 }

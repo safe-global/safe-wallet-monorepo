@@ -54,7 +54,7 @@ const AddToWorkspaceButton = ({ address, name, chainIds }: AddToWorkspaceButtonP
       setAdded(true)
       dispatch(
         showNotification({
-          message: 'Contact added to workspace',
+          message: 'Contact added to Workspace',
           variant: 'success',
           groupKey: 'add-to-workspace-success',
         }),
@@ -70,7 +70,7 @@ const AddToWorkspaceButton = ({ address, name, chainIds }: AddToWorkspaceButtonP
 
   const button = (
     <Button variant="outline" size="sm" onClick={handleAdd} disabled={isSubmitting || added || !!nameError}>
-      {isSubmitting ? <Spinner className="size-3.5" /> : added ? 'Added' : 'Add to workspace'}
+      {isSubmitting ? <Spinner className="size-3.5" /> : added ? 'Added' : 'Add to Workspace'}
     </Button>
   )
 

@@ -18,6 +18,8 @@ import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrust
 import TrustedSafesModal from '@/components/common/TrustedSafesModal'
 import WelcomeContentCard from '@/components/common/WelcomeContentCard'
 import { DataWidget } from '../DataWidget'
+import { useLoadFeature } from '@/features/__core__'
+import { SafeProFeature, useIsSafeProEnabled } from '@/features/safe-pro-announcement'
 
 type MyAccountsProps = {
   safes: AllSafeItemsGrouped
@@ -27,6 +29,8 @@ type MyAccountsProps = {
 const MyAccountsV2 = ({ safes, onLinkClick }: MyAccountsProps) => {
   const wallet = useWallet()
   const isDarkMode = useDarkMode()
+  const { SafeProBanner, SafeProWorkspacesBanner } = useLoadFeature(SafeProFeature)
+  const isSafeProEnabled = useIsSafeProEnabled()
   const [searchQuery, setSearchQuery] = useState('')
   const modal = useTrustedSafesModal()
   const migration = useMigrationPrompt()
@@ -42,6 +46,13 @@ const MyAccountsV2 = ({ safes, onLinkClick }: MyAccountsProps) => {
         <div className="flex justify-center py-6">
           <AccountsNavigation />
         </div>
+
+        {isSafeProEnabled &&
+          (showList ? (
+            <SafeProWorkspacesBanner className="mb-4" />
+          ) : (
+            <SafeProBanner className="mx-auto -mb-6 w-full max-w-[440px]" />
+          ))}
 
         {showGetStarted && <GetStartedCard />}
 

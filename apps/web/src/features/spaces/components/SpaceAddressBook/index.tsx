@@ -116,7 +116,7 @@ const SpaceAddressBook = () => {
             <TabsTrigger value="workspace" className="cursor-pointer">
               <Tooltip>
                 <TooltipTrigger render={<span />}>Workspace contacts ({addressBookItems.length})</TooltipTrigger>
-                <TooltipContent>Shared contacts visible to everyone in this workspace</TooltipContent>
+                <TooltipContent>Shared contacts visible to everyone in this Workspace</TooltipContent>
               </Tooltip>
             </TabsTrigger>
             {isPrivateAddressBookEnabled && (
@@ -130,7 +130,7 @@ const SpaceAddressBook = () => {
                 <TabsTrigger value="pending" className="cursor-pointer">
                   <Tooltip>
                     <TooltipTrigger render={<span />}>Pending ({pendingRequests.length})</TooltipTrigger>
-                    <TooltipContent>Contacts you proposed to add to the workspace</TooltipContent>
+                    <TooltipContent>Contacts you proposed to add to the Workspace</TooltipContent>
                   </Tooltip>
                 </TabsTrigger>
               </>
@@ -170,7 +170,7 @@ const SpaceAddressBook = () => {
               {searchQuery && filteredAll.length === 0 ? (
                 <p className="text-muted-foreground mb-2 text-sm">Found 0 results</p>
               ) : addressBookItems.length === 0 ? (
-                <p className="text-muted-foreground text-sm">No contacts in this workspace yet.</p>
+                <p className="text-muted-foreground text-sm">No contacts in this Workspace yet.</p>
               ) : (
                 <SpaceAddressBookTable entries={filteredAll} />
               )}
@@ -194,7 +194,7 @@ const SpaceAddressBook = () => {
                               <TooltipTrigger render={<span className="inline-flex" />}>
                                 <Badge variant="secondary">Already shared</Badge>
                               </TooltipTrigger>
-                              <TooltipContent>Already saved in your workspace address book</TooltipContent>
+                              <TooltipContent>Already saved in your Workspace address book</TooltipContent>
                             </Tooltip>
                           )
                         }

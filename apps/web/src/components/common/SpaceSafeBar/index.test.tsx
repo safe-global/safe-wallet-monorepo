@@ -341,7 +341,7 @@ describe('SpaceSafeBar', () => {
     expect(connect).toHaveBeenCalledTimes(1)
   })
 
-  it('does not render a footer on the Workspace tab (default in a space context)', () => {
+  it('does not render a footer on the workspace tab (default in a space context)', () => {
     mockUseIsQualifiedSafe.mockReturnValue(true)
     mockUseSpaceSafeSelectorItems.mockReturnValue({
       workspaceItems: mockItems,
@@ -359,18 +359,18 @@ describe('SpaceSafeBar', () => {
     expect(getByTestId('safe-selector-dropdown').getAttribute('data-has-footer')).toBe('false')
   })
 
-  it('renders Workspace and Local tabs in the dropdown', () => {
+  it('renders workspace and Local tabs in the dropdown', () => {
     const { getByTestId } = render(<SpaceSafeBar />)
     expect(getByTestId('dropdown-tab-workspace')).toBeInTheDocument()
     expect(getByTestId('dropdown-tab-local')).toBeInTheDocument()
   })
 
-  it('labels the Workspace tab "Workspace" off the Spaces level', () => {
+  it('labels the workspace tab "Workspace" off the Spaces level', () => {
     const { getByTestId } = render(<SpaceSafeBar />)
     expect(getByTestId('dropdown-tab-workspace').textContent).toBe('Workspace')
   })
 
-  it('labels the Workspace tab "Workspace" when a fallback space is loaded but the safe is not part of it', () => {
+  it('labels the workspace tab "Workspace" when a fallback space is loaded but the safe is not part of it', () => {
     // `useCurrentSpaceId` resolves a fallback space (last-used / first in the list) even when the
     // current safe belongs to no workspace, so `space` is populated while isInSpaceContext is false.
     mockUseSpaceBackLink.mockReturnValue({ space: { id: 1, name: 'Daniel Test space' }, handleBackToSpace: jest.fn() })
@@ -379,7 +379,7 @@ describe('SpaceSafeBar', () => {
     expect(getByTestId('dropdown-tab-workspace').textContent).toBe('Workspace')
   })
 
-  it('labels the Workspace tab with the space name in a space context', () => {
+  it('labels the workspace tab with the space name in a space context', () => {
     mockUseIsQualifiedSafe.mockReturnValue(true)
     mockUseSpaceSafeSelectorItems.mockReturnValue({
       workspaceItems: mockItems,
