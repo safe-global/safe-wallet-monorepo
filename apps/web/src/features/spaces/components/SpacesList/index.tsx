@@ -5,6 +5,7 @@ import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
 import TrialFlow from '../Plans/TrialFlow'
+import { TIERS } from '../Plans/fixtures'
 import SpaceRow from './SpaceRow'
 import SignInOptions from '../SignInOptions'
 import WorkspaceBanner from '../WorkspaceBanner'
@@ -308,6 +309,7 @@ const SpacesList = () => {
                     space={space}
                     currentUserId={currentUser?.id}
                     showDivider={index < activeSpaces.length - 1}
+                    planName={isSafePro ? TIERS.find((tier) => tier.isCurrent)?.name : undefined}
                   />
                 ))}
               </div>

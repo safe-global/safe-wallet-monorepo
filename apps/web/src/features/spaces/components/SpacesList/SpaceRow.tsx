@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { EllipsisVertical } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
@@ -11,6 +12,7 @@ import { SpaceSummary } from '../SpaceCard'
 import SpaceContextMenu from '../SpaceCard/SpaceContextMenu'
 import { AdminOnlyWorkspaceTooltip } from '../AdminOnlyWorkspaceTooltip'
 import { isUserActiveAdmin } from '@/features/spaces/utils'
+import ProWordmark from '@/public/images/safe-pro/pro-wordmark.svg'
 
 const MEMBER_NO_EDIT_MESSAGE = 'You need admin access to edit.'
 
@@ -24,10 +26,13 @@ const SpaceRow = ({
   space,
   currentUserId,
   showDivider = false,
+  planName,
 }: {
   space: GetSpaceResponse
   currentUserId?: number
   showDivider?: boolean
+  /** Paid Pro tier; renders the PRO pill when set. */
+  planName?: string
 }) => {
   const isAdmin = isUserActiveAdmin(space.members, currentUserId)
 
@@ -63,6 +68,16 @@ const SpaceRow = ({
               isCompact
             />
           </div>
+          {planName && (
+            <Badge variant="subtle" size="status" shape="status" data-testid="space-row-pro-badge">
+              <span className="flex h-4 w-6 items-center justify-center rounded-[4px] bg-mint text-accent-secondary-foreground">
+                <span className="block h-1.5 w-[15px]">
+                  <ProWordmark className="size-full" />
+                </span>
+              </span>
+              · {planName}
+            </Badge>
+          )}
         </Link>
 
         <div className="absolute right-0 top-1/2 -translate-y-1/2">
