@@ -24,17 +24,20 @@ export default function StartTrialModal({
   open,
   onOpenChange,
   onContinue,
+  selectAccounts = true,
 }: {
   trialDays: 30 | 60
   open: boolean
   onOpenChange: (open: boolean) => void
   onContinue: (selection: TrialSelection) => void
+  /** Off for the 30-day flow: the create-workspace onboarding picks the accounts afterwards. */
+  selectAccounts?: boolean
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent size="sm-md" surface="card" padding="sm">
         <div className="flex flex-col gap-6 pt-5">
-          <StartTrialSteps trialDays={trialDays} onContinue={onContinue} />
+          <StartTrialSteps trialDays={trialDays} onContinue={onContinue} selectAccounts={selectAccounts} />
         </div>
       </DialogContent>
     </Dialog>
@@ -45,9 +48,11 @@ export default function StartTrialModal({
 const StartTrialSteps = ({
   trialDays,
   onContinue,
+  selectAccounts,
 }: {
   trialDays: 30 | 60
   onContinue: (selection: TrialSelection) => void
+  selectAccounts: boolean
 }) => {
   const [step, setStep] = useState<'plan' | 'accounts'>('plan')
   const [tierId, setTierId] = useState(RECOMMENDED_TRIAL_TIER)
@@ -113,7 +118,12 @@ const StartTrialSteps = ({
         {TRIAL_DISCLAIMER}
       </Typography>
 
-      <Button size="action" accentIcon className="self-center" onClick={() => setStep('accounts')}>
+      <Button
+        size="action"
+        accentIcon
+        className="self-center"
+        onClick={() => (selectAccounts ? setStep('accounts') : onContinue({ tierId, seats: tierSeats, safeIds: [] }))}
+      >
         Start free trial
         <ArrowRight />
       </Button>

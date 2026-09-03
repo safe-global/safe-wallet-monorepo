@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import SpacesList, { WORKSPACE_BENEFITS } from '../index'
@@ -56,7 +56,6 @@ const mockUseHasFeature = jest.fn()
 jest.mock('@/features/safe-pro-announcement', () => ({
   SafeProFeature: { name: 'SafeProFeature' },
   useIsSafeProEnabled: () => mockUseIsSafeProEnabled(),
-  useSafeProTrialPrompt: (isReady: boolean) => ({ isOpen: isReady, setIsOpen: jest.fn() }),
 }))
 
 jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
@@ -136,7 +135,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
     mockUseHasFeature.mockReturnValue(false)
   })
 
-  it('opens the 30-day trial prompt over the empty state once SAFE_PRO is on', () => {
+  it('opens the 30-day trial dialog from Create workspace once SAFE_PRO is on', () => {
     mockUseHasFeature.mockReturnValue(true)
     mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
@@ -145,7 +144,13 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     const flow = screen.getByTestId('trial-flow')
     expect(flow).toHaveAttribute('data-days', '30')
-    expect(flow).toHaveAttribute('data-open', 'true')
+    expect(flow).toHaveAttribute('data-open', 'false')
+
+    const cta = screen.getByRole('button', { name: /create workspace/i })
+    expect(cta).not.toHaveAttribute('href')
+    fireEvent.click(cta)
+
+    expect(screen.getByTestId('trial-flow')).toHaveAttribute('data-open', 'true')
   })
 
   it('does not mount the trial flow while SAFE_PRO is off', () => {

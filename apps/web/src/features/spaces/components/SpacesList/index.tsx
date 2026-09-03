@@ -1,6 +1,6 @@
 import { useLoadFeature } from '@/features/__core__'
 import { MyAccountsFeature } from '@/features/myAccounts'
-import { SafeProFeature, useIsSafeProEnabled, useSafeProTrialPrompt } from '@/features/safe-pro-announcement'
+import { SafeProFeature, useIsSafeProEnabled } from '@/features/safe-pro-announcement'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
@@ -48,6 +48,7 @@ const AddSpaceButton = ({
   variant = 'default',
   label = 'Create Workspace',
   icon = 'add',
+  link = true,
 }: {
   onClick?: () => void
   disabled?: boolean
@@ -55,6 +56,8 @@ const AddSpaceButton = ({
   variant?: 'default' | 'outline'
   label?: string
   icon?: 'add' | 'arrow'
+  /** Off when the click opens a dialog instead of navigating to the onboarding. */
+  link?: boolean
 }) => {
   const iconSize = size === 'lg' ? 'size-5' : 'size-4'
 
@@ -69,7 +72,7 @@ const AddSpaceButton = ({
         variant === 'outline' && 'hover:bg-muted',
         disabled && 'cursor-not-allowed opacity-50 grayscale',
       )}
-      render={disabled ? <span /> : <NextLink href={AppRoutes.welcome.createSpace} />}
+      render={disabled ? <span /> : link ? <NextLink href={AppRoutes.welcome.createSpace} /> : undefined}
       disabled={disabled}
       onClick={disabled ? undefined : onClick}
     >
@@ -155,7 +158,7 @@ export const WORKSPACE_BENEFITS = [
   'Share an address book across your team',
 ]
 
-const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
+const NoSpacesState = ({ isAtLimit, onCreate }: { isAtLimit: boolean; onCreate?: () => void }) => {
   const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
 
   return (
@@ -185,9 +188,11 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
           <div className="h-12">
             <AddSpaceButton
               disabled={isAtLimit}
-              onClick={() =>
+              link={!onCreate}
+              onClick={() => {
                 trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
-              }
+                onCreate?.()
+              }}
             />
           </div>
 
@@ -240,8 +245,7 @@ const SpacesList = () => {
     singleSpaceId,
   })
 
-  const hasNoSpaces = isUserSignedIn && !isSpacesLoading && !error && activeSpaces.length === 0
-  const { isOpen: isTrialOpen, setIsOpen: setIsTrialOpen } = useSafeProTrialPrompt(isSafePro && hasNoSpaces)
+  const [isTrialOpen, setIsTrialOpen] = useState(false)
 
   const afterSignIn = useCallback(() => {
     setHasSignedIn(true)
@@ -313,11 +317,12 @@ const SpacesList = () => {
           <>
             {isSafeProEnabled && <SafeProWorkspacesBanner className="mb-4" />}
             {pendingInviteBanners}
-            <NoSpacesState isAtLimit={isAtSpacesLimit} />
+            <NoSpacesState isAtLimit={isAtSpacesLimit} onCreate={isSafePro ? () => setIsTrialOpen(true) : undefined} />
             {isSafePro && (
               <ShadcnProvider dark={isDarkMode}>
                 <TrialFlow
                   trialDays={30}
+                  selectAccounts={false}
                   activatedHref={AppRoutes.welcome.createSpace}
                   open={isTrialOpen}
                   onOpenChange={setIsTrialOpen}

@@ -11,10 +11,12 @@ export default function TrialFlow({
   open,
   onOpenChange,
   activatedHref,
+  selectAccounts,
 }: {
   trialDays: 30 | 60
   open: boolean
   onOpenChange: (open: boolean) => void
+  selectAccounts?: boolean
   /** Where the confirmation's CTA leads; the locked dashboard just closes it. */
   activatedHref?: LinkProps['href']
 }) {
@@ -27,6 +29,7 @@ export default function TrialFlow({
         trialDays={trialDays}
         open={open}
         onOpenChange={onOpenChange}
+        selectAccounts={selectAccounts}
         onContinue={() => {
           onOpenChange(false)
           setTrialEndsAt(Date.now() + trialDays * DAY_MS)
