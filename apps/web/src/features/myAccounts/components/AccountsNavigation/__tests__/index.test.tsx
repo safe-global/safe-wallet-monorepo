@@ -5,8 +5,9 @@ const mockUseHasFeature = jest.fn()
 
 jest.mock('next/router', () => ({ useRouter: () => ({ pathname: '/welcome/spaces' }) }))
 jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
-jest.mock('@/public/images/safe-pro/safe-pro-lockup.svg', () => 'svg')
-jest.mock('@/public/images/safe-pro/safe-pro-lockup-dark.svg', () => 'svg')
+jest.mock('@/public/images/safe-pro/safe-mark.svg', () => 'svg')
+jest.mock('@/public/images/safe-pro/safe-wordmark.svg', () => 'svg')
+jest.mock('@/public/images/safe-pro/pro-chip.svg', () => 'svg')
 jest.mock('@/public/images/safe-wallet-lockup.svg', () => 'svg')
 
 describe('AccountsNavigation', () => {
@@ -15,7 +16,7 @@ describe('AccountsNavigation', () => {
 
     render(<AccountsNavigation />)
 
-    expect(screen.getAllByRole('img', { name: 'Safe Pro' })).toHaveLength(2)
+    expect(screen.getByRole('img', { name: 'Safe Pro' })).toBeInTheDocument()
     expect(screen.getByRole('img', { name: 'Safe{Wallet}' })).toBeInTheDocument()
     expect(screen.queryByText('Workspaces')).not.toBeInTheDocument()
   })

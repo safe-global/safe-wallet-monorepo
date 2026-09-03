@@ -6,7 +6,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import userEvent from '@testing-library/user-event'
 
-jest.mock('@/public/images/safe-pro/pro-wordmark.svg', () => 'svg')
+jest.mock('@/public/images/safe-pro/pro-chip.svg', () => 'svg')
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
   trackEvent: jest.fn(),

@@ -7,8 +7,7 @@ import { trackEvent } from '@/services/analytics'
 import type { AnalyticsEvent } from '@/services/analytics/types'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import SafeProLockup from '@/public/images/safe-pro/safe-pro-lockup.svg'
-import SafeProLockupDark from '@/public/images/safe-pro/safe-pro-lockup-dark.svg'
+import SafeProLockup from '@/components/common/SafeProLockup'
 import SafeWalletLockup from '@/public/images/safe-wallet-lockup.svg'
 
 type Item = {
@@ -56,14 +55,7 @@ const AccountsNavigation = () => {
             {!isSafePro ? (
               item.label
             ) : item.pro ? (
-              <>
-                <span className="block h-[30px] w-[99px] dark:hidden">
-                  <SafeProLockup role="img" aria-label="Safe Pro" className="size-full" />
-                </span>
-                <span className="hidden h-[30px] w-[139px] dark:block">
-                  <SafeProLockupDark role="img" aria-label="Safe Pro" className="size-full" />
-                </span>
-              </>
+              <SafeProLockup className="text-[1.25rem]" />
             ) : (
               <span className="block h-7 w-[140px]">
                 <SafeWalletLockup role="img" aria-label="Safe{Wallet}" className="size-full" />

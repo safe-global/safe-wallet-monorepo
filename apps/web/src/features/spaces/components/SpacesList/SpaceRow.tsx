@@ -12,7 +12,7 @@ import { SpaceSummary } from '../SpaceCard'
 import SpaceContextMenu from '../SpaceCard/SpaceContextMenu'
 import { AdminOnlyWorkspaceTooltip } from '../AdminOnlyWorkspaceTooltip'
 import { isUserActiveAdmin } from '@/features/spaces/utils'
-import ProWordmark from '@/public/images/safe-pro/pro-wordmark.svg'
+import ProChip from '@/public/images/safe-pro/pro-chip.svg'
 
 const MEMBER_NO_EDIT_MESSAGE = 'You need admin access to edit.'
 
@@ -70,10 +70,8 @@ const SpaceRow = ({
           </div>
           {planName && (
             <Badge variant="subtle" size="status" shape="status" data-testid="space-row-pro-badge">
-              <span className="flex h-4 w-6 items-center justify-center rounded-[4px] bg-mint text-accent-secondary-foreground">
-                <span className="block h-1.5 w-[15px]">
-                  <ProWordmark className="size-full" />
-                </span>
+              <span className="block h-4 w-6">
+                <ProChip className="size-full" />
               </span>
               · {planName}
             </Badge>
