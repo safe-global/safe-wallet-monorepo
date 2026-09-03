@@ -6,6 +6,7 @@ import SignInOptions from '../SignInOptions'
 import WorkspaceBanner from '../WorkspaceBanner'
 import Image from 'next/image'
 import WorkspacesEmptyIllustration from '@/public/images/spaces/workspaces_empty.png'
+import WorkspacesEmptyIllustrationDark from '@/public/images/spaces/workspaces_empty_dark.png'
 import SafeMarkIcon from '@/public/images/logo-no-text.svg'
 import SafeProLockup from '@/public/images/safe-pro/safe-pro-lockup.svg'
 import SafeProLockupDark from '@/public/images/safe-pro/safe-pro-lockup-dark.svg'
@@ -157,14 +158,14 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
   return (
     <>
       <Card size="none" radius="xl" className="w-full text-center">
-        <div className="flex flex-col items-center gap-8 rounded-t-xl bg-muted p-8 text-left md:flex-row md:items-start md:gap-16">
-          <div className="flex flex-col gap-4 md:self-center">
+        <div className="flex flex-col items-center gap-8 rounded-t-xl bg-muted p-8 text-left md:flex-row md:items-end md:gap-16">
+          <div className="flex shrink-0 flex-col gap-4 md:self-center">
             {WORKSPACE_BENEFITS.map((benefit) => (
               <div key={benefit} className="flex flex-row items-center gap-2">
-                <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                  <Check className="size-4 text-primary" />
+                <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[var(--color-background-light-hover)]">
+                  <Check className="size-4 text-badge-dot-success" strokeWidth={1.5} />
                 </div>
-                <Typography variant="paragraph-large" className="font-medium">
+                <Typography variant="paragraph-large" className="font-medium whitespace-nowrap">
                   {benefit}
                 </Typography>
               </div>
@@ -174,7 +175,12 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
           <Image
             src={WorkspacesEmptyIllustration}
             alt="Workspace dashboard showing accounts grouped by workspace"
-            className="h-auto w-full max-w-[400px]"
+            className="-my-8 h-auto w-full min-w-0 md:-mr-8 md:w-[60%] dark:hidden"
+          />
+          <Image
+            src={WorkspacesEmptyIllustrationDark}
+            alt="Workspace dashboard showing accounts grouped by workspace"
+            className="-my-8 hidden h-auto w-full min-w-0 md:-mr-8 md:w-[60%] dark:block"
           />
         </div>
 
