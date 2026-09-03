@@ -28,6 +28,7 @@ import { useHasFeature } from '@/hooks/useChains'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { Typography } from '@/components/ui/typography'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import StartTrialModal from '../Plans/StartTrialModal'
 
 const EmptyStateAddAction = () => {
   return (
@@ -57,6 +58,7 @@ const SpaceDashboard = () => {
     refetch: refetchPendingTxs,
   } = useSpacePendingTransactions(PENDING_TX_DISPLAY_LIMIT)
   const [setupDismissed, setSetupDismissed] = useState(false)
+  const [isTrialOpen, setIsTrialOpen] = useState(false)
   const [dismissedSpaces = {}] = useLocalStorage<Record<string, number>>('setupWidgetDismissed')
   const isSetupDismissedForSpace = spaceId ? (dismissedSpaces[spaceId] ?? 0) > Date.now() : false
   useTrackSpace(safes, activeMembers)
@@ -128,7 +130,13 @@ const SpaceDashboard = () => {
         <Typography variant="h2" className="mb-6 font-bold leading-[1] tracking-tight">
           {space?.name}
         </Typography>
-        <SafeProLockedWorkspace plansHref={{ pathname: AppRoutes.spaces.plans, query: { spaceId } }} />
+        <SafeProLockedWorkspace onStartTrial={() => setIsTrialOpen(true)} />
+        <StartTrialModal
+          trialDays={60}
+          open={isTrialOpen}
+          onOpenChange={setIsTrialOpen}
+          onContinue={() => setIsTrialOpen(false)}
+        />
       </div>
     )
   }

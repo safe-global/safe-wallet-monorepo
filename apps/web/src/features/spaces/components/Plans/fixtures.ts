@@ -35,13 +35,21 @@ const ENTERPRISE_FEATURES = [
 ]
 
 export const TIERS: PlanTier[] = [
-  tier({ id: 'starter-month', name: 'Starter', price: 149, billingCycle: 'month', features: STARTER_FEATURES }),
+  tier({
+    id: 'starter-month',
+    name: 'Starter',
+    price: 149,
+    billingCycle: 'month',
+    seats: ['2 Safe accounts'],
+    features: STARTER_FEATURES,
+  }),
   tier({
     id: 'starter-year',
     name: 'Starter',
     price: 1608,
     originalPrice: 1788,
     billingCycle: 'year',
+    seats: ['2 Safe accounts'],
     features: STARTER_FEATURES,
   }),
   tier({
@@ -65,6 +73,14 @@ export const TIERS: PlanTier[] = [
   }),
   tier({ id: 'enterprise', name: 'Enterprise', seats: ['20+ Safe accounts'], features: ENTERPRISE_FEATURES }),
 ]
+
+export const RECOMMENDED_TRIAL_TIER = 'business-month'
+
+export const TRIAL_TIERS: PlanTier[] = TIERS.filter((tier) => tier.billingCycle === 'month').map((tier) => ({
+  ...tier,
+  isCurrent: false,
+  features: [tier.features[0], 'Advanced threat analysis'],
+}))
 
 // ponytail: static fixture until the entitlement hooks land (PLA-1828)
 export const TRIAL_PLANS: PlansData = {

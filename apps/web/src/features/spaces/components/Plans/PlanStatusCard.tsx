@@ -9,7 +9,7 @@ import { Typography } from '@/components/ui/typography'
 import { formatDate } from '@safe-global/utils/utils/date'
 import type { Meter, PlansData } from './types'
 
-const TRIAL_TOOLTIP =
+export const TRIAL_TOOLTIP =
   "Your paid subscription only starts after you add billing details. If you don't add them before the trial ends, your Workspace will be locked. Your Safe accounts remain available outside the Workspace."
 
 export const remaining = ({ used, quota }: Meter): number | null => (quota === null ? null : Math.max(quota - used, 0))

@@ -1,5 +1,3 @@
-import Link from 'next/link'
-import type { LinkProps } from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -8,7 +6,7 @@ import { cn } from '@/utils/cn'
 import SafeProHero from '../SafeProHero'
 import css from '../SafeProAnnouncement/styles.module.css'
 
-const SafeProLockedWorkspace = ({ plansHref }: { plansHref: LinkProps['href'] }) => (
+const SafeProLockedWorkspace = ({ onStartTrial }: { onStartTrial: () => void }) => (
   <Card size="none" radius="xl" className="w-full">
     <div className="p-1">
       <SafeProHero />
@@ -25,7 +23,7 @@ const SafeProLockedWorkspace = ({ plansHref }: { plansHref: LinkProps['href'] })
           </Typography>
         </div>
 
-        <Button size="lg" className="w-[250px]" render={<Link href={plansHref} />}>
+        <Button size="lg" className="w-[250px]" onClick={onStartTrial}>
           Start free trial
           <ArrowRight data-icon="inline-end" className={cn('size-5 text-green-400', css.arrow)} />
         </Button>
