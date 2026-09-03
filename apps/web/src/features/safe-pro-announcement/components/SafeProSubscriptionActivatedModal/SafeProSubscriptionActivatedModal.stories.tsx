@@ -11,8 +11,7 @@ const meta = {
     planName: 'Business',
     price: 499,
     currency: 'eur',
-    billingCycle: 'month',
-    nextBillingAt: Date.UTC(2026, 9, 1),
+    nextBillingAt: Date.UTC(2026, 10, 1),
   },
 } satisfies Meta<typeof SafeProSubscriptionActivatedModal>
 
@@ -20,4 +19,4 @@ export default meta
 
 export const Default: StoryObj<typeof meta> = {}
 
-export const Yearly: StoryObj<typeof meta> = { args: { price: 5389, billingCycle: 'year' } }
+export const Yearly: StoryObj<typeof meta> = { args: { price: 5389 } }

@@ -14,7 +14,6 @@ const SafeProSubscriptionActivatedModal = ({
   planName,
   price,
   currency,
-  billingCycle,
   nextBillingAt,
 }: {
   open: boolean
@@ -22,7 +21,6 @@ const SafeProSubscriptionActivatedModal = ({
   planName: string
   price: number
   currency: string
-  billingCycle: 'month' | 'year'
   nextBillingAt: number
 }) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
@@ -33,11 +31,10 @@ const SafeProSubscriptionActivatedModal = ({
         <div className="flex flex-col items-center gap-8 px-8 pt-6 pb-4">
           <div className="flex flex-col gap-2">
             <Typography variant="h3" align="center" as={DialogTitle}>
-              Your Workspace is now on <span className={css.highlight}>Safe Pro</span>
+              Your paid subscription is active, you&apos;re on <span className={css.highlight}>{planName}</span>!
             </Typography>
             <Typography color="muted" align="center">
-              {planName} plan, {formatPrice(price, currency)} per {billingCycle}. Your next payment is on{' '}
-              {formatDate(nextBillingAt)}.
+              You&apos;ll pay {formatPrice(price, currency)} on {formatDate(nextBillingAt)}
             </Typography>
           </div>
 

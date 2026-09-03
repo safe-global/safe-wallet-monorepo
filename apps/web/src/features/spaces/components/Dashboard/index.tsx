@@ -133,14 +133,13 @@ const SpaceDashboard = () => {
     router.replace({ pathname: router.pathname, query }, undefined, { shallow: true })
   }
   const paidTier = TIERS.find((tier) => tier.isCurrent)
-  const checkoutSuccessModal = paidTier?.price !== null && paidTier?.billingCycle && (
+  const checkoutSuccessModal = paidTier && paidTier.price !== null && (
     <SafeProSubscriptionActivatedModal
       open={router.query.checkout === 'success'}
       onOpenChange={closeCheckoutSuccess}
       planName={paidTier.name}
       price={paidTier.price}
       currency={paidTier.currency}
-      billingCycle={paidTier.billingCycle}
       nextBillingAt={Date.parse(TRIAL_PLANS.plan?.periodEndsAt ?? '')}
     />
   )

@@ -84,27 +84,23 @@ exports[`./SafeProSubscriptionActivatedModal.stories Default 1`] = `
                 data-variant="h3"
                 id="base-ui-_r_3_"
               >
-                Your Workspace is now on 
+                Your paid subscription is active, you're on 
                 <span
                   class="highlight"
                 >
-                  Safe Pro
+                  Business
                 </span>
+                !
               </h2>
               <p
                 class="m-0 text-base leading-6 font-normal block w-full text-center text-muted-foreground"
                 data-slot="typography"
                 data-variant="paragraph"
               >
-                Business
-                 plan, 
+                You'll pay 
                 €499
-                 per 
-                month
-                . Your next payment is on
-                 
-                Oct 1, 2026
-                .
+                 on 
+                Nov 1, 2026
               </p>
             </div>
             <button
@@ -246,27 +242,23 @@ exports[`./SafeProSubscriptionActivatedModal.stories Yearly 1`] = `
                 data-variant="h3"
                 id="base-ui-_r_7_"
               >
-                Your Workspace is now on 
+                Your paid subscription is active, you're on 
                 <span
                   class="highlight"
                 >
-                  Safe Pro
+                  Business
                 </span>
+                !
               </h2>
               <p
                 class="m-0 text-base leading-6 font-normal block w-full text-center text-muted-foreground"
                 data-slot="typography"
                 data-variant="paragraph"
               >
-                Business
-                 plan, 
+                You'll pay 
                 €5,389
-                 per 
-                year
-                . Your next payment is on
-                 
-                Oct 1, 2026
-                .
+                 on 
+                Nov 1, 2026
               </p>
             </div>
             <button
