@@ -2,7 +2,6 @@ import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
 import SafeProHero from '../SafeProHero'
 import css from '../SafeProAnnouncement/styles.module.css'
 
@@ -23,9 +22,9 @@ const SafeProLockedWorkspace = ({ onStartTrial }: { onStartTrial: () => void }) 
           </Typography>
         </div>
 
-        <Button size="lg" className="w-[250px]" onClick={onStartTrial}>
+        <Button size="lg" accentIcon className="w-[250px]" onClick={onStartTrial}>
           Start free trial
-          <ArrowRight data-icon="inline-end" className={cn('size-5 text-green-400', css.arrow)} />
+          <ArrowRight data-icon="inline-end" className="size-5" />
         </Button>
       </div>
     </div>

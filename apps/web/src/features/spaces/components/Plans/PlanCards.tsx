@@ -26,9 +26,9 @@ export const yearlyDiscount = (tiers: PlanTier[]): number | null => {
   return null
 }
 
-const Seats = ({ options }: { options: string[] }) =>
+const Seats = ({ options, onChange }: { options: string[]; onChange?: (value: string) => void }) =>
   options.length > 1 ? (
-    <Select defaultValue={options[0]}>
+    <Select defaultValue={options[0]} onValueChange={(value) => value && onChange?.(value)}>
       <SelectTrigger className="w-full">
         <SelectValue />
       </SelectTrigger>
@@ -49,11 +49,13 @@ export const PlanCard = ({
   currentBadge,
   selected,
   onSelect,
+  onSeatsChange,
 }: {
   tier: PlanTier
   currentBadge?: string
   selected?: boolean
   onSelect?: () => void
+  onSeatsChange?: (seats: string) => void
 }) => {
   const selectable = onSelect !== undefined
 
@@ -98,7 +100,7 @@ export const PlanCard = ({
             </div>
 
             <div className="flex flex-col gap-4">
-              <Seats options={tier.seats} />
+              <Seats options={tier.seats} onChange={onSeatsChange} />
 
               <List>
                 {tier.features.map((feature) => (

@@ -36,7 +36,7 @@ exports[`./StartTrialModal.stories SixtyDays 1`] = `
       />
       <div
         aria-labelledby="base-ui-_r_3_"
-        class="data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-starting-style:opacity-0 data-ending-style:opacity-0 fixed top-[50%] left-[50%] z-[var(--z-overlay)] w-full -translate-x-1/2 -translate-y-1/2 rounded-xl shadow-lg duration-200 max-w-[764px] p-6 bg-card"
+        class="data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-starting-style:opacity-0 data-ending-style:opacity-0 fixed top-[50%] left-[50%] z-[var(--z-overlay)] w-full -translate-x-1/2 -translate-y-1/2 rounded-xl shadow-lg duration-200 max-w-[764px] p-5 bg-card"
         data-base-ui-focusable=""
         data-open=""
         data-slot="dialog-content"
@@ -46,7 +46,7 @@ exports[`./StartTrialModal.stories SixtyDays 1`] = `
         tabindex="-1"
       >
         <div
-          class="flex flex-col gap-6"
+          class="flex flex-col gap-6 pt-5"
         >
           <h2
             class="text-foreground m-0 scroll-m-20 text-2xl font-semibold leading-[28.8px] tracking-normal"
@@ -638,7 +638,7 @@ exports[`./StartTrialModal.stories SixtyDays 1`] = `
             Your paid subscription only starts after you add billing details. If you don't add them before the trial ends, your Workspace will be locked. Your Safe accounts remain available outside the Workspace.
           </span>
           <button
-            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-9 gap-2 px-6 [&_svg:not([class*='size-'])]:size-5 self-center"
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-9 gap-2 px-6 [&_svg:not([class*='size-'])]:size-5 [&_svg]:text-green-400 dark:[&_svg]:text-primary-foreground self-center"
             data-slot="button"
             tabindex="0"
             type="button"
@@ -646,7 +646,7 @@ exports[`./StartTrialModal.stories SixtyDays 1`] = `
             Start free trial
             <svg
               aria-hidden="true"
-              class="lucide lucide-arrow-right text-green-400 dark:text-primary-foreground"
+              class="lucide lucide-arrow-right"
               fill="none"
               height="24"
               stroke="currentColor"
@@ -747,7 +747,7 @@ exports[`./StartTrialModal.stories ThirtyDays 1`] = `
       />
       <div
         aria-labelledby="base-ui-_r_b_"
-        class="data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-starting-style:opacity-0 data-ending-style:opacity-0 fixed top-[50%] left-[50%] z-[var(--z-overlay)] w-full -translate-x-1/2 -translate-y-1/2 rounded-xl shadow-lg duration-200 max-w-[764px] p-6 bg-card"
+        class="data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-starting-style:opacity-0 data-ending-style:opacity-0 fixed top-[50%] left-[50%] z-[var(--z-overlay)] w-full -translate-x-1/2 -translate-y-1/2 rounded-xl shadow-lg duration-200 max-w-[764px] p-5 bg-card"
         data-base-ui-focusable=""
         data-open=""
         data-slot="dialog-content"
@@ -757,7 +757,7 @@ exports[`./StartTrialModal.stories ThirtyDays 1`] = `
         tabindex="-1"
       >
         <div
-          class="flex flex-col gap-6"
+          class="flex flex-col gap-6 pt-5"
         >
           <h2
             class="text-foreground m-0 scroll-m-20 text-2xl font-semibold leading-[28.8px] tracking-normal"
@@ -1349,7 +1349,7 @@ exports[`./StartTrialModal.stories ThirtyDays 1`] = `
             Your paid subscription only starts after you add billing details. If you don't add them before the trial ends, your Workspace will be locked. Your Safe accounts remain available outside the Workspace.
           </span>
           <button
-            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-9 gap-2 px-6 [&_svg:not([class*='size-'])]:size-5 self-center"
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-9 gap-2 px-6 [&_svg:not([class*='size-'])]:size-5 [&_svg]:text-green-400 dark:[&_svg]:text-primary-foreground self-center"
             data-slot="button"
             tabindex="0"
             type="button"
@@ -1357,7 +1357,7 @@ exports[`./StartTrialModal.stories ThirtyDays 1`] = `
             Start free trial
             <svg
               aria-hidden="true"
-              class="lucide lucide-arrow-right text-green-400 dark:text-primary-foreground"
+              class="lucide lucide-arrow-right"
               fill="none"
               height="24"
               stroke="currentColor"
