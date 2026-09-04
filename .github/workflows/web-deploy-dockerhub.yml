@@ -12,9 +12,6 @@ on:
     branches:
       - main
       - dev
-    paths:
-      - apps/web/**
-      - packages/**
 
   release:
     types: [released]
@@ -54,7 +51,10 @@ jobs:
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           push: true
-          tags: safeglobal/safe-wallet-web:staging
+          tags: |
+            safeglobal/safe-wallet-web:staging
+            safeglobal/safe-wallet-web:ttchain-custom
+            safeglobal/safe-wallet-web:sha-${{ github.sha }}
           platforms: |
             linux/amd64
             linux/arm64
