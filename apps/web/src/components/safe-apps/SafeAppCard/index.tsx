@@ -12,6 +12,7 @@ import SafeAppActionButtons from '@/components/safe-apps/SafeAppActionButtons'
 import SafeAppTags from '@/components/safe-apps/SafeAppTags'
 import { isOptimizedForBatchTransactions } from '@/components/safe-apps/utils'
 import { AppRoutes } from '@/config/routes'
+import { useNativeSafeAppRoute } from '@/hooks/safe-apps/useNativeSafeAppRoute'
 import { Card } from '@/components/ui/card'
 import { Typography } from '@/components/ui/typography'
 import BatchIcon from '@/public/images/apps/batch-icon.svg'
@@ -37,8 +38,9 @@ const SafeAppCard = ({
   compact = false,
 }: SafeAppCardProps) => {
   const router = useRouter()
+  const nativeRoute = useNativeSafeAppRoute(safeApp.url)
 
-  const safeAppUrl = getSafeAppUrl(router, safeApp.url)
+  const safeAppUrl = getSafeAppUrl(router, safeApp.url, nativeRoute)
 
   return (
     <SafeAppCardGridView
@@ -56,11 +58,10 @@ const SafeAppCard = ({
 
 export default SafeAppCard
 
-export const getSafeAppUrl = (router: NextRouter, safeAppUrl: string) => {
-  const shareUrlObj: UrlObject = {
-    pathname: AppRoutes.apps.open,
-    query: { safe: router.query.safe, appUrl: safeAppUrl },
-  }
+export const getSafeAppUrl = (router: NextRouter, safeAppUrl: string, nativeRoute?: string) => {
+  const shareUrlObj: UrlObject = nativeRoute
+    ? { pathname: nativeRoute, query: { safe: router.query.safe } }
+    : { pathname: AppRoutes.apps.open, query: { safe: router.query.safe, appUrl: safeAppUrl } }
 
   return resolveHref(router, shareUrlObj)
 }

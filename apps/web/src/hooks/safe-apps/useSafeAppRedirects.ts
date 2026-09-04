@@ -9,6 +9,7 @@ type UseSafeAppRedirectsParams = {
   appUrl: string | undefined
   remoteSafeAppsLoading: boolean
   goToList: () => void
+  nativeRoute?: string
 }
 
 const isAppUnavailable = (safeAppData: UseSafeAppRedirectsParams['safeAppData'], chainId: string): boolean => {
@@ -28,8 +29,18 @@ const useSafeAppRedirects = ({
   appUrl,
   remoteSafeAppsLoading,
   goToList,
+  nativeRoute,
 }: UseSafeAppRedirectsParams): boolean => {
   const router = useRouter()
+  const { replace, isReady } = router
+  const safe = router.query.safe
+  const shouldRedirectToNative = Boolean(nativeRoute && isReady && safe)
+
+  useEffect(() => {
+    if (nativeRoute && isReady && safe) {
+      replace({ pathname: nativeRoute, query: { safe } })
+    }
+  }, [nativeRoute, isReady, safe, replace])
 
   useEffect(() => {
     if (!remoteSafeAppsLoading && isAppUnavailable(safeAppData, chainId)) {
@@ -44,7 +55,7 @@ const useSafeAppRedirects = ({
     })
   }
 
-  return Boolean(isSafeAppsEnabled && appUrl && router.isReady && router.query.safe)
+  return Boolean(isSafeAppsEnabled && appUrl && router.isReady && router.query.safe && !shouldRedirectToNative)
 }
 
 export { useSafeAppRedirects }

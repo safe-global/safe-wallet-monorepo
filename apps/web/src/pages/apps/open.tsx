@@ -17,6 +17,7 @@ import { AppRoutes } from '@/config/routes'
 import { getOrigin } from '@/components/safe-apps/utils'
 import { useHasFeature } from '@/hooks/useChains'
 import { useSafeAppRedirects } from '@/hooks/safe-apps/useSafeAppRedirects'
+import { useNativeSafeAppRoute } from '@/hooks/safe-apps/useNativeSafeAppRoute'
 
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
@@ -28,6 +29,7 @@ const SafeApps: NextPage = () => {
   const safeAppData = appUrl ? getSafeAppByUrl(appUrl) : undefined
   const { safeApp, isLoading } = useSafeAppFromManifest(appUrl || '', chainId, safeAppData)
   const isSafeAppsEnabled = useHasFeature(FEATURES.SAFE_APPS)
+  const nativeRoute = useNativeSafeAppRoute(appUrl)
 
   const { addPermissions, getPermissions, getAllowedFeaturesList } = useBrowserPermissions()
   const origin = getOrigin(appUrl)
@@ -61,6 +63,7 @@ const SafeApps: NextPage = () => {
     appUrl,
     remoteSafeAppsLoading,
     goToList,
+    nativeRoute,
   })
 
   if (!shouldRender) return null
