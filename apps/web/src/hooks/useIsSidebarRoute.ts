@@ -22,6 +22,7 @@ const NO_SIDEBAR_ROUTES = [
   AppRoutes.terms,
   AppRoutes.licenses,
   AppRoutes.spaces.index,
+  AppRoutes.towerDefense,
 ]
 
 const TOGGLE_SIDEBAR_ROUTES = [AppRoutes.apps.open]

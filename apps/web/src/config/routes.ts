@@ -2,6 +2,7 @@ export const AppRoutes = {
   '403': '/403',
   '404': '/404',
   wc: '/wc',
+  towerDefense: '/tower-defense',
   terms: '/terms',
   swap: '/swap',
   stake: '/stake',
