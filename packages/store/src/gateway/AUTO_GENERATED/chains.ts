@@ -157,6 +157,17 @@ export type Relayer = {
   safeTransactionSponsored: boolean
   enableTenderlySimulationBeforeRelay: boolean
 }
+export type ContractAddresses = {
+  safeSingletonAddress?: string | null
+  safeProxyFactoryAddress?: string | null
+  fallbackHandlerAddress?: string | null
+  multiSendAddress?: string | null
+  multiSendCallOnlyAddress?: string | null
+  signMessageLibAddress?: string | null
+  createCallAddress?: string | null
+  simulateTxAccessorAddress?: string | null
+  safeWebAuthnSignerFactoryAddress?: string | null
+}
 export type Chain = {
   chainId: string
   chainName: string
@@ -181,6 +192,7 @@ export type Chain = {
   theme: Theme
   recommendedMasterCopyVersion?: string | null
   relayer: Relayer | null
+  contractAddresses?: ContractAddresses | null
 }
 export type ChainPage = {
   count?: number | null

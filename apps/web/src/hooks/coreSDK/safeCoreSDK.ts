@@ -31,6 +31,7 @@ export const initSafeSDK = async ({
   undeployedSafe,
   isL2Chain,
   isZkChain,
+  contractAddresses,
 }: SafeCoreSDKProps): Promise<Safe | undefined> => {
   const providerNetwork = (await provider.getNetwork()).chainId
   if (providerNetwork !== BigInt(chainId)) {
@@ -141,6 +142,38 @@ export const initSafeSDK = async ({
         ...contractNetworks?.[chainId],
         ...(canonicalMultiSendCallOnly && { multiSendCallOnlyAddress: canonicalMultiSendCallOnly }),
         ...(canonicalMultiSend && { multiSendAddress: canonicalMultiSend }),
+      },
+    }
+  }
+
+  if (contractAddresses) {
+    contractNetworks = {
+      ...contractNetworks,
+      [chainId]: {
+        ...contractNetworks?.[chainId],
+        ...(contractAddresses.safeSingletonAddress && {
+          safeSingletonAddress: contractAddresses.safeSingletonAddress,
+        }),
+        ...(contractAddresses.safeProxyFactoryAddress && {
+          safeProxyFactoryAddress: contractAddresses.safeProxyFactoryAddress,
+        }),
+        ...(contractAddresses.fallbackHandlerAddress && {
+          fallbackHandlerAddress: contractAddresses.fallbackHandlerAddress,
+        }),
+        ...(contractAddresses.multiSendAddress && { multiSendAddress: contractAddresses.multiSendAddress }),
+        ...(contractAddresses.multiSendCallOnlyAddress && {
+          multiSendCallOnlyAddress: contractAddresses.multiSendCallOnlyAddress,
+        }),
+        ...(contractAddresses.signMessageLibAddress && {
+          signMessageLibAddress: contractAddresses.signMessageLibAddress,
+        }),
+        ...(contractAddresses.createCallAddress && { createCallAddress: contractAddresses.createCallAddress }),
+        ...(contractAddresses.simulateTxAccessorAddress && {
+          simulateTxAccessorAddress: contractAddresses.simulateTxAccessorAddress,
+        }),
+        ...(contractAddresses.safeWebAuthnSignerFactoryAddress && {
+          safeWebAuthnSignerFactoryAddress: contractAddresses.safeWebAuthnSignerFactoryAddress,
+        }),
       },
     }
   }

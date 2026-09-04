@@ -7664,6 +7664,47 @@
           "enableTenderlySimulationBeforeRelay"
         ]
       },
+      "ContractAddresses": {
+        "type": "object",
+        "properties": {
+          "safeSingletonAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "safeProxyFactoryAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "fallbackHandlerAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "multiSendAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "multiSendCallOnlyAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "signMessageLibAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "createCallAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "simulateTxAccessorAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "safeWebAuthnSignerFactoryAddress": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "Chain": {
         "type": "object",
         "properties": {
@@ -7761,6 +7802,14 @@
             "allOf": [
               {
                 "$ref": "#/components/schemas/Relayer"
+              }
+            ]
+          },
+          "contractAddresses": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContractAddresses"
               }
             ]
           }

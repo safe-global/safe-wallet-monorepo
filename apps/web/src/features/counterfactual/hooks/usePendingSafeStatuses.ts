@@ -178,6 +178,15 @@ const usePendingSafeStatus = (): void => {
           return
         }
 
+        let startBlock: number | undefined
+        try {
+          startBlock = await provider?.getBlockNumber()
+        } catch (error) {
+          // The block number is only used to detect replacement transactions. A
+          // temporary RPC failure must not prevent monitoring the submitted tx.
+          console.warn('Could not read the current block number while tracking Safe creation', error)
+        }
+
         dispatch(
           updateUndeployedSafeStatus({
             chainId: creationChainId,
@@ -186,7 +195,7 @@ const usePendingSafeStatus = (): void => {
               status,
               txHash: 'txHash' in detail ? detail.txHash : undefined,
               taskId: 'taskId' in detail ? detail.taskId : undefined,
-              startBlock: await provider?.getBlockNumber(),
+              startBlock,
               submittedAt: Date.now(),
             },
           }),

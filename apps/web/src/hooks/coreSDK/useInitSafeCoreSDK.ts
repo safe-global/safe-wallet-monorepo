@@ -46,6 +46,7 @@ export const useInitSafeCoreSDK = () => {
       undeployedSafe,
       isL2Chain: chain?.l2,
       isZkChain: chain?.zk,
+      contractAddresses: chain?.contractAddresses,
     })
       .then((safeSDK) => {
         if (cancelled) return
@@ -76,6 +77,7 @@ export const useInitSafeCoreSDK = () => {
   }, [
     address,
     chain?.l2,
+    chain?.contractAddresses,
     chain?.zk,
     dispatch,
     safe.address.value,

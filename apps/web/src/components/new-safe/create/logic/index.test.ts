@@ -220,6 +220,55 @@ describe('create/logic', () => {
       expect(result.safeAccountConfig.fallbackHandler).toBeDefined()
     })
 
+    it('should prefer CFG contract addresses over Safe deployments', () => {
+      const contractAddresses = {
+        safeSingletonAddress: faker.finance.ethereumAddress(),
+        safeProxyFactoryAddress: faker.finance.ethereumAddress(),
+        fallbackHandlerAddress: faker.finance.ethereumAddress(),
+      }
+      const result = createNewUndeployedSafeWithoutSalt(
+        '1.4.1',
+        { owners: [faker.finance.ethereumAddress()], threshold: 1 },
+        chainBuilder()
+          .with({
+            chainId: '1',
+            l2: false,
+            features: [FEATURES.COUNTERFACTUAL],
+            contractAddresses,
+          })
+          .build(),
+      )
+
+      expect(result.factoryAddress).toBe(contractAddresses.safeProxyFactoryAddress)
+      expect(result.masterCopy).toBe(contractAddresses.safeSingletonAddress)
+      expect(result.safeAccountConfig.fallbackHandler).toBe(contractAddresses.fallbackHandlerAddress)
+    })
+
+    it('should fall back to Safe deployments for missing CFG contract addresses', () => {
+      const safeSingletonAddress = faker.finance.ethereumAddress()
+      const chain = chainBuilder()
+        .with({
+          chainId: '1',
+          l2: false,
+          features: [FEATURES.COUNTERFACTUAL],
+          contractAddresses: { safeSingletonAddress },
+        })
+        .build()
+      const result = createNewUndeployedSafeWithoutSalt(
+        '1.4.1',
+        { owners: [faker.finance.ethereumAddress()], threshold: 1 },
+        chain,
+      )
+
+      expect(result.masterCopy).toBe(safeSingletonAddress)
+      expect(result.factoryAddress).toBe(
+        getProxyFactoryDeployment({ version: '1.4.1', network: chain.chainId })?.defaultAddress,
+      )
+      expect(result.safeAccountConfig.fallbackHandler).toBe(
+        getFallbackHandlerDeployment({ version: '1.4.1', network: chain.chainId })?.defaultAddress,
+      )
+    })
+
     it('should use l1 masterCopy and no migration on l1s without multichain feature', () => {
       const safeSetup = {
         owners: [faker.finance.ethereumAddress()],

@@ -246,16 +246,22 @@ export const createNewUndeployedSafeWithoutSalt = (
   const deploymentType = chain.zk ? 'zksync' : 'canonical'
 
   const fallbackHandlerDeployments = getCompatibilityFallbackHandlerDeployments({ version: safeVersion })
-  const fallbackHandlerAddress = getChainAgnosticAddress(fallbackHandlerDeployments, chain.chainId, deploymentType)
+  const fallbackHandlerAddress =
+    chain.contractAddresses?.fallbackHandlerAddress ||
+    getChainAgnosticAddress(fallbackHandlerDeployments, chain.chainId, deploymentType)
 
   const safeL2Deployments = getSafeL2SingletonDeployments({ version: safeVersion })
   const safeL2Address = getChainAgnosticAddress(safeL2Deployments, chain.chainId, deploymentType)
 
   const safeL1Deployments = getSafeSingletonDeployments({ version: safeVersion })
-  const safeL1Address = getChainAgnosticAddress(safeL1Deployments, chain.chainId, deploymentType)
+  const safeL1Address =
+    chain.contractAddresses?.safeSingletonAddress ||
+    getChainAgnosticAddress(safeL1Deployments, chain.chainId, deploymentType)
 
   const safeFactoryDeployments = getProxyFactoryDeployments({ version: safeVersion })
-  const safeFactoryAddress = getChainAgnosticAddress(safeFactoryDeployments, chain.chainId, deploymentType)
+  const safeFactoryAddress =
+    chain.contractAddresses?.safeProxyFactoryAddress ||
+    getChainAgnosticAddress(safeFactoryDeployments, chain.chainId, deploymentType)
 
   if (!safeL2Address || !safeL1Address || !safeFactoryAddress || !fallbackHandlerAddress) {
     throw new Error('No Safe deployment found')

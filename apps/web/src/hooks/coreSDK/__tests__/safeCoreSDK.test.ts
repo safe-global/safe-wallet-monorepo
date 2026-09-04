@@ -144,6 +144,33 @@ describe('safeCoreSDK', () => {
         })
       })
 
+      it('should prefer CFG contract addresses over resolved deployments', async () => {
+        const chainId = '167901'
+        const multiSendAddress = toBeHex('0x2', 20)
+        const multiSendCallOnlyAddress = toBeHex('0x3', 20)
+        const mockProvider = new JsonRpcProvider()
+        mockProvider.getNetwork = jest.fn().mockReturnValue({ chainId: BigInt(chainId) })
+
+        await initSafeSDK({
+          provider: mockProvider,
+          chainId,
+          address: toBeHex('0x1', 20),
+          version: '1.5.0',
+          implementation: MAINNET_MASTER_COPY,
+          implementationVersionState: ImplementationVersionState.UP_TO_DATE,
+          isL2Chain: false,
+          contractAddresses: { multiSendAddress, multiSendCallOnlyAddress },
+        })
+
+        expect(Safe.init).toHaveBeenCalledWith(
+          expect.objectContaining({
+            contractNetworks: {
+              [chainId]: expect.objectContaining({ multiSendAddress, multiSendCallOnlyAddress }),
+            },
+          }),
+        )
+      })
+
       it('should return an L2 SDK instance for L2 chain', async () => {
         const chainId = '137' // Polygon
         const version = '1.3.0'

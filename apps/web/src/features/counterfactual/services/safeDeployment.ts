@@ -171,6 +171,7 @@ export const checkSafeActivation = async (
         error: new Error('Transaction reverted'),
         safeAddress,
       })
+      return
     }
 
     safeCreationDispatch(SafeCreationEvent.SUCCESS, {
