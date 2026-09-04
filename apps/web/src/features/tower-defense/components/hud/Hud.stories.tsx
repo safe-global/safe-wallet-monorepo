@@ -21,6 +21,7 @@ const HudPreview = ({ snapshot }: { snapshot: GameSnapshot }): ReactElement => (
         onSpeed={noop}
         onPause={noop}
         onMute={noop}
+        onVolume={noop}
         onBloom={noop}
         onHelp={noop}
         onExit={noop}
@@ -65,6 +66,7 @@ export const WaveInProgress: Story = {
       canCallWave: false,
       speed: 2,
       buildTowerId: 'safenet',
+      waveProgress: { index: 10, total: 11, queued: 3, alive: 4, done: 4 },
       toast: { id: 1, text: 'Wave 10: BOSS: Rug pull whale', tone: 'info' },
     }),
   },

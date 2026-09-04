@@ -23,6 +23,8 @@ export type SoundName =
   | 'lost'
 
 const MUTE_KEY = 'safe-td-muted'
+const VOLUME_KEY = 'safe-td-volume'
+const MASTER_GAIN = 0.8
 
 const RATE_LIMIT_MS: Partial<Record<SoundName, number>> = {
   shot_bolt: 45,
@@ -61,6 +63,7 @@ export class SoundEngine {
   private beat = 0
   private intensity = 0
   private mutedState: boolean
+  private volumeState = 1
 
   constructor() {
     let stored = false
@@ -70,6 +73,35 @@ export class SoundEngine {
       stored = false
     }
     this.mutedState = stored
+    try {
+      const rawVolume = typeof localStorage !== 'undefined' ? localStorage.getItem(VOLUME_KEY) : null
+      const parsed = rawVolume === null ? NaN : Number(rawVolume)
+      if (Number.isFinite(parsed)) this.volumeState = Math.max(0, Math.min(1, parsed))
+    } catch {
+      this.volumeState = 1
+    }
+  }
+
+  get volume(): number {
+    return this.volumeState
+  }
+
+  /** Master volume 0..1, persisted. Muting is separate so unmuting restores the chosen level. */
+  setVolume(volume: number): void {
+    this.volumeState = Math.max(0, Math.min(1, volume))
+    try {
+      localStorage.setItem(VOLUME_KEY, String(this.volumeState))
+    } catch {
+      // storage unavailable
+    }
+    this.applyMasterGain()
+  }
+
+  private applyMasterGain(): void {
+    if (!this.master || !this.ctx) return
+    const target = this.mutedState ? 0 : MASTER_GAIN * this.volumeState
+    this.master.gain.cancelScheduledValues(this.ctx.currentTime)
+    this.master.gain.linearRampToValueAtTime(target, this.ctx.currentTime + 0.15)
   }
 
   get muted(): boolean {
@@ -90,7 +122,7 @@ export class SoundEngine {
       return
     }
     this.master = this.ctx.createGain()
-    this.master.gain.value = this.mutedState ? 0 : 0.8
+    this.master.gain.value = this.mutedState ? 0 : MASTER_GAIN * this.volumeState
     this.master.connect(this.ctx.destination)
     this.sfxGain = this.ctx.createGain()
     this.sfxGain.gain.value = 0.55
@@ -112,10 +144,7 @@ export class SoundEngine {
     } catch {
       // ignore storage failures (private mode etc.)
     }
-    if (this.master && this.ctx) {
-      this.master.gain.cancelScheduledValues(this.ctx.currentTime)
-      this.master.gain.linearRampToValueAtTime(muted ? 0 : 0.8, this.ctx.currentTime + 0.15)
-    }
+    this.applyMasterGain()
   }
 
   toggleMuted(): boolean {

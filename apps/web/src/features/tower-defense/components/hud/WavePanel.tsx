@@ -31,6 +31,8 @@ export const EnemyChips = ({ preview }: { preview: WavePreview }): ReactElement 
 const WavePanel = ({ snapshot, onCallWave }: WavePanelProps): ReactElement => {
   const preview = snapshot.nextWave ?? snapshot.currentWave
   const isFinalRunning = snapshot.nextWave === null
+  const progress = snapshot.waveProgress
+  const progressRatio = progress ? progress.done / Math.max(1, progress.total) : 0
   return (
     <div className={`${css.panel} ${css.wavePanel}`} data-testid="td-wave-panel">
       <div>
@@ -41,6 +43,20 @@ const WavePanel = ({ snapshot, onCallWave }: WavePanelProps): ReactElement => {
       </div>
       {preview && <div className={css.waveIntel}>{preview.intel}</div>}
       {preview && <EnemyChips preview={preview} />}
+      {progress && (
+        <div data-testid="td-wave-progress">
+          <div className={css.countdown}>
+            <span className={css.panelKicker}>Wave {progress.index} in progress</span>
+            <span className={css.progressLabel}>
+              {progress.done}/{progress.total} down · {progress.alive} active
+              {progress.queued > 0 ? ` · ${progress.queued} incoming` : ''}
+            </span>
+          </div>
+          <div className={css.progressBar} aria-hidden>
+            <div className={css.progressFill} style={{ width: `${Math.round(progressRatio * 100)}%` }} />
+          </div>
+        </div>
+      )}
       {!isFinalRunning && (
         <div className={css.countdown}>
           <div>

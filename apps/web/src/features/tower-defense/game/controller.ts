@@ -13,6 +13,7 @@ export interface GameController {
   setSpeed(speed: GameSpeed): void
   togglePause(): void
   toggleMute(): void
+  setVolume(volume: number): void
   toggleBloom(): void
   setTargeting(mode: TargetingMode): void
   continueEndless(): void

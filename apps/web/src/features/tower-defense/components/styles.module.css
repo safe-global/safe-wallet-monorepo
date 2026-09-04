@@ -75,13 +75,14 @@
 .topBar {
   position: absolute;
   top: 12px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 316px;
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 16px;
   padding: 8px 16px;
   min-height: 56px;
+  max-width: calc(100% - 328px);
+  flex-wrap: wrap;
 }
 
 .topGroup {
@@ -199,6 +200,40 @@
   border: 0;
   border-radius: 0;
   min-width: 36px;
+}
+
+/* Keyboard users get an unmistakable brand-green focus ring on every HUD control. */
+.hud :focus-visible,
+.overlay :focus-visible {
+  outline: 2px solid #12ff80;
+  outline-offset: 2px;
+}
+
+.volume {
+  width: 60px;
+  accent-color: #12ff80;
+  cursor: pointer;
+}
+
+.progressLabel {
+  font-size: 11px;
+  color: #d6d8da;
+  font-variant-numeric: tabular-nums;
+}
+
+.progressBar {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #0fda6d, #12ff80);
+  transition: width 0.25s ease;
 }
 
 /* ─── Wave panel ─────────────────────────────────────────────────────────── */
@@ -926,6 +961,12 @@
 .helpColumn ul {
   padding-left: 16px;
   margin: 0;
+}
+
+@media (max-width: 1400px) {
+  .statSecondary {
+    display: none;
+  }
 }
 
 @media (max-width: 1100px) {

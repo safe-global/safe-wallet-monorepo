@@ -250,8 +250,16 @@ export class GameRenderer {
       ;(this.hoverRing.material as THREE.MeshBasicMaterial).color.setHex(ghost.valid ? COLORS.safeGreen : COLORS.danger)
     } else {
       tileMat.color.setHex(0xffffff)
-      this.hoverRing.visible = false
       if (this.ghost) this.ghost.visible = false
+      const hovered = this.sim.getTowerAt(cell)
+      if (hovered) {
+        this.hoverRing.visible = true
+        this.hoverRing.position.set(hovered.pos.x, HOVER_Y + 0.01, hovered.pos.z)
+        this.hoverRing.scale.setScalar(hovered.def.levels[hovered.level - 1].range)
+        ;(this.hoverRing.material as THREE.MeshBasicMaterial).color.setHex(hovered.def.color)
+      } else {
+        this.hoverRing.visible = false
+      }
     }
   }
 

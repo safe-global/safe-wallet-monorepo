@@ -75,6 +75,7 @@ export class Simulation {
   private readonly blocked: Set<string>
   private spawnQueue: SpawnEntry[] = []
   private readonly waveRemaining = new Map<number, number>()
+  private readonly waveTotals = new Map<number, number>()
   private readonly clearedWaves = new Set<number>()
   private events: SimEvent[] = []
   private uidCounter = 1
@@ -249,6 +250,7 @@ export class Simulation {
     })
     this.spawnQueue.sort((a, b) => a.time - b.time)
     this.waveRemaining.set(wave.index, total)
+    this.waveTotals.set(wave.index, total)
     this.lastWaveSpawnEnd = lastSpawn
     this.nextWaveAt =
       this.waveIndex < this.totalWaves ? lastSpawn + this.difficulty.buildTime * WAVE_GAP_RATIO + 3 : null
@@ -621,6 +623,17 @@ export class Simulation {
 
   private addToWave(wave: number, count: number): void {
     this.waveRemaining.set(wave, (this.waveRemaining.get(wave) ?? 0) + count)
+    this.waveTotals.set(wave, (this.waveTotals.get(wave) ?? 0) + count)
+  }
+
+  /** How far a wave has progressed: attackers still to spawn, still alive and already dealt with. */
+  waveProgress(wave: number): { total: number; queued: number; alive: number; done: number } | null {
+    const total = this.waveTotals.get(wave)
+    if (total === undefined) return null
+    const queued = this.spawnQueue.filter((entry) => entry.wave === wave).length
+    const remaining = this.waveRemaining.get(wave) ?? 0
+    const alive = Math.max(0, remaining - queued)
+    return { total, queued, alive, done: Math.max(0, total - remaining) }
   }
 
   private removeEnemy(enemy: EnemyState): void {

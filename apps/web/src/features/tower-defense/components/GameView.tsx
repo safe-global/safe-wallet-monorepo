@@ -84,6 +84,7 @@ const Hud = ({
         onSpeed={(speed) => controller.setSpeed(speed)}
         onPause={() => controller.togglePause()}
         onMute={() => controller.toggleMute()}
+        onVolume={(volume) => controller.setVolume(volume)}
         onBloom={() => controller.toggleBloom()}
         onHelp={() => setHelpOpen((open) => !open)}
         onExit={onExit}

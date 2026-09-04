@@ -328,6 +328,22 @@ describe('Simulation', () => {
     })
   })
 
+  describe('wave progress', () => {
+    it('reports queued, alive and finished attackers per wave', () => {
+      const sim = new Simulation({ difficulty: 'mainnet' })
+      expect(sim.waveProgress(1)).toBeNull()
+      sim.callNextWave()
+      advance(sim, 2.1)
+      expect(sim.waveProgress(1)).toEqual({ total: 8, queued: 5, alive: 3, done: 0 })
+      const first = Array.from(sim.enemies.values())[0]
+      sim.applyDamage(first, 1e9, null, 1)
+      expect(sim.waveProgress(1)).toEqual({ total: 8, queued: 5, alive: 2, done: 1 })
+      advance(sim, 6)
+      expect(sim.waveProgress(1)?.queued).toBe(0)
+      expect(sim.waveProgress(1)?.alive).toBe(7)
+    })
+  })
+
   describe('overlapping waves', () => {
     it('clears each wave independently when its last attacker is gone', () => {
       const sim = new Simulation({ difficulty: 'mainnet' })

@@ -45,12 +45,14 @@ export interface GameSnapshot {
   speed: GameSpeed
   paused: boolean
   muted: boolean
+  volume: number
   bloom: boolean
   endless: boolean
   buildTowerId: TowerId | null
   selected: SelectedTowerInfo | null
   nextWave: WavePreview | null
   currentWave: WavePreview | null
+  waveProgress: { index: number; total: number; queued: number; alive: number; done: number } | null
   toast: { id: number; text: string; tone: 'info' | 'danger' | 'success' } | null
   icons: Record<TowerId, string>
   elapsed: number
@@ -61,6 +63,7 @@ type Listener = () => void
 const FIXED_STEP = 1 / 60
 const MAX_FRAME = 0.1
 const SNAPSHOT_INTERVAL = 0.1
+const KILL_MILESTONES = [50, 100, 250, 500, 1000, 2500]
 
 export interface GameAppOptions {
   difficulty: Difficulty
@@ -149,11 +152,13 @@ export class GameApp {
       speed: this.speed,
       paused: this.paused,
       muted: this.sound.muted,
+      volume: this.sound.volume,
       bloom: this.renderer.bloom,
       buildTowerId: this.buildTowerId,
       selected: selected ? this.describeTower(selected) : null,
       nextWave: this.previewWave(nextIndex),
       currentWave: this.previewWave(sim.waveIndex),
+      waveProgress: this.currentWaveProgress(),
       toast: this.toast,
       icons: this.icons,
       elapsed: (performance.now() - this.startedAt) / 1000,
@@ -178,6 +183,13 @@ export class GameApp {
     const wave = getWave(index, this.sim.endless)
     if (!wave) return null
     return { index: wave.index, title: wave.title, intel: wave.intel, enemies: waveEnemyCounts(wave) }
+  }
+
+  private currentWaveProgress(): GameSnapshot['waveProgress'] {
+    const index = this.sim.waveIndex
+    const progress = this.sim.waveProgress(index)
+    if (!progress || progress.done >= progress.total) return null
+    return { index, ...progress }
   }
 
   private showToast(text: string, tone: 'info' | 'danger' | 'success' = 'info'): void {
@@ -271,6 +283,12 @@ export class GameApp {
     this.paused = !this.paused
     if (this.paused) this.sound.suspend()
     else this.sound.resume()
+    this.emit()
+  }
+
+  setVolume(volume: number): void {
+    this.sound.unlock()
+    this.sound.setVolume(volume)
     this.emit()
   }
 
@@ -493,6 +511,9 @@ export class GameApp {
       case 'death':
         this.sound.play(event.boss ? 'bossDeath' : 'death')
         if (event.boss) this.showToast(`${ENEMIES[event.enemyId].name} neutralised!`, 'success')
+        else if (KILL_MILESTONES.includes(this.sim.kills)) {
+          this.showToast(`${this.sim.kills} threats neutralised. The signers salute you.`, 'success')
+        }
         break
       case 'spawn':
         if (event.boss) {
@@ -513,6 +534,9 @@ export class GameApp {
         break
       case 'waveCleared':
         this.sound.play('waveCleared')
+        if (event.index % 5 === 0 && this.sim.leaked === 0) {
+          this.showToast(`${event.index} waves without a single leak. Flawless threshold.`, 'success')
+        }
         break
       case 'won':
         this.sound.play('won')

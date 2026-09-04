@@ -76,7 +76,7 @@ exports[`./Hud.stories BuildPhase 1`] = `
             </span>
           </div>
           <div
-            class="stat"
+            class="stat statSecondary"
           >
             <span
               class="statLabel"
@@ -90,7 +90,7 @@ exports[`./Hud.stories BuildPhase 1`] = `
             </span>
           </div>
           <div
-            class="stat"
+            class="stat statSecondary"
           >
             <span
               class="statLabel"
@@ -150,6 +150,17 @@ exports[`./Hud.stories BuildPhase 1`] = `
             >
               Sound on
             </button>
+            <input
+              aria-label="Volume"
+              class="volume"
+              data-testid="td-volume"
+              max="100"
+              min="0"
+              step="5"
+              title="Volume"
+              type="range"
+              value="80"
+            />
             <button
               class="iconButton iconButtonActive"
               title="Toggle bloom post-processing (B)"
@@ -1074,7 +1085,7 @@ exports[`./Hud.stories Defeat 1`] = `
             </span>
           </div>
           <div
-            class="stat"
+            class="stat statSecondary"
           >
             <span
               class="statLabel"
@@ -1088,7 +1099,7 @@ exports[`./Hud.stories Defeat 1`] = `
             </span>
           </div>
           <div
-            class="stat"
+            class="stat statSecondary"
           >
             <span
               class="statLabel"
@@ -1148,6 +1159,17 @@ exports[`./Hud.stories Defeat 1`] = `
             >
               Sound on
             </button>
+            <input
+              aria-label="Volume"
+              class="volume"
+              data-testid="td-volume"
+              max="100"
+              min="0"
+              step="5"
+              title="Volume"
+              type="range"
+              value="80"
+            />
             <button
               class="iconButton iconButtonActive"
               title="Toggle bloom post-processing (B)"
@@ -2204,7 +2226,7 @@ exports[`./Hud.stories TowerSelected 1`] = `
             </span>
           </div>
           <div
-            class="stat"
+            class="stat statSecondary"
           >
             <span
               class="statLabel"
@@ -2218,7 +2240,7 @@ exports[`./Hud.stories TowerSelected 1`] = `
             </span>
           </div>
           <div
-            class="stat"
+            class="stat statSecondary"
           >
             <span
               class="statLabel"
@@ -2278,6 +2300,17 @@ exports[`./Hud.stories TowerSelected 1`] = `
             >
               Sound on
             </button>
+            <input
+              aria-label="Volume"
+              class="volume"
+              data-testid="td-volume"
+              max="100"
+              min="0"
+              step="5"
+              title="Volume"
+              type="range"
+              value="80"
+            />
             <button
               class="iconButton iconButtonActive"
               title="Toggle bloom post-processing (B)"
@@ -3498,7 +3531,7 @@ exports[`./Hud.stories TreasuryLow 1`] = `
             </span>
           </div>
           <div
-            class="stat"
+            class="stat statSecondary"
           >
             <span
               class="statLabel"
@@ -3512,7 +3545,7 @@ exports[`./Hud.stories TreasuryLow 1`] = `
             </span>
           </div>
           <div
-            class="stat"
+            class="stat statSecondary"
           >
             <span
               class="statLabel"
@@ -3572,6 +3605,17 @@ exports[`./Hud.stories TreasuryLow 1`] = `
             >
               Sound on
             </button>
+            <input
+              aria-label="Volume"
+              class="volume"
+              data-testid="td-volume"
+              max="100"
+              min="0"
+              step="5"
+              title="Volume"
+              type="range"
+              value="80"
+            />
             <button
               class="iconButton iconButtonActive"
               title="Toggle bloom post-processing (B)"
@@ -4502,7 +4546,7 @@ exports[`./Hud.stories Victory 1`] = `
             </span>
           </div>
           <div
-            class="stat"
+            class="stat statSecondary"
           >
             <span
               class="statLabel"
@@ -4516,7 +4560,7 @@ exports[`./Hud.stories Victory 1`] = `
             </span>
           </div>
           <div
-            class="stat"
+            class="stat statSecondary"
           >
             <span
               class="statLabel"
@@ -4576,6 +4620,17 @@ exports[`./Hud.stories Victory 1`] = `
             >
               Sound on
             </button>
+            <input
+              aria-label="Volume"
+              class="volume"
+              data-testid="td-volume"
+              max="100"
+              min="0"
+              step="5"
+              title="Volume"
+              type="range"
+              value="80"
+            />
             <button
               class="iconButton iconButtonActive"
               title="Toggle bloom post-processing (B)"
@@ -5595,7 +5650,7 @@ exports[`./Hud.stories WaveInProgress 1`] = `
             </span>
           </div>
           <div
-            class="stat"
+            class="stat statSecondary"
           >
             <span
               class="statLabel"
@@ -5609,7 +5664,7 @@ exports[`./Hud.stories WaveInProgress 1`] = `
             </span>
           </div>
           <div
-            class="stat"
+            class="stat statSecondary"
           >
             <span
               class="statLabel"
@@ -5669,6 +5724,17 @@ exports[`./Hud.stories WaveInProgress 1`] = `
             >
               Sound on
             </button>
+            <input
+              aria-label="Volume"
+              class="volume"
+              data-testid="td-volume"
+              max="100"
+              min="0"
+              step="5"
+              title="Volume"
+              type="range"
+              value="80"
+            />
             <button
               class="iconButton iconButtonActive"
               title="Toggle bloom post-processing (B)"
@@ -5748,6 +5814,41 @@ exports[`./Hud.stories WaveInProgress 1`] = `
                 6
               </span>
             </span>
+          </div>
+          <div
+            data-testid="td-wave-progress"
+          >
+            <div
+              class="countdown"
+            >
+              <span
+                class="panelKicker"
+              >
+                Wave 
+                10
+                 in progress
+              </span>
+              <span
+                class="progressLabel"
+              >
+                4
+                /
+                11
+                 down · 
+                4
+                 active
+                 · 3 incoming
+              </span>
+            </div>
+            <div
+              aria-hidden="true"
+              class="progressBar"
+            >
+              <div
+                class="progressFill"
+                style="width: 36%;"
+              />
+            </div>
           </div>
           <div
             class="countdown"

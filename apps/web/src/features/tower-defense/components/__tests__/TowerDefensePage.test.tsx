@@ -50,6 +50,9 @@ class FakeController implements GameController {
   toggleMute = (): void => {
     this.calls.push('mute')
   }
+  setVolume = (volume: number): void => {
+    this.calls.push(`volume:${volume}`)
+  }
   toggleBloom = (): void => {
     this.calls.push('bloom')
   }
@@ -102,7 +105,8 @@ describe('TowerDefensePage', () => {
     fireEvent.click(screen.getByTestId('td-build-shield'))
     fireEvent.click(screen.getByTestId('td-call-wave'))
     fireEvent.click(screen.getByText('2x'))
-    expect(controller.calls).toEqual(['build:shield', 'wave', 'speed:2'])
+    fireEvent.change(screen.getByTestId('td-volume'), { target: { value: '40' } })
+    expect(controller.calls).toEqual(['build:shield', 'wave', 'speed:2', 'volume:0.4'])
   })
 
   it('reflects live snapshot updates and shows the tower panel for a selection', async () => {
@@ -126,6 +130,11 @@ describe('TowerDefensePage', () => {
       })
     })
     expect(screen.getByTestId('td-gold')).toHaveTextContent('999')
+    expect(screen.queryByTestId('td-wave-progress')).not.toBeInTheDocument()
+    act(() => {
+      controller.update({ waveProgress: { index: 3, total: 12, queued: 2, alive: 4, done: 6 } })
+    })
+    expect(screen.getByTestId('td-wave-progress')).toHaveTextContent('6/12 down · 4 active · 2 incoming')
     const panel = screen.getByTestId('td-tower-panel')
     expect(panel).toHaveTextContent('Multisig Cannon')
     expect(panel).toHaveTextContent('Level 2')

@@ -8,6 +8,7 @@ interface TopBarProps {
   onSpeed: (speed: GameSpeed) => void
   onPause: () => void
   onMute: () => void
+  onVolume: (volume: number) => void
   onBloom: () => void
   onHelp: () => void
   onExit: () => void
@@ -15,7 +16,16 @@ interface TopBarProps {
 
 const SPEEDS: GameSpeed[] = [1, 2, 3]
 
-const TopBar = ({ snapshot, onSpeed, onPause, onMute, onBloom, onHelp, onExit }: TopBarProps): ReactElement => {
+const TopBar = ({
+  snapshot,
+  onSpeed,
+  onPause,
+  onMute,
+  onVolume,
+  onBloom,
+  onHelp,
+  onExit,
+}: TopBarProps): ReactElement => {
   const treasuryRatio = snapshot.maxTreasury > 0 ? snapshot.treasury / snapshot.maxTreasury : 0
   return (
     <div className={`${css.panel} ${css.topBar}`} data-testid="td-topbar">
@@ -46,12 +56,12 @@ const TopBar = ({ snapshot, onSpeed, onPause, onMute, onBloom, onHelp, onExit }:
         </span>
       </div>
 
-      <div className={css.stat}>
+      <div className={`${css.stat} ${css.statSecondary}`}>
         <span className={css.statLabel}>Threats</span>
         <span className={css.statValue}>{snapshot.enemiesAlive}</span>
       </div>
 
-      <div className={css.stat}>
+      <div className={`${css.stat} ${css.statSecondary}`}>
         <span className={css.statLabel}>Neutralised</span>
         <span className={css.statValue}>{formatNumber(snapshot.kills)}</span>
       </div>
@@ -81,6 +91,18 @@ const TopBar = ({ snapshot, onSpeed, onPause, onMute, onBloom, onHelp, onExit }:
         <button type="button" className={css.iconButton} onClick={onMute} title="Toggle sound (M)">
           {snapshot.muted ? 'Sound off' : 'Sound on'}
         </button>
+        <input
+          type="range"
+          className={css.volume}
+          min={0}
+          max={100}
+          step={5}
+          value={Math.round(snapshot.volume * 100)}
+          onChange={(e) => onVolume(Number(e.target.value) / 100)}
+          aria-label="Volume"
+          title="Volume"
+          data-testid="td-volume"
+        />
         <button
           type="button"
           className={`${css.iconButton} ${snapshot.bloom ? css.iconButtonActive : ''}`}
