@@ -38,8 +38,10 @@ const HudPreview = ({ snapshot }: { snapshot: GameSnapshot }): ReactElement => (
           onTargeting={noop}
         />
       )}
-      <BuildBar snapshot={snapshot} onSelect={noop} />
-      <AbilityBar snapshot={snapshot} onHardFork={noop} onFundraise={noop} onCallVitalik={noop} />
+      <div className={css.bottomDock}>
+        <AbilityBar snapshot={snapshot} onHardFork={noop} onFundraise={noop} onCallVitalik={noop} />
+        <BuildBar snapshot={snapshot} onSelect={noop} />
+      </div>
       <Toast toast={snapshot.toast} />
       {(snapshot.phase === 'won' || snapshot.phase === 'lost') && (
         <EndScreen snapshot={snapshot} isNewBest onRestart={noop} onMenu={noop} onContinueEndless={noop} />

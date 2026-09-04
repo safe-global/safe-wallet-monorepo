@@ -101,13 +101,15 @@ const Hud = ({
           onTargeting={(mode) => controller.setTargeting(mode)}
         />
       )}
-      <BuildBar snapshot={snapshot} onSelect={(id) => controller.setBuildTower(id)} />
-      <AbilityBar
-        snapshot={snapshot}
-        onHardFork={() => controller.hardFork()}
-        onFundraise={() => controller.fundraise()}
-        onCallVitalik={() => controller.callVitalik()}
-      />
+      <div className={css.bottomDock}>
+        <AbilityBar
+          snapshot={snapshot}
+          onHardFork={() => controller.hardFork()}
+          onFundraise={() => controller.fundraise()}
+          onCallVitalik={() => controller.callVitalik()}
+        />
+        <BuildBar snapshot={snapshot} onSelect={(id) => controller.setBuildTower(id)} />
+      </div>
       <Toast toast={snapshot.toast} />
       {snapshot.paused && !isOver && <div className={css.pausedBanner}>Paused</div>}
       {helpOpen && <HelpOverlay onClose={() => setHelpOpen(false)} />}

@@ -416,11 +416,24 @@
 
 /* ─── Build bar ──────────────────────────────────────────────────────────── */
 
-.buildBar {
+.bottomDock {
   position: absolute;
   bottom: 14px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 12px;
+  right: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.bottomDock > * {
+  pointer-events: auto;
+}
+
+.buildBar {
   display: flex;
   gap: 8px;
   padding: 10px;
@@ -685,9 +698,6 @@
 /* ─── Ability bar ────────────────────────────────────────────────────────── */
 
 .abilityBar {
-  position: absolute;
-  bottom: 14px;
-  left: 12px;
   display: flex;
   gap: 8px;
   padding: 10px;
@@ -790,7 +800,7 @@
 
 .toast {
   position: absolute;
-  bottom: 150px;
+  bottom: 160px;
   left: 50%;
   transform: translateX(-50%);
   padding: 10px 18px;
