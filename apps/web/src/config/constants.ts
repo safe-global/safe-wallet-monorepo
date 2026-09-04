@@ -26,6 +26,9 @@ export const GATEWAY_URL_PRODUCTION =
 export const GATEWAY_URL_STAGING = process.env.NEXT_PUBLIC_GATEWAY_URL_STAGING || 'https://safe-client.staging.5afe.dev'
 export const CONFIG_SERVICE_KEY = process.env.NEXT_PUBLIC_CONFIG_SERVICE_KEY || 'WALLET_WEB'
 
+// Cloud cosigner service (a separate deployable of the Client Gateway). Empty disables the feature.
+export const CLOUD_COSIGNER_URL = process.env.NEXT_PUBLIC_CLOUD_COSIGNER_URL || ''
+
 // Status page
 export const STATUS_PAGE_URL = process.env.NEXT_PUBLIC_SAFE_STATUS_PAGE_URL || 'https://status.safe.global'
 

@@ -33,6 +33,8 @@ export type NewSafeFormData = {
   safeAddress?: string
   willRelay?: boolean
   paymentReceiver?: string
+  /** Set when the user opted into the cloud cosigner; added as an extra owner with threshold + 1. */
+  cloudCosigner?: NamedAddress
 }
 
 const staticHints: Record<

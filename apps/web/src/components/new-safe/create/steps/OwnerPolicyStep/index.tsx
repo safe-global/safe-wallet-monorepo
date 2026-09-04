@@ -6,7 +6,7 @@ import { Typography } from '@/components/ui/typography'
 import { Separator } from '@/components/ui/separator'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Controller, FormProvider, useFieldArray, useForm } from 'react-hook-form'
-import type { ReactElement } from 'react'
+import { type ReactElement, useState } from 'react'
 
 import AddIcon from '@/public/images/common/add.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
@@ -21,6 +21,8 @@ import layoutCss from '@/components/new-safe/create/styles.module.css'
 import { CREATE_SAFE_EVENTS, trackEvent } from '@/services/analytics'
 import OwnerRow from '@/components/new-safe/OwnerRow'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
+import { useLoadFeature } from '@/features/__core__'
+import { CloudCosignerFeature, toCosignerOwner } from '@/features/cloud-cosigner'
 
 enum OwnerPolicyStepFields {
   owners = 'owners',
@@ -51,6 +53,8 @@ const OwnerPolicyStep = ({
     address: wallet?.address || '',
   }
   useSyncSafeCreationStep(setStep, data.networks)
+  const { CloudCosignerOption } = useLoadFeature(CloudCosignerFeature)
+  const [cloudCosigner, setCloudCosigner] = useState<NamedAddress | undefined>(data.cloudCosigner)
 
   const formMethods = useForm<OwnerPolicyStepForm>({
     mode: 'onChange',
@@ -83,11 +87,11 @@ const OwnerPolicyStep = ({
 
   const handleBack = () => {
     const formData = getValues()
-    onBack({ ...data, ...formData })
+    onBack({ ...data, ...formData, cloudCosigner })
   }
 
   const onFormSubmit = handleSubmit((data) => {
-    onSubmit(data)
+    onSubmit({ ...data, cloudCosigner })
 
     trackEvent({
       ...CREATE_SAFE_EVENTS.OWNERS,
@@ -122,6 +126,10 @@ const OwnerPolicyStep = ({
             <AddIcon className="size-4" />
             Add new signer
           </Button>
+          <CloudCosignerOption
+            checked={!!cloudCosigner}
+            onCheckedChange={(checked, address) => setCloudCosigner(checked ? toCosignerOwner(address) : undefined)}
+          />
         </div>
 
         <Separator />
@@ -172,6 +180,12 @@ const OwnerPolicyStep = ({
               </Typography>
             </div>
           </div>
+          {cloudCosigner && (
+            <Typography data-testid="cloud-cosigner-threshold-hint" variant="paragraph-small" className="mt-4 block">
+              The cloud cosigner adds one more required confirmation: {threshold + 1} out of {ownerFields.length + 1}{' '}
+              signers in total.
+            </Typography>
+          )}
         </div>
         <Separator />
         <div className={layoutCss.row}>

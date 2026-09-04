@@ -172,6 +172,8 @@ const config: StorybookConfig = {
     NEXT_PUBLIC_APP_HOMEPAGE: process.env.NEXT_PUBLIC_APP_HOMEPAGE || packageJson.homepage,
     // Enable official host features (logo, branding) in Storybook
     NEXT_PUBLIC_IS_OFFICIAL_HOST: 'true',
+    // Stories mock the cloud cosigner service with MSW at this origin
+    NEXT_PUBLIC_CLOUD_COSIGNER_URL: process.env.NEXT_PUBLIC_CLOUD_COSIGNER_URL || 'https://cosigner.storybook',
   }),
 
   typescript: {

@@ -50,6 +50,8 @@ import {
 } from '@/services/analytics'
 import { gtmSetChainId, gtmSetSafeAddress } from '@/services/analytics/gtm'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { useLoadFeature } from '@/features/__core__'
+import { CloudCosignerFeature, isCloudCosignerAddress } from '@/features/cloud-cosigner'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { hasRemainingRelays } from '@/utils/relaying'
 import { isWalletRejection } from '@/utils/wallets'
@@ -113,12 +115,16 @@ export const SafeSetupOverview = ({
   owners,
   threshold,
   networks,
+  cloudCosignerAddress,
 }: {
   name?: string
   owners: NamedAddress[]
   threshold: number
   networks: Chain[]
+  cloudCosignerAddress?: string
 }) => {
+  const { CloudCosignerBadge } = useLoadFeature(CloudCosignerFeature)
+
   return (
     <div className="grid grid-cols-12 gap-6">
       <ReviewRow
@@ -150,16 +156,18 @@ export const SafeSetupOverview = ({
         value={
           <div data-testid="review-step-owner-info" className={css.ownersArray}>
             {owners.map((owner, index) => (
-              <EthHashInfo
-                address={owner.address}
-                name={owner.name || owner.ens}
-                shortAddress={false}
-                showPrefix={false}
-                showName
-                hasExplorer
-                showCopyButton
-                key={index}
-              />
+              <div key={index} className="flex items-center gap-2">
+                <EthHashInfo
+                  address={owner.address}
+                  name={owner.name || owner.ens}
+                  shortAddress={false}
+                  showPrefix={false}
+                  showName
+                  hasExplorer
+                  showCopyButton
+                />
+                {isCloudCosignerAddress(owner.address, cloudCosignerAddress) && <CloudCosignerBadge />}
+              </div>
             ))}
           </div>
         }
@@ -197,8 +205,16 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
     ? getNativeTokenDisplay(chain)
     : NATIVE_TOKEN_DISPLAY_DEFAULT
 
+  // Relay eligibility is about the human signers; the cosigner never pays for deployments.
   const ownerAddresses = useMemo(() => data.owners.map((owner) => owner.address), [data.owners])
   const [minRelays] = useLeastRemainingRelays(ownerAddresses)
+
+  // The cosigner is one more owner and one more required confirmation on top of the chosen setup.
+  const allOwners = useMemo(
+    () => (data.cloudCosigner ? [...data.owners, data.cloudCosigner] : data.owners),
+    [data.owners, data.cloudCosigner],
+  )
+  const effectiveThreshold = data.threshold + (data.cloudCosigner ? 1 : 0)
 
   const isMultiChainDeployment = data.networks.length > 1
 
@@ -212,14 +228,14 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
         ? createNewUndeployedSafeWithoutSalt(
             data.safeVersion,
             {
-              owners: data.owners.map((owner) => owner.address),
-              threshold: data.threshold,
+              owners: allOwners.map((owner) => owner.address),
+              threshold: effectiveThreshold,
               paymentReceiver: data.paymentReceiver,
             },
             chain,
           )
         : undefined,
-    [chain, data.owners, data.safeVersion, data.threshold, data.paymentReceiver],
+    [chain, allOwners, data.safeVersion, effectiveThreshold, data.paymentReceiver],
   )
 
   const safePropsForGasEstimation = useMemo(() => {
@@ -292,8 +308,8 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
             successfulChains.map((res) => res.chain.chainId),
             safeAddress,
             data.name,
-            data.owners,
-            data.threshold,
+            allOwners,
+            effectiveThreshold,
           ),
         )
       }
@@ -479,7 +495,13 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
   return (
     <>
       <div data-testid="safe-setup-overview" className={layoutCss.row}>
-        <SafeSetupOverview name={data.name} owners={data.owners} threshold={data.threshold} networks={data.networks} />
+        <SafeSetupOverview
+          name={data.name}
+          owners={allOwners}
+          threshold={effectiveThreshold}
+          networks={data.networks}
+          cloudCosignerAddress={data.cloudCosigner?.address}
+        />
       </div>
       {isCounterfactualEnabled && (
         <>

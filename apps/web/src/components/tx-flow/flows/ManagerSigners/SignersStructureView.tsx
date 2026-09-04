@@ -5,7 +5,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Controller, FormProvider } from 'react-hook-form'
 import { useContext } from 'react'
-import type { ReactElement } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 
 import AddIcon from '@/public/images/common/add.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
@@ -29,6 +29,8 @@ type Props = {
   isSameSetup: boolean
   onRemove: (index: number) => void
   onAdd: () => void
+  /** Rendered below the signer rows, e.g. the cloud cosigner opt-in. */
+  extraSignerControls?: ReactNode
 }
 
 export function SignersStructureView(props: Props): ReactElement {
@@ -68,7 +70,8 @@ function Signers({
   fieldArray,
   onRemove: _onRemove,
   onAdd,
-}: Pick<Props, 'fieldArray' | 'onAdd' | 'onRemove'>): ReactElement {
+  extraSignerControls,
+}: Pick<Props, 'fieldArray' | 'onAdd' | 'onRemove' | 'extraSignerControls'>): ReactElement {
   const onRemove = (index: number) => {
     _onRemove(index)
     trackEvent({ ...SETTINGS_EVENTS.SETUP.REMOVE_OWNER, label: SETTINGS_LABELS.manage_signers })
@@ -98,6 +101,8 @@ function Signers({
           Add new signer
         </Button>
       </Track>
+
+      {extraSignerControls && <div className="mb-6">{extraSignerControls}</div>}
     </>
   )
 }

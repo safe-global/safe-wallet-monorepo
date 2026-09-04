@@ -11,6 +11,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import SettingsHeader from '@/components/settings/SettingsHeader'
 import ProposersList from 'src/components/settings/ProposersList'
 import { SpendingLimitsFeature } from '@/features/spending-limits'
+import { CloudCosignerFeature } from '@/features/cloud-cosigner'
 import { useLoadFeature } from '@/features/__core__'
 import { BRAND_NAME } from '@/config/constants'
 import { NestedSafesList } from '@/components/settings/NestedSafesList'
@@ -19,6 +20,7 @@ import { FeeTokenPreference } from '@/components/settings/FeeTokenPreference'
 const Setup: NextPage = () => {
   const { safe, safeLoaded } = useSafeInfo()
   const { SpendingLimitsSettings } = useLoadFeature(SpendingLimitsFeature)
+  const { CloudCosignerSettings } = useLoadFeature(CloudCosignerFeature)
   const nonce = safe.nonce
   const ownerLength = safe.owners.length
   const threshold = safe.threshold
@@ -83,6 +85,8 @@ const Setup: NextPage = () => {
 
           <RequiredConfirmation threshold={threshold} owners={ownerLength} />
         </div>
+
+        <CloudCosignerSettings />
 
         <SpendingLimitsSettings />
 

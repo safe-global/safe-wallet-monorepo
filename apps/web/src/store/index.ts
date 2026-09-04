@@ -29,6 +29,7 @@ import * as hydrate from './useHydrateStore'
 import { ofacApi } from '@/store/api/ofac'
 import { safePassApi } from './api/safePass'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
+import { cloudCosignerApi } from '@/features/cloud-cosigner/store'
 import { safenetCheckApi } from '@safe-global/store/safenet/safenetCheckApi'
 import { safenetCheckSlice } from '@safe-global/store/safenet/safenetCheckSlice'
 import { version as termsVersion } from '@/markdown/terms/version'
@@ -72,6 +73,7 @@ const rootReducer = combineReducers({
   [ofacApi.reducerPath]: ofacApi.reducer,
   [safePassApi.reducerPath]: safePassApi.reducer,
   [hypernativeApi.reducerPath]: hypernativeApi.reducer,
+  [cloudCosignerApi.reducerPath]: cloudCosignerApi.reducer,
   [safenetCheckSlice.name]: safenetCheckSlice.reducer,
   [safenetCheckApi.reducerPath]: safenetCheckApi.reducer,
   [slices.gatewayApi.reducerPath]: slices.gatewayApi.reducer,
@@ -115,6 +117,7 @@ const middleware: Middleware<{}, RootState>[] = [
   ofacApi.middleware,
   safePassApi.middleware,
   hypernativeApi.middleware,
+  cloudCosignerApi.middleware,
   safenetCheckApi.middleware,
   slices.gatewayApi.middleware,
 ]

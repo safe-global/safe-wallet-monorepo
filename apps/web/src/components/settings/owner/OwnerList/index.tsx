@@ -22,11 +22,15 @@ import DeleteIcon from '@/public/images/common/delete.svg'
 import type { AddressBook } from '@/store/addressBookSlice'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
+import { useLoadFeature } from '@/features/__core__'
+import { CloudCosignerFeature, isCloudCosignerAddress, useCloudCosignerInfo } from '@/features/cloud-cosigner'
 
 export const OwnerList = () => {
   const addressBook = useAddressBook()
   const { safe } = useSafeInfo()
   const { setTxFlow } = useContext(TxModalContext)
+  const { CloudCosignerBadge } = useLoadFeature(CloudCosignerFeature)
+  const { address: cosignerAddress } = useCloudCosignerInfo()
 
   const rows = useMemo(() => {
     const showRemoveOwnerButton = safe.owners.length > 1
@@ -34,13 +38,19 @@ export const OwnerList = () => {
     return safe.owners.map((owner) => {
       const address = owner.value
       const name = addressBook[address]
+      const isCloudCosigner = isCloudCosignerAddress(address, cosignerAddress)
 
       return {
         key: address,
         cells: {
           owner: {
             rawValue: address,
-            content: <NamedAddressInfo address={address} showCopyButton shortAddress={false} name={name} hasExplorer />,
+            content: (
+              <div className="flex items-center gap-2">
+                <NamedAddressInfo address={address} showCopyButton shortAddress={false} name={name} hasExplorer />
+                {isCloudCosigner && <CloudCosignerBadge />}
+              </div>
+            ),
           },
           actions: {
             rawValue: '',
@@ -104,7 +114,7 @@ export const OwnerList = () => {
         },
       }
     })
-  }, [safe.owners, safe.chainId, addressBook, setTxFlow])
+  }, [safe.owners, safe.chainId, addressBook, setTxFlow, cosignerAddress, CloudCosignerBadge])
 
   return (
     <div className="flex flex-col gap-4">
