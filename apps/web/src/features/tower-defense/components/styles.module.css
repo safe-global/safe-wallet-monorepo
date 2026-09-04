@@ -682,6 +682,110 @@
   flex: 1;
 }
 
+/* ─── Ability bar ────────────────────────────────────────────────────────── */
+
+.abilityBar {
+  position: absolute;
+  bottom: 14px;
+  left: 12px;
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+}
+
+.abilityCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: 96px;
+  padding: 8px 6px 7px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+  opacity: 0.55;
+  transition:
+    transform 0.12s,
+    border-color 0.15s,
+    background 0.15s,
+    opacity 0.15s;
+}
+
+.abilityCard:hover {
+  transform: translateY(-3px);
+  opacity: 0.85;
+}
+
+.abilityCard:hover .tooltip {
+  opacity: 1;
+  transform: translate(-50%, -6px);
+}
+
+.abilityReady {
+  opacity: 1;
+  border-color: currentColor;
+  animation: abilityPulse 1.6s ease-in-out infinite;
+}
+
+.abilitySpent {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.abilitySpent:hover {
+  transform: none;
+}
+
+@keyframes abilityPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+  }
+
+  50% {
+    box-shadow: 0 0 22px currentColor;
+  }
+}
+
+.abilityfork {
+  color: #ff8c00;
+}
+
+.abilityraise {
+  color: #ffd166;
+}
+
+.abilitynuke {
+  color: #b388ff;
+}
+
+.abilityGlyph {
+  font-size: 26px;
+  line-height: 1;
+  margin-top: 8px;
+  filter: drop-shadow(0 0 8px currentColor);
+}
+
+.abilityTitle {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  margin-top: 4px;
+}
+
+.abilityStatus {
+  font-size: 10px;
+  color: #d6d8da;
+  text-align: center;
+  line-height: 1.2;
+  min-height: 24px;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ─── Toast ──────────────────────────────────────────────────────────────── */
 
 .toast {

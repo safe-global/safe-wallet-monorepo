@@ -562,12 +562,12 @@ exports[`./Hud.stories BuildPhase 1`] = `
               class="towerIconFallback"
               style="background: rgb(132, 217, 160);"
             >
-              T
+              S
             </span>
             <span
               class="towerName"
             >
-              Tx Simulator
+              Safenet Sentinel
             </span>
             <span
               class="towerCost "
@@ -582,14 +582,14 @@ exports[`./Hud.stories BuildPhase 1`] = `
               <div
                 class="tooltipTitle"
               >
-                Tx Simulator
+                Safenet Sentinel
               </div>
               <div
                 class="tooltipTagline"
               >
-                Simulate before you sign
+                Sentinel oracle
               </div>
-              Long range, high damage single shots. Its simulation runs reveal stealthy social engineers so other towers can target them.
+              A Safenet Sentinel oracle simulates every transaction before it lands: long range, huge single shots, and its risk signals reveal stealthy social engineers for the other towers.
               <div
                 class="tooltipStats"
               >
@@ -658,7 +658,7 @@ exports[`./Hud.stories BuildPhase 1`] = `
             <span
               class="towerName"
             >
-              Safenet Relay
+              Safenet Validators
             </span>
             <span
               class="towerCost "
@@ -673,14 +673,14 @@ exports[`./Hud.stories BuildPhase 1`] = `
               <div
                 class="tooltipTitle"
               >
-                Safenet Relay
+                Safenet Validators
               </div>
               <div
                 class="tooltipTagline"
               >
-                Cross-chain guarantees
+                Cryptographic attestations
               </div>
-              Arcs validator consensus between attackers. Each jump hits another target for slightly less damage.
+              A Byzantine fault tolerant set of Validators arcs consensus between attackers. Each attestation jumps to another target for slightly less damage.
               <div
                 class="tooltipStats"
               >
@@ -835,12 +835,12 @@ exports[`./Hud.stories BuildPhase 1`] = `
               class="towerIconFallback"
               style="background: rgb(234, 255, 242);"
             >
-              R
+              D
             </span>
             <span
               class="towerName"
             >
-              Recovery Module
+              Delegator Pool
             </span>
             <span
               class="towerCost "
@@ -855,14 +855,14 @@ exports[`./Hud.stories BuildPhase 1`] = `
               <div
                 class="tooltipTitle"
               >
-                Recovery Module
+                Delegator Pool
               </div>
               <div
                 class="tooltipTagline"
               >
-                Signer support aura
+                Stake SAFE, earn rewards
               </div>
-              Does not attack. Boosts the damage of every tower in its aura and pays out SAFE at the end of each wave.
+              Does not attack. Delegators stake SAFE behind every tower in its aura, boosting their damage, and pay out staking rewards at the end of each wave.
               <div
                 class="tooltipStats"
               >
@@ -931,7 +931,7 @@ exports[`./Hud.stories BuildPhase 1`] = `
             <span
               class="towerName"
             >
-              Spending Guard
+              Safe Guard
             </span>
             <span
               class="towerCost "
@@ -946,14 +946,14 @@ exports[`./Hud.stories BuildPhase 1`] = `
               <div
                 class="tooltipTitle"
               >
-                Spending Guard
+                Safe Guard
               </div>
               <div
                 class="tooltipTagline"
               >
-                Allowance enforcement
+                Onchain enforcement
               </div>
-              Fires allowance darts that keep draining an attacker after impact. Excellent against regenerating threats.
+              The Guard verifies attestations onchain. Anything without one keeps bleeding after impact. Excellent against regenerating threats.
               <div
                 class="tooltipStats"
               >
@@ -1000,6 +1000,131 @@ exports[`./Hud.stories BuildPhase 1`] = `
               >
                 Drains 9/s for 3s
               </div>
+            </span>
+          </button>
+        </div>
+        <div
+          class="panel abilityBar"
+          data-testid="td-abilities"
+        >
+          <button
+            aria-disabled="true"
+            class="abilityCard abilityfork  "
+            data-testid="td-hardfork"
+            title="Roll back the chain. Every attacker on the map is reorged out of existence and the treasury is restored to half. Once per game, only when the treasury is below 30%."
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              K
+            </span>
+            <span
+              aria-hidden="true"
+              class="abilityGlyph"
+            >
+              ⑂
+            </span>
+            <span
+              class="abilityTitle"
+            >
+              Hard fork
+            </span>
+            <span
+              class="abilityStatus"
+            >
+              Below 30% treasury
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Hard fork
+              </div>
+              Roll back the chain. Every attacker on the map is reorged out of existence and the treasury is restored to half. Once per game, only when the treasury is below 30%.
+            </span>
+          </button>
+          <button
+            aria-disabled="false"
+            class="abilityCard abilityraise abilityReady "
+            data-testid="td-fundraise"
+            title="Raise ETH into the treasury by handing SAFE to investors. Seed, then Series A, B and C, each bigger than the last. 45 second cooldown."
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              R
+            </span>
+            <span
+              aria-hidden="true"
+              class="abilityGlyph"
+            >
+              Ξ
+            </span>
+            <span
+              class="abilityTitle"
+            >
+              Fundraise
+            </span>
+            <span
+              class="abilityStatus"
+            >
+              Seed · +3 ETH for 90 SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Fundraise
+              </div>
+              Raise ETH into the treasury by handing SAFE to investors. Seed, then Series A, B and C, each bigger than the last. 45 second cooldown.
+            </span>
+          </button>
+          <button
+            aria-disabled="true"
+            class="abilityCard abilitynuke  "
+            data-testid="td-vitalik"
+            title="Vitalik flies in and nukes the mempool: every attacker loses 40% of its health (bosses 15%) and is frozen for 1.5 seconds. 2 minute cooldown."
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              V
+            </span>
+            <span
+              aria-hidden="true"
+              class="abilityGlyph"
+            >
+              ☄
+            </span>
+            <span
+              class="abilityTitle"
+            >
+              Call Vitalik
+            </span>
+            <span
+              class="abilityStatus"
+            >
+              Busy · 1:24
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Call Vitalik
+              </div>
+              Vitalik flies in and nukes the mempool: every attacker loses 40% of its health (bosses 15%) and is frozen for 1.5 seconds. 2 minute cooldown.
             </span>
           </button>
         </div>
@@ -1571,12 +1696,12 @@ exports[`./Hud.stories Defeat 1`] = `
               class="towerIconFallback"
               style="background: rgb(132, 217, 160);"
             >
-              T
+              S
             </span>
             <span
               class="towerName"
             >
-              Tx Simulator
+              Safenet Sentinel
             </span>
             <span
               class="towerCost "
@@ -1591,14 +1716,14 @@ exports[`./Hud.stories Defeat 1`] = `
               <div
                 class="tooltipTitle"
               >
-                Tx Simulator
+                Safenet Sentinel
               </div>
               <div
                 class="tooltipTagline"
               >
-                Simulate before you sign
+                Sentinel oracle
               </div>
-              Long range, high damage single shots. Its simulation runs reveal stealthy social engineers so other towers can target them.
+              A Safenet Sentinel oracle simulates every transaction before it lands: long range, huge single shots, and its risk signals reveal stealthy social engineers for the other towers.
               <div
                 class="tooltipStats"
               >
@@ -1667,7 +1792,7 @@ exports[`./Hud.stories Defeat 1`] = `
             <span
               class="towerName"
             >
-              Safenet Relay
+              Safenet Validators
             </span>
             <span
               class="towerCost "
@@ -1682,14 +1807,14 @@ exports[`./Hud.stories Defeat 1`] = `
               <div
                 class="tooltipTitle"
               >
-                Safenet Relay
+                Safenet Validators
               </div>
               <div
                 class="tooltipTagline"
               >
-                Cross-chain guarantees
+                Cryptographic attestations
               </div>
-              Arcs validator consensus between attackers. Each jump hits another target for slightly less damage.
+              A Byzantine fault tolerant set of Validators arcs consensus between attackers. Each attestation jumps to another target for slightly less damage.
               <div
                 class="tooltipStats"
               >
@@ -1844,12 +1969,12 @@ exports[`./Hud.stories Defeat 1`] = `
               class="towerIconFallback"
               style="background: rgb(234, 255, 242);"
             >
-              R
+              D
             </span>
             <span
               class="towerName"
             >
-              Recovery Module
+              Delegator Pool
             </span>
             <span
               class="towerCost "
@@ -1864,14 +1989,14 @@ exports[`./Hud.stories Defeat 1`] = `
               <div
                 class="tooltipTitle"
               >
-                Recovery Module
+                Delegator Pool
               </div>
               <div
                 class="tooltipTagline"
               >
-                Signer support aura
+                Stake SAFE, earn rewards
               </div>
-              Does not attack. Boosts the damage of every tower in its aura and pays out SAFE at the end of each wave.
+              Does not attack. Delegators stake SAFE behind every tower in its aura, boosting their damage, and pay out staking rewards at the end of each wave.
               <div
                 class="tooltipStats"
               >
@@ -1940,7 +2065,7 @@ exports[`./Hud.stories Defeat 1`] = `
             <span
               class="towerName"
             >
-              Spending Guard
+              Safe Guard
             </span>
             <span
               class="towerCost "
@@ -1955,14 +2080,14 @@ exports[`./Hud.stories Defeat 1`] = `
               <div
                 class="tooltipTitle"
               >
-                Spending Guard
+                Safe Guard
               </div>
               <div
                 class="tooltipTagline"
               >
-                Allowance enforcement
+                Onchain enforcement
               </div>
-              Fires allowance darts that keep draining an attacker after impact. Excellent against regenerating threats.
+              The Guard verifies attestations onchain. Anything without one keeps bleeding after impact. Excellent against regenerating threats.
               <div
                 class="tooltipStats"
               >
@@ -2009,6 +2134,131 @@ exports[`./Hud.stories Defeat 1`] = `
               >
                 Drains 9/s for 3s
               </div>
+            </span>
+          </button>
+        </div>
+        <div
+          class="panel abilityBar"
+          data-testid="td-abilities"
+        >
+          <button
+            aria-disabled="true"
+            class="abilityCard abilityfork  "
+            data-testid="td-hardfork"
+            title="Roll back the chain. Every attacker on the map is reorged out of existence and the treasury is restored to half. Once per game, only when the treasury is below 30%."
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              K
+            </span>
+            <span
+              aria-hidden="true"
+              class="abilityGlyph"
+            >
+              ⑂
+            </span>
+            <span
+              class="abilityTitle"
+            >
+              Hard fork
+            </span>
+            <span
+              class="abilityStatus"
+            >
+              Below 30% treasury
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Hard fork
+              </div>
+              Roll back the chain. Every attacker on the map is reorged out of existence and the treasury is restored to half. Once per game, only when the treasury is below 30%.
+            </span>
+          </button>
+          <button
+            aria-disabled="false"
+            class="abilityCard abilityraise abilityReady "
+            data-testid="td-fundraise"
+            title="Raise ETH into the treasury by handing SAFE to investors. Seed, then Series A, B and C, each bigger than the last. 45 second cooldown."
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              R
+            </span>
+            <span
+              aria-hidden="true"
+              class="abilityGlyph"
+            >
+              Ξ
+            </span>
+            <span
+              class="abilityTitle"
+            >
+              Fundraise
+            </span>
+            <span
+              class="abilityStatus"
+            >
+              Seed · +3 ETH for 90 SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Fundraise
+              </div>
+              Raise ETH into the treasury by handing SAFE to investors. Seed, then Series A, B and C, each bigger than the last. 45 second cooldown.
+            </span>
+          </button>
+          <button
+            aria-disabled="true"
+            class="abilityCard abilitynuke  "
+            data-testid="td-vitalik"
+            title="Vitalik flies in and nukes the mempool: every attacker loses 40% of its health (bosses 15%) and is frozen for 1.5 seconds. 2 minute cooldown."
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              V
+            </span>
+            <span
+              aria-hidden="true"
+              class="abilityGlyph"
+            >
+              ☄
+            </span>
+            <span
+              class="abilityTitle"
+            >
+              Call Vitalik
+            </span>
+            <span
+              class="abilityStatus"
+            >
+              Busy · 1:24
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Call Vitalik
+              </div>
+              Vitalik flies in and nukes the mempool: every attacker loses 40% of its health (bosses 15%) and is frozen for 1.5 seconds. 2 minute cooldown.
             </span>
           </button>
         </div>
@@ -3008,12 +3258,12 @@ exports[`./Hud.stories TowerSelected 1`] = `
               class="towerIconFallback"
               style="background: rgb(132, 217, 160);"
             >
-              T
+              S
             </span>
             <span
               class="towerName"
             >
-              Tx Simulator
+              Safenet Sentinel
             </span>
             <span
               class="towerCost towerCostUnaffordable"
@@ -3028,14 +3278,14 @@ exports[`./Hud.stories TowerSelected 1`] = `
               <div
                 class="tooltipTitle"
               >
-                Tx Simulator
+                Safenet Sentinel
               </div>
               <div
                 class="tooltipTagline"
               >
-                Simulate before you sign
+                Sentinel oracle
               </div>
-              Long range, high damage single shots. Its simulation runs reveal stealthy social engineers so other towers can target them.
+              A Safenet Sentinel oracle simulates every transaction before it lands: long range, huge single shots, and its risk signals reveal stealthy social engineers for the other towers.
               <div
                 class="tooltipStats"
               >
@@ -3104,7 +3354,7 @@ exports[`./Hud.stories TowerSelected 1`] = `
             <span
               class="towerName"
             >
-              Safenet Relay
+              Safenet Validators
             </span>
             <span
               class="towerCost towerCostUnaffordable"
@@ -3119,14 +3369,14 @@ exports[`./Hud.stories TowerSelected 1`] = `
               <div
                 class="tooltipTitle"
               >
-                Safenet Relay
+                Safenet Validators
               </div>
               <div
                 class="tooltipTagline"
               >
-                Cross-chain guarantees
+                Cryptographic attestations
               </div>
-              Arcs validator consensus between attackers. Each jump hits another target for slightly less damage.
+              A Byzantine fault tolerant set of Validators arcs consensus between attackers. Each attestation jumps to another target for slightly less damage.
               <div
                 class="tooltipStats"
               >
@@ -3281,12 +3531,12 @@ exports[`./Hud.stories TowerSelected 1`] = `
               class="towerIconFallback"
               style="background: rgb(234, 255, 242);"
             >
-              R
+              D
             </span>
             <span
               class="towerName"
             >
-              Recovery Module
+              Delegator Pool
             </span>
             <span
               class="towerCost towerCostUnaffordable"
@@ -3301,14 +3551,14 @@ exports[`./Hud.stories TowerSelected 1`] = `
               <div
                 class="tooltipTitle"
               >
-                Recovery Module
+                Delegator Pool
               </div>
               <div
                 class="tooltipTagline"
               >
-                Signer support aura
+                Stake SAFE, earn rewards
               </div>
-              Does not attack. Boosts the damage of every tower in its aura and pays out SAFE at the end of each wave.
+              Does not attack. Delegators stake SAFE behind every tower in its aura, boosting their damage, and pay out staking rewards at the end of each wave.
               <div
                 class="tooltipStats"
               >
@@ -3377,7 +3627,7 @@ exports[`./Hud.stories TowerSelected 1`] = `
             <span
               class="towerName"
             >
-              Spending Guard
+              Safe Guard
             </span>
             <span
               class="towerCost "
@@ -3392,14 +3642,14 @@ exports[`./Hud.stories TowerSelected 1`] = `
               <div
                 class="tooltipTitle"
               >
-                Spending Guard
+                Safe Guard
               </div>
               <div
                 class="tooltipTagline"
               >
-                Allowance enforcement
+                Onchain enforcement
               </div>
-              Fires allowance darts that keep draining an attacker after impact. Excellent against regenerating threats.
+              The Guard verifies attestations onchain. Anything without one keeps bleeding after impact. Excellent against regenerating threats.
               <div
                 class="tooltipStats"
               >
@@ -3446,6 +3696,131 @@ exports[`./Hud.stories TowerSelected 1`] = `
               >
                 Drains 9/s for 3s
               </div>
+            </span>
+          </button>
+        </div>
+        <div
+          class="panel abilityBar"
+          data-testid="td-abilities"
+        >
+          <button
+            aria-disabled="true"
+            class="abilityCard abilityfork  "
+            data-testid="td-hardfork"
+            title="Roll back the chain. Every attacker on the map is reorged out of existence and the treasury is restored to half. Once per game, only when the treasury is below 30%."
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              K
+            </span>
+            <span
+              aria-hidden="true"
+              class="abilityGlyph"
+            >
+              ⑂
+            </span>
+            <span
+              class="abilityTitle"
+            >
+              Hard fork
+            </span>
+            <span
+              class="abilityStatus"
+            >
+              Below 30% treasury
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Hard fork
+              </div>
+              Roll back the chain. Every attacker on the map is reorged out of existence and the treasury is restored to half. Once per game, only when the treasury is below 30%.
+            </span>
+          </button>
+          <button
+            aria-disabled="false"
+            class="abilityCard abilityraise abilityReady "
+            data-testid="td-fundraise"
+            title="Raise ETH into the treasury by handing SAFE to investors. Seed, then Series A, B and C, each bigger than the last. 45 second cooldown."
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              R
+            </span>
+            <span
+              aria-hidden="true"
+              class="abilityGlyph"
+            >
+              Ξ
+            </span>
+            <span
+              class="abilityTitle"
+            >
+              Fundraise
+            </span>
+            <span
+              class="abilityStatus"
+            >
+              Seed · +3 ETH for 90 SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Fundraise
+              </div>
+              Raise ETH into the treasury by handing SAFE to investors. Seed, then Series A, B and C, each bigger than the last. 45 second cooldown.
+            </span>
+          </button>
+          <button
+            aria-disabled="true"
+            class="abilityCard abilitynuke  "
+            data-testid="td-vitalik"
+            title="Vitalik flies in and nukes the mempool: every attacker loses 40% of its health (bosses 15%) and is frozen for 1.5 seconds. 2 minute cooldown."
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              V
+            </span>
+            <span
+              aria-hidden="true"
+              class="abilityGlyph"
+            >
+              ☄
+            </span>
+            <span
+              class="abilityTitle"
+            >
+              Call Vitalik
+            </span>
+            <span
+              class="abilityStatus"
+            >
+              Busy · 1:24
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Call Vitalik
+              </div>
+              Vitalik flies in and nukes the mempool: every attacker loses 40% of its health (bosses 15%) and is frozen for 1.5 seconds. 2 minute cooldown.
             </span>
           </button>
         </div>
@@ -4017,12 +4392,12 @@ exports[`./Hud.stories TreasuryLow 1`] = `
               class="towerIconFallback"
               style="background: rgb(132, 217, 160);"
             >
-              T
+              S
             </span>
             <span
               class="towerName"
             >
-              Tx Simulator
+              Safenet Sentinel
             </span>
             <span
               class="towerCost towerCostUnaffordable"
@@ -4037,14 +4412,14 @@ exports[`./Hud.stories TreasuryLow 1`] = `
               <div
                 class="tooltipTitle"
               >
-                Tx Simulator
+                Safenet Sentinel
               </div>
               <div
                 class="tooltipTagline"
               >
-                Simulate before you sign
+                Sentinel oracle
               </div>
-              Long range, high damage single shots. Its simulation runs reveal stealthy social engineers so other towers can target them.
+              A Safenet Sentinel oracle simulates every transaction before it lands: long range, huge single shots, and its risk signals reveal stealthy social engineers for the other towers.
               <div
                 class="tooltipStats"
               >
@@ -4113,7 +4488,7 @@ exports[`./Hud.stories TreasuryLow 1`] = `
             <span
               class="towerName"
             >
-              Safenet Relay
+              Safenet Validators
             </span>
             <span
               class="towerCost towerCostUnaffordable"
@@ -4128,14 +4503,14 @@ exports[`./Hud.stories TreasuryLow 1`] = `
               <div
                 class="tooltipTitle"
               >
-                Safenet Relay
+                Safenet Validators
               </div>
               <div
                 class="tooltipTagline"
               >
-                Cross-chain guarantees
+                Cryptographic attestations
               </div>
-              Arcs validator consensus between attackers. Each jump hits another target for slightly less damage.
+              A Byzantine fault tolerant set of Validators arcs consensus between attackers. Each attestation jumps to another target for slightly less damage.
               <div
                 class="tooltipStats"
               >
@@ -4290,12 +4665,12 @@ exports[`./Hud.stories TreasuryLow 1`] = `
               class="towerIconFallback"
               style="background: rgb(234, 255, 242);"
             >
-              R
+              D
             </span>
             <span
               class="towerName"
             >
-              Recovery Module
+              Delegator Pool
             </span>
             <span
               class="towerCost towerCostUnaffordable"
@@ -4310,14 +4685,14 @@ exports[`./Hud.stories TreasuryLow 1`] = `
               <div
                 class="tooltipTitle"
               >
-                Recovery Module
+                Delegator Pool
               </div>
               <div
                 class="tooltipTagline"
               >
-                Signer support aura
+                Stake SAFE, earn rewards
               </div>
-              Does not attack. Boosts the damage of every tower in its aura and pays out SAFE at the end of each wave.
+              Does not attack. Delegators stake SAFE behind every tower in its aura, boosting their damage, and pay out staking rewards at the end of each wave.
               <div
                 class="tooltipStats"
               >
@@ -4386,7 +4761,7 @@ exports[`./Hud.stories TreasuryLow 1`] = `
             <span
               class="towerName"
             >
-              Spending Guard
+              Safe Guard
             </span>
             <span
               class="towerCost towerCostUnaffordable"
@@ -4401,14 +4776,14 @@ exports[`./Hud.stories TreasuryLow 1`] = `
               <div
                 class="tooltipTitle"
               >
-                Spending Guard
+                Safe Guard
               </div>
               <div
                 class="tooltipTagline"
               >
-                Allowance enforcement
+                Onchain enforcement
               </div>
-              Fires allowance darts that keep draining an attacker after impact. Excellent against regenerating threats.
+              The Guard verifies attestations onchain. Anything without one keeps bleeding after impact. Excellent against regenerating threats.
               <div
                 class="tooltipStats"
               >
@@ -4455,6 +4830,131 @@ exports[`./Hud.stories TreasuryLow 1`] = `
               >
                 Drains 9/s for 3s
               </div>
+            </span>
+          </button>
+        </div>
+        <div
+          class="panel abilityBar"
+          data-testid="td-abilities"
+        >
+          <button
+            aria-disabled="false"
+            class="abilityCard abilityfork abilityReady "
+            data-testid="td-hardfork"
+            title="Roll back the chain. Every attacker on the map is reorged out of existence and the treasury is restored to half. Once per game, only when the treasury is below 30%."
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              K
+            </span>
+            <span
+              aria-hidden="true"
+              class="abilityGlyph"
+            >
+              ⑂
+            </span>
+            <span
+              class="abilityTitle"
+            >
+              Hard fork
+            </span>
+            <span
+              class="abilityStatus"
+            >
+              Ready · dire
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Hard fork
+              </div>
+              Roll back the chain. Every attacker on the map is reorged out of existence and the treasury is restored to half. Once per game, only when the treasury is below 30%.
+            </span>
+          </button>
+          <button
+            aria-disabled="true"
+            class="abilityCard abilityraise  "
+            data-testid="td-fundraise"
+            title="Raise ETH into the treasury by handing SAFE to investors. Seed, then Series A, B and C, each bigger than the last. 45 second cooldown."
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              R
+            </span>
+            <span
+              aria-hidden="true"
+              class="abilityGlyph"
+            >
+              Ξ
+            </span>
+            <span
+              class="abilityTitle"
+            >
+              Fundraise
+            </span>
+            <span
+              class="abilityStatus"
+            >
+              Series B in 12s
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Fundraise
+              </div>
+              Raise ETH into the treasury by handing SAFE to investors. Seed, then Series A, B and C, each bigger than the last. 45 second cooldown.
+            </span>
+          </button>
+          <button
+            aria-disabled="true"
+            class="abilityCard abilitynuke  "
+            data-testid="td-vitalik"
+            title="Vitalik flies in and nukes the mempool: every attacker loses 40% of its health (bosses 15%) and is frozen for 1.5 seconds. 2 minute cooldown."
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              V
+            </span>
+            <span
+              aria-hidden="true"
+              class="abilityGlyph"
+            >
+              ☄
+            </span>
+            <span
+              class="abilityTitle"
+            >
+              Call Vitalik
+            </span>
+            <span
+              class="abilityStatus"
+            >
+              Inbound!
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Call Vitalik
+              </div>
+              Vitalik flies in and nukes the mempool: every attacker loses 40% of its health (bosses 15%) and is frozen for 1.5 seconds. 2 minute cooldown.
             </span>
           </button>
         </div>
@@ -4988,12 +5488,12 @@ exports[`./Hud.stories Victory 1`] = `
               class="towerIconFallback"
               style="background: rgb(132, 217, 160);"
             >
-              T
+              S
             </span>
             <span
               class="towerName"
             >
-              Tx Simulator
+              Safenet Sentinel
             </span>
             <span
               class="towerCost "
@@ -5008,14 +5508,14 @@ exports[`./Hud.stories Victory 1`] = `
               <div
                 class="tooltipTitle"
               >
-                Tx Simulator
+                Safenet Sentinel
               </div>
               <div
                 class="tooltipTagline"
               >
-                Simulate before you sign
+                Sentinel oracle
               </div>
-              Long range, high damage single shots. Its simulation runs reveal stealthy social engineers so other towers can target them.
+              A Safenet Sentinel oracle simulates every transaction before it lands: long range, huge single shots, and its risk signals reveal stealthy social engineers for the other towers.
               <div
                 class="tooltipStats"
               >
@@ -5084,7 +5584,7 @@ exports[`./Hud.stories Victory 1`] = `
             <span
               class="towerName"
             >
-              Safenet Relay
+              Safenet Validators
             </span>
             <span
               class="towerCost "
@@ -5099,14 +5599,14 @@ exports[`./Hud.stories Victory 1`] = `
               <div
                 class="tooltipTitle"
               >
-                Safenet Relay
+                Safenet Validators
               </div>
               <div
                 class="tooltipTagline"
               >
-                Cross-chain guarantees
+                Cryptographic attestations
               </div>
-              Arcs validator consensus between attackers. Each jump hits another target for slightly less damage.
+              A Byzantine fault tolerant set of Validators arcs consensus between attackers. Each attestation jumps to another target for slightly less damage.
               <div
                 class="tooltipStats"
               >
@@ -5261,12 +5761,12 @@ exports[`./Hud.stories Victory 1`] = `
               class="towerIconFallback"
               style="background: rgb(234, 255, 242);"
             >
-              R
+              D
             </span>
             <span
               class="towerName"
             >
-              Recovery Module
+              Delegator Pool
             </span>
             <span
               class="towerCost "
@@ -5281,14 +5781,14 @@ exports[`./Hud.stories Victory 1`] = `
               <div
                 class="tooltipTitle"
               >
-                Recovery Module
+                Delegator Pool
               </div>
               <div
                 class="tooltipTagline"
               >
-                Signer support aura
+                Stake SAFE, earn rewards
               </div>
-              Does not attack. Boosts the damage of every tower in its aura and pays out SAFE at the end of each wave.
+              Does not attack. Delegators stake SAFE behind every tower in its aura, boosting their damage, and pay out staking rewards at the end of each wave.
               <div
                 class="tooltipStats"
               >
@@ -5357,7 +5857,7 @@ exports[`./Hud.stories Victory 1`] = `
             <span
               class="towerName"
             >
-              Spending Guard
+              Safe Guard
             </span>
             <span
               class="towerCost "
@@ -5372,14 +5872,14 @@ exports[`./Hud.stories Victory 1`] = `
               <div
                 class="tooltipTitle"
               >
-                Spending Guard
+                Safe Guard
               </div>
               <div
                 class="tooltipTagline"
               >
-                Allowance enforcement
+                Onchain enforcement
               </div>
-              Fires allowance darts that keep draining an attacker after impact. Excellent against regenerating threats.
+              The Guard verifies attestations onchain. Anything without one keeps bleeding after impact. Excellent against regenerating threats.
               <div
                 class="tooltipStats"
               >
@@ -5426,6 +5926,131 @@ exports[`./Hud.stories Victory 1`] = `
               >
                 Drains 9/s for 3s
               </div>
+            </span>
+          </button>
+        </div>
+        <div
+          class="panel abilityBar"
+          data-testid="td-abilities"
+        >
+          <button
+            aria-disabled="true"
+            class="abilityCard abilityfork  "
+            data-testid="td-hardfork"
+            title="Roll back the chain. Every attacker on the map is reorged out of existence and the treasury is restored to half. Once per game, only when the treasury is below 30%."
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              K
+            </span>
+            <span
+              aria-hidden="true"
+              class="abilityGlyph"
+            >
+              ⑂
+            </span>
+            <span
+              class="abilityTitle"
+            >
+              Hard fork
+            </span>
+            <span
+              class="abilityStatus"
+            >
+              Below 30% treasury
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Hard fork
+              </div>
+              Roll back the chain. Every attacker on the map is reorged out of existence and the treasury is restored to half. Once per game, only when the treasury is below 30%.
+            </span>
+          </button>
+          <button
+            aria-disabled="false"
+            class="abilityCard abilityraise abilityReady "
+            data-testid="td-fundraise"
+            title="Raise ETH into the treasury by handing SAFE to investors. Seed, then Series A, B and C, each bigger than the last. 45 second cooldown."
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              R
+            </span>
+            <span
+              aria-hidden="true"
+              class="abilityGlyph"
+            >
+              Ξ
+            </span>
+            <span
+              class="abilityTitle"
+            >
+              Fundraise
+            </span>
+            <span
+              class="abilityStatus"
+            >
+              Seed · +3 ETH for 90 SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Fundraise
+              </div>
+              Raise ETH into the treasury by handing SAFE to investors. Seed, then Series A, B and C, each bigger than the last. 45 second cooldown.
+            </span>
+          </button>
+          <button
+            aria-disabled="true"
+            class="abilityCard abilitynuke  "
+            data-testid="td-vitalik"
+            title="Vitalik flies in and nukes the mempool: every attacker loses 40% of its health (bosses 15%) and is frozen for 1.5 seconds. 2 minute cooldown."
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              V
+            </span>
+            <span
+              aria-hidden="true"
+              class="abilityGlyph"
+            >
+              ☄
+            </span>
+            <span
+              class="abilityTitle"
+            >
+              Call Vitalik
+            </span>
+            <span
+              class="abilityStatus"
+            >
+              Busy · 1:24
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Call Vitalik
+              </div>
+              Vitalik flies in and nukes the mempool: every attacker loses 40% of its health (bosses 15%) and is frozen for 1.5 seconds. 2 minute cooldown.
             </span>
           </button>
         </div>
@@ -6172,12 +6797,12 @@ exports[`./Hud.stories WaveInProgress 1`] = `
               class="towerIconFallback"
               style="background: rgb(132, 217, 160);"
             >
-              T
+              S
             </span>
             <span
               class="towerName"
             >
-              Tx Simulator
+              Safenet Sentinel
             </span>
             <span
               class="towerCost "
@@ -6192,14 +6817,14 @@ exports[`./Hud.stories WaveInProgress 1`] = `
               <div
                 class="tooltipTitle"
               >
-                Tx Simulator
+                Safenet Sentinel
               </div>
               <div
                 class="tooltipTagline"
               >
-                Simulate before you sign
+                Sentinel oracle
               </div>
-              Long range, high damage single shots. Its simulation runs reveal stealthy social engineers so other towers can target them.
+              A Safenet Sentinel oracle simulates every transaction before it lands: long range, huge single shots, and its risk signals reveal stealthy social engineers for the other towers.
               <div
                 class="tooltipStats"
               >
@@ -6268,7 +6893,7 @@ exports[`./Hud.stories WaveInProgress 1`] = `
             <span
               class="towerName"
             >
-              Safenet Relay
+              Safenet Validators
             </span>
             <span
               class="towerCost "
@@ -6283,14 +6908,14 @@ exports[`./Hud.stories WaveInProgress 1`] = `
               <div
                 class="tooltipTitle"
               >
-                Safenet Relay
+                Safenet Validators
               </div>
               <div
                 class="tooltipTagline"
               >
-                Cross-chain guarantees
+                Cryptographic attestations
               </div>
-              Arcs validator consensus between attackers. Each jump hits another target for slightly less damage.
+              A Byzantine fault tolerant set of Validators arcs consensus between attackers. Each attestation jumps to another target for slightly less damage.
               <div
                 class="tooltipStats"
               >
@@ -6445,12 +7070,12 @@ exports[`./Hud.stories WaveInProgress 1`] = `
               class="towerIconFallback"
               style="background: rgb(234, 255, 242);"
             >
-              R
+              D
             </span>
             <span
               class="towerName"
             >
-              Recovery Module
+              Delegator Pool
             </span>
             <span
               class="towerCost "
@@ -6465,14 +7090,14 @@ exports[`./Hud.stories WaveInProgress 1`] = `
               <div
                 class="tooltipTitle"
               >
-                Recovery Module
+                Delegator Pool
               </div>
               <div
                 class="tooltipTagline"
               >
-                Signer support aura
+                Stake SAFE, earn rewards
               </div>
-              Does not attack. Boosts the damage of every tower in its aura and pays out SAFE at the end of each wave.
+              Does not attack. Delegators stake SAFE behind every tower in its aura, boosting their damage, and pay out staking rewards at the end of each wave.
               <div
                 class="tooltipStats"
               >
@@ -6541,7 +7166,7 @@ exports[`./Hud.stories WaveInProgress 1`] = `
             <span
               class="towerName"
             >
-              Spending Guard
+              Safe Guard
             </span>
             <span
               class="towerCost "
@@ -6556,14 +7181,14 @@ exports[`./Hud.stories WaveInProgress 1`] = `
               <div
                 class="tooltipTitle"
               >
-                Spending Guard
+                Safe Guard
               </div>
               <div
                 class="tooltipTagline"
               >
-                Allowance enforcement
+                Onchain enforcement
               </div>
-              Fires allowance darts that keep draining an attacker after impact. Excellent against regenerating threats.
+              The Guard verifies attestations onchain. Anything without one keeps bleeding after impact. Excellent against regenerating threats.
               <div
                 class="tooltipStats"
               >
@@ -6610,6 +7235,131 @@ exports[`./Hud.stories WaveInProgress 1`] = `
               >
                 Drains 9/s for 3s
               </div>
+            </span>
+          </button>
+        </div>
+        <div
+          class="panel abilityBar"
+          data-testid="td-abilities"
+        >
+          <button
+            aria-disabled="true"
+            class="abilityCard abilityfork  "
+            data-testid="td-hardfork"
+            title="Roll back the chain. Every attacker on the map is reorged out of existence and the treasury is restored to half. Once per game, only when the treasury is below 30%."
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              K
+            </span>
+            <span
+              aria-hidden="true"
+              class="abilityGlyph"
+            >
+              ⑂
+            </span>
+            <span
+              class="abilityTitle"
+            >
+              Hard fork
+            </span>
+            <span
+              class="abilityStatus"
+            >
+              Below 30% treasury
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Hard fork
+              </div>
+              Roll back the chain. Every attacker on the map is reorged out of existence and the treasury is restored to half. Once per game, only when the treasury is below 30%.
+            </span>
+          </button>
+          <button
+            aria-disabled="false"
+            class="abilityCard abilityraise abilityReady "
+            data-testid="td-fundraise"
+            title="Raise ETH into the treasury by handing SAFE to investors. Seed, then Series A, B and C, each bigger than the last. 45 second cooldown."
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              R
+            </span>
+            <span
+              aria-hidden="true"
+              class="abilityGlyph"
+            >
+              Ξ
+            </span>
+            <span
+              class="abilityTitle"
+            >
+              Fundraise
+            </span>
+            <span
+              class="abilityStatus"
+            >
+              Seed · +3 ETH for 90 SAFE
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Fundraise
+              </div>
+              Raise ETH into the treasury by handing SAFE to investors. Seed, then Series A, B and C, each bigger than the last. 45 second cooldown.
+            </span>
+          </button>
+          <button
+            aria-disabled="true"
+            class="abilityCard abilitynuke  "
+            data-testid="td-vitalik"
+            title="Vitalik flies in and nukes the mempool: every attacker loses 40% of its health (bosses 15%) and is frozen for 1.5 seconds. 2 minute cooldown."
+            type="button"
+          >
+            <span
+              class="hotkey"
+            >
+              V
+            </span>
+            <span
+              aria-hidden="true"
+              class="abilityGlyph"
+            >
+              ☄
+            </span>
+            <span
+              class="abilityTitle"
+            >
+              Call Vitalik
+            </span>
+            <span
+              class="abilityStatus"
+            >
+              Busy · 1:24
+            </span>
+            <span
+              class="tooltip"
+              role="tooltip"
+            >
+              <div
+                class="tooltipTitle"
+              >
+                Call Vitalik
+              </div>
+              Vitalik flies in and nukes the mempool: every attacker loses 40% of its health (bosses 15%) and is frozen for 1.5 seconds. 2 minute cooldown.
             </span>
           </button>
         </div>

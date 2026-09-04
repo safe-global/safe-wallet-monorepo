@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import type { ReactElement } from 'react'
 import { makeSnapshot } from '../__fixtures__/snapshot'
 import type { GameSnapshot } from '../../game/GameApp'
+import AbilityBar from './AbilityBar'
 import BuildBar from './BuildBar'
 import EndScreen from './EndScreen'
 import Toast from './Toast'
@@ -38,6 +39,7 @@ const HudPreview = ({ snapshot }: { snapshot: GameSnapshot }): ReactElement => (
         />
       )}
       <BuildBar snapshot={snapshot} onSelect={noop} />
+      <AbilityBar snapshot={snapshot} onHardFork={noop} onFundraise={noop} onCallVitalik={noop} />
       <Toast toast={snapshot.toast} />
       {(snapshot.phase === 'won' || snapshot.phase === 'lost') && (
         <EndScreen snapshot={snapshot} isNewBest onRestart={noop} onMenu={noop} onContinueEndless={noop} />
@@ -97,6 +99,11 @@ export const TreasuryLow: Story = {
       treasury: 3,
       gold: 12,
       paused: true,
+      abilities: {
+        hardFork: { available: true, used: false, threshold: 0.3 },
+        fundraise: { available: false, round: 'Series B', eth: 5, cost: 200, cooldown: 12 },
+        nuke: { available: false, cooldown: 0, inFlight: true },
+      },
       toast: { id: 2, text: '2 ETH drained from the treasury!', tone: 'danger' },
     }),
   },

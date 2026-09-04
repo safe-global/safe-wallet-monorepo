@@ -62,6 +62,15 @@ class FakeController implements GameController {
   continueEndless = (): void => {
     this.calls.push('endless')
   }
+  hardFork = (): void => {
+    this.calls.push('hardFork')
+  }
+  fundraise = (): void => {
+    this.calls.push('fundraise')
+  }
+  callVitalik = (): void => {
+    this.calls.push('vitalik')
+  }
   cancel = (): void => {
     this.calls.push('cancel')
   }
@@ -106,7 +115,22 @@ describe('TowerDefensePage', () => {
     fireEvent.click(screen.getByTestId('td-call-wave'))
     fireEvent.click(screen.getByText('2x'))
     fireEvent.change(screen.getByTestId('td-volume'), { target: { value: '40' } })
-    expect(controller.calls).toEqual(['build:shield', 'wave', 'speed:2', 'volume:0.4'])
+    fireEvent.click(screen.getByTestId('td-fundraise'))
+    fireEvent.click(screen.getByTestId('td-vitalik'))
+    fireEvent.click(screen.getByTestId('td-hardfork'))
+    expect(controller.calls).toEqual([
+      'build:shield',
+      'wave',
+      'speed:2',
+      'volume:0.4',
+      'fundraise',
+      'vitalik',
+      'hardFork',
+    ])
+    const abilities = screen.getByTestId('td-abilities')
+    expect(abilities).toHaveTextContent('Seed · +3 ETH for 90 SAFE')
+    expect(abilities).toHaveTextContent('Busy · 1:24')
+    expect(abilities).toHaveTextContent('Below 30% treasury')
   })
 
   it('reflects live snapshot updates and shows the tower panel for a selection', async () => {

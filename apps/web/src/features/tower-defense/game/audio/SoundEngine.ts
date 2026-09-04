@@ -18,6 +18,10 @@ export type SoundName =
   | 'error'
   | 'waveStart'
   | 'boss'
+  | 'hardFork'
+  | 'fundraise'
+  | 'vitalik'
+  | 'nuke'
   | 'waveCleared'
   | 'won'
   | 'lost'
@@ -247,6 +251,25 @@ export class SoundEngine {
       case 'boss':
         ;[110, 110, 82.4, 110].forEach((f, i) => this.tone(f, f * 0.97, 0.6, 'sawtooth', 0.35, t + i * 0.35))
         this.noise(1.2, 0.18, 300, t)
+        break
+      case 'hardFork':
+        ;[880, 660, 440, 330, 220].forEach((f, i) => this.tone(f, f * 0.5, 0.5, 'sawtooth', 0.22, t + i * 0.12))
+        this.noise(1.4, 0.16, 900, t)
+        ;[440, 554, 659, 880].forEach((f, i) => this.tone(f, f, 0.5, 'triangle', 0.2, t + 0.8 + i * 0.1))
+        break
+      case 'fundraise':
+        ;[659, 784, 988, 1175, 1318].forEach((f, i) => this.tone(f, f, 0.22, 'triangle', 0.2, t + i * 0.08))
+        this.noise(0.3, 0.06, 5000, t + 0.4)
+        break
+      case 'vitalik':
+        this.tone(220, 880, 2.2, 'sawtooth', 0.14, t)
+        this.tone(110, 440, 2.2, 'square', 0.06, t)
+        this.noise(2.4, 0.1, 1400, t)
+        break
+      case 'nuke':
+        this.noise(2.0, 0.6, 250, t)
+        this.tone(90, 25, 1.8, 'sawtooth', 0.6, t)
+        this.tone(1600, 100, 0.6, 'square', 0.12, t)
         break
       case 'waveCleared':
         ;[523, 659, 784].forEach((f, i) => this.tone(f, f, 0.3, 'triangle', 0.2, t + i * 0.1))

@@ -24,6 +24,9 @@ export const CONTROLS: Array<[string, string]> = [
   ['Pan camera', 'WASD / arrows / middle drag'],
   ['Rotate camera', 'Q / E / right drag'],
   ['Zoom', 'Mouse wheel'],
+  ['Hard fork (dire only)', 'K'],
+  ['Fundraise', 'R'],
+  ['Call Vitalik', 'V'],
   ['Toggle sound', 'M'],
   ['Help', 'H'],
 ]
@@ -37,7 +40,9 @@ const StartScreen = ({ best, onStart }: StartScreenProps): ReactElement => {
           <div className={css.title}>
             Safe<span className={css.titleBrace}>{'{'}</span>Defense<span className={css.titleBrace}>{'}'}</span>
           </div>
-          <div className={css.subtitle}>Hold the threshold. Defend the treasury.</div>
+          <div className={css.subtitle}>
+            The defence protocol for self-custody. Hold the threshold, defend the treasury.
+          </div>
         </div>
         <p className={css.lore}>
           Your Safe holds the treasury. Every attacker in the mempool wants it: phishing bots, address poisoners,
@@ -46,9 +51,10 @@ const StartScreen = ({ best, onStart }: StartScreenProps): ReactElement => {
             Safe{'{'}Shield{'}'}
           </strong>{' '}
           scanners, <strong>Hypernative Guards</strong>, <strong>Multisig Cannons</strong>,{' '}
-          <strong>Tx Simulators</strong> and <strong>Safenet Relays</strong> along the attack path and survive all{' '}
-          {TOTAL_WAVES} waves. Every leaked attacker drains ETH from the vault. When the treasury hits zero, the Safe is
-          gone.
+          <strong>Safenet Sentinels</strong> and <strong>Safenet Validators</strong> along the attack path and survive
+          all {TOTAL_WAVES} waves. When it gets dire, <strong>fundraise</strong>, <strong>hard fork</strong> the chain
+          or <strong>call Vitalik</strong> to nuke the mempool. Every leaked attacker drains ETH from the vault. When
+          the treasury hits zero, the Safe is gone.
         </p>
         <div>
           <div className={css.sectionTitle}>Choose your network</div>

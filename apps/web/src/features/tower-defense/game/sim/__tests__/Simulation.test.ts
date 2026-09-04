@@ -3,6 +3,7 @@ import { ENEMIES } from '../../config/enemies'
 import { MAP, spawnCell, vaultCell } from '../../config/map'
 import { TOWERS } from '../../config/towers'
 import { TOTAL_WAVES } from '../../config/waves'
+import { FUNDRAISE, HARD_FORK, VITALIK_NUKE } from '../../config/abilities'
 import { Simulation } from '../Simulation'
 import type { SimEvent } from '../types'
 
@@ -341,6 +342,128 @@ describe('Simulation', () => {
       advance(sim, 6)
       expect(sim.waveProgress(1)?.queued).toBe(0)
       expect(sim.waveProgress(1)?.alive).toBe(7)
+    })
+  })
+
+  describe('abilities', () => {
+    const spawnMany = (sim: Simulation, id: string, count: number) => {
+      const spawnEnemy = (
+        sim as unknown as { spawnEnemy: (id: string, mult: number, wave: number, dist: number) => { uid: number } }
+      ).spawnEnemy.bind(sim)
+      for (let i = 0; i < count; i++) spawnEnemy(id, 1, 1, 3 + i)
+    }
+
+    it('hard forks only once, only when dire, reorging every attacker and restoring the treasury', () => {
+      const sim = new Simulation({ difficulty: 'mainnet' })
+      expect(sim.canHardFork).toBe(false)
+      sim.callNextWave()
+      advance(sim, 3)
+      expect(sim.canHardFork).toBe(false)
+      expect(sim.hardFork()).toBe(false)
+      sim.treasury = Math.floor(sim.maxTreasury * HARD_FORK.direThreshold)
+      expect(sim.canHardFork).toBe(true)
+      const alive = sim.enemies.size
+      expect(alive).toBeGreaterThan(0)
+      const kills = sim.kills
+      expect(sim.hardFork()).toBe(true)
+      expect(sim.enemies.size).toBe(0)
+      expect(sim.kills).toBe(kills)
+      expect(sim.leaked).toBe(0)
+      expect(sim.treasury).toBe(Math.round(sim.maxTreasury * HARD_FORK.restoreRatio))
+      expect(sim.drainEvents()).toContainEqual(
+        expect.objectContaining({ type: 'hardFork', reverted: alive, restored: sim.treasury }),
+      )
+      sim.treasury = 1
+      expect(sim.canHardFork).toBe(false)
+      expect(sim.hardFork()).toBe(false)
+    })
+
+    it('raises treasury ETH for SAFE through Seed, A, B and C with a cooldown', () => {
+      const sim = new Simulation({ difficulty: 'mainnet' })
+      sim.nextWaveAt = null
+      sim.gold = 1000
+      const raised: SimEvent[] = []
+      const collect = (): void => {
+        raised.push(...sim.drainEvents().filter((e) => e.type === 'fundraise'))
+      }
+      expect(sim.canFundraise).toBe(false)
+      sim.treasury = 10
+      const gold = sim.gold
+      expect(sim.nextFundraise?.name).toBe('Seed')
+      expect(sim.fundraise()).toBe(true)
+      collect()
+      expect(sim.gold).toBe(gold - FUNDRAISE.rounds[0].cost)
+      expect(sim.treasury).toBe(10 + FUNDRAISE.rounds[0].eth)
+      expect(sim.canFundraise).toBe(false)
+      expect(sim.fundraise()).toBe(false)
+      expect(sim.fundraiseCooldown).toBeCloseTo(FUNDRAISE.cooldown)
+      advance(sim, FUNDRAISE.cooldown + 0.1)
+      expect(sim.nextFundraise?.name).toBe('Series A')
+      sim.gold = FUNDRAISE.rounds[1].cost - 1
+      expect(sim.canFundraise).toBe(false)
+      sim.gold = 1000
+      expect(sim.fundraise()).toBe(true)
+      collect()
+      advance(sim, FUNDRAISE.cooldown + 0.1)
+      sim.treasury = sim.maxTreasury - 1
+      expect(sim.fundraise()).toBe(true)
+      collect()
+      expect(sim.treasury).toBe(sim.maxTreasury)
+      advance(sim, FUNDRAISE.cooldown + 0.1)
+      expect(sim.canFundraise).toBe(false)
+      sim.treasury = 5
+      expect(sim.fundraise()).toBe(true)
+      collect()
+      expect(sim.nextFundraise).toBeNull()
+      advance(sim, FUNDRAISE.cooldown + 0.1)
+      expect(sim.canFundraise).toBe(false)
+      expect(raised).toHaveLength(4)
+      expect(raised[2]).toEqual(expect.objectContaining({ eth: 1, cost: FUNDRAISE.rounds[2].cost }))
+    })
+
+    it('calls Vitalik after the cooldown and nukes every attacker on impact', () => {
+      const sim = new Simulation({ difficulty: 'mainnet' })
+      sim.nextWaveAt = null
+      spawnMany(sim, 'blindSigner', 3)
+      spawnMany(sim, 'spoofedUi', 1)
+      expect(sim.nukeCooldown).toBeCloseTo(VITALIK_NUKE.cooldown)
+      expect(sim.launchNuke()).toBe(false)
+      sim.nukeReadyAt = sim.time
+      expect(sim.nukeCooldown).toBe(0)
+      expect(sim.canNuke).toBe(true)
+      expect(sim.launchNuke()).toBe(true)
+      expect(sim.nukeInFlight).toBe(true)
+      expect(sim.launchNuke()).toBe(false)
+      let events = sim.drainEvents()
+      expect(events).toContainEqual(
+        expect.objectContaining({ type: 'nukeLaunch', flightTime: VITALIK_NUKE.flightTime }),
+      )
+      const before = Array.from(sim.enemies.values()).map((e) => e.hp)
+      events = advance(sim, VITALIK_NUKE.flightTime + 0.1)
+      const impact = events.find((e) => e.type === 'nukeImpact')
+      expect(impact).toBeDefined()
+      expect(sim.nukeInFlight).toBe(false)
+      const after = Array.from(sim.enemies.values())
+      expect(after.length).toBe(before.length)
+      after.forEach((enemy) => {
+        expect(enemy.hp).toBeLessThan(enemy.maxHp * (1 - VITALIK_NUKE.damageRatio) + 1)
+        expect(enemy.shieldHits).toBe(0)
+        expect(enemy.stunUntil).toBeGreaterThan(sim.time)
+      })
+      expect(sim.nukeCooldown).toBeGreaterThan(VITALIK_NUKE.cooldown - VITALIK_NUKE.flightTime - 1)
+    })
+
+    it('a nuke finishes off weak attackers and counts them as kills', () => {
+      const sim = new Simulation({ difficulty: 'mainnet' })
+      spawnMany(sim, 'dust', 4)
+      Array.from(sim.enemies.values()).forEach((e) => {
+        e.hp = 1
+      })
+      sim.nukeReadyAt = 0
+      expect(sim.launchNuke()).toBe(true)
+      advance(sim, VITALIK_NUKE.flightTime + 0.1)
+      expect(sim.enemies.size).toBe(0)
+      expect(sim.kills).toBe(4)
     })
   })
 

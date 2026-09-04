@@ -16,6 +16,7 @@ import { buildEnvironment, type Environment } from './environment'
 import { box, cone, plane, ring, sphere } from './geometry'
 import { COLORS, glow, material } from './materials'
 import { buildGhostModel, buildTowerModel, type TowerModel } from './towerMeshes'
+import { buildVitalikModel, type VitalikModel } from './vitalik'
 
 interface TowerView {
   model: TowerModel
@@ -78,6 +79,10 @@ export class GameRenderer {
   private readonly hitPoint = new THREE.Vector3()
   private readonly resizeObserver: ResizeObserver | null
   private damageFlash = 0
+  private forkFlash = 0
+  private nukeFlash = 0
+  private vitalik: VitalikModel | null = null
+  private flight: { from: THREE.Vector3; to: THREE.Vector3; age: number; duration: number } | null = null
   private time = 0
   private width = 1
   private height = 1
@@ -290,7 +295,17 @@ export class GameRenderer {
     this.syncEnemies(dt)
     this.syncProjectiles()
     this.env.update(dt, this.time, this.sim.treasury / this.sim.maxTreasury, this.damageFlash)
-    this.flashLayer.style.opacity = String(Math.min(1, this.damageFlash * 0.9))
+    this.updateFlight(dt)
+    this.forkFlash = Math.max(0, this.forkFlash - dt * 1.2)
+    this.nukeFlash = Math.max(0, this.nukeFlash - dt * 1.5)
+    const flash = Math.max(this.damageFlash * 0.9, this.forkFlash, this.nukeFlash)
+    this.flashLayer.style.background =
+      this.nukeFlash > this.damageFlash && this.nukeFlash > this.forkFlash
+        ? 'radial-gradient(ellipse at center, rgba(255,255,255,0.9) 0%, rgba(179,136,255,0.5) 60%, rgba(0,0,0,0) 100%)'
+        : this.forkFlash > this.damageFlash
+          ? 'radial-gradient(ellipse at center, rgba(18,255,128,0) 30%, rgba(18,255,128,0.75) 100%)'
+          : 'radial-gradient(ellipse at center, rgba(255,95,114,0) 45%, rgba(255,95,114,0.85) 100%)'
+    this.flashLayer.style.opacity = String(Math.min(1, flash))
     this.particles.update(dt)
     this.beams.update(dt)
     this.pulses.update(dt)
@@ -406,6 +421,48 @@ export class GameRenderer {
         )
         this.floating.add({ x: event.pos.x, y: 1.6, z: event.pos.z }, `+${event.refund}`, 'gold')
         break
+      case 'hardFork': {
+        this.forkFlash = 1
+        this.camera.shake(1.4)
+        this.pulses.add(event.pos, 14, COLORS.safeGreen, 1.6)
+        this.pulses.add(event.pos, 9, COLORS.safeGreen, 1.1)
+        for (const view of this.enemyViews.values()) {
+          const p = view.model.group.position
+          this.particles.emit(
+            { x: p.x, y: 0.8, z: p.z },
+            { count: 16, color: COLORS.safeGreen, speed: 3, life: 0.9, size: 0.22, gravity: -2 },
+          )
+        }
+        this.floating.add(
+          { x: event.pos.x, y: 3.8, z: event.pos.z },
+          `HARD FORK  ${event.reverted} attackers reorged`,
+          'bonus',
+          2.4,
+        )
+        break
+      }
+      case 'fundraise':
+        this.particles.emit(
+          { x: event.pos.x, y: 2.4, z: event.pos.z },
+          { count: 60, color: 0xffd166, speed: 3.5, life: 1.2, size: 0.22, gravity: 5 },
+        )
+        this.pulses.add(event.pos, 3, 0xffd166, 0.8)
+        this.floating.add({ x: event.pos.x, y: 3.6, z: event.pos.z }, `${event.round}  +${event.eth} ETH`, 'gold', 2)
+        break
+      case 'nukeLaunch':
+        this.startFlight(event.from, event.to, event.flightTime)
+        break
+      case 'nukeImpact': {
+        this.nukeFlash = 1
+        this.camera.shake(1.5)
+        const pos = { x: event.pos.x, y: 0.6, z: event.pos.z }
+        this.pulses.add(event.pos, 16, 0xb388ff, 1.5)
+        this.pulses.add(event.pos, 10, 0xffffff, 1.0)
+        this.particles.emit(pos, { count: 260, color: 0xb388ff, speed: 9, life: 1.6, size: 0.36, gravity: 4 })
+        this.particles.emit(pos, { count: 120, color: 0xffffff, speed: 5, life: 1.2, size: 0.3, gravity: 1, up: 6 })
+        this.floating.add({ x: pos.x, y: 3, z: pos.z }, `NUKED ${event.hit} attackers`, 'bonus', 2.2)
+        break
+      }
       case 'waveCleared':
         this.floating.add(
           { x: this.sim.vaultPos.x, y: 3.6, z: this.sim.vaultPos.z },
@@ -603,6 +660,51 @@ export class GameRenderer {
         this.projectileViews.delete(uid)
       }
     }
+  }
+
+  private startFlight(from: { x: number; z: number }, to: { x: number; z: number }, duration: number): void {
+    if (!this.vitalik) {
+      this.vitalik = buildVitalikModel()
+      this.scene.add(this.vitalik.group)
+    }
+    this.vitalik.group.visible = true
+    this.flight = {
+      from: new THREE.Vector3(from.x, 7, from.z),
+      to: new THREE.Vector3(to.x, 5.5, to.z),
+      age: 0,
+      duration,
+    }
+  }
+
+  /** Flies Vitalik along an arc towards the impact point, then out the far side of the map. */
+  private updateFlight(dt: number): void {
+    if (!this.flight || !this.vitalik) return
+    this.flight.age += dt
+    const total = this.flight.duration + 1.8
+    const t = this.flight.age / total
+    if (t >= 1) {
+      this.vitalik.group.visible = false
+      this.flight = null
+      return
+    }
+    const { from, to } = this.flight
+    const exit = new THREE.Vector3(to.x * 2 - from.x + 8, 9, to.z * 2 - from.z + 6)
+    const k = this.flight.age / this.flight.duration
+    const pos =
+      k <= 1
+        ? new THREE.Vector3().lerpVectors(from, to, k)
+        : new THREE.Vector3().lerpVectors(to, exit, Math.min(1, (this.flight.age - this.flight.duration) / 1.8))
+    pos.y += Math.sin(this.time * 6) * 0.12
+    const ahead = k <= 1 ? to : exit
+    this.vitalik.group.position.copy(pos)
+    this.vitalik.group.lookAt(ahead.x, pos.y, ahead.z)
+    this.vitalik.group.rotation.z = Math.sin(this.time * 4) * 0.08
+    this.vitalik.cape.rotation.x = Math.sin(this.time * 10) * 0.25
+    this.vitalik.trail.scale.y = 1 + Math.sin(this.time * 20) * 0.25
+    this.particles.emit(
+      { x: pos.x, y: pos.y - 0.4, z: pos.z },
+      { count: 2, color: 0xb388ff, speed: 0.6, life: 0.5, size: 0.16, gravity: 0, up: -1 },
+    )
   }
 
   worldToScreen(pos: Vec3): { x: number; y: number } {

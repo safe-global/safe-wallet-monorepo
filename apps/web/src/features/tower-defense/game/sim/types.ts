@@ -94,6 +94,10 @@ export type SimEvent =
   | { type: 'sell'; pos: Vec2; refund: number }
   | { type: 'waveStart'; index: number; title: string; earlyBonus: number }
   | { type: 'waveCleared'; index: number; bonus: number; income: number }
+  | { type: 'hardFork'; pos: Vec2; reverted: number; restored: number }
+  | { type: 'fundraise'; pos: Vec2; round: string; eth: number; cost: number }
+  | { type: 'nukeLaunch'; from: Vec2; to: Vec2; flightTime: number }
+  | { type: 'nukeImpact'; pos: Vec2; hit: number }
   | { type: 'won' }
   | { type: 'lost' }
 

@@ -38,7 +38,7 @@ exports[`./StartScreen.stories Default 1`] = `
             <div
               class="subtitle"
             >
-              Hold the threshold. Defend the treasury.
+              The defence protocol for self-custody. Hold the threshold, defend the treasury.
             </div>
           </div>
           <p
@@ -68,16 +68,27 @@ exports[`./StartScreen.stories Default 1`] = `
             ,
              
             <strong>
-              Tx Simulators
+              Safenet Sentinels
             </strong>
              and 
             <strong>
-              Safenet Relays
+              Safenet Validators
             </strong>
-             along the attack path and survive all
-             
+             along the attack path and survive all 
             30
-             waves. Every leaked attacker drains ETH from the vault. When the treasury hits zero, the Safe is gone.
+             waves. When it gets dire, 
+            <strong>
+              fundraise
+            </strong>
+            , 
+            <strong>
+              hard fork
+            </strong>
+             the chain or 
+            <strong>
+              call Vitalik
+            </strong>
+             to nuke the mempool. Every leaked attacker drains ETH from the vault. When the treasury hits zero, the Safe is gone.
           </p>
           <div>
             <div
@@ -347,6 +358,36 @@ exports[`./StartScreen.stories Default 1`] = `
               </li>
               <li>
                 <span>
+                  Hard fork (dire only)
+                </span>
+                <span
+                  class="kbd"
+                >
+                  K
+                </span>
+              </li>
+              <li>
+                <span>
+                  Fundraise
+                </span>
+                <span
+                  class="kbd"
+                >
+                  R
+                </span>
+              </li>
+              <li>
+                <span>
+                  Call Vitalik
+                </span>
+                <span
+                  class="kbd"
+                >
+                  V
+                </span>
+              </li>
+              <li>
+                <span>
                   Toggle sound
                 </span>
                 <span
@@ -412,7 +453,7 @@ exports[`./StartScreen.stories WithBestScores 1`] = `
             <div
               class="subtitle"
             >
-              Hold the threshold. Defend the treasury.
+              The defence protocol for self-custody. Hold the threshold, defend the treasury.
             </div>
           </div>
           <p
@@ -442,16 +483,27 @@ exports[`./StartScreen.stories WithBestScores 1`] = `
             ,
              
             <strong>
-              Tx Simulators
+              Safenet Sentinels
             </strong>
              and 
             <strong>
-              Safenet Relays
+              Safenet Validators
             </strong>
-             along the attack path and survive all
-             
+             along the attack path and survive all 
             30
-             waves. Every leaked attacker drains ETH from the vault. When the treasury hits zero, the Safe is gone.
+             waves. When it gets dire, 
+            <strong>
+              fundraise
+            </strong>
+            , 
+            <strong>
+              hard fork
+            </strong>
+             the chain or 
+            <strong>
+              call Vitalik
+            </strong>
+             to nuke the mempool. Every leaked attacker drains ETH from the vault. When the treasury hits zero, the Safe is gone.
           </p>
           <div>
             <div
@@ -734,6 +786,36 @@ exports[`./StartScreen.stories WithBestScores 1`] = `
                   class="kbd"
                 >
                   Mouse wheel
+                </span>
+              </li>
+              <li>
+                <span>
+                  Hard fork (dire only)
+                </span>
+                <span
+                  class="kbd"
+                >
+                  K
+                </span>
+              </li>
+              <li>
+                <span>
+                  Fundraise
+                </span>
+                <span
+                  class="kbd"
+                >
+                  R
+                </span>
+              </li>
+              <li>
+                <span>
+                  Call Vitalik
+                </span>
+                <span
+                  class="kbd"
+                >
+                  V
                 </span>
               </li>
               <li>

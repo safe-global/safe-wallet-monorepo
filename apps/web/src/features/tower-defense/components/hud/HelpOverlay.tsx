@@ -24,13 +24,13 @@ const HelpOverlay = ({ onClose }: { onClose: () => void }): ReactElement => (
           </p>
           <p>
             Waves start automatically when the timer runs out. Sending the next wave early pays a SAFE bonus for each
-            second you skip. Clearing a wave pays a bonus plus the income from your Recovery Modules.
+            second you skip. Clearing a wave pays a bonus plus the staking rewards from your Delegator Pools.
           </p>
           <h4>Damage types</h4>
           <p>
             <strong>Scan</strong> shreds unarmored bots but struggles against heavy armor. <strong>Impact</strong> is
             best against heavy and fortified units. <strong>Consensus</strong> (magic) excels against light armor.
-            Cannons cannot hit air units and stealth units are untargetable until a Tx Simulator reveals them.
+            Cannons cannot hit air units and stealth units are untargetable until a Safenet Sentinel reveals them.
           </p>
           <h4>Controls</h4>
           <ul>

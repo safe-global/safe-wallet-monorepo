@@ -1,6 +1,7 @@
 import type { Difficulty, EnemyId, GridCell, TargetingMode, TowerId } from './config/types'
 import { TOWERS, sellValue } from './config/towers'
 import { ENEMIES } from './config/enemies'
+import { HARD_FORK } from './config/abilities'
 import { getWave, waveEnemyCounts } from './config/waves'
 import { Simulation } from './sim/Simulation'
 import type { Phase, SimEvent, TowerState } from './sim/types'
@@ -53,6 +54,11 @@ export interface GameSnapshot {
   nextWave: WavePreview | null
   currentWave: WavePreview | null
   waveProgress: { index: number; total: number; queued: number; alive: number; done: number } | null
+  abilities: {
+    hardFork: { available: boolean; used: boolean; threshold: number }
+    fundraise: { available: boolean; round: string | null; eth: number | null; cost: number | null; cooldown: number }
+    nuke: { available: boolean; cooldown: number; inFlight: boolean }
+  }
   toast: { id: number; text: string; tone: 'info' | 'danger' | 'success' } | null
   icons: Record<TowerId, string>
   elapsed: number
@@ -159,6 +165,17 @@ export class GameApp {
       nextWave: this.previewWave(nextIndex),
       currentWave: this.previewWave(sim.waveIndex),
       waveProgress: this.currentWaveProgress(),
+      abilities: {
+        hardFork: { available: sim.canHardFork, used: sim.hardForkUsed, threshold: HARD_FORK.direThreshold },
+        fundraise: {
+          available: sim.canFundraise,
+          round: sim.nextFundraise?.name ?? null,
+          eth: sim.nextFundraise?.eth ?? null,
+          cost: sim.nextFundraise?.cost ?? null,
+          cooldown: sim.fundraiseCooldown,
+        },
+        nuke: { available: sim.canNuke, cooldown: sim.nukeCooldown, inFlight: sim.nukeInFlight },
+      },
       toast: this.toast,
       icons: this.icons,
       elapsed: (performance.now() - this.startedAt) / 1000,
@@ -314,6 +331,53 @@ export class GameApp {
     this.setTargeting(modes[(modes.indexOf(tower.targeting) + 1) % modes.length])
   }
 
+  hardFork(): void {
+    this.sound.unlock()
+    if (!this.sim.canHardFork) {
+      this.sound.play('error')
+      const why = this.sim.hardForkUsed
+        ? 'The chain can only be hard forked once'
+        : `Hard fork is only possible below ${Math.round(HARD_FORK.direThreshold * 100)}% treasury`
+      return this.showToast(why, 'danger')
+    }
+    this.sim.hardFork()
+    this.emit()
+  }
+
+  fundraise(): void {
+    this.sound.unlock()
+    if (!this.sim.canFundraise) {
+      this.sound.play('error')
+      const round = this.sim.nextFundraise
+      const why =
+        round === null
+          ? 'No investors left. The cap table is full.'
+          : this.sim.fundraiseCooldown > 0
+            ? `Investors need ${Math.ceil(this.sim.fundraiseCooldown)}s more due diligence`
+            : this.sim.treasury >= this.sim.maxTreasury
+              ? 'The treasury is already full'
+              : `Investors want ${round.cost} SAFE for the ${round.name} round`
+      return this.showToast(why, 'danger')
+    }
+    this.sim.fundraise()
+    this.emit()
+  }
+
+  callVitalik(): void {
+    this.sound.unlock()
+    if (!this.sim.canNuke) {
+      this.sound.play('error')
+      const why = this.sim.nukeInFlight
+        ? 'Vitalik is already on his way'
+        : this.sim.nukeCooldown > 0
+          ? `Vitalik is busy for another ${Math.ceil(this.sim.nukeCooldown)}s`
+          : 'Nothing on the map worth nuking'
+      return this.showToast(why, 'danger')
+    }
+    this.sim.launchNuke()
+    this.emit()
+  }
+
   continueEndless(): void {
     if (this.sim.continueEndless()) {
       this.sound.play('waveStart')
@@ -435,6 +499,15 @@ export class GameApp {
       case 'KeyF':
         this.cycleSpeed()
         break
+      case 'KeyK':
+        this.hardFork()
+        break
+      case 'KeyR':
+        this.fundraise()
+        break
+      case 'KeyV':
+        this.callVitalik()
+        break
       case 'KeyT':
         this.cycleTargeting()
         break
@@ -531,6 +604,25 @@ export class GameApp {
           `Wave ${event.index}: ${event.title}${event.earlyBonus > 0 ? ` (+${event.earlyBonus} SAFE early call)` : ''}`,
           'info',
         )
+        break
+      case 'hardFork':
+        this.sound.play('hardFork')
+        this.showToast(
+          `Hard fork! ${event.reverted} attackers reorged out. Treasury restored to ${event.restored} ETH.`,
+          'success',
+        )
+        break
+      case 'fundraise':
+        this.sound.play('fundraise')
+        this.showToast(`${event.round} closed: +${event.eth} ETH treasury for ${event.cost} SAFE`, 'success')
+        break
+      case 'nukeLaunch':
+        this.sound.play('vitalik')
+        this.showToast('Vitalik is inbound. Brace the mempool.', 'info')
+        break
+      case 'nukeImpact':
+        this.sound.play('nuke')
+        this.showToast(`Nuked ${event.hit} attackers. Proof of stake, proof of pain.`, 'success')
         break
       case 'waveCleared':
         this.sound.play('waveCleared')

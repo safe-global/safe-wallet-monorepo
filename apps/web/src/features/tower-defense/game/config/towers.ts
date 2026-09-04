@@ -58,10 +58,10 @@ export const TOWERS: Record<TowerId, TowerDef> = {
   },
   simulator: {
     id: 'simulator',
-    name: 'Tx Simulator',
-    tagline: 'Simulate before you sign',
+    name: 'Safenet Sentinel',
+    tagline: 'Sentinel oracle',
     description:
-      'Long range, high damage single shots. Its simulation runs reveal stealthy social engineers so other towers can target them.',
+      'A Safenet Sentinel oracle simulates every transaction before it lands: long range, huge single shots, and its risk signals reveal stealthy social engineers for the other towers.',
     attackType: 'scan',
     targets: 'both',
     projectile: 'tracer',
@@ -75,9 +75,10 @@ export const TOWERS: Record<TowerId, TowerDef> = {
   },
   safenet: {
     id: 'safenet',
-    name: 'Safenet Relay',
-    tagline: 'Cross-chain guarantees',
-    description: 'Arcs validator consensus between attackers. Each jump hits another target for slightly less damage.',
+    name: 'Safenet Validators',
+    tagline: 'Cryptographic attestations',
+    description:
+      'A Byzantine fault tolerant set of Validators arcs consensus between attackers. Each attestation jumps to another target for slightly less damage.',
     attackType: 'magic',
     targets: 'both',
     projectile: 'beam',
@@ -107,10 +108,10 @@ export const TOWERS: Record<TowerId, TowerDef> = {
   },
   recovery: {
     id: 'recovery',
-    name: 'Recovery Module',
-    tagline: 'Signer support aura',
+    name: 'Delegator Pool',
+    tagline: 'Stake SAFE, earn rewards',
     description:
-      'Does not attack. Boosts the damage of every tower in its aura and pays out SAFE at the end of each wave.',
+      'Does not attack. Delegators stake SAFE behind every tower in its aura, boosting their damage, and pay out staking rewards at the end of each wave.',
     attackType: 'magic',
     targets: 'none',
     projectile: 'none',
@@ -124,10 +125,10 @@ export const TOWERS: Record<TowerId, TowerDef> = {
   },
   guard: {
     id: 'guard',
-    name: 'Spending Guard',
-    tagline: 'Allowance enforcement',
+    name: 'Safe Guard',
+    tagline: 'Onchain enforcement',
     description:
-      'Fires allowance darts that keep draining an attacker after impact. Excellent against regenerating threats.',
+      'The Guard verifies attestations onchain. Anything without one keeps bleeding after impact. Excellent against regenerating threats.',
     attackType: 'magic',
     targets: 'both',
     projectile: 'dart',

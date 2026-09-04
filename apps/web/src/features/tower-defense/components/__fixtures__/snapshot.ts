@@ -33,6 +33,11 @@ export const makeSnapshot = (overrides: Partial<GameSnapshot> = {}): GameSnapsho
   nextWave: preview(4),
   currentWave: preview(3),
   waveProgress: null,
+  abilities: {
+    hardFork: { available: false, used: false, threshold: 0.3 },
+    fundraise: { available: true, round: 'Seed', eth: 3, cost: 90, cooldown: 0 },
+    nuke: { available: false, cooldown: 84, inFlight: false },
+  },
   toast: null,
   icons: Object.fromEntries(Object.keys(TOWERS).map((id) => [id, ''])) as Record<TowerId, string>,
   elapsed: 184,

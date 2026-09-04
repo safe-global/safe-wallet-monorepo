@@ -58,7 +58,8 @@ export const ENEMIES: Record<EnemyId, EnemyDef> = {
   blindSigner: {
     id: 'blindSigner',
     name: 'Blind signer',
-    description: 'Signs whatever the hardware wallet shows. Slow, thick-skinned, and hard to stop.',
+    description:
+      'Signs whatever the hardware wallet shows. Slow, thick-skinned, and the reason Safenet protects you even if you sign by mistake.',
     hp: 330,
     speed: 0.8,
     armor: 'heavy',
@@ -84,7 +85,7 @@ export const ENEMIES: Record<EnemyId, EnemyDef> = {
   socialEngineer: {
     id: 'socialEngineer',
     name: 'Social engineer',
-    description: 'Looks exactly like a colleague on Slack. Invisible until a Tx Simulator reveals it.',
+    description: 'Looks exactly like a colleague on Slack. Invisible until a Safenet Sentinel reveals it.',
     hp: 125,
     speed: 1.4,
     armor: 'unarmored',

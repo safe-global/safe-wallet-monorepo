@@ -17,6 +17,7 @@ import {
 } from '../config/map'
 import { sellValue, TOWERS } from '../config/towers'
 import { getWave, TOTAL_WAVES } from '../config/waves'
+import { FUNDRAISE, HARD_FORK, VITALIK_NUKE } from '../config/abilities'
 import { createRng } from './rng'
 import type {
   EnemyState,
@@ -64,6 +65,11 @@ export class Simulation {
   waveIndex = 0
   kills = 0
   endless = false
+  hardForkUsed = false
+  fundraiseRound = 0
+  fundraiseReadyAt = 0
+  nukeReadyAt = VITALIK_NUKE.cooldown
+  private nukeImpactAt: number | null = null
   leaked = 0
   nextWaveAt: number | null
   lastWaveSpawnEnd = 0
@@ -135,6 +141,115 @@ export class Simulation {
     const out = this.events
     this.events = []
     return out
+  }
+
+  // ─── Abilities ───────────────────────────────────────────────────────────────
+
+  get canHardFork(): boolean {
+    return (
+      !this.hardForkUsed &&
+      !this.isOver &&
+      this.waveIndex > 0 &&
+      this.treasury <= this.maxTreasury * HARD_FORK.direThreshold
+    )
+  }
+
+  /** Reorgs every attacker off the map and restores the treasury. Once per game, dire moments only. */
+  hardFork(): boolean {
+    if (!this.canHardFork) return false
+    this.hardForkUsed = true
+    const reverted = this.enemies.size
+    for (const enemy of Array.from(this.enemies.values())) this.removeEnemy(enemy)
+    this.projectiles.clear()
+    const restored = Math.max(this.treasury, Math.round(this.maxTreasury * HARD_FORK.restoreRatio))
+    this.treasury = restored
+    this.events.push({ type: 'hardFork', pos: this.vaultPos, reverted, restored })
+    this.checkWaveProgress()
+    return true
+  }
+
+  get nextFundraise(): { name: string; eth: number; cost: number } | null {
+    return FUNDRAISE.rounds[this.fundraiseRound] ?? null
+  }
+
+  get fundraiseCooldown(): number {
+    return Math.max(0, this.fundraiseReadyAt - this.time)
+  }
+
+  get canFundraise(): boolean {
+    const round = this.nextFundraise
+    return (
+      !this.isOver &&
+      round !== null &&
+      this.fundraiseCooldown === 0 &&
+      this.gold >= round.cost &&
+      this.treasury < this.maxTreasury
+    )
+  }
+
+  /** Hands SAFE to investors and tops the treasury up with ETH. Seed, then Series A, B and C. */
+  fundraise(): boolean {
+    const round = this.nextFundraise
+    if (!round || !this.canFundraise) return false
+    this.fundraiseRound += 1
+    this.fundraiseReadyAt = this.time + FUNDRAISE.cooldown
+    this.gold -= round.cost
+    const eth = Math.min(round.eth, this.maxTreasury - this.treasury)
+    this.treasury += eth
+    this.events.push({ type: 'fundraise', pos: this.vaultPos, round: round.name, eth, cost: round.cost })
+    return true
+  }
+
+  get nukeCooldown(): number {
+    return Math.max(0, this.nukeReadyAt - this.time)
+  }
+
+  get nukeInFlight(): boolean {
+    return this.nukeImpactAt !== null
+  }
+
+  get canNuke(): boolean {
+    return !this.isOver && this.nukeCooldown === 0 && !this.nukeInFlight && this.enemies.size > 0
+  }
+
+  /** Calls Vitalik. He needs a moment to fly in; the impact lands in `step`. */
+  launchNuke(): boolean {
+    if (!this.canNuke) return false
+    this.nukeImpactAt = this.time + VITALIK_NUKE.flightTime
+    this.nukeReadyAt = this.time + VITALIK_NUKE.cooldown
+    this.events.push({
+      type: 'nukeLaunch',
+      from: { x: this.spawnPos.x - 6, z: this.spawnPos.z - 4 },
+      to: this.nukeCentre(),
+      flightTime: VITALIK_NUKE.flightTime,
+    })
+    return true
+  }
+
+  private nukeCentre(): Vec2 {
+    if (this.enemies.size === 0) return { x: 0.5, z: 0.5 }
+    let x = 0
+    let z = 0
+    for (const enemy of this.enemies.values()) {
+      x += enemy.pos.x
+      z += enemy.pos.z
+    }
+    return { x: x / this.enemies.size, z: z / this.enemies.size }
+  }
+
+  private detonateNuke(): void {
+    this.nukeImpactAt = null
+    const pos = this.nukeCentre()
+    let hit = 0
+    for (const enemy of Array.from(this.enemies.values())) {
+      hit++
+      enemy.shieldHits = 0
+      enemy.stunUntil = Math.max(enemy.stunUntil, this.time + VITALIK_NUKE.stun)
+      const ratio = enemy.def.boss ? VITALIK_NUKE.bossDamageRatio : VITALIK_NUKE.damageRatio
+      enemy.hp -= enemy.maxHp * ratio
+      if (enemy.hp <= 0) this.killEnemy(enemy, null)
+    }
+    this.events.push({ type: 'nukeImpact', pos, hit })
   }
 
   // ─── Building ────────────────────────────────────────────────────────────────
@@ -320,6 +435,7 @@ export class Simulation {
     this.stepDetection()
     this.stepTowers(dt)
     this.stepProjectiles(dt)
+    if (this.nukeImpactAt !== null && this.time >= this.nukeImpactAt) this.detonateNuke()
     this.checkWaveProgress()
   }
 

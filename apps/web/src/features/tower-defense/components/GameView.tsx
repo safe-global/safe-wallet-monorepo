@@ -3,6 +3,7 @@ import type { Difficulty } from '../game/config/types'
 import type { GameController } from '../game/controller'
 import type { FloatingTextClasses } from '../game/render/effects'
 import { recordScore } from './highScores'
+import AbilityBar from './hud/AbilityBar'
 import BuildBar from './hud/BuildBar'
 import EndScreen from './hud/EndScreen'
 import HelpOverlay from './hud/HelpOverlay'
@@ -101,6 +102,12 @@ const Hud = ({
         />
       )}
       <BuildBar snapshot={snapshot} onSelect={(id) => controller.setBuildTower(id)} />
+      <AbilityBar
+        snapshot={snapshot}
+        onHardFork={() => controller.hardFork()}
+        onFundraise={() => controller.fundraise()}
+        onCallVitalik={() => controller.callVitalik()}
+      />
       <Toast toast={snapshot.toast} />
       {snapshot.paused && !isOver && <div className={css.pausedBanner}>Paused</div>}
       {helpOpen && <HelpOverlay onClose={() => setHelpOpen(false)} />}

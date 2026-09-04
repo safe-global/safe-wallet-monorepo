@@ -39,7 +39,7 @@ const RAW_WAVES: Array<Omit<WaveDef, 'index' | 'hpMultiplier'>> = [
   { title: 'Lazarus scouts', intel: 'The Lazarus Group sends its first operatives.', groups: [g('lazarus', 8, 1.2)] },
   {
     title: 'Social engineering',
-    intel: 'Stealth units. Only a Tx Simulator can reveal them for your other towers.',
+    intel: 'Stealth units. Only a Safenet Sentinel can reveal them for your other towers.',
     groups: [g('socialEngineer', 6, 1.5)],
   },
   {
@@ -60,7 +60,7 @@ const RAW_WAVES: Array<Omit<WaveDef, 'index' | 'hpMultiplier'>> = [
   },
   {
     title: 'Unlimited approvals',
-    intel: 'Approval hijackers regenerate as they walk. Spending Guards keep draining them.',
+    intel: 'Approval hijackers regenerate as they walk. Safe Guards keep draining them.',
     groups: [g('approvalHijacker', 8, 1.4)],
   },
   {
@@ -101,7 +101,7 @@ const RAW_WAVES: Array<Omit<WaveDef, 'index' | 'hpMultiplier'>> = [
   },
   {
     title: 'Signing party',
-    intel: 'Armor everywhere. Cannons and Safenet arcs earn their keep.',
+    intel: 'Armor everywhere. Cannons and Safenet Validators earn their keep.',
     groups: [g('blindSigner', 14, 0.9), g('approvalHijacker', 8, 1.2, 6)],
   },
   {

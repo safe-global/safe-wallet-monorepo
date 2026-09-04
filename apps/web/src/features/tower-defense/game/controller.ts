@@ -17,6 +17,9 @@ export interface GameController {
   toggleBloom(): void
   setTargeting(mode: TargetingMode): void
   continueEndless(): void
+  hardFork(): void
+  fundraise(): void
+  callVitalik(): void
   cancel(): void
   dispose(): void
 }

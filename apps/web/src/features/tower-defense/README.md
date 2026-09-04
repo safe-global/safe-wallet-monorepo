@@ -1,7 +1,8 @@
 # Safe{Defense}
 
 A Warcraft-3-style 3D tower defense game where Safe security primitives defend the treasury
-against everyone who ever tried to drain a Safe. Reachable at `/tower-defense` (not linked
+against everyone who ever tried to drain a Safe. Tower names follow Safe and Safenet vocabulary
+(Safe{Shield}, Hypernative Guard, Safenet Sentinels and Validators, Safe Guard, Delegator Pool). Reachable at `/tower-defense` (not linked
 from navigation). Everything, three.js included, is code-split behind `next/dynamic` and only
 loads on that route.
 
