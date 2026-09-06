@@ -6,6 +6,7 @@ import type {
   HypernativeBatchAssessmentRequestWithAuthDto,
   HypernativeTokenExchangeResponseDto,
   HypernativeTokenExchangeRequestDto,
+  HypernativeTokenRefreshRequestDto,
   HypernativeMessageAssessmentResponseDto,
   HypernativeMessageAssessmentRequestWithAuthDto,
 } from './hypernativeApi.dto'
@@ -31,6 +32,22 @@ export const hypernativeApi = createApi({
       }),
       transformResponse: (response: HypernativeTokenExchangeResponseDto) => response.data, // Extract data from the response wrapper
       transformErrorResponse: (response: HypernativeTokenExchangeResponseDto) => response.data,
+      invalidatesTags: ['hypernative-oauth'],
+    }),
+    refreshToken: build.mutation<HypernativeTokenExchangeResponseDto['data'], HypernativeTokenRefreshRequestDto>({
+      query: (request) => ({
+        url: '/oauth/token',
+        method: 'POST',
+        body: request,
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+      }),
+      transformResponse: (response: HypernativeTokenExchangeResponseDto) => response.data,
+      transformErrorResponse: (response: HypernativeTokenExchangeResponseDto) => response.data,
+      // The refresh token is single-use; retrying with an already-consumed token revokes the whole chain
+      extraOptions: { maxRetries: 0 },
       invalidatesTags: ['hypernative-oauth'],
     }),
     assessTransaction: build.mutation<
