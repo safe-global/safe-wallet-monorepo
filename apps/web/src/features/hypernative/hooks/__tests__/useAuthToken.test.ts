@@ -1,6 +1,8 @@
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { useAuthToken } from '../useAuthToken'
 import * as cookieStorage from '../../store/cookieStorage'
+import { getStoreInstance } from '@/store'
+import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 
 // Mock cookieStorage module
 jest.mock('../../store/cookieStorage', () => ({
@@ -9,11 +11,29 @@ jest.mock('../../store/cookieStorage', () => ({
   clearAuthCookie: jest.fn(),
 }))
 
+// Mock the store's imperative accessor (used outside React components) rather than the whole
+// store module, so this test doesn't have to boot the real app store
+jest.mock('@/store', () => ({
+  getStoreInstance: jest.fn(),
+}))
+
+jest.mock('@safe-global/store/hypernative/hypernativeApi', () => ({
+  hypernativeApi: {
+    endpoints: {
+      refreshToken: {
+        initiate: jest.fn(),
+      },
+    },
+  },
+}))
+
 const mockGetAuthCookieData = cookieStorage.getAuthCookieData as jest.MockedFunction<
   typeof cookieStorage.getAuthCookieData
 >
 const mockSetAuthCookie = cookieStorage.setAuthCookie as jest.MockedFunction<typeof cookieStorage.setAuthCookie>
 const mockClearAuthCookie = cookieStorage.clearAuthCookie as jest.MockedFunction<typeof cookieStorage.clearAuthCookie>
+const mockGetStoreInstance = getStoreInstance as jest.MockedFunction<typeof getStoreInstance>
+const mockInitiate = hypernativeApi.endpoints.refreshToken.initiate as jest.Mock
 
 describe('useAuthToken', () => {
   const originalDateNow = Date.now
@@ -182,7 +202,7 @@ describe('useAuthToken', () => {
         // Let's trigger it again to simulate the effect
       })
 
-      expect(mockSetAuthCookie).toHaveBeenCalledWith('new-token', 'Bearer', 3600)
+      expect(mockSetAuthCookie).toHaveBeenCalledWith('new-token', 'Bearer', 3600, undefined, undefined)
     })
 
     it('should handle different token types', () => {
@@ -192,7 +212,7 @@ describe('useAuthToken', () => {
         result.current[1]('custom-token', 'Custom', 7200)
       })
 
-      expect(mockSetAuthCookie).toHaveBeenCalledWith('custom-token', 'Custom', 7200)
+      expect(mockSetAuthCookie).toHaveBeenCalledWith('custom-token', 'Custom', 7200, undefined, undefined)
     })
 
     it('should update state immediately after setting token', () => {
@@ -531,7 +551,8 @@ describe('useAuthToken', () => {
       const { result } = renderHook(() => useAuthToken())
 
       expect(typeof result.current[1]).toBe('function')
-      expect(result.current[1].length).toBe(3) // Function expects 3 parameters
+      // token, tokenType, expiresIn, refreshToken?, refreshExpiresIn?
+      expect(result.current[1].length).toBe(5)
     })
 
     it('should return clearToken function as third element', () => {
@@ -539,6 +560,150 @@ describe('useAuthToken', () => {
 
       expect(typeof result.current[2]).toBe('function')
       expect(result.current[2].length).toBe(0) // Function expects 0 parameters
+    })
+  })
+
+  describe('silent refresh', () => {
+    // Minimal in-memory stand-in for the cookie, wired through the mocked cookieStorage module,
+    // so a refresh (mockSetAuthCookie) is actually observable on the next mockGetAuthCookieData read
+    let fakeCookie: ReturnType<typeof cookieStorage.getAuthCookieData>
+
+    const REFRESHED_RESPONSE = {
+      access_token: 'refreshed-token',
+      token_type: 'Bearer',
+      expires_in: 300,
+      refresh_token: 'rotated-refresh-token',
+      refresh_expires_in: 2591700,
+    }
+
+    beforeEach(() => {
+      fakeCookie = undefined
+
+      mockGetAuthCookieData.mockImplementation(() => fakeCookie)
+      mockSetAuthCookie.mockImplementation((token, tokenType, expiresIn, refreshToken, refreshExpiresIn) => {
+        fakeCookie = {
+          token,
+          tokenType,
+          expiry: Date.now() + expiresIn * 1000,
+          ...(refreshToken &&
+            refreshExpiresIn !== undefined && {
+              refreshToken,
+              refreshExpiry: Date.now() + refreshExpiresIn * 1000,
+            }),
+        }
+      })
+      mockClearAuthCookie.mockImplementation(() => {
+        fakeCookie = undefined
+      })
+
+      mockGetStoreInstance.mockReturnValue({
+        dispatch: jest.fn((action: unknown) => action),
+      } as unknown as ReturnType<typeof getStoreInstance>)
+      mockInitiate.mockReturnValue({ unwrap: () => Promise.resolve(REFRESHED_RESPONSE) })
+    })
+
+    it('degrades gracefully for a legacy cookie with no refreshToken (no crash, no refresh attempted)', async () => {
+      fakeCookie = { token: 'legacy-token', tokenType: 'Bearer', expiry: Date.now() + 3600000 }
+
+      const { result, unmount } = renderHook(() => useAuthToken())
+
+      expect(result.current[0].isAuthenticated).toBe(true)
+      expect(result.current[0].isExpired).toBe(false)
+      expect(mockGetStoreInstance).not.toHaveBeenCalled()
+      expect(mockInitiate).not.toHaveBeenCalled()
+
+      unmount()
+    })
+
+    it('refreshes the access token once the refresh margin is reached and rotates the refresh token', async () => {
+      fakeCookie = {
+        token: 'stale-token',
+        tokenType: 'Bearer',
+        expiry: Date.now() - 1, // already past the refresh margin
+        refreshToken: 'current-refresh-token',
+        refreshExpiry: Date.now() + 2592000000,
+      }
+
+      const { result, unmount } = renderHook(() => useAuthToken())
+
+      await waitFor(() => {
+        expect(mockInitiate).toHaveBeenCalledWith({
+          grant_type: 'refresh_token',
+          client_id: expect.any(String),
+          refresh_token: 'current-refresh-token',
+        })
+      })
+
+      await waitFor(() => {
+        expect(result.current[0].token).toBe('Bearer refreshed-token')
+        expect(result.current[0].isExpired).toBe(false)
+      })
+
+      expect(fakeCookie?.refreshToken).toBe('rotated-refresh-token')
+
+      unmount()
+    })
+
+    it('clears all auth state on invalid_grant instead of retrying', async () => {
+      mockInitiate.mockReturnValue({ unwrap: () => Promise.reject(new Error('invalid_grant')) })
+      fakeCookie = {
+        token: 'stale-token',
+        tokenType: 'Bearer',
+        expiry: Date.now() - 1,
+        refreshToken: 'dead-refresh-token',
+        refreshExpiry: Date.now() + 2592000000,
+      }
+
+      const { result, unmount } = renderHook(() => useAuthToken())
+
+      await waitFor(() => {
+        expect(mockClearAuthCookie).toHaveBeenCalled()
+        expect(result.current[0].isAuthenticated).toBe(false)
+      })
+
+      expect(mockInitiate).toHaveBeenCalledTimes(1)
+
+      unmount()
+    })
+
+    it('yields a single rotation when two tabs race to refresh the same token', async () => {
+      // navigator.locks isn't implemented in jsdom - stub a real FIFO queue so this exercises the
+      // actual serialisation + re-read-inside-the-lock logic, not just a trivial always-resolve mock
+      let lockChain: Promise<unknown> = Promise.resolve()
+      const lockRequest = jest.fn((_name: string, callback: () => Promise<unknown>) => {
+        const run = lockChain.then(callback)
+        lockChain = run.catch(() => undefined)
+        return run
+      })
+      Object.defineProperty(global.navigator, 'locks', {
+        value: { request: lockRequest },
+        configurable: true,
+      })
+
+      fakeCookie = {
+        token: 'stale-token',
+        tokenType: 'Bearer',
+        expiry: Date.now() - 1,
+        refreshToken: 'current-refresh-token',
+        refreshExpiry: Date.now() + 2592000000,
+      }
+
+      // Two "tabs" sharing the same cookie racing to refresh at the same instant
+      const tabA = renderHook(() => useAuthToken())
+      const tabB = renderHook(() => useAuthToken())
+
+      await waitFor(() => {
+        expect(tabA.result.current[0].token).toBe('Bearer refreshed-token')
+        expect(tabB.result.current[0].token).toBe('Bearer refreshed-token')
+      })
+
+      expect(mockInitiate).toHaveBeenCalledTimes(1)
+      expect(fakeCookie?.refreshToken).toBe('rotated-refresh-token')
+
+      tabA.unmount()
+      tabB.unmount()
+
+      delete (global.navigator as { locks?: unknown }).locks
     })
   })
 })
