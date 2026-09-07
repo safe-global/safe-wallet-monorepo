@@ -50,12 +50,17 @@ describe('useAuthToken', () => {
     Date.now = originalDateNow
     mockGetAuthCookieData.mockReturnValue(undefined)
 
-    // Mock storage event listeners
+    // Capture window listeners by event name. This used to record only 'storage' and silently
+    // drop everything else, which meant a listener the hook registers for any other event was
+    // never actually attached and could not be exercised - a test for one would fail against
+    // working code.
+    const windowListeners: Record<string, Array<() => void>> = {}
     const storageListeners: Array<() => void> = []
     window.addEventListener = jest.fn((event: string, listener: () => void) => {
       if (event === 'storage') {
         storageListeners.push(listener)
       }
+      ;(windowListeners[event] ||= []).push(listener)
     }) as unknown as typeof window.addEventListener
 
     window.removeEventListener = jest.fn((event: string, listener: () => void) => {
@@ -71,6 +76,9 @@ describe('useAuthToken', () => {
     ;(window as { triggerStorageEvent?: () => void }).triggerStorageEvent = () => {
       storageListeners.forEach((listener) => listener())
     }
+    ;(window as { triggerWindowEvent?: (event: string) => void }).triggerWindowEvent = (event: string) => {
+      ;(windowListeners[event] || []).forEach((listener) => listener())
+    }
   })
 
   afterEach(() => {
@@ -80,6 +88,7 @@ describe('useAuthToken', () => {
     window.addEventListener = originalAddEventListener
     window.removeEventListener = originalRemoveEventListener
     delete (window as { triggerStorageEvent?: () => void }).triggerStorageEvent
+    delete (window as { triggerWindowEvent?: (event: string) => void }).triggerWindowEvent
   })
 
   describe('initial state', () => {
@@ -740,6 +749,42 @@ describe('useAuthToken', () => {
      * idempotent. Once they are spent the token is left alone rather than presented again later,
      * which would read as a replay and revoke the family.
      */
+    /**
+     * CDP's offline emulation does not fire the `online` event, so this path cannot be checked in
+     * a driven browser - a real connectivity change does fire it, so it is asserted here instead.
+     */
+    it('retries again when connectivity returns after the retries were spent', async () => {
+      mockInitiate.mockReturnValue({ unwrap: () => Promise.reject({ message: 'Rejected' }) })
+      fakeCookie = staleCookie()
+
+      const { unmount } = renderHook(() => useAuthToken())
+
+      // Wait for the backoff schedule to be genuinely exhausted - the last step is 8s, so a
+      // shorter settle window would call it spent while a retry was still pending, and the extra
+      // call below could then be that retry rather than the online event.
+      await waitFor(() => expect(mockInitiate).toHaveBeenCalledTimes(REFRESH_RETRY_ATTEMPTS + 1), {
+        timeout: 25_000,
+        interval: 250,
+      })
+
+      const callsBeforeOnline = mockInitiate.mock.calls.length
+      mockInitiate.mockReturnValue({ unwrap: () => Promise.resolve(REFRESHED_RESPONSE) })
+
+      await act(async () => {
+        ;(window as unknown as { triggerWindowEvent: (event: string) => void }).triggerWindowEvent('online')
+      })
+
+      await waitFor(
+        () => {
+          expect(mockInitiate.mock.calls.length).toBeGreaterThan(callsBeforeOnline)
+        },
+        { timeout: 15_000, interval: 250 },
+      )
+      expect(mockClearAuthCookie).not.toHaveBeenCalled()
+
+      unmount()
+    }, 40_000)
+
     it('stops presenting a token once its retries are spent, without logging out', async () => {
       mockInitiate.mockReturnValue({ unwrap: () => Promise.reject(undefined) })
       fakeCookie = staleCookie()
