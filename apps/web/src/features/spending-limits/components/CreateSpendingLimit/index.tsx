@@ -22,11 +22,11 @@ import SpendingLimitNotSupported from './SpendingLimitNotSupported'
 export const NO_TOKEN_SELECTED_ERROR = 'Select a token'
 
 export const _validateSpendingLimit = (val: string, decimals?: number | null) => {
-  // Without a selected token we don't know the decimals, so the amount can't be range-checked yet.
-  if (decimals == null) return
+  // Without a selected token the decimals are unknown, so the amount cannot be valid yet.
+  if (decimals == null) return NO_TOKEN_SELECTED_ERROR
   // Allowance amount is uint96 https://github.com/safe-global/safe-modules/blob/main/modules/allowances/contracts/AllowanceModule.sol#L52
   try {
-    const amount = parseUnits(val, decimals ?? 'Gwei')
+    const amount = parseUnits(val, decimals)
     AbiCoder.defaultAbiCoder().encode(['int96'], [amount])
   } catch (e) {
     return Number(val) > 1 ? 'Amount is too big' : 'Amount is too small'
@@ -60,15 +60,10 @@ const CreateSpendingLimit = () => {
   const tokenDecimals = selectedToken?.tokenInfo.decimals
 
   const validateSpendingLimit = useCallback(
-    (value: string) => {
-      if (tokenDecimals == null) return NO_TOKEN_SELECTED_ERROR
-
-      return (
-        validateAmount(value) ||
-        validateDecimalLength(value, tokenDecimals) ||
-        _validateSpendingLimit(value, tokenDecimals)
-      )
-    },
+    (value: string) =>
+      validateAmount(value) ||
+      validateDecimalLength(value, tokenDecimals) ||
+      _validateSpendingLimit(value, tokenDecimals),
     [tokenDecimals],
   )
 
