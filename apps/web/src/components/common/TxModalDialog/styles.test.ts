@@ -10,10 +10,14 @@ const declOf = (rule: Rule | undefined, prop: string): string | undefined =>
 const dialogRulesIn = (container: { nodes?: postcss.ChildNode[] }): Rule[] =>
   (container.nodes ?? []).filter((node): node is Rule => node.type === 'rule' && node.selector === '.dialog')
 
-const ruleIn = (root: postcss.Root, selector: string): Rule | undefined =>
-  root.nodes.find((node): node is Rule => node.type === 'rule' && node.selector === selector)
+const ruleIn = (container: { nodes?: postcss.ChildNode[] }, selector: string): Rule | undefined =>
+  (container.nodes ?? []).find((node): node is Rule => node.type === 'rule' && node.selector === selector)
+
+const mediaBlock = (root: postcss.Root, params: string): AtRule | undefined =>
+  root.nodes.find((node): node is AtRule => node.type === 'atrule' && node.name === 'media' && node.params === params)
 
 const PAGE_LAYOUT_ROOT = postcss.parse(readFileSync(join(__dirname, '..', 'PageLayout', 'styles.module.css'), 'utf8'))
+const DIALOG_SOURCE = readFileSync(join(__dirname, 'index.tsx'), 'utf8')
 
 /**
  * The elevated topbar paints over this dialog (z-index 99 vs 3), so the dialog's top edge —
@@ -75,5 +79,44 @@ describe('TxModalDialog topbar clearance', () => {
 
     expect(declOf(mobileDialog, 'top')).toBe('0')
     expect(Number(declOf(mobileDialog, 'z-index'))).toBeGreaterThan(99)
+  })
+})
+
+/**
+ * Above md the close button is sticky in the dialog's top-right corner, so once the page scrolls
+ * it paints over whatever the flow lays out along its right edge — between 900px and 1199px that
+ * was the Safe Shield widget (WA-3478), a security signal the user has to be able to read and
+ * click. The content therefore keeps a column as wide as the button's footprint free on the
+ * right, and that column has to be sized from the same values the button is drawn with.
+ */
+describe('TxModalDialog close button column', () => {
+  const dialog = ruleIn(stylesRoot, '.dialog')
+  const desktop = mediaBlock(stylesRoot, '(min-width: 900px)') ?? {}
+
+  it('sizes the column from the icon plus the two paddings around it', () => {
+    // The icon is a Tailwind `size-N` utility (N * 4px); the button and its wrapper each add
+    // `--space-1` on both sides. If any of those change, the column has to follow.
+    const iconSize = Number(DIALOG_SOURCE.match(/<X className="size-(\d+)" \/>/)?.[1]) * 4
+    const closePadding = declOf(ruleIn(stylesRoot, '.close'), 'padding')
+    const wrapperPadding = declOf(ruleIn(stylesRoot, '.buttons'), 'padding')
+
+    expect(iconSize).toBe(24)
+    expect(closePadding).toBe('var(--space-1)')
+    expect(wrapperPadding).toBe(closePadding)
+    expect(declOf(dialog, '--close-column')).toBe(`calc(${iconSize}px + 4 * ${closePadding})`)
+  })
+
+  it('keeps the content out of that column wherever the button is sticky', () => {
+    // Both live in the same media block on purpose: the reservation is only needed while the X
+    // can scroll into the content, and it must switch on at the exact width the stickiness does.
+    expect(declOf(ruleIn(desktop, '.title'), 'position')).toBe('sticky')
+    expect(declOf(ruleIn(desktop, '.content'), 'padding-right')).toBe('var(--close-column)')
+  })
+
+  it('does not reserve the column below md, where the X sits in its own header bar', () => {
+    const mobile = mediaBlock(stylesRoot, '(max-width: 899.95px)') ?? {}
+
+    expect(declOf(ruleIn(stylesRoot, '.content'), 'padding-right')).toBeUndefined()
+    expect(declOf(ruleIn(mobile, '.content'), 'padding-right')).toBeUndefined()
   })
 })

@@ -22,6 +22,10 @@
      the flow reads as the page itself rather than a sheet laid over it. Mirrors PageLayout's
      `.main` / `[data-theme='dark'] .mainSpace` pair; styles.test.ts keeps the two in step. */
   background-color: var(--color-background-main);
+  /* The footprint of the close button below: the 24px icon, its own `--space-1` padding and the
+     `--space-1` of `.buttons` around it. Above md the flow content stays out of this column
+     (see the min-width: 900px block), so the sticky X never lands on it. */
+  --close-column: calc(24px + 4 * var(--space-1));
 }
 
 [data-theme='dark'] .dialog {
@@ -78,6 +82,15 @@
   .title {
     position: sticky;
     top: 0;
+  }
+
+  /* The X is sticky in the dialog's top-right corner, so once the page scrolls it paints over
+     whatever the flow puts on its right edge. Between 900px and 1199px that is the Safe Shield
+     widget: the flow's right gutter is 40px there and the X reaches 48px in from the edge. Before
+     the shadcn migration MUI's DialogContent added its own 24px padding, which kept the content
+     clear; reserving the button's column here restores that guarantee at every desktop width. */
+  .content {
+    padding-right: var(--close-column);
   }
 }
 
