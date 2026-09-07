@@ -2,23 +2,23 @@
   position: relative;
   margin: 0 auto;
   width: 100%;
-  height: 100%;
-  overflow: hidden;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .sliderInner {
   position: relative;
   display: flex;
   min-width: 100%;
-  min-height: 100%;
+  min-height: 426px;
   transform: translateX(0);
-  height: 426px;
   transition: transform 0.5s ease;
 }
 
 .sliderItem {
   min-width: 100%;
-  min-height: 100%;
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;

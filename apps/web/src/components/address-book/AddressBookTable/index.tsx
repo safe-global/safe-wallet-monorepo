@@ -167,7 +167,6 @@ function AddressBookTable({ chain, setTxFlow }: AddressBookTableProps) {
       },
       actions: {
         rawValue: '',
-        sticky: true,
         content: <div className={tableCss.actions}>{renderActionButtons(address, name)}</div>,
       },
     },
@@ -207,7 +206,7 @@ function AddressBookTable({ chain, setTxFlow }: AddressBookTableProps) {
             </div>
 
             <div className={css.desktopCard}>
-              <EnhancedTable rows={rows} headCells={headCells} />
+              <EnhancedTable rows={rows} headCells={headCells} panel />
             </div>
           </TableCard>
         ) : (

@@ -6,10 +6,11 @@ import WorkspaceBanner from '../WorkspaceBanner'
 import SpacesIcon from '@/public/images/spaces/spaces.svg'
 import SafeMarkIcon from '@/public/images/logo-no-text.svg'
 import { useAppSelector } from '@/store'
-import { isAuthenticated } from '@/store/authSlice'
+import { isAuthenticated, selectIsStoreHydrated } from '@/store/authSlice'
 import { Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { Spinner } from '@/components/ui/spinner'
 import { Link } from '@/components/ui/link'
 import { Typography } from '@/components/ui/typography'
 import { type GetSpaceResponse, useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
@@ -129,7 +130,7 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
   )
 }
 
-const WORKSPACE_BENEFITS = [
+export const WORKSPACE_BENEFITS = [
   'Organize multiple Safe accounts in one place',
   'Invite members and manage their roles',
   'Share an address book across your team',
@@ -140,41 +141,42 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
 
   return (
     <>
-      {/* eslint-disable-next-line no-restricted-syntax -- 40px empty-state padding; no p-10 Card size variant */}
-      <Card className="w-full p-10 text-center">
-        <div className="mb-4 flex justify-center">
-          <SpacesIcon />
-        </div>
+      <Card size="none" className="w-full">
+        <div className="flex flex-col p-10 text-center">
+          <div className="mb-4 flex justify-center">
+            <SpacesIcon />
+          </div>
 
-        <Typography variant="h4" className="mb-2 font-bold">
-          Create your first workspace
-        </Typography>
-        <Typography color="muted" className="mb-3">
-          Collaborate on your Safe accounts with your team.
-        </Typography>
+          <Typography variant="h4" className="mb-2 font-bold">
+            Create your first workspace
+          </Typography>
+          <Typography color="muted" className="mb-3">
+            Collaborate on your Safe accounts with your team.
+          </Typography>
 
-        <div className="mx-auto mb-4 flex max-w-[360px] flex-col gap-1.5 text-left">
-          {WORKSPACE_BENEFITS.map((benefit) => (
-            <div key={benefit} className="flex flex-row items-center gap-1.5">
-              <Check className="size-4 shrink-0 text-primary" />
-              <Typography variant="paragraph-small">{benefit}</Typography>
-            </div>
-          ))}
-        </div>
+          <div className="mx-auto mt-2 mb-6 flex max-w-[360px] flex-col gap-3 text-left">
+            {WORKSPACE_BENEFITS.map((benefit) => (
+              <div key={benefit} className="flex flex-row items-center gap-1.5">
+                <Check className="size-4 shrink-0 text-primary" />
+                <Typography variant="paragraph-small">{benefit}</Typography>
+              </div>
+            ))}
+          </div>
 
-        <div className="h-12">
-          <AddSpaceButton
-            disabled={isAtLimit}
-            onClick={() =>
-              trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
-            }
-          />
-        </div>
+          <div className="h-12">
+            <AddSpaceButton
+              disabled={isAtLimit}
+              onClick={() =>
+                trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
+              }
+            />
+          </div>
 
-        <div className="mt-2">
-          <Link onClick={() => setIsInfoOpen(true)} href="#">
-            What are workspaces?
-          </Link>
+          <div className="mt-2">
+            <Link onClick={() => setIsInfoOpen(true)} href="#">
+              What are workspaces?
+            </Link>
+          </div>
         </div>
       </Card>
       {isInfoOpen && <SpaceInfoModal onClose={() => setIsInfoOpen(false)} />}
@@ -185,12 +187,14 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
 const SpacesList = () => {
   const { AccountsNavigation } = useLoadFeature(MyAccountsFeature)
   const isUserSignedIn = useAppSelector(isAuthenticated)
+  const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const {
     currentData: spaces,
     isFetching,
     isUninitialized,
     error,
+    refetch,
   } = useSpacesGetV1Query(undefined, { skip: !isUserSignedIn })
   const pendingInvites = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.INVITED)
   const activeSpaces = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.ACTIVE)
@@ -198,18 +202,17 @@ const SpacesList = () => {
 
   const singleSpaceId = activeSpaces.length === 1 ? activeSpaces[0].uuid : null
 
+  // Treat any indefinite state as loading. On the skip→unskip flip (re-login
+  // after logout) RTK Query lags one render — isFetching/isUninitialized are
+  // both false while spaces is still undefined. The `spaces === undefined &&
+  // !error` clause covers that gap so an existing user isn't bounced into
+  // /welcome/create-space on a stale spacesAmount=0.
+  const isSpacesLoading = isFetching || isUninitialized || (spaces === undefined && !error)
+
   const { setHasSignedIn, redirectLoading } = useSignInRedirect({
     spacesAmount: spaces?.length || 0,
     inviteAmount: pendingInvites.length,
-    // Treat any state without a definitive answer as still loading. The
-    // skip→unskip transition (re-login after logout) returns isFetching=false
-    // and isUninitialized=false on the render where skip flips — RTK Query
-    // dispatches the refetch in a useEffect, so the loading flags lag one
-    // render behind. Without the `spaces === undefined && !error` clause an
-    // existing user gets bounced into /welcome/create-space because the hook
-    // reads spacesAmount=0 with isSpacesLoading=false. Once spaces or error
-    // resolves, this clause becomes false and the normal redirect logic runs.
-    isSpacesLoading: isFetching || isUninitialized || (spaces === undefined && !error),
+    isSpacesLoading,
     error: error || undefined,
     singleSpaceId,
   })
@@ -239,8 +242,19 @@ const SpacesList = () => {
           <AccountsNavigation />
         </div>
 
-        {!isUserSignedIn ? (
+        {!isStoreHydrated || (isUserSignedIn && isSpacesLoading) ? (
+          <div className="flex justify-center py-10">
+            <Spinner className="size-6 text-muted-foreground" />
+          </div>
+        ) : !isUserSignedIn ? (
           <SignedOutState afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
+        ) : error && !spaces?.length ? (
+          <div className="flex flex-col items-center gap-3 py-10 text-center">
+            <Typography color="muted">Couldn&apos;t load your workspaces. Try again, or contact support.</Typography>
+            <Button variant="outline" onClick={() => refetch()}>
+              Try again
+            </Button>
+          </div>
         ) : activeSpaces.length > 0 ? (
           <WelcomeContentCard className="flex flex-col gap-4">
             <div className="flex justify-end">
