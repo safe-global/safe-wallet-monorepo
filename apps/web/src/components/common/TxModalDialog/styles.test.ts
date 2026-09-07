@@ -93,9 +93,10 @@ describe('TxModalDialog close button column', () => {
   const dialog = ruleIn(stylesRoot, '.dialog')
   const desktop = mediaBlock(stylesRoot, '(min-width: 900px)') ?? {}
 
-  it('sizes the column from the icon plus the two paddings around it', () => {
-    // The icon is a Tailwind `size-N` utility (N * 4px); the button and its wrapper each add
-    // `--space-1` on both sides. If any of those change, the column has to follow.
+  it('sizes the column from how far the button reaches in, plus a gap', () => {
+    // The icon is a Tailwind `size-N` utility (N * 4px); the button adds `--space-1` on both
+    // sides and its wrapper another `--space-1` outside it, so the X reaches icon + 3 paddings in
+    // from the edge. If any of those change, the column has to follow.
     const iconSize = Number(DIALOG_SOURCE.match(/<X className="size-(\d+)" \/>/)?.[1]) * 4
     const closePadding = declOf(ruleIn(stylesRoot, '.close'), 'padding')
     const wrapperPadding = declOf(ruleIn(stylesRoot, '.buttons'), 'padding')
@@ -103,7 +104,7 @@ describe('TxModalDialog close button column', () => {
     expect(iconSize).toBe(24)
     expect(closePadding).toBe('var(--space-1)')
     expect(wrapperPadding).toBe(closePadding)
-    expect(declOf(dialog, '--close-column')).toBe(`calc(${iconSize}px + 4 * ${closePadding})`)
+    expect(declOf(dialog, '--close-column')).toBe(`calc(${iconSize}px + 3 * ${closePadding} + var(--space-2))`)
   })
 
   it('keeps the content out of that column wherever the button is sticky', () => {
