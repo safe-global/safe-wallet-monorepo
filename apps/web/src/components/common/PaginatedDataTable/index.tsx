@@ -136,11 +136,18 @@ function PaginatedDataTable<T>({
     return () => observer.disconnect()
   }, [])
 
-  // Jump back to the first page when the data set changes (e.g. a new search/filter)
-  useEffect(() => {
+  // The identity of the row set, not of the array holding it: a parent that re-renders with an
+  // equivalent `rows` must not send the user back to the first page.
+  const rowsKey = rows.map(getRowKey).join('\u0000')
+  const [prevRowsKey, setPrevRowsKey] = useState(rowsKey)
+
+  // A new data set (search/filter/delete) starts over at page one. Adjusted during render, so
+  // the stale page is never committed.
+  if (rowsKey !== prevRowsKey) {
+    setPrevRowsKey(rowsKey)
     setPage(0)
     setExpanded(new Set())
-  }, [rows])
+  }
 
   // Cycle through asc → desc → unsorted on repeated clicks of the same column header
   const handleSort = (columnId: string) => {
@@ -186,7 +193,7 @@ function PaginatedDataTable<T>({
     })
 
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} data-testid="table-container">
       {/* Fixed layout on regular desktop preserves column proportions and lets `truncate` cells
           clip; compact mode falls back to auto layout so the remaining columns size to content. */}
       <Table variant="panel" className={cn(!isCompact && 'md:table-fixed')}>

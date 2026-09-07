@@ -71,7 +71,7 @@ function AddressBookTable({ chain, setTxFlow }: AddressBookTableProps) {
   }
 
   const addressBook = useAddressBook()
-  const addressBookEntries = Object.entries(addressBook)
+  const addressBookEntries = useMemo(() => Object.entries(addressBook), [addressBook])
   const filteredEntries = useMemo(() => {
     if (!searchQuery) {
       return addressBookEntries
@@ -149,7 +149,10 @@ function AddressBookTable({ chain, setTxFlow }: AddressBookTableProps) {
     </>
   )
 
-  const entries: Entry[] = filteredEntries.map(([address, name]) => ({ address, name }))
+  const entries: Entry[] = useMemo(
+    () => filteredEntries.map(([address, name]) => ({ address, name })),
+    [filteredEntries],
+  )
 
   const columns: DataTableColumn<Entry>[] = [
     {
@@ -167,7 +170,14 @@ function AddressBookTable({ chain, setTxFlow }: AddressBookTableProps) {
           {/* Compact drops the address column, so the address rides under the name instead. */}
           {isCompact && (
             <span className="text-muted-foreground text-xs font-normal">
-              <EthHashInfo address={entry.address} showName={false} shortAddress showAvatar={false} />
+              <EthHashInfo
+                address={entry.address}
+                showName={false}
+                shortAddress
+                showAvatar={false}
+                hasExplorer
+                showCopyButton
+              />
             </span>
           )}
         </div>
