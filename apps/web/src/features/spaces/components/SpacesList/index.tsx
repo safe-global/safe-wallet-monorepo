@@ -6,7 +6,7 @@ import SignInOptions from '../SignInOptions'
 import WorkspaceBanner from '../WorkspaceBanner'
 import Image from 'next/image'
 import WorkspacesEmptyIllustration from '@/public/images/spaces/workspaces_empty.png'
-import WorkspacesEmptyIllustrationDark from '@/public/images/spaces/workspaces_empty_dark.png'
+import WorkspacesEmptyIllustrationDark from '@/public/images/spaces/workspaces_empty_dark.webp'
 import SafeMarkIcon from '@/public/images/logo-no-text.svg'
 import SafeProLockup from '@/public/images/safe-pro/safe-pro-lockup.svg'
 import SafeProLockupDark from '@/public/images/safe-pro/safe-pro-lockup-dark.svg'
@@ -98,7 +98,7 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
     <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
       {/* The page keeps its Topbar + Accounts/Workspaces tabs, so the sign-in
           card renders inline rather than as a full-screen takeover. */}
-      <div className={cn('relative flex items-center justify-center p-6 pb-10', isSafeProEnabled ? 'pt-0' : 'pt-10')}>
+      <div className={cn('relative flex items-center justify-center pb-10', isSafeProEnabled ? 'pt-0' : 'pt-10')}>
         <div className="flex w-full max-w-[440px] flex-col items-center">
           {isSafeProEnabled ? <SafeProBanner className="mb-4" /> : <WorkspaceBanner className="mb-3" />}
 
@@ -155,6 +155,7 @@ const WORKSPACE_BENEFITS = [
 
 const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
   const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
+  const isDarkMode = useDarkMode()
 
   return (
     <>
@@ -174,14 +175,9 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
           </div>
 
           <Image
-            src={WorkspacesEmptyIllustration}
+            src={isDarkMode ? WorkspacesEmptyIllustrationDark : WorkspacesEmptyIllustration}
             alt="Workspace dashboard showing accounts grouped by workspace"
-            className="-my-8 h-auto w-full min-w-0 md:-mr-8 md:w-[60%] dark:hidden"
-          />
-          <Image
-            src={WorkspacesEmptyIllustrationDark}
-            alt="Workspace dashboard showing accounts grouped by workspace"
-            className="-my-8 hidden h-auto w-full min-w-0 md:-mr-8 md:w-[60%] dark:block"
+            className="-my-8 h-auto w-full min-w-0 md:-mr-8 md:w-[60%]"
           />
         </div>
 
