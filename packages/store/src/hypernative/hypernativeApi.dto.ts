@@ -132,6 +132,28 @@ export type HypernativeTokenExchangeResponseDto = {
 }
 
 /**
+ * A failed OAuth call. The API wraps the RFC 6749 §5.2 body in its standard envelope, so the code
+ * that says whether the grant is recoverable sits at `error.error`, not at the top level.
+ */
+export type HypernativeOAuthErrorEnvelopeDto = {
+  success: false
+  data: null
+  error?: {
+    error: string
+    error_description?: string
+  }
+}
+
+/**
+ * What `transformErrorResponse` actually receives from `fetchBaseQuery`: the HTTP status plus the
+ * parsed body, which is absent entirely for a transport-level failure.
+ */
+export type HypernativeQueryErrorDto = {
+  status: number | string
+  data?: HypernativeOAuthErrorEnvelopeDto
+}
+
+/**
  * DTOs for Hypernative EIP-712 Typed Message Assessment
  */
 
