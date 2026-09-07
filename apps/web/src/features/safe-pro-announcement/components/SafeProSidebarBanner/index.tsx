@@ -8,7 +8,11 @@ import css from './styles.module.css'
 
 const SafeProSidebarBanner = ({ className }: { className?: string }) => (
   <div
-    className={cn('flex w-full flex-col items-start gap-3 rounded-lg bg-muted p-4 shadow-lg', css.banner, className)}
+    className={cn(
+      'flex w-full flex-col items-start gap-3 rounded-lg bg-muted bg-no-repeat p-4 shadow-lg',
+      css.banner,
+      className,
+    )}
     data-testid="safe-pro-sidebar-banner"
   >
     <span className={cn('flex shrink-0 items-center rounded-sm px-2 py-1.5', css.proChip)}>

@@ -14,7 +14,7 @@ exports[`./SafeProSidebarBanner.stories Default 1`] = `
         class="w-[226px]"
       >
         <div
-          class="flex w-full flex-col items-start gap-3 rounded-lg bg-muted p-4 shadow-lg banner"
+          class="flex w-full flex-col items-start gap-3 rounded-lg bg-muted bg-no-repeat p-4 shadow-lg banner"
           data-testid="safe-pro-sidebar-banner"
         >
           <span
