@@ -83,7 +83,7 @@ Web-specific principles live in [apps/web/AGENTS.md](apps/web/AGENTS.md); mobile
 
 ## Testing Requirements
 
-Every behavioral change must include tests — each platform's file defines the exact matrix and exemptions (see the Test Decision Matrix in [apps/web/AGENTS.md](apps/web/AGENTS.md) for web). Suggest developer-owned tests (unit / component / integration) before reaching for QA automation — the full rule lives in the Web Testing section of [apps/web/AGENTS.md](apps/web/AGENTS.md). Web conventions, templates, and mock patterns: [apps/web/docs/TESTING.md](apps/web/docs/TESTING.md).
+Every behavioral change must include tests — each platform's file defines the exact matrix and exemptions (see the Test Decision Matrix in [apps/web/AGENTS.md](apps/web/AGENTS.md) for web). Suggest developer-owned tests (unit / component / integration) before reaching for QA automation — the full rule lives in the Web Testing section of [apps/web/AGENTS.md](apps/web/AGENTS.md). Before writing or changing any test, read the cross-cutting conventions in [docs/ai/testing-conventions.md](docs/ai/testing-conventions.md); web templates and mock patterns: [apps/web/docs/TESTING.md](apps/web/docs/TESTING.md).
 
 ## Workflow
 
@@ -145,33 +145,7 @@ Before writing code for any non-trivial change (anything beyond a typo, doc twea
 
 ### Commit and PR conventions
 
-1. **Pre-commit hooks** (Husky): **pre-commit** runs `lint-staged` (**prettier only — no type-check at commit time**); **pre-push** runs linting (set `RUN_TESTS_ON_PUSH=true` to also run tests).
-
-2. **Commit messages**: use [semantic commit messages](https://www.conventionalcommits.org/en/v1.0.0/) as described in `CONTRIBUTING.md`.
-   - **CI/CD changes**: Always use `chore:` prefix for CI, workflows, build configs (NEVER `feat:` or `fix:`)
-   - **Test changes**: Always use `tests:` prefix for changes in unit or e2e tests (NEVER `feat:` or `fix:`)
-
-3. **Code style**: follow the guidelines in:
-   - `apps/web/docs/code-style.md` for the web app.
-   - `apps/mobile/docs/code-style.md` for the mobile app.
-
-4. **Pull requests**: fill out the GitHub PR template (`.github/PULL_REQUEST_TEMPLATE.md`) completely — "What it solves", "How this PR fixes it", "How to test it", and the checklist — and ensure all checks pass.
-
-5. **PR visual summary (required)**: Every PR must include a visual in the `## Visual summary` section. This is mandatory, not optional.
-   - **Architecture/logic changes** → Mermaid diagram (flowchart, sequence, or class diagram) showing what changed — GitHub renders mermaid natively
-   - **UI changes** → Screenshot of the result (use Chrome DevTools MCP if the app is running, or describe how to capture manually)
-   - **Both** if the PR includes UI + logic changes
-
-## Testing Guidelines
-
-### Unit Tests
-
-- When writing Redux tests, verify resulting state changes rather than checking that specific actions were dispatched.
-- **Avoid `any` type assertions** – create properly typed test helpers instead of using `as any` (templates in [apps/web/docs/TESTING.md](apps/web/docs/TESTING.md)).
-- Use [Mock Service Worker](https://mswjs.io/) (MSW) for tests involving network requests instead of mocking `fetch`. Use MSW for mocking blockchain RPC calls instead of mocking ethers.js directly
-- Create test data with helpers using [faker](https://fakerjs.dev/)
-- Test files should be colocated with source files using the `*.test.ts(x)` naming convention
-- No comments above test cases — the `it(...)` name carries the intent, even for regression tests
+Before committing, pushing, opening a PR, or reviewing one, read [docs/ai/git-conventions.md](docs/ai/git-conventions.md) first — pre-commit/pre-push hooks, commit-message prefixes, how to fill the PR template, the required visual summary, and PR citation rules live there. Do not commit or open a PR without having read it.
 
 ## Security & Safe Wallet Patterns
 

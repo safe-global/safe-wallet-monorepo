@@ -28,7 +28,7 @@ Standard scripts (`test`, `test:watch`, `lint`, `type-check`, …) follow the us
 
 - **Unit tests**: use `src/tests/test-utils.tsx` (custom render with providers), factories in `src/tests/factories/`, and the MSW server in `src/tests/server.ts` — don't hand-roll provider wrappers.
 - **E2E (Maestro)**: operational quick-start in [e2e/README.md](e2e/README.md); guidelines in [docs/e2e-tests-guidelines.md](docs/e2e-tests-guidelines.md).
-- Cross-cutting unit-test conventions (Redux state assertions, MSW, no `any` in tests, faker) live in the root [AGENTS.md](../../AGENTS.md).
+- Cross-cutting unit-test conventions (Redux state assertions, MSW, no `any` in tests, faker) live in [docs/ai/testing-conventions.md](../../docs/ai/testing-conventions.md) — read it before writing tests.
 
 ## Mobile-specific common pitfalls
 

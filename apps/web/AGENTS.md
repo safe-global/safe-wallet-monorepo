@@ -72,7 +72,7 @@ Full guide (folder structure, proxy stubs, `$error`, feature flags): [docs/featu
 
 ## Web Testing
 
-Cross-cutting unit-test conventions live in the root [AGENTS.md](../../AGENTS.md). The matrix and tooling below are web-specific.
+Before writing or changing any test, read the cross-cutting conventions in [docs/ai/testing-conventions.md](../../docs/ai/testing-conventions.md). The matrix and tooling below are web-specific.
 
 ### E2E tests
 
