@@ -93,18 +93,28 @@ describe('TxModalDialog close button column', () => {
   const dialog = ruleIn(stylesRoot, '.dialog')
   const desktop = mediaBlock(stylesRoot, '(min-width: 900px)') ?? {}
 
+  it('draws the icon and the column from one variable', () => {
+    // The X is sized in CSS from `--close-icon-size`, so the column below cannot hold a stale copy
+    // of the icon's pixels: a `size-*` utility in the TSX would resize the X on its own, and a
+    // literal here would go stale when whatever scale that utility reads from changes.
+    const icon = ruleIn(stylesRoot, '.close svg')
+
+    expect(declOf(icon, 'width')).toBe('var(--close-icon-size)')
+    expect(declOf(icon, 'height')).toBe('var(--close-icon-size)')
+    expect(DIALOG_SOURCE).not.toMatch(/<X[^>]*\bsize-/)
+    expect(declOf(dialog, '--close-icon-size')).toMatch(/^var\(--space-\d+\)$/)
+  })
+
   it('sizes the column from how far the button reaches in, plus a gap', () => {
-    // The icon is a Tailwind `size-N` utility (N * 4px); the button adds `--space-1` on both
-    // sides and its wrapper another `--space-1` outside it, so the X reaches icon + 3 paddings in
-    // from the edge. If any of those change, the column has to follow.
-    const iconSize = Number(DIALOG_SOURCE.match(/<X className="size-(\d+)" \/>/)?.[1]) * 4
+    // The button pads the icon on both sides and its wrapper adds another `--space-1` outside it,
+    // so the X reaches icon + 3 paddings in from the edge. If any of those change, the column has
+    // to follow.
     const closePadding = declOf(ruleIn(stylesRoot, '.close'), 'padding')
     const wrapperPadding = declOf(ruleIn(stylesRoot, '.buttons'), 'padding')
 
-    expect(iconSize).toBe(24)
     expect(closePadding).toBe('var(--space-1)')
     expect(wrapperPadding).toBe(closePadding)
-    expect(declOf(dialog, '--close-column')).toBe(`calc(${iconSize}px + 3 * ${closePadding} + var(--space-2))`)
+    expect(declOf(dialog, '--close-column')).toBe(`calc(var(--close-icon-size) + 3 * ${closePadding} + var(--space-2))`)
   })
 
   it('keeps the content out of that column wherever the button is sticky', () => {

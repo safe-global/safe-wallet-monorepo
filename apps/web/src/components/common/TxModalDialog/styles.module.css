@@ -22,11 +22,14 @@
      the flow reads as the page itself rather than a sheet laid over it. Mirrors PageLayout's
      `.main` / `[data-theme='dark'] .mainSpace` pair; styles.test.ts keeps the two in step. */
   background-color: var(--color-background-main);
-  /* How far the close button reaches in from the right edge (the 24px icon, its own `--space-1`
-     on both sides and the `--space-1` of `.buttons` outside it) plus a `--space-2` gap. Above md
+  /* One source for the close icon's size: `.close svg` draws the X from it, `--close-column`
+     below reserves room for it. */
+  --close-icon-size: var(--space-3);
+  /* How far the close button reaches in from the right edge (the icon, its own `--space-1` on
+     both sides and the `--space-1` of `.buttons` outside it) plus a `--space-2` gap. Above md
      the flow content ends on this line (see the min-width: 900px block), so the sticky X never
      lands on it; TxLayoutBase adds no right gutter of its own there, this is the whole gutter. */
-  --close-column: calc(24px + 3 * var(--space-1) + var(--space-2));
+  --close-column: calc(var(--close-icon-size) + 3 * var(--space-1) + var(--space-2));
 }
 
 [data-theme='dark'] .dialog {
@@ -58,6 +61,11 @@
   color: var(--color-border-main);
   padding: var(--space-1);
   background-color: var(--color-border-light);
+}
+
+.close svg {
+  width: var(--close-icon-size);
+  height: var(--close-icon-size);
 }
 
 /* No background of its own: `.dialog` above lands on this same element and already paints the
@@ -109,9 +117,5 @@
 
   .close {
     background-color: unset;
-  }
-
-  .close svg {
-    font-size: 1.5rem;
   }
 }
