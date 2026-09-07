@@ -935,12 +935,12 @@ export const Tables: Story = {
         }
       >
         <Row
-          label="Default grid — EnhancedTable"
-          note="shown in its card wrapper (TableCard), the way it renders in the app — sortable, paginated, sticky"
+          label="Panel grid — EnhancedTable"
+          note="shown in its card wrapper (TableCard) with `panel` on — sortable, paginated, sticky"
         >
           <Swatch
             label="TableCard › EnhancedTable"
-            use="Untyped rows + headCells. ~9 consumers (AssetsTable, OwnerList, ProposersList, NestedSafesList…). Always wrapped in a card surface — never rendered bare. `panel` opts into the shared panel look (grey header bar, hover pills, dividers); the address book uses it."
+            use="Untyped rows + headCells. ~9 consumers (AssetsTable, OwnerList, ProposersList, NestedSafesList…). Always wrapped in a card surface — never rendered bare. `panel` opts into the shared panel look (grey header bar, hover pills, dividers) — shown here; the address book moved to PaginatedDataTable, so no consumer passes it today."
             review="Is the newer PaginatedDataTable its successor? They already share the panel stylesheet, so the split is now behavioural: if yes, ~9 consumers need migrating; if no, draw a clear boundary — and their pagination differs, so pick one."
             to="Components/Common/EnhancedTable"
             toLabel="EnhancedTable"

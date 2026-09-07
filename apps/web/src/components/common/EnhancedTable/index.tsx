@@ -216,7 +216,7 @@ function EnhancedTable({ rows, headCells, compact, footer, panel }: EnhancedTabl
               })
             ) : (
               // Prevent no `tbody` rows hydration error
-              <TableRow>
+              <TableRow data-no-hover="">
                 <TableCell />
               </TableRow>
             )}
