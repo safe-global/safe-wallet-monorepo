@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import TableCard from '@/components/common/TableCard'
 import PaginatedDataTable, { type DataTableColumn } from './index'
 
 /**
@@ -8,6 +9,9 @@ import PaginatedDataTable, { type DataTableColumn } from './index'
  * Address Book tables. Consumers pass typed columns (alignment, emphasis, width,
  * priority, sticky, sortValue) and rows; the table owns styling, sorting,
  * pagination, responsive column dropping, and the optional mobile detail row.
+ *
+ * Rendered in a TableCard, as every consumer does — the card is what the panel look's
+ * header bar and row pills are inset against.
  */
 type Row = {
   id: string
@@ -52,6 +56,7 @@ const meta: Meta<typeof PaginatedDataTable<Row>> = {
   title: 'Features/Spaces/PaginatedDataTable',
   component: PaginatedDataTable as typeof PaginatedDataTable<Row>,
   parameters: { layout: 'padded' },
+  decorators: [(Story) => <TableCard>{Story()}</TableCard>],
 }
 
 export default meta
