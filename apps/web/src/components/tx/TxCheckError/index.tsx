@@ -1,10 +1,64 @@
 import type { ReactElement } from 'react'
 import { useCurrentChain } from '@/hooks/useChains'
-import { isRateLimitError, isRevertError, RATE_LIMIT_USER_MESSAGE } from '@/utils/transaction-errors'
+import {
+  isHypernativeGuardRevert,
+  isRateLimitError,
+  isRevertError,
+  RATE_LIMIT_USER_MESSAGE,
+} from '@/utils/transaction-errors'
 import ErrorMessage from '@/components/tx/ErrorMessage'
+import ExternalLink from '@/components/common/ExternalLink'
+import { Button } from '@/components/ui/button'
+import HypernativeIcon from '@/public/images/hypernative/hypernative-icon.svg'
+import { HYPERNATIVE_EVENTS, trackEvent } from '@/services/analytics'
+import { useSafeShieldAssessmentUrl } from '@/features/hypernative'
 
 export const TX_WILL_FAIL_MESSAGE =
   'This transaction will most likely fail. To save gas costs, reject this transaction.'
+
+export const HYPERNATIVE_APPROVAL_REQUIRED_MESSAGE =
+  'This transaction is awaiting approval in your Hypernative account.'
+
+const onHypernativeCtaClick = () => {
+  trackEvent(HYPERNATIVE_EVENTS.EXECUTION_BLOCKED_APPROVAL_CLICKED)
+}
+
+/**
+ * The Hypernative guard blocks execution until the transaction is approved in the
+ * owner's Hypernative account. That is an action to take, not a prediction of
+ * failure, so it replaces the generic revert copy.
+ *
+ * No `error` is passed to `ErrorMessage` on purpose: that is what drops the guard
+ * line, the `Error code GS013` reference and the raw-payload Details toggle, none
+ * of which mean anything here (WA-1219). The revert still reaches Sentry via
+ * `useGasLimit`. The CTA is offered only when the deep link resolves to this
+ * transaction — a generic dashboard link is not a usable next step.
+ */
+const HypernativeApprovalRequired = (): ReactElement => {
+  const assessmentUrl = useSafeShieldAssessmentUrl()
+
+  return (
+    <ErrorMessage level="error">
+      {HYPERNATIVE_APPROVAL_REQUIRED_MESSAGE}
+
+      {assessmentUrl && (
+        <span className="mt-3 block">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={onHypernativeCtaClick}
+            render={<ExternalLink href={assessmentUrl} />}
+          >
+            <span className="-mr-[3px] [&>svg]:block [&>svg]:h-4 [&>svg]:w-[9px]">
+              <HypernativeIcon />
+            </span>
+            Approve in Hypernative
+          </Button>
+        </span>
+      )}
+    </ErrorMessage>
+  )
+}
 
 export const getCouldNotCheckMessage = (network?: string): string =>
   `Could not check this transaction. ${network ?? 'The network'} is not responding. Nothing was signed.`
@@ -19,6 +73,10 @@ export const getCouldNotCheckMessage = (network?: string): string =>
  */
 const TxCheckError = ({ error, context }: { error: Error; context?: 'estimation' | 'execution' }): ReactElement => {
   const chain = useCurrentChain()
+
+  if (isHypernativeGuardRevert(error)) {
+    return <HypernativeApprovalRequired />
+  }
 
   if (isRateLimitError(error)) {
     return (

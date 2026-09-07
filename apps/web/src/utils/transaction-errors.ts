@@ -2,7 +2,7 @@
  * Utilities for detecting and handling specific transaction errors
  */
 import { BaseError } from 'viem'
-import { getKnownCustomError } from '@/utils/customErrorRegistry'
+import { getKnownCustomError, HYPERNATIVE_GUARD_SOURCE } from '@/utils/customErrorRegistry'
 import { getGsCodeFromError } from '@safe-global/utils/services/exceptions/contractErrors'
 
 /**
@@ -58,6 +58,21 @@ export const getGuardErrorName = (errorCode: string): string => {
  */
 export const isGuardError = (error: Error): boolean => {
   return extractGuardErrorCode(error) !== undefined
+}
+
+/**
+ * Detects a revert raised by the Hypernative guard — in practice its
+ * `UnapprovedHash` custom error, which the guard throws while a transaction is
+ * still awaiting approval in the owner's Hypernative account.
+ *
+ * Built on `extractGuardErrorCode`, the same path that produces the generic
+ * "Guard reverted the transaction (…)" copy, so the Hypernative branch fires in
+ * exactly the cases that copy fires in today. The source comes from the
+ * ABI-derived registry rather than a hardcoded selector.
+ */
+export const isHypernativeGuardRevert = (error: Error): boolean => {
+  const code = extractGuardErrorCode(error)
+  return !!code && getKnownCustomError(code)?.source === HYPERNATIVE_GUARD_SOURCE
 }
 
 /**

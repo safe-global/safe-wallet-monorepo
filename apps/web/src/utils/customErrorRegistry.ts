@@ -35,9 +35,15 @@ export type DecodedCustomError = {
  */
 const STANDARD_ERROR_SELECTORS = new Set(['0x08c379a0', '0x4e487b71'])
 
+/**
+ * The `source` label for selectors derived from the vendored Hypernative guard
+ * ABIs. Exported so consumers can match on it without duplicating the literal.
+ */
+export const HYPERNATIVE_GUARD_SOURCE = 'Hypernative guard'
+
 const ABI_SOURCES: ReadonlyArray<{ source: string; abi: InterfaceAbi }> = [
-  { source: 'Hypernative guard', abi: HypernativeGuardAbi as InterfaceAbi },
-  { source: 'Hypernative guard', abi: HypernativeGuardV2Abi as InterfaceAbi },
+  { source: HYPERNATIVE_GUARD_SOURCE, abi: HypernativeGuardAbi as InterfaceAbi },
+  { source: HYPERNATIVE_GUARD_SOURCE, abi: HypernativeGuardV2Abi as InterfaceAbi },
   { source: 'Zodiac Roles module', abi: ContractAbis.roles_v2 as InterfaceAbi },
   { source: 'Zodiac Roles module', abi: ContractAbis.roles_v1 as InterfaceAbi },
   { source: 'Zodiac Roles module', abi: ContractAbis.permissions as InterfaceAbi },
