@@ -45,7 +45,7 @@ type SpaceAddressBookTableProps = {
   entries: AddressBookEntry[]
   showAddedBy?: boolean
   showLastUpdated?: boolean
-  renderExtraAction?: (entry: AddressBookEntry) => React.ReactNode
+  renderExtraAction?: (entry: AddressBookEntry, context: { isCompact: boolean }) => React.ReactNode
 }
 
 function SpaceAddressBookTable({
@@ -56,6 +56,9 @@ function SpaceAddressBookTable({
 }: SpaceAddressBookTableProps) {
   const resolveMemberName = useMemberNameResolver()
   const hasMiddleColumn = showAddedBy || showLastUpdated
+  // The extra action is a text button that cannot shrink, so its layout hands the actions column a
+  // bigger share and a minimum wide enough to hold it.
+  const hasExtraAction = Boolean(renderExtraAction)
 
   // Chain logo cluster — used in the desktop "Chains" cell.
   const renderChains = (entry: AddressBookEntry) => (
@@ -100,7 +103,7 @@ function SpaceAddressBookTable({
     {
       id: 'address',
       header: 'Address',
-      width: hasMiddleColumn ? '30%' : '40%',
+      width: hasMiddleColumn || hasExtraAction ? '30%' : '40%',
       minWidth: 240,
       priority: 'secondary',
       sortValue: (e) => e.address,
@@ -109,7 +112,7 @@ function SpaceAddressBookTable({
     {
       id: 'chains',
       header: 'Chains',
-      width: '20%',
+      width: hasExtraAction ? '15%' : '20%',
       priority: 'secondary',
       minWidth: 90,
       sortValue: (e) => e.chainIds.length,
@@ -130,12 +133,12 @@ function SpaceAddressBookTable({
       : []),
     {
       id: 'actions',
-      width: (hasMiddleColumn ? '15%' : '20%') as ColumnWidth,
+      width: (hasExtraAction ? '35%' : hasMiddleColumn ? '15%' : '20%') as ColumnWidth,
       align: 'end',
-      minWidth: 80,
+      minWidth: hasExtraAction ? 240 : 80,
       cell: (entry, { isCompact }) => (
         <span className="inline-flex items-center justify-end gap-1">
-          {renderExtraAction?.(entry)}
+          {renderExtraAction?.(entry, { isCompact })}
           {entry.isLocal ? (
             <LocalContactActions entry={entry} />
           ) : (

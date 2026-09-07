@@ -18,6 +18,7 @@ import type { AddressBookEntry } from './SpaceAddressBookTable'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { Badge } from '@/components/ui/badge'
+import { Check } from 'lucide-react'
 import AddressBookSearchInput from '@/components/common/AddressBookSearchInput'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import Track from '@/components/common/Track'
@@ -186,12 +187,20 @@ const SpaceAddressBook = () => {
                     <SpaceAddressBookTable
                       entries={filteredMine}
                       showAddedBy={false}
-                      renderExtraAction={(entry) => {
+                      renderExtraAction={(entry, { isCompact }) => {
                         if (entry.isDuplicate) {
                           return (
                             <Tooltip>
-                              <TooltipTrigger render={<span className="inline-flex" />}>
-                                <Badge variant="secondary">Already shared</Badge>
+                              <TooltipTrigger
+                                render={
+                                  <span className="inline-flex" aria-label={isCompact ? 'Already shared' : undefined} />
+                                }
+                              >
+                                {isCompact ? (
+                                  <Check className="text-muted-foreground size-4" />
+                                ) : (
+                                  <Badge variant="secondary">Already shared</Badge>
+                                )}
                               </TooltipTrigger>
                               <TooltipContent>Already saved in your workspace address book</TooltipContent>
                             </Tooltip>
@@ -199,7 +208,12 @@ const SpaceAddressBook = () => {
                         }
                         if (isAdmin) {
                           return (
-                            <AddToWorkspaceButton address={entry.address} name={entry.name} chainIds={entry.chainIds} />
+                            <AddToWorkspaceButton
+                              address={entry.address}
+                              name={entry.name}
+                              chainIds={entry.chainIds}
+                              isCompact={isCompact}
+                            />
                           )
                         }
                         // Invitees can preview the space but cannot propose contacts
@@ -212,6 +226,7 @@ const SpaceAddressBook = () => {
                             name={entry.name}
                             chainIds={entry.chainIds}
                             alreadyRequested={pendingAddresses.has(entry.address.toLowerCase())}
+                            isCompact={isCompact}
                           />
                         )
                       }}

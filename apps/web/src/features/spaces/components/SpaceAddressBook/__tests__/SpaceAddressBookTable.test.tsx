@@ -67,6 +67,43 @@ describe('SpaceAddressBookTable', () => {
     mockResolveMemberName.mockReturnValue(undefined)
   })
 
+  it('tells the extra action whether the row is compact', () => {
+    const renderExtraAction = jest.fn(() => null)
+
+    const { unmount } = render(
+      <SpaceAddressBookTable entries={[entryBuilder().build()]} renderExtraAction={renderExtraAction} />,
+    )
+    expect(renderExtraAction).toHaveBeenLastCalledWith(expect.anything(), { isCompact: false })
+    unmount()
+
+    mockUseIsMobile.mockReturnValue(true)
+    render(<SpaceAddressBookTable entries={[entryBuilder().build()]} renderExtraAction={renderExtraAction} />)
+    expect(renderExtraAction).toHaveBeenLastCalledWith(expect.anything(), { isCompact: true })
+  })
+
+  // The extra action is a text button, so its column cannot live on the default narrow share
+  it('widens the actions column when an extra action is rendered', () => {
+    const lastHeader = (container: HTMLElement) => {
+      const headers = container.querySelectorAll('th')
+      return headers[headers.length - 1]
+    }
+
+    const { container, unmount } = render(<SpaceAddressBookTable entries={[entryBuilder().build()]} />)
+    expect(lastHeader(container).className).toContain('md:w-[15%]')
+    expect(lastHeader(container).style.getPropertyValue('--col-min-w')).toBe('80px')
+    unmount()
+
+    const withExtra = render(
+      <SpaceAddressBookTable
+        entries={[entryBuilder().build()]}
+        showAddedBy={false}
+        renderExtraAction={() => <button>Add to workspace</button>}
+      />,
+    )
+    expect(lastHeader(withExtra.container).className).toContain('md:w-[35%]')
+    expect(lastHeader(withExtra.container).style.getPropertyValue('--col-min-w')).toBe('240px')
+  })
+
   it('resolves the "Added by" cell to the space member name by user id', () => {
     const memberName = 'My space creator'
     mockResolveMemberName.mockImplementation((userId: number | undefined) => (userId === 7 ? memberName : undefined))
