@@ -1,4 +1,6 @@
 import { matchUserOutcome, normalizeError } from '@safe-global/utils/services/exceptions/normalizeError'
+import { ERROR_CODE_MAP, ErrorType } from '@safe-global/utils/services/exceptions/errorTaxonomy'
+import { isRevertError } from '@/utils/transaction-errors'
 import type { ErrorContext, SurfacedError } from '../../types'
 import { MixpanelEvent, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { mixpanelTrack } from '@/services/analytics/mixpanel'
@@ -47,6 +49,25 @@ const mapContext = (context?: ErrorContext): Record<string, string | number | bo
     }),
   }
 }
+
+/**
+ * A pre-execution gas estimation that the node says reverts is a *prediction*,
+ * not a surfaced failure: it renders the "This transaction will most likely
+ * fail" warning while the user is still deciding whether to execute. Counting
+ * it would report an error for every transaction the user correctly rejects,
+ * and a second one for those executed anyway (already reported as `_804`).
+ *
+ * An estimation that failed because the node could not be reached is a genuine
+ * RPC failure and keeps reporting — the same split `TxCheckError` makes when it
+ * chooses between "will most likely fail" and "could not check this
+ * transaction". Either way the revert still reaches Datadog via `logger.warn`.
+ *
+ * Keyed off the code's own classification rather than the normalized type,
+ * because `normalizeError` rewrites the type to `on_chain_revert` whenever the
+ * node returned a GS code.
+ */
+const isPredictedRevert = (code: number, message: string): boolean =>
+  ERROR_CODE_MAP[code]?.type === ErrorType.GAS_ESTIMATION_FAILED && isRevertError({ message })
 
 /**
  * Evicts entries past their window first, then the least recently sent, until
@@ -111,6 +132,10 @@ export const trackErrorSurfaced = ({ code, message, isUserFacing, context }: Sur
   // they never surface as an Error Surfaced event (WA-2950). Checked before any
   // dedupe bookkeeping so they leave no trace in the map.
   if (matchUserOutcome(message)) {
+    return
+  }
+
+  if (isPredictedRevert(code, message)) {
     return
   }
 

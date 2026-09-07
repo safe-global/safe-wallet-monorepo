@@ -126,6 +126,52 @@ describe('trackErrorSurfaced', () => {
     })
   })
 
+  describe('pre-execution predictions (the "will most likely fail" warning)', () => {
+    it('does not emit Error Surfaced for an estimation the node says reverts', () => {
+      trackErrorSurfaced({
+        code: 612,
+        message: 'Code 612: Error estimating gas (execution reverted: GS013)',
+        isUserFacing: false,
+      })
+
+      expect(mockedTrack).not.toHaveBeenCalled()
+    })
+
+    it('does not emit Error Surfaced for a custom-error revert without a GS code', () => {
+      trackErrorSurfaced({
+        code: 612,
+        message: 'Code 612: Error estimating gas (execution reverted, unknown custom error)',
+        isUserFacing: false,
+      })
+
+      expect(mockedTrack).not.toHaveBeenCalled()
+    })
+
+    it('still emits Error Surfaced when the estimation failed because the node was unreachable', () => {
+      trackErrorSurfaced({
+        code: 612,
+        message: 'Code 612: Error estimating gas (missing response)',
+        isUserFacing: false,
+        context: { rpcHost: 'mainnet.infura.io' },
+      })
+
+      expect(mockedTrack).toHaveBeenCalledTimes(1)
+      expect(mockedTrack.mock.calls[0][1]).toMatchObject({
+        [MixpanelEventParams.ERROR_DOMAIN]: ErrorDomain.RPC,
+        [MixpanelEventParams.ERROR_TYPE]: ErrorType.GAS_ESTIMATION_FAILED,
+      })
+    })
+
+    it('still emits Error Surfaced when the user executes and it reverts on chain', () => {
+      trackErrorSurfaced({ code: 804, message: 'Code 804: execution reverted GS013', isUserFacing: true })
+
+      expect(mockedTrack).toHaveBeenCalledTimes(1)
+      expect(mockedTrack.mock.calls[0][1]).toMatchObject({
+        [MixpanelEventParams.ERROR_CODE]: 'GS013',
+      })
+    })
+  })
+
   describe('retry attempts', () => {
     it('emits the attempt number and flags it as a retry when it is not the first', () => {
       trackErrorSurfaced({
