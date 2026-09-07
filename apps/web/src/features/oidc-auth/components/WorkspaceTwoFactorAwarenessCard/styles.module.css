@@ -1,0 +1,26 @@
+.card {
+  background-image: radial-gradient(
+    ellipse 86% 110% at 4% 6%,
+    color-mix(in srgb, var(--color-static-text-brand) 18%, transparent) 0%,
+    transparent 100%
+  );
+  border: 1px solid transparent;
+  transition: border-color 150ms ease;
+}
+
+.card:hover {
+  border-color: color-mix(in srgb, var(--color-static-text-brand) 55%, var(--card));
+}
+
+.iconChip {
+  color: var(--color-success-main);
+  background-color: color-mix(in srgb, var(--color-static-text-brand) 15%, transparent);
+}
+
+:global(.dark) .card {
+  background-color: var(--card);
+}
+
+:global(.dark) .iconChip {
+  color: var(--color-static-text-brand);
+}

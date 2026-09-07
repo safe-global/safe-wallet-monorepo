@@ -127,6 +127,27 @@ jest.mock('@/features/safe-pro-announcement', () => ({
   useIsSafeProEnabled: () => mockIsSafeProEnabled,
 }))
 
+let mockIsTwoFactorBannerEnabled = false
+jest.mock('@/hooks/useChains', () => ({
+  useHasFeature: (feature: string) => feature === 'TWO_FACTOR_AWARENESS_BANNER' && mockIsTwoFactorBannerEnabled,
+}))
+
+let mockSpaceId: string | null = 'space-uuid'
+jest.mock('../../../../hooks/useCurrentSpaceId', () => ({
+  useCurrentSpaceId: () => mockSpaceId,
+}))
+
+let mockIsTwoFactorCardDismissed = false
+const mockDismissTwoFactorCard = jest.fn()
+jest.mock('@/features/oidc-auth', () => ({
+  useTwoFactorAwarenessDismissed: () => [mockIsTwoFactorCardDismissed, mockDismissTwoFactorCard],
+  WorkspaceTwoFactorAwarenessCard: ({ spaceId, onDismiss }: { spaceId?: string; onDismiss: () => void }) => (
+    <div data-testid="workspace-2fa-awareness-card" data-space-id={spaceId}>
+      <button onClick={onDismiss}>Dismiss</button>
+    </div>
+  ),
+}))
+
 jest.mock('@/features/__core__', () => ({
   useLoadFeature: () => ({
     SafeProSidebarBanner: () => <div data-testid="safe-pro-sidebar-banner" />,
@@ -154,7 +175,98 @@ describe('SidebarCommonFooter', () => {
     mockUseAppDispatch.mockReturnValue(jest.fn())
     mockUseDarkMode.mockReturnValue(false)
     mockIsSafeProEnabled = false
+    mockIsTwoFactorBannerEnabled = false
+    mockIsTwoFactorCardDismissed = false
+    mockSpaceId = 'space-uuid'
     mockPathname = '/spaces'
+  })
+
+  describe('2FA awareness card', () => {
+    it('shows the card on the Workspaces sidebar when the flag is on', () => {
+      mockIsTwoFactorBannerEnabled = true
+      render(<SidebarCommonFooter />)
+
+      expect(screen.getByTestId('workspace-2fa-awareness-card')).toHaveAttribute('data-space-id', 'space-uuid')
+    })
+
+    it('hides the card when the flag is off', () => {
+      render(<SidebarCommonFooter />)
+
+      expect(screen.queryByTestId('workspace-2fa-awareness-card')).not.toBeInTheDocument()
+    })
+
+    it('hides the card on the Safe sidebar', () => {
+      mockIsTwoFactorBannerEnabled = true
+      render(<SidebarCommonFooter isSafeSidebar />)
+
+      expect(screen.queryByTestId('workspace-2fa-awareness-card')).not.toBeInTheDocument()
+    })
+
+    it('hides the card when no space is known', () => {
+      mockIsTwoFactorBannerEnabled = true
+      mockSpaceId = null
+      render(<SidebarCommonFooter />)
+
+      expect(screen.queryByTestId('workspace-2fa-awareness-card')).not.toBeInTheDocument()
+    })
+
+    it('hides the card on the general settings page, which is where it links to', () => {
+      mockIsTwoFactorBannerEnabled = true
+      mockPathname = '/spaces/settings/general'
+      render(<SidebarCommonFooter />)
+
+      expect(screen.queryByTestId('workspace-2fa-awareness-card')).not.toBeInTheDocument()
+    })
+
+    it('hides the card once it was dismissed', () => {
+      mockIsTwoFactorBannerEnabled = true
+      mockIsTwoFactorCardDismissed = true
+      render(<SidebarCommonFooter />)
+
+      expect(screen.queryByTestId('workspace-2fa-awareness-card')).not.toBeInTheDocument()
+    })
+
+    it('dismisses the card through the shared dismissal state', () => {
+      mockIsTwoFactorBannerEnabled = true
+      render(<SidebarCommonFooter />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }))
+
+      expect(mockDismissTwoFactorCard).toHaveBeenCalledTimes(1)
+    })
+
+    it('renders the card above the API section', () => {
+      mockIsTwoFactorBannerEnabled = true
+      render(<SidebarCommonFooter />)
+
+      const card = screen.getByTestId('workspace-2fa-awareness-card')
+      const api = screen.getByTestId('api-cta-sidebar')
+      expect(card.compareDocumentPosition(api) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    })
+  })
+
+  describe('banner carousel', () => {
+    it('shows the 2FA card first and the Safe Pro banner on the next slide', () => {
+      mockIsTwoFactorBannerEnabled = true
+      mockIsSafeProEnabled = true
+      render(<SidebarCommonFooter />)
+
+      expect(screen.getByTestId('workspace-2fa-awareness-card')).toBeInTheDocument()
+      expect(screen.queryByTestId('safe-pro-sidebar-banner')).not.toBeInTheDocument()
+
+      fireEvent.click(screen.getByRole('button', { name: 'Next banner' }))
+
+      expect(screen.queryByTestId('workspace-2fa-awareness-card')).not.toBeInTheDocument()
+      expect(screen.getByTestId('safe-pro-sidebar-banner')).toBeInTheDocument()
+    })
+
+    it('shows no carousel controls when only one banner is on', () => {
+      mockIsSafeProEnabled = true
+      render(<SidebarCommonFooter />)
+
+      expect(screen.getByTestId('safe-pro-sidebar-banner')).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Next banner' })).not.toBeInTheDocument()
+    })
   })
 
   describe('Safe Pro banner', () => {

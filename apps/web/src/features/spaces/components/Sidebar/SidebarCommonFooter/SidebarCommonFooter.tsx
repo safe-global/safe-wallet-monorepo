@@ -24,6 +24,11 @@ import HelpMenu from '@/components/common/HelpMenu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useHasFeature } from '@/hooks/useChains'
+import { WorkspaceTwoFactorAwarenessCard, useTwoFactorAwarenessDismissed } from '@/features/oidc-auth'
+import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
+import { SidebarBannerCarousel } from '../SidebarBannerCarousel'
 
 export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?: boolean }): ReactElement => {
   const dispatch = useAppDispatch()
@@ -36,6 +41,19 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
   const { pathname } = useRouter()
   // The Plans page is the banner's own link destination, so hide it there.
   const showSafeProBanner = isSafeProEnabled && pathname !== AppRoutes.spaces.plans
+
+  const spaceId = useCurrentSpaceId()
+  // Own flag, separate from the 2FA feature itself, so the card can be switched off on its own.
+  const isTwoFactorCardEnabled = useHasFeature(FEATURES.TWO_FACTOR_AWARENESS_BANNER) === true
+  const [isTwoFactorCardDismissed, dismissTwoFactorCard] = useTwoFactorAwarenessDismissed()
+  // The card speaks about the current Workspace and its Continue link needs one, so it is limited
+  // to the Workspaces sidebar. Like the Safe Pro banner, it is hidden on its own destination.
+  const showTwoFactorCard =
+    !isSafeSidebar &&
+    isTwoFactorCardEnabled &&
+    !isTwoFactorCardDismissed &&
+    spaceId !== null &&
+    pathname !== AppRoutes.spaces.settingsGeneral
 
   const onToggleGateway = (checked: boolean) => {
     setIsProdGateway(checked)
@@ -81,9 +99,14 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
       )}
 
       <SidebarMenu className="gap-0.5">
-        {showSafeProBanner && (
+        {(showTwoFactorCard || showSafeProBanner) && (
           <SidebarMenuItem className="group-data-[collapsible=icon]:hidden">
-            <SafeProSidebarBanner className="mb-2" />
+            <SidebarBannerCarousel className="mb-2">
+              {showTwoFactorCard && (
+                <WorkspaceTwoFactorAwarenessCard spaceId={spaceId ?? undefined} onDismiss={dismissTwoFactorCard} />
+              )}
+              {showSafeProBanner && <SafeProSidebarBanner />}
+            </SidebarBannerCarousel>
           </SidebarMenuItem>
         )}
 
