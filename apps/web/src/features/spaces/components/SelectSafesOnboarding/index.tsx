@@ -118,7 +118,7 @@ const SelectSafesOnboarding = (): ReactElement => {
                 <TooltipTrigger render={<span className="inline-flex cursor-help" />}>
                   <Info className="size-4" />
                 </TooltipTrigger>
-                <TooltipContent>You can add up to {SAFE_ACCOUNTS_LIMIT} Safe accounts per workspace</TooltipContent>
+                <TooltipContent>You can add up to {SAFE_ACCOUNTS_LIMIT} Safe accounts per Workspace</TooltipContent>
               </Tooltip>
             </div>
             <SearchInput

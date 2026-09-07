@@ -119,7 +119,7 @@ export const persistCounterfactualSafe = async ({
           showNotification({
             variant: 'info',
             groupKey: 'cf-safe-space-skipped',
-            message: 'Safe added to your accounts — ask an admin to add it to the workspace',
+            message: 'Safe added to your accounts — ask an admin to add it to the Workspace',
           }),
         )
       } else if (spaceSafeCount !== undefined && spaceSafeCount >= SAFE_ACCOUNTS_LIMIT) {
@@ -130,7 +130,7 @@ export const persistCounterfactualSafe = async ({
           showNotification({
             variant: 'info',
             groupKey: 'cf-safe-space-limit',
-            message: `Safe created. This workspace is full (${SAFE_ACCOUNTS_LIMIT} Safes), so it wasn't added — switch to another workspace to add it there`,
+            message: `Safe created. This Workspace is full (${SAFE_ACCOUNTS_LIMIT} Safes), so it wasn't added — switch to another Workspace to add it there`,
           }),
         )
       } else {
@@ -235,7 +235,7 @@ function isConflict(error: unknown): boolean {
 }
 
 function toSpaceError(error: unknown): Error {
-  return new Error((error as BackendError)?.data?.message || 'Failed to add Safe account to workspace')
+  return new Error((error as BackendError)?.data?.message || 'Failed to add Safe account to Workspace')
 }
 
 /** Matches the CGW limit message, e.g. "This space only allows a maximum of 40 safe accounts...".

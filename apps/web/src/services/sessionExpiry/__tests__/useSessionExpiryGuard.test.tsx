@@ -303,7 +303,7 @@ describe('useSessionExpiryGuard', () => {
     const notification = findNotification(store)
     expect(notification).toMatchObject({ message: SESSION_EXPIRED_MESSAGE })
     expect(notification?.link).toBeUndefined()
-    expect(SESSION_EXPIRED_MESSAGE).toBe('Your session has expired. Please sign in to workspaces again.')
+    expect(SESSION_EXPIRED_MESSAGE).toBe('Your session has expired. Please sign in to Workspaces again.')
   })
 
   it('clears auth but shows no toast when the session expires outside /welcome/spaces', async () => {

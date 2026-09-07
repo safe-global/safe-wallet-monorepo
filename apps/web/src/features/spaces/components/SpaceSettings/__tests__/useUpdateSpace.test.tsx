@@ -67,7 +67,7 @@ describe('useUpdateSpace', () => {
     const notifications = store.getState().notifications
     expect(notifications.length).toBeGreaterThan(0)
     const last = notifications[notifications.length - 1]
-    expect(last.message).toBe('Updated workspace name')
+    expect(last.message).toBe('Updated Workspace name')
     expect(last.variant).toBe('success')
     expect(last.groupKey).toBe('space-update-name')
   })

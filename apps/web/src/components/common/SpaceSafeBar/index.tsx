@@ -91,7 +91,7 @@ function SignInWorkspaceCta({ label, onSignIn }: { label: string; onSignIn: () =
   return (
     <div className="flex flex-col items-center gap-3 px-4 py-8 text-center" data-testid="dropdown-signin-cta">
       <p className="text-sm text-muted-foreground">
-        Sign in to a workspace to collaborate on Safe accounts with your team.
+        Sign in to a Workspace to collaborate on Safe accounts with your team.
       </p>
       <Button variant="secondary" size="sm" onClick={onSignIn} data-testid="dropdown-signin-btn">
         {label}
@@ -262,7 +262,7 @@ function SpaceSafeBar() {
   const emptyStateOverride =
     activeTab === 'workspace' && !isInSpaceContext ? (
       <SignInWorkspaceCta
-        label={isSignedIn ? 'View workspaces' : 'Sign in'}
+        label={isSignedIn ? 'View Workspaces' : 'Sign in'}
         onSignIn={() => router.push({ pathname: AppRoutes.welcome.spaces })}
       />
     ) : activeTab === 'local' && !hasWallet ? (

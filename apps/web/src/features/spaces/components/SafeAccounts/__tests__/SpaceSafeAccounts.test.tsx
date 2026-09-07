@@ -135,7 +135,7 @@ describe('SpaceSafeAccounts', () => {
     expect(screen.getByText('Treasury')).toBeInTheDocument()
   })
 
-  it('does not render the Workspace/Trusted tabs', () => {
+  it('does not render the workspace/Trusted tabs', () => {
     render(<SpaceSafeAccounts />)
 
     expect(screen.queryByRole('tablist')).not.toBeInTheDocument()
