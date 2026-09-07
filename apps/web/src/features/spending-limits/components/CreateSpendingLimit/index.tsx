@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useMemo } from 'react'
+import { useCallback, useContext, useMemo } from 'react'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
@@ -46,7 +46,7 @@ const CreateSpendingLimit = () => {
     mode: 'onChange',
   })
 
-  const { handleSubmit, watch, control, formState, getValues, trigger } = formMethods
+  const { handleSubmit, watch, control, formState } = formMethods
 
   const tokenAddress = watch(SpendingLimitFields.tokenAddress)
   const beneficiary = watch(SpendingLimitFields.beneficiary)
@@ -66,14 +66,6 @@ const CreateSpendingLimit = () => {
       _validateSpendingLimit(value, tokenDecimals),
     [tokenDecimals],
   )
-
-  // react-hook-form only evaluates `isValid` on mount, so a prefilled amount must be re-checked
-  // once the selected token (and therefore its decimals) becomes known or is lost.
-  useEffect(() => {
-    if (getValues(SpendingLimitFields.amount)) {
-      trigger(SpendingLimitFields.amount)
-    }
-  }, [tokenDecimals, getValues, trigger])
 
   if (!isSupported) {
     return <SpendingLimitNotSupported />

@@ -54,7 +54,7 @@ const mockBalances = (items: Balances['items']) => {
   })
 }
 
-const buildForm = (data?: Partial<NewSpendingLimitFlowProps>) => {
+const renderForm = (data?: Partial<NewSpendingLimitFlowProps>) => {
   const onNext = jest.fn()
   const context: TxFlowContextType<NewSpendingLimitFlowProps> = {
     ...initialContext,
@@ -68,19 +68,13 @@ const buildForm = (data?: Partial<NewSpendingLimitFlowProps>) => {
     onNext,
   }
 
-  // A fresh element per render call, so `rerender` cannot bail out on an identical element.
-  const buildUi = () => (
+  const ui = (
     <TxFlowContext.Provider value={context as TxFlowContextType}>
       <CreateSpendingLimit />
     </TxFlowContext.Provider>
   )
 
-  return { buildUi, onNext }
-}
-
-const renderForm = (data?: Partial<NewSpendingLimitFlowProps>) => {
-  const { buildUi, onNext } = buildForm(data)
-  return { ...render(buildUi()), buildUi, onNext }
+  return { ...render(ui), onNext }
 }
 
 const fillForm = async (amount: string) => {
@@ -164,24 +158,6 @@ describe('CreateSpendingLimit', () => {
           expect.anything(),
         ),
       )
-    })
-
-    it('re-validates a prefilled amount once the selected token becomes available', async () => {
-      mockBalances([])
-
-      const { rerender, buildUi } = renderForm({
-        [SpendingLimitFields.beneficiary]: BENEFICIARY,
-        [SpendingLimitFields.amount]: '1.5',
-      })
-
-      expect(await screen.findByText(NO_TOKEN_SELECTED_ERROR)).toBeInTheDocument()
-      expect(screen.getByTestId('next-btn')).toBeDisabled()
-
-      mockBalances([nativeBalance])
-      rerender(buildUi())
-
-      await waitFor(() => expect(screen.getByTestId('next-btn')).toBeEnabled())
-      expect(screen.queryByText(NO_TOKEN_SELECTED_ERROR)).not.toBeInTheDocument()
     })
   })
 })
