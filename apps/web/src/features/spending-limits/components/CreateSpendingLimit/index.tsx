@@ -1,4 +1,4 @@
-import { useCallback, useContext, useMemo } from 'react'
+import { useCallback, useContext, useEffect, useMemo } from 'react'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
@@ -18,6 +18,8 @@ import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFl
 import { SpendingLimitFields, type NewSpendingLimitFlowProps } from '../../types'
 import useIsSpendingLimitSupported from '../../hooks/useIsSpendingLimitSupported'
 import SpendingLimitNotSupported from './SpendingLimitNotSupported'
+
+export const NO_TOKEN_SELECTED_ERROR = 'Select a token'
 
 export const _validateSpendingLimit = (val: string, decimals?: number | null) => {
   // Without a selected token we don't know the decimals, so the amount can't be range-checked yet.
@@ -44,7 +46,7 @@ const CreateSpendingLimit = () => {
     mode: 'onChange',
   })
 
-  const { handleSubmit, watch, control } = formMethods
+  const { handleSubmit, watch, control, formState, getValues, trigger } = formMethods
 
   const tokenAddress = watch(SpendingLimitFields.tokenAddress)
   const beneficiary = watch(SpendingLimitFields.beneficiary)
@@ -55,16 +57,28 @@ const CreateSpendingLimit = () => {
     ? balances.items.find((item) => item.tokenInfo.address === tokenAddress)
     : undefined
 
+  const tokenDecimals = selectedToken?.tokenInfo.decimals
+
   const validateSpendingLimit = useCallback(
     (value: string) => {
+      if (tokenDecimals == null) return NO_TOKEN_SELECTED_ERROR
+
       return (
         validateAmount(value) ||
-        validateDecimalLength(value, selectedToken?.tokenInfo.decimals) ||
-        _validateSpendingLimit(value, selectedToken?.tokenInfo.decimals)
+        validateDecimalLength(value, tokenDecimals) ||
+        _validateSpendingLimit(value, tokenDecimals)
       )
     },
-    [selectedToken?.tokenInfo.decimals],
+    [tokenDecimals],
   )
+
+  // react-hook-form only evaluates `isValid` on mount, so a prefilled amount must be re-checked
+  // once the selected token (and therefore its decimals) becomes known or is lost.
+  useEffect(() => {
+    if (getValues(SpendingLimitFields.amount)) {
+      trigger(SpendingLimitFields.amount)
+    }
+  }, [tokenDecimals, getValues, trigger])
 
   if (!isSupported) {
     return <SpendingLimitNotSupported />
@@ -114,7 +128,7 @@ const CreateSpendingLimit = () => {
           </div>
 
           <TxCardActions>
-            <Button data-testid="next-btn" type="submit">
+            <Button data-testid="next-btn" type="submit" disabled={!formState.isValid}>
               Next
             </Button>
           </TxCardActions>
