@@ -18,7 +18,7 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
         </Typography>
 
         <Card className="w-full gap-0 py-0">
-          <SafeProAnnouncement />
+          <SafeProAnnouncement location="plans_page" />
         </Card>
       </div>
     </AuthState>
