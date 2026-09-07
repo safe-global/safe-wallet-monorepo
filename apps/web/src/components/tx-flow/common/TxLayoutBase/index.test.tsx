@@ -1,5 +1,5 @@
 import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
-import TxLayoutBase from '.'
+import TxLayoutBase, { BACK_BUTTON_ROW_QUERY } from '.'
 
 // The Safe Shield widget and the status rail pull in network/analytics-heavy hooks; stub them so
 // this test focuses on the shared layout logic (what renders, when) rather than their internals.
@@ -98,5 +98,54 @@ describe('TxLayoutBase', () => {
 
     await user.click(backButton)
     expect(onBack).toHaveBeenCalledTimes(1)
+  })
+
+  // Mirrors the layout switch in styles.module.css: at Tailwind `lg` the actions become a
+  // right-aligned row and the back button joins it as an outlined button on the left; below that
+  // the actions are stacked and the back button is a centered ghost link underneath (WA-3479).
+  describe('back button variant', () => {
+    const originalMatchMedia = window.matchMedia
+
+    const stubMatchMedia = (matchingQuery: string) => {
+      window.matchMedia = (query: string) =>
+        ({
+          matches: query === matchingQuery,
+          media: query,
+          onchange: null,
+          addListener: () => {},
+          removeListener: () => {},
+          addEventListener: () => {},
+          removeEventListener: () => {},
+          dispatchEvent: () => false,
+        }) as MediaQueryList
+    }
+
+    afterEach(() => {
+      window.matchMedia = originalMatchMedia
+    })
+
+    it('is outlined from 1024px up, where it shares a row with the primary action', () => {
+      stubMatchMedia(BACK_BUTTON_ROW_QUERY)
+
+      render(
+        <TxLayoutBase title="Confirm transaction" step={1} stepCount={3} progress={66} onBack={jest.fn()}>
+          <Step />
+        </TxLayoutBase>,
+      )
+
+      expect(screen.getByTestId('modal-back-btn')).toHaveClass('border-border')
+    })
+
+    it('is a ghost button below 1024px, where it is centered under the stacked actions', () => {
+      stubMatchMedia('(min-width:1200px)')
+
+      render(
+        <TxLayoutBase title="Confirm transaction" step={1} stepCount={3} progress={66} onBack={jest.fn()}>
+          <Step />
+        </TxLayoutBase>,
+      )
+
+      expect(screen.getByTestId('modal-back-btn')).not.toHaveClass('border-border')
+    })
   })
 })

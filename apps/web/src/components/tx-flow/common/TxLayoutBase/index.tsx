@@ -76,6 +76,10 @@ export type TxLayoutBaseProps = {
   sidebarSlot?: ReactNode
 }
 
+/* Tailwind `lg`. Must match the breakpoint TxCardActions uses for its row layout — see the
+   `.backButton` media query in styles.module.css for why. */
+export const BACK_BUTTON_ROW_QUERY = '(min-width:1024px)'
+
 /**
  * The presentational chrome shared by every transaction flow: the status rail, the titled
  * card with progress bar + header, the step content, and the Safe Shield sidebar. It is
@@ -103,7 +107,7 @@ const TxLayoutBase = ({
   sidebarSlot,
 }: TxLayoutBaseProps): ReactElement => {
   const isSmallScreen = useIsBelowMd()
-  const isDesktop = useMediaQuery('(min-width:1200px)')
+  const isDesktop = useMediaQuery(BACK_BUTTON_ROW_QUERY)
   const isDarkMode = useDarkMode()
 
   return (
