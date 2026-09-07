@@ -50,19 +50,55 @@ const REFRESH_LOCK_NAME = 'hypernative-auth-refresh'
 const REFRESH_JITTER_MAX_MS = 250
 
 /**
+ * OAuth error codes (RFC 6749 §5.2) that mean the refresh chain is gone and only a fresh login
+ * recovers it. Anything else - a dropped connection, a 5xx, a proxy interposing a 403 - leaves the
+ * chain intact, so it must not end the session.
+ */
+const TERMINAL_OAUTH_ERRORS = ['invalid_grant', 'invalid_client', 'unsupported_grant_type', 'invalid_request']
+
+/**
+ * Backoff for a refresh that failed without saying the chain is dead.
+ *
+ * The schedule deliberately stays inside the server's reuse grace window. Inside it, presenting
+ * the same refresh token again is idempotent and returns the same successor, so a response lost in
+ * transit costs nothing. Past it, that same request reads as a replay: it revokes the whole family
+ * and reports a reuse. Since the user ends up logging in again either way, we stop retrying rather
+ * than trade a quiet expiry for a false theft signal.
+ */
+const REFRESH_RETRY_DELAYS_MS = [1_000, 2_000, 4_000, 8_000]
+
+type RefreshOutcome = 'refreshed' | 'terminal' | 'transient'
+
+/**
+ * Reads the OAuth error code out of a failed refresh.
+ *
+ * The API wraps errors in an envelope, so the code sits at `error.error` rather than at the top
+ * level of the body. A failure with no code at all - a network error, a gateway page - resolves to
+ * undefined and is treated as transient.
+ * @param rejection - The value `.unwrap()` rejected with
+ */
+const readOAuthErrorCode = (rejection: unknown): string | undefined => {
+  const envelopeError = (rejection as { error?: unknown } | undefined)?.error
+  const code = (envelopeError as { error?: unknown } | undefined)?.error
+  return typeof code === 'string' ? code : undefined
+}
+
+/**
  * Refresh the access token using the given refresh token.
  *
  * Serialised via navigator.locks (falling back to a jittered cookie re-read) so a losing tab
  * re-reads the winner's rotated token instead of replaying one the server has already consumed -
  * doing so would revoke the whole refresh chain.
+ * Reports what happened rather than acting on it, so the caller can tell a dead chain from a
+ * failure worth retrying.
  * @param refreshToken - The refresh token this call was scheduled for
  */
-const refreshAuthToken = async (refreshToken: string): Promise<void> => {
-  const runRefresh = async (): Promise<void> => {
+const refreshAuthToken = async (refreshToken: string): Promise<RefreshOutcome> => {
+  const runRefresh = async (): Promise<RefreshOutcome> => {
     // Re-read inside the lock: another tab (or hook instance) may have already rotated this token
     const current = getAuthCookieData()
     if (!current?.refreshToken || current.refreshToken !== refreshToken) {
-      return
+      return 'refreshed'
     }
 
     let store
@@ -70,7 +106,7 @@ const refreshAuthToken = async (refreshToken: string): Promise<void> => {
       store = getStoreInstance()
     } catch {
       // Store not initialised yet; the next scheduled check will retry
-      return
+      return 'transient'
     }
 
     try {
@@ -91,18 +127,19 @@ const refreshAuthToken = async (refreshToken: string): Promise<void> => {
         response.refresh_token,
         response.refresh_expires_in,
       )
-    } catch {
-      // invalid_grant (or any other failure) is terminal - the chain is gone, only a fresh login recovers
-      clearAuthCookie()
+      return 'refreshed'
+    } catch (rejection) {
+      const code = readOAuthErrorCode(rejection)
+      return code !== undefined && TERMINAL_OAUTH_ERRORS.includes(code) ? 'terminal' : 'transient'
     }
   }
 
   if (typeof navigator !== 'undefined' && navigator.locks) {
-    await navigator.locks.request(REFRESH_LOCK_NAME, runRefresh)
-  } else {
-    await new Promise((resolve) => setTimeout(resolve, Math.random() * REFRESH_JITTER_MAX_MS))
-    await runRefresh()
+    return (await navigator.locks.request(REFRESH_LOCK_NAME, runRefresh)) as RefreshOutcome
   }
+
+  await new Promise((resolve) => setTimeout(resolve, Math.random() * REFRESH_JITTER_MAX_MS))
+  return await runRefresh()
 }
 
 /**
@@ -118,28 +155,66 @@ export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResu
   })
 
   const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const retryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const scheduledRefreshTokenRef = useRef<string | undefined>(undefined)
   const isRefreshingRef = useRef(false)
   const checkAuthStateRef = useRef<() => void>(() => {})
+  // A token whose retries are spent. Kept so the polling loop does not present it again once the
+  // grace window has closed, which would read as a replay and revoke the family.
+  const abandonedRefreshTokenRef = useRef<string | undefined>(undefined)
+  const attemptRefreshRef = useRef<(refreshToken: string, attempt?: number) => void>(() => {})
 
   const clearScheduledRefresh = useCallback(() => {
     if (refreshTimeoutRef.current) {
       clearTimeout(refreshTimeoutRef.current)
       refreshTimeoutRef.current = null
     }
+    if (retryTimeoutRef.current) {
+      clearTimeout(retryTimeoutRef.current)
+      retryTimeoutRef.current = null
+    }
     scheduledRefreshTokenRef.current = undefined
   }, [])
 
-  const attemptRefresh = useCallback((refreshToken: string) => {
+  const attemptRefresh = useCallback((refreshToken: string, attempt = 0) => {
     if (isRefreshingRef.current) {
       return
     }
     isRefreshingRef.current = true
-    void refreshAuthToken(refreshToken).finally(() => {
-      isRefreshingRef.current = false
-      checkAuthStateRef.current()
-    })
+    void refreshAuthToken(refreshToken)
+      .then((outcome) => {
+        if (outcome === 'refreshed') {
+          abandonedRefreshTokenRef.current = undefined
+          return
+        }
+
+        if (outcome === 'terminal') {
+          // The server says this chain is gone. Only a fresh login recovers it.
+          abandonedRefreshTokenRef.current = undefined
+          clearAuthCookie()
+          return
+        }
+
+        const delay = REFRESH_RETRY_DELAYS_MS[attempt]
+        if (delay === undefined) {
+          // Retries spent inside the grace window. The cookie stays: the access token is still
+          // usable until its own expiry, and presenting this refresh token again now would look
+          // like theft rather than a retry.
+          abandonedRefreshTokenRef.current = refreshToken
+          return
+        }
+
+        retryTimeoutRef.current = setTimeout(() => attemptRefreshRef.current(refreshToken, attempt + 1), delay)
+      })
+      .finally(() => {
+        isRefreshingRef.current = false
+        checkAuthStateRef.current()
+      })
   }, [])
+
+  useEffect(() => {
+    attemptRefreshRef.current = attemptRefresh
+  }, [attemptRefresh])
 
   // Schedules (or immediately triggers) the next refresh for the current cookie data.
   // A cookie with no refreshToken degrades to "no refresh available" - the access token just
@@ -151,8 +226,15 @@ export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResu
         return
       }
 
+      if (abandonedRefreshTokenRef.current === data.refreshToken) {
+        return
+      }
+
       const delay = data.expiry - REFRESH_MARGIN_MS - Date.now()
       if (delay <= 0) {
+        if (retryTimeoutRef.current) {
+          return
+        }
         clearScheduledRefresh()
         attemptRefresh(data.refreshToken)
         return
@@ -212,12 +294,14 @@ export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResu
     refreshExpiresIn?: number,
   ) => {
     setAuthCookie(token, tokenType, expiresIn, refreshToken, refreshExpiresIn)
+    abandonedRefreshTokenRef.current = undefined
     checkAuthState()
   }
 
   const clearToken = () => {
     clearAuthCookie()
     clearScheduledRefresh()
+    abandonedRefreshTokenRef.current = undefined
     setAuthState({
       token: undefined,
       isAuthenticated: false,

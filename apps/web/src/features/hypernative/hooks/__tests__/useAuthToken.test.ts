@@ -35,6 +35,9 @@ const mockClearAuthCookie = cookieStorage.clearAuthCookie as jest.MockedFunction
 const mockGetStoreInstance = getStoreInstance as jest.MockedFunction<typeof getStoreInstance>
 const mockInitiate = hypernativeApi.endpoints.refreshToken.initiate as jest.Mock
 
+/** Mirrors REFRESH_RETRY_DELAYS_MS in the hook - the number of retries before a token is left alone */
+const REFRESH_RETRY_ATTEMPTS = 4
+
 describe('useAuthToken', () => {
   const originalDateNow = Date.now
   const originalSetInterval = global.setInterval
@@ -644,24 +647,110 @@ describe('useAuthToken', () => {
       unmount()
     })
 
-    it('clears all auth state on invalid_grant instead of retrying', async () => {
-      mockInitiate.mockReturnValue({ unwrap: () => Promise.reject(new Error('invalid_grant')) })
-      fakeCookie = {
-        token: 'stale-token',
-        tokenType: 'Bearer',
-        expiry: Date.now() - 1,
-        refreshToken: 'dead-refresh-token',
-        refreshExpiry: Date.now() + 2592000000,
-      }
+    /** The shape the API actually rejects with: the RFC 6749 §5.2 body inside the standard
+     * envelope, so the code sits at `error.error`. A bare `Error` never reaches this path. */
+    const oauthRejection = (code: string) => ({
+      unwrap: () =>
+        Promise.reject({
+          success: false,
+          data: null,
+          error: { error: code, error_description: `stubbed ${code}` },
+        }),
+    })
+
+    const staleCookie = (refreshToken = 'current-refresh-token') => ({
+      token: 'stale-token',
+      tokenType: 'Bearer',
+      expiry: Date.now() - 1,
+      refreshToken,
+      refreshExpiry: Date.now() + 2592000000,
+    })
+
+    it.each(['invalid_grant', 'invalid_client', 'unsupported_grant_type', 'invalid_request'])(
+      'clears all auth state on %s instead of retrying',
+      async (code) => {
+        mockInitiate.mockReturnValue(oauthRejection(code))
+        fakeCookie = staleCookie('dead-refresh-token')
+
+        const { result, unmount } = renderHook(() => useAuthToken())
+
+        await waitFor(() => {
+          expect(mockClearAuthCookie).toHaveBeenCalled()
+          expect(result.current[0].isAuthenticated).toBe(false)
+        })
+
+        expect(mockInitiate).toHaveBeenCalledTimes(1)
+
+        unmount()
+      },
+    )
+
+    /**
+     * The case that matters most: a refresh can fail without the chain being dead. Logging the
+     * user out on a dropped connection would turn a blip into a re-login, and the access token is
+     * still valid for another minute at this point.
+     */
+    it.each([
+      ['a transport failure with no body', undefined],
+      ['a gateway error with no OAuth code', { success: false, data: null }],
+      ['a 5xx envelope carrying an unrelated error', { success: false, data: null, error: { error: 'server_error' } }],
+    ])('keeps the session on %s', async (_label, rejection) => {
+      mockInitiate.mockReturnValue({ unwrap: () => Promise.reject(rejection) })
+      fakeCookie = staleCookie()
 
       const { result, unmount } = renderHook(() => useAuthToken())
 
       await waitFor(() => {
-        expect(mockClearAuthCookie).toHaveBeenCalled()
-        expect(result.current[0].isAuthenticated).toBe(false)
+        expect(mockInitiate).toHaveBeenCalled()
       })
 
-      expect(mockInitiate).toHaveBeenCalledTimes(1)
+      expect(mockClearAuthCookie).not.toHaveBeenCalled()
+      expect(result.current[0].isAuthenticated).toBe(true)
+      expect(result.current[0].token).toBe('Bearer stale-token')
+
+      unmount()
+    })
+
+    it('recovers without a logout when a transient failure is followed by a success', async () => {
+      mockInitiate
+        .mockReturnValueOnce({ unwrap: () => Promise.reject(undefined) })
+        .mockReturnValue({ unwrap: () => Promise.resolve(REFRESHED_RESPONSE) })
+      fakeCookie = staleCookie()
+
+      const { result, unmount } = renderHook(() => useAuthToken())
+
+      await waitFor(
+        () => {
+          expect(result.current[0].token).toBe('Bearer refreshed-token')
+        },
+        { timeout: 5000 },
+      )
+
+      expect(mockClearAuthCookie).not.toHaveBeenCalled()
+      expect(mockInitiate.mock.calls.length).toBeGreaterThanOrEqual(2)
+
+      unmount()
+    })
+
+    /**
+     * Retries stay inside the server's reuse grace window, where re-presenting the same token is
+     * idempotent. Once they are spent the token is left alone rather than presented again later,
+     * which would read as a replay and revoke the family.
+     */
+    it('stops presenting a token once its retries are spent, without logging out', async () => {
+      mockInitiate.mockReturnValue({ unwrap: () => Promise.reject(undefined) })
+      fakeCookie = staleCookie()
+
+      const { result, unmount } = renderHook(() => useAuthToken())
+
+      await waitFor(() => {
+        expect(mockInitiate).toHaveBeenCalled()
+      })
+
+      const callsAfterFirstFailure = mockInitiate.mock.calls.length
+      expect(callsAfterFirstFailure).toBeLessThanOrEqual(REFRESH_RETRY_ATTEMPTS + 1)
+      expect(mockClearAuthCookie).not.toHaveBeenCalled()
+      expect(result.current[0].isAuthenticated).toBe(true)
 
       unmount()
     })
