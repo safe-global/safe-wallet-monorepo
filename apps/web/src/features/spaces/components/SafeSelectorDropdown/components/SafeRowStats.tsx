@@ -45,6 +45,7 @@ const SafeRowStats = ({
   pending,
   awaitingConfirmation = 0,
   thresholdIconOnly = false,
+  showPending = true,
 }: {
   threshold: number
   owners: number
@@ -54,6 +55,8 @@ const SafeRowStats = ({
   awaitingConfirmation?: number
   /** Multi-chain rows show an icon-only badge — the setup can differ per chain. */
   thresholdIconOnly?: boolean
+  /** Set false where no queued-transaction data exists, to reclaim the column. */
+  showPending?: boolean
 }) => {
   const iconOnlyThreshold = thresholdIconOnly || !owners
   const thresholdLabel = iconOnlyThreshold ? 'Signer threshold' : `${threshold} out of ${owners} signers required`
@@ -97,15 +100,17 @@ const SafeRowStats = ({
           )}
         </span>
       </span>
-      <span className="flex w-12 shrink-0 justify-center" data-testid="row-pending-column">
-        {pending > 0 ? (
-          <StatTooltip label={pendingLabel} triggerClassName="inline-flex">
-            <PendingBadge count={pending} awaitingConfirmation={awaitingConfirmation} compact />
-          </StatTooltip>
-        ) : (
-          <PendingBadge count={pending} compact />
-        )}
-      </span>
+      {showPending && (
+        <span className="flex w-12 shrink-0 justify-center" data-testid="row-pending-column">
+          {pending > 0 ? (
+            <StatTooltip label={pendingLabel} triggerClassName="inline-flex">
+              <PendingBadge count={pending} awaitingConfirmation={awaitingConfirmation} compact />
+            </StatTooltip>
+          ) : (
+            <PendingBadge count={pending} compact />
+          )}
+        </span>
+      )}
     </>
   )
 }

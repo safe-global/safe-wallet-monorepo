@@ -2,10 +2,21 @@ import { render } from '@/tests/test-utils'
 import type { EthersError } from '@/utils/ethers-utils'
 import type { TransactionReceipt } from 'ethers'
 import { Gs026PreCheckError } from '@/services/tx/executionPreChecks'
+import type { DmkError } from '@ledgerhq/device-management-kit'
+import { mapLedgerError } from '@/services/onboard/ledger-errors'
 import { BaseError } from 'viem'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { RATE_LIMIT_USER_MESSAGE } from '@/utils/transaction-errors'
 import TxSubmitError from '..'
+
+/** The ethers error the Ledger module rejects with, as viem re-wraps it. */
+const ledgerSubmitError = (error: Parameters<typeof mapLedgerError>[0]): Error => {
+  const cause = mapLedgerError(error)
+  return Object.assign(
+    new Error(`An unknown RPC error occurred.\n\nDetails: ${cause.message}\n\nVersion: viem@2.52.2`),
+    { cause },
+  )
+}
 
 const HTML_502 =
   '<html><head><title>502 Bad Gateway</title></head><body><center><h1>502 Bad Gateway</h1></center><hr><center>nginx</center></body></html>'
@@ -63,6 +74,37 @@ describe('TxSubmitError', () => {
     expect(getByText('Could not submit the transaction.')).toBeInTheDocument()
     expect(queryByText(/Gas was spent/)).not.toBeInTheDocument()
     expect(queryByText(/try again/i)).not.toBeInTheDocument()
+  })
+
+  it('shows what the Ledger asked for instead of the generic submit failure', () => {
+    const error = ledgerSubmitError({
+      _tag: 'DeviceLockedError',
+      errorCode: '5515',
+      message: 'Device is locked.',
+    } as DmkError)
+
+    const { getByText, queryByText } = render(<TxSubmitError error={error} />)
+
+    expect(getByText('Unlock your Ledger and try again.')).toBeInTheDocument()
+    expect(queryByText(/Could not submit/)).not.toBeInTheDocument()
+  })
+
+  it('never leaks device or library internals for a Ledger failure', () => {
+    // The shape from the bug report: no message, the reason wrapped in an Error.
+    const error = ledgerSubmitError({
+      _tag: 'InvalidStatusWordError',
+      originalError: new Error('no signature returned'),
+    })
+
+    const { getByText, queryByText, container } = render(<TxSubmitError error={error} />)
+
+    expect(getByText('Your Ledger could not complete the request.')).toBeInTheDocument()
+    expect(getByText('LEDGER-UNKNOWN')).toBeInTheDocument()
+    expect(queryByText('Details')).not.toBeInTheDocument()
+
+    for (const forbidden of ['viem@', 'version=', 'InvalidStatusWordError', 'UNKNOWN_ERROR', 'info={']) {
+      expect(container.textContent).not.toContain(forbidden)
+    }
   })
 
   it('offers a retry for a transient (non-revert) submission failure', () => {
