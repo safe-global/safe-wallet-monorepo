@@ -5,7 +5,7 @@ import classnames from 'classnames'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useIsBelowMd, useMediaQuery } from '@/hooks/useMediaQuery'
+import { useIsBelowMd } from '@/hooks/useMediaQuery'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { ProgressBar } from '@/components/common/ProgressBar'
 import { SafeTxContext } from '../../SafeTxProvider'
@@ -76,10 +76,6 @@ export type TxLayoutBaseProps = {
   sidebarSlot?: ReactNode
 }
 
-/* Tailwind `lg`. Must match the breakpoint TxCardActions uses for its row layout — see the
-   `.backButton` media query in styles.module.css for why. */
-export const BACK_BUTTON_ROW_QUERY = '(min-width:1024px)'
-
 /**
  * The presentational chrome shared by every transaction flow: the status rail, the titled
  * card with progress bar + header, the step content, and the Safe Shield sidebar. It is
@@ -107,7 +103,6 @@ const TxLayoutBase = ({
   sidebarSlot,
 }: TxLayoutBaseProps): ReactElement => {
   const isSmallScreen = useIsBelowMd()
-  const isDesktop = useMediaQuery(BACK_BUTTON_ROW_QUERY)
   const isDarkMode = useDarkMode()
 
   return (
@@ -169,7 +164,7 @@ const TxLayoutBase = ({
                 {onBack && step > 0 && (
                   <Button
                     data-testid="modal-back-btn"
-                    variant={isDesktop ? 'outline' : 'ghost'}
+                    variant="outline"
                     size="submit"
                     onClick={onBack}
                     className={css.backButton}

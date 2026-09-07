@@ -25,8 +25,9 @@ type OnboardingFooterProps = {
  * OnboardingFooter — the Back / Continue footer for the full-screen Spaces
  * onboarding flows. Owns the taller `size="xl"` (48px) CTA scale, the Back
  * (secondary) + Continue (primary) treatment, the left/right chevrons, the
- * loading → spinner swap, and the stacked-mobile → row-on-xl layout. Reach for
- * this instead of hand-building the footer so every onboarding step matches.
+ * loading → spinner swap, and the single-row layout: Back and Continue share one
+ * row at every width, each taking half of it. Reach for this instead of
+ * hand-building the footer so every onboarding step matches.
  */
 const OnboardingFooter = ({
   onBack,
@@ -40,16 +41,9 @@ const OnboardingFooter = ({
   continueLoading = false,
   continueTestId,
 }: OnboardingFooterProps) => (
-  <div className="flex flex-col-reverse gap-3 xl:flex-row xl:items-center">
+  <div className="flex items-center gap-3">
     {onBack && (
-      <Button
-        type="button"
-        variant="secondary"
-        size="xl"
-        onClick={onBack}
-        disabled={backDisabled}
-        className="w-full xl:flex-1"
-      >
+      <Button type="button" variant="secondary" size="xl" onClick={onBack} disabled={backDisabled} className="flex-1">
         <ChevronLeft />
         {backLabel}
       </Button>
@@ -61,7 +55,7 @@ const OnboardingFooter = ({
       onClick={onContinue}
       disabled={continueDisabled || continueLoading}
       data-testid={continueTestId}
-      className="w-full xl:flex-1"
+      className="flex-1"
     >
       {continueLoading ? (
         <Spinner />

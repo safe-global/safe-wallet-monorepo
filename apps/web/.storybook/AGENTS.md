@@ -56,7 +56,7 @@ a stronger guard than lint, which is why humans and AI can't drift them):
 - **`DialogActions`** — the Cancel(outline)+Confirm(default/destructive) dialog footer (order, sizes, spinner,
   responsive layout). Named `DialogActions`, not `DialogFooter` (that's the shadcn layout slot).
 - **`OnboardingFooter`** — the Back/Continue footer for full-screen onboarding flows (`size="xl"` 48px scale,
-  chevrons, loading→spinner, stacked-mobile → row-on-xl). Props: `onBack`, `continueLabel`, `onContinue`,
+  chevrons, loading→spinner, one row at every width). Props: `onBack`, `continueLabel`, `onContinue`,
   `continueType`/`continueForm`, `continueDisabled`/`continueLoading`, testids.
 - **`IconAction`** — the compact top-bar / header icon button (locks `variant="ghost"` + `size="icon-sm"` + margin).
 

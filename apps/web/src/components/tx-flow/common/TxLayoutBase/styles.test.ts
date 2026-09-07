@@ -40,41 +40,30 @@ describe('TxLayoutBase page gutter', () => {
   })
 })
 
-/**
- * TxCardActions (and the review step's Continue button, `lg:w-auto`) turn from a stacked
- * full-width column into a right-aligned row at Tailwind's `lg` (1024px). The back button is
- * centered below the actions only while they are stacked; once they sit in a row it moves to the
- * bottom-left of the same row. Both must flip at the same width or, between the two breakpoints,
- * a right-aligned Continue gets a centered Back floating underneath it (WA-3479).
- */
-describe('TxLayoutBase back button breakpoint', () => {
-  const stackedFooter = STYLES_ROOT.nodes.find(
-    (node): node is AtRule =>
-      node.type === 'atrule' && node.name === 'media' && node.params === '(max-width: 1023.95px)',
-  )
-
-  it('centers the back button only below Tailwind lg, where the actions are stacked', () => {
-    const backButton = stackedFooter?.nodes?.find(
+describe('TxLayoutBase back button row', () => {
+  it('should, at every width, keep the back button bottom-left of the step', () => {
+    const backButton = STYLES_ROOT.nodes.find(
       (node): node is Rule => node.type === 'rule' && node.selector === '.backButton',
     )
 
-    expect(declOf(backButton, 'left')).toBe('50%')
-    expect(declOf(backButton, 'transform')).toBe('translateX(-50%)')
+    expect(declOf(backButton, 'position')).toBe('absolute')
+    expect(declOf(backButton, 'left')).toBe('var(--space-3)')
+    expect(declOf(backButton, 'bottom')).toBe('var(--space-3)')
+
+    const mediaOverrides = STYLES_ROOT.nodes
+      .filter((node): node is AtRule => node.type === 'atrule' && node.name === 'media')
+      .flatMap((media) => media.nodes ?? [])
+      .filter((node): node is Rule => node.type === 'rule' && node.selector === '.backButton')
+
+    expect(mediaOverrides).toHaveLength(0)
   })
 
-  it('reserves room under the stacked actions for the centered back button in the same block', () => {
-    const actions = stackedFooter?.nodes?.find(
-      (node): node is Rule => node.type === 'rule' && node.selector === '.step :global(.txCardActions)',
-    )
+  it('should, at every width, leave no extra row under the actions for the back button', () => {
+    const actionsRules = STYLES_ROOT.nodes
+      .flatMap((node) => (node.type === 'atrule' ? (node.nodes ?? []) : [node]))
+      .filter((node): node is Rule => node.type === 'rule' && node.selector === '.step :global(.txCardActions)')
 
-    expect(declOf(actions, 'margin-bottom')).toBe('var(--space-8)')
-  })
-
-  it('no longer keys the footer off the legacy 1200px breakpoint', () => {
-    const legacy = STYLES_ROOT.nodes.find(
-      (node): node is AtRule => node.type === 'atrule' && node.name === 'media' && node.params.includes('1199'),
-    )
-
-    expect(legacy).toBeUndefined()
+    expect(actionsRules).toHaveLength(1)
+    expect(declOf(actionsRules[0], 'margin-bottom')).toBeUndefined()
   })
 })

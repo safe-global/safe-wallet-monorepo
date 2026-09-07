@@ -16,6 +16,16 @@ describe('OnboardingFooter', () => {
     expect(screen.getByRole('button', { name: /Continue/ })).toBeInTheDocument()
   })
 
+  it('should, when onBack is given, render Back and Continue as two equal halves of one row', () => {
+    const { container } = render(<OnboardingFooter onBack={jest.fn()} continueLabel="Continue" />)
+
+    const footer = container.firstElementChild
+    expect(footer).toHaveClass('flex', 'items-center')
+    expect(footer?.className).not.toMatch(/flex-col/)
+    expect(screen.getByRole('button', { name: /Back/ })).toHaveClass('flex-1')
+    expect(screen.getByRole('button', { name: /Continue/ })).toHaveClass('flex-1')
+  })
+
   it('forwards the continue test id and disables the continue button', () => {
     render(<OnboardingFooter continueLabel="Continue" continueDisabled continueTestId="next" />)
 

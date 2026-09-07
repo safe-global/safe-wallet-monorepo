@@ -32,7 +32,9 @@
   position: relative;
 }
 
-/* Back button */
+/* Bottom-left of the step's last card, in the same row as the right-aligned TxCardActions inside
+   it. --space-3 is the card's own padding, so the button lines up with the actions. This holds at
+   every width: the card is never too narrow for both buttons, so there is no stacked layout. */
 .backButton {
   position: absolute;
   left: var(--space-3);
@@ -107,21 +109,6 @@
 .widget {
   /* Height of transaction type title */
   margin-top: 30px;
-}
-
-/* 1024px is Tailwind's `lg`, the breakpoint where TxCardActions (and ReviewTransactionContent's
-   Continue button, `lg:w-auto`) switch from a stacked full-width column to a right-aligned row.
-   The back button must flip at the same width: centered under a full-width action reads as one
-   stacked footer, but centered under a right-aligned one reads as a stray second row (WA-3479). */
-@media (max-width: 1023.95px) {
-  .backButton {
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  .step :global(.txCardActions) {
-    margin-bottom: var(--space-8);
-  }
 }
 
 @media (max-width: 899.95px) {
