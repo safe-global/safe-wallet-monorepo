@@ -192,6 +192,18 @@ describe('PaginatedDataTable', () => {
       expect(screen.queryByRole('button', { name: 'Show details' })).not.toBeInTheDocument()
     })
 
+    it('lets the detail row wrap, so expanding it cannot widen the table', () => {
+      mockUseIsMobile.mockReturnValue(true)
+      renderResponsive(true)
+
+      fireEvent.click(screen.getAllByRole('button', { name: 'Show details' })[0]!)
+
+      const detailCell = screen.getByText('detail-Alice').closest('td')
+      expect(detailCell).toHaveClass('whitespace-normal')
+      expect(detailCell).toHaveClass('wrap-anywhere')
+      expect(detailCell).not.toHaveClass('whitespace-nowrap')
+    })
+
     it('expands and collapses the mobile detail row', () => {
       mockUseIsMobile.mockReturnValue(true)
       renderResponsive(true)

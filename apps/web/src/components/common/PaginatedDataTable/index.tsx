@@ -277,7 +277,11 @@ function PaginatedDataTable<T>({
 
                 {showDetail && (
                   <TableRow className={getRowClassName?.(row)}>
-                    <TableCell id={detailId} colSpan={totalColumns} className="bg-muted/30">
+                    <TableCell
+                      id={detailId}
+                      colSpan={totalColumns}
+                      className="bg-muted/30 whitespace-normal wrap-anywhere"
+                    >
                       {renderRowDetail?.(row)}
                     </TableCell>
                   </TableRow>
