@@ -139,8 +139,7 @@ const SpaceAddressBook = () => {
 
           {(activeTab === 'workspace' || activeTab === 'mine') && (
             // mb-4 on top of the Tabs root's own gap-2: 8px alone left the search almost touching
-            // the table card below it.
-            <div className="mt-6 mb-4 flex items-center gap-2">
+            <div className="mt-6 mb-4 flex flex-wrap items-center gap-2">
               {/* Only rendered when it holds an action. An always-present wrapper is still a flex
                   item when empty, so the row's gap-2 pushed the search 8px right of the table card
                   it sits above — three different left edges for viewers without admin rights. */}

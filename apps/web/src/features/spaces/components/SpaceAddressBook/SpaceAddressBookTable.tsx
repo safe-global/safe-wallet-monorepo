@@ -12,6 +12,8 @@ import { formatDate } from '@/features/spaces/utils'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import { useMemberNameResolver } from '../../hooks/useMemberNameResolver'
 import PaginatedDataTable, { type DataTableColumn, type ColumnWidth } from '../PaginatedDataTable'
+import { cn } from '@/utils/cn'
+import AddressCell from './AddressCell'
 
 export type AddressBookEntry = SpaceAddressBookItemDto & {
   isLocal: boolean
@@ -78,13 +80,20 @@ function SpaceAddressBookTable({
       minWidth: 120,
       emphasis: 'strong',
       sortValue: (e) => e.name,
-      cell: (entry) => (
-        <div className="flex items-center gap-1.5 overflow-hidden">
-          {entry.isLocal && <HardDrive className="text-muted-foreground size-4 flex-shrink-0" />}
-          <Tooltip>
-            <TooltipTrigger className="min-w-0 truncate text-left">{entry.name}</TooltipTrigger>
-            <TooltipContent>{entry.name}</TooltipContent>
-          </Tooltip>
+      // Compact drops the address column, so the address rides under the name and a long name
+      // wraps into the width that frees up instead of truncating.
+      cell: (entry, { isCompact }) => (
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <div className="flex items-center gap-1.5 overflow-hidden">
+            {entry.isLocal && <HardDrive className="text-muted-foreground size-4 flex-shrink-0" />}
+            <Tooltip>
+              <TooltipTrigger className={cn('min-w-0 text-left', !isCompact && 'truncate')}>
+                {entry.name}
+              </TooltipTrigger>
+              <TooltipContent>{entry.name}</TooltipContent>
+            </Tooltip>
+          </div>
+          {isCompact && <AddressCell address={entry.address} isCompact />}
         </div>
       ),
     },
@@ -93,21 +102,9 @@ function SpaceAddressBookTable({
       header: 'Address',
       width: hasMiddleColumn ? '30%' : '40%',
       minWidth: 240,
+      priority: 'secondary',
       sortValue: (e) => e.address,
-      cell: (entry, { isCompact }) => (
-        <div className="text-[0.8em] font-mono [&_a]:size-4 [&_button]:size-4 [&_svg]:size-4">
-          <EthHashInfo
-            address={entry.address}
-            shortAddress={isCompact}
-            showPrefix={false}
-            showName={false}
-            highlight4bytes
-            hasExplorer
-            showCopyButton
-            avatarSize={24}
-          />
-        </div>
-      ),
+      cell: (entry) => <AddressCell address={entry.address} />,
     },
     {
       id: 'chains',

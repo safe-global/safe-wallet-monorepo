@@ -154,6 +154,32 @@ describe('SpaceAddressBookTable', () => {
     expect(screen.getByRole('button', { name })).toBeInTheDocument()
   })
 
+  it('truncates the name on desktop and wraps it on mobile, where the address column is gone', () => {
+    const name = 'A very long contact name that would overflow the Name column'
+    const entry = entryBuilder().with({ name, createdBy: faker.internet.email() }).build()
+
+    const { unmount } = render(<SpaceAddressBookTable entries={[entry]} />)
+    expect(screen.getByRole('button', { name })).toHaveClass('truncate')
+    expect(screen.getByText('Address')).toBeInTheDocument()
+    unmount()
+
+    mockUseIsMobile.mockReturnValue(true)
+    render(<SpaceAddressBookTable entries={[entry]} />)
+    expect(screen.getByRole('button', { name })).not.toHaveClass('truncate')
+    expect(screen.queryByText('Address')).not.toBeInTheDocument()
+  })
+
+  it('moves the address under the name on mobile', () => {
+    mockUseIsMobile.mockReturnValue(true)
+    const entry = entryBuilder().with({ createdBy: faker.internet.email() }).build()
+
+    render(<SpaceAddressBookTable entries={[entry]} />)
+
+    const nameCell = screen.getByRole('button', { name: entry.name }).closest('td')
+    expect(nameCell).toContainElement(screen.getByTestId('eth-hash-info'))
+    expect(screen.getByTestId('eth-hash-info')).toHaveAttribute('data-short-address', 'true')
+  })
+
   it('shortens the address on mobile and shows it in full on desktop', () => {
     // createdBy as an email keeps EthHashInfo unique to the Address column
     const createdBy = faker.internet.email()
