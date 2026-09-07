@@ -3,7 +3,7 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import PaginatedDataTable, { type DataTableColumn } from '@/features/spaces/components/PaginatedDataTable'
+import PaginatedDataTable, { type DataTableColumn } from '@/components/common/PaginatedDataTable'
 import type { AddressEntry } from '@/components/address-book/EntryDialog'
 import EntryDialog from '@/components/address-book/EntryDialog'
 import ExportDialog from '@/components/address-book/ExportDialog'

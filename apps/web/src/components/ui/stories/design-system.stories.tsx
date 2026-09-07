@@ -961,8 +961,8 @@ export const Tables: Story = {
           <ul className="flex flex-col">
             <CatalogRow
               name="PaginatedDataTable"
-              use="Newer typed-column grid (alignment, emphasis, sticky, responsive column drop). Powers the Spaces address book, members and requests."
-              to="Features/Spaces/PaginatedDataTable"
+              use="Newer typed-column grid (alignment, emphasis, sticky, responsive column drop). Powers the Safe address book, and the Spaces address book, members and requests."
+              to="Components/Common/PaginatedDataTable"
               review="The generic-grid overlap with EnhancedTable is the main thing to resolve; its own note wants the bounded column variants promoted onto the ui/table primitive."
             />
             <CatalogRow
