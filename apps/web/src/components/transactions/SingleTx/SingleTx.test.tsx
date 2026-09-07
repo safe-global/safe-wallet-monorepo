@@ -91,10 +91,12 @@ describe('SingleTx', () => {
       expect(screen.getByText('Failed to load transaction')).toBeInTheDocument()
     })
 
-    await waitFor(() => {
-      fireEvent.click(screen.getByText('Details'))
-      expect(screen.getByText('Server error')).toBeInTheDocument()
-    })
+    // A known CGW response state shows the code-only support reference instead
+    // of a Details toggle revealing the raw response (WA-3252).
+    expect(screen.getByTestId('error-details')).toBeInTheDocument()
+    expect(screen.getByText('CGW-500')).toBeInTheDocument()
+    expect(screen.queryByText('Details')).not.toBeInTheDocument()
+    expect(screen.queryByText('Server error')).not.toBeInTheDocument()
   })
 
   it('shows an error when transaction is not from the opened Safe', async () => {
