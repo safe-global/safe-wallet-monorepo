@@ -105,7 +105,7 @@ describe('SafeScopeProvider', () => {
     )
   })
 
-  it('switching to a Safe on another chain rebuilds everything and never serves the old Safe (C17e)', async () => {
+  it('switching to a Safe on another chain rebuilds everything and never serves the old Safe', async () => {
     const { result } = renderHook(useProbe, {
       wrapper: wrapperWith({ chainId: safeA.chainId, safeAddress: safeA.address.value }),
     })
@@ -127,7 +127,7 @@ describe('SafeScopeProvider', () => {
     )
   })
 
-  it('reports safeLoading=true while a mid-flow switch is in flight, even though isLoading alone is false (F3)', async () => {
+  it('reports safeLoading=true while a mid-flow switch is in flight, even though isLoading alone is false', async () => {
     const { result } = renderHook(useProbe, {
       wrapper: wrapperWith({ chainId: safeA.chainId, safeAddress: safeA.address.value }),
     })

@@ -29,10 +29,10 @@ import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 /**
  * The SDK for the Safe being transacted on.
  *
- * With a `scope` (Space-level flow) it is that Safe's instance — never the singleton, even if the
- * scoped one is not ready yet. Without one it is the Safe-level singleton bound to the URL Safe —
+ * With a `scope` (Space-level flow) it is that Safe's own instance — never the app-wide one, even if the
+ * scoped one is not ready yet. Without one it is the app-wide SDK that `useInitSafeCoreSDK` binds to the URL Safe —
  * unless a `SafeScopeProvider` is mounted and the caller simply forgot to pass its scope, in which
- * case using the singleton would silently sign for the wrong (URL) Safe, so this throws instead.
+ * case falling back to that URL-Safe SDK would silently sign for the wrong Safe, so this throws instead.
  */
 export const getAndValidateSafeSDK = (scope?: TxSenderScope): Safe => {
   if (scope) {

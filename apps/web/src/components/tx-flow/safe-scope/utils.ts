@@ -1,7 +1,7 @@
-import type { SafeScopeTarget } from './types'
+import type { SafeScopeKey, SafeScopeTarget } from './types'
 
 /** Same shape as `SafeAccountSelector`'s `buildSafeAccountId`, so the selector's value can be passed straight through. */
-export const buildSafeScopeKey = (chainId: string, safeAddress: string): string => `${chainId}:${safeAddress}`
+export const buildSafeScopeKey = (chainId: string, safeAddress: string): SafeScopeKey => `${chainId}:${safeAddress}`
 
 export const parseSafeScopeKey = (key: string): SafeScopeTarget | undefined => {
   const separator = key.indexOf(':')

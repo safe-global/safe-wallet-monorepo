@@ -3,8 +3,46 @@ import { Button } from '@/components/ui/button'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { SafeScopeProvider } from './SafeScopeProvider'
-import { useSafeScopeControls } from './context'
-import { SafeScopeProbe } from './SafeScopeProbe'
+import { useSafeScope, useSafeScopeControls } from './context'
+import type { ReactElement } from 'react'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import useChainId from '@/hooks/useChainId'
+import { useCurrentChain } from '@/hooks/useChains'
+import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
+
+/** Renders what the tx-flow's hooks currently resolve to. Lives in this stories file only — nothing in the app imports it. */
+const SafeScopeProbe = (): ReactElement => {
+  const scope = useSafeScope()
+  const { safe, safeAddress, safeLoaded } = useSafeInfo()
+  const chainId = useChainId()
+  const chain = useCurrentChain()
+  const sdk = useSafeSDK()
+  const provider = useWeb3ReadOnly()
+
+  const rows: Array<[string, string]> = [
+    ['scopeKey', scope?.scopeKey ?? '— (no scope: Safe-level behaviour)'],
+    ['useChainId()', chainId],
+    ['useCurrentChain()', chain?.chainName ?? '—'],
+    ['useSafeInfo().safeAddress', safeAddress || '—'],
+    ['useSafeInfo().safe.threshold', safeLoaded ? String(safe.threshold) : 'loading…'],
+    ['useSafeSDK()', sdk ? 'ready' : '—'],
+    ['useWeb3ReadOnly()', provider ? 'ready' : '—'],
+  ]
+
+  return (
+    <table className="text-sm font-mono">
+      <tbody>
+        {rows.map(([label, value]) => (
+          <tr key={label}>
+            <td className="pr-4 text-muted-foreground">{label}</td>
+            <td data-testid={label}>{value}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )
+}
 
 // The Safe the URL/Redux would point at on a Safe-level route.
 const urlSafe = extendedSafeInfoBuilder().with({ chainId: '11155111' }).build()
@@ -38,7 +76,7 @@ type Story = StoryObj<typeof meta>
 /** Safe-level baseline: no provider, hooks read Redux/URL. */
 export const NoScope: Story = {}
 
-/** Space-level: the probe resolves to the scoped Safe although Redux still holds the URL Safe (C17c). */
+/** Space-level: the probe resolves to the scoped Safe although Redux still holds the URL Safe. */
 export const Probe: Story = {
   render: () => (
     <SafeScopeProvider initial={safeA}>
@@ -64,7 +102,7 @@ const Switcher = () => {
   )
 }
 
-/** Switching mid-flow: every row follows the new Safe; nothing from the previous one lingers (C17e). */
+/** Switching mid-flow: every row follows the new Safe; nothing from the previous one lingers. */
 export const SwitchScope: Story = {
   render: () => (
     <SafeScopeProvider>

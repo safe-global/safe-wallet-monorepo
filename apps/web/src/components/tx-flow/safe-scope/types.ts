@@ -3,6 +3,9 @@ import type { JsonRpcProvider } from 'ethers'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 
+/** The scope's identity as one string: `${chainId}:${safeAddress}`. */
+export type SafeScopeKey = `${string}:${string}`
+
 /** The Safe a Space-level flow is operating on. Two strings — no dependency on how they were chosen. */
 export type SafeScopeTarget = {
   chainId: string
@@ -11,8 +14,11 @@ export type SafeScopeTarget = {
 
 /** Everything the tx-flow needs about the selected Safe, resolved from `SafeScopeTarget`. */
 export type SafeScope = SafeScopeTarget & {
-  /** `${chainId}:${safeAddress}` — use as the reset dependency when the Safe changes (C15 / C17e). */
-  scopeKey: string
+  /**
+   * `${chainId}:${safeAddress}` — changes exactly when the selected Safe changes. Use it as the
+   * dependency that resets Safe-derived state (token lists, fee estimates, form selections).
+   */
+  scopeKey: SafeScopeKey
   /** Full SafeState from CGW with `deployed: true`. Absent until loaded. */
   safe?: ExtendedSafeInfo
   safeLoaded: boolean

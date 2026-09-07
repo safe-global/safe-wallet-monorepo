@@ -172,9 +172,9 @@ const safeSDKStore = new ExternalStore<Safe | undefined>()
 export const getSafeSDK = safeSDKStore.getStore
 export const setSafeSDK = safeSDKStore.setStore
 
-/** The Safe-level singleton, or the scoped instance inside a Space-level flow (`undefined` while it initialises). */
+/** The app-wide SDK bound to the URL Safe, or the scoped instance inside a Space-level flow (`undefined` while it initialises). */
 export const useSafeSDK = (): Safe | undefined => {
   const scope = useSafeScope()
-  const singleton = safeSDKStore.useStore()
-  return scope ? scope.sdk : singleton
+  const urlSafeSdk = safeSDKStore.useStore()
+  return scope ? scope.sdk : urlSafeSdk
 }

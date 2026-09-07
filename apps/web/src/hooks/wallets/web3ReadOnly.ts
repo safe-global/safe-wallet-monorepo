@@ -18,6 +18,6 @@ export const setWeb3ReadOnly = web3ReadOnlyStore.setStore
 /** The URL-chain provider, or the scoped chain's provider inside a Space-level flow. */
 export const useWeb3ReadOnly = (): JsonRpcProvider | undefined => {
   const scope = useSafeScope()
-  const singleton = web3ReadOnlyStore.useStore()
-  return scope ? scope.web3ReadOnly : singleton
+  const urlChainWeb3 = web3ReadOnlyStore.useStore()
+  return scope ? scope.web3ReadOnly : urlChainWeb3
 }

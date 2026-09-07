@@ -5,6 +5,7 @@ import { safeTxBuilder } from '@/tests/builders/safeTx'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { chainBuilder } from '@/tests/builders/chains'
 import { SafeScopeContext } from '@/components/tx-flow/safe-scope/context'
+import { buildSafeScopeKey } from '@/components/tx-flow/safe-scope/utils'
 import * as txSender from '@/services/tx/tx-sender'
 import * as useWalletHooks from '@/hooks/wallets/useWallet'
 import * as useOnboardHooks from '@/hooks/wallets/useOnboard'
@@ -31,7 +32,7 @@ const scopedSafe = extendedSafeInfoBuilder().build()
 const scope = {
   chainId: scopedSafe.chainId,
   safeAddress: scopedSafe.address.value,
-  scopeKey: `${scopedSafe.chainId}:${scopedSafe.address.value}`,
+  scopeKey: buildSafeScopeKey(scopedSafe.chainId, scopedSafe.address.value),
   safe: scopedSafe,
   safeLoaded: true,
   safeLoading: false,
@@ -50,7 +51,7 @@ const relaySafe = extendedSafeInfoBuilder().with({ threshold: 1 }).build()
 const relayScope = {
   chainId: relaySafe.chainId,
   safeAddress: relaySafe.address.value,
-  scopeKey: `${relaySafe.chainId}:${relaySafe.address.value}`,
+  scopeKey: buildSafeScopeKey(relaySafe.chainId, relaySafe.address.value),
   safe: relaySafe,
   safeLoaded: true,
   safeLoading: false,
@@ -97,11 +98,11 @@ describe('useTxActions under a SafeScope', () => {
     )
   })
 
-  it('proposeTx reads chainId/safeAddress from the scope target while its SafeState is still loading (F6)', async () => {
+  it('proposeTx reads chainId/safeAddress from the scope target while its SafeState is still loading', async () => {
     const loadingScope = {
       chainId: '137',
       safeAddress: '0x0000000000000000000000000000000000000789',
-      scopeKey: '137:0x0000000000000000000000000000000000000789',
+      scopeKey: buildSafeScopeKey('137', '0x0000000000000000000000000000000000000789'),
       safe: undefined,
       safeLoaded: false,
       safeLoading: true,
