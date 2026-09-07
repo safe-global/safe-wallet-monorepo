@@ -127,7 +127,10 @@ export const SafeScopeProvider = ({ initial, children }: SafeScopeProviderProps)
       scopeKey,
       safe,
       safeLoaded: safe !== undefined,
-      safeLoading: isLoading || isFetching,
+      // `isFetching` alone would also be true during every 15s background poll of the SAME target;
+      // gating it on `safe === undefined` keeps `safeLoading` true only while a (new) target
+      // has nothing to show yet, so scoped consumers don't flicker into loading states on each poll.
+      safeLoading: isLoading || (isFetching && safe === undefined),
       safeError,
       chain,
       web3ReadOnly,

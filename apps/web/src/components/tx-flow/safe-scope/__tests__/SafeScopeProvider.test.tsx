@@ -151,6 +151,36 @@ describe('SafeScopeProvider', () => {
     expect(result.current.scope?.safeLoading).toBe(true)
     expect(result.current.scope?.safeLoaded).toBe(false)
     expect(result.current.scope?.safe).toBeUndefined()
+
+    // The switch to B re-ran the provider effect; flush its dynamic-import microtask inside act
+    // so the resulting setWeb3ReadOnly lands before teardown (keeps the run act()-warning-free).
+    await act(async () => {})
+  })
+
+  it('keeps safeLoading=false during a background poll of the SAME target (isFetching with data present)', async () => {
+    const { result } = renderHook(useProbe, {
+      wrapper: wrapperWith({ chainId: safeA.chainId, safeAddress: safeA.address.value }),
+    })
+    await waitFor(() => expect(result.current.scope?.sdk).toEqual({ sdkFor: safeA.address.value }))
+
+    // Every 15s poll refetch sets `isFetching: true` while `currentData` stays populated —
+    // that must NOT read as loading, or scoped consumers flicker on each poll.
+    mockQuery.mockImplementation((args: { chainId: string; safeAddress: string } | symbol) =>
+      typeof args === 'symbol'
+        ? { currentData: undefined, error: undefined, isLoading: false, isFetching: false }
+        : {
+            currentData: safesByAddress[args.safeAddress],
+            error: undefined,
+            isLoading: false,
+            isFetching: true,
+          },
+    )
+    // Re-render with the poll's flags active (same target, nothing else changes).
+    act(() => result.current.controls.setScope(safeA.chainId, safeA.address.value))
+
+    expect(result.current.scope?.safeLoading).toBe(false)
+    expect(result.current.scope?.safeLoaded).toBe(true)
+    expect(result.current.scope?.safe?.address.value).toBe(safeA.address.value)
   })
 
   it('switching to a Safe on the SAME chain reuses the provider instance and only resets the SDK', async () => {
