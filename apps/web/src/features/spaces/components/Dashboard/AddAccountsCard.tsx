@@ -21,8 +21,8 @@ const AddAccountsCard = () => {
           </Typography>
 
           <Typography variant="paragraph" color="muted" className="mb-4">
-            Start by adding Safe accounts to your workspace. Any accounts that are linked to your connected wallet can
-            be added to the workspace.
+            Start by adding Safe accounts to your Workspace. Any accounts that are linked to your connected wallet can
+            be added to the Workspace.
           </Typography>
 
           <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.space_dashboard_card}>

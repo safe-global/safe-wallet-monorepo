@@ -33,7 +33,7 @@ import { AdminOnlyWorkspaceTooltip } from '../../../AdminOnlyWorkspaceTooltip'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getDeterministicColor } from '@/utils/colors'
 
-export const SAFE_ALREADY_IN_WORKSPACE_TOOLTIP = 'Safe is already in this workspace'
+export const SAFE_ALREADY_IN_WORKSPACE_TOOLTIP = 'Safe is already in this Workspace'
 
 const MENU_ITEM_CLASS = 'cursor-pointer gap-3 min-h-9 px-2 py-2'
 
@@ -57,7 +57,7 @@ export const SpaceSelectorDropdown = ({
   const displayName = truncateSpaceName(spaceName, SPACE_SELECTOR_NAME_MAX_LENGTH)
   const initial = spaceName.charAt(0).toUpperCase()
   const selectedSpaceColor = spaceName ? getDeterministicColor(spaceName) : undefined
-  const triggerAriaLabel = triggerVariant === 'addToWorkspace' ? 'Add Safe to workspace' : 'Open workspace selector'
+  const triggerAriaLabel = triggerVariant === 'addToWorkspace' ? 'Add Safe to Workspace' : 'Open Workspace selector'
   const safe = useSafeQueryParam() || undefined
   const safeAddress = useSafeAddressFromUrl()
   const chainId = useChainId()
@@ -163,7 +163,7 @@ export const SpaceSelectorDropdown = ({
             <span className={css.addSafeToWorkspaceRing}>
               <CircleFadingPlus className={css.addSafeToWorkspacePlusIcon} />
             </span>
-            <span className={css.addSafeToWorkspaceLabel}>Add Safe to workspace</span>
+            <span className={css.addSafeToWorkspaceLabel}>Add Safe to Workspace</span>
           </>
         ) : (
           <>
@@ -217,7 +217,7 @@ export const SpaceSelectorDropdown = ({
           return (
             <Tooltip key="add-space-tooltip">
               <TooltipTrigger render={<div className="block w-full" />}>{addSpaceMenuItem}</TooltipTrigger>
-              <TooltipContent side="right">Limit of {SPACES_LIMIT} workspaces reached</TooltipContent>
+              <TooltipContent side="right">Limit of {SPACES_LIMIT} Workspaces reached</TooltipContent>
             </Tooltip>
           )
         })()}
@@ -312,7 +312,7 @@ const SpaceMenuRow = ({
     return (
       <Tooltip>
         <TooltipTrigger render={<span className="block w-full" />}>{menuItem}</TooltipTrigger>
-        <TooltipContent side="right">{`You can have up to ${SAFE_ACCOUNTS_LIMIT} Safes per workspace`}</TooltipContent>
+        <TooltipContent side="right">{`You can have up to ${SAFE_ACCOUNTS_LIMIT} Safes per Workspace`}</TooltipContent>
       </Tooltip>
     )
   }
