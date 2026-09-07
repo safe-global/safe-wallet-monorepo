@@ -51,20 +51,7 @@ const mapContext = (context?: ErrorContext): Record<string, string | number | bo
 }
 
 /**
- * A pre-execution gas estimation that the node says reverts is a *prediction*,
- * not a surfaced failure: it renders the "This transaction will most likely
- * fail" warning while the user is still deciding whether to execute. Counting
- * it would report an error for every transaction the user correctly rejects,
- * and a second one for those executed anyway (already reported as `_804`).
- *
- * An estimation that failed because the node could not be reached is a genuine
- * RPC failure and keeps reporting — the same split `TxCheckError` makes when it
- * chooses between "will most likely fail" and "could not check this
- * transaction". Either way the revert still reaches Datadog via `logger.warn`.
- *
- * Keyed off the code's own classification rather than the normalized type,
- * because `normalizeError` rewrites the type to `on_chain_revert` whenever the
- * node returned a GS code.
+ * Ignore gas estimation reverts (prediction), only track real failures.
  */
 const isPredictedRevert = (code: number, message: string): boolean =>
   ERROR_CODE_MAP[code]?.type === ErrorType.GAS_ESTIMATION_FAILED && isRevertError({ message })
@@ -113,19 +100,7 @@ const claimOccurrences = (key: string, now: number): number | undefined => {
 }
 
 /**
- * Emits the single `Error Surfaced` analytics event (WA-2775).
- *
- * Sends enums (+ whitelisted context like txHash) only — the raw/sanitized
- * message stays out of Mixpanel so no wallet, address or calldata can leak into
- * analytics (AC7). Reused properties (Blockchain Network, Safe Address, EOA
- * Wallet Label) are attached automatically as Mixpanel super-properties.
- *
- * Identical events inside `DEDUPE_WINDOW_MS` are collapsed into one, which then
- * reports the collapsed count as `Error Occurrences`, so repeat-firing sources
- * (polling loaders, a hook mounted several times over one failure) stop
- * inflating the event volume without losing the fact that they recurred. Totals
- * are therefore `sum(Error Occurrences)`, not an event count. Deduplication is
- * deliberately Mixpanel-only — Datadog RUM keeps full per-occurrence fidelity.
+ * Tracks a deduped `Error Surfaced` event, enums only, sum occurrences.
  */
 export const trackErrorSurfaced = ({ code, message, isUserFacing, context }: SurfacedError): void => {
   // User-driven outcomes (rejection, approval-prompt expiry) are not errors —
