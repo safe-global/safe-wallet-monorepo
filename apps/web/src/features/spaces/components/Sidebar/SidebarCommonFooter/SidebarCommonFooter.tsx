@@ -46,10 +46,9 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
   // Own flag, separate from the 2FA feature itself, so the card can be switched off on its own.
   const isTwoFactorCardEnabled = useHasFeature(FEATURES.TWO_FACTOR_AWARENESS_BANNER) === true
   const [isTwoFactorCardDismissed, dismissTwoFactorCard] = useTwoFactorAwarenessDismissed()
-  // The card speaks about the current Workspace and its Continue link needs one, so it is limited
-  // to the Workspaces sidebar. Like the Safe Pro banner, it is hidden on its own destination.
+  // Continue needs a Workspace to link to, so the card waits until one is known. Like the Safe Pro
+  // banner, it is hidden on its own destination.
   const showTwoFactorCard =
-    !isSafeSidebar &&
     isTwoFactorCardEnabled &&
     !isTwoFactorCardDismissed &&
     spaceId !== null &&

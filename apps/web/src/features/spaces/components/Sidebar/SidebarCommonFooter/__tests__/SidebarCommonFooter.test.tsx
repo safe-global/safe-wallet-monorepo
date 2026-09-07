@@ -195,11 +195,11 @@ describe('SidebarCommonFooter', () => {
       expect(screen.queryByTestId('workspace-2fa-awareness-card')).not.toBeInTheDocument()
     })
 
-    it('hides the card on the Safe sidebar', () => {
+    it('shows the card on the Safe sidebar when a space is known', () => {
       mockIsTwoFactorBannerEnabled = true
       render(<SidebarCommonFooter isSafeSidebar />)
 
-      expect(screen.queryByTestId('workspace-2fa-awareness-card')).not.toBeInTheDocument()
+      expect(screen.getByTestId('workspace-2fa-awareness-card')).toHaveAttribute('data-space-id', 'space-uuid')
     })
 
     it('hides the card when no space is known', () => {
