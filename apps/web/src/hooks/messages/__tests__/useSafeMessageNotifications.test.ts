@@ -6,6 +6,7 @@ import { showNotification } from '@/store/notificationsSlice'
 import { renderHook } from '@/tests/test-utils'
 import useSafeMessageNotifications, { _getSafeMessagesAwaitingConfirmations } from '../useSafeMessageNotifications'
 import type { PendingSafeMessagesState } from '@/store/pendingSafeMessagesSlice'
+import { mapLedgerError } from '@/services/onboard/ledger-errors'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 jest.mock('@/store/notificationsSlice', () => {
@@ -153,6 +154,25 @@ describe('useSafeMessageNotifications', () => {
     expect(showNotification).toHaveBeenCalledWith({
       message: 'Confirming the message failed. Please try again.',
       detailedMessage: 'Other error',
+      groupKey: '0x789',
+      variant: 'error',
+    })
+  })
+
+  it('should translate a Ledger device failure and withhold its raw details', () => {
+    renderHook(() => useSafeMessageNotifications())
+
+    const cause = mapLedgerError({ _tag: 'InvalidStatusWordError', originalError: new Error('no signature returned') })
+    const error = Object.assign(
+      new Error(`An unknown RPC error occurred.\n\nDetails: ${cause.message}\n\nVersion: viem@2.52.2`),
+      { cause },
+    )
+
+    safeMsgDispatch(SafeMsgEvent.CONFIRM_PROPOSE_FAILED, { messageHash: '0x789', error })
+
+    expect(showNotification).toHaveBeenCalledWith({
+      message: 'Your Ledger could not complete the request.',
+      detailedMessage: undefined,
       groupKey: '0x789',
       variant: 'error',
     })

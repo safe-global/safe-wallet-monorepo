@@ -2,7 +2,7 @@ import { useMemo, useRef, type Dispatch, type ReactNode, type SetStateAction } f
 import partition from 'lodash/partition'
 import { createPortal } from 'react-dom'
 import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd'
-import { TableBody } from '@/components/ui/table'
+import { TableBody, tableVariants } from '@/components/ui/table'
 import tableCss from './styles.module.css'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { reorderByKey } from '@/utils/reorder'
@@ -218,8 +218,8 @@ const DraggableGroupRows = ({
           return snapshot.isDragging
             ? createPortal(
                 <table
-                  className={`caption-bottom text-sm ${tableCss.table}`}
-                  style={{ width: draggedRowWidth, borderCollapse: 'separate', borderSpacing: 0, margin: 0 }}
+                  className={`${tableVariants({ variant: 'panel' })} ${tableCss.accounts}`}
+                  style={{ width: draggedRowWidth, margin: 0 }}
                 >
                   <TableBody>{row}</TableBody>
                 </table>,
