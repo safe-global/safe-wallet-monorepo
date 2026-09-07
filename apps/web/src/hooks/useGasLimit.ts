@@ -1,14 +1,11 @@
-import { useEffect } from 'react'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import useChainId from '@/hooks/useChainId'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
-import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
 import chains from '@safe-global/utils/config/chains'
 import { useSigner } from './wallets/useWallet'
 import { useSafeSDK } from './coreSDK/safeCoreSDK'
 import useIsSafeOwner from './useIsSafeOwner'
-import { Errors, logError } from '@/services/exceptions'
 import useSafeInfo from './useSafeInfo'
 import {
   getEncodedSafeTx,
@@ -82,12 +79,10 @@ const useGasLimit = (
     safe,
   ])
 
-  useEffect(() => {
-    if (gasLimitError) {
-      logError(Errors._612, gasLimitError.message, getRpcErrorContext(web3ReadOnly))
-    }
-  }, [gasLimitError, web3ReadOnly])
-
+  // Deliberately not reported here: this hook has several concurrent owners on
+  // the Execute step (the form, the fee preview, the gas-too-high check), so one
+  // failed estimation would be reported several times over. The owner that
+  // surfaces the failure to the user reports it instead.
   return { gasLimit, gasLimitError, gasLimitLoading }
 }
 
