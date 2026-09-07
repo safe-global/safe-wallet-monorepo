@@ -132,14 +132,9 @@ export type SafeAccountsTableProps = {
   'data-testid'?: string
 }
 
-// Declared as a hoisted `function` (not a `const` arrow) on purpose: this component sits in a
-// cross-feature import cycle (myAccounts ↔ spaces barrels), and webpack's React Refresh runtime
-// eagerly reads every export at module-eval time. A `const` binding read mid-cycle throws
-// "Cannot access before initialization" (TDZ) and crashes Storybook; a hoisted function is
-// readable even while its module is still initializing. The app (Rspack) tolerates the cycle
-// regardless. Must be `export default function` inline (not a trailing `export default X`) — the
-// latter compiles to a TDZ `__WEBPACK_DEFAULT_EXPORT__` temp that reintroduces the crash. See
-// docs/feature-architecture.md.
+// Hoisted `export default function` (inline, not `const` nor a trailing `export default X`): in the
+// myAccounts ↔ spaces import cycle, webpack's React Refresh reads a `const`/`__WEBPACK_DEFAULT_EXPORT__`
+// temp mid-cycle and throws TDZ, crashing Storybook; a function hoists above it. See docs/feature-architecture.md.
 export default function SafeAccountsTable({
   items,
   columns,

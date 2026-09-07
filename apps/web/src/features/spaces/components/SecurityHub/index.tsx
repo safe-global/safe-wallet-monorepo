@@ -22,10 +22,8 @@ const shieldLogoOnHover = [
 ].join(' ')
 
 const SecurityHub = (): ReactElement => {
-  // Remount the per-space body on every space switch. The scan-results map and the
-  // auto-scan queue live in `SecurityHubContent`; without this boundary a slow scan
-  // from the previous space can complete after the switch and write its (stale) score
-  // back into the newly selected space — most visible on large, slow-scanning spaces.
+  // Remount the per-space body on every space switch: the scan-results map and auto-scan queue live in
+  // `SecurityHubContent`, so without this boundary a slow prior-space scan can finish after the switch and write its stale score into the new space.
   const currentSpaceId = useCurrentSpaceId()
   const isDarkMode = useDarkMode()
   const SafeShieldLogo = isDarkMode ? SafeShieldLogoFullDark : SafeShieldLogoFull

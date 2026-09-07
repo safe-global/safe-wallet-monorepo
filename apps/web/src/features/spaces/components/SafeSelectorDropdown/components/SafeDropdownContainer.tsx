@@ -201,10 +201,8 @@ const SafeDropdownContainer = ({
           value={item.id}
           // Scroll anchor for the open-to-current-safe behaviour (see the scrollIntoView effect).
           data-current-safe={item.id === selectedItemId ? 'true' : undefined}
-          // base-ui focuses the hovered/active row, so focus:bg-muted is the hover grey; data-selected
-          // keeps the open safe green, and [&[data-selected]:focus] deepens it on hover (wins by
-          // specificity). [&>div]:min-w-0/shrink let the name column truncate; [&>span.absolute]:hidden
-          // drops the built-in checkmark that would overlap the balance column.
+          // base-ui focuses hovered rows: focus:bg-muted is hover grey, data-selected keeps the open safe green,
+          // [&[data-selected]:focus] deepens on hover. min-w-0/shrink truncate the name; [&>span.absolute]:hidden drops the checkmark that would overlap the balance.
           className="group/row h-auto py-3 px-3 rounded-lg my-0.5 cursor-pointer focus:bg-muted data-[selected]:bg-sidebar-accent [&[data-selected]:focus]:bg-[var(--color-background-light-hover)] [&>div]:min-w-0 [&>div]:shrink [&>span.absolute]:hidden"
         >
           <SafeItem {...item} onRename={handleRename} />

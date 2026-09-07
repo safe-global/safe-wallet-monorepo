@@ -20,24 +20,19 @@ export const counterfactualSyncListener = (listenerMiddleware: typeof listenerMi
       // runs, the reducer has already removed it from current state.
       const originalState = listenerApi.getOriginalState() as RootState
       const removed = originalState.undeployedSafes?.[chainId]?.[address]
-      // Nothing was actually removed by this dispatch — a prior `removeUndeployedSafe`
-      // already cleared the entry. Skip the DELETE call to avoid spamming the backend
-      // with calls that 404 (and pollute the pending-delete queue) when multiple
-      // dispatchers fire in the same tick after activation (self-heal in
-      // useLoadSafeInfo + INDEXED event in usePendingSafeStatuses).
+      // Prior `removeUndeployedSafe` already cleared this entry — skip the DELETE to avoid 404 spam
+      // (which pollutes the pending-delete queue) when multiple dispatchers fire in the same tick after
+      // activation (useLoadSafeInfo self-heal + usePendingSafeStatuses INDEXED event).
       if (!removed) return
 
-      // Backend DELETE rejects non-creators with 40x, so skip the call for safes the
-      // current user didn't create (e.g. ones synced from a space endpoint).
-      // Treat undefined as `true` for backwards compatibility with entries
-      // persisted before the isCreator flag existed.
+      // Backend DELETE rejects non-creators with 40x, so skip safes the user didn't create (e.g. synced
+      // from a space endpoint). Undefined counts as creator, for entries persisted before isCreator existed.
       const wasCreator = removed.isCreator !== false
       if (!wasCreator) return
 
-      // The user can deploy a safe before signing in with SIWE (just a wallet
-      // connection is enough). In that case we can't reach the backend yet —
-      // queue the delete to be replayed once a SIWE session exists, otherwise
-      // the next sync would re-add the now-deployed safe as undeployed.
+      // A safe can be deployed before SIWE sign-in (wallet connection alone). The backend is
+      // unreachable then, so queue the delete for replay once a SIWE session exists — otherwise the
+      // next sync re-adds the now-deployed safe as undeployed.
       if (!isAuthenticated(state)) {
         listenerApi.dispatch(enqueuePendingCfDelete({ chainId, address }))
         return

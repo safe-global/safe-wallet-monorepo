@@ -43,10 +43,8 @@ import SpacePoliciesPage from './components/Policies/Page'
 // Service imports
 import { isUnauthorized, filterSpacesByStatus, getNonDeclinedSpaces } from './utils'
 
-// Flat structure - naming conventions determine stub behavior:
-// - PascalCase → component (stub renders null)
-// - camelCase → service (undefined when not ready)
-// NO hooks here - they're exported from index.ts
+// Flat structure; naming determines stub behavior: PascalCase → component (stub renders null),
+// camelCase → service (undefined when not ready). NO hooks here — they're exported from index.ts.
 const feature: SpacesContract = {
   // Components
   SpaceDashboard,

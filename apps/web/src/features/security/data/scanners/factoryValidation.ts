@@ -13,10 +13,8 @@ export const factoryValidationScanner: SecurityScanner = {
     const now = new Date().toISOString()
 
     if (!creationInfo) {
-      // Creation transaction data isn't loaded — distinct from "loaded and missing a
-      // factory". Return `inconclusive` so we don't penalize the score or label the Safe
-      // as deployed from an unrecognized source: we genuinely don't know yet, and the
-      // user shouldn't see the result flip between scans once creationTx resolves.
+      // Creation data not loaded yet (distinct from "loaded, no factory"): return `inconclusive` so
+      // we don't penalize the score or flag an unrecognized source, nor flip the result once creationTx resolves.
       const score = 50
       return {
         status: 'inconclusive',

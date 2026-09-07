@@ -17,10 +17,8 @@ import type { GlobalSearchContract } from './contract'
 import GlobalSearchInput from './components/GlobalSearchInput'
 import GlobalSearchModal from './components/GlobalSearchModal'
 
-// Flat structure - naming conventions determine stub behavior:
-// - PascalCase -> component (stub renders null)
-// - camelCase -> service (undefined when not ready)
-// NO hooks here - they're exported from index.ts
+// Naming determines stub behavior: PascalCase -> component (renders null), camelCase -> service (undefined until ready).
+// NO hooks here - they're exported from index.ts.
 const feature: GlobalSearchContract = {
   // Components
   GlobalSearchInput,

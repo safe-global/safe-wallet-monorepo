@@ -97,16 +97,9 @@ const useSafeScanContext = (
   const { configs: allChains } = useChains()
 
   return useMemo(() => {
-    // Wait for ALL dependent queries to FULLY settle — not just stop initial loading.
-    // `isLoading` is only true on the very first fetch and there are windows
-    // (uninitialized → pending transition, errored args, re-fetches) where
-    // `isLoading=false` while `currentData` is still undefined. Scanners launched in
-    // one of those windows run with `creationInfo=null` and produce the misleading
-    // "creation data not yet available" result, then flip on the next rescan when
-    // the underlying query has finally populated data. Using `isFetching` catches
-    // both initial fetches and refetches; we additionally require data to be
-    // present unless the query has definitively errored (in which case the scanner
-    // handles missing data with `inconclusive`).
+    // Gate on `isFetching` (not `isLoading`, which is only true on first fetch) plus data present:
+    // otherwise scanners run mid-refetch with `creationInfo=null` and give a misleading result that
+    // flips on rescan. Skip the data requirement once the query has definitively errored.
     if (!selected || !entry) return null
     if (isSafeFetching || !safeInfo) return null
     if (!overviewData && isOverviewFetching) return null

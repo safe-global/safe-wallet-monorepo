@@ -5,11 +5,9 @@ import useSafeScanContext, { type OverviewData } from './useSafeScanContext'
 import type { SpaceSafeEntry, SelectedSafe } from '../components/SecurityHub'
 import { scheduleWhileVisible } from '@/utils/visibility'
 
-// How long to wait for useSafeScanContext to resolve before bailing past a target.
-// Protects against "ghost-deployed" chains: a multichain Safe entry may be flagged
-// isDeployed=true locally (because this client's undeployedSafes slice doesn't track it),
-// but be counterfactual in reality — the Safe/masterCopies/creation queries then 404 and
-// scanContext stays null forever, hanging the sequential queue on that target.
+// How long to wait for useSafeScanContext to resolve before bailing past a target. Protects against
+// "ghost-deployed" chains: a Safe flagged isDeployed=true locally but counterfactual in reality 404s on
+// the Safe/masterCopies/creation queries, so scanContext stays null forever and hangs the queue.
 const SCAN_CONTEXT_BAIL_MS = 5_000
 
 // Minimum time a user-triggered re-scan keeps its "Scanning..." state on screen. Without
@@ -146,10 +144,9 @@ const useAutoScan = (
             })
             setCurrentIndex((i) => i + 1)
 
-            // Only commit when every scanner produced a result. A thrown/timed-out
-            // scanner leaves its id absent from `results`, which would shrink the
-            // gauge's denominator and shift the score between scans of an unchanged
-            // account. Skip the commit instead — the prior complete score stays put.
+            // Only commit when every scanner produced a result. A thrown/timed-out scanner is absent from
+            // `results`, shrinking the gauge's denominator and shifting the score for an unchanged account —
+            // skip the commit so the prior complete score stays put.
             if (Object.keys(results).length < total) {
               setScanIncomplete(true)
               return

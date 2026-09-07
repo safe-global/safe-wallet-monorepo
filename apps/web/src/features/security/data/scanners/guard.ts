@@ -29,10 +29,8 @@ const isKnownZodiacGuard = (chainId: string, guardAddress: string): boolean => {
   }
 }
 
-// Pure name-only heuristic to decide whether to tag a result with the hypernative partner.
-// The authoritative on-chain check (`features/hypernative/services/hypernativeGuardCheck.ts`)
-// needs a JSON-RPC provider, which the scanner intentionally avoids. We start the name with
-// the canonical prefix to keep false positives down.
+// Name-only heuristic to tag the hypernative partner (the authoritative on-chain check in
+// `hypernative/services/hypernativeGuardCheck.ts` needs an RPC provider the scanner avoids); the canonical prefix match keeps false positives down.
 const nameSuggestsHypernativeGuard = (name?: string | null): boolean => {
   if (!name) return false
   return name.trim().toLowerCase().startsWith(HYPERNATIVE_GUARD_NAME)

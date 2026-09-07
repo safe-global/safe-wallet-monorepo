@@ -65,10 +65,9 @@ type SafeAccountTableRowProps = {
   onOverviewsLoaded: (overviews: SafeOverview[]) => void
 }
 
-// Shares the dropdown's row identity cell: clip-gated name/address tooltips and copy/explorer icons
-// revealed on row hover. Single/parent rows lead with the blockie identicon; per-chain child rows
-// carry no icon (the chain is already named beside them) — a blank icon-width spacer keeps their name
-// aligned under the parent's. `onRename`, when set, adds the hover rename pencil (non-modal surfaces).
+// Row identity cell: clip-gated name/address tooltips and hover-revealed copy/explorer icons. Single/parent
+// rows lead with the blockie identicon; per-chain child rows use a blank icon-width spacer (chain already
+// named beside them) to align under the parent. `onRename`, when set, adds the hover rename pencil.
 const NameCellContent = ({
   line,
   warning,
@@ -156,11 +155,9 @@ const NameCell = ({
   return content
 }
 
-// Always-visible grip, absolutely positioned so it reserves no layout space. Two placements:
-//  • default: inside the Name cell's left padding (the cell widens via `pl` while reordering, shifting
-//    the avatar right to make room — see the RowCell sx), used by the page lists.
-//  • inline: sits in the leading checkbox cell's own left padding (selection surfaces like the Manage
-//    list, whose table is inside a horizontally-clipping scroll container).
+// Always-visible grip, absolutely positioned so it reserves no layout space. Two placements: `default`
+// in the Name cell's left padding (cell widens via `pl` while reordering, shifting the avatar right —
+// page lists); `inline` in the leading checkbox cell's padding (selection surfaces like the Manage list).
 const ReorderHandle = ({
   dragHandleProps,
   inline,
@@ -292,9 +289,9 @@ const RowCell = ({
   renderActions?: (line: AccountLine) => ReactNode
   dragHandleProps?: DraggableProvidedDragHandleProps | null
 }) => {
-  // The draggable parent's first cell hosts the (absolutely-positioned) grip — the Name cell normally,
-  // or the leading checkbox cell in selection mode, so the grip sits left of the checkbox instead of
-  // over it. It anchors to the cell, which must let the grip overflow into the left gutter without clipping.
+  // The draggable parent's first cell hosts the absolutely-positioned grip — Name cell normally, leading
+  // checkbox cell in selection mode (grip sits left of the checkbox, not over it). The cell must let the
+  // grip overflow into the left gutter without clipping.
   const hostsHandle = isFirstCell && dragHandleProps != null
 
   return (
@@ -375,10 +372,9 @@ const SafeAccountTableRow = ({
   // (except affordances that stop propagation: the checkbox, actions, copy and explorer link).
   const rowSelectable = Boolean(checkbox) && !line.expandable && !checkbox?.disabled
 
-  // Outside selection mode the whole row is a click target: leaf rows navigate to the safe, group rows
-  // toggle their per-chain children. The name keeps its real <a> (for keyboard focus and modifier-clicks
-  // that open a new tab) and the other affordances — copy, explorer, rename, the actions menu — keep
-  // their own behaviour, so the row handler bails when the click lands on any of them.
+  // Outside selection mode the whole row is a click target: leaf rows navigate, group rows toggle children.
+  // The name keeps its real <a> (keyboard focus, modifier-click new tab) and other affordances (copy,
+  // explorer, rename, actions) keep their behaviour, so the row handler bails when a click lands on any.
   const rowNavigable = !checkbox && (line.expandable || line.href != null)
 
   const handleRowClick = (event: MouseEvent<HTMLElement>) => {

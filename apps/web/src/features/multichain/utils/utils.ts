@@ -99,11 +99,9 @@ const memoizedGetProxyCreationCode = memoize(
 // see https://docs.zksync.io/build/developer-reference/ethereum-differences/evm-instructions#address-derivation
 const ZKSYNC_CREATE2_PREFIX = keccak256(ethers.toUtf8Bytes('zksyncCreate2'))
 
-// EraVM (zksolc) SafeProxy bytecode hashes per Safe version, matching protocol-kit's
-// internal ZKSYNC_SAFE_PROXY_DEPLOYED_BYTECODE table (not publicly exported there). They
-// cannot be computed here: no package in the tree ships the raw EraVM proxy bytecode.
-// This is a closed set — EraVM deployments end at 1.4.1; from 1.5.0 zk chains ship EVM
-// (canonical) contracts only, so no new entries can ever be needed.
+// EraVM (zksolc) SafeProxy bytecode hashes per Safe version, mirroring protocol-kit's non-exported
+// ZKSYNC_SAFE_PROXY_DEPLOYED_BYTECODE. Uncomputable here (no package ships the raw EraVM bytecode) and
+// a closed set: EraVM ends at 1.4.1, and from 1.5.0 zk chains ship EVM contracts only.
 const ZKSYNC_PROXY_BYTECODE_HASH: Record<string, string> = {
   '1.3.0': '0x0100004124426fb9ebb25e27d670c068e52f9ba631bd383279a188be47e3f86d',
   '1.4.1': '0x0100003b6cfa15bd7d1cae1c9c022074524d7785d34859ad0576d8fab4305d4f',

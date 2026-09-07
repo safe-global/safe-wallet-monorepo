@@ -23,12 +23,8 @@ const MockupSidebar = ({ displayName, initial, highlight }: MockupSidebarProps) 
 
     <motion.div
       animate={{
-        // Hex inlined for the DS success-green token (--color-success-main, #00b460). Two reasons we
-        // can't use var() here: (1) motion interpolates box-shadow in JS frame-by-frame and can't
-        // resolve CSS vars at animation time, so it'd snap instead of fading; (2) the rgba() alpha
-        // form needs raw rgb channels, and Tailwind's /opacity modifier only works in utility classes,
-        // not inline strings. Safe to hardcode because --color-success-main is #00b460 in both
-        // light and dark mode (see vars.css).
+        // Hex inlined for DS success-green (--color-success-main, #00b460); var() can't be used because motion
+        // interpolates box-shadow in JS per-frame (snaps, not fades) and rgba() needs raw rgb channels. Safe — same value in both themes (see vars.css).
         scale: highlight === 'switcher' ? 1.18 : 1,
         boxShadow:
           highlight === 'switcher'

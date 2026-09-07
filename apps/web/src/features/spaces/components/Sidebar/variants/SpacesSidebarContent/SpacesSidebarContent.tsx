@@ -29,18 +29,15 @@ export const SpacesSidebarContent = ({
 
   const isItemDisabled = (item: SidebarItemConfig) => !!item.activeMemberOnly && !isActiveMember
 
-  // Match the item when the URL is the item's href or one of its sub-routes
-  // (e.g. /spaces/settings/general should highlight the Settings nav item).
-  // The spaces index (/spaces) is exact-match only — otherwise every space
-  // sub-route would also highlight Home.
+  // Match the item on its href or any sub-route (e.g. /spaces/settings/general highlights Settings).
+  // The spaces index (/spaces) is exact-match only, else every sub-route would also highlight Home.
   const isItemActive = (item: SidebarItemConfig, pathname: string) => {
     if (item.href === AppRoutes.spaces.index) return pathname === item.href
     return pathname === item.href || pathname.startsWith(`${item.href}/`)
   }
 
-  // Drop flag-gated entries when their chain feature flag is explicitly off. `undefined` means
-  // the chain config is still loading — keep the item to avoid flicker. Plans is the inverse: it
-  // shows only once SAFE_PRO_ANNOUNCEMENT is known to be on, so a slow chain config can't flash it in and out.
+  // Drop flag-gated entries when their flag is explicitly off; `undefined` means still loading, so keep the
+  // item to avoid flicker. Plans is the inverse: shown only once SAFE_PRO_ANNOUNCEMENT is known on.
   const gatedOffHrefs = useMemo(
     () =>
       new Set(

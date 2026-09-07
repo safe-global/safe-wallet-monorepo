@@ -71,10 +71,9 @@ function createStableStubProxy<T extends FeatureImplementation>(
 }
 
 // ── Shared Feature Registry ──────────────────────────────────────
-// Stores loaded features globally so multiple components calling
-// useLoadFeature(SameFeature) share a single load and get the result
-// synchronously on first render. Only successful loads are cached;
-// errors remain per-instance so retry is possible on remount.
+// Global cache so concurrent useLoadFeature(SameFeature) callers share one load and
+// get the result synchronously on first render. Only successful loads are cached;
+// errors stay per-instance so retry is possible on remount.
 
 type CachedLoadResult = { feature: unknown }
 
@@ -220,13 +219,9 @@ export function useLoadFeature<T extends FeatureImplementation>(
     }
   }, [isEnabled, handle])
 
-  // Derive meta primitives from current state. We deliberately do NOT
-  // build a `meta` object up here and feed it into the final useMemo:
-  // a fresh object reference every render would invalidate the memo on
-  // every commit, making every `useLoadFeature` consumer receive a new
-  // feature reference each time. That cascades through their downstream
-  // useEffect/useCallback dep chains and contributed to the render
-  // storm we observed in dev.
+  // Derive meta primitives, not a `meta` object: a fresh object ref each render would
+  // invalidate the final useMemo on every commit, handing every consumer a new feature
+  // reference that cascades through their useEffect/useCallback deps — the dev render storm.
   const feature = getFeature(loaded)
   const $isDisabled = isEnabled === false
   const $isReady = !!feature
