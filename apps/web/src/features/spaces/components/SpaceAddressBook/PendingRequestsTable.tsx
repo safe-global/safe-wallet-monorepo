@@ -266,7 +266,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
   )
 
   if (requests.length === 0) {
-    return <p className="text-muted-foreground text-sm">No pending requests.</p>
+    return <p className="text-muted-foreground p-4 text-sm">No pending requests.</p>
   }
 
   return (
