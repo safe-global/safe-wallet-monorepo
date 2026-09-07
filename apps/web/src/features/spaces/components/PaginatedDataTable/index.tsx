@@ -238,7 +238,11 @@ function PaginatedDataTable<T>({
 
             return (
               <Fragment key={key}>
-                <TableRow data-no-divider={showDetail ? '' : undefined} className={getRowClassName?.(row)}>
+                <TableRow
+                  data-testid="table-row"
+                  data-no-divider={showDetail ? '' : undefined}
+                  className={getRowClassName?.(row)}
+                >
                   {visibleColumns.map((column) => (
                     <TableCell
                       key={column.id}
@@ -249,6 +253,7 @@ function PaginatedDataTable<T>({
                         hideClass(column),
                         stickyClass(column),
                         !isCompact && minWidthClass(column),
+                        isCompact && 'whitespace-normal wrap-anywhere',
                       )}
                     >
                       {column.cell(row, { isCompact })}
@@ -294,6 +299,7 @@ function PaginatedDataTable<T>({
               variant="outline"
               size="icon-sm"
               aria-label="Previous page"
+              data-testid="prev-page-btn"
               disabled={currentPage === 0}
               onClick={() => setPage(currentPage - 1)}
             >
@@ -303,6 +309,7 @@ function PaginatedDataTable<T>({
               variant="outline"
               size="icon-sm"
               aria-label="Next page"
+              data-testid="next-page-btn"
               disabled={currentPage >= totalPages - 1}
               onClick={() => setPage(currentPage + 1)}
             >
