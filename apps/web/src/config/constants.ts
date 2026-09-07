@@ -151,6 +151,8 @@ export const MULTICHAIN_HELP_ARTICLE = `${HELP_CENTER_URL}/en/articles/222612-mu
 
 export const WORKSPACE_ANNOUNCEMENT_URL = `${SAFE_GLOBAL_DOMAIN}/blog/introducing-workspace-the-onchain-operating-environment-for-treasury-teams`
 
+export const SAFE_PRO_ANNOUNCEMENT_URL = `${SAFE_GLOBAL_DOMAIN}/blog/safe-pro-early-partner-program`
+
 // Hypernative Campaign IDs
 export const PROD_HYPERNATIVE_OUTREACH_ID = parseInt(process.env.NEXT_PUBLIC_PROD_HYPERNATIVE_OUTREACH_ID ?? `${3}`)
 export const STAGING_HYPERNATIVE_OUTREACH_ID = parseInt(

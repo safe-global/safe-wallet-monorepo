@@ -1,6 +1,6 @@
 import { Wallet } from 'lucide-react'
 import NextLink from 'next/link'
-import SafeMarkIcon from '@/public/images/logo-no-text.svg'
+import SafeWalletLockup from '@/public/images/safe-wallet-lockup.svg'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
 import Track from '@/components/common/Track'
 import { AppRoutes } from '@/config/routes'
@@ -26,8 +26,8 @@ const GetStartedCard = () => {
         data-testid="get-started-card"
         className="w-full max-w-[440px] rounded-2xl bg-card p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]"
       >
-        <div className="mx-auto mb-6 flex size-10 items-center justify-center text-foreground">
-          <SafeMarkIcon className="size-10" />
+        <div className="mx-auto mb-6 flex h-10 items-center justify-center text-foreground">
+          <SafeWalletLockup className="h-10 w-auto" />
         </div>
 
         <Typography variant="h3" className="text-center">

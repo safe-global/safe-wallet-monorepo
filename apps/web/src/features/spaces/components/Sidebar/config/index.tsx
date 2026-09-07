@@ -17,6 +17,7 @@ import {
   EllipsisVertical,
   Shield,
   History,
+  ListChecks,
 } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
 import type { SidebarItemConfig, SidebarGroupConfig } from '../types'
@@ -54,6 +55,11 @@ export const spacesMainNavigation: SidebarItemConfig[] = [
 export const spacesSetupGroup: SidebarGroupConfig = {
   label: 'Setup',
   items: [
+    {
+      icon: ListChecks,
+      label: 'Plans',
+      href: AppRoutes.spaces.plans,
+    },
     {
       icon: UsersRound,
       label: 'Team',

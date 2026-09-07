@@ -1,10 +1,13 @@
 import { useLoadFeature } from '@/features/__core__'
 import { MyAccountsFeature } from '@/features/myAccounts'
+import { SafeProFeature, useIsSafeProEnabled } from '@/features/safe-pro-announcement'
 import SpaceRow from './SpaceRow'
 import SignInOptions from '../SignInOptions'
 import WorkspaceBanner from '../WorkspaceBanner'
 import SpacesIcon from '@/public/images/spaces/spaces.svg'
 import SafeMarkIcon from '@/public/images/logo-no-text.svg'
+import SafeProLockup from '@/public/images/safe-pro/safe-pro-lockup.svg'
+import SafeProLockupDark from '@/public/images/safe-pro/safe-pro-lockup-dark.svg'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { Box, Card, Link, Stack, Typography } from '@mui/material'
@@ -90,19 +93,29 @@ const AddSpaceButton = ({
 
 const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => void; redirectLoading: boolean }) => {
   const isDarkMode = useDarkMode()
+  const isSafeProEnabled = useIsSafeProEnabled()
+  const { SafeProBanner } = useLoadFeature(SafeProFeature)
 
   return (
     <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
       {/* The page keeps its Topbar + Accounts/Workspaces tabs, so the sign-in
           card renders inline rather than as a full-screen takeover. */}
-      <div className="relative flex items-center justify-center p-6 py-10">
+      <div className={cn('relative flex items-center justify-center pb-10', isSafeProEnabled ? 'pt-0' : 'pt-10')}>
         <div className="flex w-full max-w-[440px] flex-col items-center">
-          <WorkspaceBanner className="mb-3" />
+          {isSafeProEnabled ? <SafeProBanner className="mb-4" /> : <WorkspaceBanner className="mb-3" />}
 
           <div className="relative w-full">
             <div className="relative w-full rounded-lg bg-card p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]">
-              <div className="mx-auto mb-6 flex size-10 items-center justify-center text-foreground">
-                <SafeMarkIcon className="size-10" />
+              <div className="mx-auto mb-6 flex h-10 items-center justify-center text-foreground">
+                {isSafeProEnabled ? (
+                  isDarkMode ? (
+                    <SafeProLockupDark className="h-10 w-auto" />
+                  ) : (
+                    <SafeProLockup className="h-10 w-auto" />
+                  )
+                ) : (
+                  <SafeMarkIcon className="size-10" />
+                )}
               </div>
 
               <ShadcnTypography variant="h3" className="mb-6 text-center">
@@ -190,6 +203,8 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
 
 const SpacesList = () => {
   const { AccountsNavigation } = useLoadFeature(MyAccountsFeature)
+  const { SafeProWorkspacesBanner } = useLoadFeature(SafeProFeature)
+  const isSafeProEnabled = useIsSafeProEnabled()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const {
@@ -248,32 +263,36 @@ const SpacesList = () => {
         {!isUserSignedIn ? (
           <SignedOutState afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
         ) : activeSpaces.length > 0 ? (
-          <WelcomeContentCard className="flex flex-col gap-4">
-            <div className="flex justify-end">
-              <AddSpaceButton
-                size="default"
-                variant="outline"
-                label="Create"
-                disabled={isAtSpacesLimit}
-                onClick={onAddSpaceBtnClick}
-              />
-            </div>
-
-            {pendingInviteBanners}
-
-            <div className="rounded-lg border border-border bg-card px-4 py-1" data-testid="org-list">
-              {activeSpaces.map((space, index) => (
-                <SpaceRow
-                  key={space.uuid}
-                  space={space}
-                  currentUserId={currentUser?.id}
-                  showDivider={index < activeSpaces.length - 1}
+          <>
+            {isSafeProEnabled && <SafeProWorkspacesBanner className="mb-4" />}
+            <WelcomeContentCard className="flex flex-col gap-4">
+              <div className="flex justify-end">
+                <AddSpaceButton
+                  size="default"
+                  variant="outline"
+                  label="Create"
+                  disabled={isAtSpacesLimit}
+                  onClick={onAddSpaceBtnClick}
                 />
-              ))}
-            </div>
-          </WelcomeContentCard>
+              </div>
+
+              {pendingInviteBanners}
+
+              <div className="rounded-lg border border-border bg-card px-4 py-1" data-testid="org-list">
+                {activeSpaces.map((space, index) => (
+                  <SpaceRow
+                    key={space.uuid}
+                    space={space}
+                    currentUserId={currentUser?.id}
+                    showDivider={index < activeSpaces.length - 1}
+                  />
+                ))}
+              </div>
+            </WelcomeContentCard>
+          </>
         ) : (
           <>
+            {isSafeProEnabled && <SafeProWorkspacesBanner className="mb-4" />}
             {pendingInviteBanners}
             <NoSpacesState isAtLimit={isAtSpacesLimit} />
           </>

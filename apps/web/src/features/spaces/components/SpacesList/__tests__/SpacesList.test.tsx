@@ -36,12 +36,23 @@ jest.mock('@/hooks/useDarkMode', () => ({
 }))
 
 jest.mock('@/features/__core__', () => ({
-  useLoadFeature: () => ({ AccountsNavigation: () => <nav data-testid="accounts-nav" /> }),
+  useLoadFeature: () => ({
+    AccountsNavigation: () => <nav data-testid="accounts-nav" />,
+    SafeProBanner: () => <div data-testid="safe-pro-banner" />,
+    SafeProWorkspacesBanner: () => <div data-testid="safe-pro-workspaces-banner" />,
+  }),
   createFeatureHandle: () => ({}),
 }))
 
 jest.mock('@/features/myAccounts', () => ({
   MyAccountsFeature: { name: 'MyAccountsFeature' },
+}))
+
+const mockUseIsSafeProEnabled = jest.fn()
+
+jest.mock('@/features/safe-pro-announcement', () => ({
+  SafeProFeature: { name: 'SafeProFeature' },
+  useIsSafeProEnabled: () => mockUseIsSafeProEnabled(),
 }))
 
 jest.mock('@/features/spaces', () => ({
@@ -96,6 +107,69 @@ describe('SpacesList — auth/expiry state rendering', () => {
     mockUseSpacesGetV1Query.mockReturnValue({ currentData: undefined, isFetching: false, error: undefined })
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: undefined })
     mockUseSignInRedirect.mockReturnValue({ setHasSignedIn: jest.fn(), redirectLoading: false })
+    mockUseIsSafeProEnabled.mockReturnValue(false)
+  })
+
+  describe('SAFE_PRO_ANNOUNCEMENT banner gating', () => {
+    it('keeps the pre-Pro Workspace banner when the flag is off', () => {
+      mockUseAppSelector.mockReturnValue(false)
+
+      render(<SpacesList />)
+
+      expect(screen.getByText('Introducing Workspace')).toBeInTheDocument()
+      expect(screen.queryByTestId('safe-pro-banner')).not.toBeInTheDocument()
+    })
+
+    it('swaps in the Safe Pro banner when the flag is on', () => {
+      mockUseAppSelector.mockReturnValue(false)
+      mockUseIsSafeProEnabled.mockReturnValue(true)
+
+      render(<SpacesList />)
+
+      expect(screen.getByTestId('safe-pro-banner')).toBeInTheDocument()
+      expect(screen.queryByText('Introducing Workspace')).not.toBeInTheDocument()
+    })
+
+    it('shows the wide Pro banner above the workspaces list when signed in and the flag is on', () => {
+      mockUseAppSelector.mockReturnValue(true)
+      mockUseIsSafeProEnabled.mockReturnValue(true)
+      mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+      mockUseSpacesGetV1Query.mockReturnValue({
+        currentData: [{ uuid: 'a', name: 'Acme', memberStatus: 'ACTIVE' }],
+        isFetching: false,
+        error: undefined,
+      })
+
+      render(<SpacesList />)
+
+      expect(screen.getByTestId('safe-pro-workspaces-banner')).toBeInTheDocument()
+    })
+
+    it('shows the wide Pro banner above the empty state when signed in with no workspaces', () => {
+      mockUseAppSelector.mockReturnValue(true)
+      mockUseIsSafeProEnabled.mockReturnValue(true)
+      mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+      mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
+
+      render(<SpacesList />)
+
+      expect(screen.getByTestId('safe-pro-workspaces-banner')).toBeInTheDocument()
+      expect(screen.getByText(/create your first workspace/i)).toBeInTheDocument()
+    })
+
+    it('hides the wide Pro banner when signed in and the flag is off', () => {
+      mockUseAppSelector.mockReturnValue(true)
+      mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+      mockUseSpacesGetV1Query.mockReturnValue({
+        currentData: [{ uuid: 'a', name: 'Acme', memberStatus: 'ACTIVE' }],
+        isFetching: false,
+        error: undefined,
+      })
+
+      render(<SpacesList />)
+
+      expect(screen.queryByTestId('safe-pro-workspaces-banner')).not.toBeInTheDocument()
+    })
   })
 
   it('renders the Sign in card (not Create space) when the user is unauthenticated — i.e. after a session expiry redirect', () => {
