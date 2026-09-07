@@ -121,8 +121,25 @@ jest.mock('../../ApiCtaSidebar', () => ({
   ApiCtaSidebar: () => <div data-testid="api-cta-sidebar" />,
 }))
 
+let mockIsSafeProEnabled = false
+jest.mock('@/features/safe-pro-announcement', () => ({
+  SafeProFeature: { name: 'safe-pro-announcement' },
+  useIsSafeProEnabled: () => mockIsSafeProEnabled,
+}))
+
+jest.mock('@/features/__core__', () => ({
+  useLoadFeature: () => ({
+    SafeProSidebarBanner: () => <div data-testid="safe-pro-sidebar-banner" />,
+  }),
+}))
+
 jest.mock('../../SidebarIndexingStatus', () => ({
   SidebarIndexingStatus: () => <div data-testid="indexing-status" />,
+}))
+
+let mockPathname = '/spaces'
+jest.mock('next/router', () => ({
+  useRouter: () => ({ pathname: mockPathname }),
 }))
 
 jest.mock('@/services/beamer', () => ({
@@ -136,6 +153,38 @@ describe('SidebarCommonFooter', () => {
     mockHasBeamerConsent = true
     mockUseAppDispatch.mockReturnValue(jest.fn())
     mockUseDarkMode.mockReturnValue(false)
+    mockIsSafeProEnabled = false
+    mockPathname = '/spaces'
+  })
+
+  describe('Safe Pro banner', () => {
+    it('shows the banner on the Workspaces sidebar when the flag is on', () => {
+      mockIsSafeProEnabled = true
+      render(<SidebarCommonFooter />)
+
+      expect(screen.getByTestId('safe-pro-sidebar-banner')).toBeInTheDocument()
+    })
+
+    it('shows the banner on the Safe sidebar when the flag is on', () => {
+      mockIsSafeProEnabled = true
+      render(<SidebarCommonFooter isSafeSidebar />)
+
+      expect(screen.getByTestId('safe-pro-sidebar-banner')).toBeInTheDocument()
+    })
+
+    it('hides the banner on the Plans page, which is where it links to', () => {
+      mockIsSafeProEnabled = true
+      mockPathname = '/spaces/plans'
+      render(<SidebarCommonFooter />)
+
+      expect(screen.queryByTestId('safe-pro-sidebar-banner')).not.toBeInTheDocument()
+    })
+
+    it('hides the banner when the flag is off', () => {
+      render(<SidebarCommonFooter />)
+
+      expect(screen.queryByTestId('safe-pro-sidebar-banner')).not.toBeInTheDocument()
+    })
   })
 
   it('fires HELP_CENTER tracking event when clicking the Help button', () => {
