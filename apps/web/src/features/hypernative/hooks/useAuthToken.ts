@@ -197,6 +197,12 @@ export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResu
 
         const delay = REFRESH_RETRY_DELAYS_MS[attempt]
         if (delay === undefined) {
+          if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+            // Offline: the request never left the browser, so the token is untouched. Wait for the
+            // online event rather than burning the token or ending the session.
+            return
+          }
+
           // Retries spent inside the grace window. The cookie stays: the access token is still
           // usable until its own expiry, and presenting this refresh token again now would look
           // like theft rather than a retry.
@@ -204,7 +210,12 @@ export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResu
           return
         }
 
-        retryTimeoutRef.current = setTimeout(() => attemptRefreshRef.current(refreshToken, attempt + 1), delay)
+        retryTimeoutRef.current = setTimeout(() => {
+          // Drop the handle as it fires: leaving a spent one in place reads as "a retry is still
+          // pending" to scheduleRefresh, which then declines to start another attempt ever again.
+          retryTimeoutRef.current = null
+          attemptRefreshRef.current(refreshToken, attempt + 1)
+        }, delay)
       })
       .finally(() => {
         isRefreshingRef.current = false
@@ -318,10 +329,18 @@ export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResu
         checkAuthState()
       }
     }
+    // Coming back online means the failures that spent this token's retries never reached the
+    // server, so the token is still live and presenting it again is a retry rather than a replay.
+    // Ambiguous failures - a 5xx, a proxy error - do not come back through here and stay abandoned.
+    const handleOnline = () => {
+      abandonedRefreshTokenRef.current = undefined
+      checkAuthState()
+    }
 
     window.addEventListener('storage', handleStorageEvent)
     document.addEventListener('visibilitychange', handleVisibilityChange)
     window.addEventListener('focus', checkAuthState)
+    window.addEventListener('online', handleOnline)
 
     const interval = setInterval(checkAuthState, AUTH_POLLING_INTERVAL)
     checkAuthState() // Initial check
@@ -330,6 +349,7 @@ export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResu
       window.removeEventListener('storage', handleStorageEvent)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
       window.removeEventListener('focus', checkAuthState)
+      window.removeEventListener('online', handleOnline)
       clearInterval(interval)
       clearScheduledRefresh()
     }
