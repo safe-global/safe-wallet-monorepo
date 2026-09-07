@@ -5,7 +5,7 @@
  */
 import type { JsonRpcProvider, BrowserProvider } from 'ethers'
 import ExternalStore from '@safe-global/utils/services/ExternalStore'
-// Deep import on purpose: the safe-scope barrel re-exports SafeScopeProvider, which pulls ethers + protocol-kit into this bundle.
+// Imported from `context` directly so this always-loaded module depends on nothing but the React context.
 import { useSafeScope } from '@/components/tx-flow/safe-scope/context'
 
 export const { setStore: setWeb3, useStore: useWeb3 } = new ExternalStore<BrowserProvider>()

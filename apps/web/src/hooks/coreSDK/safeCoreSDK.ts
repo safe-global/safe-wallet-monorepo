@@ -20,7 +20,7 @@ import {
   resolveChainAgnosticContractAddresses,
 } from '@safe-global/utils/services/contracts/deployments'
 import { logError, Errors } from '@/services/exceptions'
-// Deep import on purpose: the safe-scope barrel re-exports SafeScopeProvider, which pulls ethers + protocol-kit into this bundle.
+// Imported from `context` directly so this always-loaded module depends on nothing but the React context.
 import { useSafeScope } from '@/components/tx-flow/safe-scope/context'
 
 export const initSafeSDK = async ({

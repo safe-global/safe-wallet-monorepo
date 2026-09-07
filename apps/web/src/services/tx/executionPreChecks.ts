@@ -15,6 +15,7 @@ import { getNonces } from '@/services/tx/tx-sender/recommendedNonce'
 import { getAndValidateSafeSDK } from '@/services/tx/tx-sender/sdk'
 import { isOwner } from '@/utils/transaction-guards'
 import type { TxSenderScope } from '@/components/tx-flow/safe-scope/types'
+import { hasActiveScope } from '@/components/tx-flow/safe-scope/activeScope'
 
 export class Gs026PreCheckError extends Error {
   /** The GS code this pre-check prevents — lets the Details panel show it. */
@@ -133,11 +134,13 @@ export const runExecutionPreChecks = async ({
 
   // BAD_SIGNATURE: a collected signature does not recover to its claimed signer.
   // Best-effort: when the SDK isn't initialised yet, this check is skipped rather
-  // than blocking a potentially valid transaction.
+  // than blocking a potentially valid transaction. An unscoped call while a Space-level
+  // flow is mounted is a caller bug, not "not ready" — that guard error must surface.
   let sdk: ReturnType<typeof getAndValidateSafeSDK> | undefined
   try {
     sdk = getAndValidateSafeSDK(scope)
-  } catch {
+  } catch (e) {
+    if (!scope && hasActiveScope()) throw e
     sdk = undefined
   }
   if (sdk) {

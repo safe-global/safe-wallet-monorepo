@@ -45,6 +45,8 @@ export const SafeScopeProvider = ({ initial, children }: SafeScopeProviderProps)
     target ? { chainId: target.chainId, safeAddress: target.safeAddress } : skipToken,
     { pollingInterval: POLLING_INTERVAL },
   )
+  // CGW only serves deployed Safes, so a 200 here IS the deployment proof — same as `useLoadSafeInfo`.
+  // Counterfactual (undeployed) Safes are local-only and out of scope for Space flows (see WA-3147).
   const safe = useMemo<ExtendedSafeInfo | undefined>(
     () => (currentData ? { ...currentData, deployed: true } : undefined),
     [currentData],
