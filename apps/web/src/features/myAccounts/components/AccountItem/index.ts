@@ -31,23 +31,6 @@ export type { AccountItemContentProps } from './AccountItemContent'
  *
  * Use AccountItem.Button for click interactions (selection, modals).
  * Use AccountItem.Link for navigation to a Safe.
- *
- * @example
- * // Navigation mode
- * <AccountItem.Link href={href} isCurrentSafe={isCurrentSafe}>
- *   <AccountItem.Icon ... />
- *   <AccountItem.Info ... />
- *   <AccountItem.Balance ... />
- *   <AccountItem.PinButton ... />
- *   <AccountItem.ContextMenu ... />
- * </AccountItem.Link>
- *
- * @example
- * // Selection mode
- * <AccountItem.Button onClick={onSelect}>
- *   <AccountItem.Icon ... />
- *   <AccountItem.Info ... />
- * </AccountItem.Button>
  */
 // Hoisted `function` namespace (not a `const` object) on purpose: AccountItem is re-exported by
 // the myAccounts barrel, which sits in the myAccounts ↔ spaces import cycle. webpack's React

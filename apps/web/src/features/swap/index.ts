@@ -2,25 +2,6 @@
  * Swap Feature - Public API (v3 Architecture)
  *
  * Provides native swap functionality via CoW Protocol integration.
- *
- * @example
- * ```typescript
- * // Component access via feature handle
- * import { SwapFeature } from '@/features/swap'
- * import { useLoadFeature } from '@/features/__core__'
- *
- * function MyComponent() {
- *   const swap = useLoadFeature(SwapFeature)
- *   return <swap.SwapWidget />
- * }
- *
- * // Hook access via direct import
- * import { useIsSwapFeatureEnabled } from '@/features/swap'
- *
- * function MyComponent() {
- *   const isEnabled = useIsSwapFeatureEnabled()
- * }
- * ```
  */
 import { createFeatureHandle } from '@/features/__core__'
 import type { SwapContract } from './contract'

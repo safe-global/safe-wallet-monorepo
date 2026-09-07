@@ -3,21 +3,6 @@
  *
  * Provides OIDC login alongside SIWE.
  * Uses createFeatureHandle auto-derivation: 'oidc-auth' → FEATURES.OIDC_AUTH
- *
- * @example
- * ```typescript
- * // Component access via feature handle
- * import { OidcAuthFeature } from '@/features/oidc-auth'
- * import { useLoadFeature } from '@/features/__core__'
- *
- * function MyComponent() {
- *   const { EmailSignInButton } = useLoadFeature(OidcAuthFeature)
- *   return <EmailSignInButton />
- * }
- *
- * // Hook access via direct import
- * import { useOidcLogin } from '@/features/oidc-auth'
- * ```
  */
 import { createFeatureHandle } from '@/features/__core__'
 import type { OidcAuthContract } from './contract'

@@ -3,26 +3,6 @@
  *
  * Core feature for managing user Safe accounts.
  * Feature flag: MY_ACCOUNTS (enabled by default, can be disabled via CGW config)
- *
- * @example
- * ```typescript
- * // Component access via feature handle
- * import { MyAccountsFeature } from '@/features/myAccounts'
- * import { useLoadFeature } from '@/features/__core__'
- *
- * function MyComponent() {
- *   const { AccountItemLink, AccountItemIcon, AccountItemInfo } = useLoadFeature(MyAccountsFeature)
- *   return (
- *     <AccountItemLink href={href}>
- *       <AccountItemIcon address={address} chainId={chainId} />
- *       <AccountItemInfo address={address} chainId={chainId} name={name} />
- *     </AccountItemLink>
- *   )
- * }
- *
- * // Shared Safe data hooks (moved to @/hooks/safes)
- * import { useAllSafes, useAllSafesGrouped, isMultiChainSafeItem } from '@/hooks/safes'
- * ```
  */
 import { createFeatureHandle } from '@/features/__core__'
 import type { MyAccountsContract } from './contract'

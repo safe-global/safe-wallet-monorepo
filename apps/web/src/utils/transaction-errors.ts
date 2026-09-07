@@ -69,17 +69,13 @@ export const isGuardError = (error: Error): boolean => {
 export const RATE_LIMIT_USER_MESSAGE = 'Network is busy. Please try again in a moment.'
 
 /**
- * Detects if an error originated from a transient RPC rate-limit: a viem
- * error whose cause chain carries the documented throttle signals
- * (JSON-RPC -32005 / HTTP 429). viem's `http()` transport already retries
- * these with backoff; this guard only decides whether to show the friendly
- * message once retries are exhausted and the error reaches the UI.
+ * Detects a transient RPC rate-limit (JSON-RPC -32005 / HTTP 429). viem's `http()`
+ * transport already retries these; this only decides whether to show the friendly
+ * message once retries are exhausted.
  *
- * Intentionally only matches structured shapes (viem `BaseError` cause
- * chains carrying the expected `code`/`status`). A message-text regex would
- * false-positive on contract reverts like `require(..., "rate limit
- * exceeded")`, leading users to retry transactions guaranteed to fail
- * on-chain.
+ * Matches structured shapes only — a message-text regex would false-positive on
+ * contract reverts like `require(..., "rate limit exceeded")` and prompt users to
+ * retry transactions guaranteed to fail on-chain.
  */
 export const isRateLimitError = (error: unknown): boolean => {
   if (error instanceof BaseError) {
@@ -122,14 +118,11 @@ export const isNonceTooLowError = (error: unknown): boolean => {
 }
 
 /**
- * Detects whether an error is a genuine on-chain revert — i.e. a node told us
- * the transaction reverts — as opposed to an infrastructure failure (RPC down,
- * timeout, rate-limit) where we simply could not complete the check.
- *
- * Only a decodable revert signal counts: a known GS code, an ethers
- * `CALL_EXCEPTION`, or an "execution reverted" message. Everything else is
- * treated as infra — the safe default, so we never claim a transaction will
- * fail unless a node actually reverted it (WA-3005 guideline #2).
+ * Detects a genuine on-chain revert (a node told us the tx reverts) vs. an infra
+ * failure (RPC down/timeout/rate-limit) where the check couldn't complete. Only a
+ * decodable revert signal counts; everything else is treated as infra — the safe
+ * default, so we never claim a tx will fail unless a node actually reverted it
+ * (WA-3005 guideline #2).
  */
 export const isRevertError = (error: unknown): boolean => {
   if (!error) return false
