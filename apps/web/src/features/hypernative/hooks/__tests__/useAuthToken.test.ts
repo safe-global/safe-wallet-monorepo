@@ -691,6 +691,9 @@ describe('useAuthToken', () => {
      * still valid for another minute at this point.
      */
     it.each([
+      // The shape RTK Query actually rejects with when the server is unreachable, confirmed
+      // against a dead port with the real store and baseQuery rather than assumed.
+      ['an unreachable server', { message: 'Rejected' }],
       ['a transport failure with no body', undefined],
       ['a gateway error with no OAuth code', { success: false, data: null }],
       ['a 5xx envelope carrying an unrelated error', { success: false, data: null, error: { error: 'server_error' } }],
