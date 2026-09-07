@@ -31,7 +31,7 @@ const TxModalDialog = ({ children, open, onClose, fullWidth = false }: TxModalDi
           <div className={css.title}>
             <div className={css.buttons}>
               <button type="button" className={css.close} aria-label="close" onClick={() => onClose?.()}>
-                <X className="size-6" />
+                <X />
               </button>
             </div>
           </div>
