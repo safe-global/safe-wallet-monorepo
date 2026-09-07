@@ -782,4 +782,36 @@ describe('useSpaceSafeSelectorItems', () => {
     expect(polygonChain?.isUndeployed).toBe(false)
     expect(polygonChain?.isActivating).toBe(false)
   })
+
+  // ── balance falls back to `--` (null) on a failed overview fetch ──
+
+  it('sets balance to null on a failed overview fetch for a deployed safe', () => {
+    setupDefaults({ overviews: [], overviewsLoading: false, overviewsError: true })
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].balance).toBeNull()
+  })
+
+  it('keeps a real balance when the fetch succeeded', () => {
+    setupDefaults({
+      overviews: [
+        {
+          address: { value: '0xSafe1' },
+          chainId: '1',
+          fiatTotal: '5000',
+          threshold: 2,
+          owners: [{ value: '0xOwner1' }],
+        },
+      ],
+      overviewsError: false,
+    })
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].balance).toBe('5000')
+  })
+
+  it('does not mark balance as failed while still loading (no error)', () => {
+    setupDefaults({ overviews: [], overviewsLoading: true, overviewsError: false })
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].balance).not.toBeNull()
+    expect(result.current.items[0].isLoading).toBe(true)
+  })
 })

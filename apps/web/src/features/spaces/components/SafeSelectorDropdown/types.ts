@@ -28,7 +28,7 @@ export interface SafeItemData {
   threshold: number
   owners: number
   chains: SafeItemDataChain[]
-  balance: string
+  balance: string | null
   isLoading?: boolean
   parentSafeId?: string
 }

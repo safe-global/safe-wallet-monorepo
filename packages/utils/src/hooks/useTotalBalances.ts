@@ -82,7 +82,10 @@ const buildTxServiceResult = (
     }
   }
 
-  return { data: undefined, error: toError(txService.error), loading: true, ...shared }
+  // No balances yet: keep "loading" only until an error arrives. Once the fetch has errored,
+  // stop reporting loading so consumers can surface the error (e.g. show `--`) instead of an
+  // endless skeleton.
+  return { data: undefined, error: toError(txService.error), loading: !txService.error, ...shared }
 }
 
 /**
