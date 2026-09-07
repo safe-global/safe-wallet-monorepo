@@ -1,7 +1,7 @@
 import { render } from '@/tests/test-utils'
-import { GUARD_ERROR_CODES } from '@/utils/transaction-errors'
+import { GUARD_ERROR_CODES, HYPERNATIVE_APPROVAL_REQUIRED_MESSAGE } from '@/utils/transaction-errors'
 import { useSafeShieldAssessmentUrl } from '@/features/hypernative'
-import TxCheckError, { HYPERNATIVE_APPROVAL_REQUIRED_MESSAGE } from '..'
+import TxCheckError from '..'
 
 jest.mock('@/features/hypernative', () => ({
   ...jest.requireActual('@/features/hypernative'),

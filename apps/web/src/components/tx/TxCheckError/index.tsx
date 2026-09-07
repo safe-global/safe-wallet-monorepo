@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
 import { useCurrentChain } from '@/hooks/useChains'
 import {
+  HYPERNATIVE_APPROVAL_REQUIRED_MESSAGE,
   isHypernativeGuardRevert,
   isRateLimitError,
   isRevertError,
@@ -15,9 +16,6 @@ import { useSafeShieldAssessmentUrl } from '@/features/hypernative'
 
 export const TX_WILL_FAIL_MESSAGE =
   'This transaction will most likely fail. To save gas costs, reject this transaction.'
-
-export const HYPERNATIVE_APPROVAL_REQUIRED_MESSAGE =
-  'This transaction is awaiting approval in your Hypernative account.'
 
 const onHypernativeCtaClick = () => {
   trackEvent(HYPERNATIVE_EVENTS.EXECUTION_BLOCKED_APPROVAL_CLICKED)

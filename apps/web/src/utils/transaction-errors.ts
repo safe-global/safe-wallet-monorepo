@@ -84,6 +84,14 @@ export const isHypernativeGuardRevert = (error: Error): boolean => {
 export const RATE_LIMIT_USER_MESSAGE = 'Network is busy. Please try again in a moment.'
 
 /**
+ * User-facing message shown wherever the Hypernative guard blocks execution —
+ * inline in the transaction flow and in the transaction toast. Kept as a single
+ * constant, like `RATE_LIMIT_USER_MESSAGE`, so both surfaces cannot drift apart.
+ */
+export const HYPERNATIVE_APPROVAL_REQUIRED_MESSAGE =
+  'This transaction is awaiting approval in your Hypernative account.'
+
+/**
  * Detects if an error originated from a transient RPC rate-limit: a viem
  * error whose cause chain carries the documented throttle signals
  * (JSON-RPC -32005 / HTTP 429). viem's `http()` transport already retries
