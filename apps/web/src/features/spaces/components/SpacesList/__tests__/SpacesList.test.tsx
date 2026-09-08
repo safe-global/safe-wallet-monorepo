@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
-import SpacesList, { WORKSPACE_BENEFITS } from '../index'
+import SpacesList from '../index'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
@@ -38,12 +38,23 @@ jest.mock('@/hooks/useDarkMode', () => ({
 }))
 
 jest.mock('@/features/__core__', () => ({
-  useLoadFeature: () => ({ AccountsNavigation: () => <nav data-testid="accounts-nav" /> }),
+  useLoadFeature: () => ({
+    AccountsNavigation: () => <nav data-testid="accounts-nav" />,
+    SafeProBanner: () => <div data-testid="safe-pro-banner" />,
+    SafeProWorkspacesBanner: () => <div data-testid="safe-pro-workspaces-banner" />,
+  }),
   createFeatureHandle: () => ({}),
 }))
 
 jest.mock('@/features/myAccounts', () => ({
   MyAccountsFeature: { name: 'MyAccountsFeature' },
+}))
+
+const mockUseIsSafeProEnabled = jest.fn()
+
+jest.mock('@/features/safe-pro-announcement', () => ({
+  SafeProFeature: { name: 'SafeProFeature' },
+  useIsSafeProEnabled: () => mockUseIsSafeProEnabled(),
 }))
 
 jest.mock('@/features/spaces', () => ({
@@ -110,6 +121,69 @@ describe('SpacesList — auth/expiry state rendering', () => {
     mockUseSpacesGetV1Query.mockReturnValue({ currentData: undefined, isFetching: false, error: undefined })
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: undefined })
     mockUseSignInRedirect.mockReturnValue({ setHasSignedIn: jest.fn(), redirectLoading: false })
+    mockUseIsSafeProEnabled.mockReturnValue(false)
+  })
+
+  describe('SAFE_PRO_ANNOUNCEMENT banner gating', () => {
+    it('keeps the pre-Pro Workspace banner when the flag is off', () => {
+      setAuth(false)
+
+      render(<SpacesList />)
+
+      expect(screen.getByText('Introducing Workspace')).toBeInTheDocument()
+      expect(screen.queryByTestId('safe-pro-banner')).not.toBeInTheDocument()
+    })
+
+    it('swaps in the Safe Pro banner when the flag is on', () => {
+      setAuth(false)
+      mockUseIsSafeProEnabled.mockReturnValue(true)
+
+      render(<SpacesList />)
+
+      expect(screen.getByTestId('safe-pro-banner')).toBeInTheDocument()
+      expect(screen.queryByText('Introducing Workspace')).not.toBeInTheDocument()
+    })
+
+    it('shows the wide Pro banner above the workspaces list when signed in and the flag is on', () => {
+      setAuth(true)
+      mockUseIsSafeProEnabled.mockReturnValue(true)
+      mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+      mockUseSpacesGetV1Query.mockReturnValue({
+        currentData: [{ uuid: 'a', name: 'Acme', memberStatus: 'ACTIVE' }],
+        isFetching: false,
+        error: undefined,
+      })
+
+      render(<SpacesList />)
+
+      expect(screen.getByTestId('safe-pro-workspaces-banner')).toBeInTheDocument()
+    })
+
+    it('shows the wide Pro banner above the empty state when signed in with no workspaces', () => {
+      setAuth(true)
+      mockUseIsSafeProEnabled.mockReturnValue(true)
+      mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+      mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
+
+      render(<SpacesList />)
+
+      expect(screen.getByTestId('safe-pro-workspaces-banner')).toBeInTheDocument()
+      expect(screen.getByText(/create your first workspace/i)).toBeInTheDocument()
+    })
+
+    it('hides the wide Pro banner when signed in and the flag is off', () => {
+      setAuth(true)
+      mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+      mockUseSpacesGetV1Query.mockReturnValue({
+        currentData: [{ uuid: 'a', name: 'Acme', memberStatus: 'ACTIVE' }],
+        isFetching: false,
+        error: undefined,
+      })
+
+      render(<SpacesList />)
+
+      expect(screen.queryByTestId('safe-pro-workspaces-banner')).not.toBeInTheDocument()
+    })
   })
 
   it('renders the Sign in card (not Create space) when the user is unauthenticated — i.e. after a session expiry redirect', () => {
@@ -157,8 +231,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     render(<SpacesList />)
 
-    expect(screen.getByText(/create your first workspace/i)).toBeInTheDocument()
-    const cta = screen.getByRole('link', { name: /create workspace/i })
+    const cta = screen.getByRole('link', { name: /create your first workspace/i })
     expect(cta).toHaveAttribute('href')
 
     // Sign in card must NOT render in this branch.
@@ -175,19 +248,6 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     const card = container.querySelector('[data-slot="card"]')
     expect(card).toHaveAttribute('data-size', 'none')
-  })
-
-  it('renders the workspace-benefits bullet list with 12px spacing (gap-3)', () => {
-    setAuth(true)
-    mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
-    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
-
-    render(<SpacesList />)
-
-    const firstBullet = screen.getByText(WORKSPACE_BENEFITS[0])
-    const list = firstBullet.closest('.gap-3')
-    expect(list).toBeInTheDocument()
-    expect(list).not.toHaveClass('gap-1.5')
   })
 
   it('shows a loading spinner, not the empty state, while the spaces query is still fetching', () => {

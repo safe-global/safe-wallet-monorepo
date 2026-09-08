@@ -1,14 +1,14 @@
-import { useEffect } from 'react'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import useChainId from '@/hooks/useChainId'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
+import { Errors } from '@/services/exceptions'
+import useLogError from './useLogError'
 import chains from '@safe-global/utils/config/chains'
 import { useSigner } from './wallets/useWallet'
 import { useSafeSDK } from './coreSDK/safeCoreSDK'
 import useIsSafeOwner from './useIsSafeOwner'
-import { Errors, logError } from '@/services/exceptions'
 import { isExpectedEstimationError } from '@/utils/transaction-errors'
 import useSafeInfo from './useSafeInfo'
 import {
@@ -83,15 +83,11 @@ const useGasLimit = (
     safe,
   ])
 
-  useEffect(() => {
-    if (!gasLimitError) return
-    // A revert is the estimate's answer, not a fault, and a throttle is
-    // transient — both already have their own UI copy. Only a genuine
-    // infrastructure failure is worth a coded log.
-    if (isExpectedEstimationError(gasLimitError)) return
-
-    logError(Errors._612, gasLimitError.message, getRpcErrorContext(web3ReadOnly))
-  }, [gasLimitError, web3ReadOnly])
+  // Several concurrent owners on the Execute step, one on Sign, so no single
+  // owner sees every failure; `useLogError` collapses them into one report.
+  // A revert or a throttle is the estimate's expected answer, not a fault.
+  const unexpectedGasLimitError = gasLimitError && !isExpectedEstimationError(gasLimitError) ? gasLimitError : undefined
+  useLogError(Errors._612, unexpectedGasLimitError?.message, getRpcErrorContext(web3ReadOnly))
 
   return { gasLimit, gasLimitError, gasLimitLoading }
 }

@@ -1,6 +1,7 @@
 import type { MasterCopy as MasterCopyType } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import useChainId from '@/hooks/useChainId'
-import { Errors, logError } from '@/services/exceptions'
+import { Errors } from '@/services/exceptions'
+import useLogError from '@/hooks/useLogError'
 import { useMemo } from 'react'
 import { useChainsGetMasterCopiesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
@@ -35,15 +36,21 @@ export const useMasterCopies = (): AsyncResult<MasterCopy[]> => {
   const chainId = useChainId()
   const { data, isLoading, error } = useChainsGetMasterCopiesV1Query({ chainId })
 
-  const transformedData = useMemo(() => {
-    if (!data) return undefined
+  const { transformedData, transformError } = useMemo<{
+    transformedData?: MasterCopy[]
+    transformError?: unknown
+  }>(() => {
+    if (!data) return {}
     try {
-      return data.map(extractMasterCopyInfo)
+      return { transformedData: data.map(extractMasterCopyInfo) }
     } catch (err) {
-      logError(Errors._619, err)
-      return undefined
+      return { transformError: err }
     }
   }, [data])
+
+  // Reported outside the memo: a memo is a cache hint, not a guarantee of a
+  // single evaluation, and re-running it must not re-report the same bad payload.
+  useLogError(Errors._619, transformError)
 
   const processedError = useMemo(() => {
     if (!error) return undefined
