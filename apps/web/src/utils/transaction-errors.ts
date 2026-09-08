@@ -3,7 +3,6 @@
  */
 import { BaseError } from 'viem'
 import { getKnownCustomError } from '@/utils/customErrorRegistry'
-import { getGsCodeFromError } from '@safe-global/utils/services/exceptions/contractErrors'
 
 /**
  * Guard error codes
@@ -131,19 +130,4 @@ export const isNonceTooLowError = (error: unknown): boolean => {
  * treated as infra — the safe default, so we never claim a transaction will
  * fail unless a node actually reverted it (WA-3005 guideline #2).
  */
-export const isRevertError = (error: unknown): boolean => {
-  if (!error) return false
-
-  const err = error as { code?: unknown; reason?: string; message?: string }
-
-  // A known GS revert reason is definitive.
-  if (getGsCodeFromError(err)) return true
-
-  // ethers marks a reverted eth_call/estimateGas as CALL_EXCEPTION.
-  if (err.code === 'CALL_EXCEPTION') return true
-
-  // viem/ethers revert text.
-  if (typeof err.message === 'string' && /execution reverted|reverted with/i.test(err.message)) return true
-
-  return false
-}
+export { isRevertError } from '@safe-global/utils/services/exceptions/contractErrors'
