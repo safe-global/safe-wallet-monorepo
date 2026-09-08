@@ -11,6 +11,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import useChainId from '@/hooks/useChainId'
 import { useChain } from '@/hooks/useChains'
 import { useTokenListSetting } from '@/hooks/loadables/useLoadBalances'
+import { makeStore } from '@/store'
 import { POPULAR_TOKENS } from '../../popularTokens'
 import useSpendingLimitTokenOptions, { buildIdentityKey } from '../useSpendingLimitTokenOptions'
 
@@ -49,9 +50,9 @@ const queryResult = (overrides: Partial<QueryResult> = {}): QueryResult =>
 const CHAIN_ID = '1'
 const safeAddress = checksumAddress(faker.finance.ethereumAddress())
 
-const setSafe = (overrides: { deployed?: boolean; address?: string } = {}) => {
+const setSafe = (overrides: { deployed?: boolean; address?: string; chainId?: string } = {}) => {
   const safe = extendedSafeInfoBuilder()
-    .with({ chainId: CHAIN_ID, deployed: overrides.deployed ?? true })
+    .with({ chainId: overrides.chainId ?? CHAIN_ID, deployed: overrides.deployed ?? true })
     .build()
   mockUseSafeInfo.mockReturnValue({
     safe,
@@ -82,8 +83,9 @@ describe('useSpendingLimitTokenOptions', () => {
   })
 
   it('queries the Transaction Service balances for the current Safe with the trusted setting', () => {
+    const settings = { ...makeStore().getState().settings, currency: 'chf' }
     renderHook(() => useSpendingLimitTokenOptions(), {
-      initialReduxState: { settings: { currency: 'chf' } as never },
+      initialReduxState: { settings },
     })
 
     expect(querySpy).toHaveBeenCalledWith(
@@ -109,6 +111,19 @@ describe('useSpendingLimitTokenOptions', () => {
     mockUseTokenListSetting.mockReturnValue(undefined)
     renderHook(() => useSpendingLimitTokenOptions())
     expect(querySpy).toHaveBeenLastCalledWith(expect.anything(), expect.objectContaining({ skip: true }))
+  })
+
+  it('skips the query and reports an empty identity while the Safe chain has not caught up with useChainId (mid-navigation)', () => {
+    // The stored Safe is still on chain '1' while useChainId already reports '137' — the render
+    // between navigating from Safe A (chain 1) to Safe B (chain 137).
+    setSafe({ chainId: '1' })
+    mockUseChainId.mockReturnValue('137')
+
+    const { result } = renderHook(() => useSpendingLimitTokenOptions())
+
+    expect(querySpy).toHaveBeenLastCalledWith(expect.anything(), expect.objectContaining({ skip: true }))
+    expect(result.current.identityKey).toBe('')
+    expect(result.current.isLoading).toBe(false)
   })
 
   it('merges held balances with the chain popular list and native currency', () => {
@@ -168,6 +183,16 @@ describe('useSpendingLimitTokenOptions', () => {
 
     querySpy.mockReturnValue(queryResult({ isFetching: true, currentData: balancesBuilder().build() }))
     expect(renderHook(() => useSpendingLimitTokenOptions()).result.current.isLoading).toBe(false)
+  })
+
+  it('reports loading while the token-list setting is unresolved for a deployed Safe', () => {
+    mockUseTokenListSetting.mockReturnValue(undefined)
+
+    const { result } = renderHook(() => useSpendingLimitTokenOptions())
+
+    expect(querySpy).toHaveBeenLastCalledWith(expect.anything(), expect.objectContaining({ skip: true }))
+    expect(result.current.isLoading).toBe(true)
+    expect(result.current.isError).toBe(false)
   })
 
   it('never reports loading or error while the query is skipped', () => {

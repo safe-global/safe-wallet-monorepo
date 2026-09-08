@@ -26,7 +26,8 @@ export const buildIdentityKey = (chainId: string, safeAddress: string): string =
 
 /**
  * Token options for the spending-limit selector, scoped to the Safe that `useSafeInfo` / `useChainId`
- * resolve — the Space-level scope when one is mounted, the URL Safe otherwise.
+ * resolve — the Space-level scope once WA-3146's scope-aware `useSafeInfo`/`useChainId` land (#8646);
+ * the URL Safe otherwise.
  *
  * Held tokens always come from the Transaction Service balances endpoint (never the portfolio one):
  * it returns every token the Safe ever received, zero balances included, which AC C16 relies on.
@@ -39,9 +40,14 @@ const useSpendingLimitTokenOptions = (): TokenOptionsResult => {
   const currency = useAppSelector(selectCurrency)
   const trusted = useTokenListSetting()
 
+  // `useChainId` can flip a render before `useSafeInfo` (Redux, updated in an effect) catches up
+  // during navigation between Safes on different chains — see useLoadSafeInfo's `isStoredSafeValid`.
+  // Treat the identity as valid only once both agree, so we never issue a cross-chain balances query.
+  const identityMatchesChain = safe.chainId === chainId
   // The Transaction Service has no balances for an undeployed Safe; `trusted` is undefined until the
   // chain config resolves.
-  const skip = !safeAddress || !safe.deployed || trusted === undefined
+  const hasValidSafe = Boolean(safeAddress) && safe.deployed && identityMatchesChain
+  const skip = !hasValidSafe || trusted === undefined
 
   const { currentData, isLoading, isFetching, isError, refetch } = useBalancesGetBalancesV1Query(
     { chainId, safeAddress, fiatCode: currency, trusted },
@@ -61,10 +67,12 @@ const useSpendingLimitTokenOptions = (): TokenOptionsResult => {
 
   return {
     options,
-    isLoading: !skip && currentData === undefined && (isLoading || isFetching),
+    // While `trusted` is still resolving for an otherwise-valid Safe, report loading rather than
+    // letting the popular-only list flash before the held-token query even starts.
+    isLoading: hasValidSafe && (trusted === undefined || (currentData === undefined && (isLoading || isFetching))),
     isError: !skip && isError,
     refetch,
-    identityKey: buildIdentityKey(chainId, safeAddress),
+    identityKey: identityMatchesChain ? buildIdentityKey(chainId, safeAddress) : '',
   }
 }
 
