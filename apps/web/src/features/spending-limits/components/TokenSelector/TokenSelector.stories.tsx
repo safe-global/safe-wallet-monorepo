@@ -25,7 +25,7 @@ const popularToken = (address: string, symbol: string, name: string, decimals: n
   type: 'ERC20',
 })
 
-/** What CGW answers for the Ethereum popular list (USDC is also held by efSafe → de-duplicated). */
+/** What CGW answers for the Ethereum popular list (USDC and DAI are also held by efSafe → de-duplicated, leaving 6 of 8). */
 const popularTokens: Erc20TokenMetadata[] = [
   popularToken('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 'USDC', 'USD Coin', 6),
   popularToken('0xdAC17F958D2ee523a2206206994597C13D831ec7', 'USDT', 'Tether USD', 6),
@@ -135,7 +135,7 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** The efSafe fixture: 41 held tokens (USDC among them, so it is de-duplicated out of Popular, which is mocked from CGW). */
+/** The efSafe fixture: 41 held tokens (USDC and DAI among them, so both are de-duplicated out of Popular, which is mocked from CGW — 6 of 8 remain). */
 export const Default: Story = {
   play: openCombobox,
 }
