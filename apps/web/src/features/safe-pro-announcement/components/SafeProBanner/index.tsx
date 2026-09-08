@@ -5,12 +5,14 @@ import { Card } from '@/components/ui/card'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
+import { trackSafeProBannerClick } from '../../utils/trackSafeProBannerClick'
 import css from './styles.module.css'
 
 const SafeProBanner = ({ className }: { className?: string }) => (
   <Card
     as="a"
     href={SAFE_PRO_ANNOUNCEMENT_URL}
+    onClick={() => trackSafeProBannerClick('workspaces_sign_in')}
     target="_blank"
     rel="noopener noreferrer"
     size="none"
