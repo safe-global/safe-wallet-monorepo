@@ -8,6 +8,10 @@ on:
     paths:
       - apps/web/**
       - .github/workflows/web-storybook-tests.yml
+      - yarn.lock
+      - package.json
+      - .yarnrc.yml
+      - .yarn/patches/**
 
   push:
     branches:
@@ -15,6 +19,10 @@ on:
     paths:
       - apps/web/**
       - .github/workflows/web-storybook-tests.yml
+      - yarn.lock
+      - package.json
+      - .yarnrc.yml
+      - .yarn/patches/**
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
