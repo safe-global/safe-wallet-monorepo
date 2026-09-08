@@ -28,7 +28,6 @@ import PlusIcon from '@/public/images/common/plus.svg'
 import useAddressBook from '@/hooks/useAddressBook'
 import useChainId from '@/hooks/useChainId'
 import { cn } from '@/utils/cn'
-import { matchesNetworkSearch } from './utils'
 
 export const getNetworkLink = (
   router: NextRouter,
@@ -297,17 +296,19 @@ const NetworkSelector = ({
     ])
   }, [chainId, configs, isSafeOpened, safeAddress, safesGrouped.allMultiChainSafes])
 
+  const query = search.trim().toLowerCase()
+
   const [testNets, prodNets] = useMemo(
     () =>
       partition(
-        configs.filter((config) => availableChainIds.includes(config.chainId) && matchesNetworkSearch(config, search)),
+        configs.filter(
+          (config) =>
+            availableChainIds.includes(config.chainId) && (!query || config.chainName.toLowerCase().includes(query)),
+        ),
         (config) => config.isTestnet,
       ),
-    [availableChainIds, configs, search],
+    [availableChainIds, configs, query],
   )
-
-  const isSearching = search.trim() !== ''
-  const hasNoMatches = isSearching && prodNets.length === 0 && testNets.length === 0
 
   const renderMenuItem = useCallback(
     (chainId: string, isSelected: boolean) => {
@@ -341,10 +342,9 @@ const NetworkSelector = ({
     [configs, onChainSelect, router, safeAddress, compactButton],
   )
 
-  // base-ui tracks the highlighted row as a numeric index and never re-derives it when the list is
-  // filtered, so letting the arrow keys through would navigate from a stale position. Moving focus to
-  // a row we picked instead is what corrects it: the item's own onFocus writes its current index back
-  // as the active one, and base-ui's navigation takes over correctly from there.
+  // base-ui holds the highlighted row as a numeric index into the rendered rows and does not re-derive
+  // it when the list shrinks, so a stale index can point at a row that is no longer there. Focusing a
+  // row directly resets it, because the row's own onFocus writes its current index back as the active one.
   const focusRow = (edge: 'first' | 'last') => {
     const rows = searchRef.current
       ?.closest('[data-slot="select-content"]')
@@ -362,9 +362,9 @@ const NetworkSelector = ({
       return
     }
 
-    // Everything else is kept from base-ui's typeahead, which would otherwise hijack typing. Escape
-    // still reaches the popup so it can close. Tab is unaffected: stopping propagation does not stop
-    // the browser's own focus move.
+    // base-ui reads printable keys as list typeahead, which would take over the field. Escape has to
+    // reach the popup so it can close. Tab is unaffected: stopping propagation does not stop the
+    // browser's own focus move.
     if (event.key !== 'Escape') {
       event.stopPropagation()
     }
@@ -372,8 +372,8 @@ const NetworkSelector = ({
 
   const handleOpenChange = (nextOpen: boolean) => {
     setOpen(nextOpen)
-    // The popup keeps its search state between openings (this component stays mounted), so clear it
-    // here — otherwise reopening the dropdown shows a stale filter.
+    // This component stays mounted when the popup closes, so the query has to be cleared explicitly
+    // or the next opening starts filtered.
     setSearch('')
     if (nextOpen) {
       offerSafeCreation && trackEvent({ ...OVERVIEW_EVENTS.EXPAND_MULTI_SAFE, label: OVERVIEW_LABELS.top_bar })
@@ -403,13 +403,12 @@ const NetworkSelector = ({
       >
         <SelectValue>{renderSelectedValue}</SelectValue>
       </SelectTrigger>
-      {/* outline-hidden: base-ui focuses the popup on open; typing in the search field makes that
-          :focus-visible and would otherwise draw the browser's blue outline around the whole popup. */}
+      {/* outline-hidden: base-ui focuses the popup on open, and typing makes that :focus-visible, which
+          draws the browser's focus ring around the whole popup. */}
       <SelectContent className="min-w-[260px] outline-hidden" alignItemWithTrigger={false}>
-        {/* Sticky because SelectContent renders its children inside the scrolling list, so a plain
-            header would scroll out of reach. The negative margins and offset bleed it over that list's
-            padding, so they have to stay in step with the `p-1.5` on SelectPrimitive.List in
-            components/ui/select.tsx. */}
+        {/* SelectContent renders its children inside the scrolling list, so a plain header would scroll
+            out of reach. The negative margins and offset bleed this one over that list's padding and have
+            to stay in step with the `p-1.5` on SelectPrimitive.List in components/ui/select.tsx. */}
         <div className="sticky -top-1.5 z-10 -mx-1.5 -mt-1.5 bg-popover px-1.5 pt-1.5 pb-2">
           <SearchInput
             variant="surface"
@@ -431,13 +430,13 @@ const NetworkSelector = ({
 
         {testNets.map((chain) => renderMenuItem(chain.chainId, false))}
 
-        {hasNoMatches && (
+        {query && prodNets.length === 0 && testNets.length === 0 && (
           <p className="px-4 py-6 text-center text-sm text-muted-foreground" data-testid="network-selector-empty">
             No networks match your search
           </p>
         )}
 
-        {!isSearching && offerSafeCreation && isSafeOpened && addNetworkFeatureEnabled && (
+        {!query && offerSafeCreation && isSafeOpened && addNetworkFeatureEnabled && (
           <UndeployedNetworks
             chains={configs}
             deployedChains={availableChainIds}

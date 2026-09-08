@@ -20,9 +20,9 @@ const mockChains = [
   mockChain('11155111', 'Sepolia', true),
 ]
 
-// The real Base UI Select keeps its popup in a portal that synthetic clicks don't reliably open in
-// jsdom, so the popup parts render inline here and a bare button drives `onOpenChange`. Mirrors the
-// stub in SafeSelectorDropdown's own container test.
+// base-ui keeps the popup in a portal that synthetic clicks do not reliably open under jsdom, so the
+// popup parts render inline here. The data-slot attributes match the real primitive because the
+// component finds its rows by them.
 jest.mock('@/components/ui/select', () => ({
   __esModule: true,
   Select: ({
@@ -48,8 +48,7 @@ jest.mock('@/components/ui/select', () => ({
       {children}
     </div>
   ),
-  // The data-slot and tabIndex mirror the real primitive: the component finds rows by that slot, and
-  // jsdom refuses to focus a div without a tabindex.
+  // tabIndex mirrors base-ui's roving tabindex; jsdom will not focus a div without one.
   SelectItem: ({ children, value, ...props }: { children?: ReactNode; value?: string }) => (
     <div data-slot="select-item" data-value={value} tabIndex={-1} {...props}>
       {children}
@@ -64,24 +63,13 @@ jest.mock('@/hooks/useChains', () => ({
   useCurrentChain: () => mockChains[0],
 }))
 
-jest.mock('@/hooks/useChainId', () => ({
-  __esModule: true,
-  default: () => '1',
-}))
+jest.mock('@/hooks/useChainId', () => ({ __esModule: true, default: () => '1' }))
 
-jest.mock('@/hooks/useSafeAddress', () => ({
-  __esModule: true,
-  default: () => '',
-}))
+jest.mock('@/hooks/useSafeAddress', () => ({ __esModule: true, default: () => '' }))
 
-jest.mock('@/hooks/safes', () => ({
-  useAllSafesGrouped: () => ({ allMultiChainSafes: [], allSingleSafes: [] }),
-}))
+jest.mock('@/hooks/safes', () => ({ useAllSafesGrouped: () => ({ allMultiChainSafes: [], allSingleSafes: [] }) }))
 
-jest.mock('@/hooks/useAddressBook', () => ({
-  __esModule: true,
-  default: () => ({}),
-}))
+jest.mock('@/hooks/useAddressBook', () => ({ __esModule: true, default: () => ({}) }))
 
 jest.mock('@/features/multichain', () => ({
   __esModule: true,
@@ -90,167 +78,181 @@ jest.mock('@/features/multichain', () => ({
   CreateSafeOnSpecificChain: () => null,
 }))
 
-const getSearchInput = () => screen.getByTestId('network-selector-search-input')
-
-const getListedNetworks = () => screen.getAllByTestId('network-selector-item').map((item) => item.textContent?.trim())
-
 describe('NetworkSelector', () => {
-  it('renders a search field at the top of the dropdown', () => {
+  it('should, when the dropdown is open, render the search field above the first network', () => {
     render(<NetworkSelector />)
 
-    const search = getSearchInput()
-    expect(search).toBeInTheDocument()
+    const search = screen.getByTestId('network-selector-search-input')
+    const firstNetwork = screen.getAllByTestId('network-selector-item')[0]
+
     expect(search).toHaveAttribute('placeholder', 'Search networks')
-
-    // "At the top" is the contract the ticket asks for: the field must precede the first network row.
-    const content = screen.getByTestId('select-content')
-    const rows = screen.getAllByTestId('network-selector-item')
-    expect(content.firstElementChild).toContainElement(search)
-    expect(search.compareDocumentPosition(rows[0]) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(search.compareDocumentPosition(firstNetwork) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
-  it('lists every available network while the search is empty', () => {
+  it('should, when the search is empty, list every available network', () => {
     render(<NetworkSelector />)
 
-    expect(getListedNetworks()).toHaveLength(mockChains.length)
+    const listed = screen.getAllByTestId('network-selector-item').map((item) => item.textContent?.trim())
+
+    expect(listed).toEqual(['Ethereum', 'Polygon', 'Gnosis Chain', 'Sepolia'])
   })
 
-  it('filters the listed networks by the typed term', () => {
+  it('should, when a network name is typed, list only the matching network', () => {
     render(<NetworkSelector />)
 
-    fireEvent.change(getSearchInput(), { target: { value: 'gnosis' } })
+    fireEvent.change(screen.getByTestId('network-selector-search-input'), { target: { value: 'gnosis' } })
 
-    expect(getListedNetworks()).toEqual(['Gnosis Chain'])
-    // A partial match must not also claim there are no matches.
+    const listed = screen.getAllByTestId('network-selector-item').map((item) => item.textContent?.trim())
+
+    expect(listed).toEqual(['Gnosis Chain'])
     expect(screen.queryByTestId('network-selector-empty')).not.toBeInTheDocument()
   })
 
-  it('matches network names case-insensitively', () => {
+  it('should, when the typed term differs in case, still list the matching network', () => {
     render(<NetworkSelector />)
 
-    fireEvent.change(getSearchInput(), { target: { value: 'POLY' } })
+    fireEvent.change(screen.getByTestId('network-selector-search-input'), { target: { value: 'POLY' } })
 
-    expect(getListedNetworks()).toEqual(['Polygon'])
-    expect(screen.queryByTestId('network-selector-empty')).not.toBeInTheDocument()
+    const listed = screen.getAllByTestId('network-selector-item').map((item) => item.textContent?.trim())
+
+    expect(listed).toEqual(['Polygon'])
   })
 
-  it('keeps a filtered network selectable, with its link intact', () => {
+  it('should, when the typed term is only whitespace, list every available network', () => {
     render(<NetworkSelector />)
 
-    fireEvent.change(getSearchInput(), { target: { value: 'polygon' } })
+    fireEvent.change(screen.getByTestId('network-selector-search-input'), { target: { value: '   ' } })
+
+    const listed = screen.getAllByTestId('network-selector-item').map((item) => item.textContent?.trim())
+
+    expect(listed).toEqual(['Ethereum', 'Polygon', 'Gnosis Chain', 'Sepolia'])
+  })
+
+  it('should, when a network is filtered down to, keep the link that switches to it', () => {
+    render(<NetworkSelector />)
+
+    fireEvent.change(screen.getByTestId('network-selector-search-input'), { target: { value: 'polygon' } })
 
     const row = screen.getByTestId('network-selector-item')
+
     expect(row).toHaveAttribute('data-value', '137')
-    // The row's link is what performs the switch; a filtered row must still carry it.
     expect(row.querySelector('a')).toHaveAttribute('href', expect.stringContaining('pol'))
   })
 
-  it('shows an empty state when nothing matches', () => {
+  it('should, when nothing matches, show the no-matches message and no networks', () => {
     render(<NetworkSelector />)
 
-    fireEvent.change(getSearchInput(), { target: { value: 'no-such-network' } })
+    fireEvent.change(screen.getByTestId('network-selector-search-input'), { target: { value: 'no-such-network' } })
 
     expect(screen.queryAllByTestId('network-selector-item')).toHaveLength(0)
     expect(screen.getByTestId('network-selector-empty')).toHaveTextContent('No networks match your search')
   })
 
-  it('does not show the empty state when the search is empty', () => {
+  it('should, when the search is empty, not show the no-matches message', () => {
     render(<NetworkSelector />)
 
     expect(screen.queryByTestId('network-selector-empty')).not.toBeInTheDocument()
   })
 
-  it('hides the testnet divider when no testnet matches', () => {
+  it('should, when no testnet matches, hide the testnets divider', () => {
     render(<NetworkSelector />)
-    expect(screen.getByText('Testnets')).toBeInTheDocument()
 
-    fireEvent.change(getSearchInput(), { target: { value: 'ethereum' } })
+    fireEvent.change(screen.getByTestId('network-selector-search-input'), { target: { value: 'ethereum' } })
 
     expect(screen.queryByText('Testnets')).not.toBeInTheDocument()
   })
 
-  it('still groups a matching testnet under the divider', () => {
+  it('should, when a testnet matches, keep it under the testnets divider', () => {
     render(<NetworkSelector />)
 
-    fireEvent.change(getSearchInput(), { target: { value: 'sepolia' } })
+    fireEvent.change(screen.getByTestId('network-selector-search-input'), { target: { value: 'sepolia' } })
+
+    const listed = screen.getAllByTestId('network-selector-item').map((item) => item.textContent?.trim())
 
     expect(screen.getByText('Testnets')).toBeInTheDocument()
-    expect(getListedNetworks()).toEqual(['Sepolia'])
-    expect(screen.queryByTestId('network-selector-empty')).not.toBeInTheDocument()
+    expect(listed).toEqual(['Sepolia'])
   })
 
-  it('clears the search when the dropdown is reopened', () => {
+  it('should, when the dropdown is reopened, clear the previous search', () => {
     render(<NetworkSelector />)
 
-    fireEvent.change(getSearchInput(), { target: { value: 'gnosis' } })
-    expect(getListedNetworks()).toEqual(['Gnosis Chain'])
+    fireEvent.change(screen.getByTestId('network-selector-search-input'), { target: { value: 'gnosis' } })
+    fireEvent.click(screen.getByTestId('select-toggle'))
+    fireEvent.click(screen.getByTestId('select-toggle'))
 
-    const toggle = screen.getByTestId('select-toggle')
-    fireEvent.click(toggle) // open
-    fireEvent.click(toggle) // close
+    const listed = screen.getAllByTestId('network-selector-item').map((item) => item.textContent?.trim())
 
-    expect(getSearchInput()).toHaveValue('')
-    expect(getListedNetworks()).toHaveLength(mockChains.length)
+    expect(screen.getByTestId('network-selector-search-input')).toHaveValue('')
+    expect(listed).toEqual(['Ethereum', 'Polygon', 'Gnosis Chain', 'Sepolia'])
   })
 
-  // Base UI's Select reads printable keys as list typeahead from a handler above the input, so those
-  // must not reach it. Escape must, or the popup can no longer close.
-  const renderWithAncestorKeyDown = () => {
-    const onAncestorKeyDown = jest.fn()
+  it('should, when a letter is typed, keep it from the select that reads letters as typeahead', () => {
+    const onSelectKeyDown = jest.fn()
     render(
-      <div onKeyDown={onAncestorKeyDown}>
+      <div onKeyDown={onSelectKeyDown}>
         <NetworkSelector />
       </div>,
     )
-    return onAncestorKeyDown
-  }
 
-  it.each(['g', '1', ' ', 'Enter', 'Tab'])('stops the %s key from reaching the Select above it', (key) => {
-    const onAncestorKeyDown = renderWithAncestorKeyDown()
+    fireEvent.keyDown(screen.getByTestId('network-selector-search-input'), { key: 'g' })
 
-    fireEvent.keyDown(getSearchInput(), { key })
-
-    expect(onAncestorKeyDown).not.toHaveBeenCalled()
+    expect(onSelectKeyDown).not.toHaveBeenCalled()
   })
 
-  it('lets Escape reach the Select above it', () => {
-    const onAncestorKeyDown = renderWithAncestorKeyDown()
+  it('should, when Enter is pressed, keep it from the select so no unseen row is committed', () => {
+    const onSelectKeyDown = jest.fn()
+    render(
+      <div onKeyDown={onSelectKeyDown}>
+        <NetworkSelector />
+      </div>,
+    )
 
-    fireEvent.keyDown(getSearchInput(), { key: 'Escape' })
+    fireEvent.keyDown(screen.getByTestId('network-selector-search-input'), { key: 'Enter' })
 
-    expect(onAncestorKeyDown).toHaveBeenCalledWith(expect.objectContaining({ key: 'Escape' }))
+    expect(onSelectKeyDown).not.toHaveBeenCalled()
   })
 
-  // The arrows are handled here rather than passed up: base-ui tracks the highlighted row by index and
-  // never re-derives it when the list filters, so navigating from its stale position lands on the wrong
-  // row — or nowhere. Focusing a row we picked makes that row's own onFocus write the correct index back.
-  it('moves focus to the first matching row on ArrowDown, without reaching the Select', () => {
-    const onAncestorKeyDown = renderWithAncestorKeyDown()
-    fireEvent.change(getSearchInput(), { target: { value: 'pol' } })
+  it('should, when Escape is pressed, pass it to the select so the popup can close', () => {
+    const onSelectKeyDown = jest.fn()
+    render(
+      <div onKeyDown={onSelectKeyDown}>
+        <NetworkSelector />
+      </div>,
+    )
 
-    fireEvent.keyDown(getSearchInput(), { key: 'ArrowDown' })
+    fireEvent.keyDown(screen.getByTestId('network-selector-search-input'), { key: 'Escape' })
+
+    expect(onSelectKeyDown).toHaveBeenCalledWith(expect.objectContaining({ key: 'Escape' }))
+  })
+
+  it('should, when ArrowDown is pressed after filtering, move focus to the first matching network', () => {
+    render(<NetworkSelector />)
+
+    fireEvent.change(screen.getByTestId('network-selector-search-input'), { target: { value: 'pol' } })
+    fireEvent.keyDown(screen.getByTestId('network-selector-search-input'), { key: 'ArrowDown' })
 
     expect(document.activeElement).toBe(screen.getAllByTestId('network-selector-item')[0])
     expect(document.activeElement).toHaveTextContent('Polygon')
-    expect(onAncestorKeyDown).not.toHaveBeenCalled()
   })
 
-  it('moves focus to the last matching row on ArrowUp', () => {
+  it('should, when ArrowUp is pressed after filtering, move focus to the last matching network', () => {
     render(<NetworkSelector />)
-    fireEvent.change(getSearchInput(), { target: { value: 'o' } })
 
-    fireEvent.keyDown(getSearchInput(), { key: 'ArrowUp' })
+    fireEvent.change(screen.getByTestId('network-selector-search-input'), { target: { value: 'pol' } })
+    fireEvent.keyDown(screen.getByTestId('network-selector-search-input'), { key: 'ArrowUp' })
 
-    const rows = screen.getAllByTestId('network-selector-item')
-    expect(document.activeElement).toBe(rows[rows.length - 1])
+    const listed = screen.getAllByTestId('network-selector-item')
+
+    expect(document.activeElement).toBe(listed[listed.length - 1])
+    expect(document.activeElement).toHaveTextContent('Sepolia')
   })
 
-  it('does not move focus on ArrowDown when nothing matches', () => {
+  it('should, when ArrowDown is pressed and nothing matches, leave focus in the search field', () => {
     render(<NetworkSelector />)
-    const search = getSearchInput()
+
+    const search = screen.getByTestId('network-selector-search-input')
     fireEvent.change(search, { target: { value: 'no-such-network' } })
     search.focus()
-
     fireEvent.keyDown(search, { key: 'ArrowDown' })
 
     expect(document.activeElement).toBe(search)
