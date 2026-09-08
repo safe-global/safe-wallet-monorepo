@@ -9,6 +9,7 @@ import chains from '@safe-global/utils/config/chains'
 import { useSigner } from './wallets/useWallet'
 import { useSafeSDK } from './coreSDK/safeCoreSDK'
 import useIsSafeOwner from './useIsSafeOwner'
+import { isExpectedEstimationError } from '@/utils/transaction-errors'
 import useSafeInfo from './useSafeInfo'
 import {
   getEncodedSafeTx,
@@ -82,12 +83,11 @@ const useGasLimit = (
     safe,
   ])
 
-  // Reported here rather than by a nominated owner: this hook has several
-  // concurrent owners on the Execute step (the form, the fee preview, the
-  // gas-too-high check) but only the fee preview on the Sign step, so no single
-  // owner sees every failure. `useLogError` collapses the concurrent owners into
-  // one report, which is what nominating an owner was working around.
-  useLogError(Errors._612, gasLimitError?.message, getRpcErrorContext(web3ReadOnly))
+  // Several concurrent owners on the Execute step, one on Sign, so no single
+  // owner sees every failure; `useLogError` collapses them into one report.
+  // A revert or a throttle is the estimate's expected answer, not a fault.
+  const unexpectedGasLimitError = gasLimitError && !isExpectedEstimationError(gasLimitError) ? gasLimitError : undefined
+  useLogError(Errors._612, unexpectedGasLimitError?.message, getRpcErrorContext(web3ReadOnly))
 
   return { gasLimit, gasLimitError, gasLimitLoading }
 }
