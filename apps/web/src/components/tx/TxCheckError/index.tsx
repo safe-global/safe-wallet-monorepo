@@ -36,7 +36,7 @@ const HypernativeApprovalRequired = (): ReactElement => {
       {assessmentUrl && (
         <span className="mt-3 block">
           <Button
-            variant="outline"
+            variant="surface"
             size="sm"
             className="gap-2"
             onClick={onHypernativeCtaClick}
