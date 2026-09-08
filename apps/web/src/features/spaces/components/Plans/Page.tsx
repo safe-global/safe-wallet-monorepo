@@ -26,7 +26,7 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
           <Plans data={TRIAL_PLANS} />
         ) : (
           <Card size="none" radius="xl" className="w-full">
-            <SafeProAnnouncement />
+            <SafeProAnnouncement location="plans_page" />
           </Card>
         )}
       </div>

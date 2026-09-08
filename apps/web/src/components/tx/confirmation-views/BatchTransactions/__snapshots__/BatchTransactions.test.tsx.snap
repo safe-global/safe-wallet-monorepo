@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`BatchTransactions should render a list of batch transactions 1`] = `
 <div>
@@ -8,6 +8,7 @@ exports[`BatchTransactions should render a list of batch transactions 1`] = `
   >
     <li
       class="flex items-start gap-4 py-0"
+      data-size="default"
       data-slot="list-item"
     >
       <div
@@ -189,6 +190,7 @@ exports[`BatchTransactions should render a list of batch transactions 1`] = `
     </li>
     <li
       class="flex items-start gap-4 py-0"
+      data-size="default"
       data-slot="list-item"
     >
       <div

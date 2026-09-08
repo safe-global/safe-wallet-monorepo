@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
-import SpacesList, { WORKSPACE_BENEFITS } from '../index'
+import SpacesList from '../index'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
@@ -125,7 +125,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
   })
 
   describe('SAFE_PRO_ANNOUNCEMENT banner gating', () => {
-    it('keeps the pre-Pro workspace banner when the flag is off', () => {
+    it('keeps the pre-Pro Workspace banner when the flag is off', () => {
       setAuth(false)
 
       render(<SpacesList />)
@@ -145,7 +145,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
     })
 
     it('shows the wide Pro banner above the workspaces list when signed in and the flag is on', () => {
-      mockUseAppSelector.mockReturnValue(true)
+      setAuth(true)
       mockUseIsSafeProEnabled.mockReturnValue(true)
       mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
       mockUseSpacesGetV1Query.mockReturnValue({
@@ -160,7 +160,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
     })
 
     it('shows the wide Pro banner above the empty state when signed in with no workspaces', () => {
-      mockUseAppSelector.mockReturnValue(true)
+      setAuth(true)
       mockUseIsSafeProEnabled.mockReturnValue(true)
       mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
       mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
@@ -172,7 +172,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
     })
 
     it('hides the wide Pro banner when signed in and the flag is off', () => {
-      mockUseAppSelector.mockReturnValue(true)
+      setAuth(true)
       mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
       mockUseSpacesGetV1Query.mockReturnValue({
         currentData: [{ uuid: 'a', name: 'Acme', memberStatus: 'ACTIVE' }],
@@ -231,8 +231,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     render(<SpacesList />)
 
-    expect(screen.getByText(/create your first workspace/i)).toBeInTheDocument()
-    const cta = screen.getByRole('link', { name: /create workspace/i })
+    const cta = screen.getByRole('link', { name: /create your first Workspace/i })
     expect(cta).toHaveAttribute('href')
 
     // Sign in card must NOT render in this branch.
@@ -251,19 +250,6 @@ describe('SpacesList — auth/expiry state rendering', () => {
     expect(card).toHaveAttribute('data-size', 'none')
   })
 
-  it('renders the workspace-benefits bullet list with 12px spacing (gap-3)', () => {
-    setAuth(true)
-    mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
-    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
-
-    render(<SpacesList />)
-
-    const firstBullet = screen.getByText(WORKSPACE_BENEFITS[0])
-    const list = firstBullet.closest('.gap-3')
-    expect(list).toBeInTheDocument()
-    expect(list).not.toHaveClass('gap-1.5')
-  })
-
   it('shows a loading spinner, not the empty state, while the spaces query is still fetching', () => {
     setAuth(true)
     mockUseSpacesGetV1Query.mockReturnValue({ currentData: undefined, isFetching: true, error: undefined })
@@ -272,7 +258,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
     render(<SpacesList />)
 
     expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument()
-    expect(screen.queryByText(/create your first workspace/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/create your first Workspace/i)).not.toBeInTheDocument()
   })
 
   it('shows a loading spinner, not the sign-in card or empty state, before the store is hydrated on a hard refresh', () => {
@@ -282,7 +268,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument()
     expect(screen.queryByTestId('sign-in-options')).not.toBeInTheDocument()
-    expect(screen.queryByText(/create your first workspace/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/create your first Workspace/i)).not.toBeInTheDocument()
   })
 
   it('shows an error message with a retry button, not the empty state, when the spaces query errors', () => {
@@ -299,7 +285,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     expect(screen.getByText(/couldn't load your workspaces/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /try again/i })).toBeInTheDocument()
-    expect(screen.queryByText(/create your first workspace/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/create your first Workspace/i)).not.toBeInTheDocument()
   })
 
   it('calls refetch when the retry button is clicked in the error state', async () => {
@@ -350,7 +336,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
     render(<SpacesList />)
 
     expect(screen.getByText(/couldn't load your workspaces/i)).toBeInTheDocument()
-    expect(screen.queryByText(/create your first workspace/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/create your first Workspace/i)).not.toBeInTheDocument()
   })
 
   it('shows a loading spinner, not the spaces list, when the user is signed in but the store is not yet hydrated', () => {

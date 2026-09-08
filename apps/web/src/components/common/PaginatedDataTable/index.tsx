@@ -1,9 +1,9 @@
 import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { cva } from 'class-variance-authority'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableSortIcon } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { useIsMobile } from '@/hooks/use-mobile'
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
+import { ChevronDown, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import { cn } from '@/utils/cn'
 
 // Bounded design-system styling for columns. Consumers pick from these variant
@@ -112,12 +112,6 @@ const compareNullable = (
 const ariaSortValue = (direction?: SortDirection): 'ascending' | 'descending' | 'none' =>
   direction === 'asc' ? 'ascending' : direction === 'desc' ? 'descending' : 'none'
 
-const SortIcon = ({ direction }: { direction?: SortDirection }) => {
-  if (direction === 'asc') return <ArrowUp className="size-3.5" />
-  if (direction === 'desc') return <ArrowDown className="size-3.5" />
-  return <ArrowUpDown className="size-3.5 opacity-50" />
-}
-
 function PaginatedDataTable<T>({
   columns,
   rows,
@@ -142,11 +136,18 @@ function PaginatedDataTable<T>({
     return () => observer.disconnect()
   }, [])
 
-  // Jump back to the first page when the data set changes (e.g. a new search/filter)
-  useEffect(() => {
+  // The identity of the row set, not of the array holding it: a parent that re-renders with an
+  // equivalent `rows` must not send the user back to the first page.
+  const rowsKey = rows.map(getRowKey).join('\u0000')
+  const [prevRowsKey, setPrevRowsKey] = useState(rowsKey)
+
+  // A new data set (search/filter/delete) starts over at page one. Adjusted during render, so
+  // the stale page is never committed.
+  if (rowsKey !== prevRowsKey) {
+    setPrevRowsKey(rowsKey)
     setPage(0)
     setExpanded(new Set())
-  }, [rows])
+  }
 
   // Cycle through asc → desc → unsorted on repeated clicks of the same column header
   const handleSort = (columnId: string) => {
@@ -192,10 +193,10 @@ function PaginatedDataTable<T>({
     })
 
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} data-testid="table-container">
       {/* Fixed layout on regular desktop preserves column proportions and lets `truncate` cells
           clip; compact mode falls back to auto layout so the remaining columns size to content. */}
-      <Table className={cn(!isCompact && 'md:table-fixed')}>
+      <Table variant="panel" className={cn(!isCompact && 'md:table-fixed')}>
         <TableHeader>
           <TableRow>
             {visibleColumns.map((column) => {
@@ -218,10 +219,10 @@ function PaginatedDataTable<T>({
                     <button
                       type="button"
                       onClick={() => handleSort(column.id)}
-                      className="hover:text-foreground inline-flex cursor-pointer items-center gap-1 font-medium"
+                      className="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1"
                     >
                       {column.header}
-                      <SortIcon direction={direction} />
+                      <TableSortIcon direction={direction} />
                     </button>
                   ) : (
                     column.header
@@ -238,10 +239,17 @@ function PaginatedDataTable<T>({
             const key = getRowKey(row)
             const isOpen = expanded.has(key)
             const detailId = `data-table-detail-${key}`
+            // The variant draws a divider under every row but the last; an expanded row hands its
+            // own to the detail row below, which closes the pair.
+            const showDetail = showDetailToggle && isOpen
 
             return (
               <Fragment key={key}>
-                <TableRow className={getRowClassName?.(row)}>
+                <TableRow
+                  data-testid="table-row"
+                  data-no-divider={showDetail ? '' : undefined}
+                  className={getRowClassName?.(row)}
+                >
                   {visibleColumns.map((column) => (
                     <TableCell
                       key={column.id}
@@ -252,6 +260,7 @@ function PaginatedDataTable<T>({
                         hideClass(column),
                         stickyClass(column),
                         !isCompact && minWidthClass(column),
+                        isCompact && 'whitespace-normal wrap-anywhere',
                       )}
                     >
                       {column.cell(row, { isCompact })}
@@ -273,9 +282,13 @@ function PaginatedDataTable<T>({
                   )}
                 </TableRow>
 
-                {showDetailToggle && isOpen && (
+                {showDetail && (
                   <TableRow className={getRowClassName?.(row)}>
-                    <TableCell id={detailId} colSpan={totalColumns} className="bg-muted/30">
+                    <TableCell
+                      id={detailId}
+                      colSpan={totalColumns}
+                      className="bg-muted/30 whitespace-normal wrap-anywhere"
+                    >
                       {renderRowDetail?.(row)}
                     </TableCell>
                   </TableRow>
@@ -287,7 +300,7 @@ function PaginatedDataTable<T>({
       </Table>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between pt-4 pr-16">
+        <div className="flex items-center justify-between px-4 pt-4">
           <p className="text-muted-foreground text-sm">
             {currentPage * pageSize + 1}&ndash;{Math.min((currentPage + 1) * pageSize, sortedRows.length)} of{' '}
             {sortedRows.length}
@@ -297,6 +310,7 @@ function PaginatedDataTable<T>({
               variant="outline"
               size="icon-sm"
               aria-label="Previous page"
+              data-testid="prev-page-btn"
               disabled={currentPage === 0}
               onClick={() => setPage(currentPage - 1)}
             >
@@ -306,6 +320,7 @@ function PaginatedDataTable<T>({
               variant="outline"
               size="icon-sm"
               aria-label="Next page"
+              data-testid="next-page-btn"
               disabled={currentPage >= totalPages - 1}
               onClick={() => setPage(currentPage + 1)}
             >

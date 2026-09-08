@@ -37,7 +37,7 @@ exports[`./SafeProBanner.stories Default 1`] = `
               >
                 <svg
                   aria-hidden="true"
-                  class="lucide lucide-sparkles"
+                  class="lucide lucide-sparkles max-md:hidden"
                   fill="none"
                   height="24"
                   stroke="currentColor"
@@ -75,7 +75,7 @@ exports[`./SafeProBanner.stories Default 1`] = `
             </div>
             <span
               aria-hidden="true"
-              class="flex size-8 shrink-0 items-center justify-center arrow"
+              class="hidden size-8 shrink-0 items-center justify-center md:flex arrow"
             >
               <svg
                 aria-hidden="true"

@@ -90,7 +90,6 @@ function RecoverySettings(): ReactElement {
             },
             [HeadCells.Actions]: {
               rawValue: '',
-              sticky: true,
               content: (
                 <div className={tableCss.actions}>
                   <DelayModifierRow delayModifier={delayModifier} />

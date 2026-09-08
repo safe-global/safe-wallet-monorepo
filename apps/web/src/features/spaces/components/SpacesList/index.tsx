@@ -4,7 +4,9 @@ import { SafeProFeature, useIsSafeProEnabled } from '@/features/safe-pro-announc
 import SpaceRow from './SpaceRow'
 import SignInOptions from '../SignInOptions'
 import WorkspaceBanner from '../WorkspaceBanner'
-import SpacesIcon from '@/public/images/spaces/spaces.svg'
+import Image from 'next/image'
+import WorkspacesEmptyIllustration from '@/public/images/spaces/workspaces_empty.png'
+import WorkspacesEmptyIllustrationDark from '@/public/images/spaces/workspaces_empty_dark.webp'
 import SafeMarkIcon from '@/public/images/logo-no-text.svg'
 import SafeProLockup from '@/public/images/safe-pro/safe-pro-lockup.svg'
 import SafeProLockupDark from '@/public/images/safe-pro/safe-pro-lockup-dark.svg'
@@ -96,7 +98,7 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
     <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
       {/* The page keeps its Topbar + Accounts/Workspaces tabs, so the sign-in
           card renders inline rather than as a full-screen takeover. */}
-      <div className={cn('relative flex items-center justify-center p-6 pb-10', isSafeProEnabled ? 'pt-0' : 'pt-10')}>
+      <div className={cn('relative flex items-center justify-center pb-10', isSafeProEnabled ? 'pt-0' : 'pt-10')}>
         <div className="flex w-full max-w-[440px] flex-col items-center">
           {isSafeProEnabled ? <SafeProBanner className="mb-4" /> : <WorkspaceBanner className="mb-3" />}
 
@@ -145,7 +147,7 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
   )
 }
 
-export const WORKSPACE_BENEFITS = [
+const WORKSPACE_BENEFITS = [
   'Organize multiple Safe accounts in one place',
   'Invite members and manage their roles',
   'Share an address book across your team',
@@ -153,42 +155,48 @@ export const WORKSPACE_BENEFITS = [
 
 const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
   const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
+  const isDarkMode = useDarkMode()
 
   return (
     <>
-      <Card size="none" className="w-full">
-        <div className="flex flex-col p-10 text-center">
-          <div className="mb-4 flex justify-center">
-            <SpacesIcon />
-          </div>
-
-          <Typography variant="h4" className="mb-2 font-bold">
-            Create your first workspace
-          </Typography>
-          <Typography color="muted" className="mb-3">
-            Collaborate on your Safe accounts with your team.
-          </Typography>
-
-          <div className="mx-auto mt-2 mb-6 flex max-w-[360px] flex-col gap-3 text-left">
+      <Card size="none" radius="xl" className="w-full text-center">
+        <div className="flex flex-col items-center gap-8 rounded-t-xl bg-muted p-8 text-left md:flex-row md:items-end md:gap-16">
+          <div className="flex shrink-0 flex-col gap-4 md:self-center">
             {WORKSPACE_BENEFITS.map((benefit) => (
-              <div key={benefit} className="flex flex-row items-center gap-1.5">
-                <Check className="size-4 shrink-0 text-primary" />
-                <Typography variant="paragraph-small">{benefit}</Typography>
+              <div key={benefit} className="flex flex-row items-center gap-2">
+                <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[var(--color-background-light-hover)]">
+                  <Check className="size-4 text-badge-dot-success" strokeWidth={1.5} />
+                </div>
+                <Typography variant="paragraph-large" className="font-medium whitespace-nowrap">
+                  {benefit}
+                </Typography>
               </div>
             ))}
           </div>
 
-          <div className="h-12">
-            <AddSpaceButton
-              disabled={isAtLimit}
-              onClick={() =>
-                trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
-              }
-            />
-          </div>
+          <Image
+            src={isDarkMode ? WorkspacesEmptyIllustrationDark : WorkspacesEmptyIllustration}
+            alt="Workspace dashboard showing accounts grouped by workspace"
+            className="-my-8 h-auto w-full min-w-0 md:-mr-8 md:w-[60%]"
+          />
+        </div>
 
-          <div className="mt-2">
-            <Link onClick={() => setIsInfoOpen(true)} href="#">
+        <div className="flex flex-col items-center gap-6 p-8">
+          <Typography variant="h3">Collaborate on your Safe accounts with your team.</Typography>
+
+          <div className="flex flex-col items-center gap-4">
+            <div className="h-12">
+              <AddSpaceButton
+                label="Create your first Workspace"
+                icon="arrow"
+                disabled={isAtLimit}
+                onClick={() =>
+                  trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
+                }
+              />
+            </div>
+
+            <Link variant="muted" className="text-sm underline" onClick={() => setIsInfoOpen(true)} href="#">
               What are workspaces?
             </Link>
           </div>

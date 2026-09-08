@@ -111,6 +111,19 @@ describe('PaginatedDataTable', () => {
     expect(screen.queryByText('z')).not.toBeInTheDocument()
   })
 
+  it('keeps the current page when the parent re-renders an equivalent row set', () => {
+    const { rerender } = render(tableElement(['a', 'b', 'c'], 2))
+
+    fireEvent.click(screen.getByRole('button', { name: 'Next page' }))
+    expect(screen.getByText('c')).toBeInTheDocument()
+
+    // A fresh array holding the same rows — a parent re-render, not a data change
+    rerender(tableElement(['a', 'b', 'c'], 2))
+
+    expect(screen.getByText('c')).toBeInTheDocument()
+    expect(screen.queryByText('a')).not.toBeInTheDocument()
+  })
+
   describe('sorting', () => {
     const sortableColumns: DataTableColumn<{ name: string }>[] = [
       { id: 'name', header: 'Name', sortValue: (row) => row.name, cell: (row) => row.name },
@@ -148,6 +161,39 @@ describe('PaginatedDataTable', () => {
 
       fireEvent.click(header)
       expect(cellTexts()).toEqual(['Charlie', 'Alice', 'Bob'])
+    })
+
+    it('restarts at ascending when the sort moves to another column', () => {
+      render(
+        <PaginatedDataTable
+          columns={[
+            { id: 'name', header: 'Name', sortValue: (row) => row.name, cell: (row) => row.name },
+            { id: 'code', header: 'Code', sortValue: (row) => row.code, cell: (row) => row.code },
+          ]}
+          rows={[
+            { name: 'Alice', code: 'c' },
+            { name: 'Bob', code: 'a' },
+            { name: 'Charlie', code: 'b' },
+          ]}
+          getRowKey={(row) => row.name}
+        />,
+      )
+
+      const nameHeader = screen.getByRole('button', { name: /Name/ })
+      const codeHeader = screen.getByRole('button', { name: /Code/ })
+
+      fireEvent.click(nameHeader)
+      fireEvent.click(nameHeader)
+      expect(cellTexts()).toEqual(['Charlie', 'b', 'Bob', 'a', 'Alice', 'c'])
+
+      // The new column starts its own cycle instead of inheriting the descending direction
+      fireEvent.click(codeHeader)
+      expect(cellTexts()).toEqual(['Bob', 'a', 'Charlie', 'b', 'Alice', 'c'])
+      expect(codeHeader.closest('th')).toHaveAttribute('aria-sort', 'ascending')
+      expect(nameHeader.closest('th')).toHaveAttribute('aria-sort', 'none')
+
+      fireEvent.click(codeHeader)
+      expect(cellTexts()).toEqual(['Alice', 'c', 'Charlie', 'b', 'Bob', 'a'])
     })
   })
 
@@ -192,6 +238,18 @@ describe('PaginatedDataTable', () => {
       expect(screen.queryByRole('button', { name: 'Show details' })).not.toBeInTheDocument()
     })
 
+    it('lets the detail row wrap, so expanding it cannot widen the table', () => {
+      mockUseIsMobile.mockReturnValue(true)
+      renderResponsive(true)
+
+      fireEvent.click(screen.getAllByRole('button', { name: 'Show details' })[0]!)
+
+      const detailCell = screen.getByText('detail-Alice').closest('td')
+      expect(detailCell).toHaveClass('whitespace-normal')
+      expect(detailCell).toHaveClass('wrap-anywhere')
+      expect(detailCell).not.toHaveClass('whitespace-nowrap')
+    })
+
     it('expands and collapses the mobile detail row', () => {
       mockUseIsMobile.mockReturnValue(true)
       renderResponsive(true)
@@ -207,6 +265,35 @@ describe('PaginatedDataTable', () => {
 
       fireEvent.click(screen.getByRole('button', { name: 'Hide details' }))
       expect(screen.queryByText('detail-Alice')).not.toBeInTheDocument()
+    })
+  })
+
+  // The panel variant draws a divider under every row but the last; rows opt out.
+  describe('row dividers', () => {
+    const suppressed = (container: HTMLElement) =>
+      Array.from(container.querySelectorAll('tbody tr')).map((row) => row.hasAttribute('data-no-divider'))
+
+    it('leaves every row to the variant by default', () => {
+      const { container } = render(tableElement(['a', 'b', 'c']))
+
+      expect(suppressed(container)).toEqual([false, false, false])
+    })
+
+    it("hands an expanded row's divider to its detail row", () => {
+      mockUseIsMobile.mockReturnValue(true)
+      const { container } = render(
+        <PaginatedDataTable
+          columns={columns}
+          rows={['a', 'b']}
+          getRowKey={(row) => row}
+          renderRowDetail={(row) => <span>detail-{row}</span>}
+        />,
+      )
+
+      fireEvent.click(screen.getAllByRole('button', { name: 'Show details' })[0]!)
+
+      // The pair renders as [row a, detail a, row b] — only the detail row closes it.
+      expect(suppressed(container)).toEqual([true, false, false])
     })
   })
 })

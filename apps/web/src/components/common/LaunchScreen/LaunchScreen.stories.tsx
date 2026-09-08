@@ -24,3 +24,11 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
+
+export const StepUpLeaving: Story = {
+  args: { stepUpCaption: 'Verifying your identity…' },
+}
+
+export const StepUpReturning: Story = {
+  args: { stepUpCaption: 'Finishing your request…' },
+}

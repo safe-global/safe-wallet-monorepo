@@ -1,8 +1,7 @@
 /**
- * TanStack root route — mirrors apps/web/src/pages/_app.tsx as documented in
- * docs/migration/state/plan.md ("Provider tree to reproduce"). This file is
- * one of the few intentional copies in the migration; the rest of the
- * codebase is re-used from apps/web/src/** via path aliases.
+ * TanStack root route — mirrors the provider tree of apps/web/src/pages/_app.tsx.
+ * This file is one of the few intentional copies in the migration; the rest of
+ * the codebase is re-used from apps/web/src/** via path aliases.
  */
 import { Outlet, createRootRoute } from '@tanstack/react-router'
 import { HelmetProvider, Helmet } from 'react-helmet-async'
@@ -38,7 +37,8 @@ import { useSafeMsgTracking } from '@/hooks/messages/useSafeMsgTracking'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import { useVisitedSafes } from '@/features/myAccounts'
 import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
-import { useOidcLoginCallback } from '@/features/oidc-auth'
+import LaunchScreen from '@/components/common/LaunchScreen'
+import { useOidcLoginCallback, useStepUpCallback, useStepUpSplash } from '@/features/oidc-auth'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import { initObservability } from '@/services/observability'
@@ -83,6 +83,12 @@ const TargetedOutreachPopupLoader = () => {
   return <OutreachPopup />
 }
 
+const StepUpSplash = (): ReactElement | null => {
+  const stepUpCaption = useStepUpSplash()
+
+  return stepUpCaption ? <LaunchScreen stepUpCaption={stepUpCaption} /> : null
+}
+
 const InitApp = (): null => {
   useHydrateStore(reduxStore)
   useInitChains()
@@ -104,6 +110,7 @@ const InitApp = (): null => {
   useVisitedSafes()
   usePortfolioRefetchOnTxHistory()
   useOidcLoginCallback()
+  useStepUpCallback()
   useLogoutCallback()
   useSessionExpiryGuard()
   return null
@@ -148,6 +155,7 @@ function RootShell() {
         <AppProviders>
           <CaptchaProvider>
             <InitApp />
+            <StepUpSplash />
             <PwaReloadPrompt />
             <Suspense fallback={null}>
               <LazyWeb3Init />

@@ -123,6 +123,12 @@ describe('AddToWorkspaceButton', () => {
     })
   })
 
+  it('drops the label into the accessible name in the compact layout', () => {
+    render(<AddToWorkspaceButton address={address} name="Alice" chainIds={['1']} isCompact />)
+
+    expect(screen.getByRole('button', { name: 'Add to Workspace' })).toHaveTextContent('')
+  })
+
   it('disables the button and skips the mutation when the local name has invalid characters', async () => {
     render(<AddToWorkspaceButton address={address} name="Bad/Name" chainIds={['1']} />, {
       initialReduxState: { addressBook: { '1': { [address]: 'Bad/Name' } } },
