@@ -59,9 +59,8 @@ export const SpaceSelectorDropdown = ({
   const menuId = useId()
   const spaceName = selectedSpace?.name ?? ''
   const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
-  const { plan, tierName } = useSpacePlan()
-  const isTrial = isSafePro && plan?.status === 'trialing'
-  const planLabel = !isSafePro ? 'Workspace' : isTrial ? 'Free trial' : tierName
+  const { tierName, isTrialing } = useSpacePlan()
+  const planLabel = !isSafePro ? 'Workspace' : isTrialing ? 'Free trial' : tierName
   const displayName = truncateSpaceName(spaceName, SPACE_SELECTOR_NAME_MAX_LENGTH)
   const initial = spaceName.charAt(0).toUpperCase()
   const selectedSpaceColor = spaceName ? getDeterministicColor(spaceName) : undefined
@@ -193,7 +192,7 @@ export const SpaceSelectorDropdown = ({
                 ) : (
                   <span className={css.spaceSelectorName} />
                 )}
-                {isTrial && (
+                {isTrialing && (
                   <span className="block h-4 w-6 shrink-0" data-testid="space-selector-pro-chip">
                     <ProChip className="size-full" />
                   </span>

@@ -16,7 +16,7 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
 
 const mockUseHasFeature = jest.fn()
 jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
-const mockPlans: { plan: { status: string } | null } = { plan: null }
+const mockPlans = { isPaidActive: false }
 jest.mock('../../../../hooks/useSpacePlan', () => ({ useSpacePlan: () => mockPlans }))
 
 jest.mock('@/hooks/useIsSpaceRoute', () => ({
@@ -126,14 +126,13 @@ describe('SidebarTopBar', () => {
   it('swaps the Home pill for the Safe PRO lockup on a paid Pro workspace', () => {
     mockUseRouter.mockReturnValue({ pathname: AppRoutes.spaces.index })
     mockUseIsSpaceRoute.mockReturnValue(true)
-    mockUseHasFeature.mockReturnValue(true)
-    mockPlans.plan = { status: 'active' }
+    mockPlans.isPaidActive = true
 
     render(<SidebarTopBar />)
 
     expect(screen.getByTestId('logo-container')).toHaveAttribute('data-pro-lockup', 'true')
 
-    mockPlans.plan = { status: 'trialing' }
+    mockPlans.isPaidActive = false
     render(<SidebarTopBar />)
     expect(screen.getAllByTestId('logo-container')[1]).toHaveAttribute('data-pro-lockup', 'false')
   })

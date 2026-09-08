@@ -214,7 +214,7 @@ const SpacesList = () => {
   const { SafeProWorkspacesBanner } = useLoadFeature(SafeProFeature)
   const isSafeProEnabled = useIsSafeProEnabled()
   const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
-  const { plan, tierName } = useSpacePlan()
+  const { tierName, isPaidActive } = useSpacePlan()
   const isDarkMode = useDarkMode()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
@@ -310,7 +310,7 @@ const SpacesList = () => {
                     space={space}
                     currentUserId={currentUser?.id}
                     showDivider={index < activeSpaces.length - 1}
-                    planName={isSafePro && plan?.status === 'active' ? tierName : undefined}
+                    planName={isPaidActive ? tierName : undefined}
                   />
                 ))}
               </div>

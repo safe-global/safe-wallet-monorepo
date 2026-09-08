@@ -80,7 +80,7 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
 const mockUseHasFeature = jest.fn()
 jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
 jest.mock('@/public/images/safe-pro/pro-chip.svg', () => 'svg')
-const mockPlans = { plan: { status: 'trialing' }, tierName: 'Business' }
+const mockPlans = { tierName: 'Business', isTrialing: false }
 jest.mock('../../../../../hooks/useSpacePlan', () => ({ useSpacePlan: () => mockPlans }))
 
 jest.mock('@/hooks/useChainId', () => ({
@@ -1076,12 +1076,12 @@ describe('SpaceSelectorDropdown', () => {
 
   describe('plan label under the workspace name', () => {
     it.each([
-      [false, 'trialing', 'Workspace', false],
-      [true, 'trialing', 'Free trial', true],
-      [true, 'active', 'Business', false],
-    ])('SAFE_PRO=%s status=%s → "%s", chip=%s', (isSafePro, status, label, hasChip) => {
+      [false, false, 'Workspace', false],
+      [true, true, 'Free trial', true],
+      [true, false, 'Business', false],
+    ])('SAFE_PRO=%s isTrialing=%s → "%s", chip=%s', (isSafePro, isTrialing, label, hasChip) => {
       mockUseHasFeature.mockReturnValue(isSafePro)
-      mockPlans.plan.status = status
+      mockPlans.isTrialing = isTrialing
       const spaces = [{ uuid: 'uuid-1', name: 'Alpha', safeCount: 0 }]
 
       render(<SpaceSelectorDropdown spaces={spaces} selectedSpace={spaces[0]} />)

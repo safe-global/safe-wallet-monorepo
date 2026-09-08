@@ -31,7 +31,6 @@ const SpaceRow = ({
   space: GetSpaceResponse
   currentUserId?: number
   showDivider?: boolean
-  /** Paid Pro tier; renders the PRO pill when set. */
   planName?: string
 }) => {
   const isAdmin = isUserActiveAdmin(space.members, currentUserId)
