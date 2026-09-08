@@ -25,7 +25,7 @@ Read this before committing, pushing, opening a PR, or reviewing one. Nothing in
   - **How to test it** — concrete steps a reviewer can follow, starting from which Safe/chain/state to use.
   - **Affected flows / Blast radius / Risks — not checked** — carry these over from the pre-implementation regression checklist (root [AGENTS.md](../../AGENTS.md), Workflow section); do not re-derive them from the diff.
   - **Checklist** — tick honestly; an unticked box with a reason beats a false tick.
-- **Visual summary is required.** Every PR must include a visual in the `## Visual summary` section — mandatory, not optional:
+- **Visual summary is required for AI-authored PRs.** Every AI-authored PR must include a visual in the `## Visual summary` section — mandatory, not optional:
   - **Architecture/logic changes** → Mermaid diagram (flowchart, sequence, or class diagram) showing what changed — GitHub renders mermaid natively
   - **UI changes** → Screenshot of the result (use Chrome DevTools MCP if the app is running, or describe how to capture manually)
   - **Both** if the PR includes UI + logic changes

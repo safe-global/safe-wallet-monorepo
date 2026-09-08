@@ -12,6 +12,8 @@
 
 `yarn workspace @safe-global/tx-builder dev` (Vite dev server, port 4000) — plus the standard `build` / `test` / `lint` scripts.
 
+Root `yarn verify:changed` does NOT cover this app; run `node scripts/verify.mjs --changed --workspace=tx-builder`.
+
 ## Testing
 
 Unit tests are colocated. E2E coverage lives in the main web suite at `apps/web/cypress/e2e/safe-apps/` (exercises the real iframe integration).

@@ -92,7 +92,7 @@ Every behavioral change must include tests — each platform's file defines the 
 
 Verify your changes with the repo's `verify` scripts before committing — running them is your responsibility:
 
-1. **Scoped check**: `yarn verify:changed` type-checks, lints, prettier-checks and tests changed files — **for `apps/web/` only. It does not auto-detect the workspace**: it defaults to web and silently skips files outside `apps/<workspace>/`, so a mobile-, web-tanstack-, packages-, or config-only change gets a false green pass. Other workspaces: `node scripts/verify.mjs --changed --workspace=mobile|web-tanstack`. For `packages/` changes see [packages/AGENTS.md](packages/AGENTS.md); for `config/` changes see [config/AGENTS.md](config/AGENTS.md). (`SKIP_VERIFY=1` skips verify entirely — only with the user's explicit say-so.)
+1. **Scoped check**: `yarn verify:changed` type-checks, lints, prettier-checks and tests changed files — **for `apps/web/` only. It does not auto-detect the workspace**: it defaults to web and silently skips files outside `apps/<workspace>/`, so a mobile-, web-tanstack-, packages-, or config-only change gets a false green pass. Other workspaces: `node scripts/verify.mjs --changed --workspace=mobile|web-tanstack|tx-builder`. For `packages/` changes see [packages/AGENTS.md](packages/AGENTS.md); for `config/` changes see [config/AGENTS.md](config/AGENTS.md). (`SKIP_VERIFY=1` skips verify entirely — only with the user's explicit say-so.)
 
 2. **Full check**: Run `yarn verify:web` for a full check before committing.
 
