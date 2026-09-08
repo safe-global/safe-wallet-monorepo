@@ -29,7 +29,7 @@ export const fetchSafeMessage = async (safeMessageHash: string, chainId: string)
       // Convert Message to MessageItem by adding the type field
       message = { ...result.data, type: 'MESSAGE' as const }
     } else {
-      throw new Error('error' in result ? String(result.error) : 'Failed to fetch message')
+      throw 'error' in result ? asError(result.error) : new Error('Failed to fetch message')
     }
   } catch (err) {
     logError(Errors._613, err)

@@ -51,7 +51,7 @@ export const dispatchSafeMsgProposal = async ({
     )
 
     if ('error' in result) {
-      throw new Error(String(result.error))
+      throw asError(result.error)
     }
   } catch (error) {
     safeMsgDispatch(SafeMsgEvent.PROPOSE_FAILED, {
@@ -95,7 +95,7 @@ export const dispatchSafeMsgConfirmation = async ({
     )
 
     if ('error' in result) {
-      throw new Error(String(result.error))
+      throw asError(result.error)
     }
   } catch (error) {
     safeMsgDispatch(SafeMsgEvent.CONFIRM_PROPOSE_FAILED, {
