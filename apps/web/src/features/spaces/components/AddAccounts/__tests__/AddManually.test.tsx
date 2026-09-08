@@ -1,9 +1,16 @@
-import { render, screen, fireEvent } from '@/tests/test-utils'
+import { render, screen, fireEvent, waitFor } from '@/tests/test-utils'
+import { chainBuilder } from '@/tests/builders/chains'
+import chains from '@safe-global/utils/config/chains'
 import AddManually from '../AddManually'
+
+const chainConfigs = [
+  chainBuilder().with({ chainId: chains.eth, chainName: 'Ethereum' }).build(),
+  chainBuilder().with({ chainId: '137', chainName: 'Polygon' }).build(),
+]
 
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
-  default: () => ({ configs: [] }),
+  default: () => ({ configs: chainConfigs }),
   useHasFeature: () => false,
 }))
 
@@ -18,13 +25,25 @@ jest.mock('@/components/common/AddressInput', () => ({
 
 jest.mock('@/components/common/ChainIndicator', () => ({
   __esModule: true,
-  default: () => <div data-testid="chain-indicator" />,
+  default: ({ chainId }: { chainId: string }) => <span>Chain {chainId}</span>,
 }))
 
 jest.mock('@/components/common/ModalDialog', () => ({
   __esModule: true,
-  default: ({ open, children }: { open: boolean; children: React.ReactNode }) =>
-    open ? <div data-testid="modal-dialog">{children}</div> : null,
+  default: ({
+    open,
+    children,
+    forceBackdrop,
+  }: {
+    open: boolean
+    children: React.ReactNode
+    forceBackdrop?: boolean
+  }) =>
+    open ? (
+      <div data-testid="modal-dialog" data-force-backdrop={String(Boolean(forceBackdrop))}>
+        {children}
+      </div>
+    ) : null,
 }))
 
 describe('AddManually', () => {
@@ -46,5 +65,25 @@ describe('AddManually', () => {
     fireEvent.click(screen.getByTestId('add-manually-button'))
 
     expect(screen.queryByTestId('modal-dialog')).not.toBeInTheDocument()
+  })
+
+  // The dialog is nested inside the "My accounts" picker dialog, and Base UI drops the backdrop of a
+  // nested dialog. Without forceBackdrop the two surfaces render with nothing between them.
+  it('forces its own backdrop so it does not merge into the dialog behind it', () => {
+    render(<AddManually handleAddSafe={jest.fn()} />)
+
+    fireEvent.click(screen.getByTestId('add-manually-button'))
+
+    expect(screen.getByTestId('modal-dialog')).toHaveAttribute('data-force-backdrop', 'true')
+  })
+
+  it('shows the network label on the closed network trigger for the default chain', async () => {
+    render(<AddManually handleAddSafe={jest.fn()} />)
+
+    fireEvent.click(screen.getByTestId('add-manually-button'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('network-selector')).toHaveTextContent(`Chain ${chains.eth}`)
+    })
   })
 })

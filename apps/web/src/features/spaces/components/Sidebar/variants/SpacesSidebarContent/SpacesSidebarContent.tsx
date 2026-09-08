@@ -19,6 +19,8 @@ export const SpacesSidebarContent = ({
   const isActiveMember = useIsActiveMember(selectedSpace?.uuid)
   const isSecurityHubEnabled = useHasFeature(FEATURES.SECURITY_HUB)
   const isAuditLogEnabled = useHasFeature(FEATURES.SPACE_AUDIT_LOG)
+  const isPoliciesEnabled = useHasFeature(FEATURES.POLICIES)
+  const isSafeProEnabled = useHasFeature(FEATURES.SAFE_PRO_ANNOUNCEMENT)
 
   const getLink = (item: SidebarItemConfig) => ({
     pathname: item.href,
@@ -36,23 +38,34 @@ export const SpacesSidebarContent = ({
     return pathname === item.href || pathname.startsWith(`${item.href}/`)
   }
 
-  // Drop the Security entry from the Setup group when the chain feature flag is explicitly
-  // off. `undefined` means the chain config is still loading — keep the item to avoid flicker.
-  const filteredSetupGroup = useMemo(
+  // Drop flag-gated entries when their chain feature flag is explicitly off. `undefined` means
+  // the chain config is still loading — keep the item to avoid flicker. Plans is the inverse: it
+  // shows only once SAFE_PRO_ANNOUNCEMENT is known to be on, so a slow chain config can't flash it in and out.
+  const gatedOffHrefs = useMemo(
     () =>
-      isSecurityHubEnabled === false
-        ? { ...spacesSetupGroup, items: spacesSetupGroup.items.filter((i) => i.href !== AppRoutes.spaces.security) }
-        : spacesSetupGroup,
-    [isSecurityHubEnabled],
+      new Set(
+        (
+          [
+            [AppRoutes.spaces.security, isSecurityHubEnabled],
+            [AppRoutes.spaces.activity, isAuditLogEnabled],
+            [AppRoutes.spaces.policies, isPoliciesEnabled],
+            [AppRoutes.spaces.plans, !!isSafeProEnabled],
+          ] as const
+        )
+          .filter(([, isEnabled]) => isEnabled === false)
+          .map(([href]) => href),
+      ),
+    [isSecurityHubEnabled, isAuditLogEnabled, isPoliciesEnabled, isSafeProEnabled],
   )
 
-  // Same anti-flicker rule for the Activity entry (SPACE_AUDIT_LOG flag).
+  const filteredSetupGroup = useMemo(
+    () => ({ ...spacesSetupGroup, items: spacesSetupGroup.items.filter((i) => !gatedOffHrefs.has(i.href)) }),
+    [gatedOffHrefs],
+  )
+
   const filteredMainNavigation = useMemo(
-    () =>
-      isAuditLogEnabled === false
-        ? spacesMainNavigation.filter((i) => i.href !== AppRoutes.spaces.activity)
-        : spacesMainNavigation,
-    [isAuditLogEnabled],
+    () => spacesMainNavigation.filter((i) => !gatedOffHrefs.has(i.href)),
+    [gatedOffHrefs],
   )
 
   const { mainNavItems, setupGroup } = useResolvedSidebarNav(filteredMainNavigation, filteredSetupGroup, {

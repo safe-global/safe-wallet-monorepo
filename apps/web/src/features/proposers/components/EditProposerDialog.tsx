@@ -1,62 +1,43 @@
-import CheckWallet from '@/components/common/CheckWallet'
 import Track from '@/components/common/Track'
-import UpsertProposer from './UpsertProposer'
-import useWallet from '@/hooks/wallets/useWallet'
-import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
+import EntryDialog from '@/components/address-book/EntryDialog'
+import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
+import useChainId from '@/hooks/useChainId'
 import EditIcon from '@/public/images/common/edit.svg'
 import { SETTINGS_EVENTS } from '@/services/analytics'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import type { Delegate } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 const EditProposerDialog = ({ proposer }: { proposer: Delegate }) => {
   const [open, setOpen] = useState<boolean>(false)
-  const wallet = useWallet()
-  const nestedSafeOwners = useNestedSafeOwners()
-
-  const canEdit =
-    sameAddress(wallet?.address, proposer.delegator) ||
-    (nestedSafeOwners?.some((addr) => sameAddress(addr, proposer.delegator)) ?? false)
+  const chainId = useChainId()
+  const contact = useAddressBookItem(proposer.delegate, chainId)
 
   return (
     <>
-      <CheckWallet allowProposer={false}>
-        {(isOk) => {
-          const tooltipTitle =
-            isOk && canEdit ? 'Edit proposer' : isOk && !canEdit ? 'Only the owner of this proposer can edit them' : ''
+      <Track {...SETTINGS_EVENTS.PROPOSERS.EDIT_PROPOSER}>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <span tabIndex={0}>
+                <Button variant="ghost" size="icon-sm" data-testid="edit-proposer-btn" onClick={() => setOpen(true)}>
+                  <EditIcon className="size-4 text-[var(--color-border-main)]" />
+                </Button>
+              </span>
+            }
+          />
+          <TooltipContent>Rename proposer</TooltipContent>
+        </Tooltip>
+      </Track>
 
-          const button = (
-            <span tabIndex={0}>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                data-testid="edit-proposer-btn"
-                onClick={() => setOpen(true)}
-                disabled={!isOk || !canEdit}
-              >
-                <EditIcon className="size-4 text-[var(--color-border-main)]" />
-              </Button>
-            </span>
-          )
-
-          return (
-            <Track {...SETTINGS_EVENTS.PROPOSERS.EDIT_PROPOSER}>
-              {tooltipTitle ? (
-                <Tooltip>
-                  <TooltipTrigger render={button} />
-                  <TooltipContent>{tooltipTitle}</TooltipContent>
-                </Tooltip>
-              ) : (
-                button
-              )}
-            </Track>
-          )
-        }}
-      </CheckWallet>
-
-      {open && <UpsertProposer onClose={() => setOpen(false)} onSuccess={() => setOpen(false)} proposer={proposer} />}
+      {open && (
+        <EntryDialog
+          handleClose={() => setOpen(false)}
+          defaultValues={{ address: proposer.delegate, name: contact?.name ?? '' }}
+          disableAddressInput
+        />
+      )}
     </>
   )
 }

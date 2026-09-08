@@ -34,11 +34,18 @@ export type PublicCheckStatus =
   | CheckStatus.UNAVAILABLE
 
 /**
- * Why a check reads as `UNAVAILABLE`: no check was ever requested, or the
- * chain read failed. `undefined` while the first read is still in flight, so
- * an unresolved read never claims a failure.
+ * Why a check reads as `UNAVAILABLE`:
+ *
+ *  - `NO_CHECK`: a read whose window covers the check's whole possible lifetime
+ *    found nothing, so no check was ever requested.
+ *  - `WINDOW_UNCERTAIN`: a read found nothing over a window that cannot support
+ *    that claim (see `WindowCoverage`). The state is unknown, not absent.
+ *  - `READ_FAILED`: the chain read itself failed.
+ *
+ * `undefined` while the first read is still in flight, so an unresolved read
+ * never claims a failure.
  */
-export type UnavailableReason = 'NO_CHECK' | 'READ_FAILED'
+export type UnavailableReason = 'NO_CHECK' | 'WINDOW_UNCERTAIN' | 'READ_FAILED'
 
 /**
  * Map an internal status to its public projection: `AWAITING_VERIFICATION`

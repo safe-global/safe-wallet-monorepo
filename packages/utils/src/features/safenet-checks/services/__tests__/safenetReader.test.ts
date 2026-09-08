@@ -2,6 +2,7 @@ import { setupServer, type SetupServerApi } from 'msw/node'
 import { SafenetReader, type SafenetReaderConfig } from '../safenetReader'
 import { CONSENSUS_TOPIC0S } from '../../abi'
 import { transactionProposalHash } from '../../utils/proposalHash'
+import { BLOCK_ESTIMATE_TOLERANCE_SECONDS } from '../../constants'
 import {
   resetLogCounter,
   buildOracleProposedLog,
@@ -618,6 +619,118 @@ describe('SafenetReader block targeting — estimate convergence', () => {
     const result = await makeReader().fetchCheckState(SAFE_TX_HASH, { timestampMs: 900_000 * 1000 })
 
     expect(result.events.map((event) => event.blockNumber)).toEqual([centre, 988_999])
+  })
+})
+
+describe('SafenetReader window coverage', () => {
+  // Head is block 1,000,000 at t=1,000,000s with 5s blocks (see the mock), so
+  // the aimed window spans 10,000 blocks ≈ 13.9h from 1,000 blocks back.
+  const recent = () => makeEndpoint({ url: 'http://rpc.test/1', head: 1_000_000, headTimestamp: 1_000_000, logs: [] })
+
+  it('proves an aimed window that still runs to the chain head', async () => {
+    const endpoint = recent()
+    server = setupServer(endpoint.handler)
+    server.listen()
+
+    // 1,000s old: the window starts before the transaction and ends at the head,
+    // so no block the check could live in went unread.
+    const result = await makeReader().fetchCheckState(SAFE_TX_HASH, { timestampMs: 999_000 * 1000 })
+
+    expect(consensusCalls(endpoint.getLogsCalls)[0].toBlock).toBe(1_000_000)
+    expect(result.windowCoverage).toBe('proven')
+  })
+
+  it('cannot prove an aimed window that ends short of the head', async () => {
+    const endpoint = recent()
+    server = setupServer(endpoint.handler)
+    server.listen()
+
+    // 100,000s old: the window closes at block 988,999 and the 11,001 blocks up
+    // to the head are never read, so a settlement could sit outside it.
+    const result = await makeReader().fetchCheckState(SAFE_TX_HASH, { timestampMs: 900_000 * 1000 })
+
+    expect(consensusCalls(endpoint.getLogsCalls)[0].toBlock).toBe(988_999)
+    expect(result.windowCoverage).toBe('heuristic')
+  })
+
+  it('cannot prove a head-relative scan — it is not tied to the transaction', async () => {
+    const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 45_000, logs: [] })
+    server = setupServer(endpoint.handler)
+    server.listen()
+
+    const result = await makeReader().fetchCheckState(SAFE_TX_HASH)
+
+    expect(result.windowCoverage).toBe('heuristic')
+  })
+
+  it('cannot prove a window the block estimate never converged on', async () => {
+    const endpoint = makeEndpoint({
+      url: 'http://rpc.test/1',
+      head: 600_000,
+      timestampAt: (n) => (n <= 500_000 ? n : 10_000_000 + (n - 500_000) * 5),
+      logs: [],
+    })
+    server = setupServer(endpoint.handler)
+    server.listen()
+
+    const result = await makeReader().fetchCheckState(SAFE_TX_HASH, { timestampMs: 5_000_000 * 1000 })
+
+    expect(result.windowCoverage).toBe('heuristic')
+  })
+
+  it('cannot prove a window placed without a usable block probe', async () => {
+    const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 45_000, failBlockProbes: 'error', logs: [] })
+    server = setupServer(endpoint.handler)
+    server.listen()
+
+    const result = await makeReader().fetchCheckState(SAFE_TX_HASH, { timestampMs: 1_000 * 1000 })
+
+    expect(result.windowCoverage).toBe('heuristic')
+  })
+
+  // The estimate pins to the head for any target at or past it, and its drift is
+  // then the skew. A skew inside BLOCK_ESTIMATE_TOLERANCE_SECONDS therefore
+  // reads as "converged" — the boundary where a lagging head could otherwise
+  // license the confident claim over blocks the endpoint has not served.
+  it.each([
+    ['300s', 300],
+    ['exactly BLOCK_ESTIMATE_TOLERANCE_SECONDS', BLOCK_ESTIMATE_TOLERANCE_SECONDS],
+    ['30,000s', 30_000],
+  ])('cannot prove a window whose submission the head has not reached (%s ahead)', async (_label, lagSeconds) => {
+    const endpoint = recent()
+    server = setupServer(endpoint.handler)
+    server.listen()
+
+    const result = await makeReader().fetchCheckState(SAFE_TX_HASH, {
+      timestampMs: (1_000_000 + lagSeconds) * 1000,
+    })
+
+    // The window is pinned to the head and unchanged by the classification.
+    const calls = consensusCalls(endpoint.getLogsCalls)
+    expect(calls).toHaveLength(1)
+    expect([calls[0].fromBlock, calls[0].toBlock]).toEqual([999_000, 1_000_000])
+    expect(result.windowCoverage).toBe('heuristic')
+  })
+
+  // The mirror of the case above: the same separation between head and target,
+  // the other way round. A submission the chain has seen still proves its window.
+  it.each([
+    ['300s', 300],
+    ['exactly BLOCK_ESTIMATE_TOLERANCE_SECONDS', BLOCK_ESTIMATE_TOLERANCE_SECONDS],
+  ])('still proves a window whose submission the head has passed (%s behind)', async (_label, ageSeconds) => {
+    const endpoint = recent()
+    server = setupServer(endpoint.handler)
+    server.listen()
+
+    const result = await makeReader().fetchCheckState(SAFE_TX_HASH, {
+      timestampMs: (1_000_000 - ageSeconds) * 1000,
+    })
+
+    const calls = consensusCalls(endpoint.getLogsCalls)
+    expect(calls).toHaveLength(1)
+    // centre = head − ageSeconds/5, then 1,000 blocks back, clamped at the head.
+    expect([calls[0].fromBlock, calls[0].toBlock]).toEqual([1_000_000 - ageSeconds / 5 - 1_000, 1_000_000])
+    expect(result.windowCoverage).toBe('proven')
   })
 })
 

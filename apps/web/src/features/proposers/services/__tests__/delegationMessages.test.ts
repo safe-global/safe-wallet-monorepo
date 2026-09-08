@@ -21,7 +21,7 @@ describe('delegationMessages', () => {
 
   describe('buildDelegationOrigin', () => {
     it('should build correct JSON string for add action', () => {
-      const result = buildDelegationOrigin('add', delegateAddress, nestedSafeAddress, 'Test Label')
+      const result = buildDelegationOrigin('add', delegateAddress, nestedSafeAddress)
 
       const parsed = JSON.parse(result)
       expect(parsed).toEqual({
@@ -29,12 +29,11 @@ describe('delegationMessages', () => {
         action: 'add',
         delegate: delegateAddress,
         nestedSafe: nestedSafeAddress,
-        label: 'Test Label',
       })
     })
 
     it('should build correct JSON string for remove action', () => {
-      const result = buildDelegationOrigin('remove', delegateAddress, nestedSafeAddress, 'Remove Label')
+      const result = buildDelegationOrigin('remove', delegateAddress, nestedSafeAddress)
 
       const parsed = JSON.parse(result)
       expect(parsed).toEqual({
@@ -42,25 +41,24 @@ describe('delegationMessages', () => {
         action: 'remove',
         delegate: delegateAddress,
         nestedSafe: nestedSafeAddress,
-        label: 'Remove Label',
       })
     })
 
-    it('should include all required fields for proper delegation origin', () => {
-      const result = buildDelegationOrigin('add', delegateAddress, nestedSafeAddress, 'My Label')
+    it('should never carry a proposer name, which must stay on the device', () => {
+      const result = buildDelegationOrigin('add', delegateAddress, nestedSafeAddress)
 
       const parsed = JSON.parse(result)
       expect(parsed.type).toBe('proposer-delegation')
       expect(parsed.action).toBeDefined()
       expect(parsed.delegate).toBeDefined()
       expect(parsed.nestedSafe).toBeDefined()
-      expect(parsed.label).toBeDefined()
+      expect(parsed.label).toBeUndefined()
     })
   })
 
   describe('createDelegationMessage', () => {
     const typedData = createTypedData()
-    const origin = buildDelegationOrigin('add', delegateAddress, nestedSafeAddress, 'Test')
+    const origin = buildDelegationOrigin('add', delegateAddress, nestedSafeAddress)
 
     it('should successfully create message by dispatching correct action', async () => {
       const mockUnwrap = jest.fn().mockResolvedValue({})

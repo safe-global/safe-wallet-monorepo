@@ -3,14 +3,23 @@ import { CheckStatus, type PublicCheckStatus, type UnavailableReason } from '@sa
 import { resolvePresentation, STATUS_PRESENTATION, UNAVAILABLE_PRESENTATION } from '../statusPresentation'
 
 const VERDICT_STATUSES = Object.keys(STATUS_PRESENTATION) as Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>[]
+const UNAVAILABLE_REASONS = Object.keys(UNAVAILABLE_PRESENTATION) as UnavailableReason[]
 
 describe('resolvePresentation', () => {
-  it.each<UnavailableReason>(['NO_CHECK', 'READ_FAILED'])('renders the %s copy with a neutral icon', (reason) => {
+  it.each(UNAVAILABLE_REASONS)('renders the %s copy with a neutral icon', (reason) => {
     expect(resolvePresentation(CheckStatus.UNAVAILABLE, reason, false)).toEqual({
       ...UNAVAILABLE_PRESENTATION[reason],
       severity: Severity.INFO,
       muted: true,
     })
+  })
+
+  it('claims an absent check only for the reason that proves one', () => {
+    // A heuristic window found nothing where it looked. Saying "no check was
+    // requested" there would assert a fact the read cannot support.
+    expect(UNAVAILABLE_PRESENTATION.WINDOW_UNCERTAIN).toEqual(UNAVAILABLE_PRESENTATION.READ_FAILED)
+    expect(UNAVAILABLE_PRESENTATION.WINDOW_UNCERTAIN.copy).not.toContain('No Safenet check was requested')
+    expect(UNAVAILABLE_PRESENTATION.NO_CHECK.copy).toContain('No Safenet check was requested')
   })
 
   it('keeps the neutral icon even when a snapshot says no check was requested', () => {

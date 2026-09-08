@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`./index.stories Default 1`] = `
 <div
@@ -12,6 +12,7 @@ exports[`./index.stories Default 1`] = `
       data-radius="lg"
       data-size="none"
       data-slot="card"
+      data-surface="default"
       data-variant="default"
     >
       <div
@@ -59,6 +60,7 @@ exports[`./index.stories WithHiddenTokens 1`] = `
       data-radius="lg"
       data-size="none"
       data-slot="card"
+      data-surface="default"
       data-variant="default"
     >
       <div
@@ -73,6 +75,7 @@ exports[`./index.stories WithHiddenTokens 1`] = `
             data-radius="lg"
             data-size="none"
             data-slot="card"
+            data-surface="default"
             data-variant="default"
           >
             <div
@@ -123,6 +126,7 @@ exports[`./index.stories WithoutDefaultTokenlist 1`] = `
       data-radius="lg"
       data-size="none"
       data-slot="card"
+      data-surface="default"
       data-variant="default"
     >
       <div

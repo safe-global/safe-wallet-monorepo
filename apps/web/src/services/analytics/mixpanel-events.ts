@@ -85,6 +85,7 @@ export enum MixpanelEvent {
   SECURITY_REPORT_OPENED = 'Security Report Opened',
   ACTIVITY_LOG_VIEWED = 'Activity Log Viewed',
   ACTIVITY_LOG_FILTERED = 'Activity Log Filtered',
+  POLICY_CATALOGUE_TILE_CLICKED = 'Policy Catalogue Tile Clicked',
 }
 
 export enum WorkspaceCreateEntryPoint {
@@ -152,6 +153,8 @@ export enum MixpanelEventParams {
   ACCOUNT_COUNT = 'Account Count',
   ENTRY_COUNT = 'Entry Count',
   MEMBER_ROLE = 'Member Role',
+  POLICY_TYPE = 'Policy Type',
+  IS_AVAILABLE = 'Is Available',
 }
 
 export enum AuthLoginMethod {

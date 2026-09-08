@@ -61,7 +61,7 @@ describe('SafenetChecksSection', () => {
     expect(container).toBeEmptyDOMElement()
   })
 
-  it('never subscribes before the submission time is known (shared cache aims by the last args)', () => {
+  it('never subscribes before the submission time is known (nothing else aims the shared read)', () => {
     mockUseSafenetCheck.mockReturnValue(buildCheckView())
 
     const { container } = renderInFlow({ txId: TX_ID })
@@ -83,7 +83,11 @@ describe('SafenetChecksSection', () => {
   })
 
   it('renders the no-check copy when no check was requested', () => {
-    const snapshot = buildSnapshot({ safeTxHash: HASH as `0x${string}`, status: CheckStatus.UNAVAILABLE })
+    const snapshot = buildSnapshot({
+      safeTxHash: HASH as `0x${string}`,
+      status: CheckStatus.UNAVAILABLE,
+      windowCoverage: 'proven',
+    })
     mockUseSafenetCheck.mockReturnValue(
       buildCheckView({
         snapshot,
@@ -99,6 +103,30 @@ describe('SafenetChecksSection', () => {
     expect(section).toHaveAttribute('data-reason', 'NO_CHECK')
     expect(section).toHaveTextContent('Not checked')
     expect(section).toHaveTextContent('No Safenet check was requested for this transaction.')
+  })
+
+  it('never claims an absent check when the read window could not cover one', () => {
+    const snapshot = buildSnapshot({
+      safeTxHash: HASH as `0x${string}`,
+      status: CheckStatus.UNAVAILABLE,
+      windowCoverage: 'heuristic',
+    })
+    mockUseSafenetCheck.mockReturnValue(
+      buildCheckView({
+        snapshot,
+        status: CheckStatus.UNAVAILABLE,
+        publicStatus: CheckStatus.UNAVAILABLE,
+        unavailableReason: 'WINDOW_UNCERTAIN',
+      }),
+    )
+
+    renderInFlow({ txId: TX_ID, txDetails })
+
+    const section = screen.getByTestId('safenet-checks-section')
+    expect(section).toHaveAttribute('data-reason', 'WINDOW_UNCERTAIN')
+    expect(section).toHaveTextContent('Status unavailable')
+    expect(section).toHaveTextContent('The Safenet check status could not be read. Retry later.')
+    expect(section).not.toHaveTextContent('No Safenet check was requested')
   })
 
   it('renders the read-failed copy when the status could not be read', () => {

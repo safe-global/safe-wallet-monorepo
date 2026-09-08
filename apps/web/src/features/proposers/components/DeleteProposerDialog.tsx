@@ -88,7 +88,7 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
         // Multi-sig flow: create off-chain message on parent Safe for signature collection
         const eoaSignature = await signProposerTypedDataForSafe(chainId, proposer.delegate, parentSafeAddress, signer)
         const delegateTypedData = getDelegateTypedData(chainId, proposer.delegate) as TypedData
-        const origin = buildDelegationOrigin('remove', proposer.delegate, safeAddress, proposer.label)
+        const origin = buildDelegationOrigin('remove', proposer.delegate, safeAddress)
 
         await createDelegationMessage(dispatch, chainId, parentSafeAddress, delegateTypedData, eoaSignature, origin)
 

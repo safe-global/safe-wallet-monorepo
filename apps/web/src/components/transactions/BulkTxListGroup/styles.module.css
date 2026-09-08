@@ -1,12 +1,16 @@
 .container {
+  /* Same value as the rows' own px-3: the two insets together put the nonce 24px from the card
+     border, level with a standalone transaction row's nonce. */
+  --row-inset: calc(var(--spacing) * 3);
+
   position: relative;
-  padding: var(--space-2);
+  padding: var(--space-2) var(--row-inset) var(--row-inset);
   display: grid;
   align-items: center;
   grid-template-columns: minmax(50px, 0.25fr) minmax(240px, 2fr) minmax(150px, 4fr) minmax(170px, 1fr);
   grid-template-areas:
     'icon info action hash'
-    'nonce items items items';
+    'items items items items';
 }
 
 .action {
@@ -21,12 +25,6 @@
   justify-content: flex-end;
 }
 
-.nonce {
-  position: absolute;
-  left: -24px;
-  top: var(--space-1);
-}
-
 .txItems {
   display: flex;
   flex-direction: column;
@@ -35,21 +33,40 @@
   padding: 0;
   border-radius: var(--radius-lg);
   background-color: var(--surface-sunken);
-  overflow: hidden;
 }
 
 .txItems > div:not(:last-child) {
   border-bottom: 1px solid var(--border);
+  transition: border-color 0.2s ease;
+}
+
+/* A hovered row draws its own ring, so the dividers either side of it would double up. Open rows keep
+   theirs: with no border on the row, the divider is the only thing separating two open rows. */
+.txItems > div:hover,
+.txItems > div:has(+ div:hover) {
+  border-bottom-color: transparent;
+}
+
+/* The outer rows carry the rounding so this block needn't clip — a clipped row would bite the corners
+   off its own hover border. */
+.txItems > div:first-child > [data-slot='accordion'] > [data-slot='accordion-item'] {
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+}
+
+.txItems > div:last-child > [data-slot='accordion'] > [data-slot='accordion-item'] {
+  border-bottom-left-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--radius-lg);
 }
 
 @media (max-width: 699px) {
   .container {
     grid-template-columns: minmax(30px, 0.25fr) minmax(230px, 3fr);
     grid-template-areas:
-      'icon info '
-      'nonce action'
-      'nonce hash '
-      'nonce items';
+      'icon  info  '
+      'action action'
+      'hash  hash  '
+      'items items ';
   }
 
   .action {
@@ -57,8 +74,5 @@
   }
   .hash {
     justify-content: flex-start;
-  }
-  .nonce {
-    left: -16px;
   }
 }

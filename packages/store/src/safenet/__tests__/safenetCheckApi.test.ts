@@ -16,6 +16,7 @@ import {
   requestCreatedEvent,
 } from '@safe-global/utils/features/safenet-checks/builders'
 import { safenetCheckApi } from '../safenetCheckApi'
+import { forgetAim, recordAim, resolveAim } from '../safenetAimRegistry'
 import {
   pinVerdict,
   safenetCheckSlice,
@@ -40,6 +41,7 @@ const SAFE = '0x0000000000000000000000000000000000000abc'
 const TARGET = { chainId: CHAIN_ID, safeAddress: SAFE }
 /** Attested-event fields that bind an attestation to the Safe under test. */
 const BOUND = { chainId: CHAIN_ID, safe: SAFE }
+const IDENTITY = { safeTxHash: HASH, ...TARGET }
 
 const fakeReader = { fetchCheckState: jest.fn(), verifyAttestation: jest.fn(), blockTimeMs: jest.fn() }
 
@@ -52,6 +54,7 @@ const baseRead = (over: Partial<CheckReadResult> = {}): CheckReadResult => ({
   epoch: null,
   oracle: null,
   deadlineBlock: null,
+  windowCoverage: 'heuristic',
   ...over,
 })
 
@@ -72,12 +75,24 @@ const runQuery = (store: ReturnType<typeof makeTestStore>, over: Partial<CheckTa
     ),
   )
 
+/**
+ * Let a cache-entry lifecycle handler's continuation run. The tick queue drains
+ * ahead of pending microtasks, so this waits on the event loop, not the clock.
+ */
+const flushLifecycle = (): Promise<void> => {
+  const { promise, resolve } = Promise.withResolvers<void>()
+  process.nextTick(resolve)
+  return promise
+}
+
 beforeEach(() => {
   fakeReader.fetchCheckState.mockReset()
   fakeReader.verifyAttestation.mockReset()
   fakeReader.blockTimeMs.mockReset()
   fakeReader.blockTimeMs.mockResolvedValue(null)
   mockedGetReader.mockReturnValue(fakeReader as unknown as ReturnType<typeof getSafenetReader>)
+  forgetAim(IDENTITY)
+  forgetAim({ ...IDENTITY, chainId: '1' })
 })
 
 describe('safenetCheckApi.getSafenetCheck', () => {
@@ -326,32 +341,102 @@ describe('safenetCheckApi.getSafenetCheck', () => {
     expect(pins).toHaveLength(1)
   })
 
-  it('forwards timestampMs so the reader can aim its block window', async () => {
-    fakeReader.fetchCheckState.mockResolvedValue(baseRead())
-    const store = makeTestStore()
+  describe('block window aim', () => {
+    // Every shipped surface offers the transaction's submission date, so the
+    // fold is exercised here with a hypothetical later surrogate: the read looks
+    // for events emitted at or after the submission, so only the earliest may aim it.
+    const PROPOSED_AT = 1_700_000_000_000
+    const LATER_OFFER = PROPOSED_AT + 3_600_000
 
-    await store.dispatch(
-      safenetCheckApi.endpoints.getSafenetCheck.initiate({
-        safeTxHash: HASH,
-        ...TARGET,
-        timestampMs: 1_700_000_000_000,
-      }),
+    it('aims the read at the registered submission time', async () => {
+      fakeReader.fetchCheckState.mockResolvedValue(baseRead())
+      recordAim(IDENTITY, PROPOSED_AT)
+
+      const result = await runQuery(makeTestStore())
+
+      expect(fakeReader.fetchCheckState).toHaveBeenCalledWith(HASH, { timestampMs: PROPOSED_AT })
+      expect(result.data?.aimedAtMs).toBe(PROPOSED_AT)
+    })
+
+    it('scans head-relative when no surface has offered a submission time', async () => {
+      fakeReader.fetchCheckState.mockResolvedValue(baseRead())
+
+      const result = await runQuery(makeTestStore())
+
+      expect(fakeReader.fetchCheckState).toHaveBeenCalledWith(HASH, { timestampMs: null })
+      expect(result.data?.aimedAtMs).toBeNull()
+    })
+
+    it('keeps ONE cache entry and one read for a check every surface shares', async () => {
+      fakeReader.fetchCheckState.mockResolvedValue(baseRead())
+      const store = makeTestStore()
+
+      recordAim(IDENTITY, LATER_OFFER)
+      await store.dispatch(safenetCheckApi.endpoints.getSafenetCheck.initiate(IDENTITY))
+      recordAim(IDENTITY, PROPOSED_AT)
+      await store.dispatch(safenetCheckApi.endpoints.getSafenetCheck.initiate(IDENTITY))
+
+      expect(Object.keys(store.getState()[safenetCheckApi.reducerPath].queries)).toHaveLength(1)
+      expect(fakeReader.fetchCheckState).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not let the surface that subscribed first aim every later read', async () => {
+      // A worse-aimed surface lands first and a better-aimed one follows. Every
+      // read after the better offer uses it.
+      fakeReader.fetchCheckState.mockResolvedValue(baseRead())
+      const store = makeTestStore()
+
+      recordAim(IDENTITY, LATER_OFFER)
+      await runQuery(store)
+      expect(fakeReader.fetchCheckState).toHaveBeenLastCalledWith(HASH, { timestampMs: LATER_OFFER })
+
+      recordAim(IDENTITY, PROPOSED_AT)
+      const reaimed = await runQuery(store)
+
+      expect(fakeReader.fetchCheckState).toHaveBeenLastCalledWith(HASH, { timestampMs: PROPOSED_AT })
+      expect(reaimed.data?.aimedAtMs).toBe(PROPOSED_AT)
+    })
+
+    it('replays the best aim on every poll, never one read`s own arguments', async () => {
+      fakeReader.fetchCheckState.mockResolvedValue(baseRead())
+      const store = makeTestStore()
+      recordAim(IDENTITY, LATER_OFFER)
+      recordAim(IDENTITY, PROPOSED_AT)
+
+      await runQuery(store)
+      await runQuery(store)
+      await runQuery(store)
+
+      expect(fakeReader.fetchCheckState).toHaveBeenCalledTimes(3)
+      for (const call of fakeReader.fetchCheckState.mock.calls) {
+        expect(call[1]).toEqual({ timestampMs: PROPOSED_AT })
+      }
+    })
+
+    it('forgets the aim once the cache entry is gone', async () => {
+      fakeReader.fetchCheckState.mockResolvedValue(baseRead())
+      const store = makeTestStore()
+      recordAim(IDENTITY, PROPOSED_AT)
+      await store.dispatch(safenetCheckApi.endpoints.getSafenetCheck.initiate(IDENTITY))
+
+      store.dispatch(safenetCheckApi.util.resetApiState())
+      await flushLifecycle()
+
+      expect(resolveAim(IDENTITY)).toBeNull()
+    })
+
+    it.each(['proven', 'heuristic'] as const)(
+      'carries the read`s %s window coverage onto the snapshot',
+      async (coverage) => {
+        // The snapshot is where the reader's honesty about its window reaches the
+        // presentation layer; dropping it here would restore the false claim.
+        fakeReader.fetchCheckState.mockResolvedValue(baseRead({ windowCoverage: coverage }))
+
+        const result = await runQuery(makeTestStore())
+
+        expect(result.data?.windowCoverage).toBe(coverage)
+      },
     )
-
-    expect(fakeReader.fetchCheckState).toHaveBeenCalledWith(HASH, { timestampMs: 1_700_000_000_000 })
-  })
-
-  it('keeps ONE cache entry per check however the timestamp varies (single poll loop)', async () => {
-    fakeReader.fetchCheckState.mockResolvedValue(baseRead())
-    const store = makeTestStore()
-
-    const args = { safeTxHash: HASH, ...TARGET }
-    await store.dispatch(safenetCheckApi.endpoints.getSafenetCheck.initiate({ ...args, timestampMs: 1_000 }))
-    await store.dispatch(safenetCheckApi.endpoints.getSafenetCheck.initiate({ ...args, timestampMs: 2_000 }))
-
-    const queries = store.getState()[safenetCheckApi.reducerPath].queries
-    expect(Object.keys(queries)).toHaveLength(1)
-    expect(fakeReader.fetchCheckState).toHaveBeenCalledTimes(1)
   })
 
   describe('attestation selection', () => {

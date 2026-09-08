@@ -27,6 +27,7 @@ export const useSpaceSafes = () => {
     isError: isSpaceSafesError,
     error: spaceSafesError,
     refetch: refetchSpaceSafes,
+    isUninitialized: isSpaceSafesUninitialized,
   } = useSpaceSafesGetV1Query(
     { spaceId: spaceId ?? '' },
     { skip: !isUserSignedIn || !spaceId, ...SPACE_REFRESH_OPTIONS },
@@ -70,5 +71,13 @@ export const useSpaceSafes = () => {
     return [...allMultiChainSafes, ...allSingleSafes].sort(sortComparator)
   }, [safeItems, sortComparator])
 
-  return { allSafes, isLoading, isError: isSpaceSafesError, error: spaceSafesError, refetch: refetchSpaceSafes }
+  return {
+    allSafes,
+    isLoading,
+    isError: isSpaceSafesError,
+    error: spaceSafesError,
+    refetch: refetchSpaceSafes,
+    // Check before calling `refetch()`: the query skips when signed out or outside a Space.
+    isUninitialized: isSpaceSafesUninitialized,
+  }
 }

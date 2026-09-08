@@ -115,7 +115,8 @@ export function verifyPositionGroupVisible(groupName) {
 }
 
 export function verifyPositionGroupNotVisible(groupName) {
-  cy.contains(groupName).should('not.be.visible')
+  // Collapsed accordion panels are unmounted, so the text leaves the DOM.
+  cy.contains(groupName).should('not.exist')
 }
 
 export function verifyTokenNameVisible(tokenName) {

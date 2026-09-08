@@ -43,14 +43,10 @@ export function usePendingDelegations(): UsePendingDelegationsResult {
     },
   )
 
-  // Map of lowercase address -> label for current delegates
-  const currentDelegatesMap = useMemo(() => {
-    const map = new Map<string, string>()
-    for (const p of proposers.data?.results ?? []) {
-      map.set(p.delegate.toLowerCase(), p.label)
-    }
-    return map
-  }, [proposers.data?.results])
+  const currentDelegates = useMemo(
+    () => new Set((proposers.data?.results ?? []).map((p) => p.delegate.toLowerCase())),
+    [proposers.data?.results],
+  )
 
   const pendingDelegations = useMemo(() => {
     if (!messagesPage?.results || !parentSafeAddress) return []
@@ -61,8 +57,8 @@ export function usePendingDelegations(): UsePendingDelegationsResult {
       .filter((d): d is DelegationWithTimestamp => d !== null)
 
     const latestByDelegate = keepLatestPerDelegate(allDelegations)
-    return filterActedUponDelegations(latestByDelegate, currentDelegatesMap)
-  }, [messagesPage, parentSafeAddress, safeAddress, currentDelegatesMap])
+    return filterActedUponDelegations(latestByDelegate, currentDelegates)
+  }, [messagesPage, parentSafeAddress, safeAddress, currentDelegates])
 
   return { pendingDelegations, isLoading, refetch }
 }

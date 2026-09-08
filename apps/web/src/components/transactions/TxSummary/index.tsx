@@ -47,6 +47,7 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
   const nonce = isMultisigExecutionInfo(tx.executionInfo) ? tx.executionInfo.nonce : undefined
   const isTrusted = !hasDefaultTokenlist || isTrustedTx(tx)
   const isImitationTransaction = isImitation(tx)
+  const showWarning = isImitationTransaction || !isTrusted
   const isPending = useIsPending(tx.id)
   const executionInfo = isMultisigExecutionInfo(tx.executionInfo) ? tx.executionInfo : undefined
   const expiredSwap = useIsExpiredSwap(tx.txInfo)
@@ -68,19 +69,20 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
         [css.history]: !isQueue,
         [css.conflictGroup]: isConflictGroup,
         [css.bulkGroup]: isBulkGroup,
-        [css.untrusted]: !isTrusted || isImitationTransaction,
+        [css.untrusted]: showWarning,
         [css.withAssessment]: showAssessment,
         [css.withSafenet]: showSafenetStatus,
       })}
       id={tx.id}
     >
-      {nonce !== undefined && !isConflictGroup && !isBulkGroup && (
+      {/* The warning claims the same cell, so the nonce yields to it rather than stacking underneath. */}
+      {nonce !== undefined && !isConflictGroup && !showWarning && (
         <div data-testid="nonce" className={css.nonce} style={{ gridArea: 'nonce' }}>
           {nonce}
         </div>
       )}
 
-      {(isImitationTransaction || !isTrusted) && (
+      {showWarning && (
         <div data-testid="warning" style={{ gridArea: 'nonce' }}>
           <MaliciousTxWarning withTooltip={!isImitationTransaction} />
         </div>

@@ -3,6 +3,7 @@ import { http, HttpResponse } from 'msw'
 import { mswLoader } from 'msw-storybook-addon'
 import type { DelegatePage } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { createMockStory } from '@/stories/mocks'
+import { PROPOSER_LABEL_PLACEHOLDER } from '@/features/proposers/constants'
 import ProposersList from './index'
 
 const setup = createMockStory({
@@ -34,6 +35,16 @@ const proposersPage: DelegatePage = {
 
 const withProposersHandler = http.get(/\/v[12]\/chains\/\d+\/delegates$/, () => HttpResponse.json(proposersPage))
 
+// What a proposer added after names became device-local looks like from the API
+const placeholderProposersPage: DelegatePage = {
+  ...proposersPage,
+  results: proposersPage.results.map((proposer) => ({ ...proposer, label: PROPOSER_LABEL_PLACEHOLDER })),
+}
+
+const withPlaceholderProposersHandler = http.get(/\/v[12]\/chains\/\d+\/delegates$/, () =>
+  HttpResponse.json(placeholderProposersPage),
+)
+
 const meta = {
   title: 'Features/Proposers/ProposersList',
   component: ProposersList,
@@ -55,6 +66,15 @@ export const Default: Story = {
       // The custom proposers handler must come first so it wins over the
       // default empty delegates handler included in setup.parameters
       handlers: [withProposersHandler, ...setup.handlers],
+    },
+  },
+}
+
+/** No local address book entry, so only the address shows — names never come from the backend. */
+export const AddressOnly: Story = {
+  parameters: {
+    msw: {
+      handlers: [withPlaceholderProposersHandler, ...setup.handlers],
     },
   },
 }

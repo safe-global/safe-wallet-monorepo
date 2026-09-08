@@ -11,9 +11,8 @@ import { chainsAdapter, chainsInitialState } from '@safe-global/store/gateway'
 import { CONFIG_SERVICE_KEY, DEFAULT_CHAIN_ID } from '@/config/constants'
 import chains from '@safe-global/utils/config/chains'
 import type { RootState } from '@/store'
-import type { ResolvedSidebarNavItem, ResolvedSidebarGroup, SpaceItem } from './types'
-import { AppRoutes } from '@/config/routes'
-import { Wallet, Coins, ArrowRightLeft, BookUser, LayoutGrid, Repeat2, Orbit, Database, TrendingUp } from 'lucide-react'
+import type { ResolvedSidebarNavItem, ResolvedSidebarGroup, SidebarItemConfig, SpaceItem } from './types'
+import { safeDefiGroup, safeMainNavigation } from './config'
 
 const defaultChainShortName =
   (Object.entries(chains) as [string, string][]).find(([, id]) => id === String(DEFAULT_CHAIN_ID))?.[0] ?? 'sep'
@@ -195,85 +194,21 @@ const VARIANT_SAFE_ADDRESS = '0x1234567890123456789012345678901234567890'
 const VARIANT_CHAIN_ID = '11155111'
 const variantQuery = { safe: `eth:${VARIANT_SAFE_ADDRESS}`, spaceId: '1' }
 
-const variantMainNavItems: ResolvedSidebarNavItem[] = [
-  {
-    icon: Wallet,
-    label: 'Overview',
-    href: AppRoutes.home,
-    isActive: false,
-    disabled: false,
-    link: { pathname: AppRoutes.home, query: variantQuery },
-  },
-  {
-    icon: Coins,
-    label: 'Assets',
-    href: AppRoutes.balances.index,
-    isActive: false,
-    disabled: false,
-    link: { pathname: AppRoutes.balances.index, query: variantQuery },
-  },
-  {
-    icon: ArrowRightLeft,
-    label: 'Transactions',
-    href: AppRoutes.transactions.history,
-    isActive: false,
-    disabled: false,
-    link: { pathname: AppRoutes.transactions.history, query: variantQuery },
-  },
-  {
-    icon: BookUser,
-    label: 'Address book',
-    href: AppRoutes.addressBook,
-    isActive: false,
-    disabled: false,
-    link: { pathname: AppRoutes.addressBook, query: variantQuery },
-  },
-  {
-    icon: LayoutGrid,
-    label: 'Apps',
-    href: AppRoutes.apps.index,
-    isActive: false,
-    disabled: false,
-    link: { pathname: AppRoutes.apps.index, query: variantQuery },
-  },
-]
+// Derived from the production config so these stories cannot drift from the real sidebar.
+const resolveVariantItem = ({ icon, label, href }: SidebarItemConfig): ResolvedSidebarNavItem => ({
+  icon,
+  label,
+  href,
+  isActive: false,
+  disabled: false,
+  link: { pathname: href, query: variantQuery },
+})
+
+const variantMainNavItems: ResolvedSidebarNavItem[] = safeMainNavigation.map(resolveVariantItem)
 
 const variantDefiGroup: ResolvedSidebarGroup = {
-  label: 'Defi',
-  items: [
-    {
-      icon: Repeat2,
-      label: 'Swap',
-      href: AppRoutes.swap,
-      isActive: false,
-      disabled: false,
-      link: { pathname: AppRoutes.swap, query: variantQuery },
-    },
-    {
-      icon: Orbit,
-      label: 'Bridge',
-      href: AppRoutes.bridge,
-      isActive: false,
-      disabled: false,
-      link: { pathname: AppRoutes.bridge, query: variantQuery },
-    },
-    {
-      icon: Database,
-      label: 'Earn',
-      href: AppRoutes.earn,
-      isActive: false,
-      disabled: false,
-      link: { pathname: AppRoutes.earn, query: variantQuery },
-    },
-    {
-      icon: TrendingUp,
-      label: 'Stake',
-      href: AppRoutes.stake,
-      isActive: false,
-      disabled: false,
-      link: { pathname: AppRoutes.stake, query: variantQuery },
-    },
-  ],
+  label: safeDefiGroup.label,
+  items: safeDefiGroup.items.map(resolveVariantItem),
 }
 
 const variantCounterfactualState = {

@@ -6,11 +6,12 @@ type PagePlaceholderProps = {
   img: ReactNode
   text: ReactNode
   children?: ReactNode
+  testId?: string
 }
 
-const PagePlaceholder = ({ img, text, children }: PagePlaceholderProps): ReactElement => {
+const PagePlaceholder = ({ img, text, children, testId }: PagePlaceholderProps): ReactElement => {
   return (
-    <div className={css.container}>
+    <div className={css.container} data-testid={testId}>
       {img}
 
       {typeof text === 'string' ? (

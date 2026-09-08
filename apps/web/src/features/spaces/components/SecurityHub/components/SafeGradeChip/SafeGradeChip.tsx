@@ -1,6 +1,5 @@
 import { type MouseEventHandler, type ReactElement } from 'react'
-import type { VariantProps } from 'class-variance-authority'
-import { Badge, type badgeVariants } from '@/components/ui/badge'
+import { Badge } from '@/components/ui/badge'
 import { cn } from '@/utils/cn'
 import type { SafeGrade } from '@/features/security/types'
 
@@ -12,16 +11,12 @@ export const SAFE_GRADE_LABEL: Record<SafeGrade, string> = {
   passing: 'Healthy',
 }
 
-/**
- * Badge variant per grade on the score ramp. `needs_attention` maps to the `review-*`
- * palette, which has no Badge variant — its pill tint is applied as a grandfathered
- * className below.
- */
-const GRADE_BADGE_VARIANT: Record<SafeGrade, NonNullable<VariantProps<typeof badgeVariants>['variant']> | undefined> = {
-  critical: 'negative',
-  at_risk: 'warning',
-  needs_attention: undefined,
-  passing: 'positive',
+/** Soft `*-background` pill tint + `*-main` text per grade on the score ramp. */
+const GRADE_PILL_STYLES: Record<SafeGrade, string> = {
+  critical: 'bg-[var(--color-error-background)] text-[var(--color-error-main)]',
+  at_risk: 'bg-[var(--color-warning-background)] text-[var(--color-warning-main)]',
+  needs_attention: 'bg-[var(--color-review-background)] text-[var(--color-review-main)]',
+  passing: 'bg-[var(--color-success-background)] text-[var(--color-success-main)]',
 }
 
 /** Filled status dot in the grade's fill colour, sitting on the tinted pill. */
@@ -60,7 +55,6 @@ const SafeGradeChip = ({
 }: SafeGradeChipProps): ReactElement => {
   return (
     <Badge
-      variant={GRADE_BADGE_VARIANT[grade]}
       size="auto"
       onClick={onClick}
       role={onClick ? 'button' : undefined}
@@ -68,8 +62,8 @@ const SafeGradeChip = ({
       aria-label={ariaLabel}
       className={cn(
         'gap-1.5',
-        // eslint-disable-next-line no-restricted-syntax -- needs_attention maps to the review-* palette, which has no Badge variant
-        grade === 'needs_attention' && 'bg-[var(--color-review-background)] text-[var(--color-review-main)]',
+
+        GRADE_PILL_STYLES[grade],
         onClick && 'cursor-pointer transition-opacity hover:opacity-80',
         active && 'ring-1 ring-inset ring-current',
         className,

@@ -107,14 +107,14 @@ const SafeAppsPermissions = (): ReactElement => {
           data-testid="app-permissions-item"
           className="mb-4 rounded-lg border border-[var(--color-border-light)]"
         >
-          <div className="grid grid-cols-1 border-b border-[var(--color-border-light)] px-6 py-[15px] sm:grid-cols-12">
-            <div className="py-[9px] sm:col-span-5">
+          <div className="grid grid-cols-1 border-b border-[var(--color-border-light)] px-6 py-4 sm:grid-cols-12">
+            <div className="py-2 sm:col-span-5">
               <Typography variant="paragraph-bold" as="h5">
                 {appNames[domain]}
               </Typography>
               <Typography variant="paragraph-small">{domain}</Typography>
             </div>
-            <div className="grid grid-cols-1 sm:col-span-7 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-x-4 py-2 sm:col-span-7 sm:grid-cols-2 2xl:grid-cols-3">
               {safePermissions[domain]?.map(({ parentCapability, caveats }) => {
                 return (
                   <div key={parentCapability}>
@@ -156,7 +156,11 @@ const SafeAppsPermissions = (): ReactElement => {
             >
               Clear all
             </Link>
-            <Link href="#" className="text-destructive" onClick={(event) => handleRemoveApp(event, domain)}>
+            <Link
+              href="#"
+              className="flex items-center text-destructive"
+              onClick={(event) => handleRemoveApp(event, domain)}
+            >
               <DeleteIcon className="size-4" />
             </Link>
           </div>

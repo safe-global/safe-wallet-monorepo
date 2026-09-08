@@ -274,6 +274,7 @@ const AddressInput = ({
                   type="button"
                   variant="ghost"
                   size="icon-sm"
+                  data-testid="address-book-toggle"
                   onClick={onOpenListClick}
                   className={classnames(css.openButton, { [css.rotated]: isAutocompleteOpen })}
                 >

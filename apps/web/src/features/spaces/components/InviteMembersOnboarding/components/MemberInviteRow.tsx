@@ -94,9 +94,9 @@ const MemberInviteRow = ({
   }, [resolvedAddress, handleAddressResolved])
 
   return (
-    // items-center so the fixed-height remove button centres against the 44px field/select pair
-    // instead of top-aligning under the default `stretch`.
-    <div className="flex items-center gap-2">
+    // items-start so a validation error grows the field column downwards instead of re-centring the
+    // row; the controls sit in their own 44px band and stay level with the field.
+    <div className="flex items-start gap-2">
       <div className="flex flex-1 flex-col gap-1">
         <div className="relative">
           <Input
@@ -151,6 +151,7 @@ const MemberInviteRow = ({
             // eslint-disable-next-line no-restricted-syntax -- bespoke 44px invite field (h-11, rounded-lg, px-4); between the lg/xl tiers, no size fits
             className={cn('h-11 rounded-lg px-4', resolving && 'pr-10')}
             error={displayError}
+            errorSize="xs"
             data-testid={`invite-identifier-input-${index}`}
           />
           {resolving && (
@@ -160,37 +161,39 @@ const MemberInviteRow = ({
           )}
         </div>
 
-        {resolverError && <p className="pl-1 text-xs text-destructive">Failed to resolve ENS name</p>}
+        {resolverError && <p className="text-xs text-destructive">Failed to resolve ENS name</p>}
       </div>
 
-      <Controller
-        control={control}
-        name={`members.${index}.role`}
-        render={({ field }) => (
-          <Select value={field.value} onValueChange={field.onChange}>
-            <SelectTrigger className="min-w-[120px] cursor-pointer data-[size=default]:h-11">
-              <SelectValue placeholder="Role">{ROLE_LABELS[field.value]}</SelectValue>
-            </SelectTrigger>
-            <SelectContent alignItemWithTrigger={false} align="start">
-              <SelectItem value={MemberRole.ADMIN}>{ROLE_LABELS[MemberRole.ADMIN]}</SelectItem>
-              <SelectItem value={MemberRole.MEMBER}>{ROLE_LABELS[MemberRole.MEMBER]}</SelectItem>
-            </SelectContent>
-          </Select>
-        )}
-      />
+      <div className="flex h-11 items-center gap-2">
+        <Controller
+          control={control}
+          name={`members.${index}.role`}
+          render={({ field }) => (
+            <Select value={field.value} onValueChange={field.onChange}>
+              <SelectTrigger className="min-w-[120px] cursor-pointer data-[size=default]:h-11">
+                <SelectValue placeholder="Role">{ROLE_LABELS[field.value]}</SelectValue>
+              </SelectTrigger>
+              <SelectContent alignItemWithTrigger={false} align="start">
+                <SelectItem value={MemberRole.ADMIN}>{ROLE_LABELS[MemberRole.ADMIN]}</SelectItem>
+                <SelectItem value={MemberRole.MEMBER}>{ROLE_LABELS[MemberRole.MEMBER]}</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+        />
 
-      {canRemove && (
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          onClick={onRemove}
-          aria-label="Remove member"
-          data-testid={`remove-member-${index}`}
-        >
-          <X className="size-4" />
-        </Button>
-      )}
+        {canRemove && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            onClick={onRemove}
+            aria-label="Remove member"
+            data-testid={`remove-member-${index}`}
+          >
+            <X className="size-4" />
+          </Button>
+        )}
+      </div>
     </div>
   )
 }

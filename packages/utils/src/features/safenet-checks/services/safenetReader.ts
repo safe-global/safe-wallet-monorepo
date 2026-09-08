@@ -23,6 +23,7 @@ import {
   type OracleAttestedEvent,
   type OracleProposedEvent,
   type PlainAttestedEvent,
+  type WindowCoverage,
 } from '../types'
 import { decodeLogs, type RawLog } from '../utils/decodeLogs'
 import { deadlineBlockOf } from '../utils/deriveCheckState'
@@ -49,6 +50,11 @@ export type CheckReadResult = {
   oracle: string | null
   /** Block the check times out at (the request's reveal deadline). */
   deadlineBlock: string | null
+  /**
+   * Whether the block window this read used covers the check's whole possible
+   * lifetime. An empty event set only proves the absence of a check when it does.
+   */
+  windowCoverage: WindowCoverage
 }
 
 export type SafenetReaderConfig = {
@@ -220,31 +226,57 @@ export class SafenetReader {
   /**
    * Choose the block range to read: a narrow window around the block matching
    * the transaction timestamp (constant cost at any age), or the head-relative
-   * scan when no timestamp is given or the estimate did not converge.
+   * scan when no timestamp is given or the estimate did not converge. Reports
+   * how much the chosen window can prove, since a caller that finds no events
+   * needs to know whether the window ever covered them.
    *
-   * Known limit: the targeted window ends ~12.5h after the transaction, so a
-   * later settlement reads TIMED_OUT rather than a BENIGN it cannot support.
+   * A targeted window reaches ~12.5h past the transaction, so it only covers a
+   * check's whole lifetime while it still runs to the chain head. Past that the
+   * read is a sample, and a later settlement can sit outside it.
    */
   private async readRange(
     provider: JsonRpcProvider,
     timestampMs: number | null | undefined,
     head: { number: number; timestamp: number },
-  ): Promise<{ fromBlock: number; toBlock: number }> {
-    const headRelative = { fromBlock: Math.max(0, head.number - MAX_LOOKBACK_BLOCKS + 1), toBlock: head.number }
+  ): Promise<{ fromBlock: number; toBlock: number; coverage: WindowCoverage }> {
+    const headRelative = {
+      fromBlock: Math.max(0, head.number - MAX_LOOKBACK_BLOCKS + 1),
+      toBlock: head.number,
+      // A fixed lookback is not tied to the transaction at all: it may start
+      // well after the submission and never reach it.
+      coverage: 'heuristic' as const,
+    }
     if (timestampMs == null || !Number.isFinite(timestampMs)) return headRelative
 
     const targetSeconds = Math.floor(timestampMs / 1000)
+    // Only a submission the chain has already seen can be located on it. Past
+    // the head the estimate pins to the head and its drift measures the skew,
+    // not the transaction's block, so such a window aims but proves nothing.
+    const seenByChain = targetSeconds < head.timestamp
     const { block: centre, driftSeconds } = await this.estimateBlockAt(provider, targetSeconds, head)
+    const converged = Math.abs(driftSeconds) <= BLOCK_ESTIMATE_TOLERANCE_SECONDS
     // Aim only when the estimate converged — converting leftover drift into a
-    // block budget needs a local cadence nothing here measures. A target at or
-    // past the head is the exception: the estimate is pinned to the head.
-    if (targetSeconds < head.timestamp && Math.abs(driftSeconds) > BLOCK_ESTIMATE_TOLERANCE_SECONDS) {
-      return headRelative
-    }
+    // block budget needs a local cadence nothing here measures. A target past
+    // the head is the exception: the head is still the best aim available.
+    if (seenByChain && !converged) return headRelative
 
     // One chunk wide, so a targeted read is always a single getLogs.
     const fromBlock = Math.max(0, centre - TARGETED_WINDOW_BACK_BLOCKS)
-    return { fromBlock, toBlock: Math.min(head.number, fromBlock + GETLOGS_CHUNK_BLOCKS - 1) }
+    const toBlock = Math.min(head.number, fromBlock + GETLOGS_CHUNK_BLOCKS - 1)
+    // ponytail: `proven` reads the aim as the submission time. Ceiling: the
+    // window only reaches TARGETED_WINDOW_BACK_BLOCKS (~1.4h) behind it, so an
+    // aim later than the real submission by more than that can miss the
+    // proposal and still report `proven`. No shipped surface can trigger it —
+    // every one offers the transaction's submission date (checked against CGW
+    // v1.122.0) — so the trigger is a future surface, or an upstream mapping
+    // change such as the queued summary timestamp becoming the modified date.
+    // Upgrade path: carry the aim's provenance so a surrogate timestamp cannot
+    // license the claim, or widen the backward reach.
+    return {
+      fromBlock,
+      toBlock,
+      coverage: seenByChain && converged && toBlock >= head.number ? 'proven' : 'heuristic',
+    }
   }
 
   /**
@@ -388,6 +420,7 @@ export class SafenetReader {
         epoch: active?.epoch ?? null,
         oracle: active?.oracle ?? null,
         deadlineBlock: deadline === null ? null : deadline.toString(),
+        windowCoverage: range.coverage,
       }
     })
   }

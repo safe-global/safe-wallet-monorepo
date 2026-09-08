@@ -2,7 +2,7 @@
  * Wallet credentials parser tests — pure, no browser.
  *
  * Verifies getWalletCredentials parsing/validation. The raw JSON is passed via
- * the `raw` param so these tests never mutate process.env.
+ * the `raw` param, so only the undefined-fallback case touches process.env.
  */
 import { test, expect } from '../../src/fixtures/test.fixture'
 import { getWalletCredentials, getDefaultSignerKey } from '../../src/data/credentials'
@@ -51,7 +51,18 @@ test.describe('Wallet credentials parser', { tag: '@api' }, () => {
   })
 
   test('throws mentioning CYPRESS_WALLET_CREDENTIALS when raw is undefined', () => {
-    expect(() => getWalletCredentials(undefined)).toThrow(/CYPRESS_WALLET_CREDENTIALS/)
+    // The undefined path deliberately falls back to process.env, so this is the one
+    // case that must control the var — the wallet-connected specs require it set.
+    const saved = process.env.CYPRESS_WALLET_CREDENTIALS
+    delete process.env.CYPRESS_WALLET_CREDENTIALS
+
+    try {
+      expect(() => getWalletCredentials(undefined)).toThrow(/CYPRESS_WALLET_CREDENTIALS/)
+    } finally {
+      if (saved !== undefined) {
+        process.env.CYPRESS_WALLET_CREDENTIALS = saved
+      }
+    }
   })
 
   test('throws mentioning CYPRESS_WALLET_CREDENTIALS when raw is empty', () => {

@@ -38,7 +38,7 @@ describe('ColorCodedTxAccordion', () => {
   // colour and read as no border at all. The values below are the pre-migration ones.
   it.each([
     ['transfer', transferTxInfo, 'var(--color-success-light)', 'var(--color-background-light)'],
-    ['settings change', settingsChangeTxInfo, 'var(--warning-accent)', 'var(--warning-subtle)'],
+    ['settings change', settingsChangeTxInfo, 'var(--warning-outline)', 'var(--warning-subtle)'],
     ['custom', customTxInfo, 'var(--color-info-dark)', 'var(--color-info-background)'],
   ])('gives %s a border token distinct from its fill', (_name, txInfo, expectedBorder, expectedFill) => {
     const { border, fill } = accordionVars(txInfo())

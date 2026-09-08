@@ -1,25 +1,125 @@
 name: Web Full Regression on demand tests
+run-name: ${{ inputs.spec != '' && inputs.suite == 'full-regression' && format('E2E regression — **/{0}', inputs.spec) || inputs.spec != '' && format('E2E regression — {0}/{1}', inputs.suite, inputs.spec) || (inputs.suite != '' && inputs.suite != 'full-regression') && format('E2E regression — {0}/*', inputs.suite) || 'Web Full Regression on demand tests' }}
+
+# Manual runs can be narrowed down; leave both inputs untouched for the full regression.
+#   suite  = full-regression (default) | smoke | regression | happypath_2 | safe-apps
+#   spec   = spec file name(s) without path or .cy.js, comma-separated, e.g.
+#              create_tx_2                 -> cypress/e2e/<suite>/create_tx_2.cy.js
+#              create_tx_2, portfolio      -> both, inside <suite>
+#            with suite=full-regression a name matches every full-regression directory it exists in
+#            (21 names exist in more than one; happypath/ and visual/ are never included).
+# Partial runs are tagged "partial" in Cypress Cloud, skip the TestRail upload and use one container
+# per named spec (max 8; whole directories keep 8).
+# A spec name that matches no file fails the small "plan" job in seconds; no e2e container is started.
+# Scheduled runs have no inputs and always run the full regression.
 
 on:
   workflow_dispatch:
+    inputs:
+      suite:
+        description: 'Directory to run. Default = the full regression (all four directories).'
+        type: choice
+        default: full-regression
+        options:
+          - full-regression
+          - smoke
+          - regression
+          - happypath_2
+          - safe-apps
+      spec:
+        description: 'Spec names (optional), comma-separated, e.g. create_tx_2, portfolio (no path, no .cy.js).'
+        type: string
+        required: false
+        default: ''
   schedule:
     - cron: '0 3 * * 1-5'
 
+# Scheduled runs on the same ref still replace each other; manual runs never cancel one another.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'workflow_dispatch' && github.run_id || 'schedule' }}
   cancel-in-progress: true
 
 jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    name: Resolve specs
+    permissions:
+      contents: read
+    outputs:
+      specs: ${{ steps.specs.outputs.specs }}
+      partial: ${{ steps.specs.outputs.partial }}
+      containers: ${{ steps.specs.outputs.containers }}
+      title: ${{ steps.specs.outputs.title }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # Scheduled runs have no inputs and fall through to the full regression.
+      - name: Resolve specs to run
+        id: specs
+        shell: bash
+        env:
+          SUITE: ${{ inputs.suite || 'full-regression' }}
+          SPEC: ${{ inputs.spec || '' }}
+        run: |
+          set -euo pipefail
+          # The full regression covers these; happypath/ and visual/ have their own workflows.
+          FULL_DIRS=(happypath_2 regression safe-apps smoke)
+          suite="${SUITE:-full-regression}"
+          if [ "$suite" = 'full-regression' ]; then dirs=("${FULL_DIRS[@]}"); else dirs=("$suite"); fi
+
+          specs=""
+          partial=true
+          if [ -z "${SPEC//[[:space:]]/}" ]; then
+            for d in "${dirs[@]}"; do specs+="cypress/e2e/${d}/*.cy.js"$'\n'; done
+            [ "$suite" = 'full-regression' ] && partial=false
+            n=8
+            if [ "$partial" = false ]; then title="Cypress Full Regression on demand tests"; else title="Cypress ${suite}/*"; fi
+          else
+            missing=""
+            n=0
+            while IFS= read -r raw; do
+              name="${raw#"${raw%%[![:space:]]*}"}"
+              name="${name%"${name##*[![:space:]]}"}"
+              [ -z "$name" ] && continue
+              name="${name%.cy.js}"
+              found=0
+              for d in "${dirs[@]}"; do
+                if [ -f "apps/web/cypress/e2e/${d}/${name}.cy.js" ]; then
+                  specs+="cypress/e2e/${d}/${name}.cy.js"$'\n'
+                  found=1; n=$((n + 1))
+                fi
+              done
+              [ "$found" -eq 0 ] && missing+="  $name"$'\n'
+            done <<< "$(printf '%s' "$SPEC" | tr ',' '\n')"
+
+            if [ -n "$missing" ] || [ "$n" -eq 0 ]; then
+              echo "::error::No spec file matches:"$'\n'"${missing:-  (the 'spec' input contained no names)}"
+              echo "Check the spec names (file name only, no path, no .cy.js) and the selected suite."
+              exit 1
+            fi
+            [ "$n" -gt 8 ] && n=8
+            names="$(printf '%s' "$SPEC" | tr '\n' ',' | sed 's/[[:space:]]*,[[:space:]]*/, /g; s/^[[:space:]]*//; s/[[:space:]]*$//; s/, $//')"
+            if [ "$suite" = 'full-regression' ]; then title="Cypress **/${names}"; else title="Cypress ${suite}/${names}"; fi
+          fi
+
+          list=""; for ((i = 1; i <= n; i++)); do list+="$i,"; done
+          containers="[${list%,}]"
+          echo "Specs to run:"; echo "$specs"; echo "Containers: $containers"; echo "Title: $title"
+          { echo "specs<<EOF"; echo "$specs"; echo "EOF"; echo "partial=$partial"; echo "containers=$containers"; echo "title=$title"; } >> "$GITHUB_OUTPUT"
+          { echo "### Specs to run"; echo '```'; echo "$specs"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
   e2e:
+    needs: plan
     runs-on: ubuntu-latest
     timeout-minutes: 40
-    name: Cypress Full Regression on demand tests
+    name: ${{ needs.plan.outputs.title }}
     permissions:
       contents: read
     strategy:
       fail-fast: false
       matrix:
-        containers: [1, 2, 3, 4, 5, 6, 7, 8]
+        containers: ${{ fromJSON(needs.plan.outputs.containers) }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -86,32 +186,28 @@ jobs:
           NEXT_PUBLIC_WC_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_WC_PROJECT_ID }}
           NEXT_PUBLIC_ZODIAC_SECURITY_CHECK_URL: ${{ secrets.NEXT_PUBLIC_ZODIAC_SECURITY_CHECK_URL }}
         with:
-          spec: |
-            cypress/e2e/happypath_2/*.cy.js
-            cypress/e2e/regression/*.cy.js
-            cypress/e2e/safe-apps/*.cy.js
-            cypress/e2e/smoke/*.cy.js
-          group: 'Full Regression on demand tests'
-          tag: 'full_regression'
+          spec: ${{ needs.plan.outputs.specs }}
+          group: ${{ needs.plan.outputs.partial == 'true' && 'Partial regression on demand tests' || 'Full Regression on demand tests' }}
+          tag: ${{ needs.plan.outputs.partial == 'true' && 'partial' || 'full_regression' }}
 
       - name: Python setup
-        if: always()
+        if: always() && needs.plan.outputs.partial != 'true'
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.x'
 
       - name: Install junitparser
-        if: always()
+        if: always() && needs.plan.outputs.partial != 'true'
         run: |
           pip install 'junitparser==5.0.1'
 
       - name: Merge JUnit reports for TestRail
-        if: always()
+        if: always() && needs.plan.outputs.partial != 'true'
         run: |
           junitparser merge --suite-name "Root Suite" --glob "apps/web/reports/junit-*" "apps/web/reports/junit-report.xml"
 
       - name: TestRail CLI upload results
-        if: always()
+        if: always() && needs.plan.outputs.partial != 'true'
         env:
           TESTRAIL_USERNAME: ${{ secrets.TESTRAIL_USERNAME }}
           TESTRAIL_PASSWORD: ${{ secrets.TESTRAIL_PASSWORD }}

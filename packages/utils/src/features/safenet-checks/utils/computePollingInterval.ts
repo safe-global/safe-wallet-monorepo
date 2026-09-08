@@ -72,8 +72,10 @@ export const computePollingInterval = ({
   // requested around the first read still self-heals. Ceiling: past the window
   // a later check is only picked up by a page reload, or by a fresh mount after
   // the five-minute cache retention lapses — there is no re-check control in
-  // the UI. Polling on past the window would put every check-less transaction
-  // on a public RPC forever.
+  // the UI. (Re-aiming the shared read is a third path in principle, but every
+  // shipped surface offers the same submission date, so it cannot fire today.)
+  // Polling on past the window would put every check-less transaction on a
+  // public RPC forever.
   if (status === CheckStatus.UNAVAILABLE) {
     if (submittedAtMs == null || nowMs === undefined) return 0
     // A submission stamped in the future is clock skew, not a young check:
