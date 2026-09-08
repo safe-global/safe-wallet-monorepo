@@ -114,6 +114,7 @@ export const ERROR_CODE_MAP: Record<number, ErrorClassification> = {
   619: { domain: ErrorDomain.DATA_LOADING, type: ErrorType.FETCH_FAILED, layer: ErrorLayer.OFF_CHAIN },
   621: { domain: ErrorDomain.DATA_LOADING, type: ErrorType.FETCH_FAILED, layer: ErrorLayer.OFF_CHAIN },
   622: { domain: ErrorDomain.API, type: ErrorType.API_ERROR, layer: ErrorLayer.OFF_CHAIN },
+  623: { domain: ErrorDomain.RPC, type: ErrorType.RPC_ERROR, layer: ErrorLayer.OFF_CHAIN },
   633: { domain: ErrorDomain.DATA_LOADING, type: ErrorType.NOTIFICATION_ERROR, layer: ErrorLayer.OFF_CHAIN },
   640: { domain: ErrorDomain.AUTH, type: ErrorType.AUTH_FAILED, layer: ErrorLayer.OFF_CHAIN },
   650: { domain: ErrorDomain.DATA_LOADING, type: ErrorType.FETCH_FAILED, layer: ErrorLayer.OFF_CHAIN },
@@ -133,6 +134,8 @@ export const ERROR_CODE_MAP: Record<number, ErrorClassification> = {
   801: { domain: ErrorDomain.TX_EXECUTION, type: ErrorType.TX_EXECUTION_FAILED, layer: ErrorLayer.OFF_CHAIN },
   804: { domain: ErrorDomain.TX_EXECUTION, type: ErrorType.TX_EXECUTION_FAILED, layer: ErrorLayer.OFF_CHAIN },
   805: { domain: ErrorDomain.TX_PROPOSAL, type: ErrorType.TX_PROPOSAL_FAILED, layer: ErrorLayer.OFF_CHAIN },
+  // 806/807 are retired — the remove-module/remove-guard build failures they
+  // covered now report as 103. Mappings kept so historical data still resolves.
   806: { domain: ErrorDomain.OFF_CHAIN_ACTION, type: ErrorType.OFF_CHAIN_ACTION_FAILED, layer: ErrorLayer.OFF_CHAIN },
   807: { domain: ErrorDomain.OFF_CHAIN_ACTION, type: ErrorType.OFF_CHAIN_ACTION_FAILED, layer: ErrorLayer.OFF_CHAIN },
   808: { domain: ErrorDomain.TX_EXECUTION, type: ErrorType.TX_EXECUTION_FAILED, layer: ErrorLayer.OFF_CHAIN },

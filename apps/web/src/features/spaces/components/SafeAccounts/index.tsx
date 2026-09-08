@@ -67,14 +67,14 @@ const SpaceSafeAccounts = () => {
         Safe accounts
       </Typography>
 
-      <div className="mb-6 flex items-center gap-4">
+      <div className="mb-6 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:gap-4">
         {isAdmin && (
           <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.accounts_page}>
             <AddAccountsChooser buttonVariant="default" buttonLabel="Add accounts" entryPoint="safe_accounts" />
           </Track>
         )}
         {!isSpaceEmpty && !isSpaceSafesError && (
-          <>
+          <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
             <InputGroup variant="search" inputSize="lg" className="flex-1">
               <InputGroupAddon>
                 <Search className="size-4" />
@@ -92,7 +92,7 @@ const SpaceSafeAccounts = () => {
               size="lg"
               className="border-border shadow-xs hover:bg-foreground/[0.06] aria-expanded:bg-foreground/[0.06]"
             />
-          </>
+          </div>
         )}
       </div>
 

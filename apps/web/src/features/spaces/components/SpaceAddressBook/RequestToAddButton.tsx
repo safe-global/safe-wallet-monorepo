@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Clock, Plus } from 'lucide-react'
 import InvalidContactNameTooltip from './InvalidContactNameTooltip'
 import { Badge } from '@/components/ui/badge'
 import { Typography } from '@/components/ui/typography'
@@ -23,6 +25,7 @@ type RequestToAddButtonProps = {
   name: string
   chainIds: string[]
   alreadyRequested?: boolean
+  isCompact?: boolean
 }
 
 const getRequestErrorMessage = (error: unknown): string => {
@@ -33,7 +36,7 @@ const getRequestErrorMessage = (error: unknown): string => {
   return 'Failed to create request. Please try again.'
 }
 
-const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: RequestToAddButtonProps) => {
+const RequestToAddButton = ({ address, name, chainIds, alreadyRequested, isCompact }: RequestToAddButtonProps) => {
   const spaceId = useCurrentSpaceId()
   const chains = useChains()
   const dispatch = useAppDispatch()
@@ -97,18 +100,43 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
   }
 
   if (isDone) {
-    return <Badge variant="secondary">Requested</Badge>
+    return isCompact ? (
+      <Tooltip>
+        <TooltipTrigger render={<span className="inline-flex" aria-label="Requested" />}>
+          <Clock className="text-muted-foreground size-4" />
+        </TooltipTrigger>
+        <TooltipContent>Requested</TooltipContent>
+      </Tooltip>
+    ) : (
+      <Badge variant="secondary">Requested</Badge>
+    )
   }
 
-  const trigger = (
-    <Button variant="outline" size="sm" onClick={() => setOpen(true)} disabled={!!nameError}>
-      Request to add
+  // Compact has no room for the label, so it moves into the accessible name and a tooltip
+  const button = (
+    <Button
+      variant="outline"
+      size={isCompact ? 'icon-sm' : 'sm'}
+      aria-label={isCompact ? 'Request to add' : undefined}
+      onClick={() => setOpen(true)}
+      disabled={!!nameError}
+    >
+      {isCompact ? <Plus className="size-4" /> : 'Request to add'}
     </Button>
+  )
+
+  const trigger = isCompact ? (
+    <Tooltip>
+      <TooltipTrigger render={<span className="inline-flex" />}>{button}</TooltipTrigger>
+      <TooltipContent>Request to add</TooltipContent>
+    </Tooltip>
+  ) : (
+    button
   )
 
   return (
     <>
-      {nameError ? <InvalidContactNameTooltip nameError={nameError}>{trigger}</InvalidContactNameTooltip> : trigger}
+      {nameError ? <InvalidContactNameTooltip nameError={nameError}>{button}</InvalidContactNameTooltip> : trigger}
 
       <ModalDialog open={open} onClose={() => setOpen(false)} dialogTitle="Request to add contact" hideChainIndicator>
         <div className="px-6 py-4">
