@@ -9,7 +9,7 @@ import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import useChainId from '../useChainId'
 import useSafeInfo from '../useSafeInfo'
 import { Errors } from '@/services/exceptions'
-import useLogErrorOnce from '../useLogErrorOnce'
+import useLogError from '../useLogError'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { useCurrentChain } from '../useChains'
 import { useSafeAddressFromUrl } from '../useSafeAddressFromUrl'
@@ -52,8 +52,11 @@ const useLoadSafeInfo = (): AsyncResult<ExtendedSafeInfo> => {
       skip: !chainId || !address,
       pollingInterval: POLLING_INTERVAL,
       // A backgrounded tab left open on a failing Safe otherwise keeps polling —
-      // and reporting — indefinitely.
+      // and reporting — indefinitely. Paired with refetchOnFocus so pausing the
+      // poll costs no freshness: without it, coming back to the tab could show a
+      // stale nonce, owner set or threshold for up to a full polling interval.
       skipPollingIfUnfocused: true,
+      refetchOnFocus: true,
     },
   )
 
@@ -76,7 +79,7 @@ const useLoadSafeInfo = (): AsyncResult<ExtendedSafeInfo> => {
         : 'Failed to load safe info'
       : undefined
 
-  useLogErrorOnce(Errors._600, reportedCgwError)
+  useLogError(Errors._600, reportedCgwError)
 
   // Self-heal: if the safe is deployed on-chain (backend returned SafeInfo) but a
   // counterfactual entry still exists locally, remove it. The listener propagates

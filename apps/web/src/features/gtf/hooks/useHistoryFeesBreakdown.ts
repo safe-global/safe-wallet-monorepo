@@ -15,7 +15,7 @@ import { selectCurrency } from '@/store/settingsSlice'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
 import { Errors } from '@/services/exceptions'
-import useLogErrorOnce from '@/hooks/useLogErrorOnce'
+import useLogError from '@/hooks/useLogError'
 import type { FeeRow } from './useFeesPreview'
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 
@@ -120,7 +120,7 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
     return provider.getTransactionReceipt(txHash)
   }, [isGtfEnabled, executedAt, !!exec, isSafePaid, txHash, provider])
 
-  useLogErrorOnce(Errors._612, receiptError?.message, getRpcErrorContext(provider))
+  useLogError(Errors._612, receiptError?.message, getRpcErrorContext(provider))
 
   const signerPaidData = useMemo<HistoryFeesData | null>(() => {
     if (!receipt) return null

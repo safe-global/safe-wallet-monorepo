@@ -2,6 +2,9 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import useChainId from '@/hooks/useChainId'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
+import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
+import { Errors } from '@/services/exceptions'
+import useLogError from './useLogError'
 import chains from '@safe-global/utils/config/chains'
 import { useSigner } from './wallets/useWallet'
 import { useSafeSDK } from './coreSDK/safeCoreSDK'
@@ -79,10 +82,13 @@ const useGasLimit = (
     safe,
   ])
 
-  // Deliberately not reported here: this hook has several concurrent owners on
-  // the Execute step (the form, the fee preview, the gas-too-high check), so one
-  // failed estimation would be reported several times over. The owner that
-  // surfaces the failure to the user reports it instead.
+  // Reported here rather than by a nominated owner: this hook has several
+  // concurrent owners on the Execute step (the form, the fee preview, the
+  // gas-too-high check) but only the fee preview on the Sign step, so no single
+  // owner sees every failure. `useLogError` collapses the concurrent owners into
+  // one report, which is what nominating an owner was working around.
+  useLogError(Errors._612, gasLimitError?.message, getRpcErrorContext(web3ReadOnly))
+
   return { gasLimit, gasLimitError, gasLimitLoading }
 }
 

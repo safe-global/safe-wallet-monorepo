@@ -4,7 +4,7 @@ import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from '../useSafeInfo'
 import useEffectiveSafeParams from '../useEffectiveSafeParams'
 import { Errors } from '@/services/exceptions'
-import useLogErrorOnce from '../useLogErrorOnce'
+import useLogError from '../useLogError'
 import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
 import { getTransactionQueue } from '@/services/transactions'
 
@@ -44,7 +44,7 @@ const useLoadTxQueue = (): AsyncResult<QueuedItemPage> => {
     }
   }, [])
 
-  useLogErrorOnce(Errors._603, error?.message)
+  useLogError(Errors._603, error?.message)
 
   return [data, error, loadingQueueItems]
 }

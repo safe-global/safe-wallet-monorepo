@@ -264,6 +264,65 @@ describe('trackErrorSurfaced', () => {
       })
     })
 
+    describe('trailing occurrences', () => {
+      // The count used to be carried out only by the *next* occurrence, so a
+      // user who retried a failing action twice inside the window and then gave
+      // up had those two retries dropped when the entry expired.
+      beforeEach(() => {
+        jest.useFakeTimers()
+      })
+
+      afterEach(() => {
+        jest.runOnlyPendingTimers()
+        jest.useRealTimers()
+      })
+
+      it('flushes what it collapsed when the failure stops recurring', () => {
+        trackPollFailure()
+        now += 15_000
+        trackPollFailure()
+        now += 15_000
+        trackPollFailure()
+
+        expect(mockedTrack).toHaveBeenCalledTimes(1)
+
+        now = START + DEDUPE_WINDOW_MS
+        jest.advanceTimersByTime(DEDUPE_WINDOW_MS)
+
+        expect(mockedTrack).toHaveBeenCalledTimes(2)
+        // 1 emitted + 2 flushed = the three occurrences that really happened.
+        expect(mockedTrack.mock.calls[1][1]).toMatchObject({
+          [MixpanelEventParams.ERROR_OCCURRENCES]: 2,
+        })
+      })
+
+      it('emits nothing extra when nothing was collapsed', () => {
+        trackPollFailure()
+
+        jest.advanceTimersByTime(DEDUPE_WINDOW_MS)
+
+        expect(mockedTrack).toHaveBeenCalledTimes(1)
+      })
+
+      it('keeps the taxonomy of the error it stands for', () => {
+        trackPollFailure()
+        now += 15_000
+        trackPollFailure()
+
+        now = START + DEDUPE_WINDOW_MS
+        jest.advanceTimersByTime(DEDUPE_WINDOW_MS)
+
+        const [, flushed] = mockedTrack.mock.calls[1]
+        expect(flushed).toMatchObject(
+          Object.fromEntries(
+            Object.entries(mockedTrack.mock.calls[0][1] as Record<string, unknown>).filter(
+              ([key]) => key !== MixpanelEventParams.ERROR_OCCURRENCES,
+            ),
+          ),
+        )
+      })
+    })
+
     it('does not suppress a different taxonomy', () => {
       trackPollFailure()
       trackErrorSurfaced({ code: 804, message: 'Code 804: execution reverted GS013', isUserFacing: true })

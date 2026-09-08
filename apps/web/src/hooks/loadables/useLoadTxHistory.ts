@@ -1,7 +1,7 @@
 import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { Errors } from '@/services/exceptions'
-import useLogErrorOnce from '../useLogErrorOnce'
+import useLogError from '../useLogError'
 import useSafeInfo from '../useSafeInfo'
 import useEffectiveSafeParams from '../useEffectiveSafeParams'
 import { getTxHistory } from '@/services/transactions'
@@ -42,7 +42,7 @@ const useLoadTxHistory = (): AsyncResult<TransactionItemPage> => {
     false,
   )
 
-  useLogErrorOnce(Errors._602, error?.message)
+  useLogError(Errors._602, error?.message)
 
   return [data, error, loading]
 }

@@ -25,9 +25,6 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { TxModalContext } from '@/components/tx-flow'
 import { SuccessScreenFlow } from '@/components/tx-flow/flows'
 import useGasLimit from '@/hooks/useGasLimit'
-import useLogErrorOnce from '@/hooks/useLogErrorOnce'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
-import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
 import AdvancedParams, { useAdvancedParams } from '@/components/tx/AdvancedParams'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { isWalletRejection } from '@/utils/wallets'
@@ -147,10 +144,6 @@ export const ExecuteForm = ({
 
   // Estimate gas limit
   const { gasLimit, gasLimitError } = useGasLimit(safeTx)
-  const web3ReadOnly = useWeb3ReadOnly()
-  // useGasLimit has several concurrent owners, so the form that surfaces the
-  // failed estimation owns reporting it.
-  useLogErrorOnce(Errors._612, gasLimitError?.message, getRpcErrorContext(web3ReadOnly))
   const [advancedParams, setAdvancedParams] = useAdvancedParams(gasLimit)
 
   // Safe-pays runs via relayer (not the wallet), so the simulated `from` doesn't match the

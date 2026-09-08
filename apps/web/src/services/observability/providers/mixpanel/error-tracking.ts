@@ -1,6 +1,6 @@
 import { matchUserOutcome, normalizeError } from '@safe-global/utils/services/exceptions/normalizeError'
 import { ERROR_CODE_MAP, ErrorType } from '@safe-global/utils/services/exceptions/errorTaxonomy'
-import { isRevertError } from '@/utils/transaction-errors'
+import { isRevertError } from '@safe-global/utils/services/exceptions/contractErrors'
 import type { ErrorContext, SurfacedError } from '../../types'
 import { MixpanelEvent, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { mixpanelTrack } from '@/services/analytics/mixpanel'
@@ -21,9 +21,15 @@ const MAX_TRACKED_ERRORS = 500
 
 interface DedupeState {
   lastSentAt: number
-  /** Occurrences collapsed since `lastSentAt`, reported on the next send. */
+  /** Occurrences collapsed since `lastSentAt`, reported on the next send or on flush. */
   suppressed: number
+  /** The event this key stands for, so a flush can emit it without a fresh occurrence. */
+  properties: EventProperties
+  /** Fires one window after `lastSentAt` to emit whatever was collapsed since. */
+  flushTimer?: ReturnType<typeof setTimeout>
 }
+
+type EventProperties = Record<string, string | number | boolean>
 
 const sentErrors = new Map<string, DedupeState>()
 
@@ -60,24 +66,59 @@ const isPredictedRevert = (code: number, message: string): boolean =>
  * Evicts entries past their window first, then the least recently sent, until
  * the map is back within its ceiling.
  */
+const forget = (key: string): void => {
+  const state = sentErrors.get(key)
+  state?.flushTimer && clearTimeout(state.flushTimer)
+  sentErrors.delete(key)
+}
+
 const pruneSentErrors = (now: number): void => {
   for (const [key, state] of sentErrors) {
     if (now - state.lastSentAt >= DEDUPE_WINDOW_MS) {
-      sentErrors.delete(key)
+      forget(key)
     }
   }
 
   for (const key of sentErrors.keys()) {
     if (sentErrors.size <= MAX_TRACKED_ERRORS) break
-    sentErrors.delete(key)
+    forget(key)
   }
 }
+
+/**
+ * Emits whatever was collapsed during the window that just ended.
+ *
+ * Without this the count is only carried out by the *next* occurrence, so a
+ * failure a user retried three times and then gave up on reported as one — the
+ * trailing two were dropped when the entry expired. Reschedules while
+ * occurrences keep arriving, and lets the entry go once a window passes quietly.
+ */
+const scheduleFlush = (key: string): ReturnType<typeof setTimeout> =>
+  setTimeout(() => {
+    const state = sentErrors.get(key)
+    if (!state) return
+
+    if (state.suppressed === 0) {
+      sentErrors.delete(key)
+      return
+    }
+
+    const occurrences = state.suppressed
+    state.lastSentAt = Date.now()
+    state.suppressed = 0
+    state.flushTimer = scheduleFlush(key)
+
+    mixpanelTrack(MixpanelEvent.ERROR_SURFACED, {
+      ...state.properties,
+      [MixpanelEventParams.ERROR_OCCURRENCES]: occurrences,
+    })
+  }, DEDUPE_WINDOW_MS)
 
 /**
  * Claims the right to emit `key`, returning how many occurrences the event
  * stands for, or `undefined` while an identical event is still in its cooldown.
  */
-const claimOccurrences = (key: string, now: number): number | undefined => {
+const claimOccurrences = (key: string, properties: EventProperties, now: number): number | undefined => {
   const state = sentErrors.get(key)
 
   if (state && now - state.lastSentAt < DEDUPE_WINDOW_MS) {
@@ -89,8 +130,9 @@ const claimOccurrences = (key: string, now: number): number | undefined => {
 
   // Re-inserted rather than mutated so Map insertion order stays send-recency
   // order, which is what `pruneSentErrors` evicts by.
+  state?.flushTimer && clearTimeout(state.flushTimer)
   sentErrors.delete(key)
-  sentErrors.set(key, { lastSentAt: now, suppressed: 0 })
+  sentErrors.set(key, { lastSentAt: now, suppressed: 0, properties, flushTimer: scheduleFlush(key) })
 
   if (sentErrors.size > MAX_TRACKED_ERRORS) {
     pruneSentErrors(now)
@@ -128,7 +170,7 @@ export const trackErrorSurfaced = ({ code, message, isUserFacing, context }: Sur
   // Keyed off the emitted properties themselves, so every facet that makes two
   // events genuinely different — `attempt` above all — separates them here for
   // free, and a facet added later cannot be forgotten.
-  const occurrences = claimOccurrences(JSON.stringify(properties), Date.now())
+  const occurrences = claimOccurrences(JSON.stringify(properties), properties, Date.now())
   if (occurrences === undefined) {
     return
   }
@@ -141,5 +183,8 @@ export const trackErrorSurfaced = ({ code, message, isUserFacing, context }: Sur
 
 /** Test-only: clears the dedupe map between unit tests. */
 export const __resetErrorSurfacedDedupeForTests = (): void => {
+  for (const state of sentErrors.values()) {
+    state.flushTimer && clearTimeout(state.flushTimer)
+  }
   sentErrors.clear()
 }

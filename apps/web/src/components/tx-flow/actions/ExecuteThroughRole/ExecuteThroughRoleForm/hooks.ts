@@ -3,7 +3,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
 import { Errors } from '@/services/exceptions'
-import useLogErrorOnce from '@/hooks/useLogErrorOnce'
+import useLogError from '@/hooks/useLogError'
 import { getModuleTransactionId } from '@/services/transactions'
 import { backOff } from 'exponential-backoff'
 import { useMemo } from 'react'
@@ -331,7 +331,7 @@ export const useGasLimit = (
     return web3ReadOnly.estimateGas(tx)
   }, [web3ReadOnly, tx])
 
-  useLogErrorOnce(Errors._612, gasLimitError?.message, getRpcErrorContext(web3ReadOnly))
+  useLogError(Errors._612, gasLimitError?.message, getRpcErrorContext(web3ReadOnly))
 
   return { gasLimit, gasLimitError, gasLimitLoading }
 }
