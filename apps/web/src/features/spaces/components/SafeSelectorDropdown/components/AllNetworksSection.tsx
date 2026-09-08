@@ -45,10 +45,12 @@ function AllNetworksSection({
   // vanish without focus moving, so a screen reader would not otherwise hear that the list emptied.
   const nothingToShow =
     search && !hasMatchesAbove ? (
+      // `block` because this Typography variant renders a span: inline padding insets only the first
+      // and last line boxes, leaving a wrapped line against the popup's rounded corner.
       <Typography
         role="status"
         variant="paragraph-small-medium"
-        className="px-2 py-2 text-muted-foreground"
+        className="block px-4 py-3 text-center text-muted-foreground"
         data-testid="all-networks-empty"
       >
         No networks match your search

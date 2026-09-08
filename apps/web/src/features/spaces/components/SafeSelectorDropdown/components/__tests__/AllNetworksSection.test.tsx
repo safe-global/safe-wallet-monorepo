@@ -329,6 +329,20 @@ describe('AllNetworksSection', () => {
     expect(mockTrack).not.toHaveBeenCalled()
   })
 
+  it('should, when the no-matches message wraps, keep it off the popup corner', () => {
+    mockHook.mockReturnValue({
+      loading: false,
+      availableNetworks: [{ chainId: '10', chainName: 'Optimism', available: true }],
+      unavailableReason: null,
+      isFeatureEnabled: true,
+    })
+
+    render(<AllNetworksSection safeAddress="0xSafe" deployedChainIds={['1']} onAddNetwork={jest.fn()} search="zzz" />)
+
+    // The variant renders a span, so without `block` the padding misses every wrapped line.
+    expect(screen.getByTestId('all-networks-empty')).toHaveClass('block')
+  })
+
   it('should, when the no-matches message appears, announce it to a screen reader', () => {
     mockHook.mockReturnValue({
       loading: false,
