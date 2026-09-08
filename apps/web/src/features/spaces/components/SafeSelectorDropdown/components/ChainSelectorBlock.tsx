@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { SearchInput } from '@/components/ui/search-input'
 import { Typography } from '@/components/ui/typography'
 import AllNetworksSection from './AllNetworksSection'
 import ChainLogo from './ChainLogo'
@@ -34,6 +35,12 @@ function ChainSelectorBlock({
 }: ChainSelectorBlockProps) {
   const displayChainId = selectedChainId || deployedChains[0]?.chainId
   const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState('')
+
+  const query = search.trim().toLowerCase()
+  const matchingChains = query
+    ? deployedChains.filter((chainItem) => chainItem.chainName.toLowerCase().includes(query))
+    : deployedChains
 
   const handleAddNetworkClick = (chainId: string) => {
     setOpen(false)
@@ -43,6 +50,18 @@ function ChainSelectorBlock({
   const handleOpenChange = (next: boolean) => {
     if (disabled) return
     setOpen(next)
+    // This block stays mounted when the popup closes, so the query has to be cleared explicitly
+    // or the next opening starts filtered.
+    setSearch('')
+  }
+
+  // base-ui's menu calls preventDefault on every printable key to drive its own typeahead, which
+  // would leave this field unable to accept text. Escape still has to reach the popup so it can
+  // close. Tab is unaffected: stopping propagation does not stop the browser's own focus move.
+  const handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== 'Escape') {
+      event.stopPropagation()
+    }
   }
 
   const triggerClassName = disabled
@@ -74,8 +93,20 @@ function ChainSelectorBlock({
         sideOffset={12}
         className="w-[196px] bg-card text-foreground ring-0 p-1 rounded-2xl"
       >
+        <SearchInput
+          variant="surface"
+          className="mb-1 shadow-xs"
+          placeholder="Search networks"
+          aria-label="Search networks"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          onKeyDown={handleSearchKeyDown}
+          autoComplete="off"
+          data-testid="chain-selector-search-input"
+        />
+
         <div className="flex flex-col">
-          {deployedChains.map((chainItem) => (
+          {matchingChains.map((chainItem) => (
             <button
               key={chainItem.chainId}
               onClick={(e) => {
@@ -96,6 +127,8 @@ function ChainSelectorBlock({
           safeAddress={safeAddress}
           deployedChainIds={deployedChainIds}
           onAddNetwork={handleAddNetworkClick}
+          search={query}
+          hasMatchesAbove={matchingChains.length > 0}
         />
       </DropdownMenuContent>
     </DropdownMenu>
