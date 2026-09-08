@@ -5,7 +5,8 @@ import { SafeTxContext } from './SafeTxContext'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { createTx } from '@/services/tx/tx-sender'
 import { useRecommendedNonce, useSafeTxGas } from '@/components/tx/shared/hooks'
-import { Errors, logError } from '@/services/exceptions'
+import { Errors } from '@/services/exceptions'
+import useLogError from '@/hooks/useLogError'
 import { getTxOrigin } from '@/utils/transactions'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectGtfPaymentSourcePreference, setGtfPaymentSourcePreference } from '@/features/gtf/store'
@@ -70,9 +71,7 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
   }, [canEdit, finalNonce, finalSafeTxGas, safeTx?.data])
 
   // Log errors
-  useEffect(() => {
-    safeTxError && logError(Errors._103, safeTxError)
-  }, [safeTxError])
+  useLogError(Errors._103, safeTxError)
 
   return (
     <SafeTxContext.Provider
