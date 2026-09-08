@@ -1,0 +1,48 @@
+import { faker } from '@faker-js/faker'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { filterTokenOptions, matchesTokenQuery } from '../tokenSearch'
+
+const token = (symbol: string, name: string) => ({
+  symbol,
+  name,
+  address: checksumAddress(faker.finance.ethereumAddress()),
+})
+
+describe('matchesTokenQuery', () => {
+  const usdc = token('USDC', 'USD Coin')
+
+  it('matches an empty or whitespace query', () => {
+    expect(matchesTokenQuery(usdc, '')).toBe(true)
+    expect(matchesTokenQuery(usdc, '   ')).toBe(true)
+  })
+
+  it('matches symbol, name and address case-insensitively as substrings', () => {
+    expect(matchesTokenQuery(usdc, 'usd')).toBe(true)
+    expect(matchesTokenQuery(usdc, 'coin')).toBe(true)
+    expect(matchesTokenQuery(usdc, usdc.address.slice(2, 10).toUpperCase())).toBe(true)
+  })
+
+  it('trims the query', () => {
+    expect(matchesTokenQuery(usdc, '  usdc ')).toBe(true)
+  })
+
+  it('rejects non-matching text', () => {
+    expect(matchesTokenQuery(usdc, 'dai')).toBe(false)
+  })
+})
+
+describe('filterTokenOptions', () => {
+  it('keeps every option matching the query, preserving order', () => {
+    const usdc = token('USDC', 'USD Coin')
+    const dai = token('DAI', 'Dai Stablecoin')
+    const usdt = token('USDT', 'Tether USD')
+
+    expect(filterTokenOptions([usdc, dai, usdt], 'usd')).toEqual([usdc, usdt])
+  })
+
+  it('returns the same items for an empty query', () => {
+    const options = [token('A', 'a'), token('B', 'b')]
+
+    expect(filterTokenOptions(options, '')).toEqual(options)
+  })
+})
