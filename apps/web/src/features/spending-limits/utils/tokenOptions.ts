@@ -3,7 +3,27 @@ import { TokenType } from '@safe-global/store/gateway/types'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import type { PopularToken } from '../popularTokens'
+import type { TokensGetTokensV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/tokens'
+
+/** One token of the CGW batch response (`NativeTokenMetadata | Erc20TokenMetadata | Erc721TokenMetadata`). */
+export type TokenMetadata = TokensGetTokensV1ApiResponse[number]
+
+/** Metadata of a popular token, as fed into the merge. */
+export type PopularToken = {
+  symbol: string
+  name: string
+  address: string
+  decimals: number
+  logoUri: string
+}
+
+export const toPopularToken = (token: TokenMetadata): PopularToken => ({
+  symbol: token.symbol,
+  name: token.name,
+  address: token.address,
+  decimals: token.decimals,
+  logoUri: token.logoUri,
+})
 
 export type TokenOptionGroup = 'held' | 'popular'
 

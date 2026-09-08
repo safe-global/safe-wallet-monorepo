@@ -3,8 +3,14 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { balanceBuilder, erc20TokenBuilder, nativeTokenBuilder } from '@/tests/builders/balances'
-import type { PopularToken } from '../../popularTokens'
-import { buildTokenOptions, findTokenOption, tokenOptionLabel, type NativeCurrencyInfo } from '../tokenOptions'
+import type { PopularToken } from '../tokenOptions'
+import {
+  buildTokenOptions,
+  findTokenOption,
+  tokenOptionLabel,
+  toPopularToken,
+  type NativeCurrencyInfo,
+} from '../tokenOptions'
 
 const popularTokenBuilder = (overrides: Partial<PopularToken> = {}): PopularToken => ({
   symbol: faker.finance.currencyCode(),
@@ -135,5 +141,27 @@ describe('tokenOptionLabel', () => {
     expect(tokenOptionLabel(option)).toBe('ABC')
     expect(tokenOptionLabel({ ...option, symbol: '' })).toBe('Alphabet')
     expect(tokenOptionLabel({ ...option, symbol: '', name: '' })).toBe(shortenAddress(option.address))
+  })
+})
+
+describe('toPopularToken', () => {
+  it('keeps address, symbol, name, decimals and logo and drops the rest', () => {
+    const token = {
+      address: checksumAddress(faker.finance.ethereumAddress()),
+      symbol: 'USDC',
+      name: 'USD Coin',
+      decimals: 6,
+      logoUri: faker.image.url(),
+      trusted: true,
+      type: 'ERC20' as const,
+    }
+
+    expect(toPopularToken(token)).toEqual({
+      address: token.address,
+      symbol: 'USDC',
+      name: 'USD Coin',
+      decimals: 6,
+      logoUri: token.logoUri,
+    })
   })
 })
