@@ -64,6 +64,9 @@ const config: ConfigFile = {
     '../src/gateway/AUTO_GENERATED/targeted-messages.ts': {
       filterEndpoints: [/^targetedMessaging/],
     },
+    '../src/gateway/AUTO_GENERATED/tokens.ts': {
+      filterEndpoints: [/^tokens/],
+    },
     '../src/gateway/AUTO_GENERATED/transactions.ts': {
       filterEndpoints: [/^transactions/],
     },

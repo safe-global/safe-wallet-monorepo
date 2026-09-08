@@ -151,137 +151,6 @@
         ]
       }
     },
-    "/v1/auth/oidc/authorize": {
-      "get": {
-        "description": "Redirects the browser to OIDC provider login page with a generated state value stored in an HTTP-only cookie.",
-        "operationId": "oidcAuthAuthorizeV1",
-        "parameters": [
-          {
-            "name": "redirect_url",
-            "required": false,
-            "in": "query",
-            "description": "URL to redirect to after successful login. Must be same-origin as the configured post-login redirect URI.",
-            "schema": {
-              "example": "/settings",
-              "type": "string"
-            }
-          },
-          {
-            "name": "connection",
-            "required": false,
-            "in": "query",
-            "description": "OIDC connection name to route to a specific identity provider.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "enroll",
-            "required": false,
-            "in": "query",
-            "description": "When true, requests hosted enrollment of a new authenticator: the provider challenges an existing factor, then walks the user through enrolling the new one.",
-            "schema": {
-              "type": "boolean"
-            }
-          }
-        ],
-        "responses": {
-          "302": {
-            "description": "Redirect to OIDC authorize endpoint"
-          }
-        },
-        "summary": "Start OIDC authorization code flow",
-        "tags": [
-          "auth"
-        ]
-      }
-    },
-    "/v1/auth/oidc/callback": {
-      "get": {
-        "description": "Exchanges the OIDC authorization code for user information, mints the internal JWT cookie, and redirects to the provided post-login URL or a configured default one.",
-        "operationId": "oidcAuthCallbackV1",
-        "parameters": [
-          {
-            "name": "code",
-            "required": false,
-            "in": "query",
-            "description": "Authorization code returned by the OIDC provider",
-            "schema": {
-              "example": "SplxlOBeZQQYbYS6WxSbIA",
-              "type": "string"
-            }
-          },
-          {
-            "name": "state",
-            "required": false,
-            "in": "query",
-            "description": "State parameter returned by the OIDC provider",
-            "schema": {
-              "example": "af0ifjsldkj",
-              "type": "string"
-            }
-          },
-          {
-            "name": "error",
-            "required": false,
-            "in": "query",
-            "description": "Error parameter returned by the OIDC provider",
-            "schema": {
-              "example": "access_denied",
-              "type": "string"
-            }
-          },
-          {
-            "name": "error_description",
-            "required": false,
-            "in": "query",
-            "description": "Description of the error returned by the OIDC provider (if failed)",
-            "schema": {
-              "example": "The user has denied the request",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "302": {
-            "description": "Redirect to the post-login URL. On error, includes error query parameter."
-          }
-        },
-        "summary": "Handle OIDC authorization callback",
-        "tags": [
-          "auth"
-        ]
-      }
-    },
-    "/v1/auth/oidc/mfa/authenticators": {
-      "get": {
-        "description": "Lists the MFA authentication methods of the authenticated user for the self-service authenticator management UI.",
-        "operationId": "oidcAuthListAuthenticatorsV1",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "MFA authentication methods",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Authenticator"
-                  }
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Not authenticated"
-          }
-        },
-        "summary": "List MFA authenticators",
-        "tags": [
-          "auth"
-        ]
-      }
-    },
     "/v1/chains/{chainId}/safes/{safeAddress}/balances/{fiatCode}": {
       "get": {
         "description": "Retrieves token balances for a Safe on a specific chain, converted to the specified fiat currency. Includes native tokens, ERC-20 tokens, and their current market values.",
@@ -378,308 +247,6 @@
         "summary": "Get supported fiat currencies",
         "tags": [
           "balances"
-        ]
-      }
-    },
-    "/v1/billing/spaces/{spaceId}/subscriptions": {
-      "get": {
-        "operationId": "billingGetSubscriptionsV1",
-        "parameters": [
-          {
-            "name": "status",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "spaceId",
-            "required": true,
-            "in": "path",
-            "description": "Space UUID",
-            "schema": {
-              "example": "123e4567-e89b-12d3-a456-426614174000",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Subscription"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "summary": "Get a space subscriptions",
-        "tags": [
-          "billing"
-        ]
-      }
-    },
-    "/v1/billing/plans/{planId}": {
-      "get": {
-        "operationId": "billingGetPlanV1",
-        "parameters": [
-          {
-            "name": "planId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Plan"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Get a plan by id",
-        "tags": [
-          "billing"
-        ]
-      }
-    },
-    "/v1/billing/spaces/{spaceId}/session-url": {
-      "get": {
-        "operationId": "billingGetSessionUrlV1",
-        "parameters": [
-          {
-            "name": "returnUrl",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "spaceId",
-            "required": true,
-            "in": "path",
-            "description": "Space UUID",
-            "schema": {
-              "example": "123e4567-e89b-12d3-a456-426614174000",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UrlResponse"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Get the billing portal session URL for a space",
-        "tags": [
-          "billing"
-        ]
-      }
-    },
-    "/v1/billing/spaces/{spaceId}/payment-links": {
-      "get": {
-        "operationId": "billingGetSpacePaymentLinksV1",
-        "parameters": [
-          {
-            "name": "spaceId",
-            "required": true,
-            "in": "path",
-            "description": "Space UUID",
-            "schema": {
-              "example": "123e4567-e89b-12d3-a456-426614174000",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PaymentLink"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "summary": "Get payment links for a space, plus the general catalog",
-        "tags": [
-          "billing"
-        ]
-      }
-    },
-    "/v1/billing/spaces/{spaceId}/payment-links/{paymentLinkId}/checkout-url": {
-      "get": {
-        "operationId": "billingGetCheckoutUrlV1",
-        "parameters": [
-          {
-            "name": "paymentLinkId",
-            "required": true,
-            "in": "path",
-            "description": "Payment link identifier",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "returnUrl",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "spaceId",
-            "required": true,
-            "in": "path",
-            "description": "Space UUID",
-            "schema": {
-              "example": "123e4567-e89b-12d3-a456-426614174000",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CheckoutSessionResult"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Create a checkout session for a payment link",
-        "tags": [
-          "billing"
-        ]
-      }
-    },
-    "/v1/billing/sessions/{sessionId}": {
-      "get": {
-        "operationId": "billingGetCheckoutSessionV1",
-        "parameters": [
-          {
-            "name": "sessionId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CheckoutSession"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Get a checkout session by id",
-        "tags": [
-          "billing"
-        ]
-      }
-    },
-    "/v1/chains/{chainId}/safes/{safeAddress}/positions/{fiatCode}": {
-      "get": {
-        "operationId": "positionsGetPositionsV1",
-        "parameters": [
-          {
-            "name": "chainId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "safeAddress",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "fiatCode",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "refresh",
-            "required": false,
-            "in": "query",
-            "description": "Cache busting parameter. Set to true to invalidate cache and fetch fresh data from Zerion",
-            "schema": {
-              "example": true,
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "sync",
-            "required": false,
-            "in": "query",
-            "description": "If true, waits for position data to be aggregated before responding (up to 30s)",
-            "schema": {
-              "example": false,
-              "type": "boolean"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Protocol"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "positions"
         ]
       }
     },
@@ -2889,6 +2456,9 @@
           },
           "401": {
             "description": "Authentication required or user unauthorized to modify this space"
+          },
+          "402": {
+            "description": "The space is at its plan's Safe seat limit. The body carries `{ code: \"QUOTA_EXCEEDED\", feature, quota, used, resetsAt }`"
           },
           "403": {
             "description": "Access forbidden - user lacks permission to add Safes to this space"
@@ -5979,6 +5549,125 @@
         ]
       }
     },
+    "/v1/chains/{chainId}/tokens/{address}": {
+      "get": {
+        "description": "Symbol, name, decimals, logo and trust flag of a token on the given chain, as known by the Transaction Service.",
+        "operationId": "tokensGetTokenV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID the token is deployed on",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "description": "Token contract address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/NativeTokenMetadata"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Erc20TokenMetadata"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Erc721TokenMetadata"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The Transaction Service does not know this token"
+          },
+          "422": {
+            "description": "Invalid chain ID or address"
+          }
+        },
+        "summary": "Get token metadata",
+        "tags": [
+          "tokens"
+        ]
+      }
+    },
+    "/v1/chains/{chainId}/tokens": {
+      "get": {
+        "description": "Metadata for up to 20 tokens of one chain, in request order. Addresses the Transaction Service does not know are omitted.",
+        "operationId": "tokensGetTokensV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID the token is deployed on",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "addresses",
+            "required": true,
+            "in": "query",
+            "description": "Comma-separated token contract addresses, at most 20",
+            "schema": {
+              "example": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48,0xdAC17F958D2ee523a2206206994597C13D831ec7",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token metadata for the known addresses, in request order",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/NativeTokenMetadata"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Erc20TokenMetadata"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Erc721TokenMetadata"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid chain ID, malformed address, empty list or more than 20 addresses"
+          }
+        },
+        "summary": "Get metadata for several tokens",
+        "tags": [
+          "tokens"
+        ]
+      }
+    },
     "/v1/register/notifications": {
       "post": {
         "deprecated": true,
@@ -6321,7 +6010,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main",
+    "version": "",
     "contact": {}
   },
   "tags": [],
@@ -6408,31 +6097,6 @@
             "description": "Post-logout redirect URL (must be same-origin as pre-configured URL)"
           }
         }
-      },
-      "Authenticator": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "Auth0 authentication method identifier (e.g. totp|...)"
-          },
-          "type": {
-            "type": "string",
-            "description": "Authentication method type (e.g. totp)"
-          },
-          "name": {
-            "type": "string",
-            "description": "User-visible authenticator name"
-          },
-          "createdAt": {
-            "type": "string",
-            "description": "ISO 8601 timestamp of when the method was enrolled"
-          }
-        },
-        "required": [
-          "id",
-          "type"
-        ]
       },
       "NativeToken": {
         "type": "object",
@@ -6591,530 +6255,6 @@
           }
         },
         "required": [
-          "fiatTotal",
-          "items"
-        ]
-      },
-      "SubscriptionPlan": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "description": {
-            "type": "string",
-            "nullable": true
-          },
-          "currentPrice": {
-            "type": "number"
-          },
-          "originalPrice": {
-            "type": "number",
-            "nullable": true
-          },
-          "paymentMethod": {
-            "type": "string",
-            "enum": [
-              "fiat"
-            ]
-          },
-          "currency": {
-            "type": "string",
-            "enum": [
-              "usd",
-              "eur"
-            ]
-          },
-          "features": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "billingCycle": {
-            "type": "string",
-            "enum": [
-              "month",
-              "year"
-            ],
-            "nullable": true
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "standard",
-              "premium",
-              "enterprise"
-            ]
-          },
-          "product": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "id",
-          "currentPrice",
-          "originalPrice",
-          "paymentMethod",
-          "currency",
-          "features",
-          "type",
-          "product"
-        ]
-      },
-      "Subscription": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "customerId": {
-            "type": "string"
-          },
-          "upstreamCustomerId": {
-            "type": "string"
-          },
-          "plan": {
-            "$ref": "#/components/schemas/SubscriptionPlan"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "active",
-              "canceled",
-              "incomplete",
-              "incomplete_expired",
-              "past_due",
-              "paused",
-              "trialing",
-              "unpaid"
-            ]
-          },
-          "createdAt": {
-            "type": "number"
-          },
-          "startAt": {
-            "type": "number"
-          },
-          "cancelledAt": {
-            "type": "number",
-            "nullable": true
-          },
-          "cancelAt": {
-            "type": "number",
-            "nullable": true
-          },
-          "validUntil": {
-            "type": "number",
-            "nullable": true
-          },
-          "metadata": {
-            "type": "object",
-            "nullable": true
-          }
-        },
-        "required": [
-          "id",
-          "customerId",
-          "upstreamCustomerId",
-          "plan",
-          "status",
-          "createdAt",
-          "startAt",
-          "cancelledAt",
-          "cancelAt"
-        ]
-      },
-      "MarketingFeature": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "name"
-        ]
-      },
-      "Product": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "active": {
-            "type": "boolean"
-          },
-          "description": {
-            "type": "string"
-          },
-          "marketingFeatures": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MarketingFeature"
-            }
-          },
-          "metadata": {
-            "type": "object"
-          },
-          "name": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "active",
-          "description",
-          "marketingFeatures",
-          "metadata",
-          "name"
-        ]
-      },
-      "Plan": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "description": {
-            "type": "string",
-            "nullable": true
-          },
-          "currentPrice": {
-            "type": "number"
-          },
-          "originalPrice": {
-            "type": "number",
-            "nullable": true
-          },
-          "paymentMethod": {
-            "type": "string",
-            "enum": [
-              "fiat"
-            ]
-          },
-          "currency": {
-            "type": "string",
-            "enum": [
-              "usd",
-              "eur"
-            ]
-          },
-          "features": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "billingCycle": {
-            "type": "string",
-            "enum": [
-              "month",
-              "year"
-            ],
-            "nullable": true
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "standard",
-              "premium",
-              "enterprise"
-            ]
-          },
-          "product": {
-            "$ref": "#/components/schemas/Product"
-          }
-        },
-        "required": [
-          "id",
-          "currentPrice",
-          "originalPrice",
-          "paymentMethod",
-          "currency",
-          "features",
-          "type",
-          "product"
-        ]
-      },
-      "UrlResponse": {
-        "type": "object",
-        "properties": {
-          "url": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "url"
-        ]
-      },
-      "PaymentLink": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "url": {
-            "type": "string"
-          },
-          "active": {
-            "type": "boolean"
-          },
-          "metadata": {
-            "type": "object"
-          },
-          "customText": {
-            "type": "object"
-          },
-          "afterCompletion": {
-            "type": "object"
-          },
-          "lineItems": {
-            "type": "array",
-            "items": {
-              "type": "object"
-            }
-          }
-        },
-        "required": [
-          "id",
-          "url",
-          "active",
-          "metadata"
-        ]
-      },
-      "CheckoutSessionResult": {
-        "type": "object",
-        "properties": {
-          "sessionId": {
-            "type": "string"
-          },
-          "url": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "sessionId",
-          "url"
-        ]
-      },
-      "CheckoutSession": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "object": {
-            "type": "string"
-          },
-          "amountSubtotal": {
-            "type": "number"
-          },
-          "amountTotal": {
-            "type": "number"
-          },
-          "cancelUrl": {
-            "type": "string"
-          },
-          "clientReferenceId": {
-            "type": "object",
-            "nullable": true
-          },
-          "created": {
-            "type": "number"
-          },
-          "currency": {
-            "type": "string"
-          },
-          "customer": {
-            "type": "object",
-            "nullable": true
-          },
-          "expiresAt": {
-            "type": "number"
-          },
-          "metadata": {
-            "type": "object"
-          },
-          "mode": {
-            "type": "string"
-          },
-          "paymentStatus": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "successUrl": {
-            "type": "string"
-          },
-          "url": {
-            "type": "object",
-            "nullable": true
-          },
-          "subscription": {
-            "type": "object",
-            "nullable": true
-          },
-          "invoice": {
-            "type": "object",
-            "nullable": true
-          }
-        },
-        "required": [
-          "id",
-          "object",
-          "amountSubtotal",
-          "amountTotal",
-          "cancelUrl",
-          "created",
-          "currency",
-          "expiresAt",
-          "metadata",
-          "mode",
-          "paymentStatus",
-          "status",
-          "successUrl"
-        ]
-      },
-      "Position": {
-        "type": "object",
-        "properties": {
-          "balance": {
-            "type": "string"
-          },
-          "fiatBalance": {
-            "type": "string"
-          },
-          "fiatConversion": {
-            "type": "string"
-          },
-          "tokenInfo": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/NativeToken"
-              },
-              {
-                "$ref": "#/components/schemas/Erc20Token"
-              },
-              {
-                "$ref": "#/components/schemas/Erc721Token"
-              }
-            ]
-          },
-          "fiatBalance24hChange": {
-            "type": "string",
-            "nullable": true
-          },
-          "position_type": {
-            "type": "string",
-            "enum": [
-              "deposit",
-              "loan",
-              "locked",
-              "staked",
-              "reward",
-              "wallet",
-              "airdrop",
-              "margin",
-              "unknown"
-            ],
-            "nullable": true
-          }
-        },
-        "required": [
-          "balance",
-          "fiatBalance",
-          "fiatConversion",
-          "tokenInfo",
-          "fiatBalance24hChange",
-          "position_type"
-        ]
-      },
-      "PositionGroup": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "items": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/Position"
-                }
-              ]
-            }
-          }
-        },
-        "required": [
-          "name",
-          "items"
-        ]
-      },
-      "ProtocolIcon": {
-        "type": "object",
-        "properties": {
-          "url": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "url"
-        ]
-      },
-      "ProtocolMetadata": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "icon": {
-            "$ref": "#/components/schemas/ProtocolIcon"
-          }
-        },
-        "required": [
-          "name",
-          "icon"
-        ]
-      },
-      "Protocol": {
-        "type": "object",
-        "properties": {
-          "protocol": {
-            "type": "string"
-          },
-          "protocol_metadata": {
-            "$ref": "#/components/schemas/ProtocolMetadata"
-          },
-          "fiatTotal": {
-            "type": "string"
-          },
-          "items": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/PositionGroup"
-                }
-              ]
-            }
-          }
-        },
-        "required": [
-          "protocol",
-          "protocol_metadata",
           "fiatTotal",
           "items"
         ]
@@ -10695,7 +9835,7 @@
           "gasLimit": {
             "type": "string",
             "nullable": true,
-            "description": "Accepted for backward compatibility and validation; not forwarded to the relay provider (Gelato)."
+            "description": "Accepted for backward compatibility and validation; not forwarded to the relay provider."
           },
           "safeTxHash": {
             "type": "string",
@@ -12396,6 +11536,20 @@
           "type"
         ]
       },
+      "DeleteModuleGuard": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "DELETE_MODULE_GUARD"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
       "DisableModule": {
         "type": "object",
         "properties": {
@@ -12490,6 +11644,24 @@
           "guard"
         ]
       },
+      "SetModuleGuard": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "SET_MODULE_GUARD"
+            ]
+          },
+          "moduleGuard": {
+            "$ref": "#/components/schemas/AddressInfo"
+          }
+        },
+        "required": [
+          "type",
+          "moduleGuard"
+        ]
+      },
       "SettingsChange": {
         "type": "object",
         "properties": {
@@ -12500,11 +11672,13 @@
               "CHANGE_MASTER_COPY",
               "CHANGE_THRESHOLD",
               "DELETE_GUARD",
+              "DELETE_MODULE_GUARD",
               "DISABLE_MODULE",
               "ENABLE_MODULE",
               "REMOVE_OWNER",
               "SET_FALLBACK_HANDLER",
               "SET_GUARD",
+              "SET_MODULE_GUARD",
               "SWAP_OWNER"
             ]
           }
@@ -12566,6 +11740,9 @@
                 "$ref": "#/components/schemas/DeleteGuard"
               },
               {
+                "$ref": "#/components/schemas/DeleteModuleGuard"
+              },
+              {
                 "$ref": "#/components/schemas/DisableModule"
               },
               {
@@ -12579,6 +11756,9 @@
               },
               {
                 "$ref": "#/components/schemas/SetGuard"
+              },
+              {
+                "$ref": "#/components/schemas/SetModuleGuard"
               },
               {
                 "$ref": "#/components/schemas/SwapOwner"
@@ -15149,6 +14329,123 @@
         },
         "required": [
           "signature"
+        ]
+      },
+      "NativeTokenMetadata": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "decimals": {
+            "type": "number"
+          },
+          "logoUri": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "trusted": {
+            "type": "boolean",
+            "description": "Whether the Transaction Service lists the token in one of its imported token lists"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "NATIVE_TOKEN"
+            ]
+          }
+        },
+        "required": [
+          "address",
+          "decimals",
+          "logoUri",
+          "name",
+          "symbol",
+          "trusted",
+          "type"
+        ]
+      },
+      "Erc20TokenMetadata": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "decimals": {
+            "type": "number"
+          },
+          "logoUri": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "trusted": {
+            "type": "boolean",
+            "description": "Whether the Transaction Service lists the token in one of its imported token lists"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ERC20"
+            ]
+          }
+        },
+        "required": [
+          "address",
+          "decimals",
+          "logoUri",
+          "name",
+          "symbol",
+          "trusted",
+          "type"
+        ]
+      },
+      "Erc721TokenMetadata": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "decimals": {
+            "type": "number"
+          },
+          "logoUri": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "trusted": {
+            "type": "boolean",
+            "description": "Whether the Transaction Service lists the token in one of its imported token lists"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ERC721"
+            ]
+          }
+        },
+        "required": [
+          "address",
+          "decimals",
+          "logoUri",
+          "name",
+          "symbol",
+          "trusted",
+          "type"
         ]
       },
       "SafeRegistration": {
