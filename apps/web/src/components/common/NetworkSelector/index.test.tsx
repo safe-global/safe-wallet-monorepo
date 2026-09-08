@@ -148,6 +148,14 @@ describe('NetworkSelector', () => {
     expect(screen.getByTestId('network-selector-empty')).toHaveTextContent('No networks match your search')
   })
 
+  it('should, when the no-matches message appears, announce it to a screen reader', () => {
+    render(<NetworkSelector />)
+
+    fireEvent.change(screen.getByTestId('network-selector-search-input'), { target: { value: 'no-such-network' } })
+
+    expect(screen.getByTestId('network-selector-empty')).toHaveAttribute('role', 'status')
+  })
+
   it('should, when the search is empty, not show the no-matches message', () => {
     render(<NetworkSelector />)
 

@@ -39,24 +39,23 @@ function AllNetworksSection({
   )
   const [openItems, setOpenItems] = useState<string[]>([])
 
-  const noMatchesLine = (
-    <Typography
-      variant="paragraph-small-medium"
-      className="px-2 py-2 text-muted-foreground"
-      data-testid="all-networks-empty"
-    >
-      No networks match your search
-    </Typography>
-  )
+  // This is the last thing in the popup, so wherever it has nothing of its own to show it carries
+  // the popup's no-matches line: the search field sits above the rows, and a query matching nothing
+  // would otherwise leave the popup showing a field and nothing else. role=status because the rows
+  // vanish without focus moving, so a screen reader would not otherwise hear that the list emptied.
+  const nothingToShow =
+    search && !hasMatchesAbove ? (
+      <Typography
+        role="status"
+        variant="paragraph-small-medium"
+        className="px-2 py-2 text-muted-foreground"
+        data-testid="all-networks-empty"
+      >
+        No networks match your search
+      </Typography>
+    ) : null
 
-  // This is the last thing in the popup, so it carries the no-matches line whenever it has no list
-  // of its own — otherwise a query matching nothing would leave the popup showing only a search
-  // field. The "cannot add" notice and the loader are not replaced: they already say why no network
-  // is listed, which answers the query better than "no matches" would.
-  const hasNoListOfItsOwn = !isFeatureEnabled || (!unavailableReason && !loading && availableNetworks.length === 0)
-  if (search && !hasMatchesAbove && hasNoListOfItsOwn) return noMatchesLine
-
-  if (!isFeatureEnabled) return null
+  if (!isFeatureEnabled) return nothingToShow
 
   if (unavailableReason) {
     const infoIcon = <Info className="size-4 shrink-0 text-muted-foreground mt-0.5" />
@@ -98,14 +97,14 @@ function AllNetworksSection({
     )
   }
 
-  if (availableNetworks.length === 0) return null
+  if (availableNetworks.length === 0) return nothingToShow
 
   const matchingNetworks = search
     ? availableNetworks.filter((chainItem) => chainItem.chainName.toLowerCase().includes(search))
     : availableNetworks
 
   // Nothing here matches, so the accordion header would expand onto an empty panel.
-  if (search && matchingNetworks.length === 0) return hasMatchesAbove ? null : noMatchesLine
+  if (search && matchingNetworks.length === 0) return nothingToShow
 
   const handleAccordionChange = (value: unknown) => {
     const openedIds = Array.isArray(value) ? (value as string[]) : []

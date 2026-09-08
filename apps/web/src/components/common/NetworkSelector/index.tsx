@@ -430,8 +430,14 @@ const NetworkSelector = ({
 
         {testNets.map((chain) => renderMenuItem(chain.chainId, false))}
 
+        {/* role=status: the rows vanish without focus moving, so a screen reader would not
+            otherwise hear that the list emptied. */}
         {query && prodNets.length === 0 && testNets.length === 0 && (
-          <p className="px-4 py-6 text-center text-sm text-muted-foreground" data-testid="network-selector-empty">
+          <p
+            role="status"
+            className="px-4 py-6 text-center text-sm text-muted-foreground"
+            data-testid="network-selector-empty"
+          >
             No networks match your search
           </p>
         )}

@@ -270,6 +270,78 @@ describe('AllNetworksSection', () => {
     expect(screen.getByTestId('all-networks-empty')).toHaveTextContent('No networks match your search')
   })
 
+  it('should, when there is no network to add and nothing above matches, still show the no-matches message', () => {
+    mockHook.mockReturnValue({
+      loading: false,
+      availableNetworks: [],
+      unavailableReason: null,
+      isFeatureEnabled: true,
+    })
+
+    render(<AllNetworksSection safeAddress="0xSafe" deployedChainIds={['1']} onAddNetwork={jest.fn()} search="zzz" />)
+
+    expect(screen.getByTestId('all-networks-empty')).toHaveTextContent('No networks match your search')
+  })
+
+  it('should, when a query is typed while the networks are still loading, keep showing the loader', () => {
+    mockHook.mockReturnValue({
+      loading: true,
+      availableNetworks: [],
+      unavailableReason: null,
+      isFeatureEnabled: true,
+    })
+
+    render(<AllNetworksSection safeAddress="0xSafe" deployedChainIds={['1']} onAddNetwork={jest.fn()} search="o" />)
+
+    expect(screen.getByTestId('chain-selector-loading')).toBeInTheDocument()
+    expect(screen.queryByTestId('all-networks-empty')).not.toBeInTheDocument()
+  })
+
+  it('should, when the query is cleared again, collapse the section', () => {
+    mockHook.mockReturnValue({
+      loading: false,
+      availableNetworks: [{ chainId: '10', chainName: 'Optimism', available: true }],
+      unavailableReason: null,
+      isFeatureEnabled: true,
+    })
+
+    const { rerender } = render(
+      <AllNetworksSection safeAddress="0xSafe" deployedChainIds={['1']} onAddNetwork={jest.fn()} search="o" />,
+    )
+    expect(screen.getByLabelText('Add Optimism')).toBeInTheDocument()
+
+    rerender(<AllNetworksSection safeAddress="0xSafe" deployedChainIds={['1']} onAddNetwork={jest.fn()} search="" />)
+
+    expect(screen.queryByLabelText('Add Optimism')).not.toBeInTheDocument()
+  })
+
+  it('should, when a query expands the section on its own, not report it as showing all networks', () => {
+    mockHook.mockReturnValue({
+      loading: false,
+      availableNetworks: [{ chainId: '10', chainName: 'Optimism', available: true }],
+      unavailableReason: null,
+      isFeatureEnabled: true,
+    })
+
+    render(<AllNetworksSection safeAddress="0xSafe" deployedChainIds={['1']} onAddNetwork={jest.fn()} search="o" />)
+
+    expect(screen.getByLabelText('Add Optimism')).toBeInTheDocument()
+    expect(mockTrack).not.toHaveBeenCalled()
+  })
+
+  it('should, when the no-matches message appears, announce it to a screen reader', () => {
+    mockHook.mockReturnValue({
+      loading: false,
+      availableNetworks: [{ chainId: '10', chainName: 'Optimism', available: true }],
+      unavailableReason: null,
+      isFeatureEnabled: true,
+    })
+
+    render(<AllNetworksSection safeAddress="0xSafe" deployedChainIds={['1']} onAddNetwork={jest.fn()} search="zzz" />)
+
+    expect(screen.getByTestId('all-networks-empty')).toHaveAttribute('role', 'status')
+  })
+
   it('should, when a row above already matches, leave the no-matches message to nobody', () => {
     mockHook.mockReturnValue({
       loading: false,
