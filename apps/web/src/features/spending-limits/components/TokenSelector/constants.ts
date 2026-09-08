@@ -4,5 +4,6 @@ export const HELD_GROUP_LABEL = 'Your tokens'
 export const POPULAR_GROUP_LABEL = 'Popular'
 export const NO_TOKENS_FOUND_TEXT = 'No tokens found'
 export const BALANCES_LOAD_ERROR_TEXT = "Couldn't load this Safe's tokens"
+export const RETRY_TEXT = 'Retry'
 export const SKELETON_ROW_COUNT = 3
 export const TOKEN_ICON_SIZE = 24

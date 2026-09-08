@@ -2,7 +2,13 @@ import { AlertCircle, RotateCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
-import { BALANCES_LOAD_ERROR_TEXT, HELD_GROUP_LABEL, SKELETON_ROW_COUNT, TOKEN_ICON_SIZE } from './constants'
+import {
+  BALANCES_LOAD_ERROR_TEXT,
+  HELD_GROUP_LABEL,
+  RETRY_TEXT,
+  SKELETON_ROW_COUNT,
+  TOKEN_ICON_SIZE,
+} from './constants'
 
 /** Same geometry as `ComboboxLabel`, without needing a Base UI group ancestor. */
 const GroupHeading = ({ children }: { children: string }) => (
@@ -34,7 +40,7 @@ export const HeldTokensError = ({ onRetry }: { onRetry: () => void }) => (
       </Typography>
       <Button variant="ghost" size="sm" onClick={onRetry}>
         <RotateCw className="size-3.5" />
-        Retry
+        {RETRY_TEXT}
       </Button>
     </div>
   </div>
