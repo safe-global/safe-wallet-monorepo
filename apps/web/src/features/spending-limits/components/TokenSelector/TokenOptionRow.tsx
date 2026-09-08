@@ -1,12 +1,14 @@
 import TokenIcon from '@/components/common/TokenIcon'
 import { Typography } from '@/components/ui/typography'
-import { formatVisualAmount, shortenAddress } from '@safe-global/utils/utils/formatters'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { tokenOptionLabel, type TokenOption } from '../../utils/tokenOptions'
 import { TOKEN_ICON_SIZE } from './constants'
 
 /**
- * One selectable token. Metadata degrades gracefully: a missing logo falls back to TokenIcon's
- * placeholder, missing symbol/name fall back to the shortened address — a token is never hidden.
+ * One selectable token: icon, symbol, name. Metadata degrades gracefully — a missing logo falls back
+ * to TokenIcon's placeholder, missing symbol/name fall back to the shortened address — a token is
+ * never hidden. No balance here: it crowded the name out at the field's width; WA-3150 shows it
+ * under the field instead.
  */
 const TokenOptionRow = ({ option }: { option: TokenOption }) => {
   const primary = tokenOptionLabel(option)
@@ -18,7 +20,7 @@ const TokenOptionRow = ({ option }: { option: TokenOption }) => {
       <TokenIcon logoUri={option.logoUri} tokenSymbol={primary} size={TOKEN_ICON_SIZE} />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <Typography variant="paragraph-small" className="truncate">
+        <Typography variant="paragraph-small-medium" className="truncate">
           {primary}
         </Typography>
         {secondary && (
@@ -27,17 +29,6 @@ const TokenOptionRow = ({ option }: { option: TokenOption }) => {
           </Typography>
         )}
       </div>
-
-      {option.group === 'held' && option.balance !== undefined && (
-        <Typography
-          variant="paragraph-mini"
-          color="muted"
-          className="shrink-0 whitespace-nowrap"
-          data-testid="token-option-balance"
-        >
-          {formatVisualAmount(option.balance, option.decimals)} {option.symbol}
-        </Typography>
-      )}
     </div>
   )
 }

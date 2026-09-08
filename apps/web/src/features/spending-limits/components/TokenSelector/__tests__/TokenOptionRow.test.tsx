@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker'
 import { render, screen } from '@/tests/test-utils'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
-import { formatVisualAmount, shortenAddress } from '@safe-global/utils/utils/formatters'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { TokenOption } from '../../../utils/tokenOptions'
 import TokenOptionRow from '../TokenOptionRow'
 
@@ -21,20 +21,6 @@ describe('TokenOptionRow', () => {
 
     expect(screen.getByText('USDC')).toBeInTheDocument()
     expect(screen.getByText('USD Coin')).toBeInTheDocument()
-  })
-
-  it('shows the balance for held tokens, including zero', () => {
-    const held = option({ group: 'held', balance: '0', decimals: 6 })
-
-    render(<TokenOptionRow option={held} />)
-
-    expect(screen.getByTestId('token-option-balance')).toHaveTextContent(`${formatVisualAmount('0', 6)} USDC`)
-  })
-
-  it('shows no balance for popular tokens', () => {
-    render(<TokenOptionRow option={option()} />)
-
-    expect(screen.queryByTestId('token-option-balance')).not.toBeInTheDocument()
   })
 
   it('degrades to the shortened address when symbol and name are missing', () => {

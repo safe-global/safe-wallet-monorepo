@@ -23,7 +23,6 @@ export const HeldTokensLoading = () => (
       <div key={index} className="flex items-center gap-2 px-2 py-1.5">
         <Skeleton className="shrink-0 rounded-full" style={{ width: TOKEN_ICON_SIZE, height: TOKEN_ICON_SIZE }} />
         <Skeleton className="h-4 w-24" />
-        <Skeleton className="ml-auto h-3 w-16" />
       </div>
     ))}
   </div>

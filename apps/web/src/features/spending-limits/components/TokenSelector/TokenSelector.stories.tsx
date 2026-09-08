@@ -71,7 +71,7 @@ const withBalances = (handler: Parameters<typeof http.get>[1]) => ({
 })
 
 const meta = {
-  title: 'Features/SpendingLimits/TokenSelector',
+  title: 'Features/Spaces/Policies/TokenSelector',
   component: TokenSelector,
   parameters: {
     layout: 'centered',

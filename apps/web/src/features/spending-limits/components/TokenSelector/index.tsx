@@ -13,6 +13,7 @@ import {
   ComboboxItem,
   ComboboxLabel,
   ComboboxList,
+  useComboboxAnchor,
 } from '@/components/ui/combobox'
 import TokenIcon from '@/components/common/TokenIcon'
 import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
@@ -24,7 +25,7 @@ import {
   HELD_GROUP_LABEL,
   NO_TOKENS_FOUND_TEXT,
   POPULAR_GROUP_LABEL,
-  TOKEN_ICON_SIZE,
+  TOKEN_FIELD_ICON_SIZE,
   TOKEN_SELECTOR_LABEL,
   TOKEN_SELECTOR_PLACEHOLDER,
 } from './constants'
@@ -84,6 +85,9 @@ const TokenSelector = ({
 }: TokenSelectorProps) => {
   const generatedId = useId()
   const fieldId = id ?? generatedId
+  // Base UI anchors the popup to the <input>, not the field. Anchoring to the InputGroup makes the
+  // popup exactly as wide as, and flush with, the visible field.
+  const fieldAnchor = useComboboxAnchor()
   const { options, isLoading, isError, refetch, identityKey } = useSpendingLimitTokenOptions()
 
   const visibleOptions = useMemo(
@@ -140,30 +144,32 @@ const TokenSelector = ({
         name={name}
         openOnInputClick
       >
-        <ComboboxInput
-          id={fieldId}
-          placeholder={placeholder}
-          autoComplete="off"
-          spellCheck={false}
-          aria-label={label}
-          disabled={disabled || !hasSafe}
-          className="w-full"
-          data-testid={testId}
-        >
-          <InputGroupAddon align="inline-start">
-            {selectedOption ? (
-              <TokenIcon
-                logoUri={selectedOption.logoUri}
-                tokenSymbol={tokenOptionLabel(selectedOption)}
-                size={TOKEN_ICON_SIZE}
-              />
-            ) : (
-              <Search className="text-muted-foreground size-4" />
-            )}
-          </InputGroupAddon>
-        </ComboboxInput>
+        <div ref={fieldAnchor} className="w-full">
+          <ComboboxInput
+            id={fieldId}
+            placeholder={placeholder}
+            autoComplete="off"
+            spellCheck={false}
+            aria-label={label}
+            disabled={disabled || !hasSafe}
+            className="w-full"
+            data-testid={testId}
+          >
+            <InputGroupAddon align="inline-start">
+              {selectedOption ? (
+                <TokenIcon
+                  logoUri={selectedOption.logoUri}
+                  tokenSymbol={tokenOptionLabel(selectedOption)}
+                  size={TOKEN_FIELD_ICON_SIZE}
+                />
+              ) : (
+                <Search className="text-muted-foreground size-4" />
+              )}
+            </InputGroupAddon>
+          </ComboboxInput>
+        </div>
 
-        <ComboboxContent>
+        <ComboboxContent anchor={fieldAnchor}>
           {isLoading && <HeldTokensLoading />}
           {isError && <HeldTokensError onRetry={refetch} />}
           <ComboboxList>
