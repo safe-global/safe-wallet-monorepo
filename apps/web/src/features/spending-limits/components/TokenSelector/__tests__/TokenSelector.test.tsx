@@ -11,6 +11,7 @@ import {
   HELD_GROUP_LABEL,
   NO_TOKENS_FOUND_TEXT,
   POPULAR_GROUP_LABEL,
+  RETRY_TEXT,
   TOKEN_SELECTOR_LABEL,
   TOKEN_SELECTOR_PLACEHOLDER,
 } from '../constants'
@@ -287,7 +288,7 @@ describe('TokenSelector — states', () => {
     expect(screen.getByText(BALANCES_LOAD_ERROR_TEXT)).toBeInTheDocument()
     expect(screen.getByRole('option', { name: /DAI/ })).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: /retry/i }))
+    await user.click(screen.getByRole('button', { name: RETRY_TEXT }))
     expect(refetch).toHaveBeenCalledTimes(1)
   })
 })

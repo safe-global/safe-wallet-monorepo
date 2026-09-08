@@ -12,6 +12,3 @@ export const matchesTokenQuery = (option: Searchable, query: string): boolean =>
     option.address.toLowerCase().includes(needle)
   )
 }
-
-export const filterTokenOptions = <T extends Searchable>(options: readonly T[], query: string): T[] =>
-  options.filter((option) => matchesTokenQuery(option, query))

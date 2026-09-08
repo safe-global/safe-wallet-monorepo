@@ -33,7 +33,10 @@ export type TokenSelectorProps = {
   /** Token address; `ZERO_ADDRESS` for the native currency. */
   value?: string
   onChange: (address: string | undefined) => void
-  /** Hidden from the list (e.g. tokens already used by the same spender). Never hides `value` itself. */
+  /**
+   * Hidden from the list (e.g. tokens already used by the same spender). Never hides `value` itself.
+   * Pass a stable reference (memoise) — a new array each render recomputes the list.
+   */
   excludeAddresses?: string[]
   disabled?: boolean
   label?: string
@@ -77,7 +80,7 @@ const TokenSelector = ({
   placeholder = TOKEN_SELECTOR_PLACEHOLDER,
   name,
   id,
-  'data-testid': testId = 'token-selector',
+  'data-testid': testId = 'spending-limit-token-selector',
 }: TokenSelectorProps) => {
   const generatedId = useId()
   const fieldId = id ?? generatedId
@@ -130,7 +133,7 @@ const TokenSelector = ({
         value={selectedOption}
         onValueChange={(next) => onChange(next?.address)}
         itemToStringLabel={tokenOptionLabel}
-        itemToStringValue={tokenOptionLabel}
+        itemToStringValue={(option) => option.address}
         isItemEqualToValue={isSameOption}
         filter={(item, query) => matchesTokenQuery(item, query)}
         disabled={disabled || !hasSafe}
