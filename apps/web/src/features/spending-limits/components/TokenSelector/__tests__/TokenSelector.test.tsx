@@ -327,4 +327,12 @@ describe('TokenSelector — states', () => {
     expect(screen.getByTestId('held-tokens-loading')).toBeInTheDocument()
     expect(screen.getByTestId('popular-tokens-loading')).toBeInTheDocument()
   })
+
+  it('hides the "no tokens found" empty state while a group is still loading', async () => {
+    setOptions({ isLoading: true, isPopularLoading: true, options: [] })
+    const { user } = renderSelector()
+    await openSelector(user)
+
+    expect(screen.queryByText(NO_TOKENS_FOUND_TEXT)).not.toBeInTheDocument()
+  })
 })

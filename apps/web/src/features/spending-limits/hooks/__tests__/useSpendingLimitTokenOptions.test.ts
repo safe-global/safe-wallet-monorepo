@@ -288,6 +288,18 @@ describe('useSpendingLimitTokenOptions', () => {
     expect(result.current.isPopularError).toBe(false)
   })
 
+  it('does not call refetch for a chain without a popular list (RTK throws on a skipped query)', () => {
+    const refetch = jest.fn()
+    mockUseChainId.mockReturnValue('999')
+    mockUseChain.mockReturnValue(chainBuilder().with({ chainId: '999', features: [] }).build())
+    tokensSpy.mockReturnValue(tokensQueryResult({ refetch }))
+
+    const { result } = renderHook(() => useSpendingLimitTokenOptions())
+
+    expect(() => result.current.refetchPopular()).not.toThrow()
+    expect(refetch).not.toHaveBeenCalled()
+  })
+
   it('passes through the popular error flag and refetch', () => {
     const refetch = jest.fn()
     tokensSpy.mockReturnValue(tokensQueryResult({ isError: true, refetch }))
@@ -297,5 +309,13 @@ describe('useSpendingLimitTokenOptions', () => {
     expect(result.current.isPopularError).toBe(true)
     result.current.refetchPopular()
     expect(refetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not report a popular error while stale popular data is still present', () => {
+    tokensSpy.mockReturnValue(tokensQueryResult({ isError: true, currentData: [tokenMetadataBuilder()] }))
+
+    const { result } = renderHook(() => useSpendingLimitTokenOptions())
+
+    expect(result.current.isPopularError).toBe(false)
   })
 })

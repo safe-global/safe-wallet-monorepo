@@ -21,6 +21,7 @@ export type TokenOptionsResult = {
   /** Popular-token metadata is in flight and nothing has arrived yet. False for chains without a popular list. */
   isPopularLoading: boolean
   isPopularError: boolean
+  /** No-op for chains without a popular list. */
   refetchPopular: () => void
   /** `${chainId}:${safeAddress}`; `''` when no Safe is selected. Changes exactly when the Safe changes. */
   identityKey: string
@@ -28,6 +29,8 @@ export type TokenOptionsResult = {
 
 export const buildIdentityKey = (chainId: string, safeAddress: string): string =>
   safeAddress ? `${chainId}:${safeAddress}` : ''
+
+const noop = (): void => {}
 
 /**
  * Token options for the spending-limit selector, scoped to the Safe that `useSafeInfo` / `useChainId`
@@ -96,8 +99,8 @@ const useSpendingLimitTokenOptions = (): TokenOptionsResult => {
     isError: !skip && isError,
     refetch,
     isPopularLoading: hasPopular && popularData === undefined && (popularIsLoading || popularIsFetching),
-    isPopularError: hasPopular && popularIsError,
-    refetchPopular,
+    isPopularError: hasPopular && popularIsError && popularData === undefined,
+    refetchPopular: hasPopular ? refetchPopular : noop,
     identityKey: identityMatchesChain ? buildIdentityKey(chainId, safeAddress) : '',
   }
 }

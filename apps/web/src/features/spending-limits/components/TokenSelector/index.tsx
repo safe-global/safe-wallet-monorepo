@@ -205,7 +205,7 @@ const TokenSelector = ({
               data-testid="popular-tokens-error"
             />
           )}
-          <ComboboxEmpty>{NO_TOKENS_FOUND_TEXT}</ComboboxEmpty>
+          {!isLoading && !isPopularLoading && <ComboboxEmpty>{NO_TOKENS_FOUND_TEXT}</ComboboxEmpty>}
         </ComboboxContent>
       </Combobox>
     </div>
