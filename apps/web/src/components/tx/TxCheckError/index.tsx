@@ -8,9 +8,8 @@ import {
   RATE_LIMIT_USER_MESSAGE,
 } from '@/utils/transaction-errors'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import ExternalLink from '@/components/common/ExternalLink'
+import { ExternalLink as ExternalLinkIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import HypernativeIcon from '@/public/images/hypernative/hypernative-icon.svg'
 import { HYPERNATIVE_EVENTS, trackEvent } from '@/services/analytics'
 import { useSafeShieldAssessmentUrl } from '@/features/hypernative'
 
@@ -37,15 +36,14 @@ const HypernativeApprovalRequired = (): ReactElement => {
       {assessmentUrl && (
         <span className="mt-3 block">
           <Button
-            variant="secondary"
+            variant="outline"
             size="sm"
+            className="gap-2"
             onClick={onHypernativeCtaClick}
-            render={<ExternalLink href={assessmentUrl} />}
+            render={<a href={assessmentUrl} target="_blank" rel="noreferrer noopener" />}
           >
-            <span className="-mr-[3px] [&>svg]:block [&>svg]:h-4 [&>svg]:w-[9px]">
-              <HypernativeIcon />
-            </span>
             Approve in Hypernative
+            <ExternalLinkIcon />
           </Button>
         </span>
       )}
