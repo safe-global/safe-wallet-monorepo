@@ -9,6 +9,7 @@ import { InputGroup } from '@/components/ui/input-group'
 import css from './styles.module.css'
 import { useFormContext } from 'react-hook-form'
 import useChains from '@/hooks/useChains'
+import { matchesNetworkSearch } from './utils'
 
 type NetworkMultiSelectorInputProps = {
   value: Chain[]
@@ -93,13 +94,10 @@ const NetworkMultiSelectorInput = ({
 
   const options = showSelectAll ? [SELECT_ALL_OPTION, ...configs] : configs
 
-  const visibleOptions = inputValue
-    ? options.filter(
-        (option) =>
-          (showSelectAll && option.chainId === SELECT_ALL_OPTION.chainId) ||
-          option.chainName.toLowerCase().includes(inputValue.toLowerCase()),
-      )
-    : options
+  const visibleOptions = options.filter(
+    (option) =>
+      (showSelectAll && option.chainId === SELECT_ALL_OPTION.chainId) || matchesNetworkSearch(option, inputValue),
+  )
 
   const renderChips = () => {
     if (showSelectAll && isAllSelected) {

@@ -8,6 +8,7 @@ import { Typography } from '@/components/ui/typography'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { SearchInput } from '@/components/ui/search-input'
 import partition from 'lodash/partition'
 import { ChevronDownIcon, InfoIcon } from 'lucide-react'
 import useChains, { useCurrentChain } from '@/hooks/useChains'
@@ -27,6 +28,7 @@ import PlusIcon from '@/public/images/common/plus.svg'
 import useAddressBook from '@/hooks/useAddressBook'
 import useChainId from '@/hooks/useChainId'
 import { cn } from '@/utils/cn'
+import { matchesNetworkSearch } from './utils'
 
 export const getNetworkLink = (
   router: NextRouter,
@@ -270,6 +272,7 @@ const NetworkSelector = ({
   triggerClassName?: string
 }): ReactElement => {
   const [open, setOpen] = useState<boolean>(false)
+  const [search, setSearch] = useState('')
   const { configs } = useChains()
   const chainId = useChainId()
   const router = useRouter()
@@ -296,11 +299,14 @@ const NetworkSelector = ({
   const [testNets, prodNets] = useMemo(
     () =>
       partition(
-        configs.filter((config) => availableChainIds.includes(config.chainId)),
+        configs.filter((config) => availableChainIds.includes(config.chainId) && matchesNetworkSearch(config, search)),
         (config) => config.isTestnet,
       ),
-    [availableChainIds, configs],
+    [availableChainIds, configs, search],
   )
+
+  const isSearching = search.trim() !== ''
+  const hasNoMatches = isSearching && prodNets.length === 0 && testNets.length === 0
 
   const renderMenuItem = useCallback(
     (chainId: string, isSelected: boolean) => {
@@ -334,15 +340,18 @@ const NetworkSelector = ({
     [configs, onChainSelect, router, safeAddress, compactButton],
   )
 
-  const handleClose = () => {
-    setOpen(false)
-  }
-
   const handleOpenChange = (nextOpen: boolean) => {
     setOpen(nextOpen)
+    // The popup keeps its search state between openings (this component stays mounted), so clear it
+    // here — otherwise reopening the dropdown shows a stale filter.
+    setSearch('')
     if (nextOpen) {
       offerSafeCreation && trackEvent({ ...OVERVIEW_EVENTS.EXPAND_MULTI_SAFE, label: OVERVIEW_LABELS.top_bar })
     }
+  }
+
+  const handleClose = () => {
+    handleOpenChange(false)
   }
 
   const renderSelectedValue = () => {
@@ -364,14 +373,42 @@ const NetworkSelector = ({
       >
         <SelectValue>{renderSelectedValue}</SelectValue>
       </SelectTrigger>
-      <SelectContent className="min-w-[260px]" alignItemWithTrigger={false}>
+      {/* outline-hidden: base-ui focuses the popup on open; typing in the search field makes that
+          :focus-visible and would otherwise draw the browser's blue outline around the whole popup. */}
+      <SelectContent className="min-w-[260px] outline-hidden" alignItemWithTrigger={false}>
+        {/* Sticky because SelectContent renders its children inside the scrolling list, so a plain
+            header would scroll out of reach. The negative margins bleed it over the list's padding. */}
+        <div className="sticky -top-1.5 z-10 -mx-1.5 -mt-1.5 bg-popover px-1.5 pt-1.5 pb-2">
+          <SearchInput
+            variant="surface"
+            className="shadow-xs"
+            placeholder="Search networks"
+            aria-label="Search networks"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            // Stop keystrokes reaching base-ui Select's typeahead, which would hijack typing.
+            // Trade-off: arrows/Enter stay in the input (no list nav); Escape still closes.
+            onKeyDown={(e) => {
+              if (e.key !== 'Escape') e.stopPropagation()
+            }}
+            autoComplete="off"
+            data-testid="network-selector-search-input"
+          />
+        </div>
+
         {prodNets.map((chain) => renderMenuItem(chain.chainId, false))}
 
         {testNets.length > 0 && <TestnetDivider />}
 
         {testNets.map((chain) => renderMenuItem(chain.chainId, false))}
 
-        {offerSafeCreation && isSafeOpened && addNetworkFeatureEnabled && (
+        {hasNoMatches && (
+          <p className="px-4 py-6 text-center text-sm text-muted-foreground" data-testid="network-selector-empty">
+            No networks match your search
+          </p>
+        )}
+
+        {!isSearching && offerSafeCreation && isSafeOpened && addNetworkFeatureEnabled && (
           <UndeployedNetworks
             chains={configs}
             deployedChains={availableChainIds}
