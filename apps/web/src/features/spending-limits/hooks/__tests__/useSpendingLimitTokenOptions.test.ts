@@ -4,6 +4,7 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import * as balancesQueries from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import * as tokensQueries from '@safe-global/store/gateway/AUTO_GENERATED/tokens'
 import { balanceBuilder, balancesBuilder } from '@/tests/builders/balances'
 import { chainBuilder } from '@/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
@@ -12,7 +13,7 @@ import useChainId from '@/hooks/useChainId'
 import { useChain } from '@/hooks/useChains'
 import { useTokenListSetting } from '@/hooks/loadables/useLoadBalances'
 import { makeStore } from '@/store'
-import { POPULAR_TOKENS } from '../../popularTokens'
+import { POPULAR_TOKEN_ADDRESSES } from '../../popularTokens'
 import useSpendingLimitTokenOptions, { buildIdentityKey } from '../useSpendingLimitTokenOptions'
 
 jest.mock('@/hooks/useSafeInfo', () => ({ __esModule: true, default: jest.fn() }))
@@ -32,6 +33,7 @@ const mockUseChain = useChain as jest.MockedFunction<typeof useChain>
 const mockUseTokenListSetting = useTokenListSetting as jest.MockedFunction<typeof useTokenListSetting>
 
 type QueryResult = ReturnType<typeof balancesQueries.useBalancesGetBalancesV1Query>
+type TokensQueryResult = ReturnType<typeof tokensQueries.useTokensGetTokensV1Query>
 
 const queryResult = (overrides: Partial<QueryResult> = {}): QueryResult =>
   ({
@@ -46,6 +48,33 @@ const queryResult = (overrides: Partial<QueryResult> = {}): QueryResult =>
     refetch: jest.fn(),
     ...overrides,
   }) as unknown as QueryResult
+
+const tokensQueryResult = (overrides: Partial<TokensQueryResult> = {}): TokensQueryResult =>
+  ({
+    currentData: undefined,
+    data: undefined,
+    isLoading: false,
+    isFetching: false,
+    isError: false,
+    isSuccess: false,
+    isUninitialized: false,
+    error: undefined,
+    refetch: jest.fn(),
+    ...overrides,
+  }) as unknown as TokensQueryResult
+
+const tokenMetadataBuilder = (
+  overrides: Partial<tokensQueries.Erc20TokenMetadata> = {},
+): tokensQueries.Erc20TokenMetadata => ({
+  address: checksumAddress(faker.finance.ethereumAddress()),
+  symbol: faker.finance.currencyCode(),
+  name: faker.finance.currencyName(),
+  decimals: 18,
+  logoUri: faker.image.url(),
+  trusted: true,
+  type: 'ERC20',
+  ...overrides,
+})
 
 const CHAIN_ID = '1'
 const safeAddress = checksumAddress(faker.finance.ethereumAddress())
@@ -72,6 +101,7 @@ describe('buildIdentityKey', () => {
 
 describe('useSpendingLimitTokenOptions', () => {
   let querySpy: jest.SpyInstance
+  let tokensSpy: jest.SpyInstance
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -80,6 +110,7 @@ describe('useSpendingLimitTokenOptions', () => {
     mockUseTokenListSetting.mockReturnValue(true)
     setSafe()
     querySpy = jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockReturnValue(queryResult())
+    tokensSpy = jest.spyOn(tokensQueries, 'useTokensGetTokensV1Query').mockReturnValue(tokensQueryResult())
   })
 
   it('queries the Transaction Service balances for the current Safe with the trusted setting', () => {
@@ -135,14 +166,17 @@ describe('useSpendingLimitTokenOptions', () => {
           .build(),
       }),
     )
+    const popularTokens = [tokenMetadataBuilder(), tokenMetadataBuilder()]
+    tokensSpy.mockReturnValue(tokensQueryResult({ currentData: popularTokens }))
 
     const { result } = renderHook(() => useSpendingLimitTokenOptions())
 
     const addresses = result.current.options.map((option) => option.address)
     expect(addresses[0]).toBe(held.tokenInfo.address)
     expect(addresses).toContain(ZERO_ADDRESS)
-    for (const token of POPULAR_TOKENS[CHAIN_ID]) {
-      expect(addresses).toContain(token.address)
+    for (const token of popularTokens) {
+      const option = result.current.options.find((candidate) => candidate.address === token.address)
+      expect(option).toMatchObject({ group: 'popular' })
     }
     expect(result.current.identityKey).toBe(`${CHAIN_ID}:${safeAddress}`)
   })
@@ -174,6 +208,7 @@ describe('useSpendingLimitTokenOptions', () => {
 
     const { result } = renderHook(() => useSpendingLimitTokenOptions())
 
+    expect(tokensSpy).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ skip: true }))
     expect(result.current.options.map((option) => option.address)).toEqual([ZERO_ADDRESS])
   })
 
@@ -213,6 +248,54 @@ describe('useSpendingLimitTokenOptions', () => {
 
     expect(result.current.isError).toBe(true)
     result.current.refetch()
+    expect(refetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('requests the popular metadata for the chain in one batch', () => {
+    renderHook(() => useSpendingLimitTokenOptions())
+
+    expect(tokensSpy).toHaveBeenCalledWith(
+      { chainId: CHAIN_ID, addresses: POPULAR_TOKEN_ADDRESSES[CHAIN_ID].join(',') },
+      expect.objectContaining({ skip: false }),
+    )
+  })
+
+  it('drops ERC-721 entries from the popular metadata', () => {
+    const nft = { ...tokenMetadataBuilder(), type: 'ERC721' as const }
+    tokensSpy.mockReturnValue(tokensQueryResult({ currentData: [nft] }))
+
+    const { result } = renderHook(() => useSpendingLimitTokenOptions())
+
+    expect(result.current.options.some((option) => option.address === nft.address)).toBe(false)
+  })
+
+  it('reports popular loading only while there is no popular data yet', () => {
+    tokensSpy.mockReturnValue(tokensQueryResult({ isLoading: true }))
+    expect(renderHook(() => useSpendingLimitTokenOptions()).result.current.isPopularLoading).toBe(true)
+
+    tokensSpy.mockReturnValue(tokensQueryResult({ isFetching: true, currentData: [tokenMetadataBuilder()] }))
+    expect(renderHook(() => useSpendingLimitTokenOptions()).result.current.isPopularLoading).toBe(false)
+  })
+
+  it('never reports popular loading or error for a chain without a popular list', () => {
+    mockUseChainId.mockReturnValue('999')
+    mockUseChain.mockReturnValue(chainBuilder().with({ chainId: '999', features: [] }).build())
+    tokensSpy.mockReturnValue(tokensQueryResult({ isLoading: true, isError: true }))
+
+    const { result } = renderHook(() => useSpendingLimitTokenOptions())
+
+    expect(result.current.isPopularLoading).toBe(false)
+    expect(result.current.isPopularError).toBe(false)
+  })
+
+  it('passes through the popular error flag and refetch', () => {
+    const refetch = jest.fn()
+    tokensSpy.mockReturnValue(tokensQueryResult({ isError: true, refetch }))
+
+    const { result } = renderHook(() => useSpendingLimitTokenOptions())
+
+    expect(result.current.isPopularError).toBe(true)
+    result.current.refetchPopular()
     expect(refetch).toHaveBeenCalledTimes(1)
   })
 })
