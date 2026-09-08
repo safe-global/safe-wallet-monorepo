@@ -54,6 +54,15 @@ describe('TokenOptionRow', () => {
     expect(screen.getByText(shortenAddress(symbolOnly.address))).toBeInTheDocument()
   })
 
+  it('shows the name as primary and the address as secondary when only the name is known', () => {
+    const nameOnly = option({ symbol: '' })
+
+    render(<TokenOptionRow option={nameOnly} />)
+
+    expect(screen.getByText('USD Coin')).toBeInTheDocument()
+    expect(screen.getByText(shortenAddress(nameOnly.address))).toBeInTheDocument()
+  })
+
   it('still renders the row without a logo', () => {
     const noLogo = option({ logoUri: undefined })
 
