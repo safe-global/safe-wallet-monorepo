@@ -7,6 +7,7 @@ import type { TokenOptionsResult } from '../../../hooks/useSpendingLimitTokenOpt
 import type { TokenOption } from '../../../utils/tokenOptions'
 import TokenSelector from '..'
 import {
+  BALANCES_LOAD_ERROR_TEXT,
   HELD_GROUP_LABEL,
   NO_TOKENS_FOUND_TEXT,
   POPULAR_GROUP_LABEL,
@@ -181,5 +182,101 @@ describe('TokenSelector — search', () => {
     await user.keyboard('{Enter}')
 
     expect(onChange).not.toHaveBeenCalled()
+  })
+})
+
+describe('TokenSelector — Safe/chain changes (C15)', () => {
+  it('clears the selection when the Safe identity changes after mount', () => {
+    const onChange = jest.fn()
+    const { rerender } = render(<TokenSelector value={heldUsdc.address} onChange={onChange} />)
+    expect(onChange).not.toHaveBeenCalled()
+
+    setOptions({ identityKey: `137:${checksumAddress(faker.finance.ethereumAddress())}`, options: [popularDai] })
+    rerender(<TokenSelector value={heldUsdc.address} onChange={onChange} />)
+
+    expect(onChange).toHaveBeenCalledTimes(1)
+    expect(onChange).toHaveBeenCalledWith(undefined)
+  })
+
+  it('does not clear on first mount, nor when the identity is unchanged', () => {
+    const onChange = jest.fn()
+    const { rerender } = render(<TokenSelector value={heldUsdc.address} onChange={onChange} />)
+
+    rerender(<TokenSelector value={heldUsdc.address} onChange={onChange} />)
+
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it('does not clear when a Safe is selected for the first time (identity goes from empty to set)', () => {
+    const onChange = jest.fn()
+    setOptions({ identityKey: '', options: [] })
+    const { rerender } = render(<TokenSelector onChange={onChange} />)
+
+    setOptions()
+    rerender(<TokenSelector onChange={onChange} />)
+
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it('does not call onChange on identity change when nothing is selected', () => {
+    const onChange = jest.fn()
+    const { rerender } = render(<TokenSelector onChange={onChange} />)
+
+    setOptions({ identityKey: `137:${checksumAddress(faker.finance.ethereumAddress())}` })
+    rerender(<TokenSelector onChange={onChange} />)
+
+    expect(onChange).not.toHaveBeenCalled()
+  })
+})
+
+describe('TokenSelector — excludeAddresses', () => {
+  it('hides excluded tokens but never the current value', async () => {
+    const { user } = renderSelector({
+      value: popularDai.address,
+      excludeAddresses: [popularDai.address.toLowerCase(), popularWbtc.address],
+    })
+    await openSelector(user)
+
+    expect(screen.getByRole('option', { name: /DAI/ })).toBeInTheDocument()
+    expect(screen.queryByRole('option', { name: /WBTC/ })).not.toBeInTheDocument()
+  })
+})
+
+describe('TokenSelector — states', () => {
+  it('is disabled when no Safe is selected', () => {
+    setOptions({ identityKey: '', options: [] })
+
+    render(<TokenSelector onChange={jest.fn()} />)
+
+    expect(screen.getByRole('combobox')).toBeDisabled()
+  })
+
+  it('respects the disabled prop', () => {
+    render(<TokenSelector onChange={jest.fn()} disabled />)
+
+    expect(screen.getByRole('combobox')).toBeDisabled()
+  })
+
+  it('shows skeletons for held tokens while loading and keeps popular tokens selectable', async () => {
+    const onChange = jest.fn()
+    setOptions({ isLoading: true, options: [popularDai, popularWbtc] })
+    const { user } = renderSelector({ onChange })
+    await openSelector(user)
+
+    expect(screen.getByTestId('held-tokens-loading')).toBeInTheDocument()
+    await user.click(screen.getByRole('option', { name: /DAI/ }))
+    expect(onChange).toHaveBeenCalledWith(popularDai.address)
+  })
+
+  it('shows the error row with retry and keeps popular tokens selectable', async () => {
+    const { refetch } = setOptions({ isError: true, options: [popularDai] })
+    const { user } = renderSelector()
+    await openSelector(user)
+
+    expect(screen.getByText(BALANCES_LOAD_ERROR_TEXT)).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: /DAI/ })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /retry/i }))
+    expect(refetch).toHaveBeenCalledTimes(1)
   })
 })

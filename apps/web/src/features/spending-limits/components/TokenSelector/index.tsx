@@ -1,4 +1,4 @@
-import { useId, useMemo } from 'react'
+import { useEffect, useId, useMemo, useRef } from 'react'
 import { Search } from 'lucide-react'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { Label } from '@/components/ui/label'
@@ -108,6 +108,18 @@ const TokenSelector = ({
   )
 
   const hasSafe = identityKey !== ''
+
+  // AC C15: a token picked for Safe A must not survive switching to Safe B (different chain, different
+  // decimals, possibly a different token behind the same address). Reset whenever the identity changes
+  // after the first non-empty one — never on mount, never when a Safe is chosen for the first time.
+  const previousIdentity = useRef(identityKey)
+  useEffect(() => {
+    const previous = previousIdentity.current
+    previousIdentity.current = identityKey
+    if (previous !== '' && previous !== identityKey && value !== undefined) {
+      onChange(undefined)
+    }
+  }, [identityKey, value, onChange])
 
   return (
     <div className="flex w-full flex-col gap-1.5">
