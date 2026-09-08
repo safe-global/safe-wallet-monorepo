@@ -48,8 +48,10 @@ jest.mock('@/components/ui/select', () => ({
       {children}
     </div>
   ),
+  // The data-slot and tabIndex mirror the real primitive: the component finds rows by that slot, and
+  // jsdom refuses to focus a div without a tabindex.
   SelectItem: ({ children, value, ...props }: { children?: ReactNode; value?: string }) => (
-    <div data-value={value} {...props}>
+    <div data-slot="select-item" data-value={value} tabIndex={-1} {...props}>
       {children}
     </div>
   ),
@@ -191,9 +193,8 @@ describe('NetworkSelector', () => {
     expect(getListedNetworks()).toHaveLength(mockChains.length)
   })
 
-  // Base UI's Select attaches list navigation and typeahead above the input. Printable keys must not
-  // reach it (they would be read as typeahead and hijack typing), but the navigation keys must, or a
-  // keyboard user cannot reach the filtered rows at all.
+  // Base UI's Select reads printable keys as list typeahead from a handler above the input, so those
+  // must not reach it. Escape must, or the popup can no longer close.
   const renderWithAncestorKeyDown = () => {
     const onAncestorKeyDown = jest.fn()
     render(
@@ -204,7 +205,7 @@ describe('NetworkSelector', () => {
     return onAncestorKeyDown
   }
 
-  it.each(['g', '1', ' ', 'Enter'])('stops the %s key from reaching the Select above it', (key) => {
+  it.each(['g', '1', ' ', 'Enter', 'Tab'])('stops the %s key from reaching the Select above it', (key) => {
     const onAncestorKeyDown = renderWithAncestorKeyDown()
 
     fireEvent.keyDown(getSearchInput(), { key })
@@ -212,11 +213,46 @@ describe('NetworkSelector', () => {
     expect(onAncestorKeyDown).not.toHaveBeenCalled()
   })
 
-  it.each(['ArrowDown', 'ArrowUp', 'Tab', 'Escape'])('lets %s reach the Select above it', (key) => {
+  it('lets Escape reach the Select above it', () => {
     const onAncestorKeyDown = renderWithAncestorKeyDown()
 
-    fireEvent.keyDown(getSearchInput(), { key })
+    fireEvent.keyDown(getSearchInput(), { key: 'Escape' })
 
-    expect(onAncestorKeyDown).toHaveBeenCalledWith(expect.objectContaining({ key }))
+    expect(onAncestorKeyDown).toHaveBeenCalledWith(expect.objectContaining({ key: 'Escape' }))
+  })
+
+  // The arrows are handled here rather than passed up: base-ui tracks the highlighted row by index and
+  // never re-derives it when the list filters, so navigating from its stale position lands on the wrong
+  // row — or nowhere. Focusing a row we picked makes that row's own onFocus write the correct index back.
+  it('moves focus to the first matching row on ArrowDown, without reaching the Select', () => {
+    const onAncestorKeyDown = renderWithAncestorKeyDown()
+    fireEvent.change(getSearchInput(), { target: { value: 'pol' } })
+
+    fireEvent.keyDown(getSearchInput(), { key: 'ArrowDown' })
+
+    expect(document.activeElement).toBe(screen.getAllByTestId('network-selector-item')[0])
+    expect(document.activeElement).toHaveTextContent('Polygon')
+    expect(onAncestorKeyDown).not.toHaveBeenCalled()
+  })
+
+  it('moves focus to the last matching row on ArrowUp', () => {
+    render(<NetworkSelector />)
+    fireEvent.change(getSearchInput(), { target: { value: 'o' } })
+
+    fireEvent.keyDown(getSearchInput(), { key: 'ArrowUp' })
+
+    const rows = screen.getAllByTestId('network-selector-item')
+    expect(document.activeElement).toBe(rows[rows.length - 1])
+  })
+
+  it('does not move focus on ArrowDown when nothing matches', () => {
+    render(<NetworkSelector />)
+    const search = getSearchInput()
+    fireEvent.change(search, { target: { value: 'no-such-network' } })
+    search.focus()
+
+    fireEvent.keyDown(search, { key: 'ArrowDown' })
+
+    expect(document.activeElement).toBe(search)
   })
 })

@@ -15,7 +15,7 @@ import useChains, { useCurrentChain } from '@/hooks/useChains'
 import type { NextRouter } from 'next/router'
 import { useRouter } from 'next/router'
 import css from './styles.module.css'
-import { type ReactElement, useCallback, useMemo, useState } from 'react'
+import { type KeyboardEvent, type ReactElement, useCallback, useMemo, useRef, useState } from 'react'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analytics'
 import { useAllSafesGrouped } from '@/hooks/safes'
 import useSafeAddress from '@/hooks/useSafeAddress'
@@ -66,16 +66,6 @@ export const getNetworkLink = (
 
   return route
 }
-
-/**
- * Keys the search field lets bubble up to the Select popup, which is where base-ui attaches its list
- * navigation. Everything else is stopped, because base-ui reads printable keys as list typeahead and
- * would otherwise hijack typing. Arrows move focus into the filtered rows, Tab reaches the row that
- * holds the roving tabindex, and Escape closes the popup. Enter is deliberately not here: while focus
- * is still in the field, base-ui would commit whichever row it thinks is active, which after filtering
- * is not the row the user is looking at.
- */
-const KEYS_THE_SELECT_HANDLES = new Set(['ArrowDown', 'ArrowUp', 'Tab', 'Escape'])
 
 const UndeployedNetworkMenuItem = ({
   chain,
@@ -283,6 +273,7 @@ const NetworkSelector = ({
 }): ReactElement => {
   const [open, setOpen] = useState<boolean>(false)
   const [search, setSearch] = useState('')
+  const searchRef = useRef<HTMLInputElement>(null)
   const { configs } = useChains()
   const chainId = useChainId()
   const router = useRouter()
@@ -350,6 +341,35 @@ const NetworkSelector = ({
     [configs, onChainSelect, router, safeAddress, compactButton],
   )
 
+  // base-ui tracks the highlighted row as a numeric index and never re-derives it when the list is
+  // filtered, so letting the arrow keys through would navigate from a stale position. Moving focus to
+  // a row we picked instead is what corrects it: the item's own onFocus writes its current index back
+  // as the active one, and base-ui's navigation takes over correctly from there.
+  const focusRow = (edge: 'first' | 'last') => {
+    const rows = searchRef.current
+      ?.closest('[data-slot="select-content"]')
+      ?.querySelectorAll<HTMLElement>('[data-slot="select-item"]')
+    if (!rows?.length) return
+    const row = edge === 'first' ? rows[0] : rows[rows.length - 1]
+    row?.focus()
+  }
+
+  const handleSearchKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault()
+      event.stopPropagation()
+      focusRow(event.key === 'ArrowDown' ? 'first' : 'last')
+      return
+    }
+
+    // Everything else is kept from base-ui's typeahead, which would otherwise hijack typing. Escape
+    // still reaches the popup so it can close. Tab is unaffected: stopping propagation does not stop
+    // the browser's own focus move.
+    if (event.key !== 'Escape') {
+      event.stopPropagation()
+    }
+  }
+
   const handleOpenChange = (nextOpen: boolean) => {
     setOpen(nextOpen)
     // The popup keeps its search state between openings (this component stays mounted), so clear it
@@ -396,11 +416,10 @@ const NetworkSelector = ({
             className="shadow-xs"
             placeholder="Search networks"
             aria-label="Search networks"
+            ref={searchRef}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => {
-              if (!KEYS_THE_SELECT_HANDLES.has(e.key)) e.stopPropagation()
-            }}
+            onKeyDown={handleSearchKeyDown}
             autoComplete="off"
             data-testid="network-selector-search-input"
           />
