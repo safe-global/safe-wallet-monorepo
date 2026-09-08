@@ -218,6 +218,17 @@ describe('TokenSelector — Safe/chain changes (C15)', () => {
     expect(onChange).not.toHaveBeenCalled()
   })
 
+  it('does not clear a prefilled value when a Safe is selected for the first time', () => {
+    const onChange = jest.fn()
+    setOptions({ identityKey: '', options: [] })
+    const { rerender } = render(<TokenSelector value={heldUsdc.address} onChange={onChange} />)
+
+    setOptions()
+    rerender(<TokenSelector value={heldUsdc.address} onChange={onChange} />)
+
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
   it('does not call onChange on identity change when nothing is selected', () => {
     const onChange = jest.fn()
     const { rerender } = render(<TokenSelector onChange={onChange} />)
