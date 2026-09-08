@@ -14,7 +14,7 @@ import { AppRoutes } from '@/config/routes'
 const OIDC_AUTH_PENDING_KEY = 'oidc_auth_pending'
 
 export const SESSION_EXPIRED_GROUP_KEY = 'session-expired'
-export const SESSION_EXPIRED_MESSAGE = 'Your session has expired. Please sign in to Workspaces again.'
+export const SESSION_EXPIRED_MESSAGE = 'Your session has expired. Please sign in to workspaces again.'
 
 const isForbidden = (error: unknown): error is FetchBaseQueryError =>
   typeof error === 'object' && error !== null && 'status' in error && error.status === 403

@@ -102,7 +102,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
       trackEvent(SPACE_EVENTS.ADDRESS_REQUEST_APPROVED)
       dispatch(
         showNotification({
-          message: 'Contact added to Workspace address book',
+          message: 'Contact added to workspace address book',
           variant: 'success',
           groupKey: 'approve-success',
         }),
@@ -160,8 +160,8 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
             <span className={cn('min-w-0', !isCompact && 'truncate')}>{req.name}</span>
             {spaceAddresses.has(req.address.toLowerCase()) && (
               <Tooltip>
-                <TooltipTrigger render={<Badge variant="outline">Already in Workspace</Badge>} />
-                <TooltipContent>Approving replaces the existing Workspace entry for this address.</TooltipContent>
+                <TooltipTrigger render={<Badge variant="outline">Already in workspace</Badge>} />
+                <TooltipContent>Approving replaces the existing workspace entry for this address.</TooltipContent>
               </Tooltip>
             )}
           </span>

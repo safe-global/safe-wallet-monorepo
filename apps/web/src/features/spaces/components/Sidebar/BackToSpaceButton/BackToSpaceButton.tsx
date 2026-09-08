@@ -18,7 +18,7 @@ export const BackToSpaceButton = ({ spaceName, spaceInitial }: SafeWorkspaceHead
   return (
     <SidebarMenuButton
       size="lg"
-      tooltip="Back to Workspace"
+      tooltip="Back to workspace"
       data-testid="back-to-space-button"
       className={css.spaceSelector}
       onClick={handleBackToSpace}

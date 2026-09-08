@@ -134,7 +134,7 @@ describe('SafeDropdownContainer', () => {
           items={[]}
           onItemSelect={jest.fn()}
           closeDropdown={jest.fn()}
-          emptyStateOverride={<div data-testid="custom-empty">Sign in to a Workspace</div>}
+          emptyStateOverride={<div data-testid="custom-empty">Sign in to a workspace</div>}
         />,
       )
 
@@ -148,7 +148,7 @@ describe('SafeDropdownContainer', () => {
           items={[]}
           onItemSelect={jest.fn()}
           closeDropdown={jest.fn()}
-          emptyStateOverride={<div data-testid="custom-empty">Sign in to a Workspace</div>}
+          emptyStateOverride={<div data-testid="custom-empty">Sign in to a workspace</div>}
           searchValue="treasury"
           onSearchValueChange={jest.fn()}
         />,

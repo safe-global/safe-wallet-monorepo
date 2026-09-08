@@ -61,10 +61,10 @@ export function getAuditEventDescription(
       const name = asString(payload.name)
       return name ? (
         <>
-          created the Workspace <Em>{name}</Em>
+          created the workspace <Em>{name}</Em>
         </>
       ) : (
-        'created the Workspace'
+        'created the workspace'
       )
     }
     case 'SPACE_UPDATED': {
@@ -73,20 +73,20 @@ export function getAuditEventDescription(
       if (oldName && newName) {
         return (
           <>
-            renamed the Workspace from <Em>{oldName}</Em> to <Em>{newName}</Em>
+            renamed the workspace from <Em>{oldName}</Em> to <Em>{newName}</Em>
           </>
         )
       }
-      return 'updated the Workspace'
+      return 'updated the workspace'
     }
     case 'SPACE_DELETED': {
       const name = asString(payload.name)
       return name ? (
         <>
-          deleted the Workspace <Em>{name}</Em>
+          deleted the workspace <Em>{name}</Em>
         </>
       ) : (
-        'deleted the Workspace'
+        'deleted the workspace'
       )
     }
     case 'MEMBER_INVITED': {
@@ -129,11 +129,11 @@ export function getAuditEventDescription(
     case 'MEMBER_REMOVED':
       return (
         <>
-          removed <Em>{target}</Em> from the Workspace
+          removed <Em>{target}</Em> from the workspace
         </>
       )
     case 'MEMBER_LEFT':
-      return payload.accountDeleted === true ? 'left the Workspace (account deleted)' : 'left the Workspace'
+      return payload.accountDeleted === true ? 'left the workspace (account deleted)' : 'left the workspace'
     case 'SAFE_ADDED': {
       const count = asCount(payload.safes)
       return count > 0 ? `added ${pluralize(count, 'Safe account')}` : 'added Safe accounts'

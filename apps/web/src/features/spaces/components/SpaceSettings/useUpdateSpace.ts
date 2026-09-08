@@ -34,7 +34,7 @@ export const useUpdateSpace = (space: GetSpaceResponse | undefined, onSuccess?: 
       dispatch(
         showNotification({
           variant: 'success',
-          message: 'Updated Workspace name',
+          message: 'Updated workspace name',
           groupKey: 'space-update-name',
         }),
       )

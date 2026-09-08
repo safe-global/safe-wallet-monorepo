@@ -49,7 +49,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
 
         dispatch(
           showNotification({
-            message: `Created Workspace with name ${name}.`,
+            message: `Created workspace with name ${name}.`,
             variant: 'success',
             groupKey: 'create-space-success',
           }),
@@ -73,7 +73,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
       dialogTitle={
         <>
           <SpaceIcon className="mr-2 size-6 fill-none" />
-          Create Workspace
+          Create workspace
         </>
       }
       hideChainIndicator
@@ -110,7 +110,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
               className="p-4 pt-0"
               onCancel={onClose}
               cancelTestId="cancel-btn"
-              confirmLabel="Create Workspace"
+              confirmLabel="Create workspace"
               confirmType="submit"
               confirmDisabled={!formState.isValid || isSubmitting}
               confirmLoading={isSubmitting}

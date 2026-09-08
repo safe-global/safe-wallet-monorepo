@@ -44,7 +44,7 @@ const AddSpaceButton = ({
   disabled,
   size = 'lg',
   variant = 'default',
-  label = 'Create Workspace',
+  label = 'Create workspace',
   icon = 'add',
 }: {
   onClick?: () => void
@@ -84,7 +84,7 @@ const AddSpaceButton = ({
   return (
     <Tooltip>
       <TooltipTrigger render={<div className="inline-flex" />}>{button}</TooltipTrigger>
-      <TooltipContent>Limit of {SPACES_LIMIT} Workspaces reached</TooltipContent>
+      <TooltipContent>Limit of {SPACES_LIMIT} workspaces reached</TooltipContent>
     </Tooltip>
   )
 }
@@ -117,7 +117,7 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
               </div>
 
               <Typography variant="h3" className="mb-6 text-center">
-                Sign in to your Workspace
+                Sign in to your workspace
               </Typography>
 
               <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
@@ -187,7 +187,7 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
           <div className="flex flex-col items-center gap-4">
             <div className="h-12">
               <AddSpaceButton
-                label="Create your first Workspace"
+                label="Create your first workspace"
                 icon="arrow"
                 disabled={isAtLimit}
                 onClick={() =>
