@@ -1,4 +1,4 @@
-import { ArrowRight, Shield, X } from 'lucide-react'
+import { ArrowRight, ShieldCheck, X } from 'lucide-react'
 import NextLink from 'next/link'
 import { AppRoutes } from '@/config/routes'
 import { Button } from '@/components/ui/button'
@@ -9,6 +9,9 @@ import css from './styles.module.css'
 /**
  * Sidebar card announcing that the workspace requires 2FA. Continue opens the General settings
  * page, where the two-factor section shows who is covered and how to set it up.
+ *
+ * Deliberately quieter than the Safe Pro sidebar banner it shares the slot with: a flat muted
+ * card and a bare icon, no glow and no chip.
  */
 const WorkspaceTwoFactorAwarenessCard = ({
   spaceId,
@@ -21,7 +24,7 @@ const WorkspaceTwoFactorAwarenessCard = ({
 }) => (
   <div
     className={cn(
-      'relative flex w-full flex-col items-start gap-3 rounded-lg bg-muted bg-no-repeat p-4 shadow-lg',
+      'relative flex w-full flex-col items-start gap-3 rounded-lg bg-muted p-4 shadow-lg',
       css.card,
       className,
     )}
@@ -37,9 +40,7 @@ const WorkspaceTwoFactorAwarenessCard = ({
       <X className="size-4" />
     </button>
 
-    <span className={cn('flex size-8 shrink-0 items-center justify-center rounded-md', css.iconChip)}>
-      <Shield className="size-4" />
-    </span>
+    <ShieldCheck className={cn('size-4 shrink-0', css.icon)} aria-hidden />
 
     <div className="flex w-full flex-col gap-1">
       <Typography variant="paragraph-small-bold" className="text-foreground">
