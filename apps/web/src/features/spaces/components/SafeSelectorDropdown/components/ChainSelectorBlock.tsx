@@ -93,9 +93,12 @@ function ChainSelectorBlock({
         sideOffset={12}
         className="w-[196px] bg-card text-foreground ring-0 p-1 rounded-2xl"
       >
+        {/* m-1 takes the inset from the popup's own 4px to 8px on every side, and rounded-[16px] is the
+            popup's 24px corner less that 8px, so the two outlines stay concentric instead of crossing. */}
         <SearchInput
           variant="surface"
-          className="mb-1 shadow-xs"
+          // eslint-disable-next-line no-restricted-syntax -- the radius has to be the popup's less this field's inset; no preset can know the container it is nested in
+          className="m-1 w-[calc(100%-0.5rem)] rounded-[16px] shadow-xs"
           placeholder="Search networks"
           aria-label="Search networks"
           value={search}

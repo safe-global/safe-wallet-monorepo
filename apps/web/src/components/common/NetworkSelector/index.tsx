@@ -410,9 +410,12 @@ const NetworkSelector = ({
             out of reach. The negative margins and offset bleed this one over that list's padding and have
             to stay in step with the `p-1.5` on SelectPrimitive.List in components/ui/select.tsx. */}
         <div className="sticky -top-1.5 z-10 -mx-1.5 -mt-1.5 bg-popover px-1.5 pt-1.5 pb-2">
+          {/* rounded-[6px] is the popup's 12px corner less the 6px this header insets the field by,
+              so the two curves stay concentric instead of crossing. */}
           <SearchInput
             variant="surface"
-            className="shadow-xs"
+            // eslint-disable-next-line no-restricted-syntax -- the radius has to be the popup's less this field's inset; no preset can know the container it is nested in
+            className="rounded-[6px] shadow-xs"
             placeholder="Search networks"
             aria-label="Search networks"
             ref={searchRef}
