@@ -94,6 +94,13 @@ describe('NestedSafesList', () => {
     expect(renameButton()).toBeEnabled()
   })
 
+  it('scopes the rename by the parent Safe, not the nested one', () => {
+    withNestedSafe()
+    renderWithTxFlow()
+
+    expect(mockWriteScope.mock.calls[0][0]).toBe(mockSafeAddress)
+  })
+
   it('disables rename for a member looking at a workspace Safe', () => {
     withNestedSafe()
     mockWriteScope.mockReturnValue({ scope: 'local', canRename: false })
