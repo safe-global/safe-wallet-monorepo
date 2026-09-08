@@ -68,7 +68,7 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
                 <span data-testid="space-safe-rename-btn">Rename</span>
               </DropdownMenuItem>
             </TooltipTrigger>
-            {!canRename && <TooltipContent>Only ADMINs can edit</TooltipContent>}
+            {!canRename && <TooltipContent>Only Workspace admins can rename this account</TooltipContent>}
           </Tooltip>
 
           {isAdmin && (

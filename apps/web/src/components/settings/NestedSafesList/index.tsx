@@ -56,7 +56,7 @@ function RenameNestedSafeButton({
         }
       />
       {!canRename ? (
-        <TooltipContent>Only ADMINs can edit</TooltipContent>
+        <TooltipContent>Only Workspace admins can rename this account</TooltipContent>
       ) : (
         isOk && <TooltipContent>Rename nested Safe</TooltipContent>
       )}

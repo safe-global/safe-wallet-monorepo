@@ -101,12 +101,22 @@ describe('EntryDialog scope', () => {
     expect(screen.queryByTestId('entry-scope-notice')).not.toBeInTheDocument()
   })
 
-  it('keeps the dialog open and shows the reason when the workspace write is rejected', async () => {
-    upsertWorkspaceName.mockResolvedValue({ error: 'Only ADMINs can edit' })
+  it('surfaces a fallback error when the submit itself rejects', async () => {
+    upsertWorkspaceName.mockRejectedValue(new Error('boom'))
     renderDialog('workspace')
     await save()
 
-    await waitFor(() => expect(screen.getByText('Only ADMINs can edit')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Something went wrong. Please try again.')).toBeInTheDocument())
+    expect(screen.getByTestId('entry-dialog')).toBeInTheDocument()
+    expect(screen.getByTestId('save-btn')).not.toBeDisabled()
+  })
+
+  it('keeps the dialog open and shows the reason when the workspace write is rejected', async () => {
+    upsertWorkspaceName.mockResolvedValue({ error: 'Only Workspace admins can rename this account' })
+    renderDialog('workspace')
+    await save()
+
+    await waitFor(() => expect(screen.getByText('Only Workspace admins can rename this account')).toBeInTheDocument())
     expect(screen.getByTestId('entry-dialog')).toBeInTheDocument()
   })
 

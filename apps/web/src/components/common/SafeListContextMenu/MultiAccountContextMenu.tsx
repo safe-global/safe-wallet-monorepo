@@ -83,7 +83,7 @@ const MultiAccountContextMenu = ({
                 <span data-testid="rename-btn">Rename</span>
               </DropdownMenuItem>
             </TooltipTrigger>
-            {!canRename && <TooltipContent>Only ADMINs can edit</TooltipContent>}
+            {!canRename && <TooltipContent>Only Workspace admins can rename this account</TooltipContent>}
           </Tooltip>
           {addNetwork && (
             <DropdownMenuItem onClick={handleOpenModal(ModalType.ADD_CHAIN, OVERVIEW_EVENTS.ADD_NEW_NETWORK)}>

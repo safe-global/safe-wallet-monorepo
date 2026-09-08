@@ -150,7 +150,7 @@ const SafeListContextMenu = ({
                   <span data-testid="rename-btn">{hasName ? 'Rename' : 'Give name'}</span>
                 </DropdownMenuItem>
               </TooltipTrigger>
-              {!canRename && <TooltipContent>Only ADMINs can edit</TooltipContent>}
+              {!canRename && <TooltipContent>Only Workspace admins can rename this account</TooltipContent>}
             </Tooltip>
           )}
 
