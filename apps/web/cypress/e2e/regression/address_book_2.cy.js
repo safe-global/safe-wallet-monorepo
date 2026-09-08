@@ -30,12 +30,11 @@ describe('Address book tests - 2', () => {
     addressBook.clickOnNameSortBtn()
     addressBook.verifyEntriesOrder('descending')
 
-    // Clicking twice is required to trigger actual click after swtiching from Name
-    addressBook.clickOnAddrressSortBtn()
-    addressBook.clickOnAddrressSortBtn()
-    addressBook.verifyEntriesOrder()
+    // BB Safe's address sorts before AA Safe's, so the address order is the inverse of the name order.
     addressBook.clickOnAddrressSortBtn()
     addressBook.verifyEntriesOrder('descending')
+    addressBook.clickOnAddrressSortBtn()
+    addressBook.verifyEntriesOrder()
   })
 
   it('Verify that edit owners name changes the name in the settings', () => {

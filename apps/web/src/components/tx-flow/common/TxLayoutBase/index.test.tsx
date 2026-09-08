@@ -27,6 +27,22 @@ describe('TxLayoutBase', () => {
     expect(screen.getByTestId('step-content')).toBeInTheDocument()
   })
 
+  it('adds no right padding of its own at desktop widths', () => {
+    // The right gutter belongs to TxModalDialog, which reserves the column its sticky close button
+    // scrolls in. Any `px-`/`pr-` utility here stacks on that and pushes the widget away from the X.
+    const { container } = render(
+      <TxLayoutBase title="Send tokens" step={0} stepCount={2} progress={50}>
+        <Step />
+      </TxLayoutBase>,
+    )
+
+    const desktopRightPadding = Array.from(container.querySelectorAll('[class]')).filter((el) =>
+      /(^|\s)min-\[\d+px\]:p[rx]-/.test(el.className),
+    )
+
+    expect(desktopRightPadding).toEqual([])
+  })
+
   it('shows the Safe Shield widget and status rail by default', () => {
     render(
       <TxLayoutBase title="Send tokens" step={0} stepCount={2} progress={50}>
