@@ -1,6 +1,5 @@
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { type ComponentType, type ReactElement, type ReactNode, useContext } from 'react'
-import { ArrowLeft } from 'lucide-react'
 import classnames from 'classnames'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
@@ -162,15 +161,10 @@ const TxLayoutBase = ({
               <div className={css.step}>
                 {children}
 
+                {/* No icon, and not `size="submit"`: its 7rem floor plus the arrow cost width the
+                    narrowest card cannot spare beside a long action label. */}
                 {onBack && step > 0 && (
-                  <Button
-                    data-testid="modal-back-btn"
-                    variant="outline"
-                    size="submit"
-                    onClick={onBack}
-                    className={css.backButton}
-                  >
-                    <ArrowLeft className="size-4" />
+                  <Button data-testid="modal-back-btn" variant="outline" onClick={onBack} className={css.backButton}>
                     Back
                   </Button>
                 )}

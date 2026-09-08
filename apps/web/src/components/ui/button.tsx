@@ -79,8 +79,8 @@ const buttonVariants = cva(
         // `action` — a dialog footer should not be taller than the CTA it mirrors on the page.
         submit: "h-9 gap-2 px-6 min-w-[7rem] [&_svg:not([class*='size-'])]:size-5",
         // Full-screen onboarding / flow footer CTA: the taller 48px scale used by the Spaces
-        // onboarding Back/Continue buttons. Use via the OnboardingFooter preset, which keeps both
-        // on one row (`flex-1` each) at every width.
+        // onboarding Back/Continue buttons. Use via the OnboardingFooter preset, which shares one
+        // row between them and stacks only when a long label leaves no room.
         xl: 'h-12 gap-2 px-6',
         icon: 'size-9',
         'icon-xs': "size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3",

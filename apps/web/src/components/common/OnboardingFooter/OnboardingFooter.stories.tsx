@@ -4,7 +4,7 @@ import OnboardingFooter from './index'
 /**
  * OnboardingFooter — the Back / Continue footer for the full-screen Spaces
  * onboarding flows. Owns the `size="xl"` (48px) scale, Back(secondary)/Continue,
- * chevrons, loading→spinner, and the single-row layout at every width.
+ * loading→spinner, and the shared row that stacks only when space runs out.
  */
 const meta = {
   title: 'Components/Common/OnboardingFooter',
@@ -32,7 +32,8 @@ export const AllVariants: Story = {
         <OnboardingFooter continueLabel="Get started" onContinue={() => {}} />
       </div>
       <p className="text-sm text-muted-foreground">
-        Back and Continue share one row at every width, each taking half of it.
+        Back and Continue share one row, each taking half of it. Below about 340px a long label such as &ldquo;Create
+        Workspace&rdquo; no longer fits beside Back, and the two stack full-width instead of clipping.
       </p>
     </div>
   ),

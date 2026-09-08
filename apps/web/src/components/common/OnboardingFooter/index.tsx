@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 
@@ -24,9 +23,9 @@ type OnboardingFooterProps = {
 /**
  * OnboardingFooter — the Back / Continue footer for the full-screen Spaces
  * onboarding flows. Owns the taller `size="xl"` (48px) CTA scale, the Back
- * (secondary) + Continue (primary) treatment, the left/right chevrons, the
- * loading → spinner swap, and the single-row layout: Back and Continue share one
- * row at every width, each taking half of it. Reach for this instead of
+ * (secondary) + Continue (primary) treatment, the loading → spinner swap, and
+ * the layout: both buttons share one row, each taking half of it, and stack
+ * full-width only when a long label leaves no room. Reach for this instead of
  * hand-building the footer so every onboarding step matches.
  */
 const OnboardingFooter = ({
@@ -41,10 +40,9 @@ const OnboardingFooter = ({
   continueLoading = false,
   continueTestId,
 }: OnboardingFooterProps) => (
-  <div className="flex items-center gap-3">
+  <div className="flex flex-wrap items-center gap-3">
     {onBack && (
       <Button type="button" variant="secondary" size="xl" onClick={onBack} disabled={backDisabled} className="flex-1">
-        <ChevronLeft />
         {backLabel}
       </Button>
     )}
@@ -57,14 +55,7 @@ const OnboardingFooter = ({
       data-testid={continueTestId}
       className="flex-1"
     >
-      {continueLoading ? (
-        <Spinner />
-      ) : (
-        <>
-          {continueLabel}
-          <ChevronRight />
-        </>
-      )}
+      {continueLoading ? <Spinner /> : continueLabel}
     </Button>
   </div>
 )
