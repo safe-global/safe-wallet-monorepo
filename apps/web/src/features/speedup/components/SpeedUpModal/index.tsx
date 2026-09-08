@@ -200,7 +200,7 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
           <Button onClick={onCancel}>Cancel</Button>
 
           <Tooltip title="Speed up transaction">
-            <CheckWallet checkNetwork={!isDisabled}>
+            <CheckWallet allowNonOwner checkNetwork={!isDisabled}>
               {(isOk) => (
                 <Button
                   color="primary"
