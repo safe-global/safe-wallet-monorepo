@@ -119,6 +119,8 @@ describe('NetworkSelector', () => {
     fireEvent.change(getSearchInput(), { target: { value: 'gnosis' } })
 
     expect(getListedNetworks()).toEqual(['Gnosis Chain'])
+    // A partial match must not also claim there are no matches.
+    expect(screen.queryByTestId('network-selector-empty')).not.toBeInTheDocument()
   })
 
   it('matches network names case-insensitively', () => {
@@ -127,6 +129,7 @@ describe('NetworkSelector', () => {
     fireEvent.change(getSearchInput(), { target: { value: 'POLY' } })
 
     expect(getListedNetworks()).toEqual(['Polygon'])
+    expect(screen.queryByTestId('network-selector-empty')).not.toBeInTheDocument()
   })
 
   it('keeps a filtered network selectable, with its link intact', () => {
@@ -171,6 +174,7 @@ describe('NetworkSelector', () => {
 
     expect(screen.getByText('Testnets')).toBeInTheDocument()
     expect(getListedNetworks()).toEqual(['Sepolia'])
+    expect(screen.queryByTestId('network-selector-empty')).not.toBeInTheDocument()
   })
 
   it('clears the search when the dropdown is reopened', () => {
@@ -187,31 +191,32 @@ describe('NetworkSelector', () => {
     expect(getListedNetworks()).toHaveLength(mockChains.length)
   })
 
-  // Base UI's Select reads typed characters as list typeahead from a handler above the input, so a
-  // printable key must not reach an ancestor — while Escape must, or the popup can no longer close.
-  it('stops printable keystrokes from reaching the Select above it', () => {
+  // Base UI's Select attaches list navigation and typeahead above the input. Printable keys must not
+  // reach it (they would be read as typeahead and hijack typing), but the navigation keys must, or a
+  // keyboard user cannot reach the filtered rows at all.
+  const renderWithAncestorKeyDown = () => {
     const onAncestorKeyDown = jest.fn()
     render(
       <div onKeyDown={onAncestorKeyDown}>
         <NetworkSelector />
       </div>,
     )
+    return onAncestorKeyDown
+  }
 
-    fireEvent.keyDown(getSearchInput(), { key: 'g' })
+  it.each(['g', '1', ' ', 'Enter'])('stops the %s key from reaching the Select above it', (key) => {
+    const onAncestorKeyDown = renderWithAncestorKeyDown()
+
+    fireEvent.keyDown(getSearchInput(), { key })
 
     expect(onAncestorKeyDown).not.toHaveBeenCalled()
   })
 
-  it('lets Escape reach the Select above it', () => {
-    const onAncestorKeyDown = jest.fn()
-    render(
-      <div onKeyDown={onAncestorKeyDown}>
-        <NetworkSelector />
-      </div>,
-    )
+  it.each(['ArrowDown', 'ArrowUp', 'Tab', 'Escape'])('lets %s reach the Select above it', (key) => {
+    const onAncestorKeyDown = renderWithAncestorKeyDown()
 
-    fireEvent.keyDown(getSearchInput(), { key: 'Escape' })
+    fireEvent.keyDown(getSearchInput(), { key })
 
-    expect(onAncestorKeyDown).toHaveBeenCalledWith(expect.objectContaining({ key: 'Escape' }))
+    expect(onAncestorKeyDown).toHaveBeenCalledWith(expect.objectContaining({ key }))
   })
 })

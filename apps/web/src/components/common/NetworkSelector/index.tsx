@@ -67,6 +67,16 @@ export const getNetworkLink = (
   return route
 }
 
+/**
+ * Keys the search field lets bubble up to the Select popup, which is where base-ui attaches its list
+ * navigation. Everything else is stopped, because base-ui reads printable keys as list typeahead and
+ * would otherwise hijack typing. Arrows move focus into the filtered rows, Tab reaches the row that
+ * holds the roving tabindex, and Escape closes the popup. Enter is deliberately not here: while focus
+ * is still in the field, base-ui would commit whichever row it thinks is active, which after filtering
+ * is not the row the user is looking at.
+ */
+const KEYS_THE_SELECT_HANDLES = new Set(['ArrowDown', 'ArrowUp', 'Tab', 'Escape'])
+
 const UndeployedNetworkMenuItem = ({
   chain,
   isSelected = false,
@@ -377,7 +387,9 @@ const NetworkSelector = ({
           :focus-visible and would otherwise draw the browser's blue outline around the whole popup. */}
       <SelectContent className="min-w-[260px] outline-hidden" alignItemWithTrigger={false}>
         {/* Sticky because SelectContent renders its children inside the scrolling list, so a plain
-            header would scroll out of reach. The negative margins bleed it over the list's padding. */}
+            header would scroll out of reach. The negative margins and offset bleed it over that list's
+            padding, so they have to stay in step with the `p-1.5` on SelectPrimitive.List in
+            components/ui/select.tsx. */}
         <div className="sticky -top-1.5 z-10 -mx-1.5 -mt-1.5 bg-popover px-1.5 pt-1.5 pb-2">
           <SearchInput
             variant="surface"
@@ -386,10 +398,8 @@ const NetworkSelector = ({
             aria-label="Search networks"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            // Stop keystrokes reaching base-ui Select's typeahead, which would hijack typing.
-            // Trade-off: arrows/Enter stay in the input (no list nav); Escape still closes.
             onKeyDown={(e) => {
-              if (e.key !== 'Escape') e.stopPropagation()
+              if (!KEYS_THE_SELECT_HANDLES.has(e.key)) e.stopPropagation()
             }}
             autoComplete="off"
             data-testid="network-selector-search-input"
