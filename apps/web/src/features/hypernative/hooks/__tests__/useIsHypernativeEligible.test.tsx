@@ -72,10 +72,6 @@ describe('useIsHypernativeEligible', () => {
     expect(result.current.loading).toBe(true)
   })
 
-  // The targeted-messaging probe answers 404 for every Safe outside the
-  // outreach, and the browser logs that 404 to the console itself — no JS
-  // filter can suppress it (WA-2991). With HYPERNATIVE off on the chain the
-  // answer cannot make a Safe eligible, so we must not ask.
   describe('when the Hypernative feature is disabled on the chain', () => {
     beforeEach(() => {
       mockUseIsHypernativeFeature.mockReturnValue(false)
@@ -94,6 +90,21 @@ describe('useIsHypernativeEligible', () => {
 
       expect(result.current.isHypernativeGuard).toBe(true)
       expect(result.current.isHypernativeEligible).toBe(true)
+    })
+
+    // The behaviour change this skip introduces, and the one the Safe Shield
+    // widget and the queue login card read: an allowlisted Safe on a chain
+    // without the feature is no longer eligible.
+    it('drops allowlist-only eligibility, because a skipped query has no answer', () => {
+      mockUseIsOutreachSafe.mockImplementation((_id, options) => ({
+        isTargeted: !options?.skip,
+        loading: false,
+      }))
+
+      const { result } = renderHook(() => useIsHypernativeEligible())
+
+      expect(result.current.isAllowlistedSafe).toBe(false)
+      expect(result.current.isHypernativeEligible).toBe(false)
     })
   })
 })

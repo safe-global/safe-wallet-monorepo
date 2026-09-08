@@ -410,6 +410,25 @@ describe('DatadogProvider', () => {
       expect(filterRumEvent(event, resourceContext)).toBe(true)
     })
 
+    it('keeps every filtered route on a status it does not list', async () => {
+      const { filterRumEvent } = await import('../datadog')
+      const CGW = 'https://safe-client.safe.global/v1'
+      const routes = [
+        OUTREACH_BASE,
+        `${CGW}/chains/1/contracts/${SAFE_ADDRESS}`,
+        `${CGW}/chains/1/relay/${SAFE_ADDRESS}`,
+        `${CGW}/chains/1/safes/${SAFE_ADDRESS}/transactions/history`,
+        `${CGW}/chains/1/safes/${SAFE_ADDRESS}/transactions/queued`,
+        `${CGW}/chains/1/messages/0x${'ab'.repeat(32)}`,
+      ]
+
+      for (const url of routes) {
+        for (const status of [400, 401, 408, 502]) {
+          expect(filterRumEvent(buildResourceEvent(url, status), resourceContext)).toBe(true)
+        }
+      }
+    })
+
     it('keeps resource events missing url or status_code', async () => {
       const { filterRumEvent } = await import('../datadog')
       const noResource = { type: 'resource', resource: {} } as unknown as RumResourceEvent

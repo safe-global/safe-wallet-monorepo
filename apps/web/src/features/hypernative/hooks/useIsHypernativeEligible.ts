@@ -14,15 +14,9 @@ export type HypernativeEligibility = {
  * Determines whether the current Safe is eligible for Hypernative CTAs.
  * Eligibility requires a Hypernative guard installed or targeted outreach membership.
  *
- * The outreach probe is skipped when HYPERNATIVE is off on the chain. CGW
- * answers that route with a documented 404 ("Safe not targeted") for every
- * Safe outside the allowlist, and the browser writes that 404 to the console
- * itself — no client-side filter can suppress it (WA-2991). With the feature
- * off there are no Hypernative CTAs to gate, so the answer cannot change any
- * outcome and the request is pure console noise. This also makes the feature
- * flag a real precondition of `isHypernativeEligible`, which `useThreatAnalysis`,
- * `useNestedThreatAnalysis` and `useShowHypernativeAssessment` already AND in
- * by hand at every call site.
+ * With HYPERNATIVE off on the chain there are no CTAs to gate, so the outreach
+ * probe is skipped and the flag becomes a real precondition of eligibility —
+ * previously every caller had to AND it in by hand (WA-2991).
  */
 export const useIsHypernativeEligible = (): HypernativeEligibility => {
   const isEnabled = useIsHypernativeFeature()

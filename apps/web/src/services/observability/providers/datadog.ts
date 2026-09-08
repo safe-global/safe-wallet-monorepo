@@ -115,69 +115,44 @@ const NON_USER_IMPACTING_SOURCES = new Set(['console', 'report'])
 const ADDRESS = String.raw`0x[a-fA-F0-9]{40}`
 const MESSAGE_HASH = String.raw`0x[a-fA-F0-9]{64}`
 
-/**
- * End of the matched route: the URL ends here, or continues only into a query
- * string or fragment. Every pattern below is terminated with it so a prefix
- * match cannot also swallow a deeper route nested under the same path —
- * `/safes/{addr}/signers/…/submissions`, `/relay/status/{taskId}`,
- * `/messages/{hash}/signatures`, all of which report their own failures.
- *
- * The patterns are deliberately shape-specific (a 20-byte address, a 32-byte
- * hash). If a URL form ever stops matching, the expected response starts being
- * reported again rather than a real failure being hidden — the safe direction
- * for a filter like this to fail in.
- */
+// Terminates every pattern below so a prefix match cannot also swallow a deeper
+// route nested under the same path, which reports its own failures.
 const PATH_END = String.raw`(?:[?#]|$)`
 
 /**
  * Resource requests whose non-2xx responses are an expected part of normal
- * operation, not failures. Dropped before dispatch to keep RUM ingestion and
- * the Resource explorer free of predictable noise. Matched on the raw request
- * URL (the `@resource.url_path_group` facet is computed by Datadog and is not
- * available client-side) plus the status code.
- *
- * These are the response states WA-2991 lists as known-benign. RUM turns an
- * HTTP status into a `resource` event only — it raises no `error` event for a
- * 4xx — so dropping the resource event is the whole of the fix for each.
+ * operation, not failures (WA-2991). Matched on the raw request URL — the
+ * `@resource.url_path_group` facet is computed by Datadog and is not available
+ * client-side — plus the status code.
  */
 const EXPECTED_RESOURCE_FAILURES: { urlPattern: RegExp; statuses: Set<number> }[] = [
-  // CGW returns 404 from the "is this Safe targeted?" check when no outreach
-  // covers the Safe. This is the documented "Safe not targeted." response, and
-  // it is the answer for nearly every Safe on a route probed on every Safe
-  // load, so it dominates RUM resource volume (WA-2991).
+  // "Safe not targeted." — the documented answer for nearly every Safe, on a
+  // route probed on every Safe load.
   {
     urlPattern: new RegExp(
       String.raw`/v1/targeted-messaging/outreaches/[^/]+/chains/[^/]+/safes/${ADDRESS}${PATH_END}`,
     ),
     statuses: new Set([404]),
   },
-  // CGW has no metadata for most addresses; the UI already falls back to
-  // rendering the raw address, so the 404 is the answer rather than a failure.
+  // CGW has no metadata for most addresses; the UI falls back to the raw address.
   {
     urlPattern: new RegExp(String.raw`/v1/chains/[^/]+/contracts/${ADDRESS}${PATH_END}`),
     statuses: new Set([404]),
   },
-  // CGW answers 403 on a relay-fee chain when the request quotes no
-  // `safeTxHash` — a documented response, not a permission failure.
+  // A documented answer on a relay-fee chain when the request quotes no
+  // `safeTxHash`, not a permission failure.
   {
     urlPattern: new RegExp(String.raw`/v1/chains/[^/]+/relay/${ADDRESS}${PATH_END}`),
     statuses: new Set([403]),
   },
-  // CGW answers 404 on the queue and history of a Safe it does not know —
-  // reached whenever the app renders a Safe that is not indexed, notably an
-  // undeployed counterfactual one or an address typed into the URL. Together
-  // these are the largest 404 source on the gateway (~2k/week).
-  //
-  // Only 404 is dropped. On these same routes 429 is the single largest
-  // non-2xx bucket and is a real capacity signal, 422 means we sent a
-  // malformed request (`cgwErrorAlert` raises an internal alert on it), and
-  // 451/5xx are gateway-side — all keep reporting.
+  // A Safe CGW does not index — an undeployed counterfactual one, or an address
+  // typed into the URL. 429 on these same routes is a real capacity signal and
+  // deliberately keeps reporting.
   {
     urlPattern: new RegExp(String.raw`/v1/chains/[^/]+/safes/${ADDRESS}/transactions/(?:queued|history)${PATH_END}`),
     statuses: new Set([404]),
   },
-  // A single message looked up by hash 404s once it is no longer known to CGW
-  // — an expired or already-executed message the UI still has a link to.
+  // An expired or already-executed message the UI still has a link to.
   {
     urlPattern: new RegExp(String.raw`/v1/chains/[^/]+/messages/${MESSAGE_HASH}${PATH_END}`),
     statuses: new Set([404]),
@@ -216,10 +191,8 @@ const isExpectedResourceFailure = (event: RumResourceEvent): boolean => {
  *
  * Genuine user failures continue to flow through `trackError` /
  * `captureException` (source: `custom`) and unhandled exceptions (`source`).
- * A failed request is not among them: `@datadog/browser-rum-core` emits no
- * error event with source `network` — the constant is declared in
- * browser-core's enum but nothing in the RUM SDK ever produces one — so a
- * request failure reaches us only as the `resource` event handled above.
+ * A failed request is not among them — the RUM SDK raises no error event with
+ * source `network` — so it reaches us only as the `resource` event above.
  */
 export const filterRumEvent = (event: RumEvent, context: RumEventDomainContext): boolean => {
   if (event.type === 'resource') return !isExpectedResourceFailure(event as RumResourceEvent)

@@ -68,36 +68,55 @@ export const isGuardError = (error: Error): boolean => {
  */
 export const RATE_LIMIT_USER_MESSAGE = 'Network is busy. Please try again in a moment.'
 
+/** JSON-RPC LimitExceeded. -32603 (Internal) is deliberately excluded: a real eth_call failure surfaces as -32603. */
+const RPC_LIMIT_EXCEEDED = -32005
+
+const isViemRateLimitError = (error: unknown): boolean =>
+  error instanceof BaseError &&
+  !!error.walk((e) => {
+    const { code, status } = (e ?? {}) as { code?: unknown; status?: unknown }
+    return code === RPC_LIMIT_EXCEEDED || status === 429
+  })
+
 /**
- * Detects if an error originated from a transient RPC rate-limit: a viem
- * error whose cause chain carries the documented throttle signals
- * (JSON-RPC -32005 / HTTP 429). viem's `http()` transport already retries
- * these with backoff; this guard only decides whether to show the friendly
- * message once retries are exhausted and the error reaches the UI.
- *
- * Intentionally only matches structured shapes (viem `BaseError` cause
- * chains carrying the expected `code`/`status`). A message-text regex would
- * false-positive on contract reverts like `require(..., "rate limit
- * exceeded")`, leading users to retry transactions guaranteed to fail
- * on-chain.
+ * ethers wraps the same two signals in shapes of its own: an HTTP 429 becomes a
+ * `SERVER_ERROR` carrying the `FetchResponse`, and -32005 lands on the nested
+ * JSON-RPC error — under `error` for most methods, under `info.error` for
+ * `eth_call`/`eth_estimateGas`, which ethers first misclassifies as a revert.
  */
-export const isRateLimitError = (error: unknown): boolean => {
-  if (error instanceof BaseError) {
-    const match = error.walk((e) => {
-      const code = (e as { code?: unknown } | null)?.code
-      const status = (e as { status?: unknown } | null)?.status
-      // Match only the documented throttle signals: JSON-RPC -32005
-      // (LimitExceeded) and HTTP 429. -32603 (Internal) is intentionally NOT
-      // matched — a real eth_call simulation failure can surface as -32603,
-      // and translating it to "Network is busy" would prompt users to retry
-      // guaranteed-failing transactions.
-      return code === -32005 || status === 429
-    })
-    if (match) return true
+const isEthersRateLimitError = (error: unknown): boolean => {
+  if (!error || typeof error !== 'object') return false
+
+  const err = error as {
+    code?: unknown
+    error?: { code?: unknown }
+    info?: { error?: { code?: unknown } }
+    response?: { statusCode?: unknown; statusMessage?: unknown }
   }
 
-  return false
+  if (err.error?.code === RPC_LIMIT_EXCEEDED || err.info?.error?.code === RPC_LIMIT_EXCEEDED) return true
+  if (err.code !== 'SERVER_ERROR') return false
+
+  const { statusCode, statusMessage } = err.response ?? {}
+  if (statusCode === 429) return true
+
+  // ethers retries a 429 itself and, once its retry budget is spent, escalates
+  // it to a synthetic 599 that quotes the original status in its message.
+  return statusCode === 599 && typeof statusMessage === 'string' && /\b429\b/.test(statusMessage)
 }
+
+/**
+ * Detects a transient RPC rate-limit (JSON-RPC -32005 / HTTP 429) from either
+ * client. Both viem's `http()` transport and ethers' `FetchRequest` retry these
+ * with backoff, so this only decides whether to show the friendly message once
+ * the retries are spent and the error reaches the UI.
+ *
+ * Matched on structured shapes only. A message-text regex would false-positive
+ * on contract reverts like `require(..., "rate limit exceeded")`, telling users
+ * to retry a transaction guaranteed to fail on-chain.
+ */
+export const isRateLimitError = (error: unknown): boolean =>
+  isViemRateLimitError(error) || isEthersRateLimitError(error)
 
 /**
  * Detects a wallet-level (EOA) nonce conflict rejected by the RPC pre-mining

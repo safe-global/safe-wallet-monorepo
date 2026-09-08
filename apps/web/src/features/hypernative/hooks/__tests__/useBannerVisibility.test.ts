@@ -1145,10 +1145,6 @@ describe('useBannerVisibility', () => {
     })
 
     describe('outreach probes when the Hypernative feature is disabled', () => {
-      // The targeted-messaging probe answers 404 for every Safe that is not in
-      // the outreach, and the browser logs that 404 to the console itself — no
-      // JS filter can suppress it (WA-2991). When HYPERNATIVE is off on the
-      // chain the answer cannot change the outcome, so we must not ask.
       const mockBaseline = () => {
         jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
         jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)

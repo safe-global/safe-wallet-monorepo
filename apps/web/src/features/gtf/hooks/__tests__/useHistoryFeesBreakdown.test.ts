@@ -8,7 +8,7 @@ import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERAT
 import { DetailedExecutionInfoType } from '@safe-global/store/gateway/types'
 import { chainBuilder } from '@/tests/builders/chains'
 import { Errors } from '@/services/exceptions'
-import { BaseError } from 'viem'
+import { FetchResponse } from 'ethers'
 
 const mockLogError = jest.fn()
 jest.mock('@/services/exceptions', () => ({
@@ -248,11 +248,18 @@ describe('useHistoryFeesBreakdown', () => {
       expect(result.current).toBeNull()
     })
 
-    it('does not log a transient throttle', async () => {
-      const inner = Object.assign(new BaseError('inner'), { code: -32005 })
-      jest
-        .spyOn(web3Module, 'useWeb3ReadOnly')
-        .mockReturnValue(buildFailingProvider(new BaseError('outer', { cause: inner })))
+    it('does not log a transient throttle from the ethers provider', async () => {
+      // The provider here is ethers, so the throttle arrives in ethers' shape:
+      // a SERVER_ERROR escalated from the 429 it already retried.
+      let throttled: unknown
+      try {
+        new FetchResponse(429, 'Too Many Requests', {}, null, undefined)
+          .makeServerError('exceeded maximum retry limit')
+          .assertOk()
+      } catch (error) {
+        throttled = error
+      }
+      jest.spyOn(web3Module, 'useWeb3ReadOnly').mockReturnValue(buildFailingProvider(throttled))
 
       const { result } = renderHook(() => useHistoryFeesBreakdown(mockSignerPaysTx))
 
