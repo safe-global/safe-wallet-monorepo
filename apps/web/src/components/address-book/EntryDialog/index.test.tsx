@@ -112,11 +112,11 @@ describe('EntryDialog scope', () => {
   })
 
   it('keeps the dialog open and shows the reason when the workspace write is rejected', async () => {
-    upsertWorkspaceName.mockResolvedValue({ error: 'Only Workspace admins can rename this account' })
+    upsertWorkspaceName.mockResolvedValue({ error: 'Forbidden' })
     renderDialog('workspace')
     await save()
 
-    await waitFor(() => expect(screen.getByText('Only Workspace admins can rename this account')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Forbidden')).toBeInTheDocument())
     expect(screen.getByTestId('entry-dialog')).toBeInTheDocument()
   })
 

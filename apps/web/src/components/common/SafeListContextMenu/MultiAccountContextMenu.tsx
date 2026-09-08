@@ -1,4 +1,5 @@
 import type { MouseEvent } from 'react'
+import { ADMIN_ONLY_RENAME_MESSAGE } from '@/utils/addressBookNotifications'
 import { useState, type ReactElement } from 'react'
 import { EllipsisVertical } from 'lucide-react'
 
@@ -83,7 +84,7 @@ const MultiAccountContextMenu = ({
                 <span data-testid="rename-btn">Rename</span>
               </DropdownMenuItem>
             </TooltipTrigger>
-            {!canRename && <TooltipContent>Only Workspace admins can rename this account</TooltipContent>}
+            {!canRename && <TooltipContent>{ADMIN_ONLY_RENAME_MESSAGE}</TooltipContent>}
           </Tooltip>
           {addNetwork && (
             <DropdownMenuItem onClick={handleOpenModal(ModalType.ADD_CHAIN, OVERVIEW_EVENTS.ADD_NEW_NETWORK)}>

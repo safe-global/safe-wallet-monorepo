@@ -1,4 +1,5 @@
 import { type SafeItem, type MultiChainSafeItem, isMultiChainSafeItem } from '@/hooks/safes'
+import { ADMIN_ONLY_RENAME_MESSAGE } from '@/utils/addressBookNotifications'
 import RemoveSafeDialog from './RemoveSafeDialog'
 import { type MouseEvent, useState } from 'react'
 import { LogOut, MoreVertical, Pencil } from 'lucide-react'
@@ -68,7 +69,7 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
                 <span data-testid="space-safe-rename-btn">Rename</span>
               </DropdownMenuItem>
             </TooltipTrigger>
-            {!canRename && <TooltipContent>Only Workspace admins can rename this account</TooltipContent>}
+            {!canRename && <TooltipContent>{ADMIN_ONLY_RENAME_MESSAGE}</TooltipContent>}
           </Tooltip>
 
           {isAdmin && (

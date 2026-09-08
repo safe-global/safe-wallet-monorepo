@@ -28,3 +28,5 @@ export const PERSONAL_ADDRESS_BOOK_LABEL = 'your address book'
 export const WORKSPACE_ADDRESS_BOOK_FALLBACK_LABEL = 'the workspace address book'
 
 export const getWorkspaceAddressBookLabel = (spaceName: string): string => `${spaceName} address book`
+
+export const ADMIN_ONLY_RENAME_MESSAGE = 'Only Workspace admins can rename this account'

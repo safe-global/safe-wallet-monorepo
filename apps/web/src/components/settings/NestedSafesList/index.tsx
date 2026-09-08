@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { ADMIN_ONLY_RENAME_MESSAGE } from '@/utils/addressBookNotifications'
 import { Typography } from '@/components/ui/typography'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useContext, useMemo, useState } from 'react'
@@ -56,7 +57,7 @@ function RenameNestedSafeButton({
         }
       />
       {!canRename ? (
-        <TooltipContent>Only Workspace admins can rename this account</TooltipContent>
+        <TooltipContent>{ADMIN_ONLY_RENAME_MESSAGE}</TooltipContent>
       ) : (
         isOk && <TooltipContent>Rename nested Safe</TooltipContent>
       )}

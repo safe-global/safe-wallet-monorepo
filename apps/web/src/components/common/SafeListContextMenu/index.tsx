@@ -1,4 +1,5 @@
 import type { MouseEvent } from 'react'
+import { ADMIN_ONLY_RENAME_MESSAGE } from '@/utils/addressBookNotifications'
 import { useRef, useState, type ReactElement } from 'react'
 import { EllipsisVertical } from 'lucide-react'
 
@@ -150,7 +151,7 @@ const SafeListContextMenu = ({
                   <span data-testid="rename-btn">{hasName ? 'Rename' : 'Give name'}</span>
                 </DropdownMenuItem>
               </TooltipTrigger>
-              {!canRename && <TooltipContent>Only Workspace admins can rename this account</TooltipContent>}
+              {!canRename && <TooltipContent>{ADMIN_ONLY_RENAME_MESSAGE}</TooltipContent>}
             </Tooltip>
           )}
 
