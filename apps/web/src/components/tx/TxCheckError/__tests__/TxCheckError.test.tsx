@@ -34,8 +34,6 @@ describe('TxCheckError', () => {
     )
 
     expect(getByText(HYPERNATIVE_APPROVAL_REQUIRED_MESSAGE)).toBeInTheDocument()
-    // The generic prediction, the guard line and the GS013 reference are all
-    // meaningless for a transaction that is merely awaiting approval (WA-1219).
     expect(queryByText(/most likely fail/)).not.toBeInTheDocument()
     expect(queryByText(/Guard reverted the transaction/)).not.toBeInTheDocument()
     expect(queryByText(/GS013/)).not.toBeInTheDocument()
@@ -57,7 +55,6 @@ describe('TxCheckError', () => {
     const { getByText, queryByRole } = render(<TxCheckError error={hypernativeRevert()} context="estimation" />)
 
     expect(getByText(HYPERNATIVE_APPROVAL_REQUIRED_MESSAGE)).toBeInTheDocument()
-    // A generic dashboard link is not a usable next step, so no CTA is offered.
     expect(queryByRole('link')).not.toBeInTheDocument()
   })
 

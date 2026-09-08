@@ -76,10 +76,7 @@ const useTxNotifications = (): void => {
 
         // Check if this is a Guard error
         const guardErrorName = isError ? getGuardErrorInfo(detail.error) : undefined
-        // The Safe Account's Hypernative guard blocked execution: the transaction
-        // is awaiting approval in the owner's Hypernative account. An action to
-        // take, not a failure to report, so it replaces the guard wording and the
-        // raw revert payload alike (WA-1219).
+        // Awaiting approval in Hypernative: replaces the guard wording and the raw payload (WA-1219)
         const hnApprovalRequired = isError && isHypernativeGuardRevert(detail.error)
         // A Ledger device failure states its own reason. Its raw error is a
         // dump of DMK class names, ethers codes and the viem version, so it is

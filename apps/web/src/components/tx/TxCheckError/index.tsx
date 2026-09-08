@@ -22,15 +22,10 @@ const onHypernativeCtaClick = () => {
 }
 
 /**
- * The Hypernative guard blocks execution until the transaction is approved in the
- * owner's Hypernative account. That is an action to take, not a prediction of
- * failure, so it replaces the generic revert copy.
- *
- * No `error` is passed to `ErrorMessage` on purpose: that is what drops the guard
- * line, the `Error code GS013` reference and the raw-payload Details toggle, none
- * of which mean anything here (WA-1219). The revert still reaches Sentry via
- * `useGasLimit`. The CTA is offered only when the deep link resolves to this
- * transaction — a generic dashboard link is not a usable next step.
+ * The transaction is awaiting approval, not failing — an action to take rather than
+ * a prediction. No `error` is passed to `ErrorMessage` on purpose: that drops the
+ * guard line, the GS013 reference and the raw-payload Details toggle. The revert
+ * still reaches Sentry via `useGasLimit`.
  */
 const HypernativeApprovalRequired = (): ReactElement => {
   const assessmentUrl = useSafeShieldAssessmentUrl()

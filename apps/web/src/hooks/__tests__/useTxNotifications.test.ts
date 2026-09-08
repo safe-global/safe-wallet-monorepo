@@ -146,7 +146,6 @@ describe('useTxNotifications', () => {
 
     expect(lastNotification()).toMatchObject({
       message: HYPERNATIVE_APPROVAL_REQUIRED_MESSAGE,
-      // The raw revert payload must not leak into the toast either (WA-1219).
       detailedMessage: undefined,
     })
   })

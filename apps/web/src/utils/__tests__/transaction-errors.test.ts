@@ -1,9 +1,11 @@
 import { BaseError } from 'viem'
+import { getKnownCustomError, HYPERNATIVE_GUARD_SOURCE } from '../customErrorRegistry'
 import {
   isGuardError,
   extractGuardErrorCode,
   getGuardErrorInfo,
   getGuardErrorName,
+  isHypernativeGuardRevert,
   isNonceTooLowError,
   isRateLimitError,
   isRevertError,
@@ -130,6 +132,33 @@ describe('transaction-errors', () => {
 
     it('should return "Unknown" for unrecognized codes', () => {
       expect(getGuardErrorName('0x12345678')).toBe('Unknown')
+    })
+  })
+
+  describe('isHypernativeGuardRevert', () => {
+    it('detects the UnapprovedHash selector raised by the Hypernative guard', () => {
+      const error = new Error(
+        `execution reverted (unknown custom error) (action="estimateGas", data="${GUARD_ERROR_CODES.UNAPPROVED_HASH}")`,
+      )
+      expect(isHypernativeGuardRevert(error)).toBe(true)
+    })
+
+    it('resolves the selector through the ABI-derived registry, not a hardcoded string', () => {
+      expect(getKnownCustomError(GUARD_ERROR_CODES.UNAPPROVED_HASH)).toEqual({
+        name: 'UnapprovedHash',
+        source: HYPERNATIVE_GUARD_SOURCE,
+      })
+    })
+
+    it('returns false for a guard revert from another source', () => {
+      expect(isHypernativeGuardRevert(new Error('execution reverted: GS013'))).toBe(false)
+      expect(isHypernativeGuardRevert(new Error('Transaction reverted: 0x12345678'))).toBe(false)
+    })
+
+    it('returns false for unrelated and missing errors', () => {
+      expect(isHypernativeGuardRevert(new Error('Regular error'))).toBe(false)
+      expect(isHypernativeGuardRevert(null as unknown as Error)).toBe(false)
+      expect(isHypernativeGuardRevert(undefined as unknown as Error)).toBe(false)
     })
   })
 

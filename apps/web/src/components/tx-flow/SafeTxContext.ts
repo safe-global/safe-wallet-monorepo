@@ -5,12 +5,9 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import type { GtfPaymentMode } from '@/features/gtf/types'
 
 /**
- * The context lives apart from `SafeTxProvider` on purpose: the provider pulls in
- * `tx/shared/hooks`, and through it `features/batching` and `features/spaces`.
- * Consumers that only read the context — feature hooks, in particular — would
- * otherwise drag that whole graph in and can close an import cycle back into
- * their own feature barrel (WA-1219). Keep this file free of runtime imports
- * beyond `react`; `SafeTxProvider` re-exports both symbols for existing callers.
+ * Kept apart from `SafeTxProvider`, whose imports reach `features/spaces` and
+ * `features/hypernative` — reading the context from there would close an import
+ * cycle. Keep this file free of runtime imports beyond `react`.
  */
 export type SafeTxContextParams = {
   safeTx?: SafeTransaction

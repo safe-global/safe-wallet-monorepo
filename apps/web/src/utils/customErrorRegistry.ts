@@ -35,10 +35,6 @@ export type DecodedCustomError = {
  */
 const STANDARD_ERROR_SELECTORS = new Set(['0x08c379a0', '0x4e487b71'])
 
-/**
- * The `source` label for selectors derived from the vendored Hypernative guard
- * ABIs. Exported so consumers can match on it without duplicating the literal.
- */
 export const HYPERNATIVE_GUARD_SOURCE = 'Hypernative guard'
 
 const ABI_SOURCES: ReadonlyArray<{ source: string; abi: InterfaceAbi }> = [

@@ -61,14 +61,8 @@ export const isGuardError = (error: Error): boolean => {
 }
 
 /**
- * Detects a revert raised by the Hypernative guard — in practice its
- * `UnapprovedHash` custom error, which the guard throws while a transaction is
- * still awaiting approval in the owner's Hypernative account.
- *
- * Built on `extractGuardErrorCode`, the same path that produces the generic
- * "Guard reverted the transaction (…)" copy, so the Hypernative branch fires in
- * exactly the cases that copy fires in today. The source comes from the
- * ABI-derived registry rather than a hardcoded selector.
+ * Detects a Hypernative guard revert — its `UnapprovedHash` custom error, thrown
+ * while a transaction is still awaiting approval in the owner's Hypernative account.
  */
 export const isHypernativeGuardRevert = (error: Error): boolean => {
   const code = extractGuardErrorCode(error)
@@ -83,11 +77,7 @@ export const isHypernativeGuardRevert = (error: Error): boolean => {
  */
 export const RATE_LIMIT_USER_MESSAGE = 'Network is busy. Please try again in a moment.'
 
-/**
- * User-facing message shown wherever the Hypernative guard blocks execution —
- * inline in the transaction flow and in the transaction toast. Kept as a single
- * constant, like `RATE_LIMIT_USER_MESSAGE`, so both surfaces cannot drift apart.
- */
+/** Shown wherever the Hypernative guard blocks execution: inline in the tx flow and in the toast. */
 export const HYPERNATIVE_APPROVAL_REQUIRED_MESSAGE =
   'This transaction is awaiting approval in your Hypernative account.'
 
