@@ -144,6 +144,7 @@ const SafeListContextMenu = ({
               <TooltipTrigger render={<div />}>
                 <DropdownMenuItem
                   disabled={!canRename}
+                  title={canRename ? undefined : ADMIN_ONLY_RENAME_MESSAGE}
                   onClick={canRename ? handleOpenModal(ModalType.RENAME, OVERVIEW_EVENTS.SIDEBAR_RENAME) : undefined}
                   onSelect={(e) => e.stopPropagation()}
                 >

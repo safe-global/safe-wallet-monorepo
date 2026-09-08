@@ -189,7 +189,7 @@ export default function SafeAccountsTable({
   // "Manage my account list" modal opts back in via `allowRenameInDialog`.
   const canRename = allowRenameInDialog || !selection
   const onRename = canRename ? (line: AccountLine) => setRenameTarget(toRenameTarget(line)) : undefined
-  const { scope: renameScope } = useAddressBookWriteScope(renameTarget?.address ?? '', renameTarget?.chainIds ?? [])
+  const { scope: renameScope } = useAddressBookWriteScope(renameTarget?.address, renameTarget?.chainIds ?? [])
 
   const visibleColumns = useMemo(() => {
     const base = columns ? SAFE_ACCOUNT_COLUMNS.filter((c) => columns.includes(c.id)) : SAFE_ACCOUNT_COLUMNS

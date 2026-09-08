@@ -62,6 +62,7 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
             <TooltipTrigger render={<div />}>
               <DropdownMenuItem
                 disabled={!canRename}
+                title={canRename ? undefined : ADMIN_ONLY_RENAME_MESSAGE}
                 onClick={canRename ? (e) => handleOpenModal(e, ModalType.RENAME) : undefined}
                 onSelect={(e) => e.stopPropagation()}
               >

@@ -9,6 +9,10 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpaceSafesGetV1Query: jest.fn(),
 }))
 jest.mock('../useCurrentSpaceId', () => ({ useCurrentSpaceId: jest.fn() }))
+jest.mock('@/store/authSlice', () => ({
+  ...jest.requireActual('@/store/authSlice'),
+  isAuthenticated: () => true,
+}))
 jest.mock('../useSpaceMembers', () => ({ useIsAdmin: jest.fn() }))
 
 const WORKSPACE_SAFE = '0x1111111111111111111111111111111111111111'
@@ -60,10 +64,24 @@ describe('useAddressBookWriteScope', () => {
       expect(result.current.canRename).toBe(true)
     })
 
-    it('allows the rename while the space query has no data yet', () => {
+    it('withholds the rename while the space query has no data yet', () => {
       setup({ isAdmin: false })
       ;(useSpaceSafesGetV1Query as jest.Mock).mockReturnValue({ currentData: undefined })
       const { result } = renderHook(() => useAddressBookWriteScope(WORKSPACE_SAFE, [WORKSPACE_CHAIN]))
+      expect(result.current).toEqual({ scope: 'local', canRename: false })
+    })
+
+    it('allows the rename when there is no workspace to check against', () => {
+      setup({ isAdmin: false })
+      ;(useCurrentSpaceId as jest.Mock).mockReturnValue(null)
+      ;(useSpaceSafesGetV1Query as jest.Mock).mockReturnValue({ currentData: undefined })
+      const { result } = renderHook(() => useAddressBookWriteScope(WORKSPACE_SAFE, [WORKSPACE_CHAIN]))
+      expect(result.current).toEqual({ scope: 'local', canRename: true })
+    })
+
+    it('allows the rename before a target address exists', () => {
+      setup({ isAdmin: false })
+      const { result } = renderHook(() => useAddressBookWriteScope(undefined, [WORKSPACE_CHAIN]))
       expect(result.current).toEqual({ scope: 'local', canRename: true })
     })
   })

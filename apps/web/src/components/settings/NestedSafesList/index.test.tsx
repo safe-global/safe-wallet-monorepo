@@ -1,4 +1,4 @@
-import { render, screen } from '@/tests/test-utils'
+import { fireEvent, render, screen } from '@/tests/test-utils'
 import { NestedSafesList } from '.'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
@@ -30,6 +30,14 @@ jest.mock('@/features/spaces/hooks/useAddressBookWriteScope', () => ({
 }))
 
 jest.mock('@/hooks/useSafeDisplayName', () => ({ useSafeDisplayName: () => 'Nested name' }))
+
+jest.mock('@/components/address-book/EntryDialog', () => {
+  const Mock = ({ scope, defaultValues }: { scope?: string; defaultValues?: { address: string } }) => (
+    <div data-testid="entry-dialog" data-scope={scope} data-address={defaultValues?.address} />
+  )
+  Mock.displayName = 'EntryDialog'
+  return { __esModule: true, default: Mock }
+})
 
 jest.mock('@/components/common/CheckWallet', () => ({
   __esModule: true,
@@ -99,6 +107,18 @@ describe('NestedSafesList', () => {
     renderWithTxFlow()
 
     expect(mockWriteScope.mock.calls[0][0]).toBe(mockSafeAddress)
+  })
+
+  it('writes the nested address under the scope inherited from the parent', () => {
+    withNestedSafe()
+    mockWriteScope.mockReturnValue({ scope: 'workspace', canRename: true })
+    renderWithTxFlow()
+
+    fireEvent.click(renameButton())
+
+    const dialog = screen.getByTestId('entry-dialog')
+    expect(dialog).toHaveAttribute('data-scope', 'workspace')
+    expect(dialog.getAttribute('data-address')).not.toBe(mockSafeAddress)
   })
 
   it('disables rename for a member looking at a workspace Safe', () => {
