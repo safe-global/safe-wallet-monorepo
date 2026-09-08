@@ -14,10 +14,10 @@ exports[`./index.stories Default 1`] = `
         class="mb-4"
       >
         <div
-          class="mb-4 w-full"
+          class="w-full mb-4"
         >
           <div
-            class="w-full overflow-x-auto rounded-t-3xl bg-[var(--color-background-paper)] md:overflow-x-hidden rounded-b-3xl"
+            class="w-full overflow-x-auto md:overflow-x-hidden rounded-t-lg bg-[var(--color-background-paper)] rounded-b-lg"
             data-testid="table-container"
           >
             <div

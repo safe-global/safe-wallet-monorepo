@@ -18,6 +18,7 @@ import type { AddressBookEntry } from './SpaceAddressBookTable'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { Badge } from '@/components/ui/badge'
+import { Check } from 'lucide-react'
 import AddressBookSearchInput from '@/components/common/AddressBookSearchInput'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import Track from '@/components/common/Track'
@@ -139,8 +140,7 @@ const SpaceAddressBook = () => {
 
           {(activeTab === 'workspace' || activeTab === 'mine') && (
             // mb-4 on top of the Tabs root's own gap-2: 8px alone left the search almost touching
-            // the table card below it.
-            <div className="mt-6 mb-4 flex items-center gap-2">
+            <div className="mt-6 mb-4 flex flex-wrap items-center gap-2">
               {/* Only rendered when it holds an action. An always-present wrapper is still a flex
                   item when empty, so the row's gap-2 pushed the search 8px right of the table card
                   it sits above — three different left edges for viewers without admin rights. */}
@@ -168,9 +168,9 @@ const SpaceAddressBook = () => {
           <TableCard>
             <TabsContent value="workspace">
               {searchQuery && filteredAll.length === 0 ? (
-                <p className="text-muted-foreground mb-2 text-sm">Found 0 results</p>
+                <p className="text-muted-foreground mb-2 p-4 text-sm">Found 0 results</p>
               ) : addressBookItems.length === 0 ? (
-                <p className="text-muted-foreground text-sm">No contacts in this workspace yet.</p>
+                <p className="text-muted-foreground p-4 text-sm">No contacts in this workspace yet.</p>
               ) : (
                 <SpaceAddressBookTable entries={filteredAll} />
               )}
@@ -180,19 +180,27 @@ const SpaceAddressBook = () => {
               <>
                 <TabsContent value="mine">
                   {searchQuery && filteredMine.length === 0 ? (
-                    <p className="text-muted-foreground mb-2 text-sm">Found 0 results</p>
+                    <p className="text-muted-foreground mb-2 p-4 text-sm">Found 0 results</p>
                   ) : filteredMine.length === 0 ? (
-                    <p className="text-muted-foreground text-sm">You haven&apos;t added any contacts yet.</p>
+                    <p className="text-muted-foreground p-4 text-sm">You haven&apos;t added any contacts yet.</p>
                   ) : (
                     <SpaceAddressBookTable
                       entries={filteredMine}
                       showAddedBy={false}
-                      renderExtraAction={(entry) => {
+                      renderExtraAction={(entry, { isCompact }) => {
                         if (entry.isDuplicate) {
                           return (
                             <Tooltip>
-                              <TooltipTrigger render={<span className="inline-flex" />}>
-                                <Badge variant="secondary">Already shared</Badge>
+                              <TooltipTrigger
+                                render={
+                                  <span className="inline-flex" aria-label={isCompact ? 'Already shared' : undefined} />
+                                }
+                              >
+                                {isCompact ? (
+                                  <Check className="text-muted-foreground size-4" />
+                                ) : (
+                                  <Badge variant="secondary">Already shared</Badge>
+                                )}
                               </TooltipTrigger>
                               <TooltipContent>Already saved in your workspace address book</TooltipContent>
                             </Tooltip>
@@ -200,7 +208,12 @@ const SpaceAddressBook = () => {
                         }
                         if (isAdmin) {
                           return (
-                            <AddToWorkspaceButton address={entry.address} name={entry.name} chainIds={entry.chainIds} />
+                            <AddToWorkspaceButton
+                              address={entry.address}
+                              name={entry.name}
+                              chainIds={entry.chainIds}
+                              isCompact={isCompact}
+                            />
                           )
                         }
                         // Invitees can preview the space but cannot propose contacts
@@ -213,6 +226,7 @@ const SpaceAddressBook = () => {
                             name={entry.name}
                             chainIds={entry.chainIds}
                             alreadyRequested={pendingAddresses.has(entry.address.toLowerCase())}
+                            isCompact={isCompact}
                           />
                         )
                       }}

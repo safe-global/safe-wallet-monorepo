@@ -256,7 +256,7 @@ jobs:
       - name: Sync release to Linear
         id: linear_sync
         continue-on-error: true
-        uses: linear/linear-release-action@3858a5d7892435dc63302ac76b0cdb587435caa9 # v0.14.6
+        uses: linear/linear-release-action@3f31fcf14c110cc53579fcc3575a26d469c413b4 # v0.17.1
         with:
           access_key: ${{ secrets.LINEAR_ACCESS_KEY_WEB }}
           command: sync
@@ -266,7 +266,7 @@ jobs:
 
       - name: Move Linear release to Code Freeze
         continue-on-error: true
-        uses: linear/linear-release-action@3858a5d7892435dc63302ac76b0cdb587435caa9 # v0.14.6
+        uses: linear/linear-release-action@3f31fcf14c110cc53579fcc3575a26d469c413b4 # v0.17.1
         with:
           access_key: ${{ secrets.LINEAR_ACCESS_KEY_WEB }}
           command: update

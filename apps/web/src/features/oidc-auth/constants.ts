@@ -1,6 +1,8 @@
 export const OIDC_AUTH_PENDING_KEY = 'oidc_auth_pending'
 export const OIDC_AUTH_CONNECTION_KEY = 'oidc_auth_connection'
 
+export const STEP_UP_FAILED_MESSAGE = 'Verification was not completed. Please try again.'
+
 export enum OidcConnection {
   EMAIL = 'email',
   GOOGLE = 'google-oauth2',
