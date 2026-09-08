@@ -78,6 +78,7 @@ For "who uses this symbol?" questions, prefer the `LSP` tool (`findReferences`, 
 - Never use the `any` type!
 - **Comments are tech debt — default to writing none.** AI agents habitually over-comment; this codebase already carries too many long comments. Write a comment only for what the code cannot express (a non-obvious why, an invariant, a workaround and its reason) and keep it to one line — never narrate what the next line does, restate the diff, justify a change to the reviewer, or write multi-paragraph comment blocks.
 - **Use sentence case for UI text** – Buttons, headings, labels, warnings, and other UI copy should use sentence case (e.g., "Add new owner") not Title Case (e.g., "Add New Owner")
+- **Extract a function only for a reason** – reuse, a dedicated test, or isolating a responsibility; never just to name a single built-in call. Full rules: [docs/ai/when-to-extract-a-function.md](docs/ai/when-to-extract-a-function.md)
 
 Web-specific principles live in [apps/web/AGENTS.md](apps/web/AGENTS.md); mobile-specific ones in [apps/mobile/AGENTS.md](apps/mobile/AGENTS.md).
 

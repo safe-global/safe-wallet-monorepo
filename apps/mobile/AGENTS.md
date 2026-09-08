@@ -37,6 +37,6 @@ Standard scripts (`test`, `test:watch`, `lint`, `type-check`, …) follow the us
 
 ## Code complexity
 
-The code complexity guidelines (lookup tables, early returns, switch for type discrimination, function-length limits) in [../web/docs/code-style.md](../web/docs/code-style.md) apply equally to mobile. See also [docs/code-style.md](docs/code-style.md) for mobile-specific organisation.
+The code complexity guidelines (lookup tables, early returns, switch for type discrimination, nesting limits) in [../web/docs/code-style.md](../web/docs/code-style.md) apply equally to mobile. See also [docs/code-style.md](docs/code-style.md) for mobile-specific organisation.
 
 Other mobile docs: [docs/](docs/) covers analytics, push notifications, and the release procedure.

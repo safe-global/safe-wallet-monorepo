@@ -160,4 +160,4 @@ Don't add `loaders: [mswLoader]` — it is global in `preview.tsx`. Don't overri
 
 ## Code complexity
 
-See [docs/code-style.md](docs/code-style.md) for code complexity guidelines (lookup tables, early returns, switch for type discrimination, function-length limits).
+See [docs/code-style.md](docs/code-style.md) for code complexity guidelines (lookup tables, early returns, switch for type discrimination, nesting limits).
