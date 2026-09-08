@@ -20,11 +20,13 @@ import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptio
 import { findTokenOption, tokenOptionLabel, type TokenOption, type TokenOptionGroup } from '../../utils/tokenOptions'
 import { matchesTokenQuery } from '../../utils/tokenSearch'
 import TokenOptionRow from './TokenOptionRow'
-import { HeldTokensError, HeldTokensLoading } from './HeldTokensState'
+import { TokenGroupError, TokenGroupLoading } from './TokenGroupState'
 import {
+  BALANCES_LOAD_ERROR_TEXT,
   HELD_GROUP_LABEL,
   NO_TOKENS_FOUND_TEXT,
   POPULAR_GROUP_LABEL,
+  POPULAR_LOAD_ERROR_TEXT,
   TOKEN_FIELD_ICON_SIZE,
   TOKEN_SELECTOR_LABEL,
   TOKEN_SELECTOR_PLACEHOLDER,
@@ -88,7 +90,8 @@ const TokenSelector = ({
   // Base UI anchors the popup to the <input>, not the field. Anchoring to the InputGroup makes the
   // popup exactly as wide as, and flush with, the visible field.
   const fieldAnchor = useComboboxAnchor()
-  const { options, isLoading, isError, refetch, identityKey } = useSpendingLimitTokenOptions()
+  const { options, isLoading, isError, refetch, isPopularLoading, isPopularError, refetchPopular, identityKey } =
+    useSpendingLimitTokenOptions()
 
   const visibleOptions = useMemo(
     () =>
@@ -170,8 +173,15 @@ const TokenSelector = ({
         </div>
 
         <ComboboxContent anchor={fieldAnchor}>
-          {isLoading && <HeldTokensLoading />}
-          {isError && <HeldTokensError onRetry={refetch} />}
+          {isLoading && <TokenGroupLoading label={HELD_GROUP_LABEL} data-testid="held-tokens-loading" />}
+          {isError && (
+            <TokenGroupError
+              label={HELD_GROUP_LABEL}
+              message={BALANCES_LOAD_ERROR_TEXT}
+              onRetry={refetch}
+              data-testid="held-tokens-error"
+            />
+          )}
           <ComboboxList>
             {(group: TokenGroup) => (
               <ComboboxGroup key={group.value} items={group.items}>
@@ -186,6 +196,15 @@ const TokenSelector = ({
               </ComboboxGroup>
             )}
           </ComboboxList>
+          {isPopularLoading && <TokenGroupLoading label={POPULAR_GROUP_LABEL} data-testid="popular-tokens-loading" />}
+          {isPopularError && (
+            <TokenGroupError
+              label={POPULAR_GROUP_LABEL}
+              message={POPULAR_LOAD_ERROR_TEXT}
+              onRetry={refetchPopular}
+              data-testid="popular-tokens-error"
+            />
+          )}
           <ComboboxEmpty>{NO_TOKENS_FOUND_TEXT}</ComboboxEmpty>
         </ComboboxContent>
       </Combobox>

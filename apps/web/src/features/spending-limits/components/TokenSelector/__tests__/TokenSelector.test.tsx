@@ -11,6 +11,7 @@ import {
   HELD_GROUP_LABEL,
   NO_TOKENS_FOUND_TEXT,
   POPULAR_GROUP_LABEL,
+  POPULAR_LOAD_ERROR_TEXT,
   RETRY_TEXT,
   TOKEN_SELECTOR_LABEL,
   TOKEN_SELECTOR_PLACEHOLDER,
@@ -55,6 +56,9 @@ const setOptions = (overrides: Partial<TokenOptionsResult> = {}) => {
     isLoading: false,
     isError: false,
     refetch: jest.fn(),
+    isPopularLoading: false,
+    isPopularError: false,
+    refetchPopular: jest.fn(),
     identityKey: IDENTITY,
     ...overrides,
   }
@@ -288,7 +292,39 @@ describe('TokenSelector — states', () => {
     expect(screen.getByText(BALANCES_LOAD_ERROR_TEXT)).toBeInTheDocument()
     expect(screen.getByRole('option', { name: /DAI/ })).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: RETRY_TEXT }))
+    await user.click(within(screen.getByTestId('held-tokens-error')).getByRole('button', { name: RETRY_TEXT }))
     expect(refetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('shows skeletons for popular tokens while their metadata loads and keeps held tokens selectable', async () => {
+    const onChange = jest.fn()
+    setOptions({ isPopularLoading: true, options: [heldEth, heldUsdc] })
+    const { user } = renderSelector({ onChange })
+    await openSelector(user)
+
+    expect(screen.getByTestId('popular-tokens-loading')).toBeInTheDocument()
+    await user.click(screen.getByRole('option', { name: /USDC/ }))
+    expect(onChange).toHaveBeenCalledWith(heldUsdc.address)
+  })
+
+  it('shows the popular error row with retry and keeps held tokens selectable', async () => {
+    const { refetchPopular } = setOptions({ isPopularError: true, options: [heldEth] })
+    const { user } = renderSelector()
+    await openSelector(user)
+
+    expect(screen.getByText(POPULAR_LOAD_ERROR_TEXT)).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: /ETH/ })).toBeInTheDocument()
+
+    await user.click(within(screen.getByTestId('popular-tokens-error')).getByRole('button', { name: RETRY_TEXT }))
+    expect(refetchPopular).toHaveBeenCalledTimes(1)
+  })
+
+  it('can show both groups loading at once', async () => {
+    setOptions({ isLoading: true, isPopularLoading: true, options: [] })
+    const { user } = renderSelector()
+    await openSelector(user)
+
+    expect(screen.getByTestId('held-tokens-loading')).toBeInTheDocument()
+    expect(screen.getByTestId('popular-tokens-loading')).toBeInTheDocument()
   })
 })
