@@ -38,5 +38,11 @@ describe('EnhancedTable', () => {
 
       expect(surface(container)).not.toContain('bg-[var(--color-background-paper)]')
     })
+
+    it('keeps the hover pill off the empty placeholder row', () => {
+      const { container } = render(<EnhancedTable headCells={headCells} rows={[]} panel />)
+
+      expect(container.querySelector('tbody tr')).toHaveAttribute('data-no-hover')
+    })
   })
 })
