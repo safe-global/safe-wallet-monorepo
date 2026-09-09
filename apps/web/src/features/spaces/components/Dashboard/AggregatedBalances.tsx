@@ -33,6 +33,9 @@ const AggregatedBalance = ({
 
   const { data: safeOverviews, isLoading } = useGetMultipleSafeOverviewsQuery({ safes: safeItems, currency })
   const aggregatedBalance = safeOverviews ? safeOverviews.reduce((prev, next) => prev + Number(next.fiatTotal), 0) : 0
+  // The overview query drops failed safes and never surfaces an error, so a total failure returns an
+  // empty array. Requested safes but got none back → couldn't fetch → show `--`, not a misleading $0.00.
+  const hasError = !isLoading && safeItems.length > 0 && (safeOverviews?.length ?? 0) === 0
 
   const safeQueryParam = chain && firstSafe ? `${chain.shortName}:${firstSafe.address}` : undefined
 
@@ -54,7 +57,7 @@ const AggregatedBalance = ({
   if (isLoading) return <AggregatedBalanceSkeleton />
 
   const isDimmed = safeItems.length === 0 || accountsLoading
-  const formattedValue = formatCurrencyPrecise(aggregatedBalance, currency)
+  const formattedValue = hasError ? '--' : formatCurrencyPrecise(aggregatedBalance, currency)
 
   const handleSend = async () => {
     await setActiveSafe()
@@ -88,6 +91,7 @@ const AggregatedBalance = ({
       <div className={isDimmed ? 'opacity-50' : undefined}>
         <DashboardHeader
           value={formattedValue}
+          error={hasError}
           noAssets={isDimmed}
           onSend={handleSend}
           onReceive={handleReceive}
