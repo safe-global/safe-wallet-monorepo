@@ -58,9 +58,8 @@ export const DecodedMsg = ({
 }): ReactElement | null => {
   const isTextMessage = typeof message === 'string'
 
-  // Normalize the message so we know its primaryType. Hoisted above the early
-  // returns — and memoised — so a message we cannot normalize is reported once
-  // per message instead of once per render of the details panel.
+  // Normalize to get the primaryType. Hoisted above the early returns and memoised so an un-normalizable
+  // message is reported once per message, not once per render.
   const { normalizedMsg, normalizeFailure } = useMemo<{
     normalizedMsg?: TypedData
     normalizeFailure?: unknown

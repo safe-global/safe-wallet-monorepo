@@ -83,9 +83,8 @@ const useGasLimit = (
     safe,
   ])
 
-  // Several concurrent owners on the Execute step, one on Sign, so no single
-  // owner sees every failure; `useLogError` collapses them into one report.
-  // A revert or a throttle is the estimate's expected answer, not a fault.
+  // Concurrent owners on Execute mean no single one sees every failure, so `useLogError` collapses them
+  // into one report. A revert or throttle is the estimate's expected answer, not a fault.
   const unexpectedGasLimitError = gasLimitError && !isExpectedEstimationError(gasLimitError) ? gasLimitError : undefined
   useLogError(Errors._612, unexpectedGasLimitError?.message, getRpcErrorContext(web3ReadOnly))
 

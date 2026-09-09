@@ -75,10 +75,8 @@ const ReviewSignMessageOnChain = ({ message, method, children, ...props }: SignM
     } else if (isTypedMessage) {
       const typesCopy = { ...message.types }
 
-      // We need to remove the EIP712Domain type from the types object
-      // Because it's a part of the JSON-RPC payload, but for the `.hash` in ethers.js
-      // The types are not allowed to be recursive, so ever type must either be used by another type, or be
-      // the primary type. And there must only be one type that is not used by any other type.
+      // Remove EIP712Domain from the types: it's part of the JSON-RPC payload, but ethers' `.hash` forbids
+      // recursive types (every type must be used by another or be the single unused primary type).
       delete typesCopy.EIP712Domain
       txData = readOnlySignMessageLibContract.encode('signMessage', [
         // @ts-ignore

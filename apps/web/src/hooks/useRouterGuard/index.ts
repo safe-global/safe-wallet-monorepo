@@ -8,9 +8,7 @@ export type UseGuard = () => {
   activationGuard: ActivationGuard
 }
 
-// ---------------------------------------------------------------------------
-// Global store for isCheckingAccess — any component can subscribe via the hook
-// ---------------------------------------------------------------------------
+// Global store for isCheckingAccess — any component can subscribe via the hook.
 
 const { setStore: setIsCheckingAccess, useStore: useIsCheckingAccess } = new ExternalStore<boolean>(true)
 

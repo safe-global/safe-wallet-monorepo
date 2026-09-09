@@ -3,10 +3,8 @@ import { Copy, Check } from 'lucide-react'
 import useCopyToClipboard from '@/hooks/useCopyToClipboard'
 import RowIconAction from './RowIconAction'
 
-// Copies a safe address to the clipboard. Used in the dropdown trigger and list rows; the rows pass
-// a distinct testId so the trigger's `copy-address-btn` stays a single, unambiguous element.
-// Tracking-agnostic: pass `onCopy` to fire an analytics event labelled for the call site's surface
-// (the component itself no longer emits sidebar-specific events from the table/dropdown).
+// Copies a safe address. Rows pass a distinct testId so the trigger's `copy-address-btn` stays unambiguous.
+// Tracking-agnostic: pass `onCopy` to fire an analytics event labelled for the call site's surface.
 const CopyAddressButton = ({
   address,
   testId = 'copy-address-btn',

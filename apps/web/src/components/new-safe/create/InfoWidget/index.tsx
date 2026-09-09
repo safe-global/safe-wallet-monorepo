@@ -67,9 +67,8 @@ const InfoWidget = ({ title, steps, variant, startExpanded = false }: InfoWidget
           }}
         >
           {steps.map(({ title, text }) => (
-            // `not-last:border-b-0` replaces (via tailwind-merge) the AccordionItem's own
-            // `not-last:border-b`: these tips are one tinted block, not a divided list. A plain
-            // `border-none` would lose to the two-class `not-last:` selector.
+            // `not-last:border-b-0` overrides the AccordionItem's `not-last:border-b` (these tips are one
+            // block, not a divided list); plain `border-none` would lose to the two-class selector.
             <AccordionItem key={title} value={title} className={`${css.tipAccordion} not-last:border-b-0`}>
               <AccordionTrigger>{title}</AccordionTrigger>
               <AccordionContent>

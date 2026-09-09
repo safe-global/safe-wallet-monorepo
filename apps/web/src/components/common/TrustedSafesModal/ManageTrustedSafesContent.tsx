@@ -70,8 +70,8 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
   const { orderBy } = useAppSelector(selectOrderByPreference)
   const saveManualOrder = useSaveManualOrder(TRUSTED_ORDER_SCOPE)
 
-  // Rendering hundreds of account rows takes ~1s and blocks the dialog's first paint. Defer the table
-  // past one painted frame (double rAF) so the shell + spinner show immediately, then the rows fill in.
+  // Hundreds of rows take ~1s and block first paint, so defer the table past one frame (double rAF) —
+  // shell + spinner show immediately, then rows fill in.
   const [showTable, setShowTable] = useState(false)
   useEffect(() => {
     let inner = 0
@@ -84,10 +84,9 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
     }
   }, [])
 
-  // Reordering shares the trusted list's Manual order (same scope as the workspace accounts list)
-  // and is offered in every sort mode — dragging switches the mode to Manual. Suppressed while
-  // searching: a drop then would persist only the filtered subset, dropping the hidden addresses
-  // from the saved order.
+  // Reordering shares the trusted list's Manual order and is offered in every sort mode (dragging switches
+  // to Manual). Suppressed while searching: a drop would persist only the filtered subset, dropping hidden
+  // addresses from the saved order.
   const canReorder = !searchQuery
 
   const pendingItem = pendingConfirmation

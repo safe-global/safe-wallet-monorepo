@@ -1,7 +1,3 @@
-// ---------------------------------------------------------------------------
-// Guard helpers
-// ---------------------------------------------------------------------------
-
 import type { ParsedUrlQuery } from '@/storybook/mocks/querystring'
 
 export interface GuardResult {
@@ -9,10 +5,7 @@ export interface GuardResult {
   redirectTo?: string
 }
 
-// ---------------------------------------------------------------------------
-// Guard context — all derived state the rules need to make decisions
-// ---------------------------------------------------------------------------
-
+// Derived state the rules read to make decisions.
 export interface GuardContext {
   pathname: string
   query: ParsedUrlQuery
@@ -26,9 +19,7 @@ export interface GuardContext {
   isPartOfSpaceUrl: boolean
 }
 
-// ---------------------------------------------------------------------------
-// Guard rules — evaluated in order, first match wins
-// ---------------------------------------------------------------------------
+// Guard rules — evaluated in order, first match wins.
 
 export interface GuardRule {
   match: (ctx: GuardContext) => boolean

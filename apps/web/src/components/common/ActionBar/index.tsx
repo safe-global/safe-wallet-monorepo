@@ -11,9 +11,7 @@ const ActionBar = ({ className, ...props }: ComponentProps<'div'>) => (
   <div className={cn('flex flex-wrap items-center gap-2', className)} {...props} />
 )
 
-// Closed preset: `size` and `className` are intentionally NOT accepted so the
-// action-pill identity can't be overridden. Layout is a semantic prop
-// (`fullWidth`); `variant` carries the emphasis.
+// Closed preset: no `size`/`className` (the action-pill identity is fixed); `fullWidth` is layout, `variant` the emphasis.
 type ActionButtonProps = Omit<ComponentProps<typeof Button>, 'size' | 'className'> & {
   /** Stretch to the container width (e.g. stacked-mobile CTA row). */
   fullWidth?: boolean

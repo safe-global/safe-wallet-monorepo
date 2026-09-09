@@ -69,19 +69,15 @@ export default function SplitMenuButton({
               onClick={handleClick}
               type="submit"
               disabled={disabled}
-              // Corner reset carries the same `in-data-[slot=button-group]` variant as Button's own
-              // `rounded-md`, otherwise that variant outranks a bare `rounded-r-none` and the halves
-              // `bg-clip-border` paints the fill under Button's 1px transparent border, which
-              // otherwise lets the card background through as a white gap at the seam.
+              // Corner reset needs Button's `in-data-[slot=button-group]` variant (a bare `rounded-r-none`
+              // is outranked); `bg-clip-border` hides the card background at the seam.
               className={cn(
                 // eslint-disable-next-line no-restricted-syntax -- split-button halves fill the button-group row height and paint their fill to the border box so the seam stays a single hairline
                 'h-full min-w-0 flex-1 shrink bg-clip-border',
                 hasMenu && 'in-data-[slot=button-group]:rounded-r-none',
               )}
-              // The floor keeps the button from resizing as the selected option's label changes, but
-              // an unconditional `${maxCharLen}ch` outgrew narrow rows and shoved the dropdown half
-              // outside the group, where TxCard's overflow-hidden clipped it off. Capping it against
-              // the space left after that half (3rem = its max-w-12) keeps both inside at any width.
+              // Width floor stops resizing as the label changes, but an unconditional `${maxCharLen}ch`
+              // pushed the dropdown half out on narrow rows — cap against the space left after it (3rem).
               style={{ minWidth: `min(${maxCharLen}ch, 100% - 3rem)` }}
             />
           }

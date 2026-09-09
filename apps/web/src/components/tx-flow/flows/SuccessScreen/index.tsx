@@ -56,11 +56,9 @@ const SuccessScreen = ({ txId, txHash }: Props) => {
 
     hasSucceededRef.current = false
 
-    // Deliberately independent of `pendingTx`: the same events clear it from the store, so reading it
-    // here would tie the error state to the order in which the subscribers happen to run.
-    // Success is authoritative instead — `PROCESSED` needs a receipt that did not revert and `SUCCESS`
-    // needs the tx indexed, so it both clears a failure already reported by a stale watcher (the
-    // replaced hash of a sped-up tx, the relay timeout) and suppresses any later one.
+    // Independent of `pendingTx` (the same events clear it, so reading it would tie error state to
+    // subscriber order). Success is authoritative — `PROCESSED` needs a non-reverting receipt and `SUCCESS`
+    // the tx indexed — so it clears and suppresses failures from a stale watcher (sped-up hash, relay timeout).
     const unsubFns: Array<() => void> = [
       ...([TxEvent.PROCESSED, TxEvent.SUCCESS] as const).map((event) =>
         txSubscribe(event, (detail) => {

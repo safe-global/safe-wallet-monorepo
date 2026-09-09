@@ -95,9 +95,8 @@ const useTxNotifications = (): void => {
         } else if (guardErrorName) {
           message = `Guard reverted the transaction (${guardErrorName}).`
         } else if (isError && isNonceTooLowError(detail.error)) {
-          // The signer wallet's Ethereum nonce advanced before broadcast — the
-          // RPC rejected it pre-mining (no gas spent). Same user story as a
-          // stale Safe nonce, so show the same message.
+          // The signer's nonce advanced before broadcast — RPC-rejected pre-mining (no gas spent). Same
+          // story as a stale Safe nonce, so show the same message.
           message = getGs026Message('STALE_NONCE')
         } else if (ledgerError) {
           message = getLedgerUserMessage(ledgerError)

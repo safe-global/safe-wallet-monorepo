@@ -49,10 +49,8 @@ const FiatValue = ({
     )
   }
 
-  // `fiat` is abbreviated above ~$100k and the tooltip carrying the full number is hover-only, so
-  // the precise figure would never reach a screen reader — announce it separately, matching the
-  // `aria-label` this used to carry. Only when it differs: below $1 both formats produce the same
-  // string, and emitting it twice would duplicate the value for text selection and `getByText`.
+  // `fiat` is abbreviated above ~$100k with a hover-only tooltip, so announce the full figure for screen
+  // readers — but only when it differs, else the value duplicates for text selection and `getByText`.
   const content = (
     <span suppressHydrationWarning className="whitespace-nowrap">
       {fiat === preciseFiat ? (

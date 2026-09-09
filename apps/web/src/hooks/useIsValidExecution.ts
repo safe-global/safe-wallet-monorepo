@@ -63,9 +63,8 @@ const useIsValidExecution = (
   const chain = useCurrentChain()
   const { balances } = useBalances()
 
-  // GS012 pays the network fee in an ERC-20 gas token; resolve its symbol so the
-  // message reads e.g. "Not enough USDC ..." instead of "{token}". Derived here as
-  // a string so balance polling doesn't re-trigger the simulation below.
+  // GS012 pays the fee in an ERC-20 gas token; resolve its symbol so the message reads "Not enough USDC…"
+  // not "{token}". A string (not the object) so balance polling doesn't re-trigger the simulation below.
   const gasToken = safeTx?.data.gasToken
   const gasTokenSymbol = useMemo(
     () =>
@@ -93,9 +92,8 @@ const useIsValidExecution = (
     } catch (_err) {
       const err = _err as EthersError
 
-      // Map a known on-chain (GS) revert reason to its user-facing message from
-      // the shared source. The raw GS code stays out of the message; it belongs
-      // in the support reference (Details panel).
+      // Map a known GS revert to its user-facing message; the raw GS code belongs in the support reference,
+      // not the message.
       if (isGsCode(err.reason)) {
         err.reason = getContractErrorMessage(err.reason, {
           nativeAsset: chain?.nativeCurrency.symbol,

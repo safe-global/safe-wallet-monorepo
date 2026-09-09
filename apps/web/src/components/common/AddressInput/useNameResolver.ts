@@ -9,9 +9,8 @@ import useAsync from '@safe-global/utils/hooks/useAsync'
 import { isDomain, resolveName } from '@/services/ens'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
 
-// Shown when the user enters an ENS-style name that can't be resolved to an address on the chain it
-// was looked up on — either because that chain has no domain lookup, or the name isn't set there.
-// Names the chain (e.g. "Ethereum" in the chain-agnostic Spaces address book) so it isn't ambiguous.
+// Shown when an ENS-style name can't resolve on the lookup chain (no domain lookup there, or name unset).
+// Names the chain (e.g. "Ethereum" in the chain-agnostic Spaces address book) to avoid ambiguity.
 export const getEnsNotAvailableError = (chain?: Chain): string =>
   `ENS name not available on ${chain?.chainName || 'this network'}`
 
@@ -23,9 +22,8 @@ const useNameResolver = (
   const currentChain = useCurrentChain()
   const customRpc = useAppSelector(selectRpc)
 
-  // ENS lives on a specific chain. When the field resolves against a chain other than the app's
-  // current one — e.g. the chain-agnostic Spaces address book resolves names on mainnet — use a
-  // dedicated read-only provider for it, since the global provider follows the connected chain.
+  // ENS is chain-specific: when resolving against a chain other than the current one (e.g. Spaces resolves
+  // on mainnet), use a dedicated read-only provider, since the global provider follows the connected chain.
   const needsOwnProvider = !!chain && chain.chainId !== currentChain?.chainId
   const ownProvider = useMemo(
     () => (needsOwnProvider && chain ? createWeb3ReadOnly(chain, customRpc?.[chain.chainId]) : undefined),

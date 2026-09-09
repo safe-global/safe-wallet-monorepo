@@ -16,10 +16,9 @@ export function useSpaceBackLink() {
 
   const handleBackToSpace = useCallback(() => {
     if (spaceId) {
-      // Return to the space sub-page the user came from (e.g. the Security Hub), but only when that
-      // origin belongs to the space we're currently in — otherwise a stale origin from another
-      // workspace would misroute "back". Fall back to the workspace landing in every other case
-      // (different space, or no origin recorded on a deep-link / fresh session).
+      // Return to the space sub-page the user came from, but only when that origin belongs to the current
+      // space (else a stale origin from another workspace misroutes "back"). Otherwise fall back to the
+      // workspace landing (different space, or no origin on a deep-link / fresh session).
       const pathname = origin?.spaceId === spaceId ? origin.path : AppRoutes.spaces.index
       router.push({
         pathname,

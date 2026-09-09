@@ -3,10 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { cn } from '@/utils/cn'
 
-// Closed preset: `size` and `className` are intentionally NOT accepted so the
-// submit-button identity (height, padding, radius) can't be overridden at the
-// call site. Layout is a semantic prop (`fullWidth`); everything else — variant,
-// onClick, type, form, disabled, data-testid — passes through.
+// Closed preset: no `size`/`className` (the submit-button identity is fixed); `fullWidth` is the only layout knob.
 type SubmitButtonProps = Omit<ComponentProps<typeof Button>, 'size' | 'className'> & {
   /** Show a spinner in place of the label and disable the button while pending. */
   loading?: boolean

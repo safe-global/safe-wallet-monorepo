@@ -89,11 +89,9 @@ export function initializeCaptchaHeaders() {
     try {
       await prev
 
-      // Lazy refresh: the previous request consumed the token and no new
-      // challenge is currently in flight (captchaReadyResolve === null means
-      // the ready promise has already resolved). Kick off a fresh challenge
-      // now — but only if a widget is actually registered, otherwise we'd
-      // arm a promise nothing can resolve.
+      // Lazy refresh: the previous request consumed the token and none is in flight (captchaReadyResolve
+      // === null means the ready promise resolved). Kick off a fresh challenge — but only if a widget is
+      // registered, else we'd arm a promise nothing can resolve.
       if (!sharedTokenRef.current && captchaReadyResolve === null && widgetRefreshCallbackRef.current) {
         resetCaptchaPromise()
         widgetRefreshCallbackRef.current()
@@ -129,9 +127,8 @@ export function initializeCaptchaHeaders() {
     try {
       const data = await response.clone().json()
       if (data?.message === 'Invalid CAPTCHA token') {
-        // Clear the stale token only. The next protected request will lazily
-        // trigger a fresh challenge via the rotation logic above — avoids
-        // popping a modal when no retry is in flight.
+        // Clear only the stale token; the next protected request lazily triggers a fresh challenge via the
+        // rotation above, avoiding a modal pop when no retry is in flight.
         sharedTokenRef.current = null
       }
     } catch {

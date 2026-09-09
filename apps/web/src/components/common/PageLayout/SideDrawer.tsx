@@ -32,8 +32,7 @@ const SideDrawer = ({
   const isDarkMode = useDarkMode()
 
   const showSidebarToggle = isSafeAppRoute && !isSmallScreen
-  // Keep the sidebar hidden on small screens via CSS until we collapse it via JS.
-  // With a small delay to avoid flickering.
+  // Keep the sidebar hidden via CSS on small screens until JS collapses it (small delay avoids flicker).
   const smDrawerHidden = useDebounce(!isSmallScreen, 300)
   const router = useRouter()
 
@@ -72,11 +71,8 @@ const SideDrawer = ({
   return (
     <>
       {isSmallScreen ? (
-        // Below `md` the drawer is a temporary overlay with a backdrop / focus trap.
-        // `smDrawerHidden` is still true for the ~300ms after the viewport crosses below `md`, before
-        // the effect above has collapsed the drawer. The Sheet's backdrop is a portal sibling of its
-        // content, so it cannot be hidden with CSS the way the shared MUI Drawer was — keep the Sheet
-        // closed for that window instead.
+        // `smDrawerHidden` stays true ~300ms after crossing below `md` before the effect collapses the
+        // drawer; the Sheet's backdrop is a portal sibling (not CSS-hideable), so keep the Sheet closed then.
         <Sheet open={isOpen && !smDrawerHidden} onOpenChange={onToggle}>
           <SheetContent
             side="left"

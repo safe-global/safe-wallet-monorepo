@@ -62,10 +62,8 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   useKeyboardObserver()
   const isTopbarElevated = useIsTopbarElevated()
   const isTopbarAboveOverlay = useIsTopbarAboveOverlay()
-  // The Topbar is absolutely positioned, so the content reserves space for it via the
-  // `--topbar-height` CSS var. That height is not constant: below the header's `@1100px`
-  // container query the safe selector wraps onto its own row, doubling the topbar height.
-  // A fixed reserve then lets the topbar overlap the page (WA: dashboard cards clipped).
+  // Topbar height isn't constant — the safe selector wraps below `@1100px`, doubling it. Measured into
+  // `--topbar-height`; a fixed reserve clipped dashboard cards (WA).
   const setTopbarNode = useCssHeightVar('--topbar-height')
 
   // Hide sidebar when transaction flow is open
@@ -107,10 +105,9 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
             className={classnames(css.topbar, {
               [css.topbarElevated]: isTopbarElevated,
               [css.topbarAboveOverlay]: isTopbarAboveOverlay,
-              // The topbar is absolutely positioned, so it can't inherit `.main`'s sidebar
-              // offset — it has to reproduce it. Keep these conditions identical to the
-              // `mainNoSidebar` / `mainSidebarCollapsed` ones below or the header drifts out
-              // of alignment with the page content underneath it.
+              // The absolutely-positioned topbar can't inherit `.main`'s sidebar offset, so it reproduces
+              // it — keep these conditions identical to `mainNoSidebar`/`mainSidebarCollapsed` below or the
+              // header drifts out of alignment with the page.
               [css.topbarNoSidebar]: !isSidebarVisible || !isSidebarRoute,
               [css.topbarCollapsed]: isSidebarRoute && isSidebarVisible && !isSidebarExpanded,
             })}

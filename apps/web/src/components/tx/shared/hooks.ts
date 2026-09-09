@@ -134,9 +134,8 @@ export const useTxActions = (): TxActions => {
 
       // Smart contract wallets must sign via an on-chain tx
       if (signer.isSafe || (await isSmartContractWallet(signer.chainId, signer.address))) {
-        // If the first signature is a smart contract wallet, we have to propose w/o signatures
-        // Otherwise the backend won't pick up the tx
-        // The signature will be added once the on-chain signature is indexed
+        // A smart-contract-wallet first signer must be proposed without signatures (else the backend won't
+        // pick up the tx); the signature is added once the on-chain signature is indexed.
         const id = txId || (await _propose(signer.address, safeTx, txId, origin)).txId
         await dispatchOnChainSigning(
           safeTx,
@@ -180,9 +179,8 @@ export const useTxActions = (): TxActions => {
       assertOnboard(onboard)
       assertChainInfo(chain)
 
-      // Catch the three GS026 causes (stale nonce, non-signer executor, bad
-      // signature) before anything is signed or broadcast — an on-chain GS026
-      // revert would cost the user gas for a guaranteed failure (WA-3005).
+      // Catch the three GS026 causes (stale nonce, non-signer executor, bad signature) before signing —
+      // an on-chain GS026 revert would cost gas for a guaranteed failure (WA-3005).
       await runExecutionPreChecks({ safeTx, safe, signerAddress: signer.address })
 
       let tx: TransactionDetails | undefined

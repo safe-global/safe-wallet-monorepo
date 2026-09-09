@@ -52,9 +52,8 @@ export const ChooseOwner = ({
   const { handleSubmit, formState, watch, control } = formMethods
   const isValid = Object.keys(formState.errors).length === 0 // do not use formState.isValid because names can be empty
 
-  // Inline validation for the GS204/GS203 on-chain reverts (WA-3005 Bucket A):
-  // duplicate signer, the Safe itself, and reserved (zero/sentinel) addresses
-  // are blocked here so they never reach signing.
+  // Inline validation for the GS204/GS203 reverts (WA-3005 Bucket A): duplicate signer, the Safe itself,
+  // and reserved (zero/sentinel) addresses are blocked here so they never reach signing.
   const notAlreadyOwner = uniqueAddress(
     safe.owners.map((owner) => owner.value),
     getContractErrorMessage('GS204'),

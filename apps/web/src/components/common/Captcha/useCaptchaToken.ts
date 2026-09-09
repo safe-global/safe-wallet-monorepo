@@ -76,11 +76,9 @@ export function useCaptchaToken({ theme = 'auto', isScriptReady }: UseCaptchaTok
         size: 'normal',
         // Only show widget when user interaction is required
         appearance: 'interaction-only',
-        // Default is 'auto', which silently re-runs the challenge at the
-        // ~5-minute TTL and pops the modal on idle tabs. 'never' keeps the
-        // widget dormant on expiry; refreshToken() → turnstile.reset() is the
-        // only path that fetches a new token, and only when a real protected
-        // request is waiting.
+        // Default 'auto' silently re-runs at the ~5-min TTL and pops the modal on idle tabs. 'never' keeps
+        // the widget dormant; refreshToken() → turnstile.reset() is the only refresh path, and only when a
+        // protected request is waiting.
         'refresh-expired': 'never',
         callback: (token: string) => {
           sharedTokenRef.current = token
@@ -101,9 +99,8 @@ export function useCaptchaToken({ theme = 'auto', isScriptReady }: UseCaptchaTok
           setIsLoading(false)
           setToken(null)
         },
-        // Token expired silently (Turnstile ~5min TTL). Clear it and wait for
-        // the next protected request to lazily trigger a fresh challenge via
-        // captchaHeadersInit. Avoids background modal pops when the user is idle.
+        // Token expired silently (~5min TTL). Clear it; the next protected request lazily triggers a fresh
+        // challenge via captchaHeadersInit, avoiding background modal pops on idle tabs.
         'expired-callback': () => {
           sharedTokenRef.current = null
           setToken(null)

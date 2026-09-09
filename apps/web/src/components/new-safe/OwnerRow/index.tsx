@@ -83,10 +83,8 @@ const OwnerRow = ({
   const walletIsOwner = owner.address === wallet?.address
   return (
     <div
-      // `items-start`: both columns are label-above-control fields of the same 66px box height, so
-      // aligning their tops puts the labels on one baseline and the boxes level. Bottom-aligning
-      // them instead pushed the address field down by the height of the name field's
-      // "Your connected wallet" caption.
+      // `items-start` so the two fields' labels share a baseline; bottom-aligning pushed the address field
+      // down by the name field's "Your connected wallet" caption.
       className={classNames('mb-6 grid grid-cols-12 items-start gap-6', {
         [css.helper]: walletIsOwner,
       })}
@@ -129,8 +127,7 @@ const OwnerRow = ({
         )}
       </div>
       {!readOnly && (
-        // Offset past the label (text-sm x leading-snug + Field's gap-3, Tailwind's scale) so the
-        // button centres on the 66px field, not the cell — which grows with the wallet caption.
+        // Offset past the label so the button centres on the 66px field, not the caption-grown cell.
         <div className="col-span-1 -ml-4 mt-[calc(0.875rem*1.375+0.75rem)] flex h-[66px] shrink-0 items-center">
           {removable && (
             <Button
