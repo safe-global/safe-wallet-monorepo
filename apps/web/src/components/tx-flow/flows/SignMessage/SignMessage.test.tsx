@@ -27,6 +27,7 @@ import { GATEWAY_URL } from '@/config/gateway'
 import { zeroPadBytes } from 'ethers'
 import type { JsonRpcSigner } from 'ethers'
 import { CGW_ERROR_FALLBACK, CGW_SAFE_UNAVAILABLE } from '@safe-global/utils/services/exceptions/gatewayErrors'
+import { mapLedgerError } from '@/services/onboard/ledger-errors'
 import type { Message } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
 import type { ReactElement } from 'react'
@@ -978,6 +979,29 @@ describe('SignMessage', () => {
       await waitFor(() => expect(getByText(CGW_ERROR_FALLBACK)).toBeInTheDocument())
 
       expect(getByTestId('error-message').textContent).not.toContain('nginx')
+    })
+
+    it('translates a Ledger device failure and withholds its raw details', async () => {
+      const cause = mapLedgerError({
+        _tag: 'InvalidStatusWordError',
+        originalError: new Error('no signature returned'),
+      })
+      const error = Object.assign(
+        new Error(`An unknown RPC error occurred.\n\nDetails: ${cause.message}\n\nVersion: viem@2.52.2`),
+        { cause },
+      )
+
+      const { getByText, getByTestId } = renderPendingConfirmation()
+      jest.spyOn(sender, 'dispatchSafeMsgConfirmation').mockRejectedValue(error)
+
+      fireEvent.click(getByText('Sign'))
+
+      await waitFor(() => expect(getByText('Your Ledger could not complete the request.')).toBeInTheDocument())
+
+      const alert = getByTestId('error-message').textContent
+      expect(alert).not.toContain('viem@')
+      expect(alert).not.toContain('InvalidStatusWordError')
+      expect(alert).not.toContain('Details:')
     })
 
     it('does not offer a retry the copy rules prohibit', async () => {
