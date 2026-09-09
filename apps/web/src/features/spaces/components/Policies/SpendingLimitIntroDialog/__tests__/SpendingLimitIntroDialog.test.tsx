@@ -18,7 +18,6 @@ describe('SpendingLimitIntroDialog', () => {
     expect(screen.getByText('Let spenders access assets without collecting signatures.')).toBeInTheDocument()
   })
 
-  // The three things someone must understand before signing, per the design copy.
   it('explains that a spender need not be a signer', () => {
     render(<SpendingLimitIntroDialog open onOpenChange={jest.fn()} onProceed={jest.fn()} />)
 

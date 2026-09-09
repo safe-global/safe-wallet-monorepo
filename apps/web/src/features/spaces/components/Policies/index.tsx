@@ -22,8 +22,6 @@ const Policies = (): ReactElement => {
       // TODO(WA-3138, WA-3160): open the proposer form and the Suggest a policy dialog.
       if (id !== 'spending-limit') return
 
-      // The intro explains what a spending limit is, so it is worth reading once: later entries
-      // go straight to the flow.
       if (hasSeenSpendingLimitIntro) {
         startSpendingLimitFlow()
         return
@@ -34,8 +32,7 @@ const Policies = (): ReactElement => {
     [hasSeenSpendingLimitIntro, startSpendingLimitFlow],
   )
 
-  // Any dismissal counts as shown — an explainer that returns after the user closed it reads as
-  // a bug, and the help link in its title is there for a second look.
+  // Any dismissal counts as shown: an explainer that returns after you closed it reads as a bug.
   const closeSpendingLimitIntro = useCallback(() => {
     setIsSpendingLimitIntroOpen(false)
     setHasSeenSpendingLimitIntro(true)

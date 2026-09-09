@@ -26,11 +26,7 @@ type Story = StoryObj<typeof meta>
 /** The intro as designed: the end-result preview, the three things to know, and the way in. */
 export const Default: Story = {}
 
-/**
- * Open state held by the story, so dismissal is exercisable: the close button, Escape and a click
- * outside all close the dialog and leave `onProceed` uncalled — the "nothing started" guarantee.
- * Proceeding closes it too, as it does on the Policies page.
- */
+/** Dismissal is exercisable here: close, Escape and click-outside all leave `onProceed` uncalled. */
 export const Dismissible: Story = {
   render: function DismissibleStory(args) {
     const [open, setOpen] = useState(true)

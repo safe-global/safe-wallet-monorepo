@@ -7,11 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Typography } from '@/components/ui/typography'
 import SpendingLimitPreview from './SpendingLimitPreview'
 
-/**
- * The three things someone must understand before signing: a spender is not a signer, a limit is
- * a token/amount/period that resets, and only creating it costs a transaction. Copy is verbatim
- * from the design.
- */
+/** Copy is verbatim from the design. */
 const EXPLAINERS: { Icon: LucideIcon; text: string }[] = [
   {
     Icon: UsersRound,
@@ -31,17 +27,11 @@ export interface SpendingLimitIntroDialogProps {
   open: boolean
   /** Called with `false` on every dismissal — the close button, Escape and a click outside. */
   onOpenChange: (open: boolean) => void
-  /** Called when the user chooses to continue into the spending limit flow. */
   onProceed: () => void
 }
 
-/**
- * Explains what a spending limit is before the flow starts, so the consequences are not
- * discovered after signing. Dismissing it starts nothing.
- */
 const SpendingLimitIntroDialog = ({ open, onOpenChange, onProceed }: SpendingLimitIntroDialogProps): ReactElement => {
-  // Without this the dialog opens with the title's help link focused, which both rings a 16px
-  // icon and puts "open a new tab" one Enter away from someone who only wants to read on.
+  // Without this, focus opens on the title's help link, where Enter opens a new tab.
   const proceedRef = useRef<HTMLButtonElement>(null)
 
   return (
@@ -85,7 +75,7 @@ const SpendingLimitIntroDialog = ({ open, onOpenChange, onProceed }: SpendingLim
 
             <Button ref={proceedRef} className="w-full gap-2" onClick={onProceed}>
               Set up spending limit
-              {/* Brand green on the light button; the dark button is already green, so its icon stays black. */}
+              {/* The dark button is already green, so its icon stays black. */}
               <ArrowRight className="text-[var(--color-static-text-brand)] dark:text-black" aria-hidden />
             </Button>
           </div>

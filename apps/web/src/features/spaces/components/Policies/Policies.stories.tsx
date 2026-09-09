@@ -8,8 +8,7 @@ import Policies from './index'
 const meta = {
   title: 'Features/Spaces/Policies',
   component: Policies,
-  // The page renders inside a `.shadcn-scope` wrapper in the app; the dialog it opens is
-  // portalled into that same scope, so the story needs the provider to match.
+  // The dialog is portalled into `.shadcn-scope`, which only the provider sets up.
   decorators: [withMockProvider({ shadcn: true })],
   tags: ['autodocs'],
   parameters: {
@@ -23,12 +22,8 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {}
 
 /**
- * The spending limit intro opens on the first entry only, and "seen" lives in localStorage — so
- * the behaviour is only demoable with a way to forget it again.
- *
- * Click the Spending limit tile: the intro opens. Dismiss it, click the tile again, and nothing
- * opens — the flow behind the intro lands in WA-3150, so proceeding is a no-op for now. Forget
- * that it was seen, and the intro is back.
+ * Click the Spending limit tile: the intro opens. Dismiss it and click again: nothing opens, since
+ * the flow behind it lands in WA-3150. Forget that it was seen, and the intro is back.
  */
 export const SpendingLimitIntro: Story = {
   render: function SpendingLimitIntroStory() {
