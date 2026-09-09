@@ -132,7 +132,7 @@ const pageSizes = [10, 25, 100]
 const pageSizeItems = Object.fromEntries(pageSizes.map((size) => [String(size), String(size)]))
 
 /**
- * @deprecated Use `PaginatedDataTable` (features/spaces/components/PaginatedDataTable) for new
+ * @deprecated Use `PaginatedDataTable` (components/common/PaginatedDataTable) for new
  * tables — it takes typed columns instead of untyped cell maps, and bounds width/alignment to the
  * design system. This one stays for its nine existing consumers; it is missing typed columns and
  * responsive column dropping, and `PaginatedDataTable` is missing rows-per-page pagination and a
@@ -216,7 +216,7 @@ function EnhancedTable({ rows, headCells, compact, footer, panel }: EnhancedTabl
               })
             ) : (
               // Prevent no `tbody` rows hydration error
-              <TableRow>
+              <TableRow data-no-hover="">
                 <TableCell />
               </TableRow>
             )}

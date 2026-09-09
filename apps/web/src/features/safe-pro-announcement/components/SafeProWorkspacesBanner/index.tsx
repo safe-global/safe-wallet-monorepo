@@ -7,6 +7,7 @@ import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
 import ProWordmark from '@/public/images/safe-pro/pro-wordmark.svg'
+import { trackSafeProBannerClick } from '../../utils/trackSafeProBannerClick'
 import css from './styles.module.css'
 
 const SafeProWorkspacesBanner = ({ className }: { className?: string }) => {
@@ -29,7 +30,14 @@ const SafeProWorkspacesBanner = ({ className }: { className?: string }) => {
             </div>
 
             <Button
-              render={<a href={SAFE_PRO_ANNOUNCEMENT_URL} target="_blank" rel="noopener noreferrer" />}
+              render={
+                <a
+                  onClick={() => trackSafeProBannerClick('workspaces_list')}
+                  href={SAFE_PRO_ANNOUNCEMENT_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                />
+              }
               className={cn('shrink-0', css.learnMore)}
             >
               Learn more

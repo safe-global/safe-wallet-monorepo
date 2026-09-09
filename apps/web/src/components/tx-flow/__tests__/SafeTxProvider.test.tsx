@@ -4,6 +4,14 @@ import SafeTxProvider, { SafeTxContext } from '../SafeTxProvider'
 import { getTxOrigin } from '@/utils/transactions'
 import { gtfPaymentSourcePreferenceSlice } from '@/features/gtf/store'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
+import { Errors, logError } from '@/services/exceptions'
+
+jest.mock('@/services/exceptions', () => ({
+  ...jest.requireActual('@/services/exceptions'),
+  logError: jest.fn(),
+}))
+
+const mockedLogError = logError as jest.MockedFunction<typeof logError>
 
 jest.mock('@/components/tx/shared/hooks', () => ({
   useRecommendedNonce: () => undefined,
@@ -34,9 +42,69 @@ const PaymentModeReader = () => {
   return <div data-testid="payment-mode">{gtfPaymentMode}</div>
 }
 
+/** Stands in for any of the ~20 review components that do `.catch(setSafeTxError)`. */
+const FailingFlow = ({ error }: { error: Error }) => {
+  const { setSafeTxError } = useContext(SafeTxContext)
+  useEffect(() => {
+    setSafeTxError(error)
+  }, [error, setSafeTxError])
+  return null
+}
+
 describe('SafeTxProvider', () => {
   beforeEach(() => {
     mockUseWallet.mockReturnValue(null)
+    mockedLogError.mockClear()
+  })
+
+  describe('error reporting', () => {
+    // The provider is the single reporter for a failed tx build: every flow
+    // routes its failure into this one `safeTxError`, so a flow reporting it
+    // again would emit a second event for the same failure.
+    it('reports a failure any flow puts into the context', async () => {
+      const error = new Error('Failed to create the transaction')
+
+      render(
+        <SafeTxProvider>
+          <FailingFlow error={error} />
+        </SafeTxProvider>,
+      )
+
+      await waitFor(() => {
+        expect(mockedLogError).toHaveBeenCalledTimes(1)
+      })
+      expect(mockedLogError).toHaveBeenCalledWith(Errors._103, error, undefined)
+    })
+
+    it('reports it once while the failure stands', async () => {
+      const error = new Error('Failed to create the transaction')
+
+      const { rerender } = render(
+        <SafeTxProvider>
+          <FailingFlow error={error} />
+        </SafeTxProvider>,
+      )
+
+      await waitFor(() => expect(mockedLogError).toHaveBeenCalledTimes(1))
+
+      rerender(
+        <SafeTxProvider>
+          <FailingFlow error={error} />
+        </SafeTxProvider>,
+      )
+
+      expect(mockedLogError).toHaveBeenCalledTimes(1)
+    })
+
+    it('reports nothing while there is no failure', () => {
+      render(
+        <SafeTxProvider>
+          <TestConsumer />
+        </SafeTxProvider>,
+      )
+
+      expect(mockedLogError).not.toHaveBeenCalled()
+    })
   })
 
   it('should set a default txOrigin with the app URL and brand name', () => {

@@ -74,13 +74,13 @@ const buttonVariants = cva(
         action: "h-9 gap-2 px-6 [&_svg:not([class*='size-'])]:size-5",
         // Modal / flow / settings submit button: the action pill plus a stable minimum width so
         // the label can swap (e.g. "Execute" → spinner) without the button resizing. Replaces the
-        // per-call magic min-w-[82/112/114/122px]. Pair with a `w-full lg:w-auto` wrapper for the
-        // full-width-on-mobile flow submit pattern. Same `h-9` as `action` — a dialog footer should
-        // not be taller than the CTA it mirrors on the page.
+        // per-call magic min-w-[82/112/114/122px]. In a tx flow it shares one row with the Back
+        // button at every width (see TxCardActions), so never make it full-width. Same `h-9` as
+        // `action` — a dialog footer should not be taller than the CTA it mirrors on the page.
         submit: "h-9 gap-2 px-6 min-w-[7rem] [&_svg:not([class*='size-'])]:size-5",
         // Full-screen onboarding / flow footer CTA: the taller 48px scale used by the Spaces
-        // onboarding Back/Continue buttons. Use via the OnboardingFooter preset; pair with a
-        // `w-full xl:flex-1` wrapper for the stacked-mobile → row-on-xl layout.
+        // onboarding Back/Continue buttons. Use via the OnboardingFooter preset, which shares one
+        // row between them and stacks only when a long label leaves no room.
         xl: 'h-12 gap-2 px-6',
         icon: 'size-9',
         'icon-xs': "size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3",

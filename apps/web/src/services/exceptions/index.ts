@@ -76,6 +76,8 @@ export class CodedException extends Error {
       ...(context?.rpcEndpointKind && { rpc_endpoint_kind: context.rpcEndpointKind }),
       ...(context?.rpcHost && { rpc_host: context.rpcHost }),
       ...(context?.httpStatus && { http_status: context.httpStatus }),
+      // Presence, not truthiness — see the same note in the Mixpanel mapper.
+      ...(context?.attempt !== undefined && { attempt: context.attempt, is_retry: context.attempt > 1 }),
       ...(this.ledgerDevice && {
         ledger_reason: this.ledgerDevice.reason,
         ledger_tag: this.ledgerDevice.tag,

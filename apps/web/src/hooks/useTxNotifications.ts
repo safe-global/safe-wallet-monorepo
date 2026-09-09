@@ -17,6 +17,8 @@ import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
 import {
   getGuardErrorInfo,
+  HYPERNATIVE_APPROVAL_REQUIRED_MESSAGE,
+  isHypernativeGuardRevert,
   isNonceTooLowError,
   isRateLimitError,
   RATE_LIMIT_USER_MESSAGE,
@@ -74,6 +76,8 @@ const useTxNotifications = (): void => {
 
         // Check if this is a Guard error
         const guardErrorName = isError ? getGuardErrorInfo(detail.error) : undefined
+        // Awaiting approval in Hypernative: replaces the guard wording and the raw payload (WA-1219)
+        const hnApprovalRequired = isError && isHypernativeGuardRevert(detail.error)
         // A Ledger device failure states its own reason. Its raw error is a
         // dump of DMK class names, ethers codes and the viem version, so it is
         // withheld from `detailedMessage` too (WA-3243).
@@ -87,6 +91,8 @@ const useTxNotifications = (): void => {
         if (event === TxEvent.REVERTED) {
           // A mined revert means gas was already paid — say so (WA-3005).
           message = `Transaction reverted on ${chain.chainName}. Gas was spent.`
+        } else if (hnApprovalRequired) {
+          message = HYPERNATIVE_APPROVAL_REQUIRED_MESSAGE
         } else if (guardErrorName) {
           message = `Guard reverted the transaction (${guardErrorName}).`
         } else if (isError && isNonceTooLowError(detail.error)) {
@@ -125,13 +131,14 @@ const useTxNotifications = (): void => {
           showNotification({
             title: humanDescription,
             message,
-            detailedMessage: ledgerError
-              ? undefined
-              : cgwError
-                ? `Error code ${cgwError.code}`
-                : isError
-                  ? detail.error.message
-                  : undefined,
+            detailedMessage:
+              ledgerError || hnApprovalRequired
+                ? undefined
+                : cgwError
+                  ? `Error code ${cgwError.code}`
+                  : isError
+                    ? detail.error.message
+                    : undefined,
             groupKey,
             variant: isError ? Variant.ERROR : isSuccess ? Variant.SUCCESS : Variant.INFO,
             link: txId

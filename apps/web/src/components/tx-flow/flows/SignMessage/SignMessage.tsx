@@ -34,6 +34,8 @@ import { isBlindSigningPayload, isEIP712TypedData } from '@safe-global/utils/uti
 import ApprovalEditor from '@/components/tx/ApprovalEditor'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import { isWalletRejection } from '@/utils/wallets'
+import { getCgwErrorInfo } from '@/utils/cgw-errors'
+import { getLedgerDeviceError, getLedgerUserMessage } from '@/services/onboard/ledger-errors'
 import { useAppSelector } from '@/store'
 import { selectBlindSigning } from '@/store/settingsSlice'
 import NextLink from 'next/link'
@@ -94,25 +96,48 @@ const DialogHeader = ({ threshold }: { threshold: number }) => (
   </>
 )
 
+// The single place a message-signing failure is rendered: the toast for the
+// same failure was dropped so it is shown once, next to the CTA (WA-3502).
 const MessageDialogError = ({ isOwner, submitError }: { isOwner: boolean; submitError: Error | undefined }) => {
   const wallet = useWallet()
   const onboard = useOnboard()
 
-  const errorMessage =
-    !wallet || !onboard
-      ? 'No wallet is connected.'
-      : !isOwner
-        ? "You are currently not a signer of this Safe account and won't be able to confirm this message."
-        : submitError && isWalletRejection(submitError)
-          ? 'User rejected signing.'
-          : submitError
-            ? 'Error confirming the message. Please try again.'
-            : null
-
-  if (errorMessage) {
-    return <ErrorMessage>{errorMessage}</ErrorMessage>
+  if (!wallet || !onboard) {
+    return <ErrorMessage>No wallet is connected.</ErrorMessage>
   }
-  return null
+
+  if (!isOwner) {
+    return (
+      <ErrorMessage>
+        You are currently not a signer of this Safe account and won&apos;t be able to confirm this message.
+      </ErrorMessage>
+    )
+  }
+
+  if (!submitError) {
+    return null
+  }
+
+  if (isWalletRejection(submitError)) {
+    return <ErrorMessage>User rejected signing.</ErrorMessage>
+  }
+
+  // A Ledger device failure states its own reason; its raw error is a dump of
+  // DMK class names, ethers codes and the viem version (WA-3243).
+  const ledgerError = getLedgerDeviceError(submitError)
+  if (ledgerError) {
+    return <ErrorMessage error={submitError}>{getLedgerUserMessage(ledgerError)}</ErrorMessage>
+  }
+
+  // A known CGW response state replaces the copy and gets a code-only support
+  // reference — never the response body, which can be an HTML page (WA-3252).
+  const cgwError = getCgwErrorInfo(submitError)
+
+  return (
+    <ErrorMessage error={submitError}>
+      {cgwError ? cgwError.message : 'Error confirming the message. Try again.'}
+    </ErrorMessage>
+  )
 }
 
 const AlreadySignedByOwnerMessage = ({ hasSigned }: { hasSigned: boolean }) => {
@@ -322,7 +347,7 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
               title="Collect all the confirmations"
               message={
                 requestId && !hasSignature
-                  ? 'Please keep this modal open until all signers confirm this message. Closing the modal will abort the signing request.'
+                  ? 'Keep this modal open until all signers confirm this message. Closing the modal will abort the signing request.'
                   : 'The signature will be submitted to the requesting app when the message is fully signed.'
               }
             >

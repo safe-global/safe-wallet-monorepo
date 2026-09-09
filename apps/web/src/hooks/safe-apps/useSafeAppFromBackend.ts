@@ -1,7 +1,7 @@
-import { useEffect } from 'react'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { useLazySafeAppsGetSafeAppsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
-import { Errors, logError } from '@/services/exceptions'
+import { Errors } from '@/services/exceptions'
+import useLogError from '@/hooks/useLogError'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { trimTrailingSlash } from '@/utils/url'
@@ -33,11 +33,7 @@ const useSafeAppFromBackend = (url: string, chainId: string): AsyncResult<SafeAp
     return result?.[0]
   }, [chainId, url, trigger])
 
-  useEffect(() => {
-    if (error) {
-      logError(Errors._900, error.message)
-    }
-  }, [error])
+  useLogError(Errors._900, error?.message)
 
   return [backendApp, error, loading]
 }

@@ -34,9 +34,11 @@ export const TxCardActions = ({
   return (
     /* justify-end so the primary action is right-aligned on its own, per WA-3234, and not only
        when TxLayoutBase's `.step` happens to be an ancestor. Inside `.step` the module flips this
-       row to a column and right-aligns the child with `align-self`, so justify-end is inert there. */
+       row to a column and right-aligns the child with `align-self`, so justify-end is inert there.
+       The inner row never goes full width: TxLayoutBase places its Back button at the left of this
+       same row, and a full-width action would cover it. */
     <div className={cn('txCardActions flex items-center justify-end', className)}>
-      <div className="flex w-full flex-col-reverse gap-4 lg:w-auto lg:flex-row">{children}</div>
+      <div className="flex flex-row items-center gap-4">{children}</div>
     </div>
   )
 }

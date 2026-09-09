@@ -115,4 +115,70 @@ describe('TxLayoutBase', () => {
     await user.click(backButton)
     expect(onBack).toHaveBeenCalledTimes(1)
   })
+
+  it('should, past the first step, render a back button with no icon and no minimum width', () => {
+    render(
+      <TxLayoutBase title="Confirm transaction" step={1} stepCount={3} progress={66} onBack={jest.fn()}>
+        <Step />
+      </TxLayoutBase>,
+    )
+
+    const backButton = screen.getByTestId('modal-back-btn')
+    expect(backButton.querySelector('svg')).toBeNull()
+    expect(backButton).not.toHaveClass('min-w-[7rem]')
+  })
+
+  it('should, when the viewport matches every media query, render an outlined back button', () => {
+    const originalMatchMedia = window.matchMedia
+    window.matchMedia = (query: string) =>
+      ({
+        matches: true,
+        media: query,
+        onchange: null,
+        addListener: () => {},
+        removeListener: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => false,
+      }) as MediaQueryList
+
+    try {
+      render(
+        <TxLayoutBase title="Confirm transaction" step={1} stepCount={3} progress={66} onBack={jest.fn()}>
+          <Step />
+        </TxLayoutBase>,
+      )
+
+      expect(screen.getByTestId('modal-back-btn')).toHaveClass('border-border')
+    } finally {
+      window.matchMedia = originalMatchMedia
+    }
+  })
+
+  it('should, when the viewport matches no media query, render an outlined back button', () => {
+    const originalMatchMedia = window.matchMedia
+    window.matchMedia = (query: string) =>
+      ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: () => {},
+        removeListener: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => false,
+      }) as MediaQueryList
+
+    try {
+      render(
+        <TxLayoutBase title="Confirm transaction" step={1} stepCount={3} progress={66} onBack={jest.fn()}>
+          <Step />
+        </TxLayoutBase>,
+      )
+
+      expect(screen.getByTestId('modal-back-btn')).toHaveClass('border-border')
+    } finally {
+      window.matchMedia = originalMatchMedia
+    }
+  })
 })

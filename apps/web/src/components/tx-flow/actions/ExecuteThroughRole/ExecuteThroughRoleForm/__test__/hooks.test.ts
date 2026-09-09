@@ -13,8 +13,12 @@ import { AbiCoder, encodeBytes32String } from 'ethers'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { chainBuilder } from '@/tests/builders/chains'
 import { useHasFeature } from '@/hooks/useChains'
-import { useRoles } from '../hooks'
+import { useGasLimit, useRoles } from '../hooks'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { Errors } from '@/services/exceptions'
+import { __resetUseLogErrorForTests } from '@/hooks/useLogError'
+import { BaseError } from 'viem'
+import type { Transaction } from '@safe-global/types-kit'
 
 const mockChain = chainBuilder()
   .with({ features: [FEATURES.ZODIAC_ROLES, FEATURES.EIP1559] })
@@ -34,6 +38,12 @@ jest.mock('@/hooks/useChains', () => ({
 
 jest.mock('@/hooks/useChainId', () => ({
   useChainId: jest.fn().mockReturnValue(() => '1'),
+}))
+
+const mockLogError = jest.fn()
+jest.mock('@/services/exceptions', () => ({
+  ...jest.requireActual('@/services/exceptions'),
+  logError: (...args: unknown[]) => mockLogError(...args),
 }))
 
 describe('useRoles', () => {
@@ -226,3 +236,57 @@ const TEST_ROLES_MOD = {
     },
   ],
 }
+
+describe('useGasLimit', () => {
+  const tx: Transaction = { to: WETH_ADDRESS, data: '0xd0e30db0', value: '0' }
+
+  const renderWithRejectedEstimate = (error: unknown) => {
+    const provider = mockWeb3Provider([])
+    ;(provider.estimateGas as jest.Mock).mockRejectedValue(error)
+    return renderHook(() => useGasLimit(tx))
+  }
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    __resetUseLogErrorForTests()
+  })
+
+  it('returns the estimate', async () => {
+    mockWeb3Provider([])
+    const { result } = renderHook(() => useGasLimit(tx))
+
+    await waitFor(() => expect(result.current.gasLimit).toEqual(50_000n))
+    expect(mockLogError).not.toHaveBeenCalled()
+  })
+
+  it('does not log a revert — the node answered, and the UI maps the GS code', async () => {
+    const { result } = renderWithRejectedEstimate(
+      Object.assign(new Error('execution reverted: "GS013"'), { code: 'CALL_EXCEPTION' }),
+    )
+
+    await waitFor(() => expect(result.current.gasLimitError).toBeDefined())
+    expect(mockLogError).not.toHaveBeenCalled()
+  })
+
+  it('does not log a transient throttle from either client', async () => {
+    const viemThrottle = new BaseError('outer', { cause: Object.assign(new BaseError('inner'), { code: -32005 }) })
+    const { result } = renderWithRejectedEstimate(viemThrottle)
+    await waitFor(() => expect(result.current.gasLimitError).toBeDefined())
+
+    const ethersThrottle = Object.assign(new Error('too many requests'), {
+      code: 'SERVER_ERROR',
+      response: { statusCode: 429, statusMessage: 'Too Many Requests' },
+    })
+    const { result: ethersResult } = renderWithRejectedEstimate(ethersThrottle)
+    await waitFor(() => expect(ethersResult.current.gasLimitError).toBeDefined())
+
+    expect(mockLogError).not.toHaveBeenCalled()
+  })
+
+  it('still logs a genuine RPC failure as 612', async () => {
+    const { result } = renderWithRejectedEstimate(new Error('HTTP request failed. Status: 500'))
+
+    await waitFor(() => expect(result.current.gasLimitError).toBeDefined())
+    expect(mockLogError).toHaveBeenCalledWith(Errors._612, 'HTTP request failed. Status: 500', expect.anything())
+  })
+})

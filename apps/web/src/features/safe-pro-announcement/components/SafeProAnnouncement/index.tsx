@@ -5,29 +5,30 @@ import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
 import { useDarkMode } from '@/hooks/useDarkMode'
+import { trackSafeProBannerClick, type SafeProBannerLocation } from '../../utils/trackSafeProBannerClick'
 import css from './styles.module.css'
 
-const SafeProAnnouncement = ({ onDismiss }: { onDismiss?: () => void }) => {
+const SafeProAnnouncement = ({ location, onDismiss }: { location: SafeProBannerLocation; onDismiss?: () => void }) => {
   const isDarkMode = useDarkMode()
 
   return (
     <div className="p-1">
-      <div className="relative aspect-[1056/369] w-full overflow-hidden rounded-t-[calc(var(--radius-xl)-2px)]">
+      <div className="relative aspect-[1141/268] w-full overflow-hidden rounded-t-[calc(2rem_-_4px)]">
         <Image
           src={`/images/safe-pro/pro-announcement-hero${isDarkMode ? '-dark' : ''}.jpg`}
           alt="A Workspace from Safe Pro, with its accounts, members and transactions"
           fill
-          className="object-cover"
+          className="object-cover object-top"
         />
       </div>
 
       <div className="flex flex-col items-center gap-6 px-8 py-6">
-        <div className="flex flex-col items-center gap-2">
-          <Typography variant="h3" align="center">
+        <div className="flex flex-col items-center gap-3">
+          <Typography variant="h4" align="center">
             Your Workspace moves to <span className={css.highlight}>Safe Pro</span> on Oct 6, 2026
           </Typography>
 
-          <Typography variant="paragraph-large" color="muted" align="center">
+          <Typography variant="paragraph" color="muted" align="center">
             Safe Pro will add advanced security checks, sponsored transactions and policies. Your Safe accounts remain
             available outside of the Workspace. Starting October 6, you can claim up to two months of Safe Pro for free
             for this Workspace.
@@ -41,7 +42,17 @@ const SafeProAnnouncement = ({ onDismiss }: { onDismiss?: () => void }) => {
             </Button>
           )}
 
-          <Button size="lg" render={<a href={SAFE_PRO_ANNOUNCEMENT_URL} target="_blank" rel="noopener noreferrer" />}>
+          <Button
+            size="lg"
+            render={
+              <a
+                onClick={() => trackSafeProBannerClick(location)}
+                href={SAFE_PRO_ANNOUNCEMENT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+              />
+            }
+          >
             Learn more
             <ArrowUpRight data-icon="inline-end" className={cn('text-green-400', css.arrow)} />
           </Button>

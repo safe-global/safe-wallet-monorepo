@@ -85,6 +85,9 @@ export const takeStepUpTrip = (): StepUpTrip | undefined => {
   }
 }
 
+/** Every endpoint in `REPLAYABLE_ENDPOINTS` invalidates this tag and no other. */
+const REPLAY_INVALIDATED_TAGS = ['spaces'] as const
+
 type ReplayOutcome = { error?: FetchBaseQueryError | SerializedError }
 
 /**
@@ -121,6 +124,17 @@ export const replayStepUpAction = async (dispatch: AppDispatch, pending: Pending
 
   // The success message must not appear while the lists still show the old data.
   // This thunk returns one promise per running query, not a single promise.
+  await Promise.all(dispatch(cgwApi.util.getRunningQueriesThunk()))
+
+  // The replay runs during page load, so a query it invalidates can still be in
+  // flight when the mutation completes. RTK Query does not start a second fetch
+  // for such a query, and its `delayed` invalidation does not wait for it either:
+  // the pending counter behind it is also decremented by the rejection that a
+  // duplicate `initiate` of the same in-flight query produces, so the counter is
+  // zero while the first request is still open. The query then keeps the response
+  // it gets, which may have been produced before the write. Invalidating again
+  // once nothing is in flight fetches every affected query with the written data.
+  dispatch(cgwApi.util.invalidateTags([...REPLAY_INVALIDATED_TAGS]))
   await Promise.all(dispatch(cgwApi.util.getRunningQueriesThunk()))
 
   dispatch(

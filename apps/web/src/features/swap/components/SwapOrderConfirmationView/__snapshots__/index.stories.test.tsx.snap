@@ -521,7 +521,7 @@ exports[`./index.stories CustomRecipient 1`] = `
           >
             <mock-icon />
             <div
-              class="text-muted-foreground text-sm font-normal break-words min-w-0 text-balance md:text-pretty [&_p:not(:last-child)]:mb-4 [&_a]:hover:text-foreground [&_a]:underline [&_a]:underline-offset-3"
+              class="text-muted-foreground text-sm font-normal break-words min-w-0 text-balance md:text-pretty [&_p:not(:last-child)]:mb-4 [&_a:not([data-slot=button])]:hover:text-foreground [&_a:not([data-slot=button])]:underline [&_a:not([data-slot=button])]:underline-offset-3"
               data-slot="alert-description"
             >
               <span

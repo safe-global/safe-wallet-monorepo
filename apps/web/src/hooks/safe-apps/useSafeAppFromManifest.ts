@@ -1,6 +1,7 @@
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
-import { Errors, logError } from '@/services/exceptions'
+import { Errors } from '@/services/exceptions'
+import useLogError from '@/hooks/useLogError'
 import { fetchSafeAppFromManifest } from '@/services/safe-apps/manifest'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { getEmptySafeApp } from '@/components/safe-apps/utils'
@@ -23,10 +24,7 @@ const useSafeAppFromManifest = (
 
   const emptyApp = useMemo(() => getEmptySafeApp(appUrl, safeAppData), [appUrl, safeAppData])
 
-  useEffect(() => {
-    if (!error) return
-    logError(Errors._903, `${appUrl}, ${asError(error).message}`)
-  }, [appUrl, error])
+  useLogError(Errors._903, error && `${appUrl}, ${asError(error).message}`)
 
   return { safeApp: data || emptyApp, isLoading }
 }

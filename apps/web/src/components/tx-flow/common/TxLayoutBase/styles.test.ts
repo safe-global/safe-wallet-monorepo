@@ -50,3 +50,31 @@ describe('TxLayoutBase page gutter', () => {
     expect(declOf(mobileContainer, 'padding')).toBe('0')
   })
 })
+
+describe('TxLayoutBase back button row', () => {
+  it('should, at every width, keep the back button bottom-left of the step', () => {
+    const backButton = STYLES_ROOT.nodes.find(
+      (node): node is Rule => node.type === 'rule' && node.selector === '.backButton',
+    )
+
+    expect(declOf(backButton, 'position')).toBe('absolute')
+    expect(declOf(backButton, 'left')).toBe('var(--space-3)')
+    expect(declOf(backButton, 'bottom')).toBe('var(--space-3)')
+
+    const mediaOverrides = STYLES_ROOT.nodes
+      .filter((node): node is AtRule => node.type === 'atrule' && node.name === 'media')
+      .flatMap((media) => media.nodes ?? [])
+      .filter((node): node is Rule => node.type === 'rule' && node.selector === '.backButton')
+
+    expect(mediaOverrides).toHaveLength(0)
+  })
+
+  it('should, at every width, leave no extra row under the actions for the back button', () => {
+    const actionsRules = STYLES_ROOT.nodes
+      .flatMap((node) => (node.type === 'atrule' ? (node.nodes ?? []) : [node]))
+      .filter((node): node is Rule => node.type === 'rule' && node.selector === '.step :global(.txCardActions)')
+
+    expect(actionsRules).toHaveLength(1)
+    expect(declOf(actionsRules[0], 'margin-bottom')).toBeUndefined()
+  })
+})

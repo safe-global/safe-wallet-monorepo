@@ -4,11 +4,19 @@ on:
     paths:
       - packages/utils/**
       - packages/store/**
+      - yarn.lock
+      - package.json
+      - .yarnrc.yml
+      - .yarn/patches/**
   push:
     branches:
       - main
     paths:
       - packages/**
+      - yarn.lock
+      - package.json
+      - .yarnrc.yml
+      - .yarn/patches/**
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true

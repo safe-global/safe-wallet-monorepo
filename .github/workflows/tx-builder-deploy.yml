@@ -68,7 +68,7 @@ jobs:
         uses: ./.github/actions/branch-slug
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        uses: aws-actions/configure-aws-credentials@cbe3b392738ccf3f987d68400dafcf4b0624a56c # v6.2.4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
@@ -116,7 +116,7 @@ jobs:
           VITE_TENDERLY_SIMULATE_ENDPOINT_URL: ${{ secrets.NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL }}
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        uses: aws-actions/configure-aws-credentials@cbe3b392738ccf3f987d68400dafcf4b0624a56c # v6.2.4
         with:
           role-to-assume: ${{ secrets.TX_BUILDER_AWS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
@@ -175,7 +175,7 @@ jobs:
         run: tar -czf tx-builder-${{ steps.version.outputs.version_number }}.tar.gz -C build .
 
       - name: Generate artifact attestation
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
           subject-path: ${{ env.WORKING_DIRECTORY }}/tx-builder-${{ steps.version.outputs.version_number }}.tar.gz
 
@@ -208,7 +208,7 @@ jobs:
           git push origin ${{ steps.version.outputs.version }}
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           name: ${{ steps.version.outputs.version }}
           tag_name: ${{ steps.version.outputs.version }}

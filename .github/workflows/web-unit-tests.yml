@@ -4,6 +4,10 @@ on:
     paths:
       - apps/web/**
       - packages/**
+      - yarn.lock
+      - package.json
+      - .yarnrc.yml
+      - .yarn/patches/**
 
   push:
     branches:
@@ -12,6 +16,10 @@ on:
     paths:
       - apps/web/**
       - packages/**
+      - yarn.lock
+      - package.json
+      - .yarnrc.yml
+      - .yarn/patches/**
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true

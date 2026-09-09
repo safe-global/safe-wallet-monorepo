@@ -182,4 +182,34 @@ export const getContractErrorHandling = (code: GsCode): ContractErrorHandling =>
 /** Resolve a specific GS026 cause to its message. */
 export const getGs026Message = (reason: Gs026Reason): string => GS026_MESSAGES[reason]
 
+const REVERT_MESSAGE = /execution reverted|reverted with the following/i
+
+/**
+ * Whether a failure is the chain saying the call reverts, as opposed to the node
+ * being unreachable.
+ *
+ * Lives here rather than next to the web transaction-error helpers so that the
+ * analytics layer can reuse it: those helpers pull a custom-error ABI registry
+ * that builds several `ethers.Interface` instances at module scope, and the
+ * analytics provider is imported during app bootstrap.
+ */
+export const isRevertError = (error: unknown): boolean => {
+  if (!error) return false
+
+  const err = error as { code?: unknown; reason?: string; message?: string }
+
+  // A known GS revert reason is definitive.
+  if (getGsCodeFromError(err)) return true
+
+  // ethers marks a reverted eth_call/estimateGas as CALL_EXCEPTION.
+  if (err.code === 'CALL_EXCEPTION') return true
+
+  // viem/ethers revert text. "reverted with" is anchored to the phrasings those
+  // clients actually emit, so an infra failure worded "… reverted with a
+  // connection timeout" is not read as a revert.
+  if (typeof err.message === 'string' && REVERT_MESSAGE.test(err.message)) return true
+
+  return false
+}
+
 export default CONTRACT_ERRORS

@@ -6,6 +6,14 @@ import * as useChains from '@/hooks/useChains'
 import * as hypernativeGuardCheck from '../../services/hypernativeGuardCheck'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import type { JsonRpcProvider } from 'ethers'
+import { logError } from '@/services/exceptions'
+
+jest.mock('@/services/exceptions', () => ({
+  ...jest.requireActual('@/services/exceptions'),
+  logError: jest.fn(),
+}))
+
+const mockedLogError = logError as jest.MockedFunction<typeof logError>
 
 describe('useIsHypernativeGuard', () => {
   let mockProvider: JsonRpcProvider
@@ -164,7 +172,36 @@ describe('useIsHypernativeGuard', () => {
       expect(result.current.isHypernativeGuard).toBe(false)
     })
 
-    // The hook catches the error and returns false (error logging is tested in service layer tests)
+    // The failure is reported once, by the service layer. Reporting it here too
+    // would double-count it — and once per render at that, since this hook has
+    // several concurrent owners on a single page.
+    expect(mockedLogError).not.toHaveBeenCalled()
+  })
+
+  it('does not re-report on re-render while the check is failing', async () => {
+    const guardAddress = '0x4784e9bF408F649D04A0a3294e87B0c74C5A3020'
+    jest.spyOn(hypernativeGuardCheck, 'isHypernativeGuard').mockRejectedValue(new Error('Network error'))
+    jest.spyOn(useSafeInfo, 'default').mockReturnValue({
+      safe: extendedSafeInfoBuilder()
+        .with({
+          chainId: '1',
+          guard: { value: guardAddress, name: 'HypernativeGuard', logoUri: null },
+        })
+        .build(),
+      safeAddress: '0x1234567890123456789012345678901234567890',
+      safeLoaded: true,
+      safeLoading: false,
+      safeError: undefined,
+    })
+
+    const { result, rerender } = renderHook(() => useIsHypernativeGuard())
+
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    rerender()
+    rerender()
+
+    expect(mockedLogError).not.toHaveBeenCalled()
   })
 
   it('should re-check when guard address changes', async () => {
