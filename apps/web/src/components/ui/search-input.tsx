@@ -49,10 +49,7 @@ function SearchInput({
             onClick={onClear}
             data-testid="search-clear"
           >
-            {/* size-6 fills the 24px button and ICON_STROKE is 1.5, which together reproduce the
-                13.5px glyph of the design system's Icon / x. The preset's default 16px svg at
-                stroke 2 would draw it at roughly 9px instead. */}
-            <XIcon className="pointer-events-none size-6" strokeWidth={ICON_STROKE} />
+            <XIcon className="pointer-events-none size-4" strokeWidth={ICON_STROKE} />
           </InputGroupButton>
         </InputGroupAddon>
       )}
