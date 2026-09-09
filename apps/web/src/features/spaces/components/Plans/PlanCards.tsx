@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Typography } from '@/components/ui/typography'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
+import { cn } from '@/utils/cn'
 import type { PlanTier } from './types'
 
 type Cycle = 'month' | 'year'
@@ -25,9 +26,9 @@ export const yearlyDiscount = (tiers: PlanTier[]): number | null => {
   return null
 }
 
-const Seats = ({ options }: { options: string[] }) =>
+const Seats = ({ options, onChange }: { options: string[]; onChange?: (value: string) => void }) =>
   options.length > 1 ? (
-    <Select defaultValue={options[0]}>
+    <Select defaultValue={options[0]} onValueChange={(value) => value && onChange?.(value)}>
       <SelectTrigger className="w-full">
         <SelectValue />
       </SelectTrigger>
@@ -43,56 +44,89 @@ const Seats = ({ options }: { options: string[] }) =>
     <Input readOnly value={options[0]} />
   )
 
-const PlanCard = ({ tier, currentBadge }: { tier: PlanTier; currentBadge: string }) => (
-  <Card variant="muted-secondary" radius="lg-xl" className="flex-1">
-    <CardContent className="flex flex-1 flex-col">
-      <div className="flex h-full flex-col gap-4">
-        <div className="flex flex-1 flex-col gap-6">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-2">
-              <Typography variant="h3">{tier.name}</Typography>
-              {tier.isCurrent && (
-                <Badge variant="brand" size="status" shape="status">
-                  {currentBadge}
-                </Badge>
-              )}
+export const PlanCard = ({
+  tier,
+  currentBadge,
+  selected,
+  onSelect,
+  onSeatsChange,
+}: {
+  tier: PlanTier
+  currentBadge?: string
+  selected?: boolean
+  onSelect?: () => void
+  onSeatsChange?: (seats: string) => void
+}) => {
+  const selectable = onSelect !== undefined
+
+  return (
+    <Card
+      variant="muted-secondary"
+      radius="lg-xl"
+      className={cn('flex-1', selectable && 'cursor-pointer')}
+      selected={selectable ? Boolean(selected) : undefined}
+      role={selectable ? 'radio' : undefined}
+      aria-checked={selectable ? selected : undefined}
+      tabIndex={selectable ? 0 : undefined}
+      onClick={onSelect}
+      onKeyDown={selectable ? (e) => (e.key === 'Enter' || e.key === ' ') && onSelect() : undefined}
+    >
+      <CardContent className="flex flex-1 flex-col">
+        <div className="flex h-full flex-col gap-4">
+          <div className="flex flex-1 flex-col gap-6">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-2">
+                <Typography variant={selectable ? 'paragraph-large-medium' : 'h3'}>{tier.name}</Typography>
+                {tier.isCurrent && currentBadge && (
+                  <Badge variant="brand" size="status" shape="status">
+                    {currentBadge}
+                  </Badge>
+                )}
+              </div>
+
+              <div className="flex items-baseline gap-1">
+                <Typography variant={selectable ? 'h4' : 'h2'} className={cn(selectable && 'line-through')}>
+                  {tier.price === null ? 'Custom' : formatPrice(tier.price, tier.currency)}
+                </Typography>
+                <Typography color="muted">
+                  {tier.price === null ? 'Annual term' : tier.billingCycle === 'year' ? '/yr' : '/mo'}
+                </Typography>
+                {selectable && (
+                  <Typography variant="paragraph-large-bold" color="success">
+                    Free
+                  </Typography>
+                )}
+              </div>
             </div>
 
-            <div className="flex items-baseline gap-1">
-              <Typography variant="h2">
-                {tier.price === null ? 'Custom' : formatPrice(tier.price, tier.currency)}
-              </Typography>
-              <Typography color="muted">
-                {tier.price === null ? 'Annual term' : tier.billingCycle === 'year' ? '/yr' : '/mo'}
-              </Typography>
+            <div className="flex flex-col gap-4">
+              <Seats options={tier.seats} onChange={onSeatsChange} />
+
+              <List>
+                {tier.features.map((feature) => (
+                  <ListItem key={feature} size="sm">
+                    <Avatar size="xs">
+                      <AvatarFallback>
+                        <Check className="size-4" strokeWidth={1.5} />
+                      </AvatarFallback>
+                    </Avatar>
+                    <ListItemText primary={feature} />
+                  </ListItem>
+                ))}
+              </List>
             </div>
           </div>
 
-          <div className="flex flex-col gap-4">
-            <Seats options={tier.seats} />
-
-            <List>
-              {tier.features.map((feature) => (
-                <ListItem key={feature} size="sm">
-                  <Avatar size="xs">
-                    <AvatarFallback>
-                      <Check className="size-4" strokeWidth={1.5} />
-                    </AvatarFallback>
-                  </Avatar>
-                  <ListItemText primary={feature} />
-                </ListItem>
-              ))}
-            </List>
-          </div>
+          {!selectable && (
+            <Button variant="outline" size="lg" weight="semibold" className="w-full">
+              Coming soon
+            </Button>
+          )}
         </div>
-
-        <Button variant="outline" size="lg" weight="semibold" className="w-full">
-          Coming soon
-        </Button>
-      </div>
-    </CardContent>
-  </Card>
-)
+      </CardContent>
+    </Card>
+  )
+}
 
 export default function PlanCards({ tiers, currentBadge }: { tiers: PlanTier[]; currentBadge: string }) {
   const [cycle, setCycle] = useState<Cycle>('month')

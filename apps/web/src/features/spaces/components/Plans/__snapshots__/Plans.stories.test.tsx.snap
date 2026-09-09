@@ -457,11 +457,12 @@ exports[`./Plans.stories ActivePlan 1`] = `
                           data-slot="input"
                           id="base-ui-_r_6_"
                           readonly=""
-                          value="10 Safe accounts"
+                          value="2 Safe accounts"
                         />
                       </div>
                       <ul
-                        class="m-0 flex list-none flex-col p-0"
+                        class="m-0 flex list-none p-0 flex-col"
+                        data-orientation="vertical"
                         data-slot="list"
                       >
                         <li
@@ -901,7 +902,8 @@ exports[`./Plans.stories ActivePlan 1`] = `
                         value="10 Safe accounts"
                       />
                       <ul
-                        class="m-0 flex list-none flex-col p-0"
+                        class="m-0 flex list-none p-0 flex-col"
+                        data-orientation="vertical"
                         data-slot="list"
                       >
                         <li
@@ -1389,7 +1391,8 @@ exports[`./Plans.stories ActivePlan 1`] = `
                         />
                       </div>
                       <ul
-                        class="m-0 flex list-none flex-col p-0"
+                        class="m-0 flex list-none p-0 flex-col"
+                        data-orientation="vertical"
                         data-slot="list"
                       >
                         <li
@@ -2253,11 +2256,12 @@ exports[`./Plans.stories Free 1`] = `
                           data-slot="input"
                           id="base-ui-_r_h_"
                           readonly=""
-                          value="10 Safe accounts"
+                          value="2 Safe accounts"
                         />
                       </div>
                       <ul
-                        class="m-0 flex list-none flex-col p-0"
+                        class="m-0 flex list-none p-0 flex-col"
+                        data-orientation="vertical"
                         data-slot="list"
                       >
                         <li
@@ -2690,7 +2694,8 @@ exports[`./Plans.stories Free 1`] = `
                         value="10 Safe accounts"
                       />
                       <ul
-                        class="m-0 flex list-none flex-col p-0"
+                        class="m-0 flex list-none p-0 flex-col"
+                        data-orientation="vertical"
                         data-slot="list"
                       >
                         <li
@@ -3178,7 +3183,8 @@ exports[`./Plans.stories Free 1`] = `
                         />
                       </div>
                       <ul
-                        class="m-0 flex list-none flex-col p-0"
+                        class="m-0 flex list-none p-0 flex-col"
+                        data-orientation="vertical"
                         data-slot="list"
                       >
                         <li
@@ -4104,11 +4110,12 @@ exports[`./Plans.stories Trial 1`] = `
                           data-slot="input"
                           id="base-ui-_r_u_"
                           readonly=""
-                          value="10 Safe accounts"
+                          value="2 Safe accounts"
                         />
                       </div>
                       <ul
-                        class="m-0 flex list-none flex-col p-0"
+                        class="m-0 flex list-none p-0 flex-col"
+                        data-orientation="vertical"
                         data-slot="list"
                       >
                         <li
@@ -4548,7 +4555,8 @@ exports[`./Plans.stories Trial 1`] = `
                         value="10 Safe accounts"
                       />
                       <ul
-                        class="m-0 flex list-none flex-col p-0"
+                        class="m-0 flex list-none p-0 flex-col"
+                        data-orientation="vertical"
                         data-slot="list"
                       >
                         <li
@@ -5036,7 +5044,8 @@ exports[`./Plans.stories Trial 1`] = `
                         />
                       </div>
                       <ul
-                        class="m-0 flex list-none flex-col p-0"
+                        class="m-0 flex list-none p-0 flex-col"
+                        data-orientation="vertical"
                         data-slot="list"
                       >
                         <li

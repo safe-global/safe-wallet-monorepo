@@ -56,7 +56,7 @@ exports[`./SafeProAnnouncementModal.stories Default 1`] = `
           class="p-1"
         >
           <div
-            class="relative aspect-[1056/369] w-full overflow-hidden rounded-t-[calc(var(--radius-xl)-4px)]"
+            class="relative w-full overflow-hidden rounded-t-[calc(var(--radius-xl)-4px)] aspect-[1056/369]"
           >
             <img
               alt="A Workspace from Safe Pro, with its accounts, members and transactions"

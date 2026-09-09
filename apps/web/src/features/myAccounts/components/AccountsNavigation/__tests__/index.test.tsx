@@ -5,17 +5,29 @@ const mockUseHasFeature = jest.fn()
 
 jest.mock('next/router', () => ({ useRouter: () => ({ pathname: '/welcome/spaces' }) }))
 jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
-jest.mock('@/public/images/safe-pro/pro-wordmark.svg', () => 'svg')
+jest.mock('@/public/images/safe-pro/safe-mark.svg', () => 'svg')
+jest.mock('@/public/images/safe-pro/safe-wordmark.svg', () => 'svg')
+jest.mock('@/public/images/safe-pro/pro-chip.svg', () => 'svg')
+jest.mock('@/public/images/safe-wallet-lockup.svg', () => 'svg')
 
 describe('AccountsNavigation', () => {
-  it.each([
-    [true, 1],
-    [false, 0],
-  ])('shows the Pro chip on the Workspaces tab only when SAFE_PRO is on (%s)', (enabled, count) => {
-    mockUseHasFeature.mockReturnValue(enabled)
+  it('shows the Safe Pro and Safe{Wallet} lockups when SAFE_PRO is on', () => {
+    mockUseHasFeature.mockReturnValue(true)
 
     render(<AccountsNavigation />)
 
-    expect(screen.queryAllByTestId('pro-chip')).toHaveLength(count)
+    expect(screen.getByRole('img', { name: 'Safe Pro' })).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: 'Safe{Wallet}' })).toBeInTheDocument()
+    expect(screen.queryByText('Workspaces')).not.toBeInTheDocument()
+  })
+
+  it('keeps the text labels when SAFE_PRO is off', () => {
+    mockUseHasFeature.mockReturnValue(false)
+
+    render(<AccountsNavigation />)
+
+    expect(screen.getByText('Workspaces')).toBeInTheDocument()
+    expect(screen.getByText('My accounts')).toBeInTheDocument()
+    expect(screen.queryAllByRole('img')).toHaveLength(0)
   })
 })

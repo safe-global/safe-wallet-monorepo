@@ -1,0 +1,312 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./SafeProTrialActivatedModal.stories Default 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      data-base-ui-portal=""
+      data-slot="dialog-portal"
+      id="_r_2_"
+    >
+      <div
+        aria-hidden="true"
+        data-base-ui-inert=""
+        role="presentation"
+        style="position: fixed; inset: 0; user-select: none;"
+      />
+      <div
+        aria-hidden="true"
+        class="bg-backdrop supports-backdrop-filter:backdrop-blur-xs fixed inset-0 z-[var(--z-overlay)] duration-100 data-open:animate-in data-closed:animate-out data-open:fade-in-0 data-closed:fade-out-0 data-starting-style:opacity-0 data-ending-style:opacity-0 data-closed:pointer-events-none"
+        data-base-ui-inert=""
+        data-open=""
+        data-slot="dialog-overlay"
+        role="presentation"
+        style="user-select: none;"
+      />
+      <span
+        data-base-ui-focus-guard=""
+        data-type="inside"
+        role="button"
+        style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;"
+        tabindex="0"
+      />
+      <div
+        aria-labelledby="base-ui-_r_3_"
+        class="data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-starting-style:opacity-0 data-ending-style:opacity-0 fixed top-[50%] left-[50%] z-[var(--z-overlay)] w-full -translate-x-1/2 -translate-y-1/2 rounded-xl shadow-lg duration-200 max-w-[600px] p-0 bg-card"
+        data-base-ui-focusable=""
+        data-open=""
+        data-slot="dialog-content"
+        id="_r_0_"
+        role="dialog"
+        style="--nested-dialogs: 0;"
+        tabindex="-1"
+      >
+        <div
+          class="p-1 pb-2"
+        >
+          <div
+            class="relative w-full overflow-hidden rounded-t-[calc(var(--radius-xl)-4px)] aspect-[568/369] *:object-left"
+          >
+            <img
+              alt="A Workspace from Safe Pro, with its accounts, members and transactions"
+              class="object-cover dark:hidden"
+              data-nimg="fill"
+              decoding="async"
+              loading="lazy"
+              sizes="100vw"
+              src="/_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=3840&q=75"
+              srcset="/_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=640&q=75 640w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=750&q=75 750w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=828&q=75 828w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=1080&q=75 1080w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=1200&q=75 1200w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=1920&q=75 1920w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=2048&q=75 2048w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=3840&q=75 3840w"
+              style="position: absolute; height: 100%; width: 100%; left: 0px; top: 0px; right: 0px; bottom: 0px; color: transparent;"
+            />
+            <img
+              alt="A Workspace from Safe Pro, with its accounts, members and transactions"
+              class="hidden object-cover dark:block"
+              data-nimg="fill"
+              decoding="async"
+              loading="lazy"
+              src="/images/safe-pro/pro-announcement-hero-dark.svg"
+              style="position: absolute; height: 100%; width: 100%; left: 0px; top: 0px; right: 0px; bottom: 0px; color: transparent;"
+            />
+          </div>
+          <div
+            class="flex flex-col items-center gap-8 px-8 pt-6 pb-4"
+          >
+            <div
+              class="flex flex-col gap-2"
+            >
+              <h2
+                class="text-foreground m-0 scroll-m-20 text-2xl font-semibold leading-[28.8px] tracking-normal block w-full text-center"
+                data-slot="typography"
+                data-variant="h3"
+                id="base-ui-_r_3_"
+              >
+                Your 
+                <span
+                  class="highlight"
+                >
+                  Safe Pro
+                </span>
+                 trial is active until 
+                Dec 6, 2026
+              </h2>
+              <p
+                class="m-0 text-base leading-6 font-normal block w-full text-center text-muted-foreground"
+                data-slot="typography"
+                data-variant="paragraph"
+              >
+                Your paid subscription only starts after you add billing details. If you don't add them before the trial ends, your Workspace will be locked. Your Safe accounts remain available outside the Workspace.
+              </p>
+            </div>
+            <button
+              class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-10 gap-1.5 px-4 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3 w-full"
+              data-slot="button"
+              tabindex="0"
+              type="button"
+            >
+              Go to Workspace
+            </button>
+          </div>
+        </div>
+        <button
+          class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-8 in-data-[slot=button-group]:rounded-sm absolute top-4 right-4"
+          data-slot="dialog-close"
+          tabindex="0"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-x"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M18 6 6 18"
+            />
+            <path
+              d="m6 6 12 12"
+            />
+          </svg>
+          <span
+            class="sr-only"
+          >
+            Close
+          </span>
+        </button>
+      </div>
+      <span
+        data-base-ui-focus-guard=""
+        data-type="inside"
+        role="button"
+        style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;"
+        tabindex="0"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./SafeProTrialActivatedModal.stories NewWorkspace 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      data-base-ui-portal=""
+      data-slot="dialog-portal"
+      id="_r_6_"
+    >
+      <div
+        aria-hidden="true"
+        data-base-ui-inert=""
+        role="presentation"
+        style="position: fixed; inset: 0; user-select: none;"
+      />
+      <div
+        aria-hidden="true"
+        class="bg-backdrop supports-backdrop-filter:backdrop-blur-xs fixed inset-0 z-[var(--z-overlay)] duration-100 data-open:animate-in data-closed:animate-out data-open:fade-in-0 data-closed:fade-out-0 data-starting-style:opacity-0 data-ending-style:opacity-0 data-closed:pointer-events-none"
+        data-base-ui-inert=""
+        data-open=""
+        data-slot="dialog-overlay"
+        role="presentation"
+        style="user-select: none;"
+      />
+      <span
+        data-base-ui-focus-guard=""
+        data-type="inside"
+        role="button"
+        style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;"
+        tabindex="0"
+      />
+      <div
+        aria-labelledby="base-ui-_r_7_"
+        class="data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-starting-style:opacity-0 data-ending-style:opacity-0 fixed top-[50%] left-[50%] z-[var(--z-overlay)] w-full -translate-x-1/2 -translate-y-1/2 rounded-xl shadow-lg duration-200 max-w-[600px] p-0 bg-card"
+        data-base-ui-focusable=""
+        data-open=""
+        data-slot="dialog-content"
+        id="_r_4_"
+        role="dialog"
+        style="--nested-dialogs: 0;"
+        tabindex="-1"
+      >
+        <div
+          class="p-1 pb-2"
+        >
+          <div
+            class="relative w-full overflow-hidden rounded-t-[calc(var(--radius-xl)-4px)] aspect-[568/369] *:object-left"
+          >
+            <img
+              alt="A Workspace from Safe Pro, with its accounts, members and transactions"
+              class="object-cover dark:hidden"
+              data-nimg="fill"
+              decoding="async"
+              loading="lazy"
+              sizes="100vw"
+              src="/_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=3840&q=75"
+              srcset="/_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=640&q=75 640w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=750&q=75 750w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=828&q=75 828w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=1080&q=75 1080w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=1200&q=75 1200w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=1920&q=75 1920w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=2048&q=75 2048w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=3840&q=75 3840w"
+              style="position: absolute; height: 100%; width: 100%; left: 0px; top: 0px; right: 0px; bottom: 0px; color: transparent;"
+            />
+            <img
+              alt="A Workspace from Safe Pro, with its accounts, members and transactions"
+              class="hidden object-cover dark:block"
+              data-nimg="fill"
+              decoding="async"
+              loading="lazy"
+              src="/images/safe-pro/pro-announcement-hero-dark.svg"
+              style="position: absolute; height: 100%; width: 100%; left: 0px; top: 0px; right: 0px; bottom: 0px; color: transparent;"
+            />
+          </div>
+          <div
+            class="flex flex-col items-center gap-8 px-8 pt-6 pb-4"
+          >
+            <div
+              class="flex flex-col gap-2"
+            >
+              <h2
+                class="text-foreground m-0 scroll-m-20 text-2xl font-semibold leading-[28.8px] tracking-normal block w-full text-center"
+                data-slot="typography"
+                data-variant="h3"
+                id="base-ui-_r_7_"
+              >
+                Your 
+                <span
+                  class="highlight"
+                >
+                  Safe Pro
+                </span>
+                 trial is active until 
+                Dec 6, 2026
+              </h2>
+              <p
+                class="m-0 text-base leading-6 font-normal block w-full text-center text-muted-foreground"
+                data-slot="typography"
+                data-variant="paragraph"
+              >
+                Your paid subscription only starts after you add billing details. If you don't add them before the trial ends, your Workspace will be locked. Your Safe accounts remain available outside the Workspace.
+              </p>
+            </div>
+            <a
+              class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-10 gap-1.5 px-4 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3 w-full"
+              data-slot="button"
+              href="/welcome/create-space"
+            >
+              Go to Workspace
+            </a>
+          </div>
+        </div>
+        <button
+          class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-8 in-data-[slot=button-group]:rounded-sm absolute top-4 right-4"
+          data-slot="dialog-close"
+          tabindex="0"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-x"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M18 6 6 18"
+            />
+            <path
+              d="m6 6 12 12"
+            />
+          </svg>
+          <span
+            class="sr-only"
+          >
+            Close
+          </span>
+        </button>
+      </div>
+      <span
+        data-base-ui-focus-guard=""
+        data-type="inside"
+        role="button"
+        style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;"
+        tabindex="0"
+      />
+    </div>
+  </div>
+</div>
+`;

@@ -17,8 +17,19 @@ import { cn } from '@/utils/cn'
  * </List>
  * ```
  */
-function List({ className, ...props }: ComponentProps<'ul'>) {
-  return <ul className={cn('m-0 flex list-none flex-col p-0', className)} data-slot="list" {...props} />
+function List({
+  className,
+  orientation = 'vertical',
+  ...props
+}: ComponentProps<'ul'> & { orientation?: 'vertical' | 'horizontal' }) {
+  return (
+    <ul
+      className={cn('m-0 flex list-none p-0', orientation === 'horizontal' ? 'flex-row gap-4' : 'flex-col', className)}
+      data-slot="list"
+      data-orientation={orientation}
+      {...props}
+    />
+  )
 }
 
 function ListItem({ className, size = 'default', ...props }: ComponentProps<'li'> & { size?: 'default' | 'sm' }) {

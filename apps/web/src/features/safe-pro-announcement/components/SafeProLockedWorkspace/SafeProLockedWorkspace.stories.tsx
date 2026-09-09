@@ -5,7 +5,7 @@ const meta = {
   component: SafeProLockedWorkspace,
   title: 'Features/SafePro/SafeProLockedWorkspace',
   tags: ['autodocs'],
-  args: { plansHref: { pathname: '/spaces/plans', query: { spaceId: '1' } } },
+  args: { onStartTrial: () => {} },
 } satisfies Meta<typeof SafeProLockedWorkspace>
 
 export default meta
