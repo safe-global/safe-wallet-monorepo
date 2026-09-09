@@ -40,7 +40,10 @@ const WorkspaceTwoFactorAwarenessCard = ({
       <X className="size-4" />
     </button>
 
-    <ShieldCheck className={cn('size-4 shrink-0', css.icon)} aria-hidden />
+    {/* 20px row, the height of the Safe Pro banner's PRO chip, so swapping the two banners keeps the footer still. */}
+    <span className="flex h-5 shrink-0 items-center">
+      <ShieldCheck className={cn('size-4', css.icon)} aria-hidden />
+    </span>
 
     <div className="flex w-full flex-col gap-1">
       <Typography variant="paragraph-small-bold" className="text-foreground">
