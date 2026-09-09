@@ -2,7 +2,6 @@ import useGasPrice from '@/hooks/useGasPrice'
 import ModalDialog from '@/components/common/ModalDialog'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Typography } from '@/components/ui/typography'
 import RocketSpeedup from '@/public/images/common/ic-rocket-speedup.svg'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -27,7 +26,7 @@ import { getTransactionTrackingType } from '@/services/analytics/tx-tracking'
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 import { trackError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
-import CheckWallet from '@/components/common/CheckWallet'
+import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -52,6 +51,8 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
   const onboard = useOnboard()
   const chainInfo = useCurrentChain()
   const safeAddress = useSafeAddress()
+  const isWrongChain = useIsWrongChain()
+  // Sole authorization: a replacement needs the original (from, nonce), so only the submitter can send one
   const hasActions = signerAddress && signerAddress === wallet?.address
   const dispatch = useAppDispatch()
   const [trigger] = useLazyTransactionsGetTransactionByIdV1Query()
@@ -194,7 +195,7 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
             )}
           </div>
           <div className="[&:not(:empty)]:mt-6">
-            <NetworkWarning />
+            <NetworkWarning action="speed up a transaction" />
           </div>
         </div>
 
@@ -203,19 +204,9 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
             Cancel
           </Button>
 
-          <Tooltip>
-            <TooltipTrigger render={<span className="inline-flex" />}>
-              {/* Only the wallet that broadcast the tx can replace it by nonce, owner or not */}
-              <CheckWallet allowNonOwner checkNetwork={!isDisabled}>
-                {(isOk) => (
-                  <Button disabled={!isOk || isDisabled} onClick={onSubmit}>
-                    {isDisabled ? <Spinner className="size-5" /> : 'Confirm'}
-                  </Button>
-                )}
-              </CheckWallet>
-            </TooltipTrigger>
-            <TooltipContent>Speed up transaction</TooltipContent>
-          </Tooltip>
+          <Button disabled={isDisabled || isWrongChain} onClick={onSubmit}>
+            {isDisabled ? <Spinner className="size-5" /> : 'Confirm'}
+          </Button>
         </div>
       </ModalDialog>
     )

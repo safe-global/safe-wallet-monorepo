@@ -5,12 +5,10 @@ import { extendedSafeInfoBuilder, addressExBuilder } from '@/tests/builders/safe
 import { chainBuilder } from '@/tests/builders/chains'
 import { PendingStatus, PendingTxType, type PendingProcessingTx } from '@/store/pendingTxsSlice'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import useWallet, { useSigner } from '@/hooks/wallets/useWallet'
-import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
-import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
+import useWallet from '@/hooks/wallets/useWallet'
+import useIsWrongChain from '@/hooks/useIsWrongChain'
 import * as useChains from '@/hooks/useChains'
 import { createExistingTx } from '@/services/tx/tx-sender'
-import type Safe from '@safe-global/protocol-kit'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import SpeedUpModal from '.'
 
@@ -20,7 +18,6 @@ const SAFE_ADDRESS = fakerChecksummedAddress()
 jest.mock('@/hooks/wallets/useWallet', () => ({
   __esModule: true,
   default: jest.fn(),
-  useSigner: jest.fn(),
 }))
 
 jest.mock('@/hooks/wallets/useOnboard', () => ({
@@ -34,10 +31,6 @@ jest.mock('@/hooks/useSafeAddress', () => ({
 }))
 
 jest.mock('@/hooks/useSafeInfo')
-
-jest.mock('@/hooks/useNestedSafeOwners')
-
-jest.mock('@/hooks/coreSDK/safeCoreSDK')
 
 jest.mock('@/hooks/useIsWrongChain', () => ({
   __esModule: true,
@@ -60,11 +53,9 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/transactions', () => ({
 }))
 
 const mockUseWallet = useWallet as jest.MockedFunction<typeof useWallet>
-const mockUseSigner = useSigner as jest.MockedFunction<typeof useSigner>
 const mockUseSafeInfo = useSafeInfo as jest.MockedFunction<typeof useSafeInfo>
-const mockUseNestedSafeOwners = useNestedSafeOwners as jest.MockedFunction<typeof useNestedSafeOwners>
-const mockUseSafeSdk = useSafeSDK as jest.MockedFunction<typeof useSafeSDK>
 const mockCreateExistingTx = createExistingTx as jest.MockedFunction<typeof createExistingTx>
+const mockUseIsWrongChain = useIsWrongChain as jest.MockedFunction<typeof useIsWrongChain>
 
 const pendingTx: PendingProcessingTx = {
   chainId: '1',
@@ -113,10 +104,8 @@ describe('SpeedUpModal', () => {
     jest.clearAllMocks()
     jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(chainBuilder().with({ chainId: '1' }).build())
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
-    mockUseSafeSdk.mockReturnValue({} as unknown as Safe)
-    mockUseNestedSafeOwners.mockReturnValue([])
+    mockUseIsWrongChain.mockReturnValue(false)
     mockUseWallet.mockReturnValue({ address: SIGNER_ADDRESS, provider: {} } as unknown as ConnectedWallet)
-    mockUseSigner.mockReturnValue({ address: SIGNER_ADDRESS } as unknown as ReturnType<typeof useSigner>)
     mockCreateExistingTx.mockResolvedValue({
       data: { nonce: 5 },
       signatures: new Map([[SIGNER_ADDRESS, {}]]),
@@ -139,9 +128,25 @@ describe('SpeedUpModal', () => {
     expect(queryByLabelText('Your connected wallet is not a signer of this Safe account')).not.toBeInTheDocument()
   })
 
+  it('disables Confirm and explains why when connected to the wrong chain', async () => {
+    mockUseIsWrongChain.mockReturnValue(true)
+
+    const { findByText, getByText } = renderModal()
+
+    expect(await findByText('Confirm')).toBeDisabled()
+    expect(getByText('Change your wallet network')).toBeInTheDocument()
+    expect(getByText(/trying to speed up a transaction/)).toBeInTheDocument()
+  })
+
+  it('shows no network warning when Confirm is enabled', async () => {
+    const { findByText, queryByText } = renderModal()
+
+    expect(await findByText('Confirm')).not.toBeDisabled()
+    expect(queryByText('Change your wallet network')).not.toBeInTheDocument()
+  })
+
   it('renders nothing when no wallet is connected', async () => {
     mockUseWallet.mockReturnValue(null)
-    mockUseSigner.mockReturnValue(null)
 
     const { queryByTestId } = renderModal()
     await waitFor(() => expect(mockCreateExistingTx).toHaveBeenCalled())
