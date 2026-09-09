@@ -50,6 +50,14 @@ describe('getRtkQueryErrorMessage', () => {
     expect(getRtkQueryErrorMessage(error)).toBe('Names must be at least 3 characters long')
   })
 
+  it('drops the backend message for a 451 in favour of the agreed copy', () => {
+    const error: FetchBaseQueryError = {
+      status: 451,
+      data: { code: 451, message: 'Blocked in your region by provider edge-node-7' },
+    }
+    expect(getRtkQueryErrorMessage(error)).toBe(CGW_SAFE_UNAVAILABLE)
+  })
+
   it("replaces CGW's elevation_required marker with copy written for users", () => {
     const error: FetchBaseQueryError = { status: 403, data: { message: ELEVATION_REQUIRED_ERROR } }
     expect(getRtkQueryErrorMessage(error)).toBe(ELEVATION_REQUIRED_MESSAGE)
