@@ -34,7 +34,9 @@
   position: relative;
 }
 
-/* Back button */
+/* Bottom-left of the step's last card, in the same row as the right-aligned TxCardActions inside
+   it. --space-3 is the card's own padding, so the button lines up with the actions. This holds at
+   every width: the card is never too narrow for both buttons, so there is no stacked layout. */
 .backButton {
   position: absolute;
   left: var(--space-3);
@@ -109,17 +111,6 @@
 .widget {
   /* Height of transaction type title */
   margin-top: 30px;
-}
-
-@media (max-width: 1199px) {
-  .backButton {
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  .step :global(.txCardActions) {
-    margin-bottom: var(--space-8);
-  }
 }
 
 @media (max-width: 899.95px) {
