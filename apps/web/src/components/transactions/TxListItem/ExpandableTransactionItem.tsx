@@ -76,12 +76,9 @@ const ExpandableTransactionItem = ({
         <AccordionContent
           data-testid="accordion-details"
           keepMounted={hasExpanded}
-          // Full-bleed panel: the details draw their separators — and the vertical rule beside the
-          // audit log — as borders on their own blocks, so any padding here holds those rules off
-          // the card's edges. The inset moves onto each block via `--tx-details-edge-inset` (see
-          // TxDetails/styles.module.css), matching the trigger's horizontal padding above so text
-          // lands exactly where it did. `pb-0` for the same reason: the blocks bring their own
-          // bottom padding, and padding here would cut the vertical rule short of the card's edge.
+          // Full-bleed: the details draw separators (and the audit-log rule) as block borders, so padding
+          // here would hold them off the card edges. Inset moves onto each block via `--tx-details-edge-inset`
+          // (TxDetails/styles.module.css); `pb-0` because the blocks bring their own bottom padding.
           className={classNames(
             'pt-0 pb-0',
             // Mirrors the trigger's horizontal padding above so the details' text lands on the same

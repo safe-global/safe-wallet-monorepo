@@ -37,14 +37,10 @@ const walletConnectV2 = () => {
       },
       themeMode: prefersDarkMode() ? 'dark' : 'light',
     },
-    // No `requiredChains`: anything listed there lands in WalletConnect's `requiredNamespaces`,
-    // which a wallet cannot negotiate. A wallet that can't serve the Safe's chain — MetaMask with
-    // test networks off, looking at a Sepolia Safe — shows the approval sheet, then silently never
-    // returns a session, so the connect hangs with nothing logged on either side.
-    // Omitting it also leaves `optionalChains` at its default (every chain onboard was
-    // initialised with), so the wallet connects with whatever it supports. Being on the wrong
-    // chain afterwards is already handled: `useIsWrongChain` gates the UI and `assertWalletChain`
-    // switches the wallet before signing.
+    // No `requiredChains`: they become WalletConnect `requiredNamespaces` a wallet can't negotiate, so a
+    // wallet that can't serve the Safe's chain (e.g. MetaMask with test networks off on Sepolia) silently
+    // never returns a session and the connect hangs. Omitting it connects with whatever the wallet supports;
+    // a wrong chain afterwards is handled by `useIsWrongChain` (UI) and `assertWalletChain` (before signing).
     dappUrl: location.origin,
   })
 }

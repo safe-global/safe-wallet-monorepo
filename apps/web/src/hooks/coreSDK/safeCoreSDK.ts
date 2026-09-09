@@ -41,12 +41,8 @@ export const initSafeSDK = async ({
   let isL1SafeSingleton = chainId === chains.eth
   let contractNetworks: ContractNetworksConfig | undefined
 
-  // For versions >= 1.4.1, resolve all addresses chain-agnostically (works on any chain).
-  // Derive deployment type AND L1/L2 flavour from the master copy so that Safes on
-  // zk chains with a canonical master copy get canonical aux contracts (and vice
-  // versa), and Safes on L2 chains running an L1 master copy resolve against the
-  // L1 singleton table. Chain-level flags are only used as defaults when the master
-  // copy can't be matched (e.g. custom / unregistered deployments).
+  // For >= 1.4.1, resolve addresses chain-agnostically: derive deployment type and L1/L2 flavour from the
+  // master copy (chain-level flags are only fallback defaults when it can't be matched).
   if (isChainAgnosticVersion(safeVersion) && isL2Chain !== undefined) {
     const { deploymentType, isL1 } = getDeploymentTypeForMasterCopy(implementation, safeVersion, {
       deploymentType: isZkChain ? 'zksync' : 'canonical',

@@ -103,12 +103,8 @@ const useTxNotifications = (): void => {
         } else if (ledgerError) {
           message = getLedgerUserMessage(ledgerError)
         } else if (isError && isRateLimitError(detail.error)) {
-          // Translate transient RPC rate-limit failures into friendly copy.
-          // The raw error from viem looks like a contract revert ("Request is
-          // being rate limited"); we replace the message but keep the original
-          // in detailedMessage for debugging.
-          // Checked before the CGW classification so a 429-carrying error reads
-          // the same here as it does inline in `TxSubmitError` (WA-3252).
+          // viem surfaces a rate-limit failure as a contract revert; swap in friendly copy (original kept
+          // in detailedMessage). Checked before CGW classification so a 429 matches `TxSubmitError` (WA-3252).
           message = RATE_LIMIT_USER_MESSAGE
         } else if (cgwError) {
           message = cgwError.message

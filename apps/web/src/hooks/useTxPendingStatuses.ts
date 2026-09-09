@@ -76,13 +76,9 @@ export const useTxMonitor = (): void => {
         continue
       }
 
-      // The tx was sped up: stop watching the replaced hash so it cannot report on the old attempt.
-      // Only reliable for a hash watched by a single txId — a batch execution dispatches PROCESSING
-      // for every txId with the same hash, and `SimpleTxWatcher` keeps one unsubscribe per hash, so
-      // the stale block listeners of the other txIds in the batch survive this call.
-      // Deliberately not awaited: `stopWatchingTxHash` has a synchronous body, so the replaced hash
-      // is unsubscribed before the replacement is watched below. That ordering has to be revisited
-      // if it ever awaits internally.
+      // Sped-up tx: stop watching the replaced hash. Batch execution shares one hash across txIds but
+      // `SimpleTxWatcher` unsubscribes per hash, so other txIds' stale listeners survive. Not awaited —
+      // relies on `stopWatchingTxHash` being synchronous (revisit if it ever awaits internally).
       if (monitored?.type === 'tx') {
         SimpleTxWatcher.getInstance().stopWatchingTxHash(monitored.id)
       }
