@@ -112,7 +112,7 @@ jobs:
   e2e:
     needs: plan
     # Pin the OS image so every --parallel shard reports the same osVersion to Cypress Cloud (else mismatched shards are dropped).
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04.4
     timeout-minutes: 40
     name: ${{ needs.plan.outputs.title }}
     permissions:
