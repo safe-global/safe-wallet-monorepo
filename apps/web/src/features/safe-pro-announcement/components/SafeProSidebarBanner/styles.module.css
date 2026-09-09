@@ -27,7 +27,7 @@
 }
 
 :global(.dark) .learnMore {
-  background-color: #7ffab7;
+  background-color: var(--color-static-text-brand);
 }
 
 :global(.dark) .arrow {
