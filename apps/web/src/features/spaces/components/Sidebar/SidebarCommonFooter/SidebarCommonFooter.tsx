@@ -40,21 +40,22 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
   const { pathname } = useRouter()
   const [isSafeProBannerDismissed, dismissSafeProBanner] = useSafeProSidebarBannerDismissed()
   // The Plans page is the banner's own link destination, so hide it there.
-  const showSafeProBanner = isSafeProEnabled && !isSafeProBannerDismissed && pathname !== AppRoutes.spaces.plans
+  const hasSafeProBanner = isSafeProEnabled && pathname !== AppRoutes.spaces.plans
+  const showSafeProBanner = hasSafeProBanner && !isSafeProBannerDismissed
 
   const spaceId = useCurrentSpaceId()
   // Own flag, separate from the 2FA feature itself, so the card can be switched off on its own.
   const isTwoFactorCardEnabled = useHasFeature(FEATURES.TWO_FACTOR_AWARENESS_BANNER) === true
   const [isTwoFactorCardDismissed, dismissTwoFactorCard] = useTwoFactorAwarenessDismissed()
-  // One banner slot, Safe Pro first: the 2FA card only takes it once the Safe Pro banner is gone.
   // Continue needs a Workspace to link to, so the card waits until one is known. Like the Safe Pro
   // banner, it is hidden on its own destination.
-  const showTwoFactorCard =
-    !showSafeProBanner &&
+  const hasTwoFactorCard =
     isTwoFactorCardEnabled &&
     !isTwoFactorCardDismissed &&
     spaceId !== null &&
     pathname !== AppRoutes.spaces.settingsGeneral
+  // One banner slot, Safe Pro first: the 2FA card only takes it once the Safe Pro banner is gone.
+  const showTwoFactorCard = hasTwoFactorCard && !showSafeProBanner
 
   const onToggleGateway = (checked: boolean) => {
     setIsProdGateway(checked)
@@ -100,19 +101,25 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
       )}
 
       <SidebarMenu className="gap-0.5">
-        {showSafeProBanner && (
+        {(showSafeProBanner || showTwoFactorCard) && (
           <SidebarMenuItem className="group-data-[collapsible=icon]:hidden">
-            <SafeProSidebarBanner className="mb-2" onDismiss={dismissSafeProBanner} />
-          </SidebarMenuItem>
-        )}
-
-        {showTwoFactorCard && (
-          <SidebarMenuItem className="group-data-[collapsible=icon]:hidden">
-            <WorkspaceTwoFactorAwarenessCard
-              className="mb-2"
-              spaceId={spaceId ?? undefined}
-              onDismiss={dismissTwoFactorCard}
-            />
+            {/* Both banners share one grid cell, so the slot keeps the taller banner's height and nothing
+                below it moves when one banner gives way to the other. The one not shown stays invisible. */}
+            <div className="mb-2 grid">
+              {hasSafeProBanner && (
+                <SafeProSidebarBanner
+                  className={cn('col-start-1 row-start-1', !showSafeProBanner && 'invisible')}
+                  onDismiss={dismissSafeProBanner}
+                />
+              )}
+              {hasTwoFactorCard && (
+                <WorkspaceTwoFactorAwarenessCard
+                  className={cn('col-start-1 row-start-1', !showTwoFactorCard && 'invisible')}
+                  spaceId={spaceId ?? undefined}
+                  onDismiss={dismissTwoFactorCard}
+                />
+              )}
+            </div>
           </SidebarMenuItem>
         )}
 
