@@ -149,7 +149,6 @@ describe('useTotalBalances', () => {
 
       expect(result.current.data).toBeUndefined()
       expect(result.current.error).toBeInstanceOf(Error)
-      // loading must drop to false so consumers can render `--` instead of an endless skeleton
       expect(result.current.loading).toBe(false)
     })
 

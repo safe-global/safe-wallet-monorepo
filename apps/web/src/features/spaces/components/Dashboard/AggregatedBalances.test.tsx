@@ -33,17 +33,22 @@ describe('AggregatedBalance total value', () => {
   beforeEach(() => jest.clearAllMocks())
 
   it('shows -- when safes were requested but the settled response is empty (all fetches dropped)', () => {
-    // The overview query returns { data: [] } even when every safe's fetch failed (Promise.allSettled),
-    // so an empty array with requested safes means the balances couldn't be fetched.
-    mockUseQuery.mockReturnValue({ data: [], isLoading: false })
+    mockUseQuery.mockReturnValue({ data: [], isLoading: false, isFetching: false })
     render(<AggregatedBalance safeItems={safeItems} />)
     expect(mockDashboardHeader).toHaveBeenCalledWith(expect.objectContaining({ value: '--', error: true }))
+  })
+
+  it('does not flag an error while a fetch for new safes is in flight over stale empty data', () => {
+    mockUseQuery.mockReturnValue({ data: [], isLoading: false, isFetching: true })
+    render(<AggregatedBalance safeItems={safeItems} />)
+    expect(mockDashboardHeader).toHaveBeenCalledWith(expect.objectContaining({ error: false }))
   })
 
   it('shows a formatted total on success', () => {
     mockUseQuery.mockReturnValue({
       data: [{ fiatTotal: '1000' }, { fiatTotal: '234.5' }],
       isLoading: false,
+      isFetching: false,
     })
     render(<AggregatedBalance safeItems={safeItems} />)
     const value = mockDashboardHeader.mock.calls[0][0].value
@@ -52,7 +57,7 @@ describe('AggregatedBalance total value', () => {
   })
 
   it('shows $0.00 (not --) for an empty workspace with no safes', () => {
-    mockUseQuery.mockReturnValue({ data: [], isLoading: false })
+    mockUseQuery.mockReturnValue({ data: [], isLoading: false, isFetching: false })
     render(<AggregatedBalance safeItems={[]} />)
     const value = mockDashboardHeader.mock.calls[0][0].value
     expect(value).not.toBe('--')

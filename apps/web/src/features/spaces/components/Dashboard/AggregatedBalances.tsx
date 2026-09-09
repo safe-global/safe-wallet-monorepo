@@ -31,11 +31,14 @@ const AggregatedBalance = ({
   const chain = useChain(firstSafe?.chainId ?? '')
   const [isReceiveModalOpen, setIsReceiveModalOpen] = useState(false)
 
-  const { data: safeOverviews, isLoading } = useGetMultipleSafeOverviewsQuery({ safes: safeItems, currency })
+  const {
+    data: safeOverviews,
+    isLoading,
+    isFetching,
+  } = useGetMultipleSafeOverviewsQuery({ safes: safeItems, currency })
   const aggregatedBalance = safeOverviews ? safeOverviews.reduce((prev, next) => prev + Number(next.fiatTotal), 0) : 0
-  // The overview query drops failed safes and never surfaces an error, so a total failure returns an
-  // empty array. Requested safes but got none back → couldn't fetch → show `--`, not a misleading $0.00.
-  const hasError = !isLoading && safeItems.length > 0 && (safeOverviews?.length ?? 0) === 0
+  // The overview query drops failed safes instead of erroring, so requested safes with an empty settled response means the fetch failed → `--`, not $0.00
+  const hasError = !isFetching && safeItems.length > 0 && (safeOverviews?.length ?? 0) === 0
 
   const safeQueryParam = chain && firstSafe ? `${chain.shortName}:${firstSafe.address}` : undefined
 

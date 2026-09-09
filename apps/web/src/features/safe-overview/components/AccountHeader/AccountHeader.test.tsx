@@ -29,15 +29,28 @@ jest.mock('next/router', () => ({ useRouter: jest.fn(() => ({ query: {}, push: j
 describe('AccountHeader total value', () => {
   beforeEach(() => jest.clearAllMocks())
 
-  it('shows -- when balances errored and total is empty', () => {
+  it('shows -- instead of a skeleton when balances errored and total is empty', () => {
     mockUseVisibleBalances.mockReturnValue({
       balances: { items: [], fiatTotal: '' },
-      loaded: true,
+      loaded: false,
       loading: false,
       error: 'Request failed',
     })
     render(<AccountHeader />)
-    expect(mockDashboardHeader).toHaveBeenCalledWith(expect.objectContaining({ value: '--' }))
+    expect(mockDashboardHeader).toHaveBeenCalledWith(
+      expect.objectContaining({ value: '--', loading: false, error: true }),
+    )
+  })
+
+  it('keeps the loading skeleton while balances are not loaded and there is no error', () => {
+    mockUseVisibleBalances.mockReturnValue({
+      balances: { items: [], fiatTotal: '' },
+      loaded: false,
+      loading: false,
+      error: undefined,
+    })
+    render(<AccountHeader />)
+    expect(mockDashboardHeader).toHaveBeenCalledWith(expect.objectContaining({ loading: true }))
   })
 
   it('shows $0.00 for a successful empty Safe (no error)', () => {

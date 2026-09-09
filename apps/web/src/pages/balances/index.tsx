@@ -65,7 +65,7 @@ const Balances: NextPage = () => {
           <div className="flex flex-row items-center justify-between">
             <TotalAssetValue
               fiatTotal={tokensFiatTotal}
-              error={!!error && !tokensFiatTotal}
+              error={!!error && tokensFiatTotal === undefined}
               title="Total assets value"
               tooltipTitle="Total from this list only. Portfolio total includes positions and may use other token data."
             />

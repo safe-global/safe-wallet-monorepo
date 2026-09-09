@@ -57,9 +57,7 @@ const deriveIsReadOnly = (
   return !overview.owners.some((owner) => sameAddress(owner.value, walletAddress))
 }
 
-// CGW omits (via Promise.allSettled) any safe whose overview fetch rejected, so a deployed safe
-// absent from a settled response means its data couldn't be fetched → null renders `--` instead of a
-// misleading `0`. Undeployed safes render a badge, and a still-loading query keeps `'0'`.
+// CGW drops safes whose overview fetch rejected, so a deployed safe absent from a settled response means its data couldn't be fetched → null renders `--`, not a misleading `0`
 const resolveBalance = (
   overview: SafeOverview | undefined,
   isLoading: boolean,
