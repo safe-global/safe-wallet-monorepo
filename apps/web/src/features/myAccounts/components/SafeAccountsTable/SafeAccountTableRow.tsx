@@ -303,10 +303,10 @@ const RowCell = ({
       // The Name cell hosts the always-visible grip (w-7, anchored left-0), so it needs extra left
       // padding for the avatar to start after the grip rather than under it. The selection cell's
       // grip is the narrower `inline` one and fits the default padding. Widening happens in
-      // styles.module.css — the `td:first-of-type` rule there outranks a utility class.
+      // the panel variant — the `td:first-of-type` rule there outranks a utility class.
       data-hosts-handle={hostsHandle && column.id !== 'select' ? '' : undefined}
       // Slim 8px padding (ui default), 16px on the outer cells + the hover-pill inset borders live in
-      // styles.module.css (they need background-clip + specificity the primitive's classes can't beat).
+      // the panel variant (they need background-clip + specificity the primitive's classes can't beat).
       className={cn(hostsHandle ? 'relative overflow-visible' : 'overflow-hidden')}
       style={{
         textAlign: column.align ?? 'left',
@@ -415,13 +415,15 @@ const SafeAccountTableRow = ({
       data-variant={line.variant}
       // Locked rows opt out of the table's grey row hover (see the Table sx override).
       data-disabled={checkbox?.disabledReason ? '' : undefined}
-      // Draws the row separator (via the Table sx override); false only at the last row of a group/list.
-      data-divider={showDivider ? '' : undefined}
-      // Band membership marker — the card styling lives in the Table sx, keyed off this attribute.
+      // The variant draws a separator under every row but the last; suppress it inside a group and
+      // inside a band, both of which close themselves.
+      data-no-divider={!showDivider || highlighted ? '' : undefined}
+      // Band membership marker — the card styling is keyed off this attribute.
       data-highlighted={highlighted && !isDragging ? '' : undefined}
-      // group/row lets the shared identity cell reveal its copy/explorer/rename icons on row hover.
-      // The row border + row-level hover are neutralised in styles.module.css (we paint the hover pill
-      // on the cells and draw our own data-divider separator); the lifted-while-dragging chrome is here.
+      // The band fill is the row's own; opt out of the shared hover pill so it isn't painted over.
+      data-no-hover={highlighted ? '' : undefined}
+      // group/row lets the shared identity cell reveal its copy/explorer/rename icons on row hover;
+      // the lifted-while-dragging chrome is here.
       className={cn(
         'group/row',
         checkbox?.disabledReason && 'opacity-[0.55]',

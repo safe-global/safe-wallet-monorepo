@@ -1,16 +1,3 @@
-.tableCell {
-  transition: padding 0s;
-}
-
-.collapsedCell {
-  padding: 0px !important;
-  transition: padding 300ms ease-in-out;
-}
-
-.collapsedRow {
-  border-bottom: none !important;
-}
-
 .tableBody tr:last-child td {
   border-bottom: none;
 }
@@ -51,31 +38,7 @@
   background: none !important;
 }
 
-.fixedLayout {
-  table-layout: fixed;
-}
-
-.mobileLabel {
-  display: none;
-}
-
 @media (max-width: 899.95px) {
-  .mobileColumn thead th {
-    display: none;
-  }
-
-  .mobileColumn tbody td {
-    display: block;
-    padding: 0 !important;
-    margin: 12px var(--space-3) !important;
-    background: inherit;
-  }
-
-  .mobileLabel {
-    display: block;
-    margin-bottom: var(--space-1);
-  }
-
   .actions {
     justify-content: flex-start;
   }

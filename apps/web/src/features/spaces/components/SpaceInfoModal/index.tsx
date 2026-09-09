@@ -127,7 +127,7 @@ const SpaceInfoModal = ({ onClose }: { onClose: () => void }) => {
           <div className="flex flex-col justify-center gap-10 p-9 md:p-12">
             <div>
               <DialogTitle className="text-[40px] font-bold leading-[44px] tracking-[-0.04em] text-balance">
-                One Workspace for your team.
+                One workspace for your team.
               </DialogTitle>
 
               <DialogDescription className="mt-3 max-w-[420px] text-base leading-6">
@@ -152,7 +152,7 @@ const SpaceInfoModal = ({ onClose }: { onClose: () => void }) => {
             </div>
 
             <Typography variant="paragraph-small" color="muted">
-              New to Workspaces?{' '}
+              New to workspaces?{' '}
               <a
                 href={SPACE_HELP_ARTICLE_LINK}
                 target="_blank"

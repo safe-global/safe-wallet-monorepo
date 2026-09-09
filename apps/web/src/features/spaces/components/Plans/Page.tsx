@@ -42,7 +42,7 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
           <Plans data={{ ...TRIAL_PLANS, plan }} />
         ) : (
           <Card size="none" radius="xl" className="w-full">
-            <SafeProAnnouncement />
+            <SafeProAnnouncement location="plans_page" />
           </Card>
         )}
 

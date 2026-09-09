@@ -204,7 +204,7 @@ describe('AddAccounts — admin guard on submit', () => {
     expect(form).not.toBeNull()
     fireEvent.submit(form!)
 
-    expect(await screen.findByText('Only admins can add or remove Safe accounts in this Workspace')).toBeInTheDocument()
+    expect(await screen.findByText('Only admins can add or remove Safe accounts in this workspace')).toBeInTheDocument()
     expect(mockAddSafesToSpace).not.toHaveBeenCalled()
     expect(mockRemoveSafesFromSpace).not.toHaveBeenCalled()
   })
@@ -229,7 +229,7 @@ describe('AddAccounts — admin guard on submit', () => {
     expect(form).not.toBeNull()
     fireEvent.submit(form!)
 
-    expect(screen.queryByText('Only admins can add or remove Safe accounts in this Workspace')).not.toBeInTheDocument()
+    expect(screen.queryByText('Only admins can add or remove Safe accounts in this workspace')).not.toBeInTheDocument()
     expect(mockAddSafesToSpace).not.toHaveBeenCalled()
     expect(mockRemoveSafesFromSpace).not.toHaveBeenCalled()
   })

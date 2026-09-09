@@ -4,15 +4,20 @@ import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
 import ProWordmark from '@/public/images/safe-pro/pro-wordmark.svg'
+import { trackSafeProBannerClick } from '../../utils/trackSafeProBannerClick'
 import css from './styles.module.css'
 
 const SafeProSidebarBanner = ({ className }: { className?: string }) => (
   <div
-    className={cn('flex w-full flex-col items-start gap-3 rounded-lg bg-muted p-4 shadow-lg', css.banner, className)}
+    className={cn(
+      'flex w-full flex-col items-start gap-3 rounded-lg bg-muted bg-no-repeat p-4 shadow-lg',
+      css.banner,
+      className,
+    )}
     data-testid="safe-pro-sidebar-banner"
   >
     <span className={cn('flex shrink-0 items-center rounded-sm px-2 py-1.5', css.proChip)}>
-      <ProWordmark className="h-2 w-[21px]" />
+      <ProWordmark className="h-2 w-[21px] overflow-visible" />
     </span>
 
     <div className="flex w-full flex-col gap-1">
@@ -26,7 +31,14 @@ const SafeProSidebarBanner = ({ className }: { className?: string }) => (
 
     <Button
       size="xs"
-      render={<a href={SAFE_PRO_ANNOUNCEMENT_URL} target="_blank" rel="noopener noreferrer" />}
+      render={
+        <a
+          onClick={() => trackSafeProBannerClick('sidebar')}
+          href={SAFE_PRO_ANNOUNCEMENT_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+        />
+      }
       className={css.learnMore}
     >
       Learn more

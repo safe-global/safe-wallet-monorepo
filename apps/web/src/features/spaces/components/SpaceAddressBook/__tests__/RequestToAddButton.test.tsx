@@ -88,7 +88,7 @@ describe('RequestToAddButton', () => {
 
     await userEvent.hover(screen.getByRole('button', { name: 'Request to add' }).parentElement as HTMLElement)
 
-    await waitFor(() => expect(screen.getByText(/Rename this contact to add it to the Workspace/)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/Rename this contact to add it to the workspace/)).toBeInTheDocument())
   })
 
   it('keeps the button enabled for a valid name', () => {
@@ -111,6 +111,19 @@ describe('RequestToAddButton', () => {
     render(<RequestToAddButton address={address} name="Alice" chainIds={['1']} alreadyRequested />)
 
     expect(screen.getByText('Requested')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Request to add' })).not.toBeInTheDocument()
+  })
+
+  it('drops the label into the accessible name in the compact layout', () => {
+    render(<RequestToAddButton address={address} name="Alice" chainIds={['1']} isCompact />)
+
+    expect(screen.getByRole('button', { name: 'Request to add' })).toHaveTextContent('')
+  })
+
+  it('shows the requested state as an icon in the compact layout', () => {
+    render(<RequestToAddButton address={address} name="Alice" chainIds={['1']} alreadyRequested isCompact />)
+
+    expect(screen.getByLabelText('Requested')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Request to add' })).not.toBeInTheDocument()
   })
 

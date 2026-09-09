@@ -38,7 +38,7 @@ jest.mock('../SafeAccountTableRow', () => ({
     <tr
       data-testid="row"
       data-key={line.key}
-      data-divider={showDivider ? '' : undefined}
+      data-show-divider={showDivider ? '' : undefined}
       ref={rowRef}
       {...rowDraggableProps}
     >
@@ -221,13 +221,13 @@ describe('SafeAccountsTable', () => {
 
   it('draws dividers between groups, but not after the last row', () => {
     render(<SafeAccountsTable items={items} />)
-    const dividers = screen.getAllByTestId('row').map((row) => row.hasAttribute('data-divider'))
+    const dividers = screen.getAllByTestId('row').map((row) => row.hasAttribute('data-show-divider'))
     expect(dividers).toEqual([true, true, false])
   })
 
   it('draws no dividers in embedded mode', () => {
     render(<SafeAccountsTable items={items} embedded columns={['name', 'threshold', 'networks', 'balance']} />)
-    const dividers = screen.getAllByTestId('row').map((row) => row.hasAttribute('data-divider'))
+    const dividers = screen.getAllByTestId('row').map((row) => row.hasAttribute('data-show-divider'))
     expect(dividers).toEqual([false, false, false])
   })
 })
@@ -358,13 +358,13 @@ describe('SafeAccountsTable — selection mode', () => {
           selectedKeys: new Set(),
           onToggle: jest.fn(),
           disabledKeys: new Set(['0xB']),
-          disabledReason: 'Already in Workspace',
+          disabledReason: 'Already in workspace',
         }}
       />,
     )
     const box = screen.getByTestId('select-0xB')
     expect(box).toHaveAttribute('data-disabled', 'true')
-    expect(box).toHaveAttribute('data-reason', 'Already in Workspace')
+    expect(box).toHaveAttribute('data-reason', 'Already in workspace')
   })
 
   it('locks a multi-chain group whose every child is in disabledKeys', () => {
@@ -375,13 +375,13 @@ describe('SafeAccountsTable — selection mode', () => {
           selectedKeys: new Set(['1:0xG', '2:0xG']),
           onToggle: jest.fn(),
           disabledKeys: new Set(['1:0xG', '2:0xG']),
-          disabledReason: 'Already in Workspace',
+          disabledReason: 'Already in workspace',
         }}
       />,
     )
     const group = screen.getByTestId('select-0xG')
     expect(group).toHaveAttribute('data-disabled', 'true')
-    expect(group).toHaveAttribute('data-reason', 'Already in Workspace')
+    expect(group).toHaveAttribute('data-reason', 'Already in workspace')
   })
 
   it('suppresses the rename action on a selection surface by default', () => {

@@ -8,10 +8,11 @@ import { Typography } from '@/components/ui/typography'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import classNames from 'classnames'
 import { isAddress } from 'ethers'
-import type { ReactElement } from 'react'
+import { useMemo, type ReactElement } from 'react'
 import Msg from '../Msg'
 import css from './styles.module.css'
-import { logError, Errors } from '@/services/exceptions'
+import { Errors } from '@/services/exceptions'
+import useLogError from '@/hooks/useLogError'
 
 const EIP712_DOMAIN_TYPE = 'EIP712Domain'
 
@@ -57,20 +58,32 @@ export const DecodedMsg = ({
 }): ReactElement | null => {
   const isTextMessage = typeof message === 'string'
 
+  // Normalize the message so we know its primaryType. Hoisted above the early
+  // returns — and memoised — so a message we cannot normalize is reported once
+  // per message instead of once per render of the details panel.
+  const { normalizedMsg, normalizeFailure } = useMemo<{
+    normalizedMsg?: TypedData
+    normalizeFailure?: unknown
+  }>(() => {
+    if (!message || typeof message === 'string') return {}
+
+    try {
+      return { normalizedMsg: normalizeTypedData(message) }
+    } catch (error) {
+      return { normalizedMsg: message, normalizeFailure: error }
+    }
+  }, [message])
+
+  useLogError(Errors._809, normalizeFailure)
+
   if (!message) {
     return null
   }
   if (isTextMessage) {
     return <Msg message={message} />
   }
-
-  // Normalize message such that we know the primaryType
-  let normalizedMsg: TypedData
-  try {
-    normalizedMsg = normalizeTypedData(message)
-  } catch (error) {
-    logError(Errors._809, error)
-    normalizedMsg = message
+  if (!normalizedMsg) {
+    return null
   }
 
   return (

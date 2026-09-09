@@ -3,10 +3,11 @@ import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
+import { trackSafeProBannerClick, type SafeProBannerLocation } from '../../utils/trackSafeProBannerClick'
 import SafeProHero from '../SafeProHero'
 import css from './styles.module.css'
 
-const SafeProAnnouncement = ({ onDismiss }: { onDismiss?: () => void }) => (
+const SafeProAnnouncement = ({ location, onDismiss }: { location: SafeProBannerLocation; onDismiss?: () => void }) => (
   <div className="p-1">
     <SafeProHero />
 
@@ -30,7 +31,17 @@ const SafeProAnnouncement = ({ onDismiss }: { onDismiss?: () => void }) => (
           </Button>
         )}
 
-        <Button size="lg" render={<a href={SAFE_PRO_ANNOUNCEMENT_URL} target="_blank" rel="noopener noreferrer" />}>
+        <Button
+          size="lg"
+          render={
+            <a
+              onClick={() => trackSafeProBannerClick(location)}
+              href={SAFE_PRO_ANNOUNCEMENT_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+            />
+          }
+        >
           Learn more
           <ArrowUpRight data-icon="inline-end" className={cn('text-green-400', css.arrow)} />
         </Button>

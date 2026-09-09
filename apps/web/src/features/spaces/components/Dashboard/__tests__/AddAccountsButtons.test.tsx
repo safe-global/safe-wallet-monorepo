@@ -17,7 +17,7 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
 }))
 
 jest.mock('next/router', () => ({
-  useRouter: () => ({ push: jest.fn() }),
+  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), pathname: '/spaces', query: {} }),
 }))
 
 jest.mock('@/services/analytics', () => ({
@@ -57,6 +57,8 @@ jest.mock('@/features/myAccounts', () => ({
 jest.mock('@/features/__core__', () => ({
   useLoadFeature: jest.fn(),
 }))
+
+jest.mock('../../Plans/TrialFlow', () => ({ __esModule: true, default: () => null }))
 
 jest.mock('@/features/safe-pro-announcement', () => ({
   SafeProFeature: { name: 'safe-pro-announcement' },
@@ -127,7 +129,13 @@ const stubAccountsWidget = () => {
     if (feature.name === 'myAccounts') {
       return { AccountsWidget: AccountsWidgetStub, $isReady: true }
     }
-    return { PendingTxWidget: () => null, $isReady: true }
+    return {
+      PendingTxWidget: () => null,
+      SafeProSubscriptionActivatedModal: () => null,
+      SafeProLockedWorkspace: () => null,
+      SafeProAnnouncementModal: () => null,
+      $isReady: true,
+    }
   })
 }
 
