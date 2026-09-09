@@ -1,7 +1,7 @@
 import TokenIcon from '@/components/common/TokenIcon'
 import { Typography } from '@/components/ui/typography'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { tokenOptionLabel, type TokenOption } from '../../utils/tokenOptions'
+import { tokenOptionLabel, type TokenOption } from '../utils/tokenOptions'
 import { TOKEN_ICON_SIZE } from './constants'
 
 /**

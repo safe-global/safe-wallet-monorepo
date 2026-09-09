@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import { render, screen } from '@/tests/test-utils'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import type { TokenOption } from '../../../utils/tokenOptions'
+import type { TokenOption } from '../../utils/tokenOptions'
 import TokenOptionRow from '../TokenOptionRow'
 
 const option = (overrides: Partial<TokenOption> = {}): TokenOption => ({

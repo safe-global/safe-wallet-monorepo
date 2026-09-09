@@ -16,9 +16,9 @@ import {
   useComboboxAnchor,
 } from '@/components/ui/combobox'
 import TokenIcon from '@/components/common/TokenIcon'
-import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
-import { findTokenOption, tokenOptionLabel, type TokenOption, type TokenOptionGroup } from '../../utils/tokenOptions'
-import { matchesTokenQuery } from '../../utils/tokenSearch'
+import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
+import { findTokenOption, tokenOptionLabel, type TokenOption, type TokenOptionGroup } from '../utils/tokenOptions'
+import { matchesTokenQuery } from '../utils/tokenSearch'
 import TokenOptionRow from './TokenOptionRow'
 import { TokenGroupError, TokenGroupLoading } from './TokenGroupState'
 import {

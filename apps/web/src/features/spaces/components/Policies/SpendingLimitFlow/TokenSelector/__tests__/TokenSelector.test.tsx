@@ -2,9 +2,9 @@ import { faker } from '@faker-js/faker'
 import { render, renderWithUserEvent, screen, waitFor, within } from '@/tests/test-utils'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import useSpendingLimitTokenOptions from '../../../hooks/useSpendingLimitTokenOptions'
-import type { TokenOptionsResult } from '../../../hooks/useSpendingLimitTokenOptions'
-import type { TokenOption } from '../../../utils/tokenOptions'
+import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
+import type { TokenOptionsResult } from '../../hooks/useSpendingLimitTokenOptions'
+import type { TokenOption } from '../../utils/tokenOptions'
 import TokenSelector from '..'
 import {
   BALANCES_LOAD_ERROR_TEXT,
@@ -17,7 +17,7 @@ import {
   TOKEN_SELECTOR_PLACEHOLDER,
 } from '../constants'
 
-jest.mock('../../../hooks/useSpendingLimitTokenOptions', () => ({ __esModule: true, default: jest.fn() }))
+jest.mock('../../hooks/useSpendingLimitTokenOptions', () => ({ __esModule: true, default: jest.fn() }))
 const mockUseOptions = useSpendingLimitTokenOptions as jest.MockedFunction<typeof useSpendingLimitTokenOptions>
 
 const option = (overrides: Partial<TokenOption> = {}): TokenOption => ({
