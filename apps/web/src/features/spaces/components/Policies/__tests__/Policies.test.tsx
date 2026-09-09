@@ -1,6 +1,14 @@
-import { render, screen } from '@/tests/test-utils'
+import { render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import Policies from '../index'
+
+let mockHasSeenSpendingLimitIntro: boolean | undefined = false
+const mockSetHasSeenSpendingLimitIntro = jest.fn()
+
+jest.mock('@/services/local-storage/useLocalStorage', () => ({
+  __esModule: true,
+  default: jest.fn(() => [mockHasSeenSpendingLimitIntro, mockSetHasSeenSpendingLimitIntro]),
+}))
 
 /**
  * The page must render a title, a one-line description and a `Learn more` link to documentation,
@@ -8,6 +16,11 @@ import Policies from '../index'
  * Proposer grant is off-chain — a product decision, not an oversight.
  */
 describe('Policies', () => {
+  beforeEach(() => {
+    mockHasSeenSpendingLimitIntro = false
+    jest.clearAllMocks()
+  })
+
   it('renders the page title', () => {
     render(<Policies />)
 
@@ -56,5 +69,42 @@ describe('Policies', () => {
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Create policy/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('searchbox')).not.toBeInTheDocument()
+  })
+  describe('the spending limit intro', () => {
+    it('explains a spending limit before the flow starts', async () => {
+      const { user } = renderWithUserEvent(<Policies />)
+
+      await user.click(screen.getByRole('button', { name: /Spending limit/ }))
+
+      expect(screen.getByTestId('spending-limit-intro-dialog')).toBeInTheDocument()
+    })
+
+    it('returns to the catalogue with nothing started when dismissed', async () => {
+      const { user } = renderWithUserEvent(<Policies />)
+
+      await user.click(screen.getByRole('button', { name: /Spending limit/ }))
+      await user.click(screen.getByRole('button', { name: 'Close' }))
+
+      await waitFor(() => expect(screen.queryByTestId('spending-limit-intro-dialog')).not.toBeInTheDocument())
+      expect(screen.getByTestId('policy-catalogue')).toBeInTheDocument()
+    })
+
+    it('records that it has been shown', async () => {
+      const { user } = renderWithUserEvent(<Policies />)
+
+      await user.click(screen.getByRole('button', { name: /Spending limit/ }))
+      await user.click(screen.getByRole('button', { name: 'Close' }))
+
+      expect(mockSetHasSeenSpendingLimitIntro).toHaveBeenCalledWith(true)
+    })
+
+    it('does not explain again once it has been shown', async () => {
+      mockHasSeenSpendingLimitIntro = true
+      const { user } = renderWithUserEvent(<Policies />)
+
+      await user.click(screen.getByRole('button', { name: /Spending limit/ }))
+
+      expect(screen.queryByTestId('spending-limit-intro-dialog')).not.toBeInTheDocument()
+    })
   })
 })

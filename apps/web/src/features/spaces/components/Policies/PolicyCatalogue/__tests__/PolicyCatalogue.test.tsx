@@ -51,8 +51,8 @@ describe('PolicyCatalogue', () => {
   it('renders the mechanisms not yet shipped as unavailable rather than absent', () => {
     render(<PolicyCatalogue />)
 
-    expect(screen.getByRole('button', { name: /Spending limit/ })).toHaveAttribute('aria-disabled', 'true')
     expect(screen.getByRole('button', { name: /Account recovery/ })).toHaveAttribute('aria-disabled', 'true')
+    expect(screen.getByRole('button', { name: /Spending limit/ })).not.toHaveAttribute('aria-disabled')
     expect(screen.getByRole('button', { name: /Proposer/ })).not.toHaveAttribute('aria-disabled')
     expect(screen.getByRole('button', { name: /Something missing\?/ })).not.toHaveAttribute('aria-disabled')
   })
@@ -74,12 +74,12 @@ describe('PolicyCatalogue', () => {
   it('tracks a click on an unavailable tile', async () => {
     const { user } = renderWithUserEvent(<PolicyCatalogue />)
 
-    await user.click(screen.getByRole('button', { name: /Spending limit/ }))
+    await user.click(screen.getByRole('button', { name: /Account recovery/ }))
 
     expect(mockTrackEvent).toHaveBeenCalledWith(
-      { ...POLICY_EVENTS.POLICY_CATALOGUE_TILE_CLICKED, label: 'spending-limit' },
+      { ...POLICY_EVENTS.POLICY_CATALOGUE_TILE_CLICKED, label: 'account-recovery' },
       {
-        [MixpanelEventParams.POLICY_TYPE]: 'spending-limit',
+        [MixpanelEventParams.POLICY_TYPE]: 'account-recovery',
         [MixpanelEventParams.IS_AVAILABLE]: false,
       },
     )
