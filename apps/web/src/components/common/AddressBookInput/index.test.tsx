@@ -12,6 +12,7 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type { AddressBook } from '@/store/addressBookSlice'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useGetSpaceAddressBook } from '@/features/spaces'
+import { extendedSafeInfoBuilder, addressExBuilder } from '@/tests/builders/safe'
 
 jest.mock('@/features/spaces/hooks/useGetSpaceAddressBook', () => ({
   __esModule: true,
@@ -348,6 +349,34 @@ describe('AddressBookInput', () => {
     })
 
     await waitFor(() => expect(utils.queryByText('add it to your address book', { exact: false })).toBeNull())
+  })
+
+  it('should label a Safe co-signer as a co-signer address instead of unknown', async () => {
+    const coSigner = checksumAddress(faker.finance.ethereumAddress())
+    const safe = extendedSafeInfoBuilder()
+      .with({ owners: [addressExBuilder().with({ value: coSigner }).build()] })
+      .build()
+
+    const name = 'recipient'
+    const Form = () => {
+      const methods = useForm<{ [name]: string }>({ defaultValues: { [name]: coSigner }, mode: 'all' })
+      return (
+        <FormProvider {...methods}>
+          <AddressBookInput data-testid={testId} name={name} label="Recipient address" canAdd />
+        </FormProvider>
+      )
+    }
+
+    const utils = render(<Form />, {
+      initialReduxState: {
+        addressBook: { [mockChain.chainId]: {} },
+        safeInfo: { loading: false, error: undefined, data: safe, loaded: true },
+      },
+    })
+
+    await waitFor(() => expect(utils.getByText('This is a co-signer address', { exact: false })).toBeDefined())
+    expect(utils.queryByText('This is an unknown address', { exact: false })).toBeNull()
+    expect(utils.getByText('add it to your address book', { exact: false })).toBeDefined()
   })
 
   it('should group a server-stored (space) contact under the workspace header with the workspace icon', async () => {

@@ -13,6 +13,8 @@ import type { ContactSource } from '@/hooks/useAllAddressBooks'
 import { useMergedAddressBooks, useSafeNameResolver, type ExtendedContact } from '@/hooks/useAllAddressBooks'
 import { useCurrentChain } from '@/hooks/useChains'
 import useChainId from '@/hooks/useChainId'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import { isOwner } from '@/utils/transaction-guards'
 import { useMemberNameResolver } from '@/features/spaces'
 import RecipientOption from './RecipientOption'
 import RecipientGroupHeader from './RecipientGroupHeader'
@@ -90,6 +92,9 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
     () => allAddressBookEntries.some((entry) => sameAddress(entry.label, addressValue)),
     [allAddressBookEntries, addressValue],
   )
+
+  const { safe } = useSafeInfo()
+  const isCoSigner = useMemo(() => isOwner(safe.owners, addressValue), [safe.owners, addressValue])
 
   const wrapperRef = useRef<HTMLDivElement>(null)
   // The portalled list is not inside wrapperRef, so dismissal has to check it separately or a
@@ -287,7 +292,7 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
         <Typography variant="paragraph-small" className={css.unknownAddress}>
           <InfoIcon className="size-4" />
           <span>
-            This is an unknown address. You can{' '}
+            {isCoSigner ? 'This is a co-signer address' : 'This is an unknown address'}. You can{' '}
             <a role="button" onClick={onAddressBookClick}>
               add it to your address book
             </a>
