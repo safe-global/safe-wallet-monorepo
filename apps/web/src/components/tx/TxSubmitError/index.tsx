@@ -22,11 +22,9 @@ export const getRevertedMessage = (network?: string): string =>
 /**
  * Renders a submit/execution error.
  *
- * "Gas was spent" is only claimed on positive proof — a mined receipt whose
- * status is 0 (reverted on-chain). A pre-broadcast failure (the common inline
- * case: the wallet/node reverted during estimation) never spends gas, so we
- * never assert it did. A deterministic revert is not offered a retry (it would
- * only waste more gas); a transient failure is. Rate-limits keep their own copy.
+ * "Gas was spent" is claimed only on proof — a mined receipt with status 0 — never for a pre-broadcast
+ * failure (which spends none). A deterministic revert gets no retry (would only waste gas); a transient one
+ * does. Rate-limits keep their own copy.
  */
 const TxSubmitError = ({
   error,
@@ -37,9 +35,8 @@ const TxSubmitError = ({
 }): ReactElement => {
   const chain = useCurrentChain()
 
-  // The Ledger refused before anything was broadcast, and it said why. Its own
-  // reason beats every generic classification below — matching on the wrapped
-  // message would only rediscover viem's "unknown RPC error" (WA-3243).
+  // The Ledger refused before broadcast and said why — its own reason beats the generic classifications
+  // below (matching the wrapped message would only rediscover viem's "unknown RPC error", WA-3243).
   const ledgerError = getLedgerDeviceError(error)
   if (ledgerError) {
     return (
@@ -59,10 +56,9 @@ const TxSubmitError = ({
     )
   }
 
-  // The signer wallet's own Ethereum nonce advanced before broadcast (e.g. it
-  // executed another tx meanwhile). Same user story as a stale Safe nonce, so
-  // show the same message. Must be checked before the revert classification:
-  // viem misleadingly wraps this RPC rejection as a contract revert.
+  // The signer wallet's own nonce advanced before broadcast (executed another tx meanwhile) — same story
+  // as a stale Safe nonce, so show the same message. Check before revert classification: viem wraps this
+  // RPC rejection as a contract revert.
   if (isNonceTooLowError(error)) {
     return (
       <ErrorMessage error={error} level="error" context={context}>
@@ -79,8 +75,7 @@ const TxSubmitError = ({
     )
   }
 
-  // The Safe Client Gateway answered with a known response state. Show the
-  // agreed copy — never the response body, which can be an HTML error page —
+  // Known CGW response state: show the agreed copy, never the response body (may be an HTML error page),
   // and let ErrorMessage render the code-only support reference (WA-3252).
   const cgwError = getCgwErrorInfo(error)
   if (cgwError) {

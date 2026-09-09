@@ -182,10 +182,8 @@ function SpaceSafeBar() {
   const { orderBy } = useAppSelector(selectOrderByPreference)
   const spaceId = useCurrentSpaceId()
 
-  // Union feeds the trigger (which always shows the current safe, present in both lists).
-  // The same safe can appear in both lists under one id at different depth — e.g. a chain-scoped
-  // fallback in the workspace list vs the multi-chain group in the trusted list — so on duplicate
-  // ids keep the entry that knows more chains.
+  // Union feeds the trigger. The same safe can appear in both lists under one id at different depth
+  // (chain-scoped fallback vs multi-chain group), so on duplicate ids keep the entry with more chains.
   const unionItems = useMemo<SafeItemData[]>(() => {
     const byId = new Map<string, SafeItemData>()
     for (const item of [...workspaceItems, ...localItems]) {
@@ -195,8 +193,7 @@ function SpaceSafeBar() {
     return [...byId.values()]
   }, [workspaceItems, localItems])
 
-  // The tab labels count the search matches of each tab, so the counts stay in sync with the
-  // filtering the dropdown list applies (same query, same predicate).
+  // Tab labels count each tab's search matches (same query and predicate) so counts stay in sync with the list.
   const query = search.trim().toLowerCase()
   const countMatches = useCallback(
     (list: SafeItemData[]) =>
@@ -208,31 +205,27 @@ function SpaceSafeBar() {
     [query, resolveName],
   )
 
-  // Use the matched Next.js route, not `usePathname`: error pages (404/403) render
-  // under the original unmatched URL (e.g. `/hom`), where `usePathname` wouldn't match.
+  // Use the matched Next.js route, not `usePathname`: error pages (404/403) render under the unmatched URL.
   if (HIDDEN_ROUTES.includes(router.pathname)) return null
   // /settings/* serves both per-safe (URL has ?safe=) and global pages — hide when no safe context.
   if (pathname?.startsWith(AppRoutes.settings.index) && !urlSafeAddress) return null
 
   const activeTab: DropdownTab = selectedTab ?? (isInSpaceContext ? 'workspace' : 'local')
 
-  // The Workspace tab lists the space's safes only when the current safe is part of a space;
-  // otherwise it shows the sign-in CTA. The Local tab always lists the trusted safes.
+  // Workspace tab lists the space's safes only in a space context (else the sign-in CTA); Local always lists trusted.
   const listItems = activeTab === 'workspace' ? (isInSpaceContext ? workspaceItems : []) : localItems
 
-  // Manual sort turns the active tab's list into a drag-to-reorder list. The order persists to the
-  // same scope the welcome/workspace tables use — trusted for My accounts, this space for the
-  // workspace tab — so every surface stays in sync. Disabled while searching (a drop would persist a
-  // partial order). The Workspace tab has no scope outside a space, so it isn't reorderable there.
+  // Manual sort makes the list drag-to-reorder, persisting to the same scope the welcome/workspace tables
+  // use so surfaces stay in sync. Disabled while searching (a drop would persist a partial order) and on
+  // the Workspace tab outside a space (no scope there).
   const reorderScope = activeTab === 'local' ? TRUSTED_ORDER_SCOPE : spaceId ? getSpaceOrderScope(spaceId) : undefined
   const handleReorder =
     orderBy === OrderByOption.MANUAL && !search.trim() && reorderScope
       ? (order: string[]) => dispatch(setManualOrder({ scope: reorderScope, order }))
       : undefined
 
-  // Only surface the space name when the current safe actually belongs to it. Off a space context
-  // `useCurrentSpaceId` still resolves a fallback space (last-used / first in the list), so `space`
-  // is populated even for a safe in no workspace — labelling the tab with it would be misleading.
+  // Only show the space name when the safe belongs to it: `useCurrentSpaceId` resolves a fallback space
+  // even for a safe in no workspace, so labelling the tab with it otherwise would mislead.
   const workspaceLabel = isInSpaceContext
     ? `${space?.name ?? 'Workspace'} (${countMatches(workspaceItems)})`
     : 'Workspace'
@@ -247,8 +240,7 @@ function SpaceSafeBar() {
     />
   )
 
-  // The empty Local tab surfaces the manage-trusted CTA inside its empty state, so the footer row is
-  // dropped there to avoid a redundant second entry point.
+  // The empty Local tab already shows the manage-trusted CTA in its empty state, so drop the footer row there.
   const dropdownFooter =
     activeTab === 'local' && localItems.length > 0
       ? (close: () => void) => (
@@ -292,9 +284,8 @@ function SpaceSafeBar() {
   return (
     <div
       data-testid="safe-level-navigation"
-      // While the safe-selector dropdown is open its backdrop dims the page; the bar lifts itself
-      // above that backdrop so it stays lit (the topbar drops its stacking context — see
-      // PageLayout's .topbarAboveOverlay).
+      // The open dropdown's backdrop dims the page, so the bar lifts above it to stay lit (the topbar
+      // drops its stacking context — see PageLayout's .topbarAboveOverlay).
       className={cn('flex max-[899px]:justify-end', isAboveOverlay && 'relative z-[calc(var(--z-overlay)+1)]')}
     >
       {/* One pill: safe selector + nested safes + network selector render as muted chips

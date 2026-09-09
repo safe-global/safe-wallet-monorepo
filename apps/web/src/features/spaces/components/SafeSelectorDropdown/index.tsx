@@ -122,10 +122,9 @@ function SafeSelectorDropdown({
   const triggerRef = useRef<HTMLButtonElement>(null)
   const wasOpenOnPressRef = useRef(false)
 
-  // The display layer sits atop the full-bleed trigger and keeps pointer events (for hover tooltips), so a
-  // press on the name/balance lands on a <span> the trigger never sees — forward it, unless it hit a row
-  // control or base-ui already closed the popup on this pointerdown (forwarding would reopen it). Capture
-  // phase is required: the popup is dismissed mid-pointerdown, so by bubble phase the guard reads closed.
+  // The display layer keeps pointer events (hover tooltips), so a press on name/balance lands on a <span>
+  // the trigger never sees — forward it, unless it hit a row control or base-ui already closed the popup
+  // (forwarding would reopen it). Capture phase required: the popup is dismissed mid-pointerdown.
   const rememberOpenStateOnPress = () => {
     wasOpenOnPressRef.current = isPopupOpen
   }
@@ -152,14 +151,14 @@ function SafeSelectorDropdown({
       onValueChange={handleSafeChange}
       open={isPopupOpen}
       onOpenChange={isDisabled ? undefined : handleOpenChangeWithReset}
-      // Deliberately not disabled: a disabled <button> blocks the inline address actions (copy,
-      // explorer, env hint). Safe switching is prevented by the forced-closed `open` above instead.
+      // Not disabled: a disabled <button> would block the inline address actions; the forced-closed `open`
+      // above prevents safe switching instead.
     >
       <div
         className={cn(
-          // Suppress the focus-visible ring: overflow-hidden clips it into stray bars and the card shows no
-          // ring by design. min-w-0 (trigger + value slot): without it a long safe name can't truncate and
-          // pushes balance/chevron out of the clipped card (flex-1 alone floors items at min-content).
+          // Suppress the focus-visible ring (overflow-hidden clips it into stray bars; card is ringless by
+          // design). min-w-0 on trigger + value slot: else a long name can't truncate and pushes
+          // balance/chevron out of the clipped card (flex-1 alone floors items at min-content).
           '-m-4 flex-1 min-w-0 w-full border-0 shadow-none bg-transparent dark:bg-transparent py-0 pl-4 hover:bg-transparent dark:hover:bg-transparent data-[state=open]:bg-transparent focus-visible:ring-0 focus-visible:border-0 [&_[data-slot=select-value]]:pr-0 [&_[data-slot=select-value]]:min-w-0 relative',
           variants.triggerClass,
           isDisabled && 'cursor-not-allowed opacity-50',

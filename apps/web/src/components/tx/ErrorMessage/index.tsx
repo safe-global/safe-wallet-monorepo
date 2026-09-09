@@ -41,33 +41,26 @@ const ErrorMessage = ({
   const { safe } = useSafeInfo()
   const chain = useCurrentChain()
 
-  // On-chain (GS) errors show an always-visible, code-only support reference;
-  // every other error keeps its raw message behind the Details toggle, as
-  // before (WA-3005 is on-chain-scoped).
+  // On-chain (GS) errors show a code-only support reference; every other error keeps its raw message
+  // behind Details (WA-3005 is on-chain-scoped).
   const gsCode = error ? getGsCodeFromError(error) : undefined
 
-  // A Ledger device failure carries its own translated sentence, so the raw
-  // message must never be offered: by the time it reaches us it has been
-  // re-wrapped by ethers and viem and reads as a dump of class names, codes and
-  // library versions (WA-3243). An unmapped device state gets a support
-  // reference instead — the device's own words stay in telemetry.
+  // A Ledger device failure carries its own translated sentence; never offer the raw message — by here
+  // ethers/viem have re-wrapped it into a dump of class names and versions (WA-3243). An unmapped state
+  // gets a support reference; the device's own words stay in telemetry.
   const ledgerError = error ? getLedgerDeviceError(error) : undefined
   const ledgerReference = ledgerError?.reason === 'unknown' ? getLedgerSupportReference(ledgerError) : undefined
 
-  // GS013 family: the inner call reverted with a module/guard custom error. A
-  // custom-error revert without a GS string is still a GS013 — decode its
-  // selector against the known ABIs; undecodable ones keep the raw selector in
-  // the support reference, never in the message.
+  // GS013 family: a custom-error revert without a GS string is still GS013 — decode its selector against
+  // known ABIs; an undecodable one keeps the raw selector in the support reference, never in the message.
   const customError =
     error && (gsCode === 'GS013' || (!gsCode && isRevertError(error))) ? decodeCustomError(error) : undefined
   const effectiveGsCode = gsCode ?? (customError ? 'GS013' : undefined)
 
-  // A known CGW response state (429/422/451/5xx) gets the same code-only
-  // support reference, so the raw response body — which can be a gateway's HTML
-  // error page — is never rendered in Details (WA-3252).
+  // A known CGW response state (429/422/451/5xx) gets the code-only reference, so a raw body (possibly a
+  // gateway HTML error page) is never rendered in Details (WA-3252).
   const supportCode = effectiveGsCode ?? (error ? getCgwSupportCode(error) : undefined)
 
-  // Check if this is a Guard error that should get special treatment
   const guardErrorName = error && context ? getGuardErrorInfo(error) : undefined
   const guardExplorerLink =
     guardErrorName && safe.guard && chain ? getBlockExplorerLink(chain, safe.guard.value) : undefined

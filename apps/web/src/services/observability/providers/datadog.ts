@@ -74,18 +74,10 @@ const isKnownNoise = (message: string | undefined): boolean => {
 const FIRST_PARTY_BUNDLE_PATH = '_next/static/'
 
 /**
- * `error.type === 'EvalError'` is not proof of a CSP-blocked eval() on its
- * own: a thrown string `"EvalError: …"`, an explicit `new EvalError()`, or any
- * custom class that sets `name = 'EvalError'` all produce the same `type` in
- * `@datadog/browser-core`'s `computeRawError` (`stackTrace.name`). So this is
- * additionally gated on the stack *not* pointing at our own bundle
- * (`_next/static/`) — mirrors `originatesFromExtension`'s pattern-matching,
- * inverted. We ship no eval()/Function() call of our own today (grepped
- * `apps/web/src` and `packages/`), so a same-bundle `EvalError` would mean
- * something new started calling eval() and is worth surfacing, not silencing.
- * A missing stack defaults to "not first-party": we have no eval() call site
- * of our own to attribute it to, so there is nothing here that a stack could
- * be pointing at.
+ * `error.type === 'EvalError'` alone isn't proof of a CSP-blocked eval() (a thrown string, `new EvalError()`,
+ * or any `name = 'EvalError'` class all yield the same type), so also gate on the stack NOT pointing at our
+ * own bundle (`_next/static/`). We ship no eval()/Function() today, so a same-bundle EvalError means something
+ * new started calling eval() and is worth surfacing. A missing stack defaults to "not first-party".
  */
 const isNotFirstPartyStack = (stack: string | undefined): boolean => {
   if (!stack) return true
@@ -93,19 +85,13 @@ const isNotFirstPartyStack = (stack: string | undefined): boolean => {
 }
 
 /**
- * Real-world `EvalError`s reaching RUM are third-party vendor scripts (Beamer,
- * GTM, Calendly, Cloudflare Turnstile, HubSpot forms, etc.) whose eval() /
- * `new Function()` call our `script-src` CSP correctly blocks in production —
- * the block is the intended behaviour and nothing is broken for the user, so
- * it is dropped rather than counted as a real error (WA-2952).
+ * Real-world `EvalError`s reaching RUM are third-party vendor scripts (Beamer, GTM, Calendly, etc.) whose
+ * dynamic code our `script-src` CSP correctly blocks in production — intended behaviour, nothing broken for
+ * the user, so dropped rather than counted (WA-2952).
  *
- * Trade-off this accepts: `'unsafe-eval'` **is** permitted in dev/Cypress
- * (`config/securityHeaders.ts`), so a first-party eval()/Function() call would
- * pass locally and only throw — as this same `EvalError` type — in
- * production, where this filter would otherwise hide it. Accepted because (a)
- * no current bundle path constructs code dynamically, and (b)
- * `isNotFirstPartyStack` still surfaces it if the stack ever does point at our
- * own `_next/static/` output.
+ * Trade-off: `'unsafe-eval'` IS allowed in dev/Cypress, so a first-party dynamic-code call would pass locally
+ * and only throw (as this same EvalError) in production, where this filter would hide it. Accepted because no
+ * bundle path constructs code dynamically, and `isNotFirstPartyStack` still surfaces it if the stack ever does.
  */
 const isCspBlockedEval = (errorEvent: RumErrorEvent): boolean =>
   errorEvent.error.type === 'EvalError' && isNotFirstPartyStack(errorEvent.error.stack)
@@ -120,10 +106,8 @@ const MESSAGE_HASH = String.raw`0x[a-fA-F0-9]{64}`
 const PATH_END = String.raw`(?:[?#]|$)`
 
 /**
- * Resource requests whose non-2xx responses are an expected part of normal
- * operation, not failures (WA-2991). Matched on the raw request URL — the
- * `@resource.url_path_group` facet is computed by Datadog and is not available
- * client-side — plus the status code.
+ * Resource requests whose non-2xx responses are expected, not failures (WA-2991). Matched on the raw request
+ * URL (Datadog's `@resource.url_path_group` facet isn't available client-side) plus the status code.
  */
 const EXPECTED_RESOURCE_FAILURES: { urlPattern: RegExp; statuses: Set<number> }[] = [
   // "Safe not targeted." — the documented answer for nearly every Safe, on a
@@ -145,9 +129,8 @@ const EXPECTED_RESOURCE_FAILURES: { urlPattern: RegExp; statuses: Set<number> }[
     urlPattern: new RegExp(String.raw`/v1/chains/[^/]+/relay/${ADDRESS}${PATH_END}`),
     statuses: new Set([403]),
   },
-  // A Safe CGW does not index — an undeployed counterfactual one, or an address
-  // typed into the URL. 429 on these same routes is a real capacity signal and
-  // deliberately keeps reporting.
+  // A Safe the CGW doesn't index (undeployed counterfactual, or an address typed into the URL). A 429 on
+  // these routes is a real capacity signal and deliberately keeps reporting.
   {
     urlPattern: new RegExp(String.raw`/v1/chains/[^/]+/safes/${ADDRESS}/transactions/(?:queued|history)${PATH_END}`),
     statuses: new Set([404]),
@@ -166,33 +149,22 @@ const isExpectedResourceFailure = (event: RumResourceEvent): boolean => {
 }
 
 /**
- * Drop RUM error events that are demonstrably not caused by user-impacting
- * failures so the Error-Free Views SLO reflects real breakage, plus resource
- * events for endpoints whose non-2xx responses are expected (see
- * `EXPECTED_RESOURCE_FAILURES`). Views, actions and other resources pass
- * through untouched.
+ * Drop RUM error events not caused by user-impacting failures so the Error-Free Views SLO reflects real
+ * breakage, plus resource events with expected non-2xx responses (see `EXPECTED_RESOURCE_FAILURES`). Views,
+ * actions and other resources pass through.
  *
- * Sources we drop:
- * - `console`: the RUM SDK auto-instruments `console.error` via
- *   `trackConsoleError` (no init flag exists to disable it). The codebase has
- *   many `console.error` catch blocks for non-blocking failures (clipboard
- *   denial, RPC retries, third-party widget init, observability self-recovery
- *   in `composite.ts`, etc.) that are not user-impacting.
- * - `report`: Browser Reporting API events (CSP violations, deprecation,
- *   intervention, permissions-policy). Useful as a security/policy signal but
- *   not indicative of user-blocking failure; CSP visibility belongs on a
- *   `report-uri`/`report-to` endpoint, not the SLO.
+ * Dropped by source:
+ * - `console`: the SDK auto-instruments `console.error` (no disable flag), and we have many non-blocking
+ *   `console.error` catch blocks (clipboard denial, RPC retries, widget init, self-recovery).
+ * - `report`: Browser Reporting API events (CSP/deprecation/intervention) — a policy signal, not a
+ *   user-blocking failure; CSP visibility belongs on a `report-uri`, not the SLO.
  *
- * We also drop, regardless of source:
- * - `EvalError`s whose stack doesn't point at our own bundle (see
- *   `isCspBlockedEval`): a third-party vendor script's eval()/Function() call
- *   correctly blocked by our `script-src` CSP (WA-2952). The CSP doing its
- *   job is not a Safe{Wallet} failure.
+ * Dropped regardless of source:
+ * - `EvalError`s whose stack isn't our bundle (see `isCspBlockedEval`): a vendor script blocked by our CSP
+ *   (WA-2952) — the CSP doing its job isn't a failure.
  *
- * Genuine user failures continue to flow through `trackError` /
- * `captureException` (source: `custom`) and unhandled exceptions (`source`).
- * A failed request is not among them — the RUM SDK raises no error event with
- * source `network` — so it reaches us only as the `resource` event above.
+ * Genuine failures still flow through `trackError`/`captureException` (source `custom`) and unhandled
+ * exceptions; a failed request has no `network` error event, reaching us only as the `resource` event above.
  */
 export const filterRumEvent = (event: RumEvent, context: RumEventDomainContext): boolean => {
   if (event.type === 'resource') return !isExpectedResourceFailure(event as RumResourceEvent)
@@ -204,11 +176,9 @@ export const filterRumEvent = (event: RumEvent, context: RumEventDomainContext):
   if (isCspBlockedEval(errorEvent)) return false
   if (originatesFromExtension(errorEvent.error.stack)) return false
 
-  // User-driven outcomes surfaced as unhandled errors by third-party SDKs
-  // (WalletConnect TTL expiry, a wallet's bare "Rejected" reply) never pass
-  // through trackError/the normalizer. Re-emit them as info-level actions —
-  // kept queryable as an approval-flow drop-off signal — and drop the RUM
-  // error so they stay off the Error-Free Views SLO (WA-2950).
+  // User-driven outcomes that third-party SDKs surface as unhandled errors (WalletConnect TTL expiry, a
+  // wallet's bare "Rejected") bypass trackError/the normalizer. Re-emit as info-level actions (queryable
+  // as an approval drop-off signal) and drop the RUM error to keep it off the Error-Free Views SLO (WA-2950).
   const userOutcome = matchUserOutcome(errorEvent.error.message)
   if (userOutcome) {
     datadogRum.addAction(errorEvent.error.message, { level: 'info', error_type: userOutcome })
@@ -296,9 +266,8 @@ export class DatadogProvider implements IObservabilityProvider {
   }
 
   captureError({ error, isUserFacing, tags }: ObservedError): void {
-    // Only user-facing failures become RUM errors (addError) so background /
-    // logged errors don't count against the Error-Free Views SLO — those are
-    // already recorded as warn-level actions via getLogger().warn.
+    // Only user-facing failures become RUM errors (addError); background/logged errors are recorded as
+    // warn-level actions via getLogger().warn, keeping them off the Error-Free Views SLO.
     if (this.isInitialized && isUserFacing) {
       datadogRum.addError(error, tags)
     }
