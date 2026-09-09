@@ -12,12 +12,7 @@ concurrency:
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    # Cypress Cloud drops any machine in a --parallel run whose environment
-    # differs from the first one (osName, osVersion, browser major, specs).
-    # GitHub rolls out new ubuntu-latest images gradually, so shards could land
-    # on different Ubuntu patch levels mid-rollout and were rejected with
-    # "Could not find Cypress test run results". A pinned container fixes the OS
-    # every shard reports. Chrome still comes from setup-chrome in the action.
+    # Pin OS so every --parallel shard reports one osVersion to Cypress Cloud (mismatched shards get dropped).
     container:
       image: cypress/base:24.14.0@sha256:2c8dfc188d908189af9a02e33ead1a8691bd0ffeaf86ed48bb70512c83a115e6
       options: --user 1001
