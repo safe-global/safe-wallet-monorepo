@@ -20,7 +20,7 @@ concurrency:
 jobs:
   e2e:
     # Pin the OS image so every --parallel shard reports the same osVersion to Cypress Cloud (else mismatched shards are dropped).
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04.4
     timeout-minutes: 30
     name: Cypress Smoke tests
     permissions:
