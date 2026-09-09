@@ -13319,7 +13319,7 @@ __metadata:
     "@reown/appkit-react-native": "npm:^2.0.3"
     "@reown/walletkit": "npm:^1.2.7"
     "@rtk-query/codegen-openapi": "npm:^2.0.0"
-    "@safe-global/protocol-kit": "npm:^8.0.6"
+    "@safe-global/protocol-kit": "npm:^8.0.7"
     "@safe-global/store": "workspace:^"
     "@safe-global/test": "workspace:^"
     "@safe-global/theme": "workspace:^"
@@ -13444,14 +13444,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@safe-global/protocol-kit@npm:^8.0.5, @safe-global/protocol-kit@npm:^8.0.6":
-  version: 8.0.6
-  resolution: "@safe-global/protocol-kit@npm:8.0.6"
+"@safe-global/protocol-kit@npm:^8.0.5, @safe-global/protocol-kit@npm:^8.0.7":
+  version: 8.0.7
+  resolution: "@safe-global/protocol-kit@npm:8.0.7"
   dependencies:
     "@noble/curves": "npm:^1.6.0"
     "@peculiar/asn1-schema": "npm:^2.3.13"
-    "@safe-global/safe-deployments": "npm:^1.37.62"
-    "@safe-global/safe-modules-deployments": "npm:^3.0.9"
+    "@safe-global/safe-deployments": "npm:^1.37.63"
+    "@safe-global/safe-modules-deployments": "npm:^3.0.10"
     "@safe-global/types-kit": "npm:^4.0.1"
     abitype: "npm:^1.2.3"
     semver: "npm:^7.8.0"
@@ -13461,7 +13461,7 @@ __metadata:
       optional: true
     "@peculiar/asn1-schema":
       optional: true
-  checksum: 10/0aa846c498e9ef741b2fa101faed28be60be7b55bcb4672a553b49b272291354be0322ab726af29ca7e712df8e3cebc99ce3cffff2471a4b8c91f580ad481eda
+  checksum: 10/6f7e3ffa1218fe8d70325a228ba09775dd14f49ecf38f6b27ec1ce5f81245e38a74f9212e173b35c4e525a7b08d2a8889122ae06abc90487324a25abca2223f1
   languageName: node
   linkType: hard
 
@@ -13496,12 +13496,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/safe-deployments@npm:^1.37.62":
-  version: 1.37.62
-  resolution: "@safe-global/safe-deployments@npm:1.37.62"
+"@safe-global/safe-deployments@npm:^1.37.63":
+  version: 1.37.63
+  resolution: "@safe-global/safe-deployments@npm:1.37.63"
   dependencies:
     semver: "npm:^7.6.2"
-  checksum: 10/3a3f8128c0fe0e658b40f9462119159d9c335da4449199d622722f219fac0cc82cf50d2c3a399bbbcc04aa9639bc69418ad9bcb3636efb32b28e1e0183bf1a51
+  checksum: 10/b53c258238ad68de304d24d8561c9e4aa40451630b88f3aaeed9918799c957136c2a77e5d8c77612f5354c3c5764d2260b862135f679bf59ea02bbf49dcd3156
   languageName: node
   linkType: hard
 
@@ -13519,10 +13519,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/safe-modules-deployments@npm:^3.0.9":
-  version: 3.0.9
-  resolution: "@safe-global/safe-modules-deployments@npm:3.0.9"
-  checksum: 10/06cd3d8f84a12a98a76ec3a8854ccfcef26bf178cef191ccab4fa68ee2a0bce629df47df2702b8a70ba5d0dfd78babe7b0410a207561e5bc63f12ace26520249
+"@safe-global/safe-modules-deployments@npm:^3.0.10":
+  version: 3.0.10
+  resolution: "@safe-global/safe-modules-deployments@npm:3.0.10"
+  checksum: 10/d193090628fd5e760264c9a52d86db14a15b26da11eb8f3cb924c09607c1518f0706b5063ddce41dd3d97af2d18195d10252dd86aa074e28ecdba3183598335b
   languageName: node
   linkType: hard
 
@@ -13634,7 +13634,7 @@ __metadata:
     "@safe-global/safe-apps-provider": "npm:^0.18.6"
     "@safe-global/safe-apps-react-sdk": "npm:^4.7.2"
     "@safe-global/safe-apps-sdk": "npm:^9.1.0"
-    "@safe-global/safe-deployments": "npm:^1.37.62"
+    "@safe-global/safe-deployments": "npm:^1.37.63"
     "@safe-global/safe-gateway-typescript-sdk": "npm:^3.22.9"
     "@testing-library/dom": "npm:^10.4.0"
     "@testing-library/jest-dom": "npm:^6.6.3"
@@ -13710,7 +13710,7 @@ __metadata:
     typescript: "npm:~5.9.2"
     typescript-eslint: "npm:^8.31.1"
   peerDependencies:
-    "@safe-global/protocol-kit": ^8.0.6
+    "@safe-global/protocol-kit": ^8.0.7
     "@safe-global/store": "*"
     "@safe-global/types-kit": ^3.1.x
   languageName: unknown
@@ -13795,10 +13795,10 @@ __metadata:
     "@reown/walletkit": "npm:^1.2.7"
     "@rspack/plugin-react-refresh": "npm:^1.0.0"
     "@safe-global/api-kit": "npm:^5.0.2"
-    "@safe-global/protocol-kit": "npm:^8.0.6"
+    "@safe-global/protocol-kit": "npm:^8.0.7"
     "@safe-global/safe-apps-sdk": "npm:^9.1.0"
-    "@safe-global/safe-deployments": "npm:^1.37.62"
-    "@safe-global/safe-modules-deployments": "npm:^3.0.9"
+    "@safe-global/safe-deployments": "npm:^1.37.63"
+    "@safe-global/safe-modules-deployments": "npm:^3.0.10"
     "@safe-global/store": "workspace:^"
     "@safe-global/test": "workspace:^"
     "@safe-global/theme": "workspace:^"
