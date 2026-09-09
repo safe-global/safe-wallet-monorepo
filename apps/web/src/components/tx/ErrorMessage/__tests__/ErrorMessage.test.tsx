@@ -1,4 +1,4 @@
-import { render, fireEvent } from '@/tests/test-utils'
+import { render } from '@/tests/test-utils'
 import type { DmkError } from '@ledgerhq/device-management-kit'
 import { mapLedgerError } from '@/services/onboard/ledger-errors'
 import ErrorMessage from '..'
@@ -25,15 +25,17 @@ describe('ErrorMessage', () => {
     expect(queryByText(/eth_call/)).not.toBeInTheDocument()
   })
 
-  it('shows the raw message for a non-GS error (on-chain-scoped ticket)', () => {
+  it('offers no way to reach the raw message of an error with no code at all', () => {
     const raw = 'Request failed at https://rpc.example.org using viem@2.0.0'
 
-    const { getByText, queryByText } = render(<ErrorMessage error={new Error(raw)}>Something failed.</ErrorMessage>)
+    const { getByText, queryByText, queryByTestId, container } = render(
+      <ErrorMessage error={new Error(raw)}>Something failed.</ErrorMessage>,
+    )
 
-    fireEvent.click(getByText('Details'))
-
-    // No GS code → the original raw-message Details is kept (unchanged by this ticket).
-    expect(queryByText(/rpc\.example\.org/)).toBeInTheDocument()
+    expect(getByText('Something failed.')).toBeInTheDocument()
+    expect(queryByText('Details')).not.toBeInTheDocument()
+    expect(queryByTestId('error-details')).not.toBeInTheDocument()
+    expect(container.textContent).not.toContain('rpc.example.org')
   })
 
   it('shows a known CGW response state with no code and no raw response body', () => {
