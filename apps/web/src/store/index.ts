@@ -16,6 +16,7 @@ import {
   cookiesAndTermsSlice,
   cookiesAndTermsInitialState,
   safeMessagesListener,
+  safeInfoListener,
   swapOrderListener,
   swapOrderStatusListener,
   txHistoryListener,
@@ -125,6 +126,7 @@ const middleware: Middleware<{}, RootState>[] = [
 
 const listeners = [
   safeMessagesListener,
+  safeInfoListener,
   txHistoryListener,
   txQueueListener,
   swapOrderListener,

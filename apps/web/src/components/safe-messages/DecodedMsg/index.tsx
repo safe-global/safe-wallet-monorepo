@@ -2,7 +2,6 @@ import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/mess
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import { Value } from '@/components/transactions/TxDetails/TxData/DecodedData/ValueArray'
 import { isByte } from '@/utils/transaction-guards'
-import { normalizeTypedData } from '@safe-global/utils/utils/web3'
 import { type TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { Typography } from '@/components/ui/typography'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
@@ -11,8 +10,7 @@ import { isAddress } from 'ethers'
 import { useMemo, type ReactElement } from 'react'
 import Msg from '../Msg'
 import css from './styles.module.css'
-import { Errors } from '@/services/exceptions'
-import useLogError from '@/hooks/useLogError'
+import { normalizeMessageForDisplay } from '@/services/safe-messages/normalizeMessage'
 
 const EIP712_DOMAIN_TYPE = 'EIP712Domain'
 
@@ -58,23 +56,11 @@ export const DecodedMsg = ({
 }): ReactElement | null => {
   const isTextMessage = typeof message === 'string'
 
-  // Normalize the message so we know its primaryType. Hoisted above the early
-  // returns — and memoised — so a message we cannot normalize is reported once
-  // per message instead of once per render of the details panel.
-  const { normalizedMsg, normalizeFailure } = useMemo<{
-    normalizedMsg?: TypedData
-    normalizeFailure?: unknown
-  }>(() => {
-    if (!message || typeof message === 'string') return {}
-
-    try {
-      return { normalizedMsg: normalizeTypedData(message) }
-    } catch (error) {
-      return { normalizedMsg: message, normalizeFailure: error }
-    }
-  }, [message])
-
-  useLogError(Errors._809, normalizeFailure)
+  // Normalize the message so we know its primaryType
+  const normalizedMsg = useMemo<TypedData | undefined>(
+    () => (message && typeof message !== 'string' ? normalizeMessageForDisplay(message) : undefined),
+    [message],
+  )
 
   if (!message) {
     return null

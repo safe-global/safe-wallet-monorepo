@@ -5,8 +5,7 @@ import { SafeTxContext } from './SafeTxContext'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { createTx } from '@/services/tx/tx-sender'
 import { useRecommendedNonce, useSafeTxGas } from '@/components/tx/shared/hooks'
-import { Errors } from '@/services/exceptions'
-import useLogError from '@/hooks/useLogError'
+import { Errors, logError } from '@/services/exceptions'
 import { getTxOrigin } from '@/utils/transactions'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectGtfPaymentSourcePreference, setGtfPaymentSourcePreference } from '@/features/gtf/store'
@@ -20,7 +19,7 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
   const [safeTx, setSafeTx] = useState<SafeTransaction>()
   const [safeMessage, setSafeMessage] = useState<TypedData>()
   const [safeMessageHash, setSafeMessageHash] = useState<`0x${string}`>()
-  const [safeTxError, setSafeTxError] = useState<Error>()
+  const [safeTxError, setSafeTxErrorState] = useState<Error>()
   const [nonce, setNonce] = useState<number>()
   const [nonceNeeded, setNonceNeeded] = useState<boolean>(true)
   const [safeTxGas, setSafeTxGas] = useState<string>()
@@ -38,6 +37,12 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
     [dispatch, signerAddress],
   )
   const [gtfSelectedGasToken, setGtfSelectedGasToken] = useState<string>()
+
+  // Every flow routes a failed tx build here, so this is the one place it is reported.
+  const setSafeTxError = useCallback((error: Error | undefined) => {
+    if (error) logError(Errors._103, error)
+    setSafeTxErrorState(error)
+  }, [])
 
   // Signed txs cannot be updated
   const isSigned = Boolean(safeTx && safeTx.signatures.size > 0)
@@ -68,10 +73,7 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
         setSafeTx(tx)
       })
       .catch(setSafeTxError)
-  }, [canEdit, finalNonce, finalSafeTxGas, safeTx?.data])
-
-  // Log errors
-  useLogError(Errors._103, safeTxError)
+  }, [canEdit, finalNonce, finalSafeTxGas, safeTx?.data, setSafeTxError])
 
   return (
     <SafeTxContext.Provider

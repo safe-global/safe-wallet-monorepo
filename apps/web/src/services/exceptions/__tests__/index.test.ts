@@ -1,4 +1,4 @@
-import { Errors, CodedException } from '..'
+import { Errors, CodedException, __resetLogThrottleForTests } from '..'
 import { ErrorDomain, ErrorLayer, ErrorType } from '@safe-global/utils/services/exceptions/errorTaxonomy'
 
 const defaultPublicIsProduction = process.env.NEXT_PUBLIC_IS_PRODUCTION
@@ -9,6 +9,7 @@ describe('CodedException', () => {
     jest.clearAllMocks()
     jest.spyOn(console, 'warn').mockImplementation(() => {})
     jest.spyOn(console, 'error').mockImplementation(() => {})
+    __resetLogThrottleForTests()
   })
 
   afterAll(() => {
@@ -127,6 +128,84 @@ describe('CodedException', () => {
 
       logError(Errors._601)
       expect(mockWarn).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('Throttling', () => {
+    afterEach(() => {
+      jest.useRealTimers()
+    })
+
+    it('logs an identical failure once, however often it is reported inside the window', async () => {
+      const { logError, Errors } = await import('..')
+
+      logError(Errors._601, 'rpc down')
+      logError(Errors._601, 'rpc down')
+      logError(Errors._601, 'rpc down')
+
+      expect(console.warn).toHaveBeenCalledTimes(1)
+    })
+
+    it('throttles what goes out to observability, not only the console', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockWarn = jest.fn()
+      const captureError = jest.fn()
+      jest.doMock('@/services/observability', () => ({
+        __esModule: true,
+        ...jest.requireActual('@/services/observability'),
+        captureError,
+        logger: { info: jest.fn(), warn: mockWarn, error: jest.fn(), debug: jest.fn() },
+      }))
+      const { logError, Errors } = await import('..')
+
+      logError(Errors._601, 'rpc down')
+      logError(Errors._601, 'rpc down')
+
+      expect(mockWarn).toHaveBeenCalledTimes(1)
+      expect(captureError).toHaveBeenCalledTimes(1)
+    })
+
+    it('logs again once the window has passed', async () => {
+      jest.useFakeTimers()
+      const { logError, Errors } = await import('..')
+
+      logError(Errors._601, 'rpc down')
+      jest.advanceTimersByTime(60_000 - 1)
+      logError(Errors._601, 'rpc down')
+      expect(console.warn).toHaveBeenCalledTimes(1)
+
+      jest.advanceTimersByTime(1)
+      logError(Errors._601, 'rpc down')
+      expect(console.warn).toHaveBeenCalledTimes(2)
+    })
+
+    it('does not throttle a failure that differs in code, message or context', async () => {
+      const { logError, Errors } = await import('..')
+
+      logError(Errors._601, 'rpc down')
+      logError(Errors._602, 'rpc down')
+      logError(Errors._601, 'rpc unreachable')
+      logError(Errors._601, 'rpc down', { rpcHost: 'rpc.ankr.com' })
+
+      expect(console.warn).toHaveBeenCalledTimes(4)
+    })
+
+    it('keeps each attempt of a retry loop a distinct report', async () => {
+      const { logError, Errors } = await import('..')
+
+      logError(Errors._601, 'rpc down', { attempt: 1 })
+      logError(Errors._601, 'rpc down', { attempt: 2 })
+
+      expect(console.warn).toHaveBeenCalledTimes(2)
+    })
+
+    it('does not throttle tracked errors', async () => {
+      const { trackError, Errors } = await import('..')
+
+      trackError(Errors._804, 'execution failed')
+      trackError(Errors._804, 'execution failed')
+
+      expect(console.error).toHaveBeenCalledTimes(2)
     })
   })
 

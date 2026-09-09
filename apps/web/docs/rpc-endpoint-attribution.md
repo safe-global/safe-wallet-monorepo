@@ -36,7 +36,12 @@ A catch site turns the failing provider into `ErrorContext` with
 `getRpcErrorContext(provider)` and passes it to `logError` / `trackError`:
 
 ```ts
-logError(Errors._612, gasLimitError.message, getRpcErrorContext(web3ReadOnly))
+try {
+  return await web3ReadOnly.estimateGas(tx)
+} catch (e) {
+  logError(Errors._612, e, getRpcErrorContext(web3ReadOnly))
+  throw e
+}
 ```
 
 Deriving it from the provider rather than from the current chain matters: providers are also

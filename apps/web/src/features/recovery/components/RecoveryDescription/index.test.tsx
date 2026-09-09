@@ -1,8 +1,7 @@
 import { faker } from '@faker-js/faker'
 
-import { render } from '@/tests/test-utils'
+import { render, screen } from '@/tests/test-utils'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { Errors, logError } from '@/services/exceptions'
 import { getRecoveredSafeInfo } from '../../services/transaction-list'
 import RecoveryDescription from '.'
 import type { RecoveryQueueItem } from '../../services/recovery-state'
@@ -11,14 +10,8 @@ jest.mock('@/hooks/useSafeInfo')
 jest.mock('../../services/transaction-list')
 jest.mock('../../hooks/useIsRecoverer', () => ({ useIsRecoverer: () => false }))
 
-jest.mock('@/services/exceptions', () => ({
-  ...jest.requireActual('@/services/exceptions'),
-  logError: jest.fn(),
-}))
-
 const mockUseSafeInfo = useSafeInfo as jest.MockedFunction<typeof useSafeInfo>
 const mockGetRecoveredSafeInfo = getRecoveredSafeInfo as jest.MockedFunction<typeof getRecoveredSafeInfo>
-const mockedLogError = logError as jest.MockedFunction<typeof logError>
 
 const ownerAddress = faker.finance.ethereumAddress()
 
@@ -39,24 +32,27 @@ describe('RecoveryDescription', () => {
     mockSafeInfo()
   })
 
-  it('reports a proposal whose recovered setup cannot be derived', () => {
-    mockGetRecoveredSafeInfo.mockImplementation(() => {
-      throw new Error('Owner structure has since been modified')
-    })
+  it('renders the recovered owners and threshold', () => {
+    mockGetRecoveredSafeInfo.mockReturnValue({
+      threshold: 1,
+      owners: [{ value: ownerAddress }],
+    } as unknown as ReturnType<typeof getRecoveredSafeInfo>)
 
     render(<RecoveryDescription item={item} />)
 
-    expect(mockedLogError).toHaveBeenCalledTimes(1)
-    expect(mockedLogError).toHaveBeenCalledWith(Errors._811, expect.any(Error), undefined)
+    expect(screen.getByText('1 out of 1 owner(s)')).toBeInTheDocument()
   })
 
-  it('reports it once when a safe-info refresh rebuilds the owners array', () => {
-    // The regression: the memo depends on `safe.owners`, which is a new array on
-    // every refresh, so it re-evaluated — and re-threw — for reasons unrelated to
-    // the proposal, once per proposal rendered in the queue.
-    mockGetRecoveredSafeInfo.mockImplementation(() => {
-      throw new Error('Owner structure has since been modified')
-    })
+  it('warns that the proposal will fail when the recovered setup cannot be derived', () => {
+    mockGetRecoveredSafeInfo.mockReturnValue(undefined)
+
+    render(<RecoveryDescription item={item} />)
+
+    expect(screen.getByText(/This recovery proposal will fail/)).toBeInTheDocument()
+  })
+
+  it('does not re-derive the setup when a safe-info refresh rebuilds the owners array', () => {
+    mockGetRecoveredSafeInfo.mockReturnValue(undefined)
 
     const { rerender } = render(<RecoveryDescription item={item} />)
 
@@ -65,18 +61,6 @@ describe('RecoveryDescription', () => {
     mockSafeInfo()
     rerender(<RecoveryDescription item={item} />)
 
-    expect(mockGetRecoveredSafeInfo.mock.calls.length).toBeGreaterThan(1)
-    expect(mockedLogError).toHaveBeenCalledTimes(1)
-  })
-
-  it('reports nothing when the recovered setup derives cleanly', () => {
-    mockGetRecoveredSafeInfo.mockReturnValue({
-      threshold: 1,
-      owners: [{ value: ownerAddress }],
-    } as unknown as ReturnType<typeof getRecoveredSafeInfo>)
-
-    render(<RecoveryDescription item={item} />)
-
-    expect(mockedLogError).not.toHaveBeenCalled()
+    expect(mockGetRecoveredSafeInfo).toHaveBeenCalledTimes(1)
   })
 })
