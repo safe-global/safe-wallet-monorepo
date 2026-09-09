@@ -57,16 +57,16 @@ const deriveIsReadOnly = (
   return !overview.owners.some((owner) => sameAddress(owner.value, walletAddress))
 }
 
-// A missing overview after the query errored means the fetch failed for this (deployed) safe:
-// surface null so the UI shows `--`, not a misleading `0`. A still-loading query keeps `'0'`
-// (the isLoading flag drives the skeleton instead), and counterfactual safes render a badge, not a balance.
+// CGW omits (via Promise.allSettled) any safe whose overview fetch rejected, so a deployed safe
+// absent from a settled response means its data couldn't be fetched → null renders `--` instead of a
+// misleading `0`. Undeployed safes render a badge, and a still-loading query keeps `'0'`.
 const resolveBalance = (
   overview: SafeOverview | undefined,
-  hasError: boolean,
+  isLoading: boolean,
   isUndeployed: boolean,
 ): string | null => {
   if (overview) return overview.fiatTotal
-  if (hasError && !isUndeployed) return null
+  if (!isLoading && !isUndeployed) return null
   return '0'
 }
 
@@ -114,7 +114,6 @@ function buildMultiChainItem(
   currentChainId: string,
   overviews: SafeOverview[] | undefined,
   overviewsLoading: boolean,
-  overviewsError: boolean,
   safe: { threshold: number; owners?: { value: string }[] },
   chainConfigs: Chain[],
   undeployedSafes: UndeployedSafesState,
@@ -133,7 +132,7 @@ function buildMultiChainItem(
     name: item.name ?? '',
     address: item.address,
     ...resolveThresholdAndOwners(isCurrentSafe, safe, currentChainOverview),
-    balance: resolveBalance(currentChainOverview, overviewsError, currentChainUndeployed),
+    balance: resolveBalance(currentChainOverview, overviewsLoading, currentChainUndeployed),
     isLoading: overviewsLoading && !currentChainOverview,
     chains: mapMultiChainItemChains(
       chainConfigs,
@@ -152,7 +151,6 @@ function buildSingleChainItem(
   isCurrentSafe: boolean,
   overviews: SafeOverview[] | undefined,
   overviewsLoading: boolean,
-  overviewsError: boolean,
   safe: { threshold: number; owners?: { value: string }[] },
   chainConfigs: Chain[],
   undeployedSafes: UndeployedSafesState,
@@ -166,7 +164,7 @@ function buildSingleChainItem(
     name: item.name ?? '',
     address: item.address,
     ...resolveThresholdAndOwners(isCurrentSafe, safe, overview),
-    balance: resolveBalance(overview, overviewsError, Boolean(undeployed)),
+    balance: resolveBalance(overview, overviewsLoading, Boolean(undeployed)),
     isLoading: overviewsLoading && !overview,
     chains: mapChainIds(chainConfigs, [item.chainId]).map((chain) => ({
       ...chain,
@@ -215,7 +213,6 @@ export function useSpaceSafeSelectorItems() {
             currentChainId,
             overviews,
             overviewsLoading,
-            overviewsError,
             safe,
             chainConfigs,
             undeployedSafes,
@@ -228,7 +225,6 @@ export function useSpaceSafeSelectorItems() {
           isCurrentSafe,
           overviews,
           overviewsLoading,
-          overviewsError,
           safe,
           chainConfigs,
           undeployedSafes,
@@ -241,7 +237,6 @@ export function useSpaceSafeSelectorItems() {
       safe,
       overviews,
       overviewsLoading,
-      overviewsError,
       chainConfigs,
       undeployedSafes,
       walletAddress,

@@ -546,11 +546,12 @@ describe('useSpaceSafeSelectorItems', () => {
 
   // ── single-chain safe balance fallback ──
 
-  it('returns balance "0" for a single-chain safe with no overview data', () => {
+  it('returns balance null (`--`) for a deployed single-chain safe absent from a settled response', () => {
+    // No overview once the query has settled means the balance couldn't be fetched → show `--`, not `$0.00`.
     setupDefaults({ overviews: [] as never[] })
 
     const { result } = renderHook(() => useSpaceSafeSelectorItems())
-    expect(result.current.items[0].balance).toBe('0')
+    expect(result.current.items[0].balance).toBeNull()
   })
 
   // ── isLoading false when overview already loaded ──
@@ -785,8 +786,16 @@ describe('useSpaceSafeSelectorItems', () => {
 
   // ── balance falls back to `--` (null) on a failed overview fetch ──
 
-  it('sets balance to null on a failed overview fetch for a deployed safe', () => {
+  it('sets balance to null when the whole overview query errored', () => {
     setupDefaults({ overviews: [], overviewsLoading: false, overviewsError: true })
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].balance).toBeNull()
+  })
+
+  it('sets balance to null when a deployed safe is omitted from a settled (non-error) response', () => {
+    // CGW drops safes whose balance fetch failed (Promise.allSettled), so a partial failure looks
+    // like a successful array missing that safe — it must still render `--`, not `$0.00`.
+    setupDefaults({ overviews: [], overviewsLoading: false, overviewsError: false })
     const { result } = renderHook(() => useSpaceSafeSelectorItems())
     expect(result.current.items[0].balance).toBeNull()
   })
@@ -813,5 +822,14 @@ describe('useSpaceSafeSelectorItems', () => {
     const { result } = renderHook(() => useSpaceSafeSelectorItems())
     expect(result.current.items[0].balance).not.toBeNull()
     expect(result.current.items[0].isLoading).toBe(true)
+  })
+
+  it('does not set balance to null for an undeployed safe with no overview (badge, not `--`)', () => {
+    setupDefaults({ overviews: [], overviewsLoading: false, overviewsError: false })
+    ;(useAppSelector as jest.Mock).mockImplementation((selector: unknown) =>
+      selector === selectUndeployedSafes ? { '1': { '0xSafe1': { status: { status: 'AWAITING_EXECUTION' } } } } : 'usd',
+    )
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].balance).not.toBeNull()
   })
 })
