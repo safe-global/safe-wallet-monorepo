@@ -2,6 +2,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import type { SessionTypes } from '@walletconnect/types'
 import type { WalletKitTypes } from '@reown/walletkit'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import type { AppInfo } from '@/services/safe-wallet-provider'
 import type { SafeItem } from '@/hooks/safes'
 import type WalletConnectWallet from './services/WalletConnectWallet'
@@ -25,6 +26,12 @@ export type WalletConnectContextType = {
   setLoading: Dispatch<SetStateAction<WCLoadingState | null>>
   approveSession: () => Promise<void>
   rejectSession: () => Promise<void>
+  /** The Safe App matching the proposing dApp, if one exists on the current chain */
+  matchingSafeApp: SafeAppData | undefined
+  isMatchingSafeAppLoading: boolean
+  /** Whether the user has moved past the Safe App suggestion for the current proposal */
+  isSuggestionResolved: boolean
+  setSuggestionResolved: (resolved: boolean) => void
 }
 
 export type WcChainSwitchRequest = {

@@ -26,7 +26,15 @@ const WcHeaderWidget = ({ sessions, ...props }: WcHeaderWidgetProps) => {
         />
       </div>
 
-      <Popup keepMounted anchorEl={iconRef.current} open={props.isOpen} onClose={props.onClose} transitionDuration={0}>
+      <Popup
+        keepMounted
+        anchorEl={iconRef.current}
+        open={props.isOpen}
+        onClose={props.onClose}
+        transitionDuration={0}
+        // Wide enough for each Safe App benefit to sit on a single line
+        className="sm:w-[520px]"
+      >
         {props.children}
       </Popup>
     </>

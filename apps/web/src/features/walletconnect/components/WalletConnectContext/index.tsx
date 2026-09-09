@@ -7,17 +7,19 @@ import type { WalletKitTypes } from '@reown/walletkit'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useSafeWalletProvider from '@/services/safe-wallet-provider/useSafeWalletProvider'
 import { IS_PRODUCTION } from '@/config/constants'
-import { getEip155ChainId, getPeerName, stripEip155Prefix } from '../../services/utils'
+import { getEip155ChainId, getPeerName, isExpiredProposalError, stripEip155Prefix } from '../../services/utils'
 import { trackRequest } from '../../services/tracking'
 import { wcPopupStore } from '../../store/wcPopupStore'
 import type WalletConnectWallet from '../../services/WalletConnectWallet'
 import walletConnectInstance from '../../services/walletConnectInstance'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import { useMatchingSafeApp } from '../../hooks/useMatchingSafeApp'
 import type { WalletConnectContextType, WcAutoApproveProps } from '../../types'
 import { WCLoadingState } from '../../types'
 
 enum Errors {
   WRONG_CHAIN = '%%dappName%% made a request on a different chain than the one you are connected to',
+  EXPIRED_PROPOSAL = 'This connection request has expired. Please start a new connection from the dApp.',
 }
 
 const WC_AUTO_APPROVE_KEY = 'wcAutoApprove'
@@ -45,6 +47,10 @@ export const WalletConnectContext = createContext<WalletConnectContextType>({
   setLoading: () => {},
   approveSession: () => Promise.resolve(),
   rejectSession: () => Promise.resolve(),
+  matchingSafeApp: undefined,
+  isMatchingSafeAppLoading: false,
+  isSuggestionResolved: false,
+  setSuggestionResolved: () => {},
 })
 
 export const WalletConnectProvider = ({ children }: { children: ReactNode }) => {
@@ -222,6 +228,14 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
   // --- Proposals
   //
   const [sessionProposal, setSessionProposal] = useState<WalletKitTypes.SessionProposal | null>(null)
+  // Owned here rather than in the form so that dismissing the popup can tell whether the
+  // Safe App suggestion was still on screen
+  const [isSuggestionResolved, setSuggestionResolved] = useState(false)
+
+  // Matched on the origin WalletConnect observed, never on proposer.metadata.url, which the
+  // dApp declares about itself and can point at any domain it likes
+  const proposalDappUrl = sessionProposal?.verifyContext.verified.origin
+  const { safeApp: matchingSafeApp, isLoading: isMatchingSafeAppLoading } = useMatchingSafeApp(proposalDappUrl)
 
   const approveSession = useCallback(async () => {
     if (!walletConnect || !sessionProposal) return
@@ -254,6 +268,12 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
       }
     } catch (e) {
       setLoading(null)
+      // An expired proposal can never be approved, so drop it instead of leaving the
+      // user stuck on a dialog whose only actions keep failing
+      if (isExpiredProposalError(e as Error)) {
+        setSessionProposal(null)
+        throw new Error(Errors.EXPIRED_PROPOSAL)
+      }
       throw e
     }
 
@@ -262,14 +282,18 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
     setOpen(false)
   }, [walletConnect, sessionProposal, chainId, safeAddress, setAutoApprove, setOpen])
 
-  // Auto approve previously approved non-malicious dApps
+  // Auto approve previously approved non-malicious dApps.
+  // Skipped while the Safe App lookup is in flight, and when a Safe App exists for the dApp so
+  // that the proposal form can recommend it instead of connecting silently.
   useEffect(() => {
-    if (sessionProposal && autoApprove[chainId]?.[sessionProposal.verifyContext.verified.origin]) {
+    if (!sessionProposal || isMatchingSafeAppLoading || matchingSafeApp) return
+
+    if (autoApprove[chainId]?.[sessionProposal.verifyContext.verified.origin]) {
       approveSession().catch((e) => {
         setError(e as Error)
       })
     }
-  }, [autoApprove, approveSession, sessionProposal, chainId])
+  }, [autoApprove, approveSession, sessionProposal, chainId, matchingSafeApp, isMatchingSafeAppLoading])
 
   const rejectSession = useCallback(async () => {
     if (!walletConnect || !sessionProposal) return
@@ -280,6 +304,12 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
       await walletConnect.rejectSession(sessionProposal)
     } catch (e) {
       setLoading(null)
+      // The proposal is already gone, so treat the rejection as done rather than
+      // leaving the user on a dialog they cannot dismiss
+      if (isExpiredProposalError(e as Error)) {
+        setSessionProposal(null)
+        throw new Error(Errors.EXPIRED_PROPOSAL)
+      }
       throw e
     }
 
@@ -292,6 +322,12 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
   useEffect(() => {
     return walletConnect?.onSessionPropose((proposalData) => {
       setLoading(null)
+      // A proposal can arrive just after the 5s connection timeout fired. The error screen
+      // takes precedence over the proposal, so clear it or the request stays hidden behind a
+      // message that is no longer true.
+      setError(null)
+      // Each proposal gets its own suggestion
+      setSuggestionResolved(false)
       setSessionProposal(proposalData)
     })
   }, [walletConnect])
@@ -310,6 +346,10 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
         sessionProposal,
         approveSession,
         rejectSession,
+        matchingSafeApp,
+        isMatchingSafeAppLoading,
+        isSuggestionResolved,
+        setSuggestionResolved,
       }}
     >
       {children}

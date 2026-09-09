@@ -64,4 +64,21 @@ export const WALLETCONNECT_EVENTS = {
     category: WALLETCONNECT_CATEGORY,
     event: EventType.META,
   },
+  SAFE_APP_SUGGESTED: {
+    action: 'WC Safe App suggested',
+    category: WALLETCONNECT_CATEGORY,
+    event: EventType.META,
+  },
+  SAFE_APP_SUGGESTION_RESULT: {
+    action: 'WC Safe App suggestion result',
+    category: WALLETCONNECT_CATEGORY,
+  },
+}
+
+// The suggestion has no reject action of its own: users either open the Safe App, fall through
+// to the connection form where the usual approve/reject events take over, or close the popup
+export enum WcSafeAppSuggestionResult {
+  OPENED_SAFE_APP = 'Opened Safe App',
+  CONTINUED_WITH_WALLETCONNECT = 'Continued with WalletConnect',
+  DISMISSED = 'Dismissed',
 }
