@@ -45,9 +45,8 @@ export const useSafeSelectorState = ({
     [isSingleSafe],
   )
 
-  // Prevents the dropdown snapping back to the first-mount safe when a multi-chain row expands/collapses
-  // or items load async: base-ui fires `onValueChange` then resets to its captured initial value
-  // (SelectPositioner `onMapChange`). We forward only 'item-press' picks and cancel() the rest.
+  // Stops the dropdown snapping back to the first-mount safe on row expand/collapse or async load: base-ui
+  // fires `onValueChange` then resets to its captured initial value, so we forward only 'item-press' picks.
   const handleSafeChange = useCallback(
     (value: string | null, eventDetails: SelectRootChangeEventDetails) => {
       if (eventDetails.reason !== 'item-press') {

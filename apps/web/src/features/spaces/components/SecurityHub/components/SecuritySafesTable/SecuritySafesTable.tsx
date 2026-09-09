@@ -89,9 +89,8 @@ const SecuritySafesTable = ({
     })
   }, [safes, scanResults, gradeFilter, security.$isReady, security.scanKey, security.getSafeGrade])
 
-  // Gate remaining render on feature load. Utilities are synchronous call-site primitives —
-  // pulling them via useLoadFeature means we must wait for the module to resolve.
-  // Since FEATURES.SPACES is already enabled on this page, this is a very brief state.
+  // Gate render on feature load: these utilities are synchronous primitives pulled via useLoadFeature, so
+  // we wait for the module. Brief, since FEATURES.SPACES is already enabled on this page.
   if (!security.$isReady) return <></>
 
   return (

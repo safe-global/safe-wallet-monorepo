@@ -43,9 +43,8 @@ export const useResolvedGasToken = (
   const chain = useCurrentChain()
   const currency = useAppSelector(selectCurrency)
 
-  // The tx doesn't exist yet on the Create step. The CGW rejects nonces <= the Safe's current
-  // nonce, so probe against the recommended next nonce (the value the tx will actually get when
-  // proposed). The exact nonce doesn't change which token can cover fees.
+  // The tx doesn't exist yet on Create, and the CGW rejects nonces <= the current nonce, so probe against
+  // the recommended next nonce (what the tx will get). The exact nonce doesn't change which token covers fees.
   const [recommendedNonce] = useAsync(async () => {
     if (!safe.chainId || !safeAddress) return
     if (!safe.deployed) return 0

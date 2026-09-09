@@ -9,9 +9,8 @@ export interface AccountItemCheckboxProps {
 
 function AccountItemCheckbox({ checked, address, onCheckedChange }: AccountItemCheckboxProps) {
   return (
-    // The Base UI checkbox re-dispatches a bubbling click on its hidden input in addition to the
-    // button's own click, so inside a clickable row the row's onClick fires twice and the toggle
-    // cancels itself out. Swallow both here and toggle via onCheckedChange instead.
+    // The Base UI checkbox re-dispatches a bubbling click on its hidden input on top of the button's own,
+    // so inside a clickable row onClick fires twice and the toggle cancels out. Swallow both; toggle via onCheckedChange.
     <div className={css.accountItemCheckbox} onClick={(event) => event.stopPropagation()}>
       <Checkbox
         checked={checked}

@@ -156,9 +156,8 @@ export default function SafeAccountsTable({
 }: SafeAccountsTableProps) {
   const [overviewsByKey, setOverviewsByKey] = useState<Map<string, SafeOverview>>(new Map())
 
-  // Rows report their lazily-fetched overviews here. RTK returns a stable object ref per cache entry
-  // (a new ref only on a genuine refetch), so reference equality detects real updates; keep the
-  // previous map when nothing new arrived, so a repeated report doesn't churn a re-render.
+  // Rows report lazily-fetched overviews here. RTK returns a stable ref per cache entry, so reference
+  // equality detects real updates — keep the previous map when nothing changed to avoid churning a re-render.
   const handleOverviewsLoaded = useCallback((overviews: SafeOverview[]) => {
     setOverviewsByKey((prev) => {
       let changed = false
@@ -179,9 +178,8 @@ export default function SafeAccountsTable({
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [renameTarget, setRenameTarget] = useState<RenameTarget | null>(null)
 
-  // Selection surfaces are modals (trusted picker, manage, onboarding) where rename isn't offered by
-  // default; the hover rename pencil is otherwise only for the navigable welcome/workspace tables. The
-  // "Manage my account list" modal opts back in via `allowRenameInDialog`.
+  // Rename (hover pencil) is offered only on the navigable welcome/workspace tables, not selection modals —
+  // except the "Manage my account list" modal, which opts back in via `allowRenameInDialog`.
   const canRename = allowRenameInDialog || !selection
   const onRename = canRename ? (line: AccountLine) => setRenameTarget(toRenameTarget(line)) : undefined
   const { scope: renameScope } = useAddressBookWriteScope(renameTarget?.address, renameTarget?.chainIds ?? [])
@@ -290,9 +288,8 @@ export default function SafeAccountsTable({
                     <TableHead
                       key={column.id}
                       aria-sort={active ? (sort.order === 'asc' ? 'ascending' : 'descending') : undefined}
-                      // Indents the NAME label so it sits above the account name text rather than the
-                      // avatar (see styles.module.css) — a leading checkbox column already offsets
-                      // the cell, so it needs less.
+                      // Indents the NAME label above the account name, not the avatar (see styles.module.css);
+                      // less when a leading checkbox column already offsets the cell.
                       data-name-head={column.id === 'name' ? (selection ? 'selection' : 'default') : undefined}
                       className="px-2 py-2.5"
                       style={{ width: column.width, textAlign: column.align ?? 'left' }}

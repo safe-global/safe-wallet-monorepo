@@ -87,9 +87,8 @@ const useSecurityScan = (ctx: ScanContext | null): ScanState => {
 
   useEffect(() => {
     if (ctxKey) {
-      // Check cache when ctxKey first becomes available — not just on mount.
-      // When the drawer opens, ctx starts as null (queries loading) so the mount-time
-      // cache check misses. By the time ctx resolves, we need to check again here.
+      // Check cache when ctxKey first becomes available, not just on mount: ctx starts null (queries
+      // loading) so the mount-time check misses, and we need to re-check once it resolves.
       const cached = getCachedScan(ctxKey)
       if (cached) {
         setResults(cached.results)

@@ -18,9 +18,8 @@ export const useOidcLogin = () => {
     sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
     sessionStorage.setItem(OIDC_AUTH_CONNECTION_KEY, method)
 
-    // Strip any stale `error` param so the callback can trust that an `error`
-    // in the return URL genuinely came from the OIDC provider, not from a
-    // previous failed attempt still present in the URL.
+    // Strip any stale `error` param so the callback can trust that an `error` in the return URL came from
+    // the OIDC provider, not a previous failed attempt still in the URL.
     const cleanRedirectUrl = new URL(redirectUrl ?? window.location.href)
     cleanRedirectUrl.searchParams.delete('error')
 

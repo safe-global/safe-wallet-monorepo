@@ -77,10 +77,9 @@ export const contractVersionScanner: SecurityScanner = {
       }
     }
 
-    // Flag any Gnosis-deployed Safe older than the chain's latest recommended version. Unlike
-    // `MastercopyWarning`, no `isNonCriticalUpdate` short-circuit: the Security Hub surfaces this
-    // independently, network-aware (future bumps auto-downgrade older mastercopies), ignoring build
-    // metadata (`+L2`/`+Circles`). Uncomparable versions defer to the gateway's OUTDATED flag.
+    // Flag any Gnosis Safe older than the chain's latest recommended version. Unlike `MastercopyWarning`,
+    // no `isNonCriticalUpdate` short-circuit: the Hub surfaces this independently, network-aware, ignoring
+    // build metadata (`+L2`/`+Circles`). Uncomparable versions defer to the gateway's OUTDATED flag.
     const versionComparison = compareVersionToLatest(version, latestVersion)
     if (
       implementationVersionState === 'OUTDATED' &&

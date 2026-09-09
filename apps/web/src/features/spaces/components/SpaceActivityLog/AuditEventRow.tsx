@@ -7,9 +7,8 @@ import type { SpaceAuditLogEntryDto } from '@safe-global/store/gateway/AUTO_GENE
 import { useMemberNameResolver } from '../../hooks/useMemberNameResolver'
 import { getAuditEventDescription, getDefaultTargetDisplay, getTargetUserId } from './auditEventCopy'
 
-// People resolve as: space member name → wallet address → server label.
-// Shared address-book names are member-editable and are deliberately not
-// used here.
+// People resolve as: space member name → wallet address → server label. Shared address-book names are
+// member-editable, so deliberately not used here.
 function ActorAvatar({ actor, memberName }: { actor: string; memberName?: string }) {
   if (memberName) {
     return <InitialsAvatar name={memberName} size="medium" rounded />

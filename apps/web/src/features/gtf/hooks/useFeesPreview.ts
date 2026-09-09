@@ -131,9 +131,8 @@ export const useFeesPreview = (): FeesPreviewData => {
     return { address: lockedGasToken, symbol: '', logoUri: '', decimals: nativeDecimals, fiatBalance: '0' }
   }, [lockedGasToken, balances.items, nativeSymbol, nativeDecimals, chain?.nativeCurrency.logoUri])
 
-  // If the user's explicit choice drops out of candidates (e.g. balance dropped to 0), forget it.
-  // Skip while the candidates list is empty — that's the transient remount window (Back/Forward
-  // between flow steps) where balances haven't repopulated yet, not a real "token unavailable".
+  // If the user's choice drops out of candidates (e.g. balance hit 0), forget it — but skip while the list
+  // is empty (the transient Back/Forward remount window), which isn't a real "token unavailable".
   useEffect(() => {
     if (!gtfSelectedGasToken) return
     if (candidates.length === 0) return
@@ -148,9 +147,8 @@ export const useFeesPreview = (): FeesPreviewData => {
   const gasSymbol = selectedCandidate?.symbol ?? nativeSymbol
   const gasDecimals = selectedCandidate?.decimals ?? nativeDecimals
 
-  // Chains without a RELAY_FEE relayer can't quote Safe-pays fees at all
-  // — render the signer-pays variant: free execution fee, no
-  // gas-token selector, and no call to the preview endpoint.
+  // Chains without a RELAY_FEE relayer can't quote Safe-pays fees, so render the signer-pays variant:
+  // free execution fee, no gas-token selector, no preview call.
   const feePreviewAvailable = isGtfFeePreviewAvailable(chain)
   const isSignerMode =
     !isConfirmation &&
@@ -197,9 +195,8 @@ export const useFeesPreview = (): FeesPreviewData => {
   const { gasLimit, gasLimitError, gasLimitLoading } = useGasLimit(safeTx)
   const [gasPrice, gasPriceError, gasPriceLoading] = useGasPrice()
 
-  // Memoize the merged signing payload so threat analysis (which receives this) doesn't
-  // re-run on unrelated re-renders. Identity changes only when the CGW-resolved fee fields
-  // or the underlying safeTx change.
+  // Memoize the merged signing payload so threat analysis doesn't re-run on unrelated re-renders — identity
+  // changes only when the CGW-resolved fee fields or the safeTx change.
   const previewTxData = preview.data?.txData
   const previewedSafeTx = useMemo<SafeTransaction | undefined>(() => {
     if (!previewTxData || !safeTx) return undefined

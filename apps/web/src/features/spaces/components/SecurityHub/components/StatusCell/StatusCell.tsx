@@ -26,10 +26,9 @@ const StatusCell = ({ grade, count, isScanning }: StatusCellProps) => {
       </Typography>
     )
   }
-  // Passing Safes read as a bare "Healthy" chip; other grades carry the grade word so the chip
-  // reconciles with the panel header and sidebar per-group chips (all use "Grade · …").
-  // Defensive: count 0 should always be `passing` (computeSummary/getSafeGrade agree), so fall back
-  // to Healthy to avoid a desynced "Needs review · 0 issues found" — and warn in dev to surface the bug.
+  // Passing Safes read as a bare "Healthy"; other grades carry the grade word to match the header/sidebar
+  // ("Grade · …"). Defensive: count 0 should always be passing, so fall back to Healthy to avoid a desynced
+  // "Needs review · 0 issues found" (and warn in dev).
   const safeCount = count ?? 0
   if (grade !== 'passing' && safeCount === 0 && process.env.NODE_ENV !== 'production') {
     console.warn(

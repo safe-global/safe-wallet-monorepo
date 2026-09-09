@@ -84,9 +84,8 @@ const useSafeScanContext = (
     { skip: !isMultichain || multichainSafeItems.length === 0, refetchOnMountOrArgChange: forceRefetch },
   )
 
-  // Fetch overview for balance data (fiatTotal) on the selected chain.
-  // Skip when pre-fetched overviewData is provided (e.g. from the batch query in SecurityHub)
-  // to avoid redundant per-Safe API requests during auto-scan.
+  // Fetch overview (fiatTotal) for the selected chain; skip when pre-fetched overviewData is provided (e.g.
+  // SecurityHub's batch query) to avoid redundant per-Safe requests during auto-scan.
   const { currentData: safeOverview, isFetching: isOverviewFetching } = useGetSafeOverviewQuery(
     { chainId, safeAddress: address },
     { skip: !selected || !isDeployed || !!overviewData, refetchOnMountOrArgChange: forceRefetch },
@@ -97,9 +96,8 @@ const useSafeScanContext = (
   const { configs: allChains } = useChains()
 
   return useMemo(() => {
-    // Gate on `isFetching` (not `isLoading`, which is only true on first fetch) plus data present:
-    // otherwise scanners run mid-refetch with `creationInfo=null` and give a misleading result that
-    // flips on rescan. Skip the data requirement once the query has definitively errored.
+    // Gate on `isFetching` (not `isLoading`, first-fetch only) plus data present, else scanners run
+    // mid-refetch with `creationInfo=null` and give a result that flips on rescan. Drop the data requirement once errored.
     if (!selected || !entry) return null
     if (isSafeFetching || !safeInfo) return null
     if (!overviewData && isOverviewFetching) return null

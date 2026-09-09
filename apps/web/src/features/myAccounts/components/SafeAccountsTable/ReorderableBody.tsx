@@ -212,9 +212,8 @@ const DraggableGroupRows = ({
             />
           )
 
-          // dnd pins the dragged row with `position: fixed`; a transformed ancestor (the centered modal)
-          // would become its containing block and shove it sideways, so portal it to <body>. The wrapper
-          // table keeps the detached <tr> renderable.
+          // dnd pins the dragged row `position: fixed`; a transformed ancestor (the centered modal) would
+          // become its containing block and shove it sideways, so portal to <body>. The wrapper table keeps the <tr> renderable.
           return snapshot.isDragging
             ? createPortal(
                 <table

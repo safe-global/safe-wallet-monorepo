@@ -14,9 +14,8 @@ export const SidebarTopBar = (): ReactElement => {
   const isSpaceRoute = useIsSpaceRoute()
   const isHydrated = useIsHydrated()
 
-  // Inside a space or safe the logo becomes a "Home" pill back to the accounts view; elsewhere a plain logo.
-  // Gated on hydration: both inputs are client-only (safe address from a query param, collapsed state from a
-  // cookie), so deciding the variant on the first pass would disagree with the server HTML and trip hydration.
+  // Inside a space/safe the logo becomes a "Home" pill to the accounts view; else a plain logo. Gated on
+  // hydration: both inputs are client-only (query param, cookie), so deciding on the first pass would trip hydration.
   const isInSafeOrSpace = Boolean(safeAddress) || isSpaceRoute
   const showHomeLabel = isHydrated && isInSafeOrSpace && !isCollapsed
   const logoHref = AppRoutes.welcome.accounts

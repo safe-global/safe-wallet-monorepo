@@ -83,9 +83,8 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
     return entry?.fiatConversion
   }, [balances.items, gasToken, isSafePaid])
 
-  // Safe-pays: use the `payment` field — the actual amount transferred to the refundReceiver,
-  // denominated in `gasToken` base units. Falls back to native chain metadata when the gas
-  // token is the zero address.
+  // Safe-pays: use `payment` (the amount transferred to the refundReceiver, in `gasToken` base units);
+  // falls back to native chain metadata when the gas token is the zero address.
   const safePaidData = useMemo<HistoryFeesData | null>(() => {
     if (!isGtfEnabled || !executedAt || !exec || !isSafePaid) return null
     if (!payment) return null

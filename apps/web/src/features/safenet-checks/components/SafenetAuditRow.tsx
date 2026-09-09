@@ -61,17 +61,15 @@ export const SafenetAuditRow = ({
   if (!safeTxHash || !display) return null
   const { publicStatus, snapshot } = display
 
-  // Point at the transaction that carried the attestation this verdict came
-  // from, on the Safenet chain's block explorer. The Safenet explorer's hash
-  // route is the fallback when the chain config is unavailable.
+  // Link the attestation tx on the Safenet chain's block explorer; the Safenet hash route is the fallback
+  // when the chain config is unavailable.
   const attested = verdictAttestation(snapshot)
   const attestationTxLink =
     attested && safenetChain ? getExplorerLink(attested.transactionHash, safenetChain.blockExplorerUriTemplate) : null
   const href = attestationTxLink?.href ?? `${SAFENET_EXPLORER_URL}/#/safeTx?chainId=${chainId}&safeTxHash=${safeTxHash}`
 
-  // A session-pinned BENIGN outlives the read that earned it, so the snapshot
-  // beside it may carry no attestation. Present the proof link only when the
-  // snapshot still carries one; the generic explorer route is not the proof.
+  // A session-pinned BENIGN outlives the read that earned it, so its snapshot may carry no attestation.
+  // Show the proof link only when the snapshot still has one — the generic explorer route isn't proof.
   const isVerified = publicStatus === CheckStatus.BENIGN && attested !== undefined
 
   return (

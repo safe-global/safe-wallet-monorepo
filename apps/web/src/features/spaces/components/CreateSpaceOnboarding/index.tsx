@@ -43,9 +43,8 @@ const CreateSpaceOnboarding = (): ReactElement => {
   const { error, isSubmitting, onSubmit } = useSpaceSubmit(handleSubmit, spaceId, isEditMode)
   const watchedName = useWatch({ control, name: 'name' }) ?? ''
 
-  // Tracks whether the user typed at least once; formState.isDirty can't: RHF resets it to false when
-  // the value matches the default ('' === ''), so typing "abc" then clearing to '' would look like a
-  // fresh form, falling through to the existingSpace fallback and re-asserting the cleared highlight.
+  // Tracks whether the user typed at least once; formState.isDirty can't — RHF resets it when the value
+  // matches the default (''), so typing then clearing to '' would look fresh and fall through to the fallback.
   const [hasUserEdited, setHasUserEdited] = useState(false)
   const nameReg = register('name', {
     required: true,

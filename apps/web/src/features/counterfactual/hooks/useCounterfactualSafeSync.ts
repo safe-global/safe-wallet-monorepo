@@ -53,9 +53,8 @@ const useCounterfactualSafeSync = () => {
       // Flush DELETEs queued while unauthenticated (e.g. CF safe activated before sign-in) before the
       // fetch below, else the backend still reports them as CF and we'd regress the activated state.
       const pendingDeletes = selectPendingCfDeletes(getStoreInstance().getState())
-      // Snapshot queue keys pre-flush so the merge skips re-adding a just-deleted safe in two cases:
-      //   1. DELETE succeeded but space-CF still returns it (backend join lag / co-member's stale record).
-      //   2. DELETE failed and it's still in the user-CF response.
+      // Snapshot queue keys pre-flush so the merge skips re-adding a just-deleted safe when either the
+      // DELETE succeeded but space-CF still returns it (backend join lag), or the DELETE failed.
       const blockedByPendingDelete = new Set(pendingDeletes.map(({ chainId, address }) => `${chainId}:${address}`))
       if (pendingDeletes.length > 0) {
         await Promise.all(
@@ -148,9 +147,8 @@ const useCounterfactualSafeSync = () => {
     }
 
     const sync = async () => {
-      // One bounded retry on transient errors before unblocking consumers.
-      // Without this, a single network blip during sync leaves users who land
-      // on a space-mate's CF safe URL stuck on "Safe couldn't be loaded".
+      // One bounded retry on transient errors before unblocking consumers — else a single network blip
+      // leaves users landing on a space-mate's CF safe URL stuck on "Safe couldn't be loaded".
       try {
         await fetchAndMerge()
       } catch (firstError) {

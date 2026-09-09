@@ -34,9 +34,8 @@ export const SidebarActionButton = (): ReactElement => {
           variant="outline"
           size="lg"
           disabled={!isOk}
-          // Collapsed: a 36px square matching the icon rail. `size-9!` sets both axes; `w-9` alone left
-          // the size's `h-10` so it sat 36x40, and only the `!` beats that height (like SidebarMenuButton's
-          // icon-mode sizing does) — hence kept over dev's, while dev's muted-fill/no-border skin is taken as-is.
+          // Collapsed: 36px square for the icon rail. `size-9!` sets both axes; `w-9` alone left the size's
+          // `h-10` (36x40), and only the `!` beats that height. Dev's muted-fill/no-border skin is kept as-is.
           // eslint-disable-next-line no-restricted-syntax -- sidebar action button: sidebar-accent hover + dark border + collapsible icon-mode sizing
           className="w-full font-semibold py-0 hover:bg-sidebar-accent dark:border-border dark:hover:bg-sidebar-accent group-data-[collapsible=icon]:size-9! group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:rounded-md group-data-[collapsible=icon]:bg-muted group-data-[collapsible=icon]:border-none group-data-[collapsible=icon]:shadow-none"
         >

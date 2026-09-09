@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 
-// Matches Tailwind's default `xl` breakpoint (1280px). The onboarding side
-// panel is `hidden xl:flex`, so consumers below `xl` should skip any balance
-// query that only feeds the (invisible) mockup.
+// Matches Tailwind's `xl` (1280px). The onboarding side panel is `hidden xl:flex`, so below `xl` consumers
+// should skip any balance query that only feeds the invisible mockup.
 const XL_QUERY = '(min-width: 1280px)'
 
 // Lazy init avoids a one-render skip on xl viewports.

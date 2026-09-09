@@ -106,9 +106,8 @@ const ReplaySafeDialog = ({
 
       trackEvent({ ...OVERVIEW_EVENTS.SUBMIT_ADD_NEW_NETWORK, label: selectedChain.chainId })
 
-      // 2. Persist to backend (if authenticated) + add to Redux. Shared code
-      //    path with the initial create-safe flow so any future backend write
-      //    added to one path is automatically covered for the other.
+      // Persist to backend (if authenticated) + add to Redux. Shared path with the initial create-safe flow,
+      // so a future backend write added to one path covers the other.
       const persistResult = await persistCounterfactualSafe({
         chainId: selectedChain.chainId,
         safeAddress,

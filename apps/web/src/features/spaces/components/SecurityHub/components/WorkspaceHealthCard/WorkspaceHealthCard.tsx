@@ -110,9 +110,8 @@ const WorkspaceHealthCard = ({
     return counts
   }, [safes, scanResults, security.$isReady, security.scanKey, security.getSafeGrade])
 
-  // Show skeleton only when we have no data at all. Once any Safe has completed, render the
-  // aggregate incrementally — it updates as more results arrive. The re-scan row below
-  // surfaces the in-progress state via its "Scanning..." label.
+  // Skeleton only with no data at all; once any Safe completes, render the aggregate incrementally (it
+  // updates as results arrive). The re-scan row below surfaces the in-progress "Scanning..." state.
   if (!aggregate) {
     return (
       // eslint-disable-next-line no-restricted-syntax -- p-6 gives this gauge row uniform padding (no CardContent slot); gap comes from the default size

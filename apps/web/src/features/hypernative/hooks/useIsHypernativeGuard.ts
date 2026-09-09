@@ -38,10 +38,8 @@ export const useIsHypernativeGuard = (): HypernativeGuardCheckResult => {
         // Pass the skipAbiCheck flag from the feature flag
         return await isHypernativeGuard(safe.chainId, safe.guard.value, web3ReadOnly, skipAbiCheck)
       } catch {
-        // On error (e.g. RPC failure), return false but don't cache it. The
-        // failure is reported once by the service layer; reporting it again
-        // here would double-count it, and once per render at that — this hook
-        // has several concurrent owners on a single page.
+        // On error (e.g. RPC failure) return false but don't cache it: the service layer already reports the
+        // failure, and this hook has several concurrent owners, so reporting here would double-count per render.
         return false
       }
     },

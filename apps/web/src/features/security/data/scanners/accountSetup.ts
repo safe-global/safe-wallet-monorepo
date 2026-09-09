@@ -10,9 +10,8 @@ export const accountSetupScanner: SecurityScanner = {
     const now = new Date().toISOString()
 
     if (ownerCount === 0) {
-      // Owner data hasn't loaded — distinct from "loaded and shows 0 owners" (impossible
-      // for a real Safe). Return inconclusive so a transient missing-data state during
-      // scan doesn't penalize the score or flag the Safe with a "weak threshold" entry
+      // Owner data hasn't loaded (distinct from "loaded, 0 owners" — impossible for a real Safe). Return
+      // inconclusive so a transient missing-data state doesn't penalize the score or flag a "weak threshold"
       // that flips on rescan once `safeInfo.owners` populates.
       const score = 50
       return {

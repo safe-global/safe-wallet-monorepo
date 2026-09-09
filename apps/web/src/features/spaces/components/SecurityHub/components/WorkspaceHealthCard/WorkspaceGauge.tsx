@@ -2,9 +2,8 @@ import { type ReactElement } from 'react'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 
-// Gauge arc spans 270° with a 90° gap centered at the bottom. The SVG is rotated 135°
-// so the dash (which natively starts at 3 o'clock and sweeps clockwise) begins at the
-// bottom-left and ends at the bottom-right, leaving the gap open at the bottom.
+// Arc spans 270° with a 90° gap at the bottom. The SVG is rotated 135° so the dash (native start 3 o'clock,
+// clockwise) begins bottom-left and ends bottom-right, leaving the gap open at the bottom.
 const GAUGE_ARC_FRACTION = 0.75
 
 export type ScoreGaugeSize = 'default' | 'small'

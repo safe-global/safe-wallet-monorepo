@@ -241,9 +241,8 @@ export const useSecurityChecks = (
         : hasGuard
           ? 'Transaction guard is unverified'
           : 'Transaction guard is recommended'
-      // A partner-tagged, actionable guard result opens the Hypernative signup flow in place of a
-      // deep-link. Passing results already get no CTA (buildCta returns null), so this only fires
-      // for the Tier-3 nudge (no guard, high-value, Hypernative chain).
+      // A partner-tagged actionable guard result opens the Hypernative signup flow instead of a deep-link.
+      // Passing results get no CTA (buildCta → null), so this only fires for the Tier-3 nudge.
       const guardCta =
         !ok && guardResult.partner === 'hypernative' && onHnSignupClick
           ? { label: guardResult.ctaLabelOverride || 'Set up protection', onClick: onHnSignupClick }

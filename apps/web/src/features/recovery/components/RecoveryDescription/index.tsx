@@ -17,10 +17,8 @@ export default function RecoveryDescription({ item }: { item: RecoveryQueueItem 
   const { safe } = useSafeInfo()
   const isRecoverer = useIsRecoverer()
 
-  // The failure is carried out of the memo rather than reported inside it:
-  // `safe.owners` is a new array on every safe-info refresh, so the memo
-  // re-evaluates — and re-throws — for reasons that have nothing to do with the
-  // proposal, and this component renders once per queued proposal.
+  // Carry the failure out of the memo, don't report inside it: `safe.owners` is a new array each safe-info
+  // refresh, so the memo re-evaluates (and would re-throw) unrelated to the proposal, once per queued proposal.
   const { newSetup, recoveryError } = useMemo<{
     newSetup?: ReturnType<typeof getRecoveredSafeInfo>
     recoveryError?: unknown
