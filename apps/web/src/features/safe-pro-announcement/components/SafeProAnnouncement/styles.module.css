@@ -10,12 +10,7 @@
   bottom: 4px;
   z-index: -1;
   height: 6px;
-  background-color: color-mix(in srgb, var(--color-static-text-brand) 50%, white);
-}
-
-:global(.dark) .highlight::after {
-  bottom: -0px;
-  background-color: var(--color-static-text-brand);
+  background-color: color-mix(in srgb, var(--color-static-text-brand) 50%, transparent);
 }
 
 :global(.dark) .arrow {
