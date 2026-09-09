@@ -5,6 +5,7 @@ import SafeProAnnouncementModal from './components/SafeProAnnouncementModal'
 import SafeProLockedWorkspace from './components/SafeProLockedWorkspace'
 import SafeProTrialActivatedModal from './components/SafeProTrialActivatedModal'
 import SafeProSubscriptionActivatedModal from './components/SafeProSubscriptionActivatedModal'
+import SafeProBillingReminderModal from './components/SafeProBillingReminderModal'
 import SafeProBanner from './components/SafeProBanner'
 import SafeProSidebarBanner from './components/SafeProSidebarBanner'
 import SafeProWorkspacesBanner from './components/SafeProWorkspacesBanner'
@@ -15,6 +16,7 @@ export default {
   SafeProLockedWorkspace,
   SafeProTrialActivatedModal,
   SafeProSubscriptionActivatedModal,
+  SafeProBillingReminderModal,
   SafeProBanner,
   SafeProSidebarBanner,
   SafeProWorkspacesBanner,
