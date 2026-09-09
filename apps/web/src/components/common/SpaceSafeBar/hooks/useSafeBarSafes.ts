@@ -51,9 +51,8 @@ export function useSafeBarSafes() {
   const safeAddress = urlSafeAddress || reduxSafeAddress
   const currentChainId = useChainId()
 
-  // Skip the owned-safes enumeration (the captcha-protected owners endpoint): the bar's lists are the
-  // space safes (overview-derived) and the trusted/pinned safes (added-safes state), neither of which
-  // needs it. Per-row read-only is derived from the overviews in useSpaceSafeSelectorItems instead.
+  // Skip the owned-safes enumeration (captcha-protected endpoint): the bar's lists are space safes and
+  // trusted/pinned safes, neither of which needs it. Read-only is derived from overviews instead.
   const allSafeItems = useAllSafes(false)
 
   const spaceId = useCurrentSpaceId()
@@ -96,9 +95,8 @@ export function useSafeBarSafes() {
     }
   }, [safeAddress, currentChainId])
 
-  // Current safe: pull from allKnownSafes so the dropdown sees every chain it's
-  // deployed on (pinned, owned, or counterfactual); other safes stay pinned-only.
-  // Pin state stays decoupled — bookmark drives it, navigating doesn't auto-pin.
+  // Current safe: pull from allKnownSafes so the dropdown sees every chain it's on; other safes stay
+  // pinned-only. Pin state stays decoupled — bookmark drives it, navigating doesn't auto-pin.
   const dropdownSafes = useMemo<AllSafeItems>(() => {
     const current = safeAddress
       ? (allKnownSafes.find((s) => sameAddress(s.address, safeAddress)) ?? fallbackCurrentSafe)
@@ -106,9 +104,8 @@ export function useSafeBarSafes() {
     return orderDropdownSafes(pinnedSafes, safeAddress, trustedComparator, current)
   }, [pinnedSafes, allKnownSafes, safeAddress, fallbackCurrentSafe, trustedComparator])
 
-  // Trusted tab: pinned safes only. The current safe is pulled to the front only when it's actually
-  // pinned — it's never injected, so a non-trusted active safe never shows up under "Trusted accounts".
-  // (The trigger still renders the current safe via the workspace list, which always injects it.)
+  // Trusted tab: pinned safes only. The current safe is moved to the front only if pinned, never injected,
+  // so a non-trusted active safe never appears under "Trusted accounts". (The trigger shows it via the workspace list.)
   const localSafes = useMemo<AllSafeItems>(() => {
     const currentPinned = safeAddress ? pinnedSafes.find((s) => sameAddress(s.address, safeAddress)) : undefined
     return orderDropdownSafes(pinnedSafes, safeAddress, trustedComparator, currentPinned)

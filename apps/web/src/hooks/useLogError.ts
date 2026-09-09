@@ -57,10 +57,8 @@ const messageOf = (thrown: unknown): string => (typeof thrown === 'string' ? thr
 const useLogError = (code: ErrorCodes, thrown?: unknown, context?: ErrorContext): void => {
   const signature = thrown == null ? undefined : `${code}|${messageOf(thrown)}|${JSON.stringify(context ?? {})}`
 
-  // Read through a ref so the effect can depend on the signature alone: the
-  // thrown error and the context object are rebuilt by some callers on every
-  // render, and depending on them directly would reintroduce exactly the
-  // re-firing this hook exists to stop.
+  // Read through a ref so the effect depends on the signature alone: some callers rebuild the error/context
+  // each render, and depending on them directly would reintroduce the re-firing this hook exists to stop.
   const latest = useRef({ code, thrown, context })
   latest.current = { code, thrown, context }
 
@@ -74,8 +72,7 @@ const useLogError = (code: ErrorCodes, thrown?: unknown, context?: ErrorContext)
 
     const isReporter = claim(signature)
 
-    // The ref keeps this instance idempotent for a signature even as the claim
-    // churns around it — StrictMode tears the effect down and re-runs it, which
+    // The ref keeps this instance idempotent per signature even under StrictMode's teardown/re-run, which
     // would otherwise release and re-acquire into a second report.
     if (isReporter && lastLogged.current !== signature) {
       lastLogged.current = signature

@@ -22,10 +22,8 @@ export type HypernativeAuthStatus = {
 }
 
 /**
- * PKCE storage key in cookies
- * Stores both state and codeVerifier as a single JSON object: { state, codeVerifier }
- * Uses cookies instead of sessionStorage to support OAuth popup flow where
- * the callback page runs in a separate browsing context.
+ * PKCE storage key. Stores `{ state, codeVerifier }` as one JSON object in a cookie (not sessionStorage) so
+ * the OAuth popup callback, which runs in a separate browsing context, can read it.
  */
 const PKCE_KEY = 'hn_pkce'
 
@@ -34,13 +32,7 @@ const PKCE_KEY = 'hn_pkce'
  */
 const PKCE_COOKIE_EXPIRES_IN = 10 * 60 // 10 minutes
 
-/**
- * Cookie options for PKCE storage
- * - Secure: Only sent over HTTPS (when available)
- * - SameSite: Lax - protects against CSRF while allowing OAuth redirects
- * - Path: Root path so it's accessible from callback route
- * - Expires: Token expiry time in days
- */
+/** PKCE cookie options: Secure, SameSite=Lax (CSRF-safe but survives the OAuth redirect), root path, day-based expiry. */
 const getPkceCookieOptions = (): Cookies.CookieAttributes => {
   const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:'
   return {
@@ -69,8 +61,7 @@ const POPUP_WIDTH = 600
 const POPUP_HEIGHT = 800
 
 /**
- * Base64url encode a byte array
- * Converts bytes to base64 and then replaces URL-unsafe characters per RFC 4648
+ * Base64url-encode a byte array (base64 with URL-unsafe chars replaced per RFC 4648).
  * @param bytes - Uint8Array of bytes to encode
  * @returns Base64url-encoded string
  */
@@ -90,11 +81,8 @@ export interface PkceData {
 }
 
 /**
- * Save PKCE data (state and codeVerifier) to secure cookie as a single JSON object
- * This ensures state and verifier are always paired together
- * Uses cookies instead of sessionStorage to support OAuth popup flow where
- * the callback page runs in a separate browsing context (popup window).
- *
+ * Save PKCE `{ state, codeVerifier }` as one cookie so the pair stays together and the popup callback (a
+ * separate browsing context) can read it.
  * @param state - OAuth state parameter for CSRF protection
  * @param codeVerifier - PKCE code verifier for token exchange
  */
@@ -104,8 +92,7 @@ export function savePkce(state: string, codeVerifier: string): void {
 }
 
 /**
- * Read PKCE data from secure cookie
- * Returns parsed JSON object with state and codeVerifier, or empty object if not found
+ * Read PKCE data from the cookie (empty object if not found).
  * @returns PKCE data object with optional state and codeVerifier
  */
 export function readPkce(): PkceData {
@@ -130,9 +117,8 @@ export function clearPkce(): void {
 }
 
 /**
- * Generate SHA256 hash of the code verifier for PKCE challenge
- * The code challenge is sent in the authorization request, and the verifier
- * is sent in the token exchange request. The server verifies they match.
+ * SHA256 hash of the code verifier for the PKCE challenge (sent in the auth request; server matches it
+ * against the verifier from the token exchange).
  * @param verifier - The PKCE code verifier string
  * @returns Base64url-encoded SHA256 hash of the verifier
  */
@@ -145,9 +131,7 @@ async function generateCodeChallenge(verifier: string): Promise<string> {
 }
 
 /**
- * Build OAuth authorization URL with PKCE challenge
- * Generates PKCE parameters, stores them in sessionStorage, and constructs
- * the full authorization URL with all required query parameters.
+ * Build the OAuth authorization URL: generate PKCE params, store them, and assemble the query.
  * @param chainId - Optional chain ID to verify Safe ownership
  * @param safeAddress - Optional Safe address to verify ownership
  * @returns Complete OAuth authorization URL
@@ -194,16 +178,8 @@ async function buildAuthUrl(chainId?: string, safeAddress?: string): Promise<str
 }
 
 /**
- * Hook for managing Hypernative OAuth authentication
- * Provides login/logout controls and authentication state.
- *
- * Features:
- * - PKCE flow for secure OAuth in public clients
- * - Popup-first approach with fallback to new tab
- * - PostMessage communication with callback page
- * - Mock mode for development without real OAuth endpoints
- * - Automatic cleanup of popup windows
- *
+ * Manages Hypernative OAuth: login/logout controls and auth state. Uses a PKCE flow, popup-first (falls back
+ * to a new tab) with postMessage from the callback page, and a mock mode for development.
  * @returns Authentication status and control functions
  */
 export const useHypernativeOAuth = (): HypernativeAuthStatus => {
@@ -300,11 +276,7 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
     [tryOpenNewTab],
   )
 
-  /**
-   * Initiate OAuth login flow
-   * - In mock mode: immediately set a mock token
-   * - In real mode: open popup/tab with OAuth authorization URL
-   */
+  /** Initiate login: mock mode sets a mock token immediately; real mode opens the popup/tab with the auth URL. */
   const initiateLogin = useCallback(async () => {
     clearAllTimers()
 
