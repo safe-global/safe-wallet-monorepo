@@ -12,7 +12,7 @@ import { WalletConnectFeature } from '@/features/walletconnect'
 import { useDraftBatch } from '@/features/batching'
 import { useIsBelowMd } from '@/hooks/useMediaQuery'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { selectNotifications } from '@/store/notificationsSlice'
+import { selectCenterNotifications } from '@/store/notificationsSlice'
 import { openGlobalSearch } from '@/features/global-search/store'
 import { useWalletName } from '@/hooks/wallets/useWalletName'
 import useSafeAddress from '@/hooks/useSafeAddress'
@@ -77,7 +77,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   const { GlobalSearchModal, GlobalSearchInput } = useLoadFeature(GlobalSearchFeature)
   const { WalletConnectWidget } = useLoadFeature(WalletConnectFeature)
   const notificationsRef = useRef<NotificationsPopoverRef>(null)
-  const notifications = useAppSelector(selectNotifications)
+  const notifications = useAppSelector(selectCenterNotifications)
   const spaceId = useCurrentSpaceId()
   const isSpaceRoute = useIsSpaceRoute()
   const pathname = usePathname()

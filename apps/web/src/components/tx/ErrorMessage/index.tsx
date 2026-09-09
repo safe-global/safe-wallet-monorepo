@@ -62,10 +62,10 @@ const ErrorMessage = ({
     error && (gsCode === 'GS013' || (!gsCode && isRevertError(error))) ? decodeCustomError(error) : undefined
   const effectiveGsCode = gsCode ?? (customError ? 'GS013' : undefined)
 
-  // A known CGW response state (429/422/451/5xx) gets the same code-only
-  // support reference, so the raw response body — which can be a gateway's HTML
-  // error page — is never rendered in Details (WA-3252).
-  const supportCode = effectiveGsCode ?? (error ? getCgwSupportCode(error) : undefined)
+  // A known CGW response state (429/422/451/5xx) shows its agreed message and nothing else: no
+  // code reference, and no Details either — the raw response body can be a gateway's HTML error
+  // page (WA-3252).
+  const isCgwError = !effectiveGsCode && !!error && !!getCgwSupportCode(error)
 
   // Check if this is a Guard error that should get special treatment
   const guardErrorName = error && context ? getGuardErrorInfo(error) : undefined
@@ -107,7 +107,7 @@ const ErrorMessage = ({
             </span>
           )}
 
-          {error && !supportCode && !ledgerError && (
+          {error && !effectiveGsCode && !isCgwError && !ledgerError && (
             <Link
               render={<button type="button" />}
               onClick={onDetailsToggle}
@@ -118,12 +118,13 @@ const ErrorMessage = ({
           )}
         </span>
 
-        {supportCode ? (
-          <ErrorDetails code={supportCode} customError={customError} />
+        {effectiveGsCode ? (
+          <ErrorDetails code={effectiveGsCode} customError={customError} />
         ) : ledgerError ? (
           ledgerReference && <ErrorDetails code={ledgerReference} />
         ) : (
           error &&
+          !isCgwError &&
           showDetails && (
             <Typography variant="paragraph-small" color="muted" className="mt-2 block break-words">
               {error.message.replace(ETHERS_PREFIX, '').trim().slice(0, 500)}

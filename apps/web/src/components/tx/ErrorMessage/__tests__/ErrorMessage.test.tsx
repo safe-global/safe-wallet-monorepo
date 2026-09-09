@@ -36,6 +36,19 @@ describe('ErrorMessage', () => {
     expect(queryByText(/rpc\.example\.org/)).toBeInTheDocument()
   })
 
+  it('shows a known CGW response state with no code and no raw response body', () => {
+    const error = Object.assign(new Error('<html><title>502 Bad Gateway</title></html>'), { status: 502 })
+
+    const { getByText, queryByText, queryByTestId } = render(
+      <ErrorMessage error={error}>Something went wrong on our end. Try again.</ErrorMessage>,
+    )
+
+    expect(getByText('Something went wrong on our end. Try again.')).toBeInTheDocument()
+    expect(queryByTestId('error-details')).not.toBeInTheDocument()
+    expect(queryByText('Details')).not.toBeInTheDocument()
+    expect(queryByText(/Bad Gateway/)).not.toBeInTheDocument()
+  })
+
   it('withholds the raw message of a Ledger device failure, mapped or not', () => {
     const cause = mapLedgerError({
       _tag: 'DeviceLockedError',

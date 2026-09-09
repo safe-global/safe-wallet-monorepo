@@ -5,6 +5,7 @@ import CONTRACT_ERRORS, {
   getContractErrorMessage,
   getGs026Message,
   getGsCodeFromError,
+  getSpecificContractErrorMessage,
   isGsCode,
   isRevertError,
   type GsCode,
@@ -133,6 +134,41 @@ describe('contractErrors', () => {
       expect(getGsCodeFromError({ message: 'GS999 is not a real code' })).toBeUndefined()
       expect(getGsCodeFromError(undefined)).toBeUndefined()
       expect(getGsCodeFromError(null)).toBeUndefined()
+    })
+  })
+
+  describe('getSpecificContractErrorMessage', () => {
+    it('resolves a code that has copy of its own', () => {
+      expect(getSpecificContractErrorMessage({ reason: 'GS025' })).toBe(
+        'This transaction needs more confirmations before it can be executed.',
+      )
+    })
+
+    it('interpolates the params it is given', () => {
+      expect(getSpecificContractErrorMessage({ reason: 'GS011' }, { nativeAsset: 'ETH' })).toBe(
+        'Not enough ETH in this Safe Account to cover the network fee.',
+      )
+      expect(getSpecificContractErrorMessage({ reason: 'GS012' }, { token: 'USDC', nativeAsset: 'ETH' })).toBe(
+        'Not enough USDC to cover the network fee. Pay with ETH instead.',
+      )
+    })
+
+    it('says nothing for a code whose only copy is the shared fallback', () => {
+      // The caller's own wording beats a generic sentence, so these must not resolve.
+      expect(getSpecificContractErrorMessage({ reason: 'GS013' })).toBeUndefined()
+      expect(getSpecificContractErrorMessage({ reason: 'GS026' })).toBeUndefined()
+      expect(getSpecificContractErrorMessage({ reason: 'GS100' })).toBeUndefined()
+    })
+
+    it('says nothing rather than leaking an unfilled placeholder', () => {
+      expect(getSpecificContractErrorMessage({ reason: 'GS011' })).toBeUndefined()
+      expect(getSpecificContractErrorMessage({ reason: 'GS012' }, { nativeAsset: 'ETH' })).toBeUndefined()
+    })
+
+    it('says nothing for an error carrying no GS code', () => {
+      expect(getSpecificContractErrorMessage({ message: 'HTTP request failed. Status: 500' })).toBeUndefined()
+      expect(getSpecificContractErrorMessage(undefined)).toBeUndefined()
+      expect(getSpecificContractErrorMessage(null)).toBeUndefined()
     })
   })
 

@@ -26,6 +26,7 @@ import {
 import { getGs026Message } from '@safe-global/utils/services/exceptions/contractErrors'
 import { getLedgerDeviceError, getLedgerUserMessage } from '@/services/onboard/ledger-errors'
 import { getCgwErrorInfo } from '@/utils/cgw-errors'
+import { useIsTxFlowOpenRef } from '@/components/tx-flow/useIsTxFlowOpen'
 
 const TxNotifications = {
   [TxEvent.SIGN_FAILED]: 'Failed to sign. Please try again.',
@@ -58,6 +59,7 @@ const useTxNotifications = (): void => {
   const chain = useCurrentChain()
   const safeAddress = useSafeAddress()
   const [trigger] = useLazyTransactionsGetTransactionByIdV1Query()
+  const isTxFlowOpenRef = useIsTxFlowOpenRef()
 
   /**
    * Show notifications of a transaction's lifecycle
@@ -72,6 +74,9 @@ const useTxNotifications = (): void => {
       txSubscribe(event, async (detail) => {
         const isError = 'error' in detail
         if (isError && isWalletRejection(detail.error)) return
+        // The flow on screen already shows the failure inline, and errors are never listed in the
+        // notification center — a toast would only repeat what the flow says.
+        if (isError && isTxFlowOpenRef.current) return
         const isSuccess = successEvents.includes(event)
 
         // Check if this is a Guard error
@@ -132,13 +137,7 @@ const useTxNotifications = (): void => {
             title: humanDescription,
             message,
             detailedMessage:
-              ledgerError || hnApprovalRequired
-                ? undefined
-                : cgwError
-                  ? `Error code ${cgwError.code}`
-                  : isError
-                    ? detail.error.message
-                    : undefined,
+              ledgerError || hnApprovalRequired || cgwError ? undefined : isError ? detail.error.message : undefined,
             groupKey,
             variant: isError ? Variant.ERROR : isSuccess ? Variant.SUCCESS : Variant.INFO,
             link: txId
@@ -154,7 +153,7 @@ const useTxNotifications = (): void => {
     return () => {
       unsubFns.forEach((unsub) => unsub())
     }
-  }, [dispatch, safeAddress, chain, trigger])
+  }, [dispatch, safeAddress, chain, trigger, isTxFlowOpenRef])
 
   /**
    * If there's at least one transaction awaiting confirmations, show a notification for it
