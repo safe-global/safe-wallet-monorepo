@@ -6,7 +6,11 @@ import SafeProHero from '../SafeProHero'
 import css from '../SafeProAnnouncement/styles.module.css'
 
 const SafeProLockedWorkspace = ({ onStartTrial }: { onStartTrial: () => void }) => (
-  <Card size="none" radius="xl" className="w-full">
+  <Card
+    size="none"
+    // eslint-disable-next-line no-restricted-syntax -- Figma spec calls for a 32px corner one-off; no radius token in the scale matches it
+    className="w-full rounded-[2rem]"
+  >
     <div className="p-1">
       <SafeProHero />
 

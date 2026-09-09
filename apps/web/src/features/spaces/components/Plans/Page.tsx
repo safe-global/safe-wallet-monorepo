@@ -41,7 +41,11 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
         {isSafePro ? (
           <Plans data={{ ...TRIAL_PLANS, plan }} />
         ) : (
-          <Card size="none" radius="xl" className="w-full">
+          <Card
+            size="none"
+            // eslint-disable-next-line no-restricted-syntax -- Figma spec calls for a 32px corner one-off; no radius token in the scale matches it
+            className="w-full rounded-[2rem]"
+          >
             <SafeProAnnouncement location="plans_page" />
           </Card>
         )}

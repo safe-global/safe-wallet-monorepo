@@ -7,8 +7,10 @@ const ALT = 'A Workspace from Safe Pro, with its accounts, members and transacti
 const SafeProHero = ({ variant = 'wide' }: { variant?: 'wide' | 'tall' }) => (
   <div
     className={cn(
-      'relative w-full overflow-hidden rounded-t-[calc(var(--radius-xl)-4px)]',
-      variant === 'tall' ? 'aspect-[568/369] *:object-left' : 'aspect-[1056/369]',
+      'relative w-full overflow-hidden',
+      variant === 'tall'
+        ? 'aspect-[568/369] rounded-t-[calc(var(--radius-xl)-4px)] *:object-left'
+        : 'aspect-[1141/268] rounded-t-[calc(2rem-4px)] *:object-top',
     )}
   >
     <Image src="/images/safe-pro/pro-announcement-hero.jpg" alt={ALT} fill className="object-cover dark:hidden" />
