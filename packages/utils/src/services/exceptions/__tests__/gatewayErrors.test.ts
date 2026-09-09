@@ -18,7 +18,7 @@ describe('gatewayErrors', () => {
     })
 
     it('maps 451 (banned Safe Account) to its own message', () => {
-      expect(getCgwErrorMeta(CGW_UNAVAILABLE_FOR_LEGAL_REASONS)?.message).toBe('This Safe Account is not available.')
+      expect(getCgwErrorMeta(CGW_UNAVAILABLE_FOR_LEGAL_REASONS)?.message).toBe('This Safe account is unavailable.')
     })
 
     it('covers the whole 5xx range and nothing outside it', () => {

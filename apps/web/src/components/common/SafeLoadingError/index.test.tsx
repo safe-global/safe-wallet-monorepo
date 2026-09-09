@@ -5,10 +5,11 @@ import { GATEWAY_URL } from '@/config/gateway'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import * as useSafeLegalBlockMessageHook from '@/hooks/useSafeLegalBlockMessage'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
+import { CGW_SAFE_UNAVAILABLE } from '@safe-global/utils/services/exceptions/gatewayErrors'
 import SafeLoadingError, { GENERIC_LOADING_ERROR } from '.'
 
 const SAFE_ADDRESS = '0x87a57cBf742CC1Fc702D0E9BF595b1E056693e2f'
-const LEGAL_BLOCK_MESSAGE = 'Unavailable for legal reasons'
+const BACKEND_BLOCK_REASON = 'Blocked in your region by provider edge-node-7'
 
 const mockSafeInfo = (safeError?: string) => {
   jest.spyOn(useSafeInfoHook, 'default').mockReturnValue({
@@ -60,14 +61,14 @@ describe('SafeLoadingError', () => {
     expect(queryByText('Safe content')).not.toBeInTheDocument()
   })
 
-  it('shows the backend reason when the Safe is blocked for legal reasons', async () => {
+  it('shows the agreed copy, not the backend reason, when the Safe is blocked for legal reasons', async () => {
     mockSafeInfo('Error 451')
     // No `mockLegalBlockMessage` — the real hook reads a real 451 off MSW, so this
     // covers the component→hook wiring and not just the render given a message.
     jest.spyOn(useSafeLegalBlockMessageHook, 'default').mockRestore()
     server.use(
       http.get(`${GATEWAY_URL}/v1/chains/:chainId/safes/:safeAddress`, () =>
-        HttpResponse.json({ code: 451, message: LEGAL_BLOCK_MESSAGE }, { status: 451 }),
+        HttpResponse.json({ code: 451, message: BACKEND_BLOCK_REASON }, { status: 451 }),
       ),
     )
 
@@ -78,7 +79,8 @@ describe('SafeLoadingError', () => {
       safeInUrl,
     )
 
-    expect(await findByText(LEGAL_BLOCK_MESSAGE)).toBeInTheDocument()
+    expect(await findByText(CGW_SAFE_UNAVAILABLE)).toBeInTheDocument()
+    expect(queryByText(BACKEND_BLOCK_REASON)).not.toBeInTheDocument()
     expect(queryByText(GENERIC_LOADING_ERROR)).not.toBeInTheDocument()
     expect(getByTestId('safe-loading-error')).toBeInTheDocument()
     expect(getByTestId('safe-loading-error-cta')).toBeInTheDocument()

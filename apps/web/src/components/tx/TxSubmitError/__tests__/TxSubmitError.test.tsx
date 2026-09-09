@@ -146,7 +146,7 @@ describe('TxSubmitError', () => {
 
       const { getByText } = render(<TxSubmitError error={error} />)
 
-      expect(getByText('This Safe Account is not available.')).toBeInTheDocument()
+      expect(getByText('This Safe account is unavailable.')).toBeInTheDocument()
     })
 
     it('shows a code-only support reference instead of a raw Details payload', () => {

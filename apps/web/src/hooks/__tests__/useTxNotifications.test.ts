@@ -231,7 +231,7 @@ describe('useTxNotifications — CGW response states (WA-3252)', () => {
   it('shows the banned-Safe copy for a 451', async () => {
     await dispatchProposeFailure(asError({ status: 451, data: {} }))
 
-    expect(lastNotification().message).toBe('This Safe Account is not available.')
+    expect(lastNotification().message).toBe('This Safe account is unavailable.')
   })
 
   it('leaves an unmapped failure (404) on the existing copy', async () => {

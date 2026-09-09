@@ -5,8 +5,8 @@ import {
   RTK_QUERY_ERROR_MESSAGES,
   getGenericErrorWithStatus,
   getLegalUnavailabilityMessage,
-  LEGAL_UNAVAILABILITY_FALLBACK,
 } from './rtkQuery'
+import { CGW_SAFE_UNAVAILABLE } from '@safe-global/utils/services/exceptions/gatewayErrors'
 import { ELEVATION_REQUIRED_ERROR, ELEVATION_REQUIRED_MESSAGE } from '@/features/oidc-auth/utils/elevation'
 
 describe('getRtkQueryErrorMessage', () => {
@@ -82,14 +82,17 @@ describe('getRtkQueryErrorMessage', () => {
 })
 
 describe('getLegalUnavailabilityMessage', () => {
-  it('returns the backend reason for a 451 response', () => {
-    const error: FetchBaseQueryError = { status: 451, data: { code: 451, message: 'Unavailable for legal reasons' } }
-    expect(getLegalUnavailabilityMessage(error)).toBe('Unavailable for legal reasons')
+  it('drops the backend reason for a 451 response — it can name a provider or a region', () => {
+    const error: FetchBaseQueryError = {
+      status: 451,
+      data: { code: 451, message: 'Blocked in your region by provider edge-node-7' },
+    }
+    expect(getLegalUnavailabilityMessage(error)).toBe(CGW_SAFE_UNAVAILABLE)
   })
 
-  it('falls back to default copy for a 451 response without a message', () => {
+  it('returns the agreed copy for a 451 response without a message', () => {
     const error: FetchBaseQueryError = { status: 451, data: {} }
-    expect(getLegalUnavailabilityMessage(error)).toBe(LEGAL_UNAVAILABILITY_FALLBACK)
+    expect(getLegalUnavailabilityMessage(error)).toBe(CGW_SAFE_UNAVAILABLE)
   })
 
   it('returns undefined for other HTTP errors', () => {

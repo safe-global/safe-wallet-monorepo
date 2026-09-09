@@ -4,7 +4,7 @@ import { renderHook } from '@/tests/test-utils'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { LEGAL_UNAVAILABILITY_FALLBACK } from '@/utils/rtkQuery'
+import { CGW_SAFE_UNAVAILABLE } from '@safe-global/utils/services/exceptions/gatewayErrors'
 import useSafeLegalBlockMessage from '../useSafeLegalBlockMessage'
 
 const CHAIN_ID = '1'
@@ -31,20 +31,22 @@ const useSettledMessage = () => {
 }
 
 describe('useSafeLegalBlockMessage', () => {
-  it('returns the backend reason when the Safe is blocked for legal reasons', async () => {
-    mockSafeResponse(HttpResponse.json({ code: 451, message: 'Unavailable for legal reasons' }, { status: 451 }))
+  it('returns the agreed copy, not the backend reason, when the Safe is blocked for legal reasons', async () => {
+    mockSafeResponse(
+      HttpResponse.json({ code: 451, message: 'Blocked in your region by provider edge-node-7' }, { status: 451 }),
+    )
 
     const { result } = renderHook(() => useSafeLegalBlockMessage())
 
-    await waitFor(() => expect(result.current).toBe('Unavailable for legal reasons'))
+    await waitFor(() => expect(result.current).toBe(CGW_SAFE_UNAVAILABLE))
   })
 
-  it('falls back to default copy when the 451 carries no message', async () => {
+  it('returns the same copy when the 451 carries no message', async () => {
     mockSafeResponse(HttpResponse.json({}, { status: 451 }))
 
     const { result } = renderHook(() => useSafeLegalBlockMessage())
 
-    await waitFor(() => expect(result.current).toBe(LEGAL_UNAVAILABILITY_FALLBACK))
+    await waitFor(() => expect(result.current).toBe(CGW_SAFE_UNAVAILABLE))
   })
 
   it('returns undefined for other errors', async () => {

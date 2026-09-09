@@ -224,7 +224,7 @@ describe('useSafeMessageNotifications', () => {
       })
 
       expect(showNotification).toHaveBeenCalledWith({
-        message: 'This Safe Account is not available.',
+        message: 'This Safe account is unavailable.',
         detailedMessage: 'Error code CGW-451',
         groupKey: '0x346',
         variant: 'error',

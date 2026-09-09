@@ -15,7 +15,7 @@ describe('getCgwErrorInfo', () => {
   it('classifies a 451 as an unavailable Safe Account', () => {
     const info = getCgwErrorInfo(Object.assign(new Error('boom'), { status: 451 }))
 
-    expect(info?.message).toBe('This Safe Account is not available.')
+    expect(info?.message).toBe('This Safe account is unavailable.')
     expect(info?.code).toBe('CGW-451')
   })
 

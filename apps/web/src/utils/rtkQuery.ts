@@ -1,6 +1,7 @@
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 import { ELEVATION_REQUIRED_MESSAGE, isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { CGW_SAFE_UNAVAILABLE } from '@safe-global/utils/services/exceptions/gatewayErrors'
 
 const HTTP_TOO_MANY_REQUESTS = 429
 export const HTTP_UNAVAILABLE_FOR_LEGAL_REASONS = 451
@@ -15,9 +16,6 @@ export const RTK_QUERY_ERROR_MESSAGES = {
   generic: 'Something went wrong. Please try again, or contact support if it persists.',
 } as const
 
-// Shown when the backend blocks a resource for legal reasons but sends no message of its own.
-export const LEGAL_UNAVAILABILITY_FALLBACK = 'This Safe account is unavailable for legal reasons'
-
 // Same general copy as `generic`, but keeps the HTTP status visible so the failure stays debuggable.
 export const getGenericErrorWithStatus = (status: number): string =>
   `Something went wrong (${status}). Please try again, or contact support if it persists.`
@@ -30,14 +28,15 @@ const getBackendMessage = (error: FetchBaseQueryError): string | undefined => {
 }
 
 /**
- * The backend's reason for a `451 Unavailable for legal reasons` response, or `undefined` for any
- * other failure. Callers use it to tell a blocked resource apart from a generic loading error.
+ * Agreed copy for a `451 Unavailable for legal reasons` response, or `undefined` for any other
+ * failure. Callers use it to tell a blocked resource apart from a generic loading error. The
+ * backend's own message is deliberately dropped: it can name a provider or a region.
  */
 export const getLegalUnavailabilityMessage = (
   error: FetchBaseQueryError | SerializedError | undefined,
 ): string | undefined => {
   if (!error || !('status' in error) || error.status !== HTTP_UNAVAILABLE_FOR_LEGAL_REASONS) return undefined
-  return getBackendMessage(error) || LEGAL_UNAVAILABILITY_FALLBACK
+  return CGW_SAFE_UNAVAILABLE
 }
 
 /**
@@ -62,6 +61,8 @@ export const getRtkQueryErrorMessage = (error: FetchBaseQueryError | SerializedE
     }
 
     if (isElevationRequiredError(error)) return ELEVATION_REQUIRED_MESSAGE
+
+    if (status === HTTP_UNAVAILABLE_FOR_LEGAL_REASONS) return CGW_SAFE_UNAVAILABLE
 
     // HTTP error response: prefer the backend's own message when present.
     const backendMessage = getBackendMessage(error)

@@ -13,7 +13,7 @@
 export const CGW_ERROR_FALLBACK = 'Something went wrong on our end. Try again.'
 
 /** A Safe Account the gateway refuses to serve for legal reasons. */
-export const CGW_SAFE_UNAVAILABLE = 'This Safe Account is not available.'
+export const CGW_SAFE_UNAVAILABLE = 'This Safe account is unavailable.'
 
 export interface CgwErrorMeta {
   /** User-facing copy. */
