@@ -18,7 +18,7 @@ const SafeProSidebarBanner = ({ className, onDismiss }: { className?: string; on
     {onDismiss && (
       <button
         type="button"
-        className="absolute top-3 right-3 text-muted-foreground hover:text-foreground"
+        className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
         onClick={onDismiss}
         aria-label="Dismiss"
         data-testid="safe-pro-sidebar-banner-dismiss"
@@ -31,7 +31,9 @@ const SafeProSidebarBanner = ({ className, onDismiss }: { className?: string; on
       <ProWordmark className="h-2 w-[21px] overflow-visible" />
     </span>
 
-    <div className="flex w-full flex-col gap-1">
+    {/* Grows to fill the slot, so the button below stays at the bottom edge and keeps its place
+        when this banner gives way to another one whose copy wraps to fewer lines. */}
+    <div className="flex w-full flex-1 flex-col gap-1">
       <Typography variant="paragraph-small-bold" className="text-foreground">
         Your Workspace moves to Safe Pro on Oct 6, 2026
       </Typography>

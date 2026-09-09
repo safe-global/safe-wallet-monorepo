@@ -7,14 +7,6 @@
   border-color: color-mix(in srgb, var(--color-static-text-brand) 55%, var(--card));
 }
 
-.icon {
-  color: var(--color-success-main);
-}
-
 :global(.dark) .card {
   background-color: var(--card);
-}
-
-:global(.dark) .icon {
-  color: var(--color-static-text-brand);
 }

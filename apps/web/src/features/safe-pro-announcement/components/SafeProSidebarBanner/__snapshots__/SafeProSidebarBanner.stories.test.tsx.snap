@@ -25,7 +25,7 @@ exports[`./SafeProSidebarBanner.stories Default 1`] = `
             />
           </span>
           <div
-            class="flex w-full flex-col gap-1"
+            class="flex w-full flex-1 flex-col gap-1"
           >
             <span
               class="m-0 text-sm leading-5 font-semibold text-foreground"
@@ -98,7 +98,7 @@ exports[`./SafeProSidebarBanner.stories Dismissible 1`] = `
         >
           <button
             aria-label="Dismiss"
-            class="absolute top-3 right-3 text-muted-foreground hover:text-foreground"
+            class="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
             data-testid="safe-pro-sidebar-banner-dismiss"
             type="button"
           >
@@ -131,7 +131,7 @@ exports[`./SafeProSidebarBanner.stories Dismissible 1`] = `
             />
           </span>
           <div
-            class="flex w-full flex-col gap-1"
+            class="flex w-full flex-1 flex-col gap-1"
           >
             <span
               class="m-0 text-sm leading-5 font-semibold text-foreground"
