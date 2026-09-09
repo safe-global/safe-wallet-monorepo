@@ -28,11 +28,8 @@ const walletConnectV2 = () => {
     projectId: WC_PROJECT_ID,
     qrModalOptions: {
       themeVariables: {
-        // The QR modal is opened from inside onboard's connect modal, so it has to beat
-        // onboard.css's `--onboard-modal-z-index` (1450) — at anything lower, onboard's
-        // "Connecting to WalletConnect…" panel paints over the QR code and the connection
-        // can't be completed. Matches shadcn.css's `--z-above-onboard`; kept in sync by
-        // walletModalZIndex.test.ts.
+        // The QR modal opens inside onboard's connect modal, so it must beat `--onboard-modal-z-index` (1450)
+        // or onboard's "Connecting…" panel paints over the QR. Matches `--z-above-onboard`; pinned by walletModalZIndex.test.ts.
         '--wcm-z-index': '1451',
       },
       themeMode: prefersDarkMode() ? 'dark' : 'light',

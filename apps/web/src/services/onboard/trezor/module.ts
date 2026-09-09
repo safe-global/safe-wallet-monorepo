@@ -142,9 +142,8 @@ export function trezorModule(): WalletInit {
                   message: `Requested address ${requestedAddress} does not match connected account`,
                 })
               }
-              // The Safe requires transactions be signed as bytes, but eth_sign is only used by
-              // the Transaction Service, e.g. notification registration. We therefore sign
-              // messages as is to avoid unreadable byte notation.
+              // eth_sign is only used by the Transaction Service (e.g. notification registration), so sign
+              // the message as-is to avoid unreadable byte notation.
               const signature = await trezorSdk.signMessage(getAssertedDerivationPath(), message)
               return Signature.from(`${signature}`).serialized
             },

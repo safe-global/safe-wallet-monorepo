@@ -78,9 +78,8 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   const isWelcomeListRoute = pathname === AppRoutes.welcome.accounts || pathname === AppRoutes.welcome.spaces
   const urlSafeAddress = useSafeAddressFromUrl()
   const isSettingsWithoutSafe = pathname?.startsWith(AppRoutes.settings.index) === true && !urlSafeAddress
-  // Routes with no Safe context show the bare logo on the left instead of the safe selector or
-  // the search input. It's a 24px mark that always fits beside the actions, so it opts out of
-  // the wrapping the two wide variants need — logo left, actions right, at every width.
+  // Routes with no Safe context show the bare logo instead of the selector/search. At 24px it always fits
+  // beside the actions, so it opts out of the wrapping the two wide variants need.
   const showLogo = isSettingsWithoutSafe || isWelcomeListRoute
   const safeAddress = useSafeAddress()
   const isProposer = useIsWalletProposer()
@@ -89,9 +88,8 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   const showSafeToken = useSafeTokenEnabled()
   const { txFlow } = useContext(TxModalContext)
 
-  // On space routes we show the global search input by default, but when a transaction
-  // modal is open (e.g. Send via the Actions Tray) the URL keeps the space pathname —
-  // swap in the SpaceSafeBar so the user can see the Safe they're transacting against.
+  // Space routes show the global search by default, but while a tx modal is open the URL keeps the space
+  // pathname — swap in the SpaceSafeBar so the user sees the Safe they're transacting against.
   const showSpaceSafeBar = !isSpaceRoute || Boolean(txFlow)
 
   // Which wrap threshold and slot height apply follow the context variant — see the constants above.

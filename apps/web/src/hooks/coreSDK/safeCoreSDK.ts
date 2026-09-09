@@ -122,11 +122,8 @@ export const initSafeSDK = async ({
     isL1SafeSingleton = true
   }
 
-  // zkSync Safes using a canonical (EVM bytecode) master copy cannot delegatecall
-  // the zksync-specific (EraVM) MultiSend/MultiSendCallOnly, so force the canonical
-  // aux-contract addresses. Only runs for versions below the chain-agnostic threshold
-  // (<1.4.1); for >=1.4.1 the chain-agnostic resolver already picks the correct flavour
-  // from the master copy, and a second writer on the same fields would only risk drift.
+  // zkSync Safes on a canonical (EVM) master copy can't delegatecall the EraVM MultiSend, so force canonical
+  // aux addresses. Only for <1.4.1 — the chain-agnostic resolver already handles >=1.4.1 (a second writer would risk drift).
   if (!isChainAgnosticVersion(safeVersion) && isCanonicalDeployment(implementation, chainId, safeVersion)) {
     const canonicalMultiSendCallOnly = getCanonicalMultiSendCallOnlyAddress(safeVersion)
     const canonicalMultiSend = getCanonicalMultiSendAddress(safeVersion)

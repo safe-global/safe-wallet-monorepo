@@ -57,10 +57,9 @@ export const useTxMonitor = (): void => {
       return
     }
 
-    // Forget what a txId was watched by once it is no longer pending: the entry is cleared on
-    // SIGNATURE_INDEXED/SUCCESS/REVERTED/FAILED, and a txId that becomes pending again would
-    // otherwise compare equal to its own stale target and never be watched. Keyed on the whole
-    // slice rather than the current chain, so switching chains does not re-watch the other chain.
+    // Forget a txId's watcher once it's no longer pending (cleared on SIGNATURE_INDEXED/SUCCESS/REVERTED/
+    // FAILED), else a txId that becomes pending again compares equal to its stale target and is never watched.
+    // Keyed on the whole slice, not the current chain, so a chain switch doesn't re-watch the other chain.
     monitoredTxs.current = Object.fromEntries(
       Object.entries(monitoredTxs.current).filter(([txId]) => txId in pendingTxs),
     )

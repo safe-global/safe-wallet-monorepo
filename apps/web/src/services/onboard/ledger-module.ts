@@ -186,10 +186,8 @@ export function ledgerModule(): WalletInit {
               })) as string
             },
             eth_sign: async (args) => {
-              // The Safe requires transactions be signed as bytes, but eth_sign is only used by
-              // the Transaction Service, e.g. notification registration. We therefore sign
-              // messages as is to avoid unreadable byte notation (e.g. \xef\xbe\xad\xde). Instead,
-              // the Ledger device shows plain hex (e.g. 0xdeadbeef).
+              // eth_sign is only used by the Transaction Service (e.g. notification registration), so sign
+              // the message as-is — the Ledger then shows plain hex (0xdeadbeef) instead of unreadable bytes.
               const message = args.params[1]
               const signature = await ledgerSdk.signMessage(getAssertedDerivationPath(), message)
               return Signature.from(signature).serialized
@@ -406,9 +404,8 @@ async function waitForAction<
             actionState.status === DeviceActionStatus.Pending &&
             actionState.intermediateValue.requiredUserInteraction === UserInteractionRequired.UnlockDevice
           ) {
-            // Raise the kit's own error rather than one of ours: the user gets the same
-            // mapped sentence and the debugging sinks the same payload the timeout would
-            // have produced, a minute earlier
+            // Raise the kit's own error, not ours: same mapped sentence and debugging payload the timeout
+            // would have produced, a minute earlier.
             reject(mapLedgerError(new DeviceLockedError()))
           } else {
             // Awaiting user action, e.g. device to be unlocked. We could throw

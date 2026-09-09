@@ -78,9 +78,8 @@ const useTxNotifications = (): void => {
         const guardErrorName = isError ? getGuardErrorInfo(detail.error) : undefined
         // Awaiting approval in Hypernative: replaces the guard wording and the raw payload (WA-1219)
         const hnApprovalRequired = isError && isHypernativeGuardRevert(detail.error)
-        // A Ledger device failure states its own reason. Its raw error is a
-        // dump of DMK class names, ethers codes and the viem version, so it is
-        // withheld from `detailedMessage` too (WA-3243).
+        // A Ledger failure states its own reason; its raw error is a DMK/ethers/viem dump, so it's withheld
+        // from `detailedMessage` too (WA-3243).
         const ledgerError = isError ? getLedgerDeviceError(detail.error) : undefined
         // A known CGW response state replaces both the copy and the details:
         // the response body can be a gateway HTML error page (WA-3252).

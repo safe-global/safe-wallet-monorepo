@@ -212,8 +212,7 @@ function SafeSelectorDropdown({
   )
 
   // TODO: change rounded-lg (8px) to rounded-2xl (16px) after migrating to the new design system
-  // A muted 40px chip: the SpaceSafeBar pill that groups this with the nested-safes and
-  // network controls carries the white card and its shadow.
+  // A muted 40px chip — the grouping SpaceSafeBar pill carries the white card and shadow.
   const wrapperClassName = cn(
     'group relative w-full min-[430px]:w-auto min-[430px]:flex-1 min-[430px]:min-w-0 min-[430px]:max-w-[515px] h-10 flex items-center rounded-lg py-0.5 pl-1.5 pr-2 overflow-hidden bg-muted focus:ring-0',
     variants.wrapperClass,
