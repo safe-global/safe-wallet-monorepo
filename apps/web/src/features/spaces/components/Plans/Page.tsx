@@ -11,6 +11,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import AuthState from '../AuthState'
 import Plans from './index'
 import { TRIAL_PLANS } from './fixtures'
+import { useSpacePlan } from '../../hooks/useSpacePlan'
 
 const reminderSeen = localItem<boolean>('safeProBillingReminderSeen')
 
@@ -18,12 +19,12 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
   const isDarkMode = useDarkMode()
   const isSafePro = useHasFeature(FEATURES.SAFE_PRO)
   const { SafeProAnnouncement, SafeProBillingReminderModal } = useLoadFeature(SafeProFeature)
-  const isTrial = isSafePro && TRIAL_PLANS.plan?.status === 'trialing'
+  const { plan, isTrialing } = useSpacePlan()
   const [isReminderOpen, setIsReminderOpen] = useState(false)
 
   useEffect(() => {
-    if (isTrial && !reminderSeen.get()) setIsReminderOpen(true)
-  }, [isTrial])
+    if (isTrialing && !reminderSeen.get()) setIsReminderOpen(true)
+  }, [isTrialing])
 
   const closeReminder = () => {
     reminderSeen.set(true)
@@ -38,7 +39,7 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
         </Typography>
 
         {isSafePro ? (
-          <Plans data={TRIAL_PLANS} />
+          <Plans data={{ ...TRIAL_PLANS, plan }} />
         ) : (
           <Card size="none" radius="xl" className="w-full">
             <SafeProAnnouncement />
@@ -48,7 +49,7 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
         <SafeProBillingReminderModal
           open={isReminderOpen}
           onOpenChange={closeReminder}
-          trialEndsAt={TRIAL_PLANS.plan?.periodEndsAt ? new Date(TRIAL_PLANS.plan.periodEndsAt).getTime() : 0}
+          trialEndsAt={plan?.periodEndsAt ? new Date(plan.periodEndsAt).getTime() : 0}
           onAddBillingDetails={closeReminder}
         />
       </div>
