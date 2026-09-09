@@ -64,6 +64,7 @@
   --sidebar-ring: #d4d4d4;
   --accent-secondary: #c4fddd;
   --accent-secondary-foreground: #121312;
+  --mint: #7ffab7;
   --accent-success: #16a34a;
   /* The Figma warning surface (alert node 4316-12854) is Tailwind yellow, not the coral/amber brand
      warning tint, so light mode pins the Figma hexes. The file has no dark warning spec — dark mode
@@ -139,6 +140,7 @@
   --sidebar-ring: #404040;
   --accent-secondary: #c4fddd;
   --accent-secondary-foreground: #121312;
+  --mint: #7ffab7;
   --accent-success: #00b460; /* brand dark success.main */
   --warning-subtle: var(--color-warning-background);
   --warning-strong: var(--color-warning1-text);
@@ -191,6 +193,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --color-accent-secondary: var(--accent-secondary);
   --color-accent-secondary-foreground: var(--accent-secondary-foreground);
+  --color-mint: var(--mint);
   --color-accent-success: var(--accent-success);
   --color-success-subtle: var(--color-success-background);
   --color-success-muted: var(--color-success-light);

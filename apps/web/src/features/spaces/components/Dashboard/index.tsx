@@ -24,6 +24,12 @@ import AggregatedBalance from './AggregatedBalances'
 import SafeWidget from '../SafeWidget'
 import SetupWidget from '../SetupWidget'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import { useHasFeature } from '@/hooks/useChains'
+import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { Typography } from '@/components/ui/typography'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import TrialFlow from '../Plans/TrialFlow'
+import { TIERS, TRIAL_PLANS } from '../Plans/fixtures'
 
 const EmptyStateAddAction = () => {
   return (
@@ -39,7 +45,8 @@ const PENDING_TX_DISPLAY_LIMIT = 4
 const SpaceDashboard = () => {
   const { AccountsWidget, $isReady } = useLoadFeature(MyAccountsFeature)
   const { PendingTxWidget } = useLoadFeature(SpacesFeature)
-  const { SafeProAnnouncementModal } = useLoadFeature(SafeProFeature)
+  const { SafeProAnnouncementModal, SafeProLockedWorkspace, SafeProSubscriptionActivatedModal } =
+    useLoadFeature(SafeProFeature)
   const { allSafes: safes, isLoading: isSafesLoading } = useSpaceSafes()
   const safeItems = flattenSafeItems(safes)
   const spaceId = useCurrentSpaceId()
@@ -53,14 +60,16 @@ const SpaceDashboard = () => {
     refetch: refetchPendingTxs,
   } = useSpacePendingTransactions(PENDING_TX_DISPLAY_LIMIT)
   const [setupDismissed, setSetupDismissed] = useState(false)
+  const [isTrialOpen, setIsTrialOpen] = useState(false)
   const [dismissedSpaces = {}] = useLocalStorage<Record<string, number>>('setupWidgetDismissed')
   const isSetupDismissedForSpace = spaceId ? (dismissedSpaces[spaceId] ?? 0) > Date.now() : false
   useTrackSpace(safes, activeMembers)
   const router = useRouter()
   const isSafeProEnabled = useIsSafeProEnabled()
-  // Not shown over an invite preview: there is no Workspace of theirs to move yet.
+  const isLocked = useHasFeature(FEATURES.SAFE_PRO) === true && !isInvited
+  const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !isLocked || !spaceId })
   const { isOpen: isAnnouncementOpen, setIsOpen: setIsAnnouncementOpen } = useSafeProAnnouncement(
-    isSafeProEnabled && Boolean(spaceId) && !isInvited,
+    isSafeProEnabled && !isLocked && Boolean(spaceId) && !isInvited,
   )
 
   useEffect(() => {
@@ -117,9 +126,41 @@ const SpaceDashboard = () => {
 
   const showSetupWidget = safeItems.length === 0 && !isSafesLoading && !setupDismissed && !isSetupDismissedForSpace
 
+  // Stripe Checkout returns to Home with `?checkout=success`; the flag is dropped once the modal closes.
+  const closeCheckoutSuccess = () => {
+    const query = { ...router.query }
+    delete query.checkout
+    router.replace({ pathname: router.pathname, query }, undefined, { shallow: true })
+  }
+  const paidTier = TIERS.find((tier) => tier.isCurrent)
+  const checkoutSuccessModal = paidTier && paidTier.price !== null && (
+    <SafeProSubscriptionActivatedModal
+      open={router.query.checkout === 'success'}
+      onOpenChange={closeCheckoutSuccess}
+      planName={paidTier.name}
+      price={paidTier.price}
+      currency={paidTier.currency}
+      nextBillingAt={Date.parse(TRIAL_PLANS.plan?.periodEndsAt ?? '')}
+    />
+  )
+
+  if (isLocked) {
+    return (
+      <div className="pt-6">
+        <Typography variant="h2" className="mb-6 font-bold leading-[1] tracking-tight">
+          {space?.name}
+        </Typography>
+        <SafeProLockedWorkspace onStartTrial={() => setIsTrialOpen(true)} />
+        <TrialFlow trialDays={60} open={isTrialOpen} onOpenChange={setIsTrialOpen} />
+        {checkoutSuccessModal}
+      </div>
+    )
+  }
+
   return (
     <>
       {isSafeProEnabled && <SafeProAnnouncementModal open={isAnnouncementOpen} onOpenChange={setIsAnnouncementOpen} />}
+      {checkoutSuccessModal}
 
       {isInvited && <PreviewInvite />}
 

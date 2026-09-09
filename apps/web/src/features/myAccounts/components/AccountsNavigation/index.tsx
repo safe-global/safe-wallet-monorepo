@@ -5,11 +5,16 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 import type { AnalyticsEvent } from '@/services/analytics/types'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import SafeProLockup from '@/components/common/SafeProLockup'
+import SafeWalletLockup from '@/public/images/safe-wallet-lockup.svg'
 
 type Item = {
   label: string
   url: string
   trackEvent?: AnalyticsEvent
+  pro?: boolean
 }
 
 const navItems: Item[] = [
@@ -17,6 +22,7 @@ const navItems: Item[] = [
     label: 'Workspaces',
     url: AppRoutes.welcome.spaces,
     trackEvent: { ...SPACE_EVENTS.OPEN_SPACE_LIST_PAGE, label: SPACE_LABELS.accounts_page },
+    pro: true,
   },
   {
     label: 'My accounts',
@@ -26,6 +32,7 @@ const navItems: Item[] = [
 
 const AccountsNavigation = () => {
   const router = useRouter()
+  const isSafePro = useHasFeature(FEATURES.SAFE_PRO)
 
   const activeUrl = navItems.some((item) => item.url === router.pathname) ? router.pathname : navItems[0].url
 
@@ -45,7 +52,15 @@ const AccountsNavigation = () => {
             nativeButton={false}
             render={<NextLink href={item.url} onClick={handleClick(item)} />}
           >
-            {item.label}
+            {!isSafePro ? (
+              item.label
+            ) : item.pro ? (
+              <SafeProLockup className="text-[1.25rem]" />
+            ) : (
+              <span className="block h-7 w-[140px]">
+                <SafeWalletLockup role="img" aria-label="Safe{Wallet}" className="size-full" />
+              </span>
+            )}
           </TabsTrigger>
         ))}
       </TabsList>

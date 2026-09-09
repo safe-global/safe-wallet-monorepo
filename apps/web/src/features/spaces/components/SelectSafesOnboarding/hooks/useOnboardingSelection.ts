@@ -13,6 +13,8 @@ interface Args {
   setValue: UseFormSetValue<AddAccountsFormValues>
   /** Lowercased addresses flagged as look-alikes — selecting one requires confirmation. */
   flaggedAddresses: Set<string>
+  /** Max selectable leaves; defaults to the per-Workspace cap. */
+  limit?: number
 }
 
 /**
@@ -20,14 +22,14 @@ interface Args {
  * `selectedSafes` record, reconciling multi-chain parent keys, and gates selection of
  * address-poisoning-flagged safes behind a confirmation dialog.
  */
-const useOnboardingSelection = ({ items, control, setValue, flaggedAddresses }: Args) => {
+const useOnboardingSelection = ({ items, control, setValue, flaggedAddresses, limit = SAFE_ACCOUNTS_LIMIT }: Args) => {
   const selectedSafes = useWatch({ control, name: 'selectedSafes' }) ?? {}
   const [pendingConfirmation, setPendingConfirmation] = useState<AccountLine | null>(null)
 
   const selectedKeys = useMemo(() => getSelectedLeafKeys(selectedSafes), [selectedSafes])
 
   // Total checked leaves across both sections count toward the per-workspace cap.
-  const isAtLimit = selectedKeys.size >= SAFE_ACCOUNTS_LIMIT
+  const isAtLimit = selectedKeys.size >= limit
 
   const applyToggle = (line: AccountLine, nextChecked: boolean) =>
     applySafeSelectionToggle(setValue, items, selectedSafes, line, nextChecked)
