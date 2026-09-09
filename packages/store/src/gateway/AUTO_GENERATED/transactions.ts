@@ -370,6 +370,9 @@ export type ChangeThreshold = {
 export type DeleteGuard = {
   type: 'DELETE_GUARD'
 }
+export type DeleteModuleGuard = {
+  type: 'DELETE_MODULE_GUARD'
+}
 export type DisableModule = {
   type: 'DISABLE_MODULE'
   module: AddressInfo
@@ -391,6 +394,10 @@ export type SetGuard = {
   type: 'SET_GUARD'
   guard: AddressInfo
 }
+export type SetModuleGuard = {
+  type: 'SET_MODULE_GUARD'
+  moduleGuard: AddressInfo
+}
 export type SwapOwner = {
   type: 'SWAP_OWNER'
   oldOwner: AddressInfo
@@ -405,11 +412,13 @@ export type SettingsChangeTransaction = {
     | ChangeMasterCopy
     | ChangeThreshold
     | DeleteGuard
+    | DeleteModuleGuard
     | DisableModule
     | EnableModule
     | RemoveOwner
     | SetFallbackHandler
     | SetGuard
+    | SetModuleGuard
     | SwapOwner
 }
 export type Erc20Transfer = {
