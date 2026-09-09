@@ -11,6 +11,42 @@ import type { ErrorContext } from '../observability/types'
 // Canonical definition + cycle rationale: observability/types.ts.
 export type { ErrorContext }
 
+/**
+ * How long an identical warning is suppressed after going out. Sources that fail
+ * on a schedule — the 15s CGW poll, a gas estimate with several concurrent
+ * readers — otherwise report one failure once per attempt.
+ */
+const LOG_THROTTLE_MS = 60_000
+/** Ceiling on tracked keys, so a long-lived session cannot grow the map without bound. */
+const MAX_THROTTLED_KEYS = 500
+/** Insertion order doubles as recency: a key is re-inserted every time it goes out. */
+const lastLoggedAt = new Map<string, number>()
+
+const isThrottled = (key: string): boolean => {
+  const now = Date.now()
+  const last = lastLoggedAt.get(key)
+  if (last !== undefined && now - last < LOG_THROTTLE_MS) return true
+
+  if (lastLoggedAt.size >= MAX_THROTTLED_KEYS) {
+    for (const [tracked, at] of lastLoggedAt) {
+      if (now - at >= LOG_THROTTLE_MS) lastLoggedAt.delete(tracked)
+    }
+    for (const oldest of lastLoggedAt.keys()) {
+      if (lastLoggedAt.size < MAX_THROTTLED_KEYS) break
+      lastLoggedAt.delete(oldest)
+    }
+  }
+
+  lastLoggedAt.delete(key)
+  lastLoggedAt.set(key, now)
+  return false
+}
+
+/** Test-only: forgets what has been logged, so each test starts with an open window. */
+export const __resetLogThrottleForTests = (): void => {
+  lastLoggedAt.clear()
+}
+
 export class CodedException extends Error {
   public readonly code: number
   public readonly content: string
@@ -88,6 +124,8 @@ export class CodedException extends Error {
   }
 
   public log(context?: ErrorContext): void {
+    if (isThrottled(`${this.message}|${JSON.stringify(context ?? {})}`)) return
+
     // Filter out the logError fn from the stack trace
     if (this.stack) {
       const newStack = this.stack

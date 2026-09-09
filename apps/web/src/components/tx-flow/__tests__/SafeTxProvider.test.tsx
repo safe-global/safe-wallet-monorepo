@@ -73,7 +73,7 @@ describe('SafeTxProvider', () => {
       await waitFor(() => {
         expect(mockedLogError).toHaveBeenCalledTimes(1)
       })
-      expect(mockedLogError).toHaveBeenCalledWith(Errors._103, error, undefined)
+      expect(mockedLogError).toHaveBeenCalledWith(Errors._103, error)
     })
 
     it('reports it once while the failure stands', async () => {

@@ -20,7 +20,7 @@ export type SafeTxContextParams = {
   setSafeMessageHash: Dispatch<SetStateAction<`0x${string}` | undefined>>
 
   safeTxError?: Error
-  setSafeTxError: Dispatch<SetStateAction<Error | undefined>>
+  setSafeTxError: (error: Error | undefined) => void
 
   nonce?: number
   setNonce: Dispatch<SetStateAction<number | undefined>>
