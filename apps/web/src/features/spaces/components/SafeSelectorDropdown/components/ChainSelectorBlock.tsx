@@ -103,6 +103,7 @@ function ChainSelectorBlock({
           aria-label="Search networks"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
+          onClear={() => setSearch('')}
           onKeyDown={handleSearchKeyDown}
           autoComplete="off"
           data-testid="chain-selector-search-input"

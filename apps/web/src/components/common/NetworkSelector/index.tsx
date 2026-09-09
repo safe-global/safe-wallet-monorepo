@@ -421,6 +421,7 @@ const NetworkSelector = ({
             ref={searchRef}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            onClear={() => setSearch('')}
             onKeyDown={handleSearchKeyDown}
             autoComplete="off"
             data-testid="network-selector-search-input"
