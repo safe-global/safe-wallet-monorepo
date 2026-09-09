@@ -8,10 +8,8 @@
 import { createFeatureHandle } from '@/features/__core__'
 import type { RecoveryContract } from './contract'
 
-// Feature handle - uses semantic mapping
 export const RecoveryFeature = createFeatureHandle<RecoveryContract>('recovery')
 
-// Contract type (for type annotations if needed)
 export type { RecoveryContract } from './contract'
 
 // Hooks exported directly (always loaded, not in contract)

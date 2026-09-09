@@ -9,7 +9,6 @@ import type { NoFeeCampaignContract } from './contract'
  */
 export const NoFeeCampaignFeature = createFeatureHandle<NoFeeCampaignContract>('no-fee-campaign')
 
-// Export contract type for TypeScript inference
 export type { NoFeeCampaignContract } from './contract'
 
 // Export hooks directly (always loaded, not in contract)

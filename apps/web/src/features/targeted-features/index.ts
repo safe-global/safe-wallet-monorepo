@@ -1,4 +1,3 @@
-// Export public types
 export type { OutreachSafeResult } from './types'
 export type { TargetedFeatures } from './hooks/useIsTargetedFeature'
 

@@ -4,13 +4,10 @@
  * This feature provides collaboration spaces for managing Safe accounts, members, and address books.
  */
 
-// Feature handle - uses semantic mapping
 export { SpacesFeature } from './SpacesFeature'
 
-// Contract type (for type annotations if needed)
 export type { SpacesContract } from './contract'
 
-// Domain constants (max accounts/workspaces, shared limit copy)
 export { SAFE_ACCOUNTS_LIMIT, SPACES_LIMIT, safeAccountsLimitReachedText } from './constants'
 
 // Hooks exported directly (always loaded, not in contract)
@@ -38,7 +35,6 @@ export { useAddressBookWriteScope, type AddressBookWriteScope } from './hooks/us
 export { useUpsertWorkspaceSafeName } from './hooks/useUpsertWorkspaceSafeName'
 export { default as useTrackSpace } from './hooks/useTrackSpace'
 
-// Hooks from useSpaceMembers.tsx
 export {
   useSpaceMembersByStatus,
   useCurrentMembership,
@@ -56,13 +52,10 @@ export {
   MemberRole,
 } from './hooks/useSpaceMembers'
 
-// Hooks from useSpaceSafes.tsx
 export { useSpaceSafes } from './hooks/useSpaceSafes'
 
-// Hooks from useSpacePendingTransactions.ts
 export { useSpacePendingTransactions } from './hooks/useSpacePendingTransactions'
 
-// Store exports (actions, selectors, types)
 export {
   ESafeAction,
   openSafeActionsModal,
@@ -75,7 +68,6 @@ export {
 // Public types (compile-time only, no runtime cost)
 export { mapSpaceContactsToAddressBookState, getChainIdsParam } from './utils'
 
-// Components consumed from outside the feature
 export { HeaderNavigation } from './components/HeaderNavigation'
 export { default as HeaderAccountInfo } from './components/HeaderNavigation/HeaderAccountInfo'
 export { SpacesEnhancedSidebar } from './components/Sidebar/SpacesEnhancedSidebar'

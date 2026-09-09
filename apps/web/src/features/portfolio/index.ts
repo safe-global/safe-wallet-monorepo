@@ -19,7 +19,6 @@ import type { PortfolioContract } from './contract'
  */
 export const PortfolioFeature = createFeatureHandle<PortfolioContract>('portfolio')
 
-// Contract type (for type annotations if needed)
 export type { PortfolioContract } from './contract'
 
 // Hooks exported directly (always loaded, not lazy) to avoid Rules of Hooks violations

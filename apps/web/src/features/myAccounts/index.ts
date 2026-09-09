@@ -10,24 +10,18 @@ import type { MyAccountsContract } from './contract'
 // Uses FEATURES.MY_ACCOUNTS via mapping in createFeatureHandle
 export const MyAccountsFeature = createFeatureHandle<MyAccountsContract>('myAccounts')
 
-// Contract type
 export type { MyAccountsContract } from './contract'
 
-// Safe item data hooks
 export { useSafeItemData } from './hooks/useSafeItemData'
 export { useMultiAccountItemData } from './hooks/useMultiAccountItemData'
 
-// Navigation and state
 export { useVisitedSafes } from './hooks/useVisitedSafes'
 export { useNetworksOfSafe } from './hooks/useNetworksOfSafe'
 
-// Space accounts data
 export { default as useSpaceAccountsData } from './hooks/useSpaceAccountsData'
 
-// Pin actions
 export { usePinActions } from './hooks/usePinActions'
 
-// Address safety hooks
 export { default as useNonPinnedSafeWarning } from './hooks/useNonPinnedSafeWarning'
 export { default as useSimilarAddressDetection } from './hooks/useSimilarAddressDetection'
 export { useTrustSafe } from './hooks/useTrustSafe'
@@ -39,5 +33,4 @@ export type { SafeAccountsSelection } from './components/SafeAccountsTable'
 export type { AccountLine } from './components/SafeAccountsTable/useSafeAccountRows'
 export type { SafeAccountColumnId } from './components/SafeAccountsTable/columns'
 
-// Public types
 export type * from './types'

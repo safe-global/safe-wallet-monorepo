@@ -9,13 +9,10 @@ import type { SwapContract } from './contract'
 // Feature flag already mapped in createFeatureHandle: swap → FEATURES.NATIVE_SWAPS
 export const SwapFeature = createFeatureHandle<SwapContract>('swap')
 
-// Contract type
 export type { SwapContract } from './contract'
 
-// Feature flag hook
 export { default as useIsSwapFeatureEnabled } from './hooks/useIsSwapFeatureEnabled'
 
-// Swap state hooks
 export { default as useIsExpiredSwap } from './hooks/useIsExpiredSwap'
 export { useIsTWAPFallbackHandler, useTWAPFallbackHandlerAddress } from './hooks/useIsTWAPFallbackHandler'
 

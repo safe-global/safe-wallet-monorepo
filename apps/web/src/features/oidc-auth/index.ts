@@ -9,7 +9,6 @@ import type { OidcAuthContract } from './contract'
 
 export const OidcAuthFeature = createFeatureHandle<OidcAuthContract>('oidc-auth')
 
-// Contract type
 export type { OidcAuthContract } from './contract'
 
 export { useOidcLogin } from './hooks/useOidcLogin'

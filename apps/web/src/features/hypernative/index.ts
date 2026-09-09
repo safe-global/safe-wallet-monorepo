@@ -9,7 +9,6 @@ import type { HypernativeContract } from './contract'
 
 export const HypernativeFeature = createFeatureHandle<HypernativeContract>('hypernative')
 
-// Contract type
 export type { HypernativeContract } from './contract'
 
 // Eligibility hook (critical for safe-shield integration)
@@ -20,18 +19,15 @@ export type { HypernativeEligibility } from './hooks/useIsHypernativeEligible'
 export { useHypernativeOAuth, savePkce, readPkce, clearPkce } from './hooks/useHypernativeOAuth'
 export type { HypernativeAuthStatus, PkceData } from './hooks/useHypernativeOAuth'
 
-// Guard check hook
 export { useIsHypernativeGuard } from './hooks/useIsHypernativeGuard'
 export type { HypernativeGuardCheckResult } from './hooks/useIsHypernativeGuard'
 
-// Feature flag hooks
 export {
   useIsHypernativeFeature,
   useIsHypernativeFeature as useIsHypernativeFeatureEnabled,
 } from './hooks/useIsHypernativeFeature'
 export { useIsHypernativeQueueScanFeature } from './hooks/useIsHypernativeQueueScanFeature'
 
-// Assessment-related hooks
 export { useHnAssessmentSeverity } from './hooks/useHnAssessmentSeverity'
 export { useHnQueueAssessment } from './hooks/useHnQueueAssessment'
 export { useHnQueueAssessmentResult } from './hooks/useHnQueueAssessmentResult'
