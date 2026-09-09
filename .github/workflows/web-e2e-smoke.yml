@@ -19,8 +19,10 @@ concurrency:
 
 jobs:
   e2e:
-    # Pin the OS image so every --parallel shard reports the same osVersion to Cypress Cloud (else mismatched shards are dropped).
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
+    # Digest-pinned image so every --parallel shard reports the same osVersion to Cypress Cloud (else mismatched shards are dropped). No --user: root can run corepack enable.
+    container:
+      image: cypress/base:24.14.0@sha256:2c8dfc188d908189af9a02e33ead1a8691bd0ffeaf86ed48bb70512c83a115e6
     timeout-minutes: 30
     name: Cypress Smoke tests
     permissions:
