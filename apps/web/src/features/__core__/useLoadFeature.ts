@@ -70,7 +70,6 @@ function createStableStubProxy<T extends FeatureImplementation>(
   })
 }
 
-// ── Shared Feature Registry ──────────────────────────────────────
 // Global cache so concurrent useLoadFeature(SameFeature) callers share one load and
 // get the result synchronously on first render. Only successful loads are cached;
 // errors stay per-instance so retry is possible on remount.
@@ -117,8 +116,6 @@ export function _resetFeatureRegistry(): void {
   featureCache.clear()
   pendingLoads.clear()
 }
-
-// ── Hook ─────────────────────────────────────────────────────────
 
 /**
  * Hook to load a feature lazily based on its handle.

@@ -7,19 +7,11 @@
 import { createFeatureHandle } from '@/features/__core__'
 import type { MyAccountsContract } from './contract'
 
-// ─────────────────────────────────────────────────────────────────
-// FEATURE HANDLE (lazy-loads components when flag is enabled)
-// ─────────────────────────────────────────────────────────────────
-
 // Uses FEATURES.MY_ACCOUNTS via mapping in createFeatureHandle
 export const MyAccountsFeature = createFeatureHandle<MyAccountsContract>('myAccounts')
 
 // Contract type
 export type { MyAccountsContract } from './contract'
-
-// ─────────────────────────────────────────────────────────────────
-// PUBLIC HOOKS (always loaded, not lazy)
-// ─────────────────────────────────────────────────────────────────
 
 // Safe item data hooks
 export { useSafeItemData } from './hooks/useSafeItemData'
@@ -39,10 +31,6 @@ export { usePinActions } from './hooks/usePinActions'
 export { default as useNonPinnedSafeWarning } from './hooks/useNonPinnedSafeWarning'
 export { default as useSimilarAddressDetection } from './hooks/useSimilarAddressDetection'
 export { useTrustSafe } from './hooks/useTrustSafe'
-
-// ─────────────────────────────────────────────────────────────────
-// PUBLIC COMPONENTS
-// ─────────────────────────────────────────────────────────────────
 
 export { AccountItem } from './components/AccountItem'
 export { default as AddTrustedSafeDialog } from './components/NonPinnedWarning/AddTrustedSafeDialog'

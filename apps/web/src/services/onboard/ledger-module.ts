@@ -57,14 +57,9 @@ export function ledgerModule(): WalletInit {
         const eventEmitter = new EventEmitter()
         const ledgerSdk = await getLedgerSdk()
 
-        /* -------------------------------------------------------------------------- */
-        /*                                    State                                   */
-        /* -------------------------------------------------------------------------- */
-
         let currentChain = DEFAULT_CHAIN
         let currentAccount: Account | null = null
 
-        // Sets the current chain and emits the chainChanged event
         function setCurrentChain(chainId: Chain['id']): void {
           const newChain = chains.find((chain) => chain.id === chainId)
           if (!newChain) {
@@ -77,25 +72,21 @@ export function ledgerModule(): WalletInit {
           eventEmitter.emit('chainChanged', currentChain.id)
         }
 
-        // Sets the current account and emits the accountsChanged event
         function setCurrentAccount(account: Account): void {
           currentAccount = account
           eventEmitter.emit('accountsChanged', [currentAccount.address])
         }
 
-        // Clears the current account and emits the accountsChanged event
         function clearCurrentAccount(): void {
           currentAccount = null
           eventEmitter.emit('accountsChanged', [])
         }
 
-        // Clears the current chain and emits the chainChanged event
         function clearCurrentChain(): void {
           currentChain = DEFAULT_CHAIN
           eventEmitter.emit('chainChanged', currentChain.id)
         }
 
-        // Gets the asserted derivation path from the current account
         function getAssertedDerivationPath(): DerivationPath {
           if (!currentAccount?.derivationPath) {
             throw new ProviderRpcError({
@@ -105,10 +96,6 @@ export function ledgerModule(): WalletInit {
           }
           return currentAccount.derivationPath
         }
-
-        /* -------------------------------------------------------------------------- */
-        /*                              EIP-1193 provider                             */
-        /* -------------------------------------------------------------------------- */
 
         const eip1193Provider = createEIP1193Provider(
           getHardwareWalletProvider(() => {
@@ -247,10 +234,6 @@ export function ledgerModule(): WalletInit {
         eip1193Provider.on = eventEmitter.on.bind(eventEmitter)
         eip1193Provider.removeListener = eventEmitter.removeListener.bind(eventEmitter)
 
-        /* -------------------------------------------------------------------------- */
-        /*                       Web3-Onboard account selection                       */
-        /* -------------------------------------------------------------------------- */
-
         /**
          * Gets a list of derived accounts from Ledger device for selection
          * and sets the first account as the current account
@@ -323,7 +306,6 @@ export function ledgerModule(): WalletInit {
           return accounts
         }
 
-        // Gets derived account from Ledger device for selection in Web3-Onboard
         async function deriveAccount(args: {
           derivationPath: string
           provider: InstanceType<typeof JsonRpcProvider>

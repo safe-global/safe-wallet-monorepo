@@ -6,19 +6,11 @@
 import { createFeatureHandle } from '@/features/__core__'
 import type { StakeContract } from './contract'
 
-// ─────────────────────────────────────────────────────────────────
-// FEATURE HANDLE (lazy-loads components and services)
-// ─────────────────────────────────────────────────────────────────
-
 // Feature flag already mapped in createFeatureHandle: stake → FEATURES.STAKING
 export const StakeFeature = createFeatureHandle<StakeContract>('stake')
 
 // Contract type
 export type { StakeContract } from './contract'
-
-// ─────────────────────────────────────────────────────────────────
-// PUBLIC HOOKS (always loaded, not lazy)
-// ─────────────────────────────────────────────────────────────────
 
 // Feature flag hooks
 export { default as useIsStakingFeatureEnabled } from './hooks/useIsStakingFeatureEnabled'
@@ -31,14 +23,6 @@ export {
 // Stake widget URL hook
 export { useGetStakeWidgetUrl } from './hooks/useGetStakeWidgetUrl'
 
-// ─────────────────────────────────────────────────────────────────
-// CONSTANTS
-// ─────────────────────────────────────────────────────────────────
-
 export * from './constants'
-
-// ─────────────────────────────────────────────────────────────────
-// HELPER UTILITIES (direct exports for consumers)
-// ─────────────────────────────────────────────────────────────────
 
 export { getStakeTitle } from './helpers/utils'

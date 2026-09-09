@@ -27,10 +27,6 @@ export function trezorModule(): WalletInit {
         const eventEmitter = new EventEmitter()
         const trezorSdk = await getTrezorSdk()
 
-        /* -------------------------------------------------------------------------- */
-        /*                                    State                                   */
-        /* -------------------------------------------------------------------------- */
-
         let currentChain = DEFAULT_CHAIN
         let currentAccount: Account | null = null
 
@@ -70,10 +66,6 @@ export function trezorModule(): WalletInit {
           }
           return currentAccount.derivationPath
         }
-
-        /* -------------------------------------------------------------------------- */
-        /*                              EIP-1193 provider                             */
-        /* -------------------------------------------------------------------------- */
 
         const eip1193Provider = createEIP1193Provider(
           getHardwareWalletProvider(() => {
@@ -216,10 +208,6 @@ export function trezorModule(): WalletInit {
         // createEIP1193Provider does not bind EventEmitter
         eip1193Provider.on = eventEmitter.on.bind(eventEmitter)
         eip1193Provider.removeListener = eventEmitter.removeListener.bind(eventEmitter)
-
-        /* -------------------------------------------------------------------------- */
-        /*                       Web3-Onboard account selection                       */
-        /* -------------------------------------------------------------------------- */
 
         /**
          * Gets a list of derived accounts from Trezor device for selection

@@ -7,18 +7,10 @@
 import { createFeatureHandle } from '@/features/__core__'
 import type { HypernativeContract } from './contract'
 
-// ─────────────────────────────────────────────────────────────────
-// FEATURE HANDLE (lazy-loads components and services)
-// ─────────────────────────────────────────────────────────────────
-
 export const HypernativeFeature = createFeatureHandle<HypernativeContract>('hypernative')
 
 // Contract type
 export type { HypernativeContract } from './contract'
-
-// ─────────────────────────────────────────────────────────────────
-// PUBLIC HOOKS (always loaded, not lazy)
-// ─────────────────────────────────────────────────────────────────
 
 // Eligibility hook (critical for safe-shield integration)
 export { useIsHypernativeEligible } from './hooks/useIsHypernativeEligible'
@@ -74,14 +66,6 @@ export { HnSignupFlow } from './components/HnSignupFlow'
 // OAuth config (used by oauth-callback page)
 export { HYPERNATIVE_OAUTH_CONFIG, getRedirectUri } from './config/oauth'
 
-// ─────────────────────────────────────────────────────────────────
-// STORE (direct imports, not lazy-loaded)
-// ─────────────────────────────────────────────────────────────────
-
 export * from './store'
-
-// ─────────────────────────────────────────────────────────────────
-// CONSTANTS
-// ─────────────────────────────────────────────────────────────────
 
 export { HYPERNATIVE_OUTREACH_ID, HYPERNATIVE_ALLOWLIST_OUTREACH_ID } from './constants'
