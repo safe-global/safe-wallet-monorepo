@@ -13,7 +13,7 @@ const SafeProAnnouncement = ({ location, onDismiss }: { location: SafeProBannerL
 
   return (
     <div className="p-1">
-      <div className="relative aspect-[1056/369] w-full overflow-hidden rounded-t-[calc(var(--radius-xl)-2px)]">
+      <div className="relative aspect-[1056/369] w-full overflow-hidden rounded-t-[calc(2rem_-_2px)]">
         <Image
           src={`/images/safe-pro/pro-announcement-hero${isDarkMode ? '-dark' : ''}.jpg`}
           alt="A Workspace from Safe Pro, with its accounts, members and transactions"
