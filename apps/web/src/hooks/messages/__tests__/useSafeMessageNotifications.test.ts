@@ -9,6 +9,12 @@ import type { PendingSafeMessagesState } from '@/store/pendingSafeMessagesSlice'
 import { mapLedgerError } from '@/services/onboard/ledger-errors'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 
+let mockIsTxFlowOpen = false
+
+jest.mock('@/components/tx-flow/useIsTxFlowOpen', () => ({
+  useIsTxFlowOpenRef: () => ({ current: mockIsTxFlowOpen }),
+}))
+
 jest.mock('@/store/notificationsSlice', () => {
   const original = jest.requireActual('@/store/notificationsSlice')
   return {
@@ -18,6 +24,11 @@ jest.mock('@/store/notificationsSlice', () => {
 })
 
 describe('useSafeMessageNotifications', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockIsTxFlowOpen = false
+  })
+
   describe('getSafeMessagesAwaitingConfirmations', () => {
     it('should return all SafeMessages awaiting confirmation of the current wallet', () => {
       const items: SafeMessageListItem[] = [
@@ -209,7 +220,7 @@ describe('useSafeMessageNotifications', () => {
 
       expect(showNotification).toHaveBeenCalledWith({
         message: 'Something went wrong on our end. Try again.',
-        detailedMessage: 'Error code CGW-502',
+        detailedMessage: undefined,
         groupKey: '0x345',
         variant: 'error',
       })
@@ -225,10 +236,19 @@ describe('useSafeMessageNotifications', () => {
 
       expect(showNotification).toHaveBeenCalledWith({
         message: 'This Safe Account is not available.',
-        detailedMessage: 'Error code CGW-451',
+        detailedMessage: undefined,
         groupKey: '0x346',
         variant: 'error',
       })
     })
+  })
+
+  it('does not notify about a signing failure while the flow is on screen', () => {
+    mockIsTxFlowOpen = true
+    renderHook(() => useSafeMessageNotifications())
+
+    safeMsgDispatch(SafeMsgEvent.PROPOSE_FAILED, { messageHash: '0x347', error: new Error('Example error') })
+
+    expect(showNotification).not.toHaveBeenCalled()
   })
 })

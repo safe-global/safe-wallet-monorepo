@@ -17,6 +17,7 @@ import type { PendingSafeMessagesState } from '@/store/pendingSafeMessagesSlice'
 import { isWalletRejection } from '@/utils/wallets'
 import { getLedgerDeviceError, getLedgerUserMessage } from '@/services/onboard/ledger-errors'
 import { getCgwErrorInfo } from '@/utils/cgw-errors'
+import { useIsTxFlowOpenRef } from '@/components/tx-flow/useIsTxFlowOpen'
 
 const SafeMessageNotifications: Partial<Record<SafeMsgEvent, string>> = {
   [SafeMsgEvent.PROPOSE]: 'You successfully signed the message.',
@@ -41,6 +42,7 @@ export const _getSafeMessagesAwaitingConfirmations = (
 
 const useSafeMessageNotifications = () => {
   const dispatch = useAppDispatch()
+  const isTxFlowOpenRef = useIsTxFlowOpenRef()
 
   /**
    * Show notifications of a messages's lifecycle
@@ -53,6 +55,9 @@ const useSafeMessageNotifications = () => {
       safeMsgSubscribe(event, (detail) => {
         const isError = 'error' in detail
         if (isError && isWalletRejection(detail.error)) return
+        // The signing flow on screen already shows the failure inline, and errors are never listed
+        // in the notification center — a toast would only repeat what the flow says.
+        if (isError && isTxFlowOpenRef.current) return
         const isSuccess = event === SafeMsgEvent.PROPOSE || event === SafeMsgEvent.SIGNATURE_PREPARED
         // A Ledger device failure states its own reason; its raw error is a
         // dump of DMK class names, ethers codes and the viem version (WA-3243).
@@ -71,13 +76,7 @@ const useSafeMessageNotifications = () => {
         dispatch(
           showNotification({
             message,
-            detailedMessage: ledgerError
-              ? undefined
-              : cgwError
-                ? `Error code ${cgwError.code}`
-                : isError
-                  ? detail.error.message
-                  : undefined,
+            detailedMessage: ledgerError || cgwError ? undefined : isError ? detail.error.message : undefined,
             groupKey: detail.messageHash,
             variant: isError ? 'error' : isSuccess ? 'success' : 'info',
           }),
@@ -88,7 +87,7 @@ const useSafeMessageNotifications = () => {
     return () => {
       unsubFns.forEach((unsub) => unsub())
     }
-  }, [dispatch])
+  }, [dispatch, isTxFlowOpenRef])
 
   /**
    * If there's at least one message awaiting confirmations, show a notification for it

@@ -7,6 +7,7 @@ import BellIcon from '@/public/images/common/notifications.svg'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '@/store'
 import {
+  selectCenterNotifications,
   selectNotifications,
   readNotification,
   closeNotification,
@@ -38,7 +39,10 @@ const NotificationCenter = (): ReactElement => {
   // This hook is used to show the notification renewal message when the app is opened
   useShowNotificationsRenewalMessage()
 
-  const notifications = useAppSelector(selectNotifications)
+  const notifications = useAppSelector(selectCenterNotifications)
+  // Opening the bell dismisses every visible toast, errors included — so that sweep needs the
+  // unfiltered list.
+  const allNotifications = useAppSelector(selectNotifications)
   const chronologicalNotifications = useMemo(() => {
     // Clone as Redux returns read-only array
     return notifications.slice().sort((a, b) => b.timestamp - a.timestamp)
@@ -65,7 +69,7 @@ const NotificationCenter = (): ReactElement => {
     if (!open) {
       trackEvent(OVERVIEW_EVENTS.NOTIFICATION_CENTER)
 
-      notifications.forEach(({ isDismissed, id }) => {
+      allNotifications.forEach(({ isDismissed, id }) => {
         if (!isDismissed) {
           dispatch(closeNotification({ id }))
         }

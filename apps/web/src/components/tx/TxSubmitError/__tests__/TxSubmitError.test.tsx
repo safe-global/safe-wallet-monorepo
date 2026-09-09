@@ -149,7 +149,7 @@ describe('TxSubmitError', () => {
       expect(getByText('This Safe Account is not available.')).toBeInTheDocument()
     })
 
-    it('shows a code-only support reference instead of a raw Details payload', () => {
+    it('shows the message alone — no code reference and no raw Details payload', () => {
       const error = asError({
         status: 'PARSING_ERROR',
         originalStatus: 502,
@@ -157,10 +157,10 @@ describe('TxSubmitError', () => {
         error: "SyntaxError: Unexpected token '<'",
       })
 
-      const { getByTestId, getByText, queryByText } = render(<TxSubmitError error={error} />)
+      const { queryByTestId, queryByText } = render(<TxSubmitError error={error} />)
 
-      expect(getByTestId('error-details')).toBeInTheDocument()
-      expect(getByText('CGW-502')).toBeInTheDocument()
+      expect(queryByTestId('error-details')).not.toBeInTheDocument()
+      expect(queryByText('CGW-502')).not.toBeInTheDocument()
       expect(queryByText('Details')).not.toBeInTheDocument()
     })
 

@@ -7,6 +7,7 @@ import {
   isRevertError,
   RATE_LIMIT_USER_MESSAGE,
 } from '@/utils/transaction-errors'
+import { getSpecificContractErrorMessage } from '@safe-global/utils/services/exceptions/contractErrors'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { ExternalLink as ExternalLinkIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -60,7 +61,8 @@ export const getCouldNotCheckMessage = (network?: string): string =>
  * reverts) warns the transaction will fail so the user can avoid wasting gas;
  * an infrastructure failure (we could not reach the node) only says we could
  * not check — never a prediction about the transaction. A transient rate-limit
- * keeps its own dedicated copy.
+ * keeps its own dedicated copy. A revert carrying a GS code we have specific copy for
+ * shows that cause instead of the prediction.
  */
 const TxCheckError = ({ error, context }: { error: Error; context?: 'estimation' | 'execution' }): ReactElement => {
   const chain = useCurrentChain()
@@ -78,10 +80,13 @@ const TxCheckError = ({ error, context }: { error: Error; context?: 'estimation'
   }
 
   const willRevert = isRevertError(error)
+  // The chain named the cause, so say it instead of predicting a failure. Codes with no copy
+  // of their own keep the prediction — it is more useful than the shared fallback here.
+  const contractErrorMessage = getSpecificContractErrorMessage(error, { nativeAsset: chain?.nativeCurrency.symbol })
 
   return (
     <ErrorMessage error={error} level={willRevert ? 'error' : 'warning'} context={context}>
-      {willRevert ? TX_WILL_FAIL_MESSAGE : getCouldNotCheckMessage(chain?.chainName)}
+      {contractErrorMessage ?? (willRevert ? TX_WILL_FAIL_MESSAGE : getCouldNotCheckMessage(chain?.chainName))}
     </ErrorMessage>
   )
 }

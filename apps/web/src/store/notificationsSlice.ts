@@ -1,4 +1,4 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import { createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type { AppThunk, RootState } from '@/store'
 import type { LinkProps } from 'next/link'
 import type { ReactNode } from 'react'
@@ -80,3 +80,11 @@ export const showNotification = (payload: Omit<Notification, 'id' | 'timestamp'>
 export const selectNotifications = (state: RootState): NotificationState => {
   return state[notificationsSlice.name]
 }
+
+/**
+ * What the notification center lists. Failures are transient: they are shown as a toast and,
+ * when a tx flow is on screen, inline in the flow — they are never kept as a record here.
+ */
+export const selectCenterNotifications = createSelector(selectNotifications, (notifications) =>
+  notifications.filter(({ variant }) => variant !== 'error'),
+)
