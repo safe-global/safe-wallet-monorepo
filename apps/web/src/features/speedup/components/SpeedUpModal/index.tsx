@@ -144,6 +144,7 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
     dispatch,
     gasLimit,
     handleClose,
+    isGtfChain,
     onboard,
     pendingTx,
     safeAddress,
@@ -170,7 +171,7 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
 
           <Typography data-testid="speedup-summary">
             This will speed up the pending transaction by{' '}
-            <Typography variant="paragraph-bold" className="inline">
+            <Typography as="span" variant="paragraph-bold" className="inline">
               replacing
             </Typography>{' '}
             the original gas parameters with new ones.
@@ -204,7 +205,8 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
 
           <Tooltip>
             <TooltipTrigger render={<span className="inline-flex" />}>
-              <CheckWallet checkNetwork={!isDisabled}>
+              {/* Only the wallet that broadcast the tx can replace it by nonce, owner or not */}
+              <CheckWallet allowNonOwner checkNetwork={!isDisabled}>
                 {(isOk) => (
                   <Button disabled={!isOk || isDisabled} onClick={onSubmit}>
                     {isDisabled ? <Spinner className="size-5" /> : 'Confirm'}
