@@ -4,7 +4,7 @@ description: 'Run Cypress'
 
 inputs:
   spec:
-    description: 'A glob pattern for which tests to run'
+    description: 'Glob pattern(s) for the specs to run, separated by newlines or commas. Split across containers before running.'
     required: true
 
   group:
@@ -19,20 +19,20 @@ inputs:
     description: 'Cypress cloud tag key'
     required: false
 
-  parallel:
-    description: 'Enable Cypress Cloud parallel mode'
-    required: false
-    default: 'true'
-
   record:
     description: 'Record results to Cypress Cloud'
     required: false
     default: 'true'
 
   container-index:
-    description: 'Container index for parallel runs (used for artifact naming)'
+    description: 'Zero-based index of this container in the matrix (strategy.job-index)'
     required: false
     default: '0'
+
+  container-count:
+    description: 'Number of containers in the matrix (strategy.job-total)'
+    required: false
+    default: '1'
 
 runs:
   using: 'composite'
@@ -55,11 +55,50 @@ runs:
         # NEXT_PUBLIC_ flag that does survive the build.
         NEXT_PUBLIC_IS_TEST_E2E: 'true'
 
+    # Cypress Cloud's --parallel rejects a machine whose OS version differs from
+    # the first machine in the group, and GitHub-hosted runners in one matrix land
+    # on different image versions while a new runner image rolls out. Each
+    # container therefore runs a fixed slice of the sorted spec list and records
+    # as its own group instead.
+    - name: Select specs for this container
+      id: specs
+      shell: bash
+      working-directory: apps/web
+      env:
+        SPEC: ${{ inputs.spec }}
+        GROUP: ${{ inputs.group }}
+        CONTAINER_INDEX: ${{ inputs.container-index }}
+        CONTAINER_COUNT: ${{ inputs.container-count }}
+      run: |
+        set -euo pipefail
+        shopt -s nullglob
+        all=()
+        while IFS= read -r pattern; do
+          pattern="${pattern#"${pattern%%[![:space:]]*}"}"
+          pattern="${pattern%"${pattern##*[![:space:]]}"}"
+          [ -z "$pattern" ] && continue
+          for file in $pattern; do all+=("$file"); done
+        done < <(printf '%s\n' "$SPEC" | tr ',' '\n')
+        if [ "${#all[@]}" -eq 0 ]; then
+          echo "::error::No spec file matches: $SPEC"
+          exit 1
+        fi
+        mapfile -t all < <(printf '%s\n' "${all[@]}" | LC_ALL=C sort -u)
+        shard=()
+        for i in "${!all[@]}"; do
+          if (( i % CONTAINER_COUNT == CONTAINER_INDEX )); then shard+=("${all[$i]}"); fi
+        done
+        echo "Container $((CONTAINER_INDEX + 1))/$CONTAINER_COUNT runs ${#shard[@]} of ${#all[@]} specs"
+        [ "${#shard[@]}" -gt 0 ] && printf '  %s\n' "${shard[@]}"
+        echo "spec=$(IFS=,; echo "${shard[*]}")" >> "$GITHUB_OUTPUT"
+        if [ "$CONTAINER_COUNT" -gt 1 ]; then GROUP="$GROUP $((CONTAINER_INDEX + 1))/$CONTAINER_COUNT"; fi
+        echo "group=$GROUP" >> "$GITHUB_OUTPUT"
+
     - uses: cypress-io/github-action@f790eee7a50d9505912f50c2095510be7de06aa7 # v6.10.9
+      if: steps.specs.outputs.spec != ''
       with:
-        spec: ${{ inputs.spec }}
-        group: ${{ inputs.record == 'true' && inputs.group || '' }}
-        parallel: ${{ inputs.record == 'true' && inputs.parallel == 'true' }}
+        spec: ${{ steps.specs.outputs.spec }}
+        group: ${{ inputs.record == 'true' && steps.specs.outputs.group || '' }}
         browser: ${{ steps.setup-chrome.outputs.chrome-path }}
         record: ${{ inputs.record == 'true' }}
         tag: ${{ inputs.record == 'true' && inputs.tag || '' }}

@@ -90,6 +90,8 @@ jobs:
             cypress/e2e/happypath/*.cy.js
           group: 'Happy path on demand tests'
           tag: 'happypath'
+          container-index: ${{ strategy.job-index }}
+          container-count: ${{ strategy.job-total }}
 
       - name: Python setup
         if: always()

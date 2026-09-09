@@ -38,36 +38,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Deterministic spec sharding: each container always runs the same specs,
-      # even on retry, so Argos receives consistent screenshots per shard.
-      - name: Compute spec shard
-        id: specs
-        shell: bash
-        run: |
-          ALL_SPECS=($(ls apps/web/cypress/e2e/visual/*.cy.js | sort))
-          TOTAL=${#ALL_SPECS[@]}
-          SHARD_INDEX=$(( ${{ matrix.containers }} - 1 ))
-          SHARD_TOTAL=5
-
-          SHARD_SPECS=()
-          for i in "${!ALL_SPECS[@]}"; do
-            if [ $(( i % SHARD_TOTAL )) -eq $SHARD_INDEX ]; then
-              SPEC="${ALL_SPECS[$i]#apps/web/}"
-              SHARD_SPECS+=("$SPEC")
-            fi
-          done
-
-          SPEC_LIST=$(IFS=,; echo "${SHARD_SPECS[*]}")
-          echo "specs=$SPEC_LIST" >> "$GITHUB_OUTPUT"
-          echo "Shard ${{ matrix.containers }}: ${#SHARD_SPECS[@]} specs out of $TOTAL total"
-
       - uses: ./.github/actions/cypress
         with:
-          spec: ${{ steps.specs.outputs.specs }}
+          spec: cypress/e2e/visual/*.cy.js
           group: 'Argos E2E'
           tag: 'argos-e2e'
-          container-index: ${{ matrix.containers }}
-          parallel: 'false'
+          container-index: ${{ strategy.job-index }}
+          container-count: ${{ strategy.job-total }}
           record: 'false'
         env:
           BEAMER_DATA_E2E: ${{ secrets.BEAMER_DATA_E2E }}

@@ -5,6 +5,8 @@ on:
     paths:
       - apps/web/**
       - packages/**
+      - .github/actions/cypress/**
+      - .github/workflows/web-e2e-smoke.yml
   push:
     branches:
       - main
@@ -101,6 +103,8 @@ jobs:
           spec: cypress/e2e/smoke/*.cy.js
           group: 'Smoke tests'
           tag: 'smoke'
+          container-index: ${{ strategy.job-index }}
+          container-count: ${{ strategy.job-total }}
 
   notify:
     if: failure() && github.event_name == 'push'

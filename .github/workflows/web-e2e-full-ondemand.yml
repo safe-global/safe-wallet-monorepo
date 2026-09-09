@@ -189,6 +189,8 @@ jobs:
           spec: ${{ needs.plan.outputs.specs }}
           group: ${{ needs.plan.outputs.partial == 'true' && 'Partial regression on demand tests' || 'Full Regression on demand tests' }}
           tag: ${{ needs.plan.outputs.partial == 'true' && 'partial' || 'full_regression' }}
+          container-index: ${{ strategy.job-index }}
+          container-count: ${{ strategy.job-total }}
 
       - name: Python setup
         if: always() && needs.plan.outputs.partial != 'true'
