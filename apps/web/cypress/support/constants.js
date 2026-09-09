@@ -330,6 +330,7 @@ export const localStorageKeys = {
   SAFE_v2__visitedSafes: 'SAFE_v2__visitedSafes',
   SAFE_v2__auth: 'SAFE_v2__auth',
   SAFE_v2__lastWallet: 'SAFE_v2__lastWallet',
+  SAFE_v2__safeProAnnouncementSeen: 'SAFE_v2__safeProAnnouncementSeen',
 }
 
 export const sessionStorageKeys = {
