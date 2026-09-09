@@ -35,6 +35,8 @@ import { Typography } from '@/components/ui/typography'
 | heading 2                | `variant="h2"`                     |
 | heading 3                | `variant="h3"`                     |
 | heading 4                | `variant="h4"`                     |
+| paragraph/large          | `variant="paragraph-large"`        |
+| paragraph/large + bold   | `variant="paragraph-large-bold"`   |
 | paragraph/regular        | `variant="paragraph"`              |
 | paragraph/medium         | `variant="paragraph-medium"`       |
 | paragraph/bold           | `variant="paragraph-bold"`         |

@@ -11,8 +11,15 @@ jest.mock('@/hooks/useChains', () => ({
   useChain: () => undefined,
 }))
 
+const mockWriteScope: jest.Mock = jest.fn(() => ({ scope: 'local', canRename: true }))
+jest.mock('@/features/spaces/hooks/useAddressBookWriteScope', () => ({
+  useAddressBookWriteScope: (...args: unknown[]) => mockWriteScope(...args),
+}))
+
 jest.mock('@/components/common/AccountRow/SafeInfoDisplay', () => {
-  const Mock = () => <div data-testid="safe-info-display" />
+  const Mock = ({ onRename }: { onRename?: () => void }) => (
+    <div data-testid="safe-info-display">{onRename && <button data-testid="rename-btn" onClick={onRename} />}</div>
+  )
   Mock.displayName = 'SafeInfoDisplay'
   return { __esModule: true, default: Mock }
 })
@@ -51,6 +58,23 @@ const createItem = (chain: SafeItemDataChain): SafeItemData => ({
   owners: 2,
   balance: '0',
   chains: [chain],
+})
+
+describe('SafeItem rename gate', () => {
+  beforeEach(() => mockWriteScope.mockReturnValue({ scope: 'local', canRename: true }))
+
+  it('offers rename when the viewer may rename this Safe', () => {
+    render(<SafeItem {...createItem(makeChain())} onRename={jest.fn()} />)
+
+    expect(screen.getByTestId('rename-btn')).toBeInTheDocument()
+  })
+
+  it('withholds rename from a member looking at a workspace Safe', () => {
+    mockWriteScope.mockReturnValue({ scope: 'local', canRename: false })
+    render(<SafeItem {...createItem(makeChain())} onRename={jest.fn()} />)
+
+    expect(screen.queryByTestId('rename-btn')).not.toBeInTheDocument()
+  })
 })
 
 describe('SafeItem undeployed state', () => {

@@ -25,7 +25,7 @@ import { isAuthenticated } from '@/store/authSlice'
 import EditMemberDialog from './EditMemberDialog'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
-import PaginatedDataTable, { type DataTableColumn } from '../PaginatedDataTable'
+import PaginatedDataTable, { type DataTableColumn } from '@/components/common/PaginatedDataTable'
 import { getMemberTwoFactorStatus, MemberTwoFactorBadge } from '@/features/oidc-auth'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
@@ -175,6 +175,7 @@ const MembersList = ({ members, variant = 'active' }: { members: MemberDto[]; va
     header: '2FA',
     width: badgeWidth,
     minWidth: 130,
+    priority: 'secondary',
     cellTestId: 'table-cell-2fa',
     sortValue: (m) => getMemberTwoFactorStatus(m),
     cell: (member) => <MemberTwoFactorBadge member={member} />,
@@ -261,17 +262,25 @@ const MembersList = ({ members, variant = 'active' }: { members: MemberDto[]; va
     },
   ]
 
-  // Surfaces the date columns hidden on mobile (same pattern as the address book tables)
-  const renderRowDetail = (member: MemberDto) => (
-    <div className="flex flex-col gap-2 text-sm">
-      {DATE_COLUMNS[variant].map((column) => (
-        <div key={column.id} className="flex flex-wrap items-center gap-2">
-          <span className="text-muted-foreground w-24 shrink-0">{column.header}</span>
-          {column.cell(member, { isCompact: true })}
-        </div>
-      ))}
-    </div>
-  )
+  // Surfaces the columns hidden on mobile (same pattern as the address book tables). 2FA joins them
+  // only where the member has a status to show — declined invites have none.
+  const renderRowDetail = (member: MemberDto) => {
+    const detailColumns = [
+      ...(isTwoFactorEnabled && getMemberTwoFactorStatus(member) ? [twoFactorColumn] : []),
+      ...DATE_COLUMNS[variant],
+    ]
+
+    return (
+      <div className="flex flex-col gap-2 text-sm">
+        {detailColumns.map((column) => (
+          <div key={column.id} className="flex flex-wrap items-center gap-2">
+            <span className="text-muted-foreground w-24 shrink-0">{column.header}</span>
+            {column.cell(member, { isCompact: true })}
+          </div>
+        ))}
+      </div>
+    )
+  }
 
   return (
     <PaginatedDataTable

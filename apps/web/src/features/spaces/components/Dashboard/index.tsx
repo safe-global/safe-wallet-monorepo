@@ -16,6 +16,7 @@ import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import Track from '@/components/common/Track'
 import { trackEvent } from '@/services/analytics'
 import { MyAccountsFeature, useSpaceAccountsData } from '@/features/myAccounts'
+import { SafeProFeature, useIsSafeProEnabled, useSafeProAnnouncement } from '@/features/safe-pro-announcement'
 import { useLoadFeature } from '@/features/__core__'
 import AddAccountsChooser from '../AddAccountsChooser'
 import { useRouter } from 'next/router'
@@ -38,6 +39,7 @@ const PENDING_TX_DISPLAY_LIMIT = 4
 const SpaceDashboard = () => {
   const { AccountsWidget, $isReady } = useLoadFeature(MyAccountsFeature)
   const { PendingTxWidget } = useLoadFeature(SpacesFeature)
+  const { SafeProAnnouncementModal } = useLoadFeature(SafeProFeature)
   const { allSafes: safes, isLoading: isSafesLoading } = useSpaceSafes()
   const safeItems = flattenSafeItems(safes)
   const spaceId = useCurrentSpaceId()
@@ -55,6 +57,11 @@ const SpaceDashboard = () => {
   const isSetupDismissedForSpace = spaceId ? (dismissedSpaces[spaceId] ?? 0) > Date.now() : false
   useTrackSpace(safes, activeMembers)
   const router = useRouter()
+  const isSafeProEnabled = useIsSafeProEnabled()
+  // Not shown over an invite preview: there is no Workspace of theirs to move yet.
+  const { isOpen: isAnnouncementOpen, setIsOpen: setIsAnnouncementOpen } = useSafeProAnnouncement(
+    isSafeProEnabled && Boolean(spaceId) && !isInvited,
+  )
 
   useEffect(() => {
     if (!spaceId) return
@@ -112,6 +119,8 @@ const SpaceDashboard = () => {
 
   return (
     <>
+      {isSafeProEnabled && <SafeProAnnouncementModal open={isAnnouncementOpen} onOpenChange={setIsAnnouncementOpen} />}
+
       {isInvited && <PreviewInvite />}
 
       <>
