@@ -2,7 +2,7 @@
  * Utilities for detecting and handling specific transaction errors
  */
 import { BaseError } from 'viem'
-import { getKnownCustomError } from '@/utils/customErrorRegistry'
+import { getKnownCustomError, HYPERNATIVE_GUARD_SOURCE } from '@/utils/customErrorRegistry'
 import { isRevertError } from '@safe-global/utils/services/exceptions/contractErrors'
 
 /**
@@ -61,12 +61,25 @@ export const isGuardError = (error: Error): boolean => {
 }
 
 /**
+ * Detects a Hypernative guard revert — its `UnapprovedHash` custom error, thrown
+ * while a transaction is still awaiting approval in the owner's Hypernative account.
+ */
+export const isHypernativeGuardRevert = (error: Error): boolean => {
+  const code = extractGuardErrorCode(error)
+  return !!code && getKnownCustomError(code)?.source === HYPERNATIVE_GUARD_SOURCE
+}
+
+/**
  * User-facing message shown wherever a transient RPC rate-limit surfaces
  * (transaction notification toast, inline submit-error in ComboSubmit, etc.).
  * Kept as a single constant so the same condition reads consistently
  * regardless of which catch handler reached the UI first.
  */
 export const RATE_LIMIT_USER_MESSAGE = 'Network is busy. Please try again in a moment.'
+
+/** Shown wherever the Hypernative guard blocks execution: inline in the tx flow and in the toast. */
+export const HYPERNATIVE_APPROVAL_REQUIRED_MESSAGE =
+  'This transaction is awaiting approval in your Hypernative account.'
 
 /** JSON-RPC LimitExceeded. -32603 (Internal) is deliberately excluded: a real eth_call failure surfaces as -32603. */
 const RPC_LIMIT_EXCEEDED = -32005
