@@ -13,6 +13,11 @@
   background-color: color-mix(in srgb, var(--color-static-text-brand) 50%, white);
 }
 
+:global(.dark) .highlight::after {
+  bottom: -0px;
+  background-color: var(--color-static-text-brand);
+}
+
 :global(.dark) .arrow {
   color: var(--primary-foreground);
 }
