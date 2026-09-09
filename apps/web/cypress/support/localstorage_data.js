@@ -961,6 +961,10 @@ export const safeLabsTerms = {
   acceptedTerms: 'true',
 }
 
+export const safeProAnnouncement = {
+  seen: 'true',
+}
+
 export const pendingCfDeletes = {
   // Two ghost entries pointing at already-deleted CGW records. Used to reproduce
   // the "[CF Sync] Failed to flush pending CF delete" 404 spam regression.
