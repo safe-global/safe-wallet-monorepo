@@ -142,6 +142,7 @@ export const portfolioEndpoint = '**/v1/portfolio/**'
 export const positionsEndpoint = '**/v1/**/safes/**/positions/**'
 export const masterCopiesEndpoint = '**/v1/**/about/master-copies*'
 export const targetedMessagingEndpoint = '**/v1/targeted-messaging/**'
+export const delegatesEndpoint = '**/v2/chains/*/delegates*'
 
 export const indexStatusUrl = 'https://status.safe.global'
 
