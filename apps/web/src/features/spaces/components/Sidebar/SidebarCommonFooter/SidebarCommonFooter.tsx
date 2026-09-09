@@ -15,7 +15,7 @@ import { CookieAndTermType, hasConsentFor } from '@/store/cookiesAndTermsSlice'
 import { openCookieBanner } from '@/store/popupSlice'
 import { BEAMER_SELECTOR } from '@/services/beamer'
 import { ApiCtaSidebar } from '../ApiCtaSidebar'
-import { SafeProFeature, useIsSafeProEnabled } from '@/features/safe-pro-announcement'
+import { SafeProFeature, useIsSafeProEnabled, useSafeProSidebarBannerDismissed } from '@/features/safe-pro-announcement'
 import { useLoadFeature } from '@/features/__core__'
 import { SidebarIndexingStatus } from '../SidebarIndexingStatus'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
@@ -28,7 +28,6 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
 import { WorkspaceTwoFactorAwarenessCard, useTwoFactorAwarenessDismissed } from '@/features/oidc-auth'
 import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
-import { SidebarBannerCarousel } from '../SidebarBannerCarousel'
 
 export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?: boolean }): ReactElement => {
   const dispatch = useAppDispatch()
@@ -39,16 +38,19 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
   const { SafeProSidebarBanner } = useLoadFeature(SafeProFeature)
   const isSafeProEnabled = useIsSafeProEnabled()
   const { pathname } = useRouter()
+  const [isSafeProBannerDismissed, dismissSafeProBanner] = useSafeProSidebarBannerDismissed()
   // The Plans page is the banner's own link destination, so hide it there.
-  const showSafeProBanner = isSafeProEnabled && pathname !== AppRoutes.spaces.plans
+  const showSafeProBanner = isSafeProEnabled && !isSafeProBannerDismissed && pathname !== AppRoutes.spaces.plans
 
   const spaceId = useCurrentSpaceId()
   // Own flag, separate from the 2FA feature itself, so the card can be switched off on its own.
   const isTwoFactorCardEnabled = useHasFeature(FEATURES.TWO_FACTOR_AWARENESS_BANNER) === true
   const [isTwoFactorCardDismissed, dismissTwoFactorCard] = useTwoFactorAwarenessDismissed()
+  // One banner slot, Safe Pro first: the 2FA card only takes it once the Safe Pro banner is gone.
   // Continue needs a Workspace to link to, so the card waits until one is known. Like the Safe Pro
   // banner, it is hidden on its own destination.
   const showTwoFactorCard =
+    !showSafeProBanner &&
     isTwoFactorCardEnabled &&
     !isTwoFactorCardDismissed &&
     spaceId !== null &&
@@ -98,15 +100,19 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
       )}
 
       <SidebarMenu className="gap-0.5">
-        {(showTwoFactorCard || showSafeProBanner) && (
+        {showSafeProBanner && (
           <SidebarMenuItem className="group-data-[collapsible=icon]:hidden">
-            {/* Safe Pro leads: it is the bigger announcement, so it takes the first slide. */}
-            <SidebarBannerCarousel className="mb-2">
-              {showSafeProBanner && <SafeProSidebarBanner />}
-              {showTwoFactorCard && (
-                <WorkspaceTwoFactorAwarenessCard spaceId={spaceId ?? undefined} onDismiss={dismissTwoFactorCard} />
-              )}
-            </SidebarBannerCarousel>
+            <SafeProSidebarBanner className="mb-2" onDismiss={dismissSafeProBanner} />
+          </SidebarMenuItem>
+        )}
+
+        {showTwoFactorCard && (
+          <SidebarMenuItem className="group-data-[collapsible=icon]:hidden">
+            <WorkspaceTwoFactorAwarenessCard
+              className="mb-2"
+              spaceId={spaceId ?? undefined}
+              onDismiss={dismissTwoFactorCard}
+            />
           </SidebarMenuItem>
         )}
 

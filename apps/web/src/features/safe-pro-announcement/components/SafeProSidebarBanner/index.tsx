@@ -1,4 +1,4 @@
-import { ArrowUpRight } from 'lucide-react'
+import { ArrowUpRight, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
@@ -6,15 +6,27 @@ import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
 import ProWordmark from '@/public/images/safe-pro/pro-wordmark.svg'
 import css from './styles.module.css'
 
-const SafeProSidebarBanner = ({ className }: { className?: string }) => (
+const SafeProSidebarBanner = ({ className, onDismiss }: { className?: string; onDismiss?: () => void }) => (
   <div
     className={cn(
-      'flex w-full flex-col items-start gap-3 rounded-lg bg-muted bg-no-repeat p-4 shadow-lg',
+      'relative flex w-full flex-col items-start gap-3 rounded-lg bg-muted bg-no-repeat p-4 shadow-lg',
       css.banner,
       className,
     )}
     data-testid="safe-pro-sidebar-banner"
   >
+    {onDismiss && (
+      <button
+        type="button"
+        className="absolute top-3 right-3 text-muted-foreground hover:text-foreground"
+        onClick={onDismiss}
+        aria-label="Dismiss"
+        data-testid="safe-pro-sidebar-banner-dismiss"
+      >
+        <X className="size-4" />
+      </button>
+    )}
+
     <span className={cn('flex shrink-0 items-center rounded-sm px-2 py-1.5', css.proChip)}>
       <ProWordmark className="h-2 w-[21px] overflow-visible" />
     </span>

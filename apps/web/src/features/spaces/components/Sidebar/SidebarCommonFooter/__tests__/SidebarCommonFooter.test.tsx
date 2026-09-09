@@ -122,9 +122,12 @@ jest.mock('../../ApiCtaSidebar', () => ({
 }))
 
 let mockIsSafeProEnabled = false
+let mockIsSafeProBannerDismissed = false
+const mockDismissSafeProBanner = jest.fn()
 jest.mock('@/features/safe-pro-announcement', () => ({
   SafeProFeature: { name: 'safe-pro-announcement' },
   useIsSafeProEnabled: () => mockIsSafeProEnabled,
+  useSafeProSidebarBannerDismissed: () => [mockIsSafeProBannerDismissed, mockDismissSafeProBanner],
 }))
 
 let mockIsTwoFactorBannerEnabled = false
@@ -150,7 +153,11 @@ jest.mock('@/features/oidc-auth', () => ({
 
 jest.mock('@/features/__core__', () => ({
   useLoadFeature: () => ({
-    SafeProSidebarBanner: () => <div data-testid="safe-pro-sidebar-banner" />,
+    SafeProSidebarBanner: ({ onDismiss }: { onDismiss?: () => void }) => (
+      <div data-testid="safe-pro-sidebar-banner">
+        <button onClick={onDismiss}>Dismiss Safe Pro</button>
+      </div>
+    ),
   }),
 }))
 
@@ -175,6 +182,7 @@ describe('SidebarCommonFooter', () => {
     mockUseAppDispatch.mockReturnValue(jest.fn())
     mockUseDarkMode.mockReturnValue(false)
     mockIsSafeProEnabled = false
+    mockIsSafeProBannerDismissed = false
     mockIsTwoFactorBannerEnabled = false
     mockIsTwoFactorCardDismissed = false
     mockSpaceId = 'space-uuid'
@@ -245,35 +253,43 @@ describe('SidebarCommonFooter', () => {
     })
   })
 
-  describe('banner carousel', () => {
-    it('shows the Safe Pro banner first and the 2FA card on the next slide', () => {
+  describe('banner slot', () => {
+    it('shows only the Safe Pro banner while both are on', () => {
       mockIsTwoFactorBannerEnabled = true
       mockIsSafeProEnabled = true
       render(<SidebarCommonFooter />)
 
       expect(screen.getByTestId('safe-pro-sidebar-banner')).toBeInTheDocument()
       expect(screen.queryByTestId('workspace-2fa-awareness-card')).not.toBeInTheDocument()
+    })
 
-      fireEvent.click(screen.getByRole('button', { name: 'Next banner' }))
+    it('dismisses the Safe Pro banner through its persisted dismissal state', () => {
+      mockIsSafeProEnabled = true
+      render(<SidebarCommonFooter />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Dismiss Safe Pro' }))
+
+      expect(mockDismissSafeProBanner).toHaveBeenCalledTimes(1)
+    })
+
+    it('shows the 2FA card once the Safe Pro banner was dismissed', () => {
+      mockIsTwoFactorBannerEnabled = true
+      mockIsSafeProEnabled = true
+      mockIsSafeProBannerDismissed = true
+      render(<SidebarCommonFooter />)
 
       expect(screen.queryByTestId('safe-pro-sidebar-banner')).not.toBeInTheDocument()
       expect(screen.getByTestId('workspace-2fa-awareness-card')).toBeInTheDocument()
     })
 
-    it('shows the 2FA card alone when the Safe Pro banner is off', () => {
+    it('shows the 2FA card where the Safe Pro banner hides itself', () => {
       mockIsTwoFactorBannerEnabled = true
-      render(<SidebarCommonFooter />)
-
-      expect(screen.getByTestId('workspace-2fa-awareness-card')).toBeInTheDocument()
-      expect(screen.queryByRole('button', { name: 'Next banner' })).not.toBeInTheDocument()
-    })
-
-    it('shows no carousel controls when only one banner is on', () => {
       mockIsSafeProEnabled = true
+      mockPathname = '/spaces/plans'
       render(<SidebarCommonFooter />)
 
-      expect(screen.getByTestId('safe-pro-sidebar-banner')).toBeInTheDocument()
-      expect(screen.queryByRole('button', { name: 'Next banner' })).not.toBeInTheDocument()
+      expect(screen.queryByTestId('safe-pro-sidebar-banner')).not.toBeInTheDocument()
+      expect(screen.getByTestId('workspace-2fa-awareness-card')).toBeInTheDocument()
     })
   })
 
@@ -301,6 +317,14 @@ describe('SidebarCommonFooter', () => {
     })
 
     it('hides the banner when the flag is off', () => {
+      render(<SidebarCommonFooter />)
+
+      expect(screen.queryByTestId('safe-pro-sidebar-banner')).not.toBeInTheDocument()
+    })
+
+    it('hides the banner once it was dismissed', () => {
+      mockIsSafeProEnabled = true
+      mockIsSafeProBannerDismissed = true
       render(<SidebarCommonFooter />)
 
       expect(screen.queryByTestId('safe-pro-sidebar-banner')).not.toBeInTheDocument()
