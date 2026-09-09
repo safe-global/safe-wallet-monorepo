@@ -100,11 +100,12 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
       <SidebarMenu className="gap-0.5">
         {(showTwoFactorCard || showSafeProBanner) && (
           <SidebarMenuItem className="group-data-[collapsible=icon]:hidden">
+            {/* Safe Pro leads: it is the bigger announcement, so it takes the first slide. */}
             <SidebarBannerCarousel className="mb-2">
+              {showSafeProBanner && <SafeProSidebarBanner />}
               {showTwoFactorCard && (
                 <WorkspaceTwoFactorAwarenessCard spaceId={spaceId ?? undefined} onDismiss={dismissTwoFactorCard} />
               )}
-              {showSafeProBanner && <SafeProSidebarBanner />}
             </SidebarBannerCarousel>
           </SidebarMenuItem>
         )}

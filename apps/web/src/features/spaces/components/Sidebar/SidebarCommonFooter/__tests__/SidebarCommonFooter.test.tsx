@@ -246,18 +246,26 @@ describe('SidebarCommonFooter', () => {
   })
 
   describe('banner carousel', () => {
-    it('shows the 2FA card first and the Safe Pro banner on the next slide', () => {
+    it('shows the Safe Pro banner first and the 2FA card on the next slide', () => {
       mockIsTwoFactorBannerEnabled = true
       mockIsSafeProEnabled = true
       render(<SidebarCommonFooter />)
 
-      expect(screen.getByTestId('workspace-2fa-awareness-card')).toBeInTheDocument()
-      expect(screen.queryByTestId('safe-pro-sidebar-banner')).not.toBeInTheDocument()
+      expect(screen.getByTestId('safe-pro-sidebar-banner')).toBeInTheDocument()
+      expect(screen.queryByTestId('workspace-2fa-awareness-card')).not.toBeInTheDocument()
 
       fireEvent.click(screen.getByRole('button', { name: 'Next banner' }))
 
-      expect(screen.queryByTestId('workspace-2fa-awareness-card')).not.toBeInTheDocument()
-      expect(screen.getByTestId('safe-pro-sidebar-banner')).toBeInTheDocument()
+      expect(screen.queryByTestId('safe-pro-sidebar-banner')).not.toBeInTheDocument()
+      expect(screen.getByTestId('workspace-2fa-awareness-card')).toBeInTheDocument()
+    })
+
+    it('shows the 2FA card alone when the Safe Pro banner is off', () => {
+      mockIsTwoFactorBannerEnabled = true
+      render(<SidebarCommonFooter />)
+
+      expect(screen.getByTestId('workspace-2fa-awareness-card')).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Next banner' })).not.toBeInTheDocument()
     })
 
     it('shows no carousel controls when only one banner is on', () => {
