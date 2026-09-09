@@ -25,8 +25,10 @@ jest.mock('@/components/common/CheckWallet', () => ({
   default: ({ children }: { children: (ok: boolean) => unknown }) => children(true),
 }))
 
+const mockReplace = jest.fn()
+let mockQuery: Record<string, string> = {}
 jest.mock('next/router', () => ({
-  useRouter: () => ({ push: jest.fn() }),
+  useRouter: () => ({ push: jest.fn(), replace: mockReplace, pathname: '/spaces', query: mockQuery }),
 }))
 
 jest.mock('@/services/analytics', () => ({
@@ -133,6 +135,13 @@ function setupUseLoadFeature(txEntries: Array<{ safeAddress: string; txId: strin
     SafeProAnnouncementModal: () => <div data-testid="safe-pro-announcement-modal" />,
     SafeProLockedWorkspace: () => <div data-testid="safe-pro-locked-workspace" />,
     SafeProTrialActivatedModal: () => null,
+    SafeProSubscriptionActivatedModal: ({
+      open,
+      onOpenChange,
+    }: {
+      open: boolean
+      onOpenChange: (o: boolean) => void
+    }) => (open ? <button data-testid="checkout-success-modal" onClick={() => onOpenChange(false)} /> : null),
     $isReady: true,
   })
 }
@@ -413,5 +422,34 @@ describe('SpaceDashboard – locked Workspace (SAFE_PRO)', () => {
 
     expect(screen.queryByTestId('safe-pro-locked-workspace')).not.toBeInTheDocument()
     expect(screen.getByTestId(`pending-tx-row-${MOCK_TX_ID}`)).toBeInTheDocument()
+  })
+})
+
+describe('SpaceDashboard – checkout success', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    restoreDefaultMocks()
+    setupUseLoadFeature()
+  })
+
+  afterEach(() => {
+    mockQuery = {}
+  })
+
+  it('opens the subscription modal from ?checkout=success and drops the flag on close', () => {
+    mockQuery = { spaceId: MOCK_SPACE_ID, checkout: 'success' }
+
+    render(<SpaceDashboard />)
+
+    fireEvent.click(screen.getByTestId('checkout-success-modal'))
+    expect(mockReplace).toHaveBeenCalledWith({ pathname: '/spaces', query: { spaceId: MOCK_SPACE_ID } }, undefined, {
+      shallow: true,
+    })
+  })
+
+  it('stays closed without the flag', () => {
+    render(<SpaceDashboard />)
+
+    expect(screen.queryByTestId('checkout-success-modal')).not.toBeInTheDocument()
   })
 })
