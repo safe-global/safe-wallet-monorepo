@@ -12,6 +12,7 @@ Web-specific guidance for the Next.js app under `apps/web/`. For monorepo-wide r
 - Build UI from the shadcn/ui primitives in `@/components/ui/*` (Tailwind); MUI/Emotion are removed
 - **Never hand-roll a modal scrim.** Anything that dims the page behind it — a dialog, alert dialog, sheet, drawer, backdrop-ed select — renders `overlayVariants()` from [`@/components/ui/overlay`](src/components/ui/overlay.ts). Tint lives in the `--backdrop` token, the blur and the stacking layer live in that one cva. `overlay.test.tsx` fails if a surface drifts. Anchored surfaces (popovers, dropdowns, menus, tooltips) have no scrim by design.
 - **Prefer a component's variant/size prop over one-off `className` overrides.** See [Component variants over custom styling](#component-variants-over-custom-styling) below.
+- **Errors are logged imperatively at the catch site, never from render (component body, `useMemo`, `useEffect`).** See [Error logging](#error-logging) below.
 
 ## Component variants over custom styling
 
@@ -69,6 +70,51 @@ export { useMyHook } from './hooks/useMyHook'
 ```
 
 Full guide (folder structure, proxy stubs, `$error`, feature flags): [docs/feature-architecture.md](docs/feature-architecture.md).
+
+## Error logging
+
+**Report an error where it is caught, imperatively. Never from the render layer.** A component body, a
+`useMemo`, and a `useEffect` keyed on an error value are all re-entrant: RTK Query writes a fresh error
+object into store state on every rejection, `useAsync` constructs a new `Error` per run, a memo is a cache
+hint and not a guarantee of a single evaluation, StrictMode double-invokes, and a component rendered once
+per list item multiplies every report. Logging from there reports one failure once per attempt, per
+consumer, per render — so logging belongs on the imperative path that produced the failure.
+
+- **Async call** — log in `.catch` (or `try`/`catch`) and rethrow, so the error still reaches the UI:
+
+  ```ts
+  const [data, error, loading] = useAsync(() => {
+    return getTxHistory(chainId, address).catch((e) => {
+      logError(Errors._602, e)
+      throw e
+    })
+  }, [chainId, address])
+  ```
+
+- **Pure transform that can throw** — move it into a service function that catches, logs, and returns a
+  fallback (`undefined`, or the un-normalized input); widen the return type to say so. The hook or memo then
+  just calls it: `useMemo(() => (data ? transformMasterCopies(data) : undefined), [data])`. See
+  `src/services/contracts/masterCopies.ts` and `src/services/safe-messages/normalizeMessage.ts`.
+- **A failure every flow funnels through** — report at that one choke point, e.g. the `setSafeTxError`
+  setter in `components/tx-flow/SafeTxProvider.tsx`, not in each flow.
+- **An RTK Query rejection no hook owns** — use a listener in the slice, not a hook. Match with
+  `isRejectedWithValue` + the `endpointName`, and register the listener in the `listeners` array in
+  `src/store/index.ts` (see `safeInfoListener` in `src/store/safeInfoSlice.ts`).
+- **Never carry a failure out of a memo as a value to log later**, and never add per-call-site dedupe
+  machinery for it — `CodedException.log()` already throttles an identical `message` + context for 60s
+  (`LOG_THROTTLE_MS` in `src/services/exceptions/index.ts`), which is what makes a 15s poll or several
+  concurrent readers of one gas estimate report once.
+- **Filter expected failures at the catch site, before logging** — a reverted gas estimate
+  (`isExpectedEstimationError`), an RPC throttle (`isRateLimitError`), a counterfactual Safe's 404. An
+  expected answer is not a fault.
+- **Pass the caught value, not its message** — `CodedException` recovers the HTTP status and
+  hardware-wallet details from the error itself, and neither survives being flattened to a string.
+- **Tests** target the catch site, not a render. Unit-test the service function or the listener with
+  `logError` mocked (`jest.mock('@/services/exceptions', ...)`); when asserting against the real
+  implementation, call `__resetLogThrottleForTests()` in `beforeEach` so each test starts with an open
+  throttle window.
+
+RPC-specific context (`getRpcErrorContext`) rules: [docs/rpc-endpoint-attribution.md](docs/rpc-endpoint-attribution.md).
 
 ## Web Testing
 
