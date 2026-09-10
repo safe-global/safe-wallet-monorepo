@@ -5,8 +5,8 @@ import PaginatedDataTable, { type DataTableColumn } from './index'
 /**
  * PaginatedDataTable Component Stories
  *
- * The shared, design-system-bounded table that powers the Spaces Members and
- * Address Book tables. Consumers pass typed columns (alignment, emphasis, width,
+ * The shared, design-system-bounded table that powers the Safe address book and the
+ * Spaces Members and Address Book tables. Consumers pass typed columns (alignment, emphasis, width,
  * priority, sticky, sortValue) and rows; the table owns styling, sorting,
  * pagination, responsive column dropping, and the optional mobile detail row.
  *
@@ -53,7 +53,7 @@ const columns: DataTableColumn<Row>[] = [
 ]
 
 const meta: Meta<typeof PaginatedDataTable<Row>> = {
-  title: 'Features/Spaces/PaginatedDataTable',
+  title: 'Components/Common/PaginatedDataTable',
   component: PaginatedDataTable as typeof PaginatedDataTable<Row>,
   parameters: { layout: 'padded' },
   decorators: [(Story) => <TableCard>{Story()}</TableCard>],

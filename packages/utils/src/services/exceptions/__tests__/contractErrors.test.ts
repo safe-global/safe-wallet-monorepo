@@ -6,6 +6,7 @@ import CONTRACT_ERRORS, {
   getGs026Message,
   getGsCodeFromError,
   isGsCode,
+  isRevertError,
   type GsCode,
 } from '../contractErrors'
 
@@ -132,6 +133,41 @@ describe('contractErrors', () => {
       expect(getGsCodeFromError({ message: 'GS999 is not a real code' })).toBeUndefined()
       expect(getGsCodeFromError(undefined)).toBeUndefined()
       expect(getGsCodeFromError(null)).toBeUndefined()
+    })
+  })
+
+  describe('isRevertError', () => {
+    it.each([
+      { label: 'a GS reason', error: { reason: 'GS013', message: 'execution reverted' } },
+      { label: 'an ethers CALL_EXCEPTION', error: { code: 'CALL_EXCEPTION', message: 'call failed' } },
+      { label: 'ethers revert text', error: { message: 'execution reverted: "GS026"' } },
+      {
+        label: 'viem revert text',
+        error: { message: 'The contract function "execTransaction" reverted with the following reason:\nGS013' },
+      },
+    ])('treats $label as a revert', ({ error }) => {
+      expect(isRevertError(error)).toBe(true)
+    })
+
+    it.each([
+      { label: 'an HTTP failure', error: { message: 'HTTP request failed. Status: 500' } },
+      { label: 'a timeout', error: { code: 'TIMEOUT', message: 'timeout' } },
+      { label: 'a server error', error: { code: 'SERVER_ERROR', message: 'network error' } },
+      // The word "reverted" can appear in an infra failure's own wording. Reading
+      // that as a revert would tell the user their transaction will fail when in
+      // fact we never reached a node.
+      {
+        label: 'an infra failure that merely says "reverted"',
+        error: { message: 'request reverted with a connection timeout' },
+      },
+      { label: 'a relayer wrapping the word', error: { message: 'Relay reverted with status UNKNOWN; retrying' } },
+    ])('treats $label as NOT a revert', ({ error }) => {
+      expect(isRevertError(error)).toBe(false)
+    })
+
+    it('returns false for no error', () => {
+      expect(isRevertError(null)).toBe(false)
+      expect(isRevertError(undefined)).toBe(false)
     })
   })
 

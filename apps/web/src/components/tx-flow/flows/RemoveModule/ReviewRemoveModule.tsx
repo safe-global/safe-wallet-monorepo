@@ -1,6 +1,5 @@
 import { Typography } from '@/components/ui/typography'
 import { useCallback, useContext, useEffect, type PropsWithChildren } from 'react'
-import { Errors, logError } from '@/services/exceptions'
 import { trackEvent, SETTINGS_EVENTS } from '@/services/analytics'
 import { createRemoveModuleTx } from '@/services/tx/tx-sender'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
@@ -13,17 +12,11 @@ export const ReviewRemoveModule = ({
   onSubmit,
   children,
 }: PropsWithChildren<{ params: RemoveModuleFlowProps; onSubmit: () => void }>) => {
-  const { setSafeTx, safeTxError, setSafeTxError } = useContext(SafeTxContext)
+  const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
 
   useEffect(() => {
     createRemoveModuleTx(params.address).then(setSafeTx).catch(setSafeTxError)
   }, [params.address, setSafeTx, setSafeTxError])
-
-  useEffect(() => {
-    if (safeTxError) {
-      logError(Errors._806, safeTxError.message)
-    }
-  }, [safeTxError])
 
   const onFormSubmit = useCallback(() => {
     trackEvent(SETTINGS_EVENTS.MODULES.REMOVE_MODULE)

@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react'
 import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from '../useSafeInfo'
 import useEffectiveSafeParams from '../useEffectiveSafeParams'
-import { Errors, logError } from '@/services/exceptions'
+import { Errors } from '@/services/exceptions'
+import useLogError from '../useLogError'
 import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
 import { getTransactionQueue } from '@/services/transactions'
 
@@ -43,11 +44,7 @@ const useLoadTxQueue = (): AsyncResult<QueuedItemPage> => {
     }
   }, [])
 
-  // Log errors
-  useEffect(() => {
-    if (!error) return
-    logError(Errors._603, error.message)
-  }, [error])
+  useLogError(Errors._603, error?.message)
 
   return [data, error, loadingQueueItems]
 }
