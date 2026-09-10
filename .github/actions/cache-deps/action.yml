@@ -32,7 +32,7 @@ runs:
       with:
         path: |
           **/node_modules
-          ~/.cache/Cypress
+          /home/runner/.cache/Cypress
           ~/.yarn/berry/cache
           ${{ github.workspace }}/.yarn/install-state.gz
           ${{ github.workspace }}/packages/utils/src/types
@@ -51,7 +51,7 @@ runs:
       with:
         path: |
           **/node_modules
-          ~/.cache/Cypress
+          /home/runner/.cache/Cypress
           ~/.yarn/berry/cache
           ${{ github.workspace }}/.yarn/install-state.gz
           ${{ github.workspace }}/packages/utils/src/types
