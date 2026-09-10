@@ -24,14 +24,11 @@ import AggregatedBalance from './AggregatedBalances'
 import SafeWidget from '../SafeWidget'
 import SetupWidget from '../SetupWidget'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
-import { useHasFeature } from '@/hooks/useChains'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { Typography } from '@/components/ui/typography'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 import StartTrialModal from '../Plans/StartTrialModal'
-import { useSpacePlan } from '../../hooks/useSpacePlan'
-import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
-import { useCheckoutReturn } from '../../hooks/billing/useCheckoutReturn'
+import CheckoutReturnModals from '../Plans/CheckoutReturnModals'
+import { useWorkspaceLock } from '../../hooks/useWorkspaceLock'
 
 const EmptyStateAddAction = () => {
   return (
@@ -47,12 +44,7 @@ const PENDING_TX_DISPLAY_LIMIT = 4
 const SpaceDashboard = () => {
   const { AccountsWidget, $isReady } = useLoadFeature(MyAccountsFeature)
   const { PendingTxWidget } = useLoadFeature(SpacesFeature)
-  const {
-    SafeProAnnouncementModal,
-    SafeProLockedWorkspace,
-    SafeProSubscriptionActivatedModal,
-    SafeProTrialActivatedModal,
-  } = useLoadFeature(SafeProFeature)
+  const { SafeProAnnouncementModal, SafeProLockedWorkspace } = useLoadFeature(SafeProFeature)
   const { allSafes: safes, isLoading: isSafesLoading } = useSpaceSafes()
   const safeItems = flattenSafeItems(safes)
   const spaceId = useCurrentSpaceId()
@@ -72,23 +64,11 @@ const SpaceDashboard = () => {
   useTrackSpace(safes, activeMembers)
   const router = useRouter()
   const isSafeProEnabled = useIsSafeProEnabled()
-  const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
-  const { plan, status: planStatus, isLoading: isPlanLoading, refetch: refetchPlan } = useSpacePlan()
-  const { trialPeriodDays, isLoading: isOffersLoading } = useSpaceOffers()
-  const checkout = useCheckoutReturn()
-  const canLock = isSafePro && !isInvited && Boolean(spaceId)
-  const isResolvingPlan = canLock && (isPlanLoading || isOffersLoading)
-  // Never subscribed and a trial on offer: the Workspace is locked behind the trial takeover.
-  const isLocked = canLock && !isResolvingPlan && planStatus === 'none' && trialPeriodDays !== null
+  const { isLocked, isResolving: isResolvingPlan, trialPeriodDays } = useWorkspaceLock()
   const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !isLocked || !spaceId })
   const { isOpen: isAnnouncementOpen, setIsOpen: setIsAnnouncementOpen } = useSafeProAnnouncement(
     isSafeProEnabled && !isLocked && Boolean(spaceId) && !isInvited,
   )
-
-  const isCheckoutComplete = checkout.status === 'complete'
-  useEffect(() => {
-    if (isCheckoutComplete) refetchPlan()
-  }, [isCheckoutComplete]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!spaceId) return
@@ -144,22 +124,7 @@ const SpaceDashboard = () => {
 
   const showSetupWidget = safeItems.length === 0 && !isSafesLoading && !setupDismissed && !isSetupDismissedForSpace
 
-  const periodEndsAt = plan?.periodEndsAt ? Date.parse(plan.periodEndsAt) : 0
-  const checkoutModal =
-    isCheckoutComplete && checkout.subscription ? (
-      checkout.subscription.status === 'trialing' ? (
-        <SafeProTrialActivatedModal open onOpenChange={checkout.dismiss} trialEndsAt={periodEndsAt} />
-      ) : (
-        <SafeProSubscriptionActivatedModal
-          open
-          onOpenChange={checkout.dismiss}
-          planName={checkout.subscription.plan.name ?? 'Safe Pro'}
-          price={checkout.subscription.plan.currentPrice}
-          currency={checkout.subscription.plan.currency}
-          nextBillingAt={periodEndsAt}
-        />
-      )
-    ) : null
+  const checkoutModal = <CheckoutReturnModals />
 
   if (isResolvingPlan) return null
 
@@ -169,7 +134,11 @@ const SpaceDashboard = () => {
         <Typography variant="h2" className="mb-6 font-bold leading-[1] tracking-tight">
           {space?.name}
         </Typography>
-        <SafeProLockedWorkspace trialDays={trialPeriodDays} onStartTrial={() => setIsTrialOpen(true)} />
+        <SafeProLockedWorkspace
+          trialDays={trialPeriodDays}
+          onStartTrial={() => setIsTrialOpen(true)}
+          plansHref={{ pathname: AppRoutes.spaces.plans, query: { spaceId } }}
+        />
         <StartTrialModal open={isTrialOpen} onOpenChange={setIsTrialOpen} />
         {checkoutModal}
       </div>

@@ -90,14 +90,40 @@ describe('Plans', () => {
     expect(screen.getByRole('button', { name: 'Manage plan' })).toBeDisabled()
   })
 
-  it('shows placeholders and no plan chrome without a plan or meters', () => {
-    const tiers = buildPlanTiers({ paidPlans: [], subscription: undefined, seatsQuota: undefined })
-    render(<Plans plan={null} safeAccounts={null} sponsoredTxs={{ used: 0, quota: null }} tiers={tiers} />)
+  it('shows the locked state and lets the Workspace buy an offered plan when it has none', () => {
+    const onSubscribe = jest.fn()
+    const tiers = buildPlanTiers({ paidPlans: [STARTER], subscription: undefined, seatsQuota: undefined })
+    render(
+      <Plans
+        plan={null}
+        safeAccounts={null}
+        sponsoredTxs={{ used: 0, quota: null }}
+        tiers={tiers}
+        onSubscribe={onSubscribe}
+      />,
+    )
 
-    expect(screen.getByText('Free')).toBeInTheDocument()
+    expect(screen.getByText('No active plan')).toBeInTheDocument()
+    expect(screen.getByText(/Your Workspace is locked until you choose a plan/)).toBeInTheDocument()
     expect(screen.getByText('—')).toBeInTheDocument()
     expect(screen.getByText('Unlimited')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Add billing details|Manage plan/ })).not.toBeInTheDocument()
-    expect(screen.getByText('Enterprise')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Choose plan' }))
+    expect(onSubscribe).toHaveBeenCalledWith('pl_starter_m')
+    expect(screen.getByRole('button', { name: 'Coming soon' })).toBeInTheDocument()
+  })
+
+  it('keeps the Stripe portal reachable for a lapsed subscription and never sells while a plan is live', () => {
+    const onSubscribe = jest.fn()
+    const tiers = buildPlanTiers({ paidPlans: [STARTER], subscription: business('active'), seatsQuota: 10 })
+    const { rerender } = render(
+      <Plans plan={null} {...meters} tiers={tiers} canManage onManage={jest.fn()} onSubscribe={onSubscribe} />,
+    )
+    expect(screen.getByRole('button', { name: 'Manage plan' })).toBeInTheDocument()
+
+    rerender(<Plans plan={active} {...meters} tiers={tiers} onSubscribe={onSubscribe} />)
+    expect(screen.queryByRole('button', { name: 'Choose plan' })).not.toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: 'Coming soon' })).toHaveLength(3)
   })
 })

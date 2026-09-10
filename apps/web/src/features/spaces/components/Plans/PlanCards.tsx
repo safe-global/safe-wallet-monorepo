@@ -69,12 +69,17 @@ export const PlanCard = ({
   selected,
   onSelect,
   onOptionChange,
+  onSubscribe,
+  isSubscribing,
 }: {
   tier: PlanTier
   currentBadge?: string
   selected?: boolean
   onSelect?: () => void
   onOptionChange?: (option: PlanSeatOption) => void
+  /** Set when the Workspace has no plan: purchasable offers get a real CTA instead of "Coming soon". */
+  onSubscribe?: (paymentLinkId: string) => void
+  isSubscribing?: boolean
 }) => {
   const selectable = onSelect !== undefined
   const [option, setOption] = useState<PlanSeatOption | undefined>(tier.options[0])
@@ -143,18 +148,39 @@ export const PlanCard = ({
             </div>
           </div>
 
-          {!selectable && (
-            <Button variant="outline" size="lg" weight="semibold" className="w-full">
-              Coming soon
-            </Button>
-          )}
+          {!selectable &&
+            (onSubscribe && option?.paymentLinkId ? (
+              <Button
+                size="lg"
+                weight="semibold"
+                className="w-full"
+                disabled={isSubscribing}
+                onClick={() => onSubscribe(option.paymentLinkId as string)}
+              >
+                Choose plan
+              </Button>
+            ) : (
+              <Button variant="outline" size="lg" weight="semibold" className="w-full">
+                Coming soon
+              </Button>
+            ))}
         </div>
       </CardContent>
     </Card>
   )
 }
 
-export default function PlanCards({ tiers, currentBadge }: { tiers: PlanTier[]; currentBadge: string }) {
+export default function PlanCards({
+  tiers,
+  currentBadge,
+  onSubscribe,
+  isSubscribing,
+}: {
+  tiers: PlanTier[]
+  currentBadge: string
+  onSubscribe?: (paymentLinkId: string) => void
+  isSubscribing?: boolean
+}) {
   const [cycle, setCycle] = useState<Cycle>('month')
   const discount = yearlyDiscount(tiers)
   const visible = tiers.filter((tier) => tier.isCurrent || tier.billingCycle === null || tier.billingCycle === cycle)
@@ -186,7 +212,13 @@ export default function PlanCards({ tiers, currentBadge }: { tiers: PlanTier[]; 
       <CardContent>
         <div className="flex flex-col gap-4 md:flex-row">
           {visible.map((tier) => (
-            <PlanCard key={tier.id} tier={tier} currentBadge={currentBadge} />
+            <PlanCard
+              key={tier.id}
+              tier={tier}
+              currentBadge={currentBadge}
+              onSubscribe={onSubscribe}
+              isSubscribing={isSubscribing}
+            />
           ))}
         </div>
       </CardContent>

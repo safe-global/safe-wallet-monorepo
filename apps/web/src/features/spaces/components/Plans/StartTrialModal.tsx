@@ -27,13 +27,16 @@ export default function StartTrialModal({
   open,
   onOpenChange,
   spaceId,
+  returnPathname,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   spaceId?: string | null
+  /** Where Stripe sends the user back; defaults to the Workspace Home. */
+  returnPathname?: string
 }) {
   const { trialPlans, trialPeriodDays, isLoading } = useSpaceOffers(spaceId)
-  const { startCheckout, isRedirecting, isError } = useStartCheckout(spaceId)
+  const { startCheckout, isRedirecting, isError } = useStartCheckout(spaceId, returnPathname)
   const tiers = useMemo(() => trialTiers(trialPlans), [trialPlans])
 
   return (

@@ -73,6 +73,7 @@ export default function PlanStatusCard({
   tierName,
   onManage,
   isManaging,
+  canManage = plan !== null,
 }: {
   plan: PlanSummary | null
   safeAccounts: Meter | null
@@ -80,6 +81,8 @@ export default function PlanStatusCard({
   tierName?: string
   onManage?: () => void
   isManaging?: boolean
+  /** A lapsed subscription still has a Stripe portal to manage, even without a live plan. */
+  canManage?: boolean
 }) {
   const isTrial = plan?.status === 'trialing'
   const endDate = plan?.periodEndsAt ? formatDate(new Date(plan.periodEndsAt).getTime()) : null
@@ -90,23 +93,23 @@ export default function PlanStatusCard({
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
-              <Typography variant="h4">{plan?.name ?? 'Free'}</Typography>
+              <Typography variant="h4">{plan?.name ?? 'No active plan'}</Typography>
               {plan && (
                 <Badge variant="brand" size="status" shape="status">
                   {isTrial ? 'Free trial' : 'Active'}
                 </Badge>
               )}
             </div>
-            {plan && (
-              <Typography className="flex items-center gap-1">
-                {isTrial
+            <Typography className="flex items-center gap-1">
+              {plan === null
+                ? 'Your Workspace is locked until you choose a plan. Your Safe accounts remain available outside the Workspace.'
+                : isTrial
                   ? `Your free trial is active until ${endDate ?? 'the end of the period'}. Add billing details before then to keep your Workspace.`
                   : 'Safe accounts above the limit stay available outside the Workspace.'}
-                {isTrial && <InfoTip text={TRIAL_DISCLAIMER} />}
-              </Typography>
-            )}
+              {isTrial && <InfoTip text={TRIAL_DISCLAIMER} />}
+            </Typography>
           </div>
-          {plan && (
+          {canManage && (
             <Button size="lg" onClick={onManage} disabled={isManaging}>
               {isTrial ? 'Add billing details' : 'Manage plan'}
             </Button>

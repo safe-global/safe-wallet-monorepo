@@ -16,6 +16,7 @@ import { buildPlanTiers } from './planTiers'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
+import { useStartCheckout } from '../../hooks/billing/useStartCheckout'
 
 const reminderSeen = localItem<boolean>('safeProBillingReminderSeen')
 
@@ -33,6 +34,7 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
   const { plan, seats, subscription, isTrialing, isLoading: isPlanLoading } = useSpacePlan(spaceId)
   const { paidPlans, isLoading: isOffersLoading } = useSpaceOffers(spaceId)
   const { openPortal, isRedirecting } = useBillingPortal(spaceId)
+  const { startCheckout, isRedirecting: isCheckingOut } = useStartCheckout(spaceId)
   const [isReminderOpen, setIsReminderOpen] = useState(false)
 
   const tiers = useMemo(
@@ -74,6 +76,9 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
             tiers={tiers}
             onManage={() => void openPortal()}
             isManaging={isRedirecting}
+            canManage={subscription !== undefined}
+            onSubscribe={(paymentLinkId) => void startCheckout(paymentLinkId)}
+            isSubscribing={isCheckingOut}
           />
         )}
 

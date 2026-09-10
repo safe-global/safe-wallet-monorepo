@@ -4,10 +4,14 @@ import StartTrialModal from '../StartTrialModal'
 
 const mockUseSpaceOffers = jest.fn()
 const mockStartCheckout = jest.fn()
+const mockUseStartCheckout = jest.fn()
 let mockCheckout = { isRedirecting: false, isError: false }
 jest.mock('../../../hooks/billing/useSpaceOffers', () => ({ useSpaceOffers: () => mockUseSpaceOffers() }))
 jest.mock('../../../hooks/billing/useStartCheckout', () => ({
-  useStartCheckout: () => ({ startCheckout: mockStartCheckout, ...mockCheckout }),
+  useStartCheckout: (...args: unknown[]) => {
+    mockUseStartCheckout(...args)
+    return { startCheckout: mockStartCheckout, ...mockCheckout }
+  },
 }))
 
 const trial = (planName: string, paymentLinkId: string, seats: number, price: number): PlanGroup => ({
@@ -34,6 +38,12 @@ describe('StartTrialModal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Start free trial' }))
 
     expect(mockStartCheckout).toHaveBeenCalledWith('pl_starter')
+  })
+
+  it('hands the space and the return path to the checkout', () => {
+    render(<StartTrialModal open onOpenChange={jest.fn()} spaceId="space-1" returnPathname="/welcome/create-space" />)
+
+    expect(mockUseStartCheckout).toHaveBeenCalledWith('space-1', '/welcome/create-space')
   })
 
   it('shows a skeleton while the offers load', () => {

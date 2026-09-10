@@ -13,12 +13,14 @@ const SafeProTrialActivatedModal = ({
   onOpenChange,
   trialEndsAt,
   ctaHref,
+  ctaLabel = 'Go to Workspace',
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   trialEndsAt: number
   /** Where "Go to Workspace" leads; without it the CTA just closes. */
   ctaHref?: LinkProps['href']
+  ctaLabel?: string
 }) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent size="sm" surface="card" padding="none">
@@ -41,7 +43,7 @@ const SafeProTrialActivatedModal = ({
             render={ctaHref ? <NextLink href={ctaHref} /> : undefined}
             onClick={() => onOpenChange(false)}
           >
-            Go to Workspace
+            {ctaLabel}
           </Button>
         </div>
       </div>

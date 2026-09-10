@@ -9,6 +9,9 @@ export default function Plans({
   tiers,
   onManage,
   isManaging,
+  canManage,
+  onSubscribe,
+  isSubscribing,
 }: {
   plan: PlanSummary | null
   safeAccounts: Meter | null
@@ -16,6 +19,9 @@ export default function Plans({
   tiers: PlanTier[]
   onManage?: () => void
   isManaging?: boolean
+  canManage?: boolean
+  onSubscribe?: (paymentLinkId: string) => void
+  isSubscribing?: boolean
 }) {
   return (
     <div className="flex flex-col gap-6">
@@ -26,8 +32,14 @@ export default function Plans({
         tierName={plan?.name}
         onManage={onManage}
         isManaging={isManaging}
+        canManage={canManage}
       />
-      <PlanCards tiers={tiers} currentBadge={plan?.status === 'trialing' ? 'Free trial' : 'Active'} />
+      <PlanCards
+        tiers={tiers}
+        currentBadge={plan?.status === 'trialing' ? 'Free trial' : 'Active'}
+        onSubscribe={plan === null ? onSubscribe : undefined}
+        isSubscribing={isSubscribing}
+      />
     </div>
   )
 }
