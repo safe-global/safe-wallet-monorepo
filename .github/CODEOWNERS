@@ -1,0 +1,19 @@
+# Code owners for safe-wallet-monorepo
+
+*                   @safe-global/safe-web
+
+# Shared by web and mobile. Both teams are requested; either approval satisfies the gate.
+/packages/          @safe-global/safe-web @safe-global/safe-mobile
+
+# Mobile app and its native plugins
+/apps/mobile/       @safe-global/safe-mobile
+/expo-plugins/      @safe-global/safe-mobile
+
+# CI, deploy, dependency resolution and anything that executes on dev machines or in builds
+/.github/           @safe-global/infrasec @compojoom @PooyaRaki
+/package.json       @safe-global/infrasec @compojoom @PooyaRaki
+/Dockerfile         @safe-global/infrasec @compojoom @PooyaRaki
+/.devcontainer/     @safe-global/infrasec @compojoom @PooyaRaki
+/.yarnrc.yml        @safe-global/infrasec @compojoom @PooyaRaki
+/.yarn/             @safe-global/infrasec @compojoom @PooyaRaki
+/.husky/            @safe-global/infrasec @compojoom @PooyaRaki
