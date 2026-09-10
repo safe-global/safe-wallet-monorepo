@@ -1,11 +1,9 @@
-import ExternalStore from '@safe-global/utils/services/ExternalStore'
+import useLocalStorage from '@/services/local-storage/useLocalStorage'
 
-// Dismissal is held in memory only: the card is a short-lived notice, so closing it needs to last
-// until the page is reloaded and no longer. Nothing is written to storage or to the backend.
-export const twoFactorAwarenessDismissedStore = new ExternalStore<boolean>(false)
+export const TWO_FACTOR_AWARENESS_DISMISSED_KEY = 'twoFactorAwarenessDismissed'
 
 export function useTwoFactorAwarenessDismissed(): [boolean, () => void] {
-  const isDismissed = twoFactorAwarenessDismissedStore.useStore() === true
+  const [isDismissed = false, setIsDismissed] = useLocalStorage<boolean>(TWO_FACTOR_AWARENESS_DISMISSED_KEY)
 
-  return [isDismissed, () => twoFactorAwarenessDismissedStore.setStore(true)]
+  return [isDismissed, () => setIsDismissed(true)]
 }
