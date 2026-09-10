@@ -14,7 +14,6 @@ import AddManually, { type AddManuallyFormValues } from './AddManually'
 import { getSafeId } from '../SelectSafesOnboarding/utils/safeIds'
 import { applySafeSelectionToggle, getSelectedLeafKeys } from '../SelectSafesOnboarding/utils/selection'
 import ExternalLink from '@/components/common/ExternalLink'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
 import { useSimilarityClusters } from '@/features/address-poisoning'
 import { getChainIdsParam, useCurrentSpaceId, useIsAdmin, useSpaceSafes } from '@/features/spaces'
@@ -48,7 +47,8 @@ import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { showNotification } from '@/store/notificationsSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import { cn } from '@/utils/cn'
-import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/constants'
+import SelectedCounter, { safeLimitTooltip } from '../SelectedCounter'
+import { useSpaceSafeLimit } from '../../hooks/useSpaceSafeLimit'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
 import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
 
@@ -185,8 +185,9 @@ const AddAccounts = ({
   // never re-render even though the form value (and the footer counter) changed.
   const selectedKeys = getSelectedLeafKeys(selectedSafes || {})
 
-  // Total checked safes (workspace safes are pre-checked and count toward the per-workspace cap).
-  const isAtLimit = selectedKeys.size >= SAFE_ACCOUNTS_LIMIT
+  // Total checked safes (workspace safes are pre-checked and count toward the plan's cap).
+  const { limit } = useSpaceSafeLimit(spaceId)
+  const isAtLimit = limit !== null && selectedKeys.size >= limit
 
   // Safes already in the workspace stay visible but locked: shown checked, dimmed, and not toggleable.
   const spaceSafeKeys = useMemo(
@@ -449,22 +450,12 @@ const AddAccounts = ({
 
                   {!isListEmpty && (
                     <div className="mb-3 flex shrink-0 items-center gap-3">
-                      <div
-                        className={cn(
-                          'flex shrink-0 items-center gap-1.5 whitespace-nowrap text-sm',
-                          isAtLimit ? 'font-semibold text-yellow-700' : 'text-muted-foreground',
-                        )}
-                      >
-                        {selectedKeys.size} of {SAFE_ACCOUNTS_LIMIT} selected
-                        <Tooltip>
-                          <TooltipTrigger render={<span className="inline-flex cursor-help" />}>
-                            <Info className="size-4" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            You can add up to {SAFE_ACCOUNTS_LIMIT} Safe accounts per workspace
-                          </TooltipContent>
-                        </Tooltip>
-                      </div>
+                      <SelectedCounter
+                        count={selectedKeys.size}
+                        limit={limit}
+                        isAtLimit={isAtLimit}
+                        tooltip={safeLimitTooltip(limit)}
+                      />
                       <SearchInput
                         className="flex-1"
                         placeholder="by name, address or network"

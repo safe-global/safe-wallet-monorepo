@@ -8,11 +8,13 @@ const mockUseHasFeature = jest.fn()
 const mockDispatch = jest.fn()
 const mockReplace = jest.fn()
 const mockIsUnauthorized = jest.fn()
+const mockUseWorkspaceLock = jest.fn()
+let mockPathname = '/spaces/security'
 let mockIsAuthenticated = true
 let mockIsOidcLoginPending = false
 
 jest.mock('next/router', () => ({
-  useRouter: () => ({ replace: mockReplace, pathname: '/spaces/security' }),
+  useRouter: () => ({ replace: mockReplace, pathname: mockPathname }),
 }))
 
 jest.mock('@/store', () => ({
@@ -69,11 +71,15 @@ jest.mock('@/features/spaces/utils', () => ({
 }))
 
 jest.mock('@/config/routes', () => ({
-  AppRoutes: { welcome: { spaces: '/welcome/spaces' } },
+  AppRoutes: { welcome: { spaces: '/welcome/spaces' }, spaces: { index: '/spaces', plans: '/spaces/plans' } },
 }))
 
 jest.mock('@/features/spaces', () => ({
   MemberStatus: { ACTIVE: 'ACTIVE' },
+}))
+
+jest.mock('../../hooks/useWorkspaceLock', () => ({
+  useWorkspaceLock: (spaceId: string) => mockUseWorkspaceLock(spaceId),
 }))
 
 describe('AuthState', () => {
@@ -81,6 +87,8 @@ describe('AuthState', () => {
     jest.clearAllMocks()
     mockIsAuthenticated = true
     mockIsOidcLoginPending = false
+    mockPathname = '/spaces/security'
+    mockUseWorkspaceLock.mockReturnValue({ isLocked: false })
     mockIsUnauthorized.mockReturnValue(false)
     mockUseHasFeature.mockReturnValue(true)
     mockUseSpacesGetOneV1Query.mockReturnValue({
@@ -174,6 +182,41 @@ describe('AuthState', () => {
     expect(screen.getByTestId('children')).toBeInTheDocument()
     expect(mockReplace).not.toHaveBeenCalled()
   })
+
+  it('bounces a locked Workspace back to Home from any other Workspace route', () => {
+    mockUseWorkspaceLock.mockReturnValue({ isLocked: true })
+
+    render(
+      <AuthState spaceId="11111111-1111-1111-1111-111111111111">
+        <div data-testid="children" />
+      </AuthState>,
+    )
+
+    expect(mockUseWorkspaceLock).toHaveBeenCalledWith('11111111-1111-1111-1111-111111111111')
+    expect(mockReplace).toHaveBeenCalledWith({
+      pathname: '/spaces',
+      query: { spaceId: '11111111-1111-1111-1111-111111111111' },
+    })
+    expect(screen.queryByTestId('children')).not.toBeInTheDocument()
+    expect(screen.getByTestId('loading')).toBeInTheDocument()
+  })
+
+  it.each(['/spaces', '/spaces/plans'])(
+    'keeps a locked Workspace on %s, where it can start or buy a plan',
+    (pathname) => {
+      mockPathname = pathname
+      mockUseWorkspaceLock.mockReturnValue({ isLocked: true })
+
+      render(
+        <AuthState spaceId="11111111-1111-1111-1111-111111111111">
+          <div data-testid="children" />
+        </AuthState>,
+      )
+
+      expect(screen.getByTestId('children')).toBeInTheDocument()
+      expect(mockReplace).not.toHaveBeenCalled()
+    },
+  )
 
   it('redirects to the spaces overview when the space query is unauthorized', () => {
     mockIsUnauthorized.mockReturnValue(true)

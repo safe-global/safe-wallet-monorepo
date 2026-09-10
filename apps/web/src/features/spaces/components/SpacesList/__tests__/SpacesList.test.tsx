@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import SpacesList from '../index'
+import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
@@ -59,14 +60,44 @@ jest.mock('@/features/safe-pro-announcement', () => ({
 }))
 
 jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
-jest.mock('../../../hooks/useSpacePlan', () => ({ useSpacePlan: () => ({ tierName: undefined, isPaidActive: false }) }))
 
-jest.mock('../../Plans/TrialFlow', () => ({
+const mockCreateTrialWorkspace = jest.fn()
+const mockTrialReset = jest.fn()
+let mockTrial: { spaceId?: string; isCreating: boolean; error?: string } = { spaceId: undefined, isCreating: false }
+jest.mock('../../../hooks/useCreateTrialWorkspace', () => ({
+  useCreateTrialWorkspace: () => ({
+    ...mockTrial,
+    createTrialWorkspace: mockCreateTrialWorkspace,
+    reset: mockTrialReset,
+  }),
+}))
+jest.mock('@/components/ui/ShadcnProvider', () => ({
+  ...jest.requireActual('@/components/ui/ShadcnProvider'),
+  ShadcnProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}))
+jest.mock('../../Plans/StartTrialModal', () => ({
   __esModule: true,
-  default: ({ trialDays, open }: { trialDays: number; open: boolean }) => (
-    <div data-testid="trial-flow" data-days={trialDays} data-open={open} />
+  default: ({
+    spaceId,
+    open,
+    returnPathname,
+    onOpenChange,
+  }: {
+    spaceId: string
+    open: boolean
+    returnPathname?: string
+    onOpenChange: (open: boolean) => void
+  }) => (
+    <button
+      data-testid="start-trial-modal"
+      data-space={spaceId}
+      data-open={open}
+      data-return={returnPathname}
+      onClick={() => onOpenChange(false)}
+    />
   ),
 }))
+jest.mock('../../../hooks/useSpacePlan', () => ({ useSpacePlan: () => ({ tierName: undefined, isPaidActive: false }) }))
 
 jest.mock('@/features/spaces', () => ({
   MemberStatus: { ACTIVE: 'ACTIVE', INVITED: 'INVITED', DECLINED: 'DECLINED' },
@@ -136,30 +167,59 @@ describe('SpacesList — auth/expiry state rendering', () => {
     mockUseHasFeature.mockReturnValue(false)
   })
 
-  it('opens the 30-day trial dialog from Create workspace once SAFE_PRO is on', () => {
-    mockUseHasFeature.mockReturnValue(true)
-    mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
-    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+  describe('first Workspace through the Safe Pro trial (SAFE_PRO)', () => {
+    beforeEach(() => {
+      mockTrial = { spaceId: undefined, isCreating: false }
+      mockUseHasFeature.mockReturnValue(true)
+      mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
+      mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+    })
 
-    render(<SpacesList />)
+    it('creates the placeholder Workspace from the CTA instead of navigating to the onboarding', () => {
+      render(<SpacesList />)
 
-    const flow = screen.getByTestId('trial-flow')
-    expect(flow).toHaveAttribute('data-days', '30')
-    expect(flow).toHaveAttribute('data-open', 'false')
+      const cta = screen.getByRole('button', { name: /create your first workspace/i })
+      expect(cta).not.toHaveAttribute('href')
+      fireEvent.click(cta)
 
-    const cta = screen.getByRole('button', { name: /create your first workspace/i })
-    expect(cta).not.toHaveAttribute('href')
-    fireEvent.click(cta)
+      expect(mockCreateTrialWorkspace).toHaveBeenCalled()
+      expect(screen.queryByTestId('start-trial-modal')).not.toBeInTheDocument()
+    })
 
-    expect(screen.getByTestId('trial-flow')).toHaveAttribute('data-open', 'true')
-  })
+    it('opens the trial modal for the new Workspace, returning to the onboarding after Stripe', () => {
+      mockTrial = { spaceId: 'space-new', isCreating: false }
 
-  it('does not mount the trial flow while SAFE_PRO is off', () => {
-    mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
+      render(<SpacesList />)
 
-    render(<SpacesList />)
+      const modal = screen.getByTestId('start-trial-modal')
+      expect(modal).toHaveAttribute('data-space', 'space-new')
+      expect(modal).toHaveAttribute('data-open', 'true')
+      expect(modal).toHaveAttribute('data-return', AppRoutes.welcome.createSpace)
 
-    expect(screen.queryByTestId('trial-flow')).not.toBeInTheDocument()
+      fireEvent.click(modal)
+      expect(mockTrialReset).toHaveBeenCalled()
+    })
+
+    it('disables the CTA while creating and surfaces a creation error', () => {
+      mockTrial = { spaceId: undefined, isCreating: true, error: 'Could not create the workspace' }
+
+      render(<SpacesList />)
+
+      expect(screen.getByTestId('create-space-button')).toHaveAttribute('aria-disabled', 'true')
+      expect(screen.getByText('Could not create the workspace')).toBeInTheDocument()
+    })
+
+    it('keeps the plain onboarding link while SAFE_PRO is off', () => {
+      mockUseHasFeature.mockReturnValue(false)
+
+      render(<SpacesList />)
+
+      expect(screen.getByRole('link', { name: /create your first workspace/i })).toHaveAttribute(
+        'href',
+        AppRoutes.welcome.createSpace,
+      )
+      expect(screen.queryByTestId('start-trial-modal')).not.toBeInTheDocument()
+    })
   })
 
   describe('SAFE_PRO_ANNOUNCEMENT banner gating', () => {

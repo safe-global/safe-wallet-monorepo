@@ -12,7 +12,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Typography } from '@/components/ui/typography'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
 import { cn } from '@/utils/cn'
-import type { PlanTier } from './types'
+import type { PlanSeatOption, PlanTier } from './types'
 
 type Cycle = 'month' | 'year'
 
@@ -20,28 +20,47 @@ const formatPrice = (price: number, currency: string) =>
   new Intl.NumberFormat('en', { style: 'currency', currency, maximumFractionDigits: 0 }).format(price)
 
 export const yearlyDiscount = (tiers: PlanTier[]): number | null => {
-  for (const { billingCycle, price, originalPrice } of tiers) {
-    if (billingCycle === 'year' && price !== null && originalPrice) return Math.round((1 - price / originalPrice) * 100)
+  for (const tier of tiers) {
+    if (tier.billingCycle !== 'year') continue
+    for (const { price, originalPrice } of tier.options) {
+      if (price !== null && originalPrice) return Math.round((1 - price / originalPrice) * 100)
+    }
   }
   return null
 }
 
-const Seats = ({ options, onChange }: { options: string[]; onChange?: (value: string) => void }) =>
+const optionKey = (option: PlanSeatOption) => option.paymentLinkId ?? option.label
+
+const Seats = ({
+  options,
+  value,
+  onChange,
+}: {
+  options: PlanSeatOption[]
+  value: PlanSeatOption
+  onChange: (option: PlanSeatOption) => void
+}) =>
   options.length > 1 ? (
-    <Select defaultValue={options[0]} onValueChange={(value) => value && onChange?.(value)}>
+    <Select
+      value={optionKey(value)}
+      onValueChange={(key) => {
+        const next = options.find((option) => optionKey(option) === key)
+        if (next) onChange(next)
+      }}
+    >
       <SelectTrigger className="w-full">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
         {options.map((option) => (
-          <SelectItem key={option} value={option}>
-            {option}
+          <SelectItem key={optionKey(option)} value={optionKey(option)}>
+            {option.label}
           </SelectItem>
         ))}
       </SelectContent>
     </Select>
   ) : (
-    <Input readOnly value={options[0]} />
+    <Input readOnly value={value.label} />
   )
 
 export const PlanCard = ({
@@ -49,15 +68,27 @@ export const PlanCard = ({
   currentBadge,
   selected,
   onSelect,
-  onSeatsChange,
+  onOptionChange,
+  onSubscribe,
+  isSubscribing,
 }: {
   tier: PlanTier
   currentBadge?: string
   selected?: boolean
   onSelect?: () => void
-  onSeatsChange?: (seats: string) => void
+  onOptionChange?: (option: PlanSeatOption) => void
+  /** Purchasable offers get a real CTA; static tiers (Enterprise) keep "Coming soon". */
+  onSubscribe?: (paymentLinkId: string) => void
+  isSubscribing?: boolean
 }) => {
   const selectable = onSelect !== undefined
+  const [option, setOption] = useState<PlanSeatOption | undefined>(tier.options[0])
+  const price = option?.price ?? null
+
+  const changeOption = (next: PlanSeatOption) => {
+    setOption(next)
+    onOptionChange?.(next)
+  }
 
   return (
     <Card
@@ -86,10 +117,10 @@ export const PlanCard = ({
 
               <div className="flex items-baseline gap-1">
                 <Typography variant={selectable ? 'h4' : 'h2'} className={cn(selectable && 'line-through')}>
-                  {tier.price === null ? 'Custom' : formatPrice(tier.price, tier.currency)}
+                  {price === null ? 'Custom' : formatPrice(price, tier.currency)}
                 </Typography>
                 <Typography color="muted">
-                  {tier.price === null ? 'Annual term' : tier.billingCycle === 'year' ? '/yr' : '/mo'}
+                  {price === null ? 'Annual term' : tier.billingCycle === 'year' ? '/yr' : '/mo'}
                 </Typography>
                 {selectable && (
                   <Typography variant="paragraph-large-bold" color="success">
@@ -100,7 +131,7 @@ export const PlanCard = ({
             </div>
 
             <div className="flex flex-col gap-4">
-              <Seats options={tier.seats} onChange={onSeatsChange} />
+              {option && <Seats options={tier.options} value={option} onChange={changeOption} />}
 
               <List>
                 {tier.features.map((feature) => (
@@ -117,21 +148,42 @@ export const PlanCard = ({
             </div>
           </div>
 
-          {!selectable && (
-            <Button variant="outline" size="lg" weight="semibold" className="w-full">
-              Coming soon
-            </Button>
-          )}
+          {!selectable &&
+            (onSubscribe && option?.paymentLinkId ? (
+              <Button
+                size="lg"
+                weight="semibold"
+                className="w-full"
+                disabled={isSubscribing}
+                onClick={() => onSubscribe(option.paymentLinkId as string)}
+              >
+                Choose plan
+              </Button>
+            ) : (
+              <Button variant="outline" size="lg" weight="semibold" className="w-full">
+                Coming soon
+              </Button>
+            ))}
         </div>
       </CardContent>
     </Card>
   )
 }
 
-export default function PlanCards({ tiers, currentBadge }: { tiers: PlanTier[]; currentBadge: string }) {
+export default function PlanCards({
+  tiers,
+  currentBadge,
+  onSubscribe,
+  isSubscribing,
+}: {
+  tiers: PlanTier[]
+  currentBadge: string
+  onSubscribe?: (paymentLinkId: string) => void
+  isSubscribing?: boolean
+}) {
   const [cycle, setCycle] = useState<Cycle>('month')
   const discount = yearlyDiscount(tiers)
-  const visible = tiers.filter((tier) => tier.billingCycle === null || tier.billingCycle === cycle)
+  const visible = tiers.filter((tier) => tier.isCurrent || tier.billingCycle === null || tier.billingCycle === cycle)
 
   return (
     <Card radius="xl">
@@ -160,7 +212,13 @@ export default function PlanCards({ tiers, currentBadge }: { tiers: PlanTier[]; 
       <CardContent>
         <div className="flex flex-col gap-4 md:flex-row">
           {visible.map((tier) => (
-            <PlanCard key={tier.id} tier={tier} currentBadge={currentBadge} />
+            <PlanCard
+              key={tier.id}
+              tier={tier}
+              currentBadge={currentBadge}
+              onSubscribe={onSubscribe}
+              isSubscribing={isSubscribing}
+            />
           ))}
         </div>
       </CardContent>

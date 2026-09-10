@@ -34,6 +34,20 @@ describe('useStartCheckout', () => {
     expect(assign).toHaveBeenCalledWith('https://checkout.stripe.com/cs_1')
   })
 
+  it('returns to the onboarding when a flow asks for it', async () => {
+    mockBillingSpaceId.mockReturnValue(SPACE_ID)
+    mockTrigger.mockResolvedValue({ data: { sessionId: 'cs_1', url: 'https://checkout.stripe.com/cs_1' } })
+    const { result } = renderHook(() => useStartCheckout(undefined, '/welcome/create-space'))
+
+    await act(() => result.current.startCheckout('pl_business_10'))
+
+    expect(mockTrigger).toHaveBeenCalledWith(
+      expect.objectContaining({
+        returnUrl: expect.stringContaining(`/welcome/create-space?spaceId=${SPACE_ID}&sessionId=`),
+      }),
+    )
+  })
+
   it('does nothing while the billing queries are gated, and stays put when the request fails', async () => {
     mockBillingSpaceId.mockReturnValue(null)
     const gated = renderHook(() => useStartCheckout())

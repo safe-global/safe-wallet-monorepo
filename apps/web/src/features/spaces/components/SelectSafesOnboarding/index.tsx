@@ -9,11 +9,11 @@ import SimilarityConfirmDialog from '@/components/common/TrustedSafesModal/Simil
 import { OnboardingLayout, StepCounter, SafeAppMockup, deriveSidePanelAccountsFromSpace } from '../OnboardingLayout'
 import useWallet from '@/hooks/wallets/useWallet'
 import { type AllSafeItems } from '@/hooks/safes'
-import { SAFE_ACCOUNTS_LIMIT } from '../../constants'
 import { useSpaceSafes } from '../../hooks/useSpaceSafes'
 import { useOnboardingStepCount } from '../../hooks/useOnboardingStepCount'
 import OnboardingSafesList from './components/OnboardingSafesList'
-import SelectedCounter from './components/SelectedCounter'
+import SelectedCounter, { safeLimitTooltip } from '../SelectedCounter'
+import { useSpaceSafeLimit } from '../../hooks/useSpaceSafeLimit'
 import ConnectWalletHint from '../ConnectWalletHint'
 import useOnboardingNavigation from './hooks/useOnboardingNavigation'
 import useOnboardingSafes from './hooks/useOnboardingSafes'
@@ -50,8 +50,9 @@ const SelectSafesOnboarding = (): ReactElement => {
   )
 
   const { control, setValue } = formMethods
+  const { limit } = useSpaceSafeLimit(spaceId)
   const { selectedKeys, isAtLimit, handleToggle, pendingConfirmation, confirmPending, cancelPending } =
-    useOnboardingSelection({ items: allSafes, control, setValue, flaggedAddresses })
+    useOnboardingSelection({ items: allSafes, control, setValue, flaggedAddresses, limit })
 
   const { data: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !spaceId })
   const { allSafes: spaceSafes } = useSpaceSafes()
@@ -102,9 +103,9 @@ const SelectSafesOnboarding = (): ReactElement => {
           <div className="flex shrink-0 items-center gap-3">
             <SelectedCounter
               count={selectedKeys.size}
-              limit={SAFE_ACCOUNTS_LIMIT}
+              limit={limit}
               isAtLimit={isAtLimit}
-              tooltip={`You can add up to ${SAFE_ACCOUNTS_LIMIT} Safe accounts per Workspace`}
+              tooltip={safeLimitTooltip(limit)}
             />
             <SearchInput
               className="flex-1"

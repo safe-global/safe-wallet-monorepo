@@ -8,6 +8,7 @@ import type { CombinedState } from '@reduxjs/toolkit/query'
 export const CREDENTIAL_ROUTES = [
   /\/v1\/users/,
   /\/v1\/spaces/,
+  /\/v1\/billing/,
   /\/v1\/auth/,
   /\/v2\/register\/notifications$/,
   /\/v2\/chains\/[^/]+\/notifications\/devices/,

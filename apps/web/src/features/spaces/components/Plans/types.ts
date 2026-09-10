@@ -1,20 +1,23 @@
 export type Meter = { used: number; quota: number | null }
 
+export type PlanSeatOption = {
+  /** Null for the current plan and static tiers, which have no purchasable link. */
+  paymentLinkId: string | null
+  label: string
+  price: number | null
+  /** Undiscounted reference, e.g. twelve monthly payments for a yearly option. */
+  originalPrice: number | null
+}
+
 export type PlanTier = {
   id: string
   name: string
-  price: number | null
-  originalPrice: number | null
-  currency: 'usd' | 'eur'
+  currency: string
   billingCycle: 'month' | 'year' | null
-  seats: string[]
+  options: PlanSeatOption[]
   features: string[]
   isCurrent?: boolean
+  trialPeriodDays?: number | null
 }
 
-export type PlansData = {
-  plan: { name: string; status: 'trialing' | 'active'; periodEndsAt: string | null } | null
-  safeAccounts: Meter
-  sponsoredTxs: Meter
-  tiers: PlanTier[]
-}
+export type PlanSummary = { name: string; status: 'trialing' | 'active'; periodEndsAt: string | null }

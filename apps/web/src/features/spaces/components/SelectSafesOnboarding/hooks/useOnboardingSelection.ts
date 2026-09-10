@@ -13,8 +13,8 @@ interface Args {
   setValue: UseFormSetValue<AddAccountsFormValues>
   /** Lowercased addresses flagged as look-alikes — selecting one requires confirmation. */
   flaggedAddresses: Set<string>
-  /** Max selectable leaves; defaults to the per-Workspace cap. */
-  limit?: number
+  /** Max selectable leaves; defaults to the per-Workspace cap, null means unlimited. */
+  limit?: number | null
 }
 
 /**
@@ -29,7 +29,7 @@ const useOnboardingSelection = ({ items, control, setValue, flaggedAddresses, li
   const selectedKeys = useMemo(() => getSelectedLeafKeys(selectedSafes), [selectedSafes])
 
   // Total checked leaves across both sections count toward the per-workspace cap.
-  const isAtLimit = selectedKeys.size >= limit
+  const isAtLimit = limit !== null && selectedKeys.size >= limit
 
   const applyToggle = (line: AccountLine, nextChecked: boolean) =>
     applySafeSelectionToggle(setValue, items, selectedSafes, line, nextChecked)

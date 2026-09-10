@@ -1,4 +1,7 @@
-import type { PlanTier, PlansData } from './types'
+import type { Meter, PlanTier } from './types'
+
+// TODO(safe-pro): plan copy lives here until the catalog exposes features (Plan.features / product.marketingFeatures).
+export const PLAN_ORDER = ['Starter', 'Business', 'Enterprise']
 
 const SHARED_FEATURES = [
   'Unlimited Workspace members',
@@ -8,84 +11,38 @@ const SHARED_FEATURES = [
   'MFA Authentication',
 ]
 
-const tier = (overrides: Partial<PlanTier> & Pick<PlanTier, 'id' | 'name'>): PlanTier => ({
-  price: null,
-  originalPrice: null,
+export const PLAN_FEATURES: Record<string, string[]> = {
+  Starter: ['10 sponsored transactions / month', ...SHARED_FEATURES, 'Builder API access'],
+  Business: [
+    '50 sponsored transactions / month',
+    ...SHARED_FEATURES,
+    'Growth API access',
+    'Pay fees from Safe accounts',
+    'Policy engine',
+  ],
+  Enterprise: [
+    'Unlimited sponsored transactions',
+    ...SHARED_FEATURES,
+    'Scale API access',
+    'Pay fees from Safe accounts',
+    'Policy engine',
+  ],
+}
+
+export const PLAN_TRIAL_HIGHLIGHTS: Record<string, string[]> = {
+  Starter: ['10 sponsored transactions / month', 'Advanced threat analysis'],
+  Business: ['50 sponsored transactions / month', 'Advanced threat analysis'],
+}
+
+// TODO(safe-pro): Enterprise has no payment link; static card until sales flow is defined.
+export const ENTERPRISE_TIER: PlanTier = {
+  id: 'enterprise',
+  name: 'Enterprise',
   currency: 'eur',
   billingCycle: null,
-  seats: ['10 Safe accounts'],
-  features: SHARED_FEATURES,
-  ...overrides,
-})
-
-const STARTER_FEATURES = ['10 sponsored transactions / month', ...SHARED_FEATURES, 'Builder API access']
-const BUSINESS_FEATURES = [
-  '50 sponsored transactions / month',
-  ...SHARED_FEATURES,
-  'Growth API access',
-  'Pay fees from Safe accounts',
-  'Policy engine',
-]
-const ENTERPRISE_FEATURES = [
-  'Unlimited sponsored transactions',
-  ...SHARED_FEATURES,
-  'Scale API access',
-  'Pay fees from Safe accounts',
-  'Policy engine',
-]
-
-export const TIERS: PlanTier[] = [
-  tier({
-    id: 'starter-month',
-    name: 'Starter',
-    price: 149,
-    billingCycle: 'month',
-    seats: ['2 Safe accounts'],
-    features: STARTER_FEATURES,
-  }),
-  tier({
-    id: 'starter-year',
-    name: 'Starter',
-    price: 1608,
-    originalPrice: 1788,
-    billingCycle: 'year',
-    seats: ['2 Safe accounts'],
-    features: STARTER_FEATURES,
-  }),
-  tier({
-    id: 'business-month',
-    name: 'Business',
-    price: 499,
-    billingCycle: 'month',
-    seats: ['10 Safe accounts', '20 Safe accounts', '50 Safe accounts'],
-    features: BUSINESS_FEATURES,
-    isCurrent: true,
-  }),
-  tier({
-    id: 'business-year',
-    name: 'Business',
-    price: 5389,
-    originalPrice: 5988,
-    billingCycle: 'year',
-    seats: ['10 Safe accounts', '20 Safe accounts', '50 Safe accounts'],
-    features: BUSINESS_FEATURES,
-    isCurrent: true,
-  }),
-  tier({ id: 'enterprise', name: 'Enterprise', seats: ['20+ Safe accounts'], features: ENTERPRISE_FEATURES }),
-]
-
-export const RECOMMENDED_TRIAL_TIER = 'business-month'
-
-export const TRIAL_TIERS: PlanTier[] = TIERS.filter((tier) => tier.billingCycle === 'month').map((tier) => ({
-  ...tier,
-  isCurrent: false,
-  features: [tier.features[0], 'Advanced threat analysis'],
-}))
-
-// ponytail: static fixture until the entitlement hooks land (PLA-1828)
-export const TRIAL_PLANS: PlansData = {
-  plan: { name: 'Safe Pro', status: 'trialing', periodEndsAt: '2026-12-06T00:00:00Z' },
-  safeAccounts: { used: 6, quota: 10 },
-  sponsoredTxs: { used: 11, quota: 15 },
-  tiers: TIERS,
+  options: [{ paymentLinkId: null, label: '20+ Safe accounts', price: null, originalPrice: null }],
+  features: PLAN_FEATURES.Enterprise,
 }
+
+// TODO(safe-pro): no sponsored-transactions entitlement yet; placeholder until the CGW exposes it.
+export const SPONSORED_TXS_PLACEHOLDER: Meter = { used: 11, quota: 15 }

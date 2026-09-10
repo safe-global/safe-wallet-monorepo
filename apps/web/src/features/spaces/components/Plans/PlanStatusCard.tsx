@@ -8,11 +8,11 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Typography } from '@/components/ui/typography'
 import { formatDate } from '@safe-global/utils/utils/date'
 import { TRIAL_DISCLAIMER } from '@/features/safe-pro-announcement'
-import type { Meter, PlansData } from './types'
+import type { Meter, PlanSummary } from './types'
 
 export const remaining = ({ used, quota }: Meter): number | null => (quota === null ? null : Math.max(quota - used, 0))
 
-export const seatsTooltip = (tierName: string | undefined, quota: number | null) =>
+export const seatsTooltip = (tierName: string | undefined, quota: number | null | undefined) =>
   `${tierName ?? 'Your plan'} includes ${quota ?? 'unlimited'} Safe accounts in the Workspace. Safe accounts you create outside the Workspace remain available in My accounts.`
 
 const InfoTip = ({ text }: { text: string }) => (
@@ -33,9 +33,9 @@ const UsageMeter = ({
   icon: ReactNode
   label: string
   tooltip: string
-  meter: Meter
+  meter: Meter | null
 }) => {
-  const left = remaining(meter)
+  const left = meter && remaining(meter)
 
   return (
     <Card variant="muted" size="sm" className="flex-1">
@@ -48,7 +48,9 @@ const UsageMeter = ({
           <InfoTip text={tooltip} />
         </div>
         <Typography variant="paragraph-bold" className="whitespace-nowrap">
-          {left === null ? (
+          {meter === null ? (
+            '—'
+          ) : left === null ? (
             'Unlimited'
           ) : (
             <>
@@ -69,7 +71,19 @@ export default function PlanStatusCard({
   safeAccounts,
   sponsoredTxs,
   tierName,
-}: Omit<PlansData, 'tiers'> & { tierName?: string }) {
+  onManage,
+  isManaging,
+  canManage = plan !== null,
+}: {
+  plan: PlanSummary | null
+  safeAccounts: Meter | null
+  sponsoredTxs: Meter | null
+  tierName?: string
+  onManage?: () => void
+  isManaging?: boolean
+  /** A lapsed subscription still has a Stripe portal to manage, even without a live plan. */
+  canManage?: boolean
+}) {
   const isTrial = plan?.status === 'trialing'
   const endDate = plan?.periodEndsAt ? formatDate(new Date(plan.periodEndsAt).getTime()) : null
 
@@ -79,23 +93,27 @@ export default function PlanStatusCard({
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
-              <Typography variant="h4">{plan?.name ?? 'Free'}</Typography>
+              <Typography variant="h4">{plan?.name ?? 'No active plan'}</Typography>
               {plan && (
                 <Badge variant="brand" size="status" shape="status">
                   {isTrial ? 'Free trial' : 'Active'}
                 </Badge>
               )}
             </div>
-            {endDate && (
-              <Typography className="flex items-center gap-1">
-                {isTrial
-                  ? `Your free trial is active until ${endDate}. Add billing details before then to keep your Workspace.`
-                  : `Your plan renews on ${endDate}.`}
-                {isTrial && <InfoTip text={TRIAL_DISCLAIMER} />}
-              </Typography>
-            )}
+            <Typography className="flex items-center gap-1">
+              {plan === null
+                ? 'Your Workspace is locked until you choose a plan. Your Safe accounts remain available outside the Workspace.'
+                : isTrial
+                  ? `Your free trial is active until ${endDate ?? 'the end of the period'}. Add billing details before then to keep your Workspace.`
+                  : 'Safe accounts above the limit stay available outside the Workspace.'}
+              {isTrial && <InfoTip text={TRIAL_DISCLAIMER} />}
+            </Typography>
           </div>
-          {isTrial && <Button size="lg">Add billing details</Button>}
+          {canManage && (
+            <Button size="lg" onClick={onManage} disabled={isManaging}>
+              {isTrial ? 'Add billing details' : 'Manage plan'}
+            </Button>
+          )}
         </div>
       </CardContent>
 
@@ -104,7 +122,7 @@ export default function PlanStatusCard({
           <UsageMeter
             icon={<WalletCards className="size-5" strokeWidth={1.5} />}
             label="Safe accounts available"
-            tooltip={seatsTooltip(tierName, safeAccounts.quota)}
+            tooltip={seatsTooltip(tierName, safeAccounts?.quota)}
             meter={safeAccounts}
           />
           <UsageMeter

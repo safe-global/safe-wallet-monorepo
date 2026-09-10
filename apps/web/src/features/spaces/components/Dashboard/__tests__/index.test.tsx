@@ -83,6 +83,18 @@ jest.mock('@/features/safe-pro-announcement', () => ({
 
 jest.mock('@/services/local-storage/useLocalStorage', () => jest.fn(() => [{}, jest.fn()]))
 
+const mockUseSpacePlan = jest.fn()
+const mockUseWorkspaceLock = jest.fn()
+const mockUseCheckoutReturn = jest.fn()
+jest.mock('../../../hooks/useSpacePlan', () => ({ useSpacePlan: () => mockUseSpacePlan() }))
+jest.mock('../../../hooks/useWorkspaceLock', () => ({ useWorkspaceLock: () => mockUseWorkspaceLock() }))
+jest.mock('../../../hooks/billing/useCheckoutReturn', () => ({ useCheckoutReturn: () => mockUseCheckoutReturn() }))
+jest.mock('../../Plans/CheckoutReturnModals', () => ({ __esModule: true, default: () => null }))
+jest.mock('../../Plans/StartTrialModal', () => ({
+  __esModule: true,
+  default: ({ open }: { open: boolean }) => <div data-testid="start-trial-modal" data-open={open} />,
+}))
+
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpacesGetOneV1Query: () => ({ currentData: { name: 'Acme Inc' } }),
 }))
@@ -133,15 +145,38 @@ function setupUseLoadFeature(txEntries: Array<{ safeAddress: string; txId: strin
     PendingTxWidget: makeMockPendingTxWidget(txEntries),
     AccountsWidget: () => null,
     SafeProAnnouncementModal: () => <div data-testid="safe-pro-announcement-modal" />,
-    SafeProLockedWorkspace: () => <div data-testid="safe-pro-locked-workspace" />,
-    SafeProTrialActivatedModal: () => null,
+    SafeProLockedWorkspace: ({
+      trialDays,
+      onStartTrial,
+      plansHref,
+    }: {
+      trialDays: number | null
+      onStartTrial: () => void
+      plansHref: { pathname: string; query: { spaceId: string } }
+    }) => (
+      <button
+        data-testid="safe-pro-locked-workspace"
+        data-days={trialDays}
+        data-plans={`${plansHref.pathname}?spaceId=${plansHref.query.spaceId}`}
+        onClick={onStartTrial}
+      />
+    ),
+    SafeProTrialActivatedModal: ({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) =>
+      open ? <button data-testid="trial-activated-modal" onClick={() => onOpenChange(false)} /> : null,
     SafeProSubscriptionActivatedModal: ({
       open,
       onOpenChange,
+      planName,
     }: {
       open: boolean
       onOpenChange: (o: boolean) => void
-    }) => (open ? <button data-testid="checkout-success-modal" onClick={() => onOpenChange(false)} /> : null),
+      planName: string
+    }) =>
+      open ? (
+        <button data-testid="subscription-activated-modal" onClick={() => onOpenChange(false)}>
+          {planName}
+        </button>
+      ) : null,
     $isReady: true,
   })
 }
@@ -172,6 +207,9 @@ const restoreDefaultMocks = () => {
   mockUseIsSafeProEnabled.mockReturnValue(false)
   mockUseHasFeature.mockReturnValue(false)
   mockUseSafeProAnnouncement.mockReturnValue({ isOpen: false, setIsOpen: jest.fn() })
+  mockUseSpacePlan.mockReturnValue({ plan: null, status: 'none', isLoading: false, refetch: jest.fn() })
+  mockUseWorkspaceLock.mockReturnValue({ isLocked: false, isResolving: false, trialPeriodDays: null })
+  mockUseCheckoutReturn.mockReturnValue({ status: 'idle', subscription: undefined, dismiss: jest.fn() })
 }
 
 // ---- Tests ----
@@ -401,55 +439,47 @@ describe('SpaceDashboard – locked Workspace (SAFE_PRO)', () => {
     jest.clearAllMocks()
     restoreDefaultMocks()
     setupUseLoadFeature([{ safeAddress: MOCK_SAFE_ADDRESS, txId: MOCK_TX_ID }])
-    mockUseHasFeature.mockReturnValue(true)
     mockUseIsSafeProEnabled.mockReturnValue(true)
+    mockUseWorkspaceLock.mockReturnValue({ isLocked: true, isResolving: false, trialPeriodDays: 60 })
   })
 
-  it('replaces the dashboard with the locked card and silences the announcement', () => {
+  it('replaces the dashboard with the trial takeover and silences the announcement', () => {
     render(<SpaceDashboard />)
 
-    expect(screen.getByTestId('safe-pro-locked-workspace')).toBeInTheDocument()
+    expect(screen.getByTestId('safe-pro-locked-workspace')).toHaveAttribute('data-days', '60')
+    expect(screen.getByTestId('safe-pro-locked-workspace')).toHaveAttribute(
+      'data-plans',
+      `/spaces/plans?spaceId=${MOCK_SPACE_ID}`,
+    )
     expect(screen.getByText('Acme Inc')).toBeInTheDocument()
     expect(screen.queryByTestId(`pending-tx-row-${MOCK_TX_ID}`)).not.toBeInTheDocument()
     expect(screen.queryByTestId('safe-pro-announcement-modal')).not.toBeInTheDocument()
     expect(mockUseSafeProAnnouncement).toHaveBeenCalledWith(false)
   })
 
-  it('keeps the invite preview unlocked', () => {
-    ;(useIsInvited as jest.Mock).mockReturnValue(true)
+  it('opens the trial modal from the locked card', () => {
+    render(<SpaceDashboard />)
+
+    expect(screen.getByTestId('start-trial-modal')).toHaveAttribute('data-open', 'false')
+    fireEvent.click(screen.getByTestId('safe-pro-locked-workspace'))
+    expect(screen.getByTestId('start-trial-modal')).toHaveAttribute('data-open', 'true')
+  })
+
+  it('keeps the dashboard and the announcement when the Workspace is not locked', () => {
+    mockUseWorkspaceLock.mockReturnValue({ isLocked: false, isResolving: false, trialPeriodDays: null })
 
     render(<SpaceDashboard />)
 
     expect(screen.queryByTestId('safe-pro-locked-workspace')).not.toBeInTheDocument()
     expect(screen.getByTestId(`pending-tx-row-${MOCK_TX_ID}`)).toBeInTheDocument()
-  })
-})
-
-describe('SpaceDashboard – checkout success', () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
-    restoreDefaultMocks()
-    setupUseLoadFeature()
+    expect(mockUseSafeProAnnouncement).toHaveBeenCalledWith(true)
   })
 
-  afterEach(() => {
-    mockQuery = {}
-  })
+  it('renders nothing while the lock is still resolving, so the dashboard never flashes before it', () => {
+    mockUseWorkspaceLock.mockReturnValue({ isLocked: false, isResolving: true, trialPeriodDays: null })
 
-  it('opens the subscription modal from ?checkout=success and drops the flag on close', () => {
-    mockQuery = { spaceId: MOCK_SPACE_ID, checkout: 'success' }
+    const { container } = render(<SpaceDashboard />)
 
-    render(<SpaceDashboard />)
-
-    fireEvent.click(screen.getByTestId('checkout-success-modal'))
-    expect(mockReplace).toHaveBeenCalledWith({ pathname: '/spaces', query: { spaceId: MOCK_SPACE_ID } }, undefined, {
-      shallow: true,
-    })
-  })
-
-  it('stays closed without the flag', () => {
-    render(<SpaceDashboard />)
-
-    expect(screen.queryByTestId('checkout-success-modal')).not.toBeInTheDocument()
+    expect(container).toBeEmptyDOMElement()
   })
 })

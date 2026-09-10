@@ -13,6 +13,7 @@ import SpaceContextMenu from '../SpaceCard/SpaceContextMenu'
 import { AdminOnlyWorkspaceTooltip } from '../AdminOnlyWorkspaceTooltip'
 import { isUserActiveAdmin } from '@/features/spaces/utils'
 import ProChip from '@/public/images/safe-pro/pro-chip.svg'
+import { useSpacePlan } from '../../hooks/useSpacePlan'
 
 const MEMBER_NO_EDIT_MESSAGE = 'You need admin access to edit.'
 
@@ -26,14 +27,14 @@ const SpaceRow = ({
   space,
   currentUserId,
   showDivider = false,
-  planName,
 }: {
   space: GetSpaceResponse
   currentUserId?: number
   showDivider?: boolean
-  planName?: string
 }) => {
   const isAdmin = isUserActiveAdmin(space.members, currentUserId)
+  const { tierName, isPaidActive } = useSpacePlan(space.uuid)
+  const planName = isPaidActive ? tierName : undefined
 
   const handleOpenWorkspace = () => {
     trackEvent(

@@ -18,9 +18,9 @@ const buildSpaceUrl = (pathname: string, spaceId: string): URL => {
   return url
 }
 
-/** Where Stripe Checkout sends the user back: the Workspace Home carrying the session id. */
-export const getCheckoutReturnUrl = (spaceId: string): string =>
-  `${buildSpaceUrl(AppRoutes.spaces.index, spaceId)}&${CHECKOUT_SESSION_QUERY_PARAM}=${CHECKOUT_SESSION_ID_PLACEHOLDER}`
+/** Where Stripe Checkout sends the user back, carrying the session id: Workspace Home unless a flow asks otherwise. */
+export const getCheckoutReturnUrl = (spaceId: string, pathname: string = AppRoutes.spaces.index): string =>
+  `${buildSpaceUrl(pathname, spaceId)}&${CHECKOUT_SESSION_QUERY_PARAM}=${CHECKOUT_SESSION_ID_PLACEHOLDER}`
 
 /** Where the Stripe customer portal sends the user back: the Plans page. */
 export const getPortalReturnUrl = (spaceId: string): string => buildSpaceUrl(AppRoutes.spaces.plans, spaceId).toString()
