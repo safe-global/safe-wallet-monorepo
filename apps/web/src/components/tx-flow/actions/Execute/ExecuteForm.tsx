@@ -33,6 +33,7 @@ import commonCss from '@/components/tx-flow/common/styles.module.css'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import NonOwnerError from '@/components/tx/shared/errors/NonOwnerError'
 import SplitMenuButton from '@/components/common/SplitMenuButton'
+import { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import type { SlotComponentProps, SlotName } from '../../slots'
 import { TxFlowContext } from '../../TxFlowProvider'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
@@ -332,7 +333,7 @@ export const ExecuteForm = ({
           <Separator bleed="6" />
         </div>
 
-        <div className="txCardActions">
+        <TxCardActions>
           {/* Submit button */}
           <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!submitDisabled}>
             {(isOk) =>
@@ -340,7 +341,7 @@ export const ExecuteForm = ({
                 <Tooltip>
                   <TooltipTrigger
                     render={
-                      <div className="w-full lg:w-auto">
+                      <div>
                         <SplitMenuButton
                           selected={slotId}
                           onChange={({ id }) => onChange?.(id)}
@@ -355,20 +356,18 @@ export const ExecuteForm = ({
                   <TooltipContent side="top">{tooltip}</TooltipContent>
                 </Tooltip>
               ) : (
-                <div className="w-full lg:w-auto">
-                  <SplitMenuButton
-                    selected={slotId}
-                    onChange={({ id }) => onChange?.(id)}
-                    options={options}
-                    disabled={!isOk || submitDisabled}
-                    loading={isSubmitLoading}
-                    tooltip={tooltip}
-                  />
-                </div>
+                <SplitMenuButton
+                  selected={slotId}
+                  onChange={({ id }) => onChange?.(id)}
+                  options={options}
+                  disabled={!isOk || submitDisabled}
+                  loading={isSubmitLoading}
+                  tooltip={tooltip}
+                />
               )
             }
           </CheckWallet>
-        </div>
+        </TxCardActions>
       </form>
     </>
   )

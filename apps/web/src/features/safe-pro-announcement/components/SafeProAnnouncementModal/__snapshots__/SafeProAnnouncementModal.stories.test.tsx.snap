@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`./SafeProAnnouncementModal.stories Default 1`] = `
 <div
@@ -39,7 +39,7 @@ exports[`./SafeProAnnouncementModal.stories Default 1`] = `
         />
         <div
           aria-labelledby="base-ui-_r_3_"
-          class="data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-starting-style:opacity-0 data-ending-style:opacity-0 fixed top-[50%] left-[50%] z-[var(--z-overlay)] w-full -translate-x-1/2 -translate-y-1/2 rounded-xl shadow-lg duration-200 max-w-[1200px] p-0 bg-card"
+          class="data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-starting-style:opacity-0 data-ending-style:opacity-0 fixed top-[50%] left-[50%] z-[var(--z-overlay)] w-full -translate-x-1/2 -translate-y-1/2 shadow-lg duration-200 max-w-[900px] p-0 bg-card rounded-[2rem]"
           data-base-ui-focusable=""
           data-open=""
           data-slot="dialog-content"
@@ -59,11 +59,11 @@ exports[`./SafeProAnnouncementModal.stories Default 1`] = `
             class="p-1"
           >
             <div
-              class="relative aspect-[1056/369] w-full overflow-hidden rounded-t-[calc(var(--radius-xl)-2px)]"
+              class="relative aspect-[1141/268] w-full overflow-hidden rounded-t-[calc(2rem_-_4px)]"
             >
               <img
                 alt="A Workspace from Safe Pro, with its accounts, members and transactions"
-                class="object-cover"
+                class="object-cover object-top"
                 data-nimg="fill"
                 decoding="async"
                 loading="lazy"
@@ -77,12 +77,12 @@ exports[`./SafeProAnnouncementModal.stories Default 1`] = `
               class="flex flex-col items-center gap-6 px-8 py-6"
             >
               <div
-                class="flex flex-col items-center gap-2"
+                class="flex flex-col items-center gap-3"
               >
-                <h3
-                  class="m-0 scroll-m-20 text-2xl font-semibold leading-[28.8px] tracking-normal block w-full text-center"
+                <h4
+                  class="m-0 scroll-m-20 text-xl font-semibold leading-6 tracking-normal block w-full text-center"
                   data-slot="typography"
-                  data-variant="h3"
+                  data-variant="h4"
                 >
                   Your Workspace moves to 
                   <span
@@ -91,11 +91,11 @@ exports[`./SafeProAnnouncementModal.stories Default 1`] = `
                     Safe Pro
                   </span>
                    on Oct 6, 2026
-                </h3>
+                </h4>
                 <p
-                  class="m-0 text-lg leading-[27px] font-normal block w-full text-center text-muted-foreground"
+                  class="m-0 text-base leading-6 font-normal block w-full text-center text-muted-foreground"
                   data-slot="typography"
-                  data-variant="paragraph-large"
+                  data-variant="paragraph"
                 >
                   Safe Pro will add advanced security checks, sponsored transactions and policies. Your Safe accounts remain available outside of the Workspace. Starting October 6, you can claim up to two months of Safe Pro for free for this Workspace.
                 </p>
