@@ -55,6 +55,7 @@ export {
   useCurrentSpaceSafeCount,
   useSpaceSafeCount,
 } from './hooks/useIsCurrentSpaceAtSafeLimit'
+export { useSpaceSafeLimit } from './hooks/useSpaceSafeLimit'
 export { default as useFeatureFlagRedirect } from './hooks/useFeatureFlagRedirect'
 export { default as useFeatureRedirect } from './hooks/useFeatureRedirect'
 export { default as useGetSpaceAddressBook } from './hooks/useGetSpaceAddressBook'
