@@ -119,11 +119,11 @@ const TokenSelector = ({
 
   const hasSafe = identityKey !== ''
 
-  // AC C15: a token picked for Safe A must not survive switching to Safe B (different chain, different
-  // decimals, possibly a different token behind the same address). Reset whenever the identity changes
-  // after the first non-empty one — never on mount, never when a Safe is chosen for the first time.
+  // AC C15: a token picked for Safe A must not survive switching to Safe B. `identityKey` goes empty
+  // for a render mid-navigation, which is not a Safe change, so only ever compare two known Safes.
   const previousIdentity = useRef(identityKey)
   useEffect(() => {
+    if (identityKey === '') return
     const previous = previousIdentity.current
     previousIdentity.current = identityKey
     if (previous !== '' && previous !== identityKey && value !== undefined) {

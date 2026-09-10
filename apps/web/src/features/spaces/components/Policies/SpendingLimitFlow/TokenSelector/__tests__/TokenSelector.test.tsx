@@ -203,6 +203,34 @@ describe('TokenSelector — Safe/chain changes (C15)', () => {
     expect(onChange).toHaveBeenCalledWith(undefined)
   })
 
+  it('does not clear when the identity goes empty and comes back as the same Safe', () => {
+    const onChange = jest.fn()
+    const { rerender } = render(<TokenSelector value={heldUsdc.address} onChange={onChange} />)
+
+    // Mid-navigation useChainId and useSafeInfo disagree for a render, so the identity is unknown.
+    setOptions({ identityKey: '', options: [] })
+    rerender(<TokenSelector value={heldUsdc.address} onChange={onChange} />)
+    setOptions()
+    rerender(<TokenSelector value={heldUsdc.address} onChange={onChange} />)
+
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it('clears once the identity comes back as a different Safe', () => {
+    const onChange = jest.fn()
+    const { rerender } = render(<TokenSelector value={heldUsdc.address} onChange={onChange} />)
+
+    setOptions({ identityKey: '', options: [] })
+    rerender(<TokenSelector value={heldUsdc.address} onChange={onChange} />)
+    expect(onChange).not.toHaveBeenCalled()
+
+    setOptions({ identityKey: `137:${checksumAddress(faker.finance.ethereumAddress())}`, options: [popularDai] })
+    rerender(<TokenSelector value={heldUsdc.address} onChange={onChange} />)
+
+    expect(onChange).toHaveBeenCalledTimes(1)
+    expect(onChange).toHaveBeenCalledWith(undefined)
+  })
+
   it('does not clear on first mount, nor when the identity is unchanged', () => {
     const onChange = jest.fn()
     const { rerender } = render(<TokenSelector value={heldUsdc.address} onChange={onChange} />)
