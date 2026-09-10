@@ -159,8 +159,12 @@ jest.mock('@/features/oidc-auth', () => ({
   ),
 }))
 
+let mockIsSafeProLoaded = true
+let mockSafeProError: Error | undefined = undefined
 jest.mock('@/features/__core__', () => ({
   useLoadFeature: () => ({
+    $isReady: mockIsSafeProLoaded,
+    $error: mockSafeProError,
     SafeProSidebarBanner: ({ className, onDismiss }: { className?: string; onDismiss?: () => void }) => (
       <div data-testid="safe-pro-sidebar-banner" className={className}>
         <button onClick={onDismiss}>Dismiss Safe Pro</button>
@@ -191,6 +195,8 @@ describe('SidebarCommonFooter', () => {
     mockUseDarkMode.mockReturnValue(false)
     mockIsSafeProEnabled = false
     mockIsSafeProBannerDismissed = false
+    mockIsSafeProLoaded = true
+    mockSafeProError = undefined
     mockIsTwoFactorBannerEnabled = false
     mockIsTwoFactorCardDismissed = false
     mockSpaceId = 'space-uuid'
@@ -287,6 +293,36 @@ describe('SidebarCommonFooter', () => {
       render(<SidebarCommonFooter />)
 
       expect(screen.getByTestId('safe-pro-sidebar-banner')).toHaveClass('invisible')
+      expect(screen.getByTestId('workspace-2fa-awareness-card')).not.toHaveClass('invisible')
+    })
+
+    it('leaves the slot out of the layout while the Safe Pro banner is still loading', () => {
+      mockIsTwoFactorBannerEnabled = true
+      mockIsSafeProEnabled = true
+      mockIsSafeProLoaded = false
+      render(<SidebarCommonFooter />)
+
+      expect(screen.queryByTestId('safe-pro-sidebar-banner')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('workspace-2fa-awareness-card')).not.toBeInTheDocument()
+    })
+
+    it('gives the slot to the 2FA card when the Safe Pro banner fails to load', () => {
+      mockIsTwoFactorBannerEnabled = true
+      mockIsSafeProEnabled = true
+      mockIsSafeProLoaded = false
+      mockSafeProError = new Error('chunk load failed')
+      render(<SidebarCommonFooter />)
+
+      expect(screen.getByTestId('workspace-2fa-awareness-card')).not.toHaveClass('invisible')
+    })
+
+    it('keeps showing the 2FA card while Safe Pro loads, when Safe Pro was already dismissed', () => {
+      mockIsTwoFactorBannerEnabled = true
+      mockIsSafeProEnabled = true
+      mockIsSafeProBannerDismissed = true
+      mockIsSafeProLoaded = false
+      render(<SidebarCommonFooter />)
+
       expect(screen.getByTestId('workspace-2fa-awareness-card')).not.toHaveClass('invisible')
     })
 
