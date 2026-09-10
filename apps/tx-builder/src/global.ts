@@ -2,7 +2,6 @@ import { createGlobalStyle } from 'styled-components'
 import DMSansFont from './assets/fonts/DMSansRegular.woff2'
 import DMSansBoldFont from './assets/fonts/DMSans700.woff2'
 
-// a fix to trigger the workflows
 const GlobalStyle = createGlobalStyle`
     html {
         height: 100%
