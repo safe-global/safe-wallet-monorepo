@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { SearchInput } from '@/components/ui/search-input'
@@ -38,9 +38,11 @@ function ChainSelectorBlock({
   const [search, setSearch] = useState('')
 
   const query = search.trim().toLowerCase()
-  const matchingChains = query
-    ? deployedChains.filter((chainItem) => chainItem.chainName.toLowerCase().includes(query))
-    : deployedChains
+  const matchingChains = useMemo(
+    () =>
+      query ? deployedChains.filter((chainItem) => chainItem.chainName.toLowerCase().includes(query)) : deployedChains,
+    [deployedChains, query],
+  )
 
   const handleAddNetworkClick = (chainId: string) => {
     setOpen(false)

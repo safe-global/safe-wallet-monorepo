@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Info, Loader2, Plus } from 'lucide-react'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Badge } from '@/components/ui/badge'
@@ -38,6 +38,15 @@ function AllNetworksSection({
     deployedChainIds,
   )
   const [openItems, setOpenItems] = useState<string[]>([])
+
+  // Above the early returns below, so the hook order stays fixed.
+  const matchingNetworks = useMemo(
+    () =>
+      search
+        ? availableNetworks.filter((chainItem) => chainItem.chainName.toLowerCase().includes(search))
+        : availableNetworks,
+    [availableNetworks, search],
+  )
 
   // Last element in the popup, so it owns the whole popup's no-matches line.
   const nothingToShow =
@@ -96,10 +105,6 @@ function AllNetworksSection({
   }
 
   if (availableNetworks.length === 0) return nothingToShow
-
-  const matchingNetworks = search
-    ? availableNetworks.filter((chainItem) => chainItem.chainName.toLowerCase().includes(search))
-    : availableNetworks
 
   if (search && matchingNetworks.length === 0) return nothingToShow
 
