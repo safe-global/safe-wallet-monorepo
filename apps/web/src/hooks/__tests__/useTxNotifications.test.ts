@@ -8,7 +8,11 @@ import { showNotification } from '@/store/notificationsSlice'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
 import { mapLedgerError } from '@/services/onboard/ledger-errors'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
-import { RATE_LIMIT_USER_MESSAGE } from '@/utils/transaction-errors'
+import {
+  GUARD_ERROR_CODES,
+  HYPERNATIVE_APPROVAL_REQUIRED_MESSAGE,
+  RATE_LIMIT_USER_MESSAGE,
+} from '@/utils/transaction-errors'
 import { CGW_ERROR_FALLBACK } from '@safe-global/utils/services/exceptions/gatewayErrors'
 import useTxNotifications from '../useTxNotifications'
 
@@ -131,6 +135,28 @@ describe('useTxNotifications', () => {
     })
 
     expect(showNotification).not.toHaveBeenCalled()
+  })
+
+  it('shows the Hypernative approval message instead of the generic guard wording', () => {
+    renderHook(() => useTxNotifications())
+
+    txDispatch(TxEvent.SIGN_FAILED, {
+      error: new Error(`execution reverted (unknown custom error) (data="${GUARD_ERROR_CODES.UNAPPROVED_HASH}")`),
+    })
+
+    expect(lastNotification()).toMatchObject({
+      message: HYPERNATIVE_APPROVAL_REQUIRED_MESSAGE,
+      detailedMessage: undefined,
+    })
+  })
+
+  it('keeps the generic guard wording for a non-Hypernative guard revert', () => {
+    renderHook(() => useTxNotifications())
+
+    txDispatch(TxEvent.SIGN_FAILED, { error: new Error('execution reverted: GS013') })
+
+    const notification = lastNotification()
+    expect(notification.message).not.toContain('Hypernative')
   })
 
   it('keeps the mined-revert message ahead of every other classification', async () => {

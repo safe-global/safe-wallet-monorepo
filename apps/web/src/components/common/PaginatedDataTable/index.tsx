@@ -136,11 +136,18 @@ function PaginatedDataTable<T>({
     return () => observer.disconnect()
   }, [])
 
-  // Jump back to the first page when the data set changes (e.g. a new search/filter)
-  useEffect(() => {
+  // The identity of the row set, not of the array holding it: a parent that re-renders with an
+  // equivalent `rows` must not send the user back to the first page.
+  const rowsKey = rows.map(getRowKey).join('\u0000')
+  const [prevRowsKey, setPrevRowsKey] = useState(rowsKey)
+
+  // A new data set (search/filter/delete) starts over at page one. Adjusted during render, so
+  // the stale page is never committed.
+  if (rowsKey !== prevRowsKey) {
+    setPrevRowsKey(rowsKey)
     setPage(0)
     setExpanded(new Set())
-  }, [rows])
+  }
 
   // Cycle through asc → desc → unsorted on repeated clicks of the same column header
   const handleSort = (columnId: string) => {
@@ -186,7 +193,7 @@ function PaginatedDataTable<T>({
     })
 
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} data-testid="table-container">
       {/* Fixed layout on regular desktop preserves column proportions and lets `truncate` cells
           clip; compact mode falls back to auto layout so the remaining columns size to content. */}
       <Table variant="panel" className={cn(!isCompact && 'md:table-fixed')}>
@@ -238,7 +245,11 @@ function PaginatedDataTable<T>({
 
             return (
               <Fragment key={key}>
-                <TableRow data-no-divider={showDetail ? '' : undefined} className={getRowClassName?.(row)}>
+                <TableRow
+                  data-testid="table-row"
+                  data-no-divider={showDetail ? '' : undefined}
+                  className={getRowClassName?.(row)}
+                >
                   {visibleColumns.map((column) => (
                     <TableCell
                       key={column.id}
@@ -249,6 +260,7 @@ function PaginatedDataTable<T>({
                         hideClass(column),
                         stickyClass(column),
                         !isCompact && minWidthClass(column),
+                        isCompact && 'whitespace-normal wrap-anywhere',
                       )}
                     >
                       {column.cell(row, { isCompact })}
@@ -272,7 +284,11 @@ function PaginatedDataTable<T>({
 
                 {showDetail && (
                   <TableRow className={getRowClassName?.(row)}>
-                    <TableCell id={detailId} colSpan={totalColumns} className="bg-muted/30">
+                    <TableCell
+                      id={detailId}
+                      colSpan={totalColumns}
+                      className="bg-muted/30 whitespace-normal wrap-anywhere"
+                    >
                       {renderRowDetail?.(row)}
                     </TableCell>
                   </TableRow>
@@ -294,6 +310,7 @@ function PaginatedDataTable<T>({
               variant="outline"
               size="icon-sm"
               aria-label="Previous page"
+              data-testid="prev-page-btn"
               disabled={currentPage === 0}
               onClick={() => setPage(currentPage - 1)}
             >
@@ -303,6 +320,7 @@ function PaginatedDataTable<T>({
               variant="outline"
               size="icon-sm"
               aria-label="Next page"
+              data-testid="next-page-btn"
               disabled={currentPage >= totalPages - 1}
               onClick={() => setPage(currentPage + 1)}
             >

@@ -82,6 +82,10 @@ beforeEach(() => {
       constants.localStorageKeys.SAFE_v2__SafeApps__infoModal,
       ls.appPermissions(constants.safeTestAppurl).infoModalAccepted,
     )
+    window.localStorage.setItem(
+      constants.localStorageKeys.SAFE_v2__safeProAnnouncementSeen,
+      ls.safeProAnnouncement.seen,
+    )
     window.sessionStorage.setItem(outreachWindowKey, Date.now())
     cy.wrap(window.localStorage).invoke('getItem', cookiesKey).should('equal', ls.cookies.acceptedCookies)
   })

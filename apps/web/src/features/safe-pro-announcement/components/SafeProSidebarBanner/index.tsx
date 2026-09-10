@@ -4,6 +4,7 @@ import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
 import ProWordmark from '@/public/images/safe-pro/pro-wordmark.svg'
+import { trackSafeProBannerClick } from '../../utils/trackSafeProBannerClick'
 import css from './styles.module.css'
 
 const SafeProSidebarBanner = ({ className, onDismiss }: { className?: string; onDismiss?: () => void }) => (
@@ -44,7 +45,14 @@ const SafeProSidebarBanner = ({ className, onDismiss }: { className?: string; on
 
     <Button
       size="xs"
-      render={<a href={SAFE_PRO_ANNOUNCEMENT_URL} target="_blank" rel="noopener noreferrer" />}
+      render={
+        <a
+          onClick={() => trackSafeProBannerClick('sidebar')}
+          href={SAFE_PRO_ANNOUNCEMENT_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+        />
+      }
       className={css.learnMore}
     >
       Learn more

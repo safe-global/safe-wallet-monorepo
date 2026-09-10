@@ -93,7 +93,7 @@ export const ProposerForm = ({
               type="submit"
               size="submit"
               disabled={!isOk || submitDisabled}
-              className="order-1 w-full lg:w-auto"
+              className="order-1"
             >
               {!isSubmittable ? <Spinner className="size-5" /> : 'Propose transaction'}
             </Button>

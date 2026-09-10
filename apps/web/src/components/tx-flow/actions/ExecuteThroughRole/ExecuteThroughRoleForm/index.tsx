@@ -31,6 +31,7 @@ import { dispatchModuleTxExecution } from '@/services/tx/tx-sender'
 import { Status } from 'zodiac-roles-deployments'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import SplitMenuButton from '@/components/common/SplitMenuButton'
+import { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import type { SlotComponentProps, SlotName } from '../../../slots'
 import { TxFlowContext } from '../../../TxFlowProvider'
 import type { SubmitCallback } from '../../../TxFlow'
@@ -213,22 +214,20 @@ export const ExecuteThroughRoleForm = ({
           <Separator bleed="6" />
         </div>
 
-        <div className="txCardActions">
+        <TxCardActions>
           {/* Submit button, also available to non-owner role members */}
           <CheckWallet allowNonOwner checkNetwork={!submitDisabled}>
             {(isOk) => (
-              <div className="w-full lg:w-auto">
-                <SplitMenuButton
-                  selected={slotId}
-                  onChange={({ id }) => onChange?.(id)}
-                  options={options}
-                  disabled={!isOk || submitDisabled}
-                  loading={isSubmitLoading}
-                />
-              </div>
+              <SplitMenuButton
+                selected={slotId}
+                onChange={({ id }) => onChange?.(id)}
+                options={options}
+                disabled={!isOk || submitDisabled}
+                loading={isSubmitLoading}
+              />
             )}
           </CheckWallet>
-        </div>
+        </TxCardActions>
       </form>
     </>
   )
