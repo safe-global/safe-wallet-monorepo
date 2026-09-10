@@ -1,20 +1,14 @@
-name: 'Cache Yarn Dependencies'
-description: 'Restore or save yarn dependencies'
+name: 'Cache Next.js Build'
+description: 'Restore or save the Next.js build cache'
 inputs:
   mode:
-    description: 'restore-yarn | save-yarn | restore-nc | save-nc'
+    description: 'restore-nc | save-nc'
     required: true
   key:
-    description: 'The cache key to use to safe. Attention! Make sure to use the correct computed cache key depending on the mode'
+    description: 'The cache key to use to save. Required when mode=save-nc; ignored on restore.'
     required: false
 
 outputs:
-  cache-hit-yarn:
-    value: ${{ steps.restore.outputs.cache-hit }}
-    description: 'Whether the cache was hit or not'
-  computed-cache-key-yarn:
-    value: ${{ steps.restore.outputs.cache-primary-key }}
-    description: 'The computed cache key for yarn'
   cache-hit-nc:
     value: ${{ steps.restore-nc.outputs.cache-hit }}
     description: 'Whether the cache was hit or not'
@@ -25,38 +19,6 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - name: Restore Yarn Cache
-      if: ${{ inputs.mode == 'restore-yarn' }}
-      id: restore
-      uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-      with:
-        path: |
-          **/node_modules
-          /home/runner/.cache/Cypress
-          ~/.yarn/berry/cache
-          ${{ github.workspace }}/.yarn/install-state.gz
-          ${{ github.workspace }}/packages/utils/src/types
-        key: ${{ runner.os }}-web-core-modules-${{ hashFiles('**/package.json','**/yarn.lock') }}
-
-    - name: Set composite outputs yarn
-      if: ${{ inputs.mode == 'restore-yarn' }}
-      shell: bash
-      run: |
-        echo "cache-hit-yarn=${{ steps.restore.outputs.cache-hit }}" >> $GITHUB_OUTPUT
-        echo "computed-cache-key-yarn=${{ steps.restore.outputs.cache-primary-key }}" >> $GITHUB_OUTPUT
-
-    - name: Save Yarn Cache
-      if: ${{ inputs.mode == 'save-yarn' }}
-      uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-      with:
-        path: |
-          **/node_modules
-          /home/runner/.cache/Cypress
-          ~/.yarn/berry/cache
-          ${{ github.workspace }}/.yarn/install-state.gz
-          ${{ github.workspace }}/packages/utils/src/types
-        key: ${{inputs.key}}
-
     - name: Restore Next.js
       if: ${{ inputs.mode == 'restore-nc' }}
       id: restore-nc
@@ -65,13 +27,8 @@ runs:
         path: |
           ${{ github.workspace }}/apps/web/.next/cache
         key: ${{ runner.os }}-nextjs-cypress-${{ hashFiles('apps/web/package.json', 'apps/web/yarn.lock') }}-${{ hashFiles('apps/web/src/**/*', 'apps/web/public/**/*', 'apps/web/*.{js,jsx,cjs,ts,mjs,tsx,json}') }}
-
-    - name: Set composite outputs nc
-      if: ${{ inputs.mode == 'restore-nc' }}
-      shell: bash
-      run: |
-        echo "cache-hit-nc=${{ steps.restore-nc.outputs.cache-hit }}" >> $GITHUB_OUTPUT
-        echo "computed-cache-key-nc=${{ steps.restore-nc.outputs.cache-primary-key }}" >> $GITHUB_OUTPUT
+        restore-keys: |
+          ${{ runner.os }}-nextjs-cypress-${{ hashFiles('apps/web/package.json', 'apps/web/yarn.lock') }}-
 
     - name: Save Next.js
       if: ${{ inputs.mode == 'save-nc' }}
