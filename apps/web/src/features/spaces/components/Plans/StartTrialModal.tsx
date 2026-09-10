@@ -1,15 +1,19 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { ArrowRight, ArrowUpRight, BellRing, CircleCheckBig, LockKeyholeOpen } from 'lucide-react'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { List, ListItem } from '@/components/ui/list'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
 import { TRIAL_DISCLAIMER } from '@/features/safe-pro-announcement'
+import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
+import { useStartCheckout } from '../../hooks/billing/useStartCheckout'
 import { PlanCard } from './PlanCards'
-import { RECOMMENDED_TRIAL_TIER, TRIAL_TIERS } from './fixtures'
-import SelectAccountsStep from './SelectAccountsStep'
+import { trialTiers } from './planTiers'
+import type { PlanSeatOption, PlanTier } from './types'
 
 const PERKS = [
   [LockKeyholeOpen, 'All Pro features unlocked, no billing details needed upfront.'],
@@ -17,62 +21,67 @@ const PERKS = [
   [CircleCheckBig, 'Your subscription starts. Cancel any time.'],
 ] as const
 
-export type TrialSelection = { tierId: string; seats: string; safeIds: string[] }
+export const RECOMMENDED_PLAN = 'Business'
 
 export default function StartTrialModal({
-  trialDays,
   open,
   onOpenChange,
-  onContinue,
-  selectAccounts = true,
+  spaceId,
 }: {
-  trialDays: 30 | 60
   open: boolean
   onOpenChange: (open: boolean) => void
-  onContinue: (selection: TrialSelection) => void
-  /** Off for the 30-day flow: the create-workspace onboarding picks the accounts afterwards. */
-  selectAccounts?: boolean
+  spaceId?: string | null
 }) {
+  const { trialPlans, trialPeriodDays, isLoading } = useSpaceOffers(spaceId)
+  const { startCheckout, isRedirecting, isError } = useStartCheckout(spaceId)
+  const tiers = useMemo(() => trialTiers(trialPlans), [trialPlans])
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent size="sm-md" surface="card" padding="sm">
         <div className="flex flex-col gap-6 pt-5">
-          <StartTrialSteps trialDays={trialDays} onContinue={onContinue} selectAccounts={selectAccounts} />
+          <StartTrialSteps
+            tiers={tiers}
+            trialPeriodDays={trialPeriodDays}
+            isLoading={isLoading}
+            isStarting={isRedirecting}
+            isError={isError}
+            onStart={(paymentLinkId) => void startCheckout(paymentLinkId)}
+          />
         </div>
       </DialogContent>
     </Dialog>
   )
 }
 
-// Lives inside DialogContent so closing the dialog resets the flow.
+// Lives inside DialogContent so closing the dialog resets the selection.
 const StartTrialSteps = ({
-  trialDays,
-  onContinue,
-  selectAccounts,
+  tiers,
+  trialPeriodDays,
+  isLoading,
+  isStarting,
+  isError,
+  onStart,
 }: {
-  trialDays: 30 | 60
-  onContinue: (selection: TrialSelection) => void
-  selectAccounts: boolean
+  tiers: PlanTier[]
+  trialPeriodDays: number | null
+  isLoading: boolean
+  isStarting: boolean
+  isError: boolean
+  onStart: (paymentLinkId: string) => void
 }) => {
-  const [step, setStep] = useState<'plan' | 'accounts'>('plan')
-  const [tierId, setTierId] = useState(RECOMMENDED_TRIAL_TIER)
-  const [seats, setSeats] = useState<Record<string, string>>({})
-  const tierSeats = seats[tierId] ?? TRIAL_TIERS.find((tier) => tier.id === tierId)?.seats[0] ?? ''
-
-  if (step === 'accounts') {
-    return (
-      <SelectAccountsStep
-        limit={Number.parseInt(tierSeats, 10)}
-        onBack={() => setStep('plan')}
-        onContinue={(safeIds) => onContinue({ tierId, seats: tierSeats, safeIds })}
-      />
-    )
-  }
+  const [pickedTierId, setPickedTierId] = useState<string>()
+  const [options, setOptions] = useState<Record<string, PlanSeatOption>>({})
+  const tierId = pickedTierId ?? (tiers.find((tier) => tier.name === RECOMMENDED_PLAN) ?? tiers[0])?.id
+  const tier = tiers.find((candidate) => candidate.id === tierId)
+  const option = tier ? (options[tier.id] ?? tier.options[0]) : undefined
 
   return (
     <>
       <Typography variant="h3" as={DialogTitle}>
-        Start your {trialDays}-day free trial of Safe Pro
+        {trialPeriodDays === null
+          ? 'Start your free trial of Safe Pro'
+          : `Start your ${trialPeriodDays}-day free trial of Safe Pro`}
       </Typography>
 
       <Card variant="brand" size="sm" radius="lg">
@@ -101,18 +110,37 @@ const StartTrialSteps = ({
           </Button>
         </div>
 
-        <div role="radiogroup" aria-label="Plan" className="flex gap-6">
-          {TRIAL_TIERS.map((tier) => (
-            <PlanCard
-              key={tier.id}
-              tier={tier}
-              selected={tier.id === tierId}
-              onSelect={() => setTierId(tier.id)}
-              onSeatsChange={(value) => setSeats((prev) => ({ ...prev, [tier.id]: value }))}
-            />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="flex gap-6" data-testid="trial-plans-skeleton">
+            <Skeleton className="h-[220px] flex-1 rounded-lg-xl" />
+            <Skeleton className="h-[220px] flex-1 rounded-lg-xl" />
+          </div>
+        ) : tiers.length === 0 ? (
+          <Alert variant="info">
+            <AlertSeverityIcon variant="info" />
+            <AlertDescription>There is no free trial available for this Workspace.</AlertDescription>
+          </Alert>
+        ) : (
+          <div role="radiogroup" aria-label="Plan" className="flex gap-6">
+            {tiers.map((candidate) => (
+              <PlanCard
+                key={candidate.id}
+                tier={candidate}
+                selected={candidate.id === tierId}
+                onSelect={() => setPickedTierId(candidate.id)}
+                onOptionChange={(next) => setOptions((prev) => ({ ...prev, [candidate.id]: next }))}
+              />
+            ))}
+          </div>
+        )}
       </div>
+
+      {isError && (
+        <Alert variant="destructive">
+          <AlertSeverityIcon variant="destructive" />
+          <AlertDescription>We couldn&apos;t start the checkout. Please try again.</AlertDescription>
+        </Alert>
+      )}
 
       <Typography variant="paragraph-small" color="muted" align="center">
         {TRIAL_DISCLAIMER}
@@ -122,7 +150,8 @@ const StartTrialSteps = ({
         size="action"
         accentIcon
         className="self-center"
-        onClick={() => (selectAccounts ? setStep('accounts') : onContinue({ tierId, seats: tierSeats, safeIds: [] }))}
+        disabled={!option?.paymentLinkId || isStarting}
+        onClick={() => option?.paymentLinkId && onStart(option.paymentLinkId)}
       >
         Start free trial
         <ArrowRight />

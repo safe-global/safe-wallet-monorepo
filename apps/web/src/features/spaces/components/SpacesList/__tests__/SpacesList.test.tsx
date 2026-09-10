@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import SpacesList from '../index'
@@ -59,14 +59,6 @@ jest.mock('@/features/safe-pro-announcement', () => ({
 }))
 
 jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
-jest.mock('../../../hooks/useSpacePlan', () => ({ useSpacePlan: () => ({ tierName: undefined, isPaidActive: false }) }))
-
-jest.mock('../../Plans/TrialFlow', () => ({
-  __esModule: true,
-  default: ({ trialDays, open }: { trialDays: number; open: boolean }) => (
-    <div data-testid="trial-flow" data-days={trialDays} data-open={open} />
-  ),
-}))
 
 jest.mock('@/features/spaces', () => ({
   MemberStatus: { ACTIVE: 'ACTIVE', INVITED: 'INVITED', DECLINED: 'DECLINED' },
@@ -134,32 +126,6 @@ describe('SpacesList — auth/expiry state rendering', () => {
     mockUseSignInRedirect.mockReturnValue({ setHasSignedIn: jest.fn(), redirectLoading: false })
     mockUseIsSafeProEnabled.mockReturnValue(false)
     mockUseHasFeature.mockReturnValue(false)
-  })
-
-  it('opens the 30-day trial dialog from Create workspace once SAFE_PRO is on', () => {
-    mockUseHasFeature.mockReturnValue(true)
-    mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
-    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
-
-    render(<SpacesList />)
-
-    const flow = screen.getByTestId('trial-flow')
-    expect(flow).toHaveAttribute('data-days', '30')
-    expect(flow).toHaveAttribute('data-open', 'false')
-
-    const cta = screen.getByRole('button', { name: /create your first workspace/i })
-    expect(cta).not.toHaveAttribute('href')
-    fireEvent.click(cta)
-
-    expect(screen.getByTestId('trial-flow')).toHaveAttribute('data-open', 'true')
-  })
-
-  it('does not mount the trial flow while SAFE_PRO is off', () => {
-    mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
-
-    render(<SpacesList />)
-
-    expect(screen.queryByTestId('trial-flow')).not.toBeInTheDocument()
   })
 
   describe('SAFE_PRO_ANNOUNCEMENT banner gating', () => {

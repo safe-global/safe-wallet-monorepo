@@ -58,7 +58,16 @@ jest.mock('@/features/__core__', () => ({
   useLoadFeature: jest.fn(),
 }))
 
-jest.mock('../../Plans/TrialFlow', () => ({ __esModule: true, default: () => null }))
+jest.mock('../../Plans/StartTrialModal', () => ({ __esModule: true, default: () => null }))
+jest.mock('../../../hooks/useSpacePlan', () => ({
+  useSpacePlan: () => ({ plan: null, status: 'none', isLoading: false, refetch: jest.fn() }),
+}))
+jest.mock('../../../hooks/billing/useSpaceOffers', () => ({
+  useSpaceOffers: () => ({ trialPeriodDays: null, isLoading: false }),
+}))
+jest.mock('../../../hooks/billing/useCheckoutReturn', () => ({
+  useCheckoutReturn: () => ({ status: 'idle', subscription: undefined, dismiss: jest.fn() }),
+}))
 
 jest.mock('@/features/safe-pro-announcement', () => ({
   SafeProFeature: { name: 'safe-pro-announcement' },

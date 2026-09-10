@@ -1,37 +1,63 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
+import type { PlanGroup } from '../../../hooks/billing/types'
 import StartTrialModal from '../StartTrialModal'
 
-jest.mock('../SelectAccountsStep', () => ({
-  __esModule: true,
-  default: ({ limit, onContinue }: { limit: number; onContinue: (ids: string[]) => void }) => (
-    <button onClick={() => onContinue(['1:0xA'])}>accounts step, limit {limit}</button>
-  ),
+const mockUseSpaceOffers = jest.fn()
+const mockStartCheckout = jest.fn()
+let mockCheckout = { isRedirecting: false, isError: false }
+jest.mock('../../../hooks/billing/useSpaceOffers', () => ({ useSpaceOffers: () => mockUseSpaceOffers() }))
+jest.mock('../../../hooks/billing/useStartCheckout', () => ({
+  useStartCheckout: () => ({ startCheckout: mockStartCheckout, ...mockCheckout }),
 }))
 
+const trial = (planName: string, paymentLinkId: string, seats: number, price: number): PlanGroup => ({
+  name: planName,
+  offers: [{ paymentLinkId, planName, seats, price, currency: 'eur', billingCycle: 'month', trialPeriodDays: 60 }],
+})
+const TRIAL_PLANS = [trial('Starter', 'pl_starter', 2, 149), trial('Business', 'pl_business', 10, 499)]
+
 describe('StartTrialModal', () => {
-  it('preselects Business, then reports tier, seats and safes after the accounts step', () => {
-    const onContinue = jest.fn()
-    render(<StartTrialModal trialDays={60} open onOpenChange={jest.fn()} onContinue={onContinue} />)
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockCheckout = { isRedirecting: false, isError: false }
+    mockUseSpaceOffers.mockReturnValue({ trialPlans: TRIAL_PLANS, trialPeriodDays: 60, isLoading: false })
+  })
+
+  it('preselects Business and starts the checkout for the picked plan', () => {
+    render(<StartTrialModal open onOpenChange={jest.fn()} />)
 
     expect(screen.getByText('Start your 60-day free trial of Safe Pro')).toBeInTheDocument()
     expect(screen.getByRole('radio', { name: /^Business/ })).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByText('€149')).toHaveClass('line-through')
 
     fireEvent.click(screen.getByRole('radio', { name: /^Starter/ }))
     fireEvent.click(screen.getByRole('button', { name: 'Start free trial' }))
 
-    fireEvent.click(screen.getByRole('button', { name: 'accounts step, limit 2' }))
-    expect(onContinue).toHaveBeenCalledWith({ tierId: 'starter-month', seats: '2 Safe accounts', safeIds: ['1:0xA'] })
+    expect(mockStartCheckout).toHaveBeenCalledWith('pl_starter')
   })
 
-  it('reports the plan straight away when the accounts step is off', () => {
-    const onContinue = jest.fn()
-    render(
-      <StartTrialModal trialDays={30} open onOpenChange={jest.fn()} onContinue={onContinue} selectAccounts={false} />,
-    )
+  it('shows a skeleton while the offers load', () => {
+    mockUseSpaceOffers.mockReturnValue({ trialPlans: [], trialPeriodDays: null, isLoading: true })
+    render(<StartTrialModal open onOpenChange={jest.fn()} />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Start free trial' }))
+    expect(screen.getByText('Start your free trial of Safe Pro')).toBeInTheDocument()
+    expect(screen.getByTestId('trial-plans-skeleton')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Start free trial' })).toBeDisabled()
+  })
 
-    expect(onContinue).toHaveBeenCalledWith({ tierId: 'business-month', seats: '10 Safe accounts', safeIds: [] })
-    expect(screen.queryByText(/accounts step/)).not.toBeInTheDocument()
+  it('explains when the Workspace is offered no trial', () => {
+    mockUseSpaceOffers.mockReturnValue({ trialPlans: [], trialPeriodDays: null, isLoading: false })
+    render(<StartTrialModal open onOpenChange={jest.fn()} />)
+
+    expect(screen.getByText('There is no free trial available for this Workspace.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Start free trial' })).toBeDisabled()
+  })
+
+  it('surfaces a failed checkout request and blocks double submits while redirecting', () => {
+    mockCheckout = { isRedirecting: true, isError: true }
+    render(<StartTrialModal open onOpenChange={jest.fn()} />)
+
+    expect(screen.getByText(/couldn.t start the checkout/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Start free trial' })).toBeDisabled()
   })
 })

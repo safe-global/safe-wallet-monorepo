@@ -28,8 +28,10 @@ import { useHasFeature } from '@/hooks/useChains'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { Typography } from '@/components/ui/typography'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import TrialFlow from '../Plans/TrialFlow'
-import { TIERS, TRIAL_PLANS } from '../Plans/fixtures'
+import StartTrialModal from '../Plans/StartTrialModal'
+import { useSpacePlan } from '../../hooks/useSpacePlan'
+import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
+import { useCheckoutReturn } from '../../hooks/billing/useCheckoutReturn'
 
 const EmptyStateAddAction = () => {
   return (
@@ -45,8 +47,12 @@ const PENDING_TX_DISPLAY_LIMIT = 4
 const SpaceDashboard = () => {
   const { AccountsWidget, $isReady } = useLoadFeature(MyAccountsFeature)
   const { PendingTxWidget } = useLoadFeature(SpacesFeature)
-  const { SafeProAnnouncementModal, SafeProLockedWorkspace, SafeProSubscriptionActivatedModal } =
-    useLoadFeature(SafeProFeature)
+  const {
+    SafeProAnnouncementModal,
+    SafeProLockedWorkspace,
+    SafeProSubscriptionActivatedModal,
+    SafeProTrialActivatedModal,
+  } = useLoadFeature(SafeProFeature)
   const { allSafes: safes, isLoading: isSafesLoading } = useSpaceSafes()
   const safeItems = flattenSafeItems(safes)
   const spaceId = useCurrentSpaceId()
@@ -66,11 +72,23 @@ const SpaceDashboard = () => {
   useTrackSpace(safes, activeMembers)
   const router = useRouter()
   const isSafeProEnabled = useIsSafeProEnabled()
-  const isLocked = useHasFeature(FEATURES.SAFE_PRO) === true && !isInvited
+  const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
+  const { plan, status: planStatus, isLoading: isPlanLoading, refetch: refetchPlan } = useSpacePlan()
+  const { trialPeriodDays, isLoading: isOffersLoading } = useSpaceOffers()
+  const checkout = useCheckoutReturn()
+  const canLock = isSafePro && !isInvited && Boolean(spaceId)
+  const isResolvingPlan = canLock && (isPlanLoading || isOffersLoading)
+  // Never subscribed and a trial on offer: the Workspace is locked behind the trial takeover.
+  const isLocked = canLock && !isResolvingPlan && planStatus === 'none' && trialPeriodDays !== null
   const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !isLocked || !spaceId })
   const { isOpen: isAnnouncementOpen, setIsOpen: setIsAnnouncementOpen } = useSafeProAnnouncement(
     isSafeProEnabled && !isLocked && Boolean(spaceId) && !isInvited,
   )
+
+  const isCheckoutComplete = checkout.status === 'complete'
+  useEffect(() => {
+    if (isCheckoutComplete) refetchPlan()
+  }, [isCheckoutComplete]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!spaceId) return
@@ -126,23 +144,24 @@ const SpaceDashboard = () => {
 
   const showSetupWidget = safeItems.length === 0 && !isSafesLoading && !setupDismissed && !isSetupDismissedForSpace
 
-  // Stripe Checkout returns to Home with `?checkout=success`; the flag is dropped once the modal closes.
-  const closeCheckoutSuccess = () => {
-    const query = { ...router.query }
-    delete query.checkout
-    router.replace({ pathname: router.pathname, query }, undefined, { shallow: true })
-  }
-  const paidTier = TIERS.find((tier) => tier.isCurrent)
-  const checkoutSuccessModal = paidTier && paidTier.price !== null && (
-    <SafeProSubscriptionActivatedModal
-      open={router.query.checkout === 'success'}
-      onOpenChange={closeCheckoutSuccess}
-      planName={paidTier.name}
-      price={paidTier.price}
-      currency={paidTier.currency}
-      nextBillingAt={Date.parse(TRIAL_PLANS.plan?.periodEndsAt ?? '')}
-    />
-  )
+  const periodEndsAt = plan?.periodEndsAt ? Date.parse(plan.periodEndsAt) : 0
+  const checkoutModal =
+    isCheckoutComplete && checkout.subscription ? (
+      checkout.subscription.status === 'trialing' ? (
+        <SafeProTrialActivatedModal open onOpenChange={checkout.dismiss} trialEndsAt={periodEndsAt} />
+      ) : (
+        <SafeProSubscriptionActivatedModal
+          open
+          onOpenChange={checkout.dismiss}
+          planName={checkout.subscription.plan.name ?? 'Safe Pro'}
+          price={checkout.subscription.plan.currentPrice}
+          currency={checkout.subscription.plan.currency}
+          nextBillingAt={periodEndsAt}
+        />
+      )
+    ) : null
+
+  if (isResolvingPlan) return null
 
   if (isLocked) {
     return (
@@ -150,9 +169,9 @@ const SpaceDashboard = () => {
         <Typography variant="h2" className="mb-6 font-bold leading-[1] tracking-tight">
           {space?.name}
         </Typography>
-        <SafeProLockedWorkspace onStartTrial={() => setIsTrialOpen(true)} />
-        <TrialFlow trialDays={60} open={isTrialOpen} onOpenChange={setIsTrialOpen} />
-        {checkoutSuccessModal}
+        <SafeProLockedWorkspace trialDays={trialPeriodDays} onStartTrial={() => setIsTrialOpen(true)} />
+        <StartTrialModal open={isTrialOpen} onOpenChange={setIsTrialOpen} />
+        {checkoutModal}
       </div>
     )
   }
@@ -160,7 +179,7 @@ const SpaceDashboard = () => {
   return (
     <>
       {isSafeProEnabled && <SafeProAnnouncementModal open={isAnnouncementOpen} onOpenChange={setIsAnnouncementOpen} />}
-      {checkoutSuccessModal}
+      {checkoutModal}
 
       {isInvited && <PreviewInvite />}
 
