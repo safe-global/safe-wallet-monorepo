@@ -1,8 +1,7 @@
 import type { ReactNode } from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 
-// base-ui keeps the menu in a portal that synthetic clicks do not reliably open under jsdom, so the
-// popup parts render inline here and a bare button drives the controlled open state.
+// base-ui's portal does not open from a synthetic click under jsdom, so the popup parts render inline.
 jest.mock('@/components/ui/dropdown-menu', () => ({
   __esModule: true,
   DropdownMenu: ({

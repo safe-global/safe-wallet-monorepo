@@ -39,14 +39,10 @@ function AllNetworksSection({
   )
   const [openItems, setOpenItems] = useState<string[]>([])
 
-  // This is the last thing in the popup, so wherever it has nothing of its own to show it carries
-  // the popup's no-matches line: the search field sits above the rows, and a query matching nothing
-  // would otherwise leave the popup showing a field and nothing else. role=status because the rows
-  // vanish without focus moving, so a screen reader would not otherwise hear that the list emptied.
+  // Last element in the popup, so it owns the whole popup's no-matches line.
   const nothingToShow =
     search && !hasMatchesAbove ? (
-      // `block` because this Typography variant renders a span: inline padding insets only the first
-      // and last line boxes, leaving a wrapped line against the popup's rounded corner.
+      // `block`: this variant renders a span, whose padding insets the first and last line box only.
       <Typography
         role="status"
         variant="paragraph-small-medium"
@@ -105,7 +101,6 @@ function AllNetworksSection({
     ? availableNetworks.filter((chainItem) => chainItem.chainName.toLowerCase().includes(search))
     : availableNetworks
 
-  // Nothing here matches, so the accordion header would expand onto an empty panel.
   if (search && matchingNetworks.length === 0) return nothingToShow
 
   const handleAccordionChange = (value: unknown) => {

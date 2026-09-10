@@ -9,11 +9,7 @@ type SearchInputProps = Omit<React.ComponentProps<'input'>, 'type'> &
   Pick<React.ComponentProps<typeof InputGroup>, 'inputSize' | 'variant'> & {
     inputClassName?: string
     iconClassName?: string
-    /**
-     * Swaps the browser's native clear button for the design system's, shown only while `value` has
-     * text. The native one takes the browser's accent colour and cannot be recoloured, so opt in
-     * here rather than styling it. Needs a controlled `value` to know when to appear.
-     */
+    /** Replaces the native clear button, which cannot be recoloured. Needs a controlled `value`. */
     onClear?: () => void
   }
 
@@ -43,7 +39,6 @@ function SearchInput({
           <InputGroupButton
             variant="ghost"
             size="icon-xs"
-            // text-foreground rather than black: it has to invert in dark mode.
             className="text-foreground"
             aria-label="Clear search"
             onClick={onClear}

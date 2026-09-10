@@ -50,14 +50,11 @@ function ChainSelectorBlock({
   const handleOpenChange = (next: boolean) => {
     if (disabled) return
     setOpen(next)
-    // This block stays mounted when the popup closes, so the query has to be cleared explicitly
-    // or the next opening starts filtered.
+    // This block stays mounted across close, so the next opening would start filtered.
     setSearch('')
   }
 
-  // base-ui's menu calls preventDefault on every printable key to drive its own typeahead, which
-  // would leave this field unable to accept text. Escape still has to reach the popup so it can
-  // close. Tab is unaffected: stopping propagation does not stop the browser's own focus move.
+  // base-ui's menu preventDefaults every printable key for its own typeahead; Escape must still reach it.
   const handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key !== 'Escape') {
       event.stopPropagation()
@@ -93,8 +90,7 @@ function ChainSelectorBlock({
         sideOffset={12}
         className="w-[196px] bg-card text-foreground ring-0 p-1 rounded-2xl"
       >
-        {/* m-1 takes the inset from the popup's own 4px to 8px on every side, and rounded-[16px] is the
-            popup's 24px corner less that 8px, so the two outlines stay concentric instead of crossing. */}
+        {/* rounded-[16px] is the popup's 24px corner less the 8px m-1 inset, to stay concentric. */}
         <SearchInput
           variant="surface"
           // eslint-disable-next-line no-restricted-syntax -- the radius has to be the popup's less this field's inset; no preset can know the container it is nested in

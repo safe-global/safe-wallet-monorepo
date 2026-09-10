@@ -342,9 +342,7 @@ const NetworkSelector = ({
     [configs, onChainSelect, router, safeAddress, compactButton],
   )
 
-  // base-ui holds the highlighted row as a numeric index into the rendered rows and does not re-derive
-  // it when the list shrinks, so a stale index can point at a row that is no longer there. Focusing a
-  // row directly resets it, because the row's own onFocus writes its current index back as the active one.
+  // base-ui's highlighted-row index goes stale when the list shrinks; focusing a row resets it via onFocus.
   const focusRow = (edge: 'first' | 'last') => {
     const rows = searchRef.current
       ?.closest('[data-slot="select-content"]')
@@ -362,9 +360,7 @@ const NetworkSelector = ({
       return
     }
 
-    // base-ui reads printable keys as list typeahead, which would take over the field. Escape has to
-    // reach the popup so it can close. Tab is unaffected: stopping propagation does not stop the
-    // browser's own focus move.
+    // base-ui reads printable keys as list typeahead, which would take over the field; Escape must still reach it.
     if (event.key !== 'Escape') {
       event.stopPropagation()
     }
@@ -372,8 +368,7 @@ const NetworkSelector = ({
 
   const handleOpenChange = (nextOpen: boolean) => {
     setOpen(nextOpen)
-    // This component stays mounted when the popup closes, so the query has to be cleared explicitly
-    // or the next opening starts filtered.
+    // This component stays mounted across close, so the next opening would start filtered.
     setSearch('')
     if (nextOpen) {
       offerSafeCreation && trackEvent({ ...OVERVIEW_EVENTS.EXPAND_MULTI_SAFE, label: OVERVIEW_LABELS.top_bar })
@@ -403,15 +398,11 @@ const NetworkSelector = ({
       >
         <SelectValue>{renderSelectedValue}</SelectValue>
       </SelectTrigger>
-      {/* outline-hidden: base-ui focuses the popup on open, and typing makes that :focus-visible, which
-          draws the browser's focus ring around the whole popup. */}
+      {/* outline-hidden: base-ui focuses the popup on open, and typing makes that ring :focus-visible. */}
       <SelectContent className="min-w-[260px] outline-hidden" alignItemWithTrigger={false}>
-        {/* SelectContent renders its children inside the scrolling list, so a plain header would scroll
-            out of reach. The negative margins and offset bleed this one over that list's padding and have
-            to stay in step with the `p-1.5` on SelectPrimitive.List in components/ui/select.tsx. */}
+        {/* Negative offsets bleed this header over the scrolling list's padding: keep in step with the `p-1.5` on SelectPrimitive.List. */}
         <div className="sticky -top-1.5 z-10 -mx-1.5 -mt-1.5 bg-popover px-1.5 pt-1.5 pb-2">
-          {/* rounded-[6px] is the popup's 12px corner less the 6px this header insets the field by,
-              so the two curves stay concentric instead of crossing. */}
+          {/* rounded-[6px] is the popup's 12px corner less this header's 6px inset, to stay concentric. */}
           <SearchInput
             variant="surface"
             // eslint-disable-next-line no-restricted-syntax -- the radius has to be the popup's less this field's inset; no preset can know the container it is nested in
@@ -434,8 +425,7 @@ const NetworkSelector = ({
 
         {testNets.map((chain) => renderMenuItem(chain.chainId, false))}
 
-        {/* role=status: the rows vanish without focus moving, so a screen reader would not
-            otherwise hear that the list emptied. */}
+        {/* role=status: the rows vanish without focus moving, so nothing else announces the empty list. */}
         {query && prodNets.length === 0 && testNets.length === 0 && (
           <p
             role="status"
