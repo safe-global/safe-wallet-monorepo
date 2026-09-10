@@ -167,9 +167,11 @@ const SafeDropdownContainer = ({
       )
     }
 
-    // Manual sort turns the list into a drag-to-reorder list (never while searching — a drop would
-    // persist a partial order). Selecting a row navigates and closes, mirroring the Select rows.
-    if (onReorder && !query) {
+    // Manual sort turns the list into a drag-to-reorder list. It stays mounted while searching (with
+    // dragging disabled, since a drop would persist a partial order) rather than swapping to the
+    // plain Select list — the swap would remount the base-ui rows and pull focus off the search input.
+    // Selecting a row navigates and closes, mirroring the Select rows.
+    if (onReorder) {
       return (
         <ReorderableSafeList
           items={filteredItems}
@@ -180,6 +182,7 @@ const SafeDropdownContainer = ({
           }}
           onRename={handleRename}
           onReorder={onReorder}
+          isDragDisabled={Boolean(query)}
         />
       )
     }
