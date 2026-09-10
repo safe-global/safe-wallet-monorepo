@@ -32,18 +32,7 @@ export const buildIdentityKey = (chainId: string, safeAddress: string): string =
 
 const noop = (): void => {}
 
-/**
- * Token options for the spending-limit selector, scoped to the Safe that `useSafeInfo` / `useChainId`
- * resolve — the Space-level scope once WA-3146's scope-aware `useSafeInfo`/`useChainId` land (#8646);
- * the URL Safe otherwise.
- *
- * Held tokens always come from the Transaction Service balances endpoint (never the portfolio one):
- * it returns every token the Safe ever received, zero balances included, which AC C16 relies on.
- * Only the user's token-list ("trusted") setting applies; hidden-token and dust filters do not.
- *
- * Popular tokens are a per-chain address list; their metadata comes from CGW's token endpoint so it
- * can never drift from what the assets page shows.
- */
+/** Held tokens use the Transaction Service balances endpoint, not the portfolio one: AC C16 needs the zero balances only it returns. */
 const useSpendingLimitTokenOptions = (): TokenOptionsResult => {
   const chainId = useChainId()
   const { safe, safeAddress } = useSafeInfo()
@@ -51,9 +40,7 @@ const useSpendingLimitTokenOptions = (): TokenOptionsResult => {
   const currency = useAppSelector(selectCurrency)
   const trusted = useTokenListSetting()
 
-  // `useChainId` can flip a render before `useSafeInfo` (Redux, updated in an effect) catches up
-  // during navigation between Safes on different chains — see useLoadSafeInfo's `isStoredSafeValid`.
-  // Treat the identity as valid only once both agree, so we never issue a cross-chain balances query.
+  // `useChainId` can flip a render before `useSafeInfo` catches up — see useLoadSafeInfo's `isStoredSafeValid`.
   const identityMatchesChain = safe.chainId === chainId
   // The Transaction Service has no balances for an undeployed Safe; `trusted` is undefined until the
   // chain config resolves.

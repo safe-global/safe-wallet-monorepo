@@ -1,19 +1,4 @@
-/**
- * Popular tokens per chain for the spending-limit token selector (WA-3149, AC C14) — addresses only.
- *
- * Symbol, name, decimals and logo are resolved at runtime through CGW
- * (`GET /v1/chains/{chainId}/tokens?addresses=`), which reads the Transaction Service, the same source
- * the assets page uses. Freezing that metadata here would go stale on every token-list sync.
- *
- * Coverage: the six highest-traffic chains that expose SPENDING_LIMIT (Ethereum, BNB Chain, Base,
- * Polygon, Gnosis, Avalanche — 95% of spending-limit-eligible traffic in safe-client-gateway
- * production logs, 7 days to 2026-09-08) plus Sepolia. Other chains fall back to the Safe's own
- * tokens and the native currency, which is synthesised from `chain.nativeCurrency`.
- *
- * Every address was verified on 2026-09-08 with `GET <transactionService>/api/v1/tokens/<address>/`
- * on that chain's Transaction Service; re-verify the same way before editing. At most 20 per chain
- * (CGW batch cap). Keys are `ChainInfo.chainId` strings.
- */
+/** Addresses only — CGW resolves the metadata at runtime. Verify a new entry against that chain's Transaction Service `/api/v1/tokens/<address>/` before adding it; at most 20 per chain. */
 export const POPULAR_TOKEN_ADDRESSES: Record<string, readonly string[]> = {
   // Ethereum: USDC, USDT, DAI, USDS, WETH, WBTC, cbBTC, SAFE
   '1': [
