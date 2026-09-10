@@ -273,6 +273,18 @@ const NetworkSelector = ({
   const [open, setOpen] = useState<boolean>(false)
   const [search, setSearch] = useState('')
   const searchRef = useRef<HTMLInputElement>(null)
+  const rowRefs = useRef(new Map<string, HTMLElement>())
+
+  const registerRow = useCallback(
+    (chainId: string) => (node: HTMLElement | null) => {
+      if (!node) return
+      rowRefs.current.set(chainId, node)
+      return () => {
+        rowRefs.current.delete(chainId)
+      }
+    },
+    [],
+  )
   const { configs } = useChains()
   const chainId = useChainId()
   const router = useRouter()
@@ -320,7 +332,13 @@ const NetworkSelector = ({
       }
 
       return (
-        <SelectItem data-testid="network-selector-item" key={chainId} value={chainId} className={css.menuItem}>
+        <SelectItem
+          data-testid="network-selector-item"
+          key={chainId}
+          ref={registerRow(chainId)}
+          value={chainId}
+          className={css.menuItem}
+        >
           <Link
             href={getNetworkLink(router, safeAddress, chain)}
             onClick={() => {
@@ -339,17 +357,15 @@ const NetworkSelector = ({
         </SelectItem>
       )
     },
-    [configs, onChainSelect, router, safeAddress, compactButton],
+    [configs, onChainSelect, router, safeAddress, compactButton, registerRow],
   )
 
   // base-ui's highlighted-row index goes stale when the list shrinks; focusing a row resets it via onFocus.
   const focusRow = (edge: 'first' | 'last') => {
-    const rows = searchRef.current
-      ?.closest('[data-slot="select-content"]')
-      ?.querySelectorAll<HTMLElement>('[data-slot="select-item"]')
-    if (!rows?.length) return
-    const row = edge === 'first' ? rows[0] : rows[rows.length - 1]
-    row?.focus()
+    const rendered = [...prodNets, ...testNets]
+    const chain = edge === 'first' ? rendered[0] : rendered[rendered.length - 1]
+    if (!chain) return
+    rowRefs.current.get(chain.chainId)?.focus()
   }
 
   const handleSearchKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
