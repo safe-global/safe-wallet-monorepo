@@ -1,6 +1,6 @@
 import type React from 'react'
 import type { BeamerConfig, BeamerMethods } from '@services/beamer/types'
-// test the tests
+
 declare global {
   interface Window {
     isDesktop?: boolean
