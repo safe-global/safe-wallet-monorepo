@@ -1,26 +1,26 @@
-import useLocalStorage from '@/services/local-storage/useLocalStorage'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
-import { TIERS, TRIAL_PLANS } from '../components/Plans/fixtures'
 import type { PlansData } from '../components/Plans/types'
+import { useSpaceEntitlements } from './billing/useSpaceEntitlements'
+import { useSpaceSubscription } from './billing/useSpaceSubscription'
 
-export const PLAN_STATUS_OVERRIDE_KEY = 'safeProPlanStatus'
+/** The Workspace's plan as the UI renders it: entitlements give the cycle and seats, the subscription the status. */
+export const useSpacePlan = (spaceId?: string | null) => {
+  const entitlements = useSpaceEntitlements(spaceId)
+  const { subscription, status, isLoading: isSubscriptionLoading } = useSpaceSubscription(spaceId)
 
-// TODO: fixture-backed until the entitlement endpoint lands; localStorage can force the status for QA.
-export const useSpacePlan = (): {
-  plan: PlansData['plan']
-  tierName?: string
-  isTrialing: boolean
-  isPaidActive: boolean
-} => {
-  const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
-  const [status] = useLocalStorage<NonNullable<PlansData['plan']>['status']>(PLAN_STATUS_OVERRIDE_KEY)
-  const plan = TRIAL_PLANS.plan && { ...TRIAL_PLANS.plan, status: status ?? TRIAL_PLANS.plan.status }
+  const name = subscription?.plan.name ?? entitlements.plan?.name ?? undefined
+  const plan: PlansData['plan'] =
+    status === 'trialing' || status === 'active'
+      ? { name: name ?? 'Safe Pro', status, periodEndsAt: entitlements.plan?.cycleEndsAt ?? null }
+      : null
 
   return {
     plan,
-    tierName: TIERS.find((tier) => tier.isCurrent)?.name,
-    isTrialing: isSafePro && plan?.status === 'trialing',
-    isPaidActive: isSafePro && plan?.status === 'active',
+    tierName: name,
+    seats: entitlements.seats,
+    subscription,
+    status,
+    isTrialing: status === 'trialing',
+    isPaidActive: status === 'active',
+    isLoading: entitlements.isLoading || isSubscriptionLoading,
   }
 }

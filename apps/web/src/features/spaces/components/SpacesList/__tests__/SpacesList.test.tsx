@@ -59,6 +59,7 @@ jest.mock('@/features/safe-pro-announcement', () => ({
 }))
 
 jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
+jest.mock('../../../hooks/useSpacePlan', () => ({ useSpacePlan: () => ({ tierName: undefined, isPaidActive: false }) }))
 
 jest.mock('../../Plans/TrialFlow', () => ({
   __esModule: true,
