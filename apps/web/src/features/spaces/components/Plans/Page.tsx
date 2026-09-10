@@ -37,10 +37,7 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
   const { startCheckout, isRedirecting: isCheckingOut } = useStartCheckout(spaceId)
   const [isReminderOpen, setIsReminderOpen] = useState(false)
 
-  const tiers = useMemo(
-    () => buildPlanTiers({ paidPlans, subscription, seatsQuota: seats?.quota }),
-    [paidPlans, subscription, seats?.quota],
-  )
+  const tiers = useMemo(() => buildPlanTiers(paidPlans), [paidPlans])
 
   useEffect(() => {
     if (isTrialing && !reminderSeen.get()) setIsReminderOpen(true)
@@ -77,6 +74,7 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
             onManage={() => void openPortal()}
             isManaging={isRedirecting}
             canManage={subscription !== undefined}
+            // TODO(safe-pro): the CGW has no upgrade/downgrade yet, so on a live plan this starts a second checkout.
             onSubscribe={(paymentLinkId) => void startCheckout(paymentLinkId)}
             isSubscribing={isCheckingOut}
           />

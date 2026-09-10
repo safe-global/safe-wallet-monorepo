@@ -1,5 +1,4 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
-import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import type { PlanGroup } from '../../../hooks/billing/types'
 import Plans from '../index'
 import { remaining, seatsTooltip } from '../PlanStatusCard'
@@ -19,21 +18,6 @@ const STARTER: PlanGroup = {
   name: 'Starter',
   offers: [offer('Starter', 'pl_starter_m', 149, 'month'), offer('Starter', 'pl_starter_y', 1608, 'year')],
 }
-const business = (status: Subscription['status']) =>
-  ({
-    id: 'sub_1',
-    status,
-    plan: {
-      id: 'price_b',
-      name: 'Business',
-      currentPrice: 499,
-      originalPrice: null,
-      currency: 'eur',
-      billingCycle: 'month',
-      features: [],
-    },
-  }) as unknown as Subscription
-
 const trialing = { name: 'Business', status: 'trialing' as const, periodEndsAt: '2026-12-06T00:00:00Z' }
 const active = { name: 'Business', status: 'active' as const, periodEndsAt: '2026-12-06T00:00:00Z' }
 const meters = { safeAccounts: { used: 6, quota: 10 }, sponsoredTxs: { used: 11, quota: 15 } }
@@ -53,46 +37,49 @@ describe('Plans', () => {
   })
 
   it('derives the yearly discount from the offers, or null without a yearly one', () => {
-    const tiers = buildPlanTiers({ paidPlans: [STARTER], subscription: undefined, seatsQuota: undefined })
-    expect(yearlyDiscount(tiers)).toBe(10)
-
-    const monthlyOnly = buildPlanTiers({
-      paidPlans: [{ ...STARTER, offers: STARTER.offers.slice(0, 1) }],
-      subscription: undefined,
-      seatsQuota: undefined,
-    })
-    expect(yearlyDiscount(monthlyOnly)).toBeNull()
+    expect(yearlyDiscount(buildPlanTiers([STARTER]))).toBe(10)
+    expect(yearlyDiscount(buildPlanTiers([{ ...STARTER, offers: STARTER.offers.slice(0, 1) }]))).toBeNull()
   })
 
-  it('renders the trial state: billing CTA, current plan card from the subscription and monthly offers', () => {
+  it('renders the trial state: billing CTA, the current plan only in the status card, monthly offers on sale', () => {
     const onManage = jest.fn()
-    const tiers = buildPlanTiers({ paidPlans: [STARTER], subscription: business('trialing'), seatsQuota: 10 })
-    render(<Plans plan={trialing} {...meters} tiers={tiers} onManage={onManage} />)
+    const onSubscribe = jest.fn()
+    render(
+      <Plans
+        plan={trialing}
+        {...meters}
+        tiers={buildPlanTiers([STARTER])}
+        onManage={onManage}
+        onSubscribe={onSubscribe}
+      />,
+    )
 
-    expect(screen.getAllByText('Free trial')).toHaveLength(2)
+    expect(screen.getAllByText('Free trial')).toHaveLength(1)
     expect(screen.getByText(/Your free trial is active until Dec 6, 2026/)).toBeInTheDocument()
     expect(screen.getByText('€149')).toBeInTheDocument()
-    expect(screen.getByText('€499')).toBeInTheDocument()
+    expect(screen.queryByText('€499')).not.toBeInTheDocument()
     expect(screen.getByText('Custom')).toBeInTheDocument()
     expect(screen.queryByText('€1,608')).not.toBeInTheDocument()
-    expect(screen.getByDisplayValue('10 Safe accounts')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Add billing details' }))
     expect(onManage).toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Choose plan' }))
+    expect(onSubscribe).toHaveBeenCalledWith('pl_starter_m')
+    expect(screen.getByRole('button', { name: 'Coming soon' })).toBeInTheDocument()
   })
 
   it('renders the paid state with the Manage plan CTA', () => {
-    const tiers = buildPlanTiers({ paidPlans: [STARTER], subscription: business('active'), seatsQuota: 10 })
-    render(<Plans plan={active} {...meters} tiers={tiers} isManaging />)
+    render(<Plans plan={active} {...meters} tiers={buildPlanTiers([STARTER])} isManaging />)
 
-    expect(screen.getAllByText('Active')).toHaveLength(2)
+    expect(screen.getAllByText('Active')).toHaveLength(1)
     expect(screen.getByText('Safe accounts above the limit stay available outside the Workspace.')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Manage plan' })).toBeDisabled()
   })
 
   it('shows the locked state and lets the Workspace buy an offered plan when it has none', () => {
     const onSubscribe = jest.fn()
-    const tiers = buildPlanTiers({ paidPlans: [STARTER], subscription: undefined, seatsQuota: undefined })
+    const tiers = buildPlanTiers([STARTER])
     render(
       <Plans
         plan={null}
@@ -114,16 +101,9 @@ describe('Plans', () => {
     expect(screen.getByRole('button', { name: 'Coming soon' })).toBeInTheDocument()
   })
 
-  it('keeps the Stripe portal reachable for a lapsed subscription and never sells while a plan is live', () => {
-    const onSubscribe = jest.fn()
-    const tiers = buildPlanTiers({ paidPlans: [STARTER], subscription: business('active'), seatsQuota: 10 })
-    const { rerender } = render(
-      <Plans plan={null} {...meters} tiers={tiers} canManage onManage={jest.fn()} onSubscribe={onSubscribe} />,
-    )
-    expect(screen.getByRole('button', { name: 'Manage plan' })).toBeInTheDocument()
+  it('keeps the Stripe portal reachable for a lapsed subscription', () => {
+    render(<Plans plan={null} {...meters} tiers={buildPlanTiers([STARTER])} canManage onManage={jest.fn()} />)
 
-    rerender(<Plans plan={active} {...meters} tiers={tiers} onSubscribe={onSubscribe} />)
-    expect(screen.queryByRole('button', { name: 'Choose plan' })).not.toBeInTheDocument()
-    expect(screen.getAllByRole('button', { name: 'Coming soon' })).toHaveLength(3)
+    expect(screen.getByRole('button', { name: 'Manage plan' })).toBeInTheDocument()
   })
 })

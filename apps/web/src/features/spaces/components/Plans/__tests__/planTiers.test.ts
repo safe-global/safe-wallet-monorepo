@@ -1,7 +1,6 @@
-import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import type { PlanGroup, PlanOffer } from '../../../hooks/billing/types'
 import { PLAN_FEATURES, PLAN_TRIAL_HIGHLIGHTS } from '../fixtures'
-import { buildPlanTiers, offersToTiers, seatsLabel, subscriptionToTier, trialTiers } from '../planTiers'
+import { buildPlanTiers, offersToTiers, seatsLabel, trialTiers } from '../planTiers'
 
 const offer = (overrides: Partial<PlanOffer> & Pick<PlanOffer, 'paymentLinkId' | 'planName'>): PlanOffer => ({
   seats: 10,
@@ -29,28 +28,11 @@ const BUSINESS_TRIAL: PlanGroup = {
   offers: [offer({ paymentLinkId: 'b10m', planName: 'Business', trialPeriodDays: 60 })],
 }
 
-const subscription = (plan: Partial<Subscription['plan']>): Subscription =>
-  ({
-    id: 'sub_1',
-    status: 'active',
-    plan: {
-      id: 'price',
-      name: 'Business',
-      currentPrice: 499,
-      originalPrice: null,
-      currency: 'eur',
-      billingCycle: 'month',
-      features: [],
-      ...plan,
-    },
-  }) as unknown as Subscription
-
 describe('planTiers', () => {
   it.each([
     [10, '10 Safe accounts'],
     ['unlimited', 'Unlimited Safe accounts'],
     [null, 'Safe accounts'],
-    [undefined, 'Safe accounts'],
   ] as const)('labels seats %p as %p', (seats, label) => {
     expect(seatsLabel(seats)).toBe(label)
   })
@@ -68,34 +50,16 @@ describe('planTiers', () => {
     ])
   })
 
-  it('rebuilds the current plan card from the subscription and the seats entitlement', () => {
-    expect(subscriptionToTier(subscription({}), 10)).toMatchObject({
-      id: 'current',
-      name: 'Business',
-      isCurrent: true,
-      options: [{ paymentLinkId: null, label: '10 Safe accounts', price: 499, originalPrice: null }],
-      features: PLAN_FEATURES.Business,
-    })
-    expect(subscriptionToTier(subscription({ features: ['Custom perk'] }), null)).toMatchObject({
-      options: [expect.objectContaining({ label: 'Unlimited Safe accounts' })],
-      features: ['Custom perk'],
-    })
-    expect(subscriptionToTier(subscription({ name: null }), undefined)).toMatchObject({
-      name: 'Safe Pro',
-      options: [expect.objectContaining({ label: 'Safe accounts' })],
-    })
-  })
-
-  it('orders Starter, the current plan and Enterprise for the Plans page', () => {
+  it('orders the offered plans and the static Enterprise card, without a current-plan card', () => {
     const starter: PlanGroup = {
       name: 'Starter',
       offers: [offer({ paymentLinkId: 's2m', planName: 'Starter', seats: 2, price: 149 })],
     }
-    const tiers = buildPlanTiers({ paidPlans: [starter], subscription: subscription({}), seatsQuota: 10 })
 
-    expect(tiers.map((tier) => [tier.name, tier.isCurrent ?? false])).toEqual([
+    expect(buildPlanTiers([BUSINESS, starter]).map((tier) => [tier.name, tier.isCurrent ?? false])).toEqual([
       ['Starter', false],
-      ['Business', true],
+      ['Business', false],
+      ['Business', false],
       ['Enterprise', false],
     ])
   })

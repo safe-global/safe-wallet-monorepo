@@ -1,16 +1,11 @@
-import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import type { PlanGroup, PlanOffer } from '../../hooks/billing/types'
 import { ENTERPRISE_TIER, PLAN_FEATURES, PLAN_ORDER, PLAN_TRIAL_HIGHLIGHTS } from './fixtures'
 import type { PlanSeatOption, PlanTier } from './types'
 
 const CYCLES = ['month', 'year'] as const
 
-export const seatsLabel = (seats: PlanOffer['seats'] | undefined): string =>
-  seats === undefined || seats === null
-    ? 'Safe accounts'
-    : seats === 'unlimited'
-      ? 'Unlimited Safe accounts'
-      : `${seats} Safe accounts`
+export const seatsLabel = (seats: PlanOffer['seats']): string =>
+  seats === null ? 'Safe accounts' : seats === 'unlimited' ? 'Unlimited Safe accounts' : `${seats} Safe accounts`
 
 const toOption = (offer: PlanOffer, monthly: PlanOffer | undefined): PlanSeatOption => ({
   paymentLinkId: offer.paymentLinkId,
@@ -44,48 +39,14 @@ export const offersToTiers = (plans: PlanGroup[]): PlanTier[] =>
     })
   })
 
-/** The CGW never offers the current plan, so its card is rebuilt from the subscription and the seats entitlement. */
-export const subscriptionToTier = (subscription: Subscription, seatsQuota: number | null | undefined): PlanTier => {
-  const name = subscription.plan.name ?? 'Safe Pro'
-
-  return {
-    id: 'current',
-    name,
-    currency: subscription.plan.currency,
-    billingCycle: subscription.plan.billingCycle ?? null,
-    options: [
-      {
-        paymentLinkId: null,
-        label: seatsLabel(seatsQuota === null ? 'unlimited' : seatsQuota),
-        price: subscription.plan.currentPrice,
-        originalPrice: subscription.plan.originalPrice,
-      },
-    ],
-    features: subscription.plan.features.length > 0 ? subscription.plan.features : (PLAN_FEATURES[name] ?? []),
-    isCurrent: true,
-  }
-}
-
 const rank = (name: string): number => {
   const index = PLAN_ORDER.indexOf(name)
   return index === -1 ? PLAN_ORDER.length : index
 }
 
-export const buildPlanTiers = ({
-  paidPlans,
-  subscription,
-  seatsQuota,
-}: {
-  paidPlans: PlanGroup[]
-  subscription: Subscription | undefined
-  seatsQuota: number | null | undefined
-}): PlanTier[] => {
-  const tiers = offersToTiers(paidPlans)
-  if (subscription) tiers.push(subscriptionToTier(subscription, seatsQuota))
-  tiers.push(ENTERPRISE_TIER)
-
-  return tiers.sort((a, b) => rank(a.name) - rank(b.name))
-}
+/** The offers the CGW makes to this Workspace plus the static Enterprise card; the current plan lives in the status card. */
+export const buildPlanTiers = (paidPlans: PlanGroup[]): PlanTier[] =>
+  [...offersToTiers(paidPlans), ENTERPRISE_TIER].sort((a, b) => rank(a.name) - rank(b.name))
 
 /** Monthly trial offers as selectable cards, trimmed to the two highlights the modal shows. */
 export const trialTiers = (trialPlans: PlanGroup[]): PlanTier[] =>

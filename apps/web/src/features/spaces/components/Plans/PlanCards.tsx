@@ -77,7 +77,7 @@ export const PlanCard = ({
   selected?: boolean
   onSelect?: () => void
   onOptionChange?: (option: PlanSeatOption) => void
-  /** Set when the Workspace has no plan: purchasable offers get a real CTA instead of "Coming soon". */
+  /** Purchasable offers get a real CTA; static tiers (Enterprise) keep "Coming soon". */
   onSubscribe?: (paymentLinkId: string) => void
   isSubscribing?: boolean
 }) => {

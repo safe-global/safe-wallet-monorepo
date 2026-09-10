@@ -37,7 +37,7 @@ export default function Plans({
       <PlanCards
         tiers={tiers}
         currentBadge={plan?.status === 'trialing' ? 'Free trial' : 'Active'}
-        onSubscribe={plan === null ? onSubscribe : undefined}
+        onSubscribe={onSubscribe}
         isSubscribing={isSubscribing}
       />
     </div>
