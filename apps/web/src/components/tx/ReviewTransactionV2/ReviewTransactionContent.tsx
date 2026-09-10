@@ -92,7 +92,7 @@ export const ReviewTransactionContent = ({
                   size="submit"
                   onClick={onContinueClick}
                   disabled={!isOk || isSubmitDisabled || (needsRiskConfirmation && !isRiskConfirmed)}
-                  className="order-1 w-full lg:w-auto"
+                  className="order-1"
                 >
                   {isSubmitLoading ? <Spinner className="size-5" /> : 'Continue'}
                 </Button>

@@ -1,4 +1,5 @@
 import { type MouseEvent, useState } from 'react'
+import { ADMIN_ONLY_DELETE_CONTACT_MESSAGE, ADMIN_ONLY_EDIT_CONTACT_MESSAGE } from '@/utils/addressBookNotifications'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import EditIcon from '@/public/images/common/edit.svg'
@@ -38,8 +39,6 @@ const SpaceAddressBookActions = ({
     setOpen(defaultOpen)
   }
 
-  if (!isAdmin) return null
-
   const dialogs = (
     <>
       {open[ModalType.EDIT] && <EditContactDialog entry={entry} onClose={handleCloseModal} />}
@@ -68,10 +67,19 @@ const SpaceAddressBookActions = ({
           />
           <DropdownMenuContent align="end">
             <Track {...SPACE_EVENTS.EDIT_ADDRESS}>
-              <DropdownMenuItem onClick={(e) => handleOpenModal(e, ModalType.EDIT)}>Edit entry</DropdownMenuItem>
+              <DropdownMenuItem
+                disabled={!isAdmin}
+                onClick={isAdmin ? (e) => handleOpenModal(e, ModalType.EDIT) : undefined}
+              >
+                Edit entry
+              </DropdownMenuItem>
             </Track>
             <Track {...SPACE_EVENTS.REMOVE_ADDRESS}>
-              <DropdownMenuItem variant="destructive" onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}>
+              <DropdownMenuItem
+                variant="destructive"
+                disabled={!isAdmin}
+                onClick={isAdmin ? (e) => handleOpenModal(e, ModalType.REMOVE) : undefined}
+              >
                 Delete entry
               </DropdownMenuItem>
             </Track>
@@ -88,17 +96,20 @@ const SpaceAddressBookActions = ({
         <Tooltip>
           <TooltipTrigger
             render={
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                aria-label="Edit entry"
-                onClick={(e) => handleOpenModal(e, ModalType.EDIT)}
-              />
+              <span>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label="Edit entry"
+                  disabled={!isAdmin}
+                  onClick={isAdmin ? (e) => handleOpenModal(e, ModalType.EDIT) : undefined}
+                >
+                  <EditIcon className="size-4 text-[var(--color-border-main)]" />
+                </Button>
+              </span>
             }
-          >
-            <EditIcon className="size-4 text-[var(--color-border-main)]" />
-          </TooltipTrigger>
-          <TooltipContent>Edit entry</TooltipContent>
+          />
+          <TooltipContent>{isAdmin ? 'Edit entry' : ADMIN_ONLY_EDIT_CONTACT_MESSAGE}</TooltipContent>
         </Tooltip>
       </Track>
 
@@ -106,17 +117,20 @@ const SpaceAddressBookActions = ({
         <Tooltip>
           <TooltipTrigger
             render={
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                aria-label="Delete entry"
-                onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}
-              />
+              <span>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label="Delete entry"
+                  disabled={!isAdmin}
+                  onClick={isAdmin ? (e) => handleOpenModal(e, ModalType.REMOVE) : undefined}
+                >
+                  <DeleteIcon className="size-4 text-[var(--color-error-main)]" />
+                </Button>
+              </span>
             }
-          >
-            <DeleteIcon className="size-4 text-[var(--color-error-main)]" />
-          </TooltipTrigger>
-          <TooltipContent>Delete entry</TooltipContent>
+          />
+          <TooltipContent>{isAdmin ? 'Delete entry' : ADMIN_ONLY_DELETE_CONTACT_MESSAGE}</TooltipContent>
         </Tooltip>
       </Track>
 
