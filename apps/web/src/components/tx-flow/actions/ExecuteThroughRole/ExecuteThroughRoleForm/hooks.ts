@@ -5,6 +5,7 @@ import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
 import { Errors } from '@/services/exceptions'
 import useLogError from '@/hooks/useLogError'
 import { getModuleTransactionId } from '@/services/transactions'
+import { isExpectedEstimationError } from '@/utils/transaction-errors'
 import { backOff } from 'exponential-backoff'
 import { useMemo } from 'react'
 import {
@@ -331,7 +332,9 @@ export const useGasLimit = (
     return web3ReadOnly.estimateGas(tx)
   }, [web3ReadOnly, tx])
 
-  useLogError(Errors._612, gasLimitError?.message, getRpcErrorContext(web3ReadOnly))
+  // A revert or a throttle is the estimate's expected answer, not a fault.
+  const unexpectedGasLimitError = gasLimitError && !isExpectedEstimationError(gasLimitError) ? gasLimitError : undefined
+  useLogError(Errors._612, unexpectedGasLimitError?.message, getRpcErrorContext(web3ReadOnly))
 
   return { gasLimit, gasLimitError, gasLimitLoading }
 }
