@@ -4,6 +4,7 @@ import type { ReactNode, ReactElement } from 'react'
 import { SafeTxContext } from './SafeTxContext'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { createTx } from '@/services/tx/tx-sender'
+import { useSafeScope } from './safe-scope/context'
 import { useRecommendedNonce, useSafeTxGas } from '@/components/tx/shared/hooks'
 import { Errors } from '@/services/exceptions'
 import useLogError from '@/hooks/useLogError'
@@ -17,6 +18,7 @@ export { SafeTxContext } from './SafeTxContext'
 export type { SafeTxContextParams } from './SafeTxContext'
 
 const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => {
+  const scope = useSafeScope()
   const [safeTx, setSafeTx] = useState<SafeTransaction>()
   const [safeMessage, setSafeMessage] = useState<TypedData>()
   const [safeMessageHash, setSafeMessageHash] = useState<`0x${string}`>()
@@ -63,12 +65,12 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
 
     setSafeTxError(undefined)
 
-    createTx({ ...safeTx.data, safeTxGas: String(finalSafeTxGas) }, finalNonce)
+    createTx({ ...safeTx.data, safeTxGas: String(finalSafeTxGas) }, finalNonce, scope)
       .then((tx) => {
         setSafeTx(tx)
       })
       .catch(setSafeTxError)
-  }, [canEdit, finalNonce, finalSafeTxGas, safeTx?.data])
+  }, [canEdit, finalNonce, finalSafeTxGas, safeTx?.data, scope])
 
   // Log errors
   useLogError(Errors._103, safeTxError)
