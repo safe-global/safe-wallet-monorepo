@@ -38,23 +38,26 @@ const WcSafeAppSuggestion = ({
   const checkboxId = useId()
 
   return (
-    <div className="flex flex-col items-center text-center">
-      <SafeAppIconCard src={safeApp.iconUrl} width={56} height={56} alt={`${safeApp.name} logo`} />
+    <div className="flex flex-col gap-6 text-center">
+      <div className="flex flex-col items-center gap-1">
+        <SafeAppIconCard src={safeApp.iconUrl} width={56} height={56} alt={`${safeApp.name} logo`} />
 
-      <Typography variant="h4" className="mt-4 mb-1">
-        {safeApp.name} runs inside {BRAND_NAME}
-      </Typography>
+        <Typography variant="h4" className="mt-3">
+          {safeApp.name} runs inside {BRAND_NAME}
+        </Typography>
 
-      <Typography variant="paragraph-small" color="muted" className="mb-6">
-        {origin}
-      </Typography>
+        <Typography variant="paragraph-small" color="muted">
+          {origin}
+        </Typography>
+      </div>
 
-      <div className="bg-background-main mb-4 w-full rounded-lg px-4">
+      {/* Bled to the popup edge so the rows inside share a left edge with the controls below */}
+      <div className="bg-background-main -mx-4 rounded-lg px-4">
         {BENEFITS.map(({ Icon, text }, index) => (
           <div key={text}>
             {index > 0 && <Separator />}
-            <div className="flex items-center gap-4 py-4">
-              <div className="bg-success-background text-success flex size-8 shrink-0 items-center justify-center rounded-lg">
+            <div className="flex items-center gap-3 py-3">
+              <div className="bg-success-background text-success flex size-9 shrink-0 items-center justify-center rounded-lg">
                 <Icon className="size-4" />
               </div>
               <Typography variant="paragraph-small" align="left">
@@ -65,30 +68,38 @@ const WcSafeAppSuggestion = ({
         ))}
       </div>
 
-      <Field orientation="horizontal" className="mb-4 self-start">
-        <Checkbox id={checkboxId} checked={dontShowAgain} onCheckedChange={(checked) => setDontShowAgain(!!checked)} />
-        <FieldLabel htmlFor={checkboxId} className="text-muted-foreground">
-          Don&apos;t show again
-        </FieldLabel>
-      </Field>
+      <div className="flex flex-col gap-3">
+        <Field orientation="horizontal" className="self-center">
+          <Checkbox
+            id={checkboxId}
+            checked={dontShowAgain}
+            onCheckedChange={(checked) => setDontShowAgain(!!checked)}
+          />
+          <FieldLabel htmlFor={checkboxId} className="text-muted-foreground">
+            Don&apos;t show again
+          </FieldLabel>
+        </Field>
 
-      <Button variant="default" className="w-full" onClick={() => onOpenSafeApp(safeApp, dontShowAgain)}>
-        Open {safeApp.name} in Safe App Store
-      </Button>
+        <Button variant="default" onClick={() => onOpenSafeApp(safeApp, dontShowAgain)}>
+          Open {safeApp.name} in Safe App Store
+        </Button>
 
-      <Button variant="ghost" className="mt-2 w-full" onClick={() => onContinueWithWalletConnect(dontShowAgain)}>
-        Continue with WalletConnect
-      </Button>
+        <Button variant="ghost" onClick={() => onContinueWithWalletConnect(dontShowAgain)}>
+          Continue with WalletConnect
+        </Button>
+      </div>
 
-      <Separator className="my-4" />
+      <div className="flex flex-col gap-4">
+        <Separator bleed="4" />
 
-      <Typography variant="paragraph-small" color="muted">
-        Browse{' '}
-        <Link render={<button type="button" />} onClick={onBrowseSafeApps}>
-          <b>60+ reviewed apps</b>
-        </Link>{' '}
-        in the Safe App Store
-      </Typography>
+        <Typography variant="paragraph-small" color="muted">
+          Browse{' '}
+          <Link render={<button type="button" />} onClick={onBrowseSafeApps}>
+            <b>60+ reviewed apps</b>
+          </Link>{' '}
+          in the Safe App Store
+        </Typography>
+      </div>
     </div>
   )
 }
