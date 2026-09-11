@@ -1,5 +1,8 @@
 import type { JsonRpcProvider } from 'ethers'
+import type { SerializedError } from '@reduxjs/toolkit'
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { AppDispatch } from '@/store'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import type { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { isSmartContract } from '@/utils/wallets'
@@ -234,8 +237,9 @@ function isConflict(error: unknown): boolean {
   return (error as BackendError)?.status === 409
 }
 
-function toSpaceError(error: unknown): Error {
-  return new Error((error as BackendError)?.data?.message || 'Failed to add Safe account to workspace')
+function toSpaceError(error: FetchBaseQueryError | SerializedError | undefined): Error {
+  const fallback = 'Failed to add Safe account to workspace'
+  return new Error(error ? getRtkQueryErrorMessage(error) || fallback : fallback)
 }
 
 /** Matches the CGW limit message, e.g. "This space only allows a maximum of 40 safe accounts...".
@@ -245,9 +249,9 @@ function isLimitRejection(error: unknown): boolean {
   return status === 400 && typeof data?.message === 'string' && /maximum of \d+/i.test(data.message)
 }
 
-function toPersistError(error: unknown): Error {
+function toPersistError(error: FetchBaseQueryError | SerializedError | undefined): Error {
   // 409 (already deployed) is handled upstream via recoverAlreadyDeployed, so it
   // never reaches here — any error at this point is a genuine persist failure.
-  const message = (error as BackendError)?.data?.message
-  return new Error(message || 'Failed to save Safe account to backend')
+  const fallback = 'Failed to save Safe account to backend'
+  return new Error(error ? getRtkQueryErrorMessage(error) || fallback : fallback)
 }

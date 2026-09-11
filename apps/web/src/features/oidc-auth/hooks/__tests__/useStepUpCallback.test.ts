@@ -1,6 +1,5 @@
 import { renderHook, waitFor } from '@testing-library/react'
 import { useStepUpCallback } from '../useStepUpCallback'
-import { STEP_UP_FAILED_MESSAGE } from '../../constants'
 import { stepUpReturning, stepUpSettled } from '../../store'
 import { saveStepUpTrip } from '../../utils/stepUpReplay'
 
@@ -91,19 +90,17 @@ describe('useStepUpCallback', () => {
     })
   })
 
-  it('should, when the callback carries an error, notify and clean the URL', async () => {
+  it('should, when the callback carries an error, clean the URL without notifying', async () => {
     saveStepUpTrip(TRIP_ACTION)
     setSearch('?spaceId=42&error=access_denied&error_description=mfa_required')
 
     renderHook(() => useStepUpCallback())
 
     await waitFor(() => {
-      expect(mockDispatch).toHaveBeenCalledWith({
-        type: 'notifications/showNotification',
-        payload: { message: STEP_UP_FAILED_MESSAGE, variant: 'error', groupKey: 'step-up-failed' },
-      })
+      expect(mockReplace).toHaveBeenCalled()
     })
 
+    expect(mockDispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'notifications/showNotification' }))
     expect(mockReconcileAuth).not.toHaveBeenCalled()
     expect(mockReplayStepUpAction).not.toHaveBeenCalled()
     expect(mockReplace).toHaveBeenCalledWith({ pathname: '/spaces/members', query: { spaceId: '42' } }, undefined, {
@@ -222,5 +219,49 @@ describe('useStepUpCallback', () => {
       expect(sessionStorage.getItem('oidc_step_up')).toBeNull()
     })
     expect(mockReplayStepUpAction).not.toHaveBeenCalled()
+  })
+
+  describe('back-forward cache restore', () => {
+    const mockReload = jest.fn()
+
+    const restoreFromCache = (persisted: boolean) => {
+      const event = new Event('pageshow') as PageTransitionEvent
+      Object.defineProperty(event, 'persisted', { value: persisted })
+      window.dispatchEvent(event)
+    }
+
+    beforeEach(() => {
+      mockReload.mockClear()
+      Object.defineProperty(window, 'location', {
+        writable: true,
+        value: { ...originalLocation, search: '', pathname: '/spaces/members', reload: mockReload },
+      })
+    })
+
+    it('should, when the page is restored with the trip still unconsumed, reload so no stale error survives', () => {
+      renderHook(() => useStepUpCallback())
+      saveStepUpTrip(TRIP_ACTION)
+
+      restoreFromCache(true)
+
+      expect(mockReload).toHaveBeenCalledTimes(1)
+    })
+
+    it('should, when the page is restored after the trip was already handled, leave the page alone', () => {
+      renderHook(() => useStepUpCallback())
+
+      restoreFromCache(true)
+
+      expect(mockReload).not.toHaveBeenCalled()
+    })
+
+    it('should, when the page loads normally rather than from the cache, leave the page alone', () => {
+      renderHook(() => useStepUpCallback())
+      saveStepUpTrip(TRIP_ACTION)
+
+      restoreFromCache(false)
+
+      expect(mockReload).not.toHaveBeenCalled()
+    })
   })
 })
