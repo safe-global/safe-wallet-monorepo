@@ -103,6 +103,22 @@ describe('buildTokenOptions', () => {
     ])
   })
 
+  it('carries the fiat conversion rate of a held token and none for a popular one', () => {
+    const held = balanceBuilder().with({ fiatConversion: '1234.5' }).build()
+    const popular = {
+      address: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+      symbol: 'DAI',
+      name: 'Dai',
+      decimals: 18,
+      logoUri: '',
+    }
+
+    const options = buildTokenOptions({ balances: [held], popular: [popular] })
+
+    expect(options.find((option) => option.group === 'held')?.fiatConversion).toBe('1234.5')
+    expect(options.find((option) => option.group === 'popular')?.fiatConversion).toBeUndefined()
+  })
+
   it('copies metadata from the popular table', () => {
     const popular = popularTokenBuilder({ decimals: 6 })
 

@@ -40,6 +40,8 @@ export type TokenOption = {
   balance?: string
   /** Held tokens only. */
   fiatBalance?: string
+  /** Held tokens only: the Transaction Service's fiat price for one whole token (`Balance.fiatConversion`). */
+  fiatConversion?: string
 }
 
 /** The subset of `Chain['nativeCurrency']` the selector needs. */
@@ -67,6 +69,7 @@ const toHeldOption = (balance: Balance): TokenOption => ({
   group: 'held',
   balance: balance.balance,
   fiatBalance: balance.fiatBalance,
+  fiatConversion: balance.fiatConversion,
 })
 
 const toPopularOption = (token: PopularToken): TokenOption => ({
