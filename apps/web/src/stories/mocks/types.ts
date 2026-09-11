@@ -39,6 +39,8 @@ export interface FeatureFlags {
   oidcAuth?: boolean
   /** SWITCH_AUTHENTICATOR - 2FA management surfaces (default: false) */
   switchAuthenticator?: boolean
+  /** TWO_FACTOR_AWARENESS_BANNER - the 2FA awareness card in the Workspaces sidebar (default: false) */
+  twoFactorAwarenessBanner?: boolean
 }
 
 /**
