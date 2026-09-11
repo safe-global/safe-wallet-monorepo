@@ -23,9 +23,10 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
-export type TokensGetTokenV1ApiResponse =
-  /** status 200 Token metadata */
-  NativeTokenMetadata | Erc20TokenMetadata | Erc721TokenMetadata
+export type TokensGetTokenV1ApiResponse = /** status 200 Token metadata */
+  | NativeTokenMetadata
+  | Erc20TokenMetadata
+  | Erc721TokenMetadata
 export type TokensGetTokenV1ApiArg = {
   /** Chain ID the token is deployed on */
   chainId: string
