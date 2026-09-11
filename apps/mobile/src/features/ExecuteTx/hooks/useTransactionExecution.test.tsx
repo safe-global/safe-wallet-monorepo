@@ -2,10 +2,14 @@ import { renderHook, act, waitFor } from '@testing-library/react-native'
 import { Provider } from 'react-redux'
 import React from 'react'
 import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
-import { DdRum, ErrorSource } from 'expo-datadog'
 
 const mockExecuteRelayTx = jest.fn()
 const mockRelayMutation = jest.fn()
+const mockReportExecutionFailure = jest.fn()
+
+jest.mock('@/src/services/tx-execution/reportExecutionFailure', () => ({
+  reportExecutionFailure: (...args: unknown[]) => mockReportExecutionFailure(...args),
+}))
 
 jest.mock('@/src/services/tx-execution/relayExecutor', () => ({
   executeRelayTx: (...args: unknown[]) => mockExecuteRelayTx(...args),
@@ -123,49 +127,27 @@ describe('useTransactionExecution', () => {
     expect(mockExecuteRelayTx).toHaveBeenCalledWith(expect.objectContaining({ acceptUnverifiedSimulation: true }))
   })
 
-  it('reports an execution failure to RUM with the shared error taxonomy', async () => {
-    mockExecuteRelayTx.mockRejectedValue(new Error('method not supported: eth_sendRawTransaction'))
+  it('reports an execution failure with the execution method and chain', async () => {
+    const failure = new Error('method not supported: eth_sendRawTransaction')
+    mockExecuteRelayTx.mockRejectedValue(failure)
 
     const { result } = renderExecution()
 
     await act(async () => {
-      await expect(result.current.execute()).rejects.toThrow('method not supported')
+      await expect(result.current.execute()).rejects.toBe(failure)
     })
 
-    expect(DdRum.addError).toHaveBeenCalledWith(
-      'method not supported: eth_sendRawTransaction',
-      ErrorSource.CUSTOM,
-      expect.any(String),
-      expect.objectContaining({
-        error_domain: 'tx_execution',
-        error_type: 'tx_execution_failed',
-        error_layer: 'off_chain',
-        execution_method: ExecutionMethod.WITH_RELAY,
-        chain_id: '137',
-      }),
-    )
-  })
-
-  it('does not report a user rejection to RUM', async () => {
-    mockExecuteRelayTx.mockRejectedValue(new Error('User rejected the request'))
-
-    const { result } = renderExecution()
-
-    await act(async () => {
-      await expect(result.current.execute()).rejects.toThrow('User rejected')
-    })
-
-    expect(DdRum.addError).not.toHaveBeenCalled()
+    expect(mockReportExecutionFailure).toHaveBeenCalledWith(failure, ExecutionMethod.WITH_RELAY, '137')
     expect(result.current.status).toBe(ExecutionStatus.ERROR)
   })
 
-  it('does not report a successful execution to RUM', async () => {
+  it('does not report a successful execution', async () => {
     const { result } = renderExecution()
 
     await act(async () => {
       await result.current.execute()
     })
 
-    expect(DdRum.addError).not.toHaveBeenCalled()
+    expect(mockReportExecutionFailure).not.toHaveBeenCalled()
   })
 })
