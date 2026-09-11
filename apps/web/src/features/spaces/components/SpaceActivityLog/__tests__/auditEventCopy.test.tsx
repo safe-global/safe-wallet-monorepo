@@ -139,6 +139,32 @@ describe('getAuditEventDescription', () => {
       { eventType: 'ADDRESS_BOOK_DELETED' as const, payload: { address: '0xabc', name: 'Carol' } },
       'removed the contact Carol (0xabc)',
     ],
+    [
+      'ADDRESS_BOOK_REQUEST_CREATED',
+      {
+        eventType: 'ADDRESS_BOOK_REQUEST_CREATED' as const,
+        payload: { address: '0x3333333333333333333333333333333333333333', name: 'Dave' },
+      },
+      'requested to add the contact Dave (0x3333333333333333333333333333333333333333) to workspace',
+    ],
+    [
+      'ADDRESS_BOOK_REQUEST_CREATED (no contact details)',
+      { eventType: 'ADDRESS_BOOK_REQUEST_CREATED' as const, payload: {} },
+      'requested to add a contact to workspace',
+    ],
+    [
+      'ADDRESS_BOOK_REQUEST_REJECTED',
+      {
+        eventType: 'ADDRESS_BOOK_REQUEST_REJECTED' as const,
+        payload: { address: '0x4444444444444444444444444444444444444444', name: 'Erin' },
+      },
+      'rejected the request to add the contact Erin (0x4444444444444444444444444444444444444444) to workspace',
+    ],
+    [
+      'ADDRESS_BOOK_REQUEST_REJECTED (no contact details)',
+      { eventType: 'ADDRESS_BOOK_REQUEST_REJECTED' as const, payload: {} },
+      'rejected the request to add a contact to workspace',
+    ],
   ])('describes %s', (_label, overrides, expected) => {
     expect(describeEvent(overrides)).toBe(expected)
   })
@@ -164,6 +190,8 @@ describe('getAuditEventDescription', () => {
       'SAFE_REMOVED',
       'ADDRESS_BOOK_UPSERTED',
       'ADDRESS_BOOK_DELETED',
+      'ADDRESS_BOOK_REQUEST_CREATED',
+      'ADDRESS_BOOK_REQUEST_REJECTED',
     ]
     for (const eventType of eventTypes) {
       expect(describeEvent({ eventType, targetUser: null, payload: {} })).not.toBe('')
