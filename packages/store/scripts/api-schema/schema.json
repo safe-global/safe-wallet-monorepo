@@ -183,6 +183,15 @@
             "schema": {
               "type": "boolean"
             }
+          },
+          {
+            "name": "elevate",
+            "required": false,
+            "in": "query",
+            "description": "When true, requests step-up authentication: the provider re-challenges a second factor and the resulting session is elevated for sensitive actions.",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -578,6 +587,136 @@
           }
         },
         "summary": "Create a checkout session for a payment link",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
+    "/v1/billing/spaces/{spaceId}/subscriptions/{subscriptionId}/preview-update": {
+      "get": {
+        "operationId": "billingPreviewSubscriptionUpdateV1",
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "required": true,
+            "in": "path",
+            "description": "Subscription identifier",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "planId",
+            "required": true,
+            "in": "query",
+            "description": "The price id of the plan to preview",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionUpdatePreview"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not a member, or a plan this workspace is not offered"
+          },
+          "404": {
+            "description": "Subscription not found"
+          },
+          "409": {
+            "description": "Already on this plan"
+          },
+          "422": {
+            "description": "Malformed subscriptionId or planId"
+          }
+        },
+        "summary": "Preview what moving a subscription to another plan would cost",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
+    "/v1/billing/spaces/{spaceId}/subscriptions/{subscriptionId}": {
+      "patch": {
+        "operationId": "billingUpdateSubscriptionV1",
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "required": true,
+            "in": "path",
+            "description": "Subscription identifier",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSubscriptionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateSubscriptionResult"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not a member, or a plan this workspace is not offered"
+          },
+          "404": {
+            "description": "Subscription not found"
+          },
+          "409": {
+            "description": "Already on this plan, the subscription is not updatable, or several offered links sell the plan and none was named"
+          },
+          "422": {
+            "description": "The named payment link does not offer this plan"
+          },
+          "502": {
+            "description": "The billing service reported the plan change as unsuccessful"
+          }
+        },
+        "summary": "Move a subscription onto another plan",
         "tags": [
           "billing"
         ]
@@ -2890,6 +3029,9 @@
           "401": {
             "description": "Authentication required or user unauthorized to modify this space"
           },
+          "402": {
+            "description": "The space is at its plan's Safe seat limit. The body carries `{ code: \"QUOTA_EXCEEDED\", feature, quota, used, resetsAt }`"
+          },
           "403": {
             "description": "Access forbidden - user lacks permission to add Safes to this space"
           },
@@ -3731,6 +3873,52 @@
         "summary": "Submit a survey response for a space",
         "tags": [
           "surveys"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/entitlements": {
+      "get": {
+        "description": "The single source of truth for what a workspace can do: the active plan and per-feature entitlements, with quotas and usage for metered ones. Free-tier workspaces get the same contract shape.",
+        "operationId": "entitlementsGetEntitlementsV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitlementsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid space identifier"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Access forbidden - user is not a member of this space"
+          },
+          "404": {
+            "description": "Space not found"
+          }
+        },
+        "summary": "Get space entitlements",
+        "tags": [
+          "entitlements"
         ]
       }
     },
@@ -6709,7 +6897,11 @@
             "type": "number",
             "nullable": true
           },
-          "validUntil": {
+          "currentPeriodStart": {
+            "type": "number",
+            "nullable": true
+          },
+          "currentPeriodEnd": {
             "type": "number",
             "nullable": true
           },
@@ -6883,6 +7075,10 @@
             "items": {
               "type": "object"
             }
+          },
+          "trialPeriodDays": {
+            "type": "number",
+            "nullable": true
           }
         },
         "required": [
@@ -6905,6 +7101,84 @@
         "required": [
           "sessionId",
           "url"
+        ]
+      },
+      "PreviewLineItem": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Signed amount in minor units; negative for credit on unused time"
+          },
+          "currency": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "description",
+          "amount",
+          "currency"
+        ]
+      },
+      "SubscriptionUpdatePreview": {
+        "type": "object",
+        "properties": {
+          "amountDue": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "nextBillingDate": {
+            "type": "number",
+            "description": "Unix timestamp in seconds"
+          },
+          "lineItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PreviewLineItem"
+            }
+          }
+        },
+        "required": [
+          "amountDue",
+          "currency",
+          "nextBillingDate",
+          "lineItems"
+        ]
+      },
+      "UpdateSubscriptionDto": {
+        "type": "object",
+        "properties": {
+          "planId": {
+            "type": "string",
+            "description": "The price id of the plan to move the subscription onto"
+          },
+          "paymentLinkId": {
+            "type": "string",
+            "description": "Which offered payment link sells that plan. Only needed to disambiguate when several do"
+          }
+        },
+        "required": [
+          "planId"
+        ]
+      },
+      "UpdateSubscriptionResult": {
+        "type": "object",
+        "properties": {
+          "subscriptionId": {
+            "type": "string"
+          },
+          "success": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "subscriptionId",
+          "success"
         ]
       },
       "CheckoutSession": {
@@ -10666,6 +10940,188 @@
           "answeredByUserId"
         ]
       },
+      "FeatureKey": {
+        "type": "string",
+        "enum": [
+          "safe_seats"
+        ],
+        "description": "Feature key from the entitlements catalog."
+      },
+      "BinaryEntitlement": {
+        "type": "object",
+        "properties": {
+          "feature": {
+            "description": "Feature key from the entitlements catalog.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FeatureKey"
+              }
+            ]
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the plan grants the feature at all. A metered feature reports its quota and usage even when this is false."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "binary"
+            ]
+          }
+        },
+        "required": [
+          "feature",
+          "enabled",
+          "type"
+        ]
+      },
+      "ValueEntitlement": {
+        "type": "object",
+        "properties": {
+          "feature": {
+            "description": "Feature key from the entitlements catalog.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FeatureKey"
+              }
+            ]
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the plan grants the feature at all. A metered feature reports its quota and usage even when this is false."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "value"
+            ]
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "feature",
+          "enabled",
+          "type",
+          "value"
+        ]
+      },
+      "MeteredEntitlement": {
+        "type": "object",
+        "properties": {
+          "feature": {
+            "description": "Feature key from the entitlements catalog.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FeatureKey"
+              }
+            ]
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the plan grants the feature at all. A metered feature reports its quota and usage even when this is false."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "metered"
+            ]
+          },
+          "quota": {
+            "type": "number",
+            "nullable": true,
+            "description": "The plan's quota, never inflated to match usage; null means unlimited."
+          },
+          "used": {
+            "type": "number",
+            "description": "May legally exceed `quota`."
+          },
+          "resetsAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true,
+            "description": "Null for stock-type features (seats) that have no reset window."
+          }
+        },
+        "required": [
+          "feature",
+          "enabled",
+          "type",
+          "quota",
+          "used",
+          "resetsAt"
+        ]
+      },
+      "EntitlementsPlan": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Plan identifier in the billing service"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "cycleEndsAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true,
+            "description": "End of the current billing cycle"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "cycleEndsAt"
+        ]
+      },
+      "EntitlementsResponse": {
+        "type": "object",
+        "properties": {
+          "plan": {
+            "nullable": true,
+            "description": "Null when the workspace has no active subscription.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntitlementsPlan"
+              }
+            ]
+          },
+          "entitlements": {
+            "type": "array",
+            "description": "One entry per catalog feature. Which fields an entry carries is decided by `type`: a metered one always carries quota, usage and its reset window, and the others never do.",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/BinaryEntitlement"
+                },
+                {
+                  "$ref": "#/components/schemas/ValueEntitlement"
+                },
+                {
+                  "$ref": "#/components/schemas/MeteredEntitlement"
+                }
+              ],
+              "discriminator": {
+                "propertyName": "type",
+                "mapping": {
+                  "binary": "#/components/schemas/BinaryEntitlement",
+                  "value": "#/components/schemas/ValueEntitlement",
+                  "metered": "#/components/schemas/MeteredEntitlement"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "plan",
+          "entitlements"
+        ]
+      },
       "SafeList": {
         "type": "object",
         "properties": {
@@ -10695,7 +11151,7 @@
           "gasLimit": {
             "type": "string",
             "nullable": true,
-            "description": "Accepted for backward compatibility and validation; not forwarded to the relay provider (Gelato)."
+            "description": "Accepted for backward compatibility and validation; not forwarded to the relay provider."
           },
           "safeTxHash": {
             "type": "string",
@@ -12396,6 +12852,20 @@
           "type"
         ]
       },
+      "DeleteModuleGuard": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "DELETE_MODULE_GUARD"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
       "DisableModule": {
         "type": "object",
         "properties": {
@@ -12490,6 +12960,24 @@
           "guard"
         ]
       },
+      "SetModuleGuard": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "SET_MODULE_GUARD"
+            ]
+          },
+          "moduleGuard": {
+            "$ref": "#/components/schemas/AddressInfo"
+          }
+        },
+        "required": [
+          "type",
+          "moduleGuard"
+        ]
+      },
       "SettingsChange": {
         "type": "object",
         "properties": {
@@ -12500,11 +12988,13 @@
               "CHANGE_MASTER_COPY",
               "CHANGE_THRESHOLD",
               "DELETE_GUARD",
+              "DELETE_MODULE_GUARD",
               "DISABLE_MODULE",
               "ENABLE_MODULE",
               "REMOVE_OWNER",
               "SET_FALLBACK_HANDLER",
               "SET_GUARD",
+              "SET_MODULE_GUARD",
               "SWAP_OWNER"
             ]
           }
@@ -12566,6 +13056,9 @@
                 "$ref": "#/components/schemas/DeleteGuard"
               },
               {
+                "$ref": "#/components/schemas/DeleteModuleGuard"
+              },
+              {
                 "$ref": "#/components/schemas/DisableModule"
               },
               {
@@ -12579,6 +13072,9 @@
               },
               {
                 "$ref": "#/components/schemas/SetGuard"
+              },
+              {
+                "$ref": "#/components/schemas/SetModuleGuard"
               },
               {
                 "$ref": "#/components/schemas/SwapOwner"

@@ -57,10 +57,8 @@ const SecurityReportDrawer = ({
           showCloseButton={false}
           aria-label="Security report"
           variant="floating"
-          surface="card"
+          surface="muted"
           padding="none"
-          // Floats with a viewport margin, rounded corners and a #fafafa (light) / bg-card (dark) surface
-          // via variant="floating" + surface="card". Keep the explicit 440px width and kill the base gap.
           // eslint-disable-next-line no-restricted-syntax -- w-[440px]! beats base data-[side]:w-3/4 specificity; gap-0 removes base gap-4
           className="w-[440px]! gap-0"
         >

@@ -864,6 +864,7 @@ export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
     spaces: features.spaces ?? false,
     oidcAuth: features.oidcAuth ?? false,
     switchAuthenticator: features.switchAuthenticator ?? false,
+    twoFactorAwarenessBanner: features.twoFactorAwarenessBanner ?? false,
   }
 
   // Build handlers array
@@ -904,7 +905,7 @@ export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
     ...externalServicesHandlers(),
   )
 
-  // Add custom handlers last (can override defaults)
+  // Appended after defaults — MSW is first-match-wins, so these only add unmocked routes, never override
   allHandlers.push(...customHandlers)
 
   return allHandlers

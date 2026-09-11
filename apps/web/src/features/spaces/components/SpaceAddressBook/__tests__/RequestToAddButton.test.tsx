@@ -114,6 +114,19 @@ describe('RequestToAddButton', () => {
     expect(screen.queryByRole('button', { name: 'Request to add' })).not.toBeInTheDocument()
   })
 
+  it('drops the label into the accessible name in the compact layout', () => {
+    render(<RequestToAddButton address={address} name="Alice" chainIds={['1']} isCompact />)
+
+    expect(screen.getByRole('button', { name: 'Request to add' })).toHaveTextContent('')
+  })
+
+  it('shows the requested state as an icon in the compact layout', () => {
+    render(<RequestToAddButton address={address} name="Alice" chainIds={['1']} alreadyRequested isCompact />)
+
+    expect(screen.getByLabelText('Requested')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Request to add' })).not.toBeInTheDocument()
+  })
+
   it('tracks the request once it is created', async () => {
     mockCreateRequest.mockResolvedValue({ data: {} })
     render(<RequestToAddButton address={address} name="Alice" chainIds={['1']} />)

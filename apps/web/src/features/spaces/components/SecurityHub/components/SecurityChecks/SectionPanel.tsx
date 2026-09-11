@@ -1,6 +1,5 @@
 import type { ReactElement, ReactNode } from 'react'
 import { motion } from 'framer-motion'
-import { Separator } from '@/components/ui/separator'
 import { ROW_STAGGER } from './constants'
 
 export type SectionPanelProps = {
@@ -20,25 +19,19 @@ const SectionPanel = ({ rows, baseDelay = 0 }: SectionPanelProps): ReactElement 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ type: 'spring', stiffness: 400, damping: 30, delay: baseDelay }}
-      className="mb-6"
+      className="mb-6 flex flex-col gap-1"
     >
-      <div className="overflow-hidden bg-card rounded-lg">
-        {rows.map((r, idx) => (
-          <motion.div
-            key={r.key}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.15, delay: baseDelay + (idx + 1) * ROW_STAGGER }}
-          >
-            {idx > 0 && (
-              <div className="m-auto w-[90%]">
-                <Separator className="bg-muted" />
-              </div>
-            )}
-            {r.node}
-          </motion.div>
-        ))}
-      </div>
+      {rows.map((r, idx) => (
+        <motion.div
+          key={r.key}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.15, delay: baseDelay + (idx + 1) * ROW_STAGGER }}
+          className="overflow-hidden rounded-lg bg-card"
+        >
+          {r.node}
+        </motion.div>
+      ))}
     </motion.div>
   )
 }

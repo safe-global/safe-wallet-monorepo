@@ -23,6 +23,7 @@ type NameInputProps = {
   maxLength?: number
   inputSize?: ComponentProps<typeof Input>['inputSize']
   variant?: ComponentProps<typeof Input>['variant']
+  errorPlacement?: ComponentProps<typeof Field>['errorPlacement']
   InputProps?: {
     endAdornment?: ReactNode
     startAdornment?: ReactNode
@@ -49,6 +50,7 @@ const NameInput = ({
   maxLength,
   inputSize,
   variant,
+  errorPlacement,
   InputProps,
   InputLabelProps,
   ...props
@@ -128,7 +130,7 @@ const NameInput = ({
         )
 
         return (
-          <Field className={className} data-invalid={Boolean(fieldError) || undefined}>
+          <Field className={className} errorPlacement={errorPlacement} data-invalid={Boolean(fieldError) || undefined}>
             {resolvedLabel != null && resolvedLabel !== '' && (
               <FieldLabel htmlFor={id} className={fieldError ? 'text-destructive' : undefined}>
                 {resolvedLabel}

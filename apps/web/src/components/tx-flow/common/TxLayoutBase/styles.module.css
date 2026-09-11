@@ -1,11 +1,13 @@
-/* The tx dialog spans the full viewport, so this row owns the page gutter: without it the
+/* The tx dialog spans the full viewport, so this row owns the left page gutter: without it the
    status rail — the row's first child, and the only one with no padding of its own — sits
    flush against the viewport edge. `--space-3` matches the topbar's own `px-6`, so the rail
-   lines up with the safe selector above it instead of hanging off the side. The mobile block
-   below drops it again, where the card goes edge-to-edge. */
+   lines up with the safe selector above it instead of hanging off the side. The right gutter
+   is the dialog's: TxModalDialog reserves the column its sticky close button scrolls in, so
+   nothing is added here or the widget drifts away from the X. The mobile block below drops
+   the gutter again, where the card goes edge-to-edge. */
 .container {
   margin-top: 10px;
-  padding-inline: var(--space-3);
+  padding-left: var(--space-3);
 }
 
 .contentContainer {
@@ -32,7 +34,9 @@
   position: relative;
 }
 
-/* Back button */
+/* Bottom-left of the step's last card, in the same row as the right-aligned TxCardActions inside
+   it. --space-3 is the card's own padding, so the button lines up with the actions. This holds at
+   every width: the card is never too narrow for both buttons, so there is no stacked layout. */
 .backButton {
   position: absolute;
   left: var(--space-3);
@@ -107,17 +111,6 @@
 .widget {
   /* Height of transaction type title */
   margin-top: 30px;
-}
-
-@media (max-width: 1199px) {
-  .backButton {
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  .step :global(.txCardActions) {
-    margin-bottom: var(--space-8);
-  }
 }
 
 @media (max-width: 899.95px) {

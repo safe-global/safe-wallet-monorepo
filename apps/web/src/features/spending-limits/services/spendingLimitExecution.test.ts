@@ -67,4 +67,19 @@ describe('createNewSpendingLimitTx preconditions', () => {
     expect(result).toBeDefined()
     expect(txSender.createMultiSendCallOnlyTx).toHaveBeenCalledTimes(1)
   })
+
+  it('builds on the scoped SDK and forwards the scope to the multisend when a scope is passed', async () => {
+    const scopedSdk = {
+      createEnableModuleTx: jest.fn(() => ({ data: { data: '0x', to: ZERO_ADDRESS } })),
+    } as unknown as Safe
+    const scope = { chainId: REGISTERED_CHAIN_ID, safeAddress: ZERO_ADDRESS, sdk: scopedSdk }
+
+    await createNewSpendingLimitTx(mockData, [], REGISTERED_CHAIN_ID, mockChain, [], true, 18, undefined, scope)
+
+    // Deployed Safe without the module enabled → enableModule comes from the *scoped* SDK …
+    expect(scopedSdk.createEnableModuleTx).toHaveBeenCalled()
+    expect(mockSDK.createEnableModuleTx).not.toHaveBeenCalled()
+    // … and the batch is built for the scoped Safe too.
+    expect(txSender.createMultiSendCallOnlyTx).toHaveBeenCalledWith(expect.any(Array), scope)
+  })
 })

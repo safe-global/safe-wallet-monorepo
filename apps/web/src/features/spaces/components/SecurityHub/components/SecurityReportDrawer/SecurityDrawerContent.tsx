@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { SCROLL_AREA } from '@/utils/styles'
 import type { ScanContext, ScanResult } from '@/features/security/types'
 import SecurityDrawerChecks from './tabs/SecurityDrawerChecks'
 import SecurityDrawerDetails from './tabs/SecurityDrawerDetails'
@@ -29,7 +30,7 @@ const SecurityDrawerContent = ({
       <TabsTrigger value="details">Details</TabsTrigger>
     </TabsList>
 
-    <div className="min-h-0 flex-1 overflow-y-auto">
+    <div className={SCROLL_AREA}>
       <TabsContent value="checks">
         <SecurityDrawerChecks
           scanContext={scanContext}

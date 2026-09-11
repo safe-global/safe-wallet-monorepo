@@ -59,7 +59,7 @@ const SpaceMembers = () => {
 
             <TabsContent value="pending">
               {invitedMembers.length === 0 ? (
-                <p className="text-muted-foreground text-sm">No pending members.</p>
+                <p className="text-muted-foreground p-4 text-sm">No pending members.</p>
               ) : (
                 <MembersList members={invitedMembers} variant="pending" />
               )}

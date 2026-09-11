@@ -102,7 +102,6 @@ const ProposersList = () => {
           },
           actions: {
             rawValue: '',
-            sticky: true,
             content: isEnabled && (
               <div className={tableCss.actions}>
                 <EditProposerDialog proposer={proposer} />

@@ -32,8 +32,8 @@ const MemberInfoForm = ({
         minLength={NAME_MIN_LENGTH}
         maxLength={nameMaxLength}
         InputProps={{ className: 'min-h-[66px]' }}
-        // Float the error so it doesn't grow the field's height and shift the form.
-        className="gap-1.5 relative [&_[data-slot=field-error]]:absolute [&_[data-slot=field-error]]:top-full"
+        errorPlacement="floating"
+        className="gap-1.5"
       />
 
       <div className="flex flex-col gap-1.5">

@@ -35,7 +35,7 @@ import { XIcon } from 'lucide-react'
  * @remarks
  * Key Props:
  * - SheetContent: `side` ('top' | 'right' | 'bottom' | 'left'), `variant` ('default' | 'floating'),
- *   `size` ('sm' | 'md' | 'lg' | 'auto'), `surface` ('card' | 'paper'), `padding` ('none' | 'md'), `showCloseButton`
+ *   `size` ('sm' | 'md' | 'lg' | 'auto'), `surface` ('card' | 'paper' | 'muted'), `padding` ('none' | 'md'), `showCloseButton`
  * - SheetHeader / SheetFooter: `divided` (true = full border, 'subtle' = border-border/50)
  * - Root / Trigger / Close: see Base UI dialog
  *
@@ -68,6 +68,8 @@ const sheetContentVariants = cva(
       surface: {
         card: 'bg-card',
         paper: 'bg-[var(--color-background-paper)]',
+        // Recessed surface, a step darker than `bg-card` in both themes so the cards inside stand out.
+        muted: 'bg-zinc-50 dark:bg-[var(--color-background-main)]',
       },
       padding: {
         none: 'p-0',

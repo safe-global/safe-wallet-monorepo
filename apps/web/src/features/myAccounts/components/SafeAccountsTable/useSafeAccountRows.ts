@@ -28,6 +28,10 @@ export type AccountContextMenu =
   | { type: 'single'; name: string; address: string; chainId: string; addNetwork: boolean; undeployedSafe: boolean }
   | { type: 'multi'; name: string; address: string; chainIds: string[]; addNetwork: boolean }
 
+/** Every chain a rename from this row would target — one for a single Safe, all of them for a group. */
+export const getContextMenuChainIds = (contextMenu: AccountContextMenu): string[] =>
+  contextMenu.type === 'multi' ? contextMenu.chainIds : [contextMenu.chainId]
+
 /** One rendered table line — a single Safe, a multi-chain parent, or a per-chain child. */
 export type AccountLine = {
   key: string

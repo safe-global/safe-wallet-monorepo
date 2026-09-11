@@ -63,7 +63,7 @@ export const Row = ({ leadIcon, title, subtitle, accentTone, trailing, expandedC
 
   return (
     <div
-      className={cn('px-5 py-2', expandable ? 'cursor-pointer hover:bg-muted/60' : 'cursor-default')}
+      className={cn('px-5 py-2', expandable ? 'cursor-pointer hover:bg-secondary-hover' : 'cursor-default')}
       onClick={expandable ? () => setExpanded((v) => !v) : undefined}
     >
       <div className="flex items-center gap-2.5 py-2.5">

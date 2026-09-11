@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Typography } from '@/components/ui/typography'
-import { useIsBelowSm } from '@/hooks/useMediaQuery'
+import { useIsMobile } from '@/hooks/use-mobile'
 import classNames from 'classnames'
 import css from './styles.module.css'
 import EnhancedTable, { type EnhancedTableProps } from '@/components/common/EnhancedTable'
@@ -73,7 +73,6 @@ const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
   },
   actions: {
     rawValue: '',
-    sticky: true,
     content: (
       <div className="flex flex-row justify-end gap-2">
         <Skeleton className="h-[28px] w-[28px] rounded-md" />
@@ -215,7 +214,6 @@ const AssetsTable = ({
             },
             actions: {
               rawValue: '',
-              sticky: true,
               content: (
                 <ActionButtons
                   tokenInfo={item.tokenInfo}
@@ -231,7 +229,7 @@ const AssetsTable = ({
         }
       })
 
-  const isMobile = useIsBelowSm()
+  const isMobile = useIsMobile()
 
   return (
     <>

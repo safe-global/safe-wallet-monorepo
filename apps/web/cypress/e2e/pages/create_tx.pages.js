@@ -778,14 +778,10 @@ export function verifyTooltipMessage(message) {
 }
 
 export function selectCurrentWallet() {
-  // GTF (unlimited relay) chains hide the execution-method selector in the execute flow and the
-  // connected wallet is the implicit executor, so only click the option when it is rendered.
   cy.contains(estimatedFeeStr).should('be.visible')
-  cy.get('body').then(($body) => {
-    if ($body.find(connectedWalletExecMethod).length) {
-      cy.get(connectedWalletExecMethod).click()
-    }
-  })
+  // The option only renders once the relay quota has loaded — wait for it, then confirm it is selected.
+  cy.get(connectedWalletExecMethod, { timeout: 30000 }).click()
+  cy.get(connectedWalletExecMethod).find('[role="radio"]').should('have.attr', 'aria-checked', 'true')
 }
 
 export function verifyRelayerAttemptsAvailable() {
@@ -917,10 +913,14 @@ export function verifyAndSubmitExecutionParams() {
 
 export function setAdvancedExecutionParams() {
   cy.contains(executionParamsStr).parents('form').as('Paramsform')
-  cy.get('@Paramsform').find(gasLimitInput).clear().type(advancedParametersValues.gasLimit)
-  cy.get('@Paramsform').find(maxPriorityFee).clear().type(advancedParametersValues.maxPriorityFee)
-  cy.get('@Paramsform').find(maxFee).clear().type(advancedParametersValues.maxFee)
-  cy.get('@Paramsform').find(walletNonceInput).clear().type(advancedParametersValues.walletNonce)
+  // Fields are disabled while relay is the execution method; the 60s is only a ceiling for slow renders.
+  const typeWhenEnabled = (selector, value) =>
+    cy.get('@Paramsform').find(selector, { timeout: 60000 }).should('not.be.disabled').clear().type(value)
+
+  typeWhenEnabled(gasLimitInput, advancedParametersValues.gasLimit)
+  typeWhenEnabled(maxPriorityFee, advancedParametersValues.maxPriorityFee)
+  typeWhenEnabled(maxFee, advancedParametersValues.maxFee)
+  typeWhenEnabled(walletNonceInput, advancedParametersValues.walletNonce)
   cy.get('@Paramsform').submit()
 }
 
@@ -988,7 +988,7 @@ export function waitForProposeRequest() {
   cy.wait('@ProposeTx')
 }
 
-const submitTxErrorMsg = 'Error submitting the transaction. Please try again.'
+const submitTxErrorMsg = 'Could not submit the transaction. Try again.'
 
 export function clickViewTransaction(retriesLeft = 2) {
   // Wait for the submitted-tx success screen. Transient RPC/CGW throttling (429) surfaces a

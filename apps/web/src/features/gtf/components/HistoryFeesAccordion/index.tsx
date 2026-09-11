@@ -16,7 +16,7 @@ const TX_PALETTE_BY_TYPE: Record<string, AccordionPalette> = {
   SwapTransfer: { border: 'var(--color-success-light)', bg: 'var(--color-background-light)' },
   TwapOrder: { border: 'var(--color-success-light)', bg: 'var(--color-background-light)' },
   NativeStakingDeposit: { border: 'var(--color-success-light)', bg: 'var(--color-background-light)' },
-  SettingsChange: { border: 'var(--color-warning-light)', bg: 'var(--color-warning-background)' },
+  SettingsChange: { border: 'var(--warning-outline)', bg: 'var(--warning-subtle)' },
 }
 const DEFAULT_PALETTE: AccordionPalette = { border: 'var(--color-info-dark)', bg: 'var(--color-info-background)' }
 

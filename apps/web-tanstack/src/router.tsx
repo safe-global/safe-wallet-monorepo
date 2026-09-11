@@ -48,6 +48,8 @@ import { Route as SpacesMembersRoute } from './routes/spaces/members'
 import { Route as SpacesSafeAccountsRoute } from './routes/spaces/safe-accounts'
 import { Route as SpacesSecurityRoute } from './routes/spaces/security'
 import { Route as SpacesActivityRoute } from './routes/spaces/activity'
+import { Route as SpacesPoliciesRoute } from './routes/spaces/policies'
+import { Route as SpacesPlansRoute } from './routes/spaces/plans'
 import { Route as SpacesSettingsRoute } from './routes/spaces/settings'
 import { Route as SpacesSettingsAboutRoute } from './routes/spaces/settings/about'
 import { Route as SpacesSettingsAccountRoute } from './routes/spaces/settings/account'
@@ -122,6 +124,8 @@ const routeTree = RootRoute.addChildren([
   SpacesSafeAccountsRoute,
   SpacesSecurityRoute,
   SpacesActivityRoute,
+  SpacesPoliciesRoute,
+  SpacesPlansRoute,
   SpacesSettingsRoute,
   SpacesSettingsGeneralRoute,
   SpacesSettingsAboutRoute,

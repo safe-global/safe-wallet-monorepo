@@ -16,6 +16,10 @@ jest.mock('@/store/notificationsSlice', () => {
 })
 
 describe('useSafeMessageNotifications', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
   describe('getSafeMessagesAwaitingConfirmations', () => {
     it('should return all SafeMessages awaiting confirmation of the current wallet', () => {
       const items: SafeMessageListItem[] = [
@@ -113,22 +117,6 @@ describe('useSafeMessageNotifications', () => {
     })
   })
 
-  it('should show a notification when a message creation fails', () => {
-    renderHook(() => useSafeMessageNotifications())
-
-    safeMsgDispatch(SafeMsgEvent.PROPOSE_FAILED, {
-      messageHash: '0x456',
-      error: new Error('Example error'),
-    })
-
-    expect(showNotification).toHaveBeenCalledWith({
-      message: 'Signing the message failed. Please try again.',
-      detailedMessage: 'Example error',
-      groupKey: '0x456',
-      variant: 'error',
-    })
-  })
-
   it('should show a notification when a message is confirmed', () => {
     renderHook(() => useSafeMessageNotifications())
 
@@ -141,21 +129,16 @@ describe('useSafeMessageNotifications', () => {
     })
   })
 
-  it('should show a notification when a message confirmation fails', () => {
-    renderHook(() => useSafeMessageNotifications())
+  it.each([SafeMsgEvent.PROPOSE_FAILED, SafeMsgEvent.CONFIRM_PROPOSE_FAILED])(
+    'should not show a notification for %s, which is rendered inline instead',
+    (event) => {
+      renderHook(() => useSafeMessageNotifications())
 
-    safeMsgDispatch(SafeMsgEvent.CONFIRM_PROPOSE_FAILED, {
-      messageHash: '0x789',
-      error: new Error('Other error'),
-    })
+      safeMsgDispatch(event, { messageHash: '0x789', error: new Error('Other error') })
 
-    expect(showNotification).toHaveBeenCalledWith({
-      message: 'Confirming the message failed. Please try again.',
-      detailedMessage: 'Other error',
-      groupKey: '0x789',
-      variant: 'error',
-    })
-  })
+      expect(showNotification).not.toHaveBeenCalled()
+    },
+  )
 
   it('should show a notification when a message fully is confirmed', () => {
     renderHook(() => useSafeMessageNotifications())

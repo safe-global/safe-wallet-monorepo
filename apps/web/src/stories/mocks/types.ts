@@ -39,6 +39,8 @@ export interface FeatureFlags {
   oidcAuth?: boolean
   /** SWITCH_AUTHENTICATOR - 2FA management surfaces (default: false) */
   switchAuthenticator?: boolean
+  /** TWO_FACTOR_AWARENESS_BANNER - the 2FA awareness card in the Workspaces sidebar (default: false) */
+  twoFactorAwarenessBanner?: boolean
 }
 
 /**
@@ -92,8 +94,8 @@ export interface MockStoryConfig {
   store?: StoreOverrides
 
   /**
-   * Additional MSW handlers (merged after default handlers)
-   * Can override default handlers by matching the same routes
+   * Additional MSW handlers, appended after the defaults — first-match-wins,
+   * so these only add unmocked routes and cannot override a default handler
    */
   handlers?: RequestHandler[]
 

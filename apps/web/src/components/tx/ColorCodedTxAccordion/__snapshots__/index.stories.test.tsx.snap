@@ -406,7 +406,7 @@ exports[`./index.stories SettingsChange 1`] = `
         data-slot="card"
         data-surface="default"
         data-variant="default"
-        style="--accordion-border-active: var(--warning-accent); --accordion-fill-active: var(--warning-subtle);"
+        style="--accordion-border-active: var(--warning-outline); --accordion-fill-active: var(--warning-subtle);"
       >
         <div
           class="flex w-full flex-col"

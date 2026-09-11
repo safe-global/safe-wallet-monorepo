@@ -242,6 +242,14 @@ describe('TokenAmountInput', () => {
     })
   })
 
+  describe('Selected token missing from balances', () => {
+    it('leaves the trigger blank instead of showing the raw address', () => {
+      render(<TestWrapper defaultTokenAddress={ZERO_ADDRESS} balances={[]} />)
+
+      expect(screen.getByTestId('token-selector')).not.toHaveTextContent(ZERO_ADDRESS)
+    })
+  })
+
   describe('Token preselection with fieldArray', () => {
     it('should preselect ETH (ZERO_ADDRESS) in field array', () => {
       render(<FieldArrayTestWrapper defaultTokenAddress={ZERO_ADDRESS} />)

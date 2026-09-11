@@ -7,11 +7,19 @@ on:
     paths:
       - apps/mobile/**
       - packages/**
+      - yarn.lock
+      - package.json
+      - .yarnrc.yml
+      - .yarn/patches/**
   pull_request:
     paths:
       - apps/mobile/**
       - packages/**
       - .github/workflows/mobile-unit-tests.yml
+      - yarn.lock
+      - package.json
+      - .yarnrc.yml
+      - .yarn/patches/**
 
 jobs:
   test-and-coverage:
@@ -40,7 +48,7 @@ jobs:
             | tee ./coverage.txt && exit ${PIPESTATUS[0]}
 
       - name: Jest Coverage Comment
-        uses: MishaKav/jest-coverage-comment@25f2818fee93043532f640ad32a7565b4bd4ea9a # v1.0.34
+        uses: MishaKav/jest-coverage-comment@642ef024cc554a34b7082cea12c7bf63575ae151 # v1.0.36
         with:
           coverage-summary-path: ./coverage/coverage-summary.json
           coverage-title: Coverage
