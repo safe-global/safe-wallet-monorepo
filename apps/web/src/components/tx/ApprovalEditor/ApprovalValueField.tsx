@@ -1,5 +1,6 @@
 import { _formatNumber } from '@/components/common/NumberField'
 import { validateAmount, validateDecimalLength } from '@safe-global/utils/utils/validation'
+import type { ReactNode } from 'react'
 import { useController, useFormContext } from 'react-hook-form'
 import type { ApprovalInfo } from './hooks/useApprovalInfos'
 import css from './styles.module.css'
@@ -12,7 +13,21 @@ import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/utils/cn'
 
-export const ApprovalValueField = ({ name, tx, readOnly }: { name: string; tx: ApprovalInfo; readOnly: boolean }) => {
+export const ApprovalValueField = ({
+  name,
+  tx,
+  readOnly,
+  startAdornment,
+  endAdornment,
+}: {
+  name: string
+  tx: ApprovalInfo
+  readOnly: boolean
+  /** Rendered left of the amount input, on the input's own line. */
+  startAdornment?: ReactNode
+  /** Rendered right of the amount input, on the input's own line. */
+  endAdornment?: ReactNode
+}) => {
   const { control } = useFormContext()
   const selectValues: string[] = Object.values(PSEUDO_APPROVAL_VALUES)
   const {
@@ -60,8 +75,13 @@ export const ApprovalValueField = ({ name, tx, readOnly }: { name: string; tx: A
       readOnly={readOnly}
       inputRef={ref}
     >
-      <Field data-invalid={hasError}>
-        <FieldLabel htmlFor={inputId} className={hasError ? 'text-destructive' : undefined}>
+      {/* A grid rather than a row of flex siblings: the label and the helper text each get a row of
+          their own, so the adornments stay level with the input instead of centring on a column
+          whose height they change. Same shape as CardHeader / CardAction in ui/card.tsx.
+          The column gap is carried by the adornments rather than the grid, so the outer columns
+          leave no dead space when there are no adornments. */}
+      <Field data-invalid={hasError} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-0 gap-y-3">
+        <FieldLabel htmlFor={inputId} className={cn('col-start-2 row-start-1', hasError && 'text-destructive')}>
           {showAmountTooltip ? (
             <span className="inline-flex items-center gap-1">
               {labelText}
@@ -77,6 +97,8 @@ export const ApprovalValueField = ({ name, tx, readOnly }: { name: string; tx: A
           )}
         </FieldLabel>
 
+        {startAdornment && <div className="col-start-1 row-start-2 mr-4">{startAdornment}</div>}
+
         <ComboboxInput
           id={inputId}
           name={name}
@@ -90,8 +112,10 @@ export const ApprovalValueField = ({ name, tx, readOnly }: { name: string; tx: A
               event.target.select()
             }
           }}
-          className={cn('w-full', css.approvalAmount)}
+          className={cn('col-start-2 row-start-2 w-full', css.approvalAmount)}
         />
+
+        {endAdornment && <div className="col-start-3 row-start-2 ml-4">{endAdornment}</div>}
 
         {!readOnly && (
           <ComboboxContent>
@@ -106,7 +130,9 @@ export const ApprovalValueField = ({ name, tx, readOnly }: { name: string; tx: A
         )}
 
         {helperText && (
-          <FieldDescription className={hasError ? 'text-destructive' : undefined}>{helperText}</FieldDescription>
+          <FieldDescription className={cn('col-start-2 row-start-3', hasError && 'text-destructive')}>
+            {helperText}
+          </FieldDescription>
         )}
       </Field>
     </Combobox>

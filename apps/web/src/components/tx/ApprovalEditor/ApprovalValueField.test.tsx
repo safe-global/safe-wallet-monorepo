@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { render, screen, waitFor } from '@/tests/test-utils'
 import { userEvent } from '@testing-library/user-event'
 import { FormProvider, useForm } from 'react-hook-form'
@@ -26,7 +27,17 @@ const buildApproval = (overrides: Partial<ApprovalInfo> = {}): ApprovalInfo => {
 
 type ApprovalFormValues = { approvals: string[] }
 
-const Harness = ({ approval, onFormChange }: { approval: ApprovalInfo; onFormChange?: (values: string[]) => void }) => {
+const Harness = ({
+  approval,
+  onFormChange,
+  startAdornment,
+  endAdornment,
+}: {
+  approval: ApprovalInfo
+  onFormChange?: (values: string[]) => void
+  startAdornment?: ReactNode
+  endAdornment?: ReactNode
+}) => {
   const formMethods = useForm<ApprovalFormValues>({
     defaultValues: { approvals: [INITIAL_AMOUNT] },
     mode: 'onChange',
@@ -36,7 +47,13 @@ const Harness = ({ approval, onFormChange }: { approval: ApprovalInfo; onFormCha
 
   return (
     <FormProvider {...formMethods}>
-      <ApprovalValueField name={FIELD_NAME} tx={approval} readOnly={false} />
+      <ApprovalValueField
+        name={FIELD_NAME}
+        tx={approval}
+        readOnly={false}
+        startAdornment={startAdornment}
+        endAdornment={endAdornment}
+      />
     </FormProvider>
   )
 }
@@ -105,5 +122,22 @@ describe('ApprovalValueField', () => {
     await user.click(preset)
 
     await waitFor(() => expect(input).toHaveValue(PSEUDO_APPROVAL_VALUES.UNLIMITED))
+  })
+
+  // The adornments have to render inside the field, not as siblings of it: that is what keeps them
+  // on the input's grid row instead of centred on a column whose height the label and the helper
+  // text change.
+  it('renders the adornments inside the field, on the input row', () => {
+    const { container } = render(
+      <Harness
+        approval={buildApproval()}
+        startAdornment={<span data-testid="start-adornment" />}
+        endAdornment={<span data-testid="end-adornment" />}
+      />,
+    )
+
+    const field = container.querySelector('[data-slot="field"]')
+    expect(field).toContainElement(screen.getByTestId('start-adornment'))
+    expect(field).toContainElement(screen.getByTestId('end-adornment'))
   })
 })
