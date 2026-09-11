@@ -1,9 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/router'
 import { useAppDispatch } from '@/store'
-import { showNotification } from '@/store/notificationsSlice'
 import reconcileAuth from '@/store/reconcileAuth'
-import { STEP_UP_FAILED_MESSAGE } from '../constants'
 import { stepUpReturning, stepUpSettled } from '../store'
 import { replayStepUpAction, takeStepUpTrip } from '../utils/stepUpReplay'
 
@@ -29,15 +27,9 @@ export const useStepUpCallback = () => {
       // `router.query` can still be empty before `router.isReady` on first render.
       const params = new URLSearchParams(window.location.search)
 
+      // An abandoned verification is not reported: the user left the
+      // verification screen themselves and already knows it did not finish.
       if (params.has('error')) {
-        dispatch(
-          showNotification({
-            message: STEP_UP_FAILED_MESSAGE,
-            variant: 'error',
-            groupKey: 'step-up-failed',
-          }),
-        )
-
         params.delete('error')
         params.delete('error_description')
         const cleanQuery = Object.fromEntries(params.entries())

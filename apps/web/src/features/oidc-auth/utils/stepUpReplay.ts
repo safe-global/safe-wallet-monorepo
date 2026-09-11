@@ -4,7 +4,6 @@ import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { AppDispatch, RootState } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
-import { STEP_UP_FAILED_MESSAGE } from '../constants'
 import { isElevationRequiredError } from './elevation'
 
 const STEP_UP_KEY = 'oidc_step_up'
@@ -106,15 +105,13 @@ export const replayStepUpAction = async (dispatch: AppDispatch, pending: Pending
   const result = await dispatch(asReplayInitiator(pending.endpoint)(pending.args))
 
   if (result.error) {
-    // Rejected again means the user never finished verifying, so the usual
-    // "verify your identity" text would ask them to redo what they walked away from.
-    const message = isElevationRequiredError(result.error)
-      ? STEP_UP_FAILED_MESSAGE
-      : getRtkQueryErrorMessage(result.error) || REPLAY_FAILED_MESSAGE
+    // Rejected again means the user never finished verifying. That is not
+    // reported: they left the verification screen themselves.
+    if (isElevationRequiredError(result.error)) return
 
     dispatch(
       showNotification({
-        message,
+        message: getRtkQueryErrorMessage(result.error) || REPLAY_FAILED_MESSAGE,
         variant: 'error',
         groupKey: 'step-up-replay-failed',
       }),

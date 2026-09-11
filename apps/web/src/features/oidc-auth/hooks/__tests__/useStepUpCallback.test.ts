@@ -1,6 +1,5 @@
 import { renderHook, waitFor } from '@testing-library/react'
 import { useStepUpCallback } from '../useStepUpCallback'
-import { STEP_UP_FAILED_MESSAGE } from '../../constants'
 import { stepUpReturning, stepUpSettled } from '../../store'
 import { saveStepUpTrip } from '../../utils/stepUpReplay'
 
@@ -91,24 +90,21 @@ describe('useStepUpCallback', () => {
     })
   })
 
-  it('should, when the callback carries an error, notify and clean the URL', async () => {
+  it('should, when the callback carries an error, clean the URL without reporting anything', async () => {
     saveStepUpTrip(TRIP_ACTION)
     setSearch('?spaceId=42&error=access_denied&error_description=mfa_required')
 
     renderHook(() => useStepUpCallback())
 
     await waitFor(() => {
-      expect(mockDispatch).toHaveBeenCalledWith({
-        type: 'notifications/showNotification',
-        payload: { message: STEP_UP_FAILED_MESSAGE, variant: 'error', groupKey: 'step-up-failed' },
+      expect(mockReplace).toHaveBeenCalledWith({ pathname: '/spaces/members', query: { spaceId: '42' } }, undefined, {
+        shallow: true,
       })
     })
 
+    expect(mockDispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'notifications/showNotification' }))
     expect(mockReconcileAuth).not.toHaveBeenCalled()
     expect(mockReplayStepUpAction).not.toHaveBeenCalled()
-    expect(mockReplace).toHaveBeenCalledWith({ pathname: '/spaces/members', query: { spaceId: '42' } }, undefined, {
-      shallow: true,
-    })
   })
 
   it('should, when processing a return, enter `returning` before the replay and settle after it', async () => {

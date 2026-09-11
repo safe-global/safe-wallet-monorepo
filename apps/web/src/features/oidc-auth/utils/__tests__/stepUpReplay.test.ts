@@ -6,7 +6,6 @@ import { GATEWAY_URL } from '@/config/gateway'
 import { makeStore } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
 import { server } from '@/tests/server'
-import { STEP_UP_FAILED_MESSAGE } from '../../constants'
 import { stepUpReturning } from '../../store'
 import { getReplayableAction, replayStepUpAction, saveStepUpTrip, takeStepUpTrip } from '../stepUpReplay'
 
@@ -296,7 +295,7 @@ describe('replayStepUpAction', () => {
     ])
   })
 
-  it('should, when the replayed mutation is rejected because the session is not elevated, show the step-up failed message without saving another trip', async () => {
+  it('should, when the replayed mutation is rejected because the session is not elevated, report nothing and save no further trip', async () => {
     const spaceId = faker.string.uuid()
 
     server.use(
@@ -314,8 +313,6 @@ describe('replayStepUpAction', () => {
     })
 
     expect(sessionStorage.getItem('oidc_step_up')).toBeNull()
-    expect(selectNotifications(store.getState())).toEqual([
-      expect.objectContaining({ message: STEP_UP_FAILED_MESSAGE, variant: 'error' }),
-    ])
+    expect(selectNotifications(store.getState())).toEqual([])
   })
 })

@@ -140,16 +140,27 @@ test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
     expect(new URL((await authorizeRequest).url()).searchParams.get('elevate')).toBe('true')
   })
 
-  test('that it discards the pending action and reports failure when the challenge is abandoned', async ({
+  test('that it discards the pending action and reports nothing when the challenge is abandoned', async ({
     safePage,
   }) => {
+    let removalCalls = 0
+    await safePage.route(/\/v1\/spaces\/[^/]+\/safes$/, async (route) => {
+      if (route.request().method() !== 'DELETE') return route.fallback()
+
+      removalCalls += 1
+      return route.fulfill({ status: 403, json: { message: 'elevation_required', statusCode: 403 } })
+    })
+
     await openRemoveDialog(safePage)
     await safePage.getByRole('button', { name: 'Remove' }).click()
     await expect(safePage.getByRole('heading', { name: 'Provider challenge' })).toBeVisible()
 
     await safePage.goto(`/spaces/safe-accounts?spaceId=${SPACE_ID}`)
 
-    await expect(toast(safePage, 'Verification was not completed')).toBeVisible()
+    // The second rejection is what a toast would have reported, so the absence of one
+    // only means something after the replay has been answered.
+    await expect.poll(() => removalCalls).toBe(2)
+    await expect(toast(safePage, 'Verification')).toHaveCount(0)
     await expect.poll(() => readStepUpRecord(safePage)).toBeNull()
   })
 
