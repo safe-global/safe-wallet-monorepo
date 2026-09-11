@@ -15,8 +15,7 @@ import { executeRelayTx } from '@/src/services/tx-execution/relayExecutor'
 import { executeLedgerTx } from '@/src/services/tx-execution/ledgerExecutor'
 import { executeWalletConnectTx } from '@/src/services/tx-execution/walletConnectExecutor'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
-import { matchUserOutcome, normalizeError } from '@safe-global/utils/services/exceptions/normalizeError'
-import { DdRum, ErrorSource } from 'expo-datadog'
+import { reportExecutionFailure } from '@/src/services/tx-execution/reportExecutionFailure'
 import type { Provider } from '@reown/appkit-common-react-native'
 
 export enum ExecutionStatus {
@@ -33,27 +32,6 @@ interface UseTransactionExecutionProps {
   feeParams: EstimatedFeeValues | null
   executionMethod: ExecutionMethod
   wcProvider?: Provider
-}
-
-// 804 is the web's "Error executing a transaction" code; reusing it keeps one error taxonomy across both apps.
-const TX_EXECUTION_ERROR_CODE = 804
-
-const reportExecutionFailure = (error: Error, executionMethod: ExecutionMethod, chainId: string): void => {
-  if (matchUserOutcome(error.message)) {
-    return
-  }
-  const { domain, type, layer } = normalizeError({
-    code: TX_EXECUTION_ERROR_CODE,
-    message: error.message,
-    isUserFacing: true,
-  })
-  DdRum.addError(error.message, ErrorSource.CUSTOM, error.stack ?? '', {
-    error_domain: domain,
-    error_type: type,
-    error_layer: layer,
-    execution_method: executionMethod,
-    chain_id: chainId,
-  })
 }
 
 export function useTransactionExecution({
