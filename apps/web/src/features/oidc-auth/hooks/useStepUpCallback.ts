@@ -1,11 +1,9 @@
 import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/router'
 import { useAppDispatch } from '@/store'
-import { showNotification } from '@/store/notificationsSlice'
 import reconcileAuth from '@/store/reconcileAuth'
-import { STEP_UP_FAILED_MESSAGE } from '../constants'
 import { stepUpReturning, stepUpSettled } from '../store'
-import { replayStepUpAction, takeStepUpTrip } from '../utils/stepUpReplay'
+import { hasPendingStepUpTrip, replayStepUpAction, takeStepUpTrip } from '../utils/stepUpReplay'
 
 /** Call once globally, from `InitApp`, so it runs on page load. */
 export const useStepUpCallback = () => {
@@ -30,14 +28,8 @@ export const useStepUpCallback = () => {
       const params = new URLSearchParams(window.location.search)
 
       if (params.has('error')) {
-        dispatch(
-          showNotification({
-            message: STEP_UP_FAILED_MESSAGE,
-            variant: 'error',
-            groupKey: 'step-up-failed',
-          }),
-        )
-
+        // Leaving the challenge unfinished cancels the action; the page returns to
+        // how it was and says nothing.
         params.delete('error')
         params.delete('error_description')
         const cleanQuery = Object.fromEntries(params.entries())
@@ -54,4 +46,19 @@ export const useStepUpCallback = () => {
       .finally(() => dispatch(stepUpSettled()))
       .catch(() => undefined)
   }, [dispatch])
+
+  // Coming back from the challenge with the Back button restores this page from the
+  // back-forward cache, so no effect above runs and the call site that was rejected
+  // still holds the error it set before leaving. Reloading drops that state and puts
+  // the return on the same path every other browser takes.
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (!event.persisted || !hasPendingStepUpTrip()) return
+
+      window.location.reload()
+    }
+
+    window.addEventListener('pageshow', handlePageShow)
+    return () => window.removeEventListener('pageshow', handlePageShow)
+  }, [])
 }

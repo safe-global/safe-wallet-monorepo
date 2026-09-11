@@ -3,6 +3,8 @@ import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactu
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import type { AppDispatch } from '@/store'
 import { addOrUpdateSafe } from '@/store/addedSafesSlice'
+import { ELEVATION_REQUIRED_ERROR, ELEVATION_REQUIRED_MESSAGE } from '@/features/oidc-auth/utils/elevation'
+import { getGenericErrorWithStatus } from '@/utils/rtkQuery'
 import { removeUndeployedSafe } from '../../store/undeployedSafesSlice'
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
@@ -159,7 +161,7 @@ describe('persistCounterfactualSafe', () => {
     expect(spaceInitiate).not.toHaveBeenCalled()
     expect(replayImpl).not.toHaveBeenCalled()
     expect(result).toEqual({ ok: false, error: expect.any(Error) })
-    if (!result.ok) expect(result.error.message).toMatch(/backend/i)
+    if (!result.ok) expect(result.error.message).toBe(getGenericErrorWithStatus(500))
   })
 
   it('surfaces the backend message when the user-endpoint POST fails with a non-409 error', async () => {
@@ -344,7 +346,29 @@ describe('persistCounterfactualSafe', () => {
     })
     expect(replayImpl).not.toHaveBeenCalled()
     expect(result).toEqual({ ok: false, error: expect.any(Error) })
-    if (!result.ok) expect(result.error.message).toMatch(/space/i)
+    if (!result.ok) expect(result.error.message).toBe(getGenericErrorWithStatus(500))
+  })
+
+  it('translates the gateway elevation marker instead of putting it in front of the user', async () => {
+    const dispatch = jest.fn((action) => {
+      if (action.type === 'space-create-thunk') {
+        return { error: { status: 403, data: { message: ELEVATION_REQUIRED_ERROR, statusCode: 403 } } }
+      }
+      return action
+    }) as unknown as AppDispatch
+
+    const result = await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: MOCK_SPACE_UUID,
+      isUserAuthenticated: true,
+      dispatch,
+    })
+
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error.message).not.toContain(ELEVATION_REQUIRED_ERROR)
+      expect(result.error.message).toBe(ELEVATION_REQUIRED_MESSAGE)
+    }
   })
 
   it('keeps the user-level safe and shows the backend message as a toast when the space POST fails with a 400 (stale-snapshot limit)', async () => {
