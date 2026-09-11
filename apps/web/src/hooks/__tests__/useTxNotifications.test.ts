@@ -265,6 +265,39 @@ describe('useTxNotifications — CGW response states (WA-3252)', () => {
   })
 })
 
+describe('useTxNotifications — a gas limit below the intrinsic minimum (WA-3523)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockIsTxFlowOpen = false
+  })
+
+  it('names the minimum needed and keeps the raw payload out of the toast', async () => {
+    renderHook(() => useTxNotifications())
+
+    act(() => {
+      txDispatch(TxEvent.FAILED, {
+        txId: '0x1',
+        nonce: 1,
+        chainId: '1',
+        safeAddress: '0x0000000000000000000000000000000000000001',
+        error: new Error(
+          'The contract function "execTransaction" reverted with the following reason:\nintrinsic gas too low: gas 21000, minimum needed 25484',
+        ),
+      })
+    })
+
+    await waitFor(() => expect(showNotification).toHaveBeenCalled())
+
+    const notification = lastNotification()
+    expect(notification.message).toBe(
+      'Gas limit too low. Minimum needed: 25,484. Increase the gas limit and try again.',
+    )
+    expect(notification.detailedMessage).toBeUndefined()
+    expect(JSON.stringify(notification)).not.toContain('execTransaction')
+    expect(JSON.stringify(notification)).not.toContain('intrinsic gas')
+  })
+})
+
 describe('useTxNotifications — errors the tx flow already shows inline', () => {
   beforeEach(() => {
     jest.clearAllMocks()

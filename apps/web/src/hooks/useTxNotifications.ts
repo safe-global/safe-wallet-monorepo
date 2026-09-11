@@ -16,6 +16,7 @@ import { getTxLink } from '@/utils/tx-link'
 import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
 import {
+  getGasLimitTooLowMessage,
   getGuardErrorInfo,
   HYPERNATIVE_APPROVAL_REQUIRED_MESSAGE,
   isHypernativeGuardRevert,
@@ -90,6 +91,10 @@ const useTxNotifications = (): void => {
         // A known CGW response state replaces both the copy and the details:
         // the response body can be a gateway HTML error page (WA-3252).
         const cgwError = isError ? getCgwErrorInfo(detail.error) : undefined
+        // A gas limit below the transaction's intrinsic cost: refused pre-broadcast, and fixable
+        // by raising the limit, so the toast names the value instead of the raw payload.
+        const gasLimitTooLowMessage = isError ? getGasLimitTooLowMessage(detail.error) : undefined
+
         let message = isError ? `${baseMessage} ${formatError(detail.error)}` : baseMessage
 
         // Override message for Guard errors
@@ -100,6 +105,8 @@ const useTxNotifications = (): void => {
           message = HYPERNATIVE_APPROVAL_REQUIRED_MESSAGE
         } else if (guardErrorName) {
           message = `Guard reverted the transaction (${guardErrorName}).`
+        } else if (gasLimitTooLowMessage) {
+          message = gasLimitTooLowMessage
         } else if (isError && isNonceTooLowError(detail.error)) {
           // The signer wallet's Ethereum nonce advanced before broadcast — the
           // RPC rejected it pre-mining (no gas spent). Same user story as a
@@ -137,7 +144,11 @@ const useTxNotifications = (): void => {
             title: humanDescription,
             message,
             detailedMessage:
-              ledgerError || hnApprovalRequired || cgwError ? undefined : isError ? detail.error.message : undefined,
+              ledgerError || hnApprovalRequired || cgwError || gasLimitTooLowMessage
+                ? undefined
+                : isError
+                  ? detail.error.message
+                  : undefined,
             groupKey,
             variant: isError ? Variant.ERROR : isSuccess ? Variant.SUCCESS : Variant.INFO,
             link: txId

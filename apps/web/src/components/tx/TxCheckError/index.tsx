@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
 import { useCurrentChain } from '@/hooks/useChains'
 import {
+  getGasLimitTooLowMessage,
   HYPERNATIVE_APPROVAL_REQUIRED_MESSAGE,
   isHypernativeGuardRevert,
   isRateLimitError,
@@ -75,6 +76,18 @@ const TxCheckError = ({ error, context }: { error: Error; context?: 'estimation'
     return (
       <ErrorMessage error={error} level="warning" context={context}>
         {RATE_LIMIT_USER_MESSAGE}
+      </ErrorMessage>
+    )
+  }
+
+  // `useIsValidExecution` simulates with the gas limit the user set, so a node that rejects the
+  // simulation on intrinsic gas answers here. That is a setting to fix, not a transaction that
+  // will fail, so it must never reach the "reject this transaction" advice below.
+  const gasLimitTooLow = getGasLimitTooLowMessage(error)
+  if (gasLimitTooLow) {
+    return (
+      <ErrorMessage error={error} level="warning" context={context}>
+        {gasLimitTooLow}
       </ErrorMessage>
     )
   }

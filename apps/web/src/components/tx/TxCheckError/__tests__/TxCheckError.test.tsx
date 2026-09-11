@@ -44,6 +44,18 @@ describe('TxCheckError', () => {
     expect(queryByText(/Could not check/)).not.toBeInTheDocument()
   })
 
+  it('tells the user to raise a gas limit below the intrinsic minimum, not to reject (WA-3523)', () => {
+    const error = new Error('intrinsic gas too low: gas 21000, minimum needed 25484')
+
+    const { getByText, queryByText } = render(<TxCheckError error={error} context="estimation" />)
+
+    expect(
+      getByText('Gas limit too low. Minimum needed: 25,484. Increase the gas limit and try again.'),
+    ).toBeInTheDocument()
+    expect(queryByText(/most likely fail/)).not.toBeInTheDocument()
+    expect(queryByText(/reject this transaction/)).not.toBeInTheDocument()
+  })
+
   it('shows the Hypernative approval message when the HN guard blocks execution', () => {
     mockAssessmentUrl.mockReturnValue(DEEP_LINK)
 
