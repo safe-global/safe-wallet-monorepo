@@ -1,4 +1,4 @@
-import { useContext, useRef, type RefObject } from 'react'
+import { useContext, useEffect, useRef, type RefObject } from 'react'
 import { TxModalContext } from '.'
 
 /**
@@ -8,7 +8,12 @@ import { TxModalContext } from '.'
 export const useIsTxFlowOpenRef = (): RefObject<boolean> => {
   const { txFlow } = useContext(TxModalContext)
   const isTxFlowOpen = useRef(false)
-  isTxFlowOpen.current = !!txFlow
+
+  // Written after commit, not during render: a render React throws away would otherwise leave
+  // the ref claiming a flow is on screen when none is.
+  useEffect(() => {
+    isTxFlowOpen.current = !!txFlow
+  }, [txFlow])
 
   return isTxFlowOpen
 }
