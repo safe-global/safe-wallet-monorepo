@@ -20,6 +20,8 @@ import {
   resolveChainAgnosticContractAddresses,
 } from '@safe-global/utils/services/contracts/deployments'
 import { logError, Errors } from '@/services/exceptions'
+// Imported from `context` directly so this always-loaded module depends on nothing but the React context.
+import { useSafeScope } from '@/components/tx-flow/safe-scope/context'
 
 export const initSafeSDK = async ({
   provider,
@@ -165,8 +167,14 @@ export const initSafeSDK = async ({
   })
 }
 
-export const {
-  getStore: getSafeSDK,
-  setStore: setSafeSDK,
-  useStore: useSafeSDK,
-} = new ExternalStore<Safe | undefined>()
+const safeSDKStore = new ExternalStore<Safe | undefined>()
+
+export const getSafeSDK = safeSDKStore.getStore
+export const setSafeSDK = safeSDKStore.setStore
+
+/** The app-wide SDK bound to the URL Safe, or the scoped instance inside a Space-level flow (`undefined` while it initialises). */
+export const useSafeSDK = (): Safe | undefined => {
+  const scope = useSafeScope()
+  const urlSafeSdk = safeSDKStore.useStore()
+  return scope ? scope.sdk : urlSafeSdk
+}

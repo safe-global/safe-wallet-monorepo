@@ -58,6 +58,6 @@ describe('ConfirmProposedTx', () => {
 
     expect(safeTxValue.setNonce).toHaveBeenCalledWith(TX_NONCE)
     expect(mockCreateExistingTx).toHaveBeenCalledTimes(1)
-    expect(mockCreateExistingTx).toHaveBeenCalledWith(expect.any(String), TX_ID)
+    expect(mockCreateExistingTx).toHaveBeenCalledWith(expect.any(String), TX_ID, undefined, undefined)
   })
 })
