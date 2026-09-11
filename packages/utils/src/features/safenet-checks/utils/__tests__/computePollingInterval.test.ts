@@ -2,6 +2,7 @@ import { computePollingInterval } from '../computePollingInterval'
 import {
   ARBITRATION_POLL_MS,
   ARBITRATION_WINDOW_MS,
+  ATTESTATION_GRACE_BLOCKS,
   LATE_WINDOW_BLOCKS,
   PLAIN_DEADLINE_BLOCKS,
   POLL_INTERVAL_FAST_MS,
@@ -144,11 +145,33 @@ describe('computePollingInterval', () => {
     ).toBe(POLL_INTERVAL_FAST_MS)
   })
 
-  it('drops to the late interval at head == deadline + 1 (first out-of-window block)', () => {
+  it('stays fast one block past the deadline — the attestation trails it by design', () => {
+    expect(
+      computePollingInterval({
+        status: CheckStatus.IN_PROGRESS,
+        headBlock: '151',
+        deadlineBlock: '150',
+        firstEventBlock: '100',
+      }),
+    ).toBe(POLL_INTERVAL_FAST_MS)
+  })
+
+  it('stays fast at head == deadline + ATTESTATION_GRACE_BLOCKS (allowance is inclusive)', () => {
+    expect(
+      computePollingInterval({
+        status: CheckStatus.IN_PROGRESS,
+        headBlock: String(150 + ATTESTATION_GRACE_BLOCKS),
+        deadlineBlock: '150',
+        firstEventBlock: '100',
+      }),
+    ).toBe(POLL_INTERVAL_FAST_MS)
+  })
+
+  it('drops to the late interval one block past the attestation grace', () => {
     expect(
       computePollingInterval({
         status: CheckStatus.TIMED_OUT,
-        headBlock: '151',
+        headBlock: String(150 + ATTESTATION_GRACE_BLOCKS + 1),
         deadlineBlock: '150',
         firstEventBlock: '100',
       }),
@@ -243,11 +266,22 @@ describe('computePollingInterval', () => {
       ).toBe(POLL_INTERVAL_FAST_MS)
     })
 
-    it('drops to the late interval past the substitute deadline', () => {
+    it('stays fast through the attestation grace past the substitute deadline', () => {
       expect(
         computePollingInterval({
           status: CheckStatus.SUBMITTED,
-          headBlock: String(first + PLAIN_DEADLINE_BLOCKS + 1),
+          headBlock: String(first + PLAIN_DEADLINE_BLOCKS + ATTESTATION_GRACE_BLOCKS),
+          deadlineBlock: null,
+          firstEventBlock: String(first),
+        }),
+      ).toBe(POLL_INTERVAL_FAST_MS)
+    })
+
+    it('drops to the late interval past the substitute deadline plus grace', () => {
+      expect(
+        computePollingInterval({
+          status: CheckStatus.SUBMITTED,
+          headBlock: String(first + PLAIN_DEADLINE_BLOCKS + ATTESTATION_GRACE_BLOCKS + 1),
           deadlineBlock: null,
           firstEventBlock: String(first),
         }),
