@@ -19,9 +19,8 @@ import CONTRACT_ERRORS, {
  * - `MessageCatalog` lists every GS code with its user-facing copy and handling.
  * - `RenderedInErrorMessage` shows the copy in the real `ErrorMessage` component.
  *   Each error is fed a realistic raw payload (provider URLs, request bodies,
- *   library versions); a GS error shows an always-visible, code-only reference
- *   with a copy button — never the raw payload. (Non-GS errors keep their raw
- *   Details toggle, unchanged.)
+ *   library versions); no alert renders it. A GS error shows an always-visible,
+ *   code-only reference with a copy button.
  */
 
 const PARAMS = { nativeAsset: 'ETH', token: 'USDC' }
@@ -73,10 +72,9 @@ const Catalog = () => (
 )
 
 /**
- * Representative raw payloads as they arrive from ethers/viem/RPC today. These
- * are the strings currently dumped into the "Details" panel — provider URLs,
- * request bodies, library versions, calldata. Topic 2 replaces them with a
- * support reference (code, tx hash, network, timestamp, copy button).
+ * Representative raw payloads as they arrive from ethers/viem/RPC today —
+ * provider URLs, request bodies, library versions, calldata. None of this
+ * reaches the user: a GS error carries a code-only support reference instead.
  */
 const RAW_PAYLOADS: Partial<Record<GsCode, string>> = {
   GS201: `execution reverted: GS201 (action="estimateGas", data="0x08c379a0...4753323031", reason="GS201", code=CALL_EXCEPTION, version=6.13.2)`,
@@ -99,8 +97,9 @@ const InErrorMessage = () => {
       <Alert variant="info" outlined>
         <AlertDescription>
           The message you see is the new copy. Each error is fed a realistic raw payload (provider URLs, request bodies,
-          library versions), but a GS error shows only an inline <strong>error code</strong> with a copy button — never
-          the raw payload. The full support reference is meant to live in the support tool.
+          library versions), but none of it reaches the alert: a GS error shows only an inline{' '}
+          <strong>error code</strong> with a copy button. The full support reference is meant to live in the support
+          tool.
         </AlertDescription>
       </Alert>
       {samples.map(({ code, label }) => {

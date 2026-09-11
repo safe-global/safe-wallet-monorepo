@@ -115,6 +115,33 @@ describe('TxSubmitError', () => {
     expect(getByText('Could not submit the transaction. Try again.')).toBeInTheDocument()
   })
 
+  describe('a gas limit below the intrinsic minimum (WA-3523)', () => {
+    /** The pool rejection as viem re-wraps it: a contract revert it never was. */
+    const intrinsicGasError = () =>
+      new Error(
+        'The contract function "execTransaction" reverted with the following reason:\nintrinsic gas too low: gas 21000, minimum needed 25484',
+      )
+
+    it('names the setting to change and the minimum needed', () => {
+      const { getByText, queryByText } = render(<TxSubmitError error={intrinsicGasError()} />)
+
+      expect(
+        getByText('Gas limit too low. Minimum needed: 25,484. Increase the gas limit and try again.'),
+      ).toBeInTheDocument()
+      expect(queryByText(/Could not submit/)).not.toBeInTheDocument()
+    })
+
+    it('never claims the contract reverted, and shows no ABI or raw arguments', () => {
+      const { container, queryByText, queryByTestId } = render(<TxSubmitError error={intrinsicGasError()} />)
+
+      for (const forbidden of ['execTransaction', 'reverted', 'intrinsic gas', '21000']) {
+        expect(container.textContent).not.toContain(forbidden)
+      }
+      expect(queryByText('Details')).not.toBeInTheDocument()
+      expect(queryByTestId('error-details')).not.toBeInTheDocument()
+    })
+  })
+
   describe('CGW response states (WA-3252)', () => {
     it.each([429, 502, 500, 503, 422])('renders the agreed copy for a %s from CGW', (status) => {
       const error = asError({ status, data: {} })
@@ -149,7 +176,7 @@ describe('TxSubmitError', () => {
       expect(getByText('This Safe Account is not available.')).toBeInTheDocument()
     })
 
-    it('shows a code-only support reference instead of a raw Details payload', () => {
+    it('shows the message alone — no code reference and no raw Details payload', () => {
       const error = asError({
         status: 'PARSING_ERROR',
         originalStatus: 502,
@@ -157,10 +184,10 @@ describe('TxSubmitError', () => {
         error: "SyntaxError: Unexpected token '<'",
       })
 
-      const { getByTestId, getByText, queryByText } = render(<TxSubmitError error={error} />)
+      const { queryByTestId, queryByText } = render(<TxSubmitError error={error} />)
 
-      expect(getByTestId('error-details')).toBeInTheDocument()
-      expect(getByText('CGW-502')).toBeInTheDocument()
+      expect(queryByTestId('error-details')).not.toBeInTheDocument()
+      expect(queryByText('CGW-502')).not.toBeInTheDocument()
       expect(queryByText('Details')).not.toBeInTheDocument()
     })
 

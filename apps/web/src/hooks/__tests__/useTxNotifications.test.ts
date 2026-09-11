@@ -16,6 +16,12 @@ import {
 import { CGW_ERROR_FALLBACK } from '@safe-global/utils/services/exceptions/gatewayErrors'
 import useTxNotifications from '../useTxNotifications'
 
+let mockIsTxFlowOpen = false
+
+jest.mock('@/components/tx-flow/useIsTxFlowOpen', () => ({
+  useIsTxFlowOpenRef: () => ({ current: mockIsTxFlowOpen }),
+}))
+
 jest.mock('@/store/notificationsSlice', () => {
   const original = jest.requireActual('@/store/notificationsSlice')
   return {
@@ -212,7 +218,7 @@ describe('useTxNotifications — CGW response states (WA-3252)', () => {
 
     const notification = lastNotification()
     expect(notification.message).toBe('Something went wrong on our end. Try again.')
-    expect(notification.detailedMessage).toBe('Error code CGW-502')
+    expect(notification.detailedMessage).toBeUndefined()
     expect(JSON.stringify(notification)).not.toContain('nginx')
     expect(JSON.stringify(notification)).not.toContain('Bad Gateway')
     expect(JSON.stringify(notification)).not.toContain('<html')
@@ -255,6 +261,78 @@ describe('useTxNotifications — CGW response states (WA-3252)', () => {
     expect(notification.message).not.toBe(CGW_ERROR_FALLBACK)
     // The support reference still carries the status, exactly as the inline
     // alert's code-only reference does.
-    expect(notification.detailedMessage).toBe('Error code CGW-429')
+    expect(notification.detailedMessage).toBeUndefined()
+  })
+})
+
+describe('useTxNotifications — a gas limit below the intrinsic minimum (WA-3523)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockIsTxFlowOpen = false
+  })
+
+  it('names the minimum needed and keeps the raw payload out of the toast', async () => {
+    renderHook(() => useTxNotifications())
+
+    act(() => {
+      txDispatch(TxEvent.FAILED, {
+        txId: '0x1',
+        nonce: 1,
+        chainId: '1',
+        safeAddress: '0x0000000000000000000000000000000000000001',
+        error: new Error(
+          'The contract function "execTransaction" reverted with the following reason:\nintrinsic gas too low: gas 21000, minimum needed 25484',
+        ),
+      })
+    })
+
+    await waitFor(() => expect(showNotification).toHaveBeenCalled())
+
+    const notification = lastNotification()
+    expect(notification.message).toBe(
+      'Gas limit too low. Minimum needed: 25,484. Increase the gas limit and try again.',
+    )
+    expect(notification.detailedMessage).toBeUndefined()
+    expect(JSON.stringify(notification)).not.toContain('execTransaction')
+    expect(JSON.stringify(notification)).not.toContain('intrinsic gas')
+  })
+})
+
+describe('useTxNotifications — errors the tx flow already shows inline', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockIsTxFlowOpen = false
+  })
+
+  it('raises nothing at all for a failure while a flow is on screen', async () => {
+    mockIsTxFlowOpen = true
+    renderHook(() => useTxNotifications())
+
+    await act(async () => {
+      txDispatch(TxEvent.PROPOSE_FAILED, { error: asError({ status: 502, data: {} }) })
+    })
+
+    expect(showNotification).not.toHaveBeenCalled()
+  })
+
+  it('toasts a failure that arrives with no flow on screen', async () => {
+    renderHook(() => useTxNotifications())
+
+    act(() => {
+      txDispatch(TxEvent.PROPOSE_FAILED, { error: new Error('boom') })
+    })
+
+    await waitFor(() => expect(lastNotification()).toMatchObject({ variant: 'error' }))
+  })
+
+  it('still toasts a success raised from inside the flow', async () => {
+    mockIsTxFlowOpen = true
+    renderHook(() => useTxNotifications())
+
+    act(() => {
+      txDispatch(TxEvent.PROPOSED, { txId: '0x1', nonce: 1 })
+    })
+
+    await waitFor(() => expect(lastNotification()).toMatchObject({ variant: 'success' }))
   })
 })
