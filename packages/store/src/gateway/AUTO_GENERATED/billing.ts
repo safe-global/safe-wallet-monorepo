@@ -44,6 +44,29 @@ const injectedRtkApi = api
         }),
         providesTags: ['billing'],
       }),
+      billingPreviewSubscriptionUpdateV1: build.query<
+        BillingPreviewSubscriptionUpdateV1ApiResponse,
+        BillingPreviewSubscriptionUpdateV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/billing/spaces/${queryArg.spaceId}/subscriptions/${queryArg.subscriptionId}/preview-update`,
+          params: {
+            planId: queryArg.planId,
+          },
+        }),
+        providesTags: ['billing'],
+      }),
+      billingUpdateSubscriptionV1: build.mutation<
+        BillingUpdateSubscriptionV1ApiResponse,
+        BillingUpdateSubscriptionV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/billing/spaces/${queryArg.spaceId}/subscriptions/${queryArg.subscriptionId}`,
+          method: 'PATCH',
+          body: queryArg.updateSubscriptionDto,
+        }),
+        invalidatesTags: ['billing'],
+      }),
       billingGetCheckoutSessionV1: build.query<
         BillingGetCheckoutSessionV1ApiResponse,
         BillingGetCheckoutSessionV1ApiArg
@@ -83,6 +106,23 @@ export type BillingGetCheckoutUrlV1ApiArg = {
   returnUrl: string
   /** Space UUID */
   spaceId: string
+}
+export type BillingPreviewSubscriptionUpdateV1ApiResponse = /** status 200  */ SubscriptionUpdatePreview
+export type BillingPreviewSubscriptionUpdateV1ApiArg = {
+  /** Subscription identifier */
+  subscriptionId: string
+  /** The price id of the plan to preview */
+  planId: string
+  /** Space UUID */
+  spaceId: string
+}
+export type BillingUpdateSubscriptionV1ApiResponse = /** status 200  */ UpdateSubscriptionResult
+export type BillingUpdateSubscriptionV1ApiArg = {
+  /** Subscription identifier */
+  subscriptionId: string
+  /** Space UUID */
+  spaceId: string
+  updateSubscriptionDto: UpdateSubscriptionDto
 }
 export type BillingGetCheckoutSessionV1ApiResponse = /** status 200  */ CheckoutSession
 export type BillingGetCheckoutSessionV1ApiArg = {
@@ -156,6 +196,29 @@ export type CheckoutSessionResult = {
   sessionId: string
   url: string
 }
+export type PreviewLineItem = {
+  description: string
+  /** Signed amount in minor units; negative for credit on unused time */
+  amount: number
+  currency: string
+}
+export type SubscriptionUpdatePreview = {
+  amountDue: number
+  currency: string
+  /** Unix timestamp in seconds */
+  nextBillingDate: number
+  lineItems: PreviewLineItem[]
+}
+export type UpdateSubscriptionResult = {
+  subscriptionId: string
+  success: boolean
+}
+export type UpdateSubscriptionDto = {
+  /** The price id of the plan to move the subscription onto */
+  planId: string
+  /** Which offered payment link sells that plan. Only needed to disambiguate when several do */
+  paymentLinkId?: string
+}
 export type CheckoutSession = {
   id: string
   object: string
@@ -187,6 +250,9 @@ export const {
   useLazyBillingGetSpacePaymentLinksV1Query,
   useBillingGetCheckoutUrlV1Query,
   useLazyBillingGetCheckoutUrlV1Query,
+  useBillingPreviewSubscriptionUpdateV1Query,
+  useLazyBillingPreviewSubscriptionUpdateV1Query,
+  useBillingUpdateSubscriptionV1Mutation,
   useBillingGetCheckoutSessionV1Query,
   useLazyBillingGetCheckoutSessionV1Query,
 } = injectedRtkApi
