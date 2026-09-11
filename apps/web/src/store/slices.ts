@@ -49,6 +49,7 @@ export {
 } from '@/features/global-search/store'
 export {
   elevationListener,
+  stepUpErrorFilter,
   stepUpSlice,
   stepUpLeaving,
   stepUpReturning,

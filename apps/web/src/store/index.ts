@@ -24,6 +24,7 @@ import {
   counterfactualSyncListener,
   addressBookListener,
   elevationListener,
+  stepUpErrorFilter,
 } from './slices'
 import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
@@ -113,6 +114,7 @@ export const listenerMiddlewareInstance = createListenerMiddleware<RootState>()
 
 const middleware: Middleware<{}, RootState>[] = [
   cgwErrorAlert,
+  stepUpErrorFilter,
   persistState(persistedSlices),
   broadcastState(persistedSlices),
   listenerMiddlewareInstance.middleware,
