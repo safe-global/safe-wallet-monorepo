@@ -592,6 +592,136 @@
         ]
       }
     },
+    "/v1/billing/spaces/{spaceId}/subscriptions/{subscriptionId}/preview-update": {
+      "get": {
+        "operationId": "billingPreviewSubscriptionUpdateV1",
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "required": true,
+            "in": "path",
+            "description": "Subscription identifier",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "planId",
+            "required": true,
+            "in": "query",
+            "description": "The price id of the plan to preview",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionUpdatePreview"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not a member, or a plan this workspace is not offered"
+          },
+          "404": {
+            "description": "Subscription not found"
+          },
+          "409": {
+            "description": "Already on this plan"
+          },
+          "422": {
+            "description": "Malformed subscriptionId or planId"
+          }
+        },
+        "summary": "Preview what moving a subscription to another plan would cost",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
+    "/v1/billing/spaces/{spaceId}/subscriptions/{subscriptionId}": {
+      "patch": {
+        "operationId": "billingUpdateSubscriptionV1",
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "required": true,
+            "in": "path",
+            "description": "Subscription identifier",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSubscriptionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateSubscriptionResult"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not a member, or a plan this workspace is not offered"
+          },
+          "404": {
+            "description": "Subscription not found"
+          },
+          "409": {
+            "description": "Already on this plan, the subscription is not updatable, or several offered links sell the plan and none was named"
+          },
+          "422": {
+            "description": "The named payment link does not offer this plan"
+          },
+          "502": {
+            "description": "The billing service reported the plan change as unsuccessful"
+          }
+        },
+        "summary": "Move a subscription onto another plan",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
     "/v1/billing/sessions/{sessionId}": {
       "get": {
         "operationId": "billingGetCheckoutSessionV1",
@@ -6037,6 +6167,131 @@
         ]
       }
     },
+    "/v1/chains/{chainId}/tokens/{address}": {
+      "get": {
+        "description": "Symbol, name, decimals, logo and trust flag of a token on the given chain, as known by the Transaction Service.",
+        "operationId": "tokensGetTokenV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID the token is deployed on",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "description": "Token contract address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/NativeTokenMetadata"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Erc20TokenMetadata"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Erc721TokenMetadata"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The Transaction Service does not know this token"
+          },
+          "422": {
+            "description": "Invalid chain ID or address"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        },
+        "summary": "Get token metadata",
+        "tags": [
+          "tokens"
+        ]
+      }
+    },
+    "/v1/chains/{chainId}/tokens": {
+      "get": {
+        "description": "Metadata for up to 20 tokens of one chain, in request order. Addresses the Transaction Service does not know are omitted.",
+        "operationId": "tokensGetTokensV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID the token is deployed on",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "addresses",
+            "required": true,
+            "in": "query",
+            "description": "Comma-separated token contract addresses, at most 20",
+            "schema": {
+              "example": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48,0xdAC17F958D2ee523a2206206994597C13D831ec7",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token metadata for the known addresses, in request order",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/NativeTokenMetadata"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Erc20TokenMetadata"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Erc721TokenMetadata"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid chain ID, malformed address, empty list or more than 20 addresses"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        },
+        "summary": "Get metadata for several tokens",
+        "tags": [
+          "tokens"
+        ]
+      }
+    },
     "/v1/register/notifications": {
       "post": {
         "deprecated": true,
@@ -6372,125 +6627,6 @@
         "summary": "Delete device",
         "tags": [
           "notifications"
-        ]
-      }
-    },
-    "/v1/chains/{chainId}/tokens": {
-      "get": {
-        "description": "Metadata for up to 20 tokens of one chain, in request order. Addresses the Transaction Service does not know are omitted.",
-        "operationId": "tokensGetTokensV1",
-        "parameters": [
-          {
-            "name": "chainId",
-            "required": true,
-            "in": "path",
-            "description": "Chain ID the token is deployed on",
-            "schema": {
-              "example": "1",
-              "type": "string"
-            }
-          },
-          {
-            "name": "addresses",
-            "required": true,
-            "in": "query",
-            "description": "Comma-separated token contract addresses, at most 20",
-            "schema": {
-              "example": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48,0xdAC17F958D2ee523a2206206994597C13D831ec7",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Token metadata for the known addresses, in request order",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "oneOf": [
-                      {
-                        "$ref": "#/components/schemas/NativeTokenMetadata"
-                      },
-                      {
-                        "$ref": "#/components/schemas/Erc20TokenMetadata"
-                      },
-                      {
-                        "$ref": "#/components/schemas/Erc721TokenMetadata"
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Invalid chain ID, malformed address, empty list or more than 20 addresses"
-          }
-        },
-        "summary": "Get metadata for several tokens",
-        "tags": [
-          "tokens"
-        ]
-      }
-    },
-    "/v1/chains/{chainId}/tokens/{address}": {
-      "get": {
-        "description": "Symbol, name, decimals, logo and trust flag of a token on the given chain, as known by the Transaction Service.",
-        "operationId": "tokensGetTokenV1",
-        "parameters": [
-          {
-            "name": "chainId",
-            "required": true,
-            "in": "path",
-            "description": "Chain ID the token is deployed on",
-            "schema": {
-              "example": "1",
-              "type": "string"
-            }
-          },
-          {
-            "name": "address",
-            "required": true,
-            "in": "path",
-            "description": "Token contract address (0x prefixed hex string)",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Token metadata",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/NativeTokenMetadata"
-                    },
-                    {
-                      "$ref": "#/components/schemas/Erc20TokenMetadata"
-                    },
-                    {
-                      "$ref": "#/components/schemas/Erc721TokenMetadata"
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "The Transaction Service does not know this token"
-          },
-          "422": {
-            "description": "Invalid chain ID or address"
-          }
-        },
-        "summary": "Get token metadata",
-        "tags": [
-          "tokens"
         ]
       }
     }
@@ -7090,6 +7226,84 @@
         "required": [
           "sessionId",
           "url"
+        ]
+      },
+      "PreviewLineItem": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Signed amount in minor units; negative for credit on unused time"
+          },
+          "currency": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "description",
+          "amount",
+          "currency"
+        ]
+      },
+      "SubscriptionUpdatePreview": {
+        "type": "object",
+        "properties": {
+          "amountDue": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "nextBillingDate": {
+            "type": "number",
+            "description": "Unix timestamp in seconds"
+          },
+          "lineItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PreviewLineItem"
+            }
+          }
+        },
+        "required": [
+          "amountDue",
+          "currency",
+          "nextBillingDate",
+          "lineItems"
+        ]
+      },
+      "UpdateSubscriptionDto": {
+        "type": "object",
+        "properties": {
+          "planId": {
+            "type": "string",
+            "description": "The price id of the plan to move the subscription onto"
+          },
+          "paymentLinkId": {
+            "type": "string",
+            "description": "Which offered payment link sells that plan. Only needed to disambiguate when several do"
+          }
+        },
+        "required": [
+          "planId"
+        ]
+      },
+      "UpdateSubscriptionResult": {
+        "type": "object",
+        "properties": {
+          "subscriptionId": {
+            "type": "string"
+          },
+          "success": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "subscriptionId",
+          "success"
         ]
       },
       "CheckoutSession": {
@@ -15558,6 +15772,123 @@
           "signature"
         ]
       },
+      "NativeTokenMetadata": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "decimals": {
+            "type": "number"
+          },
+          "logoUri": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "trusted": {
+            "type": "boolean",
+            "description": "Whether the Transaction Service lists the token in one of its imported token lists"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "NATIVE_TOKEN"
+            ]
+          }
+        },
+        "required": [
+          "address",
+          "decimals",
+          "logoUri",
+          "name",
+          "symbol",
+          "trusted",
+          "type"
+        ]
+      },
+      "Erc20TokenMetadata": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "decimals": {
+            "type": "number"
+          },
+          "logoUri": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "trusted": {
+            "type": "boolean",
+            "description": "Whether the Transaction Service lists the token in one of its imported token lists"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ERC20"
+            ]
+          }
+        },
+        "required": [
+          "address",
+          "decimals",
+          "logoUri",
+          "name",
+          "symbol",
+          "trusted",
+          "type"
+        ]
+      },
+      "Erc721TokenMetadata": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "decimals": {
+            "type": "number"
+          },
+          "logoUri": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "trusted": {
+            "type": "boolean",
+            "description": "Whether the Transaction Service lists the token in one of its imported token lists"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ERC721"
+            ]
+          }
+        },
+        "required": [
+          "address",
+          "decimals",
+          "logoUri",
+          "name",
+          "symbol",
+          "trusted",
+          "type"
+        ]
+      },
       "SafeRegistration": {
         "type": "object",
         "properties": {
@@ -15751,123 +16082,6 @@
         },
         "required": [
           "subscriptions"
-        ]
-      },
-      "NativeTokenMetadata": {
-        "type": "object",
-        "properties": {
-          "address": {
-            "type": "string"
-          },
-          "decimals": {
-            "type": "number"
-          },
-          "logoUri": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "symbol": {
-            "type": "string"
-          },
-          "trusted": {
-            "type": "boolean",
-            "description": "Whether the Transaction Service lists the token in one of its imported token lists"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "NATIVE_TOKEN"
-            ]
-          }
-        },
-        "required": [
-          "address",
-          "decimals",
-          "logoUri",
-          "name",
-          "symbol",
-          "trusted",
-          "type"
-        ]
-      },
-      "Erc20TokenMetadata": {
-        "type": "object",
-        "properties": {
-          "address": {
-            "type": "string"
-          },
-          "decimals": {
-            "type": "number"
-          },
-          "logoUri": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "symbol": {
-            "type": "string"
-          },
-          "trusted": {
-            "type": "boolean",
-            "description": "Whether the Transaction Service lists the token in one of its imported token lists"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "ERC20"
-            ]
-          }
-        },
-        "required": [
-          "address",
-          "decimals",
-          "logoUri",
-          "name",
-          "symbol",
-          "trusted",
-          "type"
-        ]
-      },
-      "Erc721TokenMetadata": {
-        "type": "object",
-        "properties": {
-          "address": {
-            "type": "string"
-          },
-          "decimals": {
-            "type": "number"
-          },
-          "logoUri": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "symbol": {
-            "type": "string"
-          },
-          "trusted": {
-            "type": "boolean",
-            "description": "Whether the Transaction Service lists the token in one of its imported token lists"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "ERC721"
-            ]
-          }
-        },
-        "required": [
-          "address",
-          "decimals",
-          "logoUri",
-          "name",
-          "symbol",
-          "trusted",
-          "type"
         ]
       }
     }
