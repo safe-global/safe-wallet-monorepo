@@ -1,9 +1,0 @@
-/* Transparent border, matching the Safe Pro banner's, so both cards measure the same in the shared
-   sidebar slot. The card has no hover treatment of its own. */
-.card {
-  border: 1px solid transparent;
-}
-
-:global(.dark) .card {
-  background-color: var(--card);
-}

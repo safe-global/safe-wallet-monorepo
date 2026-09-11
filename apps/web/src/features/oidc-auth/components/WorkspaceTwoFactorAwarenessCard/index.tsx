@@ -4,7 +4,6 @@ import { AppRoutes } from '@/config/routes'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
-import css from './styles.module.css'
 
 /**
  * Sidebar card announcing that the workspace requires 2FA. Continue opens the General settings
@@ -27,7 +26,11 @@ const WorkspaceTwoFactorAwarenessCard = ({
   className?: string
 }) => (
   <div
-    className={cn('relative flex w-full flex-col items-start rounded-lg bg-muted p-4 shadow-lg', css.card, className)}
+    className={cn(
+      // The transparent border matches the Safe Pro banner's, so both measure the same in the slot they share.
+      'relative flex w-full flex-col items-start rounded-lg border border-transparent bg-muted p-4 shadow-lg dark:bg-card',
+      className,
+    )}
     data-testid="workspace-2fa-awareness-card"
   >
     <button
