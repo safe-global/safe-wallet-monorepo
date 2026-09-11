@@ -18,4 +18,34 @@ describe('SearchInput', () => {
 
     expect(onChange).toHaveBeenCalledTimes(1)
   })
+
+  it('should, when no onClear is given, leave the browser its own clear button', () => {
+    render(<SearchInput placeholder="Search safes" value="ethereum" onChange={jest.fn()} />)
+
+    expect(screen.queryByTestId('search-clear')).not.toBeInTheDocument()
+    expect(screen.getByRole('searchbox').className).not.toContain('search-cancel-button')
+  })
+
+  it('should, when onClear is given and the field has text, replace it with the design system one', () => {
+    render(<SearchInput placeholder="Search safes" value="ethereum" onChange={jest.fn()} onClear={jest.fn()} />)
+
+    expect(screen.getByTestId('search-clear')).toHaveAttribute('aria-label', 'Clear search')
+    // The native button takes the browser's accent colour and cannot be recoloured, so it is hidden.
+    expect(screen.getByRole('searchbox').className).toContain('[&::-webkit-search-cancel-button]:hidden')
+  })
+
+  it('should, when onClear is given but the field is empty, show no clear button', () => {
+    render(<SearchInput placeholder="Search safes" value="" onChange={jest.fn()} onClear={jest.fn()} />)
+
+    expect(screen.queryByTestId('search-clear')).not.toBeInTheDocument()
+  })
+
+  it('should, when the clear button is clicked, call onClear', () => {
+    const onClear = jest.fn()
+
+    render(<SearchInput placeholder="Search safes" value="ethereum" onChange={jest.fn()} onClear={onClear} />)
+    fireEvent.click(screen.getByTestId('search-clear'))
+
+    expect(onClear).toHaveBeenCalledTimes(1)
+  })
 })
