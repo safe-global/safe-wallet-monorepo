@@ -3,7 +3,8 @@ import { NO_TOKEN_SELECTED_ERROR } from '@/features/spending-limits/services'
 import { DUPLICATE_SPENDER_ERROR, DUPLICATE_TOKEN_ERROR } from '../../constants'
 import { validateLimitAmount, validateUniqueSpender, validateUniqueToken } from '../validation'
 
-const SPENDER = '0x1234567890123456789012345678901234567890'
+// Contains hex letters so the case-insensitivity test really changes the string.
+const SPENDER = '0x1234567890abcdef1234567890abcdef12345678'
 const OTHER = '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
 
