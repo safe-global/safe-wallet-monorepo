@@ -45,7 +45,7 @@ export function useSafeTxHash({
   safeTxData,
   safeTxHash,
 }: {
-  safeTxData: SafeTransactionData
+  safeTxData: SafeTransactionData | undefined
   safeTxHash?: string
 }): string | null {
   const { safe, safeAddress } = useSafeInfo()
@@ -57,7 +57,7 @@ export function useSafeTxHash({
     }
     // Try to get version from SDK first, fall back to safe.version
     const version = safeSDK?.getContractVersion() || safe.version
-    if (!version) {
+    if (!version || !safeTxData) {
       return null
     }
     try {
