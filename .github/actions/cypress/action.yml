@@ -55,6 +55,12 @@ runs:
         # NEXT_PUBLIC_ flag that does survive the build.
         NEXT_PUBLIC_IS_TEST_E2E: 'true'
 
+    # Self-heals a dep cache written by a host job, whose ~ differs from this
+    # container's, leaving the binary where Cypress will not look for it.
+    - name: Ensure the Cypress binary is present
+      shell: bash
+      run: yarn workspace @safe-global/web exec cypress install
+
     - uses: cypress-io/github-action@f790eee7a50d9505912f50c2095510be7de06aa7 # v6.10.9
       with:
         spec: ${{ inputs.spec }}
