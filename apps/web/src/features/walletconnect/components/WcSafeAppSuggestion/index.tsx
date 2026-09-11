@@ -4,7 +4,6 @@ import type { ReactElement } from 'react'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Field, FieldLabel } from '@/components/ui/field'
 import { Link } from '@/components/ui/link'
@@ -52,24 +51,21 @@ const WcSafeAppSuggestion = ({
         </Typography>
       </div>
 
-      {/* Bled to the popup edge so the rows inside share a left edge with the controls below */}
-      <Card surface="sunken" size="none" className="-mx-4">
-        <div className="px-4">
-          {BENEFITS.map(({ Icon, text }, index) => (
-            <div key={text}>
-              {index > 0 && <Separator />}
-              <div className="flex items-center gap-3 py-3">
-                <div className="bg-success-subtle text-success-strong flex size-9 shrink-0 items-center justify-center rounded-lg">
-                  <Icon className="size-4" />
-                </div>
-                <Typography variant="paragraph-small" align="left">
-                  {text}
-                </Typography>
+      <div>
+        {BENEFITS.map(({ Icon, text }, index) => (
+          <div key={text}>
+            {index > 0 && <Separator />}
+            <div className="flex items-center gap-3 py-3">
+              <div className="bg-success-subtle text-success-strong flex size-9 shrink-0 items-center justify-center rounded-lg">
+                <Icon className="size-4" />
               </div>
+              <Typography variant="paragraph-small" align="left">
+                {text}
+              </Typography>
             </div>
-          ))}
-        </div>
-      </Card>
+          </div>
+        ))}
+      </div>
 
       <div className="flex flex-col gap-3">
         {/* w-auto overrides the primitive's w-full so the row can shrink-wrap and centre */}
