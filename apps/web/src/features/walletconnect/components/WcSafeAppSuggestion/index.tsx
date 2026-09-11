@@ -4,6 +4,7 @@ import type { ReactElement } from 'react'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Field, FieldLabel } from '@/components/ui/field'
 import { Link } from '@/components/ui/link'
@@ -52,24 +53,27 @@ const WcSafeAppSuggestion = ({
       </div>
 
       {/* Bled to the popup edge so the rows inside share a left edge with the controls below */}
-      <div className="bg-background-main -mx-4 rounded-lg px-4">
-        {BENEFITS.map(({ Icon, text }, index) => (
-          <div key={text}>
-            {index > 0 && <Separator />}
-            <div className="flex items-center gap-3 py-3">
-              <div className="bg-success-background text-success flex size-9 shrink-0 items-center justify-center rounded-lg">
-                <Icon className="size-4" />
+      <Card surface="sunken" size="none" className="-mx-4">
+        <div className="px-4">
+          {BENEFITS.map(({ Icon, text }, index) => (
+            <div key={text}>
+              {index > 0 && <Separator />}
+              <div className="flex items-center gap-3 py-3">
+                <div className="bg-success-subtle text-success-strong flex size-9 shrink-0 items-center justify-center rounded-lg">
+                  <Icon className="size-4" />
+                </div>
+                <Typography variant="paragraph-small" align="left">
+                  {text}
+                </Typography>
               </div>
-              <Typography variant="paragraph-small" align="left">
-                {text}
-              </Typography>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      </Card>
 
       <div className="flex flex-col gap-3">
-        <Field orientation="horizontal" className="self-center">
+        {/* w-auto overrides the primitive's w-full so the row can shrink-wrap and centre */}
+        <Field orientation="horizontal" className="w-auto self-center">
           <Checkbox
             id={checkboxId}
             checked={dontShowAgain}
