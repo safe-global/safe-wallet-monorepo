@@ -6,6 +6,9 @@ inputs:
   prod: # id of input
     description: 'Production build flag'
     required: false
+  app-version:
+    description: 'App version from the release tag; defaults to the latest published release'
+    required: false
 
 runs:
   using: 'composite'
@@ -28,6 +31,7 @@ runs:
         NEXT_PUBLIC_IS_PRODUCTION: ${{ inputs.prod }}
         PROD: ${{ inputs.prod }}
         COMMIT_SHA: ${{ github.sha }}
+        APP_VERSION: ${{ inputs.app-version }}
 
     - name: Upload source maps to Datadog
       shell: bash
@@ -54,6 +58,7 @@ runs:
       env:
         PROD: ${{ inputs.prod }}
         COMMIT_SHA: ${{ github.sha }}
+        APP_VERSION: ${{ inputs.app-version }}
     - name: Generate SRI for static scripts
       shell: bash
       # Skip SRI for Cypress test builds (NODE_ENV=cypress)

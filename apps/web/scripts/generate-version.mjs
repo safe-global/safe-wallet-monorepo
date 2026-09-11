@@ -3,11 +3,10 @@ import { execFileSync } from 'node:child_process'
 import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { resolveAppVersion } from './resolve-app-version.cjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const webRoot = resolve(here, '..')
-
-const pkg = JSON.parse(readFileSync(resolve(webRoot, 'package.json'), 'utf8'))
 
 const git = (...args) => {
   try {
@@ -38,7 +37,7 @@ const branch =
   headRef || (refType === 'branch' ? refName : '') || (gitBranch && gitBranch !== 'HEAD' ? gitBranch : '') || null
 
 const version = {
-  version: pkg.version,
+  version: resolveAppVersion(),
   commit,
   commitShort,
   tag,
