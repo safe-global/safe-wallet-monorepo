@@ -2,7 +2,11 @@ import { screen, waitFor, act, getByText, fireEvent } from '@testing-library/rea
 
 import { render } from '../../test-utils'
 import { ContractInterface } from '../../typings/models'
-import SolidityForm, { CONTRACT_METHOD_INDEX_FIELD_NAME, TO_ADDRESS_FIELD_NAME } from './SolidityForm'
+import SolidityForm, {
+  CONTRACT_METHOD_INDEX_FIELD_NAME,
+  NATIVE_VALUE_FORMAT_HINT,
+  TO_ADDRESS_FIELD_NAME,
+} from './SolidityForm'
 
 // Axios is bundled as ESM module which is not directly compatible with Jest
 // https://jestjs.io/docs/ecmascript-modules
@@ -212,6 +216,38 @@ describe('<SolidityForm>', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('contract-field-newValue')).toHaveValue('0x680cde08860141F9D223cE4E620B10Cd6741037E')
+    })
+  })
+
+  describe('Native value field', () => {
+    const renderForm = (nativeCurrencySymbol: string | undefined = 'ETH') =>
+      render(
+        <SolidityForm
+          id={'test-form'}
+          onSubmit={jest.fn()}
+          getAddressFromDomain={jest.fn()}
+          initialValues={initialValues}
+          contract={null}
+          nativeCurrencySymbol={nativeCurrencySymbol}
+          networkPrefix={'rin'}
+          showHexEncodedData={false}
+        >
+          <button type="submit">submit</button>
+        </SolidityForm>,
+      )
+
+    it('labels the field with the native currency unit and states the expected format', async () => {
+      renderForm()
+
+      expect(await screen.findByLabelText(/^Value \(ETH\)/)).toBeInTheDocument()
+      expect(screen.getByText(NATIVE_VALUE_FORMAT_HINT)).toBeInTheDocument()
+    })
+
+    it('falls back to a unit-less label while the chain info is unknown', async () => {
+      renderForm(undefined)
+
+      expect(await screen.findByLabelText(/^Value/)).toBeInTheDocument()
+      expect(screen.queryByLabelText(/undefined/)).not.toBeInTheDocument()
     })
   })
 })
