@@ -1,5 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import React, { type ReactNode } from 'react'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import { SidebarCommonFooter } from '../SidebarCommonFooter'
 
 const mockUseAppDispatch = jest.fn()
@@ -131,8 +132,9 @@ jest.mock('@/features/safe-pro-announcement', () => ({
 }))
 
 let mockIsTwoFactorBannerEnabled = false
+const mockTwoFactorBannerFlag = FEATURES.TWO_FACTOR_AWARENESS_BANNER
 jest.mock('@/hooks/useChains', () => ({
-  useHasFeature: (feature: string) => feature === 'TWO_FACTOR_AWARENESS_BANNER' && mockIsTwoFactorBannerEnabled,
+  useHasFeature: (feature: string) => feature === mockTwoFactorBannerFlag && mockIsTwoFactorBannerEnabled,
 }))
 
 let mockSpaceId: string | null = 'space-uuid'
@@ -143,34 +145,43 @@ jest.mock('../../../../hooks/useCurrentSpaceId', () => ({
 let mockIsTwoFactorCardDismissed = false
 const mockDismissTwoFactorCard = jest.fn()
 jest.mock('@/features/oidc-auth', () => ({
+  OidcAuthFeature: { name: 'oidc-auth' },
   useTwoFactorAwarenessDismissed: () => [mockIsTwoFactorCardDismissed, mockDismissTwoFactorCard],
-  WorkspaceTwoFactorAwarenessCard: ({
-    className,
-    spaceId,
-    onDismiss,
-  }: {
-    className?: string
-    spaceId?: string
-    onDismiss: () => void
-  }) => (
-    <div data-testid="workspace-2fa-awareness-card" data-space-id={spaceId} className={className}>
-      <button onClick={onDismiss}>Dismiss</button>
-    </div>
-  ),
 }))
 
 let mockIsSafeProLoaded = true
 let mockSafeProError: Error | undefined = undefined
+let mockIsTwoFactorCardLoaded = true
+let mockTwoFactorCardError: Error | undefined = undefined
 jest.mock('@/features/__core__', () => ({
-  useLoadFeature: () => ({
-    $isReady: mockIsSafeProLoaded,
-    $error: mockSafeProError,
-    SafeProSidebarBanner: ({ className, onDismiss }: { className?: string; onDismiss?: () => void }) => (
-      <div data-testid="safe-pro-sidebar-banner" className={className}>
-        <button onClick={onDismiss}>Dismiss Safe Pro</button>
-      </div>
-    ),
-  }),
+  useLoadFeature: (handle: { name: string }) =>
+    handle.name === 'oidc-auth'
+      ? {
+          $isReady: mockIsTwoFactorCardLoaded,
+          $error: mockTwoFactorCardError,
+          WorkspaceTwoFactorAwarenessCard: ({
+            className,
+            spaceId,
+            onDismiss,
+          }: {
+            className?: string
+            spaceId?: string
+            onDismiss: () => void
+          }) => (
+            <div data-testid="workspace-2fa-awareness-card" data-space-id={spaceId} className={className}>
+              <button onClick={onDismiss}>Dismiss</button>
+            </div>
+          ),
+        }
+      : {
+          $isReady: mockIsSafeProLoaded,
+          $error: mockSafeProError,
+          SafeProSidebarBanner: ({ className, onDismiss }: { className?: string; onDismiss?: () => void }) => (
+            <div data-testid="safe-pro-sidebar-banner" className={className}>
+              <button onClick={onDismiss}>Dismiss Safe Pro</button>
+            </div>
+          ),
+        },
 }))
 
 jest.mock('../../SidebarIndexingStatus', () => ({
@@ -197,6 +208,8 @@ describe('SidebarCommonFooter', () => {
     mockIsSafeProBannerDismissed = false
     mockIsSafeProLoaded = true
     mockSafeProError = undefined
+    mockIsTwoFactorCardLoaded = true
+    mockTwoFactorCardError = undefined
     mockIsTwoFactorBannerEnabled = false
     mockIsTwoFactorCardDismissed = false
     mockSpaceId = 'space-uuid'
@@ -324,6 +337,22 @@ describe('SidebarCommonFooter', () => {
       render(<SidebarCommonFooter />)
 
       expect(screen.getByTestId('workspace-2fa-awareness-card')).not.toHaveClass('invisible')
+    })
+
+    it('leaves the slot out of the layout while the 2FA card is still loading', () => {
+      mockIsTwoFactorBannerEnabled = true
+      mockIsTwoFactorCardLoaded = false
+      render(<SidebarCommonFooter />)
+
+      expect(screen.queryByTestId('workspace-2fa-awareness-card')).not.toBeInTheDocument()
+    })
+
+    it('drops the 2FA card when its chunk fails to load', () => {
+      mockIsTwoFactorBannerEnabled = true
+      mockTwoFactorCardError = new Error('chunk load failed')
+      render(<SidebarCommonFooter />)
+
+      expect(screen.queryByTestId('workspace-2fa-awareness-card')).not.toBeInTheDocument()
     })
 
     it('shows the 2FA card where the Safe Pro banner hides itself', () => {

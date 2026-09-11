@@ -26,7 +26,7 @@ import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
-import { WorkspaceTwoFactorAwarenessCard, useTwoFactorAwarenessDismissed } from '@/features/oidc-auth'
+import { OidcAuthFeature, useTwoFactorAwarenessDismissed } from '@/features/oidc-auth'
 import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
 
 export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?: boolean }): ReactElement => {
@@ -36,31 +36,33 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
   const [isProdGateway = false, setIsProdGateway] = useLocalStorage<boolean>(LS_KEY)
   const [helpMenuAnchor, setHelpMenuAnchor] = useState<HTMLElement | null>(null)
   const { SafeProSidebarBanner, $isReady: isSafeProLoaded, $error: safeProError } = useLoadFeature(SafeProFeature)
+  const {
+    WorkspaceTwoFactorAwarenessCard,
+    $isReady: isTwoFactorCardLoaded,
+    $error: twoFactorCardError,
+  } = useLoadFeature(OidcAuthFeature)
   const isSafeProEnabled = useIsSafeProEnabled()
   const { pathname } = useRouter()
   const [isSafeProBannerDismissed, dismissSafeProBanner] = useSafeProSidebarBannerDismissed()
-  // The Plans page is the banner's own link destination, so hide it there. A failed chunk counts as
-  // no banner at all, since its stub then renders nothing for good and the 2FA card can have the slot.
+  // A failed chunk counts as no banner: its stub then renders nothing for good.
   const hasSafeProBanner = isSafeProEnabled && pathname !== AppRoutes.spaces.plans && !safeProError
   const showSafeProBanner = hasSafeProBanner && !isSafeProBannerDismissed
-  // Loading the chunk takes seconds on a cold cache, and the stub renders nothing until it lands.
-  // Without this the slot would stand open and empty for that long, because the hidden 2FA card
-  // gives it a height.
-  const isSafeProBannerPending = showSafeProBanner && !isSafeProLoaded
 
   const spaceId = useCurrentSpaceId()
   // Own flag, separate from the 2FA feature itself, so the card can be switched off on its own.
   const isTwoFactorCardEnabled = useHasFeature(FEATURES.TWO_FACTOR_AWARENESS_BANNER) === true
   const [isTwoFactorCardDismissed, dismissTwoFactorCard] = useTwoFactorAwarenessDismissed()
-  // Continue needs a Workspace to link to, so the card waits until one is known. Like the Safe Pro
-  // banner, it is hidden on its own destination.
+  // Continue needs a Workspace to link to, so the card waits until one is known.
   const hasTwoFactorCard =
     isTwoFactorCardEnabled &&
     !isTwoFactorCardDismissed &&
+    !twoFactorCardError &&
     spaceId !== null &&
     pathname !== AppRoutes.spaces.settingsGeneral
-  // One banner slot, Safe Pro first: the 2FA card only takes it once the Safe Pro banner is gone.
+  // One slot, Safe Pro first: the 2FA card only takes it once the Safe Pro banner is gone.
   const showTwoFactorCard = hasTwoFactorCard && !showSafeProBanner
+  // Both are lazy: their stubs render nothing, so opening the slot early leaves an empty box.
+  const isBannerPending = (showSafeProBanner && !isSafeProLoaded) || (showTwoFactorCard && !isTwoFactorCardLoaded)
 
   const onToggleGateway = (checked: boolean) => {
     setIsProdGateway(checked)
@@ -106,10 +108,9 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
       )}
 
       <SidebarMenu className="gap-0.5">
-        {!isSafeProBannerPending && (showSafeProBanner || showTwoFactorCard) && (
+        {!isBannerPending && (showSafeProBanner || showTwoFactorCard) && (
           <SidebarMenuItem className="group-data-[collapsible=icon]:hidden">
-            {/* Both banners share one grid cell, so the slot keeps the taller banner's height and nothing
-                below it moves when one banner gives way to the other. The one not shown stays invisible. */}
+            {/* One grid cell for both, so nothing below moves when one gives way to the other. */}
             <div className="mb-2 grid">
               {hasSafeProBanner && (
                 <SafeProSidebarBanner

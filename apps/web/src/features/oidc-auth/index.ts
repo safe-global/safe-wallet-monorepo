@@ -47,7 +47,6 @@ export { useTwoFactorAwarenessDismissed } from './hooks/useTwoFactorAwarenessDis
 export { default as SwitchAuthenticatorSection } from './components/SwitchAuthenticatorSection'
 export { default as WalletTwoFactorSection } from './components/WalletTwoFactorSection'
 export { default as WorkspaceTwoFactorSection } from './components/WorkspaceTwoFactorSection'
-export { default as WorkspaceTwoFactorAwarenessCard } from './components/WorkspaceTwoFactorAwarenessCard'
 export { default as MemberTwoFactorBadge } from './components/MemberTwoFactorBadge'
 
 // ─────────────────────────────────────────────────────────────────

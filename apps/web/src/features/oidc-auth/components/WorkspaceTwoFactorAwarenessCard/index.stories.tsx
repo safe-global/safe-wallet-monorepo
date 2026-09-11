@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { mswLoader } from 'msw-storybook-addon'
 import { createMockStory } from '@/stories/mocks'
 import WorkspaceTwoFactorAwarenessCard from './index'
 
@@ -14,7 +13,6 @@ const meta = {
   title: 'Features/OidcAuth/WorkspaceTwoFactorAwarenessCard',
   component: WorkspaceTwoFactorAwarenessCard,
   tags: ['autodocs'],
-  loaders: [mswLoader],
   decorators: [
     defaultSetup.decorator,
     (Story) => (
