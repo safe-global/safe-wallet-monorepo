@@ -48,7 +48,10 @@ function SpaceNestedSafesButton(): ReactElement | null {
 
   return (
     <>
-      <div className="flex self-stretch items-stretch order-1 rounded-lg bg-muted">
+      {/* min-h-10 matches the safe selector's own `h-10`: `self-stretch` only sizes this to the
+          selector while they share a flex line, so without a floor the chip collapses to its
+          icon height on the narrow layouts where the selector wraps onto its own row. */}
+      <div className="flex self-stretch items-stretch min-h-10 order-1 rounded-lg bg-muted">
         <Tooltip>
           <TooltipTrigger
             render={

@@ -1,8 +1,8 @@
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { useMemo, type ReactElement } from 'react'
-import { Accordion, AccordionSummary, Typography, AccordionDetails, Box } from '@mui/material'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import CodeIcon from '@mui/icons-material/Code'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { Typography } from '@/components/ui/typography'
+import { Code as CodeIcon } from 'lucide-react'
 import classNames from 'classnames'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 
@@ -89,45 +89,52 @@ const MsgDetails = ({ msg }: { msg: MessageItem }): ReactElement => {
           </div>
         )}
 
-        <div className={txDetailsCss.multiSend}>
-          {msg.confirmations.map((confirmation, i) => (
-            <Accordion
-              variant="elevation"
-              key={confirmation.signature}
-              defaultExpanded={confirmation.owner.value === wallet?.address}
-            >
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <div className={singleTxDecodedCss.summary}>
-                  <CodeIcon />
-                  <Typography>{`Confirmation ${i + 1}`}</Typography>
-                </div>
-              </AccordionSummary>
+        <div className={classNames(txDetailsCss.multiSend, 'border-t border-border')}>
+          <Accordion
+            multiple
+            defaultValue={msg.confirmations
+              .filter((confirmation) => confirmation.owner.value === wallet?.address)
+              .map((confirmation) => confirmation.signature)}
+          >
+            {msg.confirmations.map((confirmation, i) => (
+              <AccordionItem value={confirmation.signature} key={confirmation.signature}>
+                <AccordionTrigger
+                  className={classNames('flex min-h-12 items-center px-4 py-3', singleTxDecodedCss.elevationTrigger)}
+                >
+                  <div className={singleTxDecodedCss.summary}>
+                    <CodeIcon className="size-4 shrink-0 text-muted-foreground" />
+                    <Typography className={singleTxDecodedCss.summaryLabel}>
+                      <b>{`Confirmation ${i + 1}`}</b>
+                    </Typography>
+                  </div>
+                </AccordionTrigger>
 
-              <AccordionDetails>
-                <div className={infoDetailsCss.container}>
-                  <EthHashInfo
-                    address={confirmation.owner.value || ''}
-                    name={confirmation.owner.name}
-                    customAvatar={confirmation.owner.logoUri || undefined}
-                    shortAddress={false}
-                    showCopyButton
-                    hasExplorer
-                  />
-                </div>
-                <TxDataRow title="Signature:">
-                  <EthHashInfo address={confirmation.signature} showAvatar={false} showCopyButton />
-                </TxDataRow>
-              </AccordionDetails>
-            </Accordion>
-          ))}
+                <AccordionContent className="p-4">
+                  <div className={infoDetailsCss.container}>
+                    <EthHashInfo
+                      address={confirmation.owner.value || ''}
+                      name={confirmation.owner.name}
+                      customAvatar={confirmation.owner.logoUri || undefined}
+                      shortAddress={false}
+                      showCopyButton
+                      hasExplorer
+                    />
+                  </div>
+                  <TxDataRow title="Signature:">
+                    <EthHashInfo address={confirmation.signature} showAvatar={false} showCopyButton />
+                  </TxDataRow>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </div>
       </div>
       <div className={txDetailsCss.txSigners}>
         <MsgAuditLog msg={msg} />
         {wallet && !isConfirmed && (
-          <Box display="flex" alignItems="center" justifyContent="center" gap={1} mt={2}>
+          <div className="mt-4 flex items-center justify-center gap-2">
             <SignMsgButton msg={msg} />
-          </Box>
+          </div>
         )}
       </div>
     </div>

@@ -1,10 +1,7 @@
 import type { SafeVersion } from '@safe-global/types-kit'
-import {
-  getSafeL2SingletonDeployments,
-  getSafeSingletonDeployments,
-  getSafeToL2SetupDeployment,
-} from '@safe-global/safe-deployments'
+import { getSafeL2SingletonDeployments, getSafeSingletonDeployments } from '@safe-global/safe-deployments'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { getSafeToL2SetupVersionByAddress } from '@safe-global/utils/services/contracts/deployments'
 import { SAFE_VERSIONS } from '@safe-global/utils/services/contracts/utils'
 import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { Safe__factory } from '@safe-global/utils/types/contracts'
@@ -72,8 +69,7 @@ export const validateAccountConfig = (safeAccountConfig: SafeAccountConfig) => {
     throw new Error(SAFE_CREATION_DATA_ERRORS.PAYMENT_SAFE)
   }
 
-  const setupToL2Address = getSafeToL2SetupDeployment({ version: '1.4.1' })?.defaultAddress
-  if (safeAccountConfig.to !== ZERO_ADDRESS && !sameAddress(safeAccountConfig.to, setupToL2Address)) {
+  if (safeAccountConfig.to !== ZERO_ADDRESS && !getSafeToL2SetupVersionByAddress(safeAccountConfig.to)) {
     // Unknown setupModules calls cannot be replayed as the target contract is likely not deployed across chains
     throw new Error(SAFE_CREATION_DATA_ERRORS.UNKNOWN_SETUP_MODULES)
   }

@@ -20,7 +20,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const AllVariants: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <div style={{ display: 'block' }}>
       <div style={{ marginBottom: '2rem' }}>
@@ -55,7 +55,7 @@ export const AllVariants: Story = {
               id="email"
               type="email"
               placeholder="name@example.com"
-              style={{ padding: '0.5rem', border: '1px solid var(--color-border)', borderRadius: '0.375rem' }}
+              style={{ padding: '0.5rem', border: '1px solid var(--border)', borderRadius: '0.375rem' }}
             />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -64,7 +64,7 @@ export const AllVariants: Story = {
               id="password"
               type="password"
               placeholder="Enter password"
-              style={{ padding: '0.5rem', border: '1px solid var(--color-border)', borderRadius: '0.375rem' }}
+              style={{ padding: '0.5rem', border: '1px solid var(--border)', borderRadius: '0.375rem' }}
             />
           </div>
         </div>

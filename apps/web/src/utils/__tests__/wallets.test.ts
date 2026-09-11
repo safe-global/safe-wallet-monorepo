@@ -188,5 +188,26 @@ describe('wallets', () => {
 
       expect(result).toBe(false)
     })
+
+    it('should memoize successful results per chainId and address', async () => {
+      getCodeMock.mockResolvedValue('0x608060405234801561001057600080fd5b5')
+
+      await isSmartContractWallet('1', toBeHex('0x1', 20))
+      await isSmartContractWallet('1', toBeHex('0x1', 20))
+
+      expect(getCodeMock).toHaveBeenCalledTimes(2) // isSmartContract + isEIP7702DelegatedAccount, once each
+    })
+
+    it('should not cache a failed check and retry on the next call', async () => {
+      getCodeMock.mockRejectedValueOnce(new Error('Provider not found'))
+
+      await expect(isSmartContractWallet('1', toBeHex('0x1', 20))).rejects.toThrow('Provider not found')
+
+      getCodeMock.mockResolvedValue('0x608060405234801561001057600080fd5b5')
+
+      const result = await isSmartContractWallet('1', toBeHex('0x1', 20))
+
+      expect(result).toBe(true)
+    })
   })
 })

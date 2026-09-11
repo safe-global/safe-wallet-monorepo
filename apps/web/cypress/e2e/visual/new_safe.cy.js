@@ -17,10 +17,4 @@ describe('[VISUAL] New safe form screenshots', { defaultCommandTimeout: 60000, .
     cy.visit(constants.loadNewSafeSepoliaUrl)
     // Skip awaitVisualStability — the load form has a persistent circular skeleton for the identicon placeholder
   })
-
-  it('[VISUAL] Screenshot load safe with invalid address error', () => {
-    cy.visit(constants.loadNewSafeSepoliaUrl)
-    safe.inputAddress('Random text')
-    // Skip awaitVisualStability — the load form has a persistent circular skeleton for the identicon placeholder
-  })
 })

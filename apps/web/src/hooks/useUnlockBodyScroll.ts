@@ -10,17 +10,19 @@ import { useEffect } from 'react'
 const OPEN_OVERLAY_SELECTOR = [
   // MUI modals/dialogs/drawers/popovers/menus. `keepMounted` ones get `.MuiModal-hidden` when closed.
   '.MuiModal-root:not(.MuiModal-hidden)',
-  // Base UI / shadcn overlays — their content is only mounted while open.
-  '[data-slot="dialog-content"]',
-  '[data-slot="alert-dialog-content"]',
-  '[data-slot="drawer-content"]',
-  '[data-slot="sheet-content"]',
-  '[data-slot="popover-content"]',
-  '[data-slot="dropdown-menu-content"]',
-  '[data-slot="context-menu-content"]',
-  '[data-slot="select-content"]',
-  '[data-slot="combobox-content"]',
-  '[data-slot="menubar-content"]',
+  // Base UI / shadcn overlays. Their content is unmounted while closed, EXCEPT under `keepMounted`
+  // (e.g. CaptchaModal), where Base UI keeps the node and only marks it `hidden` — so a bare
+  // attribute selector would match a closed overlay and disable the guard for the whole session.
+  '[data-slot="dialog-content"]:not([hidden])',
+  '[data-slot="alert-dialog-content"]:not([hidden])',
+  '[data-slot="drawer-content"]:not([hidden])',
+  '[data-slot="sheet-content"]:not([hidden])',
+  '[data-slot="popover-content"]:not([hidden])',
+  '[data-slot="dropdown-menu-content"]:not([hidden])',
+  '[data-slot="context-menu-content"]:not([hidden])',
+  '[data-slot="select-content"]:not([hidden])',
+  '[data-slot="combobox-content"]:not([hidden])',
+  '[data-slot="menubar-content"]:not([hidden])',
 ].join(', ')
 
 export const isAnyOverlayOpen = (doc: Document): boolean => doc.querySelector(OPEN_OVERLAY_SELECTOR) != null

@@ -1,4 +1,3 @@
-import { Typography, Box } from '@mui/material'
 import type { ReactElement } from 'react'
 
 export function _getCountdown(seconds: number): { days: number; hours: number; minutes: number } {
@@ -21,21 +20,17 @@ export function Countdown({ seconds }: { seconds: number }): ReactElement | null
   }
 
   if (seconds <= 60) {
-    return (
-      <Typography fontWeight={700} component="span">
-        {'< 1 min'}
-      </Typography>
-    )
+    return <span className="font-bold">{'< 1 min'}</span>
   }
 
   const { days, hours, minutes } = _getCountdown(seconds)
 
   return (
-    <Box display="flex" gap={1}>
+    <div className="flex gap-2">
       <TimeLeft value={days} unit="day" />
       <TimeLeft value={hours} unit="hr" />
       <TimeLeft value={minutes} unit="min" />
-    </Box>
+    </div>
   )
 }
 
@@ -46,12 +41,8 @@ function TimeLeft({ value, unit }: { value: number; unit: string }): ReactElemen
 
   return (
     <div>
-      <Typography fontWeight={700} component="span">
-        {value}
-      </Typography>{' '}
-      <Typography color="primary.light" component="span">
-        {value === 1 ? unit : `${unit}s`}
-      </Typography>
+      <span className="font-bold">{value}</span>{' '}
+      <span className="text-[var(--color-primary-light)]">{value === 1 ? unit : `${unit}s`}</span>
     </div>
   )
 }

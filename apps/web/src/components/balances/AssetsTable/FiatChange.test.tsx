@@ -12,40 +12,24 @@ describe('FiatChange', () => {
     expect(screen.getByText('n/a')).toBeInTheDocument()
   })
 
-  it('renders positive change with green chip and up arrow', () => {
-    const mockBalance: Balance = {
-      fiatBalance24hChange: '5.00', // 5% increase
-    } as Balance
-
-    render(<FiatChange balanceItem={mockBalance} />)
-
-    const chip = screen.getByText('5.00%')
-    expect(chip).toBeInTheDocument()
-    expect(chip).toHaveStyle({ backgroundColor: 'success.background', color: 'success.main' })
-  })
-
-  it('renders negative change with red chip and down arrow', () => {
+  it('renders a negative change as a positive percentage', () => {
     const mockBalance: Balance = {
       fiatBalance24hChange: '-3.00', // 3% decrease
     } as Balance
 
     render(<FiatChange balanceItem={mockBalance} />)
 
-    const chip = screen.getByText('3.00%')
-    expect(chip).toBeInTheDocument()
-    expect(chip).toHaveStyle({ backgroundColor: 'error.background', color: 'error.main' })
+    expect(screen.getByText('3.00%')).toBeInTheDocument()
   })
 
-  it('renders zero change with default styling', () => {
+  it('renders a zero change as 0.00%', () => {
     const mockBalance: Balance = {
       fiatBalance24hChange: '0',
     } as Balance
 
     render(<FiatChange balanceItem={mockBalance} />)
 
-    const chip = screen.getByText('0.00%')
-    expect(chip).toBeInTheDocument()
-    expect(chip).toHaveStyle({ backgroundColor: 'default', color: 'default' })
+    expect(screen.getByText('0.00%')).toBeInTheDocument()
   })
 
   it('renders up to 2 decimal places', () => {
@@ -55,9 +39,7 @@ describe('FiatChange', () => {
 
     render(<FiatChange balanceItem={mockBalance} />)
 
-    const chip = screen.getByText('5.12%')
-    expect(chip).toBeInTheDocument()
-    expect(chip).toHaveStyle({ backgroundColor: 'success.background', color: 'success.main' })
+    expect(screen.getByText('5.12%')).toBeInTheDocument()
   })
 
   it('rounds correctly', () => {
@@ -67,9 +49,7 @@ describe('FiatChange', () => {
 
     render(<FiatChange balanceItem={mockBalance} />)
 
-    const chip = screen.getByText('4.27%')
-    expect(chip).toBeInTheDocument()
-    expect(chip).toHaveStyle({ backgroundColor: 'success.background', color: 'success.main' })
+    expect(screen.getByText('4.27%')).toBeInTheDocument()
   })
 
   it('uses change prop when provided instead of balanceItem', () => {

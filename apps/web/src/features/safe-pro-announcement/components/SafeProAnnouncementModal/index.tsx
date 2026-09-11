@@ -9,7 +9,13 @@ const SafeProAnnouncementModal = ({
   onOpenChange?: (open: boolean) => void
 }) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogContent className="max-w-[1200px] bg-card p-0">
+    <DialogContent
+      size="md"
+      surface="card"
+      padding="none"
+      // eslint-disable-next-line no-restricted-syntax -- Figma spec calls for a 32px corner one-off; no radius token in the scale matches it
+      className="rounded-[2rem]"
+    >
       <DialogTitle className="sr-only" render={<div />}>
         Your Workspace moves to Pro on Oct 6, 2026
       </DialogTitle>

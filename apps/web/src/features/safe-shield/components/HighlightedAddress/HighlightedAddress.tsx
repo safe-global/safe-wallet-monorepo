@@ -1,5 +1,3 @@
-import { Box } from '@mui/material'
-
 interface HighlightedAddressProps {
   address: string
   /** Number of hex chars (after `0x`) to bold at the front. */
@@ -20,14 +18,12 @@ export const HighlightedAddress = ({ address, prefixLen, suffixLen }: Highlighte
   const head = Math.max(0, Math.min(prefixLen, hex.length))
   const tail = Math.max(0, Math.min(suffixLen, hex.length - head))
 
-  const bold = { component: 'b', sx: { fontWeight: 700 } } as const
-
   return (
-    <Box component="span" sx={{ wordBreak: 'break-all' }}>
+    <span className="break-all">
       {prefix}
-      {head > 0 && <Box {...bold}>{hex.slice(0, head)}</Box>}
+      {head > 0 && <b className="font-bold">{hex.slice(0, head)}</b>}
       {hex.slice(head, hex.length - tail)}
-      {tail > 0 && <Box {...bold}>{hex.slice(hex.length - tail)}</Box>}
-    </Box>
+      {tail > 0 && <b className="font-bold">{hex.slice(hex.length - tail)}</b>}
+    </span>
   )
 }

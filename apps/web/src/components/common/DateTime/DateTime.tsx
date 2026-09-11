@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { Tooltip } from '@mui/material'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { formatDateTime, formatTime, formatTimeInWords } from '@safe-global/utils/utils/date'
 
 type DateTimeProps = {
@@ -10,10 +10,18 @@ type DateTimeProps = {
 
 export const DateTime = ({ value, showDateTime, showTime }: DateTimeProps): ReactElement => {
   const showTooltip = !showDateTime || showTime
+  const label = (
+    <span>{showTime ? formatTime(value) : showDateTime ? formatDateTime(value) : formatTimeInWords(value)}</span>
+  )
+
+  if (!showTooltip) {
+    return label
+  }
 
   return (
-    <Tooltip title={showTooltip && formatDateTime(value)} placement="top">
-      <span>{showTime ? formatTime(value) : showDateTime ? formatDateTime(value) : formatTimeInWords(value)}</span>
+    <Tooltip>
+      <TooltipTrigger render={label} />
+      <TooltipContent side="top">{formatDateTime(value)}</TooltipContent>
     </Tooltip>
   )
 }

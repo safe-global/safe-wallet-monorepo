@@ -1,4 +1,3 @@
-import { Box } from '@mui/material'
 import type { ReactElement } from 'react'
 
 import RecoveryType from '../RecoveryType'
@@ -17,28 +16,28 @@ export default function RecoverySummary({ item }: { item: RecoveryQueueItem }): 
   const { isMalicious } = item
 
   return (
-    <Box className={css.gridContainer}>
-      <Box gridArea="type">
+    <div className={css.gridContainer}>
+      <div style={{ gridArea: 'type' }}>
         <RecoveryType isMalicious={isMalicious} />
-      </Box>
+      </div>
 
-      <Box gridArea="info">
+      <div style={{ gridArea: 'info' }}>
         <RecoveryInfo isMalicious={isMalicious} />
-      </Box>
+      </div>
 
-      <Box gridArea="date" data-testid="tx-date" className={css.date}>
+      <div style={{ gridArea: 'date' }} data-testid="tx-date" className={css.date}>
         <DateTime value={Number(item.timestamp)} />
-      </Box>
+      </div>
 
       {!isExecutable || isPending ? (
-        <Box gridArea="status">
+        <div style={{ gridArea: 'status' }}>
           <RecoveryStatus recovery={item} />
-        </Box>
+        </div>
       ) : (
-        <Box gridArea="actions" mr={2} display="flex" justifyContent="center">
+        <div style={{ gridArea: 'actions' }} className="mr-4 flex justify-center">
           {!isMalicious && wallet && <ExecuteRecoveryButton recovery={item} compact />}
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   )
 }

@@ -9,7 +9,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import AddIcon from '@/public/images/common/add.svg'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { buttonVariants } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 import NextLink from 'next/link'
@@ -20,15 +20,17 @@ const AddSafeButton = ({ trackingLabel, onLinkClick }: { trackingLabel: string; 
   const next = useNewSafeNextParam()
   return (
     <Track {...OVERVIEW_EVENTS.ADD_TO_WATCHLIST} label={trackingLabel}>
-      <NextLink
+      <Button
         data-testid="add-safe-button"
-        href={{ pathname: AppRoutes.newSafe.load, query: { next } }}
+        variant="outline"
+        size="action"
         onClick={onLinkClick}
-        className={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'h-full w-full rounded-lg px-5 text-base')}
+        className="max-[599px]:w-full"
+        render={<NextLink href={{ pathname: AppRoutes.newSafe.load, query: { next } }} />}
       >
         <AddIcon color="currentColor" className="size-5 fill-primary" />
         Add
-      </NextLink>
+      </Button>
     </Track>
   )
 }
@@ -60,10 +62,10 @@ const AccountsHeader = ({ isSidebar, onLinkClick }: { isSidebar: boolean; onLink
 
         {wallet ? (
           <Track {...OVERVIEW_EVENTS.CREATE_NEW_SAFE} label={trackingLabel}>
-            <CreateButton isPrimary className="h-full text-base" />
+            <CreateButton isPrimary />
           </Track>
         ) : (
-          <ConnectWalletButton small={true} className="h-full rounded-lg text-base" />
+          <ConnectWalletButton size="action" />
         )}
       </div>
     </div>

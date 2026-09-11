@@ -1,5 +1,5 @@
 import { type ReactElement } from 'react'
-import { Tooltip } from '@mui/material'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { TransferDirection } from '@safe-global/store/gateway/types'
 import css from './styles.module.css'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
@@ -40,23 +40,28 @@ const TokenAmount = ({
       : value
 
   return (
-    <Tooltip title={fullAmount}>
-      <span className={classNames(css.container, { [css.verticalAlign]: logoUri })}>
-        {logoUri && (
-          <TokenIcon
-            logoUri={logoUri}
-            tokenSymbol={tokenSymbol}
-            fallbackSrc={fallbackSrc}
-            size={iconSize}
-            chainId={chainId}
-            noRadius
-          />
-        )}
-        <b className={css.tokenText}>
-          {sign}
-          {amount} {tokenSymbol && tokenSymbol}
-        </b>
-      </span>
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <span className={classNames(css.container, { [css.verticalAlign]: logoUri })}>
+            {logoUri && (
+              <TokenIcon
+                logoUri={logoUri}
+                tokenSymbol={tokenSymbol}
+                fallbackSrc={fallbackSrc}
+                size={iconSize}
+                chainId={chainId}
+                noRadius
+              />
+            )}
+            <b className={css.tokenText}>
+              {sign}
+              {amount} {tokenSymbol && tokenSymbol}
+            </b>
+          </span>
+        }
+      />
+      <TooltipContent>{fullAmount}</TooltipContent>
     </Tooltip>
   )
 }

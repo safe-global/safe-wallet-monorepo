@@ -11,6 +11,9 @@ import { balancesFixtures } from '@safe-global/test/msw/fixtures'
 import { balancesBuilder, balanceBuilder, erc20TokenBuilder } from '@/tests/builders/balances'
 import AssetsTable from '../index'
 
+const mockUseIsMobile = jest.fn(() => false)
+jest.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
+
 const DEFAULT_SETTINGS = {
   currency: 'usd',
   hiddenTokens: { '5': [] },
@@ -56,6 +59,7 @@ describe('AssetsTable', () => {
     window.localStorage.clear()
     jest.clearAllMocks()
     jest.spyOn(useChainIdModule, 'default').mockReturnValue('5')
+    mockUseIsMobile.mockReturnValue(false)
   })
 
   describe('empty state', () => {
@@ -116,6 +120,32 @@ describe('AssetsTable', () => {
       expect(screen.getByText('Price')).toBeInTheDocument()
       expect(screen.getByText('Balance')).toBeInTheDocument()
       expect(screen.getByText('Value')).toBeInTheDocument()
+    })
+  })
+
+  describe('breakpoint gap regression (WA-3437)', () => {
+    // The built branch must match the one CSS shows: styles.module.css swaps at 767.98px, so the
+    // gate has to be useIsMobile() (768px), not useIsBelowSm() (600px).
+    it('builds the mobile list when useIsMobile is true', async () => {
+      mockUseIsMobile.mockReturnValue(true)
+
+      const { container } = renderAssetsTable({ balances: balancesFixtures.efSafe })
+
+      await waitFor(() => {
+        expect(screen.queryAllByTestId('token-balance')).toHaveLength(0)
+        expect(container.querySelector('.mobileContainer')).toBeInTheDocument()
+      })
+    })
+
+    it('builds the desktop table when useIsMobile is false', async () => {
+      mockUseIsMobile.mockReturnValue(false)
+
+      const { container } = renderAssetsTable({ balances: balancesFixtures.efSafe })
+
+      await waitFor(() => {
+        expect(screen.getAllByTestId('token-balance').length).toBeGreaterThan(0)
+        expect(container.querySelector('.mobileContainer')).not.toBeInTheDocument()
+      })
     })
   })
 

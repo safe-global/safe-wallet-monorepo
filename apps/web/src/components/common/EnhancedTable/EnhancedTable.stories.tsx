@@ -1,5 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Button, Typography, Chip } from '@mui/material'
+import TableCard from '@/components/common/TableCard'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
+import { Badge } from '@/components/ui/badge'
 import EnhancedTable, { type EnhancedTableProps } from './index'
 
 const meta: Meta<typeof EnhancedTable> = {
@@ -25,15 +28,16 @@ const createRows = (count: number) =>
     cells: {
       name: { content: <Typography>Transaction #{i + 1}</Typography>, rawValue: `Transaction ${i + 1}` },
       status: {
-        content: (
-          <Chip label={i % 2 === 0 ? 'Pending' : 'Executed'} color={i % 2 === 0 ? 'warning' : 'success'} size="small" />
-        ),
+        content: <Badge variant={i % 2 === 0 ? 'warning' : 'success'}>{i % 2 === 0 ? 'Pending' : 'Executed'}</Badge>,
         rawValue: i % 2 === 0 ? 'pending' : 'executed',
       },
-      amount: { content: <Typography fontWeight={500}>{(i * 0.5).toFixed(4)} ETH</Typography>, rawValue: i * 0.5 },
+      amount: {
+        content: <Typography variant="paragraph-medium">{(i * 0.5).toFixed(4)} ETH</Typography>,
+        rawValue: i * 0.5,
+      },
       actions: {
         content: (
-          <Button variant="outlined" size="small">
+          <Button variant="outline" size="sm">
             View
           </Button>
         ),
@@ -52,4 +56,18 @@ export const Empty: Story = {
 
 export const WithPagination: Story = {
   args: { headCells, rows: createRows(30) },
+}
+
+/**
+ * `panel`: the look shared with SafeAccountsTable and the Spaces tables — grey header bar, inset
+ * hover pills, gradient row dividers. Only renders correctly inside a TableCard, which is what the
+ * table spans and what its insets are measured against. Used by the global address book.
+ */
+export const Panel: Story = {
+  args: { headCells, rows: createRows(5), panel: true },
+  render: (args) => (
+    <TableCard>
+      <EnhancedTable {...args} />
+    </TableCard>
+  ),
 }

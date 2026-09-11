@@ -1,9 +1,9 @@
-import { Typography, Skeleton } from '@mui/material'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Typography } from '@/components/ui/typography'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import { CircleCheckIcon } from 'lucide-react'
 import ExternalLink from '@/components/common/ExternalLink'
 import { MastercopyWarning, useMastercopyMigration } from '@/features/multichain'
-import { Box } from '@/components/common/Mui'
 
 /**
  * Generates a GitHub release URL for a specific Safe contract version.
@@ -26,34 +26,35 @@ export const ContractVersion = () => {
 
   return (
     <>
-      <Typography variant="h4" fontWeight={700} marginBottom={1}>
+      <Typography variant="h4" className="mb-2">
         Contract version
       </Typography>
 
-      <Typography variant="body1" fontWeight={400} display="flex" alignItems="center">
+      {/* as="div": the Skeleton renders a div, which is invalid inside the default <p> */}
+      <Typography as="div" className="flex items-center">
         {safeLoaded ? (
           <>
             {safe.version ?? 'Unsupported contract'}
             {isLatestVersion && (
               <>
-                <CheckCircleIcon color="primary" sx={{ ml: 1, mr: 0.5 }} /> Latest version
+                <CircleCheckIcon className="ml-2 mr-1 size-5 text-primary" /> Latest version
               </>
             )}
           </>
         ) : (
-          <Skeleton width="60px" />
+          <Skeleton className="h-5 w-[60px]" />
         )}
       </Typography>
 
       {safeLoaded && releaseUrl && (
-        <Typography variant="body2" mt={0.5}>
+        <Typography variant="paragraph-small" className="block mt-1">
           <ExternalLink href={releaseUrl}>View release</ExternalLink>
         </Typography>
       )}
 
-      <Box mt={2}>
+      <div className="mt-4">
         <MastercopyWarning variant="settings" />
-      </Box>
+      </div>
     </>
   )
 }

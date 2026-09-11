@@ -20,7 +20,8 @@ describe('Preview drawer tests', () => {
   it('Verify the preview drawer is displayed when opening a Safe App from the app list', () => {
     safeapps.clickOnApp(safeapps.transactionBuilderStr)
 
-    cy.findByRole('presentation').within(() => {
+    // The preview drawer renders as a dialog now (MUI drawers exposed role="presentation")
+    cy.findByRole('dialog').within(() => {
       safeapps.verifyPreviewWindow(
         safeapps.transactiobUilderHeadlinePreview,
         safeapps.connecttextPreview,
@@ -28,6 +29,6 @@ describe('Preview drawer tests', () => {
       )
       safeapps.closePreviewWindow()
     })
-    cy.findByRole('presentation').should('not.exist')
+    cy.findByRole('dialog').should('not.exist')
   })
 })

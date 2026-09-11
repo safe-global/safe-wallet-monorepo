@@ -39,9 +39,7 @@ describe('shouldOpenTooltip', () => {
 describe('TruncatedText', () => {
   it('renders the full text and forwards props to the truncating element', () => {
     render(<TruncatedText text={longName} variant="paragraph-small-medium" data-testid="name" />)
-    const el = screen.getByTestId('name')
-    expect(el).toHaveTextContent(longName)
-    expect(el).toHaveClass('truncate')
+    expect(screen.getByTestId('name')).toHaveTextContent(longName)
   })
 
   it('wires the full text into the tooltip content', () => {

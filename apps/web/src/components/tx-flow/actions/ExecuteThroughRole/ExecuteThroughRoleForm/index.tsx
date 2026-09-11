@@ -1,9 +1,11 @@
 import useWalletCanPay from '@/hooks/useWalletCanPay'
 import madProps from '@/utils/mad-props'
 import { type ReactElement, type SyntheticEvent, useContext } from 'react'
-import { Box, CardActions, Divider, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
+import { Separator } from '@/components/ui/separator'
 
 import ErrorMessage from '@/components/tx/ErrorMessage'
+import TxCheckError from '@/components/tx/TxCheckError'
 import { trackError, Errors } from '@/services/exceptions'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getTxOptions } from '@/utils/transactions'
@@ -29,6 +31,7 @@ import { dispatchModuleTxExecution } from '@/services/tx/tx-sender'
 import { Status } from 'zodiac-roles-deployments'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import SplitMenuButton from '@/components/common/SplitMenuButton'
+import { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import type { SlotComponentProps, SlotName } from '../../../slots'
 import { TxFlowContext } from '../../../TxFlowProvider'
 import type { SubmitCallback } from '../../../TxFlow'
@@ -151,7 +154,7 @@ export const ExecuteThroughRoleForm = ({
       <form onSubmit={handleSubmit}>
         {!permissionsError && (
           <>
-            <Typography sx={{ mb: 2 }}>
+            <Typography className="mb-4">
               Your <RoleChip>{role.roleKey}</RoleChip> role allows you to execute this transaction without the
               confirmations of other owners.
             </Typography>
@@ -169,64 +172,62 @@ export const ExecuteThroughRoleForm = ({
         )}
 
         {permissionsError && (
-          <Box mb={2}>
-            <Typography sx={{ mb: 2 }}>
+          <div className="mb-4">
+            <Typography className="mb-4">
               You are a member of the <RoleChip>{role.roleKey}</RoleChip> role but it does not allow this transaction.
             </Typography>
 
             <ErrorMessage>{permissionsError}</ErrorMessage>
-          </Box>
+          </div>
         )}
 
-        <Typography variant="caption" display="flex" gap="2px" color="text.secondary" sx={{ mb: 2 }}>
+        <Typography variant="paragraph-mini" className="mb-4 flex gap-[2px] text-muted-foreground">
           Powered by
           <img src="/images/transactions/zodiac-roles.svg" width={16} height={16} alt="Zodiac Roles" />
           <span className={css.zodiac}>Zodiac</span>
         </Typography>
 
         {multiSendImpossible && (
-          <Box mt={1}>
+          <div className="mt-2">
             <ErrorMessage>
               The current configuration of the Zodiac Roles module does not allow executing multiple transactions in
               batch.
             </ErrorMessage>
-          </Box>
+          </div>
         )}
 
         {!walletCanPay ? (
-          <Box mt={1}>
+          <div className="mt-2">
             <ErrorMessage level="info">
               Your connected wallet doesn&apos;t have enough funds to execute this transaction.
             </ErrorMessage>
-          </Box>
+          </div>
         ) : (
           gasLimitError && (
-            <Box mt={1}>
-              <ErrorMessage error={gasLimitError}>
-                This transaction will most likely fail. To save gas costs, avoid creating this transaction.
-              </ErrorMessage>
-            </Box>
+            <div className="mt-2">
+              <TxCheckError error={gasLimitError} />
+            </div>
           )
         )}
 
-        <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
+        <div className="pt-6">
+          <Separator bleed="6" />
+        </div>
 
-        <CardActions>
+        <TxCardActions>
           {/* Submit button, also available to non-owner role members */}
           <CheckWallet allowNonOwner checkNetwork={!submitDisabled}>
             {(isOk) => (
-              <Box sx={{ minWidth: '112px', width: ['100%', '100%', '100%', 'auto'] }}>
-                <SplitMenuButton
-                  selected={slotId}
-                  onChange={({ id }) => onChange?.(id)}
-                  options={options}
-                  disabled={!isOk || submitDisabled}
-                  loading={isSubmitLoading}
-                />
-              </Box>
+              <SplitMenuButton
+                selected={slotId}
+                onChange={({ id }) => onChange?.(id)}
+                options={options}
+                disabled={!isOk || submitDisabled}
+                loading={isSubmitLoading}
+              />
             )}
           </CheckWallet>
-        </CardActions>
+        </TxCardActions>
       </form>
     </>
   )

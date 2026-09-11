@@ -147,8 +147,7 @@ export function verifySafeShieldDisplayed() {
 
 // Verify Safe Shield logo footer is displayed
 export function verifySecuredByFooter() {
-  // Check for the Safe Shield logo SVG icon
-  cy.get('[data-testid="safe-shield-widget"]').find('.MuiSvgIcon-root').should('be.visible')
+  cy.get('[data-testid="safe-shield-widget"]').find('[data-testid="safe-shield-logo"]').should('be.visible')
 }
 
 // Verify status shows "Checks passed"
@@ -296,7 +295,7 @@ export function verifyRiskConfirmationCheckboxUnchecked() {
 
 // Check the risk confirmation checkbox
 export function checkRiskConfirmationCheckbox() {
-  cy.get(riskConfirmationCheckbox).scrollIntoView().find('input[type="checkbox"]').check()
+  cy.get(riskConfirmationCheckbox).scrollIntoView().find('[role="checkbox"]').click()
 }
 
 //Verify continue button is disabled

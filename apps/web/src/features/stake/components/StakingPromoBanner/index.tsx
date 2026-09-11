@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
-import { CircularProgress, Link } from '@mui/material'
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
+import { ArrowRight } from 'lucide-react'
+import ExternalLink from '@/components/common/ExternalLink'
+import { Spinner } from '@/components/ui/spinner'
 import PromoBanner from '@/components/common/PromoBanner/PromoBanner'
 import { useOpenSafenetStakingApp } from '@/hooks/useOpenSafenetStakingApp'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
@@ -31,21 +32,20 @@ const StakingPromoBanner = ({ onDismiss }: { onDismiss: () => void }) => {
         description={
           <>
             Earn by staking your SAFE tokens, currently rewarded up to 15%.{' '}
-            <Link
+            <ExternalLink
               href={LEARN_MORE_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
+              noIcon
               onClick={onLearnMore}
-              sx={{ color: 'inherit', textDecoration: 'underline', fontWeight: 'bold' }}
+              className="font-bold text-inherit [&>span]:underline"
             >
               Learn more
-            </Link>
+            </ExternalLink>
           </>
         }
         ctaLabel="Stake now"
         onCtaClick={onStake}
         ctaVariant="text"
-        endIcon={isNavigating ? <CircularProgress size={16} color="inherit" /> : <ArrowForwardIcon fontSize="small" />}
+        endIcon={isNavigating ? <Spinner className="size-4" /> : <ArrowRight className="size-4" />}
         imageSrc="/images/common/staking-promo/safe-coin.svg"
         imageAlt="Safe token"
         trackingEvents={OVERVIEW_EVENTS.OPEN_STAKING_WIDGET}

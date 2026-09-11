@@ -1,4 +1,4 @@
-.noBottomBorderRadius :global(.MuiPaper-root) {
+.noBottomBorderRadius :global([data-slot='accordion-item']) {
   border-bottom-left-radius: 0 !important;
   border-bottom-right-radius: 0 !important;
 }

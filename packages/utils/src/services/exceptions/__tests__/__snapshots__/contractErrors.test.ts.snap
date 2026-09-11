@@ -1,0 +1,134 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`contractErrors matches the full message snapshot 1`] = `
+{
+  "GS000": {
+    "handling": "runtime",
+    "message": "Could not set up your Safe Account. Refresh and try again.",
+  },
+  "GS001": {
+    "handling": "inline-validation",
+    "message": "Set a threshold before you continue",
+  },
+  "GS002": {
+    "handling": "inline-validation",
+    "message": "Modules can only be enabled on a contract address",
+  },
+  "GS010": {
+    "handling": "runtime",
+    "message": "Not enough gas to execute this transaction. Increase the gas limit and try again.",
+  },
+  "GS011": {
+    "handling": "runtime",
+    "message": "Not enough {nativeAsset} in this Safe Account to cover the network fee.",
+  },
+  "GS012": {
+    "handling": "runtime",
+    "message": "Not enough {token} to cover the network fee. Pay with {nativeAsset} instead.",
+  },
+  "GS013": {
+    "handling": "runtime",
+    "message": "Something went wrong. Try again, or contact support with the reference below.",
+  },
+  "GS020": {
+    "handling": "runtime",
+    "message": "Could not verify your signature. Sign the transaction again.",
+  },
+  "GS021": {
+    "handling": "internal",
+    "message": "Something went wrong. Try again, or contact support with the reference below.",
+  },
+  "GS022": {
+    "handling": "internal",
+    "message": "Something went wrong. Try again, or contact support with the reference below.",
+  },
+  "GS023": {
+    "handling": "runtime",
+    "message": "Could not verify your signature. Sign the transaction again.",
+  },
+  "GS024": {
+    "handling": "runtime",
+    "message": "Could not verify the signature from your wallet. Reconnect and sign again.",
+  },
+  "GS025": {
+    "handling": "runtime",
+    "message": "This transaction needs more confirmations before it can be executed.",
+  },
+  "GS026": {
+    "handling": "runtime",
+    "message": "Something went wrong. Try again, or contact support with the reference below.",
+  },
+  "GS030": {
+    "handling": "runtime",
+    "message": "Only signers can confirm this transaction. Connect a signer wallet.",
+  },
+  "GS031": {
+    "handling": "internal",
+    "message": "Something went wrong. Try again, or contact support with the reference below.",
+  },
+  "GS100": {
+    "handling": "internal",
+    "message": "Something went wrong. Try again, or contact support with the reference below.",
+  },
+  "GS101": {
+    "handling": "inline-validation",
+    "message": "This module address is not valid",
+  },
+  "GS102": {
+    "handling": "runtime",
+    "message": "This module is already enabled on your Safe Account.",
+  },
+  "GS103": {
+    "handling": "runtime",
+    "message": "Modules changed since you opened this page. Refresh and try again.",
+  },
+  "GS104": {
+    "handling": "internal",
+    "message": "Something went wrong. Try again, or contact support with the reference below.",
+  },
+  "GS105": {
+    "handling": "internal",
+    "message": "Something went wrong. Try again, or contact support with the reference below.",
+  },
+  "GS106": {
+    "handling": "internal",
+    "message": "Something went wrong. Try again, or contact support with the reference below.",
+  },
+  "GS200": {
+    "handling": "internal",
+    "message": "Something went wrong. Try again, or contact support with the reference below.",
+  },
+  "GS201": {
+    "handling": "inline-validation",
+    "message": "Threshold cannot be higher than the number of signers",
+  },
+  "GS202": {
+    "handling": "inline-validation",
+    "message": "Threshold must be at least 1 signer",
+  },
+  "GS203": {
+    "handling": "inline-validation",
+    "message": "This signer address is not valid",
+  },
+  "GS204": {
+    "handling": "inline-validation",
+    "message": "This address is already a signer of this Safe Account",
+  },
+  "GS205": {
+    "handling": "runtime",
+    "message": "Signers changed since you opened this page. Refresh and try again.",
+  },
+  "GS300": {
+    "handling": "runtime",
+    "message": "This guard is not compatible with your Safe Account.",
+  },
+  "GS301": {
+    "handling": "runtime",
+    "message": "This module guard is not compatible with your Safe Account.",
+  },
+  "GS400": {
+    "handling": "inline-validation",
+    "message": "The fallback handler cannot be this Safe Account. Use another address",
+  },
+}
+`;

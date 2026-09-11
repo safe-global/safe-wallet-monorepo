@@ -88,7 +88,7 @@ describe('TWAP tests', { defaultCommandTimeout: 30000 }, () => {
   // Validation Tests
   // ========================================
 
-  it('Verify "Insufficient balance" message appears when the entered token amount exceeds "Max" balance', () => {
+  it('Verify "Insufficient COW balance" message appears when the entered token amount exceeds "Max" balance', () => {
     swaps.acceptLegalDisclaimer()
     cy.wait(4000)
     main.getIframeBody(iframeSelector).within(() => {
@@ -103,9 +103,11 @@ describe('TWAP tests', { defaultCommandTimeout: 30000 }, () => {
     })
   })
 
-  it('Verify "Sell amount too low" if the amount of tokens is worth less than 200 USD', () => {
+  // CoW enforces a live per-part minimum ($10); the title's "200 USD" is a stale 2024 assumption.
+  // 4 parts keeps 1 COW under the floor regardless of price; 2 parts flaked in CI.
+  it('Verify "Sell amount too small" is shown when the per-part sell amount is below CoW\'s minimum', () => {
     swaps.acceptLegalDisclaimer()
-    cy.wait(4000)
+    swaps.ensureWidgetWalletConnected(iframeSelector)
     main.getIframeBody(iframeSelector).within(() => {
       swaps.switchToTwap()
     })
@@ -114,6 +116,7 @@ describe('TWAP tests', { defaultCommandTimeout: 30000 }, () => {
       swaps.selectInputCurrency(swaps.swapTokens.cow)
       swaps.setInputValue(1)
       swaps.selectOutputCurrency(swaps.swapTokens.dai)
+      swaps.setNumberOfParts(4)
       swaps.checkSmallSellAmountMessageDisplayed()
     })
   })

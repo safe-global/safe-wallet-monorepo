@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { Box, Tooltip } from '@mui/material'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import css from './styles.module.css'
 
@@ -18,18 +18,15 @@ const EmailInfo = ({
 }: EmailInfoProps): ReactElement | null => {
   if (!email || !email.trim()) return null
 
-  const emailNode = (
-    <Box component="span" className={css.email}>
-      {email}
-    </Box>
-  )
+  const emailNode = <span className={css.email}>{email}</span>
 
   return (
     <div className={css.container}>
       <InitialsAvatar name={email} size={size} rounded={rounded} />
       {showTooltip ? (
-        <Tooltip title={email} placement="top" enterDelay={500}>
-          {emailNode}
+        <Tooltip>
+          <TooltipTrigger render={emailNode} />
+          <TooltipContent side="top">{email}</TooltipContent>
         </Tooltip>
       ) : (
         emailNode

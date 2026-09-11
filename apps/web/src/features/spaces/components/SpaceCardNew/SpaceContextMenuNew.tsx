@@ -43,7 +43,7 @@ const SpaceContextMenuNew = ({ space }: { space: GetSpaceResponse }) => {
             />
           }
         >
-          <MoreVertical className="size-4 text-border" />
+          <MoreVertical className="size-4 text-[var(--color-border-main)]" />
           <span className="sr-only">Workspace actions</span>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">

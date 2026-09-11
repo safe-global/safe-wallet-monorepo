@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Paper, Grid, Typography, Button, SvgIcon, Box } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 
 import FileIcon from '@/public/images/settings/data/file.svg'
 import ExportIcon from '@/public/images/common/export.svg'
@@ -19,6 +20,7 @@ import css from './styles.module.css'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import { ClearPendingTxs } from '../ClearPendingTxs'
+import SettingsCard from '../SettingsCard'
 
 const getExportFileName = () => {
   const today = new Date().toISOString().slice(0, 10)
@@ -76,78 +78,54 @@ const DataManagement = () => {
 
   return (
     <>
-      <Paper sx={{ p: 4, mb: 2 }}>
-        <Grid container spacing={3}>
-          <Grid item sm={4} xs={12}>
-            <Typography variant="h4" fontWeight={700}>
-              Data export
-            </Typography>
-          </Grid>
+      <SettingsCard title="Data export" className="mb-4" contentClassName="sm:grid-cols-[1fr_2fr]">
+        <div data-testid="export-file-section">
+          <Typography>Download your local data with your added Safe accounts, address book and settings.</Typography>
 
-          <Grid data-testid="export-file-section" item container xs>
-            <Typography>Download your local data with your added Safe accounts, address book and settings.</Typography>
+          <FileListCard
+            avatar={
+              <div className={`${css.fileIcon} rounded`}>
+                <FileIcon className="size-4 fill-none" />
+              </div>
+            }
+            title={<b>{exportFileName}</b>}
+            action={
+              <Track {...OVERVIEW_EVENTS.EXPORT_DATA} label={OVERVIEW_LABELS.settings}>
+                <Button className="min-w-[unset] p-[var(--space-1)]" onClick={exportAppData}>
+                  <ExportIcon className="size-4" />
+                </Button>
+              </Track>
+            }
+            addedSafes={addedSafes}
+            addressBook={addressBook}
+            settings={settings}
+            visitedSafes={visitedSafes}
+            safeApps={safeApps}
+            undeployedSafes={undeployedSafes}
+          />
+        </div>
+      </SettingsCard>
 
-            <FileListCard
-              avatar={
-                <Box className={css.fileIcon} sx={{ borderRadius: ({ shape }) => `${shape.borderRadius}px` }}>
-                  <SvgIcon component={FileIcon} inheritViewBox fontSize="small" sx={{ fill: 'none' }} />
-                </Box>
-              }
-              title={<b>{exportFileName}</b>}
-              action={
-                <Track {...OVERVIEW_EVENTS.EXPORT_DATA} label={OVERVIEW_LABELS.settings}>
-                  <Button variant="contained" className={css.exportIcon} onClick={exportAppData}>
-                    <SvgIcon component={ExportIcon} inheritViewBox fontSize="small" />
-                  </Button>
-                </Track>
-              }
-              addedSafes={addedSafes}
-              addressBook={addressBook}
-              settings={settings}
-              visitedSafes={visitedSafes}
-              safeApps={safeApps}
-              undeployedSafes={undeployedSafes}
-            />
-          </Grid>
-        </Grid>
-      </Paper>
+      <SettingsCard title="Data import" className="mb-4" contentClassName="sm:grid-cols-[1fr_2fr]">
+        <div>
+          <ImportFileUpload setFileName={setImportFileName} setJsonData={setJsonData} />
+        </div>
 
-      <Paper sx={{ p: 4, mb: 2 }}>
-        <Grid container spacing={3}>
-          <Grid item sm={4} xs={12}>
-            <Typography variant="h4" fontWeight={700}>
-              Data import
-            </Typography>
-          </Grid>
+        {jsonData && (
+          <ImportDialog
+            jsonData={jsonData}
+            fileName={importFileName}
+            setJsonData={setJsonData}
+            setFileName={setImportFileName}
+          />
+        )}
+      </SettingsCard>
 
-          <Grid item xs>
-            <ImportFileUpload setFileName={setImportFileName} setJsonData={setJsonData} />
-          </Grid>
-
-          {jsonData && (
-            <ImportDialog
-              jsonData={jsonData}
-              fileName={importFileName}
-              setJsonData={setJsonData}
-              setFileName={setImportFileName}
-            />
-          )}
-        </Grid>
-      </Paper>
-
-      <Paper sx={{ p: 4 }}>
-        <Grid container spacing={3}>
-          <Grid item sm={4} xs={12}>
-            <Typography variant="h4" fontWeight={700}>
-              Pending transactions
-            </Typography>
-          </Grid>
-
-          <Grid data-testid="clear-pending-tx-section" item container xs>
-            <ClearPendingTxs />
-          </Grid>
-        </Grid>
-      </Paper>
+      <SettingsCard title="Pending transactions" contentClassName="sm:grid-cols-[1fr_2fr]">
+        <div data-testid="clear-pending-tx-section">
+          <ClearPendingTxs />
+        </div>
+      </SettingsCard>
     </>
   )
 }

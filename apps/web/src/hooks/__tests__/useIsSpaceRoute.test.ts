@@ -35,6 +35,20 @@ describe('useIsSpaceRoute', () => {
     expect(result.current).toBe(true)
   })
 
+  // Unregistered space routes render without a sidebar (useIsSidebarRoute needs `?safe=`, which
+  // spaces routes never carry), so every space page must be listed here.
+  it('returns true on /spaces/policies', () => {
+    mockUsePathname.mockReturnValue('/spaces/policies')
+    const { result } = renderHook(() => useIsSpaceRoute())
+    expect(result.current).toBe(true)
+  })
+
+  it('does not match a prefix-overlap like /spaces/policies-foo', () => {
+    mockUsePathname.mockReturnValue('/spaces/policies-foo')
+    const { result } = renderHook(() => useIsSpaceRoute())
+    expect(result.current).toBe(false)
+  })
+
   it('returns false on /spaces/create-space', () => {
     mockUsePathname.mockReturnValue('/spaces/create-space')
     const { result } = renderHook(() => useIsSpaceRoute())

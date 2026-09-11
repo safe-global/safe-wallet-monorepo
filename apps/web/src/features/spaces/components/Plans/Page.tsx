@@ -17,7 +17,11 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
           Plans
         </Typography>
 
-        <Card className="w-full gap-0 py-0">
+        <Card
+          size="none"
+          // eslint-disable-next-line no-restricted-syntax -- Figma spec calls for a 32px corner one-off; no radius token in the scale matches it
+          className="w-full rounded-[2rem]"
+        >
           <SafeProAnnouncement location="plans_page" />
         </Card>
       </div>

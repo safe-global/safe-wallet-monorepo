@@ -18,8 +18,7 @@ describe('Transaction Builder tests', { defaultCommandTimeout: 20000 }, () => {
     const appUrl = constants.TX_Builder_url
     iframeSelector = safeapps.getSafeAppIframeSelector(appUrl)
     const visitUrl = `/apps/open?safe=${safeAppSafes.SEP_SAFEAPP_SAFE_1}&appUrl=${encodeURIComponent(appUrl)}`
-    // tx-builder keeps its form disabled until the address book permission prompt is answered:
-    // pre-grant it before the visit
+    // Pre-grant the permission so the host's consent prompt never blocks the iframe.
     main.addToLocalStorage(constants.SAFE_PERMISSIONS_KEY, ls.safeAppSafePermissions(appUrl))
     cy.visit(visitUrl)
     safeapps.verifySafeAppIframeVisible(appUrl)
@@ -39,6 +38,7 @@ describe('Transaction Builder tests', { defaultCommandTimeout: 20000 }, () => {
 
     cy.get('h4').contains(safeapps.transactionBuilderStr).should('be.visible')
     navigation.clickOnModalCloseBtn(0)
+    navigation.clickOnDiscardTxBtn()
     cy.enter(iframeSelector).then((getBody) => {
       getBody().findAllByText(constants.SEPOLIA_CONTRACT_SHORT).should('have.length', 1)
       getBody().findByText(safeapps.testAddressValueStr).should('exist')
@@ -68,6 +68,7 @@ describe('Transaction Builder tests', { defaultCommandTimeout: 20000 }, () => {
     })
     cy.get('h4').contains(safeapps.transactionBuilderStr).should('be.visible')
     navigation.clickOnModalCloseBtn(0)
+    navigation.clickOnDiscardTxBtn()
     cy.enter(iframeSelector).then((getBody) => {
       getBody().findAllByText(constants.SEPOLIA_CONTRACT_SHORT).should('have.length', 3)
       getBody().findAllByText(safeapps.testBooleanValue).should('have.length', 3)
@@ -108,6 +109,7 @@ describe('Transaction Builder tests', { defaultCommandTimeout: 20000 }, () => {
     })
     cy.get('h4').contains(safeapps.transactionBuilderStr).should('be.visible')
     navigation.clickOnModalCloseBtn(0)
+    navigation.clickOnDiscardTxBtn()
     cy.enter(iframeSelector).then((getBody) => {
       getBody().findAllByText(constants.SEPOLIA_RECIPIENT_ADDR_SHORT).should('have.length', 1)
       getBody().findAllByText(safeapps.testFallback).should('have.length', 1)
@@ -130,6 +132,7 @@ describe('Transaction Builder tests', { defaultCommandTimeout: 20000 }, () => {
     })
     cy.get('h4').contains(safeapps.transactionBuilderStr).should('be.visible')
     navigation.clickOnModalCloseBtn(0)
+    navigation.clickOnDiscardTxBtn()
     cy.enter(iframeSelector).then((getBody) => {
       getBody().findAllByText(constants.SEPOLIA_CONTRACT_SHORT).should('have.length', 1)
       getBody().findAllByText(safeapps.customData).should('have.length', 1)
@@ -186,6 +189,7 @@ describe('Transaction Builder tests', { defaultCommandTimeout: 20000 }, () => {
     cy.get('h4').contains(safeapps.transactionBuilderStr).should('be.visible')
     safeapps.checkActions(2, safeapps.basicTypesTestContractStr)
     navigation.clickOnModalCloseBtn(0)
+    navigation.clickOnDiscardTxBtn()
     cy.enter(iframeSelector).then((getBody) => {
       getBody().findAllByText(constants.SEPOLIA_CONTRACT_SHORT).should('have.length', 2)
       getBody().findAllByText(safeapps.testAddressValue2).should('have.length', 2)
@@ -224,5 +228,35 @@ describe('Transaction Builder tests', { defaultCommandTimeout: 20000 }, () => {
       getBody().find(safeapps.contractMethodSelector).click()
       getBody().find(safeapps.AddressEmptyCodeStr).should('not.exist')
     })
+  })
+
+  it('Verify a new user gets the address book permissions prompt and accepting it continues to the tx modal', () => {
+    // Fresh user: drop the permission the beforeEach pre-grants, then reload so the app forgets it
+    cy.window().then((win) => win.localStorage.removeItem(constants.SAFE_PERMISSIONS_KEY))
+    cy.reload()
+    safeapps.verifySafeAppIframeVisible(constants.TX_Builder_url)
+
+    // Must be .click(), not .type(): clicking the empty field is what triggers the permission
+    // request, and cy.type() additionally asserts the element still has focus, which the prompt takes.
+    cy.enter(iframeSelector).then((getBody) => {
+      getBody().findByLabelText(safeapps.enterAddressStr).click()
+    })
+
+    safeapps.verifyPermissionsRequestVisible()
+    safeapps.verifyAccessToAddressBookExists()
+    safeapps.clickOnPermissionsAcceptBtn()
+
+    // Re-enter: the handle above resolved against the document while the modal was blocking it.
+    cy.enter(iframeSelector).then((getBody) => {
+      getBody().findByLabelText(safeapps.enterAddressStr).type(constants.SAFE_APP_ADDRESS)
+      getBody().find(safeapps.contractMethodIndex).parent().click()
+      getBody().findByRole('option', { name: safeapps.testAddressValue2 }).click()
+      getBody().findByLabelText(safeapps.newAddressValueStr).type(safeAppSafes.SEP_SAFEAPP_SAFE_2)
+      getBody().findByText(safeapps.addTransactionStr).click()
+      getBody().findByText(safeapps.createBatchStr).click()
+      getBody().findByText(safeapps.sendBatchStr).click()
+    })
+
+    cy.get('h4').contains(safeapps.transactionBuilderStr).should('be.visible')
   })
 })

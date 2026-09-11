@@ -19,6 +19,12 @@ const MOCK_TX_ID = 'multisig_0xbbbb_123'
 
 // ---- Module mocks ----
 
+// Cut the DialogActions -> CheckWallet -> safeCoreSDK -> chains.ts import chain (circular AppRoutes) in unit tests.
+jest.mock('@/components/common/CheckWallet', () => ({
+  __esModule: true,
+  default: ({ children }: { children: (ok: boolean) => unknown }) => children(true),
+}))
+
 jest.mock('next/router', () => ({
   useRouter: () => ({ push: jest.fn() }),
 }))

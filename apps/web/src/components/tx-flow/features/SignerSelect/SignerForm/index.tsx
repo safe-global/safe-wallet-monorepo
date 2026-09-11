@@ -1,4 +1,4 @@
-import { SvgIcon, Tooltip, Typography } from '@mui/material'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
 import { useWalletContext } from '@/hooks/wallets/useWallet'
 import { useCallback, useContext, useEffect, useMemo } from 'react'
@@ -12,6 +12,7 @@ import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import SignerSelector from '@/components/common/SignerSelector'
+import TxSectionTitle from '@/components/tx-flow/common/TxSectionTitle'
 
 export const SignerForm = ({ willExecute, txId }: { willExecute?: boolean; txId?: string }) => {
   const { signer, setSignerAddress, connectedWallet: wallet } = useWalletContext() ?? {}
@@ -89,19 +90,18 @@ export const SignerForm = ({ willExecute, txId }: { willExecute?: boolean; txId?
 
   return (
     <>
-      <Typography variant="h5" display="flex" gap={1} alignItems="center">
-        <SvgIcon component={SignatureIcon} inheritViewBox fontSize="small" />
+      <TxSectionTitle>
+        <SignatureIcon className="size-4" />
         {willExecute ? 'Execute' : 'Sign'} with
-        <Tooltip
-          title={`Your connected wallet controls other Safe accounts, which can sign this transaction. You can select which Account to ${
-            willExecute ? 'execute' : 'sign'
-          } with.`}
-          arrow
-          placement="top"
-        >
-          <SvgIcon component={InfoIcon} inheritViewBox color="border" fontSize="small" />
+        <Tooltip>
+          <TooltipTrigger render={<InfoIcon className="size-4 text-[var(--color-border-main)]" />} />
+          <TooltipContent side="top">
+            {`Your connected wallet controls other Safe accounts, which can sign this transaction. You can select which Account to ${
+              willExecute ? 'execute' : 'sign'
+            } with.`}
+          </TooltipContent>
         </Tooltip>
-      </Typography>
+      </TxSectionTitle>
 
       <SignerSelector
         options={options}

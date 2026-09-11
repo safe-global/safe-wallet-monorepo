@@ -1,5 +1,5 @@
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import { TextField } from '@mui/material'
+import { Textarea } from '@/components/ui/textarea'
 import { useMemo } from 'react'
 import type { ReactElement } from 'react'
 
@@ -14,18 +14,7 @@ const Msg = ({ message }: { message: MessageItem['message'] }): ReactElement => 
     return isTextMessage ? message : JSON.stringify(message, null, 2)
   }, [isTextMessage, message])
 
-  return (
-    <TextField
-      maxRows={MAX_ROWS}
-      multiline
-      disabled
-      fullWidth
-      className={css.msg}
-      inputProps={{
-        value: readableData,
-      }}
-    />
-  )
+  return <Textarea rows={MAX_ROWS} value={readableData} readOnly className={css.msg} />
 }
 
 export default Msg

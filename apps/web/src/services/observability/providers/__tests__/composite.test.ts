@@ -1,5 +1,12 @@
 import { CompositeProvider } from '../composite'
 import type { IObservabilityProvider, ILogger, ObservedError } from '../../types'
+import { MixpanelTracingProvider } from '../mixpanel/provider'
+import { __resetErrorSurfacedDedupeForTests } from '../mixpanel/error-tracking'
+import { mixpanelTrack } from '@/services/analytics/mixpanel'
+
+jest.mock('@/services/analytics/mixpanel', () => ({
+  mixpanelTrack: jest.fn(),
+}))
 
 describe('CompositeProvider', () => {
   const createMockProvider = (name: string): IObservabilityProvider => {
@@ -124,5 +131,22 @@ describe('CompositeProvider', () => {
     expect(logger2.warn).toHaveBeenCalledWith('warning', undefined)
     expect(logger1.debug).toHaveBeenCalledWith('debug', undefined)
     expect(logger2.debug).toHaveBeenCalledWith('debug', undefined)
+  })
+
+  // The Mixpanel provider collapses repeat events; the other sinks must not
+  // inherit that, or Datadog RUM would lose per-occurrence fidelity.
+  it('deduplicates only the Mixpanel sink, leaving sibling providers every occurrence', () => {
+    __resetErrorSurfacedDedupeForTests()
+    ;(mixpanelTrack as jest.Mock).mockClear()
+
+    const datadogLike = createMockProvider('DatadogLike')
+    const composite = new CompositeProvider([datadogLike, new MixpanelTracingProvider()])
+
+    composite.captureError(observedError)
+    composite.captureError(observedError)
+    composite.captureError(observedError)
+
+    expect(datadogLike.captureError).toHaveBeenCalledTimes(3)
+    expect(mixpanelTrack).toHaveBeenCalledTimes(1)
   })
 })

@@ -1,18 +1,30 @@
 .sidebarInteractive {
   cursor: pointer;
-  border-radius: var(--rounded-lg, 12px);
+  /* `--rounded-md` is not a token under any name, so this had always fallen back to the literal 8px
+     and quietly overrode the base menu-button's own `rounded-md`. `--radius-md` is the real one (12px),
+     which is what the New transaction button above these items already renders at. */
+  border-radius: var(--radius-md);
 }
 
+/* Tighter when collapsed, per dev's sidebar pass. Written as a literal because 8px has no token that
+   actually resolves: `@theme inline` emits only --radius-md/-lg/-xl at :root, so `var(--radius-sm)`
+   here would compute to nothing — which is exactly how `--rounded-md` came to be a silent 8px. */
 :global(.group[data-collapsible='icon']) .sidebarInteractive {
-  border-radius: var(--rounded-md, 8px);
+  border-radius: 8px;
 }
 
 .sidebarNavItem {
   font-weight: 700;
+  color: var(--sidebar-foreground);
 }
 
 .sidebarNavItem svg {
-  stroke-width: 2;
+  stroke-width: 1.5;
+}
+
+.sidebarNavItem[data-active],
+.sidebarNavItem[data-active='true'] {
+  color: var(--color-text-primary);
 }
 
 .activeIcon svg {
@@ -30,7 +42,10 @@
   /* 12px inset aligns the avatar with the back-arrow pill in the top bar; !important beats the
      base menu-button's p-2 (equal specificity). Collapsed mode still wins via its own p-0!. */
   padding: 8px 12px !important;
-  border-radius: 16px;
+  /* The design system's base radius (--radius), matching the Home pill directly above. A literal
+     8px here read as barely-rounded on a 48px row — that's the scale for the 36px nav items.
+     Same 16px dev landed on, via the token rather than the number. */
+  border-radius: var(--radius-lg);
   cursor: pointer;
   /* Persistent grey "active" background (per Figma) for the workspace switcher and the
      back-to-workspace button, instead of the sidebar's green accent. */
@@ -41,6 +56,16 @@
    menu-button's green hover (equal specificity). */
 .spaceSelector:hover {
   background-color: var(--secondary-hover) !important;
+}
+
+/* Collapsed (icon-only) sidebar: the row is nothing but the avatar, so it becomes a square at the
+   rail's shared size. `min-height: 0` is what lets the icon-mode `size-9!` apply at all — a
+   min-height always wins over a height, so the 40px floor above left a 36x40 button with the avatar
+   centred and grey showing above and below it. The radius drops to 12px because the expanded 16px is
+   nearly half of 36px and rounded the button into a blob behind the squarer avatar. */
+:global([data-collapsible='icon']) .spaceSelector {
+  min-height: 0;
+  border-radius: var(--radius-md);
 }
 
 /* Match dropdown panel width to sidebar when open (same as expanded sidebar) */
@@ -70,10 +95,25 @@
   background-color: var(--color-success-background, #dcfce7);
 }
 
+.addSafeToWorkspaceTrigger:hover {
+  border-color: transparent;
+}
+
+.addSafeToWorkspaceTrigger:hover .addSafeToWorkspaceRing {
+  background-color: var(--secondary-hover);
+}
+
+.addSafeToWorkspaceTrigger:hover .addSafeToWorkspacePlusIcon {
+  color: var(--muted-foreground);
+}
+
 .addSafeToWorkspacePlusIcon {
   width: 16px;
   height: 16px;
   flex-shrink: 0;
+  /* 1px stroke, matching the nav icons (see the note on `.sidebarNavItem svg`). Size and stroke hold
+     in the collapsed rail too — the ring around it is 28px in both states. */
+  stroke-width: 1.5;
   color: var(--color-success-main, #16a34a);
 }
 
@@ -85,16 +125,17 @@
   text-align: left;
 }
 
+/* 32px in both states; collapsed it centres in the 36px button, which has no surface of its own. */
 .spaceSelectorAvatar {
   width: 32px;
   height: 32px;
   flex-shrink: 0;
-  border-radius: var(--rounded-lg, 12px);
+  border-radius: var(--radius-md);
   overflow: hidden;
 }
 
 .spaceSelectorAvatarFallback {
-  border-radius: var(--rounded-md, 8px);
+  border-radius: var(--radius-md);
   background-color: var(--primary);
   color: var(--primary-foreground);
 }
@@ -161,7 +202,7 @@
   font-weight: 700;
   line-height: 16px;
   color: var(--sidebar-foreground);
-  background-color: var(--color-success-background, #dcfce7);
+  background-color: var(--color-background-light-hover);
   border-radius: var(--rounded-lg, 12px);
 }
 
@@ -177,8 +218,7 @@
 
 :global(.group[data-collapsible='icon']) .addSafeToWorkspaceTrigger {
   justify-content: center;
-  min-height: 40px;
-  padding: 8px;
+  min-height: 0;
   gap: 0;
   border: none;
 }
@@ -187,25 +227,22 @@
   display: none !important;
 }
 
-:global(.group[data-collapsible='icon']) .addSafeToWorkspacePlusIcon {
-  width: 12px;
-  height: 12px;
+:global(.group[data-collapsible='icon']) .addSafeToWorkspaceTrigger:hover {
+  background-color: transparent;
 }
 
+:global(.group[data-collapsible='icon']) .addSafeToWorkspaceTrigger:hover .addSafeToWorkspacePlusIcon {
+  color: var(--muted-foreground);
+}
+
+/* Collapsed the button carries no surface of its own — it goes transparent and hands its hover
+   feedback to the avatar, which brightens instead. */
 :global(.group[data-collapsible='icon']) .spaceSelector {
   background-color: transparent;
-  min-height: 32px;
   padding: 0 !important;
-  border-radius: var(--rounded-lg, 12px);
   /* Re-center the avatar: the base rule's flex-start !important would otherwise pin it to the
-     left edge of the (slightly wider) collapsed button. */
+     left edge of the collapsed button. */
   justify-content: center !important;
-}
-
-:global(.group[data-collapsible='icon']) .spaceSelector .spaceSelectorAvatar {
-  width: 32px;
-  height: 32px;
-  transition: opacity 0.15s ease;
 }
 
 :global(.group[data-collapsible='icon']) .spaceSelector:hover {
@@ -249,12 +286,22 @@
   top: 50%;
   transform: translateY(-50%);
   height: 18px;
-  background-color: var(--color-success-background, #dcfce7) !important;
-  color: var(--accent-secondary-foreground) !important;
+  background-color: var(--color-background-light-hover) !important;
+  color: var(--sidebar-accent-foreground) !important;
 }
 
 .sidebarGroup {
   padding-block: 0;
+}
+
+.collapsedSeparator {
+  display: none;
+  width: 36px !important;
+  margin-block: 8px;
+}
+
+:global(.group[data-collapsible='icon']) .collapsedSeparator {
+  display: block;
 }
 
 .navItemActive {

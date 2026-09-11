@@ -1,6 +1,7 @@
 import type { ReactElement, ReactNode } from 'react'
-import { Box, Button, Paper, SvgIcon, Typography } from '@mui/material'
-import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded'
+import { ChevronRight } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 import WarningIcon from '@/public/images/notifications/warning.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import ErrorIcon from '@/public/images/notifications/error.svg'
@@ -37,19 +38,8 @@ export interface ActionCardProps {
   actionTestId?: string
 }
 
-const ACTION_BUTTON_SX = {
-  mt: 1,
-  ml: -1,
-  p: 1,
-  minWidth: 'auto',
-  textTransform: 'none',
-  textDecoration: 'none !important',
-  cursor: 'pointer',
-  '&:hover': {
-    textDecoration: 'underline !important',
-    backgroundColor: 'transparent',
-  },
-} as const
+const ACTION_BUTTON_CLASSNAME =
+  'mt-2 -ml-2 min-w-0 cursor-pointer p-2 normal-case no-underline hover:bg-transparent hover:underline'
 
 const severityConfig = {
   info: {
@@ -86,32 +76,34 @@ const ActionButton = ({
   trackingEvent?: AnalyticsEvent
   testId?: string
 }): ReactElement => {
-  const buttonProps = {
-    variant: 'text' as const,
-    size: 'small' as const,
-    endIcon: <KeyboardArrowRightRoundedIcon />,
-    sx: ACTION_BUTTON_SX,
-    'data-testid': testId,
-  }
+  const label = (
+    <>
+      {action.label}
+      <ChevronRight />
+    </>
+  )
 
   if (action.href) {
     return (
       <Button
-        {...buttonProps}
-        component="a"
-        href={action.href}
-        target={action.target}
-        rel={action.rel}
+        variant="ghost"
+        size="sm"
+        className={ACTION_BUTTON_CLASSNAME}
+        data-testid={testId}
+        render={<a href={action.href} target={action.target} rel={action.rel} />}
         onClick={trackingEvent ? () => trackEvent(trackingEvent) : undefined}
       >
-        {action.label}
+        {label}
       </Button>
     )
   }
 
   return (
     <Button
-      {...buttonProps}
+      variant="ghost"
+      size="sm"
+      className={ACTION_BUTTON_CLASSNAME}
+      data-testid={testId}
       onClick={() => {
         if (trackingEvent) {
           trackEvent(trackingEvent)
@@ -119,7 +111,7 @@ const ActionButton = ({
         action.onClick?.()
       }}
     >
-      {action.label}
+      {label}
     </Button>
   )
 }
@@ -135,62 +127,40 @@ export const ActionCard = ({
   actionTestId,
 }: ActionCardProps): ReactElement => {
   const config = severityConfig[severity]
+  const Icon = config.icon
 
   return (
-    <Paper
+    <div
       data-testid={testId}
-      elevation={0}
-      sx={{
-        backgroundColor: config.backgroundColor,
-        borderRadius: 1,
-        padding: 2,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 1.5,
-      }}
+      className="flex flex-col gap-3 rounded-lg p-4"
+      style={{ backgroundColor: config.backgroundColor }}
     >
       {/* Header: Icon + Title + Content */}
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.85 }}>
-        <SvgIcon
-          component={config.icon}
-          inheritViewBox
-          sx={{ color: config.iconColor, flexShrink: 0, width: 20, height: 20 }}
-        />
+      <div className="flex items-start gap-[6.8px]">
+        <Icon className="size-5 shrink-0" style={{ color: config.iconColor }} />
 
-        <Typography variant="subtitle2" sx={{ flex: 1, lineHeight: 1.5 }}>
-          <Box component="span" sx={{ fontWeight: 700 }}>
-            {title}
-          </Box>
+        <Typography variant="paragraph-small" className="flex-1 leading-normal">
+          <span className="font-bold">{title}</span>
           {content && <> {content}</>}
           {learnMore && (
             <>
               {' '}
               <Track {...(learnMore.trackingEvent || DEFAULT_LEARN_MORE_EVENT)} label={learnMore.label || 'learn-more'}>
-                <ExternalLink
-                  href={learnMore.href}
-                  noIcon
-                  sx={{
-                    fontWeight: 400,
-                    textDecoration: 'underline',
-                    '& span': {
-                      textDecoration: 'underline',
-                    },
-                  }}
-                >
+                <ExternalLink href={learnMore.href} noIcon className="font-normal underline [&_span]:underline">
                   Learn more
                 </ExternalLink>
               </Track>
             </>
           )}
         </Typography>
-      </Box>
+      </div>
 
       {/* Action */}
       {action && (
-        <Box sx={{ paddingLeft: 'calc(20px + 0.85 * 8px)' }}>
+        <div className="pl-[26.8px]">
           <ActionButton action={action} trackingEvent={trackingEvent} testId={actionTestId} />
-        </Box>
+        </div>
       )}
-    </Paper>
+    </div>
   )
 }

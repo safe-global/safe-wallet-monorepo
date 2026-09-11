@@ -1,24 +1,28 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./Countdown.stories Days 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root mui-style-1i27l4i"
+    class="shadcn-scope"
   >
-    <div>
-      <span
-        class="MuiTypography-root MuiTypography-body1 mui-style-w5uidf-MuiTypography-root"
-      >
-        2
-      </span>
-       
-      <span
-        class="MuiTypography-root MuiTypography-body1 mui-style-shf88x-MuiTypography-root"
-      >
-        days
-      </span>
+    <div
+      class="flex gap-2"
+    >
+      <div>
+        <span
+          class="font-bold"
+        >
+          2
+        </span>
+         
+        <span
+          class="text-[var(--color-primary-light)]"
+        >
+          days
+        </span>
+      </div>
     </div>
   </div>
 </div>
@@ -29,46 +33,50 @@ exports[`./Countdown.stories DaysHoursMinutes 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root mui-style-1i27l4i"
+    class="shadcn-scope"
   >
-    <div>
-      <span
-        class="MuiTypography-root MuiTypography-body1 mui-style-w5uidf-MuiTypography-root"
-      >
-        2
-      </span>
-       
-      <span
-        class="MuiTypography-root MuiTypography-body1 mui-style-shf88x-MuiTypography-root"
-      >
-        days
-      </span>
-    </div>
-    <div>
-      <span
-        class="MuiTypography-root MuiTypography-body1 mui-style-w5uidf-MuiTypography-root"
-      >
-        2
-      </span>
-       
-      <span
-        class="MuiTypography-root MuiTypography-body1 mui-style-shf88x-MuiTypography-root"
-      >
-        hrs
-      </span>
-    </div>
-    <div>
-      <span
-        class="MuiTypography-root MuiTypography-body1 mui-style-w5uidf-MuiTypography-root"
-      >
-        15
-      </span>
-       
-      <span
-        class="MuiTypography-root MuiTypography-body1 mui-style-shf88x-MuiTypography-root"
-      >
-        mins
-      </span>
+    <div
+      class="flex gap-2"
+    >
+      <div>
+        <span
+          class="font-bold"
+        >
+          2
+        </span>
+         
+        <span
+          class="text-[var(--color-primary-light)]"
+        >
+          days
+        </span>
+      </div>
+      <div>
+        <span
+          class="font-bold"
+        >
+          2
+        </span>
+         
+        <span
+          class="text-[var(--color-primary-light)]"
+        >
+          hrs
+        </span>
+      </div>
+      <div>
+        <span
+          class="font-bold"
+        >
+          15
+        </span>
+         
+        <span
+          class="text-[var(--color-primary-light)]"
+        >
+          mins
+        </span>
+      </div>
     </div>
   </div>
 </div>
@@ -79,20 +87,24 @@ exports[`./Countdown.stories Hours 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root mui-style-1i27l4i"
+    class="shadcn-scope"
   >
-    <div>
-      <span
-        class="MuiTypography-root MuiTypography-body1 mui-style-w5uidf-MuiTypography-root"
-      >
-        2
-      </span>
-       
-      <span
-        class="MuiTypography-root MuiTypography-body1 mui-style-shf88x-MuiTypography-root"
-      >
-        hrs
-      </span>
+    <div
+      class="flex gap-2"
+    >
+      <div>
+        <span
+          class="font-bold"
+        >
+          2
+        </span>
+         
+        <span
+          class="text-[var(--color-primary-light)]"
+        >
+          hrs
+        </span>
+      </div>
     </div>
   </div>
 </div>
@@ -103,33 +115,37 @@ exports[`./Countdown.stories HoursAndMinutes 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root mui-style-1i27l4i"
+    class="shadcn-scope"
   >
-    <div>
-      <span
-        class="MuiTypography-root MuiTypography-body1 mui-style-w5uidf-MuiTypography-root"
-      >
-        2
-      </span>
-       
-      <span
-        class="MuiTypography-root MuiTypography-body1 mui-style-shf88x-MuiTypography-root"
-      >
-        hrs
-      </span>
-    </div>
-    <div>
-      <span
-        class="MuiTypography-root MuiTypography-body1 mui-style-w5uidf-MuiTypography-root"
-      >
-        5
-      </span>
-       
-      <span
-        class="MuiTypography-root MuiTypography-body1 mui-style-shf88x-MuiTypography-root"
-      >
-        mins
-      </span>
+    <div
+      class="flex gap-2"
+    >
+      <div>
+        <span
+          class="font-bold"
+        >
+          2
+        </span>
+         
+        <span
+          class="text-[var(--color-primary-light)]"
+        >
+          hrs
+        </span>
+      </div>
+      <div>
+        <span
+          class="font-bold"
+        >
+          5
+        </span>
+         
+        <span
+          class="text-[var(--color-primary-light)]"
+        >
+          mins
+        </span>
+      </div>
     </div>
   </div>
 </div>
@@ -139,11 +155,15 @@ exports[`./Countdown.stories LessThanOneMinute 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <span
-    class="MuiTypography-root MuiTypography-body1 mui-style-w5uidf-MuiTypography-root"
+  <div
+    class="shadcn-scope"
   >
-    &lt; 1 min
-  </span>
+    <span
+      class="font-bold"
+    >
+      &lt; 1 min
+    </span>
+  </div>
 </div>
 `;
 
@@ -152,20 +172,24 @@ exports[`./Countdown.stories Minutes 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root mui-style-1i27l4i"
+    class="shadcn-scope"
   >
-    <div>
-      <span
-        class="MuiTypography-root MuiTypography-body1 mui-style-w5uidf-MuiTypography-root"
-      >
-        5
-      </span>
-       
-      <span
-        class="MuiTypography-root MuiTypography-body1 mui-style-shf88x-MuiTypography-root"
-      >
-        mins
-      </span>
+    <div
+      class="flex gap-2"
+    >
+      <div>
+        <span
+          class="font-bold"
+        >
+          5
+        </span>
+         
+        <span
+          class="text-[var(--color-primary-light)]"
+        >
+          mins
+        </span>
+      </div>
     </div>
   </div>
 </div>
@@ -174,5 +198,9 @@ exports[`./Countdown.stories Minutes 1`] = `
 exports[`./Countdown.stories Zero 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
-/>
+>
+  <div
+    class="shadcn-scope"
+  />
+</div>
 `;

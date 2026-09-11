@@ -1,21 +1,23 @@
-import { SvgIcon, type SvgIconProps } from '@mui/material'
 import HypernativeLogoSvg from '@/public/images/hypernative/hypernative-logo.svg'
-import { useEffect, useId, useRef } from 'react'
+import { useEffect, useId, useRef, type CSSProperties } from 'react'
+import { cn } from '@/utils/cn'
 
-interface HypernativeLogoProps extends Omit<SvgIconProps, 'component'> {
-  component?: never // Prevent overriding component prop
+interface HypernativeLogoProps {
+  className?: string
+  fill?: string
+  style?: CSSProperties
 }
 
 /**
  * HypernativeLogo wraps the logo SVG.
  * It dynamically updates the gradient ID to ensure multiple instances on a page don't collide.
  */
-const HypernativeLogo = (props: HypernativeLogoProps) => {
+const HypernativeLogo = ({ className, fill, style }: HypernativeLogoProps) => {
   const uniqueId = useId()
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // Find the SVG element inside the SvgIcon wrapper
+    // Find the SVG element inside the wrapper
     const svg = containerRef?.current?.querySelector('svg')
     if (!svg) return
 
@@ -28,14 +30,12 @@ const HypernativeLogo = (props: HypernativeLogoProps) => {
     }
   }, [uniqueId])
 
-  const sx = {
-    ...props.sx,
-    ...(props.fill ? { '.hypernative-logo-fill': { fill: props.fill } } : {}),
-  }
-
   return (
-    <div ref={containerRef} style={{ display: 'inline-flex' }}>
-      <SvgIcon {...props} sx={sx} component={HypernativeLogoSvg} inheritViewBox />
+    <div ref={containerRef} className="inline-flex">
+      <HypernativeLogoSvg
+        className={cn(fill ? '[&_.hypernative-logo-fill]:fill-[var(--hn-logo-fill)]' : undefined, className)}
+        style={{ ...style, ...(fill ? ({ '--hn-logo-fill': fill } as CSSProperties) : {}) }}
+      />
     </div>
   )
 }

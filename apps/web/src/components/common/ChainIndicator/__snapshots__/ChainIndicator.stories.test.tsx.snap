@@ -1,36 +1,39 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./ChainIndicator.stories Default 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
-    <span
-      class="indicator withLogo"
-      data-testid="chain-logo"
+    <div
+      class="rounded-lg bg-[var(--color-background-paper)] p-4"
     >
-      <img
-        alt="Ethereum Logo"
-        data-testid="chain-indicator-network-logo-img"
-        height="24"
-        loading="lazy"
-        src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
-        style="min-width: 24px;"
-        width="24"
-      />
-      <div
-        class="MuiStack-root mui-style-nen11g-MuiStack-root"
+      <span
+        class="indicator withLogo"
+        data-testid="chain-logo"
       >
-        <span
-          class="name"
+        <img
+          alt="Ethereum Logo"
+          data-testid="chain-indicator-network-logo-img"
+          height="24"
+          loading="lazy"
+          src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+          style="min-width: 24px;"
+          width="24"
+        />
+        <div
+          class="flex flex-col"
         >
-          Ethereum
-        </span>
-      </div>
-    </span>
+          <span
+            class="name"
+          >
+            Ethereum
+          </span>
+        </div>
+      </span>
+    </div>
   </div>
 </div>
 `;
@@ -40,9 +43,12 @@ exports[`./ChainIndicator.stories HideUnknown 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
-  />
+    class="shadcn-scope"
+  >
+    <div
+      class="rounded-lg bg-[var(--color-background-paper)] p-4"
+    />
+  </div>
 </div>
 `;
 
@@ -51,32 +57,35 @@ exports[`./ChainIndicator.stories Inline 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
-    <span
-      class="inlineIndicator withLogo"
-      data-testid="chain-logo"
+    <div
+      class="rounded-lg bg-[var(--color-background-paper)] p-4"
     >
-      <img
-        alt="Ethereum Logo"
-        data-testid="chain-indicator-network-logo-img"
-        height="24"
-        loading="lazy"
-        src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
-        style="min-width: 24px;"
-        width="24"
-      />
-      <div
-        class="MuiStack-root mui-style-nen11g-MuiStack-root"
+      <span
+        class="inlineIndicator withLogo"
+        data-testid="chain-logo"
       >
-        <span
-          class="name"
+        <img
+          alt="Ethereum Logo"
+          data-testid="chain-indicator-network-logo-img"
+          height="24"
+          loading="lazy"
+          src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+          style="min-width: 24px;"
+          width="24"
+        />
+        <div
+          class="flex flex-col"
         >
-          Ethereum
-        </span>
-      </div>
-    </span>
+          <span
+            class="name"
+          >
+            Ethereum
+          </span>
+        </div>
+      </span>
+    </div>
   </div>
 </div>
 `;
@@ -86,32 +95,35 @@ exports[`./ChainIndicator.stories LargeImage 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
-    <span
-      class="indicator withLogo"
-      data-testid="chain-logo"
+    <div
+      class="rounded-lg bg-[var(--color-background-paper)] p-4"
     >
-      <img
-        alt="Ethereum Logo"
-        data-testid="chain-indicator-network-logo-img"
-        height="36"
-        loading="lazy"
-        src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
-        style="min-width: 36px;"
-        width="36"
-      />
-      <div
-        class="MuiStack-root mui-style-nen11g-MuiStack-root"
+      <span
+        class="indicator withLogo"
+        data-testid="chain-logo"
       >
-        <span
-          class="name"
+        <img
+          alt="Ethereum Logo"
+          data-testid="chain-indicator-network-logo-img"
+          height="36"
+          loading="lazy"
+          src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+          style="min-width: 36px;"
+          width="36"
+        />
+        <div
+          class="flex flex-col"
         >
-          Ethereum
-        </span>
-      </div>
-    </span>
+          <span
+            class="name"
+          >
+            Ethereum
+          </span>
+        </div>
+      </span>
+    </div>
   </div>
 </div>
 `;
@@ -121,24 +133,27 @@ exports[`./ChainIndicator.stories NoLogo 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
-    <span
-      class="indicator"
-      data-testid="chain-logo"
-      style="background-color: rgb(98, 126, 234); color: rgb(255, 255, 255);"
+    <div
+      class="rounded-lg bg-[var(--color-background-paper)] p-4"
     >
-      <div
-        class="MuiStack-root mui-style-nen11g-MuiStack-root"
+      <span
+        class="indicator"
+        data-testid="chain-logo"
+        style="background-color: rgb(98, 126, 234); color: rgb(255, 255, 255);"
       >
-        <span
-          class="name"
+        <div
+          class="flex flex-col"
         >
-          Ethereum
-        </span>
-      </div>
-    </span>
+          <span
+            class="name"
+          >
+            Ethereum
+          </span>
+        </div>
+      </span>
+    </div>
   </div>
 </div>
 `;
@@ -148,23 +163,26 @@ exports[`./ChainIndicator.stories OnlyLogo 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
-    <span
-      class="indicator withLogo onlyLogo"
-      data-testid="chain-logo"
+    <div
+      class="rounded-lg bg-[var(--color-background-paper)] p-4"
     >
-      <img
-        alt="Ethereum Logo"
-        data-testid="chain-indicator-network-logo-img"
-        height="24"
-        loading="lazy"
-        src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
-        style="min-width: 24px;"
-        width="24"
-      />
-    </span>
+      <span
+        class="indicator withLogo onlyLogo"
+        data-testid="chain-logo"
+      >
+        <img
+          alt="Ethereum Logo"
+          data-testid="chain-indicator-network-logo-img"
+          height="24"
+          loading="lazy"
+          src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+          style="min-width: 24px;"
+          width="24"
+        />
+      </span>
+    </div>
   </div>
 </div>
 `;
@@ -174,32 +192,35 @@ exports[`./ChainIndicator.stories Responsive 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
-    <span
-      class="indicator withLogo responsive"
-      data-testid="chain-logo"
+    <div
+      class="rounded-lg bg-[var(--color-background-paper)] p-4"
     >
-      <img
-        alt="Ethereum Logo"
-        data-testid="chain-indicator-network-logo-img"
-        height="24"
-        loading="lazy"
-        src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
-        style="min-width: 24px;"
-        width="24"
-      />
-      <div
-        class="MuiStack-root mui-style-nen11g-MuiStack-root"
+      <span
+        class="indicator withLogo responsive"
+        data-testid="chain-logo"
       >
-        <span
-          class="name"
+        <img
+          alt="Ethereum Logo"
+          data-testid="chain-indicator-network-logo-img"
+          height="24"
+          loading="lazy"
+          src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+          style="min-width: 24px;"
+          width="24"
+        />
+        <div
+          class="flex flex-col"
         >
-          Ethereum
-        </span>
-      </div>
-    </span>
+          <span
+            class="name"
+          >
+            Ethereum
+          </span>
+        </div>
+      </span>
+    </div>
   </div>
 </div>
 `;
@@ -209,32 +230,35 @@ exports[`./ChainIndicator.stories SmallImage 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
-    <span
-      class="indicator withLogo"
-      data-testid="chain-logo"
+    <div
+      class="rounded-lg bg-[var(--color-background-paper)] p-4"
     >
-      <img
-        alt="Ethereum Logo"
-        data-testid="chain-indicator-network-logo-img"
-        height="16"
-        loading="lazy"
-        src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
-        style="min-width: 16px;"
-        width="16"
-      />
-      <div
-        class="MuiStack-root mui-style-nen11g-MuiStack-root"
+      <span
+        class="indicator withLogo"
+        data-testid="chain-logo"
       >
-        <span
-          class="name"
+        <img
+          alt="Ethereum Logo"
+          data-testid="chain-indicator-network-logo-img"
+          height="16"
+          loading="lazy"
+          src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+          style="min-width: 16px;"
+          width="16"
+        />
+        <div
+          class="flex flex-col"
         >
-          Ethereum
-        </span>
-      </div>
-    </span>
+          <span
+            class="name"
+          >
+            Ethereum
+          </span>
+        </div>
+      </span>
+    </div>
   </div>
 </div>
 `;
@@ -244,28 +268,30 @@ exports[`./ChainIndicator.stories UnknownChain 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
-    <span
-      class="indicator withLogo"
-      data-testid="chain-logo"
+    <div
+      class="rounded-lg bg-[var(--color-background-paper)] p-4"
     >
-      <mock-icon
-        aria-hidden=""
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-156krn5-MuiSvgIcon-root"
-        focusable="false"
-      />
-      <div
-        class="MuiStack-root mui-style-nen11g-MuiStack-root"
+      <span
+        class="indicator withLogo"
+        data-testid="chain-logo"
       >
-        <span
-          class="name"
+        <mock-icon
+          class="rounded-full bg-[var(--color-background-main)]"
+          style="height: 24px; width: 24px;"
+        />
+        <div
+          class="flex flex-col"
         >
-          Unknown network
-        </span>
-      </div>
-    </span>
+          <span
+            class="name"
+          >
+            Unknown network
+          </span>
+        </div>
+      </span>
+    </div>
   </div>
 </div>
 `;
@@ -275,44 +301,57 @@ exports[`./ChainIndicator.stories WithFiatValue 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
-    <span
-      class="indicator withLogo"
-      data-testid="chain-logo"
+    <div
+      class="rounded-lg bg-[var(--color-background-paper)] p-4"
     >
-      <img
-        alt="Ethereum Logo"
-        data-testid="chain-indicator-network-logo-img"
-        height="24"
-        loading="lazy"
-        src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
-        style="min-width: 24px;"
-        width="24"
-      />
-      <div
-        class="MuiStack-root mui-style-nen11g-MuiStack-root"
+      <span
+        class="indicator withLogo"
+        data-testid="chain-logo"
       >
-        <span
-          class="name"
-        >
-          Ethereum
-        </span>
-        <p
-          class="MuiTypography-root MuiTypography-body1 mui-style-10xjelx-MuiTypography-root"
+        <img
+          alt="Ethereum Logo"
+          data-testid="chain-indicator-network-logo-img"
+          height="24"
+          loading="lazy"
+          src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+          style="min-width: 24px;"
+          width="24"
+        />
+        <div
+          class="flex flex-col"
         >
           <span
-            aria-label="$ 1,234.56"
-            class=""
-            data-mui-internal-clone-element="true"
-            style="white-space: nowrap;"
+            class="name"
           >
-            $ 1,235
+            Ethereum
           </span>
-        </p>
-      </div>
-    </span>
+          <span
+            class="m-0 text-sm leading-5 font-semibold"
+            data-slot="typography"
+            data-variant="paragraph-small-bold"
+          >
+            <span
+              class="whitespace-nowrap"
+              data-slot="tooltip-trigger"
+              id="base-ui-_r_1_"
+            >
+              <span
+                aria-hidden="true"
+              >
+                $ 1,235
+              </span>
+              <span
+                class="sr-only"
+              >
+                $ 1,234.56
+              </span>
+            </span>
+          </span>
+        </div>
+      </span>
+    </div>
   </div>
 </div>
 `;

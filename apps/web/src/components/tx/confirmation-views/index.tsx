@@ -37,7 +37,6 @@ import TxData from '@/components/transactions/TxDetails/TxData'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import useChainId from '@/hooks/useChainId'
 import { ManageSigners } from './ManageSigners'
-import { Box } from '@mui/material'
 import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData'
 import BridgeTransaction from './BridgeTransaction'
 import { LifiSwapTransaction } from './LifiSwapTransaction'
@@ -133,12 +132,12 @@ const ConfirmationView = ({
         (ConfirmationViewComponent ||
           (details && showTxDetails && (
             <TxData txData={details?.txData} txInfo={details?.txInfo} txDetails={txDetails} imitation={false} trusted>
-              <Box ref={decodedDataRef}>
+              <div ref={decodedDataRef}>
                 <DecodedData
                   txData={details.txData}
                   toInfo={isCustomTxInfo(details.txInfo) ? details.txInfo.to : details.txData?.to}
                 />
-              </Box>
+              </div>
             </TxData>
           )))}
 

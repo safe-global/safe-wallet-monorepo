@@ -61,6 +61,8 @@ export const HelpCenterArticle = {
   BULK_IMPORT_OLD_DATA: `${HELP_CENTER_URL}/articles/6865463992-export-your-data-from-the-safewallet-mobile-app-and-import-into-the-new-safemobile-app-ios-only`,
   SAFE_SHIELD: `${HELP_CENTER_URL}/articles/6128275759-security-hub`,
   ADDRESS_POISONING: `${HELP_CENTER_URL}/articles/3861480988-what-is-address-poisoning-and-how-does-safewallet-battle-it`,
+  // TODO(WA-3134): point at the dedicated Policies article once Product/Design provide it.
+  POLICIES: HELP_CENTER_URL,
 } as const
 export const HelperCenterArticleTitles = {
   RECOVERY: 'Learn more about the Account recovery process',

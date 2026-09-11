@@ -32,7 +32,7 @@ const SafenetStakingButton = () => {
               size="sm"
               onClick={openSafenetStakingApp}
               disabled={isNavigating}
-              className="cursor-pointer gap-1.5 rounded-lg bg-transparent hover:bg-muted/30 transition-colors m-1"
+              className="gap-1.5 m-1"
               aria-label="Safenet staking"
             />
           }

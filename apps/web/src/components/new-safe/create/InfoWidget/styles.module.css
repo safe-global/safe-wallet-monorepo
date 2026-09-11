@@ -1,7 +1,3 @@
-.cardHeader {
-  padding-bottom: 0px;
-}
-
 .title {
   width: fit-content;
   padding: 4px var(--space-1);
@@ -15,24 +11,7 @@
   font-size: 12px;
 }
 
-.tipsList :global .MuiCardContent-root {
-  padding: 0;
-}
-
+/* The tips sit directly on the card's tinted surface rather than on the Accordion's own background. */
 .tipAccordion {
   background-color: inherit;
-  border: none;
-}
-
-.tipAccordion :global .MuiAccordionSummary-root:hover {
-  background: inherit;
-}
-
-.tipAccordion :global .Mui-expanded.MuiAccordionSummary-root {
-  background: inherit;
-  font-weight: bold;
-}
-
-.tipAccordion :global .MuiAccordionDetails-root {
-  padding-top: 0;
 }

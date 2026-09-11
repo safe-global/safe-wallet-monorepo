@@ -3,6 +3,7 @@ import BackLink from './index'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 
 const meta = {
+  title: 'Components/Common/BackLink',
   component: BackLink,
   parameters: {
     layout: 'centered',

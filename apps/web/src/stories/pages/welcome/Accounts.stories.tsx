@@ -11,6 +11,7 @@ import Accounts from '@/pages/welcome/accounts'
 const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'connected',
+  pathname: '/welcome/accounts',
 })
 
 const meta = {

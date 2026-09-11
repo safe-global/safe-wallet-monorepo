@@ -1,23 +1,21 @@
+import { useMemo } from 'react'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import type { EthersError } from '@/utils/ethers-utils'
 
 import useAsync from '@safe-global/utils/hooks/useAsync'
-import ContractErrorCodes from '@/services/contracts/ContractErrorCodes'
+import { getContractErrorMessage, isGsCode } from '@safe-global/utils/services/exceptions/contractErrors'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { createWeb3, useWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { type JsonRpcProvider } from 'ethers'
+import { type JsonRpcProvider, ZeroAddress } from 'ethers'
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { getCurrentGnosisSafeContract } from '@/services/contracts/safeContracts'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import useBalances from '@/hooks/useBalances'
+import { useCurrentChain } from '@/hooks/useChains'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { type NestedWallet } from '@/utils/nested-safe-wallet'
 import { assertProvider } from '@/utils/helpers'
-
-const isContractError = (error: EthersError) => {
-  if (!error.reason) return false
-
-  return Object.keys(ContractErrorCodes).includes(error.reason)
-}
 
 // Monkey patch the signerProvider to proxy requests to the "readonly" provider if on the wrong chain
 // This is ONLY used to check the validity of a transaction in `useIsValidExecution`
@@ -62,6 +60,20 @@ const useIsValidExecution = (
   const wallet = useSigner()
   const { safe } = useSafeInfo()
   const readOnlyProvider = useWeb3ReadOnly()
+  const chain = useCurrentChain()
+  const { balances } = useBalances()
+
+  // GS012 pays the network fee in an ERC-20 gas token; resolve its symbol so the
+  // message reads e.g. "Not enough USDC ..." instead of "{token}". Derived here as
+  // a string so balance polling doesn't re-trigger the simulation below.
+  const gasToken = safeTx?.data.gasToken
+  const gasTokenSymbol = useMemo(
+    () =>
+      gasToken && !sameAddress(gasToken, ZeroAddress)
+        ? balances.items.find((item) => sameAddress(item.tokenInfo.address, gasToken))?.tokenInfo.symbol
+        : undefined,
+    [gasToken, balances],
+  )
 
   const [isValidExecution, executionValidationError, isValidExecutionLoading] = useAsync(async () => {
     if (!safeTx || !wallet || gasLimit === undefined || !readOnlyProvider) {
@@ -81,14 +93,19 @@ const useIsValidExecution = (
     } catch (_err) {
       const err = _err as EthersError
 
-      if (isContractError(err)) {
-        // @ts-ignore
-        err.reason += `: ${ContractErrorCodes[err.reason]}`
+      // Map a known on-chain (GS) revert reason to its user-facing message from
+      // the shared source. The raw GS code stays out of the message; it belongs
+      // in the support reference (Details panel).
+      if (isGsCode(err.reason)) {
+        err.reason = getContractErrorMessage(err.reason, {
+          nativeAsset: chain?.nativeCurrency.symbol,
+          token: gasTokenSymbol,
+        }) as EthersError['reason']
       }
 
       throw err
     }
-  }, [safeTx, wallet, gasLimit, safe, readOnlyProvider])
+  }, [safeTx, wallet, gasLimit, safe, readOnlyProvider, chain, gasTokenSymbol])
 
   return { isValidExecution, executionValidationError, isValidExecutionLoading }
 }

@@ -1,39 +1,43 @@
-/* --topbar-height is measured live from the topbar element (see useTopbarHeight),
-   so the dialog sits flush against the header at any width — including the wrapped
-   two-row header below 1148px — with no per-viewport override to keep in sync. */
+/* The elevated topbar (z-index 99) paints over this dialog, so the dialog starts below it
+   to keep the close button visible and clickable. `--topbar-height` is measured live from
+   the real topbar element (see useCssHeightVar), so it already tracks the extra rows the
+   header wraps onto below 1148px — no width-banded offsets to keep in sync. */
 .dialog {
+  position: fixed;
   top: var(--topbar-height);
   left: 230px;
+  right: 0;
+  bottom: 0;
   z-index: 3;
+  overflow-y: auto;
+  /* Keep scrolling inside the dialog: no chaining to the page behind and no rubber-band bounce past
+     the dialog's own content. `.dialog` is the scroll container now that it is the Base UI popup;
+     it used to be MUI's `.MuiDialog-container` wrapper. */
+  overscroll-behavior: none;
+  display: flex;
+  flex-direction: column;
   transition: left 225ms cubic-bezier(0, 0, 0.2, 1) 0ms;
-  /* Opaque so macOS elastic overscroll can't reveal the page behind the
-     dialog (the backdrop is hidden, so the root is otherwise transparent). */
-  background-color: var(--color-border-background);
+  /* Opaque so macOS elastic overscroll can't reveal the page behind the dialog (the backdrop
+     is hidden, so the root is otherwise transparent) — and the same colour as that page, so
+     the flow reads as the page itself rather than a sheet laid over it. Mirrors PageLayout's
+     `.main` / `[data-theme='dark'] .mainSpace` pair; styles.test.ts keeps the two in step. */
+  background-color: var(--color-background-main);
+  /* One source for the close icon's size: `.close svg` draws the X from it, `--close-column`
+     below reserves room for it. */
+  --close-icon-size: var(--space-3);
+  /* How far the close button reaches in from the right edge (the icon, its own `--space-1` on
+     both sides and the `--space-1` of `.buttons` outside it) plus a `--space-2` gap. Above md
+     the flow content ends on this line (see the min-width: 900px block), so the sticky X never
+     lands on it; TxLayoutBase adds no right gutter of its own there, this is the whole gutter. */
+  --close-column: calc(var(--close-icon-size) + 3 * var(--space-1) + var(--space-2));
 }
 
-/* Keep scrolling inside the dialog: no chaining to the page behind and no
-   rubber-band bounce past the dialog's own content. */
-.dialog :global .MuiDialog-container {
-  overscroll-behavior: none;
+[data-theme='dark'] .dialog {
+  background-color: var(--background);
 }
 
 .dialog.fullWidth {
   left: 0;
-}
-
-.dialog :global .MuiDialogActions-root {
-  border-top: 2px solid var(--color-border-light);
-  padding: var(--space-3);
-}
-
-.dialog :global .MuiDialogActions-root > :last-of-type:not(:first-of-type) {
-  order: 2;
-}
-
-.dialog :global .MuiDialogActions-root:after {
-  content: '';
-  order: 1;
-  flex: 1;
 }
 
 .title {
@@ -48,22 +52,36 @@
 }
 
 .close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  border-radius: 50%;
   color: var(--color-border-main);
   padding: var(--space-1);
   background-color: var(--color-border-light);
 }
 
-.paper {
-  padding-bottom: var(--space-8);
-  background-color: var(--color-border-background);
+.close svg {
+  width: var(--close-icon-size);
+  height: var(--close-icon-size);
 }
 
-.dialog :global .MuiDialogContent-root {
+/* No background of its own: `.dialog` above lands on this same element and already paints the
+   page grey. Setting `--background` here instead made the flow a white sheet in light mode and
+   pure black in dark, both against the `--color-border-background` page it is supposed to blend
+   into. The two classes were separate elements under MUI, which is how they drifted apart. */
+.paper {
+  padding-bottom: var(--space-8);
+}
+
+.content {
   overflow: visible;
 }
 
 @media (min-width: 600px) {
-  .dialog :global .MuiDialog-paper {
+  .paper {
     min-width: 600px;
     margin: 0;
   }
@@ -74,6 +92,15 @@
     position: sticky;
     top: 0;
   }
+
+  /* The X is sticky in the dialog's top-right corner, so once the page scrolls it paints over
+     whatever the flow puts on its right edge — between 900px and 1199px that was the Safe Shield
+     widget. Before the shadcn migration MUI's DialogContent added its own 24px padding, which
+     kept the content clear; owning the whole right gutter here restores that at every desktop
+     width and keeps the X the same distance from the content everywhere. */
+  .content {
+    padding-right: var(--close-column);
+  }
 }
 
 @media (max-width: 899.95px) {
@@ -83,10 +110,6 @@
     z-index: 1300;
   }
 
-  .dialog :global .MuiDialogActions-root {
-    padding: 0;
-  }
-
   .title {
     margin-bottom: var(--space-3);
     background-color: var(--color-background-paper);
@@ -94,9 +117,5 @@
 
   .close {
     background-color: unset;
-  }
-
-  .close svg {
-    font-size: 1.5rem;
   }
 }

@@ -1,6 +1,5 @@
-import { Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import { useCallback, useContext, useEffect, type PropsWithChildren } from 'react'
-import { Errors, logError } from '@/services/exceptions'
 import { trackEvent, SETTINGS_EVENTS } from '@/services/analytics'
 import { createRemoveModuleTx } from '@/services/tx/tx-sender'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
@@ -13,17 +12,11 @@ export const ReviewRemoveModule = ({
   onSubmit,
   children,
 }: PropsWithChildren<{ params: RemoveModuleFlowProps; onSubmit: () => void }>) => {
-  const { setSafeTx, safeTxError, setSafeTxError } = useContext(SafeTxContext)
+  const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
 
   useEffect(() => {
     createRemoveModuleTx(params.address).then(setSafeTx).catch(setSafeTxError)
   }, [params.address, setSafeTx, setSafeTxError])
-
-  useEffect(() => {
-    if (safeTxError) {
-      logError(Errors._806, safeTxError.message)
-    }
-  }, [safeTxError])
 
   const onFormSubmit = useCallback(() => {
     trackEvent(SETTINGS_EVENTS.MODULES.REMOVE_MODULE)
@@ -32,11 +25,11 @@ export const ReviewRemoveModule = ({
 
   return (
     <ReviewTransaction onSubmit={onFormSubmit}>
-      <Typography color="primary.light">Module</Typography>
+      <Typography className="text-[var(--color-primary-light)]">Module</Typography>
 
       <EthHashInfo address={params.address} showCopyButton hasExplorer shortAddress={false} />
 
-      <Typography my={2}>
+      <Typography className="my-4">
         After removing this module, any feature or app that uses this module might no longer work. If this Safe account
         requires more than one signature, the module removal will have to be confirmed by other signers as well.
       </Typography>

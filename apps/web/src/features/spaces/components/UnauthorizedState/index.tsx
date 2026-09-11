@@ -1,29 +1,35 @@
-import { Box, Typography } from '@mui/material'
 import css from '../Dashboard/styles.module.css'
-import Button from '@mui/material/Button'
 import Link from 'next/link'
 import { AppRoutes } from '@/config/routes'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
+import { cn } from '@/utils/cn'
+import { useDarkMode } from '@/hooks/useDarkMode'
 
 const UnauthorizedState = () => {
+  const isDarkMode = useDarkMode()
+
   return (
-    <Box className={css.content}>
-      <Box textAlign="center" className={css.contentWrapper}>
-        <Box className={css.contentInner}>
-          <Typography fontWeight={700} mb={2}>
-            You don’t have permissions to this page
-          </Typography>
+    <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
+      <div className={css.content}>
+        <div className={cn('text-center', css.contentWrapper)}>
+          <div className={css.contentInner}>
+            <Typography variant="paragraph-bold" className="mb-4">
+              You don’t have permissions to this page
+            </Typography>
 
-          <Typography color="text.secondary" mb={2}>
-            Sorry, you don’t have permissions to view this page, as your wallet is not a member of the workspace. Try to
-            sign in with a different wallet or go back to the overview.
-          </Typography>
+            <Typography color="muted" className="mb-4">
+              Sorry, you don’t have permissions to view this page, as your wallet is not a member of the workspace. Try
+              to sign in with a different wallet or go back to the overview.
+            </Typography>
 
-          <Link href={AppRoutes.welcome.spaces} passHref>
-            <Button variant="outlined">Back to homepage</Button>
-          </Link>
-        </Box>
-      </Box>
-    </Box>
+            <Button variant="outline" render={<Link href={AppRoutes.welcome.spaces} />}>
+              Back to homepage
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 

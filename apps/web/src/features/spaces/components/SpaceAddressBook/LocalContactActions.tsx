@@ -1,10 +1,12 @@
 import { type MouseEvent, useState } from 'react'
-import { Button, DialogActions, DialogContent, SvgIcon, Tooltip } from '@mui/material'
-import IconButton from '@mui/material/IconButton'
 import EditIcon from '@/public/images/common/edit.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import EntryDialog from '@/components/address-book/EntryDialog'
 import ModalDialog from '@/components/common/ModalDialog'
+import { Button } from '@/components/ui/button'
+import DialogActions from '@/components/common/DialogActions'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
 import { removeAddressBookEntry } from '@/store/addressBookSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
@@ -42,16 +44,31 @@ const LocalContactActions = ({ entry }: { entry: AddressBookEntry }) => {
 
   return (
     <>
-      <Tooltip title="Edit contact" placement="top">
-        <IconButton onClick={(e) => handleOpenModal(e, ModalType.EDIT)} size="small">
-          <SvgIcon component={EditIcon} inheritViewBox color="border" fontSize="small" />
-        </IconButton>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Button type="button" variant="ghost" size="icon-sm" onClick={(e) => handleOpenModal(e, ModalType.EDIT)} />
+          }
+        >
+          <EditIcon className="size-4 text-[var(--color-border-main)]" />
+        </TooltipTrigger>
+        <TooltipContent>Edit contact</TooltipContent>
       </Tooltip>
 
-      <Tooltip title="Delete contact" placement="top">
-        <IconButton onClick={(e) => handleOpenModal(e, ModalType.REMOVE)} size="small">
-          <SvgIcon component={DeleteIcon} inheritViewBox color="error" fontSize="small" />
-        </IconButton>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}
+            />
+          }
+        >
+          <DeleteIcon className="size-4 text-[var(--color-error-main)]" />
+        </TooltipTrigger>
+        <TooltipContent>Delete contact</TooltipContent>
       </Tooltip>
 
       {open[ModalType.EDIT] && (
@@ -65,19 +82,20 @@ const LocalContactActions = ({ entry }: { entry: AddressBookEntry }) => {
 
       {open[ModalType.REMOVE] && (
         <ModalDialog open onClose={handleCloseModal} dialogTitle="Delete contact" hideChainIndicator>
-          <DialogContent sx={{ py: 2 }}>
-            <p className="text-sm">
+          <div className="px-6 py-4">
+            <Typography variant="paragraph-small">
               This removes <b>{entry.name}</b> from the address book in this browser on all its networks.
-            </p>
-          </DialogContent>
-          <DialogActions>
-            <Button data-testid="cancel-btn" onClick={handleCloseModal}>
-              Cancel
-            </Button>
-            <Button data-testid="delete-btn" variant="danger" onClick={handleRemove} disableElevation>
-              Delete
-            </Button>
-          </DialogActions>
+            </Typography>
+          </div>
+          <DialogActions
+            className="px-6 pt-0 pb-6"
+            onCancel={handleCloseModal}
+            cancelTestId="cancel-btn"
+            confirmLabel="Delete"
+            onConfirm={handleRemove}
+            confirmDestructive
+            confirmTestId="delete-btn"
+          />
         </ModalDialog>
       )}
     </>

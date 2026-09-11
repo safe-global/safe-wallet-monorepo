@@ -44,6 +44,9 @@ const withPWA = withPWAInit({
     mode: 'production',
   },
   reloadOnOnline: false,
+  // We register the SW ourselves in `useRegisterServiceWorker` so registration
+  // failures are caught and logged instead of thrown uncaught. See WA-2949.
+  register: false,
   publicExcludes: [],
   buildExcludes: [/./],
   customWorkerSrc: SERVICE_WORKERS_PATH,
@@ -103,7 +106,7 @@ const nextConfig = {
   ...(isProd || enableExperimentalOptimizations
     ? {
         experimental: {
-          optimizePackageImports: ['@mui/material', '@mui/icons-material', 'lodash', 'date-fns', '@gnosis.pm/zodiac'],
+          optimizePackageImports: ['lodash', 'date-fns', '@gnosis.pm/zodiac'],
         },
       }
     : {}),
@@ -137,7 +140,6 @@ const nextConfig = {
       ...config.resolve.alias,
       'bn.js': path.resolve('../../node_modules/bn.js/lib/bn.js'),
       'mainnet.json': path.resolve('../..node_modules/@ethereumjs/common/dist.browser/genesisStates/mainnet.json'),
-      '@mui/material$': path.resolve('./src/components/common/Mui'),
     }
 
     if (dev) {

@@ -1,9 +1,9 @@
 import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useContext } from 'react'
-import { IconButton, Tooltip } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useRouter } from 'next/router'
 import ArrowOutwardIcon from '@/public/images/transactions/outgoing.svg'
-import css from './styles.module.css'
 import { TxModalContext } from '@/components/tx-flow'
 import { TokenTransferFlow } from '@/components/tx-flow/flows'
 import { getEip3770ShortName } from '@safe-global/utils/utils/chains'
@@ -11,6 +11,7 @@ import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/saf
 import useWallet from '@/hooks/wallets/useWallet'
 import { isOwner } from '@/utils/transaction-guards'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { trackEvent } from '@/services/analytics'
 import { gtmSetSafeAddress } from '@/services/analytics/gtm'
 
@@ -50,18 +51,30 @@ const SendTransactionButton = ({ safe }: { safe: SafeOverview }) => {
     await setActiveSafe()
     // We have to set it explicitly otherwise its missing in the trackEvent below
     gtmSetSafeAddress(safe.address.value)
-    trackEvent(SPACE_EVENTS.CREATE_SPACE_TX)
+    trackEvent(SPACE_EVENTS.CREATE_SPACE_TX, {
+      [MixpanelEventParams.CHAIN_ID]: safe.chainId,
+      [MixpanelEventParams.SAFE_ADDRESS]: safe.address.value,
+    })
 
     setTxFlow(<TokenTransferFlow />, resetActiveSafe, false)
   }
 
   return (
-    <Tooltip placement="top" title={canSend ? 'Send tokens' : 'You are not a signer of this Safe account'}>
-      <span>
-        <IconButton className={css.sendButton} size="medium" onClick={onNewTxClick} disabled={!canSend}>
+    <Tooltip>
+      <TooltipTrigger render={<span className="inline-flex" />}>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onNewTxClick}
+          disabled={!canSend}
+          aria-label="Send tokens"
+          // eslint-disable-next-line no-restricted-syntax -- filled icon action on space-account row; pending a variant
+          className="mx-1 rounded-sm bg-[var(--color-background-main)] [&_svg_path]:fill-foreground disabled:[&_svg_path]:fill-[var(--color-border-main)]"
+        >
           <ArrowOutwardIcon />
-        </IconButton>
-      </span>
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{canSend ? 'Send tokens' : 'You are not a signer of this Safe account'}</TooltipContent>
     </Tooltip>
   )
 }

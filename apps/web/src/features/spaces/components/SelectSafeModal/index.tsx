@@ -77,8 +77,11 @@ const SelectSafeModal = () => {
     <>
       {opened && (
         <Dialog open onOpenChange={(isOpen) => !isOpen && handleClose()}>
-          <DialogContent className="flex max-h-[520px] flex-col gap-0 overflow-clip p-0">
-            <DialogHeader className="shrink-0 p-5 pb-0">
+          <DialogContent padding="none" className="flex max-h-[520px] flex-col overflow-clip">
+            <DialogHeader
+              // eslint-disable-next-line no-restricted-syntax -- p-5 pb-0: bespoke header padding, no token
+              className="shrink-0 p-5 pb-0"
+            >
               <DialogTitle className="text-xl font-semibold">{safeModalTitles[actionType]}</DialogTitle>
             </DialogHeader>
 

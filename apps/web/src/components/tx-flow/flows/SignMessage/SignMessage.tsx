@@ -1,19 +1,8 @@
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import {
-  Grid,
-  Button,
-  Box,
-  Typography,
-  SvgIcon,
-  CardContent,
-  CardActions,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Link,
-} from '@mui/material'
-import { useTheme } from '@mui/material/styles'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
+import { Link } from '@/components/ui/link'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { useContext, useEffect } from 'react'
 import type { ReactElement } from 'react'
 import type { RequestId } from '@safe-global/safe-apps-sdk'
@@ -35,7 +24,7 @@ import SuccessMessage from '@/components/tx/SuccessMessage'
 import useHighlightHiddenTab from '@/hooks/useHighlightHiddenTab'
 import InfoBox from '@/components/safe-messages/InfoBox'
 import { DecodedMsg } from '@/components/safe-messages/DecodedMsg'
-import TxCard from '@/components/tx-flow/common/TxCard'
+import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import { dispatchPreparedSignature } from '@/services/safe-messages/safeMsgNotifications'
 import { trackEvent } from '@/services/analytics'
 import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
@@ -45,6 +34,8 @@ import { isBlindSigningPayload, isEIP712TypedData } from '@safe-global/utils/uti
 import ApprovalEditor from '@/components/tx/ApprovalEditor'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import { isWalletRejection } from '@/utils/wallets'
+import { getCgwErrorInfo } from '@/utils/cgw-errors'
+import { getLedgerDeviceError, getLedgerUserMessage } from '@/services/onboard/ledger-errors'
 import { useAppSelector } from '@/store'
 import { selectBlindSigning } from '@/store/settingsSlice'
 import NextLink from 'next/link'
@@ -80,73 +71,73 @@ const createSkeletonMessage = (confirmationsRequired: number): MessageItem => {
 
 const MessageHashField = ({ label, hashValue }: { label: string; hashValue: string }) => (
   <>
-    <Typography
-      variant="body2"
-      sx={{
-        fontWeight: 700,
-        mt: 2,
-      }}
-    >
+    <Typography variant="paragraph-small" className="mt-4 block font-bold">
       {label}:
     </Typography>
-    <Typography data-testid="message-hash" variant="body2" component="div">
+    <div data-testid="message-hash" className="text-sm">
       <EthHashInfo address={hashValue} showAvatar={false} shortAddress={false} showCopyButton />
-    </Typography>
+    </div>
   </>
 )
 
 const DialogHeader = ({ threshold }: { threshold: number }) => (
   <>
-    <Box
-      sx={{
-        textAlign: 'center',
-        mb: 2,
-      }}
-    >
-      <SvgIcon component={RequiredIcon} viewBox="0 0 32 32" fontSize="large" />
-    </Box>
-    <Typography
-      variant="h4"
-      gutterBottom
-      sx={{
-        textAlign: 'center',
-      }}
-    >
+    <div className="mb-4 text-center">
+      <RequiredIcon className="inline-block size-9" />
+    </div>
+    <Typography variant="h4" align="center" className="mb-2">
       Confirm message
     </Typography>
     {threshold > 1 && (
-      <Typography
-        variant="body1"
-        sx={{
-          textAlign: 'center',
-          mb: 2,
-        }}
-      >
+      <Typography align="center" className="mb-4">
         To sign this message, collect signatures from <b>{threshold} signers</b> of your Safe account.
       </Typography>
     )}
   </>
 )
 
+// The single place a message-signing failure is rendered: the toast for the
+// same failure was dropped so it is shown once, next to the CTA (WA-3502).
 const MessageDialogError = ({ isOwner, submitError }: { isOwner: boolean; submitError: Error | undefined }) => {
   const wallet = useWallet()
   const onboard = useOnboard()
 
-  const errorMessage =
-    !wallet || !onboard
-      ? 'No wallet is connected.'
-      : !isOwner
-        ? "You are currently not a signer of this Safe account and won't be able to confirm this message."
-        : submitError && isWalletRejection(submitError)
-          ? 'User rejected signing.'
-          : submitError
-            ? 'Error confirming the message. Please try again.'
-            : null
-
-  if (errorMessage) {
-    return <ErrorMessage>{errorMessage}</ErrorMessage>
+  if (!wallet || !onboard) {
+    return <ErrorMessage>No wallet is connected.</ErrorMessage>
   }
-  return null
+
+  if (!isOwner) {
+    return (
+      <ErrorMessage>
+        You are currently not a signer of this Safe account and won&apos;t be able to confirm this message.
+      </ErrorMessage>
+    )
+  }
+
+  if (!submitError) {
+    return null
+  }
+
+  if (isWalletRejection(submitError)) {
+    return <ErrorMessage>User rejected signing.</ErrorMessage>
+  }
+
+  // A Ledger device failure states its own reason; its raw error is a dump of
+  // DMK class names, ethers codes and the viem version (WA-3243).
+  const ledgerError = getLedgerDeviceError(submitError)
+  if (ledgerError) {
+    return <ErrorMessage error={submitError}>{getLedgerUserMessage(ledgerError)}</ErrorMessage>
+  }
+
+  // A known CGW response state replaces the copy and gets a code-only support
+  // reference — never the response body, which can be an HTML page (WA-3252).
+  const cgwError = getCgwErrorInfo(submitError)
+
+  return (
+    <ErrorMessage error={submitError}>
+      {cgwError ? cgwError.message : 'Error confirming the message. Try again.'}
+    </ErrorMessage>
+  )
 }
 
 const AlreadySignedByOwnerMessage = ({ hasSigned }: { hasSigned: boolean }) => {
@@ -162,22 +153,14 @@ const AlreadySignedByOwnerMessage = ({ hasSigned }: { hasSigned: boolean }) => {
   }
   return (
     <SuccessMessage>
-      <Grid
-        container
-        direction="row"
-        sx={{
-          justifyContent: 'space-between',
-        }}
-      >
-        <Grid item xs={7}>
-          Your connected wallet has already signed this message.
-        </Grid>
-        <Grid item xs={4}>
-          <Button variant="contained" size="small" onClick={handleSwitchWallet} fullWidth>
+      <div className="flex flex-row justify-between gap-4">
+        <div className="basis-7/12">Your connected wallet has already signed this message.</div>
+        <div className="basis-4/12">
+          <Button size="sm" onClick={handleSwitchWallet} className="w-full">
             Switch wallet
           </Button>
-        </Grid>
-      </Grid>
+        </div>
+      </div>
     </SuccessMessage>
   )
 }
@@ -199,17 +182,15 @@ const BlindSigningWarning = ({
   return (
     <ErrorMessage level={isBlindSigningEnabled ? 'warning' : 'error'}>
       This request involves{' '}
-      <Link component={NextLink} href={{ pathname: AppRoutes.settings.security, query }}>
-        blind signing
-      </Link>
-      , which can lead to unpredictable outcomes.
+      <Link render={<NextLink href={{ pathname: AppRoutes.settings.security, query }} />}>blind signing</Link>, which
+      can lead to unpredictable outcomes.
       <br />
       {isBlindSigningEnabled ? (
         'Proceed with caution.'
       ) : (
         <>
           If you wish to proceed, you must first{' '}
-          <Link component={NextLink} href={{ pathname: AppRoutes.settings.security, query }}>
+          <Link render={<NextLink href={{ pathname: AppRoutes.settings.security, query }} />}>
             enable blind signing
           </Link>
           .
@@ -222,21 +203,15 @@ const BlindSigningWarning = ({
 const SuccessCard = ({ safeMessage, onContinue }: { safeMessage: MessageItem; onContinue: () => void }) => {
   return (
     <TxCard>
-      <Typography
-        variant="h4"
-        gutterBottom
-        sx={{
-          textAlign: 'center',
-        }}
-      >
+      <Typography variant="h4" align="center" className="mb-2">
         Message successfully signed
       </Typography>
       <MsgSigners msg={safeMessage} showOnlyConfirmations showMissingSignatures />
-      <CardActions>
-        <Button variant="contained" color="primary" onClick={onContinue} disabled={!safeMessage.preparedSignature}>
+      <TxCardActions>
+        <Button onClick={onContinue} disabled={!safeMessage.preparedSignature}>
           Continue
         </Button>
-      </CardActions>
+      </TxCardActions>
     </TxCard>
   )
 }
@@ -254,7 +229,6 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
   const { setSafeMessage: setContextSafeMessage, setSafeMessageHash: setContextSafeMessageHash } =
     useContext(SafeTxContext)
   const { needsRiskConfirmation, isRiskConfirmed } = useSafeShield()
-  const { palette } = useTheme()
   const { safe } = useSafeInfo()
   const isOwner = useIsSafeOwner()
   const wallet = useWallet()
@@ -326,7 +300,7 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
   return (
     <>
       <TxCard>
-        <CardContent>
+        <div className="p-4">
           <DialogHeader threshold={safe.threshold} />
 
           {isEip712 && (
@@ -340,33 +314,27 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
             isBlindSigningPayload={isBlindSigningRequest}
           />
 
-          <Typography
-            sx={{
-              fontWeight: 700,
-              mt: 2,
-              mb: 1,
-            }}
-          >
+          <Typography className="mt-4 mb-2 font-bold">
             Message: <CopyButton text={decodedMessageAsString} />
           </Typography>
           <DecodedMsg message={decodedMessage} isInModal />
 
-          <Accordion sx={{ mt: 2 }}>
-            <AccordionSummary data-testid="message-details" expandIcon={<ExpandMoreIcon />}>
-              SafeMessage details
-            </AccordionSummary>
-            <AccordionDetails>
-              <MessageHashField label="SafeMessage" hashValue={safeMessageMessage} />
-              <MessageHashField label="SafeMessage hash" hashValue={safeMessageHash} />
-              <MessageHashField label="Domain hash" hashValue={domainHash} />
-              <MessageHashField label="Message hash" hashValue={messageHash} />
-            </AccordionDetails>
+          <Accordion className="mt-4">
+            <AccordionItem value="message-details">
+              <AccordionTrigger data-testid="message-details">SafeMessage details</AccordionTrigger>
+              <AccordionContent>
+                <MessageHashField label="SafeMessage" hashValue={safeMessageMessage} />
+                <MessageHashField label="SafeMessage hash" hashValue={safeMessageHash} />
+                <MessageHashField label="Domain hash" hashValue={domainHash} />
+                <MessageHashField label="Message hash" hashValue={messageHash} />
+              </AccordionContent>
+            </AccordionItem>
           </Accordion>
 
-          <Box sx={{ '&:not(:empty)': { mt: 2 } }}>
+          <div className="[&:not(:empty)]:mt-4">
             <RiskConfirmation />
-          </Box>
-        </CardContent>
+          </div>
+        </div>
       </TxCard>
       {isFullySigned ? (
         <SuccessCard onContinue={onContinue} safeMessage={safeMessage} />
@@ -379,7 +347,7 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
               title="Collect all the confirmations"
               message={
                 requestId && !hasSignature
-                  ? 'Please keep this modal open until all signers confirm this message. Closing the modal will abort the signing request.'
+                  ? 'Keep this modal open until all signers confirm this message. Closing the modal will abort the signing request.'
                   : 'The signature will be submitted to the requesting app when the message is fully signed.'
               }
             >
@@ -387,7 +355,7 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
                 msg={safeMessage ?? createSkeletonMessage(safe.threshold)}
                 showOnlyConfirmations
                 showMissingSignatures
-                backgroundColor={palette.info.background}
+                backgroundColor="var(--color-info-background)"
               />
             </InfoBox>
 
@@ -396,11 +364,7 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
                 title="Share the link with other owners"
                 message={
                   <>
-                    <Typography
-                      sx={{
-                        mb: 2,
-                      }}
-                    >
+                    <Typography className="mb-4">
                       The owners will receive a notification about signing the message. You can also share the link with
                       them to speed up the process.
                     </Typography>
@@ -420,15 +384,15 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
             {!safe.deployed && <ErrorMessage>Your Safe account is not activated yet.</ErrorMessage>}
           </TxCard>
           <TxCard>
-            <CardActions>
+            <TxCardActions>
               <CheckWallet checkNetwork={!isDisabled}>
                 {(isOk) => (
-                  <Button variant="contained" color="primary" onClick={handleSign} disabled={!isOk || isDisabled}>
+                  <Button onClick={handleSign} disabled={!isOk || isDisabled}>
                     Sign
                   </Button>
                 )}
               </CheckWallet>
-            </CardActions>
+            </TxCardActions>
           </TxCard>
         </>
       )}

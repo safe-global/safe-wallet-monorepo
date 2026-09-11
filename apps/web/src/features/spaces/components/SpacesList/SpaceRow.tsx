@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { EllipsisVertical } from 'lucide-react'
-import IconButton from '@mui/material/IconButton'
+import { Button } from '@/components/ui/button'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import { Separator } from '@/components/ui/separator'
@@ -70,15 +70,15 @@ const SpaceRow = ({
             {isAdmin ? (
               <SpaceContextMenu space={space} />
             ) : (
-              <IconButton
+              <Button
+                variant="ghost"
+                size="icon-sm"
                 data-testid="space-row-locked-actions"
-                size="small"
                 disabled
                 aria-label={MEMBER_NO_EDIT_MESSAGE}
-                sx={{ '&.Mui-disabled': { color: 'var(--muted-foreground)', opacity: 0.5 } }}
               >
-                <EllipsisVertical size={20} />
-              </IconButton>
+                <EllipsisVertical className="text-muted-foreground" />
+              </Button>
             )}
           </AdminOnlyWorkspaceTooltip>
         </div>

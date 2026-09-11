@@ -87,8 +87,8 @@ const addSpaceAccountManuallyBtn = '[data-testid="add-space-account-manually-but
 const addSpaceAccountManuallyModalBtn = '[data-testid="add-manually-button"]'
 const addAccountsBtn = '[data-testid="add-accounts-button"]'
 const addAddressInput = '[data-testid="add-address-input"]'
-const netwrokSelector = '[data-testid="network-selector"]'
-const netwrokItem = '[data-testid="network-item"]'
+const networkSelector = '[data-testid="network-selector"]'
+const networkItem = '[data-testid="network-item"]'
 
 // -- Add member --
 const addMemberBtn = '[data-testid="add-member-button"]'
@@ -96,6 +96,11 @@ const addMemberModalBtn = '[data-testid="add-member-modal-button"]'
 const memberAddressInput = '[data-testid="member-invitee-identifier-input"]'
 const memberNameInput = '[data-testid="member-name-input"]'
 const pendingMembersTab = '[data-testid="pending-members-tab"]'
+
+// -- Address book page --
+const addressBookTabRole = '[role="tab"]'
+export const addressBookTabLocal = 'Local contacts'
+export const addressBookTabPending = 'Pending'
 
 // -- Invites --
 const inviteBanner = '[data-testid="space-invite-banner"]'
@@ -200,12 +205,10 @@ export function clickOnSignInBtn() {
 export function signInWithWallet(signer) {
   cy.contains(connectWalletBtn, workspaceWalletBtnText, { timeout: 30000 }).should('be.visible').click()
   cy.get(onboardV2, { timeout: 30000 }).shadow().find('button').contains('Private key').click()
-  cy.get(pkInput, { timeout: 30000 })
-    .find('input')
-    .then(($input) => {
-      $input.val(signer)
-      cy.wrap($input).trigger('input').trigger('change')
-    })
+  cy.get(pkInput, { timeout: 30000 }).then(($input) => {
+    $input.val(signer)
+    cy.wrap($input).trigger('input').trigger('change')
+  })
   cy.get(pkConnectBtn).click()
   // The page renders more than one sign-in card (the workspace card plus the generic "Sign in to
   // see content" gate), each with a continue-with-wallet-btn — click the visible one.
@@ -299,12 +302,21 @@ export function disconnectFromSpaceLevel() {
   navigation.clickOnDisconnectBtn()
 }
 
+export function clickOnSpaceDashboardSendBtn() {
+  cy.contains('button', 'Send', { timeout: 30000 }).should('be.visible').click()
+}
+
+export function verifySendFromModalOpen() {
+  cy.contains('[role="dialog"]', 'Send from', { timeout: 30000 }).should('be.visible')
+}
+
 // Navigate to a space section through the sidebar (client-side) rather than a full cy.visit reload.
 // Dismiss any open popover first (e.g. the space selector left open by clickOnSpaceSelector) so it
 // can't cover the nav item.
 function openSpaceSection(sidebarSelector, pathFragment) {
   cy.get('body').type('{esc}')
-  cy.get(sidebarSelector, { timeout: 30000 }).should('be.visible').click()
+  cy.get(sidebarSelector, { timeout: 30000 }).should('be.visible')
+  cy.get(sidebarSelector).click()
   cy.url({ timeout: 30000 }).should('include', pathFragment).and('include', 'spaceId=')
 }
 
@@ -576,12 +588,13 @@ export function ensureReadyToCreateSpace() {
 // ===========================================
 
 export function selectNetwork(network) {
-  cy.get(netwrokSelector).click()
-  cy.get(netwrokItem).contains(network).click()
+  cy.get(networkSelector).click()
+  main.selectDropdownOption(networkItem, network)
 }
 
 export function openAddAccountsToWorkspace() {
-  cy.get(openAddAccountsChooserBtn, { timeout: 30000 }).should('be.visible').and('be.enabled').click({ force: true })
+  cy.get(openAddAccountsChooserBtn, { timeout: 30000 }).should('be.visible').and('be.enabled')
+  cy.get(openAddAccountsChooserBtn).click({ force: true })
   cy.contains('[role="dialog"]', 'Add Safe accounts', { timeout: 30000 })
     .should('be.visible')
     .within(() => {
@@ -604,16 +617,31 @@ export function addAccountManually(address, network) {
 }
 
 // ===========================================
+// Members & Address book tab actions
+// ===========================================
+
+export function clickMembersPendingTab() {
+  cy.get(pendingMembersTab).should('be.visible').click()
+  cy.get(`${pendingMembersTab}[aria-selected="true"]`).should('exist')
+}
+
+export function clickAddressBookTab(label) {
+  cy.contains(addressBookTabRole, label).should('be.visible').click()
+  cy.contains(addressBookTabRole, label).should('have.attr', 'aria-selected', 'true')
+}
+
+// ===========================================
 // Add member & invite flow
 // ===========================================
 
 export function addMember(name, address) {
   cy.get(addMemberBtn, { timeout: 30000 }).should('be.enabled').click()
+  cy.get(memberNameInput).clear().type(name)
   cy.get(memberAddressInput).clear().type(address)
-  cy.get(memberNameInput).find('input').clear().type(name)
+  cy.get(memberAddressInput).should('have.value', address)
   cy.get(addMemberModalBtn).should('be.enabled').click()
 
-  cy.get(pendingMembersTab).should('be.visible').click()
+  clickMembersPendingTab()
   cy.contains(name).should('be.visible')
 }
 
@@ -632,7 +660,7 @@ export function acceptInvite(spaceName, name) {
   // Scope to this run's invite: the member may hold several pending invites, so click Accept inside
   // the banner for the space under test rather than the first accept-invite-button on the page.
   cy.contains(inviteBanner, spaceName).find(acceptInviteBtn).click()
-  cy.get(inviteNameInput).find('input').clear().type(name)
+  cy.get(inviteNameInput).clear().type(name)
   cy.get(confirmAcceptInviteBtn).click()
   // Accepting navigates into the joined workspace; the caller verifies the success message.
 }

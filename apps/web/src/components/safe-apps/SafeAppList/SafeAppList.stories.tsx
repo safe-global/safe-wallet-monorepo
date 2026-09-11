@@ -19,7 +19,7 @@ const defaultSetup = createMockStory({
 })
 
 const meta = {
-  title: 'SafeApps/SafeAppList',
+  title: 'Components/SafeApps/SafeAppList',
   component: SafeAppList,
   loaders: [mswLoader],
   parameters: {

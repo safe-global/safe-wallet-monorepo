@@ -1,17 +1,17 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Box } from '@mui/material'
 import PositionsSkeleton from './index'
 
 const meta = {
+  title: 'Features/Positions/PositionsSkeleton',
   component: PositionsSkeleton,
   parameters: {
     layout: 'padded',
   },
   decorators: [
     (Story) => (
-      <Box sx={{ maxWidth: 800 }}>
+      <div className="max-w-[800px]">
         <Story />
-      </Box>
+      </div>
     ),
   ],
   tags: ['autodocs'],

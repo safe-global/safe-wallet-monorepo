@@ -273,6 +273,42 @@ export const SPACE_EVENTS = {
     action: 'Use the old UI',
     category: SPACE_CATEGORY,
   },
+  WORKSPACE_UPDATED: {
+    action: 'Workspace updated',
+    category: SPACE_CATEGORY,
+  },
+  SECURITY_HUB_VIEWED: {
+    action: 'Security hub viewed',
+    category: SPACE_CATEGORY,
+  },
+  SECURITY_REPORT_OPENED: {
+    action: 'Security report opened',
+    category: SPACE_CATEGORY,
+  },
+  ACTIVITY_LOG_VIEWED: {
+    action: 'Activity log viewed',
+    category: SPACE_CATEGORY,
+  },
+  ACTIVITY_LOG_FILTERED: {
+    action: 'Activity log filtered',
+    category: SPACE_CATEGORY,
+  },
+  ADDRESS_REQUEST_SENT: {
+    action: 'Address request sent',
+    category: SPACE_CATEGORY,
+  },
+  ADDRESS_REQUEST_APPROVED: {
+    action: 'Address request approved',
+    category: SPACE_CATEGORY,
+  },
+  ADDRESS_REQUEST_REJECTED: {
+    action: 'Address request rejected',
+    category: SPACE_CATEGORY,
+  },
+  LOCAL_CONTACT_ADDED: {
+    action: 'Local contact added',
+    category: SPACE_CATEGORY,
+  },
 }
 
 export enum SPACE_LABELS {

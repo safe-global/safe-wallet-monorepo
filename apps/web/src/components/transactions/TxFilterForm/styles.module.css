@@ -1,3 +1,27 @@
 .filterWrapper {
-  border-width: 1px;
+  overflow: visible;
+}
+
+.filterSectionTitle {
+  margin-bottom: var(--space-2);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
+.radioOption {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.paramField {
+  display: flex;
+  min-height: 98px;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.paramField :global(.MuiFormControl-root) {
+  width: 100%;
 }

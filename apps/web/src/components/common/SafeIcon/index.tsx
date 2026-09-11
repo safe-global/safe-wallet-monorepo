@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { Box, Skeleton } from '@mui/material'
+import { Skeleton } from '@/components/ui/skeleton'
 
 import css from './styles.module.css'
 import Identicon, { type IdenticonProps } from '../Identicon'
@@ -10,9 +10,9 @@ interface ThresholdProps {
   owners: number | string
 }
 const Threshold = ({ threshold, owners }: ThresholdProps): ReactElement => (
-  <Box className={css.threshold} sx={{ color: ({ palette }) => palette.static.main }}>
+  <div className={`${css.threshold} text-[var(--color-static-main)]`}>
     {threshold}/{owners}
-  </Box>
+  </div>
 )
 
 interface SafeIconProps extends IdenticonProps {
@@ -27,7 +27,7 @@ export const ChainIcon = ({ chainId }: { chainId: string }) => {
   const chainConfig = useChain(chainId)
 
   if (!chainConfig) {
-    return <Skeleton variant="circular" width={40} height={40} />
+    return <Skeleton className="size-10 rounded-full" />
   }
 
   return (

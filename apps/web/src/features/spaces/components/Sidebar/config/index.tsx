@@ -17,6 +17,7 @@ import {
   EllipsisVertical,
   Shield,
   History,
+  Landmark,
   ListChecks,
 } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
@@ -43,6 +44,12 @@ export const spacesMainNavigation: SidebarItemConfig[] = [
     icon: BookUser,
     label: 'Address book',
     href: AppRoutes.spaces.addressBook,
+  },
+  {
+    icon: Landmark,
+    label: 'Policies',
+    href: AppRoutes.spaces.policies,
+    activeMemberOnly: true,
   },
   {
     icon: History,
@@ -122,12 +129,12 @@ export const safeDefiGroup: SidebarGroupConfig = {
       href: AppRoutes.bridge,
     },
     {
-      icon: Database,
+      icon: TrendingUp,
       label: 'Earn',
       href: AppRoutes.earn,
     },
     {
-      icon: TrendingUp,
+      icon: Database,
       label: 'Stake',
       href: AppRoutes.stake,
     },

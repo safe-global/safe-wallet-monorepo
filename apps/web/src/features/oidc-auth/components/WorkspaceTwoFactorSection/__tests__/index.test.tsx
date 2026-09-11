@@ -51,6 +51,22 @@ describe('WorkspaceTwoFactorSection', () => {
     expect(screen.getByTestId('workspace-2fa-count')).toHaveTextContent('2/3 users have 2FA enabled')
   })
 
+  it('explains why wallet signers are not counted, with singular and plural copy', () => {
+    const { rerender } = render(<WorkspaceTwoFactorSection members={[oidcMember(1), walletMember(2)]} />)
+
+    expect(screen.getByTestId('workspace-2fa-coverage-info')).toHaveAccessibleName("Why 1 signer can't enable 2FA")
+
+    rerender(<WorkspaceTwoFactorSection members={[oidcMember(1), walletMember(2), walletMember(3)]} />)
+
+    expect(screen.getByTestId('workspace-2fa-coverage-info')).toHaveAccessibleName("Why 2 signers can't enable 2FA")
+  })
+
+  it('hides the coverage info icon when every member can enable 2FA', () => {
+    render(<WorkspaceTwoFactorSection members={[oidcMember(1), oidcMember(2)]} />)
+
+    expect(screen.queryByTestId('workspace-2fa-coverage-info')).not.toBeInTheDocument()
+  })
+
   it('handles a workspace with no members', () => {
     render(<WorkspaceTwoFactorSection members={[]} />)
 

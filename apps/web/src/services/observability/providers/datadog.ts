@@ -69,22 +69,92 @@ const isKnownNoise = (message: string | undefined): boolean => {
   return KNOWN_NOISE_PATTERNS.some((pattern) => message.includes(pattern))
 }
 
+// Our own webpack output — anything reported from here is first-party and must
+// stay visible even if its `error.type` happens to be `EvalError` (see below).
+const FIRST_PARTY_BUNDLE_PATH = '_next/static/'
+
+/**
+ * `error.type === 'EvalError'` is not proof of a CSP-blocked eval() on its
+ * own: a thrown string `"EvalError: …"`, an explicit `new EvalError()`, or any
+ * custom class that sets `name = 'EvalError'` all produce the same `type` in
+ * `@datadog/browser-core`'s `computeRawError` (`stackTrace.name`). So this is
+ * additionally gated on the stack *not* pointing at our own bundle
+ * (`_next/static/`) — mirrors `originatesFromExtension`'s pattern-matching,
+ * inverted. We ship no eval()/Function() call of our own today (grepped
+ * `apps/web/src` and `packages/`), so a same-bundle `EvalError` would mean
+ * something new started calling eval() and is worth surfacing, not silencing.
+ * A missing stack defaults to "not first-party": we have no eval() call site
+ * of our own to attribute it to, so there is nothing here that a stack could
+ * be pointing at.
+ */
+const isNotFirstPartyStack = (stack: string | undefined): boolean => {
+  if (!stack) return true
+  return !stack.includes(FIRST_PARTY_BUNDLE_PATH)
+}
+
+/**
+ * Real-world `EvalError`s reaching RUM are third-party vendor scripts (Beamer,
+ * GTM, Calendly, Cloudflare Turnstile, HubSpot forms, etc.) whose eval() /
+ * `new Function()` call our `script-src` CSP correctly blocks in production —
+ * the block is the intended behaviour and nothing is broken for the user, so
+ * it is dropped rather than counted as a real error (WA-2952).
+ *
+ * Trade-off this accepts: `'unsafe-eval'` **is** permitted in dev/Cypress
+ * (`config/securityHeaders.ts`), so a first-party eval()/Function() call would
+ * pass locally and only throw — as this same `EvalError` type — in
+ * production, where this filter would otherwise hide it. Accepted because (a)
+ * no current bundle path constructs code dynamically, and (b)
+ * `isNotFirstPartyStack` still surfaces it if the stack ever does point at our
+ * own `_next/static/` output.
+ */
+const isCspBlockedEval = (errorEvent: RumErrorEvent): boolean =>
+  errorEvent.error.type === 'EvalError' && isNotFirstPartyStack(errorEvent.error.stack)
+
 const NON_USER_IMPACTING_SOURCES = new Set(['console', 'report'])
+
+const ADDRESS = String.raw`0x[a-fA-F0-9]{40}`
+const MESSAGE_HASH = String.raw`0x[a-fA-F0-9]{64}`
+
+// Terminates every pattern below so a prefix match cannot also swallow a deeper
+// route nested under the same path, which reports its own failures.
+const PATH_END = String.raw`(?:[?#]|$)`
 
 /**
  * Resource requests whose non-2xx responses are an expected part of normal
- * operation, not failures. Dropped before dispatch to keep RUM ingestion and
- * the Resource explorer free of predictable noise. Matched on the raw request
- * URL (the `@resource.url_path_group` facet is computed by Datadog and is not
- * available client-side) plus the status code.
+ * operation, not failures (WA-2991). Matched on the raw request URL — the
+ * `@resource.url_path_group` facet is computed by Datadog and is not available
+ * client-side — plus the status code.
  */
 const EXPECTED_RESOURCE_FAILURES: { urlPattern: RegExp; statuses: Set<number> }[] = [
-  // CGW returns 404 from the "is this user targeted?" check when no outreach
-  // exists for the Safe — polled on nearly every Safe load, so this dominates
-  // RUM resource volume. Scoped to the exact outreaches/chains/safes route so
-  // sibling operations (e.g. /signers/{address}/submissions) keep reporting 404.
+  // "Safe not targeted." — the documented answer for nearly every Safe, on a
+  // route probed on every Safe load.
   {
-    urlPattern: /\/v1\/targeted-messaging\/outreaches\/[^/]+\/chains\/[^/]+\/safes\/[^/?#]+/,
+    urlPattern: new RegExp(
+      String.raw`/v1/targeted-messaging/outreaches/[^/]+/chains/[^/]+/safes/${ADDRESS}${PATH_END}`,
+    ),
+    statuses: new Set([404]),
+  },
+  // CGW has no metadata for most addresses; the UI falls back to the raw address.
+  {
+    urlPattern: new RegExp(String.raw`/v1/chains/[^/]+/contracts/${ADDRESS}${PATH_END}`),
+    statuses: new Set([404]),
+  },
+  // A documented answer on a relay-fee chain when the request quotes no
+  // `safeTxHash`, not a permission failure.
+  {
+    urlPattern: new RegExp(String.raw`/v1/chains/[^/]+/relay/${ADDRESS}${PATH_END}`),
+    statuses: new Set([403]),
+  },
+  // A Safe CGW does not index — an undeployed counterfactual one, or an address
+  // typed into the URL. 429 on these same routes is a real capacity signal and
+  // deliberately keeps reporting.
+  {
+    urlPattern: new RegExp(String.raw`/v1/chains/[^/]+/safes/${ADDRESS}/transactions/(?:queued|history)${PATH_END}`),
+    statuses: new Set([404]),
+  },
+  // An expired or already-executed message the UI still has a link to.
+  {
+    urlPattern: new RegExp(String.raw`/v1/chains/[^/]+/messages/${MESSAGE_HASH}${PATH_END}`),
     statuses: new Set([404]),
   },
 ]
@@ -113,9 +183,16 @@ const isExpectedResourceFailure = (event: RumResourceEvent): boolean => {
  *   not indicative of user-blocking failure; CSP visibility belongs on a
  *   `report-uri`/`report-to` endpoint, not the SLO.
  *
+ * We also drop, regardless of source:
+ * - `EvalError`s whose stack doesn't point at our own bundle (see
+ *   `isCspBlockedEval`): a third-party vendor script's eval()/Function() call
+ *   correctly blocked by our `script-src` CSP (WA-2952). The CSP doing its
+ *   job is not a Safe{Wallet} failure.
+ *
  * Genuine user failures continue to flow through `trackError` /
- * `captureException` (source: `custom`), unhandled exceptions (`source`), and
- * network failures (`network`).
+ * `captureException` (source: `custom`) and unhandled exceptions (`source`).
+ * A failed request is not among them — the RUM SDK raises no error event with
+ * source `network` — so it reaches us only as the `resource` event above.
  */
 export const filterRumEvent = (event: RumEvent, context: RumEventDomainContext): boolean => {
   if (event.type === 'resource') return !isExpectedResourceFailure(event as RumResourceEvent)
@@ -124,6 +201,7 @@ export const filterRumEvent = (event: RumEvent, context: RumEventDomainContext):
   const errorEvent = event as RumErrorEvent
   if (NON_USER_IMPACTING_SOURCES.has(errorEvent.error.source)) return false
   if (isKnownNoise(errorEvent.error.message)) return false
+  if (isCspBlockedEval(errorEvent)) return false
   if (originatesFromExtension(errorEvent.error.stack)) return false
 
   // User-driven outcomes surfaced as unhandled errors by third-party SDKs

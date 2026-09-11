@@ -5,7 +5,6 @@ import useTxQueue from '@/hooks/useTxQueue'
 import PaginatedTxns from '@/components/common/PaginatedTxns'
 import TxHeader from '@/components/transactions/TxHeader'
 import BatchExecuteButton from '@/components/transactions/BatchExecuteButton'
-import { Box } from '@mui/material'
 import { BatchExecuteHoverProvider } from '@/components/transactions/BatchExecuteButton/BatchExecuteHoverProvider'
 import { usePendingTxsQueue, useShowUnsignedQueue } from '@/hooks/usePendingTxs'
 import { RecoveryFeature } from '@/features/recovery'
@@ -44,7 +43,7 @@ const Queue: NextPage = () => {
         </TxHeader>
 
         <main>
-          <Box mb={4}>
+          <div className="mb-8">
             <RecoveryList />
 
             {/* Pending unsigned transactions */}
@@ -57,7 +56,7 @@ const Queue: NextPage = () => {
 
             {/* The main queue of signed transactions */}
             <PaginatedTxns useTxns={useTxQueue} onPagesChange={(pages) => setQueuePages(pages, queueSourceId)} />
-          </Box>
+          </div>
         </main>
       </BatchExecuteHoverProvider>
     </>

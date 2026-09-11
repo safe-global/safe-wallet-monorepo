@@ -1,13 +1,13 @@
 import {
+  buildCommittedLog,
   buildDisputeResolvedLog,
+  buildNewRequestLog,
   buildOracleAttestedLog,
   buildOracleProposedLog,
   buildOracleResultLog,
   buildPlainAttestedLog,
   buildPlainProposedLog,
-  buildV1CommittedLog,
-  buildV1NewRequestLog,
-  buildV2RevealedLog,
+  buildRevealedLog,
 } from './rawLogs'
 import { decodeLogs, type RawLog } from '../utils/decodeLogs'
 import type {
@@ -57,17 +57,17 @@ export const plainAttestedEvent = (over: Partial<PlainAttestedEvent> = {}): Plai
 })
 
 export const requestCreatedEvent = (over: Partial<RequestCreatedEvent> = {}): RequestCreatedEvent => ({
-  ...decodeOne<RequestCreatedEvent>(buildV1NewRequestLog()),
+  ...decodeOne<RequestCreatedEvent>(buildNewRequestLog()),
   ...over,
 })
 
 export const sentinelCommittedEvent = (over: Partial<SentinelCommittedEvent> = {}): SentinelCommittedEvent => ({
-  ...decodeOne<SentinelCommittedEvent>(buildV1CommittedLog()),
+  ...decodeOne<SentinelCommittedEvent>(buildCommittedLog()),
   ...over,
 })
 
 export const sentinelRevealedEvent = (over: Partial<SentinelRevealedEvent> = {}): SentinelRevealedEvent => ({
-  ...decodeOne<SentinelRevealedEvent>(buildV2RevealedLog()),
+  ...decodeOne<SentinelRevealedEvent>(buildRevealedLog()),
   ...over,
 })
 

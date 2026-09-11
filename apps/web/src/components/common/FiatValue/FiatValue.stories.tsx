@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper } from '@mui/material'
 import FiatValue from './index'
 import { StoreDecorator } from '@/stories/storeDecorator'
 
 const meta = {
+  title: 'Components/Common/FiatValue',
   component: FiatValue,
   parameters: {
     layout: 'centered',
@@ -11,9 +11,9 @@ const meta = {
   decorators: [
     (Story) => (
       <StoreDecorator initialState={{ settings: { currency: 'usd' } }}>
-        <Paper sx={{ padding: 2 }}>
+        <div className="rounded-lg bg-[var(--color-background-paper)] p-4">
           <Story />
-        </Paper>
+        </div>
       </StoreDecorator>
     ),
   ],
@@ -30,21 +30,21 @@ export const Default: Story = {
 }
 
 export const LargeValue: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: {
     value: '1234567.89',
   },
 }
 
 export const SmallValue: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: {
     value: '0.0001234',
   },
 }
 
 export const WithMaxLength: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: {
     value: '123456789.123456',
     maxLength: 10,
@@ -52,7 +52,7 @@ export const WithMaxLength: Story = {
 }
 
 export const Precise: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: {
     value: '1234.567890',
     precise: true,
@@ -66,14 +66,14 @@ export const NullValue: Story = {
 }
 
 export const NumberValue: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: {
     value: 9999.99,
   },
 }
 
 export const ZeroValue: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: {
     value: '0',
   },

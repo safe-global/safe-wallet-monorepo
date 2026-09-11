@@ -1,6 +1,5 @@
 import type { TransactionItemPage, QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { type ReactElement, useEffect, useState, useCallback, useRef } from 'react'
-import { Box } from '@mui/material'
 import TxList from '@/components/transactions/TxList'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import type useTxHistory from '@/hooks/useTxHistory'
@@ -57,9 +56,7 @@ const TxPage = ({
   return (
     <>
       {isFirstPage && filter && page && (
-        <Box display="flex" flexDirection="column" alignItems="flex-end" pt={[2, 0]} pb={3}>
-          {getFilterResultCount(filter, page)}
-        </Box>
+        <div className="flex flex-col items-end pt-4 pb-6 sm:pt-0">{getFilterResultCount(filter, page)}</div>
       )}
 
       {page && page.results.length > 0 && <TxList items={page.results} />}
@@ -69,12 +66,12 @@ const TxPage = ({
       {error && <ErrorMessage>Error loading transactions</ErrorMessage>}
 
       {/* No skeletons for pending as they are shown above the queue which has them */}
-      {loading && !hasPending && <SkeletonTxList />}
+      {loading && !hasPending && (!page || page.results.length === 0) && <SkeletonTxList />}
 
       {page?.next && onNextPage && (
-        <Box my={4} textAlign="center">
+        <div className="my-8 text-center">
           <InfiniteScroll onLoadMore={() => onNextPage(page.next!)} />
-        </Box>
+        </div>
       )}
     </>
   )
@@ -134,7 +131,7 @@ const PaginatedTxns = ({
   }, [pages, loadedPages, onPagesChange])
 
   return (
-    <Box position="relative">
+    <div className="relative">
       {pages.map((pageUrl, index) => (
         <TxPage
           key={pageUrl}
@@ -145,7 +142,7 @@ const PaginatedTxns = ({
           onPageLoaded={handlePageLoaded(pageUrl)}
         />
       ))}
-    </Box>
+    </div>
   )
 }
 

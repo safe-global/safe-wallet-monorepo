@@ -1,5 +1,6 @@
 import { type ReactElement, memo } from 'react'
-import { Grid, Skeleton, Typography } from '@mui/material'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Typography } from '@/components/ui/typography'
 import SafeAppCard from '@/components/safe-apps/SafeAppCard'
 import { SafeAppsTag } from '@/config/constants'
 import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
@@ -13,51 +14,36 @@ const NftApps = memo(function NftApps(): ReactElement | null {
   }
 
   return (
-    <Grid
-      item
-      sm={12}
-      lg={3}
-      sx={{
-        order: { lg: 1 },
-      }}
-    >
-      <Typography
-        component="h2"
-        variant="subtitle1"
-        sx={{
-          fontWeight: 700,
-          mb: 2,
-          mt: 0.75,
-        }}
-      >
+    <div className="lg:order-1 lg:w-1/4 lg:shrink-0">
+      <Typography variant="paragraph-bold" className="mb-4 mt-1.5 font-bold">
         NFT Safe Apps
       </Typography>
-      <Grid container spacing={3}>
+      <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-1">
         {nftApps ? (
           nftApps.map((nftSafeApp) => (
-            <Grid item lg={12} md={4} xs={6} key={nftSafeApp.id}>
+            <div key={nftSafeApp.id}>
               <SafeAppCard safeApp={nftSafeApp} />
-            </Grid>
+            </div>
           ))
         ) : (
-          <Grid item lg={12} md={4} xs={6}>
-            <Skeleton variant="rounded" height="245px" />
-          </Grid>
+          <div>
+            <Skeleton className="h-[245px] w-full rounded-md" />
+          </div>
         )}
-      </Grid>
-    </Grid>
+      </div>
+    </div>
   )
 })
 
 const NftsPage = (): ReactElement => {
   return (
-    <Grid container spacing={3}>
+    <div className="flex flex-col gap-6 lg:flex-row">
       <NftApps />
 
-      <Grid item xs>
+      <div className="min-w-0 flex-1">
         <NftCollections />
-      </Grid>
-    </Grid>
+      </div>
+    </div>
   )
 }
 

@@ -1,7 +1,7 @@
 import type { ReactElement, CSSProperties } from 'react'
 import { useMemo } from 'react'
 import { blo } from 'blo'
-import Skeleton from '@mui/material/Skeleton'
+import { Skeleton } from '@/components/ui/skeleton'
 
 import css from './styles.module.css'
 import { isAddress } from 'ethers'
@@ -29,7 +29,7 @@ const Identicon = ({ address, size = 40 }: IdenticonProps): ReactElement => {
   }, [address, size])
 
   return !style ? (
-    <Skeleton variant="circular" width={size} height={size} />
+    <Skeleton className="rounded-full" style={{ width: size, height: size }} />
   ) : (
     <div className={css.icon} style={style} />
   )

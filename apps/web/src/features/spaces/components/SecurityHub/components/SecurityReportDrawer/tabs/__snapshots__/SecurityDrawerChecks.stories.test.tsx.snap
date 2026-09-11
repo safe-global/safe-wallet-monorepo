@@ -1,24 +1,27 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./SecurityDrawerChecks.stories AllPassing 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
     <div
-      class="flex flex-col gap-3"
+      class="bg-card rounded-lg p-4"
     >
       <div
-        class="bg-muted animate-pulse h-[120px] w-full rounded-xl"
-        data-slot="skeleton"
-      />
-      <div
-        class="bg-muted animate-pulse h-[200px] w-full rounded-xl"
-        data-slot="skeleton"
-      />
+        class="flex flex-col gap-3"
+      >
+        <div
+          class="bg-muted animate-pulse h-[120px] w-full rounded-xl"
+          data-slot="skeleton"
+        />
+        <div
+          class="bg-muted animate-pulse h-[200px] w-full rounded-xl"
+          data-slot="skeleton"
+        />
+      </div>
     </div>
   </div>
 </div>
@@ -29,20 +32,23 @@ exports[`./SecurityDrawerChecks.stories Loading 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
     <div
-      class="flex flex-col gap-3"
+      class="bg-card rounded-lg p-4"
     >
       <div
-        class="bg-muted animate-pulse h-[120px] w-full rounded-xl"
-        data-slot="skeleton"
-      />
-      <div
-        class="bg-muted animate-pulse h-[200px] w-full rounded-xl"
-        data-slot="skeleton"
-      />
+        class="flex flex-col gap-3"
+      >
+        <div
+          class="bg-muted animate-pulse h-[120px] w-full rounded-xl"
+          data-slot="skeleton"
+        />
+        <div
+          class="bg-muted animate-pulse h-[200px] w-full rounded-xl"
+          data-slot="skeleton"
+        />
+      </div>
     </div>
   </div>
 </div>
@@ -53,20 +59,23 @@ exports[`./SecurityDrawerChecks.stories WithIssues 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
     <div
-      class="flex flex-col gap-3"
+      class="bg-card rounded-lg p-4"
     >
       <div
-        class="bg-muted animate-pulse h-[120px] w-full rounded-xl"
-        data-slot="skeleton"
-      />
-      <div
-        class="bg-muted animate-pulse h-[200px] w-full rounded-xl"
-        data-slot="skeleton"
-      />
+        class="flex flex-col gap-3"
+      >
+        <div
+          class="bg-muted animate-pulse h-[120px] w-full rounded-xl"
+          data-slot="skeleton"
+        />
+        <div
+          class="bg-muted animate-pulse h-[200px] w-full rounded-xl"
+          data-slot="skeleton"
+        />
+      </div>
     </div>
   </div>
 </div>

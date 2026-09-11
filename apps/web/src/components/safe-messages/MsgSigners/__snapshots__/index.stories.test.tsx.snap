@@ -1,0 +1,485 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./index.stories CollectingConfirmations 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="w-[30rem] rounded-lg bg-[var(--color-info-background)] p-4"
+    >
+      <ul
+        class="signers"
+      >
+        <li
+          class="listItem"
+        >
+          <div
+            class="listItemIcon"
+          >
+            <mock-icon
+              class="icon"
+            />
+          </div>
+          <div
+            class="listItemText"
+          >
+            <p
+              class="m-0 text-base leading-6 font-semibold"
+              data-slot="typography"
+              data-variant="paragraph-bold"
+            >
+              Confirmations
+               
+              <span
+                class="confirmationsTotal"
+              >
+                (
+                1 of 3
+                )
+              </span>
+            </p>
+          </div>
+        </li>
+        <li
+          class="listItem"
+        >
+          <div
+            class="listItemIcon"
+          >
+            <mock-icon
+              class="dot"
+            />
+          </div>
+          <div
+            class="listItemText"
+          >
+            <div
+              class="container"
+            >
+              <div
+                class="avatarContainer"
+                style="width: 40px; height: 40px;"
+              >
+                <div
+                  class="icon"
+                  style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woNjYgNjklIDQ5JSkiIGQ9Ik0wLDBIOFY4SDB6Ii8+PHBhdGggZmlsbD0iaHNsKDE1NyA0OCUgNTQlKSIgZD0iTTIsMGgxdjFoLTF6TTUsMGgxdjFoLTF6TTAsMWgxdjFoLTF6TTcsMWgxdjFoLTF6TTEsMWgxdjFoLTF6TTYsMWgxdjFoLTF6TTAsM2gxdjFoLTF6TTcsM2gxdjFoLTF6TTMsM2gxdjFoLTF6TTQsM2gxdjFoLTF6TTMsNGgxdjFoLTF6TTQsNGgxdjFoLTF6TTAsNWgxdjFoLTF6TTcsNWgxdjFoLTF6TTEsNWgxdjFoLTF6TTYsNWgxdjFoLTF6TTMsNWgxdjFoLTF6TTQsNWgxdjFoLTF6TTMsNmgxdjFoLTF6TTQsNmgxdjFoLTF6TTAsN2gxdjFoLTF6TTcsN2gxdjFoLTF6TTIsN2gxdjFoLTF6TTUsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDIwIDcwJSA4MCUpIiBkPSJNMywwaDF2MWgtMXpNNCwwaDF2MWgtMXpNMCwyaDF2MWgtMXpNNywyaDF2MWgtMXpNMSwyaDF2MWgtMXpNNiwyaDF2MWgtMXpNMywyaDF2MWgtMXpNNCwyaDF2MWgtMXpNMiw0aDF2MWgtMXpNNSw0aDF2MWgtMXpNMiw1aDF2MWgtMXpNNSw1aDF2MWgtMXoiLz48L3N2Zz4=); width: 40px; height: 40px;"
+                />
+              </div>
+              <div
+                class="gap-1 overflow-hidden"
+              >
+                <div
+                  class="addressContainer"
+                >
+                  <div
+                    class="overflow-hidden text-ellipsis font-[weight:inherit] text-[length:inherit]"
+                  >
+                    <span
+                      aria-label="Copy to clipboard"
+                      class="inline-flex cursor-pointer"
+                      data-slot="tooltip-trigger"
+                      id="base-ui-_r_1_"
+                    >
+                      <b>
+                        rin
+                        :
+                      </b>
+                      <span>
+                        0x1111...1111
+                      </span>
+                    </span>
+                  </div>
+                  <span
+                    aria-label="Copy to clipboard"
+                    class="inline-flex cursor-pointer"
+                    data-slot="tooltip-trigger"
+                    id="base-ui-_r_3_"
+                  >
+                    <button
+                      aria-label="Copy to clipboard"
+                      class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3"
+                      data-slot="button"
+                      tabindex="0"
+                      type="button"
+                    >
+                      <mock-icon
+                        class="size-4 text-[var(--color-border-main)]"
+                        data-testid="copy-btn-icon"
+                      />
+                    </button>
+                  </span>
+                  <div
+                    class="text-[var(--color-border-main)]"
+                  >
+                    <a
+                      aria-label="View on rinkeby.etherscan.io"
+                      class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
+                      data-slot="tooltip-trigger"
+                      data-testid="explorer-btn"
+                      href="https://rinkeby.etherscan.io/address/0x1111111111111111111111111111111111111111"
+                      id="base-ui-_r_5_"
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      <mock-icon
+                        class="size-4"
+                      />
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li
+          class="listItem"
+        >
+          <div
+            class="listItemIcon"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-circle dot text-[var(--color-border-main)]"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+            </svg>
+          </div>
+          <div
+            class="listItemText"
+          >
+            <div
+              class="flex flex-row items-center gap-2"
+            >
+              <div
+                class="bg-muted animate-pulse size-9 rounded-full"
+                data-slot="skeleton"
+              />
+              <span
+                class="m-0 text-sm leading-5 font-normal text-[var(--color-text-secondary)]"
+                data-slot="typography"
+                data-variant="paragraph-small"
+              >
+                Confirmation #
+                2
+              </span>
+            </div>
+          </div>
+        </li>
+        <li
+          class="listItem"
+        >
+          <div
+            class="listItemIcon"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-circle dot text-[var(--color-border-main)]"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+            </svg>
+          </div>
+          <div
+            class="listItemText"
+          >
+            <div
+              class="flex flex-row items-center gap-2"
+            >
+              <div
+                class="bg-muted animate-pulse size-9 rounded-full"
+                data-slot="skeleton"
+              />
+              <span
+                class="m-0 text-sm leading-5 font-normal text-[var(--color-text-secondary)]"
+                data-slot="typography"
+                data-variant="paragraph-small"
+              >
+                Confirmation #
+                3
+              </span>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./index.stories FullySigned 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="w-[30rem] rounded-lg bg-[var(--color-info-background)] p-4"
+    >
+      <ul
+        class="signers"
+      >
+        <li
+          class="listItem"
+        >
+          <div
+            class="listItemIcon"
+          >
+            <mock-icon
+              class="icon"
+            />
+          </div>
+          <div
+            class="listItemText"
+          >
+            <p
+              class="m-0 text-base leading-6 font-semibold"
+              data-slot="typography"
+              data-variant="paragraph-bold"
+            >
+              Confirmations
+               
+              <span
+                class="confirmationsTotal"
+              >
+                (
+                2 of 2
+                )
+              </span>
+            </p>
+          </div>
+        </li>
+        <li
+          class="listItem"
+        >
+          <div
+            class="listItemIcon"
+          >
+            <mock-icon
+              class="dot"
+            />
+          </div>
+          <div
+            class="listItemText"
+          >
+            Confirmed
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./index.stories WithCreatedRow 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="w-[30rem] rounded-lg bg-[var(--color-info-background)] p-4"
+    >
+      <ul
+        class="signers"
+      >
+        <li
+          class="listItem"
+        >
+          <div
+            class="listItemIcon"
+          >
+            <mock-icon
+              class="icon"
+            />
+          </div>
+          <div
+            class="listItemText"
+          >
+            <p
+              class="m-0 text-base leading-6 font-semibold"
+              data-slot="typography"
+              data-variant="paragraph-bold"
+            >
+              Created
+            </p>
+          </div>
+        </li>
+        <li
+          class="listItem"
+        >
+          <div
+            class="listItemIcon"
+          >
+            <mock-icon
+              class="icon"
+            />
+          </div>
+          <div
+            class="listItemText"
+          >
+            <p
+              class="m-0 text-base leading-6 font-semibold"
+              data-slot="typography"
+              data-variant="paragraph-bold"
+            >
+              Confirmations
+               
+              <span
+                class="confirmationsTotal"
+              >
+                (
+                1 of 3
+                )
+              </span>
+            </p>
+          </div>
+        </li>
+        <li
+          class="listItem"
+        >
+          <div
+            class="listItemIcon"
+          >
+            <mock-icon
+              class="dot"
+            />
+          </div>
+          <div
+            class="listItemText"
+          >
+            <div
+              class="container"
+            >
+              <div
+                class="avatarContainer"
+                style="width: 40px; height: 40px;"
+              >
+                <div
+                  class="icon"
+                  style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woNjYgNjklIDQ5JSkiIGQ9Ik0wLDBIOFY4SDB6Ii8+PHBhdGggZmlsbD0iaHNsKDE1NyA0OCUgNTQlKSIgZD0iTTIsMGgxdjFoLTF6TTUsMGgxdjFoLTF6TTAsMWgxdjFoLTF6TTcsMWgxdjFoLTF6TTEsMWgxdjFoLTF6TTYsMWgxdjFoLTF6TTAsM2gxdjFoLTF6TTcsM2gxdjFoLTF6TTMsM2gxdjFoLTF6TTQsM2gxdjFoLTF6TTMsNGgxdjFoLTF6TTQsNGgxdjFoLTF6TTAsNWgxdjFoLTF6TTcsNWgxdjFoLTF6TTEsNWgxdjFoLTF6TTYsNWgxdjFoLTF6TTMsNWgxdjFoLTF6TTQsNWgxdjFoLTF6TTMsNmgxdjFoLTF6TTQsNmgxdjFoLTF6TTAsN2gxdjFoLTF6TTcsN2gxdjFoLTF6TTIsN2gxdjFoLTF6TTUsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDIwIDcwJSA4MCUpIiBkPSJNMywwaDF2MWgtMXpNNCwwaDF2MWgtMXpNMCwyaDF2MWgtMXpNNywyaDF2MWgtMXpNMSwyaDF2MWgtMXpNNiwyaDF2MWgtMXpNMywyaDF2MWgtMXpNNCwyaDF2MWgtMXpNMiw0aDF2MWgtMXpNNSw0aDF2MWgtMXpNMiw1aDF2MWgtMXpNNSw1aDF2MWgtMXoiLz48L3N2Zz4=); width: 40px; height: 40px;"
+                />
+              </div>
+              <div
+                class="gap-1 overflow-hidden"
+              >
+                <div
+                  class="addressContainer"
+                >
+                  <div
+                    class="overflow-hidden text-ellipsis font-[weight:inherit] text-[length:inherit]"
+                  >
+                    <span
+                      aria-label="Copy to clipboard"
+                      class="inline-flex cursor-pointer"
+                      data-slot="tooltip-trigger"
+                      id="base-ui-_r_7_"
+                    >
+                      <b>
+                        rin
+                        :
+                      </b>
+                      <span>
+                        0x1111...1111
+                      </span>
+                    </span>
+                  </div>
+                  <span
+                    aria-label="Copy to clipboard"
+                    class="inline-flex cursor-pointer"
+                    data-slot="tooltip-trigger"
+                    id="base-ui-_r_9_"
+                  >
+                    <button
+                      aria-label="Copy to clipboard"
+                      class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3"
+                      data-slot="button"
+                      tabindex="0"
+                      type="button"
+                    >
+                      <mock-icon
+                        class="size-4 text-[var(--color-border-main)]"
+                        data-testid="copy-btn-icon"
+                      />
+                    </button>
+                  </span>
+                  <div
+                    class="text-[var(--color-border-main)]"
+                  >
+                    <a
+                      aria-label="View on rinkeby.etherscan.io"
+                      class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
+                      data-slot="tooltip-trigger"
+                      data-testid="explorer-btn"
+                      href="https://rinkeby.etherscan.io/address/0x1111111111111111111111111111111111111111"
+                      id="base-ui-_r_b_"
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      <mock-icon
+                        class="size-4"
+                      />
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li
+          class="listItem"
+        >
+          <div
+            class="listItemIcon"
+          >
+            <mock-icon
+              class="dot"
+            />
+          </div>
+          <div
+            class="listItemText"
+          >
+            <button
+              class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current text-base"
+              data-slot="link"
+              data-variant="default"
+              type="button"
+            >
+              Hide all
+            </button>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+`;

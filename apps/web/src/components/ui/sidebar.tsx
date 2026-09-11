@@ -318,7 +318,7 @@ function Sidebar({
         data-variant={variant}
         className={cn(
           'bg-sidebar text-sidebar-foreground flex h-full w-(--sidebar-width) flex-col',
-          variant === 'floating' && 'rounded-lg',
+          variant === 'floating' && 'rounded-lg ring-1 ring-sidebar-border',
           className,
         )}
         {...props}
@@ -337,6 +337,7 @@ function Sidebar({
           data-mobile="true"
           // Sit on the overlay layer (not the desktop --z-sidebar layer) so the open mobile
           // sidebar renders above its own backdrop, like every other Sheet.
+          // eslint-disable-next-line no-restricted-syntax -- internal sidebar primitive: bespoke sidebar surface/width/border (grandfathered)
           className="bg-sidebar text-sidebar-foreground z-[var(--z-overlay)] w-(--sidebar-width) !border-r-0 p-0 [&>button]:hidden"
           style={
             {
@@ -401,7 +402,10 @@ function Sidebar({
         <div
           data-sidebar="sidebar"
           data-slot="sidebar-inner"
-          className={cn('bg-sidebar group-data-[variant=floating]:rounded-lg flex size-full flex-col', innerClassName)}
+          className={cn(
+            'bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:ring-1 group-data-[variant=floating]:ring-sidebar-border flex size-full flex-col',
+            innerClassName,
+          )}
         >
           {children}
         </div>
@@ -475,7 +479,9 @@ function SidebarInput({ className, ...props }: ComponentProps<typeof Input>) {
     <Input
       data-slot="sidebar-input"
       data-sidebar="input"
-      className={cn('bg-background h-8 w-full shadow-none', className)}
+      // The Input `default` skin is now the filled field surface the sidebar search wants, so the
+      // former bespoke `bg-background` override is gone.
+      className={cn('w-full', className)}
       {...props}
     />
   )
@@ -616,14 +622,17 @@ function SidebarMenuItem({ className, ...props }: ComponentProps<'li'>) {
   )
 }
 
+// Diverges from upstream shadcn: rows hover/press grey (`--secondary`) instead of the green accent,
+// which `data-active` keeps for the current row. `not-data-active:` is what makes that hold — it
+// compiles to `:not([data-active]):hover`, outranking `data-active:bg-sidebar-accent` on specificity.
 const sidebarMenuButtonVariants = cva(
-  'ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground data-active:bg-sidebar-accent data-active:text-sidebar-accent-foreground data-open:hover:bg-sidebar-accent data-open:hover:text-sidebar-accent-foreground gap-2 rounded-md p-2 text-left text-sm transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-9! group-data-[collapsible=icon]:p-2! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:[&>span:last-child]:hidden focus-visible:ring-2 data-active:font-medium peer/menu-button flex w-full items-center overflow-hidden outline-hidden group/menu-button disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&_svg]:size-4 [&_svg]:shrink-0',
+  'ring-sidebar-ring not-data-active:hover:bg-secondary hover:text-sidebar-accent-foreground not-data-active:active:bg-secondary active:text-sidebar-accent-foreground data-active:bg-sidebar-accent data-active:text-sidebar-accent-foreground not-data-active:data-open:hover:bg-secondary data-open:hover:text-sidebar-accent-foreground gap-2 rounded-md p-2 text-left text-sm transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-9! group-data-[collapsible=icon]:p-2! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:[&>span:last-child]:hidden focus-visible:ring-2 data-active:font-medium peer/menu-button flex w-full items-center overflow-hidden outline-hidden group/menu-button disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
-        default: 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+        default: 'not-data-active:hover:bg-secondary hover:text-sidebar-accent-foreground',
         outline:
-          'bg-background hover:bg-sidebar-accent hover:text-sidebar-accent-foreground shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]',
+          'bg-background hover:bg-sidebar-accent hover:text-sidebar-accent-foreground shadow-[0_0_0_1px_var(--sidebar-border)] hover:shadow-[0_0_0_1px_var(--sidebar-accent)]',
       },
       size: {
         default: 'h-8 text-sm',

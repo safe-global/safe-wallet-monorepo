@@ -16,7 +16,7 @@ const defaultSetup = createMockStory({
 })
 
 const meta = {
-  title: 'Pages/Features/Stake',
+  title: 'Pages/DeFi/Stake',
   component: Stake,
   loaders: [mswLoader],
   parameters: {

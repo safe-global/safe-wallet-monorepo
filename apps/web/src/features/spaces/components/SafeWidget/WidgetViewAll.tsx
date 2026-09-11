@@ -21,6 +21,7 @@ const WidgetViewAll = ({ count, onClick, className }: WidgetViewAllProps): React
       variant="ghost"
       size="sm"
       onClick={onClick}
+      // eslint-disable-next-line no-restricted-syntax -- tight inline "view all" link: sits flush with the widget's `+N` pill, so it drops the size's default horizontal padding
       className="gap-1 px-2 font-normal text-primary"
       data-testid="widget-view-all"
     >

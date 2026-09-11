@@ -1,5 +1,16 @@
 import { useCallback, useContext, useMemo, useState } from 'react'
-import { Button, DialogActions, DialogContent, SvgIcon, Tooltip, Typography } from '@mui/material'
+import { TriangleAlert } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+} from '@/components/ui/alert-dialog'
+import DialogActions from '@/components/common/DialogActions'
 import { BatchExecuteHoverContext } from '@/components/transactions/BatchExecuteButton/BatchExecuteHoverProvider'
 import { useAppSelector } from '@/store'
 import { selectPendingTxs } from '@/store/pendingTxsSlice'
@@ -14,8 +25,6 @@ import useChainId from '@/hooks/useChainId'
 import { useTransactionsGetMultipleTransactionDetailsQuery } from '@safe-global/store/gateway/transactions'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
-import ModalDialog from '@/components/common/ModalDialog'
-import WarningIcon from '@/public/images/notifications/warning.svg'
 
 const ALL_SAFE_PAID_TOOLTIP =
   "Bulk execution is not available when all ready transactions pay fees from the Safe. You'd pay gas twice, once from the Safe and once from your signer wallet."
@@ -104,52 +113,53 @@ const BatchExecuteButton = () => {
 
   return (
     <>
-      <Tooltip placement="top-start" arrow title={tooltipTitle}>
-        <span>
-          <Button
-            onMouseEnter={handleOnMouseEnter}
-            onMouseLeave={handleOnMouseLeave}
-            variant="contained"
-            size="small"
-            disabled={isDisabled}
-            onClick={handleOpenModal}
-          >
-            Bulk execute{isBatchable && ` ${batchableTransactions.length} transactions`}
-          </Button>
-        </span>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <span>
+              <Button
+                onMouseEnter={handleOnMouseEnter}
+                onMouseLeave={handleOnMouseLeave}
+                variant="outline"
+                size="action"
+                disabled={isDisabled}
+                onClick={handleOpenModal}
+              >
+                Bulk execute{isBatchable && ` ${batchableTransactions.length} transactions`}
+              </Button>
+            </span>
+          }
+        />
+        <TooltipContent side="top" align="start">
+          {tooltipTitle}
+        </TooltipContent>
       </Tooltip>
 
       {showMixedWarning && (
-        <ModalDialog
-          open
-          onClose={() => setShowMixedWarning(false)}
-          dialogTitle={
-            <>
-              <SvgIcon component={WarningIcon} inheritViewBox sx={{ mr: 1 }} />
-              Some transactions will be charged gas twice
-            </>
-          }
-          hideChainIndicator
-          maxWidth="xs"
-        >
-          <DialogContent sx={{ p: '24px !important' }}>
-            <Typography variant="body2">
-              {safePaidCount} {safePaidCount === 1 ? 'transaction' : 'transactions'} in this batch{' '}
-              {safePaidCount === 1 ? 'pays' : 'pay'} gas fees from the Safe. Those fees will still be deducted from the
-              Safe, and your signer wallet will also pay gas to execute the batch. You&apos;ll pay gas twice on those
-              transactions.
-            </Typography>
-          </DialogContent>
+        <AlertDialog open onOpenChange={(open) => !open && setShowMixedWarning(false)}>
+          <AlertDialogContent size="sm">
+            <AlertDialogHeader>
+              <div className="flex items-center justify-center size-10 rounded-full bg-[var(--color-warning-main)]/10 text-[var(--color-warning-main)] shrink-0">
+                <TriangleAlert className="size-5" />
+              </div>
+              <AlertDialogTitle>Some transactions will be charged gas twice</AlertDialogTitle>
+              <AlertDialogDescription>
+                {safePaidCount} {safePaidCount === 1 ? 'transaction' : 'transactions'} in this batch{' '}
+                {safePaidCount === 1 ? 'pays' : 'pay'} gas fees from the Safe. Those fees will still be deducted from
+                the Safe, and your signer wallet will also pay gas to execute the batch. You&apos;ll pay gas twice on
+                those transactions.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
 
-          <DialogActions sx={{ justifyContent: 'space-between', '&::after': { display: 'none' } }}>
-            <Button size="small" sx={{ height: 36 }} disableElevation onClick={() => setShowMixedWarning(false)}>
-              Cancel
-            </Button>
-            <Button variant="contained" size="small" sx={{ height: 36 }} disableElevation onClick={handleConfirmMixed}>
-              Execute anyway
-            </Button>
-          </DialogActions>
-        </ModalDialog>
+            <AlertDialogFooter>
+              <DialogActions
+                onCancel={() => setShowMixedWarning(false)}
+                confirmLabel="Execute anyway"
+                onConfirm={handleConfirmMixed}
+              />
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       )}
     </>
   )

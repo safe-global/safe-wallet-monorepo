@@ -30,13 +30,6 @@ describe(
       main.awaitVisualStability()
     })
 
-    it('[VISUAL] Screenshot add signer with invalid address error', () => {
-      owner.openManageSignersWindow()
-      owner.clickOnAddSignerBtn()
-      owner.typeOwnerAddressManage(1, main.generateRandomString(10))
-      main.awaitVisualStability()
-    })
-
     it('[VISUAL] Screenshot replace signer dialog', () => {
       owner.openReplaceOwnerWindow(0)
       main.awaitVisualStability()

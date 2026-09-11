@@ -1,7 +1,7 @@
-import { Stack, Box, Typography, SvgIcon } from '@mui/material'
-import EastRoundedIcon from '@mui/icons-material/EastRounded'
+import { ArrowRight } from 'lucide-react'
 import TokenIcon from '@/components/common/TokenIcon'
 import TokenAmount from '@/components/common/TokenAmount'
+import { Typography } from '@/components/ui/typography'
 
 export type InfoBlock = {
   value: string
@@ -16,39 +16,29 @@ export type InfoBlock = {
 
 const ConfirmationOrderHeader = ({ blocks, showArrow }: { blocks: [InfoBlock, InfoBlock]; showArrow?: boolean }) => {
   return (
-    <Stack direction="row" spacing={1}>
+    <div className="flex flex-row gap-2">
       {blocks.map((block, index) => (
-        <Stack
+        <div
           key={index}
-          direction="row"
-          sx={{
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            width: '50%',
-            bgcolor: 'border.background',
-            position: 'relative',
-            borderRadius: 1,
-            py: 2,
-            px: 3,
-          }}
+          className="relative flex w-1/2 flex-row flex-wrap items-center rounded-md bg-[var(--color-border-background)] px-6 py-4"
         >
           {block.tokenInfo && (
-            <Box width={40} mr={2}>
+            <div className="mr-4 w-10">
               <TokenIcon
                 size={40}
                 logoUri={block.tokenInfo.logoUri || ''}
                 tokenSymbol={block.tokenInfo.symbol}
                 chainId={block.chainId}
               />
-            </Box>
+            </div>
           )}
 
-          <Box data-testid="block-label" flex={1}>
-            <Typography variant="body2" color="primary.light">
+          <div data-testid="block-label" className="flex-1">
+            <Typography variant="paragraph-small" className="text-[var(--color-primary-light)]">
               {block.label}
             </Typography>
 
-            <Typography variant="h4" fontWeight="bold" component="div">
+            <Typography variant="h4">
               {block.tokenInfo ? (
                 <TokenAmount
                   tokenSymbol={block.tokenInfo.symbol}
@@ -59,31 +49,16 @@ const ConfirmationOrderHeader = ({ blocks, showArrow }: { blocks: [InfoBlock, In
                 block.value
               )}
             </Typography>
-          </Box>
+          </div>
 
           {showArrow && index === 0 && (
-            <Stack
-              sx={{
-                width: 40,
-                height: 40,
-                alignItems: 'center',
-                justifyContent: 'center',
-                p: 1,
-                borderRadius: '100%',
-                bgcolor: 'background.paper',
-                position: 'absolute',
-                right: -20,
-                top: '50%',
-                transform: 'translateY(-50%)',
-                zIndex: 2,
-              }}
-            >
-              <SvgIcon component={EastRoundedIcon} inheritViewBox fontSize="small" />
-            </Stack>
+            <div className="absolute top-1/2 right-[-20px] z-[2] flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--color-background-paper)] p-2">
+              <ArrowRight className="size-4" />
+            </div>
           )}
-        </Stack>
+        </div>
       ))}
-    </Stack>
+    </div>
   )
 }
 

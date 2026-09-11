@@ -46,6 +46,12 @@ describe('SecurityEmptyState', () => {
     expect(screen.getByTestId('security-empty-state')).toBeInTheDocument()
   })
 
+  it('marks the Hypernative logo as decorative', () => {
+    render(<SecurityEmptyState />)
+
+    expect(screen.getByAltText('')).toHaveAttribute('src', '/images/hypernative/hypernative-icon.svg')
+  })
+
   it('opens the Hypernative signup flow when the Hypernative card is clicked', () => {
     render(<SecurityEmptyState />)
 

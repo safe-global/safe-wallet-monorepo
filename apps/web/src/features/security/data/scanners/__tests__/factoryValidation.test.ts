@@ -44,6 +44,23 @@ describe('factoryValidationScanner', () => {
     })
   })
 
+  it('returns clear for the official 1.5.0 proxy factory', async () => {
+    // SafeProxyFactory v1.5.0 on Ethereum mainnet
+    const result = await factoryValidationScanner.scan(
+      createMockContext({
+        chainId: '1',
+        creationInfo: {
+          factoryAddress: '0x14F2982D601c9458F93bd70B218933A6f8165e7b',
+          creator: '0x1234',
+          masterCopy: null,
+          transactionHash: '0xabc',
+        },
+      }),
+    )
+    expect(result.status).toBe('clear')
+    expect(result.score).toBe(100)
+  })
+
   it('returns partial for an unrecognized factory address', async () => {
     const result = await factoryValidationScanner.scan(
       createMockContext({

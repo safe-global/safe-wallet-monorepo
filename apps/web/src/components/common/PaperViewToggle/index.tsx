@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
 import React, { useCallback, useRef, useState } from 'react'
-import { Paper, Stack } from '@mui/material'
 import { ToggleButtonGroup } from '@/components/common/ToggleButtonGroup'
 
 type PaperViewToggleProps = {
@@ -36,20 +35,14 @@ export const PaperViewToggle = ({ children, leftAlign, activeView = 0 }: PaperVi
   const Content = ({ index }: { index: number }) => children?.[index]?.content || null
 
   return (
-    <Paper
-      sx={{
-        backgroundColor: 'background.main',
-        pt: 1,
-        pb: 1.5,
-      }}
-    >
-      <Stack spacing={2} height={minHeight ? `${minHeight}px` : undefined} ref={stackRef}>
-        <Stack direction={leftAlign ? 'row' : 'row-reverse'} justifyContent="space-between" px={2} py={1}>
+    <div className="rounded-md bg-[var(--color-background-main)] pb-3 pt-2">
+      <div className="flex flex-col gap-4" style={{ height: minHeight ? `${minHeight}px` : undefined }} ref={stackRef}>
+        <div className={`flex justify-between px-4 py-2 ${leftAlign ? 'flex-row' : 'flex-row-reverse'}`}>
           <ToggleButtonGroup onChange={onChangeView}>{children}</ToggleButtonGroup>
-        </Stack>
+        </div>
 
         <Content index={active} />
-      </Stack>
-    </Paper>
+      </div>
+    </div>
   )
 }

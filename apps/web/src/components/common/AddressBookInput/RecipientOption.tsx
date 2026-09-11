@@ -1,9 +1,10 @@
 import type { ReactElement } from 'react'
-import { Box, Tooltip, Typography, useMediaQuery } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
 import { HardDrive } from 'lucide-react'
 import Identicon from '@/components/common/Identicon'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
 import { formatExactTime, formatRelativeTime, getProvenanceLine, type RecipientContact } from './provenance'
@@ -20,36 +21,38 @@ const RecipientOption = ({
   memberName?: string
   resolveName?: (address: string) => string
 }): ReactElement => {
-  const theme = useTheme()
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('lg'))
+  const isSmallScreen = useMediaQuery('(max-width:1199.95px)')
   const provenance = getProvenanceLine(contact, memberName, resolveName)
   const relativeTime = provenance?.timestamp ? formatRelativeTime(provenance.timestamp) : undefined
   const exactTime = provenance?.timestamp ? formatExactTime(provenance.timestamp) : undefined
 
   return (
-    <Box className={css.option}>
+    <div className={css.option}>
       <Identicon address={contact.address} size={40} />
 
-      <Box className={css.optionMain}>
-        <Typography variant="body2" fontWeight={600} noWrap>
+      <div className={css.optionMain}>
+        <Typography variant="paragraph-small-bold" className={css.optionName}>
           {contact.name}
         </Typography>
 
         {/* The tooltip is only needed when the address is shortened — on large screens it is fully visible */}
-        <Tooltip title={isSmallScreen ? contact.address : ''} placement="top">
-          <Typography variant="caption" component="div" className={css.optionAddress}>
-            {prefix ? <b>{prefix}:</b> : null}
-            {/* Bold the first 4 and last 4 hex chars. On narrow viewports the middle
-                collapses to an ellipsis; on wide ones the full address is shown. */}
-            {contact.address.slice(0, 2)}
-            <b>{contact.address.slice(2, 6)}</b>
-            {isSmallScreen ? '…' : contact.address.slice(6, -4)}
-            <b>{contact.address.slice(-4)}</b>
-          </Typography>
+        <Tooltip>
+          <TooltipTrigger render={<div />}>
+            <Typography variant="paragraph-mini" as="div" className={css.optionAddress}>
+              {prefix ? <b>{prefix}:</b> : null}
+              {/* Bold the first 4 and last 4 hex chars. On narrow viewports the middle
+                  collapses to an ellipsis; on wide ones the full address is shown. */}
+              {contact.address.slice(0, 2)}
+              <b>{contact.address.slice(2, 6)}</b>
+              {isSmallScreen ? '…' : contact.address.slice(6, -4)}
+              <b>{contact.address.slice(-4)}</b>
+            </Typography>
+          </TooltipTrigger>
+          {isSmallScreen && <TooltipContent>{contact.address}</TooltipContent>}
         </Tooltip>
 
         {provenance && (
-          <Typography variant="caption" component="div" color="text.secondary" className={css.provenance}>
+          <Typography variant="paragraph-mini" as="div" color="muted" className={css.provenance}>
             {contact.source === ContactSource.local && <HardDrive size={12} className={css.provenanceIcon} />}
             {contact.source !== ContactSource.local &&
               contact.createdBy &&
@@ -67,15 +70,16 @@ const RecipientOption = ({
             {relativeTime && (
               <>
                 <span>·</span>
-                <Tooltip title={exactTime} placement="top">
-                  <span className={css.relativeTime}>{relativeTime}</span>
+                <Tooltip>
+                  <TooltipTrigger render={<span className={css.relativeTime}>{relativeTime}</span>} />
+                  <TooltipContent>{exactTime}</TooltipContent>
                 </Tooltip>
               </>
             )}
           </Typography>
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }
 

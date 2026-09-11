@@ -27,15 +27,16 @@
   width: 100%;
 }
 
+/* The login panel is intentionally theme-static white (see WalletLogin's walletBtnStatic),
+   so the watch-account button is pinned to static colors too — the themed default variant
+   would turn Safe-green on the white panel in dark mode. */
 .watchViewAccountLink button {
-  color: #000;
+  background-color: #121312;
+  color: #fff;
 }
 
 .watchViewAccountLink button:hover {
-  --variant-containedBg: #3c3c3c;
-  --variant-textBg: rgba(18, 19, 18, 0.04);
-  --variant-outlinedBorder: #121312;
-  --variant-outlinedBg: rgba(18, 19, 18, 0.04);
+  background-color: #3c3c3c;
 }
 
 .orDivider::after {

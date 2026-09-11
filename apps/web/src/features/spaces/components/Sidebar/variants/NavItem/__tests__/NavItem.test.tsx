@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { House } from 'lucide-react'
 import type { ReactElement, ReactNode } from 'react'
-import type { ResolvedSidebarItem } from '../../../types'
+import type { ResolvedSidebarNavItem, ResolvedSidebarActionItem } from '../../../types'
 import { NavItem } from '../NavItem'
 
 const mockTrackEvent = jest.fn()
@@ -62,8 +62,11 @@ const mockSidebarState: {
 // Mock sidebar UI components
 jest.mock('@/components/ui/sidebar', () => ({
   useSidebar: () => mockSidebarState,
+  // The real primitive is an <li>; keep that so assertions about what lives inside the item hold.
   SidebarMenuItem: ({ children, className }: { children: ReactNode; className?: string }) => (
-    <div className={className}>{children}</div>
+    <li className={className} data-testid="sidebar-menu-item">
+      {children}
+    </li>
   ),
   SidebarMenuButton: ({
     children,
@@ -93,8 +96,19 @@ jest.mock('@/components/ui/sidebar', () => ({
       )
     }
 
+    // `NavItem`'s `if (item.disabled) return` guard is defence-in-depth and unreachable through
+    // the real DOM path: the real SidebarMenuButton spreads native `disabled` onto a <button>,
+    // so React never fires onClick. This mock emits aria-disabled/data-disabled instead, which
+    // deliberately diverges from the primitive so the guard can be exercised at all.
     return (
-      <button data-testid={testId} className={className} data-active={isActive} disabled={disabled} onClick={onClick}>
+      <button
+        data-testid={testId}
+        className={className}
+        data-active={isActive}
+        data-disabled={disabled}
+        aria-disabled={disabled}
+        onClick={onClick}
+      >
         {children}
       </button>
     )
@@ -102,7 +116,7 @@ jest.mock('@/components/ui/sidebar', () => ({
 }))
 
 describe('NavItem', () => {
-  const baseItem: ResolvedSidebarItem = {
+  const baseItem: ResolvedSidebarNavItem = {
     icon: House,
     label: 'Home',
     href: '/home',
@@ -137,7 +151,8 @@ describe('NavItem', () => {
     render(<NavItem item={disabledItem} />)
 
     const button = screen.getByTestId('sidebar-list-item')
-    expect(button).toBeDisabled()
+    expect(button.tagName).toBe('BUTTON')
+    expect(button).toHaveAttribute('aria-disabled', 'true')
   })
 
   it('shows tooltip when disabled', () => {
@@ -378,6 +393,116 @@ describe('NavItem', () => {
         expect.objectContaining({ action: 'Open Earn', label: 'sidebar' }),
         undefined,
       )
+    })
+  })
+
+  const actionItem: ResolvedSidebarActionItem = {
+    icon: House,
+    label: 'Feature flags',
+    id: 'feature-flags',
+    isActive: false,
+    disabled: false,
+    onSelect: jest.fn(),
+  }
+
+  describe('action items', () => {
+    it('renders a button rather than a link', () => {
+      render(<NavItem item={{ ...actionItem, onSelect: jest.fn() }} />)
+
+      const element = screen.getByTestId('sidebar-list-item')
+      expect(element.tagName).toBe('BUTTON')
+      expect(element).not.toHaveAttribute('href')
+      expect(screen.queryByRole('link')).not.toBeInTheDocument()
+      expect(element).toHaveTextContent('Feature flags')
+    })
+
+    it('calls onSelect when clicked', () => {
+      const onSelect = jest.fn()
+      render(<NavItem item={{ ...actionItem, onSelect }} />)
+
+      fireEvent.click(screen.getByTestId('sidebar-list-item'))
+
+      expect(onSelect).toHaveBeenCalledTimes(1)
+    })
+
+    it('still tracks the sidebar click', () => {
+      render(<NavItem item={{ ...actionItem, onSelect: jest.fn() }} />)
+
+      fireEvent.click(screen.getByTestId('sidebar-list-item'))
+
+      expect(mockTrackEvent).toHaveBeenCalledWith({ action: 'Sidebar clicked' }, { sidebarElement: 'Feature flags' })
+    })
+
+    it('does not call onSelect when disabled', () => {
+      const onSelect = jest.fn()
+      render(<NavItem item={{ ...actionItem, onSelect, disabled: true }} />)
+
+      fireEvent.click(screen.getByTestId('sidebar-list-item'))
+
+      expect(onSelect).not.toHaveBeenCalled()
+    })
+
+    it('renders a badge', () => {
+      render(<NavItem item={{ ...actionItem, onSelect: jest.fn(), badge: 3 }} />)
+
+      expect(screen.getByLabelText('3 Feature flags notifications')).toHaveTextContent('3')
+    })
+
+    it('shows the label tooltip when the sidebar is collapsed to icons', () => {
+      mockSidebarState.state = 'collapsed'
+      render(<NavItem item={{ ...actionItem, onSelect: jest.fn() }} />)
+
+      expect(screen.getByRole('tooltip')).toHaveTextContent('Feature flags')
+    })
+
+    it('does not close the mobile drawer, which would unmount the UI it opens', () => {
+      mockSidebarState.isMobile = true
+      render(<NavItem item={{ ...actionItem, onSelect: jest.fn() }} />)
+
+      fireEvent.click(screen.getByTestId('sidebar-list-item'))
+
+      expect(mockSetOpenMobile).not.toHaveBeenCalled()
+    })
+
+    it('does not close the drawer on tablet either', () => {
+      mockSidebarState.isTablet = true
+      render(<NavItem item={{ ...actionItem, onSelect: jest.fn() }} />)
+
+      fireEvent.click(screen.getByTestId('sidebar-list-item'))
+
+      expect(mockSetOpenMobile).not.toHaveBeenCalled()
+    })
+  })
+
+  // Items live in the menu's <ul>, so UI an item owns (e.g. the dialog it opens) has to be hosted in
+  // the item's own <li> rather than rendered as a sibling.
+  describe('children', () => {
+    it('hosts children inside the item list element', () => {
+      render(
+        <NavItem item={{ ...actionItem, onSelect: jest.fn() }}>
+          <div data-testid="owned-ui" />
+        </NavItem>,
+      )
+
+      const listItem = screen.getByTestId('sidebar-menu-item')
+      expect(listItem.tagName).toBe('LI')
+      expect(listItem).toContainElement(screen.getByTestId('owned-ui'))
+    })
+
+    it('keeps hosting children while the item is loading', () => {
+      render(
+        <NavItem item={{ ...actionItem, onSelect: jest.fn() }} isLoading>
+          <div data-testid="owned-ui" />
+        </NavItem>,
+      )
+
+      expect(screen.getByTestId('sidebar-menu-item')).toContainElement(screen.getByTestId('owned-ui'))
+    })
+
+    it('renders nothing extra when no children are passed', () => {
+      render(<NavItem item={{ ...actionItem, onSelect: jest.fn() }} />)
+
+      expect(screen.queryByTestId('owned-ui')).not.toBeInTheDocument()
     })
   })
 })

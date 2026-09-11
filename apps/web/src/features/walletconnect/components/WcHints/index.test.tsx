@@ -24,17 +24,17 @@ describe('WcHints component tests', () => {
     expect(screen.getByText(CONNECT_TITLE)).toBeVisible()
     expect(screen.getByText(INTERACT_TITLE)).toBeVisible()
 
-    expect(screen.queryByText(CONNECT_STEP)).not.toBeVisible()
-    expect(screen.queryByText(INTERACT_STEP)).not.toBeVisible()
+    expect(screen.queryByText(CONNECT_STEP)).not.toBeInTheDocument()
+    expect(screen.queryByText(INTERACT_STEP)).not.toBeInTheDocument()
   })
 
-  it('Verify connection accordion can be expanded', () => {
+  it('Verify connection accordion can be expanded', async () => {
     render(<WcHints />)
 
     fireEvent.click(screen.getByText(CONNECT_TITLE))
 
-    expect(screen.getByText(CONNECT_STEP)).toBeVisible()
-    expect(screen.getByText(CONNECT_WALLET)).toBeVisible()
+    expect(await screen.findByText(CONNECT_STEP)).toBeInTheDocument()
+    expect(screen.getByText(CONNECT_WALLET)).toBeInTheDocument()
 
     expect(trackEvent).toHaveBeenCalledWith({
       category: 'walletconnect',
@@ -42,13 +42,13 @@ describe('WcHints component tests', () => {
     })
   })
 
-  it('Verify interaction accordion can be expanded', () => {
+  it('Verify interaction accordion can be expanded', async () => {
     render(<WcHints />)
 
     fireEvent.click(screen.getByText(INTERACT_TITLE))
 
-    expect(screen.getByText(INTERACT_STEP)).toBeVisible()
-    expect(screen.getByText(ENSURE_CHAIN)).toBeVisible()
+    expect(await screen.findByText(INTERACT_STEP)).toBeInTheDocument()
+    expect(screen.getByText(ENSURE_CHAIN)).toBeInTheDocument()
 
     expect(trackEvent).toHaveBeenCalledWith({
       category: 'walletconnect',
@@ -62,11 +62,11 @@ describe('WcHints component tests', () => {
     const connectionTitle = screen.getByText(CONNECT_TITLE)
 
     fireEvent.click(connectionTitle)
-    expect(screen.getByText(CONNECT_STEP)).toBeVisible()
+    expect(await screen.findByText(CONNECT_STEP)).toBeInTheDocument()
 
     fireEvent.click(connectionTitle)
     await waitFor(() => {
-      expect(screen.queryByText(CONNECT_STEP)).not.toBeVisible()
+      expect(screen.queryByText(CONNECT_STEP)).not.toBeInTheDocument()
     })
   })
 
@@ -74,13 +74,13 @@ describe('WcHints component tests', () => {
     render(<WcHints />)
 
     fireEvent.click(screen.getByText(CONNECT_TITLE))
-    expect(screen.getByText(CONNECT_STEP)).toBeVisible()
+    expect(await screen.findByText(CONNECT_STEP)).toBeInTheDocument()
 
     fireEvent.click(screen.getByText(INTERACT_TITLE))
 
     await waitFor(() => {
-      expect(screen.queryByText(CONNECT_STEP)).not.toBeVisible()
+      expect(screen.queryByText(CONNECT_STEP)).not.toBeInTheDocument()
     })
-    expect(screen.getByText(INTERACT_STEP)).toBeVisible()
+    expect(await screen.findByText(INTERACT_STEP)).toBeInTheDocument()
   })
 })

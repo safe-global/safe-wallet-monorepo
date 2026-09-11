@@ -1,8 +1,7 @@
 import Link from 'next/link'
 import { useMemo } from 'react'
 import { useRouter } from 'next/router'
-import { ChevronRight } from '@mui/icons-material'
-import { Box, Stack } from '@mui/material'
+import { ChevronRight } from 'lucide-react'
 import type { ReactElement } from 'react'
 
 import { RecoveryFeature } from '@/features/recovery'
@@ -28,16 +27,16 @@ function PendingRecoveryListItem({ transaction }: { transaction: RecoveryQueueIt
 
   return (
     <Link href={url} passHref>
-      <Box className={classnames(css.container, css.recoveryContainer)} sx={{ minHeight: 50 }}>
+      <div className={classnames(css.container, css.recoveryContainer, 'min-h-[50px]')}>
         <RecoveryType isMalicious={isMalicious} date={transaction.timestamp} isDashboard />
 
         <RecoveryInfo isMalicious={isMalicious} />
 
-        <Stack direction="row" gap={1.5} alignItems="center" ml="auto">
+        <div className="ml-auto flex flex-row items-center gap-3">
           <RecoveryStatus recovery={transaction} />
-          <ChevronRight color="border" fontSize="small" />
-        </Stack>
-      </Box>
+          <ChevronRight className="size-5 text-[var(--color-border-main)]" />
+        </div>
+      </div>
     </Link>
   )
 }

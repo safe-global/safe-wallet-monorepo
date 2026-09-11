@@ -1,28 +1,18 @@
-import { Box, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import type { ReactElement, ReactNode } from 'react'
 
 export function SimilarityGroupContainer({ children }: { children: ReactNode }): ReactElement {
   return (
-    <Box
-      sx={{
-        my: 0.5,
-        borderRadius: 1,
-        border: '1px solid',
-        borderColor: 'warning.light',
-        overflow: 'hidden',
-      }}
-    >
+    <div className="my-1 overflow-hidden rounded-lg border border-[var(--color-warning-light)]">
       {/* Warning header */}
-      <Box sx={{ px: 1.5, py: 0.75, backgroundColor: 'warning.background' }}>
-        <Typography variant="caption" fontWeight={500} color="warning.main">
+      <div className="bg-[var(--color-warning-background)] px-3 py-1.5">
+        <Typography variant="paragraph-mini-medium" className="text-[var(--color-warning-main)]">
           Similar addresses - verify carefully
         </Typography>
-      </Box>
+      </div>
 
       {/* Grouped items */}
-      <Box sx={{ backgroundColor: 'background.paper', p: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
-        {children}
-      </Box>
-    </Box>
+      <div className="flex flex-col gap-2 bg-[var(--color-background-paper)] p-2">{children}</div>
+    </div>
   )
 }

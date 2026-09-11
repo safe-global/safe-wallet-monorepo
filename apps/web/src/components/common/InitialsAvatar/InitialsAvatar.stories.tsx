@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Stack } from '@mui/material'
 import InitialsAvatar from './index'
 
 const meta: Meta<typeof InitialsAvatar> = {
+  title: 'Components/Common/InitialsAvatar',
   component: InitialsAvatar,
   parameters: {
     layout: 'centered',
@@ -24,12 +24,12 @@ export const AllSizes: Story = {
     name: 'Safe',
   },
   render: ({ name }) => (
-    <Stack direction="row" spacing={2} alignItems="center">
+    <div className="flex items-center gap-4">
       <InitialsAvatar name={name} size="xsmall" />
       <InitialsAvatar name={name} size="small" />
       <InitialsAvatar name={name} size="medium" />
       <InitialsAvatar name={name} size="large" />
-    </Stack>
+    </div>
   ),
 }
 
@@ -73,12 +73,12 @@ export const DifferentNames: Story = {
     name: 'Alice',
   },
   render: () => (
-    <Stack direction="row" spacing={2} alignItems="center">
+    <div className="flex items-center gap-4">
       <InitialsAvatar name="Alice" />
       <InitialsAvatar name="Bob" />
       <InitialsAvatar name="Charlie" />
       <InitialsAvatar name="Diana" />
       <InitialsAvatar name="Eve" />
-    </Stack>
+    </div>
   ),
 }

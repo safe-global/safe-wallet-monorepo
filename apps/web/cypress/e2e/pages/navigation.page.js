@@ -2,10 +2,13 @@ export const sideNavSettingsIcon = '[data-testid="settings-nav-icon"]'
 export const setupSection = '[data-testid="setup-section"]'
 export const modalBackBtn = '[data-testid="modal-back-btn"]'
 export const newTxBtn = '[data-testid="new-tx-btn"]'
-const modalCloseIcon = '[data-testid="CloseIcon"]'
+// The dialog close control kept its aria-label in the shadcn migration, but the icon
+// lost the MUI-generated CloseIcon testid — target the labelled button instead.
+const modalCloseBtn = '[role="dialog"] button[aria-label="close"]'
+const discardTxBtnStr = 'Discard'
 export const expandMoreIcon = 'svg[data-testid="ExpandMoreIcon"]'
 const expandWalletBtn = '[data-testid="open-account-center"]'
-const sentinelStart = 'div[data-testid="sentinelStart"]'
+const popoverContent = '[data-slot="popover-content"]'
 
 const disconnectBtnStr = 'Disconnect'
 const notConnectedStatus = 'Connect'
@@ -18,7 +21,13 @@ export function clickOnSideNavigation(option) {
 }
 
 export function clickOnModalCloseBtn(index) {
-  cy.get(modalCloseIcon).eq(index).trigger('click')
+  cy.get(modalCloseBtn).eq(index).click()
+}
+
+export function clickOnDiscardTxBtn() {
+  // Closing an in-progress tx flow asks to discard it. This used to be a native
+  // confirm() that Cypress auto-accepted; the themed dialog needs a real click.
+  cy.contains('button', discardTxBtnStr).click()
 }
 
 export function clickOnNewTxBtn() {
@@ -35,7 +44,7 @@ export function clickOnWalletExpandMoreIcon() {
 
 export function clickOnExpandWalletBtn() {
   cy.get(expandWalletBtn).should('be.visible').click()
-  cy.get(sentinelStart).next().should('exist')
+  cy.get(popoverContent).should('be.visible')
 }
 
 export function clickOnDisconnectBtn() {

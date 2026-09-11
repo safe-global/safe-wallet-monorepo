@@ -1,5 +1,4 @@
 import type { ReactElement } from 'react'
-import { Box } from '@mui/material'
 import type {
   ContractAnalysisResults,
   DeadlockAnalysisResults,
@@ -19,6 +18,7 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { analysisVisibilityDelay, calculateAnalysisDelays, useDelayedLoading } from '../../hooks/useDelayedLoading'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
 import { HypernativeFeature, type HypernativeAuthStatus } from '@/features/hypernative'
+import { SafenetChecksFeature } from '@/features/safenet-checks'
 import { useLoadFeature } from '@/features/__core__'
 import { ThreatAnalysis } from '../ThreatAnalysis'
 
@@ -48,6 +48,7 @@ export const SafeShieldContent = ({
   onAddToTrustedList?: () => void
 }): ReactElement => {
   const hn = useLoadFeature(HypernativeFeature)
+  const safenet = useLoadFeature(SafenetChecksFeature)
   const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient
   const [contractResults = {}, _contractError, contractLoading = false] = contract
   const [threatResults = {}, _threatError, threatLoading = false] = threat
@@ -69,16 +70,11 @@ export const SafeShieldContent = ({
     calculateAnalysisDelays(recipientEmpty, contractEmpty, deadlockEmpty)
 
   return (
-    <Box padding="0px 4px 4px">
-      <Box
-        sx={{
-          border: '1px solid',
-          borderColor: 'background.main',
-          borderTop: 'none',
-          borderRadius: '0px 0px 6px 6px',
-          position: 'relative',
-        }}
-      >
+    <div className="px-1 pb-1">
+      {/* overflow-hidden clips the last analysis row's square background to the rounded corners;
+          rounded-b-md (12px) = the parent's rounded-lg (16px) minus the 4px px-1/pb-1 inset, which
+          keeps this curve concentric with the outer one. */}
+      <div className="relative overflow-hidden rounded-b-md border border-t-0 border-[var(--color-background-main)]">
         {showHypernativeInfo && (
           <hn.HnInfoCard hypernativeAuth={hypernativeAuth} showActiveStatus={showHypernativeActiveStatus} />
         )}
@@ -87,7 +83,7 @@ export const SafeShieldContent = ({
 
         {shouldShowContent && !loading && allEmpty && !hypernativeAuth && <SafeShieldAnalysisEmpty />}
 
-        <Box sx={{ '& > div': { borderTop: '1px solid', borderColor: 'background.main' } }}>
+        <div className="[&>div]:border-t [&>div]:border-[var(--color-background-main)]">
           {/* Untrusted Safe warning - shown at top when Safe is not pinned */}
           {safeAnalysis && onAddToTrustedList && (
             <UntrustedSafeWarning safeAnalysis={safeAnalysis} onAddToTrustedList={onAddToTrustedList} />
@@ -132,6 +128,8 @@ export const SafeShieldContent = ({
             hypernativeAuth={hypernativeAuth}
           />
 
+          {shouldShowContent && <safenet.SafenetChecksSection />}
+
           {!contractLoading && !threatLoading && (
             <TenderlySimulation
               safeTx={safeTx}
@@ -139,8 +137,8 @@ export const SafeShieldContent = ({
               highlightedSeverity={highlightedSeverity}
             />
           )}
-        </Box>
-      </Box>
-    </Box>
+        </div>
+      </div>
+    </div>
   )
 }

@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper, Box } from '@mui/material'
 import { AccountItem } from './index'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import type { SafeItem } from '@/hooks/safes'
@@ -38,9 +37,9 @@ const meta: Meta<typeof AccountItemStory> = {
   decorators: [
     (Story) => (
       <StoreDecorator initialState={{}}>
-        <Paper sx={{ p: 2, maxWidth: 600 }}>
+        <div className="max-w-[600px] rounded-lg bg-card p-4">
           <Story />
-        </Paper>
+        </div>
       </StoreDecorator>
     ),
   ],
@@ -68,7 +67,7 @@ export const Default: Story = {
  * Account item marked as the currently selected safe
  */
 export const CurrentSafe: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <AccountItem.Link href="/safe" isCurrentSafe trackingLabel="storybook">
       <AccountItem.Icon address={MOCK_ADDRESS} chainId={MOCK_CHAIN_ID} threshold={2} owners={3} />
@@ -83,7 +82,7 @@ export const CurrentSafe: Story = {
  * Account item without a name (shows shortened address)
  */
 export const WithoutName: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <AccountItem.Link href="/safe" trackingLabel="storybook">
       <AccountItem.Icon address={MOCK_ADDRESS} chainId={MOCK_CHAIN_ID} threshold={1} owners={1} />
@@ -98,7 +97,7 @@ export const WithoutName: Story = {
  * Account item with balance loading
  */
 export const LoadingBalance: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <AccountItem.Link href="/safe" trackingLabel="storybook">
       <AccountItem.Icon address={MOCK_ADDRESS} chainId={MOCK_CHAIN_ID} threshold={2} owners={5} />
@@ -113,7 +112,7 @@ export const LoadingBalance: Story = {
  * Account item with read-only chips
  */
 export const WithReadOnlyChip: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <AccountItem.Link href="/safe" trackingLabel="storybook">
       <AccountItem.Icon address={MOCK_ADDRESS} chainId={MOCK_CHAIN_ID} threshold={3} owners={5} />
@@ -130,7 +129,7 @@ export const WithReadOnlyChip: Story = {
  * Account item for undeployed safe (not activating)
  */
 export const UndeployedSafe: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <AccountItem.Link href="/safe" trackingLabel="storybook">
       <AccountItem.Icon address={MOCK_ADDRESS} chainId={MOCK_CHAIN_ID} threshold={2} owners={3} />
@@ -146,7 +145,7 @@ export const UndeployedSafe: Story = {
  * Account item for activating safe
  */
 export const ActivatingSafe: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <AccountItem.Link href="/safe" trackingLabel="storybook">
       <AccountItem.Icon address={MOCK_ADDRESS} chainId={MOCK_CHAIN_ID} threshold={2} owners={3} />
@@ -178,7 +177,7 @@ export const WithActions: Story = {
  * Account item that is pinned
  */
 export const PinnedSafe: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <AccountItem.Link href="/safe" trackingLabel="storybook">
       <AccountItem.Icon address={MOCK_ADDRESS} chainId={MOCK_CHAIN_ID} threshold={2} owners={3} />
@@ -194,7 +193,7 @@ export const PinnedSafe: Story = {
  * Account item with onClick handler instead of href (selection mode)
  */
 export const SelectionMode: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <AccountItem.Button onClick={() => alert('Safe selected!')}>
       <AccountItem.Icon address={MOCK_ADDRESS} chainId={MOCK_CHAIN_ID} threshold={2} owners={3} />
@@ -211,7 +210,7 @@ export const SelectionMode: Story = {
  */
 export const DifferentChains: Story = {
   render: () => (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+    <div className="flex flex-col gap-4">
       <AccountItem.Link href="/safe" trackingLabel="storybook">
         <AccountItem.Icon address={MOCK_ADDRESS} chainId="1" threshold={2} owners={3} />
         <AccountItem.Info address={MOCK_ADDRESS} chainId="1" name="Ethereum Safe" />
@@ -232,7 +231,7 @@ export const DifferentChains: Story = {
         <AccountItem.ChainBadge chainId="10" />
         <AccountItem.Balance fiatTotal="2500.00" />
       </AccountItem.Link>
-    </Box>
+    </div>
   ),
 }
 
@@ -240,7 +239,7 @@ export const DifferentChains: Story = {
  * Multi-chain safe icon variant
  */
 export const MultiChainIcon: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <AccountItem.Link href="/safe" trackingLabel="storybook">
       <AccountItem.Icon address={MOCK_ADDRESS} chainId={MOCK_CHAIN_ID} threshold={2} owners={3} isMultiChainItem />
@@ -254,7 +253,7 @@ export const MultiChainIcon: Story = {
  * Multi-chain badge showing multiple network logos with tooltip
  */
 export const MultiChainBadge: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => {
     const mockSafes = [
       { address: MOCK_ADDRESS, chainId: '1', isReadOnly: false, isPinned: false, lastVisited: 0, name: '' },
@@ -277,7 +276,7 @@ export const MultiChainBadge: Story = {
  * Minimal account item with only icon and info
  */
 export const Minimal: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <AccountItem.Link href="/safe" trackingLabel="storybook">
       <AccountItem.Icon address={MOCK_ADDRESS} chainId={MOCK_CHAIN_ID} />
@@ -290,7 +289,7 @@ export const Minimal: Story = {
  * Account item with grouped elements
  */
 export const GroupedElements: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <AccountItem.Link href="/safe" trackingLabel="storybook">
       <AccountItem.Icon address={MOCK_ADDRESS} chainId={MOCK_CHAIN_ID} threshold={2} owners={3} />

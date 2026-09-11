@@ -20,7 +20,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const AllVariants: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: { ratio: 16 / 9 },
   render: () => (
     <div style={{ display: 'block' }}>
@@ -40,12 +40,12 @@ export const AllVariants: Story = {
                 style={{
                   width: '100%',
                   height: '100%',
-                  background: 'var(--color-muted)',
+                  background: 'var(--muted)',
                   borderRadius: '0.375rem',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: 'var(--color-muted-foreground)',
+                  color: 'var(--muted-foreground)',
                 }}
               >
                 16:9
@@ -58,12 +58,12 @@ export const AllVariants: Story = {
                 style={{
                   width: '100%',
                   height: '100%',
-                  background: 'var(--color-muted)',
+                  background: 'var(--muted)',
                   borderRadius: '0.375rem',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: 'var(--color-muted-foreground)',
+                  color: 'var(--muted-foreground)',
                 }}
               >
                 4:3
@@ -76,12 +76,12 @@ export const AllVariants: Story = {
                 style={{
                   width: '100%',
                   height: '100%',
-                  background: 'var(--color-muted)',
+                  background: 'var(--muted)',
                   borderRadius: '0.375rem',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: 'var(--color-muted-foreground)',
+                  color: 'var(--muted-foreground)',
                 }}
               >
                 1:1
@@ -94,12 +94,12 @@ export const AllVariants: Story = {
                 style={{
                   width: '100%',
                   height: '100%',
-                  background: 'var(--color-muted)',
+                  background: 'var(--muted)',
                   borderRadius: '0.375rem',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: 'var(--color-muted-foreground)',
+                  color: 'var(--muted-foreground)',
                 }}
               >
                 21:9

@@ -1,5 +1,5 @@
-import { Box, SvgIcon, Typography } from '@mui/material'
 import type { ReactElement } from 'react'
+import { Typography } from '@/components/ui/typography'
 import RecoveryPlusIcon from '@/public/images/common/recovery-plus.svg'
 import txTypeCss from '@/components/transactions/TxType/styles.module.css'
 import pendingTxCss from '@/components/dashboard/PendingTxs/styles.module.css'
@@ -15,26 +15,21 @@ export default function RecoveryType({
   isDashboard?: boolean
 }): ReactElement {
   return (
-    <Box className={txTypeCss.txType} gap={isDashboard ? '12px !important' : 1}>
-      <Box className={isDashboard ? pendingTxCss.iconWrapper : undefined}>
-        <SvgIcon
-          component={RecoveryPlusIcon}
-          inheritViewBox
-          fontSize="inherit"
-          sx={{ '& path': { fill: ({ palette }) => palette.warning.main } }}
-        />
-      </Box>
-      <Box>
-        <Typography color={isMalicious ? 'error.main' : undefined}>
+    <div className={txTypeCss.txType} style={isDashboard ? { gap: '12px' } : undefined}>
+      <div className={isDashboard ? pendingTxCss.iconWrapper : undefined}>
+        <RecoveryPlusIcon className="size-[1em] [&_path]:fill-[var(--color-warning-main)]" />
+      </div>
+      <div>
+        <Typography className={isMalicious ? 'text-[var(--color-error-main)]' : undefined}>
           {isMalicious ? 'Malicious transaction' : 'Account recovery'}
         </Typography>
 
         {date && (
-          <Typography variant="body2" color="primary.light">
+          <Typography variant="paragraph-small" className="text-[var(--color-primary-light)]">
             <DateTime value={Number(date)} showDateTime={false} showTime={false} />
           </Typography>
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }

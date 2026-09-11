@@ -1,5 +1,7 @@
 import React from 'react'
-import { Alert, AlertTitle } from '@mui/material'
+import { X } from 'lucide-react'
+import { Alert, AlertTitle, AlertAction, AlertSeverityIcon } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
 import ExternalLink from '@/components/common/ExternalLink'
 
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
@@ -11,22 +13,20 @@ type ThirdPartyCookiesWarningProps = {
 export const ThirdPartyCookiesWarning = ({ onClose }: ThirdPartyCookiesWarningProps): React.ReactElement => {
   return (
     <Alert
-      severity="warning"
-      onClose={onClose}
-      sx={({ palette }) => ({
-        background: palette.warning.light,
-        border: 0,
-        borderBottom: `1px solid ${palette.warning.main}`,
-        borderRadius: '0px !important',
-      })}
+      variant="warning"
+      outlined={false}
+      className="rounded-none border-0 border-b border-[var(--color-warning-main)]"
     >
+      <AlertSeverityIcon variant="warning" />
       <AlertTitle>
         Third party cookies are disabled. Safe Apps may therefore not work properly. You can find out more information
-        about this{' '}
-        <ExternalLink href={HelpCenterArticle.COOKIES} fontSize="inherit">
-          here
-        </ExternalLink>
+        about this <ExternalLink href={HelpCenterArticle.COOKIES}>here</ExternalLink>
       </AlertTitle>
+      <AlertAction>
+        <Button variant="ghost" size="icon-sm" aria-label="Close" onClick={onClose}>
+          <X />
+        </Button>
+      </AlertAction>
     </Alert>
   )
 }

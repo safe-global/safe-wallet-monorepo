@@ -1,8 +1,10 @@
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { useState, type ReactElement } from 'react'
-import { Box, Link, List, ListItem, ListItemIcon, ListItemText, Skeleton, SvgIcon, Typography } from '@mui/material'
-import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined'
+import { Circle as CircleOutlinedIcon } from 'lucide-react'
 
+import { Typography } from '@/components/ui/typography'
+import { Link } from '@/components/ui/link'
+import { Skeleton } from '@/components/ui/skeleton'
 import CreatedIcon from '@/public/images/messages/created.svg'
 import SignedIcon from '@/public/images/messages/signed.svg'
 import DotIcon from '@/public/images/messages/dot.svg'
@@ -13,29 +15,11 @@ import txSignersCss from '@/components/transactions/TxSigners/styles.module.css'
 
 // Icons
 
-const Created = () => (
-  <SvgIcon
-    component={CreatedIcon}
-    inheritViewBox
-    className={css.icon}
-    sx={{
-      '& path:last-of-type': { fill: ({ palette }) => palette.background.paper },
-    }}
-  />
-)
+const Created = () => <CreatedIcon className={css.icon} />
 
-const Signed = () => (
-  <SvgIcon
-    component={SignedIcon}
-    inheritViewBox
-    className={css.icon}
-    sx={{
-      '& path:last-of-type': { fill: ({ palette }) => palette.background.paper },
-    }}
-  />
-)
+const Signed = () => <SignedIcon className={css.icon} />
 
-const Dot = () => <SvgIcon component={DotIcon} inheritViewBox className={css.dot} />
+const Dot = () => <DotIcon className={css.dot} />
 
 const shouldHideConfirmations = (msg: MessageItem): boolean => {
   const isConfirmed = msg.status === 'CONFIRMED'
@@ -68,92 +52,78 @@ const MsgSigners = ({
   const isConfirmed = msg.status === 'CONFIRMED'
 
   return (
-    <List className={css.signers}>
+    <ul className={css.signers}>
       {!showOnlyConfirmations && (
-        <ListItem>
-          <ListItemIcon>
+        <li className={css.listItem}>
+          <div className={css.listItemIcon}>
             <Created />
-          </ListItemIcon>
-          <ListItemText primaryTypographyProps={{ fontWeight: 700 }}>Created</ListItemText>
-        </ListItem>
+          </div>
+          <div className={css.listItemText}>
+            <Typography variant="paragraph-bold">Created</Typography>
+          </div>
+        </li>
       )}
-      <ListItem>
-        <ListItemIcon sx={{ backgroundColor }}>
+      <li className={css.listItem}>
+        <div className={css.listItemIcon} style={{ backgroundColor }}>
           <Signed />
-        </ListItemIcon>
-        <ListItemText primaryTypographyProps={{ fontWeight: 700 }}>
-          Confirmations{' '}
-          <Box component="span" className={txSignersCss.confirmationsTotal}>
-            ({`${confirmationsSubmitted} of ${confirmationsRequired}`})
-          </Box>
-        </ListItemText>
-      </ListItem>
+        </div>
+        <div className={css.listItemText}>
+          <Typography variant="paragraph-bold">
+            Confirmations{' '}
+            <span className={txSignersCss.confirmationsTotal}>
+              ({`${confirmationsSubmitted} of ${confirmationsRequired}`})
+            </span>
+          </Typography>
+        </div>
+      </li>
       {!hideConfirmations &&
         confirmations.map(({ owner }) => (
-          <ListItem key={owner.value} sx={{ py: 0 }}>
-            <ListItemIcon sx={{ backgroundColor }}>
+          <li key={owner.value} className={css.listItem}>
+            <div className={css.listItemIcon} style={{ backgroundColor }}>
               <Dot />
-            </ListItemIcon>
-            <ListItemText>
+            </div>
+            <div className={css.listItemText}>
               <EthHashInfo address={owner.value} name={owner.name} hasExplorer showCopyButton />
-            </ListItemText>
-          </ListItem>
+            </div>
+          </li>
         ))}
       {!showOnlyConfirmations && confirmations.length > 0 && (
-        <ListItem>
-          <ListItemIcon sx={{ backgroundColor }}>
+        <li className={css.listItem}>
+          <div className={css.listItemIcon} style={{ backgroundColor }}>
             <Dot />
-          </ListItemIcon>
-          <ListItemText>
-            <Link
-              component="button"
-              onClick={toggleHide}
-              sx={{
-                fontSize: 'medium',
-              }}
-            >
+          </div>
+          <div className={css.listItemText}>
+            <Link render={<button type="button" />} onClick={toggleHide} className="text-base">
               {hideConfirmations ? 'Show all' : 'Hide all'}
             </Link>
-          </ListItemText>
-        </ListItem>
+          </div>
+        </li>
       )}
       {showMissingSignatures &&
         missingConfirmations.map((_, idx) => (
-          <ListItem key={`skeleton${idx}`} sx={{ py: 0 }}>
-            <ListItemIcon sx={{ backgroundColor }}>
-              <SvgIcon component={CircleOutlinedIcon} className={css.dot} color="border" fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 1,
-                }}
-              >
-                <Skeleton variant="circular" width={36} height={36} />
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: 'text.secondary',
-                  }}
-                >
+          <li key={`skeleton${idx}`} className={css.listItem}>
+            <div className={css.listItemIcon} style={{ backgroundColor }}>
+              <CircleOutlinedIcon className={`${css.dot} text-[var(--color-border-main)]`} />
+            </div>
+            <div className={css.listItemText}>
+              <div className="flex flex-row items-center gap-2">
+                <Skeleton className="size-9 rounded-full" />
+                <Typography variant="paragraph-small" className="text-[var(--color-text-secondary)]">
                   Confirmation #{idx + 1 + confirmationsSubmitted}
                 </Typography>
-              </Box>
-            </ListItemText>
-          </ListItem>
+              </div>
+            </div>
+          </li>
         ))}
       {isConfirmed && (
-        <ListItem>
-          <ListItemIcon sx={{ backgroundColor }}>
+        <li className={css.listItem}>
+          <div className={css.listItemIcon} style={{ backgroundColor }}>
             <Dot />
-          </ListItemIcon>
-          <ListItemText>Confirmed</ListItemText>
-        </ListItem>
+          </div>
+          <div className={css.listItemText}>Confirmed</div>
+        </li>
       )}
-    </List>
+    </ul>
   )
 }
 

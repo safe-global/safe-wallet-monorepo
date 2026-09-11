@@ -25,12 +25,9 @@ describe('Tx history tests 6', () => {
 
   // Token receipt
   it('Verify summary for token receipt', () => {
-    createTx.verifySummaryByName(
-      typeReceive.summaryTitle,
-      typeReceive.summaryTxInfo,
-      [typeReceive.summaryTxInfo, typeGeneral.statusOk],
-      typeReceive.altImage,
-    )
+    createTx.verifySummaryByName(typeReceive.summaryTitle, [typeReceive.summaryTxInfo, typeGeneral.statusOk], {
+      token: typeReceive.summaryTxInfo,
+    })
   })
 
   it('Verify exapanded details for token receipt', () => {
@@ -39,47 +36,33 @@ describe('Tx history tests 6', () => {
   })
 
   it('Verify summary for token send', () => {
-    createTx.verifySummaryByName(
-      typeSend.title,
-      null,
-      [typeSend.summaryTxInfo2, typeGeneral.statusOk],
-      typeSend.altImage,
-      typeSend.altToken,
-    )
+    createTx.verifySummaryByName(typeSend.title, [typeSend.summaryTxInfo2, typeGeneral.statusOk], {
+      altToken: typeSend.altToken,
+    })
   })
 
   it('Verify summary for on-chain rejection', () => {
-    createTx.verifySummaryByName(
-      typeOnchainRejection.title,
-      null,
-      [typeGeneral.statusOk],
-      typeOnchainRejection.altImage,
-    )
+    createTx.verifySummaryByName(typeOnchainRejection.title, [typeGeneral.statusOk])
   })
 
   it('Verify summary for batch', () => {
-    createTx.verifySummaryByName(typeBatch.title, typeBatch.summaryTxInfo, [
-      typeBatch.summaryTxInfo,
-      typeGeneral.statusOk,
-    ])
+    createTx.verifySummaryByName(typeBatch.title, [typeBatch.summaryTxInfo, typeGeneral.statusOk], {
+      token: typeBatch.summaryTxInfo,
+    })
   })
 
   it('Verify summary for allowance deletion', () => {
-    createTx.verifySummaryByName(
-      typeDeleteAllowance.title,
-      typeDeleteAllowance.summaryTxInfo,
-      [typeDeleteAllowance.summaryTxInfo, typeGeneral.statusOk],
-      typeDeleteAllowance.altImage,
-    )
+    createTx.verifySummaryByName(typeDeleteAllowance.title, [typeDeleteAllowance.summaryTxInfo, typeGeneral.statusOk], {
+      token: typeDeleteAllowance.summaryTxInfo,
+    })
   })
 
   it('Verify summary for untrusted token', () => {
     createTx.toggleUntrustedTxs()
     createTx.verifySummaryByName(
       typeUntrustedToken.summaryTitle,
-      typeUntrustedToken.summaryTxInfo,
       [typeUntrustedToken.summaryTxInfo, typeGeneral.statusOk],
-      typeUntrustedToken.altImage,
+      { token: typeUntrustedToken.summaryTxInfo },
     )
     createTx.verifySpamIconIsDisplayed(typeUntrustedToken.title, typeUntrustedToken.summaryTxInfo)
   })

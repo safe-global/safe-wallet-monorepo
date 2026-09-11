@@ -29,13 +29,13 @@ describe('Inviter', () => {
   })
 
   it('renders EmailInfo when invitedByName is not an Ethereum address', () => {
-    render(<Inviter invitedByName={EMAIL} variant="body1" avatarSize={20} />)
+    render(<Inviter invitedByName={EMAIL} variant="paragraph" avatarSize={20} />)
     expect(screen.getByTestId('email-info')).toHaveTextContent(EMAIL)
     expect(screen.queryByTestId('eth-hash-info')).not.toBeInTheDocument()
   })
 
   it('renders the leading " by" prefix when an inviter is present', () => {
-    render(<Inviter invitedByName={EMAIL} variant="body1" avatarSize={20} />)
+    render(<Inviter invitedByName={EMAIL} variant="paragraph" avatarSize={20} />)
     expect(screen.getByText(/by/)).toBeInTheDocument()
   })
 })

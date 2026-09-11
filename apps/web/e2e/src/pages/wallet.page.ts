@@ -33,7 +33,8 @@ export class WalletPage {
     // visibility is the wrong readiness signal. Playwright pierces shadow roots,
     // so we key off the shadow "Private key" button instead.
     this.privateKeyOption = this.onboardModal.getByRole('button', { name: 'Private key' })
-    this.privateKeyInput = page.getByTestId('private-key-input').locator('input')
+    // The testid sits on the <input> itself (shadcn/Base UI), not on a wrapper.
+    this.privateKeyInput = page.getByTestId('private-key-input')
     this.pkConnectBtn = page.getByTestId('pk-connect-btn')
     this.accountCenter = page.getByTestId('open-account-center')
     this.siweContinueBtn = page.getByTestId('continue-with-wallet-btn')

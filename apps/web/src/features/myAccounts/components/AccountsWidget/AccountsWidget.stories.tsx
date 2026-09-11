@@ -19,6 +19,7 @@ const MOCK_ITEMS: AllSafeItems = [
 ]
 
 const meta: Meta<typeof AccountsWidget> = {
+  title: 'Features/MyAccounts/AccountsWidget',
   component: AccountsWidget,
   tags: ['autodocs'],
   decorators: [

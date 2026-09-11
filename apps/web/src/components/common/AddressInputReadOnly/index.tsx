@@ -1,5 +1,4 @@
 import { type ReactElement } from 'react'
-import { InputAdornment, Typography } from '@mui/material'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import css from './styles.module.css'
 
@@ -14,8 +13,8 @@ const AddressInputReadOnly = ({
 }): ReactElement => {
   return (
     <div className={css.input} data-testid="address-book-recipient">
-      <InputAdornment position="start">
-        <Typography variant="body2" component="div" width={1}>
+      <div className="flex h-full items-center">
+        <div className="w-full text-sm">
           <EthHashInfo
             address={address}
             shortAddress={false}
@@ -24,8 +23,8 @@ const AddressInputReadOnly = ({
             showPrefix={showPrefix}
             avatarSize={32}
           />
-        </Typography>
-      </InputAdornment>
+        </div>
+      </div>
     </div>
   )
 }

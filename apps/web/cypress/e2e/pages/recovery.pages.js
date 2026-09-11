@@ -1,4 +1,3 @@
-import * as constants from '../../support/constants'
 import * as main from './main.page'
 import * as safe from '../pages/load_safe.pages'
 import * as tx from '../pages/transactions.page'
@@ -10,7 +9,11 @@ import { moduleRemoveIcon } from '../pages/modules.page'
 export const setupRecoveryBtn = '[data-testid="setup-recovery-btn"]'
 const recoveryNextBtn = '[data-testid="next-btn"]'
 const warningSection = '[data-testid="warning-section"]'
-const termsCheckbox = 'input[type="checkbox"]'
+// Base UI checkboxes hide the native input; the visible control reports state via aria-checked.
+const termsCheckbox = '[data-slot="checkbox"]'
+// Once opened, Base UI select popups stay mounted after closing — scope to the open one.
+const openSelectContent = '[data-slot="select-content"][data-open]'
+const selectItem = '[data-slot="select-item"]'
 export const removeRecovererBtn = '[data-testid="remove-recoverer-btn"]'
 export const editRecovererBtn = '[data-testid="edit-recoverer-btn"]'
 const recoveryProposalCard = '[data-testid="recovery-proposal-card"]'
@@ -77,7 +80,9 @@ export const recoveryDelayOptions = {
 
 export function setRecoveryDelay(option) {
   cy.get(recoveryDelaySelect).click()
-  cy.contains(option).click()
+  // Base UI select items only commit a click once highlighted; hover first so the
+  // highlight renders before the click lands.
+  cy.get(openSelectContent).contains(selectItem, option).trigger('mousemove').click()
 }
 
 export function verifyRecoveryDelayOptions(options) {
@@ -90,7 +95,7 @@ export function verifyRecoveryDelayOptions(options) {
 export function setRecoveryExpiry(option) {
   cy.get(advancedBtn).click()
   cy.get(recoveryExpirySelect).click()
-  cy.contains(option).click()
+  cy.get(openSelectContent).contains(selectItem, option).trigger('mousemove').click()
 }
 
 export function verifyRecoveryExpiryOptions(options) {
@@ -124,9 +129,9 @@ export function enterRecovererAddress(address) {
 
 export function agreeToTerms() {
   cy.get(warningSection).within(() => {
-    main.verifyCheckboxeState(termsCheckbox, 0, constants.checkboxStates.unchecked)
+    cy.get(termsCheckbox).should('have.attr', 'aria-checked', 'false')
     cy.get(termsCheckbox).click()
-    main.verifyCheckboxeState(termsCheckbox, 0, constants.checkboxStates.checked)
+    cy.get(termsCheckbox).should('have.attr', 'aria-checked', 'true')
   })
 }
 

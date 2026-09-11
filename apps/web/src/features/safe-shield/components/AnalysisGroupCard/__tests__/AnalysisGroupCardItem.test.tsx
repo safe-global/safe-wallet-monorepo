@@ -57,10 +57,8 @@ describe('AnalysisGroupCardItem', () => {
 
       const { container } = render(<AnalysisGroupCardItem result={result} severity={Severity.WARN} />)
 
-      const borderBox = container.querySelector('.MuiBox-root')
+      const borderBox = container.querySelector('.border-l-4')
       expect(borderBox).toBeInTheDocument()
-      const computedStyle = borderBox ? window.getComputedStyle(borderBox as Element) : null
-      expect(computedStyle).not.toBeNull()
     })
   })
 

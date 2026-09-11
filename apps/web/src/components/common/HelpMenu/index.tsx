@@ -1,12 +1,10 @@
 import { useState, useCallback, type ReactElement } from 'react'
-import { Menu, MenuItem, ListItemIcon, ListItemText, SvgIcon } from '@mui/material'
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'
-import { OpenInNewRounded } from '@mui/icons-material'
+import { HelpCircle, MessageCircle, ExternalLink } from 'lucide-react'
+import { Popover, PopoverContent } from '@/components/ui/popover'
+import { Button } from '@/components/ui/button'
 import { useLoadFeature } from '@/features/__core__'
 import { SupportChatFeature, useSupportChat } from '@/features/support-chat'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
-import css from './styles.module.css'
 
 const HELP_CENTER_URL = 'https://help.safe.global'
 
@@ -40,37 +38,37 @@ const HelpMenu = ({ anchorEl, onClose }: HelpMenuProps): ReactElement | null => 
 
   return (
     <>
-      <Menu
-        className={css.menu}
-        anchorEl={anchorEl}
+      <Popover
         open={isMenuOpen}
-        onClose={onClose}
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
+        onOpenChange={(open) => {
+          if (!open) onClose()
         }}
       >
-        <MenuItem onClick={handleHelpCenterClick}>
-          <ListItemIcon>
-            <HelpOutlineIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Help center</ListItemText>
-          <SvgIcon component={OpenInNewRounded} fontSize="small" sx={{ color: 'text.secondary', ml: 1 }} />
-        </MenuItem>
+        <PopoverContent anchor={anchorEl} side="top" align="end" className="w-auto min-w-32 gap-1 p-1">
+          <Button
+            variant="ghost"
+            onClick={handleHelpCenterClick}
+            // eslint-disable-next-line no-restricted-syntax -- menu-item button: auto height + row padding; pending a menu-item size
+            className="h-auto w-full justify-start gap-2 px-3 py-2 font-normal"
+          >
+            <HelpCircle className="size-4" />
+            <span className="flex-1 text-left">Help center</span>
+            <ExternalLink className="size-4 text-[var(--color-text-secondary)]" />
+          </Button>
 
-        {showSupport ? (
-          <MenuItem onClick={handleContactSupportClick}>
-            <ListItemIcon>
-              <ChatBubbleOutlineIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>Contact support</ListItemText>
-          </MenuItem>
-        ) : null}
-      </Menu>
+          {showSupport ? (
+            <Button
+              variant="ghost"
+              onClick={handleContactSupportClick}
+              // eslint-disable-next-line no-restricted-syntax -- menu-item button: auto height + row padding; pending a menu-item size
+              className="h-auto w-full justify-start gap-2 px-3 py-2 font-normal"
+            >
+              <MessageCircle className="size-4" />
+              <span className="flex-1 text-left">Contact support</span>
+            </Button>
+          ) : null}
+        </PopoverContent>
+      </Popover>
 
       {showSupport ? (
         <SupportChatDrawer open={isSupportOpen} onClose={handleSupportClose} config={config} user={user} />

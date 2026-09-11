@@ -20,8 +20,10 @@ test.describe('Balances page', { tag: '@smoke' }, () => {
     // 2. UI: navigate to balances page
     await safePage.goto(`${ROUTES.balances}?safe=${SAFES.SEP_STATIC_SAFE_1}`)
 
-    // 3. Verify: UI shows the first token symbol from API
-    const firstToken = balances.items[0]
-    await expect(safePage.getByText(firstToken.tokenInfo.symbol)).toBeVisible()
+    // 3. Verify: UI shows the first token symbol from API.
+    // Matched on the symbol cell's own testid rather than by text: `getByText` is a case-insensitive
+    // substring match, so "ETH" also hits the amount ("0.1 ETH") and the token name ("Sepolia Ether")
+    // and trips strict mode with three results.
+    await expect(safePage.getByTestId('token-symbol').first()).toHaveText(balances.items[0].tokenInfo.symbol)
   })
 })

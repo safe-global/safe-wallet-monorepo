@@ -54,7 +54,9 @@ const AddAccountsChooser = ({ onLinkClick, buttonVariant = 'outline', className 
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
+        {/* eslint-disable-next-line no-restricted-syntax -- bespoke dialog width/padding preserved from dev's #8271 redesign; candidate for a Dialog size/padding variant later */}
         <DialogContent showCloseButton className="max-w-[440px] p-6 dark:border dark:border-border">
+          {/* eslint-disable-next-line no-restricted-syntax -- bespoke header padding preserved from dev's #8271 redesign */}
           <DialogHeader className="p-0 pb-3">
             <DialogTitle className="font-bold">Add Safe accounts</DialogTitle>
           </DialogHeader>

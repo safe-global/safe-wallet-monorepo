@@ -5,6 +5,7 @@ import type { useLoadFeature } from '@/features/__core__'
 import type { SecurityContract } from '@/features/security'
 import useSafeScanContext from '../../../hooks/useSafeScanContext'
 import type { OverviewMap, SelectedSafe, SpaceSafeEntry } from '../types'
+import { isSameSelection } from '../utils'
 
 type SecurityHandle = ReturnType<typeof useLoadFeature<SecurityContract>>
 
@@ -32,10 +33,7 @@ const useReportDrawer = ({ security, safes, overviewMap }: UseReportDrawerParams
   const [selectedSafe, setSelectedSafe] = useState<SelectedSafe | null>(null)
 
   const openReport = useCallback((address: string, chainId: string) => {
-    setSelectedSafe((prev) => {
-      if (prev && sameAddress(prev.address, address) && prev.chainId === chainId) return null
-      return { address, chainId }
-    })
+    setSelectedSafe((prev) => (isSameSelection(prev, address, chainId) ? null : { address, chainId }))
   }, [])
 
   const closeReport = useCallback(() => setSelectedSafe(null), [])

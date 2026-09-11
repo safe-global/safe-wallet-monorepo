@@ -1,9 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`RecoveryModal component proposal should not render the proposal modal when there is no queue for non-owners 1`] = `"<div aria-hidden="true" class="MuiBackdrop-root css-19tyr40-MuiBackdrop-root" style="opacity: 0; visibility: hidden;"></div>"`;
+exports[`RecoveryModal component proposal should not render the proposal modal when there is no queue for non-owners 1`] = `"<div class="fixed inset-0 z-[3] flex items-center justify-center bg-[var(--color-background-main)] transition-opacity duration-300 pointer-events-none opacity-0"></div>"`;
 
-exports[`RecoveryModal component proposal should not render the proposal modal when there is no queue for owners 1`] = `"<div aria-hidden="true" class="MuiBackdrop-root css-19tyr40-MuiBackdrop-root" style="opacity: 0; visibility: hidden;"></div>"`;
+exports[`RecoveryModal component proposal should not render the proposal modal when there is no queue for owners 1`] = `"<div class="fixed inset-0 z-[3] flex items-center justify-center bg-[var(--color-background-main)] transition-opacity duration-300 pointer-events-none opacity-0"></div>"`;
 
-exports[`RecoveryModal component proposal should not render the proposal modal when there is no queue for recoverers on a non-sidebar route 1`] = `"<div aria-hidden="true" class="MuiBackdrop-root css-19tyr40-MuiBackdrop-root" style="opacity: 0; visibility: hidden;"></div>"`;
+exports[`RecoveryModal component proposal should not render the proposal modal when there is no queue for recoverers on a non-sidebar route 1`] = `"<div class="fixed inset-0 z-[3] flex items-center justify-center bg-[var(--color-background-main)] transition-opacity duration-300 pointer-events-none opacity-0"></div>"`;
 
-exports[`RecoveryModal component should not render either modal if there is no queue and the user is an owner 1`] = `"<div aria-hidden="true" class="MuiBackdrop-root css-19tyr40-MuiBackdrop-root" style="opacity: 0; visibility: hidden;"></div>"`;
+exports[`RecoveryModal component should not render either modal if there is no queue and the user is an owner 1`] = `"<div class="fixed inset-0 z-[3] flex items-center justify-center bg-[var(--color-background-main)] transition-opacity duration-300 pointer-events-none opacity-0"></div>"`;

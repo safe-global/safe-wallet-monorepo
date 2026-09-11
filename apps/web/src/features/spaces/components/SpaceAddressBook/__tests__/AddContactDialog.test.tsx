@@ -13,6 +13,8 @@ jest.mock('@/store/notificationsSlice', () => ({
   showNotification: (payload: unknown) => ({ type: 'notifications/show', payload }),
 }))
 
+jest.mock('@/hooks/useDarkMode', () => ({ useDarkMode: () => false }))
+
 jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '42',
 }))

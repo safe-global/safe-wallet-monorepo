@@ -3,7 +3,7 @@ import { ArrowUpRight } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
 import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 import { SafeSidebarContent } from '../SafeSidebarContent'
-import type { SidebarGroupConfig, SidebarItemConfig } from '../../../types'
+import type { SidebarGroupConfig, SidebarItemConfig, SafeSidebarVariantProps } from '../../../types'
 
 const mockUseResolvedSidebarNav = jest.fn()
 const mockIsRouteEnabled = jest.fn()
@@ -63,7 +63,7 @@ jest.mock('../../../config', () => {
 const mockSafeSidebarVariant = jest.fn()
 
 jest.mock('../../SafeSidebarVariant', () => ({
-  SafeSidebarVariant: (props: unknown) => {
+  SafeSidebarVariant: (props: SafeSidebarVariantProps) => {
     mockSafeSidebarVariant(props)
     return <div>Safe sidebar</div>
   },

@@ -2,19 +2,16 @@ import { useMemo } from 'react'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { useGetChainsConfigV2Query } from '@safe-global/store/gateway'
 import useChainId from './useChainId'
-import type { FEATURES } from '@safe-global/utils/utils/chains'
-import { hasFeature } from '@safe-global/utils/utils/chains'
+import { type FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
+import { useChainsWithOverrides } from '@/features/feature-flag-overrides'
 
 const useChains = (): { configs: Chain[]; error?: string; loading?: boolean } => {
   const { data, error, isLoading } = useGetChainsConfigV2Query(CONFIG_SERVICE_KEY)
 
-  const configs = useMemo(() => {
-    if (!data) return []
-    // data is already EntityState with { ids: string[], entities: { [id: string]: Chain } }
-    return data.ids.map((id) => data.entities[id]!)
-  }, [data])
+  const rawConfigs = useMemo(() => (data ? data.ids.map((id) => data.entities[id]!) : []), [data])
+  const configs = useChainsWithOverrides(rawConfigs)
 
   return useMemo(
     () => ({
@@ -31,11 +28,10 @@ export default useChains
 export const useChain = (chainId: string): Chain | undefined => {
   const { data } = useGetChainsConfigV2Query(CONFIG_SERVICE_KEY)
 
-  return useMemo(() => {
-    if (!data) return undefined
-    // data.entities is a direct lookup by chainId
-    return data.entities[chainId]
-  }, [data, chainId])
+  const rawChain = data?.entities[chainId]
+  const rawChains = useMemo(() => (rawChain ? [rawChain] : []), [rawChain])
+
+  return useChainsWithOverrides(rawChains)[0]
 }
 
 export const useCurrentChain = (): Chain | undefined => {

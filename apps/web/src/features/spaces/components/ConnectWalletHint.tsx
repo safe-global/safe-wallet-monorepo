@@ -25,7 +25,7 @@ const ConnectWalletHint = ({ testId, onConnect }: { testId?: string; onConnect?:
           variant="outline"
           onClick={onConnect ?? connectWallet}
           data-testid={testId}
-          className="shrink-0 rounded-md"
+          className="shrink-0 hover:bg-muted"
         >
           Connect
         </Button>

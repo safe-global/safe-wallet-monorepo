@@ -1,11 +1,25 @@
+/* The log is the container its rows measure against: TxDetails gives it a 33.3% side column above
+   600px and the full width below, so its width does not track the viewport's. */
+.auditLog {
+  container-type: inline-size;
+  container-name: audit-log-container;
+}
+
+/* The trailing row is empty spacing that the timeline spans, so the connector reaches the next
+   entry's icon regardless of which element ends the row — or whether there is an actor line. */
 .auditRow {
   display: grid;
   grid-template-columns: 28px 1fr auto;
+  grid-template-areas:
+    'timeline label timestamp'
+    'timeline actor .'
+    'timeline .     .';
+  grid-template-rows: auto auto var(--space-2);
   column-gap: var(--space-2);
-  padding: 0;
 }
 
 .timelineCol {
+  grid-area: timeline;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -18,26 +32,24 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background-color: var(--color-background-main);
+  background-color: var(--muted);
   flex-shrink: 0;
 }
 
 .timelineLine {
   width: 2px;
   flex: 1;
-  background-color: var(--color-background-main);
+  background-color: var(--border);
   min-height: 8px;
 }
 
-.infoCol {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+.label {
+  grid-area: label;
   min-width: 0;
-  padding: 0 0 var(--space-2);
 }
 
 .actorRow {
+  grid-area: actor;
   display: flex;
   align-items: center;
   gap: var(--space-1);
@@ -67,8 +79,27 @@
 }
 
 .timestamp {
+  grid-area: timestamp;
+  align-self: baseline;
   white-space: nowrap;
   text-align: right;
-  flex-shrink: 0;
-  padding-top: 0;
+}
+
+/* 300px is the column at a 375px viewport, where the label and address start to truncate against the
+   ~137px timestamp. Below it the timestamp drops beneath both and they get the full width. */
+@container audit-log-container (max-width: 300px) {
+  .auditRow {
+    grid-template-columns: 28px 1fr;
+    grid-template-areas:
+      'timeline label'
+      'timeline actor'
+      'timeline timestamp'
+      'timeline .';
+    grid-template-rows: auto auto auto var(--space-2);
+  }
+
+  .timestamp {
+    text-align: left;
+    margin-top: 2px;
+  }
 }

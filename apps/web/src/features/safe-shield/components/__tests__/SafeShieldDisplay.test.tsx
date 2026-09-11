@@ -59,7 +59,8 @@ describe('SafeShieldDisplay', () => {
         />,
       )
 
-      expect(container.querySelector('.MuiSvgIcon-root')).toBeInTheDocument()
+      // The Safe Shield logo renders as the mocked SVG element
+      expect(container.querySelector('mock-icon')).toBeInTheDocument()
     })
 
     it('should render with empty props', () => {
@@ -72,12 +73,13 @@ describe('SafeShieldDisplay', () => {
         />,
       )
 
-      expect(container.querySelector('.MuiCard-root')).toBeInTheDocument()
-      expect(container.querySelector('.MuiSvgIcon-root')).toBeInTheDocument()
+      // Root widget container and the logo render
+      expect(screen.getByTestId('safe-shield-widget')).toBeInTheDocument()
+      expect(container.querySelector('mock-icon')).toBeInTheDocument()
     })
 
     it('should have correct layout structure', () => {
-      const { container } = render(
+      render(
         <SafeShieldDisplay
           recipient={emptyRecipient}
           contract={emptyContract}
@@ -86,13 +88,9 @@ describe('SafeShieldDisplay', () => {
         />,
       )
 
-      // Check for Stack container
-      const stacks = container.querySelectorAll('.MuiStack-root')
-      expect(stacks.length).toBeGreaterThan(0)
-
-      // Check for Card container
-      const card = container.querySelector('.MuiCard-root')
-      expect(card).toBeInTheDocument()
+      // Root widget container and header are rendered
+      expect(screen.getByTestId('safe-shield-widget')).toBeInTheDocument()
+      expect(screen.getByTestId('safe-shield-status')).toBeInTheDocument()
     })
   })
 
@@ -303,7 +301,7 @@ describe('SafeShieldDisplay', () => {
       )
 
       expect(screen.getByText('Checks passed')).toBeInTheDocument()
-      expect(container.querySelector('.MuiSvgIcon-root')).toBeInTheDocument()
+      expect(container.querySelector('mock-icon')).toBeInTheDocument()
     })
   })
 
@@ -337,7 +335,7 @@ describe('SafeShieldDisplay', () => {
         />,
       )
 
-      expect(container.querySelector('.MuiSvgIcon-root')).toBeInTheDocument()
+      expect(container.querySelector('mock-icon')).toBeInTheDocument()
     })
 
     it('should render logo even with errors', () => {
@@ -353,7 +351,7 @@ describe('SafeShieldDisplay', () => {
         />,
       )
 
-      expect(container.querySelector('.MuiSvgIcon-root')).toBeInTheDocument()
+      expect(container.querySelector('mock-icon')).toBeInTheDocument()
     })
 
     it('should render logo during loading', () => {
@@ -371,7 +369,7 @@ describe('SafeShieldDisplay', () => {
         />,
       )
 
-      expect(container.querySelector('.MuiSvgIcon-root')).toBeInTheDocument()
+      expect(container.querySelector('mock-icon')).toBeInTheDocument()
     })
   })
 

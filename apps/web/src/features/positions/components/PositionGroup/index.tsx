@@ -1,10 +1,11 @@
-import { Box, Stack, Typography } from '@mui/material'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import FiatValue from '@/components/common/FiatValue'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { getReadablePositionType } from '@/features/positions/utils'
 import TokenIcon from '@/components/common/TokenIcon'
 import { FiatChange } from '@/components/balances/AssetsTable/FiatChange'
+import { Typography } from '@/components/ui/typography'
+import { cn } from '@/utils/cn'
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 
 interface PositionGroupProps {
@@ -24,7 +25,7 @@ export const PositionGroup = ({ group, isLast = false, protocolIconUrl }: Positi
     {
       id: 'name',
       label: (
-        <Typography variant="body2" fontWeight="bold" color="text.primary">
+        <Typography variant="paragraph-small-bold" className="text-[var(--color-text-primary)]">
           {group.name}
         </Typography>
       ),
@@ -40,7 +41,7 @@ export const PositionGroup = ({ group, isLast = false, protocolIconUrl }: Positi
     cells: {
       name: {
         content: (
-          <Stack direction="row" alignItems="center" gap={1}>
+          <div className="flex items-center gap-2">
             <TokenIcon
               logoUri={position.tokenInfo.logoUri ?? undefined}
               tokenSymbol={position.tokenInfo.symbol}
@@ -48,21 +49,19 @@ export const PositionGroup = ({ group, isLast = false, protocolIconUrl }: Positi
               badgeUri={protocolIconUrl}
             />
 
-            <Box>
-              <Typography variant="body2" fontWeight="bold">
-                {position.tokenInfo.name}
-              </Typography>
-              <Typography variant="body2" color="primary.light">
+            <div>
+              <Typography variant="paragraph-small-bold">{position.tokenInfo.name}</Typography>
+              <Typography variant="paragraph-small" className="block text-[var(--color-primary-light)]">
                 {position.tokenInfo.symbol} •&nbsp; {getReadablePositionType(position.position_type)}
               </Typography>
-            </Box>
-          </Stack>
+            </div>
+          </div>
         ),
         rawValue: position.tokenInfo.name,
       },
       balance: {
         content: (
-          <Typography textAlign="right">
+          <Typography align="right">
             {formatVisualAmount(position.balance, position.tokenInfo.decimals)} {position.tokenInfo.symbol}
           </Typography>
         ),
@@ -70,14 +69,14 @@ export const PositionGroup = ({ group, isLast = false, protocolIconUrl }: Positi
       },
       value: {
         content: (
-          <Box textAlign="right">
+          <div className="text-right">
             <Typography>
               <FiatValue value={position.fiatBalance} />
             </Typography>
-            <Typography variant="caption">
+            <Typography variant="paragraph-mini" className="block">
               <FiatChange balanceItem={position} inline />
             </Typography>
-          </Box>
+          </div>
         ),
         rawValue: position.fiatBalance,
       },
@@ -85,8 +84,8 @@ export const PositionGroup = ({ group, isLast = false, protocolIconUrl }: Positi
   }))
 
   return (
-    <Box sx={{ mb: isLast ? 0 : 2 }}>
+    <div className={cn(isLast ? 'mb-0' : 'mb-4')}>
       <EnhancedTable rows={rows} headCells={headCells} compact />
-    </Box>
+    </div>
   )
 }

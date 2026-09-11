@@ -59,6 +59,18 @@ describe('useNotificationsPopover', () => {
     expect(result.current.unreadCount).toBe(2)
   })
 
+  it('leaves errors out of the list and the unread count', () => {
+    const initialReduxState = stateWithNotifications([
+      createNotification({ message: 'queued' }),
+      createNotification({ message: 'failed', variant: 'error' }),
+    ])
+
+    const { result } = renderHook(() => useNotificationsPopover(), { initialReduxState })
+
+    expect(result.current.notifications.map(({ message }) => message)).toEqual(['queued'])
+    expect(result.current.unreadCount).toBe(1)
+  })
+
   it('sorts notifications chronologically (newest first)', () => {
     const initialReduxState = stateWithNotifications([
       createNotification({ message: 'older', timestamp: 1000 }),

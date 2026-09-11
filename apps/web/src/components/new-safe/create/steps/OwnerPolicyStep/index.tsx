@@ -1,6 +1,10 @@
 import useAddressBook from '@/hooks/useAddressBook'
 import useWallet from '@/hooks/wallets/useWallet'
-import { Button, SvgIcon, MenuItem, Tooltip, Typography, Divider, Box, Grid, TextField } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
+import { Separator } from '@/components/ui/separator'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Controller, FormProvider, useFieldArray, useForm } from 'react-hook-form'
 import type { ReactElement } from 'react'
 
@@ -12,7 +16,7 @@ import type { NewSafeFormData } from '@/components/new-safe/create'
 import type { CreateSafeInfoItem } from '@/components/new-safe/create/CreateSafeInfos'
 import { useSafeSetupHints } from '@/components/new-safe/create/steps/OwnerPolicyStep/useSafeSetupHints'
 import useSyncSafeCreationStep from '@/components/new-safe/create/useSyncSafeCreationStep'
-import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import { ArrowLeft as ArrowBackIcon } from 'lucide-react'
 import layoutCss from '@/components/new-safe/create/styles.module.css'
 import { CREATE_SAFE_EVENTS, trackEvent } from '@/services/analytics'
 import OwnerRow from '@/components/new-safe/OwnerRow'
@@ -99,7 +103,7 @@ const OwnerPolicyStep = ({
   return (
     <form data-testid="owner-policy-step-form" onSubmit={onFormSubmit} id={OWNER_POLICY_STEP_FORM_ID}>
       <FormProvider {...formMethods}>
-        <Box className={layoutCss.row}>
+        <div className={layoutCss.row}>
           {ownerFields.map((field, i) => (
             <OwnerRow
               key={field.id}
@@ -111,100 +115,76 @@ const OwnerPolicyStep = ({
           ))}
           <Button
             data-testid="add-new-signer"
-            variant="text"
+            variant="ghost"
             onClick={() => appendOwner({ name: '', address: '' }, { shouldFocus: true })}
-            startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
-            size="large"
+            size="lg"
           >
+            <AddIcon className="size-4" />
             Add new signer
           </Button>
-        </Box>
+        </div>
 
-        <Divider />
-        <Box className={layoutCss.row}>
-          <Typography
-            variant="h4"
-            sx={{
-              fontWeight: 700,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 1,
-            }}
-          >
+        <Separator />
+        <div className={layoutCss.row}>
+          <Typography variant="h4" className="inline-flex items-center gap-2">
             Threshold
-            <Tooltip
-              title="The threshold of a Safe account specifies how many signers need to confirm a Safe account transaction before it can be executed."
-              arrow
-              placement="top"
-            >
-              <span style={{ display: 'flex' }}>
-                <SvgIcon component={InfoIcon} inheritViewBox color="border" fontSize="small" />
-              </span>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <span className="flex text-[var(--color-border-main)]">
+                    <InfoIcon className="size-4" />
+                  </span>
+                }
+              />
+              <TooltipContent>
+                The threshold of a Safe account specifies how many signers need to confirm a Safe account transaction
+                before it can be executed.
+              </TooltipContent>
             </Tooltip>
           </Typography>
-          <Typography
-            variant="body2"
-            sx={{
-              mb: 2,
-            }}
-          >
+          <Typography variant="paragraph-small" className="mb-4 block">
             Any transaction requires the confirmation of:
           </Typography>
-          <Grid
-            container
-            direction="row"
-            sx={{
-              alignItems: 'center',
-              gap: 2,
-              pt: 1,
-            }}
-          >
-            <Grid item>
+          <div className="flex flex-row items-center gap-4 pt-2">
+            <div>
               <Controller
                 control={control}
                 name="threshold"
                 render={({ field }) => (
-                  <TextField data-testid="threshold-selector" select {...field}>
-                    {ownerFields.map((_, idx) => (
-                      <MenuItem data-testid="threshold-item" key={idx + 1} value={idx + 1}>
-                        {idx + 1}
-                      </MenuItem>
-                    ))}
-                  </TextField>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger data-testid="threshold-selector">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ownerFields.map((_, idx) => (
+                        <SelectItem data-testid="threshold-item" key={idx + 1} value={idx + 1}>
+                          {idx + 1}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 )}
               />
-            </Grid>
-            <Grid item>
+            </div>
+            <div>
               <Typography>
                 out of {ownerFields.length} signer{maybePlural(ownerFields)}
               </Typography>
-            </Grid>
-          </Grid>
-        </Box>
-        <Divider />
-        <Box className={layoutCss.row}>
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              gap: 3,
-            }}
-          >
-            <Button
-              data-testid="back-btn"
-              variant="outlined"
-              size="large"
-              onClick={handleBack}
-              startIcon={<ArrowBackIcon fontSize="small" />}
-            >
+            </div>
+          </div>
+        </div>
+        <Separator />
+        <div className={layoutCss.row}>
+          <div className="flex flex-row justify-between gap-6">
+            <Button data-testid="back-btn" variant="outline" size="lg" onClick={handleBack}>
+              <ArrowBackIcon className="size-4" />
               Back
             </Button>
-            <Button data-testid="next-btn" type="submit" variant="contained" size="large" disabled={isDisabled}>
+            <Button data-testid="next-btn" type="submit" variant="default" size="lg" disabled={isDisabled}>
               Next
             </Button>
-          </Box>
-        </Box>
+          </div>
+        </div>
       </FormProvider>
     </form>
   )

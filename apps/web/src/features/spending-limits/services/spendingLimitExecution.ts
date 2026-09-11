@@ -1,5 +1,4 @@
 import type { SpendingLimitState, NewSpendingLimitData, SpendingLimitTxParams } from '../types'
-import { getSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import {
   getLatestSpendingLimitAddress,
   getDeployedSpendingLimitModuleAddress,
@@ -20,9 +19,20 @@ import { currentMinutes } from '@safe-global/utils/utils/date'
 import { createMultiSendCallOnlyTx } from '@/services/tx/tx-sender/create'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
 import { didRevert } from '@/utils/ethers-utils'
-import { getUncheckedSigner } from '@/services/tx/tx-sender/sdk'
+import { getAndValidateSafeSDK, getUncheckedSigner } from '@/services/tx/tx-sender/sdk'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 
+export const NO_ALLOWANCE_MODULE_ERROR =
+  'The spending limit module is not available on this network, so the transaction could not be created.'
+
+/**
+ * Builds the multiSend that enables the AllowanceModule (when needed) and sets the allowance.
+ *
+ * Never resolves `undefined`: the review step feeds the result straight into `setSafeTx`, so a
+ * silent `undefined` leaves `ReviewTransaction` on its skeleton forever with no error and no chain
+ * interaction (WA-2305 / CUS-132). Every unmet precondition therefore throws, matching the other
+ * tx builders in `services/tx/tx-sender/create` and letting `setSafeTxError` surface it.
+ */
 export const createNewSpendingLimitTx = async (
   data: NewSpendingLimitData,
   spendingLimits: SpendingLimitState[],
@@ -33,15 +43,16 @@ export const createNewSpendingLimitTx = async (
   tokenDecimals?: number | null,
   existingSpendingLimit?: SpendingLimitState,
 ) => {
-  const sdk = getSafeSDK()
-  if (!sdk) return
+  const sdk = getAndValidateSafeSDK()
 
   let spendingLimitAddress = deployed && getDeployedSpendingLimitModuleAddress(chainId, safeModules)
   const isModuleEnabled = !!spendingLimitAddress
   if (!isModuleEnabled) {
     spendingLimitAddress = getLatestSpendingLimitAddress(chainId)
   }
-  if (!spendingLimitAddress) return
+  if (!spendingLimitAddress) {
+    throw new Error(NO_ALLOWANCE_MODULE_ERROR)
+  }
 
   const txs: MetaTransactionData[] = []
 

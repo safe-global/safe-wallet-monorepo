@@ -3,6 +3,14 @@
   flex-direction: row;
   margin-top: var(--space-3);
   gap: var(--space-1);
+  align-items: flex-start;
+}
+
+/* Centres the delete button on the 66px field by skipping TokenAmountInput's label block. Offsets
+   are Tailwind's scale (label line box + gap-3), not the app's --space-* tokens. */
+.removeAsset {
+  display: flex;
   align-items: center;
-  justify-content: center;
+  height: 66px;
+  margin-top: calc(0.875rem * 1.375 + 0.75rem);
 }

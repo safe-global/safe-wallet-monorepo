@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo } from 'react'
-import { CircularProgress, FormControl, Grid, IconButton, SvgIcon, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 import NameInput from '@/components/common/NameInput'
-import InputAdornment from '@mui/material/InputAdornment'
+import { largeFormFieldRowClassName } from '@/components/common/formFieldStyles'
 import AddressBookInput from '@/components/common/AddressBookInput'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { useFormContext, useWatch } from 'react-hook-form'
@@ -10,6 +11,8 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import type { NamedAddress } from '@/components/new-safe/create/types'
 import useWallet from '@/hooks/wallets/useWallet'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { addressIsNotCurrentSafe, addressIsNotReserved } from '@safe-global/utils/utils/validation'
+import { getContractErrorMessage } from '@safe-global/utils/services/exceptions/contractErrors'
 import css from './styles.module.css'
 import classNames from 'classnames'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -44,17 +47,23 @@ const OwnerRow = ({
     return Array.from({ length: owners.length }, (_, i) => `${groupName}.${i}`)
   }, [owners, groupName])
 
+  // Blocks the GS203/GS204 on-chain reverts before signing (WA-3005 Bucket A)
   const validateOwnerAddress = useCallback(
     async (address: string) => {
-      if (sameAddress(address, safeAddress)) {
-        return 'The Safe account cannot own itself'
+      const reservedError = addressIsNotReserved()(address)
+      if (reservedError) {
+        return reservedError
       }
-      const owners = getValues('owners')
-      if (owners.filter((owner: NamedAddress) => sameAddress(owner.address, address)).length > 1) {
-        return 'Signer is already added'
+      const currentSafeError = addressIsNotCurrentSafe(safeAddress)(address)
+      if (currentSafeError) {
+        return currentSafeError
+      }
+      const owners: NamedAddress[] = getValues(groupName)
+      if (owners.filter((owner) => sameAddress(owner.address, address)).length > 1) {
+        return getContractErrorMessage('GS204')
       }
     },
-    [getValues, safeAddress],
+    [getValues, groupName, safeAddress],
   )
 
   const { name, ens, resolving } = useAddressResolver(owner.address)
@@ -72,44 +81,43 @@ const OwnerRow = ({
   }, [ens, setValue, fieldName])
 
   const walletIsOwner = owner.address === wallet?.address
-
   return (
-    <Grid
-      container
-      spacing={3}
-      className={classNames({ [css.helper]: walletIsOwner })}
-      sx={{
-        alignItems: 'center',
-        marginBottom: 3,
-        flexWrap: ['wrap', undefined, 'nowrap'],
-      }}
+    <div
+      // `items-start`: both columns are label-above-control fields of the same 66px box height, so
+      // aligning their tops puts the labels on one baseline and the boxes level. Bottom-aligning
+      // them instead pushed the address field down by the height of the name field's
+      // "Your connected wallet" caption.
+      className={classNames('mb-6 grid grid-cols-12 items-start gap-6', {
+        [css.helper]: walletIsOwner,
+      })}
     >
-      <Grid item xs={12} md={readOnly ? 5 : 4}>
-        <FormControl fullWidth>
+      <div className={readOnly ? 'col-span-12 md:col-span-5' : 'col-span-12 md:col-span-4'}>
+        <div className="flex w-full flex-col">
           <NameInput
             data-testid="owner-name"
             name={`${fieldName}.name`}
             label="Signer name"
             InputLabelProps={{ shrink: true }}
+            inputSize="hero"
+            variant="surface"
             placeholder={ens || `Signer ${index + 1}`}
             helperText={walletIsOwner && 'Your connected wallet'}
             InputProps={{
-              endAdornment: resolving ? (
-                <InputAdornment position="end">
-                  <CircularProgress size={20} />
-                </InputAdornment>
-              ) : null,
+              endAdornment: resolving && <Spinner className="size-5" />,
             }}
           />
-        </FormControl>
-      </Grid>
-      <Grid item xs={11} md={7}>
+        </div>
+      </div>
+      <div
+        className={classNames(
+          'col-span-11 md:col-span-7',
+          readOnly && `${largeFormFieldRowClassName} mt-[calc(0.875rem*1.375+0.75rem)]`,
+        )}
+      >
         {readOnly ? (
-          <Typography variant="body2" component="div">
-            <EthHashInfo address={owner.address} shortAddress hasExplorer showCopyButton />
-          </Typography>
+          <EthHashInfo address={owner.address} shortAddress hasExplorer showCopyButton />
         ) : (
-          <FormControl fullWidth>
+          <div className="flex w-full flex-col">
             <AddressBookInput
               name={`${fieldName}.address`}
               label="Signer"
@@ -117,31 +125,27 @@ const OwnerRow = ({
               deps={deps}
               onReset={() => setValue(`${fieldName}.name`, '')}
             />
-          </FormControl>
+          </div>
         )}
-      </Grid>
+      </div>
       {!readOnly && (
-        <Grid
-          item
-          xs={1}
-          sx={{
-            ml: -2,
-            alignSelf: 'stretch',
-            display: 'flex',
-            alignItems: 'center',
-            flexShrink: 0,
-          }}
-        >
+        // Offset past the label (text-sm x leading-snug + Field's gap-3, Tailwind's scale) so the
+        // button centres on the 66px field, not the cell — which grows with the wallet caption.
+        <div className="col-span-1 -ml-4 mt-[calc(0.875rem*1.375+0.75rem)] flex h-[66px] shrink-0 items-center">
           {removable && (
-            <>
-              <IconButton data-testid="remove-owner-btn" onClick={() => remove?.(index)} aria-label="Remove signer">
-                <SvgIcon component={DeleteIcon} inheritViewBox />
-              </IconButton>
-            </>
+            <Button
+              variant="ghost"
+              size="icon"
+              data-testid="remove-owner-btn"
+              onClick={() => remove?.(index)}
+              aria-label="Remove signer"
+            >
+              <DeleteIcon />
+            </Button>
           )}
-        </Grid>
+        </div>
       )}
-    </Grid>
+    </div>
   )
 }
 

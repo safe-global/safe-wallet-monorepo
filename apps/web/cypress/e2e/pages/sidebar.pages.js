@@ -9,6 +9,8 @@ import * as create_wallet from '../pages/create_wallet.pages.js'
 export const chainLogo = '[data-testid="chain-logo"]'
 const safeIcon = '[data-testid="safe-icon"]'
 const sidebarContainer = '[data-testid="sidebar-container"]'
+const sidebarTopBar = '[data-testid="sidebar-top-bar"]'
+const sidebarTrigger = '[data-testid="sidebar-trigger"]'
 const openSafesIcon = '[data-testid="open-safes-icon"]'
 const qrModalBtn = '[data-testid="qr-modal-btn"]'
 export const copyAddressBtn = '[data-testid="copy-address-btn"]'
@@ -85,9 +87,12 @@ export function checkSafesCountInPopverList(number) {
 }
 
 export function clickOnSafeInPopover(safe) {
-  cy.get(nestedSafeListPopover).within(() => {
-    cy.contains(safe).click()
-  })
+  // Rows are overlay links: the content layer is pointer-events-none, so click the row's
+  // covering "Open Safe" anchor directly (force: the copy button sits above its center).
+  cy.get(nestedSafeListPopover)
+    .contains('[data-testid="safe-list-item"]', safe)
+    .find('a[aria-label="Open Safe"]')
+    .click({ force: true })
 }
 
 export function clickOnParentSafeInBreadcrumb() {
@@ -109,9 +114,7 @@ export function checkParentSafeInBreadcrumb(name, address) {
 
 export function checkNestedSafeInBreadcrumb(name) {
   cy.get(breadcrumpContainer).within(() => {
-    cy.get(nestedSafeItem).within(() => {
-      cy.get('p').should('contain', name)
-    })
+    cy.get(nestedSafeItem).should('contain', name)
   })
 }
 
@@ -380,6 +383,14 @@ export function openSidebar() {
   cy.wait(500)
   showAllSafes()
   main.verifyElementsExist([sidebarSafeContainer])
+}
+
+export function collapseSidebar() {
+  cy.get(sidebarTrigger).click()
+}
+
+export function verifySidebarCollapsed() {
+  cy.get(sidebarTopBar).should('have.attr', 'data-sidebar-state', 'collapsed')
 }
 
 export function verifyAddedSafesExist(safes) {

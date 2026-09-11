@@ -1,13 +1,22 @@
-/* The listbox keeps its 8px top padding (compensated by the sticky header's top: -8px)
-   but drops the bottom one so the last option's hover reaches the dropdown edge */
-.listbox {
-  padding-bottom: 0 !important;
+.wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* Layout only: the portalled list gets its position, width and max-height inline from
+   useAnchoredList, and its panel surface from Tailwind classes on the element. */
+.options {
+  z-index: var(--z-overlay);
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  overflow-y: auto;
 }
 
 .groupHeader {
   position: sticky;
-  /* compensate the MuiAutocomplete-listbox top padding so the header sticks flush */
-  top: -8px;
+  /* Compensate the .options top padding so the header sticks flush. */
+  top: -4px;
   z-index: 2;
   display: flex;
   align-items: center;
@@ -37,6 +46,9 @@
   align-items: center;
   gap: calc(var(--space-1) / 2);
   min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Container for user-provided names (workspace, creator). The pill background and
@@ -64,10 +76,9 @@
   border-top: 1px solid var(--color-border-light);
 }
 
-/* Match the prototype's .ab-row: 12px vertical / 16px horizontal padding.
-   !important overrides MUI's .MuiAutocomplete-option padding. */
+/* Match the prototype's .ab-row: 12px vertical / 16px horizontal padding. */
 .groupList li {
-  padding: 12px 16px !important;
+  padding: 12px 16px;
 }
 
 .option {
@@ -76,11 +87,24 @@
   gap: 12px;
   width: 100%;
   min-width: 0;
+  cursor: pointer;
+}
+
+.option:hover,
+.option[aria-selected='true'] {
+  background-color: var(--color-background-light);
 }
 
 .optionMain {
   flex: 1;
   min-width: 0;
+}
+
+.optionName {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .optionAddress {

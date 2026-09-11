@@ -1,7 +1,8 @@
-import { SvgIcon, Typography } from '@mui/material'
 import classNames from 'classnames'
 
 import SafeAppIcon from '@/public/images/apps/apps-icon.svg'
+import { Typography } from '@/components/ui/typography'
+import { cn } from '@/utils/cn'
 
 import css from './styles.module.css'
 
@@ -12,15 +13,15 @@ type CustomAppPlaceholderProps = {
 const CustomAppPlaceholder = ({ error = '' }: CustomAppPlaceholderProps) => {
   return (
     <div className={css.customAppPlaceholderContainer}>
-      <SvgIcon
+      <SafeAppIcon
         className={classNames({
           [css.customAppPlaceholderIconError]: error,
           [css.customAppPlaceholderIconDefault]: !error,
         })}
-        component={SafeAppIcon}
-        inheritViewBox
       />
-      <Typography ml={2} color={error ? 'error' : 'text.secondary'}>
+      <Typography
+        className={cn('ml-4', error ? 'text-[var(--color-error-main)]' : 'text-[var(--color-text-secondary)]')}
+      >
         {error || 'Safe App card'}
       </Typography>
     </div>

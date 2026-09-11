@@ -1,15 +1,17 @@
 import type { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import type { AnyTransactionItem } from '@/utils/tx-list'
 import type { ReactElement } from 'react'
-import { Box, Paper, SvgIcon, Typography } from '@mui/material'
-import { isMultisigExecutionInfo, isSwapTransferOrderTxInfo } from '@/utils/transaction-guards'
+import { isSwapTransferOrderTxInfo } from '@/utils/transaction-guards'
+import { Typography } from '@/components/ui/typography'
+import { Card } from '@/components/ui/card'
 import ExpandableTransactionItem from '@/components/transactions/TxListItem/ExpandableTransactionItem'
-import BatchIcon from '@/public/images/common/batch.svg'
 import css from './styles.module.css'
 import ExplorerButton from '@/components/common/ExplorerButton'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getOrderClass } from '@/features/swap'
+import { Layers } from 'lucide-react'
+import { ICON_STROKE } from '@/components/common/iconStroke'
 
 const orderClassTitles: Record<string, string> = {
   limit: 'Limit order settlement',
@@ -39,32 +41,26 @@ const GroupedTxListItems = ({
     title = getSettlementOrderTitle(groupedListItems[0].transaction.txInfo as OrderTransactionInfo)
   }
   return (
-    <Paper data-testid="grouped-items" className={css.container}>
-      <Box gridArea="icon">
-        <SvgIcon className={css.icon} component={BatchIcon} inheritViewBox fontSize="medium" />
-      </Box>
-      <Box gridArea="info">
-        <Typography noWrap>{title}</Typography>
-      </Box>
-      <Box className={css.action}>{groupedListItems.length} transactions</Box>
-      <Box className={css.hash}>
+    <Card data-testid="grouped-items" size="none" className={css.container}>
+      <div style={{ gridArea: 'icon' }}>
+        <Layers className="size-4" strokeWidth={ICON_STROKE} />
+      </div>
+      <div style={{ gridArea: 'info' }}>
+        <Typography className="truncate">{title}</Typography>
+      </div>
+      <div className={css.action}>{groupedListItems.length} transactions</div>
+      <div className={css.hash}>
         <ExplorerButton href={explorerLink} isCompact={false} />
-      </Box>
+      </div>
 
-      <Box gridArea="items" className={css.txItems}>
-        {groupedListItems.map((tx) => {
-          const nonce = isMultisigExecutionInfo(tx.transaction.executionInfo) ? tx.transaction.executionInfo.nonce : ''
-          return (
-            <Box position="relative" key={tx.transaction.id}>
-              <Box className={css.nonce}>
-                <Typography className={css.nonce}>{nonce}</Typography>
-              </Box>
-              <ExpandableTransactionItem item={tx} isBulkGroup={true} />
-            </Box>
-          )
-        })}
-      </Box>
-    </Paper>
+      <div style={{ gridArea: 'items' }} className={css.txItems}>
+        {groupedListItems.map((tx) => (
+          <div key={tx.transaction.id}>
+            <ExpandableTransactionItem item={tx} isBulkGroup={true} />
+          </div>
+        ))}
+      </div>
+    </Card>
   )
 }
 

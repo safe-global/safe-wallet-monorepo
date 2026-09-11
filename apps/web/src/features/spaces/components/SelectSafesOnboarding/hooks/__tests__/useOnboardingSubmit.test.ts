@@ -327,17 +327,31 @@ describe('useOnboardingSubmit', () => {
     expect(result.current.error).toBe(getGenericErrorWithStatus(400))
   })
 
-  it('should track analytics event on submit', async () => {
+  it('should not track anything when the submit adds no accounts', async () => {
     const { result } = renderHook(() => useOnboardingSubmit('1', onSuccess))
 
     await act(async () => {
       await result.current.onSubmit()
     })
 
-    expect(mockTrackEvent).toHaveBeenCalledWith({
-      action: 'add_accounts',
-      category: 'spaces',
+    expect(mockTrackEvent).not.toHaveBeenCalledWith({ action: 'add_accounts', category: 'spaces' }, expect.anything())
+  })
+
+  it('should track the number of accounts added and their chains', async () => {
+    const { result } = renderHook(() => useOnboardingSubmit('1', onSuccess))
+
+    act(() => {
+      result.current.formMethods.setValue('selectedSafes', { '1:0xaaa': true, '11155111:0xbbb': true })
     })
+
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(mockTrackEvent).toHaveBeenCalledWith(
+      { action: 'add_accounts', category: 'spaces' },
+      { 'Account Count': 2, 'Chain ID': '1,11155111', Source: 'onboarding' },
+    )
   })
 
   it('should preselect safe from URL when space has no existing safes', async () => {

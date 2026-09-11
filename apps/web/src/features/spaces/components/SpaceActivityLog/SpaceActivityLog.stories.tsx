@@ -99,6 +99,7 @@ const baseSetup = createMockStory(
 )
 
 const meta = {
+  title: 'Features/Spaces/SpaceActivityLog',
   component: SpaceActivityLog,
   loaders: [mswLoader],
   parameters: baseSetup.parameters,

@@ -37,10 +37,6 @@ const actionItem = '[data-testid="action-item"]'
 const actionAccordion = '[data-testid="action-accordion"]'
 const decodedTxSummary = '[data-testid="decoded-tx-summary"]'
 
-const actionSectionItem = () => {
-  return cy.get('[data-testid="CodeIcon"]').parent()
-}
-
 export const timePeriodOptions = {
   oneTime: 'One time',
   fiveMin: '5 minutes',
@@ -48,7 +44,7 @@ export const timePeriodOptions = {
   oneHr: '1 hour',
 }
 
-const getBeneficiaryInput = () => cy.get(beneficiarySection).find('input').first()
+const getBeneficiaryInput = () => cy.get(beneficiarySection).find('input')
 const automationOwner = ls.addressBookData.sepoliaAddress2[11155111]['0xC16Db0251654C0a72E91B190d81eAD367d2C6fED']
 
 export const actionNames = {
@@ -75,7 +71,7 @@ export function verifyOldValuesAreDisplayed() {
 }
 
 export function verifyActionNamesAreDisplayed(names) {
-  main.verifyValuesExist(actionSectionItem, names)
+  main.verifyValuesExist(actionItem, names)
 }
 
 export function verifySpendingLimitBtnIsDisabled() {
@@ -104,7 +100,6 @@ export function checkMaxValue() {
 
   main.extractDigitsToArray(tokenSelector, maxValue)
   cy.get(tokenAmountFld)
-    .find('input')
     .invoke('val')
     .then((value) => {
       expect(maxValue).to.contain(value)
@@ -160,7 +155,7 @@ export function clickOnTimePeriodDropdown() {
 }
 
 export function selectTimePeriod(period) {
-  cy.get(timePeriodItem).contains(period).click()
+  main.selectDropdownOption(timePeriodItem, period)
 }
 
 export function checkTimeDropdownOptions() {
@@ -173,12 +168,12 @@ export function checkTimeDropdownOptions() {
 }
 
 export function verifyDefaultTimeIsSet() {
-  cy.get(timePeriodSection).scrollIntoView().find('div').contains(timePeriodOptions.oneTime).should('be.visible')
+  cy.get(timePeriodSection).scrollIntoView().contains(timePeriodOptions.oneTime).should('be.visible')
 }
 
 export function visitSpendingLimitsPage(safe) {
   cy.visit(constants.setupUrl + safe)
-  cy.get(spendingLimitsSection).should('be.visible')
+  cy.get(spendingLimitsSection, { timeout: 30000 }).should('be.visible')
 }
 
 export function clickOnNewSpendingLimitBtn() {
@@ -187,7 +182,7 @@ export function clickOnNewSpendingLimitBtn() {
 }
 
 export function enterSpendingLimitAmount(amount) {
-  cy.get(tokenAmountFld).find('input').clear().type(amount)
+  cy.get(tokenAmountFld).clear().type(amount)
 }
 
 export function enterBeneficiaryAddress(address) {
@@ -203,7 +198,9 @@ export function checkBeneficiaryENS(ens) {
 }
 
 export function verifyValidAddressShowsNoErrors() {
+  // The label is a sibling of the input inside the Field wrapper, not a descendant of it.
   cy.get(beneficiarySection)
+    .closest('[data-slot="field"]')
     .find('label')
     .should('not.contain', invalidAddressFormatErrorMsg)
     .and('not.contain', invalidCharErrorStr)
@@ -218,7 +215,7 @@ export function verifyCharErrorValidation() {
 }
 
 export function verifyNumberAmountEntered(amount) {
-  cy.get(tokenAmountFld).find('input').should('have.value', amount)
+  cy.get(tokenAmountFld).should('have.value', amount)
 }
 
 export function verifyActionCount(count) {

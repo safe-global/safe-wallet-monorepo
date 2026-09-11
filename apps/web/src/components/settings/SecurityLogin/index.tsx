@@ -1,4 +1,3 @@
-import { Box } from '@mui/material'
 import dynamic from 'next/dynamic'
 import { useIsRecoverySupported } from '@/features/recovery'
 import SecuritySettings from '../SecuritySettings'
@@ -15,7 +14,7 @@ const SecurityLogin = () => {
   const hn = useLoadFeature(HypernativeFeature)
 
   return (
-    <Box display="flex" flexDirection="column" gap={2}>
+    <div className="flex flex-col gap-4">
       {/* If guard is active: 
       HnActivatedSettingsBanner shows, 
       HnBannerForSettings doesn't - useBannerVisibility already ensures mutual exclusivity */}
@@ -25,7 +24,7 @@ const SecurityLogin = () => {
       {isRecoverySupported && router.query.safe ? <RecoverySettings /> : null}
 
       <SecuritySettings />
-    </Box>
+    </div>
   )
 }
 

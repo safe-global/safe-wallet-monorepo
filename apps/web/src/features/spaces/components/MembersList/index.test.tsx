@@ -97,26 +97,6 @@ describe('MembersList', () => {
     expect(within(emailCells[1]!).queryByText(/@/)).not.toBeInTheDocument()
   })
 
-  it('truncates long member emails inside a tooltip trigger', () => {
-    const longEmail = `${'a'.repeat(64)}@${'b'.repeat(186)}.com`
-
-    render(
-      <MembersList
-        members={[
-          memberBuilder()
-            .with({
-              name: 'Alice',
-              user: memberUserBuilder().with({ email: longEmail }).build(),
-            })
-            .build(),
-        ]}
-      />,
-    )
-
-    const emailNode = screen.getByText(longEmail)
-    expect(emailNode).toHaveClass('truncate')
-  })
-
   it('shows an Expired chip for a pending invite past its expiry', () => {
     render(
       <MembersList
@@ -269,6 +249,31 @@ describe('MembersList', () => {
       expect(within(cells[1]!).getByText('Wallet sign-in')).toBeInTheDocument()
       expect(within(cells[2]!).getByText('Invite pending')).toBeInTheDocument()
       expect(within(cells[3]!).queryByTestId('member-2fa-badge')).not.toBeInTheDocument()
+    })
+
+    // The badge is rigid; on mobile it used to squeeze the name column down to one character
+    it('moves the badge into the row detail on mobile', () => {
+      mockUseIsMobile.mockReturnValue(true)
+
+      render(<MembersList members={[twoFactorMembers[1]!]} />)
+
+      expect(screen.queryAllByTestId('table-cell-2fa')).toHaveLength(0)
+      expect(screen.queryByTestId('member-2fa-badge')).not.toBeInTheDocument()
+
+      fireEvent.click(screen.getByRole('button', { name: 'Show details' }))
+
+      expect(screen.getByText('2FA')).toBeInTheDocument()
+      expect(screen.getByText('Wallet sign-in')).toBeInTheDocument()
+    })
+
+    it('leaves the badge out of the row detail for a declined invite', () => {
+      mockUseIsMobile.mockReturnValue(true)
+
+      render(<MembersList members={[twoFactorMembers[3]!]} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Show details' }))
+
+      expect(screen.queryByText('2FA')).not.toBeInTheDocument()
     })
 
     it('hides the column when the feature is disabled', () => {

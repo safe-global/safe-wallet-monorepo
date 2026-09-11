@@ -1,31 +1,39 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./InitialsAvatar.stories AllSizes 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiStack-root mui-style-1sos3zc-MuiStack-root"
+    class="shadcn-scope"
   >
     <div
-      class="initialsAvatar MuiBox-root mui-style-1kpfxt2"
+      class="flex items-center gap-4"
     >
-      S
-    </div>
-    <div
-      class="initialsAvatar MuiBox-root mui-style-19jkslu"
-    >
-      S
-    </div>
-    <div
-      class="initialsAvatar MuiBox-root mui-style-1k2z1fr"
-    >
-      S
-    </div>
-    <div
-      class="initialsAvatar MuiBox-root mui-style-yswk6x"
-    >
-      S
+      <div
+        class="initialsAvatar"
+        style="background-color: rgb(194, 115, 66); width: 20px; height: 20px; min-width: 20px; min-height: 20px; flex-shrink: 0; border-radius: 6px;"
+      >
+        S
+      </div>
+      <div
+        class="initialsAvatar"
+        style="background-color: rgb(194, 115, 66); width: 24px; height: 24px; min-width: 24px; min-height: 24px; flex-shrink: 0; border-radius: 6px;"
+      >
+        S
+      </div>
+      <div
+        class="initialsAvatar"
+        style="background-color: rgb(194, 115, 66); width: 32px; height: 32px; min-width: 32px; min-height: 32px; flex-shrink: 0; border-radius: 6px;"
+      >
+        S
+      </div>
+      <div
+        class="initialsAvatar"
+        style="background-color: rgb(194, 115, 66); width: 48px; height: 48px; min-width: 48px; min-height: 48px; flex-shrink: 0; border-radius: 6px;"
+      >
+        S
+      </div>
     </div>
   </div>
 </div>
@@ -36,9 +44,14 @@ exports[`./InitialsAvatar.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="initialsAvatar MuiBox-root mui-style-1i5fx43"
+    class="shadcn-scope"
   >
-    S
+    <div
+      class="initialsAvatar"
+      style="background-color: rgb(107, 143, 61); width: 48px; height: 48px; min-width: 48px; min-height: 48px; flex-shrink: 0; border-radius: 6px;"
+    >
+      S
+    </div>
   </div>
 </div>
 `;
@@ -48,32 +61,41 @@ exports[`./InitialsAvatar.stories DifferentNames 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiStack-root mui-style-1sos3zc-MuiStack-root"
+    class="shadcn-scope"
   >
     <div
-      class="initialsAvatar MuiBox-root mui-style-1pllxyi"
+      class="flex items-center gap-4"
     >
-      A
-    </div>
-    <div
-      class="initialsAvatar MuiBox-root mui-style-4k3oai"
-    >
-      B
-    </div>
-    <div
-      class="initialsAvatar MuiBox-root mui-style-6wba2u"
-    >
-      C
-    </div>
-    <div
-      class="initialsAvatar MuiBox-root mui-style-6355sa"
-    >
-      D
-    </div>
-    <div
-      class="initialsAvatar MuiBox-root mui-style-xuvxgc"
-    >
-      E
+      <div
+        class="initialsAvatar"
+        style="background-color: rgb(76, 199, 72); width: 48px; height: 48px; min-width: 48px; min-height: 48px; flex-shrink: 0; border-radius: 6px;"
+      >
+        A
+      </div>
+      <div
+        class="initialsAvatar"
+        style="background-color: rgb(180, 114, 227); width: 48px; height: 48px; min-width: 48px; min-height: 48px; flex-shrink: 0; border-radius: 6px;"
+      >
+        B
+      </div>
+      <div
+        class="initialsAvatar"
+        style="background-color: rgb(201, 74, 125); width: 48px; height: 48px; min-width: 48px; min-height: 48px; flex-shrink: 0; border-radius: 6px;"
+      >
+        C
+      </div>
+      <div
+        class="initialsAvatar"
+        style="background-color: rgb(75, 196, 69); width: 48px; height: 48px; min-width: 48px; min-height: 48px; flex-shrink: 0; border-radius: 6px;"
+      >
+        D
+      </div>
+      <div
+        class="initialsAvatar"
+        style="background-color: rgb(162, 64, 186); width: 48px; height: 48px; min-width: 48px; min-height: 48px; flex-shrink: 0; border-radius: 6px;"
+      >
+        E
+      </div>
     </div>
   </div>
 </div>
@@ -84,9 +106,14 @@ exports[`./InitialsAvatar.stories Large 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="initialsAvatar MuiBox-root mui-style-1i5fx43"
+    class="shadcn-scope"
   >
-    S
+    <div
+      class="initialsAvatar"
+      style="background-color: rgb(107, 143, 61); width: 48px; height: 48px; min-width: 48px; min-height: 48px; flex-shrink: 0; border-radius: 6px;"
+    >
+      S
+    </div>
   </div>
 </div>
 `;
@@ -96,9 +123,14 @@ exports[`./InitialsAvatar.stories Medium 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="initialsAvatar MuiBox-root mui-style-1ea0l7d"
+    class="shadcn-scope"
   >
-    S
+    <div
+      class="initialsAvatar"
+      style="background-color: rgb(107, 143, 61); width: 32px; height: 32px; min-width: 32px; min-height: 32px; flex-shrink: 0; border-radius: 6px;"
+    >
+      S
+    </div>
   </div>
 </div>
 `;
@@ -108,9 +140,14 @@ exports[`./InitialsAvatar.stories Rounded 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="initialsAvatar MuiBox-root mui-style-lr13v5"
+    class="shadcn-scope"
   >
-    S
+    <div
+      class="initialsAvatar"
+      style="background-color: rgb(107, 143, 61); width: 48px; height: 48px; min-width: 48px; min-height: 48px; flex-shrink: 0; border-radius: 50%;"
+    >
+      S
+    </div>
   </div>
 </div>
 `;
@@ -120,9 +157,14 @@ exports[`./InitialsAvatar.stories Small 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="initialsAvatar MuiBox-root mui-style-rxyyoq"
+    class="shadcn-scope"
   >
-    S
+    <div
+      class="initialsAvatar"
+      style="background-color: rgb(107, 143, 61); width: 24px; height: 24px; min-width: 24px; min-height: 24px; flex-shrink: 0; border-radius: 6px;"
+    >
+      S
+    </div>
   </div>
 </div>
 `;
@@ -132,9 +174,14 @@ exports[`./InitialsAvatar.stories XSmall 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="initialsAvatar MuiBox-root mui-style-1cvuzms"
+    class="shadcn-scope"
   >
-    S
+    <div
+      class="initialsAvatar"
+      style="background-color: rgb(107, 143, 61); width: 20px; height: 20px; min-width: 20px; min-height: 20px; flex-shrink: 0; border-radius: 6px;"
+    >
+      S
+    </div>
   </div>
 </div>
 `;

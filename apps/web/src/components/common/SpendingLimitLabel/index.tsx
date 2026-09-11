@@ -1,18 +1,18 @@
 import React, { type ReactElement } from 'react'
-import { Box, SvgIcon, Typography } from '@mui/material'
-import SpeedIcon from '@/public/images/settings/spending-limit/speed.svg'
-import type { BoxProps } from '@mui/system'
+import { Clock } from 'lucide-react'
+import { Typography } from '@/components/ui/typography'
 
 const SpendingLimitLabel = ({
   label,
   isOneTime = false,
+  className,
   ...rest
-}: { label: string | ReactElement; isOneTime?: boolean } & BoxProps) => {
+}: { label: string | ReactElement; isOneTime?: boolean } & React.HTMLAttributes<HTMLDivElement>) => {
   return (
-    <Box display="flex" alignItems="center" gap="4px" {...rest}>
-      {!isOneTime && <SvgIcon component={SpeedIcon} inheritViewBox color="border" fontSize="medium" />}
+    <div className={`flex items-center gap-1 ${className ?? ''}`} {...rest}>
+      {!isOneTime && <Clock className="size-4 shrink-0 text-[var(--color-border-main)]" />}
       {typeof label === 'string' ? <Typography>{label}</Typography> : label}
-    </Box>
+    </div>
   )
 }
 

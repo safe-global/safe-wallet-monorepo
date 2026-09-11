@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
-import { Typography } from '@mui/material'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 import { type ContactSource } from '@/hooks/useAllAddressBooks'
 import css from '../AccountItems/styles.module.css'
+import { cn } from '@/utils/cn'
 
 export interface AccountItemInfoProps {
   address: string
@@ -41,22 +41,9 @@ function AccountItemInfo({
 }: AccountItemInfoProps) {
   return (
     <div className={css.accountItemInfo} data-testid={testId}>
-      <Typography
-        variant="body2"
-        component="div"
-        className={css.safeAddress}
-        sx={monospace ? { fontFamily: 'monospace' } : undefined}
-      >
+      <div className={cn(css.safeAddress, 'text-sm leading-5', monospace && 'font-mono')}>
         {chainName ? (
-          <Typography
-            component="span"
-            sx={{
-              color: 'var(--color-primary-light)',
-              fontSize: 'inherit',
-            }}
-          >
-            {chainName}
-          </Typography>
+          <span className="text-muted-foreground text-[length:inherit]">{chainName}</span>
         ) : (
           <NamedAddressInfo
             address={address}
@@ -74,7 +61,7 @@ function AccountItemInfo({
             highlight4bytes={highlight4bytes}
           />
         )}
-      </Typography>
+      </div>
       {children && <div className={css.accountItemInfoChips}>{children}</div>}
     </div>
   )

@@ -1,5 +1,7 @@
 import { type ReactElement } from 'react'
-import { Skeleton, Stack, SvgIcon, Tooltip, Typography } from '@mui/material'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
 import type { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 // eslint-disable-next-line no-restricted-imports -- routing SeverityIcon through the safe-shield barrel closes a hypernative<->safe-shield module-init cycle (TDZ)
@@ -32,9 +34,7 @@ const getSeverityMessage = (severity: Severity): string => {
 
 const SeverityIcon = ({ severity }: { severity: Severity }) => {
   if (severity === Severity.ERROR) {
-    return (
-      <SvgIcon inheritViewBox component={BlockIcon} sx={{ width: '16px', height: '16px', color: 'text.secondary' }} />
-    )
+    return <BlockIcon className="size-4 text-[var(--color-text-secondary)]" />
   }
   return <SeverityIconSafeShield severity={severity} />
 }
@@ -51,21 +51,22 @@ export const HnQueueAssessment = ({
   // since unauthenticated users won't have assessments fetched
   if (!isAuthenticated) {
     return (
-      <Tooltip
-        title={
-          <Typography variant="caption" letterSpacing={0} align="center">
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <div className="flex max-w-fit flex-row items-center gap-1">
+              <LockIcon className="size-4 text-[var(--color-text-disabled)]" />
+              <Typography variant="paragraph-mini" className="text-[var(--color-text-disabled)]">
+                {getSeverityMessage(Severity.ERROR)}
+              </Typography>
+            </div>
+          }
+        />
+        <TooltipContent>
+          <Typography variant="paragraph-mini" align="center">
             Log in to Hypernative to view security scan results
           </Typography>
-        }
-        arrow
-        placement="top"
-      >
-        <Stack direction="row" alignItems="center" maxWidth="fit-content" gap={0.5}>
-          <SvgIcon inheritViewBox component={LockIcon} sx={{ width: '16px', height: '16px', color: 'text.disabled' }} />
-          <Typography variant="caption" color="text.disabled">
-            {getSeverityMessage(Severity.ERROR)}
-          </Typography>
-        </Stack>
+        </TooltipContent>
       </Tooltip>
     )
   }
@@ -79,59 +80,52 @@ export const HnQueueAssessment = ({
   // Loading state
   if (isLoading) {
     return (
-      <Stack direction="row" alignItems="center" gap={0.5}>
-        <Skeleton variant="text" width={94} height={12} color="background.skeleton" />
-      </Stack>
+      <div className="flex flex-row items-center gap-1">
+        <Skeleton className="h-3 w-[94px] bg-[var(--color-background-skeleton)]" />
+      </div>
     )
   }
 
   // No assessment data
   if ((!error && !assessmentData) || !severity) {
     return (
-      <Stack direction="row" alignItems="center" gap={0.5}>
+      <div className="flex flex-row items-center gap-1">
         <SeverityIcon severity={Severity.ERROR} />
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="paragraph-mini" className="text-[var(--color-text-secondary)]">
           {getSeverityMessage(Severity.ERROR)}
         </Typography>
-      </Stack>
+      </div>
     )
   }
 
   const message = getSeverityMessage(severity)
 
   return (
-    <Tooltip
-      title={
-        <Stack gap={0.5} direction="row" maxWidth="144px">
-          <SvgIcon component={HypernativeIcon} fontSize="inherit" inheritViewBox color="primary" />
-          <Typography variant="caption" letterSpacing={0} align="center">
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <ExternalLink
+            onClick={(e) => e.stopPropagation()}
+            href={assessmentUrl}
+            className="flex max-w-fit text-muted-foreground no-underline hover:no-underline [&:not(:hover)_.external-link-icon]:hidden [&_.external-link-icon]:text-muted-foreground hover:[&_span]:underline"
+          >
+            <span className="flex cursor-pointer flex-row items-center gap-1">
+              <SeverityIcon severity={severity} />
+              <Typography variant="paragraph-mini" className="text-[var(--color-text-secondary)]">
+                {message}
+              </Typography>
+            </span>
+          </ExternalLink>
+        }
+      />
+      <TooltipContent>
+        <div className="flex max-w-[144px] flex-row gap-1">
+          <HypernativeIcon className="size-3 text-[var(--color-primary-main)]" />
+          <Typography variant="paragraph-mini" align="center">
             Review scan results on Hypernative
           </Typography>
-        </Stack>
-      }
-      arrow
-      placement="top"
-    >
-      <ExternalLink
-        onClick={(e) => e.stopPropagation()}
-        href={assessmentUrl}
-        color="text.secondary"
-        display="flex"
-        maxWidth="fit-content"
-        sx={{
-          textDecoration: 'none',
-          '&:not(:hover)': { '.external-link-icon': { display: 'none' } },
-          '.external-link-icon': { color: 'text.secondary' },
-          '&:hover': { span: { textDecoration: 'underline' } },
-        }}
-      >
-        <Stack direction="row" alignItems="center" gap={0.5} sx={{ cursor: 'pointer' }}>
-          <SeverityIcon severity={severity} />
-          <Typography variant="caption" color="text.secondary">
-            {message}
-          </Typography>
-        </Stack>
-      </ExternalLink>
+        </div>
+      </TooltipContent>
     </Tooltip>
   )
 }

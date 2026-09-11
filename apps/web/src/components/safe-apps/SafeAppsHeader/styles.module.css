@@ -25,6 +25,9 @@
   position: sticky !important;
   top: 0;
   padding: 0 var(--space-3);
+  /* Keep in sync with `top` on .filterContainer (SafeAppsFilters): the filters bar pins directly
+     below this one, so any shortfall here shows as a transparent band scrolling content leaks through. */
+  min-height: 36px;
 }
 
 /* In dark mode the page background is black (var(--background), set on .mainSpace),

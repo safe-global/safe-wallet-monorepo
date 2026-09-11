@@ -1,7 +1,6 @@
-import { Shield } from 'lucide-react'
 import { useAuthGetMeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { Badge } from '@/components/ui/badge'
+import { Badge, BadgeDot } from '@/components/ui/badge'
 import { Typography } from '@/components/ui/typography'
 import { useHasFeature } from '@/hooks/useChains'
 
@@ -29,9 +28,9 @@ const WalletTwoFactorSection = () => {
         <Typography variant="paragraph-bold" className="block tracking-tight">
           Two-factor authentication
         </Typography>
-        <Badge variant="warning">
-          <Shield />
-          Not active for wallet sign-in
+        <Badge variant="warning" size="status" shape="status">
+          <BadgeDot />
+          Not available for wallet sign-in
         </Badge>
       </div>
 

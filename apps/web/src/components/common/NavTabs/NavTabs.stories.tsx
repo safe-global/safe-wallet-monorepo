@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper } from '@mui/material'
 import NavTabs from './index'
 
 const meta: Meta<typeof NavTabs> = {
@@ -14,9 +13,9 @@ const meta: Meta<typeof NavTabs> = {
   },
   decorators: [
     (Story) => (
-      <Paper sx={{ p: 2 }}>
+      <div className="rounded-lg bg-card p-4">
         <Story />
-      </Paper>
+      </div>
     ),
   ],
   tags: ['autodocs'],

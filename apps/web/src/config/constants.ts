@@ -147,7 +147,7 @@ export const SAFE_GLOBAL_DOMAIN = 'https://safe.global'
 
 export const ECOSYSTEM_ID_ADDRESS =
   process.env.NEXT_PUBLIC_ECOSYSTEM_ID_ADDRESS || '0x0000000000000000000000000000000000000000'
-export const MULTICHAIN_HELP_ARTICLE = `${HELP_CENTER_URL}/en/articles/222612-multi-chain-safe`
+export const MULTICHAIN_HELP_ARTICLE = `${HELP_CENTER_URL}/articles/9317165368-deploying-a-multi-chain-safe`
 
 export const WORKSPACE_ANNOUNCEMENT_URL = `${SAFE_GLOBAL_DOMAIN}/blog/introducing-workspace-the-onchain-operating-environment-for-treasury-teams`
 

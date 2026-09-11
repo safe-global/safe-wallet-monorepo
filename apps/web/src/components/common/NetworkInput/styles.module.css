@@ -1,50 +1,9 @@
-.select {
-  height: 100%;
-}
-
-.select:after,
-.select:before {
-  display: none;
-}
-
-.select *:focus-visible {
-  outline: 5px auto Highlight;
-  outline: 5px auto -webkit-focus-ring-color;
-}
-
-.select :global .MuiSelect-select {
-  padding-right: 40px !important;
-  padding-left: 16px;
-  height: 100%;
-  display: flex;
-  align-items: center;
-}
-
-.select :global .MuiSelect-icon {
-  margin-right: var(--space-2);
-}
-
-.select :global .Mui-disabled {
-  pointer-events: none;
-}
-
-.select :global .MuiMenuItem-root {
-  padding: 0;
-}
-
 .listSubHeader {
   text-transform: uppercase;
   font-size: 11px;
   font-weight: bold;
   line-height: 32px;
-}
-
-.newChip {
-  font-weight: bold;
-  letter-spacing: -0.1px;
-  margin-top: -18px;
-  margin-left: -14px;
-  transform: scale(0.7);
+  padding: 0 8px;
 }
 
 .item {

@@ -1,14 +1,11 @@
 /**
- * TanStack root route — mirrors apps/web/src/pages/_app.tsx as documented in
- * docs/migration/state/plan.md ("Provider tree to reproduce"). This file is
- * one of the few intentional copies in the migration; the rest of the
- * codebase is re-used from apps/web/src/** via path aliases.
+ * TanStack root route — mirrors the provider tree of apps/web/src/pages/_app.tsx.
+ * This file is one of the few intentional copies in the migration; the rest of
+ * the codebase is re-used from apps/web/src/** via path aliases.
  */
 import { Outlet, createRootRoute } from '@tanstack/react-router'
 import { HelmetProvider, Helmet } from 'react-helmet-async'
 import { Provider } from 'react-redux'
-import { CacheProvider } from '@emotion/react'
-import CssBaseline from '@mui/material/CssBaseline'
 import { lazy, memo, Suspense, useMemo, type ReactElement } from 'react'
 
 // Reused verbatim from apps/web/src — the provider chain itself is exported.
@@ -16,7 +13,6 @@ import { AppProviders } from '@/pages/_app'
 import { BRAND_NAME } from '@/config/constants'
 import { GATEWAY_URL } from '@/config/gateway'
 import { makeStore, setStoreInstance, useHydrateStore, useInitChains } from '@/store'
-import createEmotionCache from '@/utils/createEmotionCache'
 import MetaTags from '@/components/common/MetaTags'
 import PageLayout from '@/components/common/PageLayout'
 import PwaReloadPrompt from '../components/PwaReloadPrompt'
@@ -41,7 +37,8 @@ import { useSafeMsgTracking } from '@/hooks/messages/useSafeMsgTracking'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import { useVisitedSafes } from '@/features/myAccounts'
 import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
-import { useOidcLoginCallback } from '@/features/oidc-auth'
+import LaunchScreen from '@/components/common/LaunchScreen'
+import { useOidcLoginCallback, useStepUpCallback, useStepUpSplash } from '@/features/oidc-auth'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import { initObservability } from '@/services/observability'
@@ -64,7 +61,6 @@ if (typeof window !== 'undefined') {
 
 const reduxStore = makeStore()
 setStoreInstance(reduxStore)
-const emotionCache = createEmotionCache()
 
 // LazyWeb3Init was `next/dynamic(..., { ssr: false })` — `ssr` is a no-op in
 // the SPA, so a plain React.lazy is equivalent.
@@ -85,6 +81,12 @@ const SpendingLimitsLoaderWrapper = () => {
 const TargetedOutreachPopupLoader = () => {
   const { OutreachPopup } = useLoadFeature(TargetedOutreachFeature)
   return <OutreachPopup />
+}
+
+const StepUpSplash = (): ReactElement | null => {
+  const stepUpCaption = useStepUpSplash()
+
+  return stepUpCaption ? <LaunchScreen stepUpCaption={stepUpCaption} /> : null
 }
 
 const InitApp = (): null => {
@@ -108,6 +110,7 @@ const InitApp = (): null => {
   useVisitedSafes()
   usePortfolioRefetchOnTxHistory()
   useOidcLoginCallback()
+  useStepUpCallback()
   useLogoutCallback()
   useSessionExpiryGuard()
   return null
@@ -149,19 +152,17 @@ function RootShell() {
           <title>{BRAND_NAME}</title>
         </Helmet>
         <MetaTags prefetchUrl={GATEWAY_URL} />
-        <CacheProvider value={emotionCache}>
-          <AppProviders>
-            <CssBaseline />
-            <CaptchaProvider>
-              <InitApp />
-              <PwaReloadPrompt />
-              <Suspense fallback={null}>
-                <LazyWeb3Init />
-              </Suspense>
-              <MemoizedTree pathname={location.pathname} outlet={outlet} />
-            </CaptchaProvider>
-          </AppProviders>
-        </CacheProvider>
+        <AppProviders>
+          <CaptchaProvider>
+            <InitApp />
+            <StepUpSplash />
+            <PwaReloadPrompt />
+            <Suspense fallback={null}>
+              <LazyWeb3Init />
+            </Suspense>
+            <MemoizedTree pathname={location.pathname} outlet={outlet} />
+          </CaptchaProvider>
+        </AppProviders>
       </HelmetProvider>
     </Provider>
   )

@@ -1,75 +1,37 @@
-import { Card, Box, Stack, Typography, Skeleton } from '@mui/material'
 import { type ReactElement } from 'react'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Typography } from '@/components/ui/typography'
 
 const OverviewSkeleton = (): ReactElement => {
   return (
-    <Card sx={{ border: 0, px: 3, pt: 2.5, pb: 1.5 }} component="section">
-      <Box display="flex" justifyContent="flex-end" mb={-3}>
-        <Skeleton variant="text" width={180} height={24} />
-      </Box>
-      <Box>
-        <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          alignItems={{ xs: 'flex-start', md: 'flex-end' }}
-          justifyContent="space-between"
-        >
-          <Box>
-            <Typography fontWeight="700" mb={0.5}>
+    <section className="overflow-hidden rounded-3xl bg-[var(--color-background-paper)] px-6 pb-3 pt-5">
+      <div className="-mb-6 flex justify-end">
+        <Skeleton className="h-6 w-[180px]" />
+      </div>
+      <div>
+        <div className="flex flex-col justify-between md:flex-row md:items-end">
+          <div>
+            <Typography variant="paragraph-bold" className="mb-1">
               Total balance
             </Typography>
 
-            <Skeleton
-              variant="text"
-              sx={{
-                width: 'inherit',
-                fontSize: '44px',
-                lineHeight: '1.2',
-              }}
-            />
-          </Box>
+            <Skeleton className="h-[53px] w-full" />
+          </div>
 
-          <Stack
-            direction="row"
-            alignItems={{ xs: 'flex-start', md: 'center' }}
-            flexWrap={{ xs: 'wrap', md: 'nowrap' }}
-            gap={1}
-            width={{ xs: 1, md: 'auto' }}
-            mt={{ xs: 2, md: 0 }}
-          >
-            <Box flex={1}>
-              <Skeleton
-                variant="rounded"
-                height={42}
-                sx={{
-                  minWidth: 96,
-                  width: '100%',
-                }}
-              />
-            </Box>
-            <Box flex={1}>
-              <Skeleton
-                variant="rounded"
-                height={42}
-                sx={{
-                  minWidth: 96,
-                  width: '100%',
-                }}
-              />
-            </Box>
-            <Box flex={1}>
-              <Skeleton
-                variant="rounded"
-                height={42}
-                sx={{
-                  minWidth: 96,
-                  width: '100%',
-                }}
-              />
-            </Box>
-          </Stack>
-        </Stack>
-      </Box>
-    </Card>
+          <div className="mt-4 flex flex-row flex-wrap items-start gap-2 md:mt-0 md:flex-nowrap md:items-center">
+            <div className="flex-1">
+              <Skeleton className="h-[42px] w-full min-w-[96px] rounded-lg" />
+            </div>
+            <div className="flex-1">
+              <Skeleton className="h-[42px] w-full min-w-[96px] rounded-lg" />
+            </div>
+            <div className="flex-1">
+              <Skeleton className="h-[42px] w-full min-w-[96px] rounded-lg" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   )
 }
 export default OverviewSkeleton

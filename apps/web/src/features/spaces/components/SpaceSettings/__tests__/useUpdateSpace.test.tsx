@@ -3,6 +3,13 @@ import { Provider } from 'react-redux'
 import { makeStore } from '@/store'
 import { useUpdateSpace } from '../useUpdateSpace'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
 const mockUnwrap = jest.fn()
@@ -136,5 +143,27 @@ describe('useUpdateSpace', () => {
     })
 
     expect(mockUpdateSpace).not.toHaveBeenCalled()
+  })
+
+  it('tracks the rename once the update succeeds', async () => {
+    mockUnwrap.mockResolvedValue({})
+    const { result } = renderWithStore()
+
+    await act(async () => {
+      await result.current.handleUpdate({ name: 'Renamed' })
+    })
+
+    expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.WORKSPACE_UPDATED, { Source: 'name' })
+  })
+
+  it('does not track the rename when the update fails', async () => {
+    mockUnwrap.mockRejectedValue(new Error('nope'))
+    const { result } = renderWithStore()
+
+    await act(async () => {
+      await result.current.handleUpdate({ name: 'Renamed' })
+    })
+
+    expect(trackEvent).not.toHaveBeenCalled()
   })
 })

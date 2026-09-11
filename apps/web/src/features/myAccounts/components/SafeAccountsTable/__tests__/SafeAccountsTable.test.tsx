@@ -38,7 +38,7 @@ jest.mock('../SafeAccountTableRow', () => ({
     <tr
       data-testid="row"
       data-key={line.key}
-      data-divider={showDivider ? '' : undefined}
+      data-show-divider={showDivider ? '' : undefined}
       ref={rowRef}
       {...rowDraggableProps}
     >
@@ -206,24 +206,28 @@ describe('SafeAccountsTable', () => {
   it('draws the card outline by default and drops it with bordered={false}, keeping the header', () => {
     const container = () => screen.getByTestId('safe-accounts-table').firstElementChild as HTMLElement
 
+    // Asserted on the classes, not on computed style: the outline moved from an MUI `sx` prop to the
+    // colocated CSS module, and jsdom does not evaluate CSS modules — `toHaveStyle` would fail even
+    // when the border renders. `containerBorderless` is what zeroes it.
     const { rerender } = render(<SafeAccountsTable items={items} />)
-    expect(container()).toHaveStyle({ borderTopStyle: 'solid' })
+    expect(container().className).toContain('container')
+    expect(container().className).not.toContain('containerBorderless')
 
     rerender(<SafeAccountsTable items={items} bordered={false} />)
-    expect(container()).not.toHaveStyle({ borderTopStyle: 'solid' })
+    expect(container().className).toContain('containerBorderless')
     // Unlike embedded mode, the borderless table keeps its column header.
     expect(screen.getByTestId('account-sort-name')).toBeInTheDocument()
   })
 
   it('draws dividers between groups, but not after the last row', () => {
     render(<SafeAccountsTable items={items} />)
-    const dividers = screen.getAllByTestId('row').map((row) => row.hasAttribute('data-divider'))
+    const dividers = screen.getAllByTestId('row').map((row) => row.hasAttribute('data-show-divider'))
     expect(dividers).toEqual([true, true, false])
   })
 
   it('draws no dividers in embedded mode', () => {
     render(<SafeAccountsTable items={items} embedded columns={['name', 'threshold', 'networks', 'balance']} />)
-    const dividers = screen.getAllByTestId('row').map((row) => row.hasAttribute('data-divider'))
+    const dividers = screen.getAllByTestId('row').map((row) => row.hasAttribute('data-show-divider'))
     expect(dividers).toEqual([false, false, false])
   })
 })
@@ -405,7 +409,11 @@ describe('SafeAccountsTable — selection mode', () => {
       />,
     )
     fireEvent.click(screen.getByTestId('rename-0xB'))
-    expect(screen.getByTestId('entry-dialog')).toBeInTheDocument()
+    const dialog = screen.getByTestId('entry-dialog')
+
+    expect(dialog).toBeInTheDocument()
+    // The row already fixed the address; renaming only edits its name.
+    expect(dialog.querySelector('input[name="address"]')).toBeDisabled()
   })
 })
 

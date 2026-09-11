@@ -6,6 +6,9 @@ import { showNotification } from '@/store/notificationsSlice'
 import { type GetSpaceResponse, useSpacesUpdateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { sanitizeName } from '@safe-global/utils/validation/names'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 
 export type UpdateSpaceFormData = {
   name: string
@@ -25,6 +28,8 @@ export const useUpdateSpace = (space: GetSpaceResponse | undefined, onSuccess?: 
 
     try {
       await updateSpace({ id: space.uuid, updateSpaceDto: { name: sanitizeName(data.name) } }).unwrap()
+
+      trackEvent(SPACE_EVENTS.WORKSPACE_UPDATED, { [MixpanelEventParams.SOURCE]: 'name' })
 
       dispatch(
         showNotification({

@@ -1,6 +1,6 @@
-import { Box, SvgIcon, Typography } from '@mui/material'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import ExternalLink from '@/components/common/ExternalLink'
+import { Typography } from '@/components/ui/typography'
 import useSafeMessages from '@/hooks/messages/useSafeMessages'
 
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
@@ -14,14 +14,12 @@ const SignedMessagesHelpLink = () => {
   }
 
   return (
-    <Box display="flex" alignItems="center" gap={1}>
-      <SvgIcon component={InfoIcon} inheritViewBox color="border" fontSize="small" />
+    <div className="flex items-center gap-2">
+      <InfoIcon className="size-4 text-[var(--color-border-main)]" />
       <ExternalLink noIcon href={HelpCenterArticle.SIGNED_MESSAGES}>
-        <Typography variant="body2" fontWeight={700}>
-          What are signed messages?
-        </Typography>
+        <Typography variant="paragraph-small-bold">What are signed messages?</Typography>
       </ExternalLink>
-    </Box>
+    </div>
   )
 }
 

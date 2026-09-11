@@ -3,7 +3,7 @@ import LoadingSpinner, { SpinnerStatus } from '@/components/new-safe/create/step
 import { SafeCreationEvent } from '@/features/counterfactual/services'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
-import { Box, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import FailedIcon from '@/public/images/common/tx-failed.svg'
 import type { UndeployedSafe } from '@safe-global/utils/features/counterfactual/store/types'
 
@@ -63,24 +63,24 @@ const StatusMessage = ({
 
   return (
     <>
-      <Box data-testid="safe-status-info" px={3} mt={3}>
-        <Box width="160px" height="160px" display="flex" m="auto">
+      <div data-testid="safe-status-info" className="mt-6 px-6">
+        <div className="mx-auto flex h-40 w-40">
           {isError ? <FailedIcon /> : <LoadingSpinner status={spinnerStatus} />}
-        </Box>
-        <Typography variant="h3" mt={2} fontWeight={700}>
+        </div>
+        <Typography variant="h3" className="mt-4">
           {stepInfo.description}
         </Typography>
-      </Box>
-      <Box sx={{ maxWidth: 390, m: 'auto' }}>
+      </div>
+      <div className="mx-auto max-w-[390px]">
         {stepInfo.instruction && (
-          <Typography variant="body2" my={2}>
+          <Typography variant="paragraph-small" className="my-4 block">
             {stepInfo.instruction}
           </Typography>
         )}
         {!isError && explorerLink && (
           <ExternalLink href={explorerLink.href}>Check status on block explorer</ExternalLink>
         )}
-      </Box>
+      </div>
     </>
   )
 }

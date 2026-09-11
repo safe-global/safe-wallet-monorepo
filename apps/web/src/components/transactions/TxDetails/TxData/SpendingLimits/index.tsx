@@ -1,7 +1,7 @@
 import type { CustomTransactionInfo, TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ReactElement } from 'react'
 import React, { useMemo } from 'react'
-import { Stack, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import TokenIcon from '@/components/common/TokenIcon'
 import SpendingLimitLabel from '@/components/common/SpendingLimitLabel'
@@ -42,7 +42,7 @@ export const SpendingLimits = ({ txData, type }: SpendingLimitsProps): ReactElem
   if (!txData) return null
 
   return (
-    <Stack spacing={1}>
+    <div className="flex flex-col gap-2">
       <Typography>
         <b>{`${isSetAllowanceMethod ? 'Modify' : 'Delete'} spending limit:`}</b>
       </Typography>
@@ -82,6 +82,6 @@ export const SpendingLimits = ({ txData, type }: SpendingLimitsProps): ReactElem
           <SpendingLimitLabel label={resetTimeLabel || 'One-time spending limit'} isOneTime={!resetTimeLabel} />
         </TxDetailsRow>
       )}
-    </Stack>
+    </div>
   )
 }

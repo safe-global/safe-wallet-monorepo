@@ -54,14 +54,13 @@ const setup = createMockStory({ features: { spaces: true }, layout: 'paper' })
 
 const meta = {
   title: 'Features/SecurityHub/WorkspaceHealthCard',
+  tags: ['autodocs', 'skip-visual-test'],
   component: WorkspaceHealthCard,
   decorators: [setup.decorator],
   parameters: {
     ...setup.parameters,
     // Feature loads async in Storybook — snapshots can be flaky
-    chromatic: { disableSnapshot: true },
   },
-  tags: ['autodocs'],
 } satisfies Meta<typeof WorkspaceHealthCard>
 
 export default meta

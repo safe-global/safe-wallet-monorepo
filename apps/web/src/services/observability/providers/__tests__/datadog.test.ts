@@ -290,7 +290,8 @@ describe('DatadogProvider', () => {
     const buildResourceEvent = (url: string, status_code: number): RumResourceEvent =>
       ({ type: 'resource', resource: { url, status_code } }) as unknown as RumResourceEvent
 
-    const OUTREACH_BASE = 'https://safe-client.safe.global/v1/targeted-messaging/outreaches/5/chains/1/safes/0xabc'
+    const SAFE_ADDRESS = '0x245C153cBa7b65d01706B09a30dEf30190Da1878'
+    const OUTREACH_BASE = `https://safe-client.safe.global/v1/targeted-messaging/outreaches/5/chains/1/safes/${SAFE_ADDRESS}`
 
     it('drops expected 404s from the targeted-messaging outreaches endpoint', async () => {
       const { filterRumEvent } = await import('../datadog')
@@ -305,14 +306,127 @@ describe('DatadogProvider', () => {
 
     it('keeps 404s on sibling outreaches operations (e.g. signer submissions)', async () => {
       const { filterRumEvent } = await import('../datadog')
-      const url = 'https://safe-client.safe.global/v1/targeted-messaging/outreaches/5/signers/0xabc/submissions'
+      // The real submissions URL nests under the same outreaches/chains/safes
+      // prefix, so an unanchored prefix match would swallow it too.
+      const url = `${OUTREACH_BASE}/signers/${SAFE_ADDRESS}/submissions`
       expect(filterRumEvent(buildResourceEvent(url, 404), resourceContext)).toBe(true)
+    })
+
+    describe('CGW contract metadata', () => {
+      const CONTRACT_URL = `https://safe-client.safe.global/v1/chains/1/contracts/${SAFE_ADDRESS}`
+
+      it('drops expected 404s when CGW has no metadata for the address', async () => {
+        const { filterRumEvent } = await import('../datadog')
+        expect(filterRumEvent(buildResourceEvent(CONTRACT_URL, 404), resourceContext)).toBe(false)
+      })
+
+      it('keeps genuine failures on the same endpoint', async () => {
+        const { filterRumEvent } = await import('../datadog')
+        expect(filterRumEvent(buildResourceEvent(CONTRACT_URL, 429), resourceContext)).toBe(true)
+        expect(filterRumEvent(buildResourceEvent(CONTRACT_URL, 500), resourceContext)).toBe(true)
+      })
+    })
+
+    describe('transaction queue and history', () => {
+      const TXS_BASE = `https://safe-client.safe.global/v1/chains/1/safes/${SAFE_ADDRESS}/transactions`
+
+      it('drops 404s for a Safe CGW does not know', async () => {
+        const { filterRumEvent } = await import('../datadog')
+        expect(filterRumEvent(buildResourceEvent(`${TXS_BASE}/queued`, 404), resourceContext)).toBe(false)
+        expect(filterRumEvent(buildResourceEvent(`${TXS_BASE}/history`, 404), resourceContext)).toBe(false)
+      })
+
+      it('drops 404s on a paginated page URL', async () => {
+        const { filterRumEvent } = await import('../datadog')
+        const url = `${TXS_BASE}/history?cursor=limit%3D20%26offset%3D20`
+        expect(filterRumEvent(buildResourceEvent(url, 404), resourceContext)).toBe(false)
+      })
+
+      it('keeps throttling, legal, malformed-request and gateway failures', async () => {
+        const { filterRumEvent } = await import('../datadog')
+        // 429 is the single largest non-2xx bucket on these routes and is a
+        // real capacity signal; 422 means we sent a malformed request; 451 and
+        // 5xx are gateway-side. None of them are expected operation.
+        for (const status of [422, 429, 451, 500, 502, 503]) {
+          expect(filterRumEvent(buildResourceEvent(`${TXS_BASE}/history`, status), resourceContext)).toBe(true)
+          expect(filterRumEvent(buildResourceEvent(`${TXS_BASE}/queued`, status), resourceContext)).toBe(true)
+        }
+      })
+
+      it('keeps 404s on other routes under the same Safe', async () => {
+        const { filterRumEvent } = await import('../datadog')
+        const url = `https://safe-client.safe.global/v1/chains/1/safes/${SAFE_ADDRESS}/messages`
+        expect(filterRumEvent(buildResourceEvent(url, 404), resourceContext)).toBe(true)
+      })
+    })
+
+    describe('a single message by hash', () => {
+      const MESSAGE_HASH = `0x${'ab'.repeat(32)}`
+      const MESSAGE_URL = `https://safe-client.safe.global/v1/chains/1/messages/${MESSAGE_HASH}`
+
+      it('drops 404s for a message CGW does not know', async () => {
+        const { filterRumEvent } = await import('../datadog')
+        expect(filterRumEvent(buildResourceEvent(MESSAGE_URL, 404), resourceContext)).toBe(false)
+      })
+
+      it('keeps genuine failures on the same endpoint', async () => {
+        const { filterRumEvent } = await import('../datadog')
+        expect(filterRumEvent(buildResourceEvent(MESSAGE_URL, 429), resourceContext)).toBe(true)
+        expect(filterRumEvent(buildResourceEvent(MESSAGE_URL, 500), resourceContext)).toBe(true)
+      })
+
+      it('keeps 404s on the sibling signatures route', async () => {
+        const { filterRumEvent } = await import('../datadog')
+        const url = `${MESSAGE_URL}/signatures`
+        expect(filterRumEvent(buildResourceEvent(url, 404), resourceContext)).toBe(true)
+      })
+    })
+
+    describe('relays remaining', () => {
+      const RELAY_URL = `https://safe-client.safe.global/v1/chains/1/relay/${SAFE_ADDRESS}`
+
+      it('drops the expected 403 when no safeTxHash is quoted', async () => {
+        const { filterRumEvent } = await import('../datadog')
+        expect(filterRumEvent(buildResourceEvent(RELAY_URL, 403), resourceContext)).toBe(false)
+        expect(filterRumEvent(buildResourceEvent(`${RELAY_URL}?safeTxHash=`, 403), resourceContext)).toBe(false)
+      })
+
+      it('keeps genuine failures on the same endpoint', async () => {
+        const { filterRumEvent } = await import('../datadog')
+        expect(filterRumEvent(buildResourceEvent(RELAY_URL, 404), resourceContext)).toBe(true)
+        expect(filterRumEvent(buildResourceEvent(RELAY_URL, 500), resourceContext)).toBe(true)
+      })
+
+      it('keeps 403s on the sibling relay status route', async () => {
+        const { filterRumEvent } = await import('../datadog')
+        const url = 'https://safe-client.safe.global/v1/chains/1/relay/status/task-123'
+        expect(filterRumEvent(buildResourceEvent(url, 403), resourceContext)).toBe(true)
+      })
     })
 
     it('keeps 404s from other endpoints', async () => {
       const { filterRumEvent } = await import('../datadog')
-      const event = buildResourceEvent('https://safe-client.safe.global/v1/chains/1/safes/0xabc', 404)
+      const event = buildResourceEvent(`https://safe-client.safe.global/v1/chains/1/safes/${SAFE_ADDRESS}`, 404)
       expect(filterRumEvent(event, resourceContext)).toBe(true)
+    })
+
+    it('keeps every filtered route on a status it does not list', async () => {
+      const { filterRumEvent } = await import('../datadog')
+      const CGW = 'https://safe-client.safe.global/v1'
+      const routes = [
+        OUTREACH_BASE,
+        `${CGW}/chains/1/contracts/${SAFE_ADDRESS}`,
+        `${CGW}/chains/1/relay/${SAFE_ADDRESS}`,
+        `${CGW}/chains/1/safes/${SAFE_ADDRESS}/transactions/history`,
+        `${CGW}/chains/1/safes/${SAFE_ADDRESS}/transactions/queued`,
+        `${CGW}/chains/1/messages/0x${'ab'.repeat(32)}`,
+      ]
+
+      for (const url of routes) {
+        for (const status of [400, 401, 408, 502]) {
+          expect(filterRumEvent(buildResourceEvent(url, status), resourceContext)).toBe(true)
+        }
+      }
     })
 
     it('keeps resource events missing url or status_code', async () => {
@@ -381,6 +495,68 @@ describe('DatadogProvider', () => {
         stack: 'at copy (https://app.safe.global/_next/static/chunks/main.js:1:1)',
       })
       expect(filterRumEvent(event, {} as any)).toBe(false)
+    })
+
+    describe('third-party eval() blocked by CSP (WA-2952)', () => {
+      it('drops an EvalError regardless of source, message or vendor stack', async () => {
+        const { filterRumEvent } = await import('../datadog')
+        for (const source of ['source', 'console', undefined]) {
+          const event = buildErrorEvent({
+            type: 'EvalError',
+            source,
+            message:
+              "EvalError: Refused to evaluate a string as JavaScript because 'unsafe-eval' is not an allowed source of script in the following Content Security Policy directive: \"script-src 'self'\".",
+            stack: 'at eval (https://www.googletagmanager.com/gtm.js:1:1)',
+          })
+          expect(filterRumEvent(event, {} as any)).toBe(false)
+        }
+      })
+
+      it('keeps a plain Error whose message merely mentions eval', async () => {
+        const { filterRumEvent } = await import('../datadog')
+        const event = buildErrorEvent({
+          type: 'Error',
+          source: 'source',
+          message: "Refused to evaluate a string as JavaScript because 'unsafe-eval' is not allowed",
+          stack: 'at foo (https://app.safe.global/_next/static/chunks/main.js:1:1)',
+        })
+        expect(filterRumEvent(event, {} as any)).toBe(true)
+      })
+
+      it('keeps other reserved-name errors (TypeError, RangeError) unaffected', async () => {
+        const { filterRumEvent } = await import('../datadog')
+        for (const type of ['TypeError', 'RangeError', undefined]) {
+          const event = buildErrorEvent({
+            type,
+            source: 'source',
+            message: 'Boom',
+            stack: 'at handler (https://app.safe.global/_next/static/chunks/main.js:1:1)',
+          })
+          expect(filterRumEvent(event, {} as any)).toBe(true)
+        }
+      })
+
+      it('keeps an EvalError whose stack points at our own bundle (surfaced, not silenced)', async () => {
+        const { filterRumEvent } = await import('../datadog')
+        const event = buildErrorEvent({
+          type: 'EvalError',
+          source: 'source',
+          message: "EvalError: Refused to evaluate a string as JavaScript because 'unsafe-eval' is not allowed",
+          stack: 'at foo (https://app.safe.global/_next/static/chunks/main-abc123.js:1:1)',
+        })
+        expect(filterRumEvent(event, {} as any)).toBe(true)
+      })
+
+      it('drops an EvalError with no stack at all (defaults to third-party)', async () => {
+        const { filterRumEvent } = await import('../datadog')
+        const event = buildErrorEvent({
+          type: 'EvalError',
+          source: 'source',
+          message: 'EvalError',
+          stack: undefined,
+        })
+        expect(filterRumEvent(event, {} as any)).toBe(false)
+      })
     })
 
     it('drops errors auto-captured from the Browser Reporting API (source=report)', async () => {

@@ -15,7 +15,7 @@ const SafeProWorkspacesBanner = ({ className }: { className?: string }) => {
 
   return (
     <ShadcnProvider dark={isDarkMode} className={className}>
-      <Card className={cn('w-full gap-0 py-0', css.banner)}>
+      <Card size="none" radius="xl" className={cn('w-full', css.banner)}>
         <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
           <span className={cn('flex shrink-0 items-center rounded-md', css.proChip)}>
             <ProWordmark className="h-3 w-8 overflow-visible" />

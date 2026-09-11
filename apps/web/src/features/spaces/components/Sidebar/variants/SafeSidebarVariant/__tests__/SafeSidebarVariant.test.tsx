@@ -5,6 +5,7 @@ import type {
   SafeWorkspaceHeaderBackToSpace,
   SafeWorkspaceHeaderAddToWorkspace,
   ResolvedSidebarItem,
+  ResolvedSidebarNavItem,
   ResolvedSidebarGroup,
 } from '../../../types'
 import { AppRoutes } from '@/config/routes'
@@ -161,6 +162,14 @@ jest.mock('../../../config', () => ({
   },
 }))
 
+jest.mock('../../SidebarDeveloperGroup', () => ({
+  SidebarDeveloperGroup: ({ isLoading }: { isLoading?: boolean }) => (
+    <div data-testid="developer-group" data-loading={isLoading}>
+      Developer group
+    </div>
+  ),
+}))
+
 jest.mock('../../SpaceSelectorDropdown', () => ({
   SpaceSelectorDropdown: ({ triggerVariant }: { triggerVariant?: 'default' | 'addToWorkspace' }) =>
     triggerVariant === 'addToWorkspace' ? (
@@ -189,8 +198,8 @@ const createAddHeader = (
 
 const MockIcon = () => <div>Icon</div>
 
-const createMockNavItem = (overrides: Partial<ResolvedSidebarItem> = {}): ResolvedSidebarItem => ({
-  icon: MockIcon as unknown as ResolvedSidebarItem['icon'],
+const createMockNavItem = (overrides: Partial<ResolvedSidebarNavItem> = {}): ResolvedSidebarNavItem => ({
+  icon: MockIcon as unknown as ResolvedSidebarNavItem['icon'],
   label: 'Item',
   href: '/item',
   isActive: false,
@@ -200,7 +209,7 @@ const createMockNavItem = (overrides: Partial<ResolvedSidebarItem> = {}): Resolv
 })
 
 describe('SafeSidebarVariant', () => {
-  const mockMainNavItems: ResolvedSidebarItem[] = [
+  const mockMainNavItems: ResolvedSidebarNavItem[] = [
     createMockNavItem({ label: 'Overview', href: '/home', link: { pathname: '/home', query: { spaceId: null } } }),
     createMockNavItem({
       label: 'Transactions',
@@ -279,7 +288,7 @@ describe('SafeSidebarVariant', () => {
   })
 
   it('renders all main navigation items', () => {
-    const allNavItems: ResolvedSidebarItem[] = [
+    const allNavItems: ResolvedSidebarNavItem[] = [
       createMockNavItem({ label: 'Overview', href: AppRoutes.home, link: { pathname: AppRoutes.home, query: {} } }),
       createMockNavItem({
         label: 'Assets',
@@ -689,6 +698,38 @@ describe('SafeSidebarVariant', () => {
       )
 
       expect(screen.getByTestId('new-tx-btn')).toBeInTheDocument()
+    })
+  })
+
+  // The group is self-contained (it reads the config and owns the production guard), so its own tests
+  // cover what it renders. Here we only pin down that this variant mounts it, last.
+  describe('Developer group', () => {
+    it('mounts the developer group after the DeFi group', () => {
+      const { container } = render(
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader()}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
+      )
+
+      expect(screen.getByTestId('developer-group')).toBeInTheDocument()
+
+      const text = container.textContent ?? ''
+      expect(text.indexOf('Developer group')).toBeGreaterThan(text.indexOf('Defi'))
+    })
+
+    it('forwards the loading state to the group', () => {
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader()}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+          isLoading
+        />,
+      )
+
+      expect(screen.getByTestId('developer-group')).toHaveAttribute('data-loading', 'true')
     })
   })
 })

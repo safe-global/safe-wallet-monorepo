@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import OrderId from './index'
-import { Paper } from '@mui/material'
 
 const meta = {
+  title: 'Features/Swap/OrderId',
   component: OrderId,
   parameters: {
     componentSubtitle: 'Renders an order id with an external link and a copy button',
@@ -11,9 +11,9 @@ const meta = {
   decorators: [
     (Story) => {
       return (
-        <Paper sx={{ padding: 2 }}>
+        <div className="bg-background rounded-lg p-4">
           <Story />
-        </Paper>
+        </div>
       )
     },
   ],

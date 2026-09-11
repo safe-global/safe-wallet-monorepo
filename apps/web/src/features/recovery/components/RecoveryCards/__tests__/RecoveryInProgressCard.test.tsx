@@ -7,6 +7,11 @@ import type { RecoveryQueueItem } from '../../../services/recovery-state'
 
 jest.mock('../../../hooks/useRecoveryTxState')
 
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
+
 const mockUseRecoveryTxState = useRecoveryTxState as jest.MockedFunction<typeof useRecoveryTxState>
 
 describe('RecoveryInProgressCard', () => {

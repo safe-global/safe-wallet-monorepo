@@ -21,7 +21,7 @@ describe('Swaps queue tests', { defaultCommandTimeout: 30000 }, () => {
     const dai = swaps.createRegex(swapsHistory.forAtLeastFullDai, 'DAI')
     const eq = swaps.createRegex(swapsHistory.DAIeqCOW, 'COW')
     main.verifyValuesExist(create_tx.transactionItem, [swapsHistory.title])
-    create_tx.verifySummaryByName(swapsHistory.title, null, [typeGeneral.statusExpired])
+    create_tx.verifySummaryByName(swapsHistory.title, [typeGeneral.statusExpired])
     main.verifyElementsExist([create_tx.altImgDai, create_tx.altImgCow], create_tx.altImgSwaps)
     create_tx.verifyExpandedDetails([swapsHistory.sell100Cow, dai, eq, swapsHistory.dai, swapsHistory.expired])
   })

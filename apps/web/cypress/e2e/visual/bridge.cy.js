@@ -16,6 +16,7 @@ describe('[VISUAL] Bridge page screenshots', { defaultCommandTimeout: 60000, ...
 
   it('[VISUAL] Screenshot bridge page', () => {
     cy.visit(constants.bridgeUrl + staticSafes.SEP_STATIC_SAFE_2)
+    main.acceptWidgetDisclaimer()
     main.awaitVisualStability()
   })
 })

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 const defaultSetup = createMockStory({ shadcn: true })
 
 const meta = {
+  title: 'Features/Spaces/OnboardingLayout',
   component: OnboardingLayout,
   parameters: {
     layout: 'fullscreen',

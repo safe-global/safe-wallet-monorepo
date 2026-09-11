@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
-import { ActionCard } from '@/components/common/ActionCard'
+import { Alert, AlertTitle, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
 import { trackEvent, OVERVIEW_EVENTS } from '@/services/analytics'
 import { ATTENTION_PANEL_EVENTS } from '@/services/analytics/events/attention-panel'
 import useNonPinnedSafeWarning from '../../hooks/useNonPinnedSafeWarning'
@@ -39,18 +40,28 @@ const NonPinnedWarning = () => {
 
   return (
     <>
-      <ActionCard
-        severity="warning"
-        title="Not in your accounts"
-        content="You're a signer of this Safe, but you haven't added it to your accounts yet. Adding it helps you recognize it and reduces the risk of impersonation."
-        action={{
-          label: 'Add to my accounts',
-          onClick: openConfirmDialog,
-        }}
-        trackingEvent={ATTENTION_PANEL_EVENTS.TRUST_SAFE}
-        testId="non-pinned-warning"
-        actionTestId="trust-this-safe-button"
-      />
+      <Alert variant="warning" outlined={false} data-testid="non-pinned-warning">
+        <AlertSeverityIcon variant="warning" />
+        <AlertTitle className="font-bold">Not in your accounts</AlertTitle>
+        <AlertDescription>
+          You&apos;re a signer of this Safe, but you haven&apos;t added it to your accounts yet. Adding it helps you
+          recognize it and reduces the risk of impersonation.
+          <div className="mt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-foreground"
+              data-testid="trust-this-safe-button"
+              onClick={() => {
+                trackEvent(ATTENTION_PANEL_EVENTS.TRUST_SAFE)
+                openConfirmDialog()
+              }}
+            >
+              Add to my accounts
+            </Button>
+          </div>
+        </AlertDescription>
+      </Alert>
 
       <AddTrustedSafeDialog
         open={isConfirmDialogOpen}

@@ -23,7 +23,8 @@ export const Default: Story = {
   decorators: [
     (Story) => (
       <Dialog open>
-        <DialogContent className="w-[423px] max-w-none p-0">
+        {/* eslint-disable-next-line no-restricted-syntax -- story-only: fixed 423px preview width (not a size token) */}
+        <DialogContent padding="none" className="w-[423px] max-w-none">
           <Story />
         </DialogContent>
       </Dialog>

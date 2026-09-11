@@ -9,7 +9,7 @@ import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 
 function SpaceChainSelectorSkeleton() {
   return (
-    <div className="self-stretch order-last flex items-center rounded-lg bg-muted px-4">
+    <div className="self-stretch min-h-10 order-last flex items-center rounded-lg bg-muted px-4">
       <Skeleton className="size-6 rounded-full" />
     </div>
   )
@@ -52,7 +52,11 @@ function SpaceChainSelector({ isLoading }: { isLoading?: boolean }) {
   }
 
   return (
-    <div className="self-stretch order-last flex items-stretch rounded-lg bg-muted" data-testid="space-chain-selector">
+    // min-h-10 matches the safe selector's own `h-10` — see SpaceNestedSafesButton.
+    <div
+      className="self-stretch min-h-10 order-last flex items-stretch rounded-lg bg-muted"
+      data-testid="space-chain-selector"
+    >
       {isDisabled ? (
         <Tooltip>
           <TooltipTrigger render={<span className="inline-flex" />}>

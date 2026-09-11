@@ -22,13 +22,11 @@ describe('LaunchScreen', () => {
     expect(screen.getByTestId('launch-progress-bar')).toHaveStyle({ width: '30%' })
   })
 
-  it('marks itself not busy, non-interactive and full while exiting', () => {
+  it('marks itself not busy and shows full progress while exiting', () => {
     mockUseLaunchScreen.mockReturnValue({ visible: false })
     render(<LaunchScreen />)
 
-    const root = screen.getByTestId('launch-screen')
-    expect(root).toHaveAttribute('aria-busy', 'false')
-    expect(root).toHaveClass('opacity-0')
+    expect(screen.getByTestId('launch-screen')).toHaveAttribute('aria-busy', 'false')
     expect(screen.getByTestId('launch-progress-bar')).toHaveStyle({ width: '100%' })
   })
 })

@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 import Link from 'next/link'
 import { SidebarMenuItem, SidebarMenuButton, useSidebar } from '@/components/ui/sidebar'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
@@ -52,15 +52,21 @@ interface NavItemProps {
   isSpacesVariant?: boolean
   /** Show skeleton loading state instead of actual item content. */
   isLoading?: boolean
+  /**
+   * UI belonging to this item, e.g. a dialog it opens. Hosted in the item's own list element, and
+   * kept mounted in the skeleton state so a loading flip can't tear down UI the user has open.
+   */
+  children?: ReactNode
 }
 
-export const NavItem = ({ item, isSpacesVariant = false, isLoading = false }: NavItemProps): ReactElement => {
+export const NavItem = ({ item, isSpacesVariant = false, isLoading = false, children }: NavItemProps): ReactElement => {
   const { state, isMobile, isTablet, setOpenMobile } = useSidebar()
 
   if (isLoading || !item) {
     return (
       <SidebarMenuItem>
         <NavItemSkeleton />
+        {children}
       </SidebarMenuItem>
     )
   }
@@ -69,12 +75,21 @@ export const NavItem = ({ item, isSpacesVariant = false, isLoading = false }: Na
 
   const handleClick = () => {
     if (item.disabled) return
-    const customEvent = customNavEvents[item.href]
-    if (customEvent) {
-      trackEvent({ ...customEvent.event, label: customEvent.label }, customEvent.mixpanelParams)
+
+    if (item.onSelect) {
+      item.onSelect()
+    } else if (item.href) {
+      const customEvent = customNavEvents[item.href]
+      if (customEvent) {
+        trackEvent({ ...customEvent.event, label: customEvent.label }, customEvent.mixpanelParams)
+      }
     }
+
     trackEvent({ ...OVERVIEW_EVENTS.SIDEBAR_CLICKED }, { [MixpanelEventParams.SIDEBAR_ELEMENT]: item.label })
-    if (isMobile || isTablet) {
+
+    // The drawer only closes for navigation, so the destination isn't hidden behind it. Action
+    // items open UI mounted inside the drawer's own subtree, which dismissing would unmount.
+    if (!item.onSelect && (isMobile || isTablet)) {
       setOpenMobile(false)
     }
   }
@@ -85,7 +100,7 @@ export const NavItem = ({ item, isSpacesVariant = false, isLoading = false }: Na
       isActive={item.isActive}
       disabled={item.disabled}
       className={`h-9 gap-3 ${css.sidebarInteractive} ${css.sidebarNavItem}`}
-      render={!item.disabled ? <Link href={item.link} /> : undefined}
+      render={!item.disabled && item.link ? <Link href={item.link} /> : undefined}
       data-testid={dataTestId}
       onClick={handleClick}
     >
@@ -133,6 +148,7 @@ export const NavItem = ({ item, isSpacesVariant = false, isLoading = false }: Na
           <span className={css.transactionsBadgeDot} aria-hidden />
         </>
       )}
+      {children}
     </SidebarMenuItem>
   )
 }

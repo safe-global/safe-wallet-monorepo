@@ -3,6 +3,7 @@ import Disclaimer from './index'
 import LegalDisclaimerContent from '@/components/common/LegalDisclaimerContent'
 
 const meta = {
+  title: 'Components/Common/Disclaimer',
   component: Disclaimer,
   parameters: {
     componentSubtitle: 'Renders a Block for displaying information to the user, with a button to accept.',

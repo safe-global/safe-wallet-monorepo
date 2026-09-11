@@ -2,60 +2,41 @@
  * @usedBy features/positions/components/PositionsWidget/index.tsx (WidgetCard)
  * @usedBy features/recovery/components/RecoveryHeader/index.tsx (WidgetContainer, WidgetBody)
  */
-import type { ReactElement, ReactNode } from 'react'
-import styled from '@emotion/styled'
+import type { ComponentProps, ReactElement, ReactNode } from 'react'
 import NextLink from 'next/link'
 import type { LinkProps } from 'next/link'
-import { Card as MuiCard, Link, Stack, Typography } from '@mui/material'
-import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import { Link } from '@/components/ui/link'
+import { Typography } from '@/components/ui/typography'
+import { ChevronRight } from 'lucide-react'
+import { cn } from '@/utils/cn'
 
-export const WidgetContainer = styled.section`
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-`
+export const WidgetContainer = ({ className, ...props }: ComponentProps<'section'>) => (
+  <section className={cn('flex h-full flex-col', className)} {...props} />
+)
 
-export const WidgetBody = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  height: 100%;
-`
+export const WidgetBody = ({ className, ...props }: ComponentProps<'div'>) => (
+  <div className={cn('flex h-full flex-col gap-3', className)} {...props} />
+)
 
-export const Card = styled.div`
-  background: var(--color-background-paper);
-  padding: var(--space-3);
-  border-radius: 6px;
-  flex-grow: 1;
-  position: relative;
-  box-sizing: border-box;
-  height: 100%;
-  overflow: hidden;
-
-  & h2 {
-    margin-top: 0;
-  }
-`
+export const Card = ({ className, ...props }: ComponentProps<'div'>) => (
+  <div
+    className={cn(
+      'relative box-border h-full grow overflow-hidden rounded-md bg-[var(--color-background-paper)] p-6 [&_h2]:mt-0',
+      className,
+    )}
+    {...props}
+  />
+)
 
 export const ViewAllLink = ({ url, text }: { url: LinkProps['href']; text?: string }): ReactElement => (
-  <NextLink href={url} passHref legacyBehavior>
-    <Link
-      data-testid="view-all-link"
-      sx={{
-        textDecoration: 'none',
-        fontWeight: 'bold',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '4px',
-        color: 'primary.light',
-        fontSize: '14px',
-        marginRight: '-4px', // Make up for 4px space at ChevronIcon
-        '&:hover': { color: 'primary.main' },
-      }}
-    >
-      {text || 'View all'} <ChevronRightIcon fontSize="small" />
-    </Link>
-  </NextLink>
+  <Link
+    render={<NextLink href={url} />}
+    data-testid="view-all-link"
+    variant="inherit"
+    className="-mr-1 flex items-center gap-1 text-sm font-bold text-[var(--color-primary-light)] no-underline hover:text-[var(--color-primary-main)] hover:no-underline"
+  >
+    {text || 'View all'} <ChevronRight className="size-5" />
+  </Link>
 )
 
 export const WidgetCard = ({
@@ -79,17 +60,20 @@ export const WidgetCard = ({
   const wrappedViewAllLink = viewAllWrapper && viewAllLink ? viewAllWrapper(viewAllLink) : viewAllLink
 
   return (
-    <MuiCard data-testid={testId} sx={{ border: 0, px: { xs: 3, lg: 1.5 }, pt: 2.5, pb: 1.5 }}>
-      <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5, mb: 1 }}>
-        <Stack direction="row" alignItems="center" gap={1}>
-          <Typography fontWeight={700}>{title}</Typography>
+    <div
+      data-testid={testId}
+      className="overflow-hidden rounded-xl bg-[var(--color-background-paper)] px-6 pb-3 pt-5 lg:px-3"
+    >
+      <div className="mb-2 flex flex-row justify-between px-3">
+        <div className="flex flex-row items-center gap-2">
+          <Typography variant="paragraph-bold">{title}</Typography>
           {titleExtra}
-        </Stack>
+        </div>
 
         {wrappedViewAllLink}
-      </Stack>
+      </div>
 
       {children}
-    </MuiCard>
+    </div>
   )
 }

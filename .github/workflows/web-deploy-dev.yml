@@ -84,6 +84,8 @@ jobs:
           NEXT_PUBLIC_PYLON_CHAT_URL: ${{ secrets.NEXT_PUBLIC_PYLON_CHAT_URL }}
           NEXT_PUBLIC_SAFENET_CHAIN_ID: ${{ secrets.NEXT_PUBLIC_SAFENET_CHAIN_ID }}
           NEXT_PUBLIC_SAFENET_CONSENSUS_ADDRESS: ${{ secrets.NEXT_PUBLIC_SAFENET_CONSENSUS_ADDRESS }}
+          NEXT_PUBLIC_SAFENET_COORDINATOR_ADDRESS: ${{ secrets.NEXT_PUBLIC_SAFENET_COORDINATOR_ADDRESS }}
+          NEXT_PUBLIC_SAFENET_EXPLORER_URL: ${{ secrets.NEXT_PUBLIC_SAFENET_EXPLORER_URL }}
           NEXT_PUBLIC_SAFENET_ORACLE_ADDRESSES: ${{ secrets.NEXT_PUBLIC_SAFENET_ORACLE_ADDRESSES }}
           NEXT_PUBLIC_SAFENET_RPC_URLS: ${{ secrets.NEXT_PUBLIC_SAFENET_RPC_URLS }}
           NEXT_PUBLIC_SAFE_APPS_GA_TRACKING_ID: ${{ secrets.NEXT_PUBLIC_SAFE_APPS_GA_TRACKING_ID }}
@@ -110,7 +112,7 @@ jobs:
           NEXT_PUBLIC_HUBSPOT_CONFIG: ${{ secrets.NEXT_PUBLIC_HUBSPOT_CONFIG }}
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        uses: aws-actions/configure-aws-credentials@cbe3b392738ccf3f987d68400dafcf4b0624a56c # v6.2.4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}

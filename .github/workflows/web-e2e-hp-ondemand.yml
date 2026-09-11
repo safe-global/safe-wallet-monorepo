@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     name: Cypress Happy path on demand tests
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -61,6 +63,8 @@ jobs:
           NEXT_PUBLIC_PYLON_CHAT_URL: ${{ secrets.NEXT_PUBLIC_PYLON_CHAT_URL }}
           NEXT_PUBLIC_SAFENET_CHAIN_ID: ${{ secrets.NEXT_PUBLIC_SAFENET_CHAIN_ID }}
           NEXT_PUBLIC_SAFENET_CONSENSUS_ADDRESS: ${{ secrets.NEXT_PUBLIC_SAFENET_CONSENSUS_ADDRESS }}
+          NEXT_PUBLIC_SAFENET_COORDINATOR_ADDRESS: ${{ secrets.NEXT_PUBLIC_SAFENET_COORDINATOR_ADDRESS }}
+          NEXT_PUBLIC_SAFENET_EXPLORER_URL: ${{ secrets.NEXT_PUBLIC_SAFENET_EXPLORER_URL }}
           NEXT_PUBLIC_SAFENET_ORACLE_ADDRESSES: ${{ secrets.NEXT_PUBLIC_SAFENET_ORACLE_ADDRESSES }}
           NEXT_PUBLIC_SAFENET_RPC_URLS: ${{ secrets.NEXT_PUBLIC_SAFENET_RPC_URLS }}
           NEXT_PUBLIC_SAFE_APPS_GA_TRACKING_ID: ${{ secrets.NEXT_PUBLIC_SAFE_APPS_GA_TRACKING_ID }}
@@ -89,14 +93,14 @@ jobs:
 
       - name: Python setup
         if: always()
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.x'
 
       - name: Install junitparser
         if: always()
         run: |
-          pip install junitparser
+          pip install 'junitparser==5.0.1'
 
       - name: Merge JUnit reports for TestRail
         if: always()
@@ -105,14 +109,18 @@ jobs:
 
       - name: TestRail CLI upload results
         if: always()
+        env:
+          TESTRAIL_USERNAME: ${{ secrets.TESTRAIL_USERNAME }}
+          TESTRAIL_PASSWORD: ${{ secrets.TESTRAIL_PASSWORD }}
+          TESTRAIL_RUN_DESCRIPTION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          pip install trcli
+          pip install 'trcli==1.15.2'
           trcli -y \
           -h https://gno.testrail.io/ \
           --project "Safe- Web App" \
-          --username ${{ secrets.TESTRAIL_USERNAME }} \
-          --password ${{ secrets.TESTRAIL_PASSWORD }} \
+          --username "$TESTRAIL_USERNAME" \
+          --password "$TESTRAIL_PASSWORD" \
           parse_junit \
           --title "Happy Path Automated Tests, branch: ${GITHUB_REF_NAME}" \
-          --run-description ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} \
+          --run-description "$TESTRAIL_RUN_DESCRIPTION" \
           -f "apps/web/reports/junit-report.xml"

@@ -1,12 +1,11 @@
 import LoadingSpinner, { SpinnerStatus } from '@/components/new-safe/create/steps/StatusStep/LoadingSpinner'
 import TxCard from '@/components/tx-flow/common/TxCard'
-import { Box } from '@mui/material'
 
 const ReviewTransactionSkeleton = () => (
   <TxCard>
-    <Box minHeight="38svh" display="flex" alignItems="center" justifyContent="center" mb={5}>
+    <div className="mb-10 flex min-h-[38svh] items-center justify-center">
       <LoadingSpinner status={SpinnerStatus.PROCESSING} />
-    </Box>
+    </div>
   </TxCard>
 )
 

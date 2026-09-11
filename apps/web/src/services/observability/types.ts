@@ -19,9 +19,10 @@ export interface ILogger {
  * Which RPC endpoint an error came from. Lets us separate failures of our own
  * Infura endpoint from chain-default public RPCs, user-set custom RPCs, and the
  * connected wallet's provider — a split that is otherwise only recoverable by
- * fragile message string-matching.
+ * fragile message string-matching. `unknown` is reported for an RPC failure on a
+ * provider we did not build, so it stays distinguishable from an untagged event.
  */
-export type RpcEndpointKind = 'infura' | 'chain_default' | 'custom' | 'wallet'
+export type RpcEndpointKind = 'infura' | 'chain_default' | 'custom' | 'wallet' | 'unknown'
 
 export interface ErrorContext {
   txHash?: string
@@ -38,6 +39,13 @@ export interface ErrorContext {
    * dashboards before any reclassification decision is made.
    */
   httpStatus?: number
+  /**
+   * 1-based index of the attempt that failed, set only by call sites that
+   * genuinely retry. Emitted verbatim (and as an `isRetry` flag for `> 1`), so
+   * distinct failures can be counted separately from retry noise, and it keeps
+   * each attempt of a retry loop a distinct event rather than a duplicate.
+   */
+  attempt?: number
 }
 
 /**
