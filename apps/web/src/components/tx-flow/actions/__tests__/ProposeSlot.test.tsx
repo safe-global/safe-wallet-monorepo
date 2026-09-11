@@ -86,6 +86,8 @@ const safeTxContext: SafeTxContextParams = {
   gtfPaymentMode: 'safe',
   setGtfPaymentMode: jest.fn(),
   setGtfSelectedGasToken: jest.fn(),
+  safenetCheckEnabled: false,
+  setSafenetCheckEnabled: jest.fn(),
 }
 
 describe('Propose slot', () => {

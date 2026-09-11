@@ -12,6 +12,8 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { selectGtfPaymentSourcePreference, setGtfPaymentSourcePreference } from '@/features/gtf/store'
 import type { GtfPaymentMode } from '@/features/gtf/types'
 import useWallet from '@/hooks/wallets/useWallet'
+import { useCurrentChain } from '@/hooks/useChains'
+import { isSafenetCheckAvailable } from '@/features/gtf/utils/isSafenetCheckAvailable'
 
 export { SafeTxContext } from './SafeTxContext'
 export type { SafeTxContextParams } from './SafeTxContext'
@@ -38,6 +40,13 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
     [dispatch, signerAddress],
   )
   const [gtfSelectedGasToken, setGtfSelectedGasToken] = useState<string>()
+  const [safenetCheckRequested, setSafenetCheckEnabled] = useState(false)
+
+  // Gate the opt-in here, once, so every consumer reads a value that is already valid for
+  // the current chain. A request carried over from a Safenet chain must never be sent to
+  // one that cannot run the check.
+  const currentChain = useCurrentChain()
+  const safenetCheckEnabled = safenetCheckRequested && isSafenetCheckAvailable(currentChain)
 
   // Signed txs cannot be updated
   const isSigned = Boolean(safeTx && safeTx.signatures.size > 0)
@@ -98,6 +107,8 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
         setGtfPaymentMode,
         gtfSelectedGasToken,
         setGtfSelectedGasToken,
+        safenetCheckEnabled,
+        setSafenetCheckEnabled,
       }}
     >
       {children}

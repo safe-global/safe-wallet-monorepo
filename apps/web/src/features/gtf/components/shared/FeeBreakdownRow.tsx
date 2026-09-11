@@ -66,11 +66,11 @@ export const FeeBreakdownRow = ({
             {amount &&
               (isFree && strikeAs === 'del' ? (
                 <Typography variant="paragraph-small" as="del" color="muted">
-                  {amount} {currency}
+                  {currency ? `${amount} ${currency}` : amount}
                 </Typography>
               ) : (
                 <Typography variant="paragraph-small" as="span" className={isFree ? css.strikethrough : undefined}>
-                  {amount} {currency}
+                  {currency ? `${amount} ${currency}` : amount}
                 </Typography>
               ))}
           </div>

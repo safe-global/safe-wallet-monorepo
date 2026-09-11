@@ -82,6 +82,8 @@ describe('ReviewTokenTransfer', () => {
           gtfPaymentMode: 'safe',
           setGtfPaymentMode: jest.fn(),
           setGtfSelectedGasToken: jest.fn(),
+          safenetCheckEnabled: false,
+          setSafenetCheckEnabled: jest.fn(),
         }}
       >
         <ReviewTokenTransfer params={params} onSubmit={jest.fn()} txNonce={txNonce} />

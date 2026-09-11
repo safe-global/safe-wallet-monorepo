@@ -1,7 +1,15 @@
-import { useState, type ReactNode } from 'react'
+import { useContext, useState, type ReactNode } from 'react'
 import { act } from '@testing-library/react'
 import { skipToken } from '@reduxjs/toolkit/query'
-import { renderHook } from '@/tests/test-utils'
+import { render, renderHook, screen, waitFor } from '@/tests/test-utils'
+import { http, HttpResponse } from 'msw'
+import { server } from '@/tests/server'
+import { GATEWAY_URL } from '@/config/gateway'
+import { useAppDispatch } from '@/store'
+import { initialState as defaultSettings } from '@/store/settingsSlice'
+import FeesPreview from '../../components/FeesPreview'
+import { mergeGtfFeeParams } from '../../services/mergeGtfFeeParams'
+import { resolveFeeParams } from '../../services/resolveFeeParams'
 import { useFeesPreview } from '../useFeesPreview'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import * as useGasLimitModule from '@/hooks/useGasLimit'
@@ -135,6 +143,18 @@ const mockSuccessfulPreview = {
   refetch: jest.fn(),
 } as unknown as ReturnType<typeof gatewayApi.useGetGtfFeePreviewQuery>
 
+// GTF-arm response: `feeBreakdown` only, no `relayCost` — the disjoint shape the CGW
+// sends for chains with a GTF relayer. Everything on this arm is USD.
+const gtfArmPreview = (feeBreakdown: {
+  relayCostUsd?: number
+  totalUsd?: number
+  safenetFeeUsd?: number
+}): typeof mockSuccessfulPreview =>
+  ({
+    ...mockSuccessfulPreview,
+    data: mockSuccessfulPreview.data && { txData: mockSuccessfulPreview.data.txData, feeBreakdown },
+  }) as typeof mockSuccessfulPreview
+
 const emptyPreview = {
   data: undefined,
   isLoading: false,
@@ -151,9 +171,13 @@ const loadingPreview = {
   refetch: jest.fn(),
 } as unknown as ReturnType<typeof gatewayApi.useGetGtfFeePreviewQuery>
 
-const withSafeTx = (safeTx: SafeTransaction | undefined, gtfPaymentMode: 'safe' | 'signer' = 'safe') => {
+const withSafeTx = (
+  safeTx: SafeTransaction | undefined,
+  gtfPaymentMode: 'safe' | 'signer' = 'safe',
+  initialGasToken?: string,
+) => {
   const SafeTxWrapper = ({ children }: { children: ReactNode }) => {
-    const [gtfSelectedGasToken, setGtfSelectedGasToken] = useState<string | undefined>(undefined)
+    const [gtfSelectedGasToken, setGtfSelectedGasToken] = useState(initialGasToken)
     return (
       <SafeTxContext.Provider
         value={
@@ -266,6 +290,161 @@ describe('useFeesPreview', () => {
     expect(result.current.gasFee.amount).toMatch(/^0\.00005/)
     expect(result.current.gasFee.fiatAmount).toBeDefined()
   })
+
+  it('itemizes Safenet in USD and prices the encoded gas refund from balances', () => {
+    jest
+      .spyOn(gatewayApi, 'useGetGtfFeePreviewQuery')
+      .mockReturnValue(gtfArmPreview({ relayCostUsd: 0.12, totalUsd: 1.12, safenetFeeUsd: 1 }))
+
+    const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx) })
+
+    // formatCurrencyPrecise separates the symbol with a hair space, not U+0020.
+    expect(result.current.safenetFee).toEqual({ label: 'Safenet fee', amount: '$\u200A1.00' })
+    expect(result.current.gasFee.fiatAmount).toBe('$\u200A0.13')
+    expect(result.current.canCoverFees).toBe(true)
+    expect(result.current.loading).toBe(false)
+  })
+
+  it('shows "< $ 0.01" for a sub-cent Safenet fee', () => {
+    jest
+      .spyOn(gatewayApi, 'useGetGtfFeePreviewQuery')
+      .mockReturnValue(gtfArmPreview({ totalUsd: 0.13, safenetFeeUsd: 0.004 }))
+
+    const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx) })
+
+    expect(result.current.safenetFee).toEqual({ label: 'Safenet fee', amount: '< $\u200A0.01' })
+  })
+
+  it('omits safenetFee when the reported Safenet fee is zero (unchecked chain)', () => {
+    jest
+      .spyOn(gatewayApi, 'useGetGtfFeePreviewQuery')
+      .mockReturnValue(gtfArmPreview({ totalUsd: 0.12, safenetFeeUsd: 0 }))
+
+    const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx) })
+
+    expect(result.current.safenetFee).toBeUndefined()
+  })
+
+  it('omits safenetFee on the RELAY_FEE arm (relayCost, no feeBreakdown) and keeps its fiat source', () => {
+    jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
+
+    const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx) })
+
+    expect(result.current.safenetFee).toBeUndefined()
+    // Relay cost 0.12410833692950203 USD from the existing mock — unchanged behavior.
+    expect(result.current.gasFee.fiatAmount).toBe('$\u200A0.12')
+  })
+
+  it('prices GTF outgoing totals in EUR while keeping the Safenet itemization in USD', async () => {
+    jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockRestore()
+    jest.spyOn(useBalancesModule, 'default').mockReturnValue(
+      buildBalances([
+        { ...nativeBalance, fiatConversion: '2000' },
+        { ...wethBalance, fiatConversion: '2000' },
+      ]),
+    )
+    server.use(
+      http.post(`${GATEWAY_URL}/v1/chains/1/fees/:safeAddress/preview`, () =>
+        HttpResponse.json({
+          txData: {
+            ...mockSuccessfulPreview.data!.txData,
+            safeTxGas: '0',
+            baseGas: '500000000000000',
+            gasPrice: '1',
+          },
+          feeBreakdown: { totalUsd: 1.25, safenetFeeUsd: 1 },
+        }),
+      ),
+    )
+    const { result } = renderHook(() => useFeesPreview(), {
+      wrapper: withSafeTx(erc20SafeTx),
+      initialReduxState: { settings: { ...defaultSettings, currency: 'eur' } },
+    })
+
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.gasFee.fiatAmount).toBe('€\u200A1.00')
+    expect(result.current.totalOutgoing?.fiatTotal).toBe('€\u200A10.00')
+    expect(result.current.safenetFee?.amount).toBe('$\u200A1.00')
+  })
+
+  it.each([undefined, '0'])('keeps a GTF quote without inventing fiat for price %s', async (price) => {
+    jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockRestore()
+    jest
+      .spyOn(useBalancesModule, 'default')
+      .mockReturnValue(buildBalances(price === undefined ? [] : [{ ...nativeBalance, fiatConversion: price }]))
+    server.use(
+      http.post(`${GATEWAY_URL}/v1/chains/1/fees/:safeAddress/preview`, () =>
+        HttpResponse.json({
+          txData: mockSuccessfulPreview.data!.txData,
+          feeBreakdown: { totalUsd: 1.25, safenetFeeUsd: 1 },
+        }),
+      ),
+    )
+    const { result } = renderHook(
+      () => ({
+        preview: useFeesPreview(),
+        selection: useContext(SafeTxContext).gtfSelectedGasToken,
+      }),
+      { wrapper: withSafeTx(nativeSafeTx, 'safe', ETH_ADDRESS) },
+    )
+
+    await waitFor(() => expect(result.current.preview.loading).toBe(false))
+    expect(result.current.preview.canCoverFees).toBe(true)
+    expect(result.current.preview.gasFee.fiatAmount).toBeUndefined()
+    expect(result.current.preview.totalOutgoing).toBeUndefined()
+    expect(result.current.preview.safenetFee?.amount).toBe('$\u200A1.00')
+    expect(result.current.selection).toBe(ETH_ADDRESS)
+    expect(result.current.preview.safeHasEnoughGas).toBe(price === undefined ? undefined : true)
+  })
+
+  it.each([undefined, null, '1', 1e400])(
+    'rejects unusable GTF total %s before fallback can retain Safe-paid signing',
+    async (totalUsd) => {
+      jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockRestore()
+      let requests = 0
+      server.use(
+        http.post(`${GATEWAY_URL}/v1/chains/1/fees/:safeAddress/preview`, () => {
+          requests += 1
+          const txData = JSON.stringify(mockSuccessfulPreview.data!.txData)
+          const total = totalUsd === Infinity ? '1e400' : JSON.stringify(totalUsd)
+          const breakdown = total === undefined ? '' : `"totalUsd":${total},`
+          return new HttpResponse(`{"txData":${txData},"feeBreakdown":{${breakdown}"safenetFeeUsd":1}}`, {
+            headers: { 'Content-Type': 'application/json' },
+          })
+        }),
+      )
+      const { result } = renderHook(
+        () => ({
+          preview: useFeesPreview(),
+          selection: useContext(SafeTxContext).gtfSelectedGasToken,
+          dispatch: useAppDispatch(),
+        }),
+        { wrapper: withSafeTx(nativeSafeTx, 'safe', ETH_ADDRESS) },
+      )
+      await waitFor(() => expect(result.current.preview.canCoverFees).toBe(false))
+      expect(result.current.selection).toBeUndefined()
+      expect(result.current.preview.previewedSafeTx).toBeUndefined()
+      render(<FeesPreview {...result.current.preview} />)
+      expect(screen.getByText(/Fees will be paid from the signer/)).toBeInTheDocument()
+      expect(screen.queryByText('Safenet fee')).not.toBeInTheDocument()
+
+      const signingTx = await mergeGtfFeeParams({
+        safeTx: nativeSafeTx,
+        chain: mockChain,
+        gtfPaymentMode: 'safe',
+        gtfSelectedGasToken: result.current.selection,
+        gtfFeature: { $isReady: true, resolveFeeParams },
+        chainId: '1',
+        safeAddress: mockSafe.address.value,
+        numberSignatures: 2,
+        safenetCheck: true,
+        dispatch: result.current.dispatch,
+      })
+      expect(signingTx).toBe(nativeSafeTx)
+      expect(signingTx.data.gasPrice).toBe('0')
+      expect(requests).toBe(1)
+    },
+  )
 
   it('computes single-currency totalOutgoing for native transfer (send + gas in ETH)', () => {
     jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)

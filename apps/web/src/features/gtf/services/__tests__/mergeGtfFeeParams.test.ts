@@ -30,6 +30,7 @@ const baseArgs = (safeTx: SafeTransaction) => ({
   chainId: '1',
   safeAddress: '0xsafe',
   numberSignatures: 2,
+  safenetCheck: false,
   dispatch,
 })
 
@@ -126,7 +127,18 @@ describe('mergeGtfFeeParams', () => {
       safeTx,
       gasToken: '0xtoken',
       numberSignatures: 2,
+      safenetCheck: false,
       dispatch,
     })
+  })
+
+  it('forwards the Safenet opt-in so the signed quote matches the previewed one', async () => {
+    const safeTx = createSafeTx()
+    const resolveFeeParams = jest.fn().mockResolvedValue(createSafeTx())
+    const feature = buildFeature({ resolveFeeParams })
+
+    await mergeGtfFeeParams({ ...baseArgs(safeTx), safenetCheck: true, gtfFeature: feature })
+
+    expect(resolveFeeParams).toHaveBeenCalledWith(expect.objectContaining({ safenetCheck: true }))
   })
 })
