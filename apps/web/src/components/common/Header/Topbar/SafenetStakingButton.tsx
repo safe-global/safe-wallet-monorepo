@@ -2,7 +2,7 @@ import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { SAFE_TOKEN_ADDRESSES } from '@/config/constants'
+import { isSafeToken } from '@/utils/safe-token'
 import useBalances from '@/hooks/useBalances'
 import useChainId from '@/hooks/useChainId'
 import { useOpenSafenetStakingApp } from '@/hooks/useOpenSafenetStakingApp'
@@ -14,10 +14,7 @@ const SafenetStakingButton = () => {
   const { balances, loading } = useBalances()
   const { openSafenetStakingApp, isNavigating } = useOpenSafenetStakingApp()
 
-  const safeTokenAddress = SAFE_TOKEN_ADDRESSES[chainId]
-  const safeTokenItem = balances.items.find(
-    (item) => item.tokenInfo.address.toLowerCase() === safeTokenAddress?.toLowerCase(),
-  )
+  const safeTokenItem = balances.items.find((item) => isSafeToken(chainId, item.tokenInfo.address))
   const safeBalance = safeTokenItem
     ? formatVisualAmount(safeTokenItem.balance, safeTokenItem.tokenInfo.decimals, 0)
     : '0'

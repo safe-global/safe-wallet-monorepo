@@ -8,11 +8,19 @@ import { toBeHex } from 'ethers'
 import { safeParseUnits } from '@safe-global/utils/utils/formatters'
 import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { balancesFixtures } from '@safe-global/test/msw/fixtures'
-import { balancesBuilder, balanceBuilder, erc20TokenBuilder } from '@/tests/builders/balances'
+import { balancesBuilder, balanceBuilder, erc20TokenBuilder, nativeTokenBuilder } from '@/tests/builders/balances'
+import { SAFE_TOKEN_ADDRESSES } from '@/config/constants'
 import AssetsTable from '../index'
 
 const mockUseIsMobile = jest.fn(() => false)
 jest.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
+
+const mockUseSafeTokenEnabled = jest.fn(() => false)
+jest.mock('@/hooks/useSafeTokenEnabled', () => ({ useSafeTokenEnabled: () => mockUseSafeTokenEnabled() }))
+
+jest.mock('@/hooks/useOpenSafenetStakingApp', () => ({
+  useOpenSafenetStakingApp: () => ({ openSafenetStakingApp: jest.fn(), isNavigating: false }),
+}))
 
 const DEFAULT_SETTINGS = {
   currency: 'usd',
@@ -60,6 +68,7 @@ describe('AssetsTable', () => {
     jest.clearAllMocks()
     jest.spyOn(useChainIdModule, 'default').mockReturnValue('5')
     mockUseIsMobile.mockReturnValue(false)
+    mockUseSafeTokenEnabled.mockReturnValue(false)
   })
 
   describe('empty state', () => {
@@ -225,6 +234,54 @@ describe('AssetsTable', () => {
         expect(screen.getAllByText('100 TKA')[0]).toBeInTheDocument()
         expect(screen.queryByText('100 TKB')).not.toBeInTheDocument()
       })
+    })
+  })
+
+  describe('staking entry point (WA-3450)', () => {
+    const MAINNET = '1'
+
+    const nativeAndSafeBalances = () =>
+      balancesBuilder()
+        .with({
+          items: [
+            balanceBuilder()
+              .with({ balance: safeParseUnits('1', 18)!.toString(), tokenInfo: nativeTokenBuilder().build() })
+              .build(),
+            balanceBuilder()
+              .with({
+                balance: safeParseUnits('100', 18)!.toString(),
+                tokenInfo: erc20TokenBuilder()
+                  .with({ address: SAFE_TOKEN_ADDRESSES[MAINNET], decimals: 18, name: 'Safe Token', symbol: 'SAFE' })
+                  .build(),
+              })
+              .build(),
+          ],
+        })
+        .build()
+
+    beforeEach(() => {
+      jest.spyOn(useChainIdModule, 'default').mockReturnValue(MAINNET)
+    })
+
+    it('shows the Safenet staking icon on the SAFE row and none on the native row', async () => {
+      mockUseSafeTokenEnabled.mockReturnValue(true)
+      renderAssetsTable({ balances: nativeAndSafeBalances() })
+
+      await waitFor(() => {
+        expect(screen.getAllByTestId('safenet-stake-btn')).toHaveLength(1)
+      })
+      expect(screen.queryByTestId('stake-btn')).not.toBeInTheDocument()
+    })
+
+    it('shows no staking icon at all when Safenet staking is unavailable', async () => {
+      mockUseSafeTokenEnabled.mockReturnValue(false)
+      renderAssetsTable({ balances: nativeAndSafeBalances() })
+
+      await waitFor(() => {
+        expect(screen.getAllByText('Safe Token').length).toBeGreaterThan(0)
+      })
+      expect(screen.queryByTestId('safenet-stake-btn')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('stake-btn')).not.toBeInTheDocument()
     })
   })
 })

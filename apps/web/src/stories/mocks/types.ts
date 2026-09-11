@@ -39,6 +39,8 @@ export interface FeatureFlags {
   oidcAuth?: boolean
   /** SWITCH_AUTHENTICATOR - 2FA management surfaces (default: false) */
   switchAuthenticator?: boolean
+  /** SAFE_STAKING - Safenet SAFE staking entry points (default: false) */
+  safeStaking?: boolean
 }
 
 /**
