@@ -288,7 +288,7 @@ describe('SpaceSelectorDropdown', () => {
 
     const trigger = screen.getByRole('button', { name: 'Open Workspace selector' })
     fireEvent.click(trigger)
-    fireEvent.click(screen.getByText('Add new workspace'))
+    fireEvent.click(screen.getByText('Add new Workspace'))
 
     expect(trackEvent).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'Workspace create started' }),
@@ -303,7 +303,7 @@ describe('SpaceSelectorDropdown', () => {
 
     const trigger = screen.getByRole('button', { name: 'Open Workspace selector' })
     fireEvent.click(trigger)
-    fireEvent.click(screen.getByText('Add new workspace'))
+    fireEvent.click(screen.getByText('Add new Workspace'))
 
     expect(mockPush).toHaveBeenCalledWith({
       pathname: AppRoutes.spaces.createSpace,
@@ -821,7 +821,7 @@ describe('SpaceSelectorDropdown', () => {
       const trigger = screen.getByRole('button', { name: 'Open Workspace selector' })
       fireEvent.click(trigger)
 
-      expect(screen.getByText('Add new workspace')).toBeInTheDocument()
+      expect(screen.getByText('Add new Workspace')).toBeInTheDocument()
       expect(screen.getByText('View all')).toBeInTheDocument()
     })
 
@@ -982,7 +982,7 @@ describe('SpaceSelectorDropdown', () => {
 
       const addNewSpaceButton = screen
         .getAllByRole('button')
-        .find((btn) => btn.querySelector('span')?.textContent === 'Add new workspace')
+        .find((btn) => btn.querySelector('span')?.textContent === 'Add new Workspace')
       expect(addNewSpaceButton).toBeDisabled()
     })
 
@@ -1015,7 +1015,7 @@ describe('SpaceSelectorDropdown', () => {
 
       const addNewSpaceButton = screen
         .getAllByRole('button')
-        .find((btn) => btn.querySelector('span')?.textContent === 'Add new workspace')
+        .find((btn) => btn.querySelector('span')?.textContent === 'Add new Workspace')
       expect(addNewSpaceButton).not.toBeDisabled()
     })
 
@@ -1048,7 +1048,7 @@ describe('SpaceSelectorDropdown', () => {
 
       const addNewSpaceButton = screen
         .getAllByRole('button')
-        .find((btn) => btn.querySelector('span')?.textContent === 'Add new workspace')
+        .find((btn) => btn.querySelector('span')?.textContent === 'Add new Workspace')
       expect(addNewSpaceButton).toBeDisabled()
     })
 

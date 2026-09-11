@@ -208,7 +208,7 @@ export const SpaceSelectorDropdown = ({
           const addSpaceMenuItem = (
             <DropdownMenuItem onClick={handleCreateSpace} disabled={isAtSpacesLimit} className={MENU_ITEM_CLASS}>
               <Plus className={`size-5 flex-shrink-0 ${css.dropdownIcon}`} />
-              <span>Add new workspace</span>
+              <span>Add new Workspace</span>
             </DropdownMenuItem>
           )
 
