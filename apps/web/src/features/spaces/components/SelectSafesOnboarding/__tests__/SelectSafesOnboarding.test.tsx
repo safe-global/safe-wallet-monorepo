@@ -9,6 +9,7 @@ jest.mock('@/features/spaces/constants', () => ({
 }))
 
 jest.mock('@/hooks/useIsSurveyEnabled')
+jest.mock('../../../hooks/useSpaceSafeLimit', () => ({ useSpaceSafeLimit: () => ({ limit: 10, isLoading: false }) }))
 const mockedUseIsSurveyEnabled = useIsSurveyEnabled as jest.MockedFunction<typeof useIsSurveyEnabled>
 
 // Captured props from OnboardingSafesList renders

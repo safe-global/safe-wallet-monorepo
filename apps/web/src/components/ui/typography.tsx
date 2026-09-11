@@ -22,6 +22,7 @@ const typographyVariants = cva('m-0', {
       h3: 'scroll-m-20 text-2xl font-semibold leading-[28.8px] tracking-normal',
       h4: 'scroll-m-20 text-xl font-semibold leading-6 tracking-normal',
       'paragraph-large': 'text-lg leading-[27px] font-normal',
+      'paragraph-large-medium': 'text-lg leading-[27px] font-medium',
       'paragraph-large-bold': 'text-lg leading-[27px] font-semibold',
       paragraph: 'text-base leading-6 font-normal',
       'paragraph-medium': 'text-base leading-6 font-medium',
@@ -42,6 +43,8 @@ const typographyVariants = cva('m-0', {
     color: {
       default: '',
       muted: 'text-muted-foreground',
+      success: 'text-badge-dot-success',
+      warning: 'text-warning-strong',
     },
   },
   defaultVariants: {
@@ -57,6 +60,7 @@ const variantElementMap = {
   h3: 'h3',
   h4: 'h4',
   'paragraph-large': 'p',
+  'paragraph-large-medium': 'p',
   'paragraph-large-bold': 'p',
   paragraph: 'p',
   'paragraph-medium': 'p',

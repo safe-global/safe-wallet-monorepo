@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { cn } from '@/utils/cn'
 import { ChooserRow } from '@/components/common/ChooserRow'
 import AddAccounts from '../AddAccounts'
-import { SAFE_ACCOUNTS_LIMIT, useCurrentSpaceId, useIsAdmin, useIsCurrentSpaceAtSafeLimit } from '@/features/spaces'
+import { useCurrentSpaceId, useIsAdmin, useIsCurrentSpaceAtSafeLimit, useSpaceSafeLimit } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 
@@ -30,6 +30,7 @@ const AddAccountsChooser = ({
   const isAdmin = useIsAdmin()
   const spaceId = useCurrentSpaceId()
   const isSpaceAtSafeLimit = useIsCurrentSpaceAtSafeLimit()
+  const { limit: safeLimit } = useSpaceSafeLimit()
 
   const router = useRouter()
 
@@ -96,7 +97,7 @@ const AddAccountsChooser = ({
               onClick={handleCreate}
               warning={
                 isSpaceAtSafeLimit && isAdmin
-                  ? `This workspace already has ${SAFE_ACCOUNTS_LIMIT} Safes (the maximum). Your new Safe won't be added to it, but you can still create it.`
+                  ? `This workspace already has ${safeLimit} Safes (the maximum). Your new Safe won't be added to it, but you can still create it.`
                   : undefined
               }
             />

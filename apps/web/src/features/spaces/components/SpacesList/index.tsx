@@ -38,6 +38,12 @@ import AddIcon from '@/public/images/common/add.svg'
 import { SPACES_LIMIT } from '@/features/spaces/constants'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import WelcomeContentCard from '@/components/common/WelcomeContentCard'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import StartTrialModal from '../Plans/StartTrialModal'
+import { useCreateTrialWorkspace } from '../../hooks/useCreateTrialWorkspace'
 
 const AddSpaceButton = ({
   onClick,
@@ -46,6 +52,7 @@ const AddSpaceButton = ({
   variant = 'default',
   label = 'Create workspace',
   icon = 'add',
+  link = true,
 }: {
   onClick?: () => void
   disabled?: boolean
@@ -53,6 +60,8 @@ const AddSpaceButton = ({
   variant?: 'default' | 'outline'
   label?: string
   icon?: 'add' | 'arrow'
+  /** Off when the click opens a dialog instead of navigating to the onboarding. */
+  link?: boolean
 }) => {
   const iconSize = size === 'lg' ? 'size-5' : 'size-4'
 
@@ -67,7 +76,7 @@ const AddSpaceButton = ({
         variant === 'outline' && 'hover:bg-muted',
         disabled && 'cursor-not-allowed opacity-50 grayscale',
       )}
-      render={disabled ? <span /> : <NextLink href={AppRoutes.welcome.createSpace} />}
+      render={disabled ? <span /> : link ? <NextLink href={AppRoutes.welcome.createSpace} /> : undefined}
       disabled={disabled}
       onClick={disabled ? undefined : onClick}
     >
@@ -153,7 +162,18 @@ const WORKSPACE_BENEFITS = [
   'Share an address book across your team',
 ]
 
-const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
+const NoSpacesState = ({
+  isAtLimit,
+  onCreate,
+  isCreating,
+  error,
+}: {
+  isAtLimit: boolean
+  /** Set when creating goes through the Safe Pro trial instead of straight into the onboarding. */
+  onCreate?: () => void
+  isCreating?: boolean
+  error?: string
+}) => {
   const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
   const isDarkMode = useDarkMode()
 
@@ -189,12 +209,24 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
               <AddSpaceButton
                 label="Create your first workspace"
                 icon="arrow"
-                disabled={isAtLimit}
-                onClick={() =>
-                  trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
+                disabled={isAtLimit || isCreating}
+                link={!onCreate}
+                onClick={
+                  onCreate ??
+                  (() =>
+                    trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, {
+                      entry_point: WorkspaceCreateEntryPoint.WELCOME,
+                    }))
                 }
               />
             </div>
+
+            {error && (
+              <Alert variant="destructive">
+                <AlertSeverityIcon variant="destructive" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
 
             <Link variant="muted" className="text-sm underline" onClick={() => setIsInfoOpen(true)} href="#">
               What are workspaces?
@@ -213,6 +245,9 @@ const SpacesList = () => {
   const isSafeProEnabled = useIsSafeProEnabled()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
+  const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
+  const isListDarkMode = useDarkMode()
+  const trial = useCreateTrialWorkspace()
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const {
     currentData: spaces,
@@ -312,8 +347,24 @@ const SpacesList = () => {
           <>
             {isSafeProEnabled && <SafeProWorkspacesBanner className="mb-4" />}
             {pendingInviteBanners}
-            <NoSpacesState isAtLimit={isAtSpacesLimit} />
+            <NoSpacesState
+              isAtLimit={isAtSpacesLimit}
+              onCreate={isSafePro ? () => void trial.createTrialWorkspace() : undefined}
+              isCreating={trial.isCreating}
+              error={trial.error}
+            />
           </>
+        )}
+
+        {isSafePro && trial.spaceId && (
+          <ShadcnProvider dark={isListDarkMode}>
+            <StartTrialModal
+              spaceId={trial.spaceId}
+              open
+              onOpenChange={(open) => !open && trial.reset()}
+              returnPathname={AppRoutes.welcome.createSpace}
+            />
+          </ShadcnProvider>
         )}
       </div>
     </div>

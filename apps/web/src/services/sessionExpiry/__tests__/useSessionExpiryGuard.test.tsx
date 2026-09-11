@@ -324,6 +324,7 @@ describe('useSessionExpiryGuard', () => {
       variant: 'info',
       groupKey: SESSION_EXPIRED_GROUP_KEY,
     })
+    expect(SESSION_EXPIRED_MESSAGE).toBe('Your session has expired. Please sign in to workspaces again.')
   })
 
   it('shows no toast when the mid-tab timer fires outside a workspaces route', async () => {

@@ -50,6 +50,8 @@ jest.mock('@/hooks/safes', () => ({
   flattenSafeItems: () => [],
 }))
 
+jest.mock('../Plans/CheckoutReturnModals', () => ({ __esModule: true, default: () => null }))
+
 describe('CreateSpaceOnboarding', () => {
   beforeEach(() => {
     jest.clearAllMocks()

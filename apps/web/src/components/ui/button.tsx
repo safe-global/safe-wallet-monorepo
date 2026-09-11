@@ -20,6 +20,7 @@ import { cn } from '@/utils/cn'
  * Key Props:
  * - `variant` ('default' | 'outline' | 'secondary' | 'ghost' | 'destructive' | 'surface')
  * - `size` ('default' | 'xs' | 'sm' | 'lg' | 'action' | 'submit' | 'xl' | 'icon' | 'icon-xs' | 'icon-sm')
+ * - `weight` ('medium' | 'semibold')
  * - `render`
  * - `className`
  */
@@ -48,6 +49,9 @@ const buttonVariants = cva(
           'bg-secondary text-secondary-foreground hover:bg-secondary-hover aria-expanded:bg-secondary-hover aria-expanded:text-secondary-foreground',
         ghost:
           'hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground',
+        // Figma's Ghost reads muted at rest; `ghost` keeps the foreground for the 130+ existing icon buttons.
+        'ghost-muted':
+          'text-muted-foreground hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground',
         destructive:
           'bg-destructive/10 hover:bg-destructive/20 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/20 text-destructive focus-visible:border-destructive/40 dark:hover:bg-destructive/30',
         // Card-surface CTA: reads as a raised card on a coloured/promo surface (Earn/Stake/
@@ -86,10 +90,19 @@ const buttonVariants = cva(
         'icon-xs': "size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3",
         'icon-sm': 'size-8 in-data-[slot=button-group]:rounded-sm',
       },
+      weight: {
+        medium: '',
+        semibold: 'font-semibold',
+      },
+      // Brand-green icon on a primary CTA (Safe Pro "Start free trial" pattern).
+      accentIcon: {
+        true: '[&_svg]:text-green-400 dark:[&_svg]:text-primary-foreground',
+      },
     },
     defaultVariants: {
       variant: 'default',
       size: 'default',
+      weight: 'medium',
     },
   },
 )
@@ -110,13 +123,15 @@ function Button({
   className,
   variant = 'default',
   size = 'default',
+  weight = 'medium',
+  accentIcon,
   render,
   nativeButton,
   disabled,
   focusableWhenDisabled,
   ...props
 }: ButtonProps) {
-  const buttonClassName = cn(buttonVariants({ variant, size, className }))
+  const buttonClassName = cn(buttonVariants({ variant, size, weight, accentIcon, className }))
 
   if (isAnchorRender(render)) {
     const anchorProps = props as React.ComponentPropsWithoutRef<'a'>

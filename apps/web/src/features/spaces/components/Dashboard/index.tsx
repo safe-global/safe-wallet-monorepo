@@ -24,6 +24,11 @@ import AggregatedBalance from './AggregatedBalances'
 import SafeWidget from '../SafeWidget'
 import SetupWidget from '../SetupWidget'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { Typography } from '@/components/ui/typography'
+import StartTrialModal from '../Plans/StartTrialModal'
+import CheckoutReturnModals from '../Plans/CheckoutReturnModals'
+import { useWorkspaceLock } from '../../hooks/useWorkspaceLock'
 
 const EmptyStateAddAction = () => {
   return (
@@ -39,7 +44,7 @@ const PENDING_TX_DISPLAY_LIMIT = 4
 const SpaceDashboard = () => {
   const { AccountsWidget, $isReady } = useLoadFeature(MyAccountsFeature)
   const { PendingTxWidget } = useLoadFeature(SpacesFeature)
-  const { SafeProAnnouncementModal } = useLoadFeature(SafeProFeature)
+  const { SafeProAnnouncementModal, SafeProLockedWorkspace } = useLoadFeature(SafeProFeature)
   const { allSafes: safes, isLoading: isSafesLoading } = useSpaceSafes()
   const safeItems = flattenSafeItems(safes)
   const spaceId = useCurrentSpaceId()
@@ -53,14 +58,16 @@ const SpaceDashboard = () => {
     refetch: refetchPendingTxs,
   } = useSpacePendingTransactions(PENDING_TX_DISPLAY_LIMIT)
   const [setupDismissed, setSetupDismissed] = useState(false)
+  const [isTrialOpen, setIsTrialOpen] = useState(false)
   const [dismissedSpaces = {}] = useLocalStorage<Record<string, number>>('setupWidgetDismissed')
   const isSetupDismissedForSpace = spaceId ? (dismissedSpaces[spaceId] ?? 0) > Date.now() : false
   useTrackSpace(safes, activeMembers)
   const router = useRouter()
   const isSafeProEnabled = useIsSafeProEnabled()
-  // Not shown over an invite preview: there is no Workspace of theirs to move yet.
+  const { isLocked, isResolving: isResolvingPlan, trialPeriodDays } = useWorkspaceLock()
+  const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !isLocked || !spaceId })
   const { isOpen: isAnnouncementOpen, setIsOpen: setIsAnnouncementOpen } = useSafeProAnnouncement(
-    isSafeProEnabled && Boolean(spaceId) && !isInvited,
+    isSafeProEnabled && !isLocked && Boolean(spaceId) && !isInvited,
   )
 
   useEffect(() => {
@@ -117,9 +124,31 @@ const SpaceDashboard = () => {
 
   const showSetupWidget = safeItems.length === 0 && !isSafesLoading && !setupDismissed && !isSetupDismissedForSpace
 
+  const checkoutModal = <CheckoutReturnModals />
+
+  if (isResolvingPlan) return null
+
+  if (isLocked) {
+    return (
+      <div className="pt-6">
+        <Typography variant="h2" className="mb-6 font-bold leading-[1] tracking-tight">
+          {space?.name}
+        </Typography>
+        <SafeProLockedWorkspace
+          trialDays={trialPeriodDays}
+          onStartTrial={() => setIsTrialOpen(true)}
+          plansHref={{ pathname: AppRoutes.spaces.plans, query: { spaceId } }}
+        />
+        <StartTrialModal open={isTrialOpen} onOpenChange={setIsTrialOpen} />
+        {checkoutModal}
+      </div>
+    )
+  }
+
   return (
     <>
       {isSafeProEnabled && <SafeProAnnouncementModal open={isAnnouncementOpen} onOpenChange={setIsAnnouncementOpen} />}
+      {checkoutModal}
 
       {isInvited && <PreviewInvite />}
 

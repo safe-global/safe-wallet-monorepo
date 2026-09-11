@@ -19,6 +19,7 @@ import { useOnboardingStepCount } from '../../hooks/useOnboardingStepCount'
 import useExistingSpace from './hooks/useExistingSpace'
 import useSpaceSubmit from './hooks/useSpaceSubmit'
 import useOnboardingExit from './hooks/useOnboardingExit'
+import CheckoutReturnModals from '../Plans/CheckoutReturnModals'
 import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
 import { NAME_MIN_LENGTH, sanitizeName, validateName } from '@safe-global/utils/validation/names'
 
@@ -80,6 +81,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
 
   const main = (
     <>
+      <CheckoutReturnModals spaceId={spaceId} trialCtaLabel="Continue" />
       <StepCounter currentStep={ONBOARDING_STEP} totalSteps={totalSteps} />
 
       <div className="flex flex-col gap-2">
