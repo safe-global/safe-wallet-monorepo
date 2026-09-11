@@ -34,10 +34,10 @@ GitHub → Actions → "🚀 Start Web Release"
 
 **What happens automatically:**
 
-- ✅ Creates/updates `release` branch
-- ✅ Bumps version in `package.json`
+- ✅ Creates the `release/X.Y.Z` branch
+- ✅ Derives the next version from the latest `web-v*` tag
 - ✅ Generates changelog with grouped changes
-- ✅ Creates PR from `release` to `main`
+- ✅ Creates PR from `release/X.Y.Z` to `main`
 - ✅ Sends Slack notification (if configured)
 
 **Result:** Pull Request ready for QA (~2-3 minutes)
@@ -47,7 +47,7 @@ GitHub → Actions → "🚀 Start Web Release"
 1. Find the release PR (has `release` label)
 2. Test the changes thoroughly
 3. If bugs found:
-   - Create PRs targeting `release` branch
+   - Create PRs targeting the `release/X.Y.Z` branch
    - Merge fixes
    - Continue testing
 4. When all tests pass → Approve the PR
@@ -66,7 +66,7 @@ GitHub → Actions → "🚀 Start Web Release"
    **Do not use GitHub's merge button!** Use the command line:
 
    ```bash
-   git push origin release:main
+   git push origin release/X.Y.Z:main
    ```
 
 **What happens automatically:**
@@ -201,7 +201,7 @@ Notifications will be sent for:
 ### What's Automated
 
 - Creating release branches
-- Bumping versions
+- Deriving versions from release tags
 - Generating changelogs
 - Creating and merging PRs
 - Syncing branches

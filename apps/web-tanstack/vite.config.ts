@@ -13,6 +13,7 @@ import { execSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { swAssets } from './plugins/vite-plugin-sw-assets'
 import { importMapIntegrity } from './plugins/vite-plugin-import-map-integrity'
+import { resolveAppVersion } from '../web/scripts/resolve-app-version.cjs'
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname)
 const webRoot = path.resolve(__dirname, '../web')
@@ -27,7 +28,7 @@ if (!commitHash) {
   }
 }
 
-const appVersion = process.env.VISUAL_REGRESSION_BUILD === 'true' ? 'vistest' : pkg.version
+const appVersion = process.env.VISUAL_REGRESSION_BUILD === 'true' ? 'vistest' : resolveAppVersion()
 if (process.env.VISUAL_REGRESSION_BUILD === 'true') commitHash = 'vistest'
 
 // See decisions.md: env vars are renamed to VITE_* but a transitional shim

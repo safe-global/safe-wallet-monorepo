@@ -80,12 +80,11 @@ jobs:
             echo "✅ Using provided version: $VERSION"
           else
             # Auto-increment version based on release type
-            cd apps/web
-            CURRENT_VERSION=$(node -p "require('./package.json').version" || echo "")
+            CURRENT_VERSION=$(git tag -l 'web-v*' --sort=-v:refname | head -n 1 | sed 's/^web-v//')
 
             # Validate extraction succeeded
             if [ -z "$CURRENT_VERSION" ]; then
-              echo "❌ Error: Could not extract version from package.json"
+              echo "❌ Error: Could not find a previous web-v* release tag"
               exit 1
             fi
 
@@ -126,48 +125,29 @@ jobs:
           echo "✅ Version is new"
 
       - name: Check for concurrent release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_BRANCH: release/${{ steps.version.outputs.version }}
         run: |
-          RELEASE_COMMIT=$(git ls-remote origin refs/heads/release | cut -f1)
-          if [ -n "$RELEASE_COMMIT" ]; then
-            # Release branch exists, check if it differs from base
-            BASE_COMMIT=$(git ls-remote origin "refs/heads/${{ steps.base.outputs.branch }}" | cut -f1)
-            if [ "$RELEASE_COMMIT" != "$BASE_COMMIT" ]; then
-              echo "⚠️  Warning: The 'release' branch already exists and differs from ${{ steps.base.outputs.branch }}"
-              echo "This may indicate a concurrent or in-progress release."
-              echo ""
-              echo "If you're sure you want to overwrite it, re-run this workflow."
-              echo "Otherwise, check for open release PRs first."
-              exit 1
-            fi
+          OPEN_RELEASES=$(gh pr list --base main --state open --json headRefName \
+            --jq '.[] | select(.headRefName | startswith("release/")) | .headRefName' \
+            | grep -vx "$RELEASE_BRANCH" || true)
+          if [ -n "$OPEN_RELEASES" ]; then
+            echo "⚠️  Warning: Another release is already in progress:"
+            echo "$OPEN_RELEASES"
+            echo ""
+            echo "Finish or close that release PR before starting a new one."
+            exit 1
           fi
           echo "✅ Safe to create/update release branch"
 
       - name: Create/update release branch
+        env:
+          RELEASE_BRANCH: release/${{ steps.version.outputs.version }}
         run: |
-          git checkout -B release origin/${{ steps.base.outputs.branch }}
-          git push origin release
-          echo "✅ Release branch created from ${{ steps.base.outputs.branch }}"
-
-      - name: Bump version in package.json
-        run: |
-          cd apps/web
-          # Update version using Node.js
-          node -e "
-            const fs = require('fs');
-            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-            pkg.version = '${{ steps.version.outputs.version }}';
-            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
-          "
-          echo "✅ Version bumped to ${{ steps.version.outputs.version }}"
-
-      - name: Commit version bump
-        run: |
-          git config user.name "GH Signer Bot"
-          git config user.email "gh-signer-bot@safe.global"
-          git add apps/web/package.json
-          git commit -S -m "${{ steps.version.outputs.version }}"
-          git push origin release
-          echo "✅ Version committed"
+          git checkout -B "$RELEASE_BRANCH" origin/${{ steps.base.outputs.branch }}
+          git push origin "$RELEASE_BRANCH"
+          echo "✅ Release branch $RELEASE_BRANCH created from ${{ steps.base.outputs.branch }}"
 
       - name: Generate changelog
         id: changelog
@@ -227,7 +207,7 @@ jobs:
           Merge commits are disabled in this repo. Use the command line:
 
           \`\`\`bash
-          git push origin release:main
+          git push origin release/${{ steps.version.outputs.version }}:main
           \`\`\`
 
           ---
@@ -242,7 +222,7 @@ jobs:
           # Create the PR
           PR_URL=$(gh pr create \
             --base main \
-            --head release \
+            --head release/${{ steps.version.outputs.version }} \
             --title "Release web-v${{ steps.version.outputs.version }}" \
             --body "$PR_BODY" \
             --label "release" \

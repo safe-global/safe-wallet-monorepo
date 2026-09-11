@@ -16,10 +16,9 @@ When it's time to make a release, we "freeze" the code by creating a release bra
 
 ### Preparing a release branch
 
-- Create a code-freeze branch named `release`
+- Create a code-freeze branch named `release/X.Y.Z`, where `X.Y.Z` is the new version. The git tag and the app version are taken from this name
   - If it's a regular release, this branch is typically based off of `dev`
   - For hot fixes, it would be `main` + cherry-picked commits
-- Bump the version in the `package.json` as a separate commit with the commit message equal to the exact version
 - Create a PR with the list of changes
 
   > 💡 To generate a quick changelog:
@@ -35,21 +34,13 @@ When it's time to make a release, we "freeze" the code by creating a release bra
   > ```
 
 ```bash
-git checkout release # switch to the release branch
+git checkout -B release/1.54.0 # where 1.54.0 is the new version
 git fetch --all; git reset --hard origin/dev # sync it with dev
-```
-
-Change the version in `app/web/package.json` to the new version.
-
-```bash
-git add .
-git commit -m '1.54.0' # where 1.54.0 is the new version
-git push
 ```
 
 Once pushed:
 
-- Create a PR from `release` to `main`.
+- Create a PR from `release/1.54.0` to `main`.
 - Add the PR to the Wallet project and set the status to `Ready for QA`
 
 ### QA
@@ -73,7 +64,7 @@ git reset --hard origin/main
 - Pull from the release branch:
 
 ```
-git pull origin release
+git pull origin release/1.54.0
 ```
 
 - Push:
@@ -84,7 +75,7 @@ git push
 
 A deployment workflow will be triggered and it will do the following things:
 
-- Create a new git tag from the version in `package.json`
+- Create a new git tag from the version in the release branch name
 - Create and publish a [GitHub release](https://github.com/safe-global/safe-wallet-web/releases) linked to this tag, with a changelog taken from the release PR
 - Build production assets
 - Upload to S3

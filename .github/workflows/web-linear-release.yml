@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version (e.g. 1.92.0) - defaults to apps/web/package.json'
+        description: 'Release version (e.g. 1.92.0) - defaults to the latest web-v* tag'
         required: false
         type: string
       command:
@@ -63,7 +63,7 @@ jobs:
           if [ -n "$INPUT_VERSION" ]; then
             VERSION="$INPUT_VERSION"
           else
-            VERSION=$(node -p "require('./apps/web/package.json').version")
+            VERSION=$(git tag -l 'web-v*' --sort=-v:refname | head -n 1 | sed 's/^web-v//')
           fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Linear release version: $VERSION"
