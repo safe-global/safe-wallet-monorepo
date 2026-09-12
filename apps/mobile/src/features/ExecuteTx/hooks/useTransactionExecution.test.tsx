@@ -5,6 +5,11 @@ import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
 
 const mockExecuteRelayTx = jest.fn()
 const mockRelayMutation = jest.fn()
+const mockReportExecutionFailure = jest.fn()
+
+jest.mock('@/src/services/tx-execution/reportExecutionFailure', () => ({
+  reportExecutionFailure: (...args: unknown[]) => mockReportExecutionFailure(...args),
+}))
 
 jest.mock('@/src/services/tx-execution/relayExecutor', () => ({
   executeRelayTx: (...args: unknown[]) => mockExecuteRelayTx(...args),
@@ -120,5 +125,29 @@ describe('useTransactionExecution', () => {
     })
 
     expect(mockExecuteRelayTx).toHaveBeenCalledWith(expect.objectContaining({ acceptUnverifiedSimulation: true }))
+  })
+
+  it('reports an execution failure with the execution method and chain', async () => {
+    const failure = new Error('method not supported: eth_sendRawTransaction')
+    mockExecuteRelayTx.mockRejectedValue(failure)
+
+    const { result } = renderExecution()
+
+    await act(async () => {
+      await expect(result.current.execute()).rejects.toBe(failure)
+    })
+
+    expect(mockReportExecutionFailure).toHaveBeenCalledWith(failure, ExecutionMethod.WITH_RELAY, '137')
+    expect(result.current.status).toBe(ExecutionStatus.ERROR)
+  })
+
+  it('does not report a successful execution', async () => {
+    const { result } = renderExecution()
+
+    await act(async () => {
+      await result.current.execute()
+    })
+
+    expect(mockReportExecutionFailure).not.toHaveBeenCalled()
   })
 })
