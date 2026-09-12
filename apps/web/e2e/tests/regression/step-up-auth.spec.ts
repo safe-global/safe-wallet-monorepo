@@ -91,7 +91,7 @@ function captureAuthorizeRequest(page: Page) {
 async function openRemoveDialog(page: Page): Promise<void> {
   await page.goto(`/spaces/safe-accounts?spaceId=${SPACE_ID}`)
   await page.getByRole('button', { name: 'Safe Account actions' }).first().click()
-  await page.getByRole('menuitem', { name: 'Remove from workspace' }).click()
+  await page.getByRole('menuitem', { name: 'Remove from Workspace' }).click()
 }
 
 const readStepUpRecord = (page: Page) => page.evaluate((key) => window.sessionStorage.getItem(key), STEP_UP_KEY)

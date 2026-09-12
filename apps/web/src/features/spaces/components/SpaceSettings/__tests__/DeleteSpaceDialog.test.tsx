@@ -123,7 +123,7 @@ describe('DeleteSpaceDialog', () => {
       const notifications = store.getState().notifications
       expect(notifications.length).toBeGreaterThan(0)
       const last = notifications[notifications.length - 1]
-      expect(last.message).toBe('Deleted workspace My Workspace.')
+      expect(last.message).toBe('Deleted Workspace My Workspace.')
       expect(last.variant).toBe('success')
     })
   })
@@ -138,7 +138,7 @@ describe('DeleteSpaceDialog', () => {
     fireEvent.click(screen.getByTestId('space-confirm-delete-button'))
 
     await waitFor(() => {
-      expect(screen.getByText('Error deleting the workspace. Please try again.')).toBeInTheDocument()
+      expect(screen.getByText('Error deleting the Workspace. Please try again.')).toBeInTheDocument()
     })
   })
 
@@ -152,7 +152,7 @@ describe('DeleteSpaceDialog', () => {
     fireEvent.click(screen.getByTestId('space-confirm-delete-button'))
 
     await waitFor(() => {
-      expect(screen.getByText('Error deleting the workspace. Please try again.')).toBeInTheDocument()
+      expect(screen.getByText('Error deleting the Workspace. Please try again.')).toBeInTheDocument()
     })
     expect(mockRouterPush).not.toHaveBeenCalled()
   })

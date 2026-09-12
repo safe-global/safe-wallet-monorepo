@@ -19,7 +19,7 @@ const UnauthorizedState = () => {
             </Typography>
 
             <Typography color="muted" className="mb-4">
-              Sorry, you don’t have permissions to view this page, as your wallet is not a member of the workspace. Try
+              Sorry, you don’t have permissions to view this page, as your wallet is not a member of the Workspace. Try
               to sign in with a different wallet or go back to the overview.
             </Typography>
 

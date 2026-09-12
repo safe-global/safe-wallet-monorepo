@@ -44,7 +44,7 @@ const AccountPage = () => {
       <SpaceSettingsSection data-testid="settings-account-page">
         <SpaceSettingsSectionTitle className="mb-2">Signed in</SpaceSettingsSectionTitle>
         <Typography variant="paragraph-small" color="muted">
-          You&apos;re not signed in to this workspace.
+          You&apos;re not signed in to this Workspace.
         </Typography>
       </SpaceSettingsSection>
     )

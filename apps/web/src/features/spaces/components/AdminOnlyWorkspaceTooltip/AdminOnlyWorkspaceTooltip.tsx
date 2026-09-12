@@ -1,7 +1,7 @@
 import type { ReactElement, ReactNode } from 'react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
-export const ADMIN_ONLY_WORKSPACE_TOOLTIP_MESSAGE = 'Only admins can add Safes to this workspace'
+export const ADMIN_ONLY_WORKSPACE_TOOLTIP_MESSAGE = 'Only admins can add Safes to this Workspace'
 
 type Side = 'top' | 'right' | 'bottom' | 'left'
 

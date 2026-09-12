@@ -97,7 +97,7 @@ describe('SpaceAddressBookTable', () => {
       <SpaceAddressBookTable
         entries={[entryBuilder().build()]}
         showAddedBy={false}
-        renderExtraAction={() => <button>Add to workspace</button>}
+        renderExtraAction={() => <button>Add to Workspace</button>}
       />,
     )
     expect(lastHeader(withExtra.container).className).toContain('md:w-[35%]')
