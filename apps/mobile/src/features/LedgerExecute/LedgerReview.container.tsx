@@ -12,7 +12,11 @@ import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 import { parseFeeParams } from '@/src/utils/feeParams'
 import { ReviewAndConfirmView } from '@/src/features/ConfirmTx/components/ReviewAndConfirm/ReviewAndConfirmView'
 import { LargeHeaderTitle } from '@/src/components/Title'
-import { getErrorMessage } from '@/src/features/ExecuteTx/components/ReviewAndExecute/helpers'
+import {
+  getConfirmedSigners,
+  getErrorMessage,
+  getErrorReference,
+} from '@/src/features/ExecuteTx/components/ReviewAndExecute/helpers'
 import { useTransactionExecution } from '@/src/features/ExecuteTx/hooks/useTransactionExecution'
 import { useIsMounted } from '@/src/hooks/useIsMounted'
 
@@ -46,11 +50,14 @@ export const LedgerReviewExecuteContainer = () => {
   // This allows relay execution to work even when routed through Ledger flow
   const executionMethod = (executionMethodParam || globalParams.executionMethod) ?? ExecutionMethod.WITH_LEDGER
 
+  const confirmedSigners = useMemo(() => getConfirmedSigners(txDetails), [txDetails])
+
   const { execute } = useTransactionExecution({
     txId: txId || '',
     executionMethod,
     signerAddress: activeSigner?.value || '',
     feeParams,
+    confirmedSigners,
   })
 
   useEffect(() => {
@@ -81,7 +88,7 @@ export const LedgerReviewExecuteContainer = () => {
         setIsExecuting(false)
         router.push({
           pathname: '/execution-error',
-          params: { description: getErrorMessage(err) },
+          params: { description: getErrorMessage(err), code: getErrorReference(err) },
         })
       }
     }

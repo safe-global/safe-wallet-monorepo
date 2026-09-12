@@ -7,6 +7,7 @@ import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERAT
 import { FeeParams } from '@/src/hooks/useFeeParams/useFeeParams'
 import { Signer } from '@/src/store/signersSlice'
 import { BIOMETRY_ROTATION_DESCRIPTION, BiometryInvalidationError } from '@/src/services/key-storage'
+import { isExecutionError } from '@/src/services/tx-execution/executionErrors'
 
 export const txRequiresRelay = (txDetails?: TransactionDetails): boolean => {
   const info = txDetails?.detailedExecutionInfo
@@ -18,6 +19,20 @@ export const txRequiresRelay = (txDetails?: TransactionDetails): boolean => {
     baseGas: info.baseGas,
     refundReceiver: info.refundReceiver?.value,
   })
+}
+
+/**
+ * Signers that already confirmed the transaction, for the pre-broadcast
+ * threshold check. Returns `undefined` while the details are unavailable or
+ * are not a multisig execution, so the caller can tell "unknown" apart from
+ * "nobody has confirmed" and skip the check instead of blocking.
+ */
+export const getConfirmedSigners = (txDetails?: TransactionDetails): string[] | undefined => {
+  const executionInfo = txDetails?.detailedExecutionInfo
+  if (!isMultisigDetailedExecutionInfo(executionInfo)) {
+    return undefined
+  }
+  return executionInfo.confirmations.map((confirmation) => confirmation.signer.value)
 }
 
 /**
@@ -131,3 +146,11 @@ export const getErrorMessage = (error: unknown, fallback = 'Failed to execute tr
   }
   return fallback
 }
+
+/**
+ * Support reference to render beneath a classified execution failure. The
+ * shared contract-error copy points at it, so it has to be shown wherever that
+ * copy is.
+ */
+export const getErrorReference = (error: unknown): string | undefined =>
+  isExecutionError(error) ? error.code : undefined

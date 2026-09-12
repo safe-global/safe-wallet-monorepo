@@ -24,7 +24,8 @@ export function ExecutingMonitor() {
               duration: 5000,
             })
           } else if (execution.status === 'error') {
-            toast.show(`Execution failed: ${execution.error || 'Unknown error'}`, {
+            const reference = execution.errorCode ? `\nReference: ${execution.errorCode}` : ''
+            toast.show(`Execution failed: ${execution.error || 'Unknown error'}${reference}`, {
               native: false,
               duration: 5000,
               variant: 'error',

@@ -7,6 +7,7 @@ import {
   buildRouteParams,
   determineExecutionPath,
   getErrorMessage,
+  getErrorReference,
 } from '@/src/features/ExecuteTx/components/ReviewAndExecute/helpers'
 import { useIsMounted } from '@/src/hooks/useIsMounted'
 import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
@@ -77,7 +78,7 @@ export const useExecutionFlow = ({
 
         router.push({
           pathname: '/execution-error',
-          params: { description },
+          params: { description, code: getErrorReference(err) },
         })
       }
     },

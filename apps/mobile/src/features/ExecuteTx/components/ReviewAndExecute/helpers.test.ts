@@ -7,9 +7,12 @@ import {
   getSubmitButtonText,
   buildRouteParams,
   determineExecutionPath,
+  getConfirmedSigners,
   getErrorMessage,
+  getErrorReference,
   txRequiresRelay,
 } from './helpers'
+import { ExecutionError } from '@/src/services/tx-execution/executionErrors'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { BIOMETRY_ROTATION_DESCRIPTION, BiometryInvalidationError } from '@/src/services/key-storage'
 
@@ -282,6 +285,49 @@ describe('helpers', () => {
     it('should map BiometryInvalidationError to the shared re-import copy', () => {
       const err = new BiometryInvalidationError(new Error('SE invalidated'))
       expect(getErrorMessage(err, 'Failed to sign transaction')).toBe(BIOMETRY_ROTATION_DESCRIPTION)
+    })
+  })
+
+  describe('getConfirmedSigners', () => {
+    const SIGNER_A = '0xAAaAaA2A6E1B1c2d3E4f5061728394A5b6C7d8E9'
+    const SIGNER_B = '0xBbBBbB2A6E1B1c2d3E4f5061728394A5b6C7d8E9'
+
+    const makeTx = (confirmations: { signer: { value: string } }[]): TransactionDetails =>
+      ({
+        detailedExecutionInfo: { type: 'MULTISIG', confirmations },
+      }) as unknown as TransactionDetails
+
+    it('lists the signers that already confirmed', () => {
+      expect(getConfirmedSigners(makeTx([{ signer: { value: SIGNER_A } }, { signer: { value: SIGNER_B } }]))).toEqual([
+        SIGNER_A,
+        SIGNER_B,
+      ])
+    })
+
+    it('returns an empty list for a multisig tx nobody has confirmed', () => {
+      expect(getConfirmedSigners(makeTx([]))).toEqual([])
+    })
+
+    it('returns undefined when the details are unavailable, so callers skip the check', () => {
+      expect(getConfirmedSigners(undefined)).toBeUndefined()
+    })
+
+    it('returns undefined for a non-multisig execution', () => {
+      expect(
+        getConfirmedSigners({ detailedExecutionInfo: { type: 'MODULE' } } as unknown as TransactionDetails),
+      ).toBeUndefined()
+    })
+  })
+
+  describe('getErrorReference', () => {
+    it('returns the GS code carried by a classified execution error', () => {
+      expect(getErrorReference(new ExecutionError('Something went wrong.', { code: 'GS013' }))).toBe('GS013')
+    })
+
+    it('returns undefined when there is no reference to show', () => {
+      expect(getErrorReference(new ExecutionError('Something went wrong.'))).toBeUndefined()
+      expect(getErrorReference(new Error('Private key not found'))).toBeUndefined()
+      expect(getErrorReference(undefined)).toBeUndefined()
     })
   })
 })

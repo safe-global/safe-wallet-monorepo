@@ -8,7 +8,7 @@ import { SafeButton } from '@/src/components/SafeButton'
 import { useRouter } from 'expo-router'
 import { AbsoluteLinearGradient } from '@/src/components/LinearGradient'
 
-export function ExecuteError({ description }: { description?: string }) {
+export function ExecuteError({ description, reference }: { description?: string; reference?: string }) {
   const router = useRouter()
   const theme = useTheme()
   const colors: [string, string] = [theme.errorDark.get(), 'transparent']
@@ -41,6 +41,12 @@ export function ExecuteError({ description }: { description?: string }) {
                 <Text textAlign="center" fontSize="$4" width="80%">
                   {description || 'There was an error executing this transaction.'}
                 </Text>
+
+                {reference && (
+                  <Text testID="execution-error-reference" textAlign="center" fontSize="$3" color="$colorSecondary">
+                    Reference: {reference}
+                  </Text>
+                )}
               </View>
             </View>
           </ScrollView>
