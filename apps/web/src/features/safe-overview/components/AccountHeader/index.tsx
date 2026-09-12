@@ -22,7 +22,7 @@ const QrModal = dynamic(() => import('@/components/common/QrCodeButton/QrModal')
 
 const AccountHeader = (): ReactElement => {
   const { safe, safeLoading, safeLoaded } = useSafeInfo()
-  const { balances, loaded: balancesLoaded, loading: balancesLoading } = useVisibleBalances()
+  const { balances, loaded: balancesLoaded, loading: balancesLoading, error } = useVisibleBalances()
   const { setTxFlow } = useContext(TxModalContext)
   const router = useRouter()
   const currency = useAppSelector(selectCurrency)
@@ -39,7 +39,8 @@ const AccountHeader = (): ReactElement => {
 
   const noAssets = balancesLoaded && items.length === 0
 
-  const formattedValue = formatCurrencyPrecise(Number(balances.fiatTotal), currency)
+  const hasError = !!error && balances.fiatTotal === ''
+  const formattedValue = hasError ? '--' : formatCurrencyPrecise(Number(balances.fiatTotal), currency)
 
   const handleSend = useCallback(() => {
     setTxFlow(<TokenTransferFlow />, undefined, false)
@@ -71,7 +72,8 @@ const AccountHeader = (): ReactElement => {
     <>
       <DashboardHeader
         value={formattedValue}
-        loading={!balancesLoaded}
+        loading={!balancesLoaded && !hasError}
+        error={hasError}
         noAssets={noAssets}
         onSend={!noAssets && safe.deployed ? handleSend : undefined}
         onSwap={isSwapFeatureEnabled && !noAssets && safe.deployed ? handleSwap : undefined}

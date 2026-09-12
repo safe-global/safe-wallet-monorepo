@@ -138,7 +138,7 @@ describe('useTotalBalances', () => {
       expect(result.current.loading).toBe(false)
     })
 
-    it('should handle tx service errors', () => {
+    it('should surface tx service errors without staying in loading', () => {
       const mockError = new Error('TX service error')
 
       jest
@@ -149,7 +149,7 @@ describe('useTotalBalances', () => {
 
       expect(result.current.data).toBeUndefined()
       expect(result.current.error).toBeInstanceOf(Error)
-      expect(result.current.loading).toBe(true)
+      expect(result.current.loading).toBe(false)
     })
 
     it('should show loading when no data and no error', () => {

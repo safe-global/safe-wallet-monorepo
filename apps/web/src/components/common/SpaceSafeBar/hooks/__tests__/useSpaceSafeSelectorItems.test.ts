@@ -546,11 +546,11 @@ describe('useSpaceSafeSelectorItems', () => {
 
   // ── single-chain safe balance fallback ──
 
-  it('returns balance "0" for a single-chain safe with no overview data', () => {
+  it('returns balance null (`--`) for a deployed single-chain safe absent from a settled response', () => {
     setupDefaults({ overviews: [] as never[] })
 
     const { result } = renderHook(() => useSpaceSafeSelectorItems())
-    expect(result.current.items[0].balance).toBe('0')
+    expect(result.current.items[0].balance).toBeNull()
   })
 
   // ── isLoading false when overview already loaded ──
@@ -781,5 +781,77 @@ describe('useSpaceSafeSelectorItems', () => {
     expect(ethChain?.isActivating).toBe(true)
     expect(polygonChain?.isUndeployed).toBe(false)
     expect(polygonChain?.isActivating).toBe(false)
+  })
+
+  // ── balance falls back to `--` (null) on a failed overview fetch ──
+
+  it('sets balance to null when the whole overview query errored', () => {
+    setupDefaults({ overviews: [], overviewsLoading: false, overviewsError: true })
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].balance).toBeNull()
+  })
+
+  it('sets balance to null when a deployed safe is omitted from a settled (non-error) response', () => {
+    setupDefaults({ overviews: [], overviewsLoading: false, overviewsError: false })
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].balance).toBeNull()
+  })
+
+  it('keeps a real balance when the fetch succeeded', () => {
+    setupDefaults({
+      overviews: [
+        {
+          address: { value: '0xSafe1' },
+          chainId: '1',
+          fiatTotal: '5000',
+          threshold: 2,
+          owners: [{ value: '0xOwner1' }],
+        },
+      ],
+      overviewsError: false,
+    })
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].balance).toBe('5000')
+  })
+
+  it('does not mark balance as failed while still loading (no error)', () => {
+    setupDefaults({ overviews: [], overviewsLoading: true, overviewsError: false })
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].balance).not.toBeNull()
+    expect(result.current.items[0].isLoading).toBe(true)
+  })
+
+  it('does not set balance to null for an undeployed safe with no overview (badge, not `--`)', () => {
+    setupDefaults({ overviews: [], overviewsLoading: false, overviewsError: false })
+    ;(useAppSelector as jest.Mock).mockImplementation((selector: unknown) =>
+      selector === selectUndeployedSafes ? { '1': { '0xSafe1': { status: { status: 'AWAITING_EXECUTION' } } } } : 'usd',
+    )
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].balance).not.toBeNull()
+  })
+
+  it('sets balance to null for a multi-chain safe whose current-chain overview is missing from a settled response', () => {
+    setupDefaults({
+      allSafes: [multiChainSafe],
+      safeAddress: '0xSafe2',
+      currentChainId: '1',
+      overviews: [],
+      overviewsLoading: false,
+    })
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].balance).toBeNull()
+  })
+
+  it('does not set balance to null for a multi-chain safe undeployed on the current chain', () => {
+    setupDefaults({
+      allSafes: [multiChainSafe],
+      safeAddress: '0xSafe2',
+      currentChainId: '1',
+      overviews: [],
+      overviewsLoading: false,
+    })
+    mockUndeployedSafes({ '1': { '0xSafe2': { status: { status: 'AWAITING_EXECUTION' } } } })
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].balance).not.toBeNull()
   })
 })

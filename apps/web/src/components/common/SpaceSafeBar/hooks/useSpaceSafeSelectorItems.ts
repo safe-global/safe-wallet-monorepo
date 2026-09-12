@@ -57,6 +57,17 @@ const deriveIsReadOnly = (
   return !overview.owners.some((owner) => sameAddress(owner.value, walletAddress))
 }
 
+// CGW drops safes whose overview fetch rejected, so a deployed safe absent from a settled response means its data couldn't be fetched → null renders `--`, not a misleading `0`
+const resolveBalance = (
+  overview: SafeOverview | undefined,
+  isLoading: boolean,
+  isUndeployed: boolean,
+): string | null => {
+  if (overview) return overview.fiatTotal
+  if (!isLoading && !isUndeployed) return null
+  return '0'
+}
+
 const mapChainIds = (chainConfigs: Chain[], chainIds: string[]): ChainInfo[] =>
   chainIds.map((id) =>
     toChainInfo(
@@ -112,13 +123,14 @@ function buildMultiChainItem(
   const currentChainOverview = overviews?.find(
     (o) => sameAddress(o.address.value, item.address) && o.chainId === currentChainId,
   )
+  const currentChainUndeployed = Boolean(undeployedSafes[currentChainId]?.[item.address])
 
   return {
     id: `${orderedChainIds[0]}:${item.address}`,
     name: item.name ?? '',
     address: item.address,
     ...resolveThresholdAndOwners(isCurrentSafe, safe, currentChainOverview),
-    balance: currentChainOverview?.fiatTotal ?? '0',
+    balance: resolveBalance(currentChainOverview, overviewsLoading, currentChainUndeployed),
     isLoading: overviewsLoading && !currentChainOverview,
     chains: mapMultiChainItemChains(
       chainConfigs,
@@ -150,7 +162,7 @@ function buildSingleChainItem(
     name: item.name ?? '',
     address: item.address,
     ...resolveThresholdAndOwners(isCurrentSafe, safe, overview),
-    balance: overview?.fiatTotal ?? '0',
+    balance: resolveBalance(overview, overviewsLoading, Boolean(undeployed)),
     isLoading: overviewsLoading && !overview,
     chains: mapChainIds(chainConfigs, [item.chainId]).map((chain) => ({
       ...chain,
