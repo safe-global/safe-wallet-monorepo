@@ -2082,7 +2082,7 @@
         },
         "responses": {
           "202": {
-            "description": "Message accepted. The Transaction Service indexes messages asynchronously, so the message may not be immediately retrievable — poll GET /v1/chains/{chainId}/messages/{messageHash}."
+            "description": "Message accepted. The Transaction Service indexes messages asynchronously, so the message may not be immediately retrievable \u2014 poll GET /v1/chains/{chainId}/messages/{messageHash}."
           },
           "400": {
             "description": "Invalid message format or signature"
@@ -2847,7 +2847,7 @@
     },
     "/v1/spaces/{spaceId}/audit-log": {
       "get": {
-        "description": "Retrieves the append-only audit log of a space — who did what, when. Requires ACTIVE membership. Events are ordered by creation time (newest first by default) with a stable id tie-break.",
+        "description": "Retrieves the append-only audit log of a space \u2014 who did what, when. Requires ACTIVE membership. Events are ordered by creation time (newest first by default) with a stable id tie-break.",
         "operationId": "spaceAuditGetAuditLogV1",
         "parameters": [
           {
@@ -2948,7 +2948,7 @@
     },
     "/v1/spaces/{spaceId}/audit-log/actors": {
       "get": {
-        "description": "Retrieves the distinct actors appearing in a space audit log — including former and deleted members — as a filter dropdown source. Requires ACTIVE membership.",
+        "description": "Retrieves the distinct actors appearing in a space audit log \u2014 including former and deleted members \u2014 as a filter dropdown source. Requires ACTIVE membership.",
         "operationId": "spaceAuditGetAuditLogActorsV1",
         "parameters": [
           {
@@ -6164,6 +6164,131 @@
         "summary": "Delete delegate",
         "tags": [
           "delegates"
+        ]
+      }
+    },
+    "/v1/chains/{chainId}/tokens/{address}": {
+      "get": {
+        "description": "Symbol, name, decimals, logo and trust flag of a token on the given chain, as known by the Transaction Service.",
+        "operationId": "tokensGetTokenV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID the token is deployed on",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "description": "Token contract address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/NativeTokenMetadata"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Erc20TokenMetadata"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Erc721TokenMetadata"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The Transaction Service does not know this token"
+          },
+          "422": {
+            "description": "Invalid chain ID or address"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        },
+        "summary": "Get token metadata",
+        "tags": [
+          "tokens"
+        ]
+      }
+    },
+    "/v1/chains/{chainId}/tokens": {
+      "get": {
+        "description": "Metadata for up to 20 tokens of one chain, in request order. Addresses the Transaction Service does not know are omitted.",
+        "operationId": "tokensGetTokensV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID the token is deployed on",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "addresses",
+            "required": true,
+            "in": "query",
+            "description": "Comma-separated token contract addresses, at most 20",
+            "schema": {
+              "example": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48,0xdAC17F958D2ee523a2206206994597C13D831ec7",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token metadata for the known addresses, in request order",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/NativeTokenMetadata"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Erc20TokenMetadata"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Erc721TokenMetadata"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid chain ID, malformed address, empty list or more than 20 addresses"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        },
+        "summary": "Get metadata for several tokens",
+        "tags": [
+          "tokens"
         ]
       }
     },
@@ -10823,7 +10948,7 @@
                 "type": "string"
               }
             },
-            "description": "Map from page id → selected option keys"
+            "description": "Map from page id \u2192 selected option keys"
           },
           "submittedAt": {
             "format": "date-time",
@@ -10878,7 +11003,7 @@
                 "type": "string"
               }
             },
-            "description": "Map from page id → selected option keys",
+            "description": "Map from page id \u2192 selected option keys",
             "example": {
               "use_cases": [
                 "run_payments",
@@ -15647,6 +15772,123 @@
           "signature"
         ]
       },
+      "NativeTokenMetadata": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "decimals": {
+            "type": "number"
+          },
+          "logoUri": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "trusted": {
+            "type": "boolean",
+            "description": "Whether the Transaction Service lists the token in one of its imported token lists"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "NATIVE_TOKEN"
+            ]
+          }
+        },
+        "required": [
+          "address",
+          "decimals",
+          "logoUri",
+          "name",
+          "symbol",
+          "trusted",
+          "type"
+        ]
+      },
+      "Erc20TokenMetadata": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "decimals": {
+            "type": "number"
+          },
+          "logoUri": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "trusted": {
+            "type": "boolean",
+            "description": "Whether the Transaction Service lists the token in one of its imported token lists"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ERC20"
+            ]
+          }
+        },
+        "required": [
+          "address",
+          "decimals",
+          "logoUri",
+          "name",
+          "symbol",
+          "trusted",
+          "type"
+        ]
+      },
+      "Erc721TokenMetadata": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "decimals": {
+            "type": "number"
+          },
+          "logoUri": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "trusted": {
+            "type": "boolean",
+            "description": "Whether the Transaction Service lists the token in one of its imported token lists"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ERC721"
+            ]
+          }
+        },
+        "required": [
+          "address",
+          "decimals",
+          "logoUri",
+          "name",
+          "symbol",
+          "trusted",
+          "type"
+        ]
+      },
       "SafeRegistration": {
         "type": "object",
         "properties": {
@@ -15817,7 +16059,7 @@
           "signerAddress": {
             "type": "string",
             "nullable": true,
-            "description": "Optional signer address filter:\n• Omitted (undefined): Deletes subscriptions regardless of signer address\n• null: Deletes only subscriptions with no signer address\n• Valid address: Deletes only subscriptions with that specific signer address"
+            "description": "Optional signer address filter:\n\u2022 Omitted (undefined): Deletes subscriptions regardless of signer address\n\u2022 null: Deletes only subscriptions with no signer address\n\u2022 Valid address: Deletes only subscriptions with that specific signer address"
           }
         },
         "required": [
