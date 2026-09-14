@@ -28,6 +28,8 @@ import { getCreateCallContractDeployment } from '@safe-global/utils/services/con
 import { useAllSafes, useGetHref, type SafeItem } from '@/hooks/safes'
 import { useLoadFeature } from '@/features/__core__'
 import { WalletConnectFeature } from '@/features/walletconnect'
+import { verifyAndStripNestedTxCalldata, type NestedTxEnvelope } from '@/services/tx/nestedTxEnvelope'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 export const useTxFlowApi = (chainId: string, safeAddress: string, fetchOwnedSafes = true): WalletSDK | undefined => {
   const { safe } = useSafeInfo()
@@ -123,7 +125,24 @@ export const useTxFlowApi = (chainId: string, safeAddress: string, fetchOwnedSaf
       async send(params: { txs: any[]; params: { safeTxGas: number } }, appInfo) {
         const id = Math.random().toString(36).slice(2)
 
-        const transactions = params.txs.map(({ to, value, data }) => {
+        // approveHash calldata may carry a nested-tx envelope; verify it and strip it so the
+        // parent SafeTx only contains the plain 36-byte calldata
+        let nestedChildTx: NestedTxEnvelope | undefined
+        let strippedTxs: { to: string; value: string; data: string }[]
+        try {
+          strippedTxs = params.txs.map(({ to, value, data }) => {
+            const { data: strippedData, childTx } = verifyAndStripNestedTxCalldata(data)
+            nestedChildTx = nestedChildTx ?? childTx
+            return { to, value, data: strippedData }
+          })
+        } catch (error) {
+          return Promise.reject({
+            code: RpcErrorCode.INVALID_PARAMS,
+            message: asError(error).message,
+          })
+        }
+
+        const transactions = strippedTxs.map(({ to, value, data }) => {
           return {
             to: getAddress(to),
             value: BigInt(value).toString(),
@@ -156,6 +175,7 @@ export const useTxFlowApi = (chainId: string, safeAddress: string, fetchOwnedSaf
                 requestId: id,
                 txs: transactions,
                 params: params.params,
+                ...(nestedChildTx && { nestedChildTx }),
               }}
               onSubmit={onSubmit}
             />,

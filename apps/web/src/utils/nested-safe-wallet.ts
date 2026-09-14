@@ -12,6 +12,7 @@ import { initSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { logError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { tryOffChainTxSigning } from '@/services/tx/tx-sender/sdk'
+import { verifyAndStripNestedTxCalldata } from '@/services/tx/nestedTxEnvelope'
 import type { TransactionResult } from '@safe-global/types-kit'
 
 export type NestedWallet = {
@@ -68,7 +69,9 @@ export const getNestedWallet = (
         return {
           to: getAddress(to),
           value: BigInt(value).toString(),
-          data,
+          // approveHash calldata may carry a nested-tx envelope; verify it and strip it before
+          // creating the parent SafeTx (throws if the envelope doesn't match the approved hash)
+          data: verifyAndStripNestedTxCalldata(data).data,
           operation: 0,
         }
       })
