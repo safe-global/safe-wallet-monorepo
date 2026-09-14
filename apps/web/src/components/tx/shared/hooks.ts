@@ -35,9 +35,11 @@ import { useLoadFeature } from '@/features/__core__'
 import { GTFFeature } from '@/features/gtf'
 import { mergeGtfFeeParams } from '@/features/gtf/services'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import type { SignerWallet } from '@/components/common/WalletProvider'
+import { supportsNestedTxEnvelope, type NestedTxEnvelope } from '@/services/tx/nestedTxEnvelope'
 
 // The signer is a Safe: either the in-app nested signer (`isSafe`) or a Safe connected directly,
 // e.g. via WalletConnect (`isConnectedSafe`). Such a signer creates an on-chain
@@ -89,6 +91,11 @@ export const useTxActions = (): TxActions => {
   const gtfFeature = useLoadFeature(GTFFeature)
   const { gtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
   const currency = useAppSelector(selectCurrency)
+  // A verified child tx received via a nested approveHash envelope (e.g. over WalletConnect):
+  // proposed alongside the parent tx so the service learns about it without a proposal from
+  // the child Safe
+  const { data: flowData } = useContext(TxFlowContext) as TxFlowContextType<{ nestedChildTx?: NestedTxEnvelope }>
+  const nestedChildTx = flowData?.nestedChildTx
 
   return useMemo<TxActions>(() => {
     // While a scoped Safe's SafeState is still loading, `safe` is `defaultSafeInfo` — the scope's own
@@ -111,7 +118,15 @@ export const useTxActions = (): TxActions => {
       })
 
     const _propose = async (sender: string, safeTx: SafeTransaction, origin?: string) => {
-      return dispatchTxProposal({ chainId, safeAddress, sender, safeTx, origin, scope })
+      return dispatchTxProposal({
+        chainId,
+        safeAddress,
+        sender,
+        safeTx,
+        origin,
+        scope,
+        nestedTransaction: nestedChildTx,
+      })
     }
 
     // A tx with a txId is already known to CGW, so only the new signature is sent
@@ -170,8 +185,15 @@ export const useTxActions = (): TxActions => {
       const viaSafe = isSafeSigner(signer)
       const isSmartAccount = viaSafe || (await isSmartContractWallet(signer.chainId, signer.address))
       if (isSmartAccount) {
-        const id = txId || (await _propose(signer.address, safeTx, origin)).txId
-        await dispatchOnChainSigning(
+        // A Safe signer skips the CGW proposal only when the child tx travels to the parent inside
+        // the approveHash envelope, which then proposes it alongside the parent tx. The skip must
+        // use the same predicate as appending the envelope (dispatchOnChainSigning) — if they
+        // diverged, the child tx data would be lost entirely. Envelope-less signers (older child
+        // Safes, non-Safe smart accounts) have to propose w/o signatures — otherwise the backend
+        // won't pick up the tx. The signature will be added once the on-chain signature is indexed.
+        const carriesEnvelope = viaSafe && supportsNestedTxEnvelope(safe.version)
+        const id = txId || (carriesEnvelope ? undefined : (await _propose(signer.address, safeTx, origin)).txId)
+        const signedTxId = await dispatchOnChainSigning(
           safeTx,
           id,
           signer.provider,
@@ -183,7 +205,7 @@ export const useTxActions = (): TxActions => {
           safe.version,
           scope,
         )
-        return { txId: id, isNestedSigning: viaSafe }
+        return { txId: signedTxId, isNestedSigning: viaSafe }
       }
 
       // Otherwise, sign off-chain
@@ -228,24 +250,31 @@ export const useTxActions = (): TxActions => {
         rePropose = true
       }
 
-      // Propose the tx if there's no id yet, or send the new signature to the already proposed tx
-      if (!txId || rePropose) {
-        txId = await _proposeOrConfirm(signer.address, safeTx, txId, origin)
-      }
-
-      // Relay or execute the tx via connected wallet
+      // Relayed txs must be known to the service, so propose them (or send the new signature to
+      // the already proposed tx) regardless of the signer type
       if (isRelayed) {
+        if (!txId || rePropose) {
+          txId = await _proposeOrConfirm(signer.address, safeTx, txId, origin)
+        }
         await dispatchTxRelay(safeTx, safe, txId, chain, txOptions.gasLimit, acceptUnverifiedSimulation, scope)
         return { txId, isExecuted: true }
       }
 
-      const isSmartAccount = isSafeSigner(signer) || (await isSmartContractWallet(signer.chainId, signer.address))
+      const viaSafe = isSafeSigner(signer)
+      // Propose the tx if there's no id yet ("immediate execution"). A Safe executor never
+      // proposes the child tx to CGW — only the parent proposes: its execTransaction calldata
+      // carries the full child tx, which the service picks up once it executes on-chain.
+      if (!txId && !viaSafe) {
+        txId = (await _propose(signer.address, safeTx, origin)).txId
+      }
+
+      const isSmartAccount = viaSafe || (await isSmartContractWallet(signer.chainId, signer.address))
       // A Safe executor submits to its own Safe and gets back a safeTxHash, not an on-chain tx hash
       // — UNLESS it's the in-app nested signer at threshold 1, which executes immediately and
       // returns a real hash. EOAs and non-Safe smart accounts execute directly (real hash / their
       // own semantics), so treat them as executed and keep the plain processing flow.
       const executed = executesImmediately(signer)
-      await dispatchTxExecution(
+      const executedTxId = await dispatchTxExecution(
         safe.chainId,
         safeTx,
         txOptions,
@@ -258,7 +287,7 @@ export const useTxActions = (): TxActions => {
         scope,
       )
 
-      return { txId, isExecuted: executed }
+      return { txId: executedTxId, isExecuted: executed }
     }
 
     return { addToBatch, signTx, executeTx, signProposerTx, proposeTx }
@@ -275,6 +304,7 @@ export const useTxActions = (): TxActions => {
     gtfPaymentMode,
     gtfSelectedGasToken,
     currency,
+    nestedChildTx,
   ])
 }
 
