@@ -183,28 +183,28 @@ describe('executeLedgerTx', () => {
 
       await expect(executeLedgerTx(defaultParams)).rejects.toThrow('Ledger execution failed')
 
-      expect(mockGetUserNonce).not.toHaveBeenCalled()
+      expect(mockGetUserNonce).toHaveBeenCalled()
       expect(mockDisconnect).not.toHaveBeenCalled()
     })
 
-    it('should propagate error from getUserNonce', async () => {
+    it('should propagate error from getUserNonce without broadcasting', async () => {
       mockSelectSignerByAddress.mockReturnValue(mockLedgerSigner)
       const nonceError = new Error('Failed to get nonce')
       mockGetUserNonce.mockRejectedValue(nonceError)
 
       await expect(executeLedgerTx(defaultParams)).rejects.toThrow('Failed to get nonce')
 
-      expect(mockExecuteTransaction).toHaveBeenCalled()
+      expect(mockExecuteTransaction).not.toHaveBeenCalled()
       expect(mockDisconnect).not.toHaveBeenCalled()
     })
 
-    it('should propagate error from disconnect', async () => {
+    it('should still return the result when disconnect fails after broadcast', async () => {
       mockSelectSignerByAddress.mockReturnValue(mockLedgerSigner)
-      const disconnectError = new Error('Failed to disconnect')
-      mockDisconnect.mockRejectedValue(disconnectError)
+      mockDisconnect.mockRejectedValue(new Error('Failed to disconnect'))
 
-      await expect(executeLedgerTx(defaultParams)).rejects.toThrow('Failed to disconnect')
+      const result = await executeLedgerTx(defaultParams)
 
+      expect(result.txHash).toBe('0xTransactionHash')
       expect(mockExecuteTransaction).toHaveBeenCalled()
       expect(mockGetUserNonce).toHaveBeenCalled()
     })
@@ -233,7 +233,7 @@ describe('executeLedgerTx', () => {
 
       await executeLedgerTx(defaultParams)
 
-      expect(callOrder).toEqual(['selectSignerByAddress', 'executeTransaction', 'getUserNonce', 'disconnect'])
+      expect(callOrder).toEqual(['selectSignerByAddress', 'getUserNonce', 'executeTransaction', 'disconnect'])
     })
   })
 })
