@@ -11,6 +11,7 @@ import { SafeShieldAnalysisLoading } from './SafeShieldAnalysisLoading'
 import { SafeShieldAnalysisEmpty } from './SafeShieldAnalysisEmpty'
 import { AnalysisGroupCard } from '../AnalysisGroupCard'
 import { TenderlySimulation } from '../TenderlySimulation'
+import { TenderlyExternalSimulation } from '../TenderlyExternalSimulation'
 import UntrustedSafeWarning from '../UntrustedSafeWarning'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import isEmpty from 'lodash/isEmpty'
@@ -34,6 +35,7 @@ export const SafeShieldContent = ({
   showHypernativeActiveStatus = true,
   safeAnalysis,
   onAddToTrustedList,
+  hasProFeatures = true,
 }: {
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
@@ -46,6 +48,8 @@ export const SafeShieldContent = ({
   showHypernativeActiveStatus?: boolean
   safeAnalysis?: SafeAnalysisResult | null
   onAddToTrustedList?: () => void
+  /** Without Safe Pro the simulation is not run for the user; they get a link to Tenderly's public simulator instead. */
+  hasProFeatures?: boolean
 }): ReactElement => {
   const hn = useLoadFeature(HypernativeFeature)
   const safenet = useLoadFeature(SafenetChecksFeature)
@@ -130,7 +134,10 @@ export const SafeShieldContent = ({
 
           {shouldShowContent && <safenet.SafenetChecksSection />}
 
-          {!contractLoading && !threatLoading && (
+          {!contractLoading && !threatLoading && !hasProFeatures && (
+            <TenderlyExternalSimulation safeTx={safeTx} delay={simulationAnalysisDelay} />
+          )}
+          {!contractLoading && !threatLoading && hasProFeatures && (
             <TenderlySimulation
               safeTx={safeTx}
               delay={simulationAnalysisDelay}

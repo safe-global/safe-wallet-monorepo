@@ -63,6 +63,7 @@ describe('ExecuteForm', () => {
       setIsRiskConfirmed: jest.fn(),
       safeAnalysis: null,
       addToTrustedList: jest.fn(),
+      hasProFeatures: true,
     },
     options: [
       { id: 'execute', label: 'Execute' },
