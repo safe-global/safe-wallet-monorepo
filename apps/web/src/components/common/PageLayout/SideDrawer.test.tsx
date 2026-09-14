@@ -5,10 +5,6 @@ jest.mock('@/features/spaces', () => ({
   SpacesEnhancedSidebar: () => <div data-testid="sidebar" />,
 }))
 
-jest.mock('@/hooks/useIsSidebarRoute', () => ({
-  useIsSidebarRoute: jest.fn(() => [false, false]),
-}))
-
 const BELOW_MD = '(max-width:899.95px)'
 
 type Listeners = Map<string, Set<() => void>>
@@ -91,5 +87,36 @@ describe('SideDrawer', () => {
     rerender(<SideDrawer isOpen onToggle={jest.fn()} />)
 
     expect(document.querySelector('[data-slot="sheet-content"]')).toBeInTheDocument()
+  })
+
+  // Regression: opening a Safe App used to collapse the sidebar. The drawer no longer reads the
+  // route at all, so the guard is that it opens on desktop and never asks to close.
+  it('opens on desktop and never collapses itself', () => {
+    setupMatchMedia()
+    const onToggle = jest.fn()
+
+    render(<SideDrawer isOpen onToggle={onToggle} />)
+
+    expect(onToggle).toHaveBeenCalledWith(true)
+    expect(onToggle).not.toHaveBeenCalledWith(false)
+  })
+
+  it('still collapses the sidebar on small screens', () => {
+    const media = setupMatchMedia()
+    const onToggle = jest.fn()
+
+    render(<SideDrawer isOpen onToggle={onToggle} />)
+    media.shrinkToMobile()
+
+    expect(onToggle).toHaveBeenCalledWith(false)
+  })
+
+  // The sidebar's own control is the only collapse affordance; the Safe App strip is gone
+  it('renders no Safe App collapse toggle', () => {
+    setupMatchMedia()
+
+    render(<SideDrawer isOpen onToggle={jest.fn()} />)
+
+    expect(document.querySelector('[aria-label="collapse sidebar"]')).not.toBeInTheDocument()
   })
 })

@@ -84,12 +84,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
       )}
 
       {isSidebarRoute ? (
-        <SideDrawer
-          isOpen={isSidebarVisible}
-          onToggle={setSidebarOpen}
-          onSidebarOpenChange={setSidebarExpanded}
-          isSidebarExpanded={isSidebarExpanded}
-        />
+        <SideDrawer isOpen={isSidebarVisible} onToggle={setSidebarOpen} onSidebarOpenChange={setSidebarExpanded} />
       ) : null}
 
       <div
