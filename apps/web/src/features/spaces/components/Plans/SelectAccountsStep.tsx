@@ -1,0 +1,161 @@
+import { useMemo, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { ArrowRight } from 'lucide-react'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { DialogTitle } from '@/components/ui/dialog'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { SearchInput } from '@/components/ui/search-input'
+import { Typography } from '@/components/ui/typography'
+import { SafeAccountsTable, type SafeAccountColumnId } from '@/features/myAccounts'
+import { isMultiChainSafeItem, useSafesSearch, type AllSafeItems, type SafeItem } from '@/hooks/safes'
+import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
+import { useSpaceSafes } from '../../hooks/useSpaceSafes'
+import SelectedCounter from '../SelectedCounter'
+import useOnboardingSelection from '../SelectSafesOnboarding/hooks/useOnboardingSelection'
+import { getMultiChainSafeId, getSafeId } from '../SelectSafesOnboarding/utils/safeIds'
+
+const COLUMNS: SafeAccountColumnId[] = ['name', 'networks', 'balance']
+const NO_FLAGGED = new Set<string>()
+
+export type SafeRef = Pick<SafeItem, 'chainId' | 'address'>
+
+const leavesOf = (items: AllSafeItems): SafeItem[] =>
+  items.flatMap((item) => (isMultiChainSafeItem(item) ? item.safes : [item]))
+
+/** The first `limit` Safes start selected, with a multi-chain parent checked only when all its children made it. */
+export const initialSelection = (items: AllSafeItems, limit: number): Record<string, boolean> => {
+  const kept = new Set(
+    leavesOf(items)
+      .slice(0, limit)
+      .map((safe) => getSafeId(safe)),
+  )
+  const selected: Record<string, boolean> = {}
+  for (const key of kept) selected[key] = true
+  for (const item of items) {
+    if (isMultiChainSafeItem(item) && item.safes.every((safe) => kept.has(getSafeId(safe)))) {
+      selected[getMultiChainSafeId(item)] = true
+    }
+  }
+  return selected
+}
+
+export const seatsTooltip = (planName: string, limit: number): string =>
+  `${planName} covers ${limit} Safe accounts. Safe accounts you leave out remain available outside the Workspace. You can swap them in any time.`
+
+/** Trims the Workspace to the plan's seats before checkout; the Safes left out are removed from it. */
+export default function SelectAccountsStep({
+  limit,
+  planName,
+  onBack,
+  onContinue,
+  isSubmitting,
+  error,
+}: {
+  limit: number
+  planName: string
+  onBack: () => void
+  onContinue: (removed: SafeRef[]) => void
+  isSubmitting?: boolean
+  error?: string
+}) {
+  const { allSafes, isLoading } = useSpaceSafes()
+  const [query, setQuery] = useState('')
+  const filtered = useSafesSearch(allSafes, query.trim())
+  const items = query.trim() ? filtered : allSafes
+  const { control, setValue } = useForm<AddAccountsFormValues>({
+    defaultValues: { selectedSafes: initialSelection(allSafes, limit) },
+  })
+  const { selectedKeys, isAtLimit, handleToggle } = useOnboardingSelection({
+    items: allSafes,
+    control,
+    setValue,
+    flaggedAddresses: NO_FLAGGED,
+    limit,
+  })
+  const removed = useMemo(
+    () => leavesOf(allSafes).filter((safe) => !selectedKeys.has(getSafeId(safe))),
+    [allSafes, selectedKeys],
+  )
+
+  return (
+    <>
+      <div className="flex flex-col gap-1">
+        <Typography variant="h3" as={DialogTitle}>
+          Select Safe accounts for your plan
+        </Typography>
+        <Typography color="muted">
+          {planName} covers {limit} Safe accounts. Choose which ones stay in the Workspace.
+        </Typography>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-2">
+          <SearchInput
+            className="flex-1"
+            placeholder="by name, address or network"
+            aria-label="Search Safe list"
+            autoComplete="off"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          <SelectedCounter
+            count={selectedKeys.size}
+            limit={limit}
+            isAtLimit={isAtLimit}
+            tooltip={seatsTooltip(planName, limit)}
+          />
+        </div>
+
+        <ScrollArea className="h-[364px]">
+          {!isLoading && items.length === 0 ? (
+            <Typography align="center" color="muted" className="py-8">
+              No Safe accounts match your search
+            </Typography>
+          ) : (
+            <SafeAccountsTable
+              items={items}
+              columns={COLUMNS}
+              embedded
+              selection={{ selectedKeys, onToggle: handleToggle, isAtLimit }}
+              data-testid="plan-safes-table"
+            />
+          )}
+        </ScrollArea>
+      </div>
+
+      {removed.length > 0 && (
+        <Alert variant="warning">
+          <AlertSeverityIcon variant="warning" />
+          <AlertDescription>
+            {removed.length === 1 ? '1 Safe account' : `${removed.length} Safe accounts`} will be removed from the
+            Workspace. They remain available in My accounts.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {error && (
+        <Alert variant="destructive">
+          <AlertSeverityIcon variant="destructive" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      <div className="flex gap-5">
+        <Button variant="secondary" size="lg" className="flex-1" onClick={onBack} disabled={isSubmitting}>
+          Back
+        </Button>
+        <Button
+          size="lg"
+          accentIcon
+          className="flex-1"
+          disabled={selectedKeys.size === 0 || isSubmitting}
+          onClick={() => onContinue(removed.map(({ chainId, address }) => ({ chainId, address })))}
+        >
+          Continue to checkout
+          <ArrowRight />
+        </Button>
+      </div>
+    </>
+  )
+}

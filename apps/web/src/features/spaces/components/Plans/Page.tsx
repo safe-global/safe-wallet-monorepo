@@ -42,17 +42,25 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
   const [isReminderOpen, setIsReminderOpen] = useState(false)
   const [pick, setPick] = useState<PlanPick>()
 
-  const tiers = useMemo(() => buildPlanTiers(paidPlans), [paidPlans])
-  const currentPlan: CurrentPlan | undefined =
-    canChange && subscription
-      ? {
-          name: subscription.plan.name ?? plan?.name ?? 'Safe Pro',
-          price: subscription.plan.currentPrice,
-          currency: subscription.plan.currency,
-          billingCycle: subscription.plan.billingCycle ?? null,
-          isTrialing,
-        }
-      : undefined
+  const currentPlan = useMemo<CurrentPlan | undefined>(
+    () =>
+      canChange && subscription && plan
+        ? {
+            name: subscription.plan.name ?? plan.name,
+            price: subscription.plan.currentPrice,
+            currency: subscription.plan.currency,
+            billingCycle: subscription.plan.billingCycle ?? null,
+            isTrialing,
+            periodEndsAt: plan.periodEndsAt,
+          }
+        : undefined,
+    [canChange, subscription, plan, isTrialing],
+  )
+  const tiers = useMemo(
+    () =>
+      buildPlanTiers(paidPlans, currentPlan && subscription ? { subscription, seatsQuota: seats?.quota } : undefined),
+    [paidPlans, currentPlan, subscription, seats?.quota],
+  )
 
   useEffect(() => {
     if (isTrialing && !reminderSeen.get()) setIsReminderOpen(true)
@@ -88,13 +96,12 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
             tiers={tiers}
             onManage={() => void openPortal()}
             isManaging={isRedirecting}
-            canManage={subscription !== undefined}
+            canManage={plan?.status === 'active' || (plan === null && subscription !== undefined)}
             onSubscribe={(picked) => {
-              if (isTrialing) void openPortal()
-              else if (canChange) setPick(picked)
+              if (canChange) setPick(picked)
               else if (picked.option.paymentLinkId) void startCheckout(picked.option.paymentLinkId)
             }}
-            isSubscribing={isCheckingOut || isRedirecting}
+            isSubscribing={isCheckingOut}
             currentPlan={currentPlan}
           />
         )}

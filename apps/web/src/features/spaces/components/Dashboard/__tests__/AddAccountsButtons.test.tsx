@@ -58,7 +58,6 @@ jest.mock('@/features/__core__', () => ({
   useLoadFeature: jest.fn(),
 }))
 
-jest.mock('../../Plans/StartTrialModal', () => ({ __esModule: true, default: () => null }))
 jest.mock('../../../hooks/useSpacePlan', () => ({
   useSpacePlan: () => ({ plan: null, status: 'none', isLoading: false, refetch: jest.fn() }),
 }))
@@ -139,7 +138,6 @@ const stubAccountsWidget = () => {
     return {
       PendingTxWidget: () => null,
       SafeProSubscriptionActivatedModal: () => null,
-      SafeProLockedWorkspace: () => null,
       SafeProAnnouncementModal: () => null,
       $isReady: true,
     }

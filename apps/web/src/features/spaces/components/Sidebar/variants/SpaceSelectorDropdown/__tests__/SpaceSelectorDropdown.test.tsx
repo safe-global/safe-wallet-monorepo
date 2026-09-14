@@ -80,7 +80,12 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
 const mockUseHasFeature = jest.fn()
 jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
 jest.mock('@/public/images/safe-pro/pro-chip.svg', () => 'svg')
-const mockPlans = { tierName: 'Business', isTrialing: false }
+const mockPlans: {
+  tierName: string
+  isTrialing: boolean
+  isTrialEndingSoon: boolean
+  plan: { daysLeft: number | null } | null
+} = { tierName: 'Business', isTrialing: false, isTrialEndingSoon: false, plan: null }
 jest.mock('../../../../../hooks/useSpacePlan', () => ({ useSpacePlan: () => mockPlans }))
 
 jest.mock('@/hooks/useChainId', () => ({
@@ -1076,18 +1081,27 @@ describe('SpaceSelectorDropdown', () => {
 
   describe('plan label under the workspace name', () => {
     it.each([
-      [false, false, 'Workspace', false],
-      [true, true, 'Free trial', true],
-      [true, false, 'Business', false],
-    ])('SAFE_PRO=%s isTrialing=%s → "%s", chip=%s', (isSafePro, isTrialing, label, hasChip) => {
-      mockUseHasFeature.mockReturnValue(isSafePro)
-      mockPlans.isTrialing = isTrialing
-      const spaces = [{ uuid: 'uuid-1', name: 'Alpha', safeCount: 0 }]
+      [false, false, null, 'Workspace', false, false],
+      [true, true, 14, 'Free trial · 14 days left', true, false],
+      [true, true, 7, 'Free trial · 7 days left', true, true],
+      [true, true, null, 'Free trial', true, false],
+      [true, false, 20, 'Business', false, false],
+    ])(
+      'SAFE_PRO=%s isTrialing=%s daysLeft=%s → "%s", chip=%s, warning=%s',
+      (isSafePro, isTrialing, daysLeft, label, hasChip, isWarning) => {
+        mockUseHasFeature.mockReturnValue(isSafePro)
+        mockPlans.isTrialing = isTrialing
+        mockPlans.isTrialEndingSoon = isTrialing && daysLeft !== null && daysLeft <= 7
+        mockPlans.plan = daysLeft === null && !isTrialing ? null : { daysLeft }
+        const spaces = [{ uuid: 'uuid-1', name: 'Alpha', safeCount: 0 }]
 
-      render(<SpaceSelectorDropdown spaces={spaces} selectedSpace={spaces[0]} />)
+        render(<SpaceSelectorDropdown spaces={spaces} selectedSpace={spaces[0]} />)
 
-      expect(screen.getByText(label)).toBeInTheDocument()
-      expect(screen.queryByTestId('space-selector-pro-chip') !== null).toBe(hasChip)
-    })
+        const subtitle = screen.getByText(label)
+        expect(subtitle).toBeInTheDocument()
+        expect(subtitle.classList.contains('text-warning-strong')).toBe(isWarning)
+        expect(screen.queryByTestId('space-selector-pro-chip') !== null).toBe(hasChip)
+      },
+    )
   })
 })

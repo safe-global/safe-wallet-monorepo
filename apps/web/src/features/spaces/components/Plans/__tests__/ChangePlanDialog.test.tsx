@@ -43,7 +43,14 @@ const pick: PlanPick = {
     originalPrice: null,
   },
 }
-const currentPlan = { name: 'Business', price: 499, currency: 'eur', billingCycle: 'month' as const, isTrialing: false }
+const currentPlan = {
+  name: 'Business',
+  price: 499,
+  currency: 'eur',
+  billingCycle: 'month' as const,
+  isTrialing: false,
+  periodEndsAt: '2026-12-06T00:00:00Z',
+}
 const preview = {
   amountDue: -31000,
   currency: 'eur',
@@ -120,6 +127,28 @@ describe('ChangePlanDialog', () => {
 
     expect(screen.getByRole('heading', { name: 'Upgrade plan' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Confirm upgrade' })).toBeInTheDocument()
+  })
+
+  it('skips the proration preview during a trial and explains when billing starts', async () => {
+    mockChangePlan.mockResolvedValue(true)
+    render(
+      <ChangePlanDialog
+        spaceId="space-1"
+        pick={pick}
+        currentPlan={{ ...currentPlan, isTrialing: true }}
+        onClose={jest.fn()}
+      />,
+    )
+
+    expect(mockPreviewChange).not.toHaveBeenCalled()
+    expect(screen.queryByTestId('change-plan-skeleton')).not.toBeInTheDocument()
+    expect(screen.getByTestId('change-plan-trial-note')).toHaveTextContent(
+      "You're on a free trial until Dec 6, 2026. Nothing is charged now. From then on you'll pay €189/mo for Starter.",
+    )
+    expect(screen.getByTestId('change-plan-confirm')).toBeEnabled()
+
+    fireEvent.click(screen.getByTestId('change-plan-confirm'))
+    await waitFor(() => expect(mockChangePlan).toHaveBeenCalledWith('price_starter', 'pl_starter'))
   })
 
   it('surfaces a preview error instead of the breakdown', () => {

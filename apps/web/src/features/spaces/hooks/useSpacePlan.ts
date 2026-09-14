@@ -1,4 +1,5 @@
 import type { PlanSummary } from '../components/Plans/types'
+import { getDaysLeft, TRIAL_ENDING_SOON_DAYS } from './billing/subscription'
 import { useSpaceEntitlements } from './billing/useSpaceEntitlements'
 import { useSpaceSubscription } from './billing/useSpaceSubscription'
 
@@ -7,24 +8,28 @@ export const useSpacePlan = (spaceId?: string | null) => {
   const entitlements = useSpaceEntitlements(spaceId)
   const {
     subscription,
+    latestSubscription,
     status,
     isLoading: isSubscriptionLoading,
     refetch: refetchSubscription,
   } = useSpaceSubscription(spaceId)
 
   const name = subscription?.plan.name ?? entitlements.plan?.name ?? undefined
+  const periodEndsAt = entitlements.plan?.cycleEndsAt ?? null
+  const daysLeft = getDaysLeft(periodEndsAt)
   const plan: PlanSummary | null =
-    status === 'trialing' || status === 'active'
-      ? { name: name ?? 'Safe Pro', status, periodEndsAt: entitlements.plan?.cycleEndsAt ?? null }
-      : null
+    status === 'trialing' || status === 'active' ? { name: name ?? 'Safe Pro', status, periodEndsAt, daysLeft } : null
+  const isTrialing = status === 'trialing'
 
   return {
     plan,
     tierName: name,
     seats: entitlements.seats,
     subscription,
+    latestSubscription,
     status,
-    isTrialing: status === 'trialing',
+    isTrialing,
+    isTrialEndingSoon: isTrialing && daysLeft !== null && daysLeft <= TRIAL_ENDING_SOON_DAYS,
     isPaidActive: status === 'active',
     isLoading: entitlements.isLoading || isSubscriptionLoading,
     refetch: () => {

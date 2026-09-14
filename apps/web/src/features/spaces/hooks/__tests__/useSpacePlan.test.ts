@@ -40,6 +40,11 @@ describe('useSpacePlan', () => {
     mockIsSignedIn.mockReturnValue(true)
     mockEntitlementsQuery.mockReturnValue({ data: undefined, isLoading: false })
     mockSubscriptionsQuery.mockReturnValue({ data: undefined, isLoading: false })
+    jest.spyOn(Date, 'now').mockReturnValue(Date.UTC(2026, 10, 22, 12))
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
   })
 
   it('renders a trial from the subscription status and the entitlements cycle', () => {
@@ -48,8 +53,18 @@ describe('useSpacePlan', () => {
 
     const { result } = renderHook(() => useSpacePlan())
 
-    expect(result.current.plan).toEqual({ name: 'Business', status: 'trialing', periodEndsAt: '2026-12-06T00:00:00Z' })
-    expect(result.current).toMatchObject({ tierName: 'Business', isTrialing: true, isPaidActive: false })
+    expect(result.current.plan).toEqual({
+      name: 'Business',
+      status: 'trialing',
+      periodEndsAt: '2026-12-06T00:00:00Z',
+      daysLeft: 14,
+    })
+    expect(result.current).toMatchObject({
+      tierName: 'Business',
+      isTrialing: true,
+      isTrialEndingSoon: false,
+      isPaidActive: false,
+    })
     expect(result.current.seats).toEqual({ used: 6, quota: 10 })
     expect(mockEntitlementsQuery).toHaveBeenCalledWith({ spaceId: SPACE_ID }, expect.anything())
   })
@@ -60,8 +75,18 @@ describe('useSpacePlan', () => {
 
     const { result } = renderHook(() => useSpacePlan())
 
-    expect(result.current.plan).toEqual({ name: 'Business', status: 'active', periodEndsAt: null })
+    expect(result.current.plan).toEqual({ name: 'Business', status: 'active', periodEndsAt: null, daysLeft: null })
     expect(result.current.isPaidActive).toBe(true)
+  })
+
+  it('flags a trial in its last week', () => {
+    mockEntitlementsQuery.mockReturnValue(entitlements({ name: 'Business', cycleEndsAt: '2026-11-29T00:00:00Z' }))
+    mockSubscriptionsQuery.mockReturnValue(subscriptions('trialing'))
+
+    const { result } = renderHook(() => useSpacePlan())
+
+    expect(result.current.plan?.daysLeft).toBe(7)
+    expect(result.current.isTrialEndingSoon).toBe(true)
   })
 
   it('reports no plan without a subscription or when it lapsed', () => {

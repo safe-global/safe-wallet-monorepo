@@ -1,0 +1,128 @@
+import { fireEvent, render, screen } from '@/tests/test-utils'
+import WorkspaceLockModal, { memberCopy } from '../WorkspaceLockModal'
+
+const mockUseWorkspaceLock = jest.fn()
+const mockUseCurrentMembership = jest.fn()
+const mockUseIsAdmin = jest.fn()
+const mockPush = jest.fn()
+let mockPathname = '/spaces'
+
+jest.mock('next/router', () => ({ useRouter: () => ({ push: mockPush, pathname: mockPathname }) }))
+jest.mock('../../../hooks/useWorkspaceLock', () => ({
+  useWorkspaceLock: (spaceId?: string) => mockUseWorkspaceLock(spaceId),
+}))
+jest.mock('../../../hooks/useSpaceMembers', () => ({
+  useCurrentMembership: (spaceId?: string) => mockUseCurrentMembership(spaceId),
+  useIsAdmin: (spaceId?: string) => mockUseIsAdmin(spaceId),
+}))
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
+  useSpacesGetOneV1Query: () => ({ currentData: { name: 'Acme Inc' } }),
+}))
+jest.mock('@/features/__core__', () => ({
+  useLoadFeature: () => ({
+    SafeProLockedMemberModal: ({ title, body, onBack }: { title: string; body: string; onBack: () => void }) => (
+      <div data-testid="locked-member-modal">
+        <h2>{title}</h2>
+        <p>{body}</p>
+        <button onClick={onBack}>Back to My accounts</button>
+      </div>
+    ),
+  }),
+  createFeatureHandle: () => ({}),
+}))
+jest.mock('../ClaimTrialModal', () => ({
+  __esModule: true,
+  ...jest.requireActual('../ClaimTrialModal'),
+  default: ({ spaceId, onBack }: { spaceId: string; onBack: () => void }) => (
+    <button data-testid="claim-trial-modal" data-space={spaceId} onClick={onBack} />
+  ),
+}))
+jest.mock('../PlanChooserModal', () => ({
+  __esModule: true,
+  ...jest.requireActual('../PlanChooserModal'),
+  default: ({ reason, endedAt, onDismiss }: { reason: string; endedAt: number | null; onDismiss?: () => void }) => (
+    <div data-testid="plan-chooser-modal" data-reason={reason} data-ended={endedAt ?? ''}>
+      {onDismiss && <button onClick={onDismiss}>dismiss</button>}
+    </div>
+  ),
+}))
+
+const SPACE_ID = '11111111-1111-1111-1111-111111111111'
+const ENDED_AT = Date.UTC(2026, 11, 5, 12)
+const lock = (overrides: Record<string, unknown>) => ({
+  isLocked: true,
+  isResolving: false,
+  trialPeriodDays: 60,
+  reason: 'trial-offered',
+  endedAt: null,
+  ...overrides,
+})
+
+describe('WorkspaceLockModal', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockPathname = '/spaces'
+    mockUseWorkspaceLock.mockReturnValue(lock({}))
+    mockUseCurrentMembership.mockReturnValue({ id: 1 })
+    mockUseIsAdmin.mockReturnValue(true)
+  })
+
+  it('renders nothing for a Workspace with a live plan or before the membership is known', () => {
+    mockUseWorkspaceLock.mockReturnValue(lock({ isLocked: false }))
+    expect(render(<WorkspaceLockModal spaceId={SPACE_ID} />).container).toBeEmptyDOMElement()
+
+    mockUseWorkspaceLock.mockReturnValue(lock({}))
+    mockUseCurrentMembership.mockReturnValue(undefined)
+    expect(render(<WorkspaceLockModal spaceId={SPACE_ID} />).container).toBeEmptyDOMElement()
+  })
+
+  it('offers the trial to an admin and returns to My accounts from it', () => {
+    render(<WorkspaceLockModal spaceId={SPACE_ID} />)
+
+    expect(mockUseWorkspaceLock).toHaveBeenCalledWith(SPACE_ID)
+    expect(mockUseIsAdmin).toHaveBeenCalledWith(SPACE_ID)
+    expect(screen.getByTestId('claim-trial-modal')).toHaveAttribute('data-space', SPACE_ID)
+
+    fireEvent.click(screen.getByTestId('claim-trial-modal'))
+    expect(mockPush).toHaveBeenCalledWith('/welcome/accounts')
+  })
+
+  it('shows the plan picker to an admin whose trial ended, dismissible only on the Plans page', () => {
+    mockUseWorkspaceLock.mockReturnValue(lock({ trialPeriodDays: null, reason: 'lapsed', endedAt: ENDED_AT }))
+    const { unmount } = render(<WorkspaceLockModal spaceId={SPACE_ID} />)
+
+    expect(screen.getByTestId('plan-chooser-modal')).toHaveAttribute('data-reason', 'lapsed')
+    expect(screen.getByTestId('plan-chooser-modal')).toHaveAttribute('data-ended', String(ENDED_AT))
+    expect(screen.queryByText('dismiss')).not.toBeInTheDocument()
+    unmount()
+
+    mockPathname = '/spaces/plans'
+    render(<WorkspaceLockModal spaceId={SPACE_ID} />)
+    fireEvent.click(screen.getByText('dismiss'))
+    expect(screen.queryByTestId('plan-chooser-modal')).not.toBeInTheDocument()
+  })
+
+  it('only explains the lock to a non-admin member', () => {
+    mockUseIsAdmin.mockReturnValue(false)
+    render(<WorkspaceLockModal spaceId={SPACE_ID} />)
+
+    expect(screen.getByTestId('locked-member-modal')).toHaveTextContent(
+      'Your Workspace moved to Safe Pro on Oct 6, 2026',
+    )
+    expect(screen.getByTestId('locked-member-modal')).toHaveTextContent(
+      'Acme Inc is locked until an admin starts the free trial.',
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Back to My accounts' }))
+    expect(mockPush).toHaveBeenCalledWith('/welcome/accounts')
+  })
+
+  it('words the member explanation by lock reason', () => {
+    expect(memberCopy('lapsed', null, ENDED_AT, 'Acme Inc')).toEqual({
+      title: 'Your free trial ended on Dec 5, 2026',
+      body: 'An admin needs to choose a plan to unlock it. Your Safe accounts remain available outside the Workspace.',
+    })
+    expect(memberCopy('payment-failed', null, null, 'Acme Inc').title).toBe('Your Workspace’s last payment failed')
+    expect(memberCopy('trial-offered', 30, null, 'Acme Inc').title).toBe('Start your 30-day free trial of Safe Pro')
+  })
+})

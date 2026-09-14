@@ -1,6 +1,6 @@
 import type SafeProAnnouncement from './components/SafeProAnnouncement'
 import type SafeProAnnouncementModal from './components/SafeProAnnouncementModal'
-import type SafeProLockedWorkspace from './components/SafeProLockedWorkspace'
+import type SafeProLockedMemberModal from './components/SafeProLockedMemberModal'
 import type SafeProTrialActivatedModal from './components/SafeProTrialActivatedModal'
 import type SafeProSubscriptionActivatedModal from './components/SafeProSubscriptionActivatedModal'
 import type SafeProBillingReminderModal from './components/SafeProBillingReminderModal'
@@ -11,7 +11,7 @@ import type SafeProWorkspacesBanner from './components/SafeProWorkspacesBanner'
 export interface SafeProContract {
   SafeProAnnouncement: typeof SafeProAnnouncement
   SafeProAnnouncementModal: typeof SafeProAnnouncementModal
-  SafeProLockedWorkspace: typeof SafeProLockedWorkspace
+  SafeProLockedMemberModal: typeof SafeProLockedMemberModal
   SafeProTrialActivatedModal: typeof SafeProTrialActivatedModal
   SafeProSubscriptionActivatedModal: typeof SafeProSubscriptionActivatedModal
   SafeProBillingReminderModal: typeof SafeProBillingReminderModal

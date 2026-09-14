@@ -1,9 +1,12 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
+import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
+import { SUPPORT_CHAT_URL } from '@/config/constants'
 import type { PlanGroup } from '../../../hooks/billing/types'
 import Plans from '../index'
-import { remaining, seatsTooltip } from '../PlanStatusCard'
+import { getCurrentBadge, remaining, seatsTooltip } from '../PlanStatusCard'
 import { yearlyDiscount } from '../PlanCards'
 import { buildPlanTiers } from '../planTiers'
+import type { CurrentPlan, PlanSummary } from '../types'
 
 const offer = (planName: string, paymentLinkId: string, price: number, billingCycle: 'month' | 'year') => ({
   paymentLinkId,
@@ -19,8 +22,38 @@ const STARTER: PlanGroup = {
   name: 'Starter',
   offers: [offer('Starter', 'pl_starter_m', 149, 'month'), offer('Starter', 'pl_starter_y', 1608, 'year')],
 }
-const trialing = { name: 'Business', status: 'trialing' as const, periodEndsAt: '2026-12-06T00:00:00Z' }
-const active = { name: 'Business', status: 'active' as const, periodEndsAt: '2026-12-06T00:00:00Z' }
+const BUSINESS: PlanGroup = { name: 'Business', offers: [offer('Business', 'pl_business_m', 499, 'month')] }
+
+const subscription = (name: string, currentPrice: number) =>
+  ({
+    id: 'sub_1',
+    status: 'active',
+    plan: {
+      id: `price_${name}`,
+      name,
+      currentPrice,
+      originalPrice: null,
+      currency: 'eur',
+      billingCycle: 'month',
+      features: [],
+    },
+  }) as unknown as Subscription
+
+const current = (name: string, price: number, isTrialing: boolean): CurrentPlan => ({
+  name,
+  price,
+  currency: 'eur',
+  billingCycle: 'month',
+  isTrialing,
+  periodEndsAt: '2026-12-06T00:00:00Z',
+})
+const trialing = (daysLeft: number): PlanSummary => ({
+  name: 'Business',
+  status: 'trialing',
+  periodEndsAt: '2026-12-06T00:00:00Z',
+  daysLeft,
+})
+const active: PlanSummary = { name: 'Business', status: 'active', periodEndsAt: '2026-12-06T00:00:00Z', daysLeft: 20 }
 const meters = { safeAccounts: { used: 6, quota: 10 }, sponsoredTxs: { used: 11, quota: 15 } }
 
 describe('Plans', () => {
@@ -42,84 +75,114 @@ describe('Plans', () => {
     expect(yearlyDiscount(buildPlanTiers([{ ...STARTER, offers: STARTER.offers.slice(0, 1) }]))).toBeNull()
   })
 
-  it('renders the trial state: billing CTA, the current plan only in the status card, monthly offers on sale', () => {
+  it.each([
+    [null, undefined],
+    [active, { label: 'Active', variant: 'brand' }],
+    [trialing(14), { label: 'Free trial · 14 days left', variant: 'brand' }],
+    [trialing(7), { label: 'Free trial · 7 days left', variant: 'warning' }],
+    [
+      { ...trialing(14), daysLeft: null },
+      { label: 'Free trial', variant: 'brand' },
+    ],
+  ])('derives the plan badge for %p', (plan, badge) => {
+    expect(getCurrentBadge(plan)).toEqual(badge)
+  })
+
+  it('renders a trial with the countdown, the current plan card asking for billing details and Starter on offer', () => {
     const onManage = jest.fn()
     const onSubscribe = jest.fn()
     render(
       <Plans
-        plan={trialing}
+        plan={trialing(14)}
         {...meters}
-        tiers={buildPlanTiers([STARTER])}
+        tiers={buildPlanTiers([STARTER], { subscription: subscription('Business', 499), seatsQuota: 20 })}
         onManage={onManage}
         onSubscribe={onSubscribe}
-        currentPlan={{ name: 'Business', price: 499, currency: 'eur', billingCycle: 'month', isTrialing: true }}
+        currentPlan={current('Business', 499, true)}
       />,
     )
 
-    expect(screen.getAllByText('Free trial')).toHaveLength(1)
-    expect(screen.getByText(/Your free trial is active until Dec 6, 2026/)).toBeInTheDocument()
+    expect(screen.getAllByText('Free trial · 14 days left')).toHaveLength(2)
+    expect(screen.getByText('Active until Dec 6, 2026.')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Manage plan' })).not.toBeInTheDocument()
+    expect(screen.getByTestId('current-plan-card')).toHaveTextContent('€499')
     expect(screen.getByText('€149')).toBeInTheDocument()
-    expect(screen.queryByText('€499')).not.toBeInTheDocument()
-    expect(screen.getByText('Custom')).toBeInTheDocument()
     expect(screen.queryByText('€1,608')).not.toBeInTheDocument()
 
-    const billingButtons = screen.getAllByRole('button', { name: 'Add billing details' })
-    expect(billingButtons).toHaveLength(2)
-    fireEvent.click(billingButtons[0])
+    fireEvent.click(screen.getByRole('button', { name: 'Add billing details' }))
     expect(onManage).toHaveBeenCalled()
 
-    fireEvent.click(billingButtons[1])
+    fireEvent.click(screen.getByRole('button', { name: 'Switch to Starter' }))
     expect(onSubscribe).toHaveBeenCalledWith({
       tier: expect.objectContaining({ name: 'Starter' }),
       option: expect.objectContaining({ paymentLinkId: 'pl_starter_m', priceId: 'price_pl_starter_m' }),
     })
-    expect(screen.getByRole('button', { name: 'Coming soon' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Talk to sales' })).toHaveAttribute('href', SUPPORT_CHAT_URL)
   })
 
-  it('labels a cheaper offer as a downgrade against a paid plan', () => {
+  it('turns the trial into a warning in its last week', () => {
     render(
       <Plans
-        plan={active}
+        plan={trialing(7)}
         {...meters}
-        tiers={buildPlanTiers([STARTER])}
-        onSubscribe={jest.fn()}
-        currentPlan={{ name: 'Business', price: 499, currency: 'eur', billingCycle: 'month', isTrialing: false }}
+        tiers={buildPlanTiers([STARTER], { subscription: subscription('Business', 499), seatsQuota: 20 })}
+        currentPlan={current('Business', 499, true)}
       />,
     )
 
-    expect(screen.getByRole('button', { name: 'Downgrade' })).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        /Your free trial is active until Dec 6, 2026\. Add billing details before then or choose another plan/,
+      ),
+    ).toBeInTheDocument()
+    expect(screen.getByTestId('plan-status-badge')).toHaveTextContent('Free trial · 7 days left')
   })
 
-  it('labels a pricier offer as an upgrade against the current plan', () => {
+  it('renders a paid plan with Manage plan in the header and on its card, and Upgrade to Business on offer', () => {
+    const onManage = jest.fn()
     render(
       <Plans
-        plan={active}
+        plan={{ ...active, name: 'Starter' }}
         {...meters}
-        tiers={buildPlanTiers([STARTER])}
+        tiers={buildPlanTiers([BUSINESS], { subscription: subscription('Starter', 149), seatsQuota: 2 })}
+        onManage={onManage}
         onSubscribe={jest.fn()}
-        currentPlan={{ name: 'Free', price: 49, currency: 'eur', billingCycle: 'month', isTrialing: false }}
+        currentPlan={current('Starter', 149, false)}
       />,
     )
 
-    expect(screen.getByRole('button', { name: 'Upgrade' })).toBeInTheDocument()
-  })
-  it('renders the paid state with the Manage plan CTA', () => {
-    render(<Plans plan={active} {...meters} tiers={buildPlanTiers([STARTER])} isManaging />)
+    expect(screen.getAllByText('Active')).toHaveLength(2)
+    expect(
+      screen.getByText('Safe accounts above the limit remain available outside the Workspace.'),
+    ).toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: 'Manage plan' })).toHaveLength(2)
+    expect(screen.getByRole('button', { name: 'Upgrade to Business' })).toBeInTheDocument()
 
-    expect(screen.getAllByText('Active')).toHaveLength(1)
-    expect(screen.getByText('Safe accounts above the limit stay available outside the Workspace.')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Manage plan' })).toBeDisabled()
+    fireEvent.click(screen.getAllByRole('button', { name: 'Manage plan' })[1])
+    expect(onManage).toHaveBeenCalled()
   })
 
-  it('shows the locked state and lets the Workspace buy an offered plan when it has none', () => {
+  it('flags an exhausted meter', () => {
+    render(
+      <Plans
+        plan={active}
+        safeAccounts={{ used: 20, quota: 20 }}
+        sponsoredTxs={{ used: 3, quota: 15 }}
+        tiers={buildPlanTiers([])}
+      />,
+    )
+
+    expect(screen.getByTestId('meter-exhausted')).toHaveTextContent('0 / 20')
+  })
+
+  it('shows the locked state and sells an offered plan when the Workspace has none', () => {
     const onSubscribe = jest.fn()
-    const tiers = buildPlanTiers([STARTER])
     render(
       <Plans
         plan={null}
         safeAccounts={null}
         sponsoredTxs={{ used: 0, quota: null }}
-        tiers={tiers}
+        tiers={buildPlanTiers([STARTER])}
         onSubscribe={onSubscribe}
       />,
     )
@@ -130,12 +193,11 @@ describe('Plans', () => {
     expect(screen.getByText('Unlimited')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Add billing details|Manage plan/ })).not.toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Choose plan' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Continue with Starter' }))
     expect(onSubscribe).toHaveBeenCalledWith({
       tier: expect.objectContaining({ name: 'Starter' }),
       option: expect.objectContaining({ paymentLinkId: 'pl_starter_m', priceId: 'price_pl_starter_m' }),
     })
-    expect(screen.getByRole('button', { name: 'Coming soon' })).toBeInTheDocument()
   })
 
   it('keeps the Stripe portal reachable for a lapsed subscription', () => {

@@ -3,6 +3,9 @@ import type { Meter, PlanTier } from './types'
 // TODO(safe-pro): plan copy lives here until the catalog exposes features (Plan.features / product.marketingFeatures).
 export const PLAN_ORDER = ['Starter', 'Business', 'Enterprise']
 
+/** The plan the trial and lapsed-Workspace modals lead with. */
+export const RECOMMENDED_PLAN = 'Business'
+
 const SHARED_FEATURES = [
   'Unlimited Workspace members',
   'Advanced threat analysis',
@@ -46,3 +49,24 @@ export const ENTERPRISE_TIER: PlanTier = {
 
 // TODO(safe-pro): no sponsored-transactions entitlement yet; placeholder until the CGW exposes it.
 export const SPONSORED_TXS_PLACEHOLDER: Meter = { used: 11, quota: 15 }
+
+/** What the claim-trial card lists after the seat count; the full PLAN_FEATURES list would not fit the modal. */
+export const PLAN_CLAIM_HIGHLIGHTS: Record<string, string[]> = {
+  Starter: [
+    '10 sponsored transactions / month',
+    'Advanced threat analysis',
+    'Transaction simulation',
+    'Shared address book',
+    'MFA Authentication',
+    'Builder API access',
+  ],
+  Business: [
+    '50 sponsored transactions / month',
+    'Advanced threat analysis',
+    'Policy engine',
+    'Transaction simulation',
+    'Shared address book',
+    'MFA Authentication',
+    'Growth API access',
+  ],
+}

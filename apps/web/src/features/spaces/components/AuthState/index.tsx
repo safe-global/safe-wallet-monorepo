@@ -14,9 +14,7 @@ import { MemberStatus } from '@/features/spaces'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { AppRoutes } from '@/config/routes'
-import { useWorkspaceLock } from '../../hooks/useWorkspaceLock'
-
-const LOCKED_ROUTES: string[] = [AppRoutes.spaces.index, AppRoutes.spaces.plans]
+import WorkspaceLockModal from '../Plans/WorkspaceLockModal'
 
 const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode }) => {
   const router = useRouter()
@@ -34,10 +32,6 @@ const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode
   const hasMembershipLoaded = !!currentData && !!currentUser
   const isCurrentUserActive = currentMembership?.status === MemberStatus.ACTIVE
 
-  const { isLocked } = useWorkspaceLock(spaceId)
-  // A locked Workspace only keeps Home (the takeover) and Plans (to buy one); every other route bounces to Home.
-  const isLockedOffHome = isLocked && !LOCKED_ROUTES.includes(router.pathname)
-
   const isLoadingState = isLoading || isOidcLoginPending
   const hasLostAccess = isUserSignedIn && !isLoadingState && isUnauthorized(error)
   const isInactiveMember = isUserSignedIn && !isLoadingState && hasMembershipLoaded && !isCurrentUserActive
@@ -54,10 +48,6 @@ const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode
     }
   }, [hasLostAccess, isInactiveMember, isFetching, router])
 
-  useEffect(() => {
-    if (isLockedOffHome) router.replace({ pathname: AppRoutes.spaces.index, query: { spaceId } })
-  }, [isLockedOffHome, router, spaceId])
-
   if (!isSpacesFeatureEnabled) return null
 
   if (isLoadingState) return <LoadingState />
@@ -68,9 +58,13 @@ const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode
 
   if (isInactiveMember) return <LoadingState />
 
-  if (isLockedOffHome) return <LoadingState />
-
-  return children
+  // A Workspace without a live plan keeps its pages underneath a blocking modal instead of bouncing elsewhere.
+  return (
+    <>
+      {children}
+      <WorkspaceLockModal spaceId={spaceId} />
+    </>
+  )
 }
 
 export default AuthState

@@ -8,7 +8,6 @@ const mockUseHasFeature = jest.fn()
 const mockDispatch = jest.fn()
 const mockReplace = jest.fn()
 const mockIsUnauthorized = jest.fn()
-const mockUseWorkspaceLock = jest.fn()
 let mockPathname = '/spaces/security'
 let mockIsAuthenticated = true
 let mockIsOidcLoginPending = false
@@ -78,8 +77,9 @@ jest.mock('@/features/spaces', () => ({
   MemberStatus: { ACTIVE: 'ACTIVE' },
 }))
 
-jest.mock('../../hooks/useWorkspaceLock', () => ({
-  useWorkspaceLock: (spaceId: string) => mockUseWorkspaceLock(spaceId),
+jest.mock('../Plans/WorkspaceLockModal', () => ({
+  __esModule: true,
+  default: ({ spaceId }: { spaceId: string }) => <div data-testid="workspace-lock-modal" data-space={spaceId} />,
 }))
 
 describe('AuthState', () => {
@@ -88,7 +88,6 @@ describe('AuthState', () => {
     mockIsAuthenticated = true
     mockIsOidcLoginPending = false
     mockPathname = '/spaces/security'
-    mockUseWorkspaceLock.mockReturnValue({ isLocked: false })
     mockIsUnauthorized.mockReturnValue(false)
     mockUseHasFeature.mockReturnValue(true)
     mockUseSpacesGetOneV1Query.mockReturnValue({
@@ -183,40 +182,20 @@ describe('AuthState', () => {
     expect(mockReplace).not.toHaveBeenCalled()
   })
 
-  it('bounces a locked Workspace back to Home from any other Workspace route', () => {
-    mockUseWorkspaceLock.mockReturnValue({ isLocked: true })
-
+  it('mounts the lock modal next to the page instead of redirecting a locked Workspace', () => {
     render(
       <AuthState spaceId="11111111-1111-1111-1111-111111111111">
         <div data-testid="children" />
       </AuthState>,
     )
 
-    expect(mockUseWorkspaceLock).toHaveBeenCalledWith('11111111-1111-1111-1111-111111111111')
-    expect(mockReplace).toHaveBeenCalledWith({
-      pathname: '/spaces',
-      query: { spaceId: '11111111-1111-1111-1111-111111111111' },
-    })
-    expect(screen.queryByTestId('children')).not.toBeInTheDocument()
-    expect(screen.getByTestId('loading')).toBeInTheDocument()
+    expect(screen.getByTestId('children')).toBeInTheDocument()
+    expect(screen.getByTestId('workspace-lock-modal')).toHaveAttribute(
+      'data-space',
+      '11111111-1111-1111-1111-111111111111',
+    )
+    expect(mockReplace).not.toHaveBeenCalled()
   })
-
-  it.each(['/spaces', '/spaces/plans'])(
-    'keeps a locked Workspace on %s, where it can start or buy a plan',
-    (pathname) => {
-      mockPathname = pathname
-      mockUseWorkspaceLock.mockReturnValue({ isLocked: true })
-
-      render(
-        <AuthState spaceId="11111111-1111-1111-1111-111111111111">
-          <div data-testid="children" />
-        </AuthState>,
-      )
-
-      expect(screen.getByTestId('children')).toBeInTheDocument()
-      expect(mockReplace).not.toHaveBeenCalled()
-    },
-  )
 
   it('redirects to the spaces overview when the space query is unauthorized', () => {
     mockIsUnauthorized.mockReturnValue(true)

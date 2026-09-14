@@ -8,6 +8,15 @@ import { SpacesSidebarVariant } from '../SpacesSidebarVariant'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { AppRoutes } from '@/config/routes'
+import ProChip from '@/public/images/safe-pro/pro-chip.svg'
+import { useSpacePlan } from '../../../../hooks/useSpacePlan'
+
+// The menu button forces every svg to 16px and the active state strokes it; the chip is a 24x16 fill-only lockup.
+const PlansProChip = () => (
+  <span className="block h-4 w-6 shrink-0 [&_svg]:size-full! [&_svg]:stroke-none!" data-testid="plans-pro-chip">
+    <ProChip />
+  </span>
+)
 
 export const SpacesSidebarContent = ({
   selectedSpace,
@@ -21,6 +30,9 @@ export const SpacesSidebarContent = ({
   const isAuditLogEnabled = useHasFeature(FEATURES.SPACE_AUDIT_LOG)
   const isPoliciesEnabled = useHasFeature(FEATURES.POLICIES)
   const isSafeProEnabled = useHasFeature(FEATURES.SAFE_PRO_ANNOUNCEMENT)
+  const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
+  const { isPaidActive } = useSpacePlan(selectedSpace?.uuid)
+  const hasPlansUpsell = isSafePro && !isPaidActive
 
   const getLink = (item: SidebarItemConfig) => ({
     pathname: item.href,
@@ -59,8 +71,13 @@ export const SpacesSidebarContent = ({
   )
 
   const filteredSetupGroup = useMemo(
-    () => ({ ...spacesSetupGroup, items: spacesSetupGroup.items.filter((i) => !gatedOffHrefs.has(i.href)) }),
-    [gatedOffHrefs],
+    () => ({
+      ...spacesSetupGroup,
+      items: spacesSetupGroup.items
+        .filter((i) => !gatedOffHrefs.has(i.href))
+        .map((i) => (hasPlansUpsell && i.href === AppRoutes.spaces.plans ? { ...i, icon: PlansProChip } : i)),
+    }),
+    [gatedOffHrefs, hasPlansUpsell],
   )
 
   const filteredMainNavigation = useMemo(

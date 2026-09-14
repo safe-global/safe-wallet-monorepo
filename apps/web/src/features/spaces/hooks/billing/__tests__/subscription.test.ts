@@ -1,5 +1,12 @@
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
-import { getPlanStatus, isPlanChangeable, selectCurrentSubscription } from '../subscription'
+import {
+  getDaysLeft,
+  getPlanStatus,
+  getSubscriptionEndedAt,
+  isPlanChangeable,
+  selectCurrentSubscription,
+  selectLatestSubscription,
+} from '../subscription'
 
 const sub = (id: string, status: Subscription['status']): Subscription =>
   ({ id, status, plan: { id: 'plan', name: 'Business' } }) as unknown as Subscription
@@ -37,5 +44,26 @@ describe('subscription', () => {
     [sub('a', 'incomplete'), 'pending'],
   ])('derives the plan status for %p', (subscription, expected) => {
     expect(getPlanStatus(subscription)).toBe(expected)
+  })
+
+  it('counts the days left until the period ends, rounding up and never below zero', () => {
+    const now = Date.UTC(2026, 10, 22, 12)
+    expect(getDaysLeft('2026-12-06T00:00:00Z', now)).toBe(14)
+    expect(getDaysLeft('2026-11-22T13:00:00Z', now)).toBe(1)
+    expect(getDaysLeft('2026-11-01T00:00:00Z', now)).toBe(0)
+    expect(getDaysLeft(null, now)).toBeNull()
+    expect(getDaysLeft('not a date', now)).toBeNull()
+  })
+
+  it('picks the most recently created subscription and reads when it stopped covering the Workspace', () => {
+    const older = { ...sub('old', 'canceled'), createdAt: 1, cancelledAt: 1_700_000_000 }
+    const newer = { ...sub('new', 'canceled'), createdAt: 2, cancelledAt: null, currentPeriodEnd: 1_765_000_000 }
+
+    expect(selectLatestSubscription([older, newer])).toBe(newer)
+    expect(selectLatestSubscription(undefined)).toBeUndefined()
+    expect(getSubscriptionEndedAt(older)).toBe(1_700_000_000_000)
+    expect(getSubscriptionEndedAt(newer)).toBe(1_765_000_000_000)
+    expect(getSubscriptionEndedAt({ ...newer, currentPeriodEnd: null })).toBeNull()
+    expect(getSubscriptionEndedAt(undefined)).toBeNull()
   })
 })

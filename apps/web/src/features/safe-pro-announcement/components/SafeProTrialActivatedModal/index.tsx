@@ -4,23 +4,24 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Typography } from '@/components/ui/typography'
 import { formatDate } from '@safe-global/utils/utils/date'
-import { TRIAL_DISCLAIMER } from '../../constants'
 import SafeProHero from '../SafeProHero'
-import css from '../SafeProAnnouncement/styles.module.css'
 
 const SafeProTrialActivatedModal = ({
   open,
   onOpenChange,
   trialEndsAt,
   ctaHref,
-  ctaLabel = 'Go to Workspace',
+  ctaLabel = 'Get started',
+  onAddBillingDetails,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   trialEndsAt: number
-  /** Where "Go to Workspace" leads; without it the CTA just closes. */
+  /** Where the CTA leads; without it the CTA just closes. */
   ctaHref?: LinkProps['href']
   ctaLabel?: string
+  /** Offers the Stripe portal right away; without it the secondary link is omitted. */
+  onAddBillingDetails?: () => void
 }) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent size="sm" surface="card" padding="none">
@@ -30,21 +31,29 @@ const SafeProTrialActivatedModal = ({
         <div className="flex flex-col items-center gap-8 px-8 pt-6 pb-4">
           <div className="flex flex-col gap-2">
             <Typography variant="h3" align="center" as={DialogTitle}>
-              Your <span className={css.highlight}>Safe Pro</span> trial is active until {formatDate(trialEndsAt)}
+              Your free trial is active until {formatDate(trialEndsAt)}
             </Typography>
             <Typography color="muted" align="center">
-              {TRIAL_DISCLAIMER}
+              All Pro features are unlocked for your Workspace. We&apos;ll remind you to add billing details before the
+              trial ends. Nothing is charged until you do.
             </Typography>
           </div>
 
-          <Button
-            size="lg"
-            className="w-full"
-            render={ctaHref ? <NextLink href={ctaHref} /> : undefined}
-            onClick={() => onOpenChange(false)}
-          >
-            {ctaLabel}
-          </Button>
+          <div className="flex w-full flex-col items-center gap-3">
+            <Button
+              size="lg"
+              className="w-full"
+              render={ctaHref ? <NextLink href={ctaHref} /> : undefined}
+              onClick={() => onOpenChange(false)}
+            >
+              {ctaLabel}
+            </Button>
+            {onAddBillingDetails && (
+              <Button variant="ghost-muted" size="sm" onClick={onAddBillingDetails}>
+                Add billing details now
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </DialogContent>

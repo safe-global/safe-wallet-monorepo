@@ -11,27 +11,55 @@ jest.mock('../useSpacePlan', () => ({ useSpacePlan: (spaceId?: string) => mockUs
 jest.mock('../billing/useSpaceOffers', () => ({ useSpaceOffers: (spaceId?: string) => mockUseSpaceOffers(spaceId) }))
 
 const SPACE_ID = '11111111-1111-1111-1111-111111111111'
+const canceled = { status: 'canceled', createdAt: 1, cancelledAt: 1_765_000_000, currentPeriodEnd: null }
 
 describe('useWorkspaceLock', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseHasFeature.mockReturnValue(true)
     mockUseIsInvited.mockReturnValue(false)
-    mockUseSpacePlan.mockReturnValue({ status: 'none', isLoading: false })
+    mockUseSpacePlan.mockReturnValue({ status: 'none', latestSubscription: undefined, isLoading: false })
     mockUseSpaceOffers.mockReturnValue({ trialPeriodDays: 60, isLoading: false })
   })
 
-  it.each(['none', 'canceled', 'payment_failed', 'pending'])('locks a Workspace whose plan status is %s', (status) => {
-    mockUseSpacePlan.mockReturnValue({ status, isLoading: false })
+  it.each(['none', 'canceled', 'pending'])('locks a lapsed Workspace whose plan status is %s', (status) => {
+    mockUseSpacePlan.mockReturnValue({ status, latestSubscription: canceled, isLoading: false })
     mockUseSpaceOffers.mockReturnValue({ trialPeriodDays: null, isLoading: false })
 
-    expect(renderHook(() => useWorkspaceLock()).result.current).toMatchObject({ isLocked: true, trialPeriodDays: null })
+    expect(renderHook(() => useWorkspaceLock()).result.current).toEqual({
+      isLocked: true,
+      isResolving: false,
+      trialPeriodDays: null,
+      reason: 'lapsed',
+      endedAt: 1_765_000_000_000,
+    })
   })
 
-  it('locks a never-subscribed Workspace that is offered a trial, scoped to the given space', () => {
+  it('locks a Workspace whose payment failed without reading its period end as an end date', () => {
+    mockUseSpacePlan.mockReturnValue({
+      status: 'payment_failed',
+      latestSubscription: { ...canceled, status: 'past_due', cancelledAt: null, currentPeriodEnd: 1_770_000_000 },
+      isLoading: false,
+    })
+    mockUseSpaceOffers.mockReturnValue({ trialPeriodDays: null, isLoading: false })
+
+    expect(renderHook(() => useWorkspaceLock()).result.current).toMatchObject({
+      isLocked: true,
+      reason: 'payment-failed',
+      endedAt: null,
+    })
+  })
+
+  it('locks a never-subscribed Workspace behind its trial offer, scoped to the given space', () => {
     const { result } = renderHook(() => useWorkspaceLock(SPACE_ID))
 
-    expect(result.current).toEqual({ isLocked: true, isResolving: false, trialPeriodDays: 60 })
+    expect(result.current).toEqual({
+      isLocked: true,
+      isResolving: false,
+      trialPeriodDays: 60,
+      reason: 'trial-offered',
+      endedAt: null,
+    })
     expect(mockUseSpacePlan).toHaveBeenCalledWith(SPACE_ID)
     expect(mockUseSpaceOffers).toHaveBeenCalledWith(SPACE_ID)
   })

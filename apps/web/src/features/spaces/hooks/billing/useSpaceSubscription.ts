@@ -1,7 +1,7 @@
 import { skipToken } from '@reduxjs/toolkit/query'
 import { useBillingGetSubscriptionsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import { SPACE_REFRESH_OPTIONS } from '../refreshOptions'
-import { getPlanStatus, selectCurrentSubscription } from './subscription'
+import { getPlanStatus, selectCurrentSubscription, selectLatestSubscription } from './subscription'
 import { useBillingSpaceId } from './useBillingSpaceId'
 
 export const useSpaceSubscription = (spaceId?: string | null) => {
@@ -12,5 +12,12 @@ export const useSpaceSubscription = (spaceId?: string | null) => {
   )
   const subscription = selectCurrentSubscription(data)
 
-  return { subscription, status: getPlanStatus(subscription), isLoading, isError, refetch }
+  return {
+    subscription,
+    latestSubscription: selectLatestSubscription(data),
+    status: getPlanStatus(subscription),
+    isLoading,
+    isError,
+    refetch,
+  }
 }

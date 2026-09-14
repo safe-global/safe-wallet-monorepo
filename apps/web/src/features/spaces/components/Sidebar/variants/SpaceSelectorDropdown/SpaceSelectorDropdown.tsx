@@ -59,8 +59,10 @@ export const SpaceSelectorDropdown = ({
   const menuId = useId()
   const spaceName = selectedSpace?.name ?? ''
   const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
-  const { tierName, isTrialing } = useSpacePlan()
-  const planLabel = !isSafePro ? 'Workspace' : isTrialing ? 'Free trial' : tierName
+  const { tierName, isTrialing, isTrialEndingSoon, plan } = useSpacePlan()
+  const trialLabel =
+    plan?.daysLeft === null || plan?.daysLeft === undefined ? 'Free trial' : `Free trial · ${plan.daysLeft} days left`
+  const planLabel = !isSafePro ? 'Workspace' : isTrialing ? trialLabel : tierName
   const displayName = truncateSpaceName(spaceName, SPACE_SELECTOR_NAME_MAX_LENGTH)
   const initial = spaceName.charAt(0).toUpperCase()
   const selectedSpaceColor = spaceName ? getDeterministicColor(spaceName) : undefined
@@ -198,7 +200,9 @@ export const SpaceSelectorDropdown = ({
                   </span>
                 )}
               </span>
-              <span className={css.spaceSelectorSubtitle}>{planLabel}</span>
+              <span className={cn(css.spaceSelectorSubtitle, isTrialEndingSoon && 'text-warning-strong')}>
+                {planLabel}
+              </span>
             </div>
             <ChevronsUpDown className="ml-auto size-4 shrink-0 group-data-[collapsible=icon]:hidden" aria-hidden />
           </>

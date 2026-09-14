@@ -37,9 +37,6 @@ export default function CheckoutReturnModals({
       open
       onOpenChange={checkout.dismiss}
       planName={checkout.subscription.plan.name ?? 'Safe Pro'}
-      price={checkout.subscription.plan.currentPrice}
-      currency={checkout.subscription.plan.currency}
-      nextBillingAt={periodEndsAt}
     />
   )
 }

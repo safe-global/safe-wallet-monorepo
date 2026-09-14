@@ -8,12 +8,26 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Typography } from '@/components/ui/typography'
 import { formatDate } from '@safe-global/utils/utils/date'
 import { TRIAL_DISCLAIMER } from '@/features/safe-pro-announcement'
+import { cn } from '@/utils/cn'
+import { TRIAL_ENDING_SOON_DAYS } from '../../hooks/billing/subscription'
+import type { CurrentBadge } from './PlanCards'
 import type { Meter, PlanSummary } from './types'
 
 export const remaining = ({ used, quota }: Meter): number | null => (quota === null ? null : Math.max(quota - used, 0))
 
 export const seatsTooltip = (tierName: string | undefined, quota: number | null | undefined) =>
   `${tierName ?? 'Your plan'} includes ${quota ?? 'unlimited'} Safe accounts in the Workspace. Safe accounts you create outside the Workspace remain available in My accounts.`
+
+/** The badge both the status card and the current plan card wear: trial with its countdown, or Active. */
+export const getCurrentBadge = (plan: PlanSummary | null): CurrentBadge | undefined => {
+  if (!plan) return undefined
+  if (plan.status === 'active') return { label: 'Active', variant: 'brand' }
+  const endingSoon = plan.daysLeft !== null && plan.daysLeft <= TRIAL_ENDING_SOON_DAYS
+  return {
+    label: plan.daysLeft === null ? 'Free trial' : `Free trial · ${plan.daysLeft} days left`,
+    variant: endingSoon ? 'warning' : 'brand',
+  }
+}
 
 const InfoTip = ({ text }: { text: string }) => (
   <Tooltip>
@@ -36,6 +50,7 @@ const UsageMeter = ({
   meter: Meter | null
 }) => {
   const left = meter && remaining(meter)
+  const isExhausted = left === 0
 
   return (
     <Card variant="muted" size="sm" className="flex-1">
@@ -47,7 +62,12 @@ const UsageMeter = ({
           <Typography variant="paragraph-medium">{label}</Typography>
           <InfoTip text={tooltip} />
         </div>
-        <Typography variant="paragraph-bold" className="whitespace-nowrap">
+        <Typography
+          variant="paragraph-bold"
+          className={cn('flex items-center gap-1.5 whitespace-nowrap', isExhausted && 'text-destructive')}
+          data-testid={isExhausted ? 'meter-exhausted' : undefined}
+        >
+          {isExhausted && <span aria-hidden className="size-1.5 rounded-full bg-destructive" />}
           {meter === null ? (
             '—'
           ) : left === null ? (
@@ -66,6 +86,17 @@ const UsageMeter = ({
   )
 }
 
+const statusText = (plan: PlanSummary | null, endDate: string | null, isEndingSoon: boolean): string => {
+  if (plan === null) {
+    return 'Your Workspace is locked until you choose a plan. Your Safe accounts remain available outside the Workspace.'
+  }
+  if (plan.status === 'active') return 'Safe accounts above the limit remain available outside the Workspace.'
+  const until = endDate ?? 'the end of the period'
+  return isEndingSoon
+    ? `Your free trial is active until ${until}. Add billing details before then or choose another plan to keep your Workspace.`
+    : `Active until ${until}.`
+}
+
 export default function PlanStatusCard({
   plan,
   safeAccounts,
@@ -73,7 +104,7 @@ export default function PlanStatusCard({
   tierName,
   onManage,
   isManaging,
-  canManage = plan !== null,
+  canManage = plan?.status === 'active',
 }: {
   plan: PlanSummary | null
   safeAccounts: Meter | null
@@ -81,11 +112,13 @@ export default function PlanStatusCard({
   tierName?: string
   onManage?: () => void
   isManaging?: boolean
-  /** A lapsed subscription still has a Stripe portal to manage, even without a live plan. */
+  /** Shows "Manage plan": on by default for a paid plan, and worth keeping for a lapsed one that still has a Stripe portal. */
   canManage?: boolean
 }) {
   const isTrial = plan?.status === 'trialing'
   const endDate = plan?.periodEndsAt ? formatDate(new Date(plan.periodEndsAt).getTime()) : null
+  const badge = getCurrentBadge(plan)
+  const isEndingSoon = badge?.variant === 'warning'
 
   return (
     <Card radius="xl">
@@ -94,24 +127,20 @@ export default function PlanStatusCard({
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
               <Typography variant="h4">{plan?.name ?? 'No active plan'}</Typography>
-              {plan && (
-                <Badge variant="brand" size="status" shape="status">
-                  {isTrial ? 'Free trial' : 'Active'}
+              {badge && (
+                <Badge variant={badge.variant} size="status" shape="status" data-testid="plan-status-badge">
+                  {badge.label}
                 </Badge>
               )}
             </div>
             <Typography className="flex items-center gap-1">
-              {plan === null
-                ? 'Your Workspace is locked until you choose a plan. Your Safe accounts remain available outside the Workspace.'
-                : isTrial
-                  ? `Your free trial is active until ${endDate ?? 'the end of the period'}. Add billing details before then to keep your Workspace.`
-                  : 'Safe accounts above the limit stay available outside the Workspace.'}
+              {statusText(plan, endDate, isEndingSoon)}
               {isTrial && <InfoTip text={TRIAL_DISCLAIMER} />}
             </Typography>
           </div>
           {canManage && (
-            <Button size="lg" onClick={onManage} disabled={isManaging}>
-              {isTrial ? 'Add billing details' : 'Manage plan'}
+            <Button variant="outline" size="lg" onClick={onManage} disabled={isManaging}>
+              Manage plan
             </Button>
           )}
         </div>

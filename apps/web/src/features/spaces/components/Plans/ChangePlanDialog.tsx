@@ -64,10 +64,13 @@ export default function ChangePlanDialog({
   const { priceId, paymentLinkId } = pick.option
   const direction = getChangeDirection(currentPlan, pick)
   const labels = LABELS[direction]
+  // A trial has no invoice to prorate against (Stripe rejects the preview without a payment method), and nothing is
+  // charged until it ends, so the switch is explained instead of previewed.
+  const isTrialSwitch = currentPlan.isTrialing
 
   useEffect(() => {
-    if (priceId) previewChange(priceId)
-  }, [priceId, previewChange])
+    if (priceId && !isTrialSwitch) previewChange(priceId)
+  }, [priceId, isTrialSwitch, previewChange])
 
   // The step-up redirect is on its way; the rejection must not read as a failure.
   useEffect(() => {
@@ -112,7 +115,15 @@ export default function ChangePlanDialog({
           />
         </div>
 
-        {isPreviewing || (!preview && !previewError) ? (
+        {isTrialSwitch ? (
+          <Typography color="muted" data-testid="change-plan-trial-note">
+            You&apos;re on a free trial
+            {currentPlan.periodEndsAt ? ` until ${formatDate(Date.parse(currentPlan.periodEndsAt))}` : ''}. Nothing is
+            charged now. From then on you&apos;ll pay{' '}
+            {pick.option.price === null ? 'a custom price' : formatPlanPrice(pick.option.price, pick.tier.currency)}
+            {priceSuffix(pick.tier.billingCycle)} for {pick.tier.name}.
+          </Typography>
+        ) : isPreviewing || (!preview && !previewError) ? (
           <div className="flex flex-col gap-2" data-testid="change-plan-skeleton">
             <Skeleton className="h-5 w-full" />
             <Skeleton className="h-5 w-3/4" />
@@ -173,7 +184,7 @@ export default function ChangePlanDialog({
             confirmLabel={labels.confirm}
             onConfirm={() => void onConfirm()}
             confirmLoading={isBusy}
-            confirmDisabled={!preview || Boolean(previewError) || !priceId || !paymentLinkId}
+            confirmDisabled={!priceId || !paymentLinkId || (!isTrialSwitch && (!preview || Boolean(previewError)))}
             confirmTestId="change-plan-confirm"
           />
         </AlertDialogFooter>

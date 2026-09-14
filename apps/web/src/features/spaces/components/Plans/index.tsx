@@ -1,5 +1,5 @@
 import PlanCards from './PlanCards'
-import PlanStatusCard from './PlanStatusCard'
+import PlanStatusCard, { getCurrentBadge } from './PlanStatusCard'
 import type { CurrentPlan, Meter, PlanPick, PlanSummary, PlanTier } from './types'
 
 export default function Plans({
@@ -38,10 +38,11 @@ export default function Plans({
       />
       <PlanCards
         tiers={tiers}
-        currentBadge={plan?.status === 'trialing' ? 'Free trial' : 'Active'}
-        onSubscribe={onSubscribe}
-        isSubscribing={isSubscribing}
+        currentBadge={getCurrentBadge(plan)}
         currentPlan={currentPlan}
+        onSubscribe={onSubscribe}
+        onManage={onManage}
+        isBusy={isSubscribing || isManaging}
       />
     </div>
   )

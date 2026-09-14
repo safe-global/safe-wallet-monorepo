@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowDown, ArrowUp, ArrowUpRight, Check } from 'lucide-react'
+import { ArrowRight, ArrowUpRight, Check } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -10,12 +10,14 @@ import { List, ListItem, ListItemText } from '@/components/ui/list'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Typography } from '@/components/ui/typography'
-import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
+import { SAFE_PRO_ANNOUNCEMENT_URL, SUPPORT_CHAT_URL } from '@/config/constants'
 import { cn } from '@/utils/cn'
-import { formatPlanPrice, getChangeDirection, priceSuffix } from './planTiers'
+import { formatPlanPrice, getPlanCta, priceSuffix } from './planTiers'
 import type { CurrentPlan, PlanPick, PlanSeatOption, PlanTier } from './types'
 
 type Cycle = 'month' | 'year'
+
+export type CurrentBadge = { label: string; variant: 'brand' | 'warning' }
 
 export const yearlyDiscount = (tiers: PlanTier[]): number | null => {
   for (const tier of tiers) {
@@ -61,30 +63,97 @@ const Seats = ({
     <Input readOnly value={value.label} />
   )
 
+export type PlanCardActions = {
+  /** Move to, or buy, the picked offer. */
+  onSubscribe?: (pick: PlanPick) => void
+  /** Manage the current plan: the Stripe portal for billing details, invoices or cancellation. */
+  onManage?: () => void
+  isBusy?: boolean
+  currentPlan?: CurrentPlan
+  currentBadge?: CurrentBadge
+  /** Without a live plan, the tier that gets the primary button; the others read as a switch. */
+  recommendedPlan?: string
+  /** A question shown under the seats ("Need more than 20?") followed by a link to sales. */
+  salesHint?: (tier: PlanTier) => string | undefined
+}
+
+const PlanCta = ({
+  pick,
+  currentPlan,
+  recommendedPlan,
+  onSubscribe,
+  onManage,
+  isBusy,
+}: { pick: PlanPick } & PlanCardActions) => {
+  const cta = getPlanCta(pick, currentPlan, recommendedPlan)
+
+  switch (cta.kind) {
+    case 'sales':
+      return (
+        <Button
+          variant="outline"
+          size="lg"
+          weight="semibold"
+          className="w-full"
+          render={<a href={SUPPORT_CHAT_URL} target="_blank" rel="noopener noreferrer" />}
+        >
+          {cta.label}
+        </Button>
+      )
+    case 'billing':
+      return (
+        <Button size="lg" weight="semibold" className="w-full" disabled={isBusy} onClick={onManage}>
+          {cta.label}
+          <ArrowRight data-icon="inline-end" />
+        </Button>
+      )
+    case 'manage':
+      return (
+        <Button variant="outline" size="lg" weight="semibold" className="w-full" disabled={isBusy} onClick={onManage}>
+          {cta.label}
+        </Button>
+      )
+    case 'subscribe':
+      return (
+        <Button size="lg" weight="semibold" className="w-full" disabled={isBusy} onClick={() => onSubscribe?.(pick)}>
+          {cta.label}
+          <ArrowRight data-icon="inline-end" />
+        </Button>
+      )
+    case 'change':
+      return (
+        <Button
+          variant="outline"
+          size="lg"
+          weight="semibold"
+          className="w-full"
+          disabled={isBusy}
+          onClick={() => onSubscribe?.(pick)}
+        >
+          {cta.label}
+        </Button>
+      )
+  }
+}
+
 export const PlanCard = ({
   tier,
-  currentBadge,
   selected,
   onSelect,
   onOptionChange,
-  onSubscribe,
-  isSubscribing,
-  currentPlan,
+  currentBadge,
+  salesHint,
+  ...actions
 }: {
   tier: PlanTier
-  currentBadge?: string
   selected?: boolean
   onSelect?: () => void
   onOptionChange?: (option: PlanSeatOption) => void
-  /** Purchasable offers get a real CTA; static tiers (Enterprise) keep "Coming soon". */
-  onSubscribe?: (pick: PlanPick) => void
-  isSubscribing?: boolean
-  /** With a live plan the CTA reads Upgrade or Downgrade against it; without one it reads Choose plan. */
-  currentPlan?: CurrentPlan
-}) => {
+} & PlanCardActions) => {
   const selectable = onSelect !== undefined
   const [option, setOption] = useState<PlanSeatOption | undefined>(tier.options[0])
   const price = option?.price ?? null
+  const hint = salesHint?.(tier)
 
   const changeOption = (next: PlanSeatOption) => {
     setOption(next)
@@ -96,12 +165,13 @@ export const PlanCard = ({
       variant="muted-secondary"
       radius="lg-xl"
       className={cn('flex-1', selectable && 'cursor-pointer')}
-      selected={selectable ? Boolean(selected) : undefined}
+      selected={selectable ? Boolean(selected) : tier.isCurrent}
       role={selectable ? 'radio' : undefined}
       aria-checked={selectable ? selected : undefined}
       tabIndex={selectable ? 0 : undefined}
       onClick={onSelect}
       onKeyDown={selectable ? (e) => (e.key === 'Enter' || e.key === ' ') && onSelect() : undefined}
+      data-testid={tier.isCurrent ? 'current-plan-card' : undefined}
     >
       <CardContent className="flex flex-1 flex-col">
         <div className="flex h-full flex-col gap-4">
@@ -110,8 +180,8 @@ export const PlanCard = ({
               <div className="flex items-center gap-2">
                 <Typography variant={selectable ? 'paragraph-large-medium' : 'h3'}>{tier.name}</Typography>
                 {tier.isCurrent && currentBadge && (
-                  <Badge variant="brand" size="status" shape="status">
-                    {currentBadge}
+                  <Badge variant={currentBadge.variant} size="status" shape="status">
+                    {currentBadge.label}
                   </Badge>
                 )}
               </div>
@@ -130,7 +200,19 @@ export const PlanCard = ({
             </div>
 
             <div className="flex flex-col gap-4">
-              {option && <Seats options={tier.options} value={option} onChange={changeOption} />}
+              {option && (
+                <div className="flex flex-col gap-1.5">
+                  <Seats options={tier.options} value={option} onChange={changeOption} />
+                  {hint && (
+                    <Typography variant="paragraph-mini" color="muted">
+                      {hint}{' '}
+                      <Link href={SUPPORT_CHAT_URL} target="_blank" rel="noopener noreferrer" variant="muted">
+                        Talk to sales <ArrowRight className="inline size-3" />
+                      </Link>
+                    </Typography>
+                  )}
+                </div>
+              )}
 
               <List>
                 {tier.features.map((feature) => (
@@ -147,118 +229,60 @@ export const PlanCard = ({
             </div>
           </div>
 
-          {!selectable &&
-            (onSubscribe && option?.paymentLinkId ? (
-              <SubscribeButton
-                pick={{ tier, option }}
-                currentPlan={currentPlan}
-                disabled={isSubscribing}
-                onClick={() => onSubscribe({ tier, option })}
-              />
-            ) : (
-              <Button variant="outline" size="lg" weight="semibold" className="w-full">
-                Coming soon
-              </Button>
-            ))}
+          {!selectable && option && <PlanCta pick={{ tier, option }} {...actions} />}
         </div>
       </CardContent>
     </Card>
   )
 }
 
-const SubscribeButton = ({
-  pick,
-  currentPlan,
-  disabled,
-  onClick,
-}: {
-  pick: PlanPick
-  currentPlan?: CurrentPlan
-  disabled?: boolean
-  onClick: () => void
-}) => {
-  // A trial has no invoice to prorate against, so the plan is only switchable once billing details exist.
-  if (currentPlan?.isTrialing) {
-    return (
-      <Button size="lg" weight="semibold" className="w-full" disabled={disabled} onClick={onClick}>
-        Add billing details
-      </Button>
-    )
-  }
-
-  const direction = currentPlan ? getChangeDirection(currentPlan, pick) : undefined
-  const label =
-    direction === 'upgrade'
-      ? 'Upgrade'
-      : direction === 'downgrade'
-        ? 'Downgrade'
-        : direction
-          ? 'Switch plan'
-          : 'Choose plan'
-
-  return (
-    <Button size="lg" weight="semibold" className="w-full" disabled={disabled} onClick={onClick}>
-      {direction === 'upgrade' && <ArrowUp data-icon="inline-start" />}
-      {direction === 'downgrade' && <ArrowDown data-icon="inline-start" />}
-      {label}
-    </Button>
-  )
-}
-
-export default function PlanCards({
+/** Billing-cycle toggle plus one card per visible tier; the Plans page wraps it in a card, dialogs use it bare. */
+export function PlanCatalog({
   tiers,
-  currentBadge,
-  onSubscribe,
-  isSubscribing,
-  currentPlan,
+  ...actions
 }: {
   tiers: PlanTier[]
-  currentBadge: string
-  onSubscribe?: (pick: PlanPick) => void
-  isSubscribing?: boolean
-  currentPlan?: CurrentPlan
-}) {
+} & PlanCardActions) {
   const [cycle, setCycle] = useState<Cycle>('month')
   const discount = yearlyDiscount(tiers)
   const visible = tiers.filter((tier) => tier.isCurrent || tier.billingCycle === null || tier.billingCycle === cycle)
 
   return (
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center justify-between gap-4">
+        <Tabs value={cycle} onValueChange={(value) => setCycle(value as Cycle)}>
+          <TabsList aria-label="Billing cycle">
+            <TabsTrigger value="month">Monthly</TabsTrigger>
+            <TabsTrigger value="year">
+              Yearly
+              {discount !== null && (
+                <Badge variant="brand" size="status" shape="status">
+                  -{discount}%
+                </Badge>
+              )}
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        <Link href={SAFE_PRO_ANNOUNCEMENT_URL} target="_blank" rel="noopener noreferrer" variant="muted">
+          Compare all features <ArrowUpRight />
+        </Link>
+      </div>
+
+      <div className="flex flex-col gap-4 md:flex-row">
+        {visible.map((tier) => (
+          <PlanCard key={tier.id} tier={tier} {...actions} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+export default function PlanCards(props: { tiers: PlanTier[] } & PlanCardActions) {
+  return (
     <Card radius="xl">
       <CardContent>
-        <div className="flex items-center justify-between gap-4">
-          <Tabs value={cycle} onValueChange={(value) => setCycle(value as Cycle)}>
-            <TabsList aria-label="Billing cycle">
-              <TabsTrigger value="month">Monthly</TabsTrigger>
-              <TabsTrigger value="year">
-                Yearly
-                {discount !== null && (
-                  <Badge variant="brand" size="status" shape="status">
-                    -{discount}%
-                  </Badge>
-                )}
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-
-          <Link href={SAFE_PRO_ANNOUNCEMENT_URL} target="_blank" rel="noopener noreferrer" variant="muted">
-            Compare all features <ArrowUpRight />
-          </Link>
-        </div>
-      </CardContent>
-
-      <CardContent>
-        <div className="flex flex-col gap-4 md:flex-row">
-          {visible.map((tier) => (
-            <PlanCard
-              key={tier.id}
-              tier={tier}
-              currentBadge={currentBadge}
-              onSubscribe={onSubscribe}
-              isSubscribing={isSubscribing}
-              currentPlan={currentPlan}
-            />
-          ))}
-        </div>
+        <PlanCatalog {...props} />
       </CardContent>
     </Card>
   )
