@@ -1,5 +1,4 @@
 import { Popover, PopoverContent } from '@/components/ui/popover'
-import { cn } from '@/utils/cn'
 import type { ComponentProps, ReactElement, ReactNode } from 'react'
 
 type PopupProps = {
@@ -14,15 +13,13 @@ type PopupProps = {
    * a focus trap — `'trap-focus'` gives the trap and drops the backdrop.
    */
   modal?: ComponentProps<typeof Popover>['modal']
-  /** Layout-only, for callers that need a wider panel than the 454px default. */
-  className?: string
   /** Accepted for backwards compatibility; the anchor element stays mounted via the portal. */
   keepMounted?: boolean
   /** Accepted for backwards compatibility; Base UI manages its own open/close animation. */
   transitionDuration?: number
 }
 
-const Popup = ({ children, open, onClose, anchorEl, modal = true, className }: PopupProps): ReactElement => {
+const Popup = ({ children, open, onClose, anchorEl, modal = true }: PopupProps): ReactElement => {
   return (
     <Popover
       open={open}
@@ -38,10 +35,7 @@ const Popup = ({ children, open, onClose, anchorEl, modal = true, className }: P
         side="bottom"
         sideOffset={12}
         collisionAvoidance={{ fallbackAxisSide: 'none' }}
-        className={cn(
-          'max-h-[var(--available-height)] w-[454px] max-w-[calc(100vw-1rem)] overflow-y-auto rounded-3xl',
-          className,
-        )}
+        className="max-h-[var(--available-height)] w-[454px] max-w-[calc(100vw-1rem)] overflow-y-auto rounded-3xl"
       >
         {children}
       </PopoverContent>

@@ -69,6 +69,17 @@ describe('findMatchingSafeApp', () => {
     expect(findMatchingSafeApp(apps, 'https://apps-portal.safe.global/drain-safe')?.name).toBe('Drain Account')
   })
 
+  // The disambiguation branch compares origin+path, so a trailing slash on either side must
+  // not stop a genuine match
+  it('disambiguates by path across a trailing slash difference', () => {
+    const apps = [
+      makeApp('https://apps-portal.safe.global/tx-builder', 'Transaction Builder', 1),
+      makeApp('https://apps-portal.safe.global/drain-safe', 'Drain Account', 2),
+    ]
+
+    expect(findMatchingSafeApp(apps, 'https://apps-portal.safe.global/tx-builder/')?.name).toBe('Transaction Builder')
+  })
+
   it('recommends nothing when several apps share a hostname and no path matches', () => {
     const apps = [
       makeApp('https://apps-portal.safe.global/tx-builder', 'Transaction Builder', 1),

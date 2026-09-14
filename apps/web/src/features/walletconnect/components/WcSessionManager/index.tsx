@@ -11,6 +11,7 @@ import { WALLETCONNECT_EVENTS, WcSafeAppSuggestionResult } from '@/services/anal
 import { MixpanelEventParams, SafeAppLaunchLocation } from '@/services/analytics/mixpanel-events'
 import { getSafeAppUrl } from '@/components/safe-apps/SafeAppCard'
 import { AppRoutes } from '@/config/routes'
+import { Errors, logError } from '@/services/exceptions'
 import { splitError } from '../../services/utils'
 import WcProposalForm from '../WcProposalForm'
 import WcSafeAppSuggestion from '../WcSafeAppSuggestion'
@@ -148,10 +149,6 @@ const WcSessionManager = ({ uri }: WcSessionManagerProps) => {
       if (dontShowAgain) setSuggestionDismissed(true)
       setSuggestionResolved(true)
 
-      trackSafeAppEvent({ ...SAFE_APPS_EVENTS.OPEN_APP, label: safeApp.name }, safeApp, {
-        launchLocation: SafeAppLaunchLocation.WC_PROPOSAL,
-      })
-
       // Rejecting is best-effort cleanup for the dApp. If it fails, e.g. because the
       // proposal already expired, the user still asked to open the Safe App
       try {
@@ -161,7 +158,19 @@ const WcSessionManager = ({ uri }: WcSessionManagerProps) => {
       }
 
       setOpen(false)
-      router.push(getSafeAppUrl(router, safeApp.url)).catch(() => {})
+
+      // Tracked only once the app is actually reachable, so a failed navigation does not
+      // record a launch that never happened
+      try {
+        await router.push(getSafeAppUrl(router, safeApp.url))
+      } catch (e) {
+        logError(Errors._902, (e as Error).message)
+        return
+      }
+
+      trackSafeAppEvent({ ...SAFE_APPS_EVENTS.OPEN_APP, label: safeApp.name }, safeApp, {
+        launchLocation: SafeAppLaunchLocation.WC_PROPOSAL,
+      })
     },
     [
       sessionProposal,
@@ -189,7 +198,9 @@ const WcSessionManager = ({ uri }: WcSessionManagerProps) => {
     }
 
     setOpen(false)
-    router.push({ pathname: AppRoutes.apps.index, query: { safe: router.query.safe } }).catch(() => {})
+    router.push({ pathname: AppRoutes.apps.index, query: { safe: router.query.safe } }).catch((e) => {
+      logError(Errors._900, (e as Error).message)
+    })
   }, [
     trackSuggestionResult,
     dontShowAgain,

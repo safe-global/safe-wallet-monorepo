@@ -117,6 +117,14 @@ describe('useIsSafeAppSuggested', () => {
     expect(result.current).toBe(false)
   })
 
+  // BlockedBridges is a separate list from WarnedBridges; both must suppress the one-click path
+  it('does not suggest for a blocked bridge', () => {
+    const { result } = renderHook(() =>
+      useIsSafeAppSuggested(makeProposal({ origin: 'https://cbridge.celer.network' }), mockSafeApp),
+    )
+    expect(result.current).toBe(false)
+  })
+
   it('does not suggest for a warned bridge', () => {
     const { result } = renderHook(() =>
       useIsSafeAppSuggested(makeProposal({ origin: 'https://bridge.arbitrum.io' }), mockSafeApp),
