@@ -1,6 +1,6 @@
 import PlanCards from './PlanCards'
 import PlanStatusCard from './PlanStatusCard'
-import type { Meter, PlanSummary, PlanTier } from './types'
+import type { CurrentPlan, Meter, PlanPick, PlanSummary, PlanTier } from './types'
 
 export default function Plans({
   plan,
@@ -12,6 +12,7 @@ export default function Plans({
   canManage,
   onSubscribe,
   isSubscribing,
+  currentPlan,
 }: {
   plan: PlanSummary | null
   safeAccounts: Meter | null
@@ -20,8 +21,9 @@ export default function Plans({
   onManage?: () => void
   isManaging?: boolean
   canManage?: boolean
-  onSubscribe?: (paymentLinkId: string) => void
+  onSubscribe?: (pick: PlanPick) => void
   isSubscribing?: boolean
+  currentPlan?: CurrentPlan
 }) {
   return (
     <div className="flex flex-col gap-6">
@@ -39,6 +41,7 @@ export default function Plans({
         currentBadge={plan?.status === 'trialing' ? 'Free trial' : 'Active'}
         onSubscribe={onSubscribe}
         isSubscribing={isSubscribing}
+        currentPlan={currentPlan}
       />
     </div>
   )

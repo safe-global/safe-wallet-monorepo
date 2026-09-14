@@ -2,6 +2,8 @@ export type BillingCycle = 'month' | 'year'
 
 export type PlanOffer = {
   paymentLinkId: string
+  /** Stripe price id of the link's line item; what the plan-change endpoints call `planId`. */
+  priceId: string | null
   planName: string
   /** `null` when the link carries no seat tag; `'unlimited'` mirrors the CGW metadata value. */
   seats: number | 'unlimited' | null

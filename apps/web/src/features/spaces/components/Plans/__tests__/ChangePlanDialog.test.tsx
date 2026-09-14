@@ -1,0 +1,141 @@
+import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
+import ChangePlanDialog from '../ChangePlanDialog'
+import type { PlanPick } from '../types'
+
+const mockPreviewChange = jest.fn()
+const mockChangePlan = jest.fn()
+let mockState: Record<string, unknown> = {}
+jest.mock('../../../hooks/billing/useChangePlan', () => ({
+  useChangePlan: () => ({
+    previewChange: mockPreviewChange,
+    changePlan: mockChangePlan,
+    preview: undefined,
+    isPreviewing: false,
+    previewError: undefined,
+    isChanging: false,
+    changeError: undefined,
+    ...mockState,
+  }),
+}))
+const mockShowNotification = jest.fn()
+jest.mock('@/store/notificationsSlice', () => ({
+  ...jest.requireActual('@/store/notificationsSlice'),
+  showNotification: (...args: unknown[]) => {
+    mockShowNotification(...args)
+    return { type: 'test/notification' }
+  },
+}))
+
+const pick: PlanPick = {
+  tier: {
+    id: 'Starter-month',
+    name: 'Starter',
+    currency: 'eur',
+    billingCycle: 'month',
+    options: [],
+    features: [],
+  },
+  option: {
+    paymentLinkId: 'pl_starter',
+    priceId: 'price_starter',
+    label: '2 Safe accounts',
+    price: 189,
+    originalPrice: null,
+  },
+}
+const currentPlan = { name: 'Business', price: 499, currency: 'eur', billingCycle: 'month' as const, isTrialing: false }
+const preview = {
+  amountDue: -31000,
+  currency: 'eur',
+  nextBillingDate: Date.UTC(2026, 11, 6) / 1000,
+  lineItems: [
+    { description: 'Unused time on Business', amount: -49900, currency: 'eur' },
+    { description: 'Remaining time on Starter', amount: 18900, currency: 'eur' },
+  ],
+}
+
+describe('ChangePlanDialog', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockState = {}
+  })
+
+  it('previews the picked price on open and shows a skeleton until it arrives', () => {
+    render(<ChangePlanDialog spaceId="space-1" pick={pick} currentPlan={currentPlan} onClose={jest.fn()} />)
+
+    expect(mockPreviewChange).toHaveBeenCalledWith('price_starter')
+    expect(screen.getByTestId('change-plan-skeleton')).toBeInTheDocument()
+    expect(screen.getByTestId('change-plan-confirm')).toBeDisabled()
+  })
+
+  it('renders the prorated breakdown and applies the change on confirm', async () => {
+    mockState = { preview }
+    mockChangePlan.mockResolvedValue(true)
+    const onClose = jest.fn()
+    render(<ChangePlanDialog spaceId="space-1" pick={pick} currentPlan={currentPlan} onClose={onClose} />)
+
+    expect(screen.getByRole('heading', { name: 'Downgrade plan' })).toBeInTheDocument()
+    expect(screen.getByTestId('change-plan-summary')).toHaveTextContent('Current plan')
+    expect(screen.getByTestId('change-plan-summary')).toHaveTextContent('Business')
+    expect(screen.getByTestId('change-plan-summary')).toHaveTextContent('New plan')
+    expect(screen.getByTestId('change-plan-summary')).toHaveTextContent('Starter')
+    expect(screen.getByText('Unused time on Business')).toBeInTheDocument()
+    expect(screen.getByText('Your plan will be downgraded immediately.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Confirm downgrade' })).toBeInTheDocument()
+    expect(screen.getByTestId('change-plan-amount-due')).toHaveTextContent('-€ 310')
+    expect(screen.getByText(/Next billing date: Dec 6, 2026/)).toBeInTheDocument()
+
+    fireEvent.click(screen.getByTestId('change-plan-confirm'))
+
+    await waitFor(() => expect(onClose).toHaveBeenCalled())
+    expect(mockChangePlan).toHaveBeenCalledWith('price_starter', 'pl_starter')
+    expect(mockShowNotification).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Plan downgraded to Starter.', variant: 'success' }),
+    )
+  })
+
+  it('keeps the dialog open and shows the error when the change is rejected', async () => {
+    mockState = { preview, changeError: { status: 409, data: { message: 'The workspace is already on this plan' } } }
+    mockChangePlan.mockResolvedValue(false)
+    const onClose = jest.fn()
+    render(<ChangePlanDialog spaceId="space-1" pick={pick} currentPlan={currentPlan} onClose={onClose} />)
+
+    fireEvent.click(screen.getByTestId('change-plan-confirm'))
+
+    await waitFor(() => expect(mockChangePlan).toHaveBeenCalled())
+    expect(onClose).not.toHaveBeenCalled()
+    expect(screen.getByText('The workspace is already on this plan')).toBeInTheDocument()
+  })
+
+  it('reads as an upgrade when the new plan costs more', () => {
+    mockState = { preview }
+    render(
+      <ChangePlanDialog
+        spaceId="space-1"
+        pick={pick}
+        currentPlan={{ ...currentPlan, price: 49 }}
+        onClose={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('heading', { name: 'Upgrade plan' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Confirm upgrade' })).toBeInTheDocument()
+  })
+
+  it('surfaces a preview error instead of the breakdown', () => {
+    mockState = { previewError: { status: 403, data: { message: 'This plan is not available for this workspace' } } }
+    render(<ChangePlanDialog spaceId="space-1" pick={pick} currentPlan={currentPlan} onClose={jest.fn()} />)
+
+    expect(screen.getByText('This plan is not available for this workspace')).toBeInTheDocument()
+    expect(screen.queryByTestId('change-plan-skeleton')).not.toBeInTheDocument()
+    expect(screen.getByTestId('change-plan-confirm')).toBeDisabled()
+  })
+
+  it('explains the step-up redirect instead of reporting an error when elevation is required', () => {
+    mockState = { preview, changeError: { status: 403, data: { message: 'elevation_required' } } }
+    render(<ChangePlanDialog spaceId="space-1" pick={pick} currentPlan={currentPlan} onClose={jest.fn()} />)
+
+    expect(screen.getByText(/Verify your identity to confirm the plan change/)).toBeInTheDocument()
+    expect(screen.queryByText('elevation_required')).not.toBeInTheDocument()
+  })
+})

@@ -40,7 +40,7 @@ export const ENTERPRISE_TIER: PlanTier = {
   name: 'Enterprise',
   currency: 'eur',
   billingCycle: null,
-  options: [{ paymentLinkId: null, label: '20+ Safe accounts', price: null, originalPrice: null }],
+  options: [{ paymentLinkId: null, priceId: null, label: '20+ Safe accounts', price: null, originalPrice: null }],
   features: PLAN_FEATURES.Enterprise,
 }
 

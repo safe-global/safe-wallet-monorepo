@@ -17,7 +17,15 @@ const link = (overrides: Partial<PaymentLink> & { id: string }): PaymentLink => 
 })
 
 const priced = (unitAmount: number, interval: 'month' | 'year', quantity = 1) => [
-  { price: { unitAmount, currency: 'eur', recurring: { interval, intervalCount: 1 } }, quantity },
+  {
+    price: {
+      id: `price_${unitAmount}_${interval}`,
+      unitAmount,
+      currency: 'eur',
+      recurring: { interval, intervalCount: 1 },
+    },
+    quantity,
+  },
 ]
 
 const business10 = link({
@@ -81,6 +89,7 @@ describe('paymentLinks', () => {
   it('maps a link to an offer', () => {
     expect(toPlanOffer(business10)).toEqual({
       paymentLinkId: 'pl_business_10',
+      priceId: 'price_49900_month',
       planName: 'Business',
       seats: 10,
       price: 499,
@@ -89,6 +98,7 @@ describe('paymentLinks', () => {
       trialPeriodDays: 60,
     })
     expect(toPlanOffer(starter)?.trialPeriodDays).toBeNull()
+    expect(toPlanOffer(link({ id: 'x', metadata: { planName: 'Starter' } }))?.priceId).toBeNull()
   })
 
   it('groups offers by plan name in catalog order, monthly before yearly, seats ascending', () => {

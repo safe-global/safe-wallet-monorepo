@@ -1,8 +1,9 @@
 import type { PlanGroup, PlanOffer } from '../../../hooks/billing/types'
 import { PLAN_FEATURES, PLAN_TRIAL_HIGHLIGHTS } from '../fixtures'
-import { buildPlanTiers, offersToTiers, seatsLabel, trialTiers } from '../planTiers'
+import { buildPlanTiers, getChangeDirection, offersToTiers, seatsLabel, trialTiers } from '../planTiers'
 
 const offer = (overrides: Partial<PlanOffer> & Pick<PlanOffer, 'paymentLinkId' | 'planName'>): PlanOffer => ({
+  priceId: `price_${overrides.paymentLinkId}`,
   seats: 10,
   price: 499,
   currency: 'eur',
@@ -46,7 +47,7 @@ describe('planTiers', () => {
       ['b50m', '50 Safe accounts', 999],
     ])
     expect(yearly.options).toEqual([
-      { paymentLinkId: 'b10y', label: '10 Safe accounts', price: 5389, originalPrice: 499 * 12 },
+      { paymentLinkId: 'b10y', priceId: 'price_b10y', label: '10 Safe accounts', price: 5389, originalPrice: 499 * 12 },
     ])
   })
 
@@ -62,6 +63,24 @@ describe('planTiers', () => {
       ['Business', false],
       ['Enterprise', false],
     ])
+  })
+
+  it('tells an upgrade from a downgrade by monthly-equivalent price', () => {
+    const [monthly, yearly] = offersToTiers([BUSINESS])
+    const business = {
+      name: 'Business',
+      price: 499,
+      currency: 'eur',
+      billingCycle: 'month' as const,
+      isTrialing: false,
+    }
+    const pickOf = (tier: typeof monthly, index: number) => ({ tier, option: tier.options[index] })
+
+    expect(getChangeDirection({ ...business, price: 149 }, pickOf(monthly, 0))).toBe('upgrade')
+    expect(getChangeDirection({ ...business, price: 999 }, pickOf(monthly, 0))).toBe('downgrade')
+    expect(getChangeDirection(business, pickOf(monthly, 0))).toBe('change')
+    expect(getChangeDirection(business, pickOf(yearly, 0))).toBe('downgrade')
+    expect(getChangeDirection(undefined, pickOf(monthly, 0))).toBe('change')
   })
 
   it('keeps only monthly trial offers, trimmed to the modal highlights', () => {

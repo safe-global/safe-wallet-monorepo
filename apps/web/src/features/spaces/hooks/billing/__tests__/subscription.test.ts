@@ -1,5 +1,5 @@
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
-import { getPlanStatus, selectCurrentSubscription } from '../subscription'
+import { getPlanStatus, isPlanChangeable, selectCurrentSubscription } from '../subscription'
 
 const sub = (id: string, status: Subscription['status']): Subscription =>
   ({ id, status, plan: { id: 'plan', name: 'Business' } }) as unknown as Subscription
@@ -15,6 +15,14 @@ describe('subscription', () => {
     expect(selectCurrentSubscription([sub('old', 'canceled'), sub('due', 'past_due')])?.id).toBe('due')
     expect(selectCurrentSubscription([sub('old', 'canceled'), sub('paused', 'paused')])).toBeUndefined()
     expect(selectCurrentSubscription(undefined)).toBeUndefined()
+  })
+
+  it.each(['none', 'pending', 'payment_failed', 'canceled'] as const)('cannot change plan while %s', (status) => {
+    expect(isPlanChangeable(status)).toBe(false)
+  })
+
+  it.each(['active', 'trialing'] as const)('can change plan while %s', (status) => {
+    expect(isPlanChangeable(status)).toBe(true)
   })
 
   it.each([

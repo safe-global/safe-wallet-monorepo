@@ -12,6 +12,9 @@ export const selectCurrentSubscription = (subscriptions: Subscription[] | undefi
   subscriptions?.find((sub) => ACTIVE_STATUSES.has(sub.status)) ??
   subscriptions?.find((sub) => !CANCELED_STATUSES.has(sub.status))
 
+/** Mirrors the CGW's UPDATABLE_SUBSCRIPTION_STATUSES: only a live subscription can be moved to another plan. */
+export const isPlanChangeable = (status: PlanStatus): boolean => status === 'active' || status === 'trialing'
+
 export const getPlanStatus = (subscription: Subscription | undefined): PlanStatus => {
   if (!subscription) return 'none'
   if (subscription.status === 'trialing') return 'trialing'

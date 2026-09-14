@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowUpRight, Check } from 'lucide-react'
+import { ArrowDown, ArrowUp, ArrowUpRight, Check } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -12,12 +12,10 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Typography } from '@/components/ui/typography'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
 import { cn } from '@/utils/cn'
-import type { PlanSeatOption, PlanTier } from './types'
+import { formatPlanPrice, getChangeDirection, priceSuffix } from './planTiers'
+import type { CurrentPlan, PlanPick, PlanSeatOption, PlanTier } from './types'
 
 type Cycle = 'month' | 'year'
-
-const formatPrice = (price: number, currency: string) =>
-  new Intl.NumberFormat('en', { style: 'currency', currency, maximumFractionDigits: 0 }).format(price)
 
 export const yearlyDiscount = (tiers: PlanTier[]): number | null => {
   for (const tier of tiers) {
@@ -71,6 +69,7 @@ export const PlanCard = ({
   onOptionChange,
   onSubscribe,
   isSubscribing,
+  currentPlan,
 }: {
   tier: PlanTier
   currentBadge?: string
@@ -78,8 +77,10 @@ export const PlanCard = ({
   onSelect?: () => void
   onOptionChange?: (option: PlanSeatOption) => void
   /** Purchasable offers get a real CTA; static tiers (Enterprise) keep "Coming soon". */
-  onSubscribe?: (paymentLinkId: string) => void
+  onSubscribe?: (pick: PlanPick) => void
   isSubscribing?: boolean
+  /** With a live plan the CTA reads Upgrade or Downgrade against it; without one it reads Choose plan. */
+  currentPlan?: CurrentPlan
 }) => {
   const selectable = onSelect !== undefined
   const [option, setOption] = useState<PlanSeatOption | undefined>(tier.options[0])
@@ -117,11 +118,9 @@ export const PlanCard = ({
 
               <div className="flex items-baseline gap-1">
                 <Typography variant={selectable ? 'h4' : 'h2'} className={cn(selectable && 'line-through')}>
-                  {price === null ? 'Custom' : formatPrice(price, tier.currency)}
+                  {price === null ? 'Custom' : formatPlanPrice(price, tier.currency)}
                 </Typography>
-                <Typography color="muted">
-                  {price === null ? 'Annual term' : tier.billingCycle === 'year' ? '/yr' : '/mo'}
-                </Typography>
+                <Typography color="muted">{price === null ? 'Annual term' : priceSuffix(tier.billingCycle)}</Typography>
                 {selectable && (
                   <Typography variant="paragraph-large-bold" color="success">
                     Free
@@ -150,15 +149,12 @@ export const PlanCard = ({
 
           {!selectable &&
             (onSubscribe && option?.paymentLinkId ? (
-              <Button
-                size="lg"
-                weight="semibold"
-                className="w-full"
+              <SubscribeButton
+                pick={{ tier, option }}
+                currentPlan={currentPlan}
                 disabled={isSubscribing}
-                onClick={() => onSubscribe(option.paymentLinkId as string)}
-              >
-                Choose plan
-              </Button>
+                onClick={() => onSubscribe({ tier, option })}
+              />
             ) : (
               <Button variant="outline" size="lg" weight="semibold" className="w-full">
                 Coming soon
@@ -170,16 +166,57 @@ export const PlanCard = ({
   )
 }
 
+const SubscribeButton = ({
+  pick,
+  currentPlan,
+  disabled,
+  onClick,
+}: {
+  pick: PlanPick
+  currentPlan?: CurrentPlan
+  disabled?: boolean
+  onClick: () => void
+}) => {
+  // A trial has no invoice to prorate against, so the plan is only switchable once billing details exist.
+  if (currentPlan?.isTrialing) {
+    return (
+      <Button size="lg" weight="semibold" className="w-full" disabled={disabled} onClick={onClick}>
+        Add billing details
+      </Button>
+    )
+  }
+
+  const direction = currentPlan ? getChangeDirection(currentPlan, pick) : undefined
+  const label =
+    direction === 'upgrade'
+      ? 'Upgrade'
+      : direction === 'downgrade'
+        ? 'Downgrade'
+        : direction
+          ? 'Switch plan'
+          : 'Choose plan'
+
+  return (
+    <Button size="lg" weight="semibold" className="w-full" disabled={disabled} onClick={onClick}>
+      {direction === 'upgrade' && <ArrowUp data-icon="inline-start" />}
+      {direction === 'downgrade' && <ArrowDown data-icon="inline-start" />}
+      {label}
+    </Button>
+  )
+}
+
 export default function PlanCards({
   tiers,
   currentBadge,
   onSubscribe,
   isSubscribing,
+  currentPlan,
 }: {
   tiers: PlanTier[]
   currentBadge: string
-  onSubscribe?: (paymentLinkId: string) => void
+  onSubscribe?: (pick: PlanPick) => void
   isSubscribing?: boolean
+  currentPlan?: CurrentPlan
 }) {
   const [cycle, setCycle] = useState<Cycle>('month')
   const discount = yearlyDiscount(tiers)
@@ -218,6 +255,7 @@ export default function PlanCards({
               currentBadge={currentBadge}
               onSubscribe={onSubscribe}
               isSubscribing={isSubscribing}
+              currentPlan={currentPlan}
             />
           ))}
         </div>

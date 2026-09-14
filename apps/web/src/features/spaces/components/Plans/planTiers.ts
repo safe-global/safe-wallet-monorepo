@@ -1,14 +1,31 @@
 import type { PlanGroup, PlanOffer } from '../../hooks/billing/types'
 import { ENTERPRISE_TIER, PLAN_FEATURES, PLAN_ORDER, PLAN_TRIAL_HIGHLIGHTS } from './fixtures'
-import type { PlanSeatOption, PlanTier } from './types'
+import type { CurrentPlan, PlanChangeDirection, PlanPick, PlanSeatOption, PlanTier } from './types'
 
 const CYCLES = ['month', 'year'] as const
+
+export const formatPlanPrice = (price: number, currency: string): string =>
+  new Intl.NumberFormat('en', { style: 'currency', currency, maximumFractionDigits: 0 }).format(price)
+
+export const priceSuffix = (billingCycle: 'month' | 'year' | null): string => (billingCycle === 'year' ? '/yr' : '/mo')
+
+const monthlyEquivalent = (price: number, billingCycle: 'month' | 'year' | null): number =>
+  billingCycle === 'year' ? price / 12 : price
+
+/** Compares monthly-equivalent prices, so a yearly plan is not read as a 12x upgrade. */
+export const getChangeDirection = (current: CurrentPlan | undefined, pick: PlanPick): PlanChangeDirection => {
+  if (!current || pick.option.price === null) return 'change'
+  const next = monthlyEquivalent(pick.option.price, pick.tier.billingCycle)
+  const now = monthlyEquivalent(current.price, current.billingCycle)
+  return next > now ? 'upgrade' : next < now ? 'downgrade' : 'change'
+}
 
 export const seatsLabel = (seats: PlanOffer['seats']): string =>
   seats === null ? 'Safe accounts' : seats === 'unlimited' ? 'Unlimited Safe accounts' : `${seats} Safe accounts`
 
 const toOption = (offer: PlanOffer, monthly: PlanOffer | undefined): PlanSeatOption => ({
   paymentLinkId: offer.paymentLinkId,
+  priceId: offer.priceId,
   label: seatsLabel(offer.seats),
   price: offer.price,
   originalPrice: offer.billingCycle === 'year' && monthly?.price != null ? monthly.price * 12 : null,

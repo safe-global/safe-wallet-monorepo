@@ -7,6 +7,7 @@ import { buildPlanTiers } from '../planTiers'
 
 const offer = (planName: string, paymentLinkId: string, price: number, billingCycle: 'month' | 'year') => ({
   paymentLinkId,
+  priceId: `price_${paymentLinkId}`,
   planName,
   seats: 2,
   price,
@@ -51,6 +52,7 @@ describe('Plans', () => {
         tiers={buildPlanTiers([STARTER])}
         onManage={onManage}
         onSubscribe={onSubscribe}
+        currentPlan={{ name: 'Business', price: 499, currency: 'eur', billingCycle: 'month', isTrialing: true }}
       />,
     )
 
@@ -61,14 +63,46 @@ describe('Plans', () => {
     expect(screen.getByText('Custom')).toBeInTheDocument()
     expect(screen.queryByText('€1,608')).not.toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Add billing details' }))
+    const billingButtons = screen.getAllByRole('button', { name: 'Add billing details' })
+    expect(billingButtons).toHaveLength(2)
+    fireEvent.click(billingButtons[0])
     expect(onManage).toHaveBeenCalled()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Choose plan' }))
-    expect(onSubscribe).toHaveBeenCalledWith('pl_starter_m')
+    fireEvent.click(billingButtons[1])
+    expect(onSubscribe).toHaveBeenCalledWith({
+      tier: expect.objectContaining({ name: 'Starter' }),
+      option: expect.objectContaining({ paymentLinkId: 'pl_starter_m', priceId: 'price_pl_starter_m' }),
+    })
     expect(screen.getByRole('button', { name: 'Coming soon' })).toBeInTheDocument()
   })
 
+  it('labels a cheaper offer as a downgrade against a paid plan', () => {
+    render(
+      <Plans
+        plan={active}
+        {...meters}
+        tiers={buildPlanTiers([STARTER])}
+        onSubscribe={jest.fn()}
+        currentPlan={{ name: 'Business', price: 499, currency: 'eur', billingCycle: 'month', isTrialing: false }}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Downgrade' })).toBeInTheDocument()
+  })
+
+  it('labels a pricier offer as an upgrade against the current plan', () => {
+    render(
+      <Plans
+        plan={active}
+        {...meters}
+        tiers={buildPlanTiers([STARTER])}
+        onSubscribe={jest.fn()}
+        currentPlan={{ name: 'Free', price: 49, currency: 'eur', billingCycle: 'month', isTrialing: false }}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Upgrade' })).toBeInTheDocument()
+  })
   it('renders the paid state with the Manage plan CTA', () => {
     render(<Plans plan={active} {...meters} tiers={buildPlanTiers([STARTER])} isManaging />)
 
@@ -97,7 +131,10 @@ describe('Plans', () => {
     expect(screen.queryByRole('button', { name: /Add billing details|Manage plan/ })).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Choose plan' }))
-    expect(onSubscribe).toHaveBeenCalledWith('pl_starter_m')
+    expect(onSubscribe).toHaveBeenCalledWith({
+      tier: expect.objectContaining({ name: 'Starter' }),
+      option: expect.objectContaining({ paymentLinkId: 'pl_starter_m', priceId: 'price_pl_starter_m' }),
+    })
     expect(screen.getByRole('button', { name: 'Coming soon' })).toBeInTheDocument()
   })
 

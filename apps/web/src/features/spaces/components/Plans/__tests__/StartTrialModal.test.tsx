@@ -16,7 +16,18 @@ jest.mock('../../../hooks/billing/useStartCheckout', () => ({
 
 const trial = (planName: string, paymentLinkId: string, seats: number, price: number): PlanGroup => ({
   name: planName,
-  offers: [{ paymentLinkId, planName, seats, price, currency: 'eur', billingCycle: 'month', trialPeriodDays: 60 }],
+  offers: [
+    {
+      paymentLinkId,
+      priceId: `price_${paymentLinkId}`,
+      planName,
+      seats,
+      price,
+      currency: 'eur',
+      billingCycle: 'month',
+      trialPeriodDays: 60,
+    },
+  ],
 })
 const TRIAL_PLANS = [trial('Starter', 'pl_starter', 2, 149), trial('Business', 'pl_business', 10, 499)]
 

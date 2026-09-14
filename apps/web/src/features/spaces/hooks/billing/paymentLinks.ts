@@ -9,7 +9,7 @@ const UNLIMITED = 'unlimited'
 type Metadata = Record<string, string | null | undefined>
 
 type LineItem = {
-  price?: { unitAmount?: number | null; currency?: string; recurring?: { interval?: string } | null }
+  price?: { id?: string; unitAmount?: number | null; currency?: string; recurring?: { interval?: string } | null }
   quantity?: number
 }
 
@@ -49,6 +49,7 @@ export const toPlanOffer = (link: PaymentLink): PlanOffer | null => {
 
   return {
     paymentLinkId: link.id,
+    priceId: readLineItems(link)[0]?.price?.id ?? null,
     planName,
     seats: getSeats(link),
     trialPeriodDays: link.trialPeriodDays ?? null,

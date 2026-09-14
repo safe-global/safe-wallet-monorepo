@@ -17,6 +17,9 @@ import { useSpacePlan } from '../../hooks/useSpacePlan'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
 import { useStartCheckout } from '../../hooks/billing/useStartCheckout'
+import { useChangePlan } from '../../hooks/billing/useChangePlan'
+import ChangePlanDialog from './ChangePlanDialog'
+import type { CurrentPlan, PlanPick } from './types'
 
 const reminderSeen = localItem<boolean>('safeProBillingReminderSeen')
 
@@ -35,9 +38,21 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
   const { paidPlans, isLoading: isOffersLoading } = useSpaceOffers(spaceId)
   const { openPortal, isRedirecting } = useBillingPortal(spaceId)
   const { startCheckout, isRedirecting: isCheckingOut } = useStartCheckout(spaceId)
+  const { canChange } = useChangePlan(spaceId)
   const [isReminderOpen, setIsReminderOpen] = useState(false)
+  const [pick, setPick] = useState<PlanPick>()
 
   const tiers = useMemo(() => buildPlanTiers(paidPlans), [paidPlans])
+  const currentPlan: CurrentPlan | undefined =
+    canChange && subscription
+      ? {
+          name: subscription.plan.name ?? plan?.name ?? 'Safe Pro',
+          price: subscription.plan.currentPrice,
+          currency: subscription.plan.currency,
+          billingCycle: subscription.plan.billingCycle ?? null,
+          isTrialing,
+        }
+      : undefined
 
   useEffect(() => {
     if (isTrialing && !reminderSeen.get()) setIsReminderOpen(true)
@@ -74,9 +89,22 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
             onManage={() => void openPortal()}
             isManaging={isRedirecting}
             canManage={subscription !== undefined}
-            // TODO(safe-pro): the CGW has no upgrade/downgrade yet, so on a live plan this starts a second checkout.
-            onSubscribe={(paymentLinkId) => void startCheckout(paymentLinkId)}
-            isSubscribing={isCheckingOut}
+            onSubscribe={(picked) => {
+              if (isTrialing) void openPortal()
+              else if (canChange) setPick(picked)
+              else if (picked.option.paymentLinkId) void startCheckout(picked.option.paymentLinkId)
+            }}
+            isSubscribing={isCheckingOut || isRedirecting}
+            currentPlan={currentPlan}
+          />
+        )}
+
+        {pick && currentPlan && (
+          <ChangePlanDialog
+            spaceId={spaceId}
+            pick={pick}
+            currentPlan={currentPlan}
+            onClose={() => setPick(undefined)}
           />
         )}
 
