@@ -12,8 +12,10 @@ import { getGs026Message, type Gs026Reason } from '@safe-global/utils/services/e
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { logError } from '@/services/exceptions'
 import { getNonces } from '@/services/tx/tx-sender/recommendedNonce'
-import { getSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
+import { getAndValidateSafeSDK } from '@/services/tx/tx-sender/sdk'
 import { isOwner } from '@/utils/transaction-guards'
+import type { TxSenderScope } from '@/components/tx-flow/safe-scope/types'
+import { hasActiveScope } from '@/components/tx-flow/safe-scope/activeScope'
 
 export class Gs026PreCheckError extends Error {
   /** The GS code this pre-check prevents — lets the Details panel show it. */
@@ -109,10 +111,12 @@ export const runExecutionPreChecks = async ({
   safeTx,
   safe,
   signerAddress,
+  scope,
 }: {
   safeTx: SafeTransaction
   safe: Pick<ExtendedSafeInfo, 'chainId' | 'address' | 'owners' | 'threshold' | 'deployed'>
   signerAddress: string
+  scope?: TxSenderScope
 }): Promise<void> => {
   // STALE_NONCE: another transaction already consumed this nonce
   if (safe.deployed) {
@@ -128,8 +132,17 @@ export const runExecutionPreChecks = async ({
     throw new Gs026PreCheckError('NOT_SIGNER')
   }
 
-  // BAD_SIGNATURE: a collected signature does not recover to its claimed signer
-  const sdk = getSafeSDK()
+  // BAD_SIGNATURE: a collected signature does not recover to its claimed signer.
+  // Best-effort: when the SDK isn't initialised yet, this check is skipped rather
+  // than blocking a potentially valid transaction. An unscoped call while a Space-level
+  // flow is mounted is a caller bug, not "not ready" — that guard error must surface.
+  let sdk: ReturnType<typeof getAndValidateSafeSDK> | undefined
+  try {
+    sdk = getAndValidateSafeSDK(scope)
+  } catch (e) {
+    if (!scope && hasActiveScope()) throw e
+    sdk = undefined
+  }
   if (sdk) {
     const safeTxHash = await sdk.getTransactionHash(safeTx)
     if (validateTxSignatures(safeTx, safeTxHash)) {

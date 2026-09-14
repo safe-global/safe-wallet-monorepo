@@ -9,6 +9,7 @@ import {
 } from '../executionPreChecks'
 import { getNonces } from '@/services/tx/tx-sender/recommendedNonce'
 import { getSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
+import { registerActiveScope } from '@/components/tx-flow/safe-scope/activeScope'
 
 jest.mock('@/services/tx/tx-sender/recommendedNonce', () => ({
   getNonces: jest.fn(),
@@ -219,6 +220,42 @@ describe('executionPreChecks', () => {
       await expect(
         runExecutionPreChecks({ safeTx, safe: createSafe(), signerAddress: signerWallet.address }),
       ).rejects.toThrow(GS026_MESSAGES.BAD_SIGNATURE)
+    })
+
+    it('rethrows the SafeScope guard error when called unscoped while a Space-level flow is mounted', async () => {
+      const unregister = registerActiveScope()
+      try {
+        mockGetSafeSDK.mockReturnValue({
+          getTransactionHash: jest.fn().mockResolvedValue(SAFE_TX_HASH),
+        } as unknown as ReturnType<typeof getSafeSDK>)
+        const safeTx = createSafeTx(0, [wrongSignerSignature()])
+
+        // A forgotten `scope` is a caller bug — it must not degrade into "skip the signature check".
+        await expect(
+          runExecutionPreChecks({ safeTx, safe: createSafe(), signerAddress: signerWallet.address }),
+        ).rejects.toThrow('A Safe account must be selected before transacting in this flow.')
+      } finally {
+        unregister()
+      }
+    })
+
+    it('still skips the signature check when the passed scope has no SDK yet (not ready is not a bug)', async () => {
+      const unregister = registerActiveScope()
+      try {
+        const safe = createSafe()
+        const safeTx = createSafeTx(0, [wrongSignerSignature()])
+
+        await expect(
+          runExecutionPreChecks({
+            safeTx,
+            safe,
+            signerAddress: signerWallet.address,
+            scope: { chainId: safe.chainId, safeAddress: safe.address.value, sdk: undefined },
+          }),
+        ).resolves.toBeUndefined()
+      } finally {
+        unregister()
+      }
     })
 
     it('resolves when nonce, signer and signatures are all valid', async () => {
