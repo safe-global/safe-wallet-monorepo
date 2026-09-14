@@ -52,10 +52,11 @@ const WalletProvider = ({ children }: { children: ReactNode }): ReactElement => 
   // A Safe connected directly (e.g. via WalletConnect) acts as its own signer. Resolve its Safe
   // info so the tx flow can treat it as a Safe signer (on-chain approveHash/execTransaction that
   // only queues) rather than an EOA. Returns undefined (404) for EOAs and non-Safe smart accounts.
+  // Gated on matching chains so a same-address Safe on a different chain can't be misdetected.
   const { currentData: connectedSafeInfo } = useSafesGetSafeV1Query(
     { chainId: currentChain?.chainId || '', safeAddress: wallet?.address || '' },
     {
-      skip: !wallet?.address || !currentChain,
+      skip: !wallet?.address || !currentChain || wallet.chainId !== currentChain.chainId,
     },
   )
 
