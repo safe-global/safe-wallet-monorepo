@@ -31,6 +31,12 @@ jest.mock('../hooks/useMatchingSafeApp', () => ({
   useMatchingSafeApp: (dappUrl?: string) => mockUseMatchingSafeApp(dappUrl),
 }))
 
+const mockIsSafeAppSuggested = jest.fn(() => false)
+jest.mock('../hooks/useSafeAppSuggestion', () => ({
+  useIsSafeAppSuggested: () => mockIsSafeAppSuggested(),
+  useSafeAppSuggestionDismissed: () => [undefined, jest.fn()],
+}))
+
 const mockSafeApp: SafeAppData = {
   id: 42,
   url: 'https://test-dapp.com',
@@ -103,6 +109,7 @@ describe('WalletConnectProvider', () => {
     jest.spyOn(useLocalStorageHook, 'default').mockReturnValue([{}, jest.fn()])
     // resetAllMocks above clears the implementation, so restore the default shape
     mockUseMatchingSafeApp.mockReturnValue({ safeApp: undefined, isLoading: false })
+    mockIsSafeAppSuggested.mockReturnValue(false)
   })
 
   it('sets the walletConnect state', async () => {
@@ -743,8 +750,29 @@ describe('WalletConnectProvider', () => {
         })
       })
 
-      it('does not auto approve when a Safe App matches, so the recommendation can be shown', async () => {
+      // A match alone is not enough: the suggestion must actually be eligible to be shown,
+      // otherwise the user would silently lose auto-approve with no UI explaining why
+      it('still auto approves when a Safe App matches but the suggestion is not eligible', async () => {
         mockUseMatchingSafeApp.mockReturnValue({ safeApp: mockSafeApp, isLoading: false })
+        mockIsSafeAppSuggested.mockReturnValue(false)
+        const approveSessionSpy = jest
+          .spyOn(WalletConnectWallet.prototype, 'approveSession')
+          .mockImplementation(() => Promise.resolve(mockSession))
+
+        const { getByText } = renderWithProposal()
+
+        await waitFor(() => {
+          expect(getByText('Session proposal received')).toBeInTheDocument()
+        })
+
+        await waitFor(() => {
+          expect(approveSessionSpy).toHaveBeenCalled()
+        })
+      })
+
+      it('does not auto approve when the suggestion will be shown', async () => {
+        mockUseMatchingSafeApp.mockReturnValue({ safeApp: mockSafeApp, isLoading: false })
+        mockIsSafeAppSuggested.mockReturnValue(true)
         const approveSessionSpy = jest
           .spyOn(WalletConnectWallet.prototype, 'approveSession')
           .mockImplementation(() => Promise.resolve(mockSession))

@@ -16,7 +16,7 @@ import WcProposalForm from '../WcProposalForm'
 import WcSafeAppSuggestion from '../WcSafeAppSuggestion'
 import WcChainSwitchModal from '../WcChainSwitchModal'
 import { wcChainSwitchStore } from '../../store/wcChainSwitchSlice'
-import { useIsSafeAppSuggested, useSafeAppSuggestionDismissed } from '../../hooks/useSafeAppSuggestion'
+import { useSafeAppSuggestionDismissed } from '../../hooks/useSafeAppSuggestion'
 
 type WcSessionManagerProps = {
   uri: string
@@ -29,24 +29,24 @@ const WcSessionManager = ({ uri }: WcSessionManagerProps) => {
     error,
     setError,
     open,
+    setOpen,
     approveSession,
     rejectSession,
     matchingSafeApp,
     isMatchingSafeAppLoading,
+    showSuggestion,
     isSuggestionResolved,
     setSuggestionResolved,
+    dontShowAgain,
   } = useContext(WalletConnectContext)
   const chainSwitchRequest = wcChainSwitchStore.useStore()
   const router = useRouter()
 
-  const isSafeAppSuggested = useIsSafeAppSuggested(sessionProposal, matchingSafeApp)
   const [, setSuggestionDismissed] = useSafeAppSuggestionDismissed()
 
   // The verified origin, not proposer.metadata.url, which the dApp declares about itself and
   // could use to attribute its traffic to another domain
   const proposalUrl = sessionProposal?.verifyContext.verified.origin ?? ''
-
-  const showSuggestion = Boolean(sessionProposal && matchingSafeApp && isSafeAppSuggested && !isSuggestionResolved)
 
   // Records which path the user took when a Safe App was suggested
   const trackSuggestionResult = useCallback(
@@ -95,8 +95,7 @@ const WcSessionManager = ({ uri }: WcSessionManagerProps) => {
   const onApprove = useCallback(async () => {
     if (!sessionProposal) return
 
-    const label = sessionProposal.params.proposer.metadata.url
-    trackEvent({ ...WALLETCONNECT_EVENTS.APPROVE_CLICK, label })
+    trackEvent({ ...WALLETCONNECT_EVENTS.APPROVE_CLICK, label: proposalUrl })
 
     try {
       await approveSession()
@@ -105,53 +104,49 @@ const WcSessionManager = ({ uri }: WcSessionManagerProps) => {
       return
     }
 
+    // Keyed on the verified origin, like the suggestion events, so the funnel can be joined
     trackEvent(
-      { ...WALLETCONNECT_EVENTS.CONNECTED, label },
+      { ...WALLETCONNECT_EVENTS.CONNECTED, label: proposalUrl },
       {
-        [MixpanelEventParams.APP_URL]: sessionProposal.params.proposer.metadata.url,
+        [MixpanelEventParams.APP_URL]: proposalUrl,
         [MixpanelEventParams.SAFE_APP_AVAILABLE]: Boolean(matchingSafeApp),
       },
     )
-  }, [sessionProposal, approveSession, setError, matchingSafeApp])
+  }, [sessionProposal, approveSession, setError, matchingSafeApp, proposalUrl])
 
   // On session reject
   const onReject = useCallback(async () => {
     if (!sessionProposal) return
 
-    const label = sessionProposal.params.proposer.metadata.url
-    trackEvent({ ...WALLETCONNECT_EVENTS.REJECT_CLICK, label })
+    trackEvent({ ...WALLETCONNECT_EVENTS.REJECT_CLICK, label: proposalUrl })
 
     try {
       await rejectSession()
     } catch (e) {
       setError(e as Error)
     }
-  }, [sessionProposal, rejectSession, setError])
+  }, [sessionProposal, rejectSession, setError, proposalUrl])
 
-  // Connect over WalletConnect straight from the suggestion. Marked as resolved so that a
-  // later dismissal, e.g. after a failed approval, is not also counted as declining it.
-  const onContinueWithWalletConnect = useCallback(
-    async (dontShowAgain: boolean) => {
-      trackSuggestionResult(WcSafeAppSuggestionResult.CONTINUED_WITH_WALLETCONNECT, dontShowAgain)
-      if (dontShowAgain) setSuggestionDismissed(true)
+  // Connect over WalletConnect straight from the suggestion
+  const onContinueWithWalletConnect = useCallback(async () => {
+    await onApprove()
 
-      await onApprove()
-
-      // Only after approving, so the connection form does not flash up while the approval
-      // is in flight. A failed approval falls back to it, where the user can retry.
-      setSuggestionResolved(true)
-    },
-    [trackSuggestionResult, setSuggestionDismissed, setSuggestionResolved, onApprove],
-  )
+    // Persisted and resolved only after the approval settles: flipping `dismissed` first would
+    // swap the connection form in for the whole round-trip
+    if (dontShowAgain) setSuggestionDismissed(true)
+    setSuggestionResolved(true)
+    trackSuggestionResult(WcSafeAppSuggestionResult.CONTINUED_WITH_WALLETCONNECT, dontShowAgain)
+  }, [onApprove, dontShowAgain, setSuggestionDismissed, setSuggestionResolved, trackSuggestionResult])
 
   // On opening the suggested Safe App instead of connecting over WalletConnect.
   // The proposal is rejected rather than left pending so the dApp gets a clean response.
   const onOpenSafeApp = useCallback(
-    async (safeApp: SafeAppData, dontShowAgain = false) => {
+    async (safeApp: SafeAppData) => {
       if (!sessionProposal) return
 
       trackSuggestionResult(WcSafeAppSuggestionResult.OPENED_SAFE_APP, dontShowAgain)
       if (dontShowAgain) setSuggestionDismissed(true)
+      setSuggestionResolved(true)
 
       trackSafeAppEvent({ ...SAFE_APPS_EVENTS.OPEN_APP, label: safeApp.name }, safeApp, {
         launchLocation: SafeAppLaunchLocation.WC_PROPOSAL,
@@ -165,15 +160,26 @@ const WcSessionManager = ({ uri }: WcSessionManagerProps) => {
         // Intentionally ignored: navigation is the user's intent, not the rejection
       }
 
-      router.push(getSafeAppUrl(router, safeApp.url))
+      setOpen(false)
+      router.push(getSafeAppUrl(router, safeApp.url)).catch(() => {})
     },
-    [sessionProposal, rejectSession, router, trackSuggestionResult, setSuggestionDismissed],
+    [
+      sessionProposal,
+      rejectSession,
+      router,
+      setOpen,
+      dontShowAgain,
+      trackSuggestionResult,
+      setSuggestionDismissed,
+      setSuggestionResolved,
+    ],
   )
 
   // Browsing the store declines both options, so the proposal is rejected rather than left
   // pending while the user navigates away
   const onBrowseSafeApps = useCallback(async () => {
-    trackSuggestionResult(WcSafeAppSuggestionResult.DISMISSED, false)
+    trackSuggestionResult(WcSafeAppSuggestionResult.BROWSED_STORE, dontShowAgain)
+    if (dontShowAgain) setSuggestionDismissed(true)
     setSuggestionResolved(true)
 
     try {
@@ -182,8 +188,17 @@ const WcSessionManager = ({ uri }: WcSessionManagerProps) => {
       // Intentionally ignored: navigation is the user's intent, not the rejection
     }
 
-    router.push({ pathname: AppRoutes.apps.index, query: { safe: router.query.safe } })
-  }, [trackSuggestionResult, setSuggestionResolved, rejectSession, router])
+    setOpen(false)
+    router.push({ pathname: AppRoutes.apps.index, query: { safe: router.query.safe } }).catch(() => {})
+  }, [
+    trackSuggestionResult,
+    dontShowAgain,
+    setSuggestionDismissed,
+    setSuggestionResolved,
+    rejectSession,
+    router,
+    setOpen,
+  ])
 
   // Reset error
   const onErrorReset = useCallback(() => {

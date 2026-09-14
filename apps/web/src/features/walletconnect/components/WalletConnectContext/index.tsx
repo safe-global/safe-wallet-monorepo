@@ -14,6 +14,7 @@ import type WalletConnectWallet from '../../services/WalletConnectWallet'
 import walletConnectInstance from '../../services/walletConnectInstance'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { useMatchingSafeApp } from '../../hooks/useMatchingSafeApp'
+import { useIsSafeAppSuggested } from '../../hooks/useSafeAppSuggestion'
 import type { WalletConnectContextType, WcAutoApproveProps } from '../../types'
 import { WCLoadingState } from '../../types'
 
@@ -49,8 +50,12 @@ export const WalletConnectContext = createContext<WalletConnectContextType>({
   rejectSession: () => Promise.resolve(),
   matchingSafeApp: undefined,
   isMatchingSafeAppLoading: false,
+  isSafeAppSuggested: false,
+  showSuggestion: false,
   isSuggestionResolved: false,
   setSuggestionResolved: () => {},
+  dontShowAgain: false,
+  setDontShowAgain: () => {},
 })
 
 export const WalletConnectProvider = ({ children }: { children: ReactNode }) => {
@@ -231,11 +236,17 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
   // Owned here rather than in the form so that dismissing the popup can tell whether the
   // Safe App suggestion was still on screen
   const [isSuggestionResolved, setSuggestionResolved] = useState(false)
+  const [dontShowAgain, setDontShowAgain] = useState(false)
 
   // Matched on the origin WalletConnect observed, never on proposer.metadata.url, which the
   // dApp declares about itself and can point at any domain it likes
   const proposalDappUrl = sessionProposal?.verifyContext.verified.origin
   const { safeApp: matchingSafeApp, isLoading: isMatchingSafeAppLoading } = useMatchingSafeApp(proposalDappUrl)
+
+  // Derived once here: auto-approve, the session manager and the popup close handler all need
+  // the same answer, and re-deriving it per consumer let them drift
+  const isSafeAppSuggested = useIsSafeAppSuggested(sessionProposal, matchingSafeApp)
+  const showSuggestion = Boolean(matchingSafeApp && isSafeAppSuggested && !isSuggestionResolved)
 
   const approveSession = useCallback(async () => {
     if (!walletConnect || !sessionProposal) return
@@ -282,18 +293,27 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
     setOpen(false)
   }, [walletConnect, sessionProposal, chainId, safeAddress, setAutoApprove, setOpen])
 
-  // Auto approve previously approved non-malicious dApps.
-  // Skipped while the Safe App lookup is in flight, and when a Safe App exists for the dApp so
-  // that the proposal form can recommend it instead of connecting silently.
+  // Auto approve previously approved non-malicious dApps. Skipped while the Safe App lookup is
+  // in flight, and when this dApp is eligible for the suggestion so the user gets to choose.
+  // Gated on eligibility, not merely on a match: a matched dApp the suggestion would never be
+  // shown for must keep auto-approving.
   useEffect(() => {
-    if (!sessionProposal || isMatchingSafeAppLoading || matchingSafeApp) return
+    if (!sessionProposal || isMatchingSafeAppLoading || (matchingSafeApp && isSafeAppSuggested)) return
 
     if (autoApprove[chainId]?.[sessionProposal.verifyContext.verified.origin]) {
       approveSession().catch((e) => {
         setError(e as Error)
       })
     }
-  }, [autoApprove, approveSession, sessionProposal, chainId, matchingSafeApp, isMatchingSafeAppLoading])
+  }, [
+    autoApprove,
+    approveSession,
+    sessionProposal,
+    chainId,
+    matchingSafeApp,
+    isSafeAppSuggested,
+    isMatchingSafeAppLoading,
+  ])
 
   const rejectSession = useCallback(async () => {
     if (!walletConnect || !sessionProposal) return
@@ -328,6 +348,7 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
       setError(null)
       // Each proposal gets its own suggestion
       setSuggestionResolved(false)
+      setDontShowAgain(false)
       setSessionProposal(proposalData)
     })
   }, [walletConnect])
@@ -348,8 +369,12 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
         rejectSession,
         matchingSafeApp,
         isMatchingSafeAppLoading,
+        isSafeAppSuggested,
+        showSuggestion,
         isSuggestionResolved,
         setSuggestionResolved,
+        dontShowAgain,
+        setDontShowAgain,
       }}
     >
       {children}

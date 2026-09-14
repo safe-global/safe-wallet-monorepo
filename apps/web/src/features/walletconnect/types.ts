@@ -29,9 +29,16 @@ export type WalletConnectContextType = {
   /** The Safe App matching the proposing dApp, if one exists on the current chain */
   matchingSafeApp: SafeAppData | undefined
   isMatchingSafeAppLoading: boolean
+  /** Whether this proposal is eligible for the suggestion at all, before the user acts on it */
+  isSafeAppSuggested: boolean
+  /** Whether the suggestion is on screen right now */
+  showSuggestion: boolean
   /** Whether the user has moved past the Safe App suggestion for the current proposal */
   isSuggestionResolved: boolean
   setSuggestionResolved: (resolved: boolean) => void
+  /** The in-flight "Don't show again" choice, persisted only once the user commits to an action */
+  dontShowAgain: boolean
+  setDontShowAgain: (value: boolean) => void
 }
 
 export type WcChainSwitchRequest = {

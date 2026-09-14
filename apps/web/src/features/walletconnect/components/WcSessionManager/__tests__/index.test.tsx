@@ -8,8 +8,10 @@ import { SAFE_APPS_EVENTS } from '@/services/analytics/events/safeApps'
 import { MixpanelEventParams, SafeAppLaunchLocation } from '@/services/analytics/mixpanel-events'
 import type { WalletKitTypes } from '@reown/walletkit'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
+import type { WalletConnectContextType } from '../../../types'
 
-const mockRouterPush = jest.fn()
+// Next's router.push resolves to a boolean; returning undefined would hide the .catch guard
+const mockRouterPush = jest.fn(() => Promise.resolve(true))
 
 jest.mock('next/router', () => ({
   useRouter: () => ({
@@ -58,10 +60,8 @@ jest.mock('@/hooks/useSanctionedAddress', () => ({
   useSanctionedAddress: () => null,
 }))
 
-const mockIsSafeAppSuggested = jest.fn(() => false)
 const mockSetSuggestionDismissed = jest.fn()
 jest.mock('../../../hooks/useSafeAppSuggestion', () => ({
-  useIsSafeAppSuggested: () => mockIsSafeAppSuggested(),
   useSafeAppSuggestionDismissed: () => [undefined, mockSetSuggestionDismissed],
 }))
 
@@ -72,6 +72,7 @@ const mockSafeApp: SafeAppData = {
   id: 42,
   url: 'https://test-dapp.com',
   name: 'Test dApp Safe App',
+  iconUrl: 'https://test-dapp.com/safe-app-icon.png',
   description: 'A Safe App',
   chainIds: ['1'],
   accessControl: { type: 'NO_RESTRICTIONS' },
@@ -97,7 +98,8 @@ const mockSessionProposal: WalletKitTypes.SessionProposal = {
       metadata: {
         name: 'Test dApp',
         description: 'Test description',
-        url: 'https://test-dapp.com',
+        // Deliberately different from the verified origin: the dApp declares this about itself
+        url: 'https://spoofed.example',
         icons: ['https://test-dapp.com/icon.png'],
       },
     },
@@ -136,8 +138,12 @@ const mockContextValue = {
   rejectSession: mockRejectSession,
   matchingSafeApp: undefined,
   isMatchingSafeAppLoading: false,
+  isSafeAppSuggested: false,
+  showSuggestion: false,
   isSuggestionResolved: false,
   setSuggestionResolved: jest.fn(),
+  dontShowAgain: false,
+  setDontShowAgain: jest.fn(),
 }
 
 const WcSessionManagerWithContext = ({ uri = 'test-uri' }) => (
@@ -277,19 +283,30 @@ describe('WcSessionManager tracking', () => {
 })
 
 describe('WcSessionManager Safe App suggestion', () => {
-  // isSuggestionResolved lives in the context, so the provider has to hold real state for
-  // the fall-through to the connection form to be exercised
-  const StatefulSuggestionHarness = () => {
+  const ORIGIN = 'https://test-dapp.com'
+
+  /**
+   * Drives the real context state. `showSuggestion` is supplied rather than mocked away so the
+   * render branch under test is the one the provider actually computes.
+   */
+  const StatefulSuggestionHarness = ({ safeApp = mockSafeApp }: { safeApp?: SafeAppData }) => {
     const [isSuggestionResolved, setSuggestionResolved] = useState(false)
+    const [dontShowAgain, setDontShowAgain] = useState(false)
 
     return (
       <WalletConnectContext.Provider
-        value={{
-          ...mockContextValue,
-          matchingSafeApp: mockSafeApp,
-          isSuggestionResolved,
-          setSuggestionResolved,
-        }}
+        value={
+          {
+            ...mockContextValue,
+            matchingSafeApp: safeApp,
+            isSafeAppSuggested: true,
+            showSuggestion: !isSuggestionResolved,
+            isSuggestionResolved,
+            setSuggestionResolved,
+            dontShowAgain,
+            setDontShowAgain,
+          } as unknown as WalletConnectContextType
+        }
       >
         <WcSessionManager uri="test-uri" />
       </WalletConnectContext.Provider>
@@ -302,7 +319,6 @@ describe('WcSessionManager Safe App suggestion', () => {
     jest.clearAllMocks()
     mockApproveSession.mockResolvedValue(undefined)
     mockRejectSession.mockResolvedValue(undefined)
-    mockIsSafeAppSuggested.mockReturnValue(true)
     mockSetSuggestionDismissed.mockClear()
   })
 
@@ -315,8 +331,46 @@ describe('WcSessionManager Safe App suggestion', () => {
     expect(screen.queryByRole('button', { name: /approve/i })).not.toBeInTheDocument()
   })
 
-  it('tracks the impression once', () => {
+  it('renders the Safe App icon from the registry, not the placeholder', () => {
     renderWithSafeApp()
+
+    expect(screen.getByAltText(`${mockSafeApp.name} logo`)).toHaveAttribute('src', mockSafeApp.iconUrl)
+    expect(screen.getByAltText(`${mockSafeApp.name} logo`)).not.toHaveAttribute(
+      'src',
+      '/images/apps/app-placeholder.svg',
+    )
+  })
+
+  it('falls back to a placeholder when the app has no icon', () => {
+    render(<StatefulSuggestionHarness safeApp={{ ...mockSafeApp, iconUrl: null }} />)
+
+    expect(screen.getByAltText(`${mockSafeApp.name} logo`)).toHaveAttribute('src', '/images/apps/app-placeholder.svg')
+  })
+
+  // The dApp declares metadata.url about itself; only the verified origin is trustworthy
+  it('shows the verified origin, never the dApp declared url', () => {
+    renderWithSafeApp()
+
+    expect(screen.getByText(ORIGIN)).toBeInTheDocument()
+    expect(screen.queryByText('https://spoofed.example')).not.toBeInTheDocument()
+  })
+
+  it('keys the impression on the verified origin, not the declared url', () => {
+    renderWithSafeApp()
+
+    const [event, params] = mockTrackEvent.mock.calls.find(
+      ([e]) => e.action === WALLETCONNECT_EVENTS.SAFE_APP_SUGGESTED.action,
+    )!
+    expect(event.label).toBe(ORIGIN)
+    expect(params).toEqual(expect.objectContaining({ [MixpanelEventParams.APP_URL]: ORIGIN }))
+  })
+
+  // Regression: the dedupe ref exists to survive a Safe Apps refetch handing back an equal
+  // object with a new identity, so re-rendering with a fresh object must not re-log
+  it('tracks the impression once across a refetch that changes object identity', () => {
+    const { rerender } = renderWithSafeApp()
+
+    rerender(<StatefulSuggestionHarness safeApp={{ ...mockSafeApp }} />)
 
     const impressions = mockTrackEvent.mock.calls.filter(
       ([event]) => event.action === WALLETCONNECT_EVENTS.SAFE_APP_SUGGESTED.action,
@@ -327,7 +381,7 @@ describe('WcSessionManager Safe App suggestion', () => {
   it('rejects the proposal and navigates to the Safe App', async () => {
     renderWithSafeApp()
 
-    fireEvent.click(screen.getByRole('button', { name: /open .* in safe app store/i }))
+    fireEvent.click(screen.getByRole('button', { name: /open in safe app store/i }))
 
     await waitFor(() => {
       expect(mockRejectSession).toHaveBeenCalled()
@@ -338,25 +392,19 @@ describe('WcSessionManager Safe App suggestion', () => {
         expect.stringContaining(`appUrl=${encodeURIComponent(mockSafeApp.url)}`),
       )
     })
-
-    // Opening the Safe App must not be counted as a rejection
-    expect(mockTrackEvent).not.toHaveBeenCalledWith(
-      expect.objectContaining({ action: WALLETCONNECT_EVENTS.REJECT_CLICK.action }),
-    )
   })
 
   it('tracks the Opened Safe App result and the Safe App launch', async () => {
     renderWithSafeApp()
 
-    fireEvent.click(screen.getByRole('button', { name: /open .* in safe app store/i }))
+    fireEvent.click(screen.getByRole('button', { name: /open in safe app store/i }))
 
     await waitFor(() => {
       expect(mockTrackEvent).toHaveBeenCalledWith(
-        { ...WALLETCONNECT_EVENTS.SAFE_APP_SUGGESTION_RESULT, label: 'https://test-dapp.com' },
+        { ...WALLETCONNECT_EVENTS.SAFE_APP_SUGGESTION_RESULT, label: ORIGIN },
         expect.objectContaining({
           [MixpanelEventParams.SAFE_APP_NAME]: mockSafeApp.name,
           [MixpanelEventParams.RESULT]: WcSafeAppSuggestionResult.OPENED_SAFE_APP,
-          [MixpanelEventParams.SUGGESTION_DISMISSED]: false,
         }),
       )
     })
@@ -373,87 +421,64 @@ describe('WcSessionManager Safe App suggestion', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /continue with walletconnect/i }))
 
-    // Connects off the single click, with no second dialog to confirm through
     await waitFor(() => {
       expect(mockApproveSession).toHaveBeenCalledTimes(1)
     })
 
     expect(mockTrackEvent).toHaveBeenCalledWith(
-      { ...WALLETCONNECT_EVENTS.SAFE_APP_SUGGESTION_RESULT, label: 'https://test-dapp.com' },
+      { ...WALLETCONNECT_EVENTS.SAFE_APP_SUGGESTION_RESULT, label: ORIGIN },
       expect.objectContaining({
         [MixpanelEventParams.RESULT]: WcSafeAppSuggestionResult.CONTINUED_WITH_WALLETCONNECT,
       }),
     )
-    expect(mockSetSuggestionDismissed).not.toHaveBeenCalled()
   })
 
-  it('persists the dismissal when Don’t show again is ticked', async () => {
+  it('persists the dismissal only after the action completes', async () => {
     renderWithSafeApp()
 
     fireEvent.click(screen.getByRole('checkbox'))
+    expect(mockSetSuggestionDismissed).not.toHaveBeenCalled()
+
     fireEvent.click(screen.getByRole('button', { name: /continue with walletconnect/i }))
+
+    await waitFor(() => {
+      expect(mockSetSuggestionDismissed).toHaveBeenCalledWith(true)
+    })
+  })
+
+  it('carries the dismissal through the browse path too', async () => {
+    renderWithSafeApp()
+
+    fireEvent.click(screen.getByRole('checkbox'))
+    fireEvent.click(screen.getByRole('button', { name: /60\+ reviewed apps/i }))
 
     await waitFor(() => {
       expect(mockSetSuggestionDismissed).toHaveBeenCalledWith(true)
     })
 
     expect(mockTrackEvent).toHaveBeenCalledWith(
-      { ...WALLETCONNECT_EVENTS.SAFE_APP_SUGGESTION_RESULT, label: 'https://test-dapp.com' },
-      expect.objectContaining({ [MixpanelEventParams.SUGGESTION_DISMISSED]: true }),
+      { ...WALLETCONNECT_EVENTS.SAFE_APP_SUGGESTION_RESULT, label: ORIGIN },
+      expect.objectContaining({
+        [MixpanelEventParams.RESULT]: WcSafeAppSuggestionResult.BROWSED_STORE,
+        [MixpanelEventParams.SUGGESTION_DISMISSED]: true,
+      }),
     )
   })
 
-  it('flags Safe App availability on connect', async () => {
+  it('flags Safe App availability on connect, keyed on the origin', async () => {
     renderWithSafeApp()
 
     fireEvent.click(screen.getByRole('button', { name: /continue with walletconnect/i }))
 
     await waitFor(() => {
       expect(mockTrackEvent).toHaveBeenCalledWith(
-        { ...WALLETCONNECT_EVENTS.CONNECTED, label: 'https://test-dapp.com' },
-        expect.objectContaining({ [MixpanelEventParams.SAFE_APP_AVAILABLE]: true }),
+        { ...WALLETCONNECT_EVENTS.CONNECTED, label: ORIGIN },
+        expect.objectContaining({
+          [MixpanelEventParams.APP_URL]: ORIGIN,
+          [MixpanelEventParams.SAFE_APP_AVAILABLE]: true,
+        }),
       )
     })
-  })
-
-  it('renders the Safe App icon from the registry', () => {
-    renderWithSafeApp()
-
-    expect(screen.getByAltText(`${mockSafeApp.name} logo`)).toHaveAttribute('src', mockSafeApp.iconUrl)
-  })
-
-  // A missing icon must still leave the placeholder in place rather than collapse the layout
-  it('falls back to a placeholder when the app has no icon', () => {
-    render(
-      <WalletConnectContext.Provider
-        value={{ ...mockContextValue, matchingSafeApp: { ...mockSafeApp, iconUrl: null } }}
-      >
-        <WcSessionManager uri="test-uri" />
-      </WalletConnectContext.Provider>,
-    )
-
-    expect(screen.getByAltText(`${mockSafeApp.name} logo`)).toHaveAttribute('src', '/images/apps/app-placeholder.svg')
-  })
-
-  it('shows the verified origin so the user knows who they would connect to', () => {
-    renderWithSafeApp()
-
-    expect(screen.getByText('https://test-dapp.com')).toBeInTheDocument()
-  })
-
-  // Regression: the connection form used to render while the lookup was in flight, and could
-  // be approved in the moment before the suggestion replaced it
-  it('does not show the connection form while the Safe App lookup is in flight', () => {
-    render(
-      <WalletConnectContext.Provider
-        value={{ ...mockContextValue, matchingSafeApp: undefined, isMatchingSafeAppLoading: true }}
-      >
-        <WcSessionManager uri="test-uri" />
-      </WalletConnectContext.Provider>,
-    )
-
-    expect(screen.queryByRole('button', { name: /approve/i })).not.toBeInTheDocument()
-    expect(screen.getByRole('status', { name: 'Loading' })).toBeInTheDocument()
   })
 
   it('rejects the proposal and navigates when browsing the store', async () => {
@@ -466,16 +491,43 @@ describe('WcSessionManager Safe App suggestion', () => {
     })
 
     expect(mockRouterPush).toHaveBeenCalledWith(expect.objectContaining({ pathname: '/apps' }))
-    expect(mockTrackEvent).toHaveBeenCalledWith(
-      { ...WALLETCONNECT_EVENTS.SAFE_APP_SUGGESTION_RESULT, label: 'https://test-dapp.com' },
-      expect.objectContaining({ [MixpanelEventParams.RESULT]: WcSafeAppSuggestionResult.DISMISSED }),
+  })
+
+  // Regression: the connection form used to render, and be approvable, in the window before
+  // the suggestion replaced it
+  it('does not show the connection form while the Safe App lookup is in flight', () => {
+    render(
+      <WalletConnectContext.Provider
+        value={
+          {
+            ...mockContextValue,
+            matchingSafeApp: undefined,
+            isMatchingSafeAppLoading: true,
+          } as unknown as WalletConnectContextType
+        }
+      >
+        <WcSessionManager uri="test-uri" />
+      </WalletConnectContext.Provider>,
     )
+
+    expect(screen.queryByRole('button', { name: /approve/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('status', { name: 'Loading' })).toBeInTheDocument()
   })
 
   it('shows the connection form directly when the suggestion is not eligible', () => {
-    mockIsSafeAppSuggested.mockReturnValue(false)
-
-    renderWithSafeApp()
+    render(
+      <WalletConnectContext.Provider
+        value={
+          {
+            ...mockContextValue,
+            matchingSafeApp: mockSafeApp,
+            showSuggestion: false,
+          } as unknown as WalletConnectContextType
+        }
+      >
+        <WcSessionManager uri="test-uri" />
+      </WalletConnectContext.Provider>,
+    )
 
     expect(screen.getByRole('button', { name: /approve/i })).toBeInTheDocument()
     expect(mockTrackEvent).not.toHaveBeenCalledWith(

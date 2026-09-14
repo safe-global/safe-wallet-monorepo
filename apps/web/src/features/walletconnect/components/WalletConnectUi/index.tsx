@@ -6,9 +6,9 @@ import { WALLETCONNECT_EVENTS, WcSafeAppSuggestionResult } from '@/services/anal
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { WalletConnectContext, WalletConnectProvider } from '../WalletConnectContext'
 import useWcUri from '../../hooks/useWcUri'
-import { useIsSafeAppSuggested } from '../../hooks/useSafeAppSuggestion'
 import WcHeaderWidget from '../WcHeaderWidget'
 import WcSessionManager from '../WcSessionManager'
+import { useSafeAppSuggestionDismissed } from '../../hooks/useSafeAppSuggestion'
 
 const WalletConnectWidget = () => {
   const {
@@ -20,11 +20,13 @@ const WalletConnectWidget = () => {
     sessionProposal,
     rejectSession,
     matchingSafeApp,
-    isSuggestionResolved,
+    showSuggestion,
+    loading,
+    dontShowAgain,
   } = useContext(WalletConnectContext)
   const [uri, clearUri] = useWcUri()
   const { safeLoaded } = useSafeInfo()
-  const isSafeAppSuggested = useIsSafeAppSuggested(sessionProposal, matchingSafeApp)
+  const [, setSuggestionDismissed] = useSafeAppSuggestionDismissed()
 
   const onOpen = useCallback(() => {
     setOpen(true)
@@ -35,30 +37,39 @@ const WalletConnectWidget = () => {
   const onClose = useCallback(() => {
     setOpen(false)
 
-    if (!sessionProposal) return
+    // An approve or reject is already in flight; rejecting again would cancel the very
+    // session being approved
+    if (!sessionProposal || loading) return
 
-    const label = sessionProposal.params.proposer.metadata.url
-    // Suggestion events are keyed on the verified origin, matching what the Safe App was
-    // matched against, rather than the URL the dApp declares about itself
     const origin = sessionProposal.verifyContext.verified.origin
 
-    if (matchingSafeApp && isSafeAppSuggested && !isSuggestionResolved) {
+    if (matchingSafeApp && showSuggestion) {
       trackEvent(
         { ...WALLETCONNECT_EVENTS.SAFE_APP_SUGGESTION_RESULT, label: origin },
         {
           [MixpanelEventParams.APP_URL]: origin,
           [MixpanelEventParams.SAFE_APP_NAME]: matchingSafeApp.name,
           [MixpanelEventParams.RESULT]: WcSafeAppSuggestionResult.DISMISSED,
-          [MixpanelEventParams.SUGGESTION_DISMISSED]: false,
+          [MixpanelEventParams.SUGGESTION_DISMISSED]: dontShowAgain,
         },
       )
+      if (dontShowAgain) setSuggestionDismissed(true)
     }
 
-    trackEvent({ ...WALLETCONNECT_EVENTS.REJECT_CLICK, label })
+    trackEvent({ ...WALLETCONNECT_EVENTS.REJECT_CLICK, label: origin })
 
     // Best effort: the popup is already closed, so an error here has nowhere to surface
     rejectSession().catch(() => {})
-  }, [setOpen, sessionProposal, rejectSession, matchingSafeApp, isSafeAppSuggested, isSuggestionResolved])
+  }, [
+    setOpen,
+    sessionProposal,
+    loading,
+    rejectSession,
+    matchingSafeApp,
+    showSuggestion,
+    dontShowAgain,
+    setSuggestionDismissed,
+  ])
 
   // Open the popup if there is a pairing code in the URL or clipboard
   useEffect(() => {

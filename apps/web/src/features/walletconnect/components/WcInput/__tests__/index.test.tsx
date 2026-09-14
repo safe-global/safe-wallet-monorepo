@@ -34,6 +34,14 @@ const makeContext = (loading: WCLoadingState | null = null): WalletConnectContex
     isMatchingSafeAppLoading: false,
   }) as unknown as WalletConnectContextType
 
+let setLoadingFromTest: ((next: WCLoadingState | null) => void) | undefined
+
+/** Exposes the harness's setter so a test can simulate the proposal arriving mid-flight. */
+const render_StatefulWithControl = () => {
+  render(<StatefulHarness />)
+  return { setLoadingExternally: (next: WCLoadingState | null) => setLoadingFromTest?.(next) }
+}
+
 const renderInput = (loading: WCLoadingState | null = null, uri = '') =>
   render(
     <WalletConnectContext.Provider value={makeContext(loading)}>
@@ -47,6 +55,7 @@ const renderInput = (loading: WCLoadingState | null = null, uri = '') =>
  */
 const StatefulHarness = ({ uri = '' }: { uri?: string }) => {
   const [loading, setLoading] = useState<WCLoadingState | null>(null)
+  setLoadingFromTest = setLoading
 
   const value = {
     ...makeContext(loading),
@@ -117,14 +126,20 @@ describe('WcInput', () => {
     expect(mockSetLoading).toHaveBeenLastCalledWith(null)
   })
 
+  // Pinning loading to APPROVE up front would pass against the stale-closure bug too, so the
+  // state has to transition the way it does in the real flow: null -> CONNECT -> APPROVE
   it('does not time out once a proposal is being approved', async () => {
-    renderInput(WCLoadingState.APPROVE)
+    const { setLoadingExternally } = render_StatefulWithControl()
 
     fireEvent.change(screen.getByRole('textbox'), { target: { value: VALID_URI } })
 
     await waitFor(() => {
       expect(mockConnect).toHaveBeenCalled()
     })
+    expect(mockSetLoading).toHaveBeenCalledWith(WCLoadingState.CONNECT)
+
+    // The proposal arrived and approval started before the timer fires
+    act(() => setLoadingExternally(WCLoadingState.APPROVE))
 
     await act(async () => {
       jest.advanceTimersByTime(PROPOSAL_TIMEOUT)

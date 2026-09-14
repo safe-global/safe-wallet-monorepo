@@ -8,6 +8,7 @@ import WalletConnectUi from '../index'
 import { trackEvent } from '@/services/analytics'
 import { WALLETCONNECT_EVENTS, WcSafeAppSuggestionResult } from '@/services/analytics/events/walletconnect'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { WCLoadingState } from '../../../types'
 
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
@@ -24,10 +25,9 @@ jest.mock('../../../hooks/useWcUri', () => ({
   default: () => ['', jest.fn()],
 }))
 
-const mockIsSafeAppSuggested = jest.fn(() => false)
+const mockSetSuggestionDismissed = jest.fn()
 jest.mock('../../../hooks/useSafeAppSuggestion', () => ({
-  useIsSafeAppSuggested: () => mockIsSafeAppSuggested(),
-  useSafeAppSuggestionDismissed: () => [undefined, jest.fn()],
+  useSafeAppSuggestionDismissed: () => [undefined, mockSetSuggestionDismissed],
 }))
 
 // The popup is replaced with a bare close button so the dismissal can be triggered directly
@@ -83,14 +83,18 @@ const contextValue = {
   setError: jest.fn(),
   open: true,
   setOpen: mockSetOpen,
-  loading: null,
+  loading: null as WCLoadingState | null,
   setLoading: jest.fn(),
   approveSession: jest.fn(),
   rejectSession: mockRejectSession,
   matchingSafeApp: undefined as SafeAppData | undefined,
   isMatchingSafeAppLoading: false,
+  isSafeAppSuggested: false,
+  showSuggestion: false,
   isSuggestionResolved: false,
   setSuggestionResolved: jest.fn(),
+  dontShowAgain: false,
+  setDontShowAgain: jest.fn(),
 }
 
 let currentContext = { ...contextValue }
@@ -115,7 +119,6 @@ describe('WalletConnectUi dismissal', () => {
     jest.clearAllMocks()
     mockRejectSession.mockResolvedValue(undefined)
     currentContext = { ...contextValue }
-    mockIsSafeAppSuggested.mockReturnValue(false)
   })
 
   it('does not reject anything when there is no pending proposal', () => {
@@ -148,8 +151,12 @@ describe('WalletConnectUi dismissal', () => {
   })
 
   it('records a Dismissed result when the suggestion was on screen', async () => {
-    currentContext = { ...contextValue, sessionProposal: mockSessionProposal, matchingSafeApp: mockSafeApp }
-    mockIsSafeAppSuggested.mockReturnValue(true)
+    currentContext = {
+      ...contextValue,
+      sessionProposal: mockSessionProposal,
+      matchingSafeApp: mockSafeApp,
+      showSuggestion: true,
+    }
 
     render(<WalletConnectUi />)
 
@@ -168,9 +175,9 @@ describe('WalletConnectUi dismissal', () => {
       ...contextValue,
       sessionProposal: mockSessionProposal,
       matchingSafeApp: mockSafeApp,
+      showSuggestion: false,
       isSuggestionResolved: true,
     }
-    mockIsSafeAppSuggested.mockReturnValue(true)
 
     render(<WalletConnectUi />)
 
@@ -184,6 +191,23 @@ describe('WalletConnectUi dismissal', () => {
       expect.objectContaining({ action: WALLETCONNECT_EVENTS.SAFE_APP_SUGGESTION_RESULT.action }),
       expect.anything(),
     )
+  })
+
+  // Regression: closing while an approve is in flight used to reject the very session being
+  // approved, so the dApp saw an approve immediately followed by a reject
+  it('does not reject while an approval is in flight', () => {
+    currentContext = {
+      ...contextValue,
+      sessionProposal: mockSessionProposal,
+      loading: WCLoadingState.APPROVE,
+    }
+
+    render(<WalletConnectUi />)
+
+    fireEvent.click(screen.getByText('close popup'))
+
+    expect(mockSetOpen).toHaveBeenCalledWith(false)
+    expect(mockRejectSession).not.toHaveBeenCalled()
   })
 
   it('still closes when the rejection fails', async () => {

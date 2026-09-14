@@ -8,9 +8,10 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/safe-apps', () => ({
   useSafeAppsGetSafeAppsV1Query: (arg: unknown, options: unknown) => mockQuery(arg, options),
 }))
 
+const mockChainId = jest.fn(() => '1')
 jest.mock('@/hooks/useChainId', () => ({
   __esModule: true,
-  default: () => '1',
+  default: () => mockChainId(),
 }))
 
 const mockSafeApp: SafeAppData = {
@@ -29,6 +30,7 @@ const mockSafeApp: SafeAppData = {
 describe('useMatchingSafeApp', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockChainId.mockReturnValue('1')
     mockQuery.mockReturnValue({ currentData: [mockSafeApp], isFetching: false })
   })
 
@@ -44,7 +46,7 @@ describe('useMatchingSafeApp', () => {
     const { result } = renderHook(() => useMatchingSafeApp('https://app.uniswap.org/swap'))
 
     expect(mockQuery).toHaveBeenCalledWith(
-      expect.objectContaining({ chainId: '1' }),
+      { chainId: '1', clientUrl: window.location.origin },
       expect.objectContaining({ skip: false }),
     )
     expect(result.current.safeApp).toEqual(mockSafeApp)
@@ -67,11 +69,20 @@ describe('useMatchingSafeApp', () => {
   })
 
   it('fails open with no match when the lookup errors', () => {
-    mockQuery.mockReturnValue({ currentData: undefined, isFetching: false })
+    mockQuery.mockReturnValue({ currentData: undefined, isFetching: false, isError: true })
 
     const { result } = renderHook(() => useMatchingSafeApp('https://app.uniswap.org'))
 
+    // Settled, not loading: the caller must fall through to the normal flow rather than hang
     expect(result.current.safeApp).toBeUndefined()
     expect(result.current.isLoading).toBe(false)
+  })
+
+  it('skips the query when there is no chain', () => {
+    mockChainId.mockReturnValue('')
+
+    renderHook(() => useMatchingSafeApp('https://app.uniswap.org'))
+
+    expect(mockQuery).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ skip: true }))
   })
 })

@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useContext, useId } from 'react'
 import { Link2, Lock, ShieldCheck } from 'lucide-react'
 import type { ReactElement } from 'react'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
@@ -8,9 +8,12 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Field, FieldLabel } from '@/components/ui/field'
 import { Link } from '@/components/ui/link'
 import { Separator } from '@/components/ui/separator'
+import { Spinner } from '@/components/ui/spinner'
 import { Typography } from '@/components/ui/typography'
 import SafeAppIconCard from '@/components/safe-apps/SafeAppIconCard'
 import { BRAND_NAME } from '@/config/constants'
+import { WalletConnectContext } from '../WalletConnectContext'
+import { WCLoadingState } from '../../types'
 
 const BENEFITS = [
   { Icon: Link2, text: 'Stay connected without pairing or reconnecting' },
@@ -22,8 +25,8 @@ export type WcSafeAppSuggestionProps = {
   safeApp: SafeAppData
   /** The origin WalletConnect verified, shown so the user knows who they would connect to */
   origin: string
-  onOpenSafeApp: (safeApp: SafeAppData, dontShowAgain: boolean) => void
-  onContinueWithWalletConnect: (dontShowAgain: boolean) => void
+  onOpenSafeApp: (safeApp: SafeAppData) => void
+  onContinueWithWalletConnect: () => void
   onBrowseSafeApps: () => void
 }
 
@@ -34,8 +37,9 @@ const WcSafeAppSuggestion = ({
   onContinueWithWalletConnect,
   onBrowseSafeApps,
 }: WcSafeAppSuggestionProps): ReactElement => {
-  const [dontShowAgain, setDontShowAgain] = useState(false)
+  const { loading, dontShowAgain, setDontShowAgain } = useContext(WalletConnectContext)
   const checkboxId = useId()
+  const isBusy = !!loading
 
   return (
     <div className="flex flex-col gap-6 text-center">
@@ -59,7 +63,7 @@ const WcSafeAppSuggestion = ({
               <div className="bg-success-subtle text-success-strong flex size-9 shrink-0 items-center justify-center rounded-lg">
                 <Icon className="size-4" />
               </div>
-              <Typography variant="paragraph-small" align="left">
+              <Typography variant="paragraph-small" className="text-left">
                 {text}
               </Typography>
             </div>
@@ -73,6 +77,7 @@ const WcSafeAppSuggestion = ({
           <Checkbox
             id={checkboxId}
             checked={dontShowAgain}
+            disabled={isBusy}
             onCheckedChange={(checked) => setDontShowAgain(!!checked)}
           />
           <FieldLabel htmlFor={checkboxId} className="text-muted-foreground">
@@ -80,12 +85,12 @@ const WcSafeAppSuggestion = ({
           </FieldLabel>
         </Field>
 
-        <Button variant="default" onClick={() => onOpenSafeApp(safeApp, dontShowAgain)}>
-          Open {safeApp.name} in Safe App Store
+        <Button variant="default" disabled={isBusy} onClick={() => onOpenSafeApp(safeApp)}>
+          {loading === WCLoadingState.REJECT ? <Spinner /> : 'Open in Safe App Store'}
         </Button>
 
-        <Button variant="ghost" onClick={() => onContinueWithWalletConnect(dontShowAgain)}>
-          Continue with WalletConnect
+        <Button variant="ghost" disabled={isBusy} onClick={onContinueWithWalletConnect}>
+          {loading === WCLoadingState.APPROVE ? <Spinner /> : 'Continue with WalletConnect'}
         </Button>
       </div>
 
@@ -94,7 +99,11 @@ const WcSafeAppSuggestion = ({
 
         <Typography variant="paragraph-small" color="muted">
           Browse{' '}
-          <Link render={<button type="button" />} onClick={onBrowseSafeApps}>
+          <Link
+            render={<button type="button" disabled={isBusy} />}
+            className="cursor-pointer"
+            onClick={onBrowseSafeApps}
+          >
             <b>60+ reviewed apps</b>
           </Link>{' '}
           in the Safe App Store

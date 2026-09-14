@@ -41,21 +41,22 @@ export const useIsSafeAppSuggested = (
   const isSafePass = isSafePassApp(origin)
   const sanctionedAddress = useSanctionedAddress(isSafePass)
 
-  const chainIds = useMemo(() => (proposal ? getSupportedChainIds(configs, proposal.params) : []), [configs, proposal])
+  // Runs in the provider for every proposal, so it cannot assume a fully formed params object
+  const chainIds = useMemo(
+    () => (proposal?.params ? getSupportedChainIds(configs, proposal.params) : []),
+    [configs, proposal],
+  )
 
   if (!proposal || !matchingSafeApp || dismissed || !safeLoaded || isCounterfactualSafe) return false
 
   const isBlocked = proposal.verifyContext.verified.isScam || isBlockedBridge(origin)
   const isUnsupportedChain = !chainIds.includes(safe.chainId)
 
-  // Connecting from the suggestion skips the connection form, so anything carrying a risk
-  // warning has to go through that form instead
-  const name = getPeerName(proposal.params.proposer) || ''
+  const name = proposal.params?.proposer ? getPeerName(proposal.params.proposer) : ''
   const isHighRisk = isWarnedBridge(origin, name)
 
-  // The suggestion hides the origin and lets the user connect in one click, so require an
-  // attested domain. UNKNOWN means WalletConnect could not verify it, which is not a good
-  // enough basis for that, and INVALID means the dApp is lying about who it is.
+  // One click connects, so require an attested domain: UNKNOWN means WalletConnect could not
+  // verify it, INVALID means the dApp is misrepresenting itself
   const isVerified = proposal.verifyContext.verified.validation === 'VALID'
 
   return isVerified && !isBlocked && !isHighRisk && !isUnsupportedChain && !(isSafePass && sanctionedAddress)
