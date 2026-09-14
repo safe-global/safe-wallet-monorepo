@@ -23,6 +23,7 @@ import {
   authListener,
   counterfactualSyncListener,
   addressBookListener,
+  elevationListener,
 } from './slices'
 import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
@@ -37,6 +38,7 @@ import { GATEWAY_URL } from '@/config/gateway'
 import { setupListeners } from '@reduxjs/toolkit/query'
 import { migrateBatchTxs } from '@/services/ls-migration/batch'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway'
+import { cgwErrorAlert } from './middleware/cgwErrorAlert'
 
 const rootReducer = combineReducers({
   [slices.safeInfoSlice.name]: slices.safeInfoSlice.reducer,
@@ -68,6 +70,9 @@ const rootReducer = combineReducers({
   [slices.spaceNavigationSlice.name]: slices.spaceNavigationSlice.reducer,
   [slices.gtfPaymentSourcePreferenceSlice.name]: slices.gtfPaymentSourcePreferenceSlice.reducer,
   [slices.featureFlagOverridesSlice.name]: slices.featureFlagOverridesSlice.reducer,
+  // Deliberately absent from `persistedSlices`: a phase restored from a previous
+  // page load would leave the user on a splash screen with nothing in flight.
+  [slices.stepUpSlice.name]: slices.stepUpSlice.reducer,
   [ofacApi.reducerPath]: ofacApi.reducer,
   [safePassApi.reducerPath]: safePassApi.reducer,
   [hypernativeApi.reducerPath]: hypernativeApi.reducer,
@@ -107,6 +112,7 @@ export const getPersistedState = () => {
 export const listenerMiddlewareInstance = createListenerMiddleware<RootState>()
 
 const middleware: Middleware<{}, RootState>[] = [
+  cgwErrorAlert,
   persistState(persistedSlices),
   broadcastState(persistedSlices),
   listenerMiddlewareInstance.middleware,
@@ -126,6 +132,7 @@ const listeners = [
   authListener,
   counterfactualSyncListener,
   addressBookListener,
+  elevationListener,
 ]
 
 export const _hydrationReducer: typeof rootReducer = (state, action) => {

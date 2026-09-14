@@ -17,11 +17,12 @@ import NotActivatedBadge from '@/components/common/NotActivatedBadge'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useChain } from '@/hooks/useChains'
+import { useAddressBookWriteScope } from '@/features/spaces'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { cn } from '@/utils/cn'
 import { AccountItem as BaseAccountItem } from '../AccountItem'
 import { NetworkLogosPill } from '@/features/multichain'
-import type { AccountLine } from './useSafeAccountRows'
+import { getContextMenuChainIds, type AccountLine } from './useSafeAccountRows'
 import type { SafeAccountColumn } from './columns'
 import { PendingBadge, ThresholdBadge, formatPendingLabel } from '@/components/common/AccountBadges'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -82,6 +83,7 @@ const NameCellContent = ({
   nameLink?: { href: LinkProps['href']; onClick?: () => void; testId?: string }
 }) => {
   const chainConfig = useChain(line.chainId)
+  const { canRename } = useAddressBookWriteScope(line.address, getContextMenuChainIds(line.contextMenu))
   // Explorer links are per-chain, so only single safes and per-chain child rows get one — never the
   // multi-chain parent, whose chainId is just the first network's. On child rows (address hidden) the
   // link rides next to the chain name; SafeInfoDisplay places it there.
@@ -99,7 +101,7 @@ const NameCellContent = ({
       leading={<span className="flex w-10 items-center">{leading}</span>}
       hideAddress={!line.showAddress}
       explorerLink={explorerLink}
-      onRename={onRename}
+      onRename={canRename ? onRename : undefined}
       nameAdornment={warning ? <SimilarityWarningIcon warning={warning} /> : undefined}
       nameVariant="paragraph-bold"
       className="min-w-0"
@@ -303,10 +305,10 @@ const RowCell = ({
       // The Name cell hosts the always-visible grip (w-7, anchored left-0), so it needs extra left
       // padding for the avatar to start after the grip rather than under it. The selection cell's
       // grip is the narrower `inline` one and fits the default padding. Widening happens in
-      // styles.module.css — the `td:first-of-type` rule there outranks a utility class.
+      // the panel variant — the `td:first-of-type` rule there outranks a utility class.
       data-hosts-handle={hostsHandle && column.id !== 'select' ? '' : undefined}
       // Slim 8px padding (ui default), 16px on the outer cells + the hover-pill inset borders live in
-      // styles.module.css (they need background-clip + specificity the primitive's classes can't beat).
+      // the panel variant (they need background-clip + specificity the primitive's classes can't beat).
       className={cn(hostsHandle ? 'relative overflow-visible' : 'overflow-hidden')}
       style={{
         textAlign: column.align ?? 'left',
@@ -415,13 +417,15 @@ const SafeAccountTableRow = ({
       data-variant={line.variant}
       // Locked rows opt out of the table's grey row hover (see the Table sx override).
       data-disabled={checkbox?.disabledReason ? '' : undefined}
-      // Draws the row separator (via the Table sx override); false only at the last row of a group/list.
-      data-divider={showDivider ? '' : undefined}
-      // Band membership marker — the card styling lives in the Table sx, keyed off this attribute.
+      // The variant draws a separator under every row but the last; suppress it inside a group and
+      // inside a band, both of which close themselves.
+      data-no-divider={!showDivider || highlighted ? '' : undefined}
+      // Band membership marker — the card styling is keyed off this attribute.
       data-highlighted={highlighted && !isDragging ? '' : undefined}
-      // group/row lets the shared identity cell reveal its copy/explorer/rename icons on row hover.
-      // The row border + row-level hover are neutralised in styles.module.css (we paint the hover pill
-      // on the cells and draw our own data-divider separator); the lifted-while-dragging chrome is here.
+      // The band fill is the row's own; opt out of the shared hover pill so it isn't painted over.
+      data-no-hover={highlighted ? '' : undefined}
+      // group/row lets the shared identity cell reveal its copy/explorer/rename icons on row hover;
+      // the lifted-while-dragging chrome is here.
       className={cn(
         'group/row',
         checkbox?.disabledReason && 'opacity-[0.55]',

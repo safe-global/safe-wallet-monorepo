@@ -1,10 +1,9 @@
 import { useContext, useMemo, useState } from 'react'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
-import { Typography } from '@/components/ui/typography'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import EnhancedTable from '@/components/common/EnhancedTable'
+import PaginatedDataTable, { type DataTableColumn } from '@/components/common/PaginatedDataTable'
 import type { AddressEntry } from '@/components/address-book/EntryDialog'
 import EntryDialog from '@/components/address-book/EntryDialog'
 import ExportDialog from '@/components/address-book/ExportDialog'
@@ -23,7 +22,6 @@ import NoEntriesIcon from '@/public/images/address-book/no-entries.svg'
 import { useCurrentChain } from '@/hooks/useChains'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { cn } from '@/utils/cn'
-import css from './styles.module.css'
 import TableCard from '@/components/common/TableCard'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
@@ -31,11 +29,7 @@ import { TokenTransferFlow } from '@/components/tx-flow/flows'
 import CheckWallet from '@/components/common/CheckWallet'
 import madProps from '@/utils/mad-props'
 
-const headCells = [
-  { id: 'name', label: 'Name' },
-  { id: 'address', label: 'Address' },
-  { id: 'actions', label: 'Actions', align: 'right', disableSort: true },
-]
+type Entry = { address: string; name: string }
 
 export enum ModalType {
   EXPORT = 'export',
@@ -77,7 +71,7 @@ function AddressBookTable({ chain, setTxFlow }: AddressBookTableProps) {
   }
 
   const addressBook = useAddressBook()
-  const addressBookEntries = Object.entries(addressBook)
+  const addressBookEntries = useMemo(() => Object.entries(addressBook), [addressBook])
   const filteredEntries = useMemo(() => {
     if (!searchQuery) {
       return addressBookEntries
@@ -155,23 +149,62 @@ function AddressBookTable({ chain, setTxFlow }: AddressBookTableProps) {
     </>
   )
 
-  const rows = filteredEntries.map(([address, name]) => ({
-    cells: {
-      name: {
-        rawValue: name,
-        content: name,
-      },
-      address: {
-        rawValue: address,
-        content: <EthHashInfo address={address} showName={false} shortAddress={false} hasExplorer showCopyButton />,
-      },
-      actions: {
-        rawValue: '',
-        sticky: true,
-        content: <div className={tableCss.actions}>{renderActionButtons(address, name)}</div>,
-      },
+  const entries: Entry[] = useMemo(
+    () => filteredEntries.map(([address, name]) => ({ address, name })),
+    [filteredEntries],
+  )
+
+  const columns: DataTableColumn<Entry>[] = [
+    {
+      id: 'name',
+      header: 'Name',
+      cellTestId: 'table-cell-name',
+      width: '30%',
+      minWidth: 120,
+      sticky: true,
+      emphasis: 'strong',
+      sortValue: (entry) => entry.name,
+      cell: (entry, { isCompact }) => (
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <span className={cn(!isCompact && 'truncate')}>{entry.name}</span>
+          {/* Compact drops the address column, so the address rides under the name instead. */}
+          {isCompact && (
+            <span className="text-muted-foreground text-xs font-normal">
+              <EthHashInfo
+                address={entry.address}
+                showName={false}
+                shortAddress
+                showAvatar={false}
+                hasExplorer
+                showCopyButton
+              />
+            </span>
+          )}
+        </div>
+      ),
     },
-  }))
+    {
+      id: 'address',
+      header: 'Address',
+      cellTestId: 'table-cell-address',
+      width: '40%',
+      minWidth: 240,
+      priority: 'secondary',
+      sortValue: (entry) => entry.address,
+      cell: (entry) => (
+        <EthHashInfo address={entry.address} showName={false} shortAddress={false} hasExplorer showCopyButton />
+      ),
+    },
+    {
+      id: 'actions',
+      header: 'Actions',
+      cellTestId: 'table-cell-actions',
+      align: 'end',
+      width: '30%',
+      minWidth: 120,
+      cell: (entry) => <div className={tableCss.actions}>{renderActionButtons(entry.address, entry.name)}</div>,
+    },
+  ]
 
   return (
     <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
@@ -185,30 +218,7 @@ function AddressBookTable({ chain, setTxFlow }: AddressBookTableProps) {
       <main>
         {filteredEntries.length > 0 ? (
           <TableCard className="mb-4">
-            <div className={css.mobileCard}>
-              <div className={css.mobileContainer}>
-                <div className={css.mobileHeader}>
-                  <Typography variant="paragraph-small" color="muted">
-                    Name
-                  </Typography>
-                  <Typography variant="paragraph-small" color="muted">
-                    Actions
-                  </Typography>
-                </div>
-                {filteredEntries.map(([address, name]) => (
-                  <div key={address} className={css.mobileRow}>
-                    <div className={css.mobileEntryInfo}>
-                      <EthHashInfo address={address} showName={true} shortAddress hasExplorer showCopyButton />
-                    </div>
-                    <div className={css.mobileActions}>{renderActionButtons(address, name)}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className={css.desktopCard}>
-              <EnhancedTable rows={rows} headCells={headCells} />
-            </div>
+            <PaginatedDataTable columns={columns} rows={entries} getRowKey={(entry) => entry.address} />
           </TableCard>
         ) : (
           <TableCard>

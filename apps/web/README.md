@@ -229,3 +229,5 @@ This app is built using the following frameworks:
 - [shadcn/ui](https://ui.shadcn.com/) + [Tailwind CSS v4](https://tailwindcss.com/)
 - [ethers.js v6](https://docs.ethers.org/v6/)
 - [web3-onboard](https://onboard.blocknative.com/)
+
+<!-- ci: trigger cypress smoke to validate pinned container (revert before merge) -->

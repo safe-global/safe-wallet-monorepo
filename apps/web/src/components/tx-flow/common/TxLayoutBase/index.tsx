@@ -1,11 +1,10 @@
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { type ComponentType, type ReactElement, type ReactNode, useContext } from 'react'
-import { ArrowLeft } from 'lucide-react'
 import classnames from 'classnames'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useIsBelowMd, useMediaQuery } from '@/hooks/useMediaQuery'
+import { useIsBelowMd } from '@/hooks/useMediaQuery'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { ProgressBar } from '@/components/common/ProgressBar'
 import { SafeTxContext } from '../../SafeTxProvider'
@@ -103,7 +102,6 @@ const TxLayoutBase = ({
   sidebarSlot,
 }: TxLayoutBaseProps): ReactElement => {
   const isSmallScreen = useIsBelowMd()
-  const isDesktop = useMediaQuery('(min-width:1200px)')
   const isDarkMode = useDarkMode()
 
   return (
@@ -128,8 +126,9 @@ const TxLayoutBase = ({
       {/* min-[900px]:flex-1 + min-w-0 keep this column at a stable share of the row (flex-basis 0)
           so it never wraps below the fixed-width status rail when a step's content is wide — otherwise
           the card jumps horizontally and resizes between steps. The 900px breakpoint matches the CSS
-          module and useIsBelowMd so the layout switches in one place, not across two mismatched ones. */}
-      <div className="w-full min-w-0 flex-grow min-[900px]:flex-1 min-[900px]:px-4 min-[1200px]:px-10">
+          module and useIsBelowMd so the layout switches in one place, not across two mismatched ones.
+          Left padding only: the right gutter is TxModalDialog's close-button column (see its styles). */}
+      <div className="w-full min-w-0 flex-grow min-[900px]:flex-1 min-[900px]:pl-4 min-[1200px]:pl-10">
         <div className={classnames('mx-auto w-full max-w-[1200px]', css.contentContainer)}>
           {/* min-[900px]:flex-nowrap keeps the SafeShield sidebar beside the card (its 37.5% / lg:320px
               slot) instead of wrapping below it when a step's content is tall enough to add a scrollbar —
@@ -162,15 +161,10 @@ const TxLayoutBase = ({
               <div className={css.step}>
                 {children}
 
+                {/* No icon, and not `size="submit"`: its 7rem floor plus the arrow cost width the
+                    narrowest card cannot spare beside a long action label. */}
                 {onBack && step > 0 && (
-                  <Button
-                    data-testid="modal-back-btn"
-                    variant={isDesktop ? 'outline' : 'ghost'}
-                    size="submit"
-                    onClick={onBack}
-                    className={css.backButton}
-                  >
-                    <ArrowLeft className="size-4" />
+                  <Button data-testid="modal-back-btn" variant="outline" onClick={onBack} className={css.backButton}>
                     Back
                   </Button>
                 )}

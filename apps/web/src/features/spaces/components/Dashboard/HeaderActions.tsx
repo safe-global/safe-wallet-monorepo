@@ -1,4 +1,4 @@
-import { ArrowDownLeft, Repeat, ArrowUpRight, SquareDashedBottomCode } from 'lucide-react'
+import { QrCode, Repeat, ArrowUpRight, SquareDashedBottomCode } from 'lucide-react'
 
 import { ActionBar, ActionButton } from '@/components/common/ActionBar'
 
@@ -28,7 +28,7 @@ const HeaderActions = ({ onSend, onReceive, onSwap, onBuildTransaction, otherAct
           Send
         </ActionButton>
         <ActionButton variant="outline" onClick={onReceive}>
-          <ArrowDownLeft className="size-5" />
+          <QrCode className="size-5" />
           Receive
         </ActionButton>
         <ActionButton variant="outline" onClick={onSwap}>

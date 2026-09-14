@@ -1,4 +1,4 @@
-import { render, screen } from '@/tests/test-utils'
+import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import { PushNotifications } from '.'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
@@ -107,5 +107,38 @@ describe('PushNotifications', () => {
     expect(screen.getByLabelText('Incoming transactions')).toBeInTheDocument()
     expect(screen.getByLabelText('Outgoing transactions')).toBeInTheDocument()
     expect(screen.getByText('Confirmation requests')).toBeInTheDocument()
+  })
+
+  it('registers the Safe when the switch is toggled on', async () => {
+    ;(useNotificationPreferences as jest.MockedFunction<typeof useNotificationPreferences>).mockReturnValue({
+      uuid: 'uuid',
+      getAllPreferences: jest.fn(() => ({})),
+      getPreferences: jest.fn(() => undefined),
+      updatePreferences: jest.fn(),
+      createPreferences: jest.fn(),
+      deletePreferences: jest.fn(),
+      deleteAllChainPreferences: jest.fn(),
+      _getAllPreferenceEntries: jest.fn(),
+      _deleteManyPreferenceKeys: jest.fn(),
+      getChainPreferences: jest.fn(),
+    } as unknown as ReturnType<typeof useNotificationPreferences>)
+
+    const registerNotificationsMock = jest.fn().mockResolvedValue(true)
+    ;(useNotificationRegistrations as jest.MockedFunction<typeof useNotificationRegistrations>).mockReturnValue({
+      registerNotifications: registerNotificationsMock,
+      unregisterSafeNotifications: jest.fn(),
+      unregisterDeviceNotifications: jest.fn(),
+    } as ReturnType<typeof useNotificationRegistrations>)
+
+    render(<PushNotifications />)
+
+    const notificationsSwitch = screen.getByTestId('notifications-switch')
+    expect(notificationsSwitch).not.toBeChecked()
+
+    fireEvent.click(notificationsSwitch)
+
+    await waitFor(() => {
+      expect(registerNotificationsMock).toHaveBeenCalledWith({ '1': [mockSafeAddress] })
+    })
   })
 })

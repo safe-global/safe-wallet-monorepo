@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import TableCard from '@/components/common/TableCard'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { Badge } from '@/components/ui/badge'
@@ -55,4 +56,18 @@ export const Empty: Story = {
 
 export const WithPagination: Story = {
   args: { headCells, rows: createRows(30) },
+}
+
+/**
+ * `panel`: the look shared with SafeAccountsTable and the Spaces tables — grey header bar, inset
+ * hover pills, gradient row dividers. Only renders correctly inside a TableCard, which is what the
+ * table spans and what its insets are measured against. Used by the global address book.
+ */
+export const Panel: Story = {
+  args: { headCells, rows: createRows(5), panel: true },
+  render: (args) => (
+    <TableCard>
+      <EnhancedTable {...args} />
+    </TableCard>
+  ),
 }

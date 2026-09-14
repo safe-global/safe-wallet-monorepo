@@ -59,6 +59,7 @@ export const AppRoutes = {
     settingsAbout: '/spaces/settings/about',
     safeAccounts: '/spaces/safe-accounts',
     members: '/spaces/members',
+    plans: '/spaces/plans',
     index: '/spaces',
     addressBook: '/spaces/address-book',
     createSpace: '/spaces/create-space',

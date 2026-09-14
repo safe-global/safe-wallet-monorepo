@@ -17,11 +17,15 @@ import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
 import {
   getGuardErrorInfo,
+  HYPERNATIVE_APPROVAL_REQUIRED_MESSAGE,
+  isHypernativeGuardRevert,
   isNonceTooLowError,
   isRateLimitError,
   RATE_LIMIT_USER_MESSAGE,
 } from '@/utils/transaction-errors'
 import { getGs026Message } from '@safe-global/utils/services/exceptions/contractErrors'
+import { getLedgerDeviceError, getLedgerUserMessage } from '@/services/onboard/ledger-errors'
+import { getCgwErrorInfo } from '@/utils/cgw-errors'
 
 const TxNotifications = {
   [TxEvent.SIGN_FAILED]: 'Failed to sign. Please try again.',
@@ -72,12 +76,23 @@ const useTxNotifications = (): void => {
 
         // Check if this is a Guard error
         const guardErrorName = isError ? getGuardErrorInfo(detail.error) : undefined
+        // Awaiting approval in Hypernative: replaces the guard wording and the raw payload (WA-1219)
+        const hnApprovalRequired = isError && isHypernativeGuardRevert(detail.error)
+        // A Ledger device failure states its own reason. Its raw error is a
+        // dump of DMK class names, ethers codes and the viem version, so it is
+        // withheld from `detailedMessage` too (WA-3243).
+        const ledgerError = isError ? getLedgerDeviceError(detail.error) : undefined
+        // A known CGW response state replaces both the copy and the details:
+        // the response body can be a gateway HTML error page (WA-3252).
+        const cgwError = isError ? getCgwErrorInfo(detail.error) : undefined
         let message = isError ? `${baseMessage} ${formatError(detail.error)}` : baseMessage
 
         // Override message for Guard errors
         if (event === TxEvent.REVERTED) {
           // A mined revert means gas was already paid — say so (WA-3005).
           message = `Transaction reverted on ${chain.chainName}. Gas was spent.`
+        } else if (hnApprovalRequired) {
+          message = HYPERNATIVE_APPROVAL_REQUIRED_MESSAGE
         } else if (guardErrorName) {
           message = `Guard reverted the transaction (${guardErrorName}).`
         } else if (isError && isNonceTooLowError(detail.error)) {
@@ -85,12 +100,18 @@ const useTxNotifications = (): void => {
           // RPC rejected it pre-mining (no gas spent). Same user story as a
           // stale Safe nonce, so show the same message.
           message = getGs026Message('STALE_NONCE')
+        } else if (ledgerError) {
+          message = getLedgerUserMessage(ledgerError)
         } else if (isError && isRateLimitError(detail.error)) {
           // Translate transient RPC rate-limit failures into friendly copy.
           // The raw error from viem looks like a contract revert ("Request is
           // being rate limited"); we replace the message but keep the original
           // in detailedMessage for debugging.
+          // Checked before the CGW classification so a 429-carrying error reads
+          // the same here as it does inline in `TxSubmitError` (WA-3252).
           message = RATE_LIMIT_USER_MESSAGE
+        } else if (cgwError) {
+          message = cgwError.message
         }
 
         const txId = 'txId' in detail ? detail.txId : undefined
@@ -110,7 +131,14 @@ const useTxNotifications = (): void => {
           showNotification({
             title: humanDescription,
             message,
-            detailedMessage: isError ? detail.error.message : undefined,
+            detailedMessage:
+              ledgerError || hnApprovalRequired
+                ? undefined
+                : cgwError
+                  ? `Error code ${cgwError.code}`
+                  : isError
+                    ? detail.error.message
+                    : undefined,
             groupKey,
             variant: isError ? Variant.ERROR : isSuccess ? Variant.SUCCESS : Variant.INFO,
             link: txId

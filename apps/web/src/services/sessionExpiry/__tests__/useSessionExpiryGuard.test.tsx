@@ -1,14 +1,10 @@
 import { useStore } from 'react-redux'
 import { act, renderHook, waitFor } from '@/tests/test-utils'
 import type { AppStore, RootState } from '@/store'
-import {
-  useSessionExpiryGuard,
-  SESSION_EXPIRED_GROUP_KEY,
-  SESSION_EXPIRED_MESSAGE,
-  SESSION_EXPIRED_SIGN_IN_LABEL,
-} from '../useSessionExpiryGuard'
+import { useSessionExpiryGuard, SESSION_EXPIRED_GROUP_KEY, SESSION_EXPIRED_MESSAGE } from '../useSessionExpiryGuard'
 import { setAuthenticated } from '@/store/authSlice'
 import { LOGGING_OUT_KEY } from '@/hooks/useLogoutCallback'
+import { AppRoutes } from '@/config/routes'
 
 const mockUnwrap = jest.fn()
 const mockUnsubscribe = jest.fn()
@@ -42,14 +38,14 @@ const findNotification = (store: AppStore) =>
 
 const flushMicrotasks = () => act(async () => Promise.resolve())
 
-const renderGuardWithStore = (sessionExpiresAt: number | null) => {
+const renderGuardWithStore = (sessionExpiresAt: number | null, pathname = AppRoutes.welcome.spaces) => {
   let capturedStore: AppStore | undefined
   const result = renderHook(
     () => {
       capturedStore = useStore() as AppStore
       useSessionExpiryGuard()
     },
-    { initialReduxState: buildState(sessionExpiresAt) },
+    { initialReduxState: buildState(sessionExpiresAt), routerProps: { pathname } },
   )
   if (!capturedStore) throw new Error('store not captured')
   return { ...result, store: capturedStore }
@@ -91,7 +87,8 @@ describe('useSessionExpiryGuard', () => {
     expect(store.getState().auth.sessionExpiresAt).toBeNull()
     expect(findNotification(store)).toMatchObject({
       message: SESSION_EXPIRED_MESSAGE,
-      variant: 'error',
+      variant: 'info',
+      autoHideDuration: null,
       groupKey: SESSION_EXPIRED_GROUP_KEY,
     })
   })
@@ -128,7 +125,7 @@ describe('useSessionExpiryGuard', () => {
     expect(store.getState().auth.sessionExpiresAt).toBeNull()
     expect(findNotification(store)).toMatchObject({
       message: SESSION_EXPIRED_MESSAGE,
-      variant: 'error',
+      variant: 'info',
       groupKey: SESSION_EXPIRED_GROUP_KEY,
     })
   })
@@ -299,15 +296,48 @@ describe('useSessionExpiryGuard', () => {
     expect(findNotification(store)?.isDismissed).toBe(true)
   })
 
-  it('shows a Spaces sign-in link in the toast that points at /welcome/spaces', async () => {
+  it('shows the toast without a CTA link', async () => {
     const { store } = renderGuardWithStore(Date.now() - 1_000)
     await flushMicrotasks()
 
+    const notification = findNotification(store)
+    expect(notification).toMatchObject({ message: SESSION_EXPIRED_MESSAGE })
+    expect(notification?.link).toBeUndefined()
+    expect(SESSION_EXPIRED_MESSAGE).toBe('Your session has expired. Please sign in to workspaces again.')
+  })
+
+  it('clears auth but shows no toast when the session expires outside /welcome/spaces', async () => {
+    const { store } = renderGuardWithStore(Date.now() - 1_000, AppRoutes.welcome.accounts)
+    await flushMicrotasks()
+
+    expect(store.getState().auth.sessionExpiresAt).toBeNull()
+    expect(findNotification(store)).toBeUndefined()
+  })
+
+  it('shows the toast when the session expires on an in-space route (/spaces)', async () => {
+    const { store } = renderGuardWithStore(Date.now() - 1_000, AppRoutes.spaces.index)
+    await flushMicrotasks()
+
+    expect(store.getState().auth.sessionExpiresAt).toBeNull()
     expect(findNotification(store)).toMatchObject({
       message: SESSION_EXPIRED_MESSAGE,
-      link: { href: '/welcome/spaces', title: SESSION_EXPIRED_SIGN_IN_LABEL },
+      variant: 'info',
+      groupKey: SESSION_EXPIRED_GROUP_KEY,
     })
-    expect(SESSION_EXPIRED_MESSAGE).toBe('Your session has expired. Please sign in to workspaces again.')
+  })
+
+  it('shows no toast when the mid-tab timer fires outside a workspaces route', async () => {
+    mockUnwrap.mockResolvedValue({ id: 'user-1' })
+    const { store } = renderGuardWithStore(Date.now() + 60_000, AppRoutes.welcome.accounts)
+    await flushMicrotasks()
+
+    await act(async () => {
+      jest.advanceTimersByTime(60_001)
+      await Promise.resolve()
+    })
+
+    expect(store.getState().auth.sessionExpiresAt).toBeNull()
+    expect(findNotification(store)).toBeUndefined()
   })
 
   it('runs once after the store hydrates from a partial preloaded state', async () => {

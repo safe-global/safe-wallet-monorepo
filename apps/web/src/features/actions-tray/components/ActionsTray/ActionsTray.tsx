@@ -1,7 +1,7 @@
 import { type ReactElement, type ReactNode, Fragment, useCallback, useContext } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { ArrowUpRight, ArrowDownLeft, Repeat, SquareDashedBottomCode } from 'lucide-react'
+import { ArrowUpRight, QrCode, Repeat, SquareDashedBottomCode } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
 import { ActionBar, ActionButton } from '@/components/common/ActionBar'
@@ -131,13 +131,13 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
         <Track {...OVERVIEW_EVENTS.SHOW_QR} label="dashboard">
           {isSpace ? (
             <ActionButton variant={secondaryVariant} onClick={handleOnReceive} disabled={noAssets}>
-              <ArrowDownLeft className="size-5" />
+              <QrCode className="size-5" />
               Receive
             </ActionButton>
           ) : (
             <QrCodeButton>
               <ActionButton variant={secondaryVariant}>
-                <ArrowDownLeft className="size-5" />
+                <QrCode className="size-5" />
                 Receive
               </ActionButton>
             </QrCodeButton>

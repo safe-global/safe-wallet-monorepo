@@ -117,7 +117,6 @@ export const SpendingLimitsTable = ({
                 },
                 actions: {
                   rawValue: '',
-                  sticky: true,
                   content: (
                     <CheckWallet>
                       {(isOk) => (

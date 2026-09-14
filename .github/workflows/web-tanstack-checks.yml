@@ -6,6 +6,10 @@ on:
       - apps/web-tanstack/**
       - apps/web/**
       - packages/**
+      - yarn.lock
+      - package.json
+      - .yarnrc.yml
+      - .yarn/patches/**
   push:
     branches:
       - main
@@ -14,6 +18,10 @@ on:
       - apps/web-tanstack/**
       - apps/web/**
       - packages/**
+      - yarn.lock
+      - package.json
+      - .yarnrc.yml
+      - .yarn/patches/**
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

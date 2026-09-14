@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { Alert, AlertTitle, AlertDescription, AlertAction, AlertSeverityIcon } from './alert'
+import { Button } from './button'
 
 describe('Alert', () => {
   it('renders as an alert with title and description', () => {
@@ -153,6 +154,27 @@ describe('Alert', () => {
     )
 
     expect(screen.getByRole('button', { name: 'Retry' }).parentElement).toHaveClass('text-foreground')
+  })
+})
+
+describe('link styling inside an alert', () => {
+  it.each([
+    ['AlertTitle', AlertTitle],
+    ['AlertDescription', AlertDescription],
+  ])('underlines inline links but not a Button rendered as an anchor (%s)', (_name, Slot) => {
+    render(
+      <Alert>
+        <Slot>
+          <a href="/docs">Read the docs</a>
+          <Button render={<a href="/act" />}>Act</Button>
+        </Slot>
+      </Alert>,
+    )
+
+    const slot = screen.getByText('Read the docs').parentElement as HTMLElement
+    expect(slot.className).toContain('[&_a:not([data-slot=button])]:underline')
+    expect(slot.className).not.toContain('[&_a]:underline')
+    expect(screen.getByRole('link', { name: 'Act' })).toHaveAttribute('data-slot', 'button')
   })
 })
 

@@ -44,7 +44,6 @@ export const OwnerList = () => {
           },
           actions: {
             rawValue: '',
-            sticky: true,
             content: (
               <div className={tableCss.actions}>
                 <CheckWallet>

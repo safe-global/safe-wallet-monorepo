@@ -1,6 +1,6 @@
 # Code Style Guidelines
 
-> Cyclomatic-complexity guidelines (lookup tables, early returns, switch for type discrimination, function-length limits) live in [`../../web/docs/code-style.md`](../../web/docs/code-style.md#code-complexity) and apply equally here.
+> Cyclomatic-complexity guidelines (lookup tables, early returns, switch for type discrimination, nesting limits) live in [`../../web/docs/code-style.md`](../../web/docs/code-style.md#code-complexity) and apply equally here.
 
 ## Code Structure
 

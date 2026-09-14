@@ -33,6 +33,7 @@ import type SurveyOnboarding from './components/SurveyOnboarding'
 import type SelectSafeModal from './components/SelectSafeModal'
 import type SecurityHubPage from './components/SecurityHub/Page'
 import type SpaceActivityLogPage from './components/SpaceActivityLog/Page'
+import type SpacePlansPage from './components/Plans/Page'
 import type SpacePoliciesPage from './components/Policies/Page'
 
 // Utility services
@@ -65,6 +66,7 @@ export interface SpacesContract {
   SpaceSettingsPage: typeof SpaceSettingsPage
   SecurityHubPage: typeof SecurityHubPage
   SpaceActivityLogPage: typeof SpaceActivityLogPage
+  SpacePlansPage: typeof SpacePlansPage
   SpacePoliciesPage: typeof SpacePoliciesPage
 
   // Modal components (PascalCase) - stub renders null

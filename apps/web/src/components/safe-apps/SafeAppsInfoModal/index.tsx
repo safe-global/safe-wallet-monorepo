@@ -115,13 +115,13 @@ const SafeAppsInfoModal = ({
   const origin = useMemo(() => getOrigin(appUrl), [appUrl])
 
   return (
-    <div className="flex h-[calc(100vh-52px)] flex-col items-center justify-center">
+    <div className="flex h-[calc(100vh-52px)] flex-col items-center justify-center p-4">
       <div
         data-testid="app-info-modal"
-        className="w-[450px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-border bg-card shadow-lg"
+        className="flex max-h-full w-[450px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-xl border border-border bg-card shadow-lg"
       >
         {totalSlides > 1 && (
-          <ProgressPrimitive.Root value={progressValue} className="block">
+          <ProgressPrimitive.Root value={progressValue} className="block shrink-0">
             <ProgressTrack className="h-1.5 rounded-none bg-muted">
               <ProgressIndicator
                 className={cn(
@@ -134,7 +134,7 @@ const SafeAppsInfoModal = ({
             </ProgressTrack>
           </ProgressPrimitive.Root>
         )}
-        <div className="flex flex-col p-6 text-center">
+        <div className="flex min-h-0 flex-auto flex-col p-6 text-center">
           <Slider onSlideChange={handleSlideChange}>
             {!isConsentAccepted && <LegalDisclaimerContent />}
 

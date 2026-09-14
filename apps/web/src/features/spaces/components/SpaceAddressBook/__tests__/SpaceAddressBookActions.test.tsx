@@ -50,8 +50,17 @@ jest.mock('@/components/ui/dropdown-menu', () => {
     return context?.open ? <div>{children}</div> : null
   }
 
-  const DropdownMenuItem = ({ children, onClick }: { children: ReactNode; onClick?: () => void; variant?: string }) => (
-    <button type="button" onClick={onClick}>
+  const DropdownMenuItem = ({
+    children,
+    onClick,
+    disabled,
+  }: {
+    children: ReactNode
+    onClick?: () => void
+    disabled?: boolean
+    variant?: string
+  }) => (
+    <button type="button" onClick={onClick} disabled={disabled}>
       {children}
     </button>
   )
@@ -70,12 +79,30 @@ describe('SpaceAddressBookActions', () => {
     mockUseIsAdmin.mockReturnValue(true)
   })
 
-  it('renders nothing for non-admins', () => {
+  it('shows edit and delete to a member, disabled', () => {
     mockUseIsAdmin.mockReturnValue(false)
 
-    const { container } = render(<SpaceAddressBookActions entry={buildEntry()} />)
+    render(<SpaceAddressBookActions entry={buildEntry()} />)
 
-    expect(container).toBeEmptyDOMElement()
+    expect(screen.getByRole('button', { name: 'Edit entry' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Delete entry' })).toBeDisabled()
+  })
+
+  it('disables the compact-layout actions for a member', () => {
+    mockUseIsAdmin.mockReturnValue(false)
+
+    render(<SpaceAddressBookActions entry={buildEntry()} isCompact />)
+    fireEvent.click(screen.getByRole('button', { name: 'Contact actions' }))
+
+    expect(screen.getByRole('button', { name: 'Edit entry' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Delete entry' })).toBeDisabled()
+  })
+
+  it('leaves the actions enabled for an admin', () => {
+    render(<SpaceAddressBookActions entry={buildEntry()} />)
+
+    expect(screen.getByRole('button', { name: 'Edit entry' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: 'Delete entry' })).toBeEnabled()
   })
 
   it('does not render the kebab in the regular layout', () => {
