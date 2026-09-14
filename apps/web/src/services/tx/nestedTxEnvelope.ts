@@ -1,5 +1,6 @@
 import { AbiCoder, TypedDataEncoder, concat, dataLength, dataSlice, id, isHexString } from 'ethers'
 import { getEip712TxTypes } from '@safe-global/protocol-kit'
+import semverSatisfies from 'semver/functions/satisfies'
 
 /**
  * Nested-Safe transaction envelope (v1).
@@ -28,6 +29,17 @@ export type NestedTxEnvelope = {
 }
 
 export const APPROVE_HASH_SELECTOR = '0xd4d9bdcd'
+
+// The envelope hash derivation (EIP-712 domain with chainId) only holds for Safes >= 1.3.0
+const NESTED_TX_ENVELOPE_SAFE_VERSION = '>=1.3.0'
+
+/**
+ * Whether a child Safe of this version can carry its tx to the parent in an approveHash envelope.
+ * The same predicate gates appending the envelope and skipping the CGW proposal — they must
+ * never diverge, or the child tx data would be lost entirely.
+ */
+export const supportsNestedTxEnvelope = (safeVersion: string | null | undefined): boolean =>
+  Boolean(safeVersion && semverSatisfies(safeVersion, NESTED_TX_ENVELOPE_SAFE_VERSION))
 
 export const NESTED_TX_MAGIC = dataSlice(id('SafeNestedChildTxV1'), 0, 4)
 
