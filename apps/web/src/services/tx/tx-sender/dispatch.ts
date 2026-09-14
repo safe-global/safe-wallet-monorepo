@@ -47,6 +47,12 @@ import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEn
 
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import type { TxSenderScope } from '@/components/tx-flow/safe-scope/types'
+import semverSatisfies from 'semver/functions/satisfies'
+import { concat, dataLength } from 'ethers'
+import { encodeNestedTxPayload } from '../nestedTxEnvelope'
+
+// The envelope hash derivation (EIP-712 domain with chainId) only holds for Safes >= 1.3.0
+const NESTED_TX_ENVELOPE_SAFE_VERSION = '>=1.3.0'
 
 /**
  * Propose a new transaction
@@ -193,6 +199,7 @@ export const dispatchOnChainSigning = async (
   safeAddress: string,
   isSafeSigner: boolean,
   executed: boolean,
+  safeVersion?: SafeState['version'],
   scope?: TxSenderScope,
 ) => {
   const sdk = await getSafeSDKWithSigner(provider, scope)
@@ -206,7 +213,25 @@ export const dispatchOnChainSigning = async (
   let txHashOrParentSafeTxHash: string
   try {
     // TODO: This is a workaround until there is a fix for unchecked transactions in the protocol-kit
-    const encodedApproveHashTx = await prepareApproveTxHash(safeTxHash, provider, scope)
+    let encodedApproveHashTx = await prepareApproveTxHash(safeTxHash, provider, scope)
+
+    // A parent Safe signer queues this approveHash as an unsigned proposal; append the full child
+    // tx as a self-verifying envelope so receivers can verify and display it without a service
+    // lookup. approveHash(bytes32) ABI decoding ignores trailing calldata, so appending is safe.
+    if (isSafeSigner && safeVersion && semverSatisfies(safeVersion, NESTED_TX_ENVELOPE_SAFE_VERSION)) {
+      const payload = encodeNestedTxPayload([{ chainId, safe: safeAddress, ...safeTx.data }])
+      encodedApproveHashTx = concat([encodedApproveHashTx, payload])
+      console.info('[NestedTxEnvelope] appended child tx envelope to approveHash calldata', {
+        childSafeTxHash: safeTxHash,
+        payloadBytes: dataLength(payload),
+        calldata: encodedApproveHashTx,
+      })
+    } else if (isSafeSigner) {
+      console.info('[NestedTxEnvelope] NOT appending envelope, child Safe version does not qualify', {
+        safeVersion: safeVersion ?? 'unknown',
+        required: NESTED_TX_ENVELOPE_SAFE_VERSION,
+      })
+    }
 
     // Note: SafeWalletProvider returns transaction hash if it exists, otherwise the safeTxHash
     // If the parent immediately executes, this will be the transaction hash of the approveHash
