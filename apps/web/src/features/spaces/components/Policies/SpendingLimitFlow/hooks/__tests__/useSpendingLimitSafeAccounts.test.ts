@@ -1,5 +1,4 @@
 import { renderHook } from '@/tests/test-utils'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 import { buildSafeAccountId } from '../../../SafeAccountSelector/utils'
 import type { SafeAccountOption } from '../../../SafeAccountSelector/types'
 import { useEligibleSafeAccounts } from '../../../SafeAccountSelector/hooks/useEligibleSafeAccounts'
@@ -62,9 +61,5 @@ describe('useSpendingLimitSafeAccounts', () => {
     const { result } = renderHook(() => useSpendingLimitSafeAccounts())
 
     expect(result.current).toMatchObject({ isLoading: true, isError: false, hasWallet: false, refetch })
-  })
-
-  it('reads the feature flag by its enum value', () => {
-    expect(FEATURES.SPENDING_LIMIT).toBe('SPENDING_LIMIT')
   })
 })

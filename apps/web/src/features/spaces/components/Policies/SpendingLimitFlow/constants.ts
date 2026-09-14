@@ -1,6 +1,7 @@
 /** Copy of the Create step, verbatim from the Figma frames unless noted in the spec (§5.8). */
 export const CREATE_STEP_TITLE = 'Create new policy'
 export const FLOW_SUBTITLE = 'Spending limit'
+export const FLOW_HELP_LABEL = 'Learn more about spending limits'
 
 export const CALLOUT_TITLE = 'The spender can be anyone.'
 export const CALLOUT_DESCRIPTION =

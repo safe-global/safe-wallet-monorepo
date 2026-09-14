@@ -5,7 +5,7 @@ import { getLatestSpendingLimitAddress } from '@/features/spending-limits/servic
 import { useEligibleSafeAccounts } from '../../SafeAccountSelector/hooks/useEligibleSafeAccounts'
 import { filterSafeAccountsByChains } from '../utils/safeAccounts'
 
-/** Chains where a spending limit can be created: the feature is on AND an AllowanceModule deployment is registered (same rule as `useIsSpendingLimitSupported`). */
+/** Chains where a spending limit can be created: the SPENDING_LIMIT feature is on AND an AllowanceModule deployment is registered for the chain (spec D10). */
 export const useSpendingLimitChainIds = (): ReadonlySet<string> => {
   const { configs } = useChains()
   return useMemo(
