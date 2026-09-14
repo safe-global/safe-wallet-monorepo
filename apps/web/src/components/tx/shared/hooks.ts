@@ -36,6 +36,18 @@ import { mergeGtfFeeParams } from '@/features/gtf/services'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
+import type { SignerWallet } from '@/components/common/WalletProvider'
+
+// The signer is a Safe: either the in-app nested signer (`isSafe`) or a Safe connected directly,
+// e.g. via WalletConnect (`isConnectedSafe`). Such a signer creates an on-chain
+// approveHash/execTransaction in its own Safe instead of signing/executing directly.
+const isSafeSigner = (signer: SignerWallet): boolean => Boolean(signer.isSafe) || Boolean(signer.isConnectedSafe)
+
+// Whether the signer executes the on-chain tx immediately (returning a real tx hash) rather than
+// queuing it in its own Safe (returning a safeTxHash). True for EOAs and non-Safe smart accounts;
+// among Safe signers, only the in-app nested signer at threshold 1 executes synchronously.
+const executesImmediately = (signer: SignerWallet): boolean =>
+  !isSafeSigner(signer) || (Boolean(signer.isSafe) && signer.threshold === 1)
 
 // A smart-account signer creates an on-chain approveHash tx in its own Safe, so signing lands in
 // a "nested signing" state rather than adding an off-chain signature.
@@ -144,13 +156,10 @@ export const useTxActions = (): TxActions => {
       // Any smart contract wallet must sign via an on-chain approveHash tx (they can't sign
       // off-chain). Only a Safe signer (in-app nested or a Safe connected via WalletConnect) gets
       // the nested success screen; other smart accounts keep the plain flow.
-      const isSafeSigner = Boolean(signer.isSafe) || Boolean(signer.isConnectedSafe)
-      const isSmartAccount = isSafeSigner || (await isSmartContractWallet(signer.chainId, signer.address))
+      const viaSafe = isSafeSigner(signer)
+      const isSmartAccount = viaSafe || (await isSmartContractWallet(signer.chainId, signer.address))
       if (isSmartAccount) {
         const id = txId || (await _propose(signer.address, safeTx, origin)).txId
-        // Only the in-app nested signer executes the approveHash synchronously (threshold 1);
-        // a connected Safe always queues it and returns a safeTxHash.
-        const executed = Boolean(signer.isSafe) && signer.threshold === 1
         await dispatchOnChainSigning(
           safeTx,
           id,
@@ -158,11 +167,11 @@ export const useTxActions = (): TxActions => {
           chainId,
           signer.address,
           safeAddress,
-          isSafeSigner,
-          executed,
+          viaSafe,
+          executesImmediately(signer),
           scope,
         )
-        return { txId: id, isNestedSigning: isSafeSigner }
+        return { txId: id, isNestedSigning: viaSafe }
       }
 
       // Otherwise, sign off-chain
@@ -209,9 +218,8 @@ export const useTxActions = (): TxActions => {
       }
 
       // Hoist SC-wallet check so we can reuse it for the sign guard and dispatchTxExecution
-      const isSafeSigner = Boolean(signer.isSafe) || Boolean(signer.isConnectedSafe)
       const isSmartAccount = !isRelayed
-        ? isSafeSigner || (await isSmartContractWallet(signer.chainId, signer.address))
+        ? isSafeSigner(signer) || (await isSmartContractWallet(signer.chainId, signer.address))
         : false
 
       // Non-relayed EOA wallets must sign before executing so every transaction is
@@ -250,7 +258,7 @@ export const useTxActions = (): TxActions => {
       // — UNLESS it's the in-app nested signer at threshold 1, which executes immediately and
       // returns a real hash. EOAs and non-Safe smart accounts execute directly (real hash / their
       // own semantics), so treat them as executed and keep the plain processing flow.
-      const executed = !isSafeSigner || (Boolean(signer.isSafe) && signer.threshold === 1)
+      const executed = executesImmediately(signer)
       await dispatchTxExecution(
         safe.chainId,
         safeTx,
@@ -272,12 +280,7 @@ export const useTxActions = (): TxActions => {
     safe,
     scope,
     wallet,
-    signer?.provider,
-    signer?.address,
-    signer?.chainId,
-    signer?.isSafe,
-    signer?.isConnectedSafe,
-    signer?.threshold,
+    signer,
     onboard,
     chain,
     dispatch,
