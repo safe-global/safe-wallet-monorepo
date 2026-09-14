@@ -108,16 +108,13 @@ export function expandMultichainRowByAddress(address) {
     .closest('[data-slot="collapsible"]')
     .find('[data-slot="collapsible-trigger"]')
     .as('multichainRowTrigger')
-  cy.get('@multichainRowTrigger').then(($trigger) => $trigger[0].click())
+  // The group starts expanded when it holds the active safe; clicking then would collapse it, so click only when collapsed.
+  cy.get('@multichainRowTrigger').then(($trigger) => {
+    if ($trigger.attr('aria-expanded') !== 'true') $trigger[0].click()
+  })
   cy.get('@multichainRowTrigger').should('have.attr', 'aria-expanded', 'true')
 }
 
 export function clickNotActivatedSubAccount() {
-  // Expanding the multichain group can already commit the selection of the revealed
-  // not-activated row (the popup closes and the app navigates). Only click when the
-  // popup is still open; a bare DOM click so the popup can't swallow the pointer events.
-  cy.get('body').then(($body) => {
-    const $row = $body.find(`${dropdownContent} ${dropdownRow}:has(${notActivatedBadge})`).first()
-    if ($row.length) $row[0].click()
-  })
+  cy.get(dropdownContent).find(dropdownRow).filter(`:has(${notActivatedBadge})`).first().click()
 }
