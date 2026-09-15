@@ -31,6 +31,7 @@ import {
 } from './utils'
 import AddMemberInput from './AddMemberInput'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 export const RoleMenuItem = ({
   role,
@@ -162,6 +163,7 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
 
         onClose()
       }
+      if (isElevationRequiredError(response.error)) return
       if (response.error) {
         setError(getRtkQueryErrorMessage(response.error) || 'Invite failed. Please try again.')
       }

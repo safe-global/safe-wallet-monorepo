@@ -4,7 +4,6 @@ import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { AppDispatch, RootState } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
-import { STEP_UP_FAILED_MESSAGE } from '../constants'
 import { isElevationRequiredError } from './elevation'
 
 const STEP_UP_KEY = 'oidc_step_up'
@@ -66,6 +65,15 @@ export const saveStepUpTrip = (action?: PendingStepUpAction): void => {
   }
 }
 
+/** Unconsumed trip: the user left for the challenge and this page never reloaded on the way back. */
+export const hasPendingStepUpTrip = (): boolean => {
+  try {
+    return sessionStorage.getItem(STEP_UP_KEY) !== null
+  } catch {
+    return false
+  }
+}
+
 /** Reads and removes in one step, so a saved request cannot run twice, or on a later return. */
 export const takeStepUpTrip = (): StepUpTrip | undefined => {
   const raw = sessionStorage.getItem(STEP_UP_KEY)
@@ -106,15 +114,13 @@ export const replayStepUpAction = async (dispatch: AppDispatch, pending: Pending
   const result = await dispatch(asReplayInitiator(pending.endpoint)(pending.args))
 
   if (result.error) {
-    // Rejected again means the user never finished verifying, so the usual
-    // "verify your identity" text would ask them to redo what they walked away from.
-    const message = isElevationRequiredError(result.error)
-      ? STEP_UP_FAILED_MESSAGE
-      : getRtkQueryErrorMessage(result.error) || REPLAY_FAILED_MESSAGE
+    // Rejected again means the user walked away from the challenge, which is a
+    // cancellation and not something to report back to them.
+    if (isElevationRequiredError(result.error)) return
 
     dispatch(
       showNotification({
-        message,
+        message: getRtkQueryErrorMessage(result.error) || REPLAY_FAILED_MESSAGE,
         variant: 'error',
         groupKey: 'step-up-replay-failed',
       }),
