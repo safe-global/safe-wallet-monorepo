@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import { useThreatAnalysisWithGuard } from '../useThreatAnalysisWithGuard'
+import { useFinalizedThreatAnalysis } from '../useFinalizedThreatAnalysis'
 import { useGuardCheck, type InvalidGuardResult } from '../useGuardCheck'
 import { Severity, ThreatStatus, type ThreatAnalysisResults } from '../../types'
 
@@ -26,9 +26,9 @@ const threatResults = {
 } as unknown as ThreatAnalysisResults
 
 const renderWrapper = (threat: AsyncResult<ThreatAnalysisResults> | undefined) =>
-  renderHook(() => useThreatAnalysisWithGuard(threat, { safeTx: undefined, safeAddress: '0x1', safeVersion: '1.3.0' }))
+  renderHook(() => useFinalizedThreatAnalysis(threat, { safeTx: undefined, safeAddress: '0x1', safeVersion: '1.3.0' }))
 
-describe('useThreatAnalysisWithGuard', () => {
+describe('useFinalizedThreatAnalysis', () => {
   beforeEach(() => jest.clearAllMocks())
 
   it('returns the threat result untouched when there is no invalid-guard finding', () => {
