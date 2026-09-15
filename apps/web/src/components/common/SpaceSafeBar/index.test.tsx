@@ -527,7 +527,7 @@ describe('SpaceSafeBar', () => {
     },
   )
 
-  it.each([['/terms'], ['/privacy'], ['/licenses'], ['/imprint'], ['/cookie']])(
+  it.each([['/terms'], ['/eula'], ['/privacy'], ['/licenses'], ['/imprint'], ['/cookie']])(
     'renders nothing on static page %s',
     (pathname) => {
       mockUsePathname.mockReturnValue(pathname)

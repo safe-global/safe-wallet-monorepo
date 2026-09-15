@@ -28,6 +28,7 @@ import { Route as CookieRoute } from './routes/cookie'
 import { Route as LicensesRoute } from './routes/licenses'
 import { Route as PrivacyRoute } from './routes/privacy'
 import { Route as TermsRoute } from './routes/terms'
+import { Route as EulaRoute } from './routes/eula'
 
 // Group B — /settings/*
 import { Route as SettingsAppearanceRoute } from './routes/settings/appearance'
@@ -106,6 +107,7 @@ const routeTree = RootRoute.addChildren([
   LicensesRoute,
   PrivacyRoute,
   TermsRoute,
+  EulaRoute,
   // Group B
   SettingsAppearanceRoute,
   SettingsCookiesRoute,

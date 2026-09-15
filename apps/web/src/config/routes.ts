@@ -3,6 +3,7 @@ export const AppRoutes = {
   '404': '/404',
   wc: '/wc',
   terms: '/terms',
+  eula: '/eula',
   swap: '/swap',
   stake: '/stake',
   privacy: '/privacy',

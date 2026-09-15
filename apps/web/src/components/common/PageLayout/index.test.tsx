@@ -103,7 +103,14 @@ jest.mock('@/features/__core__', () => ({
 jest.mock('@/features/batching', () => ({ BatchingFeature: {} }))
 jest.mock('@/features/spaces', () => ({ SpacesFeature: {} }))
 
-const STATIC_ROUTES = [AppRoutes.terms, AppRoutes.privacy, AppRoutes.licenses, AppRoutes.imprint, AppRoutes.cookie]
+const STATIC_ROUTES = [
+  AppRoutes.terms,
+  AppRoutes.eula,
+  AppRoutes.privacy,
+  AppRoutes.licenses,
+  AppRoutes.imprint,
+  AppRoutes.cookie,
+]
 
 const NON_STATIC_ROUTES = ['/home', '/balances', '/settings/setup', '/welcome/accounts']
 

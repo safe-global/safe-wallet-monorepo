@@ -41,6 +41,7 @@ const HIDDEN_ROUTES = [
   AppRoutes.newSafe.advancedCreate,
   AppRoutes.newSafe.load,
   AppRoutes.terms,
+  AppRoutes.eula,
   AppRoutes.privacy,
   AppRoutes.licenses,
   AppRoutes.imprint,

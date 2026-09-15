@@ -127,10 +127,10 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
           <p className="mt-4 text-center text-xs leading-[18px] text-muted-foreground">
             By continuing, you agree to the{' '}
             <NextLink
-              href={AppRoutes.terms}
+              href={AppRoutes.eula}
               className="text-muted-foreground underline underline-offset-2 hover:text-foreground"
             >
-              Terms
+              EULA
             </NextLink>{' '}
             and{' '}
             <NextLink

@@ -20,6 +20,7 @@ const NO_SIDEBAR_ROUTES = [
   AppRoutes.privacy,
   AppRoutes.cookie,
   AppRoutes.terms,
+  AppRoutes.eula,
   AppRoutes.licenses,
   AppRoutes.spaces.index,
 ]
