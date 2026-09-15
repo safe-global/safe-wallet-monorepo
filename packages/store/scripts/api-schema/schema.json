@@ -592,6 +592,136 @@
         ]
       }
     },
+    "/v1/billing/spaces/{spaceId}/subscriptions/{subscriptionId}/preview-update": {
+      "get": {
+        "operationId": "billingPreviewSubscriptionUpdateV1",
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "required": true,
+            "in": "path",
+            "description": "Subscription identifier",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "planId",
+            "required": true,
+            "in": "query",
+            "description": "The price id of the plan to preview",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionUpdatePreview"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not a member, or a plan this workspace is not offered"
+          },
+          "404": {
+            "description": "Subscription not found"
+          },
+          "409": {
+            "description": "Already on this plan"
+          },
+          "422": {
+            "description": "Malformed subscriptionId or planId"
+          }
+        },
+        "summary": "Preview what moving a subscription to another plan would cost",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
+    "/v1/billing/spaces/{spaceId}/subscriptions/{subscriptionId}": {
+      "patch": {
+        "operationId": "billingUpdateSubscriptionV1",
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "required": true,
+            "in": "path",
+            "description": "Subscription identifier",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSubscriptionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateSubscriptionResult"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not a member, or a plan this workspace is not offered"
+          },
+          "404": {
+            "description": "Subscription not found"
+          },
+          "409": {
+            "description": "Already on this plan, the subscription is not updatable, or several offered links sell the plan and none was named"
+          },
+          "422": {
+            "description": "The named payment link does not offer this plan"
+          },
+          "502": {
+            "description": "The billing service reported the plan change as unsuccessful"
+          }
+        },
+        "summary": "Move a subscription onto another plan",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
     "/v1/billing/sessions/{sessionId}": {
       "get": {
         "operationId": "billingGetCheckoutSessionV1",
@@ -6971,6 +7101,84 @@
         "required": [
           "sessionId",
           "url"
+        ]
+      },
+      "PreviewLineItem": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Signed amount in minor units; negative for credit on unused time"
+          },
+          "currency": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "description",
+          "amount",
+          "currency"
+        ]
+      },
+      "SubscriptionUpdatePreview": {
+        "type": "object",
+        "properties": {
+          "amountDue": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "nextBillingDate": {
+            "type": "number",
+            "description": "Unix timestamp in seconds"
+          },
+          "lineItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PreviewLineItem"
+            }
+          }
+        },
+        "required": [
+          "amountDue",
+          "currency",
+          "nextBillingDate",
+          "lineItems"
+        ]
+      },
+      "UpdateSubscriptionDto": {
+        "type": "object",
+        "properties": {
+          "planId": {
+            "type": "string",
+            "description": "The price id of the plan to move the subscription onto"
+          },
+          "paymentLinkId": {
+            "type": "string",
+            "description": "Which offered payment link sells that plan. Only needed to disambiguate when several do"
+          }
+        },
+        "required": [
+          "planId"
+        ]
+      },
+      "UpdateSubscriptionResult": {
+        "type": "object",
+        "properties": {
+          "subscriptionId": {
+            "type": "string"
+          },
+          "success": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "subscriptionId",
+          "success"
         ]
       },
       "CheckoutSession": {

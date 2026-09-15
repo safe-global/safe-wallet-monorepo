@@ -9,6 +9,9 @@ import type {
 import { addTagTypes } from './AUTO_GENERATED/transactions'
 import { getNextPageParam } from '../utils/infiniteQuery'
 
+/** Batch execution allows up to 20 txs, too large a burst to request at once. */
+const MAX_CONCURRENT_DETAILS_REQUESTS = 4
+
 // Define types needed for infinite query
 export type TxHistoryInfiniteQueryArg = Omit<TransactionsGetTransactionsHistoryV1ApiArg, 'cursor'>
 export type PendingTxsInfiniteQueryArg = Omit<TransactionsGetTransactionQueueV1ApiArg, 'cursor'>
@@ -59,21 +62,25 @@ export const txHistoryApi = api
         async queryFn(args, _api, _extraOptions, fetchWithBaseQuery) {
           const { chainId, txIds } = args
 
-          const results = await Promise.all(
-            txIds.map(async (id) => {
-              const result = await fetchWithBaseQuery({
-                url: `/v1/chains/${chainId}/transactions/${id}`,
-              })
+          const fetchDetails = async (id: string) => {
+            const result = await fetchWithBaseQuery({
+              url: `/v1/chains/${chainId}/transactions/${id}`,
+            })
 
-              if (result.error) {
-                return {
-                  error: result.error,
-                }
+            if (result.error) {
+              return {
+                error: result.error,
               }
+            }
 
-              return { data: result.data as TransactionDetails }
-            }),
-          )
+            return { data: result.data as TransactionDetails }
+          }
+
+          const results: Awaited<ReturnType<typeof fetchDetails>>[] = []
+          for (let i = 0; i < txIds.length; i += MAX_CONCURRENT_DETAILS_REQUESTS) {
+            const batch = txIds.slice(i, i + MAX_CONCURRENT_DETAILS_REQUESTS)
+            results.push(...(await Promise.all(batch.map(fetchDetails))))
+          }
 
           // Check if any request failed
           const firstError = results.find((r) => 'error' in r && r.error)
