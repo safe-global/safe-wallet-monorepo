@@ -101,20 +101,11 @@ export function verifyConnectWalletBtnVisible() {
 }
 
 export function expandMultichainRowByAddress(address) {
-  // The Base UI select popup intercepts the pointer-event sequence of a normal Cypress
-  // click, so force the click past the popup's overlay while staying in the command chain.
   cy.get(dropdownContent)
     .contains(address)
     .closest('[data-slot="collapsible"]')
     .find('[data-slot="collapsible-trigger"]')
-    .as('multichainRowTrigger')
-  // The group starts expanded when it holds the active safe; clicking then would collapse it, so click only when collapsed.
-  cy.get('@multichainRowTrigger').then(($trigger) => {
-    if ($trigger.attr('aria-expanded') !== 'true') {
-      cy.wrap($trigger).click({ force: true })
-    }
-  })
-  cy.get('@multichainRowTrigger').should('have.attr', 'aria-expanded', 'true')
+    .should('have.attr', 'aria-expanded', 'true')
 }
 
 export function clickNotActivatedSubAccount() {
