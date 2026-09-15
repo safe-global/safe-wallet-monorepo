@@ -1,4 +1,5 @@
 import { SENTINEL_ADDRESS } from '@safe-global/utils/utils/constants'
+import { logError, Errors } from '@/services/exceptions'
 import memoize from 'lodash/memoize'
 import { getMultiSendCallOnlyDeployments } from '@safe-global/safe-deployments'
 import { getChainAgnosticAddress } from '@safe-global/utils/services/contracts/deployments'
@@ -13,6 +14,9 @@ import { decodeMultiSendData } from '@safe-global/protocol-kit'
 import { multicall } from '@safe-global/utils/utils/multicall'
 
 export const MAX_RECOVERER_PAGE_SIZE = 100
+
+// Most providers cap the eth_getLogs block range (e.g. Infura at 10 000 blocks)
+const MAX_QUERY_BLOCK_RANGE = 10_000
 
 type AddedEvent = TransactionAddedEvent.Log
 export type RecoveryQueueItem = AddedEvent & {
@@ -154,8 +158,28 @@ const queryAddedTransactions = async (
     throw new Error(`Could not fetch creation receipt for Safe ${safeAddress}`)
   }
 
-  // @ts-expect-error
-  return await delayModifier.queryFilter(topics, creationReceipt.blockNumber, 'latest')
+  // The block range is queried in windows within the provider's eth_getLogs limit,
+  // walking backwards from the latest block and stopping once all queued txs are found.
+  const latestBlock = await provider.getBlockNumber()
+
+  const addedTransactions: AddedEvent[] = []
+
+  for (let toBlock = latestBlock; toBlock >= creationReceipt.blockNumber; toBlock -= MAX_QUERY_BLOCK_RANGE) {
+    const fromBlock = Math.max(toBlock - MAX_QUERY_BLOCK_RANGE + 1, creationReceipt.blockNumber)
+
+    // @ts-expect-error
+    const events = await delayModifier.queryFilter(topics, fromBlock, toBlock)
+    addedTransactions.unshift(...events)
+
+    // Reorged logs do not count towards the expected amount of queued txs
+    const found = addedTransactions.filter((event) => !event.removed).length
+
+    if (found >= Number(diff)) {
+      break
+    }
+  }
+
+  return addedTransactions
 }
 
 const getRecoveryQueueItem = async ({
@@ -306,5 +330,15 @@ export function getRecoveryState({
   chainId: string
   version: SafeState['version']
 }): Promise<RecoveryState> {
-  return Promise.all(delayModifiers.map((delayModifier) => _getRecoveryStateItem({ delayModifier, ...rest })))
+  // One failing Delay Modifier must not blank the recovery state of the others
+  return Promise.all(
+    delayModifiers.map(async (delayModifier) => {
+      try {
+        return await _getRecoveryStateItem({ delayModifier, ...rest })
+      } catch (error) {
+        logError(Errors._823, error)
+        return null
+      }
+    }),
+  ).then((state) => state.filter((item) => item !== null))
 }
