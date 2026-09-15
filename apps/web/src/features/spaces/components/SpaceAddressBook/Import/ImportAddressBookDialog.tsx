@@ -24,6 +24,7 @@ import type { SerializedError } from '@reduxjs/toolkit'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 export type ImportContactsFormValues = {
   contacts: Record<string, string | undefined>
@@ -93,6 +94,7 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
         upsertAddressBookItemsDto: { items: contactItems },
       })
 
+      if (isElevationRequiredError(result.error)) return
       if (result.error) {
         setError(getRtkQueryErrorMessage(result.error as FetchBaseQueryError | SerializedError))
         return

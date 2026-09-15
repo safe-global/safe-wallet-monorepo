@@ -17,6 +17,7 @@ import { removeUndeployedSafe } from '../store/undeployedSafesSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { normalizeSpaceId } from '@/utils/spaces'
 import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/constants'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 type PersistArgs = {
   chainId: string
@@ -49,7 +50,10 @@ type PersistArgs = {
   dispatch: AppDispatch
 }
 
-export type PersistResult = { ok: true; skipped?: 'already-deployed' } | { ok: false; error: Error }
+export type PersistResult =
+  | { ok: true; skipped?: 'already-deployed' }
+  /** `stepUpPending`: the step-up is taking over, so the caller shows nothing. */
+  | { ok: false; error: Error; stepUpPending?: true }
 
 /**
  * Single code path for creating a counterfactual safe: persist to backend
@@ -144,6 +148,10 @@ export const persistCounterfactualSafe = async ({
           }),
         )
         if ('error' in spaceResult) {
+          // The user-level entry stays, so the replay after verification attaches a Safe that exists.
+          if (isElevationRequiredError(spaceResult.error)) {
+            return { ok: false, error: toSpaceError(spaceResult.error), stepUpPending: true }
+          }
           // Use case: another admin added Safes to the same workspace in the meantime.
           // The cached count was stale and the backend returned 400.
           // The Safe itself was still created, so keep it and show the warning.
