@@ -126,7 +126,11 @@ test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
           key,
           JSON.stringify({
             endpoint: 'spaceSafesDeleteV1',
-            args: { spaceId, deleteSpaceSafesDto: { safes: [{ chainId: '1', address }] } },
+            request: {
+              url: `/v1/spaces/${spaceId}/safes`,
+              method: 'DELETE',
+              body: { safes: [{ chainId: '1', address }] },
+            },
             createdAt: Date.now(),
           }),
         )
@@ -161,7 +165,11 @@ test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
           key,
           JSON.stringify({
             endpoint: 'spaceSafesDeleteV1',
-            args: { spaceId, deleteSpaceSafesDto: { safes: [{ chainId: '1', address }] } },
+            request: {
+              url: `/v1/spaces/${spaceId}/safes`,
+              method: 'DELETE',
+              body: { safes: [{ chainId: '1', address }] },
+            },
             createdAt: Date.now() - 6 * 60 * 1000,
           }),
         )

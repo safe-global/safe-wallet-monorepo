@@ -69,6 +69,54 @@ describe('cgwClient hooks', () => {
     expect(mockFetch).toHaveBeenCalled()
 
     expect(mockResponseFunction).toHaveBeenCalled()
-    expect(mockResponseFunction).toHaveBeenCalledWith(expect.any(Response), '/test-response')
+    expect(mockResponseFunction).toHaveBeenCalledWith(
+      expect.any(Response),
+      '/test-response',
+      expect.objectContaining({ api: testApi, args: { url: '/test-response' } }),
+    )
+  })
+
+  it('should pass the parsed error to the response hooks when the request fails', async () => {
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(new Response('{"message":"nope"}', { status: 403, headers: new Headers() }))
+    const mockResponseFunction = jest.fn()
+    cgwClient.setHandleResponseHook(mockResponseFunction)
+
+    await cgwClient.dynamicBaseQuery('/test-error', testApi, {})
+
+    expect(mockResponseFunction).toHaveBeenCalledWith(
+      expect.any(Response),
+      '/test-error',
+      expect.objectContaining({ error: { status: 403, data: { message: 'nope' } } }),
+    )
+  })
+
+  it('should run an added hook next to the set one, and stop running it once removed', async () => {
+    // Two requests: each needs its own Response, a body can only be read once.
+    global.fetch = jest.fn(() => Promise.resolve(new Response('{}', { status: 200, headers: new Headers() })))
+    const setHook = jest.fn()
+    const addedHook = jest.fn()
+    cgwClient.setHandleResponseHook(setHook)
+    const remove = cgwClient.addHandleResponseHook(addedHook)
+
+    await cgwClient.dynamicBaseQuery('/test-hooks', testApi, {})
+    expect(setHook).toHaveBeenCalledTimes(1)
+    expect(addedHook).toHaveBeenCalledTimes(1)
+
+    remove()
+    await cgwClient.dynamicBaseQuery('/test-hooks', testApi, {})
+    expect(setHook).toHaveBeenCalledTimes(2)
+    expect(addedHook).toHaveBeenCalledTimes(1)
+  })
+
+  it('should, when a hook is set, drop the hooks added before it', async () => {
+    const addedHook = jest.fn()
+    cgwClient.addHandleResponseHook(addedHook)
+    cgwClient.setHandleResponseHook(() => {})
+
+    await cgwClient.dynamicBaseQuery('/test-replace', testApi, {})
+
+    expect(addedHook).not.toHaveBeenCalled()
   })
 })

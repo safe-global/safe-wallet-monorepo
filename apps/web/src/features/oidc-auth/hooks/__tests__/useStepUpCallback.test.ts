@@ -36,7 +36,10 @@ jest.mock('next/router', () => ({
   }),
 }))
 
-const TRIP_ACTION = { endpoint: 'membersInviteUserV1', args: { spaceId: '7' } } as const
+const TRIP_ACTION = {
+  endpoint: 'membersInviteUserV1',
+  request: { url: '/v1/spaces/7/members', method: 'POST', body: { users: [] } },
+} as const
 
 describe('useStepUpCallback', () => {
   const originalLocation = window.location
