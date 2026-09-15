@@ -87,6 +87,8 @@ export enum MixpanelEvent {
   ACTIVITY_LOG_VIEWED = 'Activity Log Viewed',
   ACTIVITY_LOG_FILTERED = 'Activity Log Filtered',
   POLICY_CATALOGUE_TILE_CLICKED = 'Policy Catalogue Tile Clicked',
+  WC_SAFE_APP_SUGGESTED = 'WC Safe App Suggested',
+  WC_SAFE_APP_SUGGESTION_RESULT = 'WC Safe App Suggestion Result',
 }
 
 export enum WorkspaceCreateEntryPoint {
@@ -159,6 +161,8 @@ export enum MixpanelEventParams {
   MEMBER_ROLE = 'Member Role',
   POLICY_TYPE = 'Policy Type',
   IS_AVAILABLE = 'Is Available',
+  SAFE_APP_AVAILABLE = 'Safe App Available',
+  SUGGESTION_DISMISSED = 'Suggestion Dismissed',
 }
 
 export enum AuthLoginMethod {
@@ -170,6 +174,7 @@ export enum AuthLoginMethod {
 export enum SafeAppLaunchLocation {
   PREVIEW_DRAWER = 'Preview Drawer',
   SAFE_APPS_LIST = 'Safe Apps List',
+  WC_PROPOSAL = 'WalletConnect Proposal',
 }
 
 export const ADDRESS_PROPERTIES = new Set([

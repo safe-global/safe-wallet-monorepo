@@ -13,6 +13,7 @@ import { useAppDispatch } from '@/store'
 import * as useSafeWalletProvider from '@/services/safe-wallet-provider/useSafeWalletProvider'
 import * as useLocalStorageHook from '@/services/local-storage/useLocalStorage'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
 jest.mock('@reown/walletkit', () => jest.fn())
 
@@ -22,6 +23,32 @@ jest.mock('../store/wcPopupStore', () => ({
   wcPopupStore: { useStore: jest.fn(), setStore: jest.fn() },
   openWalletConnect: jest.fn(),
 }))
+
+const mockUseMatchingSafeApp = jest.fn<{ safeApp: SafeAppData | undefined; isLoading: boolean }, [string | undefined]>(
+  () => ({ safeApp: undefined, isLoading: false }),
+)
+jest.mock('../hooks/useMatchingSafeApp', () => ({
+  useMatchingSafeApp: (dappUrl?: string) => mockUseMatchingSafeApp(dappUrl),
+}))
+
+const mockIsSafeAppSuggested = jest.fn(() => false)
+jest.mock('../hooks/useSafeAppSuggestion', () => ({
+  useIsSafeAppSuggested: () => mockIsSafeAppSuggested(),
+  useSafeAppSuggestionDismissed: () => [undefined, jest.fn()],
+}))
+
+const mockSafeApp: SafeAppData = {
+  id: 42,
+  url: 'https://test-dapp.com',
+  name: 'Test dApp Safe App',
+  description: 'A Safe App',
+  chainIds: ['5'],
+  accessControl: { type: 'NO_RESTRICTIONS' },
+  tags: [],
+  features: [],
+  socialProfiles: [],
+  featured: false,
+}
 
 const TestComponent = () => {
   const { walletConnect, error, loading, sessions, sessionProposal, open } = useContext(WalletConnectContext)
@@ -80,6 +107,9 @@ describe('WalletConnectProvider', () => {
     ;(wcPopupStore.useStore as jest.Mock).mockReturnValue(false)
     ;(wcPopupStore.setStore as jest.Mock).mockImplementation(() => {})
     jest.spyOn(useLocalStorageHook, 'default').mockReturnValue([{}, jest.fn()])
+    // resetAllMocks above clears the implementation, so restore the default shape
+    mockUseMatchingSafeApp.mockReturnValue({ safeApp: undefined, isLoading: false })
+    mockIsSafeAppSuggested.mockReturnValue(false)
   })
 
   it('sets the walletConnect state', async () => {
@@ -559,6 +589,217 @@ describe('WalletConnectProvider', () => {
 
       expect(approveSessionSpy).not.toHaveBeenCalled()
       expect(rejectSessionSpy).not.toHaveBeenCalled()
+    })
+
+    // Security: proposer.metadata.url is declared by the dApp, so matching on it would let a
+    // malicious origin borrow a trusted Safe App's name and icon
+    it('matches the Safe App on the observed origin, not the dApp declared url', async () => {
+      const spoofedProposal = {
+        ...mockSessionProposal,
+        params: {
+          ...mockSessionProposal.params,
+          proposer: {
+            publicKey: 'k',
+            metadata: { name: 'Uniswap', description: '', url: 'https://app.uniswap.org', icons: [] },
+          },
+        },
+        verifyContext: {
+          verified: { validation: 'VALID', origin: 'https://evil.example', verifyUrl: '', isScam: false },
+        },
+      } as WalletKitTypes.SessionProposal
+
+      jest.spyOn(WalletConnectWallet.prototype, 'init').mockImplementation(() => Promise.resolve())
+      jest.spyOn(WalletConnectWallet.prototype, 'updateSessions').mockImplementation(() => Promise.resolve())
+      jest.spyOn(WalletConnectWallet.prototype, 'onSessionPropose').mockImplementation((callback) => {
+        setTimeout(() => callback(spoofedProposal), 100)
+        return jest.fn()
+      })
+
+      const { getByText } = render(
+        <WalletConnectProvider>
+          <TestComponent />
+        </WalletConnectProvider>,
+        { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
+      )
+
+      await waitFor(() => {
+        expect(getByText('Session proposal received')).toBeInTheDocument()
+      })
+
+      expect(mockUseMatchingSafeApp).toHaveBeenCalledWith('https://evil.example')
+      expect(mockUseMatchingSafeApp).not.toHaveBeenCalledWith('https://app.uniswap.org')
+    })
+
+    describe('expired proposals', () => {
+      const expiredError = new Error('Missing or invalid. Record was recently deleted - proposal: 1234')
+
+      const renderWithProposal = () => {
+        jest.spyOn(WalletConnectWallet.prototype, 'init').mockImplementation(() => Promise.resolve())
+        jest.spyOn(WalletConnectWallet.prototype, 'updateSessions').mockImplementation(() => Promise.resolve())
+        jest.spyOn(WalletConnectWallet.prototype, 'onSessionPropose').mockImplementation((callback) => {
+          setTimeout(() => callback(mockSessionProposal), 100)
+          return jest.fn()
+        })
+
+        return render(
+          <WalletConnectProvider>
+            <TestComponent />
+            <ContextControlComponent />
+          </WalletConnectProvider>,
+          { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
+        )
+      }
+
+      // Regression: a failed rejection used to leave the proposal in state, so dismissing the
+      // error returned the user to the same dialog whose only actions kept failing
+      it('clears the proposal when rejecting an expired one fails', async () => {
+        jest.spyOn(WalletConnectWallet.prototype, 'rejectSession').mockRejectedValue(expiredError)
+
+        const { getByText, queryByText } = renderWithProposal()
+
+        await waitFor(() => {
+          expect(getByText('Session proposal received')).toBeInTheDocument()
+        })
+
+        fireEvent.click(getByText('Reject Session'))
+
+        await waitFor(() => {
+          expect(queryByText('Session proposal received')).not.toBeInTheDocument()
+        })
+
+        expect(
+          getByText('This connection request has expired. Please start a new connection from the dApp.'),
+        ).toBeInTheDocument()
+      })
+
+      it('clears the proposal when approving an expired one fails', async () => {
+        jest.spyOn(WalletConnectWallet.prototype, 'approveSession').mockRejectedValue(expiredError)
+
+        const { getByText, queryByText } = renderWithProposal()
+
+        await waitFor(() => {
+          expect(getByText('Session proposal received')).toBeInTheDocument()
+        })
+
+        fireEvent.click(getByText('Approve Session'))
+
+        await waitFor(() => {
+          expect(queryByText('Session proposal received')).not.toBeInTheDocument()
+        })
+      })
+
+      it('keeps the proposal so the user can retry a transient failure', async () => {
+        jest.spyOn(WalletConnectWallet.prototype, 'approveSession').mockRejectedValue(new Error('Network error'))
+
+        const { getByText } = renderWithProposal()
+
+        await waitFor(() => {
+          expect(getByText('Session proposal received')).toBeInTheDocument()
+        })
+
+        fireEvent.click(getByText('Approve Session'))
+
+        await waitFor(() => {
+          expect(getByText('Network error')).toBeInTheDocument()
+        })
+
+        expect(getByText('Session proposal received')).toBeInTheDocument()
+      })
+    })
+
+    describe('auto approve', () => {
+      const renderWithProposal = () => {
+        jest.spyOn(WalletConnectWallet.prototype, 'init').mockImplementation(() => Promise.resolve())
+        jest.spyOn(WalletConnectWallet.prototype, 'updateSessions').mockImplementation(() => Promise.resolve())
+        jest.spyOn(WalletConnectWallet.prototype, 'onSessionPropose').mockImplementation((callback) => {
+          setTimeout(() => callback(mockSessionProposal), 100)
+          return jest.fn()
+        })
+
+        return render(
+          <WalletConnectProvider>
+            <TestComponent />
+          </WalletConnectProvider>,
+          { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
+        )
+      }
+
+      beforeEach(() => {
+        // The dApp was approved before, so it is on the auto approve list
+        jest
+          .spyOn(useLocalStorageHook, 'default')
+          .mockReturnValue([{ '5': { [proposalOrigin]: true } }, jest.fn()] as ReturnType<
+            typeof useLocalStorageHook.default
+          >)
+      })
+
+      it('auto approves a known dApp when no Safe App matches', async () => {
+        mockUseMatchingSafeApp.mockReturnValue({ safeApp: undefined, isLoading: false })
+        const approveSessionSpy = jest
+          .spyOn(WalletConnectWallet.prototype, 'approveSession')
+          .mockImplementation(() => Promise.resolve(mockSession))
+
+        const { getByText } = renderWithProposal()
+
+        await waitFor(() => {
+          expect(getByText('Session proposal received')).toBeInTheDocument()
+        })
+
+        await waitFor(() => {
+          expect(approveSessionSpy).toHaveBeenCalled()
+        })
+      })
+
+      // A match alone is not enough: the suggestion must actually be eligible to be shown,
+      // otherwise the user would silently lose auto-approve with no UI explaining why
+      it('still auto approves when a Safe App matches but the suggestion is not eligible', async () => {
+        mockUseMatchingSafeApp.mockReturnValue({ safeApp: mockSafeApp, isLoading: false })
+        mockIsSafeAppSuggested.mockReturnValue(false)
+        const approveSessionSpy = jest
+          .spyOn(WalletConnectWallet.prototype, 'approveSession')
+          .mockImplementation(() => Promise.resolve(mockSession))
+
+        const { getByText } = renderWithProposal()
+
+        await waitFor(() => {
+          expect(getByText('Session proposal received')).toBeInTheDocument()
+        })
+
+        await waitFor(() => {
+          expect(approveSessionSpy).toHaveBeenCalled()
+        })
+      })
+
+      it('does not auto approve when the suggestion will be shown', async () => {
+        mockUseMatchingSafeApp.mockReturnValue({ safeApp: mockSafeApp, isLoading: false })
+        mockIsSafeAppSuggested.mockReturnValue(true)
+        const approveSessionSpy = jest
+          .spyOn(WalletConnectWallet.prototype, 'approveSession')
+          .mockImplementation(() => Promise.resolve(mockSession))
+
+        const { getByText } = renderWithProposal()
+
+        await waitFor(() => {
+          expect(getByText('Session proposal received')).toBeInTheDocument()
+        })
+
+        expect(approveSessionSpy).not.toHaveBeenCalled()
+      })
+
+      it('does not auto approve while the Safe App lookup is still in flight', async () => {
+        mockUseMatchingSafeApp.mockReturnValue({ safeApp: undefined, isLoading: true })
+        const approveSessionSpy = jest
+          .spyOn(WalletConnectWallet.prototype, 'approveSession')
+          .mockImplementation(() => Promise.resolve(mockSession))
+
+        const { getByText } = renderWithProposal()
+
+        await waitFor(() => {
+          expect(getByText('Session proposal received')).toBeInTheDocument()
+        })
+
+        expect(approveSessionSpy).not.toHaveBeenCalled()
+      })
     })
   })
 
