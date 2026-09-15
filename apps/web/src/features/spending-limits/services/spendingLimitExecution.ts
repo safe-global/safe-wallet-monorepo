@@ -20,6 +20,7 @@ import { createMultiSendCallOnlyTx } from '@/services/tx/tx-sender/create'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
 import { didRevert } from '@/utils/ethers-utils'
 import { getAndValidateSafeSDK, getUncheckedSigner } from '@/services/tx/tx-sender/sdk'
+import type { TxSenderScope } from '@/components/tx-flow/safe-scope/types'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 export const NO_ALLOWANCE_MODULE_ERROR =
@@ -42,8 +43,9 @@ export const createNewSpendingLimitTx = async (
   deployed: boolean,
   tokenDecimals?: number | null,
   existingSpendingLimit?: SpendingLimitState,
+  scope?: TxSenderScope,
 ) => {
-  const sdk = getAndValidateSafeSDK()
+  const sdk = getAndValidateSafeSDK(scope)
 
   let spendingLimitAddress = deployed && getDeployedSpendingLimitModuleAddress(chainId, safeModules)
   const isModuleEnabled = !!spendingLimitAddress
@@ -104,7 +106,7 @@ export const createNewSpendingLimitTx = async (
 
   txs.push(tx)
 
-  return createMultiSendCallOnlyTx(txs)
+  return createMultiSendCallOnlyTx(txs, scope)
 }
 
 export const dispatchSpendingLimitTxExecution = async (

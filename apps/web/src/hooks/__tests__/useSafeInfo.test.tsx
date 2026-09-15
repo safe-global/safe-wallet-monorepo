@@ -1,7 +1,13 @@
+import type { ReactNode } from 'react'
 import { renderHook } from '@/tests/test-utils'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import type { RootState } from '@/store'
+import { SafeScopeContext } from '@/components/tx-flow/safe-scope/context'
+import type { SafeScopeContextValue } from '@/components/tx-flow/safe-scope/types'
+import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
+import { selectSafeInfo } from '@/store/safeInfoSlice'
+import { makeStore } from '@/store'
 
 describe('useSafeInfo hook', () => {
   it('should return default safe info when no data in Redux', () => {
@@ -198,5 +204,69 @@ describe('useSafeInfo hook', () => {
 
     expect(result.current.safeLoaded).toBe(true)
     expect(result.current.safe).toEqual(mockSafe)
+  })
+})
+
+describe('useSafeInfo hook under a SafeScope', () => {
+  const reduxSafe = extendedSafeInfoBuilder().build()
+  const scopedSafe = extendedSafeInfoBuilder().build()
+  const initialReduxState: Partial<RootState> = {
+    safeInfo: { loading: false, error: undefined, data: reduxSafe, loaded: true },
+  }
+  const withScope = (scope: SafeScopeContextValue['scope']) =>
+    function Wrapper({ children }: { children: ReactNode }) {
+      return (
+        <SafeScopeContext.Provider value={{ scope, setScope: jest.fn(), clearScope: jest.fn() }}>
+          {children}
+        </SafeScopeContext.Provider>
+      )
+    }
+
+  it('ignores the Redux Safe and returns the scoped one', () => {
+    const { result } = renderHook(() => useSafeInfo(), {
+      initialReduxState,
+      wrapper: withScope({
+        chainId: scopedSafe.chainId,
+        safeAddress: scopedSafe.address.value,
+        scopeKey: `${scopedSafe.chainId}:${scopedSafe.address.value}`,
+        safe: scopedSafe,
+        safeLoaded: true,
+        safeLoading: false,
+      }),
+    })
+    expect(result.current.safe).toEqual(scopedSafe)
+    expect(result.current.safeAddress).toBe(scopedSafe.address.value)
+    expect(result.current.safeLoaded).toBe(true)
+  })
+
+  it('reports the target address and defaultSafeInfo while the scoped Safe is loading', () => {
+    const { result } = renderHook(() => useSafeInfo(), {
+      initialReduxState,
+      wrapper: withScope({
+        chainId: scopedSafe.chainId,
+        safeAddress: scopedSafe.address.value,
+        scopeKey: `${scopedSafe.chainId}:${scopedSafe.address.value}`,
+        safeLoaded: false,
+        safeLoading: true,
+      }),
+    })
+    expect(result.current.safe).toEqual(defaultSafeInfo)
+    expect(result.current.safeAddress).toBe(scopedSafe.address.value)
+    expect(result.current.safeLoaded).toBe(false)
+    expect(result.current.safeLoading).toBe(true)
+  })
+
+  it('without a Provider is exactly the pre-change selector projection (regression baseline)', () => {
+    // Frozen copy of the implementation before WA-3146. If this fails, Safe-level behaviour changed.
+    const legacy = (state: ReturnType<typeof selectSafeInfo>) => ({
+      safe: state.data || defaultSafeInfo,
+      safeAddress: state.data?.address.value || '',
+      safeLoaded: state.loaded,
+      safeError: state.error,
+      safeLoading: state.loading,
+    })
+    const store = makeStore(initialReduxState, { skipBroadcast: true })
+    const { result } = renderHook(() => useSafeInfo(), { initialReduxState })
+    expect(result.current).toEqual(legacy(selectSafeInfo(store.getState())))
   })
 })
