@@ -15,12 +15,16 @@ const TotalAssetValue = ({
   tooltipTitle,
   size = 'md',
   action,
+  error = false,
+  showErrorSubtitle = false,
 }: {
   fiatTotal: string | number | undefined
   title?: string
   tooltipTitle?: string
   size?: 'md' | 'lg'
   action?: ReactNode
+  error?: boolean
+  showErrorSubtitle?: boolean
 }) => {
   const fontSizeClass = size === 'lg' ? 'text-[44px]' : 'text-[24px]'
   const { safe } = useSafeInfo()
@@ -40,7 +44,9 @@ const TotalAssetValue = ({
       <div className="flex flex-row items-end justify-between">
         <div className={`m-0 font-semibold leading-[1.2] ${fontSizeClass}`}>
           {safe.deployed ? (
-            fiatTotal !== undefined ? (
+            error ? (
+              <FiatValue value={null} precise />
+            ) : fiatTotal !== undefined ? (
               <>
                 <FiatValue value={fiatTotal} precise />
               </>
@@ -63,6 +69,15 @@ const TotalAssetValue = ({
         </div>
         {action}
       </div>
+      {error && safe.deployed && showErrorSubtitle && (
+        <Typography
+          variant="paragraph-mini"
+          className="mt-2 block text-[var(--color-primary-light)]"
+          data-testid="total-balance-error"
+        >
+          Couldn&apos;t load your balance. Try again later
+        </Typography>
+      )}
     </div>
   )
 }
