@@ -76,9 +76,7 @@ describe('EntryDialog scope', () => {
     renderDialog('workspace')
     await save()
 
-    await waitFor(() =>
-      expect(upsertWorkspaceName).toHaveBeenCalledWith({ name: 'Treasury', address: ADDRESS, chainIds: ['1'] }),
-    )
+    await waitFor(() => expect(upsertWorkspaceName).toHaveBeenCalledWith({ name: 'Treasury', address: ADDRESS }))
   })
 
   it('writes locally by default', async () => {

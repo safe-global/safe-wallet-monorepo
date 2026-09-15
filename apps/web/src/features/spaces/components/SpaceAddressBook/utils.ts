@@ -19,14 +19,14 @@ export const flattenAddressBook = (allAddressBooks: AddressBookState): ContactIt
   })
 }
 
-export const createContactItems = (data: ImportContactsFormValues) => {
+export const createContactItems = (data: ImportContactsFormValues, chainIds: string[]) => {
   return Object.entries(data.contacts)
     .map(([contactItemId, name]) => {
-      const [chainId, address] = contactItemId.split(':')
+      const [, address] = contactItemId.split(':')
       if (!name) return
 
       return {
-        chainIds: [chainId],
+        chainIds,
         address,
         name: sanitizeName(name),
       }

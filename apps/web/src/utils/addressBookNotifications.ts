@@ -12,13 +12,13 @@ export const getImportSuccessMessage = ({
   bookLabel,
 }: {
   count: number
-  networkCount: number
+  networkCount?: number
   bookLabel: string
 }): string => {
   const contactLabel = count === 1 ? 'contact' : 'contacts'
   const base = `${count} ${contactLabel} imported to ${bookLabel}`
 
-  return networkCount > 1
+  return networkCount && networkCount > 1
     ? `${base} across ${networkCount} networks. Only contacts on the current network are shown here`
     : base
 }

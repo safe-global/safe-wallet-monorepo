@@ -37,7 +37,7 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const handleCloseRef = useRef(handleClose)
-  const { configs } = useChains()
+  const { configs: chains } = useChains()
   const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
   const workspaceAddressBookLabel = useWorkspaceAddressBookLabel()
@@ -48,9 +48,9 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
   const allContactItems = useMemo(
     () =>
       flattenAddressBook(allAddressBooks).filter((contactItem) =>
-        configs.some((chain) => chain.chainId === contactItem.chainId),
+        chains.some((chain) => chain.chainId === contactItem.chainId),
       ),
-    [allAddressBooks, configs],
+    [allAddressBooks, chains],
   )
 
   const hasNoImportableContacts = useMemo(
@@ -83,7 +83,10 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
 
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
-    const contactItems = createContactItems(data)
+    const contactItems = createContactItems(
+      data,
+      chains.map((chain) => chain.chainId),
+    )
 
     try {
       setIsSubmitting(true)
@@ -99,12 +102,7 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
       }
 
       const contactCount = contactItems.length
-      const networkCount = new Set(contactItems.flatMap((item) => item.chainIds)).size
-      const successMessage = getImportSuccessMessage({
-        count: contactCount,
-        networkCount,
-        bookLabel: workspaceAddressBookLabel,
-      })
+      const successMessage = getImportSuccessMessage({ count: contactCount, bookLabel: workspaceAddressBookLabel })
 
       dispatch(
         showNotification({

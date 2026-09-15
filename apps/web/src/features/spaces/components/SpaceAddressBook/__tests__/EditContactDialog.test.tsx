@@ -23,17 +23,17 @@ jest.mock('@/features/spaces', () => ({
   useWorkspaceAddressBookLabel: () => 'Acme address book',
 }))
 
+jest.mock('@/hooks/useChains', () => ({
+  __esModule: true,
+  default: () => ({ configs: [{ chainId: '1' }, { chainId: '137' }] }),
+}))
+
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
 }))
 
 jest.mock('@/services/analytics/events/spaces', () => ({
   SPACE_EVENTS: { EDIT_ADDRESS_SUBMIT: { action: 'Edit address submit', category: 'spaces' } },
-}))
-
-jest.mock('@/hooks/useChains', () => ({
-  __esModule: true,
-  default: () => ({ configs: [{ chainId: '1', chainName: 'Ethereum' }] }),
 }))
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
@@ -56,11 +56,6 @@ jest.mock('@/components/common/NameInput', () => ({
     const { register } = (jest.requireActual('react-hook-form') as typeof ReactHookForm).useFormContext()
     return <input aria-label={label} {...register(name, { required: true })} />
   },
-}))
-
-jest.mock('@/components/common/NetworkSelector/NetworkMultiSelectorInput', () => ({
-  __esModule: true,
-  default: () => <div data-testid="network-selector" />,
 }))
 
 const entry: SpaceAddressBookItemDto = {
@@ -114,6 +109,22 @@ describe('EditContactDialog', () => {
     await submitForm()
 
     expect(await screen.findByText(/Something went wrong \(500\)/)).toBeInTheDocument()
+  })
+
+  it('saves the contact on every supported chain without a network selector', async () => {
+    mockUpsertAddressBook.mockResolvedValue({ data: {} })
+
+    render(<EditContactDialog entry={entry} onClose={jest.fn()} />)
+    expect(screen.queryByText('Select networks')).not.toBeInTheDocument()
+
+    await submitForm()
+
+    await waitFor(() =>
+      expect(mockUpsertAddressBook).toHaveBeenCalledWith({
+        spaceId: '42',
+        upsertAddressBookItemsDto: { items: [{ name: 'Alice Updated', address: '0xabc', chainIds: ['1', '137'] }] },
+      }),
+    )
   })
 
   it('dispatches a workspace-labeled "updated" notification on success', async () => {

@@ -141,6 +141,27 @@ describe('SpaceAddressBookTable', () => {
     expect(logosList).toHaveAttribute('data-count', '5')
   })
 
+  it('omits the chains column and detail row when showChains is false', () => {
+    mockUseIsMobile.mockReturnValue(true)
+    render(
+      <SpaceAddressBookTable
+        entries={[
+          entryBuilder()
+            .with({ chainIds: ['1', '137'] })
+            .build(),
+        ]}
+        showChains={false}
+      />,
+    )
+
+    expect(screen.queryByText('Chains')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('network-logos')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show details' }))
+
+    expect(screen.queryAllByTestId('chain-indicator')).toHaveLength(0)
+  })
+
   it('renders the network logos tooltip even when entry covers all chains', () => {
     render(
       <SpaceAddressBookTable

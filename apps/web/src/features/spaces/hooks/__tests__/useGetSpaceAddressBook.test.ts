@@ -19,6 +19,13 @@ jest.mock('@/store/authSlice', () => ({
   isAuthenticated: 'isAuthenticated',
 }))
 
+let mockConfigs: { chainId: string }[] = []
+
+jest.mock('@/hooks/useChains', () => ({
+  __esModule: true,
+  default: () => ({ configs: mockConfigs }),
+}))
+
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useAddressBooksGetAddressBookItemsV1Query: (...args: unknown[]) =>
     mockUseAddressBooksGetAddressBookItemsV1Query(...args),
@@ -28,6 +35,7 @@ describe('useGetSpaceAddressBook', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockIsAuthenticated = true
+    mockConfigs = [{ chainId: '1' }, { chainId: '137' }]
     mockUseAddressBooksGetAddressBookItemsV1Query.mockReturnValue({ currentData: undefined })
   })
 
@@ -76,8 +84,25 @@ describe('useGetSpaceAddressBook', () => {
     )
   })
 
-  it('returns the address book data when the query resolves', () => {
+  it('returns every contact on every supported chain, replacing the stored chainIds', () => {
     mockUseCurrentSpaceId.mockReturnValue(MOCK_SPACE_UUID)
+    const data = [
+      { address: '0xabc', name: 'Alice', chainIds: ['1'] },
+      { address: '0xdef', name: 'Bob', chainIds: ['1', '137'] },
+    ]
+    mockUseAddressBooksGetAddressBookItemsV1Query.mockReturnValue({ currentData: { data } })
+
+    const { result } = renderHook(() => useGetSpaceAddressBook())
+
+    expect(result.current).toEqual([
+      { address: '0xabc', name: 'Alice', chainIds: ['1', '137'] },
+      { address: '0xdef', name: 'Bob', chainIds: ['1', '137'] },
+    ])
+  })
+
+  it('keeps the stored chainIds while the chain config is empty', () => {
+    mockUseCurrentSpaceId.mockReturnValue(MOCK_SPACE_UUID)
+    mockConfigs = []
     const data = [{ address: '0xabc', name: 'Alice', chainIds: ['1'] }]
     mockUseAddressBooksGetAddressBookItemsV1Query.mockReturnValue({ currentData: { data } })
 

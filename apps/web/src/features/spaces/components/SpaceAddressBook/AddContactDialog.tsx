@@ -44,6 +44,7 @@ type AddContactDialogProps = {
   onSubmitStart?: () => void
   onSuccess?: () => void
   validateCharset?: boolean
+  showNetworks?: boolean
 }
 
 const AddContactDialog = ({
@@ -57,6 +58,7 @@ const AddContactDialog = ({
   onSubmitStart,
   onSuccess,
   validateCharset = false,
+  showNetworks = true,
 }: AddContactDialogProps) => {
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string>()
@@ -164,26 +166,28 @@ const AddContactDialog = ({
                   />
                   <AddressInput name="address" label="Address or ENS" required showPrefix={false} chain={ensChain} />
 
-                  <div>
-                    <p className="mb-1 inline-flex items-center gap-1 text-sm font-bold">Select networks</p>
-                    <p className="text-muted-foreground mb-2 text-sm">
-                      Add contact on all networks or only on specific ones of your choice.
-                    </p>
-                    <Controller
-                      name="networks"
-                      control={control}
-                      render={({ field }) => (
-                        <NetworkMultiSelectorInput
-                          name="networks"
-                          showSelectAll
-                          value={field.value || []}
-                          error={!!errors.networks}
-                          helperText={errors.networks ? 'Select at least one network' : ''}
-                        />
-                      )}
-                      rules={{ required: true }}
-                    />
-                  </div>
+                  {showNetworks && (
+                    <div>
+                      <p className="mb-1 inline-flex items-center gap-1 text-sm font-bold">Select networks</p>
+                      <p className="text-muted-foreground mb-2 text-sm">
+                        Add contact on all networks or only on specific ones of your choice.
+                      </p>
+                      <Controller
+                        name="networks"
+                        control={control}
+                        render={({ field }) => (
+                          <NetworkMultiSelectorInput
+                            name="networks"
+                            showSelectAll
+                            value={field.value || []}
+                            error={!!errors.networks}
+                            helperText={errors.networks ? 'Select at least one network' : ''}
+                          />
+                        )}
+                        rules={{ required: true }}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {error && (
@@ -200,7 +204,7 @@ const AddContactDialog = ({
                 cancelTestId="cancel-btn"
                 confirmType="submit"
                 confirmLabel={submitLabel}
-                confirmDisabled={!formState.isValid || isSubmitting}
+                confirmDisabled={!formState.isValid || isSubmitting || allNetworks.length === 0}
                 confirmLoading={isSubmitting}
               />
             </form>

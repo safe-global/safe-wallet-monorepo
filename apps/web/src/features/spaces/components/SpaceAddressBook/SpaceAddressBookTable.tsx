@@ -45,6 +45,7 @@ type SpaceAddressBookTableProps = {
   entries: AddressBookEntry[]
   showAddedBy?: boolean
   showLastUpdated?: boolean
+  showChains?: boolean
   renderExtraAction?: (entry: AddressBookEntry, context: { isCompact: boolean }) => React.ReactNode
 }
 
@@ -52,6 +53,7 @@ function SpaceAddressBookTable({
   entries,
   showAddedBy = true,
   showLastUpdated = false,
+  showChains = true,
   renderExtraAction,
 }: SpaceAddressBookTableProps) {
   const resolveMemberName = useMemberNameResolver()
@@ -109,15 +111,19 @@ function SpaceAddressBookTable({
       sortValue: (e) => e.address,
       cell: (entry) => <AddressCell address={entry.address} />,
     },
-    {
-      id: 'chains',
-      header: 'Chains',
-      width: hasExtraAction ? '15%' : '20%',
-      priority: 'secondary',
-      minWidth: 90,
-      sortValue: (e) => e.chainIds.length,
-      cell: renderChains,
-    },
+    ...(showChains
+      ? [
+          {
+            id: 'chains',
+            header: 'Chains',
+            width: (hasExtraAction ? '15%' : '20%') as ColumnWidth,
+            priority: 'secondary' as const,
+            minWidth: 90,
+            sortValue: (e: AddressBookEntry) => e.chainIds.length,
+            cell: renderChains,
+          },
+        ]
+      : []),
     ...(hasMiddleColumn
       ? [
           {
@@ -152,14 +158,16 @@ function SpaceAddressBookTable({
   // Surfaces the columns hidden on mobile (chains, added-by / last-updated)
   const renderRowDetail = (entry: AddressBookEntry) => (
     <div className="flex flex-col gap-2 text-sm">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-muted-foreground w-20 shrink-0">Chains</span>
-        <div className="flex flex-wrap gap-1">
-          {entry.chainIds.map((chainId) => (
-            <ChainIndicator key={chainId} chainId={chainId} />
-          ))}
+      {showChains && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-muted-foreground w-20 shrink-0">Chains</span>
+          <div className="flex flex-wrap gap-1">
+            {entry.chainIds.map((chainId) => (
+              <ChainIndicator key={chainId} chainId={chainId} />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
       {hasMiddleColumn && (
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-muted-foreground w-20 shrink-0">{showAddedBy ? 'Added by' : 'Last updated'}</span>
