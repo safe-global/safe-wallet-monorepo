@@ -6,8 +6,6 @@ import { useGetSpaceAddressBook, useWorkspaceAddressBookLabel } from '@/features
 import { getContactAddedMessage } from '@/utils/addressBookNotifications'
 import AddContactDialog from './AddContactDialog'
 
-export type { ContactField } from './AddContactDialog'
-
 const AddContact = ({ label = 'Add contact' }: { label?: string }) => {
   const addressBookItems = useGetSpaceAddressBook()
   const workspaceAddressBookLabel = useWorkspaceAddressBookLabel()
