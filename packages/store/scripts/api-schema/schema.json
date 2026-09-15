@@ -10092,7 +10092,9 @@
               "SAFE_ADDED",
               "SAFE_REMOVED",
               "ADDRESS_BOOK_UPSERTED",
-              "ADDRESS_BOOK_DELETED"
+              "ADDRESS_BOOK_DELETED",
+              "ADDRESS_BOOK_REQUEST_CREATED",
+              "ADDRESS_BOOK_REQUEST_REJECTED"
             ]
           },
           "actorUserId": {
