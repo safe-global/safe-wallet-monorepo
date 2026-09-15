@@ -118,6 +118,24 @@ describe('AddContactDialog', () => {
     })
   })
 
+  it('hides the network selector for workspace contacts and still submits every chain', async () => {
+    const submit = jest.fn().mockResolvedValue({})
+    render(<AddContactDialog {...baseProps} submit={submit} showNetworks={false} />)
+    openDialog()
+
+    expect(screen.queryByTestId('network-selector')).not.toBeInTheDocument()
+    expect(screen.queryByText('Select networks')).not.toBeInTheDocument()
+
+    fillRequiredFields()
+    const submitButton = screen.getByRole('button', { name: 'Add contact' })
+    await waitFor(() => expect(submitButton).not.toBeDisabled())
+    fireEvent.click(submitButton)
+
+    await waitFor(() => {
+      expect(submit).toHaveBeenCalledWith({ name: 'Alice', address: '0xabc', chainIds: ['1', '137'] }, '42')
+    })
+  })
+
   it('on success dispatches the notification, fires onSuccess, and closes the dialog', async () => {
     const onSuccess = jest.fn()
     const submit = jest.fn().mockResolvedValue({})

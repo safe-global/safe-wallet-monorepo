@@ -65,7 +65,7 @@ function EntryDialog({
     if (scope === 'workspace') {
       setError(undefined)
       setIsSubmitting(true)
-      const result = await upsertWorkspaceName({ ...entry, chainIds: targetChainIds })
+      const result = await upsertWorkspaceName(entry)
       setIsSubmitting(false)
       if (result.error) return setError(result.error)
     } else {

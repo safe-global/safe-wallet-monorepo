@@ -5,6 +5,7 @@ import { Check, Plus } from 'lucide-react'
 import InvalidContactNameTooltip from './InvalidContactNameTooltip'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from '@/features/spaces'
+import useChains from '@/hooks/useChains'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
@@ -18,12 +19,12 @@ import { sanitizeName } from '@safe-global/utils/validation/names'
 type AddToWorkspaceButtonProps = {
   address: string
   name: string
-  chainIds: string[]
   isCompact?: boolean
 }
 
-const AddToWorkspaceButton = ({ address, name, chainIds, isCompact }: AddToWorkspaceButtonProps) => {
+const AddToWorkspaceButton = ({ address, name, isCompact }: AddToWorkspaceButtonProps) => {
   const spaceId = useCurrentSpaceId()
+  const { configs } = useChains()
   const dispatch = useAppDispatch()
   const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -39,7 +40,9 @@ const AddToWorkspaceButton = ({ address, name, chainIds, isCompact }: AddToWorks
 
       const result = await upsertAddressBook({
         spaceId: spaceId ?? '',
-        upsertAddressBookItemsDto: { items: [{ name: sanitizeName(name), address, chainIds }] },
+        upsertAddressBookItemsDto: {
+          items: [{ name: sanitizeName(name), address, chainIds: configs.map((chain) => chain.chainId) }],
+        },
       })
 
       if (result.error) {

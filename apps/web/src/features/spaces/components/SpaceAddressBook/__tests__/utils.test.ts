@@ -71,7 +71,7 @@ describe('space address book utils', () => {
         contacts: {},
       }
 
-      const result = createContactItems(data)
+      const result = createContactItems(data, ['1', '5'])
       expect(result).toEqual([])
     })
 
@@ -83,7 +83,7 @@ describe('space address book utils', () => {
         },
       }
 
-      const result = createContactItems(data)
+      const result = createContactItems(data, ['1', '5'])
       expect(result).toEqual([])
     })
 
@@ -94,8 +94,8 @@ describe('space address book utils', () => {
         },
       }
 
-      const result = createContactItems(data)
-      expect(result).toEqual([{ chainIds: ['1'], address: '0x123', name: 'Alice' }])
+      const result = createContactItems(data, ['1', '5'])
+      expect(result).toEqual([{ chainIds: ['1', '5'], address: '0x123', name: 'Alice' }])
     })
 
     it('filters out entries without a name and only keeps valid items', () => {
@@ -107,12 +107,12 @@ describe('space address book utils', () => {
         },
       }
 
-      const result = createContactItems(data)
+      const result = createContactItems(data, ['1', '5'])
       expect(result).toHaveLength(2)
       expect(result).toEqual(
         expect.arrayContaining([
-          { chainIds: ['1'], address: '0x123', name: 'Alice' },
-          { chainIds: ['5'], address: '0xABC', name: 'Charlie' },
+          { chainIds: ['1', '5'], address: '0x123', name: 'Alice' },
+          { chainIds: ['1', '5'], address: '0xABC', name: 'Charlie' },
         ]),
       )
     })
@@ -124,8 +124,8 @@ describe('space address book utils', () => {
         },
       }
 
-      const result = createContactItems(data)
-      expect(result).toEqual([{ chainIds: ['1'], address: '0x123', name: "Alice'Bob" }])
+      const result = createContactItems(data, ['1', '5'])
+      expect(result).toEqual([{ chainIds: ['1', '5'], address: '0x123', name: "Alice'Bob" }])
     })
 
     it('parses multiple valid contacts', () => {
@@ -137,13 +137,13 @@ describe('space address book utils', () => {
         },
       }
 
-      const result = createContactItems(data)
+      const result = createContactItems(data, ['1', '5'])
       expect(result).toHaveLength(3)
       expect(result).toEqual(
         expect.arrayContaining([
-          { chainIds: ['1'], address: '0x123', name: 'Alice' },
-          { chainIds: ['1'], address: '0x456', name: 'Bob' },
-          { chainIds: ['5'], address: '0xABC', name: 'Charlie' },
+          { chainIds: ['1', '5'], address: '0x123', name: 'Alice' },
+          { chainIds: ['1', '5'], address: '0x456', name: 'Bob' },
+          { chainIds: ['1', '5'], address: '0xABC', name: 'Charlie' },
         ]),
       )
     })

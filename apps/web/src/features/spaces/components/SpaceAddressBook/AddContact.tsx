@@ -20,6 +20,7 @@ const AddContact = ({ label = 'Add contact' }: { label?: string }) => {
       successMessage={getContactAddedMessage(workspaceAddressBookLabel)}
       successGroupKey="add-contact-success"
       validateCharset
+      showNetworks={false}
       submit={(item, sid) =>
         upsertAddressBook({
           spaceId: sid,

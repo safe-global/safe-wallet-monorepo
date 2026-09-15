@@ -103,12 +103,12 @@ describe('ImportAddressBookDialog', () => {
     expect(callArgs).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          chainIds: ['1'],
+          chainIds: ['1', '5'],
           address: '0x123',
           name: 'Alice',
         }),
         expect.objectContaining({
-          chainIds: ['5'],
+          chainIds: ['1', '5'],
           address: '0xABC',
           name: 'Charlie',
         }),
@@ -152,7 +152,7 @@ describe('ImportAddressBookDialog', () => {
     jest.useRealTimers()
   })
 
-  it('shows a single-network success notification with the contact count', async () => {
+  it('shows a success notification with the contact count', async () => {
     upsertionSpyFn.mockResolvedValue({ data: {} })
 
     mockedUseAllAddressBooks.mockReturnValue({
@@ -173,7 +173,7 @@ describe('ImportAddressBookDialog', () => {
     })
   })
 
-  it('calls out the network spread in the success notification for a multi-network import', async () => {
+  it('does not mention networks when contacts come from different local chains', async () => {
     upsertionSpyFn.mockResolvedValue({ data: {} })
 
     mockedUseAllAddressBooks.mockReturnValue({
@@ -189,8 +189,7 @@ describe('ImportAddressBookDialog', () => {
 
     await waitFor(() => {
       expect(importMessages()).toContainEqual({
-        message:
-          '2 contacts imported to Acme address book across 2 networks. Only contacts on the current network are shown here',
+        message: '2 contacts imported to Acme address book',
         variant: 'success',
       })
     })

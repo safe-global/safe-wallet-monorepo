@@ -83,7 +83,10 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
 
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
-    const contactItems = createContactItems(data)
+    const contactItems = createContactItems(
+      data,
+      configs.map((chain) => chain.chainId),
+    )
 
     try {
       setIsSubmitting(true)
@@ -99,12 +102,7 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
       }
 
       const contactCount = contactItems.length
-      const networkCount = new Set(contactItems.flatMap((item) => item.chainIds)).size
-      const successMessage = getImportSuccessMessage({
-        count: contactCount,
-        networkCount,
-        bookLabel: workspaceAddressBookLabel,
-      })
+      const successMessage = getImportSuccessMessage({ count: contactCount, bookLabel: workspaceAddressBookLabel })
 
       dispatch(
         showNotification({
