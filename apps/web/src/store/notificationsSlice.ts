@@ -62,7 +62,11 @@ export const { closeNotification, closeByGroupKey, deleteAllNotifications, readN
   notificationsSlice.actions
 
 export const showNotification = (payload: Omit<Notification, 'id' | 'timestamp'>): AppThunk<string> => {
-  return (dispatch) => {
+  return (dispatch, getState) => {
+    // The browser is about to leave for the second-factor challenge, and the
+    // rejection that started it is a handshake, not a failure to report.
+    if (getState().stepUp.phase === 'leaving') return ''
+
     const id = Math.random().toString(32).slice(2)
 
     const notification: Notification = {
