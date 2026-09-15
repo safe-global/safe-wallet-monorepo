@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import SpacesList from '../index'
+import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
@@ -457,7 +458,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
     expect(heading.className).toContain('text-center')
   })
 
-  // WA-2486: the "By continuing…" Terms/Privacy text is moved out of the card
+  // WA-2486: the "By continuing…" EULA/Privacy text is moved out of the card
   // (below it) to reduce text overload inside the box.
   it('renders the "By continuing" text outside the sign-in card', () => {
     setAuth(false)
@@ -465,9 +466,20 @@ describe('SpacesList — auth/expiry state rendering', () => {
     const { container } = render(<SpacesList />)
 
     const card = container.querySelector('.bg-card')
-    const termsLink = screen.getByRole('link', { name: /^terms$/i })
+    const eulaLink = screen.getByRole('link', { name: /^eula$/i })
     expect(card).toBeInTheDocument()
-    expect(card).not.toContainElement(termsLink)
+    expect(card).not.toContainElement(eulaLink)
+  })
+
+  // WA-3520: workspace sign-in is governed by the Safe Pro EULA, not the general Terms.
+  it('links the sign-in consent text to the EULA and Privacy Policy', () => {
+    setAuth(false)
+
+    render(<SpacesList />)
+
+    expect(screen.getByRole('link', { name: /^eula$/i })).toHaveAttribute('href', AppRoutes.eula)
+    expect(screen.getByRole('link', { name: /privacy policy/i })).toHaveAttribute('href', AppRoutes.privacy)
+    expect(screen.queryByRole('link', { name: /^terms$/i })).not.toBeInTheDocument()
   })
 
   // The Create button sits right-aligned above the workspaces list when the

@@ -15,6 +15,11 @@ describe('Footer', () => {
     expect(screen.getByRole('contentinfo')).toBeInTheDocument()
   })
 
+  it('renders on the workspace legal page', () => {
+    renderAt(AppRoutes.eula)
+    expect(screen.getByRole('contentinfo')).toBeInTheDocument()
+  })
+
   it('renders on settings sub-routes', () => {
     renderAt('/settings/setup')
     expect(screen.getByRole('contentinfo')).toBeInTheDocument()

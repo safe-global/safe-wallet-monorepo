@@ -19,6 +19,7 @@ const footerPages = [
   AppRoutes.privacy,
   AppRoutes.cookie,
   AppRoutes.terms,
+  AppRoutes.eula,
   AppRoutes.licenses,
   AppRoutes.welcome.accounts,
   AppRoutes.welcome.spaces,

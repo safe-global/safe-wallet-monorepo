@@ -27,7 +27,14 @@ const ONBOARDING_ROUTES = [
   AppRoutes.welcome.survey,
 ]
 
-const STATIC_PAGE_ROUTES = [AppRoutes.terms, AppRoutes.privacy, AppRoutes.licenses, AppRoutes.imprint, AppRoutes.cookie]
+const STATIC_PAGE_ROUTES = [
+  AppRoutes.terms,
+  AppRoutes.eula,
+  AppRoutes.privacy,
+  AppRoutes.licenses,
+  AppRoutes.imprint,
+  AppRoutes.cookie,
+]
 
 const NO_HEADER_ROUTES = [
   AppRoutes.welcome.index,
