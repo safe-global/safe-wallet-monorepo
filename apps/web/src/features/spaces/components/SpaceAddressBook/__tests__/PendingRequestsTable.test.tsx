@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -90,6 +90,19 @@ describe('PendingRequestsTable', () => {
     const nameCell = screen.getByText(request.name).closest('td')
     expect(nameCell).toContainElement(screen.getByTestId('eth-hash-info'))
     expect(screen.getByTestId('eth-hash-info')).toHaveTextContent(request.address)
+  })
+
+  it('shows no chains column or chain details, since requests apply to every network', () => {
+    const request = requestBuilder().build()
+
+    const { unmount } = render(<PendingRequestsTable requests={[request]} />)
+    expect(screen.queryByText('Chains')).not.toBeInTheDocument()
+    unmount()
+
+    mockUseIsMobile.mockReturnValue(true)
+    render(<PendingRequestsTable requests={[request]} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Show details' }))
+    expect(screen.queryByText('Chains')).not.toBeInTheDocument()
   })
 
   it('renders a highlighted full address in the "Requested by" cell when requestedBy is an address', () => {

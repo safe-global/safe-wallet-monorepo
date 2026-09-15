@@ -1,11 +1,11 @@
 /**
- * Regression — the recipient dropdown only suggests contacts configured for the
- * chain the transaction is on.
+ * Regression — the recipient dropdown suggests every workspace contact on every
+ * chain, but only the local contacts stored for the chain the transaction is on.
  *
- * Sending on Sepolia must never surface a contact that only exists on mainnet or
- * polygon, even when those contacts are in the (workspace) address book. Workspace
- * contacts carry explicit `chainIds`; the dropdown filters by the current chain.
- * Local contacts are stored per chain, so only the current chain's are ever loaded.
+ * Workspace contacts are chain-agnostic: the stored `chainIds` is a save-time
+ * snapshot and is ignored on read, so a contact saved for mainnet only still shows
+ * when sending on Sepolia. Local contacts are stored per chain, so only the current
+ * chain's are ever loaded.
  *
  * Setup is explicit and inline (no shared mock helper): a faked Spaces session via
  * localStorage + a mocked `/v1/auth/me` (so the session-expiry guard doesn't clear
@@ -34,8 +34,8 @@ const WORKSPACE_CONTACTS = [
 ]
 
 // Contacts that should appear when sending on Sepolia, and those that must not.
-const VISIBLE_ON_SEPOLIA = ['Local Sepolia', 'WS Sepolia Only', 'WS Multichain']
-const HIDDEN_ON_SEPOLIA = ['Local Mainnet', 'WS Mainnet Only', 'WS Polygon Only']
+const VISIBLE_ON_SEPOLIA = ['Local Sepolia', 'WS Sepolia Only', 'WS Multichain', 'WS Mainnet Only', 'WS Polygon Only']
+const HIDDEN_ON_SEPOLIA = ['Local Mainnet']
 
 const SPACE = {
   id: Number(DROPDOWN_TEST_SPACE.id),
@@ -47,7 +47,7 @@ const SPACE = {
 }
 
 test.describe('Recipient dropdown — network filtering', { tag: '@regression' }, () => {
-  test('should only suggest contacts on the transaction chain (Sepolia), never mainnet or polygon', async ({
+  test('should suggest every workspace contact on Sepolia but only the Sepolia local contacts', async ({
     safePage,
     walletPage,
     credentials,
@@ -79,7 +79,7 @@ test.describe('Recipient dropdown — network filtering', { tag: '@regression' }
     )
 
     // Mock auth + spaces endpoints. The workspace address book returns contacts
-    // across chains; the frontend is what filters them down to the tx chain.
+    // with mixed stored chainIds; the frontend shows all of them on every chain.
     await safePage.route(/\/v1\/auth\/me(\?.*)?$/, (route) =>
       route.fulfill({ json: { id: '1', authMethod: 'siwe', signerAddress: SIGNER } }),
     )
@@ -126,12 +126,12 @@ test.describe('Recipient dropdown — network filtering', { tag: '@regression' }
     const optionByName = (name: string) => safePage.getByTestId('address-item').filter({ hasText: name })
     await expect(optionByName('WS Sepolia Only')).toBeVisible()
 
-    // Sepolia-eligible contacts are suggested.
+    // Every workspace contact and the Sepolia local contact are suggested.
     for (const name of VISIBLE_ON_SEPOLIA) {
       await expect(optionByName(name)).toBeVisible()
     }
 
-    // Contacts only on other networks are never suggested.
+    // Local contacts stored for other networks are never suggested.
     for (const name of HIDDEN_ON_SEPOLIA) {
       await expect(optionByName(name)).toHaveCount(0)
     }
