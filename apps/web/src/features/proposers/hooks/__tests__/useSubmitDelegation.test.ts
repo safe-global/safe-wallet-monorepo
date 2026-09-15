@@ -34,8 +34,8 @@ describe('useSubmitDelegation', () => {
     ...overrides,
   })
 
-  let mockAddDelegateV2: jest.Mock
-  let mockDeleteDelegateV2: jest.Mock
+  let mockAddDelegateV3: jest.Mock
+  let mockDeleteDelegateV3: jest.Mock
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -43,19 +43,19 @@ describe('useSubmitDelegation', () => {
     jest.spyOn(useSafeAddressModule, 'default').mockReturnValue(safeAddress)
     jest.spyOn(utilsModule, 'encodeEIP1271Signature').mockResolvedValue(encodedSignature)
 
-    mockAddDelegateV2 = jest.fn().mockReturnValue({ unwrap: jest.fn().mockResolvedValue({}) })
-    mockDeleteDelegateV2 = jest.fn().mockReturnValue({ unwrap: jest.fn().mockResolvedValue({}) })
+    mockAddDelegateV3 = jest.fn().mockReturnValue({ unwrap: jest.fn().mockResolvedValue({}) })
+    mockDeleteDelegateV3 = jest.fn().mockReturnValue({ unwrap: jest.fn().mockResolvedValue({}) })
 
     jest
-      .spyOn(delegatesQueries, 'useDelegatesPostDelegateV2Mutation')
-      .mockReturnValue([mockAddDelegateV2, { isLoading: false, reset: jest.fn() }] as unknown as ReturnType<
-        typeof delegatesQueries.useDelegatesPostDelegateV2Mutation
+      .spyOn(delegatesQueries, 'useDelegatesPostDelegateV3Mutation')
+      .mockReturnValue([mockAddDelegateV3, { isLoading: false, reset: jest.fn() }] as unknown as ReturnType<
+        typeof delegatesQueries.useDelegatesPostDelegateV3Mutation
       >)
 
     jest
-      .spyOn(delegatesQueries, 'useDelegatesDeleteDelegateV2Mutation')
-      .mockReturnValue([mockDeleteDelegateV2, { isLoading: false, reset: jest.fn() }] as unknown as ReturnType<
-        typeof delegatesQueries.useDelegatesDeleteDelegateV2Mutation
+      .spyOn(delegatesQueries, 'useDelegatesDeleteDelegateV3Mutation')
+      .mockReturnValue([mockDeleteDelegateV3, { isLoading: false, reset: jest.fn() }] as unknown as ReturnType<
+        typeof delegatesQueries.useDelegatesDeleteDelegateV3Mutation
       >)
   })
 
@@ -68,7 +68,7 @@ describe('useSubmitDelegation', () => {
     )
   })
 
-  it('should call addDelegateV2 for add action with correct params', async () => {
+  it('should call addDelegateV3 for add action with correct params', async () => {
     const { result } = renderHook(() => useSubmitDelegation())
     const delegation = createPendingDelegation({ action: 'add' })
 
@@ -77,7 +77,7 @@ describe('useSubmitDelegation', () => {
     })
 
     expect(utilsModule.encodeEIP1271Signature).toHaveBeenCalledWith(parentSafeAddress, preparedSignature)
-    expect(mockAddDelegateV2).toHaveBeenCalledWith({
+    expect(mockAddDelegateV3).toHaveBeenCalledWith({
       chainId,
       createDelegateDto: {
         safe: safeAddress,
@@ -87,10 +87,10 @@ describe('useSubmitDelegation', () => {
         label: PROPOSER_LABEL_PLACEHOLDER,
       },
     })
-    expect(mockDeleteDelegateV2).not.toHaveBeenCalled()
+    expect(mockDeleteDelegateV3).not.toHaveBeenCalled()
   })
 
-  it('should call deleteDelegateV2 for remove action with correct params', async () => {
+  it('should call deleteDelegateV3 for remove action with correct params', async () => {
     const { result } = renderHook(() => useSubmitDelegation())
     const delegation = createPendingDelegation({ action: 'remove' })
 
@@ -99,16 +99,16 @@ describe('useSubmitDelegation', () => {
     })
 
     expect(utilsModule.encodeEIP1271Signature).toHaveBeenCalledWith(parentSafeAddress, preparedSignature)
-    expect(mockDeleteDelegateV2).toHaveBeenCalledWith({
+    expect(mockDeleteDelegateV3).toHaveBeenCalledWith({
       chainId,
       delegateAddress,
-      deleteDelegateV2Dto: {
+      deleteDelegateV3Dto: {
         delegator: parentSafeAddress,
         safe: safeAddress,
         signature: encodedSignature,
       },
     })
-    expect(mockAddDelegateV2).not.toHaveBeenCalled()
+    expect(mockAddDelegateV3).not.toHaveBeenCalled()
   })
 
   it('should set isSubmitting to true during submission', async () => {
@@ -117,7 +117,7 @@ describe('useSubmitDelegation', () => {
       resolvePromise = resolve
     })
 
-    mockAddDelegateV2.mockReturnValue({ unwrap: () => pendingPromise })
+    mockAddDelegateV3.mockReturnValue({ unwrap: () => pendingPromise })
 
     const { result } = renderHook(() => useSubmitDelegation())
     const delegation = createPendingDelegation({ action: 'add' })
@@ -154,7 +154,7 @@ describe('useSubmitDelegation', () => {
 
   it('should set submitError on failure', async () => {
     const error = new Error('Network error')
-    mockAddDelegateV2.mockReturnValue({ unwrap: jest.fn().mockRejectedValue(error) })
+    mockAddDelegateV3.mockReturnValue({ unwrap: jest.fn().mockRejectedValue(error) })
 
     const { result } = renderHook(() => useSubmitDelegation())
     const delegation = createPendingDelegation({ action: 'add' })
@@ -172,7 +172,7 @@ describe('useSubmitDelegation', () => {
 
   it('should re-throw error after setting submitError', async () => {
     const error = new Error('Network error')
-    mockAddDelegateV2.mockReturnValue({ unwrap: jest.fn().mockRejectedValue(error) })
+    mockAddDelegateV3.mockReturnValue({ unwrap: jest.fn().mockRejectedValue(error) })
 
     const { result } = renderHook(() => useSubmitDelegation())
     const delegation = createPendingDelegation({ action: 'add' })
@@ -192,7 +192,7 @@ describe('useSubmitDelegation', () => {
 
   it('should set isSubmitting to false after failure', async () => {
     const error = new Error('Network error')
-    mockAddDelegateV2.mockReturnValue({ unwrap: jest.fn().mockRejectedValue(error) })
+    mockAddDelegateV3.mockReturnValue({ unwrap: jest.fn().mockRejectedValue(error) })
 
     const { result } = renderHook(() => useSubmitDelegation())
     const delegation = createPendingDelegation({ action: 'add' })
@@ -210,7 +210,7 @@ describe('useSubmitDelegation', () => {
 
   it('should clear previous submitError on new submission', async () => {
     const error = new Error('Network error')
-    mockAddDelegateV2
+    mockAddDelegateV3
       .mockReturnValueOnce({ unwrap: jest.fn().mockRejectedValue(error) })
       .mockReturnValueOnce({ unwrap: jest.fn().mockResolvedValue({}) })
 

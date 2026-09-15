@@ -19,7 +19,7 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { isEthSignWallet } from '@/utils/wallets'
 import {
   useDelegatesDeleteDelegateV1Mutation,
-  useDelegatesDeleteDelegateV2Mutation,
+  useDelegatesDeleteDelegateV3Mutation,
   type Delegate,
 } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
@@ -39,7 +39,6 @@ import { getAssertedChainSigner } from '@/services/tx/tx-sender/sdk'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 
 type DeleteProposerProps = {
   wallet: ReturnType<typeof useWallet>
@@ -54,7 +53,7 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [multiSigInitiated, setMultiSigInitiated] = useState<boolean>(false)
   const [deleteDelegateV1] = useDelegatesDeleteDelegateV1Mutation()
-  const [deleteDelegateV2] = useDelegatesDeleteDelegateV2Mutation()
+  const [deleteDelegateV3] = useDelegatesDeleteDelegateV3Mutation()
   const dispatch = useAppDispatch()
   const nestedSafeOwners = useNestedSafeOwners()
 
@@ -86,8 +85,15 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
 
       if (parentSafeAddress && isMultiSigRequired) {
         // Multi-sig flow: create off-chain message on parent Safe for signature collection
-        const eoaSignature = await signProposerTypedDataForSafe(chainId, proposer.delegate, parentSafeAddress, signer)
-        const delegateTypedData = getDelegateTypedData(chainId, proposer.delegate) as TypedData
+        const eoaSignature = await signProposerTypedDataForSafe(
+          chainId,
+          proposer.delegate,
+          parentSafeAddress,
+          safeAddress,
+          'delete',
+          signer,
+        )
+        const delegateTypedData = getDelegateTypedData(chainId, proposer.delegate, safeAddress, 'delete')
         const origin = buildDelegationOrigin('remove', proposer.delegate, safeAddress)
 
         await createDelegationMessage(dispatch, chainId, parentSafeAddress, delegateTypedData, eoaSignature, origin)
@@ -102,13 +108,20 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
 
       if (parentSafeAddress) {
         // Single-sig nested Safe owner
-        const eoaSignature = await signProposerTypedDataForSafe(chainId, proposer.delegate, parentSafeAddress, signer)
+        const eoaSignature = await signProposerTypedDataForSafe(
+          chainId,
+          proposer.delegate,
+          parentSafeAddress,
+          safeAddress,
+          'delete',
+          signer,
+        )
         signature = await encodeEIP1271Signature(parentSafeAddress, eoaSignature)
 
-        await deleteDelegateV2({
+        await deleteDelegateV3({
           chainId,
           delegateAddress: proposer.delegate,
-          deleteDelegateV2Dto: {
+          deleteDelegateV3Dto: {
             delegator: parentSafeAddress,
             safe: safeAddress,
             signature,
@@ -117,7 +130,7 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
       } else {
         signature = shouldEthSign
           ? await signProposerData(proposer.delegate, signer)
-          : await signProposerTypedData(chainId, proposer.delegate, signer)
+          : await signProposerTypedData(chainId, proposer.delegate, safeAddress, 'delete', signer)
 
         if (shouldEthSign) {
           await deleteDelegateV1({
@@ -130,10 +143,10 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
             },
           }).unwrap()
         } else {
-          await deleteDelegateV2({
+          await deleteDelegateV3({
             chainId,
             delegateAddress: proposer.delegate,
-            deleteDelegateV2Dto: {
+            deleteDelegateV3Dto: {
               delegator: proposer.delegator,
               safe: safeAddress,
               signature,

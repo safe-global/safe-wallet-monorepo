@@ -2,9 +2,9 @@ import { useCallback } from 'react'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWallet from '@/hooks/wallets/useWallet'
 import {
-  useDelegatesGetDelegatesV2Query,
-  useLazyDelegatesGetDelegatesV2Query,
-  type DelegatesGetDelegatesV2ApiArg,
+  useDelegatesGetDelegatesV3Query,
+  useLazyDelegatesGetDelegatesV3Query,
+  type DelegatesGetDelegatesV3ApiArg,
   type DelegatePage,
 } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 
@@ -19,9 +19,9 @@ const useProposers = () => {
 
   const shouldFetch = Boolean(chainId && safeAddress)
 
-  const queryArg: DelegatesGetDelegatesV2ApiArg | undefined = shouldFetch ? { chainId, safe: safeAddress } : undefined
+  const queryArg: DelegatesGetDelegatesV3ApiArg | undefined = shouldFetch ? { chainId, safe: safeAddress } : undefined
 
-  return useDelegatesGetDelegatesV2Query(queryArg as DelegatesGetDelegatesV2ApiArg, {
+  return useDelegatesGetDelegatesV3Query(queryArg as DelegatesGetDelegatesV3ApiArg, {
     skip: !shouldFetch,
   })
 }
@@ -34,7 +34,7 @@ export const useGetIsWalletProposer = (): (() => Promise<boolean>) => {
     safeAddress,
   } = useSafeInfo()
   const { data } = useProposers()
-  const [fetchProposers] = useLazyDelegatesGetDelegatesV2Query()
+  const [fetchProposers] = useLazyDelegatesGetDelegatesV3Query()
 
   const isProposer = data ? hasDelegate(data, wallet?.address) : undefined
   const walletAddress = wallet?.address
