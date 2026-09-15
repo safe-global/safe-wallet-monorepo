@@ -24,7 +24,7 @@ type AddToWorkspaceButtonProps = {
 
 const AddToWorkspaceButton = ({ address, name, isCompact }: AddToWorkspaceButtonProps) => {
   const spaceId = useCurrentSpaceId()
-  const { configs } = useChains()
+  const { configs: chains } = useChains()
   const dispatch = useAppDispatch()
   const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -39,9 +39,9 @@ const AddToWorkspaceButton = ({ address, name, isCompact }: AddToWorkspaceButton
       setIsSubmitting(true)
 
       const result = await upsertAddressBook({
-        spaceId: spaceId ?? '',
+        spaceId,
         upsertAddressBookItemsDto: {
-          items: [{ name: sanitizeName(name), address, chainIds: configs.map((chain) => chain.chainId) }],
+          items: [{ name: sanitizeName(name), address, chainIds: chains.map((chain) => chain.chainId) }],
         },
       })
 
@@ -84,7 +84,7 @@ const AddToWorkspaceButton = ({ address, name, isCompact }: AddToWorkspaceButton
       size={isCompact ? 'icon-sm' : 'sm'}
       aria-label={isCompact ? label : undefined}
       onClick={handleAdd}
-      disabled={isSubmitting || added || !!nameError}
+      disabled={isSubmitting || added || !!nameError || chains.length === 0}
     >
       {isSubmitting ? <Spinner className="size-3.5" /> : isCompact ? icon : label}
     </Button>

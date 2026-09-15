@@ -37,7 +37,7 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const handleCloseRef = useRef(handleClose)
-  const { configs } = useChains()
+  const { configs: chains } = useChains()
   const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
   const workspaceAddressBookLabel = useWorkspaceAddressBookLabel()
@@ -48,9 +48,9 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
   const allContactItems = useMemo(
     () =>
       flattenAddressBook(allAddressBooks).filter((contactItem) =>
-        configs.some((chain) => chain.chainId === contactItem.chainId),
+        chains.some((chain) => chain.chainId === contactItem.chainId),
       ),
-    [allAddressBooks, configs],
+    [allAddressBooks, chains],
   )
 
   const hasNoImportableContacts = useMemo(
@@ -85,7 +85,7 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
     setError(undefined)
     const contactItems = createContactItems(
       data,
-      configs.map((chain) => chain.chainId),
+      chains.map((chain) => chain.chainId),
     )
 
     try {

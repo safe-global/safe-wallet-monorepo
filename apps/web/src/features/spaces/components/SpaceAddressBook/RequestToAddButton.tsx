@@ -36,7 +36,7 @@ const getRequestErrorMessage = (error: unknown): string => {
 
 const RequestToAddButton = ({ address, name, alreadyRequested, isCompact }: RequestToAddButtonProps) => {
   const spaceId = useCurrentSpaceId()
-  const { configs } = useChains()
+  const { configs: chains } = useChains()
   const dispatch = useAppDispatch()
   const [createRequest] = useAddressBookRequestsCreateRequestV1Mutation()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -57,7 +57,7 @@ const RequestToAddButton = ({ address, name, alreadyRequested, isCompact }: Requ
         createAddressBookRequestDto: {
           address,
           name: sanitizeName(name),
-          chainIds: configs.map((chain) => chain.chainId),
+          chainIds: chains.map((chain) => chain.chainId),
         },
       })
 
@@ -177,7 +177,7 @@ const RequestToAddButton = ({ address, name, alreadyRequested, isCompact }: Requ
           confirmLabel="Request to add"
           onConfirm={handleConfirm}
           confirmTestId="confirm-request-btn"
-          confirmDisabled={!!nameError || isSubmitting}
+          confirmDisabled={!!nameError || isSubmitting || chains.length === 0}
           confirmLoading={isSubmitting}
         />
       </ModalDialog>

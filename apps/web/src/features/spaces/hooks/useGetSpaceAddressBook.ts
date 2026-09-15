@@ -14,18 +14,19 @@ const EMPTY_ADDRESS_BOOK: SpaceAddressBookItemDto[] = []
 const useGetSpaceAddressBook = (): SpaceAddressBookItemDto[] => {
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { configs } = useChains()
+  const { configs: chains } = useChains()
   const { currentData: addressBook } = useAddressBooksGetAddressBookItemsV1Query(
     { spaceId: spaceId ?? '' },
     { skip: !isUserSignedIn || !spaceId, ...SPACE_REFRESH_OPTIONS },
   )
 
-  // Workspace contacts apply to every network; the stored `chainIds` is a save-time snapshot
+  // Workspace contacts apply to every network; the stored save-time snapshot only serves while the chain config is unavailable
   return useMemo(() => {
     if (!addressBook) return EMPTY_ADDRESS_BOOK
-    const chainIds = configs.map((chain) => chain.chainId)
+    if (chains.length === 0) return addressBook.data
+    const chainIds = chains.map((chain) => chain.chainId)
     return addressBook.data.map((item) => ({ ...item, chainIds }))
-  }, [addressBook, configs])
+  }, [addressBook, chains])
 }
 
 export default useGetSpaceAddressBook

@@ -8,9 +8,11 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
 }))
 jest.mock('../useCurrentSpaceId', () => ({ useCurrentSpaceId: jest.fn() }))
 jest.mock('../useWorkspaceAddressBookLabel', () => ({ useWorkspaceAddressBookLabel: () => 'Acme address book' }))
+let mockConfigs: { chainId: string }[] = []
+
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
-  default: () => ({ configs: [{ chainId: '1' }, { chainId: '137' }] }),
+  default: () => ({ configs: mockConfigs }),
 }))
 
 const ADDRESS = '0x1111111111111111111111111111111111111111'
@@ -24,7 +26,21 @@ const setup = ({ result = {} }: { result?: unknown } = {}) => {
 }
 
 describe('useUpsertWorkspaceSafeName', () => {
-  beforeEach(() => jest.clearAllMocks())
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockConfigs = [{ chainId: '1' }, { chainId: '137' }]
+  })
+
+  it('refuses to write while the chain config is empty', async () => {
+    const upsert = setup()
+    mockConfigs = []
+    const { result } = renderHook(() => useUpsertWorkspaceSafeName())
+
+    await expect(result.current({ address: ADDRESS, name: 'Treasury' })).resolves.toEqual({
+      error: 'Supported networks are still loading. Try again in a moment.',
+    })
+    expect(upsert).not.toHaveBeenCalled()
+  })
 
   it('writes the name to the current space address book on every supported chain', async () => {
     const upsert = setup()

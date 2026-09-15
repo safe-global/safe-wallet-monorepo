@@ -19,14 +19,11 @@ jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '42',
 }))
 
+let mockConfigs: { chainId: string; chainName: string }[] = []
+
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
-  default: () => ({
-    configs: [
-      { chainId: '1', chainName: 'Ethereum' },
-      { chainId: '137', chainName: 'Polygon' },
-    ],
-  }),
+  default: () => ({ configs: mockConfigs }),
 }))
 
 jest.mock('@/components/common/ModalDialog', () => ({
@@ -77,6 +74,24 @@ const fillRequiredFields = () => {
 describe('AddContactDialog', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockConfigs = [
+      { chainId: '1', chainName: 'Ethereum' },
+      { chainId: '137', chainName: 'Polygon' },
+    ]
+  })
+
+  it('keeps submit disabled while the chain config is empty', async () => {
+    mockConfigs = []
+    const submit = jest.fn().mockResolvedValue({})
+    render(<AddContactDialog {...baseProps} submit={submit} showNetworks={false} />)
+    openDialog()
+    fillRequiredFields()
+
+    const submitButton = screen.getByRole('button', { name: 'Add contact' })
+    await waitFor(() => expect(screen.getByLabelText('Name')).toHaveValue('Alice'))
+    expect(submitButton).toBeDisabled()
+    fireEvent.click(submitButton)
+    expect(submit).not.toHaveBeenCalled()
   })
 
   it('renders the trigger label and opens the dialog with the given title', () => {

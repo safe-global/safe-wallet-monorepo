@@ -204,7 +204,7 @@ const AddContactDialog = ({
                 cancelTestId="cancel-btn"
                 confirmType="submit"
                 confirmLabel={submitLabel}
-                confirmDisabled={!formState.isValid || isSubmitting}
+                confirmDisabled={!formState.isValid || isSubmitting || allNetworks.length === 0}
                 confirmLoading={isSubmitting}
               />
             </form>

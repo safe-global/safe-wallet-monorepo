@@ -13,7 +13,7 @@ type UpsertWorkspaceSafeName = (args: { address: string; name: string }) => Prom
 
 export const useUpsertWorkspaceSafeName = (): UpsertWorkspaceSafeName => {
   const spaceId = useCurrentSpaceId()
-  const { configs } = useChains()
+  const { configs: chains } = useChains()
   const workspaceLabel = useWorkspaceAddressBookLabel()
   const dispatch = useAppDispatch()
   const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
@@ -21,8 +21,9 @@ export const useUpsertWorkspaceSafeName = (): UpsertWorkspaceSafeName => {
   return useCallback(
     async ({ address, name }) => {
       if (!spaceId) return { error: 'No workspace is selected. Switch to a workspace and try again.' }
+      if (chains.length === 0) return { error: 'Supported networks are still loading. Try again in a moment.' }
 
-      const chainIds = configs.map((chain) => chain.chainId)
+      const chainIds = chains.map((chain) => chain.chainId)
       const result = await upsertAddressBook({
         spaceId,
         upsertAddressBookItemsDto: { items: [{ name: sanitizeName(name), address, chainIds }] },
@@ -42,6 +43,6 @@ export const useUpsertWorkspaceSafeName = (): UpsertWorkspaceSafeName => {
 
       return {}
     },
-    [spaceId, configs, workspaceLabel, dispatch, upsertAddressBook],
+    [spaceId, chains, workspaceLabel, dispatch, upsertAddressBook],
   )
 }

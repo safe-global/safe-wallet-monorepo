@@ -36,7 +36,7 @@ type EditContactField = {
 const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { configs } = useChains()
+  const { configs: chains } = useChains()
   const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
   const isDarkMode = useDarkMode()
@@ -66,7 +66,7 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
     const addressBookItem = {
       name: sanitizeName(data.name),
       address: entry.address,
-      chainIds: configs.map((chain) => chain.chainId),
+      chainIds: chains.map((chain) => chain.chainId),
     }
 
     try {
@@ -138,7 +138,7 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
               cancelTestId="cancel-btn"
               confirmLabel="Save"
               confirmType="submit"
-              confirmDisabled={!formState.isValid || !hasChanges}
+              confirmDisabled={!formState.isValid || !hasChanges || chains.length === 0}
               confirmLoading={isSubmitting}
             />
           </form>
