@@ -324,7 +324,7 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
               class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
               data-slot="link"
               data-variant="default"
-              href="https://help.safe.global/articles/6128275759-security-hub"
+              href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
               rel="noreferrer noopener"
               target="_blank"
             >
@@ -409,7 +409,7 @@ exports[`./SafeShield.stories Empty 1`] = `
               class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
               data-slot="link"
               data-variant="default"
-              href="https://help.safe.global/articles/6128275759-security-hub"
+              href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
               rel="noreferrer noopener"
               target="_blank"
             >
@@ -737,7 +737,7 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
               class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
               data-slot="link"
               data-variant="default"
-              href="https://help.safe.global/articles/6128275759-security-hub"
+              href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
               rel="noreferrer noopener"
               target="_blank"
             >
@@ -982,7 +982,7 @@ exports[`./SafeShield.stories HypernativeCustomCheckFailed 1`] = `
               class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
               data-slot="link"
               data-variant="default"
-              href="https://help.safe.global/articles/6128275759-security-hub"
+              href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
               rel="noreferrer noopener"
               target="_blank"
             >
@@ -1227,7 +1227,7 @@ exports[`./SafeShield.stories HypernativeGuardActive 1`] = `
               class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
               data-slot="link"
               data-variant="default"
-              href="https://help.safe.global/articles/6128275759-security-hub"
+              href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
               rel="noreferrer noopener"
               target="_blank"
             >
@@ -1686,7 +1686,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
               class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
               data-slot="link"
               data-variant="default"
-              href="https://help.safe.global/articles/6128275759-security-hub"
+              href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
               rel="noreferrer noopener"
               target="_blank"
             >
@@ -1888,7 +1888,7 @@ exports[`./SafeShield.stories HypernativeNotLoggedIn 1`] = `
               class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
               data-slot="link"
               data-variant="default"
-              href="https://help.safe.global/articles/6128275759-security-hub"
+              href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
               rel="noreferrer noopener"
               target="_blank"
             >
@@ -2028,7 +2028,7 @@ exports[`./SafeShield.stories Loading 1`] = `
               class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
               data-slot="link"
               data-variant="default"
-              href="https://help.safe.global/articles/6128275759-security-hub"
+              href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
               rel="noreferrer noopener"
               target="_blank"
             >
@@ -2570,7 +2570,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
               class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
               data-slot="link"
               data-variant="default"
-              href="https://help.safe.global/articles/6128275759-security-hub"
+              href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
               rel="noreferrer noopener"
               target="_blank"
             >
@@ -2934,7 +2934,7 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
               class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
               data-slot="link"
               data-variant="default"
-              href="https://help.safe.global/articles/6128275759-security-hub"
+              href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
               rel="noreferrer noopener"
               target="_blank"
             >
@@ -3282,7 +3282,7 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
               class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
               data-slot="link"
               data-variant="default"
-              href="https://help.safe.global/articles/6128275759-security-hub"
+              href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
               rel="noreferrer noopener"
               target="_blank"
             >
@@ -3610,7 +3610,7 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
               class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
               data-slot="link"
               data-variant="default"
-              href="https://help.safe.global/articles/6128275759-security-hub"
+              href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
               rel="noreferrer noopener"
               target="_blank"
             >
@@ -5256,7 +5256,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
               class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
               data-slot="link"
               data-variant="default"
-              href="https://help.safe.global/articles/6128275759-security-hub"
+              href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
               rel="noreferrer noopener"
               target="_blank"
             >
@@ -5750,7 +5750,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
               class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
               data-slot="link"
               data-variant="default"
-              href="https://help.safe.global/articles/6128275759-security-hub"
+              href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
               rel="noreferrer noopener"
               target="_blank"
             >
@@ -6010,7 +6010,7 @@ exports[`./SafeShield.stories OverflowFindings 1`] = `
               class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
               data-slot="link"
               data-variant="default"
-              href="https://help.safe.global/articles/6128275759-security-hub"
+              href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
               rel="noreferrer noopener"
               target="_blank"
             >
@@ -6338,7 +6338,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
               class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
               data-slot="link"
               data-variant="default"
-              href="https://help.safe.global/articles/6128275759-security-hub"
+              href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
               rel="noreferrer noopener"
               target="_blank"
             >
@@ -6838,7 +6838,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
               class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
               data-slot="link"
               data-variant="default"
-              href="https://help.safe.global/articles/6128275759-security-hub"
+              href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
               rel="noreferrer noopener"
               target="_blank"
             >
@@ -7185,7 +7185,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
               class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
               data-slot="link"
               data-variant="default"
-              href="https://help.safe.global/articles/6128275759-security-hub"
+              href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
               rel="noreferrer noopener"
               target="_blank"
             >
@@ -7506,7 +7506,7 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
               class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
               data-slot="link"
               data-variant="default"
-              href="https://help.safe.global/articles/6128275759-security-hub"
+              href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
               rel="noreferrer noopener"
               target="_blank"
             >
@@ -7751,7 +7751,7 @@ exports[`./SafeShield.stories UnverifiedContract 1`] = `
               class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
               data-slot="link"
               data-variant="default"
-              href="https://help.safe.global/articles/6128275759-security-hub"
+              href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
               rel="noreferrer noopener"
               target="_blank"
             >

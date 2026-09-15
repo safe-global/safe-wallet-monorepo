@@ -72,11 +72,11 @@ const BatchSidebar = ({ isOpen, onToggle }: { isOpen: boolean; onToggle: (open: 
       <SheetContent
         side="right"
         showCloseButton={false}
-        overlayClassName="z-[100]"
+        overlayClassName="z-[var(--z-overlay)]"
         size="lg"
         padding="none"
-        // eslint-disable-next-line no-restricted-syntax -- z-[100] stacking + gap-0 (kills base gap-4) + rounded-l-2xl partial-float radius; no tokens
-        className="z-[100] gap-0 rounded-l-2xl"
+        // eslint-disable-next-line no-restricted-syntax -- --z-overlay stacking (above sidebar) + gap-0 (kills base gap-4) + rounded-l-2xl partial-float radius
+        className="z-[var(--z-overlay)] gap-0 rounded-l-2xl"
       >
         <aside className={css.aside}>
           <Typography variant="h4" className="pr-10 font-bold">

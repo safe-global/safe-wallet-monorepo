@@ -41,27 +41,26 @@ const EditableApprovalItem = ({
   }
 
   return (
-    <div
-      className={`${css.approvalField} flex flex-row items-center gap-4`}
-      onClick={readOnly ? handleEditMode : undefined}
-    >
-      <div className="flex flex-row items-center gap-1">
+    <div className={`${css.approvalField} ${css.approvalRow}`} onClick={readOnly ? handleEditMode : undefined}>
+      <div className={css.approvalIcon}>
         <TokenIcon size={32} logoUri={approval.tokenInfo?.logoUri} tokenSymbol={approval.tokenInfo?.symbol} />
       </div>
 
       <ApprovalValueField name={name} tx={approval} readOnly={readOnly} />
 
-      <Track {...MODALS_EVENTS.EDIT_APPROVALS} label={readOnly ? 'edit' : 'save'}>
-        {readOnly ? (
-          <Button variant="ghost" size="icon-sm" onClick={handleEditMode} title="Edit">
-            <SquarePen className="size-4" />
-          </Button>
-        ) : (
-          <Button variant="ghost" size="sm" onClick={handleSave} title="Save" disabled={!!fieldErrors || !isDirty}>
-            Save
-          </Button>
-        )}
-      </Track>
+      <div className={css.approvalAction}>
+        <Track {...MODALS_EVENTS.EDIT_APPROVALS} label={readOnly ? 'edit' : 'save'}>
+          {readOnly ? (
+            <Button variant="ghost" size="icon-sm" onClick={handleEditMode} title="Edit">
+              <SquarePen className="size-4" />
+            </Button>
+          ) : (
+            <Button variant="ghost" size="sm" onClick={handleSave} title="Save" disabled={!!fieldErrors || !isDirty}>
+              Save
+            </Button>
+          )}
+        </Track>
+      </div>
     </div>
   )
 }

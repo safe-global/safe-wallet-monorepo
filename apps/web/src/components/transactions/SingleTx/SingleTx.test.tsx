@@ -1,6 +1,6 @@
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
-import { fireEvent, render } from '@/tests/test-utils'
+import { render } from '@/tests/test-utils'
 import SingleTx from '@/pages/transactions/tx'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
 import { waitFor } from '@testing-library/react'
@@ -91,10 +91,10 @@ describe('SingleTx', () => {
       expect(screen.getByText('Failed to load transaction')).toBeInTheDocument()
     })
 
-    // A known CGW response state shows the code-only support reference instead
-    // of a Details toggle revealing the raw response (WA-3252).
-    expect(screen.getByTestId('error-details')).toBeInTheDocument()
-    expect(screen.getByText('CGW-500')).toBeInTheDocument()
+    // A known CGW response state shows its message alone — no code reference, and no Details
+    // toggle revealing the raw response (WA-3252).
+    expect(screen.queryByTestId('error-details')).not.toBeInTheDocument()
+    expect(screen.queryByText('CGW-500')).not.toBeInTheDocument()
     expect(screen.queryByText('Details')).not.toBeInTheDocument()
     expect(screen.queryByText('Server error')).not.toBeInTheDocument()
   })
@@ -115,10 +115,8 @@ describe('SingleTx', () => {
       expect(screen.getByText('Failed to load transaction')).toBeInTheDocument()
     })
 
-    fireEvent.click(screen.getByText('Details'))
-
-    await waitFor(() => {
-      expect(screen.getByText('Transaction with this id was not found in this Safe account')).toBeInTheDocument()
-    })
+    // The raw gateway response is never offered to the user — there is no Details toggle to open.
+    expect(screen.queryByText('Details')).not.toBeInTheDocument()
+    expect(screen.queryByText('Transaction with this id was not found in this Safe account')).not.toBeInTheDocument()
   })
 })
