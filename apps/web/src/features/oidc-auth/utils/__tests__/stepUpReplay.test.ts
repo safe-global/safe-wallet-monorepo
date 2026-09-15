@@ -7,57 +7,37 @@ import { makeStore } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
 import { server } from '@/tests/server'
 import { stepUpReturning } from '../../store'
-import { getReplayableAction, replayStepUpAction, saveStepUpTrip, takeStepUpTrip } from '../stepUpReplay'
+import { replayStepUpAction, saveStepUpTrip, takeStepUpTrip, toReplayableRequest } from '../stepUpReplay'
 
-const rejectedMutation = (endpointName: string, originalArgs: unknown) => ({
-  type: 'cgwClient/executeMutation/rejected',
-  payload: { status: 403, data: { message: 'elevation_required' } },
-  meta: { arg: { type: 'mutation', endpointName, originalArgs }, requestStatus: 'rejected' },
-})
+const INVITE_REQUEST = { url: '/v1/spaces/7/members', method: 'POST', body: { users: [] } }
 
-describe('getReplayableAction', () => {
-  it('should, when a rejected gated mutation is given, return its endpoint and args', () => {
-    const args = { spaceId: faker.string.numeric(3) }
-
-    expect(getReplayableAction(rejectedMutation('spaceSafesCreateV1', args))).toEqual({
-      endpoint: 'spaceSafesCreateV1',
-      args,
+describe('toReplayableRequest', () => {
+  it('should, when a gated endpoint is given, keep its name and the prepared request', () => {
+    expect(toReplayableRequest('membersInviteUserV1', INVITE_REQUEST)).toEqual({
+      endpoint: 'membersInviteUserV1',
+      request: INVITE_REQUEST,
     })
   })
 
-  it('should, when the rejected mutation targets any gated endpoint, return that endpoint', () => {
-    expect(getReplayableAction(rejectedMutation('spaceSafesCreateV1', {}))?.endpoint).toBe('spaceSafesCreateV1')
-    expect(getReplayableAction(rejectedMutation('spaceSafesDeleteV1', {}))?.endpoint).toBe('spaceSafesDeleteV1')
-    expect(getReplayableAction(rejectedMutation('spacesUpdateV1', {}))?.endpoint).toBe('spacesUpdateV1')
-    expect(getReplayableAction(rejectedMutation('spacesDeleteV1', {}))?.endpoint).toBe('spacesDeleteV1')
-    expect(getReplayableAction(rejectedMutation('membersInviteUserV1', {}))?.endpoint).toBe('membersInviteUserV1')
-    expect(getReplayableAction(rejectedMutation('membersUpdateRoleV1', {}))?.endpoint).toBe('membersUpdateRoleV1')
-    expect(getReplayableAction(rejectedMutation('membersRemoveUserV1', {}))?.endpoint).toBe('membersRemoveUserV1')
-    expect(getReplayableAction(rejectedMutation('addressBooksUpsertAddressBookItemsV1', {}))?.endpoint).toBe(
+  it('should accept every gated endpoint', () => {
+    const gated = [
+      'spaceSafesCreateV1',
+      'spaceSafesDeleteV1',
+      'spacesUpdateV1',
+      'spacesDeleteV1',
+      'membersInviteUserV1',
+      'membersUpdateRoleV1',
+      'membersRemoveUserV1',
       'addressBooksUpsertAddressBookItemsV1',
-    )
-    expect(getReplayableAction(rejectedMutation('addressBooksDeleteByAddressV1', {}))?.endpoint).toBe(
       'addressBooksDeleteByAddressV1',
-    )
-    expect(getReplayableAction(rejectedMutation('addressBookRequestsApproveRequestV1', {}))?.endpoint).toBe(
       'addressBookRequestsApproveRequestV1',
-    )
+    ]
+
+    expect(gated.map((endpoint) => toReplayableRequest(endpoint, INVITE_REQUEST)?.endpoint)).toEqual(gated)
   })
 
-  it('should, when the rejected mutation targets an endpoint outside the gated set, return undefined', () => {
-    expect(getReplayableAction(rejectedMutation('spacesCreateV1', {}))).toBeUndefined()
-  })
-
-  it('should, when the action has no meta, return undefined', () => {
-    expect(getReplayableAction({ type: 'x' })).toBeUndefined()
-  })
-
-  it('should, when the action has no arg, return undefined', () => {
-    expect(getReplayableAction({ type: 'x', meta: {} })).toBeUndefined()
-  })
-
-  it('should, when the action has no endpointName, return undefined', () => {
-    expect(getReplayableAction({ type: 'x', meta: { arg: {} } })).toBeUndefined()
+  it('should, when the endpoint is outside the gated set, return undefined', () => {
+    expect(toReplayableRequest('spacesCreateV1', INVITE_REQUEST)).toBeUndefined()
   })
 })
 
@@ -68,7 +48,7 @@ describe('step-up trip storage', () => {
   })
 
   it('should, when an action was saved, return it on take', () => {
-    const action = { endpoint: 'membersInviteUserV1', args: { spaceId: '7' } } as const
+    const action = { endpoint: 'membersInviteUserV1', request: INVITE_REQUEST } as const
     saveStepUpTrip(action)
 
     expect(takeStepUpTrip()).toEqual({ action })
@@ -81,7 +61,7 @@ describe('step-up trip storage', () => {
   })
 
   it('should, when a trip is taken, remove it so nothing is acted on twice or by a later trip', () => {
-    saveStepUpTrip({ endpoint: 'spacesDeleteV1', args: { id: '1' } })
+    saveStepUpTrip({ endpoint: 'spacesDeleteV1', request: { url: '/v1/spaces/1', method: 'DELETE' } })
 
     expect(takeStepUpTrip()).toBeDefined()
     expect(takeStepUpTrip()).toBeUndefined()
@@ -94,7 +74,7 @@ describe('step-up trip storage', () => {
 
   it('should, when the stored trip is older than the challenge window, return undefined and delete it', () => {
     jest.useFakeTimers()
-    saveStepUpTrip({ endpoint: 'membersInviteUserV1', args: {} })
+    saveStepUpTrip({ endpoint: 'membersInviteUserV1', request: INVITE_REQUEST })
 
     jest.advanceTimersByTime(5 * 60 * 1_000 + 1)
 
@@ -110,7 +90,7 @@ describe('step-up trip storage', () => {
   })
 
   it('should, when the stored record has no createdAt, return undefined and delete it', () => {
-    sessionStorage.setItem('oidc_step_up', JSON.stringify({ endpoint: 'spacesUpdateV1', args: {} }))
+    sessionStorage.setItem('oidc_step_up', JSON.stringify({ endpoint: 'spacesUpdateV1', request: INVITE_REQUEST }))
 
     expect(takeStepUpTrip()).toBeUndefined()
     expect(sessionStorage.getItem('oidc_step_up')).toBeNull()
@@ -119,7 +99,16 @@ describe('step-up trip storage', () => {
   it('should, when a fresh record names an endpoint that is no longer gated, return a bare trip', () => {
     sessionStorage.setItem(
       'oidc_step_up',
-      JSON.stringify({ endpoint: 'somethingElse', args: {}, createdAt: Date.now() }),
+      JSON.stringify({ endpoint: 'somethingElse', request: INVITE_REQUEST, createdAt: Date.now() }),
+    )
+
+    expect(takeStepUpTrip()).toEqual({})
+  })
+
+  it('should, when a fresh record holds arguments instead of a request, return a bare trip', () => {
+    sessionStorage.setItem(
+      'oidc_step_up',
+      JSON.stringify({ endpoint: 'spaceSafesDeleteV1', args: { spaceId: '7' }, createdAt: Date.now() }),
     )
 
     expect(takeStepUpTrip()).toEqual({})
@@ -162,7 +151,11 @@ describe('replayStepUpAction', () => {
 
     const replay = replayStepUpAction(store.dispatch, {
       endpoint: 'spaceSafesCreateV1',
-      args: { spaceId, createSpaceSafesDto: { safes: [{ chainId: '1', address: addedSafe }] } },
+      request: {
+        url: `/v1/spaces/${spaceId}/safes`,
+        method: 'POST',
+        body: { safes: [{ chainId: '1', address: addedSafe }] },
+      },
     })
     await mutationArrived
     await Promise.all(store.dispatch(cgwApi.util.getRunningMutationsThunk()))
@@ -201,7 +194,11 @@ describe('replayStepUpAction', () => {
 
     await replayStepUpAction(store.dispatch, {
       endpoint: 'spaceSafesCreateV1',
-      args: { spaceId, createSpaceSafesDto: { safes: [{ chainId: '1', address: addedSafe }] } },
+      request: {
+        url: `/v1/spaces/${spaceId}/safes`,
+        method: 'POST',
+        body: { safes: [{ chainId: '1', address: addedSafe }] },
+      },
     })
 
     expect(listRequests).toHaveLength(3)
@@ -240,7 +237,11 @@ describe('replayStepUpAction', () => {
     const store = makeStore(undefined, { skipBroadcast: true })
     const replay = replayStepUpAction(store.dispatch, {
       endpoint: 'spaceSafesCreateV1',
-      args: { spaceId, createSpaceSafesDto: { safes: [{ chainId: '1', address: addedSafe }] } },
+      request: {
+        url: `/v1/spaces/${spaceId}/safes`,
+        method: 'POST',
+        body: { safes: [{ chainId: '1', address: addedSafe }] },
+      },
     })
     await mutationArrived
     store.dispatch(cgwApi.endpoints.spaceSafesGetV1.initiate({ spaceId }))
@@ -282,7 +283,11 @@ describe('replayStepUpAction', () => {
 
     const replay = replayStepUpAction(store.dispatch, {
       endpoint: 'spaceSafesCreateV1',
-      args: { spaceId, createSpaceSafesDto: { safes: [{ chainId: '1', address: faker.finance.ethereumAddress() }] } },
+      request: {
+        url: `/v1/spaces/${spaceId}/safes`,
+        method: 'POST',
+        body: { safes: [{ chainId: '1', address: faker.finance.ethereumAddress() }] },
+      },
     })
     await mutationArrived
     await Promise.all(store.dispatch(cgwApi.util.getRunningMutationsThunk()))
@@ -309,7 +314,11 @@ describe('replayStepUpAction', () => {
 
     await replayStepUpAction(store.dispatch, {
       endpoint: 'spaceSafesCreateV1',
-      args: { spaceId, createSpaceSafesDto: { safes: [{ chainId: '1', address: faker.finance.ethereumAddress() }] } },
+      request: {
+        url: `/v1/spaces/${spaceId}/safes`,
+        method: 'POST',
+        body: { safes: [{ chainId: '1', address: faker.finance.ethereumAddress() }] },
+      },
     })
 
     expect(sessionStorage.getItem('oidc_step_up')).toBeNull()

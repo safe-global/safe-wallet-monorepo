@@ -48,7 +48,7 @@ export {
   selectGlobalSearchOpen,
 } from '@/features/global-search/store'
 export {
-  elevationListener,
+  stepUpResponseHook,
   stepUpSlice,
   stepUpLeaving,
   stepUpReturning,

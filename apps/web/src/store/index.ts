@@ -23,7 +23,7 @@ import {
   authListener,
   counterfactualSyncListener,
   addressBookListener,
-  elevationListener,
+  stepUpResponseHook,
 } from './slices'
 import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
@@ -33,7 +33,7 @@ import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import { safenetCheckApi } from '@safe-global/store/safenet/safenetCheckApi'
 import { safenetCheckSlice } from '@safe-global/store/safenet/safenetCheckSlice'
 import { version as termsVersion } from '@/markdown/terms/version'
-import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
+import { addHandleResponseHook, cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import { GATEWAY_URL } from '@/config/gateway'
 import { setupListeners } from '@reduxjs/toolkit/query'
 import { migrateBatchTxs } from '@/services/ls-migration/batch'
@@ -132,7 +132,6 @@ const listeners = [
   authListener,
   counterfactualSyncListener,
   addressBookListener,
-  elevationListener,
 ]
 
 export const _hydrationReducer: typeof rootReducer = (state, action) => {
@@ -192,6 +191,7 @@ type MakeStoreOptions = {
 }
 export const makeStore = (initialState?: Partial<RootState>, options?: MakeStoreOptions) => {
   setBaseUrl(GATEWAY_URL)
+  addHandleResponseHook(stepUpResponseHook)
 
   const store = configureStore({
     reducer: _hydrationReducer,

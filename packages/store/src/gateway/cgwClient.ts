@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react'
+import type { BaseQueryApi, BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react'
 import { REHYDRATE } from 'redux-persist'
 import type { UnknownAction } from '@reduxjs/toolkit'
 import type { CombinedState } from '@reduxjs/toolkit/query'
@@ -39,15 +39,36 @@ export const setPrepareHeadersHook = (hook: PrepareHeadersHook) => {
   customPrepareHeaders = hook
 }
 
-// Hook for handling response - this can be overridden by platform-specific code
-type HandleResponseHook = (response: Response, url: string) => void | Promise<void>
+export type HandleResponseContext = {
+  api: BaseQueryApi
+  /** The request as the endpoint prepared it, before the base URL was added. */
+  args: FetchArgs
+  error?: FetchBaseQueryError
+}
 
-// Default implementation (does nothing)
-let customHandleResponse: HandleResponseHook = () => {}
+// Hook for handling response - this can be overridden by platform-specific code.
+// A hook that never resolves holds the request open, which a platform can use to
+// keep a response from ever reaching the caller.
+export type HandleResponseHook = (
+  response: Response,
+  url: string,
+  context: HandleResponseContext,
+) => void | Promise<void>
 
-// Setter for the custom hook
+const responseHooks = new Set<HandleResponseHook>()
+
+// Replaces every registered hook
 export const setHandleResponseHook = (hook: HandleResponseHook) => {
-  customHandleResponse = hook
+  responseHooks.clear()
+  responseHooks.add(hook)
+}
+
+// Adds a hook next to the registered ones; returns a function that removes it again
+export const addHandleResponseHook = (hook: HandleResponseHook) => {
+  responseHooks.add(hook)
+  return () => {
+    responseHooks.delete(hook)
+  }
 }
 
 export const rawBaseQuery = fetchBaseQuery({
@@ -110,7 +131,14 @@ export const dynamicBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBas
 
   // Apply platform-specific response handling
   if (response.meta?.response) {
-    await customHandleResponse(response.meta.response, urlEnd)
+    const context: HandleResponseContext = {
+      api,
+      args: typeof args === 'string' ? { url: args } : args,
+      error: response.error,
+    }
+    for (const hook of responseHooks) {
+      await hook(response.meta.response, urlEnd, context)
+    }
   }
 
   return response

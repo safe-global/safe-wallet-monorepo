@@ -1,7 +1,6 @@
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import type { SerializedError, ThunkAction, UnknownAction } from '@reduxjs/toolkit'
-import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
-import type { AppDispatch, RootState } from '@/store'
+import type { FetchArgs } from '@reduxjs/toolkit/query'
+import type { AppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { isElevationRequiredError } from './elevation'
@@ -32,9 +31,14 @@ const REPLAYABLE_ENDPOINTS = {
 
 type ReplayableEndpoint = keyof typeof REPLAYABLE_ENDPOINTS
 
+/**
+ * The request as the endpoint prepared it, rather than the arguments it was
+ * called with: RTK Query keeps no record of a mutation's arguments while it is
+ * in flight, and the prepared request is enough to send it again.
+ */
 export type PendingStepUpAction = {
   endpoint: ReplayableEndpoint
-  args: unknown
+  request: FetchArgs
 }
 
 const REPLAY_FAILED_MESSAGE = 'Verification succeeded, but the action could not be completed. Please try again.'
@@ -43,14 +47,10 @@ const isRecord = (value: unknown): value is Record<string, unknown> => typeof va
 
 const isReplayableEndpoint = (value: string): value is ReplayableEndpoint => value in REPLAYABLE_ENDPOINTS
 
-/** Checked field by field: the listener passes an `UnknownAction`, and RTK types `meta.arg` as `unknown`. */
-export const getReplayableAction = (action: UnknownAction): PendingStepUpAction | undefined => {
-  const arg = isRecord(action.meta) ? action.meta.arg : undefined
-  if (!isRecord(arg) || typeof arg.endpointName !== 'string') return undefined
-  if (!isReplayableEndpoint(arg.endpointName)) return undefined
+const isFetchArgs = (value: unknown): value is FetchArgs => isRecord(value) && typeof value.url === 'string'
 
-  return { endpoint: arg.endpointName, args: arg.originalArgs }
-}
+export const toReplayableRequest = (endpoint: string, request: FetchArgs): PendingStepUpAction | undefined =>
+  isReplayableEndpoint(endpoint) ? { endpoint, request } : undefined
 
 export type StepUpTrip = {
   /** Missing when the endpoint that was rejected is not in the list above. */
@@ -77,8 +77,9 @@ export const takeStepUpTrip = (): StepUpTrip | undefined => {
     if (!isRecord(parsed) || typeof parsed.createdAt !== 'number') return undefined
     if (Date.now() - parsed.createdAt > STEP_UP_MAX_AGE_MS) return undefined
     if (typeof parsed.endpoint !== 'string' || !isReplayableEndpoint(parsed.endpoint)) return {}
+    if (!isFetchArgs(parsed.request)) return {}
 
-    return { action: { endpoint: parsed.endpoint, args: parsed.args } }
+    return { action: { endpoint: parsed.endpoint, request: parsed.request } }
   } catch {
     return undefined
   }
@@ -87,22 +88,19 @@ export const takeStepUpTrip = (): StepUpTrip | undefined => {
 /** Every endpoint in `REPLAYABLE_ENDPOINTS` invalidates this tag and no other. */
 const REPLAY_INVALIDATED_TAGS = ['spaces'] as const
 
-type ReplayOutcome = { error?: FetchBaseQueryError | SerializedError }
-
-/**
- * `cgwApi.endpoints[name].initiate` is a different signature per endpoint, so a
- * union of names gives a union of thunks that `dispatch` rejects, and `args` lost
- * its type when it went through JSON. Collapsing both to one signature is safe
- * because an endpoint and its arguments are only ever stored together, taken from
- * the single request that was rejected.
- */
-type ReplayInitiator = (args: unknown) => ThunkAction<Promise<ReplayOutcome>, RootState, unknown, UnknownAction>
-
-const asReplayInitiator = (endpoint: ReplayableEndpoint): ReplayInitiator =>
-  cgwApi.endpoints[endpoint].initiate as unknown as ReplayInitiator
+// One endpoint sends any stored request again, invalidating what the gated
+// endpoints invalidate, since the request no longer carries its endpoint's tags.
+const replayApi = cgwApi.injectEndpoints({
+  endpoints: (build) => ({
+    replayStepUpRequest: build.mutation<unknown, FetchArgs>({
+      query: (request) => request,
+      invalidatesTags: [...REPLAY_INVALIDATED_TAGS],
+    }),
+  }),
+})
 
 export const replayStepUpAction = async (dispatch: AppDispatch, pending: PendingStepUpAction): Promise<void> => {
-  const result = await dispatch(asReplayInitiator(pending.endpoint)(pending.args))
+  const result = await dispatch(replayApi.endpoints.replayStepUpRequest.initiate(pending.request))
 
   if (result.error) {
     // Rejected again means the user walked away from the challenge, which is a
