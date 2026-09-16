@@ -31,6 +31,7 @@ import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { capitalize } from '@safe-global/utils/utils/formatters'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 type MemberField = {
   name: string
@@ -96,6 +97,7 @@ const EditMemberDialog = ({ member, handleClose }: { member: MemberDto; handleCl
           updateRoleDto: { role: roleValue },
         })
 
+        if (isElevationRequiredError(error)) return
         if (error) {
           setError(getRtkQueryErrorMessage(error as FetchBaseQueryError | SerializedError))
           return

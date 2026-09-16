@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import { useState, type ReactNode } from 'react'
+import type { Decorator, Meta, StoryObj } from '@storybook/react'
 import { delay, http, HttpResponse } from 'msw'
 import { fn, userEvent, within } from 'storybook/test'
 import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
@@ -40,15 +40,30 @@ const popularTokens: Erc20TokenMetadata[] = [
 const popularTokensHandler = http.get(TOKENS_ROUTE, () => HttpResponse.json(popularTokens))
 
 /** Opens the popup so the story renders with the token list visible. */
+/** Sized like the token column of the spending-limit row in the policy dialog. */
+const Field = ({ children }: { children: ReactNode }) => <div className="w-[236px]">{children}</div>
+
+/** Renders what a story is demonstrating above the field, so the Canvas view explains itself. */
+const withNote = (note: string): Decorator => {
+  const WithNote: Decorator = (Story) => (
+    <div className="flex flex-col gap-3">
+      <p className="text-muted-foreground max-w-[420px] text-xs leading-relaxed">{note}</p>
+      <Story />
+    </div>
+  )
+  return WithNote
+}
+
 const openCombobox = async ({ canvasElement }: { canvasElement: HTMLElement }) => {
   const canvas = within(canvasElement)
   await userEvent.click(canvas.getByRole('combobox'))
 }
 
 const setup = createMockStory({ scenario: 'efSafe', wallet: 'connected', shadcn: true })
-const emptySetup = createMockStory({ scenario: 'empty', wallet: 'connected', shadcn: true })
 
-/** Held tokens only — USDC with balance 0 and an ERC-20 with no logo, so C16 and the logo fallback are visible. */
+const emptyBalances: Balances = { fiatTotal: '0', items: [] }
+
+/** Held tokens only — USDC with balance 0 and an ERC-20 with no logo, so both fallbacks are visible. */
 const degradedBalances: Balances = {
   fiatTotal: '1000',
   items: [
@@ -94,6 +109,9 @@ const degradedBalances: Balances = {
   ],
 }
 
+/** Two held tokens, so the Popular group's loading and error states sit above the fold. */
+const fewBalances: Balances = { fiatTotal: '1000', items: degradedBalances.items.slice(0, 2) }
+
 const withBalances = (handler: Parameters<typeof http.get>[1]) => ({
   msw: { handlers: [http.get(BALANCES_ROUTE, handler), popularTokensHandler, ...setup.handlers] },
 })
@@ -106,28 +124,22 @@ const meta = {
     ...setup.parameters,
     msw: { handlers: [popularTokensHandler, ...setup.handlers] },
   },
-  decorators: [
-    setup.decorator,
-    // Sized like the token column of the spending-limit row in the policy dialog.
-    (Story) => (
-      <div className="w-[236px]">
-        <Story />
-      </div>
-    ),
-  ],
+  decorators: [setup.decorator],
   tags: ['autodocs'],
   args: { onChange: fn() },
   render: function Render(args) {
     const [value, setValue] = useState<string | undefined>()
     return (
-      <TokenSelector
-        {...args}
-        value={value}
-        onChange={(next) => {
-          args.onChange(next)
-          setValue(next)
-        }}
-      />
+      <Field>
+        <TokenSelector
+          {...args}
+          value={value}
+          onChange={(next) => {
+            args.onChange(next)
+            setValue(next)
+          }}
+        />
+      </Field>
     )
   },
 } satisfies Meta<typeof TokenSelector>
@@ -142,13 +154,17 @@ export const Default: Story = {
 
 /** A Safe with no balances at all: only the native currency and the Ethereum popular list. */
 export const EmptySafe: Story = {
-  decorators: [emptySetup.decorator],
-  parameters: { ...emptySetup.parameters, msw: { handlers: [popularTokensHandler, ...emptySetup.handlers] } },
+  parameters: { msw: { handlers: [...balanceHandlers(emptyBalances), popularTokensHandler, ...setup.handlers] } },
   play: openCombobox,
 }
 
 /** Zero-balance USDC stays selectable; the nameless token and the logo-less ETH still render. */
 export const DegradedMetadata: Story = {
+  decorators: [
+    withNote(
+      'Every held token here is missing something, and none of them may disappear because of it. ETH has no logo and falls back to the placeholder. USDC has a zero balance and stays selectable, because a limit may be set before the Safe is funded. The third token has neither symbol nor name and renders as its shortened address rather than an empty row.',
+    ),
+  ],
   parameters: { msw: { handlers: [...balanceHandlers(degradedBalances), popularTokensHandler, ...setup.handlers] } },
   play: openCombobox,
 }
@@ -179,6 +195,7 @@ export const PopularLoading: Story = {
           await delay('infinite')
           return HttpResponse.json(popularTokens)
         }),
+        ...balanceHandlers(fewBalances),
         ...setup.handlers,
       ],
     },
@@ -192,6 +209,7 @@ export const PopularLoadError: Story = {
     msw: {
       handlers: [
         http.get(TOKENS_ROUTE, () => HttpResponse.json({ message: 'boom' }, { status: 502 })),
+        ...balanceHandlers(fewBalances),
         ...setup.handlers,
       ],
     },
@@ -201,12 +219,28 @@ export const PopularLoadError: Story = {
 
 /** A value the list does not know — the edit flow for a token that is neither held nor popular. */
 export const UnknownValue: Story = {
-  render: (args) => <TokenSelector {...args} value="0x4B0897b0513fdC7C541B6d9D7E929C4e5364D2dB" />,
+  decorators: [
+    withNote(
+      'The selected address is neither held by this Safe nor in the popular list — the edit flow for a token that has since left both. It stays selected and shows its shortened address instead of an empty field, so opening an existing limit never looks like nothing was chosen.',
+    ),
+  ],
+  render: (args) => (
+    <Field>
+      <TokenSelector {...args} value="0x4B0897b0513fdC7C541B6d9D7E929C4e5364D2dB" />
+    </Field>
+  ),
   play: openCombobox,
 }
 
 /** WBTC and DAI are already used on other rows of the same spender, so they are hidden here. */
 export const WithExclusions: Story = {
+  decorators: [
+    withNote(
+      'WBTC and DAI are already used by other rows of this spending limit, so neither appears here — ' +
+        'one beneficiary must not end up with two conflicting rules for the same token. The list is the ' +
+        'Default one minus those two.',
+    ),
+  ],
   args: {
     excludeAddresses: ['0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', '0x6B175474E89094C44Da98b954EedeAC495271d0F'],
   },

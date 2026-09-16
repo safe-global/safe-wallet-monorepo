@@ -5,10 +5,8 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { TokensGetTokensV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/tokens'
 
-/** One token of the CGW batch response (`NativeTokenMetadata | Erc20TokenMetadata | Erc721TokenMetadata`). */
 export type TokenMetadata = TokensGetTokensV1ApiResponse[number]
 
-/** Metadata of a popular token, as fed into the merge. */
 export type PopularToken = {
   symbol: string
   name: string
@@ -40,11 +38,10 @@ export type TokenOption = {
   balance?: string
   /** Held tokens only. */
   fiatBalance?: string
-  /** Held tokens only: the Transaction Service's fiat price for one whole token (`Balance.fiatConversion`). */
+  /** Held tokens only: the fiat price of one whole token. */
   fiatConversion?: string
 }
 
-/** The subset of `Chain['nativeCurrency']` the selector needs. */
 export type NativeCurrencyInfo = {
   symbol: string
   name: string
@@ -58,6 +55,8 @@ export type BuildTokenOptionsInput = {
   popular: readonly PopularToken[]
   /** Omit on chains with `HIDE_NATIVE_TOKEN`. */
   native?: NativeCurrencyInfo
+  /** False on `HIDE_NATIVE_TOKEN` chains, where the balances API still returns the native token. */
+  showNative?: boolean
 }
 
 const toHeldOption = (balance: Balance): TokenOption => ({
@@ -88,13 +87,16 @@ const byFiatDescThenSymbol = (a: TokenOption, b: TokenOption): number => {
 
 const bySymbol = (a: TokenOption, b: TokenOption): number => a.symbol.localeCompare(b.symbol)
 
-/**
- * Held tokens (zero balances included — a limit may be set before funding, AC C16) merged with the
- * chain's popular list and native currency, de-duplicated by address (AC C14).
- */
-export const buildTokenOptions = ({ balances, popular, native }: BuildTokenOptionsInput): TokenOption[] => {
+/** Zero balances are kept so a limit can be set before funding; held wins on a duplicate address. */
+export const buildTokenOptions = ({
+  balances,
+  popular,
+  native,
+  showNative = true,
+}: BuildTokenOptionsInput): TokenOption[] => {
   const held = (balances ?? [])
     .filter((balance) => balance.tokenInfo.type !== TokenType.ERC721)
+    .filter((balance) => showNative || balance.tokenInfo.type !== TokenType.NATIVE_TOKEN)
     .map(toHeldOption)
     .sort(byFiatDescThenSymbol)
 

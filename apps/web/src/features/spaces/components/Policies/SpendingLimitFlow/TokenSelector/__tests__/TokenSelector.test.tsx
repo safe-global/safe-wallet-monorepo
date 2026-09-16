@@ -5,6 +5,7 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
 import type { TokenOptionsResult } from '../../hooks/useSpendingLimitTokenOptions'
 import type { TokenOption } from '../../utils/tokenOptions'
+import { tokenOptionBuilder } from '../../utils/testBuilders'
 import TokenSelector from '..'
 import {
   BALANCES_LOAD_ERROR_TEXT,
@@ -12,7 +13,6 @@ import {
   NO_TOKENS_FOUND_TEXT,
   POPULAR_GROUP_LABEL,
   POPULAR_LOAD_ERROR_TEXT,
-  RETRY_TEXT,
   TOKEN_SELECTOR_LABEL,
   TOKEN_SELECTOR_PLACEHOLDER,
 } from '../constants'
@@ -20,15 +20,7 @@ import {
 jest.mock('../../hooks/useSpendingLimitTokenOptions', () => ({ __esModule: true, default: jest.fn() }))
 const mockUseOptions = useSpendingLimitTokenOptions as jest.MockedFunction<typeof useSpendingLimitTokenOptions>
 
-const option = (overrides: Partial<TokenOption> = {}): TokenOption => ({
-  address: checksumAddress(faker.finance.ethereumAddress()),
-  symbol: faker.finance.currencyCode(),
-  name: faker.finance.currencyName(),
-  decimals: 18,
-  logoUri: faker.image.url(),
-  group: 'popular',
-  ...overrides,
-})
+const option = (overrides: Partial<TokenOption> = {}): TokenOption => tokenOptionBuilder().with(overrides).build()
 
 const heldUsdc = option({
   symbol: 'USDC',
@@ -173,6 +165,20 @@ describe('TokenSelector — search', () => {
     expect(screen.getByRole('option', { name: /DAI/ })).toBeInTheDocument()
   })
 
+  it('selects the first match on Enter, without arrowing to it first', async () => {
+    const onChange = jest.fn()
+    const { user } = renderSelector({ onChange })
+    const input = await openSelector(user)
+
+    // `autoHighlight` highlights the first match as the query narrows, so Enter commits it. The first
+    // match is the first row in list order, which is fiat-descending among held tokens — not the
+    // closest name match, so a query matching several tokens can commit one the user did not mean.
+    await user.type(input, 'USD')
+    await user.keyboard('{Enter}')
+
+    expect(onChange).toHaveBeenCalledWith(heldUsdc.address)
+  })
+
   it('shows the empty state and does not accept an unknown address', async () => {
     const onChange = jest.fn()
     const { user } = renderSelector({ onChange })
@@ -190,7 +196,7 @@ describe('TokenSelector — search', () => {
   })
 })
 
-describe('TokenSelector — Safe/chain changes (C15)', () => {
+describe('TokenSelector — Safe/chain changes', () => {
   it('clears the selection when the Safe identity changes after mount', () => {
     const onChange = jest.fn()
     const { rerender } = render(<TokenSelector value={heldUsdc.address} onChange={onChange} />)
@@ -320,7 +326,7 @@ describe('TokenSelector — states', () => {
     expect(screen.getByText(BALANCES_LOAD_ERROR_TEXT)).toBeInTheDocument()
     expect(screen.getByRole('option', { name: /DAI/ })).toBeInTheDocument()
 
-    await user.click(within(screen.getByTestId('held-tokens-error')).getByRole('button', { name: RETRY_TEXT }))
+    await user.click(within(screen.getByTestId('held-tokens-error')).getByRole('button', { name: /retry/i }))
     expect(refetch).toHaveBeenCalledTimes(1)
   })
 
@@ -343,7 +349,7 @@ describe('TokenSelector — states', () => {
     expect(screen.getByText(POPULAR_LOAD_ERROR_TEXT)).toBeInTheDocument()
     expect(screen.getByRole('option', { name: /ETH/ })).toBeInTheDocument()
 
-    await user.click(within(screen.getByTestId('popular-tokens-error')).getByRole('button', { name: RETRY_TEXT }))
+    await user.click(within(screen.getByTestId('popular-tokens-error')).getByRole('button', { name: /retry/i }))
     expect(refetchPopular).toHaveBeenCalledTimes(1)
   })
 

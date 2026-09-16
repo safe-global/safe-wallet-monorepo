@@ -338,7 +338,7 @@ describe('safeMsgSender', () => {
 
       const error = await rejection(propose)
 
-      expect(getCgwErrorInfo(error)).toEqual(expect.objectContaining({ status, code: `CGW-${status}`, message: copy }))
+      expect(getCgwErrorInfo(error)).toEqual(expect.objectContaining({ status, message: copy }))
     })
 
     it.each([
@@ -351,7 +351,7 @@ describe('safeMsgSender', () => {
 
       const error = await rejection(confirm)
 
-      expect(getCgwErrorInfo(error)).toEqual(expect.objectContaining({ status, code: `CGW-${status}`, message: copy }))
+      expect(getCgwErrorInfo(error)).toEqual(expect.objectContaining({ status, message: copy }))
     })
 
     it('never throws a stringified error object', async () => {

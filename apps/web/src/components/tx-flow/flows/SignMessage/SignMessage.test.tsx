@@ -938,17 +938,16 @@ describe('SignMessage', () => {
       [429, CGW_ERROR_FALLBACK],
       [422, CGW_ERROR_FALLBACK],
       [451, CGW_SAFE_UNAVAILABLE],
-    ])('renders the agreed copy and the CGW-%s support code', async (status, copy) => {
+    ])('renders the agreed copy for a %s, with no support code', async (status, copy) => {
       mockConfirmationResponse(() => HttpResponse.json({ message: 'Example error' }, { status }))
 
-      const { getByText, getByTestId } = renderPendingConfirmation()
+      const { getByText, queryByTestId } = renderPendingConfirmation()
 
       fireEvent.click(getByText('Sign'))
 
-      await waitFor(() => {
-        expect(getByText(copy)).toBeInTheDocument()
-        expect(getByTestId('error-details')).toHaveTextContent(`CGW-${status}`)
-      })
+      await waitFor(() => expect(getByText(copy)).toBeInTheDocument())
+
+      expect(queryByTestId('error-details')).not.toBeInTheDocument()
     })
 
     it('never renders a stringified error object', async () => {

@@ -140,7 +140,7 @@ test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
     expect(new URL((await authorizeRequest).url()).searchParams.get('elevate')).toBe('true')
   })
 
-  test('that it discards the pending action and reports failure when the challenge is abandoned', async ({
+  test('that it discards the pending action without reporting an error when the challenge is abandoned', async ({
     safePage,
   }) => {
     await openRemoveDialog(safePage)
@@ -149,8 +149,9 @@ test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
 
     await safePage.goto(`/spaces/safe-accounts?spaceId=${SPACE_ID}`)
 
-    await expect(toast(safePage, 'Verification was not completed')).toBeVisible()
     await expect.poll(() => readStepUpRecord(safePage)).toBeNull()
+    await expect(toast(safePage, 'Verification was not completed')).toBeHidden()
+    await expect(safePage.getByText('elevation_required')).toBeHidden()
   })
 
   test('that it ignores a pending action older than the challenge window', async ({ safePage }) => {

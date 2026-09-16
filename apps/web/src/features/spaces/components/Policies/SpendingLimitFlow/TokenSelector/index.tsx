@@ -36,10 +36,7 @@ export type TokenSelectorProps = {
   /** Token address; `ZERO_ADDRESS` for the native currency. */
   value?: string
   onChange: (address: string | undefined) => void
-  /**
-   * Hidden from the list (e.g. tokens already used by the same spender). Never hides `value` itself.
-   * Pass a stable reference (memoise) — a new array each render recomputes the list.
-   */
+  /** Never hides `value` itself. Pass a stable reference — a new array each render recomputes the list. */
   excludeAddresses?: string[]
   disabled?: boolean
   label?: string
@@ -49,7 +46,6 @@ export type TokenSelectorProps = {
   'data-testid'?: string
 }
 
-/** Base UI group shape: items are filtered per group and empty groups are dropped. */
 type TokenGroup = { value: TokenOptionGroup; items: TokenOption[] }
 
 const GROUP_LABELS: Record<TokenOptionGroup, string> = {
@@ -68,12 +64,7 @@ const unknownTokenOption = (address: string): TokenOption => ({
 
 const isSameOption = (a: TokenOption, b: TokenOption): boolean => sameAddress(a.address, b.address)
 
-/**
- * Chain-aware token picker for spending limits (WA-3149). Controlled and form-library agnostic.
- * Reads the Safe/chain through `useSpendingLimitTokenOptions`, so it follows a Space-level scope
- * when one is mounted and the URL Safe otherwise. Search only — typing an address that is not in
- * the list selects nothing.
- */
+/** Search only: typing an address that is not in the list selects nothing. */
 const TokenSelector = ({
   value,
   onChange,
@@ -87,8 +78,7 @@ const TokenSelector = ({
 }: TokenSelectorProps) => {
   const generatedId = useId()
   const fieldId = id ?? generatedId
-  // Base UI anchors the popup to the <input>, not the field. Anchoring to the InputGroup makes the
-  // popup exactly as wide as, and flush with, the visible field.
+  // Base UI anchors the popup to the <input>; anchoring to the InputGroup makes it match the visible field.
   const fieldAnchor = useComboboxAnchor()
   const { options, isLoading, isError, refetch, isPopularLoading, isPopularError, refetchPopular, identityKey } =
     useSpendingLimitTokenOptions()
@@ -119,8 +109,8 @@ const TokenSelector = ({
 
   const hasSafe = identityKey !== ''
 
-  // AC C15: a token picked for Safe A must not survive switching to Safe B. `identityKey` goes empty
-  // for a render mid-navigation, which is not a Safe change, so only ever compare two known Safes.
+  // A token picked for one Safe must not survive a switch to another. `identityKey` goes empty for a
+  // render mid-navigation, which is not a Safe change.
   const previousIdentity = useRef(identityKey)
   useEffect(() => {
     if (identityKey === '') return
@@ -146,6 +136,7 @@ const TokenSelector = ({
         disabled={disabled || !hasSafe}
         name={name}
         openOnInputClick
+        autoHighlight
       >
         <div ref={fieldAnchor} className="w-full">
           <ComboboxInput

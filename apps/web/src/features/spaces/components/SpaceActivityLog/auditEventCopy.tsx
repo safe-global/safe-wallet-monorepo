@@ -180,6 +180,26 @@ export function getAuditEventDescription(
         'removed a contact'
       )
     }
+    case 'ADDRESS_BOOK_REQUEST_CREATED': {
+      const contact = asContact(payload)
+      return hasContactDetail(contact) ? (
+        <>
+          requested to add the contact <ContactRef contact={contact} /> to workspace
+        </>
+      ) : (
+        'requested to add a contact to workspace'
+      )
+    }
+    case 'ADDRESS_BOOK_REQUEST_REJECTED': {
+      const contact = asContact(payload)
+      return hasContactDetail(contact) ? (
+        <>
+          rejected the request to add the contact <ContactRef contact={contact} /> to workspace
+        </>
+      ) : (
+        'rejected the request to add a contact to workspace'
+      )
+    }
     default:
       return 'made a change'
   }

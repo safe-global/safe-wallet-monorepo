@@ -5,9 +5,10 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import * as balancesQueries from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import * as tokensQueries from '@safe-global/store/gateway/AUTO_GENERATED/tokens'
-import { balanceBuilder, balancesBuilder } from '@/tests/builders/balances'
+import { balanceBuilder, balancesBuilder, nativeTokenBuilder } from '@/tests/builders/balances'
 import { chainBuilder } from '@/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
+import { erc20TokenMetadataBuilder } from '@/tests/builders/tokens'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useChainId from '@/hooks/useChainId'
 import { useChain } from '@/hooks/useChains'
@@ -65,16 +66,10 @@ const tokensQueryResult = (overrides: Partial<TokensQueryResult> = {}): TokensQu
 
 const tokenMetadataBuilder = (
   overrides: Partial<tokensQueries.Erc20TokenMetadata> = {},
-): tokensQueries.Erc20TokenMetadata => ({
-  address: checksumAddress(faker.finance.ethereumAddress()),
-  symbol: faker.finance.currencyCode(),
-  name: faker.finance.currencyName(),
-  decimals: 18,
-  logoUri: faker.image.url(),
-  trusted: true,
-  type: 'ERC20',
-  ...overrides,
-})
+): tokensQueries.Erc20TokenMetadata =>
+  erc20TokenMetadataBuilder()
+    .with({ decimals: 18, ...overrides })
+    .build()
 
 const CHAIN_ID = '1'
 const safeAddress = checksumAddress(faker.finance.ethereumAddress())
@@ -202,6 +197,24 @@ describe('useSpendingLimitTokenOptions', () => {
     expect(result.current.options.some((option) => option.address === ZERO_ADDRESS)).toBe(false)
   })
 
+  it('also drops a native token the balances API returns on HIDE_NATIVE_TOKEN chains', () => {
+    mockUseChain.mockReturnValue(
+      chainBuilder()
+        .with({ chainId: CHAIN_ID, features: [FEATURES.HIDE_NATIVE_TOKEN] })
+        .build(),
+    )
+    const heldNative = balanceBuilder()
+      .with({ tokenInfo: nativeTokenBuilder().with({ address: ZERO_ADDRESS }).build() })
+      .build()
+    querySpy.mockReturnValue(queryResult({ currentData: { fiatTotal: '1', items: [heldNative] } }))
+
+    const { result } = renderHook(() => useSpendingLimitTokenOptions())
+
+    // The flag suppressing the synthesised entry is not enough: the Safe's own native balance
+    // comes back from the balances endpoint and would otherwise stay selectable.
+    expect(result.current.options.some((option) => option.address === ZERO_ADDRESS)).toBe(false)
+  })
+
   it('returns an empty popular list on a chain outside the table', () => {
     mockUseChainId.mockReturnValue('999')
     mockUseChain.mockReturnValue(chainBuilder().with({ chainId: '999', features: [] }).build())
@@ -311,11 +324,15 @@ describe('useSpendingLimitTokenOptions', () => {
     expect(refetch).toHaveBeenCalledTimes(1)
   })
 
-  it('does not report a popular error while stale popular data is still present', () => {
-    tokensSpy.mockReturnValue(tokensQueryResult({ isError: true, currentData: [tokenMetadataBuilder()] }))
+  it('still reports a popular error when a refetch fails over data that is already on screen', () => {
+    const stale = tokenMetadataBuilder()
+    tokensSpy.mockReturnValue(tokensQueryResult({ isError: true, currentData: [stale] }))
 
     const { result } = renderHook(() => useSpendingLimitTokenOptions())
 
-    expect(result.current.isPopularError).toBe(false)
+    // RTK Query keeps the last good data for the same arg, so the error would otherwise be swallowed
+    // and the user would keep looking at a list that failed to refresh.
+    expect(result.current.isPopularError).toBe(true)
+    expect(result.current.isPopularLoading).toBe(false)
   })
 })

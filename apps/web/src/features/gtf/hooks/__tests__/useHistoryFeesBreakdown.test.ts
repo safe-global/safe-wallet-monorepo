@@ -244,7 +244,11 @@ describe('useHistoryFeesBreakdown', () => {
       const { result } = renderHook(() => useHistoryFeesBreakdown(mockSignerPaysTx))
 
       await waitFor(() => expect(mockLogError).toHaveBeenCalled())
-      expect(mockLogError).toHaveBeenCalledWith(Errors._623, 'HTTP request failed. Status: 500', expect.anything())
+      expect(mockLogError).toHaveBeenCalledWith(
+        Errors._623,
+        expect.objectContaining({ message: 'HTTP request failed. Status: 500' }),
+        expect.anything(),
+      )
       expect(result.current).toBeNull()
     })
 

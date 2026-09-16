@@ -14,11 +14,11 @@ import { buildTokenOptions, toPopularToken, type NativeCurrencyInfo, type TokenO
 export type TokenOptionsResult = {
   /** Held tokens first (fiat desc), then popular (symbol asc). */
   options: TokenOption[]
-  /** Balances are in flight and nothing has arrived yet. Always false while the query is skipped. */
+  /** False while the query is skipped. */
   isLoading: boolean
   isError: boolean
   refetch: () => void
-  /** Popular-token metadata is in flight and nothing has arrived yet. False for chains without a popular list. */
+  /** False for chains without a popular list. */
   isPopularLoading: boolean
   isPopularError: boolean
   /** No-op for chains without a popular list. */
@@ -32,7 +32,7 @@ export const buildIdentityKey = (chainId: string, safeAddress: string): string =
 
 const noop = (): void => {}
 
-/** Held tokens use the Transaction Service balances endpoint, not the portfolio one: AC C16 needs the zero balances only it returns. */
+/** Held tokens use the Transaction Service balances endpoint, not the portfolio one: only it returns zero balances. */
 const useSpendingLimitTokenOptions = (): TokenOptionsResult => {
   const chainId = useChainId()
   const { safe, safeAddress } = useSafeInfo()
@@ -42,8 +42,7 @@ const useSpendingLimitTokenOptions = (): TokenOptionsResult => {
 
   // `useChainId` can flip a render before `useSafeInfo` catches up — see useLoadSafeInfo's `isStoredSafeValid`.
   const identityMatchesChain = safe.chainId === chainId
-  // The Transaction Service has no balances for an undeployed Safe; `trusted` is undefined until the
-  // chain config resolves.
+  // The Transaction Service has no balances for an undeployed Safe.
   const hasValidSafe = Boolean(safeAddress) && safe.deployed && identityMatchesChain
   const skip = !hasValidSafe || trusted === undefined
 
@@ -62,11 +61,14 @@ const useSpendingLimitTokenOptions = (): TokenOptionsResult => {
     refetch: refetchPopular,
   } = useTokensGetTokensV1Query({ chainId, addresses: popularAddresses.join(',') }, { skip: !hasPopular })
 
+  // Default to showing it while the chain config loads, as useCounterfactualBalances does.
+  const showNative = chain ? getNativeTokenDisplay(chain).showNativeInBalances : true
+
   const native = useMemo<NativeCurrencyInfo | undefined>(() => {
-    if (!chain || !getNativeTokenDisplay(chain).showNativeInBalances) return undefined
+    if (!chain || !showNative) return undefined
     const { symbol, name, decimals, logoUri } = chain.nativeCurrency
     return { symbol, name, decimals, logoUri }
-  }, [chain])
+  }, [chain, showNative])
 
   const popular = useMemo(
     () => (popularData ?? []).filter((token) => token.type !== 'ERC721').map(toPopularToken),
@@ -74,19 +76,20 @@ const useSpendingLimitTokenOptions = (): TokenOptionsResult => {
   )
 
   const options = useMemo(
-    () => buildTokenOptions({ balances: currentData?.items, popular, native }),
-    [currentData, popular, native],
+    () => buildTokenOptions({ balances: currentData?.items, popular, native, showNative }),
+    [currentData, popular, native, showNative],
   )
 
   return {
     options,
-    // While `trusted` is still resolving for an otherwise-valid Safe, report loading rather than
-    // letting the popular-only list flash before the held-token query even starts.
+    // Report loading while `trusted` resolves, so the popular-only list does not flash first.
     isLoading: hasValidSafe && (trusted === undefined || (currentData === undefined && (isLoading || isFetching))),
     isError: !skip && isError,
     refetch,
+    // Only the loading flag is guarded on `popularData`: a background refetch must not flash skeletons
+    // over a list that is already on screen, but a failed one must still surface, stale data or not.
     isPopularLoading: hasPopular && popularData === undefined && (popularIsLoading || popularIsFetching),
-    isPopularError: hasPopular && popularIsError && popularData === undefined,
+    isPopularError: hasPopular && popularIsError,
     refetchPopular: hasPopular ? refetchPopular : noop,
     identityKey: identityMatchesChain ? buildIdentityKey(chainId, safeAddress) : '',
   }

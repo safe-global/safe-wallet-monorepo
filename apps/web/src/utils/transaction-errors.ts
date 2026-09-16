@@ -153,6 +153,30 @@ export const isNonceTooLowError = (error: unknown): boolean => {
   )
 }
 
+/**
+ * A gas limit below the transaction's intrinsic cost (21000 base + calldata) is rejected by the
+ * node before anything is broadcast: nothing reverted and no gas was spent. viem wraps that
+ * rejection as a contract revert, so this must be resolved before the revert classification —
+ * otherwise a fixable setting reads as a transaction that will fail.
+ *
+ * geth-family clients quote the minimum back ("intrinsic gas too low: gas 21000, minimum needed
+ * 25484"); Besu ("Intrinsic gas exceeds gas limit") quotes nothing, so the value is optional.
+ */
+const INTRINSIC_GAS_MESSAGE = /intrinsic gas (?:too low|exceeds)/i
+const MINIMUM_GAS = /(?:minimum needed|want)[:\s]+(\d+)/i
+
+export const getGasLimitTooLowMessage = (error: unknown): string | undefined => {
+  const message = (error as { message?: unknown } | null | undefined)?.message
+
+  if (typeof message !== 'string' || !INTRINSIC_GAS_MESSAGE.test(message)) return undefined
+
+  const minimumGas = Number(MINIMUM_GAS.exec(message)?.[1])
+
+  return Number.isSafeInteger(minimumGas) && minimumGas > 0
+    ? `Gas limit too low. Minimum needed: ${minimumGas.toLocaleString()}. Increase the gas limit and try again.`
+    : 'Gas limit too low. Increase the gas limit and try again.'
+}
+
 export { isRevertError }
 
 /**

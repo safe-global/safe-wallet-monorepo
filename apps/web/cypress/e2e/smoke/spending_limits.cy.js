@@ -22,6 +22,12 @@ describe('[SMOKE] Spending limits tests', () => {
   })
 
   it('Verify A valid ENS name is resolved successfully', () => {
+    cy.fixture('ens_e2etestsafe').then((results) => {
+      cy.intercept('POST', '**', (req) => {
+        const result = results[req.body?.params?.[0]?.to?.toLowerCase()]
+        if (result) req.reply({ body: { jsonrpc: '2.0', id: req.body.id, result } })
+      })
+    })
     spendinglimit.enterBeneficiaryAddress(constants.ENS_TEST_SEPOLIA)
     spendinglimit.checkBeneficiaryENS(staticSafes.SEP_STATIC_SAFE_6)
   })
