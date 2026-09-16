@@ -17,7 +17,7 @@ jobs:
     if: >-
       github.event.pull_request.merged == true ||
       (github.event.action == 'closed' &&
-       startsWith(github.event.pull_request.head.ref, 'release') &&
+       startsWith(github.event.pull_request.head.ref, 'release/') &&
        github.event.pull_request.head.repo.full_name == github.repository)
     permissions:
       actions: write
@@ -59,10 +59,17 @@ jobs:
             exit 1
           fi
 
-      - name: Extract version
+      - name: Extract version from release branch name
         id: version
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
-          NEW_VERSION=$(node -p 'require("./apps/web/package.json").version')
+          if [[ "$HEAD_REF" =~ ^release/([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            NEW_VERSION="${BASH_REMATCH[1]}"
+          else
+            echo "::error::PR branch '$HEAD_REF' is not a release branch (expected 'release/X.Y.Z')"
+            exit 1
+          fi
           echo "version=web-v$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "version_number=$NEW_VERSION" >> $GITHUB_OUTPUT
 
@@ -142,6 +149,12 @@ jobs:
 
       - uses: ./.github/actions/yarn
 
+      - name: Extract app version from release tag
+        id: app_version
+        env:
+          RELEASE_TAG: ${{ needs.tag.outputs.version }}
+        run: echo "version=${RELEASE_TAG#web-v}" >> $GITHUB_OUTPUT
+
       - uses: ./.github/actions/build
         env:
           DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
@@ -204,6 +217,7 @@ jobs:
           NEXT_PUBLIC_ZODIAC_SECURITY_CHECK_URL: ${{ secrets.NEXT_PUBLIC_ZODIAC_SECURITY_CHECK_URL }}
         with:
           prod: ${{ true }}
+          app-version: ${{ steps.app_version.outputs.version }}
 
       - name: Add SRI to scripts
         run: node ./scripts/integrity-hashes.cjs

@@ -1,12 +1,14 @@
 const path = require('path')
 const fs = require('fs')
 
+const { resolveAppVersion } = require('./scripts/resolve-app-version.cjs')
+
 // Set environment variables before modules are loaded
-if (!process.env.NEXT_PUBLIC_APP_VERSION || !process.env.NEXT_PUBLIC_APP_HOMEPAGE) {
+process.env.NEXT_PUBLIC_APP_VERSION = resolveAppVersion()
+if (!process.env.NEXT_PUBLIC_APP_HOMEPAGE) {
   const packageJsonPath = path.join(__dirname, 'package.json')
   const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'))
-  process.env.NEXT_PUBLIC_APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION || packageJson.version
-  process.env.NEXT_PUBLIC_APP_HOMEPAGE = process.env.NEXT_PUBLIC_APP_HOMEPAGE || packageJson.homepage
+  process.env.NEXT_PUBLIC_APP_HOMEPAGE = packageJson.homepage
 }
 
 const nextJest = require('next/jest')
