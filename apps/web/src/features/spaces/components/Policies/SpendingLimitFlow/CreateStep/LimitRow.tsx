@@ -98,7 +98,22 @@ const LimitRow = ({ spenderIndex, limitIndex, limitCount, removable, onRemove }:
   const amountError = get(errors, amountPath)
 
   return (
-    <Card size="none" radius="lg" data-testid="limit-row">
+    <Card variant="muted-nested" size="none" radius="lg" className="relative" data-testid="limit-row">
+      {/* Corner-pinned like the spender card's own remove button, so it never narrows the two fields. */}
+      {removable && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          aria-label={REMOVE_LIMIT_LABEL}
+          onClick={onRemove}
+          data-testid="remove-limit-btn"
+          className="absolute top-2 right-2"
+        >
+          <X />
+        </Button>
+      )}
+
       {/* Card owns spacing only via `size`/`radius`; the visual gap/padding lives on this plain div. */}
       <div className="flex flex-col gap-3 p-3">
         {/* Both columns render their own label and helper through the shared `Field` primitives, so
@@ -160,20 +175,6 @@ const LimitRow = ({ spenderIndex, limitIndex, limitCount, removable, onRemove }:
               {...register(amountPath, { validate: (value) => validateLimitAmount(value, decimals) })}
             />
           </div>
-
-          {removable && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              aria-label={REMOVE_LIMIT_LABEL}
-              onClick={onRemove}
-              data-testid="remove-limit-btn"
-              className="mt-6"
-            >
-              <X />
-            </Button>
-          )}
         </div>
 
         <Controller
