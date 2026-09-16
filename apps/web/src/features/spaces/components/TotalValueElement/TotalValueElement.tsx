@@ -12,10 +12,9 @@ import { Typography } from '@/components/ui/typography'
 interface TotalValueElementProps {
   value: string
   loading?: boolean
-  error?: boolean
 }
 
-const TotalValueElement = ({ value, loading, error }: TotalValueElementProps) => {
+const TotalValueElement = ({ value, loading }: TotalValueElementProps) => {
   return (
     <div className="flex flex-col gap-1">
       <Typography variant="paragraph-mini-medium" color="muted">
@@ -30,15 +29,6 @@ const TotalValueElement = ({ value, loading, error }: TotalValueElementProps) =>
           data-testid="space-dashboard-total-value"
         >
           {value}
-        </Typography>
-      )}
-      {error && (
-        <Typography
-          variant="paragraph-mini"
-          className="mt-2 block text-[var(--color-primary-light)]"
-          data-testid="space-dashboard-total-value-error"
-        >
-          Couldn&apos;t load your balance. Try again later
         </Typography>
       )}
     </div>
