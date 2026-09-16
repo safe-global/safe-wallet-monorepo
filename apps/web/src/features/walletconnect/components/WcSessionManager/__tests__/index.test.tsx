@@ -138,6 +138,7 @@ const mockContextValue = {
   rejectSession: mockRejectSession,
   matchingSafeApp: undefined,
   isMatchingSafeAppLoading: false,
+  isSuggestionFeatureEnabled: true,
   isSafeAppSuggested: false,
   showSuggestion: false,
   isSuggestionResolved: false,
@@ -534,5 +535,65 @@ describe('WcSessionManager Safe App suggestion', () => {
       expect.objectContaining({ action: WALLETCONNECT_EVENTS.SAFE_APP_SUGGESTED.action }),
       expect.anything(),
     )
+  })
+
+  describe('with the feature flag off', () => {
+    const renderOff = (overrides = {}) =>
+      render(
+        <WalletConnectContext.Provider
+          value={
+            {
+              ...mockContextValue,
+              isSuggestionFeatureEnabled: false,
+              matchingSafeApp: undefined,
+              showSuggestion: false,
+              ...overrides,
+            } as unknown as WalletConnectContextType
+          }
+        >
+          <WcSessionManager uri="test-uri" />
+        </WalletConnectContext.Provider>,
+      )
+
+    beforeEach(() => {
+      jest.clearAllMocks()
+      mockApproveSession.mockResolvedValue(undefined)
+    })
+
+    it('shows the proposal form with no spinner even while a lookup reports loading', () => {
+      renderOff({ isMatchingSafeAppLoading: true })
+
+      expect(screen.getByRole('button', { name: /approve/i })).toBeInTheDocument()
+      expect(screen.queryByRole('status', { name: 'Loading' })).not.toBeInTheDocument()
+    })
+
+    // Existing dashboards keyed on the declared URL must not shift while the feature is dark
+    it('labels analytics with the dApp declared url, not the verified origin', async () => {
+      renderOff()
+
+      fireEvent.click(screen.getByRole('button', { name: /approve/i }))
+
+      await waitFor(() => {
+        expect(mockTrackEvent).toHaveBeenCalledWith(
+          { ...WALLETCONNECT_EVENTS.CONNECTED, label: 'https://spoofed.example' },
+          expect.objectContaining({ [MixpanelEventParams.APP_URL]: 'https://spoofed.example' }),
+        )
+      })
+    })
+
+    it('omits Safe App Available from the connect event', async () => {
+      renderOff()
+
+      fireEvent.click(screen.getByRole('button', { name: /approve/i }))
+
+      await waitFor(() => {
+        expect(mockApproveSession).toHaveBeenCalled()
+      })
+
+      const connected = mockTrackEvent.mock.calls.find(
+        ([event]) => event.action === WALLETCONNECT_EVENTS.CONNECTED.action,
+      )!
+      expect(connected[1]).not.toHaveProperty(MixpanelEventParams.SAFE_APP_AVAILABLE)
+    })
   })
 })

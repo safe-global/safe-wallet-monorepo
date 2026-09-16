@@ -23,6 +23,7 @@ const WalletConnectWidget = () => {
     showSuggestion,
     loading,
     dontShowAgain,
+    isSuggestionFeatureEnabled,
   } = useContext(WalletConnectContext)
   const [uri, clearUri] = useWcUri()
   const { safeLoaded } = useSafeInfo()
@@ -36,6 +37,9 @@ const WalletConnectWidget = () => {
   // the dApp waiting for a response that never comes
   const onClose = useCallback(() => {
     setOpen(false)
+
+    // With the feature off, closing the popup leaves the proposal pending as it always did
+    if (!isSuggestionFeatureEnabled) return
 
     // An approve or reject is already in flight; rejecting again would cancel the very
     // session being approved
@@ -69,6 +73,7 @@ const WalletConnectWidget = () => {
     showSuggestion,
     dontShowAgain,
     setSuggestionDismissed,
+    isSuggestionFeatureEnabled,
   ])
 
   // Open the popup if there is a pairing code in the URL or clipboard

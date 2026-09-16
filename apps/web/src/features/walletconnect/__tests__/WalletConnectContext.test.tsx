@@ -32,8 +32,10 @@ jest.mock('../hooks/useMatchingSafeApp', () => ({
 }))
 
 const mockIsSafeAppSuggested = jest.fn(() => false)
+const mockIsFeatureEnabled = jest.fn(() => true)
 jest.mock('../hooks/useSafeAppSuggestion', () => ({
   useIsSafeAppSuggested: () => mockIsSafeAppSuggested(),
+  useIsSuggestionFeatureEnabled: () => mockIsFeatureEnabled(),
   useSafeAppSuggestionDismissed: () => [undefined, jest.fn()],
 }))
 
@@ -110,6 +112,7 @@ describe('WalletConnectProvider', () => {
     // resetAllMocks above clears the implementation, so restore the default shape
     mockUseMatchingSafeApp.mockReturnValue({ safeApp: undefined, isLoading: false })
     mockIsSafeAppSuggested.mockReturnValue(false)
+    mockIsFeatureEnabled.mockReturnValue(true)
   })
 
   it('sets the walletConnect state', async () => {
@@ -628,6 +631,33 @@ describe('WalletConnectProvider', () => {
 
       expect(mockUseMatchingSafeApp).toHaveBeenCalledWith('https://evil.example')
       expect(mockUseMatchingSafeApp).not.toHaveBeenCalledWith('https://app.uniswap.org')
+    })
+
+    // With the feature off nothing about the proposal flow may change, starting with not
+    // reaching out for a Safe Apps list that will never be used
+    it('does not look up a Safe App when the feature is off', async () => {
+      mockIsFeatureEnabled.mockReturnValue(false)
+
+      jest.spyOn(WalletConnectWallet.prototype, 'init').mockImplementation(() => Promise.resolve())
+      jest.spyOn(WalletConnectWallet.prototype, 'updateSessions').mockImplementation(() => Promise.resolve())
+      jest.spyOn(WalletConnectWallet.prototype, 'onSessionPropose').mockImplementation((callback) => {
+        setTimeout(() => callback(mockSessionProposal), 100)
+        return jest.fn()
+      })
+
+      const { getByText } = render(
+        <WalletConnectProvider>
+          <TestComponent />
+        </WalletConnectProvider>,
+        { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
+      )
+
+      await waitFor(() => {
+        expect(getByText('Session proposal received')).toBeInTheDocument()
+      })
+
+      expect(mockUseMatchingSafeApp).toHaveBeenCalledWith(undefined)
+      expect(mockUseMatchingSafeApp).not.toHaveBeenCalledWith(proposalOrigin)
     })
 
     describe('expired proposals', () => {

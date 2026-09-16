@@ -14,7 +14,7 @@ import type WalletConnectWallet from '../../services/WalletConnectWallet'
 import walletConnectInstance from '../../services/walletConnectInstance'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { useMatchingSafeApp } from '../../hooks/useMatchingSafeApp'
-import { useIsSafeAppSuggested } from '../../hooks/useSafeAppSuggestion'
+import { useIsSafeAppSuggested, useIsSuggestionFeatureEnabled } from '../../hooks/useSafeAppSuggestion'
 import type { WalletConnectContextType, WcAutoApproveProps } from '../../types'
 import { WCLoadingState } from '../../types'
 
@@ -50,6 +50,7 @@ export const WalletConnectContext = createContext<WalletConnectContextType>({
   rejectSession: () => Promise.resolve(),
   matchingSafeApp: undefined,
   isMatchingSafeAppLoading: false,
+  isSuggestionFeatureEnabled: false,
   isSafeAppSuggested: false,
   showSuggestion: false,
   isSuggestionResolved: false,
@@ -238,9 +239,12 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
   const [isSuggestionResolved, setSuggestionResolved] = useState(false)
   const [dontShowAgain, setDontShowAgain] = useState(false)
 
+  const isSuggestionFeatureEnabled = useIsSuggestionFeatureEnabled()
+
   // Matched on the origin WalletConnect observed, never on proposer.metadata.url, which the
-  // dApp declares about itself and can point at any domain it likes
-  const proposalDappUrl = sessionProposal?.verifyContext.verified.origin
+  // dApp declares about itself and can point at any domain it likes. Left undefined when the
+  // feature is off so the query is skipped entirely rather than fetched and ignored.
+  const proposalDappUrl = isSuggestionFeatureEnabled ? sessionProposal?.verifyContext.verified.origin : undefined
   const { safeApp: matchingSafeApp, isLoading: isMatchingSafeAppLoading } = useMatchingSafeApp(proposalDappUrl)
 
   // Derived once here: auto-approve, the session manager and the popup close handler all need
@@ -281,7 +285,7 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
       setLoading(null)
       // An expired proposal can never be approved, so drop it instead of leaving the
       // user stuck on a dialog whose only actions keep failing
-      if (isExpiredProposalError(e as Error)) {
+      if (isSuggestionFeatureEnabled && isExpiredProposalError(e as Error)) {
         setSessionProposal(null)
         throw new Error(Errors.EXPIRED_PROPOSAL)
       }
@@ -291,7 +295,7 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
     setLoading(null)
     setSessionProposal(null)
     setOpen(false)
-  }, [walletConnect, sessionProposal, chainId, safeAddress, setAutoApprove, setOpen])
+  }, [walletConnect, sessionProposal, chainId, safeAddress, setAutoApprove, setOpen, isSuggestionFeatureEnabled])
 
   // Auto approve previously approved non-malicious dApps. Skipped while the Safe App lookup is
   // in flight, and when this dApp is eligible for the suggestion so the user gets to choose.
@@ -326,7 +330,7 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
       setLoading(null)
       // The proposal is already gone, so treat the rejection as done rather than
       // leaving the user on a dialog they cannot dismiss
-      if (isExpiredProposalError(e as Error)) {
+      if (isSuggestionFeatureEnabled && isExpiredProposalError(e as Error)) {
         setSessionProposal(null)
         throw new Error(Errors.EXPIRED_PROPOSAL)
       }
@@ -336,22 +340,22 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
     setLoading(null)
     setSessionProposal(null)
     setOpen(false)
-  }, [walletConnect, sessionProposal, setOpen])
+  }, [walletConnect, sessionProposal, setOpen, isSuggestionFeatureEnabled])
 
   // Subscribe to session proposals
   useEffect(() => {
     return walletConnect?.onSessionPropose((proposalData) => {
       setLoading(null)
-      // A proposal can arrive just after the 5s connection timeout fired. The error screen
-      // takes precedence over the proposal, so clear it or the request stays hidden behind a
-      // message that is no longer true.
-      setError(null)
+      // A proposal can arrive just after the connection timeout fired. The error screen takes
+      // precedence over the proposal, so clear it or the request stays hidden behind a message
+      // that is no longer true.
+      if (isSuggestionFeatureEnabled) setError(null)
       // Each proposal gets its own suggestion
       setSuggestionResolved(false)
       setDontShowAgain(false)
       setSessionProposal(proposalData)
     })
-  }, [walletConnect])
+  }, [walletConnect, isSuggestionFeatureEnabled])
 
   return (
     <WalletConnectContext.Provider
@@ -369,6 +373,7 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
         rejectSession,
         matchingSafeApp,
         isMatchingSafeAppLoading,
+        isSuggestionFeatureEnabled,
         isSafeAppSuggested,
         showSuggestion,
         isSuggestionResolved,

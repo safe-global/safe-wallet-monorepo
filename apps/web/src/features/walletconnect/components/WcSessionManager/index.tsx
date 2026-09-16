@@ -39,6 +39,7 @@ const WcSessionManager = ({ uri }: WcSessionManagerProps) => {
     isSuggestionResolved,
     setSuggestionResolved,
     dontShowAgain,
+    isSuggestionFeatureEnabled,
   } = useContext(WalletConnectContext)
   const chainSwitchRequest = wcChainSwitchStore.useStore()
   const router = useRouter()
@@ -46,8 +47,12 @@ const WcSessionManager = ({ uri }: WcSessionManagerProps) => {
   const [, setSuggestionDismissed] = useSafeAppSuggestionDismissed()
 
   // The verified origin, not proposer.metadata.url, which the dApp declares about itself and
-  // could use to attribute its traffic to another domain
-  const proposalUrl = sessionProposal?.verifyContext.verified.origin ?? ''
+  // could use to attribute its traffic to another domain. Falls back while the feature is off
+  // so existing dashboards keep the values they have always had.
+  const proposalUrl =
+    (isSuggestionFeatureEnabled
+      ? sessionProposal?.verifyContext.verified.origin
+      : sessionProposal?.params?.proposer?.metadata?.url) ?? ''
 
   // Records which path the user took when a Safe App was suggested
   const trackSuggestionResult = useCallback(
@@ -110,10 +115,12 @@ const WcSessionManager = ({ uri }: WcSessionManagerProps) => {
       { ...WALLETCONNECT_EVENTS.CONNECTED, label: proposalUrl },
       {
         [MixpanelEventParams.APP_URL]: proposalUrl,
-        [MixpanelEventParams.SAFE_APP_AVAILABLE]: Boolean(matchingSafeApp),
+        ...(isSuggestionFeatureEnabled && {
+          [MixpanelEventParams.SAFE_APP_AVAILABLE]: Boolean(matchingSafeApp),
+        }),
       },
     )
-  }, [sessionProposal, approveSession, setError, matchingSafeApp, proposalUrl])
+  }, [sessionProposal, approveSession, setError, matchingSafeApp, proposalUrl, isSuggestionFeatureEnabled])
 
   // On session reject
   const onReject = useCallback(async () => {
@@ -247,7 +254,7 @@ const WcSessionManager = ({ uri }: WcSessionManagerProps) => {
 
   // Without this the connection form renders, and can be approved, in the moment before the
   // suggestion replaces it
-  if (sessionProposal && isMatchingSafeAppLoading && !isSuggestionResolved) {
+  if (isSuggestionFeatureEnabled && sessionProposal && isMatchingSafeAppLoading && !isSuggestionResolved) {
     return (
       <div className="flex justify-center py-10">
         <Spinner />

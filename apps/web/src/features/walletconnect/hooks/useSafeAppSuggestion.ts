@@ -16,6 +16,12 @@ export const WC_SUGGESTION_DISMISSED_KEY = 'wcSafeAppSuggestionDismissed'
 export const useSafeAppSuggestionDismissed = () => useLocalStorage<boolean>(WC_SUGGESTION_DISMISSED_KEY)
 
 /**
+ * The feature switch for the whole flow. Undefined until the chain config loads, which counts
+ * as off so the connection form never flashes behind a late-arriving flag.
+ */
+export const useIsSuggestionFeatureEnabled = (): boolean => useHasFeature(FEATURES.WC_SAFE_APP_SUGGESTION) ?? false
+
+/**
  * Whether to suggest the Safe App instead of showing the connection form.
  *
  * Connecting from the suggestion skips the connection form, so this is suppressed whenever
@@ -33,7 +39,7 @@ export const useIsSafeAppSuggested = (
   proposal: WalletKitTypes.SessionProposal | null,
   matchingSafeApp: SafeAppData | undefined,
 ): boolean => {
-  const isFeatureEnabled = useHasFeature(FEATURES.WC_SAFE_APP_SUGGESTION)
+  const isFeatureEnabled = useIsSuggestionFeatureEnabled()
   const [dismissed] = useSafeAppSuggestionDismissed()
   const { configs } = useChains()
   const { safe, safeLoaded } = useSafeInfo()

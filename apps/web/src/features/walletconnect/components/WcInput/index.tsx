@@ -31,7 +31,7 @@ const useTrackErrors = (error?: Error) => {
 }
 
 const WcInput = ({ uri }: { uri: string }) => {
-  const { walletConnect, loading, setLoading, setError } = useContext(WalletConnectContext)
+  const { walletConnect, loading, setLoading, setError, isSuggestionFeatureEnabled } = useContext(WalletConnectContext)
   const [value, setValue] = useState('')
   const [inputError, setInputError] = useState<Error>()
   const inputId = useId()
@@ -69,6 +69,10 @@ const WcInput = ({ uri }: { uri: string }) => {
         setInputError(asError(e))
         setLoading(null)
       }
+      // Before this timer was fixed it could never fire, so leaving it unarmed while the
+      // feature is off reproduces the previous behaviour exactly
+      if (!isSuggestionFeatureEnabled) return
+
       clearTimeout(timeoutRef.current)
       timeoutRef.current = setTimeout(() => {
         if (loadingRef.current && loadingRef.current !== WCLoadingState.APPROVE) {
@@ -77,7 +81,7 @@ const WcInput = ({ uri }: { uri: string }) => {
         }
       }, PROPOSAL_TIMEOUT)
     },
-    [setError, setLoading, walletConnect],
+    [setError, setLoading, walletConnect, isSuggestionFeatureEnabled],
   )
 
   // Insert a pre-filled uri

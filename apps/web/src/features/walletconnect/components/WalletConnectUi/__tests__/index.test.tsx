@@ -89,6 +89,7 @@ const contextValue = {
   rejectSession: mockRejectSession,
   matchingSafeApp: undefined as SafeAppData | undefined,
   isMatchingSafeAppLoading: false,
+  isSuggestionFeatureEnabled: true,
   isSafeAppSuggested: false,
   showSuggestion: false,
   isSuggestionResolved: false,
@@ -208,6 +209,25 @@ describe('WalletConnectUi dismissal', () => {
 
     expect(mockSetOpen).toHaveBeenCalledWith(false)
     expect(mockRejectSession).not.toHaveBeenCalled()
+  })
+
+  // With the feature off, dismissing leaves the proposal pending exactly as it used to
+  it('does not reject or track on close when the feature is off', () => {
+    currentContext = {
+      ...contextValue,
+      sessionProposal: mockSessionProposal,
+      isSuggestionFeatureEnabled: false,
+    }
+
+    render(<WalletConnectUi />)
+
+    fireEvent.click(screen.getByText('close popup'))
+
+    expect(mockSetOpen).toHaveBeenCalledWith(false)
+    expect(mockRejectSession).not.toHaveBeenCalled()
+    expect(mockTrackEvent).not.toHaveBeenCalledWith(
+      expect.objectContaining({ action: WALLETCONNECT_EVENTS.REJECT_CLICK.action }),
+    )
   })
 
   it('still closes when the rejection fails', async () => {

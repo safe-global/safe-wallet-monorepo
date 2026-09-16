@@ -17,8 +17,12 @@ const mockConnect = jest.fn()
 const mockSetLoading = jest.fn()
 const mockSetError = jest.fn()
 
-const makeContext = (loading: WCLoadingState | null = null): WalletConnectContextType =>
+const makeContext = (
+  loading: WCLoadingState | null = null,
+  isSuggestionFeatureEnabled = true,
+): WalletConnectContextType =>
   ({
+    isSuggestionFeatureEnabled,
     walletConnect: { connect: mockConnect },
     sessions: [],
     sessionProposal: null,
@@ -143,6 +147,27 @@ describe('WcInput', () => {
 
     await act(async () => {
       jest.advanceTimersByTime(PROPOSAL_TIMEOUT)
+    })
+
+    expect(mockSetError).not.toHaveBeenCalled()
+  })
+
+  // The timer could never fire before this branch, so with the feature off it stays unarmed
+  it('does not time out when the feature is off', async () => {
+    render(
+      <WalletConnectContext.Provider value={makeContext(WCLoadingState.CONNECT, false)}>
+        <WcInput uri="" />
+      </WalletConnectContext.Provider>,
+    )
+
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: VALID_URI } })
+
+    await waitFor(() => {
+      expect(mockConnect).toHaveBeenCalled()
+    })
+
+    await act(async () => {
+      jest.advanceTimersByTime(PROPOSAL_TIMEOUT * 10)
     })
 
     expect(mockSetError).not.toHaveBeenCalled()

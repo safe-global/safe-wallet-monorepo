@@ -29,6 +29,8 @@ export type WalletConnectContextType = {
   /** The Safe App matching the proposing dApp, if one exists on the current chain */
   matchingSafeApp: SafeAppData | undefined
   isMatchingSafeAppLoading: boolean
+  /** The feature switch for the whole suggestion flow; off restores the previous behaviour */
+  isSuggestionFeatureEnabled: boolean
   /** Whether this proposal is eligible for the suggestion at all, before the user acts on it */
   isSafeAppSuggested: boolean
   /** Whether the suggestion is on screen right now */
