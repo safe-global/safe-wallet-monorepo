@@ -874,7 +874,7 @@ describe('SignOrExecute hooks', () => {
       expect(resolveFeeParams).toHaveBeenCalledWith(
         expect.objectContaining({ gasToken: GAS_TOKEN, numberSignatures: 2 }),
       )
-      expect(signSpy).toHaveBeenCalledWith(mergedTx, expect.anything(), undefined)
+      expect(signSpy).toHaveBeenCalledWith(mergedTx, expect.anything(), undefined, undefined)
     })
 
     it('skips the merge for confirmers (safeTx already has a signature)', async () => {

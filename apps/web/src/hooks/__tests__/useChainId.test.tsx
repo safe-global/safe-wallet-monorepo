@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { useParams } from 'next/navigation'
 import useChainId from '@/hooks/useChainId'
 import { renderHook } from '@/tests/test-utils'
@@ -5,6 +6,7 @@ import * as useWalletHook from '@/hooks/wallets/useWallet'
 import * as useChains from '@/hooks/useChains'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { SafeScopeContext } from '@/components/tx-flow/safe-scope/context'
 
 // mock useRouter
 jest.mock('next/navigation', () => ({
@@ -93,5 +95,34 @@ describe('useChainId hook', () => {
 
     const { result } = renderHook(() => useChainId())
     expect(result.current).toBe('1337')
+  })
+})
+
+describe('useChainId under a SafeScope', () => {
+  it('returns the scope chain even when the URL names another one', () => {
+    ;(useParams as any).mockImplementation(() => ({}))
+    Object.defineProperty(window, 'location', {
+      writable: true,
+      value: { pathname: '/spaces/policies', search: '?safe=sep:0x0000000000000000000000000000000000000123' },
+    })
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <SafeScopeContext.Provider
+        value={{
+          scope: {
+            chainId: '137',
+            safeAddress: '0x0000000000000000000000000000000000000456',
+            scopeKey: '137:0x0000000000000000000000000000000000000456',
+            safeLoaded: false,
+            safeLoading: true,
+          },
+          setScope: jest.fn(),
+          clearScope: jest.fn(),
+        }}
+      >
+        {children}
+      </SafeScopeContext.Provider>
+    )
+    const { result } = renderHook(() => useChainId(), { wrapper })
+    expect(result.current).toBe('137')
   })
 })

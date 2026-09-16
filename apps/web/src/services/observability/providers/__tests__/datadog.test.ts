@@ -79,6 +79,25 @@ describe('DatadogProvider', () => {
     })
   }
 
+  const mockTracingEnabledDatadogConstants = (): void => {
+    jest.doMock('@/config/constants', () => {
+      const actualConstants = jest.requireActual<typeof ConstantsModule>('@/config/constants')
+
+      return {
+        ...actualConstants,
+        DATADOG_RUM_APPLICATION_ID: 'test-app-id',
+        DATADOG_RUM_CLIENT_TOKEN: 'test-client-token',
+        DATADOG_RUM_TRACING_ENABLED: true,
+      }
+    })
+  }
+
+  const getInitConfig = (): Record<string, unknown> => {
+    expect(mockInit).toHaveBeenCalledTimes(1)
+    const [config] = mockInit.mock.calls[0] as [Record<string, unknown>]
+    return config
+  }
+
   const importProvider = async () => {
     const { DatadogProvider } = await import('../datadog')
     return DatadogProvider as unknown as DatadogProviderConstructor
@@ -210,6 +229,36 @@ describe('DatadogProvider', () => {
 
       expect(mockAddError).not.toHaveBeenCalled()
       expect(mockAddAction).not.toHaveBeenCalled()
+    })
+  })
+
+  // One case per branch of the DATADOG_RUM_TRACING_ENABLED spread in init().
+  // Each asserts the SDK v7 default pinned back to v6 on that path — the
+  // reasoning for both pins lives in datadog.ts.
+  describe('init configuration', () => {
+    it('pins the action-name privacy default and sends no tracing options when tracing is off', async () => {
+      mockEnabledDatadogConstants()
+      mockGetInitConfiguration.mockReturnValue(undefined)
+      const Provider = await importProvider()
+
+      await new Provider().init()
+
+      const config = getInitConfig()
+      expect(config.enablePrivacyForActionName).toBe(false)
+      expect(config).not.toHaveProperty('propagateTraceBaggage')
+      expect(config).not.toHaveProperty('allowedTracingUrls')
+    })
+
+    it('sends the gateway tracing options without trace baggage when tracing is on', async () => {
+      mockTracingEnabledDatadogConstants()
+      mockGetInitConfiguration.mockReturnValue(undefined)
+      const Provider = await importProvider()
+
+      await new Provider().init()
+
+      const config = getInitConfig()
+      expect(config.allowedTracingUrls).toHaveLength(2)
+      expect(config.propagateTraceBaggage).toBe(false)
     })
   })
 
