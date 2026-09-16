@@ -82,7 +82,8 @@ const buildTxServiceResult = (
     }
   }
 
-  return { data: undefined, error: toError(txService.error), loading: true, ...shared }
+  // Loading must drop once the fetch errors so consumers can surface the error instead of an endless skeleton
+  return { data: undefined, error: toError(txService.error), loading: !txService.error, ...shared }
 }
 
 /**
