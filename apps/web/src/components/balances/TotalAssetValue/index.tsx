@@ -35,6 +35,32 @@ const TotalAssetValue = ({
     balances.items.length > 1 ||
     (balances.items.length === 1 && balances.items[0]?.tokenInfo.type !== TokenType.NATIVE_TOKEN)
 
+  const renderValue = () => {
+    if (safe.deployed) {
+      if (error) return <FiatValue value={null} precise />
+
+      if (fiatTotal === undefined) return <Skeleton className="h-[1.2em] w-[60px]" />
+
+      return <FiatValue value={fiatTotal} precise />
+    }
+
+    if (shouldHideNativeTokenValue) {
+      if (hasOtherBalances) return <FiatValue value={fiatTotal ?? '0'} precise />
+
+      return <FiatValue value="0" precise />
+    }
+
+    const [firstToken] = balances.items
+
+    return (
+      <TokenAmount
+        value={firstToken?.balance}
+        decimals={firstToken?.tokenInfo.decimals}
+        tokenSymbol={firstToken?.tokenInfo.symbol}
+      />
+    )
+  }
+
   return (
     <div>
       <Typography variant="paragraph" className="mb-1 font-bold">
@@ -42,31 +68,7 @@ const TotalAssetValue = ({
         {tooltipTitle && <InfoTooltip title={tooltipTitle} />}
       </Typography>
       <div className="flex flex-row items-end justify-between">
-        <div className={`m-0 font-semibold leading-[1.2] ${fontSizeClass}`}>
-          {safe.deployed ? (
-            error ? (
-              <FiatValue value={null} precise />
-            ) : fiatTotal !== undefined ? (
-              <>
-                <FiatValue value={fiatTotal} precise />
-              </>
-            ) : (
-              <Skeleton className="h-[1.2em] w-[60px]" />
-            )
-          ) : shouldHideNativeTokenValue ? (
-            hasOtherBalances ? (
-              <FiatValue value={fiatTotal ?? '0'} precise />
-            ) : (
-              <FiatValue value="0" precise />
-            )
-          ) : (
-            <TokenAmount
-              value={balances.items[0]?.balance}
-              decimals={balances.items[0]?.tokenInfo.decimals}
-              tokenSymbol={balances.items[0]?.tokenInfo.symbol}
-            />
-          )}
-        </div>
+        <div className={`m-0 font-semibold leading-[1.2] ${fontSizeClass}`}>{renderValue()}</div>
         {action}
       </div>
       {error && safe.deployed && showErrorSubtitle && (
