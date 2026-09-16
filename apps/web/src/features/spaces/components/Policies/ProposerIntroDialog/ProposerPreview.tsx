@@ -118,7 +118,7 @@ const ProposerPreview = (): ReactElement => (
         scale: `calc(100cqw / ${FRAME_WIDTH})`,
       }}
     >
-      <PreviewCard left={23.3} top={21.3} width={200} height={207} scale={CARD_SCALE_FRONT}>
+      <PreviewCard left={27.3} top={21.3} width={200} height={207} scale={CARD_SCALE_FRONT}>
         <CardHeading fontSize={HEADING_FONT_SIZE + 2}>Transactions</CardHeading>
 
         {TRANSACTION_ICONS.map((Icon, index) => (
@@ -137,7 +137,7 @@ const ProposerPreview = (): ReactElement => (
         ))}
       </PreviewCard>
 
-      <PreviewCard left={125.5} top={82.5} width={146} height={151} scale={1}>
+      <PreviewCard left={129.5} top={82.5} width={146} height={151} scale={1}>
         <div className="flex shrink-0 items-center" style={{ gap: 6 }}>
           <CardHeading>Signers</CardHeading>
 
@@ -161,7 +161,7 @@ const ProposerPreview = (): ReactElement => (
         ))}
       </PreviewCard>
 
-      <PreviewCard left={221.6} top={21.6} width={147} height={152} scale={1}>
+      <PreviewCard left={225.6} top={21.6} width={147} height={152} scale={1}>
         <CardHeading>Proposers</CardHeading>
 
         {PREVIEW_PROPOSERS.map((address) => (
