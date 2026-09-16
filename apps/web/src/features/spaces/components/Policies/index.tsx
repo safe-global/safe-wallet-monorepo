@@ -51,7 +51,7 @@ const Policies = (): ReactElement => {
           // TODO(WA-3160): open the Suggest a policy dialog.
           return
 
-        // Unavailable in the catalogue, so it is never selected.
+        // Only unreachable while `isAvailable` is false in the catalogue; needs a flow before it flips.
         case 'account-recovery':
           return
 
