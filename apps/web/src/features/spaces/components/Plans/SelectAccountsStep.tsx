@@ -94,10 +94,11 @@ export default function SelectAccountsStep({
 
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-3">
+          {/* Amber only while the selection still exceeds the plan; sitting exactly at the cap is the goal. */}
           <SelectedCounter
             count={selectedKeys.size}
             limit={limit}
-            isAtLimit={isAtLimit}
+            isAtLimit={isOverLimit}
             tooltip={seatsTooltip(planName, limit)}
           />
           <SearchInput

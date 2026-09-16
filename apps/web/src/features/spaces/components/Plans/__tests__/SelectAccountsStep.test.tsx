@@ -84,12 +84,14 @@ describe('SelectAccountsStep', () => {
 
     expect(screen.getByText('Business covers 2 Safe accounts')).toBeInTheDocument()
     expect(screen.getByTestId('selected-count')).toHaveTextContent('3 of 2 selected')
+    expect(screen.getByTestId('selected-count')).toHaveClass('text-warning-strong')
     expect(screen.getByText('Deselect 1 Safe account to fit the plan.')).toBeInTheDocument()
     expect(screen.getByRole('checkbox', { name: 'Grants' })).toBeChecked()
     expect(screen.getByRole('button', { name: /Continue to checkout/ })).toBeDisabled()
 
     fireEvent.click(screen.getByRole('checkbox', { name: 'Payroll' }))
     expect(screen.getByTestId('selected-count')).toHaveTextContent('2 of 2 selected')
+    expect(screen.getByTestId('selected-count')).not.toHaveClass('text-warning-strong')
     expect(screen.getByText(/1 Safe account will be removed from the Workspace/)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Continue to checkout/ })).toBeEnabled()
 
