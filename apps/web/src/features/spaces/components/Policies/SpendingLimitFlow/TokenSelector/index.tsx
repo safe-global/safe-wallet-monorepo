@@ -135,6 +135,7 @@ const TokenSelector = ({
         disabled={disabled || !hasSafe}
         name={name}
         openOnInputClick
+        autoHighlight
       >
         <div ref={fieldAnchor} className="w-full">
           <ComboboxInput

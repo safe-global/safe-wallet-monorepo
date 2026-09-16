@@ -165,6 +165,20 @@ describe('TokenSelector — search', () => {
     expect(screen.getByRole('option', { name: /DAI/ })).toBeInTheDocument()
   })
 
+  it('selects the first match on Enter, without arrowing to it first', async () => {
+    const onChange = jest.fn()
+    const { user } = renderSelector({ onChange })
+    const input = await openSelector(user)
+
+    // `autoHighlight` highlights the first match as the query narrows, so Enter commits it. The first
+    // match is the first row in list order, which is fiat-descending among held tokens — not the
+    // closest name match, so a query matching several tokens can commit one the user did not mean.
+    await user.type(input, 'USD')
+    await user.keyboard('{Enter}')
+
+    expect(onChange).toHaveBeenCalledWith(heldUsdc.address)
+  })
+
   it('shows the empty state and does not accept an unknown address', async () => {
     const onChange = jest.fn()
     const { user } = renderSelector({ onChange })
