@@ -157,7 +157,7 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
                 confirmLabel={`Import contacts (${selectedCount})`}
                 confirmType="submit"
                 confirmLoading={isSubmitting}
-                confirmDisabled={selectedCount === 0 || isSuccess}
+                confirmDisabled={selectedCount === 0 || isSuccess || chains.length === 0}
                 confirmTooltip={hasNoImportableContacts ? 'You have no new contacts to import.' : undefined}
               />
             </DialogFooter>

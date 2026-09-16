@@ -23,9 +23,11 @@ jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => MOCK_SPACE_UUID,
 }))
 
+let mockConfigs: { chainId: string }[] = []
+
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
-  default: () => ({ configs: [{ chainId: '1' }, { chainId: '137' }] }),
+  default: () => ({ configs: mockConfigs }),
 }))
 
 describe('AddToWorkspaceButton', () => {
@@ -33,6 +35,14 @@ describe('AddToWorkspaceButton', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockConfigs = [{ chainId: '1' }, { chainId: '137' }]
+  })
+
+  it('is disabled while the chain config is empty', () => {
+    mockConfigs = []
+    render(<AddToWorkspaceButton address={address} name="Alice" />)
+
+    expect(screen.getByRole('button', { name: 'Add to workspace' })).toBeDisabled()
   })
 
   it('adds the contact to the workspace address book', async () => {

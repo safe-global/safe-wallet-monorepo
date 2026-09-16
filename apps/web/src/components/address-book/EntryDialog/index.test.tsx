@@ -15,6 +15,15 @@ jest.mock('@/hooks/use-mobile', () => ({
   useIsMobile: jest.fn(() => false),
 }))
 
+let mockConfigs: { chainId: string }[] = [{ chainId: '1' }]
+
+jest.mock('@/hooks/useChains', () => ({
+  __esModule: true,
+  default: () => ({ configs: mockConfigs }),
+  useChain: () => undefined,
+  useCurrentChain: () => undefined,
+}))
+
 describe('EntryDialog', () => {
   it('renders a create-entry dialog', () => {
     render(<EntryDialog handleClose={jest.fn()} />)
@@ -49,8 +58,21 @@ describe('EntryDialog scope', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockConfigs = [{ chainId: '1' }]
     upsertWorkspaceName.mockResolvedValue({})
     ;(useUpsertWorkspaceSafeName as jest.Mock).mockReturnValue(upsertWorkspaceName)
+  })
+
+  it('keeps a workspace save disabled while the chain config is empty', async () => {
+    mockConfigs = []
+    renderDialog('workspace')
+
+    const field = screen.getByTestId('name-input')
+    const input = (field.tagName === 'INPUT' ? field : field.querySelector('input')) as HTMLInputElement
+    fireEvent.change(input, { target: { value: 'Treasury' } })
+
+    await waitFor(() => expect(input).toHaveValue('Treasury'))
+    expect(screen.getByTestId('save-btn')).toBeDisabled()
   })
 
   const renderDialog = (scope?: 'local' | 'workspace') =>
