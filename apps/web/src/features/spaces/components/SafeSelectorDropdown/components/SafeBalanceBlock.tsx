@@ -3,7 +3,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export interface SafeBalanceBlockProps {
   isLoading: boolean
-  balance: string | null
+  balance: string
 }
 
 function SafeBalanceBlock({ isLoading, balance }: SafeBalanceBlockProps) {

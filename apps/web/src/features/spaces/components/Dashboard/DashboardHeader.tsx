@@ -12,7 +12,6 @@ import { TotalValueElement } from '../TotalValueElement'
 interface DashboardHeaderProps {
   value: string
   loading?: boolean
-  error?: boolean
   onSend?: () => void
   onReceive?: () => void
   onSwap?: () => void
@@ -21,10 +20,10 @@ interface DashboardHeaderProps {
   noAssets: boolean
 }
 
-const DashboardHeader = ({ value, loading, error, noAssets }: DashboardHeaderProps) => {
+const DashboardHeader = ({ value, loading, noAssets }: DashboardHeaderProps) => {
   return (
     <div className="flex flex-col gap-6 mb-10">
-      <TotalValueElement value={value} loading={loading} error={error} />
+      <TotalValueElement value={value} loading={loading} />
       <ActionsTray noAssets={noAssets} variant="space" />
     </div>
   )
