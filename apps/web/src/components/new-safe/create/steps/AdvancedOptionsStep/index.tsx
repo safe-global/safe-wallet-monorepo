@@ -81,8 +81,8 @@ const AdvancedOptionsStep = ({ onSubmit, onBack, data, setStep }: StepRenderProp
   }, [provider, newSafeProps, selectedSaltNonce])
 
   const [isDeployed] = useAsync(
-    async () => (predictedSafeAddress ? await isSmartContract(predictedSafeAddress) : false),
-    [predictedSafeAddress],
+    async () => (predictedSafeAddress && chain ? await isSmartContract(chain.chainId, predictedSafeAddress) : false),
+    [chain, predictedSafeAddress],
   )
 
   const isDisabled = !formState.isValid || Boolean(isDeployed)

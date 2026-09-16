@@ -258,7 +258,7 @@ describe('persistCounterfactualSafe', () => {
       dispatch,
     })
 
-    expect(isSmartContractImpl).toHaveBeenCalledWith('0xSafe', mockProvider)
+    expect(isSmartContractImpl).toHaveBeenCalledWith('100', '0xSafe')
     expect(userInitiate).not.toHaveBeenCalled()
     expect(replayImpl).not.toHaveBeenCalled()
     expect(result.ok).toBe(true)

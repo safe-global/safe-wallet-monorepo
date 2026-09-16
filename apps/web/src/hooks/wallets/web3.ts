@@ -15,6 +15,13 @@ import { getWeb3ReadOnly } from './web3ReadOnly'
  */
 const BATCH_MAX_COUNT = 3
 
+/**
+ * Widens ethers' 250ms request-sharing window, which is shorter than a typical RPC round-trip and so
+ * misses sequential callers entirely. Kept below the 4s polling interval so no poll is ever served
+ * a cached answer. Not applied to the Safe Apps provider: third-party dapps get unmediated reads.
+ */
+const RPC_CACHE_TIMEOUT = 2_000
+
 // RPC helpers
 const formatRpcServiceUrl = ({ authentication, value }: RpcUri, token: string): string => {
   const needsToken = authentication === 'API_KEY_PATH'
@@ -37,6 +44,7 @@ export const createWeb3ReadOnly = (chain: Chain, customRpc?: string): JsonRpcPro
   const provider = new JsonRpcProvider(url, Number(chain.chainId), {
     staticNetwork: true,
     batchMaxCount: BATCH_MAX_COUNT,
+    cacheTimeout: RPC_CACHE_TIMEOUT,
   })
   return rememberRpcEndpoint(provider, getRpcEndpointInfo(chain.rpcUri, { url, isCustom: Boolean(customRpc) }))
 }

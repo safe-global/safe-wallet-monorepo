@@ -1,4 +1,4 @@
-import { isSmartContract } from '@/utils/wallets'
+import { isSmartContractOnProvider } from '@/utils/wallets'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { createWeb3ReadOnly, getRpcServiceUrl } from '@/hooks/wallets/web3'
@@ -36,7 +36,7 @@ export const getAvailableSaltNonce = async (
     const safeAddress = await predictAddressBasedOnReplayData(replayedSafe, web3ReadOnly)
 
     const isKnown = knownSafeAddresses.some((knownAddress) => sameAddress(knownAddress, safeAddress))
-    if (isKnown || (await isSmartContract(safeAddress, web3ReadOnly))) {
+    if (isKnown || (await isSmartContractOnProvider(web3ReadOnly, safeAddress))) {
       // We found a chain where the nonce is used up
       isAvailableOnAllChains = false
       break

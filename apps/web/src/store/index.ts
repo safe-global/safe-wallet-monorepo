@@ -28,6 +28,7 @@ import {
 import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
 import { ofacApi } from '@/store/api/ofac'
+import { rpcApi } from '@/store/api/rpc'
 import { safePassApi } from './api/safePass'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import { safenetCheckApi } from '@safe-global/store/safenet/safenetCheckApi'
@@ -74,6 +75,7 @@ const rootReducer = combineReducers({
   // page load would leave the user on a splash screen with nothing in flight.
   [slices.stepUpSlice.name]: slices.stepUpSlice.reducer,
   [ofacApi.reducerPath]: ofacApi.reducer,
+  [rpcApi.reducerPath]: rpcApi.reducer,
   [safePassApi.reducerPath]: safePassApi.reducer,
   [hypernativeApi.reducerPath]: hypernativeApi.reducer,
   [safenetCheckSlice.name]: safenetCheckSlice.reducer,
@@ -117,6 +119,7 @@ const middleware: Middleware<{}, RootState>[] = [
   broadcastState(persistedSlices),
   listenerMiddlewareInstance.middleware,
   ofacApi.middleware,
+  rpcApi.middleware,
   safePassApi.middleware,
   hypernativeApi.middleware,
   safenetCheckApi.middleware,

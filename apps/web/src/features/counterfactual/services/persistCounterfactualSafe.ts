@@ -78,7 +78,7 @@ export const persistCounterfactualSafe = async ({
   if (provider && !isUserAuthenticated) {
     let isDeployed = false
     try {
-      isDeployed = await isSmartContract(safeAddress, provider)
+      isDeployed = await isSmartContract(chainId, safeAddress)
     } catch {
       // Couldn't verify deployment — fail open and let the persist proceed.
     }

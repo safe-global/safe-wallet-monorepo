@@ -33,8 +33,8 @@ const SpeedUpMonitor = ({ txId, pendingTx, modalTrigger = 'alertBox' }: SpeedUpM
 
   const [smartContract] = useAsync(async () => {
     if (!pendingTx.signerAddress || !web3ReadOnly) return false
-    return isSmartContract(pendingTx.signerAddress)
-  }, [pendingTx.signerAddress, web3ReadOnly])
+    return isSmartContract(pendingTx.chainId, pendingTx.signerAddress)
+  }, [pendingTx.chainId, pendingTx.signerAddress, web3ReadOnly])
 
   if (!isFeatureEnabled || !isSpeedableTx(pendingTx, smartContract, wallet?.address ?? '')) {
     return null

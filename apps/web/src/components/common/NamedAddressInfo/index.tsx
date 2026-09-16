@@ -14,7 +14,8 @@ const THIS_SAFE_ACCOUNT = 'This Safe account'
 const UNVERIFIED_CONTRACT = 'Unverified contract'
 
 const useIsContractAddress = (address?: string): boolean => {
-  const [isContract] = useAsync(() => (address ? isSmartContract(address) : undefined), [address])
+  const chainId = useChainId()
+  const [isContract] = useAsync(() => (address ? isSmartContract(chainId, address) : undefined), [chainId, address])
   return isContract ?? false
 }
 

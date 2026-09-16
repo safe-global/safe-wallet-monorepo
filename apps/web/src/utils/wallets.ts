@@ -1,12 +1,12 @@
 import type { EthersError } from '@/utils/ethers-utils'
 import { getWalletConnectLabel, type ConnectedWallet } from '@/hooks/wallets/useOnboard'
-import { getWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { WALLET_KEYS } from '@/hooks/wallets/consts'
 // Inlined to avoid importing from protocol-kit which has heavy dependencies
 const EMPTY_DATA = '0x'
-import memoize from 'lodash/memoize'
 import { PRIVATE_KEY_MODULE_LABEL } from '@/services/private-key-module/constants'
 import { type Eip1193Provider, type JsonRpcProvider } from 'ethers'
+import { getStoreInstance } from '@/store'
+import { rpcApi } from '@/store/api/rpc'
 
 const WALLETCONNECT = 'WalletConnect'
 const WC_LEDGER = 'Ledger Wallet'
@@ -50,40 +50,29 @@ export const isPKWallet = (wallet: ConnectedWallet): boolean => {
   return wallet.label.toUpperCase() === WALLET_KEYS.PK
 }
 
-const getAccountCode = async (address: string, provider?: JsonRpcProvider): Promise<string> => {
-  const web3 = provider ?? getWeb3ReadOnly()
+const getAccountCode = (chainId: string, address: string): Promise<string> =>
+  getStoreInstance().dispatch(rpcApi.endpoints.getCode.initiate({ chainId, address })).unwrap()
 
-  if (!web3) {
-    throw new Error('Provider not found')
-  }
-
-  return await web3.getCode(address)
-}
-
-export const isSmartContract = async (address: string, provider?: JsonRpcProvider): Promise<boolean> => {
-  const code = await getAccountCode(address, provider)
+export const isSmartContract = async (chainId: string, address: string): Promise<boolean> => {
+  const code = await getAccountCode(chainId, address)
   return code !== EMPTY_DATA
 }
 
-export const isEIP7702DelegatedAccount = async (address: string, provider?: JsonRpcProvider): Promise<boolean> => {
-  const code = await getAccountCode(address, provider)
+/** For callers holding a provider for a chain other than the active one, so the read is not cached. */
+export const isSmartContractOnProvider = async (provider: JsonRpcProvider, address: string): Promise<boolean> => {
+  return (await provider.getCode(address)) !== EMPTY_DATA
+}
+
+export const isEIP7702DelegatedAccount = async (chainId: string, address: string): Promise<boolean> => {
+  const code = await getAccountCode(chainId, address)
   return code.startsWith(EIP_7702_DELEGATED_ACCOUNT_PREFIX)
 }
 
-export const isSmartContractWallet = memoize(
-  async (chainId: string, address: string): Promise<boolean> => {
-    try {
-      const isContract = await isSmartContract(address)
-      const isEIP7702 = await isEIP7702DelegatedAccount(address)
-      return isContract && !isEIP7702
-    } catch (error) {
-      // memoize would otherwise cache the rejected promise for the whole session
-      isSmartContractWallet.cache.delete?.(chainId + address)
-      throw error
-    }
-  },
-  (chainId, address) => chainId + address,
-)
+export const isSmartContractWallet = async (chainId: string, address: string): Promise<boolean> => {
+  const isContract = await isSmartContract(chainId, address)
+  const isEIP7702 = await isEIP7702DelegatedAccount(chainId, address)
+  return isContract && !isEIP7702
+}
 
 type Eip6963AnnounceProviderEvent = CustomEvent<{
   info: { name: string }

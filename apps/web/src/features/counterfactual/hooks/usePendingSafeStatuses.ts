@@ -86,7 +86,7 @@ const usePendingSafeStatus = (): void => {
       const { chainId } = await provider.getNetwork()
       if (chainId !== BigInt(safe.chainId)) return
 
-      const isContractDeployed = await isSmartContract(safeAddress)
+      const isContractDeployed = await isSmartContract(safe.chainId, safeAddress)
 
       if (isContractDeployed) {
         dispatch(removeUndeployedSafe({ chainId: safe.chainId, address: safeAddress }))

@@ -5,24 +5,27 @@ import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
 import {
   isSmartContractWallet,
   isSmartContract,
+  isSmartContractOnProvider,
   isEIP7702DelegatedAccount,
   EIP_7702_DELEGATED_ACCOUNT_PREFIX,
   isWalletUnlocked,
   isWalletRejection,
 } from '@/utils/wallets'
 import { PRIVATE_KEY_MODULE_LABEL } from '@/services/private-key-module/constants'
+import { makeStore, setStoreInstance } from '@/store'
 
 describe('wallets', () => {
   const getCodeMock = jest.fn()
 
   beforeEach(() => {
-    isSmartContractWallet.cache.clear?.()
-
     jest.clearAllMocks()
+
+    setStoreInstance(makeStore(undefined, { skipBroadcast: true }))
 
     jest.spyOn(web3ReadOnly, 'getWeb3ReadOnly').mockImplementation(() => {
       return {
         getCode: getCodeMock,
+        getNetwork: async () => ({ chainId: BigInt(1) }),
       } as unknown as JsonRpcProvider
     })
   })
@@ -121,7 +124,7 @@ describe('wallets', () => {
     it('should return true for accounts with bytecode', async () => {
       getCodeMock.mockResolvedValue('0x608060405234801561001057600080fd5b5')
 
-      const result = await isSmartContract(toBeHex('0x1', 20))
+      const result = await isSmartContract('1', toBeHex('0x1', 20))
 
       expect(result).toBe(true)
       expect(getCodeMock).toHaveBeenCalledWith(toBeHex('0x1', 20))
@@ -130,7 +133,7 @@ describe('wallets', () => {
     it('should return false for EOAs (empty bytecode)', async () => {
       getCodeMock.mockResolvedValue(EMPTY_DATA)
 
-      const result = await isSmartContract(toBeHex('0x1', 20))
+      const result = await isSmartContract('1', toBeHex('0x1', 20))
 
       expect(result).toBe(false)
     })
@@ -141,7 +144,7 @@ describe('wallets', () => {
       const eip7702Code = EIP_7702_DELEGATED_ACCOUNT_PREFIX + '1234567890abcdef1234567890abcdef12345678'
       getCodeMock.mockResolvedValue(eip7702Code)
 
-      const result = await isEIP7702DelegatedAccount(toBeHex('0x1', 20))
+      const result = await isEIP7702DelegatedAccount('1', toBeHex('0x1', 20))
 
       expect(result).toBe(true)
     })
@@ -149,7 +152,7 @@ describe('wallets', () => {
     it('should return false for regular smart contracts', async () => {
       getCodeMock.mockResolvedValue('0x608060405234801561001057600080fd5b5')
 
-      const result = await isEIP7702DelegatedAccount(toBeHex('0x1', 20))
+      const result = await isEIP7702DelegatedAccount('1', toBeHex('0x1', 20))
 
       expect(result).toBe(false)
     })
@@ -157,9 +160,28 @@ describe('wallets', () => {
     it('should return false for EOAs', async () => {
       getCodeMock.mockResolvedValue(EMPTY_DATA)
 
-      const result = await isEIP7702DelegatedAccount(toBeHex('0x1', 20))
+      const result = await isEIP7702DelegatedAccount('1', toBeHex('0x1', 20))
 
       expect(result).toBe(false)
+    })
+  })
+
+  describe('isSmartContractOnProvider', () => {
+    it('reads from the given provider rather than the active one', async () => {
+      const explicitGetCode = jest.fn().mockResolvedValue('0x608060405234801561001057600080fd5b5')
+      const provider = { getCode: explicitGetCode } as unknown as JsonRpcProvider
+
+      const result = await isSmartContractOnProvider(provider, toBeHex('0x1', 20))
+
+      expect(result).toBe(true)
+      expect(explicitGetCode).toHaveBeenCalledWith(toBeHex('0x1', 20))
+      expect(getCodeMock).not.toHaveBeenCalled()
+    })
+
+    it('returns false for an address with no bytecode', async () => {
+      const provider = { getCode: jest.fn().mockResolvedValue(EMPTY_DATA) } as unknown as JsonRpcProvider
+
+      expect(await isSmartContractOnProvider(provider, toBeHex('0x1', 20))).toBe(false)
     })
   })
 
@@ -189,13 +211,13 @@ describe('wallets', () => {
       expect(result).toBe(false)
     })
 
-    it('should memoize successful results per chainId and address', async () => {
+    it('reads the bytecode once for both the contract and the EIP-7702 check', async () => {
       getCodeMock.mockResolvedValue('0x608060405234801561001057600080fd5b5')
 
       await isSmartContractWallet('1', toBeHex('0x1', 20))
       await isSmartContractWallet('1', toBeHex('0x1', 20))
 
-      expect(getCodeMock).toHaveBeenCalledTimes(2) // isSmartContract + isEIP7702DelegatedAccount, once each
+      expect(getCodeMock).toHaveBeenCalledTimes(1)
     })
 
     it('should not cache a failed check and retry on the next call', async () => {
