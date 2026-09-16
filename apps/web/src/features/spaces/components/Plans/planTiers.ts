@@ -143,12 +143,18 @@ export const buildPlanTiers = (
     ENTERPRISE_TIER,
   ].sort((a, b) => rank(a.name) - rank(b.name))
 
-/** Monthly trial offers for the claim modal: the seat count leads a trimmed feature list. */
-export const claimTiers = (trialPlans: PlanGroup[]): PlanTier[] =>
+/**
+ * Monthly trial offers for the claim modal: the seat count leads the feature list, trimmed to the highlights for an
+ * existing Workspace and complete for a brand-new one.
+ */
+export const claimTiers = (trialPlans: PlanGroup[], { full = false }: { full?: boolean } = {}): PlanTier[] =>
   offersToTiers(trialPlans)
     .filter((tier) => tier.billingCycle === 'month')
     .map((tier) => ({
       ...tier,
-      features: [tier.options[0].label, ...(PLAN_CLAIM_HIGHLIGHTS[tier.name] ?? tier.features)],
+      features: [
+        tier.options[0].label,
+        ...(full ? tier.features : (PLAN_CLAIM_HIGHLIGHTS[tier.name] ?? tier.features)),
+      ],
     }))
     .sort((a, b) => rank(a.name) - rank(b.name))

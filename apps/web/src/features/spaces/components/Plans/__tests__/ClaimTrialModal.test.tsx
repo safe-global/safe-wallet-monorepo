@@ -75,11 +75,20 @@ describe('ClaimTrialModal', () => {
 
   it('adapts the headline to the migrated 60-day grace and to a regular trial', () => {
     expect(claimCopy(60).title).toBe('Your Workspace moved to Safe Pro on Oct 6, 2026')
-    expect(claimCopy(30)).toEqual({
+    expect(claimCopy(30)).toMatchObject({
       title: 'Start your 30-day free trial of Safe Pro',
       subtitle: 'All Pro features unlocked. No billing details needed upfront.',
+      back: 'Back to My accounts',
+      claim: 'Claim free trial',
     })
     expect(claimCopy(null).title).toBe('Start your free trial of Safe Pro')
+    expect(claimCopy(60, 'new')).toEqual({
+      title: 'Workspaces run on Safe Pro',
+      subtitle: 'Your first 60 days are free.',
+      note: 'No payment method required. We’ll remind you before it ends. Cancel any time.',
+      back: 'Go to My accounts',
+      claim: 'Claim free trial',
+    })
   })
 
   it('offers the Business trial and confirms the covered Safes of an existing Workspace before Stripe', () => {
@@ -106,9 +115,17 @@ describe('ClaimTrialModal', () => {
     expect(screen.getByTestId('select-accounts-step')).toHaveAttribute('data-plan', 'Business')
   })
 
-  it('sends a brand-new Workspace without Safes straight to Stripe', () => {
+  it('greets a brand-new Workspace with the full feature list and sends it straight to Stripe', () => {
     mockSpaceSafes.mockReturnValue({ safes: {} })
-    render(<ClaimTrialModal spaceId={SPACE_ID} onBack={jest.fn()} returnPathname="/welcome/select-safes" />)
+    const onBack = jest.fn()
+    render(<ClaimTrialModal spaceId={SPACE_ID} onBack={onBack} returnPathname="/welcome/select-safes" variant="new" />)
+
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Workspaces run on Safe Pro')
+    expect(screen.getByText('Your first 60 days are free.')).toBeInTheDocument()
+    expect(screen.getByText(/No payment method required/)).toBeInTheDocument()
+    expect(screen.getByText('Unlimited Workspace members')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Go to My accounts' }))
+    expect(onBack).toHaveBeenCalled()
 
     fireEvent.click(screen.getByRole('button', { name: /Claim free trial/ }))
     expect(mockStartCheckout).toHaveBeenCalledWith(SPACE_ID, '/welcome/select-safes', 'pl_business')

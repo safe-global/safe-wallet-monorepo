@@ -22,14 +22,15 @@ import useOnboardingExit from './hooks/useOnboardingExit'
 import ClaimTrialModal from '../Plans/ClaimTrialModal'
 import { useWorkspaceLock } from '../../hooks/useWorkspaceLock'
 import { AppRoutes } from '@/config/routes'
+import { useRouter } from 'next/router'
 import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
 import { NAME_MIN_LENGTH, sanitizeName, validateName } from '@safe-global/utils/validation/names'
 
 const ONBOARDING_STEP = 1
 const FORM_ID = 'create-space-form'
-const TRIAL_LABELS = { back: 'Continue without Safe Pro', claim: 'Continue to free trial' }
 
 const CreateSpaceOnboarding = (): ReactElement => {
+  const router = useRouter()
   const totalSteps = useOnboardingStepCount()
   const isCheckingAccess = useIsCheckingAccess() ?? true
 
@@ -49,7 +50,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
     spaceId,
     isEditMode,
   )
-  // The new Workspace is offered its trial right here; declining, or having no offer, moves on to the Safes step.
+  // The new Workspace is offered its trial right here; without an offer the wizard moves on to the Safes step.
   const trialLock = useWorkspaceLock(createdSpaceId ?? null)
   const offersTrial = Boolean(createdSpaceId) && trialLock.isLocked && trialLock.reason === 'trial-offered'
   useEffect(() => {
@@ -97,9 +98,9 @@ const CreateSpaceOnboarding = (): ReactElement => {
       {offersTrial && createdSpaceId && (
         <ClaimTrialModal
           spaceId={createdSpaceId}
-          labels={TRIAL_LABELS}
+          variant="new"
           returnPathname={AppRoutes.welcome.selectSafes}
-          onBack={() => goToSelectSafes(createdSpaceId)}
+          onBack={() => router.push(AppRoutes.welcome.accounts)}
         />
       )}
       <StepCounter currentStep={ONBOARDING_STEP} totalSteps={totalSteps} />

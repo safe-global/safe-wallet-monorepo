@@ -180,5 +180,9 @@ describe('planTiers', () => {
     expect(starter.features[0]).toBe('2 Safe accounts')
     expect(business.features).toEqual(['10 Safe accounts', ...PLAN_CLAIM_HIGHLIGHTS.Business])
     expect(business.options[0].seats).toBe(10)
+    expect(claimTiers([BUSINESS_TRIAL], { full: true })[0].features).toEqual([
+      '10 Safe accounts',
+      ...PLAN_FEATURES.Business,
+    ])
   })
 })

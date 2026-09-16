@@ -38,6 +38,9 @@ jest.mock('./hooks/useSpaceSubmit', () => ({
   }),
 }))
 
+const mockPush = jest.fn()
+jest.mock('next/router', () => ({ useRouter: () => ({ push: mockPush, query: {} }) }))
+
 const mockUseWorkspaceLock = jest.fn()
 jest.mock('../../hooks/useWorkspaceLock', () => ({
   useWorkspaceLock: (spaceId?: string | null) => mockUseWorkspaceLock(spaceId),
@@ -46,18 +49,17 @@ jest.mock('../Plans/ClaimTrialModal', () => ({
   __esModule: true,
   default: ({
     spaceId,
-    labels,
+    variant,
     returnPathname,
     onBack,
   }: {
     spaceId: string
-    labels: { back: string; claim: string }
+    variant?: string
     returnPathname?: string
     onBack: () => void
   }) => (
-    <div data-testid="claim-trial-modal" data-space={spaceId} data-return={returnPathname}>
-      <button onClick={onBack}>{labels.back}</button>
-      <button>{labels.claim}</button>
+    <div data-testid="claim-trial-modal" data-space={spaceId} data-variant={variant} data-return={returnPathname}>
+      <button onClick={onBack}>decline</button>
     </div>
   ),
 }))
@@ -91,18 +93,19 @@ describe('CreateSpaceOnboarding', () => {
     mockUseWorkspaceLock.mockReturnValue({ isLocked: true, isResolving: false, reason: 'trial-offered' })
   })
 
-  it('offers the trial over the step once the Workspace exists, returning to the Safes step after Stripe', () => {
+  it('offers the trial over the step once the Workspace exists; declining leaves for My accounts', () => {
     mockCreatedSpaceId = 'space-new'
     render(<CreateSpaceOnboarding />)
 
     expect(mockUseWorkspaceLock).toHaveBeenCalledWith('space-new')
     expect(screen.getByTestId('claim-trial-modal')).toHaveAttribute('data-space', 'space-new')
     expect(screen.getByTestId('claim-trial-modal')).toHaveAttribute('data-return', '/welcome/select-safes')
-    expect(screen.getByRole('button', { name: 'Continue to free trial' })).toBeInTheDocument()
+    expect(screen.getByTestId('claim-trial-modal')).toHaveAttribute('data-variant', 'new')
     expect(mockGoToSelectSafes).not.toHaveBeenCalled()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Continue without Safe Pro' }))
-    expect(mockGoToSelectSafes).toHaveBeenCalledWith('space-new')
+    fireEvent.click(screen.getByRole('button', { name: 'decline' }))
+    expect(mockPush).toHaveBeenCalledWith('/welcome/accounts')
+    expect(mockGoToSelectSafes).not.toHaveBeenCalled()
   })
 
   it('moves straight to the Safes step when the new Workspace is offered no trial', () => {

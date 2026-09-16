@@ -19,22 +19,41 @@ import type { PlanTier, SafeRef } from './types'
 // The CGW grants the 60-day grace only to Workspaces that predate enforcement; anything else is a new Workspace.
 const MIGRATED_TRIAL_DAYS = 60
 
-export type ClaimTrialLabels = { back: string; claim: string }
-const LOCKED_LABELS: ClaimTrialLabels = { back: 'Back to My accounts', claim: 'Claim free trial' }
+/** `existing` locks a Workspace that predates Safe Pro; `new` greets one the wizard just created. */
+export type ClaimTrialVariant = 'existing' | 'new'
 
-export const claimCopy = (trialPeriodDays: number | null): { title: string; subtitle: string } =>
-  trialPeriodDays === MIGRATED_TRIAL_DAYS
+export type ClaimTrialCopy = { title: string; subtitle: string; note: string; back: string; claim: string }
+
+export const claimCopy = (trialPeriodDays: number | null, variant: ClaimTrialVariant = 'existing'): ClaimTrialCopy => {
+  if (variant === 'new') {
+    return {
+      title: 'Workspaces run on Safe Pro',
+      subtitle: trialPeriodDays === null ? 'Your first days are free.' : `Your first ${trialPeriodDays} days are free.`,
+      note: 'No payment method required. We’ll remind you before it ends. Cancel any time.',
+      back: 'Go to My accounts',
+      claim: 'Claim free trial',
+    }
+  }
+  const existing = {
+    note: 'No billing details required. We’ll remind you before it ends. Cancel any time.',
+    back: 'Back to My accounts',
+    claim: 'Claim free trial',
+  }
+  return trialPeriodDays === MIGRATED_TRIAL_DAYS
     ? {
+        ...existing,
         title: 'Your Workspace moved to Safe Pro on Oct 6, 2026',
         subtitle: 'You’ve used Safe before, so your trial is 60 days instead of 30.',
       }
     : {
+        ...existing,
         title:
           trialPeriodDays === null
             ? 'Start your free trial of Safe Pro'
             : `Start your ${trialPeriodDays}-day free trial of Safe Pro`,
         subtitle: 'All Pro features unlocked. No billing details needed upfront.',
       }
+}
 
 const TrialOfferCard = ({
   tier,
@@ -107,16 +126,16 @@ export default function ClaimTrialModal({
   spaceId,
   onBack,
   returnPathname,
-  labels = LOCKED_LABELS,
+  variant = 'existing',
 }: {
   spaceId: string
   onBack: () => void
   /** Where Stripe sends the user back; defaults to the Workspace Home. */
   returnPathname?: string
-  labels?: ClaimTrialLabels
+  variant?: ClaimTrialVariant
 }) {
   const { trialPlans, trialPeriodDays, isLoading } = useSpaceOffers(spaceId)
-  const tiers = useMemo(() => claimTiers(trialPlans), [trialPlans])
+  const tiers = useMemo(() => claimTiers(trialPlans, { full: variant === 'new' }), [trialPlans, variant])
   const { needsTrim, checkout, isBusy, error } = useSeatTrimCheckout(spaceId, returnPathname)
   const [pickedTierId, setPickedTierId] = useState<string>()
   const [step, setStep] = useState<'offer' | 'accounts'>('offer')
@@ -127,7 +146,7 @@ export default function ClaimTrialModal({
     tiers[0]
   const option = tier?.options[0]
   const seats = option?.seats ?? null
-  const { title, subtitle } = claimCopy(trialPeriodDays)
+  const copy = claimCopy(trialPeriodDays, variant)
   const availableUntil = trialPeriodDays === null ? null : formatDate(Date.now() + trialPeriodDays * DAY_MS)
 
   const claim = () => {
@@ -157,9 +176,9 @@ export default function ClaimTrialModal({
             <>
               <div className="flex flex-col gap-1">
                 <Typography variant="h3" as={DialogTitle}>
-                  {title}
+                  {copy.title}
                 </Typography>
-                <Typography color="muted">{subtitle}</Typography>
+                <Typography color="muted">{copy.subtitle}</Typography>
               </div>
 
               {isLoading ? (
@@ -189,7 +208,7 @@ export default function ClaimTrialModal({
               )}
 
               <Typography variant="paragraph-small" color="muted" align="center">
-                No billing details required. We’ll remind you before it ends. Cancel any time.
+                {copy.note}
               </Typography>
 
               {error && (
@@ -201,7 +220,7 @@ export default function ClaimTrialModal({
 
               <div className="flex gap-4">
                 <Button variant="secondary" size="lg" className="flex-1" onClick={onBack} disabled={isBusy}>
-                  {labels.back}
+                  {copy.back}
                 </Button>
                 <Button
                   size="lg"
@@ -210,7 +229,7 @@ export default function ClaimTrialModal({
                   disabled={!option?.paymentLinkId || isBusy}
                   onClick={claim}
                 >
-                  {labels.claim}
+                  {copy.claim}
                   <ArrowRight />
                 </Button>
               </div>
