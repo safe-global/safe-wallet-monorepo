@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/router'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { AppRoutes } from '@/config/routes'
+import { highlightSafePro } from '@/components/common/ProHighlight'
 import { useLoadFeature } from '@/features/__core__'
 import { SafeProFeature } from '@/features/safe-pro-announcement'
 import { useCurrentMembership, useIsAdmin } from '../../hooks/useSpaceMembers'
@@ -49,7 +50,7 @@ export default function WorkspaceLockModal({ spaceId }: { spaceId: string }) {
 
   if (!isAdmin) {
     const { title, body } = memberCopy(reason, trialPeriodDays, endedAt, space?.name ?? 'This Workspace')
-    return <SafeProNoticeModal open title={title} body={body} onAction={goBack} />
+    return <SafeProNoticeModal open title={highlightSafePro(title)} body={body} onAction={goBack} />
   }
 
   if (reason === 'trial-offered') return <ClaimTrialModal spaceId={spaceId} onBack={goBack} />

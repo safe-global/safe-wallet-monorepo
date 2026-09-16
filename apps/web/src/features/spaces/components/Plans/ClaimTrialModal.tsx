@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
+import { highlightSafePro } from '@/components/common/ProHighlight'
 import { formatDate } from '@safe-global/utils/utils/date'
 import { DAY_MS } from '../../hooks/billing/subscription'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
@@ -35,8 +36,8 @@ export const claimCopy = (trialPeriodDays: number | null, variant: ClaimTrialVar
     }
   }
   const existing = {
-    note: 'No billing details required. We’ll remind you before it ends. Cancel any time.',
-    back: 'Back to My accounts',
+    note: "No payment method required. We'll remind you 14 and 3 days before it ends — cancel any time.",
+    back: 'Go to My accounts',
     claim: 'Claim free trial',
   }
   return trialPeriodDays === MIGRATED_TRIAL_DAYS
@@ -176,7 +177,7 @@ export default function ClaimTrialModal({
             <>
               <div className="flex flex-col gap-1">
                 <Typography variant="h3" as={DialogTitle}>
-                  {copy.title}
+                  {highlightSafePro(copy.title)}
                 </Typography>
                 <Typography color="muted">{copy.subtitle}</Typography>
               </div>

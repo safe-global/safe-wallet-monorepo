@@ -78,7 +78,8 @@ describe('ClaimTrialModal', () => {
     expect(claimCopy(30)).toMatchObject({
       title: 'Start your 30-day free trial of Safe Pro',
       subtitle: 'All Pro features unlocked. No billing details needed upfront.',
-      back: 'Back to My accounts',
+      note: "No payment method required. We'll remind you 14 and 3 days before it ends — cancel any time.",
+      back: 'Go to My accounts',
       claim: 'Claim free trial',
     })
     expect(claimCopy(null).title).toBe('Start your free trial of Safe Pro')
@@ -106,7 +107,7 @@ describe('ClaimTrialModal', () => {
     expect(screen.getByText('Policy engine')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Close' })).not.toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Back to My accounts' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Go to My accounts' }))
     expect(onBack).toHaveBeenCalled()
 
     fireEvent.click(screen.getByRole('button', { name: /Claim free trial/ }))

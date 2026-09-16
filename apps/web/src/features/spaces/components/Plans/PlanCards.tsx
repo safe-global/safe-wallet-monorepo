@@ -49,7 +49,8 @@ const Seats = ({
       }}
     >
       <SelectTrigger className="w-full">
-        <SelectValue />
+        {/* The closed trigger would otherwise print the raw value, the payment link id. */}
+        <SelectValue>{value.label}</SelectValue>
       </SelectTrigger>
       <SelectContent>
         {options.map((option) => (

@@ -164,6 +164,20 @@ describe('Plans', () => {
     expect(onManage).toHaveBeenCalled()
   })
 
+  it('names the picked seat option on the closed selector instead of its payment link id', () => {
+    const business = {
+      name: 'Business',
+      offers: [
+        offer('Business', 'pl_business_10', 499, 'month'),
+        { ...offer('Business', 'pl_business_50', 999, 'month'), seats: 50 },
+      ],
+    }
+    render(<Plans plan={null} {...meters} tiers={buildPlanTiers([business])} />)
+
+    expect(screen.getByText('2 Safe accounts')).toBeInTheDocument()
+    expect(screen.queryByText('pl_business_10')).not.toBeInTheDocument()
+  })
+
   it('flags an exhausted meter', () => {
     render(
       <Plans
