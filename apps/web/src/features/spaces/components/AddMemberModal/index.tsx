@@ -54,8 +54,8 @@ export const RoleMenuItem = ({
         <div style={{ gridArea: 'description' }}>
           <Typography variant="paragraph-small" className="max-w-[300px] break-words whitespace-normal">
             {isAdmin
-              ? 'Admins can create and delete workspaces, invite members, and more.'
-              : 'Can view the workspace data.'}
+              ? 'Admins can create and delete Workspaces, invite members, and more.'
+              : 'Can view the Workspace data.'}
           </Typography>
         </div>
       )}

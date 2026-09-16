@@ -211,7 +211,7 @@ const AddAccounts = ({
 
   const onSubmit = handleSubmit(async (data) => {
     if (!isAdmin) {
-      setError('Only admins can add or remove Safe accounts in this workspace')
+      setError('Only admins can add or remove Safe accounts in this Workspace')
       return
     }
 
@@ -461,7 +461,7 @@ const AddAccounts = ({
                             <Info className="size-4" />
                           </TooltipTrigger>
                           <TooltipContent>
-                            You can add up to {SAFE_ACCOUNTS_LIMIT} Safe accounts per workspace
+                            You can add up to {SAFE_ACCOUNTS_LIMIT} Safe accounts per Workspace
                           </TooltipContent>
                         </Tooltip>
                       </div>
@@ -499,7 +499,7 @@ const AddAccounts = ({
                           onToggle: handleTableToggle,
                           isAtLimit,
                           disabledKeys: spaceSafeKeys,
-                          disabledReason: 'This safe is already part of your workspace',
+                          disabledReason: 'This safe is already part of your Workspace',
                         }}
                         data-testid="add-accounts-safes-table"
                       />

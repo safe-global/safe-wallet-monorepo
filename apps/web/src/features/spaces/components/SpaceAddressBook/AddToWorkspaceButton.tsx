@@ -57,7 +57,7 @@ const AddToWorkspaceButton = ({ address, name, chainIds, isCompact }: AddToWorks
       setAdded(true)
       dispatch(
         showNotification({
-          message: 'Contact added to workspace',
+          message: 'Contact added to Workspace',
           variant: 'success',
           groupKey: 'add-to-workspace-success',
         }),
@@ -71,7 +71,7 @@ const AddToWorkspaceButton = ({ address, name, chainIds, isCompact }: AddToWorks
     }
   }
 
-  const label = added ? 'Added' : 'Add to workspace'
+  const label = added ? 'Added' : 'Add to Workspace'
   const icon = added ? <Check className="size-4" /> : <Plus className="size-4" />
 
   // Compact has no room for the label, so it moves into the accessible name and a tooltip
