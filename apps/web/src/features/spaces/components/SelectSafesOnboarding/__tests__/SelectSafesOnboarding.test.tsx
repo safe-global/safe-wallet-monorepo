@@ -1,4 +1,4 @@
-import { render, screen, act } from '@/tests/test-utils'
+import { render, screen, act, fireEvent } from '@/tests/test-utils'
 import SelectSafesOnboarding from '../index'
 import type { AllSafeItems } from '@/hooks/safes'
 import useIsSurveyEnabled from '@/hooks/useIsSurveyEnabled'
@@ -83,6 +83,19 @@ jest.mock('@/hooks/useDarkMode', () => ({
   useDarkMode: () => false,
 }))
 
+const mockOpenPortal = jest.fn()
+jest.mock('../../../hooks/billing/useBillingPortal', () => ({
+  useBillingPortal: () => ({ openPortal: mockOpenPortal, isRedirecting: false }),
+}))
+jest.mock('../../Plans/CheckoutReturnModals', () => ({
+  __esModule: true,
+  default: ({ trialCtaLabel, onAddBillingDetails }: { trialCtaLabel?: string; onAddBillingDetails?: () => void }) => (
+    <button data-testid="checkout-return-modals" onClick={onAddBillingDetails}>
+      {trialCtaLabel}
+    </button>
+  ),
+}))
+
 const makeSafe = (chainId: string, address: string) => ({
   chainId,
   address,
@@ -90,6 +103,24 @@ const makeSafe = (chainId: string, address: string) => ({
   isReadOnly: false,
   lastVisited: 0,
   name: undefined,
+})
+
+describe('SelectSafesOnboarding — Stripe return', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockTrustedSafes = [makeSafe('1', '0xA')] as AllSafeItems
+    mockOwnedSafes = []
+    mockFlagged = new Set<string>()
+    mockWalletValue = { address: '0xWallet' }
+  })
+
+  it('confirms the trial on landing and sends the user to billing from it', () => {
+    render(<SelectSafesOnboarding />)
+
+    expect(screen.getByTestId('checkout-return-modals')).toHaveTextContent('Get started')
+    fireEvent.click(screen.getByTestId('checkout-return-modals'))
+    expect(mockOpenPortal).toHaveBeenCalled()
+  })
 })
 
 describe('SelectSafesOnboarding — selection wiring', () => {

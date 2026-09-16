@@ -14,6 +14,7 @@ import { MemberStatus } from '@/features/spaces'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { AppRoutes } from '@/config/routes'
+import TrialEndingModal from '../Plans/TrialEndingModal'
 import WorkspaceLockModal from '../Plans/WorkspaceLockModal'
 
 const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode }) => {
@@ -63,6 +64,7 @@ const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode
     <>
       {children}
       <WorkspaceLockModal spaceId={spaceId} />
+      <TrialEndingModal spaceId={spaceId} />
     </>
   )
 }

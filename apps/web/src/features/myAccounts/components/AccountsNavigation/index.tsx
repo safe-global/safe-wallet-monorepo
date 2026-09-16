@@ -5,15 +5,13 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 import type { AnalyticsEvent } from '@/services/analytics/types'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
-import SafeProLockup from '@/components/common/SafeProLockup'
-import SafeWalletLockup from '@/public/images/safe-wallet-lockup.svg'
+import ProChip from '@/public/images/safe-pro/pro-chip.svg'
 
 type Item = {
   label: string
   url: string
   trackEvent?: AnalyticsEvent
+  /** Workspaces are the Safe Pro side of the app, and the chip says so regardless of any flag. */
   pro?: boolean
 }
 
@@ -32,7 +30,6 @@ const navItems: Item[] = [
 
 const AccountsNavigation = () => {
   const router = useRouter()
-  const isSafePro = useHasFeature(FEATURES.SAFE_PRO)
 
   const activeUrl = navItems.some((item) => item.url === router.pathname) ? router.pathname : navItems[0].url
 
@@ -52,13 +49,10 @@ const AccountsNavigation = () => {
             nativeButton={false}
             render={<NextLink href={item.url} onClick={handleClick(item)} />}
           >
-            {!isSafePro ? (
-              item.label
-            ) : item.pro ? (
-              <SafeProLockup className="text-[1.25rem]" />
-            ) : (
-              <span className="block h-7 w-[140px]">
-                <SafeWalletLockup role="img" aria-label="Safe{Wallet}" className="size-full" />
+            {item.label}
+            {item.pro && (
+              <span className="block h-4 w-6 shrink-0" role="img" aria-label="Pro">
+                <ProChip className="size-full" />
               </span>
             )}
           </TabsTrigger>

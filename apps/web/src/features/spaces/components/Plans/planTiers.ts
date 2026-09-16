@@ -1,7 +1,16 @@
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import type { PlanGroup, PlanOffer } from '../../hooks/billing/types'
-import { ENTERPRISE_TIER, PLAN_CLAIM_HIGHLIGHTS, PLAN_FEATURES, PLAN_ORDER, PLAN_TRIAL_HIGHLIGHTS } from './fixtures'
-import type { CurrentPlan, PlanChangeDirection, PlanCta, PlanPick, PlanSeatOption, PlanTier } from './types'
+import { getSubscriptionPlanName } from '../../hooks/billing/subscription'
+import { ENTERPRISE_TIER, PLAN_CLAIM_HIGHLIGHTS, PLAN_FEATURES, PLAN_ORDER } from './fixtures'
+import type {
+  CurrentPlan,
+  PlanChangeDirection,
+  PlanCta,
+  PlanPick,
+  PlanSeatOption,
+  PlanSummary,
+  PlanTier,
+} from './types'
 
 const CYCLES = ['month', 'year'] as const
 
@@ -12,6 +21,17 @@ export const priceSuffix = (billingCycle: 'month' | 'year' | null): string => (b
 
 const monthlyEquivalent = (price: number, billingCycle: 'month' | 'year' | null): number =>
   billingCycle === 'year' ? price / 12 : price
+
+/** The live subscription as the cards and the change dialog need it. */
+export const toCurrentPlan = (subscription: Subscription, plan: PlanSummary, isTrialing: boolean): CurrentPlan => ({
+  name: getSubscriptionPlanName(subscription) ?? plan.name,
+  price: subscription.plan.currentPrice,
+  currency: subscription.plan.currency,
+  billingCycle: subscription.plan.billingCycle ?? null,
+  isTrialing,
+  periodEndsAt: plan.periodEndsAt,
+  daysLeft: plan.daysLeft,
+})
 
 /** Compares monthly-equivalent prices, so a yearly plan is not read as a 12x upgrade. */
 export const getChangeDirection = (current: CurrentPlan | undefined, pick: PlanPick): PlanChangeDirection => {
@@ -85,7 +105,7 @@ export const offersToTiers = (plans: PlanGroup[]): PlanTier[] =>
 
 /** The CGW never offers the current plan, so its card is rebuilt from the subscription and the seats entitlement. */
 export const subscriptionToTier = (subscription: Subscription, seatsQuota: number | null | undefined): PlanTier => {
-  const name = subscription.plan.name ?? 'Safe Pro'
+  const name = getSubscriptionPlanName(subscription) ?? 'Safe Pro'
 
   return {
     id: 'current',
@@ -97,6 +117,7 @@ export const subscriptionToTier = (subscription: Subscription, seatsQuota: numbe
         paymentLinkId: null,
         priceId: subscription.plan.id,
         label: seatsLabel(seatsQuota === undefined ? null : seatsQuota === null ? 'unlimited' : seatsQuota),
+        seats: typeof seatsQuota === 'number' ? seatsQuota : null,
         price: subscription.plan.currentPrice,
         originalPrice: subscription.plan.originalPrice,
       },
@@ -121,13 +142,6 @@ export const buildPlanTiers = (
     ...(current ? [subscriptionToTier(current.subscription, current.seatsQuota)] : []),
     ENTERPRISE_TIER,
   ].sort((a, b) => rank(a.name) - rank(b.name))
-
-/** Monthly trial offers as selectable cards, trimmed to the two highlights the modal shows. */
-export const trialTiers = (trialPlans: PlanGroup[]): PlanTier[] =>
-  offersToTiers(trialPlans)
-    .filter((tier) => tier.billingCycle === 'month')
-    .map((tier) => ({ ...tier, features: PLAN_TRIAL_HIGHLIGHTS[tier.name] ?? tier.features.slice(0, 2) }))
-    .sort((a, b) => rank(a.name) - rank(b.name))
 
 /** Monthly trial offers for the claim modal: the seat count leads a trimmed feature list. */
 export const claimTiers = (trialPlans: PlanGroup[]): PlanTier[] =>

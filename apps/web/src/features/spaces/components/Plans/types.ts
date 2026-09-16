@@ -1,5 +1,8 @@
 export type Meter = { used: number; quota: number | null }
 
+/** A Safe as the Workspace endpoints address it. */
+export type SafeRef = { chainId: string; address: string }
+
 export type PlanSeatOption = {
   /** Null for static tiers, which have no purchasable link. */
   paymentLinkId: string | null
@@ -35,6 +38,7 @@ export type CurrentPlan = {
   billingCycle: 'month' | 'year' | null
   isTrialing: boolean
   periodEndsAt: string | null
+  daysLeft?: number | null
 }
 
 export type PlanChangeDirection = 'upgrade' | 'downgrade' | 'change'

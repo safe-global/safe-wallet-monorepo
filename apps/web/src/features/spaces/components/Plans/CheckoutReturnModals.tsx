@@ -3,14 +3,18 @@ import { useLoadFeature } from '@/features/__core__'
 import { SafeProFeature } from '@/features/safe-pro-announcement'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
 import { useCheckoutReturn } from '../../hooks/billing/useCheckoutReturn'
+import { getSubscriptionPeriodEnd, getSubscriptionPlanName } from '../../hooks/billing/subscription'
 
 /** Opens the trial or subscription confirmation once Stripe sends the user back and the subscription has landed. */
 export default function CheckoutReturnModals({
   spaceId,
   trialCtaLabel,
+  onAddBillingDetails,
 }: {
   spaceId?: string | null
   trialCtaLabel?: string
+  /** Offers the Stripe portal from the trial confirmation (the onboarding wizard). */
+  onAddBillingDetails?: () => void
 }) {
   const { SafeProTrialActivatedModal, SafeProSubscriptionActivatedModal } = useLoadFeature(SafeProFeature)
   const { plan, refetch } = useSpacePlan(spaceId)
@@ -23,7 +27,9 @@ export default function CheckoutReturnModals({
 
   if (!isComplete || !checkout.subscription) return null
 
-  const periodEndsAt = plan?.periodEndsAt ? Date.parse(plan.periodEndsAt) : 0
+  // The fresh subscription knows its own period end; the entitlements it feeds may not have caught up yet.
+  const endsAt = getSubscriptionPeriodEnd(checkout.subscription) ?? plan?.periodEndsAt
+  const periodEndsAt = endsAt ? Date.parse(endsAt) : 0
 
   return checkout.subscription.status === 'trialing' ? (
     <SafeProTrialActivatedModal
@@ -31,12 +37,13 @@ export default function CheckoutReturnModals({
       onOpenChange={checkout.dismiss}
       trialEndsAt={periodEndsAt}
       ctaLabel={trialCtaLabel}
+      onAddBillingDetails={onAddBillingDetails}
     />
   ) : (
     <SafeProSubscriptionActivatedModal
       open
       onOpenChange={checkout.dismiss}
-      planName={checkout.subscription.plan.name ?? 'Safe Pro'}
+      planName={getSubscriptionPlanName(checkout.subscription) ?? 'Safe Pro'}
     />
   )
 }

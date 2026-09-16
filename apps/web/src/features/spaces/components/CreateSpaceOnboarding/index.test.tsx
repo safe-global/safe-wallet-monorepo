@@ -25,9 +25,41 @@ jest.mock('./hooks/useOnboardingExit', () => ({
   default: () => ({ onExit: jest.fn(), hasNoSpaces: false }),
 }))
 
+const mockGoToSelectSafes = jest.fn()
+let mockCreatedSpaceId: string | undefined
 jest.mock('./hooks/useSpaceSubmit', () => ({
   __esModule: true,
-  default: () => ({ error: undefined, isSubmitting: false, onSubmit: jest.fn() }),
+  default: () => ({
+    error: undefined,
+    isSubmitting: false,
+    onSubmit: jest.fn(),
+    createdSpaceId: mockCreatedSpaceId,
+    goToSelectSafes: mockGoToSelectSafes,
+  }),
+}))
+
+const mockUseWorkspaceLock = jest.fn()
+jest.mock('../../hooks/useWorkspaceLock', () => ({
+  useWorkspaceLock: (spaceId?: string | null) => mockUseWorkspaceLock(spaceId),
+}))
+jest.mock('../Plans/ClaimTrialModal', () => ({
+  __esModule: true,
+  default: ({
+    spaceId,
+    labels,
+    returnPathname,
+    onBack,
+  }: {
+    spaceId: string
+    labels: { back: string; claim: string }
+    returnPathname?: string
+    onBack: () => void
+  }) => (
+    <div data-testid="claim-trial-modal" data-space={spaceId} data-return={returnPathname}>
+      <button onClick={onBack}>{labels.back}</button>
+      <button>{labels.claim}</button>
+    </div>
+  ),
 }))
 
 jest.mock('../../hooks/useSpaceSafes', () => ({
@@ -50,13 +82,53 @@ jest.mock('@/hooks/safes', () => ({
   flattenSafeItems: () => [],
 }))
 
-jest.mock('../Plans/CheckoutReturnModals', () => ({ __esModule: true, default: () => null }))
-
 describe('CreateSpaceOnboarding', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockIsCheckingAccess = false
     mockExistingSpace = { spaceId: undefined, isEditMode: false, isSpaceLoading: false, existingSpace: undefined }
+    mockCreatedSpaceId = undefined
+    mockUseWorkspaceLock.mockReturnValue({ isLocked: true, isResolving: false, reason: 'trial-offered' })
+  })
+
+  it('offers the trial over the step once the Workspace exists, returning to the Safes step after Stripe', () => {
+    mockCreatedSpaceId = 'space-new'
+    render(<CreateSpaceOnboarding />)
+
+    expect(mockUseWorkspaceLock).toHaveBeenCalledWith('space-new')
+    expect(screen.getByTestId('claim-trial-modal')).toHaveAttribute('data-space', 'space-new')
+    expect(screen.getByTestId('claim-trial-modal')).toHaveAttribute('data-return', '/welcome/select-safes')
+    expect(screen.getByRole('button', { name: 'Continue to free trial' })).toBeInTheDocument()
+    expect(mockGoToSelectSafes).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Continue without Safe Pro' }))
+    expect(mockGoToSelectSafes).toHaveBeenCalledWith('space-new')
+  })
+
+  it('moves straight to the Safes step when the new Workspace is offered no trial', () => {
+    mockCreatedSpaceId = 'space-new'
+    mockUseWorkspaceLock.mockReturnValue({ isLocked: false, isResolving: false, reason: 'lapsed' })
+    render(<CreateSpaceOnboarding />)
+
+    expect(screen.queryByTestId('claim-trial-modal')).not.toBeInTheDocument()
+    expect(mockGoToSelectSafes).toHaveBeenCalledWith('space-new')
+  })
+
+  it('waits for the offer to resolve before deciding', () => {
+    mockCreatedSpaceId = 'space-new'
+    mockUseWorkspaceLock.mockReturnValue({ isLocked: false, isResolving: true, reason: 'trial-offered' })
+    render(<CreateSpaceOnboarding />)
+
+    expect(screen.queryByTestId('claim-trial-modal')).not.toBeInTheDocument()
+    expect(mockGoToSelectSafes).not.toHaveBeenCalled()
+  })
+
+  it('shows no trial offer before the Workspace is created', () => {
+    render(<CreateSpaceOnboarding />)
+
+    expect(screen.queryByTestId('claim-trial-modal')).not.toBeInTheDocument()
+    expect(mockUseWorkspaceLock).toHaveBeenCalledWith(null)
+    expect(mockGoToSelectSafes).not.toHaveBeenCalled()
   })
 
   it('focuses the workspace name input on load in create mode', async () => {

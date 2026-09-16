@@ -82,7 +82,7 @@ describe('ClaimTrialModal', () => {
     expect(claimCopy(null).title).toBe('Start your free trial of Safe Pro')
   })
 
-  it('offers the Business trial and sends the admin straight to Stripe when the Workspace fits the seats', () => {
+  it('offers the Business trial and confirms the covered Safes of an existing Workspace before Stripe', () => {
     const onBack = jest.fn()
     render(<ClaimTrialModal spaceId={SPACE_ID} onBack={onBack} />)
 
@@ -101,11 +101,22 @@ describe('ClaimTrialModal', () => {
     expect(onBack).toHaveBeenCalled()
 
     fireEvent.click(screen.getByRole('button', { name: /Claim free trial/ }))
-    expect(mockStartCheckout).toHaveBeenCalledWith(SPACE_ID, undefined, 'pl_business')
-    expect(mockRemoveSafes).not.toHaveBeenCalled()
+    expect(mockStartCheckout).not.toHaveBeenCalled()
+    expect(screen.getByTestId('select-accounts-step')).toHaveAttribute('data-limit', '20')
+    expect(screen.getByTestId('select-accounts-step')).toHaveAttribute('data-plan', 'Business')
   })
 
-  it('asks which Safes stay when the Workspace exceeds the seats, removes the rest and then checks out', async () => {
+  it('sends a brand-new Workspace without Safes straight to Stripe', () => {
+    mockSpaceSafes.mockReturnValue({ safes: {} })
+    render(<ClaimTrialModal spaceId={SPACE_ID} onBack={jest.fn()} returnPathname="/welcome/select-safes" />)
+
+    fireEvent.click(screen.getByRole('button', { name: /Claim free trial/ }))
+    expect(mockStartCheckout).toHaveBeenCalledWith(SPACE_ID, '/welcome/select-safes', 'pl_business')
+    expect(mockRemoveSafes).not.toHaveBeenCalled()
+    expect(screen.queryByTestId('select-accounts-step')).not.toBeInTheDocument()
+  })
+
+  it('removes the Safes left out of the picked plan and then checks out', async () => {
     mockUseSpaceOffers.mockReturnValue({ trialPlans: [STARTER], trialPeriodDays: 30, isLoading: false })
     mockSpaceSafes.mockReturnValue({ safes: { '1': ['0xA', '0xB', '0xC'] } })
     render(<ClaimTrialModal spaceId={SPACE_ID} onBack={jest.fn()} returnPathname="/welcome/select-safes" />)
@@ -143,7 +154,7 @@ describe('ClaimTrialModal', () => {
     expect(screen.getByTestId('select-accounts-step')).toHaveTextContent('Boom')
   })
 
-  it('lets the admin pick between several trial offers', () => {
+  it('lets the admin pick between several trial offers and carries the pick into the accounts step', () => {
     mockUseSpaceOffers.mockReturnValue({ trialPlans: [BUSINESS, STARTER], trialPeriodDays: 60, isLoading: false })
     render(<ClaimTrialModal spaceId={SPACE_ID} onBack={jest.fn()} />)
 
@@ -151,7 +162,8 @@ describe('ClaimTrialModal', () => {
     fireEvent.click(screen.getByRole('radio', { name: /Starter/ }))
     fireEvent.click(screen.getByRole('button', { name: /Claim free trial/ }))
 
-    expect(mockStartCheckout).toHaveBeenCalledWith(SPACE_ID, undefined, 'pl_starter')
+    expect(screen.getByTestId('select-accounts-step')).toHaveAttribute('data-plan', 'Starter')
+    expect(screen.getByTestId('select-accounts-step')).toHaveAttribute('data-limit', '2')
   })
 
   it('shows a skeleton while the offers load and an empty state without a trial', () => {

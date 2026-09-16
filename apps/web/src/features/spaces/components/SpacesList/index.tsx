@@ -36,14 +36,10 @@ import NextLink from 'next/link'
 import { useSignInRedirect } from '@/components/welcome/WelcomeLogin/hooks/useSignInRedirect'
 import AddIcon from '@/public/images/common/add.svg'
 import { SPACES_LIMIT } from '@/features/spaces/constants'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import WelcomeContentCard from '@/components/common/WelcomeContentCard'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import StartTrialModal from '../Plans/StartTrialModal'
-import { useCreateTrialWorkspace } from '../../hooks/useCreateTrialWorkspace'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import WelcomeContentCard from '@/components/common/WelcomeContentCard'
 
 const AddSpaceButton = ({
   onClick,
@@ -162,26 +158,20 @@ const WORKSPACE_BENEFITS = [
   'Share an address book across your team',
 ]
 
-const NoSpacesState = ({
-  isAtLimit,
-  onCreate,
-  isCreating,
-  error,
-}: {
-  isAtLimit: boolean
-  /** Set when creating goes through the Safe Pro trial instead of straight into the onboarding. */
-  onCreate?: () => void
-  isCreating?: boolean
-  error?: string
-}) => {
+const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
   const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
   const isDarkMode = useDarkMode()
 
   return (
     <>
-      <Card size="none" radius="xl" className="w-full text-center">
-        <div className="flex flex-col items-center gap-8 rounded-t-xl bg-muted p-8 text-left md:flex-row md:items-end md:gap-16">
-          <div className="flex shrink-0 flex-col gap-4 md:self-center">
+      <Card
+        size="none"
+        // eslint-disable-next-line no-restricted-syntax -- Figma spec calls for a 32px corner one-off; no radius token in the scale matches it
+        className="w-full rounded-[2rem] p-1 text-center"
+      >
+        {/* The mint glow behind the benefits is a blurred brand-colored disc, clipped by the panel's corners. */}
+        <div className="relative flex flex-col items-center gap-8 overflow-hidden rounded-t-[calc(2rem-4px)] bg-muted p-8 text-left before:absolute before:top-[72%] before:-left-16 before:size-96 before:-translate-y-1/2 before:rounded-full before:bg-[var(--color-static-text-brand)] before:opacity-45 before:blur-3xl md:flex-row md:items-end md:gap-16">
+          <div className="relative flex shrink-0 flex-col gap-4 md:self-center">
             {WORKSPACE_BENEFITS.map((benefit) => (
               <div key={benefit} className="flex flex-row items-center gap-2">
                 <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[var(--color-background-light-hover)]">
@@ -197,7 +187,7 @@ const NoSpacesState = ({
           <Image
             src={isDarkMode ? WorkspacesEmptyIllustrationDark : WorkspacesEmptyIllustration}
             alt="Workspace dashboard showing accounts grouped by workspace"
-            className="-my-8 h-auto w-full min-w-0 md:-mr-8 md:w-[60%]"
+            className="relative -my-8 h-auto w-full min-w-0 md:-mr-8 md:w-[60%]"
           />
         </div>
 
@@ -209,24 +199,15 @@ const NoSpacesState = ({
               <AddSpaceButton
                 label="Create your first workspace"
                 icon="arrow"
-                disabled={isAtLimit || isCreating}
-                link={!onCreate}
-                onClick={
-                  onCreate ??
-                  (() =>
-                    trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, {
-                      entry_point: WorkspaceCreateEntryPoint.WELCOME,
-                    }))
+                disabled={isAtLimit}
+                link
+                onClick={() =>
+                  trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, {
+                    entry_point: WorkspaceCreateEntryPoint.WELCOME,
+                  })
                 }
               />
             </div>
-
-            {error && (
-              <Alert variant="destructive">
-                <AlertSeverityIcon variant="destructive" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
 
             <Link variant="muted" className="text-sm underline" onClick={() => setIsInfoOpen(true)} href="#">
               What are workspaces?
@@ -243,11 +224,10 @@ const SpacesList = () => {
   const { AccountsNavigation } = useLoadFeature(MyAccountsFeature)
   const { SafeProWorkspacesBanner } = useLoadFeature(SafeProFeature)
   const isSafeProEnabled = useIsSafeProEnabled()
+  // The pre-launch heads-up only makes sense to a user without a Workspace while Safe Pro is not live yet.
+  const isSafeProLive = useHasFeature(FEATURES.SAFE_PRO) === true
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
-  const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
-  const isListDarkMode = useDarkMode()
-  const trial = useCreateTrialWorkspace()
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const {
     currentData: spaces,
@@ -345,26 +325,10 @@ const SpacesList = () => {
           </>
         ) : (
           <>
-            {isSafeProEnabled && <SafeProWorkspacesBanner className="mb-4" />}
+            {isSafeProEnabled && !isSafeProLive && <SafeProWorkspacesBanner className="mb-4" />}
             {pendingInviteBanners}
-            <NoSpacesState
-              isAtLimit={isAtSpacesLimit}
-              onCreate={isSafePro ? () => void trial.createTrialWorkspace() : undefined}
-              isCreating={trial.isCreating}
-              error={trial.error}
-            />
+            <NoSpacesState isAtLimit={isAtSpacesLimit} />
           </>
-        )}
-
-        {isSafePro && trial.spaceId && (
-          <ShadcnProvider dark={isListDarkMode}>
-            <StartTrialModal
-              spaceId={trial.spaceId}
-              open
-              onOpenChange={(open) => !open && trial.reset()}
-              returnPathname={AppRoutes.welcome.createSpace}
-            />
-          </ShadcnProvider>
         )}
       </div>
     </div>

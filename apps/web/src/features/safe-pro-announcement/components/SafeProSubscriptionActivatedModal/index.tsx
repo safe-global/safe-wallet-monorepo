@@ -1,3 +1,4 @@
+import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Typography } from '@/components/ui/typography'
@@ -23,8 +24,9 @@ const SafeProSubscriptionActivatedModal = ({
             Your paid subscription is active, you&apos;re on <span className={css.highlight}>{planName}</span>!
           </Typography>
 
-          <Button size="lg" className="w-full" onClick={() => onOpenChange(false)}>
+          <Button size="lg" accentIcon className="w-full" onClick={() => onOpenChange(false)}>
             Get started
+            <ArrowRight data-icon="inline-end" />
           </Button>
         </div>
       </div>

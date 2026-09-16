@@ -1,6 +1,6 @@
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import type { PlanGroup, PlanOffer } from '../../../hooks/billing/types'
-import { PLAN_CLAIM_HIGHLIGHTS, PLAN_FEATURES, PLAN_TRIAL_HIGHLIGHTS } from '../fixtures'
+import { PLAN_CLAIM_HIGHLIGHTS, PLAN_FEATURES } from '../fixtures'
 import {
   buildPlanTiers,
   claimTiers,
@@ -9,7 +9,6 @@ import {
   offersToTiers,
   seatsLabel,
   subscriptionToTier,
-  trialTiers,
 } from '../planTiers'
 import type { CurrentPlan } from '../types'
 
@@ -173,14 +172,6 @@ describe('planTiers', () => {
       label: 'Continue with Starter',
     })
     expect(getPlanCta(pick(enterprise), business)).toEqual({ kind: 'sales', label: 'Talk to sales' })
-  })
-
-  it('keeps only monthly trial offers, trimmed to the modal highlights', () => {
-    const tiers = trialTiers([BUSINESS_TRIAL, STARTER_TRIAL])
-
-    expect(tiers.map((tier) => tier.name)).toEqual(['Starter', 'Business'])
-    expect(tiers[1]).toMatchObject({ trialPeriodDays: 60, features: PLAN_TRIAL_HIGHLIGHTS.Business })
-    expect(trialTiers([])).toEqual([])
   })
 
   it('leads the claim card with the seat count and trims the features to the highlights', () => {

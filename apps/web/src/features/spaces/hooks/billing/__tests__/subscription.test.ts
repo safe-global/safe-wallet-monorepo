@@ -3,6 +3,9 @@ import {
   getDaysLeft,
   getPlanStatus,
   getSubscriptionEndedAt,
+  getSubscriptionPeriodEnd,
+  getSubscriptionPlanName,
+  trialLabel,
   isPlanChangeable,
   selectCurrentSubscription,
   selectLatestSubscription,
@@ -65,5 +68,33 @@ describe('subscription', () => {
     expect(getSubscriptionEndedAt(newer)).toBe(1_765_000_000_000)
     expect(getSubscriptionEndedAt({ ...newer, currentPeriodEnd: null })).toBeNull()
     expect(getSubscriptionEndedAt(undefined)).toBeNull()
+  })
+
+  it('reads the plan name from the plan or from the Stripe metadata, and the period end as an ISO date', () => {
+    const tagged = {
+      ...sub('a', 'trialing'),
+      plan: { id: 'p' },
+      metadata: { planName: 'Business' },
+      currentPeriodEnd: 1_794_664_499,
+    }
+
+    expect(getSubscriptionPlanName(sub('a', 'active'))).toBe('Business')
+    expect(getSubscriptionPlanName(tagged as unknown as Subscription)).toBe('Business')
+    expect(getSubscriptionPlanName({ ...tagged, metadata: null } as unknown as Subscription)).toBeNull()
+    expect(getSubscriptionPlanName(undefined)).toBeNull()
+    expect(getSubscriptionPeriodEnd(tagged as unknown as Subscription)).toBe(
+      new Date(1_794_664_499 * 1000).toISOString(),
+    )
+    expect(getSubscriptionPeriodEnd(sub('a', 'active'))).toBeNull()
+  })
+
+  it.each([
+    [null, 'Free trial'],
+    [20, 'Free trial'],
+    [14, 'Free trial · 14 days left'],
+    [1, 'Free trial · 1 day left'],
+    [0, 'Free trial · 0 days left'],
+  ])('labels a trial with %p days left as %p', (daysLeft, label) => {
+    expect(trialLabel(daysLeft)).toBe(label)
   })
 })

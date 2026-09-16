@@ -78,7 +78,9 @@ describe('Plans', () => {
   it.each([
     [null, undefined],
     [active, { label: 'Active', variant: 'brand' }],
+    [trialing(20), { label: 'Free trial', variant: 'brand' }],
     [trialing(14), { label: 'Free trial · 14 days left', variant: 'brand' }],
+    [trialing(1), { label: 'Free trial · 1 day left', variant: 'warning' }],
     [trialing(7), { label: 'Free trial · 7 days left', variant: 'warning' }],
     [
       { ...trialing(14), daysLeft: null },

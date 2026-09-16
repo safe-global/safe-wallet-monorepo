@@ -34,12 +34,17 @@ jest.mock('@/features/__core__', () => ({
 const SPACE_ID = '11111111-1111-1111-1111-111111111111'
 const dismiss = jest.fn()
 const refetch = jest.fn()
-const subscription = (status: string) => ({ status, plan: { name: 'Business', currentPrice: 499, currency: 'eur' } })
+const subscription = (status: string) => ({
+  status,
+  plan: { id: 'price_1', currentPrice: 499, currency: 'eur' },
+  metadata: { planName: 'Business' },
+  currentPeriodEnd: Date.UTC(2026, 10, 14) / 1000,
+})
 
 describe('CheckoutReturnModals', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseSpacePlan.mockReturnValue({ plan: { periodEndsAt: '2026-12-06T00:00:00Z' }, refetch })
+    mockUseSpacePlan.mockReturnValue({ plan: null, refetch })
     mockUseCheckoutReturn.mockReturnValue({ status: 'complete', subscription: subscription('trialing'), dismiss })
   })
 
@@ -49,7 +54,7 @@ describe('CheckoutReturnModals', () => {
     expect(mockUseSpacePlan).toHaveBeenCalledWith(SPACE_ID)
     expect(mockUseCheckoutReturn).toHaveBeenCalledWith(SPACE_ID)
     expect(refetch).toHaveBeenCalled()
-    expect(screen.getByTestId('trial-activated-modal')).toHaveAttribute('data-ends', String(Date.UTC(2026, 11, 6)))
+    expect(screen.getByTestId('trial-activated-modal')).toHaveAttribute('data-ends', String(Date.UTC(2026, 10, 14)))
     expect(screen.getByRole('button', { name: 'Continue' })).toBeInTheDocument()
 
     fireEvent.click(screen.getByTestId('trial-activated-modal'))

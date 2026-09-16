@@ -1,5 +1,10 @@
 import type { PlanSummary } from '../components/Plans/types'
-import { getDaysLeft, TRIAL_ENDING_SOON_DAYS } from './billing/subscription'
+import {
+  getDaysLeft,
+  getSubscriptionPeriodEnd,
+  getSubscriptionPlanName,
+  TRIAL_ENDING_SOON_DAYS,
+} from './billing/subscription'
 import { useSpaceEntitlements } from './billing/useSpaceEntitlements'
 import { useSpaceSubscription } from './billing/useSpaceSubscription'
 
@@ -14,8 +19,9 @@ export const useSpacePlan = (spaceId?: string | null) => {
     refetch: refetchSubscription,
   } = useSpaceSubscription(spaceId)
 
-  const name = subscription?.plan.name ?? entitlements.plan?.name ?? undefined
-  const periodEndsAt = entitlements.plan?.cycleEndsAt ?? null
+  // Entitlements may lag the webhook right after checkout, so the subscription itself backs both values.
+  const name = getSubscriptionPlanName(subscription) ?? entitlements.plan?.name ?? undefined
+  const periodEndsAt = entitlements.plan?.cycleEndsAt ?? getSubscriptionPeriodEnd(subscription)
   const daysLeft = getDaysLeft(periodEndsAt)
   const plan: PlanSummary | null =
     status === 'trialing' || status === 'active' ? { name: name ?? 'Safe Pro', status, periodEndsAt, daysLeft } : null

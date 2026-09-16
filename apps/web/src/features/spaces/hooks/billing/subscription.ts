@@ -9,6 +9,13 @@ const CANCELED_STATUSES = new Set<Subscription['status']>(['canceled', 'incomple
 
 /** From this many days before the trial ends the UI turns to warnings and reminders. */
 export const TRIAL_ENDING_SOON_DAYS = 7
+/** From here on the trial label counts down; further out it just says "Free trial". */
+export const TRIAL_COUNTDOWN_DAYS = 14
+
+export const trialLabel = (daysLeft: number | null | undefined): string => {
+  if (daysLeft == null || daysLeft > TRIAL_COUNTDOWN_DAYS) return 'Free trial'
+  return `Free trial · ${daysLeft} ${daysLeft === 1 ? 'day' : 'days'} left`
+}
 
 export const DAY_MS = 24 * 60 * 60 * 1_000
 
@@ -52,3 +59,15 @@ export const getSubscriptionEndedAt = (subscription: Subscription | undefined): 
   const seconds = subscription?.cancelledAt ?? subscription?.currentPeriodEnd ?? null
   return seconds == null ? null : seconds * 1000
 }
+
+/** The plan's display name: the CGW puts it on the plan or, for Stripe-tagged subscriptions, in `metadata.planName`. */
+export const getSubscriptionPlanName = (subscription: Subscription | undefined): string | null => {
+  if (!subscription) return null
+  const metadata = (subscription.metadata ?? {}) as Record<string, unknown>
+  const fromMetadata = metadata.planName
+  return subscription.plan.name ?? (typeof fromMetadata === 'string' && fromMetadata ? fromMetadata : null)
+}
+
+/** When the current billing period (or trial) ends, as an ISO date; Stripe reports seconds. */
+export const getSubscriptionPeriodEnd = (subscription: Subscription | undefined): string | null =>
+  subscription?.currentPeriodEnd ? new Date(subscription.currentPeriodEnd * 1000).toISOString() : null

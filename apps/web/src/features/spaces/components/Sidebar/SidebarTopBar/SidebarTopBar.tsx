@@ -14,7 +14,7 @@ export const SidebarTopBar = (): ReactElement => {
   const safeAddress = useSafeAddressFromUrl()
   const isSpaceRoute = useIsSpaceRoute()
   const isHydrated = useIsHydrated()
-  const { isPaidActive } = useSpacePlan()
+  const { plan } = useSpacePlan()
 
   // Inside a space or an individual safe the logo turns into a "Home" label pill that returns to the
   // top-level accounts view; elsewhere it stays a plain logo linking to that same view.
@@ -37,7 +37,7 @@ export const SidebarTopBar = (): ReactElement => {
       <SafeLogo
         href={logoHref}
         showHomeLabel={showHomeLabel}
-        showProLockup={isSpaceRoute && isPaidActive}
+        showProLockup={isSpaceRoute && plan !== null}
         data-testid="logo-container"
         className={cn(
           'absolute z-10 top-1/2 -translate-y-1/2',

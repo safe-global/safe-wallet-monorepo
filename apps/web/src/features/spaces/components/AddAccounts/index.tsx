@@ -49,6 +49,9 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { cn } from '@/utils/cn'
 import SelectedCounter, { safeLimitTooltip } from '../SelectedCounter'
 import { useSpaceSafeLimit } from '../../hooks/useSpaceSafeLimit'
+import { useSeatUpsell } from '../../hooks/useSeatUpsell'
+import { seatsTooltip } from '../Plans/PlanStatusCard'
+import { Link } from '@/components/ui/link'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
 import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
 
@@ -188,6 +191,8 @@ const AddAccounts = ({
   // Total checked safes (workspace safes are pre-checked and count toward the plan's cap).
   const { limit } = useSpaceSafeLimit(spaceId)
   const isAtLimit = limit !== null && selectedKeys.size >= limit
+  const { isSafePro, tierName, plansHref } = useSeatUpsell(spaceId)
+  const limitTooltip = isSafePro && limit !== null ? seatsTooltip(tierName, limit) : safeLimitTooltip(limit)
 
   // Safes already in the workspace stay visible but locked: shown checked, dimmed, and not toggleable.
   const spaceSafeKeys = useMemo(
@@ -454,7 +459,7 @@ const AddAccounts = ({
                         count={selectedKeys.size}
                         limit={limit}
                         isAtLimit={isAtLimit}
-                        tooltip={safeLimitTooltip(limit)}
+                        tooltip={limitTooltip}
                       />
                       <SearchInput
                         className="flex-1"
@@ -502,6 +507,15 @@ const AddAccounts = ({
                       <AlertSeverityIcon variant="destructive" />
                       <AlertDescription>{error}</AlertDescription>
                     </Alert>
+                  )}
+
+                  {isSafePro && isAtLimit && (
+                    <Typography variant="paragraph-small" color="muted" align="center" className="mt-4 shrink-0">
+                      Need more?{' '}
+                      <Link href={plansHref} variant="muted" data-testid="compare-plans-link">
+                        Compare plans
+                      </Link>
+                    </Typography>
                   )}
 
                   <div className="mt-4 flex shrink-0 flex-row items-center gap-3">

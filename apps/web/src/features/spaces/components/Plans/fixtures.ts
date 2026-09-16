@@ -32,11 +32,6 @@ export const PLAN_FEATURES: Record<string, string[]> = {
   ],
 }
 
-export const PLAN_TRIAL_HIGHLIGHTS: Record<string, string[]> = {
-  Starter: ['10 sponsored transactions / month', 'Advanced threat analysis'],
-  Business: ['50 sponsored transactions / month', 'Advanced threat analysis'],
-}
-
 // TODO(safe-pro): Enterprise has no payment link; static card until sales flow is defined.
 export const ENTERPRISE_TIER: PlanTier = {
   id: 'enterprise',

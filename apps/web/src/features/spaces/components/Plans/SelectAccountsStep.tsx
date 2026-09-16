@@ -9,6 +9,7 @@ import { SearchInput } from '@/components/ui/search-input'
 import { Typography } from '@/components/ui/typography'
 import { SafeAccountsTable, type SafeAccountColumnId } from '@/features/myAccounts'
 import { isMultiChainSafeItem, useSafesSearch, type AllSafeItems, type SafeItem } from '@/hooks/safes'
+import type { SafeRef } from './types'
 import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
 import { useSpaceSafes } from '../../hooks/useSpaceSafes'
 import SelectedCounter from '../SelectedCounter'
@@ -17,8 +18,6 @@ import { getMultiChainSafeId, getSafeId } from '../SelectSafesOnboarding/utils/s
 
 const COLUMNS: SafeAccountColumnId[] = ['name', 'networks', 'balance']
 const NO_FLAGGED = new Set<string>()
-
-export type SafeRef = Pick<SafeItem, 'chainId' | 'address'>
 
 const leavesOf = (items: AllSafeItems): SafeItem[] =>
   items.flatMap((item) => (isMultiChainSafeItem(item) ? item.safes : [item]))
@@ -45,6 +44,7 @@ export const seatsTooltip = (planName: string, limit: number): string =>
 
 /** Trims the Workspace to the plan's seats before checkout; the Safes left out are removed from it. */
 export default function SelectAccountsStep({
+  title = 'Select Safe accounts for your plan',
   limit,
   planName,
   onBack,
@@ -52,6 +52,7 @@ export default function SelectAccountsStep({
   isSubmitting,
   error,
 }: {
+  title?: string
   limit: number
   planName: string
   onBack: () => void
@@ -82,7 +83,7 @@ export default function SelectAccountsStep({
     <>
       <div className="flex flex-col gap-1">
         <Typography variant="h3" as={DialogTitle}>
-          Select Safe accounts for your plan
+          {title}
         </Typography>
         <Typography color="muted">
           {planName} covers {limit} Safe accounts. Choose which ones stay in the Workspace.
@@ -90,7 +91,13 @@ export default function SelectAccountsStep({
       </div>
 
       <div className="flex flex-col gap-3">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          <SelectedCounter
+            count={selectedKeys.size}
+            limit={limit}
+            isAtLimit={isAtLimit}
+            tooltip={seatsTooltip(planName, limit)}
+          />
           <SearchInput
             className="flex-1"
             placeholder="by name, address or network"
@@ -98,12 +105,6 @@ export default function SelectAccountsStep({
             autoComplete="off"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-          />
-          <SelectedCounter
-            count={selectedKeys.size}
-            limit={limit}
-            isAtLimit={isAtLimit}
-            tooltip={seatsTooltip(planName, limit)}
           />
         </div>
 

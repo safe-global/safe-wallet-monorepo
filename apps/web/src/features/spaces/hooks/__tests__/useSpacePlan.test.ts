@@ -79,6 +79,31 @@ describe('useSpacePlan', () => {
     expect(result.current.isPaidActive).toBe(true)
   })
 
+  it('falls back to the subscription for the name and the period end while the entitlements lag', () => {
+    mockEntitlementsQuery.mockReturnValue(entitlements(null))
+    mockSubscriptionsQuery.mockReturnValue({
+      data: [
+        {
+          id: 'sub_1',
+          status: 'trialing',
+          plan: { id: 'plan_1' },
+          metadata: { planName: 'Business' },
+          currentPeriodEnd: Date.UTC(2026, 11, 6) / 1000,
+        },
+      ],
+      isLoading: false,
+    })
+
+    const { result } = renderHook(() => useSpacePlan())
+
+    expect(result.current.plan).toEqual({
+      name: 'Business',
+      status: 'trialing',
+      periodEndsAt: '2026-12-06T00:00:00.000Z',
+      daysLeft: 14,
+    })
+  })
+
   it('flags a trial in its last week', () => {
     mockEntitlementsQuery.mockReturnValue(entitlements({ name: 'Business', cycleEndsAt: '2026-11-29T00:00:00Z' }))
     mockSubscriptionsQuery.mockReturnValue(subscriptions('trialing'))

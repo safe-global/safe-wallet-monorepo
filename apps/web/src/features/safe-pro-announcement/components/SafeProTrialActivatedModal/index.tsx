@@ -1,5 +1,6 @@
 import NextLink from 'next/link'
 import type { LinkProps } from 'next/link'
+import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Typography } from '@/components/ui/typography'
@@ -42,11 +43,13 @@ const SafeProTrialActivatedModal = ({
           <div className="flex w-full flex-col items-center gap-3">
             <Button
               size="lg"
+              accentIcon
               className="w-full"
               render={ctaHref ? <NextLink href={ctaHref} /> : undefined}
               onClick={() => onOpenChange(false)}
             >
               {ctaLabel}
+              <ArrowRight data-icon="inline-end" />
             </Button>
             {onAddBillingDetails && (
               <Button variant="ghost-muted" size="sm" onClick={onAddBillingDetails}>

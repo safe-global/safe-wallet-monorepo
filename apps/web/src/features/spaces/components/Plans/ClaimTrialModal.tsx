@@ -1,9 +1,5 @@
 import { useMemo, useState } from 'react'
 import { ArrowRight, Check } from 'lucide-react'
-import {
-  useSpaceSafesDeleteV1Mutation,
-  useSpaceSafesGetV1Query,
-} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -11,15 +7,14 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
-import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { formatDate } from '@safe-global/utils/utils/date'
 import { DAY_MS } from '../../hooks/billing/subscription'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
-import { useStartCheckout } from '../../hooks/billing/useStartCheckout'
+import { useSeatTrimCheckout } from '../../hooks/billing/useSeatTrimCheckout'
 import { RECOMMENDED_PLAN } from './fixtures'
 import { claimTiers, formatPlanPrice, priceSuffix } from './planTiers'
-import SelectAccountsStep, { type SafeRef } from './SelectAccountsStep'
-import type { PlanTier } from './types'
+import SelectAccountsStep from './SelectAccountsStep'
+import type { PlanTier, SafeRef } from './types'
 
 // The CGW grants the 60-day grace only to Workspaces that predate enforcement; anything else is a new Workspace.
 const MIGRATED_TRIAL_DAYS = 60
@@ -104,8 +99,9 @@ const TrialOfferCard = ({
 }
 
 /**
- * Blocking offer of the Workspace's free trial. When the Workspace holds more Safes than the offer covers, a second
- * step trims it before Stripe: the Safes left out are removed from the Workspace, not from the user's accounts.
+ * Blocking offer of the Workspace's free trial. A Workspace that already holds Safes confirms which ones the plan
+ * covers before Stripe: the Safes left out are removed from the Workspace, not from the user's accounts. A brand-new
+ * Workspace (the onboarding wizard) goes straight to Stripe.
  */
 export default function ClaimTrialModal({
   spaceId,
@@ -121,13 +117,7 @@ export default function ClaimTrialModal({
 }) {
   const { trialPlans, trialPeriodDays, isLoading } = useSpaceOffers(spaceId)
   const tiers = useMemo(() => claimTiers(trialPlans), [trialPlans])
-  const { currentData: spaceSafes } = useSpaceSafesGetV1Query({ spaceId })
-  const safeCount = useMemo(
-    () => Object.values(spaceSafes?.safes ?? {}).reduce((total, addresses) => total + addresses.length, 0),
-    [spaceSafes],
-  )
-  const { startCheckout, isRedirecting, isError: isCheckoutError } = useStartCheckout(spaceId, returnPathname)
-  const [removeSafes, { isLoading: isRemoving, error: removeError }] = useSpaceSafesDeleteV1Mutation()
+  const { needsTrim, checkout, isBusy, error } = useSeatTrimCheckout(spaceId, returnPathname)
   const [pickedTierId, setPickedTierId] = useState<string>()
   const [step, setStep] = useState<'offer' | 'accounts'>('offer')
 
@@ -137,25 +127,17 @@ export default function ClaimTrialModal({
     tiers[0]
   const option = tier?.options[0]
   const seats = option?.seats ?? null
-  const needsAccountsStep = seats !== null && safeCount > seats
   const { title, subtitle } = claimCopy(trialPeriodDays)
   const availableUntil = trialPeriodDays === null ? null : formatDate(Date.now() + trialPeriodDays * DAY_MS)
-  const isBusy = isRedirecting || isRemoving
-  const checkoutError = isCheckoutError ? 'We couldn’t start the checkout. Please try again.' : undefined
 
   const claim = () => {
     if (!option?.paymentLinkId) return
-    if (needsAccountsStep) setStep('accounts')
-    else void startCheckout(option.paymentLinkId)
+    if (needsTrim(seats)) setStep('accounts')
+    else void checkout(option.paymentLinkId)
   }
 
-  const continueToCheckout = async (removed: SafeRef[]) => {
-    if (!option?.paymentLinkId) return
-    if (removed.length > 0) {
-      const result = await removeSafes({ spaceId, deleteSpaceSafesDto: { safes: removed } })
-      if (result.error) return
-    }
-    await startCheckout(option.paymentLinkId)
+  const continueToCheckout = (removed: SafeRef[]) => {
+    if (option?.paymentLinkId) void checkout(option.paymentLinkId, removed)
   }
 
   return (
@@ -167,13 +149,9 @@ export default function ClaimTrialModal({
               limit={seats}
               planName={tier.name}
               onBack={() => setStep('offer')}
-              onContinue={(removed) => void continueToCheckout(removed)}
+              onContinue={continueToCheckout}
               isSubmitting={isBusy}
-              error={
-                removeError
-                  ? getRtkQueryErrorMessage(removeError) || 'We couldn’t update the Workspace. Please try again.'
-                  : checkoutError
-              }
+              error={error}
             />
           ) : (
             <>
@@ -214,10 +192,10 @@ export default function ClaimTrialModal({
                 No billing details required. We’ll remind you before it ends. Cancel any time.
               </Typography>
 
-              {checkoutError && (
+              {error && (
                 <Alert variant="destructive">
                   <AlertSeverityIcon variant="destructive" />
-                  <AlertDescription>{checkoutError}</AlertDescription>
+                  <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
 

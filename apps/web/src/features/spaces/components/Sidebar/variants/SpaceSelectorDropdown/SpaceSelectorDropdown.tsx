@@ -34,8 +34,8 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getDeterministicColor } from '@/utils/colors'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import ProChip from '@/public/images/safe-pro/pro-chip.svg'
 import { useSpacePlan } from '../../../../hooks/useSpacePlan'
+import { trialLabel } from '../../../../hooks/billing/subscription'
 
 export const SAFE_ALREADY_IN_WORKSPACE_TOOLTIP = 'Safe is already in this workspace'
 
@@ -60,9 +60,7 @@ export const SpaceSelectorDropdown = ({
   const spaceName = selectedSpace?.name ?? ''
   const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
   const { tierName, isTrialing, isTrialEndingSoon, plan } = useSpacePlan()
-  const trialLabel =
-    plan?.daysLeft === null || plan?.daysLeft === undefined ? 'Free trial' : `Free trial · ${plan.daysLeft} days left`
-  const planLabel = !isSafePro ? 'Workspace' : isTrialing ? trialLabel : tierName
+  const planLabel = !isSafePro ? 'Workspace' : isTrialing ? trialLabel(plan?.daysLeft) : tierName
   const displayName = truncateSpaceName(spaceName, SPACE_SELECTOR_NAME_MAX_LENGTH)
   const initial = spaceName.charAt(0).toUpperCase()
   const selectedSpaceColor = spaceName ? getDeterministicColor(spaceName) : undefined
@@ -194,13 +192,14 @@ export const SpaceSelectorDropdown = ({
                 ) : (
                   <span className={css.spaceSelectorName} />
                 )}
-                {isTrialing && (
-                  <span className="block h-4 w-6 shrink-0" data-testid="space-selector-pro-chip">
-                    <ProChip className="size-full" />
-                  </span>
-                )}
               </span>
-              <span className={cn(css.spaceSelectorSubtitle, isTrialEndingSoon && 'text-warning-strong')}>
+              <span
+                className={cn(
+                  css.spaceSelectorSubtitle,
+                  'block truncate',
+                  !isSafePro ? 'text-muted-foreground' : isTrialEndingSoon ? 'text-warning-strong' : 'text-green-500',
+                )}
+              >
                 {planLabel}
               </span>
             </div>

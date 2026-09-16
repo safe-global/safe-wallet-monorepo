@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
@@ -7,21 +7,18 @@ import { useHasFeature } from '@/hooks/useChains'
 import { cn } from '@/utils/cn'
 import { useLoadFeature } from '@/features/__core__'
 import { SafeProFeature } from '@/features/safe-pro-announcement'
-import { localItem } from '@/services/local-storage/local'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import AuthState from '../AuthState'
 import Plans from './index'
 import { SPONSORED_TXS_PLACEHOLDER } from './fixtures'
-import { buildPlanTiers } from './planTiers'
+import { buildPlanTiers, toCurrentPlan } from './planTiers'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
 import { useStartCheckout } from '../../hooks/billing/useStartCheckout'
 import { useChangePlan } from '../../hooks/billing/useChangePlan'
 import ChangePlanDialog from './ChangePlanDialog'
-import type { CurrentPlan, PlanPick } from './types'
-
-const reminderSeen = localItem<boolean>('safeProBillingReminderSeen')
+import type { PlanPick } from './types'
 
 const PlansSkeleton = () => (
   <div className="flex flex-col gap-6" data-testid="plans-skeleton">
@@ -33,27 +30,16 @@ const PlansSkeleton = () => (
 export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
   const isDarkMode = useDarkMode()
   const isSafePro = useHasFeature(FEATURES.SAFE_PRO)
-  const { SafeProAnnouncement, SafeProBillingReminderModal } = useLoadFeature(SafeProFeature)
+  const { SafeProAnnouncement } = useLoadFeature(SafeProFeature)
   const { plan, seats, subscription, isTrialing, isLoading: isPlanLoading } = useSpacePlan(spaceId)
   const { paidPlans, isLoading: isOffersLoading } = useSpaceOffers(spaceId)
   const { openPortal, isRedirecting } = useBillingPortal(spaceId)
   const { startCheckout, isRedirecting: isCheckingOut } = useStartCheckout(spaceId)
   const { canChange } = useChangePlan(spaceId)
-  const [isReminderOpen, setIsReminderOpen] = useState(false)
   const [pick, setPick] = useState<PlanPick>()
 
-  const currentPlan = useMemo<CurrentPlan | undefined>(
-    () =>
-      canChange && subscription && plan
-        ? {
-            name: subscription.plan.name ?? plan.name,
-            price: subscription.plan.currentPrice,
-            currency: subscription.plan.currency,
-            billingCycle: subscription.plan.billingCycle ?? null,
-            isTrialing,
-            periodEndsAt: plan.periodEndsAt,
-          }
-        : undefined,
+  const currentPlan = useMemo(
+    () => (canChange && subscription && plan ? toCurrentPlan(subscription, plan, isTrialing) : undefined),
     [canChange, subscription, plan, isTrialing],
   )
   const tiers = useMemo(
@@ -61,15 +47,6 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
       buildPlanTiers(paidPlans, currentPlan && subscription ? { subscription, seatsQuota: seats?.quota } : undefined),
     [paidPlans, currentPlan, subscription, seats?.quota],
   )
-
-  useEffect(() => {
-    if (isTrialing && !reminderSeen.get()) setIsReminderOpen(true)
-  }, [isTrialing])
-
-  const closeReminder = () => {
-    reminderSeen.set(true)
-    setIsReminderOpen(false)
-  }
 
   return (
     <AuthState spaceId={spaceId}>
@@ -114,16 +91,6 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
             onClose={() => setPick(undefined)}
           />
         )}
-
-        <SafeProBillingReminderModal
-          open={isReminderOpen}
-          onOpenChange={closeReminder}
-          trialEndsAt={plan?.periodEndsAt ? new Date(plan.periodEndsAt).getTime() : 0}
-          onAddBillingDetails={() => {
-            closeReminder()
-            void openPortal()
-          }}
-        />
       </div>
     </AuthState>
   )

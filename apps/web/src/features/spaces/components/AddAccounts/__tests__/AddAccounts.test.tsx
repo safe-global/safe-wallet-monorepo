@@ -75,6 +75,9 @@ let mockSpaceSafesLoading = false
 jest.mock('../../../hooks/useSpaceSafeLimit', () => ({
   useSpaceSafeLimit: () => ({ limit: 40, isLoading: false }),
 }))
+jest.mock('../../../hooks/useSeatUpsell', () => ({
+  useSeatUpsell: () => ({ isSafePro: false, tierName: undefined, limit: null, plansHref: '/spaces/plans' }),
+}))
 
 jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '1',

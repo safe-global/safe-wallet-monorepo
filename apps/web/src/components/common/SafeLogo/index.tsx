@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 import Link from 'next/link'
 import { AppRoutes } from '@/config/routes'
 import { cn } from '@/utils/cn'
-import SafeProLockup from '@/components/common/SafeProLockup'
+import ProChip from '@/public/images/safe-pro/pro-chip.svg'
 import css from './SafeLogo.module.css'
 
 const LogoMark = (): ReactElement => (
@@ -32,7 +32,7 @@ const SafeLogo = ({
   className?: string
   /** Renders a logo + "Home" label pill (Safe/space context) instead of the bare logo. */
   showHomeLabel?: boolean
-  /** Paid Safe Pro workspace: the pill carries the Safe PRO lockup instead of logo + "Home". */
+  /** Workspace on a live Safe Pro plan: the pill carries the logo and the PRO chip instead of logo + "Home". */
   showProLockup?: boolean
   'data-testid'?: string
 }): ReactElement => {
@@ -46,13 +46,13 @@ const SafeLogo = ({
           className,
         )}
       >
+        <LogoMark />
         {showProLockup ? (
-          <SafeProLockup />
+          <span className="block h-4 w-6 shrink-0" role="img" aria-label="Safe Pro">
+            <ProChip className="size-full" />
+          </span>
         ) : (
-          <>
-            <LogoMark />
-            <span className="text-sm font-semibold">Home</span>
-          </>
+          <span className="text-sm font-semibold">Home</span>
         )}
       </Link>
     )

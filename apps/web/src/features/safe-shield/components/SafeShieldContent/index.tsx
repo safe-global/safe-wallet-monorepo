@@ -12,6 +12,8 @@ import { SafeShieldAnalysisEmpty } from './SafeShieldAnalysisEmpty'
 import { AnalysisGroupCard } from '../AnalysisGroupCard'
 import { TenderlySimulation } from '../TenderlySimulation'
 import { TenderlyExternalSimulation } from '../TenderlyExternalSimulation'
+import { ProChecksRow } from '../ProChecksRow'
+import { AnalysisGroupCardDisabled } from '../ThreatAnalysis/AnalysisGroupCardDisabled'
 import UntrustedSafeWarning from '../UntrustedSafeWarning'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import isEmpty from 'lodash/isEmpty'
@@ -93,13 +95,24 @@ export const SafeShieldContent = ({
             <UntrustedSafeWarning safeAnalysis={safeAnalysis} onAddToTrustedList={onAddToTrustedList} />
           )}
 
-          <AnalysisGroupCard
-            data-testid="recipient-analysis-group-card"
-            delay={recipientDelay}
-            data={recipientResults}
-            highlightedSeverity={highlightedSeverity}
-            analyticsEvent={SAFE_SHIELD_EVENTS.RECIPIENT_DECODED}
-          />
+          {/* The recipient check is Pro-only: labelled with the chip when it runs, locked (with an upgrade) when not. */}
+          {shouldShowContent && (!hasProFeatures || !recipientEmpty) && (
+            <ProChecksRow hasProFeatures={hasProFeatures} />
+          )}
+          {!hasProFeatures && shouldShowContent && (
+            <AnalysisGroupCardDisabled data-testid="recipient-analysis-locked">
+              Known recipient
+            </AnalysisGroupCardDisabled>
+          )}
+          {hasProFeatures && (
+            <AnalysisGroupCard
+              data-testid="recipient-analysis-group-card"
+              delay={recipientDelay}
+              data={recipientResults}
+              highlightedSeverity={highlightedSeverity}
+              analyticsEvent={SAFE_SHIELD_EVENTS.RECIPIENT_DECODED}
+            />
+          )}
 
           <AnalysisGroupCard
             data-testid="contract-analysis-group-card"

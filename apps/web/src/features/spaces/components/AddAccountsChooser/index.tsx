@@ -2,13 +2,20 @@ import { useState } from 'react'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { buildCurrentNextUrl } from '@/utils/nextUrl'
-import { CirclePlus, Plus } from 'lucide-react'
+import { CirclePlus, Plus, Settings2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { cn } from '@/utils/cn'
 import { ChooserRow } from '@/components/common/ChooserRow'
 import AddAccounts from '../AddAccounts'
-import { useCurrentSpaceId, useIsAdmin, useIsCurrentSpaceAtSafeLimit, useSpaceSafeLimit } from '@/features/spaces'
+import {
+  useCurrentSpaceId,
+  useCurrentSpaceSafeCount,
+  useIsAdmin,
+  useIsCurrentSpaceAtSafeLimit,
+  useSpaceSafeLimit,
+} from '@/features/spaces'
+import SeatLimitBanner from '../SafeAccounts/SeatLimitBanner'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 
@@ -31,6 +38,8 @@ const AddAccountsChooser = ({
   const spaceId = useCurrentSpaceId()
   const isSpaceAtSafeLimit = useIsCurrentSpaceAtSafeLimit()
   const { limit: safeLimit } = useSpaceSafeLimit()
+  const safeCount = useCurrentSpaceSafeCount()
+  const showsLimit = isSpaceAtSafeLimit && isAdmin
 
   const router = useRouter()
 
@@ -83,9 +92,13 @@ const AddAccountsChooser = ({
             <DialogTitle className="font-bold">Add Safe accounts</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-2">
+            {showsLimit && <SeatLimitBanner variant="alert" />}
             <ChooserRow
-              icon={<Plus className="size-4" />}
-              title="Select from my accounts"
+              icon={showsLimit ? <Settings2 className="size-4" /> : <Plus className="size-4" />}
+              title={showsLimit ? 'Manage accounts' : 'Select from my accounts'}
+              subtitle={
+                showsLimit ? `Swap one out to add another · ${safeCount ?? safeLimit} of ${safeLimit}` : undefined
+              }
               onClick={handleAdd}
               disabled={!isAdmin}
               disabledTooltip="You need to be an Admin to add accounts"
@@ -93,13 +106,9 @@ const AddAccountsChooser = ({
             />
             <ChooserRow
               icon={<CirclePlus className="size-4" />}
-              title="Create new Safe"
+              title={showsLimit ? 'Create new' : 'Create new Safe'}
+              subtitle={showsLimit ? 'Created outside the Workspace, in My accounts' : undefined}
               onClick={handleCreate}
-              warning={
-                isSpaceAtSafeLimit && isAdmin
-                  ? `This workspace already has ${safeLimit} Safes (the maximum). Your new Safe won't be added to it, but you can still create it.`
-                  : undefined
-              }
             />
           </div>
         </DialogContent>

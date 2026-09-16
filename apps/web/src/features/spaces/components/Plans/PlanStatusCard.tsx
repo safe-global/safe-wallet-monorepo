@@ -9,7 +9,7 @@ import { Typography } from '@/components/ui/typography'
 import { formatDate } from '@safe-global/utils/utils/date'
 import { TRIAL_DISCLAIMER } from '@/features/safe-pro-announcement'
 import { cn } from '@/utils/cn'
-import { TRIAL_ENDING_SOON_DAYS } from '../../hooks/billing/subscription'
+import { TRIAL_ENDING_SOON_DAYS, trialLabel } from '../../hooks/billing/subscription'
 import type { CurrentBadge } from './PlanCards'
 import type { Meter, PlanSummary } from './types'
 
@@ -24,7 +24,7 @@ export const getCurrentBadge = (plan: PlanSummary | null): CurrentBadge | undefi
   if (plan.status === 'active') return { label: 'Active', variant: 'brand' }
   const endingSoon = plan.daysLeft !== null && plan.daysLeft <= TRIAL_ENDING_SOON_DAYS
   return {
-    label: plan.daysLeft === null ? 'Free trial' : `Free trial · ${plan.daysLeft} days left`,
+    label: trialLabel(plan.daysLeft),
     variant: endingSoon ? 'warning' : 'brand',
   }
 }

@@ -3,23 +3,48 @@ import { SUPPORT_CHAT_URL } from '@/config/constants'
 import PlanChooserModal, { chooserCopy } from '../PlanChooserModal'
 
 const mockUseSpaceOffers = jest.fn()
-const mockStartCheckout = jest.fn()
+const mockCheckout = jest.fn()
+const mockNeedsTrim = jest.fn()
 const mockOpenPortal = jest.fn()
-let mockCheckoutState: Record<string, unknown> = {}
+let mockTrimState: Record<string, unknown> = {}
 
 jest.mock('../../../hooks/billing/useSpaceOffers', () => ({
   useSpaceOffers: (spaceId?: string) => mockUseSpaceOffers(spaceId),
 }))
-jest.mock('../../../hooks/billing/useStartCheckout', () => ({
-  useStartCheckout: (spaceId?: string) => ({
-    startCheckout: (paymentLinkId: string) => mockStartCheckout(spaceId, paymentLinkId),
-    isRedirecting: false,
-    isError: false,
-    ...mockCheckoutState,
+jest.mock('../../../hooks/billing/useSeatTrimCheckout', () => ({
+  useSeatTrimCheckout: (spaceId: string) => ({
+    safeCount: 3,
+    needsTrim: (seats: number | null | undefined) => mockNeedsTrim(seats),
+    checkout: (paymentLinkId: string, removed?: unknown[]) => mockCheckout(spaceId, paymentLinkId, removed),
+    isBusy: false,
+    error: undefined,
+    ...mockTrimState,
   }),
 }))
 jest.mock('../../../hooks/billing/useBillingPortal', () => ({
   useBillingPortal: () => ({ openPortal: mockOpenPortal, isRedirecting: false }),
+}))
+jest.mock('../SelectAccountsStep', () => ({
+  __esModule: true,
+  default: ({
+    title,
+    limit,
+    planName,
+    onBack,
+    onContinue,
+  }: {
+    title: string
+    limit: number
+    planName: string
+    onBack: () => void
+    onContinue: (removed: Array<{ chainId: string; address: string }>) => void
+  }) => (
+    <div data-testid="select-accounts-step" data-limit={limit} data-plan={planName}>
+      {title}
+      <button onClick={onBack}>step-back</button>
+      <button onClick={() => onContinue([{ chainId: '1', address: '0xC' }])}>step-continue</button>
+    </div>
+  ),
 }))
 
 const offer = (planName: string, paymentLinkId: string, seats: number, price: number) => ({
@@ -42,8 +67,9 @@ const ENDED_AT = Date.UTC(2026, 11, 5, 12)
 describe('PlanChooserModal', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockCheckoutState = {}
+    mockTrimState = {}
     mockUseSpaceOffers.mockReturnValue({ paidPlans: PLANS, isLoading: false })
+    mockNeedsTrim.mockImplementation((seats: number | null | undefined) => seats != null)
   })
 
   it('words the headline by lock reason', () => {
@@ -63,14 +89,35 @@ describe('PlanChooserModal', () => {
     expect(screen.getByText('Need more than 20?')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Talk to sales/ })).toHaveAttribute('href', SUPPORT_CHAT_URL)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Switch to Starter' }))
-    expect(mockStartCheckout).toHaveBeenCalledWith(SPACE_ID, 'pl_starter')
-
-    fireEvent.click(screen.getByRole('button', { name: 'Continue with Business' }))
-    expect(mockStartCheckout).toHaveBeenCalledWith(SPACE_ID, 'pl_business')
-
     fireEvent.click(screen.getByRole('button', { name: 'Back to My accounts' }))
     expect(onBack).toHaveBeenCalled()
+  })
+
+  it('goes straight to Stripe when the Workspace holds no Safes yet', () => {
+    mockNeedsTrim.mockReturnValue(false)
+    render(<PlanChooserModal spaceId={SPACE_ID} reason="lapsed" endedAt={ENDED_AT} onBack={jest.fn()} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Continue with Business' }))
+    expect(mockCheckout).toHaveBeenCalledWith(SPACE_ID, 'pl_business', undefined)
+    expect(screen.queryByTestId('select-accounts-step')).not.toBeInTheDocument()
+  })
+
+  it('asks which Safes the picked plan covers before checking out', () => {
+    render(<PlanChooserModal spaceId={SPACE_ID} reason="lapsed" endedAt={ENDED_AT} onBack={jest.fn()} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Switch to Starter' }))
+    expect(mockCheckout).not.toHaveBeenCalled()
+    expect(screen.getByTestId('select-accounts-step')).toHaveAttribute('data-limit', '2')
+    expect(screen.getByTestId('select-accounts-step')).toHaveAttribute('data-plan', 'Starter')
+    expect(screen.getByTestId('select-accounts-step')).toHaveTextContent('Choose Safe accounts for your plan')
+    expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument()
+
+    fireEvent.click(screen.getByText('step-back'))
+    expect(screen.getByRole('heading', { name: 'Your free trial ended on Dec 5, 2026' })).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Switch to Starter' }))
+    fireEvent.click(screen.getByText('step-continue'))
+    expect(mockCheckout).toHaveBeenCalledWith(SPACE_ID, 'pl_starter', [{ chainId: '1', address: '0xC' }])
   })
 
   it('can be dismissed only when given a dismiss handler', () => {
@@ -99,7 +146,7 @@ describe('PlanChooserModal', () => {
     expect(screen.getByTestId('plan-chooser-skeleton')).toBeInTheDocument()
 
     mockUseSpaceOffers.mockReturnValue({ paidPlans: [], isLoading: false })
-    mockCheckoutState = { isError: true }
+    mockTrimState = { error: 'We couldn’t start the checkout. Please try again.' }
     rerender(<PlanChooserModal spaceId={SPACE_ID} reason="lapsed" endedAt={null} onBack={jest.fn()} />)
     expect(screen.getByText('There is no plan available for this Workspace right now.')).toBeInTheDocument()
     expect(screen.getByText('We couldn’t start the checkout. Please try again.')).toBeInTheDocument()

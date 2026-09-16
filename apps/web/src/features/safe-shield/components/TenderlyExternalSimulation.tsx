@@ -5,7 +5,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Typography } from '@/components/ui/typography'
 import ExternalLink from '@/components/common/ExternalLink'
 import InfoIcon from '@/public/images/notifications/info.svg'
-import UpdateIcon from '@/public/images/safe-shield/update.svg'
+import LockIcon from '@/public/images/common/lock-small.svg'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { getPublicSimulatorLink } from '@safe-global/utils/components/tx/security/tenderly/utils'
@@ -48,8 +48,8 @@ export const TenderlyExternalSimulation = ({
       style={{ opacity: isVisible ? 1 : 0, transition: 'opacity 0.3s ease-in-out', transitionDelay: `${delay}ms` }}
     >
       <div className="flex flex-row items-center gap-2">
-        <UpdateIcon className="size-4" />
-        <Typography variant="paragraph-small" className="text-[var(--color-primary-light)]">
+        <LockIcon className="size-4 text-[var(--color-text-disabled)]" />
+        <Typography variant="paragraph-small" className="text-[var(--color-text-disabled)]">
           Transaction simulation
         </Typography>
         <Tooltip>

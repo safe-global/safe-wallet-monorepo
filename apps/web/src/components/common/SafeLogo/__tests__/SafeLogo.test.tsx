@@ -41,9 +41,10 @@ describe('SafeLogo', () => {
     expect(screen.getByTestId('logo-image')).toBeInTheDocument()
   })
 
-  it('renders the Safe PRO lockup in the pill for paid workspaces', () => {
+  it('renders the logo with the PRO chip in the pill for Workspaces on a plan', () => {
     render(<SafeLogo showHomeLabel showProLockup />)
     expect(screen.getByRole('img', { name: 'Safe Pro' })).toBeInTheDocument()
+    expect(screen.getByTestId('logo-image')).toBeInTheDocument()
     expect(screen.getByRole('link')).not.toHaveTextContent('Home')
   })
 })

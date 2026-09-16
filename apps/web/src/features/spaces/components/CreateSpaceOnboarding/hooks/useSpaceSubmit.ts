@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useRouter } from 'next/router'
 import { useSpacesCreateV1Mutation, useSpacesUpdateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useAppDispatch } from '@/store'
@@ -8,6 +8,8 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { AppRoutes } from '@/config/routes'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import { sanitizeNextUrl } from '@/utils/nextUrl'
 import { sanitizeName } from '@safe-global/utils/validation/names'
 import type { UseFormHandleSubmit } from 'react-hook-form'
@@ -19,11 +21,25 @@ const useSpaceSubmit = (
 ) => {
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  // Under Safe Pro a freshly created Workspace is offered its trial before the wizard moves on.
+  const [createdSpaceId, setCreatedSpaceId] = useState<string>()
   const router = useRouter()
   const dispatch = useAppDispatch()
   const safe = useSafeQueryParam() || undefined
+  const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
   const [createSpaceWithUser] = useSpacesCreateV1Mutation()
   const [updateSpace] = useSpacesUpdateV1Mutation()
+
+  const goToSelectSafes = useCallback(
+    (targetSpaceId: string) => {
+      const next = sanitizeNextUrl(router.query.next)
+      router.push({
+        pathname: AppRoutes.welcome.selectSafes,
+        query: { spaceId: targetSpaceId, ...(safe ? { safe } : {}), ...(next ? { next } : {}) },
+      })
+    },
+    [router, safe],
+  )
 
   const editSpace = async (name: string) => {
     const response = await updateSpace({ id: spaceId ?? '', updateSpaceDto: { name: sanitizeName(name) } })
@@ -32,11 +48,7 @@ const useSpaceSubmit = (
       throw new Error(getRtkQueryErrorMessage(response.error))
     }
 
-    const next = sanitizeNextUrl(router.query.next)
-    router.push({
-      pathname: AppRoutes.welcome.selectSafes,
-      query: { spaceId, ...(safe ? { safe } : {}), ...(next ? { next } : {}) },
-    })
+    goToSelectSafes(spaceId ?? '')
   }
 
   const createSpace = async (name: string) => {
@@ -48,11 +60,12 @@ const useSpaceSubmit = (
 
       dispatch(setLastUsedSpace(newSpaceId))
 
-      const next = sanitizeNextUrl(router.query.next)
-      router.push({
-        pathname: AppRoutes.welcome.selectSafes,
-        query: { spaceId: newSpaceId, ...(safe ? { safe } : {}), ...(next ? { next } : {}) },
-      })
+      if (isSafePro) {
+        setCreatedSpaceId(newSpaceId)
+        setIsSubmitting(false)
+        return
+      }
+      goToSelectSafes(newSpaceId)
     }
 
     if (response.error) {
@@ -85,6 +98,8 @@ const useSpaceSubmit = (
     error,
     isSubmitting,
     onSubmit,
+    createdSpaceId,
+    goToSelectSafes,
   }
 }
 

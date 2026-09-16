@@ -38,7 +38,7 @@ export default function WorkspaceLockModal({ spaceId }: { spaceId: string }) {
   const membership = useCurrentMembership(spaceId)
   const isAdmin = useIsAdmin(spaceId)
   const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId }, { skip: !isLocked })
-  const { SafeProLockedMemberModal } = useLoadFeature(SafeProFeature)
+  const { SafeProNoticeModal } = useLoadFeature(SafeProFeature)
   const [dismissed, setDismissed] = useState(false)
   const canDismiss = router.pathname === AppRoutes.spaces.plans
 
@@ -49,7 +49,7 @@ export default function WorkspaceLockModal({ spaceId }: { spaceId: string }) {
 
   if (!isAdmin) {
     const { title, body } = memberCopy(reason, trialPeriodDays, endedAt, space?.name ?? 'This Workspace')
-    return <SafeProLockedMemberModal open title={title} body={body} onBack={goBack} />
+    return <SafeProNoticeModal open title={title} body={body} onAction={goBack} />
   }
 
   if (reason === 'trial-offered') return <ClaimTrialModal spaceId={spaceId} onBack={goBack} />

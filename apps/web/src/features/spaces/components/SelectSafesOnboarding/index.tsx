@@ -8,6 +8,8 @@ import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/aler
 import SimilarityConfirmDialog from '@/components/common/TrustedSafesModal/SimilarityConfirmDialog'
 import { OnboardingLayout, StepCounter, SafeAppMockup, deriveSidePanelAccountsFromSpace } from '../OnboardingLayout'
 import useWallet from '@/hooks/wallets/useWallet'
+import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
+import CheckoutReturnModals from '../Plans/CheckoutReturnModals'
 import { type AllSafeItems } from '@/hooks/safes'
 import { useSpaceSafes } from '../../hooks/useSpaceSafes'
 import { useOnboardingStepCount } from '../../hooks/useOnboardingStepCount'
@@ -56,6 +58,8 @@ const SelectSafesOnboarding = (): ReactElement => {
 
   const { data: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !spaceId })
   const { allSafes: spaceSafes } = useSpaceSafes()
+  // Stripe sends the trial checkout back here; the confirmation offers the billing portal right away.
+  const { openPortal } = useBillingPortal(spaceId)
 
   const selectedSafes = useWatch({ control, name: 'selectedSafes' })
 
@@ -192,6 +196,14 @@ const SelectSafesOnboarding = (): ReactElement => {
           safe={{ address: pendingConfirmation.address, name: pendingConfirmation.displayName }}
           onConfirm={confirmPending}
           onCancel={cancelPending}
+        />
+      )}
+
+      {spaceId && (
+        <CheckoutReturnModals
+          spaceId={spaceId}
+          trialCtaLabel="Get started"
+          onAddBillingDetails={() => void openPortal()}
         />
       )}
     </>

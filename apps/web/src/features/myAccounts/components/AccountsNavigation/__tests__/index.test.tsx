@@ -1,33 +1,28 @@
 import { render, screen } from '@testing-library/react'
 import AccountsNavigation from '../index'
 
-const mockUseHasFeature = jest.fn()
-
-jest.mock('next/router', () => ({ useRouter: () => ({ pathname: '/welcome/spaces' }) }))
-jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
-jest.mock('@/public/images/safe-pro/safe-mark.svg', () => 'svg')
-jest.mock('@/public/images/safe-pro/safe-wordmark.svg', () => 'svg')
+let mockPathname = '/welcome/spaces'
+jest.mock('next/router', () => ({ useRouter: () => ({ pathname: mockPathname }) }))
 jest.mock('@/public/images/safe-pro/pro-chip.svg', () => 'svg')
-jest.mock('@/public/images/safe-wallet-lockup.svg', () => 'svg')
 
 describe('AccountsNavigation', () => {
-  it('shows the Safe Pro and Safe{Wallet} lockups when SAFE_PRO is on', () => {
-    mockUseHasFeature.mockReturnValue(true)
-
+  it('labels Workspaces as the Safe Pro side and keeps My accounts plain', () => {
     render(<AccountsNavigation />)
 
-    expect(screen.getByRole('img', { name: 'Safe Pro' })).toBeInTheDocument()
-    expect(screen.getByRole('img', { name: 'Safe{Wallet}' })).toBeInTheDocument()
-    expect(screen.queryByText('Workspaces')).not.toBeInTheDocument()
+    const workspaces = screen.getByRole('tab', { name: /Workspaces/ })
+    expect(workspaces).toHaveAttribute('href', '/welcome/spaces')
+    expect(workspaces).toContainElement(screen.getByRole('img', { name: 'Pro' }))
+    expect(workspaces).toHaveAttribute('aria-selected', 'true')
+
+    const accounts = screen.getByRole('tab', { name: 'My accounts' })
+    expect(accounts).toHaveAttribute('href', '/welcome/accounts')
+    expect(screen.getAllByRole('img')).toHaveLength(1)
   })
 
-  it('keeps the text labels when SAFE_PRO is off', () => {
-    mockUseHasFeature.mockReturnValue(false)
-
+  it('selects My accounts on its route', () => {
+    mockPathname = '/welcome/accounts'
     render(<AccountsNavigation />)
 
-    expect(screen.getByText('Workspaces')).toBeInTheDocument()
-    expect(screen.getByText('My accounts')).toBeInTheDocument()
-    expect(screen.queryAllByRole('img')).toHaveLength(0)
+    expect(screen.getByRole('tab', { name: 'My accounts' })).toHaveAttribute('aria-selected', 'true')
   })
 })

@@ -14,7 +14,7 @@ jest.mock('../../AuthState', () => ({
 jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => true }))
 jest.mock('@/hooks/useDarkMode', () => ({ useDarkMode: () => false }))
 jest.mock('@/features/__core__', () => ({
-  useLoadFeature: () => ({ SafeProAnnouncement: () => null, SafeProBillingReminderModal: () => null }),
+  useLoadFeature: () => ({ SafeProAnnouncement: () => null }),
   createFeatureHandle: () => ({}),
 }))
 jest.mock('../../../hooks/useSpacePlan', () => ({ useSpacePlan: (spaceId?: string) => mockUseSpacePlan(spaceId) }))

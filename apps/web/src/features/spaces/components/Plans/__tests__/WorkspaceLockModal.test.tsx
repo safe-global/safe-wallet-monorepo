@@ -20,11 +20,11 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
 }))
 jest.mock('@/features/__core__', () => ({
   useLoadFeature: () => ({
-    SafeProLockedMemberModal: ({ title, body, onBack }: { title: string; body: string; onBack: () => void }) => (
+    SafeProNoticeModal: ({ title, body, onAction }: { title: string; body: string; onAction: () => void }) => (
       <div data-testid="locked-member-modal">
         <h2>{title}</h2>
         <p>{body}</p>
-        <button onClick={onBack}>Back to My accounts</button>
+        <button onClick={onAction}>Back to My accounts</button>
       </div>
     ),
   }),

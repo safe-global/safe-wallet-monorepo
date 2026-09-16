@@ -4,20 +4,27 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Typography } from '@/components/ui/typography'
 import SafeProHero from '../SafeProHero'
 
-/** A non-admin cannot unlock the Workspace; the modal only explains the lock and leads back to My accounts. */
-const SafeProLockedMemberModal = ({
+/**
+ * Hero, headline, one paragraph and one button: the notice a member sees when only an admin can act on the
+ * Workspace. Without `onOpenChange` the notice cannot be dismissed (a locked Workspace).
+ */
+const SafeProNoticeModal = ({
   open,
   title,
   body,
-  onBack,
+  actionLabel = 'Back to My accounts',
+  onAction,
+  onOpenChange,
 }: {
   open: boolean
   title: ReactNode
   body: string
-  onBack: () => void
+  actionLabel?: string
+  onAction: () => void
+  onOpenChange?: (open: boolean) => void
 }) => (
-  <Dialog open={open} onOpenChange={() => undefined}>
-    <DialogContent size="sm" surface="card" padding="none" showCloseButton={false}>
+  <Dialog open={open} onOpenChange={onOpenChange ?? (() => undefined)}>
+    <DialogContent size="sm" surface="card" padding="none" showCloseButton={Boolean(onOpenChange)}>
       <div className="p-1 pb-2">
         <SafeProHero variant="tall" />
 
@@ -31,8 +38,8 @@ const SafeProLockedMemberModal = ({
             </Typography>
           </div>
 
-          <Button variant="secondary" size="lg" onClick={onBack}>
-            Back to My accounts
+          <Button variant="secondary" size="lg" onClick={onAction}>
+            {actionLabel}
           </Button>
         </div>
       </div>
@@ -40,4 +47,4 @@ const SafeProLockedMemberModal = ({
   </Dialog>
 )
 
-export default SafeProLockedMemberModal
+export default SafeProNoticeModal

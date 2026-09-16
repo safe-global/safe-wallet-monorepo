@@ -77,6 +77,10 @@ jest.mock('@/features/spaces', () => ({
   MemberStatus: { ACTIVE: 'ACTIVE' },
 }))
 
+jest.mock('../Plans/TrialEndingModal', () => ({
+  __esModule: true,
+  default: ({ spaceId }: { spaceId: string }) => <div data-testid="trial-ending-modal" data-space={spaceId} />,
+}))
 jest.mock('../Plans/WorkspaceLockModal', () => ({
   __esModule: true,
   default: ({ spaceId }: { spaceId: string }) => <div data-testid="workspace-lock-modal" data-space={spaceId} />,
@@ -194,6 +198,7 @@ describe('AuthState', () => {
       'data-space',
       '11111111-1111-1111-1111-111111111111',
     )
+    expect(screen.getByTestId('trial-ending-modal')).toBeInTheDocument()
     expect(mockReplace).not.toHaveBeenCalled()
   })
 
