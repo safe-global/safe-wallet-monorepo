@@ -84,7 +84,6 @@ const EditMemberDialog = ({ member, handleClose }: { member: MemberDto; handleCl
       if (hasNameChanged) {
         const { error } = await updateAlias({ spaceId, updateMemberAliasDto: { alias: sanitizedName } })
 
-        if (isElevationRequiredError(error)) return
         if (error) {
           setError(getRtkQueryErrorMessage(error as FetchBaseQueryError | SerializedError))
           return

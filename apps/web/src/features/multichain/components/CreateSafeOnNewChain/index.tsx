@@ -124,6 +124,7 @@ const ReplaySafeDialog = ({
       })
       if (!persistResult.ok) {
         if (persistResult.stepUpPending) {
+          // Nothing to show, but the dialog must not close as if the network had been added.
           hasError = true
           return
         }

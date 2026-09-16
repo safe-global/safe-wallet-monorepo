@@ -57,7 +57,6 @@ const useSpaceSubmit = (
       })
     }
 
-    if (isElevationRequiredError(response.error)) throw response.error
     if (response.error) {
       throw new Error(getRtkQueryErrorMessage(response.error))
     }
