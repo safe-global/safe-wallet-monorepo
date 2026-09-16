@@ -49,7 +49,7 @@ const DataStack = ({ children }: { children: ReactNode }) => (
 export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSignatures = false }: ReceiptProps) => {
   const chain = useCurrentChain()
   const { safe, safeAddress } = useSafeInfo()
-  const { safeTx, gtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
+  const { safeTx, gtfPaymentMode, gtfSelectedGasToken, safenetCheckEnabled } = useContext(SafeTxContext)
   const { balances } = useBalances()
   const operation = Number(safeTxData.operation) as Operation
 
@@ -82,6 +82,7 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
     safeAddress,
     gasToken: gtfSelectedGasToken,
     numberSignatures: safe.threshold,
+    safenetCheck: safenetCheckEnabled,
   })
 
   const previewTxData = shouldPreviewGtf ? previewData?.txData : undefined
