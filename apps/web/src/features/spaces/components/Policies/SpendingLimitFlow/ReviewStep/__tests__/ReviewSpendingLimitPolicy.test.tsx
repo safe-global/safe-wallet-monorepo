@@ -3,7 +3,7 @@ import { render, screen } from '@/tests/test-utils'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
-import type { TokenOption } from '../../utils/tokenOptions'
+import { tokenOptionBuilder } from '../../utils/testBuilders'
 import { REVIEW_PLACEHOLDER_TEXT, REVIEW_STEP_TITLE } from '../../constants'
 import type { SpendingLimitPolicyFormValues } from '../../types'
 import ReviewSpendingLimitPolicy from '..'
@@ -19,7 +19,7 @@ const SPENDER_A = '0x1234567890123456789012345678901234567890'
 const SPENDER_B = '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'
 const UNKNOWN_TOKEN = '0x4B0897b0513fdC7C541B6d9D7E929C4e5364D2dB'
 
-const eth: TokenOption = { address: ZERO_ADDRESS, symbol: 'ETH', name: 'Ether', decimals: 18, group: 'held' }
+const eth = tokenOptionBuilder().with({ address: ZERO_ADDRESS, symbol: 'ETH', name: 'Ether', group: 'held' }).build()
 
 const data: SpendingLimitPolicyFormValues = {
   safe: `1:${SAFE_A}`,

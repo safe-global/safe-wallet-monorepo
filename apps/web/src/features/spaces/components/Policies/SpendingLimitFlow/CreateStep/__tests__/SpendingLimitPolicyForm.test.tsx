@@ -2,7 +2,7 @@ import { useFormContext } from 'react-hook-form'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
-import type { TokenOption } from '../../utils/tokenOptions'
+import { tokenOptionBuilder } from '../../utils/testBuilders'
 import { buildSafeAccountId } from '../../../SafeAccountSelector/utils'
 import type { SafeAccountOption } from '../../../SafeAccountSelector/types'
 import { SAFE_ACCOUNT_SELECTOR_LABEL } from '../../../SafeAccountSelector/constants'
@@ -15,27 +15,30 @@ const SPENDER = '0x1234567890123456789012345678901234567890'
 const SPENDER_B = '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
 
-const mockTokens: TokenOption[] = [
-  {
-    address: ZERO_ADDRESS,
-    symbol: 'ETH',
-    name: 'Ether',
-    decimals: 18,
-    group: 'held',
-    balance: '1000000000000000000',
-    fiatBalance: '2000',
-    fiatConversion: '2000',
-  },
-  {
-    address: USDC,
-    symbol: 'USDC',
-    name: 'USD Coin',
-    decimals: 6,
-    group: 'held',
-    balance: '0',
-    fiatBalance: '0',
-    fiatConversion: '1',
-  },
+const mockTokens = [
+  tokenOptionBuilder()
+    .with({
+      address: ZERO_ADDRESS,
+      symbol: 'ETH',
+      name: 'Ether',
+      group: 'held',
+      balance: '1000000000000000000',
+      fiatBalance: '2000',
+      fiatConversion: '2000',
+    })
+    .build(),
+  tokenOptionBuilder()
+    .with({
+      address: USDC,
+      symbol: 'USDC',
+      name: 'USD Coin',
+      decimals: 6,
+      group: 'held',
+      balance: '0',
+      fiatBalance: '0',
+      fiatConversion: '1',
+    })
+    .build(),
 ]
 
 jest.mock('@/components/common/ChainIndicator', () => {

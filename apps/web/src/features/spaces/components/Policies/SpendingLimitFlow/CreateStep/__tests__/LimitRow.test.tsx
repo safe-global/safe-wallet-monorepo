@@ -3,7 +3,7 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import { NO_TOKEN_SELECTED_ERROR } from '@/features/spending-limits/services'
 import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
-import type { TokenOption } from '../../utils/tokenOptions'
+import { tokenOptionBuilder } from '../../utils/testBuilders'
 import {
   DUPLICATE_TOKEN_ERROR,
   ONE_TIME_HELPER_TEXT,
@@ -16,28 +16,32 @@ import LimitRow from '../LimitRow'
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'
 
-const mockTokens: TokenOption[] = [
-  {
-    address: ZERO_ADDRESS,
-    symbol: 'ETH',
-    name: 'Ether',
-    decimals: 18,
-    group: 'held',
-    balance: '1000000000000000000',
-    fiatBalance: '2000',
-    fiatConversion: '2000',
-  },
-  {
-    address: USDC,
-    symbol: 'USDC',
-    name: 'USD Coin',
-    decimals: 6,
-    group: 'held',
-    balance: '0',
-    fiatBalance: '0',
-    fiatConversion: '1',
-  },
-  { address: DAI, symbol: 'DAI', name: 'Dai Stablecoin', decimals: 18, group: 'popular' },
+const mockTokens = [
+  tokenOptionBuilder()
+    .with({
+      address: ZERO_ADDRESS,
+      symbol: 'ETH',
+      name: 'Ether',
+      group: 'held',
+      balance: '1000000000000000000',
+      fiatBalance: '2000',
+      fiatConversion: '2000',
+    })
+    .build(),
+  tokenOptionBuilder()
+    .with({
+      address: USDC,
+      symbol: 'USDC',
+      name: 'USD Coin',
+      decimals: 6,
+      group: 'held',
+      balance: '0',
+      fiatBalance: '0',
+      fiatConversion: '1',
+    })
+    .build(),
+  // Popular-only: no balance and no price, so the row falls back to "Price unavailable".
+  tokenOptionBuilder().with({ address: DAI, symbol: 'DAI', name: 'Dai Stablecoin' }).build(),
 ]
 
 // The real selector is a base-ui combobox with its own suite; a plain <select> keeps these tests about the row.
