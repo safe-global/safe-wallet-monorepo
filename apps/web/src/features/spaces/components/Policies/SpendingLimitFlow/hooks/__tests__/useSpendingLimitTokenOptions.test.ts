@@ -8,6 +8,7 @@ import * as tokensQueries from '@safe-global/store/gateway/AUTO_GENERATED/tokens
 import { balanceBuilder, balancesBuilder } from '@/tests/builders/balances'
 import { chainBuilder } from '@/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
+import { erc20TokenMetadataBuilder } from '@/tests/builders/tokens'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useChainId from '@/hooks/useChainId'
 import { useChain } from '@/hooks/useChains'
@@ -65,16 +66,10 @@ const tokensQueryResult = (overrides: Partial<TokensQueryResult> = {}): TokensQu
 
 const tokenMetadataBuilder = (
   overrides: Partial<tokensQueries.Erc20TokenMetadata> = {},
-): tokensQueries.Erc20TokenMetadata => ({
-  address: checksumAddress(faker.finance.ethereumAddress()),
-  symbol: faker.finance.currencyCode(),
-  name: faker.finance.currencyName(),
-  decimals: 18,
-  logoUri: faker.image.url(),
-  trusted: true,
-  type: 'ERC20',
-  ...overrides,
-})
+): tokensQueries.Erc20TokenMetadata =>
+  erc20TokenMetadataBuilder()
+    .with({ decimals: 18, ...overrides })
+    .build()
 
 const CHAIN_ID = '1'
 const safeAddress = checksumAddress(faker.finance.ethereumAddress())

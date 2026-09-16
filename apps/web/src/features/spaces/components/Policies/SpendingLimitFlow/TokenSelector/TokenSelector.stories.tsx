@@ -46,7 +46,8 @@ const openCombobox = async ({ canvasElement }: { canvasElement: HTMLElement }) =
 }
 
 const setup = createMockStory({ scenario: 'efSafe', wallet: 'connected', shadcn: true })
-const emptySetup = createMockStory({ scenario: 'empty', wallet: 'connected', shadcn: true })
+
+const emptyBalances: Balances = { fiatTotal: '0', items: [] }
 
 /** Held tokens only — USDC with balance 0 and an ERC-20 with no logo, so C16 and the logo fallback are visible. */
 const degradedBalances: Balances = {
@@ -142,8 +143,7 @@ export const Default: Story = {
 
 /** A Safe with no balances at all: only the native currency and the Ethereum popular list. */
 export const EmptySafe: Story = {
-  decorators: [emptySetup.decorator],
-  parameters: { ...emptySetup.parameters, msw: { handlers: [popularTokensHandler, ...emptySetup.handlers] } },
+  parameters: { msw: { handlers: [...balanceHandlers(emptyBalances), popularTokensHandler, ...setup.handlers] } },
   play: openCombobox,
 }
 
