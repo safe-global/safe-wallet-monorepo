@@ -16,11 +16,7 @@ jest.mock('@/services/local-storage/useLocalStorage', () => ({
   ),
 }))
 
-/**
- * The page must render a title, a one-line description and a `Learn more` link to documentation,
- * with the copy exactly as designed. The description's onchain framing is deliberate even though a
- * Proposer grant is off-chain — a product decision, not an oversight.
- */
+// The description's onchain framing is deliberate although a Proposer grant is off-chain.
 describe('Policies', () => {
   beforeEach(() => {
     mockHasSeenSpendingLimitIntro = false
@@ -50,8 +46,7 @@ describe('Policies', () => {
     expect(screen.getByRole('link', { name: 'Learn more' })).toHaveAttribute('href', HelpCenterArticle.POLICIES)
   })
 
-  // Mirrors the `Learn more` link in the Proposers section of Safe settings
-  // (components/settings/ProposersList) — bold, with the external-link icon.
+  // Mirrors the `Learn more` link in components/settings/ProposersList.
   it('styles Learn more like the Proposers section', () => {
     render(<Policies />)
 

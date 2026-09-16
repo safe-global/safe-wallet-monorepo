@@ -22,10 +22,6 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
 
-/**
- * Click the Spending limit tile: the intro opens. Dismiss it and click again: nothing opens, since
- * the flow behind it lands in WA-3150. Forget that it was seen, and the intro is back.
- */
 export const SpendingLimitIntro: Story = {
   render: function SpendingLimitIntroStory() {
     const [, setHasSeenIntro] = useLocalStorage<boolean>(SPENDING_LIMIT_INTRO_SEEN_KEY)
@@ -42,10 +38,6 @@ export const SpendingLimitIntro: Story = {
   },
 }
 
-/**
- * Click the Proposer tile: the intro opens. Dismiss it and click again: nothing opens, since the
- * flow behind it lands in WA-3138. Forget that it was seen, and the intro is back.
- */
 export const ProposerIntro: Story = {
   render: function ProposerIntroStory() {
     const [, setHasSeenIntro] = useLocalStorage<boolean>(PROPOSER_INTRO_SEEN_KEY)

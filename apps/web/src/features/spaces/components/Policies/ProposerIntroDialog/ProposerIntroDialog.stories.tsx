@@ -23,10 +23,8 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** The intro as designed: the end-result preview, the three things to know, and the way in. */
 export const Default: Story = {}
 
-/** Dismissal is exercisable here: close, Escape and click-outside all leave `onProceed` uncalled. */
 export const Dismissible: Story = {
   render: function DismissibleStory(args) {
     const [open, setOpen] = useState(true)

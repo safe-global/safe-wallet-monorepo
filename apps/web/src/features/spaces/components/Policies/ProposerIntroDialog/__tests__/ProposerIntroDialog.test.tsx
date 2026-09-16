@@ -3,7 +3,6 @@ import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import ProposerIntroDialog from '../index'
 
-/** Holds the open state the way the Policies page does, so dismissal is observable. */
 const StatefulIntro = ({ onProceed }: { onProceed: () => void }) => {
   const [open, setOpen] = useState(true)
 

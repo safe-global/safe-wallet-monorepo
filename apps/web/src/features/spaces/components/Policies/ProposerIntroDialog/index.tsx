@@ -7,7 +7,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Typography } from '@/components/ui/typography'
 import ProposerPreview from './ProposerPreview'
 
-/** Copy is verbatim from the design. */
 const EXPLAINERS: { Icon: LucideIcon; text: string }[] = [
   {
     Icon: UsersRound,
@@ -44,9 +43,9 @@ const ProposerIntroDialog = ({ open, onOpenChange, onProceed }: ProposerIntroDia
               href={HelpCenterArticle.PROPOSERS}
               noIcon
               aria-label="Learn more about proposers"
-              className="text-muted-foreground no-underline hover:text-foreground"
+              className="flex text-muted-foreground no-underline hover:text-foreground"
             >
-              <Info className="size-4" aria-hidden />
+              <Info className="size-4 translate-y-px" aria-hidden />
             </ExternalLink>
           </DialogTitle>
         </DialogHeader>

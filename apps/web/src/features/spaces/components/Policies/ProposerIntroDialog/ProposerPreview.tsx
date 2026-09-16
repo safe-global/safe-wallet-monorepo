@@ -1,9 +1,8 @@
-import { ArrowDownLeft, ArrowUpRight, ArrowLeftRight, UserRound, type LucideIcon } from 'lucide-react'
+import { ArrowDownLeft, ArrowUpRight, Repeat, UserRound, type LucideIcon } from 'lucide-react'
 import type { ReactElement, ReactNode } from 'react'
 import Identicon from '@/components/common/Identicon'
 import { Typography } from '@/components/ui/typography'
 
-/** Illustrative values: the intro is shown before any proposer exists, so nothing here is real. */
 const PREVIEW_SIGNERS = ['0x8674ff2cC41CE1A26D0A1B4b8f6c8B58F7bca19b', '0x2F4b9a1Cd3e5F70a8b6c4D2E1a9F8c7B6E5d4c3b']
 
 // Checksummed: `Identicon` falls back to a pulsing skeleton for an address `isAddress` rejects.
@@ -13,22 +12,23 @@ const PREVIEW_PROPOSERS = [
   '0x4D7b2E9C6A1F8b3d5C0E7a9B2D4F6c8A1E3b5d7F',
 ]
 
-const TRANSACTION_ICONS: LucideIcon[] = [ArrowLeftRight, ArrowUpRight, ArrowDownLeft]
+const TRANSACTION_ICONS: LucideIcon[] = [Repeat, ArrowUpRight, ArrowDownLeft]
 
-/** The design frame the card coordinates below are measured in; the whole scene scales off it. */
+const TRANSACTION_ICON_SIZE = 12.6
+
+const TRANSACTION_ICON_STROKE = 1.5
+
 const FRAME_WIDTH = 390
 const FRAME_HEIGHT = 200
 
 /** One card design at two sizes: the front card is drawn 1.37x larger than the two behind it. */
 const CARD_SCALE_FRONT = 1.366
 
-const CARD_SHADOW = '0 2px 12px rgba(0,0,0,0.04), 0 8px 32px rgba(0,0,0,0.06)'
+const cardShadow = (scale: number) =>
+  `0 ${2 * scale}px ${14 * scale}px rgba(0,0,0,0.13), 0 ${6 * scale}px ${36 * scale}px rgba(0,0,0,0.05)`
+
 const ROW_SHADOW = '0 1px 4px rgba(0,0,0,0.04), 0 2px 10px rgba(0,0,0,0.05)'
 
-/**
- * A card body in frame coordinates. `scale` sizes the contents, so the two card sizes stay one
- * design rather than two sets of hand-tuned numbers.
- */
 const PreviewCard = ({
   left,
   top,
@@ -56,14 +56,13 @@ const PreviewCard = ({
       paddingInline: 4.5 * scale,
       gap: 8.3 * scale,
       borderRadius: 16 * scale,
-      boxShadow: CARD_SHADOW,
+      boxShadow: cardShadow(scale),
     }}
   >
     {children}
   </div>
 )
 
-/** Rows read as white-on-white: the design separates them with a soft shadow, not a fill or border. */
 const PreviewRow = ({ scale, children }: { scale: number; children: ReactNode }): ReactElement => (
   <div
     className="flex shrink-0 items-center bg-card"
@@ -79,15 +78,12 @@ const PreviewRow = ({ scale, children }: { scale: number; children: ReactNode })
   </div>
 )
 
-/** The grey pill standing in for a row's text. */
 const PreviewBar = ({ scale }: { scale: number }): ReactElement => (
   <div className="shrink-0 bg-muted" style={{ width: 37.4 * scale, height: 12.3 * scale, borderRadius: 6.2 * scale }} />
 )
 
-/** One size on every card: the two card scales differ in box and row geometry, not in type. */
 const HEADING_FONT_SIZE = 10.5
 
-/** Indents the title past the card padding so it lines up with the row content below it. */
 const HEADING_INSET = 6
 
 const CardHeading = ({
@@ -106,7 +102,6 @@ const CardHeading = ({
   </Typography>
 )
 
-/** Plain elements, not the Card primitives: a picture of the feature, not a card to act on. */
 const ProposerPreview = (): ReactElement => (
   // Hidden from assistive tech: the values are invented and the copy already explains the role.
   <div
@@ -120,7 +115,6 @@ const ProposerPreview = (): ReactElement => (
       style={{
         width: FRAME_WIDTH,
         height: FRAME_HEIGHT,
-        // Frame coordinates rendered at any container width, so the measurements stay exact.
         scale: `calc(100cqw / ${FRAME_WIDTH})`,
       }}
     >
@@ -131,7 +125,11 @@ const ProposerPreview = (): ReactElement => (
           <PreviewRow key={index} scale={CARD_SCALE_FRONT}>
             <Icon
               className="shrink-0 text-muted-foreground"
-              style={{ width: 17.3 * CARD_SCALE_FRONT, height: 17.3 * CARD_SCALE_FRONT }}
+              strokeWidth={TRANSACTION_ICON_STROKE}
+              style={{
+                width: TRANSACTION_ICON_SIZE * CARD_SCALE_FRONT,
+                height: TRANSACTION_ICON_SIZE * CARD_SCALE_FRONT,
+              }}
             />
 
             <PreviewBar scale={CARD_SCALE_FRONT} />
