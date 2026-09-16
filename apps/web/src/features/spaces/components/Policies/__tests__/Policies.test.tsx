@@ -1,5 +1,8 @@
+import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import { PROPOSER_INTRO_SEEN_KEY } from '../ProposerIntroDialog/constants'
+import { SPENDING_LIMIT_INTRO_SEEN_KEY } from '../SpendingLimitIntroDialog/constants'
 import Policies from '../index'
 
 let mockHasSeenSpendingLimitIntro: boolean | undefined = false
@@ -15,6 +18,8 @@ jest.mock('@/services/local-storage/useLocalStorage', () => ({
       : [mockHasSeenSpendingLimitIntro, mockSetHasSeenSpendingLimitIntro],
   ),
 }))
+
+const mockUseLocalStorage = jest.mocked(useLocalStorage)
 
 // The description's onchain framing is deliberate although a Proposer grant is off-chain.
 describe('Policies', () => {
@@ -108,6 +113,25 @@ describe('Policies', () => {
 
       expect(screen.queryByTestId('spending-limit-intro-dialog')).not.toBeInTheDocument()
     })
+
+    it('is unaffected by the proposer intro having been seen', async () => {
+      mockHasSeenProposerIntro = true
+      const { user } = renderWithUserEvent(<Policies />)
+
+      await user.click(screen.getByRole('button', { name: /Spending limit/ }))
+
+      expect(screen.getByTestId('spending-limit-intro-dialog')).toBeInTheDocument()
+    })
+
+    it('records only its own key when dismissed', async () => {
+      const { user } = renderWithUserEvent(<Policies />)
+
+      await user.click(screen.getByRole('button', { name: /Spending limit/ }))
+      await user.click(screen.getByRole('button', { name: 'Close' }))
+
+      expect(mockSetHasSeenSpendingLimitIntro).toHaveBeenCalledWith(true)
+      expect(mockSetHasSeenProposerIntro).not.toHaveBeenCalled()
+    })
   })
 
   describe('the proposer intro', () => {
@@ -164,6 +188,27 @@ describe('Policies', () => {
 
       expect(screen.getByTestId('proposer-intro-dialog')).toBeInTheDocument()
       expect(screen.getAllByRole('dialog')).toHaveLength(1)
+    })
+  })
+
+  describe('the intro storage keys', () => {
+    it('remembers each intro under its own key', () => {
+      render(<Policies />)
+
+      const keys = mockUseLocalStorage.mock.calls.map(([key]) => key)
+
+      expect(keys).toContain(SPENDING_LIMIT_INTRO_SEEN_KEY)
+      expect(keys).toContain(PROPOSER_INTRO_SEEN_KEY)
+      expect(SPENDING_LIMIT_INTRO_SEEN_KEY).not.toBe(PROPOSER_INTRO_SEEN_KEY)
+    })
+
+    it('scopes the keys to the browser, not to a Safe or a chain', () => {
+      render(<Policies />)
+
+      for (const [key] of mockUseLocalStorage.mock.calls) {
+        expect(key).not.toMatch(/0x[a-fA-F0-9]/)
+        expect(key).not.toMatch(/\d+:/)
+      }
     })
   })
 
