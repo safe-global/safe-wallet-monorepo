@@ -24,6 +24,15 @@ const popularTokenBuilder = (overrides: Partial<PopularToken> = {}): PopularToke
 const native: NativeCurrencyInfo = { symbol: 'ETH', name: 'Ether', decimals: 18, logoUri: faker.image.url() }
 
 describe('buildTokenOptions', () => {
+  it('drops a held native token when the chain hides the native token', () => {
+    const heldNative = balanceBuilder().with({ tokenInfo: nativeTokenBuilder().build() }).build()
+    const heldErc20 = balanceBuilder().with({ tokenInfo: erc20TokenBuilder().build() }).build()
+
+    const options = buildTokenOptions({ balances: [heldNative, heldErc20], popular: [], showNative: false })
+
+    expect(options.map((option) => option.address)).toEqual([heldErc20.tokenInfo.address])
+  })
+
   it('keeps zero-balance held tokens as held options', () => {
     const zero = balanceBuilder().with({ balance: '0', fiatBalance: '0' }).build()
 

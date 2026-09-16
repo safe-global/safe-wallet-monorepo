@@ -61,11 +61,14 @@ const useSpendingLimitTokenOptions = (): TokenOptionsResult => {
     refetch: refetchPopular,
   } = useTokensGetTokensV1Query({ chainId, addresses: popularAddresses.join(',') }, { skip: !hasPopular })
 
+  // Default to showing it while the chain config loads, as useCounterfactualBalances does.
+  const showNative = chain ? getNativeTokenDisplay(chain).showNativeInBalances : true
+
   const native = useMemo<NativeCurrencyInfo | undefined>(() => {
-    if (!chain || !getNativeTokenDisplay(chain).showNativeInBalances) return undefined
+    if (!chain || !showNative) return undefined
     const { symbol, name, decimals, logoUri } = chain.nativeCurrency
     return { symbol, name, decimals, logoUri }
-  }, [chain])
+  }, [chain, showNative])
 
   const popular = useMemo(
     () => (popularData ?? []).filter((token) => token.type !== 'ERC721').map(toPopularToken),
@@ -73,8 +76,8 @@ const useSpendingLimitTokenOptions = (): TokenOptionsResult => {
   )
 
   const options = useMemo(
-    () => buildTokenOptions({ balances: currentData?.items, popular, native }),
-    [currentData, popular, native],
+    () => buildTokenOptions({ balances: currentData?.items, popular, native, showNative }),
+    [currentData, popular, native, showNative],
   )
 
   return {

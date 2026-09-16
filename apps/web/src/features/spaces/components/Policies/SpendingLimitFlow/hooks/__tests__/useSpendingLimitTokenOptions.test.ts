@@ -5,7 +5,7 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import * as balancesQueries from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import * as tokensQueries from '@safe-global/store/gateway/AUTO_GENERATED/tokens'
-import { balanceBuilder, balancesBuilder } from '@/tests/builders/balances'
+import { balanceBuilder, balancesBuilder, nativeTokenBuilder } from '@/tests/builders/balances'
 import { chainBuilder } from '@/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { erc20TokenMetadataBuilder } from '@/tests/builders/tokens'
@@ -194,6 +194,24 @@ describe('useSpendingLimitTokenOptions', () => {
 
     const { result } = renderHook(() => useSpendingLimitTokenOptions())
 
+    expect(result.current.options.some((option) => option.address === ZERO_ADDRESS)).toBe(false)
+  })
+
+  it('also drops a native token the balances API returns on HIDE_NATIVE_TOKEN chains', () => {
+    mockUseChain.mockReturnValue(
+      chainBuilder()
+        .with({ chainId: CHAIN_ID, features: [FEATURES.HIDE_NATIVE_TOKEN] })
+        .build(),
+    )
+    const heldNative = balanceBuilder()
+      .with({ tokenInfo: nativeTokenBuilder().with({ address: ZERO_ADDRESS }).build() })
+      .build()
+    querySpy.mockReturnValue(queryResult({ currentData: { fiatTotal: '1', items: [heldNative] } }))
+
+    const { result } = renderHook(() => useSpendingLimitTokenOptions())
+
+    // The flag suppressing the synthesised entry is not enough: the Safe's own native balance
+    // comes back from the balances endpoint and would otherwise stay selectable.
     expect(result.current.options.some((option) => option.address === ZERO_ADDRESS)).toBe(false)
   })
 

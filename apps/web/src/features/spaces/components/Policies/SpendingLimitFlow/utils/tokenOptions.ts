@@ -53,6 +53,8 @@ export type BuildTokenOptionsInput = {
   popular: readonly PopularToken[]
   /** Omit on chains with `HIDE_NATIVE_TOKEN`. */
   native?: NativeCurrencyInfo
+  /** False on `HIDE_NATIVE_TOKEN` chains, where the balances API still returns the native token. */
+  showNative?: boolean
 }
 
 const toHeldOption = (balance: Balance): TokenOption => ({
@@ -83,9 +85,15 @@ const byFiatDescThenSymbol = (a: TokenOption, b: TokenOption): number => {
 const bySymbol = (a: TokenOption, b: TokenOption): number => a.symbol.localeCompare(b.symbol)
 
 /** Zero balances are kept so a limit can be set before funding (AC C16); held wins on a duplicate address (AC C14). */
-export const buildTokenOptions = ({ balances, popular, native }: BuildTokenOptionsInput): TokenOption[] => {
+export const buildTokenOptions = ({
+  balances,
+  popular,
+  native,
+  showNative = true,
+}: BuildTokenOptionsInput): TokenOption[] => {
   const held = (balances ?? [])
     .filter((balance) => balance.tokenInfo.type !== TokenType.ERC721)
+    .filter((balance) => showNative || balance.tokenInfo.type !== TokenType.NATIVE_TOKEN)
     .map(toHeldOption)
     .sort(byFiatDescThenSymbol)
 
