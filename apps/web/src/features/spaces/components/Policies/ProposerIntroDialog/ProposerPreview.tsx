@@ -15,26 +15,95 @@ const PREVIEW_PROPOSERS = [
 
 const TRANSACTION_ICONS: LucideIcon[] = [ArrowLeftRight, ArrowUpRight, ArrowDownLeft]
 
-/** A grey bar standing in for a row's text; `className` carries its width and fill. */
-const PreviewBar = ({ className }: { className: string }): ReactElement => (
-  <div className={`h-3 rounded-full ${className}`} />
-)
+/** The design frame the card coordinates below are measured in; the whole scene scales off it. */
+const FRAME_WIDTH = 390
+const FRAME_HEIGHT = 200
+
+/** One card design at two sizes: the front card is drawn 1.37x larger than the two behind it. */
+const CARD_SCALE_FRONT = 1.366
+
+const CARD_SHADOW = '0 2px 12px rgba(0,0,0,0.04), 0 8px 32px rgba(0,0,0,0.06)'
+const ROW_SHADOW = '0 1px 4px rgba(0,0,0,0.04), 0 2px 10px rgba(0,0,0,0.05)'
 
 /**
- * Fixed geometry from the design frame, not a layout that should reflow. The cards are taller than
- * the 200px frame on purpose — the design clips them at the bottom edge.
+ * A card body in frame coordinates. `scale` sizes the contents, so the two card sizes stay one
+ * design rather than two sets of hand-tuned numbers.
  */
-const PreviewCard = ({ className, children }: { className: string; children: ReactNode }): ReactElement => (
+const PreviewCard = ({
+  left,
+  top,
+  width,
+  height,
+  scale,
+  children,
+}: {
+  left: number
+  top: number
+  width: number
+  height: number
+  scale: number
+  children: ReactNode
+}): ReactElement => (
   <div
-    className={`absolute flex flex-col gap-1.5 rounded-xl bg-card p-4 shadow-[0_4px_24px_rgba(0,0,0,0.08)] ${className}`}
+    className="absolute flex flex-col bg-card"
+    style={{
+      left,
+      top,
+      width,
+      height,
+      paddingTop: 12,
+      paddingBottom: 4.5 * scale,
+      paddingInline: 4.5 * scale,
+      gap: 8.3 * scale,
+      borderRadius: 16 * scale,
+      boxShadow: CARD_SHADOW,
+    }}
   >
     {children}
   </div>
 )
 
-/** The design keeps rows barely distinct from the card: a faint fill, or a hairline on white. */
-const PreviewRow = ({ children, className = '' }: { children: ReactNode; className?: string }): ReactElement => (
-  <div className={`flex h-[34px] items-center gap-2 rounded-xl px-2 ${className}`}>{children}</div>
+/** Rows read as white-on-white: the design separates them with a soft shadow, not a fill or border. */
+const PreviewRow = ({ scale, children }: { scale: number; children: ReactNode }): ReactElement => (
+  <div
+    className="flex shrink-0 items-center bg-card"
+    style={{
+      height: 31.2 * scale,
+      gap: 7 * scale,
+      paddingInline: 10.4 * scale,
+      borderRadius: 12 * scale,
+      boxShadow: ROW_SHADOW,
+    }}
+  >
+    {children}
+  </div>
+)
+
+/** The grey pill standing in for a row's text. */
+const PreviewBar = ({ scale }: { scale: number }): ReactElement => (
+  <div className="shrink-0 bg-muted" style={{ width: 37.4 * scale, height: 12.3 * scale, borderRadius: 6.2 * scale }} />
+)
+
+/** One size on every card: the two card scales differ in box and row geometry, not in type. */
+const HEADING_FONT_SIZE = 10.5
+
+/** Indents the title past the card padding so it lines up with the row content below it. */
+const HEADING_INSET = 6
+
+const CardHeading = ({
+  children,
+  fontSize = HEADING_FONT_SIZE,
+}: {
+  children: ReactNode
+  fontSize?: number
+}): ReactElement => (
+  <Typography
+    variant="paragraph-small-bold"
+    className="shrink-0"
+    style={{ fontSize, lineHeight: `${fontSize * 1.35}px`, paddingLeft: HEADING_INSET }}
+  >
+    {children}
+  </Typography>
 )
 
 /** Plain elements, not the Card primitives: a picture of the feature, not a card to act on. */
@@ -43,59 +112,71 @@ const ProposerPreview = (): ReactElement => (
   <div
     aria-hidden
     data-testid="proposer-preview"
-    className="relative h-[200px] w-full overflow-hidden rounded-xl bg-muted"
+    className="relative w-full overflow-hidden rounded-xl bg-muted"
+    style={{ aspectRatio: `${FRAME_WIDTH} / ${FRAME_HEIGHT}`, containerType: 'inline-size' }}
   >
-    <PreviewCard className="left-[26px] top-[20px] h-[250px] w-[228px]">
-      <Typography variant="paragraph-small-bold">Transactions</Typography>
+    <div
+      className="absolute left-0 top-0 origin-top-left"
+      style={{
+        width: FRAME_WIDTH,
+        height: FRAME_HEIGHT,
+        // Frame coordinates rendered at any container width, so the measurements stay exact.
+        scale: `calc(100cqw / ${FRAME_WIDTH})`,
+      }}
+    >
+      <PreviewCard left={23.3} top={21.3} width={200} height={207} scale={CARD_SCALE_FRONT}>
+        <CardHeading fontSize={HEADING_FONT_SIZE + 2}>Transactions</CardHeading>
 
-      {TRANSACTION_ICONS.map((Icon, index) => (
-        <PreviewRow key={index} className="bg-muted/40">
-          <Icon className="size-4 shrink-0 text-muted-foreground" />
+        {TRANSACTION_ICONS.map((Icon, index) => (
+          <PreviewRow key={index} scale={CARD_SCALE_FRONT}>
+            <Icon
+              className="shrink-0 text-muted-foreground"
+              style={{ width: 17.3 * CARD_SCALE_FRONT, height: 17.3 * CARD_SCALE_FRONT }}
+            />
 
-          <PreviewBar className="w-[60%] bg-muted/70" />
-        </PreviewRow>
-      ))}
-    </PreviewCard>
+            <PreviewBar scale={CARD_SCALE_FRONT} />
+          </PreviewRow>
+        ))}
+      </PreviewCard>
 
-    <PreviewCard className="left-[108px] top-[82px] h-[183px] w-[166px]">
-      <div className="flex items-center gap-2">
-        <Typography variant="paragraph-small-bold" className="flex-1">
-          Signers
-        </Typography>
+      <PreviewCard left={125.5} top={82.5} width={146} height={151} scale={1}>
+        <div className="flex shrink-0 items-center" style={{ gap: 6 }}>
+          <CardHeading>Signers</CardHeading>
 
-        <div className="flex items-center gap-1 rounded-full bg-muted/70 px-1.5 py-0.5">
-          <UserRound className="size-3 text-muted-foreground" />
+          <div className="flex items-center rounded-full bg-black/5" style={{ gap: 2, paddingInline: 4, height: 10.5 }}>
+            <UserRound className="text-muted-foreground" style={{ width: 6.3, height: 6.3 }} />
 
-          <Typography variant="paragraph-mini-medium" color="muted">
-            3/5
-          </Typography>
+            <Typography variant="paragraph-mini-medium" color="muted" style={{ fontSize: 6.3, lineHeight: '8px' }}>
+              3/5
+            </Typography>
+          </div>
         </div>
-      </div>
 
-      {PREVIEW_SIGNERS.map((address) => (
-        <PreviewRow key={address} className="border border-border/40">
-          <div className="shrink-0">
-            <Identicon address={address} size={24} />
-          </div>
+        {PREVIEW_SIGNERS.map((address) => (
+          <PreviewRow key={address} scale={1}>
+            <div className="shrink-0">
+              <Identicon address={address} size={17.3} />
+            </div>
 
-          <PreviewBar className="w-[55%] bg-muted" />
-        </PreviewRow>
-      ))}
-    </PreviewCard>
+            <PreviewBar scale={1} />
+          </PreviewRow>
+        ))}
+      </PreviewCard>
 
-    <PreviewCard className="left-[212px] top-[20px] h-[183px] w-[166px]">
-      <Typography variant="paragraph-small-bold">Proposers</Typography>
+      <PreviewCard left={221.6} top={21.6} width={147} height={152} scale={1}>
+        <CardHeading>Proposers</CardHeading>
 
-      {PREVIEW_PROPOSERS.map((address) => (
-        <PreviewRow key={address} className="border border-border/40">
-          <div className="shrink-0">
-            <Identicon address={address} size={24} />
-          </div>
+        {PREVIEW_PROPOSERS.map((address) => (
+          <PreviewRow key={address} scale={1}>
+            <div className="shrink-0">
+              <Identicon address={address} size={17.3} />
+            </div>
 
-          <PreviewBar className="w-[55%] bg-muted" />
-        </PreviewRow>
-      ))}
-    </PreviewCard>
+            <PreviewBar scale={1} />
+          </PreviewRow>
+        ))}
+      </PreviewCard>
+    </div>
   </div>
 )
 
