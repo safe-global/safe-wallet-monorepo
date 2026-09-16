@@ -28,26 +28,39 @@ const Policies = (): ReactElement => {
 
   const handleSelect = useCallback(
     (id: PolicyCatalogueId) => {
-      if (id === 'spending-limit') {
-        if (hasSeenSpendingLimitIntro) {
-          startSpendingLimitFlow()
+      switch (id) {
+        case 'spending-limit':
+          if (hasSeenSpendingLimitIntro) {
+            startSpendingLimitFlow()
+            return
+          }
+
+          setIsSpendingLimitIntroOpen(true)
           return
-        }
 
-        setIsSpendingLimitIntroOpen(true)
-        return
-      }
+        case 'proposer':
+          if (hasSeenProposerIntro) {
+            startProposerFlow()
+            return
+          }
 
-      if (id === 'proposer') {
-        if (hasSeenProposerIntro) {
-          startProposerFlow()
+          setIsProposerIntroOpen(true)
           return
+
+        case 'suggestion':
+          // TODO(WA-3160): open the Suggest a policy dialog.
+          return
+
+        // Unavailable in the catalogue, so it is never selected.
+        case 'account-recovery':
+          return
+
+        // A new policy id must pick a branch above rather than silently doing nothing.
+        default: {
+          const _exhaustive: never = id
+          return _exhaustive
         }
-
-        setIsProposerIntroOpen(true)
       }
-
-      // TODO(WA-3160): open the Suggest a policy dialog.
     },
     [hasSeenSpendingLimitIntro, startSpendingLimitFlow, hasSeenProposerIntro, startProposerFlow],
   )

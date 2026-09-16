@@ -156,6 +156,15 @@ describe('Policies', () => {
 
       expect(screen.getByTestId('proposer-intro-dialog')).toBeInTheDocument()
     })
+
+    it('opens the proposer intro and no other policy dialog', async () => {
+      const { user } = renderWithUserEvent(<Policies />)
+
+      await user.click(screen.getByTestId('policy-catalogue-tile-proposer'))
+
+      expect(screen.getByTestId('proposer-intro-dialog')).toBeInTheDocument()
+      expect(screen.getAllByRole('dialog')).toHaveLength(1)
+    })
   })
 
   it('opens no intro for the policies that have no flow yet', async () => {
