@@ -95,6 +95,9 @@ const degradedBalances: Balances = {
   ],
 }
 
+/** Two held tokens, so the Popular group's loading and error states sit above the fold. */
+const fewBalances: Balances = { fiatTotal: '1000', items: degradedBalances.items.slice(0, 2) }
+
 const withBalances = (handler: Parameters<typeof http.get>[1]) => ({
   msw: { handlers: [http.get(BALANCES_ROUTE, handler), popularTokensHandler, ...setup.handlers] },
 })
@@ -179,6 +182,7 @@ export const PopularLoading: Story = {
           await delay('infinite')
           return HttpResponse.json(popularTokens)
         }),
+        ...balanceHandlers(fewBalances),
         ...setup.handlers,
       ],
     },
@@ -192,6 +196,7 @@ export const PopularLoadError: Story = {
     msw: {
       handlers: [
         http.get(TOKENS_ROUTE, () => HttpResponse.json({ message: 'boom' }, { status: 502 })),
+        ...balanceHandlers(fewBalances),
         ...setup.handlers,
       ],
     },
