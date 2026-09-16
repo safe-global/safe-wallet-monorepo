@@ -1,6 +1,8 @@
 import { render, screen, waitFor } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import AddToWorkspaceButton from '../AddToWorkspaceButton'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { getStoreInstance } from '@/store'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { faker } from '@faker-js/faker'
@@ -10,6 +12,11 @@ const mockUpsert = jest.fn()
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useAddressBooksUpsertAddressBookItemsV1Mutation: () => [mockUpsert],
+}))
+
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
 }))
 
 jest.mock('@/features/spaces', () => ({
@@ -116,6 +123,12 @@ describe('AddToWorkspaceButton', () => {
     })
   })
 
+  it('drops the label into the accessible name in the compact layout', () => {
+    render(<AddToWorkspaceButton address={address} name="Alice" chainIds={['1']} isCompact />)
+
+    expect(screen.getByRole('button', { name: 'Add to workspace' })).toHaveTextContent('')
+  })
+
   it('disables the button and skips the mutation when the local name has invalid characters', async () => {
     render(<AddToWorkspaceButton address={address} name="Bad/Name" chainIds={['1']} />, {
       initialReduxState: { addressBook: { '1': { [address]: 'Bad/Name' } } },
@@ -136,5 +149,26 @@ describe('AddToWorkspaceButton', () => {
     await userEvent.hover(screen.getByRole('button', { name: 'Add to workspace' }).parentElement as HTMLElement)
 
     await waitFor(() => expect(screen.getByText(/Rename this contact to add it to the workspace/)).toBeInTheDocument())
+  })
+
+  it('tracks the contact once it is added to the workspace', async () => {
+    mockUpsert.mockResolvedValue({ data: {} })
+    render(<AddToWorkspaceButton address={address} name="Alice" chainIds={['1']} />)
+
+    await userEvent.click(screen.getByRole('button', { name: 'Add to workspace' }))
+
+    await waitFor(() =>
+      expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.LOCAL_CONTACT_ADDED, { Source: 'local_contact_row' }),
+    )
+  })
+
+  it('does not track when the upsert fails', async () => {
+    mockUpsert.mockResolvedValue({ error: { status: 500 } })
+    render(<AddToWorkspaceButton address={address} name="Alice" chainIds={['1']} />)
+
+    await userEvent.click(screen.getByRole('button', { name: 'Add to workspace' }))
+
+    await waitFor(() => expect(mockUpsert).toHaveBeenCalled())
+    expect(trackEvent).not.toHaveBeenCalled()
   })
 })

@@ -1,7 +1,7 @@
 import { type ReactElement } from 'react'
 import WalletConnectIcon from '@/public/images/common/walletconnect.svg'
 import SafeAppIconCard from '@/components/safe-apps/SafeAppIconCard'
-import { Button } from '@/components/ui/button'
+import IconAction from '@/components/common/IconAction'
 import { WALLETCONNECT_EVENTS } from '@/services/analytics/events/walletconnect'
 import Track from '@/components/common/Track'
 
@@ -18,15 +18,9 @@ const WcIcon = ({ sessionCount, sessionIcon, isError, onClick }: WcIconProps): R
   return (
     <Track {...WALLETCONNECT_EVENTS.POPUP_OPENED}>
       <div className="relative flex items-center rounded-lg bg-muted">
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={onClick}
-          className="size-10 cursor-pointer rounded-lg bg-transparent hover:bg-muted-foreground/10 transition-colors"
-          aria-label="WalletConnect"
-        >
+        <IconAction onClick={onClick} aria-label="WalletConnect">
           <WalletConnectIcon className="size-5 fill-current text-muted-foreground" />
-        </Button>
+        </IconAction>
 
         {isError && (
           <span

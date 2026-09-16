@@ -6,7 +6,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { isAddress } from 'ethers'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import Identicon from '@/components/common/Identicon'
-import { NetworkLogosTooltip } from '@/features/multichain'
+import { NetworkLogosPill, NetworkLogosTooltip } from '@/features/multichain'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import {
@@ -14,11 +14,15 @@ import {
   useAddressBookRequestsRejectRequestV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId, useGetSpaceAddressBook, useIsAdmin } from '@/features/spaces'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import useChains from '@/hooks/useChains'
 import { Check, X } from 'lucide-react'
-import PaginatedDataTable, { type DataTableColumn } from '../PaginatedDataTable'
+import PaginatedDataTable, { type DataTableColumn } from '@/components/common/PaginatedDataTable'
+import { cn } from '@/utils/cn'
+import AddressCell from './AddressCell'
 
 type PendingRequestsTableProps = {
   requests: AddressBookRequestItemDto[]
@@ -95,6 +99,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
         )
         return
       }
+      trackEvent(SPACE_EVENTS.ADDRESS_REQUEST_APPROVED)
       dispatch(
         showNotification({
           message: 'Contact added to workspace address book',
@@ -118,6 +123,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
         dispatch(showNotification({ message: 'Failed to reject request', variant: 'error', groupKey: 'reject-error' }))
         return
       }
+      trackEvent(SPACE_EVENTS.ADDRESS_REQUEST_REJECTED)
       dispatch(showNotification({ message: 'Request rejected', variant: 'success', groupKey: 'reject-success' }))
     } catch {
       dispatch(showNotification({ message: 'Something went wrong', variant: 'error', groupKey: 'reject-error' }))
@@ -126,68 +132,65 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
     }
   }
 
-  const renderChains = (req: AddressBookRequestItemDto) => (
-    <NetworkLogosTooltip
-      networks={req.chainIds.map((chainId) => ({ chainId }))}
-      maxVisible={3}
-      trigger={chains.configs.length === req.chainIds.length ? <Badge variant="secondary">All</Badge> : undefined}
-    />
-  )
+  // The "All" badge stands on its own; logo stacks get the standard grey pill.
+  const renderChains = (req: AddressBookRequestItemDto) =>
+    chains.configs.length === req.chainIds.length ? (
+      <NetworkLogosTooltip
+        networks={req.chainIds.map((chainId) => ({ chainId }))}
+        maxVisible={3}
+        trigger={<Badge variant="secondary">All</Badge>}
+      />
+    ) : (
+      <NetworkLogosPill networks={req.chainIds.map((chainId) => ({ chainId }))} />
+    )
 
   const columns: DataTableColumn<AddressBookRequestItemDto>[] = [
     {
       id: 'name',
       header: 'Name',
-      width: '20%',
+      width: '15%',
       sticky: true,
-      minWidth: 140,
+      minWidth: 120,
       emphasis: 'strong',
-      cell: (req) => (
-        <span className="inline-flex min-w-0 items-center gap-2 overflow-hidden">
-          <span className="min-w-0 truncate">{req.name}</span>
-          {spaceAddresses.has(req.address.toLowerCase()) && (
-            <Tooltip>
-              <TooltipTrigger render={<Badge variant="outline">Already in workspace</Badge>} />
-              <TooltipContent>Approving replaces the existing workspace entry for this address.</TooltipContent>
-            </Tooltip>
-          )}
-        </span>
+      // Compact drops the address column, so the address rides under the name and a long name
+      // wraps into the width that frees up instead of truncating.
+      cell: (req, { isCompact }) => (
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <span className="inline-flex min-w-0 items-center gap-2 overflow-hidden">
+            <span className={cn('min-w-0', !isCompact && 'truncate')}>{req.name}</span>
+            {spaceAddresses.has(req.address.toLowerCase()) && (
+              <Tooltip>
+                <TooltipTrigger render={<Badge variant="outline">Already in workspace</Badge>} />
+                <TooltipContent>Approving replaces the existing workspace entry for this address.</TooltipContent>
+              </Tooltip>
+            )}
+          </span>
+          {isCompact && <AddressCell address={req.address} isCompact />}
+        </div>
       ),
     },
     {
       id: 'address',
       header: 'Address',
       width: '30%',
-      minWidth: 360,
-      cell: (req) => (
-        <div className="text-[0.8em] font-mono">
-          <EthHashInfo
-            address={req.address}
-            shortAddress={false}
-            showPrefix={false}
-            showName={false}
-            highlight4bytes
-            hasExplorer
-            showCopyButton
-            avatarSize={24}
-          />
-        </div>
-      ),
+      minWidth: 240,
+      priority: 'secondary',
+      cell: (req) => <AddressCell address={req.address} />,
     },
     {
       id: 'chains',
       header: 'Chains',
-      width: '15%',
+      width: '20%',
       priority: 'secondary',
-      minWidth: 100,
+      minWidth: 90,
       cell: renderChains,
     },
     {
       id: 'requestedBy',
       header: 'Requested by',
-      width: '30%',
+      width: '20%',
       priority: 'secondary',
-      minWidth: 300,
+      minWidth: 140,
       cell: (req) => (req.requestedBy ? <RequestedBy requestedBy={req.requestedBy} /> : null),
     },
     {
@@ -204,7 +207,12 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
               <>
                 <Tooltip>
                   <TooltipTrigger render={<span className="inline-flex" />}>
-                    <Button variant="outline" size="icon-sm" onClick={() => handleApprove(req.id)}>
+                    <Button
+                      variant="outline"
+                      size="icon-sm"
+                      data-testid="approve-request-btn"
+                      onClick={() => handleApprove(req.id)}
+                    >
                       <Check className="size-4" />
                     </Button>
                   </TooltipTrigger>
@@ -212,7 +220,12 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger render={<span className="inline-flex" />}>
-                    <Button variant="outline" size="icon-sm" onClick={() => handleReject(req.id)}>
+                    <Button
+                      variant="outline"
+                      size="icon-sm"
+                      data-testid="reject-request-btn"
+                      onClick={() => handleReject(req.id)}
+                    >
                       <X className="size-4" />
                     </Button>
                   </TooltipTrigger>
@@ -248,7 +261,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
   )
 
   if (requests.length === 0) {
-    return <p className="text-muted-foreground text-sm">No pending requests.</p>
+    return <p className="text-muted-foreground p-4 text-sm">No pending requests.</p>
   }
 
   return (

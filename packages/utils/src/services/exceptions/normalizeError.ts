@@ -38,18 +38,41 @@ const GS_CODE_RE = /\bGS\d{3}\b/
  */
 const TYPE_MATCHERS: ReadonlyArray<readonly [RegExp, ErrorType]> = [
   [
-    /user rejected|user denied|rejected the request|action_rejected|rejected by user|\b4001\b/i,
+    // The anchored alternatives catch wallets that reply with a bare "Rejected"
+    // (raw, "Error: "-prefixed by RUM auto-capture, or wrapped by CodedException
+    // as "... (Rejected)") without swallowing revert reasons that merely
+    // contain the word.
+    /user rejected|user denied|rejected the request|action_rejected|rejected by user|\b4001\b|^(?:error:\s*)?rejected\.?$|\(rejected\.?\)$/i,
     ErrorType.USER_REJECTED,
   ],
   [/eth_sign/i, ErrorType.ETH_SIGN_DISABLED],
   [/insufficient funds/i, ErrorType.INSUFFICIENT_FUNDS],
   [/slippage/i, ErrorType.SLIPPAGE_EXCEEDED],
   [/order.*expired|expired.*order/i, ErrorType.ORDER_EXPIRED],
+  [/request expired|proposal expired|session request expired|pairing expired/i, ErrorType.EXPIRED],
   [/nonce/i, ErrorType.NONCE_CONFLICT],
   [/timeout|timed out/i, ErrorType.WALLET_TIMEOUT],
   [/chain mismatch|wrong network|network changed/i, ErrorType.CHAIN_MISMATCH],
   [/ledger/i, ErrorType.LEDGER_ERROR],
 ]
+
+/**
+ * User-driven outcomes (declining to sign, letting an approval prompt pass its
+ * TTL) are expected behaviour, not failures — they must never count as
+ * user-facing errors regardless of what the call site claims (WA-2950).
+ */
+const USER_OUTCOME_TYPES: ReadonlySet<ErrorType> = new Set([ErrorType.USER_REJECTED, ErrorType.EXPIRED])
+
+/**
+ * Returns the user-outcome type (`user_rejected` / `expired`) a raw error
+ * message classifies as, or `undefined` for genuine failures. For sinks that
+ * see errors outside the `normalizeError` pipeline (e.g. RUM auto-capture).
+ */
+export const matchUserOutcome = (message: string | undefined): ErrorType | undefined => {
+  if (!message) return undefined
+  const type = refineType(message)
+  return type !== undefined && USER_OUTCOME_TYPES.has(type) ? type : undefined
+}
 
 export const sanitizeErrorMessage = (message: string): string => message.replace(HEX_BLOB_RE, '[redacted]')
 
@@ -96,7 +119,7 @@ export const normalizeError = ({ code, message, isUserFacing }: NormalizeErrorIn
     type,
     layer,
     code: codeStr,
-    isUserFacing,
+    isUserFacing: USER_OUTCOME_TYPES.has(type) ? false : isUserFacing,
     sanitizedMessage: sanitizeErrorMessage(message),
   }
 }

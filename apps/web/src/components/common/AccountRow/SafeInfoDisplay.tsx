@@ -1,5 +1,6 @@
 import { useRef, useState, type ComponentProps, type ReactNode } from 'react'
 import { blo } from 'blo'
+import NextLink, { type LinkProps } from 'next/link'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/utils/cn'
@@ -26,10 +27,17 @@ export interface SafeInfoDisplayProps {
   leading?: ReactNode
   /** Hides the address line — e.g. multi-chain child rows that show only a chain name. */
   hideAddress?: boolean
-  /** Rendered above the name (e.g. a "High similarity" warning badge). */
-  badge?: ReactNode
+  /** Rendered inline, right after the name (e.g. a small look-alike ⚠️ icon). */
+  nameAdornment?: ReactNode
   /** Typography variant for the name line. Defaults to the compact `paragraph-small-medium`. */
   nameVariant?: ComponentProps<typeof TruncatedText>['variant']
+  /**
+   * Turns the name into a client-side navigation link (row navigation). Kept to the name text only —
+   * never wrapping the whole row — so the copy / explorer / rename controls stay OUTSIDE the link.
+   * An explorer `<a>` nested inside a row `<a>` is invalid HTML and triggers a hydration error, so
+   * callers that make the row clickable must route those controls around the link, not through it.
+   */
+  nameLink?: { href: LinkProps['href']; onClick?: () => void; testId?: string }
 }
 
 const SafeInfoDisplay = ({
@@ -40,12 +48,15 @@ const SafeInfoDisplay = ({
   onRename,
   leading,
   hideAddress,
-  badge,
+  nameAdornment,
   nameVariant = 'paragraph-small-medium',
+  nameLink,
 }: SafeInfoDisplayProps) => {
   const { displayName } = getSafeDisplayInfo(name, address)
   const addressMiddleRef = useRef<HTMLSpanElement>(null)
   const [addressTooltipOpen, setAddressTooltipOpen] = useState(false)
+
+  const nameText = <TruncatedText variant={nameVariant} className="block min-w-0" text={displayName} />
 
   return (
     <div className={cn('flex items-center gap-3', className)}>
@@ -58,9 +69,23 @@ const SafeInfoDisplay = ({
         )}
       </div>
       <div className="flex flex-col items-start flex-1 min-w-0">
-        {badge}
         <div className="flex items-center gap-1 min-w-0 max-w-full">
-          <TruncatedText variant={nameVariant} className="block min-w-0" text={displayName} />
+          {nameLink ? (
+            <NextLink
+              href={nameLink.href}
+              onClick={nameLink.onClick}
+              data-testid={nameLink.testId}
+              className="flex min-w-0"
+            >
+              {nameText}
+            </NextLink>
+          ) : (
+            nameText
+          )}
+          {/* Outside the link on purpose: the adornment is the look-alike ⚠️, whose tooltip carries a
+              copy button, and an interactive control nested in the row's navigation anchor is invalid
+              markup (see nameLink's doc comment). */}
+          {nameAdornment}
           {onRename && <RenameButton onRename={onRename} className={HOVER_ACTION_CLASS} />}
           {/* With no address line to host it (e.g. a multi-chain child showing only its chain name),
               the explorer link rides alongside the name instead. */}

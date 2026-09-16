@@ -1,6 +1,5 @@
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import { Box, SvgIcon } from '@mui/material'
-import RequiredIcon from '@/public/images/messages/required.svg'
+import { FilePen as RequiredIcon } from 'lucide-react'
 import ImageFallback from '@/components/common/ImageFallback'
 import txTypeCss from '@/components/transactions/TxType/styles.module.css'
 import { isEIP712TypedData } from '@safe-global/utils/utils/safe-messages'
@@ -25,7 +24,7 @@ const getMessageName = (msg: MessageItem) => {
 
 const MsgType = ({ msg }: { msg: MessageItem }) => {
   return (
-    <Box className={txTypeCss.txType}>
+    <div className={txTypeCss.txType}>
       {msg.logoUri ? (
         <ImageFallback
           src={msg.logoUri || FALLBACK_LOGO_URI}
@@ -35,10 +34,10 @@ const MsgType = ({ msg }: { msg: MessageItem }) => {
           height={16}
         />
       ) : (
-        <SvgIcon component={RequiredIcon} viewBox="0 0 32 32" fontSize="small" />
+        <RequiredIcon strokeWidth={1.5} className="size-4 shrink-0 text-muted-foreground" />
       )}
       {getMessageName(msg)}
-    </Box>
+    </div>
   )
 }
 

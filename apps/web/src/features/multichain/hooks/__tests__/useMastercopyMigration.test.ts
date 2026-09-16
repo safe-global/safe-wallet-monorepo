@@ -1,7 +1,7 @@
 import { renderHook } from '@/tests/test-utils'
 import { useMastercopyMigration } from '../useMastercopyMigration'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
-import { MasterCopyDeployer } from '@/hooks/useMasterCopies'
+import { MasterCopyDeployer } from '@/services/contracts/masterCopies'
 import type { BytecodeComparisonState } from '@/hooks/useBytecodeComparison'
 
 jest.mock('@/hooks/useSafeInfo')

@@ -72,6 +72,9 @@ describe('MsgAuditLog', () => {
     render(<MsgAuditLog msg={buildMsg()} />)
 
     expect(screen.getByText('Can be confirmed once the threshold is reached.')).toBeInTheDocument()
+    const alert = screen.getByText('Can be confirmed once the threshold is reached.').closest('[role="alert"]')
+    expect(alert).toHaveClass('bg-[var(--color-info-background)]')
+    expect(alert?.querySelector('svg.lucide-info')).toBeTruthy()
   })
 
   it('hides info banner when confirmed', () => {

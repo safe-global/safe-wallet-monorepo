@@ -98,7 +98,7 @@ describe('Safe creation tests', () => {
   })
 
   it('Verify duplicated signer error using the autocomplete feature', () => {
-    cy.visit(constants.createNewSafeSepoliaUrl + '?chain=sep', {
+    cy.visit(constants.createNewSafeSepoliaUrl, {
       onBeforeLoad(win) {
         win.localStorage.setItem(
           constants.localStorageKeys.SAFE_v2__addressBook,
@@ -107,13 +107,15 @@ describe('Safe creation tests', () => {
       },
     })
     createwallet.waitForConnectionMsgDisappear()
+    // Step 2 bounces back to step 1 (useSyncSafeCreationStep) if the wallet hasn't reconnected yet
+    owner.waitForConnectionStatus()
     createwallet.selectMultiNetwork(1, constants.networks.sepolia.toLowerCase())
     createwallet.clickOnYourSafeAccountPreview()
     createwallet.clickOnNextBtn()
     createwallet.clickOnAddNewOwnerBtn()
     createwallet.clickOnSignerAddressInput(1)
-    main.verifyMinimumElementsCount(createwallet.addressAutocompleteOptions, 2)
-    createwallet.selectSignerOnAutocomplete(2)
+    main.verifyMinimumElementsCount(createwallet.addressAutocompleteOptions, 1)
+    createwallet.selectSignerOnAutocomplete(0)
     owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.ownerAdded)
   })
 

@@ -1,8 +1,8 @@
 import { type ReactElement, useContext, useMemo, useCallback, useState, Suspense } from 'react'
 import { useRouter } from 'next/router'
 import dynamic from 'next/dynamic'
-import { Skeleton } from '@mui/material'
 import { Settings } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { DashboardHeader } from '@/features/spaces'
 import { TxModalContext } from '@/components/tx-flow'
@@ -22,7 +22,7 @@ const QrModal = dynamic(() => import('@/components/common/QrCodeButton/QrModal')
 
 const AccountHeader = (): ReactElement => {
   const { safe, safeLoading, safeLoaded } = useSafeInfo()
-  const { balances, loaded: balancesLoaded, loading: balancesLoading } = useVisibleBalances()
+  const { balances, loaded: balancesLoaded, loading: balancesLoading, error } = useVisibleBalances()
   const { setTxFlow } = useContext(TxModalContext)
   const router = useRouter()
   const currency = useAppSelector(selectCurrency)
@@ -39,7 +39,8 @@ const AccountHeader = (): ReactElement => {
 
   const noAssets = balancesLoaded && items.length === 0
 
-  const formattedValue = formatCurrencyPrecise(Number(balances.fiatTotal), currency)
+  const hasError = !!error && balances.fiatTotal === ''
+  const formattedValue = hasError ? '--' : formatCurrencyPrecise(Number(balances.fiatTotal), currency)
 
   const handleSend = useCallback(() => {
     setTxFlow(<TokenTransferFlow />, undefined, false)
@@ -71,18 +72,15 @@ const AccountHeader = (): ReactElement => {
     <>
       <DashboardHeader
         value={formattedValue}
-        loading={!balancesLoaded}
+        loading={!balancesLoaded && !hasError}
+        error={hasError}
         noAssets={noAssets}
         onSend={!noAssets && safe.deployed ? handleSend : undefined}
         onSwap={isSwapFeatureEnabled && !noAssets && safe.deployed ? handleSwap : undefined}
         onReceive={safe.deployed ? handleReceive : undefined}
         onBuildTransaction={safe.deployed ? handleBuildTransaction : undefined}
         otherActions={
-          <Button
-            variant="outline"
-            className="!border-[var(--color-border-light)] bg-transparent hover:bg-muted/50"
-            onClick={handleManageSafe}
-          >
+          <Button variant="surface" size="action" onClick={handleManageSafe}>
             <Settings className="size-4" />
             Manage Safe
           </Button>
@@ -102,10 +100,10 @@ const SafeAccountHeaderSkeleton = (): ReactElement => {
   return (
     <div className="mb-10 flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <Skeleton variant="rounded" width={80} height={16} />
-        <Skeleton variant="rounded" width={200} height={30} />
+        <Skeleton className="h-[16px] w-[80px]" />
+        <Skeleton className="h-[30px] w-[200px]" />
       </div>
-      <Skeleton variant="rounded" width={500} height={36} />
+      <Skeleton className="h-[36px] w-[500px]" />
     </div>
   )
 }

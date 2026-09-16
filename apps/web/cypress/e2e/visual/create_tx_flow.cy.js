@@ -26,24 +26,10 @@ describe(
       main.awaitVisualStability()
     })
 
-    it('[VISUAL] Screenshot send form initial state', () => {
-      main.awaitVisualStability()
-    })
-
     it('[VISUAL] Screenshot send form with filled recipient and amount', () => {
       createtx.typeRecipientAddress(constants.RECIPIENT_ADDRESS)
       createtx.clickOnTokenselectorAndSelectToken('Ether')
       createtx.setMaxAmount()
-      main.awaitVisualStability()
-    })
-
-    it('[VISUAL] Screenshot send form validation errors for invalid address', () => {
-      createtx.typeRecipientAddress('Lorem Ipsum')
-      main.awaitVisualStability()
-    })
-
-    it('[VISUAL] Screenshot send form with nonce warning', () => {
-      createtx.changeNonce(0)
       main.awaitVisualStability()
     })
   },

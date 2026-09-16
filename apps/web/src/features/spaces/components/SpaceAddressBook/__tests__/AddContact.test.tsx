@@ -24,6 +24,7 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
 jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '11111111-1111-1111-1111-111111111111',
   useGetSpaceAddressBook: () => [{ id: 1 }, { id: 2 }],
+  useWorkspaceAddressBookLabel: () => 'Acme address book',
 }))
 
 type CapturedProps = {
@@ -57,7 +58,7 @@ describe('AddContact', () => {
 
     expect(lastProps?.triggerLabel).toBe('Add shared contact')
     expect(lastProps?.dialogTitle).toBe('Add contact')
-    expect(lastProps?.successMessage).toBe('Added contact')
+    expect(lastProps?.successMessage).toBe('Contact added to Acme address book')
     expect(lastProps?.successGroupKey).toBe('add-contact-success')
     expect(screen.getByTestId('dialog-stub')).toHaveTextContent('Add shared contact')
   })
@@ -86,14 +87,11 @@ describe('AddContact', () => {
     expect(trackEvent).toHaveBeenCalledWith({ ...SPACE_EVENTS.ADD_ADDRESS_SUBMIT })
   })
 
-  it('onSuccess tracks ADDRESS_BOOK_ENTRY_CREATED with workspace id and post-insert count', () => {
+  it('onSuccess tracks ADDRESS_BOOK_ENTRY_CREATED with the post-insert count', () => {
     render(<AddContact />)
     lastProps!.onSuccess!()
 
-    expect(trackEvent).toHaveBeenCalledWith(
-      { ...SPACE_EVENTS.ADDRESS_BOOK_ENTRY_CREATED },
-      { workspace_id: MOCK_SPACE_UUID, entry_count_after: 3 },
-    )
+    expect(trackEvent).toHaveBeenCalledWith({ ...SPACE_EVENTS.ADDRESS_BOOK_ENTRY_CREATED }, { 'Entry Count': 3 })
   })
 
   it('renders without crashing when invoked', async () => {

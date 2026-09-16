@@ -1,4 +1,4 @@
-import { asError } from '../utils'
+import { asError, getHttpStatusFromError } from '../utils'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 
 describe('utils', () => {
@@ -82,6 +82,53 @@ describe('utils', () => {
       expect(result.status).toBe('FETCH_ERROR')
     })
 
+    it('never surfaces an unparsable response body as the message (WA-3252)', () => {
+      // RTK Query cannot JSON-parse a gateway's HTML 502 page: it reports
+      // PARSING_ERROR and parks the real status in `originalStatus`.
+      const thrown = {
+        status: 'PARSING_ERROR',
+        originalStatus: 502,
+        data: '<html><head><title>502 Bad Gateway</title></head><body><center><h1>502 Bad Gateway</h1></center><hr><center>nginx</center></body></html>',
+        error: "SyntaxError: Unexpected token '<'",
+      } as FetchBaseQueryError
+
+      const result = asError(thrown)
+
+      expect(result.message).not.toContain('<')
+      expect(result.message).not.toContain('nginx')
+      expect(result.message).not.toContain('Bad Gateway')
+      expect(result.status).toBe(502)
+      expect(getHttpStatusFromError(result)).toBe(502)
+    })
+
+    it('never surfaces a markup body as the message for a plain HTTP error', () => {
+      const thrown: FetchBaseQueryError = { status: 502, data: '<html><body>502 Bad Gateway</body></html>' }
+
+      const result = asError(thrown)
+
+      expect(result.message).not.toContain('<')
+      expect(result.status).toBe(502)
+    })
+
+    it('still surfaces a plain-text body that is not markup', () => {
+      const thrown: FetchBaseQueryError = { status: 429, data: 'Rate limit reached' }
+
+      expect(asError(thrown).message).toBe('Rate limit reached')
+    })
+
+    it('keeps the string status when a parsing error carries no original status', () => {
+      const thrown: FetchBaseQueryError = {
+        status: 'PARSING_ERROR',
+        originalStatus: 0,
+        data: 'plain body',
+        error: 'oops',
+      }
+
+      const result = asError(thrown)
+      expect(result.status).toBe('PARSING_ERROR')
+      expect(result.message).toBe('plain body')
+    })
+
     it('should handle FetchBaseQueryError with missing data.message', () => {
       const thrown: FetchBaseQueryError = {
         status: 500,
@@ -91,6 +138,38 @@ describe('utils', () => {
       const result = asError(thrown)
       expect(result.message).toBe('HTTP Error 500')
       expect(result.status).toBe(500)
+    })
+  })
+
+  describe('getHttpStatusFromError', () => {
+    it('reads a numeric status property (RTK Query / asError)', () => {
+      expect(getHttpStatusFromError({ status: 422 })).toBe(422)
+      expect(getHttpStatusFromError(Object.assign(new Error('x'), { status: 404 }))).toBe(404)
+    })
+
+    it('reads a numeric statusCode property', () => {
+      expect(getHttpStatusFromError({ statusCode: 429 })).toBe(429)
+    })
+
+    it('parses the status from a CGW SDK error message', () => {
+      expect(getHttpStatusFromError(new Error('CGW error - 422: Invalid transaction'))).toBe(422)
+    })
+
+    it('parses a wrapped CGW SDK error message', () => {
+      expect(getHttpStatusFromError(new Error('Code 805: Error proposing (CGW error - 400: Bad request)'))).toBe(400)
+    })
+
+    it('ignores non-HTTP numbers (CGW internal codes, string statuses)', () => {
+      expect(getHttpStatusFromError(new Error('CGW error - 1337: Some internal code'))).toBeUndefined()
+      expect(getHttpStatusFromError({ status: 'FETCH_ERROR' })).toBeUndefined()
+      expect(getHttpStatusFromError({ status: 'PARSING_ERROR', originalStatus: 502 })).toBe(502)
+      expect(getHttpStatusFromError({ status: 42 })).toBeUndefined()
+    })
+
+    it('returns undefined when no status is present', () => {
+      expect(getHttpStatusFromError(new Error('something broke'))).toBeUndefined()
+      expect(getHttpStatusFromError(undefined)).toBeUndefined()
+      expect(getHttpStatusFromError('string error')).toBeUndefined()
     })
   })
 })

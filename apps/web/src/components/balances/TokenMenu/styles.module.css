@@ -16,11 +16,3 @@
   align-items: center;
   gap: var(--space-3);
 }
-
-.cancelButton {
-  padding: 4px 10px;
-}
-
-.applyButton {
-  padding: 6px var(--space-3);
-}

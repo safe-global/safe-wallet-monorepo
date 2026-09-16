@@ -67,8 +67,3 @@
   /* The button order is reversed to prioritize the primary action on the right for better UX. */
   flex-direction: row-reverse;
 }
-
-.button {
-  padding: var(--space-1) var(--space-4);
-  min-width: 130px;
-}

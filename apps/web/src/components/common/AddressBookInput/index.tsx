@@ -1,31 +1,50 @@
-import { type ReactElement, useState, useMemo, Children } from 'react'
-import { Controller, useFormContext, useWatch } from 'react-hook-form'
-import { SvgIcon, Typography } from '@mui/material'
-import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete'
+import { type KeyboardEvent, type ReactElement, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { useFormContext, useWatch } from 'react-hook-form'
 import AddressInput, { type AddressInputProps } from '../AddressInput'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import EntryDialog from '@/components/address-book/EntryDialog'
+import { Typography } from '@/components/ui/typography'
+import { cn } from '@/utils/cn'
 import css from './styles.module.css'
-import inputCss from '@/styles/inputs.module.css'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { useMergedAddressBooks, useSafeNameResolver, type ContactSource } from '@/hooks/useAllAddressBooks'
+import type { ContactSource } from '@/hooks/useAllAddressBooks'
+import { useMergedAddressBooks, useSafeNameResolver, type ExtendedContact } from '@/hooks/useAllAddressBooks'
 import { useCurrentChain } from '@/hooks/useChains'
 import useChainId from '@/hooks/useChainId'
 import { useMemberNameResolver } from '@/features/spaces'
 import RecipientOption from './RecipientOption'
 import RecipientGroupHeader from './RecipientGroupHeader'
 import useWorkspaceName from './useWorkspaceName'
+import { useAnchoredList } from './useAnchoredList'
+import { usePortalContainerElement } from '@/components/ui/ShadcnProvider'
 
-const abFilterOptions = createFilterOptions({
-  stringify: (option: { label: string; name: string }) => option.name + ' ' + option.label,
-})
+type AddressBookEntry = { label: string; name: string; source: ContactSource; contact: ExtendedContact }
+
+const filterEntries = (entries: AddressBookEntry[], input: string): AddressBookEntry[] => {
+  const search = input.trim().toLowerCase()
+  if (!search) return entries
+  return entries.filter((entry) => `${entry.name} ${entry.label}`.toLowerCase().includes(search))
+}
+
+const groupEntriesBySource = (entries: AddressBookEntry[]): [ContactSource, AddressBookEntry[]][] => {
+  const groups = new Map<ContactSource, AddressBookEntry[]>()
+  for (const entry of entries) {
+    const group = groups.get(entry.source) ?? []
+    group.push(entry)
+    groups.set(entry.source, group)
+  }
+  return [...groups.entries()]
+}
 
 /**
  *  Temporary component until revamped safe components are done
  */
 const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canAdd?: boolean }): ReactElement => {
+  const listId = useId()
   const [open, setOpen] = useState(false)
+  const [activeIndex, setActiveIndex] = useState(-1)
   const [openAddressBook, setOpenAddressBook] = useState<boolean>(false)
   const mergedAddressBook = useMergedAddressBooks()
   const workspaceName = useWorkspaceName()
@@ -37,7 +56,7 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
   const { setValue, control } = useFormContext()
   const addressValue = useWatch({ name, control })
 
-  const allAddressBookEntries = useMemo(
+  const allAddressBookEntries = useMemo<AddressBookEntry[]>(
     () =>
       mergedAddressBook.list
         // Only suggest contacts configured for the chain we are sending on
@@ -51,23 +70,80 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
     [mergedAddressBook, chainId],
   )
 
-  const hasVisibleOptions = useMemo(
-    () => !!allAddressBookEntries.filter((entry) => entry.label.includes(addressValue)).length,
-    [allAddressBookEntries, addressValue],
-  )
+  // Don't show suggestions from the address book once a valid address has been entered.
+  const filteredEntries = useMemo(() => {
+    if (isValidAddress(addressValue)) return []
+    return filterEntries(allAddressBookEntries, addressValue ?? '')
+  }, [allAddressBookEntries, addressValue])
+
+  const groupedEntries = useMemo(() => groupEntriesBySource(filteredEntries), [filteredEntries])
+
+  // Arrow keys walk the options in the order they are painted, so index off the flattened groups
+  // rather than off `filteredEntries`.
+  const flatEntries = useMemo(() => groupedEntries.flatMap(([, entries]) => entries), [groupedEntries])
+  const optionIndexes = useMemo(() => new Map(flatEntries.map((entry, index) => [entry, index])), [flatEntries])
+
+  // Same set the list renders from, so the click and chevron paths agree with the typed one.
+  const hasVisibleOptions = filteredEntries.length > 0
 
   const isInAddressBook = useMemo(
     () => allAddressBookEntries.some((entry) => sameAddress(entry.label, addressValue)),
     [allAddressBookEntries, addressValue],
   )
 
-  const customFilterOptions = (options: any, state: any) => {
-    // Don't show suggestions from the address book once a valid address has been entered.
-    if (isValidAddress(addressValue)) return []
-    return abFilterOptions(options, state)
-  }
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  // The portalled list is not inside wrapperRef, so dismissal has to check it separately or a
+  // pointerdown on an option counts as "outside" and closes the list before the click lands.
+  const listRef = useRef<HTMLUListElement>(null)
+  const portalContainer = usePortalContainerElement()
 
-  const handleOpenAutocomplete = () => {
+  const closeList = useCallback(() => {
+    setOpen(false)
+    setActiveIndex(-1)
+  }, [])
+
+  // Typing changes which contacts are on offer, so the previous highlight no longer means anything.
+  useEffect(() => {
+    setActiveIndex(-1)
+  }, [filteredEntries])
+
+  // Keyed off the input event, not the value: a programmatic reset would otherwise reopen the list,
+  // and an empty value matches every contact.
+  const onUserInput = useCallback(() => setOpen(true), [])
+
+  // Restores the three dismissal paths MUI's Autocomplete provided. Without them the suggestion
+  // list stays open over the rest of the form, and a click aimed at the next field lands on a
+  // contact instead — silently writing it in as the recipient.
+  useEffect(() => {
+    if (!open) return
+
+    const wrapper = wrapperRef.current
+
+    const isInside = (node: Node | null) => !!node && (!!wrapper?.contains(node) || !!listRef.current?.contains(node))
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (!isInside(event.target as Node)) {
+        closeList()
+      }
+    }
+    // Options `preventDefault` on mousedown to keep focus, so selecting one never fires focusout —
+    // only genuinely leaving the field (tab away, focus elsewhere) closes the list here.
+    const onFocusOut = (event: FocusEvent) => {
+      const next = event.relatedTarget as Node | null
+      if (wrapper && !isInside(next)) {
+        closeList()
+      }
+    }
+
+    document.addEventListener('pointerdown', onPointerDown)
+    wrapper?.addEventListener('focusout', onFocusOut)
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown)
+      wrapper?.removeEventListener('focusout', onFocusOut)
+    }
+  }, [open, closeList])
+
+  const handleToggleAutocomplete = () => {
     setOpen((value) => !value)
   }
 
@@ -77,76 +153,139 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
       }
     : undefined
 
+  const showList = open && !props.disabled && !props.InputProps?.readOnly && filteredEntries.length > 0
+  const listStyle = useAnchoredList(wrapperRef, showList)
+
+  const onSelectOption = (entry: AddressBookEntry) => {
+    setValue(name, entry.label, { shouldValidate: true })
+    closeList()
+  }
+
+  const optionId = (index: number) => `${listId}-option-${index}`
+
+  const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    const lastIndex = flatEntries.length - 1
+
+    switch (event.key) {
+      case 'ArrowDown':
+      case 'ArrowUp': {
+        if (props.disabled || props.InputProps?.readOnly || lastIndex < 0) return
+        event.preventDefault()
+        if (!showList) {
+          setOpen(true)
+          setActiveIndex(event.key === 'ArrowDown' ? 0 : lastIndex)
+          return
+        }
+        const delta = event.key === 'ArrowDown' ? 1 : -1
+        setActiveIndex((current) => Math.min(Math.max(current + delta, 0), lastIndex))
+        return
+      }
+      case 'Home':
+      case 'End': {
+        if (!showList) return
+        event.preventDefault()
+        setActiveIndex(event.key === 'Home' ? 0 : lastIndex)
+        return
+      }
+      case 'Enter': {
+        if (!showList || activeIndex < 0) return
+        // Picking a suggestion must not also submit the transaction form.
+        event.preventDefault()
+        onSelectOption(flatEntries[activeIndex])
+        return
+      }
+      case 'Tab': {
+        if (showList) closeList()
+        return
+      }
+      case 'Escape': {
+        // Must stop here, or the enclosing tx modal closes too. With the list shut it falls through.
+        if (!showList) return
+        event.preventDefault()
+        event.stopPropagation()
+        closeList()
+        return
+      }
+    }
+  }
+
   return (
     <>
-      <Controller
-        name={name}
-        control={control}
-        // eslint-disable-next-line
-        render={({ field: { ref, ...field } }) => (
-          <Autocomplete
-            {...field}
-            className={inputCss.input}
-            open={open}
-            onOpen={() => setOpen(true)}
-            onClose={() => setOpen(false)}
-            disableClearable
-            disabled={props.disabled}
-            readOnly={props.InputProps?.readOnly}
-            freeSolo
-            options={allAddressBookEntries}
-            onChange={(_, value) => (typeof value === 'string' ? field.onChange(value) : field.onChange(value.label))}
-            onInputChange={(_, value) => setValue(name, value)}
-            filterOptions={customFilterOptions}
-            componentsProps={{
-              paper: {
-                elevation: 2,
-              },
-            }}
-            ListboxProps={{ className: css.listbox }}
-            groupBy={(option) => option.source}
-            renderGroup={(params) => (
-              <li key={params.key}>
-                <RecipientGroupHeader
-                  source={params.group as ContactSource}
-                  workspaceName={workspaceName}
-                  count={Children.count(params.children)}
-                />
-                <ul className={css.groupList}>{params.children}</ul>
-              </li>
-            )}
-            renderOption={(props, option) => {
-              const { key, ...rest } = props
-              return (
-                <Typography data-testid="address-item" component="li" variant="body2" {...rest} key={key}>
-                  <RecipientOption
-                    contact={option.contact}
-                    prefix={prefix}
-                    memberName={resolveMemberName(option.contact.createdByUserId)}
-                    resolveName={(address) => resolveSafeName(address, chainId)}
-                  />
-                </Typography>
-              )
-            }}
-            renderInput={(params) => (
-              <AddressInput
-                data-testid="address-item"
-                {...params}
-                {...props}
-                focused={props.focused || !addressValue}
-                name={name}
-                onOpenListClick={hasVisibleOptions ? handleOpenAutocomplete : undefined}
-                isAutocompleteOpen={open}
-                onAddressBookClick={canAdd && !isInAddressBook ? onAddressBookClick : undefined}
-              />
-            )}
-          />
-        )}
-      />
+      <div ref={wrapperRef} className={css.wrapper} onInput={onUserInput}>
+        <AddressInput
+          {...props}
+          data-testid={props['data-testid'] ?? 'address-book-input'}
+          name={name}
+          focused={props.focused || !addressValue}
+          onOpenListClick={hasVisibleOptions ? handleToggleAutocomplete : undefined}
+          isAutocompleteOpen={open}
+          onAddressBookClick={canAdd && !isInAddressBook ? onAddressBookClick : undefined}
+          role="combobox"
+          aria-expanded={showList}
+          aria-autocomplete="list"
+          aria-controls={showList ? listId : undefined}
+          aria-activedescendant={showList && activeIndex >= 0 ? optionId(activeIndex) : undefined}
+          onKeyDown={onKeyDown}
+          onMouseDown={() => setOpen(hasVisibleOptions)}
+        />
+
+        {showList &&
+          createPortal(
+            <ul
+              ref={listRef}
+              className={cn(
+                'bg-popover text-popover-foreground ring-foreground/10 rounded-lg shadow-lg ring-1',
+                // Slim scrollbar, matching SafeDropdownContainer; the OS default reads as a second
+                // UI element inside a small panel.
+                '[scrollbar-color:var(--border)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-1.5',
+                css.options,
+              )}
+              role="listbox"
+              id={listId}
+              style={listStyle}
+            >
+              {groupedEntries.map(([source, entries]) => (
+                <li key={source}>
+                  <RecipientGroupHeader source={source} workspaceName={workspaceName} count={entries.length} />
+                  <ul className={css.groupList}>
+                    {entries.map((entry) => {
+                      const index = optionIndexes.get(entry) ?? -1
+
+                      return (
+                        <li
+                          key={entry.label}
+                          id={optionId(index)}
+                          data-testid="address-item"
+                          role="option"
+                          aria-selected={index === activeIndex}
+                          className={css.option}
+                          ref={(node) => {
+                            if (index === activeIndex) node?.scrollIntoView({ block: 'nearest' })
+                          }}
+                          // Keep input focus on press so the click lands before blur removes the option
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => onSelectOption(entry)}
+                        >
+                          <RecipientOption
+                            contact={entry.contact}
+                            prefix={prefix}
+                            memberName={resolveMemberName(entry.contact.createdByUserId)}
+                            resolveName={(address) => resolveSafeName(address, chainId)}
+                          />
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </li>
+              ))}
+            </ul>,
+            portalContainer ?? document.body,
+          )}
+      </div>
 
       {canAdd && !isInAddressBook ? (
-        <Typography variant="body2" className={css.unknownAddress}>
-          <SvgIcon component={InfoIcon} fontSize="small" />
+        <Typography variant="paragraph-small" className={css.unknownAddress}>
+          <InfoIcon className="size-4" />
           <span>
             This is an unknown address. You can{' '}
             <a role="button" onClick={onAddressBookClick}>

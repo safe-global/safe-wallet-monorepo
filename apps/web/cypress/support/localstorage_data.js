@@ -290,7 +290,10 @@ export const visitedSafes = {
 }
 export const addressBookData = {
   proposers: {
-    11155111: { '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED': 'AD Proposer1' },
+    11155111: {
+      '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED': 'AD Proposer1',
+      '0x8eeC30d6FB6eC104B7308a8847db5FF487152a3b': 'AD Proposer2',
+    },
   },
   nestedsafes: {
     11155111: {
@@ -944,6 +947,11 @@ export const appPermissions = (url) => ({
   infoModalAccepted: JSON.stringify(infoModalAccepted),
 })
 
+// Safe (SDK) permissions payload for SAFE_PERMISSIONS_KEY, as stored after accepting the prompt
+export const safeAppSafePermissions = (appUrl) => ({
+  [appUrl]: [{ invoker: appUrl, parentCapability: 'requestAddressBook', date: 1111111111111, caveats: [] }],
+})
+
 export const cookies = {
   acceptedCookies: JSON.stringify(cookieState),
   acceptedTokenListOnboarding: true,
@@ -951,6 +959,10 @@ export const cookies = {
 
 export const safeLabsTerms = {
   acceptedTerms: 'true',
+}
+
+export const safeProAnnouncement = {
+  seen: 'true',
 }
 
 export const pendingCfDeletes = {

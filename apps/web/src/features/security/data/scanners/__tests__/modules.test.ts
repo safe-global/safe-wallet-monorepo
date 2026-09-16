@@ -204,4 +204,62 @@ describe('modulesScanner', () => {
       expect(result.vulnerableModules).toBeUndefined()
     })
   })
+
+  describe('unsupported Zodiac mastercopies', () => {
+    // Zodiac Delay Modifier v1.1.0 mastercopy enabled directly as a module. The server-side
+    // security-check reports these Safes as `safe`, and CGW returns no name — so only the
+    // address ruleset catches it.
+    const UNSUPPORTED_MASTERCOPY = '0x01F8cabB808D7dE0dF4202D4B60C8310d2f1339b'
+
+    it('flags a known-unsupported Zodiac mastercopy as Critical even when the API reports safe', async () => {
+      mockIsAffected.mockResolvedValue(false)
+      const result = await modulesScanner.scan(
+        createMockContext({ chainId: '1', modules: [{ value: UNSUPPORTED_MASTERCOPY, name: null }] }),
+      )
+
+      expect(result.status).toBe('issue')
+      expect(result.severity).toBe('Critical')
+      expect(result.score).toBe(0)
+      expect(result.ctaLabelOverride).toBe('Remove unsupported module')
+      expect(result.vulnerableModules).toEqual([UNSUPPORTED_MASTERCOPY])
+      expect(result.evidence).toContainEqual({ label: 'Vulnerable module', value: UNSUPPORTED_MASTERCOPY })
+    })
+
+    it('matches the unsupported mastercopy case-insensitively', async () => {
+      mockIsAffected.mockResolvedValue(false)
+      const lowercased = UNSUPPORTED_MASTERCOPY.toLowerCase()
+      const result = await modulesScanner.scan(
+        createMockContext({ chainId: '1', modules: [{ value: lowercased, name: null }] }),
+      )
+
+      expect(result.severity).toBe('Critical')
+      expect(result.vulnerableModules).toEqual([lowercased])
+    })
+
+    it('does not double-list a mastercopy matched by both address and API name', async () => {
+      mockIsAffected.mockResolvedValue(true)
+      const result = await modulesScanner.scan(
+        createMockContext({ chainId: '1', modules: [{ value: UNSUPPORTED_MASTERCOPY, name: 'Delay Modifier' }] }),
+      )
+
+      expect(result.severity).toBe('Critical')
+      expect(result.vulnerableModules).toEqual([UNSUPPORTED_MASTERCOPY])
+    })
+
+    it('flags the unsupported mastercopy alongside other untrusted modules', async () => {
+      mockIsAffected.mockResolvedValue(false)
+      const result = await modulesScanner.scan(
+        createMockContext({
+          chainId: '1',
+          modules: [
+            { value: UNSUPPORTED_MASTERCOPY, name: null },
+            { value: '0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF', name: null },
+          ],
+        }),
+      )
+
+      expect(result.severity).toBe('Critical')
+      expect(result.vulnerableModules).toEqual([UNSUPPORTED_MASTERCOPY])
+    })
+  })
 })

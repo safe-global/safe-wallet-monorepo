@@ -61,26 +61,22 @@ describe('SidebarTopBar', () => {
     expect(screen.getByTestId('sidebar-trigger')).toBeInTheDocument()
   })
 
-  it('applies expanded top bar sizing and state when sidebar is expanded', () => {
+  it('exposes the expanded sidebar state on the top bar', () => {
     const { useSidebar } = require('@/components/ui/sidebar')
     useSidebar.mockReturnValue({ state: 'expanded' })
 
     render(<SidebarTopBar />)
 
-    const topBar = screen.getByTestId('sidebar-top-bar')
-    expect(topBar).toHaveAttribute('data-sidebar-state', 'expanded')
-    expect(topBar).toHaveClass('h-10')
+    expect(screen.getByTestId('sidebar-top-bar')).toHaveAttribute('data-sidebar-state', 'expanded')
   })
 
-  it('applies collapsed top bar sizing and state when sidebar is collapsed', () => {
+  it('exposes the collapsed sidebar state on the top bar', () => {
     const { useSidebar } = require('@/components/ui/sidebar')
     useSidebar.mockReturnValue({ state: 'collapsed' })
 
     render(<SidebarTopBar />)
 
-    const topBar = screen.getByTestId('sidebar-top-bar')
-    expect(topBar).toHaveAttribute('data-sidebar-state', 'collapsed')
-    expect(topBar).toHaveClass('min-h-16')
+    expect(screen.getByTestId('sidebar-top-bar')).toHaveAttribute('data-sidebar-state', 'collapsed')
   })
 
   it('links the logo to the accounts view outside a safe or space', () => {

@@ -47,6 +47,7 @@ type Story = StoryObj<typeof meta>
 
 export const ActiveMembers: Story = {
   args: {
+    variant: 'active',
     members: [
       member({ id: 1, role: 'ADMIN', name: 'Admin User', user: { id: 1, email: 'admin@example.com' } }),
       member({ id: 2, name: 'Alice', user: { id: 42, email: 'alice@example.com' } }),
@@ -56,6 +57,7 @@ export const ActiveMembers: Story = {
 
 export const PendingInvites: Story = {
   args: {
+    variant: 'pending',
     members: [
       // Pending email invite — renewable, "resend the email" tooltip, no Expired chip
       member({

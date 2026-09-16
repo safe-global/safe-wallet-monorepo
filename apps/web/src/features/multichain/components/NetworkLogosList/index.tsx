@@ -1,5 +1,6 @@
+import type { CSSProperties } from 'react'
 import ChainIndicator from '@/components/common/ChainIndicator'
-import { Box } from '@mui/material'
+import { cn } from '@/utils/cn'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import css from './styles.module.css'
 
@@ -15,16 +16,18 @@ const NetworkLogosList = ({
   imageSize?: number
 }) => {
   const visibleChains = showHasMore ? networks.slice(0, maxVisible) : networks
+  // Drives the overlap-cutout mask geometry in the stylesheet; 24px is the ChainIndicator default.
+  const maskSizeVar = imageSize ? ({ '--network-logo-size': `${imageSize}px` } as CSSProperties) : undefined
 
   return (
-    <Box className={css.networks}>
+    <div className={cn(css.networks, showHasMore && css.capped)} style={maskSizeVar}>
       {visibleChains.map((chain) => (
         <ChainIndicator key={chain.chainId} chainId={chain.chainId} onlyLogo inline imageSize={imageSize} />
       ))}
       {showHasMore && networks.length > maxVisible && (
-        <Box className={css.moreChainsIndicator}>+{networks.length - maxVisible}</Box>
+        <div className={css.moreChainsIndicator}>+{networks.length - maxVisible}</div>
       )}
-    </Box>
+    </div>
   )
 }
 

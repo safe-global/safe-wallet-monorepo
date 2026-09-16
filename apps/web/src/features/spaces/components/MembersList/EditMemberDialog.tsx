@@ -1,5 +1,8 @@
 import ModalDialog from '@/components/common/ModalDialog'
-import { DialogContent, DialogActions, Button, Typography } from '@mui/material'
+import DialogActions from '@/components/common/DialogActions'
+import { Typography } from '@/components/ui/typography'
+import { cn } from '@/utils/cn'
+import { useDarkMode } from '@/hooks/useDarkMode'
 import {
   type MemberDto,
   useMembersUpdateAliasV1Mutation,
@@ -40,6 +43,7 @@ const EditMemberDialog = ({ member, handleClose }: { member: MemberDto; handleCl
   const [updateAlias] = useMembersUpdateAliasV1Mutation()
   const [updateRole] = useMembersUpdateRoleV1Mutation()
   const [error, setError] = useState<string>()
+  const isDarkMode = useDarkMode()
 
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
@@ -142,32 +146,36 @@ const EditMemberDialog = ({ member, handleClose }: { member: MemberDto; handleCl
 
   return (
     <ModalDialog open onClose={handleClose} dialogTitle="Edit member" hideChainIndicator>
-      <FormProvider {...methods}>
-        <form onSubmit={onSubmit}>
-          <DialogContent sx={{ p: '24px !important' }}>
-            <Typography mb={2}>
-              Edit <b>{displayName}</b> in this workspace.
-            </Typography>
+      <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
+        <FormProvider {...methods}>
+          <form onSubmit={onSubmit}>
+            <div className="p-6">
+              <Typography variant="paragraph" className="mb-4">
+                Edit <b>{displayName}</b> in this workspace.
+              </Typography>
 
-            <MemberInfoForm
-              isEdit
-              disableName={!canEditName}
-              disableRole={disableRole}
-              nameMaxLength={MEMBER_ALIAS_MAX_LENGTH}
+              <MemberInfoForm
+                isEdit
+                disableName={!canEditName}
+                disableRole={disableRole}
+                nameMaxLength={MEMBER_ALIAS_MAX_LENGTH}
+              />
+              {error && <ErrorMessage>{error}</ErrorMessage>}
+            </div>
+
+            <DialogActions
+              className="px-6 pb-6"
+              onCancel={handleClose}
+              cancelTestId="cancel-btn"
+              confirmLabel="Update"
+              confirmType="submit"
+              confirmDestructive
+              confirmDisabled={!canSubmit}
+              confirmTestId="delete-btn"
             />
-            {error && <ErrorMessage>{error}</ErrorMessage>}
-          </DialogContent>
-
-          <DialogActions>
-            <Button data-testid="cancel-btn" onClick={handleClose}>
-              Cancel
-            </Button>
-            <Button type="submit" data-testid="delete-btn" variant="danger" disableElevation disabled={!canSubmit}>
-              Update
-            </Button>
-          </DialogActions>
-        </form>
-      </FormProvider>
+          </form>
+        </FormProvider>
+      </div>
     </ModalDialog>
   )
 }

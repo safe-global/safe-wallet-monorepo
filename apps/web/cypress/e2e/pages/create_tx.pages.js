@@ -13,7 +13,6 @@ export const tokenSelector = '[data-testid="token-selector"]'
 const newTransactionBtnStr = 'New transaction'
 const recepientInput = 'input[name="recipients.0.recipient"]'
 const recepientInput_ = (index) => `input[name="recipients.${index}.recipient"]`
-const tokenAddressInput = 'input[name="recipients.0.tokenAddress"]'
 const amountInput = 'input[name="recipients.0.amount"]'
 const amountInput_ = (index) => `input[name="recipients.${index}.amount"]`
 const nonceInput = 'input[name="nonce"]'
@@ -21,7 +20,7 @@ const walletNonceInput = '[name="userNonce"]'
 const gasLimitInput = '[name="gasLimit"]'
 const maxPriorityFee = '[name="maxPriorityFeePerGas"]'
 const maxFee = '[name="maxFeePerGas"]'
-const rotateLeftIcon = '[data-testid="RotateLeftIcon"]'
+const gasLimitResetBtn = 'button[aria-label="Reset to recommended gas limit"]'
 export const transactionItem = '[data-testid="transaction-item"]'
 export const connectedWalletExecMethod = '[data-testid="connected-wallet-execution-method"]'
 export const relayExecMethod = '[data-testid="relay-execution-method"]'
@@ -55,9 +54,10 @@ const filterTokenInput = '[data-testid="token-input"]'
 const filterNonceInput = '[data-testid="nonce-input"]'
 const filterApplyBtn = '[data-testid="apply-btn"]'
 const filterClearBtn = '[data-testid="clear-btn"]'
-export const addressItem = '[data-testid="address-item"]'
+export const addressItem = '[data-testid="address-book-input"]'
 const radioSelector = 'div[role="radiogroup"]'
 const rejectTxBtn = '[data-testid="reject-btn"]'
+const checkWalletTooltipTrigger = '[data-testid="check-wallet-tooltip-trigger"]'
 const rejectChoiceBtn = '[data-track="reject-tx: Reject onchain button"]'
 const replaceChoiceBtn = '[data-track="reject-tx: Replace tx button"]'
 export const deleteChoiceBtn = '[data-track="reject-tx: Delete offchain button"]'
@@ -166,7 +166,7 @@ export const txAccordionDetails = '[data-testid="decoded-tx-details"]'
 
 //Arrays for the Transaction Details on Tx creation for different type of txs
 export const MultisendData = ['Call', 'multiSend', 'on', 'Safe: MultiSendCallOnly 1.4.1']
-export const SafeProxy = ['Call', 'createProxyWithNonce', 'on', 'SafeProxyFactory 1.4.1']
+export const SafeProxy = ['Call', 'createProxyWithNonce', 'on', constants.safeProxyFactoryLabel]
 
 export const tx_status = {
   execution_needed: 'Execution needed',
@@ -222,7 +222,8 @@ export function clickOnRejectBtn() {
 }
 
 export function hoverOverRejectBtnBtn() {
-  getRejectButton().trigger('mouseover', { force: true })
+  // Base UI tooltips open on a native mouseenter on the trigger span (CheckWallet wrapper), not the disabled button
+  main.hoverUntilTooltipOpen(() => getRejectButton().closest(checkWalletTooltipTrigger))
 }
 
 export function verifyRejectBtnDisabled() {
@@ -230,7 +231,8 @@ export function verifyRejectBtnDisabled() {
 }
 
 export function verifyPayNowOptionIsDisabled() {
-  cy.get(payNowExecMethod).find('input').should('be.disabled')
+  // Base UI radios are non-native elements; disabled state is exposed via data-disabled.
+  cy.get(payNowExecMethod).find('[data-slot="radio-group-item"]').should('have.attr', 'data-disabled')
 }
 
 export function verifyTxRejectModalVisible() {
@@ -280,7 +282,7 @@ export function checkNoteRecordedNote(note) {
 }
 
 export function checkNoteCreator(creator) {
-  cy.get(txNoteTooltip).trigger('mouseover', { force: true })
+  main.hoverUntilTooltipOpen(() => cy.get(txNoteTooltip))
   cy.get(noteCreator).should('be.visible').invoke('text').should('include', creator)
 }
 
@@ -311,13 +313,16 @@ export function verifyBulkExecuteBtnIsEnabled(txs) {
 }
 
 export function verifyEnabledBulkExecuteBtnTooltip() {
-  cy.get('button').contains(bulkExecuteBtnStr).trigger('mouseover', { force: true })
+  // Base UI tooltips open on a native mouseenter on the trigger (mouseover/mousemove don't open them)
+  cy.get('button').contains(bulkExecuteBtnStr).trigger('mouseenter', { force: true })
   cy.contains(enabledBulkExecuteBtnTooltip).should('exist')
 }
 
 export function deleteTx() {
   clickOnRejectBtn()
-  cy.get(wallet.choiceBtn).contains(deleteFromQueueStr).click()
+  // The delete choice stays disabled until the recommended nonce loads (deletability check),
+  // so wait for it to become enabled — a click on the disabled button is silently ignored.
+  cy.get(wallet.choiceBtn).contains(deleteFromQueueStr).closest(wallet.choiceBtn).should('be.enabled').click()
   cy.get(deleteTxModalBtn).click()
 }
 
@@ -471,14 +476,13 @@ export function verifyNumberOfExternalLinks(number) {
 }
 
 export function clickOnTransactionItemByName(name, token) {
-  cy.get(transactionItem)
-    .filter(':contains("' + name + '")')
-    .then(($elements) => {
-      if (token) {
-        $elements = $elements.filter(':contains("' + token + '")')
-      }
-      cy.wrap($elements.first()).scrollIntoView().click({ force: true })
-    })
+  // Keep both filters in the query chain so Cypress retries until a row contains
+  // name AND token — rows render their token text slightly after they appear
+  let matches = cy.get(transactionItem).filter(':contains("' + name + '")')
+  if (token) {
+    matches = matches.filter(':contains("' + token + '")')
+  }
+  matches.first().scrollIntoView().click({ force: true })
 }
 
 export function clickOnTransactionItemByIndex(index) {
@@ -584,8 +588,9 @@ export function clickOnExpandAllActionsBtn() {
 
 export function collapseAllActions(data) {
   cy.get(collapseAllBtn).click()
+  // Collapsed accordion panels are unmounted, so the rows are removed from the DOM entirely
   data.forEach((action) => {
-    cy.get(txRowTitle).contains(action).should('have.css', 'visibility', 'hidden')
+    cy.contains(txRowTitle, action).should('not.exist')
   })
 }
 
@@ -654,7 +659,7 @@ function verifyTokenSymbol($element, expectedToken) {
   expect(found, `Token "${expectedToken}" should be found in token text elements`).to.be.true
 }
 
-export function verifySummaryByName(name, token, data, alt, altToken) {
+export function verifySummaryByName(name, data, { token, alt, altToken } = {}) {
   if (!name) {
     throw new Error('Name parameter is required for verification')
   }
@@ -769,25 +774,38 @@ export function verifyAmountLargerThanCurrentBalance() {
 }
 
 export function verifyTooltipMessage(message) {
-  cy.get('div[role="tooltip"]').contains(message).should('be.visible')
+  cy.get('[data-slot="tooltip-content"]').contains(message).should('be.visible')
 }
 
 export function selectCurrentWallet() {
-  cy.get(connectedWalletExecMethod).click()
+  cy.contains(estimatedFeeStr).should('be.visible')
+  // The option only renders once the relay quota has loaded — wait for it, then confirm it is selected.
+  cy.get(connectedWalletExecMethod, { timeout: 30000 }).click()
+  cy.get(connectedWalletExecMethod).find('[role="radio"]').should('have.attr', 'aria-checked', 'true')
 }
 
 export function verifyRelayerAttemptsAvailable() {
-  cy.contains(transactionsPerHrStr).should('exist')
+  // GTF (unlimited relay) chains hide the execution-method selector and the
+  // "free transactions left today" counter in the execute flow. Assert one of the two
+  // valid states explicitly: relay option with its counter, or no selector at all —
+  // a rendered selector without the relay option would be a real bug, not GTF.
+  cy.contains(estimatedFeeStr).should('be.visible')
+  cy.get('body').then(($body) => {
+    if ($body.find(relayExecMethod).length) {
+      cy.contains(transactionsPerHrStr).should('exist')
+    } else {
+      cy.get(connectedWalletExecMethod).should('not.exist')
+    }
+  })
 }
 
 export function clickOnTokenselectorAndSelectSepoliaEth() {
-  cy.get(tokenSelector).click()
-  cy.get('ul[role="listbox"]').contains(constants.tokenNames.sepoliaEther).click()
+  clickOnTokenselectorAndSelectToken(constants.tokenNames.sepoliaEther)
 }
 
 export function clickOnTokenselectorAndSelectToken(tokenName) {
   cy.get(tokenSelector).click()
-  cy.get('ul[role="listbox"]').contains(tokenName).click()
+  cy.get('[data-slot="select-content"]').contains(tokenName).click()
 }
 
 export function setMaxAmount() {
@@ -795,9 +813,9 @@ export function setMaxAmount() {
 }
 
 export function verifyMaxAmount(token, tokenAbbreviation) {
-  cy.get(tokenAddressInput)
-    .prev()
-    .find('p')
+  cy.get(tokenSelector)
+    .find('[data-testid="token-item"]')
+    .first()
     .contains(token)
     .next()
     .then((element) => {
@@ -806,7 +824,6 @@ export function verifyMaxAmount(token, tokenAbbreviation) {
         const actualValue = parseFloat($input.val())
         expect(actualValue).to.be.closeTo(maxBalance, 0.1)
       })
-      console.log(maxBalance)
     })
 }
 
@@ -859,7 +876,9 @@ export function displayAdvancedDetails() {
 
 export function openExecutionParamsModal() {
   displayAdvancedDetails()
-  cy.contains(editBtnStr).click()
+  // The Edit link stays a skeleton until gas estimation and gas price settle; estimation
+  // retries on the safe-info polling cycle, so allow it extra time under RPC load.
+  cy.contains(editBtnStr, { timeout: 60000 }).click()
 }
 
 export function verifyAndSubmitExecutionParams() {
@@ -871,22 +890,37 @@ export function verifyAndSubmitExecutionParams() {
     advancedParametersInputNames.gasLimit,
   ]
   arrayNames.forEach((element) => {
-    cy.get('@Paramsform').find('label').contains(`${element}`).next().find('input').should('not.be.disabled')
+    cy.get('@Paramsform')
+      .find('label')
+      .contains(`${element}`)
+      .closest('[data-slot="field"]')
+      .find('input')
+      .should('not.be.disabled')
   })
 
   cy.get('@Paramsform').find(gasLimitInput).clear().type('100').invoke('prop', 'value').should('equal', '100')
   cy.contains(gasLimit21000).should('be.visible')
   cy.get('@Paramsform').find(gasLimitInput).clear().type('300000').invoke('prop', 'value').should('equal', '300000')
-  cy.get('@Paramsform').find(gasLimitInput).parent('div').find(rotateLeftIcon).click()
+  // The reset adornment only renders once the recommended gas limit estimation is available,
+  // which can lag behind the modal opening under RPC load.
+  cy.get('@Paramsform')
+    .find(gasLimitInput)
+    .closest('[data-slot="field"]')
+    .find(gasLimitResetBtn, { timeout: 60000 })
+    .click()
   cy.get('@Paramsform').submit()
 }
 
 export function setAdvancedExecutionParams() {
   cy.contains(executionParamsStr).parents('form').as('Paramsform')
-  cy.get('@Paramsform').find(gasLimitInput).clear().type(advancedParametersValues.gasLimit)
-  cy.get('@Paramsform').find(maxPriorityFee).clear().type(advancedParametersValues.maxPriorityFee)
-  cy.get('@Paramsform').find(maxFee).clear().type(advancedParametersValues.maxFee)
-  cy.get('@Paramsform').find(walletNonceInput).clear().type(advancedParametersValues.walletNonce)
+  // Fields are disabled while relay is the execution method; the 60s is only a ceiling for slow renders.
+  const typeWhenEnabled = (selector, value) =>
+    cy.get('@Paramsform').find(selector, { timeout: 60000 }).should('not.be.disabled').clear().type(value)
+
+  typeWhenEnabled(gasLimitInput, advancedParametersValues.gasLimit)
+  typeWhenEnabled(maxPriorityFee, advancedParametersValues.maxPriorityFee)
+  typeWhenEnabled(maxFee, advancedParametersValues.maxFee)
+  typeWhenEnabled(walletNonceInput, advancedParametersValues.walletNonce)
   cy.get('@Paramsform').submit()
 }
 
@@ -954,8 +988,29 @@ export function waitForProposeRequest() {
   cy.wait('@ProposeTx')
 }
 
-export function clickViewTransaction() {
-  cy.contains(viewTransactionBtn).click()
+const submitTxErrorMsg = 'Could not submit the transaction. Try again.'
+
+export function clickViewTransaction(retriesLeft = 2) {
+  // Wait for the submitted-tx success screen. Transient RPC/CGW throttling (429) surfaces a
+  // retryable submission error with the sign button re-enabled instead — retry like a user would.
+  cy.get('body', { timeout: 60000 }).should(($body) => {
+    const hasSuccess = $body.text().includes(viewTransactionBtn)
+    const hasSubmitError = $body.text().includes(submitTxErrorMsg)
+    expect(hasSuccess || hasSubmitError, 'success screen or retryable submission error shown').to.be.true
+  })
+  cy.get('body').then(($body) => {
+    const needsRetry = !$body.text().includes(viewTransactionBtn) && $body.text().includes(submitTxErrorMsg)
+    if (!needsRetry) {
+      cy.contains(viewTransactionBtn).click()
+      return
+    }
+    if (retriesLeft === 0 || !$body.find(signBtn).length) {
+      throw new Error('Transaction kept failing to submit — likely RPC rate limiting (429)')
+    }
+    cy.wait(5000)
+    cy.get(signBtn).should('be.enabled').click()
+    clickViewTransaction(retriesLeft - 1)
+  })
 }
 
 export function verifySingleTxPage() {
@@ -1036,7 +1091,7 @@ export function verifyBulkTxHistoryBlock(order, tx, actions) {
 
 export function verifyBulkExecuteBtnIsDisabled() {
   cy.get('button').contains(bulkExecuteBtnStr).should('be.disabled')
-  cy.get('button').contains(bulkExecuteBtnStr).trigger('mouseover', { force: true })
+  cy.get('button').contains(bulkExecuteBtnStr).parent().trigger('mouseenter', { force: true })
   cy.contains(disabledBultExecuteBtnTooltip).should('exist')
 }
 

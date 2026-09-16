@@ -38,12 +38,10 @@ export function connectSigner(signer) {
   function handlePkConnect() {
     cy.get('body').then(($body) => {
       if ($body.find(pkInput).length > 0) {
-        cy.get(pkInput)
-          .find('input')
-          .then(($input) => {
-            $input.val(signer)
-            cy.wrap($input).trigger('input').trigger('change')
-          })
+        cy.get(pkInput).then(($input) => {
+          $input.val(signer)
+          cy.wrap($input).trigger('input').trigger('change')
+        })
         cy.get(pkConnectBtn).click()
         cy.wait(2000)
       }
@@ -54,12 +52,10 @@ export function connectSigner(signer) {
     cy.wait(3000)
     return cy.get('body').then(($body) => {
       if ($body.find(pkInput).length > 0) {
-        cy.get(pkInput)
-          .find('input')
-          .then(($input) => {
-            $input.val(signer)
-            cy.wrap($input).trigger('input').trigger('change')
-          })
+        cy.get(pkInput).then(($input) => {
+          $input.val(signer)
+          cy.wrap($input).trigger('input').trigger('change')
+        })
 
         cy.get(pkConnectBtn).click()
       } else if ($body.find(connectWalletBtn).length > 0) {
@@ -135,7 +131,9 @@ export function connectSignerViaStorage(signer, url, { extraStorage, waitForConn
   // The last wallet reconnects asynchronously after the page loads (useOnboard ->
   // connectLastWallet), so wait for the header's connected-wallet chip to be visible before
   // proceeding; otherwise the test can act while the wallet is still (briefly) disconnected.
+  // The reconnect can take well over the default 10s when the RPC is rate-limited (429s), so
+  // wait longer before giving up.
   if (waitForConnection) {
-    cy.get('[data-testid="open-account-center"]').should('be.visible')
+    cy.get('[data-testid="open-account-center"]', { timeout: 30000 }).should('be.visible')
   }
 }

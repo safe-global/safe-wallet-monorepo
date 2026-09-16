@@ -1,4 +1,3 @@
-import { SvgIcon, Tooltip, Typography } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import type { ReactElement } from 'react'
 
@@ -7,7 +6,6 @@ import { TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import InfoIcon from '@/public/images/notifications/info.svg'
-import { Errors, logError } from '@/services/exceptions'
 import { getRecoveryUpsertTransactions } from '@/features/recovery/services'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
@@ -19,11 +17,13 @@ import { isCustomDelaySelected } from './utils'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 import ErrorMessage from '@/components/tx/ErrorMessage'
+import { Typography } from '@/components/ui/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 export function UpsertRecoveryFlowReview({ children, ...props }: ReviewTransactionProps): ReactElement {
   const web3ReadOnly = useWeb3ReadOnly()
   const { safe, safeAddress } = useSafeInfo()
-  const { setSafeTx, safeTxError, setSafeTxError } = useContext(SafeTxContext)
+  const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   const periods = useRecoveryPeriods()
 
   const { data } = useContext<TxFlowContextType<UpsertRecoveryFlowProps>>(TxFlowContext)
@@ -45,12 +45,6 @@ export function UpsertRecoveryFlowReview({ children, ...props }: ReviewTransacti
       .then(setSafeTx)
       .catch(setSafeTxError)
   }, [data, safe.chainId, safeAddress, setSafeTx, setSafeTxError, web3ReadOnly])
-
-  useEffect(() => {
-    if (safeTxError) {
-      logError(Errors._809, safeTxError.message)
-    }
-  }, [safeTxError])
 
   const isEdit = !!data?.moduleAddress
 
@@ -81,16 +75,11 @@ export function UpsertRecoveryFlowReview({ children, ...props }: ReviewTransacti
         title={
           <>
             Review window
-            <Tooltip placement="top" title={TOOLTIP_TITLES.REVIEW_WINDOW}>
-              <span>
-                <SvgIcon
-                  component={InfoIcon}
-                  inheritViewBox
-                  fontSize="small"
-                  color="border"
-                  sx={{ verticalAlign: 'middle', ml: 0.5 }}
-                />
-              </span>
+            <Tooltip>
+              <TooltipTrigger render={<span />}>
+                <InfoIcon className="ml-1 inline size-4 align-middle text-[var(--color-border-main)]" />
+              </TooltipTrigger>
+              <TooltipContent>{TOOLTIP_TITLES.REVIEW_WINDOW}</TooltipContent>
             </Tooltip>
           </>
         }
@@ -103,16 +92,11 @@ export function UpsertRecoveryFlowReview({ children, ...props }: ReviewTransacti
           title={
             <>
               Proposal expiry
-              <Tooltip placement="top" title={TOOLTIP_TITLES.PROPOSAL_EXPIRY}>
-                <span>
-                  <SvgIcon
-                    component={InfoIcon}
-                    inheritViewBox
-                    fontSize="small"
-                    color="border"
-                    sx={{ verticalAlign: 'middle', ml: 0.5 }}
-                  />
-                </span>
+              <Tooltip>
+                <TooltipTrigger render={<span />}>
+                  <InfoIcon className="ml-1 inline size-4 align-middle text-[var(--color-border-main)]" />
+                </TooltipTrigger>
+                <TooltipContent>{TOOLTIP_TITLES.PROPOSAL_EXPIRY}</TooltipContent>
               </Tooltip>
             </>
           }

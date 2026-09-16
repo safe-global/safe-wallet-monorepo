@@ -66,6 +66,9 @@ export { useAdminCount, useIsLastActiveAdmin } from './hooks/useIsLastActiveAdmi
 export { default as useIsQualifiedSafe } from './hooks/useIsQualifiedSafe'
 export { useMembersSearch } from './hooks/useMembersSearch'
 export { useInviteNotification } from './hooks/useInviteNotification'
+export { useWorkspaceAddressBookLabel } from './hooks/useWorkspaceAddressBookLabel'
+export { useAddressBookWriteScope, type AddressBookWriteScope } from './hooks/useAddressBookWriteScope'
+export { useUpsertWorkspaceSafeName } from './hooks/useUpsertWorkspaceSafeName'
 export { default as useTrackSpace } from './hooks/useTrackSpace'
 
 // Hooks from useSpaceMembers.tsx
@@ -103,7 +106,7 @@ export {
 } from './store'
 
 // Public types (compile-time only, no runtime cost)
-export { mapSpaceContactsToAddressBookState } from './utils'
+export { mapSpaceContactsToAddressBookState, getChainIdsParam } from './utils'
 
 // Components consumed from outside the feature
 export { HeaderNavigation } from './components/HeaderNavigation'

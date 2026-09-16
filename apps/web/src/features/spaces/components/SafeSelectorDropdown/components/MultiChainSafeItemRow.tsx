@@ -7,6 +7,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip
 import { Typography } from '@/components/ui/typography'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import { useChain } from '@/hooks/useChains'
+import { useAddressBookWriteScope } from '../../../hooks/useAddressBookWriteScope'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import {
   ExplorerLinkButton,
@@ -71,7 +72,7 @@ function NetworkRow({ chain, address }: { chain: SafeItemDataChain; address: str
       // pl-11 (avatar 32px + gap-3 12px) aligns the chain name under the parent safe name — the
       // per-chain rows carry no identicon but keep the same threshold / network / pending / balance
       // columns as the summary row. [&>span.absolute]:hidden drops the built-in checkmark span.
-      className="group/row flex items-center gap-2 rounded-md px-3 py-3 cursor-pointer focus:bg-muted data-[selected]:bg-[var(--color-background-light)] [&>span.absolute]:hidden"
+      className="group/row flex items-center gap-2 rounded-md px-3 py-3 cursor-pointer focus:bg-muted data-[selected]:bg-[var(--color-background-light)] [&[data-selected]:focus]:bg-[var(--color-background-light-hover)] [&>span.absolute]:hidden"
     >
       <div className="flex min-w-0 flex-1 items-center gap-2 pl-11">
         <Typography variant="paragraph-small-medium" className="min-w-0 truncate">
@@ -112,6 +113,8 @@ function NetworkRow({ chain, address }: { chain: SafeItemDataChain; address: str
 const MultiChainSafeItemRow = ({ item, onRename, isSelected = false, leading }: MultiChainSafeItemRowProps) => {
   const chainId = item.chains[0]?.chainId ?? ''
   const resolvedName = useSafeDisplayName(item.address, chainId, item.name)
+  const chainIds = item.chains.map((chain) => chain.chainId)
+  const { canRename } = useAddressBookWriteScope(item.address, chainIds)
   const pending = item.chains.reduce((sum, chain) => sum + (chain.queued ?? 0), 0)
   const awaitingConfirmation = item.chains.reduce((sum, chain) => sum + (chain.awaitingConfirmation ?? 0), 0)
 
@@ -136,13 +139,7 @@ const MultiChainSafeItemRow = ({ item, onRename, isSelected = false, leading }: 
           address={item.address}
           className="flex-1 min-w-0"
           onRename={
-            onRename &&
-            (() =>
-              onRename({
-                address: item.address,
-                name: resolvedName,
-                chainIds: item.chains.map((chain) => chain.chainId),
-              }))
+            onRename && canRename ? () => onRename({ address: item.address, name: resolvedName, chainIds }) : undefined
           }
         />
         <SafeRowStats

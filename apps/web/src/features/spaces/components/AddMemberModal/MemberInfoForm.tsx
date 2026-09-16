@@ -1,10 +1,10 @@
 import NameInput from '@/components/common/NameInput'
 import { MEMBER_NAME_MAX_LENGTH, NAME_MIN_LENGTH } from '@safe-global/utils/validation/names'
 import { Controller, useFormContext } from 'react-hook-form'
-import { MenuItem, Select, Stack } from '@mui/material'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { FieldLabel } from '@/components/ui/field'
 import { RoleMenuItem } from './index'
 import { MemberRole } from '@/features/spaces'
-import css from './styles.module.css'
 
 const MemberInfoForm = ({
   isEdit = false,
@@ -20,7 +20,8 @@ const MemberInfoForm = ({
   const { control } = useFormContext()
 
   return (
-    <Stack direction="row" spacing={2} alignItems="center">
+    // Top-aligned so the Name error can't drag the Role select down; spacer label keeps them level.
+    <div className="flex flex-row items-start gap-4">
       <NameInput
         data-testid="member-name-input"
         name="name"
@@ -30,32 +31,41 @@ const MemberInfoForm = ({
         validateCharset
         minLength={NAME_MIN_LENGTH}
         maxLength={nameMaxLength}
+        InputProps={{ className: 'min-h-[66px]' }}
+        errorPlacement="floating"
+        className="gap-1.5"
       />
 
-      <Controller
-        control={control}
-        name="role"
-        defaultValue={MemberRole.MEMBER}
-        render={({ field: { value, onChange, ...field } }) => (
-          <Select
-            {...field}
-            value={value}
-            onChange={onChange}
-            required
-            disabled={disableRole}
-            className={css.roleSelect}
-            renderValue={(role) => <RoleMenuItem role={role as MemberRole} />}
-          >
-            <MenuItem value={MemberRole.ADMIN} className={css.menuItem}>
-              <RoleMenuItem role={MemberRole.ADMIN} hasDescription selected={value === MemberRole.ADMIN} />
-            </MenuItem>
-            <MenuItem value={MemberRole.MEMBER} className={css.menuItem}>
-              <RoleMenuItem role={MemberRole.MEMBER} hasDescription selected={value === MemberRole.MEMBER} />
-            </MenuItem>
-          </Select>
-        )}
-      />
-    </Stack>
+      <div className="flex flex-col gap-1.5">
+        <FieldLabel aria-hidden className="invisible">
+          Role
+        </FieldLabel>
+
+        <Controller
+          control={control}
+          name="role"
+          defaultValue={MemberRole.MEMBER}
+          render={({ field: { value, onChange } }) => (
+            <Select value={value} onValueChange={onChange} required disabled={disableRole}>
+              <SelectTrigger aria-label="Role" className="min-h-[66px]! min-w-[150px]">
+                <SelectValue>{(role) => <RoleMenuItem role={role as MemberRole} />}</SelectValue>
+              </SelectTrigger>
+              {/* No `showBackdrop`: both consumers (Add member, Edit member) are ModalDialogs, so the
+                  dialog already owns the scrim. A second one paints over the dialog and blurs the
+                  very form the dropdown belongs to. */}
+              <SelectContent align="end" alignItemWithTrigger={false} className=" min-h-[66px] w-[340px]">
+                <SelectItem value={MemberRole.ADMIN}>
+                  <RoleMenuItem role={MemberRole.ADMIN} hasDescription />
+                </SelectItem>
+                <SelectItem value={MemberRole.MEMBER}>
+                  <RoleMenuItem role={MemberRole.MEMBER} hasDescription />
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+        />
+      </div>
+    </div>
   )
 }
 

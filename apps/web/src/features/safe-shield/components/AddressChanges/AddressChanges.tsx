@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import type { MasterCopyChangeThreatAnalysisResult } from '@safe-global/utils/features/safe-shield/types'
 import React from 'react'
 
@@ -23,23 +23,17 @@ export const AddressChanges = ({ result }: AddressChangesProps) => {
   ]
 
   return items.map((item, index) => (
-    <Box
-      padding="8px"
-      bgcolor="background.paper"
-      borderRadius="4px"
-      gap={1}
-      display="flex"
+    <div
       key={`${item.value}-${index}`}
-      flexDirection="column"
-      overflow="hidden"
+      className="flex flex-col gap-2 overflow-hidden rounded-[4px] bg-[var(--color-background-paper)] p-2"
     >
-      <Typography letterSpacing="1px" fontSize="12px" color="text.secondary">
+      <Typography variant="paragraph-mini" className="text-[var(--color-text-secondary)]">
         {item.label}
       </Typography>
 
-      <Typography variant="body2" sx={{ wordBreak: 'break-all', whiteSpace: 'pre-wrap' }}>
+      <Typography variant="paragraph-small" className="break-all whitespace-pre-wrap">
         {item.value}
       </Typography>
-    </Box>
+    </div>
   ))
 }

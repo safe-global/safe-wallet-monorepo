@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react'
 import { Info, Loader2, Plus } from 'lucide-react'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Badge } from '@/components/ui/badge'
@@ -13,19 +14,55 @@ const UNAVAILABLE_MESSAGES: Record<AddNetworkUnavailableReason, string> = {
     'This account was created from an outdated mastercopy. Adding another network is not possible.',
 }
 
+const ALL_NETWORKS_ITEM = 'all-networks'
+
 export interface AllNetworksSectionProps {
   safeAddress: string
   deployedChainIds: string[]
   onAddNetwork: (chainId: string) => void
+  /** Lower-cased query from the picker's search field. Filters the list and keeps the section open. */
+  search?: string
+  /** Whether the rows above the section match the query. Decides who owns the no-matches line. */
+  hasMatchesAbove?: boolean
 }
 
-function AllNetworksSection({ safeAddress, deployedChainIds, onAddNetwork }: AllNetworksSectionProps) {
+function AllNetworksSection({
+  safeAddress,
+  deployedChainIds,
+  onAddNetwork,
+  search,
+  hasMatchesAbove,
+}: AllNetworksSectionProps) {
   const { loading, availableNetworks, unavailableReason, error, isFeatureEnabled } = useAddNetworkState(
     safeAddress,
     deployedChainIds,
   )
+  const [openItems, setOpenItems] = useState<string[]>([])
 
-  if (!isFeatureEnabled) return null
+  // Above the early returns below, so the hook order stays fixed.
+  const matchingNetworks = useMemo(
+    () =>
+      search
+        ? availableNetworks.filter((chainItem) => chainItem.chainName.toLowerCase().includes(search))
+        : availableNetworks,
+    [availableNetworks, search],
+  )
+
+  // Last element in the popup, so it owns the whole popup's no-matches line.
+  const nothingToShow =
+    search && !hasMatchesAbove ? (
+      // `block`: this variant renders a span, whose padding insets the first and last line box only.
+      <Typography
+        role="status"
+        variant="paragraph-small-medium"
+        className="block px-4 py-3 text-center text-muted-foreground"
+        data-testid="all-networks-empty"
+      >
+        No networks match your search
+      </Typography>
+    ) : null
+
+  if (!isFeatureEnabled) return nothingToShow
 
   if (unavailableReason) {
     const infoIcon = <Info className="size-4 shrink-0 text-muted-foreground mt-0.5" />
@@ -67,11 +104,14 @@ function AllNetworksSection({ safeAddress, deployedChainIds, onAddNetwork }: All
     )
   }
 
-  if (availableNetworks.length === 0) return null
+  if (availableNetworks.length === 0) return nothingToShow
+
+  if (search && matchingNetworks.length === 0) return nothingToShow
 
   const handleAccordionChange = (value: unknown) => {
     const openedIds = Array.isArray(value) ? (value as string[]) : []
-    if (openedIds.includes('all-networks')) {
+    setOpenItems(openedIds)
+    if (openedIds.includes(ALL_NETWORKS_ITEM)) {
       trackEvent(OVERVIEW_EVENTS.SHOW_ALL_NETWORKS)
     }
   }
@@ -82,11 +122,16 @@ function AllNetworksSection({ safeAddress, deployedChainIds, onAddNetwork }: All
   }
 
   return (
-    <Accordion defaultValue={[]} onValueChange={handleAccordionChange} data-testid="all-networks-accordion">
-      <AccordionItem value="all-networks" className="border-0">
+    // A query holds the section open: collapsing it would hide the rows the user just searched for.
+    <Accordion
+      value={search ? [ALL_NETWORKS_ITEM] : openItems}
+      onValueChange={handleAccordionChange}
+      data-testid="all-networks-accordion"
+    >
+      <AccordionItem value={ALL_NETWORKS_ITEM} className="border-0">
         <AccordionTrigger
           data-testid="all-networks-accordion-trigger"
-          className="rounded-lg pl-4 pr-2 py-2 hover:no-underline hover:bg-muted/30 text-muted-foreground cursor-pointer"
+          className="rounded-lg pl-4 pr-2 py-2 hover:bg-muted/30 text-muted-foreground cursor-pointer"
         >
           <Typography variant="paragraph-small-medium" className="text-muted-foreground">
             All networks
@@ -94,7 +139,7 @@ function AllNetworksSection({ safeAddress, deployedChainIds, onAddNetwork }: All
         </AccordionTrigger>
         <AccordionContent className="pb-0">
           <div className="flex flex-col">
-            {availableNetworks.map((chainItem) => {
+            {matchingNetworks.map((chainItem) => {
               const disabled = !chainItem.available
               return (
                 <button
@@ -112,7 +157,7 @@ function AllNetworksSection({ safeAddress, deployedChainIds, onAddNetwork }: All
                     </Typography>
                   </div>
                   {disabled ? (
-                    <Badge variant="secondary" className="text-[10px] px-1.5">
+                    <Badge variant="secondary" size="sm">
                       Not available
                     </Badge>
                   ) : (

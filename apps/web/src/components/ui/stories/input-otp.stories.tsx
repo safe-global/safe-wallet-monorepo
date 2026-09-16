@@ -21,7 +21,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const AllVariants: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   args: {} as any,
   render: () => (
     <div style={{ display: 'block' }}>

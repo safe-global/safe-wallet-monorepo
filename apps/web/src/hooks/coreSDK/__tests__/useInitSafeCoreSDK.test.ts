@@ -9,6 +9,13 @@ import * as coreSDK from '@/hooks/coreSDK/safeCoreSDK'
 import { waitFor } from '@testing-library/react'
 import type Safe from '@safe-global/protocol-kit'
 import { type JsonRpcProvider } from 'ethers'
+import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
+
+const mockTrackError = jest.fn()
+jest.mock('@/services/exceptions', () => ({
+  ...jest.requireActual('@/services/exceptions'),
+  trackError: (...args: unknown[]) => mockTrackError(...args),
+}))
 
 describe('useInitSafeCoreSDK hook', () => {
   const mockSafeAddress = '0x0000000000000000000000000000000000005AFE'
@@ -32,6 +39,18 @@ describe('useInitSafeCoreSDK hook', () => {
   }
 
   let mockProvider: JsonRpcProvider
+
+  const deferred = () => {
+    let resolve!: (value: Safe | undefined) => void
+    let reject!: (reason: Error) => void
+    const promise = new Promise<Safe | undefined>((res, rej) => {
+      resolve = res
+      reject = rej
+    })
+    return { promise, resolve, reject }
+  }
+
+  const flushMicrotasks = () => new Promise((resolve) => setTimeout(resolve, 0))
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -105,5 +124,48 @@ describe('useInitSafeCoreSDK hook', () => {
 
     expect(initMock).not.toHaveBeenCalled()
     expect(setSDKMock).toHaveBeenCalledWith(undefined)
+  })
+
+  it('clears the SDK and reports an error when initialization fails', async () => {
+    const error = new Error('RPC unreachable')
+    jest.spyOn(coreSDK, 'initSafeSDK').mockRejectedValue(error)
+    const setSDKMock = jest.spyOn(coreSDK, 'setSafeSDK')
+
+    renderHook(() => useInitSafeCoreSDK())
+
+    await waitFor(() => {
+      expect(setSDKMock).toHaveBeenCalledWith(undefined)
+    })
+
+    expect(mockTrackError).toHaveBeenCalledWith(ErrorCodes._105, error.message, expect.anything())
+  })
+
+  it('does not clear the SDK when a superseded run fails', async () => {
+    const { promise, reject } = deferred()
+    jest.spyOn(coreSDK, 'initSafeSDK').mockReturnValue(promise)
+    const setSDKMock = jest.spyOn(coreSDK, 'setSafeSDK')
+
+    const { unmount } = renderHook(() => useInitSafeCoreSDK())
+    unmount()
+
+    reject(new Error('RPC unreachable'))
+    await flushMicrotasks()
+
+    expect(setSDKMock).not.toHaveBeenCalled()
+    expect(mockTrackError).not.toHaveBeenCalled()
+  })
+
+  it('does not overwrite the SDK when a superseded run succeeds', async () => {
+    const { promise, resolve } = deferred()
+    jest.spyOn(coreSDK, 'initSafeSDK').mockReturnValue(promise)
+    const setSDKMock = jest.spyOn(coreSDK, 'setSafeSDK')
+
+    const { unmount } = renderHook(() => useInitSafeCoreSDK())
+    unmount()
+
+    resolve({} as Safe)
+    await flushMicrotasks()
+
+    expect(setSDKMock).not.toHaveBeenCalled()
   })
 })

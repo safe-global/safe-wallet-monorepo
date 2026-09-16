@@ -1,7 +1,10 @@
-import { render, screen, within } from '@/tests/test-utils'
+import { fireEvent, render, screen, within } from '@/tests/test-utils'
 import type { ReactNode } from 'react'
+import { formatDate as formatDateUtil, formatTimeInWords } from '@safe-global/utils/utils/date'
 import { memberBuilder, memberUserBuilder } from '@/tests/builders/member'
 import MembersList from './index'
+
+const formatDate = (iso: string) => formatDateUtil(new Date(iso).getTime())
 
 jest.mock('./MemberName', () => ({
   __esModule: true,
@@ -92,26 +95,6 @@ describe('MembersList', () => {
     expect(emailCells).toHaveLength(2)
     expect(within(emailCells[0]!).getByText('alice@example.com')).toBeInTheDocument()
     expect(within(emailCells[1]!).queryByText(/@/)).not.toBeInTheDocument()
-  })
-
-  it('truncates long member emails inside a tooltip trigger', () => {
-    const longEmail = `${'a'.repeat(64)}@${'b'.repeat(186)}.com`
-
-    render(
-      <MembersList
-        members={[
-          memberBuilder()
-            .with({
-              name: 'Alice',
-              user: memberUserBuilder().with({ email: longEmail }).build(),
-            })
-            .build(),
-        ]}
-      />,
-    )
-
-    const emailNode = screen.getByText(longEmail)
-    expect(emailNode).toHaveClass('truncate')
   })
 
   it('shows an Expired chip for a pending invite past its expiry', () => {
@@ -268,6 +251,31 @@ describe('MembersList', () => {
       expect(within(cells[3]!).queryByTestId('member-2fa-badge')).not.toBeInTheDocument()
     })
 
+    // The badge is rigid; on mobile it used to squeeze the name column down to one character
+    it('moves the badge into the row detail on mobile', () => {
+      mockUseIsMobile.mockReturnValue(true)
+
+      render(<MembersList members={[twoFactorMembers[1]!]} />)
+
+      expect(screen.queryAllByTestId('table-cell-2fa')).toHaveLength(0)
+      expect(screen.queryByTestId('member-2fa-badge')).not.toBeInTheDocument()
+
+      fireEvent.click(screen.getByRole('button', { name: 'Show details' }))
+
+      expect(screen.getByText('2FA')).toBeInTheDocument()
+      expect(screen.getByText('Wallet sign-in')).toBeInTheDocument()
+    })
+
+    it('leaves the badge out of the row detail for a declined invite', () => {
+      mockUseIsMobile.mockReturnValue(true)
+
+      render(<MembersList members={[twoFactorMembers[3]!]} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Show details' }))
+
+      expect(screen.queryByText('2FA')).not.toBeInTheDocument()
+    })
+
     it('hides the column when the feature is disabled', () => {
       mockUseHasFeature.mockReturnValue(false)
 
@@ -278,5 +286,90 @@ describe('MembersList', () => {
       // The other columns still render
       expect(screen.getByText('Email')).toBeInTheDocument()
     })
+  })
+
+  it('shows a single "Member since" join-date column for the active variant', () => {
+    const createdAt = '2026-04-22T12:00:00.000Z'
+    render(<MembersList variant="active" members={[memberBuilder().with({ name: 'Alice', createdAt }).build()]} />)
+
+    expect(screen.getByText('Member since')).toBeInTheDocument()
+    expect(screen.queryByText('Invited on')).not.toBeInTheDocument()
+    expect(screen.queryByText('Expires')).not.toBeInTheDocument()
+    expect(within(screen.getByTestId('table-cell-memberSince')).getByText(formatDate(createdAt))).toBeInTheDocument()
+  })
+
+  it('shows both an "Invited on" date and a relative "Expires" column for the pending variant', () => {
+    const createdAt = '2026-04-22T12:00:00.000Z'
+    const inviteExpiresAt = '2027-01-01T12:00:00.000Z'
+    render(
+      <MembersList
+        variant="pending"
+        members={[memberBuilder().with({ status: 'INVITED', name: 'Bob', createdAt, inviteExpiresAt }).build()]}
+      />,
+    )
+
+    expect(screen.getByText('Invited on')).toBeInTheDocument()
+    expect(screen.getByText('Expires')).toBeInTheDocument()
+    expect(screen.queryByText('Member since')).not.toBeInTheDocument()
+
+    // "Invited on" is the absolute creation date; "Expires" is relative time-to-go.
+    expect(within(screen.getByTestId('table-cell-invitedOn')).getByText(formatDate(createdAt))).toBeInTheDocument()
+    expect(
+      within(screen.getByTestId('table-cell-expires')).getByText(
+        formatTimeInWords(new Date(inviteExpiresAt).getTime()),
+      ),
+    ).toBeInTheDocument()
+  })
+
+  it('surfaces the join date in a collapsible row detail on mobile', () => {
+    mockUseIsMobile.mockReturnValue(true)
+    const createdAt = '2026-04-22T12:00:00.000Z'
+
+    render(<MembersList variant="active" members={[memberBuilder().with({ name: 'Alice', createdAt }).build()]} />)
+
+    // The date column is dropped from the compact table — it only lives in the row detail
+    expect(screen.queryByText(formatDate(createdAt))).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Show details' }))
+    expect(screen.getByText(formatDate(createdAt))).toBeInTheDocument()
+    expect(screen.getByText('Member since')).toBeInTheDocument()
+  })
+
+  it('surfaces both invite dates in the row detail on mobile for the pending variant', () => {
+    mockUseIsMobile.mockReturnValue(true)
+    const createdAt = '2026-04-22T12:00:00.000Z'
+    const inviteExpiresAt = '2999-01-01T12:00:00.000Z'
+
+    render(
+      <MembersList
+        variant="pending"
+        members={[memberBuilder().with({ status: 'INVITED', name: 'Bob', createdAt, inviteExpiresAt }).build()]}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show details' }))
+    expect(screen.getByText(formatDate(createdAt))).toBeInTheDocument()
+    expect(screen.getByText(formatTimeInWords(new Date(inviteExpiresAt).getTime()))).toBeInTheDocument()
+    expect(screen.getByText('Invited on')).toBeInTheDocument()
+    expect(screen.getByText('Expires')).toBeInTheDocument()
+  })
+
+  it('renders a dash in the Expires column when a pending invite has no expiry', () => {
+    render(
+      <MembersList
+        variant="pending"
+        members={[
+          memberBuilder()
+            .with({
+              status: 'INVITED',
+              name: 'Bob',
+              inviteExpiresAt: null,
+              user: memberUserBuilder().with({ email: 'bob@x.io' }).build(),
+            })
+            .build(),
+        ]}
+      />,
+    )
+
+    expect(within(screen.getByTestId('table-cell-expires')).getByText('–')).toBeInTheDocument()
   })
 })

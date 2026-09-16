@@ -35,7 +35,7 @@ export const BackToSpaceButton = ({ spaceName, spaceInitial }: SafeWorkspaceHead
         <span className={css.spaceSelectorName}>{spaceName}</span>
         <span className={css.spaceSelectorSubtitle}>Workspace</span>
       </div>
-      <icons.ChevronLeft className="ml-auto size-4 shrink-0" aria-hidden />
+      <icons.ChevronLeft className="ml-auto size-4 shrink-0 group-data-[collapsible=icon]:hidden" aria-hidden />
     </SidebarMenuButton>
   )
 }

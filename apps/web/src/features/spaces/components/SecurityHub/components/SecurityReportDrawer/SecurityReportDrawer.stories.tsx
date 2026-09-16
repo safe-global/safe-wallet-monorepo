@@ -18,15 +18,14 @@ const setup = createMockStory({ features: { spaces: true } })
 
 const meta = {
   title: 'Features/SecurityHub/SecurityReportDrawer',
+  tags: ['autodocs', 'skip-visual-test'],
   component: SecurityReportDrawer,
   decorators: [setup.decorator],
   parameters: {
     ...setup.parameters,
     layout: 'fullscreen',
     // Drawer is open on the right side; the main content area is intentionally empty.
-    chromatic: { disableSnapshot: true },
   },
-  tags: ['autodocs'],
 } satisfies Meta<typeof SecurityReportDrawer>
 
 export default meta

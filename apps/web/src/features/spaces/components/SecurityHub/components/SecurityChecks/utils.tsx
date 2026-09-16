@@ -3,8 +3,9 @@ import type { Cta } from './primitives'
 
 /**
  * Fallback CTA for a Zodiac vulnerability when we can't offer an in-app removal —
- * either no remove handler was provided, or the Safe is only implicated via a
- * related account (no removable module here). Points at Zodiac's public checker.
+ * either we have no deep-link (chain metadata still loading), or the Safe is only
+ * implicated via a related account (no removable module here). Points at Zodiac's
+ * public checker.
  */
 export const ZODIAC_VULNERABILITY_CTA: Cta = {
   label: 'Check affected Safes',
@@ -22,23 +23,23 @@ export const VULNERABLE_MODULE_INTRO: ReactNode = (
 
 /**
  * Intro copy + CTA for a single module row, keyed on its verdict:
- * - vulnerable → remove action (or the external checker when no in-app handler),
+ * - vulnerable → the modules deep-link (labelled "Remove unsupported module"), falling back
+ *   to the external checker when we have no deep-link,
  * - trusted → no CTA,
  * - unrecognized → the generic "review modules" CTA.
+ *
+ * The vulnerable CTA deep-links to the target Safe's Modules settings rather than launching
+ * the remove flow in place: the tx flow, simulation and Safe Shield all key off the *active*
+ * Safe, which the Spaces drawer does not set — so an in-place flow would run against the wrong
+ * Safe and never resolve. `modulesCta` already carries the "Remove unsupported module" label
+ * (from the scanner's `ctaLabelOverride`) and the correct `?safe=` deep-link.
  */
 export const getModuleRowContent = (
-  module: { value: string; name?: string | null },
   verdict: { vulnerable: boolean; trusted: boolean },
   modulesCta: Cta | null,
-  onRemoveModule?: (address: string) => void,
 ): { intro: ReactNode; cta: Cta | null } => {
   if (verdict.vulnerable) {
-    return {
-      intro: VULNERABLE_MODULE_INTRO,
-      cta: onRemoveModule
-        ? { label: 'Remove unsupported module', onClick: () => onRemoveModule(module.value) }
-        : ZODIAC_VULNERABILITY_CTA,
-    }
+    return { intro: VULNERABLE_MODULE_INTRO, cta: modulesCta ?? ZODIAC_VULNERABILITY_CTA }
   }
   if (verdict.trusted) {
     return { intro: 'Recognized Safe ecosystem module.', cta: null }

@@ -1,7 +1,7 @@
 import type { MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import ExternalLink from '@/components/common/ExternalLink'
 import { NOT_AVAILABLE } from '@/components/transactions/TxDetails'
-import { Box, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import React from 'react'
 
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
@@ -23,17 +23,17 @@ const RejectionTxInfo = ({ nonce, isTxExecuted }: Props) => {
 
   return (
     <>
-      <Typography data-testid="onchain-rejection" mr={2}>
+      <Typography data-testid="onchain-rejection" className="mr-4">
         {message}
       </Typography>
       {!isTxExecuted && (
-        <Box mt={2} sx={{ width: 'fit-content' }}>
+        <div className="mt-4 w-fit">
           <ExternalLink href={HelpCenterArticle.CANCELLING_TRANSACTIONS} title={title}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Typography sx={{ textDecoration: 'underline' }}>{title}</Typography>
-            </Box>
+            <div className="flex items-center gap-1.5">
+              <Typography className="underline">{title}</Typography>
+            </div>
           </ExternalLink>
-        </Box>
+        </div>
       )}
     </>
   )

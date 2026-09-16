@@ -16,7 +16,7 @@ import { SafeApiClient } from '../api/safe-api-client'
 import { LS_KEYS, STAGING_CGW_URL } from '../data/constants'
 import { WalletPage } from '../pages/wallet.page'
 import { getWalletCredentials, type WalletCredentials } from '../data/credentials'
-import { version as TERMS_VERSION } from '../../../src/markdown/terms/version'
+import { version as TERMS_VERSION } from '@/markdown/terms/version'
 
 // Cookie consent state — mirrors Cypress localstorage_data.js.
 // `hasAcceptedTerms` only treats consent as valid when `termsVersion` matches
@@ -46,10 +46,11 @@ async function seedLocalStorage(page: Page): Promise<void> {
       // Suppress outreach popup
       window.sessionStorage.setItem(outreachKey, String(Date.now()))
 
-      // Suppress Beamer (product updates widget)
+      // Suppress Beamer (product updates widget).
+      // KNOWN GAP: Beamer reads these keys suffixed with its PRODUCT_ID, so these unsuffixed
+      // writes are likely inert. See the Beamer row in docs/CYPRESS_MIGRATION_GUIDE.md.
       const beamerKeys = Object.keys(window.localStorage).filter((k) => k.startsWith('_BEAMER'))
       if (beamerKeys.length === 0) {
-        // Pre-seed with current date to suppress first-visit banner
         const now = new Date().toISOString()
         window.localStorage.setItem('_BEAMER_FIRST_VISIT_', now)
         window.localStorage.setItem('_BEAMER_BOOSTED_ANNOUNCEMENT_DATE_', now)

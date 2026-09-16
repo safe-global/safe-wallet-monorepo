@@ -3,7 +3,8 @@ import useChainId from '@/hooks/useChainId'
 import { type AddressBookItem, Methods } from '@safe-global/safe-apps-sdk'
 import type { ReactElement } from 'react'
 import { useCallback, useEffect } from 'react'
-import { Box, CircularProgress, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
+import { Spinner } from '@/components/ui/spinner'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import type { RequestId } from '@safe-global/safe-apps-sdk'
@@ -81,11 +82,19 @@ const AppFrame = ({ appUrl, allowedFeaturesList, safeAppFromManifest, isNativeEm
   }
 
   const onRejectPermissionRequest = (requestId?: RequestId) => {
-    if (requestId) {
+    // Reject passes the id and persists a denial. Closing the modal only dismisses, so the app can ask
+    // again — but either way it has to be answered, or its SDK call never settles.
+    const isExplicitReject = requestId !== undefined
+    const id = requestId ?? permissionsRequest?.requestId
+
+    if (isExplicitReject) {
       confirmPermissionRequest(PermissionStatus.DENIED)
-      communicator?.send('Permissions were rejected', requestId as string, true)
     } else {
       setPermissionsRequest(undefined)
+    }
+
+    if (id != null) {
+      communicator?.send('Permissions were rejected', id as string, true)
     }
   }
 
@@ -118,9 +127,9 @@ const AppFrame = ({ appUrl, allowedFeaturesList, safeAppFromManifest, isNativeEm
         <Head>
           <title>{`Safe Apps - Viewer - ${remoteApp ? remoteApp.name : UNKNOWN_APP_NAME}`}</title>
         </Head>
-        <Box p={2}>
+        <div className="p-4">
           <BlockedAddress address={sanctionedAddress} featureTitle="Safe{Pass} Safe app" />
-        </Box>
+        </div>
       </>
     )
   }
@@ -139,11 +148,11 @@ const AppFrame = ({ appUrl, allowedFeaturesList, safeAppFromManifest, isNativeEm
         {appIsLoading && (
           <div className={css.loadingContainer}>
             {isLoadingSlow && (
-              <Typography variant="h4" gutterBottom>
+              <Typography variant="h4" className="mb-2">
                 The Safe App is taking too long to load, consider refreshing.
               </Typography>
             )}
-            <CircularProgress size={48} color="primary" />
+            <Spinner className="size-12 text-[var(--color-primary-main)]" />
           </div>
         )}
 

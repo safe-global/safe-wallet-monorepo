@@ -2,7 +2,6 @@ import * as constants from '../../support/constants.js'
 import * as safeapps from './safeapps.pages.js'
 import * as main from './main.page.js'
 import * as createtx from './create_tx.pages.js'
-import staticSafes from '../../fixtures/safes/static.js'
 
 const transactionQueueStr = 'Pending transactions'
 const noTransactionStr = 'This Safe has no queued transactions'
@@ -38,9 +37,9 @@ export const reviewSignersTestId = '[data-testid="review-signers-btn"]'
 // Case #2 & #3 — Unsupported mastercopy (Warning)
 export const unsupportedMastercopyTitle = 'This Safe is running an unsupported version'
 export const unsupportedMigratableContent =
-  'and may miss security fixes and improvements. You should migrate it to a compatible version.'
+  'It may miss security fixes and improvements. You should migrate it to a compatible version.'
 export const unsupportedCliContent =
-  'and may miss security fixes and improvements. You must use our CLI tool to migrate.'
+  'It may miss security fixes and improvements. You must use our CLI tool to migrate.'
 
 const migrateSafeSubtitle = 'Update Safe account base contract'
 export const nonPinnedWarningTitle = 'Not in your accounts'
@@ -160,10 +159,7 @@ export function verifyTxQueueWidget() {
 
     cy.contains(`a[href^="/transactions/tx?id=multisig_0x"]`, '1/1').should('exist')
 
-    cy.contains(
-      `a[href="${constants.transactionQueueUrl}${encodeURIComponent(staticSafes.SEP_STATIC_SAFE_2)}"]`,
-      viewAllStr,
-    )
+    cy.contains(`a[data-testid="view-all-link"][href^="${constants.transactionQueueUrl}"]`, viewAllStr)
   })
 }
 

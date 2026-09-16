@@ -48,23 +48,6 @@ jest.mock('@/components/ui/sidebar', () => ({
   useSidebar: () => ({ state: mockSidebarState, isMobile: false }),
 }))
 
-jest.mock('@/components/ui/button', () => ({
-  Button: ({
-    children,
-    render: renderProp,
-  }: {
-    children: ReactNode
-    render?: React.ReactElement<{ href: string; target?: string; rel?: string }>
-  }) =>
-    renderProp ? (
-      <a href={renderProp.props.href} target={renderProp.props.target} rel={renderProp.props.rel}>
-        {children}
-      </a>
-    ) : (
-      <button>{children}</button>
-    ),
-}))
-
 jest.mock('../../styles.module.css', () => ({}))
 
 describe('ApiCtaSidebar', () => {

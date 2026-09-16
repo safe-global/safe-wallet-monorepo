@@ -6,7 +6,9 @@ import useAddressBook from '@/hooks/useAddressBook'
 import { CREATE_SAFE_CATEGORY, CREATE_SAFE_EVENTS, OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import { gtmSetChainId } from '@/services/analytics/gtm'
 import { showNotification } from '@/store/notificationsSlice'
-import { Box, Button, CircularProgress, DialogActions, DialogContent, Stack, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { Typography } from '@/components/ui/typography'
 import { FormProvider, useForm } from 'react-hook-form'
 import { useSafeCreationData } from '../../hooks/useSafeCreationData'
 import useChains from '@/hooks/useChains'
@@ -117,6 +119,7 @@ const ReplaySafeDialog = ({
         isUserAuthenticated,
         isAdminOfActiveSpace,
         spaceSafeCount,
+        provider,
         dispatch,
       })
       if (!persistResult.ok) {
@@ -132,8 +135,11 @@ const ReplaySafeDialog = ({
         return
       }
 
-      trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
-      trackEvent({ ...CREATE_SAFE_EVENTS.CREATED_SAFE, label: 'counterfactual' })
+      // Don't report a creation for Safes that were already deployed.
+      if (persistResult.skipped !== 'already-deployed') {
+        trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
+        trackEvent({ ...CREATE_SAFE_EVENTS.CREATED_SAFE, label: 'counterfactual' })
+      }
 
       router.push({
         pathname: UNDEPLOYED_SAFE_BLOCKED_ROUTES.includes(router.pathname) ? AppRoutes.home : router.pathname,
@@ -161,7 +167,10 @@ const ReplaySafeDialog = ({
         showNotification({
           variant: 'success',
           groupKey: 'replay-safe-success',
-          message: `Successfully added your account on ${selectedChain.chainName}`,
+          message:
+            persistResult.skipped === 'already-deployed'
+              ? `This account is already deployed on ${selectedChain.chainName}`
+              : `Successfully added your account on ${selectedChain.chainName}`,
         }),
       )
     } catch (err) {
@@ -191,22 +200,15 @@ const ReplaySafeDialog = ({
   return (
     <ModalDialog open={open} onClose={onClose} dialogTitle="Add another network" hideChainIndicator>
       <form onSubmit={onFormSubmit} id="recreate-safe">
-        <DialogContent data-testid="add-chain-dialog">
+        <div className="px-6 py-4" data-testid="add-chain-dialog">
           <FormProvider {...formMethods}>
-            <Stack spacing={2}>
+            <div className="flex flex-col gap-4">
               <Typography>Add this Safe to another network with the same address.</Typography>
 
               {chain && (
-                <Box
-                  data-testid="added-network"
-                  sx={{
-                    p: 2,
-                    backgroundColor: 'background.main',
-                    borderRadius: '6px',
-                  }}
-                >
+                <div data-testid="added-network" className="rounded-md bg-[var(--color-background-main)] p-4">
                   <ChainIndicator chainId={chain.chainId} />
-                </Box>
+                </div>
               )}
 
               <ErrorMessage level="info">
@@ -215,16 +217,10 @@ const ReplaySafeDialog = ({
               </ErrorMessage>
 
               {safeCreationDataLoading ? (
-                <Stack
-                  direction="column"
-                  sx={{
-                    alignItems: 'center',
-                    gap: 1,
-                  }}
-                >
-                  <CircularProgress />
-                  <Typography variant="body2">Loading Safe data</Typography>
-                </Stack>
+                <div className="flex flex-col items-center gap-2">
+                  <Spinner className="size-10" />
+                  <Typography variant="paragraph-small">Loading Safe data</Typography>
+                </div>
               ) : safeCreationDataError ? (
                 <ErrorMessage error={safeCreationDataError} level="error">
                   Could not determine the Safe creation parameters.
@@ -252,35 +248,28 @@ const ReplaySafeDialog = ({
                   {creationError.message || 'The Safe could not be created with the same address.'}
                 </ErrorMessage>
               )}
-            </Stack>
+            </div>
           </FormProvider>
-        </DialogContent>
-        <DialogActions>
+        </div>
+        <div className="flex w-full items-center justify-between gap-2 border-t border-[var(--color-border-light)] px-6 py-4">
           {isUnsupportedSafeCreationVersion ? (
-            <Box
-              sx={{
-                display: 'flex',
-                width: '100%',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}
-            >
-              <ExternalLink sx={{ flexGrow: 1 }} href={MULTICHAIN_HELP_ARTICLE}>
+            <>
+              <ExternalLink className="grow" href={MULTICHAIN_HELP_ARTICLE}>
                 Read more
               </ExternalLink>
-              <Button variant="contained" onClick={onClose}>
-                Got it
-              </Button>
-            </Box>
+              <Button onClick={onClose}>Got it</Button>
+            </>
           ) : (
             <>
-              <Button onClick={onCancel}>Cancel</Button>
-              <Button data-testid="modal-add-network-btn" type="submit" variant="contained" disabled={submitDisabled}>
-                {isSubmitting ? <CircularProgress size={20} /> : 'Add network'}
+              <Button variant="ghost" onClick={onCancel}>
+                Cancel
+              </Button>
+              <Button data-testid="modal-add-network-btn" type="submit" disabled={submitDisabled}>
+                {isSubmitting ? <Spinner className="size-5" /> : 'Add network'}
               </Button>
             </>
           )}
-        </DialogActions>
+        </div>
       </form>
     </ModalDialog>
   )

@@ -8,8 +8,9 @@ import useIsSpendingLimitSupported from '../useIsSpendingLimitSupported'
 
 // A chain that has the AllowanceModule registered in @safe-global/safe-modules-deployments
 const SUPPORTED_CHAIN_ID = '11155111' // Sepolia
-// A chain that does NOT have the AllowanceModule registered yet
-const UNSUPPORTED_CHAIN_ID = '42161' // Arbitrum One
+// Not a real chain: deployment bumps keep registering new networks, so any real id we
+// pick as "unsupported" eventually becomes supported and breaks these assertions.
+const UNSUPPORTED_CHAIN_ID = '999999999999'
 
 // The CREATE2 address the deployment package falls back to for unregistered chains
 const FALLBACK_MODULE_ADDRESS = Object.values(

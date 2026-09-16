@@ -8,7 +8,6 @@ import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import useChainId from '../useChainId'
 import useSafeInfo from '../useSafeInfo'
-import { Errors, logError } from '@/services/exceptions'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { useCurrentChain } from '../useChains'
 import { useSafeAddressFromUrl } from '../useSafeAddressFromUrl'
@@ -50,6 +49,12 @@ const useLoadSafeInfo = (): AsyncResult<ExtendedSafeInfo> => {
     {
       skip: !chainId || !address,
       pollingInterval: POLLING_INTERVAL,
+      // A backgrounded tab left open on a failing Safe otherwise keeps polling —
+      // and reporting — indefinitely. Paired with refetchOnFocus so pausing the
+      // poll costs no freshness: without it, coming back to the tab could show a
+      // stale nonce, owner set or threshold for up to a full polling interval.
+      skipPollingIfUnfocused: true,
+      refetchOnFocus: true,
     },
   )
 
@@ -63,13 +68,6 @@ const useLoadSafeInfo = (): AsyncResult<ExtendedSafeInfo> => {
   // Only 404s are suppressed during CF sync — real errors (500, network) must still surface.
   const isCgw404 = !!cgwError && 'status' in cgwError && cgwError.status === 404
   const suppressCgwError = awaitingCfSync && isCgw404
-
-  // Log errors only when not suppressing (CF sync + 404) and no CF fallback
-  useEffect(() => {
-    if (cgwError && !suppressCgwError && !undeployedSafe) {
-      logError(Errors._600, 'message' in cgwError ? String(cgwError.message) : 'Failed to load safe info')
-    }
-  }, [cgwError, suppressCgwError, undeployedSafe])
 
   // Self-heal: if the safe is deployed on-chain (backend returned SafeInfo) but a
   // counterfactual entry still exists locally, remove it. The listener propagates

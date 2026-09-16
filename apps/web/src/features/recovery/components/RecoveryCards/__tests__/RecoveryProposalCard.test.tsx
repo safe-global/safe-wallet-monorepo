@@ -20,10 +20,11 @@ describe('RecoveryProposalCard', () => {
       const mockClose = jest.fn()
       const mockSetTxFlow = jest.fn()
 
-      const { queryByText } = render(
+      const { getByTestId, queryByText } = render(
         <InternalRecoveryProposalCard orientation="vertical" onClose={mockClose} setTxFlow={mockSetTxFlow} />,
       )
 
+      expect(getByTestId('recovery-proposal')).toHaveAttribute('data-slot', 'card')
       expect(queryByText(/Recover this account\./)).toBeTruthy()
       expect(queryByText('Your connected wallet can help you regain access by adding a new signer.')).toBeTruthy()
       expect(queryByText('Learn more')).toBeTruthy()

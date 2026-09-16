@@ -1,0 +1,101 @@
+/* The `panel` table variant (see table.tsx): grey rounded header bar, hover pills painted on the
+   cells, gradient row dividers. A CSS module rather than utilities because background-clip, the
+   divider gradient and the band's clip-paths have no utility equivalent. A row opts out of the
+   divider with `data-no-divider`, and of the hover pill with `data-disabled` / `data-no-hover`. */
+
+/* Cell radii (bar ends, hover pill) need separated borders; the shadcn scope collapses them. */
+.table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+/* Header bar: transparent borders plus a padding-box clip inset the paint without moving the cells;
+   the first row's own top border makes the gap below. `tr` outranks TableCard's `.container thead th`. */
+.table thead th {
+  border-top: 4px solid transparent;
+  background-clip: padding-box;
+}
+/* The bar is not an interactive row: the primitive's row hover would tint the inset around it. */
+.table thead tr:hover {
+  background-color: transparent;
+}
+.table thead tr th {
+  background-color: var(--muted);
+  color: var(--muted-foreground);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+/* The UA sheet gives buttons `text-transform: none` and the scoped preflight does not reset it. */
+.table thead tr th button {
+  text-transform: inherit;
+}
+.table thead th:first-of-type {
+  padding-left: 16px;
+  border-left: 4px solid transparent;
+}
+.table thead tr th:first-of-type {
+  border-start-start-radius: var(--radius-lg);
+  border-end-start-radius: var(--radius-lg);
+}
+.table thead th:last-of-type {
+  padding-right: 16px;
+  border-right: 4px solid transparent;
+}
+.table thead tr th:last-of-type {
+  border-start-end-radius: var(--radius-lg);
+  border-end-end-radius: var(--radius-lg);
+}
+/* Inset the hover pill off the row separator with transparent borders. The 5/8 split centres it: the
+   row background paints the 1px line ~1px above the row's bottom edge. */
+.table tbody td {
+  border-top: 5px solid transparent;
+  border-bottom: 8px solid transparent;
+  background-clip: padding-box;
+}
+.table tbody td:first-of-type {
+  padding-left: 16px;
+  border-left: 4px solid transparent;
+}
+.table tbody td:last-of-type {
+  padding-right: 16px;
+  border-right: 4px solid transparent;
+}
+
+/* The divider and the hover pill are drawn below instead. */
+.table tbody tr {
+  border: 0;
+}
+.table tbody tr:hover {
+  background-color: transparent;
+}
+
+/* On the cells, not the <tr>, so the inset borders float it clear and round its ends. A row opts out
+   with `data-disabled` (locked) or `data-no-hover` (already carries a fill of its own). */
+.table tbody tr:not([data-disabled]):not([data-no-hover]):hover td {
+  background-color: var(--muted);
+}
+.table tbody tr:not([data-disabled]):not([data-no-hover]):hover td:first-of-type {
+  border-top-left-radius: var(--radius-lg);
+  border-bottom-left-radius: var(--radius-lg);
+}
+.table tbody tr:not([data-disabled]):not([data-no-hover]):hover td:last-of-type {
+  border-top-right-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--radius-lg);
+}
+
+/* A 1px line at the row's bottom, inset 4px each side to line up with the pill. Every row but the
+   last draws one; `data-no-divider` is for a row the next one belongs to (a detail row, a band). */
+.table tbody tr:not(:last-child):not([data-no-divider]) {
+  background-image: linear-gradient(
+    to right,
+    transparent 4px,
+    var(--color-border-light) 4px,
+    var(--color-border-light) calc(100% - 4px),
+    transparent calc(100% - 4px)
+  );
+  background-repeat: no-repeat;
+  background-position: bottom;
+  background-size: 100% 1px;
+}

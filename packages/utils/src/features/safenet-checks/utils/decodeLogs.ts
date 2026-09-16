@@ -1,6 +1,6 @@
-import type { Result } from 'ethers'
+import { keccak256, type Result } from 'ethers'
 import { TOPICS, type TopicDispatch } from '../abi'
-import { CheckEventType, OracleGeneration, type CheckEventBase, type Hex, type NormalizedCheckEvent } from '../types'
+import { CheckEventType, type CheckEventBase, type Hex, type NormalizedCheckEvent } from '../types'
 
 /** A raw EVM log, as returned by `eth_getLogs` (ethers `Log`-shaped). */
 export type RawLog = {
@@ -13,6 +13,17 @@ export type RawLog = {
 }
 
 const str = (value: unknown): string => (typeof value === 'bigint' ? value.toString() : String(value))
+
+const ADDRESS_MASK = (1n << 160n) - 1n
+
+/** Unpack a `SafeId.T` (`chainId << 160 | safe`) into its two parts. */
+const unpackSafeId = (safeId: string): { chainId: string; safe: string } => {
+  const packed = BigInt(safeId)
+  return {
+    chainId: (packed >> 160n).toString(),
+    safe: `0x${(packed & ADDRESS_MASK).toString(16).padStart(40, '0')}`,
+  }
+}
 
 /**
  * Decode raw Safenet logs into normalized, Redux-serializable events.
@@ -49,27 +60,30 @@ const normalize = (dispatch: TopicDispatch, args: Result, log: RawLog): Normaliz
     blockNumber: log.blockNumber,
     logIndex: log.logIndex,
     transactionHash: log.transactionHash,
-    generation: dispatch.generation,
   }
 
   switch (dispatch.type) {
     case CheckEventType.ORACLE_PROPOSED:
+      // The event has no top-level chainId/safe; the transaction tuple carries both.
       return {
         ...base,
         type: CheckEventType.ORACLE_PROPOSED,
         safeTxHash: args.safeTxHash as Hex,
-        chainId: str(args.chainId),
-        safe: args.safe as string,
+        chainId: str(args.transaction.chainId),
+        safe: args.transaction.safe as string,
         epoch: str(args.epoch),
         oracle: args.oracle as string,
+        oracleDataHash: keccak256(args.oracleData as string) as Hex,
       }
-    case CheckEventType.ORACLE_ATTESTED:
+    case CheckEventType.ORACLE_ATTESTED: {
+      // The attested event carries no transaction tuple; safeId packs chainId+safe.
+      const id = unpackSafeId(args.safeId as string)
       return {
         ...base,
         type: CheckEventType.ORACLE_ATTESTED,
         safeTxHash: args.safeTxHash as Hex,
-        chainId: str(args.chainId),
-        safe: args.safe as string,
+        chainId: id.chainId,
+        safe: id.safe,
         epoch: str(args.epoch),
         oracle: args.oracle as string,
         signatureId: args.signatureId as Hex,
@@ -77,7 +91,9 @@ const normalize = (dispatch: TopicDispatch, args: Result, log: RawLog): Normaliz
           r: { x: str(args.attestation.r.x), y: str(args.attestation.r.y) },
           z: str(args.attestation.z),
         },
+        oracleDataHash: args.oracleDataHash as Hex,
       }
+    }
     case CheckEventType.PLAIN_PROPOSED:
       return {
         ...base,
@@ -101,31 +117,25 @@ const normalize = (dispatch: TopicDispatch, args: Result, log: RawLog): Normaliz
           z: str(args.attestation.z),
         },
       }
-    case CheckEventType.REQUEST_CREATED: {
-      const isV2 = dispatch.generation === OracleGeneration.V2
+    case CheckEventType.REQUEST_CREATED:
       return {
         ...base,
         type: CheckEventType.REQUEST_CREATED,
         requestId: args.requestId as Hex,
-        proposer: args.proposer as string,
+        proposer: args.sponsor as string,
         fee: str(args.fee),
         bondTarget: str(args.bondTarget),
-        deadlineBlock: isV2 ? str(args.revealDeadline) : str(args.deadline),
-        commitDeadlineBlock: isV2 ? str(args.commitDeadline) : null,
+        deadlineBlock: str(args.revealDeadline),
+        commitDeadlineBlock: str(args.commitDeadline),
       }
-    }
-    case CheckEventType.SENTINEL_COMMITTED: {
-      const isV1 = dispatch.generation === OracleGeneration.V1
+    case CheckEventType.SENTINEL_COMMITTED:
       return {
         ...base,
         type: CheckEventType.SENTINEL_COMMITTED,
         requestId: args.requestId as Hex,
         sentinel: args.sentinel as string,
         bondAmount: str(args.bondAmount),
-        approved: isV1 ? Boolean(args.approved) : null,
-        position: isV1 ? str(args.position) : null,
       }
-    }
     case CheckEventType.SENTINEL_REVEALED:
       return {
         ...base,
@@ -141,7 +151,7 @@ const normalize = (dispatch: TopicDispatch, args: Result, log: RawLog): Normaliz
         ...base,
         type: CheckEventType.ORACLE_RESULT,
         requestId: args.requestId as Hex,
-        proposer: args.proposer as string,
+        proposer: args.sponsor as string,
         approved: Boolean(args.approved),
         result: args.result as Hex,
       }

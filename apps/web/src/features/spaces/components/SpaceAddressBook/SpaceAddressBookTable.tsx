@@ -2,17 +2,18 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip
 import { isAddress } from 'ethers'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import EmailInfo from '@/components/common/EmailInfo'
-import { NetworkLogosTooltip } from '@/features/multichain'
+import { NetworkLogosPill } from '@/features/multichain'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { HardDrive } from 'lucide-react'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import SpaceAddressBookActions from './SpaceAddressBookActions'
 import LocalContactActions from './LocalContactActions'
-import { useIsMobile } from '@/hooks/use-mobile'
 import { formatDate } from '@/features/spaces/utils'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import { useMemberNameResolver } from '../../hooks/useMemberNameResolver'
-import PaginatedDataTable, { type DataTableColumn, type ColumnWidth } from '../PaginatedDataTable'
+import PaginatedDataTable, { type DataTableColumn, type ColumnWidth } from '@/components/common/PaginatedDataTable'
+import { cn } from '@/utils/cn'
+import AddressCell from './AddressCell'
 
 export type AddressBookEntry = SpaceAddressBookItemDto & {
   isLocal: boolean
@@ -44,7 +45,7 @@ type SpaceAddressBookTableProps = {
   entries: AddressBookEntry[]
   showAddedBy?: boolean
   showLastUpdated?: boolean
-  renderExtraAction?: (entry: AddressBookEntry) => React.ReactNode
+  renderExtraAction?: (entry: AddressBookEntry, context: { isCompact: boolean }) => React.ReactNode
 }
 
 function SpaceAddressBookTable({
@@ -53,13 +54,15 @@ function SpaceAddressBookTable({
   showLastUpdated = false,
   renderExtraAction,
 }: SpaceAddressBookTableProps) {
-  const isMobile = useIsMobile()
   const resolveMemberName = useMemberNameResolver()
   const hasMiddleColumn = showAddedBy || showLastUpdated
+  // The extra action is a text button that cannot shrink, so its layout hands the actions column a
+  // bigger share and a minimum wide enough to hold it.
+  const hasExtraAction = Boolean(renderExtraAction)
 
-  // Chain logo cluster — used in the desktop "Chains" cell
+  // Chain logo cluster — used in the desktop "Chains" cell.
   const renderChains = (entry: AddressBookEntry) => (
-    <NetworkLogosTooltip networks={entry.chainIds.map((chainId) => ({ chainId }))} maxVisible={3} />
+    <NetworkLogosPill networks={entry.chainIds.map((chainId) => ({ chainId }))} />
   )
 
   // Added-by / Last-updated content — used in the desktop column and the mobile detail row.
@@ -77,46 +80,41 @@ function SpaceAddressBookTable({
       header: 'Name',
       width: '20%',
       sticky: true,
-      minWidth: 140,
+      minWidth: 120,
       emphasis: 'strong',
       sortValue: (e) => e.name,
-      cell: (entry) => (
-        <div className="flex items-center gap-1.5 overflow-hidden">
-          {entry.isLocal && <HardDrive className="text-muted-foreground size-4 flex-shrink-0" />}
-          <Tooltip>
-            <TooltipTrigger className="min-w-0 truncate text-left">{entry.name}</TooltipTrigger>
-            <TooltipContent>{entry.name}</TooltipContent>
-          </Tooltip>
+      // Compact drops the address column, so the address rides under the name and a long name
+      // wraps into the width that frees up instead of truncating.
+      cell: (entry, { isCompact }) => (
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <div className="flex items-center gap-1.5 overflow-hidden">
+            {entry.isLocal && <HardDrive className="text-muted-foreground size-4 flex-shrink-0" />}
+            <Tooltip>
+              <TooltipTrigger className={cn('min-w-0 text-left', !isCompact && 'truncate')}>
+                {entry.name}
+              </TooltipTrigger>
+              <TooltipContent>{entry.name}</TooltipContent>
+            </Tooltip>
+          </div>
+          {isCompact && <AddressCell address={entry.address} isCompact />}
         </div>
       ),
     },
     {
       id: 'address',
       header: 'Address',
-      width: '40%',
-      minWidth: 360,
+      width: hasMiddleColumn || hasExtraAction ? '30%' : '40%',
+      minWidth: 240,
+      priority: 'secondary',
       sortValue: (e) => e.address,
-      cell: (entry) => (
-        <div className="text-[0.8em] font-mono">
-          <EthHashInfo
-            address={entry.address}
-            shortAddress={isMobile}
-            showPrefix={false}
-            showName={false}
-            highlight4bytes
-            hasExplorer
-            showCopyButton
-            avatarSize={24}
-          />
-        </div>
-      ),
+      cell: (entry) => <AddressCell address={entry.address} />,
     },
     {
       id: 'chains',
       header: 'Chains',
-      width: '15%',
+      width: hasExtraAction ? '15%' : '20%',
       priority: 'secondary',
-      minWidth: 100,
+      minWidth: 90,
       sortValue: (e) => e.chainIds.length,
       cell: renderChains,
     },
@@ -125,9 +123,9 @@ function SpaceAddressBookTable({
           {
             id: 'middle',
             header: showAddedBy ? 'Added by' : 'Last updated',
-            width: '20%' as const,
+            width: '15%' as const,
             priority: 'secondary' as const,
-            minWidth: 140,
+            minWidth: 120,
             sortValue: (e: AddressBookEntry) => (showAddedBy ? e.createdBy : e.updatedAt || e.createdAt),
             cell: renderAddedBy,
           },
@@ -135,13 +133,17 @@ function SpaceAddressBookTable({
       : []),
     {
       id: 'actions',
-      width: (hasMiddleColumn ? '15%' : '35%') as ColumnWidth,
+      width: (hasExtraAction ? '35%' : hasMiddleColumn ? '15%' : '20%') as ColumnWidth,
       align: 'end',
-      minWidth: 80,
-      cell: (entry) => (
+      minWidth: hasExtraAction ? 240 : 80,
+      cell: (entry, { isCompact }) => (
         <span className="inline-flex items-center justify-end gap-1">
-          {renderExtraAction?.(entry)}
-          {entry.isLocal ? <LocalContactActions entry={entry} /> : <SpaceAddressBookActions entry={entry} />}
+          {renderExtraAction?.(entry, { isCompact })}
+          {entry.isLocal ? (
+            <LocalContactActions entry={entry} />
+          ) : (
+            <SpaceAddressBookActions entry={entry} isCompact={isCompact} />
+          )}
         </span>
       ),
     },

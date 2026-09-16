@@ -1,6 +1,7 @@
 import { createPortal } from 'react-dom'
 import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd'
 import { cn } from '@/utils/cn'
+import { clickOnEnterOrSpace } from '@/utils/keyboard'
 import { reorderByKey } from '@/utils/reorder'
 import DragHandle from './DragHandle'
 import SafeItem from './SafeItem'
@@ -86,12 +87,16 @@ const ReorderableSafeList = ({
                           data-current-safe={isCurrent ? 'true' : undefined}
                           data-testid="reorder-safe-row"
                           onClick={() => onSelect(item.id)}
+                          onKeyDown={clickOnEnterOrSpace}
                           // Take focus on hover so base-ui's stale grey highlight leaves the
                           // previous network row (network sub-rows are base-ui SelectItems).
                           onMouseEnter={focusRowOnHover}
                           className={cn(
-                            'group/row flex cursor-pointer items-center gap-2 rounded-lg py-3 pl-2 pr-3 hover:bg-muted',
-                            isCurrent && 'bg-[var(--color-background-light)]',
+                            'group/row flex cursor-pointer items-center gap-2 rounded-lg py-3 pl-2 pr-3',
+                            // The current safe hovers to a deeper green instead of the grey used by the rest.
+                            isCurrent
+                              ? 'bg-[var(--color-background-light)] hover:bg-[var(--color-background-light-hover)]'
+                              : 'hover:bg-muted',
                           )}
                         >
                           {dragHandle}

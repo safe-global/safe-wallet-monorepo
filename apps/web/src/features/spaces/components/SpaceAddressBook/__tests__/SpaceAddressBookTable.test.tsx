@@ -28,6 +28,9 @@ jest.mock('@/features/multichain', () => ({
   NetworkLogosTooltip: ({ networks, maxVisible }: { networks: { chainId: string }[]; maxVisible?: number }) => (
     <span data-testid="network-logos" data-max-visible={maxVisible} data-count={networks.length} />
   ),
+  NetworkLogosPill: ({ networks }: { networks: { chainId: string }[] }) => (
+    <span data-testid="network-logos" data-count={networks.length} />
+  ),
 }))
 jest.mock('@/components/common/ChainIndicator', () => {
   const ChainIndicator = () => <span data-testid="chain-indicator" />
@@ -64,6 +67,43 @@ describe('SpaceAddressBookTable', () => {
     mockResolveMemberName.mockReturnValue(undefined)
   })
 
+  it('tells the extra action whether the row is compact', () => {
+    const renderExtraAction = jest.fn(() => null)
+
+    const { unmount } = render(
+      <SpaceAddressBookTable entries={[entryBuilder().build()]} renderExtraAction={renderExtraAction} />,
+    )
+    expect(renderExtraAction).toHaveBeenLastCalledWith(expect.anything(), { isCompact: false })
+    unmount()
+
+    mockUseIsMobile.mockReturnValue(true)
+    render(<SpaceAddressBookTable entries={[entryBuilder().build()]} renderExtraAction={renderExtraAction} />)
+    expect(renderExtraAction).toHaveBeenLastCalledWith(expect.anything(), { isCompact: true })
+  })
+
+  // The extra action is a text button, so its column cannot live on the default narrow share
+  it('widens the actions column when an extra action is rendered', () => {
+    const lastHeader = (container: HTMLElement) => {
+      const headers = container.querySelectorAll('th')
+      return headers[headers.length - 1]
+    }
+
+    const { container, unmount } = render(<SpaceAddressBookTable entries={[entryBuilder().build()]} />)
+    expect(lastHeader(container).className).toContain('md:w-[15%]')
+    expect(lastHeader(container).style.getPropertyValue('--col-min-w')).toBe('80px')
+    unmount()
+
+    const withExtra = render(
+      <SpaceAddressBookTable
+        entries={[entryBuilder().build()]}
+        showAddedBy={false}
+        renderExtraAction={() => <button>Add to workspace</button>}
+      />,
+    )
+    expect(lastHeader(withExtra.container).className).toContain('md:w-[35%]')
+    expect(lastHeader(withExtra.container).style.getPropertyValue('--col-min-w')).toBe('240px')
+  })
+
   it('resolves the "Added by" cell to the space member name by user id', () => {
     const memberName = 'My space creator'
     mockResolveMemberName.mockImplementation((userId: number | undefined) => (userId === 7 ? memberName : undefined))
@@ -92,12 +132,12 @@ describe('SpaceAddressBookTable', () => {
     expect(screen.getByTestId('local-actions')).toBeInTheDocument()
   })
 
-  it('renders the network logos tooltip with maxVisible=3 for chain logos', () => {
+  it('renders the network logos pill with all chain logos', () => {
     const chainIds = ['1', '137', '10', '42161', '8453']
     render(<SpaceAddressBookTable entries={[entryBuilder().with({ chainIds }).build()]} />)
 
+    // The 3-logo cap and +N indicator live inside NetworkLogosPill (see its own stories/tests).
     const logosList = screen.getByTestId('network-logos')
-    expect(logosList).toHaveAttribute('data-max-visible', '3')
     expect(logosList).toHaveAttribute('data-count', '5')
   })
 
@@ -144,20 +184,37 @@ describe('SpaceAddressBookTable', () => {
     expect(screen.getAllByTestId('eth-hash-info')).toHaveLength(1)
   })
 
-  it('dims duplicate entries', () => {
-    const entry = entryBuilder().with({ isDuplicate: true }).build()
-    render(<SpaceAddressBookTable entries={[entry]} />)
-
-    const nameTrigger = screen.getByRole('button', { name: entry.name })
-    expect(nameTrigger.closest('tr')).toHaveClass('opacity-50')
-    expect(nameTrigger.closest('div')).not.toHaveClass('line-through')
-  })
-
   it('exposes the full name via a tooltip trigger in the Name column', () => {
     const name = 'A very long contact name that would overflow the Name column'
     render(<SpaceAddressBookTable entries={[entryBuilder().with({ name }).build()]} />)
 
     expect(screen.getByRole('button', { name })).toBeInTheDocument()
+  })
+
+  it('truncates the name on desktop and wraps it on mobile, where the address column is gone', () => {
+    const name = 'A very long contact name that would overflow the Name column'
+    const entry = entryBuilder().with({ name, createdBy: faker.internet.email() }).build()
+
+    const { unmount } = render(<SpaceAddressBookTable entries={[entry]} />)
+    expect(screen.getByRole('button', { name })).toHaveClass('truncate')
+    expect(screen.getByText('Address')).toBeInTheDocument()
+    unmount()
+
+    mockUseIsMobile.mockReturnValue(true)
+    render(<SpaceAddressBookTable entries={[entry]} />)
+    expect(screen.getByRole('button', { name })).not.toHaveClass('truncate')
+    expect(screen.queryByText('Address')).not.toBeInTheDocument()
+  })
+
+  it('moves the address under the name on mobile', () => {
+    mockUseIsMobile.mockReturnValue(true)
+    const entry = entryBuilder().with({ createdBy: faker.internet.email() }).build()
+
+    render(<SpaceAddressBookTable entries={[entry]} />)
+
+    const nameCell = screen.getByRole('button', { name: entry.name }).closest('td')
+    expect(nameCell).toContainElement(screen.getByTestId('eth-hash-info'))
+    expect(screen.getByTestId('eth-hash-info')).toHaveAttribute('data-short-address', 'true')
   })
 
   it('shortens the address on mobile and shows it in full on desktop', () => {

@@ -187,6 +187,34 @@ describe('contractVersionScanner', () => {
     expect(result.status).toBe('clear')
   })
 
+  it('returns clear for a 1.5.0 Safe with the 1.5.0 L2 singleton', async () => {
+    // SafeL2 v1.5.0 on mainnet
+    const result = await contractVersionScanner.scan(
+      createMockContext({
+        chainId: '1',
+        version: '1.5.0',
+        latestVersion: '1.5.0',
+        implementationAddress: '0xEdd160fEBBD92E350D4D398fb636302fccd67C7e',
+      }),
+    )
+    expect(result.status).toBe('clear')
+    expect(result.score).toBe(100)
+  })
+
+  it('returns clear for a 1.5.0 Safe with the 1.5.0 L1 singleton', async () => {
+    // Safe v1.5.0 on mainnet
+    const result = await contractVersionScanner.scan(
+      createMockContext({
+        chainId: '1',
+        version: '1.5.0',
+        latestVersion: '1.5.0',
+        implementationAddress: '0xFf51A5898e281Db6DfC7855790607438dF2ca44b',
+      }),
+    )
+    expect(result.status).toBe('clear')
+    expect(result.score).toBe(100)
+  })
+
   it('returns partial when original deployment used unrecognized implementation', async () => {
     const result = await contractVersionScanner.scan(
       createMockContext({

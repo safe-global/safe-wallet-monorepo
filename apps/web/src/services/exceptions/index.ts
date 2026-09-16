@@ -1,17 +1,64 @@
 import { IS_PRODUCTION } from '@/config/constants'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
-import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { asError, getHttpStatusFromError } from '@safe-global/utils/services/exceptions/utils'
 import { normalizeError } from '@safe-global/utils/services/exceptions/normalizeError'
 import { logger, captureError } from '../observability'
+import { getLedgerDeviceError } from '@/services/onboard/ledger-errors'
+import type { LedgerDeviceErrorInfo } from '@/services/onboard/types'
 import type { ErrorContext } from '../observability/types'
 
 // Re-exported for back-compat with `@/services/exceptions` call sites.
 // Canonical definition + cycle rationale: observability/types.ts.
 export type { ErrorContext }
 
+/**
+ * How long an identical warning is suppressed after going out. Sources that fail
+ * on a schedule — the 15s CGW poll, a gas estimate with several concurrent
+ * readers — otherwise report one failure once per attempt.
+ */
+const LOG_THROTTLE_MS = 60_000
+/** Ceiling on tracked keys, so a long-lived session cannot grow the map without bound. */
+const MAX_THROTTLED_KEYS = 500
+/** Insertion order doubles as recency: a key is re-inserted every time it goes out. */
+const lastLoggedAt = new Map<string, number>()
+
+const isThrottled = (key: string): boolean => {
+  const now = Date.now()
+  const last = lastLoggedAt.get(key)
+  if (last !== undefined && now - last < LOG_THROTTLE_MS) return true
+
+  if (lastLoggedAt.size >= MAX_THROTTLED_KEYS) {
+    for (const [tracked, at] of lastLoggedAt) {
+      if (now - at >= LOG_THROTTLE_MS) lastLoggedAt.delete(tracked)
+    }
+    for (const oldest of lastLoggedAt.keys()) {
+      if (lastLoggedAt.size < MAX_THROTTLED_KEYS) break
+      lastLoggedAt.delete(oldest)
+    }
+  }
+
+  lastLoggedAt.delete(key)
+  lastLoggedAt.set(key, now)
+  return false
+}
+
+/** Test-only: forgets what has been logged, so each test starts with an open window. */
+export const __resetLogThrottleForTests = (): void => {
+  lastLoggedAt.clear()
+}
+
 export class CodedException extends Error {
   public readonly code: number
   public readonly content: string
+  /** HTTP status of the wrapped request failure, when one is recoverable from `thrown`. */
+  public readonly httpStatus?: number
+  /**
+   * What the hardware wallet actually said, when the thrown error came from
+   * one. Read off the error rather than out of `message`: the sentence we show
+   * the user deliberately contains none of it (WA-3243), so this is the only
+   * route by which the tag, status word and device text still reach Datadog.
+   */
+  private readonly ledgerDevice?: LedgerDeviceErrorInfo
 
   private getCode(content: ErrorCodes): number {
     const codePrefix = content.split(':')[0]
@@ -29,6 +76,18 @@ export class CodedException extends Error {
     this.message = `Code ${content}${extraInfo}`
     this.code = this.getCode(content)
     this.content = content
+    this.httpStatus = getHttpStatusFromError(thrown)
+    this.ledgerDevice = getLedgerDeviceError(thrown)
+  }
+
+  /**
+   * Call-site context enriched with the HTTP status extracted from the thrown
+   * error, so every `trackError`/`logError` site gets the facet for free. An
+   * explicit `context.httpStatus` wins over the extracted one.
+   */
+  private withHttpStatus(context?: ErrorContext): ErrorContext | undefined {
+    if (this.httpStatus === undefined) return context
+    return { httpStatus: this.httpStatus, ...context }
   }
 
   /**
@@ -52,10 +111,21 @@ export class CodedException extends Error {
       error_layer: layer,
       ...(context?.rpcEndpointKind && { rpc_endpoint_kind: context.rpcEndpointKind }),
       ...(context?.rpcHost && { rpc_host: context.rpcHost }),
+      ...(context?.httpStatus && { http_status: context.httpStatus }),
+      // Presence, not truthiness — see the same note in the Mixpanel mapper.
+      ...(context?.attempt !== undefined && { attempt: context.attempt, is_retry: context.attempt > 1 }),
+      ...(this.ledgerDevice && {
+        ledger_reason: this.ledgerDevice.reason,
+        ledger_tag: this.ledgerDevice.tag,
+        ...(this.ledgerDevice.errorCode && { ledger_status_word: this.ledgerDevice.errorCode }),
+        ...(this.ledgerDevice.deviceMessage && { ledger_device_message: this.ledgerDevice.deviceMessage }),
+      }),
     }
   }
 
   public log(context?: ErrorContext): void {
+    if (isThrottled(`${this.message}|${JSON.stringify(context ?? {})}`)) return
+
     // Filter out the logError fn from the stack trace
     if (this.stack) {
       const newStack = this.stack
@@ -70,19 +140,33 @@ export class CodedException extends Error {
     console.warn(IS_PRODUCTION ? this.message : this)
 
     if (IS_PRODUCTION) {
-      const tags = this.getObservabilityContext(context)
+      const enrichedContext = this.withHttpStatus(context)
+      const tags = this.getObservabilityContext(enrichedContext)
       logger.warn(this.message, tags)
-      captureError({ error: this, isUserFacing: false, code: this.code, tags, context })
+      captureError({ error: this, isUserFacing: false, code: this.code, tags, context: enrichedContext })
     }
   }
 
   public track(context?: ErrorContext): void {
+    // User-driven outcomes (rejection, approval-prompt expiry) are expected
+    // behaviour, not failures: recorded as info-level Datadog actions only —
+    // no RUM error, no Error Surfaced analytics event (WA-2950).
+    const { isUserFacing } = normalizeError({ code: this.code, message: this.message, isUserFacing: true })
+    if (!isUserFacing) {
+      console.info(IS_PRODUCTION ? this.message : this)
+      if (IS_PRODUCTION) {
+        logger.info(this.message, this.getObservabilityContext(this.withHttpStatus(context)))
+      }
+      return
+    }
+
     console.error(IS_PRODUCTION ? this.message : this)
 
     if (IS_PRODUCTION) {
-      const tags = this.getObservabilityContext(context)
+      const enrichedContext = this.withHttpStatus(context)
+      const tags = this.getObservabilityContext(enrichedContext)
       logger.error(this.message, tags)
-      captureError({ error: this, isUserFacing: true, code: this.code, tags, context })
+      captureError({ error: this, isUserFacing: true, code: this.code, tags, context: enrichedContext })
     }
   }
 }

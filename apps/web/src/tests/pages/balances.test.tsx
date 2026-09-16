@@ -19,7 +19,11 @@ jest.mock('@/components/balances/AssetsTable', () => ({
 
 jest.mock('@/components/balances/TotalAssetValue', () => ({
   __esModule: true,
-  default: ({ tooltipTitle }: { tooltipTitle?: string }) => <div data-testid="total-asset-value">{tooltipTitle}</div>,
+  default: ({ tooltipTitle, error }: { tooltipTitle?: string; error?: boolean }) => (
+    <div data-testid="total-asset-value" data-error={String(!!error)}>
+      {tooltipTitle}
+    </div>
+  ),
 }))
 
 jest.mock('@/components/balances/ManageTokensButton', () => ({
@@ -104,7 +108,40 @@ describe('Balances page', () => {
     expect(screen.queryByTestId('assets-table')).not.toBeInTheDocument()
   })
 
-  const tooltipText = 'Total Balance may be different when you show all tokens.'
+  it('flags an error on the total value when balances errored with no data', () => {
+    jest.mocked(useVisibleBalances).mockReturnValue({
+      balances: {
+        items: [],
+        fiatTotal: '',
+      },
+      loaded: true,
+      loading: false,
+      error: 'There was an error loading balances',
+    })
+
+    render(<BalancesPage />)
+
+    expect(screen.getByTestId('total-asset-value')).toHaveAttribute('data-error', 'true')
+  })
+
+  it('does not flag an error on the total value when a real zero total is loaded despite a stale error', () => {
+    jest.mocked(useVisibleBalances).mockReturnValue({
+      balances: {
+        items: [],
+        fiatTotal: '0',
+        tokensFiatTotal: '0',
+      },
+      loaded: true,
+      loading: false,
+      error: 'There was an error loading balances',
+    })
+
+    render(<BalancesPage />)
+
+    expect(screen.getByTestId('total-asset-value')).toHaveAttribute('data-error', 'false')
+  })
+
+  const tooltipText = 'Total from this list only. Portfolio total includes positions and may use other token data.'
 
   const renderWithTokenList = (tokenList: TOKEN_LISTS | undefined) =>
     render(<BalancesPage />, {
@@ -123,9 +160,9 @@ describe('Balances page', () => {
     expect(screen.getByTestId('total-asset-value')).toHaveTextContent(tooltipText)
   })
 
-  it('hides the total balance tooltip when only trusted tokens are shown', () => {
+  it('shows the total balance tooltip when only trusted tokens are shown (tooltip is informational and list-independent)', () => {
     renderWithTokenList(TOKEN_LISTS.TRUSTED)
 
-    expect(screen.getByTestId('total-asset-value')).not.toHaveTextContent(tooltipText)
+    expect(screen.getByTestId('total-asset-value')).toHaveTextContent(tooltipText)
   })
 })

@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import type { NextPage } from 'next'
-import { Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 
 import SettingsHeader from '@/components/settings/SettingsHeader'
 import { PushNotifications } from '@/components/settings/PushNotifications'
@@ -23,7 +23,7 @@ const NotificationsPage: NextPage = () => {
         {isNotificationFeatureEnabled === true ? (
           <PushNotifications />
         ) : isNotificationFeatureEnabled === false ? (
-          <Typography textAlign="center" my={3}>
+          <Typography align="center" className="my-6">
             Notifications are not available on this network.
           </Typography>
         ) : null}

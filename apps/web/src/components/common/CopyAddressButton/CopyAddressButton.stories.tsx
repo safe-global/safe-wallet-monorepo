@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import CopyAddressButton from './index'
 import { StoreDecorator } from '@/stories/storeDecorator'
 
 const meta = {
+  title: 'Components/Common/CopyAddressButton',
   component: CopyAddressButton,
   parameters: {
     layout: 'centered',
@@ -11,9 +12,9 @@ const meta = {
   decorators: [
     (Story) => (
       <StoreDecorator initialState={{}}>
-        <Paper sx={{ padding: 2 }}>
+        <div className="rounded-lg bg-[var(--color-background-paper)] p-4">
           <Story />
-        </Paper>
+        </div>
       </StoreDecorator>
     ),
   ],
@@ -32,11 +33,7 @@ export const Default: Story = {
 export const WithChildren: Story = {
   args: {
     address: '0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552',
-    children: (
-      <Typography variant="body2" component="span">
-        0xd9Db...9552
-      </Typography>
-    ),
+    children: <Typography variant="paragraph-small">0xd9Db...9552</Typography>,
   },
 }
 

@@ -3,7 +3,7 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import { useAddressName } from '@/components/common/NamedAddressInfo'
 import useAddressBook from '@/hooks/useAddressBook'
 import { isCustomTxInfo } from '@/utils/transaction-guards'
-import { Chip } from '@mui/material'
+import { Chip } from '@/components/ui/chip'
 
 const NameChip = ({ txData, txInfo }: { txData?: TransactionData | null; txInfo?: TransactionDetails['txInfo'] }) => {
   const addressBook = useAddressBook()
@@ -22,17 +22,9 @@ const NameChip = ({ txData, txInfo }: { txData?: TransactionData | null; txInfo?
   const isUntrusted = !isInAddressBook && contractInfo.isUnverifiedContract
 
   return toAddress && (name || logo) ? (
-    <Chip
-      data-testid="name-chip"
-      sx={{
-        backgroundColor: isUntrusted ? 'error.background' : 'background.paper',
-        color: isUntrusted ? 'error.main' : undefined,
-        height: 'unset',
-      }}
-      label={
-        <EthHashInfo address={toAddress} name={name} customAvatar={logo} showAvatar={!!logo} avatarSize={20} onlyName />
-      }
-    ></Chip>
+    <Chip data-testid="name-chip" size="auto" variant={isUntrusted ? 'negative' : 'default'}>
+      <EthHashInfo address={toAddress} name={name} customAvatar={logo} showAvatar={!!logo} avatarSize={20} onlyName />
+    </Chip>
   ) : null
 }
 

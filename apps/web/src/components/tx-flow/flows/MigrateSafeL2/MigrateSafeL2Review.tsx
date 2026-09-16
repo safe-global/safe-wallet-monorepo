@@ -4,7 +4,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { createTx } from '@/services/tx/tx-sender'
 import { SafeTxContext } from '../../SafeTxProvider'
 import { createUpdateMigration } from '@/utils/safe-migrations'
-import { Box, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
@@ -23,17 +23,15 @@ export const MigrateSafeL2Review = ({ children, ...props }: ReviewTransactionPro
   }, [chain, safe.version, safe.fallbackHandler?.value, safe.implementation?.value, setSafeTx, setSafeTxError, safeSDK])
 
   return (
-    <Box>
-      <ReviewTransaction {...props}>
-        <ErrorMessage level="warning" title="Migration transaction">
-          <Typography>
-            The migration may take a few minutes. Transactions made before or during the migration won&apos;t show up in
-            your transaction history, but all future transactions will appear as usual.
-          </Typography>
-        </ErrorMessage>
+    <ReviewTransaction {...props}>
+      <ErrorMessage level="warning" title="Migration transaction">
+        <Typography>
+          The migration may take a few minutes. Transactions made before or during the migration won&apos;t show up in
+          your transaction history, but all future transactions will appear as usual.
+        </Typography>
+      </ErrorMessage>
 
-        {children}
-      </ReviewTransaction>
-    </Box>
+      {children}
+    </ReviewTransaction>
   )
 }

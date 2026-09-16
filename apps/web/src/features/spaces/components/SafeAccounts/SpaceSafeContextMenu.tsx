@@ -1,19 +1,16 @@
 import { type SafeItem, type MultiChainSafeItem, isMultiChainSafeItem } from '@/hooks/safes'
+import { ADMIN_ONLY_RENAME_MESSAGE } from '@/utils/addressBookNotifications'
 import RemoveSafeDialog from './RemoveSafeDialog'
 import { type MouseEvent, useState } from 'react'
-import MoreVertIcon from '@mui/icons-material/MoreVert'
-import IconButton from '@mui/material/IconButton'
-import ListItemIcon from '@mui/material/ListItemIcon'
-import ListItemText from '@mui/material/ListItemText'
-import MenuItem from '@mui/material/MenuItem'
-import { LogOut, Pencil } from 'lucide-react'
-import ContextMenu from '@/components/common/ContextMenu'
+import { LogOut, MoreVertical, Pencil } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import EntryDialog from '@/components/address-book/EntryDialog'
-import { useAppSelector } from '@/store'
-import { selectAllAddressBooks } from '@/store/addressBookSlice'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
-import { useIsAdmin } from '@/features/spaces'
+import { useAddressBookWriteScope, useIsAdmin } from '@/features/spaces'
+import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 
 enum ModalType {
   RENAME = 'rename',
@@ -23,29 +20,18 @@ enum ModalType {
 const defaultOpen = { [ModalType.RENAME]: false, [ModalType.REMOVE]: false }
 
 const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSafeItem }) => {
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>()
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
   const isAdmin = useIsAdmin()
 
-  const allAddressBooks = useAppSelector(selectAllAddressBooks)
   const chainIds = isMultiChainSafeItem(safeItem) ? safeItem.safes.map((safe) => safe.chainId) : [safeItem.chainId]
-  const name = isMultiChainSafeItem(safeItem) ? safeItem.name : allAddressBooks[safeItem.chainId]?.[safeItem.address]
-
-  const handleOpenContextMenu = (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setAnchorEl(e.currentTarget)
-  }
-
-  const handleCloseContextMenu = (e: Event) => {
-    e.stopPropagation()
-    setAnchorEl(undefined)
-  }
+  const name = useSafeDisplayName(safeItem.address, chainIds[0], safeItem.name)
+  const { scope, canRename } = useAddressBookWriteScope(safeItem.address, chainIds)
 
   const handleOpenModal = (e: MouseEvent, type: keyof typeof open) => {
     e.stopPropagation()
     if (type === ModalType.REMOVE) trackEvent({ ...SPACE_EVENTS.DELETE_ACCOUNT_MODAL })
-    setAnchorEl(undefined)
+    setIsMenuOpen(false)
     setOpen((prev) => ({ ...prev, [type]: true }))
   }
 
@@ -55,44 +41,56 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
 
   return (
     <>
-      <span
-        onClick={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-        }}
-        onMouseDown={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-        }}
-      >
-        <IconButton edge="end" size="small" onClick={handleOpenContextMenu}>
-          <MoreVertIcon />
-        </IconButton>
-      </span>
-      <ContextMenu anchorEl={anchorEl} open={!!anchorEl} onClose={handleCloseContextMenu} autoFocus={false}>
-        <MenuItem onClick={(e) => handleOpenModal(e, ModalType.RENAME)}>
-          <ListItemIcon>
-            <Pencil className="size-5 text-muted-foreground" />
-          </ListItemIcon>
-          <ListItemText>Rename</ListItemText>
-        </MenuItem>
+      <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Safe Account actions"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+              }}
+            />
+          }
+        >
+          <MoreVertical className="size-4" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <Tooltip>
+            <TooltipTrigger render={<div />}>
+              <DropdownMenuItem
+                disabled={!canRename}
+                title={canRename ? undefined : ADMIN_ONLY_RENAME_MESSAGE}
+                onClick={canRename ? (e) => handleOpenModal(e, ModalType.RENAME) : undefined}
+                onSelect={(e) => e.stopPropagation()}
+              >
+                <Pencil className="size-4 text-muted-foreground" />
+                <span data-testid="space-safe-rename-btn">Rename</span>
+              </DropdownMenuItem>
+            </TooltipTrigger>
+            {!canRename && <TooltipContent>{ADMIN_ONLY_RENAME_MESSAGE}</TooltipContent>}
+          </Tooltip>
 
-        {isAdmin && (
-          <MenuItem onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}>
-            <ListItemIcon>
-              <LogOut className="size-5 text-muted-foreground" />
-            </ListItemIcon>
-            <ListItemText>Remove from workspace</ListItemText>
-          </MenuItem>
-        )}
-      </ContextMenu>
+          {isAdmin && (
+            <DropdownMenuItem
+              onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}
+              onSelect={(e) => e.stopPropagation()}
+            >
+              <LogOut className="size-4 text-muted-foreground" />
+              <span>Remove from workspace</span>
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       {open[ModalType.RENAME] && (
         <EntryDialog
           handleClose={handleCloseModal}
-          defaultValues={{ name: name || '', address: safeItem.address }}
+          defaultValues={{ name, address: safeItem.address }}
           chainIds={chainIds}
-          currentChainId={isMultiChainSafeItem(safeItem) ? undefined : chainIds[0]}
+          scope={scope}
           disableAddressInput
         />
       )}

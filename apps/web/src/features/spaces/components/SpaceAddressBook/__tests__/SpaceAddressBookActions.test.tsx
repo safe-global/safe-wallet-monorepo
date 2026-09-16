@@ -6,9 +6,6 @@ import { Builder } from '@/tests/Builder'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import SpaceAddressBookActions from '../SpaceAddressBookActions'
 
-const mockUseIsMobile = jest.fn(() => false)
-jest.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
-
 const mockUseIsAdmin = jest.fn(() => true)
 jest.mock('@/features/spaces', () => ({ useIsAdmin: () => mockUseIsAdmin() }))
 
@@ -53,8 +50,17 @@ jest.mock('@/components/ui/dropdown-menu', () => {
     return context?.open ? <div>{children}</div> : null
   }
 
-  const DropdownMenuItem = ({ children, onClick }: { children: ReactNode; onClick?: () => void; variant?: string }) => (
-    <button type="button" onClick={onClick}>
+  const DropdownMenuItem = ({
+    children,
+    onClick,
+    disabled,
+  }: {
+    children: ReactNode
+    onClick?: () => void
+    disabled?: boolean
+    variant?: string
+  }) => (
+    <button type="button" onClick={onClick} disabled={disabled}>
       {children}
     </button>
   )
@@ -70,27 +76,43 @@ const buildEntry = () =>
 describe('SpaceAddressBookActions', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseIsMobile.mockReturnValue(false)
     mockUseIsAdmin.mockReturnValue(true)
   })
 
-  it('renders nothing for non-admins', () => {
+  it('shows edit and delete to a member, disabled', () => {
     mockUseIsAdmin.mockReturnValue(false)
 
-    const { container } = render(<SpaceAddressBookActions entry={buildEntry()} />)
+    render(<SpaceAddressBookActions entry={buildEntry()} />)
 
-    expect(container).toBeEmptyDOMElement()
+    expect(screen.getByRole('button', { name: 'Edit entry' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Delete entry' })).toBeDisabled()
   })
 
-  it('does not render the kebab on desktop', () => {
+  it('disables the compact-layout actions for a member', () => {
+    mockUseIsAdmin.mockReturnValue(false)
+
+    render(<SpaceAddressBookActions entry={buildEntry()} isCompact />)
+    fireEvent.click(screen.getByRole('button', { name: 'Contact actions' }))
+
+    expect(screen.getByRole('button', { name: 'Edit entry' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Delete entry' })).toBeDisabled()
+  })
+
+  it('leaves the actions enabled for an admin', () => {
+    render(<SpaceAddressBookActions entry={buildEntry()} />)
+
+    expect(screen.getByRole('button', { name: 'Edit entry' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: 'Delete entry' })).toBeEnabled()
+  })
+
+  it('does not render the kebab in the regular layout', () => {
     render(<SpaceAddressBookActions entry={buildEntry()} />)
 
     expect(screen.queryByRole('button', { name: 'Contact actions' })).not.toBeInTheDocument()
   })
 
-  it('opens the edit dialog from the mobile kebab', () => {
-    mockUseIsMobile.mockReturnValue(true)
-    render(<SpaceAddressBookActions entry={buildEntry()} />)
+  it('opens the edit dialog from the compact-layout kebab', () => {
+    render(<SpaceAddressBookActions entry={buildEntry()} isCompact />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Contact actions' }))
     fireEvent.click(screen.getByRole('button', { name: 'Edit entry' }))
@@ -98,9 +120,8 @@ describe('SpaceAddressBookActions', () => {
     expect(screen.getByTestId('edit-contact-dialog')).toBeInTheDocument()
   })
 
-  it('opens the delete dialog from the mobile kebab', () => {
-    mockUseIsMobile.mockReturnValue(true)
-    render(<SpaceAddressBookActions entry={buildEntry()} />)
+  it('opens the delete dialog from the compact-layout kebab', () => {
+    render(<SpaceAddressBookActions entry={buildEntry()} isCompact />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Contact actions' }))
     fireEvent.click(screen.getByRole('button', { name: 'Delete entry' }))

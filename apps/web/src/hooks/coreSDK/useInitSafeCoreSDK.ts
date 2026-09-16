@@ -8,7 +8,7 @@ import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
-import { useRpcEndpointInfo } from '@/hooks/wallets/useRpcEndpointInfo'
+import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
 import { parsePrefixedAddress, sameAddress } from '@safe-global/utils/utils/addresses'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { useChain } from '@/hooks/useChains'
@@ -18,7 +18,6 @@ export const useInitSafeCoreSDK = () => {
   const dispatch = useAppDispatch()
   const web3ReadOnly = useWeb3ReadOnly()
   const chain = useChain(safe.chainId)
-  const rpcInfo = useRpcEndpointInfo()
 
   const { query } = useRouter()
   const prefixedAddress = Array.isArray(query.safe) ? query.safe[0] : query.safe
@@ -32,6 +31,10 @@ export const useInitSafeCoreSDK = () => {
       return
     }
 
+    // Runs can overlap and settle out of order, so a superseded one must not
+    // write to the store — see the mobile twin of this hook.
+    let cancelled = false
+
     // A read-only instance of the SDK is sufficient because we connect the signer to it when needed
     initSafeSDK({
       provider: web3ReadOnly,
@@ -44,8 +47,17 @@ export const useInitSafeCoreSDK = () => {
       isL2Chain: chain?.l2,
       isZkChain: chain?.zk,
     })
-      .then(setSafeSDK)
+      .then((safeSDK) => {
+        if (cancelled) return
+        setSafeSDK(safeSDK)
+      })
       .catch((_e) => {
+        if (cancelled) return
+
+        // Leaving the previous SDK in the store would silently serve a stale
+        // instance (e.g. a counterfactual one after the Safe was deployed).
+        setSafeSDK(undefined)
+
         const e = asError(_e)
         dispatch(
           showNotification({
@@ -55,8 +67,12 @@ export const useInitSafeCoreSDK = () => {
             detailedMessage: e.message,
           }),
         )
-        trackError(ErrorCodes._105, e.message, rpcInfo)
+        trackError(ErrorCodes._105, e.message, getRpcErrorContext(web3ReadOnly))
       })
+
+    return () => {
+      cancelled = true
+    }
   }, [
     address,
     chain?.l2,
@@ -70,6 +86,5 @@ export const useInitSafeCoreSDK = () => {
     safeLoaded,
     web3ReadOnly,
     undeployedSafe,
-    rpcInfo,
   ])
 }

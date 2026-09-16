@@ -61,6 +61,12 @@ describe('SafeSelectorTriggerContent', () => {
     mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: false, loading: false })
   })
 
+  it('tags the identity block with the safe-header-info test id', () => {
+    const { getByTestId } = render(<SafeSelectorTriggerContent selectedItem={createItem()} selectedChainId="1" />)
+
+    expect(getByTestId('safe-header-info')).toBeInTheDocument()
+  })
+
   it('resolves name per chain without using the cross-chain item name', () => {
     const item = createItem({ name: 'Name from Ethereum' })
 

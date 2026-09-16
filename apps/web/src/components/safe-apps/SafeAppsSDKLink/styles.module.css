@@ -71,14 +71,11 @@
 
 .openButton {
   width: 50px;
-  height: 20px;
-  border-radius: 0 0 8px 8px;
   position: absolute;
   z-index: 1;
   left: 50%;
   bottom: -20px;
   margin-left: -25px;
-  background-color: var(--color-secondary-main);
 }
 
 [data-theme='dark'] .openButton {

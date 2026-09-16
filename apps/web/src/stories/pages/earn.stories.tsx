@@ -16,7 +16,7 @@ const defaultSetup = createMockStory({
 })
 
 const meta = {
-  title: 'Pages/Features/Earn',
+  title: 'Pages/DeFi/Earn',
   component: Earn,
   loaders: [mswLoader],
   parameters: {

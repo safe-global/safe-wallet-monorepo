@@ -1,21 +1,19 @@
 import { useState } from 'react'
-import {
-  Box,
-  Button as MuiButton,
-  CircularProgress,
-  DialogActions,
-  DialogContent,
-  Stack,
-  Typography,
-} from '@mui/material'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Clock, Plus } from 'lucide-react'
 import InvalidContactNameTooltip from './InvalidContactNameTooltip'
 import { Badge } from '@/components/ui/badge'
+import { Typography } from '@/components/ui/typography'
+import DialogActions from '@/components/common/DialogActions'
 import ModalDialog from '@/components/common/ModalDialog'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { NetworkLogosTooltip } from '@/features/multichain'
 import { useAddressBookRequestsCreateRequestV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from '@/features/spaces'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import useChains from '@/hooks/useChains'
@@ -27,6 +25,7 @@ type RequestToAddButtonProps = {
   name: string
   chainIds: string[]
   alreadyRequested?: boolean
+  isCompact?: boolean
 }
 
 const getRequestErrorMessage = (error: unknown): string => {
@@ -37,7 +36,7 @@ const getRequestErrorMessage = (error: unknown): string => {
   return 'Failed to create request. Please try again.'
 }
 
-const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: RequestToAddButtonProps) => {
+const RequestToAddButton = ({ address, name, chainIds, alreadyRequested, isCompact }: RequestToAddButtonProps) => {
   const spaceId = useCurrentSpaceId()
   const chains = useChains()
   const dispatch = useAppDispatch()
@@ -77,6 +76,7 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
         return
       }
 
+      trackEvent(SPACE_EVENTS.ADDRESS_REQUEST_SENT)
       setRequested(true)
       setOpen(false)
       dispatch(
@@ -100,46 +100,71 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
   }
 
   if (isDone) {
-    return <Badge variant="secondary">Requested</Badge>
+    return isCompact ? (
+      <Tooltip>
+        <TooltipTrigger render={<span className="inline-flex" aria-label="Requested" />}>
+          <Clock className="text-muted-foreground size-4" />
+        </TooltipTrigger>
+        <TooltipContent>Requested</TooltipContent>
+      </Tooltip>
+    ) : (
+      <Badge variant="secondary">Requested</Badge>
+    )
   }
 
-  const trigger = (
-    <Button variant="outline" size="sm" onClick={() => setOpen(true)} disabled={!!nameError}>
-      Request to add
+  // Compact has no room for the label, so it moves into the accessible name and a tooltip
+  const button = (
+    <Button
+      variant="outline"
+      size={isCompact ? 'icon-sm' : 'sm'}
+      aria-label={isCompact ? 'Request to add' : undefined}
+      onClick={() => setOpen(true)}
+      disabled={!!nameError}
+    >
+      {isCompact ? <Plus className="size-4" /> : 'Request to add'}
     </Button>
+  )
+
+  const trigger = isCompact ? (
+    <Tooltip>
+      <TooltipTrigger render={<span className="inline-flex" />}>{button}</TooltipTrigger>
+      <TooltipContent>Request to add</TooltipContent>
+    </Tooltip>
+  ) : (
+    button
   )
 
   return (
     <>
-      {nameError ? <InvalidContactNameTooltip nameError={nameError}>{trigger}</InvalidContactNameTooltip> : trigger}
+      {nameError ? <InvalidContactNameTooltip nameError={nameError}>{button}</InvalidContactNameTooltip> : trigger}
 
       <ModalDialog open={open} onClose={() => setOpen(false)} dialogTitle="Request to add contact" hideChainIndicator>
-        <DialogContent sx={{ py: 2 }}>
-          <Stack spacing={2}>
-            <Typography variant="body2" color="text.secondary">
+        <div className="px-6 py-4">
+          <div className="flex flex-col gap-4">
+            <Typography variant="paragraph-small" color="muted">
               An admin has to approve the request before the contact appears in the workspace address book.
             </Typography>
 
-            <Box>
-              <Typography variant="body2" color="text.secondary" mb={0.5}>
+            <div className="flex flex-col gap-1">
+              <Typography variant="paragraph-small" color="muted">
                 Name
               </Typography>
-              <Typography variant="body1">{name}</Typography>
-            </Box>
+              <Typography>{name}</Typography>
+            </div>
 
-            <Box>
-              <Typography variant="body2" color="text.secondary" mb={0.5}>
+            <div className="flex flex-col gap-1">
+              <Typography variant="paragraph-small" color="muted">
                 Address
               </Typography>
               <EthHashInfo address={address} shortAddress={false} showPrefix={false} showName={false} avatarSize={24} />
-            </Box>
+            </div>
 
-            <Box>
-              <Typography variant="body2" color="text.secondary" mb={1}>
+            <div className="flex flex-col gap-2">
+              <Typography variant="paragraph-small" color="muted">
                 Networks
               </Typography>
               {chains.configs.length === chainIds.length ? (
-                <Typography variant="body1">All networks</Typography>
+                <Typography>All networks</Typography>
               ) : (
                 <NetworkLogosTooltip
                   networks={chainIds.map((chainId) => ({ chainId }))}
@@ -147,25 +172,27 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
                   triggerRender={<span className="inline-flex" />}
                 />
               )}
-            </Box>
-          </Stack>
-        </DialogContent>
+            </div>
 
-        <DialogActions>
-          <MuiButton data-testid="cancel-btn" onClick={() => setOpen(false)}>
-            Cancel
-          </MuiButton>
-          <MuiButton
-            data-testid="confirm-request-btn"
-            type="submit"
-            variant="contained"
-            onClick={handleConfirm}
-            disabled={isSubmitting}
-            disableElevation
-          >
-            {isSubmitting ? <CircularProgress size={20} /> : 'Request to add'}
-          </MuiButton>
-        </DialogActions>
+            {nameError && (
+              <Alert variant="warning" outlined={false}>
+                <AlertSeverityIcon variant="warning" />
+                <AlertDescription>Rename this contact to share it with the workspace. {nameError}.</AlertDescription>
+              </Alert>
+            )}
+          </div>
+        </div>
+
+        <DialogActions
+          className="px-6 pt-0 pb-6"
+          onCancel={() => setOpen(false)}
+          cancelTestId="cancel-btn"
+          confirmLabel="Request to add"
+          onConfirm={handleConfirm}
+          confirmTestId="confirm-request-btn"
+          confirmDisabled={!!nameError || isSubmitting}
+          confirmLoading={isSubmitting}
+        />
       </ModalDialog>
     </>
   )

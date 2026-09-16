@@ -1,5 +1,6 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useCallback } from 'react'
 import { Copy, Check } from 'lucide-react'
+import useCopyToClipboard from '@/hooks/useCopyToClipboard'
 import RowIconAction from './RowIconAction'
 
 // Copies a safe address to the clipboard. Used in the dropdown trigger and list rows; the rows pass
@@ -15,18 +16,12 @@ const CopyAddressButton = ({
   testId?: string
   onCopy?: () => void
 }) => {
-  const [copied, setCopied] = useState(false)
-  const resetTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const { copied, copy } = useCopyToClipboard()
 
   const runCopy = useCallback(() => {
-    navigator.clipboard.writeText(address)
-    setCopied(true)
-    clearTimeout(resetTimer.current)
-    resetTimer.current = setTimeout(() => setCopied(false), 2000)
+    copy(address)
     onCopy?.()
-  }, [address, onCopy])
-
-  useEffect(() => () => clearTimeout(resetTimer.current), [])
+  }, [copy, address, onCopy])
 
   return (
     <RowIconAction

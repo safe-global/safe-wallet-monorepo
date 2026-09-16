@@ -8,6 +8,7 @@ import {
   isEIP7702DelegatedAccount,
   EIP_7702_DELEGATED_ACCOUNT_PREFIX,
   isWalletUnlocked,
+  isWalletRejection,
 } from '@/utils/wallets'
 import { PRIVATE_KEY_MODULE_LABEL } from '@/services/private-key-module/constants'
 
@@ -89,6 +90,33 @@ describe('wallets', () => {
     })
   })
 
+  describe('isWalletRejection', () => {
+    it('detects an ethers ACTION_REJECTED error', () => {
+      const err = Object.assign(new Error('user rejected action'), { code: 'ACTION_REJECTED' })
+      expect(isWalletRejection(err)).toBe(true)
+    })
+
+    it('detects a lowercase rejection message', () => {
+      expect(isWalletRejection(new Error('user rejected the request'))).toBe(true)
+    })
+
+    it('does not detect a bare capitalised "Rejected" (handled downstream by the error normalizer, WA-2950)', () => {
+      expect(isWalletRejection(new Error('Rejected'))).toBe(false)
+    })
+
+    it('detects a WalletConnect "User rejected." reply', () => {
+      expect(isWalletRejection(new Error('User rejected.'))).toBe(true)
+    })
+
+    it('does not flag unrelated errors', () => {
+      expect(isWalletRejection(new Error('insufficient funds for gas'))).toBe(false)
+    })
+
+    it('does not flag genuine failures that merely contain a capitalised "Rejected"', () => {
+      expect(isWalletRejection(new Error('Transaction Rejected by guard'))).toBe(false)
+    })
+  })
+
   describe('isSmartContract', () => {
     it('should return true for accounts with bytecode', async () => {
       getCodeMock.mockResolvedValue('0x608060405234801561001057600080fd5b5')
@@ -159,6 +187,27 @@ describe('wallets', () => {
       const result = await isSmartContractWallet('1', toBeHex('0x1', 20))
 
       expect(result).toBe(false)
+    })
+
+    it('should memoize successful results per chainId and address', async () => {
+      getCodeMock.mockResolvedValue('0x608060405234801561001057600080fd5b5')
+
+      await isSmartContractWallet('1', toBeHex('0x1', 20))
+      await isSmartContractWallet('1', toBeHex('0x1', 20))
+
+      expect(getCodeMock).toHaveBeenCalledTimes(2) // isSmartContract + isEIP7702DelegatedAccount, once each
+    })
+
+    it('should not cache a failed check and retry on the next call', async () => {
+      getCodeMock.mockRejectedValueOnce(new Error('Provider not found'))
+
+      await expect(isSmartContractWallet('1', toBeHex('0x1', 20))).rejects.toThrow('Provider not found')
+
+      getCodeMock.mockResolvedValue('0x608060405234801561001057600080fd5b5')
+
+      const result = await isSmartContractWallet('1', toBeHex('0x1', 20))
+
+      expect(result).toBe(true)
     })
   })
 })

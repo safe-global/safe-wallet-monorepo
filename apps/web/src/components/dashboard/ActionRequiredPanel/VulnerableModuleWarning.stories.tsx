@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { VulnerableModuleWarning } from './VulnerableModuleWarning'
 
 const meta = {
-  title: 'Dashboard/VulnerableModuleWarning',
+  title: 'Components/Dashboard/VulnerableModuleWarning',
   component: VulnerableModuleWarning,
   tags: ['autodocs'],
   parameters: {

@@ -4,11 +4,11 @@ import * as nfts from '../pages/nfts.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import { mockVisualTestApis } from '../../support/visual-mocks.js'
 
-let staticSafes = []
+let nftSafes = []
 
 describe('[VISUAL] NFTs page screenshots', { defaultCommandTimeout: 60000, ...constants.VISUAL_VIEWPORT }, () => {
   before(async () => {
-    staticSafes = await getSafes(CATEGORIES.static)
+    nftSafes = await getSafes(CATEGORIES.nfts)
   })
 
   beforeEach(() => {
@@ -18,7 +18,7 @@ describe('[VISUAL] NFTs page screenshots', { defaultCommandTimeout: 60000, ...co
   it('[VISUAL] Screenshot NFTs page with items', () => {
     cy.fixture('nfts/nfts.json').then((mockData) => {
       cy.intercept('GET', constants.collectiblesEndpoint, mockData).as('getCollectibles')
-      cy.visit(constants.balanceNftsUrl + staticSafes.SEP_STATIC_SAFE_23)
+      cy.visit(constants.balanceNftsUrl + nftSafes.SEP_NFT_SAFE_1)
     })
     cy.wait('@getCollectibles')
     nfts.waitForNftItems(1)

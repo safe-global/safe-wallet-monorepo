@@ -1,5 +1,4 @@
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { TriangleAlert } from 'lucide-react'
+import { Alert, AlertDescription, AlertTitle, AlertSeverityIcon } from '@/components/ui/alert'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import ExternalLink from '@/components/common/ExternalLink'
 import { cn } from '@/utils/cn'
@@ -15,18 +14,15 @@ interface SecurityBannerProps {
  */
 const SecurityBanner = ({ title, className }: SecurityBannerProps) => {
   return (
-    <Alert
-      variant="warning"
-      className={cn('mb-4 dark:bg-[var(--color-warning-background)] dark:text-[var(--color-text-primary)]', className)}
-    >
-      <TriangleAlert className="dark:text-[var(--color-warning-main)]" />
+    <Alert variant="warning" outlined={false} className={cn('mb-4', className)}>
+      <AlertSeverityIcon variant="warning" />
       {title && <AlertTitle className="font-bold">{title}</AlertTitle>}
-      <AlertDescription className="dark:text-current">
+      <AlertDescription>
         Some Safe accounts may be malicious or impersonations. Only trust Safe accounts you can verify.{' '}
         <ExternalLink
           href={HelpCenterArticle.ADDRESS_POISONING}
           noIcon
-          sx={{ '& span': { textDecoration: 'underline' }, '.dark &': { color: 'inherit' } }}
+          className="font-bold text-inherit [&>span]:underline"
         >
           Learn more
         </ExternalLink>

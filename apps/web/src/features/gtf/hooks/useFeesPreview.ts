@@ -19,6 +19,7 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { useGasTokenCandidates, type GasTokenCandidate } from './useGasTokenCandidates'
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 import { isGtfFeePreviewAvailable } from '../utils/isGtfFeePreviewAvailable'
+import { IS_RELAYING_LIVE } from '../constants'
 import {
   computeTotalOutgoing,
   getSendInGasToken,
@@ -154,7 +155,8 @@ export const useFeesPreview = (): FeesPreviewData => {
   // gas-token selector, and no call to the preview endpoint.
   const feePreviewAvailable = isGtfFeePreviewAvailable(chain)
   const isSignerMode =
-    !isConfirmation && (!feePreviewAvailable || gtfPaymentMode === 'signer' || candidates.length === 0)
+    !isConfirmation &&
+    (!IS_RELAYING_LIVE || !feePreviewAvailable || gtfPaymentMode === 'signer' || candidates.length === 0)
 
   // Confirmers render the fee locked in the signed payload, not a fresh CGW quote.
   // Skip the query when the Safe holds no eligible gas token — without this the CGW endpoint

@@ -4,7 +4,7 @@ import { type AllSafeItems, _groupAndSort, getComparator, useSafesSearch } from 
 import useAllSafes, { type SafeItem } from '@/hooks/safes/useAllSafes'
 import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
-import { useSimilarityClusters } from '@/features/address-poisoning'
+import { useSimilarityClusters, bandGroupsForList, buildSimilarWarnings } from '@/features/address-poisoning'
 
 const useOnboardingSafes = () => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -28,9 +28,25 @@ const useOnboardingSafes = () => {
     }
   }, [allSafes])
 
-  // Trusted rows are deliberately included — a pinned impostor must still warn (WA-2912).
+  // Cluster the full pool — a pinned/trusted impostor must still be caught (WA-2912).
   const allSafeAddresses = useMemo(() => (allSafes ?? []).map((s) => s.address), [allSafes])
-  const flaggedAddresses = useSimilarityClusters(allSafeAddresses).flagged
+  const { flagged: flaggedAddresses, groupIdByAddress } = useSimilarityClusters(allSafeAddresses)
+
+  // Each list bands its own cluster members.
+  const trustedSimilarityGroups = useMemo(
+    () => bandGroupsForList(trustedSafeItems, groupIdByAddress),
+    [trustedSafeItems, groupIdByAddress],
+  )
+  const ownedSimilarityGroups = useMemo(
+    () => bandGroupsForList(ownedSafeItems, groupIdByAddress),
+    [ownedSafeItems, groupIdByAddress],
+  )
+
+  // ⚠️ only where a cluster spans both lists — a single band can't box it.
+  const similarWarnings = useMemo(
+    () => buildSimilarWarnings(trustedSafeItems, ownedSafeItems, groupIdByAddress),
+    [trustedSafeItems, ownedSafeItems, groupIdByAddress],
+  )
 
   // Group into multi-chain / single-chain and sort
   const trustedGrouped = useMemo<AllSafeItems>(
@@ -56,6 +72,9 @@ const useOnboardingSafes = () => {
     trustedSafes: searchQuery ? filteredTrusted : trustedGrouped,
     ownedSafes: searchQuery ? filteredOwned : ownedGrouped,
     flaggedAddresses,
+    trustedSimilarityGroups,
+    ownedSimilarityGroups,
+    similarWarnings,
     handleSearch,
     hasNoSafes,
   }

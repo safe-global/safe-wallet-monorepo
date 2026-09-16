@@ -1,6 +1,7 @@
 import { type Chain, type RpcUri } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { JsonRpcProvider, BrowserProvider, type Eip1193Provider } from 'ethers'
 import { INFURA_TOKEN, SAFE_APPS_INFURA_TOKEN } from '@safe-global/utils/config/constants'
+import { getRpcEndpointInfo, rememberRpcEndpoint, WALLET_RPC_ENDPOINT_INFO } from './rpcEndpointInfo'
 
 // Re-export stores from lightweight module for backwards compatibility
 export { setWeb3, useWeb3, getWeb3ReadOnly, setWeb3ReadOnly, useWeb3ReadOnly } from './web3ReadOnly'
@@ -33,23 +34,25 @@ export const getRpcServiceUrl = (rpcUri: RpcUri): string => {
 export const createWeb3ReadOnly = (chain: Chain, customRpc?: string): JsonRpcProvider | undefined => {
   const url = customRpc || getRpcServiceUrl(chain.rpcUri)
   if (!url) return
-  return new JsonRpcProvider(url, Number(chain.chainId), {
+  const provider = new JsonRpcProvider(url, Number(chain.chainId), {
     staticNetwork: true,
     batchMaxCount: BATCH_MAX_COUNT,
   })
+  return rememberRpcEndpoint(provider, getRpcEndpointInfo(chain.rpcUri, { url, isCustom: Boolean(customRpc) }))
 }
 
 export const createWeb3 = (walletProvider: Eip1193Provider): BrowserProvider => {
-  return new BrowserProvider(walletProvider)
+  return rememberRpcEndpoint(new BrowserProvider(walletProvider), WALLET_RPC_ENDPOINT_INFO)
 }
 
 export const createSafeAppsWeb3Provider = (chain: Chain, customRpc?: string): JsonRpcProvider | undefined => {
   const url = customRpc || formatRpcServiceUrl(chain.rpcUri, SAFE_APPS_INFURA_TOKEN)
   if (!url) return
-  return new JsonRpcProvider(url, undefined, {
+  const provider = new JsonRpcProvider(url, undefined, {
     staticNetwork: true,
     batchMaxCount: BATCH_MAX_COUNT,
   })
+  return rememberRpcEndpoint(provider, getRpcEndpointInfo(chain.rpcUri, { url, isCustom: Boolean(customRpc) }))
 }
 
 export const getUserNonce = async (userAddress: string): Promise<number> => {

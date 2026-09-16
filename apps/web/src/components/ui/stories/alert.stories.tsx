@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Alert, AlertTitle, AlertDescription, AlertAction } from '../alert'
-import { AlertCircle, Wallet, X } from 'lucide-react'
+import { Alert, AlertTitle, AlertDescription, AlertAction, AlertSeverityIcon } from '../alert'
+import { AlertCircle, Check, TriangleAlert, Wallet, X } from 'lucide-react'
 import { Button } from '../button'
 
 /**
  * Alert Component Stories
  *
- * Figma: https://www.figma.com/design/trBVcpjZslO63zxiNUI9io/Obra-shadcn-ui--safe-?node-id=842-44439
+ * Figma: https://www.figma.com/design/trBVcpjZslO63zxiNUI9io/Obra-shadcn-ui--safe-?node-id=4029-4518
  */
 const meta = {
   title: 'UI/Alert',
@@ -14,7 +14,7 @@ const meta = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['default', 'destructive', 'warning', 'success'],
+      options: ['default', 'destructive', 'warning', 'success', 'info', 'subtle'],
     },
   },
 } satisfies Meta<typeof Alert>
@@ -22,8 +22,75 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
+const playgroundIcons = {
+  check: Check,
+  'circle-alert': AlertCircle,
+  'triangle-alert': TriangleAlert,
+} as const
+
+type PlaygroundArgs = {
+  variant: 'default' | 'destructive' | 'warning' | 'success' | 'info' | 'subtle'
+  outlined: boolean
+  title: string
+  description: string
+  icon: keyof typeof playgroundIcons | 'none'
+  button: 'none' | 'label' | 'close'
+}
+
+export const Playground: StoryObj<PlaygroundArgs> = {
+  args: {
+    variant: 'default',
+    outlined: true,
+    title: 'Item added successfully',
+    description: '',
+    icon: 'check',
+    button: 'none',
+  },
+  argTypes: {
+    variant: {
+      control: 'select',
+      options: ['default', 'destructive', 'warning', 'success', 'info', 'subtle'],
+    },
+    outlined: { control: 'boolean' },
+    icon: {
+      control: 'select',
+      options: ['none', 'check', 'circle-alert', 'triangle-alert'],
+    },
+    button: {
+      control: 'select',
+      options: ['none', 'label', 'close'],
+    },
+    title: { control: 'text' },
+    description: { control: 'text' },
+  },
+  render: ({ variant, outlined, title, description, icon, button }) => {
+    const Icon = icon === 'none' ? null : playgroundIcons[icon]
+
+    return (
+      <div className="w-[400px]">
+        <Alert variant={variant} outlined={outlined}>
+          {Icon && <Icon />}
+          <AlertTitle>{title}</AlertTitle>
+          {description && <AlertDescription>{description}</AlertDescription>}
+          {button !== 'none' && (
+            <AlertAction>
+              {button === 'label' ? (
+                <Button variant="outline">Undo</Button>
+              ) : (
+                <Button variant="ghost" size="sm">
+                  <X />
+                </Button>
+              )}
+            </AlertAction>
+          )}
+        </Alert>
+      </div>
+    )
+  },
+}
+
 export const AllVariants: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <div style={{ display: 'block' }}>
       <div style={{ marginBottom: '2rem' }}>
@@ -46,6 +113,43 @@ export const AllVariants: Story = {
             <Alert variant="destructive">
               <AlertTitle>Destructive Alert</AlertTitle>
               <AlertDescription>This is a destructive alert message.</AlertDescription>
+            </Alert>
+          </div>
+          <div style={{ width: '400px' }}>
+            <Alert variant="destructive" outlined={false}>
+              <AlertTitle>Destructive Alert (filled)</AlertTitle>
+              <AlertDescription>This is a destructive alert with outlined set to false.</AlertDescription>
+            </Alert>
+          </div>
+          <div style={{ width: '400px' }}>
+            <Alert variant="warning">
+              <AlertTitle>Warning Alert</AlertTitle>
+              <AlertDescription>This is a warning alert message.</AlertDescription>
+            </Alert>
+          </div>
+          <div style={{ width: '400px' }}>
+            <Alert variant="warning" outlined={false}>
+              <AlertTitle>Warning Alert (filled)</AlertTitle>
+              <AlertDescription>This is a warning alert with outlined set to false.</AlertDescription>
+            </Alert>
+          </div>
+          <div style={{ width: '400px' }}>
+            <Alert variant="success">
+              <AlertTitle>Success Alert</AlertTitle>
+              <AlertDescription>This is a success alert message.</AlertDescription>
+            </Alert>
+          </div>
+          <div style={{ width: '400px' }}>
+            <Alert variant="info">
+              <AlertSeverityIcon variant="info" />
+              <AlertTitle>Info Alert</AlertTitle>
+              <AlertDescription>This is an info alert message.</AlertDescription>
+            </Alert>
+          </div>
+          <div style={{ width: '400px' }}>
+            <Alert variant="subtle">
+              <AlertTitle>Subtle Alert</AlertTitle>
+              <AlertDescription>A neutral tint for messages that carry no status.</AlertDescription>
             </Alert>
           </div>
         </div>
@@ -73,6 +177,51 @@ export const AllVariants: Story = {
               <AlertCircle />
               <AlertTitle>Destructive with Icon</AlertTitle>
               <AlertDescription>This destructive alert includes an icon.</AlertDescription>
+            </Alert>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 className="mb-4 text-lg font-semibold">Severity Icons</h3>
+        <p className="mb-4 text-sm text-muted-foreground">
+          <code>AlertSeverityIcon</code> renders the standard icon for a given `variant` — opt in per alert, existing
+          consumers with their own icon (or none) are unaffected.
+        </p>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(400px, max-content))',
+            gap: '1.5rem',
+            justifyItems: 'start',
+          }}
+        >
+          <div style={{ width: '400px' }}>
+            <Alert variant="destructive">
+              <AlertSeverityIcon variant="destructive" />
+              <AlertTitle>Destructive Alert</AlertTitle>
+              <AlertDescription>Uses the standard destructive icon.</AlertDescription>
+            </Alert>
+          </div>
+          <div style={{ width: '400px' }}>
+            <Alert variant="warning">
+              <AlertSeverityIcon variant="warning" />
+              <AlertTitle>Warning Alert</AlertTitle>
+              <AlertDescription>Uses the standard warning icon.</AlertDescription>
+            </Alert>
+          </div>
+          <div style={{ width: '400px' }}>
+            <Alert variant="success">
+              <AlertSeverityIcon variant="success" />
+              <AlertTitle>Success Alert</AlertTitle>
+              <AlertDescription>Uses the standard success icon.</AlertDescription>
+            </Alert>
+          </div>
+          <div style={{ width: '400px' }}>
+            <Alert variant="info">
+              <AlertSeverityIcon variant="info" />
+              <AlertTitle>Info Alert</AlertTitle>
+              <AlertDescription>Uses the standard info icon.</AlertDescription>
             </Alert>
           </div>
         </div>

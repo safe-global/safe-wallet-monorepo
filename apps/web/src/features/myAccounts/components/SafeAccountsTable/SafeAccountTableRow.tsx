@@ -1,15 +1,14 @@
-import { useMemo, type MouseEvent, type ReactNode } from 'react'
+import { useCallback, useMemo, type MouseEvent, type ReactNode } from 'react'
 import type { DraggableProvidedDraggableProps, DraggableProvidedDragHandleProps } from '@hello-pangea/dnd'
-import NextLink from 'next/link'
+import type { LinkProps } from 'next/link'
 import { useRouter } from 'next/router'
-import TableCell from '@mui/material/TableCell'
-import TableRow from '@mui/material/TableRow'
-import { useForkRef } from '@mui/material/utils'
+import { TableCell, TableRow } from '@/components/ui/table'
 import type { SafeItem } from '@/hooks/safes'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useRowOverviews } from './useRowOverviews'
-import { Badge } from '@/components/ui/badge'
-import { GripVertical, TriangleAlert } from 'lucide-react'
+import { GripVertical } from 'lucide-react'
+import { SimilarityWarningIcon } from './SimilarityBand'
+import type { SimilarWarning } from '@/features/address-poisoning'
 import Identicon from '@/components/common/Identicon'
 import { SafeInfoDisplay } from '@/components/common/AccountRow'
 import MultiAccountContextMenu from '@/components/common/SafeListContextMenu/MultiAccountContextMenu'
@@ -18,10 +17,12 @@ import NotActivatedBadge from '@/components/common/NotActivatedBadge'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useChain } from '@/hooks/useChains'
+import { useAddressBookWriteScope } from '@/features/spaces'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { cn } from '@/utils/cn'
 import { AccountItem as BaseAccountItem } from '../AccountItem'
-import type { AccountLine } from './useSafeAccountRows'
+import { NetworkLogosPill } from '@/features/multichain'
+import { getContextMenuChainIds, type AccountLine } from './useSafeAccountRows'
 import type { SafeAccountColumn } from './columns'
 import { PendingBadge, ThresholdBadge, formatPendingLabel } from '@/components/common/AccountBadges'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -43,8 +44,10 @@ type SafeAccountTableRowProps = {
   expanded?: boolean
   /** Draw a bottom divider — only true at the boundary between top-level accounts, not within a group. */
   showDivider?: boolean
-  /** Flags the row with a "High similarity" warning (address-poisoning defence). */
-  isFlagged?: boolean
+  /** When set, shows the inline look-alike ⚠️ (with a peers tooltip) after the name — cross-list only. */
+  warning?: SimilarWarning
+  /** Tints the row (warning background) as a member of an address-poisoning similarity group. */
+  highlighted?: boolean
   /** Replaces the default context-menu actions cell (e.g. an "Add to workspace" button). */
   renderActions?: (line: AccountLine) => ReactNode
   /** When set, adds the hover rename pencil to the identity cell (non-modal surfaces). */
@@ -63,27 +66,24 @@ type SafeAccountTableRowProps = {
   onOverviewsLoaded: (overviews: SafeOverview[]) => void
 }
 
-const HighSimilarityBadge = () => (
-  <Badge variant="warning" className="-ml-px self-start">
-    <TriangleAlert data-icon="inline-start" />
-    High similarity
-  </Badge>
-)
-
 // Shares the dropdown's row identity cell: clip-gated name/address tooltips and copy/explorer icons
 // revealed on row hover. Single/parent rows lead with the blockie identicon; per-chain child rows
 // carry no icon (the chain is already named beside them) — a blank icon-width spacer keeps their name
 // aligned under the parent's. `onRename`, when set, adds the hover rename pencil (non-modal surfaces).
 const NameCellContent = ({
   line,
-  isFlagged,
+  warning,
   onRename,
+  nameLink,
 }: {
   line: AccountLine
-  isFlagged?: boolean
+  warning?: SimilarWarning
   onRename?: () => void
+  /** When set, only the name text becomes a navigation link — see SafeInfoDisplay's `nameLink`. */
+  nameLink?: { href: LinkProps['href']; onClick?: () => void; testId?: string }
 }) => {
   const chainConfig = useChain(line.chainId)
+  const { canRename } = useAddressBookWriteScope(line.address, getContextMenuChainIds(line.contextMenu))
   // Explorer links are per-chain, so only single safes and per-chain child rows get one — never the
   // multi-chain parent, whose chainId is just the first network's. On child rows (address hidden) the
   // link rides next to the chain name; SafeInfoDisplay places it there.
@@ -101,10 +101,11 @@ const NameCellContent = ({
       leading={<span className="flex w-10 items-center">{leading}</span>}
       hideAddress={!line.showAddress}
       explorerLink={explorerLink}
-      onRename={onRename}
-      badge={isFlagged ? <HighSimilarityBadge /> : undefined}
+      onRename={canRename ? onRename : undefined}
+      nameAdornment={warning ? <SimilarityWarningIcon warning={warning} /> : undefined}
       nameVariant="paragraph-bold"
       className="min-w-0"
+      nameLink={nameLink}
     />
   )
 }
@@ -112,7 +113,7 @@ const NameCellContent = ({
 const NameCell = ({
   line,
   expanded,
-  isFlagged,
+  warning,
   disableLink,
   onToggle,
   onLinkClick,
@@ -120,14 +121,25 @@ const NameCell = ({
 }: {
   line: AccountLine
   expanded?: boolean
-  isFlagged?: boolean
+  warning?: SimilarWarning
   /** In selection mode the row itself toggles the checkbox, so the name never navigates. */
   disableLink?: boolean
   onToggle?: () => void
   onLinkClick?: () => void
   onRename?: () => void
 }) => {
-  const content = <NameCellContent line={line} isFlagged={isFlagged} onRename={onRename} />
+  // Only the name text is the navigation link — never a wrapper around the whole cell — so the row's
+  // explorer/copy/rename controls stay outside it (a nested <a> is invalid HTML). Expandable group
+  // rows render inside a <button>, so they never get a link (an <a> inside a <button> is invalid too);
+  // selection mode (disableLink) makes the whole row toggle the checkbox instead of navigating.
+  const nameLink =
+    line.href && !line.expandable && !disableLink
+      ? { href: line.href, onClick: onLinkClick, testId: 'account-row-link' }
+      : undefined
+
+  // `warning` replaces the old boolean `isFlagged`: it carries the look-alike peers, so the cell can
+  // render the ⚠️ adornment with them listed rather than just tinting the row.
+  const content = <NameCellContent line={line} warning={warning} onRename={onRename} nameLink={nameLink} />
 
   if (line.expandable) {
     return (
@@ -140,26 +152,6 @@ const NameCell = ({
       >
         {content}
       </button>
-    )
-  }
-
-  if (line.href && !disableLink) {
-    // A link can't wrap the content (the explorer <a> is in there — no <a> inside <a>), so it sits
-    // behind it instead. Clicks pass through the content to the link; only the small controls and
-    // the address tooltip still catch the mouse.
-    return (
-      <div className="relative">
-        <NextLink
-          href={line.href}
-          onClick={onLinkClick}
-          data-testid="account-row-link"
-          aria-label={line.displayName}
-          className="absolute inset-0"
-        />
-        <div className="pointer-events-none relative [&_[role=button]]:pointer-events-auto [&_[data-address-tooltip]]:pointer-events-auto [&_a]:pointer-events-auto">
-          {content}
-        </div>
-      </div>
     )
   }
 
@@ -224,16 +216,14 @@ const CellContent = ({ column, line }: { column: SafeAccountColumn; line: Accoun
         />
       )
     case 'networks':
-      // The grey pill lives here, not in the shared ChainBadge — other surfaces (sidebar list,
-      // multi-account items) render the bare logos.
       return (
-        <span className="bg-muted inline-flex items-center rounded-full p-0.5">
+        <NetworkLogosPill>
           {line.networks ? (
             <BaseAccountItem.ChainBadge safes={line.networks} />
           ) : (
             <BaseAccountItem.ChainBadge chainId={line.chainId} />
           )}
-        </span>
+        </NetworkLogosPill>
       )
     case 'workspaces':
       return <WorkspaceAvatars spaces={line.workspaces} />
@@ -312,22 +302,16 @@ const RowCell = ({
   return (
     <TableCell
       data-testid={`account-cell-${column.id}`}
-      sx={{
+      // The Name cell hosts the always-visible grip (w-7, anchored left-0), so it needs extra left
+      // padding for the avatar to start after the grip rather than under it. The selection cell's
+      // grip is the narrower `inline` one and fits the default padding. Widening happens in
+      // the panel variant — the `td:first-of-type` rule there outranks a utility class.
+      data-hosts-handle={hostsHandle && column.id !== 'select' ? '' : undefined}
+      // Slim 8px padding (ui default), 16px on the outer cells + the hover-pill inset borders live in
+      // the panel variant (they need background-clip + specificity the primitive's classes can't beat).
+      className={cn(hostsHandle ? 'relative overflow-visible' : 'overflow-hidden')}
+      style={{
         textAlign: column.align ?? 'left',
-        verticalAlign: 'middle',
-        overflow: hostsHandle ? 'visible' : 'hidden',
-        ...(hostsHandle ? { position: 'relative' } : {}),
-        // Slimmer than MUI's default 16px so the fixed column budget matches the design.
-        px: 1,
-        // Horizontal inset for the hover pill on the outer cells (vertical inset + background-clip are set
-        // at the Table level, where they can beat the theme's cell-border override). When the Name cell
-        // hosts the reorder grip, the extra padding makes room so the grip sits
-        // left of the avatar instead of over it.
-        '&:first-of-type': {
-          pl: hostsHandle && column.id !== 'select' ? 3.5 : 2,
-          borderLeft: '4px solid transparent',
-        },
-        '&:last-of-type': { pr: 2, borderRight: '4px solid transparent' },
         ...(reorderable && column.width ? { width: column.width, minWidth: column.width, maxWidth: column.width } : {}),
       }}
       onClick={column.id === 'actions' || column.id === 'select' ? (e) => e.stopPropagation() : undefined}
@@ -356,7 +340,8 @@ const SafeAccountTableRow = ({
   columns,
   expanded,
   showDivider,
-  isFlagged,
+  warning,
+  highlighted,
   renderActions,
   onRename,
   checkbox,
@@ -378,8 +363,15 @@ const SafeAccountTableRow = ({
     [line],
   )
   const observerRef = useRowOverviews(rowSafes, line.variant !== 'child', onOverviewsLoaded)
-  // Compose the visibility observer ref with the drag-and-drop ref (only set in reorder mode).
-  const setRowRef = useForkRef(observerRef, rowRef)
+  // Compose the visibility observer ref (an object ref) with the drag-and-drop callback ref
+  // (only set in reorder mode) — replaces MUI's useForkRef.
+  const setRowRef = useCallback(
+    (element: HTMLTableRowElement | null) => {
+      observerRef.current = element
+      if (typeof rowRef === 'function') rowRef(element)
+    },
+    [observerRef, rowRef],
+  )
 
   // In selection mode a leaf row is one big checkbox — clicking anywhere on it toggles selection
   // (except affordances that stop propagation: the checkbox, actions, copy and explorer link).
@@ -408,7 +400,7 @@ const SafeAccountTableRow = ({
     <NameCell
       line={line}
       expanded={expanded}
-      isFlagged={isFlagged}
+      warning={warning}
       // Per-chain child rows can't be renamed on their own — only the whole safe (single/group).
       onRename={onRename && line.variant !== 'child' ? () => onRename(line) : undefined}
       disableLink={Boolean(checkbox)}
@@ -425,17 +417,23 @@ const SafeAccountTableRow = ({
       data-variant={line.variant}
       // Locked rows opt out of the table's grey row hover (see the Table sx override).
       data-disabled={checkbox?.disabledReason ? '' : undefined}
-      // Draws the row separator (via the Table sx override); false only at the last row of a group/list.
-      data-divider={showDivider ? '' : undefined}
-      // group/row lets the shared identity cell reveal its copy/explorer/rename icons on row hover.
-      className="group/row"
+      // The variant draws a separator under every row but the last; suppress it inside a group and
+      // inside a band, both of which close themselves.
+      data-no-divider={!showDivider || highlighted ? '' : undefined}
+      // Band membership marker — the card styling is keyed off this attribute.
+      data-highlighted={highlighted && !isDragging ? '' : undefined}
+      // The band fill is the row's own; opt out of the shared hover pill so it isn't painted over.
+      data-no-hover={highlighted ? '' : undefined}
+      // group/row lets the shared identity cell reveal its copy/explorer/rename icons on row hover;
+      // the lifted-while-dragging chrome is here.
+      className={cn(
+        'group/row',
+        checkbox?.disabledReason && 'opacity-[0.55]',
+        (rowSelectable || rowNavigable) && 'cursor-pointer',
+        isDragging && 'rounded-xl bg-[var(--color-background-paper)] shadow-md',
+      )}
       tabIndex={-1}
       onClick={rowSelectable ? () => onSelectToggle?.(!checkbox?.checked) : rowNavigable ? handleRowClick : undefined}
-      sx={{
-        ...(checkbox?.disabledReason ? { opacity: 0.55 } : {}),
-        ...(rowSelectable || rowNavigable ? { cursor: 'pointer' } : {}),
-        ...(isDragging ? { backgroundColor: 'background.paper', boxShadow: 3, borderRadius: '12px' } : {}),
-      }}
     >
       {columns.map((column, index) => (
         <RowCell

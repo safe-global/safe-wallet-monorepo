@@ -1,13 +1,13 @@
-import { Stack, Tooltip, Typography } from '@mui/material'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded'
+import { ChevronRight } from 'lucide-react'
 import type { ScanResult } from '@/features/security/types'
 import Identicon from '@/components/common/Identicon'
 import CopyAddressIconButton from '@/components/common/CopyAddressIconButton'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { cn } from '@/utils/cn'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import StatusCell from '../StatusCell/StatusCell'
 import { BalanceCell, ScoreCell } from './cells'
 import { CARD_ROW_CLASS, CELL_BASE, GRID_COLS, HIDE_BALANCE, ROW_VARIANTS } from './constants'
@@ -51,6 +51,7 @@ const SingleSafeRow = ({
   const isScanning = scanningKeys?.has(key)
   const safeHref = getSafeSecurityHref(safe.address, safe.chainId)
   const isDeployed = safe.chainEntries[0]?.isDeployed !== false
+  const safeName = safe.name || shortenAddress(safe.address)
 
   return (
     <motion.div
@@ -68,37 +69,34 @@ const SingleSafeRow = ({
       })}
     >
       <div className={CELL_BASE}>
-        <Stack direction="row" alignItems="center" spacing={2} sx={{ minWidth: 0 }}>
+        <div className="flex min-w-0 items-center gap-4">
           <Identicon address={safe.address} size={32} />
-          <Stack sx={{ minWidth: 0, gap: '6px' }}>
-            <Typography
-              variant="body2"
-              noWrap
-              fontWeight={700}
-              component={safeHref ? Link : 'span'}
-              {...(safeHref ? { href: safeHref } : {})}
-              title={safe.name || safe.address}
-              onClick={(e: React.MouseEvent) => e.stopPropagation()}
-              sx={{
-                display: 'block',
-                fontSize: '0.8125rem',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                textDecoration: 'none',
-                color: 'inherit',
-                '&:hover': safeHref ? { textDecoration: 'underline' } : {},
-              }}
-            >
-              {safe.name || shortenAddress(safe.address)}
-            </Typography>
-            <Stack direction="row" alignItems="center" spacing={0.5} sx={{ minWidth: 0 }}>
-              <Typography noWrap sx={{ fontSize: '0.6875rem', color: 'text.secondary', lineHeight: 1 }}>
+          <div className="flex min-w-0 flex-col gap-1.5">
+            {safeHref ? (
+              <Link
+                href={safeHref}
+                title={safe.name || safe.address}
+                onClick={(e) => e.stopPropagation()}
+                className="block min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[0.8125rem] font-bold text-inherit no-underline hover:underline"
+              >
+                {safeName}
+              </Link>
+            ) : (
+              <span
+                title={safe.name || safe.address}
+                className="block min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[0.8125rem] font-bold text-inherit"
+              >
+                {safeName}
+              </span>
+            )}
+            <div className="flex min-w-0 items-center gap-1">
+              <span className="text-[0.6875rem] leading-none text-muted-foreground">
                 {shortenAddress(safe.address)}
-              </Typography>
+              </span>
               <CopyAddressIconButton address={safe.address} />
-            </Stack>
-          </Stack>
-        </Stack>
+            </div>
+          </div>
+        </div>
       </div>
       <div className={CELL_BASE}>
         <ChainIndicator chainId={safe.chainId} onlyLogo imageSize={18} />
@@ -114,21 +112,17 @@ const SingleSafeRow = ({
       </div>
       <div className={cn(CELL_BASE, 'justify-end')}>
         {isDeployed ? (
-          <ChevronRightRoundedIcon
-            sx={{
-              color: isSelected ? 'primary.main' : 'text.secondary',
-              verticalAlign: 'middle',
-            }}
-          />
+          <ChevronRight className={cn('h-5 w-5 align-middle', isSelected ? 'text-primary' : 'text-muted-foreground')} />
         ) : (
-          <Tooltip title="Safe not yet deployed on this network">
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ display: 'inline-block', whiteSpace: 'normal', lineHeight: 1.2, textAlign: 'right' }}
+          <Tooltip>
+            <TooltipTrigger
+              render={<span />}
+              tabIndex={0}
+              className="inline-block text-right leading-tight whitespace-normal text-xs text-muted-foreground"
             >
               Not deployed
-            </Typography>
+            </TooltipTrigger>
+            <TooltipContent>Safe not yet deployed on this network</TooltipContent>
           </Tooltip>
         )}
       </div>

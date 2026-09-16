@@ -1,5 +1,5 @@
 import Identicon from '@/components/common/Identicon'
-import { Box, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import { Suspense } from 'react'
 import type { ReactElement } from 'react'
 
@@ -15,14 +15,14 @@ import css from './styles.module.css'
 
 export const WalletIdenticon = ({ wallet, size = 32 }: { wallet: ConnectedWallet; size?: number }) => {
   return (
-    <Box className={css.imageContainer}>
+    <div className={css.imageContainer}>
       <Identicon address={wallet.address} size={size} />
       <Suspense>
-        <Box className={css.walletIcon}>
+        <div className={css.walletIcon}>
           <WalletIcon provider={wallet.label} icon={wallet.icon} width={size / 2} height={size / 2} />
-        </Box>
+        </div>
       </Suspense>
-    </Box>
+    </div>
   )
 }
 
@@ -40,11 +40,11 @@ const WalletOverview = ({
   const ens = useWalletName(wallet)
 
   return (
-    <Box className={css.container}>
+    <div className={css.container}>
       <WalletIdenticon wallet={wallet} />
 
-      <Box className={css.walletDetails}>
-        <Typography variant="body2" component="div">
+      <div className={css.walletDetails}>
+        <div className="text-sm leading-5 font-normal">
           {ens ? (
             <div>{ens}</div>
           ) : (
@@ -57,15 +57,15 @@ const WalletOverview = ({
               copyAddress={false}
             />
           )}
-        </Typography>
+        </div>
 
         {showBalance && showWalletBalance && (
-          <Typography variant="caption" component="div" fontWeight="bold" display={{ xs: 'none', sm: 'block' }}>
+          <Typography variant="paragraph-mini-bold" className="hidden sm:block">
             <WalletBalance balance={balance} />
           </Typography>
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }
 

@@ -1,4 +1,3 @@
-import { Box } from '@mui/material'
 import { getDeterministicColor } from '@/utils/colors'
 import css from './styles.module.css'
 
@@ -24,19 +23,21 @@ const InitialsAvatar = ({
   const { width, height, fontSize } = dimensions[size]
 
   return (
-    <Box
+    <div
       className={css.initialsAvatar}
-      bgcolor={logoColor}
-      width={width}
-      height={height}
-      minWidth={width}
-      minHeight={height}
-      flexShrink={0}
-      fontSize={fontSize}
-      borderRadius={rounded ? '50%' : '6px'}
+      style={{
+        backgroundColor: logoColor,
+        width,
+        height,
+        minWidth: width,
+        minHeight: height,
+        flexShrink: 0,
+        fontSize,
+        borderRadius: rounded ? '50%' : '6px',
+      }}
     >
       {logoLetters}
-    </Box>
+    </div>
   )
 }
 

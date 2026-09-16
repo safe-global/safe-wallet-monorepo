@@ -12,6 +12,8 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { getChainIdsParam } from '../../../utils'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import useChains from '@/hooks/useChains'
 import { useAppDispatch, useAppSelector } from '@/store'
@@ -200,8 +202,11 @@ const useOnboardingSubmit = (
     }
   }
 
-  const processSelectedSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdStr: string) => {
-    const safesToAdd = getSafesToAdd(selectedSafes)
+  const processSelectedSafes = async (
+    safesToAdd: Array<{ chainId: string; address: string }>,
+    selectedSafes: AddAccountsFormValues['selectedSafes'],
+    spaceIdStr: string,
+  ) => {
     await addNewSafes(safesToAdd, spaceIdStr)
     await removeUnselectedSafes(selectedSafes, spaceIdStr)
     trustAddedSafes(safesToAdd)
@@ -214,8 +219,15 @@ const useOnboardingSubmit = (
     setIsSubmitting(true)
 
     try {
-      trackEvent({ ...SPACE_EVENTS.ADD_ACCOUNTS })
-      await processSelectedSafes(data.selectedSafes, spaceId)
+      const safesToAdd = getSafesToAdd(data.selectedSafes)
+      if (safesToAdd.length > 0) {
+        trackEvent(SPACE_EVENTS.ADD_ACCOUNTS, {
+          [MixpanelEventParams.ACCOUNT_COUNT]: safesToAdd.length,
+          [MixpanelEventParams.SOURCE]: 'onboarding',
+          [MixpanelEventParams.CHAIN_ID]: getChainIdsParam(safesToAdd),
+        })
+      }
+      await processSelectedSafes(safesToAdd, data.selectedSafes, spaceId)
 
       onSuccess()
     } catch (e) {

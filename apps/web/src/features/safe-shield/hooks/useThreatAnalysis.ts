@@ -1,7 +1,7 @@
 import {
   useThreatAnalysis as useThreatAnalysisUtils,
   useThreatAnalysisHypernative,
-  useThreatAnalysisWithGuard,
+  useFinalizedThreatAnalysis,
 } from '@safe-global/utils/features/safe-shield/hooks'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
@@ -103,5 +103,5 @@ export function useThreatAnalysis(
     ? { safeTx: nestedSafeTx, safeAddress: nestedSafeInfo?.address.value, safeVersion: nestedSafeInfo?.version }
     : { safeTx: safeTxToCheck, safeAddress, safeVersion: version }
 
-  return useThreatAnalysisWithGuard(combinedThreatAnalysis, { ...guardCheckParams, web3ReadOnly })
+  return useFinalizedThreatAnalysis(combinedThreatAnalysis, { ...guardCheckParams, web3ReadOnly })
 }

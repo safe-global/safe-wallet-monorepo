@@ -1,5 +1,7 @@
 import * as constants from '../../support/constants'
 import { accordionActionItem } from '../pages/nfts.pages'
+import * as main from '../pages/main.page'
+import * as ls from '../../support/localstorage_data.js'
 
 const searchAppInput = 'input[id="search-by-name"]'
 const appUrlInput = 'input[name="appUrl"]'
@@ -119,10 +121,10 @@ export const transactiobUilderHeadlinePreview = 'Transaction Builder'
 export const availableNetworksPreview = 'Available networks'
 export const connecttextPreview = 'Compose custom contract interactions and batch them into a single transaction'
 export const AddressEmptyCodeStr = 'AddressEmptyCode'
-export const gridItem = 'main .MuiPaper-root > .MuiGrid-item'
+export const gridItem = '[data-testid="app-permissions-item"]'
 export const linkNames = {
-  wcLogo: /WalletConnect logo/i,
-  txBuilderLogo: /Transaction Builder logo/i,
+  wcLink: /Open WalletConnect/i,
+  txBuilderLink: /Open Transaction Builder/i,
 }
 const featuredAppsStr = /featured apps/i
 const pinnedAppsStr = 'My pinned apps'
@@ -175,6 +177,9 @@ export function verifyBlindSigningEnabled(option) {
 
 export function clickOnBlindSigningOption() {
   cy.contains(blindSigningStr2).click()
+  // Navigating away from the open message flow asks to discard it. This used to be a
+  // native confirm() that Cypress auto-accepted; the themed dialog needs a real click.
+  cy.contains('button', 'Discard').click()
   cy.contains(enableBlindSigningStr).click()
 }
 
@@ -207,7 +212,10 @@ export function verifyLinkName(name) {
 }
 
 export function clickOnApp(app) {
-  cy.contains(app).click()
+  // The card's text sits in a pointer-events-none layer; clicks land on the overlay
+  // link covering the card, so target that link directly. An app can render two cards
+  // (featured + all apps), so take the first like cy.contains() used to.
+  cy.get(`a[aria-label="Open ${app}"]`).first().click()
   cy.wait(2000)
 }
 
@@ -335,10 +343,36 @@ export function clickOnAcceptBtn() {
   cy.findByRole('button', { name: acceptBtnStr }).click()
 }
 
+export function verifyPermissionsRequestVisible() {
+  cy.contains(permissionRequestStr).should('be.visible')
+}
+
+export function clickOnPermissionsAcceptBtn() {
+  cy.contains('button', acceptBtnStr).click()
+}
+
 export function uncheckAllPermissions(element) {
   cy.wrap(element).findByText(clearAllBtnStr).click()
 }
 
 export function checkAllPermissions(element) {
   cy.wrap(element).findByText(allowAllPermissions).click()
+}
+
+export function getSafeAppIframeSelector(appUrl) {
+  return `iframe[id="iframe-${encodeURIComponent(appUrl)}"]`
+}
+
+export function verifySafeAppIframeVisible(appUrl) {
+  cy.get(getSafeAppIframeSelector(appUrl), { timeout: 30000 }).should('be.visible')
+}
+
+/**
+ * Opens a Safe App with the address book permission already granted, so the host's consent prompt
+ * never appears and blocks the iframe. Specs that test the prompt itself should not use this.
+ */
+export function openSafeAppWithAddressBookPermission(safeAddress, appUrl) {
+  main.addToLocalStorage(constants.SAFE_PERMISSIONS_KEY, ls.safeAppSafePermissions(appUrl))
+  cy.visit(`/apps/open?safe=${safeAddress}&appUrl=${encodeURIComponent(appUrl)}`)
+  verifySafeAppIframeVisible(appUrl)
 }

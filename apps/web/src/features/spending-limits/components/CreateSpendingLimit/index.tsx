@@ -1,7 +1,9 @@
-import { useCallback, useContext, useMemo } from 'react'
+import { useCallback, useContext, useEffect, useMemo } from 'react'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
-import { Button, CardActions, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material'
-import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { parseUnits, AbiCoder } from 'ethers'
 
 import AddressBookInput from '@/components/common/AddressBookInput'
@@ -9,8 +11,7 @@ import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShi
 import useChainId from '@/hooks/useChainId'
 import { getResetTimeOptions } from '../../constants'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
-import TxCard from '@/components/tx-flow/common/TxCard'
-import css from '@/components/tx/ExecuteCheckbox/styles.module.css'
+import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import TokenAmountInput from '@/components/common/TokenAmountInput'
 import { validateAmount, validateDecimalLength } from '@safe-global/utils/utils/validation'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
@@ -18,10 +19,14 @@ import { SpendingLimitFields, type NewSpendingLimitFlowProps } from '../../types
 import useIsSpendingLimitSupported from '../../hooks/useIsSpendingLimitSupported'
 import SpendingLimitNotSupported from './SpendingLimitNotSupported'
 
+export const NO_TOKEN_SELECTED_ERROR = 'Select a token'
+
 export const _validateSpendingLimit = (val: string, decimals?: number | null) => {
+  // Without a selected token the decimals are unknown, so the amount cannot be valid yet.
+  if (decimals == null) return NO_TOKEN_SELECTED_ERROR
   // Allowance amount is uint96 https://github.com/safe-global/safe-modules/blob/main/modules/allowances/contracts/AllowanceModule.sol#L52
   try {
-    const amount = parseUnits(val, decimals ?? 'Gwei')
+    const amount = parseUnits(val, decimals)
     AbiCoder.defaultAbiCoder().encode(['int96'], [amount])
   } catch (e) {
     return Number(val) > 1 ? 'Amount is too big' : 'Amount is too small'
@@ -41,7 +46,7 @@ const CreateSpendingLimit = () => {
     mode: 'onChange',
   })
 
-  const { handleSubmit, watch, control } = formMethods
+  const { handleSubmit, watch, control, formState, getValues, trigger } = formMethods
 
   const tokenAddress = watch(SpendingLimitFields.tokenAddress)
   const beneficiary = watch(SpendingLimitFields.beneficiary)
@@ -52,16 +57,23 @@ const CreateSpendingLimit = () => {
     ? balances.items.find((item) => item.tokenInfo.address === tokenAddress)
     : undefined
 
+  const tokenDecimals = selectedToken?.tokenInfo.decimals
+
   const validateSpendingLimit = useCallback(
-    (value: string) => {
-      return (
-        validateAmount(value) ||
-        validateDecimalLength(value, selectedToken?.tokenInfo.decimals) ||
-        _validateSpendingLimit(value, selectedToken?.tokenInfo.decimals)
-      )
-    },
-    [selectedToken?.tokenInfo.decimals],
+    (value: string) =>
+      validateAmount(value) ||
+      validateDecimalLength(value, tokenDecimals) ||
+      _validateSpendingLimit(value, tokenDecimals),
+    [tokenDecimals],
   )
+
+  // react-hook-form only evaluates `isValid` on mount, so a prefilled amount must be re-checked
+  // once the selected token (and therefore its decimals) becomes known or is lost.
+  useEffect(() => {
+    if (getValues(SpendingLimitFields.amount)) {
+      trigger(SpendingLimitFields.amount)
+    }
+  }, [tokenDecimals, getValues, trigger])
 
   if (!isSupported) {
     return <SpendingLimitNotSupported />
@@ -71,55 +83,50 @@ const CreateSpendingLimit = () => {
     <TxCard>
       <FormProvider {...formMethods}>
         <form onSubmit={handleSubmit(onNext)}>
-          <FormControl fullWidth sx={{ mb: 3 }}>
+          <div className="mb-6 w-full">
             <AddressBookInput
               data-testid="beneficiary-section"
               name={SpendingLimitFields.beneficiary}
               label="Beneficiary"
             />
-          </FormControl>
+          </div>
 
           <TokenAmountInput balances={balances.items} selectedToken={selectedToken} validate={validateSpendingLimit} />
 
-          <Typography variant="h4" fontWeight={700} mt={3}>
+          <Typography variant="h4" className="mt-6 font-bold">
             Reset Timer
           </Typography>
           <Typography>
             Set a reset time so the allowance automatically refills after the defined time period.
           </Typography>
-          <FormControl fullWidth className={css.select}>
-            <InputLabel shrink={false}>Time Period</InputLabel>
+          <div className="mt-2 flex items-center justify-start gap-2">
+            <Label>Time Period</Label>
             <Controller
               rules={{ required: true }}
               control={control}
               name={SpendingLimitFields.resetTime}
               render={({ field }) => (
-                <Select
-                  data-testid="time-period-section"
-                  {...field}
-                  sx={{ textAlign: 'right', fontWeight: 700 }}
-                  IconComponent={ExpandMoreRoundedIcon}
-                >
-                  {resetTimeOptions.map((resetTime) => (
-                    <MenuItem
-                      data-testid="time-period-item"
-                      key={resetTime.value}
-                      value={resetTime.value}
-                      sx={{ overflow: 'hidden' }}
-                    >
-                      {resetTime.label}
-                    </MenuItem>
-                  ))}
+                <Select items={resetTimeOptions} value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger data-testid="time-period-section" className="font-bold">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {resetTimeOptions.map((resetTime) => (
+                      <SelectItem data-testid="time-period-item" key={resetTime.value} value={resetTime.value}>
+                        {resetTime.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               )}
             />
-          </FormControl>
+          </div>
 
-          <CardActions>
-            <Button data-testid="next-btn" variant="contained" type="submit">
+          <TxCardActions>
+            <Button data-testid="next-btn" type="submit" disabled={!formState.isValid}>
               Next
             </Button>
-          </CardActions>
+          </TxCardActions>
         </form>
       </FormProvider>
     </TxCard>

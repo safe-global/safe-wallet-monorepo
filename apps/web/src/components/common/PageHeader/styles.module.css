@@ -3,11 +3,26 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  /* Opaque page background: the header is sticky, so scrolling content must not bleed through. */
   background-color: var(--color-background-main);
   z-index: 2;
   width: 100%;
   position: sticky !important;
-  top: calc(var(--header-height) - 76px);
+  top: var(--page-header-top);
+}
+
+/* Breathing room between the tabs and the content passing under them once the header is pinned.
+   Out of flow and no taller than `main`'s own top padding, so at rest it covers nothing but page
+   background and the tabs stay flush with the content. */
+.container::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: var(--space-2);
+  background-color: inherit;
+  pointer-events: none;
 }
 
 /* In dark mode the page background is black (var(--background), set on .mainSpace),
@@ -23,7 +38,7 @@
 }
 
 .border {
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--border);
 }
 
 .pageHeader,
@@ -38,8 +53,12 @@
   row-gap: var(--space-3);
 }
 
+.navWrapper {
+  min-width: 0;
+}
+
 .actionsWrapper {
-  gap: var(--space-1);
+  gap: var(--space-2);
 }
 
 @media (max-width: 599.95px) {
@@ -58,7 +77,7 @@
   }
 
   .navWrapper {
-    border-bottom: 1px solid var(--color-border-light);
+    border-bottom: 1px solid var(--border);
     margin-left: calc(var(--space-2) * -1);
     padding-left: var(--space-2);
     margin-right: calc(var(--space-2) * -1);

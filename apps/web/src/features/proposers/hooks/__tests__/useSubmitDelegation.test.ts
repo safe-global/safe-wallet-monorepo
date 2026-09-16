@@ -7,6 +7,7 @@ import * as utilsModule from '@/features/proposers/utils/utils'
 import { faker } from '@faker-js/faker'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type { PendingDelegation } from '@/features/proposers/types'
+import { PROPOSER_LABEL_PLACEHOLDER } from '@/features/proposers/constants'
 
 describe('useSubmitDelegation', () => {
   const chainId = '1'
@@ -20,7 +21,6 @@ describe('useSubmitDelegation', () => {
     messageHash: `0x${faker.string.hexadecimal({ length: 64 })}`,
     action: 'add',
     delegateAddress,
-    delegateLabel: 'Test Proposer',
     nestedSafeAddress: safeAddress,
     parentSafeAddress,
     totp: Math.floor(Date.now() / 1000 / 3600),
@@ -84,7 +84,7 @@ describe('useSubmitDelegation', () => {
         delegate: delegateAddress,
         delegator: parentSafeAddress,
         signature: encodedSignature,
-        label: 'Test Proposer',
+        label: PROPOSER_LABEL_PLACEHOLDER,
       },
     })
     expect(mockDeleteDelegateV2).not.toHaveBeenCalled()

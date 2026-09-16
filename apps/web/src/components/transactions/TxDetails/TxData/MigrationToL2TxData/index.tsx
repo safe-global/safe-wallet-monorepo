@@ -10,7 +10,6 @@ import DecodedData from '../DecodedData'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { MigrateToL2Information } from '@/components/tx/confirmation-views/MigrateToL2Information'
-import { Box } from '@mui/material'
 import { isCustomTxInfo, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
 import Summary from '../../Summary'
@@ -72,7 +71,7 @@ export const MigrationToL2TxData = ({
   const [txPreview, txPreviewError] = useTxPreview(realSafeTx?.data)
 
   return (
-    <Box>
+    <div>
       <MigrateToL2Information variant="history" />
 
       {realSafeTxError ? (
@@ -84,6 +83,6 @@ export const MigrationToL2TxData = ({
       ) : (
         txPreview && <Summary {...txPreview} safeTxData={realSafeTx?.data} />
       )}
-    </Box>
+    </div>
   )
 }

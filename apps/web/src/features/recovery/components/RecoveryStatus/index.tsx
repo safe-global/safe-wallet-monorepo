@@ -1,6 +1,6 @@
-import { CircularProgress, SvgIcon } from '@mui/material'
 import type { ReactElement } from 'react'
 
+import { Spinner } from '@/components/ui/spinner'
 import ClockIcon from '@/public/images/common/clock.svg'
 import { useRecoveryTxState } from '../../hooks/useRecoveryTxState'
 import { RecoveryEvent } from '../../services/recoveryEvents'
@@ -21,7 +21,7 @@ const RecoveryStatus = ({ recovery }: { recovery: RecoveryQueueItem }): ReactEle
 
   const status = pendingTxStatus ? (
     <>
-      <CircularProgress size={14} color="inherit" />
+      <Spinner className="size-3.5" />
       {STATUS_LABELS[pendingTxStatus]}
     </>
   ) : isExecutable ? (
@@ -30,7 +30,7 @@ const RecoveryStatus = ({ recovery }: { recovery: RecoveryQueueItem }): ReactEle
     'Expired'
   ) : (
     <>
-      <SvgIcon component={ClockIcon} inheritViewBox fontSize="inherit" />
+      <ClockIcon className="size-[1em] fill-current" />
       Pending
     </>
   )

@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { DateTime } from './DateTime'
 
 const meta = {
+  title: 'Components/Common/DateTime',
   component: DateTime,
   parameters: {
     layout: 'centered',

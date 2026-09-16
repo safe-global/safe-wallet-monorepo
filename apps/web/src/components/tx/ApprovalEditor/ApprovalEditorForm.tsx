@@ -1,4 +1,4 @@
-import { Box, Divider, List, ListItem, Stack } from '@mui/material'
+import { Separator } from '@/components/ui/separator'
 import { FormProvider, useForm } from 'react-hook-form'
 import css from './styles.module.css'
 import type { ApprovalInfo } from './hooks/useApprovalInfos'
@@ -42,31 +42,26 @@ export const ApprovalEditorForm = ({
 
   return (
     <FormProvider {...formMethods}>
-      <List className={css.approvalsList}>
+      <ul className={css.approvalsList}>
         {Object.entries(groupedApprovals).map(([spender, approvals], spenderIdx) => (
-          <Box key={spender}>
-            <Stack
-              sx={{
-                gap: 2,
-              }}
-            >
+          <div key={spender}>
+            <div className="flex flex-col gap-4">
               {approvals.map((tx) => (
-                <ListItem
+                <li
                   key={tx.tokenAddress + tx.spender}
-                  className={0n === tx.amount ? css.zeroValueApproval : undefined}
-                  disablePadding
+                  className={`flex w-full ${0n === tx.amount ? css.zeroValueApproval : ''}`}
                   data-testid="approval-item"
                 >
                   <EditableApprovalItem approval={tx} name={`approvals.${fieldIndex++}`} onSave={onSave} />
-                </ListItem>
+                </li>
               ))}
               <SpenderField address={spender} />
 
-              {spenderIdx !== Object.keys(groupedApprovals).length - 1 && <Divider />}
-            </Stack>
-          </Box>
+              {spenderIdx !== Object.keys(groupedApprovals).length - 1 && <Separator />}
+            </div>
+          </div>
         ))}
-      </List>
+      </ul>
     </FormProvider>
   )
 }

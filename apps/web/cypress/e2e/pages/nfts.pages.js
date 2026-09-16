@@ -9,8 +9,8 @@ const recipientInput = 'input[name="recipient"]'
 export const nftsRow = '[data-testid^="nfts-table-row"]'
 const inactiveNftIcon = '[data-testid="nft-icon-border"]'
 const activeNftIcon = '[data-testid="nft-icon-primary"]'
-const nftCheckBox = (index) => `[data-testid="nft-checkbox-${index}"] > input`
-const selectAllNFTsCheckbox = 'span[title="Select all"] > input'
+const nftCheckBox = (index) => `[data-testid="nft-checkbox-${index}"]`
+const selectAllNFTsCheckbox = '[data-slot="checkbox"][title="Select all"]'
 const activeSendNFTBtn = '[data-testid="nft-send-btn-false"]'
 const disabledSendNFTBtn = '[data-testid="nft-send-btn-true"]'
 const modalSelectedNFTs = '[data-testid="selected-nfts"]'
@@ -99,7 +99,7 @@ export function deselectNFTs(checkboxIndexes, checkedItems) {
   let total = checkedItems - checkboxIndexes.length
 
   checkboxIndexes.forEach((i) => {
-    cy.get(nftCheckBox(i)).uncheck()
+    cy.get(nftCheckBox(i)).should('have.attr', 'aria-checked', 'true').click()
   })
 
   cy.contains(`${total} NFT${total !== 1 ? 's' : ''} selected`)

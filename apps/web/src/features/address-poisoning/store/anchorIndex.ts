@@ -21,12 +21,12 @@ import type { RootState } from '@/store'
  */
 export const selectAnchorAddresses = createSelector(
   [
-    selectAllAddressBooks,
+    // `selectAllAddressBooks` (addressBookSlice) and `selectAllCuratedNestedSafes` (settingsSlice)
+    // can still be mid-evaluation when this module is first pulled in via the store barrel
+    // (slices.ts). Reading the binding eagerly here yields `undefined` and crashes createSelector,
+    // so wrap them to resolve the live binding at call-time instead.
+    (state: RootState) => selectAllAddressBooks(state),
     selectAllAddedSafes,
-    // `selectAllCuratedNestedSafes` lives near the end of settingsSlice, which is
-    // still mid-evaluation when this module is first pulled in via the store barrel
-    // (slices.ts). Reading the binding eagerly here yields `undefined` and crashes
-    // createSelector. Wrap it so the live binding is resolved at call-time instead.
     (state: RootState) => selectAllCuratedNestedSafes(state),
     selectUndeployedSafes,
   ],

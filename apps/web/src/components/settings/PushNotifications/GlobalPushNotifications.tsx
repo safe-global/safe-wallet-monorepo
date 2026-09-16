@@ -1,20 +1,11 @@
 import type { AllOwnedSafes } from '@safe-global/store/gateway/types'
 import { selectUndeployedSafes } from '@/features/counterfactual/store'
-import {
-  Box,
-  Grid,
-  Paper,
-  Typography,
-  Checkbox,
-  Button,
-  Divider,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  CircularProgress,
-} from '@mui/material'
+import { Typography } from '@/components/ui/typography'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Spinner } from '@/components/ui/spinner'
+import { List, ListItem } from '@/components/ui/list'
 import mapValues from 'lodash/mapValues'
 import difference from 'lodash/difference'
 import pickBy from 'lodash/pickBy'
@@ -30,11 +21,11 @@ import { useNotificationPreferences } from './hooks/useNotificationPreferences'
 import { useNotificationRegistrations } from './hooks/useNotificationRegistrations'
 import { trackEvent } from '@/services/analytics'
 import { PUSH_NOTIFICATION_EVENTS } from '@/services/analytics/events/push-notifications'
-import { requestNotificationPermission } from './logic'
 import type { NotifiableSafes } from './logic'
 import type { PushNotificationPreferences } from '@/services/push-notifications/preferences'
 import CheckWalletWithPermission from '@/components/common/CheckWalletWithPermission'
 import { Permission } from '@/permissions/config'
+import { clickOnEnterOrSpace } from '@/utils/keyboard'
 
 import css from './styles.module.css'
 import { useAllOwnedSafes } from '@/hooks/safes'
@@ -207,6 +198,24 @@ export const _getSafesToRegister = (
   }
 }
 
+export const _filterSafesForRenewal = (
+  selectedSafes: NotifiableSafes,
+  safesForRenewal?: NotifiableSafes,
+): NotifiableSafes | undefined => {
+  if (!safesForRenewal) {
+    return
+  }
+
+  const selectedSafesForRenewal = pickBy(
+    mapValues(safesForRenewal, (safeAddresses, chainId) => {
+      return safeAddresses.filter((safeAddress) => selectedSafes[chainId]?.includes(safeAddress))
+    }),
+    (safeAddresses) => safeAddresses.length > 0,
+  )
+
+  return Object.keys(selectedSafesForRenewal).length > 0 ? selectedSafesForRenewal : undefined
+}
+
 // Safes that need to be unregistered with the service
 export const _getSafesToUnregister = (
   selectedSafes: NotifiableSafes,
@@ -237,23 +246,10 @@ export const _getSafesToUnregister = (
   }
 }
 
-// Whether the device needs to be unregistered from the service
-export const _shouldUnregisterDevice = (
-  chainId: string,
-  safeAddresses: Array<string>,
-  currentNotifiedSafes?: NotifiableSafes,
-): boolean => {
-  if (!currentNotifiedSafes) {
-    return false
-  }
-
-  if (safeAddresses.length !== currentNotifiedSafes[chainId].length) {
-    return false
-  }
-
-  return safeAddresses.every((safeAddress) => {
-    return currentNotifiedSafes[chainId]?.includes(safeAddress)
-  })
+// Unregistering the device wipes every subscription on the chain, including Safes registered
+// earlier in the same save, so it is only valid when no Safe remains selected on that chain
+export const _shouldUnregisterDevice = (chainId: string, selectedSafes: NotifiableSafes): boolean => {
+  return !selectedSafes[chainId]?.length
 }
 
 export const GlobalPushNotifications = (): ReactElement | null => {
@@ -340,39 +336,35 @@ export const GlobalPushNotifications = (): ReactElement | null => {
 
     setIsLoading(true)
 
-    // Although the (un-)registration functions will request permission in getToken we manually
-    // check beforehand to prevent multiple promises in registrationPromises from throwing
-    const isGranted = await requestNotificationPermission()
-
-    if (!isGranted) {
-      setIsLoading(false)
-      return
-    }
-
-    const registrationPromises: Array<Promise<unknown>> = []
-
     const newlySelectedSafes = _getSafesToRegister(selectedSafes, currentNotifiedSafes)
+    const selectedSafesForRenewal = _filterSafesForRenewal(selectedSafes, safesForRenewal)
 
     // Merge Safes that need to be registered with the ones for which notifications need to be renewed
-    const safesToRegister = _mergeNotifiableSafes(newlySelectedSafes, {}, safesForRenewal)
+    const safesToRegister = _mergeNotifiableSafes(newlySelectedSafes, {}, selectedSafesForRenewal)
 
-    if (safesToRegister) {
-      registrationPromises.push(registerNotifications(safesToRegister))
+    // _mergeNotifiableSafes can return a truthy {}; register only a non-empty set
+    // so unregister-only saves never prompt for notification permission
+    if (safesToRegister && Object.keys(safesToRegister).length > 0) {
+      const isRegistered = await registerNotifications(safesToRegister)
+
+      // A denied permission prompt or failed registration must not strip existing subscriptions
+      if (!isRegistered) {
+        setIsLoading(false)
+        return
+      }
     }
 
     const safesToUnregister = _getSafesToUnregister(selectedSafes, currentNotifiedSafes)
     if (safesToUnregister) {
       const unregistrationPromises = Object.entries(safesToUnregister).flatMap(([chainId, safeAddresses]) => {
-        if (_shouldUnregisterDevice(chainId, safeAddresses, currentNotifiedSafes)) {
+        if (_shouldUnregisterDevice(chainId, selectedSafes)) {
           return unregisterDeviceNotifications(chainId)
         }
         return safeAddresses.map((safeAddress) => unregisterSafeNotifications(chainId, safeAddress))
       })
 
-      registrationPromises.push(...unregistrationPromises)
+      await Promise.all(unregistrationPromises)
     }
-
-    await Promise.all(registrationPromises)
 
     trackEvent(PUSH_NOTIFICATION_EVENTS.SAVE_SETTINGS)
 
@@ -381,22 +373,20 @@ export const GlobalPushNotifications = (): ReactElement | null => {
 
   if (totalNotifiableSafes === 0) {
     return (
-      <Typography sx={{ color: ({ palette }) => palette.primary.light }}>
-        {address ? 'No owned Safes' : 'No wallet connected'}
-      </Typography>
+      <Typography className="text-muted-foreground">{address ? 'No owned Safes' : 'No wallet connected'}</Typography>
     )
   }
 
   return (
-    <Grid container>
-      <Grid item xs={12} display="flex" alignItems="center" justifyContent="space-between" mb={1}>
-        <Typography variant="h4" fontWeight={700} display="inline">
+    <div>
+      <div className="mb-2 flex items-center justify-between">
+        <Typography variant="h4" className="inline">
           My Safes Accounts ({totalNotifiableSafes})
         </Typography>
 
-        <Box display="flex" alignItems="center">
+        <div className="flex items-center">
           {totalSignaturesRequired > 0 && (
-            <Typography display="inline" mr={2} textAlign="right">
+            <Typography className="mr-4 inline text-right">
               We&apos;ll ask you to verify ownership of each Safe account with your signature per chain{' '}
               {totalSignaturesRequired} time{maybePlural(totalSignaturesRequired)}
             </Typography>
@@ -404,104 +394,123 @@ export const GlobalPushNotifications = (): ReactElement | null => {
 
           <CheckWalletWithPermission permission={Permission.EnablePushNotifications}>
             {(isOk) => (
-              <Button variant="contained" disabled={!canSave || !isOk || isLoading} onClick={onSave}>
-                {isLoading ? <CircularProgress size={20} /> : 'Save'}
+              <Button disabled={!canSave || !isOk || isLoading} onClick={onSave}>
+                {isLoading ? <Spinner className="size-5" /> : 'Save'}
               </Button>
             )}
           </CheckWalletWithPermission>
-        </Box>
-      </Grid>
+        </div>
+      </div>
 
-      <Grid item xs={12}>
-        <Paper sx={{ border: ({ palette }) => `1px solid ${palette.border.light}` }}>
-          <List>
-            <ListItem disablePadding className={css.item}>
-              <ListItemButton onClick={onSelectAll} dense>
-                <ListItemIcon className={css.icon}>
-                  <Checkbox edge="start" checked={isAllSelected} disableRipple />
-                </ListItemIcon>
-                <ListItemText primary="Select all" primaryTypographyProps={{ variant: 'h5' }} />
-              </ListItemButton>
-            </ListItem>
-          </List>
+      <List className="rounded-lg border border-border bg-card">
+        <ListItem className="block p-0">
+          <div
+            role="button"
+            tabIndex={0}
+            className={`${css.item} flex w-full cursor-pointer items-center gap-3 py-2 text-left`}
+            onClick={onSelectAll}
+            onKeyDown={clickOnEnterOrSpace}
+          >
+            <span className={css.icon}>
+              <Checkbox checked={isAllSelected} aria-hidden tabIndex={-1} className="pointer-events-none" />
+            </span>
+            <Typography variant="paragraph-bold">Select all</Typography>
+          </div>
+        </ListItem>
 
-          <Divider />
+        <ListItem aria-hidden className="p-0">
+          <Separator />
+        </ListItem>
 
-          {Object.entries(notifiableSafes).map(([chainId, safeAddresses], i, arr) => {
-            if (safeAddresses.length === 0) return
-            const chain = chains.configs?.find((chain) => chain.chainId === chainId)
+        {Object.entries(notifiableSafes).map(([chainId, safeAddresses], i, arr) => {
+          if (safeAddresses.length === 0) return
+          const chain = chains.configs?.find((chain) => chain.chainId === chainId)
 
-            const isChainSelected = safeAddresses.every((address) => {
-              return selectedSafes[chainId]?.includes(address)
+          const isChainSelected = safeAddresses.every((address) => {
+            return selectedSafes[chainId]?.includes(address)
+          })
+
+          const onSelectChain = () => {
+            setSelectedSafes((prev) => {
+              return {
+                ...prev,
+                [chainId]: isChainSelected ? [] : safeAddresses,
+              }
             })
+          }
 
-            const onSelectChain = () => {
-              setSelectedSafes((prev) => {
-                return {
-                  ...prev,
-                  [chainId]: isChainSelected ? [] : safeAddresses,
-                }
-              })
-            }
+          return (
+            <Fragment key={chainId}>
+              <ListItem className="block p-0">
+                <div
+                  role="button"
+                  tabIndex={0}
+                  className={`${css.item} flex w-full cursor-pointer items-center gap-3 py-2 text-left`}
+                  onClick={onSelectChain}
+                  onKeyDown={clickOnEnterOrSpace}
+                >
+                  <span className={css.icon}>
+                    <Checkbox checked={isChainSelected} aria-hidden tabIndex={-1} className="pointer-events-none" />
+                  </span>
+                  <Typography variant="paragraph-bold">{`${chain?.chainName} Safe accounts`}</Typography>
+                </div>
 
-            return (
-              <Fragment key={chainId}>
-                <List>
-                  <ListItem disablePadding className={css.item}>
-                    <ListItemButton onClick={onSelectChain} dense>
-                      <ListItemIcon className={css.icon}>
-                        <Checkbox edge="start" checked={isChainSelected} disableRipple />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={`${chain?.chainName} Safe accounts`}
-                        primaryTypographyProps={{ variant: 'h5' }}
-                      />
-                    </ListItemButton>
-                  </ListItem>
+                <List className={css.item}>
+                  {safeAddresses.map((safeAddress) => {
+                    const isSafeSelected = selectedSafes[chainId]?.includes(safeAddress) ?? false
 
-                  <List disablePadding className={css.item}>
-                    {safeAddresses.map((safeAddress) => {
-                      const isSafeSelected = selectedSafes[chainId]?.includes(safeAddress) ?? false
+                    const onSelectSafe = () => {
+                      setSelectedSafes((prev) => {
+                        return {
+                          ...prev,
+                          [chainId]: isSafeSelected
+                            ? prev[chainId]?.filter((addr) => !sameAddress(addr, safeAddress))
+                            : [...(prev[chainId] ?? []), safeAddress],
+                        }
+                      })
+                    }
 
-                      const onSelectSafe = () => {
-                        setSelectedSafes((prev) => {
-                          return {
-                            ...prev,
-                            [chainId]: isSafeSelected
-                              ? prev[chainId]?.filter((addr) => !sameAddress(addr, safeAddress))
-                              : [...(prev[chainId] ?? []), safeAddress],
-                          }
-                        })
-                      }
-
-                      return (
-                        <ListItem disablePadding key={safeAddress}>
-                          <ListItemButton sx={{ pl: 7, py: 0.5 }} onClick={onSelectSafe} dense>
-                            <ListItemIcon className={css.icon}>
-                              <Checkbox edge="start" checked={isSafeSelected} disableRipple />
-                            </ListItemIcon>
-                            <EthHashInfo
-                              avatarSize={36}
-                              prefix={chain?.shortName}
-                              key={safeAddress}
-                              address={safeAddress || ''}
-                              shortAddress={false}
-                              showName={true}
-                              chainId={chainId}
+                    return (
+                      <ListItem key={safeAddress} className="p-0">
+                        <div
+                          role="button"
+                          tabIndex={0}
+                          className="flex w-full cursor-pointer items-center gap-3 py-0.5 pl-14 text-left"
+                          onClick={onSelectSafe}
+                          onKeyDown={clickOnEnterOrSpace}
+                        >
+                          <span className={css.icon}>
+                            <Checkbox
+                              checked={isSafeSelected}
+                              aria-hidden
+                              tabIndex={-1}
+                              className="pointer-events-none"
                             />
-                          </ListItemButton>
-                        </ListItem>
-                      )
-                    })}
-                  </List>
+                          </span>
+                          <EthHashInfo
+                            avatarSize={36}
+                            prefix={chain?.shortName}
+                            address={safeAddress || ''}
+                            shortAddress={false}
+                            showName={true}
+                            chainId={chainId}
+                          />
+                        </div>
+                      </ListItem>
+                    )
+                  })}
                 </List>
+              </ListItem>
 
-                {i !== arr.length - 1 ? <Divider /> : null}
-              </Fragment>
-            )
-          })}
-        </Paper>
-      </Grid>
-    </Grid>
+              {i !== arr.length - 1 ? (
+                <ListItem aria-hidden className="p-0">
+                  <Separator />
+                </ListItem>
+              ) : null}
+            </Fragment>
+          )
+        })}
+      </List>
+    </div>
   )
 }

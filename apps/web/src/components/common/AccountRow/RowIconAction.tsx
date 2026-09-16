@@ -3,7 +3,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip
 import { cn } from '@/utils/cn'
 import { TOOLTIP_DELAY_MS } from './utils'
 
-const TRIGGER_CLASS = 'shrink-0 rounded p-0.5 hover:bg-muted transition-colors cursor-pointer inline-flex'
+const TRIGGER_CLASS = 'shrink-0 rounded p-0.5 hover:bg-foreground/5 transition-colors cursor-pointer inline-flex'
 
 // pointerdown is stopped so the surrounding SelectItem / trigger doesn't select the safe or toggle the
 // dropdown. preventDefault on pointerdown does not cancel the synthetic click, so the action still runs

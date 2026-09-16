@@ -1,4 +1,4 @@
-import { Tooltip, SvgIcon } from '@mui/material'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import type { ReactElement } from 'react'
 import WarningIcon from '@/public/images/notifications/warning.svg'
 
@@ -8,14 +8,15 @@ import WarningIcon from '@/public/images/notifications/warning.svg'
  */
 export function SimilarityWarning(): ReactElement {
   return (
-    <Tooltip title="This address looks similar to another address. Double-check before selecting." placement="top">
-      <SvgIcon
-        component={WarningIcon}
-        inheritViewBox
-        fontSize="small"
-        sx={{ color: 'error.main', ml: 1, flexShrink: 0 }}
-        data-testid="similarity-warning"
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <span className="ml-2 inline-flex shrink-0">
+            <WarningIcon className="size-5 text-[var(--color-error-main)]" data-testid="similarity-warning" />
+          </span>
+        }
       />
+      <TooltipContent>This address looks similar to another address. Double-check before selecting.</TooltipContent>
     </Tooltip>
   )
 }

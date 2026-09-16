@@ -1,4 +1,4 @@
-import { Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import css from './styles.module.css'
 import useWalletBalance from '@/hooks/wallets/useWalletBalance'
 import WalletBalance from '@/components/common/WalletBalance'
@@ -9,7 +9,7 @@ const BalanceInfo = () => {
 
   return (
     <div className={css.container}>
-      <Typography variant="body2" color="primary.light">
+      <Typography variant="paragraph-small" className="text-[var(--color-primary-light)]">
         <b>Wallet balance:</b> <WalletBalance balance={balance} />
       </Typography>
     </div>

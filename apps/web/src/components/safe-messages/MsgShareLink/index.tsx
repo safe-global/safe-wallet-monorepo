@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
-import { Button, IconButton, Link, SvgIcon } from '@mui/material'
-import ShareIcon from '@/public/images/common/share.svg'
+import { Button } from '@/components/ui/button'
+import { Share2 as ShareIcon } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'
 import Track from '@/components/common/Track'
@@ -19,13 +19,14 @@ const MsgShareLink = ({ safeMessageHash, button }: { safeMessageHash: string; bu
     <Track {...MESSAGE_EVENTS.COPY_DEEPLINK}>
       <CopyTooltip text={txUrl} initialToolTipText="Copy the message URL">
         {button ? (
-          <Button data-testid="share-btn" aria-label="Share" variant="contained" size="small" onClick={() => {}}>
+          <Button data-testid="share-btn" aria-label="Share" size="sm" onClick={() => {}}>
             Copy link
           </Button>
         ) : (
-          <IconButton data-testid="share-btn" component={Link} aria-label="Share">
-            <SvgIcon component={ShareIcon} inheritViewBox fontSize="small" color="border" />
-          </IconButton>
+          // eslint-disable-next-line no-restricted-syntax -- circular hover on the icon button; no round icon size variant exists
+          <Button data-testid="share-btn" aria-label="Share" variant="ghost" size="icon-xs" className="rounded-full">
+            <ShareIcon className="size-4 text-[var(--color-border-main)]" />
+          </Button>
         )}
       </CopyTooltip>
     </Track>

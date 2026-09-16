@@ -21,8 +21,8 @@
 .iconBG {
   width: 40px;
   height: 40px;
-  background-color: var(--color-background-main);
-  border-radius: 50%;
+  background-color: var(--accent);
+  border-radius: 12px;
   margin-bottom: var(--space-2);
   display: flex;
   align-items: center;

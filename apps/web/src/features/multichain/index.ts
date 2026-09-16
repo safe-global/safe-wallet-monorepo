@@ -18,6 +18,9 @@ export {
   hasMultiChainAddNetworkFeature,
 } from './utils'
 
+// Static export — the pill is tiny and always visible in its consumers' first paint
+export { default as NetworkLogosPill } from './components/NetworkLogosPill'
+
 const CreateSafeOnNewChain = dynamic(() =>
   import('./components/CreateSafeOnNewChain').then((mod) => ({ default: mod.CreateSafeOnNewChain })),
 )

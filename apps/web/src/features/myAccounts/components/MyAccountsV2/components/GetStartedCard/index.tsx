@@ -1,6 +1,6 @@
 import { Wallet } from 'lucide-react'
 import NextLink from 'next/link'
-import SafeMarkIcon from '@/public/images/logo-no-text.svg'
+import SafeWalletLockup from '@/public/images/safe-wallet-lockup.svg'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
 import Track from '@/components/common/Track'
 import { AppRoutes } from '@/config/routes'
@@ -26,8 +26,8 @@ const GetStartedCard = () => {
         data-testid="get-started-card"
         className="w-full max-w-[440px] rounded-2xl bg-card p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]"
       >
-        <div className="mx-auto mb-6 flex size-10 items-center justify-center text-foreground">
-          <SafeMarkIcon className="size-10" />
+        <div className="mx-auto mb-6 flex h-10 items-center justify-center text-foreground">
+          <SafeWalletLockup className="h-10 w-auto" />
         </div>
 
         <Typography variant="h3" className="text-center">
@@ -39,12 +39,7 @@ const GetStartedCard = () => {
         </p>
 
         <div className="mt-5 flex flex-col gap-2.5">
-          <Button
-            size="lg"
-            className="h-12 w-full text-[15px]"
-            onClick={connectWallet}
-            data-testid="connect-wallet-button"
-          >
+          <Button size="xl" className="w-full" onClick={connectWallet} data-testid="connect-wallet-button">
             <Wallet className="size-[18px]" />
             Connect wallet
           </Button>
@@ -58,8 +53,8 @@ const GetStartedCard = () => {
           <Track {...OVERVIEW_EVENTS.ADD_TO_WATCHLIST} label={OVERVIEW_LABELS.login_page}>
             <Button
               variant="ghost"
-              size="lg"
-              className="h-12 w-full text-[15px]"
+              size="xl"
+              className="w-full"
               data-testid="watch-account-button"
               render={<NextLink href={{ pathname: AppRoutes.newSafe.load, query: { next } }} />}
             >

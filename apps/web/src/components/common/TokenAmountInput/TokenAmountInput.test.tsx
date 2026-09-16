@@ -1,5 +1,6 @@
 import React from 'react'
-import { render, screen } from '@/tests/test-utils'
+import { render, screen, waitFor, within } from '@/tests/test-utils'
+import userEvent from '@testing-library/user-event'
 import { FormProvider, useForm, useFieldArray } from 'react-hook-form'
 import TokenAmountInput from './index'
 import { TokenAmountFields } from '@/components/tx-flow/flows/TokenTransfer/types'
@@ -176,7 +177,57 @@ const FiatTestWrapper = ({
   )
 }
 
+// The token select is controlled by `setValue` on a field the component never `register`s. RHF still
+// writes unregistered names into the form values, which is what keeps the chosen token in the
+// submitted payload — pin it so that assumption cannot silently break.
+const SubmitTestWrapper = ({
+  defaultTokenAddress,
+  onSubmit,
+}: {
+  defaultTokenAddress: string
+  onSubmit: (values: unknown) => void
+}) => {
+  const methods = useForm({
+    defaultValues: {
+      [TokenAmountFields.tokenAddress]: defaultTokenAddress,
+      [TokenAmountFields.amount]: '',
+    },
+  })
+
+  const selectedToken = mockBalances.find((b) => b.tokenInfo.address === defaultTokenAddress)
+
+  return (
+    <FormProvider {...methods}>
+      <form onSubmit={methods.handleSubmit(onSubmit)}>
+        <TokenAmountInput
+          balances={mockBalances}
+          selectedToken={selectedToken}
+          maxAmount={BigInt(selectedToken?.balance || '0')}
+          validate={() => undefined}
+        />
+        <button type="submit">Submit</button>
+      </form>
+    </FormProvider>
+  )
+}
+
 describe('TokenAmountInput', () => {
+  describe('Submitted values', () => {
+    it('keeps the picked token address in the submitted payload', async () => {
+      const onSubmit = jest.fn()
+      render(<SubmitTestWrapper defaultTokenAddress={ZERO_ADDRESS} onSubmit={onSubmit} />)
+
+      await userEvent.click(within(screen.getByTestId('token-selector')).getByRole('combobox'))
+      await userEvent.click(await screen.findByText('USD Coin'))
+
+      await userEvent.type(screen.getByTestId('token-amount-field'), '1')
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+
+      await waitFor(() => expect(onSubmit).toHaveBeenCalled())
+      expect(onSubmit.mock.calls[0][0]).toMatchObject({ [TokenAmountFields.tokenAddress]: USDC_ADDRESS })
+    })
+  })
+
   describe('Token preselection without fieldArray', () => {
     it('should preselect ETH (ZERO_ADDRESS) by default', () => {
       render(<TestWrapper defaultTokenAddress={ZERO_ADDRESS} />)
@@ -188,6 +239,14 @@ describe('TokenAmountInput', () => {
       render(<TestWrapper defaultTokenAddress={USDC_ADDRESS} />)
 
       expect(screen.getByText('USD Coin')).toBeInTheDocument()
+    })
+  })
+
+  describe('Selected token missing from balances', () => {
+    it('leaves the trigger blank instead of showing the raw address', () => {
+      render(<TestWrapper defaultTokenAddress={ZERO_ADDRESS} balances={[]} />)
+
+      expect(screen.getByTestId('token-selector')).not.toHaveTextContent(ZERO_ADDRESS)
     })
   })
 
@@ -365,6 +424,42 @@ describe('TokenAmountInput', () => {
       render(<FiatTestWrapper defaultTokenAddress={USDC_ADDRESS} defaultAmount="-5" />)
 
       expect(screen.queryByTestId('fiat-display')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Error state styling', () => {
+    // The amount FIELD (label + border) must turn destructive on error, but the typed
+    // VALUE text must stay neutral — the invalid `Field` ancestor would otherwise cascade its red
+    // colour onto the value via CSS inheritance (see ui/input.tsx's `text-foreground`).
+    const ErroredWrapper = ({ defaultAmount }: { defaultAmount: string }) => {
+      const methods = useForm({
+        defaultValues: { [TokenAmountFields.tokenAddress]: USDC_ADDRESS, [TokenAmountFields.amount]: defaultAmount },
+      })
+
+      React.useEffect(() => {
+        methods.setError(TokenAmountFields.amount, { type: 'validate', message: 'Insufficient funds' })
+      }, [methods])
+
+      const selectedToken = mockBalances.find((b) => b.tokenInfo.address === USDC_ADDRESS)
+
+      return (
+        <FormProvider {...methods}>
+          <TokenAmountInput balances={mockBalances} selectedToken={selectedToken} maxAmount={0n} />
+        </FormProvider>
+      )
+    }
+
+    it('keeps the typed value neutral while the label goes destructive on an insufficient-funds error', () => {
+      render(<ErroredWrapper defaultAmount="0.0159" />)
+
+      const amountField = screen.getByTestId('token-amount-field')
+
+      // The label swaps in the error message and turns destructive...
+      expect(screen.getByText('Insufficient funds')).toHaveClass('text-destructive')
+      // ...but the typed value stays the normal foreground colour, not red.
+      expect(amountField).toHaveDisplayValue('0.0159')
+      expect(amountField).toHaveClass('text-foreground')
+      expect(amountField.className).not.toContain('text-destructive')
     })
   })
 })

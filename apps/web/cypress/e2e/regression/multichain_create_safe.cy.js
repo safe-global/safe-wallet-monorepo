@@ -42,7 +42,9 @@ describe('Multichain safe creation tests', () => {
     createwallet.clickOnNextBtn()
     createwallet.clickOnNextBtn()
     tx.selectRelayOtion()
-    cy.contains(tx.relayRemainingAttemptsStr).should('exist')
+    // The remaining-relays counter is hidden on GTF (unlimited relay) chains, so assert the
+    // relay option itself is selected instead.
+    tx.verifyRelayExecutionMethodChecked()
   })
 
   it('Verify that multichain safe creation is available with 2/2 setup', () => {
@@ -52,7 +54,7 @@ describe('Multichain safe creation tests', () => {
     owner.clickOnAddSignerBtn()
     owner.typeOwnerAddressCreateSafeStep(1, getMockAddress())
     owner.clickOnThresholdDropdown()
-    owner.getThresholdOptions().eq(1).click()
+    owner.selectThresholdOption(1)
     createwallet.clickOnNextBtn()
     createwallet.clickOnSignInToWorkspaceBtn()
     createwallet.clickOnReviewStepNextBtn()
@@ -72,7 +74,7 @@ describe('Multichain safe creation tests', () => {
     owner.clickOnAddSignerBtn()
     owner.typeOwnerAddressCreateSafeStep(1, getMockAddress())
     owner.clickOnThresholdDropdown()
-    owner.getThresholdOptions().eq(0).click()
+    owner.selectThresholdOption(0)
     createwallet.clickOnNextBtn()
     createwallet.clickOnSignInToWorkspaceBtn()
     createwallet.clickOnReviewStepNextBtn()

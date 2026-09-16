@@ -9,11 +9,13 @@ import {
   SidebarGroupContent,
   SidebarMenu,
   SidebarMenuItem,
+  SidebarSeparator,
 } from '@/components/ui/sidebar'
 import css from '../../styles.module.css'
-import type { ResolvedSidebarItem, SafeSidebarVariantProps } from '../../types'
+import type { ResolvedSidebarNavItem, SafeSidebarVariantProps } from '../../types'
 import { AppRoutes } from '@/config/routes'
 import { NavItem } from '../NavItem'
+import { SidebarDeveloperGroup } from '../SidebarDeveloperGroup'
 import { SidebarActionButton } from '../../NewTransactionButton'
 import { SafeSidebarWorkspaceHeader } from '../SafeSidebarWorkspaceHeader'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -54,7 +56,7 @@ export const SafeSidebarVariant = ({
 
   // Settings lives in the main nav group but isn't config-driven: its outdated indicator and
   // active state depend on the current Safe. Render it through NavItem so styling stays in sync.
-  const settingsItem: ResolvedSidebarItem = {
+  const settingsItem: ResolvedSidebarNavItem = {
     icon: Settings,
     label: 'Settings',
     href: AppRoutes.settings.setup,
@@ -76,7 +78,7 @@ export const SafeSidebarVariant = ({
     <SidebarContent>
       <motion.div variants={containerVariants} initial="hidden" animate="visible">
         {shouldRenderWorkspaceHeaderGroup && (
-          <motion.div variants={itemVariants} className="mb-2">
+          <motion.div variants={itemVariants} className="mb-4">
             <SidebarGroup className={css.sidebarGroup}>
               <SidebarMenu>
                 <SidebarMenuItem>
@@ -88,7 +90,7 @@ export const SafeSidebarVariant = ({
         )}
 
         {/* Action Button */}
-        <motion.div variants={itemVariants} className="mb-2">
+        <motion.div variants={itemVariants} className="mb-4">
           <SidebarGroup className={css.sidebarGroup}>
             <SidebarGroupContent>
               <SidebarActionButton />
@@ -114,7 +116,10 @@ export const SafeSidebarVariant = ({
         {(defiGroup?.items?.length ?? 0) > 0 && (
           <motion.div variants={itemVariants}>
             <SidebarGroup className={css.sidebarGroup}>
-              <SidebarGroupLabel>{defiGroup?.label ?? ''}</SidebarGroupLabel>
+              <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
+                {defiGroup?.label ?? ''}
+              </SidebarGroupLabel>
+              <SidebarSeparator className={css.collapsedSeparator} />
               <SidebarGroupContent>
                 <SidebarMenu className="gap-0">
                   {displayDefiItems.map((item, index) => (
@@ -125,6 +130,8 @@ export const SafeSidebarVariant = ({
             </SidebarGroup>
           </motion.div>
         )}
+
+        <SidebarDeveloperGroup isLoading={isLoading} />
       </motion.div>
     </SidebarContent>
   )

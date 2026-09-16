@@ -1,6 +1,7 @@
-import type { ReactElement } from 'react'
-import { OpenInNewRounded } from '@mui/icons-material'
-import { Box, Button, Link, type LinkProps } from '@mui/material'
+import type { ReactElement, ComponentProps } from 'react'
+import { ExternalLink as ExternalLinkIcon } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Link } from '@/components/ui/link'
 
 /**
  * Renders an external Link which always sets the noopener and noreferrer rel attribute and the target to _blank.
@@ -11,36 +12,26 @@ const ExternalLink = ({
   children,
   href,
   mode = 'link',
+  className,
   ...props
-}: Omit<LinkProps, 'target' | 'rel'> & { noIcon?: boolean; mode?: 'button' | 'link' }): ReactElement => {
+}: Omit<ComponentProps<'a'>, 'target' | 'rel'> & { noIcon?: boolean; mode?: 'button' | 'link' }): ReactElement => {
   if (!href) return <>{children}</>
 
   const linkContent = (
-    <Box
-      component="span"
-      sx={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 0.5,
-        cursor: 'pointer',
-      }}
-    >
+    <span className="inline-flex cursor-pointer items-center gap-0.5">
       {children ?? href}
-      {!noIcon && <OpenInNewRounded className="external-link-icon" fontSize="small" />}
-    </Box>
+      {!noIcon && <ExternalLinkIcon className="external-link-icon size-4" />}
+    </span>
   )
   return mode === 'link' ? (
-    <Link href={href} rel="noreferrer noopener" target="_blank" {...props}>
+    <Link href={href} rel="noreferrer noopener" target="_blank" className={className} {...props}>
       {linkContent}
     </Link>
   ) : (
     <Button
-      variant="outlined"
-      href={href}
-      rel="noreferrer noopener"
-      target="_blank"
-      className={props.className}
-      sx={props.sx}
+      variant="outline"
+      className={className}
+      render={<a href={href} rel="noreferrer noopener" target="_blank" />}
     >
       {linkContent}
     </Button>

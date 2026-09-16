@@ -1,61 +1,71 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./HnDashboardBanner.stories Default 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-1hhziu-MuiPaper-root-MuiCard-root"
-    role="button"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
     <div
-      class="tag MuiBox-root mui-style-0"
-    >
-      <p
-        class="MuiTypography-root MuiTypography-body2 tagText mui-style-17vdyq3-MuiTypography-root"
-      >
-        Powered by Hypernative
-      </p>
-    </div>
-    <div
-      class="content MuiBox-root mui-style-0"
+      class="cursor-pointer banner"
+      role="button"
     >
       <div
-        class="badgeContainer MuiBox-root mui-style-0"
+        class="tag"
       >
-        <img
-          alt="Guardian badge"
-          class="badge"
-          data-nimg="1"
-          decoding="async"
-          height="54"
-          loading="lazy"
-          src="/images/hypernative/guardian-badge.svg"
-          style="color: transparent;"
-          width="54"
-        />
+        <span
+          class="m-0 text-sm leading-5 font-normal tagText"
+          data-slot="typography"
+          data-variant="paragraph-small"
+        >
+          Powered by Hypernative
+        </span>
       </div>
       <div
-        class="textContent MuiBox-root mui-style-0"
+        class="content"
       >
-        <h6
-          class="MuiTypography-root MuiTypography-h6 title mui-style-v1yov6-MuiTypography-root"
+        <div
+          class="badgeContainer"
         >
-          Enforce enterprise-grade security
-        </h6>
-        <p
-          class="MuiTypography-root MuiTypography-body2 description mui-style-17vdyq3-MuiTypography-root"
+          <img
+            alt="Guardian badge"
+            class="badge"
+            data-nimg="1"
+            decoding="async"
+            height="54"
+            loading="lazy"
+            src="/images/hypernative/guardian-badge.svg"
+            style="color: transparent;"
+            width="54"
+          />
+        </div>
+        <div
+          class="textContent"
         >
-          Automatically block risky transactions using advanced, user-defined security policies.
-        </p>
-        <button
-          class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary ctaButton mui-style-m1g3nl-MuiButtonBase-root-MuiButton-root"
-          tabindex="0"
-          type="button"
-        >
-          Learn more
-        </button>
+          <h4
+            class="m-0 scroll-m-20 text-xl font-semibold leading-6 tracking-normal title"
+            data-slot="typography"
+            data-variant="h4"
+          >
+            Enforce enterprise-grade security
+          </h4>
+          <span
+            class="m-0 text-sm leading-5 font-normal description"
+            data-slot="typography"
+            data-variant="paragraph-small"
+          >
+            Automatically block risky transactions using advanced, user-defined security policies.
+          </span>
+          <button
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 border bg-clip-padding focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs h-8 gap-1 in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 mt-[var(--space-3)]! mb-[var(--space-1)]! border-[#12ff80]! text-[#12ff80]! rounded-[6px] py-[6px] px-[var(--space-1)] font-bold text-[14px] leading-[24px] tracking-[0.4px] normal-case self-start hover:border-[#12ff80]! hover:bg-[rgba(18,255,128,0.1)]! hover:max-w-full"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            Learn more
+          </button>
+        </div>
       </div>
     </div>
   </div>

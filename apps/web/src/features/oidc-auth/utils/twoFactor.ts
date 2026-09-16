@@ -22,12 +22,22 @@ export const getMemberTwoFactorStatus = (member: TwoFactorMember): MemberTwoFact
   return member.user.email ? MemberTwoFactorStatus.ACTIVE : MemberTwoFactorStatus.WALLET_SIGN_IN
 }
 
-/** Coverage across members who have actually joined; pending and declined invites don't count. */
-export const getTwoFactorCoverage = (members: TwoFactorMember[]): { enabled: number; total: number } => {
+/**
+ * Coverage across members who have actually joined; pending and declined invites don't count.
+ * `walletOnly` is the remainder that _cannot_ enable 2FA at all, because wallet
+ * (SIWE) sign-ins never go through an authenticator.
+ */
+export const getTwoFactorCoverage = (
+  members: TwoFactorMember[],
+): { enabled: number; total: number; walletOnly: number } => {
   const activeMembers = members.filter((member) => member.status === 'ACTIVE')
+  const enabled = activeMembers.filter(
+    (member) => getMemberTwoFactorStatus(member) === MemberTwoFactorStatus.ACTIVE,
+  ).length
 
   return {
-    enabled: activeMembers.filter((member) => getMemberTwoFactorStatus(member) === MemberTwoFactorStatus.ACTIVE).length,
+    enabled,
     total: activeMembers.length,
+    walletOnly: activeMembers.length - enabled,
   }
 }

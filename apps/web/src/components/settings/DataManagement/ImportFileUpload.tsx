@@ -1,5 +1,5 @@
 import { useDropzone } from 'react-dropzone'
-import { Typography, SvgIcon } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import { useCallback } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 
@@ -57,7 +57,8 @@ export const ImportFileUpload = ({
 
       <FileUpload
         fileType={FileTypes.JSON}
-        getRootProps={() => ({ ...getRootProps(), height: '228px' })}
+        getRootProps={getRootProps}
+        className="h-[228px]"
         getInputProps={getInputProps}
         isDragActive={isDragActive}
         isDragReject={isDragReject}
@@ -65,16 +66,7 @@ export const ImportFileUpload = ({
       />
 
       <Typography>
-        <SvgIcon
-          component={InfoIcon}
-          inheritViewBox
-          fontSize="small"
-          color="border"
-          sx={{
-            verticalAlign: 'middle',
-            mr: 0.5,
-          }}
-        />
+        <InfoIcon className="mr-1 inline size-4 align-middle text-muted-foreground" />
         Only JSON files exported from the {BRAND_NAME} can be imported.
       </Typography>
     </>

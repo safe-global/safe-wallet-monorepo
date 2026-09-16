@@ -6,6 +6,10 @@ on:
       - apps/web-tanstack/**
       - apps/web/**
       - packages/**
+      - yarn.lock
+      - package.json
+      - .yarnrc.yml
+      - .yarn/patches/**
   push:
     branches:
       - main
@@ -14,6 +18,10 @@ on:
       - apps/web-tanstack/**
       - apps/web/**
       - packages/**
+      - yarn.lock
+      - package.json
+      - .yarnrc.yml
+      - .yarn/patches/**
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -26,7 +34,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/yarn
         with:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
@@ -48,7 +56,7 @@ jobs:
   verify-changed:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
       - uses: ./.github/actions/yarn

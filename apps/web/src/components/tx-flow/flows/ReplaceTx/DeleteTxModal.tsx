@@ -1,19 +1,11 @@
 import useWallet from '@/hooks/wallets/useWallet'
 import { useState } from 'react'
-import {
-  Dialog,
-  DialogTitle,
-  Typography,
-  IconButton,
-  Divider,
-  DialogContent,
-  DialogActions,
-  Button,
-  Box,
-  SvgIcon,
-  CircularProgress,
-} from '@mui/material'
-import { Close } from '@mui/icons-material'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Spinner } from '@/components/ui/spinner'
+import { X as Close } from 'lucide-react'
 import madProps from '@/utils/mad-props'
 import useChainId from '@/hooks/useChainId'
 import useSafeAddress from '@/hooks/useSafeAddress'
@@ -90,74 +82,74 @@ const InternalDeleteTxModal = ({
   }
 
   return (
-    <Dialog open onClose={onClose}>
-      <DialogTitle>
-        <Box data-testid="untrusted-token-warning" display="flex" alignItems="center">
-          <Typography variant="h6" fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <SvgIcon component={InfoIcon} inheritViewBox color="error" />
-            Delete this transaction?
-          </Typography>
+    <Dialog open onOpenChange={(nextOpen) => !nextOpen && onClose()}>
+      <DialogContent showCloseButton={false}>
+        <DialogTitle render={<div />} className="p-4">
+          <div data-testid="untrusted-token-warning" className="flex items-center">
+            <Typography variant="paragraph-bold" className="flex items-center gap-2">
+              <InfoIcon className="size-5 text-[var(--color-error-main)]" />
+              Delete this transaction?
+            </Typography>
 
-          <Box flexGrow={1} />
+            <div className="grow" />
 
-          <ChainIndicator chainId={chainId} />
+            <ChainIndicator chainId={chainId} />
 
-          <IconButton aria-label="close" onClick={onClose} sx={{ marginLeft: 'auto' }}>
-            <Close />
-          </IconButton>
-        </Box>
-      </DialogTitle>
-
-      <Divider />
-
-      <DialogContent>
-        <Box>
-          Are you sure you want to delete this transaction? This will permanently remove it from the queue but the
-          already given signatures will remain valid.
-        </Box>
-
-        <Box mt={2}>
-          Make sure that you are aware of the{' '}
-          <ExternalLink href="https://help.safe.global/articles/4016097317-Why-do-I-need-to-pay-for-cancelling-a-transaction?">
-            potential risks
-          </ExternalLink>{' '}
-          related to deleting a transaction off-chain.
-        </Box>
-
-        <Box mt={2}>
-          <ChainSwitcher />
-        </Box>
-
-        {error && (
-          <Box mt={2}>
-            <ErrorMessage error={error}>Error deleting transaction</ErrorMessage>
-          </Box>
-        )}
-      </DialogContent>
-
-      <Divider />
-
-      <DialogActions sx={{ padding: 3, justifyContent: 'space-between' }}>
-        <Button size="small" variant="text" onClick={onCancel}>
-          Keep it
-        </Button>
-
-        <CheckWallet checkNetwork>
-          {(isOk) => (
-            <Button
-              data-testid="delete-tx-btn"
-              size="small"
-              variant="contained"
-              color="primary"
-              onClick={onConfirm}
-              disabled={!isOk || isLoading}
-              sx={{ minWidth: '122px', minHeight: '36px' }}
-            >
-              {isLoading ? <CircularProgress size={20} /> : 'Yes, delete'}
+            <Button aria-label="close" variant="ghost" size="icon-sm" onClick={onClose} className="ml-auto">
+              <Close />
             </Button>
+          </div>
+        </DialogTitle>
+
+        <Separator />
+
+        <div className="p-6">
+          <div>
+            Are you sure you want to delete this transaction? This will permanently remove it from the queue but the
+            already given signatures will remain valid.
+          </div>
+
+          <div className="mt-4">
+            Make sure that you are aware of the{' '}
+            <ExternalLink href="https://help.safe.global/articles/4016097317-Why-do-I-need-to-pay-for-cancelling-a-transaction?">
+              potential risks
+            </ExternalLink>{' '}
+            related to deleting a transaction off-chain.
+          </div>
+
+          <div className="mt-4">
+            <ChainSwitcher />
+          </div>
+
+          {error && (
+            <div className="mt-4">
+              <ErrorMessage error={error}>Error deleting transaction</ErrorMessage>
+            </div>
           )}
-        </CheckWallet>
-      </DialogActions>
+        </div>
+
+        <Separator />
+
+        <div className="flex items-center justify-between p-6">
+          <Button size="sm" variant="ghost" onClick={onCancel}>
+            Keep it
+          </Button>
+
+          <CheckWallet checkNetwork>
+            {(isOk) => (
+              <Button
+                data-testid="delete-tx-btn"
+                size="sm"
+                onClick={onConfirm}
+                disabled={!isOk || isLoading}
+                className="min-h-9 min-w-[122px]"
+              >
+                {isLoading ? <Spinner className="size-5" /> : 'Yes, delete'}
+              </Button>
+            )}
+          </CheckWallet>
+        </div>
+      </DialogContent>
     </Dialog>
   )
 }

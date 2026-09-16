@@ -1,5 +1,6 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
+import * as createTx from '../pages/create_tx.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import { mockVisualTestApis } from '../../support/visual-mocks.js'
 
@@ -28,6 +29,14 @@ describe(
 
     it('[VISUAL] Screenshot expanded queued transaction details', () => {
       cy.contains('Batch').first().click()
+      main.awaitVisualStability()
+    })
+
+    it('[VISUAL] Screenshot expanded batch actions', () => {
+      createTx.clickOnTransactionItemByName('Batch')
+      // Settle before expanding: the "Expand all" button only exists once the details have loaded.
+      main.awaitVisualStability()
+      createTx.clickOnExpandAllActionsBtn()
       main.awaitVisualStability()
     })
   },

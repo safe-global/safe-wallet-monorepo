@@ -117,7 +117,8 @@ const WorkspaceHealthCard = ({
   // surfaces the in-progress state via its "Scanning..." label.
   if (!aggregate) {
     return (
-      <Card className="mb-6 flex-col items-start gap-6 p-6 md:flex-row md:items-center">
+      // eslint-disable-next-line no-restricted-syntax -- p-6 gives this gauge row uniform padding (no CardContent slot); gap comes from the default size
+      <Card className="mb-6 flex-col items-start p-6 md:flex-row md:items-center">
         <Skeleton className="size-[100px] shrink-0 rounded-full" />
         <div className="min-w-0 flex-1">
           <Skeleton className="mb-2 h-6 w-[180px] rounded" />
@@ -135,7 +136,8 @@ const WorkspaceHealthCard = ({
   const { band, scorePct } = aggregate
 
   return (
-    <Card className="mb-10 flex-col items-start gap-6 py-5 px-6 md:flex-row md:items-center">
+    // eslint-disable-next-line no-restricted-syntax -- bespoke 20/24px gauge-row padding (py-5 px-6, no CardContent slot); gap comes from the default size
+    <Card className="mb-10 flex-col items-start py-5 px-6 md:flex-row md:items-center">
       <div className="-mb-4">
         <ScoreGauge scorePct={scorePct} color={band.color} />
       </div>
@@ -165,8 +167,9 @@ const WorkspaceHealthCard = ({
             <div className="mt-2 flex flex-col gap-1">
               <Button
                 variant="outline"
+                size="action"
                 disabled={isScanning}
-                className="self-end px-6 hover:bg-border"
+                className="self-end"
                 onClick={isScanning ? undefined : onRescan}
               >
                 <RefreshCw className={cn('size-5', isScanning && 'animate-spin')} strokeWidth={1.5} />

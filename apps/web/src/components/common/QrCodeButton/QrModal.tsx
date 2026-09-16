@@ -1,5 +1,7 @@
 import { type ReactElement } from 'react'
-import { Box, Switch, DialogContent, FormControlLabel, Typography } from '@mui/material'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Typography } from '@/components/ui/typography'
 import ModalDialog from '@/components/common/ModalDialog'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -26,32 +28,31 @@ const QrModal = ({ onClose }: { onClose: () => void }): ReactElement => {
       hideChainIndicator
       slotProps={{ paper: { sx: { borderRadius: '24px' } } }}
     >
-      <DialogContent>
-        <Box bgcolor={chain?.theme.backgroundColor} color={chain?.theme.textColor} px={3} py={2} mx={-3}>
+      <div className="p-6">
+        <div
+          className="-mx-6 px-6 py-4"
+          style={{ backgroundColor: chain?.theme.backgroundColor, color: chain?.theme.textColor }}
+        >
           {chainName} only &mdash; assets sent from other networks will be lost.
-        </Box>
+        </div>
 
-        <Typography my={2}>
+        <Typography className="my-4">
           Scan the QR or copy the address below to deposit {nativeToken} and any ERC‑20 or ERC‑721 token.
         </Typography>
 
-        <Box display="flex" flexDirection="column" flexWrap="wrap" justifyContent="center" alignItems="center" my={2}>
-          <Box mt={1} mb={1} p={1} border="1px solid" borderColor="border.main" borderRadius={1}>
+        <div className="my-4 flex flex-col flex-wrap items-center justify-center">
+          <div className="mb-2 mt-2 rounded-lg border border-[var(--color-border-main)] p-2">
             <QRCode value={qrCode} size={164} />
-          </Box>
+          </div>
 
-          <FormControlLabel
-            control={
-              <Switch checked={settings.shortName.qr} onChange={(e) => dispatch(setQrShortName(e.target.checked))} />
-            }
-            label={
-              <>
-                QR code with chain prefix (<b>{chain?.shortName}:</b>)
-              </>
-            }
-          />
+          <Label className="gap-2">
+            <Switch checked={settings.shortName.qr} onCheckedChange={(checked) => dispatch(setQrShortName(checked))} />
+            <span>
+              QR code with chain prefix (<b>{chain?.shortName}:</b>)
+            </span>
+          </Label>
 
-          <Box mt={2}>
+          <div className="mt-4">
             <EthHashInfo
               address={safeAddress}
               shortAddress={false}
@@ -59,9 +60,9 @@ const QrModal = ({ onClose }: { onClose: () => void }): ReactElement => {
               hasExplorer
               showCopyButton
             />
-          </Box>
-        </Box>
-      </DialogContent>
+          </div>
+        </div>
+      </div>
     </ModalDialog>
   )
 }

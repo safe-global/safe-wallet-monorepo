@@ -1,4 +1,4 @@
-import { normalizeError, sanitizeErrorMessage } from '../normalizeError'
+import { matchUserOutcome, normalizeError, sanitizeErrorMessage } from '../normalizeError'
 import { ErrorDomain, ErrorLayer, ErrorType } from '../errorTaxonomy'
 
 describe('sanitizeErrorMessage', () => {
@@ -123,4 +123,112 @@ describe('normalizeError', () => {
 
     expect(result.sanitizedMessage).not.toContain('0x1234567890abcdef1234567890ABCDEF12345678')
   })
+
+  describe('user-driven outcomes (WA-2950)', () => {
+    it('classifies a WalletConnect request TTL expiry as expired and not user-facing', () => {
+      const result = normalizeError({
+        code: 0,
+        message: 'Request expired. Please try again.',
+        isUserFacing: true,
+      })
+
+      expect(result.type).toBe(ErrorType.EXPIRED)
+      expect(result.isUserFacing).toBe(false)
+    })
+
+    it('classifies a WalletConnect proposal TTL expiry as expired and not user-facing', () => {
+      const result = normalizeError({ code: 0, message: 'Proposal expired', isUserFacing: true })
+
+      expect(result.type).toBe(ErrorType.EXPIRED)
+      expect(result.isUserFacing).toBe(false)
+    })
+
+    it('classifies a coded error wrapping an expiry as expired', () => {
+      const result = normalizeError({
+        code: 804,
+        message: 'Code 804: Error executing a transaction (Request expired. Please try again.)',
+        isUserFacing: true,
+      })
+
+      expect(result.type).toBe(ErrorType.EXPIRED)
+      expect(result.isUserFacing).toBe(false)
+    })
+
+    it('forces isUserFacing to false for a user rejection', () => {
+      const result = normalizeError({
+        code: 804,
+        message: 'Code 804: Error executing a transaction (user rejected the request)',
+        isUserFacing: true,
+      })
+
+      expect(result.type).toBe(ErrorType.USER_REJECTED)
+      expect(result.isUserFacing).toBe(false)
+    })
+
+    it('detects a bare "Rejected" wallet reply wrapped by a coded error', () => {
+      const result = normalizeError({
+        code: 804,
+        message: 'Code 804: Error executing a transaction (Rejected)',
+        isUserFacing: true,
+      })
+
+      expect(result.type).toBe(ErrorType.USER_REJECTED)
+      expect(result.isUserFacing).toBe(false)
+    })
+
+    it('detects a bare "Rejected" message', () => {
+      const result = normalizeError({ code: 0, message: 'Rejected', isUserFacing: true })
+
+      expect(result.type).toBe(ErrorType.USER_REJECTED)
+      expect(result.isUserFacing).toBe(false)
+    })
+
+    it('keeps a swap order expiry classified as order_expired and user-facing', () => {
+      const result = normalizeError({ code: 806, message: 'Code 806: Your order expired', isUserFacing: true })
+
+      expect(result.type).toBe(ErrorType.ORDER_EXPIRED)
+      expect(result.isUserFacing).toBe(true)
+    })
+
+    it('does not swallow a revert reason that merely contains "rejected"', () => {
+      const result = normalizeError({
+        code: 804,
+        message: 'Code 804: execution reverted: transfer rejected by token guard',
+        isUserFacing: true,
+      })
+
+      expect(result.type).not.toBe(ErrorType.USER_REJECTED)
+      expect(result.isUserFacing).toBe(true)
+    })
+
+    it('keeps a genuine execution failure user-facing', () => {
+      const result = normalizeError({
+        code: 804,
+        message: 'Code 804: execution reverted GS013',
+        isUserFacing: true,
+      })
+
+      expect(result.type).toBe(ErrorType.ON_CHAIN_REVERT)
+      expect(result.isUserFacing).toBe(true)
+    })
+  })
+})
+
+describe('matchUserOutcome', () => {
+  it.each([
+    ['Request expired. Please try again.', ErrorType.EXPIRED],
+    ['Proposal expired', ErrorType.EXPIRED],
+    ['Rejected', ErrorType.USER_REJECTED],
+    ['Error: Rejected', ErrorType.USER_REJECTED],
+    ['User rejected.', ErrorType.USER_REJECTED],
+  ])('classifies %p as a user outcome', (message, expected) => {
+    expect(matchUserOutcome(message)).toBe(expected)
+  })
+
+  it.each(['Boom', 'Transaction rejected by guard module', 'nonce too low', 'Your order expired', undefined, ''])(
+    'returns undefined for %p',
+    (message) => {
+      expect(matchUserOutcome(message)).toBeUndefined()
+    },
+  )
 })

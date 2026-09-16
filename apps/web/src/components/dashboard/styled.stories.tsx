@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Box, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import { WidgetCard } from './styled'
 
 const meta: Meta<typeof WidgetCard> = {
@@ -16,9 +16,9 @@ export const Default: Story = {
   args: {
     title: 'Recent Activity',
     children: (
-      <Box p={2}>
-        <Typography color="text.secondary">Widget content goes here</Typography>
-      </Box>
+      <div className="p-4">
+        <Typography color="muted">Widget content goes here</Typography>
+      </div>
     ),
   },
 }
@@ -28,9 +28,9 @@ export const WithViewAllLink: Story = {
     title: 'Transactions',
     viewAllUrl: '/transactions',
     children: (
-      <Box p={2}>
+      <div className="p-4">
         <Typography>3 pending transactions</Typography>
-      </Box>
+      </div>
     ),
   },
 }

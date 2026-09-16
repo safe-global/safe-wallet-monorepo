@@ -283,6 +283,19 @@ describe('tx-history-filter', () => {
     })
 
     describe('formatFormData', () => {
+      it('should drop a date that cannot be parsed', () => {
+        const result = txFilter.formatFormData({
+          type: 'Outgoing' as TxFilterType,
+          filter: {
+            execution_date__gte: 'not-a-date',
+            execution_date__lte: '1970-01-01T00:00:00.000Z',
+          },
+        })
+
+        expect(result.execution_date__gte).toBeNull()
+        expect(result.execution_date__lte).toEqual(new Date('1970-01-01'))
+      })
+
       it('should return a form formatted filter', () => {
         const result = txFilter.formatFormData({
           type: 'Outgoing' as TxFilterType,

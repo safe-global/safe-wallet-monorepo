@@ -9,6 +9,12 @@ const mockPush = jest.fn()
 const mockDispatch = jest.fn()
 const mockCreateSpaceWithUser = jest.fn()
 
+// Cut the DialogActions -> CheckWallet -> safeCoreSDK -> chains.ts import chain (circular AppRoutes) in unit tests.
+jest.mock('@/components/common/CheckWallet', () => ({
+  __esModule: true,
+  default: ({ children }: { children: (ok: boolean) => unknown }) => children(true),
+}))
+
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
 }))
@@ -27,6 +33,8 @@ jest.mock('next/router', () => ({
 jest.mock('@/store', () => ({
   useAppDispatch: () => mockDispatch,
 }))
+
+jest.mock('@/hooks/useDarkMode', () => ({ useDarkMode: () => false }))
 
 jest.mock('@/store/notificationsSlice', () => ({
   showNotification: (payload: unknown) => ({ type: 'notifications/show', payload }),

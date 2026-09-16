@@ -17,9 +17,7 @@ import type SpaceSafeAccounts from './components/SafeAccounts'
 import type SpaceAddressBook from './components/SpaceAddressBook'
 import type SpaceBreadcrumbs from './components/SpaceBreadcrumbs'
 import type SpacesList from './components/SpacesList'
-import type SpaceSidebar from './components/SpaceSidebar'
 import type SpaceSettings from './components/SpaceSettings'
-import type UserSettings from './components/UserSettings'
 import type SpaceSafeContextMenu from './components/SafeAccounts/SpaceSafeContextMenu'
 import type SendTransactionButton from './components/SafeAccounts/SendTransactionButton'
 import type PendingTxWidget from './components/Dashboard/PendingTxWidget'
@@ -35,6 +33,8 @@ import type SurveyOnboarding from './components/SurveyOnboarding'
 import type SelectSafeModal from './components/SelectSafeModal'
 import type SecurityHubPage from './components/SecurityHub/Page'
 import type SpaceActivityLogPage from './components/SpaceActivityLog/Page'
+import type SpacePlansPage from './components/Plans/Page'
+import type SpacePoliciesPage from './components/Policies/Page'
 
 // Utility services
 import type { isUnauthorized, filterSpacesByStatus, getNonDeclinedSpaces } from './utils'
@@ -53,9 +53,7 @@ export interface SpacesContract {
   SpaceAddressBook: typeof SpaceAddressBook
   SpaceBreadcrumbs: typeof SpaceBreadcrumbs
   SpacesList: typeof SpacesList
-  SpaceSidebar: typeof SpaceSidebar
   SpaceSettings: typeof SpaceSettings
-  UserSettings: typeof UserSettings
   SpaceSafeContextMenu: typeof SpaceSafeContextMenu
   SendTransactionButton: typeof SendTransactionButton
   PendingTxWidget: typeof PendingTxWidget
@@ -68,6 +66,8 @@ export interface SpacesContract {
   SpaceSettingsPage: typeof SpaceSettingsPage
   SecurityHubPage: typeof SecurityHubPage
   SpaceActivityLogPage: typeof SpaceActivityLogPage
+  SpacePlansPage: typeof SpacePlansPage
+  SpacePoliciesPage: typeof SpacePoliciesPage
 
   // Modal components (PascalCase) - stub renders null
   SelectSafeModal: typeof SelectSafeModal

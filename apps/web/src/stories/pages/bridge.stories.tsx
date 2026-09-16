@@ -16,7 +16,7 @@ const defaultSetup = createMockStory({
 })
 
 const meta = {
-  title: 'Pages/Features/Bridge',
+  title: 'Pages/DeFi/Bridge',
   component: Bridge,
   loaders: [mswLoader],
   parameters: {

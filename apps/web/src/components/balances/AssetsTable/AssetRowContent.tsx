@@ -1,5 +1,6 @@
 import React, { type ReactElement } from 'react'
-import { Box, Link, Stack, Typography } from '@mui/material'
+import { Link } from '@/components/ui/link'
+import { Typography } from '@/components/ui/typography'
 import TokenIcon from '@/components/common/TokenIcon'
 import TokenAmount from '@/components/common/TokenAmount'
 import { TokenType } from '@safe-global/store/gateway/types'
@@ -37,12 +38,12 @@ export const AssetRowContent = ({
   const explorerLink = !isNative && currentChain ? getBlockExplorerLink(currentChain, item.tokenInfo.address) : null
 
   return (
-    <Box className={css.mobileAssetRow}>
+    <div className={css.mobileAssetRow}>
       <div className={css.token}>
         <TokenIcon logoUri={item.tokenInfo.logoUri} tokenSymbol={item.tokenInfo.symbol} size={32} />
 
-        <Stack>
-          <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
+        <div className="flex flex-col">
+          <span className="inline-flex items-center gap-2">
             {explorerLink ? (
               <Link
                 data-testid="token-name"
@@ -50,22 +51,13 @@ export const AssetRowContent = ({
                 target="_blank"
                 rel="noreferrer"
                 title={explorerLink.title}
-                variant="body1"
-                sx={{
-                  fontWeight: 'bold',
-                  color: 'text.primary',
-                  textDecoration: 'none',
-                  cursor: 'pointer',
-                  '&:hover': {
-                    textDecoration: 'underline',
-                    color: 'primary.main',
-                  },
-                }}
+                variant="inherit"
+                className="cursor-pointer font-bold text-[var(--color-text-primary)] no-underline hover:text-[var(--color-primary-main)] hover:underline"
               >
                 {item.tokenInfo.name}
               </Link>
             ) : (
-              <Typography data-testid="token-name" component="span" variant="body1" fontWeight="bold">
+              <Typography data-testid="token-name" variant="paragraph" className="font-bold">
                 {item.tokenInfo.name}
               </Typography>
             )}
@@ -75,9 +67,12 @@ export const AssetRowContent = ({
               isStakingPromoEnabled={isStakingPromoEnabled}
               isEarnPromoEnabled={isEarnPromoEnabled}
             />
-          </Box>
+          </span>
           {showMobileBalance && (
-            <Typography variant="body2" color="primary.light" className={css.mobileBalance} fontWeight="normal">
+            <Typography
+              variant="paragraph-small"
+              className={`font-normal text-[var(--color-primary-light)] ${css.mobileBalance}`}
+            >
               <TokenAmount
                 value={item.balance}
                 decimals={item.tokenInfo.decimals}
@@ -86,28 +81,26 @@ export const AssetRowContent = ({
             </Typography>
           )}
           <Typography
-            variant="body2"
-            color="primary.light"
-            className={css.desktopSymbol}
-            sx={{ fontSize: '13px' }}
+            variant="paragraph-small"
+            className={`text-[13px] text-[var(--color-primary-light)] ${css.desktopSymbol}`}
             data-testid="token-symbol"
           >
             {item.tokenInfo.symbol}
           </Typography>
-        </Stack>
+        </div>
       </div>
       {showMobileValue && (
-        <Box className={css.mobileValue}>
-          <Typography>
+        <div className={css.mobileValue}>
+          <Typography variant="paragraph" as="div">
             <FiatBalance balanceItem={item} />
           </Typography>
           {item.fiatBalance24hChange && (
-            <Typography variant="caption">
+            <Typography variant="paragraph-mini">
               <FiatChange balanceItem={item} inline />
             </Typography>
           )}
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   )
 }

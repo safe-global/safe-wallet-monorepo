@@ -48,6 +48,8 @@ import { Route as SpacesMembersRoute } from './routes/spaces/members'
 import { Route as SpacesSafeAccountsRoute } from './routes/spaces/safe-accounts'
 import { Route as SpacesSecurityRoute } from './routes/spaces/security'
 import { Route as SpacesActivityRoute } from './routes/spaces/activity'
+import { Route as SpacesPoliciesRoute } from './routes/spaces/policies'
+import { Route as SpacesPlansRoute } from './routes/spaces/plans'
 import { Route as SpacesSettingsRoute } from './routes/spaces/settings'
 import { Route as SpacesSettingsAboutRoute } from './routes/spaces/settings/about'
 import { Route as SpacesSettingsAccountRoute } from './routes/spaces/settings/account'
@@ -76,7 +78,6 @@ import { Route as StakeRoute } from './routes/stake'
 import { Route as SwapRoute } from './routes/swap'
 import { Route as ShareSafeAppRoute } from './routes/share/safe-app'
 import { Route as WcRoute } from './routes/wc'
-import { Route as UserSettingsRoute } from './routes/user-settings'
 import { Route as HypernativeOauthCallbackRoute } from './routes/hypernative/oauth-callback'
 
 const routeTree = RootRoute.addChildren([
@@ -123,6 +124,8 @@ const routeTree = RootRoute.addChildren([
   SpacesSafeAccountsRoute,
   SpacesSecurityRoute,
   SpacesActivityRoute,
+  SpacesPoliciesRoute,
+  SpacesPlansRoute,
   SpacesSettingsRoute,
   SpacesSettingsGeneralRoute,
   SpacesSettingsAboutRoute,
@@ -149,7 +152,6 @@ const routeTree = RootRoute.addChildren([
   SwapRoute,
   ShareSafeAppRoute,
   WcRoute,
-  UserSettingsRoute,
   HypernativeOauthCallbackRoute,
 ])
 

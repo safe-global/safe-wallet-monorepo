@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import type { CSSProperties, ReactNode } from 'react'
-import { House, ArrowRightLeft, WalletCards, BookUser, UsersRound, Shield, Settings } from 'lucide-react'
+import { House, ArrowRightLeft, WalletCards, BookUser, UsersRound, Shield, Settings, ListChecks } from 'lucide-react'
 import { SidebarProvider, Sidebar, SidebarHeader } from '@/components/ui/sidebar'
 import { AppRoutes } from '@/config/routes'
 import { withMockProvider } from '@/storybook/preview'
@@ -8,11 +8,11 @@ import { SpacesSidebarVariant } from './variants/SpacesSidebarVariant'
 import { SidebarTopBar } from './SidebarTopBar'
 import { SidebarCommonFooter } from './SidebarCommonFooter'
 import type { SpaceItem } from './types'
-import type { ResolvedSidebarItem, ResolvedSidebarGroup } from './types'
+import type { ResolvedSidebarNavItem, ResolvedSidebarGroup } from './types'
 
 const mockSpaceId = '1'
 
-const mockMainNavItems: ResolvedSidebarItem[] = [
+const mockMainNavItems: ResolvedSidebarNavItem[] = [
   {
     icon: House,
     label: 'Home',
@@ -51,6 +51,14 @@ const mockMainNavItems: ResolvedSidebarItem[] = [
 const mockSetupGroup: ResolvedSidebarGroup = {
   label: 'Setup',
   items: [
+    {
+      icon: ListChecks,
+      label: 'Plans',
+      href: AppRoutes.spaces.plans,
+      isActive: false,
+      disabled: false,
+      link: { pathname: AppRoutes.spaces.plans, query: { spaceId: mockSpaceId } },
+    },
     {
       icon: UsersRound,
       label: 'Team',

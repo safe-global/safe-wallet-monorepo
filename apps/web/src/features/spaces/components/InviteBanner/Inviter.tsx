@@ -1,12 +1,12 @@
-import { Stack, Typography, type TypographyProps } from '@mui/material'
 import { isAddress } from 'ethers'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import EmailInfo from '@/components/common/EmailInfo'
-import css from './styles.module.css'
+import { Typography } from '@/components/ui/typography'
+import { type ComponentProps } from 'react'
 
 type InviterProps = {
   invitedByName: string | undefined
-  variant: TypographyProps['variant']
+  variant: ComponentProps<typeof Typography>['variant']
   avatarSize: number
 }
 
@@ -14,17 +14,17 @@ const Inviter = ({ invitedByName, variant, avatarSize }: InviterProps) => {
   if (!invitedByName) return null
 
   return (
-    <Stack direction="row" alignItems="center" spacing={0.75}>
+    <div className="flex flex-row items-center gap-1.5">
       <Typography variant={variant}>by</Typography>
       {/* Typography wrapper keeps the inviter name at the same font size as the surrounding text. */}
-      <Typography variant={variant} component="div" className={css.inviterName}>
+      <Typography variant={variant} as="div" className="flex items-center gap-1 font-bold text-primary">
         {isAddress(invitedByName) ? (
           <EthHashInfo address={invitedByName} avatarSize={avatarSize} showName={false} showPrefix={false} />
         ) : (
           <EmailInfo email={invitedByName} size="small" />
         )}
       </Typography>
-    </Stack>
+    </div>
   )
 }
 

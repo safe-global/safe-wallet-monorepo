@@ -1,9 +1,10 @@
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { type ReactElement } from 'react'
-import { Alert, Box, IconButton } from '@mui/material'
-import CopyIcon from '@mui/icons-material/ContentCopy'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Copy as CopyIcon } from 'lucide-react'
 import TxConfirmations from '@/components/transactions/TxConfirmations'
-import { AuditRow, AuditLogHeader } from '@/components/common/AuditLog'
+import { AuditLog, AuditRow, AuditLogHeader } from '@/components/common/AuditLog'
 import CopyTooltip from '@/components/common/CopyTooltip'
 import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'
@@ -25,7 +26,7 @@ const MsgAuditLog = ({ msg }: { msg: MessageItem }): ReactElement => {
   const signingLabel = (idx: number) => `Signed (${idx + 1}/${confirmationsRequired})`
 
   return (
-    <Box mb={2} data-testid="msg-audit-log">
+    <AuditLog className="mb-4" data-testid="msg-audit-log">
       <AuditLogHeader
         chip={
           <TxConfirmations
@@ -35,9 +36,9 @@ const MsgAuditLog = ({ msg }: { msg: MessageItem }): ReactElement => {
         }
         actions={
           <CopyTooltip text={msgUrl} initialToolTipText="Copy message link">
-            <IconButton size="small" sx={{ color: 'inherit' }}>
-              <CopyIcon fontSize="small" />
-            </IconButton>
+            <Button variant="ghost" size="icon-xs" className="text-inherit">
+              <CopyIcon className="size-4" />
+            </Button>
           </CopyTooltip>
         }
       />
@@ -65,11 +66,12 @@ const MsgAuditLog = ({ msg }: { msg: MessageItem }): ReactElement => {
       {isConfirmed && <AuditRow label="Confirmed" actionType="confirmed" timestamp={msg.modifiedTimestamp} isLast />}
 
       {!isConfirmed && (
-        <Alert severity="info" sx={{ mt: 2, py: 0.5 }}>
-          Can be confirmed once the threshold is reached.
+        <Alert variant="info" className="mt-4">
+          <AlertSeverityIcon variant="info" />
+          <AlertDescription>Can be confirmed once the threshold is reached.</AlertDescription>
         </Alert>
       )}
-    </Box>
+    </AuditLog>
   )
 }
 

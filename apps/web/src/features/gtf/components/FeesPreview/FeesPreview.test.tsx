@@ -7,6 +7,19 @@ jest.mock('@/hooks/useChains', () => ({
   useCurrentChain: () => ({ nativeCurrency: { symbol: 'ETH', logoUri: 'https://example/eth.svg' } }),
 }))
 
+// Keeps the Safe-pays suite below as live-relaying coverage; the last describe flips it off.
+let mockRelayingLive = true
+jest.mock('../../constants', () => ({
+  ...jest.requireActual('../../constants'),
+  get IS_RELAYING_LIVE() {
+    return mockRelayingLive
+  },
+}))
+
+afterEach(() => {
+  mockRelayingLive = true
+})
+
 const defaultProps: FeesPreviewData = {
   canCoverFees: true,
   executionFee: { label: 'Execution fee', isFree: true },
@@ -183,6 +196,70 @@ describe('FeesPreview', () => {
       render(<FeesPreview {...defaultProps} safeHasEnoughGas={false} loading />)
 
       expect(screen.queryByText(/Insufficient .* balance to cover the gas fee/)).not.toBeInTheDocument()
+    })
+  })
+
+  describe('relaying hidden (PLA-1854)', () => {
+    beforeEach(() => {
+      mockRelayingLive = false
+    })
+
+    it('hides the "How fees work" link', () => {
+      render(<FeesPreview {...defaultProps} />)
+
+      expect(screen.queryByText(/How fees work/)).not.toBeInTheDocument()
+    })
+
+    it('hides both selectors', () => {
+      render(<FeesPreview {...defaultProps} />)
+
+      expect(screen.queryByText('Pay fees from:')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('payment-source-selector')).not.toBeInTheDocument()
+      expect(screen.queryByText('Fees token:')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('gas-token-selector')).not.toBeInTheDocument()
+    })
+
+    it('hides the signer fallback notice', () => {
+      render(<FeesPreview {...defaultProps} canCoverFees={false} />)
+
+      expect(screen.queryByText(/Fees will be paid from the signer/)).not.toBeInTheDocument()
+      expect(screen.queryByText(/Fees can.*t currently be paid from your Safe/)).not.toBeInTheDocument()
+    })
+
+    it('hides the Safe-pays notice on a confirmation', () => {
+      render(<FeesPreview {...defaultProps} isConfirmation />)
+
+      expect(screen.queryByText(/Fees will be paid from your Safe/)).not.toBeInTheDocument()
+    })
+
+    it('still renders the fee table', () => {
+      render(<FeesPreview {...defaultProps} />)
+
+      expect(screen.getByText('Fees')).toBeInTheDocument()
+      expect(screen.getByText('FREE')).toBeInTheDocument()
+      expect(screen.getByText('Max gas fee')).toBeInTheDocument()
+      expect(screen.getByText('$97.30')).toBeInTheDocument()
+      expect(screen.getByText('Total outgoing')).toBeInTheDocument()
+      expect(screen.getByText('0.60126 ETH')).toBeInTheDocument()
+    })
+
+    const twoCurrencyOutgoing = {
+      primary: [{ amount: '0.5466', currency: 'ETH' }],
+      fees: { amount: '3.50', currency: 'USDC' },
+      fiatTotal: '$1,068.00',
+    }
+
+    it('drops the fee line from total outgoing when the signer pays', () => {
+      render(<FeesPreview {...defaultProps} totalOutgoing={twoCurrencyOutgoing} />)
+
+      expect(screen.getByText('0.5466 ETH')).toBeInTheDocument()
+      expect(screen.queryByText('3.50 USDC')).not.toBeInTheDocument()
+    })
+
+    it('keeps the fee line for a Safe-pays payload signed before the switch', () => {
+      render(<FeesPreview {...defaultProps} isConfirmation totalOutgoing={twoCurrencyOutgoing} />)
+
+      expect(screen.getByText('3.50 USDC')).toBeInTheDocument()
     })
   })
 })

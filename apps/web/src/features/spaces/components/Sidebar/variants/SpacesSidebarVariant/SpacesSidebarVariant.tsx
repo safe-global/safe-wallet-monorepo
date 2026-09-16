@@ -7,15 +7,17 @@ import {
   SidebarGroupContent,
   SidebarMenu,
   SidebarMenuItem,
+  SidebarSeparator,
 } from '@/components/ui/sidebar'
 import css from '../../styles.module.css'
-import type { SpaceSelectorProps, ResolvedSidebarItem, ResolvedSidebarGroup } from '../../types'
+import type { SpaceSelectorProps, ResolvedSidebarNavItem, ResolvedSidebarGroup } from '../../types'
 import { NavItem } from '../NavItem'
+import { SidebarDeveloperGroup } from '../SidebarDeveloperGroup'
 import { SpaceSelectorDropdown } from '../SpaceSelectorDropdown'
 import { containerVariants, itemVariants } from '../../constants'
 
 interface SpacesSidebarVariantProps extends SpaceSelectorProps {
-  mainNavItems: ResolvedSidebarItem[] | null
+  mainNavItems: ResolvedSidebarNavItem[] | null
   setupGroup: ResolvedSidebarGroup | null
   isLoading?: boolean
 }
@@ -36,7 +38,7 @@ export const SpacesSidebarVariant = ({
   return (
     <SidebarContent>
       <motion.div variants={containerVariants} initial="hidden" animate="visible">
-        <motion.div variants={itemVariants} className="mb-2">
+        <motion.div variants={itemVariants} className="mb-6 group-data-[collapsible=icon]:mb-4">
           <SidebarGroup className={css.sidebarGroup}>
             <SidebarMenu>
               <SidebarMenuItem>
@@ -67,7 +69,10 @@ export const SpacesSidebarVariant = ({
         {/* Setup Group */}
         <motion.div variants={itemVariants}>
           <SidebarGroup className={css.sidebarGroup}>
-            <SidebarGroupLabel>{setupGroup?.label ?? ''}</SidebarGroupLabel>
+            <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
+              {setupGroup?.label ?? ''}
+            </SidebarGroupLabel>
+            <SidebarSeparator className={css.collapsedSeparator} />
             <SidebarGroupContent>
               <SidebarMenu className="gap-0">
                 {displaySetupItems.map((item, index) => (
@@ -82,6 +87,8 @@ export const SpacesSidebarVariant = ({
             </SidebarGroupContent>
           </SidebarGroup>
         </motion.div>
+
+        <SidebarDeveloperGroup isLoading={isLoading} />
       </motion.div>
     </SidebarContent>
   )

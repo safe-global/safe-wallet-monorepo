@@ -65,7 +65,7 @@ export type RelayDto = {
   version: string
   to: string
   data: string
-  /** Accepted for backward compatibility and validation; not forwarded to the relay provider (Gelato). */
+  /** Accepted for backward compatibility and validation; not forwarded to the relay provider. */
   gasLimit?: string | null
   /** Safe transaction hash for relay-fee eligibility check */
   safeTxHash?: string

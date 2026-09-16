@@ -1,9 +1,13 @@
 .txCreation,
 .txSummary {
-  padding: 20px 24px;
   display: flex;
   flex-direction: column;
-  padding-right: 60px; /* to not overlap with the share link */
+  /* These blocks sit straight in the list item's full-bleed panel, so .txSummary's rule below spans
+     the whole card and each block re-adds the inset the panel dropped — same contract as
+     `--tx-details-edge-inset` in TxDetails/styles.module.css. */
+  padding-block: 20px;
+  padding-left: calc(24px + var(--tx-details-edge-inset, 0px));
+  padding-right: calc(60px + var(--tx-details-edge-inset, 0px)); /* 60px: clears the share link */
 }
 
 .txSummary {

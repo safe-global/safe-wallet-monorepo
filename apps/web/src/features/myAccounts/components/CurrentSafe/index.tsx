@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { AllSafeItems } from '@/hooks/safes'
@@ -30,12 +30,12 @@ function CurrentSafe({ allSafes, onLinkClick }: { allSafes: AllSafeItems; onLink
   if (!safeAddress || safeInList?.isPinned) return null
 
   return (
-    <Box data-testid="current-safe-section" mb={3}>
-      <Typography variant="h5" fontWeight={700} mb={2}>
+    <div data-testid="current-safe-section" className="mb-6">
+      <Typography variant="h4" className="mb-4">
         Current Safe account
       </Typography>
       <SafeListItem safeItem={safeItem} onLinkClick={onLinkClick} />
-    </Box>
+    </div>
   )
 }
 

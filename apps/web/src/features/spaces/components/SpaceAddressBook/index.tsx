@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Typography } from '@/components/ui/typography'
+import TableCard from '@/components/common/TableCard'
 import {
   useIsInvited,
   useIsAdmin,
@@ -16,9 +17,9 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { AddressBookEntry } from './SpaceAddressBookTable'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { Input } from '@/components/ui/input'
-import { Search } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { Check } from 'lucide-react'
+import AddressBookSearchInput from '@/components/common/AddressBookSearchInput'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -112,7 +113,7 @@ const SpaceAddressBook = () => {
             setActiveTab(val)
           }}
         >
-          <TabsList variant="line" className="flex-wrap h-auto mb-4 sm:mb-0">
+          <TabsList variant="underline" className="flex-wrap mb-4">
             <TabsTrigger value="workspace" className="cursor-pointer">
               <Tooltip>
                 <TooltipTrigger render={<span />}>Workspace contacts ({addressBookItems.length})</TooltipTrigger>
@@ -138,39 +139,38 @@ const SpaceAddressBook = () => {
           </TabsList>
 
           {(activeTab === 'workspace' || activeTab === 'mine') && (
-            <div className="mt-6 flex items-center gap-2">
-              <div className="flex shrink-0 gap-2">
-                {isAdmin && activeTab === 'workspace' && (
-                  <>
-                    <Track {...SPACE_EVENTS.ADD_ADDRESS}>
-                      <AddContact label="Add shared contact" />
-                    </Track>
-                    <ImportAddressBook />
-                  </>
-                )}
-                {isPrivateAddressBookEnabled && activeTab === 'mine' && <AddLocalContact />}
-              </div>
-              {(activeTab === 'workspace' ? addressBookItems.length > 0 : sortedLocalContacts.length > 0) && (
-                <div className="relative w-full sm:w-[320px]">
-                  <Search className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
-                  <Input
-                    placeholder="Search for contacts"
-                    aria-label="Search contacts by name or address"
-                    className="h-10 bg-white pl-8 dark:bg-white/10 hover:ring-1 hover:ring-ring"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
+            // mb-4 on top of the Tabs root's own gap-2: 8px alone left the search almost touching
+            <div className="mt-6 mb-4 flex flex-wrap items-center gap-2">
+              {/* Only rendered when it holds an action. An always-present wrapper is still a flex
+                  item when empty, so the row's gap-2 pushed the search 8px right of the table card
+                  it sits above — three different left edges for viewers without admin rights. */}
+              {(isAdmin && activeTab === 'workspace') || (isPrivateAddressBookEnabled && activeTab === 'mine') ? (
+                <div className="flex shrink-0 gap-2">
+                  {isAdmin && activeTab === 'workspace' && (
+                    <>
+                      <Track {...SPACE_EVENTS.ADD_ADDRESS}>
+                        <AddContact label="Add shared contact" />
+                      </Track>
+                      <ImportAddressBook />
+                    </>
+                  )}
+                  {isPrivateAddressBookEnabled && activeTab === 'mine' && <AddLocalContact />}
                 </div>
+              ) : null}
+              {(activeTab === 'workspace' ? addressBookItems.length > 0 : sortedLocalContacts.length > 0) && (
+                // `default` (h-9), not `lg`: the Add contact / Import buttons on this row are
+                // `size="action"`, which is h-9.
+                <AddressBookSearchInput value={searchQuery} onChange={setSearchQuery} inputSize="default" />
               )}
             </div>
           )}
 
-          <div className="bg-card mt-6 rounded-lg p-4">
+          <TableCard>
             <TabsContent value="workspace">
               {searchQuery && filteredAll.length === 0 ? (
-                <p className="text-muted-foreground mb-2 text-sm">Found 0 results</p>
+                <p className="text-muted-foreground mb-2 p-4 text-sm">Found 0 results</p>
               ) : addressBookItems.length === 0 ? (
-                <p className="text-muted-foreground text-sm">No contacts in this workspace yet.</p>
+                <p className="text-muted-foreground p-4 text-sm">No contacts in this workspace yet.</p>
               ) : (
                 <SpaceAddressBookTable entries={filteredAll} />
               )}
@@ -180,19 +180,27 @@ const SpaceAddressBook = () => {
               <>
                 <TabsContent value="mine">
                   {searchQuery && filteredMine.length === 0 ? (
-                    <p className="text-muted-foreground mb-2 text-sm">Found 0 results</p>
+                    <p className="text-muted-foreground mb-2 p-4 text-sm">Found 0 results</p>
                   ) : filteredMine.length === 0 ? (
-                    <p className="text-muted-foreground text-sm">You haven&apos;t added any contacts yet.</p>
+                    <p className="text-muted-foreground p-4 text-sm">You haven&apos;t added any contacts yet.</p>
                   ) : (
                     <SpaceAddressBookTable
                       entries={filteredMine}
                       showAddedBy={false}
-                      renderExtraAction={(entry) => {
+                      renderExtraAction={(entry, { isCompact }) => {
                         if (entry.isDuplicate) {
                           return (
                             <Tooltip>
-                              <TooltipTrigger render={<span className="inline-flex" />}>
-                                <Badge variant="secondary">Already shared</Badge>
+                              <TooltipTrigger
+                                render={
+                                  <span className="inline-flex" aria-label={isCompact ? 'Already shared' : undefined} />
+                                }
+                              >
+                                {isCompact ? (
+                                  <Check className="text-muted-foreground size-4" />
+                                ) : (
+                                  <Badge variant="secondary">Already shared</Badge>
+                                )}
                               </TooltipTrigger>
                               <TooltipContent>Already saved in your workspace address book</TooltipContent>
                             </Tooltip>
@@ -200,7 +208,12 @@ const SpaceAddressBook = () => {
                         }
                         if (isAdmin) {
                           return (
-                            <AddToWorkspaceButton address={entry.address} name={entry.name} chainIds={entry.chainIds} />
+                            <AddToWorkspaceButton
+                              address={entry.address}
+                              name={entry.name}
+                              chainIds={entry.chainIds}
+                              isCompact={isCompact}
+                            />
                           )
                         }
                         // Invitees can preview the space but cannot propose contacts
@@ -213,6 +226,7 @@ const SpaceAddressBook = () => {
                             name={entry.name}
                             chainIds={entry.chainIds}
                             alreadyRequested={pendingAddresses.has(entry.address.toLowerCase())}
+                            isCompact={isCompact}
                           />
                         )
                       }}
@@ -225,7 +239,7 @@ const SpaceAddressBook = () => {
                 </TabsContent>
               </>
             )}
-          </div>
+          </TableCard>
         </Tabs>
       </div>
     </>

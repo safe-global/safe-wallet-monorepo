@@ -16,6 +16,15 @@ import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { SafeTransaction, SafeTransactionData } from '@safe-global/types-kit'
 
+// Keeps the Safe-pays suite below as live-relaying coverage; the last describe flips it off.
+let mockRelayingLive = true
+jest.mock('../../constants', () => ({
+  ...jest.requireActual('../../constants'),
+  get IS_RELAYING_LIVE() {
+    return mockRelayingLive
+  },
+}))
+
 // Safe-pays requires both the GTF flag and a RELAY_FEE relayer on the chain.
 const mockChain = chainBuilder()
   .with({
@@ -194,6 +203,7 @@ const candidateWeth = {
 describe('useFeesPreview', () => {
   beforeEach(() => {
     jest.resetAllMocks()
+    mockRelayingLive = true
     jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(mockChain)
     jest.spyOn(useSafeInfoModule, 'default').mockReturnValue({
       safe: mockSafe,
@@ -657,6 +667,55 @@ describe('useFeesPreview', () => {
       expect(result.current.totalOutgoing).toBeDefined()
       expect(result.current.totalOutgoing?.primary[0].currency).toBe('WETH')
       expect(result.current.totalOutgoing?.fees).toBeUndefined()
+    })
+  })
+
+  describe('relaying hidden (PLA-1854)', () => {
+    const SAFE_PAYS = {
+      safeTxGas: '2409',
+      baseGas: '68568',
+      gasPrice: '741064438',
+      refundReceiver: '0xc918e75504D1B0c741Eb4236B72Dae7A52401E95',
+    }
+
+    beforeEach(() => {
+      mockRelayingLive = false
+    })
+
+    it('never queries the preview even with the Safe payment preference persisted', () => {
+      const spy = jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
+
+      const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx, 'safe') })
+
+      expect(spy.mock.calls.length).toBeGreaterThan(0)
+      spy.mock.calls.forEach(([arg]) => expect(arg).toBe(skipToken))
+      expect(result.current.gasFee).toEqual({ label: 'Max gas fee', note: 'Calculated at execution' })
+      expect(result.current.previewedSafeTx).toBeUndefined()
+    })
+
+    it('leaves the signed payload free of relay params (no gas token selected)', () => {
+      jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(emptyPreview)
+
+      const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(erc20SafeTx, 'safe') })
+
+      // mergeGtfFeeParams no-ops on a falsy selection, so the tx signs as pure signer-pays.
+      expect(result.current.selectedGasToken).toBe(ETH_ADDRESS)
+      expect(result.current.previewedSafeTx).toBeUndefined()
+    })
+
+    it('still renders the locked fee of a Safe-pays payload signed before the switch', () => {
+      jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(emptyPreview)
+      const signedWethGasSafeTx = buildSafeTx(
+        { to: mockSafe.address.value, value: '100000000000000', data: '0x', gasToken: WETH_ADDRESS, ...SAFE_PAYS },
+        new Map([['0xSigner', {}]]),
+      )
+
+      const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(signedWethGasSafeTx) })
+
+      expect(result.current.isConfirmation).toBe(true)
+      expect(result.current.selectedGasToken).toBe(WETH_ADDRESS)
+      expect(result.current.gasFee.currency).toBe('WETH')
+      expect(result.current.gasFee.amount).toBeDefined()
     })
   })
 })

@@ -1,8 +1,8 @@
 import { type ReactElement } from 'react'
-import { Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 
 export const SafeShieldAnalysisEmpty = (): ReactElement => (
-  <Typography padding={2} variant="body2" color="text.secondary" textAlign="center">
+  <Typography variant="paragraph-small" align="center" className="block p-4 text-[var(--color-text-secondary)]">
     Transaction details will be automatically scanned for potential risks and will appear here.
   </Typography>
 )

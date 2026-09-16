@@ -1,11 +1,16 @@
+import type { JsonRpcProvider } from 'ethers'
 import type { AppDispatch } from '@/store'
 import type { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
+import { isSmartContract } from '@/utils/wallets'
 import { cgwApi as counterfactualSafesApi } from '@safe-global/store/gateway/AUTO_GENERATED/counterfactual-safes'
 import { cgwApi as spacesApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { addOrUpdateSafe } from '@/store/addedSafesSlice'
+import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { toBackendDto } from './counterfactualSafeMapper'
 import { replayCounterfactualSafeDeployment } from './safeDeployment'
 import { enqueuePendingCfDelete } from '../store/pendingCfDeletesSlice'
+import { removeUndeployedSafe } from '../store/undeployedSafesSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { normalizeSpaceId } from '@/utils/spaces'
 import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/constants'
@@ -35,10 +40,13 @@ type PersistArgs = {
    *  entry) instead of swallowing it as success. Single-create flows keep the
    *  soft toast-and-succeed behavior. */
   isMultiChainCreation?: boolean
+  /** Read-only provider for `chainId`, used to check the Safe isn't already
+   *  deployed. Must target `chainId`; when absent the check is skipped. */
+  provider?: JsonRpcProvider
   dispatch: AppDispatch
 }
 
-export type PersistResult = { ok: true } | { ok: false; error: Error }
+export type PersistResult = { ok: true; skipped?: 'already-deployed' } | { ok: false; error: Error }
 
 /**
  * Single code path for creating a counterfactual safe: persist to backend
@@ -62,8 +70,24 @@ export const persistCounterfactualSafe = async ({
   isAdminOfActiveSpace,
   spaceSafeCount,
   isMultiChainCreation,
+  provider,
   dispatch,
 }: PersistArgs): Promise<PersistResult> => {
+  // Client-side deploy check, unauth path only — authed users get a 409 from the
+  // backend instead (handled below). Skip without a provider; fail open on error.
+  if (provider && !isUserAuthenticated) {
+    let isDeployed = false
+    try {
+      isDeployed = await isSmartContract(safeAddress, provider)
+    } catch {
+      // Couldn't verify deployment — fail open and let the persist proceed.
+    }
+
+    if (isDeployed) {
+      return recoverAlreadyDeployed({ chainId, safeAddress, props, name, dispatch })
+    }
+  }
+
   // 1. Save to backend (blocking). Unauth users fall back to local-only —
   //    matches pre-backend-sync behavior and avoids creating orphan entries
   //    that can never be cleaned up server-side.
@@ -75,6 +99,12 @@ export const persistCounterfactualSafe = async ({
       }),
     )
     if ('error' in userResult) {
+      // CGW rejects an already-deployed Safe with 409. Treat it like the client
+      // guard: add the Safe to My accounts as deployed and skip CF creation,
+      // rather than surfacing it as a hard failure.
+      if (isConflict(userResult.error)) {
+        return recoverAlreadyDeployed({ chainId, safeAddress, props, name, dispatch })
+      }
       return { ok: false, error: toPersistError(userResult.error) }
     }
 
@@ -165,10 +195,44 @@ export const persistCounterfactualSafe = async ({
   return { ok: true }
 }
 
-const CONFLICT_MESSAGE =
-  'A counterfactual Safe with these parameters already exists on this chain. Please contact support if this is unexpected.'
+/**
+ * The Safe is already deployed, so store it as a regular deployed Safe in My
+ * accounts (not counterfactual, which shows "Not activated") and drop any stale
+ * undeployed entry.
+ */
+function recoverAlreadyDeployed({
+  chainId,
+  safeAddress,
+  props,
+  name,
+  dispatch,
+}: {
+  chainId: string
+  safeAddress: string
+  props: ReplayedSafeProps
+  name: string
+  dispatch: AppDispatch
+}): PersistResult {
+  dispatch(
+    addOrUpdateSafe({
+      safe: {
+        ...defaultSafeInfo,
+        chainId,
+        address: { value: safeAddress, name },
+        threshold: Number(props.safeAccountConfig.threshold),
+        owners: props.safeAccountConfig.owners.map((owner) => ({ value: owner })),
+      },
+    }),
+  )
+  dispatch(removeUndeployedSafe({ chainId, address: safeAddress }))
+  return { ok: true, skipped: 'already-deployed' }
+}
 
 type BackendError = { status?: number; data?: { message?: string } }
+
+function isConflict(error: unknown): boolean {
+  return (error as BackendError)?.status === 409
+}
 
 function toSpaceError(error: unknown): Error {
   return new Error((error as BackendError)?.data?.message || 'Failed to add Safe account to workspace')
@@ -182,8 +246,8 @@ function isLimitRejection(error: unknown): boolean {
 }
 
 function toPersistError(error: unknown): Error {
-  if ((error as BackendError)?.status === 409) {
-    return new Error(CONFLICT_MESSAGE)
-  }
-  return new Error('Failed to save Safe account to backend')
+  // 409 (already deployed) is handled upstream via recoverAlreadyDeployed, so it
+  // never reaches here — any error at this point is a genuine persist failure.
+  const message = (error as BackendError)?.data?.message
+  return new Error(message || 'Failed to save Safe account to backend')
 }

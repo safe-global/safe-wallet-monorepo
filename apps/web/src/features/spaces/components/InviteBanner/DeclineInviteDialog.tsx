@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { Typography } from '@mui/material'
-import { DialogContent, DialogActions, Button } from '@mui/material'
 import ModalDialog from '@/components/common/ModalDialog'
+import DialogActions from '@/components/common/DialogActions'
 import ErrorMessage from '@/components/tx/ErrorMessage'
+import { Typography } from '@/components/ui/typography'
+import { cn } from '@/utils/cn'
+import { useDarkMode } from '@/hooks/useDarkMode'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useMembersDeclineInviteV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -19,6 +21,7 @@ const DeclineInviteDialog = ({ space, onClose }: DeclineInviteDialogProps) => {
   const [errorMessage, setErrorMessage] = useState<string>('')
   const [declineInvite] = useMembersDeclineInviteV1Mutation()
   const dispatch = useAppDispatch()
+  const isDarkMode = useDarkMode()
 
   const handleConfirm = async () => {
     setErrorMessage('')
@@ -46,21 +49,24 @@ const DeclineInviteDialog = ({ space, onClose }: DeclineInviteDialogProps) => {
 
   return (
     <ModalDialog open onClose={onClose} dialogTitle="Decline invitation" hideChainIndicator>
-      <DialogContent sx={{ p: '24px !important' }}>
-        <Typography>
-          Are you sure you want to decline the invitation to <b>{space.name}</b>?
-        </Typography>
-        {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
-      </DialogContent>
+      <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
+        <div className="p-6">
+          <Typography variant="paragraph">
+            Are you sure you want to decline the invitation to <b>{space.name}</b>?
+          </Typography>
+          {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
+        </div>
 
-      <DialogActions>
-        <Button data-testid="cancel-btn" onClick={onClose}>
-          Cancel
-        </Button>
-        <Button data-testid="decline-btn" onClick={handleConfirm} variant="danger" disableElevation>
-          Decline
-        </Button>
-      </DialogActions>
+        <DialogActions
+          className="px-6 pb-6"
+          onCancel={onClose}
+          cancelTestId="cancel-btn"
+          confirmLabel="Decline"
+          onConfirm={handleConfirm}
+          confirmDestructive
+          confirmTestId="decline-btn"
+        />
+      </div>
     </ModalDialog>
   )
 }

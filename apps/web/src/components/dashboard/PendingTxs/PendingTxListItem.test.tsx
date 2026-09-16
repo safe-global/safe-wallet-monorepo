@@ -48,6 +48,12 @@ describe('PendingTxListItem', () => {
     expect(screen.getByText('1/2')).toBeInTheDocument()
   })
 
+  it('uses a block container for the transaction description', () => {
+    render(<PendingTxListItem transaction={createTransaction()} />)
+
+    expect(screen.getByText('Transaction Builder').closest('[data-slot="typography"]')).toHaveProperty('tagName', 'DIV')
+  })
+
   it('does not render a confirmations badge for non-multisig execution info', () => {
     render(<PendingTxListItem transaction={createTransaction({ executionInfo: undefined })} />)
 

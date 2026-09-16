@@ -1,21 +1,7 @@
-import {
-  Typography,
-  Divider,
-  CardActions,
-  Button,
-  SvgIcon,
-  Grid,
-  MenuItem,
-  TextField,
-  IconButton,
-  Tooltip,
-  Alert,
-} from '@mui/material'
 import { useForm, FormProvider, useFieldArray, Controller } from 'react-hook-form'
-import { Fragment } from 'react'
 import type { ReactElement } from 'react'
 
-import TxCard from '../../common/TxCard'
+import TxCard, { TxCardActions } from '../../common/TxCard'
 import AddIcon from '@/public/images/common/add.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { RecoverAccountFlowFields } from '.'
@@ -25,11 +11,19 @@ import { TOOLTIP_TITLES } from '../../common/constants'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { addressIsNotReserved, validateThreshold } from '@safe-global/utils/utils/validation'
+import { getContractErrorMessage } from '@safe-global/utils/services/exceptions/contractErrors'
 import type { RecoverAccountFlowProps } from '.'
 import { type AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 export function _isSameSetup({
   oldOwners,
@@ -53,6 +47,31 @@ export function _isSameSetup({
   return oldOwners.every((oldOwner) => {
     return newOwners.some((newOwner) => sameAddress(oldOwner.value, newOwner.value))
   })
+}
+
+export function _validateNewOwner({
+  value,
+  safeAddress,
+  newOwners,
+}: {
+  value: string
+  safeAddress: string
+  newOwners: Array<AddressInfo>
+}): string | undefined {
+  // Blocks the GS203/GS204 on-chain reverts before signing (WA-3005 Bucket A)
+  const reservedError = addressIsNotReserved()(value)
+  if (reservedError) {
+    return reservedError
+  }
+
+  if (sameAddress(value, safeAddress)) {
+    return 'Cannot use Safe account itself as signer.'
+  }
+
+  const isDuplicate = newOwners.filter((owner) => sameAddress(owner.value, value)).length > 1
+  if (isDuplicate) {
+    return getContractErrorMessage('GS204')
+  }
 }
 
 export function RecoverAccountFlowSetup({
@@ -87,168 +106,128 @@ export function RecoverAccountFlowSetup({
     newThreshold: Number(newThreshold),
   })
 
+  // Derived rather than read from RHF: removing a signer row does not re-run the
+  // threshold field's validation, which is exactly when it goes stale.
+  const thresholdError = validateThreshold(newThreshold, fields.length)
+
   return (
     <FormProvider {...formMethods}>
       <form onSubmit={formMethods.handleSubmit(onSubmit)} className={commonCss.form}>
-        <TxCard sx={{ mt: 0, borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
+        <TxCard>
           <div>
-            <Typography
-              variant="h6"
-              gutterBottom
-              sx={{
-                fontWeight: 700,
-              }}
-            >
+            <Typography variant="h4" className="mb-2">
               Add signer(s)
             </Typography>
 
-            <Typography
-              variant="body2"
-              sx={{
-                mb: 1,
-              }}
-            >
+            <Typography variant="paragraph-small" className="mb-2 block">
               Set the new signer wallet(s) of this Safe account and how many need to confirm a transaction before it can
               be executed.
             </Typography>
           </div>
 
-          <Grid container spacing={3} direction="row">
+          <div className="flex flex-col gap-6">
             {fields.map((field, index) => (
-              <Fragment key={index}>
-                <Grid item xs={11}>
+              <div className="flex items-center gap-6" key={index}>
+                <div className="flex-1">
                   <AddressBookInput
                     label={`Signer ${index + 1}`}
                     name={`${RecoverAccountFlowFields.owners}.${index}.value`}
                     required
                     fullWidth
                     key={field.id}
-                    validate={(value) => {
-                      if (sameAddress(value, safeAddress)) {
-                        return 'The Safe account cannot own itself'
-                      }
-
-                      const isDuplicate = newOwners.filter((owner) => owner.value === value).length > 1
-                      if (isDuplicate) {
-                        return 'Already designated to be a signer'
-                      }
-                    }}
+                    validate={(value) => _validateNewOwner({ value, safeAddress, newOwners })}
                   />
-                </Grid>
+                </div>
 
-                <Grid
-                  item
-                  xs={1}
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
+                <div className="flex items-center justify-center">
                   {index > 0 && (
-                    <IconButton onClick={() => remove(index)}>
-                      <SvgIcon component={DeleteIcon} inheritViewBox />
-                    </IconButton>
+                    <Button variant="ghost" size="icon" data-testid="remove-signer-btn" onClick={() => remove(index)}>
+                      <DeleteIcon className="size-4" />
+                    </Button>
                   )}
-                </Grid>
-              </Fragment>
+                </div>
+              </div>
             ))}
-          </Grid>
+          </div>
 
-          <Button
-            onClick={() => append({ value: '' })}
-            variant="text"
-            startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
-            sx={{ alignSelf: 'flex-start', my: 1 }}
-          >
+          <Button variant="ghost" onClick={() => append({ value: '' })} className="my-2 self-start">
+            <AddIcon className="size-4" />
             Add new signer
           </Button>
 
-          <Divider className={commonCss.nestedDivider} />
+          <Separator bleed="6" />
 
           <div>
-            <Typography
-              variant="h6"
-              gutterBottom
-              sx={{
-                fontWeight: 700,
-              }}
-            >
+            <Typography variant="h4" className="mb-2">
               Threshold
-              <Tooltip title={TOOLTIP_TITLES.THRESHOLD} arrow placement="top">
-                <span>
-                  <SvgIcon
-                    component={InfoIcon}
-                    inheritViewBox
-                    color="border"
-                    fontSize="small"
-                    sx={{
-                      verticalAlign: 'middle',
-                      ml: 0.5,
-                    }}
-                  />
-                </span>
+              <Tooltip>
+                <TooltipTrigger render={<span />}>
+                  <InfoIcon className="ml-1 inline size-4 align-middle text-[var(--color-border-main)]" />
+                </TooltipTrigger>
+                <TooltipContent>{TOOLTIP_TITLES.THRESHOLD}</TooltipContent>
               </Tooltip>
             </Typography>
 
-            <Typography
-              variant="body2"
-              sx={{
-                mb: 1,
-              }}
-            >
+            <Typography variant="paragraph-small" className="mb-2 block">
               After recovery, Safe account transactions will require:
             </Typography>
           </div>
 
-          <Grid
-            container
-            direction="row"
-            sx={{
-              alignItems: 'center',
-              gap: 2,
-              mb: 1,
-            }}
-          >
-            <Grid item>
+          <div className="mb-2 flex flex-row items-center gap-4">
+            <div>
               <Controller
                 control={formMethods.control}
                 name={RecoverAccountFlowFields.threshold}
+                rules={{ validate: (value) => validateThreshold(value, fields.length) }}
                 render={({ field }) => (
-                  <TextField select {...field}>
-                    {fields.map((_, index) => {
-                      const value = index + 1
-                      return (
-                        <MenuItem key={index} value={value}>
-                          {value}
-                        </MenuItem>
-                      )
-                    })}
-                  </TextField>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger aria-invalid={!!thresholdError} data-testid="recovery-threshold-select">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {fields.map((_, index) => {
+                        const value = index + 1
+                        return (
+                          <SelectItem key={index} value={String(value)}>
+                            {value}
+                          </SelectItem>
+                        )
+                      })}
+                    </SelectContent>
+                  </Select>
                 )}
               />
-            </Grid>
+            </div>
 
-            <Grid item>
+            <div>
               <Typography>
                 out of {fields.length} signer{maybePlural(fields)}
               </Typography>
-            </Grid>
-          </Grid>
+            </div>
+          </div>
+
+          {thresholdError && <Typography className="mb-2 text-destructive">{thresholdError}</Typography>}
 
           {isSameSetup && (
-            <Alert severity="error" sx={{ border: 'unset' }}>
-              The proposed Account setup is the same as the current one.
+            <Alert variant="destructive" className="border-0">
+              <AlertSeverityIcon variant="destructive" />
+              <AlertDescription>The proposed Account setup is the same as the current one.</AlertDescription>
             </Alert>
           )}
 
-          <Divider className={commonCss.nestedDivider} />
+          <Separator bleed="6" />
 
-          <CardActions sx={{ mt: '0 !important' }}>
-            <Button data-testid="next-btn" variant="contained" type="submit" sx={{ mt: 1 }} disabled={isSameSetup}>
+          <TxCardActions className="!mt-0">
+            <Button
+              data-testid="next-btn"
+              variant="default"
+              type="submit"
+              className="mt-2"
+              disabled={isSameSetup || !!thresholdError}
+            >
               Next
             </Button>
-          </CardActions>
+          </TxCardActions>
         </TxCard>
       </form>
     </FormProvider>

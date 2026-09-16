@@ -5,6 +5,7 @@ import { Errors, logError } from '@/services/exceptions'
 import type { SpendingLimitState } from '../types'
 import useChainId from '@/hooks/useChainId'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
 import useBalances from '@/hooks/useBalances'
 import { loadSpendingLimits } from '../services/spendingLimitLoader'
 import { useAppDispatch, useAppSelector } from '@/store'
@@ -33,19 +34,16 @@ export const useLoadSpendingLimits = () => {
     () => {
       if (!provider || !safeLoaded || !safe.modules || tokenInfoFromBalances.length === 0) return
 
-      return loadSpendingLimits(provider, safe.modules, safeAddress, chainId, tokenInfoFromBalances)
+      return loadSpendingLimits(provider, safe.modules, safeAddress, chainId, tokenInfoFromBalances).catch((e) => {
+        logError(Errors._609, e, getRpcErrorContext(provider))
+        throw e
+      })
     },
     // Need to check length of modules array to prevent new request every time Safe info polls
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [provider, safeLoaded, safe.modules?.length, tokenInfoFromBalances, safeAddress, chainId, safe.txHistoryTag],
     true,
   )
-
-  useEffect(() => {
-    if (error) {
-      logError(Errors._609, error.message)
-    }
-  }, [error])
 
   // Dispatch to store — mirrors the old useUpdateStore pattern.
   // During loading: data=undefined, so the reducer computes loaded=false.

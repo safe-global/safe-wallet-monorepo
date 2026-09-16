@@ -69,7 +69,7 @@ const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) =>
   if (searchQuery) {
     return (
       <>
-        <Typography variant="paragraph-small" color="muted" className="mb-2">
+        <Typography variant="paragraph-small" color="muted" className="block mb-2">
           Found {filteredSafes.length} result{maybePlural(filteredSafes)}
         </Typography>
         <SafeAccountsTable
@@ -87,7 +87,7 @@ const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) =>
     <>
       {showCurrentSafe && (
         <section data-testid="current-safe-section" className="mb-6">
-          <Typography variant="paragraph-small-bold" className="mb-2">
+          <Typography variant="paragraph-small-bold" className="block mb-2">
             Current Safe account
           </Typography>
           <SafeAccountsTable items={currentSafeItem ? [currentSafeItem] : []} onLinkClick={onLinkClick} />

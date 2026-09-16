@@ -173,7 +173,7 @@ describe('CheckWalletWithPermission', () => {
     )
 
     expect(getByText('Continue')).toBeDisabled()
-    expect(getByLabelText('SDK is not initialized yet'))
+    expect(getByLabelText('Still loading. Try again in a moment.'))
   })
 
   it('should not disable the button if SDK is not initialized and safe is not loaded', () => {

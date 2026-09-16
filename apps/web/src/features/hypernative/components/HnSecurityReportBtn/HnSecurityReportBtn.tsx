@@ -1,4 +1,5 @@
-import { Button, SvgIcon, Tooltip } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import HypernativeIcon from '@/public/images/hypernative/hypernative-icon.svg'
 import ExternalLink from '@/components/common/ExternalLink'
 import { hnSecurityReportBtnConfig } from './config'
@@ -27,11 +28,18 @@ const HnSecurityReportBtn = ({ chainId, safe, tx }: HnSecurityReportBtnProps): R
 
   return (
     // Click event is sent to mixpanel as well via the GA_TO_MIXPANEL_MAPPING in services/analytics/)
-    <Tooltip title="Review security report on Hypernative" arrow placement="top" onClick={onBtnClick}>
-      <Button variant="neutral" fullWidth component={ExternalLink} href={href}>
-        <SvgIcon component={HypernativeIcon} inheritViewBox className={css.hypernativeIcon} />
-        {text}
-      </Button>
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Button variant="secondary" className="w-full" onClick={onBtnClick} render={<ExternalLink href={href} />}>
+            <span className={css.hypernativeIcon}>
+              <HypernativeIcon />
+            </span>
+            {text}
+          </Button>
+        }
+      />
+      <TooltipContent>Review security report on Hypernative</TooltipContent>
     </Tooltip>
   )
 }

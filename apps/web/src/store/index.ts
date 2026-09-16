@@ -16,24 +16,30 @@ import {
   cookiesAndTermsSlice,
   cookiesAndTermsInitialState,
   safeMessagesListener,
+  safeInfoListener,
   swapOrderListener,
   swapOrderStatusListener,
   txHistoryListener,
   txQueueListener,
   authListener,
   counterfactualSyncListener,
+  addressBookListener,
+  elevationListener,
 } from './slices'
 import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
 import { ofacApi } from '@/store/api/ofac'
 import { safePassApi } from './api/safePass'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
+import { safenetCheckApi } from '@safe-global/store/safenet/safenetCheckApi'
+import { safenetCheckSlice } from '@safe-global/store/safenet/safenetCheckSlice'
 import { version as termsVersion } from '@/markdown/terms/version'
 import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import { GATEWAY_URL } from '@/config/gateway'
 import { setupListeners } from '@reduxjs/toolkit/query'
 import { migrateBatchTxs } from '@/services/ls-migration/batch'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway'
+import { cgwErrorAlert } from './middleware/cgwErrorAlert'
 
 const rootReducer = combineReducers({
   [slices.safeInfoSlice.name]: slices.safeInfoSlice.reducer,
@@ -64,9 +70,15 @@ const rootReducer = combineReducers({
   [slices.safeActionsModalSlice.name]: slices.safeActionsModalSlice.reducer,
   [slices.spaceNavigationSlice.name]: slices.spaceNavigationSlice.reducer,
   [slices.gtfPaymentSourcePreferenceSlice.name]: slices.gtfPaymentSourcePreferenceSlice.reducer,
+  [slices.featureFlagOverridesSlice.name]: slices.featureFlagOverridesSlice.reducer,
+  // Deliberately absent from `persistedSlices`: a phase restored from a previous
+  // page load would leave the user on a splash screen with nothing in flight.
+  [slices.stepUpSlice.name]: slices.stepUpSlice.reducer,
   [ofacApi.reducerPath]: ofacApi.reducer,
   [safePassApi.reducerPath]: safePassApi.reducer,
   [hypernativeApi.reducerPath]: hypernativeApi.reducer,
+  [safenetCheckSlice.name]: safenetCheckSlice.reducer,
+  [safenetCheckApi.reducerPath]: safenetCheckApi.reducer,
   [slices.gatewayApi.reducerPath]: slices.gatewayApi.reducer,
   [cgwClient.reducerPath]: cgwClient.reducer,
   [slices.authSlice.reducerPath]: slices.authSlice.reducer,
@@ -91,6 +103,7 @@ const persistedSlices: (keyof Partial<RootState>)[] = [
   slices.authSlice.name,
   slices.hnStateSlice.name,
   slices.gtfPaymentSourcePreferenceSlice.name,
+  slices.featureFlagOverridesSlice.name,
 ]
 
 export const getPersistedState = () => {
@@ -100,23 +113,28 @@ export const getPersistedState = () => {
 export const listenerMiddlewareInstance = createListenerMiddleware<RootState>()
 
 const middleware: Middleware<{}, RootState>[] = [
+  cgwErrorAlert,
   persistState(persistedSlices),
   broadcastState(persistedSlices),
   listenerMiddlewareInstance.middleware,
   ofacApi.middleware,
   safePassApi.middleware,
   hypernativeApi.middleware,
+  safenetCheckApi.middleware,
   slices.gatewayApi.middleware,
 ]
 
 const listeners = [
   safeMessagesListener,
+  safeInfoListener,
   txHistoryListener,
   txQueueListener,
   swapOrderListener,
   swapOrderStatusListener,
   authListener,
   counterfactualSyncListener,
+  addressBookListener,
+  elevationListener,
 ]
 
 export const _hydrationReducer: typeof rootReducer = (state, action) => {

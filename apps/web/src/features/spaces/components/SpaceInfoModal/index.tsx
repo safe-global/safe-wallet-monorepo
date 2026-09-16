@@ -110,7 +110,9 @@ const SpaceInfoModal = ({ onClose }: { onClose: () => void }) => {
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent
         showCloseButton={false}
-        className="w-full max-w-[960px] gap-0 overflow-hidden border-0 p-0 sm:rounded-3xl"
+        padding="none"
+        // eslint-disable-next-line no-restricted-syntax -- bespoke 960px width + borderless full-bleed panel + sm:rounded-3xl (grandfathered, needs design)
+        className="max-w-[960px] overflow-hidden border-0 sm:rounded-3xl"
       >
         {/* Mobile close — the dark panel (with its own close) is hidden on small screens */}
         <DialogClose

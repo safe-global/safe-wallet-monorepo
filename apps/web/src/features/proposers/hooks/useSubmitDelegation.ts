@@ -6,6 +6,7 @@ import {
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { encodeEIP1271Signature } from '@/features/proposers/utils/utils'
 import { isTotpValid } from '@/features/proposers/utils/totp'
+import { PROPOSER_LABEL_PLACEHOLDER } from '@/features/proposers/constants'
 import useChainId from '@/hooks/useChainId'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import type { PendingDelegation } from '@/features/proposers/types'
@@ -41,7 +42,7 @@ export const useSubmitDelegation = () => {
           delegation.preparedSignature,
         )
 
-        if (delegation.action === 'add' || delegation.action === 'edit') {
+        if (delegation.action === 'add') {
           await addDelegateV2({
             chainId,
             createDelegateDto: {
@@ -49,7 +50,7 @@ export const useSubmitDelegation = () => {
               delegate: delegation.delegateAddress,
               delegator: delegation.parentSafeAddress,
               signature: eip1271Signature,
-              label: delegation.delegateLabel,
+              label: PROPOSER_LABEL_PLACEHOLDER,
             },
           }).unwrap()
         } else if (delegation.action === 'remove') {

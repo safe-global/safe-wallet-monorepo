@@ -19,6 +19,12 @@ const MOCK_TX_ID = 'multisig_0xbbbb_123'
 
 // ---- Module mocks ----
 
+// Cut the DialogActions -> CheckWallet -> safeCoreSDK -> chains.ts import chain (circular AppRoutes) in unit tests.
+jest.mock('@/components/common/CheckWallet', () => ({
+  __esModule: true,
+  default: ({ children }: { children: (ok: boolean) => unknown }) => children(true),
+}))
+
 jest.mock('next/router', () => ({
   useRouter: () => ({ push: jest.fn() }),
 }))
@@ -62,6 +68,15 @@ jest.mock('@/features/myAccounts', () => ({
 
 jest.mock('@/features/__core__', () => ({
   useLoadFeature: jest.fn(),
+}))
+
+const mockUseIsSafeProEnabled = jest.fn()
+const mockUseSafeProAnnouncement = jest.fn()
+
+jest.mock('@/features/safe-pro-announcement', () => ({
+  SafeProFeature: { name: 'safe-pro-announcement' },
+  useIsSafeProEnabled: () => mockUseIsSafeProEnabled(),
+  useSafeProAnnouncement: (isReady: boolean) => mockUseSafeProAnnouncement(isReady),
 }))
 
 jest.mock('@/services/local-storage/useLocalStorage', () => jest.fn(() => [{}, jest.fn()]))
@@ -108,6 +123,7 @@ function setupUseLoadFeature(txEntries: Array<{ safeAddress: string; txId: strin
   ;(useLoadFeature as jest.Mock).mockReturnValue({
     PendingTxWidget: makeMockPendingTxWidget(txEntries),
     AccountsWidget: () => null,
+    SafeProAnnouncementModal: () => <div data-testid="safe-pro-announcement-modal" />,
     $isReady: true,
   })
 }
@@ -135,6 +151,8 @@ const restoreDefaultMocks = () => {
     refetch: jest.fn(),
   })
   useSpaceAccountsDataMock.mockReturnValue({ accounts: [], isLoading: false, error: null, refetch: jest.fn() })
+  mockUseIsSafeProEnabled.mockReturnValue(false)
+  mockUseSafeProAnnouncement.mockReturnValue({ isOpen: false, setIsOpen: jest.fn() })
 }
 
 // ---- Tests ----
@@ -315,5 +333,46 @@ describe('SpaceDashboard – PENDING_TX_WIDGET_CLICKED tracking', () => {
         [MixpanelEventParams.TX_ID]: secondTxId,
       },
     ])
+  })
+})
+
+describe('SpaceDashboard – Safe Pro announcement', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    restoreDefaultMocks()
+    setupUseLoadFeature()
+  })
+
+  it('does not mount the announcement while the flag is off', () => {
+    render(<SpaceDashboard />)
+
+    expect(screen.queryByTestId('safe-pro-announcement-modal')).not.toBeInTheDocument()
+  })
+
+  it('mounts and arms the announcement on a workspace once the flag is on', () => {
+    mockUseIsSafeProEnabled.mockReturnValue(true)
+
+    render(<SpaceDashboard />)
+
+    expect(screen.getByTestId('safe-pro-announcement-modal')).toBeInTheDocument()
+    expect(mockUseSafeProAnnouncement).toHaveBeenCalledWith(true)
+  })
+
+  it('stays unarmed before a workspace resolves', () => {
+    mockUseIsSafeProEnabled.mockReturnValue(true)
+    ;(useCurrentSpaceId as jest.Mock).mockReturnValue(undefined)
+
+    render(<SpaceDashboard />)
+
+    expect(mockUseSafeProAnnouncement).toHaveBeenCalledWith(false)
+  })
+
+  it('stays unarmed over an invite preview', () => {
+    mockUseIsSafeProEnabled.mockReturnValue(true)
+    ;(useIsInvited as jest.Mock).mockReturnValue(true)
+
+    render(<SpaceDashboard />)
+
+    expect(mockUseSafeProAnnouncement).toHaveBeenCalledWith(false)
   })
 })

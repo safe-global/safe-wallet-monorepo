@@ -154,9 +154,7 @@ describe('ExecuteForm', () => {
       />,
     )
 
-    expect(
-      getByText('This transaction will most likely fail. To save gas costs, reject this transaction.'),
-    ).toBeInTheDocument()
+    expect(getByText(/Could not check this transaction/)).toBeInTheDocument()
   })
 
   it('shows a gasLimit error', () => {
@@ -166,9 +164,7 @@ describe('ExecuteForm', () => {
 
     const { getByText } = render(<ExecuteForm {...defaultProps} />)
 
-    expect(
-      getByText('This transaction will most likely fail. To save gas costs, reject this transaction.'),
-    ).toBeInTheDocument()
+    expect(getByText(/Could not check this transaction/)).toBeInTheDocument()
   })
 
   it('execute the tx when the submit button is clicked', async () => {

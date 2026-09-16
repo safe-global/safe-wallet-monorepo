@@ -29,6 +29,17 @@ const MIGRATION_METHOD_BY_FLAVOUR = {
   l2: { keep: 'migrateL2Singleton', reset: 'migrateL2WithFallbackHandler' },
 } as const satisfies Record<'l1' | 'l2', Record<'keep' | 'reset', MigrationMethod>>
 
+const SAFE_MIGRATION_INTERFACE = Safe_migration__factory.createInterface()
+
+const MIGRATION_METHOD_SELECTORS = MIGRATION_METHODS.map(
+  (method) => SAFE_MIGRATION_INTERFACE.getFunction(method).selector,
+)
+
+// Official SafeMigration addresses across every version and variant (canonical / zksync)
+const SAFE_MIGRATION_ADDRESSES = SAFE_VERSIONS.flatMap((version) =>
+  Object.values(getSafeMigrationDeployments({ version })?.deployments ?? {}).map((variant) => variant?.address),
+)
+
 /**
  * Resolves the SafeMigration contract address for the chain and master copy.
  *
@@ -88,11 +99,9 @@ export const createUpdateMigration = (
 
   const method = MIGRATION_METHOD_BY_FLAVOUR[chain.l2 ? 'l2' : 'l1'][keepFallbackHandler ? 'keep' : 'reset']
 
-  const interfce = Safe_migration__factory.createInterface()
-
   return {
     operation: OperationType.DelegateCall, // delegate call required
-    data: interfce.encodeFunctionData(method as 'migrateSingleton'), // appease typescript overloads
+    data: SAFE_MIGRATION_INTERFACE.encodeFunctionData(method as 'migrateSingleton'), // appease typescript overloads
     to,
     value: '0',
   }
@@ -110,13 +119,9 @@ export const isSafeMigrationCall = (txData: TransactionData): boolean => {
     return false
   }
 
-  const migrationAddresses = SAFE_VERSIONS.flatMap((version) =>
-    Object.values(getSafeMigrationDeployments({ version })?.deployments ?? {}).map((variant) => variant?.address),
-  )
-  if (!migrationAddresses.some((address) => sameAddress(txData.to.value, address))) {
+  if (!SAFE_MIGRATION_ADDRESSES.some((address) => sameAddress(txData.to.value, address))) {
     return false
   }
 
-  const safeMigrationInterface = Safe_migration__factory.createInterface()
-  return MIGRATION_METHODS.some((method) => hexData.startsWith(safeMigrationInterface.getFunction(method).selector))
+  return MIGRATION_METHOD_SELECTORS.some((selector) => hexData.startsWith(selector))
 }

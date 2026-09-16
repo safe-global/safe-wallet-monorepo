@@ -1,8 +1,10 @@
-import { FormControlLabel, Grid, Paper, Typography, Switch } from '@mui/material'
-import type { ChangeEvent } from 'react'
+import { useId } from 'react'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 
+import { Switch } from '@/components/ui/switch'
+import { Field, FieldLabel } from '@/components/ui/field'
+import { Typography } from '@/components/ui/typography'
 import { useAppDispatch } from '@/store'
 import { setDarkMode } from '@/store/settingsSlice'
 import SettingsHeader from '@/components/settings/SettingsHeader'
@@ -13,8 +15,9 @@ import { BRAND_NAME } from '@/config/constants'
 const Appearance: NextPage = () => {
   const dispatch = useAppDispatch()
   const isDarkMode = useDarkMode()
+  const darkModeId = useId()
 
-  const handleDarkModeToggle = (_: ChangeEvent<HTMLInputElement>, checked: boolean) => {
+  const handleDarkModeToggle = (checked: boolean) => {
     dispatch(setDarkMode(checked))
 
     trackEvent({
@@ -30,33 +33,20 @@ const Appearance: NextPage = () => {
       </Head>
       <SettingsHeader />
       <main>
-        <Paper sx={{ p: 4 }}>
-          <Grid
-            container
-            spacing={3}
-            sx={{
-              alignItems: 'center',
-            }}
-          >
-            <Grid item lg={4} xs={12}>
-              <Typography
-                variant="h4"
-                sx={{
-                  fontWeight: 'bold',
-                }}
-              >
-                Theme
-              </Typography>
-            </Grid>
+        <div className="rounded-lg bg-[var(--color-background-paper)] p-8">
+          <div className="grid grid-cols-1 items-center gap-6 lg:grid-cols-[1fr_2fr]">
+            <div>
+              <Typography variant="h4">Theme</Typography>
+            </div>
 
-            <Grid item xs>
-              <FormControlLabel
-                control={<Switch checked={isDarkMode} onChange={handleDarkModeToggle} />}
-                label="Dark mode"
-              />
-            </Grid>
-          </Grid>
-        </Paper>
+            <div>
+              <Field orientation="horizontal">
+                <Switch id={darkModeId} checked={isDarkMode} onCheckedChange={handleDarkModeToggle} />
+                <FieldLabel htmlFor={darkModeId}>Dark mode</FieldLabel>
+              </Field>
+            </div>
+          </div>
+        </div>
       </main>
     </>
   )

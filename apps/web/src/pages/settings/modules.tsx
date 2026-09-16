@@ -1,6 +1,5 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { Grid } from '@mui/material'
 import SafeModules from '@/components/settings/SafeModules'
 import TransactionGuards from '@/components/settings/TransactionGuards'
 import SettingsHeader from '@/components/settings/SettingsHeader'
@@ -17,19 +16,19 @@ const Modules: NextPage = () => {
       <SettingsHeader />
 
       <main>
-        <Grid container direction="column" spacing={2}>
-          <Grid item>
+        <div className="flex flex-col gap-4">
+          <div>
             <SafeModules />
-          </Grid>
+          </div>
 
-          <Grid item>
+          <div>
             <TransactionGuards />
-          </Grid>
+          </div>
 
-          <Grid item>
+          <div>
             <FallbackHandler />
-          </Grid>
-        </Grid>
+          </div>
+        </div>
       </main>
     </>
   )

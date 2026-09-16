@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import { Toaster } from '../sonner'
 import { toast } from 'sonner'
@@ -16,8 +17,25 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
+const OpenDemo = () => {
+  useEffect(() => {
+    toast.success('Success message', { duration: Infinity })
+    toast.error('Error message', { duration: Infinity })
+    toast('Toast with action', { duration: Infinity, action: { label: 'Undo', onClick: () => {} } })
+  }, [])
+  return (
+    <div className="min-h-80">
+      <Toaster position="bottom-right" />
+    </div>
+  )
+}
+
+export const Open: Story = {
+  render: () => <OpenDemo />,
+}
+
 export const AllVariants: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <div style={{ display: 'block' }}>
       <div style={{ marginBottom: '2rem' }}>

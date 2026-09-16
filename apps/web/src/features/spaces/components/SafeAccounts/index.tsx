@@ -1,6 +1,5 @@
 import AddAccountsChooser from '../AddAccountsChooser'
 import EmptySafeAccounts from './EmptySafeAccounts'
-import { Stack } from '@mui/material'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Typography } from '@/components/ui/typography'
 import { useMemo, useState } from 'react'
@@ -20,21 +19,18 @@ import { useSimilarityClusters } from '@/features/address-poisoning'
 import { useSpaceSafes, useIsInvited, useIsAdmin, useCurrentSpaceId } from '@/features/spaces'
 import { SafeAccountsTable } from '@/features/myAccounts'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
-import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
-import { useDarkMode } from '@/hooks/useDarkMode'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { TriangleAlert, RotateCw, Search } from 'lucide-react'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_LABELS, SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
-import SimilarAddressAlert from '@/components/common/SimilarAddressAlert'
+import SecurityBanner from '@/components/common/TrustedSafesModal/SecurityBanner'
 import SpaceSafeContextMenu from './SpaceSafeContextMenu'
 
 const SpaceSafeAccounts = () => {
   const { allSafes, isError: isSpaceSafesError, error: spaceSafesError, refetch: refetchSpaceSafes } = useSpaceSafes()
   const isInvited = useIsInvited()
   const isAdmin = useIsAdmin()
-  const isDarkMode = useDarkMode()
   const spaceId = useCurrentSpaceId()
   const orderScope = spaceId ? getSpaceOrderScope(spaceId) : undefined
 
@@ -49,7 +45,7 @@ const SpaceSafeAccounts = () => {
   const spaceSafeItems = useMemo<SafeItem[]>(() => flattenSafeItems(allSafes ?? []), [allSafes])
 
   const spaceSafeAddresses = useMemo(() => spaceSafeItems.map((s) => s.address), [spaceSafeItems])
-  const similarAddresses = useSimilarityClusters(spaceSafeAddresses).flagged
+  const { flagged: similarAddresses, groupIdByAddress: similarityGroups } = useSimilarityClusters(spaceSafeAddresses)
 
   // Group and sort
   const displaySafes = useMemo<AllSafeItems>(
@@ -71,15 +67,15 @@ const SpaceSafeAccounts = () => {
         Safe accounts
       </Typography>
 
-      <Stack direction="row" alignItems="center" gap={2} sx={{ mb: 3 }}>
+      <div className="mb-6 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:gap-4">
         {isAdmin && (
           <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.accounts_page}>
             <AddAccountsChooser buttonVariant="default" buttonLabel="Add accounts" entryPoint="safe_accounts" />
           </Track>
         )}
         {!isSpaceEmpty && !isSpaceSafesError && (
-          <>
-            <InputGroup className="flex-1 rounded-md bg-card">
+          <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
+            <InputGroup variant="search" inputSize="lg" className="flex-1">
               <InputGroupAddon>
                 <Search className="size-4" />
               </InputGroupAddon>
@@ -92,12 +88,13 @@ const SpaceSafeAccounts = () => {
                 data-testid="space-safe-accounts-search-input"
               />
             </InputGroup>
-            <ShadcnProvider dark={isDarkMode} className="flex items-center">
-              <SafeListSortToggle className="border-border shadow-xs" />
-            </ShadcnProvider>
-          </>
+            <SafeListSortToggle
+              size="lg"
+              className="border-border shadow-xs hover:bg-foreground/[0.06] aria-expanded:bg-foreground/[0.06]"
+            />
+          </div>
         )}
-      </Stack>
+      </div>
 
       {isSpaceSafesError ? (
         <div className="flex items-center gap-3 rounded-2xl border border-destructive/30 bg-destructive/5 px-5 py-4">
@@ -125,12 +122,14 @@ const SpaceSafeAccounts = () => {
         </Typography>
       ) : (
         <div className="flex flex-col gap-4">
-          {similarAddresses.size > 0 && <SimilarAddressAlert />}
+          {similarAddresses.size > 0 && <SecurityBanner title="Verify before you trust" />}
           <SafeAccountsTable
             items={visibleSafes}
+            // The table sits directly on the page background here, so the card outline is dropped.
+            bordered={false}
             // Inside a workspace every Safe belongs to it, so the Workspaces column adds no information.
             columns={['name', 'threshold', 'networks', 'pending', 'balance', 'actions']}
-            flaggedAddresses={similarAddresses}
+            similarityGroups={similarityGroups}
             // Column sorting is only offered in Name mode; Last visited / Manual own the order.
             sortableColumns={orderBy === OrderByOption.NAME}
             renderActions={(line) =>

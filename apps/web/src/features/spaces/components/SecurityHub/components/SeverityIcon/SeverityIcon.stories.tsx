@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Stack } from '@mui/material'
 import { GRADE_TONE, resolveStatusTone, SeverityIcon, STATUS_TONE } from './SeverityIcon'
 
 const meta = {
@@ -19,11 +18,11 @@ export const Inconclusive: Story = { args: { tone: STATUS_TONE.inconclusive } }
 
 export const AllGrades: StoryObj = {
   render: () => (
-    <Stack direction="row" spacing={2} alignItems="center">
+    <div className="flex flex-row items-center gap-4">
       <SeverityIcon tone={GRADE_TONE.critical} ariaLabel="Critical" />
       <SeverityIcon tone={GRADE_TONE.at_risk} ariaLabel="At risk" />
       <SeverityIcon tone={GRADE_TONE.needs_attention} ariaLabel="Needs review" />
       <SeverityIcon tone={GRADE_TONE.passing} ariaLabel="Healthy" />
-    </Stack>
+    </div>
   ),
 }

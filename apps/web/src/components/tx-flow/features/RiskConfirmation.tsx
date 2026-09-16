@@ -1,7 +1,9 @@
 import { useContext } from 'react'
 import { SlotName, withSlot } from '../slots'
-import { FEATURES } from '@/utils/featureToggled'
-import { Card, Checkbox, FormControlLabel, Typography } from '@mui/material'
+import { Card } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
+import { Typography } from '@/components/ui/typography'
 import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
 import { SafeTxContext } from '../SafeTxProvider'
@@ -23,17 +25,18 @@ export const RiskConfirmation = () => {
   }
 
   return (
-    <Card sx={{ px: 1 }}>
+    <Card size="none" surface="sunken">
       <Track {...MODALS_EVENTS.ACCEPT_RISK}>
-        <FormControlLabel
+        <Label
+          htmlFor="risk-confirmation"
           data-testid="risk-confirmation-checkbox"
-          label={
-            <Typography variant="body2" data-testid="risk-confirmation-text">
-              I understand the risks and would like to proceed with this {isTransaction ? 'transaction' : 'message'}.
-            </Typography>
-          }
-          control={<Checkbox checked={isRiskConfirmed} onChange={toggleConfirmation} color="primary" />}
-        />
+          className="cursor-pointer gap-3 px-2 py-2"
+        >
+          <Checkbox id="risk-confirmation" checked={isRiskConfirmed} onCheckedChange={toggleConfirmation} />
+          <Typography variant="paragraph-small" data-testid="risk-confirmation-text">
+            I understand the risks and would like to proceed with this {isTransaction ? 'transaction' : 'message'}.
+          </Typography>
+        </Label>
       </Track>
     </Card>
   )
@@ -48,7 +51,6 @@ const RiskConfirmationSlot = withSlot({
   Component: RiskConfirmation,
   slotName: SlotName.Footer,
   id: 'riskConfirmation',
-  feature: FEATURES.RISK_MITIGATION,
   useSlotCondition,
 })
 

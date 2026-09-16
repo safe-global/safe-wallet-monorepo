@@ -131,12 +131,13 @@ describe('LeaveSpaceDialog', () => {
     expect(onClose).toHaveBeenCalled()
   })
 
-  it('disables both buttons and shows loading label while the mutation is in flight', () => {
+  it('disables both buttons and shows a spinner while the mutation is in flight', () => {
     mockIsLoading = true
     renderDialog()
 
     expect(screen.getByTestId('space-confirm-leave-button')).toBeDisabled()
-    expect(screen.getByTestId('space-confirm-leave-button')).toHaveTextContent('Leaving…')
+    // DialogActions swaps the confirm label for a spinner while loading
+    expect(screen.getByRole('status')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /cancel/i })).toBeDisabled()
   })
 })

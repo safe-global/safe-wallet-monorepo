@@ -60,6 +60,11 @@ describe('useUnlockBodyScroll helpers', () => {
       expect(isAnyOverlayOpen(document)).toBe(true)
     })
 
+    it('ignores a keepMounted Base UI dialog that is closed', () => {
+      addOverlay('<div data-slot="dialog-content" hidden></div>')
+      expect(isAnyOverlayOpen(document)).toBe(false)
+    })
+
     it('is false when nothing is open', () => {
       expect(isAnyOverlayOpen(document)).toBe(false)
     })
@@ -80,6 +85,15 @@ describe('useUnlockBodyScroll helpers', () => {
 
       expect(unlockBodyScrollIfStuck(document)).toBe(false)
       expect(document.body.style.overflow).toBe('hidden')
+    })
+
+    it('clears the lock when the only dialog in the DOM is a closed keepMounted one', () => {
+      lockBody()
+      addOverlay('<div data-slot="dialog-content" hidden></div>')
+
+      expect(unlockBodyScrollIfStuck(document)).toBe(true)
+      expect(document.body.style.overflow).toBe('')
+      expect(document.body.style.paddingRight).toBe('')
     })
 
     it('does nothing when the body is not locked', () => {
