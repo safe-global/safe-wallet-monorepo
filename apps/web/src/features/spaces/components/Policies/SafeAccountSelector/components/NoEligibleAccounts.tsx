@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { NO_ELIGIBLE_ACCOUNTS_TEXT, NO_WALLET_TEXT } from '../constants'
-import PopupMessage from './PopupMessage'
+import PopupMessage from '../../components/PopupMessage'
 
 /**
  * The Space has Safes, but none this wallet may set a policy on. Says why in the same words as the
