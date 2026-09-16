@@ -3,11 +3,17 @@ import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import Policies from '../index'
 
 let mockHasSeenSpendingLimitIntro: boolean | undefined = false
+let mockHasSeenProposerIntro: boolean | undefined = false
 const mockSetHasSeenSpendingLimitIntro = jest.fn()
+const mockSetHasSeenProposerIntro = jest.fn()
 
 jest.mock('@/services/local-storage/useLocalStorage', () => ({
   __esModule: true,
-  default: jest.fn(() => [mockHasSeenSpendingLimitIntro, mockSetHasSeenSpendingLimitIntro]),
+  default: jest.fn((key: string) =>
+    key === 'proposerIntroSeen'
+      ? [mockHasSeenProposerIntro, mockSetHasSeenProposerIntro]
+      : [mockHasSeenSpendingLimitIntro, mockSetHasSeenSpendingLimitIntro],
+  ),
 }))
 
 /**
@@ -18,6 +24,7 @@ jest.mock('@/services/local-storage/useLocalStorage', () => ({
 describe('Policies', () => {
   beforeEach(() => {
     mockHasSeenSpendingLimitIntro = false
+    mockHasSeenProposerIntro = false
     jest.clearAllMocks()
   })
 
@@ -106,5 +113,62 @@ describe('Policies', () => {
 
       expect(screen.queryByTestId('spending-limit-intro-dialog')).not.toBeInTheDocument()
     })
+  })
+
+  describe('the proposer intro', () => {
+    it('explains the proposer role before the flow starts', async () => {
+      const { user } = renderWithUserEvent(<Policies />)
+
+      await user.click(screen.getByTestId('policy-catalogue-tile-proposer'))
+
+      expect(screen.getByTestId('proposer-intro-dialog')).toBeInTheDocument()
+    })
+
+    it('returns to the catalogue with nothing started when dismissed', async () => {
+      const { user } = renderWithUserEvent(<Policies />)
+
+      await user.click(screen.getByTestId('policy-catalogue-tile-proposer'))
+      await user.click(screen.getByRole('button', { name: 'Close' }))
+
+      await waitFor(() => expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument())
+      expect(screen.getByTestId('policy-catalogue')).toBeInTheDocument()
+    })
+
+    it('records that it has been shown', async () => {
+      const { user } = renderWithUserEvent(<Policies />)
+
+      await user.click(screen.getByTestId('policy-catalogue-tile-proposer'))
+      await user.click(screen.getByRole('button', { name: 'Close' }))
+
+      expect(mockSetHasSeenProposerIntro).toHaveBeenCalledWith(true)
+      expect(mockSetHasSeenSpendingLimitIntro).not.toHaveBeenCalled()
+    })
+
+    it('does not explain again once it has been shown', async () => {
+      mockHasSeenProposerIntro = true
+      const { user } = renderWithUserEvent(<Policies />)
+
+      await user.click(screen.getByTestId('policy-catalogue-tile-proposer'))
+
+      expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument()
+    })
+
+    it('is unaffected by the spending limit intro having been seen', async () => {
+      mockHasSeenSpendingLimitIntro = true
+      const { user } = renderWithUserEvent(<Policies />)
+
+      await user.click(screen.getByTestId('policy-catalogue-tile-proposer'))
+
+      expect(screen.getByTestId('proposer-intro-dialog')).toBeInTheDocument()
+    })
+  })
+
+  it('opens no intro for the policies that have no flow yet', async () => {
+    const { user } = renderWithUserEvent(<Policies />)
+
+    await user.click(screen.getByTestId('policy-catalogue-tile-suggestion'))
+
+    expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('spending-limit-intro-dialog')).not.toBeInTheDocument()
   })
 })

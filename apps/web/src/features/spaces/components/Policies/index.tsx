@@ -5,6 +5,8 @@ import { Typography } from '@/components/ui/typography'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import PolicyCatalogue from './PolicyCatalogue'
 import type { PolicyCatalogueId } from './PolicyCatalogue/catalogue'
+import ProposerIntroDialog from './ProposerIntroDialog'
+import { PROPOSER_INTRO_SEEN_KEY } from './ProposerIntroDialog/constants'
 import SpendingLimitIntroDialog from './SpendingLimitIntroDialog'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from './SpendingLimitIntroDialog/constants'
 
@@ -13,23 +15,41 @@ const Policies = (): ReactElement => {
     useLocalStorage<boolean>(SPENDING_LIMIT_INTRO_SEEN_KEY)
   const [isSpendingLimitIntroOpen, setIsSpendingLimitIntroOpen] = useState(false)
 
+  const [hasSeenProposerIntro = false, setHasSeenProposerIntro] = useLocalStorage<boolean>(PROPOSER_INTRO_SEEN_KEY)
+  const [isProposerIntroOpen, setIsProposerIntroOpen] = useState(false)
+
   const startSpendingLimitFlow = useCallback(() => {
     // TODO(WA-3150): open the spending limit create form.
   }, [])
 
+  const startProposerFlow = useCallback(() => {
+    // TODO(WA-3138): open the proposer form.
+  }, [])
+
   const handleSelect = useCallback(
     (id: PolicyCatalogueId) => {
-      // TODO(WA-3138, WA-3160): open the proposer form and the Suggest a policy dialog.
-      if (id !== 'spending-limit') return
+      if (id === 'spending-limit') {
+        if (hasSeenSpendingLimitIntro) {
+          startSpendingLimitFlow()
+          return
+        }
 
-      if (hasSeenSpendingLimitIntro) {
-        startSpendingLimitFlow()
+        setIsSpendingLimitIntroOpen(true)
         return
       }
 
-      setIsSpendingLimitIntroOpen(true)
+      if (id === 'proposer') {
+        if (hasSeenProposerIntro) {
+          startProposerFlow()
+          return
+        }
+
+        setIsProposerIntroOpen(true)
+      }
+
+      // TODO(WA-3160): open the Suggest a policy dialog.
     },
-    [hasSeenSpendingLimitIntro, startSpendingLimitFlow],
+    [hasSeenSpendingLimitIntro, startSpendingLimitFlow, hasSeenProposerIntro, startProposerFlow],
   )
 
   // Any dismissal counts as shown: an explainer that returns after you closed it reads as a bug.
@@ -42,6 +62,16 @@ const Policies = (): ReactElement => {
     closeSpendingLimitIntro()
     startSpendingLimitFlow()
   }, [closeSpendingLimitIntro, startSpendingLimitFlow])
+
+  const closeProposerIntro = useCallback(() => {
+    setIsProposerIntroOpen(false)
+    setHasSeenProposerIntro(true)
+  }, [setHasSeenProposerIntro])
+
+  const proceedToProposerFlow = useCallback(() => {
+    closeProposerIntro()
+    startProposerFlow()
+  }, [closeProposerIntro, startProposerFlow])
 
   return (
     <div data-testid="policies">
@@ -67,6 +97,14 @@ const Policies = (): ReactElement => {
           if (!open) closeSpendingLimitIntro()
         }}
         onProceed={proceedToSpendingLimitFlow}
+      />
+
+      <ProposerIntroDialog
+        open={isProposerIntroOpen}
+        onOpenChange={(open) => {
+          if (!open) closeProposerIntro()
+        }}
+        onProceed={proceedToProposerFlow}
       />
     </div>
   )
