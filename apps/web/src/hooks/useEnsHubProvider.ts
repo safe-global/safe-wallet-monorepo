@@ -27,16 +27,7 @@ export const _clearEnsHubProviders = (): void => {
   Object.keys(hubProviders).forEach((key) => delete hubProviders[key])
 }
 
-/**
- * Returns the ENSv2 hub chain (Mainnet/Sepolia Universal Resolver) for a target chain, a
- * read-only provider for it, and whether ENS is enabled on that hub.
- *
- * `DOMAIN_LOOKUP` is hub-only: production Safes follow Mainnet’s flag, testnet Safes follow
- * Sepolia’s. A `DOMAIN_LOOKUP` entry on an L2 chain config is ignored.
- *
- * Reuses the app's global provider when the current chain is the hub. Fails closed when the hub
- * chain is not in the loaded config — ENS must not fall back to another chain's RPC.
- */
+// Fails closed when the hub chain is missing from config: ENS must never fall back to another RPC.
 export const useEnsHubProvider = (
   targetChain?: Chain,
 ): { hubChain: Chain | undefined; provider: JsonRpcProvider | undefined; isDomainLookupEnabled: boolean } => {
