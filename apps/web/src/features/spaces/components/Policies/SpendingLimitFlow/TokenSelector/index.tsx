@@ -109,7 +109,8 @@ const TokenSelector = ({
 
   const hasSafe = identityKey !== ''
 
-  // AC C15. `identityKey` goes empty for a render mid-navigation, which is not a Safe change.
+  // A token picked for one Safe must not survive a switch to another. `identityKey` goes empty for a
+  // render mid-navigation, which is not a Safe change.
   const previousIdentity = useRef(identityKey)
   useEffect(() => {
     if (identityKey === '') return

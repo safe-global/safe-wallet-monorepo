@@ -63,7 +63,7 @@ const setup = createMockStory({ scenario: 'efSafe', wallet: 'connected', shadcn:
 
 const emptyBalances: Balances = { fiatTotal: '0', items: [] }
 
-/** Held tokens only — USDC with balance 0 and an ERC-20 with no logo, so C16 and the logo fallback are visible. */
+/** Held tokens only — USDC with balance 0 and an ERC-20 with no logo, so both fallbacks are visible. */
 const degradedBalances: Balances = {
   fiatTotal: '1000',
   items: [

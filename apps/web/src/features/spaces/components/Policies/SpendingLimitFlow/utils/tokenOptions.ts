@@ -84,7 +84,7 @@ const byFiatDescThenSymbol = (a: TokenOption, b: TokenOption): number => {
 
 const bySymbol = (a: TokenOption, b: TokenOption): number => a.symbol.localeCompare(b.symbol)
 
-/** Zero balances are kept so a limit can be set before funding (AC C16); held wins on a duplicate address (AC C14). */
+/** Zero balances are kept so a limit can be set before funding; held wins on a duplicate address. */
 export const buildTokenOptions = ({
   balances,
   popular,

@@ -32,7 +32,7 @@ export const buildIdentityKey = (chainId: string, safeAddress: string): string =
 
 const noop = (): void => {}
 
-/** Held tokens use the Transaction Service balances endpoint, not the portfolio one: AC C16 needs the zero balances only it returns. */
+/** Held tokens use the Transaction Service balances endpoint, not the portfolio one: only it returns zero balances. */
 const useSpendingLimitTokenOptions = (): TokenOptionsResult => {
   const chainId = useChainId()
   const { safe, safeAddress } = useSafeInfo()

@@ -196,7 +196,7 @@ describe('TokenSelector — search', () => {
   })
 })
 
-describe('TokenSelector — Safe/chain changes (C15)', () => {
+describe('TokenSelector — Safe/chain changes', () => {
   it('clears the selection when the Safe identity changes after mount', () => {
     const onChange = jest.fn()
     const { rerender } = render(<TokenSelector value={heldUsdc.address} onChange={onChange} />)
