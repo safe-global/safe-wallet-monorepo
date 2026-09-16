@@ -1,12 +1,15 @@
 import { SpacesEnhancedSidebar } from '@/features/spaces'
 import { useRouter } from 'next/router'
 import { useEffect, type ReactElement } from 'react'
+import { ChevronsLeft, ChevronsRight } from 'lucide-react'
 
 import classnames from 'classnames'
 import css from './styles.module.css'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
+import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
 import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
 import { useDarkMode } from '@/hooks/useDarkMode'
+import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { useIsBelowMd, useMediaQuery } from '@/hooks/useMediaQuery'
 
@@ -14,21 +17,31 @@ type SideDrawerProps = {
   isOpen: boolean
   onToggle: (isOpen: boolean) => void
   onSidebarOpenChange?: (open: boolean) => void
+  isSidebarExpanded?: boolean
 }
 
-const SideDrawer = ({ isOpen, onToggle, onSidebarOpenChange }: SideDrawerProps): ReactElement => {
+const SideDrawer = ({
+  isOpen,
+  onToggle,
+  onSidebarOpenChange,
+  isSidebarExpanded = true,
+}: SideDrawerProps): ReactElement => {
   const isSmallScreen = useIsBelowMd()
   const isTabletDrawer = useMediaQuery('(min-width:768px) and (max-width:899.95px)')
+  const [, isSafeAppRoute] = useIsSidebarRoute()
   const isDarkMode = useDarkMode()
 
+  const showSidebarToggle = isSafeAppRoute && !isSmallScreen
   // Keep the sidebar hidden on small screens via CSS until we collapse it via JS.
   // With a small delay to avoid flickering.
   const smDrawerHidden = useDebounce(!isSmallScreen, 300)
   const router = useRouter()
 
+  // Depends on isSafeAppRoute so entering or leaving a Safe App restores the default: a manual
+  // collapse must not persist onto routes that hide the toggle, where it could not be undone
   useEffect(() => {
     onToggle(!isSmallScreen)
-  }, [isSmallScreen, onToggle])
+  }, [isSmallScreen, isSafeAppRoute, onToggle])
 
   // Close the drawer whenever the route changes
   useEffect(() => {
@@ -93,6 +106,21 @@ const SideDrawer = ({ isOpen, onToggle, onSidebarOpenChange }: SideDrawerProps):
         >
           {sidebar}
         </aside>
+      )}
+
+      {showSidebarToggle && (
+        <div
+          className={classnames(
+            css.sidebarTogglePosition,
+            isOpen && (isSidebarExpanded ? css.sidebarOpen : css.sidebarCollapsed),
+          )}
+        >
+          <div className={css.sidebarToggle} role="button" onClick={() => onToggle(!isOpen)}>
+            <Button variant="ghost" size="icon-sm" aria-label="collapse sidebar">
+              {isOpen ? <ChevronsLeft className="size-5" /> : <ChevronsRight className="size-5" />}
+            </Button>
+          </div>
+        </div>
       )}
     </>
   )

@@ -26,7 +26,7 @@ export const useSafeAppSuggestionDismissed = () => useLocalStorage<boolean>(WC_S
  * - sanctioned addresses on Safe{Pass}
  *
  * Also suppressed for undeployed Safes, which cannot open Safe Apps, and once the user has
- * opted out via "Don't show again".
+ * opted out via "Remember my choice".
  */
 export const useIsSafeAppSuggested = (
   proposal: WalletKitTypes.SessionProposal | null,

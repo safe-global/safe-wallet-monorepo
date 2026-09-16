@@ -81,7 +81,7 @@ const WcSafeAppSuggestion = ({
             onCheckedChange={(checked) => setDontShowAgain(!!checked)}
           />
           <FieldLabel htmlFor={checkboxId} className="text-muted-foreground">
-            Don&apos;t show again
+            Remember my choice
           </FieldLabel>
         </Field>
 

@@ -36,7 +36,7 @@ export type WalletConnectContextType = {
   /** Whether the user has moved past the Safe App suggestion for the current proposal */
   isSuggestionResolved: boolean
   setSuggestionResolved: (resolved: boolean) => void
-  /** The in-flight "Don't show again" choice, persisted only once the user commits to an action */
+  /** Persisted only once the user commits to an action, not when the box is ticked */
   dontShowAgain: boolean
   setDontShowAgain: (value: boolean) => void
 }
