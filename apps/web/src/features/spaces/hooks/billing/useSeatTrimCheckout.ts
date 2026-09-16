@@ -8,8 +8,8 @@ import type { SafeRef } from '../../components/Plans/types'
 import { useStartCheckout } from './useStartCheckout'
 
 /**
- * Checkout for a seat-limited offer: `needsTrim` tells whether the accounts step is shown (the Workspace holds Safes
- * and the plan caps them), `checkout` removes the Safes left out (they stay in My accounts) and then goes to Stripe.
+ * Checkout for a seat-limited offer: `needsTrim` tells whether the accounts step is shown (the Workspace holds more
+ * Safes than the plan covers), `checkout` removes the Safes left out (they stay in My accounts) and then goes to Stripe.
  */
 export const useSeatTrimCheckout = (spaceId: string, returnPathname?: string) => {
   const { currentData: spaceSafes } = useSpaceSafesGetV1Query({ spaceId })
@@ -22,7 +22,7 @@ export const useSeatTrimCheckout = (spaceId: string, returnPathname?: string) =>
   )
 
   const needsTrim = useCallback(
-    (seats: number | null | undefined): seats is number => seats != null && safeCount > 0,
+    (seats: number | null | undefined): seats is number => seats != null && safeCount > seats,
     [safeCount],
   )
 

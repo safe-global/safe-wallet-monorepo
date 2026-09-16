@@ -69,7 +69,7 @@ describe('PlanChooserModal', () => {
     jest.clearAllMocks()
     mockTrimState = {}
     mockUseSpaceOffers.mockReturnValue({ paidPlans: PLANS, isLoading: false })
-    mockNeedsTrim.mockImplementation((seats: number | null | undefined) => seats != null)
+    mockNeedsTrim.mockImplementation((seats: number | null | undefined) => seats != null && 3 > seats)
   })
 
   it('words the headline by lock reason', () => {
@@ -93,8 +93,7 @@ describe('PlanChooserModal', () => {
     expect(onBack).toHaveBeenCalled()
   })
 
-  it('goes straight to Stripe when the Workspace holds no Safes yet', () => {
-    mockNeedsTrim.mockReturnValue(false)
+  it('goes straight to Stripe when the picked plan covers the Workspace', () => {
     render(<PlanChooserModal spaceId={SPACE_ID} reason="lapsed" endedAt={ENDED_AT} onBack={jest.fn()} />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Continue with Business' }))
@@ -102,7 +101,7 @@ describe('PlanChooserModal', () => {
     expect(screen.queryByTestId('select-accounts-step')).not.toBeInTheDocument()
   })
 
-  it('asks which Safes the picked plan covers before checking out', () => {
+  it('asks which Safes stay when the picked plan covers fewer than the Workspace holds', () => {
     render(<PlanChooserModal spaceId={SPACE_ID} reason="lapsed" endedAt={ENDED_AT} onBack={jest.fn()} />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Switch to Starter' }))

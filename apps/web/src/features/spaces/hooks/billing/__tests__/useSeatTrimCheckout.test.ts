@@ -31,12 +31,13 @@ describe('useSeatTrimCheckout', () => {
     mockSafes = { safes: { '1': ['0xA', '0xB'], '10': ['0xC'] } }
   })
 
-  it('counts the Workspace Safes across chains and asks to trim whenever a capped plan meets a non-empty Workspace', () => {
+  it('counts the Workspace Safes across chains and asks to trim only when the plan covers fewer', () => {
     const { result } = renderHook(() => useSeatTrimCheckout(SPACE_ID))
 
     expect(result.current.safeCount).toBe(3)
     expect(result.current.needsTrim(2)).toBe(true)
-    expect(result.current.needsTrim(20)).toBe(true)
+    expect(result.current.needsTrim(3)).toBe(false)
+    expect(result.current.needsTrim(20)).toBe(false)
     expect(result.current.needsTrim(null)).toBe(false)
     expect(result.current.needsTrim(undefined)).toBe(false)
   })
