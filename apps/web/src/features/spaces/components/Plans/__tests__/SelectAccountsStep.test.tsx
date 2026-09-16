@@ -69,24 +69,29 @@ const renderStep = (props: Partial<React.ComponentProps<typeof SelectAccountsSte
   )
 
 describe('SelectAccountsStep', () => {
-  it('preselects the first Safes up to the limit and checks a multi-chain group only when whole', () => {
-    expect(initialSelection([multi, treasury], 2)).toEqual({ '1:0xD': true, '10:0xD': true, multichain_0xD: true })
-    expect(initialSelection([multi, treasury], 1)).toEqual({ '1:0xD': true })
+  it('preselects every Safe, multi-chain groups included', () => {
+    expect(initialSelection([multi, treasury])).toEqual({
+      '1:0xD': true,
+      '10:0xD': true,
+      multichain_0xD: true,
+      '1:0xA': true,
+    })
   })
 
-  it('starts full, warns about the Safes left out and reports them on continue', () => {
+  it('starts with everything selected and only lets the user continue once the plan fits', () => {
     const onContinue = jest.fn()
     renderStep({ onContinue })
 
-    expect(screen.getByText(/Business covers 2 Safe accounts/)).toBeInTheDocument()
-    expect(screen.getByTestId('selected-count')).toHaveTextContent('2 of 2 selected')
-    expect(screen.getByRole('checkbox', { name: 'Treasury' })).toBeChecked()
-    expect(screen.getByRole('checkbox', { name: 'Grants' })).not.toBeChecked()
-    expect(screen.getByText(/1 Safe account will be removed from the Workspace/)).toBeInTheDocument()
+    expect(screen.getByText('Business covers 2 Safe accounts')).toBeInTheDocument()
+    expect(screen.getByTestId('selected-count')).toHaveTextContent('3 of 2 selected')
+    expect(screen.getByText('Deselect 1 Safe account to fit the plan.')).toBeInTheDocument()
+    expect(screen.getByRole('checkbox', { name: 'Grants' })).toBeChecked()
+    expect(screen.getByRole('button', { name: /Continue to checkout/ })).toBeDisabled()
 
     fireEvent.click(screen.getByRole('checkbox', { name: 'Payroll' }))
-    fireEvent.click(screen.getByRole('checkbox', { name: 'Grants' }))
     expect(screen.getByTestId('selected-count')).toHaveTextContent('2 of 2 selected')
+    expect(screen.getByText(/1 Safe account will be removed from the Workspace/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Continue to checkout/ })).toBeEnabled()
 
     fireEvent.click(screen.getByRole('button', { name: /Continue to checkout/ }))
     expect(onContinue).toHaveBeenCalledWith([{ chainId: '1', address: '0xB' }])
@@ -99,7 +104,7 @@ describe('SelectAccountsStep', () => {
 
     expect(screen.queryByRole('checkbox', { name: 'Treasury' })).not.toBeInTheDocument()
     expect(screen.getByRole('checkbox', { name: 'Grants' })).toBeInTheDocument()
-    expect(screen.getByTestId('selected-count')).toHaveTextContent('2 of 2 selected')
+    expect(screen.getByTestId('selected-count')).toHaveTextContent('3 of 2 selected')
   })
 
   it('shows the given error and blocks the buttons while submitting', () => {

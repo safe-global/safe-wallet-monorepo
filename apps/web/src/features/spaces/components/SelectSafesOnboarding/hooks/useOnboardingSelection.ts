@@ -28,8 +28,10 @@ const useOnboardingSelection = ({ items, control, setValue, flaggedAddresses, li
 
   const selectedKeys = useMemo(() => getSelectedLeafKeys(selectedSafes), [selectedSafes])
 
-  // Total checked leaves across both sections count toward the per-workspace cap.
+  // Total checked leaves across both sections count toward the per-workspace cap. Everything starts selected, so
+  // the count can sit above the cap until the user deselects down to it.
   const isAtLimit = limit !== null && selectedKeys.size >= limit
+  const isOverLimit = limit !== null && selectedKeys.size > limit
 
   const applyToggle = (line: AccountLine, nextChecked: boolean) =>
     applySafeSelectionToggle(setValue, items, selectedSafes, line, nextChecked)
@@ -50,7 +52,7 @@ const useOnboardingSelection = ({ items, control, setValue, flaggedAddresses, li
 
   const cancelPending = () => setPendingConfirmation(null)
 
-  return { selectedKeys, isAtLimit, handleToggle, pendingConfirmation, confirmPending, cancelPending }
+  return { selectedKeys, isAtLimit, isOverLimit, handleToggle, pendingConfirmation, confirmPending, cancelPending }
 }
 
 export default useOnboardingSelection

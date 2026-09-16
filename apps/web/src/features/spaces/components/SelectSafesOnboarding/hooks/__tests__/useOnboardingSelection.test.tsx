@@ -21,9 +21,11 @@ const groupLine = (address: string, chainIds: string[]) =>
     source: { address, safes: chainIds.map((chainId) => ({ chainId, address })) },
   }) as never
 
-const setup = (opts: { items?: AllSafeItems; flagged?: Set<string> } = {}) =>
+const setup = (opts: { items?: AllSafeItems; flagged?: Set<string>; selected?: Record<string, boolean> } = {}) =>
   renderHook(() => {
-    const { control, setValue } = useForm<AddAccountsFormValues>({ defaultValues: { selectedSafes: {} } })
+    const { control, setValue } = useForm<AddAccountsFormValues>({
+      defaultValues: { selectedSafes: opts.selected ?? {} },
+    })
     return useOnboardingSelection({
       items: opts.items ?? [],
       control,
@@ -93,6 +95,17 @@ describe('useOnboardingSelection', () => {
     expect(result.current.isAtLimit).toBe(false)
 
     act(() => result.current.handleToggle(singleLine('1', '0xC'), true))
+    expect(result.current.isAtLimit).toBe(true)
+  })
+
+  it('reports a selection above the cap until the user deselects down to it', () => {
+    const { result } = setup({ selected: { '1:0xA': true, '1:0xB': true, '1:0xC': true, '1:0xD': true } })
+
+    expect(result.current.isOverLimit).toBe(true)
+    expect(result.current.isAtLimit).toBe(true)
+
+    act(() => result.current.handleToggle(singleLine('1', '0xD'), false))
+    expect(result.current.isOverLimit).toBe(false)
     expect(result.current.isAtLimit).toBe(true)
   })
 })

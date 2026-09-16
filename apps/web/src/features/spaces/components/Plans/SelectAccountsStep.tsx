@@ -22,18 +22,15 @@ const NO_FLAGGED = new Set<string>()
 const leavesOf = (items: AllSafeItems): SafeItem[] =>
   items.flatMap((item) => (isMultiChainSafeItem(item) ? item.safes : [item]))
 
-/** The first `limit` Safes start selected, with a multi-chain parent checked only when all its children made it. */
-export const initialSelection = (items: AllSafeItems, limit: number): Record<string, boolean> => {
-  const kept = new Set(
-    leavesOf(items)
-      .slice(0, limit)
-      .map((safe) => getSafeId(safe)),
-  )
+/** Every Safe starts selected (multi-chain parents included); the user deselects down to the plan's seats. */
+export const initialSelection = (items: AllSafeItems): Record<string, boolean> => {
   const selected: Record<string, boolean> = {}
-  for (const key of kept) selected[key] = true
   for (const item of items) {
-    if (isMultiChainSafeItem(item) && item.safes.every((safe) => kept.has(getSafeId(safe)))) {
+    if (isMultiChainSafeItem(item)) {
       selected[getMultiChainSafeId(item)] = true
+      for (const safe of item.safes) selected[getSafeId(safe)] = true
+    } else {
+      selected[getSafeId(item)] = true
     }
   }
   return selected
@@ -42,7 +39,7 @@ export const initialSelection = (items: AllSafeItems, limit: number): Record<str
 export const seatsTooltip = (planName: string, limit: number): string =>
   `${planName} covers ${limit} Safe accounts. Safe accounts you leave out remain available outside the Workspace. You can swap them in any time.`
 
-/** Trims the Workspace to the plan's seats before checkout; the Safes left out are removed from it. */
+/** Trims the Workspace to the plan's seats before checkout; the Safes deselected are removed from it. */
 export default function SelectAccountsStep({
   title = 'Select Safe accounts for your plan',
   limit,
@@ -65,9 +62,9 @@ export default function SelectAccountsStep({
   const filtered = useSafesSearch(allSafes, query.trim())
   const items = query.trim() ? filtered : allSafes
   const { control, setValue } = useForm<AddAccountsFormValues>({
-    defaultValues: { selectedSafes: initialSelection(allSafes, limit) },
+    defaultValues: { selectedSafes: initialSelection(allSafes) },
   })
-  const { selectedKeys, isAtLimit, handleToggle } = useOnboardingSelection({
+  const { selectedKeys, isAtLimit, isOverLimit, handleToggle } = useOnboardingSelection({
     items: allSafes,
     control,
     setValue,
@@ -81,14 +78,19 @@ export default function SelectAccountsStep({
 
   return (
     <>
-      <div className="flex flex-col gap-1">
-        <Typography variant="h3" as={DialogTitle}>
-          {title}
-        </Typography>
-        <Typography color="muted">
-          {planName} covers {limit} Safe accounts. Choose which ones stay in the Workspace.
-        </Typography>
-      </div>
+      <Typography variant="h3" as={DialogTitle}>
+        {title}
+      </Typography>
+
+      <Alert variant="info">
+        <AlertSeverityIcon variant="info" />
+        <AlertDescription>
+          <span className="block font-medium text-foreground">
+            {planName} covers {limit} Safe accounts
+          </span>
+          Safe accounts you leave out remain available in My accounts. You can swap them in any time.
+        </AlertDescription>
+      </Alert>
 
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-3">
@@ -125,14 +127,24 @@ export default function SelectAccountsStep({
         </ScrollArea>
       </div>
 
-      {removed.length > 0 && (
+      {isOverLimit ? (
         <Alert variant="warning">
           <AlertSeverityIcon variant="warning" />
           <AlertDescription>
-            {removed.length === 1 ? '1 Safe account' : `${removed.length} Safe accounts`} will be removed from the
-            Workspace. They remain available in My accounts.
+            Deselect {selectedKeys.size - limit === 1 ? '1 Safe account' : `${selectedKeys.size - limit} Safe accounts`}{' '}
+            to fit the plan.
           </AlertDescription>
         </Alert>
+      ) : (
+        removed.length > 0 && (
+          <Alert variant="warning">
+            <AlertSeverityIcon variant="warning" />
+            <AlertDescription>
+              {removed.length === 1 ? '1 Safe account' : `${removed.length} Safe accounts`} will be removed from the
+              Workspace. They remain available in My accounts.
+            </AlertDescription>
+          </Alert>
+        )
       )}
 
       {error && (
@@ -150,7 +162,7 @@ export default function SelectAccountsStep({
           size="lg"
           accentIcon
           className="flex-1"
-          disabled={selectedKeys.size === 0 || isSubmitting}
+          disabled={selectedKeys.size === 0 || isOverLimit || isSubmitting}
           onClick={() => onContinue(removed.map(({ chainId, address }) => ({ chainId, address })))}
         >
           Continue to checkout
