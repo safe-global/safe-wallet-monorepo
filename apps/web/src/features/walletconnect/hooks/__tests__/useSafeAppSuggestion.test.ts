@@ -9,9 +9,11 @@ jest.mock('@/services/local-storage/useLocalStorage', () => ({
   default: () => [mockDismissed(), jest.fn()],
 }))
 
+const mockHasFeature = jest.fn(() => true as boolean | undefined)
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
   default: () => ({ configs: [{ chainId: '1', chainName: 'Ethereum' }] }),
+  useHasFeature: () => mockHasFeature(),
 }))
 
 const mockSafeInfo = jest.fn(() => ({ safe: { chainId: '1' }, safeLoaded: true }))
@@ -75,6 +77,7 @@ describe('useIsSafeAppSuggested', () => {
     mockSafeInfo.mockReturnValue({ safe: { chainId: '1' }, safeLoaded: true })
     mockSanctioned.mockReturnValue(null)
     mockCounterfactual.mockReturnValue(false)
+    mockHasFeature.mockReturnValue(true)
   })
 
   it('suggests the Safe App for a normal proposal', () => {
@@ -85,6 +88,19 @@ describe('useIsSafeAppSuggested', () => {
   it('does not suggest without a proposal or a matching app', () => {
     expect(renderHook(() => useIsSafeAppSuggested(null, mockSafeApp)).result.current).toBe(false)
     expect(renderHook(() => useIsSafeAppSuggested(makeProposal(), undefined)).result.current).toBe(false)
+  })
+
+  it('does not suggest when the feature flag is off', () => {
+    mockHasFeature.mockReturnValue(false)
+    const { result } = renderHook(() => useIsSafeAppSuggested(makeProposal(), mockSafeApp))
+    expect(result.current).toBe(false)
+  })
+
+  // useHasFeature is undefined until the chain config loads; fail closed rather than flash
+  it('does not suggest while the chain config is still loading', () => {
+    mockHasFeature.mockReturnValue(undefined)
+    const { result } = renderHook(() => useIsSafeAppSuggested(makeProposal(), mockSafeApp))
+    expect(result.current).toBe(false)
   })
 
   it('does not suggest once dismissed', () => {

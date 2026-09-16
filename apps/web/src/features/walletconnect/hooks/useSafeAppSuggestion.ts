@@ -2,7 +2,8 @@ import { useMemo } from 'react'
 import type { WalletKitTypes } from '@reown/walletkit'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
-import useChains from '@/hooks/useChains'
+import useChains, { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { useSanctionedAddress } from '@/hooks/useSanctionedAddress'
@@ -25,13 +26,14 @@ export const useSafeAppSuggestionDismissed = () => useLocalStorage<boolean>(WC_S
  * - chains the dApp does not support, which cannot be approved at all
  * - sanctioned addresses on Safe{Pass}
  *
- * Also suppressed for undeployed Safes, which cannot open Safe Apps, and once the user has
- * opted out via "Remember my choice".
+ * Also suppressed for undeployed Safes, which cannot open Safe Apps, once the user has opted
+ * out via "Remember my choice", and wherever FEATURES.WC_SAFE_APP_SUGGESTION is not enabled.
  */
 export const useIsSafeAppSuggested = (
   proposal: WalletKitTypes.SessionProposal | null,
   matchingSafeApp: SafeAppData | undefined,
 ): boolean => {
+  const isFeatureEnabled = useHasFeature(FEATURES.WC_SAFE_APP_SUGGESTION)
   const [dismissed] = useSafeAppSuggestionDismissed()
   const { configs } = useChains()
   const { safe, safeLoaded } = useSafeInfo()
@@ -46,6 +48,9 @@ export const useIsSafeAppSuggested = (
     () => (proposal?.params ? getSupportedChainIds(configs, proposal.params) : []),
     [configs, proposal],
   )
+
+  // Also gates auto-approve, so with the flag off the whole flow reverts to its previous behaviour
+  if (!isFeatureEnabled) return false
 
   if (!proposal || !matchingSafeApp || dismissed || !safeLoaded || isCounterfactualSafe) return false
 
