@@ -1,19 +1,13 @@
-import { faker } from '@faker-js/faker'
 import { render, screen } from '@/tests/test-utils'
-import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { TokenOption } from '../../utils/tokenOptions'
 import TokenOptionRow from '../TokenOptionRow'
+import { tokenOptionBuilder } from '../../utils/testBuilders'
 
-const option = (overrides: Partial<TokenOption> = {}): TokenOption => ({
-  address: checksumAddress(faker.finance.ethereumAddress()),
-  symbol: 'USDC',
-  name: 'USD Coin',
-  decimals: 6,
-  logoUri: faker.image.url(),
-  group: 'popular',
-  ...overrides,
-})
+const option = (overrides: Partial<TokenOption> = {}): TokenOption =>
+  tokenOptionBuilder()
+    .with({ symbol: 'USDC', name: 'USD Coin', decimals: 6, ...overrides })
+    .build()
 
 describe('TokenOptionRow', () => {
   it('shows symbol and name', () => {
@@ -55,6 +49,13 @@ describe('TokenOptionRow', () => {
     render(<TokenOptionRow option={noLogo} />)
 
     expect(screen.getByText('USDC')).toBeInTheDocument()
-    expect(screen.getByTitle('USDC')).toBeInTheDocument()
+    // The symbol is also the truncation tooltip, so name the icon element rather than matching on title alone.
+    expect(screen.getAllByTitle('USDC').find((el) => el.tagName === 'IFRAME')).toBeInTheDocument()
+  })
+
+  it('carries the full text as a tooltip so a truncated row can still be read', () => {
+    render(<TokenOptionRow option={option()} />)
+
+    expect(screen.getByText('USD Coin')).toHaveAttribute('title', 'USD Coin')
   })
 })
