@@ -33,6 +33,12 @@ describe('[SMOKE] Create transactions tests', () => {
   })
 
   it('[SMOKE] Verify address input resolves a valid ENS name', () => {
+    cy.fixture('ens_e2etestsafe').then((results) => {
+      cy.intercept('POST', '**', (req) => {
+        const result = results[req.body?.params?.[0]?.to?.toLowerCase()]
+        if (result) req.reply({ body: { jsonrpc: '2.0', id: req.body.id, result } })
+      })
+    })
     createtx.typeRecipientAddress(constants.ENS_TEST_SEPOLIA)
     createtx.verifyENSResolves(staticSafes.SEP_STATIC_SAFE_6)
   })
