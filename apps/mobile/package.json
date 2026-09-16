@@ -162,7 +162,7 @@
     "@datadog/datadog-ci": "^5.9.0",
     "@datadog/mobile-react-native-babel-plugin": "^3.1.2",
     "@eslint/js": "^9.18.0",
-    "@faker-js/faker": "^9.0.3",
+    "@faker-js/faker": "^10.5.0",
     "@rtk-query/codegen-openapi": "^2.0.0",
     "@safe-global/test": "workspace:^",
     "@safe-global/types-kit": "^4.0.1",
