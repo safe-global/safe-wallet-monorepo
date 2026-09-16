@@ -14,11 +14,11 @@ import { buildTokenOptions, toPopularToken, type NativeCurrencyInfo, type TokenO
 export type TokenOptionsResult = {
   /** Held tokens first (fiat desc), then popular (symbol asc). */
   options: TokenOption[]
-  /** Balances are in flight and nothing has arrived yet. Always false while the query is skipped. */
+  /** False while the query is skipped. */
   isLoading: boolean
   isError: boolean
   refetch: () => void
-  /** Popular-token metadata is in flight and nothing has arrived yet. False for chains without a popular list. */
+  /** False for chains without a popular list. */
   isPopularLoading: boolean
   isPopularError: boolean
   /** No-op for chains without a popular list. */
@@ -42,8 +42,7 @@ const useSpendingLimitTokenOptions = (): TokenOptionsResult => {
 
   // `useChainId` can flip a render before `useSafeInfo` catches up — see useLoadSafeInfo's `isStoredSafeValid`.
   const identityMatchesChain = safe.chainId === chainId
-  // The Transaction Service has no balances for an undeployed Safe; `trusted` is undefined until the
-  // chain config resolves.
+  // The Transaction Service has no balances for an undeployed Safe.
   const hasValidSafe = Boolean(safeAddress) && safe.deployed && identityMatchesChain
   const skip = !hasValidSafe || trusted === undefined
 
@@ -80,8 +79,7 @@ const useSpendingLimitTokenOptions = (): TokenOptionsResult => {
 
   return {
     options,
-    // While `trusted` is still resolving for an otherwise-valid Safe, report loading rather than
-    // letting the popular-only list flash before the held-token query even starts.
+    // Report loading while `trusted` resolves, so the popular-only list does not flash first.
     isLoading: hasValidSafe && (trusted === undefined || (currentData === undefined && (isLoading || isFetching))),
     isError: !skip && isError,
     refetch,

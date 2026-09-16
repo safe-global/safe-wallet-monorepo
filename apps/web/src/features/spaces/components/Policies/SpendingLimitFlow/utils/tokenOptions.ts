@@ -5,10 +5,8 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { TokensGetTokensV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/tokens'
 
-/** One token of the CGW batch response (`NativeTokenMetadata | Erc20TokenMetadata | Erc721TokenMetadata`). */
 export type TokenMetadata = TokensGetTokensV1ApiResponse[number]
 
-/** Metadata of a popular token, as fed into the merge. */
 export type PopularToken = {
   symbol: string
   name: string
@@ -42,7 +40,6 @@ export type TokenOption = {
   fiatBalance?: string
 }
 
-/** The subset of `Chain['nativeCurrency']` the selector needs. */
 export type NativeCurrencyInfo = {
   symbol: string
   name: string
@@ -85,10 +82,7 @@ const byFiatDescThenSymbol = (a: TokenOption, b: TokenOption): number => {
 
 const bySymbol = (a: TokenOption, b: TokenOption): number => a.symbol.localeCompare(b.symbol)
 
-/**
- * Held tokens (zero balances included — a limit may be set before funding, AC C16) merged with the
- * chain's popular list and native currency, de-duplicated by address (AC C14).
- */
+/** Zero balances are kept so a limit can be set before funding (AC C16); held wins on a duplicate address (AC C14). */
 export const buildTokenOptions = ({ balances, popular, native }: BuildTokenOptionsInput): TokenOption[] => {
   const held = (balances ?? [])
     .filter((balance) => balance.tokenInfo.type !== TokenType.ERC721)
