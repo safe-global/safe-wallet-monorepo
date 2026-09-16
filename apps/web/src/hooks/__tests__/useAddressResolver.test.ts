@@ -136,6 +136,32 @@ describe('useAddressResolver', () => {
     jest.useRealTimers()
   })
 
+  it('does not reuse a primary name cached for another hub', async () => {
+    const ADDR_ON_BOTH_HUBS = zeroPadValue('0xdd', 20)
+    jest.spyOn(addressBook, 'default').mockReturnValue({})
+    const currentChainMock = jest
+      .spyOn(useChains, 'useCurrentChain')
+      .mockReturnValue(createChain({ chainId: '1', isTestnet: false }))
+    const lookupMock = jest
+      .spyOn(domains, 'lookupAddress')
+      .mockResolvedValueOnce('mainnet.eth')
+      .mockResolvedValueOnce('sepolia.eth')
+
+    const { result, rerender } = renderHook(() => useAddressResolver(ADDR_ON_BOTH_HUBS))
+
+    await waitFor(() => {
+      expect(result.current.ens).toBe('mainnet.eth')
+    })
+
+    currentChainMock.mockReturnValue(createChain({ chainId: '11155111', isTestnet: true }))
+    rerender()
+
+    await waitFor(() => {
+      expect(result.current.ens).toBe('sepolia.eth')
+    })
+    expect(lookupMock).toHaveBeenCalledTimes(2)
+  })
+
   it('does not resolve ENS domain if hub domain lookup is disabled', async () => {
     jest.spyOn(addressBook, 'default').mockReturnValue({})
     jest.spyOn(useChains, 'useChain').mockReturnValue(createChain({ chainId: '1', features: [] }))

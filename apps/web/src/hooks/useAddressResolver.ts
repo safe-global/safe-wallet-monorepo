@@ -7,8 +7,8 @@ import { useCurrentChain } from './useChains'
 import { useEnsHubProvider } from './useEnsHubProvider'
 import { ETH_COIN_TYPE } from '@safe-global/utils/utils/ens'
 
-// Reverse lookups are coin-type scoped (currently always ETH 60 on the hub). Key by coin type so
-// a future ENSIP-19 per-chain reverse does not reuse the wrong primary name.
+// Mainnet and Sepolia hubs are independent registries, so a primary name cached for one must not
+// be served for the other. Keyed by hub and coin type (always ETH 60 today).
 const cache: Record<string, Record<string, string>> = {}
 
 export const useAddressResolver = (address?: string) => {
@@ -18,30 +18,30 @@ export const useAddressResolver = (address?: string) => {
   const addressBookName = address && addressBook[address]
 
   // ENSv2: reverse lookups run on the shared hub provider (Mainnet/Sepolia Universal Resolver)
-  const { provider: ethersProvider, isDomainLookupEnabled } = useEnsHubProvider(currentChain)
+  const { hubChain, provider: ethersProvider, isDomainLookupEnabled } = useEnsHubProvider(currentChain)
 
   const shouldResolve = address && !addressBookName && isDomainLookupEnabled && !!ethersProvider && !!debouncedValue
-  const coinTypeKey = String(ETH_COIN_TYPE)
+  const cacheKey = `${hubChain?.chainId}:${ETH_COIN_TYPE}`
 
   const [ens, _, isResolving] = useAsync<string | undefined>(() => {
     if (!shouldResolve) return
     // Wait for debounce to settle so we never resolve a stale address
     if (debouncedValue !== address) return
-    if (debouncedValue && cache[coinTypeKey]?.[debouncedValue]) {
-      return Promise.resolve(cache[coinTypeKey][debouncedValue])
+    if (debouncedValue && cache[cacheKey]?.[debouncedValue]) {
+      return Promise.resolve(cache[cacheKey][debouncedValue])
     }
     // Primary names live on the hub with ETH coin type 60
     return lookupAddress(ethersProvider, debouncedValue, ETH_COIN_TYPE)
-  }, [ethersProvider, debouncedValue, shouldResolve, address, coinTypeKey])
+  }, [ethersProvider, debouncedValue, shouldResolve, address, cacheKey])
 
   const resolving = (shouldResolve && isResolving) || false
 
   useEffect(() => {
     if (ens && debouncedValue) {
-      cache[coinTypeKey] = cache[coinTypeKey] || {}
-      cache[coinTypeKey][debouncedValue] = ens
+      cache[cacheKey] = cache[cacheKey] || {}
+      cache[cacheKey][debouncedValue] = ens
     }
-  }, [coinTypeKey, debouncedValue, ens])
+  }, [cacheKey, debouncedValue, ens])
 
   // Clear stale ENS while debounce catches up to the new address
   const isStale = debouncedValue !== address
