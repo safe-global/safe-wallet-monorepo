@@ -20,6 +20,7 @@ import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 type Consequence = { variant: 'danger' | 'success'; text: string }
 
@@ -73,6 +74,7 @@ const DeleteSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undef
 
       router.push({ pathname: AppRoutes.welcome.spaces })
     } catch (e) {
+      if (isElevationRequiredError(e)) return
       console.error(e)
       setError('Error deleting the workspace. Please try again.')
     }

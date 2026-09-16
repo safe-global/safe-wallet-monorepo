@@ -8,6 +8,7 @@ import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import type { SpaceItem } from '../types'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 interface UseAddSafeToSpaceOptions {
   spaces: SpaceItem[]
@@ -43,6 +44,7 @@ export const useAddSafeToSpace = ({ spaces, onSpaceAdded }: UseAddSafeToSpaceOpt
         spaceId,
         createSpaceSafesDto: { safes: [{ chainId: chain.chainId, address: safe.address.value }] },
       })
+      if (isElevationRequiredError(result.error)) return false
       if (result.error) {
         showError(getRtkQueryErrorMessage(result.error))
         return false

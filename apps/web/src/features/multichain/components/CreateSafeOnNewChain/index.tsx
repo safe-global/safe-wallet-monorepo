@@ -123,6 +123,10 @@ const ReplaySafeDialog = ({
         dispatch,
       })
       if (!persistResult.ok) {
+        if (persistResult.stepUpPending) {
+          hasError = true
+          return
+        }
         setCreationError(persistResult.error)
         hasError = true
         dispatch(
