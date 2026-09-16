@@ -1,9 +1,11 @@
-import { createContext, useContext, useEffect, useState, PropsWithChildren } from 'react'
+import { createContext, useContext, useEffect, useState, PropsWithChildren, useCallback } from 'react'
 import SafeAppsSDK, { ChainInfo, SafeInfo } from '@safe-global/safe-apps-sdk'
-import { BrowserProvider } from 'ethers'
+import { BrowserProvider, JsonRpcProvider } from 'ethers'
+import { getChainConfig } from '@safe-global/safe-gateway-typescript-sdk'
 import InterfaceRepository, { InterfaceRepo } from '../lib/interfaceRepository'
 import { useSafeAppsSDK } from '@safe-global/safe-apps-react-sdk'
 import { SafeAppProvider } from '@safe-global/safe-apps-provider'
+import { getEnsHubChainId, hasHubDomainLookup, resolveNameForChain } from '@safe-global/utils/utils/ens'
 
 type NetworkContextProps = {
   sdk: SafeAppsSDK
@@ -18,11 +20,30 @@ type NetworkContextProps = {
 
 export const NetworkContext = createContext<NetworkContextProps | null>(null)
 
+// The hub RPC (Mainnet/Sepolia Universal Resolver) is settled once from the gateway config.
+// While it is unknown (config still loading or unavailable) names are left unresolved rather
+// than being resolved against a guessed hub.
+const createEnsHubProvider = async (chainId: string): Promise<JsonRpcProvider | undefined> => {
+  const config = await getChainConfig(chainId)
+  const hubChainId = getEnsHubChainId(!!config.isTestnet)
+  const hubConfig = hubChainId === chainId ? config : await getChainConfig(hubChainId)
+
+  // DOMAIN_LOOKUP is hub-only — ignore the Safe's chain flag and require it on Mainnet/Sepolia.
+  if (!hasHubDomainLookup(hubConfig)) return undefined
+
+  const rpcUrl = hubConfig.publicRpcUri?.value || hubConfig.rpcUri?.value
+  if (!rpcUrl) return undefined
+
+  // Match web's createWeb3ReadOnly: Infura and similar RPCs reject large batches.
+  return new JsonRpcProvider(rpcUrl, Number(hubChainId), { staticNetwork: true, batchMaxCount: 3 })
+}
+
 const NetworkProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const { sdk, safe } = useSafeAppsSDK()
   const [provider, setProvider] = useState<BrowserProvider | undefined>()
   const [chainInfo, setChainInfo] = useState<ChainInfo>()
   const [interfaceRepo, setInterfaceRepo] = useState<InterfaceRepository | undefined>()
+  const [ensHubProvider, setEnsHubProvider] = useState<JsonRpcProvider | undefined>()
 
   useEffect(() => {
     if (!chainInfo) {
@@ -38,31 +59,55 @@ const NetworkProvider: React.FC<PropsWithChildren> = ({ children }) => {
   }, [chainInfo, safe, sdk])
 
   useEffect(() => {
+    let cancelled = false
+
     const getChainInfo = async () => {
       try {
-        const chainInfo = await sdk.safe.getChainInfo()
-        setChainInfo(chainInfo)
+        const nextChainInfo = await sdk.safe.getChainInfo()
+        if (cancelled) return
+        setChainInfo(nextChainInfo)
+
+        try {
+          const hubProvider = await createEnsHubProvider(nextChainInfo.chainId)
+          if (cancelled) {
+            hubProvider?.destroy()
+            return
+          }
+          setEnsHubProvider(hubProvider)
+        } catch (error) {
+          console.error('Unable to configure the ENS hub provider:', error)
+          if (!cancelled) setEnsHubProvider(undefined)
+        }
       } catch (error) {
         console.error('Unable to get chain info:', error)
       }
     }
 
     getChainInfo()
+
+    return () => {
+      cancelled = true
+    }
   }, [sdk.safe])
+
+  useEffect(() => () => ensHubProvider?.destroy(), [ensHubProvider])
 
   const networkPrefix = chainInfo?.shortName || ''
 
   const nativeCurrencySymbol = chainInfo?.nativeCurrency.symbol
 
-  const getAddressFromDomain = async (name: string): Promise<string> => {
-    if (!provider) return name
-    try {
-      const address = await provider.resolveName(name)
-      return address ?? name
-    } catch {
-      return name
-    }
-  }
+  const getAddressFromDomain = useCallback(
+    async (name: string): Promise<string> => {
+      if (!chainInfo || !ensHubProvider) return name
+      try {
+        const address = await resolveNameForChain(ensHubProvider, name, Number(chainInfo.chainId))
+        return address ?? name
+      } catch {
+        return name
+      }
+    },
+    [chainInfo, ensHubProvider],
+  )
 
   return (
     <NetworkContext.Provider

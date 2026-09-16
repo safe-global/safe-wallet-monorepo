@@ -7,6 +7,8 @@ import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { isDomain } from '@/services/ens'
 import { MemberRole } from '../../../hooks/useSpaceMembers'
 import useNameResolver from '@/components/common/AddressInput/useNameResolver'
+import useChains from '@/hooks/useChains'
+import { DEFAULT_MAINNET_CHAIN_ID } from '@/config/constants'
 import { cn } from '@/utils/cn'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -74,6 +76,9 @@ const MemberInviteRow = ({
   const fieldErrorMessage = errors?.members?.[index]?.identifier?.message
   const debouncedError = useDebounce(fieldErrorMessage, ERROR_DEBOUNCE_MS)
   const displayError = fieldErrorMessage ? debouncedError : undefined
+  const { configs: allNetworks } = useChains()
+  // Space invites are chain-agnostic — resolve ENS on mainnet, not the current Safe chain
+  const ensChain = allNetworks.find((chain) => chain.chainId === String(DEFAULT_MAINNET_CHAIN_ID))
 
   const handleAddressResolved = useCallback(
     (address: string) => {
@@ -87,7 +92,7 @@ const MemberInviteRow = ({
     address: resolvedAddress,
     resolverError,
     resolving,
-  } = useNameResolver(isEmailAddress(identifierValue.trim()) ? '' : identifierValue)
+  } = useNameResolver(isEmailAddress(identifierValue.trim()) ? '' : identifierValue, ensChain)
 
   useEffect(() => {
     if (resolvedAddress) handleAddressResolved(resolvedAddress)
