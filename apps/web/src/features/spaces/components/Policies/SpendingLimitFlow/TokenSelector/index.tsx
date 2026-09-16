@@ -1,7 +1,7 @@
-import { useEffect, useId, useMemo, useRef } from 'react'
+import { useEffect, useId, useMemo, useRef, type ReactNode } from 'react'
 import { Search } from 'lucide-react'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { Label } from '@/components/ui/label'
+import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
 import { InputGroupAddon } from '@/components/ui/input-group'
 import {
   Combobox,
@@ -41,6 +41,10 @@ export type TokenSelectorProps = {
   disabled?: boolean
   label?: string
   placeholder?: string
+  /** Marks the field invalid and colours the label and helper text, as `NumberField` does. */
+  error?: boolean
+  /** Rendered under the field — the Safe's balance of the selected token, or a validation message. */
+  helperText?: ReactNode
   name?: string
   id?: string
   'data-testid'?: string
@@ -72,6 +76,8 @@ const TokenSelector = ({
   disabled = false,
   label = TOKEN_SELECTOR_LABEL,
   placeholder = TOKEN_SELECTOR_PLACEHOLDER,
+  error = false,
+  helperText,
   name,
   id,
   'data-testid': testId = 'spending-limit-token-selector',
@@ -122,8 +128,12 @@ const TokenSelector = ({
   }, [identityKey, value, onChange])
 
   return (
-    <div className="flex w-full flex-col gap-1.5">
-      <Label htmlFor={fieldId}>{label}</Label>
+    /* The design-system field primitives, so this control and a `NumberField` beside it share one
+       label/helper rhythm — hand-rolled spacing here left the two columns 6px out of line. */
+    <Field data-invalid={error || undefined} className="w-full">
+      <FieldLabel htmlFor={fieldId} className={error ? 'text-destructive' : undefined}>
+        {label}
+      </FieldLabel>
 
       <Combobox<TokenOption>
         items={groups}
@@ -199,7 +209,11 @@ const TokenSelector = ({
           {!isLoading && !isPopularLoading && <ComboboxEmpty>{NO_TOKENS_FOUND_TEXT}</ComboboxEmpty>}
         </ComboboxContent>
       </Combobox>
-    </div>
+
+      {helperText != null && (
+        <FieldDescription className={error ? 'text-destructive' : undefined}>{helperText}</FieldDescription>
+      )}
+    </Field>
   )
 }
 

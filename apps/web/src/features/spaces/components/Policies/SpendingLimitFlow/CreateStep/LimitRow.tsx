@@ -10,7 +10,7 @@ import FiatValue from '@/components/common/FiatValue'
 import NumberField from '@/components/common/NumberField'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field'
+import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import TokenSelector from '../TokenSelector'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
@@ -101,8 +101,10 @@ const LimitRow = ({ spenderIndex, limitIndex, limitCount, removable, onRemove }:
     <Card size="none" radius="lg" data-testid="limit-row">
       {/* Card owns spacing only via `size`/`radius`; the visual gap/padding lives on this plain div. */}
       <div className="flex flex-col gap-3 p-3">
+        {/* Both columns render their own label and helper through the shared `Field` primitives, so
+            the two fields line up without this row adding any vertical spacing of its own. */}
         <div className="flex items-start gap-4">
-          <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <div className="flex min-w-0 flex-1 flex-col">
             <Controller
               control={control}
               name={tokenPath}
@@ -124,23 +126,24 @@ const LimitRow = ({ spenderIndex, limitIndex, limitCount, removable, onRemove }:
                   onChange={(next) => field.onChange(next ?? '')}
                   excludeAddresses={excludeAddresses}
                   name={field.name}
+                  error={!!tokenError}
+                  helperText={
+                    tokenError?.message ? (
+                      <span data-testid="token-error">{String(tokenError.message)}</span>
+                    ) : selectedToken ? (
+                      <span data-testid="token-balance">
+                        {formatVisualAmount(selectedToken.balance ?? '0', selectedToken.decimals)}{' '}
+                        {tokenOptionLabel(selectedToken)}
+                      </span>
+                    ) : undefined
+                  }
                   data-testid="limit-token-selector"
                 />
               )}
             />
-            {tokenError?.message ? (
-              <FieldError data-testid="token-error">{String(tokenError.message)}</FieldError>
-            ) : (
-              selectedToken && (
-                <FieldDescription data-testid="token-balance">
-                  {formatVisualAmount(selectedToken.balance ?? '0', selectedToken.decimals)}{' '}
-                  {tokenOptionLabel(selectedToken)}
-                </FieldDescription>
-              )
-            )}
           </div>
 
-          <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <div className="flex min-w-0 flex-1 flex-col">
             <NumberField
               label={LIMIT_AMOUNT_LABEL}
               placeholder={LIMIT_AMOUNT_PLACEHOLDER}

@@ -71,23 +71,28 @@ jest.mock('../../TokenSelector', () => ({
     value,
     onChange,
     excludeAddresses = [],
+    helperText,
     'data-testid': testId = 'limit-token-selector',
   }: {
     value?: string
     onChange: (next: string | undefined) => void
     excludeAddresses?: string[]
+    helperText?: React.ReactNode
     'data-testid'?: string
   }) => (
-    <select data-testid={testId} value={value ?? ''} onChange={(event) => onChange(event.target.value || undefined)}>
-      <option value="">none</option>
-      {mockTokens
-        .filter((token) => !excludeAddresses.includes(token.address))
-        .map((token) => (
-          <option key={token.address} value={token.address}>
-            {token.symbol}
-          </option>
-        ))}
-    </select>
+    <div>
+      <select data-testid={testId} value={value ?? ''} onChange={(event) => onChange(event.target.value || undefined)}>
+        <option value="">none</option>
+        {mockTokens
+          .filter((token) => !excludeAddresses.includes(token.address))
+          .map((token) => (
+            <option key={token.address} value={token.address}>
+              {token.symbol}
+            </option>
+          ))}
+      </select>
+      {helperText}
+    </div>
   ),
 }))
 
