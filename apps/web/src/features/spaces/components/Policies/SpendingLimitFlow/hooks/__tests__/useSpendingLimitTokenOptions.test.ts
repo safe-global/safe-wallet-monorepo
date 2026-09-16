@@ -306,11 +306,15 @@ describe('useSpendingLimitTokenOptions', () => {
     expect(refetch).toHaveBeenCalledTimes(1)
   })
 
-  it('does not report a popular error while stale popular data is still present', () => {
-    tokensSpy.mockReturnValue(tokensQueryResult({ isError: true, currentData: [tokenMetadataBuilder()] }))
+  it('still reports a popular error when a refetch fails over data that is already on screen', () => {
+    const stale = tokenMetadataBuilder()
+    tokensSpy.mockReturnValue(tokensQueryResult({ isError: true, currentData: [stale] }))
 
     const { result } = renderHook(() => useSpendingLimitTokenOptions())
 
-    expect(result.current.isPopularError).toBe(false)
+    // RTK Query keeps the last good data for the same arg, so the error would otherwise be swallowed
+    // and the user would keep looking at a list that failed to refresh.
+    expect(result.current.isPopularError).toBe(true)
+    expect(result.current.isPopularLoading).toBe(false)
   })
 })

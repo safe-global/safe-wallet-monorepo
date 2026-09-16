@@ -83,8 +83,10 @@ const useSpendingLimitTokenOptions = (): TokenOptionsResult => {
     isLoading: hasValidSafe && (trusted === undefined || (currentData === undefined && (isLoading || isFetching))),
     isError: !skip && isError,
     refetch,
+    // Only the loading flag is guarded on `popularData`: a background refetch must not flash skeletons
+    // over a list that is already on screen, but a failed one must still surface, stale data or not.
     isPopularLoading: hasPopular && popularData === undefined && (popularIsLoading || popularIsFetching),
-    isPopularError: hasPopular && popularIsError && popularData === undefined,
+    isPopularError: hasPopular && popularIsError,
     refetchPopular: hasPopular ? refetchPopular : noop,
     identityKey: identityMatchesChain ? buildIdentityKey(chainId, safeAddress) : '',
   }
