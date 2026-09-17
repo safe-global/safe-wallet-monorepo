@@ -104,18 +104,17 @@ describe('SetUpNestedSafe', () => {
     })
   })
 
-  it('clears a prefilled amount when the row switches token', async () => {
-    // Back-navigation re-seeds defaultValues, so the old amount must not return with a new token.
-    renderSetup([{ tokenAddress: ZERO_ADDRESS, amount: '0.5' }])
+  it('keeps a prefilled amount when the row switches token and re-validates it', async () => {
+    // 7 decimals: fine for ETH, too many for USDC.
+    renderSetup([{ tokenAddress: ZERO_ADDRESS, amount: '0.0000001' }])
 
-    expect(screen.getByTestId('token-amount-field')).toHaveValue('0.5')
+    expect(screen.getByTestId('token-amount-field')).toHaveValue('0.0000001')
 
     await userEvent.click(within(screen.getByTestId('token-selector')).getByRole('combobox'))
     await userEvent.click(await screen.findByRole('option', { name: /USD Coin/ }))
 
-    await waitFor(() => {
-      expect(screen.getByTestId('token-amount-field')).toHaveValue('')
-    })
+    expect(screen.getByTestId('token-amount-field')).toHaveValue('0.0000001')
+    expect(await screen.findByText('Should have 1 to 6 decimals')).toBeInTheDocument()
   })
 
   it('keeps the amount when the row re-picks the token it already has', async () => {
