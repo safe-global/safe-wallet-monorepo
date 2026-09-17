@@ -1,7 +1,7 @@
 import AddressInputReadOnly from '@/components/common/AddressInputReadOnly'
 import useAddressBook from '@/hooks/useAddressBook'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import type { KeyboardEvent, ReactElement, ReactNode } from 'react'
+import type { FocusEvent, KeyboardEvent, ReactElement, ReactNode } from 'react'
 import { useEffect, useCallback, useId, useLayoutEffect, useRef, useMemo, useState } from 'react'
 import { Input as InputPrimitive } from '@base-ui/react/input'
 import { useFormContext, useWatch, type Validate, get } from 'react-hook-form'
@@ -33,6 +33,7 @@ export type AddressInputProps = {
   chain?: Chain
   showPrefix?: boolean
   onReset?: () => void
+  onEdit?: () => void
   label?: ReactNode
   required?: boolean
   disabled?: boolean
@@ -65,6 +66,7 @@ const AddressInput = ({
   chain,
   showPrefix = true,
   onReset,
+  onEdit,
   label,
   disabled,
   focused,
@@ -93,9 +95,14 @@ const AddressInput = ({
 
   const addressBook = useAddressBook()
 
+  const isSavedContact = Boolean(addressBook[watchedValue])
+  // The contact opened for editing by clicking the chip; any other value shows the chip again.
+  const [editingAddress, setEditingAddress] = useState<string>()
+  const isEditing = editingAddress !== undefined && sameAddress(editingAddress, watchedValue)
+
   // A disabled field is a read-only display, so render the readable EthHashInfo instead of the
   // greyed-out input — even when the address isn't in the (source-scoped) address book.
-  const isReadOnly = Boolean(addressBook[watchedValue]) || Boolean(disabled)
+  const isReadOnly = (isSavedContact && !isEditing) || Boolean(disabled)
 
   // Target chain for the addr record (e.g. mainnet for Spaces contacts, otherwise the current Safe).
   // DOMAIN_LOOKUP is hub-only (Mainnet/Sepolia); L2 chain flags are ignored.
@@ -172,33 +179,50 @@ const AddressInput = ({
 
   const inputRef = useRef<HTMLInputElement | null>(null)
   const readOnlyRef = useRef<HTMLDivElement>(null)
-  const focusInputAfterReset = useRef(false)
+  const focusInputWhenShown = useRef(false)
 
   // Chrome drops focus when the focused input turns `visibility: hidden` and restarts Tab from the
   // top of the page (Firefox keeps the position). Hand focus to the chip before styles apply, and
-  // back to the input once the chip is cleared.
+  // back to the input once the chip is opened for editing or cleared.
   useLayoutEffect(() => {
     if (isReadOnly && document.activeElement === inputRef.current) {
       readOnlyRef.current?.focus()
-    } else if (!isReadOnly && focusInputAfterReset.current) {
-      focusInputAfterReset.current = false
+    } else if (!isReadOnly && focusInputWhenShown.current) {
+      focusInputWhenShown.current = false
       inputRef.current?.focus()
+      inputRef.current?.select()
     }
   }, [isReadOnly])
 
+  const canEditChip = isSavedContact && !disabled
+
+  const startEditing = () => {
+    if (!canEditChip) return
+    focusInputWhenShown.current = true
+    setEditingAddress(watchedValue)
+    onEdit?.()
+  }
+
   const resetName = () => {
-    if (!disabled && addressBook[watchedValue]) {
-      focusInputAfterReset.current = true
-      setValue(name, '')
-      onReset?.()
-    }
+    if (!canEditChip) return
+    focusInputWhenShown.current = true
+    setEditingAddress(undefined)
+    setValue(name, '')
+    onReset?.()
   }
 
   const onReadOnlyKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (['Enter', ' ', 'Backspace', 'Delete'].includes(event.key)) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      startEditing()
+    } else if (event.key === 'Backspace' || event.key === 'Delete') {
       event.preventDefault()
       resetName()
     }
+  }
+
+  const onWrapperBlur = (event: FocusEvent<HTMLDivElement>) => {
+    if (!event.currentTarget.contains(event.relatedTarget)) setEditingAddress(undefined)
   }
 
   const labelText =
@@ -242,7 +266,7 @@ const AddressInput = ({
       <div
         data-testid={dataTestId}
         className={classnames(css.inputWrapper, { [css.error]: !!error, [css.readOnly]: isReadOnly })}
-        onClick={resetName}
+        onBlur={onWrapperBlur}
       >
         {isReadOnly ? (
           <div
@@ -250,6 +274,7 @@ const AddressInput = ({
             className="min-w-0 flex-1 outline-none"
             role={disabled ? undefined : 'button'}
             tabIndex={disabled ? undefined : 0}
+            onClick={disabled ? undefined : startEditing}
             onKeyDown={disabled ? undefined : onReadOnlyKeyDown}
           >
             <AddressInputReadOnly address={watchedValue} showPrefix={showPrefix} chainId={chain?.chainId} />
@@ -276,6 +301,10 @@ const AddressInput = ({
           ref={(node: HTMLInputElement | null) => {
             registerProps.ref(node)
             inputRef.current = node
+          }}
+          onChange={(event) => {
+            setEditingAddress(undefined)
+            return registerProps.onChange(event)
           }}
           id={id}
           className={classnames(css.input, InputProps?.className)}

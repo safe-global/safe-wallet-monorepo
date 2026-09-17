@@ -456,7 +456,7 @@ describe('AddressInput tests', () => {
     await waitFor(() => expect(utils.getByTestId('address-book-recipient')).toBeInTheDocument())
   })
 
-  it('should clear the input on click if the address is in the address book and not disabled', async () => {
+  it('should keep the address and switch to editing when the contact chip is clicked', async () => {
     const mockChainId = '11155111'
     const mockSafeName = 'Test Safe'
     const mockAB = { [TEST_ADDRESS_A]: mockSafeName }
@@ -489,10 +489,12 @@ describe('AddressInput tests', () => {
     })
 
     act(() => {
-      userEvent.click(input)
+      fireEvent.click(utils.getByRole('button', { name: new RegExp(mockSafeName) }))
     })
 
-    await waitFor(() => expect(utils.getByRole('textbox')).toHaveValue(''))
+    expect(utils.queryByTestId('address-book-recipient')).not.toBeInTheDocument()
+    expect(utils.getByRole('textbox')).toHaveValue(TEST_ADDRESS_A)
+    expect(input).toHaveFocus()
   })
 
   it('should not clear the input on click if the address is in the address book and the input is disabled', async () => {
@@ -571,7 +573,7 @@ describe('AddressInput tests', () => {
       expect(chip).toHaveFocus()
     })
 
-    it('clears the address and refocuses the input on Enter', () => {
+    it('opens the kept address for editing and refocuses the input on Enter', () => {
       mockSavedContact()
       const { input, utils } = setup(TEST_ADDRESS_A)
 
@@ -582,8 +584,41 @@ describe('AddressInput tests', () => {
         fireEvent.keyDown(chip, { key: 'Enter' })
       })
 
+      expect(utils.queryByTestId('address-book-recipient')).not.toBeInTheDocument()
+      expect(utils.getByRole('textbox')).toHaveValue(TEST_ADDRESS_A)
+      expect(input).toHaveFocus()
+    })
+
+    it('clears the address and refocuses the input on Backspace', () => {
+      mockSavedContact()
+      const { input, utils } = setup(TEST_ADDRESS_A)
+
+      const chip = utils.getByRole('button', { name: new RegExp(mockSafeName) })
+
+      act(() => {
+        chip.focus()
+        fireEvent.keyDown(chip, { key: 'Backspace' })
+      })
+
       expect(utils.getByRole('textbox')).toHaveValue('')
       expect(input).toHaveFocus()
+    })
+
+    it('shows the chip again when focus leaves the field while editing', () => {
+      mockSavedContact()
+      const { input, utils } = setup(TEST_ADDRESS_A)
+
+      act(() => {
+        fireEvent.click(utils.getByRole('button', { name: new RegExp(mockSafeName) }))
+      })
+      expect(utils.queryByTestId('address-book-recipient')).not.toBeInTheDocument()
+
+      act(() => {
+        fireEvent.blur(input, { relatedTarget: utils.getByRole('button', { name: 'Submit' }) })
+      })
+
+      expect(utils.getByTestId('address-book-recipient')).toBeInTheDocument()
+      expect(utils.getByRole('textbox')).toHaveValue(TEST_ADDRESS_A)
     })
 
     it('does not add a tab stop for a disabled read-only address', async () => {

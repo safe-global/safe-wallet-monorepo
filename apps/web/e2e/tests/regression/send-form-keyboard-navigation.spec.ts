@@ -79,11 +79,14 @@ test.describe('Send tokens — keyboard navigation', { tag: '@regression' }, () 
     await safePage.keyboard.press('Tab')
     await expect(next).toBeFocused()
 
-    // Shift+Tab back to the chip and Enter reopens the recipient for editing.
+    // Shift+Tab back to the chip; Enter reopens the recipient for editing with the address kept and
+    // the other contacts on offer.
     for (let i = 0; i < 5; i++) await safePage.keyboard.press('Shift+Tab')
     await expect(chip).toBeFocused()
     await safePage.keyboard.press('Enter')
     await expect(recipient).toBeFocused()
-    await expect(recipient).toHaveValue('')
+    await expect(recipient).toHaveValue(new RegExp(FIRST_CONTACT.address, 'i'))
+    await expect(recipient).toHaveAttribute('aria-expanded', 'true')
+    await expect(safePage.getByTestId('address-item').filter({ hasText: SECOND_CONTACT.name })).toBeVisible()
   })
 })

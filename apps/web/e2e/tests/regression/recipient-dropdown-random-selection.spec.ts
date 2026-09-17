@@ -155,13 +155,12 @@ test.describe('Recipient dropdown — selection updates the field', { tag: '@reg
 
     // Select each contact in turn; the field must always reflect the choice.
     for (const address of addresses) {
-      // If a contact is already selected, click its read-only chip to reset back
-      // to the editable (visible) combobox — clicking the chip triggers the
-      // field's resetName, which clears the value and re-shows the input.
+      // If a contact is already selected, click its read-only chip to reopen the
+      // editable combobox — the address stays and the dropdown lists every contact.
       if (await selectedChip.isVisible().catch(() => false)) {
         await selectedChip.click()
       }
-      await combo.click() // field is empty + closed here, so this opens the dropdown
+      await combo.click() // keeps the dropdown open (or opens it on an empty field)
 
       const option = safePage.getByTestId('address-item').filter({ hasText: address }).first()
       await expect(option).toBeVisible()
