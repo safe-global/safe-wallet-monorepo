@@ -34,7 +34,7 @@ const WORKSPACE_CONTACTS = [
 ]
 
 // Contacts that should appear when sending on Sepolia, and those that must not.
-const VISIBLE_ON_SEPOLIA = ['Local Sepolia', 'WS Sepolia Only', 'WS Multichain', 'WS Mainnet Only', 'WS Polygon Only']
+const VISIBLE_ON_SEPOLIA = ['Local Sepolia', 'WS Sepolia Only', 'WS Multichain']
 const HIDDEN_ON_SEPOLIA = ['Local Mainnet']
 
 const SPACE = {
