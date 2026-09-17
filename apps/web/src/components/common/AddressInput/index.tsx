@@ -237,8 +237,9 @@ const AddressInput = ({
 
     setValueAs: transformAddressValue,
 
-    validate: async () => {
-      const value = rawValueRef.current
+    // Validate the stored value, not the last typed text: a pick from the address book or an ENS
+    // resolution sets the value programmatically and must not be judged by what was typed before.
+    validate: async (value: string) => {
       if (!value) return
 
       const { address } = parsePrefixedAddress(value)

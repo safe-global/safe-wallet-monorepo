@@ -266,6 +266,21 @@ describe('TokenAmountInput', () => {
     })
   })
 
+  describe('Error display timing', () => {
+    it('holds an amount error back while typing but clears it at once', async () => {
+      render(<TokenSwitchTestWrapper />)
+      const amountField = screen.getByTestId('token-amount-field')
+
+      await userEvent.type(amountField, '0.')
+      expect(screen.queryByText('The value must be greater than 0')).not.toBeInTheDocument()
+      expect(await screen.findByText('The value must be greater than 0')).toBeInTheDocument()
+
+      await userEvent.type(amountField, '5')
+      expect(screen.queryByText('The value must be greater than 0')).not.toBeInTheDocument()
+      expect(screen.getByText('Amount')).toBeInTheDocument()
+    })
+  })
+
   describe('Submitted values', () => {
     it('keeps the picked token address in the submitted payload', async () => {
       const onSubmit = jest.fn()
@@ -503,13 +518,13 @@ describe('TokenAmountInput', () => {
       )
     }
 
-    it('keeps the typed value neutral while the label goes destructive on an insufficient-funds error', () => {
+    it('keeps the typed value neutral while the label goes destructive on an insufficient-funds error', async () => {
       render(<ErroredWrapper defaultAmount="0.0159" />)
 
       const amountField = screen.getByTestId('token-amount-field')
 
-      // The label swaps in the error message and turns destructive...
-      expect(screen.getByText('Insufficient funds')).toHaveClass('text-destructive')
+      // The label swaps in the error message (after the display debounce) and turns destructive...
+      expect(await screen.findByText('Insufficient funds')).toHaveClass('text-destructive')
       // ...but the typed value stays the normal foreground colour, not red.
       expect(amountField).toHaveDisplayValue('0.0159')
       expect(amountField).toHaveClass('text-foreground')

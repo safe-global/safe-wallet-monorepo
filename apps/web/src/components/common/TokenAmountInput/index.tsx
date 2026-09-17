@@ -1,6 +1,7 @@
 import NumberField from '@/components/common/NumberField'
 import { AutocompleteItem } from '@/components/tx-flow/flows/TokenTransfer/CreateTokenTransfer'
 import { safeFormatUnits, safeParseUnits } from '@safe-global/utils/utils/formatters'
+import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { validateDecimalLength, validateLimitedAmount } from '@safe-global/utils/utils/validation'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -66,7 +67,11 @@ const TokenAmountInput = ({
   const tokenAddress = watchedTokenAddress || defaultTokenAddress || ''
   const watchedAmount = watch(amountField) || ''
 
-  const isAmountError = !!get(errors, amountField)
+  // Hold the label error back while typing (e.g. "0." is briefly invalid), but drop it at once.
+  const amountError = get(errors, amountField)
+  const debouncedAmountError = useDebounce(amountError, 500)
+  const shownAmountError = amountError ? debouncedAmountError : undefined
+  const isAmountError = !!shownAmountError
 
   const fiatValue = useMemo(
     () => computeFiatValue(parseFloat(watchedAmount), selectedToken?.fiatConversion),
@@ -132,7 +137,7 @@ const TokenAmountInput = ({
       <div data-testid="token-amount-section" className="w-full">
         <NumberField
           data-testid="token-amount-field"
-          label={get(errors, amountField)?.message?.toString() || 'Amount'}
+          label={shownAmountError?.message?.toString() || 'Amount'}
           error={isAmountError}
           fullWidth
           inputSize="hero"
