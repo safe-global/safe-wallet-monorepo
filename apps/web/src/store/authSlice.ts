@@ -12,6 +12,7 @@ type AuthPayload = {
   isStoreHydrated: boolean
   cfSafeSynced: boolean
   isOidcLoginPending: boolean
+  isSessionCheckPending: boolean
 }
 
 const initialState: AuthPayload = {
@@ -20,6 +21,7 @@ const initialState: AuthPayload = {
   isStoreHydrated: false,
   cfSafeSynced: false,
   isOidcLoginPending: false,
+  isSessionCheckPending: false,
 }
 
 export const authSlice = createSlice({
@@ -28,12 +30,14 @@ export const authSlice = createSlice({
   reducers: {
     setAuthenticated: (state, { payload }: PayloadAction<AuthPayload['sessionExpiresAt']>) => {
       state.sessionExpiresAt = payload
+      state.isSessionCheckPending = false
     },
 
     setUnauthenticated: (state) => {
       state.sessionExpiresAt = null
       // Reset so CF sync re-runs on next sign-in
       state.cfSafeSynced = false
+      state.isSessionCheckPending = false
     },
 
     setLastUsedSpace: (state, { payload }: PayloadAction<AuthPayload['lastUsedSpace']>) => {
@@ -47,11 +51,21 @@ export const authSlice = createSlice({
     setIsOidcLoginPending: (state, { payload }: PayloadAction<boolean>) => {
       state.isOidcLoginPending = payload
     },
+
+    setSessionCheckPending: (state, { payload }: PayloadAction<boolean>) => {
+      state.isSessionCheckPending = payload
+    },
   },
 })
 
-export const { setAuthenticated, setUnauthenticated, setLastUsedSpace, setCfSafeSynced, setIsOidcLoginPending } =
-  authSlice.actions
+export const {
+  setAuthenticated,
+  setUnauthenticated,
+  setLastUsedSpace,
+  setCfSafeSynced,
+  setIsOidcLoginPending,
+  setSessionCheckPending,
+} = authSlice.actions
 
 export const isAuthenticated = (state: RootState): boolean => {
   return !!state.auth.sessionExpiresAt && state.auth.sessionExpiresAt > Date.now()
@@ -71,6 +85,10 @@ export const selectCfSafeSynced = (state: RootState): boolean => {
 
 export const selectIsOidcLoginPending = (state: RootState): boolean => {
   return state.auth.isOidcLoginPending
+}
+
+export const selectIsSessionCheckPending = (state: RootState): boolean => {
+  return state.auth.isSessionCheckPending
 }
 
 export const authListener = (listenerMiddleware: typeof listenerMiddlewareInstance) => {
