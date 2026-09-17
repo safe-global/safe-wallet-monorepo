@@ -30,12 +30,7 @@ export const isSessionForbiddenRejection = (action: UnknownAction, state: RootSt
   return url !== undefined && isCredentialRoute(url)
 }
 
-/**
- * A 403 from a credentialed CGW route while the store says "signed in" means the
- * cookie may be gone. Confirm with /v1/auth/me and, if that is forbidden too,
- * expire the session the same way the boot-time probe does so the router guard
- * redirects to the welcome page without a page refresh.
- */
+// A single 403 is not proof the cookie is gone, so /v1/auth/me is asked before the session is expired.
 export const forbiddenSessionListener = (listenerMiddleware: typeof listenerMiddlewareInstance) => {
   listenerMiddleware.startListening({
     matcher: isRejectedWithValue(),
@@ -43,12 +38,14 @@ export const forbiddenSessionListener = (listenerMiddleware: typeof listenerMidd
       if (!isSessionForbiddenRejection(action, getState())) return
 
       unsubscribe()
+      const probedSession = getState().auth.sessionExpiresAt
       dispatch(setSessionCheckPending(true))
       const probe = dispatch(authApi.endpoints.authGetMeV1.initiate(undefined, { forceRefetch: true }))
       try {
         await probe.unwrap()
       } catch (error) {
-        if (isForbidden(error)) dispatch(expireSession(window.location.pathname))
+        const isSameSession = getState().auth.sessionExpiresAt === probedSession
+        if (isForbidden(error) && isSameSession) dispatch(expireSession(window.location.pathname))
       } finally {
         probe.unsubscribe()
         dispatch(setSessionCheckPending(false))

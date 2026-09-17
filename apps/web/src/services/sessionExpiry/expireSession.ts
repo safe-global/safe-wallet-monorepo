@@ -13,10 +13,7 @@ export const isForbidden = (error: unknown): error is FetchBaseQueryError => get
 export const isSpacesRoute = (pathname: string): boolean =>
   pathname === AppRoutes.welcome.spaces || pathname === AppRoutes.spaces.index || pathname.startsWith('/spaces/')
 
-/**
- * Clears Redux auth state; the router guard then redirects protected routes to
- * the welcome page. The toast is shown only on workspaces routes.
- */
+// Clearing auth is what makes the router guard redirect; the toast is only shown on workspaces routes.
 export const expireSession =
   (pathname: string): AppThunk =>
   (dispatch) => {
