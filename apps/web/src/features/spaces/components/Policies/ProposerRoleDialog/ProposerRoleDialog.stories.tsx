@@ -127,6 +127,11 @@ export const NoWallet: Story = {
   args: { accounts: [], hasWallet: false },
 }
 
+/** The Workspace has Safes, but none this wallet is a signer or proposer on. */
+export const NoEligibleAccounts: Story = {
+  args: { accounts: [] },
+}
+
 export const Submitting: Story = {
   args: {
     safeAccount: treasury.id,
