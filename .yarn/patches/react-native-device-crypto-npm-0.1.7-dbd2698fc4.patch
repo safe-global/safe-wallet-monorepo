@@ -123,3 +123,161 @@ index 03fd79e8a389f33a2841ecf0e177ffc9ea01b78c..d903b5dc4b0110dab9a8c1a648d34920
              }
              break;
          }
+diff --git a/ios/DeviceCrypto.m b/ios/DeviceCrypto.m
+index 1c05886476b28afcb44eb8fc36f5141593d41b0e..1eda77f9daa6c5fb74a0225ea427c72d1f5cfe5c 100644
+--- a/ios/DeviceCrypto.m
++++ b/ios/DeviceCrypto.m
+@@ -143,9 +143,11 @@ - (bool) deletePublicKey:(nonnull NSData*) alias
+     (id)kSecAttrApplicationTag:  (id)alias,
+   };
+   OSStatus status = SecItemDelete((CFDictionaryRef) query);
+-  while (status == errSecDuplicateItem)
+-  {
+-    status = SecItemDelete((CFDictionaryRef) query);
++  if (status != errSecSuccess && status != errSecItemNotFound) {
++    NSError *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil];
++    @throw [NSException exceptionWithName:@"E_DELETE_PUBLIC_KEY"
++                                  reason:[NSString stringWithFormat:@"Status: %i", (int)status]
++                                userInfo:@{@"error": error}];
+   }
+   return true;
+ }
+@@ -171,8 +173,12 @@ - (SecKeyRef) getPrivateKeyRef:(nonnull NSData*)alias withMessage:(NSString *)au
+     return (SecKeyRef)resultTypeRef;
+   else if (status == errSecItemNotFound)
+     return nil;
+-  else
+-    [NSException raise:@"E1715: Unexpected OSStatus" format:@"Status: %i", (int)status];
++  else {
++    NSError *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil];
++    @throw [NSException exceptionWithName:@"E1715: Unexpected OSStatus"
++                                  reason:[NSString stringWithFormat:@"Status: %i", (int)status]
++                                userInfo:@{@"error": error}];
++  }
+   return nil;
+ }
+ 
+@@ -185,9 +191,11 @@ - (bool) deletePrivateKey:(nonnull NSData*) alias
+     (id)kSecAttrApplicationTag:  (id)alias,
+   };
+   OSStatus status = SecItemDelete((CFDictionaryRef) query);
+-  while (status == errSecDuplicateItem)
+-  {
+-    status = SecItemDelete((CFDictionaryRef) query);
++  if (status != errSecSuccess && status != errSecItemNotFound) {
++    NSError *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil];
++    @throw [NSException exceptionWithName:@"E_DELETE_PRIVATE_KEY"
++                                  reason:[NSString stringWithFormat:@"Status: %i", (int)status]
++                                userInfo:@{@"error": error}];
+   }
+   return true;
+ }
+@@ -244,7 +252,10 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+   SecAccessControlRef acRef = SecAccessControlCreateWithFlags(kCFAllocatorDefault, keyAccessLevel, acFlag, &error);
+   
+   if (!acRef) {
+-    [NSException raise:@"E1711" format:@"Could not create access control."];
++    NSError *nativeError = CFBridgingRelease(error);
++    @throw [NSException exceptionWithName:@"E1711"
++                                  reason:[NSString stringWithFormat:@"Could not create access control: %@", nativeError]
++                                userInfo:nativeError ? @{@"error": nativeError} : nil];
+   }
+   
+   NSDictionary* attributes =
+@@ -266,7 +277,10 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+   
+   privateKeyRef = SecKeyCreateRandomKey((__bridge CFDictionaryRef)attributes, &error);
+   if (!privateKeyRef){
+-    [NSException raise:@"E1712" format:@"SecKeyCreate could not create key."];
++    NSError *nativeError = CFBridgingRelease(error);
++    @throw [NSException exceptionWithName:@"E1712"
++                                  reason:[NSString stringWithFormat:@"SecKeyCreate could not create key: %@", nativeError]
++                                userInfo:nativeError ? @{@"error": nativeError} : nil];
+   }
+   SecKeyRef publicKeyRef = SecKeyCopyPublicKey(privateKeyRef);
+   [self savePublicKeyFromRef:publicKeyRef withAlias:alias];
+@@ -288,16 +302,19 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+       resolve(publicKey != nil ? @(YES) : @(NO));
+     }
+   } @catch(NSException *err) {
+-    reject(err.name, err.reason, nil);
++    reject(err.name, err.reason, err.userInfo[@"error"]);
+   }
+ }
+ 
+ RCT_EXPORT_METHOD(deleteKey:(nonnull NSData *)alias resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+ {
+-  [self deletePublicKey:alias];
+-  [self deletePrivateKey:alias];
+-  
+-  return resolve(@(YES));
++  @try {
++    [self deletePrivateKey:alias];
++    [self deletePublicKey:alias];
++    resolve(@(YES));
++  } @catch(NSException *err) {
++    reject(err.name, err.reason, err.userInfo[@"error"]);
++  }
+ }
+ 
+ RCT_EXPORT_METHOD(sign:(nonnull NSData *)alias withPlainText:(nonnull NSString *)plainText withOptions:(nonnull NSDictionary *)options resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+@@ -383,7 +400,10 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+                                                                      &aerr));
+     
+     if (!clearText || aerr) {
+-      [NSException raise:@"E1760 - Decryption error." format:@"%@", aerr];
++      NSError *nativeError = CFBridgingRelease(aerr);
++      @throw [NSException exceptionWithName:@"E1760 - Decryption error."
++                                    reason:[NSString stringWithFormat:@"%@", nativeError]
++                                  userInfo:nativeError ? @{@"error": nativeError} : nil];
+     }
+     
+     if (privateKeyRef) { CFRelease(privateKeyRef); }
+@@ -391,7 +411,7 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+     
+     resolve([[NSString alloc] initWithData:clearText   encoding:NSUTF8StringEncoding]);
+   } @catch(NSException *err) {
+-    reject(err.name, err.description, nil);
++    reject(err.name, err.description, err.userInfo[@"error"]);
+   }
+ }
+ 
+diff --git a/lib/commonjs/index.js b/lib/commonjs/index.js
+index d02926abfdf1d0cbeea5ab109c3239d686eb5d69..7bb96f6622b41fc5270dc64144bcf60ab3704354 100644
+--- a/lib/commonjs/index.js
++++ b/lib/commonjs/index.js
+@@ -81,7 +81,7 @@ const DeviceCrypto = {
+    * @return {Promise} Resolves to `true` when successful
+    */
+   async deleteKey(alias) {
+-    return Boolean(RNDeviceCrypto.deleteKey(alias));
++    return Boolean(await RNDeviceCrypto.deleteKey(alias));
+   },
+ 
+   /**
+diff --git a/lib/module/index.js b/lib/module/index.js
+index d30feaf62eb060b99d274606ff52eb365884d808..b9d890cee5491093b3c9fc01945eaa7d754e5686 100644
+--- a/lib/module/index.js
++++ b/lib/module/index.js
+@@ -69,7 +69,7 @@ const DeviceCrypto = {
+    * @return {Promise} Resolves to `true` when successful
+    */
+   async deleteKey(alias) {
+-    return Boolean(RNDeviceCrypto.deleteKey(alias));
++    return Boolean(await RNDeviceCrypto.deleteKey(alias));
+   },
+ 
+   /**
+diff --git a/src/index.ts b/src/index.ts
+index d19d2d3840fafe69d02bf407603d37824a3adcb5..94ade5fee2148ce261db1c0da4484253c97d665d 100644
+--- a/src/index.ts
++++ b/src/index.ts
+@@ -85,7 +85,7 @@ const DeviceCrypto = {
+    * @return {Promise} Resolves to `true` when successful
+    */
+   async deleteKey(alias: string): Promise<boolean> {
+-    return Boolean(RNDeviceCrypto.deleteKey(alias));
++    return Boolean(await RNDeviceCrypto.deleteKey(alias));
+   },
+ 
+   /**

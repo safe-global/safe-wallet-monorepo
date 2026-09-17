@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { KeyStorageService } from './key-storage.service'
-import { BiometryInvalidationError } from './errors'
+import { BiometryInvalidationError, KeyStorageError } from './errors'
 import DeviceCrypto from 'react-native-device-crypto'
 import * as Keychain from 'react-native-keychain'
 import DeviceInfo from 'react-native-device-info'
@@ -16,9 +16,11 @@ describe('KeyStorageService', () => {
   const privateKey = faker.string.hexadecimal({ length: 64, prefix: '0x' })
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    jest.resetAllMocks()
     service = new KeyStorageService()
     ;(Platform.OS as string) = 'ios'
+    mockDeviceCrypto.decrypt.mockResolvedValue(privateKey)
+    mockDeviceCrypto.deleteKey.mockResolvedValue(true)
   })
 
   describe('storePrivateKey', () => {
@@ -200,7 +202,7 @@ describe('KeyStorageService', () => {
         storage: Keychain.STORAGE_TYPE.AES_GCM,
       })
       mockKeychain.resetGenericPassword.mockResolvedValue(true)
-      mockDeviceCrypto.deleteKey.mockResolvedValue(undefined as never)
+      mockDeviceCrypto.deleteKey.mockResolvedValue(true)
 
       await service.removePrivateKey(userId)
 
@@ -210,7 +212,7 @@ describe('KeyStorageService', () => {
 
     it('continues to delete crypto key even if keychain key not found', async () => {
       mockKeychain.getGenericPassword.mockResolvedValue(false)
-      mockDeviceCrypto.deleteKey.mockResolvedValue(undefined as never)
+      mockDeviceCrypto.deleteKey.mockResolvedValue(true)
 
       await service.removePrivateKey(userId)
 
@@ -220,7 +222,7 @@ describe('KeyStorageService', () => {
 
     it('handles keychain authentication failure gracefully', async () => {
       mockKeychain.getGenericPassword.mockRejectedValue(new Error('Auth failed'))
-      mockDeviceCrypto.deleteKey.mockResolvedValue(undefined as never)
+      mockDeviceCrypto.deleteKey.mockResolvedValue(true)
 
       await service.removePrivateKey(userId)
 
@@ -254,7 +256,7 @@ describe('KeyStorageService', () => {
 
       mockKeychain.getGenericPassword.mockResolvedValue(false)
       mockKeychain.resetGenericPassword.mockResolvedValue(true)
-      mockDeviceCrypto.deleteKey.mockResolvedValue(undefined as never)
+      mockDeviceCrypto.deleteKey.mockResolvedValue(true)
       mockKeychain.setGenericPassword.mockResolvedValue({
         service: 'test-service',
         storage: Keychain.STORAGE_TYPE.AES_GCM,
@@ -266,10 +268,7 @@ describe('KeyStorageService', () => {
       expect(mockDeviceCrypto.deleteKey).toHaveBeenCalled()
     })
 
-    it('retries storage when iOS post-store decrypt probe reveals orphan SE key', async () => {
-      // iOS Quick Start migration leaves an orphan SE asymmetric key reference
-      // where encrypt (public-half) succeeds but decrypt (private-half) fails.
-      // The probe should surface this and trigger handleKeyInvalidation.
+    it('retries storage when iOS verification reveals an orphan SE key', async () => {
       ;(Platform.OS as string) = 'ios'
       mockDeviceInfo.isEmulator.mockResolvedValue(false)
       mockDeviceCrypto.getOrCreateAsymmetricKey.mockResolvedValue('key-name')
@@ -277,11 +276,11 @@ describe('KeyStorageService', () => {
       mockDeviceCrypto.encrypt.mockResolvedValue({ encryptedText: 'encrypted', iv: 'iv-value' })
       mockDeviceCrypto.decrypt
         .mockRejectedValueOnce(new Error('Domain=CryptoTokenKit Code=-3 ... AKSError=-536362999'))
-        .mockResolvedValueOnce('decrypted')
+        .mockResolvedValueOnce(privateKey)
 
       mockKeychain.getGenericPassword.mockResolvedValue(false)
       mockKeychain.resetGenericPassword.mockResolvedValue(true)
-      mockDeviceCrypto.deleteKey.mockResolvedValue(undefined as never)
+      mockDeviceCrypto.deleteKey.mockResolvedValue(true)
       mockKeychain.setGenericPassword.mockResolvedValue({
         service: 'test-service',
         storage: Keychain.STORAGE_TYPE.AES_GCM,
@@ -292,6 +291,7 @@ describe('KeyStorageService', () => {
       expect(mockDeviceCrypto.encrypt).toHaveBeenCalledTimes(2)
       expect(mockDeviceCrypto.decrypt).toHaveBeenCalledTimes(2)
       expect(mockDeviceCrypto.deleteKey).toHaveBeenCalled()
+      expect(mockKeychain.setGenericPassword).toHaveBeenCalledTimes(1)
     })
 
     it('retries storage after key invalidation on Android (KeyPermanentlyInvalidatedException)', async () => {
@@ -304,7 +304,7 @@ describe('KeyStorageService', () => {
 
       mockKeychain.getGenericPassword.mockResolvedValue(false)
       mockKeychain.resetGenericPassword.mockResolvedValue(true)
-      mockDeviceCrypto.deleteKey.mockResolvedValue(undefined as never)
+      mockDeviceCrypto.deleteKey.mockResolvedValue(true)
       mockKeychain.setGenericPassword.mockResolvedValue({
         service: 'test-service',
         storage: Keychain.STORAGE_TYPE.AES_GCM,
@@ -314,6 +314,119 @@ describe('KeyStorageService', () => {
 
       expect(mockDeviceCrypto.encrypt).toHaveBeenCalledTimes(2)
       expect(mockDeviceCrypto.deleteKey).toHaveBeenCalled()
+    })
+  })
+
+  describe('import recovery', () => {
+    beforeEach(() => {
+      mockDeviceInfo.isEmulator.mockResolvedValue(false)
+      mockDeviceCrypto.getOrCreateAsymmetricKey.mockResolvedValue('key-name')
+      mockDeviceCrypto.encrypt.mockResolvedValue({ encryptedText: 'encrypted', iv: 'iv-value' })
+    })
+
+    it('recovers from invalidation during key lookup and retrieves the re-imported key', async () => {
+      mockDeviceCrypto.getOrCreateAsymmetricKey.mockRejectedValueOnce(new Error('AKSError=-536362999'))
+      mockKeychain.setGenericPassword.mockImplementation(async (_username, password) => {
+        mockKeychain.getGenericPassword.mockResolvedValue({
+          username: 'signer_address',
+          password,
+          service: 'test-service',
+          storage: Keychain.STORAGE_TYPE.AES_GCM,
+        })
+        return { service: 'test-service', storage: Keychain.STORAGE_TYPE.AES_GCM }
+      })
+
+      await service.storePrivateKey(userId, privateKey)
+
+      expect(mockDeviceCrypto.getOrCreateAsymmetricKey).toHaveBeenCalledTimes(2)
+      expect(mockDeviceCrypto.deleteKey).toHaveBeenCalledTimes(1)
+      expect(mockKeychain.resetGenericPassword).not.toHaveBeenCalled()
+      await expect(service.getPrivateKey(userId)).resolves.toBe(privateKey)
+    })
+
+    it('waits for deletion before recreating the wrapping key', async () => {
+      let finishDeletion!: (result: boolean) => void
+      let deletionStarted!: () => void
+      const started = new Promise<void>((resolve) => {
+        deletionStarted = resolve
+      })
+      mockDeviceCrypto.getOrCreateAsymmetricKey.mockRejectedValueOnce(new Error('AKSError=-536362999'))
+      mockDeviceCrypto.deleteKey.mockImplementation(() => {
+        deletionStarted()
+        return new Promise<boolean>((resolve) => {
+          finishDeletion = resolve
+        })
+      })
+
+      const storing = service.storePrivateKey(userId, privateKey)
+      await started
+      expect(mockDeviceCrypto.getOrCreateAsymmetricKey).toHaveBeenCalledTimes(1)
+      expect(mockKeychain.setGenericPassword).not.toHaveBeenCalled()
+
+      finishDeletion(true)
+      await storing
+      expect(mockDeviceCrypto.getOrCreateAsymmetricKey).toHaveBeenCalledTimes(2)
+    })
+
+    it.each(['reject', 'false'])('does not retry if deletion returns %s', async (failure) => {
+      mockDeviceCrypto.getOrCreateAsymmetricKey.mockRejectedValueOnce(new Error('AKSError=-536362999'))
+      if (failure === 'reject') {
+        mockDeviceCrypto.deleteKey.mockRejectedValueOnce(new Error('Status: -25293'))
+      } else {
+        mockDeviceCrypto.deleteKey.mockResolvedValueOnce(false)
+      }
+
+      await expect(service.storePrivateKey(userId, privateKey)).rejects.toBeInstanceOf(KeyStorageError)
+
+      expect(mockDeviceCrypto.getOrCreateAsymmetricKey).toHaveBeenCalledTimes(1)
+      expect(mockKeychain.setGenericPassword).not.toHaveBeenCalled()
+      expect(mockKeychain.resetGenericPassword).not.toHaveBeenCalled()
+    })
+
+    it('stops after one recovery attempt and preserves the native cause', async () => {
+      const nativeError = Object.assign(new Error('AKSError=-536362999'), { code: 'E1712' })
+      mockDeviceCrypto.getOrCreateAsymmetricKey.mockRejectedValue(nativeError)
+
+      await expect(service.storePrivateKey(userId, privateKey)).rejects.toMatchObject({ cause: nativeError })
+
+      expect(mockDeviceCrypto.getOrCreateAsymmetricKey).toHaveBeenCalledTimes(2)
+      expect(mockDeviceCrypto.deleteKey).toHaveBeenCalledTimes(1)
+      expect(mockKeychain.setGenericPassword).not.toHaveBeenCalled()
+    })
+
+    it.each([
+      'Status: -25293',
+      'OSStatus error -25293',
+      'Status: -128',
+      'LAErrorDomain Code=-2',
+      'LAErrorDomain Code=-8',
+      'LAErrorDomain Code=-7',
+      'The device cannot meet requirements. No biometry has been enrolled.',
+    ])('preserves storage on authentication failure: %s', async (message) => {
+      mockDeviceCrypto.decrypt.mockRejectedValueOnce(new Error(message))
+
+      await expect(service.storePrivateKey(userId, privateKey)).rejects.toBeInstanceOf(KeyStorageError)
+
+      expect(mockDeviceCrypto.deleteKey).not.toHaveBeenCalled()
+      expect(mockKeychain.resetGenericPassword).not.toHaveBeenCalled()
+      expect(mockKeychain.setGenericPassword).not.toHaveBeenCalled()
+    })
+
+    it('does not persist or delete keys when verification returns a different value', async () => {
+      mockDeviceCrypto.decrypt.mockResolvedValueOnce('incorrect')
+
+      await expect(service.storePrivateKey(userId, privateKey)).rejects.toThrow('Failed to store private key')
+
+      expect(mockKeychain.setGenericPassword).not.toHaveBeenCalled()
+      expect(mockDeviceCrypto.deleteKey).not.toHaveBeenCalled()
+    })
+
+    it('does not delete the wrapping key when persistence fails', async () => {
+      mockKeychain.setGenericPassword.mockRejectedValueOnce(new Error('Storage unavailable'))
+
+      await expect(service.storePrivateKey(userId, privateKey)).rejects.toThrow('Failed to store private key')
+
+      expect(mockDeviceCrypto.deleteKey).not.toHaveBeenCalled()
     })
   })
 

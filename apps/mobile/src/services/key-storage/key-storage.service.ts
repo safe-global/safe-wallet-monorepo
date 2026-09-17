@@ -3,7 +3,7 @@ import * as Keychain from 'react-native-keychain'
 import DeviceInfo from 'react-native-device-info'
 import { DdRum, ErrorSource } from 'expo-datadog'
 import { IKeyStorageService, PrivateKeyStorageOptions } from './types'
-import { BiometryInvalidationError, isBiometryInvalidationError } from './errors'
+import { BiometryInvalidationError, isBiometryInvalidationError, KeyStorageError } from './errors'
 import Logger from '@/src/utils/logger'
 import { Platform } from 'react-native'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
@@ -39,8 +39,7 @@ export class KeyStorageService implements IKeyStorageService {
       const isEmulator = Platform.OS === 'android' ? false : await DeviceInfo.isEmulator()
       await this.storeKey(userId, privateKey, requireAuthentication, isEmulator, 0)
     } catch (err) {
-      Logger.error('Error storing private key:', asError(err).message)
-      throw new Error('Failed to store private key')
+      throw new KeyStorageError(err)
     }
   }
 
@@ -91,36 +90,6 @@ export class KeyStorageService implements IKeyStorageService {
     return `${this.getKeyNameDeviceCrypto(userId)}_encrypted_storage`
   }
 
-  private async getOrCreateKeyIOS(keyName: string, requireAuth: boolean, isEmulator: boolean): Promise<string> {
-    try {
-      await DeviceCrypto.getOrCreateAsymmetricKey(keyName, {
-        accessLevel: requireAuth ? (isEmulator ? 1 : 2) : 1,
-        invalidateOnNewBiometry: requireAuth,
-      })
-
-      return keyName
-    } catch (error) {
-      Logger.error('Error creating key:', asError(error).message)
-      throw new Error('Failed to create encryption key')
-    }
-  }
-
-  /**
-   * The android implementation of the device-crypto diverges from the iOS implementation
-   * On Android, the encrypt function expects a symmetric key, while on iOS it expects an asymmetric key.
-   */
-  private async getOrCreateKeyAndroid(keyName: string, requireAuth: boolean, isEmulator: boolean): Promise<void> {
-    try {
-      await DeviceCrypto.getOrCreateSymmetricKey(keyName, {
-        accessLevel: requireAuth ? (isEmulator ? 1 : 2) : 1,
-        invalidateOnNewBiometry: requireAuth,
-      })
-    } catch (error) {
-      Logger.error('Error creating symmetric encryption key:', asError(error).message)
-      throw new Error('Failed to create symmetric key')
-    }
-  }
-
   private async storeKey(
     userId: string,
     privateKey: string,
@@ -130,15 +99,37 @@ export class KeyStorageService implements IKeyStorageService {
   ): Promise<void> {
     const keyName = this.getKeyNameDeviceCrypto(userId)
 
-    if (Platform.OS === 'android') {
-      await this.getOrCreateKeyAndroid(keyName, requireAuth, isEmulator)
-    } else {
-      await this.getOrCreateKeyIOS(keyName, requireAuth, isEmulator)
-    }
+    let operation = 'create'
 
     try {
+      const options = {
+        accessLevel: requireAuth ? (isEmulator ? 1 : 2) : 1,
+        invalidateOnNewBiometry: requireAuth,
+      }
+      if (Platform.OS === 'android') {
+        await DeviceCrypto.getOrCreateSymmetricKey(keyName, options)
+      } else {
+        await DeviceCrypto.getOrCreateAsymmetricKey(keyName, options)
+      }
+
+      operation = 'encrypt'
       const encryptedPrivateKey = await DeviceCrypto.encrypt(keyName, privateKey, this.BIOMETRIC_PROMPTS.SAVE)
 
+      // iOS encryption uses the public key, so verify the private wrapping key before persisting.
+      if (Platform.OS === 'ios') {
+        operation = 'verify'
+        const decryptedPrivateKey = await DeviceCrypto.decrypt(
+          keyName,
+          encryptedPrivateKey.encryptedText,
+          encryptedPrivateKey.iv,
+          this.BIOMETRIC_PROMPTS.SAVE,
+        )
+        if (decryptedPrivateKey !== privateKey) {
+          throw new Error('Private key verification failed')
+        }
+      }
+
+      operation = 'persist'
       await Keychain.setGenericPassword(
         'signer_address',
         JSON.stringify({
@@ -147,30 +138,20 @@ export class KeyStorageService implements IKeyStorageService {
         }),
         { accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY, service: this.getKeyService(userId) },
       )
-
-      // On iOS, encrypt uses only the public-key half of the SE asymmetric key
-      // and never surfaces invalidation. Read the blob back so an orphan SE
-      // private key fails here (where the existing self-heal can recover) rather
-      // than at sign time. Android's symmetric encrypt already required auth and
-      // would have thrown above, so this probe is iOS-only.
-      if (Platform.OS === 'ios') {
-        await DeviceCrypto.decrypt(
-          keyName,
-          encryptedPrivateKey.encryptedText,
-          encryptedPrivateKey.iv,
-          this.BIOMETRIC_PROMPTS.SAVE,
-        )
-      }
     } catch (error) {
+      Logger.error('Error storing private key', {
+        operation,
+        code: error instanceof Error && 'code' in error ? error.code : undefined,
+        platform: Platform.OS,
+      })
       if (attempt === 0 && isBiometryInvalidationError(error)) {
-        try {
-          await this.handleKeyInvalidation(userId, requireAuth)
-          return await this.storeKey(userId, privateKey, requireAuth, isEmulator, attempt + 1)
-        } catch (_error) {
-          throw new Error('Failed to store private key')
+        // Keep the encrypted blob until its replacement has passed verification.
+        if (!(await DeviceCrypto.deleteKey(keyName))) {
+          throw new Error('Failed to remove invalidated encryption key')
         }
+        return await this.storeKey(userId, privateKey, requireAuth, isEmulator, attempt + 1)
       }
-      throw new Error('Failed to store private key')
+      throw error
     }
   }
 
@@ -196,11 +177,6 @@ export class KeyStorageService implements IKeyStorageService {
       this.BIOMETRIC_PROMPTS.STANDARD,
     )
     return decryptedPrivateKey
-  }
-
-  private async handleKeyInvalidation(userId: string, requireAuth: boolean): Promise<void> {
-    Logger.warn('Key has been permanently invalidated, removing key')
-    await this.removeKey(userId, requireAuth)
   }
 
   private async removeKey(userId: string, requireAuth: boolean): Promise<void> {
