@@ -115,10 +115,7 @@ const TokenAmountInput = ({
     trigger(deps)
   }, [maxAmount, selectedToken, setValue, amountField, trigger, deps, onMaxClick])
 
-  const handleTokenChange = useCallback(
-    (value: string) => setValue(tokenAddressField, value, { shouldValidate: true }),
-    [setValue, tokenAddressField],
-  )
+  const handleTokenChange = (value: string) => setValue(tokenAddressField, value, { shouldValidate: true })
 
   // The amount survives a token change; its validators close over the new token's decimals and
   // balance only after this render, so re-run them here rather than in the change handler.
