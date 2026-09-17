@@ -68,9 +68,11 @@ const TokenAmountInput = ({
   const watchedAmount = watch(amountField) || ''
 
   // Hold the label error back while typing (e.g. "0." is briefly invalid), but drop it at once.
+  // Each validation run yields a new error object, so the identity check keeps a corrected-then-
+  // broken field from flashing the previous message before the new one has settled.
   const amountError = get(errors, amountField)
   const debouncedAmountError = useDebounce(amountError, 500)
-  const shownAmountError = amountError ? debouncedAmountError : undefined
+  const shownAmountError = amountError && debouncedAmountError === amountError ? amountError : undefined
   const isAmountError = !!shownAmountError
 
   const fiatValue = useMemo(
