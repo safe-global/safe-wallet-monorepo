@@ -1,52 +1,56 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
-import { FormProvider, useForm } from 'react-hook-form'
-import { Info, WalletCards } from 'lucide-react'
 import { fn } from 'storybook/test'
-import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-import AddressBookInput from '@/components/common/AddressBookInput'
-import DialogActions from '@/components/common/DialogActions'
-import ExternalLink from '@/components/common/ExternalLink'
-import NameInput from '@/components/common/NameInput'
-import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@/components/ui/alert'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Typography } from '@/components/ui/typography'
+import ErrorMessage from '@/components/tx/ErrorMessage'
 import { createMockStory } from '@/stories/mocks'
 import { DEFAULT_CHAIN_ID } from '@/config/constants'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
-import SafeAccountSelector from '../SafeAccountSelector'
-import { buildSafeAccountId } from '../SafeAccountSelector/utils'
-import type { SafeAccountEntry, SafeAccountOption } from '../SafeAccountSelector/types'
+import { buildSafeAccountId, groupSafeAccounts } from '../SafeAccountSelector/utils'
+import { isSafeAccountGroup, type SafeAccountEntry, type SafeAccountOption } from '../SafeAccountSelector/types'
 import type { ChainInfo } from '@/features/spaces/types'
+import ProposerRoleDialog from './index'
 
 const ETHEREUM = '1'
+const POLYGON = '137'
 
 const TREASURY = '0xA77De01c5B6f829Cbe4604cF71dDc8C4d608b000'
+const OPS = '0x86753FE4b8E29Ce8A38cDf9559D80E05b00cdBA0'
 const PROPOSER = checksumAddress('0x8675B754342754A30A2AeF474D114d8460bca19b')
 
-const ETHEREUM_CHAIN: ChainInfo = {
-  chainId: ETHEREUM,
-  chainName: 'Ethereum',
-  chainLogoUri: null,
-  shortName: 'eth',
+const CHAINS: Record<string, ChainInfo> = {
+  [ETHEREUM]: { chainId: ETHEREUM, chainName: 'Ethereum', chainLogoUri: null, shortName: 'eth' },
+  [POLYGON]: { chainId: POLYGON, chainName: 'Polygon', chainLogoUri: null, shortName: 'matic' },
 }
 
-const treasury: SafeAccountOption = {
-  id: buildSafeAccountId(ETHEREUM, TREASURY),
-  chainId: ETHEREUM,
-  address: TREASURY,
-  name: 'Treasury',
+const account = (chainId: string, address: string, extra: Partial<SafeAccountOption> = {}): SafeAccountOption => ({
+  id: buildSafeAccountId(chainId, address),
+  chainId,
+  address,
   threshold: 3,
   owners: 5,
   eligibility: 'signer',
-  chain: ETHEREUM_CHAIN,
+  chain: CHAINS[chainId],
   fiatTotal: '123720',
-}
+  ...extra,
+})
 
-const accounts: SafeAccountEntry[] = [treasury]
+const treasury = account(ETHEREUM, TREASURY, { name: 'Treasury' })
+
+const opsChain = (chainId: string, fiatTotal: string) =>
+  account(chainId, OPS, { name: 'Team operations', threshold: 2, owners: 3, fiatTotal })
+
+const [opsEntry] = groupSafeAccounts([opsChain(ETHEREUM, '48210.42'), opsChain(POLYGON, '0')])
+
+if (!isSafeAccountGroup(opsEntry)) throw new Error('Expected the two-chain fixture to group')
+
+const opsGroup = opsEntry
+
+const accounts: SafeAccountEntry[] = [treasury, opsGroup]
+
+const PROPOSER_NAME = 'Test proposer'
 
 /** Resolves the proposer address to a name in the picker, the way a saved contact does in the app. */
-const addressBook = { [DEFAULT_CHAIN_ID]: { [PROPOSER]: 'Nicole' } }
+const addressBook = { [DEFAULT_CHAIN_ID]: { [PROPOSER]: PROPOSER_NAME } }
 
 const setup = createMockStory({
   scenario: 'efSafe',
@@ -55,104 +59,6 @@ const setup = createMockStory({
   shadcn: true,
   store: { addressBook },
 })
-
-type ProposerRoleForm = {
-  proposer: string
-  name: string
-}
-
-/**
- * The proposer-role setup dialog: pick the Safe Account the role applies to, pick the proposer, name
- * it. Composed from the shipped pieces — `SafeAccountSelector` for the account field and
- * `AddressBookInput`/`NameInput` for the proposer fields, as the Settings add-proposer dialog uses them.
- */
-const ProposerRoleDialog = () => {
-  const [safeAccount, setSafeAccount] = useState<string | undefined>(treasury.id)
-
-  const methods = useForm<ProposerRoleForm>({
-    defaultValues: { proposer: PROPOSER, name: '' },
-    mode: 'onChange',
-  })
-
-  return (
-    <Dialog open>
-      <DialogContent padding="none" showCloseButton={false}>
-        <FormProvider {...methods}>
-          <form onSubmit={methods.handleSubmit(fn())}>
-            <DialogHeader>
-              <div className="flex items-center gap-4">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-[var(--color-background-light-hover)]">
-                  <WalletCards className="size-4 text-badge-dot-success" aria-hidden />
-                </div>
-
-                <div className="flex flex-col gap-1">
-                  <DialogTitle className="flex items-center gap-2.5 text-xl leading-6 font-semibold">
-                    Proposer role
-                    <ExternalLink
-                      href={HelpCenterArticle.PROPOSERS}
-                      noIcon
-                      aria-label="Learn more about proposers"
-                      className="flex text-muted-foreground no-underline hover:text-foreground"
-                    >
-                      <Info className="size-4 translate-y-px" aria-hidden />
-                    </ExternalLink>
-                  </DialogTitle>
-
-                  <Typography variant="paragraph-small" color="muted">
-                    Let teammates without signing rights propose transactions.
-                  </Typography>
-                </div>
-              </div>
-            </DialogHeader>
-
-            <div className="flex flex-col gap-6 px-4 pb-4">
-              <Alert variant="info" className="px-3 py-3 *:data-[slot=alert-description]:text-muted-foreground">
-                <AlertSeverityIcon variant="info" />
-                <AlertTitle className="text-sm font-normal">
-                  You are about to grant the ability to propose transactions.
-                </AlertTitle>
-
-                <AlertDescription>
-                  To complete the setup, confirm with a signature from your connected wallet.
-                </AlertDescription>
-              </Alert>
-
-              <SafeAccountSelector
-                accounts={accounts}
-                value={safeAccount}
-                onChange={setSafeAccount}
-                helperText={null}
-              />
-
-              <div className="flex flex-col gap-1">
-                <AddressBookInput name="proposer" label="Proposer" required />
-
-                <Typography variant="paragraph-mini" color="muted">
-                  The beneficiary that will have the ability to propose transactions, publicly visible
-                </Typography>
-              </div>
-
-              <NameInput
-                className="gap-1"
-                name="name"
-                label="Proposer name"
-                placeholder="Type name here"
-                helperText={
-                  <Typography variant="paragraph-mini" color="muted">
-                    Add a nickname for your proposer, it stays private.
-                  </Typography>
-                }
-                inputSize="hero"
-              />
-            </div>
-
-            <DialogActions confirmLabel="Submit" confirmType="submit" className="p-4" />
-          </form>
-        </FormProvider>
-      </DialogContent>
-    </Dialog>
-  )
-}
 
 const meta = {
   title: 'Features/Spaces/Policies/ProposerRoleDialog',
@@ -163,10 +69,77 @@ const meta = {
   },
   decorators: [setup.decorator],
   tags: ['autodocs'],
+  args: {
+    open: true,
+    accounts,
+    onOpenChange: fn(),
+    onSubmit: fn(),
+    onSafeAccountChange: fn(),
+  },
+  render: function ProposerRoleDialogStory(args) {
+    const [safeAccount, setSafeAccount] = useState(args.safeAccount)
+
+    return (
+      <ProposerRoleDialog
+        {...args}
+        safeAccount={safeAccount}
+        onSafeAccountChange={(value) => {
+          args.onSafeAccountChange(value)
+          setSafeAccount(value)
+        }}
+      />
+    )
+  },
 } satisfies Meta<typeof ProposerRoleDialog>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Default state: the Treasury account preselected and a known proposer resolved from the address book. */
+/** Nothing picked yet — Submit stays disabled until an account and a valid proposer are set. */
 export const Default: Story = {}
+
+/** Both fields filled, as the design shows them. */
+export const Filled: Story = {
+  args: {
+    safeAccount: treasury.id,
+    defaultValues: { proposer: PROPOSER, name: PROPOSER_NAME },
+  },
+}
+
+/** A multi-chain group in the account picker, alongside the single-chain Safe. */
+export const MultiChainAccount: Story = {
+  args: {
+    safeAccount: opsGroup.accounts[0].id,
+    defaultValues: { proposer: PROPOSER },
+  },
+}
+
+export const AccountsLoading: Story = {
+  args: { accounts: [], accountsLoading: true },
+}
+
+export const AccountsError: Story = {
+  args: { accounts: [], accountsError: true, onAccountsRetry: fn() },
+}
+
+/** No wallet connected: the account picker prompts to connect one. */
+export const NoWallet: Story = {
+  args: { accounts: [], hasWallet: false },
+}
+
+export const Submitting: Story = {
+  args: {
+    safeAccount: treasury.id,
+    defaultValues: { proposer: PROPOSER, name: PROPOSER_NAME },
+    isSubmitting: true,
+  },
+}
+
+/** A failed signature surfaces above the footer without clearing the form. */
+export const WithError: Story = {
+  args: {
+    safeAccount: treasury.id,
+    defaultValues: { proposer: PROPOSER, name: PROPOSER_NAME },
+    errorMessage: <ErrorMessage>Error adding proposer</ErrorMessage>,
+  },
+}
