@@ -24,7 +24,7 @@ export const REMOVE_SPENDER_LABEL = 'Remove spender'
 export const REMOVE_LIMIT_LABEL = 'Remove token limit'
 export const NEXT_LABEL = 'Next'
 
-export const DUPLICATE_SPENDER_ERROR = 'This spender is already in the policy'
+export const DUPLICATE_SPENDER_ERROR = 'This spender is already in the policy. Add the token to their existing card.'
 export const DUPLICATE_TOKEN_ERROR = 'This token already has a limit for this spender'
 
 export const REVIEW_STEP_TITLE = 'Review policy'

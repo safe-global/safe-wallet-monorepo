@@ -26,7 +26,7 @@ export type SpenderCardProps = {
 
 /** One spender with its own limit rows and its own "Add token". Renders inside the form's `FormProvider`. */
 const SpenderCard = ({ spenderIndex, spenderCount, removable, onRemove }: SpenderCardProps): ReactElement => {
-  const { control, getValues } = useFormContext<SpendingLimitPolicyFormValues>()
+  const { control, getValues, watch } = useFormContext<SpendingLimitPolicyFormValues>()
   const { fields, append, remove } = useFieldArray({ control, name: limitsPath(spenderIndex) })
 
   const otherSpenderPaths = useMemo(
@@ -47,6 +47,14 @@ const SpenderCard = ({ spenderIndex, spenderCount, removable, onRemove }: Spende
     [getValues, spenderIndex],
   )
 
+  // Keep the spenders already in the policy out of the suggestions, the way a limit row hides the
+  // tokens its siblings use. RHF hands back the same mutated array every render, so key on the values.
+  const otherSpendersKey = (watch('spenders') ?? [])
+    .map((spender) => spender?.address ?? '')
+    .filter((_, index) => index !== spenderIndex)
+    .join(',')
+  const excludeAddresses = useMemo(() => otherSpendersKey.split(',').filter(Boolean), [otherSpendersKey])
+
   return (
     <Card variant="muted" size="none" radius="xl" className="relative" data-testid="spender-card">
       {/* Card owns spacing/surface/radius; the visual gap/padding lives on this plain div. */}
@@ -59,7 +67,10 @@ const SpenderCard = ({ spenderIndex, spenderCount, removable, onRemove }: Spende
             aria-label={REMOVE_SPENDER_LABEL}
             onClick={onRemove}
             data-testid="remove-spender-btn"
-            className="absolute top-2 right-2"
+            /* z-10: the address field's wrapper is `position: relative` and follows this button in the
+               DOM, so without it that wrapper's full-width label paints over the button and swallows
+               the click everywhere but its top and bottom edges. */
+            className="absolute top-2 right-2 z-10"
           >
             <X />
           </Button>
@@ -72,6 +83,7 @@ const SpenderCard = ({ spenderIndex, spenderCount, removable, onRemove }: Spende
             placeholder={SPENDER_PLACEHOLDER}
             validate={validateSpender}
             deps={otherSpenderPaths}
+            excludeAddresses={excludeAddresses}
             data-testid="spender-address-input"
           />
           <FieldDescription>{SPENDER_HELPER_TEXT}</FieldDescription>

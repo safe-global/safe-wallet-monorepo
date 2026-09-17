@@ -10,11 +10,13 @@ jest.mock('@/components/common/AddressBookInput', () => {
     name,
     validate,
     deps,
+    excludeAddresses = [],
     'data-testid': testId,
   }: {
     name: string
     validate?: (value: string) => string | undefined | Promise<string | undefined>
     deps?: string[]
+    excludeAddresses?: readonly string[]
     'data-testid'?: string
   }) => {
     const {
@@ -28,7 +30,11 @@ jest.mock('@/components/common/AddressBookInput', () => {
       | undefined
     return (
       <div>
-        <input data-testid={testId} {...register(name, { required: true, validate, deps })} />
+        <input
+          data-testid={testId}
+          data-excluded={excludeAddresses.join(',')}
+          {...register(name, { required: true, validate, deps })}
+        />
         {error?.message && <span>{error.message}</span>}
       </div>
     )
@@ -51,6 +57,7 @@ jest.mock('../LimitRow', () => ({
 }))
 
 const SPENDER = '0x1234567890123456789012345678901234567890'
+const OTHER_SPENDER = '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'
 
 const Harness = ({ spenders, onRemove = jest.fn() }: { spenders: SpenderFormValues[]; onRemove?: () => void }) => {
   const methods = useForm<SpendingLimitPolicyFormValues>({ mode: 'onChange', defaultValues: { safe: '', spenders } })
@@ -105,6 +112,30 @@ describe('SpenderCard', () => {
     await user.click(screen.getByRole('button', { name: 'validate' }))
 
     expect(await screen.findAllByText(DUPLICATE_SPENDER_ERROR)).toHaveLength(2)
+  })
+
+  it('keeps the spenders already in the policy out of the suggestions', () => {
+    renderWithUserEvent(
+      <Harness
+        spenders={[
+          { ...createEmptySpender(), address: SPENDER },
+          { ...createEmptySpender(), address: OTHER_SPENDER },
+        ]}
+      />,
+    )
+
+    const [first, second] = screen.getAllByTestId('spender-address-input')
+    expect(first).toHaveAttribute('data-excluded', OTHER_SPENDER)
+    expect(second).toHaveAttribute('data-excluded', SPENDER)
+  })
+
+  it('leaves the remove button clickable across its whole face', () => {
+    renderWithUserEvent(<Harness spenders={[createEmptySpender(), createEmptySpender()]} />)
+
+    // The address field's wrapper is `position: relative` and follows the button in the DOM, so
+    // without a stacking bump its full-width label paints over the button and eats the click.
+    const button = screen.getAllByRole('button', { name: REMOVE_SPENDER_LABEL })[0]
+    expect(button.className).toContain('z-10')
   })
 
   it('offers to remove the spender only when it is not the last one', async () => {
