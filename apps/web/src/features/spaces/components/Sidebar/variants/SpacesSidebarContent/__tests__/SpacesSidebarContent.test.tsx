@@ -139,7 +139,7 @@ describe('SpacesSidebarContent', () => {
     mockUseIsActiveMember.mockReturnValue(true)
     mockUseResolvedSidebarNav.mockReturnValue(mockResolvedNavItems)
     mockUseHasFeature.mockReturnValue(true)
-    mockUseSpacePlan.mockReturnValue({ isPaidActive: false })
+    mockUseSpacePlan.mockReturnValue({ isPaidActive: false, isLoading: false, isUninitialized: false })
   })
 
   describe('PRO chip on the Plans entry', () => {
@@ -158,13 +158,22 @@ describe('SpacesSidebarContent', () => {
     })
 
     it('keeps the regular icon on a paid plan', () => {
-      mockUseSpacePlan.mockReturnValue({ isPaidActive: true })
+      mockUseSpacePlan.mockReturnValue({ isPaidActive: true, isLoading: false, isUninitialized: false })
 
       render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
 
       plansIcon()
       expect(screen.queryByTestId('plans-pro-chip')).not.toBeInTheDocument()
       expect(screen.getByText('Pro')).toBeInTheDocument()
+    })
+
+    it('keeps the regular icon until the plan is known, so a paid Workspace never flashes the chip', () => {
+      mockUseSpacePlan.mockReturnValue({ isPaidActive: false, isLoading: true, isUninitialized: false })
+
+      render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
+
+      plansIcon()
+      expect(screen.queryByTestId('plans-pro-chip')).not.toBeInTheDocument()
     })
 
     it('keeps the regular icon while SAFE_PRO is off', () => {

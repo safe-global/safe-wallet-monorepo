@@ -35,8 +35,13 @@ export const SpacesSidebarContent = ({
   const isPoliciesEnabled = useHasFeature(FEATURES.POLICIES)
   const isSafeProEnabled = useHasFeature(FEATURES.SAFE_PRO_ANNOUNCEMENT)
   const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
-  const { isPaidActive } = useSpacePlan(selectedSpace?.uuid)
-  const hasPlansUpsell = isSafePro && !isPaidActive
+  const {
+    isPaidActive,
+    isLoading: isPlanLoading,
+    isUninitialized: isPlanUninitialized,
+  } = useSpacePlan(selectedSpace?.uuid)
+  // Decided only once the plan is known, so a paid Workspace never flashes the chip while it loads.
+  const hasPlansUpsell = isSafePro && !isPlanLoading && !isPlanUninitialized && !isPaidActive
 
   const getLink = (item: SidebarItemConfig) => ({
     pathname: item.href,

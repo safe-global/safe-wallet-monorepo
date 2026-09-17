@@ -33,6 +33,7 @@ jest.mock('@/features/__core__', () => ({
 
 const SPACE_ID = '11111111-1111-1111-1111-111111111111'
 const dismiss = jest.fn()
+const retry = jest.fn()
 const refetch = jest.fn()
 const subscription = (status: string) => ({
   status,
@@ -45,7 +46,12 @@ describe('CheckoutReturnModals', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseSpacePlan.mockReturnValue({ plan: null, refetch })
-    mockUseCheckoutReturn.mockReturnValue({ status: 'complete', subscription: subscription('trialing'), dismiss })
+    mockUseCheckoutReturn.mockReturnValue({
+      status: 'complete',
+      subscription: subscription('trialing'),
+      dismiss,
+      retry,
+    })
   })
 
   it('opens the trial confirmation for a trial subscription, refreshes the plan and dismisses on close', () => {
@@ -62,21 +68,46 @@ describe('CheckoutReturnModals', () => {
   })
 
   it('opens the subscription confirmation for a paid subscription', () => {
-    mockUseCheckoutReturn.mockReturnValue({ status: 'complete', subscription: subscription('active'), dismiss })
+    mockUseCheckoutReturn.mockReturnValue({ status: 'complete', subscription: subscription('active'), dismiss, retry })
     render(<CheckoutReturnModals />)
 
     expect(screen.getByTestId('subscription-activated-modal')).toHaveTextContent('Business')
     expect(screen.queryByTestId('trial-activated-modal')).not.toBeInTheDocument()
   })
 
-  it.each(['idle', 'processing', 'activating', 'timeout', 'error'])(
-    'renders nothing while the return is %s',
-    (status) => {
-      mockUseCheckoutReturn.mockReturnValue({ status, subscription: undefined, dismiss })
-      const { container } = render(<CheckoutReturnModals />)
+  it('renders nothing when the user did not come back from Stripe', () => {
+    mockUseCheckoutReturn.mockReturnValue({ status: 'idle', subscription: undefined, dismiss, retry })
+    const { container } = render(<CheckoutReturnModals />)
 
-      expect(container).toBeEmptyDOMElement()
-      expect(refetch).not.toHaveBeenCalled()
-    },
-  )
+    expect(container).toBeEmptyDOMElement()
+    expect(refetch).not.toHaveBeenCalled()
+  })
+
+  it.each(['processing', 'activating'])('blocks the screen with a loader while the return is %s', (status) => {
+    mockUseCheckoutReturn.mockReturnValue({ status, subscription: undefined, dismiss, retry })
+    render(<CheckoutReturnModals />)
+
+    expect(screen.getByTestId('checkout-pending')).toHaveTextContent('Confirming your subscription')
+    expect(screen.queryByRole('button', { name: 'Close' })).not.toBeInTheDocument()
+    expect(refetch).not.toHaveBeenCalled()
+  })
+
+  it('offers a retry when the subscription never propagates', () => {
+    mockUseCheckoutReturn.mockReturnValue({ status: 'timeout', subscription: undefined, dismiss, retry })
+    render(<CheckoutReturnModals />)
+
+    expect(screen.getByTestId('checkout-failed')).toHaveTextContent('taking longer than expected')
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
+    expect(retry).toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+    expect(dismiss).toHaveBeenCalled()
+  })
+
+  it('reports a failed session without a retry', () => {
+    mockUseCheckoutReturn.mockReturnValue({ status: 'error', subscription: undefined, dismiss, retry })
+    render(<CheckoutReturnModals />)
+
+    expect(screen.getByTestId('checkout-failed')).toHaveTextContent('We couldn’t confirm your checkout')
+    expect(screen.queryByRole('button', { name: 'Try again' })).not.toBeInTheDocument()
+  })
 })

@@ -67,6 +67,13 @@ describe('useCheckoutReturn', () => {
     act(() => jest.advanceTimersByTime(60_000))
 
     expect(result.current.status).toBe('timeout')
+
+    act(() => result.current.retry())
+    expect(result.current.status).toBe('activating')
+    act(() => jest.advanceTimersByTime(59_000))
+    expect(result.current.status).toBe('activating')
+    act(() => jest.advanceTimersByTime(1_000))
+    expect(result.current.status).toBe('timeout')
     jest.useRealTimers()
   })
 

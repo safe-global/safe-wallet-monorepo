@@ -28,6 +28,7 @@ export const useCheckoutReturn = (spaceId?: string | null) => {
   const sessionId = typeof rawSessionId === 'string' && rawSessionId ? rawSessionId : null
   const isReturning = sessionId !== null
   const [timedOut, setTimedOut] = useState(false)
+  const [attempt, setAttempt] = useState(0)
   const startedAt = useRef<number | null>(null)
 
   const { data: session, isError: isSessionError } = useBillingGetCheckoutSessionV1Query(
@@ -54,7 +55,14 @@ export const useCheckoutReturn = (spaceId?: string | null) => {
     const remaining = POLL_TIMEOUT - (Date.now() - startedAt.current)
     const id = setTimeout(() => setTimedOut(true), Math.max(remaining, 0))
     return () => clearTimeout(id)
-  }, [isReturning, isComplete])
+  }, [isReturning, isComplete, attempt])
+
+  // The queries keep polling after a timeout; retrying only restarts the clock the user is shown.
+  const retry = () => {
+    startedAt.current = null
+    setTimedOut(false)
+    setAttempt((count) => count + 1)
+  }
 
   const dismiss = () => {
     const { [CHECKOUT_SESSION_QUERY_PARAM]: _sessionId, ...query } = router.query
@@ -73,5 +81,5 @@ export const useCheckoutReturn = (spaceId?: string | null) => {
             ? 'activating'
             : 'processing'
 
-  return { isReturning, status, subscription, dismiss }
+  return { isReturning, status, subscription, dismiss, retry }
 }

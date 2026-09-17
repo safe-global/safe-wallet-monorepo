@@ -2,6 +2,10 @@ import { fireEvent, render, screen } from '@/tests/test-utils'
 import WorkspaceLockModal, { memberCopy } from '../WorkspaceLockModal'
 
 const mockUseWorkspaceLock = jest.fn()
+const mockUseCheckoutReturn = jest.fn()
+jest.mock('../../../hooks/billing/useCheckoutReturn', () => ({
+  useCheckoutReturn: (spaceId?: string) => mockUseCheckoutReturn(spaceId),
+}))
 const mockUseCurrentMembership = jest.fn()
 const mockUseIsAdmin = jest.fn()
 const mockPush = jest.fn()
@@ -65,6 +69,16 @@ describe('WorkspaceLockModal', () => {
     mockUseWorkspaceLock.mockReturnValue(lock({}))
     mockUseCurrentMembership.mockReturnValue({ id: 1 })
     mockUseIsAdmin.mockReturnValue(true)
+    mockUseCheckoutReturn.mockReturnValue({ isReturning: false, status: 'idle' })
+  })
+
+  it('stays hidden while a Stripe return is still being confirmed, and comes back once it fails', () => {
+    mockUseCheckoutReturn.mockReturnValue({ isReturning: true, status: 'activating' })
+    expect(render(<WorkspaceLockModal spaceId={SPACE_ID} />).container).toBeEmptyDOMElement()
+
+    mockUseCheckoutReturn.mockReturnValue({ isReturning: true, status: 'timeout' })
+    render(<WorkspaceLockModal spaceId={SPACE_ID} />)
+    expect(screen.getByTestId('claim-trial-modal')).toBeInTheDocument()
   })
 
   it('renders nothing for a Workspace with a live plan or before the membership is known', () => {

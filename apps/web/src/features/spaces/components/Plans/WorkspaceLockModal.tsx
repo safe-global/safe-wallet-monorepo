@@ -5,6 +5,7 @@ import { AppRoutes } from '@/config/routes'
 import { highlightSafePro } from '@/components/common/ProHighlight'
 import { useLoadFeature } from '@/features/__core__'
 import { SafeProFeature } from '@/features/safe-pro-announcement'
+import { useCheckoutReturn } from '../../hooks/billing/useCheckoutReturn'
 import { useCurrentMembership, useIsAdmin } from '../../hooks/useSpaceMembers'
 import { useWorkspaceLock, type WorkspaceLockReason } from '../../hooks/useWorkspaceLock'
 import { claimCopy } from './ClaimTrialModal'
@@ -42,9 +43,12 @@ export default function WorkspaceLockModal({ spaceId }: { spaceId: string }) {
   const { SafeProNoticeModal } = useLoadFeature(SafeProFeature)
   const [dismissed, setDismissed] = useState(false)
   const canDismiss = router.pathname === AppRoutes.spaces.plans
+  // Back from Stripe the subscription is still propagating: the checkout modals own the screen until it fails.
+  const checkout = useCheckoutReturn(spaceId)
+  const isConfirmingCheckout = checkout.isReturning && checkout.status !== 'error' && checkout.status !== 'timeout'
 
   // Without the membership the admin check cannot be trusted yet; a non-member never gets this far (AuthState).
-  if (!isLocked || !membership || (dismissed && canDismiss)) return null
+  if (!isLocked || !membership || isConfirmingCheckout || (dismissed && canDismiss)) return null
 
   const goBack = () => void router.push(AppRoutes.welcome.accounts)
 
