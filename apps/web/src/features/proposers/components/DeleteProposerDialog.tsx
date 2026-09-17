@@ -37,6 +37,7 @@ import useChainId from '@/hooks/useChainId'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { getAssertedChainSigner } from '@/services/tx/tx-sender/sdk'
 import ErrorMessage from '@/components/tx/ErrorMessage'
+import { getProposerErrorText } from '@/features/proposers/utils/proposerErrors'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
@@ -268,7 +269,7 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
 
                 {error && (
                   <div className="mt-4">
-                    <ErrorMessage error={error}>Error deleting proposer</ErrorMessage>
+                    <ErrorMessage error={error}>{getProposerErrorText(error, 'Error deleting proposer')}</ErrorMessage>
                   </div>
                 )}
 
