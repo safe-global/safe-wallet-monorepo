@@ -160,6 +160,7 @@ export const PlanCard = ({
   }, [currentOption])
   const price = option?.price ?? null
   const hint = salesHint?.(tier)
+  const features = option?.features?.length ? option.features : tier.features
 
   const changeOption = (next: PlanSeatOption) => {
     setOption(next)
@@ -221,7 +222,7 @@ export const PlanCard = ({
               )}
 
               <List>
-                {tier.features.map((feature) => (
+                {features.map((feature) => (
                   <ListItem key={feature} size="sm">
                     <Avatar size="xs">
                       <AvatarFallback>

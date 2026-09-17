@@ -1,4 +1,5 @@
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
+import { getPlanDescriptions } from './paymentLinks'
 
 export type PlanStatus = 'none' | 'trialing' | 'active' | 'pending' | 'payment_failed' | 'canceled'
 
@@ -71,3 +72,9 @@ export const getSubscriptionPlanName = (subscription: Subscription | undefined):
 /** When the current billing period (or trial) ends, as an ISO date; Stripe reports seconds. */
 export const getSubscriptionPeriodEnd = (subscription: Subscription | undefined): string | null =>
   subscription?.currentPeriodEnd ? new Date(subscription.currentPeriodEnd * 1000).toISOString() : null
+
+/** The plan's selling points: from the plan itself, else from the Stripe metadata the CGW forwards. */
+export const getSubscriptionFeatures = (subscription: Subscription): string[] =>
+  subscription.plan.features.length > 0
+    ? subscription.plan.features
+    : getPlanDescriptions((subscription.metadata ?? {}) as Record<string, string | null | undefined>)

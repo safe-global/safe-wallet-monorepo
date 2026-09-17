@@ -1,7 +1,7 @@
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import type { PlanGroup, PlanOffer } from '../../hooks/billing/types'
-import { getSubscriptionPlanName } from '../../hooks/billing/subscription'
-import { ENTERPRISE_TIER, PLAN_CLAIM_HIGHLIGHTS, PLAN_FEATURES, PLAN_ORDER } from './fixtures'
+import { getSubscriptionFeatures, getSubscriptionPlanName } from '../../hooks/billing/subscription'
+import { ENTERPRISE_TIER, PLAN_FEATURES, PLAN_ORDER } from './fixtures'
 import type {
   CurrentPlan,
   PlanChangeDirection,
@@ -85,7 +85,12 @@ const toOption = (offer: PlanOffer, monthly: PlanOffer | undefined): PlanSeatOpt
   seats: typeof offer.seats === 'number' ? offer.seats : null,
   price: offer.price,
   originalPrice: offer.billingCycle === 'year' && monthly?.price != null ? monthly.price * 12 : null,
+  features: offer.features,
 })
+
+/** Stripe's own list when the offer carries one, else the static copy for that plan. */
+const featuresOf = (name: string, offers: Pick<PlanOffer, 'features'>[]): string[] =>
+  offers.find((offer) => offer.features && offer.features.length > 0)?.features ?? PLAN_FEATURES[name] ?? []
 
 /** One tier per plan and billing cycle; a yearly option carries twelve monthly payments as its reference price. */
 export const offersToTiers = (plans: PlanGroup[]): PlanTier[] =>
@@ -105,7 +110,7 @@ export const offersToTiers = (plans: PlanGroup[]): PlanTier[] =>
           currency: offers[0].currency,
           billingCycle: cycle,
           options: offers.map((offer) => toOption(offer, monthlyBySeats.get(String(offer.seats)))),
-          features: PLAN_FEATURES[plan.name] ?? [],
+          features: featuresOf(plan.name, offers),
           trialPeriodDays: offers[0].trialPeriodDays,
         },
       ]
@@ -115,6 +120,7 @@ export const offersToTiers = (plans: PlanGroup[]): PlanTier[] =>
 /** The CGW never offers the current plan, so its card is rebuilt from the subscription and the seats entitlement. */
 export const subscriptionToTier = (subscription: Subscription, seatsQuota: number | null | undefined): PlanTier => {
   const name = getSubscriptionPlanName(subscription) ?? 'Safe Pro'
+  const features = getSubscriptionFeatures(subscription)
 
   return {
     id: 'current',
@@ -129,9 +135,10 @@ export const subscriptionToTier = (subscription: Subscription, seatsQuota: numbe
         seats: typeof seatsQuota === 'number' ? seatsQuota : null,
         price: subscription.plan.currentPrice,
         originalPrice: subscription.plan.originalPrice,
+        features,
       },
     ],
-    features: subscription.plan.features.length > 0 ? subscription.plan.features : (PLAN_FEATURES[name] ?? []),
+    features: features.length > 0 ? features : (PLAN_FEATURES[name] ?? []),
     isCurrent: true,
     currentPriceId: subscription.plan.id,
   }
@@ -140,14 +147,20 @@ export const subscriptionToTier = (subscription: Subscription, seatsQuota: numbe
 const bySeats = (a: PlanSeatOption, b: PlanSeatOption): number =>
   (a.seats ?? Number.POSITIVE_INFINITY) - (b.seats ?? Number.POSITIVE_INFINITY)
 
+const getSubscriptionFeaturesOrFallback = (current: PlanTier, offered: PlanTier | undefined): string[] =>
+  current.options[0]?.features?.length ? current.features : (offered?.features ?? current.features)
+
 /**
  * One card per plan and cycle: the current plan's card absorbs the other seat sizes the CGW offers for its billing
  * cycle (so the user can resize from it); the same plan on the other cycle stays a regular offer.
  */
 const mergeCurrentTier = (offered: PlanTier[], current: PlanTier): PlanTier[] => {
   const isSameCycle = (tier: PlanTier) => tier.name === current.name && tier.billingCycle === current.billingCycle
-  const extra = (offered.find(isSameCycle)?.options ?? []).filter((option) => option.priceId !== current.currentPriceId)
-  const merged = { ...current, options: [...current.options, ...extra].sort(bySeats) }
+  const sameCycle = offered.find(isSameCycle)
+  const extra = (sameCycle?.options ?? []).filter((option) => option.priceId !== current.currentPriceId)
+  // A subscription without its own selling points borrows the offered tier's, so the card never falls back to copy.
+  const features = getSubscriptionFeaturesOrFallback(current, sameCycle)
+  const merged = { ...current, features, options: [...current.options, ...extra].sort(bySeats) }
   return [...offered.filter((tier) => !isSameCycle(tier)), merged]
 }
 
@@ -168,18 +181,9 @@ export const buildPlanTiers = (
   return [...tiers, ENTERPRISE_TIER].sort((a, b) => rank(a.name) - rank(b.name))
 }
 
-/**
- * Monthly trial offers for the claim modal: the seat count leads the feature list, trimmed to the highlights for an
- * existing Workspace and complete for a brand-new one.
- */
-export const claimTiers = (trialPlans: PlanGroup[], { full = false }: { full?: boolean } = {}): PlanTier[] =>
+/** Monthly trial offers for the claim modal: the seat count leads the plan's own selling points, verbatim. */
+export const claimTiers = (trialPlans: PlanGroup[]): PlanTier[] =>
   offersToTiers(trialPlans)
     .filter((tier) => tier.billingCycle === 'month')
-    .map((tier) => ({
-      ...tier,
-      features: [
-        tier.options[0].label,
-        ...(full ? tier.features : (PLAN_CLAIM_HIGHLIGHTS[tier.name] ?? tier.features)),
-      ],
-    }))
+    .map((tier) => ({ ...tier, features: [tier.options[0].label, ...tier.features] }))
     .sort((a, b) => rank(a.name) - rank(b.name))

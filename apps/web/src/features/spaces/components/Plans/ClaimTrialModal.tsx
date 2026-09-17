@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type CSSProperties } from 'react'
 import { ArrowRight, Check } from 'lucide-react'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -104,7 +104,11 @@ const TrialOfferCard = ({
             )}
           </div>
 
-          <ul className="grid gap-x-6 gap-y-2 sm:grid-cols-2">
+          {/* Column-major like the design: the first half of the list on the left, the rest on the right. */}
+          <ul
+            className="grid gap-x-6 gap-y-2 sm:grid-flow-col sm:grid-rows-[repeat(var(--rows),auto)]"
+            style={{ '--rows': Math.ceil(tier.features.length / 2) } as CSSProperties}
+          >
             {tier.features.map((feature) => (
               <li key={feature} className="flex items-center gap-2">
                 <Check className="size-4 shrink-0 text-muted-foreground" strokeWidth={1.5} />
@@ -136,7 +140,7 @@ export default function ClaimTrialModal({
   variant?: ClaimTrialVariant
 }) {
   const { trialPlans, trialPeriodDays, isLoading } = useSpaceOffers(spaceId)
-  const tiers = useMemo(() => claimTiers(trialPlans, { full: variant === 'new' }), [trialPlans, variant])
+  const tiers = useMemo(() => claimTiers(trialPlans), [trialPlans])
   const { needsTrim, checkout, isBusy, error } = useSeatTrimCheckout(spaceId, returnPathname)
   const [pickedTierId, setPickedTierId] = useState<string>()
   const [step, setStep] = useState<'offer' | 'accounts'>('offer')

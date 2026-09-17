@@ -12,6 +12,8 @@ export type PlanOffer = {
   currency: string
   billingCycle: BillingCycle | null
   trialPeriodDays: number | null
+  /** The plan's selling points as Stripe carries them (`metadata.planDescriptions`), shown verbatim and in order. */
+  features?: string[]
 }
 
 export type PlanGroup = {

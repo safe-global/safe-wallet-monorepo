@@ -86,6 +86,25 @@ describe('paymentLinks', () => {
     expect(toPlanOffer(link({ id: 'x', lineItems: priced(100, 'month') }))).toBeNull()
   })
 
+  it('reads the selling points verbatim and in order, tolerating missing or malformed metadata', () => {
+    const descriptions = ['50 sponsored transactions per month', 'Policy engine']
+    expect(
+      toPlanOffer(
+        link({
+          id: 'd',
+          metadata: { planName: 'Business', planDescriptions: JSON.stringify(descriptions) },
+        }),
+      )?.features,
+    ).toEqual(descriptions)
+    expect(toPlanOffer(link({ id: 'e', metadata: { planName: 'Business' } }))?.features).toEqual([])
+    expect(
+      toPlanOffer(link({ id: 'f', metadata: { planName: 'Business', planDescriptions: 'not json' } }))?.features,
+    ).toEqual([])
+    expect(
+      toPlanOffer(link({ id: 'g', metadata: { planName: 'Business', planDescriptions: '["ok", 3, null]' } }))?.features,
+    ).toEqual(['ok'])
+  })
+
   it('maps a link to an offer', () => {
     expect(toPlanOffer(business10)).toEqual({
       paymentLinkId: 'pl_business_10',
@@ -96,6 +115,7 @@ describe('paymentLinks', () => {
       currency: 'eur',
       billingCycle: 'month',
       trialPeriodDays: 60,
+      features: [],
     })
     expect(toPlanOffer(starter)?.trialPeriodDays).toBeNull()
     expect(toPlanOffer(link({ id: 'x', metadata: { planName: 'Starter' } }))?.priceId).toBeNull()

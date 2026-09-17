@@ -4,6 +4,7 @@ import type { BillingCycle, PlanGroup, PlanOffer } from './types'
 // Stripe metadata vocabulary shared with the CGW (entitlements.constants.ts).
 export const PLAN_NAME_METADATA_KEY = 'planName'
 export const SAFE_SEATS_METADATA_KEY = 'FEATURE_SAFE_SEATS'
+export const PLAN_DESCRIPTIONS_METADATA_KEY = 'planDescriptions'
 const UNLIMITED = 'unlimited'
 
 type Metadata = Record<string, string | null | undefined>
@@ -27,6 +28,18 @@ export const getSeats = (link: PaymentLink): PlanOffer['seats'] => {
   if (raw.toLowerCase() === UNLIMITED) return UNLIMITED
   const parsed = Number.parseInt(raw, 10)
   return Number.isNaN(parsed) || parsed < 0 ? null : parsed
+}
+
+/** The JSON-encoded list of selling points on the link, or an empty list when missing or malformed. */
+export const getPlanDescriptions = (metadata: Metadata): string[] => {
+  const raw = metadata[PLAN_DESCRIPTIONS_METADATA_KEY]
+  if (!raw) return []
+  try {
+    const parsed: unknown = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === 'string') : []
+  } catch {
+    return []
+  }
 }
 
 const toCycle = (interval: string | undefined): BillingCycle | null =>
@@ -53,6 +66,7 @@ export const toPlanOffer = (link: PaymentLink): PlanOffer | null => {
     planName,
     seats: getSeats(link),
     trialPeriodDays: link.trialPeriodDays ?? null,
+    features: getPlanDescriptions(readMetadata(link)),
     ...getPrice(link),
   }
 }

@@ -14,6 +14,8 @@ export type PlanSeatOption = {
   price: number | null
   /** Undiscounted reference, e.g. twelve monthly payments for a yearly option. */
   originalPrice: number | null
+  /** Selling points of this seat size when Stripe carries them; the card falls back to the tier's list. */
+  features?: string[]
 }
 
 export type PlanTier = {

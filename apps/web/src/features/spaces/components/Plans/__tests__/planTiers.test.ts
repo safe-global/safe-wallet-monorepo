@@ -1,6 +1,6 @@
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import type { PlanGroup, PlanOffer } from '../../../hooks/billing/types'
-import { PLAN_CLAIM_HIGHLIGHTS, PLAN_FEATURES } from '../fixtures'
+import { PLAN_FEATURES } from '../fixtures'
 import {
   buildPlanTiers,
   claimTiers,
@@ -218,15 +218,34 @@ describe('planTiers', () => {
     expect(getPlanCta(pick(enterprise), businessPlan)).toEqual({ kind: 'sales', label: 'Talk to sales' })
   })
 
-  it('leads the claim card with the seat count and trims the features to the highlights', () => {
+  it('leads the claim card with the seat count and then the plan’s own selling points', () => {
     const [starter, business] = claimTiers([BUSINESS_TRIAL, STARTER_TRIAL])
 
     expect(starter.features[0]).toBe('2 Safe accounts')
-    expect(business.features).toEqual(['10 Safe accounts', ...PLAN_CLAIM_HIGHLIGHTS.Business])
+    expect(business.features).toEqual(['10 Safe accounts', ...PLAN_FEATURES.Business])
     expect(business.options[0].seats).toBe(10)
-    expect(claimTiers([BUSINESS_TRIAL], { full: true })[0].features).toEqual([
-      '10 Safe accounts',
-      ...PLAN_FEATURES.Business,
-    ])
+  })
+
+  it('prefers the selling points Stripe carries over the static copy, per offer and for the current plan', () => {
+    const stripeBusiness: PlanGroup = {
+      name: 'Business',
+      offers: [offer({ paymentLinkId: 'b10m', planName: 'Business', features: ['From Stripe', 'In order'] })],
+    }
+    const [tier] = offersToTiers([stripeBusiness])
+    expect(tier.features).toEqual(['From Stripe', 'In order'])
+    expect(tier.options[0].features).toEqual(['From Stripe', 'In order'])
+
+    const tagged = {
+      ...subscription({ id: 'price_b20m' }),
+      metadata: { planDescriptions: JSON.stringify(['Sub perk']) },
+    } as unknown as Subscription
+    expect(subscriptionToTier(tagged, 20).features).toEqual(['Sub perk'])
+
+    const [merged] = buildPlanTiers([stripeBusiness], {
+      subscription: subscription({ id: 'price_b20m' }),
+      seatsQuota: 20,
+    })
+    expect(merged.isCurrent).toBe(true)
+    expect(merged.features).toEqual(['From Stripe', 'In order'])
   })
 })
