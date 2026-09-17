@@ -80,6 +80,7 @@ describe('ReviewStep', () => {
           isStoreHydrated: true,
           cfSafeSynced: false,
           isOidcLoginPending: false,
+          isSessionCheckPending: false,
         },
       },
     })
@@ -180,6 +181,7 @@ describe('ReviewStep', () => {
       isStoreHydrated: true,
       cfSafeSynced: false,
       isOidcLoginPending: false,
+      isSessionCheckPending: false,
     },
   }
 

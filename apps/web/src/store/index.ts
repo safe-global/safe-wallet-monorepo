@@ -40,6 +40,7 @@ import { setupListeners } from '@reduxjs/toolkit/query'
 import { migrateBatchTxs } from '@/services/ls-migration/batch'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway'
 import { cgwErrorAlert } from './middleware/cgwErrorAlert'
+import { forbiddenSessionListener } from '@/services/sessionExpiry/forbiddenSessionListener'
 
 const rootReducer = combineReducers({
   [slices.safeInfoSlice.name]: slices.safeInfoSlice.reducer,
@@ -135,6 +136,7 @@ const listeners = [
   counterfactualSyncListener,
   addressBookListener,
   elevationListener,
+  forbiddenSessionListener,
 ]
 
 export const _hydrationReducer: typeof rootReducer = (state, action) => {
@@ -182,6 +184,7 @@ export const _hydrationReducer: typeof rootReducer = (state, action) => {
       isStoreHydrated: true,
       cfSafeSynced: false,
       isOidcLoginPending: false,
+      isSessionCheckPending: false,
     }
 
     return nextState
