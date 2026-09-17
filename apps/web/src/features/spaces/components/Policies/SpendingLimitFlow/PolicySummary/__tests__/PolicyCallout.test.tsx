@@ -1,0 +1,23 @@
+import { render, screen } from '@/tests/test-utils'
+import PolicyCallout from '../PolicyCallout'
+import { describePolicy } from '../copy'
+import { limitSummaryBuilder, policySummaryBuilder, spenderSummaryBuilder } from '../testBuilders'
+
+describe('PolicyCallout', () => {
+  it('renders the plain-language title and description for the policy', () => {
+    const simon = spenderSummaryBuilder()
+      .with({ name: 'Simon', limits: [limitSummaryBuilder().with({ resetTimeMin: '0' }).build()] })
+      .build()
+    const policy = policySummaryBuilder()
+      .with({ spenders: [simon] })
+      .build()
+    const { title, description } = describePolicy(policy)
+
+    render(<PolicyCallout policy={policy} />)
+
+    const callout = screen.getByTestId('policy-summary-callout')
+    expect(callout).toHaveTextContent('You are giving Simon a one-time spending limit.')
+    expect(callout).toHaveTextContent(title)
+    expect(callout).toHaveTextContent(description)
+  })
+})
