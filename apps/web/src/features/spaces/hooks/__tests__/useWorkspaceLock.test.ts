@@ -81,6 +81,15 @@ describe('useWorkspaceLock', () => {
     expect(renderHook(() => useWorkspaceLock()).result.current).toMatchObject({ isLocked: false, isResolving: true })
   })
 
+  it('reports resolving while a query has not started yet, so an empty first render never reads as lapsed', () => {
+    mockUseSpaceOffers.mockReturnValue({ trialPeriodDays: null, isLoading: false, isUninitialized: true })
+    expect(renderHook(() => useWorkspaceLock()).result.current).toMatchObject({ isLocked: false, isResolving: true })
+
+    mockUseSpaceOffers.mockReturnValue({ trialPeriodDays: null, isLoading: false, isUninitialized: false })
+    mockUseSpacePlan.mockReturnValue({ status: 'none', isLoading: false, isUninitialized: true })
+    expect(renderHook(() => useWorkspaceLock()).result.current).toMatchObject({ isLocked: false, isResolving: true })
+  })
+
   it('never reports resolving while the lock does not apply', () => {
     mockUseHasFeature.mockReturnValue(false)
     mockUseSpacePlan.mockReturnValue({ status: 'none', isLoading: true })

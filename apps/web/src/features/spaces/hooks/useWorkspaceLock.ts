@@ -12,10 +12,22 @@ export type WorkspaceLockReason = 'trial-offered' | 'payment-failed' | 'lapsed'
 export const useWorkspaceLock = (spaceId?: string | null) => {
   const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
   const isInvited = useIsInvited()
-  const { status, latestSubscription, isLoading: isPlanLoading } = useSpacePlan(spaceId)
-  const { trialPeriodDays, isLoading: isOffersLoading } = useSpaceOffers(spaceId)
+  const {
+    status,
+    latestSubscription,
+    isLoading: isPlanLoading,
+    isUninitialized: isPlanUninitialized,
+  } = useSpacePlan(spaceId)
+  const {
+    trialPeriodDays,
+    isLoading: isOffersLoading,
+    isUninitialized: isOffersUninitialized,
+  } = useSpaceOffers(spaceId)
   const applies = isSafePro && !isInvited
-  const isResolving = applies && (isPlanLoading || isOffersLoading)
+  // A query that has not started yet (first render after the space id appears, or skipped while signed out) reads as
+  // "no plan, no offers"; treating it as resolving keeps the lock from firing, or navigating away, on stale emptiness.
+  const isResolving =
+    applies && (isPlanLoading || isOffersLoading || Boolean(isPlanUninitialized) || Boolean(isOffersUninitialized))
   const reason: WorkspaceLockReason =
     trialPeriodDays !== null ? 'trial-offered' : status === 'payment_failed' ? 'payment-failed' : 'lapsed'
 

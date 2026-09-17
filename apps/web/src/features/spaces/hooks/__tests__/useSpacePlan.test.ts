@@ -150,4 +150,13 @@ describe('useSpacePlan', () => {
     mockSubscriptionsQuery.mockReturnValue({ data: undefined, isLoading: true })
     expect(renderHook(() => useSpacePlan()).result.current.isLoading).toBe(true)
   })
+
+  it('reports uninitialized until both queries have started', () => {
+    mockSubscriptionsQuery.mockReturnValue({ data: undefined, isLoading: false, isUninitialized: true })
+    expect(renderHook(() => useSpacePlan()).result.current.isUninitialized).toBe(true)
+
+    mockSubscriptionsQuery.mockReturnValue({ data: undefined, isLoading: false, isUninitialized: false })
+    mockEntitlementsQuery.mockReturnValue({ data: undefined, isLoading: false, isUninitialized: false })
+    expect(renderHook(() => useSpacePlan()).result.current.isUninitialized).toBe(false)
+  })
 })

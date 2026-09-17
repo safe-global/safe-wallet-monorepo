@@ -16,6 +16,7 @@ export const useSpacePlan = (spaceId?: string | null) => {
     latestSubscription,
     status,
     isLoading: isSubscriptionLoading,
+    isUninitialized: isSubscriptionUninitialized,
     refetch: refetchSubscription,
   } = useSpaceSubscription(spaceId)
 
@@ -38,6 +39,8 @@ export const useSpacePlan = (spaceId?: string | null) => {
     isTrialEndingSoon: isTrialing && daysLeft !== null && daysLeft <= TRIAL_ENDING_SOON_DAYS,
     isPaidActive: status === 'active',
     isLoading: entitlements.isLoading || isSubscriptionLoading,
+    /** True until both queries have started (skipped or not yet dispatched), when `status` still reads `none`. */
+    isUninitialized: Boolean(entitlements.isUninitialized || isSubscriptionUninitialized),
     refetch: () => {
       void entitlements.refetch()
       void refetchSubscription()

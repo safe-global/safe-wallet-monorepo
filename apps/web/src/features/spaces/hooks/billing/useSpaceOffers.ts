@@ -10,11 +10,19 @@ import { useBillingSpaceId } from './useBillingSpaceId'
  */
 export const useSpaceOffers = (spaceId?: string | null) => {
   const gatedSpaceId = useBillingSpaceId(spaceId)
-  const { data, isLoading, isError } = useBillingGetSpacePaymentLinksV1Query(
+  const { data, isLoading, isUninitialized, isError } = useBillingGetSpacePaymentLinksV1Query(
     gatedSpaceId ? { spaceId: gatedSpaceId } : skipToken,
   )
   const plans = useMemo(() => groupOffersByPlan(data ?? []), [data])
   const { trialPlans, paidPlans } = useMemo(() => splitPlansByTrial(plans), [plans])
 
-  return { plans, trialPlans, paidPlans, trialPeriodDays: getTrialPeriodDays(trialPlans), isLoading, isError }
+  return {
+    plans,
+    trialPlans,
+    paidPlans,
+    trialPeriodDays: getTrialPeriodDays(trialPlans),
+    isLoading,
+    isUninitialized,
+    isError,
+  }
 }

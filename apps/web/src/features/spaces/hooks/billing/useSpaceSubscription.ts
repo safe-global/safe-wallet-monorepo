@@ -6,7 +6,7 @@ import { useBillingSpaceId } from './useBillingSpaceId'
 
 export const useSpaceSubscription = (spaceId?: string | null) => {
   const gatedSpaceId = useBillingSpaceId(spaceId)
-  const { data, isLoading, isError, refetch } = useBillingGetSubscriptionsV1Query(
+  const { data, isLoading, isUninitialized, isError, refetch } = useBillingGetSubscriptionsV1Query(
     gatedSpaceId ? { spaceId: gatedSpaceId } : skipToken,
     SPACE_REFRESH_OPTIONS,
   )
@@ -17,6 +17,7 @@ export const useSpaceSubscription = (spaceId?: string | null) => {
     latestSubscription: selectLatestSubscription(data),
     status: getPlanStatus(subscription),
     isLoading,
+    isUninitialized,
     isError,
     refetch,
   }
