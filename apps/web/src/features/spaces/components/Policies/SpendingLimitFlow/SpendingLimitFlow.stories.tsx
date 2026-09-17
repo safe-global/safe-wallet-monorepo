@@ -5,17 +5,13 @@ import SpendingLimitFlow from '.'
 
 /** `SAFE_ADDRESSES.efSafe` in config/test/msw/fixtures. */
 const EF_SAFE = '0x9fC3dc011b461664c835F2527fffb1169b3C213e'
-/** efSafe fixture's `owners[0].value` — what `wallet: 'owner'` resolves to (verified via the dev server's network tab). */
+/** efSafe fixture's `owners[0].value` — what `wallet: 'owner'` resolves to. */
 const WALLET = '0x5eD8Cee6b63b1c6AFce3AD7c92f4fD7E1B8fAd9F'
 
-// `createMockStory`'s `features.spaces` handlers already answer `/v1/spaces/:id/safes` with `{ safes: {} }`,
-// and (since spaces-specific mocks are registered ahead of the scenario's own fallback handlers) also
-// answer `/v1/safes` and `/v2/safes` with a fixed `mockSafeOverviews` list that does not include efSafe.
-// A `handlers` array passed INTO `createMockStory` is appended after all of those — MSW is first-match-wins,
-// so it can only add routes, never override one already mocked (see apps/web/docs/storybook-guide.md,
-// "MSW patterns"). Composing `parameters.msw.handlers` ourselves, with these two first, is the documented
-// way to override a default: the Space holds efSafe on Ethereum, and its overview lists the connected
-// wallet as an owner, so `useEligibleSafeAccounts` resolves it as a signer-eligible Safe.
+// `createMockStory` already mocks these two routes, and a `handlers` array passed into it is appended
+// after its own — MSW is first-match-wins, so that can only add routes, never override one. Composing
+// `parameters.msw.handlers` with these first is how a default is overridden: the Space holds efSafe and
+// its overview lists the connected wallet as an owner, so it resolves as a signer-eligible Safe.
 const spaceSafesHandler = http.get(/\/v1\/spaces\/[^/]+\/safes$/, () =>
   HttpResponse.json({ safes: { '1': [EF_SAFE] } }),
 )
@@ -65,5 +61,5 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** The real TxFlow chrome at Space level with no Safe picked yet: rail, header, idle Safe Shield, disabled Next. */
+/** The real TxFlow chrome at Space level with no Safe picked yet. */
 export const CreateStep: Story = {}

@@ -133,7 +133,7 @@ describe('SpenderCard', () => {
     renderWithUserEvent(<Harness spenders={[createEmptySpender(), createEmptySpender()]} />)
 
     // The address field's wrapper is `position: relative` and follows the button in the DOM, so
-    // without a stacking bump its full-width label paints over the button and eats the click.
+    // without a stacking bump its label paints over the button and eats the click.
     const button = screen.getAllByRole('button', { name: REMOVE_SPENDER_LABEL })[0]
     expect(button.className).toContain('z-10')
   })

@@ -93,7 +93,7 @@ describe('CreateSpendingLimitPolicy', () => {
 
     const form = screen.getByTestId('form')
     expect(form).toHaveAttribute('data-scope-key', `1:${SAFE_A}`)
-    // The flow's stored data round-trips into defaultValues — this is what keeps step-1 input when the user presses Back.
+    // Stored data round-trips into defaultValues — this is what keeps step-1 input when Back is pressed.
     expect(form).toHaveAttribute('data-default-safe', `1:${SAFE_A}`)
     expect(form).toHaveAttribute('data-default-spenders', '1')
     fireEvent.click(screen.getByRole('button', { name: 'submit' }))

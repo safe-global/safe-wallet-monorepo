@@ -29,7 +29,7 @@ import {
 export type LimitRowProps = {
   spenderIndex: number
   limitIndex: number
-  /** How many rows the spender has — the other rows' token paths are this row's validation deps. */
+  /** The other rows' token paths become this row's validation deps. */
   limitCount: number
   removable: boolean
   onRemove: () => void
@@ -37,7 +37,6 @@ export type LimitRowProps = {
 
 const hasPrice = (token: TokenOption): boolean => !!token.fiatConversion && parseFloat(token.fiatConversion) > 0
 
-/** What the typed amount is worth — or the defined fallback when the token has no price (spec D7). */
 const FiatLine = ({ amount, token }: { amount: string; token: TokenOption | undefined }): ReactElement | null => {
   if (!token) return null
   if (!hasPrice(token)) return <span data-testid="amount-fiat">{PRICE_UNAVAILABLE_TEXT}</span>
@@ -48,7 +47,6 @@ const FiatLine = ({ amount, token }: { amount: string; token: TokenOption | unde
   )
 }
 
-/** One (token, amount, frequency) limit of a spender. Renders inside the form's `FormProvider`. */
 const LimitRow = ({ spenderIndex, limitIndex, limitCount, removable, onRemove }: LimitRowProps): ReactElement => {
   const chainId = useChainId()
   const {
@@ -70,12 +68,12 @@ const LimitRow = ({ spenderIndex, limitIndex, limitCount, removable, onRemove }:
   // RHF hands back the same mutated array every render, so key on the joined values, not the reference.
   const siblingTokensKey = (watch(limitsPath(spenderIndex)) ?? []).map((limit) => limit?.tokenAddress ?? '').join(',')
 
-  /** Tokens the spender already uses on other rows — hidden from this row's list (spec D8). */
+  /** Tokens the spender's other rows already use — hidden from this row's list. */
   const excludeAddresses = useMemo(
     () => siblingTokensKey.split(',').filter((address, index) => index !== limitIndex && address !== ''),
     [siblingTokensKey, limitIndex],
   )
-  /** A token change on any sibling re-validates this row, so a duplicate created elsewhere shows up here too. */
+  /** A token change on a sibling re-validates this row, so a duplicate shows on both. */
   const siblingTokenPaths = useMemo(
     () =>
       Array.from({ length: limitCount }, (_, index) => limitPath(spenderIndex, index, 'tokenAddress')).filter(
@@ -88,8 +86,7 @@ const LimitRow = ({ spenderIndex, limitIndex, limitCount, removable, onRemove }:
   const decimals = selectedToken?.decimals
   const resetTimeOptions = useMemo(() => getResetTimeOptions(chainId), [chainId])
 
-  // react-hook-form only evaluates `isValid` on mount, so a typed amount must be re-checked once the
-  // token (and therefore its decimals) becomes known or is lost.
+  // The amount's rule needs the token's decimals, so re-check a typed amount when the token changes.
   useEffect(() => {
     if (getValues(amountPath)) trigger(amountPath)
   }, [decimals, amountPath, getValues, trigger])
@@ -99,7 +96,7 @@ const LimitRow = ({ spenderIndex, limitIndex, limitCount, removable, onRemove }:
 
   return (
     <Card variant="muted-nested" size="none" radius="lg" className="relative" data-testid="limit-row">
-      {/* Corner-pinned like the spender card's own remove button, so it never narrows the two fields. */}
+      {/* Corner-pinned so it never narrows the two fields. */}
       {removable && (
         <Button
           type="button"
@@ -114,10 +111,9 @@ const LimitRow = ({ spenderIndex, limitIndex, limitCount, removable, onRemove }:
         </Button>
       )}
 
-      {/* Card owns spacing only via `size`/`radius`; the visual gap/padding lives on this plain div. */}
+      {/* `Card` takes spacing only through `size`/`radius`, so the padding lives on this div. */}
       <div className="flex flex-col gap-3 p-3">
-        {/* Both columns render their own label and helper through the shared `Field` primitives, so
-            the two fields line up without this row adding any vertical spacing of its own. */}
+        {/* Both columns bring their own label and helper via `Field`, so they line up with no spacing here. */}
         <div className="flex items-start gap-4">
           <div className="flex min-w-0 flex-1 flex-col">
             <Controller
@@ -126,7 +122,7 @@ const LimitRow = ({ spenderIndex, limitIndex, limitCount, removable, onRemove }:
               rules={{
                 required: NO_TOKEN_SELECTED_ERROR,
                 deps: siblingTokenPaths,
-                // Read the siblings at validation time: a memoised list would be one render behind.
+                // Read the siblings at validation time; a memo would be one render behind.
                 validate: (value) =>
                   validateUniqueToken(
                     value,

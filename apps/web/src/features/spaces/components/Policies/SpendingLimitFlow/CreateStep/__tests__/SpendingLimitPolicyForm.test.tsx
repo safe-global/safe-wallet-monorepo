@@ -134,11 +134,8 @@ const renderForm = (props: Partial<SpendingLimitPolicyFormProps> = {}) => {
   return { ...renderWithUserEvent(buildUi()), buildUi, onSubmit, onSafeChange, onSpendersChange }
 }
 
-// The mocked TokenSelector is a <select> (also role=combobox), so the Safe selector is found by its label.
-// The default form already mounts one limit row, whose mocked TokenSelector renders native <option>
-// elements — those also carry the implicit ARIA role "option", so a bare `getByRole('option')` is
-// ambiguous. `safe-account-option` is the test id `SafeAccountRow` puts on the real popup row (see
-// SafeAccountSelector/components/SafeAccountRow.tsx), so query by that instead of the role.
+// The mocked TokenSelector is a <select>, so it also answers to role combobox and role option — hence
+// the Safe selector is found by its label and its rows by `safe-account-option` rather than by role.
 const pickSafe = async (user: ReturnType<typeof renderForm>['user']) => {
   const trigger = screen.getByLabelText(SAFE_ACCOUNT_SELECTOR_LABEL)
   await user.click(trigger)
@@ -232,8 +229,6 @@ describe('SpendingLimitPolicyForm', () => {
 
     await user.type(screen.getAllByTestId('spender-address-input')[0], SPENDER)
 
-    // `toHaveLastCalledWith` is not a Jest matcher (the repo convention elsewhere is `toHaveBeenLastCalledWith`);
-    // same assertion, correct API name.
     await waitFor(() => expect(onSpendersChange).toHaveBeenLastCalledWith([SPENDER]))
   })
 

@@ -6,8 +6,8 @@ import type { ChainInfo } from '@/features/spaces/types'
 const SAFE_A = '0xAAAAaaaaAAaaaaAAAaAAaaaAaAaaaaaAAAaaAAaA'
 const SAFE_B = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB'
 
-// Named so `groupSafeAccounts`'s chain-name sort (see SafeAccountSelector/utils.ts) has something to sort by —
-// without it every option falls back to its raw chainId string, which does not sort the way these tests expect.
+// Named so `groupSafeAccounts`'s chain-name sort has something to sort by — without it every option
+// falls back to its raw chainId string, which does not sort the way these tests expect.
 const CHAINS: Record<string, ChainInfo> = {
   '1': { chainId: '1', chainName: 'Ethereum', chainLogoUri: null, shortName: 'eth' },
   '137': { chainId: '137', chainName: 'Polygon', chainLogoUri: null, shortName: 'matic' },

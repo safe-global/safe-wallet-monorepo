@@ -6,14 +6,14 @@ import { useSpendingLimitSafeAccounts } from '../hooks/useSpendingLimitSafeAccou
 import SpendingLimitPolicyForm from './SpendingLimitPolicyForm'
 import { createDefaultFormValues, type SpendingLimitPolicyFormValues } from '../types'
 
-/** Step 1 of `SpendingLimitFlow`: connects the form to the flow data, the eligible accounts and the SafeScope. */
+/** Step 1: connects the form to the flow data, the eligible accounts and the SafeScope. */
 const CreateSpendingLimitPolicy = (): ReactElement => {
   const { data, onNext } = useContext<TxFlowContextType<SpendingLimitPolicyFormValues>>(TxFlowContext)
   const { accounts, isLoading, isError, refetch, hasWallet } = useSpendingLimitSafeAccounts()
   const { setScope } = useSafeScopeControls()
   const scopeKey = useSafeScope()?.scopeKey
 
-  // Copilot address-poisoning check for every spender, as the Safe-level form does for its beneficiary.
+  // Address-poisoning check for every spender, as the Safe-level form does for its beneficiary.
   const [spenderAddresses, setSpenderAddresses] = useState<string[]>([])
   useSafeShieldForAddressPoisoning(spenderAddresses)
 

@@ -12,7 +12,7 @@ import type { SafeAccountEntry, SafeAccountOption } from '../../SafeAccountSelec
 import { createDefaultFormValues, type SpendingLimitPolicyFormValues } from '../types'
 import SpendingLimitPolicyForm, { type SpendingLimitPolicyFormProps } from './SpendingLimitPolicyForm'
 
-/** `SAFE_ADDRESSES.efSafe` in config/test/msw/fixtures — the scenario every handler below serves. */
+/** `SAFE_ADDRESSES.efSafe` in config/test/msw/fixtures. */
 const EF_SAFE = '0x9fC3dc011b461664c835F2527fffb1169b3C213e'
 const OPS_SAFE = '0x86753FE4b8E29Ce8A38cDf9559D80E05b00cdBA0'
 const NICOLE = '0x8675B754342754A30A2AeF474D114d8460bca19b'
@@ -22,7 +22,7 @@ const USDT = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
 
 const efSafeTarget: SafeScopeTarget = { chainId: '1', safeAddress: EF_SAFE }
 
-/** CGW's batch token-metadata route (`?addresses=` follows). USDT is not held by efSafe, so it has no price. */
+/** CGW's batch token-metadata route. USDT is not held by efSafe, so it has no price. */
 const TOKENS_ROUTE = /\/v1\/chains\/\d+\/tokens(\?|$)/
 const popularTokens: Erc20TokenMetadata[] = [
   { address: USDT, symbol: 'USDT', name: 'Tether USD', decimals: 6, logoUri: '', trusted: true, type: 'ERC20' },
@@ -70,7 +70,7 @@ const filledValues: SpendingLimitPolicyFormValues = {
 
 type StoryProps = Partial<SpendingLimitPolicyFormProps> & { initialSafe?: SafeScopeTarget }
 
-/** Moves the SafeScope like `CreateSpendingLimitPolicy` does, so the TokenSelector sees the picked Safe. */
+/** Moves the SafeScope as the step does, so the TokenSelector sees the picked Safe. */
 const ScopedForm = ({ initialSafe: _initialSafe, ...props }: StoryProps) => {
   const { setScope } = useSafeScopeControls()
   const scopeKey = useSafeScope()?.scopeKey
@@ -121,10 +121,8 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Nothing picked: the token fields stay disabled until a Safe is chosen. */
 export const Empty: Story = {}
 
-/** The Safe is picked, so the row's token list is efSafe's holdings plus the popular list. */
 export const SafeSelected: Story = {
   args: {
     initialSafe: efSafeTarget,
@@ -132,12 +130,11 @@ export const SafeSelected: Story = {
   },
 }
 
-/** Two spenders, three limits, per-row frequencies — the filled frame. */
 export const Filled: Story = {
   args: { initialSafe: efSafeTarget, defaultValues: filledValues },
 }
 
-/** USDT is popular but not held: no price, so the fiat line says so. */
+/** USDT is popular but not held, so it has no price and the fiat line says so. */
 export const PriceUnavailable: Story = {
   args: {
     initialSafe: efSafeTarget,
@@ -148,12 +145,10 @@ export const PriceUnavailable: Story = {
   },
 }
 
-/** The connected wallet is a signer or proposer on no Safe of this Space. */
 export const NoEligibleAccounts: Story = {
   args: { accounts: [] },
 }
 
-/** Accounts still resolving. */
 export const AccountsLoading: Story = {
   tags: ['skip-visual-test'],
   args: { accounts: [], isAccountsLoading: true },

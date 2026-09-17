@@ -48,8 +48,8 @@ const AddressBookInput = ({
   ...props
 }: AddressInputProps & {
   canAdd?: boolean
-  /** Contacts to leave out of the suggestions — an address the form already holds elsewhere. Typing it
-      is still possible, so the caller keeps its own `validate` for the message. */
+  /** Contacts to leave out of the suggestions. Typing one is still possible, so the caller keeps its
+      own `validate` for the message. */
   excludeAddresses?: readonly string[]
 }): ReactElement => {
   const listId = useId()

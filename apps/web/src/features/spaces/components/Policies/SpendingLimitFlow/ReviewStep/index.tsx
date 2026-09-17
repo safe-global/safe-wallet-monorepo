@@ -15,12 +15,7 @@ import { findTokenOption, tokenOptionLabel } from '../utils/tokenOptions'
 import type { SpendingLimitPolicyFormValues } from '../types'
 import { REVIEW_APPLIES_TO_LABEL, REVIEW_PLACEHOLDER_TEXT, REVIEW_STEP_TITLE } from '../constants'
 
-/**
- * Placeholder for the Review step (WA-3150 scope). Shows what step 1 collected so the hand-over can be
- * checked, and states that signing is not available yet. It takes no props: `TxFlow` passes `onSubmit` and
- * children, which this placeholder ignores until WA-3151 replaces the summary and WA-3152 wires `setSafeTx`
- * and the actions.
- */
+/** Placeholder: shows what step 1 collected. Signing is not wired up yet, so the `TxFlow` props are ignored. */
 const ReviewSpendingLimitPolicy = (): ReactElement => {
   const { data } = useContext<TxFlowContextType<SpendingLimitPolicyFormValues>>(TxFlowContext)
   const chainId = useChainId()
@@ -29,7 +24,7 @@ const ReviewSpendingLimitPolicy = (): ReactElement => {
   const safe = data?.safe ? parseSafeScopeKey(data.safe) : undefined
 
   return (
-    // Layout props are replaced per step, so the nonce must be hidden here too until WA-3152 builds the transaction.
+    // Layout props are set per step, so the nonce has to be hidden here too while there is no transaction.
     <TxFlowStep title={REVIEW_STEP_TITLE} hideNonce>
       <TxCard>
         <div className="flex flex-col gap-4" data-testid="review-spending-limit-policy">

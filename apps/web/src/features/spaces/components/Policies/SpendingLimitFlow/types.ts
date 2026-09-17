@@ -1,9 +1,10 @@
 export type LimitFormValues = {
   /** Token address; `ZERO_ADDRESS` for the native currency; `''` until picked. */
   tokenAddress: string
-  /** Human-readable amount as typed (decimals resolved from the token when building the tx). */
+  /** Human-readable amount as typed; decimals come from the token when building the tx. */
   amount: string
-  /** Reset period in MINUTES as a string — what `setAllowance` stores. `'0'` = one time. Recovery uses seconds; never share a helper. */
+  /** Reset period in MINUTES as a string — what `setAllowance` stores. `'0'` = one time.
+      Recovery stores seconds, so never share a helper with it. */
   resetTime: string
 }
 
@@ -13,12 +14,12 @@ export type SpenderFormValues = {
 }
 
 export type SpendingLimitPolicyFormValues = {
-  /** `${chainId}:${address}` of the selected Safe — the `SafeAccountSelector` id and the `SafeScopeKey` format. */
+  /** `${chainId}:${address}` — both the `SafeAccountSelector` id and the `SafeScopeKey` format. */
   safe: string
   spenders: SpenderFormValues[]
 }
 
-/** One time: the least permissive period and the Safe-level flow's default (spec D6). */
+/** One time is the least permissive period, and the Safe-level flow's default. */
 export const DEFAULT_RESET_TIME = '0'
 
 export const createEmptyLimit = (): LimitFormValues => ({ tokenAddress: '', amount: '', resetTime: DEFAULT_RESET_TIME })

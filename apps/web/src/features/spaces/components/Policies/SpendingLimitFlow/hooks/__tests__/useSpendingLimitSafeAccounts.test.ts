@@ -8,7 +8,7 @@ jest.mock('../../../SafeAccountSelector/hooks/useEligibleSafeAccounts', () => ({
   useEligibleSafeAccounts: jest.fn(),
 }))
 
-// Sepolia and Polygon have an AllowanceModule deployment; chain 999999 does not exist in the deployments package.
+// Sepolia and Polygon have an AllowanceModule deployment; chain 999999 does not exist.
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
   default: () => ({

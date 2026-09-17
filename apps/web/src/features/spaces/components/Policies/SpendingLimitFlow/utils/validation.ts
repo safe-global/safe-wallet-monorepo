@@ -10,6 +10,6 @@ export const validateUniqueSpender = (address: string, otherAddresses: readonly 
 export const validateUniqueToken = (tokenAddress: string, siblingTokens: readonly string[]): string | undefined =>
   siblingTokens.some((other) => sameAddress(other, tokenAddress)) ? DUPLICATE_TOKEN_ERROR : undefined
 
-/** Same chain as the Safe-level form: numeric → decimals → uint96. `decimals` is unknown until a token is picked. */
+/** Numeric → decimals → uint96, as the Safe-level form. `decimals` is unknown until a token is picked. */
 export const validateLimitAmount = (value: string, decimals: number | undefined): string | undefined =>
   validateAmount(value) || validateDecimalLength(value, decimals) || validateSpendingLimitAmount(value, decimals)

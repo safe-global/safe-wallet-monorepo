@@ -11,11 +11,10 @@ export type SafeAccountFieldProps = {
   isError: boolean
   onRetry: () => void
   hasWallet: boolean
-  /** The picked `${chainId}:${address}`, already split — the flow moves its SafeScope with it. */
+  /** The picked `${chainId}:${address}`, already split. */
   onSafeChange: (chainId: string, address: string) => void
 }
 
-/** The shared policy Safe selector, registered as the form's `safe` field. Renders inside the form's `FormProvider`. */
 const SafeAccountField = ({
   accounts,
   isLoading,

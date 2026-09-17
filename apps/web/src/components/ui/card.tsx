@@ -52,10 +52,9 @@ const cardVariants = cva(
         default: '',
         outlined: 'border border-border',
         muted: 'bg-muted',
-        /* A card nested inside a `muted` one (a limit row inside its spender card). Translucent on
-           purpose: over `muted` it resolves to exactly the design's #fafafa in light mode, and in
-           dark mode it keeps stepping toward the dialog surface instead of hard-coding a hex that
-           would flip the nesting the way `--surface-sunken`'s comment warns about. */
+        /* For a card nested inside a `muted` one. Translucent on purpose: over `muted` it resolves to
+           the design's #fafafa in light mode, and in dark mode it keeps stepping toward the dialog
+           surface instead of hard-coding a hex that would flip the nesting. */
         'muted-nested': 'bg-card/50',
       },
       surface: {

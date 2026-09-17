@@ -18,13 +18,12 @@ import {
 
 export type SpenderCardProps = {
   spenderIndex: number
-  /** How many spenders the policy has — the other spenders' address paths are this card's validation deps. */
+  /** The other spenders' address paths become this card's validation deps. */
   spenderCount: number
   removable: boolean
   onRemove: () => void
 }
 
-/** One spender with its own limit rows and its own "Add token". Renders inside the form's `FormProvider`. */
 const SpenderCard = ({ spenderIndex, spenderCount, removable, onRemove }: SpenderCardProps): ReactElement => {
   const { control, getValues, watch } = useFormContext<SpendingLimitPolicyFormValues>()
   const { fields, append, remove } = useFieldArray({ control, name: limitsPath(spenderIndex) })
@@ -47,8 +46,8 @@ const SpenderCard = ({ spenderIndex, spenderCount, removable, onRemove }: Spende
     [getValues, spenderIndex],
   )
 
-  // Keep the spenders already in the policy out of the suggestions, the way a limit row hides the
-  // tokens its siblings use. RHF hands back the same mutated array every render, so key on the values.
+  // Hide the spenders already in the policy, as a limit row hides its siblings' tokens. RHF returns
+  // the same mutated array every render, so key on the values.
   const otherSpendersKey = (watch('spenders') ?? [])
     .map((spender) => spender?.address ?? '')
     .filter((_, index) => index !== spenderIndex)
@@ -57,7 +56,7 @@ const SpenderCard = ({ spenderIndex, spenderCount, removable, onRemove }: Spende
 
   return (
     <Card variant="muted" size="none" radius="xl" className="relative" data-testid="spender-card">
-      {/* Card owns spacing/surface/radius; the visual gap/padding lives on this plain div. */}
+      {/* `Card` takes spacing only through `size`/`radius`, so the padding lives on this div. */}
       <div className="flex flex-col gap-4 p-4">
         {removable && (
           <Button

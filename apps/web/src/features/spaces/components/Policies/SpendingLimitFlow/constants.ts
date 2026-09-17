@@ -1,4 +1,4 @@
-/** Copy of the Create step, verbatim from the Figma frames unless noted in the spec (§5.8). */
+/** Copy of the Create step, verbatim from the Figma frames. */
 export const CREATE_STEP_TITLE = 'Create new policy'
 export const FLOW_SUBTITLE = 'Spending limit'
 export const FLOW_HELP_LABEL = 'Learn more about spending limits'

@@ -10,10 +10,8 @@ import ReviewSpendingLimitPolicy from './ReviewStep'
 import { createDefaultFormValues } from './types'
 import { CREATE_STEP_TITLE, FLOW_HELP_LABEL, FLOW_SUBTITLE } from './constants'
 
-/** Same glyph as the Policies catalogue tile. */
 const SpendingLimitIcon = (): ReactElement => <WalletCards aria-hidden />
 
-/** Mirrors the WA-3148 intro dialog's title: the flow subtitle plus a link to the help article. */
 const FlowSubtitle = (): ReactElement => (
   <span className="flex items-center gap-2.5">
     {FLOW_SUBTITLE}
@@ -29,9 +27,8 @@ const FlowSubtitle = (): ReactElement => (
 )
 
 /**
- * Space-level spending limit policy flow (WA-3150). The SafeScopeProvider sits above TxFlow so every
- * tx-flow provider and hook resolves the Safe picked in step 1 (WA-3146); it starts empty because the
- * first step is where the Safe is chosen. No `eventCategory` until the flow can complete (WA-3152).
+ * The SafeScopeProvider sits above TxFlow so every tx-flow provider and hook resolves the Safe picked
+ * in step 1. It starts empty because step 1 is where that Safe is chosen.
  */
 const SpendingLimitFlow = (): ReactElement => (
   <SafeScopeProvider>

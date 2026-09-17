@@ -4,7 +4,7 @@ import { Alert, AlertAction, AlertDescription, AlertSeverityIcon, AlertTitle } f
 import { Button } from '@/components/ui/button'
 import { CALLOUT_DESCRIPTION, CALLOUT_DISMISS_LABEL, CALLOUT_TITLE } from '../constants'
 
-/** Dismissal lives with the mounted flow only: the intro dialog already remembers "seen" across sessions. */
+/** Dismissal lasts only while the flow is mounted; the intro dialog is what remembers "seen". */
 const SpenderCallout = (): ReactElement | null => {
   const [open, setOpen] = useState(true)
   if (!open) return null

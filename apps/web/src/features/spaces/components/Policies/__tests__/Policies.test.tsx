@@ -12,7 +12,7 @@ jest.mock('@/services/local-storage/useLocalStorage', () => ({
   default: jest.fn(() => [mockHasSeenSpendingLimitIntro, mockSetHasSeenSpendingLimitIntro]),
 }))
 
-// The flow pulls in the protocol-kit initialiser through SafeScopeProvider; the page test only needs its identity.
+// The flow pulls in the protocol-kit initialiser; the page test only needs the flow's identity.
 jest.mock('../SpendingLimitFlow', () => ({
   __esModule: true,
   default: () => <div data-testid="spending-limit-flow" />,

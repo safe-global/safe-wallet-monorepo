@@ -41,9 +41,9 @@ export type TokenSelectorProps = {
   disabled?: boolean
   label?: string
   placeholder?: string
-  /** Marks the field invalid and colours the label and helper text, as `NumberField` does. */
+  /** Marks the field invalid, as `NumberField` does. */
   error?: boolean
-  /** Rendered under the field — the Safe's balance of the selected token, or a validation message. */
+  /** Rendered under the field: the selected token's balance, or a validation message. */
   helperText?: ReactNode
   name?: string
   id?: string
@@ -128,8 +128,7 @@ const TokenSelector = ({
   }, [identityKey, value, onChange])
 
   return (
-    /* The design-system field primitives, so this control and a `NumberField` beside it share one
-       label/helper rhythm — hand-rolled spacing here left the two columns 6px out of line. */
+    /* `Field` rather than hand-rolled spacing, so this control and a `NumberField` beside it line up. */
     <Field data-invalid={error || undefined} className="w-full">
       <FieldLabel htmlFor={fieldId} className={error ? 'text-destructive' : undefined}>
         {label}

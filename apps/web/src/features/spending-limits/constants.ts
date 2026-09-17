@@ -11,9 +11,8 @@ const RESET_TIME_OPTIONS: ResetTimeOption[] = [
 ]
 
 /**
- * Short periods that make reset behaviour observable within one QA session. Offered on test chains
- * in addition to the production periods (M1 Policies decision Q52), so daily / weekly / monthly can
- * be verified on Sepolia too. The divergence is documented for QA in docs/README.md → Reset Periods.
+ * Short periods that make reset behaviour observable within one QA session. Offered on test chains in
+ * addition to the production periods; the divergence is written up in docs/README.md → Reset Periods.
  */
 const TEST_RESET_TIME_OPTIONS: ResetTimeOption[] = [
   { label: '5 minutes', value: '5' },

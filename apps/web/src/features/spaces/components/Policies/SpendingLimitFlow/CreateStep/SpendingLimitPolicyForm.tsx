@@ -19,16 +19,15 @@ export type SpendingLimitPolicyFormProps = {
   onRetryAccounts: () => void
   hasWallet: boolean
   onSafeChange: (chainId: string, address: string) => void
-  /** `${chainId}:${address}` of the scoped Safe; a change after mount clears every token selection (spec D12). */
+  /** `${chainId}:${address}` of the scoped Safe; a change after mount clears every token selection. */
   scopeKey?: string
-  /** Every spender address currently typed, for the Safe Shield poisoning check owned by the connected step. */
+  /** Every spender address currently typed, for the poisoning check the connected step runs. */
   onSpendersChange?: (addresses: string[]) => void
 }
 
 /**
- * The Create step's form: Safe → spender cards → limit rows. Pure with respect to the flow: it receives
- * accounts and the scope key, and hands values back through callbacks, so it can be rendered in Storybook
- * and tests without `TxFlow`.
+ * Safe → spender cards → limit rows. It takes accounts and the scope key as props and hands values back
+ * through callbacks, so it renders in Storybook and tests without `TxFlow`.
  */
 const SpendingLimitPolicyForm = ({
   defaultValues,
@@ -46,8 +45,7 @@ const SpendingLimitPolicyForm = ({
   const { control, handleSubmit, formState, watch, getValues, setValue } = formMethods
   const { fields, append, remove } = useFieldArray({ control, name: 'spenders' })
 
-  // A token picked for Safe A must not survive switching to Safe B. The TokenSelector clears its own
-  // value too (WA-3149 C15); this is the belt to its braces. The first selection is not a switch.
+  // A token picked for Safe A must not survive switching to Safe B. The first selection is not a switch.
   const previousScopeKey = useRef(scopeKey)
   useEffect(() => {
     const previous = previousScopeKey.current

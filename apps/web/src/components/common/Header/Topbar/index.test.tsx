@@ -226,8 +226,8 @@ describe('Topbar', () => {
       expect(screen.getByTestId('space-safe-bar')).toBeInTheDocument()
     })
 
-    // The policy flows pick their Safe inside step 1 (SafeScopeProvider) and never set the URL Safe,
-    // so the bar would render an empty Safe selector over the Space.
+    // The policy flows pick their Safe inside step 1 and never set the URL Safe, so the bar would
+    // render an empty Safe selector over the Space.
     it('keeps the search input on space routes when the open flow has no Safe of its own', () => {
       mockIsSpaceRoute.mockReturnValue(true)
       mockUseSafeAddress.mockReturnValue('')

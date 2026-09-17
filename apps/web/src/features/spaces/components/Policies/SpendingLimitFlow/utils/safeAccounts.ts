@@ -2,7 +2,7 @@ import { groupSafeAccounts } from '../../SafeAccountSelector/utils'
 import { isSafeAccountGroup, type SafeAccountEntry } from '../../SafeAccountSelector/types'
 
 /**
- * Keeps only the per-chain entries on `chainIds` (AC B5c: ineligible chains are absent, not disabled).
+ * Keeps only the per-chain entries on `chainIds`; an ineligible chain is absent, not disabled.
  * Groups are re-formed afterwards so a Safe left with one chain becomes a plain row again.
  */
 export const filterSafeAccountsByChains = (

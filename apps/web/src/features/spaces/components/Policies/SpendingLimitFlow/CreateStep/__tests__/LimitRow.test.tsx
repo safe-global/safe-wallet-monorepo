@@ -44,9 +44,8 @@ const mockTokens = [
   tokenOptionBuilder().with({ address: DAI, symbol: 'DAI', name: 'Dai Stablecoin' }).build(),
 ]
 
-// The real selector is a base-ui combobox with its own suite; a plain <select> keeps these tests about
-// the row. It still renders `helperText` where the real one does, since the row's balance and token
-// error reach the user through that slot.
+// A plain <select> keeps these tests about the row. It still renders `helperText`, since that slot is
+// where the row's balance and token error reach the user.
 jest.mock('../../TokenSelector', () => ({
   __esModule: true,
   default: ({
