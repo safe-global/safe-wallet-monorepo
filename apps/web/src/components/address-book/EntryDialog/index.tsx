@@ -9,9 +9,14 @@ import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/aler
 import useChainId from '@/hooks/useChainId'
 import { useAppDispatch } from '@/store'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
-import useChains, { useChain } from '@/hooks/useChains'
+import { useChain } from '@/hooks/useChains'
 import { sanitizeName } from '@safe-global/utils/validation/names'
-import { useUpsertWorkspaceSafeName, useWorkspaceAddressBookLabel, type AddressBookWriteScope } from '@/features/spaces'
+import {
+  useAllChainIds,
+  useUpsertWorkspaceSafeName,
+  useWorkspaceAddressBookLabel,
+  type AddressBookWriteScope,
+} from '@/features/spaces'
 
 export type AddressEntry = {
   name: string
@@ -44,7 +49,7 @@ function EntryDialog({
   const chainId = useChainId()
   const actualChainId = currentChainId ?? chainId
   const currentChain = useChain(actualChainId)
-  const { configs: chains } = useChains()
+  const allChainIds = useAllChainIds()
   const dispatch = useAppDispatch()
   const upsertWorkspaceName = useUpsertWorkspaceSafeName()
   const workspaceLabel = useWorkspaceAddressBookLabel()
@@ -139,7 +144,7 @@ function EntryDialog({
             confirmLabel="Save"
             confirmType="submit"
             confirmTestId="save-btn"
-            confirmDisabled={!formState.isValid || (scope === 'workspace' && chains.length === 0)}
+            confirmDisabled={!formState.isValid || (scope === 'workspace' && allChainIds.length === 0)}
             confirmLoading={isSubmitting}
             className="p-6 pt-2"
           />

@@ -69,6 +69,7 @@ export { useInviteNotification } from './hooks/useInviteNotification'
 export { useWorkspaceAddressBookLabel } from './hooks/useWorkspaceAddressBookLabel'
 export { useAddressBookWriteScope, type AddressBookWriteScope } from './hooks/useAddressBookWriteScope'
 export { useUpsertWorkspaceSafeName } from './hooks/useUpsertWorkspaceSafeName'
+export { useAllChainIds } from './hooks/useAllChainIds'
 export { default as useTrackSpace } from './hooks/useTrackSpace'
 
 // Hooks from useSpaceMembers.tsx

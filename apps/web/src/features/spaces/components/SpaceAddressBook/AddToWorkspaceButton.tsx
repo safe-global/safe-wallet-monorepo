@@ -5,7 +5,7 @@ import { Check, Plus } from 'lucide-react'
 import InvalidContactNameTooltip from './InvalidContactNameTooltip'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from '@/features/spaces'
-import useChains from '@/hooks/useChains'
+import { useAllChainIds } from '../../hooks/useAllChainIds'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
@@ -24,7 +24,7 @@ type AddToWorkspaceButtonProps = {
 
 const AddToWorkspaceButton = ({ address, name, isCompact }: AddToWorkspaceButtonProps) => {
   const spaceId = useCurrentSpaceId()
-  const { configs: chains } = useChains()
+  const chainIds = useAllChainIds()
   const dispatch = useAppDispatch()
   const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -40,9 +40,7 @@ const AddToWorkspaceButton = ({ address, name, isCompact }: AddToWorkspaceButton
 
       const result = await upsertAddressBook({
         spaceId,
-        upsertAddressBookItemsDto: {
-          items: [{ name: sanitizeName(name), address, chainIds: chains.map((chain) => chain.chainId) }],
-        },
+        upsertAddressBookItemsDto: { items: [{ name: sanitizeName(name), address, chainIds }] },
       })
 
       if (result.error) {
@@ -84,7 +82,7 @@ const AddToWorkspaceButton = ({ address, name, isCompact }: AddToWorkspaceButton
       size={isCompact ? 'icon-sm' : 'sm'}
       aria-label={isCompact ? label : undefined}
       onClick={handleAdd}
-      disabled={isSubmitting || added || !!nameError || chains.length === 0}
+      disabled={isSubmitting || added || !!nameError || chainIds.length === 0}
     >
       {isSubmitting ? <Spinner className="size-3.5" /> : isCompact ? icon : label}
     </Button>

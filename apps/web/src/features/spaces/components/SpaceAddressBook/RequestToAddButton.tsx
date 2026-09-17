@@ -15,7 +15,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
-import useChains from '@/hooks/useChains'
+import { useAllChainIds } from '../../hooks/useAllChainIds'
 import { validateContactName } from './utils'
 import { sanitizeName } from '@safe-global/utils/validation/names'
 
@@ -36,7 +36,7 @@ const getRequestErrorMessage = (error: unknown): string => {
 
 const RequestToAddButton = ({ address, name, alreadyRequested, isCompact }: RequestToAddButtonProps) => {
   const spaceId = useCurrentSpaceId()
-  const { configs: chains } = useChains()
+  const chainIds = useAllChainIds()
   const dispatch = useAppDispatch()
   const [createRequest] = useAddressBookRequestsCreateRequestV1Mutation()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -54,11 +54,7 @@ const RequestToAddButton = ({ address, name, alreadyRequested, isCompact }: Requ
 
       const result = await createRequest({
         spaceId,
-        createAddressBookRequestDto: {
-          address,
-          name: sanitizeName(name),
-          chainIds: chains.map((chain) => chain.chainId),
-        },
+        createAddressBookRequestDto: { address, name: sanitizeName(name), chainIds },
       })
 
       if (result.error) {
@@ -177,7 +173,7 @@ const RequestToAddButton = ({ address, name, alreadyRequested, isCompact }: Requ
           confirmLabel="Request to add"
           onConfirm={handleConfirm}
           confirmTestId="confirm-request-btn"
-          confirmDisabled={!!nameError || isSubmitting || chains.length === 0}
+          confirmDisabled={!!nameError || isSubmitting || chainIds.length === 0}
           confirmLoading={isSubmitting}
         />
       </ModalDialog>

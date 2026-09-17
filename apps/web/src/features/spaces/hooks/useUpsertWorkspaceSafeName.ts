@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { sanitizeName } from '@safe-global/utils/validation/names'
-import useChains from '@/hooks/useChains'
+import { useAllChainIds } from './useAllChainIds'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { getContactUpdatedMessage } from '@/utils/addressBookNotifications'
@@ -13,7 +13,7 @@ type UpsertWorkspaceSafeName = (args: { address: string; name: string }) => Prom
 
 export const useUpsertWorkspaceSafeName = (): UpsertWorkspaceSafeName => {
   const spaceId = useCurrentSpaceId()
-  const { configs: chains } = useChains()
+  const chainIds = useAllChainIds()
   const workspaceLabel = useWorkspaceAddressBookLabel()
   const dispatch = useAppDispatch()
   const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
@@ -21,9 +21,8 @@ export const useUpsertWorkspaceSafeName = (): UpsertWorkspaceSafeName => {
   return useCallback(
     async ({ address, name }) => {
       if (!spaceId) return { error: 'No workspace is selected. Switch to a workspace and try again.' }
-      if (chains.length === 0) return { error: 'Supported networks are still loading. Try again in a moment.' }
+      if (chainIds.length === 0) return { error: 'Supported networks are still loading. Try again in a moment.' }
 
-      const chainIds = chains.map((chain) => chain.chainId)
       const result = await upsertAddressBook({
         spaceId,
         upsertAddressBookItemsDto: { items: [{ name: sanitizeName(name), address, chainIds }] },
@@ -43,6 +42,6 @@ export const useUpsertWorkspaceSafeName = (): UpsertWorkspaceSafeName => {
 
       return {}
     },
-    [spaceId, chains, workspaceLabel, dispatch, upsertAddressBook],
+    [spaceId, chainIds, workspaceLabel, dispatch, upsertAddressBook],
   )
 }

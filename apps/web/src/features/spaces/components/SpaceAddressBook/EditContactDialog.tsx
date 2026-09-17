@@ -9,7 +9,7 @@ import NameInput from '@/components/common/NameInput'
 import { ADDRESS_BOOK_NAME_MAX_LENGTH, NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import useChains from '@/hooks/useChains'
+import { useAllChainIds } from '../../hooks/useAllChainIds'
 import {
   type SpaceAddressBookItemDto,
   useAddressBooksUpsertAddressBookItemsV1Mutation,
@@ -36,7 +36,7 @@ type EditContactField = {
 const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { configs: chains } = useChains()
+  const chainIds = useAllChainIds()
   const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
   const isDarkMode = useDarkMode()
@@ -66,7 +66,7 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
     const addressBookItem = {
       name: sanitizeName(data.name),
       address: entry.address,
-      chainIds: chains.map((chain) => chain.chainId),
+      chainIds,
     }
 
     try {
@@ -138,7 +138,7 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
               cancelTestId="cancel-btn"
               confirmLabel="Save"
               confirmType="submit"
-              confirmDisabled={!formState.isValid || !hasChanges || chains.length === 0}
+              confirmDisabled={!formState.isValid || !hasChanges || chainIds.length === 0}
               confirmLoading={isSubmitting}
             />
           </form>
