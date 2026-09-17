@@ -11,9 +11,13 @@ import { AppRoutes } from '@/config/routes'
 import ProChip from '@/public/images/safe-pro/pro-chip.svg'
 import { useSpacePlan } from '../../../../hooks/useSpacePlan'
 
-// The menu button forces every svg to 16px and the active state strokes it; the chip is a 24x16 fill-only lockup.
+// The chip is a 24x16 fill-only lockup: it sits in the 16px icon slot (so the label lines up with the other items)
+// and overflows it sideways, overriding the menu button's 16px svg sizing and the active-state stroke.
 const PlansProChip = () => (
-  <span className="block h-4 w-6 shrink-0 [&_svg]:size-full! [&_svg]:stroke-none!" data-testid="plans-pro-chip">
+  <span
+    className="flex size-4 shrink-0 items-center justify-center [&_svg]:h-4! [&_svg]:w-6! [&_svg]:max-w-none [&_svg]:shrink-0 [&_svg]:stroke-none!"
+    data-testid="plans-pro-chip"
+  >
     <ProChip />
   </span>
 )
