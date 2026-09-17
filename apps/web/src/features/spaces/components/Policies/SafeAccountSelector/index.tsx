@@ -5,7 +5,8 @@ import { Select, SelectContent, SelectGroup, SelectTrigger, SelectValue } from '
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
-import LoadError from './components/LoadError'
+import LoadError from '../components/LoadError'
+import { SKELETON_ROW_COUNT } from '../constants'
 import NoEligibleAccounts from './components/NoEligibleAccounts'
 import SafeAccountGroupHeader from './components/SafeAccountGroupHeader'
 import SafeAccountRow, {
@@ -37,8 +38,6 @@ export type SafeAccountSelectorProps = {
   name?: string
   id?: string
 }
-
-const SKELETON_ROW_COUNT = 3
 
 /** Height of the picked state's two-line identity. Every state reserves it so the field never jumps. */
 const TRIGGER_CONTENT_HEIGHT = 'min-h-9'

@@ -23,6 +23,7 @@ import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { getContactUpdatedMessage } from '@/utils/addressBookNotifications'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 type EditContactDialogProps = {
   entry: SpaceAddressBookItemDto
@@ -78,6 +79,7 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
         upsertAddressBookItemsDto: { items: [addressBookItem] },
       })
 
+      if (isElevationRequiredError(result.error)) return
       if (result.error) {
         setError(getRtkQueryErrorMessage(result.error as FetchBaseQueryError | SerializedError))
         return

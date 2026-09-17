@@ -15,6 +15,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { validateContactName } from './utils'
 import { sanitizeName } from '@safe-global/utils/validation/names'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 type AddToWorkspaceButtonProps = {
   address: string
@@ -43,6 +44,7 @@ const AddToWorkspaceButton = ({ address, name, isCompact }: AddToWorkspaceButton
         upsertAddressBookItemsDto: { items: [{ name: sanitizeName(name), address, chainIds }] },
       })
 
+      if (isElevationRequiredError(result.error)) return
       if (result.error) {
         dispatch(
           showNotification({

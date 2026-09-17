@@ -59,7 +59,8 @@ export const HelpCenterArticle = {
   SWAP_WIDGET_FEES: `${HELP_CENTER_URL}/articles/9969629388-how-does-the-widget-fee-work-for-native-swaps`,
   VERIFY_TX_DETAILS: `${HELP_CENTER_URL}/articles/2485383995-how-to-perform-basic-transactions-checks-on-safewallet`,
   BULK_IMPORT_OLD_DATA: `${HELP_CENTER_URL}/articles/6865463992-export-your-data-from-the-safewallet-mobile-app-and-import-into-the-new-safemobile-app-ios-only`,
-  SAFE_SHIELD: `${HELP_CENTER_URL}/articles/6128275759-security-hub`,
+  SAFE_SHIELD: `${HELP_CENTER_URL}/articles/6434169802-understanding-safe-shield-copilot`,
+  SECURITY_HUB: `${HELP_CENTER_URL}/articles/6128275759-security-hub`,
   ADDRESS_POISONING: `${HELP_CENTER_URL}/articles/3861480988-what-is-address-poisoning-and-how-does-safewallet-battle-it`,
   // TODO(WA-3134): point at the dedicated Policies article once Product/Design provide it.
   POLICIES: HELP_CENTER_URL,

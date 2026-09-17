@@ -193,7 +193,11 @@ describe('useGasLimit', () => {
       const { result } = renderHook(() => useGasLimit(safeTx))
 
       await waitFor(() => expect(result.current.gasLimitError).toBeDefined())
-      expect(mockLogError).toHaveBeenCalledWith(Errors._612, 'HTTP request failed. Status: 500', expect.anything())
+      expect(mockLogError).toHaveBeenCalledWith(
+        Errors._612,
+        expect.objectContaining({ message: 'HTTP request failed. Status: 500' }),
+        expect.anything(),
+      )
     })
   })
 })

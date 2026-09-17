@@ -175,6 +175,16 @@ describe('Topbar', () => {
     expect(screen.queryByLabelText(/unread messages/)).not.toBeInTheDocument()
   })
 
+  it('does not count errors in the badge', () => {
+    const initialReduxState: Partial<RootState> = {
+      notifications: [createNotification(), createNotification({ variant: 'error' })],
+    }
+
+    render(<Topbar />, { initialReduxState })
+
+    expect(screen.getByLabelText('1 unread messages')).toBeInTheDocument()
+  })
+
   it('does not count read notifications in the badge', () => {
     const initialReduxState: Partial<RootState> = {
       notifications: [createNotification({ isRead: true }), createNotification()],
