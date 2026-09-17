@@ -47,9 +47,18 @@ export const getChangeDirection = (current: CurrentPlan | undefined, pick: PlanP
  */
 export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined, recommended?: string): PlanCta => {
   if (pick.tier.isCurrent) {
-    return current?.isTrialing
-      ? { kind: 'billing', label: 'Add billing details' }
-      : { kind: 'manage', label: 'Manage plan' }
+    if (pick.option.priceId === pick.tier.currentPriceId || !pick.option.paymentLinkId) {
+      return current?.isTrialing
+        ? { kind: 'billing', label: 'Add payment method' }
+        : { kind: 'manage', label: 'Manage plan' }
+    }
+    // Another seat size of the same plan: a change, worded by seats rather than by plan name.
+    const direction = getChangeDirection(current, pick)
+    return {
+      kind: 'change',
+      direction,
+      label: direction === 'upgrade' ? `Upgrade to ${pick.option.label}` : `Switch to ${pick.option.label}`,
+    }
   }
   if (!pick.option.paymentLinkId) return { kind: 'sales', label: 'Talk to sales' }
   if (!current) {
@@ -124,7 +133,22 @@ export const subscriptionToTier = (subscription: Subscription, seatsQuota: numbe
     ],
     features: subscription.plan.features.length > 0 ? subscription.plan.features : (PLAN_FEATURES[name] ?? []),
     isCurrent: true,
+    currentPriceId: subscription.plan.id,
   }
+}
+
+const bySeats = (a: PlanSeatOption, b: PlanSeatOption): number =>
+  (a.seats ?? Number.POSITIVE_INFINITY) - (b.seats ?? Number.POSITIVE_INFINITY)
+
+/**
+ * One card per plan: the current plan's card absorbs the other seat sizes the CGW offers for the same billing cycle
+ * (so the user can resize from it), and any other card of that plan is dropped.
+ */
+const mergeCurrentTier = (offered: PlanTier[], current: PlanTier): PlanTier[] => {
+  const sameCycle = offered.find((tier) => tier.name === current.name && tier.billingCycle === current.billingCycle)
+  const extra = (sameCycle?.options ?? []).filter((option) => option.priceId !== current.currentPriceId)
+  const merged = { ...current, options: [...current.options, ...extra].sort(bySeats) }
+  return [...offered.filter((tier) => tier.name !== current.name), merged]
 }
 
 const rank = (name: string): number => {
@@ -136,12 +160,13 @@ const rank = (name: string): number => {
 export const buildPlanTiers = (
   paidPlans: PlanGroup[],
   current?: { subscription: Subscription; seatsQuota: number | null | undefined },
-): PlanTier[] =>
-  [
-    ...offersToTiers(paidPlans),
-    ...(current ? [subscriptionToTier(current.subscription, current.seatsQuota)] : []),
-    ENTERPRISE_TIER,
-  ].sort((a, b) => rank(a.name) - rank(b.name))
+): PlanTier[] => {
+  const offered = offersToTiers(paidPlans)
+  const tiers = current
+    ? mergeCurrentTier(offered, subscriptionToTier(current.subscription, current.seatsQuota))
+    : offered
+  return [...tiers, ENTERPRISE_TIER].sort((a, b) => rank(a.name) - rank(b.name))
+}
 
 /**
  * Monthly trial offers for the claim modal: the seat count leads the feature list, trimmed to the highlights for an

@@ -140,7 +140,7 @@ describe('SpacePlansPage', () => {
     onPlan('Business', 499, 'trialing')
     render(<SpacePlansPage spaceId={SPACE_ID} />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Add billing details' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Add payment method' }))
     expect(mockOpenPortal).toHaveBeenCalled()
 
     fireEvent.click(screen.getByRole('button', { name: 'Switch to Starter' }))

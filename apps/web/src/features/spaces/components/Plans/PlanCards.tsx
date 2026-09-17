@@ -152,7 +152,9 @@ export const PlanCard = ({
   onOptionChange?: (option: PlanSeatOption) => void
 } & PlanCardActions) => {
   const selectable = onSelect !== undefined
-  const [option, setOption] = useState<PlanSeatOption | undefined>(tier.options[0])
+  const [option, setOption] = useState<PlanSeatOption | undefined>(
+    tier.options.find((candidate) => candidate.priceId === tier.currentPriceId) ?? tier.options[0],
+  )
   const price = option?.price ?? null
   const hint = salesHint?.(tier)
 

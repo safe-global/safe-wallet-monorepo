@@ -127,7 +127,7 @@ describe('TrialEndingModal', () => {
     expect(screen.getByText('Need more than 20?')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Talk to sales/ })).toHaveAttribute('href', SUPPORT_CHAT_URL)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Add billing details' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Add payment method' }))
     expect(mockOpenPortal).toHaveBeenCalled()
 
     fireEvent.click(screen.getByRole('button', { name: 'Switch to Starter' }))

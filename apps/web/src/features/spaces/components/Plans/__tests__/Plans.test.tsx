@@ -111,7 +111,7 @@ describe('Plans', () => {
     expect(screen.getByText('€149')).toBeInTheDocument()
     expect(screen.queryByText('€1,608')).not.toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Add billing details' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Add payment method' }))
     expect(onManage).toHaveBeenCalled()
 
     fireEvent.click(screen.getByRole('button', { name: 'Switch to Starter' }))
@@ -134,7 +134,7 @@ describe('Plans', () => {
 
     expect(
       screen.getByText(
-        /Your free trial is active until Dec 6, 2026\. Add billing details before then or choose another plan/,
+        /Your free trial is active until Dec 6, 2026\. Add payment method before then or choose another plan/,
       ),
     ).toBeInTheDocument()
     expect(screen.getByTestId('plan-status-badge')).toHaveTextContent('Free trial · 7 days left')
@@ -207,7 +207,7 @@ describe('Plans', () => {
     expect(screen.getByText(/Your Workspace is locked until you choose a plan/)).toBeInTheDocument()
     expect(screen.getByText('—')).toBeInTheDocument()
     expect(screen.getByText('Unlimited')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /Add billing details|Manage plan/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Add payment method|Manage plan/ })).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Continue with Starter' }))
     expect(onSubscribe).toHaveBeenCalledWith({

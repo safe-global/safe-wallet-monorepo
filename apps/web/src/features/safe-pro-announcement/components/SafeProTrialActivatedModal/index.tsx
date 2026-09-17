@@ -53,7 +53,7 @@ const SafeProTrialActivatedModal = ({
             </Button>
             {onAddBillingDetails && (
               <Button variant="ghost-muted" size="sm" onClick={onAddBillingDetails}>
-                Add billing details now
+                Add payment method now
               </Button>
             )}
           </div>

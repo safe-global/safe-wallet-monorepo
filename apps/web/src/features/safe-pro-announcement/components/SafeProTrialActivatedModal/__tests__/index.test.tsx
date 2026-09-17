@@ -8,7 +8,7 @@ describe('SafeProTrialActivatedModal', () => {
 
     expect(screen.getByRole('heading')).toHaveTextContent('Your free trial is active until Dec 6, 2026')
     expect(screen.getByText(/Nothing is charged until you do/)).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Add billing details now' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Add payment method now' })).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Get started' }))
     expect(onOpenChange).toHaveBeenCalledWith(false)
@@ -28,7 +28,7 @@ describe('SafeProTrialActivatedModal', () => {
     )
 
     expect(screen.getByRole('link', { name: 'Continue' })).toHaveAttribute('href', '/welcome/select-safes')
-    fireEvent.click(screen.getByRole('button', { name: 'Add billing details now' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Add payment method now' }))
     expect(onAddBillingDetails).toHaveBeenCalled()
   })
 })

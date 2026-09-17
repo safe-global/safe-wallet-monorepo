@@ -93,7 +93,7 @@ const statusText = (plan: PlanSummary | null, endDate: string | null, isEndingSo
   if (plan.status === 'active') return 'Safe accounts above the limit remain available outside the Workspace.'
   const until = endDate ?? 'the end of the period'
   return isEndingSoon
-    ? `Your free trial is active until ${until}. Add billing details before then or choose another plan to keep your Workspace.`
+    ? `Your free trial is active until ${until}. Add payment method before then or choose another plan to keep your Workspace.`
     : `Active until ${until}.`
 }
 

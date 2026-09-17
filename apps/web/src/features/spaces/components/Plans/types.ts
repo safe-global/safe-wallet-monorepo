@@ -24,6 +24,8 @@ export type PlanTier = {
   options: PlanSeatOption[]
   features: string[]
   isCurrent?: boolean
+  /** On the current plan's card, the price the subscription is on; the other options are seat changes. */
+  currentPriceId?: string | null
   trialPeriodDays?: number | null
 }
 
@@ -45,7 +47,7 @@ export type PlanChangeDirection = 'upgrade' | 'downgrade' | 'change'
 
 /** What a plan card's button does: manage the current plan, move to another one, buy one, or contact sales. */
 export type PlanCta =
-  | { kind: 'billing'; label: 'Add billing details' }
+  | { kind: 'billing'; label: 'Add payment method' }
   | { kind: 'manage'; label: 'Manage plan' }
   | { kind: 'change'; label: string; direction: PlanChangeDirection }
   | { kind: 'subscribe'; label: string }

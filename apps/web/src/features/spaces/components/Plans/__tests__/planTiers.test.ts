@@ -59,7 +59,7 @@ const subscription = (plan: Partial<Subscription['plan']> = {}): Subscription =>
     },
   }) as unknown as Subscription
 
-const business: CurrentPlan = {
+const businessPlan: CurrentPlan = {
   name: 'Business',
   price: 499,
   currency: 'eur',
@@ -131,14 +131,57 @@ describe('planTiers', () => {
     ])
   })
 
+  it('folds the other seat sizes of the current plan into its card and drops its duplicate cards', () => {
+    const tiers = buildPlanTiers([BUSINESS, STARTER], {
+      subscription: subscription({ id: 'price_b20m' }),
+      seatsQuota: 20,
+    })
+
+    expect(tiers.map((tier) => [tier.name, tier.billingCycle, tier.isCurrent ?? false])).toEqual([
+      ['Starter', 'month', false],
+      ['Business', 'month', true],
+      ['Enterprise', null, false],
+    ])
+    const business = tiers[1]
+    expect(business.currentPriceId).toBe('price_b20m')
+    expect(business.options.map((option) => [option.priceId, option.seats, option.paymentLinkId])).toEqual([
+      ['price_b10m', 10, 'b10m'],
+      ['price_b20m', 20, null],
+      ['price_b50m', 50, 'b50m'],
+    ])
+  })
+
+  it('turns another seat size of the current plan into a change, and the current one into managing it', () => {
+    const [business] = buildPlanTiers([BUSINESS], {
+      subscription: subscription({ id: 'price_b20m' }),
+      seatsQuota: 20,
+    })
+    const [smaller, current, bigger] = business.options
+
+    expect(getPlanCta({ tier: business, option: current }, businessPlan)).toEqual({
+      kind: 'manage',
+      label: 'Manage plan',
+    })
+    expect(getPlanCta({ tier: business, option: bigger }, { ...businessPlan, price: 499 })).toEqual({
+      kind: 'change',
+      direction: 'upgrade',
+      label: 'Upgrade to 50 Safe accounts',
+    })
+    expect(getPlanCta({ tier: business, option: smaller }, { ...businessPlan, price: 999 })).toEqual({
+      kind: 'change',
+      direction: 'downgrade',
+      label: 'Switch to 10 Safe accounts',
+    })
+  })
+
   it('tells an upgrade from a downgrade by monthly-equivalent price', () => {
     const [monthly, yearly] = offersToTiers([BUSINESS])
     const pickOf = (tier: typeof monthly, index: number) => ({ tier, option: tier.options[index] })
 
-    expect(getChangeDirection({ ...business, price: 149 }, pickOf(monthly, 0))).toBe('upgrade')
-    expect(getChangeDirection({ ...business, price: 999 }, pickOf(monthly, 0))).toBe('downgrade')
-    expect(getChangeDirection(business, pickOf(monthly, 0))).toBe('change')
-    expect(getChangeDirection(business, pickOf(yearly, 0))).toBe('downgrade')
+    expect(getChangeDirection({ ...businessPlan, price: 149 }, pickOf(monthly, 0))).toBe('upgrade')
+    expect(getChangeDirection({ ...businessPlan, price: 999 }, pickOf(monthly, 0))).toBe('downgrade')
+    expect(getChangeDirection(businessPlan, pickOf(monthly, 0))).toBe('change')
+    expect(getChangeDirection(businessPlan, pickOf(yearly, 0))).toBe('downgrade')
     expect(getChangeDirection(undefined, pickOf(monthly, 0))).toBe('change')
   })
 
@@ -146,17 +189,17 @@ describe('planTiers', () => {
     const [starter, current, enterprise] = buildPlanTiers([STARTER], { subscription: subscription(), seatsQuota: 20 })
     const pick = (tier: typeof starter) => ({ tier, option: tier.options[0] })
 
-    expect(getPlanCta(pick(current), business)).toEqual({ kind: 'manage', label: 'Manage plan' })
-    expect(getPlanCta(pick(current), { ...business, isTrialing: true })).toEqual({
+    expect(getPlanCta(pick(current), businessPlan)).toEqual({ kind: 'manage', label: 'Manage plan' })
+    expect(getPlanCta(pick(current), { ...businessPlan, isTrialing: true })).toEqual({
       kind: 'billing',
-      label: 'Add billing details',
+      label: 'Add payment method',
     })
-    expect(getPlanCta(pick(starter), business)).toEqual({
+    expect(getPlanCta(pick(starter), businessPlan)).toEqual({
       kind: 'change',
       direction: 'downgrade',
       label: 'Switch to Starter',
     })
-    expect(getPlanCta(pick(starter), { ...business, name: 'Free', price: 49 })).toEqual({
+    expect(getPlanCta(pick(starter), { ...businessPlan, name: 'Free', price: 49 })).toEqual({
       kind: 'change',
       direction: 'upgrade',
       label: 'Upgrade to Starter',
@@ -171,7 +214,7 @@ describe('planTiers', () => {
       kind: 'subscribe',
       label: 'Continue with Starter',
     })
-    expect(getPlanCta(pick(enterprise), business)).toEqual({ kind: 'sales', label: 'Talk to sales' })
+    expect(getPlanCta(pick(enterprise), businessPlan)).toEqual({ kind: 'sales', label: 'Talk to sales' })
   })
 
   it('leads the claim card with the seat count and trims the features to the highlights', () => {
