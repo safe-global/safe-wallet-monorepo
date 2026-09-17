@@ -21,7 +21,6 @@ jest.mock('@/services/local-storage/useLocalStorage', () => ({
 
 const mockUseLocalStorage = jest.mocked(useLocalStorage)
 
-// The description's onchain framing is deliberate although a Proposer grant is off-chain.
 describe('Policies', () => {
   beforeEach(() => {
     mockHasSeenSpendingLimitIntro = false
@@ -51,7 +50,6 @@ describe('Policies', () => {
     expect(screen.getByRole('link', { name: 'Learn more' })).toHaveAttribute('href', HelpCenterArticle.POLICIES)
   })
 
-  // Mirrors the `Learn more` link in components/settings/ProposersList.
   it('styles Learn more like the Proposers section', () => {
     render(<Policies />)
 

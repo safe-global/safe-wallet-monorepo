@@ -5,7 +5,6 @@ import { Typography } from '@/components/ui/typography'
 
 const PREVIEW_SIGNERS = ['0x8674ff2cC41CE1A26D0A1B4b8f6c8B58F7bca19b', '0x2F4b9a1Cd3e5F70a8b6c4D2E1a9F8c7B6E5d4c3b']
 
-// Checksummed: `Identicon` falls back to a pulsing skeleton for an address `isAddress` rejects.
 const PREVIEW_PROPOSERS = [
   '0x1C8b9E4a7F2d5c3b6a8e9D0f4c2B7A5E3d1c8b9E',
   '0x9a3e7C5B1D8f2A6C4E0B9d7F3a1C5E8B2d6f4A0c',
@@ -103,7 +102,6 @@ const CardHeading = ({
 )
 
 const ProposerPreview = (): ReactElement => (
-  // Hidden from assistive tech: the values are invented and the copy already explains the role.
   <div
     aria-hidden
     data-testid="proposer-preview"
