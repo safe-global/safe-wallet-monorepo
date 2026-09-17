@@ -1,0 +1,55 @@
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { render, screen } from '@/tests/test-utils'
+import PolicySummary from '..'
+import { describePolicy } from '../copy'
+import {
+  limitSummaryBuilder,
+  policySummaryBuilder,
+  safeAccountOptionBuilder,
+  spenderSummaryBuilder,
+} from '../testBuilders'
+
+jest.mock('@/components/common/ChainIndicator', () => {
+  const Mock = ({ chainId }: { chainId: string }) => <img data-testid="chain-logo-img" alt={`chain-${chainId}`} />
+  Mock.displayName = 'ChainIndicator'
+  return { __esModule: true, default: Mock }
+})
+
+const withPeriods = (name: string | undefined, resetTimes: string[]) =>
+  spenderSummaryBuilder()
+    .with({ name, limits: resetTimes.map((resetTimeMin) => limitSummaryBuilder().with({ resetTimeMin }).build()) })
+    .build()
+
+describe('PolicySummary', () => {
+  const simon = withPeriods('Simon', ['0'])
+  const dev = withPeriods('Dev', ['10080', '43200'])
+  const unnamed = withPeriods(undefined, ['1440'])
+  const policy = policySummaryBuilder()
+    .with({ safe: safeAccountOptionBuilder().with({ name: 'Treasury' }).build(), spenders: [simon, dev, unnamed] })
+    .build()
+
+  it('opens with the callout, then the Safe, then one card per spender with one row per limit', () => {
+    render(<PolicySummary policy={policy} />)
+
+    expect(screen.getByTestId('policy-summary')).toBeInTheDocument()
+    expect(screen.getByTestId('policy-summary-callout')).toHaveTextContent(describePolicy(policy).title)
+    expect(screen.getByTestId('policy-summary-applies-to')).toHaveTextContent('Treasury')
+    expect(screen.getAllByTestId('policy-summary-spender')).toHaveLength(3)
+    expect(screen.getAllByTestId('policy-summary-limit')).toHaveLength(4)
+  })
+
+  it('names the spenders in the callout, falling back to the shortened address', () => {
+    render(<PolicySummary policy={policy} />)
+
+    expect(screen.getByTestId('policy-summary-callout')).toHaveTextContent(
+      `You are giving Simon, Dev and ${shortenAddress(unnamed.address)} spending limits.`,
+    )
+  })
+
+  it('shows each limit with its own frequency, in form order', () => {
+    render(<PolicySummary policy={policy} />)
+
+    const labels = screen.getAllByTestId('policy-summary-frequency').map((node) => node.textContent)
+    expect(labels).toEqual(['One time only', 'Weekly', 'Monthly', 'Daily'])
+  })
+})
