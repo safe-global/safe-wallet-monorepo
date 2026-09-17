@@ -533,4 +533,65 @@ describe('AddressInput tests', () => {
 
     await waitFor(() => expect(utils.getByRole('textbox')).toHaveValue(TEST_ADDRESS_A))
   })
+
+  describe('keyboard focus on the read-only contact chip', () => {
+    const mockSafeName = 'Test Safe'
+
+    const mockSavedContact = () => {
+      const mockChainId = '11155111'
+      jest.spyOn(urlChainId, 'default').mockImplementation(() => mockChainId)
+      jest.spyOn(allAddressBooks, 'useAddressBookItem').mockReturnValue({
+        name: mockSafeName,
+        address: TEST_ADDRESS_A,
+        chainIds: [mockChainId],
+        createdBy: '',
+        createdByUserId: 0,
+        lastUpdatedBy: '',
+        lastUpdatedByUserId: 0,
+        createdAt: '',
+        updatedAt: '',
+        source: ContactSource.local,
+      })
+      jest.spyOn(addressBook, 'default').mockImplementation(() => ({ [TEST_ADDRESS_A]: mockSafeName }))
+    }
+
+    it('moves focus from the hidden input to the chip when the address becomes a saved contact', async () => {
+      mockSavedContact()
+      const { input, utils } = setup('')
+
+      // Assert synchronously: earlier tests leave un-awaited userEvent clicks whose fake-timer
+      // steps blur the active element as soon as a waitFor advances the clock.
+      act(() => {
+        input.focus()
+        fireEvent.change(input, { target: { value: TEST_ADDRESS_A } })
+      })
+
+      const chip = utils.getByRole('button', { name: new RegExp(mockSafeName) })
+      expect(chip).toHaveAttribute('tabindex', '0')
+      expect(chip).toHaveFocus()
+    })
+
+    it('clears the address and refocuses the input on Enter', () => {
+      mockSavedContact()
+      const { input, utils } = setup(TEST_ADDRESS_A)
+
+      const chip = utils.getByRole('button', { name: new RegExp(mockSafeName) })
+
+      act(() => {
+        chip.focus()
+        fireEvent.keyDown(chip, { key: 'Enter' })
+      })
+
+      expect(utils.getByRole('textbox')).toHaveValue('')
+      expect(input).toHaveFocus()
+    })
+
+    it('does not add a tab stop for a disabled read-only address', async () => {
+      const { utils } = setup(TEST_ADDRESS_A, undefined, true)
+
+      const chip = await utils.findByTestId('address-book-recipient')
+      expect(chip.parentElement).not.toHaveAttribute('tabindex')
+      expect(chip.parentElement).not.toHaveAttribute('role')
+    })
+  })
 })

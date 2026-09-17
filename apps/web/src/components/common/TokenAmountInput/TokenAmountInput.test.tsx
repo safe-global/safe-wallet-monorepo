@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, screen, waitFor, within } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
-import { FormProvider, useForm, useFieldArray } from 'react-hook-form'
+import { FormProvider, useForm, useFieldArray, useWatch } from 'react-hook-form'
 import TokenAmountInput from './index'
 import { TokenAmountFields } from '@/components/tx-flow/flows/TokenTransfer/types'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
@@ -211,7 +211,61 @@ const SubmitTestWrapper = ({
   )
 }
 
+// Derives the selected token from the form like RecipientRow does, so a token pick reaches the
+// amount validators.
+const TokenSwitchTestWrapper = () => {
+  const methods = useForm({
+    defaultValues: {
+      recipients: [{ recipient: '', [TokenAmountFields.tokenAddress]: ZERO_ADDRESS, [TokenAmountFields.amount]: '' }],
+    },
+    mode: 'onChange',
+  })
+  const tokenAddress = useWatch({ control: methods.control, name: 'recipients.0.tokenAddress' })
+  const selectedToken = mockBalances.find((b) => b.tokenInfo.address === tokenAddress)
+
+  return (
+    <FormProvider {...methods}>
+      <TokenAmountInput
+        balances={mockBalances}
+        selectedToken={selectedToken}
+        maxAmount={BigInt(selectedToken?.balance || '0')}
+        fieldArray={{ name: 'recipients', index: 0 }}
+        deps={['recipients']}
+      />
+    </FormProvider>
+  )
+}
+
+const pickToken = async (name: string) => {
+  await userEvent.click(within(screen.getByTestId('token-selector')).getByRole('combobox'))
+  await userEvent.click(await screen.findByText(name))
+}
+
 describe('TokenAmountInput', () => {
+  describe('Token change', () => {
+    it('keeps the typed amount when a different token is picked', async () => {
+      render(<TokenSwitchTestWrapper />)
+
+      await userEvent.type(screen.getByTestId('token-amount-field'), '0.5')
+      await pickToken('USD Coin')
+
+      expect(screen.getByTestId('token-amount-field')).toHaveValue('0.5')
+      expect(screen.getByText('Amount')).toBeInTheDocument()
+    })
+
+    it('re-validates the kept amount against the new token', async () => {
+      render(<TokenSwitchTestWrapper />)
+
+      await userEvent.type(screen.getByTestId('token-amount-field'), '0.0000001')
+      expect(screen.getByText('Amount')).toBeInTheDocument()
+
+      await pickToken('USD Coin')
+
+      expect(await screen.findByText('Should have 1 to 6 decimals')).toBeInTheDocument()
+      expect(screen.getByTestId('token-amount-field')).toHaveValue('0.0000001')
+    })
+  })
+
   describe('Submitted values', () => {
     it('keeps the picked token address in the submitted payload', async () => {
       const onSubmit = jest.fn()

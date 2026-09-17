@@ -1,8 +1,8 @@
 import AddressInputReadOnly from '@/components/common/AddressInputReadOnly'
 import useAddressBook from '@/hooks/useAddressBook'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import type { ReactElement, ReactNode } from 'react'
-import { useEffect, useCallback, useId, useRef, useMemo, useState } from 'react'
+import type { KeyboardEvent, ReactElement, ReactNode } from 'react'
+import { useEffect, useCallback, useId, useLayoutEffect, useRef, useMemo, useState } from 'react'
 import { Input as InputPrimitive } from '@base-ui/react/input'
 import { useFormContext, useWatch, type Validate, get } from 'react-hook-form'
 import { validatePrefixedAddress } from '@safe-global/utils/utils/validation'
@@ -170,10 +170,34 @@ const AddressInput = ({
     }
   }, [address, currentShortName, setAddressValue, transformAddressValue, watchedValue])
 
+  const inputRef = useRef<HTMLInputElement | null>(null)
+  const readOnlyRef = useRef<HTMLDivElement>(null)
+  const focusInputAfterReset = useRef(false)
+
+  // Chrome drops focus when the focused input turns `visibility: hidden` and restarts Tab from the
+  // top of the page (Firefox keeps the position). Hand focus to the chip before styles apply, and
+  // back to the input once the chip is cleared.
+  useLayoutEffect(() => {
+    if (isReadOnly && document.activeElement === inputRef.current) {
+      readOnlyRef.current?.focus()
+    } else if (!isReadOnly && focusInputAfterReset.current) {
+      focusInputAfterReset.current = false
+      inputRef.current?.focus()
+    }
+  }, [isReadOnly])
+
   const resetName = () => {
     if (!disabled && addressBook[watchedValue]) {
+      focusInputAfterReset.current = true
       setValue(name, '')
       onReset?.()
+    }
+  }
+
+  const onReadOnlyKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (['Enter', ' ', 'Backspace', 'Delete'].includes(event.key)) {
+      event.preventDefault()
+      resetName()
     }
   }
 
@@ -221,7 +245,15 @@ const AddressInput = ({
         onClick={resetName}
       >
         {isReadOnly ? (
-          <AddressInputReadOnly address={watchedValue} showPrefix={showPrefix} chainId={chain?.chainId} />
+          <div
+            ref={readOnlyRef}
+            className="min-w-0 flex-1 outline-none"
+            role={disabled ? undefined : 'button'}
+            tabIndex={disabled ? undefined : 0}
+            onKeyDown={disabled ? undefined : onReadOnlyKeyDown}
+          >
+            <AddressInputReadOnly address={watchedValue} showPrefix={showPrefix} chainId={chain?.chainId} />
+          </div>
         ) : (
           <div className={css.startAdornment}>
             {InputProps?.startAdornment}
@@ -241,6 +273,10 @@ const AddressInput = ({
         <InputPrimitive
           {...props}
           {...registerProps}
+          ref={(node: HTMLInputElement | null) => {
+            registerProps.ref(node)
+            inputRef.current = node
+          }}
           id={id}
           className={classnames(css.input, InputProps?.className)}
           autoComplete="off"
@@ -275,6 +311,8 @@ const AddressInput = ({
                   variant="ghost"
                   size="icon-sm"
                   data-testid="address-book-toggle"
+                  // Arrow down on the input opens the list, so the caret is a redundant tab stop.
+                  tabIndex={-1}
                   onClick={onOpenListClick}
                   className={classnames(css.openButton, { [css.rotated]: isAutocompleteOpen })}
                 >

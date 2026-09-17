@@ -554,6 +554,13 @@ describe('AddressBookInput', () => {
       return activeId ? document.getElementById(activeId) : null
     }
 
+    it('keeps the caret out of the tab order since ArrowDown opens the list', () => {
+      const { addressBook } = twoContacts()
+      const { utils } = setup('', addressBook)
+
+      expect(utils.getByTestId('address-book-toggle')).toHaveAttribute('tabindex', '-1')
+    })
+
     it('opens the list and activates the first option on ArrowDown', async () => {
       const { addressBook } = twoContacts()
       const { input, utils } = setup('', addressBook)

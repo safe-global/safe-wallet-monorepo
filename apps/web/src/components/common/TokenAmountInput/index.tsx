@@ -7,7 +7,7 @@ import { Separator } from '@/components/ui/separator'
 import { Typography } from '@/components/ui/typography'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import classNames from 'classnames'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { get, useFormContext } from 'react-hook-form'
 import type { FieldArrayPath, FieldValues } from 'react-hook-form'
 import css from './styles.module.css'
@@ -50,7 +50,6 @@ const TokenAmountInput = ({
   const {
     formState: { errors },
     register,
-    resetField,
     watch,
     setValue,
     trigger,
@@ -109,23 +108,22 @@ const TokenAmountInput = ({
     trigger(deps)
   }, [maxAmount, selectedToken, setValue, amountField, trigger, deps, onMaxClick])
 
-  const onChangeToken = useCallback(() => {
-    // Clear, not reset: with prefilled defaultValues a reset would restore the old token's amount.
-    resetField(amountField, { defaultValue: '' })
-
-    trigger(deps)
-  }, [resetField, amountField, trigger, deps])
-
   const handleTokenChange = useCallback(
-    (value: string) => {
-      // Re-picking the same token is not a change, so it must not wipe a typed amount.
-      if (sameAddress(value, tokenAddress)) return
-
-      setValue(tokenAddressField, value, { shouldValidate: true })
-      onChangeToken()
-    },
-    [setValue, tokenAddressField, onChangeToken, tokenAddress],
+    (value: string) => setValue(tokenAddressField, value, { shouldValidate: true }),
+    [setValue, tokenAddressField],
   )
+
+  // The amount survives a token change; its validators close over the new token's decimals and
+  // balance only after this render, so re-run them here rather than in the change handler.
+  const previousTokenAddress = useRef(tokenAddress)
+  useEffect(() => {
+    if (sameAddress(previousTokenAddress.current, tokenAddress)) return
+    previousTokenAddress.current = tokenAddress
+
+    if (!watchedAmount) return
+    trigger(amountField)
+    if (deps) trigger(deps)
+  }, [tokenAddress, watchedAmount, amountField, deps, trigger])
 
   const selectedBalance = balances.find((item) => item.tokenInfo.address === tokenAddress)
 
