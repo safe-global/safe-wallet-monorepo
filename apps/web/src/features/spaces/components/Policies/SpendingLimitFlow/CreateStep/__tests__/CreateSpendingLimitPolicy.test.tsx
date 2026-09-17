@@ -61,7 +61,7 @@ const renderStep = ({ data, scopeKey }: { data?: SpendingLimitPolicyFormValues; 
       }}
     >
       <TxFlowContext.Provider value={context as TxFlowContextType}>
-        <CreateSpendingLimitPolicy />
+        <CreateSpendingLimitPolicy isCalloutDismissed={false} onDismissCallout={jest.fn()} />
       </TxFlowContext.Provider>
     </SafeScopeContext.Provider>,
   )

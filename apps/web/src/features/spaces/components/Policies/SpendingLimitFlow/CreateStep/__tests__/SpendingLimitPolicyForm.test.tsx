@@ -124,6 +124,8 @@ const renderForm = (props: Partial<SpendingLimitPolicyFormProps> = {}) => {
       isAccountsLoading={false}
       isAccountsError={false}
       onRetryAccounts={jest.fn()}
+      isCalloutDismissed={false}
+      onDismissCallout={jest.fn()}
       hasWallet
       onSafeChange={onSafeChange}
       onSpendersChange={onSpendersChange}
@@ -255,10 +257,19 @@ describe('SpendingLimitPolicyForm', () => {
     expect(screen.getAllByTestId('limit-token-selector')[0]).toHaveValue(ZERO_ADDRESS)
   })
 
-  it('lets the callout be dismissed', async () => {
-    const { user } = renderForm()
+  // The dismissal is owned above `TxFlow` so it survives a trip to Review and back, which means the
+  // form reports the click rather than hiding the callout itself.
+  it('hands the callout dismissal to its owner', async () => {
+    const onDismissCallout = jest.fn()
+    const { user } = renderForm({ onDismissCallout })
 
     await user.click(screen.getByRole('button', { name: CALLOUT_DISMISS_LABEL }))
+
+    expect(onDismissCallout).toHaveBeenCalled()
+  })
+
+  it('hides the callout once its owner says it was dismissed', () => {
+    renderForm({ isCalloutDismissed: true })
 
     expect(screen.queryByText(CALLOUT_TITLE)).not.toBeInTheDocument()
   })

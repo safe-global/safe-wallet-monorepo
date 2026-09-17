@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
 import { fn } from 'storybook/test'
@@ -74,6 +75,7 @@ type StoryProps = Partial<SpendingLimitPolicyFormProps> & { initialSafe?: SafeSc
 const ScopedForm = ({ initialSafe: _initialSafe, ...props }: StoryProps) => {
   const { setScope } = useSafeScopeControls()
   const scopeKey = useSafeScope()?.scopeKey
+  const [isCalloutDismissed, setIsCalloutDismissed] = useState(false)
   return (
     <SpendingLimitPolicyForm
       defaultValues={createDefaultFormValues()}
@@ -83,6 +85,8 @@ const ScopedForm = ({ initialSafe: _initialSafe, ...props }: StoryProps) => {
       isAccountsError={false}
       onRetryAccounts={fn()}
       hasWallet
+      isCalloutDismissed={isCalloutDismissed}
+      onDismissCallout={() => setIsCalloutDismissed(true)}
       onSafeChange={setScope}
       scopeKey={scopeKey}
       {...props}

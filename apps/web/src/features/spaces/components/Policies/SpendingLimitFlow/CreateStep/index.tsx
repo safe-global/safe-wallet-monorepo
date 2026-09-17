@@ -6,8 +6,16 @@ import { useSpendingLimitSafeAccounts } from '../hooks/useSpendingLimitSafeAccou
 import SpendingLimitPolicyForm from './SpendingLimitPolicyForm'
 import { createDefaultFormValues, type SpendingLimitPolicyFormValues } from '../types'
 
+export type CreateSpendingLimitPolicyProps = {
+  isCalloutDismissed: boolean
+  onDismissCallout: () => void
+}
+
 /** Step 1: connects the form to the flow data, the eligible accounts and the SafeScope. */
-const CreateSpendingLimitPolicy = (): ReactElement => {
+const CreateSpendingLimitPolicy = ({
+  isCalloutDismissed,
+  onDismissCallout,
+}: CreateSpendingLimitPolicyProps): ReactElement => {
   const { data, onNext } = useContext<TxFlowContextType<SpendingLimitPolicyFormValues>>(TxFlowContext)
   const { accounts, isLoading, isError, refetch, hasWallet } = useSpendingLimitSafeAccounts()
   const { setScope } = useSafeScopeControls()
@@ -29,6 +37,8 @@ const CreateSpendingLimitPolicy = (): ReactElement => {
       onSafeChange={setScope}
       scopeKey={scopeKey}
       onSpendersChange={setSpenderAddresses}
+      isCalloutDismissed={isCalloutDismissed}
+      onDismissCallout={onDismissCallout}
     />
   )
 }

@@ -1,13 +1,27 @@
+import { useState as mockUseState } from 'react'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-import { render, screen } from '@/tests/test-utils'
+import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import { TxFlow } from '@/components/tx-flow/TxFlow'
 import ReviewSpendingLimitPolicy from '../ReviewStep'
 import { createDefaultFormValues } from '../types'
 import { CREATE_STEP_TITLE, FLOW_HELP_LABEL, FLOW_SUBTITLE } from '../constants'
 import SpendingLimitFlow from '..'
 
+// A miniature of TxFlow: it shows one step at a time, so the Create step really unmounts when the
+// flow moves on — which is the whole reason state it must keep lives above it.
 jest.mock('@/components/tx-flow/TxFlow', () => ({
-  TxFlow: jest.fn(({ children }: { children: React.ReactNode }) => <div data-testid="tx-flow">{children}</div>),
+  TxFlow: jest.fn(({ children }: { children: React.ReactNode }) => {
+    // `mock`-prefixed so the hoisted factory may reach it.
+    const [isOnCreateStep, setIsOnCreateStep] = mockUseState(true)
+    return (
+      <div data-testid="tx-flow">
+        {isOnCreateStep ? children : <div data-testid="other-step" />}
+        <button type="button" onClick={() => setIsOnCreateStep((current) => !current)}>
+          change step
+        </button>
+      </div>
+    )
+  }),
 }))
 jest.mock('@/components/tx-flow/safe-scope/SafeScopeProvider', () => ({
   SafeScopeProvider: ({ children, initial }: { children: React.ReactNode; initial?: unknown }) => (
@@ -16,7 +30,22 @@ jest.mock('@/components/tx-flow/safe-scope/SafeScopeProvider', () => ({
     </div>
   ),
 }))
-jest.mock('../CreateStep', () => ({ __esModule: true, default: () => <div data-testid="create-step" /> }))
+jest.mock('../CreateStep', () => ({
+  __esModule: true,
+  default: ({
+    isCalloutDismissed,
+    onDismissCallout,
+  }: {
+    isCalloutDismissed: boolean
+    onDismissCallout: () => void
+  }) => (
+    <div data-testid="create-step" data-callout-dismissed={String(isCalloutDismissed)}>
+      <button type="button" onClick={onDismissCallout}>
+        dismiss callout
+      </button>
+    </div>
+  ),
+}))
 
 const mockTxFlow = TxFlow as jest.MockedFunction<typeof TxFlow>
 
@@ -47,6 +76,20 @@ describe('SpendingLimitFlow', () => {
     expect(props.ReviewTransactionComponent).toBe(ReviewSpendingLimitPolicy)
     expect(props.initialData).toEqual(createDefaultFormValues())
     expect(props.eventCategory).toBeUndefined()
+  })
+
+  it('keeps the callout dismissed across a trip to the next step and back', async () => {
+    const { user } = renderWithUserEvent(<SpendingLimitFlow />)
+
+    expect(screen.getByTestId('create-step')).toHaveAttribute('data-callout-dismissed', 'false')
+    await user.click(screen.getByRole('button', { name: 'dismiss callout' }))
+    expect(screen.getByTestId('create-step')).toHaveAttribute('data-callout-dismissed', 'true')
+
+    await user.click(screen.getByRole('button', { name: 'change step' }))
+    expect(screen.queryByTestId('create-step')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'change step' }))
+
+    expect(screen.getByTestId('create-step')).toHaveAttribute('data-callout-dismissed', 'true')
   })
 
   it('titles the first step and hides the nonce on it', () => {

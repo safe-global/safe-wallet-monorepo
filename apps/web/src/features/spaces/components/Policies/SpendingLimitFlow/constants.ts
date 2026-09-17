@@ -19,7 +19,7 @@ export const ONE_TIME_HELPER_TEXT = 'One-time limit, it does not reset'
 export const PRICE_UNAVAILABLE_TEXT = 'Price unavailable'
 
 export const ADD_TOKEN_LABEL = 'Add token'
-export const ADD_SPENDER_LABEL = 'Add Spender'
+export const ADD_SPENDER_LABEL = 'Add spender'
 export const REMOVE_SPENDER_LABEL = 'Remove spender'
 export const REMOVE_LIMIT_LABEL = 'Remove token limit'
 export const NEXT_LABEL = 'Next'

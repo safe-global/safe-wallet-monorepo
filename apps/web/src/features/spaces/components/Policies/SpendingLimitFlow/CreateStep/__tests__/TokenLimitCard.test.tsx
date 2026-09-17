@@ -148,6 +148,14 @@ describe('TokenLimitCard', () => {
     expect(screen.getByTestId('amount-fiat')).toHaveTextContent(/4[,.]000/)
   })
 
+  it('stays quiet about fiat until an amount is entered, rather than claiming $0.00', async () => {
+    const { user } = renderRows()
+
+    await user.selectOptions(screen.getByTestId('limit-token-selector'), ZERO_ADDRESS)
+
+    expect(screen.queryByTestId('amount-fiat')).not.toBeInTheDocument()
+  })
+
   it('says so when the selected token has no price', async () => {
     const { user } = renderRows()
 

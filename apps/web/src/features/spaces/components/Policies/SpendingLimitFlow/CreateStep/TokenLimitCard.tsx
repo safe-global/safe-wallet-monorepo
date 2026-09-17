@@ -40,9 +40,15 @@ const hasPrice = (token: TokenOption): boolean => !!token.fiatConversion && pars
 const FiatLine = ({ amount, token }: { amount: string; token: TokenOption | undefined }): ReactElement | null => {
   if (!token) return null
   if (!hasPrice(token)) return <span data-testid="amount-fiat">{PRICE_UNAVAILABLE_TEXT}</span>
+
+  // Nothing typed yet is not worth $0.00 — `computeFiatValue` returns null for that, and for anything
+  // else it cannot price, so say nothing rather than coercing it to a figure.
+  const fiat = computeFiatValue(parseFloat(amount), token.fiatConversion)
+  if (fiat === null) return null
+
   return (
     <span data-testid="amount-fiat">
-      <FiatValue value={computeFiatValue(parseFloat(amount), token.fiatConversion) ?? 0} />
+      <FiatValue value={fiat} />
     </span>
   )
 }

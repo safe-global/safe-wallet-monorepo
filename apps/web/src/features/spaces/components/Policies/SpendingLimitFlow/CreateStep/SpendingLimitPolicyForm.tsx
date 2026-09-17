@@ -23,6 +23,8 @@ export type SpendingLimitPolicyFormProps = {
   scopeKey?: string
   /** Every spender address currently typed, for the poisoning check the connected step runs. */
   onSpendersChange?: (addresses: string[]) => void
+  isCalloutDismissed: boolean
+  onDismissCallout: () => void
 }
 
 /**
@@ -40,12 +42,15 @@ const SpendingLimitPolicyForm = ({
   onSafeChange,
   scopeKey,
   onSpendersChange,
+  isCalloutDismissed,
+  onDismissCallout,
 }: SpendingLimitPolicyFormProps): ReactElement => {
   const formMethods = useForm<SpendingLimitPolicyFormValues>({ defaultValues, mode: 'onChange' })
   const { control, handleSubmit, formState, watch, getValues, setValue } = formMethods
   const { fields, append, remove } = useFieldArray({ control, name: 'spenders' })
 
-  // A token picked for Safe A must not survive switching to Safe B. The first selection is not a switch.
+  // A token picked for Safe A must not survive switching to Safe B. The picker clears its own value
+  // too; clearing here as well covers every row, open or not. The first selection is not a switch.
   const previousScopeKey = useRef(scopeKey)
   useEffect(() => {
     const previous = previousScopeKey.current
@@ -73,7 +78,7 @@ const SpendingLimitPolicyForm = ({
           className="flex flex-col gap-5"
           data-testid="spending-limit-policy-form"
         >
-          <SpenderCallout />
+          <SpenderCallout dismissed={isCalloutDismissed} onDismiss={onDismissCallout} />
 
           <SafeAccountField
             accounts={accounts}

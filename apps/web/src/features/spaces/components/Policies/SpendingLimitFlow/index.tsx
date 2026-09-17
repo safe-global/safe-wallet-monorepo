@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react'
+import { useCallback, useState, type ReactElement } from 'react'
 import { Info, WalletCards } from 'lucide-react'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import ExternalLink from '@/components/common/ExternalLink'
@@ -30,19 +30,26 @@ const FlowSubtitle = (): ReactElement => (
  * The SafeScopeProvider sits above TxFlow so every tx-flow provider and hook resolves the Safe picked
  * in step 1. It starts empty because step 1 is where that Safe is chosen.
  */
-const SpendingLimitFlow = (): ReactElement => (
-  <SafeScopeProvider>
-    <TxFlow
-      icon={SpendingLimitIcon}
-      subtitle={<FlowSubtitle />}
-      ReviewTransactionComponent={ReviewSpendingLimitPolicy}
-      initialData={createDefaultFormValues()}
-    >
-      <TxFlowStep title={CREATE_STEP_TITLE} hideNonce>
-        <CreateSpendingLimitPolicy />
-      </TxFlowStep>
-    </TxFlow>
-  </SafeScopeProvider>
-)
+const SpendingLimitFlow = (): ReactElement => {
+  // `TxFlow` renders one step at a time, so anything the Create step should still know after a trip to
+  // Review and back has to be held here instead.
+  const [isCalloutDismissed, setIsCalloutDismissed] = useState(false)
+  const dismissCallout = useCallback(() => setIsCalloutDismissed(true), [])
+
+  return (
+    <SafeScopeProvider>
+      <TxFlow
+        icon={SpendingLimitIcon}
+        subtitle={<FlowSubtitle />}
+        ReviewTransactionComponent={ReviewSpendingLimitPolicy}
+        initialData={createDefaultFormValues()}
+      >
+        <TxFlowStep title={CREATE_STEP_TITLE} hideNonce>
+          <CreateSpendingLimitPolicy isCalloutDismissed={isCalloutDismissed} onDismissCallout={dismissCallout} />
+        </TxFlowStep>
+      </TxFlow>
+    </SafeScopeProvider>
+  )
+}
 
 export default SpendingLimitFlow
