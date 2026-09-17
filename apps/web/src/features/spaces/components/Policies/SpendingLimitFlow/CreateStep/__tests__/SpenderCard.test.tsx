@@ -42,14 +42,14 @@ jest.mock('@/components/common/AddressBookInput', () => {
   return { __esModule: true, default: MockAddressBookInput }
 })
 
-jest.mock('../LimitRow', () => ({
+jest.mock('../TokenLimitCard', () => ({
   __esModule: true,
   default: ({ limitIndex, removable, onRemove }: { limitIndex: number; removable: boolean; onRemove: () => void }) => (
-    <div data-testid="limit-row">
-      row {limitIndex}
+    <div data-testid="token-limit-card">
+      limit {limitIndex}
       {removable && (
         <button type="button" onClick={onRemove}>
-          remove row {limitIndex}
+          remove limit {limitIndex}
         </button>
       )}
     </div>
@@ -83,7 +83,7 @@ describe('SpenderCard', () => {
   it('starts with one limit row and explains who the spender is', () => {
     renderWithUserEvent(<Harness spenders={[createEmptySpender()]} />)
 
-    expect(screen.getAllByTestId('limit-row')).toHaveLength(1)
+    expect(screen.getAllByTestId('token-limit-card')).toHaveLength(1)
     expect(screen.getByText(SPENDER_HELPER_TEXT)).toBeInTheDocument()
   })
 
@@ -91,11 +91,11 @@ describe('SpenderCard', () => {
     const { user } = renderWithUserEvent(<Harness spenders={[createEmptySpender()]} />)
 
     await user.click(screen.getByRole('button', { name: ADD_TOKEN_LABEL }))
-    expect(screen.getAllByTestId('limit-row')).toHaveLength(2)
+    expect(screen.getAllByTestId('token-limit-card')).toHaveLength(2)
 
-    await user.click(screen.getByRole('button', { name: 'remove row 0' }))
-    expect(screen.getAllByTestId('limit-row')).toHaveLength(1)
-    expect(screen.getByTestId('limit-row')).toHaveTextContent('row 0')
+    await user.click(screen.getByRole('button', { name: 'remove limit 0' }))
+    expect(screen.getAllByTestId('token-limit-card')).toHaveLength(1)
+    expect(screen.getByTestId('token-limit-card')).toHaveTextContent('limit 0')
     expect(screen.queryByRole('button', { name: /remove row/ })).not.toBeInTheDocument()
   })
 

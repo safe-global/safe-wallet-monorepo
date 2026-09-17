@@ -5,7 +5,7 @@ import AddressBookInput from '@/components/common/AddressBookInput'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { FieldDescription } from '@/components/ui/field'
-import LimitRow from './LimitRow'
+import TokenLimitCard from './TokenLimitCard'
 import { validateUniqueSpender } from '../utils/validation'
 import { createEmptyLimit, limitsPath, spenderAddressPath, type SpendingLimitPolicyFormValues } from '../types'
 import {
@@ -66,9 +66,7 @@ const SpenderCard = ({ spenderIndex, spenderCount, removable, onRemove }: Spende
             aria-label={REMOVE_SPENDER_LABEL}
             onClick={onRemove}
             data-testid="remove-spender-btn"
-            /* z-10: the address field's wrapper is `position: relative` and follows this button in the
-               DOM, so without it that wrapper's full-width label paints over the button and swallows
-               the click everywhere but its top and bottom edges. */
+            /* The address field's wrapper follows this in the DOM and would otherwise paint over it. */
             className="absolute top-2 right-2 z-10"
           >
             <X />
@@ -90,7 +88,7 @@ const SpenderCard = ({ spenderIndex, spenderCount, removable, onRemove }: Spende
 
         <div className="flex flex-col gap-3">
           {fields.map((field, index) => (
-            <LimitRow
+            <TokenLimitCard
               key={field.id}
               spenderIndex={spenderIndex}
               limitIndex={index}

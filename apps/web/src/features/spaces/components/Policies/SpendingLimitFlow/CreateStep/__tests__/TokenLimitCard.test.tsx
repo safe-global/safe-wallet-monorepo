@@ -11,7 +11,7 @@ import {
   REMOVE_LIMIT_LABEL,
 } from '../../constants'
 import { createEmptyLimit, type LimitFormValues, type SpendingLimitPolicyFormValues } from '../../types'
-import LimitRow from '../LimitRow'
+import TokenLimitCard from '../TokenLimitCard'
 
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'
@@ -90,7 +90,7 @@ const Harness = ({ limits, onRemove = jest.fn() }: { limits: LimitFormValues[]; 
   return (
     <FormProvider {...methods}>
       {limits.map((_, index) => (
-        <LimitRow
+        <TokenLimitCard
           key={index}
           spenderIndex={0}
           limitIndex={index}
@@ -109,7 +109,7 @@ const Harness = ({ limits, onRemove = jest.fn() }: { limits: LimitFormValues[]; 
 const renderRows = (limits: LimitFormValues[] = [createEmptyLimit()], onRemove?: () => void) =>
   renderWithUserEvent(<Harness limits={limits} onRemove={onRemove} />)
 
-describe('LimitRow', () => {
+describe('TokenLimitCard', () => {
   beforeEach(() => {
     mockUseOptions.mockReturnValue({
       options: mockTokens,

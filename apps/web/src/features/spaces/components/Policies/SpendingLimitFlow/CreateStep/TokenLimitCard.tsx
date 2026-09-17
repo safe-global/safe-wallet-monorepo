@@ -26,7 +26,7 @@ import {
   REMOVE_LIMIT_LABEL,
 } from '../constants'
 
-export type LimitRowProps = {
+export type TokenLimitCardProps = {
   spenderIndex: number
   limitIndex: number
   /** The other rows' token paths become this row's validation deps. */
@@ -47,7 +47,13 @@ const FiatLine = ({ amount, token }: { amount: string; token: TokenOption | unde
   )
 }
 
-const LimitRow = ({ spenderIndex, limitIndex, limitCount, removable, onRemove }: LimitRowProps): ReactElement => {
+const TokenLimitCard = ({
+  spenderIndex,
+  limitIndex,
+  limitCount,
+  removable,
+  onRemove,
+}: TokenLimitCardProps): ReactElement => {
   const chainId = useChainId()
   const {
     control,
@@ -95,7 +101,7 @@ const LimitRow = ({ spenderIndex, limitIndex, limitCount, removable, onRemove }:
   const amountError = get(errors, amountPath)
 
   return (
-    <Card variant="muted-nested" size="none" radius="lg" className="relative" data-testid="limit-row">
+    <Card variant="muted-nested" size="none" radius="lg" className="relative" data-testid="token-limit-card">
       {/* Corner-pinned so it never narrows the two fields. */}
       {removable && (
         <Button
@@ -206,4 +212,4 @@ const LimitRow = ({ spenderIndex, limitIndex, limitCount, removable, onRemove }:
   )
 }
 
-export default LimitRow
+export default TokenLimitCard
