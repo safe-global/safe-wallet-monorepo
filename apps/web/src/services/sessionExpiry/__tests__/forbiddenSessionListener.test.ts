@@ -164,6 +164,22 @@ describe('forbiddenSessionListener', () => {
     expect(pendingOf(store)).toBe(false)
   })
 
+  it('keeps a session that was renewed while the probe was in flight', async () => {
+    let rejectProbe: (error: unknown) => void = () => {}
+    mockUnwrap.mockImplementation(() => new Promise((_, reject) => (rejectProbe = reject)))
+    const store = createTestStore()
+    signIn(store)
+
+    store.dispatch(rejectedWithValue())
+    await flush()
+    const renewedExpiry = store.dispatch(setAuthenticated(Date.now() + 120_000)).payload
+    rejectProbe({ status: 403, data: 'Forbidden' })
+    await flush()
+
+    expect(sessionOf(store)).toBe(renewedExpiry)
+    expect(toastOf(store)).toBeUndefined()
+  })
+
   it('probes again for a 403 that arrives after the previous probe settled', async () => {
     mockUnwrap.mockResolvedValue({ id: faker.number.int() })
     const store = createTestStore()
