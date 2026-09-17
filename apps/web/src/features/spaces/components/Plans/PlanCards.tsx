@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ArrowRight, ArrowUpRight, Check } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -152,9 +152,12 @@ export const PlanCard = ({
   onOptionChange?: (option: PlanSeatOption) => void
 } & PlanCardActions) => {
   const selectable = onSelect !== undefined
-  const [option, setOption] = useState<PlanSeatOption | undefined>(
-    tier.options.find((candidate) => candidate.priceId === tier.currentPriceId) ?? tier.options[0],
-  )
+  const currentOption = tier.options.find((candidate) => candidate.priceId === tier.currentPriceId)
+  const [option, setOption] = useState<PlanSeatOption | undefined>(currentOption ?? tier.options[0])
+  // The subscription can land after the card mounted; the selector must then snap to the plan in force.
+  useEffect(() => {
+    if (currentOption) setOption(currentOption)
+  }, [currentOption])
   const price = option?.price ?? null
   const hint = salesHint?.(tier)
 
@@ -248,7 +251,12 @@ export function PlanCatalog({
 } & PlanCardActions) {
   const [cycle, setCycle] = useState<Cycle>('month')
   const discount = yearlyDiscount(tiers)
-  const visible = tiers.filter((tier) => tier.isCurrent || tier.billingCycle === null || tier.billingCycle === cycle)
+  // The current plan's card follows the toggle like any other, except it stays put when the other cycle has no
+  // offer of that plan to show in its place.
+  const visible = tiers.filter((tier) => {
+    if (tier.billingCycle === null || tier.billingCycle === cycle) return true
+    return Boolean(tier.isCurrent) && !tiers.some((other) => other.name === tier.name && other.billingCycle === cycle)
+  })
 
   return (
     <div className="flex flex-col gap-6">

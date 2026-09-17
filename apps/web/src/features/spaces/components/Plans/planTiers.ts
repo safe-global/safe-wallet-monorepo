@@ -141,14 +141,14 @@ const bySeats = (a: PlanSeatOption, b: PlanSeatOption): number =>
   (a.seats ?? Number.POSITIVE_INFINITY) - (b.seats ?? Number.POSITIVE_INFINITY)
 
 /**
- * One card per plan: the current plan's card absorbs the other seat sizes the CGW offers for the same billing cycle
- * (so the user can resize from it), and any other card of that plan is dropped.
+ * One card per plan and cycle: the current plan's card absorbs the other seat sizes the CGW offers for its billing
+ * cycle (so the user can resize from it); the same plan on the other cycle stays a regular offer.
  */
 const mergeCurrentTier = (offered: PlanTier[], current: PlanTier): PlanTier[] => {
-  const sameCycle = offered.find((tier) => tier.name === current.name && tier.billingCycle === current.billingCycle)
-  const extra = (sameCycle?.options ?? []).filter((option) => option.priceId !== current.currentPriceId)
+  const isSameCycle = (tier: PlanTier) => tier.name === current.name && tier.billingCycle === current.billingCycle
+  const extra = (offered.find(isSameCycle)?.options ?? []).filter((option) => option.priceId !== current.currentPriceId)
   const merged = { ...current, options: [...current.options, ...extra].sort(bySeats) }
-  return [...offered.filter((tier) => tier.name !== current.name), merged]
+  return [...offered.filter((tier) => !isSameCycle(tier)), merged]
 }
 
 const rank = (name: string): number => {

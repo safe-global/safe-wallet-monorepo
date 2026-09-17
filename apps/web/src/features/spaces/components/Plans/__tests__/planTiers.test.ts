@@ -139,10 +139,11 @@ describe('planTiers', () => {
 
     expect(tiers.map((tier) => [tier.name, tier.billingCycle, tier.isCurrent ?? false])).toEqual([
       ['Starter', 'month', false],
+      ['Business', 'year', false],
       ['Business', 'month', true],
       ['Enterprise', null, false],
     ])
-    const business = tiers[1]
+    const business = tiers[2]
     expect(business.currentPriceId).toBe('price_b20m')
     expect(business.options.map((option) => [option.priceId, option.seats, option.paymentLinkId])).toEqual([
       ['price_b10m', 10, 'b10m'],
@@ -152,7 +153,7 @@ describe('planTiers', () => {
   })
 
   it('turns another seat size of the current plan into a change, and the current one into managing it', () => {
-    const [business] = buildPlanTiers([BUSINESS], {
+    const [, business] = buildPlanTiers([BUSINESS], {
       subscription: subscription({ id: 'price_b20m' }),
       seatsQuota: 20,
     })

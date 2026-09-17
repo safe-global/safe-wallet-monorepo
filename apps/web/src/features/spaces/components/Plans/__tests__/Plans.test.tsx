@@ -164,6 +164,30 @@ describe('Plans', () => {
     expect(onManage).toHaveBeenCalled()
   })
 
+  it('shows the current plan on its own cycle and the offered plan of the other cycle under the toggle', () => {
+    const business = {
+      name: 'Business',
+      offers: [offer('Business', 'pl_business_5', 299, 'month'), offer('Business', 'pl_business_y', 6990, 'year')],
+    }
+    render(
+      <Plans
+        plan={trialing(14)}
+        {...meters}
+        tiers={buildPlanTiers([business], { subscription: subscription('Business', 499), seatsQuota: 20 })}
+        currentPlan={current('Business', 499, true)}
+      />,
+    )
+
+    expect(screen.getByTestId('current-plan-card')).toHaveTextContent('€499')
+    expect(screen.getByTestId('current-plan-card')).toHaveTextContent('20 Safe accounts')
+    expect(screen.queryByText('€6,990')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('tab', { name: /Yearly/ }))
+    expect(screen.queryByTestId('current-plan-card')).not.toBeInTheDocument()
+    expect(screen.getByText('€6,990')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Upgrade to Business' })).toBeInTheDocument()
+  })
+
   it('names the picked seat option on the closed selector instead of its payment link id', () => {
     const business = {
       name: 'Business',
