@@ -9,7 +9,7 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { buildSafeAccountId, groupSafeAccounts } from '../SafeAccountSelector/utils'
 import { isSafeAccountGroup, type SafeAccountEntry, type SafeAccountOption } from '../SafeAccountSelector/types'
 import type { ChainInfo } from '@/features/spaces/types'
-import ProposerRoleDialog from './index'
+import ProposerRoleForm from './ProposerRoleForm'
 
 const ETHEREUM = '1'
 const POLYGON = '137'
@@ -93,8 +93,8 @@ const setup = createMockStory({
 })
 
 const meta = {
-  title: 'Features/Spaces/Policies/ProposerRoleDialog',
-  component: ProposerRoleDialog,
+  title: 'Features/Spaces/Policies/ProposerRoleForm',
+  component: ProposerRoleForm,
   parameters: {
     layout: 'centered',
     ...setup.parameters,
@@ -104,27 +104,28 @@ const meta = {
   decorators: [setup.decorator],
   tags: ['autodocs'],
   args: {
-    open: true,
     accounts,
-    onOpenChange: fn(),
     onSubmit: fn(),
     onSafeAccountChange: fn(),
   },
-  render: function ProposerRoleDialogStory(args) {
+  render: function ProposerRoleFormStory(args) {
     const [safeAccount, setSafeAccount] = useState(args.safeAccount)
 
+    // Same width as the tx-flow card column the form lives in.
     return (
-      <ProposerRoleDialog
-        {...args}
-        safeAccount={safeAccount}
-        onSafeAccountChange={(value) => {
-          args.onSafeAccountChange(value)
-          setSafeAccount(value)
-        }}
-      />
+      <div className="w-[672px] max-w-[calc(100vw-2rem)]">
+        <ProposerRoleForm
+          {...args}
+          safeAccount={safeAccount}
+          onSafeAccountChange={(value) => {
+            args.onSafeAccountChange(value)
+            setSafeAccount(value)
+          }}
+        />
+      </div>
     )
   },
-} satisfies Meta<typeof ProposerRoleDialog>
+} satisfies Meta<typeof ProposerRoleForm>
 
 export default meta
 type Story = StoryObj<typeof meta>

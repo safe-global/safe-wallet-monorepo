@@ -1,13 +1,20 @@
-import { render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
+import type { ReactNode } from 'react'
+import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import { buildSafeAccountId } from '../../SafeAccountSelector/utils'
 import type { SafeAccountOption } from '../../SafeAccountSelector/types'
-import ProposerRoleDialog, { type ProposerRoleDialogProps } from '../index'
+import ProposerRoleForm, { type ProposerRoleFormProps } from '../ProposerRoleForm'
 
 jest.mock('@/components/common/ChainIndicator', () => {
   const Mock = ({ chainId }: { chainId: string }) => <img data-testid="chain-logo-img" alt={`chain-${chainId}`} />
   Mock.displayName = 'ChainIndicator'
   return { __esModule: true, default: Mock }
 })
+
+// No wallet or scoped Safe here; the wallet gate is CheckWallet's own concern.
+jest.mock('@/components/common/CheckWallet', () => ({
+  __esModule: true,
+  default: ({ children }: { children: (ok: boolean) => ReactNode }) => <>{children(true)}</>,
+}))
 
 const CHAIN_ID = '1'
 const SAFE = '0xAAAAaaaaAAaaaaAAAaAAaaaAaAaaaaaAAAaaAAaA'
@@ -25,16 +32,9 @@ const treasury: SafeAccountOption = {
   fiatTotal: '123720',
 }
 
-const renderDialog = (props: Partial<ProposerRoleDialogProps> = {}) =>
+const renderForm = (props: Partial<ProposerRoleFormProps> = {}) =>
   renderWithUserEvent(
-    <ProposerRoleDialog
-      open
-      onOpenChange={jest.fn()}
-      onSubmit={jest.fn()}
-      accounts={[treasury]}
-      onSafeAccountChange={jest.fn()}
-      {...props}
-    />,
+    <ProposerRoleForm onSubmit={jest.fn()} accounts={[treasury]} onSafeAccountChange={jest.fn()} {...props} />,
   )
 
 const submitButton = () => screen.getByRole('button', { name: 'Submit' })
@@ -42,30 +42,15 @@ const submitButton = () => screen.getByRole('button', { name: 'Submit' })
 // The proposer field is a combobox too, so the account field is addressed by its test id.
 const accountField = () => screen.getByTestId('safe-account-selector')
 
-const openAccountField = async (user: ReturnType<typeof renderDialog>['user']) => {
+const openAccountField = async (user: ReturnType<typeof renderForm>['user']) => {
   const trigger = accountField()
   await user.click(trigger)
   await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'true'))
 }
 
-describe('ProposerRoleDialog', () => {
-  it('names the policy and what it does', () => {
-    render(
-      <ProposerRoleDialog
-        open
-        onOpenChange={jest.fn()}
-        onSubmit={jest.fn()}
-        accounts={[treasury]}
-        onSafeAccountChange={jest.fn()}
-      />,
-    )
-
-    expect(screen.getByRole('heading', { name: /Proposer role/ })).toBeInTheDocument()
-    expect(screen.getByText('Let teammates without signing rights propose transactions.')).toBeInTheDocument()
-  })
-
+describe('ProposerRoleForm', () => {
   it('warns that the grant needs a wallet signature to complete', () => {
-    renderDialog()
+    renderForm()
 
     expect(screen.getByText('You are about to grant the ability to propose transactions.')).toBeInTheDocument()
     expect(
@@ -74,7 +59,7 @@ describe('ProposerRoleDialog', () => {
   })
 
   it('says the proposer address is public and the name is not', () => {
-    renderDialog()
+    renderForm()
 
     expect(
       screen.getByText('The beneficiary that will have the ability to propose transactions, publicly visible'),
@@ -82,42 +67,62 @@ describe('ProposerRoleDialog', () => {
     expect(screen.getByText('Only you can see this name. Everyone else sees the address.')).toBeInTheDocument()
   })
 
-  it('renders nothing while closed', () => {
-    render(
-      <ProposerRoleDialog
-        open={false}
-        onOpenChange={jest.fn()}
-        onSubmit={jest.fn()}
-        accounts={[treasury]}
-        onSafeAccountChange={jest.fn()}
-      />,
-    )
-
-    expect(screen.queryByRole('heading', { name: /Proposer role/ })).not.toBeInTheDocument()
-  })
-
   describe('submit gating', () => {
     it('disables submit until a Safe account is picked', () => {
-      renderDialog({ defaultValues: { proposer: PROPOSER, name: 'Nicole' } })
+      renderForm({ defaultValues: { proposer: PROPOSER, name: 'Nicole' } })
 
       expect(submitButton()).toBeDisabled()
     })
 
     it('disables submit while the proposer address is empty', () => {
-      renderDialog({ safeAccount: treasury.id })
+      renderForm({ safeAccount: treasury.id })
 
       expect(submitButton()).toBeDisabled()
     })
 
     it('enables submit once an account and a valid proposer are set', async () => {
-      renderDialog({ safeAccount: treasury.id, defaultValues: { proposer: PROPOSER } })
+      renderForm({ safeAccount: treasury.id, defaultValues: { proposer: PROPOSER } })
 
       await waitFor(() => expect(submitButton()).toBeEnabled())
     })
 
+    it('runs the proposer rule on the typed address and blocks submit on its message', async () => {
+      const validateProposer = jest.fn().mockResolvedValue('Cannot add a signer of this Safe account as proposer')
+      const { user } = renderForm({ safeAccount: treasury.id, validateProposer })
+
+      await user.type(screen.getByRole('combobox', { name: 'Proposer' }), PROPOSER)
+
+      await waitFor(() => expect(validateProposer).toHaveBeenCalledWith(PROPOSER))
+      await waitFor(() =>
+        expect(screen.getByText('Cannot add a signer of this Safe account as proposer')).toBeInTheDocument(),
+      )
+      expect(submitButton()).toBeDisabled()
+    })
+
+    it('re-validates the proposer when the Safe account changes', async () => {
+      const validateProposer = jest.fn().mockResolvedValue(undefined)
+      const { user, rerender } = renderForm({ safeAccount: treasury.id, validateProposer })
+
+      await user.type(screen.getByRole('combobox', { name: 'Proposer' }), PROPOSER)
+      await waitFor(() => expect(validateProposer).toHaveBeenCalled())
+      validateProposer.mockClear()
+
+      rerender(
+        <ProposerRoleForm
+          onSubmit={jest.fn()}
+          accounts={[treasury]}
+          onSafeAccountChange={jest.fn()}
+          safeAccount="137:0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB"
+          validateProposer={validateProposer}
+        />,
+      )
+
+      await waitFor(() => expect(validateProposer).toHaveBeenCalledWith(PROPOSER))
+    })
+
     it('reports the entered values to onSubmit', async () => {
       const onSubmit = jest.fn()
-      const { user } = renderDialog({
+      const { user } = renderForm({
         safeAccount: treasury.id,
         defaultValues: { proposer: PROPOSER, name: 'Nicole' },
         onSubmit,
@@ -135,7 +140,7 @@ describe('ProposerRoleDialog', () => {
     })
 
     it('swaps submit for a disabled spinner while submitting', () => {
-      renderDialog({
+      renderForm({
         safeAccount: treasury.id,
         defaultValues: { proposer: PROPOSER },
         isSubmitting: true,
@@ -147,7 +152,7 @@ describe('ProposerRoleDialog', () => {
 
     it('submits without a name, which is optional', async () => {
       const onSubmit = jest.fn()
-      const { user } = renderDialog({
+      const { user } = renderForm({
         safeAccount: treasury.id,
         defaultValues: { proposer: PROPOSER },
         onSubmit,
@@ -162,20 +167,20 @@ describe('ProposerRoleDialog', () => {
 
   describe('Safe account field', () => {
     it('shows the picked account on the trigger', () => {
-      renderDialog({ safeAccount: treasury.id })
+      renderForm({ safeAccount: treasury.id })
 
       expect(accountField()).toHaveTextContent('Treasury')
     })
 
     it('states the eligibility rule below the field', () => {
-      renderDialog()
+      renderForm()
 
       expect(screen.getByText("You only see accounts where you're a signer or proposer.")).toBeInTheDocument()
     })
 
     it('reports a picked account to onSafeAccountChange', async () => {
       const onSafeAccountChange = jest.fn()
-      const { user } = renderDialog({ onSafeAccountChange })
+      const { user } = renderForm({ onSafeAccountChange })
 
       await openAccountField(user)
       await user.click(await screen.findByRole('option'))
@@ -184,14 +189,14 @@ describe('ProposerRoleDialog', () => {
     })
 
     it('passes the loading state through to the account field', () => {
-      renderDialog({ accounts: [], accountsLoading: true })
+      renderForm({ accounts: [], accountsLoading: true })
 
       expect(accountField().querySelector('[data-testid="safe-account-avatar-skeleton"]')).toBeInTheDocument()
     })
 
     it('offers a retry when the accounts failed to load', async () => {
       const onAccountsRetry = jest.fn()
-      const { user } = renderDialog({ accounts: [], accountsError: true, onAccountsRetry })
+      const { user } = renderForm({ accounts: [], accountsError: true, onAccountsRetry })
 
       await openAccountField(user)
       await user.click(await screen.findByRole('button', { name: /retry/i }))
@@ -201,7 +206,7 @@ describe('ProposerRoleDialog', () => {
   })
 
   it('surfaces a submission error without clearing the form', () => {
-    renderDialog({
+    renderForm({
       safeAccount: treasury.id,
       defaultValues: { proposer: PROPOSER, name: 'Nicole' },
       errorMessage: <span>Error adding proposer</span>,
