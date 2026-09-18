@@ -105,6 +105,12 @@ export type FeePreviewArg = {
   tx: FeePreviewTransactionDto
 }
 
+export type FeeSnapshotArg = {
+  chainId: string
+  safeAddress: string
+  safeTxHash: string
+}
+
 const hasCompleteFeeBreakdown = (value: unknown): boolean =>
   typeof value === 'object' &&
   value !== null &&
@@ -118,28 +124,49 @@ const isFeePreviewResponse = (value: unknown): value is FeePreviewResponse => {
   return 'relayCost' in value
 }
 
+/**
+ * Both fee routes answer the same envelope and fail the same way, so they share one reader.
+ * `label` prefixes the error message; nothing downstream parses it.
+ */
+const fetchFeePreview = async (
+  label: string,
+  url: string,
+  init?: RequestInit,
+): Promise<{ data: FeePreviewResponse } | { error: Error }> => {
+  try {
+    const response = await fetch(url, init)
+
+    if (!response.ok) {
+      return { error: new Error(`${label} failed with status ${response.status}`) }
+    }
+
+    const body: unknown = await response.json()
+    if (!isFeePreviewResponse(body)) {
+      return { error: new Error(`${label} response did not match expected shape`) }
+    }
+    return { data: body }
+  } catch (error) {
+    return { error: asError(error) }
+  }
+}
+
 export const gtfFeePreviewEndpoints = (builder: GatewayEndpointBuilder) => ({
   getGtfFeePreview: builder.query<FeePreviewResponse, FeePreviewArg>({
-    async queryFn({ chainId, safeAddress, tx }) {
-      try {
-        const response = await fetch(`${GATEWAY_URL}/v1/chains/${chainId}/fees/${safeAddress}/preview`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...tx, nonce: String(tx.nonce) }),
-        })
+    queryFn: ({ chainId, safeAddress, tx }) =>
+      fetchFeePreview('Fee preview', `${GATEWAY_URL}/v1/chains/${chainId}/fees/${safeAddress}/preview`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...tx, nonce: String(tx.nonce) }),
+      }),
+  }),
 
-        if (!response.ok) {
-          return { error: new Error(`Fee preview failed with status ${response.status}`) }
-        }
-
-        const body: unknown = await response.json()
-        if (!isFeePreviewResponse(body)) {
-          return { error: new Error('Fee preview response did not match expected shape') }
-        }
-        return { data: body }
-      } catch (error) {
-        return { error: asError(error) }
-      }
-    },
+  /**
+   * Read-back of the immutable quote stored against a signed `safeTxHash`. Co-signers cannot
+   * re-quote, so this is the only way to itemize what the first signer actually signed.
+   * The GTF arm answers with `feeBreakdown` and no `relayCost`; 404 means no stored quote.
+   */
+  getGtfFeeSnapshot: builder.query<FeePreviewResponse, FeeSnapshotArg>({
+    queryFn: ({ chainId, safeAddress, safeTxHash }) =>
+      fetchFeePreview('Fee snapshot', `${GATEWAY_URL}/v1/chains/${chainId}/fees/${safeAddress}/preview/${safeTxHash}`),
   }),
 })
