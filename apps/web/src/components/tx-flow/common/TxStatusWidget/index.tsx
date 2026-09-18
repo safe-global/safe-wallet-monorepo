@@ -12,6 +12,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
+import { useAlreadySigned } from '@/components/tx/shared/hooks'
 
 /* Between 900px and 1200px the rail collapses to icons only so the transaction card — the point of
    the screen — keeps its width instead of the header wrapping mid-word. `sr-only` rather than
@@ -38,7 +39,7 @@ const TxStatusWidget = ({
 }) => {
   const wallet = useWallet()
   const { safe } = useSafeInfo()
-  const { nonceNeeded } = useContext(SafeTxContext)
+  const { nonceNeeded, safeTx } = useContext(SafeTxContext)
   const { threshold } = safe
   const isSafeOwner = useIsSafeOwner()
   const isProposer = useIsWalletProposer()
@@ -53,6 +54,8 @@ const TxStatusWidget = ({
     : safe.threshold === 1 && !isProposing
 
   const canSign = txSummary ? isSignableBy(txSummary, wallet?.address || '') : !isProposing
+  const hasSigned = useAlreadySigned(safeTx)
+  const showSignStep = threshold === 1 && !isBatch && !isMessage
 
   return (
     <div className="bg-transparent">
@@ -84,6 +87,16 @@ const TxStatusWidget = ({
             )}
           </StatusLabel>
         </li>
+
+        {showSignStep && (
+          <li className={classnames(css.item, { [css.incomplete]: !hasSigned })}>
+            <span className={css.itemIcon}>
+              <SignedIcon />
+            </span>
+
+            <StatusLabel>Sign</StatusLabel>
+          </li>
+        )}
 
         <li className={classnames(css.item, { [css.incomplete]: !(isAwaitingExecution && isLastStep) })}>
           <span className={css.itemIcon}>
