@@ -12,7 +12,7 @@ Read this before committing, pushing, opening a PR, or reviewing one. Nothing in
 
 ## Commits
 
-- **Pre-commit hook (Husky):** **pre-commit** runs `lint-staged` (**prettier only — no type-check at commit time**). There is no pre-push hook — run `yarn verify:changed` yourself before pushing.
+- **Pre-commit hook (Husky):** **pre-commit** runs `lint-staged` (**prettier only — no type-check at commit time**). There is no pre-push hook — before pushing, run the verify command for the workspace you changed (see the Fast Feedback Loop in the root [AGENTS.md](../../AGENTS.md); `yarn verify:changed` covers `apps/web/` only).
 - **Commit messages** use [semantic commit messages](https://www.conventionalcommits.org/en/v1.0.0/) as described in [CONTRIBUTING.md](../../CONTRIBUTING.md).
 - **CI/CD changes always use `chore:`** — CI, workflows, build configs (NEVER `feat:` or `fix:`).
 - **Test changes always use `tests:`** — changes in unit or e2e tests (NEVER `feat:` or `fix:`).
