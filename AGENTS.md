@@ -146,7 +146,7 @@ Before writing code for any non-trivial change (anything beyond a typo, doc twea
 
 ### Commit and PR conventions
 
-Before committing, pushing, opening a PR, or reviewing one, read [docs/ai/git-conventions.md](docs/ai/git-conventions.md) first — pre-commit/pre-push hooks, commit-message prefixes, how to fill the PR template, the required visual summary, and PR citation rules live there. Do not commit or open a PR without having read it.
+Before committing, pushing, opening a PR, or reviewing one, read [docs/ai/git-conventions.md](docs/ai/git-conventions.md) first — the pre-commit hook, commit-message prefixes, how to fill the PR template, the required visual summary, and PR citation rules live there. Do not commit or open a PR without having read it.
 
 ## Security & Safe Wallet Patterns
 
