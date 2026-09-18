@@ -6,10 +6,7 @@ import type { SpendingLimitSummaryModel } from './types'
 
 export type SpendingLimitSummaryProps = { policy: SpendingLimitSummaryModel }
 
-/**
- * The plain-language block at the top of the confirm step: what is granted, to which Safe, and every spender's
- * limits with their own frequency. Purely presentational — WA-3152 builds the transaction the rest of the step shows.
- */
+/** The confirm step's plain-language block. Purely presentational: it renders the model it is handed. */
 const SpendingLimitSummary = ({ policy }: SpendingLimitSummaryProps): ReactElement => (
   <div className="flex flex-col gap-3" data-testid="spending-limit-summary">
     <PolicyCallout policy={policy} />

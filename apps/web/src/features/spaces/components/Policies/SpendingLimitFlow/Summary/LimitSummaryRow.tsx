@@ -10,11 +10,7 @@ const TOKEN_ICON_SIZE = 24
 
 type DisplayAmount = { value: string; decimals?: number }
 
-/**
- * An amount carrying more precision than the token holds is an ordinary outcome here — an edit path or a stale
- * model can produce one — and `safeParseUnits` logs every failed parse. Checking first keeps that expected case out
- * of the console, and leaves the log for a genuinely malformed amount, which is a fault worth seeing.
- */
+/** `safeParseUnits` logs every failed parse, and over-precision is expected here, so it is ruled out first. */
 const exceedsPrecision = (amount: string, decimals: number): boolean => (amount.split('.')[1]?.length ?? 0) > decimals
 
 /** Raw units for `TokenAmount`'s formatter; the typed string is kept when the decimals are unknown or parsing fails. */
@@ -30,7 +26,6 @@ type LimitSummaryRowProps = {
   chainId: string
 }
 
-/** One limit: token icon, amount and symbol, then that row's own frequency. */
 const LimitSummaryRow = ({ limit, chainId }: LimitSummaryRowProps): ReactElement => {
   const { value, decimals } = toDisplayAmount(limit)
   const { label } = describeFrequency(limit.resetTimeMin, chainId)

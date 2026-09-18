@@ -3,7 +3,6 @@ import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@/compon
 import { describePolicy } from './copy'
 import type { SpendingLimitSummaryModel } from './types'
 
-/** What is being granted, in one sentence, and that spending within the limit needs no further approvals. */
 const PolicyCallout = ({ policy }: { policy: SpendingLimitSummaryModel }): ReactElement => {
   const { title, description } = describePolicy(policy)
 

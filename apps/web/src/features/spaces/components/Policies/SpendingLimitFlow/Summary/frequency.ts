@@ -8,10 +8,7 @@ type FrequencyDescription = {
   adjective?: string
 }
 
-/**
- * Wording for a reset period. The four production periods get Figma's label and a callout adjective; anything else
- * (the test-chain periods) reuses the label the form's dropdown showed, so the summary never invents a word.
- */
+/** A test-chain period has no designed wording, so it reuses the label the form's dropdown showed. */
 export const describeFrequency = (resetTimeMin: string, chainId: string): FrequencyDescription => {
   const canonical = CANONICAL_FREQUENCIES[resetTimeMin]
   if (canonical) return { label: canonical.label, adjective: canonical.adjective }

@@ -14,10 +14,8 @@ type SpenderSummaryCardProps = {
   chainId: string
 }
 
-/** One card per spender, holding every limit granted to them. */
 const SpenderSummaryCard = ({ spender, chainId }: SpenderSummaryCardProps): ReactElement => (
   <Card variant="muted" size="none" radius="lg" data-testid="spending-limit-summary-spender">
-    {/* `Card` takes spacing only through `size`/`radius`, so the padding lives on this div. */}
     <div className="flex flex-col gap-4 p-3">
       <SummaryField label={SPENDER_LABEL}>
         <EthHashInfo

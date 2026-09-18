@@ -1,4 +1,4 @@
-/** Labels of the summary's `label | content` rows, verbatim from the Figma frame. */
+/** Row labels, verbatim from the frame. */
 export const APPLIES_TO_LABEL = 'Applies to'
 export const SPENDER_LABEL = 'Spender'
 export const LIMITS_LABEL = 'Limits'

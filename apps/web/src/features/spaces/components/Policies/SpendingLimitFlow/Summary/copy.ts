@@ -33,10 +33,7 @@ const sharedAdjective = (policy: SpendingLimitSummaryModel): string | undefined 
   return describeFrequency(resetTimeMin, policy.safe.chainId).adjective
 }
 
-/**
- * Plain-language callout for the confirm step. One sentence cannot enumerate mixed frequencies, so the adjective is
- * used only when every limit shares one canonical period; otherwise the rows below carry the frequency.
- */
+/** One sentence cannot enumerate mixed frequencies, so the adjective survives only when every limit shares one. */
 export const describePolicy = (policy: SpendingLimitSummaryModel): PolicyDescription => {
   const names = joinNames(policy.spenders.map(spenderDisplayName))
   const count = policy.spenders.reduce((total, spender) => total + spender.limits.length, 0)

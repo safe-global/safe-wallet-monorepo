@@ -5,8 +5,7 @@ import { buildSafeAccountId } from '../../SafeAccountSelector/utils'
 import type { SafeAccountOption } from '../../SafeAccountSelector/types'
 import type { LimitSummary, LimitSummaryToken, SpendingLimitSummaryModel, SpenderSummary } from './types'
 
-// Test-only: the `.fixtures` suffix marks it, and it stays out of `__tests__/` because jest runs every file there
-// as a suite. Deliberately avoids `@/tests/test-utils`, which pulls jest globals in.
+// Test-only data factories.
 const fakeAddress = (): string => checksumAddress(faker.finance.ethereumAddress())
 
 const PRODUCTION_PERIODS = ['0', '1440', '10080', '43200']
