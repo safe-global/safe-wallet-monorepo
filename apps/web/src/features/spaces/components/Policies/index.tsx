@@ -1,12 +1,14 @@
-import { useCallback, useState, type ReactElement } from 'react'
+import { useCallback, useContext, useState, type ReactElement } from 'react'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import ExternalLink from '@/components/common/ExternalLink'
+import { TxModalContext } from '@/components/tx-flow'
 import { Typography } from '@/components/ui/typography'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import PolicyCatalogue from './PolicyCatalogue'
 import type { PolicyCatalogueId } from './PolicyCatalogue/catalogue'
 import ProposerIntroDialog from './ProposerIntroDialog'
 import { PROPOSER_INTRO_SEEN_KEY } from './ProposerIntroDialog/constants'
+import ProposerRoleFlow from './ProposerRoleFlow'
 import SpendingLimitIntroDialog from './SpendingLimitIntroDialog'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from './SpendingLimitIntroDialog/constants'
 
@@ -17,14 +19,15 @@ const Policies = (): ReactElement => {
 
   const [hasSeenProposerIntro = false, setHasSeenProposerIntro] = useLocalStorage<boolean>(PROPOSER_INTRO_SEEN_KEY)
   const [isProposerIntroOpen, setIsProposerIntroOpen] = useState(false)
+  const { setTxFlow } = useContext(TxModalContext)
 
   const startSpendingLimitFlow = useCallback(() => {
     // TODO(WA-3150): open the spending limit create form.
   }, [])
 
   const startProposerFlow = useCallback(() => {
-    // TODO(WA-3138): open the proposer form.
-  }, [])
+    setTxFlow(<ProposerRoleFlow />)
+  }, [setTxFlow])
 
   const handleSelect = useCallback(
     (id: PolicyCatalogueId) => {

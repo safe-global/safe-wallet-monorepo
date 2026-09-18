@@ -1,9 +1,16 @@
+import { TxModalContext } from '@/components/tx-flow'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { PROPOSER_INTRO_SEEN_KEY } from '../ProposerIntroDialog/constants'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from '../SpendingLimitIntroDialog/constants'
+import ProposerRoleFlow from '../ProposerRoleFlow'
 import Policies from '../index'
+
+jest.mock('../ProposerRoleFlow', () => ({
+  __esModule: true,
+  default: () => <div data-testid="proposer-role-flow" />,
+}))
 
 let mockHasSeenSpendingLimitIntro: boolean | undefined = false
 let mockHasSeenProposerIntro: boolean | undefined = false
@@ -20,6 +27,16 @@ jest.mock('@/services/local-storage/useLocalStorage', () => ({
 }))
 
 const mockUseLocalStorage = jest.mocked(useLocalStorage)
+
+const renderWithTxModal = () => {
+  const setTxFlow = jest.fn()
+  const utils = renderWithUserEvent(
+    <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
+      <Policies />
+    </TxModalContext.Provider>,
+  )
+  return { ...utils, setTxFlow }
+}
 
 describe('Policies', () => {
   beforeEach(() => {
@@ -186,6 +203,28 @@ describe('Policies', () => {
 
       expect(screen.getByTestId('proposer-intro-dialog')).toBeInTheDocument()
       expect(screen.getAllByRole('dialog')).toHaveLength(1)
+    })
+
+    it('opens the proposer flow from the intro', async () => {
+      const { user, setTxFlow } = renderWithTxModal()
+
+      await user.click(screen.getByTestId('policy-catalogue-tile-proposer'))
+      await user.click(await screen.findByRole('button', { name: 'Set up proposer' }))
+
+      expect(setTxFlow).toHaveBeenCalledTimes(1)
+      expect(setTxFlow.mock.calls[0][0].type).toBe(ProposerRoleFlow)
+      await waitFor(() => expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument())
+    })
+
+    it('opens the flow directly once the intro has been seen', async () => {
+      mockHasSeenProposerIntro = true
+      const { user, setTxFlow } = renderWithTxModal()
+
+      await user.click(screen.getByTestId('policy-catalogue-tile-proposer'))
+
+      expect(setTxFlow).toHaveBeenCalledTimes(1)
+      expect(setTxFlow.mock.calls[0][0].type).toBe(ProposerRoleFlow)
+      expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument()
     })
   })
 
