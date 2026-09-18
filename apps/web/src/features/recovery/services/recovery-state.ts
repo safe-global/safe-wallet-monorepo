@@ -1,12 +1,10 @@
 import { SENTINEL_ADDRESS } from '@safe-global/utils/utils/constants'
-import memoize from 'lodash/memoize'
 import { getMultiSendCallOnlyDeployments } from '@safe-global/safe-deployments'
 import { getChainAgnosticAddress } from '@safe-global/utils/services/contracts/deployments'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { Delay } from '@gnosis.pm/zodiac'
 import type { TransactionAddedEvent } from '@gnosis.pm/zodiac/dist/cjs/types/Delay'
-import { toBeHex, type JsonRpcProvider, type TransactionReceipt } from 'ethers'
-import { trimTrailingSlash } from '@/utils/url'
+import { toBeHex, type JsonRpcProvider } from 'ethers'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import { decodeMultiSendData } from '@safe-global/protocol-kit'
@@ -98,39 +96,120 @@ export const _getRecoveryQueueItemTimestamps = async ({
   }
 }
 
-export const _getSafeCreationReceipt = memoize(
-  async ({
-    transactionService,
-    safeAddress,
-    provider,
-  }: {
-    transactionService: string
-    safeAddress: string
-    provider: JsonRpcProvider
-  }): Promise<TransactionReceipt | null> => {
-    const url = `${trimTrailingSlash(transactionService)}/api/v1/safes/${safeAddress}/creation/`
+// Infura caps eth_getLogs at 10k blocks; the window halves on rejection for stricter RPCs
+const LOG_QUERY_BLOCK_RANGE = 10_000
+const MIN_LOG_QUERY_BLOCK_RANGE = 1_000
+// Recently queued txs are the common case: walk back this many windows before bisecting
+const RECENT_WINDOWS = 3
 
-    const { transactionHash } = await fetch(url).then((res) => {
-      if (res.ok && res.status === 200) {
-        return res.json() as Promise<{ transactionHash: string } & unknown>
-      } else {
-        throw new Error('Error fetching Safe creation details')
+// A TransactionAdded event never changes once mined, so found events are kept for the session
+export const _addedTransactionsCache = new Map<string, AddedEvent>()
+
+const getCacheKey = (chainId: string, delayModifierAddress: string, nonce: bigint) =>
+  `${chainId}:${delayModifierAddress.toLowerCase()}:${nonce}`
+
+// First block mined at or after `timestamp`, found by bisecting [0, upperBound]
+const findBlockAtTimestamp = async (provider: JsonRpcProvider, timestamp: number, upperBound: number) => {
+  let low = 0
+  let high = upperBound
+
+  while (low < high) {
+    const mid = Math.floor((low + high) / 2)
+    const block = await provider.getBlock(mid)
+
+    if (!block) {
+      throw new Error(`Could not fetch block ${mid}`)
+    }
+
+    if (block.timestamp < timestamp) {
+      low = mid + 1
+    } else {
+      high = mid
+    }
+  }
+
+  return low
+}
+
+const scanAddedTransactions = async ({
+  delayModifier,
+  provider,
+  topics,
+  missingNonces,
+  latestBlock,
+}: {
+  delayModifier: Delay
+  provider: JsonRpcProvider
+  topics: Array<string | Array<string> | null>
+  missingNonces: Array<bigint>
+  latestBlock: number
+}): Promise<Array<AddedEvent>> => {
+  const events: Array<AddedEvent> = []
+  const isComplete = () => events.length >= missingNonces.length
+  let range = LOG_QUERY_BLOCK_RANGE
+
+  // Returns false after halving the window so the caller recomputes its bounds
+  const queryWindow = async (fromBlock: number, toBlock: number): Promise<boolean> => {
+    try {
+      // @ts-expect-error
+      const chunk: Array<AddedEvent> = await delayModifier.queryFilter(topics, fromBlock, toBlock)
+      events.push(...chunk)
+      return true
+    } catch (error) {
+      if (range <= MIN_LOG_QUERY_BLOCK_RANGE) {
+        throw error
       }
-    })
+      range = Math.floor(range / 2)
+      return false
+    }
+  }
 
-    return provider.getTransactionReceipt(transactionHash)
-  },
-  ({ transactionService, safeAddress }) => transactionService + safeAddress,
-)
+  let toBlock = latestBlock
+  let windows = 0
+  while (toBlock >= 0 && windows < RECENT_WINDOWS && !isComplete()) {
+    const fromBlock = Math.max(toBlock - range + 1, 0)
+    if (await queryWindow(fromBlock, toBlock)) {
+      toBlock = fromBlock - 1
+      windows++
+    }
+  }
 
-const queryAddedTransactions = async (
-  delayModifier: Delay,
-  queueNonce: bigint,
-  txNonce: bigint,
-  transactionService: string,
-  provider: JsonRpcProvider,
-  safeAddress: string,
-) => {
+  if (isComplete() || toBlock < 0) {
+    return events
+  }
+
+  // Every missing event was emitted at or after the oldest missing nonce was queued
+  const createdAt = await delayModifier.txCreatedAt(missingNonces[0])
+  if (createdAt === BigInt(0)) {
+    throw new Error(`Could not determine when recovery ${missingNonces[0]} was queued`)
+  }
+
+  let fromBlock = await findBlockAtTimestamp(provider, Number(createdAt), toBlock)
+  while (fromBlock <= toBlock && !isComplete()) {
+    const windowEnd = Math.min(fromBlock + range - 1, toBlock)
+    if (await queryWindow(fromBlock, windowEnd)) {
+      fromBlock = windowEnd + 1
+    }
+  }
+
+  return events
+}
+
+const queryAddedTransactions = async ({
+  delayModifier,
+  delayModifierAddress,
+  queueNonce,
+  txNonce,
+  provider,
+  chainId,
+}: {
+  delayModifier: Delay
+  delayModifierAddress: string
+  queueNonce: bigint
+  txNonce: bigint
+  provider: JsonRpcProvider
+  chainId: string
+}): Promise<Array<AddedEvent>> => {
   if (queueNonce === txNonce) {
     // There are no queued txs
     return []
@@ -138,24 +217,36 @@ const queryAddedTransactions = async (
 
   // We filter for the valid nonces while fetching the event logs.
   // The nonce has to be one between the current queueNonce and the txNonce.
-  const diff = queueNonce - txNonce
-  const queryNonces = Array.from({ length: Number(diff) }, (_, idx) => {
-    return toBeHex(BigInt(txNonce + BigInt(idx)), 32)
-  })
+  const cached: Array<AddedEvent> = []
+  const missingNonces: Array<bigint> = []
+  for (let nonce = txNonce; nonce < queueNonce; nonce++) {
+    const event = _addedTransactionsCache.get(getCacheKey(chainId, delayModifierAddress, nonce))
+    if (event) {
+      cached.push(event)
+    } else {
+      missingNonces.push(nonce)
+    }
+  }
+
+  if (missingNonces.length === 0) {
+    return cached
+  }
 
   const transactionAddedFilter = delayModifier.filters.TransactionAdded() as TransactionAddedEvent.Filter
 
   const topics = await transactionAddedFilter.getTopicFilter()
-  topics[1] = queryNonces
+  topics[1] = missingNonces.map((nonce) => toBeHex(nonce, 32))
 
-  const creationReceipt = await _getSafeCreationReceipt({ transactionService, provider, safeAddress })
+  const latestBlock = await provider.getBlockNumber()
+  const events = await scanAddedTransactions({ delayModifier, provider, topics, missingNonces, latestBlock })
 
-  if (!creationReceipt) {
-    throw new Error(`Could not fetch creation receipt for Safe ${safeAddress}`)
+  for (const event of events) {
+    if (!event.removed) {
+      _addedTransactionsCache.set(getCacheKey(chainId, delayModifierAddress, event.args.queueNonce), event)
+    }
   }
 
-  // @ts-expect-error
-  return await delayModifier.queryFilter(topics, creationReceipt.blockNumber, 'latest')
+  return [...cached, ...events]
 }
 
 const getRecoveryQueueItem = async ({
@@ -208,14 +299,12 @@ const getRecoveryQueueItem = async ({
 
 export const _getRecoveryStateItem = async ({
   delayModifier,
-  transactionService,
   safeAddress,
   provider,
   chainId,
   version,
 }: {
   delayModifier: Delay
-  transactionService: string
   safeAddress: string
   provider: JsonRpcProvider
   chainId: string
@@ -260,14 +349,14 @@ export const _getRecoveryStateItem = async ({
     BigInt(callResults[4].returnData),
   ]
 
-  const queuedTransactionsAdded = await queryAddedTransactions(
+  const queuedTransactionsAdded = await queryAddedTransactions({
     delayModifier,
+    delayModifierAddress,
     queueNonce,
     txNonce,
-    transactionService,
     provider,
-    safeAddress,
-  )
+    chainId,
+  })
 
   const queue = await Promise.all(
     queuedTransactionsAdded.map((transactionAdded) => {
@@ -300,7 +389,6 @@ export function getRecoveryState({
   ...rest
 }: {
   delayModifiers: Array<Delay>
-  transactionService: string
   safeAddress: string
   provider: JsonRpcProvider
   chainId: string
