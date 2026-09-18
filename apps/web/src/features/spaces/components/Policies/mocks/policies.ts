@@ -19,7 +19,7 @@ const DAY = 86_400
 export const MOCK_SAFES = {
   treasury: { address: '0x8675B754342754A30A2AeF474D114d8460bca19b', chainId: '1' },
   payroll: { address: '0x1F2504De05f5167650bE5B28c472601Be434b60A', chainId: '137' },
-  grants: { address: '0xA77D7c8B23A2E4d1E6A1a49e57B1e0dC7b8Fc2b1', chainId: '11155111' },
+  grants: { address: '0xa77d7c8B23A2E4d1E6a1a49E57b1e0Dc7b8fC2B1', chainId: '11155111' },
 } as const satisfies Record<string, PolicySafe>
 
 export const MOCK_TOKENS = {
@@ -27,13 +27,13 @@ export const MOCK_TOKENS = {
     address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
     symbol: 'USDC',
     decimals: 6,
-    logoUri: 'https://safe-transaction-assets.safe.global/tokens/logos/USDC.png',
+    logoUri: 'https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png',
   },
   usdt: {
     address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
     symbol: 'USDT',
     decimals: 6,
-    logoUri: 'https://safe-transaction-assets.safe.global/tokens/logos/USDT.png',
+    logoUri: 'https://safe-transaction-assets.safe.global/tokens/logos/0xdAC17F958D2ee523a2206206994597C13D831ec7.png',
   },
   /** CGW can return a token it has no logo or full metadata for. */
   unknown: {
@@ -49,7 +49,7 @@ export const MOCK_ADDRESSES = {
   alice: '0x0000000000000000000000000000000000000A11',
   bob: '0x0000000000000000000000000000000000000B0b',
   /** Has no address book entry, so it renders as a shortened, copyable address. */
-  unresolved: '0xdEAD00000000000000000000000000000000bEEF',
+  unresolved: '0xDeaD00000000000000000000000000000000BEEf',
 } as const
 
 const ALLOWANCE_MODULE = '0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134'

@@ -64,3 +64,16 @@ export const Recovery: Story = {
 export const LongList: Story = {
   args: { policies: mockLongPolicyList(30) },
 }
+
+/**
+ * The table's only empty state. An empty policy list never reaches this component: the page shows
+ * the catalogue instead. So the table is empty only when a search matches nothing.
+ */
+export const NoSearchResults: Story = {
+  args: { policies: mockPolicies() },
+  play: async ({ canvasElement }) => {
+    const { userEvent, within } = await import('storybook/test')
+    const search = within(canvasElement).getByPlaceholderText('by name, address or network')
+    await userEvent.type(search, 'zzzz')
+  },
+}
