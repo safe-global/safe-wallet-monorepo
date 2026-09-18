@@ -3,14 +3,21 @@ import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import ExternalLink from '@/components/common/ExternalLink'
 import { Typography } from '@/components/ui/typography'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
-import PolicyCatalogue from './PolicyCatalogue'
+import PolicyCatalogue, { type PolicyCatalogueLock } from './PolicyCatalogue'
 import type { PolicyCatalogueId } from './PolicyCatalogue/catalogue'
+import PolicyUpsellBanner, { type PolicyUpsellPlan } from './PolicyUpsellBanner'
 import ProposerIntroDialog from './ProposerIntroDialog'
 import { PROPOSER_INTRO_SEEN_KEY } from './ProposerIntroDialog/constants'
 import SpendingLimitIntroDialog from './SpendingLimitIntroDialog'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from './SpendingLimitIntroDialog/constants'
 
-const Policies = (): ReactElement => {
+interface PoliciesProps {
+  /** Set when the workspace's plan does not include policies. WA-3560 supplies it from the plan hooks. */
+  lockedPlan?: PolicyUpsellPlan & Pick<PolicyCatalogueLock, 'accountCounts'>
+  onUpgrade?: () => void
+}
+
+const Policies = ({ lockedPlan, onUpgrade = () => {} }: PoliciesProps): ReactElement => {
   const [hasSeenSpendingLimitIntro = false, setHasSeenSpendingLimitIntro] =
     useLocalStorage<boolean>(SPENDING_LIMIT_INTRO_SEEN_KEY)
   const [isSpendingLimitIntroOpen, setIsSpendingLimitIntroOpen] = useState(false)
@@ -102,7 +109,20 @@ const Policies = (): ReactElement => {
         </Typography>
       </div>
 
-      <PolicyCatalogue onSelect={handleSelect} />
+      {lockedPlan && (
+        <div className="mb-4">
+          <PolicyUpsellBanner
+            planName={lockedPlan.planName}
+            workspaceName={lockedPlan.workspaceName}
+            onUpgrade={onUpgrade}
+          />
+        </div>
+      )}
+
+      <PolicyCatalogue
+        onSelect={handleSelect}
+        locked={lockedPlan ? { accountCounts: lockedPlan.accountCounts, onUpgrade } : undefined}
+      />
 
       <SpendingLimitIntroDialog
         open={isSpendingLimitIntroOpen}

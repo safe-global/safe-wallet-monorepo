@@ -1,0 +1,49 @@
+import { ArrowRight, Lock } from 'lucide-react'
+import ExternalLink from '@/components/common/ExternalLink'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Typography } from '@/components/ui/typography'
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+
+export type PolicyUpsellPlan = {
+  /** The plan the workspace is on, for example `Starter`. */
+  planName: string
+  workspaceName: string
+}
+
+type PolicyUpsellBannerProps = PolicyUpsellPlan & {
+  onUpgrade: () => void
+}
+
+/** Shown above the catalogue when the workspace's plan does not include policies. */
+const PolicyUpsellBanner = ({ planName, workspaceName, onUpgrade }: PolicyUpsellBannerProps) => (
+  <Card radius="xl" data-testid="policy-upsell-banner">
+    <CardContent>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col gap-2">
+          <Badge variant="secondary" size="status" shape="status">
+            <Lock aria-hidden />
+            Business
+          </Badge>
+
+          <Typography variant="h4" className="font-bold">
+            Set the rules once. They run on every Safe account.
+          </Typography>
+
+          <Typography variant="paragraph-small" className="text-muted-foreground">
+            {workspaceName} is on {planName}. Upgrade to Business to set up policies.{' '}
+            <ExternalLink href={HelpCenterArticle.POLICIES}>Read more</ExternalLink>
+          </Typography>
+        </div>
+
+        <Button onClick={onUpgrade} className="shrink-0">
+          Upgrade to Business
+          <ArrowRight aria-hidden />
+        </Button>
+      </div>
+    </CardContent>
+  </Card>
+)
+
+export default PolicyUpsellBanner

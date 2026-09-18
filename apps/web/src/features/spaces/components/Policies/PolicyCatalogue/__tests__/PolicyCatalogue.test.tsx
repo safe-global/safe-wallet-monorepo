@@ -3,6 +3,7 @@ import { trackEvent } from '@/services/analytics'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import PolicyCatalogue from '../index'
+import { mockStarterPlan } from '../../mocks/plan'
 
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
@@ -101,5 +102,60 @@ describe('PolicyCatalogue', () => {
     await user.click(screen.getByRole('button', { name: /Account recovery/ }))
 
     expect(onSelect).not.toHaveBeenCalled()
+  })
+
+  it('should, when locked, render a counter and a Set policy button on each policy tile', () => {
+    render(<PolicyCatalogue locked={{ accountCounts: mockStarterPlan.accountCounts, onUpgrade: jest.fn() }} />)
+
+    expect(screen.getAllByTestId('policy-account-count')).toHaveLength(3)
+    expect(screen.getAllByRole('button', { name: 'Set policy' })).toHaveLength(3)
+  })
+
+  it('should, when locked, leave the Something missing? tile as it is', () => {
+    render(<PolicyCatalogue locked={{ accountCounts: mockStarterPlan.accountCounts, onUpgrade: jest.fn() }} />)
+
+    const tile = screen.getByTestId('policy-catalogue-tile-suggestion')
+
+    expect(tile).toHaveRole('button')
+    expect(within(tile).queryByTestId('policy-account-count')).not.toBeInTheDocument()
+  })
+
+  it('should, when a locked tile is clicked, call onUpgrade and not onSelect', async () => {
+    const onUpgrade = jest.fn()
+    const onSelect = jest.fn()
+    const { user } = renderWithUserEvent(
+      <PolicyCatalogue onSelect={onSelect} locked={{ accountCounts: mockStarterPlan.accountCounts, onUpgrade }} />,
+    )
+
+    await user.click(within(screen.getByTestId('policy-catalogue-tile-proposer')).getByRole('button'))
+
+    expect(onUpgrade).toHaveBeenCalledTimes(1)
+    expect(onSelect).not.toHaveBeenCalled()
+  })
+
+  it('should, when the Something missing? tile is clicked while locked, call onSelect and not onUpgrade', async () => {
+    const onUpgrade = jest.fn()
+    const onSelect = jest.fn()
+    const { user } = renderWithUserEvent(
+      <PolicyCatalogue onSelect={onSelect} locked={{ accountCounts: mockStarterPlan.accountCounts, onUpgrade }} />,
+    )
+
+    await user.click(screen.getByTestId('policy-catalogue-tile-suggestion'))
+
+    expect(onSelect).toHaveBeenCalledWith('suggestion')
+    expect(onUpgrade).not.toHaveBeenCalled()
+  })
+
+  it('should, when a locked tile is clicked, still track the click', async () => {
+    const { user } = renderWithUserEvent(
+      <PolicyCatalogue locked={{ accountCounts: mockStarterPlan.accountCounts, onUpgrade: jest.fn() }} />,
+    )
+
+    await user.click(within(screen.getByTestId('policy-catalogue-tile-spending-limit')).getByRole('button'))
+
+    expect(mockTrackEvent).toHaveBeenCalledWith(
+      { ...POLICY_EVENTS.POLICY_CATALOGUE_TILE_CLICKED, label: 'spending-limit' },
+      { [MixpanelEventParams.POLICY_TYPE]: 'spending-limit', [MixpanelEventParams.IS_AVAILABLE]: true },
+    )
   })
 })

@@ -44,3 +44,16 @@ export const Unavailable: Story = {
     onClick: () => {},
   },
 }
+
+/** The plan does not include policies: a counter replaces the arrow and Set policy opens the upgrade flow. */
+export const Locked: Story = {
+  args: {
+    id: 'spending-limit',
+    title: 'Spending limit',
+    description: 'Let spenders access assets without collecting signatures.',
+    Icon: WalletCards,
+    isAvailable: true,
+    onClick: () => {},
+    locked: { applied: 0, total: 6 },
+  },
+}

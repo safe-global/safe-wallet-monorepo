@@ -58,4 +58,25 @@ describe('PolicyCatalogueTile', () => {
 
     expect(defaultProps.onClick).toHaveBeenCalledTimes(1)
   })
+
+  it('should, when locked, render how many accounts have the policy', () => {
+    render(<PolicyCatalogueTile {...defaultProps} locked={{ applied: 0, total: 6 }} />)
+
+    expect(screen.getByTestId('policy-account-count')).toHaveTextContent('0 / 6 Accounts')
+  })
+
+  it('should, when locked, render a Set policy button that calls onClick', async () => {
+    const { user } = renderWithUserEvent(<PolicyCatalogueTile {...defaultProps} locked={{ applied: 0, total: 6 }} />)
+
+    await user.click(screen.getByRole('button', { name: 'Set policy' }))
+
+    expect(defaultProps.onClick).toHaveBeenCalledTimes(1)
+  })
+
+  it('should, when locked and the policy has not shipped, render no Soon badge', () => {
+    render(<PolicyCatalogueTile {...defaultProps} isAvailable={false} locked={{ applied: 0, total: 6 }} />)
+
+    expect(screen.queryByText('Soon')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Set policy' })).toBeInTheDocument()
+  })
 })
