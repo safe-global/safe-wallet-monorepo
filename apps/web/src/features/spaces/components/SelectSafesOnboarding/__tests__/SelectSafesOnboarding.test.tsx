@@ -1,4 +1,4 @@
-import { render, screen, act, fireEvent } from '@/tests/test-utils'
+import { render, screen, act } from '@/tests/test-utils'
 import SelectSafesOnboarding from '../index'
 import type { AllSafeItems } from '@/hooks/safes'
 import useIsSurveyEnabled from '@/hooks/useIsSurveyEnabled'
@@ -83,16 +83,12 @@ jest.mock('@/hooks/useDarkMode', () => ({
   useDarkMode: () => false,
 }))
 
-const mockOpenPortal = jest.fn()
-jest.mock('../../../hooks/billing/useBillingPortal', () => ({
-  useBillingPortal: () => ({ openPortal: mockOpenPortal, isRedirecting: false }),
-}))
 jest.mock('../../Plans/CheckoutReturnModals', () => ({
   __esModule: true,
-  default: ({ trialCtaLabel, onAddBillingDetails }: { trialCtaLabel?: string; onAddBillingDetails?: () => void }) => (
-    <button data-testid="checkout-return-modals" onClick={onAddBillingDetails}>
+  default: ({ trialCtaLabel, showConfirmationNote }: { trialCtaLabel?: string; showConfirmationNote?: boolean }) => (
+    <div data-testid="checkout-return-modals" data-note={String(Boolean(showConfirmationNote))}>
       {trialCtaLabel}
-    </button>
+    </div>
   ),
 }))
 
@@ -114,12 +110,11 @@ describe('SelectSafesOnboarding — Stripe return', () => {
     mockWalletValue = { address: '0xWallet' }
   })
 
-  it('confirms the trial on landing and sends the user to billing from it', () => {
+  it('confirms the trial on landing, pointing to the confirmation email', () => {
     render(<SelectSafesOnboarding />)
 
     expect(screen.getByTestId('checkout-return-modals')).toHaveTextContent('Get started')
-    fireEvent.click(screen.getByTestId('checkout-return-modals'))
-    expect(mockOpenPortal).toHaveBeenCalled()
+    expect(screen.getByTestId('checkout-return-modals')).toHaveAttribute('data-note', 'true')
   })
 })
 

@@ -28,9 +28,9 @@ export const getCurrentBadge = (plan: PlanSummary | null): CurrentBadge | undefi
   }
 }
 
-const InfoTip = ({ text }: { text: string }) => (
+export const InfoTip = ({ text, 'data-testid': testId }: { text: string; 'data-testid'?: string }) => (
   <Tooltip>
-    <TooltipTrigger render={<span className="inline-flex" />}>
+    <TooltipTrigger render={<span className="inline-flex" data-testid={testId} />}>
       <Info className="size-4 text-muted-foreground" />
     </TooltipTrigger>
     <TooltipContent className="max-w-[260px]">{text}</TooltipContent>

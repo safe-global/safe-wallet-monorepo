@@ -1,6 +1,9 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import CheckoutReturnModals from '../CheckoutReturnModals'
 
+const mockPush = jest.fn()
+jest.mock('next/router', () => ({ useRouter: () => ({ push: mockPush }) }))
+
 const mockUseSpacePlan = jest.fn()
 const mockUseCheckoutReturn = jest.fn()
 jest.mock('../../../hooks/useSpacePlan', () => ({ useSpacePlan: (spaceId?: string) => mockUseSpacePlan(spaceId) }))
@@ -27,6 +30,26 @@ jest.mock('@/features/__core__', () => ({
       ) : null,
     SafeProSubscriptionActivatedModal: ({ open, planName }: { open: boolean; planName: string }) =>
       open ? <div data-testid="subscription-activated-modal">{planName}</div> : null,
+    SafeProPendingModal: ({ title }: { title: string }) => <div data-testid="checkout-pending">{title}</div>,
+    SafeProNoticeModal: ({
+      title,
+      actionLabel,
+      onAction,
+      secondaryActionLabel,
+      onSecondaryAction,
+    }: {
+      title: string
+      actionLabel: string
+      onAction: () => void
+      secondaryActionLabel?: string
+      onSecondaryAction?: () => void
+    }) => (
+      <div data-testid="checkout-failed">
+        {title}
+        <button onClick={onAction}>{actionLabel}</button>
+        {secondaryActionLabel && <button onClick={onSecondaryAction}>{secondaryActionLabel}</button>}
+      </div>
+    ),
   }),
   createFeatureHandle: () => ({}),
 }))
@@ -100,7 +123,8 @@ describe('CheckoutReturnModals', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
     expect(retry).toHaveBeenCalled()
     fireEvent.click(screen.getByRole('button', { name: 'Close' }))
-    expect(dismiss).toHaveBeenCalled()
+    expect(mockPush).toHaveBeenCalledWith('/welcome/spaces')
+    expect(dismiss).not.toHaveBeenCalled()
   })
 
   it('reports a failed session without a retry', () => {

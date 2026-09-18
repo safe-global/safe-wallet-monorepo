@@ -14,6 +14,8 @@ const SafeProNoticeModal = ({
   body,
   actionLabel = 'Back to My accounts',
   onAction,
+  secondaryActionLabel,
+  onSecondaryAction,
   onOpenChange,
 }: {
   open: boolean
@@ -21,6 +23,9 @@ const SafeProNoticeModal = ({
   body: string
   actionLabel?: string
   onAction: () => void
+  /** An optional primary alternative next to the action, e.g. "Try again". */
+  secondaryActionLabel?: string
+  onSecondaryAction?: () => void
   onOpenChange?: (open: boolean) => void
 }) => (
   <Dialog open={open} onOpenChange={onOpenChange ?? (() => undefined)}>
@@ -38,9 +43,16 @@ const SafeProNoticeModal = ({
             </Typography>
           </div>
 
-          <Button variant="secondary" size="lg" onClick={onAction}>
-            {actionLabel}
-          </Button>
+          <div className="flex w-full gap-3">
+            <Button variant="secondary" size="lg" className="flex-1" onClick={onAction}>
+              {actionLabel}
+            </Button>
+            {secondaryActionLabel && onSecondaryAction && (
+              <Button size="lg" className="flex-1" onClick={onSecondaryAction}>
+                {secondaryActionLabel}
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </DialogContent>

@@ -13,7 +13,7 @@ const SafeProTrialActivatedModal = ({
   trialEndsAt,
   ctaHref,
   ctaLabel = 'Get started',
-  onAddBillingDetails,
+  showConfirmationNote = false,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -21,8 +21,8 @@ const SafeProTrialActivatedModal = ({
   /** Where the CTA leads; without it the CTA just closes. */
   ctaHref?: LinkProps['href']
   ctaLabel?: string
-  /** Offers the Stripe portal right away; without it the secondary link is omitted. */
-  onAddBillingDetails?: () => void
+  /** The onboarding wizard adds a pointer to the confirmation email under the CTA. */
+  showConfirmationNote?: boolean
 }) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent size="sm" surface="card" padding="none">
@@ -51,10 +51,10 @@ const SafeProTrialActivatedModal = ({
               {ctaLabel}
               <ArrowRight data-icon="inline-end" />
             </Button>
-            {onAddBillingDetails && (
-              <Button variant="ghost-muted" size="sm" onClick={onAddBillingDetails}>
-                Add payment method now
-              </Button>
+            {showConfirmationNote && (
+              <Typography variant="paragraph-small" color="muted" align="center">
+                Full details are in your confirmation email.
+              </Typography>
             )}
           </div>
         </div>

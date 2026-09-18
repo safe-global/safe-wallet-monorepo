@@ -15,6 +15,7 @@ import { useSeatTrimCheckout } from '../../hooks/billing/useSeatTrimCheckout'
 import { RECOMMENDED_PLAN } from './fixtures'
 import { claimTiers, formatPlanPrice, priceSuffix } from './planTiers'
 import SelectAccountsStep from './SelectAccountsStep'
+import { InfoTip } from './PlanStatusCard'
 import type { PlanTier, SafeRef } from './types'
 
 // The CGW grants the 60-day grace only to Workspaces that predate enforcement; anything else is a new Workspace.
@@ -25,12 +26,16 @@ export type ClaimTrialVariant = 'existing' | 'new'
 
 export type ClaimTrialCopy = { title: string; subtitle: string; note: string; back: string; claim: string }
 
+/** What happens when the trial runs out, behind the info icon next to the note. */
+export const TRIAL_END_TOOLTIP =
+  "Your paid subscription only starts after you add a payment method. If you don't add one or choose another plan before the trial ends, your Workspace will be locked. Nothing is deleted for 90 days and your Safe accounts remain available in My accounts."
+
 export const claimCopy = (trialPeriodDays: number | null, variant: ClaimTrialVariant = 'existing'): ClaimTrialCopy => {
   if (variant === 'new') {
     return {
       title: 'Workspaces run on Safe Pro',
       subtitle: trialPeriodDays === null ? 'Your first days are free.' : `Your first ${trialPeriodDays} days are free.`,
-      note: 'No payment method required. We’ll remind you before it ends. Cancel any time.',
+      note: "No payment method required. We'll remind you 7 and 2 days before the trial ends.",
       back: 'Go to My accounts',
       claim: 'Claim free trial',
     }
@@ -212,8 +217,14 @@ export default function ClaimTrialModal({
                 </div>
               )}
 
-              <Typography variant="paragraph-small" color="muted" align="center">
+              <Typography
+                variant="paragraph-small"
+                color="muted"
+                align="center"
+                className="flex items-center justify-center gap-1.5"
+              >
                 {copy.note}
+                <InfoTip text={TRIAL_END_TOOLTIP} data-testid="trial-end-tooltip" />
               </Typography>
 
               {error && (

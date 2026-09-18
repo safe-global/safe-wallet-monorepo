@@ -86,7 +86,7 @@ describe('ClaimTrialModal', () => {
     expect(claimCopy(60, 'new')).toEqual({
       title: 'Workspaces run on Safe Pro',
       subtitle: 'Your first 60 days are free.',
-      note: 'No payment method required. We’ll remind you before it ends. Cancel any time.',
+      note: "No payment method required. We'll remind you 7 and 2 days before the trial ends.",
       back: 'Go to My accounts',
       claim: 'Claim free trial',
     })
@@ -124,6 +124,7 @@ describe('ClaimTrialModal', () => {
     expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Workspaces run on Safe Pro')
     expect(screen.getByText('Your first 60 days are free.')).toBeInTheDocument()
     expect(screen.getByText(/No payment method required/)).toBeInTheDocument()
+    expect(screen.getByTestId('trial-end-tooltip')).toBeInTheDocument()
     expect(screen.getByText('Unlimited Workspace members')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Go to My accounts' }))
     expect(onBack).toHaveBeenCalled()

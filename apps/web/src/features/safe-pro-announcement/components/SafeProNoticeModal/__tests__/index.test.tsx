@@ -40,4 +40,23 @@ describe('SafeProNoticeModal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close' }))
     expect(onOpenChange).toHaveBeenCalledWith(false, expect.anything())
   })
+
+  it('offers a second action when given one', () => {
+    const onSecondaryAction = jest.fn()
+    render(
+      <SafeProNoticeModal
+        open
+        title="Taking longer than expected"
+        body="Try again in a moment."
+        actionLabel="Close"
+        onAction={jest.fn()}
+        secondaryActionLabel="Try again"
+        onSecondaryAction={onSecondaryAction}
+        onOpenChange={jest.fn()}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
+    expect(onSecondaryAction).toHaveBeenCalled()
+  })
 })

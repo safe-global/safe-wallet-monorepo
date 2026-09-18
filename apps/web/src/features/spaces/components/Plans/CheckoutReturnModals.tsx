@@ -1,8 +1,6 @@
 import { useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
-import { Spinner } from '@/components/ui/spinner'
-import { Typography } from '@/components/ui/typography'
+import { useRouter } from 'next/router'
+import { AppRoutes } from '@/config/routes'
 import { useLoadFeature } from '@/features/__core__'
 import { SafeProFeature } from '@/features/safe-pro-announcement'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
@@ -11,60 +9,16 @@ import { getSubscriptionPeriodEnd, getSubscriptionPlanName } from '../../hooks/b
 
 const PENDING_STATUSES: CheckoutReturnStatus[] = ['processing', 'activating']
 
-const CheckoutPendingDialog = () => (
-  <Dialog open onOpenChange={() => undefined}>
-    <DialogContent size="xs" surface="card" padding="md" showCloseButton={false}>
-      <div className="flex flex-col items-center gap-4 py-4 text-center" data-testid="checkout-pending">
-        <Spinner className="size-8" />
-        <div className="flex flex-col gap-1">
-          <Typography variant="h4" as={DialogTitle}>
-            Confirming your subscription
-          </Typography>
-          <Typography color="muted">This usually takes a few seconds.</Typography>
-        </div>
-      </div>
-    </DialogContent>
-  </Dialog>
-)
-
-const CheckoutFailedDialog = ({
-  status,
-  onRetry,
-  onClose,
-}: {
-  status: 'timeout' | 'error'
-  onRetry: () => void
-  onClose: () => void
-}) => (
-  <Dialog open onOpenChange={(open) => !open && onClose()}>
-    <DialogContent size="xs" surface="card" padding="md" showCloseButton={false}>
-      <div className="flex flex-col gap-6" data-testid="checkout-failed">
-        <div className="flex flex-col gap-2">
-          <Typography variant="h4" as={DialogTitle}>
-            {status === 'timeout'
-              ? 'Your subscription is taking longer than expected'
-              : 'We couldn’t confirm your checkout'}
-          </Typography>
-          <Typography color="muted">
-            {status === 'timeout'
-              ? 'Stripe accepted the checkout, but your Workspace hasn’t been updated yet. Try again in a moment; if the problem persists, contact support.'
-              : 'We couldn’t verify the checkout session. If you were charged, contact support and we’ll sort it out.'}
-          </Typography>
-        </div>
-        <div className="flex gap-3">
-          <Button variant="secondary" size="lg" className="flex-1" onClick={onClose}>
-            Close
-          </Button>
-          {status === 'timeout' && (
-            <Button size="lg" className="flex-1" onClick={onRetry}>
-              Try again
-            </Button>
-          )}
-        </div>
-      </div>
-    </DialogContent>
-  </Dialog>
-)
+const FAILURE_COPY = {
+  timeout: {
+    title: 'Your subscription is taking longer than expected',
+    body: 'Stripe accepted the checkout, but your Workspace hasn’t been updated yet. Try again in a moment; if the problem persists, contact support.',
+  },
+  error: {
+    title: 'We couldn’t confirm your checkout',
+    body: 'We couldn’t verify the checkout session. If you were charged, contact support and we’ll sort it out.',
+  },
+} as const
 
 /**
  * Owns the screen while Stripe sends the user back: a blocking loader until the session settles and the subscription
@@ -73,26 +27,44 @@ const CheckoutFailedDialog = ({
 export default function CheckoutReturnModals({
   spaceId,
   trialCtaLabel,
-  onAddBillingDetails,
+  showConfirmationNote,
 }: {
   spaceId?: string | null
   trialCtaLabel?: string
-  /** Offers the Stripe portal from the trial confirmation (the onboarding wizard). */
-  onAddBillingDetails?: () => void
+  /** Points to the confirmation email under the trial CTA (the onboarding wizard). */
+  showConfirmationNote?: boolean
 }) {
-  const { SafeProTrialActivatedModal, SafeProSubscriptionActivatedModal } = useLoadFeature(SafeProFeature)
+  const { SafeProTrialActivatedModal, SafeProSubscriptionActivatedModal, SafeProPendingModal, SafeProNoticeModal } =
+    useLoadFeature(SafeProFeature)
   const { plan, refetch } = useSpacePlan(spaceId)
   const checkout = useCheckoutReturn(spaceId)
+  const router = useRouter()
   const isComplete = checkout.status === 'complete'
+  // A failed return leaves the Workspace as it was, so closing steps out to the Workspaces list.
+  const leave = () => void router.push(AppRoutes.welcome.spaces)
 
   useEffect(() => {
     if (isComplete) refetch()
   }, [isComplete]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (PENDING_STATUSES.includes(checkout.status)) return <CheckoutPendingDialog />
+  if (PENDING_STATUSES.includes(checkout.status)) {
+    return <SafeProPendingModal title="Confirming your subscription" body="This usually takes a few seconds." />
+  }
 
   if (checkout.status === 'timeout' || checkout.status === 'error') {
-    return <CheckoutFailedDialog status={checkout.status} onRetry={checkout.retry} onClose={checkout.dismiss} />
+    const { title, body } = FAILURE_COPY[checkout.status]
+    return (
+      <SafeProNoticeModal
+        open
+        title={title}
+        body={body}
+        actionLabel="Close"
+        onAction={leave}
+        secondaryActionLabel={checkout.status === 'timeout' ? 'Try again' : undefined}
+        onSecondaryAction={checkout.status === 'timeout' ? checkout.retry : undefined}
+        onOpenChange={(open) => !open && leave()}
+      />
+    )
   }
 
   if (!isComplete || !checkout.subscription) return null
@@ -107,7 +79,7 @@ export default function CheckoutReturnModals({
       onOpenChange={checkout.dismiss}
       trialEndsAt={periodEndsAt}
       ctaLabel={trialCtaLabel}
-      onAddBillingDetails={onAddBillingDetails}
+      showConfirmationNote={showConfirmationNote}
     />
   ) : (
     <SafeProSubscriptionActivatedModal
