@@ -9,6 +9,7 @@ import { useLoadFeature } from '@/features/__core__'
 import { SafeProFeature } from '@/features/safe-pro-announcement'
 import { localItem } from '@/services/local-storage/local'
 import { formatDate } from '@safe-global/utils/utils/date'
+import { TRIAL_ENDING_SOON_DAYS, TRIAL_LAST_REMINDER_DAYS } from '../../hooks/billing/subscription'
 import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import { useCurrentMembership, useIsAdmin } from '../../hooks/useSpaceMembers'
@@ -20,7 +21,12 @@ import { salesHintFor } from './PlanChooserModal'
 import { buildPlanTiers, toCurrentPlan } from './planTiers'
 import type { CurrentPlan, PlanPick } from './types'
 
-const reminderSeen = (spaceId: string) => localItem<boolean>(`safeProTrialReminderSeen:${spaceId}`)
+/** Remembers the last reminder stage dismissed, so each stage nags exactly once. */
+const reminderSeen = (spaceId: string) => localItem<number>(`safeProTrialReminderSeen:${spaceId}`)
+
+/** The reminder fires twice: on entering the last week, and again in the last two days. */
+export const reminderStage = (daysLeft: number | null | undefined): number =>
+  daysLeft != null && daysLeft <= TRIAL_LAST_REMINDER_DAYS ? TRIAL_LAST_REMINDER_DAYS : TRIAL_ENDING_SOON_DAYS
 
 export const endsIn = (daysLeft: number | null): string =>
   daysLeft === null || daysLeft > 1 ? `in ${daysLeft ?? 7} days` : daysLeft === 1 ? 'in 1 day' : 'today'
@@ -93,15 +99,21 @@ const TrialEndingChooser = ({
       </Dialog>
 
       {pick && (
-        <ChangePlanFlow spaceId={spaceId} pick={pick} currentPlan={currentPlan} onClose={() => setPick(undefined)} />
+        <ChangePlanFlow
+          spaceId={spaceId}
+          pick={pick}
+          currentPlan={currentPlan}
+          onClose={() => setPick(undefined)}
+          onChanged={onClose}
+        />
       )}
     </>
   )
 }
 
 /**
- * Mounted on every Workspace page: once per Workspace, when the trial enters its last week, an admin gets the plan
- * picker and a member a heads-up. Seen state lives in local storage so the reminder never nags.
+ * Mounted on every Workspace page: when the trial enters its last week, and again in its last two days, an admin gets
+ * the plan picker and a member a heads-up. The stage dismissed lives in local storage so each one shows once.
  */
 export default function TrialEndingModal({ spaceId }: { spaceId: string }) {
   const { plan, seats, subscription, isTrialing, isTrialEndingSoon } = useSpacePlan(spaceId)
@@ -110,15 +122,16 @@ export default function TrialEndingModal({ spaceId }: { spaceId: string }) {
   const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId }, { skip: !isTrialEndingSoon })
   const { SafeProNoticeModal } = useLoadFeature(SafeProFeature)
   const [isOpen, setIsOpen] = useState(false)
+  const stage = reminderStage(plan?.daysLeft)
 
   useEffect(() => {
-    if (isTrialEndingSoon && membership && !reminderSeen(spaceId).get()) setIsOpen(true)
-  }, [isTrialEndingSoon, membership, spaceId])
+    if (isTrialEndingSoon && membership && reminderSeen(spaceId).get() !== stage) setIsOpen(true)
+  }, [isTrialEndingSoon, membership, spaceId, stage])
 
   if (!isOpen || !plan || !subscription) return null
 
   const close = () => {
-    reminderSeen(spaceId).set(true)
+    reminderSeen(spaceId).set(stage)
     setIsOpen(false)
   }
   const currentPlan = toCurrentPlan(subscription, plan, isTrialing)

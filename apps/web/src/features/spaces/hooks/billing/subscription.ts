@@ -10,6 +10,8 @@ const CANCELED_STATUSES = new Set<Subscription['status']>(['canceled', 'incomple
 
 /** From this many days before the trial ends the UI turns to warnings and reminders. */
 export const TRIAL_ENDING_SOON_DAYS = 7
+/** The reminder comes back one last time from this many days before the trial ends. */
+export const TRIAL_LAST_REMINDER_DAYS = 2
 /** From here on the trial label counts down; further out it just says "Free trial". */
 export const TRIAL_COUNTDOWN_DAYS = 14
 

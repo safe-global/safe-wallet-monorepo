@@ -53,6 +53,7 @@ export default function ChangePlanDialog({
   currentPlan,
   removed = [],
   onClose,
+  onChanged,
 }: {
   spaceId: string
   pick: PlanPick
@@ -60,6 +61,8 @@ export default function ChangePlanDialog({
   /** Safes the accounts step left out; they leave the Workspace right before the plan changes. */
   removed?: SafeRef[]
   onClose: () => void
+  /** Fires only after the plan changed, before `onClose`, for a parent that should close along with the dialog. */
+  onChanged?: () => void
 }) {
   const dispatch = useAppDispatch()
   const { previewChange, preview, isPreviewing, previewError, changePlan, isChanging, changeError } =
@@ -94,6 +97,7 @@ export default function ChangePlanDialog({
         groupKey: 'plan-updated',
       }),
     )
+    onChanged?.()
     onClose()
   }
 

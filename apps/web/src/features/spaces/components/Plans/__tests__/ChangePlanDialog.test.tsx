@@ -86,7 +86,16 @@ describe('ChangePlanDialog', () => {
     mockState = { preview }
     mockChangePlan.mockResolvedValue(true)
     const onClose = jest.fn()
-    render(<ChangePlanDialog spaceId="space-1" pick={pick} currentPlan={currentPlan} onClose={onClose} />)
+    const onChanged = jest.fn()
+    render(
+      <ChangePlanDialog
+        spaceId="space-1"
+        pick={pick}
+        currentPlan={currentPlan}
+        onClose={onClose}
+        onChanged={onChanged}
+      />,
+    )
 
     expect(screen.getByRole('heading', { name: 'Downgrade plan' })).toBeInTheDocument()
     expect(screen.getByTestId('change-plan-summary')).toHaveTextContent('Current plan')
@@ -102,6 +111,7 @@ describe('ChangePlanDialog', () => {
     fireEvent.click(screen.getByTestId('change-plan-confirm'))
 
     await waitFor(() => expect(onClose).toHaveBeenCalled())
+    expect(onChanged).toHaveBeenCalled()
     expect(mockChangePlan).toHaveBeenCalledWith('price_starter', 'pl_starter')
     expect(mockShowNotification).toHaveBeenCalledWith(
       expect.objectContaining({ message: 'Plan downgraded to Starter.', variant: 'success' }),

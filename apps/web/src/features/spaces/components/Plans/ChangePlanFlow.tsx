@@ -19,11 +19,13 @@ export default function ChangePlanFlow({
   pick,
   currentPlan,
   onClose,
+  onChanged,
 }: {
   spaceId: string
   pick: PlanPick
   currentPlan: CurrentPlan
   onClose: () => void
+  onChanged?: () => void
 }) {
   const { needsTrim } = useSeatTrim(spaceId)
   const [removed, setRemoved] = useState<SafeRef[]>()
@@ -48,6 +50,13 @@ export default function ChangePlanFlow({
   }
 
   return (
-    <ChangePlanDialog spaceId={spaceId} pick={pick} currentPlan={currentPlan} removed={removed} onClose={onClose} />
+    <ChangePlanDialog
+      spaceId={spaceId}
+      pick={pick}
+      currentPlan={currentPlan}
+      removed={removed}
+      onClose={onClose}
+      onChanged={onChanged}
+    />
   )
 }

@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import { SUPPORT_CHAT_URL } from '@/config/constants'
-import TrialEndingModal, { endsIn } from '../TrialEndingModal'
+import TrialEndingModal, { endsIn, reminderStage } from '../TrialEndingModal'
 
 const mockUseSpacePlan = jest.fn()
 const mockUseSpaceOffers = jest.fn()
@@ -56,8 +56,27 @@ jest.mock('@/features/__core__', () => ({
 }))
 jest.mock('../ChangePlanFlow', () => ({
   __esModule: true,
-  default: ({ pick, currentPlan }: { pick: { tier: { name: string } }; currentPlan: { isTrialing: boolean } }) => (
-    <div data-testid="change-plan-dialog" data-to={pick.tier.name} data-trial={String(currentPlan.isTrialing)} />
+  default: ({
+    pick,
+    currentPlan,
+    onClose,
+    onChanged,
+  }: {
+    pick: { tier: { name: string } }
+    currentPlan: { isTrialing: boolean }
+    onClose: () => void
+    onChanged?: () => void
+  }) => (
+    <div data-testid="change-plan-dialog" data-to={pick.tier.name} data-trial={String(currentPlan.isTrialing)}>
+      <button
+        onClick={() => {
+          onChanged?.()
+          onClose()
+        }}
+      >
+        plan-changed
+      </button>
+    </div>
   ),
 }))
 
@@ -112,6 +131,34 @@ describe('TrialEndingModal', () => {
     expect(endsIn(0)).toBe('today')
   })
 
+  it('splits the reminder into a last-week and a last-two-days stage', () => {
+    expect(reminderStage(7)).toBe(7)
+    expect(reminderStage(3)).toBe(7)
+    expect(reminderStage(2)).toBe(2)
+    expect(reminderStage(0)).toBe(2)
+    expect(reminderStage(null)).toBe(7)
+  })
+
+  it('comes back once in the last two days after the last-week reminder was dismissed', () => {
+    const { unmount } = render(<TrialEndingModal spaceId={SPACE_ID} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Continue without Safe Pro' }))
+    unmount()
+
+    mockUseSpacePlan.mockReturnValue(trial(5))
+    expect(render(<TrialEndingModal spaceId={SPACE_ID} />).container).toBeEmptyDOMElement()
+
+    mockUseSpacePlan.mockReturnValue(trial(2))
+    const second = render(<TrialEndingModal spaceId={SPACE_ID} />)
+    expect(screen.getByRole('heading', { name: 'Your free trial will end in 2 days' })).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Continue without Safe Pro' }))
+    expect(storage[`safeProTrialReminderSeen:${SPACE_ID}`]).toBe('2')
+    second.unmount()
+
+    mockUseSpacePlan.mockReturnValue(trial(1))
+    expect(render(<TrialEndingModal spaceId={SPACE_ID} />).container).toBeEmptyDOMElement()
+  })
+
   it('stays quiet while the trial has more than a week left', () => {
     mockUseSpacePlan.mockReturnValue(trial(14))
 
@@ -141,6 +188,17 @@ describe('TrialEndingModal', () => {
     expect(render(<TrialEndingModal spaceId={SPACE_ID} />).container).toBeEmptyDOMElement()
   })
 
+  it('closes the reminder for good once the plan changed', () => {
+    render(<TrialEndingModal spaceId={SPACE_ID} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Switch to Starter' }))
+    fireEvent.click(screen.getByText('plan-changed'))
+
+    expect(screen.queryByTestId('change-plan-dialog')).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Your free trial will end in 7 days' })).not.toBeInTheDocument()
+    expect(storage[`safeProTrialReminderSeen:${SPACE_ID}`]).toBe('7')
+  })
+
   it('only warns a member, naming the Workspace and the lock date', () => {
     mockUseIsAdmin.mockReturnValue(false)
     render(<TrialEndingModal spaceId={SPACE_ID} />)
@@ -152,6 +210,6 @@ describe('TrialEndingModal', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Got it' }))
     expect(screen.queryByTestId('notice-modal')).not.toBeInTheDocument()
-    expect(storage[`safeProTrialReminderSeen:${SPACE_ID}`]).toBe('true')
+    expect(storage[`safeProTrialReminderSeen:${SPACE_ID}`]).toBe('7')
   })
 })
