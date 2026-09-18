@@ -9,6 +9,7 @@ import RecoverySigners from '../RecoverySigners'
 import RecoveryDescription from '../RecoveryDescription'
 import type { RecoveryQueueItem } from '../../services/recovery-state'
 
+import classNames from 'classnames'
 import txDetailsCss from '@/components/transactions/TxDetails/styles.module.css'
 
 export default function RecoveryDetails({ item }: { item: RecoveryQueueItem }): ReactElement {
@@ -21,7 +22,7 @@ export default function RecoveryDetails({ item }: { item: RecoveryQueueItem }): 
   }
 
   return (
-    <div className={txDetailsCss.container}>
+    <div className={classNames(txDetailsCss.container, txDetailsCss.containerContrast)}>
       <div className={txDetailsCss.details}>
         <div className={txDetailsCss.txData}>
           <RecoveryDescription item={item} />

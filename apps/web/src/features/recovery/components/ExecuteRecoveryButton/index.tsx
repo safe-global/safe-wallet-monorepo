@@ -34,13 +34,13 @@ export default function ExecuteRecoveryButton({
   return (
     <CheckWallet allowNonOwner checkNetwork={!isDisabled}>
       {(isOk) => {
-        const tooltipTitle =
-          !isOk || isDisabled
-            ? isWrongChain
-              ? `Switch your wallet network to ${chain?.chainName} to execute this transaction`
-              : isNext
-                ? 'You can execute the recovery after the specified review window'
-                : 'Previous recovery proposals must be executed or cancelled first'
+        // Any other reason for `!isOk` is explained by CheckWallet's own tooltip
+        const tooltipTitle = isWrongChain
+          ? `Switch your wallet network to ${chain?.chainName} to execute this transaction`
+          : isDisabled
+            ? isNext
+              ? 'You can execute the recovery after the specified review window'
+              : 'Previous recovery proposals must be executed or cancelled first'
             : null
 
         const button = (
