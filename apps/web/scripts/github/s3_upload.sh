@@ -9,7 +9,14 @@ fi
 cd out
 
 # Upload the build to S3
-aws s3 sync . $BUCKET --delete
+aws s3 sync . $BUCKET --delete --exclude "storybook/*"
+
+# Storybook's entry files are not content-hashed; a cached index points at bundles --delete already removed.
+# Paths excluded from a sync are also excluded from its --delete, so this pass owns storybook/.
+# The release workflow builds no Storybook, so the directory may not exist.
+if [[ -d storybook ]]; then
+  aws s3 sync storybook "$BUCKET/storybook" --delete --cache-control "no-cache"
+fi
 
 function parallel_limit {
     local max="$1"
