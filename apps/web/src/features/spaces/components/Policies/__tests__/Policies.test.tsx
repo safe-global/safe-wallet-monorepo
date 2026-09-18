@@ -1,5 +1,5 @@
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
-import { fireEvent, render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
+import { fireEvent, render, renderWithUserEvent, screen, waitFor, within } from '@/tests/test-utils'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { PROPOSER_INTRO_SEEN_KEY } from '../ProposerIntroDialog/constants'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from '../SpendingLimitIntroDialog/constants'
@@ -61,8 +61,8 @@ describe('Policies', () => {
 
     const link = screen.getByRole('link', { name: 'Learn more' })
 
-    expect(link.querySelector('.external-link-icon')).toBeInTheDocument()
-    expect(link).toHaveClass('font-bold', 'hover:text-muted-foreground')
+    expect(link.querySelector('.external-link-icon')).not.toBeInTheDocument()
+    expect(link).toHaveClass('font-bold', 'underline')
   })
 
   it('renders the policy catalogue', () => {
@@ -70,7 +70,6 @@ describe('Policies', () => {
 
     expect(screen.getByText('Spending limit')).toBeInTheDocument()
     expect(screen.getByText('Proposer')).toBeInTheDocument()
-    expect(screen.getByText('Account recovery')).toBeInTheDocument()
     expect(screen.getByText('Something missing?')).toBeInTheDocument()
   })
 
@@ -142,7 +141,7 @@ describe('Policies', () => {
     it('explains the proposer role before the flow starts', async () => {
       const { user } = renderWithUserEvent(<Policies />)
 
-      await user.click(screen.getByTestId('policy-catalogue-tile-proposer'))
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
 
       expect(screen.getByTestId('proposer-intro-dialog')).toBeInTheDocument()
     })
@@ -150,7 +149,7 @@ describe('Policies', () => {
     it('returns to the catalogue with nothing started when dismissed', async () => {
       const { user } = renderWithUserEvent(<Policies />)
 
-      await user.click(screen.getByTestId('policy-catalogue-tile-proposer'))
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
       await user.click(screen.getByRole('button', { name: 'Close' }))
 
       await waitFor(() => expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument())
@@ -160,7 +159,7 @@ describe('Policies', () => {
     it('records that it has been shown', async () => {
       const { user } = renderWithUserEvent(<Policies />)
 
-      await user.click(screen.getByTestId('policy-catalogue-tile-proposer'))
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
       await user.click(screen.getByRole('button', { name: 'Close' }))
 
       expect(mockSetHasSeenProposerIntro).toHaveBeenCalledWith(true)
@@ -171,7 +170,7 @@ describe('Policies', () => {
       mockHasSeenProposerIntro = true
       const { user } = renderWithUserEvent(<Policies />)
 
-      await user.click(screen.getByTestId('policy-catalogue-tile-proposer'))
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
 
       expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument()
     })
@@ -180,7 +179,7 @@ describe('Policies', () => {
       mockHasSeenSpendingLimitIntro = true
       const { user } = renderWithUserEvent(<Policies />)
 
-      await user.click(screen.getByTestId('policy-catalogue-tile-proposer'))
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
 
       expect(screen.getByTestId('proposer-intro-dialog')).toBeInTheDocument()
     })
@@ -188,7 +187,7 @@ describe('Policies', () => {
     it('opens the proposer intro and no other policy dialog', async () => {
       const { user } = renderWithUserEvent(<Policies />)
 
-      await user.click(screen.getByTestId('policy-catalogue-tile-proposer'))
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
 
       expect(screen.getByTestId('proposer-intro-dialog')).toBeInTheDocument()
       expect(screen.getAllByRole('dialog')).toHaveLength(1)
@@ -219,7 +218,7 @@ describe('Policies', () => {
   it('opens no intro for the policies that have no flow yet', async () => {
     const { user } = renderWithUserEvent(<Policies />)
 
-    await user.click(screen.getByTestId('policy-catalogue-tile-suggestion'))
+    await user.click(within(screen.getByTestId('policy-catalogue-tile-suggestion')).getByRole('button'))
 
     expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument()
     expect(screen.queryByTestId('spending-limit-intro-dialog')).not.toBeInTheDocument()
@@ -241,12 +240,11 @@ describe('Policies', () => {
 
     it('should, when no wallet is connected and the space has policies, render the whole table', () => {
       mockUseWallet.mockReturnValue(null)
-      const policies = mockPolicies()
 
-      render(<Policies policies={policies} />)
+      render(<Policies policies={mockPolicies()} />)
 
       expect(screen.getByTestId('policies-list')).toBeInTheDocument()
-      expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(policies.length)
+      expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(5)
       expect(screen.getByPlaceholderText('by name, address or network')).toBeInTheDocument()
     })
   })

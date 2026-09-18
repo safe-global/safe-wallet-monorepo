@@ -5,11 +5,33 @@ import PaginatedDataTable, { type DataTableColumn } from '@/components/common/Pa
 import PolicyRule from './components/PolicyRule'
 import PolicyStatusChip from './components/PolicyStatusChip'
 import PolicyTokens from './components/PolicyTokens'
-import { getPolicyStatus, type Policy } from '../types'
+import { getPolicyStatus, isProposerPolicy, type Policy } from '../types'
 
 export type PoliciesTableProps = {
   policies: Policy[]
   onSelect?: (policy: Policy) => void
+}
+
+type PolicyRow = {
+  /** The first policy of the group; the detail panel opens on it. */
+  policy: Policy
+  chainIds: string[]
+}
+
+/** The same policy on the same address across chains is one row. Q55 decides whether CGW groups it. */
+const toRows = (policies: Policy[]): PolicyRow[] => {
+  const rows = new Map<string, PolicyRow>()
+
+  for (const policy of policies) {
+    const proposer = isProposerPolicy(policy) ? policy.data.proposer : ''
+    const key = `${policy.type}:${policy.safe.address.toLowerCase()}:${proposer.toLowerCase()}`
+    const row = rows.get(key)
+
+    if (row) row.chainIds.push(policy.safe.chainId)
+    else rows.set(key, { policy, chainIds: [policy.safe.chainId] })
+  }
+
+  return [...rows.values()]
 }
 
 /**
@@ -19,7 +41,7 @@ export type PoliciesTableProps = {
  * Revoked policies are not in the CGW response, so nothing here has to filter them out.
  */
 const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
-  const columns: DataTableColumn<Policy>[] = [
+  const columns: DataTableColumn<PolicyRow>[] = [
     {
       id: 'rule',
       header: 'RULE',
@@ -27,7 +49,7 @@ const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
       sticky: true,
       minWidth: 240,
       cellTestId: 'policy-cell-rule',
-      cell: (policy) => <PolicyRule policy={policy} />,
+      cell: ({ policy }) => <PolicyRule policy={policy} />,
     },
     {
       id: 'appliesTo',
@@ -35,9 +57,8 @@ const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
       width: '30%',
       minWidth: 260,
       cellTestId: 'policy-cell-applies-to',
-      // A policy belongs to one Safe on one chain, so this is a single address. The design shows
-      // several stacked avatars here; that is open as Q55 in the acceptance criteria.
-      cell: (policy, { isCompact }) => (
+      // The design shows several stacked avatars here; that is open as Q55 in the acceptance criteria.
+      cell: ({ policy }, { isCompact }) => (
         <EthHashInfo
           address={policy.safe.address}
           chainId={policy.safe.chainId}
@@ -56,7 +77,13 @@ const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
       minWidth: 120,
       priority: 'secondary',
       cellTestId: 'policy-cell-network',
-      cell: (policy) => <ChainIndicator chainId={policy.safe.chainId} onlyLogo showUnknown imageSize={24} />,
+      cell: ({ chainIds }) => (
+        <div className="flex items-center -space-x-1" data-testid="policy-networks">
+          {chainIds.map((chainId) => (
+            <ChainIndicator key={chainId} chainId={chainId} onlyLogo showUnknown imageSize={24} />
+          ))}
+        </div>
+      ),
     },
     {
       id: 'tokens',
@@ -65,7 +92,7 @@ const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
       minWidth: 110,
       priority: 'secondary',
       cellTestId: 'policy-cell-tokens',
-      cell: (policy) => <PolicyTokens policy={policy} />,
+      cell: ({ policy }) => <PolicyTokens policy={policy} />,
     },
     {
       id: 'status',
@@ -73,7 +100,7 @@ const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
       width: '15%',
       minWidth: 140,
       cellTestId: 'policy-cell-status',
-      cell: (policy) => <PolicyStatusChip status={getPolicyStatus(policy)} />,
+      cell: ({ policy }) => <PolicyStatusChip status={getPolicyStatus(policy)} />,
     },
     {
       id: 'open',
@@ -87,10 +114,10 @@ const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
   return (
     <PaginatedDataTable
       columns={columns}
-      rows={policies}
-      getRowKey={(policy) => policy.id}
-      onRowClick={onSelect}
-      getRowAriaLabel={(policy) => `Open ${policy.type} policy details`}
+      rows={toRows(policies)}
+      getRowKey={({ policy }) => policy.id}
+      onRowClick={onSelect && (({ policy }) => onSelect(policy))}
+      getRowAriaLabel={({ policy }) => `Open ${policy.type} policy details`}
     />
   )
 }

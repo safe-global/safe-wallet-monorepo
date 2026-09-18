@@ -80,10 +80,6 @@ const Policies = ({
           // TODO(WA-3160): open the Suggest a policy dialog.
           return
 
-        // Only unreachable while `isAvailable` is false in the catalogue; needs a flow before it flips.
-        case 'account-recovery':
-          return
-
         // A new policy id must pick a branch above rather than silently doing nothing.
         default: {
           const _exhaustive: never = id
@@ -126,7 +122,7 @@ const Policies = ({
           <Typography variant="paragraph-medium">
             Policies are rules that help you manage your Safe accounts. Set them up once and they will run onchain,
             automatically.{' '}
-            <ExternalLink className="font-bold hover:text-muted-foreground" href={HelpCenterArticle.POLICIES}>
+            <ExternalLink noIcon href={HelpCenterArticle.POLICIES}>
               Learn more
             </ExternalLink>
           </Typography>

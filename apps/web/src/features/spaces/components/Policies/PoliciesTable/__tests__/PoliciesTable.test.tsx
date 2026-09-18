@@ -4,6 +4,7 @@ import {
   mockMultiSpenderPolicy,
   mockPendingPolicy,
   mockPolicies,
+  mockPolygonSpendingLimitPolicy,
   mockProposerPolicy,
   mockUnenforcedPolicy,
 } from '../../mocks/policies'
@@ -35,10 +36,27 @@ describe('PoliciesTable', () => {
     expect(within(cell).getByText('3 spenders · 4 limits')).toBeInTheDocument()
   })
 
-  it('should, when given several policies, render a row for each of them', () => {
+  it('should, when given several policies, render a row for each distinct one', () => {
     render(<PoliciesTable policies={mockPolicies()} />)
 
     expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(5)
+  })
+
+  it('should, when the same Safe has the policy on two chains, render one row with both network icons', () => {
+    render(
+      <PoliciesTable
+        policies={[asActivePolicy(mockMultiSpenderPolicy()), asActivePolicy(mockPolygonSpendingLimitPolicy())]}
+      />,
+    )
+
+    expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(1)
+    expect(screen.getByTestId('policy-networks').children).toHaveLength(2)
+  })
+
+  it('should, when a Safe has the policy on one chain, render one network icon', () => {
+    render(<PoliciesTable policies={[asActivePolicy(mockProposerPolicy())]} />)
+
+    expect(screen.getByTestId('policy-networks').children).toHaveLength(1)
   })
 
   it('should, when a policy module is present but not enabled, render it as not enforced', () => {
