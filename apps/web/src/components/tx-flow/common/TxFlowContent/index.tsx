@@ -1,5 +1,5 @@
 import { TxFlowContext } from '../../TxFlowProvider'
-import { type ReactNode, useContext } from 'react'
+import { Children, type ReactNode, useContext } from 'react'
 import TxLayoutBase from '../TxLayoutBase'
 import { Slot, SlotName } from '../../slots'
 
@@ -19,6 +19,7 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
       fixedNonce,
       hideNonce,
       hideProgress,
+      hideBack,
       isReplacement,
       isMessage,
     },
@@ -27,7 +28,7 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
     progress,
     onPrev,
   } = useContext(TxFlowContext)
-  const childrenArray = Array.isArray(children) ? children : [children]
+  const childrenArray = Children.toArray(children)
 
   return (
     <TxLayoutBase
@@ -44,7 +45,7 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
       step={step}
       stepCount={childrenArray.length}
       progress={progress}
-      onBack={onPrev}
+      onBack={hideBack ? undefined : onPrev}
       sidebarSlot={<Slot name={SlotName.Sidebar} />}
     >
       {childrenArray[step]}

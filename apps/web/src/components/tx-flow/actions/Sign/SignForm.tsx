@@ -46,8 +46,15 @@ export const SignForm = ({
   // Hooks
   const { signTx } = txActions
   const { setTxFlow } = useContext(TxModalContext)
-  const { isSubmitDisabled, isSubmitLoading, setIsSubmitLoading, setSubmitError, setIsRejectedByUser } =
-    useContext(TxFlowContext)
+  const {
+    isSubmitDisabled,
+    isSubmitLoading,
+    setIsSubmitLoading,
+    setSubmitError,
+    setIsRejectedByUser,
+    willSignBeforeExecute,
+    continueToExecute,
+  } = useContext(TxFlowContext)
   const { needsRiskConfirmation, isRiskConfirmed } = txSecurity
   const hasSigned = useAlreadySigned(safeTx)
   const signer = useSigner()
@@ -85,6 +92,12 @@ export const SignForm = ({
 
     // On successful sign
     onSubmitSuccess?.({ txId: resultTxId })
+
+    if (willSignBeforeExecute) {
+      setIsSubmitLoading(false)
+      continueToExecute(resultTxId)
+      return
+    }
 
     if (signer?.isSafe) {
       setTxFlow(<NestedTxSuccessScreenFlow txId={resultTxId} />, undefined, false)

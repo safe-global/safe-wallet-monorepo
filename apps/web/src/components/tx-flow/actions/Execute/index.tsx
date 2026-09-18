@@ -6,7 +6,7 @@ import { useIsCounterfactualSafe } from '@/features/counterfactual'
 import { type SlotComponentProps, SlotName, withSlot } from '../../slots'
 import type { SubmitCallback } from '../../TxFlow'
 
-const Execute = ({
+export const Execute = ({
   onSubmit,
   onSubmitSuccess,
   disabled = false,
@@ -56,9 +56,9 @@ const Execute = ({
 
 const useShouldRegisterSlot = () => {
   const isCounterfactualSafe = useIsCounterfactualSafe()
-  const { canExecute, isProposing } = useContext(TxFlowContext)
+  const { canExecute, isProposing, willSignBeforeExecute } = useContext(TxFlowContext)
 
-  return !isCounterfactualSafe && canExecute && !isProposing
+  return !isCounterfactualSafe && canExecute && !isProposing && !willSignBeforeExecute
 }
 
 const ExecuteSlot = withSlot({
