@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Drawer } from './Drawer'
+import { UserRoundPen } from 'lucide-react'
+import { Drawer, DrawerBody, DrawerFooter, DrawerHeader, DrawerSubtitle, DrawerTitle } from './Drawer'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
+import { Badge, BadgeDot } from '@/components/ui/badge'
 
 const meta = {
   title: 'Components/Common/Drawer',
@@ -32,48 +34,97 @@ const Paragraphs = ({ count }: { count: number }) => (
 export const Full: Story = {
   args: {
     ariaLabel: 'Full drawer',
-    icon: <div className="size-7 rounded-full bg-primary" />,
-    title: 'Operations Vault',
-    subtitle: 'Last updated 2 minutes ago',
-    action: <Button className="w-full">Confirm</Button>,
-    children: <Paragraphs count={3} />,
+    children: (
+      <>
+        <DrawerHeader>
+          <div className="size-7 rounded-full bg-primary" />
+          <div className="min-w-0">
+            <DrawerTitle>Operations Vault</DrawerTitle>
+            <DrawerSubtitle>Last updated 2 minutes ago</DrawerSubtitle>
+          </div>
+        </DrawerHeader>
+        <DrawerBody>
+          <Paragraphs count={3} />
+        </DrawerBody>
+        <DrawerFooter>
+          <Button className="w-full">Submit delegation</Button>
+        </DrawerFooter>
+      </>
+    ),
+  },
+}
+
+/** The Policies header: a badge-style icon, a large title and a status chip pushed to the right. */
+export const StatusHeader: Story = {
+  args: {
+    ariaLabel: 'Proposer role',
+    children: (
+      <>
+        <DrawerHeader>
+          <div className="bg-success-subtle flex size-10 items-center justify-center rounded-xl">
+            <UserRoundPen className="text-success-strong size-4" />
+          </div>
+          <DrawerTitle size="lg">Proposer role</DrawerTitle>
+          <Badge variant="warning" size="status" shape="status" className="ml-auto">
+            <BadgeDot />
+            Pending
+          </Badge>
+        </DrawerHeader>
+        <DrawerBody>
+          <Paragraphs count={3} />
+        </DrawerBody>
+        <DrawerFooter>
+          <Button className="w-full">Submit delegation</Button>
+        </DrawerFooter>
+      </>
+    ),
   },
 }
 
 export const OnlyTitle: Story = {
   args: {
     ariaLabel: 'Title only drawer',
-    title: 'Batched transactions',
-    children: <Paragraphs count={3} />,
-  },
-}
-
-export const TitleWithAction: Story = {
-  args: {
-    ariaLabel: 'Drawer with an action',
-    title: 'Batched transactions',
-    subtitle: '3 transactions queued',
-    action: <Button className="w-full">Confirm batch</Button>,
-    children: <Paragraphs count={3} />,
+    children: (
+      <>
+        <DrawerHeader>
+          <DrawerTitle>Batched transactions</DrawerTitle>
+        </DrawerHeader>
+        <DrawerBody>
+          <Paragraphs count={3} />
+        </DrawerBody>
+      </>
+    ),
   },
 }
 
 export const NoHeader: Story = {
   args: {
     ariaLabel: 'Headerless drawer',
-    children: <Paragraphs count={3} />,
+    children: (
+      <DrawerBody>
+        <Paragraphs count={3} />
+      </DrawerBody>
+    ),
   },
 }
 
 export const LongContent: Story = {
   args: {
     ariaLabel: 'Scrolling drawer',
-    title: 'Scrolling body',
-    action: <Button className="w-full">Confirm</Button>,
     children: (
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        <Paragraphs count={30} />
-      </div>
+      <>
+        <DrawerHeader>
+          <DrawerTitle>Scrolling body</DrawerTitle>
+        </DrawerHeader>
+        <DrawerBody>
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <Paragraphs count={30} />
+          </div>
+        </DrawerBody>
+        <DrawerFooter>
+          <Button className="w-full">Submit delegation</Button>
+        </DrawerFooter>
+      </>
     ),
   },
 }
@@ -82,7 +133,15 @@ export const SizeLg: Story = {
   args: {
     ariaLabel: 'Wide drawer',
     size: 'lg',
-    title: 'Wide drawer',
-    children: <Paragraphs count={3} />,
+    children: (
+      <>
+        <DrawerHeader>
+          <DrawerTitle>Wide drawer</DrawerTitle>
+        </DrawerHeader>
+        <DrawerBody>
+          <Paragraphs count={3} />
+        </DrawerBody>
+      </>
+    ),
   },
 }

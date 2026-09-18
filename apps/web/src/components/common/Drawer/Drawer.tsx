@@ -10,28 +10,14 @@ export type DrawerProps = {
   onClose: () => void
   size?: 'md' | 'lg'
   ariaLabel?: string
-  icon?: ReactNode
-  title?: ReactNode
-  subtitle?: ReactNode
-  action?: ReactNode
   children?: ReactNode
 }
 
 /**
- * Right-side slide-over panel. Owns the sheet chrome, header layout and close button so call sites
- * only supply content. The body never scrolls on its own — the child owns its scroll area.
+ * Right-side slide-over panel. Owns the sheet chrome and the close button; the content is composed
+ * from DrawerHeader / DrawerBody / DrawerFooter so each surface can shape its own header.
  */
-export const Drawer = ({
-  open,
-  onClose,
-  size = 'md',
-  ariaLabel,
-  icon,
-  title,
-  subtitle,
-  action,
-  children,
-}: DrawerProps): ReactElement => (
+export const Drawer = ({ open, onClose, size = 'md', ariaLabel, children }: DrawerProps): ReactElement => (
   <Sheet
     open={open}
     onOpenChange={(isOpen) => {
@@ -47,33 +33,36 @@ export const Drawer = ({
       showCloseButton={false}
       aria-label={ariaLabel}
     >
-      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
-        <div className="flex items-start justify-between gap-3 px-6 pt-6">
-          {(icon || title || subtitle) && (
-            <div className="flex min-w-0 items-center gap-3">
-              {icon}
-              <div className="min-w-0 leading-tight">
-                {title && (
-                  <Typography variant="paragraph-small-bold" className="truncate leading-tight">
-                    {title}
-                  </Typography>
-                )}
-                {subtitle && (
-                  <div className="flex items-center gap-1 text-xs leading-none text-muted-foreground">{subtitle}</div>
-                )}
-              </div>
-            </div>
-          )}
+      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">{children}</div>
 
-          <Button variant="surface" size="icon" onClick={onClose} aria-label="Close" className="ml-auto">
-            <X />
-          </Button>
-        </div>
-
-        <div className={cn('flex min-h-0 flex-1 flex-col px-6', !action && 'pb-6')}>{children}</div>
-
-        {action && <div className="px-6 pb-6">{action}</div>}
-      </div>
+      {/* Positioned by the Drawer rather than the header so every drawer has a close affordance */}
+      <Button variant="surface" size="icon" onClick={onClose} aria-label="Close" className="absolute top-6 right-6">
+        <X />
+      </Button>
     </SheetContent>
   </Sheet>
+)
+
+/** Header row. Leaves room for the Drawer's close button; push a trailing element with `ml-auto`. */
+export const DrawerHeader = ({ className, children }: { className?: string; children?: ReactNode }): ReactElement => (
+  <div className={cn('flex items-center gap-3 px-6 pt-6 pr-18', className)}>{children}</div>
+)
+
+export const DrawerTitle = ({ size = 'md', children }: { size?: 'md' | 'lg'; children?: ReactNode }): ReactElement => (
+  <Typography variant={size === 'lg' ? 'paragraph-bold' : 'paragraph-small-bold'} className="truncate leading-tight">
+    {children}
+  </Typography>
+)
+
+export const DrawerSubtitle = ({ children }: { children?: ReactNode }): ReactElement => (
+  <div className="flex items-center gap-1 text-xs leading-none text-muted-foreground">{children}</div>
+)
+
+/** Scroll owner is the child, not this element — `last:pb-6` drops when a DrawerFooter follows. */
+export const DrawerBody = ({ children }: { children?: ReactNode }): ReactElement => (
+  <div className="flex min-h-0 flex-1 flex-col px-6 last:pb-6">{children}</div>
+)
+
+export const DrawerFooter = ({ children }: { children?: ReactNode }): ReactElement => (
+  <div className="px-6 pb-6">{children}</div>
 )

@@ -1,19 +1,19 @@
 import { render, screen, fireEvent } from '@/tests/test-utils'
-import { Drawer } from './Drawer'
+import { Drawer, DrawerBody, DrawerFooter, DrawerHeader, DrawerSubtitle, DrawerTitle } from './Drawer'
 
 describe('Drawer', () => {
-  it('renders the icon, title, subtitle, children and action slots', () => {
+  it('renders the composed header, body and footer', () => {
     render(
-      <Drawer
-        open
-        onClose={jest.fn()}
-        ariaLabel="Test drawer"
-        icon={<span>ICON</span>}
-        title="Drawer title"
-        subtitle="Drawer subtitle"
-        action={<button>Footer action</button>}
-      >
-        Body content
+      <Drawer open onClose={jest.fn()} ariaLabel="Test drawer">
+        <DrawerHeader>
+          <span>ICON</span>
+          <DrawerTitle>Drawer title</DrawerTitle>
+          <DrawerSubtitle>Drawer subtitle</DrawerSubtitle>
+        </DrawerHeader>
+        <DrawerBody>Body content</DrawerBody>
+        <DrawerFooter>
+          <button>Footer action</button>
+        </DrawerFooter>
       </Drawer>,
     )
 
@@ -27,19 +27,18 @@ describe('Drawer', () => {
 
   it('renders nothing when closed', () => {
     render(
-      <Drawer open={false} onClose={jest.fn()} title="Drawer title">
-        Body content
+      <Drawer open={false} onClose={jest.fn()}>
+        <DrawerBody>Body content</DrawerBody>
       </Drawer>,
     )
 
-    expect(screen.queryByText('Drawer title')).not.toBeInTheDocument()
     expect(screen.queryByText('Body content')).not.toBeInTheDocument()
   })
 
-  it('keeps the close button when no header slot is provided', () => {
+  it('keeps the close button when no header is composed', () => {
     render(
       <Drawer open onClose={jest.fn()}>
-        Body content
+        <DrawerBody>Body content</DrawerBody>
       </Drawer>,
     )
 
@@ -49,8 +48,8 @@ describe('Drawer', () => {
   it('calls onClose when the close button is clicked', () => {
     const onClose = jest.fn()
     render(
-      <Drawer open onClose={onClose} title="Drawer title">
-        Body content
+      <Drawer open onClose={onClose}>
+        <DrawerBody>Body content</DrawerBody>
       </Drawer>,
     )
 
@@ -59,10 +58,15 @@ describe('Drawer', () => {
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 
-  it('renders the action outside the scrollable body so it stays pinned', () => {
+  it('renders the footer outside the body so it stays pinned', () => {
     render(
-      <Drawer open onClose={jest.fn()} action={<button>Footer action</button>}>
-        <p>Body content</p>
+      <Drawer open onClose={jest.fn()}>
+        <DrawerBody>
+          <p>Body content</p>
+        </DrawerBody>
+        <DrawerFooter>
+          <button>Footer action</button>
+        </DrawerFooter>
       </Drawer>,
     )
 
@@ -71,10 +75,50 @@ describe('Drawer', () => {
     expect(body).not.toContainElement(screen.getByRole('button', { name: 'Footer action' }))
   })
 
+  it('leaves the body as the last child only when no footer follows, which is what drops its padding', () => {
+    const { rerender } = render(
+      <Drawer open onClose={jest.fn()}>
+        <DrawerBody>
+          <p>Body content</p>
+        </DrawerBody>
+      </Drawer>,
+    )
+
+    const body = screen.getByText('Body content').parentElement
+
+    expect(body).toHaveClass('last:pb-6')
+    expect(body?.nextElementSibling).toBeNull()
+
+    rerender(
+      <Drawer open onClose={jest.fn()}>
+        <DrawerBody>
+          <p>Body content</p>
+        </DrawerBody>
+        <DrawerFooter>
+          <button>Footer action</button>
+        </DrawerFooter>
+      </Drawer>,
+    )
+
+    expect(screen.getByText('Body content').parentElement?.nextElementSibling).not.toBeNull()
+  })
+
+  it('renders the title larger when asked', () => {
+    render(
+      <Drawer open onClose={jest.fn()}>
+        <DrawerHeader>
+          <DrawerTitle size="lg">Proposer role</DrawerTitle>
+        </DrawerHeader>
+      </Drawer>,
+    )
+
+    expect(screen.getByText('Proposer role')).toHaveAttribute('data-variant', 'paragraph-bold')
+  })
+
   it('defaults to the md width and applies the lg width on request', () => {
     const { rerender } = render(
       <Drawer open onClose={jest.fn()} ariaLabel="Test drawer">
-        Body content
+        <DrawerBody>Body content</DrawerBody>
       </Drawer>,
     )
 
@@ -82,7 +126,7 @@ describe('Drawer', () => {
 
     rerender(
       <Drawer open onClose={jest.fn()} ariaLabel="Test drawer" size="lg">
-        Body content
+        <DrawerBody>Body content</DrawerBody>
       </Drawer>,
     )
 

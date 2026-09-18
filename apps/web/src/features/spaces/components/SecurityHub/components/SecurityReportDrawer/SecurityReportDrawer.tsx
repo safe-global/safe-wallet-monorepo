@@ -2,7 +2,7 @@ import { type ReactElement, useCallback, useEffect, useRef, useState } from 'rea
 import type { ScanContext, ScanResult } from '@/features/security/types'
 import { useSecurityScan } from '@/features/security'
 import { useChain } from '@/hooks/useChains'
-import { Drawer } from '@/components/common/Drawer'
+import { Drawer, DrawerBody, DrawerHeader, DrawerSubtitle, DrawerTitle } from '@/components/common/Drawer'
 import Identicon from '@/components/common/Identicon'
 import CopyButton from '@/components/common/CopyButton'
 import { Typography } from '@/components/ui/typography'
@@ -47,8 +47,6 @@ const SecurityReportDrawer = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isComplete, lastScannedAt])
 
-  const address = selectedSafe?.address
-
   return (
     <>
       <Drawer
@@ -56,32 +54,37 @@ const SecurityReportDrawer = ({
         open={!!selectedSafe}
         onClose={onClose}
         ariaLabel="Security report"
-        icon={address ? <Identicon address={address} size={28} /> : undefined}
-        title={
-          address ? (
-            <span title={selectedEntry?.name || address}>{selectedEntry?.name || shortenAddress(address)}</span>
-          ) : undefined
-        }
-        subtitle={
-          address ? (
-            <>
-              <Typography variant="paragraph-mini" className="text-[10px] text-muted-foreground">
-                {shortenAddress(address)}
-              </Typography>
-              <CopyButton text={address} className="!p-0.5 text-muted-foreground [&_svg]:!size-3" />
-            </>
-          ) : undefined
-        }
       >
         {selectedSafe && (
-          <SecurityDrawerContent
-            scanContext={scanContext}
-            results={results}
-            isComplete={isComplete}
-            lastScannedAt={lastScannedAt}
-            safeQueryParam={chain?.shortName ? `${chain.shortName}:${selectedSafe.address}` : undefined}
-            onHnSignupClick={handleHnSignupClick}
-          />
+          <>
+            <DrawerHeader>
+              <Identicon address={selectedSafe.address} size={28} />
+              <div className="min-w-0">
+                <DrawerTitle>
+                  <span title={selectedEntry?.name || selectedSafe.address}>
+                    {selectedEntry?.name || shortenAddress(selectedSafe.address)}
+                  </span>
+                </DrawerTitle>
+                <DrawerSubtitle>
+                  <Typography variant="paragraph-mini" className="text-[10px] text-muted-foreground">
+                    {shortenAddress(selectedSafe.address)}
+                  </Typography>
+                  <CopyButton text={selectedSafe.address} className="!p-0.5 text-muted-foreground [&_svg]:!size-3" />
+                </DrawerSubtitle>
+              </div>
+            </DrawerHeader>
+
+            <DrawerBody>
+              <SecurityDrawerContent
+                scanContext={scanContext}
+                results={results}
+                isComplete={isComplete}
+                lastScannedAt={lastScannedAt}
+                safeQueryParam={chain?.shortName ? `${chain.shortName}:${selectedSafe.address}` : undefined}
+                onHnSignupClick={handleHnSignupClick}
+              />
+            </DrawerBody>
+          </>
         )}
       </Drawer>
 
