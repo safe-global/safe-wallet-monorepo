@@ -7,6 +7,7 @@ import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { useIsHydrated } from '@/hooks/useIsHydrated'
 import { useSpacePlan } from '../../../hooks/useSpacePlan'
+import { useSafeSponsoredTxs } from '../../../hooks/useSafeSponsoredTxs'
 
 export const SidebarTopBar = (): ReactElement => {
   const { state } = useSidebar()
@@ -15,9 +16,12 @@ export const SidebarTopBar = (): ReactElement => {
   const isSpaceRoute = useIsSpaceRoute()
   const isHydrated = useIsHydrated()
   const { plan } = useSpacePlan()
+  // On a Safe's pages the last-used Workspace says nothing about this Safe: it must belong to a Workspace on a plan.
+  const { isPro: isSafeOnPlan } = useSafeSponsoredTxs()
 
-  // Inside a space or an individual safe the logo turns into a "Home" label pill; from a Workspace it returns to the
-  // Workspaces list, from anywhere else to the accounts view.
+  // Inside a space or an individual safe the logo turns into a "Home" label pill; while the Workspace is on a Safe
+  // Pro plan (the current one on its routes, the Safe's own one on a Safe's pages) the pill wears the PRO chip
+  // instead and leads back to the Workspaces list. From anywhere else it returns to the accounts view.
   //
   // Gated on hydration because both inputs are client-only: the safe address lives in a query param
   // the server can't see during SSG (useSafeAddressFromUrl falls back to `location.search`), and the
@@ -26,7 +30,8 @@ export const SidebarTopBar = (): ReactElement => {
   // dev's state+effect, without the extra render.
   const isInSafeOrSpace = Boolean(safeAddress) || isSpaceRoute
   const showHomeLabel = isHydrated && isInSafeOrSpace && !isCollapsed
-  const logoHref = isSpaceRoute ? AppRoutes.welcome.spaces : AppRoutes.welcome.accounts
+  const showProLockup = isSpaceRoute ? plan !== null : Boolean(safeAddress) && isSafeOnPlan
+  const logoHref = isSpaceRoute || showProLockup ? AppRoutes.welcome.spaces : AppRoutes.welcome.accounts
 
   return (
     <div
@@ -37,7 +42,7 @@ export const SidebarTopBar = (): ReactElement => {
       <SafeLogo
         href={logoHref}
         showHomeLabel={showHomeLabel}
-        showProLockup={isSpaceRoute && plan !== null}
+        showProLockup={showProLockup}
         data-testid="logo-container"
         className={cn(
           'absolute z-10 top-1/2 -translate-y-1/2',

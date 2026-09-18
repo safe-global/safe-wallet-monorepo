@@ -18,6 +18,8 @@ const mockUseHasFeature = jest.fn()
 jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
 const mockPlans: { plan: { status: string } | null } = { plan: null }
 jest.mock('../../../../hooks/useSpacePlan', () => ({ useSpacePlan: () => mockPlans }))
+const mockSponsored = { isPro: false }
+jest.mock('../../../../hooks/useSafeSponsoredTxs', () => ({ useSafeSponsoredTxs: () => mockSponsored }))
 
 jest.mock('@/hooks/useIsSpaceRoute', () => ({
   useIsSpaceRoute: () => mockUseIsSpaceRoute(),
@@ -59,6 +61,8 @@ jest.mock('@/components/common/SafeLogo', () => {
 
 describe('SidebarTopBar', () => {
   beforeEach(() => {
+    mockPlans.plan = null
+    mockSponsored.isPro = false
     jest.clearAllMocks()
     mockUseRouter.mockReturnValue({ pathname: AppRoutes.welcome.accounts })
     mockUseSafeAddressFromUrl.mockReturnValue('')
@@ -136,6 +140,31 @@ describe('SidebarTopBar', () => {
     mockPlans.plan = null
     render(<SidebarTopBar />)
     expect(screen.getAllByTestId('logo-container')[1]).toHaveAttribute('data-pro-lockup', 'false')
+  })
+
+  it('keeps the PRO chip on the pages of a Safe whose own Workspace is on a plan', () => {
+    mockUseRouter.mockReturnValue({ pathname: AppRoutes.home })
+    mockUseSafeAddressFromUrl.mockReturnValue('0x1234567890abcdef1234567890abcdef12345678')
+    mockSponsored.isPro = true
+
+    render(<SidebarTopBar />)
+
+    const logo = screen.getByTestId('logo-container')
+    expect(logo).toHaveAttribute('data-home-label', 'true')
+    expect(logo).toHaveAttribute('data-pro-lockup', 'true')
+    expect(logo).toHaveAttribute('href', AppRoutes.welcome.spaces)
+  })
+
+  it('ignores the last-used Workspace on a Safe that belongs to none', () => {
+    mockUseRouter.mockReturnValue({ pathname: AppRoutes.home })
+    mockUseSafeAddressFromUrl.mockReturnValue('0x1234567890abcdef1234567890abcdef12345678')
+    mockPlans.plan = { status: 'active' }
+
+    render(<SidebarTopBar />)
+
+    const logo = screen.getByTestId('logo-container')
+    expect(logo).toHaveAttribute('data-pro-lockup', 'false')
+    expect(logo).toHaveAttribute('href', AppRoutes.welcome.accounts)
   })
 
   it('does not show the Home label pill when the sidebar is collapsed', () => {
