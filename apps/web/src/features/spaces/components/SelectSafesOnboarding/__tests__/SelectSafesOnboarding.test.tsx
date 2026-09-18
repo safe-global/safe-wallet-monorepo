@@ -85,10 +85,8 @@ jest.mock('@/hooks/useDarkMode', () => ({
 
 jest.mock('../../Plans/CheckoutReturnModals', () => ({
   __esModule: true,
-  default: ({ trialCtaLabel, showConfirmationNote }: { trialCtaLabel?: string; showConfirmationNote?: boolean }) => (
-    <div data-testid="checkout-return-modals" data-note={String(Boolean(showConfirmationNote))}>
-      {trialCtaLabel}
-    </div>
+  default: ({ trialCtaLabel }: { trialCtaLabel?: string }) => (
+    <div data-testid="checkout-return-modals">{trialCtaLabel}</div>
   ),
 }))
 
@@ -110,11 +108,10 @@ describe('SelectSafesOnboarding — Stripe return', () => {
     mockWalletValue = { address: '0xWallet' }
   })
 
-  it('confirms the trial on landing, pointing to the confirmation email', () => {
+  it('confirms the trial on landing with a Get started CTA', () => {
     render(<SelectSafesOnboarding />)
 
     expect(screen.getByTestId('checkout-return-modals')).toHaveTextContent('Get started')
-    expect(screen.getByTestId('checkout-return-modals')).toHaveAttribute('data-note', 'true')
   })
 })
 

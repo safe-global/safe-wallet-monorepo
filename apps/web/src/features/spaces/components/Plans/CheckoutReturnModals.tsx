@@ -27,12 +27,9 @@ const FAILURE_COPY = {
 export default function CheckoutReturnModals({
   spaceId,
   trialCtaLabel,
-  showConfirmationNote,
 }: {
   spaceId?: string | null
   trialCtaLabel?: string
-  /** Points to the confirmation email under the trial CTA (the onboarding wizard). */
-  showConfirmationNote?: boolean
 }) {
   const { SafeProTrialActivatedModal, SafeProSubscriptionActivatedModal, SafeProPendingModal, SafeProNoticeModal } =
     useLoadFeature(SafeProFeature)
@@ -79,7 +76,6 @@ export default function CheckoutReturnModals({
       onOpenChange={checkout.dismiss}
       trialEndsAt={periodEndsAt}
       ctaLabel={trialCtaLabel}
-      showConfirmationNote={showConfirmationNote}
     />
   ) : (
     <SafeProSubscriptionActivatedModal

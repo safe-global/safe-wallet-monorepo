@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
+import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
 import ClaimTrialModal, { claimCopy } from '../ClaimTrialModal'
 
 const mockUseSpaceOffers = jest.fn()
@@ -78,7 +79,7 @@ describe('ClaimTrialModal', () => {
     expect(claimCopy(30)).toMatchObject({
       title: 'Start your 30-day free trial of Safe Pro',
       subtitle: 'All Pro features unlocked. No billing details needed upfront.',
-      note: "No payment method required. We'll remind you 14 and 3 days before it ends — cancel any time.",
+      note: "No payment method required. We'll remind you 7 and 2 days before the trial ends.",
       back: 'Go to My accounts',
       claim: 'Claim free trial',
     })
@@ -92,6 +93,15 @@ describe('ClaimTrialModal', () => {
     })
   })
 
+  it('links to the full feature comparison under the header', () => {
+    render(<ClaimTrialModal spaceId={SPACE_ID} onBack={jest.fn()} />)
+
+    expect(screen.getByRole('link', { name: /Compare all features/ })).toHaveAttribute(
+      'href',
+      SAFE_PRO_ANNOUNCEMENT_URL,
+    )
+  })
+
   it('offers the Business trial and, when the Workspace fits the seats, goes straight to Stripe', () => {
     const onBack = jest.fn()
     render(<ClaimTrialModal spaceId={SPACE_ID} onBack={onBack} />)
@@ -102,7 +112,7 @@ describe('ClaimTrialModal', () => {
     expect(screen.getByText(/60 days instead of 30/)).toBeInTheDocument()
     expect(screen.getByTestId('trial-offer-Business')).toHaveTextContent('€499')
     expect(screen.getByTestId('trial-offer-Business')).toHaveTextContent('Free')
-    expect(screen.getByText('Available until Dec 5, 2026')).toBeInTheDocument()
+    expect(screen.getByText('Available until Dec 5, 2026. You can subscribe any time after that.')).toBeInTheDocument()
     expect(screen.getByText('20 Safe accounts')).toBeInTheDocument()
     expect(screen.getByText('Policy engine')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Close' })).not.toBeInTheDocument()

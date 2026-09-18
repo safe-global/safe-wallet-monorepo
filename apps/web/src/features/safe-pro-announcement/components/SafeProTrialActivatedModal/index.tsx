@@ -13,7 +13,6 @@ const SafeProTrialActivatedModal = ({
   trialEndsAt,
   ctaHref,
   ctaLabel = 'Get started',
-  showConfirmationNote = false,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -21,8 +20,6 @@ const SafeProTrialActivatedModal = ({
   /** Where the CTA leads; without it the CTA just closes. */
   ctaHref?: LinkProps['href']
   ctaLabel?: string
-  /** The onboarding wizard adds a pointer to the confirmation email under the CTA. */
-  showConfirmationNote?: boolean
 }) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent size="sm" surface="card" padding="none">
@@ -35,8 +32,8 @@ const SafeProTrialActivatedModal = ({
               Your free trial is active until {formatDate(trialEndsAt)}
             </Typography>
             <Typography color="muted" align="center">
-              All Pro features are unlocked for your Workspace. We&apos;ll remind you to add billing details before the
-              trial ends. Nothing is charged until you do.
+              All Pro features are unlocked for your Workspace. We&apos;ll remind you to add a payment method before the
+              trial ends — nothing is charged until you do.
             </Typography>
           </div>
 
@@ -51,11 +48,9 @@ const SafeProTrialActivatedModal = ({
               {ctaLabel}
               <ArrowRight data-icon="inline-end" />
             </Button>
-            {showConfirmationNote && (
-              <Typography variant="paragraph-small" color="muted" align="center">
-                Full details are in your confirmation email.
-              </Typography>
-            )}
+            <Typography variant="paragraph-small" color="muted" align="center">
+              Full details are in your confirmation email.
+            </Typography>
           </div>
         </div>
       </div>

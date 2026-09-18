@@ -196,7 +196,7 @@ const SelectSafesOnboarding = (): ReactElement => {
         />
       )}
 
-      {spaceId && <CheckoutReturnModals spaceId={spaceId} trialCtaLabel="Get started" showConfirmationNote />}
+      {spaceId && <CheckoutReturnModals spaceId={spaceId} trialCtaLabel="Get started" />}
     </>
   )
 }

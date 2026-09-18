@@ -1,12 +1,14 @@
 import { useMemo, useState, type CSSProperties } from 'react'
-import { ArrowRight, Check } from 'lucide-react'
+import { ArrowRight, ArrowUpRight, Check } from 'lucide-react'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { Link } from '@/components/ui/link'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
+import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
 import { highlightSafePro } from '@/components/common/ProHighlight'
 import { formatDate } from '@safe-global/utils/utils/date'
 import { DAY_MS } from '../../hooks/billing/subscription'
@@ -41,7 +43,7 @@ export const claimCopy = (trialPeriodDays: number | null, variant: ClaimTrialVar
     }
   }
   const existing = {
-    note: "No payment method required. We'll remind you 14 and 3 days before it ends — cancel any time.",
+    note: "No payment method required. We'll remind you 7 and 2 days before the trial ends.",
     back: 'Go to My accounts',
     claim: 'Claim free trial',
   }
@@ -104,7 +106,7 @@ const TrialOfferCard = ({
             </div>
             {availableUntil && (
               <Typography variant="paragraph-small" color="muted">
-                Available until {availableUntil}
+                Available until {availableUntil}. You can subscribe any time after that.
               </Typography>
             )}
           </div>
@@ -190,6 +192,16 @@ export default function ClaimTrialModal({
                 </Typography>
                 <Typography color="muted">{copy.subtitle}</Typography>
               </div>
+
+              <Link
+                href={SAFE_PRO_ANNOUNCEMENT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                variant="muted"
+                className="self-start"
+              >
+                Compare all features <ArrowUpRight />
+              </Link>
 
               {isLoading ? (
                 <Skeleton className="h-[260px] w-full rounded-lg-xl" data-testid="claim-trial-skeleton" />
