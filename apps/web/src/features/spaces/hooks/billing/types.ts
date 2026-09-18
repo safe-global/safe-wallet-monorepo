@@ -25,3 +25,6 @@ export type SeatsMeter = {
   used: number
   quota: number | null
 }
+
+/** A metered entitlement that refills: `resetsAt` is when the count restarts (ISO), null when it never does. */
+export type SponsoredTxsMeter = SeatsMeter & { resetsAt: string | null }

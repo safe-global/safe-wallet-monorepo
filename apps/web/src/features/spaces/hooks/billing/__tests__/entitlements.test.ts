@@ -46,7 +46,7 @@ describe('getSeatsMeter', () => {
         resetsAt: '2026-10-17T15:52:37.000Z',
       },
     ])
-    expect(getSponsoredTxsMeter(data)).toEqual({ used: 0, quota: 10 })
+    expect(getSponsoredTxsMeter(data)).toEqual({ used: 0, quota: 10, resetsAt: '2026-10-17T15:52:37.000Z' })
     expect(getSponsoredTxsMeter(response([]))).toBeNull()
   })
 })
