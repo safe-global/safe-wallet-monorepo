@@ -178,6 +178,21 @@ describe('SidebarTopBar', () => {
     const logo = screen.getByTestId('logo-container')
     expect(logo).toHaveAttribute('data-home-label', 'false')
     expect(logo).toHaveAttribute('href', AppRoutes.welcome.accounts)
+    expect(screen.queryByTestId('collapsed-pro-chip')).not.toBeInTheDocument()
+  })
+
+  it('stacks the PRO chip under the logo when collapsed on a Workspace with a plan', () => {
+    const { useSidebar } = require('@/components/ui/sidebar')
+    useSidebar.mockReturnValue({ state: 'collapsed' })
+    mockUseRouter.mockReturnValue({ pathname: AppRoutes.spaces.index })
+    mockUseIsSpaceRoute.mockReturnValue(true)
+    mockPlans.plan = { status: 'active' }
+
+    render(<SidebarTopBar />)
+
+    expect(screen.getByTestId('logo-container')).toHaveAttribute('data-home-label', 'false')
+    expect(screen.getByTestId('logo-container')).toHaveAttribute('href', AppRoutes.welcome.spaces)
+    expect(screen.getByTestId('collapsed-pro-chip')).toBeInTheDocument()
   })
 
   it('keeps the plain logo on the welcome accounts view (no safe, no space)', () => {

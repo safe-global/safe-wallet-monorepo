@@ -3,20 +3,19 @@ import AccountsNavigation from '../index'
 
 let mockPathname = '/welcome/spaces'
 jest.mock('next/router', () => ({ useRouter: () => ({ pathname: mockPathname }) }))
-jest.mock('@/public/images/safe-pro/pro-chip.svg', () => 'svg')
 
 describe('AccountsNavigation', () => {
-  it('labels Workspaces as the Safe Pro side and keeps My accounts plain', () => {
+  it('names the Workspaces side Safe Pro with the brand underline and keeps My accounts plain', () => {
     render(<AccountsNavigation />)
 
-    const workspaces = screen.getByRole('tab', { name: /Workspaces/ })
-    expect(workspaces).toHaveAttribute('href', '/welcome/spaces')
-    expect(workspaces).toContainElement(screen.getByRole('img', { name: 'Pro' }))
-    expect(workspaces).toHaveAttribute('aria-selected', 'true')
+    const safePro = screen.getByRole('tab', { name: 'Safe Pro' })
+    expect(safePro).toHaveAttribute('href', '/welcome/spaces')
+    expect(safePro.querySelector('span')).toHaveTextContent('Safe Pro')
+    expect(safePro).toHaveAttribute('aria-selected', 'true')
 
     const accounts = screen.getByRole('tab', { name: 'My accounts' })
     expect(accounts).toHaveAttribute('href', '/welcome/accounts')
-    expect(screen.getAllByRole('img')).toHaveLength(1)
+    expect(accounts.querySelector('span')).toBeNull()
   })
 
   it('selects My accounts on its route', () => {

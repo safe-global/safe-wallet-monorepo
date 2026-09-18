@@ -3,6 +3,7 @@ import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar'
 import { cn } from '@/utils/cn'
 import { AppRoutes } from '@/config/routes'
 import SafeLogo from '@/components/common/SafeLogo'
+import ProChip from '@/public/images/safe-pro/pro-chip.svg'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { useIsHydrated } from '@/hooks/useIsHydrated'
@@ -32,12 +33,14 @@ export const SidebarTopBar = (): ReactElement => {
   const showHomeLabel = isHydrated && isInSafeOrSpace && !isCollapsed
   const showProLockup = isSpaceRoute ? plan !== null : Boolean(safeAddress) && isSafeOnPlan
   const logoHref = isSpaceRoute || showProLockup ? AppRoutes.welcome.spaces : AppRoutes.welcome.accounts
+  // Collapsed, the pill has no room: the chip stacks under the logo and the trigger moves down to make way.
+  const showCollapsedChip = isCollapsed && showProLockup
 
   return (
     <div
       data-testid="sidebar-top-bar"
       data-sidebar-state={state}
-      className={cn('relative w-full', isCollapsed ? 'min-h-15' : 'h-10')}
+      className={cn('relative w-full', isCollapsed ? (showCollapsedChip ? 'min-h-[88px]' : 'min-h-15') : 'h-10')}
     >
       <SafeLogo
         href={logoHref}
@@ -54,12 +57,26 @@ export const SidebarTopBar = (): ReactElement => {
               : 'left-3',
         )}
       />
+      {showCollapsedChip && (
+        <span
+          className="absolute top-[42px] left-1/2 block h-5 w-8 -translate-x-1/2"
+          role="img"
+          aria-label="Safe Pro"
+          data-testid="collapsed-pro-chip"
+        >
+          <ProChip className="size-full" />
+        </span>
+      )}
       <SidebarTrigger
         size="icon"
         className={cn(
           'absolute z-10 shrink-0 cursor-pointer text-sidebar-foreground/65 hover:text-sidebar-foreground hover:secondary',
           'transition-[left,transform] duration-200 ease-linear',
-          isCollapsed ? 'left-1/2 top-[38px] -translate-x-1/2' : 'left-[calc(100%-2rem)] -top-2',
+          isCollapsed
+            ? showCollapsedChip
+              ? 'left-1/2 top-[66px] -translate-x-1/2'
+              : 'left-1/2 top-[38px] -translate-x-1/2'
+            : 'left-[calc(100%-2rem)] -top-2',
         )}
         data-testid="sidebar-trigger"
       />

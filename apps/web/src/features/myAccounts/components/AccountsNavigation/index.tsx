@@ -5,19 +5,19 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 import type { AnalyticsEvent } from '@/services/analytics/types'
-import ProChip from '@/public/images/safe-pro/pro-chip.svg'
+import { ProHighlight } from '@/components/common/ProHighlight'
 
 type Item = {
   label: string
   url: string
   trackEvent?: AnalyticsEvent
-  /** Workspaces are the Safe Pro side of the app, and the chip says so regardless of any flag. */
+  /** Workspaces are the Safe Pro side of the app: the tab is named after it and wears the brand underline. */
   pro?: boolean
 }
 
 const navItems: Item[] = [
   {
-    label: 'Workspaces',
+    label: 'Safe Pro',
     url: AppRoutes.welcome.spaces,
     trackEvent: { ...SPACE_EVENTS.OPEN_SPACE_LIST_PAGE, label: SPACE_LABELS.accounts_page },
     pro: true,
@@ -49,12 +49,7 @@ const AccountsNavigation = () => {
             nativeButton={false}
             render={<NextLink href={item.url} onClick={handleClick(item)} />}
           >
-            {item.label}
-            {item.pro && (
-              <span className="block h-4 w-6 shrink-0" role="img" aria-label="Pro">
-                <ProChip className="size-full" />
-              </span>
-            )}
+            {item.pro ? <ProHighlight>{item.label}</ProHighlight> : item.label}
           </TabsTrigger>
         ))}
       </TabsList>
