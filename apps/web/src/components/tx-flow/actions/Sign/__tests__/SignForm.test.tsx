@@ -7,6 +7,7 @@ import { createMockSafeTransaction } from '@/tests/transactions'
 import { OperationType } from '@safe-global/types-kit'
 import { fireEvent, waitFor } from '@testing-library/react'
 import { initialContext, TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
+import { TxModalContext } from '@/components/tx-flow'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type {
   RecipientAnalysisResults,
@@ -23,9 +24,13 @@ jest.mock('@/components/common/CheckWallet', () => ({
   },
 }))
 
+const setTxFlow = jest.fn()
+
 const render = (ui: ReactElement, txFlowContext: Partial<TxFlowContextType> = {}) => {
   return renderTestUtils(
-    <TxFlowContext.Provider value={{ ...initialContext, ...txFlowContext }}>{ui}</TxFlowContext.Provider>,
+    <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow }}>
+      <TxFlowContext.Provider value={{ ...initialContext, ...txFlowContext }}>{ui}</TxFlowContext.Provider>
+    </TxModalContext.Provider>,
   )
 }
 
@@ -128,6 +133,48 @@ describe('SignForm', () => {
     await waitFor(() => {
       expect(mockSignTx).toHaveBeenCalled()
     })
+  })
+
+  it('closes the flow after signing when no execution follows', async () => {
+    const signedTxId = 'multisig_0x1_0x2'
+    const continueToExecute = jest.fn()
+
+    const { getByText } = render(
+      <SignForm
+        {...defaultProps}
+        safeTx={safeTransaction}
+        txActions={{ ...defaultProps.txActions, signTx: jest.fn().mockResolvedValue(signedTxId) }}
+      />,
+      { willSignBeforeExecute: false, continueToExecute },
+    )
+
+    fireEvent.click(getByText('Sign'))
+
+    await waitFor(() => {
+      expect(setTxFlow).toHaveBeenCalledWith(undefined)
+    })
+    expect(continueToExecute).not.toHaveBeenCalled()
+  })
+
+  it('continues to the execute step instead of closing when the Safe requires signing before executing', async () => {
+    const signedTxId = 'multisig_0x1_0x2'
+    const continueToExecute = jest.fn()
+
+    const { getByText } = render(
+      <SignForm
+        {...defaultProps}
+        safeTx={safeTransaction}
+        txActions={{ ...defaultProps.txActions, signTx: jest.fn().mockResolvedValue(signedTxId) }}
+      />,
+      { willSignBeforeExecute: true, continueToExecute },
+    )
+
+    fireEvent.click(getByText('Sign'))
+
+    await waitFor(() => {
+      expect(continueToExecute).toHaveBeenCalledWith(signedTxId)
+    })
+    expect(setTxFlow).not.toHaveBeenCalled()
   })
 
   describe('shows a disabled submit button if', () => {
