@@ -26,6 +26,9 @@ import {
   REMOVE_LIMIT_LABEL,
 } from '../constants'
 
+/** Figma draws the remove glyph at lucide's 1.5 stroke, not its default 2. */
+const ICON_STROKE_WIDTH = 1.5
+
 export type TokenLimitCardProps = {
   spenderIndex: number
   limitIndex: number
@@ -112,14 +115,14 @@ const TokenLimitCard = ({
       {removable && (
         <Button
           type="button"
-          variant="ghost"
-          size="icon-sm"
+          variant="ghost-destructive"
+          size="icon-circle"
           aria-label={REMOVE_LIMIT_LABEL}
           onClick={onRemove}
           data-testid="remove-limit-btn"
           className="absolute top-2 right-2"
         >
-          <X />
+          <X strokeWidth={ICON_STROKE_WIDTH} />
         </Button>
       )}
 

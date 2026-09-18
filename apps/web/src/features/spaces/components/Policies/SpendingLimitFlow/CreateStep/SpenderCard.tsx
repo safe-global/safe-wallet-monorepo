@@ -1,5 +1,5 @@
 import { useCallback, useMemo, type ReactElement } from 'react'
-import { Plus, X } from 'lucide-react'
+import { Plus, Trash2 } from 'lucide-react'
 import { useFieldArray, useFormContext } from 'react-hook-form'
 import AddressBookInput from '@/components/common/AddressBookInput'
 import { Button } from '@/components/ui/button'
@@ -15,6 +15,9 @@ import {
   SPENDER_LABEL,
   SPENDER_PLACEHOLDER,
 } from '../constants'
+
+/** Figma draws the remove glyph at lucide's 1.5 stroke, not its default 2. */
+const ICON_STROKE_WIDTH = 1.5
 
 export type SpenderCardProps = {
   spenderIndex: number
@@ -61,15 +64,15 @@ const SpenderCard = ({ spenderIndex, spenderCount, removable, onRemove }: Spende
         {removable && (
           <Button
             type="button"
-            variant="ghost"
-            size="icon-sm"
+            variant="ghost-destructive"
+            size="icon-circle"
             aria-label={REMOVE_SPENDER_LABEL}
             onClick={onRemove}
             data-testid="remove-spender-btn"
             /* The address field's wrapper follows this in the DOM and would otherwise paint over it. */
             className="absolute top-2 right-2 z-10"
           >
-            <X />
+            <Trash2 strokeWidth={ICON_STROKE_WIDTH} />
           </Button>
         )}
 
