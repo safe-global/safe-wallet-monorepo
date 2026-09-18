@@ -769,17 +769,7 @@ describe('SignOrExecute hooks', () => {
         expect(signSpy).toHaveBeenCalledWith(tx, MockEip1193Provider, undefined)
         expect(callOrder).toEqual(['sign', 'propose', 'execute'])
         expect(id).toBe('123')
-        // dispatchTxExecution receives the signed tx
-        expect(executeSpy).toHaveBeenCalledWith(
-          expect.anything(),
-          signedTx,
-          expect.anything(),
-          expect.anything(),
-          expect.anything(),
-          expect.anything(),
-          expect.anything(),
-          expect.anything(),
-        )
+        expect(executeSpy.mock.calls[0][1]).toBe(signedTx)
       })
 
       it('clears the pre-validated-sig gas estimate before executing after EIP-712 signing', async () => {
