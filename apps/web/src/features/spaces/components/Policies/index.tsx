@@ -3,14 +3,43 @@ import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import ExternalLink from '@/components/common/ExternalLink'
 import { Typography } from '@/components/ui/typography'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import PoliciesList from './PoliciesList'
+import { PoliciesLoadError, PoliciesLoading } from './PoliciesLoadState'
 import PolicyCatalogue from './PolicyCatalogue'
 import type { PolicyCatalogueId } from './PolicyCatalogue/catalogue'
 import ProposerIntroDialog from './ProposerIntroDialog'
 import { PROPOSER_INTRO_SEEN_KEY } from './ProposerIntroDialog/constants'
 import SpendingLimitIntroDialog from './SpendingLimitIntroDialog'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from './SpendingLimitIntroDialog/constants'
+import type { Policy } from './types'
 
-const Policies = (): ReactElement => {
+interface PoliciesProps {
+  /** Fixtures until WA-3451 connects CGW. */
+  policies?: Policy[]
+  isLoading?: boolean
+  isError?: boolean
+  onRetry?: () => void
+  /** Opens the catalogue picker from the populated mode's `Add policy` button. */
+  onAddPolicy?: () => void
+  onSelectPolicy?: (policy: Policy) => void
+}
+
+/**
+ * The page has two modes. With no policies it shows the catalogue of policies that can be set up.
+ * With policies it shows the list of policies already set up. Revoking the last policy removes it
+ * from the CGW response, so the page returns to the catalogue. While the response is pending or
+ * failed, only the heading stays and the body is the load state.
+ */
+const Policies = ({
+  policies = [],
+  isLoading = false,
+  isError = false,
+  onRetry,
+  onAddPolicy,
+  onSelectPolicy,
+}: PoliciesProps): ReactElement => {
+  const isSettled = !isLoading && !isError
+
   const [hasSeenSpendingLimitIntro = false, setHasSeenSpendingLimitIntro] =
     useLocalStorage<boolean>(SPENDING_LIMIT_INTRO_SEEN_KEY)
   const [isSpendingLimitIntroOpen, setIsSpendingLimitIntroOpen] = useState(false)
@@ -51,10 +80,6 @@ const Policies = (): ReactElement => {
           // TODO(WA-3160): open the Suggest a policy dialog.
           return
 
-        // Only unreachable while `isAvailable` is false in the catalogue; needs a flow before it flips.
-        case 'account-recovery':
-          return
-
         // A new policy id must pick a branch above rather than silently doing nothing.
         default: {
           const _exhaustive: never = id
@@ -93,16 +118,26 @@ const Policies = (): ReactElement => {
           Policies
         </Typography>
 
-        <Typography variant="paragraph-medium">
-          Policies are rules that help you manage your Safe accounts. Set them up once and they will run onchain,
-          automatically.{' '}
-          <ExternalLink className="font-bold hover:text-muted-foreground" href={HelpCenterArticle.POLICIES}>
-            Learn more
-          </ExternalLink>
-        </Typography>
+        {isSettled && (
+          <Typography variant="paragraph-medium">
+            Policies are rules that help you manage your Safe accounts. Set them up once and they will run onchain,
+            automatically.{' '}
+            <ExternalLink noIcon href={HelpCenterArticle.POLICIES}>
+              Learn more
+            </ExternalLink>
+          </Typography>
+        )}
       </div>
 
-      <PolicyCatalogue onSelect={handleSelect} />
+      {isLoading ? (
+        <PoliciesLoading />
+      ) : isError ? (
+        <PoliciesLoadError onReload={onRetry} />
+      ) : policies.length > 0 ? (
+        <PoliciesList policies={policies} onAddPolicy={onAddPolicy} onSelectPolicy={onSelectPolicy} />
+      ) : (
+        <PolicyCatalogue onSelect={handleSelect} />
+      )}
 
       <SpendingLimitIntroDialog
         open={isSpendingLimitIntroOpen}
