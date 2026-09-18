@@ -1,5 +1,8 @@
 import type { JsonRpcProvider } from 'ethers'
+import type { SerializedError } from '@reduxjs/toolkit'
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { AppDispatch } from '@/store'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import type { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { isSmartContract } from '@/utils/wallets'
@@ -14,6 +17,7 @@ import { removeUndeployedSafe } from '../store/undeployedSafesSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { normalizeSpaceId } from '@/utils/spaces'
 import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/constants'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 type PersistArgs = {
   chainId: string
@@ -46,7 +50,10 @@ type PersistArgs = {
   dispatch: AppDispatch
 }
 
-export type PersistResult = { ok: true; skipped?: 'already-deployed' } | { ok: false; error: Error }
+export type PersistResult =
+  | { ok: true; skipped?: 'already-deployed' }
+  /** `stepUpPending`: the step-up is taking over, so the caller shows nothing. */
+  | { ok: false; error: Error; stepUpPending?: true }
 
 /**
  * Single code path for creating a counterfactual safe: persist to backend
@@ -136,6 +143,10 @@ export const persistCounterfactualSafe = async ({
           }),
         )
         if ('error' in spaceResult) {
+          // The user-level entry stays, so the replay after verification attaches a Safe that exists.
+          if (isElevationRequiredError(spaceResult.error)) {
+            return { ok: false, error: toSpaceError(spaceResult.error), stepUpPending: true }
+          }
           // Stale cached count (another admin filled the workspace meanwhile) → backend 400. The Safe
           // was still created, so keep it and show the warning.
           if (isLimitRejection(spaceResult.error)) {
@@ -224,8 +235,9 @@ function isConflict(error: unknown): boolean {
   return (error as BackendError)?.status === 409
 }
 
-function toSpaceError(error: unknown): Error {
-  return new Error((error as BackendError)?.data?.message || 'Failed to add Safe account to workspace')
+function toSpaceError(error: FetchBaseQueryError | SerializedError | undefined): Error {
+  const fallback = 'Failed to add Safe account to workspace'
+  return new Error(error ? getRtkQueryErrorMessage(error) || fallback : fallback)
 }
 
 /** Matches the CGW limit message, e.g. "This space only allows a maximum of 40 safe accounts...".
@@ -235,8 +247,8 @@ function isLimitRejection(error: unknown): boolean {
   return status === 400 && typeof data?.message === 'string' && /maximum of \d+/i.test(data.message)
 }
 
-function toPersistError(error: unknown): Error {
+function toPersistError(error: FetchBaseQueryError | SerializedError | undefined): Error {
   // 409 (already deployed) is handled upstream via recoverAlreadyDeployed, so any error here is a genuine failure.
-  const message = (error as BackendError)?.data?.message
-  return new Error(message || 'Failed to save Safe account to backend')
+  const fallback = 'Failed to save Safe account to backend'
+  return new Error(error ? getRtkQueryErrorMessage(error) || fallback : fallback)
 }

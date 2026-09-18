@@ -4,7 +4,6 @@ import type {
   ModuleTransaction,
   TransactionDetails,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import ErrorMessage from '@/components/tx/ErrorMessage'
 import { useRouter } from 'next/router'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
@@ -16,9 +15,9 @@ import ExpandableTransactionItem, {
   TransactionSkeleton,
 } from '@/components/transactions/TxListItem/ExpandableTransactionItem'
 import GroupLabel from '../GroupLabel'
+import TransactionDetailsError from './TransactionDetailsError'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { useHnQueueAssessment } from '@/features/hypernative'
 
 const SingleTxGrid = ({ txDetails }: { txDetails: TransactionDetails }): ReactElement => {
@@ -61,8 +60,6 @@ const SingleTx = () => {
     },
   )
 
-  let txDetailsError = error ? asError(error) : undefined
-
   useEffect(() => {
     if (!isUninitialized) {
       refetch()
@@ -78,12 +75,13 @@ const SingleTx = () => {
     }
   }, [setTx, txDetails])
 
+  // Reloading cannot pull a tx into a Safe it does not belong to, so that state gets no CTA.
   if (txDetails && !sameAddress(txDetails.safeAddress, safeAddress)) {
-    txDetailsError = new Error('Transaction with this id was not found in this Safe account')
+    return <TransactionDetailsError message="This transaction was not found in this Safe account." />
   }
 
-  if (txDetailsError) {
-    return <ErrorMessage error={txDetailsError}>Failed to load transaction</ErrorMessage>
+  if (error) {
+    return <TransactionDetailsError onReload={() => window.location.reload()} />
   }
 
   if (txDetails) {

@@ -7,6 +7,7 @@ const config = {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     '\\.(jpg|jpeg|png|gif|webp|svg)$': '<rootDir>/src/__mocks__/fileMock.js',
     '^../../utils/env$': '<rootDir>/src/utils/__mocks__/env.ts',
+    '^@safe-global/utils/(.*)$': '<rootDir>/../../packages/utils/src/$1',
   },
   transform: {
     '^.+\\.(ts|tsx)$': [

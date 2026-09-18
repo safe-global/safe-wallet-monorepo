@@ -37,7 +37,7 @@ const SecurityHub = (): ReactElement => {
           </Typography>
         </div>
 
-        <ExternalLink href={HelpCenterArticle.SAFE_SHIELD} noIcon>
+        <ExternalLink href={HelpCenterArticle.SECURITY_HUB} noIcon>
           <SafeShieldLogo aria-label="Safe Shield" className={shieldLogoOnHover} />
         </ExternalLink>
       </div>

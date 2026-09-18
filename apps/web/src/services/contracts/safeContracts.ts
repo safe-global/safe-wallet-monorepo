@@ -3,7 +3,8 @@ import {
   isCanonicalDeployment,
   getCanonicalMultiSendCallOnlyAddress,
 } from '@safe-global/utils/services/contracts/deployments'
-import { getSafeProvider } from '@/services/tx/tx-sender/sdk'
+import { getAndValidateSafeSDK, getSafeProvider } from '@/services/tx/tx-sender/sdk'
+import type { TxSenderScope } from '@/components/tx-flow/safe-scope/types'
 import {
   SafeProvider,
   getCompatibilityFallbackHandlerContract,
@@ -37,12 +38,11 @@ const getGnosisSafeContract = async (safe: SafeState, safeProvider: SafeProvider
   })
 }
 
-export const getReadOnlyCurrentGnosisSafeContract = async (safe: SafeState): Promise<SafeBaseContract<any>> => {
-  const safeSDK = getSafeSDK()
-  if (!safeSDK) {
-    throw new Error('Safe SDK not found.')
-  }
-
+export const getReadOnlyCurrentGnosisSafeContract = async (
+  safe: SafeState,
+  scope?: TxSenderScope,
+): Promise<SafeBaseContract<any>> => {
+  const safeSDK = getAndValidateSafeSDK(scope)
   const safeProvider = safeSDK.getSafeProvider()
 
   return getGnosisSafeContract(safe, safeProvider)

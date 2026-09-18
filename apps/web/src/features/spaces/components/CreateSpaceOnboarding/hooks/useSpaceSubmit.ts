@@ -11,6 +11,7 @@ import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { sanitizeNextUrl } from '@/utils/nextUrl'
 import { sanitizeName } from '@safe-global/utils/validation/names'
 import type { UseFormHandleSubmit } from 'react-hook-form'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 const useSpaceSubmit = (
   handleSubmit: UseFormHandleSubmit<{ name: string }>,
@@ -28,6 +29,7 @@ const useSpaceSubmit = (
   const editSpace = async (name: string) => {
     const response = await updateSpace({ id: spaceId ?? '', updateSpaceDto: { name: sanitizeName(name) } })
 
+    if (isElevationRequiredError(response.error)) throw response.error
     if (response.error) {
       throw new Error(getRtkQueryErrorMessage(response.error))
     }
@@ -72,12 +74,13 @@ const useSpaceSubmit = (
         await createSpace(data.name)
       }
     } catch (error) {
+      setIsSubmitting(false)
+      if (isElevationRequiredError(error)) return
       const errorMessage =
         error instanceof Error
           ? error.message
           : `Failed ${isEditMode ? 'updating' : 'creating'} the workspace. Please try again.`
       setError(errorMessage)
-      setIsSubmitting(false)
     }
   })
 

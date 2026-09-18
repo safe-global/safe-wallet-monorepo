@@ -3,8 +3,7 @@ import { useEffect, useState } from 'react'
 import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from '../useSafeInfo'
 import useEffectiveSafeParams from '../useEffectiveSafeParams'
-import { Errors } from '@/services/exceptions'
-import useLogError from '../useLogError'
+import { Errors, logError } from '@/services/exceptions'
 import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
 import { getTransactionQueue } from '@/services/transactions'
 
@@ -23,7 +22,10 @@ const useLoadTxQueue = (): AsyncResult<QueuedItemPage> => {
       // For undeployed safes, return empty once safe info confirms not deployed
       if (safeLoaded && !safe.deployed) return Promise.resolve({ results: [] })
 
-      return getTransactionQueue(effectiveChainId, effectiveAddress)
+      return getTransactionQueue(effectiveChainId, effectiveAddress).catch((e) => {
+        logError(Errors._603, e)
+        throw e
+      })
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [effectiveChainId, effectiveAddress, reloadTag, safeLoaded, safe.deployed],
@@ -43,8 +45,6 @@ const useLoadTxQueue = (): AsyncResult<QueuedItemPage> => {
       unsubscribeDeleted()
     }
   }, [])
-
-  useLogError(Errors._603, error?.message)
 
   return [data, error, loadingQueueItems]
 }

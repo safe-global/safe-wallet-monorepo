@@ -70,11 +70,17 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
     [mergedAddressBook, chainId],
   )
 
-  // Don't show suggestions from the address book once a valid address has been entered.
+  const isInAddressBook = useMemo(
+    () => allAddressBookEntries.some((entry) => sameAddress(entry.label, addressValue)),
+    [allAddressBookEntries, addressValue],
+  )
+
+  // A complete unknown address needs no suggestions; a saved contact opened for editing is
+  // offered every contact again so the user can swap it.
   const filteredEntries = useMemo(() => {
-    if (isValidAddress(addressValue)) return []
+    if (isValidAddress(addressValue)) return isInAddressBook ? allAddressBookEntries : []
     return filterEntries(allAddressBookEntries, addressValue ?? '')
-  }, [allAddressBookEntries, addressValue])
+  }, [allAddressBookEntries, addressValue, isInAddressBook])
 
   const groupedEntries = useMemo(() => groupEntriesBySource(filteredEntries), [filteredEntries])
 
@@ -85,11 +91,6 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
 
   // Same set the list renders from, so the click and chevron paths agree with the typed one.
   const hasVisibleOptions = filteredEntries.length > 0
-
-  const isInAddressBook = useMemo(
-    () => allAddressBookEntries.some((entry) => sameAddress(entry.label, addressValue)),
-    [allAddressBookEntries, addressValue],
-  )
 
   const wrapperRef = useRef<HTMLDivElement>(null)
   // The portalled list is not inside wrapperRef, so dismissal has to check it separately or a
@@ -218,6 +219,7 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
           onOpenListClick={hasVisibleOptions ? handleToggleAutocomplete : undefined}
           isAutocompleteOpen={open}
           onAddressBookClick={canAdd && !isInAddressBook ? onAddressBookClick : undefined}
+          onEdit={() => setOpen(true)}
           role="combobox"
           aria-expanded={showList}
           aria-autocomplete="list"

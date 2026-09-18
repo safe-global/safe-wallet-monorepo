@@ -256,7 +256,7 @@ export function verifyOnSingleSpaceDashboard(spaceName) {
     .should('include', constants.spaceDashboardUrl)
     .and('include', 'spaceId=')
     .and('not.include', onboardingCreateSpacePath)
-  cy.get(spaceSelectorBtn, { timeout: 30000 }).should('be.visible').and('contain.text', spaceName)
+  cy.get(spaceSelectorBtn, { timeout: 30000 }).scrollIntoView().should('be.visible').and('contain.text', spaceName)
 }
 
 export function waitForSpacesWelcomeReady() {
@@ -291,7 +291,7 @@ export function openSpaceByName(name) {
 }
 
 export function clickOnSpaceSelector(spaceName) {
-  cy.get(spaceSelectorBtn, { timeout: 15000 }).should('be.visible').click()
+  cy.get(spaceSelectorBtn, { timeout: 15000 }).scrollIntoView().should('be.visible').click()
   if (spaceName) {
     cy.get(spaceSelectorMenu).contains(spaceName).click()
   }

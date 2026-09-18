@@ -1,12 +1,14 @@
 import type { ReactElement } from 'react'
 import { useCurrentChain } from '@/hooks/useChains'
 import {
+  getGasLimitTooLowMessage,
   HYPERNATIVE_APPROVAL_REQUIRED_MESSAGE,
   isHypernativeGuardRevert,
   isRateLimitError,
   isRevertError,
   RATE_LIMIT_USER_MESSAGE,
 } from '@/utils/transaction-errors'
+import { getSpecificContractErrorMessage } from '@safe-global/utils/services/exceptions/contractErrors'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { ExternalLink as ExternalLinkIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -60,7 +62,8 @@ export const getCouldNotCheckMessage = (network?: string): string =>
  * reverts) warns the transaction will fail so the user can avoid wasting gas;
  * an infrastructure failure (we could not reach the node) only says we could
  * not check — never a prediction about the transaction. A transient rate-limit
- * keeps its own dedicated copy.
+ * keeps its own dedicated copy. A revert carrying a GS code we have specific copy for
+ * shows that cause instead of the prediction.
  */
 const TxCheckError = ({ error, context }: { error: Error; context?: 'estimation' | 'execution' }): ReactElement => {
   const chain = useCurrentChain()
@@ -77,11 +80,26 @@ const TxCheckError = ({ error, context }: { error: Error; context?: 'estimation'
     )
   }
 
+  // `useIsValidExecution` simulates with the gas limit the user set, so a node that rejects the
+  // simulation on intrinsic gas answers here. That is a setting to fix, not a transaction that
+  // will fail, so it must never reach the "reject this transaction" advice below.
+  const gasLimitTooLow = getGasLimitTooLowMessage(error)
+  if (gasLimitTooLow) {
+    return (
+      <ErrorMessage error={error} level="warning" context={context}>
+        {gasLimitTooLow}
+      </ErrorMessage>
+    )
+  }
+
   const willRevert = isRevertError(error)
+  // The chain named the cause, so say it instead of predicting a failure. Codes with no copy
+  // of their own keep the prediction — it is more useful than the shared fallback here.
+  const contractErrorMessage = getSpecificContractErrorMessage(error, { nativeAsset: chain?.nativeCurrency.symbol })
 
   return (
     <ErrorMessage error={error} level={willRevert ? 'error' : 'warning'} context={context}>
-      {willRevert ? TX_WILL_FAIL_MESSAGE : getCouldNotCheckMessage(chain?.chainName)}
+      {contractErrorMessage ?? (willRevert ? TX_WILL_FAIL_MESSAGE : getCouldNotCheckMessage(chain?.chainName))}
     </ErrorMessage>
   )
 }

@@ -1,12 +1,9 @@
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
-import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { useCurrentChain } from '@/hooks/useChains'
-import { useAppSelector } from '@/store'
-import { selectRpc } from '@/store/settingsSlice'
+import { useEnsHubProvider } from '@/hooks/useEnsHubProvider'
 import useAsync from '@safe-global/utils/hooks/useAsync'
-import { isDomain, resolveName } from '@/services/ens'
+import { isDomain, resolveNameForChain } from '@/services/ens'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
 
 // Shown when an ENS-style name can't resolve on the lookup chain (no domain lookup there, or name unset).
@@ -18,31 +15,23 @@ const useNameResolver = (
   value?: string,
   chain?: Chain,
 ): { address: string | undefined; name: string | undefined; resolverError?: Error; resolving: boolean } => {
-  const globalProvider = useWeb3ReadOnly()
   const currentChain = useCurrentChain()
-  const customRpc = useAppSelector(selectRpc)
 
-  // ENS is chain-specific: when resolving against a chain other than the current one (e.g. Spaces resolves
-  // on mainnet), use a dedicated read-only provider, since the global provider follows the connected chain.
-  const needsOwnProvider = !!chain && chain.chainId !== currentChain?.chainId
-  const ownProvider = useMemo(
-    () => (needsOwnProvider && chain ? createWeb3ReadOnly(chain, customRpc?.[chain.chainId]) : undefined),
-    [needsOwnProvider, chain, customRpc],
-  )
-  useEffect(() => () => ownProvider?.destroy(), [ownProvider])
-
-  const ethersProvider = needsOwnProvider ? ownProvider : globalProvider
+  // ENSv2: resolution always starts on the hub (Mainnet / Sepolia Universal Resolver), not the L2 RPC.
+  // When the hub chain is unavailable, no provider is returned and resolution stays off.
+  const targetChain = chain ?? currentChain
+  const { provider: ethersProvider } = useEnsHubProvider(targetChain)
   const debouncedValue = useDebounce((value || '').trim(), 200)
+  const targetChainId = targetChain ? Number(targetChain.chainId) : undefined
 
-  // Fetch an ENS resolution for the current address
   const [ens, resolverError, isResolving] = useAsync<{ name: string; address: string } | undefined>(() => {
-    if (!ethersProvider || !debouncedValue || !isDomain(debouncedValue)) return
+    if (!ethersProvider || !debouncedValue || !isDomain(debouncedValue) || targetChainId === undefined) return
 
-    return resolveName(ethersProvider, debouncedValue).then((address) => {
-      if (!address) throw Error(getEnsNotAvailableError(chain ?? currentChain))
+    return resolveNameForChain(ethersProvider, debouncedValue, targetChainId).then((address) => {
+      if (!address) throw Error(getEnsNotAvailableError(targetChain))
       return { name: debouncedValue, address }
     })
-  }, [debouncedValue, ethersProvider, chain, currentChain])
+  }, [debouncedValue, ethersProvider, targetChain, targetChainId])
 
   const resolving = isResolving && !!ethersProvider && !!debouncedValue
   const resolved = ens && ens.name === value ? ens : undefined

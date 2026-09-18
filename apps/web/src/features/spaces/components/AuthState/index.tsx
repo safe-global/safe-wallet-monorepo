@@ -1,11 +1,15 @@
 import { type ReactNode, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import SignedOutState from '../SignedOutState'
 import { isUnauthorized } from '@/features/spaces/utils'
 import UnauthorizedState from '../UnauthorizedState'
 import LoadingState from '../LoadingState'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { isAuthenticated, selectIsOidcLoginPending, setLastUsedSpace } from '@/store/authSlice'
+import {
+  isAuthenticated,
+  selectIsOidcLoginPending,
+  selectIsSessionCheckPending,
+  setLastUsedSpace,
+} from '@/store/authSlice'
 import { setLastUsedSpaceOrigin } from '@/features/spaces/store'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
@@ -26,12 +30,13 @@ const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode
   )
   const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
   const isOidcLoginPending = useAppSelector(selectIsOidcLoginPending)
+  const isSessionCheckPending = useAppSelector(selectIsSessionCheckPending)
 
   const currentMembership = currentData?.members.find((member) => member.user.id === currentUser?.id)
   const hasMembershipLoaded = !!currentData && !!currentUser
   const isCurrentUserActive = currentMembership?.status === MemberStatus.ACTIVE
 
-  const isLoadingState = isLoading || isOidcLoginPending
+  const isLoadingState = isLoading || isOidcLoginPending || isSessionCheckPending
   const hasLostAccess = isUserSignedIn && !isLoadingState && isUnauthorized(error)
   const isInactiveMember = isUserSignedIn && !isLoadingState && hasMembershipLoaded && !isCurrentUserActive
 
@@ -51,7 +56,8 @@ const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode
 
   if (isLoadingState) return <LoadingState />
 
-  if (!isUserSignedIn) return <SignedOutState />
+  // The router guard redirects signed-out users off every /spaces route, so a sign-in screen here would only flash.
+  if (!isUserSignedIn) return <LoadingState />
 
   if (hasLostAccess) return <UnauthorizedState />
 

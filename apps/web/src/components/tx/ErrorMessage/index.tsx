@@ -1,7 +1,6 @@
-import { type ReactElement, type ReactNode, type SyntheticEvent, useState } from 'react'
+import { type ReactElement, type ReactNode } from 'react'
 import { getGsCodeFromError } from '@safe-global/utils/services/exceptions/contractErrors'
 import { getGuardErrorInfo, isRevertError } from '@/utils/transaction-errors'
-import { getCgwSupportCode } from '@/utils/cgw-errors'
 import { decodeCustomError } from '@/utils/customErrorRegistry'
 import { getBlockExplorerLink } from '@/utils/chains'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -10,11 +9,7 @@ import ExternalLink from '@/components/common/ExternalLink'
 import ErrorDetails from '@/components/common/ErrorDetails'
 import { getLedgerDeviceError, getLedgerSupportReference } from '@/services/onboard/ledger-errors'
 import { Alert, AlertDescription, AlertTitle, AlertSeverityIcon } from '@/components/ui/alert'
-import { Typography } from '@/components/ui/typography'
-import { Link } from '@/components/ui/link'
 import { cn } from '@/utils/cn'
-
-const ETHERS_PREFIX = 'could not coalesce error'
 
 const alertVariant: Record<'error' | 'warning' | 'info', 'destructive' | 'warning' | 'info'> = {
   error: 'destructive',
@@ -37,17 +32,14 @@ const ErrorMessage = ({
   title?: string
   context?: 'estimation' | 'execution'
 }): ReactElement => {
-  const [showDetails, setShowDetails] = useState<boolean>(false)
   const { safe } = useSafeInfo()
   const chain = useCurrentChain()
 
-  // On-chain (GS) errors show a code-only support reference; every other error keeps its raw message
-  // behind Details (WA-3005 is on-chain-scoped).
+  // No alert ever shows the raw payload — it's a dump of provider URLs, calldata and class names, and
+  // goes to Sentry instead. An on-chain (GS) error and an unmapped Ledger state carry a code-only
+  // support reference (WA-3005 / WA-3243).
   const gsCode = error ? getGsCodeFromError(error) : undefined
 
-  // A Ledger device failure carries its own translated sentence; never offer the raw message — by here
-  // ethers/viem have re-wrapped it into a dump of class names and versions (WA-3243). An unmapped state
-  // gets a support reference; the device's own words stay in telemetry.
   const ledgerError = error ? getLedgerDeviceError(error) : undefined
   const ledgerReference = ledgerError?.reason === 'unknown' ? getLedgerSupportReference(ledgerError) : undefined
 
@@ -57,18 +49,9 @@ const ErrorMessage = ({
     error && (gsCode === 'GS013' || (!gsCode && isRevertError(error))) ? decodeCustomError(error) : undefined
   const effectiveGsCode = gsCode ?? (customError ? 'GS013' : undefined)
 
-  // A known CGW response state (429/422/451/5xx) gets the code-only reference, so a raw body (possibly a
-  // gateway HTML error page) is never rendered in Details (WA-3252).
-  const supportCode = effectiveGsCode ?? (error ? getCgwSupportCode(error) : undefined)
-
   const guardErrorName = error && context ? getGuardErrorInfo(error) : undefined
   const guardExplorerLink =
     guardErrorName && safe.guard && chain ? getBlockExplorerLink(chain, safe.guard.value) : undefined
-
-  const onDetailsToggle = (e: SyntheticEvent) => {
-    e.preventDefault()
-    setShowDetails((prev) => !prev)
-  }
 
   return (
     <Alert
@@ -99,29 +82,12 @@ const ErrorMessage = ({
               </strong>
             </span>
           )}
-
-          {error && !supportCode && !ledgerError && (
-            <Link
-              render={<button type="button" />}
-              onClick={onDetailsToggle}
-              className={cn('block', guardErrorName && 'mt-1')}
-            >
-              Details
-            </Link>
-          )}
         </span>
 
-        {supportCode ? (
-          <ErrorDetails code={supportCode} customError={customError} />
-        ) : ledgerError ? (
-          ledgerReference && <ErrorDetails code={ledgerReference} />
+        {effectiveGsCode ? (
+          <ErrorDetails code={effectiveGsCode} customError={customError} />
         ) : (
-          error &&
-          showDetails && (
-            <Typography variant="paragraph-small" color="muted" className="mt-2 block break-words">
-              {error.message.replace(ETHERS_PREFIX, '').trim().slice(0, 500)}
-            </Typography>
-          )
+          ledgerReference && <ErrorDetails code={ledgerReference} />
         )}
       </AlertDescription>
     </Alert>

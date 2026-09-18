@@ -36,7 +36,12 @@ A catch site turns the failing provider into `ErrorContext` with
 `getRpcErrorContext(provider)` and passes it to `logError` / `trackError`:
 
 ```ts
-logError(Errors._612, gasLimitError.message, getRpcErrorContext(web3ReadOnly))
+try {
+  return await web3ReadOnly.estimateGas(tx)
+} catch (e) {
+  logError(Errors._612, e, getRpcErrorContext(web3ReadOnly))
+  throw e
+}
 ```
 
 Deriving it from the provider rather than from the current chain matters: providers are also
@@ -83,15 +88,15 @@ attribution work described here. Practical consequence for anyone adding a call 
 a raw provider error into `logError` / `trackError` on an RPC path until that is fixed. That is
 why `useSiwe` passes `undefined` as the thrown error and reports context only.
 
-Five call sites still do pass a raw provider error message today — all pre-existing, none
-introduced or widened by this PR:
+Five call sites still do pass a raw provider error today — all pre-existing, none introduced or
+widened by this PR:
 
-- `apps/web/src/hooks/useGasLimit.ts:87` — `Errors._612`
+- `apps/web/src/hooks/useGasLimit.ts:73` — `Errors._612`
 - `apps/web/src/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks.ts:335` —
   `Errors._612`
-- `apps/web/src/features/gtf/hooks/useHistoryFeesBreakdown.ts:123` — `Errors._612`
-- `apps/web/src/features/spending-limits/hooks/useSpendingLimits.ts:47` — `Errors._609`
-- `apps/web/src/hooks/coreSDK/useInitSafeCoreSDK.ts:57` — `ErrorCodes._105`
+- `apps/web/src/features/gtf/hooks/useHistoryFeesBreakdown.ts:124` — `Errors._623`
+- `apps/web/src/features/spending-limits/hooks/useSpendingLimits.ts:38` — `Errors._609`
+- `apps/web/src/hooks/coreSDK/useInitSafeCoreSDK.ts:70` — `ErrorCodes._105`
 
 These are the inventory for the follow-up sanitisation ticket.
 

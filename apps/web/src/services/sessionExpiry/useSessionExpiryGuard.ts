@@ -1,24 +1,16 @@
 import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/router'
-import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import { cgwApi as authApi } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { selectIsStoreHydrated, setUnauthenticated } from '@/store/authSlice'
-import { closeByGroupKey, showNotification } from '@/store/notificationsSlice'
+import { selectIsStoreHydrated, setSessionCheckPending } from '@/store/authSlice'
+import { closeByGroupKey } from '@/store/notificationsSlice'
 import { LOGGING_OUT_KEY } from '@/hooks/useLogoutCallback'
-import { AppRoutes } from '@/config/routes'
+import { expireSession, isForbidden, SESSION_EXPIRED_GROUP_KEY } from './expireSession'
+
+export { SESSION_EXPIRED_GROUP_KEY, SESSION_EXPIRED_MESSAGE } from './expireSession'
 
 // Mirrors oidc-auth/constants.ts — duplicated here to avoid pulling the lazy feature module into the boot path.
 const OIDC_AUTH_PENDING_KEY = 'oidc_auth_pending'
-
-export const SESSION_EXPIRED_GROUP_KEY = 'session-expired'
-export const SESSION_EXPIRED_MESSAGE = 'Your session has expired. Please sign in to workspaces again.'
-
-const isForbidden = (error: unknown): error is FetchBaseQueryError =>
-  typeof error === 'object' && error !== null && 'status' in error && error.status === 403
-
-const isSpacesRoute = (pathname: string): boolean =>
-  pathname === AppRoutes.welcome.spaces || pathname === AppRoutes.spaces.index || pathname.startsWith('/spaces/')
 
 /**
  * Detects an expired session and clears Redux auth state so components stop issuing 403-bound requests.
@@ -56,19 +48,7 @@ export const useSessionExpiryGuard = (): void => {
     let cancelled = false
     let timer: ReturnType<typeof setTimeout> | undefined
 
-    const expireNow = () => {
-      dispatch(setUnauthenticated())
-      if (!isSpacesRoute(pathnameRef.current)) return
-      dispatch(
-        showNotification({
-          message: SESSION_EXPIRED_MESSAGE,
-          variant: 'info',
-          // Keep until dismissed — info toasts otherwise auto-hide after 5s.
-          autoHideDuration: null,
-          groupKey: SESSION_EXPIRED_GROUP_KEY,
-        }),
-      )
-    }
+    const expireNow = () => dispatch(expireSession(pathnameRef.current))
 
     // Already past local expiry → clear immediately, no timer or /me probe.
     if (sessionExpiresAt <= Date.now()) {
@@ -95,6 +75,7 @@ export const useSessionExpiryGuard = (): void => {
       }
     }
 
+    dispatch(setSessionCheckPending(true))
     const probe = dispatch(authApi.endpoints.authGetMeV1.initiate())
     probe
       .unwrap()
@@ -106,6 +87,7 @@ export const useSessionExpiryGuard = (): void => {
       })
       .finally(() => {
         probe.unsubscribe()
+        dispatch(setSessionCheckPending(false))
       })
 
     return () => {

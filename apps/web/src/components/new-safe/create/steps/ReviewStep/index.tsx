@@ -383,7 +383,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
         if (!result.ok) {
           // Surface the backend's message (e.g. conflict guidance) instead of the
           // generic wallet-error fallback in the catch below.
-          setSubmitError(result.error.message)
+          if (!result.stepUpPending) setSubmitError(result.error.message)
           return { chain, safeAddress, success: false }
         }
 
