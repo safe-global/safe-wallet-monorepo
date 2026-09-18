@@ -28,15 +28,6 @@ export const Populated: Story = {
   args: { policies: mockPolicies() },
 }
 
-export const Loading: Story = {
-  args: { policies: [], isLoading: true },
-}
-
-/** The read path is atomic, so a failure shows an error rather than a partial list. */
-export const Error: Story = {
-  args: { policies: [], isError: true, onRetry: () => {} },
-}
-
 /** One policy per Safe holding three spenders — one row, not three. */
 export const MultiSpender: Story = {
   args: { policies: [asActivePolicy(mockMultiSpenderPolicy())] },

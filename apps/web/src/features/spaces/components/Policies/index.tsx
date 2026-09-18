@@ -4,6 +4,7 @@ import ExternalLink from '@/components/common/ExternalLink'
 import { Typography } from '@/components/ui/typography'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import PoliciesList from './PoliciesList'
+import { PoliciesLoadError, PoliciesLoading } from './PoliciesLoadState'
 import PolicyCatalogue from './PolicyCatalogue'
 import type { PolicyCatalogueId } from './PolicyCatalogue/catalogue'
 import ProposerIntroDialog from './ProposerIntroDialog'
@@ -26,7 +27,8 @@ interface PoliciesProps {
 /**
  * The page has two modes. With no policies it shows the catalogue of policies that can be set up.
  * With policies it shows the list of policies already set up. Revoking the last policy removes it
- * from the CGW response, so the page returns to the catalogue.
+ * from the CGW response, so the page returns to the catalogue. While the response is pending or
+ * failed, only the heading stays and the body is the load state.
  */
 const Policies = ({
   policies = [],
@@ -36,7 +38,7 @@ const Policies = ({
   onAddPolicy,
   onSelectPolicy,
 }: PoliciesProps): ReactElement => {
-  const isPopulated = isLoading || isError || policies.length > 0
+  const isSettled = !isLoading && !isError
 
   const [hasSeenSpendingLimitIntro = false, setHasSeenSpendingLimitIntro] =
     useLocalStorage<boolean>(SPENDING_LIMIT_INTRO_SEEN_KEY)
@@ -120,24 +122,23 @@ const Policies = ({
           Policies
         </Typography>
 
-        <Typography variant="paragraph-medium">
-          Policies are rules that help you manage your Safe accounts. Set them up once and they will run onchain,
-          automatically.{' '}
-          <ExternalLink className="font-bold hover:text-muted-foreground" href={HelpCenterArticle.POLICIES}>
-            Learn more
-          </ExternalLink>
-        </Typography>
+        {isSettled && (
+          <Typography variant="paragraph-medium">
+            Policies are rules that help you manage your Safe accounts. Set them up once and they will run onchain,
+            automatically.{' '}
+            <ExternalLink className="font-bold hover:text-muted-foreground" href={HelpCenterArticle.POLICIES}>
+              Learn more
+            </ExternalLink>
+          </Typography>
+        )}
       </div>
 
-      {isPopulated ? (
-        <PoliciesList
-          policies={policies}
-          isLoading={isLoading}
-          isError={isError}
-          onRetry={onRetry}
-          onAddPolicy={onAddPolicy}
-          onSelectPolicy={onSelectPolicy}
-        />
+      {isLoading ? (
+        <PoliciesLoading />
+      ) : isError ? (
+        <PoliciesLoadError onReload={onRetry} />
+      ) : policies.length > 0 ? (
+        <PoliciesList policies={policies} onAddPolicy={onAddPolicy} onSelectPolicy={onSelectPolicy} />
       ) : (
         <PolicyCatalogue onSelect={handleSelect} />
       )}

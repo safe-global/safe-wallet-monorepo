@@ -5,20 +5,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import SearchField from '@/components/common/SearchField'
 import TableCard from '@/components/common/TableCard'
 import PoliciesTable from './PoliciesTable'
-import {
-  PoliciesNoSearchResults,
-  PoliciesTableError,
-  PoliciesTableLoading,
-} from './PoliciesTable/components/PoliciesTableStates'
+import { PoliciesNoSearchResults } from './PoliciesTable/components/PoliciesTableStates'
 import usePolicySearch from './hooks/usePolicySearch'
 import { DEFAULT_POLICY_SORT, POLICY_SORT_OPTIONS, sortPolicies, type PolicySortOption } from './utils/policySort'
 import type { Policy } from './types'
 
 export type PoliciesListProps = {
   policies: Policy[]
-  isLoading?: boolean
-  isError?: boolean
-  onRetry?: () => void
   /** Opens the create-policy flow. The caller is responsible for requiring a connected wallet. */
   onAddPolicy?: () => void
   onSelectPolicy?: (policy: Policy) => void
@@ -31,14 +24,7 @@ export type PoliciesListProps = {
  * Search and sort run in the browser over the fixtures. WA-3451 moves both to the server, because
  * once CGW paginates the response a browser-side filter would only cover the current page.
  */
-const PoliciesList = ({
-  policies,
-  isLoading = false,
-  isError = false,
-  onRetry,
-  onAddPolicy,
-  onSelectPolicy,
-}: PoliciesListProps) => {
+const PoliciesList = ({ policies, onAddPolicy, onSelectPolicy }: PoliciesListProps) => {
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<PolicySortOption>(DEFAULT_POLICY_SORT)
 
@@ -46,8 +32,6 @@ const PoliciesList = ({
   const rows = useMemo(() => sortPolicies(matches, sort), [matches, sort])
 
   const renderTable = () => {
-    if (isLoading) return <PoliciesTableLoading />
-    if (isError) return <PoliciesTableError onRetry={onRetry} />
     if (rows.length === 0) return <PoliciesNoSearchResults query={query} />
 
     return <PoliciesTable policies={rows} onSelect={onSelectPolicy} />

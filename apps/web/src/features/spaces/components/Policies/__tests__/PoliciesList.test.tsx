@@ -11,29 +11,6 @@ describe('PoliciesList', () => {
     expect(screen.getByTestId('policies-sort')).toBeInTheDocument()
   })
 
-  it('should, when the policies are still loading, render the loading state and no table', () => {
-    render(<PoliciesList policies={[]} isLoading />)
-
-    expect(screen.getByTestId('policies-loading')).toBeInTheDocument()
-    expect(screen.queryByRole('table')).not.toBeInTheDocument()
-  })
-
-  it('should, when the policies failed to load, render the error state and no table', () => {
-    render(<PoliciesList policies={mockPolicies()} isError />)
-
-    expect(screen.getByRole('alert')).toHaveTextContent("Couldn't load policies")
-    expect(screen.queryByRole('table')).not.toBeInTheDocument()
-  })
-
-  it('should, when Try again is clicked in the error state, ask the caller to reload', () => {
-    const onRetry = jest.fn()
-
-    render(<PoliciesList policies={[]} isError onRetry={onRetry} />)
-    fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
-
-    expect(onRetry).toHaveBeenCalledTimes(1)
-  })
-
   it('should, when a search matches one policy, render only that policy', () => {
     render(<PoliciesList policies={mockPolicies()} />)
     fireEvent.change(screen.getByPlaceholderText('by name, address or network'), { target: { value: 'Proposer' } })

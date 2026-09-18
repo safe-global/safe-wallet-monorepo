@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { fn } from 'storybook/test'
 import { Button } from '@/components/ui/button'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { withMockProvider } from '@/storybook/preview'
@@ -60,10 +61,12 @@ export const Populated: Story = {
   args: { policies: mockPolicies() },
 }
 
+/** Only the heading stays while CGW answers. */
 export const Loading: Story = {
   args: { policies: [], isLoading: true },
 }
 
+/** The read path is atomic, so a failure replaces the page body rather than showing a partial list. */
 export const Error: Story = {
-  args: { policies: [], isError: true, onRetry: () => {} },
+  args: { policies: [], isError: true, onRetry: fn() },
 }

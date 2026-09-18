@@ -267,11 +267,38 @@ describe('Policies', () => {
       expect(screen.queryByTestId('policies-list')).not.toBeInTheDocument()
     })
 
-    it('should, when the policies are still loading, render the list rather than the catalogue', () => {
+    it('should, when the policies are still loading, render the heading and the loading state only', () => {
       render(<Policies policies={[]} isLoading />)
 
-      expect(screen.getByTestId('policies-loading')).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: 'Policies' })).toBeInTheDocument()
+      expect(screen.getByTestId('policies-loading')).toHaveTextContent('Almost there…')
+      expect(screen.queryByText(/Policies are rules that help you/)).not.toBeInTheDocument()
       expect(screen.queryByTestId('policy-catalogue')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('policies-list')).not.toBeInTheDocument()
+    })
+
+    it('should, when the policies failed to load, render the error state instead of the catalogue or the list', () => {
+      render(<Policies policies={mockPolicies()} isError />)
+
+      expect(screen.getByRole('alert')).toHaveTextContent('The website failed to load data. Please try again.')
+      expect(screen.queryByText(/Policies are rules that help you/)).not.toBeInTheDocument()
+      expect(screen.queryByTestId('policy-catalogue')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('policies-list')).not.toBeInTheDocument()
+    })
+
+    it('should, when Reload is clicked in the error state, ask the caller to reload', () => {
+      const onRetry = jest.fn()
+
+      render(<Policies policies={[]} isError onRetry={onRetry} />)
+      fireEvent.click(screen.getByRole('button', { name: 'Reload' }))
+
+      expect(onRetry).toHaveBeenCalledTimes(1)
+    })
+
+    it('should, when the policies failed to load and there is no reload handler, render no Reload button', () => {
+      render(<Policies policies={[]} isError />)
+
+      expect(screen.queryByRole('button', { name: 'Reload' })).not.toBeInTheDocument()
     })
 
     it('should, when a table row is clicked, report the policy it belongs to', () => {
