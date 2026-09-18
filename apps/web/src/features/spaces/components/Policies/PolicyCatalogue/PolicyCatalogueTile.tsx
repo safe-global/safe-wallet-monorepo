@@ -31,24 +31,26 @@ const LockedPolicyCatalogueTile = ({
   locked,
 }: PolicyCatalogueTileProps & { locked: PolicyAccountCount }) => (
   <div data-testid={`policy-catalogue-tile-${id}`} className="flex h-full flex-col gap-3 rounded-xl bg-card p-4">
-    <div className="flex items-start justify-between gap-2">
-      <div className="flex size-10 items-center justify-center rounded-md bg-accent">
-        <Icon className="size-4 text-accent-success" />
+    <div className="flex flex-1 flex-col gap-2 opacity-80">
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex size-10 items-center justify-center rounded-md bg-muted">
+          <Icon className="size-4 text-muted-foreground" />
+        </div>
+
+        <Badge variant="subtle" size="status" shape="pill" data-testid="policy-account-count">
+          {locked.applied} / {locked.total} Accounts
+        </Badge>
       </div>
 
-      <Badge variant="secondary" size="status" shape="status" data-testid="policy-account-count">
-        {locked.applied} / {locked.total} Accounts
-      </Badge>
+      <div className="flex flex-col gap-1">
+        <Typography variant="paragraph-bold">{title}</Typography>
+        <Typography variant="paragraph-small" className="text-muted-foreground">
+          {description}
+        </Typography>
+      </div>
     </div>
 
-    <div className="flex flex-1 flex-col gap-1">
-      <Typography variant="paragraph-bold">{title}</Typography>
-      <Typography variant="paragraph-small" className="text-muted-foreground">
-        {description}
-      </Typography>
-    </div>
-
-    <Button variant="outline" className="w-full" onClick={onClick}>
+    <Button variant="outline" className="w-full" onClick={onClick} aria-label={`Set policy for ${title}`}>
       Set policy
     </Button>
   </div>

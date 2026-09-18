@@ -108,16 +108,16 @@ describe('PolicyCatalogue', () => {
     render(<PolicyCatalogue locked={{ accountCounts: mockStarterPlan.accountCounts, onUpgrade: jest.fn() }} />)
 
     expect(screen.getAllByTestId('policy-account-count')).toHaveLength(3)
-    expect(screen.getAllByRole('button', { name: 'Set policy' })).toHaveLength(3)
+    expect(screen.getByRole('button', { name: 'Set policy for Spending limit' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Set policy for Proposer' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Set policy for Account recovery' })).toBeInTheDocument()
   })
 
-  it('should, when locked, leave the Something missing? tile as it is', () => {
+  it('should, when locked, render no Something missing? tile', () => {
     render(<PolicyCatalogue locked={{ accountCounts: mockStarterPlan.accountCounts, onUpgrade: jest.fn() }} />)
 
-    const tile = screen.getByTestId('policy-catalogue-tile-suggestion')
-
-    expect(tile).toHaveRole('button')
-    expect(within(tile).queryByTestId('policy-account-count')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('policy-catalogue-tile-suggestion')).not.toBeInTheDocument()
+    expect(screen.queryByText('Something missing?')).not.toBeInTheDocument()
   })
 
   it('should, when a locked tile is clicked, call onUpgrade and not onSelect', async () => {
@@ -131,19 +131,6 @@ describe('PolicyCatalogue', () => {
 
     expect(onUpgrade).toHaveBeenCalledTimes(1)
     expect(onSelect).not.toHaveBeenCalled()
-  })
-
-  it('should, when the Something missing? tile is clicked while locked, call onSelect and not onUpgrade', async () => {
-    const onUpgrade = jest.fn()
-    const onSelect = jest.fn()
-    const { user } = renderWithUserEvent(
-      <PolicyCatalogue onSelect={onSelect} locked={{ accountCounts: mockStarterPlan.accountCounts, onUpgrade }} />,
-    )
-
-    await user.click(screen.getByTestId('policy-catalogue-tile-suggestion'))
-
-    expect(onSelect).toHaveBeenCalledWith('suggestion')
-    expect(onUpgrade).not.toHaveBeenCalled()
   })
 
   it('should, when a locked tile is clicked, still track the click', async () => {

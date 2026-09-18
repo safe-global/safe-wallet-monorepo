@@ -22,7 +22,7 @@ const PolicyUpsellBanner = ({ planName, workspaceName, onUpgrade }: PolicyUpsell
     <CardContent>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-col gap-2">
-          <Badge variant="secondary" size="status" shape="status">
+          <Badge variant="subtle" size="status" shape="status">
             <Lock aria-hidden />
             Business
           </Badge>
@@ -37,9 +37,9 @@ const PolicyUpsellBanner = ({ planName, workspaceName, onUpgrade }: PolicyUpsell
           </Typography>
         </div>
 
-        <Button onClick={onUpgrade} className="shrink-0">
+        <Button onClick={onUpgrade} className="shrink-0 font-semibold">
           Upgrade to Business
-          <ArrowRight aria-hidden />
+          <ArrowRight aria-hidden className="text-[var(--color-static-text-brand)]" />
         </Button>
       </div>
     </CardContent>

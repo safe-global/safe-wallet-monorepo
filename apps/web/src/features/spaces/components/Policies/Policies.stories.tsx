@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { fn } from 'storybook/test'
 import { Button } from '@/components/ui/button'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { withMockProvider } from '@/storybook/preview'
@@ -57,5 +58,5 @@ export const ProposerIntro: Story = {
 
 /** The workspace is on a plan that does not include policies: the banner shows and every policy tile is gated. */
 export const Starter: Story = {
-  args: { lockedPlan: mockStarterPlan, onUpgrade: () => {} },
+  args: { lockedPlan: mockStarterPlan, onUpgrade: fn() },
 }

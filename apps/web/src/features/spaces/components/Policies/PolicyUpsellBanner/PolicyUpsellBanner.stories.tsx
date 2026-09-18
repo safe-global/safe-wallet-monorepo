@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { fn } from 'storybook/test'
 import PolicyUpsellBanner from './index'
 
 const meta = {
@@ -6,7 +7,7 @@ const meta = {
   component: PolicyUpsellBanner,
   tags: ['autodocs'],
   parameters: { layout: 'padded' },
-  args: { onUpgrade: () => {} },
+  args: { onUpgrade: fn() },
 } satisfies Meta<typeof PolicyUpsellBanner>
 
 export default meta

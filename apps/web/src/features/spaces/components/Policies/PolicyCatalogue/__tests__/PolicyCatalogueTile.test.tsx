@@ -68,7 +68,7 @@ describe('PolicyCatalogueTile', () => {
   it('should, when locked, render a Set policy button that calls onClick', async () => {
     const { user } = renderWithUserEvent(<PolicyCatalogueTile {...defaultProps} locked={{ applied: 0, total: 6 }} />)
 
-    await user.click(screen.getByRole('button', { name: 'Set policy' }))
+    await user.click(screen.getByRole('button', { name: 'Set policy for Spending limit' }))
 
     expect(defaultProps.onClick).toHaveBeenCalledTimes(1)
   })
@@ -77,6 +77,6 @@ describe('PolicyCatalogueTile', () => {
     render(<PolicyCatalogueTile {...defaultProps} isAvailable={false} locked={{ applied: 0, total: 6 }} />)
 
     expect(screen.queryByText('Soon')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Set policy' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Set policy for Spending limit' })).toBeInTheDocument()
   })
 })

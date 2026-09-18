@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { fn } from 'storybook/test'
 import { UserRoundPen, WalletCards } from 'lucide-react'
 import PolicyCatalogueTile from './PolicyCatalogueTile'
 
@@ -30,7 +31,7 @@ export const Available: Story = {
     description: 'Let teammates without signing rights propose transactions.',
     Icon: UserRoundPen,
     isAvailable: true,
-    onClick: () => {},
+    onClick: fn(),
   },
 }
 
@@ -41,7 +42,7 @@ export const Unavailable: Story = {
     description: 'Let spenders access assets without collecting signatures.',
     Icon: WalletCards,
     isAvailable: false,
-    onClick: () => {},
+    onClick: fn(),
   },
 }
 
@@ -53,7 +54,7 @@ export const Locked: Story = {
     description: 'Let spenders access assets without collecting signatures.',
     Icon: WalletCards,
     isAvailable: true,
-    onClick: () => {},
+    onClick: fn(),
     locked: { applied: 0, total: 6 },
   },
 }

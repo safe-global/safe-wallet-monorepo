@@ -2,6 +2,9 @@ import { LockKeyholeOpen, MessageSquarePlus, UserRoundPen, WalletCards, type Luc
 
 export type PolicyCatalogueId = 'spending-limit' | 'proposer' | 'account-recovery' | 'suggestion'
 
+/** The tiles that stand for a policy, as opposed to the suggestion tile. */
+export type PolicyId = Exclude<PolicyCatalogueId, 'suggestion'>
+
 export interface PolicyCatalogueEntry {
   id: PolicyCatalogueId
   title: string
