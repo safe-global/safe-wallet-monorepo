@@ -11,6 +11,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import AuthState from '../AuthState'
 import Plans from './index'
 import { buildPlanTiers, toCurrentPlan } from './planTiers'
+import { useIsAdmin } from '../../hooks/useSpaceMembers'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
@@ -35,6 +36,7 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
   const { openPortal, isRedirecting } = useBillingPortal(spaceId)
   const { startCheckout, isRedirecting: isCheckingOut } = useStartCheckout(spaceId)
   const { canChange } = useChangePlan(spaceId)
+  const isAdmin = useIsAdmin(spaceId)
   const [pick, setPick] = useState<PlanPick>()
 
   const currentPlan = useMemo(
@@ -79,6 +81,7 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
             }}
             isSubscribing={isCheckingOut}
             currentPlan={currentPlan}
+            readOnly={!isAdmin}
           />
         )}
 

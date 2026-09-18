@@ -13,6 +13,7 @@ export default function Plans({
   onSubscribe,
   isSubscribing,
   currentPlan,
+  readOnly,
 }: {
   plan: PlanSummary | null
   safeAccounts: Meter | null
@@ -24,6 +25,8 @@ export default function Plans({
   onSubscribe?: (pick: PlanPick) => void
   isSubscribing?: boolean
   currentPlan?: CurrentPlan
+  /** Only admins act on the plan; everyone else sees the plans without buttons. */
+  readOnly?: boolean
 }) {
   return (
     <div className="flex flex-col gap-6">
@@ -34,7 +37,7 @@ export default function Plans({
         tierName={plan?.name}
         onManage={onManage}
         isManaging={isManaging}
-        canManage={canManage}
+        canManage={readOnly ? false : canManage}
       />
       <PlanCards
         tiers={tiers}
@@ -43,6 +46,7 @@ export default function Plans({
         onSubscribe={onSubscribe}
         onManage={onManage}
         isBusy={isSubscribing || isManaging}
+        readOnly={readOnly}
       />
     </div>
   )

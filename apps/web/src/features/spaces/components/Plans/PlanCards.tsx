@@ -76,6 +76,8 @@ export type PlanCardActions = {
   recommendedPlan?: string
   /** A question shown under the seats ("Need more than 20?") followed by a link to sales. */
   salesHint?: (tier: PlanTier) => string | undefined
+  /** A viewer who cannot act on the plan (a Workspace member who is not an admin): the cards show no buttons. */
+  readOnly?: boolean
 }
 
 const PlanCta = ({
@@ -236,7 +238,7 @@ export const PlanCard = ({
             </div>
           </div>
 
-          {!selectable && option && <PlanCta pick={{ tier, option }} {...actions} />}
+          {!selectable && !actions.readOnly && option && <PlanCta pick={{ tier, option }} {...actions} />}
         </div>
       </CardContent>
     </Card>

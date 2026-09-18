@@ -164,6 +164,25 @@ describe('Plans', () => {
     expect(onManage).toHaveBeenCalled()
   })
 
+  it('hides every plan button, header included, for a viewer who cannot act on the plan', () => {
+    render(
+      <Plans
+        plan={{ ...active, name: 'Starter' }}
+        {...meters}
+        tiers={buildPlanTiers([BUSINESS], { subscription: subscription('Starter', 149), seatsQuota: 2 })}
+        onManage={jest.fn()}
+        onSubscribe={jest.fn()}
+        currentPlan={current('Starter', 149, false)}
+        readOnly
+      />,
+    )
+
+    expect(screen.getByTestId('current-plan-card')).toBeInTheDocument()
+    expect(screen.getByText('Business')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Manage plan' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Upgrade to Business' })).not.toBeInTheDocument()
+  })
+
   it('shows the current plan on its own cycle and the offered plan of the other cycle under the toggle', () => {
     const business = {
       name: 'Business',

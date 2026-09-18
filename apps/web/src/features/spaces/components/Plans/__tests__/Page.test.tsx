@@ -4,6 +4,7 @@ import SpacePlansPage from '../Page'
 const mockUseSpacePlan = jest.fn()
 const mockUseSpaceOffers = jest.fn()
 const mockUseChangePlan = jest.fn()
+let mockIsAdmin = true
 const mockStartCheckout = jest.fn()
 const mockOpenPortal = jest.fn()
 
@@ -18,6 +19,7 @@ jest.mock('@/features/__core__', () => ({
   createFeatureHandle: () => ({}),
 }))
 jest.mock('../../../hooks/useSpacePlan', () => ({ useSpacePlan: (spaceId?: string) => mockUseSpacePlan(spaceId) }))
+jest.mock('../../../hooks/useSpaceMembers', () => ({ useIsAdmin: () => mockIsAdmin }))
 jest.mock('../../../hooks/billing/useSpaceOffers', () => ({
   useSpaceOffers: (spaceId?: string) => mockUseSpaceOffers(spaceId),
 }))
@@ -100,7 +102,19 @@ const onPlan = (name: string, price: number, status: 'active' | 'trialing') => {
 describe('SpacePlansPage', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockIsAdmin = true
     mockUseSpaceOffers.mockReturnValue({ paidPlans: [STARTER], isLoading: false })
+  })
+
+  it('shows a member who is not an admin the plans without any button to act on them', () => {
+    mockIsAdmin = false
+    onPlan('Business', 499, 'active')
+    render(<SpacePlansPage spaceId={SPACE_ID} />)
+
+    expect(screen.getByTestId('current-plan-card')).toHaveTextContent('Business')
+    expect(screen.getByText('Starter')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Manage plan' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Switch to Starter' })).not.toBeInTheDocument()
   })
 
   it('lets a Business Workspace switch to Starter through the change-plan dialog, on either billing cycle', () => {
