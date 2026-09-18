@@ -2,19 +2,18 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     "paths": {
-      "@safe-global/store/*": ["../../packages/store/src/*"],
-      "@safe-global/utils/*": ["../../packages/utils/src/*"],
-      "@safe-global/test/*": ["../../config/test/*"]
+      "@safe-global/store/*": ["${configDir}/../../packages/store/src/*"],
+      "@safe-global/utils/*": ["${configDir}/../../packages/utils/src/*"],
+      "@safe-global/test/*": ["${configDir}/../../config/test/*"]
     },
     "importHelpers": true,
     "allowJs": false,
     "allowSyntheticDefaultImports": true,
-    "downlevelIteration": true,
     "esModuleInterop": true,
     "preserveSymlinks": true,
     "incremental": true,
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "forceConsistentCasingInFileNames": true,
     "noEmitOnError": false,
     "noImplicitAny": false,
