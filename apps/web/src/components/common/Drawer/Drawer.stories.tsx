@@ -1,0 +1,147 @@
+import type { Meta, StoryObj } from '@storybook/react'
+import { UserRoundPen } from 'lucide-react'
+import { Drawer, DrawerBody, DrawerFooter, DrawerHeader, DrawerSubtitle, DrawerTitle } from './Drawer'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
+import { Badge, BadgeDot } from '@/components/ui/badge'
+
+const meta = {
+  title: 'Components/Common/Drawer',
+  component: Drawer,
+  tags: ['autodocs', 'skip-visual-test'],
+  parameters: {
+    layout: 'fullscreen',
+  },
+  args: {
+    open: true,
+    onClose: () => {},
+  },
+} satisfies Meta<typeof Drawer>
+
+export default meta
+type Story = StoryObj<typeof meta>
+
+const Paragraphs = ({ count }: { count: number }) => (
+  <>
+    {Array.from({ length: count }, (_, i) => (
+      <Typography key={i} variant="paragraph-small" className="mb-4">
+        Paragraph {i + 1} — the drawer body does not scroll on its own; the content decides.
+      </Typography>
+    ))}
+  </>
+)
+
+export const Full: Story = {
+  args: {
+    ariaLabel: 'Full drawer',
+    children: (
+      <>
+        <DrawerHeader>
+          <div className="size-7 rounded-full bg-primary" />
+          <div className="min-w-0">
+            <DrawerTitle>Operations Vault</DrawerTitle>
+            <DrawerSubtitle>Last updated 2 minutes ago</DrawerSubtitle>
+          </div>
+        </DrawerHeader>
+        <DrawerBody>
+          <Paragraphs count={3} />
+        </DrawerBody>
+        <DrawerFooter>
+          <Button className="w-full">Submit delegation</Button>
+        </DrawerFooter>
+      </>
+    ),
+  },
+}
+
+/** The Policies header: a badge-style icon, a large title and a status chip pushed to the right. */
+export const StatusHeader: Story = {
+  args: {
+    ariaLabel: 'Proposer role',
+    children: (
+      <>
+        <DrawerHeader>
+          <div className="bg-success-subtle flex size-10 items-center justify-center rounded-lg">
+            <UserRoundPen className="text-success-strong size-4" />
+          </div>
+          <DrawerTitle size="lg">Proposer role</DrawerTitle>
+          <Badge variant="warning" size="status" shape="status" className="ml-auto">
+            <BadgeDot />
+            Pending
+          </Badge>
+        </DrawerHeader>
+        <DrawerBody>
+          <Paragraphs count={3} />
+        </DrawerBody>
+        <DrawerFooter>
+          <Button className="w-full">Submit delegation</Button>
+        </DrawerFooter>
+      </>
+    ),
+  },
+}
+
+export const OnlyTitle: Story = {
+  args: {
+    ariaLabel: 'Title only drawer',
+    children: (
+      <>
+        <DrawerHeader>
+          <DrawerTitle>Batched transactions</DrawerTitle>
+        </DrawerHeader>
+        <DrawerBody>
+          <Paragraphs count={3} />
+        </DrawerBody>
+      </>
+    ),
+  },
+}
+
+export const NoHeader: Story = {
+  args: {
+    ariaLabel: 'Headerless drawer',
+    children: (
+      <DrawerBody>
+        <Paragraphs count={3} />
+      </DrawerBody>
+    ),
+  },
+}
+
+export const LongContent: Story = {
+  args: {
+    ariaLabel: 'Scrolling drawer',
+    children: (
+      <>
+        <DrawerHeader>
+          <DrawerTitle>Scrolling body</DrawerTitle>
+        </DrawerHeader>
+        <DrawerBody>
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <Paragraphs count={30} />
+          </div>
+        </DrawerBody>
+        <DrawerFooter>
+          <Button className="w-full">Submit delegation</Button>
+        </DrawerFooter>
+      </>
+    ),
+  },
+}
+
+export const SizeLg: Story = {
+  args: {
+    ariaLabel: 'Wide drawer',
+    size: 'lg',
+    children: (
+      <>
+        <DrawerHeader>
+          <DrawerTitle>Wide drawer</DrawerTitle>
+        </DrawerHeader>
+        <DrawerBody>
+          <Paragraphs count={3} />
+        </DrawerBody>
+      </>
+    ),
+  },
+}
