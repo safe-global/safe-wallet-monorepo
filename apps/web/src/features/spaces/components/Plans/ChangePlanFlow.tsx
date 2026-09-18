@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { useLoadFeature } from '@/features/__core__'
 import { SafeProFeature } from '@/features/safe-pro-announcement'
-import { formatDate } from '@safe-global/utils/utils/date'
 import { useSeatTrim } from '../../hooks/billing/useSeatTrim'
 import ChangePlanDialog from './ChangePlanDialog'
 import { formatPlanPrice, getChangeDirection, priceSuffix } from './planTiers'
@@ -13,15 +12,11 @@ import type { CurrentPlan, PlanChangeDirection, PlanPick, SafeRef } from './type
 export const continueLabelFor = (direction: PlanChangeDirection): string =>
   direction === 'change' ? 'Continue' : `Continue to ${direction}`
 
-/** A plan switched during the trial stays free until the trial ends; the confirmation says what follows. */
-export const trialSwitchBody = (currentPlan: CurrentPlan, pick: PlanPick): string => {
-  const until = currentPlan.periodEndsAt ? ` until ${formatDate(Date.parse(currentPlan.periodEndsAt))}` : ''
-  const price =
-    pick.option.price === null
-      ? 'a custom price'
-      : `${formatPlanPrice(pick.option.price, pick.tier.currency)}${priceSuffix(pick.tier.billingCycle)}`
-  return `Your free trial continues${until}. From then on you'll pay ${price} for ${pick.tier.name}.`
-}
+/** What the picked plan costs once the trial is over, as the confirmation words it. */
+export const pickedPrice = (pick: PlanPick): string =>
+  pick.option.price === null
+    ? 'a custom price'
+    : `${formatPlanPrice(pick.option.price, pick.tier.currency)}${priceSuffix(pick.tier.billingCycle)}`
 
 /**
  * Moves a live plan onto the picked one. When the Workspace holds more Safes than the new plan covers, the user first
@@ -43,7 +38,7 @@ export default function ChangePlanFlow({
   /** The plan changed and the confirmation is up; a parent chooser can step aside. */
   onChanged?: () => void
 }) {
-  const { SafeProSubscriptionActivatedModal, SafeProNoticeModal } = useLoadFeature(SafeProFeature)
+  const { SafeProSubscriptionActivatedModal, SafeProPlanSwitchedModal } = useLoadFeature(SafeProFeature)
   const { needsTrim } = useSeatTrim(spaceId)
   const [removed, setRemoved] = useState<SafeRef[]>()
   const [isChanged, setIsChanged] = useState(false)
@@ -51,12 +46,11 @@ export default function ChangePlanFlow({
 
   if (isChanged) {
     return currentPlan.isTrialing ? (
-      <SafeProNoticeModal
+      <SafeProPlanSwitchedModal
         open
-        title={`You're now on ${pick.tier.name}`}
-        body={trialSwitchBody(currentPlan, pick)}
-        actionLabel="Get started"
-        onAction={onClose}
+        planName={pick.tier.name}
+        trialEndsAt={currentPlan.periodEndsAt ? Date.parse(currentPlan.periodEndsAt) : null}
+        price={pickedPrice(pick)}
         onOpenChange={(open) => !open && onClose()}
       />
     ) : (

@@ -4,7 +4,6 @@ import { SUPPORT_CHAT_URL } from '@/config/constants'
 import type { PlanGroup } from '../../../hooks/billing/types'
 import Plans from '../index'
 import { getCurrentBadge, remaining, seatsTooltip } from '../PlanStatusCard'
-import { yearlyDiscount } from '../PlanCards'
 import { buildPlanTiers } from '../planTiers'
 import type { CurrentPlan, PlanSummary } from '../types'
 
@@ -70,9 +69,15 @@ describe('Plans', () => {
     expect(seatsTooltip(undefined, null)).toMatch(/^Your plan includes unlimited Safe accounts/)
   })
 
-  it('derives the yearly discount from the offers, or null without a yearly one', () => {
-    expect(yearlyDiscount(buildPlanTiers([STARTER]))).toBe(10)
-    expect(yearlyDiscount(buildPlanTiers([{ ...STARTER, offers: STARTER.offers.slice(0, 1) }]))).toBeNull()
+  it('advertises the yearly saving as a fixed ceiling, only when a yearly offer exists', () => {
+    const { unmount } = render(<Plans plan={null} {...meters} tiers={buildPlanTiers([STARTER])} />)
+    expect(screen.getByRole('tab', { name: /Yearly/ })).toHaveTextContent('Save up to 13%')
+    unmount()
+
+    render(
+      <Plans plan={null} {...meters} tiers={buildPlanTiers([{ ...STARTER, offers: STARTER.offers.slice(0, 1) }])} />,
+    )
+    expect(screen.getByRole('tab', { name: /Yearly/ })).toHaveTextContent(/^Yearly$/)
   })
 
   it.each([
@@ -181,6 +186,24 @@ describe('Plans', () => {
     expect(screen.getByText('Business')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Manage plan' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Upgrade to Business' })).not.toBeInTheDocument()
+    expect(
+      screen.getByText('Only admins can change the plan. Ask an admin to upgrade, switch or change seats.'),
+    ).toBeInTheDocument()
+  })
+
+  it('keeps the read-only note away from admins', () => {
+    render(
+      <Plans
+        plan={{ ...active, name: 'Starter' }}
+        {...meters}
+        tiers={buildPlanTiers([BUSINESS], { subscription: subscription('Starter', 149), seatsQuota: 2 })}
+        onManage={jest.fn()}
+        onSubscribe={jest.fn()}
+        currentPlan={current('Starter', 149, false)}
+      />,
+    )
+
+    expect(screen.queryByText(/Only admins can change the plan/)).not.toBeInTheDocument()
   })
 
   it('shows the current plan on its own cycle and the offered plan of the other cycle under the toggle', () => {

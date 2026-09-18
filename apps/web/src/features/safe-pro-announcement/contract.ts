@@ -2,6 +2,7 @@ import type SafeProAnnouncement from './components/SafeProAnnouncement'
 import type SafeProAnnouncementModal from './components/SafeProAnnouncementModal'
 import type SafeProNoticeModal from './components/SafeProNoticeModal'
 import type SafeProPendingModal from './components/SafeProPendingModal'
+import type SafeProPlanSwitchedModal from './components/SafeProPlanSwitchedModal'
 import type SafeProTrialActivatedModal from './components/SafeProTrialActivatedModal'
 import type SafeProSubscriptionActivatedModal from './components/SafeProSubscriptionActivatedModal'
 import type SafeProBanner from './components/SafeProBanner'
@@ -13,6 +14,7 @@ export interface SafeProContract {
   SafeProAnnouncementModal: typeof SafeProAnnouncementModal
   SafeProNoticeModal: typeof SafeProNoticeModal
   SafeProPendingModal: typeof SafeProPendingModal
+  SafeProPlanSwitchedModal: typeof SafeProPlanSwitchedModal
   SafeProTrialActivatedModal: typeof SafeProTrialActivatedModal
   SafeProSubscriptionActivatedModal: typeof SafeProSubscriptionActivatedModal
   SafeProBanner: typeof SafeProBanner

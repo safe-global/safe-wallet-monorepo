@@ -5,8 +5,6 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
-import { useLoadFeature } from '@/features/__core__'
-import { SafeProFeature } from '@/features/safe-pro-announcement'
 import { localItem } from '@/services/local-storage/local'
 import { formatDate } from '@safe-global/utils/utils/date'
 import { TRIAL_ENDING_SOON_DAYS, TRIAL_LAST_REMINDER_DAYS } from '../../hooks/billing/subscription'
@@ -31,15 +29,26 @@ export const reminderStage = (daysLeft: number | null | undefined): number =>
 export const endsIn = (daysLeft: number | null): string =>
   daysLeft === null || daysLeft > 1 ? `in ${daysLeft ?? 7} days` : daysLeft === 1 ? 'in 1 day' : 'today'
 
+/** What the reminder asks of the viewer: an admin can act, a member is told who can. */
+export const reminderSubtitle = (endsAt: string, isAdmin: boolean, spaceName?: string): string =>
+  isAdmin
+    ? `If you don't select a plan and add a payment method by ${endsAt}, your Workspace will be locked. Your Safe accounts remain available in My accounts.`
+    : `${spaceName ?? 'This Workspace'} will be locked on ${endsAt} unless an admin chooses a plan and adds a payment method. Your Safe accounts remain available in My accounts.`
+
 const TrialEndingChooser = ({
   spaceId,
+  spaceName,
   currentPlan,
   seatsQuota,
+  isAdmin,
   onClose,
 }: {
   spaceId: string
+  spaceName?: string
   currentPlan: CurrentPlan
   seatsQuota: number | null | undefined
+  /** A member sees the same plans without any button to act on them. */
+  isAdmin: boolean
   onClose: () => void
 }) => {
   const { paidPlans, isLoading } = useSpaceOffers(spaceId)
@@ -65,10 +74,7 @@ const TrialEndingChooser = ({
               <Typography variant="h3" as={DialogTitle}>
                 Your free trial will end {endsIn(currentPlan.daysLeft ?? null)}
               </Typography>
-              <Typography color="muted">
-                If you don&apos;t select a plan and add billing details by {endsAt}, your Workspace will be locked. Your
-                Safe accounts remain available outside the Workspace.
-              </Typography>
+              <Typography color="muted">{reminderSubtitle(endsAt, isAdmin, spaceName)}</Typography>
             </div>
 
             {isLoading ? (
@@ -89,12 +95,19 @@ const TrialEndingChooser = ({
                 onManage={() => void openPortal()}
                 onSubscribe={setPick}
                 isBusy={isRedirecting}
+                readOnly={!isAdmin}
               />
             )}
 
-            <Button variant="ghost-muted" size="sm" className="self-center" onClick={onClose}>
-              Continue without Safe Pro
-            </Button>
+            {isAdmin ? (
+              <Button variant="ghost-muted" size="sm" className="self-center" onClick={onClose}>
+                Continue without Safe Pro
+              </Button>
+            ) : (
+              <Button size="lg" className="self-center" onClick={onClose}>
+                Got it
+              </Button>
+            )}
           </div>
         </DialogContent>
       </Dialog>
@@ -120,8 +133,7 @@ export default function TrialEndingModal({ spaceId }: { spaceId: string }) {
   const { plan, seats, subscription, isTrialing, isTrialEndingSoon } = useSpacePlan(spaceId)
   const membership = useCurrentMembership(spaceId)
   const isAdmin = useIsAdmin(spaceId)
-  const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId }, { skip: !isTrialEndingSoon })
-  const { SafeProNoticeModal } = useLoadFeature(SafeProFeature)
+  const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId }, { skip: !isTrialEndingSoon || isAdmin })
   const [isOpen, setIsOpen] = useState(false)
   const stage = reminderStage(plan?.daysLeft)
 
@@ -137,19 +149,14 @@ export default function TrialEndingModal({ spaceId }: { spaceId: string }) {
   }
   const currentPlan = toCurrentPlan(subscription, plan, isTrialing)
 
-  if (!isAdmin) {
-    const endsAt = plan.periodEndsAt ? formatDate(Date.parse(plan.periodEndsAt)) : 'the end of the trial'
-    return (
-      <SafeProNoticeModal
-        open
-        title={`Your free trial will end ${endsIn(plan.daysLeft)}`}
-        body={`${space?.name ?? 'This Workspace'} will be locked on ${endsAt} unless an admin chooses a plan and adds billing details. Your Safe accounts remain available outside the Workspace.`}
-        actionLabel="Got it"
-        onAction={close}
-        onOpenChange={close}
-      />
-    )
-  }
-
-  return <TrialEndingChooser spaceId={spaceId} currentPlan={currentPlan} seatsQuota={seats?.quota} onClose={close} />
+  return (
+    <TrialEndingChooser
+      spaceId={spaceId}
+      spaceName={space?.name}
+      currentPlan={currentPlan}
+      seatsQuota={seats?.quota}
+      isAdmin={isAdmin}
+      onClose={close}
+    />
+  )
 }

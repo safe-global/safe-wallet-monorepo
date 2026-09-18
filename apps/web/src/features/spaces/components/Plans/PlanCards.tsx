@@ -19,15 +19,8 @@ type Cycle = 'month' | 'year'
 
 export type CurrentBadge = { label: string; variant: 'brand' | 'warning' }
 
-export const yearlyDiscount = (tiers: PlanTier[]): number | null => {
-  for (const tier of tiers) {
-    if (tier.billingCycle !== 'year') continue
-    for (const { price, originalPrice } of tier.options) {
-      if (price !== null && originalPrice) return Math.round((1 - price / originalPrice) * 100)
-    }
-  }
-  return null
-}
+/** Fixed marketing copy: the saving differs per plan, so the toggle advertises the ceiling rather than a derived figure. */
+export const YEARLY_SAVINGS_LABEL = 'Save up to 13%'
 
 const optionKey = (option: PlanSeatOption) => option.paymentLinkId ?? option.label
 
@@ -253,7 +246,7 @@ export function PlanCatalog({
   tiers: PlanTier[]
 } & PlanCardActions) {
   const [cycle, setCycle] = useState<Cycle>('month')
-  const discount = yearlyDiscount(tiers)
+  const hasYearly = tiers.some((tier) => tier.billingCycle === 'year')
   // The current plan's card follows the toggle like any other, except it stays put when the other cycle has no
   // offer of that plan to show in its place.
   const visible = tiers.filter((tier) => {
@@ -269,9 +262,9 @@ export function PlanCatalog({
             <TabsTrigger value="month">Monthly</TabsTrigger>
             <TabsTrigger value="year">
               Yearly
-              {discount !== null && (
+              {hasYearly && (
                 <Badge variant="brand" size="status" shape="status">
-                  -{discount}%
+                  {YEARLY_SAVINGS_LABEL}
                 </Badge>
               )}
             </TabsTrigger>
@@ -292,11 +285,20 @@ export function PlanCatalog({
   )
 }
 
+export const READ_ONLY_NOTE = 'Only admins can change the plan. Ask an admin to upgrade, switch or change seats.'
+
 export default function PlanCards(props: { tiers: PlanTier[] } & PlanCardActions) {
   return (
     <Card radius="xl">
       <CardContent>
-        <PlanCatalog {...props} />
+        <div className="flex flex-col gap-6">
+          <PlanCatalog {...props} />
+          {props.readOnly && (
+            <Typography variant="paragraph-small" color="muted" align="center">
+              {READ_ONLY_NOTE}
+            </Typography>
+          )}
+        </div>
       </CardContent>
     </Card>
   )

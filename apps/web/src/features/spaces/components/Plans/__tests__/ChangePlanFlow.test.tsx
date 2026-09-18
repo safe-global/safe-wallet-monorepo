@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
-import ChangePlanFlow, { continueLabelFor, trialSwitchBody } from '../ChangePlanFlow'
+import ChangePlanFlow, { continueLabelFor, pickedPrice } from '../ChangePlanFlow'
 import type { CurrentPlan, PlanPick } from '../types'
 
 let mockSafeCount = 3
@@ -43,21 +43,19 @@ jest.mock('../ChangePlanDialog', () => ({
 
 jest.mock('@/features/__core__', () => ({
   useLoadFeature: () => ({
-    SafeProNoticeModal: ({
-      title,
-      body,
-      actionLabel,
-      onAction,
+    SafeProPlanSwitchedModal: ({
+      planName,
+      trialEndsAt,
+      price,
+      onOpenChange,
     }: {
-      title: string
-      body: string
-      actionLabel: string
-      onAction: () => void
+      planName: string
+      trialEndsAt: number | null
+      price: string
+      onOpenChange: (open: boolean) => void
     }) => (
-      <div data-testid="notice-modal">
-        <h2>{title}</h2>
-        <p>{body}</p>
-        <button onClick={onAction}>{actionLabel}</button>
+      <div data-testid="switched-modal" data-plan={planName} data-ends={String(trialEndsAt)} data-price={price}>
+        <button onClick={() => onOpenChange(false)}>Get started</button>
       </div>
     ),
     SafeProSubscriptionActivatedModal: ({
@@ -150,10 +148,9 @@ describe('ChangePlanFlow', () => {
     expect(onChanged).toHaveBeenCalled()
     expect(onClose).not.toHaveBeenCalled()
     expect(screen.queryByTestId('change-plan-dialog')).not.toBeInTheDocument()
-    expect(screen.getByTestId('notice-modal')).toHaveTextContent("You're now on Starter")
-    expect(screen.getByTestId('notice-modal')).toHaveTextContent(
-      "Your free trial continues until Dec 6, 2026. From then on you'll pay €1,669/mo for Starter.",
-    )
+    expect(screen.getByTestId('switched-modal')).toHaveAttribute('data-plan', 'Starter')
+    expect(screen.getByTestId('switched-modal')).toHaveAttribute('data-ends', String(Date.UTC(2026, 11, 6)))
+    expect(screen.getByTestId('switched-modal')).toHaveAttribute('data-price', '€1,669/mo')
 
     fireEvent.click(screen.getByRole('button', { name: 'Get started' }))
     expect(onClose).toHaveBeenCalled()
@@ -177,14 +174,10 @@ describe('ChangePlanFlow', () => {
     expect(onClose).toHaveBeenCalled()
   })
 
-  it('words the trial switch without an end date or with a custom price', () => {
-    expect(trialSwitchBody({ ...currentPlan, periodEndsAt: null }, pick(2, 189))).toBe(
-      "Your free trial continues. From then on you'll pay €189/mo for Starter.",
-    )
+  it('words the picked price, custom ones included', () => {
+    expect(pickedPrice(pick(2, 189))).toBe('€189/mo')
     const custom = pick(2, 189)
-    expect(trialSwitchBody(currentPlan, { ...custom, option: { ...custom.option, price: null } })).toBe(
-      "Your free trial continues until Dec 6, 2026. From then on you'll pay a custom price for Starter.",
-    )
+    expect(pickedPrice({ ...custom, option: { ...custom.option, price: null } })).toBe('a custom price')
   })
 
   it('words the step button after the direction of the change', () => {
