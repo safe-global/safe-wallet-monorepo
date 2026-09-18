@@ -13,7 +13,7 @@ describe('SpenderSummaryCard', () => {
     const spender = spenderSummaryBuilder()
       .with({
         address: SPENDER,
-        name: 'Simon',
+        name: 'Alice',
         limits: [
           limitSummaryBuilder().with({ token: eth, amount: '0.5466', resetTimeMin: '10080' }).build(),
           limitSummaryBuilder().with({ token: usdc, amount: '250', resetTimeMin: '43200' }).build(),
@@ -26,7 +26,7 @@ describe('SpenderSummaryCard', () => {
     const card = screen.getByTestId('policy-summary-spender')
     expect(card).toHaveTextContent(SPENDER_LABEL)
     expect(card).toHaveTextContent(LIMITS_LABEL)
-    expect(card).toHaveTextContent('Simon')
+    expect(card).toHaveTextContent('Alice')
     expect(card).toHaveTextContent(SPENDER)
     expect(card).not.toHaveTextContent(shortenAddress(SPENDER))
 

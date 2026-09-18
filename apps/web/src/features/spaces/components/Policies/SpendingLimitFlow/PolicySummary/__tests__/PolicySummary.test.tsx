@@ -21,11 +21,11 @@ const withPeriods = (name: string | undefined, resetTimes: string[]) =>
     .build()
 
 describe('PolicySummary', () => {
-  const simon = withPeriods('Simon', ['0'])
-  const dev = withPeriods('Dev', ['10080', '43200'])
+  const alice = withPeriods('Alice', ['0'])
+  const bob = withPeriods('Bob', ['10080', '43200'])
   const unnamed = withPeriods(undefined, ['1440'])
   const policy = policySummaryBuilder()
-    .with({ safe: safeAccountOptionBuilder().with({ name: 'Treasury' }).build(), spenders: [simon, dev, unnamed] })
+    .with({ safe: safeAccountOptionBuilder().with({ name: 'Treasury' }).build(), spenders: [alice, bob, unnamed] })
     .build()
 
   it('opens with the callout, then the Safe, then one card per spender with one row per limit', () => {
@@ -42,7 +42,7 @@ describe('PolicySummary', () => {
     render(<PolicySummary policy={policy} />)
 
     expect(screen.getByTestId('policy-summary-callout')).toHaveTextContent(
-      `You are giving Simon, Dev and ${shortenAddress(unnamed.address)} spending limits.`,
+      `You are giving Alice, Bob and ${shortenAddress(unnamed.address)} spending limits.`,
     )
   })
 

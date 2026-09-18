@@ -16,9 +16,9 @@ const spender = (name: string | undefined, resetTimes: string[]) =>
 
 describe('joinNames', () => {
   it.each([
-    [['Simon'], 'Simon'],
-    [['Simon', 'Dev'], 'Simon and Dev'],
-    [['Simon', 'Dev', 'Ana'], 'Simon, Dev and Ana'],
+    [['Alice'], 'Alice'],
+    [['Alice', 'Bob'], 'Alice and Bob'],
+    [['Alice', 'Bob', 'Carol'], 'Alice, Bob and Carol'],
     [[], ''],
   ])('joins %j as "%s"', (names, expected) => {
     expect(joinNames(names)).toBe(expected)
@@ -27,7 +27,7 @@ describe('joinNames', () => {
 
 describe('spenderDisplayName', () => {
   it('prefers the address-book name', () => {
-    expect(spenderDisplayName(spenderSummaryBuilder().with({ name: 'Simon' }).build())).toBe('Simon')
+    expect(spenderDisplayName(spenderSummaryBuilder().with({ name: 'Alice' }).build())).toBe('Alice')
   })
 
   it('falls back to the shortened address when the name is missing or blank', () => {
@@ -42,51 +42,51 @@ describe('spenderDisplayName', () => {
 describe('describePolicy', () => {
   it('names a single one-time limit in the singular', () => {
     const policy = policySummaryBuilder()
-      .with({ spenders: [spender('Simon', ['0'])] })
+      .with({ spenders: [spender('Alice', ['0'])] })
       .build()
 
     expect(describePolicy(policy)).toEqual({
-      title: 'You are giving Simon a one-time spending limit.',
+      title: 'You are giving Alice a one-time spending limit.',
       description: CALLOUT_DESCRIPTION_SINGULAR,
     })
   })
 
   it('keeps the adjective in the plural when every limit shares one canonical period', () => {
     const policy = policySummaryBuilder()
-      .with({ spenders: [spender('Simon', ['10080']), spender('Dev', ['10080'])] })
+      .with({ spenders: [spender('Alice', ['10080']), spender('Bob', ['10080'])] })
       .build()
 
     expect(describePolicy(policy)).toEqual({
-      title: 'You are giving Simon and Dev weekly spending limits.',
+      title: 'You are giving Alice and Bob weekly spending limits.',
       description: CALLOUT_DESCRIPTION_PLURAL,
     })
   })
 
   it('drops the adjective for mixed periods', () => {
     const policy = policySummaryBuilder()
-      .with({ spenders: [spender('Simon', ['0']), spender('Dev', ['10080', '43200'])] })
+      .with({ spenders: [spender('Alice', ['0']), spender('Bob', ['10080', '43200'])] })
       .build()
 
-    expect(describePolicy(policy).title).toBe('You are giving Simon and Dev spending limits.')
+    expect(describePolicy(policy).title).toBe('You are giving Alice and Bob spending limits.')
   })
 
   it('drops the adjective for a uniform test-chain period, which has no word of its own', () => {
     const policy = policySummaryBuilder()
       .with({
         safe: safeAccountOptionBuilder().with({ chainId: chains.sep }).build(),
-        spenders: [spender('Simon', ['30'])],
+        spenders: [spender('Alice', ['30'])],
       })
       .build()
 
-    expect(describePolicy(policy).title).toBe('You are giving Simon a spending limit.')
+    expect(describePolicy(policy).title).toBe('You are giving Alice a spending limit.')
   })
 
   it('lists three spenders with commas and a final "and"', () => {
     const policy = policySummaryBuilder()
-      .with({ spenders: [spender('Simon', ['0']), spender('Dev', ['0']), spender('Ana', ['0'])] })
+      .with({ spenders: [spender('Alice', ['0']), spender('Bob', ['0']), spender('Carol', ['0'])] })
       .build()
 
-    expect(describePolicy(policy).title).toBe('You are giving Simon, Dev and Ana one-time spending limits.')
+    expect(describePolicy(policy).title).toBe('You are giving Alice, Bob and Carol one-time spending limits.')
   })
 
   it('uses the shortened address for an unnamed spender', () => {

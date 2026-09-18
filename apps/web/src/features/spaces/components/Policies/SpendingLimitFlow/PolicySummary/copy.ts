@@ -18,7 +18,7 @@ type PolicyDescription = {
 export const spenderDisplayName = ({ name, address }: Pick<SpenderSummary, 'name' | 'address'>): string =>
   name?.trim() || shortenAddress(address)
 
-/** `Simon` · `Simon and Dev` · `Simon, Dev and Ana`. */
+/** `Alice` · `Alice and Bob` · `Alice, Bob and Carol`. */
 export const joinNames = (names: readonly string[]): string => {
   if (names.length === 0) return ''
   if (names.length === 1) return names[0]

@@ -9,9 +9,9 @@ import type { LimitSummary, LimitSummaryToken, PolicySummaryModel, SpenderSummar
 
 /** `SAFE_ADDRESSES.efSafe` in config/test/msw/fixtures. */
 const EF_SAFE = '0x9fC3dc011b461664c835F2527fffb1169b3C213e'
-const SIMON = '0x8675B754342754A30A2AeF474D114d8460bca19b'
-const DEV = '0x1F2504De05f5167650bE5B28c472601Be434b60A'
-const ANA = '0x86753fE4B8e29Ce8A38cDf9559D80E05B00cDbA0'
+const ALICE = '0x8675B754342754A30A2AeF474D114d8460bca19b'
+const BOB = '0x1F2504De05f5167650bE5B28c472601Be434b60A'
+const CAROL = '0x86753fE4B8e29Ce8A38cDf9559D80E05B00cDbA0'
 const UNNAMED = '0x9F7dfAb2222A473284205cdDF08a677726d786A0'
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
 
@@ -52,12 +52,12 @@ const spender = (address: string, name: string | undefined, limits: LimitSummary
   limits,
 })
 
-/** The Figma frame: one-time ETH for Simon, weekly ETH and monthly USDC for Dev — no single frequency to name. */
+/** The Figma frame: one-time ETH for Alice, weekly ETH and monthly USDC for Bob — no single frequency to name. */
 const mixed: PolicySummaryModel = {
   safe: treasury(),
   spenders: [
-    spender(SIMON, 'Simon', [{ token: ETH, amount: '0.5466', resetTimeMin: '0' }]),
-    spender(DEV, 'Dev', [
+    spender(ALICE, 'Alice', [{ token: ETH, amount: '0.5466', resetTimeMin: '0' }]),
+    spender(BOB, 'Bob', [
       { token: ETH, amount: '0.5466', resetTimeMin: '10080' },
       { token: USDC_TOKEN, amount: '250', resetTimeMin: '43200' },
     ]),
@@ -97,7 +97,7 @@ export const SingleLimit: Story = {
   args: {
     policy: {
       safe: treasury(),
-      spenders: [spender(SIMON, 'Simon', [{ token: ETH, amount: '0.5466', resetTimeMin: '0' }])],
+      spenders: [spender(ALICE, 'Alice', [{ token: ETH, amount: '0.5466', resetTimeMin: '0' }])],
     },
   },
 }
@@ -108,22 +108,22 @@ export const UniformWeekly: Story = {
     policy: {
       safe: treasury(),
       spenders: [
-        spender(SIMON, 'Simon', [{ token: ETH, amount: '0.5466', resetTimeMin: '10080' }]),
-        spender(DEV, 'Dev', [{ token: USDC_TOKEN, amount: '250', resetTimeMin: '10080' }]),
+        spender(ALICE, 'Alice', [{ token: ETH, amount: '0.5466', resetTimeMin: '10080' }]),
+        spender(BOB, 'Bob', [{ token: USDC_TOKEN, amount: '250', resetTimeMin: '10080' }]),
       ],
     },
   },
 }
 
-/** Three spenders read as `Simon, Dev and Ana`. */
+/** Three spenders read as `Alice, Bob and Carol`. */
 export const ThreeSpenders: Story = {
   args: {
     policy: {
       safe: treasury(),
       spenders: [
-        spender(SIMON, 'Simon', [{ token: ETH, amount: '0.5466', resetTimeMin: '0' }]),
-        spender(DEV, 'Dev', [{ token: ETH, amount: '1', resetTimeMin: '0' }]),
-        spender(ANA, 'Ana', [{ token: USDC_TOKEN, amount: '500', resetTimeMin: '0' }]),
+        spender(ALICE, 'Alice', [{ token: ETH, amount: '0.5466', resetTimeMin: '0' }]),
+        spender(BOB, 'Bob', [{ token: ETH, amount: '1', resetTimeMin: '0' }]),
+        spender(CAROL, 'Carol', [{ token: USDC_TOKEN, amount: '500', resetTimeMin: '0' }]),
       ],
     },
   },
@@ -135,7 +135,7 @@ export const UnnamedSpender: Story = {
     policy: {
       safe: treasury(),
       spenders: [
-        spender(SIMON, 'Simon', [{ token: ETH, amount: '0.5466', resetTimeMin: '1440' }]),
+        spender(ALICE, 'Alice', [{ token: ETH, amount: '0.5466', resetTimeMin: '1440' }]),
         spender(UNNAMED, undefined, [{ token: USDC_TOKEN, amount: '100', resetTimeMin: '1440' }]),
       ],
     },
@@ -147,7 +147,7 @@ export const TestPeriodOnSepolia: Story = {
   args: {
     policy: {
       safe: treasury(SEPOLIA),
-      spenders: [spender(SIMON, 'Simon', [{ token: ETH, amount: '0.01', resetTimeMin: '30' }])],
+      spenders: [spender(ALICE, 'Alice', [{ token: ETH, amount: '0.01', resetTimeMin: '30' }])],
     },
   },
 }

@@ -5,17 +5,17 @@ import { limitSummaryBuilder, policySummaryBuilder, spenderSummaryBuilder } from
 
 describe('PolicyCallout', () => {
   it('renders the plain-language title and description for the policy', () => {
-    const simon = spenderSummaryBuilder()
-      .with({ name: 'Simon', limits: [limitSummaryBuilder().with({ resetTimeMin: '0' }).build()] })
+    const alice = spenderSummaryBuilder()
+      .with({ name: 'Alice', limits: [limitSummaryBuilder().with({ resetTimeMin: '0' }).build()] })
       .build()
     const policy = policySummaryBuilder()
-      .with({ spenders: [simon] })
+      .with({ spenders: [alice] })
       .build()
 
     render(<PolicyCallout policy={policy} />)
 
     const callout = screen.getByTestId('policy-summary-callout')
-    expect(callout).toHaveTextContent('You are giving Simon a one-time spending limit.')
+    expect(callout).toHaveTextContent('You are giving Alice a one-time spending limit.')
     expect(callout).toHaveTextContent(CALLOUT_DESCRIPTION_SINGULAR)
   })
 })
