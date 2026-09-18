@@ -109,7 +109,6 @@ const ProposerRoleDialog = ({
                 isError={accountsError}
                 onRetry={onAccountsRetry}
                 hasWallet={hasWallet}
-                helperText={null}
               />
 
               <div className="flex flex-col gap-1">
@@ -127,7 +126,7 @@ const ProposerRoleDialog = ({
                 placeholder="Type name here"
                 helperText={
                   <Typography variant="paragraph-mini" color="muted">
-                    Add a nickname for your proposer, it stays private.
+                    Only you can see this name. Everyone else sees the address.
                   </Typography>
                 }
                 inputSize="hero"
