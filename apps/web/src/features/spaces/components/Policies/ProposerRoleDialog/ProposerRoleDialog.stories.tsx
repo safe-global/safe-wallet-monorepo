@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
+import { http, HttpResponse } from 'msw'
 import { fn } from 'storybook/test'
+import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { createMockStory } from '@/stories/mocks'
-import { DEFAULT_CHAIN_ID } from '@/config/constants'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { buildSafeAccountId, groupSafeAccounts } from '../SafeAccountSelector/utils'
 import { isSafeAccountGroup, type SafeAccountEntry, type SafeAccountOption } from '../SafeAccountSelector/types'
@@ -49,15 +50,46 @@ const accounts: SafeAccountEntry[] = [treasury, opsGroup]
 
 const PROPOSER_NAME = 'Test proposer'
 
-/** Resolves the proposer address to a name in the picker, the way a saved contact does in the app. */
-const addressBook = { [DEFAULT_CHAIN_ID]: { [PROPOSER]: PROPOSER_NAME } }
+const LOCAL_CONTACT = checksumAddress('0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed')
+const SPACE_CONTACT = checksumAddress('0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359')
+
+/** Keyed by the chain the `eth:` route resolves to — `AddressBookInput` filters contacts by chain. */
+const localAddressBook = { [ETHEREUM]: { [PROPOSER]: PROPOSER_NAME, [LOCAL_CONTACT]: 'Local contact' } }
+
+const SPACE_ID = '1'
+
+/** `useGetSpaceAddressBook` skips without a live session and a Workspace in scope. */
+const spaceAuth = { sessionExpiresAt: Date.now() + 60 * 60 * 1000, lastUsedSpaceId: SPACE_ID }
+
+const spaceContact = (address: string, name: string): SpaceAddressBookItemDto => ({
+  name,
+  address,
+  chainIds: [ETHEREUM],
+  createdBy: '',
+  createdByUserId: 0,
+  lastUpdatedBy: '',
+  lastUpdatedByUserId: 0,
+  createdAt: '',
+  updatedAt: '',
+})
+
+/** Workspace contacts reach the picker over the wire; local ones come from Redux. */
+const spaceAddressBookHandler = http.get(/\/v1\/spaces\/[^/]+\/address-book$/, () =>
+  HttpResponse.json({
+    spaceUuid: SPACE_ID,
+    data: [spaceContact(SPACE_CONTACT, 'Workspace contact'), spaceContact(TREASURY, 'Workspace treasury')],
+  }),
+)
 
 const setup = createMockStory({
   scenario: 'efSafe',
   wallet: 'connected',
   layout: 'none',
   shadcn: true,
-  store: { addressBook },
+  // Also what marks the session authenticated, which the Workspace address book needs.
+  features: { spaces: true },
+  store: { addressBook: localAddressBook, auth: spaceAuth },
+  query: { spaceId: SPACE_ID },
 })
 
 const meta = {
@@ -66,6 +98,8 @@ const meta = {
   parameters: {
     layout: 'centered',
     ...setup.parameters,
+    // First: the factory's handlers are appended, and MSW is first-match-wins.
+    msw: { handlers: [spaceAddressBookHandler, ...setup.handlers] },
   },
   decorators: [setup.decorator],
   tags: ['autodocs'],
@@ -95,10 +129,9 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Nothing picked yet — Submit stays disabled until an account and a valid proposer are set. */
+/** Nothing picked yet, so Submit stays disabled. */
 export const Default: Story = {}
 
-/** Both fields filled, as the design shows them. */
 export const Filled: Story = {
   args: {
     safeAccount: treasury.id,
@@ -106,7 +139,6 @@ export const Filled: Story = {
   },
 }
 
-/** A multi-chain group in the account picker, alongside the single-chain Safe. */
 export const MultiChainAccount: Story = {
   args: {
     safeAccount: opsGroup.accounts[0].id,
@@ -122,12 +154,11 @@ export const AccountsError: Story = {
   args: { accounts: [], accountsError: true, onAccountsRetry: fn() },
 }
 
-/** No wallet connected: the account picker prompts to connect one. */
 export const NoWallet: Story = {
   args: { accounts: [], hasWallet: false },
 }
 
-/** The Workspace has Safes, but none this wallet is a signer or proposer on. */
+/** The Workspace has Safes, but none this wallet can set a policy on. */
 export const NoEligibleAccounts: Story = {
   args: { accounts: [] },
 }
@@ -140,7 +171,7 @@ export const Submitting: Story = {
   },
 }
 
-/** A failed signature surfaces above the footer without clearing the form. */
+/** The error surfaces above the footer without clearing the form. */
 export const WithError: Story = {
   args: {
     safeAccount: treasury.id,
