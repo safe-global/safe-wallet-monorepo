@@ -1,94 +1,94 @@
 /**
  * Regression — the send-tokens form can be completed with the keyboard alone (WA-3550).
  *
- * Purpose: after picking an address-book contact with ArrowDown + Enter, Tab must continue
- * through the visible form controls (amount → Max → token → Next) instead of jumping to the
- * browser chrome and the page header.
+ * Picking a contact turns the recipient input `visibility: hidden`; Chromium then drops focus and
+ * restarts Tab from the top of the document, so keyboard users had to tab through the whole header
+ * to reach Amount. Only a real browser implements that focus fixup, hence Playwright.
  *
- * Risk: the recipient input turns `visibility: hidden` once the address is a saved contact.
- * Chromium drops focus from a hidden element and restarts Tab from the top of the document, so
- * keyboard users had to tab through the whole header and sidebar to reach Amount. Firefox keeps
- * the tab position, which is why only Chrome users reported it.
- *
- * Why Playwright: jsdom does not implement the browser's focus fixup for hidden elements — the
- * bug only exists in a real browser's sequential focus navigation.
- *
- * Data: the static OWNER_4 Safe (read-only, ETH balance) plus two local contacts seeded via
- * localStorage; nothing is created or mutated, so the test is parallel-safe.
+ * Data: the static OWNER_4 Safe (read-only) plus two local contacts — parallel-safe, no cleanup.
  *
  * Run: yarn workspace @safe-global/web pw:test send-form-keyboard-navigation
  * Tag: @regression — runs under the chromium project, on demand.
  */
 import { test, expect } from '../../src/fixtures/test.fixture'
-import { SAFES, CHAIN_IDS, LS_NAMESPACE, DROPDOWN_LOCAL_CONTACTS } from '../../src/data/constants'
+import { seedLocalAddressBook } from '../../src/fixtures/seed-address-book'
+import { HomePage } from '../../src/pages/home.page'
+import { SendTokensPage } from '../../src/pages/send-tokens.page'
+import { SAFES, DROPDOWN_LOCAL_CONTACTS } from '../../src/data/constants'
 
 const [FIRST_CONTACT, SECOND_CONTACT] = DROPDOWN_LOCAL_CONTACTS
 
 test.describe('Send tokens — keyboard navigation', { tag: '@regression' }, () => {
-  test('tabs from a picked contact through amount, Max and token to Next', async ({
+  test('should tab from the picked contact through amount, Max and token to Next when the recipient is chosen with the keyboard', async ({
     safePage,
     walletPage,
     credentials,
-  }) => {
-    await safePage.addInitScript(
-      ({ ns, chainId, book }) => {
-        window.localStorage.setItem(`${ns}addressBook`, JSON.stringify({ [chainId]: book }))
-      },
-      {
-        ns: LS_NAMESPACE,
-        chainId: CHAIN_IDS.sepolia,
-        book: { [FIRST_CONTACT.address]: FIRST_CONTACT.name, [SECOND_CONTACT.address]: SECOND_CONTACT.name },
-      },
-    )
+  }, testInfo) => {
+    testInfo.annotations.push({ type: 'safe-address', description: SAFES.SEP_OWNER_4_SAFE })
 
-    await safePage.goto(`/home?safe=${SAFES.SEP_OWNER_4_SAFE}`)
+    await seedLocalAddressBook(safePage, [FIRST_CONTACT, SECOND_CONTACT])
+
+    const home = new HomePage(safePage)
+    const sendTokens = new SendTokensPage(safePage)
+
+    await home.goto(SAFES.SEP_OWNER_4_SAFE)
     await walletPage.acceptCookies()
     await walletPage.connectWallet(credentials.OWNER_4_PRIVATE_KEY)
     await expect(walletPage.accountCenter).toBeVisible()
 
-    await expect(safePage.getByTestId('new-tx-btn')).toBeEnabled()
-    await safePage.getByTestId('new-tx-btn').click()
-    await safePage.getByTestId('send-tokens-btn').click()
+    await expect(sendTokens.newTxButton).toBeEnabled()
+    await sendTokens.open()
 
-    // Not keyed off the accessible name: the label swaps to the validation message while typing.
-    const recipient = safePage.getByTestId('address-book-input').getByRole('combobox')
-    await recipient.click()
-    await safePage.keyboard.type('E2E')
+    // --- Pick a contact with the keyboard only -----------------------------
+    await sendTokens.recipientInput.click()
+    await sendTokens.recipientInput.pressSequentially('E2E')
+    await expect(sendTokens.suggestionList).toBeVisible()
+
     await safePage.keyboard.press('ArrowDown')
-    await expect(recipient).toHaveAttribute('aria-expanded', 'true')
+    // Asserted, not assumed: a failure here names the dropdown order rather than looking like the
+    // focus bug returning two assertions later.
+    await expect(sendTokens.suggestion(FIRST_CONTACT.name)).toHaveAttribute('aria-selected', 'true')
     await safePage.keyboard.press('Enter')
 
-    // The picked contact renders as a focusable chip so the tab position stays in the form.
-    const chip = safePage.getByRole('button', { name: new RegExp(FIRST_CONTACT.name) })
-    await expect(chip).toBeFocused()
+    // The chip holding focus IS the fix.
+    await expect(sendTokens.recipientChipValue).toContainText(new RegExp(FIRST_CONTACT.address, 'i'))
+    await expect(sendTokens.recipientChip).toBeFocused()
+
+    // --- Tab forward through the form --------------------------------------
+    // Max renders only once balances load; without this the first Tab can race it.
+    await expect(sendTokens.maxButton).toBeVisible()
 
     await safePage.keyboard.press('Tab')
-    const amount = safePage.getByTestId('token-amount-field')
-    await expect(amount).toBeFocused()
+    await expect(sendTokens.amountField).toBeFocused()
+    // Under the Safe's ETH balance, so the form validates and Next becomes enabled.
     await safePage.keyboard.type('0.000001')
 
     await safePage.keyboard.press('Tab')
-    await expect(safePage.getByTestId('max-btn')).toBeFocused()
+    await expect(sendTokens.maxButton).toBeFocused()
 
     await safePage.keyboard.press('Tab')
-    await expect(safePage.getByTestId('token-selector').getByRole('combobox')).toBeFocused()
+    await expect(sendTokens.tokenSelector).toBeFocused()
 
     await safePage.keyboard.press('Tab')
-    await expect(safePage.getByTestId('add-recipient-btn')).toBeFocused()
+    await expect(sendTokens.addRecipientButton).toBeFocused()
 
-    const next = safePage.getByRole('button', { name: 'Next' })
-    await expect(next).toBeEnabled()
+    // A disabled button is not a tab stop, so the form must be valid before Tab reaches Next.
+    await expect(sendTokens.nextButton).toBeEnabled()
     await safePage.keyboard.press('Tab')
-    await expect(next).toBeFocused()
+    await expect(sendTokens.nextButton).toBeFocused()
 
-    // Shift+Tab back to the chip; Enter reopens the recipient for editing with the address kept and
-    // the other contacts on offer.
-    for (let i = 0; i < 5; i++) await safePage.keyboard.press('Shift+Tab')
-    await expect(chip).toBeFocused()
+    // --- Shift+Tab back to the chip ----------------------------------------
+    // Five stops back: Next → Add recipient → token → Max → amount.
+    for (let i = 0; i < 5; i++) {
+      await safePage.keyboard.press('Shift+Tab')
+    }
+    await expect(sendTokens.recipientChip).toBeFocused()
+
+    // --- Enter reopens the recipient for editing ---------------------------
     await safePage.keyboard.press('Enter')
-    await expect(recipient).toBeFocused()
-    await expect(recipient).toHaveValue(new RegExp(FIRST_CONTACT.address, 'i'))
-    await expect(recipient).toHaveAttribute('aria-expanded', 'true')
-    await expect(safePage.getByTestId('address-item').filter({ hasText: SECOND_CONTACT.name })).toBeVisible()
+    await expect(sendTokens.recipientInput).toBeFocused()
+    await expect(sendTokens.recipientInput).toHaveValue(new RegExp(FIRST_CONTACT.address, 'i'))
+    await expect(sendTokens.recipientInput).toHaveAttribute('aria-expanded', 'true')
+    await expect(sendTokens.suggestion(SECOND_CONTACT.name)).toBeVisible()
   })
 })
