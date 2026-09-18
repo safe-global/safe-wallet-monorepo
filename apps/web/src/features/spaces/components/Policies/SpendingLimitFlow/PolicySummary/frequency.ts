@@ -1,7 +1,7 @@
 import { getResetTimeOptions } from '@/features/spending-limits/constants'
 import { CANONICAL_FREQUENCIES } from './constants'
 
-export type FrequencyDescription = {
+type FrequencyDescription = {
   /** Row label: `Weekly`, or the dropdown's own label (`30 minutes`) for a non-canonical period. */
   label: string
   /** Callout adjective (`weekly`); undefined for a non-canonical period. */

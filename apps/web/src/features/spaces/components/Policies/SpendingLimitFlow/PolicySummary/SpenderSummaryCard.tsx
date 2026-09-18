@@ -8,9 +8,9 @@ import type { SpenderSummary } from './types'
 
 const AVATAR_SIZE = 24
 
-export type SpenderSummaryCardProps = {
+type SpenderSummaryCardProps = {
   spender: SpenderSummary
-  /** The Safe's chain: explorer link, address-book lookup and reset-period wording all key off it. */
+  /** The Safe's chain: address-book lookup and reset-period wording key off it. */
   chainId: string
 }
 

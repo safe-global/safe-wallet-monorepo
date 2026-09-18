@@ -9,7 +9,7 @@ import {
 import { describeFrequency } from './frequency'
 import type { PolicySummaryModel, SpenderSummary } from './types'
 
-export type PolicyDescription = {
+type PolicyDescription = {
   title: string
   description: string
 }

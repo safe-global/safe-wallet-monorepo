@@ -3,7 +3,7 @@ export const APPLIES_TO_LABEL = 'Applies to'
 export const SPENDER_LABEL = 'Spender'
 export const LIMITS_LABEL = 'Limits'
 
-export type CanonicalFrequency = {
+type CanonicalFrequency = {
   /** Row label, e.g. `Weekly`. */
   label: string
   /** Callout adjective, e.g. `weekly`. */
@@ -11,7 +11,7 @@ export type CanonicalFrequency = {
 }
 
 /** The four production reset periods, keyed by minutes. Any other value falls back to the form's own option label. */
-export const CANONICAL_FREQUENCIES: Readonly<Record<string, CanonicalFrequency>> = {
+export const CANONICAL_FREQUENCIES: Readonly<Partial<Record<string, CanonicalFrequency>>> = {
   '0': { label: 'One time only', adjective: 'one-time' },
   '1440': { label: 'Daily', adjective: 'daily' },
   '10080': { label: 'Weekly', adjective: 'weekly' },

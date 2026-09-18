@@ -17,7 +17,7 @@ const toDisplayAmount = ({ amount, token }: LimitSummary): DisplayAmount => {
   return raw === undefined ? { value: amount } : { value: raw.toString(), decimals: token.decimals }
 }
 
-export type LimitSummaryRowProps = {
+type LimitSummaryRowProps = {
   limit: LimitSummary
   /** The Safe's chain: resolves the wording of a non-canonical reset period. */
   chainId: string

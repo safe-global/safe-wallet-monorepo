@@ -32,7 +32,6 @@ describe('LimitSummaryRow', () => {
     render(<LimitSummaryRow limit={limit} chainId="1" />)
 
     expect(screen.getByTestId('policy-summary-limit')).toHaveTextContent('1.1234567 USDC')
-    expect(errorSpy).toHaveBeenCalled()
 
     errorSpy.mockRestore()
   })

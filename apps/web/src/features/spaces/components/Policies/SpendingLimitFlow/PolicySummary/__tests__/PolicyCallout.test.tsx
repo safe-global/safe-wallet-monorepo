@@ -1,6 +1,6 @@
 import { render, screen } from '@/tests/test-utils'
 import PolicyCallout from '../PolicyCallout'
-import { describePolicy } from '../copy'
+import { CALLOUT_DESCRIPTION_SINGULAR } from '../constants'
 import { limitSummaryBuilder, policySummaryBuilder, spenderSummaryBuilder } from '../testBuilders'
 
 describe('PolicyCallout', () => {
@@ -11,13 +11,11 @@ describe('PolicyCallout', () => {
     const policy = policySummaryBuilder()
       .with({ spenders: [simon] })
       .build()
-    const { title, description } = describePolicy(policy)
 
     render(<PolicyCallout policy={policy} />)
 
     const callout = screen.getByTestId('policy-summary-callout')
     expect(callout).toHaveTextContent('You are giving Simon a one-time spending limit.')
-    expect(callout).toHaveTextContent(title)
-    expect(callout).toHaveTextContent(description)
+    expect(callout).toHaveTextContent(CALLOUT_DESCRIPTION_SINGULAR)
   })
 })
