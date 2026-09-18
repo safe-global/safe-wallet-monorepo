@@ -1,6 +1,7 @@
 import {
   ARBITRATION_POLL_MS,
   ARBITRATION_WINDOW_MS,
+  ATTESTATION_GRACE_BLOCKS,
   LATE_WINDOW_BLOCKS,
   PLAIN_DEADLINE_BLOCKS,
   POLL_INTERVAL_FAST_MS,
@@ -41,10 +42,13 @@ type PollingInput = {
 /**
  * How often to re-poll a check, in ms; `0` = stop (RTK Query's convention).
  * Stops on a rejection; otherwise fast (6s) up to the effective deadline
- * (on-chain, or {@link PLAIN_DEADLINE_BLOCKS} past the first event), slow (30s)
- * through the ~1h late window, then stops. UNAVAILABLE polls slowly inside
- * {@link UNAVAILABLE_GRACE_MS} of submission and BENIGN inside
- * {@link ARBITRATION_WINDOW_MS} of the attestation, then both stop.
+ * (on-chain, or {@link PLAIN_DEADLINE_BLOCKS} past the first event) plus
+ * {@link ATTESTATION_GRACE_BLOCKS}, slow (30s) through the ~1h late window,
+ * then stops. The attestation lands past the deadline by design, so the fast
+ * cadence holds through the allowance instead of a slow poll delaying the
+ * BENIGN flip. UNAVAILABLE polls slowly inside {@link UNAVAILABLE_GRACE_MS} of
+ * submission and BENIGN inside {@link ARBITRATION_WINDOW_MS} of the
+ * attestation, then both stop.
  */
 export const computePollingInterval = ({
   status,
@@ -92,7 +96,9 @@ export const computePollingInterval = ({
         ? BigInt(firstEventBlock) + BigInt(PLAIN_DEADLINE_BLOCKS)
         : null
 
-  if (deadline === null || head === null || head <= deadline) return POLL_INTERVAL_FAST_MS
+  if (deadline === null || head === null || head <= deadline + BigInt(ATTESTATION_GRACE_BLOCKS)) {
+    return POLL_INTERVAL_FAST_MS
+  }
   if (head <= deadline + BigInt(LATE_WINDOW_BLOCKS)) return POLL_INTERVAL_LATE_MS
   return 0
 }
