@@ -114,6 +114,12 @@ describe('hasAllNames', () => {
     expect(hasAllNames(undefined, items)).toBe(false)
   })
 
+  it('rejects a name the workspace address book would reject', () => {
+    expect(hasAllNames({ [ADDRESS_A.toLowerCase()]: 'Op' }, items)).toBe(false)
+    expect(hasAllNames({ [ADDRESS_A.toLowerCase()]: 'Treasury <script>' }, items)).toBe(false)
+    expect(hasAllNames({ [ADDRESS_A.toLowerCase()]: 'x'.repeat(51) }, items)).toBe(false)
+  })
+
   it('is true for an empty list', () => {
     expect(hasAllNames({}, [])).toBe(true)
   })

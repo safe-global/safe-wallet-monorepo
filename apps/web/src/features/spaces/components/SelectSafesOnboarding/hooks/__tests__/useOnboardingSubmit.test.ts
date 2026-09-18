@@ -69,6 +69,7 @@ const mockUpsertWorkspaceNames = jest.fn().mockResolvedValue({})
 jest.mock('@/features/spaces/hooks/useGetSpaceAddressBook', () => ({
   __esModule: true,
   default: () => mockSpaceAddressBook,
+  useSpaceAddressBookState: () => ({ items: mockSpaceAddressBook, isLoading: false }),
 }))
 
 jest.mock('@/features/spaces/hooks/useUpsertWorkspaceSafeName', () => ({
@@ -672,6 +673,38 @@ describe('useOnboardingSubmit — naming step', () => {
 
     expect(result.current.error).toBe('Forbidden')
     expect(onSuccess).not.toHaveBeenCalled()
+  })
+
+  it('does not write a name for a Safe that was deselected after the naming step', async () => {
+    const NAMED = '0xBbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbB'
+    mockSpaceAddressBook = [{ address: NAMED, name: 'Already named', chainIds: ['1'] }]
+    const { result } = renderHook(() =>
+      useOnboardingSubmit('42', onSuccess, [buildSafeItem('1', ADDRESS), buildSafeItem('1', NAMED)]),
+    )
+
+    act(() => {
+      result.current.formMethods.setValue('selectedSafes', { [`1:${ADDRESS}`]: true })
+    })
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+    act(() => {
+      result.current.formMethods.setValue(`names.${ADDRESS.toLowerCase()}`, 'Treasury')
+      result.current.showSelectStep()
+    })
+
+    act(() => {
+      result.current.formMethods.setValue('selectedSafes', { [`1:${ADDRESS}`]: false, [`1:${NAMED}`]: true })
+    })
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(mockAddSafesToSpace).toHaveBeenCalledWith({
+      spaceId: '42',
+      createSpaceSafesDto: { safes: [{ chainId: '1', address: NAMED }] },
+    })
+    expect(mockUpsertWorkspaceNames).toHaveBeenCalledWith([])
   })
 
   it('returns to the selection step on demand', async () => {

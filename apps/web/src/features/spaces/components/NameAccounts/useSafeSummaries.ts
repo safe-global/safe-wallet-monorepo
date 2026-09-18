@@ -28,12 +28,12 @@ export const useSafeSummaries = (items: AllSafeItems): Map<string, SafeSummary> 
     () => flattenSafeItems(items).filter((safe) => !undeployedSafes[safe.chainId]?.[safe.address]),
     [items, undeployedSafes],
   )
-  const { data: overviews } = useGetMultipleSafeOverviewsQuery(
+  const { data: overviews, isError } = useGetMultipleSafeOverviewsQuery(
     deployedSafes.length > 0 ? { currency, walletAddress, safes: deployedSafes } : skipToken,
   )
 
   return useMemo(() => {
-    const loaded = overviews !== undefined || deployedSafes.length === 0
+    const loaded = overviews !== undefined || isError || deployedSafes.length === 0
     const summaries = new Map<string, SafeSummary>()
 
     for (const item of items) {
@@ -56,5 +56,5 @@ export const useSafeSummaries = (items: AllSafeItems): Map<string, SafeSummary> 
     }
 
     return summaries
-  }, [items, overviews, undeployedSafes, deployedSafes.length])
+  }, [items, overviews, isError, undeployedSafes, deployedSafes.length])
 }

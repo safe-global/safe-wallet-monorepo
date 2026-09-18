@@ -20,7 +20,7 @@ import { useSimilarityClusters } from '@/features/address-poisoning'
 import {
   getChainIdsParam,
   useCurrentSpaceId,
-  useGetSpaceAddressBook,
+  useSpaceAddressBookState,
   useIsAdmin,
   useSpaceSafes,
   useUpsertWorkspaceSafeNames,
@@ -118,7 +118,7 @@ const AddAccounts = ({
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
   const [removeSafesFromSpace] = useSpaceSafesDeleteV1Mutation()
   const upsertWorkspaceNames = useUpsertWorkspaceSafeNames()
-  const spaceAddressBook = useGetSpaceAddressBook()
+  const { items: spaceAddressBook, isLoading: isAddressBookLoading } = useSpaceAddressBookState()
   const spaceId = useCurrentSpaceId()
   const trustedModal = useTrustedSafesModal()
 
@@ -242,18 +242,19 @@ const AddAccounts = ({
       address: safe.address,
     }))
 
+    const safesToWrite = view === 'select' ? getSafesToName(safesToAdd, trustedSafes, spaceAddressBook) : safesToName
+
     if (view === 'select') {
-      const unnamed = getSafesToName(safesToAdd, trustedSafes, spaceAddressBook)
-      if (unnamed.length > 0) {
+      if (safesToWrite.length > 0) {
         trackEvent(SPACE_EVENTS.NAME_ACCOUNTS_STEP, {
-          [MixpanelEventParams.ACCOUNT_COUNT]: unnamed.length,
+          [MixpanelEventParams.ACCOUNT_COUNT]: safesToWrite.length,
           [MixpanelEventParams.SOURCE]: SPACE_LABELS.add_accounts_modal,
         })
-        setSafesToName(unnamed)
+        setSafesToName(safesToWrite)
         setView('name')
         return
       }
-    } else if (!hasAllNames(data.names, safesToName)) {
+    } else if (!hasAllNames(data.names, safesToWrite)) {
       return
     }
 
@@ -294,7 +295,7 @@ const AddAccounts = ({
           )
         })
 
-        const namesResult = await upsertWorkspaceNames(buildWorkspaceSafeNames(data.names, safesToName))
+        const namesResult = await upsertWorkspaceNames(buildWorkspaceSafeNames(data.names, safesToWrite))
         if (namesResult.error) {
           setError(namesResult.error)
           return
@@ -603,7 +604,7 @@ const AddAccounts = ({
                       data-testid="add-accounts-button"
                       type="submit"
                       size="lg"
-                      disabled={!isFormDirty || !namesComplete || isSubmitting}
+                      disabled={!isFormDirty || !namesComplete || isAddressBookLoading || isSubmitting}
                       className="flex-1"
                     >
                       {isSubmitting ? (

@@ -46,8 +46,17 @@ const SelectSafesOnboarding = (): ReactElement => {
     hasNoSafes,
   } = useOnboardingSafes()
   const allSafes = useMemo<AllSafeItems>(() => [...trustedSafes, ...ownedSafes], [trustedSafes, ownedSafes])
-  const { formMethods, onSubmit, selectedSafesLength, error, isSubmitting, step, safesToName, showSelectStep } =
-    useOnboardingSubmit(spaceId, redirectToNextStep, allSafes)
+  const {
+    formMethods,
+    onSubmit,
+    selectedSafesLength,
+    error,
+    isSubmitting,
+    isAddressBookLoading,
+    step,
+    safesToName,
+    showSelectStep,
+  } = useOnboardingSubmit(spaceId, redirectToNextStep, allSafes)
   const isNameStep = step === 'name'
 
   const { control, setValue } = formMethods
@@ -177,7 +186,10 @@ const SelectSafesOnboarding = (): ReactElement => {
         continueType="submit"
         continueForm={FORM_ID}
         continueDisabled={
-          selectedSafesLength === 0 || isSubmitting || (isNameStep && !hasAllNames(typedNames, safesToName))
+          selectedSafesLength === 0 ||
+          isSubmitting ||
+          isAddressBookLoading ||
+          (isNameStep && !hasAllNames(typedNames, safesToName))
         }
         continueLoading={isSubmitting}
         continueTestId="select-safes-continue-button"

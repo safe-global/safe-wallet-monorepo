@@ -9,15 +9,18 @@ import { SPACE_REFRESH_OPTIONS } from './refreshOptions'
 
 const EMPTY_ADDRESS_BOOK: SpaceAddressBookItemDto[] = []
 
-const useGetSpaceAddressBook = (): SpaceAddressBookItemDto[] => {
+/** The workspace address book, with its loading state, so an empty book is distinguishable from an unloaded one. */
+export const useSpaceAddressBookState = (): { items: SpaceAddressBookItemDto[]; isLoading: boolean } => {
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { currentData: addressBook } = useAddressBooksGetAddressBookItemsV1Query(
+  const { currentData: addressBook, isLoading } = useAddressBooksGetAddressBookItemsV1Query(
     { spaceId: spaceId ?? '' },
     { skip: !isUserSignedIn || !spaceId, ...SPACE_REFRESH_OPTIONS },
   )
 
-  return addressBook?.data ?? EMPTY_ADDRESS_BOOK
+  return { items: addressBook?.data ?? EMPTY_ADDRESS_BOOK, isLoading }
 }
+
+const useGetSpaceAddressBook = (): SpaceAddressBookItemDto[] => useSpaceAddressBookState().items
 
 export default useGetSpaceAddressBook

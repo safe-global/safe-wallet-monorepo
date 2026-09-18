@@ -1,6 +1,5 @@
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { sanitizeName } from '@safe-global/utils/validation/names'
 import {
   _getMultiChainAccounts,
   _getSingleChainAccounts,
@@ -10,6 +9,7 @@ import {
   type SafeItem,
 } from '@/hooks/safes'
 import type { WorkspaceSafeName } from '../../hooks/useUpsertWorkspaceSafeName'
+import { validateContactName } from '../SpaceAddressBook/utils'
 
 type SafeRef = { chainId: string; address: string }
 
@@ -61,6 +61,9 @@ export const buildWorkspaceSafeNames = (
     chainIds: isMultiChainSafeItem(item) ? item.safes.map((safe) => safe.chainId) : [item.chainId],
   }))
 
-/** Whether every Safe in the naming step has a non-empty name — gates the submit button. */
+/**
+ * Whether every Safe in the naming step has a name the workspace address book accepts — gates the
+ * submit button. A prefilled name never mounts its input, so this is the only validation it gets.
+ */
 export const hasAllNames = (names: Record<string, string> | undefined, safesToName: AllSafeItems): boolean =>
-  safesToName.every((item) => sanitizeName(names?.[item.address.toLowerCase()] ?? '') !== '')
+  safesToName.every((item) => validateContactName(names?.[item.address.toLowerCase()] ?? '') === undefined)

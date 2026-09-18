@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import get from 'lodash/get'
-import { useFormContext, useWatch, type FieldError } from 'react-hook-form'
+import { useFormContext, useWatch } from 'react-hook-form'
 import { ADDRESS_BOOK_NAME_MAX_LENGTH, NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 import { Typography } from '@/components/ui/typography'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -14,6 +14,7 @@ import { NetworkLogosPill } from '@/features/multichain'
 import { isMultiChainSafeItem, type AllSafeItems } from '@/hooks/safes'
 import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
 import { nameFieldKey } from './utils'
+import { validateContactName } from '../SpaceAddressBook/utils'
 import { cn } from '@/utils/cn'
 import { useSafeSummaries, type SafeSummary } from './useSafeSummaries'
 
@@ -32,10 +33,10 @@ const NameAccountCell = ({ item }: { item: Item }) => {
   const value = sanitizeName(useWatch({ name: key }) ?? '')
   const [focused, setFocused] = useState(false)
   const isTouched = Boolean(get(formState.touchedFields, key))
-  const errorMessage = (get(formState.errors, key) as FieldError | undefined)?.message
-  // Show error only while unfocused: the message takes the address line's place, so typing keeps the address visible.
-  const error = !focused && isTouched ? (value === '' ? 'Name is required' : errorMessage) : undefined
-  const showInput = focused || value === '' || Boolean(errorMessage)
+  const nameError = validateContactName(value)
+  // Shown only while unfocused: the message takes the address line's place, so typing keeps the address visible.
+  const error = focused ? undefined : value === '' ? (isTouched ? 'Name is required' : undefined) : nameError
+  const showInput = focused || Boolean(nameError)
   const startEditing = () => setFocused(true)
 
   return (

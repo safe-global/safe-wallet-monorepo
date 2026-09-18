@@ -20,7 +20,7 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { addOrUpdateSafe, selectAllAddedSafes } from '@/store/addedSafesSlice'
 import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { useSpaceSafes } from '../../../hooks/useSpaceSafes'
-import useGetSpaceAddressBook from '../../../hooks/useGetSpaceAddressBook'
+import { useSpaceAddressBookState } from '../../../hooks/useGetSpaceAddressBook'
 import { useUpsertWorkspaceSafeNames, type WorkspaceSafeName } from '../../../hooks/useUpsertWorkspaceSafeName'
 import { buildWorkspaceSafeNames, getSafesToName, hasAllNames } from '../../NameAccounts/utils'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
@@ -68,7 +68,7 @@ const useOnboardingSubmit = (
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
   const [removeSafesFromSpace] = useSpaceSafesDeleteV1Mutation()
   const upsertWorkspaceNames = useUpsertWorkspaceSafeNames()
-  const spaceAddressBook = useGetSpaceAddressBook()
+  const { items: spaceAddressBook, isLoading: isAddressBookLoading } = useSpaceAddressBookState()
 
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -233,18 +233,19 @@ const useOnboardingSubmit = (
 
     const safesToAdd = getSafesToAdd(data.selectedSafes)
 
+    const safesToWrite = step === 'select' ? getSafesToName(safesToAdd, allSafes, spaceAddressBook) : safesToName
+
     if (step === 'select') {
-      const unnamed = getSafesToName(safesToAdd, allSafes, spaceAddressBook)
-      if (unnamed.length > 0) {
+      if (safesToWrite.length > 0) {
         trackEvent(SPACE_EVENTS.NAME_ACCOUNTS_STEP, {
-          [MixpanelEventParams.ACCOUNT_COUNT]: unnamed.length,
+          [MixpanelEventParams.ACCOUNT_COUNT]: safesToWrite.length,
           [MixpanelEventParams.SOURCE]: SPACE_LABELS.onboarding,
         })
-        setSafesToName(unnamed)
+        setSafesToName(safesToWrite)
         setStep('name')
         return
       }
-    } else if (!hasAllNames(data.names, safesToName)) {
+    } else if (!hasAllNames(data.names, safesToWrite)) {
       return
     }
 
@@ -263,7 +264,7 @@ const useOnboardingSubmit = (
         safesToAdd,
         data.selectedSafes,
         spaceId,
-        buildWorkspaceSafeNames(data.names, safesToName),
+        buildWorkspaceSafeNames(data.names, safesToWrite),
       )
 
       onSuccess()
@@ -280,6 +281,7 @@ const useOnboardingSubmit = (
     selectedSafesLength,
     error,
     isSubmitting,
+    isAddressBookLoading,
     step,
     safesToName,
     showSelectStep: () => setStep('select'),

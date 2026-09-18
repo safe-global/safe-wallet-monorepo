@@ -90,6 +90,14 @@ describe('NameAccountsFields', () => {
     expect(screen.getByText(ADDRESS_A.slice(-6))).toBeInTheDocument()
   })
 
+  it('opens the editor and shows the rule for a prefilled name the address book would reject', () => {
+    render(<Harness items={[safeItem(ADDRESS_A, 'Op')]} />)
+
+    expect(screen.getByTestId('account-name-input')).toHaveValue('Op')
+    expect(screen.queryByTestId('account-name-text')).not.toBeInTheDocument()
+    expect(screen.getByRole('alert')).toHaveTextContent('Names must be at least 3 character(s) long')
+  })
+
   it('shows the shared name rules in place of the address', async () => {
     render(<Harness items={[safeItem(ADDRESS_A)]} />)
     const input = screen.getByTestId('account-name-input')

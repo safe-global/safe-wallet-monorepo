@@ -26,8 +26,8 @@ const overview = (chainId: string, threshold: number, owners: number, fiatTotal:
     fiatTotal,
   }) as SafeOverview
 
-const mockQuery = (data: SafeOverview[] | undefined) =>
-  jest.spyOn(gatewayApi, 'useGetMultipleSafeOverviewsQuery').mockReturnValue({ data } as never)
+const mockQuery = (data: SafeOverview[] | undefined, isError = false) =>
+  jest.spyOn(gatewayApi, 'useGetMultipleSafeOverviewsQuery').mockReturnValue({ data, isError } as never)
 
 describe('useSafeSummaries', () => {
   beforeEach(() => jest.restoreAllMocks())
@@ -37,6 +37,19 @@ describe('useSafeSummaries', () => {
     const { result } = renderHook(() => useSafeSummaries([safeItem('1')]))
 
     expect(result.current.get(ADDRESS.toLowerCase())).toEqual({ thresholdMixed: false, loaded: false })
+  })
+
+  it('settles the row instead of loading forever when the overview query fails', () => {
+    mockQuery(undefined, true)
+    const { result } = renderHook(() => useSafeSummaries([safeItem('1')]))
+
+    expect(result.current.get(ADDRESS.toLowerCase())).toEqual({
+      threshold: undefined,
+      owners: undefined,
+      thresholdMixed: true,
+      balance: undefined,
+      loaded: true,
+    })
   })
 
   it('reads threshold, owners and balance from a single Safe overview', () => {

@@ -89,7 +89,7 @@ jest.mock('@/features/spaces', () => ({
   useIsAdmin: () => mockIsAdmin,
   useSpaceSafes: () => ({ allSafes: mockSpaceSafes, isLoading: mockSpaceSafesLoading }),
   useIsQualifiedSafe: () => false,
-  useGetSpaceAddressBook: () => mockSpaceAddressBook,
+  useSpaceAddressBookState: () => ({ items: mockSpaceAddressBook, isLoading: false }),
   useUpsertWorkspaceSafeNames: () => mockUpsertWorkspaceNames,
   getChainIdsParam: () => '',
 }))
