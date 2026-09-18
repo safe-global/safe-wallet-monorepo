@@ -22,14 +22,6 @@ let mockTrimState: Record<string, unknown> = {}
 jest.mock('../../../hooks/billing/useSeatTrim', () => ({
   useSeatTrim: () => ({ trim: mockTrim, isTrimming: false, error: undefined, ...mockTrimState }),
 }))
-const mockShowNotification = jest.fn()
-jest.mock('@/store/notificationsSlice', () => ({
-  ...jest.requireActual('@/store/notificationsSlice'),
-  showNotification: (...args: unknown[]) => {
-    mockShowNotification(...args)
-    return { type: 'test/notification' }
-  },
-}))
 
 const pick: PlanPick = {
   tier: {
@@ -75,14 +67,22 @@ describe('ChangePlanDialog', () => {
   })
 
   it('previews the picked price on open and shows a skeleton until it arrives', () => {
-    render(<ChangePlanDialog spaceId="space-1" pick={pick} currentPlan={currentPlan} onClose={jest.fn()} />)
+    render(
+      <ChangePlanDialog
+        spaceId="space-1"
+        pick={pick}
+        currentPlan={currentPlan}
+        onClose={jest.fn()}
+        onChanged={jest.fn()}
+      />,
+    )
 
     expect(mockPreviewChange).toHaveBeenCalledWith('price_starter')
     expect(screen.getByTestId('change-plan-skeleton')).toBeInTheDocument()
     expect(screen.getByTestId('change-plan-confirm')).toBeDisabled()
   })
 
-  it('renders the prorated breakdown and applies the change on confirm', async () => {
+  it('renders the prorated breakdown and hands over once the change is applied', async () => {
     mockState = { preview }
     mockChangePlan.mockResolvedValue(true)
     const onClose = jest.fn()
@@ -110,12 +110,9 @@ describe('ChangePlanDialog', () => {
 
     fireEvent.click(screen.getByTestId('change-plan-confirm'))
 
-    await waitFor(() => expect(onClose).toHaveBeenCalled())
-    expect(onChanged).toHaveBeenCalled()
+    await waitFor(() => expect(onChanged).toHaveBeenCalled())
+    expect(onClose).not.toHaveBeenCalled()
     expect(mockChangePlan).toHaveBeenCalledWith('price_starter', 'pl_starter')
-    expect(mockShowNotification).toHaveBeenCalledWith(
-      expect.objectContaining({ message: 'Plan downgraded to Starter.', variant: 'success' }),
-    )
   })
 
   it('removes the Safes left out before the change and says so in the summary', async () => {
@@ -129,6 +126,7 @@ describe('ChangePlanDialog', () => {
         currentPlan={currentPlan}
         removed={removed}
         onClose={jest.fn()}
+        onChanged={jest.fn()}
       />,
     )
 
@@ -155,6 +153,7 @@ describe('ChangePlanDialog', () => {
         currentPlan={currentPlan}
         removed={[{ chainId: '1', address: '0xB' }]}
         onClose={onClose}
+        onChanged={jest.fn()}
       />,
     )
 
@@ -171,7 +170,15 @@ describe('ChangePlanDialog', () => {
     mockState = { preview, changeError: { status: 409, data: { message: 'The workspace is already on this plan' } } }
     mockChangePlan.mockResolvedValue(false)
     const onClose = jest.fn()
-    render(<ChangePlanDialog spaceId="space-1" pick={pick} currentPlan={currentPlan} onClose={onClose} />)
+    render(
+      <ChangePlanDialog
+        spaceId="space-1"
+        pick={pick}
+        currentPlan={currentPlan}
+        onClose={onClose}
+        onChanged={jest.fn()}
+      />,
+    )
 
     fireEvent.click(screen.getByTestId('change-plan-confirm'))
 
@@ -188,6 +195,7 @@ describe('ChangePlanDialog', () => {
         pick={pick}
         currentPlan={{ ...currentPlan, price: 49 }}
         onClose={jest.fn()}
+        onChanged={jest.fn()}
       />,
     )
 
@@ -203,6 +211,7 @@ describe('ChangePlanDialog', () => {
         pick={pick}
         currentPlan={{ ...currentPlan, isTrialing: true }}
         onClose={jest.fn()}
+        onChanged={jest.fn()}
       />,
     )
 
@@ -219,7 +228,15 @@ describe('ChangePlanDialog', () => {
 
   it('surfaces a preview error instead of the breakdown', () => {
     mockState = { previewError: { status: 403, data: { message: 'This plan is not available for this workspace' } } }
-    render(<ChangePlanDialog spaceId="space-1" pick={pick} currentPlan={currentPlan} onClose={jest.fn()} />)
+    render(
+      <ChangePlanDialog
+        spaceId="space-1"
+        pick={pick}
+        currentPlan={currentPlan}
+        onClose={jest.fn()}
+        onChanged={jest.fn()}
+      />,
+    )
 
     expect(screen.getByText('This plan is not available for this workspace')).toBeInTheDocument()
     expect(screen.queryByTestId('change-plan-skeleton')).not.toBeInTheDocument()
@@ -228,7 +245,15 @@ describe('ChangePlanDialog', () => {
 
   it('explains the step-up redirect instead of reporting an error when elevation is required', () => {
     mockState = { preview, changeError: { status: 403, data: { message: 'elevation_required' } } }
-    render(<ChangePlanDialog spaceId="space-1" pick={pick} currentPlan={currentPlan} onClose={jest.fn()} />)
+    render(
+      <ChangePlanDialog
+        spaceId="space-1"
+        pick={pick}
+        currentPlan={currentPlan}
+        onClose={jest.fn()}
+        onChanged={jest.fn()}
+      />,
+    )
 
     expect(screen.getByText(/Verify your identity to confirm the plan change/)).toBeInTheDocument()
     expect(screen.queryByText('elevation_required')).not.toBeInTheDocument()

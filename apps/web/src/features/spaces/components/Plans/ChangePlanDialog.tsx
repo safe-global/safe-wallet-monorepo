@@ -11,8 +11,6 @@ import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/aler
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
 import DialogActions from '@/components/common/DialogActions'
-import { useAppDispatch } from '@/store'
-import { showNotification } from '@/store/notificationsSlice'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { isElevationRequiredError } from '@/features/oidc-auth'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
@@ -60,11 +58,11 @@ export default function ChangePlanDialog({
   currentPlan: CurrentPlan
   /** Safes the accounts step left out; they leave the Workspace right before the plan changes. */
   removed?: SafeRef[]
+  /** Dismissed without changing anything. */
   onClose: () => void
-  /** Fires only after the plan changed, before `onClose`, for a parent that should close along with the dialog. */
-  onChanged?: () => void
+  /** The plan changed; the parent takes it from here (this dialog does not close itself). */
+  onChanged: () => void
 }) {
-  const dispatch = useAppDispatch()
   const { previewChange, preview, isPreviewing, previewError, changePlan, isChanging, changeError } =
     useChangePlan(spaceId)
   const { trim, isTrimming, error: trimError } = useSeatTrim(spaceId)
@@ -88,17 +86,7 @@ export default function ChangePlanDialog({
   const onConfirm = async () => {
     if (!priceId || !paymentLinkId) return
     if (!(await trim(removed))) return
-    const ok = await changePlan(priceId, paymentLinkId)
-    if (!ok) return
-    dispatch(
-      showNotification({
-        message: `Plan ${direction === 'change' ? 'changed' : `${direction}d`} to ${pick.tier.name}.`,
-        variant: 'success',
-        groupKey: 'plan-updated',
-      }),
-    )
-    onChanged?.()
-    onClose()
+    if (await changePlan(priceId, paymentLinkId)) onChanged()
   }
 
   const error = previewError ?? (isVerifying ? undefined : changeError)

@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
-import ChangePlanFlow, { continueLabelFor } from '../ChangePlanFlow'
+import ChangePlanFlow, { continueLabelFor, trialSwitchBody } from '../ChangePlanFlow'
 import type { CurrentPlan, PlanPick } from '../types'
 
 let mockSafeCount = 3
@@ -34,9 +34,45 @@ jest.mock('../SelectAccountsStep', () => ({
 
 jest.mock('../ChangePlanDialog', () => ({
   __esModule: true,
-  default: ({ removed }: { removed?: { chainId: string; address: string }[] }) => (
-    <div data-testid="change-plan-dialog" data-removed={JSON.stringify(removed ?? null)} />
+  default: ({ removed, onChanged }: { removed?: { chainId: string; address: string }[]; onChanged: () => void }) => (
+    <div data-testid="change-plan-dialog" data-removed={JSON.stringify(removed ?? null)}>
+      <button onClick={onChanged}>confirm-change</button>
+    </div>
   ),
+}))
+
+jest.mock('@/features/__core__', () => ({
+  useLoadFeature: () => ({
+    SafeProNoticeModal: ({
+      title,
+      body,
+      actionLabel,
+      onAction,
+    }: {
+      title: string
+      body: string
+      actionLabel: string
+      onAction: () => void
+    }) => (
+      <div data-testid="notice-modal">
+        <h2>{title}</h2>
+        <p>{body}</p>
+        <button onClick={onAction}>{actionLabel}</button>
+      </div>
+    ),
+    SafeProSubscriptionActivatedModal: ({
+      planName,
+      onOpenChange,
+    }: {
+      planName: string
+      onOpenChange: (open: boolean) => void
+    }) => (
+      <div data-testid="activated-modal" data-plan={planName}>
+        <button onClick={() => onOpenChange(false)}>Get started</button>
+      </div>
+    ),
+  }),
+  createFeatureHandle: () => ({}),
 }))
 
 const pick = (seats: number, price: number): PlanPick => ({
@@ -94,6 +130,61 @@ describe('ChangePlanFlow', () => {
 
     expect(screen.queryByTestId('accounts-step')).not.toBeInTheDocument()
     expect(screen.getByTestId('change-plan-dialog')).toHaveAttribute('data-removed', 'null')
+  })
+
+  it('confirms a switch made during the trial with when billing starts, then closes', () => {
+    const onClose = jest.fn()
+    const onChanged = jest.fn()
+    render(
+      <ChangePlanFlow
+        spaceId="space-1"
+        pick={pick(20, 1669)}
+        currentPlan={currentPlan}
+        onClose={onClose}
+        onChanged={onChanged}
+      />,
+    )
+
+    fireEvent.click(screen.getByText('confirm-change'))
+
+    expect(onChanged).toHaveBeenCalled()
+    expect(onClose).not.toHaveBeenCalled()
+    expect(screen.queryByTestId('change-plan-dialog')).not.toBeInTheDocument()
+    expect(screen.getByTestId('notice-modal')).toHaveTextContent("You're now on Starter")
+    expect(screen.getByTestId('notice-modal')).toHaveTextContent(
+      "Your free trial continues until Dec 6, 2026. From then on you'll pay €1,669/mo for Starter.",
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Get started' }))
+    expect(onClose).toHaveBeenCalled()
+  })
+
+  it('celebrates a paid plan change with the activated modal', () => {
+    const onClose = jest.fn()
+    render(
+      <ChangePlanFlow
+        spaceId="space-1"
+        pick={pick(20, 1669)}
+        currentPlan={{ ...currentPlan, isTrialing: false }}
+        onClose={onClose}
+      />,
+    )
+
+    fireEvent.click(screen.getByText('confirm-change'))
+
+    expect(screen.getByTestId('activated-modal')).toHaveAttribute('data-plan', 'Starter')
+    fireEvent.click(screen.getByRole('button', { name: 'Get started' }))
+    expect(onClose).toHaveBeenCalled()
+  })
+
+  it('words the trial switch without an end date or with a custom price', () => {
+    expect(trialSwitchBody({ ...currentPlan, periodEndsAt: null }, pick(2, 189))).toBe(
+      "Your free trial continues. From then on you'll pay €189/mo for Starter.",
+    )
+    const custom = pick(2, 189)
+    expect(trialSwitchBody(currentPlan, { ...custom, option: { ...custom.option, price: null } })).toBe(
+      "Your free trial continues until Dec 6, 2026. From then on you'll pay a custom price for Starter.",
+    )
   })
 
   it('words the step button after the direction of the change', () => {

@@ -46,6 +46,7 @@ const TrialEndingChooser = ({
   const { subscription } = useSpacePlan(spaceId)
   const { openPortal, isRedirecting } = useBillingPortal(spaceId)
   const [pick, setPick] = useState<PlanPick>()
+  const [isChanged, setIsChanged] = useState(false)
   const tiers = useMemo(
     () =>
       buildPlanTiers(paidPlans, subscription ? { subscription, seatsQuota } : undefined).filter(
@@ -57,7 +58,7 @@ const TrialEndingChooser = ({
 
   return (
     <>
-      <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <Dialog open={!isChanged} onOpenChange={(open) => !open && onClose()}>
         <DialogContent size="md" surface="card" padding="sm">
           <div className="flex flex-col gap-6 pt-5">
             <div className="flex flex-col gap-1">
@@ -103,8 +104,8 @@ const TrialEndingChooser = ({
           spaceId={spaceId}
           pick={pick}
           currentPlan={currentPlan}
-          onClose={() => setPick(undefined)}
-          onChanged={onClose}
+          onClose={() => (isChanged ? onClose() : setPick(undefined))}
+          onChanged={() => setIsChanged(true)}
         />
       )}
     </>

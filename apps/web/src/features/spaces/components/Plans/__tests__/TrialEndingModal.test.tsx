@@ -68,14 +68,8 @@ jest.mock('../ChangePlanFlow', () => ({
     onChanged?: () => void
   }) => (
     <div data-testid="change-plan-dialog" data-to={pick.tier.name} data-trial={String(currentPlan.isTrialing)}>
-      <button
-        onClick={() => {
-          onChanged?.()
-          onClose()
-        }}
-      >
-        plan-changed
-      </button>
+      <button onClick={onChanged}>plan-changed</button>
+      <button onClick={onClose}>flow-closed</button>
     </div>
   ),
 }))
@@ -194,8 +188,13 @@ describe('TrialEndingModal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Switch to Starter' }))
     fireEvent.click(screen.getByText('plan-changed'))
 
-    expect(screen.queryByTestId('change-plan-dialog')).not.toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: 'Your free trial will end in 7 days' })).not.toBeInTheDocument()
+    expect(screen.getByTestId('change-plan-dialog')).toBeInTheDocument()
+    expect(storage[`safeProTrialReminderSeen:${SPACE_ID}`]).toBeUndefined()
+
+    fireEvent.click(screen.getByText('flow-closed'))
+
+    expect(screen.queryByTestId('change-plan-dialog')).not.toBeInTheDocument()
     expect(storage[`safeProTrialReminderSeen:${SPACE_ID}`]).toBe('7')
   })
 
