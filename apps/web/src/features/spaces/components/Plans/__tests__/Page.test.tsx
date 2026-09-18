@@ -88,6 +88,7 @@ const onPlan = (name: string, price: number, status: 'active' | 'trialing') => {
   mockUseSpacePlan.mockReturnValue({
     plan: { name, status, periodEndsAt: '2026-12-06T00:00:00Z', daysLeft: 20 },
     seats: { used: 6, quota: 20 },
+    sponsoredTxs: { used: 0, quota: 10 },
     subscription: subscription(name, price, status),
     status,
     isTrialing: status === 'trialing',
@@ -151,6 +152,7 @@ describe('SpacePlansPage', () => {
     mockUseSpacePlan.mockReturnValue({
       plan: null,
       seats: null,
+      sponsoredTxs: null,
       subscription: undefined,
       status: 'none',
       isTrialing: false,

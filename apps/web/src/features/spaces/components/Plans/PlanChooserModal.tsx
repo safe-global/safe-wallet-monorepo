@@ -45,21 +45,19 @@ export const chooserCopy = (
 }
 
 /**
- * Blocking plan picker for a Workspace whose trial or plan ended; on the Plans page it can be dismissed. Before Stripe
- * the admin confirms which Safes the picked plan covers (the Workspace already holds some).
+ * Blocking plan picker for a Workspace whose trial or plan ended. Before Stripe the admin confirms which Safes the
+ * picked plan covers when the Workspace holds more than it allows.
  */
 export default function PlanChooserModal({
   spaceId,
   reason,
   endedAt,
   onBack,
-  onDismiss,
 }: {
   spaceId: string
   reason: Exclude<WorkspaceLockReason, 'trial-offered'>
   endedAt: number | null
   onBack: () => void
-  onDismiss?: () => void
 }) {
   const { paidPlans, isLoading } = useSpaceOffers(spaceId)
   const tiers = useMemo(() => buildPlanTiers(paidPlans).filter((tier) => tier.id !== ENTERPRISE_TIER.id), [paidPlans])
@@ -75,11 +73,9 @@ export default function PlanChooserModal({
     else void checkout(picked.option.paymentLinkId)
   }
 
-  const close = () => (trimming ? setPick(undefined) : onDismiss?.())
-
   return (
-    <Dialog open onOpenChange={(open) => !open && close()}>
-      <DialogContent size="md" surface="card" padding="sm" showCloseButton={Boolean(onDismiss) || Boolean(trimming)}>
+    <Dialog open onOpenChange={(open) => !open && trimming && setPick(undefined)}>
+      <DialogContent size="md" surface="card" padding="sm" showCloseButton={Boolean(trimming)}>
         <div className="flex flex-col gap-6 pt-5">
           {trimming ? (
             <SelectAccountsStep

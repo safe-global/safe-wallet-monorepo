@@ -44,10 +44,8 @@ jest.mock('../ClaimTrialModal', () => ({
 jest.mock('../PlanChooserModal', () => ({
   __esModule: true,
   ...jest.requireActual('../PlanChooserModal'),
-  default: ({ reason, endedAt, onDismiss }: { reason: string; endedAt: number | null; onDismiss?: () => void }) => (
-    <div data-testid="plan-chooser-modal" data-reason={reason} data-ended={endedAt ?? ''}>
-      {onDismiss && <button onClick={onDismiss}>dismiss</button>}
-    </div>
+  default: ({ reason, endedAt }: { reason: string; endedAt: number | null }) => (
+    <div data-testid="plan-chooser-modal" data-reason={reason} data-ended={endedAt ?? ''} />
   ),
 }))
 
@@ -101,19 +99,17 @@ describe('WorkspaceLockModal', () => {
     expect(mockPush).toHaveBeenCalledWith('/welcome/accounts')
   })
 
-  it('shows the plan picker to an admin whose trial ended, dismissible only on the Plans page', () => {
+  it('shows the plan picker to an admin whose trial ended, on the Plans page too', () => {
     mockUseWorkspaceLock.mockReturnValue(lock({ trialPeriodDays: null, reason: 'lapsed', endedAt: ENDED_AT }))
     const { unmount } = render(<WorkspaceLockModal spaceId={SPACE_ID} />)
 
     expect(screen.getByTestId('plan-chooser-modal')).toHaveAttribute('data-reason', 'lapsed')
     expect(screen.getByTestId('plan-chooser-modal')).toHaveAttribute('data-ended', String(ENDED_AT))
-    expect(screen.queryByText('dismiss')).not.toBeInTheDocument()
     unmount()
 
     mockPathname = '/spaces/plans'
     render(<WorkspaceLockModal spaceId={SPACE_ID} />)
-    fireEvent.click(screen.getByText('dismiss'))
-    expect(screen.queryByTestId('plan-chooser-modal')).not.toBeInTheDocument()
+    expect(screen.getByTestId('plan-chooser-modal')).toBeInTheDocument()
   })
 
   it('only explains the lock to a non-admin member', () => {

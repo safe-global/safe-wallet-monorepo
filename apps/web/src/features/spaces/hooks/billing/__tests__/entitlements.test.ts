@@ -1,5 +1,5 @@
 import type { EntitlementsResponse } from '@safe-global/store/gateway/AUTO_GENERATED/entitlements'
-import { getSeatsMeter } from '../entitlements'
+import { getSeatsMeter, getSponsoredTxsMeter } from '../entitlements'
 
 const response = (entitlements: EntitlementsResponse['entitlements']): EntitlementsResponse => ({
   plan: { id: 'plan', name: 'Business', cycleEndsAt: '2026-12-06T00:00:00Z' },
@@ -31,5 +31,22 @@ describe('getSeatsMeter', () => {
     expect(getSeatsMeter(undefined)).toBeNull()
     expect(getSeatsMeter(response([]))).toBeNull()
     expect(getSeatsMeter(response([{ feature: 'safe_seats', type: 'binary', enabled: true }]))).toBeNull()
+  })
+
+  it('reads the sponsored transactions meter from its own entitlement', () => {
+    const data = response([
+      { feature: 'safe_seats', type: 'metered', enabled: true, quota: 2, used: 2, resetsAt: null },
+      {
+        // The generated client still types `feature` as 'safe_seats' only; the CGW already serves this key.
+        feature: 'sponsored_transactions' as never,
+        type: 'metered',
+        enabled: true,
+        quota: 10,
+        used: 0,
+        resetsAt: '2026-10-17T15:52:37.000Z',
+      },
+    ])
+    expect(getSponsoredTxsMeter(data)).toEqual({ used: 0, quota: 10 })
+    expect(getSponsoredTxsMeter(response([]))).toBeNull()
   })
 })

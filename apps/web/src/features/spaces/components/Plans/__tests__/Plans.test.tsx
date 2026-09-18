@@ -213,6 +213,8 @@ describe('Plans', () => {
     )
 
     expect(screen.getByTestId('meter-exhausted')).toHaveTextContent('0 / 20')
+    // Only the dot flags the exhausted meter; the number keeps the regular colour, as designed.
+    expect(screen.getAllByTestId('meter-left')[0]).not.toHaveClass('text-destructive')
   })
 
   it('shows the locked state and sells an offered plan when the Workspace has none', () => {

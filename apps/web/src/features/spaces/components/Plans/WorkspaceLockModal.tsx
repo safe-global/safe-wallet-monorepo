@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useRouter } from 'next/router'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { AppRoutes } from '@/config/routes'
@@ -32,7 +31,7 @@ export const memberCopy = (
 
 /**
  * Mounted on every Workspace page: while the Workspace has no live plan it blocks the page behind the trial offer,
- * the plan picker or, for non-admins, an explanation. Only the Plans page lets an admin dismiss the picker.
+ * the plan picker or, for non-admins, an explanation. None of them can be dismissed.
  */
 export default function WorkspaceLockModal({ spaceId }: { spaceId: string }) {
   const router = useRouter()
@@ -41,14 +40,12 @@ export default function WorkspaceLockModal({ spaceId }: { spaceId: string }) {
   const isAdmin = useIsAdmin(spaceId)
   const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId }, { skip: !isLocked })
   const { SafeProNoticeModal } = useLoadFeature(SafeProFeature)
-  const [dismissed, setDismissed] = useState(false)
-  const canDismiss = router.pathname === AppRoutes.spaces.plans
   // Back from Stripe the subscription is still propagating: the checkout modals own the screen until it fails.
   const checkout = useCheckoutReturn(spaceId)
   const isConfirmingCheckout = checkout.isReturning && checkout.status !== 'error' && checkout.status !== 'timeout'
 
   // Without the membership the admin check cannot be trusted yet; a non-member never gets this far (AuthState).
-  if (!isLocked || !membership || isConfirmingCheckout || (dismissed && canDismiss)) return null
+  if (!isLocked || !membership || isConfirmingCheckout) return null
 
   const goBack = () => void router.push(AppRoutes.welcome.accounts)
 
@@ -59,13 +56,5 @@ export default function WorkspaceLockModal({ spaceId }: { spaceId: string }) {
 
   if (reason === 'trial-offered') return <ClaimTrialModal spaceId={spaceId} onBack={goBack} />
 
-  return (
-    <PlanChooserModal
-      spaceId={spaceId}
-      reason={reason}
-      endedAt={endedAt}
-      onBack={goBack}
-      onDismiss={canDismiss ? () => setDismissed(true) : undefined}
-    />
-  )
+  return <PlanChooserModal spaceId={spaceId} reason={reason} endedAt={endedAt} onBack={goBack} />
 }

@@ -8,7 +8,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Typography } from '@/components/ui/typography'
 import { formatDate } from '@safe-global/utils/utils/date'
 import { TRIAL_DISCLAIMER } from '@/features/safe-pro-announcement'
-import { cn } from '@/utils/cn'
 import { TRIAL_ENDING_SOON_DAYS, trialLabel } from '../../hooks/billing/subscription'
 import type { CurrentBadge } from './PlanCards'
 import type { Meter, PlanSummary } from './types'
@@ -64,7 +63,7 @@ const UsageMeter = ({
         </div>
         <Typography
           variant="paragraph-bold"
-          className={cn('flex items-center gap-1.5 whitespace-nowrap', isExhausted && 'text-destructive')}
+          className="flex items-center gap-1.5 whitespace-nowrap"
           data-testid={isExhausted ? 'meter-exhausted' : undefined}
         >
           {isExhausted && <span aria-hidden className="size-1.5 rounded-full bg-destructive" />}
@@ -74,7 +73,7 @@ const UsageMeter = ({
             'Unlimited'
           ) : (
             <>
-              {left}{' '}
+              <span data-testid="meter-left">{left}</span>{' '}
               <Typography variant="paragraph-small" color="muted">
                 / {meter.quota}
               </Typography>

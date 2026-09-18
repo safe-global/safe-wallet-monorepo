@@ -1,4 +1,4 @@
-import type { Meter, PlanTier } from './types'
+import type { PlanTier } from './types'
 
 // TODO(safe-pro): plan copy lives here until the catalog exposes features (Plan.features / product.marketingFeatures).
 export const PLAN_ORDER = ['Starter', 'Business', 'Enterprise']
@@ -41,6 +41,3 @@ export const ENTERPRISE_TIER: PlanTier = {
   options: [{ paymentLinkId: null, priceId: null, label: '20+ Safe accounts', price: null, originalPrice: null }],
   features: PLAN_FEATURES.Enterprise,
 }
-
-// TODO(safe-pro): no sponsored-transactions entitlement yet; placeholder until the CGW exposes it.
-export const SPONSORED_TXS_PLACEHOLDER: Meter = { used: 11, quota: 15 }

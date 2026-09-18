@@ -32,6 +32,7 @@ export const useSpacePlan = (spaceId?: string | null) => {
     plan,
     tierName: name,
     seats: entitlements.seats,
+    sponsoredTxs: entitlements.sponsoredTxs,
     subscription,
     latestSubscription,
     status,

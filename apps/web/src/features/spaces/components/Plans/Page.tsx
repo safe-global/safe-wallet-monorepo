@@ -10,7 +10,6 @@ import { SafeProFeature } from '@/features/safe-pro-announcement'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import AuthState from '../AuthState'
 import Plans from './index'
-import { SPONSORED_TXS_PLACEHOLDER } from './fixtures'
 import { buildPlanTiers, toCurrentPlan } from './planTiers'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
@@ -31,7 +30,7 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
   const isDarkMode = useDarkMode()
   const isSafePro = useHasFeature(FEATURES.SAFE_PRO)
   const { SafeProAnnouncement } = useLoadFeature(SafeProFeature)
-  const { plan, seats, subscription, isTrialing, isLoading: isPlanLoading } = useSpacePlan(spaceId)
+  const { plan, seats, sponsoredTxs, subscription, isTrialing, isLoading: isPlanLoading } = useSpacePlan(spaceId)
   const { paidPlans, isLoading: isOffersLoading } = useSpaceOffers(spaceId)
   const { openPortal, isRedirecting } = useBillingPortal(spaceId)
   const { startCheckout, isRedirecting: isCheckingOut } = useStartCheckout(spaceId)
@@ -69,7 +68,7 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
           <Plans
             plan={plan}
             safeAccounts={seats}
-            sponsoredTxs={SPONSORED_TXS_PLACEHOLDER}
+            sponsoredTxs={sponsoredTxs}
             tiers={tiers}
             onManage={() => void openPortal()}
             isManaging={isRedirecting}

@@ -119,16 +119,6 @@ describe('PlanChooserModal', () => {
     expect(mockCheckout).toHaveBeenCalledWith(SPACE_ID, 'pl_starter', [{ chainId: '1', address: '0xC' }])
   })
 
-  it('can be dismissed only when given a dismiss handler', () => {
-    const onDismiss = jest.fn()
-    render(
-      <PlanChooserModal spaceId={SPACE_ID} reason="lapsed" endedAt={null} onBack={jest.fn()} onDismiss={onDismiss} />,
-    )
-
-    fireEvent.click(screen.getByRole('button', { name: 'Close' }))
-    expect(onDismiss).toHaveBeenCalled()
-  })
-
   it('sends a failed payment to the billing portal instead of the catalog', () => {
     render(<PlanChooserModal spaceId={SPACE_ID} reason="payment-failed" endedAt={null} onBack={jest.fn()} />)
 
