@@ -1,6 +1,6 @@
 import chains from '@safe-global/utils/config/chains'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { describePolicy, joinNames, spenderDisplayName } from '../copy'
+import { describePolicy, joinNames, spenderDisplayName } from '../describePolicy'
 import { CALLOUT_DESCRIPTION_PLURAL, CALLOUT_DESCRIPTION_SINGULAR } from '../constants'
 import {
   limitSummaryBuilder,

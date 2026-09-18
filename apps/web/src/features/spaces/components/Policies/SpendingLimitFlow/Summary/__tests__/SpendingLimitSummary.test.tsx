@@ -1,7 +1,7 @@
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { render, screen } from '@/tests/test-utils'
 import SpendingLimitSummary from '..'
-import { describePolicy } from '../copy'
+import { describePolicy } from '../describePolicy'
 import {
   limitSummaryBuilder,
   spendingLimitSummaryBuilder,

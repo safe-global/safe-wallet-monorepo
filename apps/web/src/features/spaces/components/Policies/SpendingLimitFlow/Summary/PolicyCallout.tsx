@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@/components/ui/alert'
-import { describePolicy } from './copy'
+import { describePolicy } from './describePolicy'
 import type { SpendingLimitSummaryModel } from './types'
 
 const PolicyCallout = ({ policy }: { policy: SpendingLimitSummaryModel }): ReactElement => {
