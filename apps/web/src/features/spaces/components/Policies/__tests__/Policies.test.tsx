@@ -51,13 +51,13 @@ describe('Policies', () => {
     expect(screen.getByRole('link', { name: 'Learn more' })).toHaveAttribute('href', HelpCenterArticle.POLICIES)
   })
 
-  it('styles Learn more like the Proposers section', () => {
+  it('should, when rendered, style Learn more as a bold underlined link without the external icon', () => {
     render(<Policies />)
 
     const link = screen.getByRole('link', { name: 'Learn more' })
 
-    expect(link.querySelector('.external-link-icon')).toBeInTheDocument()
-    expect(link).toHaveClass('font-bold', 'hover:text-muted-foreground')
+    expect(link.querySelector('.external-link-icon')).not.toBeInTheDocument()
+    expect(link).toHaveClass('font-bold', 'underline')
   })
 
   it('renders the policy catalogue', () => {
