@@ -112,7 +112,7 @@ describe('SidebarTopBar', () => {
     expect(logo).toHaveAttribute('href', AppRoutes.welcome.accounts)
   })
 
-  it('shows the Home label pill inside a space route', () => {
+  it('shows the Home label pill inside a space route, linking back to the Workspaces list', () => {
     mockUseRouter.mockReturnValue({ pathname: AppRoutes.spaces.index })
     mockUseIsSpaceRoute.mockReturnValue(true)
 
@@ -120,7 +120,7 @@ describe('SidebarTopBar', () => {
 
     const logo = screen.getByTestId('logo-container')
     expect(logo).toHaveAttribute('data-home-label', 'true')
-    expect(logo).toHaveAttribute('href', AppRoutes.welcome.accounts)
+    expect(logo).toHaveAttribute('href', AppRoutes.welcome.spaces)
   })
 
   it('swaps the Home label for the PRO chip while the Workspace is on a plan, trial included', () => {
@@ -131,6 +131,7 @@ describe('SidebarTopBar', () => {
     render(<SidebarTopBar />)
 
     expect(screen.getByTestId('logo-container')).toHaveAttribute('data-pro-lockup', 'true')
+    expect(screen.getByTestId('logo-container')).toHaveAttribute('href', AppRoutes.welcome.spaces)
 
     mockPlans.plan = null
     render(<SidebarTopBar />)

@@ -16,8 +16,8 @@ export const SidebarTopBar = (): ReactElement => {
   const isHydrated = useIsHydrated()
   const { plan } = useSpacePlan()
 
-  // Inside a space or an individual safe the logo turns into a "Home" label pill that returns to the
-  // top-level accounts view; elsewhere it stays a plain logo linking to that same view.
+  // Inside a space or an individual safe the logo turns into a "Home" label pill; from a Workspace it returns to the
+  // Workspaces list, from anywhere else to the accounts view.
   //
   // Gated on hydration because both inputs are client-only: the safe address lives in a query param
   // the server can't see during SSG (useSafeAddressFromUrl falls back to `location.search`), and the
@@ -26,7 +26,7 @@ export const SidebarTopBar = (): ReactElement => {
   // dev's state+effect, without the extra render.
   const isInSafeOrSpace = Boolean(safeAddress) || isSpaceRoute
   const showHomeLabel = isHydrated && isInSafeOrSpace && !isCollapsed
-  const logoHref = AppRoutes.welcome.accounts
+  const logoHref = isSpaceRoute ? AppRoutes.welcome.spaces : AppRoutes.welcome.accounts
 
   return (
     <div

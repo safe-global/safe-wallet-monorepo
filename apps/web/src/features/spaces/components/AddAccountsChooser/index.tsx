@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { buildCurrentNextUrl } from '@/utils/nextUrl'
-import { CirclePlus, Plus, Settings2 } from 'lucide-react'
+import { CirclePlus, Plus, Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { cn } from '@/utils/cn'
@@ -82,8 +82,10 @@ const AddAccountsChooser = ({
         <DialogContent
           showCloseButton
           padding="md"
+          // At the seat limit the banner needs room for its title and button on one row.
+          size={showsLimit ? 'sm' : 'default'}
           // eslint-disable-next-line no-restricted-syntax -- max-w-[440px] bespoke width + dark:border accent, no tokens (grandfathered)
-          className="max-w-[440px] dark:border dark:border-border"
+          className={cn('dark:border dark:border-border', !showsLimit && 'max-w-[440px]')}
         >
           <DialogHeader
             // eslint-disable-next-line no-restricted-syntax -- p-0 pb-3: bespoke header padding, no token
@@ -94,7 +96,7 @@ const AddAccountsChooser = ({
           <div className="flex flex-col gap-2">
             {showsLimit && <SeatLimitBanner variant="alert" />}
             <ChooserRow
-              icon={showsLimit ? <Settings2 className="size-4" /> : <Plus className="size-4" />}
+              icon={showsLimit ? <Settings className="size-4" /> : <Plus className="size-4" />}
               title={showsLimit ? 'Manage accounts' : 'Select from my accounts'}
               subtitle={
                 showsLimit ? `Swap one out to add another · ${safeCount ?? safeLimit} of ${safeLimit}` : undefined

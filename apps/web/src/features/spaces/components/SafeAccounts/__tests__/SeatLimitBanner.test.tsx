@@ -15,6 +15,14 @@ describe('SeatLimitBanner', () => {
     expect(screen.getByRole('link', { name: 'Talk to sales' })).toHaveAttribute('href', SUPPORT_CHAT_URL)
   })
 
+  it('leads with a primary Talk to sales inside the chooser', () => {
+    mockUseSeatUpsell.mockReturnValue({ tierName: 'Business', limit: 20, plansHref: '/spaces/plans?spaceId=1' })
+    render(<SeatLimitBanner variant="alert" />)
+
+    expect(screen.getByTestId('seat-limit-banner')).toHaveTextContent('Business includes 20 Safe accounts')
+    expect(screen.getByRole('link', { name: 'Talk to sales' })).toHaveAttribute('href', SUPPORT_CHAT_URL)
+  })
+
   it('sends a Starter Workspace to the Plans page for the bigger plan, also as an alert', () => {
     mockUseSeatUpsell.mockReturnValue({
       tierName: 'Starter',
