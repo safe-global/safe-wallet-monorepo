@@ -24,6 +24,9 @@
  * Tag: @regression — runs under the chromium project, on demand.
  */
 import { test, expect } from '../../src/fixtures/test.fixture'
+import { seedLocalAddressBook } from '../../src/fixtures/seed-address-book'
+import { HomePage } from '../../src/pages/home.page'
+import { SendTokensPage } from '../../src/pages/send-tokens.page'
 import type { Page } from '@playwright/test'
 import {
   SAFES,
@@ -70,7 +73,7 @@ const WORKSPACE_ADDRESS_BOOK = {
  */
 async function mockSpacesSession(page: Page): Promise<void> {
   await page.addInitScript(
-    ({ ns, spaceId, chainId, localContacts }) => {
+    ({ ns, spaceId }) => {
       window.localStorage.setItem(
         `${ns}auth`,
         JSON.stringify({
@@ -81,16 +84,10 @@ async function mockSpacesSession(page: Page): Promise<void> {
           isOidcLoginPending: false,
         }),
       )
-      const book = Object.fromEntries(localContacts.map((c) => [c.address, c.name]))
-      window.localStorage.setItem(`${ns}addressBook`, JSON.stringify({ [chainId]: book }))
     },
-    {
-      ns: LS_NAMESPACE,
-      spaceId: DROPDOWN_TEST_SPACE.id,
-      chainId: CHAIN_IDS.sepolia,
-      localContacts: DROPDOWN_LOCAL_CONTACTS.map((c) => ({ name: c.name, address: c.address })),
-    },
+    { ns: LS_NAMESPACE, spaceId: DROPDOWN_TEST_SPACE.id },
   )
+  await seedLocalAddressBook(page, DROPDOWN_LOCAL_CONTACTS)
 
   // Keeps the session-expiry guard's probe from 403-ing and clearing the session.
   await page.route(/\/v1\/auth\/me(\?.*)?$/, (route) =>
@@ -116,34 +113,36 @@ test.describe('Recipient dropdown — selection updates the field', { tag: '@reg
   }) => {
     await mockSpacesSession(safePage)
 
+    const home = new HomePage(safePage)
+    const sendTokens = new SendTokensPage(safePage)
+
     // Open the Safe and connect the owner wallet (enables "New transaction").
-    await safePage.goto(`/home?safe=${SAFES.SEP_OWNER_4_SAFE}`)
+    await home.goto(SAFES.SEP_OWNER_4_SAFE)
     await walletPage.acceptCookies()
     await walletPage.connectWallet(credentials.OWNER_4_PRIVATE_KEY)
     await expect(walletPage.accountCenter).toBeVisible()
 
     // Open the Send-tokens flow.
-    await expect(safePage.getByTestId('new-tx-btn')).toBeEnabled()
-    await safePage.getByTestId('new-tx-btn').click()
-    await safePage.getByTestId('send-tokens-btn').click()
+    await expect(sendTokens.newTxButton).toBeEnabled()
+    await sendTokens.open()
 
     // The editable input is a combobox; once a contact is selected the field
     // switches to a read-only chip (the input becomes visibility:hidden, so the
     // combobox role disappears) — hence two separate locators.
-    const combo = safePage.getByRole('combobox', { name: /Recipient address/ })
-    const selectedChip = safePage.getByTestId('address-book-recipient')
+    const combo = sendTokens.recipientInput
+    const selectedChip = sendTokens.recipientChipValue
 
     await expect(combo).toBeVisible()
     await combo.click()
 
     // Mixed setup must be present: both the workspace and local groups render.
-    await expect(safePage.getByTestId('contact-group-header').filter({ hasText: 'Contacts of' })).toBeVisible()
-    await expect(safePage.getByTestId('contact-group-header').filter({ hasText: 'Local contacts' })).toBeVisible()
+    await expect(sendTokens.suggestionGroupHeaders.filter({ hasText: 'Contacts of' })).toBeVisible()
+    await expect(sendTokens.suggestionGroupHeaders.filter({ hasText: 'Local contacts' })).toBeVisible()
 
     // Read each rendered option's address (data-driven; the input row has no
     // address and is filtered out). renderOption and renderInput share the
     // "address-item" testid, so we key off the presence of a 40-hex address.
-    const addresses = await safePage.getByTestId('address-item').evaluateAll((els, re) => {
+    const addresses = await sendTokens.suggestions.evaluateAll((els, re) => {
       const pattern = new RegExp(re)
       return els.map((el) => (el.textContent || '').match(pattern)?.[0]).filter((a): a is string => Boolean(a))
     }, ADDRESS_RE.source)
@@ -155,15 +154,14 @@ test.describe('Recipient dropdown — selection updates the field', { tag: '@reg
 
     // Select each contact in turn; the field must always reflect the choice.
     for (const address of addresses) {
-      // If a contact is already selected, click its read-only chip to reset back
-      // to the editable (visible) combobox — clicking the chip triggers the
-      // field's resetName, which clears the value and re-shows the input.
+      // If a contact is already selected, click its read-only chip to reopen the
+      // editable combobox — the address stays and the dropdown lists every contact.
       if (await selectedChip.isVisible().catch(() => false)) {
         await selectedChip.click()
       }
-      await combo.click() // field is empty + closed here, so this opens the dropdown
+      await combo.click() // keeps the dropdown open (or opens it on an empty field)
 
-      const option = safePage.getByTestId('address-item').filter({ hasText: address }).first()
+      const option = sendTokens.suggestion(address).first()
       await expect(option).toBeVisible()
       await option.click()
 
