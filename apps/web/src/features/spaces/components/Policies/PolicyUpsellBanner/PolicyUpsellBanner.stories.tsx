@@ -6,7 +6,14 @@ const meta = {
   title: 'Features/Spaces/Policies/PolicyUpsellBanner',
   component: PolicyUpsellBanner,
   tags: ['autodocs'],
-  parameters: { layout: 'padded' },
+  parameters: { layout: 'fullscreen' },
+  decorators: [
+    (Story) => (
+      <div className="bg-muted p-6">
+        <Story />
+      </div>
+    ),
+  ],
   args: { onUpgrade: fn() },
 } satisfies Meta<typeof PolicyUpsellBanner>
 
