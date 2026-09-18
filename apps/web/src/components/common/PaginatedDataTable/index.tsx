@@ -75,6 +75,10 @@ type PaginatedDataTableProps<T> = {
   rows: T[]
   /** Optional mobile-only collapsible detail row, revealed per row via a toggle */
   renderRowDetail?: (row: T) => ReactNode
+  /** Draws the detail row on the table surface instead of the muted tint, so row and detail read as one */
+  plainDetail?: boolean
+  /** Set to `false` to turn off the row hover pill, e.g. when cells carry their own hover affordance */
+  rowHover?: boolean
   getRowKey: (row: T) => string
   getRowClassName?: (row: T) => string
   pageSize?: number
@@ -116,6 +120,8 @@ function PaginatedDataTable<T>({
   columns,
   rows,
   renderRowDetail,
+  plainDetail = false,
+  rowHover = true,
   getRowKey,
   getRowClassName,
   pageSize = DEFAULT_PAGE_SIZE,
@@ -248,6 +254,7 @@ function PaginatedDataTable<T>({
                 <TableRow
                   data-testid="table-row"
                   data-no-divider={showDetail ? '' : undefined}
+                  data-no-hover={rowHover ? undefined : ''}
                   className={getRowClassName?.(row)}
                 >
                   {visibleColumns.map((column) => (
@@ -283,11 +290,11 @@ function PaginatedDataTable<T>({
                 </TableRow>
 
                 {showDetail && (
-                  <TableRow className={getRowClassName?.(row)}>
+                  <TableRow data-no-hover={rowHover ? undefined : ''} className={getRowClassName?.(row)}>
                     <TableCell
                       id={detailId}
                       colSpan={totalColumns}
-                      className="bg-muted/30 whitespace-normal wrap-anywhere"
+                      className={cn(!plainDetail && 'bg-muted/30', 'whitespace-normal wrap-anywhere')}
                     >
                       {renderRowDetail?.(row)}
                     </TableCell>

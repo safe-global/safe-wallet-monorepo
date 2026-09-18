@@ -1,6 +1,6 @@
 import { renderHook } from '@/tests/test-utils'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useUpsertWorkspaceSafeName } from '../useUpsertWorkspaceSafeName'
+import { useUpsertWorkspaceSafeName, useUpsertWorkspaceSafeNames } from '../useUpsertWorkspaceSafeName'
 import { useCurrentSpaceId } from '../useCurrentSpaceId'
 import useGetSpaceAddressBook from '../useGetSpaceAddressBook'
 
@@ -65,5 +65,45 @@ describe('useUpsertWorkspaceSafeName', () => {
       error: 'No workspace is selected. Switch to a workspace and try again.',
     })
     expect(upsert).not.toHaveBeenCalled()
+  })
+})
+
+describe('useUpsertWorkspaceSafeNames', () => {
+  const OTHER_ADDRESS = '0x2222222222222222222222222222222222222222'
+
+  beforeEach(() => jest.clearAllMocks())
+
+  it('writes every name in a single request and merges each entry chainIds', async () => {
+    const upsert = setup({ addressBook: [{ address: ADDRESS, name: 'Old', chainIds: ['137'] }] })
+    const { result } = renderHook(() => useUpsertWorkspaceSafeNames())
+
+    await expect(
+      result.current([
+        { address: ADDRESS, name: ' Treasury ', chainIds: ['1'] },
+        { address: OTHER_ADDRESS, name: 'Ops', chainIds: ['1', '10'] },
+      ]),
+    ).resolves.toEqual({})
+
+    expect(upsert).toHaveBeenCalledTimes(1)
+    const { items } = upsert.mock.calls[0][0].upsertAddressBookItemsDto
+    expect(items[0]).toEqual({ name: 'Treasury', address: ADDRESS, chainIds: ['137', '1'] })
+    expect(items[1]).toEqual({ name: 'Ops', address: OTHER_ADDRESS, chainIds: ['1', '10'] })
+  })
+
+  it('does not call the API for an empty list', async () => {
+    const upsert = setup()
+    const { result } = renderHook(() => useUpsertWorkspaceSafeNames())
+
+    await expect(result.current([])).resolves.toEqual({})
+    expect(upsert).not.toHaveBeenCalled()
+  })
+
+  it('returns the error message when the request fails', async () => {
+    setup({ result: { error: { status: 403, data: { message: 'Forbidden' } } } })
+    const { result } = renderHook(() => useUpsertWorkspaceSafeNames())
+
+    await expect(result.current([{ address: ADDRESS, name: 'Treasury', chainIds: ['1'] }])).resolves.toEqual({
+      error: 'Forbidden',
+    })
   })
 })

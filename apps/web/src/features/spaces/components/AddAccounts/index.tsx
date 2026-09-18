@@ -17,7 +17,15 @@ import ExternalLink from '@/components/common/ExternalLink'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
 import { useSimilarityClusters } from '@/features/address-poisoning'
-import { getChainIdsParam, useCurrentSpaceId, useIsAdmin, useSpaceSafes } from '@/features/spaces'
+import {
+  getChainIdsParam,
+  useCurrentSpaceId,
+  useGetSpaceAddressBook,
+  useIsAdmin,
+  useSpaceSafes,
+  useUpsertWorkspaceSafeNames,
+} from '@/features/spaces'
+import { NameAccountsFields, buildWorkspaceSafeNames, getSafesToName, hasAllNames } from '../NameAccounts'
 import { AdminOnlyWorkspaceTooltip } from '../AdminOnlyWorkspaceTooltip'
 import {
   useSpaceSafesCreateV1Mutation,
@@ -54,6 +62,9 @@ import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 const PICKER_COLUMNS: SafeAccountColumnId[] = ['select', 'name', 'threshold', 'networks', 'balance']
+
+const SCROLL_REGION_CLASS =
+  'overflow-y-auto overscroll-y-none pr-1 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border'
 
 function getSelectedSafes(safes: AddAccountsFormValues['selectedSafes'], spaceSafes: AllSafeItems) {
   const flatSafeItems = flattenSafeItems(spaceSafes)
@@ -94,9 +105,10 @@ const AddAccounts = ({
   const isAdmin = useIsAdmin()
   const [open, setOpen] = useState<boolean>(false)
   const isOpen = externalOpen ?? open
-  const [view, setView] = useState<'select' | 'manage'>('select')
+  const [view, setView] = useState<'select' | 'manage' | 'name'>('select')
   const [error, setError] = useState<string>()
   const [manualSafes, setManualSafes] = useState<SafeItems>([])
+  const [safesToName, setSafesToName] = useState<AllSafeItems>([])
   const hasResetForOpen = useRef(false)
 
   const { orderBy } = useAppSelector(selectOrderByPreference)
@@ -105,6 +117,8 @@ const AddAccounts = ({
   const sortComparator = getComparator(orderBy)
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
   const [removeSafesFromSpace] = useSpaceSafesDeleteV1Mutation()
+  const upsertWorkspaceNames = useUpsertWorkspaceSafeNames()
+  const spaceAddressBook = useGetSpaceAddressBook()
   const spaceId = useCurrentSpaceId()
   const trustedModal = useTrustedSafesModal()
 
@@ -170,6 +184,7 @@ const AddAccounts = ({
     mode: 'onChange',
     defaultValues: {
       selectedSafes: {},
+      names: {},
     },
   })
 
@@ -179,6 +194,7 @@ const AddAccounts = ({
   const selectedSafesLength = getSelectedSafes(selectedSafes, spaceSafes).length
   const removedSafesCount = getRemovedSafes(selectedSafes, spaceSafes).length
   const isFormDirty = selectedSafesLength > 0 || removedSafesCount > 0
+  const namesComplete = view !== 'name' || hasAllNames(watch('names'), safesToName)
   const { isSubmitting } = formState
 
   // Computed inline (not memoised): react-hook-form's watch() mutates and returns the same object
@@ -203,7 +219,7 @@ const AddAccounts = ({
   // finalizing that empty seed would make Save diff every existing member as a removal (data loss).
   useEffect(() => {
     if (isOpen && !hasResetForOpen.current && !isLoadingSpaceSafes) {
-      reset({ selectedSafes: defaultSelectedSafes })
+      reset({ selectedSafes: defaultSelectedSafes, names: {} })
       hasResetForOpen.current = true
     } else if (!isOpen) {
       hasResetForOpen.current = false
@@ -225,6 +241,21 @@ const AddAccounts = ({
       chainId: safe.chainId,
       address: safe.address,
     }))
+
+    if (view === 'select') {
+      const unnamed = getSafesToName(safesToAdd, trustedSafes, spaceAddressBook)
+      if (unnamed.length > 0) {
+        trackEvent(SPACE_EVENTS.NAME_ACCOUNTS_STEP, {
+          [MixpanelEventParams.ACCOUNT_COUNT]: unnamed.length,
+          [MixpanelEventParams.SOURCE]: SPACE_LABELS.add_accounts_modal,
+        })
+        setSafesToName(unnamed)
+        setView('name')
+        return
+      }
+    } else if (!hasAllNames(data.names, safesToName)) {
+      return
+    }
 
     // Track event based on what action is being taken
     if (safesToAdd.length > 0) {
@@ -262,6 +293,12 @@ const AddAccounts = ({
             { workspace_id: spaceId, safe_address: address, chain_id: chainId },
           )
         })
+
+        const namesResult = await upsertWorkspaceNames(buildWorkspaceSafeNames(data.names, safesToName))
+        if (namesResult.error) {
+          setError(namesResult.error)
+          return
+        }
       }
 
       // Remove unchecked safes
@@ -312,7 +349,7 @@ const AddAccounts = ({
       isReadOnly: false,
       isPinned: false,
       lastVisited: 0,
-      name: '',
+      name: allSafeNames[data.chainId]?.[data.address] ?? '',
     }
 
     if (!alreadyExists) {
@@ -341,6 +378,8 @@ const AddAccounts = ({
     setRawSearchQuery('')
     setManualSafes([])
     setValue('selectedSafes', {}) // Reset doesn't seem to work consistently with an object
+    setValue('names', {})
+    setSafesToName([])
     setView('select')
     trustedModal.close()
     setOpen(false)
@@ -420,94 +459,118 @@ const AddAccounts = ({
             <>
               {/* eslint-disable-next-line no-restricted-syntax -- bespoke dialog header divider/padding from dev's #8271 redesign */}
               <DialogHeader className="shrink-0 border-b border-border px-6 pb-4 pt-6">
-                <DialogTitle className="font-bold">My accounts</DialogTitle>
+                <div className="flex items-center gap-2">
+                  {view === 'name' && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setView('select')}
+                      aria-label="Back"
+                      data-testid="name-accounts-back"
+                    >
+                      <ArrowLeft className="size-5" />
+                    </Button>
+                  )}
+                  <DialogTitle className="font-bold">
+                    {view === 'name' ? 'Name your Safe accounts' : 'My accounts'}
+                  </DialogTitle>
+                </div>
               </DialogHeader>
 
               <FormProvider {...formMethods}>
                 <form onSubmit={onSubmit} className="flex min-h-0 flex-1 flex-col px-6 pb-6 pt-4">
-                  <div className="mb-4 flex shrink-0 items-center gap-3 rounded-2xl bg-muted p-4">
-                    <Info className="size-5 shrink-0 text-muted-foreground" />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-foreground">What are my accounts?</p>
-                      <p className="text-sm text-muted-foreground">
-                        This list protects you from impersonation. Anyone can create a Safe account listing your address
-                        as a signer, so only accounts you&apos;ve confirmed appear here.{' '}
-                        <ExternalLink href={HELP_CENTER_URL} noIcon className="underline">
-                          Learn more
-                        </ExternalLink>
-                      </p>
+                  {view === 'name' ? (
+                    <div className={cn(SCROLL_REGION_CLASS, 'min-h-0 flex-1')} data-testid="name-accounts-region">
+                      <NameAccountsFields items={safesToName} />
                     </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={handleOpenManage}
-                      data-testid="open-manage-trusted-safes"
-                      className="shrink-0"
-                    >
-                      <Settings2 className="size-4" />
-                      Manage list
-                    </Button>
-                  </div>
-
-                  {!isListEmpty && (
-                    <div className="mb-3 flex shrink-0 items-center gap-3">
-                      <div
-                        className={cn(
-                          'flex shrink-0 items-center gap-1.5 whitespace-nowrap text-sm',
-                          isAtLimit ? 'font-semibold text-yellow-700' : 'text-muted-foreground',
-                        )}
-                      >
-                        {selectedKeys.size} of {SAFE_ACCOUNTS_LIMIT} selected
-                        <Tooltip>
-                          <TooltipTrigger render={<span className="inline-flex cursor-help" />}>
-                            <Info className="size-4" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            You can add up to {SAFE_ACCOUNTS_LIMIT} Safe accounts per workspace
-                          </TooltipContent>
-                        </Tooltip>
+                  ) : (
+                    <>
+                      <div className="mb-4 flex shrink-0 items-center gap-3 rounded-2xl bg-muted p-4">
+                        <Info className="size-5 shrink-0 text-muted-foreground" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold text-foreground">What are my accounts?</p>
+                          <p className="text-sm text-muted-foreground">
+                            This list protects you from impersonation. Anyone can create a Safe account listing your
+                            address as a signer, so only accounts you&apos;ve confirmed appear here.{' '}
+                            <ExternalLink href={HELP_CENTER_URL} noIcon className="underline">
+                              Learn more
+                            </ExternalLink>
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={handleOpenManage}
+                          data-testid="open-manage-trusted-safes"
+                          className="shrink-0"
+                        >
+                          <Settings2 className="size-4" />
+                          Manage list
+                        </Button>
                       </div>
-                      <SearchInput
-                        className="flex-1"
-                        placeholder="by name, address or network"
-                        aria-label="Search Safe accounts by name, address or network"
-                        autoComplete="off"
-                        value={rawSearchQuery}
-                        onChange={(e) => setRawSearchQuery(e.target.value)}
-                        data-testid="add-accounts-search-input"
-                      />
-                    </div>
-                  )}
 
-                  <div
-                    className="min-h-0 flex-1 overflow-y-auto overscroll-y-none pr-1 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
-                    data-testid="add-accounts-safes-list-region"
-                  >
-                    {isListEmpty ? (
-                      <Typography variant="paragraph" align="center" color="muted" className="py-8">
-                        {emptyStateMessage}
-                      </Typography>
-                    ) : hasNoSearchMatch ? (
-                      <Typography variant="paragraph" align="center" color="muted" className="py-8">
-                        No safes match your search
-                      </Typography>
-                    ) : (
-                      <SafeAccountsTable
-                        items={visibleTrusted}
-                        columns={PICKER_COLUMNS}
-                        similarityGroups={similarityGroups}
-                        selection={{
-                          selectedKeys,
-                          onToggle: handleTableToggle,
-                          isAtLimit,
-                          disabledKeys: spaceSafeKeys,
-                          disabledReason: 'This safe is already part of your workspace',
-                        }}
-                        data-testid="add-accounts-safes-table"
-                      />
-                    )}
-                  </div>
+                      {!isListEmpty && (
+                        <div className="mb-3 flex shrink-0 items-center gap-3">
+                          <div
+                            className={cn(
+                              'flex shrink-0 items-center gap-1.5 whitespace-nowrap text-sm',
+                              isAtLimit ? 'font-semibold text-yellow-700' : 'text-muted-foreground',
+                            )}
+                          >
+                            {selectedKeys.size} of {SAFE_ACCOUNTS_LIMIT} selected
+                            <Tooltip>
+                              <TooltipTrigger render={<span className="inline-flex cursor-help" />}>
+                                <Info className="size-4" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                You can add up to {SAFE_ACCOUNTS_LIMIT} Safe accounts per workspace
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                          <SearchInput
+                            className="flex-1"
+                            placeholder="by name, address or network"
+                            aria-label="Search Safe accounts by name, address or network"
+                            autoComplete="off"
+                            value={rawSearchQuery}
+                            onChange={(e) => setRawSearchQuery(e.target.value)}
+                            data-testid="add-accounts-search-input"
+                          />
+                        </div>
+                      )}
+
+                      <div
+                        className={cn(SCROLL_REGION_CLASS, 'min-h-0 flex-1')}
+                        data-testid="add-accounts-safes-list-region"
+                      >
+                        {isListEmpty ? (
+                          <Typography variant="paragraph" align="center" color="muted" className="py-8">
+                            {emptyStateMessage}
+                          </Typography>
+                        ) : hasNoSearchMatch ? (
+                          <Typography variant="paragraph" align="center" color="muted" className="py-8">
+                            No safes match your search
+                          </Typography>
+                        ) : (
+                          <SafeAccountsTable
+                            items={visibleTrusted}
+                            columns={PICKER_COLUMNS}
+                            similarityGroups={similarityGroups}
+                            selection={{
+                              selectedKeys,
+                              onToggle: handleTableToggle,
+                              isAtLimit,
+                              disabledKeys: spaceSafeKeys,
+                              disabledReason: 'This safe is already part of your workspace',
+                            }}
+                            data-testid="add-accounts-safes-table"
+                          />
+                        )}
+                      </div>
+                    </>
+                  )}
 
                   {error && (
                     <Alert variant="destructive" className="mt-4 shrink-0">
@@ -518,16 +581,29 @@ const AddAccounts = ({
 
                   <div className="mt-4 flex shrink-0 flex-row items-center gap-3">
                     <div className="flex-1">
-                      <Track {...SPACE_EVENTS.ADD_ACCOUNT_MANUALLY_MODAL}>
-                        <AddManually handleAddSafe={handleAddSafe} disabled={isAtLimit} />
-                      </Track>
+                      {view === 'name' ? (
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="lg"
+                          onClick={() => setView('select')}
+                          className="w-full"
+                          data-testid="name-accounts-back-button"
+                        >
+                          Back
+                        </Button>
+                      ) : (
+                        <Track {...SPACE_EVENTS.ADD_ACCOUNT_MANUALLY_MODAL}>
+                          <AddManually handleAddSafe={handleAddSafe} disabled={isAtLimit} />
+                        </Track>
+                      )}
                     </div>
 
                     <Button
                       data-testid="add-accounts-button"
                       type="submit"
                       size="lg"
-                      disabled={!isFormDirty || isSubmitting}
+                      disabled={!isFormDirty || !namesComplete || isSubmitting}
                       className="flex-1"
                     >
                       {isSubmitting ? (

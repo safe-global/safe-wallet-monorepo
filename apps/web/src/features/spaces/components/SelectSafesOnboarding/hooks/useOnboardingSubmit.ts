@@ -11,7 +11,7 @@ import {
   useSpaceSafesDeleteV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { trackEvent } from '@/services/analytics'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { getChainIdsParam } from '../../../utils'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
@@ -20,6 +20,9 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { addOrUpdateSafe, selectAllAddedSafes } from '@/store/addedSafesSlice'
 import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { useSpaceSafes } from '../../../hooks/useSpaceSafes'
+import useGetSpaceAddressBook from '../../../hooks/useGetSpaceAddressBook'
+import { useUpsertWorkspaceSafeNames, type WorkspaceSafeName } from '../../../hooks/useUpsertWorkspaceSafeName'
+import { buildWorkspaceSafeNames, getSafesToName, hasAllNames } from '../../NameAccounts/utils'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { getSafeId, getMultiChainSafeId } from '../utils/safeIds'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../constants'
@@ -64,14 +67,19 @@ const useOnboardingSubmit = (
   const addedSafes = useAppSelector(selectAllAddedSafes)
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
   const [removeSafesFromSpace] = useSpaceSafesDeleteV1Mutation()
+  const upsertWorkspaceNames = useUpsertWorkspaceSafeNames()
+  const spaceAddressBook = useGetSpaceAddressBook()
 
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [step, setStep] = useState<'select' | 'name'>('select')
+  const [safesToName, setSafesToName] = useState<AllSafeItems>([])
 
   const formMethods = useForm<AddAccountsFormValues>({
     mode: 'onChange',
     defaultValues: {
       selectedSafes: {},
+      names: {},
     },
   })
 
@@ -209,8 +217,13 @@ const useOnboardingSubmit = (
     safesToAdd: Array<{ chainId: string; address: string }>,
     selectedSafes: AddAccountsFormValues['selectedSafes'],
     spaceIdStr: string,
+    names: WorkspaceSafeName[],
   ) => {
     await addNewSafes(safesToAdd, spaceIdStr)
+    const namesResult = await upsertWorkspaceNames(names)
+    if (namesResult.error) {
+      throw new Error(namesResult.error)
+    }
     await removeUnselectedSafes(selectedSafes, spaceIdStr)
     trustAddedSafes(safesToAdd)
   }
@@ -218,19 +231,40 @@ const useOnboardingSubmit = (
   const onSubmit = handleSubmit(async (data) => {
     if (!spaceId) return
 
+    const safesToAdd = getSafesToAdd(data.selectedSafes)
+
+    if (step === 'select') {
+      const unnamed = getSafesToName(safesToAdd, allSafes, spaceAddressBook)
+      if (unnamed.length > 0) {
+        trackEvent(SPACE_EVENTS.NAME_ACCOUNTS_STEP, {
+          [MixpanelEventParams.ACCOUNT_COUNT]: unnamed.length,
+          [MixpanelEventParams.SOURCE]: SPACE_LABELS.onboarding,
+        })
+        setSafesToName(unnamed)
+        setStep('name')
+        return
+      }
+    } else if (!hasAllNames(data.names, safesToName)) {
+      return
+    }
+
     setError(undefined)
     setIsSubmitting(true)
 
     try {
-      const safesToAdd = getSafesToAdd(data.selectedSafes)
       if (safesToAdd.length > 0) {
         trackEvent(SPACE_EVENTS.ADD_ACCOUNTS, {
           [MixpanelEventParams.ACCOUNT_COUNT]: safesToAdd.length,
-          [MixpanelEventParams.SOURCE]: 'onboarding',
+          [MixpanelEventParams.SOURCE]: SPACE_LABELS.onboarding,
           [MixpanelEventParams.CHAIN_ID]: getChainIdsParam(safesToAdd),
         })
       }
-      await processSelectedSafes(safesToAdd, data.selectedSafes, spaceId)
+      await processSelectedSafes(
+        safesToAdd,
+        data.selectedSafes,
+        spaceId,
+        buildWorkspaceSafeNames(data.names, safesToName),
+      )
 
       onSuccess()
     } catch (e) {
@@ -246,6 +280,9 @@ const useOnboardingSubmit = (
     selectedSafesLength,
     error,
     isSubmitting,
+    step,
+    safesToName,
+    showSelectStep: () => setStep('select'),
   }
 }
 

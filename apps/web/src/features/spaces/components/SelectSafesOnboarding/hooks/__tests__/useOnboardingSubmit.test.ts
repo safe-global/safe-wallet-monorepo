@@ -53,10 +53,26 @@ jest.mock('@/features/spaces/hooks/useSpaceSafes', () => ({
   useSpaceSafes: () => ({ allSafes: mockSpaceSafes }),
 }))
 
+// The grouping helpers are resolved lazily: requiring the real barrel while it is being mocked
+// trips its import cycle before initialization.
 jest.mock('@/hooks/safes', () => ({
   flattenSafeItems: (items: Array<SafeItem | MultiChainSafeItem>) =>
     items.flatMap((item) => ('safes' in item ? item.safes : [item])),
   isMultiChainSafeItem: (safe: SafeItem | MultiChainSafeItem) => 'safes' in safe,
+  _getMultiChainAccounts: (...args: unknown[]) => jest.requireActual('@/hooks/safes')._getMultiChainAccounts(...args),
+  _getSingleChainAccounts: (...args: unknown[]) => jest.requireActual('@/hooks/safes')._getSingleChainAccounts(...args),
+}))
+
+let mockSpaceAddressBook: Array<{ address: string; name: string; chainIds: string[] }> = []
+const mockUpsertWorkspaceNames = jest.fn().mockResolvedValue({})
+
+jest.mock('@/features/spaces/hooks/useGetSpaceAddressBook', () => ({
+  __esModule: true,
+  default: () => mockSpaceAddressBook,
+}))
+
+jest.mock('@/features/spaces/hooks/useUpsertWorkspaceSafeName', () => ({
+  useUpsertWorkspaceSafeNames: () => mockUpsertWorkspaceNames,
 }))
 
 const mockDispatch = jest.fn()
@@ -88,9 +104,17 @@ describe('useOnboardingSubmit', () => {
     mockSpaceSafes = []
     mockRouterQuery = {}
     mockAddedSafes = {}
+    // Every fixture Safe already carries a workspace name so these cases stay on the direct submit path.
+    mockSpaceAddressBook = [
+      { address: '0xnew', name: 'Named', chainIds: ['1'] },
+      { address: '0xnewone', name: 'Named', chainIds: ['5'] },
+      { address: '0xaaa', name: 'Named', chainIds: ['1', '10'] },
+      { address: '0xbbb', name: 'Named', chainIds: ['5', '11155111'] },
+    ]
     mockChains.splice(0, mockChains.length)
     mockAddSafesToSpace.mockResolvedValue({ data: {} })
     mockRemoveSafesFromSpace.mockResolvedValue({ data: {} })
+    mockUpsertWorkspaceNames.mockResolvedValue({})
   })
 
   it('should initialize with default values', () => {
@@ -538,5 +562,129 @@ describe('useOnboardingSubmit', () => {
     const selectedSafes = result.current.formMethods.getValues('selectedSafes')
     expect(selectedSafes['5:0xother']).toBe(true)
     expect(selectedSafes['1:0xdeadbeef']).toBeUndefined()
+  })
+})
+
+describe('useOnboardingSubmit — naming step', () => {
+  const onSuccess = jest.fn()
+  const ADDRESS = '0xAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaA'
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockSpaceSafes = []
+    mockRouterQuery = {}
+    mockAddedSafes = {}
+    mockSpaceAddressBook = []
+    mockAddSafesToSpace.mockResolvedValue({ data: {} })
+    mockRemoveSafesFromSpace.mockResolvedValue({ data: {} })
+    mockUpsertWorkspaceNames.mockResolvedValue({})
+  })
+
+  it('moves to the naming step instead of submitting when an added Safe has no workspace name', async () => {
+    const { result } = renderHook(() => useOnboardingSubmit('42', onSuccess, [buildSafeItem('1', ADDRESS)]))
+
+    act(() => {
+      result.current.formMethods.setValue('selectedSafes', { [`1:${ADDRESS}`]: true })
+    })
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(result.current.step).toBe('name')
+    expect(result.current.safesToName).toEqual([expect.objectContaining({ chainId: '1', address: ADDRESS })])
+    expect(mockAddSafesToSpace).not.toHaveBeenCalled()
+    expect(onSuccess).not.toHaveBeenCalled()
+  })
+
+  it('tracks the naming step with the number of Safes that need a name', async () => {
+    const { result } = renderHook(() => useOnboardingSubmit('42', onSuccess, [buildSafeItem('1', ADDRESS)]))
+
+    act(() => {
+      result.current.formMethods.setValue('selectedSafes', { [`1:${ADDRESS}`]: true })
+    })
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(mockTrackEvent).toHaveBeenCalledWith(
+      { action: 'Open name accounts step', category: 'spaces' },
+      { 'Account Count': 1, Source: 'onboarding' },
+    )
+  })
+
+  it('adds the Safes and then writes the entered names to the workspace address book', async () => {
+    const { result } = renderHook(() => useOnboardingSubmit('42', onSuccess, [buildSafeItem('1', ADDRESS)]))
+
+    act(() => {
+      result.current.formMethods.setValue('selectedSafes', { [`1:${ADDRESS}`]: true })
+    })
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+    act(() => {
+      result.current.formMethods.setValue(`names.${ADDRESS.toLowerCase()}`, 'Treasury')
+    })
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(mockAddSafesToSpace).toHaveBeenCalledTimes(1)
+    expect(mockUpsertWorkspaceNames).toHaveBeenCalledWith([{ address: ADDRESS, name: 'Treasury', chainIds: ['1'] }])
+    expect(mockAddSafesToSpace.mock.invocationCallOrder[0]).toBeLessThan(
+      mockUpsertWorkspaceNames.mock.invocationCallOrder[0],
+    )
+    expect(onSuccess).toHaveBeenCalled()
+  })
+
+  it('skips the naming step when the workspace already names the Safe on that chain', async () => {
+    mockSpaceAddressBook = [{ address: ADDRESS, name: 'Named', chainIds: ['1'] }]
+    const { result } = renderHook(() => useOnboardingSubmit('42', onSuccess, [buildSafeItem('1', ADDRESS)]))
+
+    act(() => {
+      result.current.formMethods.setValue('selectedSafes', { [`1:${ADDRESS}`]: true })
+    })
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(result.current.step).toBe('select')
+    expect(mockAddSafesToSpace).toHaveBeenCalledTimes(1)
+    expect(mockUpsertWorkspaceNames).toHaveBeenCalledWith([])
+    expect(onSuccess).toHaveBeenCalled()
+  })
+
+  it('surfaces a failed name write as the form error', async () => {
+    mockUpsertWorkspaceNames.mockResolvedValue({ error: 'Forbidden' })
+    const { result } = renderHook(() => useOnboardingSubmit('42', onSuccess, [buildSafeItem('1', ADDRESS)]))
+
+    act(() => {
+      result.current.formMethods.setValue('selectedSafes', { [`1:${ADDRESS}`]: true })
+    })
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+    act(() => {
+      result.current.formMethods.setValue(`names.${ADDRESS.toLowerCase()}`, 'Treasury')
+    })
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(result.current.error).toBe('Forbidden')
+    expect(onSuccess).not.toHaveBeenCalled()
+  })
+
+  it('returns to the selection step on demand', async () => {
+    const { result } = renderHook(() => useOnboardingSubmit('42', onSuccess, [buildSafeItem('1', ADDRESS)]))
+
+    act(() => {
+      result.current.formMethods.setValue('selectedSafes', { [`1:${ADDRESS}`]: true })
+    })
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+    act(() => result.current.showSelectStep())
+
+    expect(result.current.step).toBe('select')
   })
 })
