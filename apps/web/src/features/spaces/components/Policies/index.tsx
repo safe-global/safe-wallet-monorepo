@@ -5,12 +5,19 @@ import { Typography } from '@/components/ui/typography'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import PolicyCatalogue from './PolicyCatalogue'
 import type { PolicyCatalogueId } from './PolicyCatalogue/catalogue'
+import type { PolicyLock } from './policyLock'
+import PolicyUpsellBanner from './PolicyUpsellBanner'
 import ProposerIntroDialog from './ProposerIntroDialog'
 import { PROPOSER_INTRO_SEEN_KEY } from './ProposerIntroDialog/constants'
 import SpendingLimitIntroDialog from './SpendingLimitIntroDialog'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from './SpendingLimitIntroDialog/constants'
 
-const Policies = (): ReactElement => {
+interface PoliciesProps {
+  /** Set when the workspace's plan does not include policies. WA-3560 supplies it from the plan hooks. */
+  locked?: PolicyLock
+}
+
+const Policies = ({ locked }: PoliciesProps): ReactElement => {
   const [hasSeenSpendingLimitIntro = false, setHasSeenSpendingLimitIntro] =
     useLocalStorage<boolean>(SPENDING_LIMIT_INTRO_SEEN_KEY)
   const [isSpendingLimitIntroOpen, setIsSpendingLimitIntroOpen] = useState(false)
@@ -96,13 +103,19 @@ const Policies = (): ReactElement => {
         <Typography variant="paragraph-medium">
           Policies are rules that help you manage your Safe accounts. Set them up once and they will run onchain,
           automatically.{' '}
-          <ExternalLink className="font-bold hover:text-muted-foreground" href={HelpCenterArticle.POLICIES}>
+          <ExternalLink noIcon href={HelpCenterArticle.POLICIES}>
             Learn more
           </ExternalLink>
         </Typography>
       </div>
 
-      <PolicyCatalogue onSelect={handleSelect} />
+      {locked && (
+        <div className="mb-4">
+          <PolicyUpsellBanner {...locked} />
+        </div>
+      )}
+
+      <PolicyCatalogue onSelect={handleSelect} locked={locked} />
 
       <SpendingLimitIntroDialog
         open={isSpendingLimitIntroOpen}

@@ -1,9 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { fn } from 'storybook/test'
 import { Button } from '@/components/ui/button'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { withMockProvider } from '@/storybook/preview'
 import { PROPOSER_INTRO_SEEN_KEY } from './ProposerIntroDialog/constants'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from './SpendingLimitIntroDialog/constants'
+import { mockStarterPlan } from './mocks/plan'
 import Policies from './index'
 
 const meta = {
@@ -52,4 +54,17 @@ export const ProposerIntro: Story = {
       </div>
     )
   },
+}
+
+/** The workspace is on a plan that does not include policies: the banner shows and every policy tile is gated. */
+export const Starter: Story = {
+  args: { locked: { ...mockStarterPlan, onUpgrade: fn() } },
+  parameters: { layout: 'fullscreen' },
+  decorators: [
+    (Story) => (
+      <div className="bg-muted p-6">
+        <Story />
+      </div>
+    ),
+  ],
 }
