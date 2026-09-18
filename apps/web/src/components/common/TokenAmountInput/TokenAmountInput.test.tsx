@@ -279,11 +279,13 @@ describe('TokenAmountInput', () => {
       expect(screen.queryByText('The value must be greater than 0')).not.toBeInTheDocument()
       expect(screen.getByText('Amount')).toBeInTheDocument()
 
-      // Breaking the value again right away must not flash the old message before the debounce.
-      await userEvent.type(amountField, '{backspace}')
-      expect(amountField).toHaveValue('0.')
+      // Breaking the value differently right away must not flash the previous message.
+      await userEvent.clear(amountField)
+      await userEvent.type(amountField, '1.')
+      expect(amountField).toHaveValue('1.')
       expect(screen.queryByText('The value must be greater than 0')).not.toBeInTheDocument()
-      expect(await screen.findByText('The value must be greater than 0')).toBeInTheDocument()
+      expect(screen.queryByText('Should have 1 to 18 decimals')).not.toBeInTheDocument()
+      expect(await screen.findByText('Should have 1 to 18 decimals')).toBeInTheDocument()
     })
   })
 

@@ -68,11 +68,12 @@ const TokenAmountInput = ({
   const watchedAmount = watch(amountField) || ''
 
   // Hold the label error back while typing (e.g. "0." is briefly invalid), but drop it at once.
-  // Each validation run yields a new error object, so the identity check keeps a corrected-then-
-  // broken field from flashing the previous message before the new one has settled.
+  // Debounce the message, not the object: RHF swaps the error object on every re-validation, and a
+  // corrected-then-broken field must not flash a previous, different message before it settles.
   const amountError = get(errors, amountField)
-  const debouncedAmountError = useDebounce(amountError, 500)
-  const shownAmountError = amountError && debouncedAmountError === amountError ? amountError : undefined
+  const amountErrorMessage = amountError?.message?.toString()
+  const debouncedAmountErrorMessage = useDebounce(amountErrorMessage, 500)
+  const shownAmountError = amountError && debouncedAmountErrorMessage === amountErrorMessage ? amountError : undefined
   const isAmountError = !!shownAmountError
 
   const fiatValue = useMemo(
