@@ -74,9 +74,9 @@ const meta = {
   },
   decorators: [
     setup.decorator,
-    // The block is sized for the tx-flow card column.
+    // Caps at the tx-flow card column, but shrinks so the viewport addon exercises narrow widths.
     (Story) => (
-      <div className="w-[577px]">
+      <div className="w-full max-w-[577px]">
         <Story />
       </div>
     ),
