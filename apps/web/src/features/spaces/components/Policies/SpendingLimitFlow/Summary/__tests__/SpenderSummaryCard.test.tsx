@@ -2,7 +2,7 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { render, screen } from '@/tests/test-utils'
 import SpenderSummaryCard from '../SpenderSummaryCard'
 import { LIMITS_LABEL, SPENDER_LABEL } from '../constants'
-import { limitSummaryBuilder, limitSummaryTokenBuilder, spenderSummaryBuilder } from '../testBuilders'
+import { limitSummaryBuilder, limitSummaryTokenBuilder, spenderSummaryBuilder } from '../SpendingLimitSummary.fixtures'
 
 const SPENDER = '0x8675B754342754A30A2AeF474D114d8460bca19b'
 
@@ -23,14 +23,14 @@ describe('SpenderSummaryCard', () => {
 
     render(<SpenderSummaryCard spender={spender} chainId="1" />)
 
-    const card = screen.getByTestId('policy-summary-spender')
+    const card = screen.getByTestId('spending-limit-summary-spender')
     expect(card).toHaveTextContent(SPENDER_LABEL)
     expect(card).toHaveTextContent(LIMITS_LABEL)
     expect(card).toHaveTextContent('Alice')
     expect(card).toHaveTextContent(SPENDER)
     expect(card).not.toHaveTextContent(shortenAddress(SPENDER))
 
-    const rows = screen.getAllByTestId('policy-summary-limit')
+    const rows = screen.getAllByTestId('spending-limit-summary-limit')
     expect(rows).toHaveLength(2)
     expect(rows[0]).toHaveTextContent('0.5466 ETH')
     expect(rows[0]).toHaveTextContent('Weekly')
@@ -43,6 +43,6 @@ describe('SpenderSummaryCard', () => {
 
     render(<SpenderSummaryCard spender={spender} chainId="1" />)
 
-    expect(screen.getByTestId('policy-summary-spender')).toHaveTextContent(SPENDER)
+    expect(screen.getByTestId('spending-limit-summary-spender')).toHaveTextContent(SPENDER)
   })
 })

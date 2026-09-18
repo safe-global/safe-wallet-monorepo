@@ -6,8 +6,8 @@ import SummaryField from './SummaryField'
 import { APPLIES_TO_LABEL } from './constants'
 
 /** The Safe the policy applies to: name, address, threshold, chain and fiat balance — the selector's own row. */
-const AppliesToRow = ({ safe }: { safe: SafeAccountOption }): ReactElement => (
-  <Card variant="muted" size="none" radius="lg" data-testid="policy-summary-applies-to">
+const AppliesToCard = ({ safe }: { safe: SafeAccountOption }): ReactElement => (
+  <Card variant="muted" size="none" radius="lg" data-testid="spending-limit-summary-applies-to">
     {/* `Card` takes spacing only through `size`/`radius`, so the padding lives on this div. */}
     <div className="p-3">
       <SummaryField label={APPLIES_TO_LABEL}>
@@ -17,4 +17,4 @@ const AppliesToRow = ({ safe }: { safe: SafeAccountOption }): ReactElement => (
   </Card>
 )
 
-export default AppliesToRow
+export default AppliesToCard

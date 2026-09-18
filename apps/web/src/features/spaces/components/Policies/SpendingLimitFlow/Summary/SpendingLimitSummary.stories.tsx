@@ -1,11 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { mswLoader } from 'msw-storybook-addon'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { createMockStory } from '@/stories/mocks'
 import { buildSafeAccountId } from '../../SafeAccountSelector/utils'
 import type { SafeAccountOption } from '../../SafeAccountSelector/types'
-import PolicySummary from './index'
-import type { LimitSummary, LimitSummaryToken, PolicySummaryModel, SpenderSummary } from './types'
+import SpendingLimitSummary from './index'
+import type { LimitSummary, LimitSummaryToken, SpendingLimitSummaryModel, SpenderSummary } from './types'
 
 /** `SAFE_ADDRESSES.efSafe` in config/test/msw/fixtures. */
 const EF_SAFE = '0x9fC3dc011b461664c835F2527fffb1169b3C213e'
@@ -53,7 +52,7 @@ const spender = (address: string, name: string | undefined, limits: LimitSummary
 })
 
 /** The Figma frame: one-time ETH for Alice, weekly ETH and monthly USDC for Bob — no single frequency to name. */
-const mixed: PolicySummaryModel = {
+const mixed: SpendingLimitSummaryModel = {
   safe: treasury(),
   spenders: [
     spender(ALICE, 'Alice', [{ token: ETH, amount: '0.5466', resetTimeMin: '0' }]),
@@ -67,9 +66,8 @@ const mixed: PolicySummaryModel = {
 const setup = createMockStory({ scenario: 'efSafe', wallet: 'connected', layout: 'none', shadcn: true })
 
 const meta = {
-  title: 'Features/Spaces/Policies/PolicySummary',
-  component: PolicySummary,
-  loaders: [mswLoader],
+  title: 'Features/Spaces/Policies/SpendingLimitSummary',
+  component: SpendingLimitSummary,
   parameters: {
     layout: 'centered',
     ...setup.parameters,
@@ -85,7 +83,7 @@ const meta = {
   ],
   tags: ['autodocs'],
   args: { policy: mixed },
-} satisfies Meta<typeof PolicySummary>
+} satisfies Meta<typeof SpendingLimitSummary>
 
 export default meta
 type Story = StoryObj<typeof meta>

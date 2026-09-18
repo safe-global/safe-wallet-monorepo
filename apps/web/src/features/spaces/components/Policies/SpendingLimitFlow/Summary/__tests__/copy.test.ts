@@ -4,10 +4,10 @@ import { describePolicy, joinNames, spenderDisplayName } from '../copy'
 import { CALLOUT_DESCRIPTION_PLURAL, CALLOUT_DESCRIPTION_SINGULAR } from '../constants'
 import {
   limitSummaryBuilder,
-  policySummaryBuilder,
+  spendingLimitSummaryBuilder,
   safeAccountOptionBuilder,
   spenderSummaryBuilder,
-} from '../testBuilders'
+} from '../SpendingLimitSummary.fixtures'
 
 const spender = (name: string | undefined, resetTimes: string[]) =>
   spenderSummaryBuilder()
@@ -41,7 +41,7 @@ describe('spenderDisplayName', () => {
 
 describe('describePolicy', () => {
   it('names a single one-time limit in the singular', () => {
-    const policy = policySummaryBuilder()
+    const policy = spendingLimitSummaryBuilder()
       .with({ spenders: [spender('Alice', ['0'])] })
       .build()
 
@@ -52,7 +52,7 @@ describe('describePolicy', () => {
   })
 
   it('keeps the adjective in the plural when every limit shares one canonical period', () => {
-    const policy = policySummaryBuilder()
+    const policy = spendingLimitSummaryBuilder()
       .with({ spenders: [spender('Alice', ['10080']), spender('Bob', ['10080'])] })
       .build()
 
@@ -63,7 +63,7 @@ describe('describePolicy', () => {
   })
 
   it('drops the adjective for mixed periods', () => {
-    const policy = policySummaryBuilder()
+    const policy = spendingLimitSummaryBuilder()
       .with({ spenders: [spender('Alice', ['0']), spender('Bob', ['10080', '43200'])] })
       .build()
 
@@ -71,7 +71,7 @@ describe('describePolicy', () => {
   })
 
   it('drops the adjective for a uniform test-chain period, which has no word of its own', () => {
-    const policy = policySummaryBuilder()
+    const policy = spendingLimitSummaryBuilder()
       .with({
         safe: safeAccountOptionBuilder().with({ chainId: chains.sep }).build(),
         spenders: [spender('Alice', ['30'])],
@@ -82,7 +82,7 @@ describe('describePolicy', () => {
   })
 
   it('lists three spenders with commas and a final "and"', () => {
-    const policy = policySummaryBuilder()
+    const policy = spendingLimitSummaryBuilder()
       .with({ spenders: [spender('Alice', ['0']), spender('Bob', ['0']), spender('Carol', ['0'])] })
       .build()
 
@@ -91,7 +91,7 @@ describe('describePolicy', () => {
 
   it('uses the shortened address for an unnamed spender', () => {
     const unnamed = spender(undefined, ['1440'])
-    const policy = policySummaryBuilder()
+    const policy = spendingLimitSummaryBuilder()
       .with({ spenders: [unnamed] })
       .build()
 
@@ -101,7 +101,7 @@ describe('describePolicy', () => {
   })
 
   it('does not throw for an empty policy', () => {
-    const policy = policySummaryBuilder().with({ spenders: [] }).build()
+    const policy = spendingLimitSummaryBuilder().with({ spenders: [] }).build()
 
     expect(describePolicy(policy)).toEqual({
       title: 'You are giving spending limits.',

@@ -23,8 +23,8 @@ export type SpenderSummary = {
   limits: LimitSummary[]
 }
 
-/** Everything the confirm-step summary shows. Built from the form by `toPolicySummaryModel` (Phase 2). */
-export type PolicySummaryModel = {
+/** Everything the confirm-step summary shows. Built from the form by `toSpendingLimitSummaryModel` (WA-3152). */
+export type SpendingLimitSummaryModel = {
   safe: SafeAccountOption
   spenders: SpenderSummary[]
 }

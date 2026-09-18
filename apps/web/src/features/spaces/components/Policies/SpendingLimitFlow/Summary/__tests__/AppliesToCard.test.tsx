@@ -1,7 +1,7 @@
 import { render, screen } from '@/tests/test-utils'
-import AppliesToRow from '../AppliesToRow'
+import AppliesToCard from '../AppliesToCard'
 import { APPLIES_TO_LABEL } from '../constants'
-import { safeAccountOptionBuilder } from '../testBuilders'
+import { safeAccountOptionBuilder } from '../SpendingLimitSummary.fixtures'
 
 jest.mock('@/components/common/ChainIndicator', () => {
   const Mock = ({ chainId }: { chainId: string }) => <img data-testid="chain-logo-img" alt={`chain-${chainId}`} />
@@ -9,15 +9,15 @@ jest.mock('@/components/common/ChainIndicator', () => {
   return { __esModule: true, default: Mock }
 })
 
-describe('AppliesToRow', () => {
+describe('AppliesToCard', () => {
   it('labels the row and shows the Safe with its threshold, chain and fiat balance', () => {
     const safe = safeAccountOptionBuilder()
       .with({ name: 'Treasury', threshold: 3, owners: 5, fiatTotal: '123720' })
       .build()
 
-    render(<AppliesToRow safe={safe} />)
+    render(<AppliesToCard safe={safe} />)
 
-    const row = screen.getByTestId('policy-summary-applies-to')
+    const row = screen.getByTestId('spending-limit-summary-applies-to')
     expect(row).toHaveTextContent(APPLIES_TO_LABEL)
     expect(row).toHaveTextContent('Treasury')
     expect(screen.getByTestId('account-threshold')).toHaveTextContent('3/5')

@@ -10,9 +10,16 @@ const TOKEN_ICON_SIZE = 24
 
 type DisplayAmount = { value: string; decimals?: number }
 
+/**
+ * An amount carrying more precision than the token holds is an ordinary outcome here — an edit path or a stale
+ * model can produce one — and `safeParseUnits` logs every failed parse. Checking first keeps that expected case out
+ * of the console, and leaves the log for a genuinely malformed amount, which is a fault worth seeing.
+ */
+const exceedsPrecision = (amount: string, decimals: number): boolean => (amount.split('.')[1]?.length ?? 0) > decimals
+
 /** Raw units for `TokenAmount`'s formatter; the typed string is kept when the decimals are unknown or parsing fails. */
 const toDisplayAmount = ({ amount, token }: LimitSummary): DisplayAmount => {
-  if (token.decimals === undefined) return { value: amount }
+  if (token.decimals === undefined || exceedsPrecision(amount, token.decimals)) return { value: amount }
   const raw = safeParseUnits(amount, token.decimals)
   return raw === undefined ? { value: amount } : { value: raw.toString(), decimals: token.decimals }
 }
@@ -29,7 +36,7 @@ const LimitSummaryRow = ({ limit, chainId }: LimitSummaryRowProps): ReactElement
   const { label } = describeFrequency(limit.resetTimeMin, chainId)
 
   return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-1" data-testid="policy-summary-limit">
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1" data-testid="spending-limit-summary-limit">
       <TokenAmount
         value={value}
         decimals={decimals}
@@ -45,7 +52,7 @@ const LimitSummaryRow = ({ limit, chainId }: LimitSummaryRowProps): ReactElement
         >
           <CalendarClock className="size-4" />
         </span>
-        <Typography variant="paragraph-small" data-testid="policy-summary-frequency">
+        <Typography variant="paragraph-small" data-testid="spending-limit-summary-frequency">
           {label}
         </Typography>
       </span>

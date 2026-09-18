@@ -7,7 +7,7 @@ import {
   CALLOUT_TITLE_PREFIX,
 } from './constants'
 import { describeFrequency } from './frequency'
-import type { PolicySummaryModel, SpenderSummary } from './types'
+import type { SpendingLimitSummaryModel, SpenderSummary } from './types'
 
 type PolicyDescription = {
   title: string
@@ -26,7 +26,7 @@ export const joinNames = (names: readonly string[]): string => {
 }
 
 /** The callout adjective when every limit shares one canonical period; undefined for a mixed or test-chain set. */
-const sharedAdjective = (policy: PolicySummaryModel): string | undefined => {
+const sharedAdjective = (policy: SpendingLimitSummaryModel): string | undefined => {
   const periods = new Set(policy.spenders.flatMap((spender) => spender.limits.map((limit) => limit.resetTimeMin)))
   if (periods.size !== 1) return undefined
   const [resetTimeMin] = [...periods]
@@ -37,7 +37,7 @@ const sharedAdjective = (policy: PolicySummaryModel): string | undefined => {
  * Plain-language callout for the confirm step. One sentence cannot enumerate mixed frequencies, so the adjective is
  * used only when every limit shares one canonical period; otherwise the rows below carry the frequency.
  */
-export const describePolicy = (policy: PolicySummaryModel): PolicyDescription => {
+export const describePolicy = (policy: SpendingLimitSummaryModel): PolicyDescription => {
   const names = joinNames(policy.spenders.map(spenderDisplayName))
   const count = policy.spenders.reduce((total, spender) => total + spender.limits.length, 0)
   const adjective = sharedAdjective(policy)

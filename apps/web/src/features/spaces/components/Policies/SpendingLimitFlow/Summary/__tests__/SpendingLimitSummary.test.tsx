@@ -1,13 +1,13 @@
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { render, screen } from '@/tests/test-utils'
-import PolicySummary from '..'
+import SpendingLimitSummary from '..'
 import { describePolicy } from '../copy'
 import {
   limitSummaryBuilder,
-  policySummaryBuilder,
+  spendingLimitSummaryBuilder,
   safeAccountOptionBuilder,
   spenderSummaryBuilder,
-} from '../testBuilders'
+} from '../SpendingLimitSummary.fixtures'
 
 jest.mock('@/components/common/ChainIndicator', () => {
   const Mock = ({ chainId }: { chainId: string }) => <img data-testid="chain-logo-img" alt={`chain-${chainId}`} />
@@ -20,36 +20,36 @@ const withPeriods = (name: string | undefined, resetTimes: string[]) =>
     .with({ name, limits: resetTimes.map((resetTimeMin) => limitSummaryBuilder().with({ resetTimeMin }).build()) })
     .build()
 
-describe('PolicySummary', () => {
+describe('SpendingLimitSummary', () => {
   const alice = withPeriods('Alice', ['0'])
   const bob = withPeriods('Bob', ['10080', '43200'])
   const unnamed = withPeriods(undefined, ['1440'])
-  const policy = policySummaryBuilder()
+  const policy = spendingLimitSummaryBuilder()
     .with({ safe: safeAccountOptionBuilder().with({ name: 'Treasury' }).build(), spenders: [alice, bob, unnamed] })
     .build()
 
   it('opens with the callout, then the Safe, then one card per spender with one row per limit', () => {
-    render(<PolicySummary policy={policy} />)
+    render(<SpendingLimitSummary policy={policy} />)
 
-    expect(screen.getByTestId('policy-summary')).toBeInTheDocument()
-    expect(screen.getByTestId('policy-summary-callout')).toHaveTextContent(describePolicy(policy).title)
-    expect(screen.getByTestId('policy-summary-applies-to')).toHaveTextContent('Treasury')
-    expect(screen.getAllByTestId('policy-summary-spender')).toHaveLength(3)
-    expect(screen.getAllByTestId('policy-summary-limit')).toHaveLength(4)
+    expect(screen.getByTestId('spending-limit-summary')).toBeInTheDocument()
+    expect(screen.getByTestId('spending-limit-summary-callout')).toHaveTextContent(describePolicy(policy).title)
+    expect(screen.getByTestId('spending-limit-summary-applies-to')).toHaveTextContent('Treasury')
+    expect(screen.getAllByTestId('spending-limit-summary-spender')).toHaveLength(3)
+    expect(screen.getAllByTestId('spending-limit-summary-limit')).toHaveLength(4)
   })
 
   it('names the spenders in the callout, falling back to the shortened address', () => {
-    render(<PolicySummary policy={policy} />)
+    render(<SpendingLimitSummary policy={policy} />)
 
-    expect(screen.getByTestId('policy-summary-callout')).toHaveTextContent(
+    expect(screen.getByTestId('spending-limit-summary-callout')).toHaveTextContent(
       `You are giving Alice, Bob and ${shortenAddress(unnamed.address)} spending limits.`,
     )
   })
 
   it('shows each limit with its own frequency, in form order', () => {
-    render(<PolicySummary policy={policy} />)
+    render(<SpendingLimitSummary policy={policy} />)
 
-    const labels = screen.getAllByTestId('policy-summary-frequency').map((node) => node.textContent)
+    const labels = screen.getAllByTestId('spending-limit-summary-frequency').map((node) => node.textContent)
     expect(labels).toEqual(['One time only', 'Weekly', 'Monthly', 'Daily'])
   })
 })

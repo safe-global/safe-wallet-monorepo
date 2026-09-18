@@ -3,9 +3,10 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { Builder, type IBuilder } from '@/tests/Builder'
 import { buildSafeAccountId } from '../../SafeAccountSelector/utils'
 import type { SafeAccountOption } from '../../SafeAccountSelector/types'
-import type { LimitSummary, LimitSummaryToken, PolicySummaryModel, SpenderSummary } from './types'
+import type { LimitSummary, LimitSummaryToken, SpendingLimitSummaryModel, SpenderSummary } from './types'
 
-// Not `@/tests/test-utils`: that module pulls jest globals in, and these builders must stay importable from stories.
+// Test-only: the `.fixtures` suffix marks it, and it stays out of `__tests__/` because jest runs every file there
+// as a suite. Deliberately avoids `@/tests/test-utils`, which pulls jest globals in.
 const fakeAddress = (): string => checksumAddress(faker.finance.ethereumAddress())
 
 const PRODUCTION_PERIODS = ['0', '1440', '10080', '43200']
@@ -48,8 +49,8 @@ export const safeAccountOptionBuilder = (): IBuilder<SafeAccountOption> => {
   })
 }
 
-export const policySummaryBuilder = (): IBuilder<PolicySummaryModel> =>
-  Builder.new<PolicySummaryModel>().with({
+export const spendingLimitSummaryBuilder = (): IBuilder<SpendingLimitSummaryModel> =>
+  Builder.new<SpendingLimitSummaryModel>().with({
     safe: safeAccountOptionBuilder().build(),
     spenders: [spenderSummaryBuilder().build()],
   })
