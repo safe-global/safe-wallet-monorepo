@@ -8,8 +8,6 @@ import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import useChainId from '../useChainId'
 import useSafeInfo from '../useSafeInfo'
-import { Errors } from '@/services/exceptions'
-import useLogError from '../useLogError'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { useCurrentChain } from '../useChains'
 import { useSafeAddressFromUrl } from '../useSafeAddressFromUrl'
@@ -70,16 +68,6 @@ const useLoadSafeInfo = (): AsyncResult<ExtendedSafeInfo> => {
   // Only 404s are suppressed during CF sync — real errors (500, network) must still surface.
   const isCgw404 = !!cgwError && 'status' in cgwError && cgwError.status === 404
   const suppressCgwError = awaitingCfSync && isCgw404
-
-  // Report only when not suppressing (CF sync + 404) and no CF fallback
-  const reportedCgwError =
-    cgwError && !suppressCgwError && !undeployedSafe
-      ? 'message' in cgwError
-        ? String(cgwError.message)
-        : 'Failed to load safe info'
-      : undefined
-
-  useLogError(Errors._600, reportedCgwError)
 
   // Self-heal: if the safe is deployed on-chain (backend returned SafeInfo) but a
   // counterfactual entry still exists locally, remove it. The listener propagates

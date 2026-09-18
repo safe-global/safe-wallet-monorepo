@@ -1,13 +1,21 @@
 import { AlertCircle, RotateCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
-import { LOAD_ERROR_TEXT } from '../constants'
+import { LOAD_ERROR_TEXT } from '../SafeAccountSelector/constants'
 import PopupMessage from './PopupMessage'
 
-/** The eligible accounts could not be loaded. Same shape as the empty state, but in an error tone. */
-const LoadError = ({ onRetry }: { onRetry?: () => void }) => (
+/** A popup list that failed to load. Same shape as the empty state, in an error tone. */
+const LoadError = ({
+  message = LOAD_ERROR_TEXT,
+  onRetry,
+  'data-testid': testId = 'safe-accounts-load-error',
+}: {
+  message?: string
+  onRetry?: () => void
+  'data-testid'?: string
+}) => (
   <PopupMessage
-    data-testid="safe-accounts-load-error"
+    data-testid={testId}
     action={
       onRetry && (
         <Button variant="destructive" size="sm" onClick={onRetry}>
@@ -19,7 +27,7 @@ const LoadError = ({ onRetry }: { onRetry?: () => void }) => (
   >
     <AlertCircle className="text-destructive size-4 shrink-0 translate-y-0.5" />
     <Typography variant="paragraph-small" className="text-destructive w-full">
-      {LOAD_ERROR_TEXT}
+      {message}
     </Typography>
   </PopupMessage>
 )

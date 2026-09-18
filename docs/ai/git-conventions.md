@@ -12,7 +12,7 @@ Read this before committing, pushing, opening a PR, or reviewing one. Nothing in
 
 ## Commits
 
-- **Pre-commit hooks (Husky):** **pre-commit** runs `lint-staged` (**prettier only — no type-check at commit time**); **pre-push** runs linting (set `RUN_TESTS_ON_PUSH=true` to also run tests).
+- **Pre-commit hooks (Husky):** **pre-commit** runs `lint-staged` (**prettier only — no type-check at commit time**).
 - **Commit messages** use [semantic commit messages](https://www.conventionalcommits.org/en/v1.0.0/) as described in [CONTRIBUTING.md](../../CONTRIBUTING.md).
 - **CI/CD changes always use `chore:`** — CI, workflows, build configs (NEVER `feat:` or `fix:`).
 - **Test changes always use `tests:`** — changes in unit or e2e tests (NEVER `feat:` or `fix:`).
