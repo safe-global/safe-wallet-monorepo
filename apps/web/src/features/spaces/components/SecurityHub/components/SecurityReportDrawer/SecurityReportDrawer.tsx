@@ -2,9 +2,12 @@ import { type ReactElement, useCallback, useEffect, useRef, useState } from 'rea
 import type { ScanContext, ScanResult } from '@/features/security/types'
 import { useSecurityScan } from '@/features/security'
 import { useChain } from '@/hooks/useChains'
-import { Sheet, SheetContent } from '@/components/ui/sheet'
+import { Drawer } from '@/components/common/Drawer'
+import Identicon from '@/components/common/Identicon'
+import CopyButton from '@/components/common/CopyButton'
+import { Typography } from '@/components/ui/typography'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { HnSignupFlow } from '@/features/hypernative'
-import SecurityDrawerHeader from './SecurityDrawerHeader'
 import SecurityDrawerContent from './SecurityDrawerContent'
 import type { SelectedSafe, SpaceSafeEntry } from '../../types'
 
@@ -44,40 +47,43 @@ const SecurityReportDrawer = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isComplete, lastScannedAt])
 
+  const address = selectedSafe?.address
+
   return (
     <>
-      <Sheet
+      <Drawer
+        // Keep the Drawer mounted while closed so the sheet can play its slide-out animation
         open={!!selectedSafe}
-        onOpenChange={(open) => {
-          if (!open) onClose()
-        }}
+        onClose={onClose}
+        ariaLabel="Security report"
+        icon={address ? <Identicon address={address} size={28} /> : undefined}
+        title={
+          address ? (
+            <span title={selectedEntry?.name || address}>{selectedEntry?.name || shortenAddress(address)}</span>
+          ) : undefined
+        }
+        subtitle={
+          address ? (
+            <>
+              <Typography variant="paragraph-mini" className="text-[10px] text-muted-foreground">
+                {shortenAddress(address)}
+              </Typography>
+              <CopyButton text={address} className="!p-0.5 text-muted-foreground [&_svg]:!size-3" />
+            </>
+          ) : undefined
+        }
       >
-        <SheetContent
-          side="right"
-          showCloseButton={false}
-          aria-label="Security report"
-          variant="floating"
-          surface="muted"
-          padding="none"
-          // eslint-disable-next-line no-restricted-syntax -- w-[440px]! beats base data-[side]:w-3/4 specificity; gap-0 removes base gap-4
-          className="w-[440px]! gap-0"
-        >
-          {selectedSafe && (
-            <div className="flex min-h-0 gap-3 flex-1 flex-col overflow-hidden">
-              <SecurityDrawerHeader address={selectedSafe.address} name={selectedEntry?.name} onClose={onClose} />
-
-              <SecurityDrawerContent
-                scanContext={scanContext}
-                results={results}
-                isComplete={isComplete}
-                lastScannedAt={lastScannedAt}
-                safeQueryParam={chain?.shortName ? `${chain.shortName}:${selectedSafe.address}` : undefined}
-                onHnSignupClick={handleHnSignupClick}
-              />
-            </div>
-          )}
-        </SheetContent>
-      </Sheet>
+        {selectedSafe && (
+          <SecurityDrawerContent
+            scanContext={scanContext}
+            results={results}
+            isComplete={isComplete}
+            lastScannedAt={lastScannedAt}
+            safeQueryParam={chain?.shortName ? `${chain.shortName}:${selectedSafe.address}` : undefined}
+            onHnSignupClick={handleHnSignupClick}
+          />
+        )}
+      </Drawer>
 
       <HnSignupFlow open={isHnSignupOpen} onClose={() => setIsHnSignupOpen(false)} />
     </>
