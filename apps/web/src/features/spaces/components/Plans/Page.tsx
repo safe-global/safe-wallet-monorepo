@@ -16,7 +16,7 @@ import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
 import { useStartCheckout } from '../../hooks/billing/useStartCheckout'
 import { useChangePlan } from '../../hooks/billing/useChangePlan'
-import ChangePlanDialog from './ChangePlanDialog'
+import ChangePlanFlow from './ChangePlanFlow'
 import type { PlanPick } from './types'
 
 const PlansSkeleton = () => (
@@ -83,12 +83,7 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
         )}
 
         {pick && currentPlan && (
-          <ChangePlanDialog
-            spaceId={spaceId}
-            pick={pick}
-            currentPlan={currentPlan}
-            onClose={() => setPick(undefined)}
-          />
+          <ChangePlanFlow spaceId={spaceId} pick={pick} currentPlan={currentPlan} onClose={() => setPick(undefined)} />
         )}
       </div>
     </AuthState>

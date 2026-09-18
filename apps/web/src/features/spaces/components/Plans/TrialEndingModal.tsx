@@ -13,7 +13,7 @@ import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import { useCurrentMembership, useIsAdmin } from '../../hooks/useSpaceMembers'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
-import ChangePlanDialog from './ChangePlanDialog'
+import ChangePlanFlow from './ChangePlanFlow'
 import { ENTERPRISE_TIER } from './fixtures'
 import { PlanCatalog } from './PlanCards'
 import { salesHintFor } from './PlanChooserModal'
@@ -93,7 +93,7 @@ const TrialEndingChooser = ({
       </Dialog>
 
       {pick && (
-        <ChangePlanDialog spaceId={spaceId} pick={pick} currentPlan={currentPlan} onClose={() => setPick(undefined)} />
+        <ChangePlanFlow spaceId={spaceId} pick={pick} currentPlan={currentPlan} onClose={() => setPick(undefined)} />
       )}
     </>
   )

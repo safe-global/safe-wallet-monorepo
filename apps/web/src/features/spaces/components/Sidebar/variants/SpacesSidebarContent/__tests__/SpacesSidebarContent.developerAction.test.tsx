@@ -18,10 +18,6 @@ jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => '1',
 }))
 
-jest.mock('@/features/spaces/hooks/useSpacePlan', () => ({
-  useSpacePlan: () => ({ isPaidActive: false }),
-}))
-
 jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
   useIsActiveMember: () => true,
 }))

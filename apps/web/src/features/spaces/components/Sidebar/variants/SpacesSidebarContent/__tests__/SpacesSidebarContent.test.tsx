@@ -8,7 +8,6 @@ const mockUseCurrentSpaceId = jest.fn()
 const mockUseIsActiveMember = jest.fn()
 const mockUseResolvedSidebarNav = jest.fn()
 const mockUseHasFeature = jest.fn()
-const mockUseSpacePlan = jest.fn()
 
 jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => mockUseCurrentSpaceId(),
@@ -16,10 +15,6 @@ jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
 
 jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
   useIsActiveMember: jest.fn((spaceId) => mockUseIsActiveMember(spaceId)),
-}))
-
-jest.mock('@/features/spaces/hooks/useSpacePlan', () => ({
-  useSpacePlan: (spaceId?: string) => mockUseSpacePlan(spaceId),
 }))
 
 jest.mock('@/hooks/useChains', () => ({
@@ -139,51 +134,6 @@ describe('SpacesSidebarContent', () => {
     mockUseIsActiveMember.mockReturnValue(true)
     mockUseResolvedSidebarNav.mockReturnValue(mockResolvedNavItems)
     mockUseHasFeature.mockReturnValue(true)
-    mockUseSpacePlan.mockReturnValue({ isPaidActive: false, isLoading: false, isUninitialized: false })
-  })
-
-  describe('PRO chip on the Plans entry', () => {
-    const plansIcon = () => {
-      const [, setupGroup] = mockUseResolvedSidebarNav.mock.calls[0]
-      const Icon = setupGroup.items.find((i: { href: string }) => i.href === '/spaces/plans').icon
-      return render(<Icon />)
-    }
-
-    it('replaces the icon with the chip while the workspace has no paid plan', () => {
-      render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
-
-      expect(mockUseSpacePlan).toHaveBeenCalledWith('uuid-1')
-      plansIcon()
-      expect(screen.getByTestId('plans-pro-chip')).toBeInTheDocument()
-    })
-
-    it('keeps the regular icon on a paid plan', () => {
-      mockUseSpacePlan.mockReturnValue({ isPaidActive: true, isLoading: false, isUninitialized: false })
-
-      render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
-
-      plansIcon()
-      expect(screen.queryByTestId('plans-pro-chip')).not.toBeInTheDocument()
-      expect(screen.getByText('Pro')).toBeInTheDocument()
-    })
-
-    it('keeps the regular icon until the plan is known, so a paid Workspace never flashes the chip', () => {
-      mockUseSpacePlan.mockReturnValue({ isPaidActive: false, isLoading: true, isUninitialized: false })
-
-      render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
-
-      plansIcon()
-      expect(screen.queryByTestId('plans-pro-chip')).not.toBeInTheDocument()
-    })
-
-    it('keeps the regular icon while SAFE_PRO is off', () => {
-      mockUseHasFeature.mockImplementation((feature) => feature !== FEATURES.SAFE_PRO)
-
-      render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
-
-      plansIcon()
-      expect(screen.queryByTestId('plans-pro-chip')).not.toBeInTheDocument()
-    })
   })
 
   it('renders SpacesSidebarVariant with resolved navigation', () => {

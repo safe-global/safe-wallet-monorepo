@@ -30,7 +30,7 @@ jest.mock('../../../hooks/billing/useStartCheckout', () => ({
 jest.mock('../../../hooks/billing/useBillingPortal', () => ({
   useBillingPortal: () => ({ openPortal: mockOpenPortal, isRedirecting: false }),
 }))
-jest.mock('../ChangePlanDialog', () => ({
+jest.mock('../ChangePlanFlow', () => ({
   __esModule: true,
   default: ({
     pick,

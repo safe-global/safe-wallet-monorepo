@@ -99,6 +99,13 @@ describe('SelectAccountsStep', () => {
     expect(onContinue).toHaveBeenCalledWith([{ chainId: '1', address: '0xB' }])
   })
 
+  it('names where the step leads when it is not a checkout', () => {
+    renderStep({ continueLabel: 'Continue to downgrade' })
+
+    expect(screen.getByRole('button', { name: /Continue to downgrade/ })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Continue to checkout/ })).not.toBeInTheDocument()
+  })
+
   it('filters the table by the search query without losing the selection', () => {
     renderStep()
 

@@ -54,7 +54,7 @@ jest.mock('@/features/__core__', () => ({
   }),
   createFeatureHandle: () => ({}),
 }))
-jest.mock('../ChangePlanDialog', () => ({
+jest.mock('../ChangePlanFlow', () => ({
   __esModule: true,
   default: ({ pick, currentPlan }: { pick: { tier: { name: string } }; currentPlan: { isTrialing: boolean } }) => (
     <div data-testid="change-plan-dialog" data-to={pick.tier.name} data-trial={String(currentPlan.isTrialing)} />

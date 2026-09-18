@@ -18,8 +18,9 @@ import { isElevationRequiredError } from '@/features/oidc-auth'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import { formatDate } from '@safe-global/utils/utils/date'
 import { useChangePlan } from '../../hooks/billing/useChangePlan'
+import { useSeatTrim } from '../../hooks/billing/useSeatTrim'
 import { formatPlanPrice, getChangeDirection, priceSuffix } from './planTiers'
-import type { CurrentPlan, PlanPick } from './types'
+import type { CurrentPlan, PlanPick, SafeRef } from './types'
 
 /** Stripe amounts arrive in minor units and its dates in seconds. */
 const money = (minorUnits: number, currency: string) => formatCurrency(minorUnits / 100, currency.toUpperCase())
@@ -50,16 +51,20 @@ export default function ChangePlanDialog({
   spaceId,
   pick,
   currentPlan,
+  removed = [],
   onClose,
 }: {
   spaceId: string
   pick: PlanPick
   currentPlan: CurrentPlan
+  /** Safes the accounts step left out; they leave the Workspace right before the plan changes. */
+  removed?: SafeRef[]
   onClose: () => void
 }) {
   const dispatch = useAppDispatch()
   const { previewChange, preview, isPreviewing, previewError, changePlan, isChanging, changeError } =
     useChangePlan(spaceId)
+  const { trim, isTrimming, error: trimError } = useSeatTrim(spaceId)
   const [isVerifying, setIsVerifying] = useState(false)
   const { priceId, paymentLinkId } = pick.option
   const direction = getChangeDirection(currentPlan, pick)
@@ -79,6 +84,7 @@ export default function ChangePlanDialog({
 
   const onConfirm = async () => {
     if (!priceId || !paymentLinkId) return
+    if (!(await trim(removed))) return
     const ok = await changePlan(priceId, paymentLinkId)
     if (!ok) return
     dispatch(
@@ -92,7 +98,9 @@ export default function ChangePlanDialog({
   }
 
   const error = previewError ?? (isVerifying ? undefined : changeError)
-  const isBusy = isChanging || isVerifying
+  const errorMessage =
+    trimError ?? (error ? getRtkQueryErrorMessage(error) || 'Something went wrong. Please try again.' : undefined)
+  const isBusy = isTrimming || isChanging || isVerifying
 
   return (
     <AlertDialog open onOpenChange={(open) => !open && !isBusy && onClose()}>
@@ -159,12 +167,17 @@ export default function ChangePlanDialog({
           </div>
         ) : null}
 
-        {error && (
+        {removed.length > 0 && (
+          <Typography variant="paragraph-small" color="muted" data-testid="change-plan-removed-note">
+            {removed.length === 1 ? '1 Safe account' : `${removed.length} Safe accounts`} will be removed from the
+            Workspace. They remain available in My accounts.
+          </Typography>
+        )}
+
+        {errorMessage && (
           <Alert variant="destructive">
             <AlertSeverityIcon variant="destructive" />
-            <AlertDescription>
-              {getRtkQueryErrorMessage(error) || 'Something went wrong. Please try again.'}
-            </AlertDescription>
+            <AlertDescription>{errorMessage}</AlertDescription>
           </Alert>
         )}
 

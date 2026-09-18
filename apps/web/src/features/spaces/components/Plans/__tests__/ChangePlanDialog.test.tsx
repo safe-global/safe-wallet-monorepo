@@ -17,6 +17,11 @@ jest.mock('../../../hooks/billing/useChangePlan', () => ({
     ...mockState,
   }),
 }))
+const mockTrim = jest.fn()
+let mockTrimState: Record<string, unknown> = {}
+jest.mock('../../../hooks/billing/useSeatTrim', () => ({
+  useSeatTrim: () => ({ trim: mockTrim, isTrimming: false, error: undefined, ...mockTrimState }),
+}))
 const mockShowNotification = jest.fn()
 jest.mock('@/store/notificationsSlice', () => ({
   ...jest.requireActual('@/store/notificationsSlice'),
@@ -65,6 +70,8 @@ describe('ChangePlanDialog', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockState = {}
+    mockTrimState = {}
+    mockTrim.mockResolvedValue(true)
   })
 
   it('previews the picked price on open and shows a skeleton until it arrives', () => {
@@ -99,6 +106,55 @@ describe('ChangePlanDialog', () => {
     expect(mockShowNotification).toHaveBeenCalledWith(
       expect.objectContaining({ message: 'Plan downgraded to Starter.', variant: 'success' }),
     )
+  })
+
+  it('removes the Safes left out before the change and says so in the summary', async () => {
+    mockState = { preview }
+    mockChangePlan.mockResolvedValue(true)
+    const removed = [{ chainId: '1', address: '0xB' }]
+    render(
+      <ChangePlanDialog
+        spaceId="space-1"
+        pick={pick}
+        currentPlan={currentPlan}
+        removed={removed}
+        onClose={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByTestId('change-plan-removed-note')).toHaveTextContent(
+      '1 Safe account will be removed from the Workspace. They remain available in My accounts.',
+    )
+
+    fireEvent.click(screen.getByTestId('change-plan-confirm'))
+
+    await waitFor(() => expect(mockChangePlan).toHaveBeenCalledWith('price_starter', 'pl_starter'))
+    expect(mockTrim).toHaveBeenCalledWith(removed)
+    expect(mockTrim.mock.invocationCallOrder[0]).toBeLessThan(mockChangePlan.mock.invocationCallOrder[0])
+  })
+
+  it('stops before the change when the removal fails and shows why', async () => {
+    mockState = { preview }
+    mockTrim.mockResolvedValue(false)
+    mockTrimState = { error: 'We couldn’t update the Workspace. Please try again.' }
+    const onClose = jest.fn()
+    render(
+      <ChangePlanDialog
+        spaceId="space-1"
+        pick={pick}
+        currentPlan={currentPlan}
+        removed={[{ chainId: '1', address: '0xB' }]}
+        onClose={onClose}
+      />,
+    )
+
+    fireEvent.click(screen.getByTestId('change-plan-confirm'))
+
+    await waitFor(() => expect(mockTrim).toHaveBeenCalled())
+    expect(mockChangePlan).not.toHaveBeenCalled()
+    expect(onClose).not.toHaveBeenCalled()
+    expect(screen.getByText('We couldn’t update the Workspace. Please try again.')).toBeInTheDocument()
+    expect(screen.queryByTestId('change-plan-removed-note')).toBeInTheDocument()
   })
 
   it('keeps the dialog open and shows the error when the change is rejected', async () => {

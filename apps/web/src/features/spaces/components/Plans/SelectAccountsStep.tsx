@@ -39,11 +39,12 @@ export const initialSelection = (items: AllSafeItems): Record<string, boolean> =
 export const seatsTooltip = (planName: string, limit: number): string =>
   `${planName} covers ${limit} Safe accounts. Safe accounts you leave out remain available outside the Workspace. You can swap them in any time.`
 
-/** Trims the Workspace to the plan's seats before checkout; the Safes deselected are removed from it. */
+/** Trims the Workspace to the plan's seats before the plan is taken; the Safes deselected are removed from it. */
 export default function SelectAccountsStep({
   title = 'Select Safe accounts for your plan',
   limit,
   planName,
+  continueLabel = 'Continue to checkout',
   onBack,
   onContinue,
   isSubmitting,
@@ -52,6 +53,8 @@ export default function SelectAccountsStep({
   title?: string
   limit: number
   planName: string
+  /** Names where the step leads: Stripe for a new plan, the change summary for a live one. */
+  continueLabel?: string
   onBack: () => void
   onContinue: (removed: SafeRef[]) => void
   isSubmitting?: boolean
@@ -166,7 +169,7 @@ export default function SelectAccountsStep({
           disabled={selectedKeys.size === 0 || isOverLimit || isSubmitting}
           onClick={() => onContinue(removed.map(({ chainId, address }) => ({ chainId, address })))}
         >
-          Continue to checkout
+          {continueLabel}
           <ArrowRight />
         </Button>
       </div>

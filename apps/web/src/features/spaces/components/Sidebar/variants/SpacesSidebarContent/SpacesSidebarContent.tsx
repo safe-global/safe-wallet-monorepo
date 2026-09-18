@@ -8,19 +8,6 @@ import { SpacesSidebarVariant } from '../SpacesSidebarVariant'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { AppRoutes } from '@/config/routes'
-import ProChip from '@/public/images/safe-pro/pro-chip.svg'
-import { useSpacePlan } from '../../../../hooks/useSpacePlan'
-
-// The chip is a 24x16 fill-only lockup: it sits in the 16px icon slot (so the label lines up with the other items)
-// and overflows it sideways, overriding the menu button's 16px svg sizing and the active-state stroke.
-const PlansProChip = () => (
-  <span
-    className="flex size-4 shrink-0 items-center justify-center [&_svg]:h-4! [&_svg]:w-6! [&_svg]:max-w-none [&_svg]:shrink-0 [&_svg]:stroke-none!"
-    data-testid="plans-pro-chip"
-  >
-    <ProChip />
-  </span>
-)
 
 export const SpacesSidebarContent = ({
   selectedSpace,
@@ -34,14 +21,6 @@ export const SpacesSidebarContent = ({
   const isAuditLogEnabled = useHasFeature(FEATURES.SPACE_AUDIT_LOG)
   const isPoliciesEnabled = useHasFeature(FEATURES.POLICIES)
   const isSafeProEnabled = useHasFeature(FEATURES.SAFE_PRO_ANNOUNCEMENT)
-  const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
-  const {
-    isPaidActive,
-    isLoading: isPlanLoading,
-    isUninitialized: isPlanUninitialized,
-  } = useSpacePlan(selectedSpace?.uuid)
-  // Decided only once the plan is known, so a paid Workspace never flashes the chip while it loads.
-  const hasPlansUpsell = isSafePro && !isPlanLoading && !isPlanUninitialized && !isPaidActive
 
   const getLink = (item: SidebarItemConfig) => ({
     pathname: item.href,
@@ -82,11 +61,9 @@ export const SpacesSidebarContent = ({
   const filteredSetupGroup = useMemo(
     () => ({
       ...spacesSetupGroup,
-      items: spacesSetupGroup.items
-        .filter((i) => !gatedOffHrefs.has(i.href))
-        .map((i) => (hasPlansUpsell && i.href === AppRoutes.spaces.plans ? { ...i, icon: PlansProChip } : i)),
+      items: spacesSetupGroup.items.filter((i) => !gatedOffHrefs.has(i.href)),
     }),
-    [gatedOffHrefs, hasPlansUpsell],
+    [gatedOffHrefs],
   )
 
   const filteredMainNavigation = useMemo(
