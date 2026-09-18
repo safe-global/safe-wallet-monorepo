@@ -296,12 +296,12 @@ describe('AddProposer signing logic', () => {
     const mockUseWallet = useWallet as jest.MockedFunction<typeof useWallet>
     const mockUseDelegatorSelection = useDelegatorSelection as jest.MockedFunction<typeof useDelegatorSelection>
     const mockGetSigner = getAssertedChainSigner as jest.MockedFunction<typeof getAssertedChainSigner>
-    const mockUseAddDelegateV2 = useDelegatesPostDelegateV2Mutation as jest.MockedFunction<
-      typeof useDelegatesPostDelegateV2Mutation
+    const mockUseAddDelegateV3 = useDelegatesPostDelegateV3Mutation as jest.MockedFunction<
+      typeof useDelegatesPostDelegateV3Mutation
     >
 
-    const submitProposer = async (addDelegateV2: jest.Mock) => {
-      mockUseAddDelegateV2.mockReturnValue([addDelegateV2, {} as never])
+    const submitProposer = async (addDelegateV3: jest.Mock) => {
+      mockUseAddDelegateV3.mockReturnValue([addDelegateV3, {} as never])
 
       const utils = render(<AddProposer onClose={jest.fn()} onSuccess={jest.fn()} />)
 
@@ -338,11 +338,11 @@ describe('AddProposer signing logic', () => {
 
     it('names the owner who already signed instead of the generic error', async () => {
       const owner = '0x4c3c38a459F0bAABB763290111B66ed01b5fEfA2'
-      const addDelegateV2 = jest.fn().mockReturnValue({
+      const addDelegateV3 = jest.fn().mockReturnValue({
         unwrap: () => Promise.reject({ status: 400, data: { message: `Signature for owner ${owner} already exists` } }),
       })
 
-      const { findByText, queryByText } = await submitProposer(addDelegateV2)
+      const { findByText, queryByText } = await submitProposer(addDelegateV3)
 
       expect(
         await findByText(
