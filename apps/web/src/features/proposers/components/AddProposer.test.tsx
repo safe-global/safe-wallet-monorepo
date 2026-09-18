@@ -158,7 +158,7 @@ describe('AddProposer signing logic', () => {
     it('does not save the name locally when the delegate request fails', async () => {
       const failingAddDelegate = jest
         .fn()
-        .mockReturnValue({ unwrap: () => Promise.reject(new Error('delegate rejected')) })
+        .mockReturnValue({ unwrap: () => Promise.reject(new Error('Request failed with status 500')) })
       mockUseAddDelegateV3.mockReturnValue([failingAddDelegate, {} as never])
 
       const { getByLabelText, getByTestId, findByText } = render(
