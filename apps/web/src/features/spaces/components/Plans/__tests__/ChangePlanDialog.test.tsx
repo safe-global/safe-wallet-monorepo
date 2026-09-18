@@ -47,6 +47,7 @@ const currentPlan = {
   billingCycle: 'month' as const,
   isTrialing: false,
   periodEndsAt: '2026-12-06T00:00:00Z',
+  seatsLabel: '20 Safe accounts',
 }
 const preview = {
   amountDue: -31000,
@@ -97,14 +98,15 @@ describe('ChangePlanDialog', () => {
       />,
     )
 
-    expect(screen.getByRole('heading', { name: 'Downgrade plan' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Switch to 2 Safe accounts' })).toBeInTheDocument()
     expect(screen.getByTestId('change-plan-summary')).toHaveTextContent('Current plan')
-    expect(screen.getByTestId('change-plan-summary')).toHaveTextContent('Business')
+    expect(screen.getByTestId('change-plan-summary')).toHaveTextContent('Business· 20 Safe accounts€499/mo')
     expect(screen.getByTestId('change-plan-summary')).toHaveTextContent('New plan')
-    expect(screen.getByTestId('change-plan-summary')).toHaveTextContent('Starter')
+    expect(screen.getByTestId('change-plan-summary')).toHaveTextContent('Starter· 2 Safe accounts€189/mo')
     expect(screen.getByText('Unused time on Business')).toBeInTheDocument()
-    expect(screen.getByText('Your plan will be downgraded immediately.')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Confirm downgrade' })).toBeInTheDocument()
+    expect(screen.getByText('Your plan will be downgraded immediately')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Confirm change' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument()
     expect(screen.getByTestId('change-plan-amount-due')).toHaveTextContent('-€ 310')
     expect(screen.getByText(/Next billing date: Dec 6, 2026/)).toBeInTheDocument()
 
@@ -199,8 +201,9 @@ describe('ChangePlanDialog', () => {
       />,
     )
 
-    expect(screen.getByRole('heading', { name: 'Upgrade plan' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Confirm upgrade' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Upgrade to 2 Safe accounts' })).toBeInTheDocument()
+    expect(screen.getByText('Your plan will be upgraded immediately')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Confirm change' })).toBeInTheDocument()
   })
 
   it('skips the proration preview during a trial and explains when billing starts', async () => {

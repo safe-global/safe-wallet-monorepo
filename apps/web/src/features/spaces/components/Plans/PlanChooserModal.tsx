@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
+import { highlightSafePro } from '@/components/common/ProHighlight'
 import { formatDate } from '@safe-global/utils/utils/date'
 import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
 import { useSeatTrimCheckout } from '../../hooks/billing/useSeatTrimCheckout'
@@ -38,10 +39,15 @@ export const chooserCopy = (
       subtitle: 'Update your billing details to keep using your Workspace, everything is exactly as you left it.',
     }
   }
-  return {
-    title: endedAt === null ? 'Your Workspace has no active plan' : `Your free trial ended on ${formatDate(endedAt)}`,
-    subtitle: 'Choose a plan to keep using your Workspace, everything is exactly as you left it.',
-  }
+  return endedAt === null
+    ? {
+        title: 'Your Workspace has no active plan',
+        subtitle: 'Choose a plan to keep using your Workspace, everything is exactly as you left it.',
+      }
+    : {
+        title: `Your Safe Pro free trial ended on ${formatDate(endedAt)}`,
+        subtitle: 'Choose a plan to keep using your Workspace.',
+      }
 }
 
 /**
@@ -93,7 +99,7 @@ export default function PlanChooserModal({
             <>
               <div className="flex flex-col gap-1">
                 <Typography variant="h3" as={DialogTitle}>
-                  {title}
+                  {highlightSafePro(title)}
                 </Typography>
                 <Typography color="muted">{subtitle}</Typography>
               </div>

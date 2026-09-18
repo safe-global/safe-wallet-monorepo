@@ -23,7 +23,12 @@ const monthlyEquivalent = (price: number, billingCycle: 'month' | 'year' | null)
   billingCycle === 'year' ? price / 12 : price
 
 /** The live subscription as the cards and the change dialog need it. */
-export const toCurrentPlan = (subscription: Subscription, plan: PlanSummary, isTrialing: boolean): CurrentPlan => ({
+export const toCurrentPlan = (
+  subscription: Subscription,
+  plan: PlanSummary,
+  isTrialing: boolean,
+  seatsQuota?: number | null,
+): CurrentPlan => ({
   name: getSubscriptionPlanName(subscription) ?? plan.name,
   price: subscription.plan.currentPrice,
   currency: subscription.plan.currency,
@@ -31,6 +36,7 @@ export const toCurrentPlan = (subscription: Subscription, plan: PlanSummary, isT
   isTrialing,
   periodEndsAt: plan.periodEndsAt,
   daysLeft: plan.daysLeft,
+  seatsLabel: seatsQuota === undefined ? undefined : seatsLabel(seatsQuota === null ? 'unlimited' : seatsQuota),
 })
 
 /** Compares monthly-equivalent prices, so a yearly plan is not read as a 12x upgrade. */

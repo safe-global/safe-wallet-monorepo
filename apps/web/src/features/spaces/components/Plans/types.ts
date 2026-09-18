@@ -43,6 +43,8 @@ export type CurrentPlan = {
   isTrialing: boolean
   periodEndsAt: string | null
   daysLeft?: number | null
+  /** "20 Safe accounts", when the seats quota is known. */
+  seatsLabel?: string
 }
 
 export type PlanChangeDirection = 'upgrade' | 'downgrade' | 'change'

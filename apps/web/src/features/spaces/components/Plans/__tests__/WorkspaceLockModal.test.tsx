@@ -129,7 +129,7 @@ describe('WorkspaceLockModal', () => {
 
   it('words the member explanation by lock reason', () => {
     expect(memberCopy('lapsed', null, ENDED_AT, 'Acme Inc')).toEqual({
-      title: 'Your free trial ended on Dec 5, 2026',
+      title: 'Your Safe Pro free trial ended on Dec 5, 2026',
       body: 'An admin needs to choose a plan to unlock it. Your Safe accounts remain available outside the Workspace.',
     })
     expect(memberCopy('payment-failed', null, null, 'Acme Inc').title).toBe('Your Workspace’s last payment failed')

@@ -40,8 +40,8 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
   const [pick, setPick] = useState<PlanPick>()
 
   const currentPlan = useMemo(
-    () => (canChange && subscription && plan ? toCurrentPlan(subscription, plan, isTrialing) : undefined),
-    [canChange, subscription, plan, isTrialing],
+    () => (canChange && subscription && plan ? toCurrentPlan(subscription, plan, isTrialing, seats?.quota) : undefined),
+    [canChange, subscription, plan, isTrialing, seats?.quota],
   )
   const tiers = useMemo(
     () =>

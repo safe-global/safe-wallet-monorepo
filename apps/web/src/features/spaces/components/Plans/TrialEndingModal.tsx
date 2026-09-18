@@ -147,7 +147,7 @@ export default function TrialEndingModal({ spaceId }: { spaceId: string }) {
     reminderSeen(spaceId).set(stage)
     setIsOpen(false)
   }
-  const currentPlan = toCurrentPlan(subscription, plan, isTrialing)
+  const currentPlan = toCurrentPlan(subscription, plan, isTrialing, seats?.quota)
 
   return (
     <TrialEndingChooser
