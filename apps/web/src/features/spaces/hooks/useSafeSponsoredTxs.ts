@@ -13,6 +13,10 @@ export type SafeSponsoredTxs = {
   meter: SponsoredTxsMeter | null
   /** Sponsored transactions left in the cycle; null when the plan sets no cap or the Safe is not on a plan. */
   left: number | null
+  /** The Workspace whose allowance pays for a relay; null unless the Safe is on a plan. */
+  spaceId: string | null
+  /** The Workspace can still sponsor a transaction right now. */
+  canSponsor: boolean
   isLoading: boolean
 }
 
@@ -35,6 +39,8 @@ export const useSafeSponsoredTxs = (): SafeSponsoredTxs => {
     isPro,
     meter: isPro ? sponsoredTxs : null,
     left,
+    spaceId: isPro ? spaceId : null,
+    canSponsor: isPro && (left === null || left > 0),
     isLoading: isEnabled && (isSpacesLoading || (spaceId !== null && isPlanLoading)),
   }
 }

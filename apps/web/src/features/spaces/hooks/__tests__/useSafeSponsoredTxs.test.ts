@@ -31,7 +31,15 @@ describe('useSafeSponsoredTxs', () => {
 
     expect(mockUseSafeSpaces).toHaveBeenCalledWith(false)
     expect(mockUseSpacePlan).toHaveBeenCalledWith('space-1')
-    expect(result.current).toEqual({ isEnabled: true, isPro: true, meter, left: 30, isLoading: false })
+    expect(result.current).toEqual({
+      isEnabled: true,
+      isPro: true,
+      meter,
+      left: 30,
+      spaceId: 'space-1',
+      canSponsor: true,
+      isLoading: false,
+    })
   })
 
   it('caps the count at zero and reads a missing quota as unlimited', () => {
@@ -40,14 +48,18 @@ describe('useSafeSponsoredTxs', () => {
       sponsoredTxs: { ...meter, used: 60 },
       isLoading: false,
     })
-    expect(renderHook(() => useSafeSponsoredTxs()).result.current.left).toBe(0)
+    expect(renderHook(() => useSafeSponsoredTxs()).result.current).toMatchObject({ left: 0, canSponsor: false })
 
     mockUseSpacePlan.mockReturnValue({
       plan: { status: 'active' },
       sponsoredTxs: { ...meter, quota: null },
       isLoading: false,
     })
-    expect(renderHook(() => useSafeSponsoredTxs()).result.current).toMatchObject({ isPro: true, left: null })
+    expect(renderHook(() => useSafeSponsoredTxs()).result.current).toMatchObject({
+      isPro: true,
+      left: null,
+      canSponsor: true,
+    })
   })
 
   it('is not Pro for a Safe outside any Workspace, or in one without a live plan', () => {
@@ -57,6 +69,8 @@ describe('useSafeSponsoredTxs', () => {
       isPro: false,
       meter: null,
       left: null,
+      spaceId: null,
+      canSponsor: false,
     })
     expect(mockUseSpacePlan).toHaveBeenCalledWith(null)
 
@@ -71,7 +85,15 @@ describe('useSafeSponsoredTxs', () => {
 
     expect(mockUseSafeSpaces).toHaveBeenCalledWith(true)
     expect(mockUseSpacePlan).toHaveBeenCalledWith(null)
-    expect(result.current).toEqual({ isEnabled: false, isPro: false, meter: null, left: null, isLoading: false })
+    expect(result.current).toEqual({
+      isEnabled: false,
+      isPro: false,
+      meter: null,
+      left: null,
+      spaceId: null,
+      canSponsor: false,
+      isLoading: false,
+    })
   })
 
   it('reports loading while the Workspaces or the plan resolve', () => {

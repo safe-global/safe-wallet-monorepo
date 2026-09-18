@@ -37,8 +37,7 @@ describe('getSeatsMeter', () => {
     const data = response([
       { feature: 'safe_seats', type: 'metered', enabled: true, quota: 2, used: 2, resetsAt: null },
       {
-        // The generated client still types `feature` as 'safe_seats' only; the CGW already serves this key.
-        feature: 'sponsored_transactions' as never,
+        feature: 'sponsored_transactions',
         type: 'metered',
         enabled: true,
         quota: 10,

@@ -564,6 +564,46 @@ describe('txSender', () => {
 
       expect(receivedBody.safeTxHash).toBe('0x1234567890')
     })
+
+    it("relays at the Workspace's expense when a sponsoring space is given, without the chain-only gas limit", async () => {
+      const safeAddress = toBeHex('0x789', 20)
+      const safeTx = createMockSafeTransaction({ to: safeAddress, data: '0x', value: '0', operation: 0 })
+      const safe = {
+        address: { value: safeAddress },
+        chainId: '5',
+        version: '1.3.0',
+      } as unknown as Parameters<typeof dispatchTxRelay>[1]
+      const chain = {} as unknown as Parameters<typeof dispatchTxRelay>[3]
+
+      jest.spyOn(safeContracts, 'getReadOnlyCurrentGnosisSafeContract').mockResolvedValue({
+        encode: jest.fn(() => '0xabcd'),
+      } as any)
+
+      let receivedBody: any
+      const chainRelay = jest.fn()
+      server.use(
+        http.post(`${GATEWAY_URL}/v1/chains/5/relay`, () => {
+          chainRelay()
+          return HttpResponse.json({ taskId: '0xchain' })
+        }),
+        http.post(`${GATEWAY_URL}/v1/spaces/space-1/chains/5/relay`, async ({ request }) => {
+          receivedBody = await request.json()
+          return HttpResponse.json({ taskId: '0xspace' })
+        }),
+      )
+
+      await dispatchTxRelay(safeTx, safe, 'multisig_0x1', chain, 100000, true, undefined, 'space-1')
+
+      expect(chainRelay).not.toHaveBeenCalled()
+      expect(receivedBody).toEqual({
+        to: safeAddress,
+        data: '0xabcd',
+        version: '1.3.0',
+        safeTxHash: '0x1234567890',
+        acceptUnverifiedSimulation: true,
+      })
+      expect(txEvents.txDispatch).toHaveBeenCalledWith('RELAYING', expect.objectContaining({ taskId: '0xspace' }))
+    })
   })
 
   describe('dispatchBatchExecutionRelay', () => {
@@ -623,6 +663,29 @@ describe('txSender', () => {
         chainId: '5',
         safeAddress,
       })
+    })
+
+    it("relays the batch at the Workspace's expense when a sponsoring space is given", async () => {
+      const mockMultisendAddress = zeroPadValue('0x1234', 20)
+      const safeAddress = toBeHex('0x567', 20)
+      const txs = [{ txId: 'multisig_0x01', detailedExecutionInfo: { type: 'MULTISIG' } } as TransactionDetails]
+      const multisendContractMock = {
+        encode: jest.fn(() => '0xfefe'),
+        getAddress: () => mockMultisendAddress,
+      } as unknown as MultiSendCallOnlyContractImplementationType
+
+      let receivedBody: any
+      server.use(
+        http.post(`${GATEWAY_URL}/v1/spaces/space-1/chains/5/relay`, async ({ request }) => {
+          receivedBody = await request.json()
+          return HttpResponse.json({ taskId: '0xspace' })
+        }),
+      )
+
+      await dispatchBatchExecutionRelay(txs, multisendContractMock, '0x1234', '5', safeAddress, '1.3.0', 'space-1')
+
+      expect(receivedBody).toEqual({ to: mockMultisendAddress, data: '0xfefe', version: '1.3.0' })
+      expect(txEvents.txDispatch).toHaveBeenCalledWith('RELAYING', expect.objectContaining({ taskId: '0xspace' }))
     })
   })
 })
