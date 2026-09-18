@@ -990,7 +990,7 @@ exports[`./Drawer.stories StatusHeader 1`] = `
             class="flex items-center gap-3 px-6 pt-6 pr-18"
           >
             <div
-              class="bg-success-subtle flex size-10 items-center justify-center rounded-xl"
+              class="bg-success-subtle flex size-10 items-center justify-center rounded-lg"
             >
               <svg
                 aria-hidden="true"

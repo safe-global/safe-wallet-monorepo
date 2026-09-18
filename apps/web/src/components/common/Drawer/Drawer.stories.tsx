@@ -61,7 +61,7 @@ export const StatusHeader: Story = {
     children: (
       <>
         <DrawerHeader>
-          <div className="bg-success-subtle flex size-10 items-center justify-center rounded-xl">
+          <div className="bg-success-subtle flex size-10 items-center justify-center rounded-lg">
             <UserRoundPen className="text-success-strong size-4" />
           </div>
           <DrawerTitle size="lg">Proposer role</DrawerTitle>
