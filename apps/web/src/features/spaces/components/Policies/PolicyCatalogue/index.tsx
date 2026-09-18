@@ -2,18 +2,14 @@ import { type ReactElement } from 'react'
 import { trackEvent } from '@/services/analytics'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
-import PolicyCatalogueTile, { type PolicyAccountCount } from './PolicyCatalogueTile'
+import type { PolicyLock } from '../policyLock'
+import PolicyCatalogueTile from './PolicyCatalogueTile'
 import { POLICY_CATALOGUE, type PolicyCatalogueEntry, type PolicyCatalogueId, type PolicyId } from './catalogue'
-
-/** The workspace's plan does not include policies: every policy tile is gated behind an upgrade. */
-export type PolicyCatalogueLock = {
-  accountCounts: Record<PolicyId, PolicyAccountCount>
-  onUpgrade: () => void
-}
 
 interface PolicyCatalogueProps {
   onSelect?: (id: PolicyCatalogueId) => void
-  locked?: PolicyCatalogueLock
+  /** Set when the workspace's plan does not include policies: every tile then leads to the upgrade. */
+  locked?: Pick<PolicyLock, 'accountCounts' | 'onUpgrade'>
 }
 
 const isPolicyEntry = (entry: PolicyCatalogueEntry): entry is PolicyCatalogueEntry & { id: PolicyId } =>

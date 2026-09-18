@@ -222,7 +222,7 @@ describe('Policies', () => {
 
   describe('a plan that does not include policies', () => {
     it('should, when the plan is given, render the upsell banner naming the workspace and the plan', () => {
-      render(<Policies lockedPlan={mockStarterPlan} />)
+      render(<Policies locked={{ ...mockStarterPlan, onUpgrade: jest.fn() }} />)
 
       expect(screen.getByTestId('policy-upsell-banner')).toHaveTextContent('Acme Inc is on Starter')
       expect(screen.getByRole('button', { name: /Upgrade to Business/ })).toBeInTheDocument()
@@ -236,7 +236,7 @@ describe('Policies', () => {
 
     it('should, when the banner button is clicked, call onUpgrade', async () => {
       const onUpgrade = jest.fn()
-      const { user } = renderWithUserEvent(<Policies lockedPlan={mockStarterPlan} onUpgrade={onUpgrade} />)
+      const { user } = renderWithUserEvent(<Policies locked={{ ...mockStarterPlan, onUpgrade }} />)
 
       await user.click(screen.getByRole('button', { name: /Upgrade to Business/ }))
 
@@ -245,7 +245,7 @@ describe('Policies', () => {
 
     it('should, when a locked tile is clicked, call onUpgrade and open no intro dialog', async () => {
       const onUpgrade = jest.fn()
-      const { user } = renderWithUserEvent(<Policies lockedPlan={mockStarterPlan} onUpgrade={onUpgrade} />)
+      const { user } = renderWithUserEvent(<Policies locked={{ ...mockStarterPlan, onUpgrade }} />)
 
       await user.click(within(screen.getByTestId('policy-catalogue-tile-proposer')).getByRole('button'))
 

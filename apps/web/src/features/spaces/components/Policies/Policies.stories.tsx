@@ -58,7 +58,7 @@ export const ProposerIntro: Story = {
 
 /** The workspace is on a plan that does not include policies: the banner shows and every policy tile is gated. */
 export const Starter: Story = {
-  args: { lockedPlan: mockStarterPlan, onUpgrade: fn() },
+  args: { locked: { ...mockStarterPlan, onUpgrade: fn() } },
   parameters: { layout: 'fullscreen' },
   decorators: [
     (Story) => (

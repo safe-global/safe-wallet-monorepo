@@ -3,13 +3,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
+import type { PolicyAccountCount } from '../policyLock'
 import { type PolicyCatalogueId } from './catalogue'
-
-/** How many of the workspace's Safe accounts have this policy. What is counted is open in WA-3552. */
-export type PolicyAccountCount = {
-  applied: number
-  total: number
-}
 
 export interface PolicyCatalogueTileProps {
   id: PolicyCatalogueId

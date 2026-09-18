@@ -5,16 +5,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Typography } from '@/components/ui/typography'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import type { PolicyLock } from '../policyLock'
 
-export type PolicyUpsellPlan = {
-  /** The plan the workspace is on, for example `Starter`. */
-  planName: string
-  workspaceName: string
-}
-
-type PolicyUpsellBannerProps = PolicyUpsellPlan & {
-  onUpgrade: () => void
-}
+type PolicyUpsellBannerProps = Pick<PolicyLock, 'planName' | 'workspaceName' | 'onUpgrade'>
 
 /** Shown above the catalogue when the workspace's plan does not include policies. */
 const PolicyUpsellBanner = ({ planName, workspaceName, onUpgrade }: PolicyUpsellBannerProps) => (

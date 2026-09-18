@@ -3,9 +3,10 @@ import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import ExternalLink from '@/components/common/ExternalLink'
 import { Typography } from '@/components/ui/typography'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
-import PolicyCatalogue, { type PolicyCatalogueLock } from './PolicyCatalogue'
+import PolicyCatalogue from './PolicyCatalogue'
 import type { PolicyCatalogueId } from './PolicyCatalogue/catalogue'
-import PolicyUpsellBanner, { type PolicyUpsellPlan } from './PolicyUpsellBanner'
+import type { PolicyLock } from './policyLock'
+import PolicyUpsellBanner from './PolicyUpsellBanner'
 import ProposerIntroDialog from './ProposerIntroDialog'
 import { PROPOSER_INTRO_SEEN_KEY } from './ProposerIntroDialog/constants'
 import SpendingLimitIntroDialog from './SpendingLimitIntroDialog'
@@ -13,11 +14,10 @@ import { SPENDING_LIMIT_INTRO_SEEN_KEY } from './SpendingLimitIntroDialog/consta
 
 interface PoliciesProps {
   /** Set when the workspace's plan does not include policies. WA-3560 supplies it from the plan hooks. */
-  lockedPlan?: PolicyUpsellPlan & Pick<PolicyCatalogueLock, 'accountCounts'>
-  onUpgrade?: () => void
+  locked?: PolicyLock
 }
 
-const Policies = ({ lockedPlan, onUpgrade = () => {} }: PoliciesProps): ReactElement => {
+const Policies = ({ locked }: PoliciesProps): ReactElement => {
   const [hasSeenSpendingLimitIntro = false, setHasSeenSpendingLimitIntro] =
     useLocalStorage<boolean>(SPENDING_LIMIT_INTRO_SEEN_KEY)
   const [isSpendingLimitIntroOpen, setIsSpendingLimitIntroOpen] = useState(false)
@@ -109,20 +109,13 @@ const Policies = ({ lockedPlan, onUpgrade = () => {} }: PoliciesProps): ReactEle
         </Typography>
       </div>
 
-      {lockedPlan && (
+      {locked && (
         <div className="mb-4">
-          <PolicyUpsellBanner
-            planName={lockedPlan.planName}
-            workspaceName={lockedPlan.workspaceName}
-            onUpgrade={onUpgrade}
-          />
+          <PolicyUpsellBanner {...locked} />
         </div>
       )}
 
-      <PolicyCatalogue
-        onSelect={handleSelect}
-        locked={lockedPlan ? { accountCounts: lockedPlan.accountCounts, onUpgrade } : undefined}
-      />
+      <PolicyCatalogue onSelect={handleSelect} locked={locked} />
 
       <SpendingLimitIntroDialog
         open={isSpendingLimitIntroOpen}
