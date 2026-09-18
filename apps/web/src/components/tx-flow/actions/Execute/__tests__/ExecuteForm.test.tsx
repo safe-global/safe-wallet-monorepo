@@ -63,6 +63,7 @@ describe('ExecuteForm', () => {
       setIsRiskConfirmed: jest.fn(),
       safeAnalysis: null,
       addToTrustedList: jest.fn(),
+      hasProFeatures: true,
     },
     options: [
       { id: 'execute', label: 'Execute' },
@@ -298,6 +299,7 @@ describe('ExecuteForm', () => {
       undefined,
       expect.anything(),
       false,
+      null,
     )
 
     fireEvent.click(getByTestId('relay-accept-unverified-btn'))
@@ -311,6 +313,7 @@ describe('ExecuteForm', () => {
         undefined,
         expect.anything(),
         true,
+        null,
       )
     })
   })

@@ -36,6 +36,8 @@ import NextLink from 'next/link'
 import { useSignInRedirect } from '@/components/welcome/WelcomeLogin/hooks/useSignInRedirect'
 import AddIcon from '@/public/images/common/add.svg'
 import { SPACES_LIMIT } from '@/features/spaces/constants'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import WelcomeContentCard from '@/components/common/WelcomeContentCard'
 
@@ -46,6 +48,7 @@ const AddSpaceButton = ({
   variant = 'default',
   label = 'Create workspace',
   icon = 'add',
+  link = true,
 }: {
   onClick?: () => void
   disabled?: boolean
@@ -53,6 +56,8 @@ const AddSpaceButton = ({
   variant?: 'default' | 'outline'
   label?: string
   icon?: 'add' | 'arrow'
+  /** Off when the click opens a dialog instead of navigating to the onboarding. */
+  link?: boolean
 }) => {
   const iconSize = size === 'lg' ? 'size-5' : 'size-4'
 
@@ -67,7 +72,7 @@ const AddSpaceButton = ({
         variant === 'outline' && 'hover:bg-muted',
         disabled && 'cursor-not-allowed opacity-50 grayscale',
       )}
-      render={disabled ? <span /> : <NextLink href={AppRoutes.welcome.createSpace} />}
+      render={disabled ? <span /> : link ? <NextLink href={AppRoutes.welcome.createSpace} /> : undefined}
       disabled={disabled}
       onClick={disabled ? undefined : onClick}
     >
@@ -159,9 +164,14 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
 
   return (
     <>
-      <Card size="none" radius="xl" className="w-full text-center">
-        <div className="flex flex-col items-center gap-8 rounded-t-xl bg-muted p-8 text-left md:flex-row md:items-end md:gap-16">
-          <div className="flex shrink-0 flex-col gap-4 md:self-center">
+      <Card
+        size="none"
+        // eslint-disable-next-line no-restricted-syntax -- Figma spec calls for a 32px corner one-off; no radius token in the scale matches it
+        className="w-full rounded-[2rem] p-1 text-center"
+      >
+        {/* The mint glow behind the benefits is a blurred brand-colored disc, clipped by the panel's corners. */}
+        <div className="relative flex flex-col items-center gap-8 overflow-hidden rounded-t-[calc(2rem-4px)] bg-muted p-8 text-left before:absolute before:top-[72%] before:-left-16 before:size-96 before:-translate-y-1/2 before:rounded-full before:bg-[var(--color-static-text-brand)] before:opacity-45 before:blur-3xl md:flex-row md:items-end md:gap-16">
+          <div className="relative flex shrink-0 flex-col gap-4 md:self-center">
             {WORKSPACE_BENEFITS.map((benefit) => (
               <div key={benefit} className="flex flex-row items-center gap-2">
                 <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[var(--color-background-light-hover)]">
@@ -177,7 +187,7 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
           <Image
             src={isDarkMode ? WorkspacesEmptyIllustrationDark : WorkspacesEmptyIllustration}
             alt="Workspace dashboard showing accounts grouped by workspace"
-            className="-my-8 h-auto w-full min-w-0 md:-mr-8 md:w-[60%]"
+            className="relative -my-8 h-auto w-full min-w-0 md:-mr-8 md:w-[60%]"
           />
         </div>
 
@@ -190,8 +200,11 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
                 label="Create your first workspace"
                 icon="arrow"
                 disabled={isAtLimit}
+                link
                 onClick={() =>
-                  trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
+                  trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, {
+                    entry_point: WorkspaceCreateEntryPoint.WELCOME,
+                  })
                 }
               />
             </div>
@@ -211,6 +224,8 @@ const SpacesList = () => {
   const { AccountsNavigation } = useLoadFeature(MyAccountsFeature)
   const { SafeProWorkspacesBanner } = useLoadFeature(SafeProFeature)
   const isSafeProEnabled = useIsSafeProEnabled()
+  // The pre-launch heads-up only makes sense to a user without a Workspace while Safe Pro is not live yet.
+  const isSafeProLive = useHasFeature(FEATURES.SAFE_PRO) === true
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
@@ -310,7 +325,7 @@ const SpacesList = () => {
           </>
         ) : (
           <>
-            {isSafeProEnabled && <SafeProWorkspacesBanner className="mb-4" />}
+            {isSafeProEnabled && !isSafeProLive && <SafeProWorkspacesBanner className="mb-4" />}
             {pendingInviteBanners}
             <NoSpacesState isAtLimit={isAtSpacesLimit} />
           </>

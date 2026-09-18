@@ -39,6 +39,7 @@ export const SafeShieldDisplay = ({
   showHypernativeActiveStatus = true,
   safeAnalysis,
   onAddToTrustedList,
+  hasProFeatures = true,
 }: {
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
@@ -50,6 +51,7 @@ export const SafeShieldDisplay = ({
   showHypernativeActiveStatus?: boolean
   safeAnalysis?: SafeAnalysisResult | null
   onAddToTrustedList?: () => void
+  hasProFeatures?: boolean
 }): ReactElement => {
   const [recipientResults] = recipient || []
   const [contractResults] = contract || []
@@ -103,6 +105,7 @@ export const SafeShieldDisplay = ({
           showHypernativeActiveStatus={showHypernativeActiveStatus}
           safeAnalysis={safeAnalysis}
           onAddToTrustedList={onAddToTrustedList}
+          hasProFeatures={hasProFeatures}
         />
       </div>
 

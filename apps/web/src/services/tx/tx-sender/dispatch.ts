@@ -488,6 +488,8 @@ export const dispatchTxRelay = async (
   gasLimit?: string | number | bigint,
   acceptUnverifiedSimulation?: boolean,
   scope?: TxSenderScope,
+  /** A Safe Pro Workspace paying for the relay out of its allowance; without it the chain's relayer policy applies. */
+  sponsorSpaceId?: string | null,
 ) => {
   const store = getStoreInstance()
   const readOnlySafeContract = await getReadOnlyCurrentGnosisSafeContract(safe, scope)
@@ -509,19 +511,32 @@ export const dispatchTxRelay = async (
   ])
 
   try {
-    const relayAction = relayApi.endpoints.relayRelayV1.initiate({
-      chainId: safe.chainId,
-      relayDto: {
-        to: safe.address.value,
-        data,
-        gasLimit: gasLimit?.toString(),
-        version: safe.version ?? getLatestSafeVersion(chain),
-        safeTxHash,
-        acceptUnverifiedSimulation,
-      },
-    })
-
-    const relayResponse = await store.dispatch(relayAction).unwrap()
+    const version = safe.version ?? getLatestSafeVersion(chain)
+    const relayResponse = sponsorSpaceId
+      ? await store
+          .dispatch(
+            relayApi.endpoints.spaceRelayRelayV1.initiate({
+              spaceId: sponsorSpaceId,
+              chainId: safe.chainId,
+              spaceRelayDto: { to: safe.address.value, data, version, safeTxHash, acceptUnverifiedSimulation },
+            }),
+          )
+          .unwrap()
+      : await store
+          .dispatch(
+            relayApi.endpoints.relayRelayV1.initiate({
+              chainId: safe.chainId,
+              relayDto: {
+                to: safe.address.value,
+                data,
+                gasLimit: gasLimit?.toString(),
+                version,
+                safeTxHash,
+                acceptUnverifiedSimulation,
+              },
+            }),
+          )
+          .unwrap()
     const taskId = relayResponse.taskId
 
     if (!taskId) {
@@ -560,6 +575,7 @@ export const dispatchBatchExecutionRelay = async (
   chainId: string,
   safeAddress: string,
   safeVersion: string,
+  sponsorSpaceId?: string | null,
 ) => {
   const store = getStoreInstance()
   const to = multiSendContract.getAddress()
@@ -569,16 +585,19 @@ export const dispatchBatchExecutionRelay = async (
 
   let relayResponse
   try {
-    const relayAction = relayApi.endpoints.relayRelayV1.initiate({
-      chainId,
-      relayDto: {
-        to,
-        data,
-        version: safeVersion,
-      },
-    })
-
-    relayResponse = await store.dispatch(relayAction).unwrap()
+    relayResponse = sponsorSpaceId
+      ? await store
+          .dispatch(
+            relayApi.endpoints.spaceRelayRelayV1.initiate({
+              spaceId: sponsorSpaceId,
+              chainId,
+              spaceRelayDto: { to, data, version: safeVersion },
+            }),
+          )
+          .unwrap()
+      : await store
+          .dispatch(relayApi.endpoints.relayRelayV1.initiate({ chainId, relayDto: { to, data, version: safeVersion } }))
+          .unwrap()
   } catch (error) {
     txs.forEach(({ txId }) => {
       txDispatch(TxEvent.FAILED, {

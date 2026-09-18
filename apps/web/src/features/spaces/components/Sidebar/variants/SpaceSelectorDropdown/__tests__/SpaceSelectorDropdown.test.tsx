@@ -77,6 +77,17 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
   useSafeAddressFromUrl: () => mockSafeAddressFromUrl,
 }))
 
+const mockUseHasFeature = jest.fn()
+jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
+jest.mock('@/public/images/safe-pro/pro-chip.svg', () => 'svg')
+const mockPlans: {
+  tierName: string
+  isTrialing: boolean
+  isTrialEndingSoon: boolean
+  plan: { daysLeft: number | null } | null
+} = { tierName: 'Business', isTrialing: false, isTrialEndingSoon: false, plan: null }
+jest.mock('../../../../../hooks/useSpacePlan', () => ({ useSpacePlan: () => mockPlans }))
+
 jest.mock('@/hooks/useChainId', () => ({
   __esModule: true,
   default: () => mockChainId,
@@ -1066,5 +1077,34 @@ describe('SpaceSelectorDropdown', () => {
 
       expect(screen.getByText(`Limit of ${SPACES_LIMIT} workspaces reached`)).toBeInTheDocument()
     })
+  })
+
+  describe('plan label under the workspace name', () => {
+    it.each([
+      [false, false, null, 'Workspace', false],
+      [true, true, 20, 'Free trial', false],
+      [true, true, 14, 'Free trial · 14 days left', false],
+      [true, true, 7, 'Free trial · 7 days left', true],
+      [true, true, 1, 'Free trial · 1 day left', true],
+      [true, true, null, 'Free trial', false],
+      [true, false, 20, 'Business', false],
+    ])(
+      'SAFE_PRO=%s isTrialing=%s daysLeft=%s → "%s", warning=%s',
+      (isSafePro, isTrialing, daysLeft, label, isWarning) => {
+        mockUseHasFeature.mockReturnValue(isSafePro)
+        mockPlans.isTrialing = isTrialing
+        mockPlans.isTrialEndingSoon = isTrialing && daysLeft !== null && daysLeft <= 7
+        mockPlans.plan = daysLeft === null && !isTrialing ? null : { daysLeft }
+        const spaces = [{ uuid: 'uuid-1', name: 'Alpha', safeCount: 0 }]
+
+        render(<SpaceSelectorDropdown spaces={spaces} selectedSpace={spaces[0]} />)
+
+        const subtitle = screen.getByText(label)
+        expect(subtitle).toBeInTheDocument()
+        expect(subtitle.classList.contains('text-warning-strong')).toBe(isWarning)
+        expect(subtitle.classList.contains('text-green-500')).toBe(isSafePro && !isWarning)
+        expect(screen.queryByTestId('space-selector-pro-chip')).not.toBeInTheDocument()
+      },
+    )
   })
 })

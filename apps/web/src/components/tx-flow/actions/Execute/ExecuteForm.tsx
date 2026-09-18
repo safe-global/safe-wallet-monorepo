@@ -17,6 +17,7 @@ import useIsValidExecution from '@/hooks/useIsValidExecution'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useIsExecutionLoop, useTxActions } from '@/components/tx/shared/hooks'
 import { useRelaysBySafe } from '@/hooks/useRemainingRelays'
+import { useSafeSponsoredTxs } from '@/features/spaces'
 import useWalletCanRelay from '@/hooks/useWalletCanRelay'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
 import { useNoFeeCampaignEligibility, useGasTooHigh, useIsNoFeeCampaignEnabled } from '@/features/no-fee-campaign'
@@ -81,6 +82,7 @@ export const ExecuteForm = ({
   // SC wallets can relay fully signed transactions
   const [walletCanRelay, , walletCanRelayLoading] = useWalletCanRelay(safeTx)
   const relays = useRelaysBySafe()
+  const sponsoredTxs = useSafeSponsoredTxs()
   const { isEligible: isNoFeeCampaign, remaining, limit, blockedAddress } = useNoFeeCampaignEligibility()
   const isNoFeeCampaignEnabled = useIsNoFeeCampaignEnabled()
   const gasTooHigh = useGasTooHigh(safeTx)
@@ -100,9 +102,10 @@ export const ExecuteForm = ({
 
   const noFeeCampaignEligible = !isGtfChain && isNoFeeCampaignEnabled && isNoFeeCampaign && !blockedAddress
 
-  // Safe-pays bypasses the no-fee campaign and the daily relay quota (Safe funds its own relay).
-  const canRelay =
-    walletCanRelay && (requiresRelay || (!isGtfChain && !noFeeCampaignEligible && hasRemainingRelays(relays[0])))
+  // Safe-pays bypasses the no-fee campaign and the daily relay quota (Safe funds its own relay). A Safe on a Safe Pro
+  // plan relays against its Workspace's allowance instead of the chain's daily quota.
+  const hasSponsoring = sponsoredTxs.isPro ? sponsoredTxs.canSponsor : hasRemainingRelays(relays[0])
+  const canRelay = walletCanRelay && (requiresRelay || (!isGtfChain && !noFeeCampaignEligible && hasSponsoring))
   const canNoFeeCampaign = !requiresRelay && noFeeCampaignEligible && !gasTooHigh && !!remaining && remaining > 0
   const isLimitReached = noFeeCampaignEligible && remaining === 0
 
@@ -188,6 +191,7 @@ export const ExecuteForm = ({
         origin,
         willRelay || willNoFeeCampaign,
         acceptUnverifiedSimulation,
+        willRelay ? sponsoredTxs.spaceId : null,
       )
     } catch (_err) {
       const err = asError(_err)

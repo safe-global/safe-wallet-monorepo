@@ -24,8 +24,8 @@ import { cn } from '@/utils/cn'
  *
  * @remarks
  * Key Props:
- * - Card: `as`, `size` ('default' | 'sm' | 'lg' | 'none'), `variant` ('default' | 'outlined' | 'muted'),
- *   `surface` ('default' | 'sunken', default 'default'), `radius` ('lg' | 'xl' | 'none', default 'lg'),
+ * - Card: `as`, `size` ('default' | 'sm' | 'lg' | 'none'), `variant` ('default' | 'outlined' | 'muted' | 'muted-secondary'),
+ *   `surface` ('default' | 'sunken', default 'default'), `radius` ('lg' | 'lg-xl' | 'xl' | 'none', default 'lg'),
  *   `className` (layout-only: w-*, margins, flex/grid)
  * - CardHeader / CardTitle / CardDescription / CardAction / CardContent / CardFooter: `className`
  *
@@ -52,6 +52,9 @@ const cardVariants = cva(
         default: '',
         outlined: 'border border-border',
         muted: 'bg-muted',
+        'muted-secondary': 'bg-muted-secondary',
+        brand:
+          'bg-muted-secondary bg-[linear-gradient(90deg,color-mix(in_srgb,var(--mint)_40%,var(--muted-secondary)),color-mix(in_srgb,var(--mint)_8%,var(--muted-secondary)))]',
       },
       surface: {
         default: '',
@@ -65,8 +68,13 @@ const cardVariants = cva(
       },
       radius: {
         lg: 'rounded-lg',
+        'lg-xl': 'rounded-lg-xl',
         xl: 'rounded-xl',
         none: 'rounded-none',
+      },
+      selected: {
+        true: 'border-2 border-mint shadow-lg',
+        false: 'border-2 border-transparent',
       },
     },
     defaultVariants: {
@@ -90,6 +98,7 @@ function Card<TElement extends React.ElementType = 'div'>({
   variant = 'default',
   surface = 'default',
   radius = 'lg',
+  selected,
   ...props
 }: CardProps<TElement>) {
   const Component = as ?? 'div'
@@ -101,7 +110,7 @@ function Card<TElement extends React.ElementType = 'div'>({
       data-variant={variant}
       data-surface={surface}
       data-radius={radius}
-      className={cn(cardVariants({ size, variant, surface, radius }), className)}
+      className={cn(cardVariants({ size, variant, surface, radius, selected }), className)}
       {...props}
     />
   )

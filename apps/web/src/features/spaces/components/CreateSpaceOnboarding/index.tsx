@@ -19,6 +19,10 @@ import { useOnboardingStepCount } from '../../hooks/useOnboardingStepCount'
 import useExistingSpace from './hooks/useExistingSpace'
 import useSpaceSubmit from './hooks/useSpaceSubmit'
 import useOnboardingExit from './hooks/useOnboardingExit'
+import ClaimTrialModal from '../Plans/ClaimTrialModal'
+import { useWorkspaceLock } from '../../hooks/useWorkspaceLock'
+import { AppRoutes } from '@/config/routes'
+import { useRouter } from 'next/router'
 import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
 import { NAME_MIN_LENGTH, sanitizeName, validateName } from '@safe-global/utils/validation/names'
 
@@ -26,6 +30,7 @@ const ONBOARDING_STEP = 1
 const FORM_ID = 'create-space-form'
 
 const CreateSpaceOnboarding = (): ReactElement => {
+  const router = useRouter()
   const totalSteps = useOnboardingStepCount()
   const isCheckingAccess = useIsCheckingAccess() ?? true
 
@@ -40,7 +45,17 @@ const CreateSpaceOnboarding = (): ReactElement => {
 
   const { spaceId, isEditMode, isSpaceLoading, existingSpace } = useExistingSpace(setValue)
   const { onExit, hasNoSpaces } = useOnboardingExit(isEditMode)
-  const { error, isSubmitting, onSubmit } = useSpaceSubmit(handleSubmit, spaceId, isEditMode)
+  const { error, isSubmitting, onSubmit, createdSpaceId, goToSelectSafes } = useSpaceSubmit(
+    handleSubmit,
+    spaceId,
+    isEditMode,
+  )
+  // The new Workspace is offered its trial right here; without an offer the wizard moves on to the Safes step.
+  const trialLock = useWorkspaceLock(createdSpaceId ?? null)
+  const offersTrial = Boolean(createdSpaceId) && trialLock.isLocked && trialLock.reason === 'trial-offered'
+  useEffect(() => {
+    if (createdSpaceId && !trialLock.isResolving && !offersTrial) goToSelectSafes(createdSpaceId)
+  }, [createdSpaceId, trialLock.isResolving, offersTrial, goToSelectSafes])
   const watchedName = useWatch({ control, name: 'name' }) ?? ''
 
   // Tracks whether the user has typed in the input at least once. We can't use
@@ -80,6 +95,14 @@ const CreateSpaceOnboarding = (): ReactElement => {
 
   const main = (
     <>
+      {offersTrial && createdSpaceId && (
+        <ClaimTrialModal
+          spaceId={createdSpaceId}
+          variant="new"
+          returnPathname={AppRoutes.welcome.selectSafes}
+          onBack={() => router.push(AppRoutes.welcome.accounts)}
+        />
+      )}
       <StepCounter currentStep={ONBOARDING_STEP} totalSteps={totalSteps} />
 
       <div className="flex flex-col gap-2">

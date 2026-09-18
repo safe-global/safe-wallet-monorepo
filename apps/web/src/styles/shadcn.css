@@ -32,6 +32,7 @@
   --secondary-foreground: #171717;
   --secondary-hover: var(--border);
   --muted: #f5f5f5;
+  --muted-secondary: #fafafa;
   --muted-foreground: #737373;
   /* A well sunk *into* a card, holding sibling rows (nested items of a bulk/conflict group).
      `--muted` can't express this: it sits darker than `--card` in light mode but lighter in dark, so
@@ -63,6 +64,7 @@
   --sidebar-ring: #d4d4d4;
   --accent-secondary: #c4fddd;
   --accent-secondary-foreground: #121312;
+  --mint: #7ffab7;
   --accent-success: #16a34a;
   /* The Figma warning surface (alert node 4316-12854) is Tailwind yellow, not the coral/amber brand
      warning tint, so light mode pins the Figma hexes. The file has no dark warning spec — dark mode
@@ -110,6 +112,7 @@
   --secondary-foreground: #f5f5f5;
   --secondary-hover: rgba(255, 255, 255, 0.12);
   --muted: #262626;
+  --muted-secondary: #1c1c1c;
   --muted-foreground: #a3a3a3;
   --surface-sunken: var(--color-background-main);
   --accent: #052e16;
@@ -137,6 +140,7 @@
   --sidebar-ring: #404040;
   --accent-secondary: #c4fddd;
   --accent-secondary-foreground: #121312;
+  --mint: #7ffab7;
   --accent-success: #00b460; /* brand dark success.main */
   --warning-subtle: var(--color-warning-background);
   --warning-strong: var(--color-warning1-text);
@@ -189,10 +193,13 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --color-accent-secondary: var(--accent-secondary);
   --color-accent-secondary-foreground: var(--accent-secondary-foreground);
+  --color-mint: var(--mint);
   --color-accent-success: var(--accent-success);
   --color-success-subtle: var(--color-success-background);
   --color-success-muted: var(--color-success-light);
   --color-success-strong: var(--color-success-dark);
+  --color-success-tint: var(--color-background-light);
+  --color-muted-secondary: var(--muted-secondary);
   --color-error-strong: var(--color-error-dark);
   --color-error-subtle: var(--error-subtle);
   --color-warning-subtle: var(--warning-subtle);
@@ -214,6 +221,7 @@
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
+  --radius-lg-xl: 1.25rem;
   --radius-xl: 1.5rem;
   --radius-2xl: 1.5rem;
   --radius-infinite: 9999px;

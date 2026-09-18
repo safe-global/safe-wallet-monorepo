@@ -11,6 +11,9 @@ import { SafeShieldAnalysisLoading } from './SafeShieldAnalysisLoading'
 import { SafeShieldAnalysisEmpty } from './SafeShieldAnalysisEmpty'
 import { AnalysisGroupCard } from '../AnalysisGroupCard'
 import { TenderlySimulation } from '../TenderlySimulation'
+import { TenderlyExternalSimulation } from '../TenderlyExternalSimulation'
+import { ProChecksRow } from '../ProChecksRow'
+import { AnalysisGroupCardDisabled } from '../ThreatAnalysis/AnalysisGroupCardDisabled'
 import UntrustedSafeWarning from '../UntrustedSafeWarning'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import isEmpty from 'lodash/isEmpty'
@@ -34,6 +37,7 @@ export const SafeShieldContent = ({
   showHypernativeActiveStatus = true,
   safeAnalysis,
   onAddToTrustedList,
+  hasProFeatures = true,
 }: {
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
@@ -46,6 +50,8 @@ export const SafeShieldContent = ({
   showHypernativeActiveStatus?: boolean
   safeAnalysis?: SafeAnalysisResult | null
   onAddToTrustedList?: () => void
+  /** Without Safe Pro the simulation is not run for the user; they get a link to Tenderly's public simulator instead. */
+  hasProFeatures?: boolean
 }): ReactElement => {
   const hn = useLoadFeature(HypernativeFeature)
   const safenet = useLoadFeature(SafenetChecksFeature)
@@ -89,13 +95,24 @@ export const SafeShieldContent = ({
             <UntrustedSafeWarning safeAnalysis={safeAnalysis} onAddToTrustedList={onAddToTrustedList} />
           )}
 
-          <AnalysisGroupCard
-            data-testid="recipient-analysis-group-card"
-            delay={recipientDelay}
-            data={recipientResults}
-            highlightedSeverity={highlightedSeverity}
-            analyticsEvent={SAFE_SHIELD_EVENTS.RECIPIENT_DECODED}
-          />
+          {/* The recipient check is Pro-only: labelled with the chip when it runs, locked (with an upgrade) when not. */}
+          {shouldShowContent && (!hasProFeatures || !recipientEmpty) && (
+            <ProChecksRow hasProFeatures={hasProFeatures} />
+          )}
+          {!hasProFeatures && shouldShowContent && (
+            <AnalysisGroupCardDisabled data-testid="recipient-analysis-locked">
+              Known recipient
+            </AnalysisGroupCardDisabled>
+          )}
+          {hasProFeatures && (
+            <AnalysisGroupCard
+              data-testid="recipient-analysis-group-card"
+              delay={recipientDelay}
+              data={recipientResults}
+              highlightedSeverity={highlightedSeverity}
+              analyticsEvent={SAFE_SHIELD_EVENTS.RECIPIENT_DECODED}
+            />
+          )}
 
           <AnalysisGroupCard
             data-testid="contract-analysis-group-card"
@@ -130,7 +147,10 @@ export const SafeShieldContent = ({
 
           {shouldShowContent && <safenet.SafenetChecksSection />}
 
-          {!contractLoading && !threatLoading && (
+          {!contractLoading && !threatLoading && !hasProFeatures && (
+            <TenderlyExternalSimulation safeTx={safeTx} delay={simulationAnalysisDelay} />
+          )}
+          {!contractLoading && !threatLoading && hasProFeatures && (
             <TenderlySimulation
               safeTx={safeTx}
               delay={simulationAnalysisDelay}

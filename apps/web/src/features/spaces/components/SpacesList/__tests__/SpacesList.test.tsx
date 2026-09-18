@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import SpacesList from '../index'
+import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
@@ -51,11 +52,16 @@ jest.mock('@/features/myAccounts', () => ({
 }))
 
 const mockUseIsSafeProEnabled = jest.fn()
+const mockUseHasFeature = jest.fn()
 
 jest.mock('@/features/safe-pro-announcement', () => ({
   SafeProFeature: { name: 'SafeProFeature' },
   useIsSafeProEnabled: () => mockUseIsSafeProEnabled(),
 }))
+
+jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
+
+jest.mock('../../../hooks/useSpacePlan', () => ({ useSpacePlan: () => ({ tierName: undefined, isPaidActive: false }) }))
 
 jest.mock('@/features/spaces', () => ({
   MemberStatus: { ACTIVE: 'ACTIVE', INVITED: 'INVITED', DECLINED: 'DECLINED' },
@@ -122,6 +128,20 @@ describe('SpacesList — auth/expiry state rendering', () => {
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: undefined })
     mockUseSignInRedirect.mockReturnValue({ setHasSignedIn: jest.fn(), redirectLoading: false })
     mockUseIsSafeProEnabled.mockReturnValue(false)
+    mockUseHasFeature.mockReturnValue(false)
+  })
+
+  it('leads a first Workspace straight into the onboarding, where the trial is offered', () => {
+    mockUseHasFeature.mockReturnValue(true)
+    mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    expect(screen.getByRole('link', { name: /create your first workspace/i })).toHaveAttribute(
+      'href',
+      AppRoutes.welcome.createSpace,
+    )
   })
 
   describe('SAFE_PRO_ANNOUNCEMENT banner gating', () => {
@@ -159,15 +179,20 @@ describe('SpacesList — auth/expiry state rendering', () => {
       expect(screen.getByTestId('safe-pro-workspaces-banner')).toBeInTheDocument()
     })
 
-    it('shows the wide Pro banner above the empty state when signed in with no workspaces', () => {
+    it('shows the wide Pro banner above the empty state only until Safe Pro is live', () => {
       setAuth(true)
       mockUseIsSafeProEnabled.mockReturnValue(true)
       mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
       mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
 
-      render(<SpacesList />)
-
+      const { unmount } = render(<SpacesList />)
       expect(screen.getByTestId('safe-pro-workspaces-banner')).toBeInTheDocument()
+      expect(screen.getByText(/create your first workspace/i)).toBeInTheDocument()
+      unmount()
+
+      mockUseHasFeature.mockReturnValue(true)
+      render(<SpacesList />)
+      expect(screen.queryByTestId('safe-pro-workspaces-banner')).not.toBeInTheDocument()
       expect(screen.getByText(/create your first workspace/i)).toBeInTheDocument()
     })
 

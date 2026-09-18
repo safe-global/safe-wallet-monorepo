@@ -69,6 +69,7 @@ describe('dynamicBaseQuery', () => {
 
   it.each([
     '/v1/auth',
+    '/v1/billing/spaces/e5bfa406-7b05-48fd-9b7e-88a1efb20495/payment-links',
     '/v2/register/notifications',
     `/v2/chains/1/notifications/devices/${faker.string.uuid()}/safes/0x0000000000000000000000000000000000000000`,
     '/v2/chains/1/notifications/devices/0x0000000000000000000000000000000000000000',

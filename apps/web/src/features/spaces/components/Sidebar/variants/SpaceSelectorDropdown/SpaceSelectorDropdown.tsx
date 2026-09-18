@@ -32,6 +32,10 @@ import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERAT
 import { AdminOnlyWorkspaceTooltip } from '../../../AdminOnlyWorkspaceTooltip'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getDeterministicColor } from '@/utils/colors'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useSpacePlan } from '../../../../hooks/useSpacePlan'
+import { trialLabel } from '../../../../hooks/billing/subscription'
 
 export const SAFE_ALREADY_IN_WORKSPACE_TOOLTIP = 'Safe is already in this workspace'
 
@@ -54,6 +58,9 @@ export const SpaceSelectorDropdown = ({
   const [isOpen, setIsOpen] = useState(false)
   const menuId = useId()
   const spaceName = selectedSpace?.name ?? ''
+  const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
+  const { tierName, isTrialing, isTrialEndingSoon, plan } = useSpacePlan()
+  const planLabel = !isSafePro ? 'Workspace' : isTrialing ? trialLabel(plan?.daysLeft) : tierName
   const displayName = truncateSpaceName(spaceName, SPACE_SELECTOR_NAME_MAX_LENGTH)
   const initial = spaceName.charAt(0).toUpperCase()
   const selectedSpaceColor = spaceName ? getDeterministicColor(spaceName) : undefined
@@ -176,15 +183,25 @@ export const SpaceSelectorDropdown = ({
               </AvatarFallback>
             </Avatar>
             <div className={css.spaceSelectorText}>
-              {spaceName ? (
-                <Tooltip>
-                  <TooltipTrigger render={<span className={css.spaceSelectorName} />}>{displayName}</TooltipTrigger>
-                  <TooltipContent side="top">{spaceName}</TooltipContent>
-                </Tooltip>
-              ) : (
-                <span className={css.spaceSelectorName} />
-              )}
-              <span className={css.spaceSelectorSubtitle}>Workspace</span>
+              <span className="flex items-center gap-1">
+                {spaceName ? (
+                  <Tooltip>
+                    <TooltipTrigger render={<span className={css.spaceSelectorName} />}>{displayName}</TooltipTrigger>
+                    <TooltipContent side="top">{spaceName}</TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <span className={css.spaceSelectorName} />
+                )}
+              </span>
+              <span
+                className={cn(
+                  css.spaceSelectorSubtitle,
+                  'block truncate',
+                  !isSafePro ? 'text-muted-foreground' : isTrialEndingSoon ? 'text-warning-strong' : 'text-green-500',
+                )}
+              >
+                {planLabel}
+              </span>
             </div>
             <ChevronsUpDown className="ml-auto size-4 shrink-0 group-data-[collapsible=icon]:hidden" aria-hidden />
           </>

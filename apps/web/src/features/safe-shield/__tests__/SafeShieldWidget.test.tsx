@@ -79,6 +79,7 @@ describe('SafeShieldWidget', () => {
       setSafeTx: jest.fn(),
       safeAnalysis: null,
       addToTrustedList: jest.fn(),
+      hasProFeatures: true,
     })
     mockUseHypernativeOAuth.mockReturnValue({
       isAuthenticated: false,

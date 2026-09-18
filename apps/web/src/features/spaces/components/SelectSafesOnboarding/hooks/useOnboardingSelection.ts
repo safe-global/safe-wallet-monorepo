@@ -13,6 +13,8 @@ interface Args {
   setValue: UseFormSetValue<AddAccountsFormValues>
   /** Lowercased addresses flagged as look-alikes — selecting one requires confirmation. */
   flaggedAddresses: Set<string>
+  /** Max selectable leaves; defaults to the per-Workspace cap, null means unlimited. */
+  limit?: number | null
 }
 
 /**
@@ -20,14 +22,16 @@ interface Args {
  * `selectedSafes` record, reconciling multi-chain parent keys, and gates selection of
  * address-poisoning-flagged safes behind a confirmation dialog.
  */
-const useOnboardingSelection = ({ items, control, setValue, flaggedAddresses }: Args) => {
+const useOnboardingSelection = ({ items, control, setValue, flaggedAddresses, limit = SAFE_ACCOUNTS_LIMIT }: Args) => {
   const selectedSafes = useWatch({ control, name: 'selectedSafes' }) ?? {}
   const [pendingConfirmation, setPendingConfirmation] = useState<AccountLine | null>(null)
 
   const selectedKeys = useMemo(() => getSelectedLeafKeys(selectedSafes), [selectedSafes])
 
-  // Total checked leaves across both sections count toward the per-workspace cap.
-  const isAtLimit = selectedKeys.size >= SAFE_ACCOUNTS_LIMIT
+  // Total checked leaves across both sections count toward the per-workspace cap. Everything starts selected, so
+  // the count can sit above the cap until the user deselects down to it.
+  const isAtLimit = limit !== null && selectedKeys.size >= limit
+  const isOverLimit = limit !== null && selectedKeys.size > limit
 
   const applyToggle = (line: AccountLine, nextChecked: boolean) =>
     applySafeSelectionToggle(setValue, items, selectedSafes, line, nextChecked)
@@ -48,7 +52,7 @@ const useOnboardingSelection = ({ items, control, setValue, flaggedAddresses }: 
 
   const cancelPending = () => setPendingConfirmation(null)
 
-  return { selectedKeys, isAtLimit, handleToggle, pendingConfirmation, confirmPending, cancelPending }
+  return { selectedKeys, isAtLimit, isOverLimit, handleToggle, pendingConfirmation, confirmPending, cancelPending }
 }
 
 export default useOnboardingSelection

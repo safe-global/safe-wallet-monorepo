@@ -9,6 +9,7 @@ jest.mock('@/features/spaces/constants', () => ({
 }))
 
 jest.mock('@/hooks/useIsSurveyEnabled')
+jest.mock('../../../hooks/useSpaceSafeLimit', () => ({ useSpaceSafeLimit: () => ({ limit: 10, isLoading: false }) }))
 const mockedUseIsSurveyEnabled = useIsSurveyEnabled as jest.MockedFunction<typeof useIsSurveyEnabled>
 
 // Captured props from OnboardingSafesList renders
@@ -82,6 +83,13 @@ jest.mock('@/hooks/useDarkMode', () => ({
   useDarkMode: () => false,
 }))
 
+jest.mock('../../Plans/CheckoutReturnModals', () => ({
+  __esModule: true,
+  default: ({ trialCtaLabel }: { trialCtaLabel?: string }) => (
+    <div data-testid="checkout-return-modals">{trialCtaLabel}</div>
+  ),
+}))
+
 const makeSafe = (chainId: string, address: string) => ({
   chainId,
   address,
@@ -89,6 +97,22 @@ const makeSafe = (chainId: string, address: string) => ({
   isReadOnly: false,
   lastVisited: 0,
   name: undefined,
+})
+
+describe('SelectSafesOnboarding — Stripe return', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockTrustedSafes = [makeSafe('1', '0xA')] as AllSafeItems
+    mockOwnedSafes = []
+    mockFlagged = new Set<string>()
+    mockWalletValue = { address: '0xWallet' }
+  })
+
+  it('confirms the trial on landing with a Get started CTA', () => {
+    render(<SelectSafesOnboarding />)
+
+    expect(screen.getByTestId('checkout-return-modals')).toHaveTextContent('Get started')
+  })
 })
 
 describe('SelectSafesOnboarding — selection wiring', () => {

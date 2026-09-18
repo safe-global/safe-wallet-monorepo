@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { EllipsisVertical } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
@@ -11,6 +12,8 @@ import { SpaceSummary } from '../SpaceCard'
 import SpaceContextMenu from '../SpaceCard/SpaceContextMenu'
 import { AdminOnlyWorkspaceTooltip } from '../AdminOnlyWorkspaceTooltip'
 import { isUserActiveAdmin } from '@/features/spaces/utils'
+import ProChip from '@/public/images/safe-pro/pro-chip.svg'
+import { useSpacePlan } from '../../hooks/useSpacePlan'
 
 const MEMBER_NO_EDIT_MESSAGE = 'You need admin access to edit.'
 
@@ -30,6 +33,8 @@ const SpaceRow = ({
   showDivider?: boolean
 }) => {
   const isAdmin = isUserActiveAdmin(space.members, currentUserId)
+  const { tierName, isPaidActive } = useSpacePlan(space.uuid)
+  const planName = isPaidActive ? tierName : undefined
 
   const handleOpenWorkspace = () => {
     trackEvent(
@@ -63,6 +68,14 @@ const SpaceRow = ({
               isCompact
             />
           </div>
+          {planName && (
+            <Badge variant="subtle" size="status" shape="status" data-testid="space-row-pro-badge">
+              <span className="block h-4 w-6">
+                <ProChip className="size-full" />
+              </span>
+              · {planName}
+            </Badge>
+          )}
         </Link>
 
         <div className="absolute right-0 top-1/2 -translate-y-1/2">

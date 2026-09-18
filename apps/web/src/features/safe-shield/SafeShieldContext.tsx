@@ -30,6 +30,7 @@ import {
 } from '@safe-global/utils/features/safe-shield/types'
 import { getPrimaryResult, isSeverityHigherOrEqual } from '@safe-global/utils/features/safe-shield/utils'
 import { useAuthToken } from '@/features/hypernative'
+import { useSafeProAccess } from '@/features/spaces'
 
 type SafeShieldContextType = {
   setRecipientAddresses: Dispatch<SetStateAction<string[] | undefined>>
@@ -46,6 +47,8 @@ type SafeShieldContextType = {
   // Safe-level analysis (untrusted Safe check)
   safeAnalysis: SafeAnalysisResult | null
   addToTrustedList: () => void
+  /** Recipient/counterparty analysis and simulation are Safe Pro features; threat analysis (Blockaid) always runs. */
+  hasProFeatures: boolean
 }
 
 const SafeShieldContext = createContext<SafeShieldContextType | null>(null)
@@ -57,8 +60,9 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   const [poisoningAddresses, setPoisoningAddresses] = useState<string[] | undefined>(undefined)
   const [safeTx, setSafeTx] = useState<SafeTransaction | undefined>(undefined)
 
-  const recipientOnlyAnalysis = useRecipientAnalysis(recipientAddresses)
-  const counterpartyAnalysis = useCounterpartyAnalysis(safeTx)
+  const { hasProFeatures } = useSafeProAccess()
+  const recipientOnlyAnalysis = useRecipientAnalysis(hasProFeatures ? recipientAddresses : undefined)
+  const counterpartyAnalysis = useCounterpartyAnalysis(safeTx, hasProFeatures)
   const [{ token: hypernativeAuthToken }] = useAuthToken()
 
   const threat = useThreatAnalysis(safeTx, hypernativeAuthToken) ?? [undefined, undefined, false]
@@ -130,6 +134,7 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
         setIsRiskConfirmed,
         safeAnalysis,
         addToTrustedList,
+        hasProFeatures,
       }}
     >
       {children}
