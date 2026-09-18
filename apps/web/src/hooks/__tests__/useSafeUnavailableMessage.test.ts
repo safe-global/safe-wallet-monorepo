@@ -4,8 +4,8 @@ import { renderHook } from '@/tests/test-utils'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { LEGAL_UNAVAILABILITY_FALLBACK } from '@/utils/rtkQuery'
-import useSafeLegalBlockMessage from '../useSafeLegalBlockMessage'
+import { SAFE_UNAVAILABLE_MESSAGE } from '@/utils/rtkQuery'
+import useSafeUnavailableMessage from '../useSafeUnavailableMessage'
 
 const CHAIN_ID = '1'
 const SAFE_ADDRESS = '0x87a57cBf742CC1Fc702D0E9BF595b1E056693e2f'
@@ -27,24 +27,26 @@ const mockSafeResponse = (response: HttpResponse) => {
 // rather than on the undefined the hook returns while still loading.
 const useSettledMessage = () => {
   const { isSuccess, isError } = useSafesGetSafeV1Query({ chainId: CHAIN_ID, safeAddress: SAFE_ADDRESS })
-  return { message: useSafeLegalBlockMessage(), settled: isSuccess || isError }
+  return { message: useSafeUnavailableMessage(), settled: isSuccess || isError }
 }
 
-describe('useSafeLegalBlockMessage', () => {
-  it('returns the backend reason when the Safe is blocked for legal reasons', async () => {
-    mockSafeResponse(HttpResponse.json({ code: 451, message: 'Unavailable for legal reasons' }, { status: 451 }))
+describe('useSafeUnavailableMessage', () => {
+  it('hides the backend reason when the Safe is blocked', async () => {
+    mockSafeResponse(
+      HttpResponse.json({ code: 451, message: 'Blocked in your region by provider edge-node-7' }, { status: 451 }),
+    )
 
-    const { result } = renderHook(() => useSafeLegalBlockMessage())
+    const { result } = renderHook(() => useSafeUnavailableMessage())
 
-    await waitFor(() => expect(result.current).toBe('Unavailable for legal reasons'))
+    await waitFor(() => expect(result.current).toBe(SAFE_UNAVAILABLE_MESSAGE))
   })
 
-  it('falls back to default copy when the 451 carries no message', async () => {
+  it('returns the same copy when the 451 carries no message', async () => {
     mockSafeResponse(HttpResponse.json({}, { status: 451 }))
 
-    const { result } = renderHook(() => useSafeLegalBlockMessage())
+    const { result } = renderHook(() => useSafeUnavailableMessage())
 
-    await waitFor(() => expect(result.current).toBe(LEGAL_UNAVAILABILITY_FALLBACK))
+    await waitFor(() => expect(result.current).toBe(SAFE_UNAVAILABLE_MESSAGE))
   })
 
   it('returns undefined for other errors', async () => {
