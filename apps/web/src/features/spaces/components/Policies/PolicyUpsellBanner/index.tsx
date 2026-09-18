@@ -33,7 +33,13 @@ const PolicyUpsellBanner = ({ planName, workspaceName, onUpgrade }: PolicyUpsell
 
           <Typography variant="paragraph-small" className="text-muted-foreground">
             {workspaceName} is on {planName}. Upgrade to Business to set up policies.{' '}
-            <ExternalLink href={HelpCenterArticle.POLICIES}>Read more</ExternalLink>
+            <ExternalLink
+              noIcon
+              className="font-normal text-muted-foreground underline"
+              href={HelpCenterArticle.POLICIES}
+            >
+              Read more
+            </ExternalLink>
           </Typography>
         </div>
 
