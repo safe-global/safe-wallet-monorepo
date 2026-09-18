@@ -23,6 +23,7 @@ import { Check, X } from 'lucide-react'
 import PaginatedDataTable, { type DataTableColumn } from '@/components/common/PaginatedDataTable'
 import { cn } from '@/utils/cn'
 import AddressCell from './AddressCell'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 type PendingRequestsTableProps = {
   requests: AddressBookRequestItemDto[]
@@ -89,6 +90,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
     setLoadingId(requestId)
     try {
       const result = await approveRequest({ spaceId: spaceId ?? '', requestId })
+      if (isElevationRequiredError(result.error)) return
       if (result.error) {
         dispatch(
           showNotification({

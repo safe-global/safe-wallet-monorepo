@@ -33,6 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: write
     if: >-
       github.ref == 'refs/heads/main' ||
       github.ref == 'refs/heads/dev' ||
@@ -49,12 +50,20 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: GHCR login
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Deploy Main
         if: github.ref == 'refs/heads/main'
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           push: true
-          tags: safeglobal/safe-wallet-web:staging
+          tags: |
+            safeglobal/safe-wallet-web:staging
+            ghcr.io/safe-global/safe-wallet-web:staging
           platforms: |
             linux/amd64
             linux/arm64
@@ -65,7 +74,9 @@ jobs:
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           push: true
-          tags: safeglobal/safe-wallet-web:dev
+          tags: |
+            safeglobal/safe-wallet-web:dev
+            ghcr.io/safe-global/safe-wallet-web:dev
           platforms: |
             linux/amd64
             linux/arm64
@@ -86,6 +97,8 @@ jobs:
           tags: |
             safeglobal/safe-wallet-web:${{ steps.docker_tag.outputs.tag }}
             safeglobal/safe-wallet-web:latest
+            ghcr.io/safe-global/safe-wallet-web:${{ steps.docker_tag.outputs.tag }}
+            ghcr.io/safe-global/safe-wallet-web:latest
           platforms: |
             linux/amd64
             linux/arm64

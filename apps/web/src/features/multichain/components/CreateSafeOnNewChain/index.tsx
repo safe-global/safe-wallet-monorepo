@@ -123,6 +123,11 @@ const ReplaySafeDialog = ({
         dispatch,
       })
       if (!persistResult.ok) {
+        if (persistResult.stepUpPending) {
+          // Nothing to show, but the dialog must not close as if the network had been added.
+          hasError = true
+          return
+        }
         setCreationError(persistResult.error)
         hasError = true
         dispatch(

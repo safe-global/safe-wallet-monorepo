@@ -88,8 +88,10 @@ describe('SingleTx', () => {
     const screen = render(<SingleTx />)
 
     await waitFor(() => {
-      expect(screen.getByText('Failed to load transaction')).toBeInTheDocument()
+      expect(screen.getByText('The website failed to load data. Please try again.')).toBeInTheDocument()
     })
+
+    expect(screen.getByRole('button', { name: 'Reload' })).toBeInTheDocument()
 
     // A known CGW response state shows its message alone — no code reference, and no Details
     // toggle revealing the raw response (WA-3252).
@@ -112,11 +114,13 @@ describe('SingleTx', () => {
     const screen = render(<SingleTx />)
 
     await waitFor(() => {
-      expect(screen.getByText('Failed to load transaction')).toBeInTheDocument()
+      expect(screen.getByText('This transaction was not found in this Safe account.')).toBeInTheDocument()
     })
+
+    // Reloading can never surface a tx that belongs to another Safe, so no CTA is offered.
+    expect(screen.queryByRole('button', { name: 'Reload' })).not.toBeInTheDocument()
 
     // The raw gateway response is never offered to the user — there is no Details toggle to open.
     expect(screen.queryByText('Details')).not.toBeInTheDocument()
-    expect(screen.queryByText('Transaction with this id was not found in this Safe account')).not.toBeInTheDocument()
   })
 })

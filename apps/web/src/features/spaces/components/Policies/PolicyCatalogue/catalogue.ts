@@ -16,7 +16,7 @@ export const POLICY_CATALOGUE: PolicyCatalogueEntry[] = [
     title: 'Spending limit',
     description: 'Let spenders access assets without collecting signatures.',
     Icon: WalletCards,
-    isAvailable: false,
+    isAvailable: true,
   },
   {
     id: 'proposer',

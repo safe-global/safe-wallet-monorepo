@@ -23,6 +23,7 @@ import { useSpaceSafes } from '../../../hooks/useSpaceSafes'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { getSafeId, getMultiChainSafeId } from '../utils/safeIds'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../constants'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 // URL safe-param prefix can be either numeric chainId or shortName ("1:" or "eth:").
 const safeParamToFormKey = (safeParam: string, chains: Chain[]): string | undefined => {
@@ -157,6 +158,7 @@ const useOnboardingSubmit = (
       spaceId: spaceIdStr,
       createSpaceSafesDto: { safes: safesToAdd },
     })
+    if (isElevationRequiredError(result.error)) throw result.error
     if (result.error) {
       throw new Error(getRtkQueryErrorMessage(result.error))
     }
@@ -197,6 +199,7 @@ const useOnboardingSubmit = (
       spaceId: spaceIdStr,
       deleteSpaceSafesDto: { safes: safesToRemove },
     })
+    if (isElevationRequiredError(result.error)) throw result.error
     if (result.error) {
       throw new Error(getRtkQueryErrorMessage(result.error))
     }
@@ -231,8 +234,9 @@ const useOnboardingSubmit = (
 
       onSuccess()
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Something went wrong updating Safe accounts. Please try again.')
       setIsSubmitting(false)
+      if (isElevationRequiredError(e)) return
+      setError(e instanceof Error ? e.message : 'Something went wrong updating Safe accounts. Please try again.')
     }
   })
 

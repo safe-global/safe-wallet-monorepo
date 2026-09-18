@@ -51,6 +51,7 @@ import { cn } from '@/utils/cn'
 import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/constants'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
 import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 const PICKER_COLUMNS: SafeAccountColumnId[] = ['select', 'name', 'threshold', 'networks', 'balance']
 
@@ -248,6 +249,7 @@ const AddAccounts = ({
           createSpaceSafesDto: { safes: safesToAdd },
         })
 
+        if (isElevationRequiredError(result.error)) return
         if (result.error) {
           const msg = getRtkQueryErrorMessage(result.error) || 'Something went wrong adding one or more Safe accounts.'
           setError(msg.replace(/:\s*Key\s*\(.*$/, ''))
@@ -269,6 +271,7 @@ const AddAccounts = ({
           deleteSpaceSafesDto: { safes: safesToRemove },
         })
 
+        if (isElevationRequiredError(result.error)) return
         if (result.error) {
           setError(getRtkQueryErrorMessage(result.error) || 'Something went wrong removing one or more Safe accounts.')
           return
