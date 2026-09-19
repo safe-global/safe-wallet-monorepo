@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -9,7 +9,6 @@ import { Builder } from '@/tests/Builder'
 
 const mockUseIsMobile = jest.fn(() => false)
 jest.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
-jest.mock('@/hooks/useChains', () => () => ({ configs: [] }))
 jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '1',
   useIsAdmin: () => true,
@@ -52,20 +51,6 @@ jest.mock('@/components/common/Identicon', () => {
   const Identicon = ({ address }: { address: string }) => <span data-testid="identicon" data-address={address} />
   return Identicon
 })
-jest.mock('@/features/multichain', () => ({
-  NetworkLogosTooltip: ({ networks, trigger }: { networks: { chainId: string }[]; trigger?: React.ReactNode }) => (
-    <span data-testid="network-logos" data-count={networks.length}>
-      {trigger}
-    </span>
-  ),
-  NetworkLogosPill: ({ networks }: { networks: { chainId: string }[] }) => (
-    <span data-testid="network-logos-pill" data-count={networks.length} />
-  ),
-}))
-jest.mock('@/components/common/ChainIndicator', () => {
-  const ChainIndicator = () => <span data-testid="chain-indicator" />
-  return ChainIndicator
-})
 
 const requestBuilder = () =>
   Builder.new<AddressBookRequestItemDto>().with({
@@ -105,6 +90,19 @@ describe('PendingRequestsTable', () => {
     const nameCell = screen.getByText(request.name).closest('td')
     expect(nameCell).toContainElement(screen.getByTestId('eth-hash-info'))
     expect(screen.getByTestId('eth-hash-info')).toHaveTextContent(request.address)
+  })
+
+  it('shows no chains column or chain details, since requests apply to every network', () => {
+    const request = requestBuilder().build()
+
+    const { unmount } = render(<PendingRequestsTable requests={[request]} />)
+    expect(screen.queryByText('Chains')).not.toBeInTheDocument()
+    unmount()
+
+    mockUseIsMobile.mockReturnValue(true)
+    render(<PendingRequestsTable requests={[request]} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Show details' }))
+    expect(screen.queryByText('Chains')).not.toBeInTheDocument()
   })
 
   it('renders a highlighted full address in the "Requested by" cell when requestedBy is an address', () => {

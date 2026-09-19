@@ -23,17 +23,19 @@ jest.mock('@/features/spaces', () => ({
   useWorkspaceAddressBookLabel: () => 'Acme address book',
 }))
 
+let mockConfigs: { chainId: string }[] = []
+
+jest.mock('@/hooks/useChains', () => ({
+  __esModule: true,
+  default: () => ({ configs: mockConfigs }),
+}))
+
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
 }))
 
 jest.mock('@/services/analytics/events/spaces', () => ({
   SPACE_EVENTS: { EDIT_ADDRESS_SUBMIT: { action: 'Edit address submit', category: 'spaces' } },
-}))
-
-jest.mock('@/hooks/useChains', () => ({
-  __esModule: true,
-  default: () => ({ configs: [{ chainId: '1', chainName: 'Ethereum' }] }),
 }))
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
@@ -58,11 +60,6 @@ jest.mock('@/components/common/NameInput', () => ({
   },
 }))
 
-jest.mock('@/components/common/NetworkSelector/NetworkMultiSelectorInput', () => ({
-  __esModule: true,
-  default: () => <div data-testid="network-selector" />,
-}))
-
 const entry: SpaceAddressBookItemDto = {
   name: 'Alice',
   address: '0xabc',
@@ -85,6 +82,18 @@ const submitForm = async () => {
 describe('EditContactDialog', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockConfigs = [{ chainId: '1' }, { chainId: '137' }]
+  })
+
+  it('keeps Save disabled while the chain config is empty', async () => {
+    mockConfigs = []
+    render(<EditContactDialog entry={entry} onClose={jest.fn()} />)
+
+    const nameInput = screen.getByLabelText('Name')
+    fireEvent.change(nameInput, { target: { value: 'Alice Updated' } })
+
+    await waitFor(() => expect(nameInput).toHaveValue('Alice Updated'))
+    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled()
   })
 
   it('bubbles the backend error message from result.error', async () => {
@@ -114,6 +123,22 @@ describe('EditContactDialog', () => {
     await submitForm()
 
     expect(await screen.findByText(/Something went wrong \(500\)/)).toBeInTheDocument()
+  })
+
+  it('saves the contact on every supported chain without a network selector', async () => {
+    mockUpsertAddressBook.mockResolvedValue({ data: {} })
+
+    render(<EditContactDialog entry={entry} onClose={jest.fn()} />)
+    expect(screen.queryByText('Select networks')).not.toBeInTheDocument()
+
+    await submitForm()
+
+    await waitFor(() =>
+      expect(mockUpsertAddressBook).toHaveBeenCalledWith({
+        spaceId: '42',
+        upsertAddressBookItemsDto: { items: [{ name: 'Alice Updated', address: '0xabc', chainIds: ['1', '137'] }] },
+      }),
+    )
   })
 
   it('dispatches a workspace-labeled "updated" notification on success', async () => {

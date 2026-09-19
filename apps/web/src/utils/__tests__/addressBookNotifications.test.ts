@@ -29,6 +29,9 @@ describe('addressBookNotifications', () => {
     expect(getImportSuccessMessage({ count: 3, networkCount: 1, bookLabel: PERSONAL_ADDRESS_BOOK_LABEL })).toBe(
       '3 contacts imported to your address book',
     )
+    expect(getImportSuccessMessage({ count: 3, bookLabel: getWorkspaceAddressBookLabel('Acme') })).toBe(
+      '3 contacts imported to Acme address book',
+    )
     expect(
       getImportSuccessMessage({ count: 10, networkCount: 5, bookLabel: getWorkspaceAddressBookLabel('Acme') }),
     ).toBe(

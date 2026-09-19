@@ -35,6 +35,7 @@ type CapturedProps = {
   submit: (item: unknown, sid: string) => Promise<unknown>
   onSubmitStart?: () => void
   onSuccess?: () => void
+  showNetworks?: boolean
 }
 
 let lastProps: CapturedProps | undefined
@@ -61,6 +62,11 @@ describe('AddContact', () => {
     expect(lastProps?.successMessage).toBe('Contact added to Acme address book')
     expect(lastProps?.successGroupKey).toBe('add-contact-success')
     expect(screen.getByTestId('dialog-stub')).toHaveTextContent('Add shared contact')
+  })
+
+  it('hides the network selector because workspace contacts apply to every network', () => {
+    render(<AddContact />)
+    expect(lastProps?.showNetworks).toBe(false)
   })
 
   it('defaults the trigger label to "Add contact"', () => {

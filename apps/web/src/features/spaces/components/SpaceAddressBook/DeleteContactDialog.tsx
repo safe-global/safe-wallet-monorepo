@@ -1,7 +1,6 @@
 import ModalDialog from '@/components/common/ModalDialog'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { ChainIndicatorList } from '@/features/multichain'
 import { useAddressBooksDeleteByAddressV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId, useWorkspaceAddressBookLabel } from '@/features/spaces'
 import { useState } from 'react'
@@ -19,11 +18,10 @@ import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 type DeleteContactDialogProps = {
   name: string
   address: string
-  networks: string[]
   onClose: () => void
 }
 
-const DeleteContactDialog = ({ name, address, networks, onClose }: DeleteContactDialogProps) => {
+const DeleteContactDialog = ({ name, address, onClose }: DeleteContactDialogProps) => {
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const dispatch = useAppDispatch()
@@ -74,11 +72,8 @@ const DeleteContactDialog = ({ name, address, networks, onClose }: DeleteContact
       <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
         <div className="p-6">
           <Typography className="mb-2">
-            Are you sure you want to remove <strong>{name}</strong> from the address book? This change will apply to the
-            following networks:
+            Are you sure you want to remove <strong>{name}</strong> from the address book?
           </Typography>
-
-          <ChainIndicatorList chainIds={networks} />
 
           {error && (
             <Alert variant="destructive" className="mt-4">

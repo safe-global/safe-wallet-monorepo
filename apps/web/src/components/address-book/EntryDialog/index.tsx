@@ -11,7 +11,12 @@ import { useAppDispatch } from '@/store'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { useChain } from '@/hooks/useChains'
 import { sanitizeName } from '@safe-global/utils/validation/names'
-import { useUpsertWorkspaceSafeName, useWorkspaceAddressBookLabel, type AddressBookWriteScope } from '@/features/spaces'
+import {
+  useAllChainIds,
+  useUpsertWorkspaceSafeName,
+  useWorkspaceAddressBookLabel,
+  type AddressBookWriteScope,
+} from '@/features/spaces'
 
 export type AddressEntry = {
   name: string
@@ -44,6 +49,7 @@ function EntryDialog({
   const chainId = useChainId()
   const actualChainId = currentChainId ?? chainId
   const currentChain = useChain(actualChainId)
+  const allChainIds = useAllChainIds()
   const dispatch = useAppDispatch()
   const upsertWorkspaceName = useUpsertWorkspaceSafeName()
   const workspaceLabel = useWorkspaceAddressBookLabel()
@@ -65,7 +71,7 @@ function EntryDialog({
     if (scope === 'workspace') {
       setError(undefined)
       setIsSubmitting(true)
-      const result = await upsertWorkspaceName({ ...entry, chainIds: targetChainIds })
+      const result = await upsertWorkspaceName(entry)
       setIsSubmitting(false)
       if (result.error) return setError(result.error)
     } else {
@@ -138,7 +144,7 @@ function EntryDialog({
             confirmLabel="Save"
             confirmType="submit"
             confirmTestId="save-btn"
-            confirmDisabled={!formState.isValid}
+            confirmDisabled={!formState.isValid || (scope === 'workspace' && allChainIds.length === 0)}
             confirmLoading={isSubmitting}
             className="p-6 pt-2"
           />

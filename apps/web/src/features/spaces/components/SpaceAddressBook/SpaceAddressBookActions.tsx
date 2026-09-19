@@ -44,12 +44,7 @@ const SpaceAddressBookActions = ({
       {open[ModalType.EDIT] && <EditContactDialog entry={entry} onClose={handleCloseModal} />}
 
       {open[ModalType.REMOVE] && (
-        <DeleteContactDialog
-          name={entry.name}
-          address={entry.address}
-          networks={entry.chainIds}
-          onClose={handleCloseModal}
-        />
+        <DeleteContactDialog name={entry.name} address={entry.address} onClose={handleCloseModal} />
       )}
     </>
   )

@@ -23,16 +23,35 @@ jest.mock('@/features/spaces', () => ({
   useGetSpaceAddressBook: () => [],
 }))
 
+let mockConfigs: { chainId: string }[] = []
+
+jest.mock('@/hooks/useChains', () => ({
+  __esModule: true,
+  default: () => ({ configs: mockConfigs }),
+  useChain: () => undefined,
+}))
+
 describe('RequestToAddButton', () => {
   const address = checksumAddress(faker.finance.ethereumAddress())
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockConfigs = [{ chainId: '1' }, { chainId: '137' }]
+  })
+
+  it('keeps the confirm button disabled while the chain config is empty', async () => {
+    mockConfigs = []
+    render(<RequestToAddButton address={address} name="Alice" />)
+
+    await userEvent.click(screen.getByRole('button', { name: 'Request to add' }))
+
+    expect(screen.getByTestId('confirm-request-btn')).toBeDisabled()
+    expect(mockCreateRequest).not.toHaveBeenCalled()
   })
 
   it('sends the full contact in one request and keeps the dialog flow', async () => {
     mockCreateRequest.mockResolvedValue({ data: {} })
-    render(<RequestToAddButton address={address} name="Alice" chainIds={['1', '137']} />, {
+    render(<RequestToAddButton address={address} name="Alice" />, {
       initialReduxState: { addressBook: { '1': { [address]: 'Alice' }, '137': { [address]: 'Alice' } } },
     })
 
@@ -40,7 +59,6 @@ describe('RequestToAddButton', () => {
     expect(screen.getByText('Request to add contact')).toBeInTheDocument()
     expect(screen.getByText('Name')).toBeInTheDocument()
     expect(screen.getByText('Address')).toBeInTheDocument()
-    expect(screen.getByText('Networks')).toBeInTheDocument()
 
     await userEvent.click(screen.getByTestId('confirm-request-btn'))
 
@@ -56,7 +74,7 @@ describe('RequestToAddButton', () => {
 
   it('submits the sanitized name so it matches the validated value', async () => {
     mockCreateRequest.mockResolvedValue({ data: {} })
-    render(<RequestToAddButton address={address} name=" Alice‚Bob " chainIds={['1']} />, {
+    render(<RequestToAddButton address={address} name=" Alice‚Bob " />, {
       initialReduxState: { addressBook: { '1': { [address]: ' Alice‚Bob ' } } },
     })
 
@@ -66,13 +84,13 @@ describe('RequestToAddButton', () => {
     await waitFor(() => {
       expect(mockCreateRequest).toHaveBeenCalledWith({
         spaceId: MOCK_SPACE_UUID,
-        createAddressBookRequestDto: { address, name: "Alice'Bob", chainIds: ['1'] },
+        createAddressBookRequestDto: { address, name: "Alice'Bob", chainIds: ['1', '137'] },
       })
     })
   })
 
   it('disables the button and does not open the dialog when the name has invalid characters', async () => {
-    render(<RequestToAddButton address={address} name="José 🦄" chainIds={['1']} />)
+    render(<RequestToAddButton address={address} name="José 🦄" />)
 
     const button = screen.getByRole('button', { name: 'Request to add' })
     expect(button).toBeDisabled()
@@ -84,7 +102,7 @@ describe('RequestToAddButton', () => {
   })
 
   it('shows a tooltip explaining why an invalid-name contact cannot be requested', async () => {
-    render(<RequestToAddButton address={address} name="José 🦄" chainIds={['1']} />)
+    render(<RequestToAddButton address={address} name="José 🦄" />)
 
     await userEvent.hover(screen.getByRole('button', { name: 'Request to add' }).parentElement as HTMLElement)
 
@@ -92,14 +110,14 @@ describe('RequestToAddButton', () => {
   })
 
   it('keeps the button enabled for a valid name', () => {
-    render(<RequestToAddButton address={address} name="Alice" chainIds={['1']} />)
+    render(<RequestToAddButton address={address} name="Alice" />)
 
     expect(screen.getByRole('button', { name: 'Request to add' })).not.toBeDisabled()
   })
 
   it('treats an already-pending request (409) as requested', async () => {
     mockCreateRequest.mockResolvedValue({ error: { status: 409, data: {} } })
-    render(<RequestToAddButton address={address} name="Alice" chainIds={['1']} />)
+    render(<RequestToAddButton address={address} name="Alice" />)
 
     await userEvent.click(screen.getByRole('button', { name: 'Request to add' }))
     await userEvent.click(screen.getByTestId('confirm-request-btn'))
@@ -108,20 +126,20 @@ describe('RequestToAddButton', () => {
   })
 
   it('renders the requested badge when a pending request already exists', () => {
-    render(<RequestToAddButton address={address} name="Alice" chainIds={['1']} alreadyRequested />)
+    render(<RequestToAddButton address={address} name="Alice" alreadyRequested />)
 
     expect(screen.getByText('Requested')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Request to add' })).not.toBeInTheDocument()
   })
 
   it('drops the label into the accessible name in the compact layout', () => {
-    render(<RequestToAddButton address={address} name="Alice" chainIds={['1']} isCompact />)
+    render(<RequestToAddButton address={address} name="Alice" isCompact />)
 
     expect(screen.getByRole('button', { name: 'Request to add' })).toHaveTextContent('')
   })
 
   it('shows the requested state as an icon in the compact layout', () => {
-    render(<RequestToAddButton address={address} name="Alice" chainIds={['1']} alreadyRequested isCompact />)
+    render(<RequestToAddButton address={address} name="Alice" alreadyRequested isCompact />)
 
     expect(screen.getByLabelText('Requested')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Request to add' })).not.toBeInTheDocument()
@@ -129,7 +147,7 @@ describe('RequestToAddButton', () => {
 
   it('tracks the request once it is created', async () => {
     mockCreateRequest.mockResolvedValue({ data: {} })
-    render(<RequestToAddButton address={address} name="Alice" chainIds={['1']} />)
+    render(<RequestToAddButton address={address} name="Alice" />)
 
     await userEvent.click(screen.getByRole('button', { name: 'Request to add' }))
     await userEvent.click(screen.getByTestId('confirm-request-btn'))
@@ -139,7 +157,7 @@ describe('RequestToAddButton', () => {
 
   it('does not track when a request was already pending (409)', async () => {
     mockCreateRequest.mockResolvedValue({ error: { status: 409 } })
-    render(<RequestToAddButton address={address} name="Alice" chainIds={['1']} />)
+    render(<RequestToAddButton address={address} name="Alice" />)
 
     await userEvent.click(screen.getByRole('button', { name: 'Request to add' }))
     await userEvent.click(screen.getByTestId('confirm-request-btn'))

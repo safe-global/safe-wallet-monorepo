@@ -6,8 +6,6 @@ import { Spinner } from '@/components/ui/spinner'
 import { isAddress } from 'ethers'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import Identicon from '@/components/common/Identicon'
-import { NetworkLogosPill, NetworkLogosTooltip } from '@/features/multichain'
-import ChainIndicator from '@/components/common/ChainIndicator'
 import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import {
   useAddressBookRequestsApproveRequestV1Mutation,
@@ -18,7 +16,6 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
-import useChains from '@/hooks/useChains'
 import { Check, X } from 'lucide-react'
 import PaginatedDataTable, { type DataTableColumn } from '@/components/common/PaginatedDataTable'
 import { cn } from '@/utils/cn'
@@ -69,7 +66,6 @@ function RequestedBy({ requestedBy }: { requestedBy: string }) {
 }
 
 function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
-  const chains = useChains()
   const isAdmin = useIsAdmin()
   const spaceId = useCurrentSpaceId()
   const dispatch = useAppDispatch()
@@ -134,23 +130,11 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
     }
   }
 
-  // The "All" badge stands on its own; logo stacks get the standard grey pill.
-  const renderChains = (req: AddressBookRequestItemDto) =>
-    chains.configs.length === req.chainIds.length ? (
-      <NetworkLogosTooltip
-        networks={req.chainIds.map((chainId) => ({ chainId }))}
-        maxVisible={3}
-        trigger={<Badge variant="secondary">All</Badge>}
-      />
-    ) : (
-      <NetworkLogosPill networks={req.chainIds.map((chainId) => ({ chainId }))} />
-    )
-
   const columns: DataTableColumn<AddressBookRequestItemDto>[] = [
     {
       id: 'name',
       header: 'Name',
-      width: '15%',
+      width: '20%',
       sticky: true,
       minWidth: 120,
       emphasis: 'strong',
@@ -174,23 +158,15 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
     {
       id: 'address',
       header: 'Address',
-      width: '30%',
+      width: '35%',
       minWidth: 240,
       priority: 'secondary',
       cell: (req) => <AddressCell address={req.address} />,
     },
     {
-      id: 'chains',
-      header: 'Chains',
-      width: '20%',
-      priority: 'secondary',
-      minWidth: 90,
-      cell: renderChains,
-    },
-    {
       id: 'requestedBy',
       header: 'Requested by',
-      width: '20%',
+      width: '30%',
       priority: 'secondary',
       minWidth: 140,
       cell: (req) => (req.requestedBy ? <RequestedBy requestedBy={req.requestedBy} /> : null),
@@ -242,17 +218,9 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
     },
   ]
 
-  // Surfaces the columns hidden on mobile (chains, requested-by)
+  // Surfaces the column hidden on mobile (requested-by)
   const renderRowDetail = (req: AddressBookRequestItemDto) => (
     <div className="flex flex-col gap-2 text-sm">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-muted-foreground w-24 shrink-0">Chains</span>
-        <div className="flex flex-wrap gap-1">
-          {req.chainIds.map((chainId) => (
-            <ChainIndicator key={chainId} chainId={chainId} />
-          ))}
-        </div>
-      </div>
       {req.requestedBy && (
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-muted-foreground w-24 shrink-0">Requested by</span>

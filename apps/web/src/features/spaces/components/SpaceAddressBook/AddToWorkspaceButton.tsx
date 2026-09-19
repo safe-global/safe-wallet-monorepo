@@ -5,6 +5,7 @@ import { Check, Plus } from 'lucide-react'
 import InvalidContactNameTooltip from './InvalidContactNameTooltip'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from '@/features/spaces'
+import { useAllChainIds } from '../../hooks/useAllChainIds'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
@@ -19,12 +20,12 @@ import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 type AddToWorkspaceButtonProps = {
   address: string
   name: string
-  chainIds: string[]
   isCompact?: boolean
 }
 
-const AddToWorkspaceButton = ({ address, name, chainIds, isCompact }: AddToWorkspaceButtonProps) => {
+const AddToWorkspaceButton = ({ address, name, isCompact }: AddToWorkspaceButtonProps) => {
   const spaceId = useCurrentSpaceId()
+  const chainIds = useAllChainIds()
   const dispatch = useAppDispatch()
   const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -39,7 +40,7 @@ const AddToWorkspaceButton = ({ address, name, chainIds, isCompact }: AddToWorks
       setIsSubmitting(true)
 
       const result = await upsertAddressBook({
-        spaceId: spaceId ?? '',
+        spaceId,
         upsertAddressBookItemsDto: { items: [{ name: sanitizeName(name), address, chainIds }] },
       })
 
@@ -83,7 +84,7 @@ const AddToWorkspaceButton = ({ address, name, chainIds, isCompact }: AddToWorks
       size={isCompact ? 'icon-sm' : 'sm'}
       aria-label={isCompact ? label : undefined}
       onClick={handleAdd}
-      disabled={isSubmitting || added || !!nameError}
+      disabled={isSubmitting || added || !!nameError || chainIds.length === 0}
     >
       {isSubmitting ? <Spinner className="size-3.5" /> : isCompact ? icon : label}
     </Button>

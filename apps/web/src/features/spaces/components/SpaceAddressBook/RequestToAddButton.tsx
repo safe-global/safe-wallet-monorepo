@@ -9,21 +9,19 @@ import { Typography } from '@/components/ui/typography'
 import DialogActions from '@/components/common/DialogActions'
 import ModalDialog from '@/components/common/ModalDialog'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { NetworkLogosTooltip } from '@/features/multichain'
 import { useAddressBookRequestsCreateRequestV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
-import useChains from '@/hooks/useChains'
+import { useAllChainIds } from '../../hooks/useAllChainIds'
 import { validateContactName } from './utils'
 import { sanitizeName } from '@safe-global/utils/validation/names'
 
 type RequestToAddButtonProps = {
   address: string
   name: string
-  chainIds: string[]
   alreadyRequested?: boolean
   isCompact?: boolean
 }
@@ -36,9 +34,9 @@ const getRequestErrorMessage = (error: unknown): string => {
   return 'Failed to create request. Please try again.'
 }
 
-const RequestToAddButton = ({ address, name, chainIds, alreadyRequested, isCompact }: RequestToAddButtonProps) => {
+const RequestToAddButton = ({ address, name, alreadyRequested, isCompact }: RequestToAddButtonProps) => {
   const spaceId = useCurrentSpaceId()
-  const chains = useChains()
+  const chainIds = useAllChainIds()
   const dispatch = useAppDispatch()
   const [createRequest] = useAddressBookRequestsCreateRequestV1Mutation()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -159,21 +157,6 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested, isCompa
               <EthHashInfo address={address} shortAddress={false} showPrefix={false} showName={false} avatarSize={24} />
             </div>
 
-            <div className="flex flex-col gap-2">
-              <Typography variant="paragraph-small" color="muted">
-                Networks
-              </Typography>
-              {chains.configs.length === chainIds.length ? (
-                <Typography>All networks</Typography>
-              ) : (
-                <NetworkLogosTooltip
-                  networks={chainIds.map((chainId) => ({ chainId }))}
-                  maxVisible={6}
-                  triggerRender={<span className="inline-flex" />}
-                />
-              )}
-            </div>
-
             {nameError && (
               <Alert variant="warning" outlined={false}>
                 <AlertSeverityIcon variant="warning" />
@@ -190,7 +173,7 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested, isCompa
           confirmLabel="Request to add"
           onConfirm={handleConfirm}
           confirmTestId="confirm-request-btn"
-          confirmDisabled={!!nameError || isSubmitting}
+          confirmDisabled={!!nameError || isSubmitting || chainIds.length === 0}
           confirmLoading={isSubmitting}
         />
       </ModalDialog>

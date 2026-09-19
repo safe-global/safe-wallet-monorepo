@@ -11,7 +11,7 @@ import ContactsList from './ContactsList'
 import useAllAddressBooks from '@/hooks/useAllAddressBooks'
 import { useContactSearch } from '../useContactSearch'
 import { createContactItems, flattenAddressBook } from '../utils'
-import useChains from '@/hooks/useChains'
+import { useAllChainIds } from '../../../hooks/useAllChainIds'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId, useGetSpaceAddressBook, useWorkspaceAddressBookLabel } from '@/features/spaces'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
@@ -38,7 +38,7 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const handleCloseRef = useRef(handleClose)
-  const { configs } = useChains()
+  const allChainIds = useAllChainIds()
   const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
   const workspaceAddressBookLabel = useWorkspaceAddressBookLabel()
@@ -47,11 +47,8 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
   const allAddressBooks = useAllAddressBooks()
   const spaceContacts = useGetSpaceAddressBook()
   const allContactItems = useMemo(
-    () =>
-      flattenAddressBook(allAddressBooks).filter((contactItem) =>
-        configs.some((chain) => chain.chainId === contactItem.chainId),
-      ),
-    [allAddressBooks, configs],
+    () => flattenAddressBook(allAddressBooks).filter((contactItem) => allChainIds.includes(contactItem.chainId)),
+    [allAddressBooks, allChainIds],
   )
 
   const hasNoImportableContacts = useMemo(
@@ -84,7 +81,7 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
 
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
-    const contactItems = createContactItems(data)
+    const contactItems = createContactItems(data, allChainIds)
 
     try {
       setIsSubmitting(true)
@@ -101,12 +98,7 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
       }
 
       const contactCount = contactItems.length
-      const networkCount = new Set(contactItems.flatMap((item) => item.chainIds)).size
-      const successMessage = getImportSuccessMessage({
-        count: contactCount,
-        networkCount,
-        bookLabel: workspaceAddressBookLabel,
-      })
+      const successMessage = getImportSuccessMessage({ count: contactCount, bookLabel: workspaceAddressBookLabel })
 
       dispatch(
         showNotification({
@@ -161,7 +153,7 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
                 confirmLabel={`Import contacts (${selectedCount})`}
                 confirmType="submit"
                 confirmLoading={isSubmitting}
-                confirmDisabled={selectedCount === 0 || isSuccess}
+                confirmDisabled={selectedCount === 0 || isSuccess || allChainIds.length === 0}
                 confirmTooltip={hasNoImportableContacts ? 'You have no new contacts to import.' : undefined}
               />
             </DialogFooter>

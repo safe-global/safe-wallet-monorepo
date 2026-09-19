@@ -172,7 +172,7 @@ const SpaceAddressBook = () => {
               ) : addressBookItems.length === 0 ? (
                 <p className="text-muted-foreground p-4 text-sm">No contacts in this workspace yet.</p>
               ) : (
-                <SpaceAddressBookTable entries={filteredAll} />
+                <SpaceAddressBookTable entries={filteredAll} showChains={false} />
               )}
             </TabsContent>
 
@@ -208,12 +208,7 @@ const SpaceAddressBook = () => {
                         }
                         if (isAdmin) {
                           return (
-                            <AddToWorkspaceButton
-                              address={entry.address}
-                              name={entry.name}
-                              chainIds={entry.chainIds}
-                              isCompact={isCompact}
-                            />
+                            <AddToWorkspaceButton address={entry.address} name={entry.name} isCompact={isCompact} />
                           )
                         }
                         // Invitees can preview the space but cannot propose contacts
@@ -224,7 +219,6 @@ const SpaceAddressBook = () => {
                           <RequestToAddButton
                             address={entry.address}
                             name={entry.name}
-                            chainIds={entry.chainIds}
                             alreadyRequested={pendingAddresses.has(entry.address.toLowerCase())}
                             isCompact={isCompact}
                           />
