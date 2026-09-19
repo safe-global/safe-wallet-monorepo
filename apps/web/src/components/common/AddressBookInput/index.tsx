@@ -41,7 +41,17 @@ const groupEntriesBySource = (entries: AddressBookEntry[]): [ContactSource, Addr
 /**
  *  Temporary component until revamped safe components are done
  */
-const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canAdd?: boolean }): ReactElement => {
+const AddressBookInput = ({
+  name,
+  canAdd,
+  excludeAddresses,
+  ...props
+}: AddressInputProps & {
+  canAdd?: boolean
+  /** Contacts to leave out of the suggestions. Typing one is still possible, so the caller keeps its
+      own `validate` for the message. */
+  excludeAddresses?: readonly string[]
+}): ReactElement => {
   const listId = useId()
   const [open, setOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
@@ -56,19 +66,25 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
   const { setValue, control } = useFormContext()
   const addressValue = useWatch({ name, control })
 
-  const allAddressBookEntries = useMemo<AddressBookEntry[]>(
-    () =>
+  // Joined so a caller passing a fresh array each render does not rebuild the list every time.
+  const excludedKey = excludeAddresses?.join(',') ?? ''
+
+  const allAddressBookEntries = useMemo<AddressBookEntry[]>(() => {
+    const excluded = excludedKey ? excludedKey.split(',').filter(Boolean) : []
+
+    return (
       mergedAddressBook.list
         // Only suggest contacts configured for the chain we are sending on
         .filter((entry) => entry.chainIds.includes(chainId))
+        .filter((entry) => !excluded.some((address) => sameAddress(address, entry.address)))
         .map((entry) => ({
           label: entry.address,
           name: entry.name,
           source: entry.source,
           contact: entry,
-        })),
-    [mergedAddressBook, chainId],
-  )
+        }))
+    )
+  }, [mergedAddressBook, chainId, excludedKey])
 
   const isInAddressBook = useMemo(
     () => allAddressBookEntries.some((entry) => sameAddress(entry.label, addressValue)),
