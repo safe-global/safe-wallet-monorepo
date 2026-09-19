@@ -78,6 +78,25 @@ describe('ReorderableSafeList', () => {
 
     expect(row).toHaveFocus()
   })
+
+  it('hides the grips but keeps click-to-navigate rows while dragging is disabled (search)', () => {
+    const onSelect = jest.fn()
+    render(
+      <ReorderableSafeList
+        items={[item(ADDR_A, 'A'), item(ADDR_B, 'B')]}
+        selectedItemId={`1:${ADDR_B}`}
+        onSelect={onSelect}
+        onReorder={jest.fn()}
+        isDragDisabled
+      />,
+    )
+
+    expect(screen.getAllByTestId('reorder-safe-row')).toHaveLength(2)
+    expect(screen.queryByTestId('safe-drag-handle')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getAllByTestId('reorder-safe-row')[0])
+    expect(onSelect).toHaveBeenCalledWith(`1:${ADDR_A}`)
+  })
 })
 
 describe('ReorderableSafeList multi-chain items', () => {
