@@ -1,5 +1,6 @@
-import { act, render } from '@/tests/test-utils'
+import { act, fireEvent, render } from '@/tests/test-utils'
 import SideDrawer from './SideDrawer'
+import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
 
 jest.mock('@/features/spaces', () => ({
   SpacesEnhancedSidebar: () => <div data-testid="sidebar" />,
@@ -51,7 +52,10 @@ const setupMatchMedia = () => {
 describe('SideDrawer', () => {
   const originalMatchMedia = window.matchMedia
 
-  beforeEach(() => jest.useFakeTimers())
+  beforeEach(() => {
+    jest.useFakeTimers()
+    ;(useIsSidebarRoute as jest.Mock).mockReturnValue([false, false])
+  })
   afterEach(() => {
     jest.useRealTimers()
     window.matchMedia = originalMatchMedia
@@ -91,5 +95,58 @@ describe('SideDrawer', () => {
     rerender(<SideDrawer isOpen onToggle={jest.fn()} />)
 
     expect(document.querySelector('[data-slot="sheet-content"]')).toBeInTheDocument()
+  })
+
+  // Regression: opening a Safe App used to collapse the sidebar automatically. The toggle is
+  // still offered so the user can collapse it themselves.
+  it('keeps the sidebar open on a Safe App route', () => {
+    setupMatchMedia()
+    ;(useIsSidebarRoute as jest.Mock).mockReturnValue([true, true])
+    const onToggle = jest.fn()
+
+    render(<SideDrawer isOpen onToggle={onToggle} />)
+
+    expect(onToggle).toHaveBeenCalledWith(true)
+    expect(onToggle).not.toHaveBeenCalledWith(false)
+  })
+
+  it('still collapses the sidebar on small screens', () => {
+    const media = setupMatchMedia()
+    ;(useIsSidebarRoute as jest.Mock).mockReturnValue([true, true])
+    const onToggle = jest.fn()
+
+    render(<SideDrawer isOpen onToggle={onToggle} />)
+    media.shrinkToMobile()
+
+    expect(onToggle).toHaveBeenCalledWith(false)
+  })
+
+  it('offers the collapse toggle on a Safe App route', () => {
+    setupMatchMedia()
+    ;(useIsSidebarRoute as jest.Mock).mockReturnValue([true, true])
+
+    render(<SideDrawer isOpen onToggle={jest.fn()} />)
+
+    expect(document.querySelector('[aria-label="collapse sidebar"]')).toBeInTheDocument()
+  })
+
+  it('does not offer the collapse toggle off Safe App routes', () => {
+    setupMatchMedia()
+    ;(useIsSidebarRoute as jest.Mock).mockReturnValue([true, false])
+
+    render(<SideDrawer isOpen onToggle={jest.fn()} />)
+
+    expect(document.querySelector('[aria-label="collapse sidebar"]')).not.toBeInTheDocument()
+  })
+
+  it('collapses when the toggle is clicked', () => {
+    setupMatchMedia()
+    ;(useIsSidebarRoute as jest.Mock).mockReturnValue([true, true])
+    const onToggle = jest.fn()
+
+    render(<SideDrawer isOpen onToggle={onToggle} />)
+    fireEvent.click(document.querySelector('[aria-label="collapse sidebar"]')!)
+
+    expect(onToggle).toHaveBeenLastCalledWith(false)
   })
 })
