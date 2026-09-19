@@ -15,8 +15,6 @@ const IOS_INVALIDATED_PATTERNS = [
   /AKSError\s*=\s*-?536362999\b/, // kAKSReturnPolicyInvalid
   /AKSError\s*=\s*-?536870203\b/, // kAKSReturnBadDeviceKey
   /\b0xe007c009\b/i,
-  /OSStatus error -25293\b/, // errSecAuthFailed
-  /LAError(?:Domain)?\s+Code\s*=?\s*-7\b/, // biometryNotEnrolled
 ]
 
 const ANDROID_INVALIDATED_PATTERNS = [
@@ -37,4 +35,26 @@ export const isBiometryInvalidationError = (err: unknown): boolean => {
   const msg = messageOf(err)
   const patterns = Platform.OS === 'ios' ? IOS_INVALIDATED_PATTERNS : ANDROID_INVALIDATED_PATTERNS
   return patterns.some((p) => p.test(msg))
+}
+
+export class KeyStorageError extends Error {
+  constructor(cause: unknown) {
+    const message = messageOf(cause)
+    const authenticationCode = message.match(
+      /(?:LAError(?:Domain)?|com\.apple\.LocalAuthentication)\s+Code\s*=?\s*(-\d+)\b/,
+    )?.[1]
+    const osStatus = message.match(/(?:Status:|OSStatus error|NSOSStatusErrorDomain\s+Code=)\s*(-\d+)\b/)?.[1]
+    let description = 'Failed to store private key'
+    if (authenticationCode === '-8') {
+      description = 'Biometrics are locked. Unlock your device with its passcode and try again.'
+    } else if (message.includes('No biometry has been enrolled') || ['-6', '-7'].includes(authenticationCode ?? '')) {
+      description = 'Enable biometrics and allow this app to use them, then try again.'
+    } else if (osStatus === '-25293') {
+      description = 'Authentication failed. Check biometric access for this app and try again.'
+    } else if (osStatus === '-128' || authenticationCode === '-2') {
+      description = 'Authentication was cancelled. Please try again.'
+    }
+    super(description, { cause })
+    this.name = 'KeyStorageError'
+  }
 }

@@ -39465,11 +39465,11 @@ __metadata:
 
 "react-native-device-crypto@patch:react-native-device-crypto@npm%3A0.1.7#~/.yarn/patches/react-native-device-crypto-npm-0.1.7-dbd2698fc4.patch":
   version: 0.1.7
-  resolution: "react-native-device-crypto@patch:react-native-device-crypto@npm%3A0.1.7#~/.yarn/patches/react-native-device-crypto-npm-0.1.7-dbd2698fc4.patch::version=0.1.7&hash=2b3d9e"
+  resolution: "react-native-device-crypto@patch:react-native-device-crypto@npm%3A0.1.7#~/.yarn/patches/react-native-device-crypto-npm-0.1.7-dbd2698fc4.patch::version=0.1.7&hash=5842cf"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10/0eed99b617e49ca1c5132aa7f97e2043c4d29987442b841288e6d77e9fcd04560026269e60ec41318b1046b31682ff6183e17d39ddad66a0bf491b2d4241a7eb
+  checksum: 10/e82db1efaa0e8ebe723d7f13ee311bc53777654329de94da8521606776dca300dcc11d11195425671d85791111faa62c8dd6dfe3406c53f2f23381820284f92a
   languageName: node
   linkType: hard
 

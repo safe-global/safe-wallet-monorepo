@@ -1,5 +1,5 @@
 import { Platform } from 'react-native'
-import { BiometryInvalidationError, isBiometryInvalidationError } from './errors'
+import { BiometryInvalidationError, isBiometryInvalidationError, KeyStorageError } from './errors'
 
 describe('key-storage/errors', () => {
   const originalPlatform = Platform.OS
@@ -44,16 +44,29 @@ describe('key-storage/errors', () => {
       expect(isBiometryInvalidationError(new Error('failed (0xe007c009)'))).toBe(true)
     })
 
-    it('matches errSecAuthFailed (OSStatus -25293)', () => {
-      expect(isBiometryInvalidationError(new Error('OSStatus error -25293'))).toBe(true)
+    it.each(['OSStatus error -25293', 'Status: -25293', 'E1715: Unexpected OSStatus: Status: -25293'])(
+      'does not treat authentication failure as permanent invalidation: %s',
+      (message) => {
+        expect(isBiometryInvalidationError(new Error(message))).toBe(false)
+      },
+    )
+
+    it('recognizes invalidation in a native key-creation error', () => {
+      expect(
+        isBiometryInvalidationError(
+          new Error(
+            'SecKeyCreate could not create key: Error Domain=CryptoTokenKit Code=-3 UserInfo={AKSError=-536870203}',
+          ),
+        ),
+      ).toBe(true)
     })
 
     it('does NOT match errSecItemNotFound (-25300, no-item-in-keychain — handled separately)', () => {
       expect(isBiometryInvalidationError(new Error('OSStatus error -25300'))).toBe(false)
     })
 
-    it('matches LAErrorBiometryNotEnrolled (-7)', () => {
-      expect(isBiometryInvalidationError(new Error('LAErrorDomain Code=-7'))).toBe(true)
+    it('does not treat missing biometric enrollment as proof of key invalidation', () => {
+      expect(isBiometryInvalidationError(new Error('LAErrorDomain Code=-7'))).toBe(false)
     })
 
     it('does NOT match LAErrorBiometryLockout (-8, transient)', () => {
@@ -71,6 +84,30 @@ describe('key-storage/errors', () => {
     it('handles non-Error throwables (strings)', () => {
       expect(isBiometryInvalidationError('AKSError=-536362999')).toBe(true)
       expect(isBiometryInvalidationError('something benign')).toBe(false)
+    })
+  })
+
+  describe('KeyStorageError', () => {
+    it.each([
+      ['Status: -25293', 'Authentication failed.'],
+      ['OSStatus error -25293', 'Authentication failed.'],
+      ['Error Domain=NSOSStatusErrorDomain Code=-25293', 'Authentication failed.'],
+      ['Status: -128', 'Authentication was cancelled.'],
+      ['LAErrorDomain Code=-2', 'Authentication was cancelled.'],
+      ['LAErrorDomain Code=-8', 'Biometrics are locked.'],
+      ['Error Domain=com.apple.LocalAuthentication Code=-8', 'Biometrics are locked.'],
+      ['LAErrorDomain Code=-7', 'Enable biometrics'],
+      ['Error Domain=com.apple.LocalAuthentication Code=-6', 'Enable biometrics'],
+      ['The device cannot meet requirements. No biometry has been enrolled.', 'Enable biometrics'],
+    ])('explains %s without losing the cause', (message, description) => {
+      const cause = Object.assign(new Error(message), { code: 'E1715' })
+      const error = new KeyStorageError(cause)
+      expect(error.message).toContain(description)
+      expect(error.cause).toBe(cause)
+    })
+
+    it('does not expose unrecognized native messages to the user', () => {
+      expect(new KeyStorageError(new Error('Native detail')).message).toBe('Failed to store private key')
     })
   })
 

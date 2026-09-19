@@ -5,6 +5,7 @@ import { useAddressOwnershipValidation } from '@/src/hooks/useAddressOwnershipVa
 import { storePrivateKey } from '@/src/hooks/useSign/useSign'
 import useDelegate from '@/src/hooks/useDelegate'
 import Logger from '@/src/utils/logger'
+import { KeyStorageError } from '@/src/services/key-storage/errors'
 import { useSignerCollisionGuard } from './useSignerCollisionGuard'
 
 interface ImportError {
@@ -100,7 +101,10 @@ export const useImportSeedPhraseAddress = () => {
         Logger.error('Error importing seed phrase address:', error)
         setError({
           code: 'IMPORT',
-          message: 'Failed to import the selected address. Please try again.',
+          message:
+            error instanceof KeyStorageError
+              ? error.message
+              : 'Failed to import the selected address. Please try again.',
         })
         setIsImporting(false)
         return { success: false }

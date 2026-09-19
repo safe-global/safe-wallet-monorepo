@@ -123,3 +123,360 @@ index 03fd79e8a389f33a2841ecf0e177ffc9ea01b78c..d903b5dc4b0110dab9a8c1a648d34920
              }
              break;
          }
+diff --git a/ios/DeviceCrypto.m b/ios/DeviceCrypto.m
+index 1c05886476b28afcb44eb8fc36f5141593d41b0e..429bc9c85be59198d60faa7bc00b8f7feb281889 100644
+--- a/ios/DeviceCrypto.m
++++ b/ios/DeviceCrypto.m
+@@ -33,46 +33,39 @@ typedef NS_ENUM(NSUInteger, AccessLevel) {
+ 
+ - (SecKeyRef) getPublicKeyRef:(nonnull NSData*) alias
+ {
+-  NSDictionary *query = @{
+-    (id)kSecClass:               (id)kSecClassKey,
+-    (id)kSecAttrKeyClass:        (id)kSecAttrKeyClassPublic,
+-    (id)kSecAttrLabel:           @"publicKey",
+-    (id)kSecAttrApplicationTag:  (id)alias,
+-    (id)kSecReturnRef:           (id)kCFBooleanTrue,
+-  };
+-  
+-  CFTypeRef resultTypeRef = NULL;
+-  OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef) query, &resultTypeRef);
+-  if (status == errSecSuccess) {
+-    return (SecKeyRef)resultTypeRef;
+-  } else if (status == errSecItemNotFound) {
+-    return nil;
+-  } else
+-  [NSException raise:@"Unexpected OSStatus" format:@"Status: %i", (int)status];
+-  return nil;
++  SecKeyRef privateKey = [self getPrivateKeyRef:alias withMessage:nil];
++  if (!privateKey) {
++    NSError *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:errSecItemNotFound userInfo:nil];
++    @throw [NSException exceptionWithName:@"E_PUBLIC_KEY_PRIVATE_MISSING"
++                                  reason:@"The private wrapping key was not found."
++                                userInfo:@{@"error": error}];
++  }
++
++  // An independently stored public key can outlive its matching private key after restore.
++  SecKeyRef publicKey = SecKeyCopyPublicKey(privateKey);
++  CFRelease(privateKey);
++  if (!publicKey) {
++    @throw [NSException exceptionWithName:@"E_PUBLIC_KEY_DERIVATION"
++                                  reason:@"Could not obtain the public key for the private wrapping key."
++                                userInfo:nil];
++  }
++  return publicKey;
+ }
+ 
+ - (NSData *) getPublicKeyBits:(nonnull NSData*) alias
+ {
+-  NSDictionary *query = @{
+-    (id)kSecClass:               (id)kSecClassKey,
+-    (id)kSecAttrKeyClass:        (id)kSecAttrKeyClassPublic,
+-    (id)kSecAttrLabel:           @"publicKey",
+-    (id)kSecAttrApplicationTag:  (id)alias,
+-    (id)kSecReturnData:          (id)kCFBooleanTrue,
+-    (id)kSecReturnRef:           (id)kCFBooleanTrue,
+-  };
+-  
+-  SecKeyRef keyRef;
+-  OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef) query, (CFTypeRef *)&keyRef);
+-  if (status == errSecSuccess) {
+-    return CFDictionaryGetValue((CFDictionaryRef)keyRef, kSecValueData);
+-  } else if (status == errSecItemNotFound) {
+-    return nil;
+-  } else {
+-    [NSException raise:@"Unexpected OSStatus" format:@"Status: %i", status];
++  SecKeyRef publicKey = [self getPublicKeyRef:alias];
++  CFErrorRef error = NULL;
++  NSData *bits = CFBridgingRelease(SecKeyCopyExternalRepresentation(publicKey, &error));
++  CFRelease(publicKey);
++  if (!bits) {
++    NSError *nativeError = CFBridgingRelease(error);
++    @throw [NSException exceptionWithName:@"E_PUBLIC_KEY_EXPORT"
++                                  reason:@"Could not export the public wrapping key."
++                                userInfo:nativeError ? @{@"error": nativeError} : nil];
+   }
+-  return nil;
++  if (error) { CFRelease(error); }
++  return bits;
+ }
+ 
+ - (NSString *) getPublicKeyAsString:(nonnull NSData*) alias
+@@ -112,29 +105,7 @@ - (NSString*) getPublicKeyAsPEM:(nonnull NSData*) alias
+   return pemString;
+ }
+ 
+-- (bool) savePublicKeyFromRef:(nonnull SecKeyRef)publicKeyRef withAlias:(nonnull NSData*) alias
+-{
+-  NSDictionary* attributes =
+-  @{
+-    (id)kSecClass:              (id)kSecClassKey,
+-    (id)kSecAttrKeyClass:       (id)kSecAttrKeyClassPublic,
+-    (id)kSecAttrLabel:          @"publicKey",
+-    (id)kSecAttrApplicationTag: (id)alias,
+-    (id)kSecValueRef:           (__bridge id)publicKeyRef,
+-    (id)kSecAttrIsPermanent:    (id)kCFBooleanTrue,
+-  };
+-  
+-  OSStatus status = SecItemAdd((CFDictionaryRef)attributes, nil);
+-  while (status == errSecDuplicateItem)
+-  {
+-    status = SecItemDelete((CFDictionaryRef)attributes);
+-  }
+-  status = SecItemAdd((CFDictionaryRef)attributes, nil);
+-  
+-  return true;
+-}
+-
+-- (bool) deletePublicKey:(nonnull NSData*) alias
++- (void) deletePublicKey:(nonnull NSData*) alias
+ {
+   NSDictionary *query = @{
+     (id)kSecClass:               (id)kSecClassKey,
+@@ -143,11 +114,9 @@ - (bool) deletePublicKey:(nonnull NSData*) alias
+     (id)kSecAttrApplicationTag:  (id)alias,
+   };
+   OSStatus status = SecItemDelete((CFDictionaryRef) query);
+-  while (status == errSecDuplicateItem)
+-  {
+-    status = SecItemDelete((CFDictionaryRef) query);
++  if (status != errSecSuccess && status != errSecItemNotFound) {
++    RCTLogWarn(@"Legacy public wrapping-key cleanup failed (OSStatus %i).", (int)status);
+   }
+-  return true;
+ }
+ 
+ - (SecKeyRef) getPrivateKeyRef:(nonnull NSData*)alias withMessage:(NSString *)authPromptMessage
+@@ -171,8 +140,12 @@ - (SecKeyRef) getPrivateKeyRef:(nonnull NSData*)alias withMessage:(NSString *)au
+     return (SecKeyRef)resultTypeRef;
+   else if (status == errSecItemNotFound)
+     return nil;
+-  else
+-    [NSException raise:@"E1715: Unexpected OSStatus" format:@"Status: %i", (int)status];
++  else {
++    NSError *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil];
++    @throw [NSException exceptionWithName:@"E1715: Unexpected OSStatus"
++                                  reason:[NSString stringWithFormat:@"Status: %i", (int)status]
++                                userInfo:@{@"error": error}];
++  }
+   return nil;
+ }
+ 
+@@ -185,9 +158,11 @@ - (bool) deletePrivateKey:(nonnull NSData*) alias
+     (id)kSecAttrApplicationTag:  (id)alias,
+   };
+   OSStatus status = SecItemDelete((CFDictionaryRef) query);
+-  while (status == errSecDuplicateItem)
+-  {
+-    status = SecItemDelete((CFDictionaryRef) query);
++  if (status != errSecSuccess && status != errSecItemNotFound) {
++    NSError *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil];
++    @throw [NSException exceptionWithName:@"E_DELETE_PRIVATE_KEY"
++                                  reason:[NSString stringWithFormat:@"Status: %i", (int)status]
++                                userInfo:@{@"error": error}];
+   }
+   return true;
+ }
+@@ -208,6 +183,7 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+ {
+   SecKeyRef privateKeyRef = [self getPrivateKeyRef:alias withMessage:kAuthenticationRequired];
+   if (privateKeyRef != nil) {
++    CFRelease(privateKeyRef);
+     return [self getPublicKeyAsPEM:alias];
+   }
+ 
+@@ -244,7 +220,10 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+   SecAccessControlRef acRef = SecAccessControlCreateWithFlags(kCFAllocatorDefault, keyAccessLevel, acFlag, &error);
+   
+   if (!acRef) {
+-    [NSException raise:@"E1711" format:@"Could not create access control."];
++    NSError *nativeError = CFBridgingRelease(error);
++    @throw [NSException exceptionWithName:@"E1711"
++                                  reason:[NSString stringWithFormat:@"Could not create access control: %@", nativeError]
++                                userInfo:nativeError ? @{@"error": nativeError} : nil];
+   }
+   
+   NSDictionary* attributes =
+@@ -265,11 +244,14 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+   };
+   
+   privateKeyRef = SecKeyCreateRandomKey((__bridge CFDictionaryRef)attributes, &error);
++  CFRelease(acRef);
+   if (!privateKeyRef){
+-    [NSException raise:@"E1712" format:@"SecKeyCreate could not create key."];
++    NSError *nativeError = CFBridgingRelease(error);
++    @throw [NSException exceptionWithName:@"E1712"
++                                  reason:[NSString stringWithFormat:@"SecKeyCreate could not create key: %@", nativeError]
++                                userInfo:nativeError ? @{@"error": nativeError} : nil];
+   }
+-  SecKeyRef publicKeyRef = SecKeyCopyPublicKey(privateKeyRef);
+-  [self savePublicKeyFromRef:publicKeyRef withAlias:alias];
++  CFRelease(privateKeyRef);
+   return [self getPublicKeyAsPEM:alias];
+ }
+ 
+@@ -288,16 +270,77 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+       resolve(publicKey != nil ? @(YES) : @(NO));
+     }
+   } @catch(NSException *err) {
+-    reject(err.name, err.reason, nil);
++    reject(err.name, err.reason, err.userInfo[@"error"]);
+   }
+ }
+ 
+ RCT_EXPORT_METHOD(deleteKey:(nonnull NSData *)alias resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+ {
+-  [self deletePublicKey:alias];
+-  [self deletePrivateKey:alias];
+-  
+-  return resolve(@(YES));
++  @try {
++    [self deletePrivateKey:alias];
++    [self deletePublicKey:alias];
++    resolve(@(YES));
++  } @catch(NSException *err) {
++    reject(err.name, err.reason, err.userInfo[@"error"]);
++  }
++}
++
++RCT_EXPORT_METHOD(debugDeletePrivateWrappingKey:(nonnull NSData *)alias resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
++{
++  NSString *aliasString = [[NSString alloc] initWithData:alias encoding:NSUTF8StringEncoding];
++  if (!aliasString || [aliasString rangeOfString:@"^signer_address_0x[0-9a-fA-F]{40}$" options:NSRegularExpressionSearch].location == NSNotFound) {
++    reject(@"E_DEBUG_ALIAS", @"Expected a signer wrapping-key alias.", nil);
++    return;
++  }
++
++  NSDictionary *publicQuery = @{
++    (id)kSecClass: (id)kSecClassKey,
++    (id)kSecAttrKeyClass: (id)kSecAttrKeyClassPublic,
++    (id)kSecAttrLabel: @"publicKey",
++    (id)kSecAttrApplicationTag: alias,
++    (id)kSecMatchLimit: (id)kSecMatchLimitAll,
++    (id)kSecReturnData: @YES,
++  };
++  CFTypeRef beforeResult = NULL;
++  OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)publicQuery, &beforeResult);
++  NSArray *publicKeysBefore = CFBridgingRelease(beforeResult);
++  if (status != errSecSuccess || publicKeysBefore.count == 0) {
++    reject(@"E_DEBUG_PUBLIC_KEY", @"Cannot establish the public wrapping-key entries. Nothing was deleted.",
++           [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil]);
++    return;
++  }
++
++  NSDictionary *privateQuery = @{
++    (id)kSecClass: (id)kSecClassKey,
++    (id)kSecAttrKeyClass: (id)kSecAttrKeyClassPrivate,
++    (id)kSecAttrLabel: @"privateKey",
++    (id)kSecAttrApplicationTag: alias,
++  };
++  status = SecItemDelete((__bridge CFDictionaryRef)privateQuery);
++  if (status != errSecSuccess) {
++    reject(@"E_DEBUG_DELETE_PRIVATE", @"Private wrapping-key deletion failed or the entry was already absent.",
++           [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil]);
++    return;
++  }
++
++  status = SecItemCopyMatching((__bridge CFDictionaryRef)privateQuery, NULL);
++  if (status != errSecItemNotFound) {
++    reject(@"E_DEBUG_VERIFY_PRIVATE", @"Deletion was attempted, but private-key absence could not be confirmed.",
++           [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil]);
++    return;
++  }
++
++  CFTypeRef afterResult = NULL;
++  status = SecItemCopyMatching((__bridge CFDictionaryRef)publicQuery, &afterResult);
++  NSArray *publicKeysAfter = CFBridgingRelease(afterResult);
++  if (status != errSecSuccess || publicKeysBefore.count != publicKeysAfter.count ||
++      ![[NSSet setWithArray:publicKeysBefore] isEqualToSet:[NSSet setWithArray:publicKeysAfter ?: @[]]]) {
++    reject(@"E_DEBUG_VERIFY_PUBLIC", @"Private key was deleted, but preservation of the public entries could not be confirmed.",
++           [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil]);
++    return;
++  }
++
++  resolve(@{@"publicKeyCount": @(publicKeysAfter.count)});
+ }
+ 
+ RCT_EXPORT_METHOD(sign:(nonnull NSData *)alias withPlainText:(nonnull NSString *)plainText withOptions:(nonnull NSDictionary *)options resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+@@ -357,7 +400,7 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+       @"encryptedText": [cipherText base64EncodedStringWithOptions:0],
+     });
+   } @catch(NSException *err) {
+-    reject(err.name, err.description, nil);
++    reject(err.name, err.description, err.userInfo[@"error"]);
+   }
+ }
+ 
+@@ -383,7 +426,10 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+                                                                      &aerr));
+     
+     if (!clearText || aerr) {
+-      [NSException raise:@"E1760 - Decryption error." format:@"%@", aerr];
++      NSError *nativeError = CFBridgingRelease(aerr);
++      @throw [NSException exceptionWithName:@"E1760 - Decryption error."
++                                    reason:[NSString stringWithFormat:@"%@", nativeError]
++                                  userInfo:nativeError ? @{@"error": nativeError} : nil];
+     }
+     
+     if (privateKeyRef) { CFRelease(privateKeyRef); }
+@@ -391,7 +437,7 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+     
+     resolve([[NSString alloc] initWithData:clearText   encoding:NSUTF8StringEncoding]);
+   } @catch(NSException *err) {
+-    reject(err.name, err.description, nil);
++    reject(err.name, err.description, err.userInfo[@"error"]);
+   }
+ }
+ 
+@@ -399,7 +445,11 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+ // ______________________________________________
+ RCT_EXPORT_METHOD(getPublicKey:(nonnull NSData *)alias resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+ {
+-  return resolve([self getPublicKeyAsPEM:alias]);
++  @try {
++    resolve([self getPublicKeyAsPEM:alias]);
++  } @catch(NSException *err) {
++    reject(err.name, err.reason, err.userInfo[@"error"]);
++  }
+ }
+ 
+ RCT_EXPORT_METHOD(isKeyExists:(nonnull NSData *)alias withKeyType:(nonnull NSNumber *) keyType resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+diff --git a/lib/commonjs/index.js b/lib/commonjs/index.js
+index d02926abfdf1d0cbeea5ab109c3239d686eb5d69..a3ab9892e68875dd2930a73d100f4c9021cc4dbc 100644
+--- a/lib/commonjs/index.js
++++ b/lib/commonjs/index.js
+@@ -81,7 +81,7 @@ const DeviceCrypto = {
+    * @return {Promise} Resolves to `true` when successful
+    */
+   async deleteKey(alias) {
+-    return Boolean(RNDeviceCrypto.deleteKey(alias));
++    return Boolean(await RNDeviceCrypto.deleteKey(alias));
+   },
+ 
+   /**
+diff --git a/lib/module/index.js b/lib/module/index.js
+index d30feaf62eb060b99d274606ff52eb365884d808..264d784a1cf1b0c7a33b5a3dd67e2ed1bb00d1a9 100644
+--- a/lib/module/index.js
++++ b/lib/module/index.js
+@@ -69,7 +69,7 @@ const DeviceCrypto = {
+    * @return {Promise} Resolves to `true` when successful
+    */
+   async deleteKey(alias) {
+-    return Boolean(RNDeviceCrypto.deleteKey(alias));
++    return Boolean(await RNDeviceCrypto.deleteKey(alias));
+   },
+ 
+   /**
+diff --git a/src/index.ts b/src/index.ts
+index d19d2d3840fafe69d02bf407603d37824a3adcb5..94ade5fee2148ce261db1c0da4484253c97d665d 100644
+--- a/src/index.ts
++++ b/src/index.ts
+@@ -85,7 +85,7 @@ const DeviceCrypto = {
+    * @return {Promise} Resolves to `true` when successful
+    */
+   async deleteKey(alias: string): Promise<boolean> {
+-    return Boolean(RNDeviceCrypto.deleteKey(alias));
++    return Boolean(await RNDeviceCrypto.deleteKey(alias));
+   },
+ 
+   /**
