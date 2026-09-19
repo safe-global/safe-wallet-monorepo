@@ -49,30 +49,26 @@ const useLoadSafeInfo = (): AsyncResult<ExtendedSafeInfo> => {
     {
       skip: !chainId || !address,
       pollingInterval: POLLING_INTERVAL,
-      // A backgrounded tab left open on a failing Safe otherwise keeps polling —
-      // and reporting — indefinitely. Paired with refetchOnFocus so pausing the
-      // poll costs no freshness: without it, coming back to the tab could show a
-      // stale nonce, owner set or threshold for up to a full polling interval.
+      // Stops a backgrounded tab on a failing Safe from polling (and reporting) forever. Paired with
+      // refetchOnFocus so pausing costs no freshness — else returning could show a stale nonce/owners/
+      // threshold for up to a polling interval.
       skipPollingIfUnfocused: true,
       refetchOnFocus: true,
     },
   )
 
-  // Memoize so the reference stays stable across renders when cgwData hasn't
-  // changed. Without this, every render produced a new object, which feeds
-  // into `safeData` → `useMemo` deps → `useUpdateStore` effect → re-dispatch
-  // → re-render — a per-render loop that fires ~50 `safeInfo/set` actions
-  // and ~1300 total store actions during a single navigation.
+  // Stable reference when cgwData is unchanged. Without it a fresh object each render feeds
+  // safeData → useMemo deps → useUpdateStore → re-dispatch → re-render, a loop that fired ~50
+  // `safeInfo/set` (~1300 total actions) during one navigation.
   const cgwDataWithDeployed = useMemo(() => (cgwData ? { ...cgwData, deployed: true } : undefined), [cgwData])
 
   // Only 404s are suppressed during CF sync — real errors (500, network) must still surface.
   const isCgw404 = !!cgwError && 'status' in cgwError && cgwError.status === 404
   const suppressCgwError = awaitingCfSync && isCgw404
 
-  // Self-heal: if the safe is deployed on-chain (backend returned SafeInfo) but a
-  // counterfactual entry still exists locally, remove it. The listener propagates
-  // the DELETE to the backend best-effort. Covers: tab closed mid-activation,
-  // prior DELETE failed, stale entry synced from another member of a space.
+  // Self-heal: safe deployed on-chain but a counterfactual entry lingers locally → remove it (the
+  // listener DELETEs to the backend best-effort). Covers tab-closed-mid-activation, a failed prior
+  // DELETE, or a stale entry synced from another space member.
   useEffect(() => {
     if (cgwData && undeployedSafe && chainId && address) {
       dispatch(removeUndeployedSafe({ chainId, address }))
@@ -96,10 +92,8 @@ const useLoadSafeInfo = (): AsyncResult<ExtendedSafeInfo> => {
     return undeployedSafe ? undeployedError : undefined
   }, [cgwError, undeployedSafe, undeployedError, suppressCgwError])
 
-  // Only block on CF sync while we don't yet have on-chain data — a deployed
-  // safe (cgwData truthy) shouldn't wait for the CF sync round-trip. Combined
-  // with useCounterfactualSafeSync's bounded retry + always-settle behavior,
-  // this also bounds the loading window when the CF endpoint 500s.
+  // Only block on CF sync until on-chain data arrives (a deployed safe shouldn't wait for it). With
+  // useCounterfactualSafeSync's bounded retry + always-settle, this bounds the loading window if CF 500s.
   const loading = cgwLoading || (!cgwData && awaitingCfSync)
 
   return useMemo(() => [safeData, error, loading], [safeData, error, loading])

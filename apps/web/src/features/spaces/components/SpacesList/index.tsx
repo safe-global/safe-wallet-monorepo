@@ -227,11 +227,9 @@ const SpacesList = () => {
 
   const singleSpaceId = activeSpaces.length === 1 ? activeSpaces[0].uuid : null
 
-  // Treat any indefinite state as loading. On the skip→unskip flip (re-login
-  // after logout) RTK Query lags one render — isFetching/isUninitialized are
-  // both false while spaces is still undefined. The `spaces === undefined &&
-  // !error` clause covers that gap so an existing user isn't bounced into
-  // /welcome/create-space on a stale spacesAmount=0.
+  // Treat any indefinite state as loading: on the skip→unskip flip (re-login) RTK Query lags one render with
+  // spaces still undefined, and `spaces === undefined && !error` covers that gap so an existing user isn't
+  // bounced to /welcome/create-space on a stale spacesAmount=0.
   const isSpacesLoading = isFetching || isUninitialized || (spaces === undefined && !error)
 
   const { setHasSignedIn, redirectLoading } = useSignInRedirect({

@@ -32,9 +32,8 @@ export const SetThreshold = ({
 
   const newNumberOfOwners = safe ? safe.owners.length - 1 : 1
 
-  // The threshold lives outside a form, so guard it at submit: blocks the
-  // GS202/GS201 on-chain reverts if the owner set changed while the flow was
-  // open (WA-3005 Bucket A).
+  // The threshold lives outside a form, so guard at submit: blocks the GS202/GS201 reverts if the owner set
+  // changed while the flow was open (WA-3005 Bucket A).
   const thresholdError = validateThreshold(selectedThreshold, newNumberOfOwners)
 
   const onSubmitHandler = (e: SyntheticEvent) => {

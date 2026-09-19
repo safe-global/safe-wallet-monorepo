@@ -9,35 +9,18 @@ import { expireSession, isForbidden, SESSION_EXPIRED_GROUP_KEY } from './expireS
 
 export { SESSION_EXPIRED_GROUP_KEY, SESSION_EXPIRED_MESSAGE } from './expireSession'
 
-// Mirrors apps/web/src/features/oidc-auth/constants.ts. The constant is not
-// exported from the feature's public API; duplicating the literal here avoids
-// pulling the (lazy-loaded) feature module into the boot path.
+// Mirrors oidc-auth/constants.ts — duplicated here to avoid pulling the lazy feature module into the boot path.
 const OIDC_AUTH_PENDING_KEY = 'oidc_auth_pending'
 
 /**
- * Detects an expired session and clears Redux auth state so components stop
- * issuing credentialed requests that would otherwise 403.
+ * Detects an expired session and clears Redux auth state so components stop issuing 403-bound requests.
  *
- * On boot (after store hydration), when the persisted state says the user is
- * signed in:
- *  1. If `sessionExpiresAt` has already passed → clear auth + toast immediately,
- *     no /v1/auth/me round-trip.
- *  2. Otherwise → arm a local-expiry timer for the remaining lifetime so a
- *     session that crosses `sessionExpiresAt` mid-tab is cleared without any
- *     further network request, even if the probe is slow or skipped.
- *  3. In parallel, fire exactly one /v1/auth/me probe to detect cookies that
- *     expired earlier than the persisted hint suggests. 403 → clear auth + toast
- *     immediately (overrides the timer); 200 / transient error → leave the timer
- *     to fire when local expiry passes.
+ * On boot, if the persisted state says signed-in: clear immediately if `sessionExpiresAt` already passed;
+ * otherwise arm a local-expiry timer (fires without any network request) and fire one /v1/auth/me probe —
+ * a 403 clears immediately and overrides the timer; 200/transient leaves the timer to enforce local expiry.
  *
- * The /me probe is suppressed while OIDC login or logout callback flows are
- * processing — those hooks already call /me themselves. The local timer is
- * **not** suppressed: we still want sessionExpiresAt enforced even if the
- * surrounding flow finishes silently without dispatching an auth-state change.
- *
- * Auth is cleared on every route; the toast is shown only on workspaces routes.
- * Mid-session 403s are handled by `forbiddenSessionListener`, which funnels
- * into the same `expireSession` routine.
+ * The probe (not the timer) is suppressed during OIDC login/logout flows, which call /me themselves.
+ * Auth is cleared on every route; the toast shows only on workspaces routes.
  */
 export const useSessionExpiryGuard = (): void => {
   const dispatch = useAppDispatch()
@@ -49,10 +32,8 @@ export const useSessionExpiryGuard = (): void => {
   const pathnameRef = useRef(router.pathname)
   pathnameRef.current = router.pathname
 
-  // Track which sessionExpiresAt value we've already processed so that
-  // unrelated re-renders (e.g. dispatch identity churn under React Strict Mode)
-  // don't re-fire the /me probe. Cleared when the user signs out so a
-  // subsequent sign-in within the same tab is processed afresh.
+  // Track the processed sessionExpiresAt so unrelated re-renders (e.g. Strict Mode dispatch churn) don't
+  // re-fire the /me probe. Cleared on sign-out so a re-sign-in in the same tab is processed afresh.
   const lastProcessedRef = useRef<number | null>(null)
 
   useEffect(() => {
@@ -69,29 +50,23 @@ export const useSessionExpiryGuard = (): void => {
 
     const expireNow = () => dispatch(expireSession(pathnameRef.current))
 
-    // Pre-flight: cookie is already past local expiry → no point arming the
-    // timer or probing /me, just clear immediately.
+    // Already past local expiry → clear immediately, no timer or /me probe.
     if (sessionExpiresAt <= Date.now()) {
       expireNow()
       return
     }
 
-    // We have a fresh, future expiry — meaning the user is (re-)authenticated.
-    // Dismiss any lingering session-expired toast left over from a prior expiry
-    // in the same tab so it doesn't hang around after the user signs back in.
+    // A fresh future expiry means the user is (re-)authenticated: dismiss any lingering session-expired
+    // toast from a prior expiry in the same tab.
     dispatch(closeByGroupKey({ groupKey: SESSION_EXPIRED_GROUP_KEY }))
 
-    // Arm the local-expiry timer up front. This is the floor on cleanup
-    // latency: even if the /me probe hangs or is suppressed (OIDC/logout flow
-    // owns /me), the session is guaranteed to be cleared at sessionExpiresAt.
+    // Arm the local-expiry timer up front: even if the /me probe hangs or is suppressed, the session is
+    // guaranteed to clear at sessionExpiresAt.
     timer = setTimeout(expireNow, sessionExpiresAt - Date.now())
 
-    // Suppress the probe while OIDC login or logout callback flows are
-    // processing. Both flags are set *synchronously before a full-page redirect*
-    // (useLogout.ts / useOidcLogin.ts), so on the return load they're guaranteed
-    // to be present. They're cleared only after the callback's async /me
-    // resolves and dispatches an auth-state change, which triggers this effect
-    // to re-run via the sessionExpiresAt dep.
+    // Suppress the probe during OIDC-login/logout flows (they call /me themselves). Both flags are set
+    // synchronously before a full-page redirect, so they're present on the return load, and cleared only
+    // once the callback's /me dispatches an auth-state change — re-running this effect via sessionExpiresAt.
     const inFlow = sessionStorage.getItem(LOGGING_OUT_KEY) || sessionStorage.getItem(OIDC_AUTH_PENDING_KEY)
     if (inFlow) {
       return () => {
@@ -106,12 +81,9 @@ export const useSessionExpiryGuard = (): void => {
       .unwrap()
       .catch((error: unknown) => {
         if (cancelled) return
-        // 403 → cookie is gone; expire now (the timer is also cleared in
-        // cleanup, but expireNow's setUnauthenticated triggers a re-render
-        // with sessionExpiresAt=null which will run the cleanup anyway).
+        // 403 → cookie is gone, expire now.
         if (isForbidden(error)) expireNow()
-        // Transient (5xx / network): we have no proof the cookie is invalid;
-        // fall through and let the timer enforce local expiry.
+        // Transient (5xx / network): no proof the cookie is invalid, so let the timer enforce local expiry.
       })
       .finally(() => {
         probe.unsubscribe()

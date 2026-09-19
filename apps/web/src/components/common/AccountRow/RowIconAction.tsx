@@ -5,9 +5,8 @@ import { TOOLTIP_DELAY_MS } from './utils'
 
 const TRIGGER_CLASS = 'shrink-0 rounded p-0.5 hover:bg-foreground/5 transition-colors cursor-pointer inline-flex'
 
-// pointerdown is stopped so the surrounding SelectItem / trigger doesn't select the safe or toggle the
-// dropdown. preventDefault on pointerdown does not cancel the synthetic click, so the action still runs
-// (span buttons) or the anchor still navigates.
+// Stop pointerdown so the surrounding SelectItem/trigger doesn't select the safe or toggle the dropdown;
+// it doesn't cancel the synthetic click, so the action still runs / the anchor still navigates.
 const stopParent = (e: MouseEvent | PointerEvent) => {
   e.stopPropagation()
   e.preventDefault()

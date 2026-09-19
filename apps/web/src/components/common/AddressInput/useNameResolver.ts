@@ -6,9 +6,8 @@ import useAsync from '@safe-global/utils/hooks/useAsync'
 import { isDomain, resolveNameForChain } from '@/services/ens'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
 
-// Shown when the user enters an ENS-style name that can't be resolved to an address on the chain it
-// was looked up for — either because that chain has no domain lookup hub, or the name isn't set.
-// Names the chain (e.g. "Ethereum" in the chain-agnostic Spaces address book) so it isn't ambiguous.
+// Shown when an ENS-style name can't resolve on the lookup chain (no domain lookup there, or name unset).
+// Names the chain (e.g. "Ethereum" in the chain-agnostic Spaces address book) to avoid ambiguity.
 export const getEnsNotAvailableError = (chain?: Chain): string =>
   `ENS name not available on ${chain?.chainName || 'this network'}`
 
@@ -18,9 +17,8 @@ const useNameResolver = (
 ): { address: string | undefined; name: string | undefined; resolverError?: Error; resolving: boolean } => {
   const currentChain = useCurrentChain()
 
-  // Target chain whose address record we want (e.g. Base Safe, or mainnet for Spaces contacts).
-  // ENSv2: resolution always starts on the hub (Mainnet / Sepolia Universal Resolver), not the L2
-  // RPC. When the hub chain is unavailable, no provider is returned and resolution stays off.
+  // ENSv2: resolution always starts on the hub (Mainnet / Sepolia Universal Resolver), not the L2 RPC.
+  // When the hub chain is unavailable, no provider is returned and resolution stays off.
   const targetChain = chain ?? currentChain
   const { provider: ethersProvider } = useEnsHubProvider(targetChain)
   const debouncedValue = useDebounce((value || '').trim(), 200)

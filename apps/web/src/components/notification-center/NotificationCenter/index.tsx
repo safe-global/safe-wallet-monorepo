@@ -114,9 +114,8 @@ const NotificationCenter = (): ReactElement => {
       </Button>
 
       <Popover
-        // Clicking the "view transaction" link doesn't remove the popover even though
-        // handleClose is called which results in the UI not being clickable anymore
-        // so by adding a key we force a re-render
+        // The "view transaction" link doesn't remove the popover despite handleClose, leaving the UI
+        // unclickable — a key forces a re-render.
         key={Number(open)}
         open={open}
         onOpenChange={(isOpen) => {

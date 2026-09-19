@@ -244,9 +244,8 @@ const AddressInput = ({
 
       const { address } = parsePrefixedAddress(value)
 
-      // An ENS-style name keeps the field invalid until it resolves (the value is replaced by
-      // the resolved address). If it can't be resolved on the lookup chain, say so explicitly
-      // instead of the generic "Invalid address format".
+      // An ENS-style name keeps the field invalid until it resolves (value replaced by the address). If it
+      // can't resolve on the lookup chain, say so explicitly instead of "Invalid address format".
       if (isDomain(address)) {
         return getEnsNotAvailableError(ensChain)
       }

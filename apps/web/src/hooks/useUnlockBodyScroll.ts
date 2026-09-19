@@ -10,9 +10,9 @@ import { useEffect } from 'react'
 const OPEN_OVERLAY_SELECTOR = [
   // MUI modals/dialogs/drawers/popovers/menus. `keepMounted` ones get `.MuiModal-hidden` when closed.
   '.MuiModal-root:not(.MuiModal-hidden)',
-  // Base UI / shadcn overlays. Their content is unmounted while closed, EXCEPT under `keepMounted`
-  // (e.g. CaptchaModal), where Base UI keeps the node and only marks it `hidden` — so a bare
-  // attribute selector would match a closed overlay and disable the guard for the whole session.
+  // Base UI / shadcn overlays. Content unmounts while closed EXCEPT under `keepMounted` (e.g. CaptchaModal),
+  // where the node stays and is only marked `hidden` — so a bare attribute selector would match a closed
+  // overlay and disable the guard for the whole session.
   '[data-slot="dialog-content"]:not([hidden])',
   '[data-slot="alert-dialog-content"]:not([hidden])',
   '[data-slot="drawer-content"]:not([hidden])',
@@ -81,11 +81,9 @@ const useUnlockBodyScroll = (): void => {
     }
 
     const observer = new MutationObserver(scheduleCheck)
-    // `attributes` catches a stuck `overflow: hidden` being written to the body, while
-    // `childList` catches an overlay being unmounted from the DOM. The latter matters
-    // because a locker's restore may run while the previous overlay's exit transition is
-    // still in flight (e.g. MUI's ~225ms Drawer transition): the first check bails because
-    // the overlay node is still present, and only the unmount tells us to re-check.
+    // `attributes` catches a stuck `overflow: hidden` on the body; `childList` catches an overlay unmount.
+    // The latter matters when a restore runs mid exit-transition (e.g. MUI's ~225ms Drawer): the node is
+    // still present so the first check bails, and only the unmount triggers a re-check.
     observer.observe(document.body, { attributes: true, attributeFilter: ['style'], childList: true })
 
     return () => {

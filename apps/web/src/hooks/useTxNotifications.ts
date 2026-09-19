@@ -84,9 +84,8 @@ const useTxNotifications = (): void => {
         const guardErrorName = isError ? getGuardErrorInfo(detail.error) : undefined
         // Awaiting approval in Hypernative: replaces the guard wording and the raw payload (WA-1219)
         const hnApprovalRequired = isError && isHypernativeGuardRevert(detail.error)
-        // A Ledger device failure states its own reason. Its raw error is a
-        // dump of DMK class names, ethers codes and the viem version, so it is
-        // withheld from `detailedMessage` too (WA-3243).
+        // A Ledger failure states its own reason; its raw error is a DMK/ethers/viem dump, so it's withheld
+        // from `detailedMessage` too (WA-3243).
         const ledgerError = isError ? getLedgerDeviceError(detail.error) : undefined
         // A known CGW response state replaces both the copy and the details:
         // the response body can be a gateway HTML error page (WA-3252).
@@ -108,19 +107,14 @@ const useTxNotifications = (): void => {
         } else if (gasLimitTooLowMessage) {
           message = gasLimitTooLowMessage
         } else if (isError && isNonceTooLowError(detail.error)) {
-          // The signer wallet's Ethereum nonce advanced before broadcast — the
-          // RPC rejected it pre-mining (no gas spent). Same user story as a
-          // stale Safe nonce, so show the same message.
+          // The signer's nonce advanced before broadcast — RPC-rejected pre-mining (no gas spent). Same
+          // story as a stale Safe nonce, so show the same message.
           message = getGs026Message('STALE_NONCE')
         } else if (ledgerError) {
           message = getLedgerUserMessage(ledgerError)
         } else if (isError && isRateLimitError(detail.error)) {
-          // Translate transient RPC rate-limit failures into friendly copy.
-          // The raw error from viem looks like a contract revert ("Request is
-          // being rate limited"); we replace the message but keep the original
-          // in detailedMessage for debugging.
-          // Checked before the CGW classification so a 429-carrying error reads
-          // the same here as it does inline in `TxSubmitError` (WA-3252).
+          // viem surfaces a rate-limit failure as a contract revert; swap in friendly copy (original kept
+          // in detailedMessage). Checked before CGW classification so a 429 matches `TxSubmitError` (WA-3252).
           message = RATE_LIMIT_USER_MESSAGE
         } else if (cgwError) {
           message = cgwError.message

@@ -101,10 +101,8 @@ export const useFeesPreview = (): FeesPreviewData => {
   const lockedGasToken = safeTx && safeTx.signatures.size > 0 ? safeTx.data.gasToken : undefined
   const isConfirmation = lockedGasToken !== undefined && !!safeTx && isGtfSafePaid(safeTx.data)
 
-  // Signed payload that never went through Safe-pays setup — pre-M2 queue items, or post-M2
-  // Signer-pays multi-sig after the first signature. The hook can't tell these apart from the
-  // payload alone (both have zero gasPrice/baseGas + ZERO_ADDRESS refundReceiver), so we lock
-  // the UI for confirmers regardless of how the tx got there.
+  // Signed payload that skipped Safe-pays setup (pre-M2 queue items or post-M2 Signer-pays multi-sig).
+  // Both look identical in the payload (zero gasPrice/baseGas + ZERO_ADDRESS refundReceiver), so lock the UI for confirmers regardless.
   const isLegacySigned = !!safeTx && safeTx.signatures.size > 0 && !isGtfSafePaid(safeTx.data)
 
   const { candidates, defaultAddress } = useGasTokenCandidates(isConfirmation ? undefined : txPayload)
@@ -133,9 +131,8 @@ export const useFeesPreview = (): FeesPreviewData => {
     return { address: lockedGasToken, symbol: '', logoUri: '', decimals: nativeDecimals, fiatBalance: '0' }
   }, [lockedGasToken, balances.items, nativeSymbol, nativeDecimals, chain?.nativeCurrency.logoUri])
 
-  // If the user's explicit choice drops out of candidates (e.g. balance dropped to 0), forget it.
-  // Skip while the candidates list is empty — that's the transient remount window (Back/Forward
-  // between flow steps) where balances haven't repopulated yet, not a real "token unavailable".
+  // If the user's choice drops out of candidates (e.g. balance hit 0), forget it — but skip while the list
+  // is empty (the transient Back/Forward remount window), which isn't a real "token unavailable".
   useEffect(() => {
     if (!gtfSelectedGasToken) return
     if (candidates.length === 0) return
@@ -150,18 +147,15 @@ export const useFeesPreview = (): FeesPreviewData => {
   const gasSymbol = selectedCandidate?.symbol ?? nativeSymbol
   const gasDecimals = selectedCandidate?.decimals ?? nativeDecimals
 
-  // Chains without a RELAY_FEE relayer can't quote Safe-pays fees at all
-  // — render the signer-pays variant: free execution fee, no
-  // gas-token selector, and no call to the preview endpoint.
+  // Chains without a RELAY_FEE relayer can't quote Safe-pays fees, so render the signer-pays variant:
+  // free execution fee, no gas-token selector, no preview call.
   const feePreviewAvailable = isGtfFeePreviewAvailable(chain)
   const isSignerMode =
     !isConfirmation &&
     (!IS_RELAYING_LIVE || !feePreviewAvailable || gtfPaymentMode === 'signer' || candidates.length === 0)
 
-  // Confirmers render the fee locked in the signed payload, not a fresh CGW quote.
-  // Skip the query when the Safe holds no eligible gas token — without this the CGW endpoint
-  // can still return a quote priced in native against ZERO_ADDRESS, surfacing "Pay from Safe"
-  // with an empty token dropdown. The signer fallback below then takes over.
+  // Confirmers render the locked signed fee, not a fresh CGW quote. Skip the query with no eligible
+  // gas token — else CGW quotes native against ZERO_ADDRESS, showing "Pay from Safe" with an empty dropdown; the signer fallback takes over instead.
   const preview = useGtfFeePreview({
     enabled: !isConfirmation && !isSignerMode && !isLegacySigned && candidates.length > 0,
     safeTx,
@@ -171,11 +165,8 @@ export const useFeesPreview = (): FeesPreviewData => {
     numberSignatures: safe.threshold,
   })
 
-  // Sync `gtfSelectedGasToken` with the latest preview state
-  //  - preview unavailable (errored / no eligible token after settling): drop the persisted
-  //    selection so `mergeGtfFeeParams` bails and the tx is signed as signer-pays.
-  //  - preview succeeded and the user hasn't picked anything yet: persist the implicit
-  //    default.
+  // Sync `gtfSelectedGasToken` with the latest preview state: on failure drop the selection so
+  // `mergeGtfFeeParams` bails to signer-pays; on success with no user pick, persist the default.
   useEffect(() => {
     if (gtfPaymentMode !== 'safe') return
     if (isLegacySigned) return
@@ -204,9 +195,8 @@ export const useFeesPreview = (): FeesPreviewData => {
   const { gasLimit, gasLimitError, gasLimitLoading } = useGasLimit(safeTx)
   const [gasPrice, gasPriceError, gasPriceLoading] = useGasPrice()
 
-  // Memoize the merged signing payload so threat analysis (which receives this) doesn't
-  // re-run on unrelated re-renders. Identity changes only when the CGW-resolved fee fields
-  // or the underlying safeTx change.
+  // Memoize the merged signing payload so threat analysis doesn't re-run on unrelated re-renders — identity
+  // changes only when the CGW-resolved fee fields or the safeTx change.
   const previewTxData = preview.data?.txData
   const previewedSafeTx = useMemo<SafeTransaction | undefined>(() => {
     if (!previewTxData || !safeTx) return undefined
@@ -223,10 +213,8 @@ export const useFeesPreview = (): FeesPreviewData => {
     } as SafeTransaction
   }, [safeTx, previewTxData])
 
-  // When the chain can't quote Safe-pays fees, expose no candidates so the UI takes the same
-  // locked signer-pays notice as "no eligible gas token" (PLA-1435) — otherwise the component
-  // would offer a "Pay fees from: Safe" choice that can never work. Confirmers are exempt:
-  // they render the fields locked in the signed payload.
+  // When the chain can't quote Safe-pays fees, expose no candidates so the UI takes the same locked
+  // signer-pays notice as "no eligible gas token" (PLA-1435), not a "Pay from Safe" choice that can't work. Confirmers are exempt (they render the locked signed payload).
   const canOfferSafePays = feePreviewAvailable || isConfirmation
   const base = {
     executionFee: EXECUTION_FEE,

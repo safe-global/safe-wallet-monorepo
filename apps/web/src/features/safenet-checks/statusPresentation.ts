@@ -62,10 +62,8 @@ export const UNAVAILABLE_PRESENTATION: Record<UnavailableReason, Pick<SafenetSta
     copy: 'No Safenet check was requested for this transaction.',
   },
   READ_FAILED: STATUS_UNKNOWN,
-  // A read over a window that cannot cover the check's lifetime found nothing
-  // where it looked; it did not establish that nothing is there. That is the
-  // same "unknown" a failed read reports, so it gets the same copy — never the
-  // definite "no check was requested", and never an error tone.
+  // A read over a window too short to cover the check's lifetime found nothing, but didn't establish
+  // nothing is there — same "unknown" as a failed read, never "no check requested" or an error tone.
   WINDOW_UNCERTAIN: STATUS_UNKNOWN,
 }
 

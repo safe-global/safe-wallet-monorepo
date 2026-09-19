@@ -11,10 +11,6 @@ import { allow, evaluateGuard, redirect } from '../utils'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { getWelcomeRoute } from '@/utils/getWelcomeRoute'
 
-// ---------------------------------------------------------------------------
-// Route classifications
-// ---------------------------------------------------------------------------
-
 const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
   AppRoutes.welcome.selectSafes,
@@ -22,9 +18,8 @@ const ONBOARDING_ROUTES = [
 ]
 
 const guardRules: GuardRule[] = [
-  // Store not hydrated — we can't trust isSiweAuthenticated yet, keep page visible.
-  // (We deliberately do NOT wait for full wallet readiness here: that meant the
-  // page would render briefly on /home etc. before the auth check fired.)
+  // Store not hydrated — can't trust isSiweAuthenticated yet, keep the page visible. Deliberately don't
+  // wait for full wallet readiness: that let the page flash on /home before the auth check fired.
   {
     match: ({ isStoreHydrated }) => !isStoreHydrated,
     action: () => allow(),
@@ -84,10 +79,6 @@ const guardRules: GuardRule[] = [
   },
 ]
 
-// ---------------------------------------------------------------------------
-// Hook
-// ---------------------------------------------------------------------------
-
 export const useFlowActivationGuard: UseGuard = () => {
   const { pathname, query, isReady } = useRouter()
   const walletContext = useWalletContext()
@@ -109,12 +100,9 @@ export const useFlowActivationGuard: UseGuard = () => {
 
     if (isSiweAuthenticated) {
       const { data: spaces, error } = await fetchSpaces(undefined)
-      // Trust the response only when it's definitive: a successful fetch
-      // (possibly empty) or a 404 confirming the user has no spaces. On any
-      // other error (401/403 from cleared cookies, network failure, 5xx),
-      // assume the user has spaces so we don't bounce them into create-space.
-      // forbiddenSessionListener confirms a 403 against /v1/auth/me, clears the
-      // stale auth state and re-triggers the guard with a correct isSiweAuthenticated.
+      // Trust only a definitive response: a successful fetch (possibly empty) or a 404 (no spaces). On any
+      // other error (401/403/5xx/network) assume the user has spaces so we don't bounce them into
+      // create-space; reconcileAuth then clears the stale auth state and re-triggers the guard.
       const isNotFound = !!error && (error as { status?: unknown }).status === 404
       const transientError = !!error && !isNotFound
       if (transientError) {

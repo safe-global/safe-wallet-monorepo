@@ -29,9 +29,8 @@ export const ChooseThreshold = () => {
 
   const newThreshold = formMethods.watch(ChangeThresholdFlowFieldNames.threshold)
 
-  // Derived rather than read from RHF: the owner set can change on-chain while
-  // the flow is open, which does not re-run the field's validation. Skipped
-  // until the Safe is loaded, when the owner list is still empty.
+  // Derived, not read from RHF: the owner set can change on-chain while the flow is open without re-running
+  // the field's validation. Skipped until the Safe loads (owner list still empty).
   const boundsError = safeLoaded ? validateThreshold(newThreshold, safe.owners.length) : undefined
 
   useEffect(() => {

@@ -45,9 +45,7 @@ export const useLoadSpendingLimits = () => {
     true,
   )
 
-  // Dispatch to store — mirrors the old useUpdateStore pattern.
-  // During loading: data=undefined, so the reducer computes loaded=false.
-  // On completion: data=[...results], so the reducer computes loaded=true.
+  // Dispatch to store: data=undefined while loading (reducer → loaded=false), data=[...] on completion (loaded=true).
   useEffect(() => {
     dispatch(
       spendingLimitSlice.actions.set({

@@ -43,9 +43,8 @@ const SignInButton = ({ afterSignIn, redirectLoading = false, buttonStyle, butto
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { signIn, loading } = useSiwe()
   const spaceId = useCurrentSpaceId()
-  // Tracks whether the most recent wallet connect came from the user clicking
-  // "Connect wallet" inside this button (vs. them just switching wallets while
-  // already signed in). Only the former should chain into a SIWE prompt.
+  // True when the last connect came from clicking "Connect wallet" here (vs. switching wallets while signed
+  // in) — only that should chain into a SIWE prompt.
   const autoSignInPending = useRef(false)
 
   const handleLogin = () => {

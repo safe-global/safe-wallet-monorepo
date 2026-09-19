@@ -1,9 +1,8 @@
 import type { ReactNode } from 'react'
 import type { SpaceAuditLogEntryDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
-// Payload shapes mirror the CGW audit event taxonomy. Payloads arrive
-// untyped, so every field is treated as optional and unknown event types
-// fall back to a generic description.
+// Payload shapes mirror the CGW audit taxonomy but arrive untyped, so every field is optional and unknown
+// event types fall back to a generic description.
 
 const FALLBACK_TARGET = 'a former member'
 

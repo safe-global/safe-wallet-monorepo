@@ -17,10 +17,9 @@ const FeesPreview = (): ReactElement => {
     return () => setIsSubmitDisabled(false)
   }, [feesData.loading, setIsSubmitDisabled])
 
-  // Hand the CGW resolved payload to Safe Shield so the threat-analysis simulation runs against
-  // the same gasToken/baseGas/gasPrice the user is about to sign. Without this the analyzer sees
-  // the bare safeTx (gasToken=0x0, baseGas=0) and misses Safe-pays specific issues like
-  // "insufficient gas-token balance to cover the refund" (only surfaced at sign time otherwise).
+  // Hand the CGW-resolved payload to Safe Shield so threat analysis simulates the same gasToken/baseGas/
+  // gasPrice the user will sign. Without it the analyzer sees the bare safeTx (gasToken=0x0) and misses
+  // Safe-pays issues like "insufficient gas-token balance to cover the refund".
   useSafeShieldForTxData(feesData.previewedSafeTx)
 
   return <FeesPreviewComponent {...feesData} />

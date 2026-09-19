@@ -1,11 +1,4 @@
-/**
- * Feature Architecture Types - v3 Flat Structure
- *
- * Features use a flat structure with naming conventions:
- * - PascalCase → component (stub renders null)
- * - useSomething → hook (stub returns {})
- * - camelCase → service (stub is no-op)
- */
+/** Feature architecture types — v3 flat structure. */
 
 /**
  * Feature implementation - the lazy-loaded part of a feature.

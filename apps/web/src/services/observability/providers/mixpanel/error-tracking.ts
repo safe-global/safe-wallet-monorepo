@@ -46,9 +46,8 @@ const mapContext = (context?: ErrorContext): Record<string, string | number | bo
     ...(context.rpcEndpointKind && { [MixpanelEventParams.RPC_ENDPOINT_KIND]: context.rpcEndpointKind }),
     ...(context.rpcHost && { [MixpanelEventParams.RPC_HOST]: context.rpcHost }),
     ...(context.httpStatus && { [MixpanelEventParams.HTTP_STATUS]: context.httpStatus }),
-    // Presence, not truthiness: distinguishing "attempt 1" from "untagged" is
-    // the whole point of the facet, and `isRetry` must not read as false when
-    // no attempt was reported at all.
+    // Presence, not truthiness: "attempt 1" must stay distinct from "untagged", so `isRetry` can't read
+    // false when no attempt was reported.
     ...(context.attempt !== undefined && {
       [MixpanelEventParams.ERROR_ATTEMPT]: context.attempt,
       [MixpanelEventParams.IS_RETRY]: context.attempt > 1,
@@ -145,9 +144,8 @@ const claimOccurrences = (key: string, properties: EventProperties, now: number)
  * Tracks a deduped `Error Surfaced` event, enums only, sum occurrences.
  */
 export const trackErrorSurfaced = ({ code, message, isUserFacing, context }: SurfacedError): void => {
-  // User-driven outcomes (rejection, approval-prompt expiry) are not errors —
-  // they never surface as an Error Surfaced event (WA-2950). Checked before any
-  // dedupe bookkeeping so they leave no trace in the map.
+  // User-driven outcomes (rejection, approval-prompt expiry) aren't errors, so no Error Surfaced event
+  // (WA-2950). Checked before dedupe bookkeeping so they leave no trace in the map.
   if (matchUserOutcome(message)) {
     return
   }
@@ -167,9 +165,8 @@ export const trackErrorSurfaced = ({ code, message, isUserFacing, context }: Sur
     ...mapContext(context),
   }
 
-  // Keyed off the emitted properties themselves, so every facet that makes two
-  // events genuinely different — `attempt` above all — separates them here for
-  // free, and a facet added later cannot be forgotten.
+  // Keyed off the emitted properties themselves, so every distinguishing facet (esp. `attempt`) separates
+  // events for free and a facet added later can't be forgotten.
   const occurrences = claimOccurrences(JSON.stringify(properties), properties, Date.now())
   if (occurrences === undefined) {
     return

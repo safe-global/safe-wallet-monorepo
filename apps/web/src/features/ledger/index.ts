@@ -9,7 +9,6 @@ export const LedgerFeature: FeatureHandle<LedgerContract> = {
   load: () => import(/* webpackMode: "lazy" */ './feature') as Promise<{ default: LedgerContract }>,
 }
 
-// Type exports
 export type { TransactionHash, LedgerHashState, ShowHashFunction, HideHashFunction } from './types'
 
 // Store function exports (not lazy-loaded)

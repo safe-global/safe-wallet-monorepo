@@ -59,9 +59,8 @@ function DateFilter({
         id={id}
         type="date"
         variant="surface"
-        // No radius/height utilities here on purpose: Input's defaults (rounded-md, h-9) are the same
-        // as SelectTrigger's, which is what keeps this field flush with the selects on the same row.
-        // The rest is layout plus the colour scheme the native date picker needs per theme.
+        // No radius/height utilities on purpose: Input's defaults (rounded-md, h-9) match SelectTrigger's,
+        // keeping this field flush with the selects on the row. The rest is layout + per-theme date-picker colours.
         className="w-40 [color-scheme:light] dark:[color-scheme:dark] [&~p]:w-40 [&~p]:text-xs"
         value={value}
         min={min}

@@ -92,10 +92,8 @@ const WorkspaceHealthCard = ({
     return { ...counts, band, scorePct }
   }, [scanResults, security.$isReady, security.getScoreBand])
 
-  // Per-Safe grade counts for the filter chips.
-  // Iterate over `safes` (not scanResults) so multichain safes are counted once per
-  // distinct grade — not once per chain entry. This keeps chip counts consistent with
-  // the table's filter semantics ("show safes where ANY chain matches this grade").
+  // Per-Safe grade counts for the filter chips. Iterate over `safes` (not scanResults) so multichain safes
+  // count once per distinct grade, matching the table's filter ("show safes where ANY chain matches").
   const gradeCounts = useMemo(() => {
     const counts: Record<SafeGrade, number> = { critical: 0, at_risk: 0, needs_attention: 0, passing: 0 }
     if (!security.$isReady) return counts
@@ -112,9 +110,8 @@ const WorkspaceHealthCard = ({
     return counts
   }, [safes, scanResults, security.$isReady, security.scanKey, security.getSafeGrade])
 
-  // Show skeleton only when we have no data at all. Once any Safe has completed, render the
-  // aggregate incrementally — it updates as more results arrive. The re-scan row below
-  // surfaces the in-progress state via its "Scanning..." label.
+  // Skeleton only with no data at all; once any Safe completes, render the aggregate incrementally (it
+  // updates as results arrive). The re-scan row below surfaces the in-progress "Scanning..." state.
   if (!aggregate) {
     return (
       // eslint-disable-next-line no-restricted-syntax -- p-6 gives this gauge row uniform padding (no CardContent slot); gap comes from the default size

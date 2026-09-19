@@ -35,10 +35,8 @@ export const useSpaceSafes = () => {
   const spaceContacts = useGetSpaceAddressBook()
   const localAddressBook = useAppSelector(selectAllAddressBooks)
 
-  // Space contacts take priority but fall back to the user's address book, so the name used for
-  // sorting matches the name actually displayed (the row resolves via the address book too — see
-  // useSafeDisplayName). Without the fallback, address-book-named safes have an empty `name` here
-  // and "Name" sorting silently no-ops on them.
+  // Space contacts take priority but fall back to the user's address book, so the sort name matches the displayed
+  // name. Without the fallback, address-book-named safes have an empty `name` here and "Name" sorting no-ops.
   const addressBooks = useMemo(
     () => merge({}, localAddressBook, mapSpaceContactsToAddressBookState(spaceContacts)),
     [localAddressBook, spaceContacts],

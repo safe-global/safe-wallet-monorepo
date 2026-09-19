@@ -13,9 +13,7 @@ interface UseSignInRedirectProps {
   inviteAmount: number
   isSpacesLoading: boolean
   error: RtkError | undefined
-  // When the signed-in user has exactly one active space, jump straight to it
-  // after sign-in instead of leaving them on the workspace list. Pass null when
-  // there are zero or multiple active spaces.
+  // With exactly one active space, jump straight to it after sign-in; pass null for zero or multiple.
   singleSpaceId?: string | null
 }
 
@@ -44,16 +42,13 @@ export const useSignInRedirect = ({
   }, [isOidcLoginPending, isUserSignedIn])
 
   useEffect(() => {
-    // A new user (no active spaces) is no longer pushed into the create-workspace
-    // flow — they stay on the Workspaces tab and see the "Create your first
-    // workspace" card. Any spaces-query error keeps them there too.
+    // A new user (no active spaces) stays on the Workspaces tab with the "Create your first workspace"
+    // card rather than being pushed into the create flow; a spaces-query error keeps them there too.
     if (error) return
 
     if (hasSignedIn && isUserSignedIn && !isSpacesLoading && spacesAmount > 0) {
-      // If the user has exactly one space, jump straight to it. Falling back to
-      // the workspace list (i.e. leaving the user on /welcome/spaces) is
-      // intentional only when there are multiple to choose between, or when
-      // there are pending invites the user should see.
+      // Exactly one space → jump straight to it. Staying on the workspace list is intentional only with
+      // multiple spaces to choose between, or pending invites the user should see.
       if (singleSpaceId && inviteAmount === 0) {
         setRedirectLoading(true)
         router.push({ pathname: AppRoutes.spaces.index, query: { spaceId: singleSpaceId } })

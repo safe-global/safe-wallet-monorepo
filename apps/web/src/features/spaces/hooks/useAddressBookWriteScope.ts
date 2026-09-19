@@ -28,9 +28,8 @@ export const useAddressBookWriteScope = (
     { skip: !hasSpaceToCheck, ...SPACE_REFRESH_OPTIONS },
   )
 
-  // One rename, one name, one book: if the workspace holds this Safe on any of the target chains, the
-  // name is workspace-owned for the whole group. Splitting per chain would leave half the rename in the
-  // local book, which workspace pages filter out on read.
+  // If the workspace holds this Safe on any target chain, the name is workspace-owned for the whole group —
+  // splitting per chain would leave half the rename in the local book, which workspace pages filter out.
   const isWorkspaceSafe =
     !!address &&
     chainIds.some((chainId) => currentData?.safes[chainId]?.some((safeAddress) => sameAddress(safeAddress, address)))

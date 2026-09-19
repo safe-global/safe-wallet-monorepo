@@ -16,10 +16,8 @@ import type { PortfolioContract } from './contract'
 // Component imports
 import PortfolioRefreshHint from './components/PortfolioRefreshHint'
 
-// Flat structure - naming conventions determine stub behavior:
-// - PascalCase → component (stub renders null)
-// - camelCase → service (undefined when not ready)
-// NO hooks here - they're exported from index.ts
+// Naming determines stub behavior: PascalCase → component (renders null), camelCase → service (undefined until ready).
+// NO hooks here - they're exported from index.ts.
 const feature: PortfolioContract = {
   // Components
   PortfolioRefreshHint,

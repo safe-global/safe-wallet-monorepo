@@ -57,14 +57,9 @@ export function ledgerModule(): WalletInit {
         const eventEmitter = new EventEmitter()
         const ledgerSdk = await getLedgerSdk()
 
-        /* -------------------------------------------------------------------------- */
-        /*                                    State                                   */
-        /* -------------------------------------------------------------------------- */
-
         let currentChain = DEFAULT_CHAIN
         let currentAccount: Account | null = null
 
-        // Sets the current chain and emits the chainChanged event
         function setCurrentChain(chainId: Chain['id']): void {
           const newChain = chains.find((chain) => chain.id === chainId)
           if (!newChain) {
@@ -77,25 +72,21 @@ export function ledgerModule(): WalletInit {
           eventEmitter.emit('chainChanged', currentChain.id)
         }
 
-        // Sets the current account and emits the accountsChanged event
         function setCurrentAccount(account: Account): void {
           currentAccount = account
           eventEmitter.emit('accountsChanged', [currentAccount.address])
         }
 
-        // Clears the current account and emits the accountsChanged event
         function clearCurrentAccount(): void {
           currentAccount = null
           eventEmitter.emit('accountsChanged', [])
         }
 
-        // Clears the current chain and emits the chainChanged event
         function clearCurrentChain(): void {
           currentChain = DEFAULT_CHAIN
           eventEmitter.emit('chainChanged', currentChain.id)
         }
 
-        // Gets the asserted derivation path from the current account
         function getAssertedDerivationPath(): DerivationPath {
           if (!currentAccount?.derivationPath) {
             throw new ProviderRpcError({
@@ -105,10 +96,6 @@ export function ledgerModule(): WalletInit {
           }
           return currentAccount.derivationPath
         }
-
-        /* -------------------------------------------------------------------------- */
-        /*                              EIP-1193 provider                             */
-        /* -------------------------------------------------------------------------- */
 
         const eip1193Provider = createEIP1193Provider(
           getHardwareWalletProvider(() => {
@@ -199,10 +186,8 @@ export function ledgerModule(): WalletInit {
               })) as string
             },
             eth_sign: async (args) => {
-              // The Safe requires transactions be signed as bytes, but eth_sign is only used by
-              // the Transaction Service, e.g. notification registration. We therefore sign
-              // messages as is to avoid unreadable byte notation (e.g. \xef\xbe\xad\xde). Instead,
-              // the Ledger device shows plain hex (e.g. 0xdeadbeef).
+              // eth_sign is only used by the Transaction Service (e.g. notification registration), so sign
+              // the message as-is — the Ledger then shows plain hex (0xdeadbeef) instead of unreadable bytes.
               const message = args.params[1]
               const signature = await ledgerSdk.signMessage(getAssertedDerivationPath(), message)
               return Signature.from(signature).serialized
@@ -246,10 +231,6 @@ export function ledgerModule(): WalletInit {
         // createEIP1193Provider does not bind EventEmitter
         eip1193Provider.on = eventEmitter.on.bind(eventEmitter)
         eip1193Provider.removeListener = eventEmitter.removeListener.bind(eventEmitter)
-
-        /* -------------------------------------------------------------------------- */
-        /*                       Web3-Onboard account selection                       */
-        /* -------------------------------------------------------------------------- */
 
         /**
          * Gets a list of derived accounts from Ledger device for selection
@@ -323,7 +304,6 @@ export function ledgerModule(): WalletInit {
           return accounts
         }
 
-        // Gets derived account from Ledger device for selection in Web3-Onboard
         async function deriveAccount(args: {
           derivationPath: string
           provider: InstanceType<typeof JsonRpcProvider>
@@ -424,9 +404,8 @@ async function waitForAction<
             actionState.status === DeviceActionStatus.Pending &&
             actionState.intermediateValue.requiredUserInteraction === UserInteractionRequired.UnlockDevice
           ) {
-            // Raise the kit's own error rather than one of ours: the user gets the same
-            // mapped sentence and the debugging sinks the same payload the timeout would
-            // have produced, a minute earlier
+            // Raise the kit's own error, not ours: same mapped sentence and debugging payload the timeout
+            // would have produced, a minute earlier.
             reject(mapLedgerError(new DeviceLockedError()))
           } else {
             // Awaiting user action, e.g. device to be unlocked. We could throw

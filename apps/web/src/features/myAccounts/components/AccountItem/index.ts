@@ -31,31 +31,10 @@ export type { AccountItemContentProps } from './AccountItemContent'
  *
  * Use AccountItem.Button for click interactions (selection, modals).
  * Use AccountItem.Link for navigation to a Safe.
- *
- * @example
- * // Navigation mode
- * <AccountItem.Link href={href} isCurrentSafe={isCurrentSafe}>
- *   <AccountItem.Icon ... />
- *   <AccountItem.Info ... />
- *   <AccountItem.Balance ... />
- *   <AccountItem.PinButton ... />
- *   <AccountItem.ContextMenu ... />
- * </AccountItem.Link>
- *
- * @example
- * // Selection mode
- * <AccountItem.Button onClick={onSelect}>
- *   <AccountItem.Icon ... />
- *   <AccountItem.Info ... />
- * </AccountItem.Button>
  */
-// Hoisted `function` namespace (not a `const` object) on purpose: AccountItem is re-exported by
-// the myAccounts barrel, which sits in the myAccounts ↔ spaces import cycle. webpack's React
-// Refresh reads every barrel export at module-eval time, and a `const` binding read mid-cycle
-// throws a TDZ "Cannot access before initialization" that crashes Storybook. A function
-// declaration hoists above the module's requires, so the binding is readable while its module is
-// still initializing (the app under Rspack tolerates the cycle either way). AccountItem is only
-// ever consumed as `AccountItem.Icon` / `AccountItem.Link` etc. — never rendered directly.
+// Hoisted `function` namespace (not a `const` object): re-exported by the myAccounts barrel in the
+// myAccounts ↔ spaces import cycle, where webpack's React Refresh reads a `const` mid-cycle and throws
+// TDZ, crashing Storybook; a function declaration hoists above it. Only consumed as `AccountItem.Icon` etc.
 function AccountItem() {
   return null
 }

@@ -1,14 +1,9 @@
 /**
- * Ledger's Device Management Kit reports failures as tagged objects, not as
- * `Error`s: `{ _tag, originalError?, errorCode? }`. The device's own
- * explanation lives in `message`, in `originalError.message`, or — for a status
- * word the kit does not model — inside `originalError`. Dropping it (as a bare
- * `'unknown'`) leaves both the user and Datadog with nothing to act on, and
- * serialising the raw object leaks internals onto the screen (WA-3243).
- *
- * So: read the reason, classify it, translate it, and keep the raw evidence in
- * the error's `info` payload, which reaches the debugging sinks but is never
- * rendered.
+ * Ledger's DMK reports failures as tagged objects, not `Error`s: `{ _tag, originalError?, errorCode? }`. The
+ * device's explanation lives in `message`, `originalError.message`, or (for an unmodelled status word) inside
+ * `originalError`. Dropping it as `'unknown'` leaves nothing to act on; serialising the raw object leaks
+ * internals to the screen (WA-3243). So: read the reason, classify, translate, and keep the raw evidence in
+ * the error's `info` payload — read by debugging sinks, never rendered.
  */
 
 import type { DmkError } from '@ledgerhq/device-management-kit'
@@ -16,11 +11,8 @@ import type { DmkError } from '@ledgerhq/device-management-kit'
 import type { LedgerDeviceErrorInfo, LedgerDeviceErrorReason } from './types'
 
 /**
- * The runtime marker written into every mapped error. Annotated with the
- * interface's own field type so the const and the type cannot drift apart
- * silently — that marker is what lets `getLedgerDeviceError` recognise the
- * payload after viem re-wraps the error, so a mismatch would quietly disable
- * the whole feature.
+ * Runtime marker on every mapped error, letting `getLedgerDeviceError` recognise the payload after viem
+ * re-wraps it. Typed from the interface field so const and type can't drift (a mismatch disables the feature).
  */
 const LEDGER_ERROR_SOURCE: LedgerDeviceErrorInfo['source'] = 'ledger-device'
 
@@ -63,12 +55,9 @@ const LOCKED_TAGS: ReadonlySet<string> = new Set(['DeviceLockedError'])
 const APP_TAGS: ReadonlySet<string> = new Set(['OpenAppCommandError'])
 
 /**
- * Transport-level tags: the cable, the WebHID handle or the session went away.
- *
- * These are runtime `_tag` values, which are not always the SDK's export name —
- * `OpeningConnectionError` declares `_tag = 'ConnectionOpeningError'`. Every
- * entry here was read off the shipped class, not off the export, and the table
- * test below pins all nine so a rename cannot silently un-map one.
+ * Transport-level tags (cable/WebHID/session lost). These are runtime `_tag` values, not always the SDK
+ * export name (`OpeningConnectionError` declares `_tag = 'ConnectionOpeningError'`), so each was read off the
+ * shipped class; the table test below pins all nine so a rename can't silently un-map one.
  */
 const CONNECTION_TAGS: ReadonlySet<string> = new Set([
   'ConnectionOpeningError',
@@ -92,14 +81,9 @@ const USER_MESSAGES: Record<LedgerDeviceErrorReason, string> = {
 }
 
 /**
- * The message a rejection carries. Two constraints meet here: `matchUserOutcome`
- * classifies purely on wording, so the phrase "rejected the request" has to
- * survive verbatim or a cancellation starts counting as a failure (WA-2950) —
- * and the account picker renders this string raw, so it also has to read as
- * copy. ethers' own `user rejected action` satisfied only the first.
- *
- * The tx and message flows show `USER_MESSAGES.rejected` instead; they resolve
- * the sentence from the reason rather than from this message.
+ * The message a rejection carries. Two constraints: `matchUserOutcome` classifies on wording, so "rejected
+ * the request" must survive verbatim or a cancellation counts as a failure (WA-2950); and the account picker
+ * renders it raw, so it must read as copy. (tx/message flows show `USER_MESSAGES.rejected` from the reason instead.)
  */
 const REJECTION_MESSAGE = 'You rejected the request on your Ledger.'
 
@@ -110,30 +94,17 @@ const readString = (source: unknown, key: string): string | undefined => {
 }
 
 /**
- * The status word, wherever the kit put it: on the error for a
- * `DeviceExchangeError`, nested in `originalError` for the status words it
- * does not model (`UnknownDeviceExchangeError`).
- *
- * A status word nested in `originalError` is worth noting: an eth-app code that
- * arrives outside the app's own table (e.g. `6982` raised by the global
- * handler) becomes an `UnknownDeviceExchangeError` whose plain-object
- * `originalError` still carries the code, so it classifies the same way it
- * would have on the typed class — a `6982` there maps to `rejected` and is
- * suppressed everywhere. No shipped DMK-supported firmware does this today
- * (locked is signalled by `5515` exclusively), but reading the code from both
- * places is what keeps the two paths consistent if one ever does.
- *
- * Lower-cased because the comparison tables are lower-case hex. The kit emits
- * lower case today (`bufferToHexaString` goes through `toString(16)`); this is
- * insurance, and the casing of a hex status word carries no information.
+ * The status word wherever the kit put it: on the error for `DeviceExchangeError`, nested in `originalError`
+ * for unmodelled words (`UnknownDeviceExchangeError`). Reading both keeps the paths consistent — e.g. a `6982`
+ * raised by the global handler lands in `originalError` yet still maps to `rejected`. No shipped firmware does
+ * this today (locked is `5515` only), but this is insurance. Lower-cased to match the lower-case hex tables.
  */
 const readErrorCode = (error: DmkError): string | undefined =>
   (readString(error, 'errorCode') ?? readString(error.originalError, 'errorCode'))?.toLowerCase()
 
 /**
- * The device's own explanation. `InvalidStatusWordError` has no `message` at
- * all — its text is wrapped in an `Error` under `originalError`, which
- * serialises to `{}` and is why these failures reached users as `unknown`.
+ * The device's own explanation. `InvalidStatusWordError` has no `message` — its text is an `Error` under
+ * `originalError`, which serialises to `{}`; that's why these failures reached users as `unknown`.
  */
 const readDeviceMessage = (error: DmkError): string | undefined =>
   readString(error, 'message') ?? readString(error.originalError, 'message')
@@ -165,9 +136,8 @@ export const readLedgerDeviceError = (error: DmkError): LedgerDeviceErrorInfo =>
 export const getLedgerUserMessage = (info: LedgerDeviceErrorInfo): string => USER_MESSAGES[info.reason]
 
 /**
- * Support reference for a device failure we have no sentence for. Only the
- * status word is exposed — the tag and the device's raw words stay in
- * telemetry, as they name internals.
+ * Support reference for a device failure with no sentence. Only the status word is exposed; the tag and raw
+ * device words stay in telemetry (they name internals).
  */
 export const getLedgerSupportReference = (info: LedgerDeviceErrorInfo): string =>
   `LEDGER-${info.errorCode ? `0x${info.errorCode}` : 'UNKNOWN'}`
@@ -179,10 +149,8 @@ const isLedgerDeviceErrorInfo = (value: unknown): value is LedgerDeviceErrorInfo
 const MAX_CAUSE_DEPTH = 10
 
 /**
- * Recovers the device reason from an error that has since been re-wrapped —
- * ethers hands the rejection to viem, which wraps it in `UnknownRpcError`, and
- * protocol-kit may wrap that again. Each wrapper keeps the previous error as
- * `cause`, so the payload is always reachable from the chain.
+ * Recovers the device reason from a re-wrapped error (ethers → viem's `UnknownRpcError` → maybe protocol-kit).
+ * Each wrapper keeps the previous as `cause`, so the payload is always reachable down the chain.
  */
 export const getLedgerDeviceError = (error: unknown): LedgerDeviceErrorInfo | undefined => {
   let current: unknown = error
@@ -210,22 +178,18 @@ interface LedgerErrorFields {
 }
 
 /**
- * Builds the error by hand rather than with ethers' `makeError`, which appends
- * every `info` key plus `code=` and `version=` to `message` and keeps the clean
- * sentence only in `shortMessage`. `message` is what gets rendered — the
- * wallet-connect account picker (`@web3-onboard/hw-common`) prints it verbatim
- * and we cannot intercept it — so the sentence has to BE the message, and the
- * evidence has to ride on fields nothing renders (WA-3243).
+ * Built by hand, not with ethers' `makeError` (which appends every `info` key plus `code=`/`version=` to
+ * `message` and keeps the clean sentence only in `shortMessage`). The account picker renders `message`
+ * verbatim and we can't intercept it, so the sentence must BE the message and evidence rides on unrendered
+ * fields (WA-3243).
  */
 const buildLedgerError = (message: string, fields: LedgerErrorFields): Error =>
   Object.assign(new Error(message), fields)
 
 /**
- * Converts a DMK failure into the error the EIP-1193 provider must reject with.
- *
- * The message is the user-facing sentence and nothing else, so it reads
- * correctly wherever it is rendered raw; the device's own words ride along in
- * `info`, which the debugging sinks read and no renderer touches.
+ * Converts a DMK failure into the error the EIP-1193 provider must reject with. The message is the
+ * user-facing sentence and nothing else (reads correctly wherever rendered raw); the device's words ride in
+ * `info`, read by debugging sinks and touched by no renderer.
  */
 export const mapLedgerError = (error: DmkError): Error => {
   const info = readLedgerDeviceError(error)

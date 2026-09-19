@@ -194,9 +194,8 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
     })
   }, [visibleItems, selectedAddresses])
 
-  // Check if there are any changes to submit (pins or unpins) across the full list,
-  // not just the search-filtered view — selection persists across searches, so Save
-  // must reflect pending changes for safes hidden by the current query.
+  // Check for changes across the full list, not the search-filtered view: selection persists across
+  // searches, so Save must reflect pending changes for safes hidden by the current query.
   const hasChanges = useMemo(() => {
     if (!allSafes) return false
     return allSafes.some((safe) => {
@@ -334,9 +333,8 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
       }
     }
 
-    // Unpin deselected safes by walking the pin store directly (not `allSafes`), so a safe pinned on a
-    // chain outside the current config — invisible to the list — is still cleared. Otherwise it would
-    // linger in `addedSafes` and keep re-selecting itself on every open.
+    // Unpin by walking the pin store directly (not `allSafes`) so a safe pinned on a chain outside the
+    // current config — invisible to the list — is still cleared, not left to re-select itself on every open.
     for (const [chainId, safesOnChain] of Object.entries(addedSafes)) {
       for (const address of Object.keys(safesOnChain)) {
         if (!selectedAddresses.has(address.toLowerCase())) {

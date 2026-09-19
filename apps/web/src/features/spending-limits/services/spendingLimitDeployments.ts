@@ -34,10 +34,8 @@ export const getDeployment = (chainId: string, modules: SafeState['modules']) =>
 }
 
 export const getLatestSpendingLimitAddress = (chainId: string): string | undefined => {
-  // Try versions from newest to oldest, picking the first that's registered on this chain.
-  // Unlike getDeployment (which uses CREATE2 fallback for already-enabled modules),
-  // new enablements must match an explicitly registered chain to avoid enabling
-  // a version that was never deployed there.
+  // Newest to oldest, first registered on this chain. Unlike getDeployment (CREATE2 fallback for enabled
+  // modules), new enablements must match an explicitly registered chain, else we enable a version never deployed there.
   for (let i = ALL_VERSIONS.length - 1; i >= 0; i--) {
     const deployment = getAllowanceModuleDeployment({ version: ALL_VERSIONS[i] })
     if (!deployment) continue

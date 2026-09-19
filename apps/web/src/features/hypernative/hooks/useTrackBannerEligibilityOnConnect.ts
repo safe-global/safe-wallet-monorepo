@@ -69,10 +69,8 @@ export const useTrackBannerEligibilityOnConnect = (
   }, [safeKey])
 
   useEffect(() => {
-    // Skip tracking for:
-    // - TxReportButton: shows even when guard is already installed
-    // - Pending: only appears after promo banner was viewed (which already triggered tracking)
-    // - NoBalanceCheck: HnDashboardBanner on FirstSteps page (should not trigger tracking)
+    // Skip tracking: TxReportButton (shows even with guard installed), Pending (only after the
+    // promo banner was viewed, which already tracked), NoBalanceCheck (FirstSteps HnDashboardBanner).
     if (
       bannerType === BannerType.TxReportButton ||
       bannerType === BannerType.Pending ||
@@ -81,11 +79,8 @@ export const useTrackBannerEligibilityOnConnect = (
       return
     }
 
-    // Only track if:
-    // 1. Safe info is fully loaded (not loading)
-    // 2. We have a Safe address and chain ID
-    // 3. Banner visibility check is complete (not loading)
-    // 4. Haven't tracked for this Safe yet (check Redux state and session ref)
+    // Only track once Safe info is fully loaded, we have a Safe address + chain ID, the banner
+    // visibility check has settled, and this Safe hasn't been tracked yet (Redux state + session ref).
     if (safeLoading || !safeLoaded || !safeAddress || !chainId || isLoading || !safeKey) {
       return
     }

@@ -56,7 +56,6 @@ export const DecodedMsg = ({
 }): ReactElement | null => {
   const isTextMessage = typeof message === 'string'
 
-  // Normalize the message so we know its primaryType
   const normalizedMsg = useMemo<TypedData | undefined>(
     () => (message && typeof message !== 'string' ? normalizeMessageForDisplay(message) : undefined),
     [message],

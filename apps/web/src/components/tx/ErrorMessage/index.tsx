@@ -35,23 +35,20 @@ const ErrorMessage = ({
   const { safe } = useSafeInfo()
   const chain = useCurrentChain()
 
-  // No alert ever shows the raw payload: it is a dump of provider URLs, calldata, library
-  // versions and class names, and it goes to Sentry instead. An on-chain (GS) error and an
-  // unmapped Ledger state carry a code-only support reference (WA-3005 / WA-3243).
+  // No alert ever shows the raw payload — it's a dump of provider URLs, calldata and class names, and
+  // goes to Sentry instead. An on-chain (GS) error and an unmapped Ledger state carry a code-only
+  // support reference (WA-3005 / WA-3243).
   const gsCode = error ? getGsCodeFromError(error) : undefined
 
   const ledgerError = error ? getLedgerDeviceError(error) : undefined
   const ledgerReference = ledgerError?.reason === 'unknown' ? getLedgerSupportReference(ledgerError) : undefined
 
-  // GS013 family: the inner call reverted with a module/guard custom error. A
-  // custom-error revert without a GS string is still a GS013 — decode its
-  // selector against the known ABIs; undecodable ones keep the raw selector in
-  // the support reference, never in the message.
+  // GS013 family: a custom-error revert without a GS string is still GS013 — decode its selector against
+  // known ABIs; an undecodable one keeps the raw selector in the support reference, never in the message.
   const customError =
     error && (gsCode === 'GS013' || (!gsCode && isRevertError(error))) ? decodeCustomError(error) : undefined
   const effectiveGsCode = gsCode ?? (customError ? 'GS013' : undefined)
 
-  // Check if this is a Guard error that should get special treatment
   const guardErrorName = error && context ? getGuardErrorInfo(error) : undefined
   const guardExplorerLink =
     guardErrorName && safe.guard && chain ? getBlockExplorerLink(chain, safe.guard.value) : undefined

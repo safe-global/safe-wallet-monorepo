@@ -26,10 +26,8 @@ import { flattenSafeItems } from '@/hooks/safes'
 import SurveyOptionCard from './SurveyOptionCard'
 
 const ONBOARDING_STEP = 4
-// This step only renders when SPACE_ONBOARDING_SURVEY is on (the survey page
-// guards on the flag), so it is always the 4th of 4 steps. The earlier steps,
-// which render regardless of the flag, derive their total from
-// useOnboardingStepCount() instead.
+// This step only renders when SPACE_ONBOARDING_SURVEY is on, so it's always the 4th of 4. The earlier
+// (flag-independent) steps derive their total from useOnboardingStepCount() instead.
 const TOTAL_STEPS = 4
 const SURVEY_SLUG = 'onboarding'
 
@@ -45,9 +43,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
 }
 const FALLBACK_ICON: LucideIcon = HelpCircle
 
-// RTK Query surfaces FetchBaseQueryError | SerializedError. The first carries
-// the HTTP status; treat 404 as "no active survey" (admin turned it off via
-// surveys.is_active = false) rather than a real failure.
+// Treat a 404 from the query as "no active survey" (admin set surveys.is_active = false), not a failure.
 const isNotFoundError = (err: FetchBaseQueryError | SerializedError | undefined): boolean => {
   return err != null && 'status' in err && err.status === 404
 }

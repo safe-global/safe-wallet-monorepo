@@ -20,24 +20,17 @@ export const counterfactualSyncListener = (listenerMiddleware: typeof listenerMi
       // runs, the reducer has already removed it from current state.
       const originalState = listenerApi.getOriginalState() as RootState
       const removed = originalState.undeployedSafes?.[chainId]?.[address]
-      // Nothing was actually removed by this dispatch — a prior `removeUndeployedSafe`
-      // already cleared the entry. Skip the DELETE call to avoid spamming the backend
-      // with calls that 404 (and pollute the pending-delete queue) when multiple
-      // dispatchers fire in the same tick after activation (self-heal in
-      // useLoadSafeInfo + INDEXED event in usePendingSafeStatuses).
+      // Prior `removeUndeployedSafe` already cleared this — skip the DELETE to avoid 404 spam (pollutes the
+      // pending-delete queue) when multiple dispatchers fire in the same tick after activation.
       if (!removed) return
 
-      // Backend DELETE rejects non-creators with 40x, so skip the call for safes the
-      // current user didn't create (e.g. ones synced from a space endpoint).
-      // Treat undefined as `true` for backwards compatibility with entries
-      // persisted before the isCreator flag existed.
+      // Backend DELETE rejects non-creators with 40x, so skip safes the user didn't create (e.g. synced
+      // from a space endpoint). Undefined counts as creator, for entries persisted before isCreator existed.
       const wasCreator = removed.isCreator !== false
       if (!wasCreator) return
 
-      // The user can deploy a safe before signing in with SIWE (just a wallet
-      // connection is enough). In that case we can't reach the backend yet —
-      // queue the delete to be replayed once a SIWE session exists, otherwise
-      // the next sync would re-add the now-deployed safe as undeployed.
+      // A safe can deploy before SIWE sign-in (wallet alone), when the backend is unreachable — queue the
+      // delete for replay once a session exists, else the next sync re-adds the deployed safe as undeployed.
       if (!isAuthenticated(state)) {
         listenerApi.dispatch(enqueuePendingCfDelete({ chainId, address }))
         return
@@ -56,9 +49,8 @@ export const counterfactualSyncListener = (listenerMiddleware: typeof listenerMi
         // end state, no retry needed.
         if (is404(e)) return
         logError(Errors._650, e)
-        // Network/5xx during the live DELETE leaves backend stuck on the now-deployed
-        // safe. Queue it so the next sync flushes the retry — otherwise the next GET
-        // would return it and the merge would re-add a "Not activated" chip.
+        // Network/5xx during the live DELETE leaves the backend stuck on the deployed safe — queue it so
+        // the next sync retries, else the next GET re-adds a "Not activated" chip.
         listenerApi.dispatch(enqueuePendingCfDelete({ chainId, address }))
       }
     },

@@ -32,20 +32,14 @@ import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
 import { TxModalContext } from '@/components/tx-flow'
 import { cn } from '@/utils/cn'
 
-// The context (left) and actions card (right) share one row until they genuinely stop fitting, then
-// the actions keep the top row and the context drops underneath — `order-last` + `basis-full` on the
-// context only (the actions are a painted card and would stretch across a full-width row), with
-// `ml-0` dropping the actions' right-alignment once stacked. Thresholds are per context variant and
-// resolve against the container's content box (px-6 excluded), measured:
+// When the context + actions pair stops fitting, actions keep the top row and context drops under.
+// Wrap thresholds are per variant, measured against the content box (px-6 excluded):
 //   space route  search 320 + actions 315 =  635  ->  break under 660
 //   safe route   bar    655 + actions 479 = 1134  ->  break under 1150
-// The threshold must stay ABOVE the pair's real width — below it flexbox wraps unprompted and the
-// order utilities never apply — but keep the slack thin: at 1260 a ~1200px window was forced onto
-// two rows even though the pair fit. The 24px logo variant always fits and opts out.
-//
-// Slot heights are per variant too: the search input is `h-full` and needs a definite parent
-// (`h-14`); the safe bar wraps internally at narrow widths, so it gets `min-h-14` — against a fixed
-// 56px slot the overflow spilled upwards into the actions card.
+// Keep the threshold just above the pair's real width: below it flexbox wraps unprompted (order utilities
+// never apply); too far above and a fitting pair still wraps (at 1260, a ~1200px window did).
+// Slot heights differ too: the search input needs a definite `h-14`; the safe bar wraps internally so gets
+// `min-h-14` — a fixed 56px slot spilled overflow into the actions.
 export const SEARCH_CONTEXT_HEIGHT = 'h-14'
 export const SAFE_BAR_CONTEXT_HEIGHT = 'min-h-14'
 export const SEARCH_CONTEXT_WRAP = '@max-[660px]:order-last @max-[660px]:basis-full'
@@ -84,9 +78,8 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   const isWelcomeListRoute = pathname === AppRoutes.welcome.accounts || pathname === AppRoutes.welcome.spaces
   const urlSafeAddress = useSafeAddressFromUrl()
   const isSettingsWithoutSafe = pathname?.startsWith(AppRoutes.settings.index) === true && !urlSafeAddress
-  // Routes with no Safe context show the bare logo on the left instead of the safe selector or
-  // the search input. It's a 24px mark that always fits beside the actions, so it opts out of
-  // the wrapping the two wide variants need — logo left, actions right, at every width.
+  // Routes with no Safe context show the bare logo instead of the selector/search. At 24px it always fits
+  // beside the actions, so it opts out of the wrapping the two wide variants need.
   const showLogo = isSettingsWithoutSafe || isWelcomeListRoute
   const safeAddress = useSafeAddress()
   const isProposer = useIsWalletProposer()
@@ -95,9 +88,8 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   const showSafeToken = useSafeTokenEnabled()
   const { txFlow } = useContext(TxModalContext)
 
-  // On space routes we show the global search input by default, but when a transaction
-  // modal is open (e.g. Send via the Actions Tray) the URL keeps the space pathname —
-  // swap in the SpaceSafeBar so the user can see the Safe they're transacting against.
+  // Space routes show the global search by default, but while a tx modal is open the URL keeps the space
+  // pathname — swap in the SpaceSafeBar so the user sees the Safe they're transacting against.
   const showSpaceSafeBar = !isSpaceRoute || Boolean(txFlow)
 
   // Which wrap threshold and slot height apply follow the context variant — see the constants above.

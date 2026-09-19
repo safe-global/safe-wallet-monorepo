@@ -122,12 +122,9 @@ function SafeSelectorDropdown({
   const triggerRef = useRef<HTMLButtonElement>(null)
   const wasOpenOnPressRef = useRef(false)
 
-  // The display layer sits on top of the full-bleed trigger and its tooltip triggers must keep pointer
-  // events (otherwise they never open on hover), so a press on the safe name or the balance lands on a
-  // <span> the trigger behind it never sees. Forward it — unless it hit one of the row's own controls,
-  // or base-ui already closed the popup on this same pointerdown, in which case forwarding reopens it.
-  // Capture phase is required: when the popup is open base-ui dismisses it mid-pointerdown, so by the
-  // bubble phase the state already reads closed and the guard below would let the click reopen it.
+  // The display layer keeps pointer events (hover tooltips), so a press on name/balance lands on a <span>
+  // the trigger never sees — forward it, unless it hit a row control or base-ui already closed the popup
+  // (forwarding would reopen it). Capture phase required: the popup is dismissed mid-pointerdown.
   const rememberOpenStateOnPress = () => {
     wasOpenOnPressRef.current = isPopupOpen
   }
@@ -154,20 +151,14 @@ function SafeSelectorDropdown({
       onValueChange={handleSafeChange}
       open={isPopupOpen}
       onOpenChange={isDisabled ? undefined : handleOpenChangeWithReset}
-      // Deliberately not disabled: a disabled <button> blocks the inline address actions (copy,
-      // explorer, env hint). Safe switching is prevented by the forced-closed `open` above instead.
+      // Not disabled: a disabled <button> would block the inline address actions; the forced-closed `open`
+      // above prevents safe switching instead.
     >
       <div
         className={cn(
-          // The wrapper's overflow-hidden clips this focus-visible ring into stray top/bottom bars,
-          // so suppress it — the card shows no focus ring by design (wrapper sets focus:ring-0).
-          //
-          // min-w-0 (trigger + value slot): without it a long safe name can't shrink/truncate and
-          // pushes the balance and chevron out of the clipped card. Concretely: `flex-1` alone still
-          // floors a flex item at min-content, so display content plus the paddings exceeded the
-          // selector's fixed box and overflowed ~19px right; the trigger lays its chevron out with
-          // `justify-end`, so the chevron rode that overflow into the gap and its padding ended up
-          // under the nested-safes button. Letting both shrink keeps them inside.
+          // Suppress the focus-visible ring (overflow-hidden clips it into stray bars; card is ringless by
+          // design). min-w-0 on trigger + value slot: else a long name can't truncate and pushes
+          // balance/chevron out of the clipped card (flex-1 alone floors items at min-content).
           '-m-4 flex-1 min-w-0 w-full border-0 shadow-none bg-transparent dark:bg-transparent py-0 pl-4 hover:bg-transparent dark:hover:bg-transparent data-[state=open]:bg-transparent focus-visible:ring-0 focus-visible:border-0 [&_[data-slot=select-value]]:pr-0 [&_[data-slot=select-value]]:min-w-0 relative',
           variants.triggerClass,
           isDisabled && 'cursor-not-allowed opacity-50',
@@ -221,8 +212,7 @@ function SafeSelectorDropdown({
   )
 
   // TODO: change rounded-lg (8px) to rounded-2xl (16px) after migrating to the new design system
-  // A muted 40px chip: the SpaceSafeBar pill that groups this with the nested-safes and
-  // network controls carries the white card and its shadow.
+  // A muted 40px chip — the grouping SpaceSafeBar pill carries the white card and shadow.
   const wrapperClassName = cn(
     'group relative w-full min-[430px]:w-auto min-[430px]:flex-1 min-[430px]:min-w-0 min-[430px]:max-w-[515px] h-10 flex items-center rounded-lg py-0.5 pl-1.5 pr-2 overflow-hidden bg-muted focus:ring-0',
     variants.wrapperClass,

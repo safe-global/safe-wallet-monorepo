@@ -221,10 +221,8 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
     logoUri: chain?.nativeCurrency.logoUri ?? '',
   }
 
-  // No eligible gas token in the Safe → Safe-pays isn't actually an option for this tx. Lock the UI
-  // to signer-pays so the dropdown isn't shown empty and the user can't pick "Safe" expecting it to
-  // work (PLA-1435). The hook already routes to signer-pays internally (canCoverFees stays true), so
-  // this only overrides the rendering.
+  // No eligible gas token → Safe-pays isn't an option; lock the UI to signer-pays so the dropdown
+  // isn't empty and "Safe" can't be picked (PLA-1435). The hook already routes to signer-pays (canCoverFees stays true), so this only overrides rendering.
   const noEligibleGasToken =
     !isConfirmation && !isLegacySigned && (availableGasTokens?.length ?? 0) === 0 && canCoverFees
 

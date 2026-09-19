@@ -80,8 +80,8 @@ export const persistCounterfactualSafe = async ({
   provider,
   dispatch,
 }: PersistArgs): Promise<PersistResult> => {
-  // Client-side deploy check, unauth path only — authed users get a 409 from the
-  // backend instead (handled below). Skip without a provider; fail open on error.
+  // Client-side deploy check, unauth path only (authed users get a 409 from the backend below).
+  // Skip without a provider; fail open on error.
   if (provider && !isUserAuthenticated) {
     let isDeployed = false
     try {
@@ -95,9 +95,8 @@ export const persistCounterfactualSafe = async ({
     }
   }
 
-  // 1. Save to backend (blocking). Unauth users fall back to local-only —
-  //    matches pre-backend-sync behavior and avoids creating orphan entries
-  //    that can never be cleaned up server-side.
+  // Save to backend first (blocking). Unauth users fall back to local-only, which avoids creating
+  // orphan entries that can never be cleaned up server-side.
   if (isUserAuthenticated) {
     const dto = toBackendDto(chainId, safeAddress, props)
     const userResult = await dispatch(
@@ -106,22 +105,19 @@ export const persistCounterfactualSafe = async ({
       }),
     )
     if ('error' in userResult) {
-      // CGW rejects an already-deployed Safe with 409. Treat it like the client
-      // guard: add the Safe to My accounts as deployed and skip CF creation,
-      // rather than surfacing it as a hard failure.
+      // CGW rejects an already-deployed Safe with 409 — treat it like the client guard (add as deployed,
+      // skip CF creation) rather than a hard failure.
       if (isConflict(userResult.error)) {
         return recoverAlreadyDeployed({ chainId, safeAddress, props, name, dispatch })
       }
       return { ok: false, error: toPersistError(userResult.error) }
     }
 
-    // Guard against persisted/legacy lastUsedSpace values that are empty or
-    // whitespace-only — pass any non-empty string through unchanged.
+    // Guard against persisted/legacy lastUsedSpace values that are empty or whitespace-only.
     const resolvedSpaceId = normalizeSpaceId(spaceId)
     if (resolvedSpaceId !== null) {
       if (!isAdminOfActiveSpace) {
-        // Backend gates this endpoint on admin role and would 403. Inform the
-        // user — the safe is still persisted at the user level above.
+        // Backend gates this endpoint on admin role (403 otherwise); the safe is still persisted at the user level.
         dispatch(
           showNotification({
             variant: 'info',
@@ -130,9 +126,8 @@ export const persistCounterfactualSafe = async ({
           }),
         )
       } else if (spaceSafeCount !== undefined && spaceSafeCount >= SAFE_ACCOUNTS_LIMIT) {
-        // Space is full — the backend would reject the add. Skip it and keep the
-        // user-level safe so creation still succeeds, but tell the user it
-        // wasn't added to the workspace.
+        // Space is full — the backend would reject the add. Keep the user-level safe so creation
+        // succeeds, but tell the user it wasn't added to the workspace.
         dispatch(
           showNotification({
             variant: 'info',
@@ -152,9 +147,8 @@ export const persistCounterfactualSafe = async ({
           if (isElevationRequiredError(spaceResult.error)) {
             return { ok: false, error: toSpaceError(spaceResult.error), stepUpPending: true }
           }
-          // Use case: another admin added Safes to the same workspace in the meantime.
-          // The cached count was stale and the backend returned 400.
-          // The Safe itself was still created, so keep it and show the warning.
+          // Stale cached count (another admin filled the workspace meanwhile) → backend 400. The Safe
+          // was still created, so keep it and show the warning.
           if (isLimitRejection(spaceResult.error)) {
             dispatch(
               showNotification({
@@ -163,9 +157,8 @@ export const persistCounterfactualSafe = async ({
                 message: toSpaceError(spaceResult.error).message,
               }),
             )
-            // In a multi-chain batch the safe genuinely wasn't attached on this
-            // chain. Roll back the user-level entry and report failure so the
-            // caller doesn't record this chain as successfully created.
+            // In a multi-chain batch the safe wasn't attached on this chain — roll back the user-level
+            // entry and report failure so the caller doesn't record it as created.
             if (isMultiChainCreation) {
               const rollbackResult = await dispatch(
                 counterfactualSafesApi.endpoints.counterfactualSafesDeleteV1.initiate({
@@ -178,18 +171,16 @@ export const persistCounterfactualSafe = async ({
               return { ok: false, error: toSpaceError(spaceResult.error) }
             }
           } else {
-            // Roll back the user-level entry so the backend doesn't end up with
-            // a safe that the user "created" but failed to associate with their
-            // active space.
+            // Roll back the user-level entry so the backend isn't left with a safe the user "created"
+            // but couldn't associate with their active space.
             const rollbackResult = await dispatch(
               counterfactualSafesApi.endpoints.counterfactualSafesDeleteV1.initiate({
                 deleteCounterfactualSafesDto: { safes: [{ chainId, address: safeAddress }] },
               }),
             )
             if ('error' in rollbackResult) {
-              // Rollback also failed — orphan now exists server-side. Queue the
-              // cleanup so the next sign-in's sync flushes it, otherwise the GET
-              // would re-surface the orphan locally as "Not activated".
+              // Rollback also failed — orphan now exists server-side. Queue cleanup for the next sign-in's
+              // sync, else the GET re-surfaces it locally as "Not activated".
               dispatch(enqueuePendingCfDelete({ chainId, address: safeAddress }))
             }
             return { ok: false, error: toSpaceError(spaceResult.error) }
@@ -199,8 +190,7 @@ export const persistCounterfactualSafe = async ({
     }
   }
 
-  // 2. Add to Redux only after backend has confirmed (or is skipped for
-  //    unauth users). Keeps local state in sync with the backend.
+  // Add to Redux only after the backend confirms (or is skipped for unauth users), keeping them in sync.
   replayCounterfactualSafeDeployment(chainId, safeAddress, props, name, dispatch, payMethod)
 
   return { ok: true }
@@ -258,8 +248,7 @@ function isLimitRejection(error: unknown): boolean {
 }
 
 function toPersistError(error: FetchBaseQueryError | SerializedError | undefined): Error {
-  // 409 (already deployed) is handled upstream via recoverAlreadyDeployed, so it
-  // never reaches here — any error at this point is a genuine persist failure.
+  // 409 (already deployed) is handled upstream via recoverAlreadyDeployed, so any error here is a genuine failure.
   const fallback = 'Failed to save Safe account to backend'
   return new Error(error ? getRtkQueryErrorMessage(error) || fallback : fallback)
 }

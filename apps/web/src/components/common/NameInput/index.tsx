@@ -68,10 +68,8 @@ const NameInput = ({
   const resolvedHelperText = validateCharset ? (validationDisplay?.label ?? helperText) : helperText
 
   const { endAdornment, startAdornment, readOnly } = InputProps ?? {}
-  // Key presence (not the current value) decides the structure: adornments that toggle between a
-  // node and null (e.g. `resolving && <Spinner />`) must not switch the tree between InputGroup and
-  // a bare Input across renders — that remounts the input element, dropping focus and in-flight
-  // keystrokes mid-typing. An addon-less InputGroup renders identically to a bare Input.
+  // Key on presence, not value: an adornment toggling node↔null must not switch InputGroup↔bare Input
+  // across renders — that remounts the input, dropping focus mid-typing. Addon-less InputGroup looks identical.
   const hasAdornment = Boolean(InputProps && ('endAdornment' in InputProps || 'startAdornment' in InputProps))
 
   const resolvedPlaceholder = placeholder ?? (required ? undefined : 'Optional')

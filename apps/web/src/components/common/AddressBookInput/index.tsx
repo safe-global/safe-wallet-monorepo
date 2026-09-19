@@ -112,9 +112,8 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
   // and an empty value matches every contact.
   const onUserInput = useCallback(() => setOpen(true), [])
 
-  // Restores the three dismissal paths MUI's Autocomplete provided. Without them the suggestion
-  // list stays open over the rest of the form, and a click aimed at the next field lands on a
-  // contact instead — silently writing it in as the recipient.
+  // Restores the three dismissal paths MUI's Autocomplete provided; without them the suggestion list stays
+  // open and a click aimed at the next field lands on a contact, silently writing it in as the recipient.
   useEffect(() => {
     if (!open) return
 
@@ -127,8 +126,7 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
         closeList()
       }
     }
-    // Options `preventDefault` on mousedown to keep focus, so selecting one never fires focusout —
-    // only genuinely leaving the field (tab away, focus elsewhere) closes the list here.
+    // Options `preventDefault` mousedown to keep focus, so only genuinely leaving the field closes the list.
     const onFocusOut = (event: FocusEvent) => {
       const next = event.relatedTarget as Node | null
       if (wrapper && !isInside(next)) {

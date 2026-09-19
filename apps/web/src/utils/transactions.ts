@@ -50,8 +50,7 @@ export { getTransactionDetails }
 
 /**
  * Delete a transaction from the gateway using RTK Query.
- * This function can be used in non-React contexts (e.g., async functions, services).
- * It dispatches the mutation and waits for the result.
+ * Usable outside React (services, async fns).
  *
  * @param chainId - The chain ID where the transaction exists
  * @param safeTxHash - The Safe transaction hash to delete
@@ -76,8 +75,7 @@ export const deleteTransaction = async (chainId: string, safeTxHash: string, sig
 
 /**
  * Fetch module transactions from the gateway using RTK Query.
- * This function can be used in non-React contexts (e.g., async functions, services).
- * It dispatches the query and waits for the result.
+ * Usable outside React (services, async fns).
  *
  * @param chainId - The chain ID where the Safe exists
  * @param safeAddress - The Safe address
@@ -124,8 +122,7 @@ export const getModuleTransactions = async (
 
 /**
  * Fetch incoming transfers from the gateway using RTK Query.
- * This function can be used in non-React contexts (e.g., async functions, services).
- * It dispatches the query and waits for the result.
+ * Usable outside React (services, async fns).
  *
  * @param chainId - The chain ID where the Safe exists
  * @param safeAddress - The Safe address
@@ -178,8 +175,7 @@ export const getIncomingTransfers = async (
 
 /**
  * Fetch multisig transactions from the gateway using RTK Query.
- * This function can be used in non-React contexts (e.g., async functions, services).
- * It dispatches the query and waits for the result.
+ * Usable outside React (services, async fns).
  *
  * @param chainId - The chain ID where the Safe exists
  * @param safeAddress - The Safe address
@@ -240,8 +236,7 @@ export const getMultisigTransactions = async (
 
 /**
  * Fetch transaction history from the gateway using RTK Query.
- * This function can be used in non-React contexts (e.g., async functions, services).
- * It dispatches the query and waits for the result.
+ * Usable outside React (services, async fns).
  *
  * @param chainId - The chain ID where the Safe exists
  * @param safeAddress - The Safe address
@@ -288,8 +283,7 @@ export const getTransactionHistory = async (
 
 /**
  * Fetch Safe nonces from the gateway using RTK Query.
- * This function can be used in non-React contexts (e.g., async functions, services).
- * It dispatches the query and waits for the result.
+ * Usable outside React (services, async fns).
  *
  * @param chainId - The chain ID where the Safe exists
  * @param safeAddress - The Safe address
@@ -318,8 +312,7 @@ export const getNonces = async (chainId: string, safeAddress: string): Promise<S
 
 /**
  * Post Safe gas estimation to the gateway using RTK Query.
- * This function can be used in non-React contexts (e.g., async functions, services).
- * It dispatches the mutation and waits for the result.
+ * Usable outside React (services, async fns).
  *
  * @param chainId - The chain ID where the Safe exists
  * @param safeAddress - The Safe address
@@ -560,8 +553,7 @@ export const getSafeTransaction = async (safeTxHash: string, chainId: string, sa
 
 /**
  * Fetch creation transaction data from the gateway using RTK Query.
- * This function can be used in non-React contexts (e.g., async functions, services).
- * It dispatches the query and waits for the result.
+ * Usable outside React (services, async fns).
  *
  * @param chainId - The chain ID where the Safe was deployed
  * @param safeAddress - The Safe address

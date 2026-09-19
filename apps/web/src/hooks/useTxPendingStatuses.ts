@@ -57,10 +57,9 @@ export const useTxMonitor = (): void => {
       return
     }
 
-    // Forget what a txId was watched by once it is no longer pending: the entry is cleared on
-    // SIGNATURE_INDEXED/SUCCESS/REVERTED/FAILED, and a txId that becomes pending again would
-    // otherwise compare equal to its own stale target and never be watched. Keyed on the whole
-    // slice rather than the current chain, so switching chains does not re-watch the other chain.
+    // Forget a txId's watcher once it's no longer pending (cleared on SIGNATURE_INDEXED/SUCCESS/REVERTED/
+    // FAILED), else a txId that becomes pending again compares equal to its stale target and is never watched.
+    // Keyed on the whole slice, not the current chain, so a chain switch doesn't re-watch the other chain.
     monitoredTxs.current = Object.fromEntries(
       Object.entries(monitoredTxs.current).filter(([txId]) => txId in pendingTxs),
     )
@@ -76,13 +75,9 @@ export const useTxMonitor = (): void => {
         continue
       }
 
-      // The tx was sped up: stop watching the replaced hash so it cannot report on the old attempt.
-      // Only reliable for a hash watched by a single txId — a batch execution dispatches PROCESSING
-      // for every txId with the same hash, and `SimpleTxWatcher` keeps one unsubscribe per hash, so
-      // the stale block listeners of the other txIds in the batch survive this call.
-      // Deliberately not awaited: `stopWatchingTxHash` has a synchronous body, so the replaced hash
-      // is unsubscribed before the replacement is watched below. That ordering has to be revisited
-      // if it ever awaits internally.
+      // Sped-up tx: stop watching the replaced hash. Batch execution shares one hash across txIds but
+      // `SimpleTxWatcher` unsubscribes per hash, so other txIds' stale listeners survive. Not awaited —
+      // relies on `stopWatchingTxHash` being synchronous (revisit if it ever awaits internally).
       if (monitored?.type === 'tx') {
         SimpleTxWatcher.getInstance().stopWatchingTxHash(monitored.id)
       }

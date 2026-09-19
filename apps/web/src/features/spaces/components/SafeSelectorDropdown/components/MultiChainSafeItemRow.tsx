@@ -69,9 +69,8 @@ function NetworkRow({ chain, address }: { chain: SafeItemDataChain; address: str
   return (
     <SelectItem
       value={`${chain.chainId}:${address}`}
-      // pl-11 (avatar 32px + gap-3 12px) aligns the chain name under the parent safe name — the
-      // per-chain rows carry no identicon but keep the same threshold / network / pending / balance
-      // columns as the summary row. [&>span.absolute]:hidden drops the built-in checkmark span.
+      // pl-11 (avatar 32px + gap-3 12px) aligns the chain name under the parent's; per-chain rows carry no
+      // identicon but keep the same columns. [&>span.absolute]:hidden drops the built-in checkmark.
       className="group/row flex items-center gap-2 rounded-md px-3 py-3 cursor-pointer focus:bg-muted data-[selected]:bg-[var(--color-background-light)] [&[data-selected]:focus]:bg-[var(--color-background-light-hover)] [&>span.absolute]:hidden"
     >
       <div className="flex min-w-0 flex-1 items-center gap-2 pl-11">

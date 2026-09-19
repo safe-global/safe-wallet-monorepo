@@ -1,10 +1,8 @@
 import type { ReactNode } from 'react'
 import { cn } from '@/utils/cn'
 
-// Fixed-width, right-aligned trailing column of a safe row. The fiat balance and the
-// counterfactual activation status both render inside it so the trailing slot keeps a
-// constant width — this keeps the chain logos in one column and lines the status up with
-// the balance across deployed and undeployed rows.
+// Fixed-width, right-aligned trailing column of a safe row holding the fiat balance and activation status.
+// The constant width keeps chain logos in one column and aligns status with balance across all rows.
 const RowEndColumn = ({ children, className }: { children?: ReactNode; className?: string }) => (
   <div
     data-testid="row-end-column"

@@ -50,16 +50,11 @@ const useCounterfactualSafeSync = () => {
     }
 
     const fetchAndMerge = async () => {
-      // Flush any DELETEs that were queued while the user wasn't SIWE-authenticated
-      // (e.g. they activated a CF safe before signing in). Must happen before the
-      // fetch below — otherwise the backend would still report those safes as CF
-      // and we'd re-add them to the undeployed slice, regressing the activated state.
+      // Flush DELETEs queued while unauthenticated (e.g. CF safe activated before sign-in) before the
+      // fetch below, else the backend still reports them as CF and we'd regress the activated state.
       const pendingDeletes = selectPendingCfDeletes(getStoreInstance().getState())
-      // Snapshot the queue keys before the flush so the merge below can skip
-      // re-adding any safe we just tried to delete — covers two cases:
-      //   1. DELETE succeeded but the space-CF endpoint still returns the safe
-      //      (backend join lag, or a co-member's stale record at the same address).
-      //   2. DELETE failed and the safe is still in the user-CF endpoint response.
+      // Snapshot queue keys pre-flush so the merge skips re-adding a just-deleted safe when either the
+      // DELETE succeeded but space-CF still returns it (backend join lag), or the DELETE failed.
       const blockedByPendingDelete = new Set(pendingDeletes.map(({ chainId, address }) => `${chainId}:${address}`))
       if (pendingDeletes.length > 0) {
         await Promise.all(
@@ -100,10 +95,8 @@ const useCounterfactualSafeSync = () => {
 
         type RemoteSafe = GetCounterfactualSafeItem & { isCreator: boolean }
 
-        // Collect safes by chain. Entries from the user endpoint are owned by the
-        // current user (isCreator=true). Entries only seen via the space endpoint
-        // belong to another space member (isCreator=false). If a safe appears in
-        // both responses, the user-endpoint entry wins.
+        // Collect safes by chain. User-endpoint entries are the current user's (isCreator=true);
+        // space-endpoint-only entries belong to another member (isCreator=false). On overlap, user wins.
         const remoteSafesByChain: Record<string, RemoteSafe[]> = {}
 
         const mergeResponse = (response: GetCounterfactualSafesResponse | undefined, isCreator: boolean) => {
@@ -154,9 +147,8 @@ const useCounterfactualSafeSync = () => {
     }
 
     const sync = async () => {
-      // One bounded retry on transient errors before unblocking consumers.
-      // Without this, a single network blip during sync leaves users who land
-      // on a space-mate's CF safe URL stuck on "Safe couldn't be loaded".
+      // One bounded retry on transient errors before unblocking consumers — else a single network blip
+      // leaves users landing on a space-mate's CF safe URL stuck on "Safe couldn't be loaded".
       try {
         await fetchAndMerge()
       } catch (firstError) {

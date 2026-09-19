@@ -10,9 +10,8 @@ export const flattenSafes = (
 ): SpaceSafeEntry[] =>
   allSafes.flatMap<SpaceSafeEntry>((item) => {
     if (isMultiChainSafeItem(item)) {
-      // A multichain group with no chains is malformed (the grouping logic upstream
-      // never produces one in practice). Skip rather than synthesising a mainnet
-      // entry — a bogus chainId would queue scans for a Safe that doesn't exist there.
+      // A multichain group with no chains is malformed (upstream never produces one). Skip rather than
+      // synthesising a mainnet entry — a bogus chainId would queue scans for a Safe that isn't there.
       const firstChainId = item.safes[0]?.chainId
       if (!firstChainId) return []
       return [

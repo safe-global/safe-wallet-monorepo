@@ -2,9 +2,7 @@ import type { ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 
-// Closed preset: the onboarding footer owns its buttons' size/variant/skin and
-// takes no styling className. Callers supply behaviour (labels, handlers,
-// disabled/loading, testids) only.
+// Closed preset: the footer owns its buttons' size/variant/skin; callers supply behaviour only, no styling className.
 type OnboardingFooterProps = {
   /** Omit to render a Continue-only footer (first step). */
   onBack?: () => void

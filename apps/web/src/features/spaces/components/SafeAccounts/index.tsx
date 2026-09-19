@@ -39,9 +39,8 @@ const SpaceSafeAccounts = () => {
   const sortComparator = useSafeOrderComparator(orderScope)
   const saveManualOrder = useSaveManualOrder(orderScope)
 
-  // useSpaceSafes already resolves names via the merged (workspace-priority, local fallback) address
-  // book, so flatten those items rather than rebuilding them — rebuilding via buildSafeItem would
-  // re-derive the name from the local address book only and drop the workspace name.
+  // useSpaceSafes already resolves names via the merged (workspace-priority) address book, so flatten those
+  // items — rebuilding via buildSafeItem would re-derive from the local book only and drop the workspace name.
   const spaceSafeItems = useMemo<SafeItem[]>(() => flattenSafeItems(allSafes ?? []), [allSafes])
 
   const spaceSafeAddresses = useMemo(() => spaceSafeItems.map((s) => s.address), [spaceSafeItems])

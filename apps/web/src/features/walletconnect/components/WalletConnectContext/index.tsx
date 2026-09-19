@@ -58,9 +58,6 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
   const [error, setError] = useState<Error | null>(null)
   const [loading, setLoading] = useState<WCLoadingState | null>(null)
 
-  //
-  // --- Sessions
-  //
   const [sessions, setSessions] = useState<SessionTypes.Struct[]>([])
 
   const updateSessions = useCallback(() => {
@@ -100,9 +97,6 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
     walletConnect.updateSessions(chainId, safeAddress).catch(setError)
   }, [walletConnect, chainId, safeAddress])
 
-  //
-  // --- Subscribe to requests
-  //
   useEffect(() => {
     if (!walletConnect || !safeWalletProvider || !chainId) return
 
@@ -152,9 +146,6 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
     })
   }, [walletConnect, chainId, safeWalletProvider])
 
-  //
-  // --- One-click Auth
-  //
   useEffect(() => {
     if (!walletConnect || !safeWalletProvider || !chainId) return
 
@@ -218,9 +209,6 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
     })
   }, [walletConnect, safeWalletProvider, chainId, safeAddress, setOpen])
 
-  //
-  // --- Proposals
-  //
   const [sessionProposal, setSessionProposal] = useState<WalletKitTypes.SessionProposal | null>(null)
 
   const approveSession = useCallback(async () => {

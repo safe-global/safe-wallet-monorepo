@@ -77,17 +77,9 @@ export const contractVersionScanner: SecurityScanner = {
       }
     }
 
-    // Outdated — flag any Gnosis-deployed Safe whose version is strictly older than
-    // the chain's latest recommended version. Unlike `MastercopyWarning`'s update branch we do
-    // NOT short-circuit on `isNonCriticalUpdate` (`>= 1.3.0`): the Security Hub must
-    // surface this independently of the dashboard banner, and the comparison must be
-    // network-aware so that future bumps (e.g. 1.5.1) automatically downgrade older
-    // mastercopies on chains where a newer one is recommended. Semver build metadata
-    // (`+L2`, `+Circles`) is intentionally ignored by `<`, so 1.3.0+L2 is treated as
-    // 1.3.0 — outdated when latest is 1.4.1, current when latest is 1.3.0.
-    //
-    // When the version can't be compared (missing or invalid semver) we defer to the
-    // gateway's OUTDATED flag rather than silently marking the Safe as up to date.
+    // Flag any Gnosis Safe older than the chain's latest recommended version. Unlike `MastercopyWarning`,
+    // no `isNonCriticalUpdate` short-circuit: the Hub surfaces this independently, network-aware, ignoring
+    // build metadata (`+L2`/`+Circles`). Uncomparable versions defer to the gateway's OUTDATED flag.
     const versionComparison = compareVersionToLatest(version, latestVersion)
     if (
       implementationVersionState === 'OUTDATED' &&

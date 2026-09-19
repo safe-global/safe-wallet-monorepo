@@ -140,9 +140,7 @@ const useAppCommunicator = (
     )
   }, [communicator, isDarkMode])
 
-  // Adding communicator logic for the required SDK Methods
-  // We don't need to unsubscribe from the events because there can be just one subscription
-  // per event type and the next effect run will simply replace the handlers
+  // No unsubscribe needed: there's one subscription per event type, and the next effect run replaces the handlers.
   useEffect(() => {
     communicator?.on(Methods.getTxBySafeTxHash, (msg) => {
       const { safeTxHash } = msg.data.params as GetTxBySafeTxHashParams

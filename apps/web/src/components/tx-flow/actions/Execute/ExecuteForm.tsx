@@ -85,10 +85,9 @@ export const ExecuteForm = ({
   const isNoFeeCampaignEnabled = useIsNoFeeCampaignEnabled()
   const gasTooHigh = useGasTooHigh(safeTx)
 
-  // GTF Safe-pays must go via relayer. WALLET execution would double-charge (network gas + Safe fee).
-  // For confirmers, the structural fingerprint of the signed payload is the only source of truth:
-  // a stale `gtfPaymentMode === 'safe'` from the user's persisted preference must NOT force the
-  // relay path on a tx whose payload doesn't carry the GTF fee fields (would fail in handlePayment).
+  // GTF Safe-pays must go via relayer — WALLET execution would double-charge (network gas + Safe fee).
+  // For confirmers the signed payload is the only truth: a stale persisted `gtfPaymentMode === 'safe'`
+  // must NOT force the relay path on a payload lacking the GTF fee fields (would fail in handlePayment).
   const { gtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
   const isGtfChain = useHasFeature(FEATURES.GTF) ?? false
   const requiresRelay =
@@ -122,9 +121,7 @@ export const ExecuteForm = ({
     setExecutionMethod(newMethod)
   }
 
-  // Show execution selector when either no-fee campaign OR relay is available
-  // Also show if gas is too high but feature is otherwise available (to show disabled state)
-  // Or if limit is reached (to show 0/X available state)
+  // Show the selector when no-fee/relay is available, or to surface the disabled (gas too high) or 0/X (limit reached) states.
   const showExecutionSelector =
     !requiresRelay &&
     !isGtfChain &&
@@ -147,10 +144,9 @@ export const ExecuteForm = ({
   const { gasLimit, gasLimitError } = useGasLimit(safeTx)
   const [advancedParams, setAdvancedParams] = useAdvancedParams(gasLimit)
 
-  // Safe-pays runs via relayer (not the wallet), so the simulated `from` doesn't match the
-  // real msg.sender on execTransaction. We still run the check, the inner-call revert that
-  // catches issues like spam-token transfers fails regardless of who calls execTransaction,
-  // and missing that signal silently in Safe-pays is worse than the simulated-from drift.
+  // Safe-pays runs via relayer, so the simulated `from` won't match the real msg.sender. Still run the
+  // check: the inner-call revert (e.g. spam-token transfers) fails regardless of caller, and missing that
+  // signal is worse than the simulated-from drift.
   const { executionValidationError } = useIsValidExecution(
     safeTx,
     advancedParams.gasLimit ? advancedParams.gasLimit : undefined,
@@ -222,9 +218,8 @@ export const ExecuteForm = ({
 
   const cannotPropose = !isOwner && !onlyExecute
 
-  // Parent Safe as executor cannot pay gas from the (child) Safe. The relay path doesn't
-  // support this nested execution flow at this moment. Block Execute when both conditions hold so
-  // the user can't submit a tx that would dead end at sign time.
+  // A parent Safe as executor can't pay gas from the child Safe, and the relay path doesn't support this
+  // nested flow yet — block Execute when both hold so the user can't submit a tx that dead-ends at sign time.
   const signer = useSigner()
   const blockSafePaysFromNestedExecutor = signer?.isSafe === true && !!requiresRelay
 

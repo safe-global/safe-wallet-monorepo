@@ -79,9 +79,8 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
     setError(undefined)
     setIsSubmitting(true)
 
-    // On success we hand off to onSuccess(), which navigates away and unmounts the form,
-    // so the spinner stays up through the route change. On every other exit the finally
-    // block resets isSubmitting so a failed/aborted submit can never leave the button stuck.
+    // On success onSuccess() navigates away and unmounts the form, so the spinner stays up through the route
+    // change; every other exit resets isSubmitting in finally so a failed submit can't leave the button stuck.
     let succeeded = false
     try {
       const usersToInvite: InviteUsersDto['users'] = validMembers.map((member) =>

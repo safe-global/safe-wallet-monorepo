@@ -81,9 +81,8 @@ export const useBannerVisibility = (bannerType: BannerType): BannerVisibilityRes
       return { showBanner: false, loading: true }
     }
 
-    // For NoBalanceCheck, skip balance check (always pass)
-    // For targeted Safes (including those with 0 balance/no assets), bypass balance check to show banner over "Add funds to get started"
-    // This allows the Hypernative banner to be shown for targeted Safes even when they have 0 balance
+    // Bypass the balance check for NoBalanceCheck and targeted Safes, so the Hypernative banner shows over
+    // "Add funds to get started" even at 0 balance.
     const hasSufficientBalanceCheck = skipBalanceCheck || hasEnoughBalance
     // Targeted Safes bypass balance requirement, allowing banner to show even with 0 balance
     const passesBalanceOrTargetedCheck = hasSufficientBalanceCheck || isPromoTargeted

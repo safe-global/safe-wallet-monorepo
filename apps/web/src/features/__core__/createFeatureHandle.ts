@@ -2,9 +2,8 @@ import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { FeatureHandle, FeatureImplementation } from './types'
 
-// Semantic mapping from folder names to feature flags
-// This allows features to omit the second parameter when the flag name
-// doesn't match the folder name convention
+// Semantic mapping from folder names to feature flags, letting features omit the second parameter when the
+// flag name doesn't match the folder-name convention.
 const FEATURE_FLAG_MAPPING: Record<string, FEATURES> = {
   walletconnect: FEATURES.NATIVE_WALLETCONNECT,
   stake: FEATURES.STAKING,

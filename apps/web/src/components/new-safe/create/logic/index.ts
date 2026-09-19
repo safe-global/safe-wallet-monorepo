@@ -124,10 +124,8 @@ export const estimateSafeCreationGas = async (
   from: string,
   undeployedSafe: UndeployedSafeProps,
 ): Promise<bigint> => {
-  // Estimate against the factory the creation will actually be sent to (see
-  // activateReplayedSafe/relaySafeCreation) — a version-derived factory can differ
-  // from the replayed creation's factory and deploys different proxy bytecode,
-  // underestimating the gas and making the real transaction run out of gas.
+  // Estimate against the factory the creation actually uses (see activateReplayedSafe/relaySafeCreation):
+  // a version-derived factory can deploy different proxy bytecode, underestimating gas and running out.
   const replayedSafeProps = assertNewUndeployedSafeProps(undeployedSafe, chain)
   const encodedSafeCreationTx = encodeSafeCreationTx(replayedSafeProps, chain)
 
@@ -199,8 +197,7 @@ export const getRedirect = (
   // Track the redirect to Safe App
   trackEvent(SAFE_APPS_EVENTS.SHARED_APP_OPEN_AFTER_SAFE_CREATION)
 
-  // We're prepending the safe address directly here because the `router.push` doesn't parse
-  // The URL for already existing query params
+  // Prepend the safe address directly because `router.push` doesn't parse existing query params in the URL.
   // TODO: Check if we can accomplish this with URLSearchParams or URL instead
   const hasQueryParams = redirectUrl.includes('?')
   const appendChar = hasQueryParams ? '&' : '?'

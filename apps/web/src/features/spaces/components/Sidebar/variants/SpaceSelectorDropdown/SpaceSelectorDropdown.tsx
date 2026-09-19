@@ -260,9 +260,8 @@ const SpaceMenuRow = ({
   isSignedIn,
   onSelect,
 }: SpaceMenuRowProps): ReactElement => {
-  // Only check membership while the dropdown is open AND the user is signed in
-  // AND we have a safe/chain to check against. RTK Query caches the result via
-  // keepUnusedDataFor, so reopening within the cache window is free.
+  // Check membership only while open, signed in, and with a safe/chain to check. RTK Query caches via
+  // keepUnusedDataFor, so reopening within the window is free.
   const shouldCheckMembership = isOpen && isAddToWorkspace && isSignedIn && Boolean(safeAddress) && Boolean(chainId)
   const { currentData: spaceSafes } = useSpaceSafesGetV1Query({ spaceId: space.uuid }, { skip: !shouldCheckMembership })
 

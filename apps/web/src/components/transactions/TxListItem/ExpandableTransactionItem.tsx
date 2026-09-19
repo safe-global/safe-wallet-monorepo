@@ -57,10 +57,8 @@ const ExpandableTransactionItem = ({
         <AccordionTrigger
           nativeButton={false}
           render={<div role="button" tabIndex={0} />}
-          // `@container` so TxSummary's row can size itself against the width it actually has rather
-          // than the viewport's. With the sidebar expanded a 920px viewport leaves the row only 638px,
-          // so viewport-based breakpoints kept the one-line grid past the point it fitted and
-          // `overflow-x-auto` turned that into a scrollbar.
+          // `@container` so TxSummary's row sizes against its own width, not the viewport's: with the sidebar
+          // open a 920px viewport leaves the row 638px, and viewport breakpoints held the one-line grid too long.
           className={classNames(
             // rounded-none: the shadcn trigger's own rounded-md would curve its fill inside the row's
             // square edges. The row owns the corners — only a group's first and last get any.
@@ -76,17 +74,13 @@ const ExpandableTransactionItem = ({
         <AccordionContent
           data-testid="accordion-details"
           keepMounted={hasExpanded}
-          // Full-bleed panel: the details draw their separators — and the vertical rule beside the
-          // audit log — as borders on their own blocks, so any padding here holds those rules off
-          // the card's edges. The inset moves onto each block via `--tx-details-edge-inset` (see
-          // TxDetails/styles.module.css), matching the trigger's horizontal padding above so text
-          // lands exactly where it did. `pb-0` for the same reason: the blocks bring their own
-          // bottom padding, and padding here would cut the vertical rule short of the card's edge.
+          // Full-bleed: the details draw separators (and the audit-log rule) as block borders, so padding
+          // here would hold them off the card edges. Inset moves onto each block via `--tx-details-edge-inset`
+          // (TxDetails/styles.module.css); `pb-0` because the blocks bring their own bottom padding.
           className={classNames(
             'pt-0 pb-0',
-            // Mirrors the trigger's horizontal padding above so the details' text lands on the same
-            // vertical line while their borders still span the card. `--spacing(3)` is what `px-3`
-            // resolves to, so the two cannot drift if the spacing scale moves.
+            // Mirrors the trigger's `px-3` (via `--spacing(3)`, so they can't drift) to align the details'
+            // text while their borders still span the card.
             isBulkGroup
               ? '[--tx-details-edge-inset:--spacing(3)]'
               : '[--tx-details-edge-inset:var(--space-2)] sm:[--tx-details-edge-inset:var(--space-3)]',
@@ -113,10 +107,8 @@ export const TransactionSkeleton = () => (
         <AccordionTrigger
           nativeButton={false}
           render={<div role="button" tabIndex={0} />}
-          // `@container` so TxSummary's row can size itself against the width it actually has rather
-          // than the viewport's. With the sidebar expanded a 920px viewport leaves the row only 638px,
-          // so viewport-based breakpoints kept the one-line grid past the point it fitted and
-          // `overflow-x-auto` turned that into a scrollbar.
+          // `@container` so TxSummary's row sizes against its own width, not the viewport's: with the sidebar
+          // open a 920px viewport leaves the row 638px, and viewport breakpoints held the one-line grid too long.
           className="@container cursor-pointer items-center justify-start overflow-x-auto px-4 py-3 sm:px-6"
         >
           <Skeleton className="h-5 w-full rounded-none bg-[var(--color-background-skeleton)]" />

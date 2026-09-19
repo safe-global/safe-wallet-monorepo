@@ -48,9 +48,8 @@ export const useSpaceSafeOverviews = (spaceSafeItems: SpaceSafeRef[]) => {
       }
     }
 
-    // Counterfactual/undeployed safes have no overview; fall back to the local CF owner config,
-    // exactly as the global `_buildSafeItem` does. Extra entries for safes outside the space are
-    // harmless — the consumer only reads keys for space safes.
+    // CF/undeployed safes have no overview; fall back to the local CF owner config (as `_buildSafeItem`
+    // does). Extra entries for out-of-space safes are harmless — the consumer only reads space-safe keys.
     for (const [chainId, safesOnChain] of Object.entries(undeployedSafes)) {
       for (const address of Object.keys(safesOnChain)) {
         const cfOwners = safesOnChain[address]?.props.safeAccountConfig.owners ?? []

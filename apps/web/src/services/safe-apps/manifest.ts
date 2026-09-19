@@ -39,12 +39,7 @@ const chooseBestIcon = (icons: AppManifestIcon[]): string => {
   return icons[0].src || ''
 }
 
-// The icons URL can be any of the following format:
-// - https://example.com/icon.png
-// - icon.png
-// - /icon.png
-// This function calculates the absolute URL of the icon taking into account the
-// different formats.
+// Resolves the icon to an absolute URL; the source may be absolute, bare (`icon.png`), or root-relative (`/icon.png`).
 const getAppLogoUrl = (appUrl: string, { icons = [], iconPath = '' }: AppManifest) => {
   const iconUrl = icons.length ? chooseBestIcon(icons) : iconPath
   const includesBaseUrl = iconUrl.startsWith('https://')

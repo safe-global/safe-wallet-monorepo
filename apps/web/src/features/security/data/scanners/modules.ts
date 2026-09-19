@@ -19,9 +19,9 @@ const isVulnerableModuleName = (name?: string | null): boolean => {
   return VULNERABLE_MODULE_NAMES.some((fragment) => lower.includes(fragment))
 }
 
-// Unsupported Zodiac mastercopies enabled directly as a module (the module address is the
-// mastercopy, not a per-Safe proxy) — flagged Critical by address, without the name/API checks.
-// A recovery Delay Modifier is a unique per-Safe proxy, so it never matches. Add addresses here.
+// Unsupported Zodiac mastercopies enabled directly as a module (address is the mastercopy, not a per-Safe
+// proxy) — flagged Critical by address, without name/API checks. A Delay Modifier is a per-Safe proxy so
+// never matches. Add addresses here.
 const UNSUPPORTED_ZODIAC_MASTERCOPIES = new Set(
   ['0x01F8cabB808D7dE0dF4202D4B60C8310d2f1339b'].map((address) => address.toLowerCase()), // Delay Modifier v1.1.0
 )
@@ -130,9 +130,8 @@ export const modulesScanner: SecurityScanner = {
       }
     }
 
-    // Critical (takes precedence over the trust tiers below): a module matches the unsupported
-    // mastercopy ruleset, or the server-side check flags the Safe as affected (which also covers
-    // the nested "affected via a related account" case). Fails closed.
+    // Critical (over the trust tiers below): a module matches the unsupported-mastercopy ruleset, or the
+    // server-side check flags the Safe as affected (covers the nested "related account" case). Fails closed.
     const flaggedByAddress = activeModules.filter((m) => isUnsupportedZodiacMastercopy(m.value))
     const isAffected = await isSafeAffectedByZodiacVulnerability(chainId, safeAddress)
     if (flaggedByAddress.length > 0 || isAffected) {

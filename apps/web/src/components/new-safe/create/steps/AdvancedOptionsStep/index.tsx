@@ -200,10 +200,9 @@ const AdvancedOptionsStep = ({ onSubmit, onBack, data, setStep }: StepRenderProp
             <Controller
               control={control}
               name={AdvancedOptionsFields.paymentReceiver}
-              // Without a format check `required` alone accepts anything non-empty, so a garbage
-              // receiver keeps the form valid and Next enabled. predictAddressBasedOnReplayData then
-              // throws inside useAsync, whose error is discarded — leaving the "New Safe address"
-              // skeleton spinning forever with no explanation.
+              // Without a format check `required` accepts anything non-empty, so a garbage receiver keeps
+              // Next enabled; predictAddressBasedOnReplayData then throws inside useAsync (error discarded),
+              // leaving the "New Safe address" skeleton spinning forever.
               rules={{ required: 'Payment receiver is required', validate: validateAddress }}
               render={({ field, fieldState }) => {
                 const isInvalid = fieldState.invalid || Boolean(isDeployed)

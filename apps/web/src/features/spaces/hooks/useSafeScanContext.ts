@@ -84,9 +84,8 @@ const useSafeScanContext = (
     { skip: !isMultichain || multichainSafeItems.length === 0, refetchOnMountOrArgChange: forceRefetch },
   )
 
-  // Fetch overview for balance data (fiatTotal) on the selected chain.
-  // Skip when pre-fetched overviewData is provided (e.g. from the batch query in SecurityHub)
-  // to avoid redundant per-Safe API requests during auto-scan.
+  // Fetch overview (fiatTotal) for the selected chain; skip when pre-fetched overviewData is provided (e.g.
+  // SecurityHub's batch query) to avoid redundant per-Safe requests during auto-scan.
   const { currentData: safeOverview, isFetching: isOverviewFetching } = useGetSafeOverviewQuery(
     { chainId, safeAddress: address },
     { skip: !selected || !isDeployed || !!overviewData, refetchOnMountOrArgChange: forceRefetch },
@@ -97,16 +96,8 @@ const useSafeScanContext = (
   const { configs: allChains } = useChains()
 
   return useMemo(() => {
-    // Wait for ALL dependent queries to FULLY settle — not just stop initial loading.
-    // `isLoading` is only true on the very first fetch and there are windows
-    // (uninitialized → pending transition, errored args, re-fetches) where
-    // `isLoading=false` while `currentData` is still undefined. Scanners launched in
-    // one of those windows run with `creationInfo=null` and produce the misleading
-    // "creation data not yet available" result, then flip on the next rescan when
-    // the underlying query has finally populated data. Using `isFetching` catches
-    // both initial fetches and refetches; we additionally require data to be
-    // present unless the query has definitively errored (in which case the scanner
-    // handles missing data with `inconclusive`).
+    // Gate on `isFetching` (not `isLoading`, first-fetch only) plus data present, else scanners run
+    // mid-refetch with `creationInfo=null` and give a result that flips on rescan. Drop the data requirement once errored.
     if (!selected || !entry) return null
     if (isSafeFetching || !safeInfo) return null
     if (!overviewData && isOverviewFetching) return null

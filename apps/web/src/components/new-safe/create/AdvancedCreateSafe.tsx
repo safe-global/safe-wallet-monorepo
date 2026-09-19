@@ -100,9 +100,8 @@ const AdvancedCreateSafe = () => {
     threshold: 1,
     saltNonce: 0,
     safeVersion: getLatestSafeVersion(chain),
-    // Checksummed because the advanced step validates this field with `validateAddress`, which
-    // rejects a non-checksummed address. NEXT_PUBLIC_ECOSYSTEM_ID_ADDRESS is injected per
-    // environment, so a lowercase value would otherwise open the step already-invalid.
+    // Checksummed because the advanced step's `validateAddress` rejects non-checksummed addresses, and
+    // NEXT_PUBLIC_ECOSYSTEM_ID_ADDRESS is injected per environment — a lowercase value would open invalid.
     paymentReceiver: checksumAddress(ECOSYSTEM_ID_ADDRESS),
   }
 

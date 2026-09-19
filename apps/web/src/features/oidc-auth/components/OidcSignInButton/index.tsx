@@ -34,10 +34,8 @@ const OidcSignInButton = ({
 
   if (!isOidcAuthEnabled) return null
 
-  // Avoid `bg-primary` here: it flips to Safe-green in dark mode and would
-  // clash with the Google "G" logo's own green path. `--sidebar-primary` is
-  // the project's neutral primary pair that flips dark ↔ light without the
-  // brand-green override.
+  // Avoid `bg-primary`: it flips to Safe-green in dark mode, clashing with the Google "G" logo's
+  // green path. `--sidebar-primary` is the neutral primary pair that flips dark ↔ light without brand-green.
   const primaryOverride =
     variant === 'primary' ? 'bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90' : ''
 

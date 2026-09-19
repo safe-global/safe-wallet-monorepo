@@ -28,23 +28,16 @@ const walletConnectV2 = () => {
     projectId: WC_PROJECT_ID,
     qrModalOptions: {
       themeVariables: {
-        // The QR modal is opened from inside onboard's connect modal, so it has to beat
-        // onboard.css's `--onboard-modal-z-index` (1450) — at anything lower, onboard's
-        // "Connecting to WalletConnect…" panel paints over the QR code and the connection
-        // can't be completed. Matches shadcn.css's `--z-above-onboard`; kept in sync by
-        // walletModalZIndex.test.ts.
+        // The QR modal opens inside onboard's connect modal, so it must beat `--onboard-modal-z-index` (1450)
+        // or onboard's "Connecting…" panel paints over the QR. Matches `--z-above-onboard`; pinned by walletModalZIndex.test.ts.
         '--wcm-z-index': '1451',
       },
       themeMode: prefersDarkMode() ? 'dark' : 'light',
     },
-    // No `requiredChains`: anything listed there lands in WalletConnect's `requiredNamespaces`,
-    // which a wallet cannot negotiate. A wallet that can't serve the Safe's chain — MetaMask with
-    // test networks off, looking at a Sepolia Safe — shows the approval sheet, then silently never
-    // returns a session, so the connect hangs with nothing logged on either side.
-    // Omitting it also leaves `optionalChains` at its default (every chain onboard was
-    // initialised with), so the wallet connects with whatever it supports. Being on the wrong
-    // chain afterwards is already handled: `useIsWrongChain` gates the UI and `assertWalletChain`
-    // switches the wallet before signing.
+    // No `requiredChains`: they become WalletConnect `requiredNamespaces` a wallet can't negotiate, so a
+    // wallet that can't serve the Safe's chain (e.g. MetaMask with test networks off on Sepolia) silently
+    // never returns a session and the connect hangs. Omitting it connects with whatever the wallet supports;
+    // a wrong chain afterwards is handled by `useIsWrongChain` (UI) and `assertWalletChain` (before signing).
     dappUrl: location.origin,
   })
 }

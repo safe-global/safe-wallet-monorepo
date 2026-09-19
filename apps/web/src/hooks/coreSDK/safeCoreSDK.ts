@@ -43,12 +43,8 @@ export const initSafeSDK = async ({
   let isL1SafeSingleton = chainId === chains.eth
   let contractNetworks: ContractNetworksConfig | undefined
 
-  // For versions >= 1.4.1, resolve all addresses chain-agnostically (works on any chain).
-  // Derive deployment type AND L1/L2 flavour from the master copy so that Safes on
-  // zk chains with a canonical master copy get canonical aux contracts (and vice
-  // versa), and Safes on L2 chains running an L1 master copy resolve against the
-  // L1 singleton table. Chain-level flags are only used as defaults when the master
-  // copy can't be matched (e.g. custom / unregistered deployments).
+  // For >= 1.4.1, resolve addresses chain-agnostically: derive deployment type and L1/L2 flavour from the
+  // master copy (chain-level flags are only fallback defaults when it can't be matched).
   if (isChainAgnosticVersion(safeVersion) && isL2Chain !== undefined) {
     const { deploymentType, isL1 } = getDeploymentTypeForMasterCopy(implementation, safeVersion, {
       deploymentType: isZkChain ? 'zksync' : 'canonical',
@@ -128,11 +124,8 @@ export const initSafeSDK = async ({
     isL1SafeSingleton = true
   }
 
-  // zkSync Safes using a canonical (EVM bytecode) master copy cannot delegatecall
-  // the zksync-specific (EraVM) MultiSend/MultiSendCallOnly, so force the canonical
-  // aux-contract addresses. Only runs for versions below the chain-agnostic threshold
-  // (<1.4.1); for >=1.4.1 the chain-agnostic resolver already picks the correct flavour
-  // from the master copy, and a second writer on the same fields would only risk drift.
+  // zkSync Safes on a canonical (EVM) master copy can't delegatecall the EraVM MultiSend, so force canonical
+  // aux addresses. Only for <1.4.1 — the chain-agnostic resolver already handles >=1.4.1 (a second writer would risk drift).
   if (!isChainAgnosticVersion(safeVersion) && isCanonicalDeployment(implementation, chainId, safeVersion)) {
     const canonicalMultiSendCallOnly = getCanonicalMultiSendCallOnlyAddress(safeVersion)
     const canonicalMultiSend = getCanonicalMultiSendAddress(safeVersion)

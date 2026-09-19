@@ -87,8 +87,7 @@ const CopyTxHashButton = ({ txHash }: { txHash?: string | null }) => {
             size="icon-xs"
             className="text-inherit"
             onClick={handleCopy}
-            // MUI's Tooltip put its `title` on the child as an aria-label; Base UI's wires no ARIA at
-            // all, so an icon-only trigger needs its own name or it announces as just "button".
+            // Base UI's Tooltip wires no ARIA (MUI's did), so an icon-only trigger needs its own name or it announces as "button".
             aria-label="Copy transaction hash"
           >
             <HashIcon className="size-4" />
@@ -164,9 +163,8 @@ const TxSigners = ({
   const isMultisig = isMultisigDetailedExecutionInfo(detailedExecutionInfo)
   const isModule = isModuleDetailedExecutionInfo(detailedExecutionInfo)
 
-  // Subscribed here as well as inside the row (same cache entry, one chain
-  // read) so the sibling rows' isLast can account for the Safenet step. The
-  // undefined hash skips the read entirely while the flag is off.
+  // Subscribed here too (same cache entry, one chain read) so sibling rows' isLast accounts for the Safenet
+  // step; the undefined hash skips the read while the flag is off.
   const safenetHash = isSafenetEnabled && isMultisig ? detailedExecutionInfo.safeTxHash : undefined
   const safenetCheck = useSafenetCheck(safenetHash, isMultisig ? detailedExecutionInfo.submittedAt : null, {
     chainId: safe.chainId,

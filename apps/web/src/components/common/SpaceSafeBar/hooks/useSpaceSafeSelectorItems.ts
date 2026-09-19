@@ -43,10 +43,9 @@ const resolveThresholdAndOwners = (
   owners: isCurrentSafe ? (safe.owners?.length ?? 0) : (overview?.owners.length ?? 0),
 })
 
-// Read-only is derived from the overview's owners (this surface fetches overviews for every listed
-// safe anyway), so the bar never enumerates owned safes via the captcha-protected owners endpoint.
-// No wallet → read-only; no overview (counterfactual safes) → the item's own flag, which is correct
-// for CF safes even without the enumeration.
+// Read-only is derived from the overview's owners (this surface fetches overviews anyway), so the bar never
+// enumerates owned safes via the captcha-protected endpoint. No wallet → read-only; no overview (CF safes)
+// → the item's own flag, correct for CF safes without the enumeration.
 const deriveIsReadOnly = (
   overview: SafeOverview | undefined,
   walletAddress: string | undefined,

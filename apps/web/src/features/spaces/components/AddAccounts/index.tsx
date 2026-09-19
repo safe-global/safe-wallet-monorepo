@@ -114,18 +114,16 @@ const AddAccounts = ({
   const { configs } = useChains()
   const allChainIds = useMemo(() => configs.map((c) => c.chainId), [configs])
 
-  // Get safe data. Only enumerate owned safes (the captcha-protected owners endpoint) once the modal
-  // is open: the trusted list itself is built from added safes, so `allOwned` only feeds the per-row
-  // read-only flag — which nothing needs while the dialog is closed and this trigger sits mounted.
+  // Only enumerate owned safes (captcha-protected endpoint) once the modal is open: `allOwned` just
+  // feeds the per-row read-only flag, which nothing needs while the dialog is closed.
   const [allOwned = {}] = useAllOwnedSafes(isOpen ? walletAddress : '')
   const allAdded = useAppSelector(selectAllAddedSafes)
   const allUndeployed = useAppSelector(selectUndeployedSafes)
   const allVisitedSafes = useAppSelector(selectAllVisitedSafes)
   const allSafeNames = useAppSelector(selectAllAddressBooks)
 
-  // Build the trusted (pinned) safes list — owned safes are added by first trusting them via the
-  // "Manage trusted Safes" view, then they appear here. Safes already in the workspace stay in the
-  // list and open pre-checked (seeded by defaultSelectedSafes); unchecking one removes it.
+  // Trusted (pinned) safes list. Safes already in the workspace stay in the list and open pre-checked
+  // (seeded by defaultSelectedSafes); unchecking one removes it.
   const trustedSafes = useMemo<AllSafeItems>(() => {
     const buildItem = (chainId: string, address: string) =>
       _buildSafeItem(chainId, address, walletAddress, allAdded, allOwned, allUndeployed, allVisitedSafes, allSafeNames)
@@ -181,9 +179,8 @@ const AddAccounts = ({
   const isFormDirty = selectedSafesLength > 0 || removedSafesCount > 0
   const { isSubmitting } = formState
 
-  // Computed inline (not memoised): react-hook-form's watch() mutates and returns the same object
-  // reference, so a useMemo keyed on `selectedSafes` would keep a stale Set and the checkboxes would
-  // never re-render even though the form value (and the footer counter) changed.
+  // Inline, not memoised: watch() returns the same mutated object reference, so a useMemo on it would
+  // keep a stale Set and the checkboxes would never re-render.
   const selectedKeys = getSelectedLeafKeys(selectedSafes || {})
 
   // Total checked safes (workspace safes are pre-checked and count toward the per-workspace cap).
@@ -198,9 +195,8 @@ const AddAccounts = ({
   const handleTableToggle = (line: AccountLine, nextChecked: boolean) =>
     applySafeSelectionToggle(setValue, visibleTrusted, selectedSafes || {}, line, nextChecked, spaceSafeKeys)
 
-  // Reset form when modal opens. Wait until the space-safes query has resolved before seeding:
-  // opening via the AddAccountsChooser on a cold cache can render with `spaceSafes` still empty, and
-  // finalizing that empty seed would make Save diff every existing member as a removal (data loss).
+  // Reset form on open, but wait for the space-safes query to resolve before seeding: seeding an empty
+  // `spaceSafes` (cold cache) would make Save diff every existing member as a removal (data loss).
   useEffect(() => {
     if (isOpen && !hasResetForOpen.current && !isLoadingSpaceSafes) {
       reset({ selectedSafes: defaultSelectedSafes })
