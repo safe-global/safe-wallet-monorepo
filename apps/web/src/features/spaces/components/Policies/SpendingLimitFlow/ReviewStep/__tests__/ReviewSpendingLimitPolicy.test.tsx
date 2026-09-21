@@ -17,7 +17,7 @@ import * as useChainsModule from '@/hooks/useChains'
 import { tokenOptionBuilder } from '../../utils/tokenOptions.fixtures'
 import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
 import { useExistingSpendingLimits } from '../../ExistingSpendingLimitsProvider'
-import { REVIEW_STEP_TITLE } from '../../constants'
+import { EXISTING_LIMITS_LOAD_ERROR, REVIEW_STEP_TITLE } from '../../constants'
 import type { SpendingLimitPolicyFormValues } from '../../types'
 import { UNKNOWN_TOKEN_IN_POLICY_ERROR } from '../buildSpendingLimitPairs'
 import ReviewSpendingLimitPolicy from '..'
@@ -222,6 +222,17 @@ describe('ReviewSpendingLimitPolicy', () => {
 
     await waitFor(() =>
       expect(setSafeTxError).toHaveBeenCalledWith(expect.objectContaining({ message: UNKNOWN_TOKEN_IN_POLICY_ERROR })),
+    )
+    expect(mockCreate).not.toHaveBeenCalled()
+  })
+
+  it('reports a failed existing-limits load instead of building blind', async () => {
+    mockUseExisting.mockReturnValue({ loading: false, error: new Error('rpc down') })
+
+    renderReview()
+
+    await waitFor(() =>
+      expect(setSafeTxError).toHaveBeenCalledWith(expect.objectContaining({ message: EXISTING_LIMITS_LOAD_ERROR })),
     )
     expect(mockCreate).not.toHaveBeenCalled()
   })

@@ -16,7 +16,7 @@ import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
 import SpendingLimitSummary from '../Summary'
 import { toPolicySummaryModel } from '../Summary/toPolicySummaryModel'
 import type { SpendingLimitPolicyFormValues } from '../types'
-import { REVIEW_STEP_TITLE } from '../constants'
+import { EXISTING_LIMITS_LOAD_ERROR, REVIEW_STEP_TITLE } from '../constants'
 import { buildSpendingLimitPairs } from './buildSpendingLimitPairs'
 
 /**
@@ -33,7 +33,7 @@ const ReviewSpendingLimitPolicy = ({ onSubmit, children }: ReviewTransactionProp
   const { accounts } = useSpendingLimitSafeAccounts()
   const { options: tokens, isLoading: tokensLoading } = useSpendingLimitTokenOptions()
   const names = useAddressBook()
-  const { limits: existingLimits } = useExistingSpendingLimits()
+  const { limits: existingLimits, error: existingLimitsError } = useExistingSpendingLimits()
   const { createSpendingLimitsTx, $isReady } = useLoadFeature(SpendingLimitsFeature)
 
   const policy = useMemo(
@@ -52,6 +52,10 @@ const ReviewSpendingLimitPolicy = ({ onSubmit, children }: ReviewTransactionProp
   const chainId = scope?.chainId
 
   useEffect(() => {
+    if (existingLimitsError) {
+      setSafeTxError(new Error(EXISTING_LIMITS_LOAD_ERROR))
+      return
+    }
     if (pairsError) {
       setSafeTxError(pairsError)
       return
@@ -73,6 +77,7 @@ const ReviewSpendingLimitPolicy = ({ onSubmit, children }: ReviewTransactionProp
     $isReady,
     safeLoaded,
     existingLimits,
+    existingLimitsError,
     safe.modules?.length,
     safe.deployed,
     createSpendingLimitsTx,

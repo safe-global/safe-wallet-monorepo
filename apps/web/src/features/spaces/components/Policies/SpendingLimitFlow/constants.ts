@@ -27,5 +27,7 @@ export const NEXT_LABEL = 'Next'
 export const DUPLICATE_SPENDER_ERROR = 'This spender is already in the policy. Add the token to their existing card.'
 export const DUPLICATE_TOKEN_ERROR = 'This token already has a limit for this spender'
 export const EXISTING_LIMIT_ERROR = 'This spender already has a spending limit for this token'
+export const EXISTING_LIMITS_LOAD_ERROR =
+  "The Safe's current spending limits could not be loaded. Close this window and try again."
 
 export const REVIEW_STEP_TITLE = 'Confirm policy'
