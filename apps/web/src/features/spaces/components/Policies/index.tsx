@@ -11,6 +11,7 @@ import { PROPOSER_INTRO_SEEN_KEY } from './ProposerIntroDialog/constants'
 import SpendingLimitFlow from './SpendingLimitFlow'
 import SpendingLimitIntroDialog from './SpendingLimitIntroDialog'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from './SpendingLimitIntroDialog/constants'
+import { REQUEST_POLICY_FORM_URL } from './constants'
 
 const Policies = (): ReactElement => {
   const [hasSeenSpendingLimitIntro = false, setHasSeenSpendingLimitIntro] =
@@ -49,7 +50,7 @@ const Policies = (): ReactElement => {
           return
 
         case 'suggestion':
-          // TODO(WA-3160): open the Suggest a policy dialog.
+          window.open(REQUEST_POLICY_FORM_URL, '_blank', 'noopener,noreferrer')
           return
 
         // Only unreachable while `isAvailable` is false in the catalogue; needs a flow before it flips.
