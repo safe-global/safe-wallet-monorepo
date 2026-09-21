@@ -64,6 +64,10 @@ const createSkeletonMessage = (confirmationsRequired: number): MessageItem => {
     proposedBy: {
       value: '',
     },
+    preparedSignature: null,
+    origin: null,
+    safeAppInfo: null,
+    safeAppId: null,
     status: 'NEEDS_CONFIRMATION',
     type: 'MESSAGE',
   }

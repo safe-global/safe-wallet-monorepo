@@ -6,6 +6,7 @@ import { Typography } from '@/components/ui/typography'
 import { Countdown } from '@/components/common/Countdown'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import ErrorMessage from '@/components/tx/ErrorMessage'
+import { getProposerErrorText } from '@/features/proposers/utils/proposerErrors'
 import CopyTooltip from '@/components/common/CopyTooltip'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { signProposerTypedDataForSafe } from '@/features/proposers/utils/utils'
@@ -190,7 +191,10 @@ function PendingDelegation({ delegation, onRefetch }: PendingDelegationProps): R
       {error && (
         <div className="mt-2">
           <ErrorMessage error={error}>
-            {delegation.status === 'ready' ? 'Error submitting delegation' : 'Error signing delegation'}
+            {getProposerErrorText(
+              error,
+              delegation.status === 'ready' ? 'Error submitting delegation' : 'Error signing delegation',
+            )}
           </ErrorMessage>
         </div>
       )}

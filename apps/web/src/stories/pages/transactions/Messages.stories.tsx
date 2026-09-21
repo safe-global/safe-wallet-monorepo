@@ -39,6 +39,8 @@ const messagesPage: MessagePage = {
       ],
       preparedSignature: sig('3'),
       origin: '{"url":"https://opensea.io","name":"OpenSea"}',
+      safeAppInfo: null,
+      safeAppId: null,
     },
     {
       type: 'MESSAGE',
@@ -55,6 +57,8 @@ const messagesPage: MessagePage = {
       confirmations: [{ owner: { value: OWNER_2 }, signature: sig('4') }],
       preparedSignature: null,
       origin: null,
+      safeAppInfo: null,
+      safeAppId: null,
     },
     { type: 'DATE_LABEL', timestamp: 1727011200000 },
     {
@@ -75,6 +79,8 @@ const messagesPage: MessagePage = {
       ],
       preparedSignature: sig('7'),
       origin: null,
+      safeAppInfo: null,
+      safeAppId: null,
     },
   ],
 }

@@ -179,6 +179,28 @@ export const getContractErrorMessage = (code: GsCode, params?: ContractErrorPara
 /** How the given code should be handled in the product. */
 export const getContractErrorHandling = (code: GsCode): ContractErrorHandling => CONTRACT_ERRORS[code].handling
 
+const PLACEHOLDER_RE = /\{\w+\}/
+
+/**
+ * The message for an error's GS code when we have copy specific to that code, so a caller
+ * showing its own generic wording can replace it with the real cause.
+ *
+ * `undefined` means keep your own wording: either the code shares
+ * `CONTRACT_ERROR_FALLBACK` (nothing specific to say) or a placeholder could not be filled
+ * from `params` — a raw `{token}` must never reach the user.
+ */
+export const getSpecificContractErrorMessage = (
+  error?: { message?: string; reason?: string; code?: unknown } | null,
+  params?: ContractErrorParams,
+): string | undefined => {
+  const code = getGsCodeFromError(error)
+  if (!code) return undefined
+
+  const message = getContractErrorMessage(code, params)
+
+  return message === CONTRACT_ERROR_FALLBACK || PLACEHOLDER_RE.test(message) ? undefined : message
+}
+
 /** Resolve a specific GS026 cause to its message. */
 export const getGs026Message = (reason: Gs026Reason): string => GS026_MESSAGES[reason]
 

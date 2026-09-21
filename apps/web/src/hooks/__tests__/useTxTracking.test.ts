@@ -37,6 +37,7 @@ describe('useTxTracking', () => {
             txId: '0x345',
             txStatus: 'AWAITING_CONFIRMATIONS' as const,
             safeAppInfo: {
+              id: 1,
               name: 'Google',
               url: 'google.com',
               logoUri: null,

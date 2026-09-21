@@ -43,14 +43,16 @@ const MsgAuditLog = ({ msg }: { msg: MessageItem }): ReactElement => {
         }
       />
 
-      <AuditRow
-        label="Created"
-        actionType="created"
-        address={proposedBy.value}
-        name={resolveName(proposedBy.value, proposedBy.name)}
-        timestamp={creationTimestamp}
-        isLast={confirmations.length === 0 && !isConfirmed}
-      />
+      {proposedBy && (
+        <AuditRow
+          label="Created"
+          actionType="created"
+          address={proposedBy.value}
+          name={resolveName(proposedBy.value, proposedBy.name)}
+          timestamp={creationTimestamp}
+          isLast={confirmations.length === 0 && !isConfirmed}
+        />
+      )}
 
       {confirmations.map(({ owner }, idx) => (
         <AuditRow

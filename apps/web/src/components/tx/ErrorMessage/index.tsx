@@ -1,7 +1,6 @@
-import { type ReactElement, type ReactNode, type SyntheticEvent, useState } from 'react'
+import { type ReactElement, type ReactNode } from 'react'
 import { getGsCodeFromError } from '@safe-global/utils/services/exceptions/contractErrors'
 import { getGuardErrorInfo, isRevertError } from '@/utils/transaction-errors'
-import { getCgwSupportCode } from '@/utils/cgw-errors'
 import { decodeCustomError } from '@/utils/customErrorRegistry'
 import { getBlockExplorerLink } from '@/utils/chains'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -10,11 +9,7 @@ import ExternalLink from '@/components/common/ExternalLink'
 import ErrorDetails from '@/components/common/ErrorDetails'
 import { getLedgerDeviceError, getLedgerSupportReference } from '@/services/onboard/ledger-errors'
 import { Alert, AlertDescription, AlertTitle, AlertSeverityIcon } from '@/components/ui/alert'
-import { Typography } from '@/components/ui/typography'
-import { Link } from '@/components/ui/link'
 import { cn } from '@/utils/cn'
-
-const ETHERS_PREFIX = 'could not coalesce error'
 
 const alertVariant: Record<'error' | 'warning' | 'info', 'destructive' | 'warning' | 'info'> = {
   error: 'destructive',
@@ -37,20 +32,14 @@ const ErrorMessage = ({
   title?: string
   context?: 'estimation' | 'execution'
 }): ReactElement => {
-  const [showDetails, setShowDetails] = useState<boolean>(false)
   const { safe } = useSafeInfo()
   const chain = useCurrentChain()
 
-  // On-chain (GS) errors show an always-visible, code-only support reference;
-  // every other error keeps its raw message behind the Details toggle, as
-  // before (WA-3005 is on-chain-scoped).
+  // No alert ever shows the raw payload: it is a dump of provider URLs, calldata, library
+  // versions and class names, and it goes to Sentry instead. An on-chain (GS) error and an
+  // unmapped Ledger state carry a code-only support reference (WA-3005 / WA-3243).
   const gsCode = error ? getGsCodeFromError(error) : undefined
 
-  // A Ledger device failure carries its own translated sentence, so the raw
-  // message must never be offered: by the time it reaches us it has been
-  // re-wrapped by ethers and viem and reads as a dump of class names, codes and
-  // library versions (WA-3243). An unmapped device state gets a support
-  // reference instead — the device's own words stay in telemetry.
   const ledgerError = error ? getLedgerDeviceError(error) : undefined
   const ledgerReference = ledgerError?.reason === 'unknown' ? getLedgerSupportReference(ledgerError) : undefined
 
@@ -62,20 +51,10 @@ const ErrorMessage = ({
     error && (gsCode === 'GS013' || (!gsCode && isRevertError(error))) ? decodeCustomError(error) : undefined
   const effectiveGsCode = gsCode ?? (customError ? 'GS013' : undefined)
 
-  // A known CGW response state (429/422/451/5xx) gets the same code-only
-  // support reference, so the raw response body — which can be a gateway's HTML
-  // error page — is never rendered in Details (WA-3252).
-  const supportCode = effectiveGsCode ?? (error ? getCgwSupportCode(error) : undefined)
-
   // Check if this is a Guard error that should get special treatment
   const guardErrorName = error && context ? getGuardErrorInfo(error) : undefined
   const guardExplorerLink =
     guardErrorName && safe.guard && chain ? getBlockExplorerLink(chain, safe.guard.value) : undefined
-
-  const onDetailsToggle = (e: SyntheticEvent) => {
-    e.preventDefault()
-    setShowDetails((prev) => !prev)
-  }
 
   return (
     <Alert
@@ -106,29 +85,12 @@ const ErrorMessage = ({
               </strong>
             </span>
           )}
-
-          {error && !supportCode && !ledgerError && (
-            <Link
-              render={<button type="button" />}
-              onClick={onDetailsToggle}
-              className={cn('block', guardErrorName && 'mt-1')}
-            >
-              Details
-            </Link>
-          )}
         </span>
 
-        {supportCode ? (
-          <ErrorDetails code={supportCode} customError={customError} />
-        ) : ledgerError ? (
-          ledgerReference && <ErrorDetails code={ledgerReference} />
+        {effectiveGsCode ? (
+          <ErrorDetails code={effectiveGsCode} customError={customError} />
         ) : (
-          error &&
-          showDetails && (
-            <Typography variant="paragraph-small" color="muted" className="mt-2 block break-words">
-              {error.message.replace(ETHERS_PREFIX, '').trim().slice(0, 500)}
-            </Typography>
-          )
+          ledgerReference && <ErrorDetails code={ledgerReference} />
         )}
       </AlertDescription>
     </Alert>

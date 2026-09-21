@@ -7,8 +7,6 @@ import { InfoDetails } from '@/components/transactions/InfoDetails'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { useIsRecoverer } from '../../hooks/useIsRecoverer'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { Errors } from '@/services/exceptions'
-import useLogError from '@/hooks/useLogError'
 import { getRecoveredSafeInfo } from '../../services/transaction-list'
 import type { RecoveryQueueItem } from '../../services/recovery-state'
 
@@ -17,30 +15,15 @@ export default function RecoveryDescription({ item }: { item: RecoveryQueueItem 
   const { safe } = useSafeInfo()
   const isRecoverer = useIsRecoverer()
 
-  // The failure is carried out of the memo rather than reported inside it:
-  // `safe.owners` is a new array on every safe-info refresh, so the memo
-  // re-evaluates — and re-throws — for reasons that have nothing to do with the
-  // proposal, and this component renders once per queued proposal.
-  const { newSetup, recoveryError } = useMemo<{
-    newSetup?: ReturnType<typeof getRecoveredSafeInfo>
-    recoveryError?: unknown
-  }>(() => {
-    try {
-      return {
-        newSetup: getRecoveredSafeInfo(safe, {
-          to: args.to,
-          value: args.value.toString(),
-          data: args.data,
-        }),
-      }
-    } catch (e) {
-      return { recoveryError: e }
-    }
+  // Keyed on the owner addresses, not the array: a safe-info refresh rebuilds the array.
+  const ownersKey = safe.owners.map((owner) => owner.value).join(',')
+
+  const newSetup = useMemo(
+    () => getRecoveredSafeInfo(safe, { to: args.to, value: args.value.toString(), data: args.data }),
     // We only render the threshold and owners
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [args.data, args.to, args.value, safe.threshold, safe.owners])
-
-  useLogError(Errors._811, recoveryError)
+    [args.data, args.to, args.value, safe.threshold, ownersKey],
+  )
 
   if (isMalicious) {
     return (

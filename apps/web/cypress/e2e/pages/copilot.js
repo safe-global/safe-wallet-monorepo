@@ -296,6 +296,7 @@ export function verifyRiskConfirmationCheckboxUnchecked() {
 // Check the risk confirmation checkbox
 export function checkRiskConfirmationCheckbox() {
   cy.get(riskConfirmationCheckbox).scrollIntoView().find('[role="checkbox"]').click()
+  cy.get(riskConfirmationCheckbox).find('[role="checkbox"]').should('have.attr', 'aria-checked', 'true')
 }
 
 //Verify continue button is disabled

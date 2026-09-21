@@ -164,7 +164,7 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
 
   if (safeTxHasSignatures) {
     return (
-      <ModalDialog open={open} onClose={onCancel} dialogTitle="Speed up transaction">
+      <ModalDialog open={open} onClose={onCancel} dialogTitle="Speed up transaction" forceBackdrop>
         <div className="p-6">
           <div className="mb-4 flex items-center justify-center">
             <RocketSpeedup className="size-[90px]" />
@@ -213,7 +213,7 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
   }
 
   return (
-    <ModalDialog open={open} onClose={handleClose} dialogTitle="Speed up transaction">
+    <ModalDialog open={open} onClose={handleClose} dialogTitle="Speed up transaction" forceBackdrop>
       <div className="p-6">
         <div className="mb-4 flex items-center justify-center">
           <RocketSpeedup className="size-[90px]" />
