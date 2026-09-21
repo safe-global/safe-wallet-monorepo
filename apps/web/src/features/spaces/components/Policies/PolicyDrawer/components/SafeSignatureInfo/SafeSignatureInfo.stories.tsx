@@ -52,3 +52,10 @@ export const ThresholdReached: Story = {
     signatures: 3,
   },
 }
+
+/** The signing failed or lapsed — the progress is stalled, not in flight. */
+export const Failed: Story = {
+  args: {
+    badgeVariant: 'destructive',
+  },
+}

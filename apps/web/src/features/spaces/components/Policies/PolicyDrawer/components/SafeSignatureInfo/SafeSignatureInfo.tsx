@@ -15,6 +15,8 @@ export type SafeSignatureInfoProps = {
   /** Signatures already collected, out of the Safe's threshold. */
   signatures: number
   label?: string
+  /** Overrides the progress tone — `destructive` once the collection failed or its window lapsed. */
+  badgeVariant?: 'warning' | 'destructive'
 }
 
 /** Row pairing a Safe with how far its signature collection has got. */
@@ -22,6 +24,7 @@ const SafeSignatureInfo = ({
   safe,
   signatures,
   label = 'Parent Safe account',
+  badgeVariant,
 }: SafeSignatureInfoProps): ReactElement => (
   <div className="flex w-full items-center justify-between gap-3 rounded-lg bg-muted p-3">
     <div className="flex min-w-0 items-center gap-1">
@@ -29,7 +32,7 @@ const SafeSignatureInfo = ({
         {label}
       </Typography>
       <Badge
-        variant={signatures >= safe.threshold ? 'success' : 'warning'}
+        variant={badgeVariant ?? (signatures >= safe.threshold ? 'success' : 'warning')}
         size="status"
         shape="status"
         data-testid="safe-signature-progress"

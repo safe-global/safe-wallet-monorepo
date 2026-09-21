@@ -17,8 +17,10 @@ export const PolicyVariantContent = (props: PolicyVariantContentProps): ReactEle
       return <PendingPolicy {...pendingProps} />
     }
 
-    case PolicyStatus.NOT_ACTIVATED:
-      return <NotActivatedPolicy />
+    case PolicyStatus.NOT_ACTIVATED: {
+      const { status, ...notActivatedProps } = props
+      return <NotActivatedPolicy {...notActivatedProps} />
+    }
 
     // A new status must pick a branch above rather than rendering an empty drawer.
     default: {

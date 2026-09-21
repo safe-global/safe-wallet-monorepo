@@ -19,19 +19,30 @@ const PENDING_PROPS = {
 } as const
 
 describe('PolicyDrawer', () => {
-  it('renders the not-activated variant content and status badge', () => {
+  it('renders the not-activated variant with why it failed and its stalled signatures', () => {
     render(
       <PolicyDrawer
         open
         onClose={jest.fn()}
         status={PolicyStatus.NOT_ACTIVATED}
-        actionLabel="Submit delegation"
+        description="The time window expired. Set the policy up again to retry."
+        safe={PENDING_PROPS.safe}
+        signatures={2}
+        expiresLabel="Expired"
+        overview={OVERVIEW}
+        actionLabel="Retry"
         onAction={jest.fn()}
       />,
     )
 
     expect(screen.getByText('Proposer role')).toBeInTheDocument()
-    expect(screen.getAllByText('Not activated')).toHaveLength(2)
+    expect(screen.getByText('Not activated')).toBeInTheDocument()
+    expect(screen.getByText('The proposer role was not activated')).toBeInTheDocument()
+    expect(screen.getByText('The time window expired. Set the policy up again to retry.')).toBeInTheDocument()
+    expect(screen.getByText('Expired')).toBeInTheDocument()
+    expect(screen.getByTestId('safe-signature-progress')).toHaveTextContent('2 of 3 signed')
+    expect(screen.getByText('Policy overview')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument()
   })
 
   it('renders the active variant as the policy overview alone', () => {

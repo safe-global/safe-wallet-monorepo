@@ -79,9 +79,29 @@ export const Pending: Story = {
   },
 }
 
-export const NotActivated: Story = {
+/** A signer turned the activation down — the window is still open, so retrying is worth it. */
+export const Rejected: Story = {
   args: {
     status: PolicyStatus.NOT_ACTIVATED,
-    actionLabel: 'Submit delegation',
+    actionLabel: 'Retry',
+    description:
+      'A signer of the parent Safe account, Ops, rejected the transaction. Set the policy up again to retry.',
+    safe: PARENT_SAFE,
+    signatures: 2,
+    expiresLabel: 'Expires in 1h 33 min',
+    overview: OVERVIEW,
+  },
+}
+
+/** Nobody rejected it; the signing window simply closed. */
+export const Expired: Story = {
+  args: {
+    status: PolicyStatus.NOT_ACTIVATED,
+    actionLabel: 'Retry',
+    description: 'The time window expired. Set the policy up again to retry.',
+    safe: PARENT_SAFE,
+    signatures: 2,
+    expiresLabel: 'Expired',
+    overview: OVERVIEW,
   },
 }

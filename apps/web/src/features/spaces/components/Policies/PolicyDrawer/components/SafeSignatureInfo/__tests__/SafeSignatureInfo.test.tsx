@@ -47,4 +47,16 @@ describe('SafeSignatureInfo', () => {
     expect(screen.getByText('Signing Safe account')).toBeInTheDocument()
     expect(screen.queryByText('Parent Safe account')).not.toBeInTheDocument()
   })
+
+  it('turns the progress green once the threshold is met', () => {
+    render(<SafeSignatureInfo safe={SAFE} signatures={3} />)
+
+    expect(screen.getByTestId('safe-signature-progress')).toHaveAttribute('data-variant', 'success')
+  })
+
+  it('marks stalled progress as failed rather than in-flight', () => {
+    render(<SafeSignatureInfo safe={SAFE} signatures={2} badgeVariant="destructive" />)
+
+    expect(screen.getByTestId('safe-signature-progress')).toHaveAttribute('data-variant', 'destructive')
+  })
 })
