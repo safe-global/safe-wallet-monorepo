@@ -1,9 +1,11 @@
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { PROPOSER_INTRO_SEEN_KEY } from '../ProposerIntroDialog/constants'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from '../SpendingLimitIntroDialog/constants'
 import Policies from '../index'
+import SpendingLimitFlow from '../SpendingLimitFlow'
 
 let mockHasSeenSpendingLimitIntro: boolean | undefined = false
 let mockHasSeenProposerIntro: boolean | undefined = false
@@ -17,6 +19,12 @@ jest.mock('@/services/local-storage/useLocalStorage', () => ({
       ? [mockHasSeenProposerIntro, mockSetHasSeenProposerIntro]
       : [mockHasSeenSpendingLimitIntro, mockSetHasSeenSpendingLimitIntro],
   ),
+}))
+
+// The flow pulls in the protocol-kit initialiser; the page test only needs the flow's identity.
+jest.mock('../SpendingLimitFlow', () => ({
+  __esModule: true,
+  default: () => <div data-testid="spending-limit-flow" />,
 }))
 
 const mockUseLocalStorage = jest.mocked(useLocalStorage)
@@ -217,5 +225,38 @@ describe('Policies', () => {
 
     expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument()
     expect(screen.queryByTestId('spending-limit-intro-dialog')).not.toBeInTheDocument()
+  })
+
+  describe('starting the spending limit flow', () => {
+    const renderWithTxModal = () => {
+      const setTxFlow = jest.fn()
+      const value: TxModalContextType = { txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }
+      const utils = renderWithUserEvent(
+        <TxModalContext.Provider value={value}>
+          <Policies />
+        </TxModalContext.Provider>,
+      )
+      return { ...utils, setTxFlow }
+    }
+
+    it('opens the flow when the intro is confirmed', async () => {
+      const { user, setTxFlow } = renderWithTxModal()
+
+      await user.click(screen.getByRole('button', { name: /Spending limit/ }))
+      await user.click(screen.getByRole('button', { name: 'Set up spending limit' }))
+
+      expect(setTxFlow).toHaveBeenCalledTimes(1)
+      expect(setTxFlow.mock.calls[0][0]).toMatchObject({ type: SpendingLimitFlow })
+    })
+
+    it('opens the flow straight from the tile once the intro has been shown', async () => {
+      mockHasSeenSpendingLimitIntro = true
+      const { user, setTxFlow } = renderWithTxModal()
+
+      await user.click(screen.getByRole('button', { name: /Spending limit/ }))
+
+      expect(setTxFlow).toHaveBeenCalledTimes(1)
+      expect(setTxFlow.mock.calls[0][0]).toMatchObject({ type: SpendingLimitFlow })
+    })
   })
 })
