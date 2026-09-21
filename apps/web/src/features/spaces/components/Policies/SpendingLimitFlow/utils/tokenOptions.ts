@@ -38,6 +38,8 @@ export type TokenOption = {
   balance?: string
   /** Held tokens only. */
   fiatBalance?: string
+  /** Held tokens only: the fiat price of one whole token. */
+  fiatConversion?: string
 }
 
 export type NativeCurrencyInfo = {
@@ -66,6 +68,7 @@ const toHeldOption = (balance: Balance): TokenOption => ({
   group: 'held',
   balance: balance.balance,
   fiatBalance: balance.fiatBalance,
+  fiatConversion: balance.fiatConversion,
 })
 
 const toPopularOption = (token: PopularToken): TokenOption => ({
