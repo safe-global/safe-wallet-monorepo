@@ -1,37 +1,57 @@
-import type { ReactElement } from 'react'
-import { useRouter } from 'next/router'
+import { type ReactElement } from 'react'
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar'
 import { cn } from '@/utils/cn'
 import { AppRoutes } from '@/config/routes'
 import SafeLogo from '@/components/common/SafeLogo'
-import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
+import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
+import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
+import { useIsHydrated } from '@/hooks/useIsHydrated'
 
 export const SidebarTopBar = (): ReactElement => {
   const { state } = useSidebar()
   const isCollapsed = state === 'collapsed'
-  const router = useRouter()
-  const isRequireLoginEnabled = useIsRequireLoginEnabled() === true
+  const safeAddress = useSafeAddressFromUrl()
+  const isSpaceRoute = useIsSpaceRoute()
+  const isHydrated = useIsHydrated()
 
-  // Under the require-login gate, /welcome/spaces is the canonical landing page.
-  // Pointing at /welcome/accounts would round-trip through the route guard.
-  const logoHref = isRequireLoginEnabled
-    ? AppRoutes.welcome.spaces
-    : router.pathname === AppRoutes.welcome.accounts
-      ? AppRoutes.welcome.index
-      : AppRoutes.welcome.accounts
+  // Inside a space or an individual safe the logo turns into a "Home" label pill that returns to the
+  // top-level accounts view; elsewhere it stays a plain logo linking to that same view.
+  //
+  // Gated on hydration because both inputs are client-only: the safe address lives in a query param
+  // the server can't see during SSG (useSafeAddressFromUrl falls back to `location.search`), and the
+  // collapsed state comes from a cookie the sidebar reads on mount. Deciding the variant on the
+  // first pass disagrees with the server HTML and trips React's hydration check. Same outcome as
+  // dev's state+effect, without the extra render.
+  const isInSafeOrSpace = Boolean(safeAddress) || isSpaceRoute
+  const showHomeLabel = isHydrated && isInSafeOrSpace && !isCollapsed
+  const logoHref = AppRoutes.welcome.accounts
 
   return (
     <div
       data-testid="sidebar-top-bar"
       data-sidebar-state={state}
-      className={cn('relative w-full', isCollapsed ? 'min-h-16' : 'h-10')}
+      className={cn('relative w-full', isCollapsed ? 'min-h-15' : 'h-10')}
     >
-      <SafeLogo href={logoHref} data-testid="logo-container" className="absolute left-3 top-3 z-10" />
-      <SidebarTrigger
+      <SafeLogo
+        href={logoHref}
+        showHomeLabel={showHomeLabel}
+        data-testid="logo-container"
         className={cn(
-          'absolute z-10 shrink-0 cursor-pointer text-sidebar-foreground/65 hover:text-sidebar-foreground hover:bg-sidebar-accent',
+          'absolute z-10 top-1/2 -translate-y-1/2',
+          (showHomeLabel || isCollapsed) && 'shadow-xs',
+          showHomeLabel
+            ? 'left-0'
+            : isCollapsed
+              ? 'left-1/2 top-0 -translate-x-1/2 translate-y-0 size-9 rounded-md bg-sidebar-accent'
+              : 'left-3',
+        )}
+      />
+      <SidebarTrigger
+        size="icon"
+        className={cn(
+          'absolute z-10 shrink-0 cursor-pointer text-sidebar-foreground/65 hover:text-sidebar-foreground hover:secondary',
           'transition-[left,transform] duration-200 ease-linear',
-          isCollapsed ? 'left-1/2 top-10 -translate-x-1/2' : 'left-[calc(100%-2rem)] top-3',
+          isCollapsed ? 'left-1/2 top-[38px] -translate-x-1/2' : 'left-[calc(100%-2rem)] -top-2',
         )}
         data-testid="sidebar-trigger"
       />

@@ -3,6 +3,7 @@ import {
   formatAmount,
   formatCurrency,
   formatCurrencyPrecise,
+  formatCurrencyMinimal,
   percentageOfTotal,
 } from '@safe-global/utils/utils/formatNumber'
 
@@ -10,6 +11,29 @@ describe('formatNumber', () => {
   describe('formatAmountPrecise', () => {
     it('should format a number with a defined precision', () => {
       expect(formatAmountPrecise(1234.5678, 2)).toBe('1,234.57')
+    })
+
+    it('should preserve precision for high-precision decimal strings without float rounding', () => {
+      // 16000000000020475 wei formatted to 18 decimals. Round-tripping through a JS
+      // number (float64) would lose the last digit and yield ...20474.
+      expect(formatAmountPrecise('0.016000000000020475', 20)).toBe('0.016000000000020475')
+    })
+
+    it('should preserve precision for negative high-precision strings', () => {
+      expect(formatAmountPrecise('-0.016000000000020475', 20)).toBe('-0.016000000000020475')
+    })
+
+    it('should still format numeric string input', () => {
+      expect(formatAmountPrecise('1234.5678', 2)).toBe('1,234.57')
+    })
+
+    it('should return "NaN" for a non-numeric string', () => {
+      expect(formatAmountPrecise('not-a-number', 2)).toBe('NaN')
+    })
+
+    it('should return "NaN" for an empty or whitespace-only string', () => {
+      expect(formatAmountPrecise('', 2)).toBe('NaN')
+      expect(formatAmountPrecise('   ', 2)).toBe('NaN')
     })
   })
 
@@ -94,6 +118,36 @@ describe('formatNumber', () => {
     it('should return "NaN" for invalid number input', () => {
       const result = formatCurrencyPrecise('invalid-number', 'USD')
       expect(result).toBe('$NaN ')
+    })
+  })
+
+  describe('formatCurrencyMinimal', () => {
+    it('returns "< $0.01" for tiny positive values that round to zero', () => {
+      expect(formatCurrencyMinimal(0.001, 'USD')).toMatch(/^<\s.*0\.01$/)
+      expect(formatCurrencyMinimal(0.004, 'USD')).toMatch(/^<\s.*0\.01$/)
+    })
+
+    it('rounds normally at the 0.005 boundary', () => {
+      expect(formatCurrencyMinimal(0.005, 'USD')).toMatch(/0\.01$/)
+      expect(formatCurrencyMinimal(0.005, 'USD')).not.toMatch(/^</)
+    })
+
+    it('returns "$ 0.00" for exact zero (no "<" prefix)', () => {
+      expect(formatCurrencyMinimal(0, 'USD')).toMatch(/0\.00$/)
+      expect(formatCurrencyMinimal(0, 'USD')).not.toMatch(/^</)
+    })
+
+    it('preserves precision for larger values (always x.xx)', () => {
+      expect(formatCurrencyMinimal(1.23, 'USD')).toMatch(/1\.23$/)
+      expect(formatCurrencyMinimal(1234.56, 'USD')).toMatch(/1,234\.56$/)
+    })
+
+    it('respects the currency symbol', () => {
+      expect(formatCurrencyMinimal(0.001, 'EUR')).toMatch(/€/)
+    })
+
+    it('does not apply the "<" prefix to negative tiny values', () => {
+      expect(formatCurrencyMinimal(-0.001, 'USD')).not.toMatch(/^</)
     })
   })
 

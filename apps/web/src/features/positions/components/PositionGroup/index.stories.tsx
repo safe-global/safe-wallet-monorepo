@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper } from '@mui/material'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { PositionGroup } from './index'
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
@@ -92,7 +91,7 @@ const meta: Meta<typeof PositionGroup> = {
           settings: {
             currency: 'usd',
             hiddenTokens: {},
-            shortName: { copy: true, qr: true },
+            shortName: { qr: true },
             theme: {},
             env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
             signing: { onChainSigning: false, blindSigning: false },
@@ -100,9 +99,9 @@ const meta: Meta<typeof PositionGroup> = {
           },
         }}
       >
-        <Paper sx={{ padding: 2, maxWidth: 900 }}>
+        <div className="max-w-[900px] rounded-lg bg-card p-4">
           <Story />
-        </Paper>
+        </div>
       </StoreDecorator>
     ),
   ],

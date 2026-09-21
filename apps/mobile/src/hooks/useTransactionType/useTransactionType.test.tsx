@@ -20,7 +20,7 @@ describe('useTransactionType', () => {
       }),
     )
 
-    expect(result.current.text).toBe('Safe Account created')
+    expect(result.current.text).toBe('Safe account created')
   })
 
   it('should be a outgoing transfer transaction', () => {
@@ -149,6 +149,7 @@ describe('useTransactionType', () => {
           type: 'something else' as TransactionInfoType,
         }),
         safeAppInfo: {
+          id: 1,
           name: 'somename',
           url: 'http://google.com',
           logoUri: 'myurl.com',

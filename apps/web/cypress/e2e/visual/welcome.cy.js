@@ -8,14 +8,15 @@ describe('[VISUAL] Welcome page screenshots', { defaultCommandTimeout: 60000, ..
     mockVisualTestApis()
   })
 
-  it('[VISUAL] Screenshot welcome page', () => {
-    cy.visit(constants.welcomeUrl)
-    main.awaitVisualStability()
-  })
-
   it('[VISUAL] Screenshot accounts page with added safes', () => {
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set1)
     cy.visit(constants.welcomeAccountUrl)
+    main.awaitVisualStability()
+  })
+
+  it('[VISUAL] Screenshot spaces welcome signed-out page', () => {
+    cy.visit(constants.spacesUrl)
+    cy.contains('Sign in to your workspace').should('be.visible')
     main.awaitVisualStability()
   })
 })

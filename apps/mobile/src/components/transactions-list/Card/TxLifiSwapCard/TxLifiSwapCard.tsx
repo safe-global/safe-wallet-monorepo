@@ -4,16 +4,17 @@ import { ellipsis, formatValue } from '@/src/utils/formatters'
 import { TokenIcon } from '@/src/components/TokenIcon'
 import React from 'react'
 import { SwapTransactionInfo, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { SafeListItemProps } from '@/src/components/SafeListItem/SafeListItem'
 
-interface TxLifiSwapCardProps {
+type TxLifiSwapCardProps = {
   txInfo: SwapTransactionInfo
   bordered?: boolean
   inQueue?: boolean
   executionInfo?: Transaction['executionInfo']
   onPress: () => void
-}
+} & Partial<SafeListItemProps>
 
-export function TxLifiSwapCard({ txInfo, bordered, executionInfo, inQueue, onPress }: TxLifiSwapCardProps) {
+export function TxLifiSwapCard({ txInfo, bordered, executionInfo, inQueue, onPress, ...rest }: TxLifiSwapCardProps) {
   const fromAmountFormatted = formatValue(txInfo.fromAmount, txInfo.fromToken.decimals)
   const toAmountFormatted = formatValue(txInfo.toAmount, txInfo.toToken.decimals)
 
@@ -26,6 +27,7 @@ export function TxLifiSwapCard({ txInfo, bordered, executionInfo, inQueue, onPre
       bordered={bordered}
       onPress={onPress}
       inQueue={inQueue}
+      {...rest}
       leftNode={
         <Theme name="logo">
           <View position="relative" width="$8" height="$10">

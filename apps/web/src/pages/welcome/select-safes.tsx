@@ -9,7 +9,7 @@ const SelectSafesPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{`${BRAND_NAME} – Select Safes`}</title>
+        <title>{`${BRAND_NAME} – Select Safe accounts`}</title>
       </Head>
 
       <SelectSafesOnboarding />

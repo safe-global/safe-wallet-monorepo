@@ -1,4 +1,6 @@
 .txButton {
+  display: flex;
+  align-items: center;
   justify-content: flex-start;
   text-align: left;
   padding: var(--space-2);

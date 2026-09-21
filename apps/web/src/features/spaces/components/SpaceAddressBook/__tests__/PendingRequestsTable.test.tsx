@@ -1,0 +1,160 @@
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { faker } from '@faker-js/faker'
+import PendingRequestsTable from '../PendingRequestsTable'
+import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { Builder } from '@/tests/Builder'
+
+const mockUseIsMobile = jest.fn(() => false)
+jest.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
+jest.mock('@/hooks/useChains', () => () => ({ configs: [] }))
+jest.mock('@/features/spaces', () => ({
+  useCurrentSpaceId: () => '1',
+  useIsAdmin: () => true,
+  useGetSpaceAddressBook: () => [],
+}))
+const mockApprove = jest.fn()
+const mockReject = jest.fn()
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
+  useAddressBookRequestsApproveRequestV1Mutation: () => [mockApprove],
+  useAddressBookRequestsRejectRequestV1Mutation: () => [mockReject],
+}))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
+jest.mock('@/store', () => ({
+  useAppDispatch: () => jest.fn(),
+}))
+jest.mock('@/components/common/EthHashInfo', () => {
+  const EthHashInfo = ({
+    address,
+    highlight4bytes,
+    onlyName,
+  }: {
+    address: string
+    highlight4bytes?: boolean
+    onlyName?: boolean
+  }) => (
+    <span
+      data-testid="eth-hash-info"
+      data-highlight={String(Boolean(highlight4bytes))}
+      data-only-name={String(Boolean(onlyName))}
+    >
+      {address}
+    </span>
+  )
+  return EthHashInfo
+})
+jest.mock('@/components/common/Identicon', () => {
+  const Identicon = ({ address }: { address: string }) => <span data-testid="identicon" data-address={address} />
+  return Identicon
+})
+jest.mock('@/features/multichain', () => ({
+  NetworkLogosTooltip: ({ networks, trigger }: { networks: { chainId: string }[]; trigger?: React.ReactNode }) => (
+    <span data-testid="network-logos" data-count={networks.length}>
+      {trigger}
+    </span>
+  ),
+  NetworkLogosPill: ({ networks }: { networks: { chainId: string }[] }) => (
+    <span data-testid="network-logos-pill" data-count={networks.length} />
+  ),
+}))
+jest.mock('@/components/common/ChainIndicator', () => {
+  const ChainIndicator = () => <span data-testid="chain-indicator" />
+  return ChainIndicator
+})
+
+const requestBuilder = () =>
+  Builder.new<AddressBookRequestItemDto>().with({
+    id: faker.number.int(),
+    name: faker.person.fullName(),
+    address: faker.finance.ethereumAddress(),
+    chainIds: ['1'],
+    requestedBy: faker.finance.ethereumAddress(),
+  })
+
+describe('PendingRequestsTable', () => {
+  beforeEach(() => {
+    mockUseIsMobile.mockReturnValue(false)
+  })
+
+  it('truncates the name on desktop and wraps it on mobile, where the address column is gone', () => {
+    const name = 'A very long contact name that would overflow the Name column'
+    const request = requestBuilder().with({ name }).build()
+
+    const { unmount } = render(<PendingRequestsTable requests={[request]} />)
+    expect(screen.getByText(name)).toHaveClass('truncate')
+    expect(screen.getByText('Address')).toBeInTheDocument()
+    unmount()
+
+    mockUseIsMobile.mockReturnValue(true)
+    render(<PendingRequestsTable requests={[request]} />)
+    expect(screen.getByText(name)).not.toHaveClass('truncate')
+    expect(screen.queryByText('Address')).not.toBeInTheDocument()
+  })
+
+  it('moves the address under the name on mobile', () => {
+    mockUseIsMobile.mockReturnValue(true)
+    const request = requestBuilder().with({ requestedBy: faker.internet.email() }).build()
+
+    render(<PendingRequestsTable requests={[request]} />)
+
+    const nameCell = screen.getByText(request.name).closest('td')
+    expect(nameCell).toContainElement(screen.getByTestId('eth-hash-info'))
+    expect(screen.getByTestId('eth-hash-info')).toHaveTextContent(request.address)
+  })
+
+  it('renders a highlighted full address in the "Requested by" cell when requestedBy is an address', () => {
+    const requestedBy = faker.finance.ethereumAddress()
+    render(<PendingRequestsTable requests={[requestBuilder().with({ requestedBy }).build()]} />)
+
+    const requestedByCell = screen.getAllByTestId('eth-hash-info').find((el) => el.textContent === requestedBy)
+    expect(requestedByCell).toHaveAttribute('data-highlight', 'true')
+    expect(requestedByCell).toHaveAttribute('data-only-name', 'false')
+  })
+
+  it('renders the full email as plain text in the "Requested by" cell when requestedBy is an email', () => {
+    const requestedBy = faker.internet.email()
+    render(<PendingRequestsTable requests={[requestBuilder().with({ requestedBy }).build()]} />)
+
+    expect(screen.getByText(requestedBy)).toBeInTheDocument()
+    expect(screen.getAllByTestId('eth-hash-info').some((el) => el.textContent === requestedBy)).toBe(false)
+  })
+
+  describe('analytics', () => {
+    beforeEach(() => {
+      jest.clearAllMocks()
+    })
+
+    it('tracks an approved request', async () => {
+      mockApprove.mockResolvedValue({ data: {} })
+      render(<PendingRequestsTable requests={[requestBuilder().build()]} />)
+
+      await userEvent.click(screen.getByTestId('approve-request-btn'))
+
+      await waitFor(() => expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.ADDRESS_REQUEST_APPROVED))
+    })
+
+    it('tracks a rejected request', async () => {
+      mockReject.mockResolvedValue({ data: {} })
+      render(<PendingRequestsTable requests={[requestBuilder().build()]} />)
+
+      await userEvent.click(screen.getByTestId('reject-request-btn'))
+
+      await waitFor(() => expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.ADDRESS_REQUEST_REJECTED))
+    })
+
+    it('does not track when approving fails', async () => {
+      mockApprove.mockResolvedValue({ error: { status: 500 } })
+      render(<PendingRequestsTable requests={[requestBuilder().build()]} />)
+
+      await userEvent.click(screen.getByTestId('approve-request-btn'))
+
+      await waitFor(() => expect(mockApprove).toHaveBeenCalled())
+      expect(trackEvent).not.toHaveBeenCalled()
+    })
+  })
+})

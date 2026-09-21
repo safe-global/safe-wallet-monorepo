@@ -5,7 +5,7 @@ import * as useChains from '@/hooks/useChains'
 import * as store from '@/store'
 import * as balancesQueries from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import * as portfolioQueries from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
-import * as useCounterfactualBalances from '@/features/counterfactual/hooks'
+import * as useCounterfactualBalances from '@/features/counterfactual'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { chainBuilder } from '@/tests/builders/chains'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
@@ -156,7 +156,6 @@ describe('useLoadBalances', () => {
           currency: 'USD',
           hiddenTokens: {},
           shortName: {
-            copy: true,
             qr: true,
           },
           theme: {},
@@ -275,7 +274,6 @@ describe('useLoadBalances', () => {
             currency: 'USD',
             hiddenTokens: {},
             shortName: {
-              copy: true,
               qr: true,
             },
             theme: {},
@@ -452,7 +450,6 @@ describe('useLoadBalances', () => {
             currency: 'USD',
             hiddenTokens: {},
             shortName: {
-              copy: true,
               qr: true,
             },
             theme: {},
@@ -538,7 +535,6 @@ describe('useLoadBalances', () => {
             currency: 'USD',
             hiddenTokens: {},
             shortName: {
-              copy: true,
               qr: true,
             },
             theme: {},

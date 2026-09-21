@@ -1,6 +1,6 @@
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { memo, type ReactElement } from 'react'
-import { TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
+import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import { isCustomTxInfo, isMultiSendTxInfo, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import type { SafeTransactionData } from '@safe-global/types-kit'
 import { dateString } from '@safe-global/utils/utils/formatters'
@@ -8,11 +8,13 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { Receipt } from '@/components/tx/ConfirmTxDetails/Receipt'
 import DecodedData from '../TxData/DecodedData'
 import ColorCodedTxAccordion from '@/components/tx/ColorCodedTxAccordion'
-import { Box, Divider, Stack, Typography } from '@mui/material'
+import { Separator } from '@/components/ui/separator'
 import DecoderLinks from './DecoderLinks'
 import isEqual from 'lodash/isEqual'
 import Multisend from '../TxData/DecodedData/Multisend'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
+import { useLoadFeature } from '@/features/__core__'
+import { GTFFeature, useHistoryFeesBreakdown } from '@/features/gtf'
 
 interface Props {
   safeTxData?: SafeTransactionData
@@ -24,6 +26,17 @@ interface Props {
   showAuditLogFields?: boolean
 }
 
+// GTF (gas-token) fee breakdown for executed txs; the hook returns null when the
+// GTF feature is off, so this renders nothing on non-GTF chains.
+const HistoryFees = ({ txDetails }: { txDetails: TransactionDetails }): ReactElement | null => {
+  const { HistoryFeesAccordion } = useLoadFeature(GTFFeature)
+  const feesData = useHistoryFeesBreakdown(txDetails)
+
+  if (!feesData) return null
+
+  return <HistoryFeesAccordion data={feesData} txInfo={txDetails.txInfo} />
+}
+
 const Summary = ({
   safeTxData,
   txData,
@@ -33,7 +46,7 @@ const Summary = ({
   showDecodedData = true,
   showAuditLogFields = true,
 }: Props): ReactElement => {
-  const { executedAt } = txDetails ?? {}
+  const { txHash, executedAt } = txDetails ?? {}
   const customTxInfo = txInfo && isCustomTxInfo(txInfo) ? txInfo : undefined
   const toInfo = customTxInfo?.to || txData?.addressInfoIndex?.[txData?.to.value] || txData?.to
   const showDetails = Boolean(txInfo && txData)
@@ -68,31 +81,36 @@ const Summary = ({
 
       {showAuditLogFields && submittedAt && (
         <TxDataRow datatestid="tx-created-at" title="Created">
-          <Typography variant="body2" component="div">
-            {dateString(submittedAt)}
-          </Typography>
+          <div className="text-sm">{dateString(submittedAt)}</div>
         </TxDataRow>
       )}
 
       {showAuditLogFields && executedAt && (
         <TxDataRow datatestid="tx-executed-at" title="Executed">
-          <Typography variant="body2" component="div">
-            {dateString(executedAt)}
-          </Typography>
+          <div className="text-sm">{dateString(executedAt)}</div>
         </TxDataRow>
       )}
 
+      {showAuditLogFields && txHash && (
+        <TxDataRow datatestid="tx-hash" title="Transaction hash">
+          {generateDataRowValue(txHash, 'hash', true)}{' '}
+        </TxDataRow>
+      )}
+
+      {txDetails?.executedAt && <HistoryFees txDetails={txDetails} />}
+
       {showDetails && (
-        <Box mt={2}>
+        <div className="mt-4">
           <ColorCodedTxAccordion txInfo={txInfo} txData={txData}>
-            <Stack gap={1} divider={<Divider sx={{ mx: -2, my: 1 }} />}>
-              {showDecodedData && <DecodedData txData={txData} toInfo={toInfo} />}
+            <div className="flex flex-col gap-2">
+              {showDecodedData && (
+                <>
+                  <DecodedData txData={txData} toInfo={toInfo} />
+                  <Separator bleed="4" className="my-2" />
+                </>
+              )}
 
-              <Box>
-                <Typography variant="subtitle2" fontWeight={700} mb={2}>
-                  Advanced details
-                </Typography>
-
+              <div>
                 <DecoderLinks />
 
                 <Receipt
@@ -103,10 +121,10 @@ const Summary = ({
                   withSignatures
                   grid
                 />
-              </Box>
-            </Stack>
+              </div>
+            </div>
           </ColorCodedTxAccordion>
-        </Box>
+        </div>
       )}
     </>
   )

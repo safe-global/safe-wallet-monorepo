@@ -1,7 +1,7 @@
 import { AppRoutes } from '@/config/routes'
 import Link from 'next/link'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { MemberStatus, useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
+import { useIsAdmin } from '../../hooks/useSpaceMembers'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { getDeterministicColor } from '@/utils/colors'
 import { Card } from '@/components/ui/card'
@@ -37,11 +37,11 @@ export const SpaceSummaryNew = ({
   )
 }
 
+// TODO(spaces): staged successor to SpaceCard for the Spaces redesign — not yet wired into
+// SpacesList. Kept in sync with BE changes (UUID #8020, memberCount #8150).
 const SpaceCardNew = ({ space, isLink = true }: { space: GetSpaceResponse; isLink?: boolean }) => {
-  const { id, name, members, safeCount } = space
-  const numberOfMembers = members.filter((member) => member.status === MemberStatus.ACTIVE).length
-  const numberOfAccounts = safeCount
-  const isAdmin = useIsAdmin(id)
+  const { uuid, name, safeCount, memberCount } = space
+  const isAdmin = useIsAdmin(uuid)
 
   const logoColor = getDeterministicColor(name)
   const logoLetter = name.slice(0, 1).toUpperCase()
@@ -49,13 +49,14 @@ const SpaceCardNew = ({ space, isLink = true }: { space: GetSpaceResponse; isLin
   return (
     <Card
       data-testid="space-card-new"
+      // eslint-disable-next-line no-restricted-syntax -- bespoke 3-col card grid: tight gap-2 + p-4 padding (no CardContent slot); not a Card size
       className="relative grid grid-cols-[auto_1fr_auto] grid-rows-[auto_auto] gap-2 p-4"
       size="sm"
     >
       {isLink && (
         <Link
           className="absolute left-0 top-0 size-full"
-          href={{ pathname: AppRoutes.spaces.index, query: { spaceId: id } }}
+          href={{ pathname: AppRoutes.spaces.index, query: { spaceId: uuid } }}
           aria-label={`Go to ${name}`}
         />
       )}
@@ -66,7 +67,7 @@ const SpaceCardNew = ({ space, isLink = true }: { space: GetSpaceResponse; isLin
         </AvatarFallback>
       </Avatar>
 
-      <SpaceSummaryNew name={name} numberOfAccounts={numberOfAccounts} numberOfMembers={numberOfMembers} />
+      <SpaceSummaryNew name={name} numberOfAccounts={safeCount} numberOfMembers={memberCount} />
 
       {isAdmin && (
         <div className="relative z-10 col-start-3 flex items-start">

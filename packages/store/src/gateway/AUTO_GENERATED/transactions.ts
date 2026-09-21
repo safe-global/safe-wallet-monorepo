@@ -13,52 +13,6 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/chains/${queryArg.chainId}/transactions/${queryArg.id}` }),
         providesTags: ['transactions'],
       }),
-      transactionsGetDomainMultisigTransactionBySafeTxHashV1: build.query<
-        TransactionsGetDomainMultisigTransactionBySafeTxHashV1ApiResponse,
-        TransactionsGetDomainMultisigTransactionBySafeTxHashV1ApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/v1/chains/${queryArg.chainId}/multisig-transactions/${queryArg.safeTxHash}/raw`,
-        }),
-        providesTags: ['transactions'],
-      }),
-      transactionsGetDomainMultisigTransactionsV1: build.query<
-        TransactionsGetDomainMultisigTransactionsV1ApiResponse,
-        TransactionsGetDomainMultisigTransactionsV1ApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/v1/chains/${queryArg.chainId}/safes/${queryArg.safeAddress}/multisig-transactions/raw`,
-          params: {
-            failed: queryArg.failed,
-            modified__lt: queryArg.modifiedLt,
-            modified__gt: queryArg.modifiedGt,
-            modified__lte: queryArg.modifiedLte,
-            modified__gte: queryArg.modifiedGte,
-            nonce__lt: queryArg.nonceLt,
-            nonce__gt: queryArg.nonceGt,
-            nonce__lte: queryArg.nonceLte,
-            nonce__gte: queryArg.nonceGte,
-            nonce: queryArg.nonce,
-            safe_tx_hash: queryArg.safeTxHash,
-            to: queryArg.to,
-            value__lt: queryArg.valueLt,
-            value__gt: queryArg.valueGt,
-            value: queryArg.value,
-            executed: queryArg.executed,
-            has_confirmations: queryArg.hasConfirmations,
-            trusted: queryArg.trusted,
-            execution_date__gte: queryArg.executionDateGte,
-            execution_date__lte: queryArg.executionDateLte,
-            submission_date__gte: queryArg.submissionDateGte,
-            submission_date__lte: queryArg.submissionDateLte,
-            transaction_hash: queryArg.transactionHash,
-            ordering: queryArg.ordering,
-            limit: queryArg.limit,
-            offset: queryArg.offset,
-          },
-        }),
-        providesTags: ['transactions'],
-      }),
       transactionsGetMultisigTransactionsV1: build.query<
         TransactionsGetMultisigTransactionsV1ApiResponse,
         TransactionsGetMultisigTransactionsV1ApiArg
@@ -192,13 +146,6 @@ const injectedRtkApi = api
         }),
         providesTags: ['transactions'],
       }),
-      transactionsGetDomainCreationTransactionV1: build.query<
-        TransactionsGetDomainCreationTransactionV1ApiResponse,
-        TransactionsGetDomainCreationTransactionV1ApiArg
-      >({
-        query: (queryArg) => ({ url: `/v1/chains/${queryArg.chainId}/safes/${queryArg.safeAddress}/creation/raw` }),
-        providesTags: ['transactions'],
-      }),
     }),
     overrideExisting: false,
   })
@@ -210,43 +157,6 @@ export type TransactionsGetTransactionByIdV1ApiArg = {
   chainId: string
   /** Transaction ID (safe transaction hash or multisig transaction ID) */
   id: string
-}
-export type TransactionsGetDomainMultisigTransactionBySafeTxHashV1ApiResponse =
-  /** status 200  */ TxsMultisigTransaction
-export type TransactionsGetDomainMultisigTransactionBySafeTxHashV1ApiArg = {
-  chainId: string
-  safeTxHash: string
-}
-export type TransactionsGetDomainMultisigTransactionsV1ApiResponse = /** status 200  */ TxsMultisigTransactionPage
-export type TransactionsGetDomainMultisigTransactionsV1ApiArg = {
-  chainId: string
-  safeAddress: string
-  failed?: boolean
-  modifiedLt?: string
-  modifiedGt?: string
-  modifiedLte?: string
-  modifiedGte?: string
-  nonceLt?: number
-  nonceGt?: number
-  nonceLte?: number
-  nonceGte?: number
-  nonce?: number
-  safeTxHash?: string
-  to?: string
-  valueLt?: number
-  valueGt?: number
-  value?: number
-  executed?: boolean
-  hasConfirmations?: boolean
-  trusted?: boolean
-  executionDateGte?: string
-  executionDateLte?: string
-  submissionDateGte?: string
-  submissionDateLte?: string
-  transactionHash?: string
-  ordering?: string
-  limit?: number
-  offset?: number
 }
 export type TransactionsGetMultisigTransactionsV1ApiResponse =
   /** status 200 Paginated list of multisig transactions */ MultisigTransactionPage
@@ -385,11 +295,6 @@ export type TransactionsGetCreationTransactionV1ApiArg = {
   /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
 }
-export type TransactionsGetDomainCreationTransactionV1ApiResponse = /** status 200  */ TxsCreationTransaction
-export type TransactionsGetDomainCreationTransactionV1ApiArg = {
-  chainId: string
-  safeAddress: string
-}
 export type AddressInfo = {
   value: string
   name?: string | null
@@ -465,6 +370,9 @@ export type ChangeThreshold = {
 export type DeleteGuard = {
   type: 'DELETE_GUARD'
 }
+export type DeleteModuleGuard = {
+  type: 'DELETE_MODULE_GUARD'
+}
 export type DisableModule = {
   type: 'DISABLE_MODULE'
   module: AddressInfo
@@ -486,6 +394,10 @@ export type SetGuard = {
   type: 'SET_GUARD'
   guard: AddressInfo
 }
+export type SetModuleGuard = {
+  type: 'SET_MODULE_GUARD'
+  moduleGuard: AddressInfo
+}
 export type SwapOwner = {
   type: 'SWAP_OWNER'
   oldOwner: AddressInfo
@@ -500,11 +412,13 @@ export type SettingsChangeTransaction = {
     | ChangeMasterCopy
     | ChangeThreshold
     | DeleteGuard
+    | DeleteModuleGuard
     | DisableModule
     | EnableModule
     | RemoveOwner
     | SetFallbackHandler
     | SetGuard
+    | SetModuleGuard
     | SwapOwner
 }
 export type Erc20Transfer = {
@@ -895,6 +809,7 @@ export type ModuleExecutionDetails = {
   address: AddressInfo
 }
 export type SafeAppInfo = {
+  id: number
   name: string
   url: string
   logoUri?: string | null
@@ -925,46 +840,6 @@ export type TransactionDetails = {
   txHash?: string | null
   safeAppInfo?: SafeAppInfo | null
   note?: string | null
-}
-export type TxsMultisigTransaction = {
-  safe: string
-  to: string
-  value: string
-  data: object
-  /** Operation type: 0 for CALL, 1 for DELEGATE */
-  operation: Operation
-  gasToken: object
-  safeTxGas: object
-  baseGas: object
-  gasPrice: object
-  proposer: object
-  proposedByDelegate: object
-  refundReceiver: object
-  nonce: number
-  executionDate: object
-  submissionDate: string
-  modified: object
-  blockNumber: object
-  transactionHash: object
-  safeTxHash: string
-  executor: object
-  isExecuted: boolean
-  isSuccessful: object
-  ethGasPrice: object
-  gasUsed: object
-  fee: object
-  payment: object
-  origin: object
-  confirmationsRequired: number
-  confirmations: object
-  signatures: object
-  trusted: boolean
-}
-export type TxsMultisigTransactionPage = {
-  count?: number | null
-  next?: string | null
-  previous?: string | null
-  results: TxsMultisigTransaction[]
 }
 export type MultisigExecutionInfo = {
   type: 'MULTISIG'
@@ -1101,6 +976,21 @@ export type TransactionItemPage = {
   previous?: string | null
   results: (TransactionItem | DateLabel)[]
 }
+export type NestedTransactionDto = {
+  to?: string | null
+  value: string
+  data?: string | null
+  /** Operation type: 0 for CALL, 1 for DELEGATE */
+  operation: Operation
+  safeTxGas: string
+  baseGas: string
+  gasPrice: string
+  gasToken?: string | null
+  refundReceiver?: string | null
+  /** The nested Safe's nonce */
+  nonce: string
+  notes?: string | null
+}
 export type ProposeTransactionDto = {
   to: string
   value: string
@@ -1117,6 +1007,8 @@ export type ProposeTransactionDto = {
   sender: string
   signature?: string | null
   origin?: string | null
+  /** A child transaction for a second Safe, authorised by the parent transaction being an `approveHash` call committing to its hash. Unknown keys are rejected. */
+  nestedTransaction?: NestedTransactionDto | null
 }
 export type CreationTransaction = {
   created: string
@@ -1128,22 +1020,9 @@ export type CreationTransaction = {
   saltNonce?: string | null
   dataDecoded?: DataDecoded | null
 }
-export type TxsCreationTransaction = {
-  created: string
-  creator: string
-  transactionHash: string
-  factoryAddress: string
-  masterCopy: object
-  setupData: object
-  saltNonce: object
-}
 export const {
   useTransactionsGetTransactionByIdV1Query,
   useLazyTransactionsGetTransactionByIdV1Query,
-  useTransactionsGetDomainMultisigTransactionBySafeTxHashV1Query,
-  useLazyTransactionsGetDomainMultisigTransactionBySafeTxHashV1Query,
-  useTransactionsGetDomainMultisigTransactionsV1Query,
-  useLazyTransactionsGetDomainMultisigTransactionsV1Query,
   useTransactionsGetMultisigTransactionsV1Query,
   useLazyTransactionsGetMultisigTransactionsV1Query,
   useTransactionsDeleteTransactionV1Mutation,
@@ -1160,6 +1039,4 @@ export const {
   useTransactionsProposeTransactionV1Mutation,
   useTransactionsGetCreationTransactionV1Query,
   useLazyTransactionsGetCreationTransactionV1Query,
-  useTransactionsGetDomainCreationTransactionV1Query,
-  useLazyTransactionsGetDomainCreationTransactionV1Query,
 } = injectedRtkApi

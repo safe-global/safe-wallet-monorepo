@@ -3,24 +3,24 @@ import type { Delay } from '@gnosis.pm/zodiac'
 
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
-import { getRecoveryState } from '@/features/recovery/services/recovery-state'
+import { getRecoveryState } from '../../../services/recovery-state'
 import { chainBuilder } from '@/tests/builders/chains'
 import { addressExBuilder } from '@/tests/builders/safe'
 import { mockSafeInfo } from '@/tests/mocks/hooks'
 import { act, fireEvent, render, renderHook, waitFor } from '@/tests/test-utils'
 import { useRecoveryState } from '../useRecoveryState'
 import useTxHistory from '@/hooks/useTxHistory'
-import { getRecoveryDelayModifiers } from '@/features/recovery/services/delay-modifier'
+import { getRecoveryDelayModifiers } from '../../../services/delay-modifier'
 import { useAppDispatch } from '@/store'
 import type { Loadable } from '@/store/common'
 import { txHistorySlice } from '@/store/txHistorySlice'
-import { recoveryDispatch, RecoveryEvent, RecoveryTxType } from '@/features/recovery/services/recoveryEvents'
+import { recoveryDispatch, RecoveryEvent, RecoveryTxType } from '../../../services/recoveryEvents'
 import RecoveryContextHooks from '../RecoveryContextHooks'
 import { ConflictType } from '@safe-global/store/gateway/types'
 import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
-jest.mock('@/features/recovery/services/delay-modifier')
-jest.mock('@/features/recovery/services/recovery-state')
+jest.mock('../../../services/delay-modifier')
+jest.mock('../../../services/recovery-state')
 
 const mockGetRecoveryDelayModifiers = getRecoveryDelayModifiers as jest.MockedFunction<typeof getRecoveryDelayModifiers>
 const mockGetRecoveryState = getRecoveryState as jest.MockedFunction<typeof getRecoveryState>

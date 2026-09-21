@@ -1,15 +1,18 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./DateTime.stories Default 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <span
-    aria-label="Apr 8, 2024 - 5:05:29 AM"
-    class=""
-    data-mui-internal-clone-element="true"
+  <div
+    class="shadcn-scope"
   >
-    5:05 AM
-  </span>
+    <span
+      data-slot="tooltip-trigger"
+      id="base-ui-_r_1_"
+    >
+      5:05 AM
+    </span>
+  </div>
 </div>
 `;

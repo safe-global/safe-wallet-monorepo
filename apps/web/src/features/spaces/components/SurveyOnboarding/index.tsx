@@ -2,28 +2,17 @@ import { useEffect, useMemo, useState, type ReactElement } from 'react'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 import { useRouter } from 'next/router'
-import {
-  ArrowLeftRight,
-  BarChart3,
-  ChevronLeft,
-  ChevronRight,
-  FileCode,
-  HelpCircle,
-  Send,
-  Shield,
-  Sparkles,
-  type LucideIcon,
-} from 'lucide-react'
+import { ArrowLeftRight, BarChart3, FileCode, HelpCircle, Send, Shield, Sparkles, type LucideIcon } from 'lucide-react'
 import {
   useSurveysGetStateV1Query,
   useSurveysSubmitResponseV1Mutation,
-  type SurveyOption,
-} from '@safe-global/store/gateway/surveys'
+  type SurveyOptionDto,
+} from '@safe-global/store/gateway/AUTO_GENERATED/surveys'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { AppRoutes } from '@/config/routes'
-import { Button } from '@/components/ui/button'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import OnboardingFooter from '@/components/common/OnboardingFooter'
 import { Spinner } from '@/components/ui/spinner'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Typography } from '@/components/ui/typography'
 import {
   OnboardingLayout,
@@ -31,12 +20,16 @@ import {
   SafeAppMockup,
   deriveSidePanelAccountsFromSpace,
   useSafeNameLookup,
-} from '@/features/spaces/components/OnboardingLayout'
-import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
+} from '../OnboardingLayout'
+import { useSpaceSafes } from '../../hooks/useSpaceSafes'
 import { flattenSafeItems } from '@/hooks/safes'
 import SurveyOptionCard from './SurveyOptionCard'
 
 const ONBOARDING_STEP = 4
+// This step only renders when SPACE_ONBOARDING_SURVEY is on (the survey page
+// guards on the flag), so it is always the 4th of 4 steps. The earlier steps,
+// which render regardless of the flag, derive their total from
+// useOnboardingStepCount() instead.
 const TOTAL_STEPS = 4
 const SURVEY_SLUG = 'onboarding'
 
@@ -67,7 +60,7 @@ const SurveyOnboarding = (): ReactElement | null => {
     { spaceId: spaceId ?? '', slug: SURVEY_SLUG },
     { skip: !spaceId },
   )
-  const { data: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !spaceId })
+  const { data: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !spaceId })
   const { allSafes: spaceSafes } = useSpaceSafes()
   const nameLookup = useSafeNameLookup()
   const sidePanelAccounts = useMemo(
@@ -112,7 +105,7 @@ const SurveyOnboarding = (): ReactElement | null => {
     const selections = Array.from(selected).sort()
     try {
       await submit({
-        spaceId,
+        spaceId: spaceId ?? '',
         slug: SURVEY_SLUG,
         submitSurveyResponseDto: { selections: { [page.id]: selections } },
       }).unwrap()
@@ -139,13 +132,14 @@ const SurveyOnboarding = (): ReactElement | null => {
 
       {error && !isNotFoundError(error) && (
         <Alert variant="destructive">
+          <AlertSeverityIcon variant="destructive" />
           <AlertDescription>Failed to load survey. Please refresh.</AlertDescription>
         </Alert>
       )}
 
       {page?.options && (
         <div className="grid auto-rows-fr grid-cols-2 gap-3 xl:grid-cols-3">
-          {page.options.map((opt: SurveyOption) => (
+          {page.options.map((opt: SurveyOptionDto) => (
             <SurveyOptionCard
               key={opt.key}
               option={opt}
@@ -159,6 +153,7 @@ const SurveyOnboarding = (): ReactElement | null => {
 
       {submitError && (
         <Alert variant="destructive">
+          <AlertSeverityIcon variant="destructive" />
           <AlertDescription>Failed to submit. Please try again.</AlertDescription>
         </Alert>
       )}
@@ -166,34 +161,16 @@ const SurveyOnboarding = (): ReactElement | null => {
   )
 
   const footer = (
-    <div className="flex flex-col-reverse gap-3 xl:flex-row xl:items-center">
-      <Button
-        type="button"
-        variant="ghost"
-        onClick={goBack}
-        disabled={isSubmitting}
-        className="w-full h-12 rounded-lg bg-muted hover:bg-border xl:flex-1"
-      >
-        <ChevronLeft className="size-4 mr-1" />
-        Back
-      </Button>
-      <Button
-        data-testid="survey-finish-button"
-        type="button"
-        disabled={!spaceId || selected.size === 0 || isSubmitting}
-        onClick={onFinish}
-        className="w-full h-12 rounded-lg text-base xl:flex-1"
-      >
-        {isSubmitting ? (
-          <Spinner />
-        ) : (
-          <>
-            Create Workspace
-            <ChevronRight className="size-4 ml-1" />
-          </>
-        )}
-      </Button>
-    </div>
+    <OnboardingFooter
+      onBack={goBack}
+      backDisabled={isSubmitting}
+      continueLabel="Create Workspace"
+      continueType="button"
+      onContinue={onFinish}
+      continueDisabled={!spaceId || selected.size === 0 || isSubmitting}
+      continueLoading={isSubmitting}
+      continueTestId="survey-finish-button"
+    />
   )
 
   return (

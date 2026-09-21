@@ -11,7 +11,7 @@ import { useAppSelector } from '@/store'
 import { selectCurrency, selectUndeployedSafes } from '@/store/slices'
 import { getSafeSetups, getSharedSetup, getDeviatingSetups } from '@/features/multichain/utils'
 import type { ScanContext } from '@/features/security/types'
-import type { SpaceSafeEntry, SelectedSafe } from '@/features/spaces/components/SecurityHub'
+import type { SpaceSafeEntry, SelectedSafe } from '../components/SecurityHub'
 
 export type OverviewData = {
   balanceUsd: number
@@ -117,7 +117,7 @@ const useSafeScanContext = (
     // transaction scanning) all default to false, producing wrong scanner results.
     if (!chain) return null
 
-    // Resolve deployer using the same logic as useMasterCopies + OutdatedMastercopyWarning
+    // Resolve deployer using the same logic as useMasterCopies + useMastercopyMigration
     const matchingMc = masterCopies?.find((mc) => sameAddress(mc.address, safeInfo.implementation.value))
     const isCircles = matchingMc?.version?.toLowerCase().includes('circles') ?? false
     const deployer: 'Gnosis' | 'Circles' | null = matchingMc ? (isCircles ? 'Circles' : 'Gnosis') : null

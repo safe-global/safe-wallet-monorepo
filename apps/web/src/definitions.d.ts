@@ -4,14 +4,6 @@ import type { BeamerConfig, BeamerMethods } from '@services/beamer/types'
 declare global {
   interface Window {
     isDesktop?: boolean
-    ethereum?: {
-      autoRefreshOnNetworkChange: boolean
-      isMetaMask: boolean
-      _metamask: {
-        isUnlocked: () => Promise<boolean>
-      }
-      isConnected?: () => boolean
-    }
     beamer_config?: BeamerConfig
     Beamer?: BeamerMethods
     dataLayer?: any[]
@@ -35,12 +27,6 @@ declare global {
     Calendly?: {
       initInlineWidget: (options: { url: string; parentElement: HTMLElement }) => void
     }
-  }
-}
-
-declare module '@mui/material/Button' {
-  interface ButtonPropsVariantOverrides {
-    danger: true
   }
 }
 

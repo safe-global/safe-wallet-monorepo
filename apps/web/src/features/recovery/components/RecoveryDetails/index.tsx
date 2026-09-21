@@ -1,4 +1,4 @@
-import { Link } from '@mui/material'
+import { Link } from '@/components/ui/link'
 import { useState } from 'react'
 import { Operation } from '@safe-global/store/gateway/types'
 import type { ReactElement } from 'react'
@@ -7,7 +7,7 @@ import { dateString } from '@safe-global/utils/utils/formatters'
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import RecoverySigners from '../RecoverySigners'
 import RecoveryDescription from '../RecoveryDescription'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import type { RecoveryQueueItem } from '../../services/recovery-state'
 
 import txDetailsCss from '@/components/transactions/TxDetails/styles.module.css'
 
@@ -34,7 +34,7 @@ export default function RecoveryDetails({ item }: { item: RecoveryQueueItem }): 
 
           {expiresAt !== null && <TxDataRow title="Expires:">{dateString(Number(expiresAt))}</TxDataRow>}
 
-          <Link onClick={toggleExpanded} component="button" variant="body1">
+          <Link render={<button type="button" />} onClick={toggleExpanded} className="cursor-pointer text-base">
             Advanced details
           </Link>
 

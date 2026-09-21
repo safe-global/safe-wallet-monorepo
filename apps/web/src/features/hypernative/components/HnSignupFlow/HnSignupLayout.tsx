@@ -1,4 +1,3 @@
-import { Grid2 } from '@mui/material'
 import type { ReactNode } from 'react'
 import css from './styles.module.css'
 
@@ -9,15 +8,13 @@ export type HnSignupLayoutProps = {
 
 const HnSignupLayout = ({ children, contentClassName }: HnSignupLayoutProps) => {
   return (
-    <Grid2 container className={css.container}>
+    <div className={`flex ${css.container}`}>
       {/* Left Column - Content */}
-      <Grid2 size="grow" className={contentClassName}>
-        {children}
-      </Grid2>
+      <div className={`grow ${contentClassName}`}>{children}</div>
 
       {/* Right Column - Background Image */}
-      <Grid2 className={css.backgroundColumn} />
-    </Grid2>
+      <div className={css.backgroundColumn} />
+    </div>
   )
 }
 

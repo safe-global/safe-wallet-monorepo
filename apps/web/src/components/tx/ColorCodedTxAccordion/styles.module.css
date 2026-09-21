@@ -1,0 +1,56 @@
+.item {
+  gap: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  /* Fill stays neutral so the block is never washed in colour; the tx type shows on the border. */
+  background-color: var(--card);
+  border: 1px solid var(--color-border-light);
+  box-shadow: none;
+}
+
+/* Same token as the BalanceChanges and gtf-fees cards that stack against this one, so the seam
+   between them stays one line. The tx-type tint rides the border only on hover and while open,
+   which is what the block had before #8040 made it unconditional. */
+.item:hover,
+.item:has([data-slot='accordion-item'][data-open]) {
+  border-color: var(--accordion-border-active);
+}
+
+.trigger {
+  min-height: 56px;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none;
+  background-color: transparent !important;
+}
+
+/* No hover fill: greying the panel made the nested "Advanced details" block blend into it. The
+   border shift above is the affordance instead. */
+.trigger:hover {
+  background-color: transparent !important;
+}
+
+/* Open row takes the tx-type tint. Child combinators: a descendant match would let an enclosing open
+   accordion tint this row while it is closed. */
+[data-slot='accordion-item'][data-open] > * > .trigger {
+  background-color: var(--accordion-fill-active) !important;
+}
+
+.content {
+  background-color: transparent;
+}
+
+/* Fill is a per-tx-level tint set inline (see TxInfoColors.background); no border, matching the
+   pre-shadcn chip which was a plain tinted label. */
+.methodChip {
+  border-color: transparent;
+}
+
+.divider {
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-2);
+  margin-left: calc(-1 * var(--space-2));
+  width: calc(100% + var(--space-4));
+}

@@ -1,15 +1,16 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper } from '@mui/material'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { _UpdateSafe } from './index'
-import { mockUpdateSafeTxData, mockUnknownContractTxData } from './mockData'
+import { MOCK_SAFE_ADDRESS, mockUpdateSafeTxData, mockUnknownContractTxData } from './mockData'
 import { faker } from '@faker-js/faker'
 
 // Seed faker for deterministic visual regression tests
 faker.seed(123)
 
 const meta = {
+  title: 'Components/TxFlow/ConfirmationViews/UpdateSafe',
   component: _UpdateSafe,
+  tags: ['autodocs', 'skip-visual-test'],
   parameters: {
     // Stories use faker for addresses which causes non-deterministic visual tests
     visualTest: { disable: true },
@@ -18,14 +19,13 @@ const meta = {
     (Story) => {
       return (
         <StoreDecorator initialState={{}}>
-          <Paper sx={{ padding: 2 }}>
+          <div className="rounded-lg bg-background p-4">
             <Story />
-          </Paper>
+          </div>
         </StoreDecorator>
       )
     },
   ],
-  tags: ['autodocs'],
 } satisfies Meta<typeof _UpdateSafe>
 
 export default meta
@@ -33,7 +33,8 @@ type Story = StoryObj<typeof meta>
 
 const mockSafeInfo = {
   safe: {
-    address: { value: faker.finance.ethereumAddress() },
+    // Must match mockUpdateSafeTxData.to — the upgrade call targets the Safe itself.
+    address: { value: MOCK_SAFE_ADDRESS },
     chainId: '1',
     nonce: 100,
     threshold: 2,
@@ -92,7 +93,8 @@ const mockL2Chain = {
 
 export const Default: Story = {
   args: {
-    safeInfo: mockSafeInfo,
+    // Old Safe (1.2.0) upgrading to the mocked 1.3.0 mastercopy.
+    safeInfo: mockOldSafeInfo,
     queueSize: '0',
     chain: mockChain,
     txData: mockUpdateSafeTxData,

@@ -1,0 +1,97 @@
+/* SafeAccountsTable's own layer on top of the `panel` table variant (ui/table.module.css): the
+   panel surface it draws for itself,
+   the NAME indent, the reorder grip's cell, and the address-poisoning similarity band. Applied
+   alongside the variant; selectors carry one unit more specificity than the shared ones they sit
+   next to, so neither file's order can decide the outcome. */
+
+/* Card container (non-embedded): a rounded panel on the paper surface. */
+.container {
+  width: 100%;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-background-paper);
+  border: 1px solid var(--color-border-light);
+  /* Keep the last row off the rounded bottom edge (the header already insets from the top). */
+  padding-bottom: 8px;
+}
+
+/* Transparent rather than `border: none`, so the 1px stays in the box and no column shifts. */
+.containerBorderless {
+  border-color: transparent;
+}
+
+/* Indent the NAME label over the account name rather than the avatar; a leading checkbox column
+   offsets the cell by 48px already. */
+.accounts thead tr th[data-name-head='default'] {
+  padding-left: 84px;
+}
+.accounts thead tr th[data-name-head='selection'] {
+  padding-left: 60px;
+}
+
+/* While reordering this cell hosts the 28px grip; start the avatar after it, not underneath. */
+.accounts tbody td:first-of-type[data-hosts-handle] {
+  padding-left: 28px;
+}
+
+/* Address-poisoning similarity band: a tinted card around a cluster of look-alike rows. Band rows
+   carry `data-no-hover`, so the shared hover pill leaves their fill alone. */
+
+.accounts {
+  --band-surface: var(--color-yellow-50);
+  --band-border: var(--color-yellow-500);
+}
+:global(.dark) .accounts {
+  --band-surface: var(--color-warning-background);
+  --band-border: var(--color-warning-main);
+}
+
+/* Border-box clip so the fill runs row to row. Never via border colours — they miter into the side
+   insets as spikes. */
+.accounts tbody tr[data-band-header] td,
+.accounts tbody tr[data-highlighted] td {
+  position: relative;
+  background-color: var(--band-surface);
+  background-clip: border-box;
+}
+
+/* Frame as an overlay so it carries the radius while the fill stays square: top/bottom on every
+   cell, sides on the outer ones. */
+.accounts tbody tr[data-highlighted] td::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-top: 1px solid var(--band-border);
+  border-bottom: 1px solid var(--band-border);
+}
+.accounts tbody tr[data-highlighted] td:first-of-type::before {
+  border-left: 1px solid var(--band-border);
+  border-top-left-radius: var(--radius-lg);
+  border-bottom-left-radius: var(--radius-lg);
+}
+.accounts tbody tr[data-highlighted] td:last-of-type::before {
+  border-right: 1px solid var(--band-border);
+  border-top-right-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--radius-lg);
+}
+
+/* clip-path, not border-radius — a radius cannot round an inset fill. Middle cells stay unclipped. */
+.accounts tbody tr[data-highlighted] td:first-of-type {
+  clip-path: inset(0 0 0 4px);
+}
+.accounts tbody tr[data-highlighted] td:last-of-type {
+  clip-path: inset(0 4px 0 0);
+}
+.accounts tbody tr[data-highlighted]:not(:has(+ tr[data-highlighted])) td:first-of-type {
+  clip-path: inset(0 0 0 4px round 0 0 0 var(--radius-lg));
+}
+.accounts tbody tr[data-highlighted]:not(:has(+ tr[data-highlighted])) td:last-of-type {
+  clip-path: inset(0 4px 0 0 round 0 0 var(--radius-lg) 0);
+}
+
+/* Band header: 3px gap above, 2px below, side insets — all in one clip. */
+.accounts tbody tr[data-band-header] td {
+  border-top: 3px solid transparent;
+  border-bottom: 2px solid transparent;
+  clip-path: inset(3px 4px 0 4px round var(--radius-lg) var(--radius-lg) 0 0);
+}

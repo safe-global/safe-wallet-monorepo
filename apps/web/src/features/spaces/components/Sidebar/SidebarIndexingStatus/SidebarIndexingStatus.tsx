@@ -14,7 +14,7 @@ type Status = 'synced' | 'slow' | 'outOfSync'
 
 const STATUS_LABEL: Record<Status, string> = {
   synced: 'Synced',
-  slow: 'Slow network',
+  slow: 'Network delays',
   outOfSync: 'Out of sync',
 }
 

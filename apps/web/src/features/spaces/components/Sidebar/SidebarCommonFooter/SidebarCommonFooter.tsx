@@ -15,11 +15,19 @@ import { CookieAndTermType, hasConsentFor } from '@/store/cookiesAndTermsSlice'
 import { openCookieBanner } from '@/store/popupSlice'
 import { BEAMER_SELECTOR } from '@/services/beamer'
 import { ApiCtaSidebar } from '../ApiCtaSidebar'
+import { SafeProFeature, useIsSafeProEnabled, useSafeProSidebarBannerDismissed } from '@/features/safe-pro-announcement'
+import { useLoadFeature } from '@/features/__core__'
 import { SidebarIndexingStatus } from '../SidebarIndexingStatus'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { LS_KEY } from '@/config/gateway'
 import HelpMenu from '@/components/common/HelpMenu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { useRouter } from 'next/router'
+import { AppRoutes } from '@/config/routes'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useHasFeature } from '@/hooks/useChains'
+import { OidcAuthFeature, useTwoFactorAwarenessDismissed } from '@/features/oidc-auth'
+import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
 
 export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?: boolean }): ReactElement => {
   const dispatch = useAppDispatch()
@@ -27,6 +35,34 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
   const isDarkMode = useDarkMode()
   const [isProdGateway = false, setIsProdGateway] = useLocalStorage<boolean>(LS_KEY)
   const [helpMenuAnchor, setHelpMenuAnchor] = useState<HTMLElement | null>(null)
+  const { SafeProSidebarBanner, $isReady: isSafeProLoaded, $error: safeProError } = useLoadFeature(SafeProFeature)
+  const {
+    WorkspaceTwoFactorAwarenessCard,
+    $isReady: isTwoFactorCardLoaded,
+    $error: twoFactorCardError,
+  } = useLoadFeature(OidcAuthFeature)
+  const isSafeProEnabled = useIsSafeProEnabled()
+  const { pathname } = useRouter()
+  const [isSafeProBannerDismissed, dismissSafeProBanner] = useSafeProSidebarBannerDismissed()
+  // A failed chunk counts as no banner: its stub then renders nothing for good.
+  const hasSafeProBanner = isSafeProEnabled && pathname !== AppRoutes.spaces.plans && !safeProError
+  const showSafeProBanner = hasSafeProBanner && !isSafeProBannerDismissed
+
+  const spaceId = useCurrentSpaceId()
+  // Own flag, separate from the 2FA feature itself, so the card can be switched off on its own.
+  const isTwoFactorCardEnabled = useHasFeature(FEATURES.TWO_FACTOR_AWARENESS_BANNER) === true
+  const [isTwoFactorCardDismissed, dismissTwoFactorCard] = useTwoFactorAwarenessDismissed()
+  // Continue needs a Workspace to link to, so the card waits until one is known.
+  const hasTwoFactorCard =
+    isTwoFactorCardEnabled &&
+    !isTwoFactorCardDismissed &&
+    !twoFactorCardError &&
+    spaceId !== null &&
+    pathname !== AppRoutes.spaces.settingsGeneral
+  // One slot, Safe Pro first: the 2FA card only takes it once the Safe Pro banner is gone.
+  const showTwoFactorCard = hasTwoFactorCard && !showSafeProBanner
+  // Both are lazy: their stubs render nothing, so opening the slot early leaves an empty box.
+  const isBannerPending = (showSafeProBanner && !isSafeProLoaded) || (showTwoFactorCard && !isTwoFactorCardLoaded)
 
   const onToggleGateway = (checked: boolean) => {
     setIsProdGateway(checked)
@@ -72,11 +108,41 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
       )}
 
       <SidebarMenu className="gap-0.5">
+        {!isBannerPending && (showSafeProBanner || showTwoFactorCard) && (
+          <SidebarMenuItem className="group-data-[collapsible=icon]:hidden">
+            {/* One grid cell for both, so nothing below moves when one gives way to the other. */}
+            <div className="mb-2 grid">
+              {hasSafeProBanner && (
+                <SafeProSidebarBanner
+                  className={cn('col-start-1 row-start-1', !showSafeProBanner && 'invisible')}
+                  onDismiss={dismissSafeProBanner}
+                />
+              )}
+              {hasTwoFactorCard && (
+                <WorkspaceTwoFactorAwarenessCard
+                  className={cn('col-start-1 row-start-1', !showTwoFactorCard && 'invisible')}
+                  spaceId={spaceId ?? undefined}
+                  onDismiss={dismissTwoFactorCard}
+                />
+              )}
+            </div>
+          </SidebarMenuItem>
+        )}
+
         <ApiCtaSidebar />
 
-        <SidebarMenuItem className={css.footerHelpRow}>
+        <SidebarMenuItem
+          className={cn(
+            css.footerHelpRow,
+            'group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-0.5',
+          )}
+        >
           <SidebarMenuButton
-            className={cn('h-9 min-w-0 flex-1 gap-3', css.sidebarInteractive, css.sidebarNavItem)}
+            className={cn(
+              'h-9 min-w-0 flex-1 gap-3 group-data-[collapsible=icon]:flex-none',
+              css.sidebarInteractive,
+              css.sidebarNavItem,
+            )}
             data-testid="list-item-need-help"
             onClick={handleHelpClick}
           >

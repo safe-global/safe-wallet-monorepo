@@ -32,8 +32,8 @@ jest.mock('../../SidebarTopBar', () => ({
   SidebarTopBar: () => <div data-testid="sidebar-top-bar" />,
 }))
 
-jest.mock('../../hooks/useSidebarHydrated', () => ({
-  useSidebarHydrated: () => mockUseSidebarHydrated(),
+jest.mock('@/hooks/useIsHydrated', () => ({
+  useIsHydrated: () => mockUseSidebarHydrated(),
 }))
 
 jest.mock('@/store', () => ({
@@ -89,8 +89,8 @@ describe('SpacesEnhancedSidebar', () => {
     mockUseRouter.mockReturnValue({ query: { spaceId: '1' } })
     mockUseIsSpaceRoute.mockReturnValue(true)
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
-    mockUseSpacesGetV1Query.mockReturnValue({ currentData: [{ id: 1, name: 'Core Space' }] })
-    mockGetNonDeclinedSpaces.mockReturnValue([{ id: 1, name: 'Core Space' }])
+    mockUseSpacesGetV1Query.mockReturnValue({ currentData: [{ id: 1, uuid: '1', name: 'Core Space' }] })
+    mockGetNonDeclinedSpaces.mockReturnValue([{ id: 1, uuid: '1', name: 'Core Space' }])
     mockUseIsQualifiedSafe.mockReturnValue(false)
   })
 

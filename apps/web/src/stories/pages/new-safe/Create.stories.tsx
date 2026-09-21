@@ -5,7 +5,7 @@ import CreateSafe from '@/pages/new-safe/create'
 
 /**
  * Create Safe page - simple Safe creation flow.
- * Guides users through creating a new Safe Account.
+ * Guides users through creating a new Safe account.
  */
 
 const defaultSetup = createMockStory({

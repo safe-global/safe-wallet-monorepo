@@ -159,7 +159,7 @@ export const waitForRelayedTx = (
             txId,
             chainId,
             safeAddress,
-            error: new Error('Relayed transaction reverted by EVM.'),
+            error: new Error('Relayed transaction reverted.'),
             groupKey,
           }),
         )

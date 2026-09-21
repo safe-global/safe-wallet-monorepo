@@ -66,6 +66,7 @@ export const createMockChain = (options: MockChainOptions = {}): Chain => {
       address: '',
       api: '',
     },
+    relayer: null,
   } as Chain
 }
 

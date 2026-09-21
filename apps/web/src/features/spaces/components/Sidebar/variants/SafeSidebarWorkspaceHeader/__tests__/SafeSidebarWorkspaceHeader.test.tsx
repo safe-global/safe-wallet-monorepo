@@ -3,9 +3,14 @@ import type { CSSProperties, ReactNode } from 'react'
 import { getDeterministicColor } from '@/utils/colors'
 import { SafeSidebarWorkspaceHeader } from '../SafeSidebarWorkspaceHeader'
 import type { SafeWorkspaceHeaderBackToSpace, SafeWorkspaceHeaderAddToWorkspace } from '../../../types'
-import { AppRoutes } from '@/config/routes'
 
 const spaceSelectorDropdownMock = jest.fn()
+
+const mockHandleBackToSpace = jest.fn()
+
+jest.mock('@/components/common/SpaceSafeBar/hooks/useSpaceBackLink', () => ({
+  useSpaceBackLink: () => ({ handleBackToSpace: mockHandleBackToSpace }),
+}))
 
 jest.mock('@/components/ui/dialog', () => ({
   Dialog: ({ children }: { children: ReactNode }) => <div data-testid="dialog-root">{children}</div>,
@@ -135,10 +140,24 @@ const createAddHeader = (
 const CURRENT_USER_ID = 7
 
 const adminMembers = [
-  { role: 'ADMIN' as const, status: 'ACTIVE' as const, name: '', invitedBy: null, user: { id: CURRENT_USER_ID } },
+  {
+    role: 'ADMIN' as const,
+    status: 'ACTIVE' as const,
+    name: '',
+    invitedBy: null,
+    inviteExpiresAt: null,
+    user: { id: CURRENT_USER_ID },
+  },
 ]
 const memberMembers = [
-  { role: 'MEMBER' as const, status: 'ACTIVE' as const, name: '', invitedBy: null, user: { id: CURRENT_USER_ID } },
+  {
+    role: 'MEMBER' as const,
+    status: 'ACTIVE' as const,
+    name: '',
+    invitedBy: null,
+    inviteExpiresAt: null,
+    user: { id: CURRENT_USER_ID },
+  },
 ]
 
 describe('SafeSidebarWorkspaceHeader', () => {
@@ -151,21 +170,21 @@ describe('SafeSidebarWorkspaceHeader', () => {
       render(
         <SafeSidebarWorkspaceHeader
           workspaceHeader={createBackHeader({
-            spaceName: 'My Safe Account',
+            spaceName: 'My Safe account',
             spaceInitial: 'M',
             spaceId: '123',
           })}
         />,
       )
 
-      expect(screen.getByText('My Safe Account')).toBeInTheDocument()
+      expect(screen.getByText('My Safe account')).toBeInTheDocument()
       expect(screen.getByText('Workspace')).toBeInTheDocument()
       expect(screen.getByText('M')).toBeInTheDocument()
       expect(screen.getByText('ChevronLeft')).toBeInTheDocument()
     })
 
     it('applies deterministic avatar color from space name', () => {
-      const spaceName = 'My Safe Account'
+      const spaceName = 'My Safe account'
 
       render(
         <SafeSidebarWorkspaceHeader
@@ -216,11 +235,11 @@ describe('SafeSidebarWorkspaceHeader', () => {
       expect(screen.getByText('U')).toBeInTheDocument()
     })
 
-    it('navigates to the correct Space when back button is clicked', () => {
+    it('delegates back navigation to useSpaceBackLink when the back button is clicked', () => {
       render(
         <SafeSidebarWorkspaceHeader
           workspaceHeader={createBackHeader({
-            spaceName: 'My Safe Account',
+            spaceName: 'My Safe account',
             spaceInitial: 'M',
             spaceId: '42',
           })}
@@ -229,10 +248,7 @@ describe('SafeSidebarWorkspaceHeader', () => {
 
       screen.getByTestId('back-to-space-button').click()
 
-      expect(mockRouterPush).toHaveBeenCalledWith({
-        pathname: AppRoutes.spaces.index,
-        query: { spaceId: '42' },
-      })
+      expect(mockHandleBackToSpace).toHaveBeenCalledTimes(1)
     })
 
     it('does not render add-to-workspace or dialog UI', () => {
@@ -261,7 +277,7 @@ describe('SafeSidebarWorkspaceHeader', () => {
     })
 
     it('renders SpaceSelectorDropdown when at least one space exists', () => {
-      const spaces = [{ id: 1, name: 'My Space', safeCount: 1, members: adminMembers }]
+      const spaces = [{ id: 1, uuid: 'uuid-1', name: 'My Space', safeCount: 1, members: adminMembers }]
       const onSpaceAdded = jest.fn()
 
       render(
@@ -288,8 +304,8 @@ describe('SafeSidebarWorkspaceHeader', () => {
 
     it('prefers SpaceSelectorDropdown over Dialog when multiple spaces exist', () => {
       const spaces = [
-        { id: 1, name: 'A', safeCount: 1, members: adminMembers },
-        { id: 2, name: 'B', safeCount: 0, members: memberMembers },
+        { id: 1, uuid: 'uuid-1', name: 'A', safeCount: 1, members: adminMembers },
+        { id: 2, uuid: 'uuid-2', name: 'B', safeCount: 0, members: memberMembers },
       ]
 
       render(<SafeSidebarWorkspaceHeader workspaceHeader={createAddHeader({ spaces })} />)
@@ -300,8 +316,8 @@ describe('SafeSidebarWorkspaceHeader', () => {
 
     it('renders SpaceSelectorDropdown even when the user is admin of zero spaces — rows handle the disabled state and tooltip', () => {
       const spaces = [
-        { id: 1, name: 'A', safeCount: 1, members: memberMembers },
-        { id: 2, name: 'B', safeCount: 0, members: memberMembers },
+        { id: 1, uuid: 'uuid-1', name: 'A', safeCount: 1, members: memberMembers },
+        { id: 2, uuid: 'uuid-2', name: 'B', safeCount: 0, members: memberMembers },
       ]
 
       render(<SafeSidebarWorkspaceHeader workspaceHeader={createAddHeader({ spaces })} />)
@@ -312,8 +328,8 @@ describe('SafeSidebarWorkspaceHeader', () => {
 
     it('renders SpaceSelectorDropdown when the user is admin of at least one space', () => {
       const spaces = [
-        { id: 1, name: 'A', safeCount: 1, members: memberMembers },
-        { id: 2, name: 'B', safeCount: 0, members: adminMembers },
+        { id: 1, uuid: 'uuid-1', name: 'A', safeCount: 1, members: memberMembers },
+        { id: 2, uuid: 'uuid-2', name: 'B', safeCount: 0, members: adminMembers },
       ]
 
       render(<SafeSidebarWorkspaceHeader workspaceHeader={createAddHeader({ spaces })} />)

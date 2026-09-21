@@ -1,13 +1,21 @@
 import { useState } from 'react'
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
+import type { SerializedError } from '@reduxjs/toolkit'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { type GetSpaceResponse, useSpacesUpdateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import { sanitizeName } from '@safe-global/utils/validation/names'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 export type UpdateSpaceFormData = {
   name: string
 }
 
-export const useUpdateSpace = (space: GetSpaceResponse | undefined) => {
+export const useUpdateSpace = (space: GetSpaceResponse | undefined, onSuccess?: () => void) => {
   const [error, setError] = useState<string>()
   const dispatch = useAppDispatch()
   const [updateSpace] = useSpacesUpdateV1Mutation()
@@ -20,7 +28,9 @@ export const useUpdateSpace = (space: GetSpaceResponse | undefined) => {
     }
 
     try {
-      await updateSpace({ id: space.id, updateSpaceDto: { name: data.name } }).unwrap()
+      await updateSpace({ id: space.uuid, updateSpaceDto: { name: sanitizeName(data.name) } }).unwrap()
+
+      trackEvent(SPACE_EVENTS.WORKSPACE_UPDATED, { [MixpanelEventParams.SOURCE]: 'name' })
 
       dispatch(
         showNotification({
@@ -29,9 +39,12 @@ export const useUpdateSpace = (space: GetSpaceResponse | undefined) => {
           groupKey: 'space-update-name',
         }),
       )
+
+      onSuccess?.()
     } catch (e) {
+      if (isElevationRequiredError(e)) return
       console.error(e)
-      setError('Error updating the workspace. Please try again.')
+      setError(getRtkQueryErrorMessage(e as FetchBaseQueryError | SerializedError))
     }
   }
 

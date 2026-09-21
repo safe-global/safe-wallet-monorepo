@@ -10,23 +10,24 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
 } from '@/components/ui/alert-dialog'
-import { Button } from '@/components/ui/button'
+import DialogActions from '@/components/common/DialogActions'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Typography } from '@/components/ui/typography'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { AppRoutes } from '@/config/routes'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 type Consequence = { variant: 'danger' | 'success'; text: string }
 
 const CONSEQUENCES: Consequence[] = [
   { variant: 'danger', text: 'Members lose access to this workspace immediately.' },
-  { variant: 'danger', text: 'Member list and Safe Account names are deleted.' },
-  { variant: 'success', text: 'Linked Safe Accounts keep working — only the workspace is removed.' },
+  { variant: 'danger', text: 'Member list and Safe account names are deleted.' },
+  { variant: 'success', text: 'Linked Safe accounts keep working — only the workspace is removed.' },
 ]
 
 const ConsequenceRow = ({ variant, text }: Consequence) => (
@@ -59,7 +60,7 @@ const DeleteSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undef
     setError(undefined)
 
     try {
-      await deleteSpace({ id: space.id }).unwrap()
+      await deleteSpace({ id: space.uuid }).unwrap()
       onClose()
 
       trackEvent({ ...SPACE_EVENTS.DELETE_SPACE })
@@ -73,6 +74,7 @@ const DeleteSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undef
 
       router.push({ pathname: AppRoutes.welcome.spaces })
     } catch (e) {
+      if (isElevationRequiredError(e)) return
       console.error(e)
       setError('Error deleting the workspace. Please try again.')
     }
@@ -111,22 +113,21 @@ const DeleteSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undef
 
         {error && (
           <Alert variant="destructive">
+            <AlertSeverityIcon variant="destructive" />
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
 
         <AlertDialogFooter>
-          <Button variant="ghost" onClick={onClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={onDelete}
-            disabled={!canConfirm}
-            data-testid="space-confirm-delete-button"
-          >
-            {isLoading ? 'Deleting…' : 'Delete workspace'}
-          </Button>
+          <DialogActions
+            onCancel={onClose}
+            confirmLabel="Delete workspace"
+            onConfirm={onDelete}
+            confirmDestructive
+            confirmDisabled={!canConfirm}
+            confirmLoading={isLoading}
+            confirmTestId="space-confirm-delete-button"
+          />
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

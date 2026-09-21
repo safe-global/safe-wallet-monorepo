@@ -10,6 +10,7 @@ const mockAcceptInvite = jest.fn()
 
 const mockSpace = spaceBuilder()
   .with({
+    uuid: '11111111-1111-1111-1111-111111111111',
     members: [
       spaceMemberBuilder()
         .with({ user: { id: 1 }, name: 'Test User' })
@@ -17,6 +18,12 @@ const mockSpace = spaceBuilder()
     ],
   })
   .build()
+
+// Cut the DialogActions -> CheckWallet -> safeCoreSDK -> chains.ts import chain (circular AppRoutes) in unit tests.
+jest.mock('@/components/common/CheckWallet', () => ({
+  __esModule: true,
+  default: ({ children }: { children: (ok: boolean) => unknown }) => children(true),
+}))
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
@@ -37,6 +44,8 @@ jest.mock('@/store', () => ({
 jest.mock('@/store/authSlice', () => ({
   isAuthenticated: jest.fn(),
 }))
+
+jest.mock('@/hooks/useDarkMode', () => ({ useDarkMode: () => false }))
 
 jest.mock('@/store/notificationsSlice', () => ({
   showNotification: (payload: unknown) => ({ type: 'notifications/show', payload }),
@@ -95,9 +104,39 @@ describe('AcceptInviteDialog tracking', () => {
     await waitFor(() => {
       expect(trackEvent).toHaveBeenCalledTimes(1)
       expect(trackEvent).toHaveBeenCalledWith(
-        { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_ACCEPTED, label: '42' },
-        { workspace_id: '42', user_id: 1 },
+        { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_ACCEPTED, label: '11111111-1111-1111-1111-111111111111' },
+        { workspace_id: '11111111-1111-1111-1111-111111111111', user_id: 1 },
       )
     })
+  })
+
+  it('bubbles the backend error message when accepting the invite fails', async () => {
+    mockAcceptInvite.mockResolvedValue({
+      error: { status: 422, data: { message: 'Name contains invalid characters' } },
+    })
+
+    render(<AcceptInviteDialog space={mockSpace} onClose={jest.fn()} />)
+
+    fireEvent.change(screen.getByTestId('name-input'), { target: { value: 'Test User' } })
+
+    const submitButton = screen.getByTestId('confirm-accept-invite-button')
+    await waitFor(() => expect(submitButton).not.toBeDisabled())
+    fireEvent.click(submitButton)
+
+    expect(await screen.findByText('Name contains invalid characters')).toBeInTheDocument()
+  })
+
+  it('falls back to a generic error when the backend provides no message', async () => {
+    mockAcceptInvite.mockResolvedValue({ error: { status: 500, data: {} } })
+
+    render(<AcceptInviteDialog space={mockSpace} onClose={jest.fn()} />)
+
+    fireEvent.change(screen.getByTestId('name-input'), { target: { value: 'Test User' } })
+
+    const submitButton = screen.getByTestId('confirm-accept-invite-button')
+    await waitFor(() => expect(submitButton).not.toBeDisabled())
+    fireEvent.click(submitButton)
+
+    expect(await screen.findByText(/Something went wrong \(500\)/)).toBeInTheDocument()
   })
 })

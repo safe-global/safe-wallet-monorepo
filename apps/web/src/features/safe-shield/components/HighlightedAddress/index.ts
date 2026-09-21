@@ -1,0 +1,1 @@
+export { HighlightedAddress } from './HighlightedAddress'

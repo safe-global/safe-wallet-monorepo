@@ -1,13 +1,23 @@
+import type { JsonRpcProvider } from 'ethers'
+import type { SerializedError } from '@reduxjs/toolkit'
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { AppDispatch } from '@/store'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import type { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
+import { isSmartContract } from '@/utils/wallets'
 import { cgwApi as counterfactualSafesApi } from '@safe-global/store/gateway/AUTO_GENERATED/counterfactual-safes'
 import { cgwApi as spacesApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { addOrUpdateSafe } from '@/store/addedSafesSlice'
+import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { toBackendDto } from './counterfactualSafeMapper'
 import { replayCounterfactualSafeDeployment } from './safeDeployment'
 import { enqueuePendingCfDelete } from '../store/pendingCfDeletesSlice'
+import { removeUndeployedSafe } from '../store/undeployedSafesSlice'
 import { showNotification } from '@/store/notificationsSlice'
-import { parseSpaceId } from '@/utils/spaces'
+import { normalizeSpaceId } from '@/utils/spaces'
+import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/constants'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 type PersistArgs = {
   chainId: string
@@ -24,10 +34,26 @@ type PersistArgs = {
    *  safe is not auto-attached to the space (the backend would reject the call
    *  with 403). The safe is still persisted at the user level. */
   isAdminOfActiveSpace: boolean
+  /** Number of safes already in the active space. When at `SAFE_ACCOUNTS_LIMIT`
+   *  the backend would reject the add; the safe is still persisted at the user
+   *  level and the user is informed via a toast. */
+  spaceSafeCount?: number
+  /** True when this call is one chain of a multi-chain creation batch. A space
+   *  limit rejection (400) then means the safe genuinely wasn't attached on this
+   *  chain, so we surface it as a failure (after rolling back the user-level
+   *  entry) instead of swallowing it as success. Single-create flows keep the
+   *  soft toast-and-succeed behavior. */
+  isMultiChainCreation?: boolean
+  /** Read-only provider for `chainId`, used to check the Safe isn't already
+   *  deployed. Must target `chainId`; when absent the check is skipped. */
+  provider?: JsonRpcProvider
   dispatch: AppDispatch
 }
 
-export type PersistResult = { ok: true } | { ok: false; error: Error }
+export type PersistResult =
+  | { ok: true; skipped?: 'already-deployed' }
+  /** `stepUpPending`: the step-up is taking over, so the caller shows nothing. */
+  | { ok: false; error: Error; stepUpPending?: true }
 
 /**
  * Single code path for creating a counterfactual safe: persist to backend
@@ -49,8 +75,26 @@ export const persistCounterfactualSafe = async ({
   spaceId,
   isUserAuthenticated,
   isAdminOfActiveSpace,
+  spaceSafeCount,
+  isMultiChainCreation,
+  provider,
   dispatch,
 }: PersistArgs): Promise<PersistResult> => {
+  // Client-side deploy check, unauth path only — authed users get a 409 from the
+  // backend instead (handled below). Skip without a provider; fail open on error.
+  if (provider && !isUserAuthenticated) {
+    let isDeployed = false
+    try {
+      isDeployed = await isSmartContract(safeAddress, provider)
+    } catch {
+      // Couldn't verify deployment — fail open and let the persist proceed.
+    }
+
+    if (isDeployed) {
+      return recoverAlreadyDeployed({ chainId, safeAddress, props, name, dispatch })
+    }
+  }
+
   // 1. Save to backend (blocking). Unauth users fall back to local-only —
   //    matches pre-backend-sync behavior and avoids creating orphan entries
   //    that can never be cleaned up server-side.
@@ -62,13 +106,19 @@ export const persistCounterfactualSafe = async ({
       }),
     )
     if ('error' in userResult) {
+      // CGW rejects an already-deployed Safe with 409. Treat it like the client
+      // guard: add the Safe to My accounts as deployed and skip CF creation,
+      // rather than surfacing it as a hard failure.
+      if (isConflict(userResult.error)) {
+        return recoverAlreadyDeployed({ chainId, safeAddress, props, name, dispatch })
+      }
       return { ok: false, error: toPersistError(userResult.error) }
     }
 
-    // Guard against persisted/legacy lastUsedSpace values that don't parse to
-    // a finite number — Number('abc') is NaN and would silently hit the API.
-    const numericSpaceId = parseSpaceId(spaceId)
-    if (numericSpaceId !== null) {
+    // Guard against persisted/legacy lastUsedSpace values that are empty or
+    // whitespace-only — pass any non-empty string through unchanged.
+    const resolvedSpaceId = normalizeSpaceId(spaceId)
+    if (resolvedSpaceId !== null) {
       if (!isAdminOfActiveSpace) {
         // Backend gates this endpoint on admin role and would 403. Inform the
         // user — the safe is still persisted at the user level above.
@@ -79,29 +129,71 @@ export const persistCounterfactualSafe = async ({
             message: 'Safe added to your accounts — ask an admin to add it to the workspace',
           }),
         )
+      } else if (spaceSafeCount !== undefined && spaceSafeCount >= SAFE_ACCOUNTS_LIMIT) {
+        // Space is full — the backend would reject the add. Skip it and keep the
+        // user-level safe so creation still succeeds, but tell the user it
+        // wasn't added to the workspace.
+        dispatch(
+          showNotification({
+            variant: 'info',
+            groupKey: 'cf-safe-space-limit',
+            message: `Safe created. This workspace is full (${SAFE_ACCOUNTS_LIMIT} Safes), so it wasn't added — switch to another workspace to add it there`,
+          }),
+        )
       } else {
         const spaceResult = await dispatch(
           spacesApi.endpoints.spaceSafesCreateV1.initiate({
-            spaceId: numericSpaceId,
+            spaceId: resolvedSpaceId,
             createSpaceSafesDto: { safes: [{ chainId, address: safeAddress }] },
           }),
         )
         if ('error' in spaceResult) {
-          // Roll back the user-level entry so the backend doesn't end up with
-          // a safe that the user "created" but failed to associate with their
-          // active space.
-          const rollbackResult = await dispatch(
-            counterfactualSafesApi.endpoints.counterfactualSafesDeleteV1.initiate({
-              deleteCounterfactualSafesDto: { safes: [{ chainId, address: safeAddress }] },
-            }),
-          )
-          if ('error' in rollbackResult) {
-            // Rollback also failed — orphan now exists server-side. Queue the
-            // cleanup so the next sign-in's sync flushes it, otherwise the GET
-            // would re-surface the orphan locally as "Not activated".
-            dispatch(enqueuePendingCfDelete({ chainId, address: safeAddress }))
+          // The user-level entry stays, so the replay after verification attaches a Safe that exists.
+          if (isElevationRequiredError(spaceResult.error)) {
+            return { ok: false, error: toSpaceError(spaceResult.error), stepUpPending: true }
           }
-          return { ok: false, error: new Error('Failed to add Safe Account to space') }
+          // Use case: another admin added Safes to the same workspace in the meantime.
+          // The cached count was stale and the backend returned 400.
+          // The Safe itself was still created, so keep it and show the warning.
+          if (isLimitRejection(spaceResult.error)) {
+            dispatch(
+              showNotification({
+                variant: 'info',
+                groupKey: 'cf-safe-space-limit',
+                message: toSpaceError(spaceResult.error).message,
+              }),
+            )
+            // In a multi-chain batch the safe genuinely wasn't attached on this
+            // chain. Roll back the user-level entry and report failure so the
+            // caller doesn't record this chain as successfully created.
+            if (isMultiChainCreation) {
+              const rollbackResult = await dispatch(
+                counterfactualSafesApi.endpoints.counterfactualSafesDeleteV1.initiate({
+                  deleteCounterfactualSafesDto: { safes: [{ chainId, address: safeAddress }] },
+                }),
+              )
+              if ('error' in rollbackResult) {
+                dispatch(enqueuePendingCfDelete({ chainId, address: safeAddress }))
+              }
+              return { ok: false, error: toSpaceError(spaceResult.error) }
+            }
+          } else {
+            // Roll back the user-level entry so the backend doesn't end up with
+            // a safe that the user "created" but failed to associate with their
+            // active space.
+            const rollbackResult = await dispatch(
+              counterfactualSafesApi.endpoints.counterfactualSafesDeleteV1.initiate({
+                deleteCounterfactualSafesDto: { safes: [{ chainId, address: safeAddress }] },
+              }),
+            )
+            if ('error' in rollbackResult) {
+              // Rollback also failed — orphan now exists server-side. Queue the
+              // cleanup so the next sign-in's sync flushes it, otherwise the GET
+              // would re-surface the orphan locally as "Not activated".
+              dispatch(enqueuePendingCfDelete({ chainId, address: safeAddress }))
+            }
+            return { ok: false, error: toSpaceError(spaceResult.error) }
+          }
         }
       }
     }
@@ -114,17 +206,60 @@ export const persistCounterfactualSafe = async ({
   return { ok: true }
 }
 
-const CONFLICT_MESSAGE =
-  'A counterfactual Safe with these parameters already exists on this chain. Please contact support if this is unexpected.'
+/**
+ * The Safe is already deployed, so store it as a regular deployed Safe in My
+ * accounts (not counterfactual, which shows "Not activated") and drop any stale
+ * undeployed entry.
+ */
+function recoverAlreadyDeployed({
+  chainId,
+  safeAddress,
+  props,
+  name,
+  dispatch,
+}: {
+  chainId: string
+  safeAddress: string
+  props: ReplayedSafeProps
+  name: string
+  dispatch: AppDispatch
+}): PersistResult {
+  dispatch(
+    addOrUpdateSafe({
+      safe: {
+        ...defaultSafeInfo,
+        chainId,
+        address: { value: safeAddress, name },
+        threshold: Number(props.safeAccountConfig.threshold),
+        owners: props.safeAccountConfig.owners.map((owner) => ({ value: owner })),
+      },
+    }),
+  )
+  dispatch(removeUndeployedSafe({ chainId, address: safeAddress }))
+  return { ok: true, skipped: 'already-deployed' }
+}
 
-function toPersistError(error: unknown): Error {
-  if (
-    typeof error === 'object' &&
-    error !== null &&
-    'status' in error &&
-    (error as { status?: unknown }).status === 409
-  ) {
-    return new Error(CONFLICT_MESSAGE)
-  }
-  return new Error('Failed to save Safe Account to backend')
+type BackendError = { status?: number; data?: { message?: string } }
+
+function isConflict(error: unknown): boolean {
+  return (error as BackendError)?.status === 409
+}
+
+function toSpaceError(error: FetchBaseQueryError | SerializedError | undefined): Error {
+  const fallback = 'Failed to add Safe account to workspace'
+  return new Error(error ? getRtkQueryErrorMessage(error) || fallback : fallback)
+}
+
+/** Matches the CGW limit message, e.g. "This space only allows a maximum of 40 safe accounts...".
+ *  Other 400s (validation, malformed payload) must keep the rollback path. */
+function isLimitRejection(error: unknown): boolean {
+  const { status, data } = (error as BackendError) ?? {}
+  return status === 400 && typeof data?.message === 'string' && /maximum of \d+/i.test(data.message)
+}
+
+function toPersistError(error: FetchBaseQueryError | SerializedError | undefined): Error {
+  // 409 (already deployed) is handled upstream via recoverAlreadyDeployed, so it
+  // never reaches here — any error at this point is a genuine persist failure.
+  const fallback = 'Failed to save Safe account to backend'
+  return new Error(error ? getRtkQueryErrorMessage(error) || fallback : fallback)
 }

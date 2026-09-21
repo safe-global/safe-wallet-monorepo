@@ -1,0 +1,50 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "types": ["vite/client", "jest", "@testing-library/jest-dom"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["../web/src/*"],
+      "@/public/*": ["../web/public/*"],
+      "@/storybook/*": ["../web/.storybook/*"],
+      "src/*": ["../web/src/*"],
+      "@safe-global/theme/*": ["../../packages/theme/src/*"],
+      "@safe-global/store/*": ["../../packages/store/src/*"],
+      "@safe-global/utils/*": ["../../packages/utils/src/*"],
+      "@safe-global/test/*": ["../../config/test/*"],
+      "@safe-global/safe-apps-sdk/dist/types/types/permissions": [
+        "../../node_modules/@safe-global/safe-apps-sdk/dist/types/types/permissions"
+      ],
+      "@gnosis.pm/zodiac/dist/cjs/types/Delay": ["../../node_modules/@gnosis.pm/zodiac/dist/cjs/types/Delay"],
+      "next/dist/client/resolve-href": ["./src/compat/next-resolve-href.ts"],
+      "next/router": ["./src/compat/next-router.tsx"],
+      "next/link": ["./src/compat/next-link.tsx"],
+      "next/head": ["./src/compat/next-head.tsx"],
+      "next/dynamic": ["./src/compat/next-dynamic.tsx"],
+      "next/image": ["./src/compat/next-image.tsx"],
+      "next/app": ["./src/compat/next-app.ts"],
+      "next/navigation": ["./src/compat/next-navigation.tsx"]
+    }
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "vite.config.ts",
+    "../web/src/definitions.d.ts",
+    "../web/src/components/theme/mui.d.ts"
+  ],
+  "exclude": ["node_modules", "dist", "cypress"]
+}

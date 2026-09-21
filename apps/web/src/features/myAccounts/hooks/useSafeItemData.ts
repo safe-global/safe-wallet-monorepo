@@ -8,7 +8,7 @@ import useChainId from '@/hooks/useChainId'
 import useWallet from '@/hooks/wallets/useWallet'
 import useOnceVisible from '@/hooks/useOnceVisible'
 import { useGetHref } from '@/hooks/safes'
-import { selectUndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
+import { selectUndeployedSafe } from '@/features/counterfactual/store'
 import { extractCounterfactualSafeSetup, isPredictedSafeProps } from '@/features/counterfactual/services'
 import { hasMultiChainAddNetworkFeature } from '@/features/multichain'
 import { selectAllAddressBooks } from '@/store/addressBookSlice'
@@ -87,6 +87,7 @@ export function useSafeItemData(safeItem: SafeItem, options?: UseSafeItemDataOpt
     name,
     href,
     safeOverview,
+    walletAddress,
 
     // Derived state
     isCurrentSafe,

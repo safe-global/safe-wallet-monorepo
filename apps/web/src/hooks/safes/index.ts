@@ -17,13 +17,16 @@ export {
   _buildMultiChainSafeItem,
   _getMultiChainAccounts,
   _getSingleChainAccounts,
+  _groupAndSort,
   flattenSafeItems,
 } from './useAllSafesGrouped'
 export { useSafesSearch } from './useSafesSearch'
 export { useGetHref } from './useGetHref'
 
 // Comparators/utilities
-export { getComparator, nameComparator, lastVisitedComparator } from './comparators'
+export { getComparator, nameComparator, lastVisitedComparator, manualComparator } from './comparators'
+export { useSafeOrderComparator } from './useSafeOrderComparator'
+export { useSaveManualOrder } from './useSaveManualOrder'
 
 // Types
 export type { SafeItem, SafeItems } from './useAllSafes'

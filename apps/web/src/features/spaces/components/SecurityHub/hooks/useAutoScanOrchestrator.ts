@@ -2,8 +2,8 @@ import { useEffect, useMemo, useRef } from 'react'
 import type { ScanResult } from '@/features/security/types'
 import type { useLoadFeature } from '@/features/__core__'
 import type { SecurityContract } from '@/features/security'
-import useAutoScan, { type AutoScanServices, type AutoScanState } from '@/features/spaces/hooks/useAutoScan'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import useAutoScan, { type AutoScanServices, type AutoScanState } from '../../../hooks/useAutoScan'
+import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
 import type { OverviewMap, SelectedSafe, SpaceSafeEntry } from '../types'
 
 type SecurityHandle = ReturnType<typeof useLoadFeature<SecurityContract>>

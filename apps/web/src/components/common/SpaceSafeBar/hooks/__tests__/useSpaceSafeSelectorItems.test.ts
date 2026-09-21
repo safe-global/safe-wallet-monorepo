@@ -72,6 +72,7 @@ import useChainId from '@/hooks/useChainId'
 import useChains from '@/hooks/useChains'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import { useAppSelector } from '@/store'
+import { selectUndeployedSafes } from '@/features/counterfactual/store'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useRouter } from 'next/router'
 
@@ -131,7 +132,9 @@ function setupDefaults(
   } = {},
 ) {
   ;(useSafeBarSafes as jest.Mock).mockReturnValue({
-    dropdownSafes: overrides.allSafes ?? [singleChainSafe],
+    workspaceSafes: [],
+    localSafes: overrides.allSafes ?? [singleChainSafe],
+    isInSpaceContext: false,
   })
   ;(useCurrentSpaceId as jest.Mock).mockReturnValue(overrides.spaceId ?? '42')
   ;(useSafeInfo as jest.Mock).mockReturnValue({
@@ -259,6 +262,62 @@ describe('useSpaceSafeSelectorItems', () => {
       chainName: 'Ethereum',
       shortName: 'eth',
     })
+  })
+
+  // ── read-only derived from overview owners (no owners-endpoint enumeration) ──
+
+  it('marks a safe read-only when the wallet is not among the overview owners', () => {
+    setupDefaults() // wallet 0xWallet, overview owners [0xOwner1]
+
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].chains[0].isReadOnly).toBe(true)
+  })
+
+  it('marks a safe writable when the wallet is among the overview owners', () => {
+    setupDefaults({
+      overviews: [
+        {
+          address: { value: '0xSafe1' },
+          chainId: '1',
+          fiatTotal: '5000',
+          threshold: 2,
+          owners: [{ value: '0xWallet' }],
+        },
+      ],
+    })
+
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].chains[0].isReadOnly).toBe(false)
+  })
+
+  it('treats a safe as read-only when no wallet is connected', () => {
+    setupDefaults({
+      overviews: [
+        {
+          address: { value: '0xSafe1' },
+          chainId: '1',
+          fiatTotal: '5000',
+          threshold: 2,
+          owners: [{ value: '0xWallet' }],
+        },
+      ],
+    })
+    ;(useWallet as jest.Mock).mockReturnValue(undefined)
+
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].chains[0].isReadOnly).toBe(true)
+  })
+
+  // Counterfactual safes have no overview; read-only falls back to the item's own flag, which stays
+  // correct without the owners enumeration.
+  it('falls back to the item read-only flag when no overview exists', () => {
+    setupDefaults({
+      allSafes: [{ ...singleChainSafe, isReadOnly: false }],
+      overviews: [],
+    })
+
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].chains[0].isReadOnly).toBe(false)
   })
 
   // ── balance and threshold from overview ──
@@ -429,6 +488,34 @@ describe('useSpaceSafeSelectorItems', () => {
     expect(result.current.items[0].owners).toBe(4)
   })
 
+  it('populates each chain row with its own threshold/owners from that chain overview', () => {
+    setupDefaults({
+      allSafes: [multiChainSafe],
+      safeAddress: '0xDifferentSafe',
+      overviews: [
+        {
+          address: { value: '0xSafe2' },
+          chainId: '1',
+          fiatTotal: '100',
+          threshold: 2,
+          owners: [{ value: '0x1' }, { value: '0x2' }],
+        },
+        {
+          address: { value: '0xSafe2' },
+          chainId: '137',
+          fiatTotal: '200',
+          threshold: 3,
+          owners: [{ value: '0x1' }, { value: '0x2' }, { value: '0x3' }],
+        },
+      ],
+    })
+
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    const chains = result.current.items[0].chains
+    expect(chains.find((c) => c.chainId === '1')).toMatchObject({ threshold: 2, owners: 2 })
+    expect(chains.find((c) => c.chainId === '137')).toMatchObject({ threshold: 3, owners: 3 })
+  })
+
   // ── toChainInfo fallback when chain config not found ──
 
   it('falls back to chainId for chainName and shortName when chain config is missing', () => {
@@ -523,7 +610,11 @@ describe('useSpaceSafeSelectorItems', () => {
       safeAddress: '0xAbCdEf',
     })
     ;(useSafeAddressFromUrl as jest.Mock).mockReturnValue('0xabcdef') // lowercase vs mixed-case in item
-    ;(useSafeBarSafes as jest.Mock).mockReturnValue({ dropdownSafes: [mixedCaseSafe] })
+    ;(useSafeBarSafes as jest.Mock).mockReturnValue({
+      workspaceSafes: [],
+      localSafes: [mixedCaseSafe],
+      isInSpaceContext: false,
+    })
 
     const { result } = renderHook(() => useSpaceSafeSelectorItems())
     // Should use live safe.threshold (3) not overview, proving case-insensitive match worked
@@ -631,5 +722,64 @@ describe('useSpaceSafeSelectorItems', () => {
     const { result } = renderHook(() => useSpaceSafeSelectorItems())
     expect(result.current.items[0].id).toBe('137:0xSafe2')
     expect(result.current.selectedItemId).toBe('137:0xSafe2')
+  })
+
+  // ── undeployed (counterfactual) status on single-chain safes ──
+
+  const mockUndeployedSafes = (undeployedSafes: Record<string, Record<string, { status: { status: string } }>>) => {
+    ;(useAppSelector as jest.Mock).mockImplementation((selector: unknown) =>
+      selector === selectUndeployedSafes ? undeployedSafes : 'usd',
+    )
+  }
+
+  it('marks a single-chain safe as undeployed when it has a counterfactual entry', () => {
+    setupDefaults({ overviews: [] as never[] })
+    mockUndeployedSafes({ '1': { '0xSafe1': { status: { status: 'AWAITING_EXECUTION' } } } })
+
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].chains[0].isUndeployed).toBe(true)
+    expect(result.current.items[0].chains[0].isActivating).toBe(false)
+  })
+
+  it('marks a single-chain safe as activating when its counterfactual status is not awaiting execution', () => {
+    setupDefaults({ overviews: [] as never[] })
+    mockUndeployedSafes({ '1': { '0xSafe1': { status: { status: 'PROCESSING' } } } })
+
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].chains[0].isUndeployed).toBe(true)
+    expect(result.current.items[0].chains[0].isActivating).toBe(true)
+  })
+
+  it('leaves a deployed single-chain safe as not undeployed', () => {
+    setupDefaults()
+    mockUndeployedSafes({})
+
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].chains[0].isUndeployed).toBe(false)
+  })
+
+  // ── undeployed status mapped per-chain on multi-chain safes ──
+
+  it('maps undeployed/activating status per chain for a multi-chain safe', () => {
+    setupDefaults({
+      allSafes: [multiChainSafe],
+      safeAddress: '0xSafe2',
+      currentChainId: '1',
+      overviews: [
+        { address: { value: '0xSafe2' }, chainId: '137', fiatTotal: '200', threshold: 1, owners: [{ value: '0xO' }] },
+      ],
+    })
+    // Chain '1' is undeployed and activating; chain '137' is deployed.
+    mockUndeployedSafes({ '1': { '0xSafe2': { status: { status: 'PROCESSING' } } } })
+
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    const chains = result.current.items[0].chains
+    const ethChain = chains.find((c) => c.chainId === '1')
+    const polygonChain = chains.find((c) => c.chainId === '137')
+
+    expect(ethChain?.isUndeployed).toBe(true)
+    expect(ethChain?.isActivating).toBe(true)
+    expect(polygonChain?.isUndeployed).toBe(false)
+    expect(polygonChain?.isActivating).toBe(false)
   })
 })

@@ -14,6 +14,6 @@ export type {
   SafeGrade,
 } from './data/scanners/types'
 export type { GradeSummary } from './data/scanners/utils'
-export type { StrengthLevel } from './data/securityScoring'
+export type { ScoreBand, ScoreBandDef } from './data/scoreBands'
 export type { SecurityGrade, CheckStatus, CheckResult } from './data/securityTypes'
 export type { CheckDef, CheckCategory } from './data/securityChecks'

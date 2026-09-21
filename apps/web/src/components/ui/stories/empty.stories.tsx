@@ -16,7 +16,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const AllVariants: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <div style={{ display: 'block' }}>
       <div style={{ marginBottom: '2rem' }}>
@@ -64,6 +64,30 @@ export const AllVariants: Story = {
         </div>
       </div>
 
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 className="mb-4 text-lg font-semibold">With Media (default variant)</h3>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, max-content))',
+            gap: '1.5rem',
+            justifyItems: 'start',
+          }}
+        >
+          <div style={{ width: '300px' }}>
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant="default">
+                  <Inbox className="size-12" />
+                </EmptyMedia>
+                <EmptyTitle>No notifications</EmptyTitle>
+                <EmptyDescription>Media without a background container.</EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          </div>
+        </div>
+      </div>
+
       <div>
         <h3 className="mb-4 text-lg font-semibold">With Content</h3>
         <div
@@ -87,8 +111,8 @@ export const AllVariants: Story = {
                 <button
                   style={{
                     padding: '0.5rem 1rem',
-                    background: 'var(--color-primary)',
-                    color: 'var(--color-primary-foreground)',
+                    background: 'var(--primary)',
+                    color: 'var(--primary-foreground)',
                     border: 'none',
                     borderRadius: '0.375rem',
                     cursor: 'pointer',

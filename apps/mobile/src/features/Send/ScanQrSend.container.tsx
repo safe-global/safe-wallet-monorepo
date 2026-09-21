@@ -1,20 +1,15 @@
 import React, { useCallback, useRef, useState } from 'react'
 import { Text } from 'tamagui'
 import { Code } from 'react-native-vision-camera'
-import { useRouter } from 'expo-router'
 import { useFocusEffect } from 'expo-router'
-import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
-import { isValidAddress } from '@safe-global/utils/utils/validation'
-import { useToastController } from '@tamagui/toast'
-import { ToastViewport } from '@tamagui/toast'
-import { QrCamera } from '@/src/components/Camera'
-import { useCameraPermissionFlow } from '@/src/components/Camera/useCameraPermissionFlow'
-import { useAppSelector } from '@/src/store/hooks'
-import { selectActiveChain } from '@/src/store/chains'
-
-function isChainMismatch(prefix: string | undefined, activeShortName: string | undefined): boolean {
-  return Boolean(prefix && activeShortName && prefix !== activeShortName)
-}
+import {
+  QrCamera,
+  ScanErrorOverlay,
+  resolveScannedAddress,
+  INVALID_ADDRESS_MESSAGE,
+  useCameraPermissionFlow,
+} from '@/src/components/Camera'
+import { useScannedAddressToSend } from './hooks/useScannedAddressToSend'
 
 const headingForPermission = (permission: ReturnType<typeof useCameraPermissionFlow>['permission']): string => {
   switch (permission) {
@@ -43,21 +38,24 @@ const bodyForPermission = (permission: ReturnType<typeof useCameraPermissionFlow
 }
 
 export function ScanQrSendContainer() {
-  const router = useRouter()
   const { permission, requestPermission, openSettings } = useCameraPermissionFlow()
   const hasScanned = useRef(false)
-  const toastForValueShown = useRef<Set<string>>(new Set())
   const [isCameraActive, setIsCameraActive] = useState(false)
-  const toast = useToastController()
-  const activeChain = useAppSelector(selectActiveChain)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const { warnChainMismatch, navigateToRecipient } = useScannedAddressToSend()
+
+  // Read the latest error inside the focus effect without listing it in deps (which would re-run the
+  // effect and fight the live state).
+  const errorRef = useRef(errorMessage)
+  errorRef.current = errorMessage
 
   const handleFocusEffect = useCallback(() => {
-    if (permission !== 'granted') {
-      return
+    // Arm the camera only when we can scan; don't wake it behind a visible error overlay (the user
+    // resumes via Try again). The cleanup is always registered so a blur pauses the camera regardless.
+    if (permission === 'granted' && !errorRef.current) {
+      setIsCameraActive(true)
+      hasScanned.current = false
     }
-
-    setIsCameraActive(true)
-    hasScanned.current = false
 
     return () => {
       setIsCameraActive(false)
@@ -66,46 +64,6 @@ export function ScanQrSendContainer() {
 
   useFocusEffect(handleFocusEffect)
 
-  const showInvalidAddressToast = useCallback(
-    (code: string) => {
-      if (toastForValueShown.current.has(code)) {
-        return
-      }
-
-      toastForValueShown.current.add(code)
-      toast.show('Not a valid address', {
-        native: false,
-        duration: 2000,
-      })
-    },
-    [toast],
-  )
-
-  const warnChainMismatch = useCallback(
-    (prefix: string | undefined) => {
-      const activeShortName = activeChain?.shortName
-
-      if (!isChainMismatch(prefix, activeShortName)) {
-        return
-      }
-
-      toast.show(`Address is for ${prefix}, but active chain is ${activeShortName}`, { native: false, duration: 3000 })
-    },
-    [activeChain?.shortName, toast],
-  )
-
-  const navigateToRecipient = useCallback(
-    (address: string) => {
-      hasScanned.current = true
-      setIsCameraActive(false)
-      router.dismissTo({
-        pathname: '/(send)/recipient',
-        params: { scannedAddress: address, scanTimestamp: Date.now().toString() },
-      })
-    },
-    [router],
-  )
-
   const onScan = useCallback(
     (codes: Code[]) => {
       if (codes.length === 0 || !isCameraActive || hasScanned.current) {
@@ -113,36 +71,52 @@ export function ScanQrSendContainer() {
       }
 
       const code = codes[0].value || ''
-      const { address, prefix } = parsePrefixedAddress(code)
+      const resolved = resolveScannedAddress(code)
 
-      if (!isValidAddress(address)) {
-        showInvalidAddressToast(code)
+      if (!resolved) {
+        // Surface the failure on the lens (camera off until Try again), mirroring the
+        // WalletConnect scanner, instead of a transient toast.
+        setErrorMessage(INVALID_ADDRESS_MESSAGE)
+        setIsCameraActive(false)
         return
       }
 
-      warnChainMismatch(prefix)
-      navigateToRecipient(address)
+      warnChainMismatch(resolved.prefix)
+      hasScanned.current = true
+      setIsCameraActive(false)
+      navigateToRecipient(resolved.address)
     },
-    [isCameraActive, showInvalidAddressToast, warnChainMismatch, navigateToRecipient],
+    [isCameraActive, warnChainMismatch, navigateToRecipient],
   )
 
   const handleActivateCamera = useCallback(() => {
     setIsCameraActive(true)
   }, [])
 
+  const onTryAgain = useCallback(() => {
+    setErrorMessage(null)
+    if (permission === 'granted') {
+      setIsCameraActive(true)
+    }
+  }, [permission])
+
   return (
-    <>
-      <QrCamera
-        permission={permission}
-        isCameraActive={isCameraActive}
-        onScan={onScan}
-        onActivateCamera={handleActivateCamera}
-        onRequestPermission={requestPermission}
-        onPressSettings={openSettings}
-        heading={headingForPermission(permission)}
-        footer={<Text textAlign="center">{bodyForPermission(permission)}</Text>}
-      />
-      <ToastViewport multipleToasts={false} left={0} right={0} />
-    </>
+    <QrCamera
+      permission={permission}
+      isCameraActive={isCameraActive}
+      onScan={onScan}
+      onActivateCamera={handleActivateCamera}
+      onRequestPermission={requestPermission}
+      onPressSettings={openSettings}
+      heading={errorMessage ? undefined : headingForPermission(permission)}
+      lensTone={errorMessage ? 'error' : 'neutral'}
+      dimLens={Boolean(errorMessage)}
+      centerOverlay={
+        errorMessage ? (
+          <ScanErrorOverlay message={errorMessage} onTryAgain={onTryAgain} testID="send-scan-try-again" />
+        ) : undefined
+      }
+      footer={<Text textAlign="center">{bodyForPermission(permission)}</Text>}
+    />
   )
 }

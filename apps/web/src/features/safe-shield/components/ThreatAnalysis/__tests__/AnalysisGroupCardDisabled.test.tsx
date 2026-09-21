@@ -38,51 +38,26 @@ describe('AnalysisGroupCardDisabled', () => {
     it('should render lock icon', () => {
       const { container } = render(<AnalysisGroupCardDisabled>Test</AnalysisGroupCardDisabled>)
 
-      // Check for SvgIcon component (MUI component that wraps the SVG)
-      const svgIcon = container.querySelector('.MuiSvgIcon-root')
-      expect(svgIcon).toBeInTheDocument()
+      // LockIcon is an SVGR component (mocked as the <lock-icon> element)
+      const lockIcon = container.querySelector('lock-icon')
+      expect(lockIcon).toBeInTheDocument()
     })
 
     it('should render keyboard arrow down icon', () => {
       const { container } = render(<AnalysisGroupCardDisabled>Test</AnalysisGroupCardDisabled>)
 
-      // KeyboardArrowDownIcon is rendered as MUI Icon
-      const icons = container.querySelectorAll('.MuiSvgIcon-root')
-      expect(icons.length).toBeGreaterThanOrEqual(1)
-    })
-  })
-
-  describe('Layout and Structure', () => {
-    it('should render with correct Stack layout', () => {
-      const { container } = render(<AnalysisGroupCardDisabled>Test content</AnalysisGroupCardDisabled>)
-
-      // Check for Stack components (MUI Stack renders as div with flex)
-      const stacks = container.querySelectorAll('.MuiStack-root')
-      expect(stacks.length).toBeGreaterThanOrEqual(1)
-    })
-
-    it('should have padding applied', () => {
-      const { container } = render(<AnalysisGroupCardDisabled>Test</AnalysisGroupCardDisabled>)
-
-      const mainStack = container.querySelector('.MuiStack-root')
-      expect(mainStack).toBeInTheDocument()
+      // ChevronDown is a lucide-react icon rendered as a plain <svg>
+      const chevron = container.querySelector('svg.lucide-chevron-down')
+      expect(chevron).toBeInTheDocument()
     })
   })
 
   describe('Typography', () => {
-    it('should render text with disabled color variant', () => {
-      render(<AnalysisGroupCardDisabled>Disabled text</AnalysisGroupCardDisabled>)
-
-      const typography = screen.getByText('Disabled text')
-      expect(typography).toBeInTheDocument()
-      expect(typography).toHaveClass('MuiTypography-root')
-    })
-
-    it('should use body2 variant for text', () => {
+    it('should use paragraph-small variant for text', () => {
       render(<AnalysisGroupCardDisabled>Test text</AnalysisGroupCardDisabled>)
 
       const typography = screen.getByText('Test text')
-      expect(typography).toHaveClass('MuiTypography-body2')
+      expect(typography).toHaveAttribute('data-variant', 'paragraph-small')
     })
   })
 

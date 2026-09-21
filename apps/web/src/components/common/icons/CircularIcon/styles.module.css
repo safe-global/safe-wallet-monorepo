@@ -7,7 +7,12 @@
   background-color: var(--color-background-main);
 }
 
-.badge :global .MuiBadge-badge {
+.badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
   border: 2px solid var(--color-background-paper);
   border-radius: 50%;
   box-sizing: content-box;

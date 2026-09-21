@@ -5,9 +5,9 @@ import { DEFAULT_CHAIN_ID } from '@/config/constants'
 /**
  * Whether the Space onboarding survey is enabled.
  *
- * The flag stored in chains config is SURVEY_ONBOARDING_DISABLED — when the
- * flag is absent (default) the survey is ON; when explicitly enabled the
- * survey is OFF (emergency kill switch).
+ * Gated on the SPACE_ONBOARDING_SURVEY chain-config flag — the survey is
+ * only shown when the flag is present in the chain's features array. The
+ * default is OFF; the config service has to opt each environment in.
  *
  * The survey runs during Space onboarding before any chain is selected, so
  * we read the flag from the default chain rather than `useCurrentChain()`.
@@ -20,7 +20,7 @@ import { DEFAULT_CHAIN_ID } from '@/config/constants'
 export const useIsSurveyEnabled = (): boolean | undefined => {
   const chain = useChain(String(DEFAULT_CHAIN_ID))
   if (!chain) return undefined
-  return !hasFeature(chain, FEATURES.SURVEY_ONBOARDING_DISABLED)
+  return hasFeature(chain, FEATURES.SPACE_ONBOARDING_SURVEY)
 }
 
 export default useIsSurveyEnabled

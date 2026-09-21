@@ -9,6 +9,10 @@ jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
 }))
 
+jest.mock('@/hooks/useDarkMode', () => ({
+  useDarkMode: jest.fn(() => false),
+}))
+
 jest.mock('@/services/analytics/events/spaces', () => ({
   SPACE_EVENTS: {
     VIEW_INVITING_SPACE: { action: 'view inviting space', category: 'spaces' },
@@ -71,5 +75,10 @@ describe('SpaceListInvite', () => {
   it('renders no inviter element when invitedByName is undefined', () => {
     render(<SpaceListInvite space={spaceBuilder().build()} invitedByName={undefined} />)
     expect(screen.queryByTestId('inviter')).not.toBeInTheDocument()
+  })
+
+  it('does not link into the space — pending members have no access until they accept', () => {
+    render(<SpaceListInvite space={spaceBuilder().build()} invitedByName={undefined} />)
+    expect(screen.queryByRole('link')).not.toBeInTheDocument()
   })
 })

@@ -12,6 +12,7 @@ const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
 describe('Multichain safe creation tests', () => {
   beforeEach(() => {
+    main.blockBeamer()
     createwallet.startCreateSafeFlow(signer)
   })
 
@@ -20,7 +21,7 @@ describe('Multichain safe creation tests', () => {
     createwallet.clickOnYourSafeAccountPreview()
     createwallet.clickOnNextBtn()
     createwallet.clickOnNextBtn()
-    main.verifyElementsCount(createtx.payNowExecMethod, 0)
+    createtx.verifyPayNowOptionIsDisabled()
   })
 
   it('Verify that Pay now is available for single safe creation', () => {
@@ -35,13 +36,15 @@ describe('Multichain safe creation tests', () => {
 
   it('Verify that Relay is available for one safe creation', () => {
     createwallet.clearNetworkInput(1)
-    createwallet.enterNetwork(1, constants.networks.polygon)
+    createwallet.enterNetwork(1, constants.networks.sepolia)
     createwallet.clickOnNetwrokCheckbox()
     createwallet.clickOnYourSafeAccountPreview()
     createwallet.clickOnNextBtn()
     createwallet.clickOnNextBtn()
     tx.selectRelayOtion()
-    cy.contains(tx.relayRemainingAttemptsStr).should('exist')
+    // The remaining-relays counter is hidden on GTF (unlimited relay) chains, so assert the
+    // relay option itself is selected instead.
+    tx.verifyRelayExecutionMethodChecked()
   })
 
   it('Verify that multichain safe creation is available with 2/2 setup', () => {
@@ -51,13 +54,16 @@ describe('Multichain safe creation tests', () => {
     owner.clickOnAddSignerBtn()
     owner.typeOwnerAddressCreateSafeStep(1, getMockAddress())
     owner.clickOnThresholdDropdown()
-    owner.getThresholdOptions().eq(1).click()
+    owner.selectThresholdOption(1)
     createwallet.clickOnNextBtn()
+    createwallet.clickOnSignInToWorkspaceBtn()
     createwallet.clickOnReviewStepNextBtn()
-    createwallet.clickOnLetsGoBtn().then(() => {
-      let data = localStorage.getItem(constants.localStorageKeys.SAFE_v2__undeployedSafes)
-      createwallet.assertCFSafeThresholdAndSigners(constants.networkKeys.polygon, 2, 2, data)
-      createwallet.assertCFSafeThresholdAndSigners(constants.networkKeys.sepolia, 2, 2, data)
+    createwallet.getCreatedSafeAddress().then((safeAddress) => {
+      createwallet.clickOnLetsGoBtn().then(() => {
+        let data = localStorage.getItem(constants.localStorageKeys.SAFE_v2__undeployedSafes)
+        createwallet.assertCFSafeThresholdAndSigners(constants.networkKeys.polygon, 2, 2, data, safeAddress)
+        createwallet.assertCFSafeThresholdAndSigners(constants.networkKeys.sepolia, 2, 2, data, safeAddress)
+      })
     })
   })
 
@@ -68,13 +74,16 @@ describe('Multichain safe creation tests', () => {
     owner.clickOnAddSignerBtn()
     owner.typeOwnerAddressCreateSafeStep(1, getMockAddress())
     owner.clickOnThresholdDropdown()
-    owner.getThresholdOptions().eq(0).click()
+    owner.selectThresholdOption(0)
     createwallet.clickOnNextBtn()
+    createwallet.clickOnSignInToWorkspaceBtn()
     createwallet.clickOnReviewStepNextBtn()
-    createwallet.clickOnLetsGoBtn().then(() => {
-      let data = localStorage.getItem(constants.localStorageKeys.SAFE_v2__undeployedSafes)
-      createwallet.assertCFSafeThresholdAndSigners(constants.networkKeys.polygon, 1, 2, data)
-      createwallet.assertCFSafeThresholdAndSigners(constants.networkKeys.sepolia, 1, 2, data)
+    createwallet.getCreatedSafeAddress().then((safeAddress) => {
+      createwallet.clickOnLetsGoBtn().then(() => {
+        let data = localStorage.getItem(constants.localStorageKeys.SAFE_v2__undeployedSafes)
+        createwallet.assertCFSafeThresholdAndSigners(constants.networkKeys.polygon, 1, 2, data, safeAddress)
+        createwallet.assertCFSafeThresholdAndSigners(constants.networkKeys.sepolia, 1, 2, data, safeAddress)
+      })
     })
   })
 })

@@ -53,7 +53,7 @@ const setupSafeInfoMock = (overrides: Partial<ReturnType<typeof useSafeInfoHook.
   })
 }
 
-jest.mock('@/components/tx-flow/SafeTxProvider', () => ({
+jest.mock('@/components/tx-flow/SafeTxContext', () => ({
   SafeTxContext: {
     _currentValue: {
       safeTx: undefined,
@@ -79,14 +79,14 @@ describe('useSafeShieldAssessmentUrl', () => {
 
   describe('when safeTx is set', () => {
     beforeEach(() => {
-      const SafeTxProvider = jest.requireMock('@/components/tx-flow/SafeTxProvider')
-      SafeTxProvider.SafeTxContext._currentValue.safeTx = buildMockSafeTx()
+      const { SafeTxContext } = jest.requireMock('@/components/tx-flow/SafeTxContext')
+      SafeTxContext._currentValue.safeTx = buildMockSafeTx()
       mockCalculateSafeTransactionHash.mockReturnValue(MOCK_TX_HASH)
     })
 
     afterEach(() => {
-      const SafeTxProvider = jest.requireMock('@/components/tx-flow/SafeTxProvider')
-      SafeTxProvider.SafeTxContext._currentValue.safeTx = undefined
+      const { SafeTxContext } = jest.requireMock('@/components/tx-flow/SafeTxContext')
+      SafeTxContext._currentValue.safeTx = undefined
     })
 
     it('should return a URL string containing the computed safeTxHash', () => {
@@ -123,16 +123,16 @@ describe('useSafeShieldAssessmentUrl', () => {
 
   describe('when calculateSafeTransactionHash throws', () => {
     beforeEach(() => {
-      const SafeTxProvider = jest.requireMock('@/components/tx-flow/SafeTxProvider')
-      SafeTxProvider.SafeTxContext._currentValue.safeTx = buildMockSafeTx()
+      const { SafeTxContext } = jest.requireMock('@/components/tx-flow/SafeTxContext')
+      SafeTxContext._currentValue.safeTx = buildMockSafeTx()
       mockCalculateSafeTransactionHash.mockImplementation(() => {
         throw new Error('Invalid transaction data')
       })
     })
 
     afterEach(() => {
-      const SafeTxProvider = jest.requireMock('@/components/tx-flow/SafeTxProvider')
-      SafeTxProvider.SafeTxContext._currentValue.safeTx = undefined
+      const { SafeTxContext } = jest.requireMock('@/components/tx-flow/SafeTxContext')
+      SafeTxContext._currentValue.safeTx = undefined
     })
 
     it('should return null', () => {
@@ -146,13 +146,13 @@ describe('useSafeShieldAssessmentUrl', () => {
       setupSafeInfoMock({
         safe: { ...mockSafe, version: '' },
       })
-      const SafeTxProvider = jest.requireMock('@/components/tx-flow/SafeTxProvider')
-      SafeTxProvider.SafeTxContext._currentValue.safeTx = buildMockSafeTx()
+      const { SafeTxContext } = jest.requireMock('@/components/tx-flow/SafeTxContext')
+      SafeTxContext._currentValue.safeTx = buildMockSafeTx()
     })
 
     afterEach(() => {
-      const SafeTxProvider = jest.requireMock('@/components/tx-flow/SafeTxProvider')
-      SafeTxProvider.SafeTxContext._currentValue.safeTx = undefined
+      const { SafeTxContext } = jest.requireMock('@/components/tx-flow/SafeTxContext')
+      SafeTxContext._currentValue.safeTx = undefined
     })
 
     it('should return null', () => {

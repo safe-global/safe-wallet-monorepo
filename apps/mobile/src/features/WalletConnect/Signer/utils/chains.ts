@@ -1,5 +1,7 @@
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { Network } from '@reown/appkit-common-react-native'
+import { EIP155 } from '@safe-global/utils/features/walletconnect/constants'
+import { getEip155ChainId } from '@safe-global/utils/features/walletconnect/utils'
 import Logger from '@/src/utils/logger'
 import { RPC_AUTHENTICATION } from '@safe-global/store/gateway/types'
 
@@ -45,8 +47,8 @@ export function cgwChainToReownNetwork(chain: Chain): Network | undefined {
         default: { name: chain.chainName, url: explorerUrl },
       },
     }),
-    chainNamespace: 'eip155',
-    caipNetworkId: `eip155:${chain.chainId}`,
+    chainNamespace: EIP155,
+    caipNetworkId: getEip155ChainId(chain.chainId),
     testnet: chain.isTestnet,
     ...(chain.chainLogoUri && { imageUrl: chain.chainLogoUri }),
   }

@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Stack, SvgIcon } from '@mui/material'
+import { Button } from '@/components/ui/button'
 import css from '@/components/tx/ApprovalEditor/styles.module.css'
 import type { ApprovalInfo } from './hooks/useApprovalInfos'
 
@@ -7,7 +7,7 @@ import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
 import { useFormContext } from 'react-hook-form'
 import get from 'lodash/get'
-import { EditOutlined } from '@mui/icons-material'
+import { SquarePen } from 'lucide-react'
 import TokenIcon from '@/components/common/TokenIcon'
 import { useState } from 'react'
 
@@ -41,31 +41,27 @@ const EditableApprovalItem = ({
   }
 
   return (
-    <Stack
-      direction="row"
-      alignItems="center"
-      gap={2}
-      className={css.approvalField}
-      onClick={readOnly ? handleEditMode : undefined}
-    >
-      <Box display="flex" flexDirection="row" alignItems="center" gap="4px">
+    <div className={`${css.approvalField} ${css.approvalRow}`} onClick={readOnly ? handleEditMode : undefined}>
+      <div className={css.approvalIcon}>
         <TokenIcon size={32} logoUri={approval.tokenInfo?.logoUri} tokenSymbol={approval.tokenInfo?.symbol} />
-      </Box>
+      </div>
 
       <ApprovalValueField name={name} tx={approval} readOnly={readOnly} />
 
-      <Track {...MODALS_EVENTS.EDIT_APPROVALS} label={readOnly ? 'edit' : 'save'}>
-        {readOnly ? (
-          <IconButton color="border" onClick={handleEditMode} title="Edit">
-            <SvgIcon fontSize="small" component={EditOutlined} inheritViewBox />
-          </IconButton>
-        ) : (
-          <Button title="Save" variant="text" size="small" onClick={handleSave} disabled={!!fieldErrors || !isDirty}>
-            Save
-          </Button>
-        )}
-      </Track>
-    </Stack>
+      <div className={css.approvalAction}>
+        <Track {...MODALS_EVENTS.EDIT_APPROVALS} label={readOnly ? 'edit' : 'save'}>
+          {readOnly ? (
+            <Button variant="ghost" size="icon-sm" onClick={handleEditMode} title="Edit">
+              <SquarePen className="size-4" />
+            </Button>
+          ) : (
+            <Button variant="ghost" size="sm" onClick={handleSave} title="Save" disabled={!!fieldErrors || !isDirty}>
+              Save
+            </Button>
+          )}
+        </Track>
+      </div>
+    </div>
   )
 }
 

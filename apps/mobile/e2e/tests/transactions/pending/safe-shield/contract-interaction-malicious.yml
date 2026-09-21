@@ -22,12 +22,11 @@ tags:
 - assertVisible:
     id: 'pending-tx-list'
 
+# Malicious approve at nonce 16 — targeted by txId so queue reordering can't break it
 - runFlow:
     file: ../../../../utils/components/pending-tx/tap-tx-card.yml
     env:
-      WAIT_FOR: '.*Contract interaction.*'
-      TAP_TEXT: '.*Contract interaction.*'
-      TAP_INDEX: '1'
+      TAP_ID: 'tx-card-multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0x228751aa0f0442baf8a670e3af8bbe93c22c7e9a0ad14527620f9a50b972f52c'
 
 - assertVisible: 'Confirm transaction'
 

@@ -7,8 +7,8 @@ import { safeInfoBuilder } from '@/tests/builders/safe'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
 import * as safeInfo from '@/hooks/useSafeInfo'
 import { useDidDismissProposal } from './index'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
-import store from '@/features/recovery/components/RecoveryContext'
+import type { RecoveryQueueItem } from '../../services/recovery-state'
+import store from '../RecoveryContext'
 
 describe('RecoveryModal', () => {
   beforeEach(() => {

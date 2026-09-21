@@ -45,6 +45,7 @@ describe('Multichain safe creation flow tests', () => {
     owner.clickOnAddSignerBtn()
     owner.typeOwnerAddressCreateSafeStep(1, getMockAddress())
     createwallet.clickOnNextBtn()
+    createwallet.clickOnSignInToWorkspaceBtn()
     createwallet.clickOnReviewStepNextBtn()
     main.verifyElementsExist([createwallet.cfSafeActivationMsg, createwallet.cfSafeCreationSuccessMsg])
     createwallet.checkNetworkLogoInSafeCreationModal([constants.networkKeys.polygon, constants.networkKeys.sepolia])

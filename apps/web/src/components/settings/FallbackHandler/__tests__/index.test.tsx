@@ -110,6 +110,53 @@ describe('FallbackHandler', () => {
     })
   })
 
+  it('should label the official ExtensibleFallbackHandler with its own deployment name', async () => {
+    const EXTENSIBLE_FALLBACK_HANDLER_1_5_0 = '0x85a8ca358D388530ad0fB95D0cb89Dd44Fc242c3'
+
+    jest.spyOn(useSafeInfoHook, 'default').mockImplementation(
+      () =>
+        ({
+          safe: {
+            version: '1.5.0',
+            chainId: '1',
+            fallbackHandler: {
+              value: EXTENSIBLE_FALLBACK_HANDLER_1_5_0,
+            },
+          },
+        }) as unknown as ReturnType<typeof useSafeInfoHook.default>,
+    )
+
+    const fbHandler = render(<FallbackHandler />)
+
+    await waitFor(() => {
+      expect(fbHandler.getByText('ExtensibleFallbackHandler')).toBeDefined()
+      expect(fbHandler.queryByText('CompatibilityFallbackHandler')).not.toBeInTheDocument()
+      expect(fbHandler.queryByText('An unofficial fallback handler is currently set.')).not.toBeInTheDocument()
+    })
+  })
+
+  it('should label the TWAP fallback handler as ExtensibleFallbackHandler, not CompatibilityFallbackHandler', async () => {
+    jest.spyOn(useSafeInfoHook, 'default').mockImplementation(
+      () =>
+        ({
+          safe: {
+            version: '1.3.0',
+            chainId: '1',
+            fallbackHandler: {
+              value: TWAP_FALLBACK_HANDLER,
+            },
+          },
+        }) as unknown as ReturnType<typeof useSafeInfoHook.default>,
+    )
+
+    const fbHandler = render(<FallbackHandler />)
+
+    await waitFor(() => {
+      expect(fbHandler.getByText('ExtensibleFallbackHandler')).toBeDefined()
+      expect(fbHandler.queryByText('CompatibilityFallbackHandler')).not.toBeInTheDocument()
+    })
+  })
+
   describe('No Fallback Handler', () => {
     it('should render a warning when no Fallback Handler is set', async () => {
       jest.spyOn(useSafeInfoHook, 'default').mockImplementation(
@@ -155,11 +202,14 @@ describe('FallbackHandler', () => {
       await waitFor(() => {
         expect(
           fbHandler.queryByText(
-            'The fallback handler adds fallback logic for funtionality that may not be present in the Safe Account contract. Learn more about the fallback handler',
+            'The fallback handler adds fallback logic for funtionality that may not be present in the Safe account contract. Learn more about the fallback handler',
           ),
         ).toBeDefined()
 
         expect(fbHandler.getByText('0x123')).toBeDefined()
+
+        // An unrecognised handler must not be mislabelled with an official deployment name
+        expect(fbHandler.queryByText('CompatibilityFallbackHandler')).not.toBeInTheDocument()
       })
 
       await waitFor(() => {
@@ -169,7 +219,7 @@ describe('FallbackHandler', () => {
     })
   })
 
-  it('should render nothing if the Safe Account version does not support Fallback Handlers', () => {
+  it('should render nothing if the Safe account version does not support Fallback Handlers', () => {
     jest.spyOn(useSafeInfoHook, 'default').mockImplementation(
       () =>
         ({

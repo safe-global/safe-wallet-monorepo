@@ -136,16 +136,22 @@ export enum SafeAppsName {
 
 // Legal
 export const IS_OFFICIAL_HOST = process.env.NEXT_PUBLIC_IS_OFFICIAL_HOST === 'true'
-export const OFFICIAL_HOSTS = /app\.safe\.global|.+\.5afe\.dev|localhost:3000|localhost:4000|localhost:6006/
+export const OFFICIAL_HOSTS =
+  /app\.safe\.global|.+\.5afe\.dev|localhost:3000|localhost:3001|localhost:4000|localhost:6006/
 export const IPFS_HOSTS = /app\.safe\.eth\.limo|app\.5afedev\.eth\.limo/
 export const BRAND_NAME = process.env.NEXT_PUBLIC_BRAND_NAME || (IS_OFFICIAL_HOST ? 'Safe{Wallet}' : 'Wallet fork')
 export const BRAND_LOGO = process.env.NEXT_PUBLIC_BRAND_LOGO || ''
 
 export const CHAINALYSIS_OFAC_CONTRACT = '0x40c57923924b5c5c5455c48d93317139addac8fb'
+export const SAFE_GLOBAL_DOMAIN = 'https://safe.global'
 
 export const ECOSYSTEM_ID_ADDRESS =
   process.env.NEXT_PUBLIC_ECOSYSTEM_ID_ADDRESS || '0x0000000000000000000000000000000000000000'
-export const MULTICHAIN_HELP_ARTICLE = `${HELP_CENTER_URL}/en/articles/222612-multi-chain-safe`
+export const MULTICHAIN_HELP_ARTICLE = `${HELP_CENTER_URL}/articles/9317165368-deploying-a-multi-chain-safe`
+
+export const WORKSPACE_ANNOUNCEMENT_URL = `${SAFE_GLOBAL_DOMAIN}/blog/introducing-workspace-the-onchain-operating-environment-for-treasury-teams`
+
+export const SAFE_PRO_ANNOUNCEMENT_URL = `${SAFE_GLOBAL_DOMAIN}/blog/safe-pro-early-partner-program`
 
 // Hypernative Campaign IDs
 export const PROD_HYPERNATIVE_OUTREACH_ID = parseInt(process.env.NEXT_PUBLIC_PROD_HYPERNATIVE_OUTREACH_ID ?? `${3}`)

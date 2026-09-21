@@ -21,24 +21,21 @@ describe('Mass payouts tests', () => {
   })
 
   it('Verify that the "Add recipient" button is displayed for the targeted safes on New Tx form', () => {
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_6)
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_6)
     createtx.clickOnNewtransactionBtn()
     createtx.clickOnSendTokensBtn()
     createtx.verifyAddRecipientBtnIsVisible()
   })
 
   it('Verify that users can add up to 5 recipients', () => {
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_6)
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_6)
     createtx.clickOnNewtransactionBtn()
     createtx.clickOnSendTokensBtn()
     createtx.checkMaxRecipientReached()
   })
 
   it('Verify that "Remove recipient" deletes the recipient field', () => {
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_6)
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_6)
     createtx.clickOnNewtransactionBtn()
     createtx.clickOnSendTokensBtn()
     createtx.clickOnAddRecipientBtn()
@@ -48,8 +45,7 @@ describe('Mass payouts tests', () => {
   })
 
   it('Verify that "Remove recipient" deletes the recipient field', () => {
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_8)
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_8)
     createtx.clickOnNewtransactionBtn()
     createtx.clickOnSendTokensBtn()
     spendinglimit.selectSpendingLimitOption()
@@ -57,8 +53,7 @@ describe('Mass payouts tests', () => {
   })
 
   it('Verify the "Max" button sets the full amount', () => {
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_6)
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_6)
     createtx.clickOnNewtransactionBtn()
     createtx.clickOnSendTokensBtn()
     createtx.clickOnAddRecipientBtn()
@@ -68,8 +63,7 @@ describe('Mass payouts tests', () => {
   })
 
   it('Verify "insufficient amount" error for the same token during send to a few recipients', () => {
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_6)
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_6)
     createtx.clickOnNewtransactionBtn()
     createtx.clickOnSendTokensBtn()
     createtx.clickOnAddRecipientBtn()
@@ -85,8 +79,7 @@ describe('Mass payouts tests', () => {
     const address1 = getMockAddress()
     const address2 = getMockAddress()
 
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_6)
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_6)
     createtx.clickOnNewtransactionBtn()
     createtx.clickOnSendTokensBtn()
     createtx.clickOnAddRecipientBtn()

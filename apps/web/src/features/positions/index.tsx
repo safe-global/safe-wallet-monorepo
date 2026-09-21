@@ -1,16 +1,18 @@
-import { Accordion, AccordionDetails, AccordionSummary, Box, Card, Stack, Typography } from '@mui/material'
-import PositionsHeader from '@/features/positions/components/PositionsHeader'
-import { PositionGroup } from '@/features/positions/components/PositionGroup'
-import usePositions from '@/features/positions/hooks/usePositions'
-import PositionsEmpty from '@/features/positions/components/PositionsEmpty'
-import usePositionsFiatTotal from '@/features/positions/hooks/usePositionsFiatTotal'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { Typography } from '@/components/ui/typography'
+import PositionsHeader from './components/PositionsHeader'
+import { PositionGroup } from './components/PositionGroup'
+import usePositions from './hooks/usePositions'
+import PositionsEmpty from './components/PositionsEmpty'
+import usePositionsFiatTotal from './hooks/usePositionsFiatTotal'
 import React from 'react'
 import PositionsUnavailable from './components/PositionsUnavailable'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
-import PositionsSkeleton from '@/features/positions/components/PositionsSkeleton'
+import PositionsSkeleton from './components/PositionsSkeleton'
 import { PortfolioFeature } from '@/features/portfolio'
 import { useLoadFeature } from '@/features/__core__'
+
+export { default as useIsPositionsFeatureEnabled } from './hooks/useIsPositionsFeatureEnabled'
 
 const Positions = () => {
   const positionsFiatTotal = usePositionsFiatTotal()
@@ -28,8 +30,8 @@ const Positions = () => {
   }
 
   return (
-    <Stack gap={2}>
-      <Box>
+    <div className="flex flex-col gap-4">
+      <div>
         <TotalAssetValue
           fiatTotal={positionsFiatTotal}
           title="Total positions value"
@@ -37,37 +39,36 @@ const Positions = () => {
         />
 
         {portfolio.$isDisabled && (
-          <Typography variant="caption" sx={{ color: 'text.secondary' }} mt={2}>
+          <Typography variant="paragraph-mini" className="mt-4 block text-[var(--color-text-secondary)]">
             Position balances are not included in the total asset value.
           </Typography>
         )}
-      </Box>
+      </div>
 
       {protocols.map((protocol) => {
         return (
-          <Card key={protocol.protocol} sx={{ border: 0 }}>
-            <Accordion disableGutters elevation={0} variant="elevation" defaultExpanded>
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon fontSize="small" />}
-                sx={{ justifyContent: 'center', overflowX: 'auto', backgroundColor: 'transparent !important' }}
-              >
-                <PositionsHeader protocol={protocol} fiatTotal={positionsFiatTotal} />
-              </AccordionSummary>
-              <AccordionDetails sx={{ pt: 0, pb: 0 }}>
-                {protocol.items.map((group, groupIndex) => (
-                  <PositionGroup
-                    key={groupIndex}
-                    group={group}
-                    isLast={groupIndex === protocol.items.length - 1}
-                    protocolIconUrl={protocol.protocol_metadata.icon.url}
-                  />
-                ))}
-              </AccordionDetails>
+          <div key={protocol.protocol} className="overflow-hidden rounded-xl bg-card">
+            <Accordion defaultValue={[protocol.protocol]}>
+              <AccordionItem value={protocol.protocol} className="border-b-0">
+                <AccordionTrigger className="items-center overflow-x-auto px-6 py-4">
+                  <PositionsHeader protocol={protocol} fiatTotal={positionsFiatTotal} />
+                </AccordionTrigger>
+                <AccordionContent className="px-6 pb-4 pt-0">
+                  {protocol.items.map((group, groupIndex) => (
+                    <PositionGroup
+                      key={groupIndex}
+                      group={group}
+                      isLast={groupIndex === protocol.items.length - 1}
+                      protocolIconUrl={protocol.protocol_metadata.icon.url}
+                    />
+                  ))}
+                </AccordionContent>
+              </AccordionItem>
             </Accordion>
-          </Card>
+          </div>
         )
       })}
-    </Stack>
+    </div>
   )
 }
 

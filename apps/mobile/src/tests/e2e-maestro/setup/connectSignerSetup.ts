@@ -1,8 +1,5 @@
 import type { Dispatch } from '@reduxjs/toolkit'
 import type { Router } from 'expo-router'
-import { addSafe } from '@/src/store/safesSlice'
-import { setActiveSafe } from '@/src/store/activeSafeSlice'
-import { updatePromptAttempts } from '@/src/store/notificationsSlice'
 import { addSigner, Signer } from '@/src/store/signersSlice'
 import { setExecutionMethod } from '@/src/store/executionMethodSlice'
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
@@ -11,14 +8,13 @@ import {
   WalletConnectE2eState,
 } from '@/src/features/WalletConnect/Signer/context/walletConnectE2eState'
 import {
-  mockedActiveAccount,
   mockedActiveSafeInfo,
   pendingTxSafe1,
   pendingTxSafeInfo1,
   mockedPendingTxSignerAddress,
+  TEST_WALLET_ICON,
 } from './mockData'
-import { resetReduxForE2E, setupPendingTxSafe } from './setupHelpers'
-import { Address } from '@/src/types/address'
+import { onboardAndNavigate, resetReduxForE2E, setupPendingTxSafe } from './setupHelpers'
 
 /** First owner from the mocked Safe — used for the happy path. */
 const OWNER_ADDRESS = mockedActiveSafeInfo.owners[0].value
@@ -27,9 +23,7 @@ const OWNER_ADDRESS = mockedActiveSafeInfo.owners[0].value
 const NON_OWNER_ADDRESS = '0x000000000000000000000000000000000000dEaD'
 
 const WALLET_NAME = 'E2E Wallet'
-/** 1x1 green PNG pixel — avoids external URL dependency in tests. */
-const WALLET_ICON =
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
+const WALLET_ICON = TEST_WALLET_ICON
 
 /**
  * Set the WC e2e state for the next connection attempt.
@@ -40,19 +34,6 @@ const setWcState = (address: string, isOwner: boolean) => {
     connectResult: { address, walletName: WALLET_NAME, walletIcon: WALLET_ICON },
     isOwner,
   })
-}
-
-/** Onboard with the test Safe and navigate to home. */
-const onboardAndNavigate = (dispatch: Dispatch, router: Router) => {
-  dispatch(
-    addSafe({
-      address: mockedActiveSafeInfo.address.value as Address,
-      info: { [mockedActiveSafeInfo.chainId]: mockedActiveSafeInfo },
-    }),
-  )
-  dispatch(setActiveSafe(mockedActiveAccount))
-  dispatch(updatePromptAttempts(1))
-  router.replace('/(tabs)')
 }
 
 /**

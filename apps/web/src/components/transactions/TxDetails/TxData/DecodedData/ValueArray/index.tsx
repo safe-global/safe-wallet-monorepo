@@ -1,6 +1,5 @@
 import { useMemo } from 'react'
 import type { ReactElement } from 'react'
-import { Typography } from '@mui/material'
 import { isAddress, isArrayParameter } from '@/utils/transaction-guards'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
@@ -33,7 +32,7 @@ export const Value = ({ type, value, ...props }: ValueArrayProps): ReactElement 
 
   if (isArrayParameter(type) && isAddress(type) && Array.isArray(parsedValue)) {
     return (
-      <Typography component="div" variant="body2">
+      <div className="text-sm">
         [
         {parsedValue.length > 0 && (
           <div className={css.nestedWrapper}>
@@ -56,7 +55,7 @@ export const Value = ({ type, value, ...props }: ValueArrayProps): ReactElement 
           </div>
         )}
         ]
-      </Typography>
+      </div>
     )
   }
 
@@ -68,7 +67,7 @@ const getTextValue = (value: string, key?: string) => {
 }
 
 const getArrayValue = (parentId: string, value: string[], separator?: boolean) => (
-  <Typography component="div" variant="body2">
+  <div className="text-sm">
     [
     <div className={css.nestedWrapper}>
       {value.map((currentValue, index, values) => {
@@ -83,7 +82,7 @@ const getArrayValue = (parentId: string, value: string[], separator?: boolean) =
       })}
     </div>
     ]{separator ? ',' : null}
-  </Typography>
+  </div>
 )
 
 const GenericValue = ({ method, value }: Omit<ValueArrayProps, 'type'>): React.ReactElement => {

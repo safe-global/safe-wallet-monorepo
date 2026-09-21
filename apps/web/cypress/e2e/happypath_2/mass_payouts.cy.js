@@ -21,8 +21,7 @@ describe('Mass payouts happy path tests', () => {
     const address1 = getMockAddress()
     const address2 = getMockAddress()
 
-    cy.visit(constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_42)
-    wallet.connectSigner(signer2)
+    wallet.connectSignerViaStorage(signer2, constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_42)
     cy.wait(5000)
     createtx.deleteAllTx()
 

@@ -1,5 +1,6 @@
 import type { NativeStakingValidatorsExitTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Alert, Stack, Typography } from '@mui/material'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { Typography } from '@/components/ui/typography'
 import FieldsGrid from '@/components/tx/FieldsGrid'
 import { formatDurationFromMilliseconds } from '@safe-global/utils/utils/formatters'
 import ConfirmationOrderHeader from '@/components/tx/ConfirmationOrder/ConfirmationOrderHeader'
@@ -16,11 +17,7 @@ const StakingConfirmationTxExit = ({ order }: StakingOrderConfirmationViewProps)
   ])
 
   return (
-    <Stack
-      sx={{
-        gap: 2,
-      }}
-    >
+    <div className="flex flex-col gap-4">
       <ConfirmationOrderHeader
         blocks={[
           {
@@ -54,20 +51,17 @@ const StakingConfirmationTxExit = ({ order }: StakingOrderConfirmationViewProps)
       >
         Up to {withdrawIn}
       </FieldsGrid>
-      <Typography
-        variant="body2"
-        sx={{
-          color: 'text.secondary',
-          mt: 2,
-        }}
-      >
+      <Typography variant="paragraph-small" color="muted" className="block mt-4">
         The selected amount and any rewards will be withdrawn from Dedicated Staking for ETH after the validator exit.
       </Typography>
-      <Alert severity="warning" sx={{ mb: 1 }}>
-        This transaction is a withdrawal request. After it&apos;s executed, you&apos;ll need to complete a separate
-        withdrawal transaction.
+      <Alert variant="warning" outlined={false} className="mb-2">
+        <AlertSeverityIcon variant="warning" />
+        <AlertDescription>
+          This transaction is a withdrawal request. After it&apos;s executed, you&apos;ll need to complete a separate
+          withdrawal transaction.
+        </AlertDescription>
       </Alert>
-    </Stack>
+    </div>
   )
 }
 

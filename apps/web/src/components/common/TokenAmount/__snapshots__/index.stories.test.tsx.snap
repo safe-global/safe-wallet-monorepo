@@ -1,27 +1,29 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./index.stories WithTokenLogo 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
-    <span
-      aria-label="100"
-      class="container verticalAlign"
-      data-mui-internal-clone-element="true"
+    <div
+      class="rounded-lg bg-card p-4"
     >
-      <div
-        class="MuiBox-root mui-style-olq4e8"
+      <span
+        class="container verticalAlign"
+        data-slot="tooltip-trigger"
+        id="base-ui-_r_1_"
       >
-        <iframe
-          height="26"
-          loading="lazy"
-          referrerpolicy="strict-origin"
-          sandbox="allow-scripts"
-          srcdoc="
+        <div
+          class="relative"
+        >
+          <iframe
+            height="26"
+            loading="lazy"
+            referrerpolicy="strict-origin"
+            sandbox="allow-scripts"
+            srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
       <img src="https://safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.png" alt="Safe App logo" height="26" width="auto" style="" />
       <script>
@@ -32,20 +34,21 @@ exports[`./index.stories WithTokenLogo 1`] = `
       </script>
     </body>
   "
-          style="pointer-events: none; border: 0px; display: block;"
-          tabindex="-1"
-          title="ETH"
-          width="26"
-        />
-      </div>
-      <b
-        class="tokenText"
-      >
-        100
-         
-        ETH
-      </b>
-    </span>
+            style="pointer-events: none; border: 0px; display: block;"
+            tabindex="-1"
+            title="ETH"
+            width="26"
+          />
+        </div>
+        <b
+          class="tokenText"
+        >
+          100
+           
+          ETH
+        </b>
+      </span>
+    </div>
   </div>
 </div>
 `;
@@ -55,22 +58,25 @@ exports[`./index.stories WithoutTokenLogo 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
-    <span
-      aria-label="100"
-      class="container"
-      data-mui-internal-clone-element="true"
+    <div
+      class="rounded-lg bg-card p-4"
     >
-      <b
-        class="tokenText"
+      <span
+        class="container"
+        data-slot="tooltip-trigger"
+        id="base-ui-_r_3_"
       >
-        100
-         
-        ETH
-      </b>
-    </span>
+        <b
+          class="tokenText"
+        >
+          100
+           
+          ETH
+        </b>
+      </span>
+    </div>
   </div>
 </div>
 `;

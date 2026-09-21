@@ -46,6 +46,7 @@ const MOCK_PENDING_TRANSACTIONS: TransactionQueuedItem[] = [
 ]
 
 const meta: Meta<typeof PendingTxWidget> = {
+  title: 'Features/Spaces/PendingTxWidget',
   component: PendingTxWidget,
   tags: ['autodocs'],
   decorators: [
@@ -66,7 +67,6 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   args: {
     transactions: MOCK_PENDING_TRANSACTIONS,
-    remainingCount: 14,
   },
 }
 
@@ -86,12 +86,5 @@ export const Loading: Story = {
 export const Empty: Story = {
   args: {
     transactions: [],
-  },
-}
-
-export const ManyPending: Story = {
-  args: {
-    transactions: MOCK_PENDING_TRANSACTIONS,
-    remainingCount: 42,
   },
 }

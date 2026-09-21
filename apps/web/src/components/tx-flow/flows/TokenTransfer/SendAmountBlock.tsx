@@ -1,6 +1,6 @@
 import { type ReactNode, useMemo } from 'react'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import { Box, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import TokenIcon from '@/components/common/TokenIcon'
 import FiatValue from '@/components/common/FiatValue'
 import FieldsGrid from '@/components/tx/FieldsGrid'
@@ -21,6 +21,7 @@ const SendAmountBlock = ({
   children?: ReactNode
   title?: string
   fiatConversion?: string
+  compact?: boolean
 }) => {
   const fiatValue = useMemo(
     () => computeFiatValue(parseFloat(safeFormatUnits(amountInWei, tokenInfo.decimals)), fiatConversion),
@@ -29,25 +30,23 @@ const SendAmountBlock = ({
 
   return (
     <FieldsGrid title={title}>
-      <Box display="flex" alignItems="center" gap={1}>
+      <div className="flex items-center gap-2">
         <TokenIcon logoUri={tokenInfo.logoUri ?? undefined} tokenSymbol={tokenInfo.symbol} />
 
-        <Typography variant="body2" fontWeight="bold">
-          {tokenInfo.symbol}
-        </Typography>
+        <Typography variant="paragraph-small-bold">{tokenInfo.symbol}</Typography>
 
         {children}
 
-        <Typography variant="body2" data-testid="token-amount">
+        <Typography variant="paragraph-small" data-testid="token-amount">
           {formatVisualAmount(amountInWei, tokenInfo.decimals, tokenInfo.decimals ?? 0)}
         </Typography>
 
         {fiatValue != null && (
-          <Typography variant="body2" color="text.secondary" component="span">
+          <Typography variant="paragraph-small" className="text-muted-foreground">
             (<FiatValue value={fiatValue} />)
           </Typography>
         )}
-      </Box>
+      </div>
     </FieldsGrid>
   )
 }

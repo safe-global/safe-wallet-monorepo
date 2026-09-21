@@ -1,5 +1,7 @@
 import type { SwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { DataDecoded, TwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { OnTradeParamsPayload } from '@cowprotocol/events'
+import { UiOrderType } from '@safe-global/utils/features/swap/types'
 import {
   getExecutionPrice,
   getFilledPercentage,
@@ -8,6 +10,7 @@ import {
   getSurplusPrice,
   isOrderPartiallyFilled,
   isSettingTwapFallbackHandler,
+  parseCowTradeParams,
   TWAP_FALLBACK_HANDLER,
 } from '../utils'
 
@@ -420,6 +423,42 @@ describe('Swap helpers', () => {
         ],
       } as unknown as DataDecoded
       expect(isSettingTwapFallbackHandler(decodedData)).toBe(false)
+    })
+  })
+
+  describe('parseCowTradeParams', () => {
+    const makePayload = (params: Record<string, unknown>) =>
+      ({ orderType: 'SWAP', ...params }) as unknown as OnTradeParamsPayload
+
+    it('maps known CoW order types to the local UiOrderType', () => {
+      expect(parseCowTradeParams(makePayload({ orderType: 'SWAP' })).uiOrderType).toBe(UiOrderType.SWAP)
+      expect(parseCowTradeParams(makePayload({ orderType: 'LIMIT' })).uiOrderType).toBe(UiOrderType.LIMIT)
+      expect(parseCowTradeParams(makePayload({ orderType: 'TWAP' })).uiOrderType).toBe(UiOrderType.TWAP)
+    })
+
+    it('does not silently reset LIMIT/TWAP to SWAP', () => {
+      expect(parseCowTradeParams(makePayload({ orderType: 'LIMIT' })).uiOrderType).not.toBe(UiOrderType.SWAP)
+      expect(parseCowTradeParams(makePayload({ orderType: 'TWAP' })).uiOrderType).not.toBe(UiOrderType.SWAP)
+    })
+
+    it('falls back to SWAP for order types we do not model (HOOKS, YIELD, unknown)', () => {
+      expect(parseCowTradeParams(makePayload({ orderType: 'HOOKS' })).uiOrderType).toBe(UiOrderType.SWAP)
+      expect(parseCowTradeParams(makePayload({ orderType: 'YIELD' })).uiOrderType).toBe(UiOrderType.SWAP)
+      expect(parseCowTradeParams(makePayload({ orderType: 'SOMETHING_NEW' })).uiOrderType).toBe(UiOrderType.SWAP)
+    })
+
+    it('extracts sell/buy token addresses', () => {
+      const result = parseCowTradeParams(
+        makePayload({ sellToken: { address: '0xSell' }, buyToken: { address: '0xBuy' } }),
+      )
+      expect(result.sellAsset).toBe('0xSell')
+      expect(result.buyAsset).toBe('0xBuy')
+    })
+
+    it('normalizes missing tokens/addresses to an empty string rather than undefined', () => {
+      expect(parseCowTradeParams(makePayload({})).sellAsset).toBe('')
+      expect(parseCowTradeParams(makePayload({})).buyAsset).toBe('')
+      expect(parseCowTradeParams(makePayload({ sellToken: {} })).sellAsset).toBe('')
     })
   })
 })

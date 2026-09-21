@@ -18,7 +18,11 @@
   align-items: center;
 }
 
+/* Both children are inline spans (Typography renders one), so without a column they ran together as
+   "securityLearn more". The description's own padding-top only makes sense stacked. */
 .bannerContent {
+  display: flex;
+  flex-direction: column;
   flex: 1;
   min-width: 0;
 }

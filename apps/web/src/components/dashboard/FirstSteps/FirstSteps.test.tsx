@@ -170,9 +170,9 @@ describe('FirstSteps', () => {
     expect(screen.getByTestId('activation-section')).toBeInTheDocument()
   })
 
-  it('shows "Activate your Safe Account" heading when not activating', () => {
+  it('shows "Activate your Safe account" heading when not activating', () => {
     renderWithUndeployedSafe({ undeployedSafeStatus: 'AWAITING_EXECUTION' })
-    expect(screen.getByText('Activate your Safe Account')).toBeInTheDocument()
+    expect(screen.getByText('Activate your Safe account')).toBeInTheDocument()
   })
 
   it('shows steps completed count', () => {
@@ -217,14 +217,14 @@ describe('FirstSteps', () => {
 
   it('shows AccountReady widget (not Hn banner) when showBanner is false', () => {
     renderWithUndeployedSafe({ undeployedSafeStatus: 'AWAITING_EXECUTION' })
-    expect(screen.getByText('Safe Account is ready!')).toBeInTheDocument()
+    expect(screen.getByText('Safe account is ready!')).toBeInTheDocument()
     expect(screen.queryByTestId('hn-banner')).not.toBeInTheDocument()
   })
 
   it('shows Hn banner instead of AccountReady when showBanner is true', () => {
     mockUseBannerVisibility.mockReturnValue({ showBanner: true })
     renderWithUndeployedSafe({ undeployedSafeStatus: 'AWAITING_EXECUTION' })
-    expect(screen.queryByText('Safe Account is ready!')).not.toBeInTheDocument()
+    expect(screen.queryByText('Safe account is ready!')).not.toBeInTheDocument()
     expect(screen.getByTestId('hn-banner')).toBeInTheDocument()
   })
 

@@ -1,37 +1,24 @@
-import { User } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
 import { Typography } from '@/components/ui/typography'
 import { Skeleton } from '@/components/ui/skeleton'
+import RowEndColumn from './RowEndColumn'
 import type { ReactNode } from 'react'
 
 export interface BalanceDisplayProps {
   balance?: string | ReactNode
-  threshold: number
-  owners: number
   isLoading?: boolean
-  showThreshold?: boolean
 }
 
-const BalanceDisplay = ({ balance, threshold, owners, isLoading, showThreshold = true }: BalanceDisplayProps) => (
-  <div className="flex flex-col items-end min-w-0 shrink sm:w-[100px] sm:shrink-0">
+// Right-aligned fiat balance for a dropdown row. The threshold/owners badge now lives on the avatar
+// (see ThresholdBadge); this component intentionally renders the balance only.
+const BalanceDisplay = ({ balance, isLoading }: BalanceDisplayProps) => (
+  <RowEndColumn>
     {balance !== undefined &&
       (isLoading ? (
         <Skeleton className="h-4 w-14 rounded" />
       ) : (
-        <Typography variant="paragraph-mini-medium" color="muted">
-          {balance}
-        </Typography>
+        <Typography variant="paragraph-small-medium">{balance}</Typography>
       ))}
-    {showThreshold &&
-      (isLoading ? (
-        <Skeleton className="h-4 w-14 rounded" />
-      ) : (
-        <Badge data-testid="safe-selector-threshold" variant="secondary" className="gap-1">
-          <User className="size-3" />
-          {threshold}/{owners}
-        </Badge>
-      ))}
-  </div>
+  </RowEndColumn>
 )
 
 export default BalanceDisplay

@@ -1,5 +1,5 @@
 import React, { type ReactElement } from 'react'
-import { Box, Checkbox, Stack } from '@mui/material'
+import { Checkbox } from '@/components/ui/checkbox'
 import SendButton from './SendButton'
 import { SwapFeature } from '@/features/swap'
 import { useLoadFeature } from '@/features/__core__'
@@ -30,29 +30,22 @@ export const ActionButtons = ({
 
   if (mobile) {
     return (
-      <Stack direction="row" className={css.mobileButtons}>
-        <Box className={css.mobileButtonWrapper}>
+      <div className={`flex flex-row ${css.mobileButtons}`}>
+        <div className={css.mobileButtonWrapper}>
           <SendButton tokenInfo={tokenInfo} />
-        </Box>
+        </div>
 
         {isSwapFeatureEnabled && (
-          <Box className={css.mobileButtonWrapper}>
+          <div className={css.mobileButtonWrapper}>
             <SwapButton tokenInfo={tokenInfo} amount="0" trackingLabel={SWAP_LABELS.asset} />
-          </Box>
+          </div>
         )}
-      </Stack>
+      </div>
     )
   }
 
   return (
-    <Stack
-      direction="row"
-      gap={1}
-      alignItems="center"
-      justifyContent="flex-end"
-      mr={-1}
-      className={onlyIcon ? css.sticky : undefined}
-    >
+    <div className={`-mr-2 flex flex-row items-center justify-end gap-2 ${onlyIcon ? css.sticky : ''}`}>
       <SendButton tokenInfo={tokenInfo} onlyIcon={onlyIcon} />
 
       {isSwapFeatureEnabled && (
@@ -60,10 +53,10 @@ export const ActionButtons = ({
       )}
 
       {showHiddenAssets && onToggleAsset && (
-        <Box display="flex" alignItems="center" height="28px">
-          <Checkbox size="small" checked={isSelected} onClick={onToggleAsset} data-testid="hide-asset-checkbox" />
-        </Box>
+        <div className="flex h-[28px] items-center">
+          <Checkbox checked={isSelected} onClick={onToggleAsset} data-testid="hide-asset-checkbox" />
+        </div>
       )}
-    </Stack>
+    </div>
   )
 }

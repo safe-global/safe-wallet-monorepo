@@ -171,7 +171,7 @@ const SetupWidget = ({ onDismiss, horizontal, loading }: SetupWidgetProps): Reac
             >
               <div
                 className={cn('flex flex-col gap-2 px-2 pb-2', {
-                  'sm:flex-row': horizontal,
+                  'sm:grid sm:grid-cols-2 xl:grid-cols-4': horizontal,
                 })}
               >
                 {sortedSteps.map(({ key, label, icon: Icon, activeFn }, index) => {
@@ -189,9 +189,8 @@ const SetupWidget = ({ onDismiss, horizontal, loading }: SetupWidgetProps): Reac
                       onClick={() => !isCompleted && handleStepClick(key)}
                       onKeyDown={(e) => e.key === 'Enter' && !isCompleted && handleStepClick(key)}
                       className={cn(
-                        'flex items-center gap-4 rounded-3xl p-4 transition-colors',
+                        'flex min-w-0 items-center gap-4 rounded-3xl p-4 transition-colors',
                         isCompleted ? 'cursor-not-allowed bg-muted/50' : 'cursor-pointer bg-muted hover:bg-muted/70',
-                        { 'sm:flex-1': horizontal },
                       )}
                     >
                       <div
@@ -206,7 +205,10 @@ const SetupWidget = ({ onDismiss, horizontal, loading }: SetupWidgetProps): Reac
                           <Icon className="size-5 text-green-500" />
                         )}
                       </div>
-                      <Typography variant="paragraph-bold" className={cn('flex-1', { 'line-through': isCompleted })}>
+                      <Typography
+                        variant="paragraph-bold"
+                        className={cn('min-w-0 flex-1', { 'line-through': isCompleted })}
+                      >
                         {label}
                       </Typography>
                       {!isCompleted && <ChevronRight className="size-5 text-muted-foreground" />}

@@ -30,7 +30,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: main
           fetch-depth: 0
@@ -106,7 +106,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: main
           fetch-depth: 0
@@ -125,7 +125,7 @@ jobs:
 
       - name: Create GitHub release (draft)
         if: needs.tag.outputs.version
-        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         id: create_release
         with:
           draft: true
@@ -143,8 +143,66 @@ jobs:
       - uses: ./.github/actions/yarn
 
       - uses: ./.github/actions/build
+        env:
+          DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+          NEXT_PUBLIC_BEAMER_ID: ${{ secrets.NEXT_PUBLIC_BEAMER_ID }}
+          NEXT_PUBLIC_BLOCKAID_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_BLOCKAID_CLIENT_ID }}
+          NEXT_PUBLIC_BRAND_LOGO: ${{ secrets.NEXT_PUBLIC_BRAND_LOGO }}
+          NEXT_PUBLIC_BRAND_NAME: ${{ secrets.NEXT_PUBLIC_BRAND_NAME }}
+          NEXT_PUBLIC_CONFIG_SERVICE_KEY: ${{ secrets.NEXT_PUBLIC_CONFIG_SERVICE_KEY }}
+          NEXT_PUBLIC_DATADOG_RUM_APPLICATION_ID: ${{ secrets.NEXT_PUBLIC_DATADOG_RUM_APPLICATION_ID }}
+          NEXT_PUBLIC_DATADOG_RUM_CLIENT_TOKEN: ${{ secrets.NEXT_PUBLIC_DATADOG_RUM_CLIENT_TOKEN }}
+          NEXT_PUBLIC_DATADOG_RUM_ENV: ${{ secrets.NEXT_PUBLIC_DATADOG_RUM_ENV }}
+          NEXT_PUBLIC_DATADOG_RUM_SERVICE: ${{ secrets.NEXT_PUBLIC_DATADOG_RUM_SERVICE }}
+          NEXT_PUBLIC_DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE: ${{ secrets.NEXT_PUBLIC_DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE }}
+          NEXT_PUBLIC_DATADOG_RUM_SESSION_SAMPLE_RATE: ${{ secrets.NEXT_PUBLIC_DATADOG_RUM_SESSION_SAMPLE_RATE }}
+          NEXT_PUBLIC_DATADOG_RUM_SITE: ${{ secrets.NEXT_PUBLIC_DATADOG_RUM_SITE }}
+          NEXT_PUBLIC_DATADOG_RUM_TRACE_SAMPLE_RATE: ${{ secrets.NEXT_PUBLIC_DATADOG_RUM_TRACE_SAMPLE_RATE }}
+          NEXT_PUBLIC_DATADOG_RUM_TRACING_ENABLED: ${{ secrets.NEXT_PUBLIC_DATADOG_RUM_TRACING_ENABLED }}
+          NEXT_PUBLIC_ECOSYSTEM_ID_ADDRESS: ${{ secrets.NEXT_PUBLIC_ECOSYSTEM_ID_ADDRESS }}
+          NEXT_PUBLIC_FIREBASE_OPTIONS_PRODUCTION: ${{ secrets.NEXT_PUBLIC_FIREBASE_OPTIONS_PRODUCTION }}
+          NEXT_PUBLIC_FIREBASE_OPTIONS_STAGING: ${{ secrets.NEXT_PUBLIC_FIREBASE_OPTIONS_STAGING }}
+          NEXT_PUBLIC_FIREBASE_VAPID_KEY_PRODUCTION: ${{ secrets.NEXT_PUBLIC_FIREBASE_VAPID_KEY_PRODUCTION }}
+          NEXT_PUBLIC_FIREBASE_VAPID_KEY_STAGING: ${{ secrets.NEXT_PUBLIC_FIREBASE_VAPID_KEY_STAGING }}
+          NEXT_PUBLIC_GATEWAY_URL_PRODUCTION: ${{ secrets.NEXT_PUBLIC_GATEWAY_URL_PRODUCTION }}
+          NEXT_PUBLIC_GATEWAY_URL_STAGING: ${{ secrets.NEXT_PUBLIC_GATEWAY_URL_STAGING }}
+          NEXT_PUBLIC_HUBSPOT_CONFIG: ${{ secrets.NEXT_PUBLIC_HUBSPOT_CONFIG }}
+          NEXT_PUBLIC_HYPERNATIVE_CALENDLY: ${{ secrets.NEXT_PUBLIC_HYPERNATIVE_CALENDLY }}
+          NEXT_PUBLIC_INFURA_TOKEN: ${{ secrets.NEXT_PUBLIC_INFURA_TOKEN }}
+          NEXT_PUBLIC_INFURA_TOKEN_DEVSTAGING: ${{ secrets.NEXT_PUBLIC_INFURA_TOKEN_DEVSTAGING }}
+          NEXT_PUBLIC_IS_BEHIND_IAP: ${{ secrets.NEXT_PUBLIC_IS_BEHIND_IAP }}
+          NEXT_PUBLIC_IS_OFFICIAL_HOST: ${{ secrets.NEXT_PUBLIC_IS_OFFICIAL_HOST }}
+          NEXT_PUBLIC_PROD_GA_TRACKING_ID: ${{ secrets.NEXT_PUBLIC_PROD_GA_TRACKING_ID }}
+          NEXT_PUBLIC_PROD_HYPERNATIVE_ALLOWLIST_OUTREACH_ID: ${{ secrets.NEXT_PUBLIC_PROD_HYPERNATIVE_ALLOWLIST_OUTREACH_ID }}
+          NEXT_PUBLIC_PROD_HYPERNATIVE_OUTREACH_ID: ${{ secrets.NEXT_PUBLIC_PROD_HYPERNATIVE_OUTREACH_ID }}
+          NEXT_PUBLIC_PROD_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_PROD_MIXPANEL_TOKEN }}
+          NEXT_PUBLIC_PYLON_APP_ID: ${{ secrets.NEXT_PUBLIC_PYLON_APP_ID }}
+          NEXT_PUBLIC_PYLON_CHAT_URL: ${{ secrets.NEXT_PUBLIC_PYLON_CHAT_URL }}
+          NEXT_PUBLIC_SAFENET_CHAIN_ID: ${{ secrets.NEXT_PUBLIC_SAFENET_CHAIN_ID }}
+          NEXT_PUBLIC_SAFENET_CONSENSUS_ADDRESS: ${{ secrets.NEXT_PUBLIC_SAFENET_CONSENSUS_ADDRESS }}
+          NEXT_PUBLIC_SAFENET_COORDINATOR_ADDRESS: ${{ secrets.NEXT_PUBLIC_SAFENET_COORDINATOR_ADDRESS }}
+          NEXT_PUBLIC_SAFENET_EXPLORER_URL: ${{ secrets.NEXT_PUBLIC_SAFENET_EXPLORER_URL }}
+          NEXT_PUBLIC_SAFENET_ORACLE_ADDRESSES: ${{ secrets.NEXT_PUBLIC_SAFENET_ORACLE_ADDRESSES }}
+          NEXT_PUBLIC_SAFENET_RPC_URLS: ${{ secrets.NEXT_PUBLIC_SAFENET_RPC_URLS }}
+          NEXT_PUBLIC_SAFE_APPS_GA_TRACKING_ID: ${{ secrets.NEXT_PUBLIC_SAFE_APPS_GA_TRACKING_ID }}
+          NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN: ${{ secrets.NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN }}
+          NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN_DEVSTAGING: ${{ secrets.NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN_DEVSTAGING }}
+          NEXT_PUBLIC_SAFE_STATUS_PAGE_URL: ${{ secrets.NEXT_PUBLIC_SAFE_STATUS_PAGE_URL }}
+          NEXT_PUBLIC_SAFE_VERSION: ${{ secrets.NEXT_PUBLIC_SAFE_VERSION }}
+          NEXT_PUBLIC_STAGING_HYPERNATIVE_ALLOWLIST_OUTREACH_ID: ${{ secrets.NEXT_PUBLIC_STAGING_HYPERNATIVE_ALLOWLIST_OUTREACH_ID }}
+          NEXT_PUBLIC_STAGING_HYPERNATIVE_OUTREACH_ID: ${{ secrets.NEXT_PUBLIC_STAGING_HYPERNATIVE_OUTREACH_ID }}
+          NEXT_PUBLIC_STAGING_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_STAGING_MIXPANEL_TOKEN }}
+          NEXT_PUBLIC_SUPPORT_CHAT_ALIAS_DOMAIN: ${{ secrets.NEXT_PUBLIC_SUPPORT_CHAT_ALIAS_DOMAIN }}
+          NEXT_PUBLIC_SUPPORT_CHAT_ALLOWED_PARENTS: ${{ secrets.NEXT_PUBLIC_SUPPORT_CHAT_ALLOWED_PARENTS }}
+          NEXT_PUBLIC_TENDERLY_ORG_NAME: ${{ secrets.NEXT_PUBLIC_TENDERLY_ORG_NAME }}
+          NEXT_PUBLIC_TENDERLY_PROJECT_NAME: ${{ secrets.NEXT_PUBLIC_TENDERLY_PROJECT_NAME }}
+          NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL: ${{ secrets.NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL }}
+          NEXT_PUBLIC_TEST_GA_TRACKING_ID: ${{ secrets.NEXT_PUBLIC_TEST_GA_TRACKING_ID }}
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY_PRODUCTION: ${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY_PRODUCTION }}
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY_STAGING: ${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY_STAGING }}
+          NEXT_PUBLIC_WC_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_WC_PROJECT_ID }}
+          NEXT_PUBLIC_ZODIAC_SECURITY_CHECK_URL: ${{ secrets.NEXT_PUBLIC_ZODIAC_SECURITY_CHECK_URL }}
         with:
-          secrets: ${{ toJSON(secrets) }}
           prod: ${{ true }}
 
       - name: Add SRI to scripts
@@ -156,7 +214,7 @@ jobs:
         working-directory: apps/web
 
       - name: Generate artifact attestation
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
           subject-path: apps/web/${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}.tar.gz
 
@@ -165,19 +223,19 @@ jobs:
         working-directory: apps/web
 
       - name: Upload archive as release asset
-        uses: shogo82148/actions-upload-release-asset@ee2ae851dc5d938b90075b3ef12c540abfd1ee72 # v1.10.1
+        uses: shogo82148/actions-upload-release-asset@aaba0f56bdbc1071f4af234d5cb16055e8a400de # v1.10.4
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: apps/web/${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}.tar.gz
 
       - name: Upload checksum as release asset
-        uses: shogo82148/actions-upload-release-asset@ee2ae851dc5d938b90075b3ef12c540abfd1ee72 # v1.10.1
+        uses: shogo82148/actions-upload-release-asset@aaba0f56bdbc1071f4af234d5cb16055e8a400de # v1.10.4
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: apps/web/${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}-sha256-checksum.txt
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 # v6.1.1
+        uses: aws-actions/configure-aws-credentials@cbe3b392738ccf3f987d68400dafcf4b0624a56c # v6.2.4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
@@ -190,13 +248,26 @@ jobs:
         run: bash ./scripts/github/s3_upload.sh
         working-directory: apps/web
 
+      # Fail-open like the hook it replaced: a promotion-dispatch problem must not block
+      # the release publish and back-merge steps below.
+      - name: Generate production promotion token
+        id: promotions_token
+        continue-on-error: true
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.PROMOTIONS_APP_ID }}
+          private-key: ${{ secrets.PROMOTIONS_APP_PRIVATE_KEY }}
+          repositories: ${{ secrets.PROMOTIONS_REPO }}
+          permission-actions: write
+
       # Script to prepare production deployments
       - name: Prepare deployment
+        continue-on-error: true
         run: bash ./scripts/github/prepare_production_deployment.sh
         working-directory: apps/web
         env:
-          PROD_DEPLOYMENT_HOOK_TOKEN: ${{ secrets.PROD_DEPLOYMENT_HOOK_TOKEN }}
-          PROD_DEPLOYMENT_HOOK_URL: ${{ secrets.PROD_DEPLOYMENT_HOOK_URL }}
+          GH_TOKEN: ${{ steps.promotions_token.outputs.token }}
+          PROMOTIONS_REPO: ${{ github.repository_owner }}/${{ secrets.PROMOTIONS_REPO }}
           VERSION_TAG: ${{ needs.tag.outputs.version }}
 
       - name: Create back-merge PR
@@ -286,10 +357,23 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
+      # Mark the Linear "Wallet" release as Released (auto-generates release
+      # notes). Guarded so a Linear outage never fails a shipped release.
+      - name: Complete Linear release
+        if: needs.tag.outputs.version && success()
+        id: linear_complete
+        continue-on-error: true
+        uses: linear/linear-release-action@53ad0f863963e7f8e270fba18426bbb55ef55384 # v0.17.2
+        with:
+          access_key: ${{ secrets.LINEAR_ACCESS_KEY_WEB }}
+          command: complete
+          version: ${{ needs.tag.outputs.version_number }}
+
       - name: Notify on Slack
         continue-on-error: true
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          LINEAR_URL: ${{ steps.linear_complete.outputs['release-url'] }}
         run: |
           if [ -z "$SLACK_WEBHOOK_URL" ]; then
             echo "No Slack webhook configured, skipping notification"
@@ -300,6 +384,10 @@ jobs:
           RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/${{ needs.tag.outputs.version }}"
           BACKMERGE_PR_URL="${{ steps.backmerge.outputs.pr_url }}"
           HAS_CONFLICTS="${{ steps.backmerge.outputs.has_conflicts }}"
+          LINEAR_LINK=""
+          if [ -n "$LINEAR_URL" ]; then
+            LINEAR_LINK="<$LINEAR_URL|View release in Linear>"
+          fi
 
           if [ -n "$BACKMERGE_PR_URL" ]; then
             if [ "$HAS_CONFLICTS" = "true" ]; then
@@ -315,6 +403,7 @@ jobs:
             --arg version "$VERSION" \
             --arg url "$RELEASE_URL" \
             --arg backmerge "$BACKMERGE_MSG" \
+            --arg linear "$LINEAR_LINK" \
             '{
               channel: "#topic-wallet-releases",
               text: ("✅ Safe Wallet " + $version + " ready for going live"),
@@ -323,7 +412,7 @@ jobs:
                   type: "section",
                   text: {
                     type: "mrkdwn",
-                    text: ("*Safe Wallet " + $version + " is ready for going live* ✅\n\n<" + $url + "|View Release on GitHub>\n\n" + $backmerge)
+                    text: ("*Safe Wallet " + $version + " is ready for going live* ✅\n\n<" + $url + "|View Release on GitHub>" + (if $linear != "" then "\n" + $linear else "" end) + "\n\n" + $backmerge)
                   }
                 }
               ]

@@ -36,6 +36,29 @@ describe('factoryValidationScanner', () => {
     )
     expect(result.status).toBe('clear')
     expect(result.score).toBe(100)
+    // The factory evidence carries the full, un-truncated address so the shared
+    // EvidenceList renderer can shorten it and attach a copy button (WA-2371).
+    expect(result.evidence).toContainEqual({
+      label: 'Factory',
+      value: '0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2',
+    })
+  })
+
+  it('returns clear for the official 1.5.0 proxy factory', async () => {
+    // SafeProxyFactory v1.5.0 on Ethereum mainnet
+    const result = await factoryValidationScanner.scan(
+      createMockContext({
+        chainId: '1',
+        creationInfo: {
+          factoryAddress: '0x14F2982D601c9458F93bd70B218933A6f8165e7b',
+          creator: '0x1234',
+          masterCopy: null,
+          transactionHash: '0xabc',
+        },
+      }),
+    )
+    expect(result.status).toBe('clear')
+    expect(result.score).toBe(100)
   })
 
   it('returns partial for an unrecognized factory address', async () => {
@@ -53,6 +76,10 @@ describe('factoryValidationScanner', () => {
     expect(result.status).toBe('partial')
     expect(result.severity).toBe('Medium')
     expect(result.score).toBe(60)
+    expect(result.evidence).toContainEqual({
+      label: 'Factory',
+      value: '0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF',
+    })
   })
 
   it('includes lastChecked timestamp', async () => {

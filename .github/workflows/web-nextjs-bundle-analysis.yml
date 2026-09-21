@@ -22,20 +22,76 @@ jobs:
   analyze:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install dependencies
         uses: ./.github/actions/yarn
 
       - name: Build next.js app
         uses: ./.github/actions/build
-        with:
-          secrets: ${{ toJSON(secrets) }}
+        env:
+          NEXT_PUBLIC_BEAMER_ID: ${{ secrets.NEXT_PUBLIC_BEAMER_ID }}
+          NEXT_PUBLIC_BLOCKAID_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_BLOCKAID_CLIENT_ID }}
+          NEXT_PUBLIC_BRAND_LOGO: ${{ secrets.NEXT_PUBLIC_BRAND_LOGO }}
+          NEXT_PUBLIC_BRAND_NAME: ${{ secrets.NEXT_PUBLIC_BRAND_NAME }}
+          NEXT_PUBLIC_CONFIG_SERVICE_KEY: ${{ secrets.NEXT_PUBLIC_CONFIG_SERVICE_KEY }}
+          NEXT_PUBLIC_DATADOG_RUM_APPLICATION_ID: ${{ secrets.NEXT_PUBLIC_DATADOG_RUM_APPLICATION_ID }}
+          NEXT_PUBLIC_DATADOG_RUM_CLIENT_TOKEN: ${{ secrets.NEXT_PUBLIC_DATADOG_RUM_CLIENT_TOKEN }}
+          NEXT_PUBLIC_DATADOG_RUM_ENV: ${{ secrets.NEXT_PUBLIC_DATADOG_RUM_ENV }}
+          NEXT_PUBLIC_DATADOG_RUM_SERVICE: ${{ secrets.NEXT_PUBLIC_DATADOG_RUM_SERVICE }}
+          NEXT_PUBLIC_DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE: ${{ secrets.NEXT_PUBLIC_DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE }}
+          NEXT_PUBLIC_DATADOG_RUM_SESSION_SAMPLE_RATE: ${{ secrets.NEXT_PUBLIC_DATADOG_RUM_SESSION_SAMPLE_RATE }}
+          NEXT_PUBLIC_DATADOG_RUM_SITE: ${{ secrets.NEXT_PUBLIC_DATADOG_RUM_SITE }}
+          NEXT_PUBLIC_DATADOG_RUM_TRACE_SAMPLE_RATE: ${{ secrets.NEXT_PUBLIC_DATADOG_RUM_TRACE_SAMPLE_RATE }}
+          NEXT_PUBLIC_DATADOG_RUM_TRACING_ENABLED: ${{ secrets.NEXT_PUBLIC_DATADOG_RUM_TRACING_ENABLED }}
+          NEXT_PUBLIC_ECOSYSTEM_ID_ADDRESS: ${{ secrets.NEXT_PUBLIC_ECOSYSTEM_ID_ADDRESS }}
+          NEXT_PUBLIC_FIREBASE_OPTIONS_PRODUCTION: ${{ secrets.NEXT_PUBLIC_FIREBASE_OPTIONS_PRODUCTION }}
+          NEXT_PUBLIC_FIREBASE_OPTIONS_STAGING: ${{ secrets.NEXT_PUBLIC_FIREBASE_OPTIONS_STAGING }}
+          NEXT_PUBLIC_FIREBASE_VAPID_KEY_PRODUCTION: ${{ secrets.NEXT_PUBLIC_FIREBASE_VAPID_KEY_PRODUCTION }}
+          NEXT_PUBLIC_FIREBASE_VAPID_KEY_STAGING: ${{ secrets.NEXT_PUBLIC_FIREBASE_VAPID_KEY_STAGING }}
+          NEXT_PUBLIC_GATEWAY_URL_PRODUCTION: ${{ secrets.NEXT_PUBLIC_GATEWAY_URL_PRODUCTION }}
+          NEXT_PUBLIC_GATEWAY_URL_STAGING: ${{ secrets.NEXT_PUBLIC_GATEWAY_URL_STAGING }}
+          NEXT_PUBLIC_HUBSPOT_CONFIG: ${{ secrets.NEXT_PUBLIC_HUBSPOT_CONFIG }}
+          NEXT_PUBLIC_HYPERNATIVE_CALENDLY: ${{ secrets.NEXT_PUBLIC_HYPERNATIVE_CALENDLY }}
+          NEXT_PUBLIC_INFURA_TOKEN: ${{ secrets.NEXT_PUBLIC_INFURA_TOKEN }}
+          NEXT_PUBLIC_INFURA_TOKEN_DEVSTAGING: ${{ secrets.NEXT_PUBLIC_INFURA_TOKEN_DEVSTAGING }}
+          NEXT_PUBLIC_IS_BEHIND_IAP: ${{ secrets.NEXT_PUBLIC_IS_BEHIND_IAP }}
+          NEXT_PUBLIC_IS_OFFICIAL_HOST: ${{ secrets.NEXT_PUBLIC_IS_OFFICIAL_HOST }}
+          NEXT_PUBLIC_PROD_GA_TRACKING_ID: ${{ secrets.NEXT_PUBLIC_PROD_GA_TRACKING_ID }}
+          NEXT_PUBLIC_PROD_HYPERNATIVE_ALLOWLIST_OUTREACH_ID: ${{ secrets.NEXT_PUBLIC_PROD_HYPERNATIVE_ALLOWLIST_OUTREACH_ID }}
+          NEXT_PUBLIC_PROD_HYPERNATIVE_OUTREACH_ID: ${{ secrets.NEXT_PUBLIC_PROD_HYPERNATIVE_OUTREACH_ID }}
+          NEXT_PUBLIC_PROD_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_PROD_MIXPANEL_TOKEN }}
+          NEXT_PUBLIC_PYLON_APP_ID: ${{ secrets.NEXT_PUBLIC_PYLON_APP_ID }}
+          NEXT_PUBLIC_PYLON_CHAT_URL: ${{ secrets.NEXT_PUBLIC_PYLON_CHAT_URL }}
+          NEXT_PUBLIC_SAFENET_CHAIN_ID: ${{ secrets.NEXT_PUBLIC_SAFENET_CHAIN_ID }}
+          NEXT_PUBLIC_SAFENET_CONSENSUS_ADDRESS: ${{ secrets.NEXT_PUBLIC_SAFENET_CONSENSUS_ADDRESS }}
+          NEXT_PUBLIC_SAFENET_COORDINATOR_ADDRESS: ${{ secrets.NEXT_PUBLIC_SAFENET_COORDINATOR_ADDRESS }}
+          NEXT_PUBLIC_SAFENET_EXPLORER_URL: ${{ secrets.NEXT_PUBLIC_SAFENET_EXPLORER_URL }}
+          NEXT_PUBLIC_SAFENET_ORACLE_ADDRESSES: ${{ secrets.NEXT_PUBLIC_SAFENET_ORACLE_ADDRESSES }}
+          NEXT_PUBLIC_SAFENET_RPC_URLS: ${{ secrets.NEXT_PUBLIC_SAFENET_RPC_URLS }}
+          NEXT_PUBLIC_SAFE_APPS_GA_TRACKING_ID: ${{ secrets.NEXT_PUBLIC_SAFE_APPS_GA_TRACKING_ID }}
+          NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN: ${{ secrets.NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN }}
+          NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN_DEVSTAGING: ${{ secrets.NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN_DEVSTAGING }}
+          NEXT_PUBLIC_SAFE_STATUS_PAGE_URL: ${{ secrets.NEXT_PUBLIC_SAFE_STATUS_PAGE_URL }}
+          NEXT_PUBLIC_SAFE_VERSION: ${{ secrets.NEXT_PUBLIC_SAFE_VERSION }}
+          NEXT_PUBLIC_STAGING_HYPERNATIVE_ALLOWLIST_OUTREACH_ID: ${{ secrets.NEXT_PUBLIC_STAGING_HYPERNATIVE_ALLOWLIST_OUTREACH_ID }}
+          NEXT_PUBLIC_STAGING_HYPERNATIVE_OUTREACH_ID: ${{ secrets.NEXT_PUBLIC_STAGING_HYPERNATIVE_OUTREACH_ID }}
+          NEXT_PUBLIC_STAGING_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_STAGING_MIXPANEL_TOKEN }}
+          NEXT_PUBLIC_SUPPORT_CHAT_ALIAS_DOMAIN: ${{ secrets.NEXT_PUBLIC_SUPPORT_CHAT_ALIAS_DOMAIN }}
+          NEXT_PUBLIC_SUPPORT_CHAT_ALLOWED_PARENTS: ${{ secrets.NEXT_PUBLIC_SUPPORT_CHAT_ALLOWED_PARENTS }}
+          NEXT_PUBLIC_TENDERLY_ORG_NAME: ${{ secrets.NEXT_PUBLIC_TENDERLY_ORG_NAME }}
+          NEXT_PUBLIC_TENDERLY_PROJECT_NAME: ${{ secrets.NEXT_PUBLIC_TENDERLY_PROJECT_NAME }}
+          NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL: ${{ secrets.NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL }}
+          NEXT_PUBLIC_TEST_GA_TRACKING_ID: ${{ secrets.NEXT_PUBLIC_TEST_GA_TRACKING_ID }}
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY_PRODUCTION: ${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY_PRODUCTION }}
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY_STAGING: ${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY_STAGING }}
+          NEXT_PUBLIC_WC_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_WC_PROJECT_ID }}
+          NEXT_PUBLIC_ZODIAC_SECURITY_CHECK_URL: ${{ secrets.NEXT_PUBLIC_ZODIAC_SECURITY_CHECK_URL }}
 
       - name: Analyze bundle
         run: |
           cd apps/web
-          npx -p nextjs-bundle-analysis report
+          npx -p nextjs-bundle-analysis@0.5.0 report
 
       - name: Upload bundle
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -45,23 +101,30 @@ jobs:
 
       - name: List artifacts from default branch
         id: list_artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
         run: |
-          runs=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/web-nextjs-bundle-analysis.yml/runs?event=push&branch=dev&status=success&per_page=1")
+          runs=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
+            "https://api.github.com/repos/$REPO/actions/workflows/web-nextjs-bundle-analysis.yml/runs?event=push&branch=dev&status=success&per_page=1")
 
           artifacts_url=$(echo "$runs" | jq -r '.workflow_runs[0].artifacts_url')
-          artifacts=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "$artifacts_url")
+          artifacts=$(curl -s -H "Authorization: Bearer $GH_TOKEN" "$artifacts_url")
 
           artifact_id=$(echo "$artifacts" | jq -r '.artifacts[] | select(.name=="bundle" and .expired==false) | .id')
 
           echo "artifact_id=$artifact_id" >> $GITHUB_OUTPUT
 
       - name: Download artifact zip
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          ARTIFACT_ID: ${{ steps.list_artifacts.outputs.artifact_id }}
         run: |
           curl -L \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Authorization: Bearer $GH_TOKEN" \
             -o artifact.zip \
-            "https://api.github.com/repos/${{ github.repository }}/actions/artifacts/${{ steps.list_artifacts.outputs.artifact_id }}/zip"
+            "https://api.github.com/repos/$REPO/actions/artifacts/$ARTIFACT_ID/zip"
 
       - name: Unzip artifact
         run: unzip artifact.zip -d apps/web/.next/analyze/base && mkdir -p apps/web/.next/analyze/base/bundle && mv apps/web/.next/analyze/base/__bundle_analysis.json apps/web/.next/analyze/base/bundle/
@@ -70,7 +133,7 @@ jobs:
         if: success() && github.event.number
         run: |
           cd apps/web
-          ls -laR .next/analyze/base && npx -p nextjs-bundle-analysis compare
+          ls -laR .next/analyze/base && npx -p nextjs-bundle-analysis@0.5.0 compare
 
       - name: Get Comment Body
         id: get-comment-body
@@ -83,7 +146,7 @@ jobs:
           echo EOF >> $GITHUB_OUTPUT
 
       - name: Comment
-        uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0 # v3.0.4
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
         with:
           header: next-bundle-analysis
           message: ${{ steps.get-comment-body.outputs.body }}

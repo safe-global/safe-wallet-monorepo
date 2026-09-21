@@ -105,7 +105,7 @@ describe('useCompatibilityWarning', () => {
       const { result } = renderHook(() => useCompatibilityWarning(proposal, true))
 
       expect(result.current).toEqual({
-        message: `Fake dApp does not support this Safe Account's network (this network). Please switch to a Safe Account on one of the supported networks below.`,
+        message: `Fake dApp does not support this Safe account's network (this network). Please switch to a Safe account on one of the supported networks below.`,
         severity: 'error',
       })
     })
@@ -122,7 +122,7 @@ describe('useCompatibilityWarning', () => {
       const { result } = renderHook(() => useCompatibilityWarning(proposal, true))
 
       expect(result.current).toEqual({
-        message: `This dApp does not support this Safe Account's network (this network). Please switch to a Safe Account on one of the supported networks below.`,
+        message: `This dApp does not support this Safe account's network (this network). Please switch to a Safe account on one of the supported networks below.`,
         severity: 'error',
       })
     })

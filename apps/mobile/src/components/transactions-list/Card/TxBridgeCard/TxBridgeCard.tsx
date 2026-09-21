@@ -6,16 +6,17 @@ import React from 'react'
 import { BridgeAndSwapTransactionInfo, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { formatUnits } from 'ethers'
 import { ChainIndicator } from '@/src/components/ChainIndicator'
+import { SafeListItemProps } from '@/src/components/SafeListItem/SafeListItem'
 
-interface TxBridgeCardProps {
+type TxBridgeCardProps = {
   txInfo: BridgeAndSwapTransactionInfo
   bordered?: boolean
   inQueue?: boolean
   executionInfo?: Transaction['executionInfo']
   onPress: () => void
-}
+} & Partial<SafeListItemProps>
 
-export function TxBridgeCard({ txInfo, bordered, executionInfo, inQueue, onPress }: TxBridgeCardProps) {
+export function TxBridgeCard({ txInfo, bordered, executionInfo, inQueue, onPress, ...rest }: TxBridgeCardProps) {
   const actualFromAmount =
     BigInt(txInfo.fromAmount) + BigInt(txInfo.fees?.integratorFee ?? 0n) + BigInt(txInfo.fees?.lifiFee ?? 0n)
 
@@ -57,6 +58,7 @@ export function TxBridgeCard({ txInfo, bordered, executionInfo, inQueue, onPress
       bordered={bordered}
       onPress={onPress}
       inQueue={inQueue}
+      {...rest}
       leftNode={
         <Theme name="logo">
           <View position="relative" width="$8" height="$8">

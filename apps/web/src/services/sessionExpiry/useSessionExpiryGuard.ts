@@ -1,23 +1,18 @@
 import { useEffect, useRef } from 'react'
-import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
+import { useRouter } from 'next/router'
 import { cgwApi as authApi } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { selectIsStoreHydrated, setUnauthenticated } from '@/store/authSlice'
-import { closeByGroupKey, showNotification } from '@/store/notificationsSlice'
+import { selectIsStoreHydrated, setSessionCheckPending } from '@/store/authSlice'
+import { closeByGroupKey } from '@/store/notificationsSlice'
 import { LOGGING_OUT_KEY } from '@/hooks/useLogoutCallback'
-import { AppRoutes } from '@/config/routes'
+import { expireSession, isForbidden, SESSION_EXPIRED_GROUP_KEY } from './expireSession'
+
+export { SESSION_EXPIRED_GROUP_KEY, SESSION_EXPIRED_MESSAGE } from './expireSession'
 
 // Mirrors apps/web/src/features/oidc-auth/constants.ts. The constant is not
 // exported from the feature's public API; duplicating the literal here avoids
 // pulling the (lazy-loaded) feature module into the boot path.
 const OIDC_AUTH_PENDING_KEY = 'oidc_auth_pending'
-
-export const SESSION_EXPIRED_GROUP_KEY = 'session-expired'
-export const SESSION_EXPIRED_MESSAGE = 'Your session has expired. Please sign in to workspaces again.'
-export const SESSION_EXPIRED_SIGN_IN_LABEL = 'Sign in to workspaces'
-
-const isForbidden = (error: unknown): error is FetchBaseQueryError =>
-  typeof error === 'object' && error !== null && 'status' in error && error.status === 403
 
 /**
  * Detects an expired session and clears Redux auth state so components stop
@@ -39,11 +34,20 @@ const isForbidden = (error: unknown): error is FetchBaseQueryError =>
  * processing — those hooks already call /me themselves. The local timer is
  * **not** suppressed: we still want sessionExpiresAt enforced even if the
  * surrounding flow finishes silently without dispatching an auth-state change.
+ *
+ * Auth is cleared on every route; the toast is shown only on workspaces routes.
+ * Mid-session 403s are handled by `forbiddenSessionListener`, which funnels
+ * into the same `expireSession` routine.
  */
 export const useSessionExpiryGuard = (): void => {
   const dispatch = useAppDispatch()
+  const router = useRouter()
   const isHydrated = useAppSelector(selectIsStoreHydrated)
   const sessionExpiresAt = useAppSelector((state) => state.auth.sessionExpiresAt)
+
+  // Ref so expiry reads the pathname at fire-time without re-arming the effect.
+  const pathnameRef = useRef(router.pathname)
+  pathnameRef.current = router.pathname
 
   // Track which sessionExpiresAt value we've already processed so that
   // unrelated re-renders (e.g. dispatch identity churn under React Strict Mode)
@@ -63,17 +67,7 @@ export const useSessionExpiryGuard = (): void => {
     let cancelled = false
     let timer: ReturnType<typeof setTimeout> | undefined
 
-    const expireNow = () => {
-      dispatch(setUnauthenticated())
-      dispatch(
-        showNotification({
-          message: SESSION_EXPIRED_MESSAGE,
-          variant: 'error',
-          groupKey: SESSION_EXPIRED_GROUP_KEY,
-          link: { href: AppRoutes.welcome.spaces, title: SESSION_EXPIRED_SIGN_IN_LABEL },
-        }),
-      )
-    }
+    const expireNow = () => dispatch(expireSession(pathnameRef.current))
 
     // Pre-flight: cookie is already past local expiry → no point arming the
     // timer or probing /me, just clear immediately.
@@ -106,6 +100,7 @@ export const useSessionExpiryGuard = (): void => {
       }
     }
 
+    dispatch(setSessionCheckPending(true))
     const probe = dispatch(authApi.endpoints.authGetMeV1.initiate())
     probe
       .unwrap()
@@ -120,6 +115,7 @@ export const useSessionExpiryGuard = (): void => {
       })
       .finally(() => {
         probe.unsubscribe()
+        dispatch(setSessionCheckPending(false))
       })
 
     return () => {

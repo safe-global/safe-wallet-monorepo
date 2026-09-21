@@ -4,7 +4,7 @@ import { TransferDirection } from '@safe-global/store/gateway/types'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 import { TransferTx } from '@/components/transactions/TxInfo'
 import { isTxQueued } from '@/utils/transaction-guards'
-import { Box, Stack, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import React from 'react'
 
 import TransferActions from '@/components/transactions/TxDetails/TxData/Transfer/TransferActions'
@@ -28,44 +28,55 @@ const TransferTxInfoMain = ({ txInfo, txStatus, trusted, imitation }: TransferTx
   const fiatValue = useTransferFiatValue(txInfo.transferInfo, isQueued)
 
   return (
-    <Box display="flex" flexDirection="row" alignItems="center" gap={1}>
-      {direction === TransferDirection.INCOMING ? 'Received' : isQueued ? 'Send' : 'Sent'}{' '}
-      <b>
-        <TransferTx info={txInfo} omitSign preciseAmount />
-      </b>
+    <div className="flex flex-row items-center gap-2 [&_b]:font-normal">
+      <Typography variant="paragraph-small-bold" className="min-w-10">
+        {direction === TransferDirection.INCOMING ? 'Received' : isQueued ? 'Send' : 'Sent'}
+      </Typography>
+      <TransferTx info={txInfo} omitSign preciseAmount iconSize={32} />
       {fiatValue != null && (
-        <Typography variant="body2" color="text.secondary" component="span">
+        <Typography variant="paragraph-small" className="text-muted-foreground">
           (<FiatValue value={fiatValue} />)
         </Typography>
       )}
-      {direction === TransferDirection.INCOMING ? ' from' : ' to'}
       {!trusted && !imitation && <MaliciousTxWarning />}
-    </Box>
+    </div>
   )
 }
 
 const TransferTxInfo = ({ txInfo, txStatus, trusted, imitation }: TransferTxInfoProps) => {
-  const address = txInfo.direction.toUpperCase() === TransferDirection.INCOMING ? txInfo.sender : txInfo.recipient
+  const { direction } = txInfo
+  const address = direction.toUpperCase() === TransferDirection.INCOMING ? txInfo.sender : txInfo.recipient
+  const directionLabel = direction === TransferDirection.INCOMING ? 'From' : 'To'
 
   return (
-    <Box display="flex" flexDirection="column" gap={1}>
+    <div className="flex flex-col gap-2">
       <TransferTxInfoMain txInfo={txInfo} txStatus={txStatus} trusted={trusted} imitation={imitation} />
 
-      <Box display="flex" alignItems="center" width="100%">
-        <NamedAddressInfo
-          address={address.value}
-          name={address.name}
-          customAvatar={address.logoUri}
-          shortAddress={false}
-          hasExplorer
-          showCopyButton
-          trusted={trusted && !imitation}
-        >
-          <TransferActions address={address.value} txInfo={txInfo} trusted={trusted} />
-        </NamedAddressInfo>
-      </Box>
+      <div className="flex w-full items-center gap-2 [&_.ethHashInfo-name]:font-bold">
+        <Typography variant="paragraph-small-bold" className="min-w-10 whitespace-nowrap">
+          {directionLabel}
+        </Typography>
+        {/* min-w-0 so the address yields to the label beside it. Without it this block kept its full
+            content width and the row overflowed by exactly the label + gap (48px), pushing the
+            trailing actions menu outside the panel. The address ellipsizes instead. */}
+        <div className="min-w-0 flex-1">
+          <NamedAddressInfo
+            address={address.value}
+            name={address.name}
+            customAvatar={address.logoUri}
+            shortAddress={false}
+            hasExplorer
+            showCopyButton
+            showPrefix={false}
+            avatarSize={32}
+            trusted={trusted && !imitation}
+          >
+            <TransferActions address={address.value} txInfo={txInfo} trusted={trusted} />
+          </NamedAddressInfo>
+        </div>
+      </div>
       {imitation && <ImitationTransactionWarning />}
-    </Box>
+    </div>
   )
 }
 
@@ -79,7 +90,7 @@ export const InlineTransferTxInfo = ({
   recipient: string
 }) => {
   return (
-    <Stack direction="row" alignItems="center" spacing={1}>
+    <div className="flex flex-row items-center gap-2">
       <Typography>Send</Typography>
       <TokenAmount
         value={value}
@@ -90,7 +101,7 @@ export const InlineTransferTxInfo = ({
       />
       <Typography>to</Typography>
       <NamedAddressInfo address={recipient} copyAddress={false} shortAddress={true} onlyName avatarSize={16} />
-    </Stack>
+    </div>
   )
 }
 

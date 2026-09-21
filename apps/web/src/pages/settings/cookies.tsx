@@ -1,6 +1,6 @@
 import { CookieAndTermBanner } from 'src/components/common/CookieAndTermBanner'
 import SettingsHeader from '@/components/settings/SettingsHeader'
-import { Grid, Paper, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
@@ -15,19 +15,17 @@ const Cookies: NextPage = () => {
       <SettingsHeader />
 
       <main>
-        <Paper sx={{ p: 4, mb: 2 }}>
-          <Grid container spacing={3}>
-            <Grid item sm={4} xs={12}>
-              <Typography variant="h4" fontWeight={700}>
-                Cookie preferences
-              </Typography>
-            </Grid>
+        <div className="mb-4 rounded-lg bg-[var(--color-background-paper)] p-8">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-[1fr_2fr]">
+            <div>
+              <Typography variant="h4">Cookie preferences</Typography>
+            </div>
 
-            <Grid item container xs>
+            <div>
               <CookieAndTermBanner />
-            </Grid>
-          </Grid>
-        </Paper>
+            </div>
+          </div>
+        </div>
       </main>
     </>
   )

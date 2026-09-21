@@ -133,7 +133,7 @@ describe('ProposersList', () => {
 
     const button = getByTestId('add-proposer-btn')
     expect(button).toBeDisabled()
-    expect(getByLabelText('Your connected wallet is not a signer of this Safe Account')).toBeInTheDocument()
+    expect(getByLabelText('Your connected wallet is not a signer of this Safe account')).toBeInTheDocument()
   })
 
   it('should disable the Add proposer button when Safe is undeployed', () => {

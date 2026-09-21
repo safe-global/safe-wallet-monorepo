@@ -290,7 +290,10 @@ export const visitedSafes = {
 }
 export const addressBookData = {
   proposers: {
-    11155111: { '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED': 'AD Proposer1' },
+    11155111: {
+      '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED': 'AD Proposer1',
+      '0x8eeC30d6FB6eC104B7308a8847db5FF487152a3b': 'AD Proposer2',
+    },
   },
   nestedsafes: {
     11155111: {
@@ -455,7 +458,6 @@ export const safeSettings = {
     hiddenTokens: {},
     shortName: {
       show: false,
-      copy: false,
       qr: false,
     },
     theme: {
@@ -480,7 +482,6 @@ export const safeSettings = {
     hideDust: false,
     shortName: {
       show: true,
-      copy: true,
       qr: true,
     },
     theme: {},
@@ -807,26 +808,6 @@ export const addedSafes = {
       },
     },
   },
-  // sidebar_6.cy.js - single safes for sorting tests
-  sidebarTrustedSafesForSorting: {
-    11155111: {
-      '0x98705770aF3b18db0a64597F6d4DCe825915fec0': {
-        owners: [],
-        threshold: 1,
-        ethBalance: '0',
-      },
-      '0xBb26E3717172d5000F87DeFd391994f789D80aEB': {
-        owners: [],
-        threshold: 1,
-        ethBalance: '0',
-      },
-      '0x905934aA8758c06B2422F0C90D97d2fbb6677811': {
-        owners: [],
-        threshold: 1,
-        ethBalance: '0',
-      },
-    },
-  },
   /** Trusted safes in sidebar-sidebar3.cy.js, sidebar5.cy.js */
   sidebarTrustedSafe1Safe2: {
     11155111: {
@@ -966,6 +947,11 @@ export const appPermissions = (url) => ({
   infoModalAccepted: JSON.stringify(infoModalAccepted),
 })
 
+// Safe (SDK) permissions payload for SAFE_PERMISSIONS_KEY, as stored after accepting the prompt
+export const safeAppSafePermissions = (appUrl) => ({
+  [appUrl]: [{ invoker: appUrl, parentCapability: 'requestAddressBook', date: 1111111111111, caveats: [] }],
+})
+
 export const cookies = {
   acceptedCookies: JSON.stringify(cookieState),
   acceptedTokenListOnboarding: true,
@@ -973,6 +959,10 @@ export const cookies = {
 
 export const safeLabsTerms = {
   acceptedTerms: 'true',
+}
+
+export const safeProAnnouncement = {
+  seen: 'true',
 }
 
 export const pendingCfDeletes = {

@@ -13,7 +13,7 @@ import {
   type GetCounterfactualSafesResponse,
 } from '@safe-global/store/gateway/AUTO_GENERATED/counterfactual-safes'
 import { cgwApi as spacesApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { parseSpaceId } from '@/utils/spaces'
+import { normalizeSpaceId } from '@/utils/spaces'
 
 const SYNC_RETRY_DELAY_MS = 2000
 
@@ -87,11 +87,11 @@ const useCounterfactualSafeSync = () => {
       // Fetch CF safes from user endpoint and space endpoint
       const userQuery = dispatch(counterfactualSafesApi.endpoints.counterfactualSafesGetV1.initiate(undefined))
       // Guard against persisted/legacy lastUsedSpace values that aren't a clean
-      // integer — Number('abc') is NaN and would silently hit the API with NaN.
-      const numericSpaceId = parseSpaceId(spaceId)
+      // UUID or non-empty string — pass through unchanged, null means skip.
+      const resolvedSpaceId = normalizeSpaceId(spaceId)
       const spaceQuery =
-        numericSpaceId !== null
-          ? dispatch(spacesApi.endpoints.spaceCounterfactualSafesGetV1.initiate({ spaceId: numericSpaceId }))
+        resolvedSpaceId !== null
+          ? dispatch(spacesApi.endpoints.spaceCounterfactualSafesGetV1.initiate({ spaceId: resolvedSpaceId }))
           : null
 
       try {
@@ -160,12 +160,14 @@ const useCounterfactualSafeSync = () => {
       try {
         await fetchAndMerge()
       } catch (firstError) {
-        logError(Errors._650, firstError)
+        // Attempts are tagged so the two failures of one sync stay separable in
+        // analytics instead of reading as a duplicated event.
+        logError(Errors._650, firstError, { attempt: 1 })
         await new Promise((resolve) => setTimeout(resolve, SYNC_RETRY_DELAY_MS))
         try {
           await fetchAndMerge()
         } catch (retryError) {
-          logError(Errors._650, retryError)
+          logError(Errors._650, retryError, { attempt: 2 })
         }
       }
       // Settle regardless of outcome — leaving consumers waiting forever is worse

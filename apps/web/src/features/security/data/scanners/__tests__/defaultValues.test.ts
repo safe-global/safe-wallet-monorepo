@@ -47,11 +47,11 @@ describe('scanner accuracy with real vs default data', () => {
       expect(result.partner).toBe('hypernative')
     })
 
-    it('correctly distinguishes 0 balance (clear) from high balance (partial) on supported chain', async () => {
+    it('correctly distinguishes 0 balance (not_applicable) from high balance (partial) on supported chain', async () => {
       const base = { guard: null, chainSupportsHypernative: true }
-      const clearResult = await guardScanner.scan(createMockContext({ ...base, balanceUsd: 0 }))
+      const naResult = await guardScanner.scan(createMockContext({ ...base, balanceUsd: 0 }))
       const partialResult = await guardScanner.scan(createMockContext({ ...base, balanceUsd: 2_000_000 }))
-      expect(clearResult.status).toBe('clear')
+      expect(naResult.status).toBe('not_applicable')
       expect(partialResult.status).toBe('partial')
     })
   })

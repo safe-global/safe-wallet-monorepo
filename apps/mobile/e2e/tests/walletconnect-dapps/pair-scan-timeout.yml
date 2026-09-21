@@ -1,0 +1,38 @@
+appId: ${APP_ID}
+tags:
+  - walletconnect-dapps
+---
+# Timeout: arm pair() to hang → open scanner → inject a valid wc: URI → spinner →
+# the scanner's 10s timer fires the timeout overlay.
+#
+# Note: the timeout in code wraps the pair() call (PAIR_TIMEOUT_MS), not the
+# arrival of a proposal. The fake pair() never resolves so the timer fires.
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+- tapOn:
+    id: 'e2eWcDappsBase'
+- assertVisible:
+    id: 'home-tab'
+
+# Arm the fake pair() to hang.
+- tapOn:
+    id: 'e2eWcPairHang'
+
+- tapOn:
+    id: 'navbar-qr-button'
+
+- tapOn:
+    id: 'e2e-scan-input'
+- inputText: 'wc:e2e-timeout@2?relay-protocol=irn'
+- tapOn:
+    id: 'e2e-scan-submit'
+
+# pair() hangs, so after PAIR_TIMEOUT_MS (10s) the timeout overlay appears. Its
+# Try again button is the reliable anchor — the connecting/timeout copy is a
+# spinner+text group with a merged accessibility label, so anchor on the id.
+- extendedWaitUntil:
+    visible:
+      id: 'wc-scan-try-again'
+    timeout: 15000

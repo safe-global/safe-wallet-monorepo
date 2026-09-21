@@ -1,43 +1,55 @@
 import { useSpacesCreateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useRouter } from 'next/router'
 import { type ReactElement, useState } from 'react'
-import { Alert, Box, Button, CircularProgress, DialogActions, DialogContent, SvgIcon, Typography } from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
 import SpaceIcon from '@/public/images/spaces/space.svg'
 import ModalDialog from '@/components/common/ModalDialog'
 import NameInput from '@/components/common/NameInput'
+import { NAME_MIN_LENGTH, SPACE_NAME_MAX_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
+import { setLastUsedSpace } from '@/store/authSlice'
 import { useAppDispatch } from '@/store'
 import ExternalLink from '@/components/common/ExternalLink'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import DialogActions from '@/components/common/DialogActions'
+import { Typography } from '@/components/ui/typography'
+import { cn } from '@/utils/cn'
+import { useDarkMode } from '@/hooks/useDarkMode'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
+import type { SerializedError } from '@reduxjs/toolkit'
 
 function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement {
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
   const dispatch = useAppDispatch()
+  const isDarkMode = useDarkMode()
   const methods = useForm<{ name: string }>({ mode: 'onChange' })
   const [createSpaceWithUser] = useSpacesCreateV1Mutation()
   const { handleSubmit, formState } = methods
 
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
+    const name = sanitizeName(data.name)
 
     try {
       setIsSubmitting(true)
-      const response = await createSpaceWithUser({ createSpaceDto: { name: data.name } })
+      const response = await createSpaceWithUser({ createSpaceDto: { name } })
 
       if (response.data) {
-        const spaceId = response.data.id.toString()
+        const spaceId = response.data.uuid
         trackEvent({ ...SPACE_EVENTS.WORKSPACE_CREATED, label: spaceId }, { workspace_id: spaceId })
+        dispatch(setLastUsedSpace(spaceId))
         router.push({ pathname: AppRoutes.spaces.index, query: { spaceId } })
         onClose()
 
         dispatch(
           showNotification({
-            message: `Created workspace with name ${data.name}.`,
+            message: `Created workspace with name ${name}.`,
             variant: 'success',
             groupKey: 'create-space-success',
           }),
@@ -48,9 +60,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
         throw response.error
       }
     } catch (error) {
-      // @ts-ignore
-      const errorMessage = error?.data?.message || 'Failed creating the workspace. Please try again.'
-      setError(errorMessage)
+      setError(getRtkQueryErrorMessage(error as FetchBaseQueryError | SerializedError))
     } finally {
       setIsSubmitting(false)
     }
@@ -62,46 +72,53 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
       onClose={onClose}
       dialogTitle={
         <>
-          <SvgIcon component={SpaceIcon} inheritViewBox sx={{ fill: 'none', mr: 1 }} />
+          <SpaceIcon className="mr-2 size-6 fill-none" />
           Create workspace
         </>
       }
       hideChainIndicator
     >
-      <FormProvider {...methods}>
-        <form onSubmit={onSubmit}>
-          <DialogContent sx={{ py: 2 }}>
-            <Box mb={2}>
-              <NameInput data-testid="space-name-input" label="Name" autoFocus name="name" required />
-            </Box>
-            <Typography variant="body2" color="text.secondary">
-              How is my data processed? Read our <ExternalLink href={AppRoutes.privacy}>privacy policy</ExternalLink>
-            </Typography>
+      <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
+        <FormProvider {...methods}>
+          <form onSubmit={onSubmit}>
+            <div className="px-6 py-4">
+              <div className="mb-4">
+                <NameInput
+                  data-testid="space-name-input"
+                  label="Name"
+                  autoFocus
+                  name="name"
+                  required
+                  validateCharset
+                  minLength={NAME_MIN_LENGTH}
+                  maxLength={SPACE_NAME_MAX_LENGTH}
+                />
+              </div>
+              <Typography variant="paragraph-small" color="muted">
+                How is my data processed? Read our <ExternalLink href={AppRoutes.privacy}>privacy policy</ExternalLink>
+              </Typography>
 
-            {error && (
-              <Alert severity="error" sx={{ mt: 2 }}>
-                {error}
-              </Alert>
-            )}
-          </DialogContent>
+              {error && (
+                <Alert variant="destructive" className="mt-4">
+                  <AlertSeverityIcon variant="destructive" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+            </div>
 
-          <DialogActions>
-            <Button data-testid="cancel-btn" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button
-              data-testid="create-space-modal-button"
-              type="submit"
-              variant="contained"
-              disabled={!formState.isValid || isSubmitting}
-              disableElevation
-              sx={{ minWidth: '200px' }}
-            >
-              {isSubmitting ? <CircularProgress size={20} /> : 'Create workspace'}
-            </Button>
-          </DialogActions>
-        </form>
-      </FormProvider>
+            <DialogActions
+              className="p-4 pt-0"
+              onCancel={onClose}
+              cancelTestId="cancel-btn"
+              confirmLabel="Create workspace"
+              confirmType="submit"
+              confirmDisabled={!formState.isValid || isSubmitting}
+              confirmLoading={isSubmitting}
+              confirmTestId="create-space-modal-button"
+            />
+          </form>
+        </FormProvider>
+      </div>
     </ModalDialog>
   )
 }

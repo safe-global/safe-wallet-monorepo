@@ -1,6 +1,9 @@
 import { useMemo } from 'react'
+import { useAppSelector } from '@/store'
 import useAllSafes from '@/hooks/safes/useAllSafes'
-import { detectSimilarAddresses } from '@safe-global/utils/utils/addressSimilarity'
+import { selectAllAddressBooks } from '@/store/addressBookSlice'
+import { selectAnchorIndex } from '@/features/address-poisoning/store'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { SimilarAddressInfo } from './useNonPinnedSafeWarning.types'
 
 type SimilarAddressResult = {
@@ -9,45 +12,44 @@ type SimilarAddressResult = {
 }
 
 /**
- * Hook to detect if a given address has similar addresses among the user's safes.
- * Used for warning users about potential address poisoning attacks.
+ * Detect whether the given address dangerously resembles one of the addresses the
+ * user EXPLICITLY trusts (the anchor set: address book, added/pinned, curated nested
+ * and undeployed safes). Used to warn about address-poisoning.
+ *
+ * The comparison baseline is anchors only — never CGW owner-owned safes — so an
+ * attacker cannot poison the baseline by deploying a Safe that names the user as
+ * owner (previously this compared against all `useAllSafes()`, which was exploitable).
  */
 const useSimilarAddressDetection = (safeAddress: string | undefined): SimilarAddressResult => {
+  const anchorIndex = useAppSelector(selectAnchorIndex)
   const allSafes = useAllSafes()
+  const addressBooks = useAppSelector(selectAllAddressBooks)
 
   return useMemo(() => {
     const emptyResult: SimilarAddressResult = { hasSimilarAddress: false, similarAddresses: [] }
 
-    if (!safeAddress || !allSafes || allSafes.length === 0) {
+    if (!safeAddress) {
       return emptyResult
     }
 
-    const otherAddresses = allSafes
-      .map((s) => s.address)
-      .filter((addr) => addr.toLowerCase() !== safeAddress.toLowerCase())
-
-    if (otherAddresses.length === 0) {
+    const match = anchorIndex.query(safeAddress)
+    if (!match) {
       return emptyResult
     }
 
-    const allAddressesToCheck = [...otherAddresses, safeAddress]
-    const result = detectSimilarAddresses(allAddressesToCheck)
+    const matchedAddress = `0x${match.anchor}`
+    const matchedSafe = allSafes?.find((safe) => sameAddress(safe.address, matchedAddress))
+    // The anchor set also includes address-book contacts that aren't in useAllSafes(); fall back to
+    // the address-book name (any chain) so a lookalike of a contact still shows the trusted name.
+    const addressBookName = Object.values(addressBooks)
+      .flatMap((entries) => Object.entries(entries))
+      .find(([addr]) => sameAddress(addr, matchedAddress))?.[1]
 
-    if (!result.isFlagged(safeAddress)) {
-      return emptyResult
+    return {
+      hasSimilarAddress: true,
+      similarAddresses: [{ address: matchedAddress, name: matchedSafe?.name ?? addressBookName }],
     }
-
-    const group = result.getGroup(safeAddress)
-    const similarAddresses =
-      group?.addresses
-        .filter((addr) => addr.toLowerCase() !== safeAddress.toLowerCase())
-        .map((addr) => {
-          const safeInfo = allSafes.find((s) => s.address.toLowerCase() === addr.toLowerCase())
-          return { address: addr, name: safeInfo?.name }
-        }) ?? []
-
-    return { hasSimilarAddress: true, similarAddresses }
-  }, [safeAddress, allSafes])
+  }, [safeAddress, anchorIndex, allSafes, addressBooks])
 }
 
 export default useSimilarAddressDetection

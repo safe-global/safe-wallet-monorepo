@@ -306,7 +306,7 @@ describe('useTotalBalances', () => {
       expect(result.current.data).toBeDefined()
     })
 
-    it('should show error when either source errors', () => {
+    it('should show error when tx service errors', () => {
       const mockPortfolio = createMockPortfolio()
 
       jest
@@ -320,6 +320,49 @@ describe('useTotalBalances', () => {
       const { result } = renderHook(() => useTotalBalances(allTokensParams))
 
       expect(result.current.error).toBeInstanceOf(Error)
+      expect(result.current.data).toBeUndefined()
+    })
+
+    it('should render tx service balances when portfolio errors', () => {
+      const mockBalances = createMockTxServiceBalances()
+
+      jest
+        .spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query')
+        .mockReturnValue(mockQueryResult({ error: new Error('Portfolio error') }))
+
+      jest
+        .spyOn(balancesQueries, 'useBalancesGetBalancesV1Query')
+        .mockReturnValue(mockQueryResult({ currentData: mockBalances }))
+
+      const { result } = renderHook(() => useTotalBalances(allTokensParams))
+
+      // No page-level error: tx service balances are enough to render the token list
+      expect(result.current.error).toBeUndefined()
+      expect(result.current.loading).toBe(false)
+      // Token list comes from tx service
+      expect(result.current.data?.items).toEqual(mockBalances.items)
+      expect(result.current.data?.fiatTotal).toBe('1000')
+      expect(result.current.data?.tokensFiatTotal).toBe('1000')
+      // Portfolio-derived data falls back safely
+      expect(result.current.data?.positions).toBeUndefined()
+      expect(result.current.data?.positionsFiatTotal).toBe('0')
+      // Still flagged as all-tokens mode so the UI keeps signalling the selected mode
+      expect(result.current.data?.isAllTokensMode).toBe(true)
+    })
+
+    it('should keep loading when portfolio errors but tx service has no data yet', () => {
+      jest
+        .spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query')
+        .mockReturnValue(mockQueryResult({ error: new Error('Portfolio error') }))
+
+      jest
+        .spyOn(balancesQueries, 'useBalancesGetBalancesV1Query')
+        .mockReturnValue(mockQueryResult({ currentData: undefined }))
+
+      const { result } = renderHook(() => useTotalBalances(allTokensParams))
+
+      expect(result.current.error).toBeUndefined()
+      expect(result.current.loading).toBe(true)
       expect(result.current.data).toBeUndefined()
     })
   })

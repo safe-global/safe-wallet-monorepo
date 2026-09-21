@@ -45,7 +45,8 @@ e2e/
 ├── docs/                      # Decisions and standards — the "why" behind the framework
 │   ├── README.md              # This file — philosophy, rules, patterns
 │   ├── AI_TEST_OUTPUT_FORMAT.md   # 12-step protocol for AI test generation
-│   ├── CYPRESS_MIGRATION_GUIDE.md # Cypress → Playwright migration protocol
+│   ├── CYPRESS_MIGRATION_GUIDE.md # Cypress → Playwright protocol + staged programme
+│   ├── CYPRESS_PW_MIGRATION_STATUS.md # Live migration queue — source of truth for stage membership
 │   └── developer-testability-contract.md  # What QA needs from dev code
 └── reports/                   # Generated — gitignored
 ```
@@ -128,13 +129,15 @@ Use web-first assertions (auto-retrying). Never extract text and assert on it ma
 
 ```typescript
 // ✅ Good — web-first, role-based, user-visible
-await expect(page.getByRole('alert')).toContainText('Email is required')
+await expect(page.getByRole('alert').filter({ hasText: 'Email is required' })).toBeVisible()
 await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled()
 await expect(page.getByRole('heading', { name: user.name })).toBeVisible()
 
 // ❌ Avoid — non-retrying, implementation-coupled
 expect(await locator.textContent()).toBe('Saved')
 ```
+
+Always narrow `getByRole('alert')` with `.filter({ hasText })`: Next.js renders its route announcer as a `role="alert"` element on every page, so a bare `getByRole('alert')` resolves to two elements the moment a toast appears and fails strict mode.
 
 ### Locator Priority
 

@@ -15,12 +15,11 @@ export function parseDelegationOrigin(originStr: string | null | undefined): Del
     const parsed = JSON.parse(originStr)
     if (
       parsed?.type === 'proposer-delegation' &&
-      (parsed.action === 'add' || parsed.action === 'remove' || parsed.action === 'edit') &&
+      (parsed.action === 'add' || parsed.action === 'remove') &&
       typeof parsed.delegate === 'string' &&
       isAddress(parsed.delegate) &&
       typeof parsed.nestedSafe === 'string' &&
-      isAddress(parsed.nestedSafe) &&
-      typeof parsed.label === 'string'
+      isAddress(parsed.nestedSafe)
     ) {
       return parsed as DelegationOrigin
     }
@@ -78,7 +77,6 @@ export function parseMessageToDelegation(
     messageHash: message.messageHash,
     action: origin.action,
     delegateAddress: origin.delegate,
-    delegateLabel: origin.label,
     nestedSafeAddress: origin.nestedSafe,
     parentSafeAddress,
     totp: messageTotp,

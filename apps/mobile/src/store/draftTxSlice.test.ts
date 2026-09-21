@@ -5,7 +5,17 @@ import { cgwApi, type TransactionDetails } from '@safe-global/store/gateway/AUTO
 import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import { GATEWAY_URL } from '@/src/config/constants'
 import { server } from '@/src/tests/server'
-import draftTxReducer, { clearAllDrafts, clearDraft, selectDraftByHash, setDraft, type DraftTx } from './draftTxSlice'
+import draftTxReducer, {
+  clearAllDrafts,
+  clearDraft,
+  selectDraftByHash,
+  selectDraftRedirect,
+  setDraft,
+  setDraftRedirect,
+  type DraftTx,
+} from './draftTxSlice'
+import { setActiveSafe } from './activeSafeSlice'
+import type { Address } from '@/src/types/address'
 import type { RootState } from '@/src/store'
 
 setBaseUrl(GATEWAY_URL)
@@ -76,6 +86,63 @@ describe('draftTxSlice', () => {
     state = draftTxReducer(state, setDraft(b))
     state = draftTxReducer(state, clearAllDrafts())
     expect(state.drafts).toEqual({})
+  })
+
+  describe('redirects', () => {
+    it('stores a redirect between safeTxHashes', () => {
+      const state = draftTxReducer(undefined, setDraftRedirect({ fromSafeTxHash: '0xold', toSafeTxHash: '0xnew' }))
+      expect(state.redirects?.['0xold']).toEqual('0xnew')
+    })
+
+    it('drops a stale redirect when a fresh draft is stashed under its hash', () => {
+      const fresh = buildDraft({ safeTxHash: '0xold' })
+      let state = draftTxReducer(undefined, setDraftRedirect({ fromSafeTxHash: '0xold', toSafeTxHash: '0xnew' }))
+      state = draftTxReducer(state, setDraft(fresh))
+
+      expect(state.redirects).toEqual({})
+      expect(state.drafts['0xold']).toEqual(fresh)
+    })
+
+    it('selectDraftRedirect resolves the new hash', () => {
+      const state = draftTxReducer(undefined, setDraftRedirect({ fromSafeTxHash: '0xold', toSafeTxHash: '0xnew' }))
+      expect(selectDraftRedirect({ draftTx: state } as RootState, '0xold')).toEqual('0xnew')
+      expect(selectDraftRedirect({ draftTx: state } as RootState, '0xnew')).toBeUndefined()
+    })
+
+    it('selectDraftRedirect follows chains from repeated edits', () => {
+      let state = draftTxReducer(undefined, setDraftRedirect({ fromSafeTxHash: '0xa', toSafeTxHash: '0xb' }))
+      state = draftTxReducer(state, setDraftRedirect({ fromSafeTxHash: '0xb', toSafeTxHash: '0xc' }))
+      expect(selectDraftRedirect({ draftTx: state } as RootState, '0xa')).toEqual('0xc')
+      expect(selectDraftRedirect({ draftTx: state } as RootState, '0xb')).toEqual('0xc')
+      expect(selectDraftRedirect({ draftTx: state } as RootState, '0xc')).toBeUndefined()
+    })
+
+    it('drops redirects together with clearAllDrafts and prunes them on safe switches', () => {
+      const withRedirect = draftTxReducer(
+        undefined,
+        setDraftRedirect({ fromSafeTxHash: '0xold', toSafeTxHash: '0xnew' }),
+      )
+
+      expect(draftTxReducer(withRedirect, clearAllDrafts()).redirects).toEqual({})
+      // No draft survives under 0xnew for the switched-to safe → entry pruned
+      expect(
+        draftTxReducer(
+          withRedirect,
+          setActiveSafe({ chainId: '137', address: faker.finance.ethereumAddress() as Address }),
+        ).redirects,
+      ).toEqual({})
+    })
+
+    it('keeps redirects whose target draft survives a same-safe setActiveSafe', () => {
+      const target = buildDraft({ safeTxHash: '0xnew' })
+      let state = draftTxReducer(undefined, setDraft(target))
+      state = draftTxReducer(state, setDraftRedirect({ fromSafeTxHash: '0xold', toSafeTxHash: '0xnew' }))
+
+      state = draftTxReducer(state, setActiveSafe({ chainId: target.chainId, address: target.safeAddress as Address }))
+
+      expect(state.drafts['0xnew']).toEqual(target)
+      expect(state.redirects?.['0xold']).toEqual('0xnew')
+    })
   })
 
   describe('CGW confirms a tx for this hash', () => {

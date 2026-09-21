@@ -1,10 +1,14 @@
 import NumberField from '@/components/common/NumberField'
 import { AutocompleteItem } from '@/components/tx-flow/flows/TokenTransfer/CreateTokenTransfer'
 import { safeFormatUnits, safeParseUnits } from '@safe-global/utils/utils/formatters'
+import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { validateDecimalLength, validateLimitedAmount } from '@safe-global/utils/utils/validation'
-import { Button, Divider, FormControl, InputLabel, MenuItem, TextField, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Typography } from '@/components/ui/typography'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import classNames from 'classnames'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { get, useFormContext } from 'react-hook-form'
 import type { FieldArrayPath, FieldValues } from 'react-hook-form'
 import css from './styles.module.css'
@@ -31,6 +35,7 @@ type TokenAmountInputProps = {
   fieldArray?: { name: FieldArrayPath<FieldValues>; index: number }
   deps?: string[]
   defaultTokenAddress?: string
+  onMaxClick?: () => void
 }
 
 const TokenAmountInput = ({
@@ -41,11 +46,11 @@ const TokenAmountInput = ({
   fieldArray,
   deps,
   defaultTokenAddress,
+  onMaxClick,
 }: TokenAmountInputProps) => {
   const {
-    formState: { errors, defaultValues },
+    formState: { errors },
     register,
-    resetField,
     watch,
     setValue,
     trigger,
@@ -62,7 +67,14 @@ const TokenAmountInput = ({
   const tokenAddress = watchedTokenAddress || defaultTokenAddress || ''
   const watchedAmount = watch(amountField) || ''
 
-  const isAmountError = !!get(errors, tokenAddressField) || !!get(errors, amountField)
+  // Hold the label error back while typing (e.g. "0." is briefly invalid), but drop it at once.
+  // Debounce the message, not the object: RHF swaps the error object on every re-validation, and a
+  // corrected-then-broken field must not flash a previous, different message before it settles.
+  const amountError = get(errors, amountField)
+  const amountErrorMessage = amountError?.message?.toString()
+  const debouncedAmountErrorMessage = useDebounce(amountErrorMessage, 500)
+  const shownAmountError = amountError && debouncedAmountErrorMessage === amountErrorMessage ? amountError : undefined
+  const isAmountError = !!shownAmountError
 
   const fiatValue = useMemo(
     () => computeFiatValue(parseFloat(watchedAmount), selectedToken?.fiatConversion),
@@ -100,86 +112,98 @@ const TokenAmountInput = ({
       shouldValidate: true,
     })
 
+    onMaxClick?.()
     trigger(deps)
-  }, [maxAmount, selectedToken, setValue, amountField, trigger, deps])
+  }, [maxAmount, selectedToken, setValue, amountField, trigger, deps, onMaxClick])
 
-  const onChangeToken = useCallback(() => {
-    const amountDefaultValue = get(
-      defaultValues,
-      getFieldName(TokenAmountFields.amount, fieldArray ? { ...fieldArray, index: 0 } : undefined),
-    )
+  const handleTokenChange = (value: string) => setValue(tokenAddressField, value, { shouldValidate: true })
 
-    resetField(amountField, amountDefaultValue)
+  // The amount survives a token change; its validators close over the new token's decimals and
+  // balance only after this render, so re-run them here rather than in the change handler.
+  const previousTokenAddress = useRef(tokenAddress)
+  useEffect(() => {
+    if (sameAddress(previousTokenAddress.current, tokenAddress)) return
+    previousTokenAddress.current = tokenAddress
 
-    trigger(deps)
-  }, [resetField, amountField, trigger, deps, defaultValues, fieldArray])
+    if (!watchedAmount) return
+    trigger(amountField)
+    if (deps) trigger(deps)
+  }, [tokenAddress, watchedAmount, amountField, deps, trigger])
+
+  const selectedBalance = balances.find((item) => item.tokenInfo.address === tokenAddress)
 
   return (
     <>
-      <FormControl
-        data-testid="token-amount-section"
-        className={classNames(css.outline, { [css.error]: isAmountError })}
-        fullWidth
-      >
-        <InputLabel shrink required className={css.label}>
-          {get(errors, tokenAddressField)?.message?.toString() ||
-            get(errors, amountField)?.message?.toString() ||
-            'Amount'}
-        </InputLabel>
-        <div className={css.inputs}>
-          <NumberField
-            data-testid="token-amount-field"
-            variant="standard"
-            InputProps={{
-              disableUnderline: true,
-              endAdornment: maxAmount !== undefined && (
-                <Button data-testid="max-btn" className={css.max} onClick={onMaxAmountClick}>
+      <div data-testid="token-amount-section" className="w-full">
+        <NumberField
+          data-testid="token-amount-field"
+          label={shownAmountError?.message?.toString() || 'Amount'}
+          error={isAmountError}
+          fullWidth
+          inputSize="hero"
+          endAdornment={
+            <div className="flex items-stretch gap-1">
+              {maxAmount !== undefined && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  data-testid="max-btn"
+                  // eslint-disable-next-line no-restricted-syntax -- h-auto drops size="sm"'s h-8 so Max matches the content-sized token select beside it
+                  className="h-auto uppercase"
+                  onClick={onMaxAmountClick}
+                >
                   Max
                 </Button>
-              ),
-            }}
-            className={css.amount}
-            required
-            placeholder="0"
-            {...register(amountField, {
-              required: true,
-              setValueAs: (value: string): string => {
-                if (typeof value !== 'string') {
-                  return value
-                }
+              )}
+              <Separator orientation="vertical" className="mx-1" />
+              <div data-testid="token-selector" className={css.select}>
+                <Select name={tokenAddressField} value={tokenAddress} onValueChange={handleTokenChange} required>
+                  {/* size="sm" lines the trigger up with the Max button and the h-8 divider beside it;
+                      min-h still lets it grow for the rich token row. */}
+                  <SelectTrigger size="sm">
+                    {/* Always pass a non-null child: with no child, base-ui's SelectValue falls back to
+                        rendering the raw address (e.g. in a new Safe with no funds). */}
+                    <SelectValue>
+                      {selectedBalance ? (
+                        <AutocompleteItem tokenInfo={selectedBalance.tokenInfo} balance={selectedBalance.balance} />
+                      ) : (
+                        ''
+                      )}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="w-auto min-w-44 max-w-[var(--available-width)]">
+                    {balances.map((item) => (
+                      <SelectItem data-testid="token-item" key={item.tokenInfo.address} value={item.tokenInfo.address}>
+                        <AutocompleteItem {...item} />
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          }
+          required
+          placeholder="0"
+          {...register(amountField, {
+            required: true,
+            setValueAs: (value: string): string => {
+              if (typeof value !== 'string') {
+                return value
+              }
 
-                return value.replace(/,/g, '.')
-              },
-              validate: validate ?? validateAmount,
-              deps,
-            })}
-          />
-          <Divider orientation="vertical" flexItem />
-          <TextField
-            data-testid="token-selector"
-            select
-            variant="standard"
-            InputProps={{
-              disableUnderline: true,
-            }}
-            className={css.select}
-            {...register(tokenAddressField, {
-              required: true,
-              onChange: onChangeToken,
-            })}
-            value={tokenAddress}
-            required
-          >
-            {balances.map((item) => (
-              <MenuItem data-testid="token-item" key={item.tokenInfo.address} value={item.tokenInfo.address}>
-                <AutocompleteItem {...item} />
-              </MenuItem>
-            ))}
-          </TextField>
-        </div>
-      </FormControl>
+              return value.replace(/,/g, '.')
+            },
+            validate: validate ?? validateAmount,
+            deps,
+          })}
+        />
+      </div>
       {fiatValue != null && (
-        <Typography data-testid="fiat-display" variant="caption" color="text.secondary" className={css.fiatDisplay}>
+        <Typography
+          data-testid="fiat-display"
+          variant="paragraph-mini"
+          className={classNames(css.fiatDisplay, 'text-muted-foreground')}
+        >
           <FiatValue value={fiatValue} precise />
         </Typography>
       )}

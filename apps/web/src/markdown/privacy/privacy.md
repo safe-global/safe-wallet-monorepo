@@ -1,6 +1,6 @@
 # Privacy Policy {#privacy-policy}
 
-Last updated: November 2025
+Last updated: March 2026
 
 Safe Labs GmbH, Unter den Linden 10, 10117 Berlin (hereinafter “**Safe Labs**”, “**we**” or “**us**”) takes the protection of personal data very seriously.
 
@@ -32,7 +32,7 @@ Unless otherwise stated in this Privacy Policy, the terms used here have the mea
 
 [4\. Data receivers](#data-receivers)
 
-[5\. Use of Subprocessors](#use-of-subprocessors)
+[5\. Use of Processors](#use-of-processors)
 
 [5.1. Blockchain](#blockchain)
 
@@ -54,11 +54,9 @@ Unless otherwise stated in this Privacy Policy, the terms used here have the mea
 
 [5.10. Tenderly](#tenderly)
 
-[5.11. MoonPay](#moonpay)
+[5.11. Fingerprint](#fingerprint)
 
-[5.12. Spindl](#spindl)
-
-[5.13. Fingerprint](#fingerprint)
+[5.12. Auth0 by Okta](#auth0-by-okta)
 
 [6\. Personal data transfers to third countries](#personal-data-transfers-to-third-countries)
 
@@ -115,22 +113,27 @@ When visiting our Website or using Safe Interfaces, we will collect and process 
 
    1. public Wallet address, and  
    2. WalletConnect connection data.
-  
-2. We process personal data when you fill out forms to register for a demo or request more information about new product integrations. Personal data processed include:
+
+2. We also allow you to log-in and to the Safe{Wallet} app via Single-Sign On. For this purpose we process:
+
+   1. Email address (not stored by Safe Labs. See Section 5 for more details), and  
+   2. User ID linked to the email address.
+
+3. We process personal data when you fill out forms to register for a demo or request more information about new product integrations. Personal data processed include:
 
    1. Full name;
    2. Email address;
    3. Company name;
    4. Location;
    5. Responses to open text fields;
-   6. Safe Wallet address (optional);
+   6. Safe{Wallet} address (optional);
    7. Telegram account (optional).
 
 We rely on the user consent (Art. 6.1a GDPR) to process this information, as users can choose to fill out an optional form should they be currently interested in our partnership with Hypernative with the goal of adding their transaction protection technology and its “Guardian” product into Safe{Wallet} to create a jointly commercialized experience that offers automated, policy-based transaction guarding with native discoverability and seamless user experience. We retain this data for a year after collection through the form. 
   
 Please note that Hypernative will also be collecting the same data when you fill out the form, and processing it in accordance with the terms stipulated in their Privacy Policy.
 
-3. When you create a new Safe Account we process the following personal data to compose a Transaction based on your entered data to be approved by your Wallet:
+4. When you create a new Safe Account we process the following personal data to compose a Transaction based on your entered data to be approved by your Wallet:
 
    1. your public Wallet address,  
    2. account balance,  
@@ -138,30 +141,30 @@ Please note that Hypernative will also be collecting the same data when you fill
    4. addresses of externally owned accounts, and  
    5. user activity.
 
-4. When you create a Profile for a new Safe Account we process the following personal data for the purpose of enabling you to view your Safe Account after creation as well as enabling you to view all co-owned Safes Accounts:
+5. When you create a Profile for a new Safe Account we process the following personal data for the purpose of enabling you to view your Safe Account after creation as well as enabling you to view all co-owned Safes Accounts:
 
    1. your public Wallet address, and  
    2. account balance.
 
-5. When you create a Profile for an existing Safe Account for the purpose of allowing you to view and use them in the Safe Interface, we process your
+6. When you create a Profile for an existing Safe Account for the purpose of allowing you to view and use them in the Safe Interface, we process your
 
    1. public Wallet address,  
    2. Safe Account balance,  
    3. smart contract address of the Safe Account, and  
    4. Safe Account owner's public Wallet addresses.
 
-6. When you initiate a Safe Account Transaction we process the following personal data to compose the Transaction for you based on your entered personal data:
+7. When you initiate a Safe Account Transaction we process the following personal data to compose the Transaction for you based on your entered personal data:
 
    1. your public Wallet address, and  
    2. smart contract address of Safe Account.
 
-7. When you sign a Safe Account Transaction we process the following personal data to enable you to sign the Transaction using your Wallet:
+8. When you sign a Safe Account Transaction we process the following personal data to enable you to sign the Transaction using your Wallet:
 
    1. Safe Account balance,  
    2. smart contract address of Safe Account, and  
    3. Safe Account owner's public Wallet addresses.
 
-8. To enable you to execute the Transaction on the Blockchain we process:
+9. To enable you to execute the Transaction on the Blockchain we process:
 
    1. your public Wallet address,  
    2. Safe Account balance,  
@@ -169,20 +172,20 @@ Please note that Hypernative will also be collecting the same data when you fill
    4. Safe Account owner's public Wallet addresses, and  
    5. Transactions signed by all Safe Account owners.
 
-9. When we collect relevant personal data from the Blockchain to display context information in the Safe Interface we process:
+10. When we collect relevant personal data from the Blockchain to display context information in the Safe Interface we process:
 
-   1. your public Wallet address,  
-   2. account balance,  
-   3. account activity, and  
-   4. Safe Account owner's Public wallet addresses.
+    1. your public Wallet address,  
+    2. account balance,  
+    3. account activity, and  
+    4. Safe Account owner's Public wallet addresses.
 
-10. When we decode Transactions from the Blockchain for the purpose of providing Transaction information in a conveniently readable format, we process:
+11. When we decode Transactions from the Blockchain for the purpose of providing Transaction information in a conveniently readable format, we process:
 
-   1. your public Wallet address,  
-   2. account balance, and  
-   3. account activity.
+    1. your public Wallet address,  
+    2. account balance, and  
+    3. account activity.
 
-11. When we maintain a user profile to provide you with a good user experience through Profiles and an address book we process:
+12. When we maintain a user profile to provide you with a good user experience through Profiles and an address book we process:
 
     1. your public Wallet address,  
     2. label,  
@@ -194,7 +197,7 @@ Please note that Hypernative will also be collecting the same data when you fill
     8. theme, and  
     9. address format.
 
-    The legal base for all these activities is the performance of the contract we have with you (GDPR Art. 6.1b).
+    The legal base for all the activities listed above is the performance of the contract we have with you (GDPR Art. 6.1b).
 
     THE PERSONAL DATA WILL BE STORED ON THE BLOCKCHAIN. GIVEN THE TECHNOLOGICAL DESIGN OF THE BLOCKCHAIN, AS EXPLAINED IN SECTION 2, THIS PERSONAL DATA WILL BECOME PUBLIC AND IT WILL NOT LIKELY BE POSSIBLE TO DELETE OR CHANGE THE PERSONAL DATA AT ANY GIVEN TIME.
 
@@ -232,7 +235,7 @@ In the case you have given consent, we will additionally store an analytics cook
 5. safe\_app\_id, and  
 6. safe\_message\_id.
 
-We conduct this analysis in our legitimate interest to continuously improve our services and ensure increased service performance and reliability (GDPR Art.6.1f)*.*
+We conduct this analysis in our legitimate interest to continuously improve our services and ensure increased service performance and reliability (GDPR Art.6.1f).
 
 3.3.3 We conduct technical monitoring of your activity on the platform in order to ensure availability, integrity and robustness of the service. For this purpose, we process your:
 
@@ -328,8 +331,8 @@ For all these activities (3.5.1-3.5.4) we rely on the legal base of performance 
 3.5.5 To report errors and improve user experience we process your:
 
 1. user agent info (Browser, OS, device),  
-1. URL that you were on (can contain Safe Account address), and  
-2. error info: time, stacktrace.
+2. URL that you were on (can contain Safe Account address), and  
+3. error info: time, stacktrace.
 
 We rely on our legitimate interest (GDPR Art.6.1f) of ensuring our service quality.
 
@@ -343,26 +346,7 @@ cookie IDs, device type,
 
 For this processing, we rely on our legitimate interest (GDPR Art.6.1f) of facilitating the onboarding for users and ameliorating the user experience with regards to our services.
 
-3.5.7 Providing on and off-ramp services to enable you to top up your Safe Account with e.g. bank transfer, debit card, credit card. For this purpose MoonPay may process your:
-
-1. full name,  
-2. date of birth,  
-3. nationality,  
-4. gender,  
-5. signature,  
-6. utility bills,  
-7. photographs,  
-8. phone number,  
-9. home address,  
-10. email,  
-11. information about the transactions you make via MoonPay services (e.g. name of the recipient, your name, the amount, and/or timestamp),  
-12. geo location/tracking details,  
-13. operating system, and  
-14. personal IP addresses.
-
-To conduct this activity we rely on our legitimate interest (GDPR Art.6.1f) of ameliorating the onboarding process and the user experience through providing an easier option to customers to fund their account.
-
-3.5.8 Geofencing users in the US to prevent locking safe tokens, which may result in them being classified as securities. For this purpose, we process the following information relating to a user’s device:
+3.5.7 Geofencing users in the US to prevent locking safe tokens, which may result in them being classified as securities. For this purpose, we process the following information relating to a user’s device:
 
 1. operating system,  
 2. browser and browser configuration,  
@@ -371,7 +355,7 @@ To conduct this activity we rely on our legitimate interest (GDPR Art.6.1f) of a
 
 We rely on our legitimate interest to ensure that our services or derivatives do not extend into sectors in which we are not licensed to operate in (GDPR Art.6.1f). Safe Labs is not licensed to provide or trade securities in the US and therefore cannot operate in the securities market.
 
-3.5.9 We process personal data to detect use of VPN aimed at circumventing the restriction in section 3.5.8 above and to prevent fraud. Personal data processed include:
+3.5.8 We process personal data to detect use of VPN aimed at circumventing the restriction in section 3.5.7 above and to prevent fraud. Personal data processed include:
 
 1. operating system,  
 2. browser and browser configuration,  
@@ -379,20 +363,6 @@ We rely on our legitimate interest to ensure that our services or derivatives do
 4. approximate location.
 
 We rely on our legitimate interest to ensure the prevention of fraud (GDPR Art.6.1f). This also helps us detect users who may want to circumvent the restriction on US users by the use of VPN.
-
-3.5.10 We process personal data when you fill out forms to register for a demo or request more information about new product integrations. Personal data processed include:
-
-1. Full name;  
-2. Email address;  
-3. Company name;  
-4. Location;  
-5. Responses to open text fields;  
-6. SafeWallet address (optional);  
-7. Telegram account (optional).  
-
-We rely on the user consent (Art. 6.1a GDPR) to process this information, as users can choose to fill out an optional form should they be currently interested in our partnership with Hypernative with the goal of adding their transaction protection technology and its “Guardian” product into Safe{Wallet} to create a jointly commercialized experience that offers automated, policy-based transaction guarding with native discoverability and seamless user experience. We retain this data for a year after collection through the form. 
-
-Please note that Hypernative will also be collecting the same data when you fill out the form, and processing it in accordance with the terms stipulated in their Privacy Policy.
 
 ## 3.6 Contacting us {#contacting-us}
 
@@ -412,7 +382,7 @@ Otherwise, the legal basis for the processing of Contact Data is GDPR Art.6.1.f.
 
    Additionally, we also use services provided by various specialized companies, *e.g.*, IT service providers, that process personal data on our behalf (“**Data Processor**”). We have concluded a data processing agreement according to GDPR Art.28 or EU standard contractual clauses of the EU Commission pursuant to GDPR Art.46.2.c with each service provider and they only process personal data in accordance with our instructions and not for their own purposes.   
 
-# 5. Use of Subprocessors {#use-of-subprocessors}
+# 5. Use of Processors {#use-of-processors}
 
 ## 5.1. Blockchain {#blockchain}
 
@@ -466,7 +436,7 @@ We use [**Infura**](https://www.infura.io/) and [**Nodereal**](https://nodereal.
 
 We use [**Tenderly**](https://tenderly.co/) to simulate blockchain transactions before they are executed. For that we send your smart contract address of your Safe Account and transaction data to Tenderly.
 
-1. Internal communication
+**Internal communication**
 
 We use the following tools for internal communication.
 
@@ -474,17 +444,13 @@ We use the following tools for internal communication.
 * [**Google Workspace**](https://workspace.google.com/)  
 * [**Notion**](https://notion.so/)
 
-## 5.11 MoonPay {#moonpay}
+## 5.11. Fingerprint {#fingerprint}
 
-We use MoonPay to offer on-ramp and off-ramp services. For that purpose personal data is required for KYC/AML or other financial regulatory requirements. This data is encrypted by MoonPay.
+This tool enables the processing in sections 3.5.7 and 3.5.8.
 
-## 5.12 Spindl {#spindl}
+## 5.12. Auth0 by Okta {#auth0-by-okta}
 
-We use [**Spindl**](https://www.spindl.xyz/), a measurement and attribution solution for web3 that assists us in comprehending how users interact with different decentralized applications and our Safe{Mobile} app and to enhance your experience with Safe{Wallet}. For enhanced privacy, data is stored for a period of 7 days after which it is securely deleted.
-
-## 5.13 Fingerprint {#fingerprint}
-
-This tool enables the processing in sections 3.5.8 and 3.5.9.
+This tool enables the login via Single Sign-On as described in section (3.1.2). Email addresses are not stored by Safe Labs but by Auth0. SafeLabs only processes the User ID generated by Auth0 tied to the user email.
 
 # 6. Personal data transfers to third countries {#personal-data-transfers-to-third-countries}
 

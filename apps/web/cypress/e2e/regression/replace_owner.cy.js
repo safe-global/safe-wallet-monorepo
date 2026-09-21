@@ -19,87 +19,94 @@ describe('Replace Owners tests', () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  beforeEach(() => {
-    cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
-    cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
+  describe('Disconnected', () => {
+    beforeEach(() => {
+      cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
+      cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
+    })
+
+    it('Verify Tooltip displays correct message for disconnected user', () => {
+      owner.verifyReplaceBtnIsDisabled()
+    })
   })
 
-  it('Verify Tooltip displays correct message for disconnected user', () => {
-    owner.verifyReplaceBtnIsDisabled()
+  describe('Connected', () => {
+    beforeEach(() => {
+      wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
+      cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
+      owner.waitForConnectionStatus()
+    })
+
+    // TODO: Check unit tests
+    it('Verify max characters in name field', () => {
+      owner.openReplaceOwnerWindow(0)
+      owner.typeOwnerName(main.generateRandomString(51))
+      owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.exceedChars)
+    })
+
+    it('Verify that Name field not mandatory. Verify confirmation for owner replacement is displayed', () => {
+      owner.openReplaceOwnerWindow(0)
+      owner.typeOwnerAddress(getMockAddress())
+      owner.clickOnNextBtn()
+      owner.verifyConfirmTransactionWindowDisplayed()
+    })
+
+    it('Verify relevant error messages are displayed in Address input', () => {
+      owner.openReplaceOwnerWindow(0)
+      owner.typeOwnerAddress(main.generateRandomString(10))
+      owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.invalidFormat)
+
+      owner.typeOwnerAddress(getMockAddress().toUpperCase())
+      owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.invalidChecksum)
+
+      owner.typeOwnerAddress(staticSafes.SEP_STATIC_SAFE_4)
+      owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.ownSafe)
+
+      owner.typeOwnerAddress(getMockAddress().replace('A', 'a'))
+      owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.invalidChecksum)
+
+      owner.typeOwnerAddress(constants.DEFAULT_OWNER_ADDRESS)
+      owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.alreadyAdded)
+    })
   })
 
-  // TODO: Check unit tests
-  it('Verify max characters in name field', () => {
-    wallet.connectSigner(signer)
-    owner.waitForConnectionStatus()
-    owner.openReplaceOwnerWindow(0)
-    owner.typeOwnerName(main.generateRandomString(51))
-    owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.exceedChars)
+  describe('With a pre-seeded address book', () => {
+    it('Verify that Address input auto-fills with related value', () => {
+      wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4, {
+        extraStorage: { [constants.localStorageKeys.SAFE_v2__addressBook]: ls.addressBookData.autofillData },
+      })
+      owner.waitForConnectionStatus()
+      owner.openReplaceOwnerWindow(0)
+      owner.typeOwnerAddress(constants.addresBookContacts.user1.address)
+      owner.verifyNewOwnerName(constants.addresBookContacts.user1.name)
+    })
   })
 
-  it('Verify that Address input auto-fills with related value', () => {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.autofillData)
-    cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
-    wallet.connectSigner(signer)
-    owner.waitForConnectionStatus()
-    owner.openReplaceOwnerWindow(0)
-    owner.typeOwnerAddress(constants.addresBookContacts.user1.address)
-    owner.verifyNewOwnerName(constants.addresBookContacts.user1.name)
-  })
-
-  it('Verify that Name field not mandatory. Verify confirmation for owner replacement is displayed', () => {
-    wallet.connectSigner(signer)
-    owner.waitForConnectionStatus()
-    owner.openReplaceOwnerWindow(0)
-    owner.typeOwnerAddress(getMockAddress())
-    owner.clickOnNextBtn()
-    owner.verifyConfirmTransactionWindowDisplayed()
-  })
-
-  it('Verify relevant error messages are displayed in Address input', () => {
-    wallet.connectSigner(signer)
-    owner.waitForConnectionStatus()
-    owner.openReplaceOwnerWindow(0)
-    owner.typeOwnerAddress(main.generateRandomString(10))
-    owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.invalidFormat)
-
-    owner.typeOwnerAddress(getMockAddress().toUpperCase())
-    owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.invalidChecksum)
-
-    owner.typeOwnerAddress(staticSafes.SEP_STATIC_SAFE_4)
-    owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.ownSafe)
-
-    owner.typeOwnerAddress(getMockAddress().replace('A', 'a'))
-    owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.invalidChecksum)
-
-    owner.typeOwnerAddress(constants.DEFAULT_OWNER_ADDRESS)
-    owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.alreadyAdded)
-  })
-
-  it("Verify 'Replace' tx is created. GA tx_created", () => {
-    const tx_created = [
-      {
-        eventLabel: events.txCreatedSwapOwner.eventLabel,
-        eventCategory: events.txCreatedSwapOwner.category,
-        eventAction: events.txCreatedSwapOwner.action,
-        event: events.txCreatedSwapOwner.eventName,
-        safeAddress: staticSafes.SEP_STATIC_SAFE_25.slice(6),
-      },
-    ]
-    cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_25)
-    wallet.connectSigner(signer)
-    owner.waitForConnectionStatus()
-    owner.openReplaceOwnerWindow(1)
-    cy.wait(1000)
-    owner.typeOwnerName(ownerName)
-    owner.typeOwnerAddress(constants.SEPOLIA_OWNER_2)
-    createTx.changeNonce(0)
-    owner.clickOnNextBtn()
-    createTx.clickOnContinueSignTransactionBtn()
-    createTx.clickOnSignTransactionBtn()
-    createTx.clickViewTransaction()
-    createTx.verifyReplacedSigner(ownerName)
-    getEvents()
-    checkDataLayerEvents(tx_created)
+  describe('On another safe', () => {
+    it("Verify 'Replace' tx is created. GA tx_created", () => {
+      const tx_created = [
+        {
+          eventLabel: events.txCreatedSwapOwner.eventLabel,
+          eventCategory: events.txCreatedSwapOwner.category,
+          eventAction: events.txCreatedSwapOwner.action,
+          event: events.txCreatedSwapOwner.eventName,
+          safeAddress: staticSafes.SEP_STATIC_SAFE_25.slice(6),
+        },
+      ]
+      wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_25)
+      owner.waitForConnectionStatus()
+      owner.openReplaceOwnerWindow(1)
+      cy.wait(1000)
+      owner.typeOwnerName(ownerName)
+      owner.typeOwnerAddress(constants.SEPOLIA_OWNER_2)
+      createTx.changeNonce(0)
+      owner.clickOnNextBtn()
+      createTx.clickOnContinueSignTransactionBtn()
+      createTx.clickOnSignTransactionBtn()
+      createTx.clickViewTransaction()
+      createTx.verifyReplacedSigner(ownerName)
+      getEvents()
+      checkDataLayerEvents(tx_created)
+    })
   })
 })

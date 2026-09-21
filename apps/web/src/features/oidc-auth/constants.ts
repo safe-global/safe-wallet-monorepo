@@ -1,6 +1,15 @@
 export const OIDC_AUTH_PENDING_KEY = 'oidc_auth_pending'
 export const OIDC_AUTH_CONNECTION_KEY = 'oidc_auth_connection'
 
+export const STEP_UP_FAILED_MESSAGE = 'Verification was not completed. Please try again.'
+
+/**
+ * `access_denied` also covers an Action denying access or crashing, so the
+ * cancellation is told apart by the description Auth0 documents for it.
+ * @see https://support.auth0.com/center/s/article/troubleshooting-the-access-denied-error
+ */
+export const STEP_UP_CANCELLED = { error: 'access_denied', description: 'User has canceled the interaction.' }
+
 export enum OidcConnection {
   EMAIL = 'email',
   GOOGLE = 'google-oauth2',

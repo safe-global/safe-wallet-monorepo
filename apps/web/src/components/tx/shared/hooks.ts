@@ -8,10 +8,11 @@
  */
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { assertTx, assertOnboard, assertChainInfo, assertProvider } from '@/utils/helpers'
-import { useMemo } from 'react'
+import { useContext, useMemo } from 'react'
 import { type TransactionOptions, type SafeTransaction } from '@safe-global/types-kit'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import { useSafeScope } from '@/components/tx-flow/safe-scope/context'
 import useWallet, { useSigner } from '@/hooks/wallets/useWallet'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import { isSmartContractWallet } from '@/utils/wallets'
@@ -24,10 +25,17 @@ import {
   dispatchTxSigning,
 } from '@/services/tx/tx-sender'
 import { useHasPendingTxs } from '@/hooks/usePendingTxs'
+import { runExecutionPreChecks } from '@/services/tx/executionPreChecks'
 import { getSafeTxGas, getNonces } from '@/services/tx/tx-sender/recommendedNonce'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useUpdateBatch } from '@/features/batching'
 import { useCurrentChain } from '@/hooks/useChains'
+import { useLoadFeature } from '@/features/__core__'
+import { GTFFeature } from '@/features/gtf'
+import { mergeGtfFeeParams } from '@/features/gtf/services'
+import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { useAppDispatch, useAppSelector } from '@/store'
+import { selectCurrency } from '@/store/settingsSlice'
 
 type TxActions = {
   addToBatch: (safeTx?: SafeTransaction, origin?: string) => Promise<string>
@@ -38,6 +46,7 @@ type TxActions = {
     txId?: string,
     origin?: string,
     isRelayed?: boolean,
+    acceptUnverifiedSimulation?: boolean,
   ) => Promise<string>
   signProposerTx: (safeTx?: SafeTransaction, origin?: string) => Promise<string>
   proposeTx: (safeTx: SafeTransaction, txId?: string, origin?: string) => Promise<TransactionDetails>
@@ -50,15 +59,36 @@ type TxActions = {
  */
 export const useTxActions = (): TxActions => {
   const { safe } = useSafeInfo()
+  const scope = useSafeScope()
   const onboard = useOnboard()
   const signer = useSigner()
   const wallet = useWallet()
   const [addTxToBatch] = useUpdateBatch()
   const chain = useCurrentChain()
+  const dispatch = useAppDispatch()
+  const gtfFeature = useLoadFeature(GTFFeature)
+  const { gtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
+  const currency = useAppSelector(selectCurrency)
 
   return useMemo<TxActions>(() => {
-    const safeAddress = safe.address.value
-    const { chainId } = safe
+    // While a scoped Safe's SafeState is still loading, `safe` is `defaultSafeInfo` — the scope's own
+    // chainId/safeAddress are already known, so prefer them over the placeholder.
+    const safeAddress = scope?.safeAddress ?? safe.address.value
+    const chainId = scope?.chainId ?? safe.chainId
+
+    const withGtfFeeParams = (safeTx: SafeTransaction) =>
+      mergeGtfFeeParams({
+        safeTx,
+        chain,
+        gtfPaymentMode,
+        gtfSelectedGasToken,
+        gtfFeature,
+        chainId,
+        safeAddress,
+        numberSignatures: safe.threshold,
+        currency,
+        dispatch,
+      })
 
     const _propose = async (sender: string, safeTx: SafeTransaction, txId?: string, origin?: string) => {
       return dispatchTxProposal({
@@ -68,6 +98,7 @@ export const useTxActions = (): TxActions => {
         safeTx,
         txId,
         origin,
+        scope,
       })
     }
 
@@ -90,17 +121,21 @@ export const useTxActions = (): TxActions => {
       assertTx(safeTx)
       assertProvider(signer?.provider)
 
+      safeTx = await withGtfFeeParams(safeTx)
+
       // Smart contracts cannot sign transactions off-chain
       if (await isSmartContractWallet(signer.chainId, signer.address)) {
         throw new Error('Cannot relay an unsigned transaction from a smart contract wallet')
       }
-      return await dispatchTxSigning(safeTx, signer.provider, txId)
+      return await dispatchTxSigning(safeTx, signer.provider, txId, scope)
     }
 
     const signTx: TxActions['signTx'] = async (safeTx, txId, origin) => {
       assertTx(safeTx)
       assertProvider(signer?.provider)
       assertOnboard(onboard)
+
+      safeTx = await withGtfFeeParams(safeTx)
 
       // Smart contract wallets must sign via an on-chain tx
       if (signer.isSafe || (await isSmartContractWallet(signer.chainId, signer.address))) {
@@ -116,12 +151,13 @@ export const useTxActions = (): TxActions => {
           signer.address,
           safeAddress,
           Boolean(signer.isSafe),
+          scope,
         )
         return id
       }
 
       // Otherwise, sign off-chain
-      const signedTx = await dispatchTxSigning(safeTx, signer.provider, txId)
+      const signedTx = await dispatchTxSigning(safeTx, signer.provider, txId, scope)
       const tx = await _propose(signer.address, signedTx, txId, origin)
       return tx.txId
     }
@@ -131,17 +167,29 @@ export const useTxActions = (): TxActions => {
       assertProvider(wallet?.provider)
       assertOnboard(onboard)
 
-      const signedTx = await dispatchProposerTxSigning(safeTx, wallet)
+      const signedTx = await dispatchProposerTxSigning(safeTx, wallet, scope)
 
       const tx = await _propose(wallet.address, signedTx, undefined, origin)
       return tx.txId
     }
 
-    const executeTx: TxActions['executeTx'] = async (txOptions, safeTx, txId, origin, isRelayed) => {
+    const executeTx: TxActions['executeTx'] = async (
+      txOptions,
+      safeTx,
+      txId,
+      origin,
+      isRelayed,
+      acceptUnverifiedSimulation,
+    ) => {
       assertTx(safeTx)
       assertProvider(signer?.provider)
       assertOnboard(onboard)
       assertChainInfo(chain)
+
+      // Catch the three GS026 causes (stale nonce, non-signer executor, bad
+      // signature) before anything is signed or broadcast — an on-chain GS026
+      // revert would cost the user gas for a guaranteed failure (WA-3005).
+      await runExecutionPreChecks({ safeTx, safe, signerAddress: signer.address, scope })
 
       let tx: TransactionDetails | undefined
       let rePropose = false
@@ -159,7 +207,7 @@ export const useTxActions = (): TxActions => {
 
       // Relay or execute the tx via connected wallet
       if (isRelayed) {
-        await dispatchTxRelay(safeTx, safe, txId, chain, txOptions.gasLimit)
+        await dispatchTxRelay(safeTx, safe, txId, chain, txOptions.gasLimit, acceptUnverifiedSimulation, scope)
       } else {
         const isSmartAccount = await isSmartContractWallet(signer.chainId, signer.address)
         await dispatchTxExecution(
@@ -171,6 +219,7 @@ export const useTxActions = (): TxActions => {
           signer.address,
           safeAddress,
           isSmartAccount,
+          scope,
         )
       }
 
@@ -178,7 +227,23 @@ export const useTxActions = (): TxActions => {
     }
 
     return { addToBatch, signTx, executeTx, signProposerTx, proposeTx }
-  }, [safe, wallet, signer?.provider, signer?.address, signer?.chainId, signer?.isSafe, addTxToBatch, onboard, chain])
+  }, [
+    safe,
+    scope,
+    wallet,
+    signer?.provider,
+    signer?.address,
+    signer?.chainId,
+    signer?.isSafe,
+    addTxToBatch,
+    onboard,
+    chain,
+    dispatch,
+    gtfFeature,
+    gtfPaymentMode,
+    gtfSelectedGasToken,
+    currency,
+  ])
 }
 
 export const useValidateNonce = (safeTx: SafeTransaction | undefined): boolean => {

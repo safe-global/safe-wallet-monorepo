@@ -1,8 +1,6 @@
 /**
- * Relay task status codes returned by the CGW proxy for Gelato Turbo Relayer.
+ * Relay task status codes returned by the CGW proxy.
  *
- * The CGW proxies Gelato's JSON-RPC `relayer_getStatus` endpoint at:
- *   GET {CGW_BASE_URL}/v1/chains/{chainId}/relay/status/{taskId}
  */
 export enum RelayStatus {
   /** Task is queued, not yet submitted to chain */
@@ -48,7 +46,7 @@ export const isTerminalRelayStatus = (status: RelayStatus): boolean => {
  *
  * @param baseUrl - CGW base URL
  * @param chainId - Chain ID where the relay transaction was submitted
- * @param taskId - The Gelato task ID
+ * @param taskId - The task ID
  * @returns Promise with the relay task status or undefined if error
  */
 export const getRelayTxStatus = async (
@@ -99,7 +97,7 @@ export class RelayTxWatcher {
    * The promise resolves when the task is successful and returns the task status (including receipt).
    * The promise rejects if the task fails, is rejected, or times out.
    *
-   * @param taskId - The Gelato task ID to watch
+   * @param taskId - The task ID to watch
    * @param chainId - Chain ID where the relay transaction was submitted
    * @param baseUrl - CGW base URL
    * @param onUpdate - Optional callback that receives status updates

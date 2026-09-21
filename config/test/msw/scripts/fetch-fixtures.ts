@@ -1,4 +1,4 @@
-#!/usr/bin/env npx ts-node
+#!/usr/bin/env node
 
 /**
  * Fetch MSW Fixtures Script
@@ -6,17 +6,16 @@
  * Downloads real API responses from the Safe Client Gateway (staging)
  * and saves them as JSON fixtures for use in Storybook stories.
  *
- * Usage:
- *   npx ts-node config/test/msw/scripts/fetch-fixtures.ts
- *   npx ts-node config/test/msw/scripts/fetch-fixtures.ts --safe ef-safe
- *   npx ts-node config/test/msw/scripts/fetch-fixtures.ts --endpoint portfolio
+ * Usage (Node ≥24 runs .ts directly):
+ *   node config/test/msw/scripts/fetch-fixtures.ts
+ *   node config/test/msw/scripts/fetch-fixtures.ts --safe=ef-safe
  */
 
 import * as fs from 'fs'
 import * as path from 'path'
 
 const GATEWAY_URL = 'https://safe-client.staging.5afe.dev'
-const FIXTURES_DIR = path.join(__dirname, '../fixtures')
+const FIXTURES_DIR = path.join(import.meta.dirname, '../fixtures')
 const CONFIG_SERVICE_KEY = process.env.NEXT_PUBLIC_CONFIG_SERVICE_KEY || 'WALLET_WEB'
 
 // Safe addresses for different scenarios

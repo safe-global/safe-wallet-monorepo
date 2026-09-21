@@ -13,8 +13,5 @@ export type {
 } from '@safe-global/utils/utils/addressSimilarity.types'
 export { DEFAULT_SIMILARITY_CONFIG } from '@safe-global/utils/utils/addressSimilarity.types'
 
-// Safe selection modal types
-export type { SelectableSafe } from './hooks/useSafeSelectionModal.types'
-
 // Non-pinned warning types
 export type { SafeUserRole, NonPinnedWarningState } from './hooks/useNonPinnedSafeWarning.types'

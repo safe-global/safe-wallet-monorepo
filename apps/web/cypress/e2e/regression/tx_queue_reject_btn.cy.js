@@ -36,7 +36,7 @@ describe('Transaction queue Reject button tests', { defaultCommandTimeout: 30000
   it('Verify that Reject button is disabled out for non-owners and disconnected users', () => {
     cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_34 + swaps.swapTxs.sellQLimitOrder)
     create_tx.verifyRejectBtnDisabled()
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     create_tx.verifyRejectBtnDisabled()
     navigation.clickOnWalletExpandMoreIcon()
     navigation.clickOnDisconnectBtn()
@@ -49,8 +49,10 @@ describe('Transaction queue Reject button tests', { defaultCommandTimeout: 30000
   })
 
   it('Verify that clicking rejection with an owner opens a modal with the Reject option', () => {
-    cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_34 + swaps.swapTxs.sellQLimitOrder)
-    wallet.connectSigner(signer2)
+    wallet.connectSignerViaStorage(
+      signer2,
+      constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_34 + swaps.swapTxs.sellQLimitOrder,
+    )
     create_tx.clickOnRejectBtn()
     create_tx.verifyTxRejectModalVisible()
     navigation.clickOnWalletExpandMoreIcon()
@@ -75,8 +77,10 @@ describe('Transaction queue Reject button tests', { defaultCommandTimeout: 30000
   })
 
   it('Verify a Reject tx cannot be "Added as batch"', () => {
-    cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_34 + swaps.swapTxs.sellQLimitOrder)
-    wallet.connectSigner(signer2)
+    wallet.connectSignerViaStorage(
+      signer2,
+      constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_34 + swaps.swapTxs.sellQLimitOrder,
+    )
     create_tx.clickOnRejectBtn()
     create_tx.verifyTxRejectModalVisible()
     create_tx.clickOnRejectionChoiceBtn(1)

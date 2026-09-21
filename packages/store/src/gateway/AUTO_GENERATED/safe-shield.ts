@@ -314,7 +314,7 @@ export type TokenAssetDetailsDto = {
   /** URL to asset logo (if available) */
   logo_url?: string
   /** Asset type */
-  type: 'ERC20' | 'ERC721' | 'ERC1155'
+  type: 'ERC20' | 'ERC721' | 'ERC1155' | 'NONERC'
   /** Token contract address */
   address: string
 }

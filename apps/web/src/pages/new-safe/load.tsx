@@ -16,7 +16,7 @@ const Load: NextPage = () => {
         <SafeLogo />
       </div>
       <Head>
-        <title>{`${BRAND_NAME} – Add Safe Account`}</title>
+        <title>{`${BRAND_NAME} – Add Safe account`}</title>
       </Head>
 
       {safeAddress ? (

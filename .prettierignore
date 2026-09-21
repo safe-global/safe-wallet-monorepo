@@ -23,6 +23,7 @@ apps/mobile/resources/
 
 # Web
 apps/web/.next
+apps/web/storybook-static
 apps/web/cypress/downloads
 apps/web/.swc
 apps/web/out
@@ -30,6 +31,9 @@ apps/web/public
 apps/web/src/markdown/privacy/privacy.md
 apps/web/src/markdown/terms/terms.md
 apps/web/src/config/__generated__/
+
+# Web (TanStack)
+apps/web-tanstack/dist
 
 # Utils package
 packages/utils/src/types/contracts/**/*
@@ -42,3 +46,6 @@ expo-plugins/notification-service-ios/dist
 
 # Spec templates (contain placeholders that aren't valid syntax)
 specs/**/contracts/*.template.*
+
+# Agent worktrees (spawned-session sandboxes; contain vendored third-party files)
+.claude/worktrees/

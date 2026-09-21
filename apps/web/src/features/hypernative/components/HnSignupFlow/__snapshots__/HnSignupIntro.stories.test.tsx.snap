@@ -1,158 +1,218 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./HnSignupIntro.stories Default 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 0px;"
 >
   <div
-    class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row container mui-style-1jxwjqx-MuiGrid2-root"
+    class="shadcn-scope"
   >
     <div
-      class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-grow introColumn mui-style-2edihr-MuiGrid2-root"
+      class="flex container"
     >
       <div
-        class="contentWrapper"
+        class="grow introColumn"
       >
         <div
-          class="header"
+          class="contentWrapper"
         >
-          <h1
-            class="MuiTypography-root MuiTypography-h1 title mui-style-1t5ogpx-MuiTypography-root"
-          >
-            Guardian
-          </h1>
           <div
-            class="poweredBy"
+            class="header"
           >
-            <p
-              class="MuiTypography-root MuiTypography-body2 poweredByText mui-style-17vdyq3-MuiTypography-root"
+            <h1
+              class="m-0 scroll-m-20 text-[48px] font-semibold leading-[48px] tracking-normal text-balance title"
+              data-slot="typography"
+              data-variant="h1"
             >
-              powered by
-            </p>
-            <img
-              alt="Hypernative"
-              class="logo"
-              src="/images/hypernative/hypernative-logo.svg"
-            />
+              Guardian
+            </h1>
+            <div
+              class="poweredBy"
+            >
+              <span
+                class="m-0 text-sm leading-5 font-normal poweredByText"
+                data-slot="typography"
+                data-variant="paragraph-small"
+              >
+                powered by
+              </span>
+              <div
+                class="inline-flex"
+              >
+                <mock-icon
+                  class="[&_.hypernative-logo-fill]:fill-[var(--hn-logo-fill)] w-[66px]"
+                  style="--hn-logo-fill: var(--color-primary-light);"
+                />
+              </div>
+            </div>
+            <span
+              class="m-0 text-sm leading-5 font-normal subtitle"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Enterprise-level protection for teams and organizations.
+            </span>
           </div>
-          <p
-            class="MuiTypography-root MuiTypography-body2 subtitle mui-style-17vdyq3-MuiTypography-root"
-          >
-            Enterprise-level protection for teams and organizations.
-          </p>
-        </div>
-        <div
-          class="features"
-        >
           <div
-            class="feature"
+            class="features"
           >
-            <svg
-              aria-hidden="true"
-              class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium featureIcon mui-style-1dhtbeh-MuiSvgIcon-root"
-              data-testid="CheckCircleIcon"
-              focusable="false"
-              viewBox="0 0 24 24"
+            <div
+              class="feature"
             >
-              <path
-                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8z"
-              />
-            </svg>
-            <div>
-              <p
-                class="MuiTypography-root MuiTypography-body2 featureTitle mui-style-1r7djff-MuiTypography-root"
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-circle-check featureIcon"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
               >
-                Automatic blocking
-              </p>
-              <p
-                class="MuiTypography-root MuiTypography-body2 featureDescription mui-style-17vdyq3-MuiTypography-root"
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                />
+                <path
+                  d="m9 12 2 2 4-4"
+                />
+              </svg>
+              <div>
+                <span
+                  class="m-0 text-sm leading-5 font-semibold featureTitle"
+                  data-slot="typography"
+                  data-variant="paragraph-small-bold"
+                >
+                  Automatic blocking
+                </span>
+                <span
+                  class="m-0 text-sm leading-5 font-normal featureDescription"
+                  data-slot="typography"
+                  data-variant="paragraph-small"
+                >
+                  Automatically prevents malicious or non-compliant transactions before they're executed
+                </span>
+              </div>
+            </div>
+            <div
+              class="feature"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-circle-check featureIcon"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
               >
-                Automatically prevents malicious or non-compliant transactions before they're executed
-              </p>
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                />
+                <path
+                  d="m9 12 2 2 4-4"
+                />
+              </svg>
+              <div>
+                <span
+                  class="m-0 text-sm leading-5 font-semibold featureTitle"
+                  data-slot="typography"
+                  data-variant="paragraph-small-bold"
+                >
+                  Custom security rules
+                </span>
+                <span
+                  class="m-0 text-sm leading-5 font-normal featureDescription"
+                  data-slot="typography"
+                  data-variant="paragraph-small"
+                >
+                  Create tailored policies using granular parameters to stop unwanted transactions.
+                </span>
+              </div>
+            </div>
+            <div
+              class="feature"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-circle-check featureIcon"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                />
+                <path
+                  d="m9 12 2 2 4-4"
+                />
+              </svg>
+              <div>
+                <span
+                  class="m-0 text-sm leading-5 font-semibold featureTitle"
+                  data-slot="typography"
+                  data-variant="paragraph-small-bold"
+                >
+                  Seamless integration
+                </span>
+                <span
+                  class="m-0 text-sm leading-5 font-normal featureDescription"
+                  data-slot="typography"
+                  data-variant="paragraph-small"
+                >
+                  Works natively within your Safe workflow. No extra steps required.
+                </span>
+              </div>
             </div>
           </div>
           <div
-            class="feature"
+            class="actions"
           >
-            <svg
-              aria-hidden="true"
-              class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium featureIcon mui-style-1dhtbeh-MuiSvgIcon-root"
-              data-testid="CheckCircleIcon"
-              focusable="false"
-              viewBox="0 0 24 24"
+            <span
+              data-track="hypernative: Guardian Form Started"
             >
-              <path
-                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8z"
-              />
-            </svg>
-            <div>
-              <p
-                class="MuiTypography-root MuiTypography-body2 featureTitle mui-style-1r7djff-MuiTypography-root"
+              <button
+                class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 w-full"
+                data-slot="button"
+                tabindex="0"
+                type="button"
               >
-                Custom security rules
-              </p>
-              <p
-                class="MuiTypography-root MuiTypography-body2 featureDescription mui-style-17vdyq3-MuiTypography-root"
-              >
-                Create tailored policies using granular parameters to stop unwanted transactions.
-              </p>
-            </div>
-          </div>
-          <div
-            class="feature"
-          >
-            <svg
-              aria-hidden="true"
-              class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium featureIcon mui-style-1dhtbeh-MuiSvgIcon-root"
-              data-testid="CheckCircleIcon"
-              focusable="false"
-              viewBox="0 0 24 24"
-            >
-              <path
-                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8z"
-              />
-            </svg>
-            <div>
-              <p
-                class="MuiTypography-root MuiTypography-body2 featureTitle mui-style-1r7djff-MuiTypography-root"
-              >
-                Seamless integration
-              </p>
-              <p
-                class="MuiTypography-root MuiTypography-body2 featureDescription mui-style-17vdyq3-MuiTypography-root"
-              >
-                Works natively within your Safe workflow. No extra steps required.
-              </p>
-            </div>
-          </div>
-        </div>
-        <div
-          class="actions"
-        >
-          <span
-            data-track="hypernative: Guardian Form Started"
-          >
+                Get started
+              </button>
+            </span>
             <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth primaryButton mui-style-1y9vpnt-MuiButtonBase-root-MuiButton-root"
+              class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 w-full"
+              data-slot="button"
               tabindex="0"
               type="button"
             >
-              Get started
+              Close
             </button>
-          </span>
-          <button
-            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary MuiButton-fullWidth secondaryButton mui-style-13rqk14-MuiButtonBase-root-MuiButton-root"
-            tabindex="0"
-            type="button"
-          >
-            Close
-          </button>
+          </div>
         </div>
       </div>
+      <div
+        class="backgroundColumn"
+      />
     </div>
-    <div
-      class="MuiGrid2-root MuiGrid2-direction-xs-row backgroundColumn mui-style-1fzlhpv-MuiGrid2-root"
-    />
   </div>
 </div>
 `;

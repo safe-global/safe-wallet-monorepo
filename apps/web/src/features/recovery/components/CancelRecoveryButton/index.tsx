@@ -1,7 +1,7 @@
 import useWallet from '@/hooks/wallets/useWallet'
 import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
-import { Button } from '@mui/material'
+import { Button } from '@/components/ui/button'
 import { useContext } from 'react'
 import type { SyntheticEvent, ReactElement } from 'react'
 
@@ -9,13 +9,13 @@ import CheckWallet from '@/components/common/CheckWallet'
 import { TxModalContext } from '@/components/tx-flow'
 import { CancelRecoveryFlow } from '@/components/tx-flow/flows'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
-import { dispatchRecoverySkipExpired } from '@/features/recovery/services/recovery-sender'
+import { dispatchRecoverySkipExpired } from '../../services/recovery-sender'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { trackError, Errors } from '@/services/exceptions'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
-import { useRecoveryTxState } from '@/features/recovery/hooks/useRecoveryTxState'
+import { useRecoveryTxState } from '../../hooks/useRecoveryTxState'
 import { RecoveryListItemContext } from '../RecoveryListItem/RecoveryListItemContext'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import type { RecoveryQueueItem } from '../../services/recovery-state'
 
 export default function CancelRecoveryButton({
   recovery,
@@ -65,9 +65,9 @@ export default function CancelRecoveryButton({
           <Button
             data-testid="cancel-recovery-btn"
             onClick={onClick}
-            variant="danger"
+            variant="destructive"
             disabled={isDisabled}
-            size={compact ? 'small' : 'large'}
+            size={compact ? 'sm' : 'lg'}
           >
             Cancel
           </Button>

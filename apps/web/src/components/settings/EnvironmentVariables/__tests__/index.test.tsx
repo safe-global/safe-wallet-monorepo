@@ -8,9 +8,6 @@ import EnvironmentVariables from '..'
 import { faker } from '@faker-js/faker'
 import { chainBuilder } from '@/tests/builders/chains'
 import * as analytics from '@/services/analytics'
-import SafeThemeProvider from '@/components/theme/SafeThemeProvider'
-import { ThemeProvider } from '@mui/material/styles'
-import type { Theme } from '@mui/material/styles'
 
 // Mock chain data
 const mockChain = chainBuilder()
@@ -41,13 +38,7 @@ jest.mock('@/services/analytics', () => ({
 // Helper function to render with store access
 const renderWithStore = (ui: React.ReactElement, initialReduxState?: Partial<RootState>) => {
   const store = makeStore(initialReduxState, { skipBroadcast: true })
-  const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <Provider store={store}>
-      <SafeThemeProvider mode="light">
-        {(safeTheme: Theme) => <ThemeProvider theme={safeTheme}>{children}</ThemeProvider>}
-      </SafeThemeProvider>
-    </Provider>
-  )
+  const wrapper = ({ children }: { children: React.ReactNode }) => <Provider store={store}>{children}</Provider>
   const result = rtlRender(ui, { wrapper })
   return { ...result, store }
 }

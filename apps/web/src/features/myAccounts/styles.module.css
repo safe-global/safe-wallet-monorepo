@@ -7,7 +7,8 @@
 
 .myAccounts {
   width: 100vw;
-  max-width: 750px;
+  /* Panel padding (2 × 16px) + table columns (958px) + table border (2px). */
+  max-width: 992px;
   margin: var(--space-2);
 }
 

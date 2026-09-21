@@ -74,7 +74,8 @@ describe('signWithWalletConnect', () => {
   const mockTypedData = {
     domain: {
       verifyingContract: '0xSafeAddress',
-      chainId: 1,
+      // protocol-kit's generateTypedData returns chainId as a bigint.
+      chainId: BigInt(1),
     },
     types: {
       EIP712Domain: [{ name: 'verifyingContract', type: 'address' }],
@@ -159,13 +160,54 @@ describe('signWithWalletConnect', () => {
     expect(types).toHaveProperty('SafeTx')
   })
 
-  it('calls provider.request with eth_signTypedData_v4', async () => {
+  it('calls provider.request with eth_signTypedData_v4 and a bigint-safe typed-data string', async () => {
     await signWithWalletConnect(defaultParams)
 
-    expect(mockProvider.request).toHaveBeenCalledWith({
-      method: SigningMethod.ETH_SIGN_TYPED_DATA_V4,
-      params: ['0xSignerAddress', JSON.stringify(mockTypedData)],
+    expect(mockProvider.request).toHaveBeenCalledTimes(1)
+    const { method, params } = mockProvider.request.mock.calls[0][0]
+    expect(method).toBe(SigningMethod.ETH_SIGN_TYPED_DATA_V4)
+    expect(params[0]).toBe('0xSignerAddress')
+    // bigint chainId serializes as a number (EIP-712 uint256), not a string.
+    const parsed = JSON.parse(params[1])
+    expect(parsed.domain.chainId).toBe(1)
+  })
+
+  it('serializes a large bigint message field as a string without precision loss', async () => {
+    const bigValue = BigInt('123456789012345678901234567890')
+    mockGenerateTypedData.mockReturnValueOnce({
+      ...mockTypedData,
+      domain: { verifyingContract: '0xSafeAddress', chainId: BigInt(137) },
+      message: { to: '0xRecipient', value: bigValue },
     })
+
+    await signWithWalletConnect(defaultParams)
+
+    const parsed = JSON.parse(mockProvider.request.mock.calls[0][0].params[1])
+    expect(parsed.domain.chainId).toBe(137)
+    expect(parsed.message.value).toBe('123456789012345678901234567890')
+  })
+
+  it('only coerces domain.chainId to a number — a chainId bigint in the message stays a string', async () => {
+    mockGenerateTypedData.mockReturnValueOnce({
+      ...mockTypedData,
+      domain: { verifyingContract: '0xSafeAddress', chainId: BigInt(1) },
+      message: { to: '0xRecipient', chainId: BigInt(137) },
+    })
+
+    await signWithWalletConnect(defaultParams)
+
+    const parsed = JSON.parse(mockProvider.request.mock.calls[0][0].params[1])
+    expect(parsed.domain.chainId).toBe(1)
+    expect(parsed.message.chainId).toBe('137')
+  })
+
+  it('throws when domain.chainId exceeds Number.MAX_SAFE_INTEGER', async () => {
+    mockGenerateTypedData.mockReturnValueOnce({
+      ...mockTypedData,
+      domain: { verifyingContract: '0xSafeAddress', chainId: BigInt(Number.MAX_SAFE_INTEGER) + BigInt(1) },
+    })
+
+    await expect(signWithWalletConnect(defaultParams)).rejects.toThrow('exceeds Number.MAX_SAFE_INTEGER')
   })
 
   it('throws when provider returns non-string signature', async () => {

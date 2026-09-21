@@ -34,8 +34,10 @@ import { createWeb3, getUserNonce } from '@/hooks/wallets/web3'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import chains from '@safe-global/utils/config/chains'
 import { createExistingTx } from './create'
+import { getRelaySimulationError } from '@safe-global/utils/services/relayErrors'
 
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
+import type { TxSenderScope } from '@/components/tx-flow/safe-scope/types'
 
 /**
  * Propose a transaction
@@ -48,6 +50,7 @@ export const dispatchTxProposal = async ({
   safeTx,
   txId,
   origin,
+  scope,
 }: {
   chainId: string
   safeAddress: string
@@ -55,8 +58,9 @@ export const dispatchTxProposal = async ({
   safeTx: SafeTransaction
   txId?: string
   origin?: string
+  scope?: TxSenderScope
 }): Promise<TransactionDetails> => {
-  const safeSDK = getAndValidateSafeSDK()
+  const safeSDK = getAndValidateSafeSDK(scope)
   const safeTxHash = await safeSDK.getTransactionHash(safeTx)
 
   let proposedTx: TransactionDetails | undefined
@@ -93,8 +97,9 @@ export const dispatchTxSigning = async (
   safeTx: SafeTransaction,
   provider: Eip1193Provider,
   txId?: string,
+  scope?: TxSenderScope,
 ): Promise<SafeTransaction> => {
-  const sdk = await getSafeSDKWithSigner(provider)
+  const sdk = await getSafeSDKWithSigner(provider, scope)
 
   let signedTx: SafeTransaction | undefined
   try {
@@ -113,8 +118,12 @@ export const dispatchTxSigning = async (
 }
 
 // We have to manually sign because sdk.signTransaction doesn't support proposers
-export const dispatchProposerTxSigning = async (safeTx: SafeTransaction, wallet: ConnectedWallet) => {
-  const sdk = await getSafeSDKWithSigner(wallet.provider)
+export const dispatchProposerTxSigning = async (
+  safeTx: SafeTransaction,
+  wallet: ConnectedWallet,
+  scope?: TxSenderScope,
+) => {
+  const sdk = await getSafeSDKWithSigner(wallet.provider, scope)
 
   let signature: SafeSignature
   if (isEthSignWallet(wallet)) {
@@ -142,8 +151,9 @@ export const dispatchOnChainSigning = async (
   signerAddress: string,
   safeAddress: string,
   isNestedSafe: boolean,
+  scope?: TxSenderScope,
 ) => {
-  const sdk = await getSafeSDKWithSigner(provider)
+  const sdk = await getSafeSDKWithSigner(provider, scope)
   const safeTxHash = await sdk.getTransactionHash(safeTx)
   const eventParams = { txId, nonce: safeTx.data.nonce, chainId, safeAddress }
 
@@ -154,7 +164,7 @@ export const dispatchOnChainSigning = async (
   let txHashOrParentSafeTxHash: string
   try {
     // TODO: This is a workaround until there is a fix for unchecked transactions in the protocol-kit
-    const encodedApproveHashTx = await prepareApproveTxHash(safeTxHash, provider)
+    const encodedApproveHashTx = await prepareApproveTxHash(safeTxHash, provider, scope)
 
     // Note: SafeWalletProvider returns transaction hash if it exists, otherwise the safeTxHash
     // If the parent immediately executes, this will be the transaction hash of the approveHash
@@ -289,8 +299,9 @@ export const dispatchTxExecution = async (
   signerAddress: string,
   safeAddress: string,
   isSmartAccount: boolean,
+  scope?: TxSenderScope,
 ): Promise<string> => {
-  const sdk = await getSafeSDKWithSigner(provider)
+  const sdk = await getSafeSDKWithSigner(provider, scope)
   const eventParams = { txId, nonce: safeTx.data.nonce, chainId, safeAddress }
 
   const signerNonce = txOptions.nonce ?? (await getUserNonce(signerAddress))
@@ -300,7 +311,7 @@ export const dispatchTxExecution = async (
   try {
     // TODO: This is a workaround until there is a fix for unchecked transactions in the protocol-kit
     if (isSmartAccount) {
-      const encodedTx = await prepareTxExecution(safeTx, provider)
+      const encodedTx = await prepareTxExecution(safeTx, provider, scope)
       const txHash = await provider.request({
         method: 'eth_sendTransaction',
         params: [{ from: signerAddress, to: safeAddress, data: encodedTx }],
@@ -475,9 +486,13 @@ export const dispatchTxRelay = async (
   txId: string,
   chain: Chain,
   gasLimit?: string | number | bigint,
+  acceptUnverifiedSimulation?: boolean,
+  scope?: TxSenderScope,
 ) => {
   const store = getStoreInstance()
-  const readOnlySafeContract = await getReadOnlyCurrentGnosisSafeContract(safe)
+  const readOnlySafeContract = await getReadOnlyCurrentGnosisSafeContract(safe, scope)
+  const safeSDK = getAndValidateSafeSDK(scope)
+  const safeTxHash = await safeSDK.getTransactionHash(safeTx)
 
   let transactionToRelay = safeTx
   const data = readOnlySafeContract.encode('execTransaction', [
@@ -501,6 +516,8 @@ export const dispatchTxRelay = async (
         data,
         gasLimit: gasLimit?.toString(),
         version: safe.version ?? getLatestSafeVersion(chain),
+        safeTxHash,
+        acceptUnverifiedSimulation,
       },
     })
 
@@ -522,14 +539,17 @@ export const dispatchTxRelay = async (
     // Monitor relay tx
     waitForRelayedTx(taskId, [txId], safe.chainId, safe.address.value, safeTx.data.nonce)
   } catch (error) {
+    // CGW pre-relay simulation surfaces SIMULATION_FAILED / INDETERMINATE_SIMULATION as a typed
+    // error so the UI can block or offer an explicit retry; everything else stays as-is.
+    const finalError = getRelaySimulationError(error) ?? asError(error)
     txDispatch(TxEvent.FAILED, {
       txId,
-      error: asError(error),
+      error: finalError,
       nonce: safeTx.data.nonce,
       chainId: safe.chainId,
       safeAddress: safe.address.value,
     })
-    throw error
+    throw finalError
   }
 }
 

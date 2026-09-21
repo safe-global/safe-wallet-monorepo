@@ -21,6 +21,10 @@ export const HYPERNATIVE_EVENTS = {
     action: 'Security Report Clicked',
     category: HYPERNATIVE_CATEGORY,
   },
+  EXECUTION_BLOCKED_APPROVAL_CLICKED: {
+    action: 'Execution Blocked Approval Clicked',
+    category: HYPERNATIVE_CATEGORY,
+  },
   GUARDIAN_BANNER_DISMISSED: {
     action: 'Guardian Banner Dismissed',
     category: HYPERNATIVE_CATEGORY,
@@ -45,6 +49,5 @@ export enum HYPERNATIVE_SOURCE {
   NewTransaction = 'New transaction',
   Tutorial = 'Tutorial',
   Queue = 'Queue',
-  History = 'History',
   Copilot = 'Copilot',
 }

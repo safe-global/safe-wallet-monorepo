@@ -1,8 +1,9 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import type { AlertColor } from '@mui/material'
+import { createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type { AppThunk, RootState } from '@/store'
 import type { LinkProps } from 'next/link'
 import type { ReactNode } from 'react'
+
+export type AlertColor = 'success' | 'info' | 'warning' | 'error'
 
 export type Notification = {
   id: string
@@ -17,6 +18,9 @@ export type Notification = {
   link?: { href: LinkProps['href']; title: string } | { onClick: () => void; title: string }
   icon?: ReactNode
   onClose?: () => void
+  // Override the variant's default auto-hide: a number sets the duration (ms),
+  // `null` keeps the toast open until the user dismisses it. Omit for default.
+  autoHideDuration?: number | null
 }
 
 export type NotificationState = Notification[]
@@ -58,7 +62,11 @@ export const { closeNotification, closeByGroupKey, deleteAllNotifications, readN
   notificationsSlice.actions
 
 export const showNotification = (payload: Omit<Notification, 'id' | 'timestamp'>): AppThunk<string> => {
-  return (dispatch) => {
+  return (dispatch, getState) => {
+    // The browser is about to leave for the second-factor challenge, and the
+    // rejection that started it is a handshake, not a failure to report.
+    if (getState().stepUp.phase === 'leaving') return ''
+
     const id = Math.random().toString(32).slice(2)
 
     const notification: Notification = {
@@ -76,3 +84,11 @@ export const showNotification = (payload: Omit<Notification, 'id' | 'timestamp'>
 export const selectNotifications = (state: RootState): NotificationState => {
   return state[notificationsSlice.name]
 }
+
+/**
+ * What the notification center lists. Failures are transient: they are shown as a toast and,
+ * when a tx flow is on screen, inline in the flow — they are never kept as a record here.
+ */
+export const selectCenterNotifications = createSelector(selectNotifications, (notifications) =>
+  notifications.filter(({ variant }) => variant !== 'error'),
+)

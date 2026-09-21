@@ -8,7 +8,8 @@ import {
 } from '@safe-global/safe-deployments'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { Interface, JsonRpcProvider } from 'ethers'
-import { createUpdateSafeTxs } from '../safeUpdateParams'
+import { createUpdateSafeTxs, extractTargetVersionFromUpdateSafeTx } from '../safeUpdateParams'
+import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import * as web3 from '@/hooks/wallets/web3'
 import { chainBuilder } from '@/tests/builders/chains'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
@@ -156,3 +157,65 @@ const decodeSetFallbackHandlerAddress = (data: string): string => {
   const decodedAddress = multiSendInterface.decodeFunctionData('setFallbackHandler', data)[0]
   return decodedAddress.toString()
 }
+
+describe('createUpdateSafeTxs for 1.4.1 Safes', () => {
+  const OFFICIAL_L1_141 = '0x41675C099F32341bf84BFc5382aF534df5C7461a'
+  const CANONICAL_MIGRATION_150 = '0x6439e7ABD8Bb915A5263094784C5CF561c4172AC'
+  const MIGRATE_WITH_FALLBACK_HANDLER = '0xed007fc6'
+
+  it('upgrades 1.4.1 → 1.5.0 via the SafeMigration delegate call, NOT the legacy changeMasterCopy path', async () => {
+    const mockSafe = {
+      address: { value: MOCK_SAFE_ADDRESS },
+      version: '1.4.1',
+      implementation: { value: OFFICIAL_L1_141 },
+    } as SafeState
+
+    const mockChainInfo = chainBuilder()
+      .with({ chainId: '1', l2: false, recommendedMasterCopyVersion: '1.5.0' })
+      .build()
+
+    const txs = await createUpdateSafeTxs(mockSafe, mockChainInfo)
+
+    expect(txs).toHaveLength(1)
+    expect(txs[0]).toEqual({
+      operation: 1,
+      data: MIGRATE_WITH_FALLBACK_HANDLER,
+      to: CANONICAL_MIGRATION_150,
+      value: '0',
+    })
+  })
+})
+
+describe('extractTargetVersionFromUpdateSafeTx', () => {
+  const CANONICAL_MIGRATION_141 = '0x526643F69b81B008F46d95CD5ced5eC0edFFDaC6'
+  const ZKSYNC_MIGRATION_141 = '0x817756C6c555A94BCEE39eB5a102AbC1678b09A7'
+  const MIGRATE_L2_WITH_FALLBACK_HANDLER = '0x68cb3d94'
+
+  const zkSafe = { chainId: '324', address: { value: MOCK_SAFE_ADDRESS }, version: '1.3.0+L2' } as SafeState
+
+  const migrationTx = (to: string, operation = 1): TransactionData =>
+    ({
+      hexData: MIGRATE_L2_WITH_FALLBACK_HANDLER,
+      to: { value: to },
+      value: '0',
+      operation,
+    }) as TransactionData
+
+  it('detects the target version for the canonical migration variant on zkSync (canonical Safes)', () => {
+    expect(extractTargetVersionFromUpdateSafeTx(migrationTx(CANONICAL_MIGRATION_141), zkSafe)).toBe('1.4.1')
+  })
+
+  it('detects the target version for the zksync migration variant on zkSync (EraVM Safes)', () => {
+    expect(extractTargetVersionFromUpdateSafeTx(migrationTx(ZKSYNC_MIGRATION_141), zkSafe)).toBe('1.4.1')
+  })
+
+  it('returns undefined for a delegate call to an unknown contract', () => {
+    expect(
+      extractTargetVersionFromUpdateSafeTx(migrationTx('0x000000000000000000000000000000000000dEaD'), zkSafe),
+    ).toBeUndefined()
+  })
+
+  it('returns undefined for a regular call to the migration contract (not a delegate call)', () => {
+    expect(extractTargetVersionFromUpdateSafeTx(migrationTx(CANONICAL_MIGRATION_141, 0), zkSafe)).toBeUndefined()
+  })
+})

@@ -23,7 +23,7 @@ const buildWorkspaceHeader = (
   onSpaceAdded: ((space: SpaceItem) => void) | undefined,
 ): SafeWorkspaceHeaderProps =>
   selectedSpace
-    ? { variant: 'backToSpace', spaceName: selectedSpace.name, spaceInitial, spaceId: String(selectedSpace.id) }
+    ? { variant: 'backToSpace', spaceName: selectedSpace.name, spaceInitial, spaceId: selectedSpace.uuid }
     : { variant: 'addToWorkspace', selectedSpace, spaces, onSpaceAdded }
 
 export const SafeSidebarContent = ({

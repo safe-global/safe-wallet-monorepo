@@ -4,6 +4,7 @@ import { createMockSafeTransaction } from '@/tests/transactions'
 import { OperationType } from '@safe-global/types-kit'
 import { type ReactElement } from 'react'
 import { ExecuteForm } from '../ExecuteForm'
+import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
 import * as useGasLimit from '@/hooks/useGasLimit'
 import * as useIsValidExecution from '@/hooks/useIsValidExecution'
 import * as useWalletCanRelay from '@/hooks/useWalletCanRelay'
@@ -49,6 +50,7 @@ describe('ExecuteForm', () => {
     },
     txSecurity: {
       setRecipientAddresses: jest.fn(),
+      setPoisoningAddresses: jest.fn(),
       setSafeTx: jest.fn(),
       recipient: [undefined, undefined, false] as AsyncResult<RecipientAnalysisResults>,
       contract: [undefined, undefined, false] as AsyncResult<ContractAnalysisResults>,
@@ -86,7 +88,7 @@ describe('ExecuteForm', () => {
     const { getByText } = render(<ExecuteForm {...defaultProps} isOwner={false} onlyExecute={false} />)
 
     expect(
-      getByText("You are currently not a signer of this Safe Account and won't be able to submit this transaction."),
+      getByText("You are currently not a signer of this Safe account and won't be able to submit this transaction."),
     ).toBeInTheDocument()
   })
 
@@ -94,7 +96,7 @@ describe('ExecuteForm', () => {
     const { queryByText } = render(<ExecuteForm {...defaultProps} isOwner={false} onlyExecute={true} />)
 
     expect(
-      queryByText("You are currently not a signer of this Safe Account and won't be able to submit this transaction."),
+      queryByText("You are currently not a signer of this Safe account and won't be able to submit this transaction."),
     ).not.toBeInTheDocument()
   })
 
@@ -102,7 +104,7 @@ describe('ExecuteForm', () => {
     const { getByText } = render(<ExecuteForm {...defaultProps} isExecutionLoop={true} />)
 
     expect(
-      getByText('Cannot execute a transaction from the Safe Account itself, please connect a different account.'),
+      getByText('Cannot execute a transaction from the Safe account itself, please connect a different account.'),
     ).toBeInTheDocument()
   })
 
@@ -152,9 +154,7 @@ describe('ExecuteForm', () => {
       />,
     )
 
-    expect(
-      getByText('This transaction will most likely fail. To save gas costs, reject this transaction.'),
-    ).toBeInTheDocument()
+    expect(getByText(/Could not check this transaction/)).toBeInTheDocument()
   })
 
   it('shows a gasLimit error', () => {
@@ -164,9 +164,7 @@ describe('ExecuteForm', () => {
 
     const { getByText } = render(<ExecuteForm {...defaultProps} />)
 
-    expect(
-      getByText('This transaction will most likely fail. To save gas costs, reject this transaction.'),
-    ).toBeInTheDocument()
+    expect(getByText(/Could not check this transaction/)).toBeInTheDocument()
   })
 
   it('execute the tx when the submit button is clicked', async () => {
@@ -250,5 +248,70 @@ describe('ExecuteForm', () => {
 
     expect(button).toBeInTheDocument()
     expect(button).not.toBeDisabled()
+  })
+
+  it('blocks execution and shows the simulation-failed banner on SIMULATION_FAILED', async () => {
+    const mockExecuteTx = jest.fn().mockRejectedValue(new RelaySimulationError('SIMULATION_FAILED', 'expected revert'))
+
+    const { getByText } = render(
+      <ExecuteForm
+        {...defaultProps}
+        safeTx={safeTransaction}
+        txActions={{ ...defaultProps.txActions, executeTx: mockExecuteTx }}
+      />,
+    )
+
+    fireEvent.click(getByText('Execute'))
+
+    await waitFor(() => {
+      expect(getByText(/expected to fail on-chain/i)).toBeInTheDocument()
+    })
+    // The doomed tx can no longer be submitted.
+    expect(getByText('Execute')).toBeDisabled()
+  })
+
+  it('offers an "Execute anyway" retry with acceptUnverifiedSimulation on INDETERMINATE_SIMULATION', async () => {
+    const mockExecuteTx = jest
+      .fn()
+      .mockRejectedValueOnce(new RelaySimulationError('INDETERMINATE_SIMULATION', 'service down'))
+      .mockResolvedValueOnce('0xnewtx')
+
+    const { getByText, getByTestId } = render(
+      <ExecuteForm
+        {...defaultProps}
+        safeTx={safeTransaction}
+        txActions={{ ...defaultProps.txActions, executeTx: mockExecuteTx }}
+      />,
+    )
+
+    fireEvent.click(getByText('Execute'))
+
+    await waitFor(() => {
+      expect(getByText(/couldn't review this transaction/i)).toBeInTheDocument()
+    })
+
+    // First attempt didn't opt into the unverified relay.
+    expect(mockExecuteTx).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      undefined,
+      expect.anything(),
+      false,
+    )
+
+    fireEvent.click(getByTestId('relay-accept-unverified-btn'))
+
+    await waitFor(() => {
+      // Retry forwards acceptUnverifiedSimulation = true.
+      expect(mockExecuteTx).toHaveBeenLastCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        undefined,
+        expect.anything(),
+        true,
+      )
+    })
   })
 })

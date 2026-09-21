@@ -1,18 +1,26 @@
-import { Alert, DialogActions, Button, DialogContent } from '@mui/material'
-import { Button as ShadcnButton } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
+import { cn } from '@/utils/cn'
+import { useDarkMode } from '@/hooks/useDarkMode'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
+import DialogActions from '@/components/common/DialogActions'
 import { useState, type ReactNode } from 'react'
 import AddressInput from '@/components/common/AddressInput'
 import NameInput from '@/components/common/NameInput'
+import { ADDRESS_BOOK_NAME_MAX_LENGTH, NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/NetworkMultiSelectorInput'
 import useChains from '@/hooks/useChains'
+import { DEFAULT_MAINNET_CHAIN_ID } from '@/config/constants'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
+import type { SerializedError } from '@reduxjs/toolkit'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 export type ContactField = {
   name: string
@@ -36,6 +44,7 @@ type AddContactDialogProps = {
   submit: (item: AddContactItem, spaceId: string) => Promise<{ error?: unknown }>
   onSubmitStart?: () => void
   onSuccess?: () => void
+  validateCharset?: boolean
 }
 
 const AddContactDialog = ({
@@ -48,6 +57,7 @@ const AddContactDialog = ({
   submit,
   onSubmitStart,
   onSuccess,
+  validateCharset = false,
 }: AddContactDialogProps) => {
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string>()
@@ -55,6 +65,10 @@ const AddContactDialog = ({
   const { configs: allNetworks } = useChains()
   const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
+  const isDarkMode = useDarkMode()
+
+  // Contacts are chain-agnostic, so resolve ENS names on mainnet regardless of the connected chain
+  const ensChain = allNetworks.find((chain) => chain.chainId === String(DEFAULT_MAINNET_CHAIN_ID))
 
   const defaultValues = {
     name: '',
@@ -86,7 +100,7 @@ const AddContactDialog = ({
     setError(undefined)
 
     const item: AddContactItem = {
-      name: data.name,
+      name: validateCharset ? sanitizeName(data.name) : data.name,
       address: data.address,
       chainIds: data.networks.map((network) => network.chainId),
     }
@@ -95,10 +109,13 @@ const AddContactDialog = ({
       setIsSubmitting(true)
       onSubmitStart?.()
 
-      const result = await submit(item, String(spaceId))
+      const result = await submit(item, spaceId ?? '')
 
+      if (isElevationRequiredError(result.error)) return
       if (result.error) {
-        setError('Something went wrong. Please try again.')
+        const message = getRtkQueryErrorMessage(result.error as FetchBaseQueryError | SerializedError)
+        setError(message)
+        dispatch(showNotification({ message, variant: 'error', groupKey: `${successGroupKey}-error` }))
         return
       }
 
@@ -113,8 +130,10 @@ const AddContactDialog = ({
       )
 
       handleClose()
-    } catch {
-      setError('Something went wrong. Please try again.')
+    } catch (error) {
+      const message = getRtkQueryErrorMessage(error as FetchBaseQueryError | SerializedError)
+      setError(message)
+      dispatch(showNotification({ message, variant: 'error', groupKey: `${successGroupKey}-error` }))
     } finally {
       setIsSubmitting(false)
     }
@@ -122,59 +141,73 @@ const AddContactDialog = ({
 
   return (
     <>
-      <ShadcnButton size="lg" className="px-4 py-0" onClick={handleOpen}>
+      <Button size="action" onClick={handleOpen}>
         <Plus className="size-4 mr-1 text-green-500" />
         {triggerLabel}
-      </ShadcnButton>
+      </Button>
       <ModalDialog open={open} onClose={handleClose} dialogTitle={dialogTitle} hideChainIndicator>
-        <FormProvider {...methods}>
-          <form onSubmit={onSubmit}>
-            <DialogContent sx={{ py: 2 }}>
-              <div className="flex flex-col gap-6">
-                {intro && <p className="text-muted-foreground text-sm">{intro}</p>}
+        <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
+          <FormProvider {...methods}>
+            <form onSubmit={onSubmit}>
+              <div className="px-6 py-4">
+                <div className="flex flex-col gap-6">
+                  {intro && <p className="text-muted-foreground text-sm">{intro}</p>}
 
-                <NameInput name="name" label="Name" required />
-                <AddressInput name="address" label="Address" required showPrefix={false} />
-
-                <div>
-                  <p className="mb-1 inline-flex items-center gap-1 text-sm font-bold">Select networks</p>
-                  <p className="text-muted-foreground mb-2 text-sm">
-                    Add contact on all networks or only on specific ones of your choice.
-                  </p>
-                  <Controller
-                    name="networks"
-                    control={control}
-                    render={({ field }) => (
-                      <NetworkMultiSelectorInput
-                        name="networks"
-                        showSelectAll
-                        value={field.value || []}
-                        error={!!errors.networks}
-                        helperText={errors.networks ? 'Select at least one network' : ''}
-                      />
-                    )}
-                    rules={{ required: true }}
+                  {/* `hero` (66px) to match the AddressInput below, whose wrapper is min-height
+                      66px — the default h-9 left the two fields visibly uneven. */}
+                  <NameInput
+                    name="name"
+                    label="Name"
+                    required
+                    validateCharset={validateCharset}
+                    minLength={validateCharset ? NAME_MIN_LENGTH : undefined}
+                    maxLength={validateCharset ? ADDRESS_BOOK_NAME_MAX_LENGTH : undefined}
+                    inputSize="hero"
                   />
+                  <AddressInput name="address" label="Address or ENS" required showPrefix={false} chain={ensChain} />
+
+                  <div>
+                    <p className="mb-1 inline-flex items-center gap-1 text-sm font-bold">Select networks</p>
+                    <p className="text-muted-foreground mb-2 text-sm">
+                      Add contact on all networks or only on specific ones of your choice.
+                    </p>
+                    <Controller
+                      name="networks"
+                      control={control}
+                      render={({ field }) => (
+                        <NetworkMultiSelectorInput
+                          name="networks"
+                          showSelectAll
+                          value={field.value || []}
+                          error={!!errors.networks}
+                          helperText={errors.networks ? 'Select at least one network' : ''}
+                        />
+                      )}
+                      rules={{ required: true }}
+                    />
+                  </div>
                 </div>
+
+                {error && (
+                  <Alert variant="destructive" className="mt-4">
+                    <AlertSeverityIcon variant="destructive" />
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
               </div>
 
-              {error && (
-                <Alert severity="error" sx={{ mt: 2 }}>
-                  {error}
-                </Alert>
-              )}
-            </DialogContent>
-
-            <DialogActions>
-              <Button data-testid="cancel-btn" onClick={handleClose}>
-                Cancel
-              </Button>
-              <Button type="submit" variant="contained" disabled={!formState.isValid || isSubmitting} disableElevation>
-                {isSubmitting ? <Spinner className="size-5" /> : submitLabel}
-              </Button>
-            </DialogActions>
-          </form>
-        </FormProvider>
+              <DialogActions
+                className="p-4 pt-0"
+                onCancel={handleClose}
+                cancelTestId="cancel-btn"
+                confirmType="submit"
+                confirmLabel={submitLabel}
+                confirmDisabled={!formState.isValid || isSubmitting}
+                confirmLoading={isSubmitting}
+              />
+            </form>
+          </FormProvider>
+        </div>
       </ModalDialog>
     </>
   )

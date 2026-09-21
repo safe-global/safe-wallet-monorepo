@@ -47,6 +47,10 @@ export const SPACE_EVENTS = {
     action: 'Workspace member role changed',
     category: SPACE_CATEGORY,
   },
+  WORKSPACE_MEMBER_NAME_CHANGED: {
+    action: 'Workspace member name changed',
+    category: SPACE_CATEGORY,
+  },
   WORKSPACE_MEMBER_REMOVED: {
     action: 'Workspace member removed',
     category: SPACE_CATEGORY,
@@ -77,6 +81,10 @@ export const SPACE_EVENTS = {
   },
   WORKSPACE_MEMBER_INVITE_SENT: {
     action: 'Workspace member invite sent',
+    category: SPACE_CATEGORY,
+  },
+  WORKSPACE_MEMBER_INVITE_RENEWED: {
+    action: 'Workspace member invite renewed',
     category: SPACE_CATEGORY,
   },
   ADD_ACCOUNTS_MODAL: {
@@ -261,11 +269,50 @@ export const SPACE_EVENTS = {
     action: 'Wallet disconnected in space',
     category: SPACE_CATEGORY,
   },
+  USE_OLD_UI: {
+    action: 'Use the old UI',
+    category: SPACE_CATEGORY,
+  },
+  WORKSPACE_UPDATED: {
+    action: 'Workspace updated',
+    category: SPACE_CATEGORY,
+  },
+  SECURITY_HUB_VIEWED: {
+    action: 'Security hub viewed',
+    category: SPACE_CATEGORY,
+  },
+  SECURITY_REPORT_OPENED: {
+    action: 'Security report opened',
+    category: SPACE_CATEGORY,
+  },
+  ACTIVITY_LOG_VIEWED: {
+    action: 'Activity log viewed',
+    category: SPACE_CATEGORY,
+  },
+  ACTIVITY_LOG_FILTERED: {
+    action: 'Activity log filtered',
+    category: SPACE_CATEGORY,
+  },
+  ADDRESS_REQUEST_SENT: {
+    action: 'Address request sent',
+    category: SPACE_CATEGORY,
+  },
+  ADDRESS_REQUEST_APPROVED: {
+    action: 'Address request approved',
+    category: SPACE_CATEGORY,
+  },
+  ADDRESS_REQUEST_REJECTED: {
+    action: 'Address request rejected',
+    category: SPACE_CATEGORY,
+  },
+  LOCAL_CONTACT_ADDED: {
+    action: 'Local contact added',
+    category: SPACE_CATEGORY,
+  },
 }
 
 export enum SPACE_LABELS {
   space_list_page = 'space_list_page',
-  safe_dashboard_banner = 'safe_dashboard_banner',
   space_selector = 'space_selector',
   accounts_page = 'accounts_page',
   preview_banner = 'preview_banner',

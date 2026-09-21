@@ -1,12 +1,11 @@
-import { Accordion, AccordionDetails, AccordionSummary } from '@mui/material'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { useContext, useState } from 'react'
 import type { ComponentProps, ReactElement } from 'react'
 
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import RecoverySummary from '../RecoverySummary'
 import RecoveryDetails from '../RecoveryDetails'
 import { RecoveryListItemContext, RecoveryListItemProvider } from './RecoveryListItemContext'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import type { RecoveryQueueItem } from '../../services/recovery-state'
 
 function ProvidedRecoveryListItem({ item }: { item: RecoveryQueueItem }): ReactElement {
   const { submitError, setSubmitError } = useContext(RecoveryListItemContext)
@@ -24,14 +23,16 @@ function ProvidedRecoveryListItem({ item }: { item: RecoveryQueueItem }): ReactE
   }
 
   return (
-    <Accordion disableGutters elevation={0} expanded={isExpanded} onChange={onChange}>
-      <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ justifyContent: 'flex-start', overflowX: 'auto' }}>
-        <RecoverySummary item={item} />
-      </AccordionSummary>
+    <Accordion value={isExpanded ? ['recovery'] : []} onValueChange={onChange}>
+      <AccordionItem value="recovery" className="border-b-0">
+        <AccordionTrigger nativeButton={false} render={<div />} className="justify-start gap-2 overflow-x-auto">
+          <RecoverySummary item={item} />
+        </AccordionTrigger>
 
-      <AccordionDetails sx={{ p: 0 }}>
-        <RecoveryDetails item={item} />
-      </AccordionDetails>
+        <AccordionContent className="p-0">
+          <RecoveryDetails item={item} />
+        </AccordionContent>
+      </AccordionItem>
     </Accordion>
   )
 }

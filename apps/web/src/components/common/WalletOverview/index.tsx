@@ -1,5 +1,5 @@
 import Identicon from '@/components/common/Identicon'
-import { Box, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import { Suspense } from 'react'
 import type { ReactElement } from 'react'
 
@@ -7,6 +7,7 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import WalletIcon from '@/components/common/WalletIcon'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { useChain } from '@/hooks/useChains'
+import { useWalletName } from '@/hooks/wallets/useWalletName'
 import WalletBalance from '@/components/common/WalletBalance'
 import { getNativeTokenDisplay, NATIVE_TOKEN_DISPLAY_DEFAULT } from '@safe-global/utils/utils/chains'
 
@@ -14,14 +15,14 @@ import css from './styles.module.css'
 
 export const WalletIdenticon = ({ wallet, size = 32 }: { wallet: ConnectedWallet; size?: number }) => {
   return (
-    <Box className={css.imageContainer}>
+    <div className={css.imageContainer}>
       <Identicon address={wallet.address} size={size} />
       <Suspense>
-        <Box className={css.walletIcon}>
+        <div className={css.walletIcon}>
           <WalletIcon provider={wallet.label} icon={wallet.icon} width={size / 2} height={size / 2} />
-        </Box>
+        </div>
       </Suspense>
-    </Box>
+    </div>
   )
 }
 
@@ -35,20 +36,20 @@ const WalletOverview = ({
   showBalance?: boolean
 }): ReactElement => {
   const walletChain = useChain(wallet.chainId)
-  const prefix = walletChain?.shortName
   const { showWalletBalance } = walletChain ? getNativeTokenDisplay(walletChain) : NATIVE_TOKEN_DISPLAY_DEFAULT
+  const ens = useWalletName(wallet)
 
   return (
-    <Box className={css.container}>
+    <div className={css.container}>
       <WalletIdenticon wallet={wallet} />
 
-      <Box className={css.walletDetails}>
-        <Typography variant="body2" component="div">
-          {wallet.ens ? (
-            <div>{wallet.ens}</div>
+      <div className={css.walletDetails}>
+        <div className="text-sm leading-5 font-normal">
+          {ens ? (
+            <div>{ens}</div>
           ) : (
             <EthHashInfo
-              prefix={prefix || ''}
+              prefix={walletChain?.shortName || ''}
               address={wallet.address}
               showName={false}
               showAvatar={false}
@@ -56,15 +57,15 @@ const WalletOverview = ({
               copyAddress={false}
             />
           )}
-        </Typography>
+        </div>
 
         {showBalance && showWalletBalance && (
-          <Typography variant="caption" component="div" fontWeight="bold" display={{ xs: 'none', sm: 'block' }}>
+          <Typography variant="paragraph-mini-bold" className="hidden sm:block">
             <WalletBalance balance={balance} />
           </Typography>
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }
 

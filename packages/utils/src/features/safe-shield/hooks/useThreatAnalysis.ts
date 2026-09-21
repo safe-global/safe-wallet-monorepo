@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSafeShieldAnalyzeThreatV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/safe-shield'
 import isEqual from 'lodash/isEqual'
 import { StatusGroup, type ThreatAnalysisResults } from '../types'
@@ -72,10 +72,16 @@ export function useThreatAnalysis({
     [data, safeAddress, chainId, safeVersion],
   )
 
+  // RTK Query mutations don't dedup or cancel, `data` reflects the last settled call. Abort
+  // any in-flight request before triggering a new one so a slow stale response can't overwrite
+  // a fresh result
+  const inflightRef = useRef<{ abort?: () => void } | null>(null)
+
   // Trigger the mutation when typed data is available
   useEffect(() => {
     if (!skip && typedData && chainId && safeAddress && walletAddress) {
-      triggerAnalysis({
+      inflightRef.current?.abort?.()
+      const promise = triggerAnalysis({
         chainId,
         safeAddress,
         threatAnalysisRequestDto: {
@@ -84,6 +90,10 @@ export function useThreatAnalysis({
           origin,
         },
       })
+      inflightRef.current = promise ?? null
+      return () => {
+        promise?.abort?.()
+      }
     }
   }, [typedData, chainId, safeAddress, walletAddress, origin, triggerAnalysis, skip])
 

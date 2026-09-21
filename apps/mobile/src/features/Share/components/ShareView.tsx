@@ -5,14 +5,15 @@ import Share from 'react-native-share'
 import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { Identicon } from '@/src/components/Identicon'
+import { Badge } from '@/src/components/Badge'
 import QRCodeStyled from 'react-native-qrcode-styled'
-import { Platform, StyleSheet } from 'react-native'
+import { Platform, Pressable, StyleSheet } from 'react-native'
+import { router } from 'expo-router'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
 import React, { useCallback } from 'react'
 import { ToastViewport } from '@tamagui/toast'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { ChainsDisplay } from '@/src/components/ChainsDisplay'
-import { getAvailableChainsNames } from '@/src/utils/chains'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectContactByAddress } from '@/src/store/addressBookSlice'
 
@@ -43,11 +44,23 @@ export const ShareView = ({ activeSafe, availableChains }: ShareViewProps) => {
   return (
     <>
       <YStack flex={1} paddingBottom={'$4'}>
+        <XStack justifyContent={'flex-start'} paddingTop={'$8'} paddingLeft={'$5'}>
+          <Pressable
+            onPress={() => router.back()}
+            accessibilityRole="button"
+            accessibilityLabel="Close"
+            testID="share-close-button"
+          >
+            <Badge themeName="badge_background" circleSize="$9" content={<SafeFontIcon size={20} name="close" />} />
+          </Pressable>
+        </XStack>
         <YStack flex={1} justifyContent={'flex-end'} alignItems={'center'} marginBottom={'$6'}>
           <H3 fontWeight={600}>{contact ? contact.name : 'Unnamed safe'}</H3>
         </YStack>
         <YStack flex={3} alignItems={'center'}>
-          <Container marginHorizontal={'$10'}>
+          {/* Fixed px (no spacing token at this scale): caps the QR card width so it stays a
+              comfortable square on large screens rather than stretching to the column. */}
+          <Container maxWidth={260}>
             <View>
               <View style={styles.root}>
                 <QRCodeStyled
@@ -79,7 +92,15 @@ export const ShareView = ({ activeSafe, availableChains }: ShareViewProps) => {
               {activeSafe.address}
             </Text>
             <View alignItems={'center'} marginTop={'$4'}>
-              <ChainsDisplay activeChainId={activeSafe.chainId} chains={availableChains} max={5} />
+              {/* Only the icons are tappable, so the Pressable hugs ChainsDisplay rather than the row. */}
+              <Pressable
+                onPress={() => router.push('/supported-networks')}
+                accessibilityRole="button"
+                accessibilityLabel="View supported networks"
+                testID="supported-networks-button"
+              >
+                <ChainsDisplay activeChainId={activeSafe.chainId} chains={availableChains} max={5} />
+              </Pressable>
             </View>
           </Container>
           <XStack gap={'$3'} marginTop={'$6'}>
@@ -90,15 +111,6 @@ export const ShareView = ({ activeSafe, availableChains }: ShareViewProps) => {
               Copy
             </SafeButton>
           </XStack>
-        </YStack>
-        <YStack flex={1} justifyContent={'flex-end'} alignItems={'center'}>
-          <Text color={'$colorLight'} textAlign={'center'} fontSize={'$3'}>
-            This account is only available on
-            <Text color={'$color'} fontWeight={600}>
-              {' '}
-              {getAvailableChainsNames(availableChains)}.
-            </Text>
-          </Text>
         </YStack>
       </YStack>
       {Platform.OS === 'ios' && <ToastViewport multipleToasts={false} left={0} right={0} />}

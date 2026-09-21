@@ -3,7 +3,7 @@ import { type AllSafeItems, useSafesSearch } from '@/hooks/safes'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { OVERVIEW_EVENTS } from '@/services/analytics'
 import { trackEvent } from '@/services/analytics'
-import { Box, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import { useEffect } from 'react'
 
 const FilteredSafes = ({
@@ -25,12 +25,12 @@ const FilteredSafes = ({
 
   return (
     <>
-      <Typography variant="h5" fontWeight="normal" mb={2} color="primary.light">
+      <Typography variant="paragraph" color="muted" className="mb-4">
         Found {filteredSafes.length} result{maybePlural(filteredSafes)}
       </Typography>
-      <Box mt={1}>
+      <div className="mt-2">
         <SafesList safes={filteredSafes} onLinkClick={onLinkClick} />
-      </Box>
+      </div>
     </>
   )
 }

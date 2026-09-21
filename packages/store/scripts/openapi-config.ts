@@ -64,6 +64,9 @@ const config: ConfigFile = {
     '../src/gateway/AUTO_GENERATED/targeted-messages.ts': {
       filterEndpoints: [/^targetedMessaging/],
     },
+    '../src/gateway/AUTO_GENERATED/tokens.ts': {
+      filterEndpoints: [/^tokens/],
+    },
     '../src/gateway/AUTO_GENERATED/transactions.ts': {
       filterEndpoints: [/^transactions/],
     },
@@ -71,7 +74,7 @@ const config: ConfigFile = {
       filterEndpoints: [/^users/],
     },
     '../src/gateway/AUTO_GENERATED/spaces.ts': {
-      filterEndpoints: [/^(spaces|members|spaceSafes|spaceCounterfactualSafes|addressBook|userAddressBook)/],
+      filterEndpoints: [/^(spaces|members|spaceSafes|spaceAudit|spaceCounterfactualSafes|addressBook|userAddressBook)/],
     },
     '../src/gateway/AUTO_GENERATED/counterfactual-safes.ts': {
       filterEndpoints: [/^counterfactualSafes/],
@@ -87,6 +90,12 @@ const config: ConfigFile = {
     },
     '../src/gateway/AUTO_GENERATED/safe-shield.ts': {
       filterEndpoints: [/^safeShield/],
+    },
+    '../src/gateway/AUTO_GENERATED/billing.ts': {
+      filterEndpoints: [/^billing/],
+    },
+    '../src/gateway/AUTO_GENERATED/entitlements.ts': {
+      filterEndpoints: [/^entitlements/],
     },
   },
 }

@@ -5,68 +5,79 @@ exports[`./PromoBanner.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-fmnm4n-MuiPaper-root-MuiCard-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
     <div
-      class="MuiStack-root bannerStack mui-style-pl8gqh-MuiStack-root"
+      class="banner"
     >
-      <img
-        alt="Promo image"
-        class="bannerImage"
-        data-nimg="1"
-        decoding="async"
-        height="95"
-        loading="lazy"
-        src="/_next/image?url=%2Fimg.jpg&w=256&q=75"
-        srcset="/_next/image?url=%2Fimg.jpg&w=96&q=75 1x, /_next/image?url=%2Fimg.jpg&w=256&q=75 2x"
-        style="color: transparent;"
-        width="95"
-      />
       <div
-        class="bannerContent MuiBox-root mui-style-0"
+        class="flex flex-row gap-4 bannerStack"
       >
-        <h4
-          class="MuiTypography-root MuiTypography-h4 bannerText bannerTitle mui-style-1x3wnrt-MuiTypography-root"
+        <img
+          alt="Promo image"
+          class="bannerImage"
+          data-nimg="1"
+          decoding="async"
+          height="95"
+          loading="lazy"
+          src="/_next/image?url=%2Fimg.jpg&w=256&q=75"
+          srcset="/_next/image?url=%2Fimg.jpg&w=96&q=75 1x, /_next/image?url=%2Fimg.jpg&w=256&q=75 2x"
+          style="color: transparent;"
+          width="95"
+        />
+        <div
+          class="bannerContent"
         >
-          Discover new features
-        </h4>
-        <p
-          class="MuiTypography-root MuiTypography-body2 bannerText bannerDescription mui-style-17vdyq3-MuiTypography-root"
-        >
-          Learn about the latest updates and improvements to Safe
-        </p>
-        <a
-          href="#"
-        >
-          <button
-            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic bannerCtaText mui-style-1upwgwi-MuiButtonBase-root-MuiButton-root"
-            tabindex="0"
-            type="button"
+          <h4
+            class="m-0 scroll-m-20 text-xl font-semibold leading-6 tracking-normal bannerText bannerTitle"
+            data-slot="typography"
+            data-variant="h4"
+          >
+            Discover new features
+          </h4>
+          <div
+            class="m-0 text-sm leading-5 font-normal bannerText bannerDescription"
+            data-slot="typography"
+            data-variant="paragraph-small"
+          >
+            Learn about the latest updates and improvements to Safe
+          </div>
+          <a
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 bannerCtaText"
+            data-slot="button"
+            href="#"
           >
             Learn more
-          </button>
-        </a>
+          </a>
+        </div>
       </div>
-    </div>
-    <button
-      aria-label="close"
-      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-le4ea9-MuiButtonBase-root-MuiIconButton-root"
-      tabindex="0"
-      type="button"
-    >
-      <svg
-        aria-hidden="true"
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium closeIcon mui-style-1dhtbeh-MuiSvgIcon-root"
-        data-testid="CloseIcon"
-        focusable="false"
-        viewBox="0 0 24 24"
+      <button
+        aria-label="close"
+        class="closeButton"
+        type="button"
       >
-        <path
-          d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-        />
-      </svg>
-    </button>
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-x size-6 closeIcon"
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18 6 6 18"
+          />
+          <path
+            d="m6 6 12 12"
+          />
+        </svg>
+      </button>
+    </div>
   </div>
 </div>
 `;
@@ -76,51 +87,60 @@ exports[`./PromoBanner.stories ShortText 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-fmnm4n-MuiPaper-root-MuiCard-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
     <div
-      class="MuiStack-root bannerStack mui-style-pl8gqh-MuiStack-root"
+      class="banner"
     >
       <div
-        class="bannerContent MuiBox-root mui-style-0"
+        class="flex flex-row gap-4 bannerStack"
       >
-        <h4
-          class="MuiTypography-root MuiTypography-h4 bannerText bannerTitle mui-style-1x3wnrt-MuiTypography-root"
+        <div
+          class="bannerContent"
         >
-          New update available
-        </h4>
-        <a
-          href="#"
-        >
-          <button
-            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic bannerCtaText mui-style-1upwgwi-MuiButtonBase-root-MuiButton-root"
-            tabindex="0"
-            type="button"
+          <h4
+            class="m-0 scroll-m-20 text-xl font-semibold leading-6 tracking-normal bannerText bannerTitle"
+            data-slot="typography"
+            data-variant="h4"
+          >
+            New update available
+          </h4>
+          <a
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 bannerCtaText"
+            data-slot="button"
+            href="#"
           >
             Update
-          </button>
-        </a>
+          </a>
+        </div>
       </div>
-    </div>
-    <button
-      aria-label="close"
-      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-le4ea9-MuiButtonBase-root-MuiIconButton-root"
-      tabindex="0"
-      type="button"
-    >
-      <svg
-        aria-hidden="true"
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium closeIcon mui-style-1dhtbeh-MuiSvgIcon-root"
-        data-testid="CloseIcon"
-        focusable="false"
-        viewBox="0 0 24 24"
+      <button
+        aria-label="close"
+        class="closeButton"
+        type="button"
       >
-        <path
-          d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-        />
-      </svg>
-    </button>
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-x size-6 closeIcon"
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18 6 6 18"
+          />
+          <path
+            d="m6 6 12 12"
+          />
+        </svg>
+      </button>
+    </div>
   </div>
 </div>
 `;
@@ -130,68 +150,80 @@ exports[`./PromoBanner.stories WithCustomColors 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-17ay4e8-MuiPaper-root-MuiCard-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
     <div
-      class="MuiStack-root bannerStack mui-style-pl8gqh-MuiStack-root"
+      class="banner"
     >
-      <img
-        alt="Special offer"
-        class="bannerImage"
-        data-nimg="1"
-        decoding="async"
-        height="95"
-        loading="lazy"
-        src="/_next/image?url=%2Fimg.jpg&w=256&q=75"
-        srcset="/_next/image?url=%2Fimg.jpg&w=96&q=75 1x, /_next/image?url=%2Fimg.jpg&w=256&q=75 2x"
-        style="color: transparent;"
-        width="95"
-      />
       <div
-        class="bannerContent MuiBox-root mui-style-0"
+        class="flex flex-row gap-4 bannerStack"
       >
-        <h4
-          class="MuiTypography-root MuiTypography-h4 bannerText bannerTitle mui-style-1x3wnrt-MuiTypography-root"
+        <img
+          alt="Special offer"
+          class="bannerImage"
+          data-nimg="1"
+          decoding="async"
+          height="95"
+          loading="lazy"
+          src="/_next/image?url=%2Fimg.jpg&w=256&q=75"
+          srcset="/_next/image?url=%2Fimg.jpg&w=96&q=75 1x, /_next/image?url=%2Fimg.jpg&w=256&q=75 2x"
+          style="color: transparent;"
+          width="95"
+        />
+        <div
+          class="bannerContent"
         >
-          Special offer
-        </h4>
-        <p
-          class="MuiTypography-root MuiTypography-body2 bannerText bannerDescription mui-style-b93xn3-MuiTypography-root"
-        >
-          Limited time promotion for Safe users
-        </p>
-        <a
-          href="#"
-        >
-          <button
-            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic bannerCtaText mui-style-1upwgwi-MuiButtonBase-root-MuiButton-root"
-            tabindex="0"
-            type="button"
+          <h4
+            class="m-0 scroll-m-20 text-xl font-semibold leading-6 tracking-normal bannerText bannerTitle"
+            data-slot="typography"
+            data-variant="h4"
+          >
+            Special offer
+          </h4>
+          <div
+            class="m-0 text-sm leading-5 font-normal bannerText bannerDescription"
+            data-slot="typography"
+            data-variant="paragraph-small"
+            style="color: rgb(255, 215, 0);"
+          >
+            Limited time promotion for Safe users
+          </div>
+          <a
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 bannerCtaText"
+            data-slot="button"
+            href="#"
           >
             Claim now
-          </button>
-        </a>
+          </a>
+        </div>
       </div>
-    </div>
-    <button
-      aria-label="close"
-      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-le4ea9-MuiButtonBase-root-MuiIconButton-root"
-      tabindex="0"
-      type="button"
-    >
-      <svg
-        aria-hidden="true"
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium closeIcon mui-style-1dhtbeh-MuiSvgIcon-root"
-        data-testid="CloseIcon"
-        focusable="false"
-        viewBox="0 0 24 24"
+      <button
+        aria-label="close"
+        class="closeButton"
+        type="button"
       >
-        <path
-          d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-        />
-      </svg>
-    </button>
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-x size-6 closeIcon"
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18 6 6 18"
+          />
+          <path
+            d="m6 6 12 12"
+          />
+        </svg>
+      </button>
+    </div>
   </div>
 </div>
 `;
@@ -201,64 +233,80 @@ exports[`./PromoBanner.stories WithOnClick 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-fmnm4n-MuiPaper-root-MuiCard-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
     <div
-      class="MuiStack-root bannerStack mui-style-pl8gqh-MuiStack-root"
+      class="banner"
     >
-      <img
-        alt="Action required"
-        class="bannerImage"
-        data-nimg="1"
-        decoding="async"
-        height="95"
-        loading="lazy"
-        src="/_next/image?url=%2Fimg.jpg&w=256&q=75"
-        srcset="/_next/image?url=%2Fimg.jpg&w=96&q=75 1x, /_next/image?url=%2Fimg.jpg&w=256&q=75 2x"
-        style="color: transparent;"
-        width="95"
-      />
       <div
-        class="bannerContent MuiBox-root mui-style-0"
+        class="flex flex-row gap-4 bannerStack"
       >
-        <h4
-          class="MuiTypography-root MuiTypography-h4 bannerText bannerTitle mui-style-1x3wnrt-MuiTypography-root"
-        >
-          Take action now
-        </h4>
-        <p
-          class="MuiTypography-root MuiTypography-body2 bannerText bannerDescription mui-style-17vdyq3-MuiTypography-root"
-        >
-          Click the button to perform a custom action
-        </p>
-        <button
-          class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary bannerCtaContained mui-style-m1g3nl-MuiButtonBase-root-MuiButton-root"
-          tabindex="0"
-          type="button"
-        >
-          Click me
-        </button>
-      </div>
-    </div>
-    <button
-      aria-label="close"
-      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-le4ea9-MuiButtonBase-root-MuiIconButton-root"
-      tabindex="0"
-      type="button"
-    >
-      <svg
-        aria-hidden="true"
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium closeIcon mui-style-1dhtbeh-MuiSvgIcon-root"
-        data-testid="CloseIcon"
-        focusable="false"
-        viewBox="0 0 24 24"
-      >
-        <path
-          d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+        <img
+          alt="Action required"
+          class="bannerImage"
+          data-nimg="1"
+          decoding="async"
+          height="95"
+          loading="lazy"
+          src="/_next/image?url=%2Fimg.jpg&w=256&q=75"
+          srcset="/_next/image?url=%2Fimg.jpg&w=96&q=75 1x, /_next/image?url=%2Fimg.jpg&w=256&q=75 2x"
+          style="color: transparent;"
+          width="95"
         />
-      </svg>
-    </button>
+        <div
+          class="bannerContent"
+        >
+          <h4
+            class="m-0 scroll-m-20 text-xl font-semibold leading-6 tracking-normal bannerText bannerTitle"
+            data-slot="typography"
+            data-variant="h4"
+          >
+            Take action now
+          </h4>
+          <div
+            class="m-0 text-sm leading-5 font-normal bannerText bannerDescription"
+            data-slot="typography"
+            data-variant="paragraph-small"
+          >
+            Click the button to perform a custom action
+          </div>
+          <button
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs h-8 gap-1 px-4 in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 bannerCtaContained"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            Click me
+          </button>
+        </div>
+      </div>
+      <button
+        aria-label="close"
+        class="closeButton"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-x size-6 closeIcon"
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18 6 6 18"
+          />
+          <path
+            d="m6 6 12 12"
+          />
+        </svg>
+      </button>
+    </div>
   </div>
 </div>
 `;
@@ -268,48 +316,51 @@ exports[`./PromoBanner.stories WithoutDismiss 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-fmnm4n-MuiPaper-root-MuiCard-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
     <div
-      class="MuiStack-root bannerStack mui-style-pl8gqh-MuiStack-root"
+      class="banner"
     >
-      <img
-        alt="Welcome"
-        class="bannerImage"
-        data-nimg="1"
-        decoding="async"
-        height="95"
-        loading="lazy"
-        src="/_next/image?url=%2Fimg.jpg&w=256&q=75"
-        srcset="/_next/image?url=%2Fimg.jpg&w=96&q=75 1x, /_next/image?url=%2Fimg.jpg&w=256&q=75 2x"
-        style="color: transparent;"
-        width="95"
-      />
       <div
-        class="bannerContent MuiBox-root mui-style-0"
+        class="flex flex-row gap-4 bannerStack"
       >
-        <h4
-          class="MuiTypography-root MuiTypography-h4 bannerText bannerTitle mui-style-1x3wnrt-MuiTypography-root"
+        <img
+          alt="Welcome"
+          class="bannerImage"
+          data-nimg="1"
+          decoding="async"
+          height="95"
+          loading="lazy"
+          src="/_next/image?url=%2Fimg.jpg&w=256&q=75"
+          srcset="/_next/image?url=%2Fimg.jpg&w=96&q=75 1x, /_next/image?url=%2Fimg.jpg&w=256&q=75 2x"
+          style="color: transparent;"
+          width="95"
+        />
+        <div
+          class="bannerContent"
         >
-          Welcome to Safe
-        </h4>
-        <p
-          class="MuiTypography-root MuiTypography-body2 bannerText bannerDescription mui-style-17vdyq3-MuiTypography-root"
-        >
-          Your gateway to secure digital asset management
-        </p>
-        <a
-          href="#"
-        >
-          <button
-            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic bannerCtaText mui-style-1upwgwi-MuiButtonBase-root-MuiButton-root"
-            tabindex="0"
-            type="button"
+          <h4
+            class="m-0 scroll-m-20 text-xl font-semibold leading-6 tracking-normal bannerText bannerTitle"
+            data-slot="typography"
+            data-variant="h4"
+          >
+            Welcome to Safe
+          </h4>
+          <div
+            class="m-0 text-sm leading-5 font-normal bannerText bannerDescription"
+            data-slot="typography"
+            data-variant="paragraph-small"
+          >
+            Your gateway to secure digital asset management
+          </div>
+          <a
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 bannerCtaText"
+            data-slot="button"
+            href="#"
           >
             Get started
-          </button>
-        </a>
+          </a>
+        </div>
       </div>
     </div>
   </div>
@@ -321,56 +372,67 @@ exports[`./PromoBanner.stories WithoutImage 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-fmnm4n-MuiPaper-root-MuiCard-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
     <div
-      class="MuiStack-root bannerStack mui-style-pl8gqh-MuiStack-root"
+      class="banner"
     >
       <div
-        class="bannerContent MuiBox-root mui-style-0"
+        class="flex flex-row gap-4 bannerStack"
       >
-        <h4
-          class="MuiTypography-root MuiTypography-h4 bannerText bannerTitle mui-style-1x3wnrt-MuiTypography-root"
+        <div
+          class="bannerContent"
         >
-          Important announcement
-        </h4>
-        <p
-          class="MuiTypography-root MuiTypography-body2 bannerText bannerDescription mui-style-17vdyq3-MuiTypography-root"
-        >
-          Check out our latest security features
-        </p>
-        <a
-          href="#"
-        >
-          <button
-            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic bannerCtaText mui-style-1upwgwi-MuiButtonBase-root-MuiButton-root"
-            tabindex="0"
-            type="button"
+          <h4
+            class="m-0 scroll-m-20 text-xl font-semibold leading-6 tracking-normal bannerText bannerTitle"
+            data-slot="typography"
+            data-variant="h4"
+          >
+            Important announcement
+          </h4>
+          <div
+            class="m-0 text-sm leading-5 font-normal bannerText bannerDescription"
+            data-slot="typography"
+            data-variant="paragraph-small"
+          >
+            Check out our latest security features
+          </div>
+          <a
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 bannerCtaText"
+            data-slot="button"
+            href="#"
           >
             View details
-          </button>
-        </a>
+          </a>
+        </div>
       </div>
-    </div>
-    <button
-      aria-label="close"
-      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-le4ea9-MuiButtonBase-root-MuiIconButton-root"
-      tabindex="0"
-      type="button"
-    >
-      <svg
-        aria-hidden="true"
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium closeIcon mui-style-1dhtbeh-MuiSvgIcon-root"
-        data-testid="CloseIcon"
-        focusable="false"
-        viewBox="0 0 24 24"
+      <button
+        aria-label="close"
+        class="closeButton"
+        type="button"
       >
-        <path
-          d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-        />
-      </svg>
-    </button>
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-x size-6 closeIcon"
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18 6 6 18"
+          />
+          <path
+            d="m6 6 12 12"
+          />
+        </svg>
+      </button>
+    </div>
   </div>
 </div>
 `;

@@ -1,17 +1,19 @@
 import ModalDialog from '@/components/common/ModalDialog'
 import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/hooks/safes'
-import { useCurrentSpaceId } from '@/features/spaces'
+import { getChainIdsParam, useCurrentSpaceId } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { Alert } from '@mui/material'
-import Button from '@mui/material/Button'
-import DialogActions from '@mui/material/DialogActions'
-import DialogContent from '@mui/material/DialogContent'
-import Typography from '@mui/material/Typography'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import DialogActions from '@/components/common/DialogActions'
+import { Typography } from '@/components/ui/typography'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { cn } from '@/utils/cn'
+import { useDarkMode } from '@/hooks/useDarkMode'
 import { useSpaceSafesDeleteV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useState } from 'react'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 function getToBeDeletedSafeAccounts(safeItem: SafeItem | MultiChainSafeItem) {
   if (isMultiChainSafeItem(safeItem)) {
@@ -33,14 +35,18 @@ const RemoveSafeDialog = ({
   const dispatch = useAppDispatch()
   const [removeSafeAccounts] = useSpaceSafesDeleteV1Mutation()
   const [error, setError] = useState('')
+  const isDarkMode = useDarkMode()
 
   const handleConfirm = async () => {
     const safeAccounts = getToBeDeletedSafeAccounts(safeItem)
-    trackEvent({ ...SPACE_EVENTS.DELETE_ACCOUNT })
+    trackEvent(SPACE_EVENTS.DELETE_ACCOUNT, {
+      [MixpanelEventParams.ACCOUNT_COUNT]: safeAccounts.length,
+      [MixpanelEventParams.CHAIN_ID]: getChainIdsParam(safeAccounts),
+    })
 
     try {
       const result = await removeSafeAccounts({
-        spaceId: Number(spaceId),
+        spaceId: spaceId ?? '',
         deleteSpaceSafesDto: { safes: safeAccounts },
       })
 
@@ -63,31 +69,36 @@ const RemoveSafeDialog = ({
         }),
       )
     } catch (e) {
+      if (isElevationRequiredError(e)) return
       setError('Error removing safe account.')
     }
   }
 
   return (
-    <ModalDialog open onClose={handleClose} dialogTitle="Remove Safe Account" hideChainIndicator>
-      <DialogContent sx={{ p: '24px !important' }}>
-        <Typography>
-          Are you sure you want to remove <b>{address}</b> from this space?
-        </Typography>
-        {error && (
-          <Alert severity="error" sx={{ mt: 2 }}>
-            {error}
-          </Alert>
-        )}
-      </DialogContent>
+    <ModalDialog open onClose={handleClose} dialogTitle="Remove Safe account" hideChainIndicator>
+      <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
+        <div className="p-6">
+          <Typography variant="paragraph">
+            Are you sure you want to remove <b>{address}</b> from this space?
+          </Typography>
+          {error && (
+            <Alert variant="destructive" className="mt-4">
+              <AlertSeverityIcon variant="destructive" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+        </div>
 
-      <DialogActions>
-        <Button data-testid="cancel-btn" onClick={handleClose}>
-          Cancel
-        </Button>
-        <Button data-testid="delete-btn" onClick={handleConfirm} variant="danger" disableElevation>
-          Remove
-        </Button>
-      </DialogActions>
+        <DialogActions
+          className="px-6 pb-6"
+          onCancel={handleClose}
+          cancelTestId="cancel-btn"
+          confirmLabel="Remove"
+          onConfirm={handleConfirm}
+          confirmTestId="delete-btn"
+          confirmDestructive
+        />
+      </div>
     </ModalDialog>
   )
 }

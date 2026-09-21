@@ -13,10 +13,11 @@ const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 const signer2 = walletCredentials.OWNER_1_PRIVATE_KEY
 const proposerAddress = 'sep:0xC16D...6fED'
-const proposerAddress2 = '0x8eeC...2a3b'
 const creatorAddress = 'sep:0xC16D...6fED'
-const proposerName = 'Proposer 1'
+const signerAddress = walletCredentials.OWNER_4_WALLET_ADDRESS
 const proposerNameAD = 'AD Proposer1'
+const proposerNameAD2 = 'AD Proposer2'
+const migratedProposerName = 'Name held by the Transaction Service'
 const proposedTx =
   '&id=multisig_0x09725D3c2f9bE905F8f9f1b11a771122cf9C9f35_0xd70f2f8b31ae98a7e3064f6cdb437e71d3df083a0709fb82c915fa82767a19eb'
 
@@ -26,9 +27,8 @@ describe('Proposers tests', () => {
   })
 
   beforeEach(() => {
-    cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_31)
+    wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_31)
     cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
-    wallet.connectSigner(signer)
   })
 
   it('Verify the proposers section on the Set up in the settings when there are no proposers', () => {
@@ -59,23 +59,34 @@ describe('Proposers tests', () => {
     proposer.checkCreatorAddress([creatorAddress])
   })
 
-  it('Verify non-creators of a proposers cannot edit or delete it', () => {
+  it('Verify non-creators of a proposers cannot delete it', () => {
     navigation.clickOnWalletExpandMoreIcon()
     navigation.clickOnDisconnectBtn()
     wallet.connectSigner(signer2)
     proposer.verifyDeleteProposerBtnIsDisabled(proposerAddress)
-    proposer.verifyEditProposerBtnDisabled(proposerAddress)
   })
 
-  it('Verify that the address book name of the proposers overwrites the name given during its creation', () => {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.proposers)
-    cy.reload()
-    cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
-    proposer.checkProposerData([proposerNameAD])
-  })
+  it('Verify a proposer name still held by the Transaction Service is migrated into the address book', () => {
+    cy.intercept('GET', constants.delegatesEndpoint, {
+      count: 1,
+      next: null,
+      previous: null,
+      results: [
+        {
+          safe: staticSafes.SEP_STATIC_SAFE_31.substring(4),
+          delegate: signerAddress,
+          delegator: signerAddress,
+          label: migratedProposerName,
+        },
+      ],
+    })
+    // Earlier tests in this spec leave migrated names in the address book, and the migration skips
+    // delegates it already has, so this test only means anything against an empty book.
+    wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_31, {
+      extraStorage: { [constants.localStorageKeys.SAFE_v2__addressBook]: {} },
+    })
 
-  it('Verify if the address book entry of propers name is removed, then the name given during its creation shows again', () => {
-    proposer.checkProposerData([proposerName])
+    proposer.checkProposerData([migratedProposerName])
   })
 
   it('Verify Proposers cannot see the "Batched tx" button in the header', () => {
@@ -92,7 +103,20 @@ describe('Proposers tests', () => {
   })
 
   it('Verify a tx with the "proposal" status shows the details of a proposer', () => {
-    cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_31 + proposedTx)
-    proposer.verifyProposerInTxActionList(proposerAddress2)
+    wallet.connectSignerViaStorage(signer, constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_31 + proposedTx, {
+      extraStorage: { [constants.localStorageKeys.SAFE_v2__addressBook]: ls.addressBookData.proposers },
+    })
+
+    proposer.verifyProposerInTxActionList(proposerNameAD2)
+  })
+
+  describe('With a pre-seeded address book', () => {
+    it('Verify that the address book name of the proposers overwrites the name given during its creation', () => {
+      wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_31, {
+        extraStorage: { [constants.localStorageKeys.SAFE_v2__addressBook]: ls.addressBookData.proposers },
+      })
+      cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
+      proposer.checkProposerData([proposerNameAD])
+    })
   })
 })

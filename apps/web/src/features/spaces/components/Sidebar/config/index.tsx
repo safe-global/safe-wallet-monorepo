@@ -1,5 +1,4 @@
 import {
-  House,
   ArrowRightLeft,
   WalletCards,
   BookUser,
@@ -17,14 +16,17 @@ import {
   PanelRight,
   EllipsisVertical,
   Shield,
+  History,
+  Landmark,
+  ListChecks,
 } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
 import type { SidebarItemConfig, SidebarGroupConfig } from '../types'
 
 export const spacesMainNavigation: SidebarItemConfig[] = [
   {
-    icon: House,
-    label: 'Home',
+    icon: LayoutGrid,
+    label: 'Dashboard',
     href: AppRoutes.spaces.index,
   },
   // TODO: Activate when Spaces Transactions page is ready
@@ -35,7 +37,7 @@ export const spacesMainNavigation: SidebarItemConfig[] = [
   // },
   {
     icon: WalletCards,
-    label: 'Accounts',
+    label: 'Safe accounts',
     href: AppRoutes.spaces.safeAccounts,
   },
   {
@@ -43,11 +45,28 @@ export const spacesMainNavigation: SidebarItemConfig[] = [
     label: 'Address book',
     href: AppRoutes.spaces.addressBook,
   },
+  {
+    icon: Landmark,
+    label: 'Policies',
+    href: AppRoutes.spaces.policies,
+    activeMemberOnly: true,
+  },
+  {
+    icon: History,
+    label: 'Activity',
+    href: AppRoutes.spaces.activity,
+    activeMemberOnly: true,
+  },
 ]
 
 export const spacesSetupGroup: SidebarGroupConfig = {
   label: 'Setup',
   items: [
+    {
+      icon: ListChecks,
+      label: 'Plans',
+      href: AppRoutes.spaces.plans,
+    },
     {
       icon: UsersRound,
       label: 'Team',
@@ -55,7 +74,7 @@ export const spacesSetupGroup: SidebarGroupConfig = {
     },
     {
       icon: Shield,
-      label: 'Security',
+      label: 'Security hub',
       href: AppRoutes.spaces.security,
       activeMemberOnly: true,
     },
@@ -110,12 +129,12 @@ export const safeDefiGroup: SidebarGroupConfig = {
       href: AppRoutes.bridge,
     },
     {
-      icon: Database,
+      icon: TrendingUp,
       label: 'Earn',
       href: AppRoutes.earn,
     },
     {
-      icon: TrendingUp,
+      icon: Database,
       label: 'Stake',
       href: AppRoutes.stake,
     },

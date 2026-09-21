@@ -1,0 +1,27 @@
+appId: ${APP_ID}
+tags:
+  - walletconnect-dapps
+---
+# Entry visible: seed one approved session → the "Connected apps" settings
+# entry renders with count 1. (The chevron is a decorative icon without a
+# test-id; the entry + count assertions cover the row.)
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+- tapOn:
+    id: 'e2eWcDappsBase'
+- assertVisible:
+    id: 'home-tab'
+
+- tapOn:
+    id: 'e2eWcSeedSession'
+
+- tapOn: 'Account, tab, 3 of 3'
+- extendedWaitUntil:
+    visible:
+      id: 'settings-connected-apps-entry'
+    timeout: 10000
+- assertVisible:
+    id: 'connected-apps-count'
+    text: '1'

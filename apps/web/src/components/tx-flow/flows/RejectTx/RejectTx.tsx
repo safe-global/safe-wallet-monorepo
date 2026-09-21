@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import { createRejectTx } from '@/services/tx/tx-sender'
 import { useContext, useEffect } from 'react'
 import { SafeTxContext } from '../../SafeTxProvider'
@@ -21,15 +21,15 @@ const RejectTx = ({ onSubmit, children }: ReviewTransactionProps): ReactElement 
 
   return (
     <ReviewTransaction onSubmit={onSubmit}>
-      <Typography mb={2}>
+      <Typography className="mb-4">
         To reject the transaction, a separate rejection transaction will be created to replace the original one.
       </Typography>
 
-      <Typography mb={2}>
+      <Typography className="mb-4">
         Transaction nonce: <b>{txNonce}</b>
       </Typography>
 
-      <Typography mb={2}>
+      <Typography className="mb-4">
         You will need to confirm the rejection transaction with your currently connected wallet.
       </Typography>
 

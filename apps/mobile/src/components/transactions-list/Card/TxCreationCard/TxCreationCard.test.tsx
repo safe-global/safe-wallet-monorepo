@@ -22,7 +22,7 @@ describe('TxCreationCard', () => {
       />,
     )
 
-    expect(getByText('Safe Account created')).toBeTruthy()
+    expect(getByText('Safe account created')).toBeTruthy()
     expect(getByText('Created by: 0xas12...d12f')).toBeTruthy()
   })
 })

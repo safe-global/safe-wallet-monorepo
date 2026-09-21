@@ -1,13 +1,11 @@
 import { useContext } from 'react'
 import type { ReactElement } from 'react'
 
-import ErrorMessage from '@/components/tx/ErrorMessage'
-import {
-  useIsValidRecoveryExecuteNextTx,
-  useIsValidRecoverySkipExpired,
-} from '@/features/recovery/hooks/useIsValidRecoveryExecution'
+import TxCheckError from '@/components/tx/TxCheckError'
+import TxSubmitError from '@/components/tx/TxSubmitError'
+import { useIsValidRecoveryExecuteNextTx, useIsValidRecoverySkipExpired } from '../../hooks/useIsValidRecoveryExecution'
 import { RecoveryListItemContext } from '../RecoveryListItem/RecoveryListItemContext'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import type { RecoveryQueueItem } from '../../services/recovery-state'
 
 export default function RecoveryValidationErrors({ item }: { item: RecoveryQueueItem }): ReactElement | null {
   const { submitError } = useContext(RecoveryListItemContext)
@@ -23,15 +21,9 @@ export default function RecoveryValidationErrors({ item }: { item: RecoveryQueue
 
   return (
     <>
-      {validationError && (
-        <ErrorMessage error={validationError}>
-          This transaction will most likely fail. To save gas costs, avoid executing the transaction.
-        </ErrorMessage>
-      )}
+      {validationError && <TxCheckError error={validationError} />}
 
-      {submitError && (
-        <ErrorMessage error={submitError}>Error submitting the transaction. Please try again.</ErrorMessage>
-      )}
+      {submitError && <TxSubmitError error={submitError} />}
     </>
   )
 }

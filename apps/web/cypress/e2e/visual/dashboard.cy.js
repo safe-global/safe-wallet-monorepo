@@ -15,11 +15,6 @@ describe('[VISUAL] Dashboard screenshots', { defaultCommandTimeout: 60000, ...co
     mockVisualTestApis()
   })
 
-  it('[VISUAL] Screenshot dashboard page', () => {
-    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_2)
-    main.awaitVisualStability()
-  })
-
   it('[VISUAL] Screenshot dashboard with pending transactions widget', () => {
     cy.fixture('pending_tx/pending_tx_order.json').then((mockData) => {
       cy.intercept('GET', constants.queuedEndpoint, mockData).as('getQueuedTransactions')

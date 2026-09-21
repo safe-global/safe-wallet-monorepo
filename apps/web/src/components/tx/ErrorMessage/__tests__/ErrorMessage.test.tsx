@@ -1,0 +1,111 @@
+import { render } from '@/tests/test-utils'
+import type { DmkError } from '@ledgerhq/device-management-kit'
+import { mapLedgerError } from '@/services/onboard/ledger-errors'
+import ErrorMessage from '..'
+
+describe('ErrorMessage', () => {
+  it('renders the children message', () => {
+    const { getByText } = render(<ErrorMessage>Transaction failed</ErrorMessage>)
+    expect(getByText('Transaction failed')).toBeInTheDocument()
+  })
+
+  it('shows an always-visible, code-only reference for a GS error — never the raw payload', () => {
+    const raw =
+      'HTTP request failed. URL: https://berachain.drpc.org Request body: {"method":"eth_call"} Version: viem@2.52.2 reason "GS013"'
+
+    const { getByText, queryByText } = render(
+      <ErrorMessage error={new Error(raw)}>This transaction will most likely fail.</ErrorMessage>,
+    )
+
+    // The code is shown inline without a Details toggle
+    expect(queryByText('Details')).not.toBeInTheDocument()
+    expect(getByText('GS013')).toBeInTheDocument()
+    expect(queryByText(/drpc\.org/)).not.toBeInTheDocument()
+    expect(queryByText(/viem@/)).not.toBeInTheDocument()
+    expect(queryByText(/eth_call/)).not.toBeInTheDocument()
+  })
+
+  it('offers no way to reach the raw message of an error with no code at all', () => {
+    const raw = 'Request failed at https://rpc.example.org using viem@2.0.0'
+
+    const { getByText, queryByText, queryByTestId, container } = render(
+      <ErrorMessage error={new Error(raw)}>Something failed.</ErrorMessage>,
+    )
+
+    expect(getByText('Something failed.')).toBeInTheDocument()
+    expect(queryByText('Details')).not.toBeInTheDocument()
+    expect(queryByTestId('error-details')).not.toBeInTheDocument()
+    expect(container.textContent).not.toContain('rpc.example.org')
+  })
+
+  it('shows a known CGW response state with no code and no raw response body', () => {
+    const error = Object.assign(new Error('<html><title>502 Bad Gateway</title></html>'), { status: 502 })
+
+    const { getByText, queryByText, queryByTestId } = render(
+      <ErrorMessage error={error}>Something went wrong on our end. Try again.</ErrorMessage>,
+    )
+
+    expect(getByText('Something went wrong on our end. Try again.')).toBeInTheDocument()
+    expect(queryByTestId('error-details')).not.toBeInTheDocument()
+    expect(queryByText('Details')).not.toBeInTheDocument()
+    expect(queryByText(/Bad Gateway/)).not.toBeInTheDocument()
+  })
+
+  it('withholds the raw message of a Ledger device failure, mapped or not', () => {
+    const cause = mapLedgerError({
+      _tag: 'DeviceLockedError',
+      errorCode: '5515',
+      message: 'Device is locked.',
+    } as DmkError)
+    const error = Object.assign(new Error(`An unknown RPC error occurred. Details: ${cause.message}`), { cause })
+
+    const { getByText, queryByText, container } = render(
+      <ErrorMessage error={error}>Unlock your Ledger and try again.</ErrorMessage>,
+    )
+
+    expect(getByText('Unlock your Ledger and try again.')).toBeInTheDocument()
+    // A mapped state needs no support reference, and never the raw payload
+    expect(queryByText('Details')).not.toBeInTheDocument()
+    expect(container.textContent).not.toContain('DeviceLockedError')
+    expect(container.textContent).not.toContain('UNKNOWN_ERROR')
+  })
+
+  it('shows a support reference for a Ledger state we have no sentence for', () => {
+    const cause = mapLedgerError({ _tag: 'InvalidStatusWordError', originalError: new Error('V is missing') })
+    const error = Object.assign(new Error('An unknown RPC error occurred.'), { cause })
+
+    const { getByText, queryByText, container } = render(
+      <ErrorMessage error={error}>Your Ledger could not complete the request.</ErrorMessage>,
+    )
+
+    expect(getByText('LEDGER-UNKNOWN')).toBeInTheDocument()
+    expect(queryByText('Details')).not.toBeInTheDocument()
+    expect(container.textContent).not.toContain('V is missing')
+  })
+
+  it('treats a custom-error revert as GS013 and decodes a known selector', () => {
+    const error = Object.assign(new Error('execution reverted (unknown custom error)'), {
+      code: 'CALL_EXCEPTION',
+      data: '0x70cc6907',
+    })
+
+    const { getByText, queryByText } = render(<ErrorMessage error={error}>This transaction failed.</ErrorMessage>)
+
+    expect(getByText(/GS013 · UnapprovedHash \(Hypernative guard\)/)).toBeInTheDocument()
+    // The reference replaces the raw Details toggle
+    expect(queryByText('Details')).not.toBeInTheDocument()
+  })
+
+  it('keeps the raw selector in the reference for an undecodable custom error', () => {
+    const error = Object.assign(new Error('execution reverted (unknown custom error)'), {
+      code: 'CALL_EXCEPTION',
+      data: '0xdeadbeef',
+    })
+
+    const { getByText, queryByText } = render(<ErrorMessage error={error}>This transaction failed.</ErrorMessage>)
+
+    expect(getByText(/GS013 · 0xdeadbeef/)).toBeInTheDocument()
+    // The selector belongs in the support reference, never in the message body
+    expect(queryByText(/0xdeadbeef.*failed|failed.*0xdeadbeef/)).not.toBeInTheDocument()
+  })
+})

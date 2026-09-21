@@ -14,7 +14,7 @@ export const useSafeSetupHints = (
     if (numberOfOwners && threshold === 1) {
       safeSetupWarningSteps.push({
         title: `1/${numberOfOwners} policy`,
-        text: 'Use a threshold higher than one to prevent losing access to your Safe Account in case a signer key is lost or compromised.',
+        text: 'Use a threshold higher than one to prevent losing access to your Safe account in case a signer key is lost or compromised.',
       })
     }
 
@@ -22,7 +22,7 @@ export const useSafeSetupHints = (
     if (threshold === numberOfOwners && numberOfOwners && numberOfOwners > 1) {
       safeSetupWarningSteps.push({
         title: `${numberOfOwners}/${numberOfOwners} policy`,
-        text: 'Use a threshold which is lower than the total number of signers of your Safe Account in case a signer loses access to their account and needs to be replaced.',
+        text: 'Use a threshold which is lower than the total number of signers of your Safe account in case a signer loses access to their account and needs to be replaced.',
       })
     }
 
@@ -34,7 +34,7 @@ export const useSafeSetupHints = (
       })
     }
 
-    setHint({ title: 'Safe Account setup', variant: 'info', steps: safeSetupWarningSteps })
+    setHint({ title: 'Safe account setup', variant: 'info', steps: safeSetupWarningSteps })
 
     // Clear dynamic hints when the step / hook unmounts
     return () => {

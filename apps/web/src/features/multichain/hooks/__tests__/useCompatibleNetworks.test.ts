@@ -11,6 +11,8 @@ import {
   getSafeL2SingletonDeployments,
   getProxyFactoryDeployments,
   getCompatibilityFallbackHandlerDeployments,
+  getExtensibleFallbackHandlerDeployments,
+  getSafeToL2SetupDeployment,
 } from '@safe-global/safe-deployments'
 import * as useChains from '@/hooks/useChains'
 
@@ -27,6 +29,15 @@ const PROXY_FACTORY_141_DEPLOYMENTS = getProxyFactoryDeployments({ version: '1.4
 
 const FALLBACK_HANDLER_130_DEPLOYMENTS = getCompatibilityFallbackHandlerDeployments({ version: '1.3.0' })?.deployments
 const FALLBACK_HANDLER_141_DEPLOYMENTS = getCompatibilityFallbackHandlerDeployments({ version: '1.4.1' })?.deployments
+
+const L1_150_MASTERCOPY_DEPLOYMENTS = getSafeSingletonDeployments({ version: '1.5.0' })?.deployments
+const L2_150_MASTERCOPY_DEPLOYMENTS = getSafeL2SingletonDeployments({ version: '1.5.0' })?.deployments
+const PROXY_FACTORY_150_DEPLOYMENTS = getProxyFactoryDeployments({ version: '1.5.0' })?.deployments
+const FALLBACK_HANDLER_150_DEPLOYMENTS = getCompatibilityFallbackHandlerDeployments({ version: '1.5.0' })?.deployments
+const EXTENSIBLE_FALLBACK_HANDLER_150_DEPLOYMENTS = getExtensibleFallbackHandlerDeployments({
+  version: '1.5.0',
+})?.deployments
+const SAFE_TO_L2_SETUP_150_ADDRESS = getSafeToL2SetupDeployment({ version: '1.5.0' })?.defaultAddress
 
 const mockChains = [
   chainBuilder().with({ chainId: '1', l2: false }).build(),
@@ -182,6 +193,138 @@ describe('useCompatibleNetworks', () => {
       expect(result.current).toHaveLength(6)
       expect(result.current.map((chain) => chain.chainId)).toEqual(['1', '10', '100', '324', '480', '10200'])
       expect(result.current.map((chain) => chain.available)).toEqual([true, true, true, true, true, false])
+    }
+  })
+
+  // Note: only mainnet and Chiado are asserted for 1.5.0 — which OTHER chains carry
+  // 1.5.0 deployments depends on the installed safe-deployments version (chains are
+  // still being registered), so exact per-chain expectations would flake across bumps.
+  it('should mark chains with 1.5.0 deployments as available for 1.5.0 Safes', () => {
+    const callData = {
+      owners: [faker.finance.ethereumAddress()],
+      threshold: 1,
+      to: ZERO_ADDRESS,
+      data: EMPTY_DATA,
+      fallbackHandler: FALLBACK_HANDLER_150_DEPLOYMENTS?.canonical?.address!,
+      paymentToken: ZERO_ADDRESS,
+      payment: 0,
+      paymentReceiver: ECOSYSTEM_ID_ADDRESS,
+    }
+
+    // 1.5.0, L2 and canonical — available on mainnet, unavailable on Chiado (no 1.5.0 deployments)
+    {
+      const creationData: ReplayedSafeProps = {
+        factoryAddress: PROXY_FACTORY_150_DEPLOYMENTS?.canonical?.address!,
+        masterCopy: L2_150_MASTERCOPY_DEPLOYMENTS?.canonical?.address!,
+        saltNonce: '0',
+        safeAccountConfig: callData,
+        safeVersion: '1.5.0',
+      }
+      const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains as Chain[]))
+      expect(result.current.map((chain) => chain.chainId)).toEqual(['1', '10', '100', '324', '480', '10200'])
+      const availability = Object.fromEntries(result.current.map((chain) => [chain.chainId, chain.available]))
+      expect(availability['1']).toBe(true)
+      expect(availability['10200']).toBe(false)
+    }
+
+    // 1.5.0, L1 with the 1.5.0 SafeToL2Setup call
+    {
+      const creationData: ReplayedSafeProps = {
+        factoryAddress: PROXY_FACTORY_150_DEPLOYMENTS?.canonical?.address!,
+        masterCopy: L1_150_MASTERCOPY_DEPLOYMENTS?.canonical?.address!,
+        saltNonce: '0',
+        safeAccountConfig: { ...callData, to: SAFE_TO_L2_SETUP_150_ADDRESS! },
+        safeVersion: '1.5.0',
+      }
+      const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains as Chain[]))
+      const availability = Object.fromEntries(result.current.map((chain) => [chain.chainId, chain.available]))
+      expect(availability['1']).toBe(true)
+      expect(availability['10200']).toBe(false)
+    }
+  })
+
+  it('should treat the official ExtensibleFallbackHandler as an existing fallback handler', () => {
+    const creationData: ReplayedSafeProps = {
+      factoryAddress: PROXY_FACTORY_150_DEPLOYMENTS?.canonical?.address!,
+      masterCopy: L2_150_MASTERCOPY_DEPLOYMENTS?.canonical?.address!,
+      saltNonce: '0',
+      safeAccountConfig: {
+        owners: [faker.finance.ethereumAddress()],
+        threshold: 1,
+        to: ZERO_ADDRESS,
+        data: EMPTY_DATA,
+        fallbackHandler: EXTENSIBLE_FALLBACK_HANDLER_150_DEPLOYMENTS?.canonical?.address!,
+        paymentToken: ZERO_ADDRESS,
+        payment: 0,
+        paymentReceiver: ECOSYSTEM_ID_ADDRESS,
+      },
+      safeVersion: '1.5.0',
+    }
+    const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains as Chain[]))
+    const availability = Object.fromEntries(result.current.map((chain) => [chain.chainId, chain.available]))
+    expect(availability['1']).toBe(true)
+    expect(availability['10200']).toBe(false)
+  })
+
+  it('should mark everything unavailable when the setup call targets an unknown contract', () => {
+    const creationData: ReplayedSafeProps = {
+      factoryAddress: PROXY_FACTORY_141_DEPLOYMENTS?.canonical?.address!,
+      masterCopy: L2_141_MASTERCOPY_DEPLOYMENTS?.canonical?.address!,
+      saltNonce: '0',
+      safeAccountConfig: {
+        owners: [faker.finance.ethereumAddress()],
+        threshold: 1,
+        to: faker.finance.ethereumAddress(),
+        data: EMPTY_DATA,
+        fallbackHandler: FALLBACK_HANDLER_141_DEPLOYMENTS?.canonical?.address!,
+        paymentToken: ZERO_ADDRESS,
+        payment: 0,
+        paymentReceiver: ECOSYSTEM_ID_ADDRESS,
+      },
+      safeVersion: '1.4.1',
+    }
+    const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains as Chain[]))
+    expect(result.current.every((chain) => chain.available)).toBe(false)
+  })
+
+  it('should mark only zkSync as available for zksync-flavour (EraVM) Safes', () => {
+    const callData = {
+      owners: [faker.finance.ethereumAddress()],
+      threshold: 1,
+      to: ZERO_ADDRESS,
+      data: EMPTY_DATA,
+      fallbackHandler: ZERO_ADDRESS,
+      paymentToken: ZERO_ADDRESS,
+      payment: 0,
+      paymentReceiver: ECOSYSTEM_ID_ADDRESS,
+    }
+
+    // 1.3.0 zksync flavour — EraVM bytecode exists only on zk chains
+    {
+      const creationData: ReplayedSafeProps = {
+        factoryAddress: PROXY_FACTORY_130_DEPLOYMENTS?.zksync?.address!,
+        masterCopy: L2_130_MASTERCOPY_DEPLOYMENTS?.zksync?.address!,
+        saltNonce: '0',
+        safeAccountConfig: { ...callData, fallbackHandler: FALLBACK_HANDLER_130_DEPLOYMENTS?.zksync?.address! },
+        safeVersion: '1.3.0',
+      }
+      const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains as Chain[]))
+      expect(result.current.map((chain) => chain.chainId)).toEqual(['1', '10', '100', '324', '480', '10200'])
+      expect(result.current.map((chain) => chain.available)).toEqual([false, false, false, true, false, false])
+    }
+
+    // 1.4.1 zksync flavour
+    {
+      const creationData: ReplayedSafeProps = {
+        factoryAddress: PROXY_FACTORY_141_DEPLOYMENTS?.zksync?.address!,
+        masterCopy: L2_141_MASTERCOPY_DEPLOYMENTS?.zksync?.address!,
+        saltNonce: '0',
+        safeAccountConfig: { ...callData, fallbackHandler: FALLBACK_HANDLER_141_DEPLOYMENTS?.zksync?.address! },
+        safeVersion: '1.4.1',
+      }
+      const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains as Chain[]))
+      expect(result.current.map((chain) => chain.chainId)).toEqual(['1', '10', '100', '324', '480', '10200'])
+      expect(result.current.map((chain) => chain.available)).toEqual([false, false, false, true, false, false])
     }
   })
 

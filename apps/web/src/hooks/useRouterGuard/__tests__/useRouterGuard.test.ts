@@ -65,14 +65,14 @@ describe('useRouterGuard', () => {
     expect(mockReplace).not.toHaveBeenCalled()
   })
 
-  it('should redirect to welcome page when guard fails without redirectTo', async () => {
+  it('should redirect to the default welcome tab when guard fails without redirectTo', async () => {
     const mockGuard = jest.fn().mockResolvedValue({ success: false })
     const useGuard: UseGuard = () => ({ activationGuard: mockGuard })
 
     renderHook(() => useRouterGuard({ useGuard }))
 
     await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith(AppRoutes.welcome.index)
+      expect(mockReplace).toHaveBeenCalledWith(AppRoutes.welcome.spaces)
     })
   })
 

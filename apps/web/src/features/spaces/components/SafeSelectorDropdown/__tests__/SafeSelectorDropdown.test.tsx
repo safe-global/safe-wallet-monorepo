@@ -1,18 +1,34 @@
 import React from 'react'
+import type * as ReactModule from 'react'
+import type * as ReactDomModule from 'react-dom'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { useSafeAppUrl } from '@/hooks/safe-apps/useSafeAppUrl'
+import useChains from '@/hooks/useChains'
 import SafeSelectorDropdown from '../index'
 import type { SafeItemData } from '../types'
+
+/**
+ * base-ui dismisses an open Select popup part-way through the outside pointerdown, flushing the
+ * closed state before the event finishes bubbling (verified in a real browser: the trigger's
+ * aria-expanded reads `true` in the capture phase and `false` in the bubble phase of one press).
+ * The trigger-content mock replays that ordering so the delegation guard is exercised for real.
+ * `mock`-prefixed so babel-plugin-jest-hoist allows the jest.mock factories to reach it.
+ */
+const mockDismissOnPress: { current: (() => void) | null } = { current: null }
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }))
 jest.mock('@/hooks/safe-apps/useSafeAppUrl', () => ({
   useSafeAppUrl: jest.fn(),
+}))
+jest.mock('@/hooks/useChains', () => ({
+  __esModule: true,
+  default: jest.fn(),
 }))
 
 jest.mock('@/components/ui/tooltip', () => ({
@@ -35,10 +51,41 @@ jest.mock('@/components/ui/tooltip', () => ({
   ),
 }))
 
-jest.mock('../components/SafeSelectorTriggerContent', () => ({
-  __esModule: true,
-  default: () => <span data-testid="safe-selector-trigger-content" />,
-}))
+jest.mock('../components/SafeSelectorTriggerContent', () => {
+  const { useEffect, useRef } = jest.requireActual<typeof ReactModule>('react')
+
+  const MockTriggerContent = ({ selectedItem }: { selectedItem: { chains: Array<{ shortName: string }> } }) => {
+    const inertRef = useRef<HTMLSpanElement>(null)
+
+    // A native listener, like base-ui's: it runs outside React's event batch, so its flushSync
+    // commits the closed state before React dispatches the bubble-phase handlers.
+    useEffect(() => {
+      const node = inertRef.current
+      if (!node) return
+      const dismiss = () => mockDismissOnPress.current?.()
+      node.addEventListener('pointerdown', dismiss)
+      return () => node.removeEventListener('pointerdown', dismiss)
+    }, [])
+
+    return (
+      <span data-testid="safe-selector-trigger-content" data-shortname={selectedItem.chains[0]?.shortName ?? ''}>
+        {/* Stands in for the tooltip-wrapped safe name and balance: display-only, pointer-events-auto */}
+        <span ref={inertRef} data-testid="inert-display-text">
+          Safe name
+        </span>
+        <a data-testid="safe-item-explorer-link" href="https://etherscan.io/address/0xabc">
+          View on explorer
+        </a>
+        <span role="button" data-testid="inline-copy-action">
+          copy
+        </span>
+      </span>
+    )
+  }
+  MockTriggerContent.displayName = 'SafeSelectorTriggerContent'
+
+  return { __esModule: true, default: MockTriggerContent }
+})
 
 jest.mock('../components/SafeDropdownContainer', () => ({
   __esModule: true,
@@ -51,6 +98,7 @@ jest.mock('../components/SafeDropdownContainer', () => ({
  * See SafeSelectorDropdown + SpaceSafeBar: selection is driven by the URL async.
  */
 jest.mock('@/components/ui/select', () => {
+  const { flushSync } = jest.requireActual<typeof ReactDomModule>('react-dom')
   const NEW_ID = '2:0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
   const PREV_ID = '1:0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 
@@ -65,43 +113,64 @@ jest.mock('@/components/ui/select', () => {
       children,
       value,
       onValueChange,
+      onOpenChange,
       disabled,
       open,
     }: {
       children?: React.ReactNode
       value?: string
       onValueChange?: (next: string | null, details: { reason: string; cancel: () => void }) => void
+      onOpenChange?: (open: boolean) => void
       disabled?: boolean
       open?: boolean
+    }) => {
+      mockDismissOnPress.current = open && onOpenChange ? () => flushSync(() => onOpenChange(false)) : null
+      return (
+        <div
+          data-testid="mock-select-root"
+          data-mock-controlled-value={value}
+          data-mock-disabled={String(!!disabled)}
+          data-mock-open={String(!!open)}
+        >
+          <button
+            type="button"
+            data-testid="simulate-user-pick-new"
+            onClick={() => {
+              onValueChange?.(NEW_ID, itemPressDetails())
+            }}
+          >
+            simulate user pick new
+          </button>
+          <button
+            type="button"
+            data-testid="simulate-base-ui-auto-reset"
+            onClick={() => {
+              onValueChange?.(PREV_ID, noneDetails())
+            }}
+          >
+            simulate base-ui auto-reset to initial value
+          </button>
+          <button
+            type="button"
+            data-testid="simulate-base-ui-open"
+            onClick={() => {
+              onOpenChange?.(true)
+            }}
+          >
+            simulate base-ui opening the popup
+          </button>
+          {children}
+        </div>
+      )
+    },
+    SelectTrigger: ({
+      children,
+      iconWrapperClassName: _iconWrapperClassName,
+      ...rest
+    }: {
+      children?: React.ReactNode
+      iconWrapperClassName?: string
     }) => (
-      <div
-        data-testid="mock-select-root"
-        data-mock-controlled-value={value}
-        data-mock-disabled={String(!!disabled)}
-        data-mock-open={String(!!open)}
-      >
-        <button
-          type="button"
-          data-testid="simulate-user-pick-new"
-          onClick={() => {
-            onValueChange?.(NEW_ID, itemPressDetails())
-          }}
-        >
-          simulate user pick new
-        </button>
-        <button
-          type="button"
-          data-testid="simulate-base-ui-auto-reset"
-          onClick={() => {
-            onValueChange?.(PREV_ID, noneDetails())
-          }}
-        >
-          simulate base-ui auto-reset to initial value
-        </button>
-        {children}
-      </div>
-    ),
-    SelectTrigger: ({ children, ...rest }: { children?: React.ReactNode }) => (
       <button type="button" data-testid="select-trigger" {...rest}>
         {children}
       </button>
@@ -150,9 +219,24 @@ describe('SafeSelectorDropdown', () => {
       .mocked(useRouter)
       .mockReturnValue({ push: jest.fn(), pathname: '/', query: {} } as unknown as ReturnType<typeof useRouter>)
     jest.mocked(useSafeAppUrl).mockReturnValue(undefined)
+    jest.mocked(useChains).mockReturnValue({
+      configs: [
+        { chainId: '1', shortName: 'eth', chainName: 'Ethereum', chainLogoUri: null },
+        { chainId: '137', shortName: 'matic', chainName: 'Polygon', chainLogoUri: null },
+      ] as ReturnType<typeof useChains>['configs'],
+    })
   })
 
   describe('onValueChange filtering by reason', () => {
+    it('keeps inline Safe actions outside the select trigger button', () => {
+      const itemA = createItem()
+      const { container } = render(
+        <SafeSelectorDropdown items={[itemA]} selectedItemId={itemA.id} onItemSelect={jest.fn()} />,
+      )
+
+      expect(container.querySelector('[data-testid="open-safes-icon"] a')).not.toBeInTheDocument()
+    })
+
     it('forwards user item-press picks to onItemSelect', async () => {
       const user = userEvent.setup()
       const onItemSelect = jest.fn()
@@ -210,42 +294,94 @@ describe('SafeSelectorDropdown', () => {
      * useSpaceChainSelector, or the controlled value plumbing), this test catches the
      * second router.push. The two unit tests above only cover each branch in isolation.
      */
-    it('renders an error message when items are loaded but selectedItemId has no match', () => {
+    it('renders a fallback trigger when items are loaded but selectedItemId has no match', () => {
       const itemA = createItem()
-      render(<SafeSelectorDropdown items={[itemA]} selectedItemId="999:0xnotfound" isLoading={false} />)
-
-      expect(screen.getByText('This Safe is not available on the selected network')).toBeInTheDocument()
-    })
-
-    it('keeps showing the skeleton while items are still loading and there is no match yet', () => {
-      const itemA = createItem()
-      render(<SafeSelectorDropdown items={[itemA]} selectedItemId="999:0xnotfound" isLoading={true} />)
-
-      expect(screen.queryByText('This Safe is not available on the selected network')).not.toBeInTheDocument()
-    })
-
-    it('shows the load error (not the no-match error) when isError is true', () => {
-      const itemA = createItem()
-      const onRetry = jest.fn()
       render(
         <SafeSelectorDropdown
           items={[itemA]}
           selectedItemId="999:0xnotfound"
           isLoading={false}
-          isError={true}
-          onRetry={onRetry}
+          onItemSelect={jest.fn()}
         />,
       )
 
-      expect(screen.getByText('Failed to load Safe data')).toBeInTheDocument()
+      expect(screen.getByTestId('mock-select-root')).toBeInTheDocument()
+      expect(screen.getByTestId('safe-selector-trigger-content')).toBeInTheDocument()
+      // Old "not available" error is gone — main content surfaces the load failure instead.
       expect(screen.queryByText('This Safe is not available on the selected network')).not.toBeInTheDocument()
     })
 
-    it('shows the skeleton (not the no-match error) when items are empty', () => {
-      const { container } = render(<SafeSelectorDropdown items={[]} selectedItemId="1:0xa" isLoading={false} />)
+    it('keeps the fallback trigger openable even when items has a single entry', () => {
+      const itemA = createItem()
+      render(
+        <SafeSelectorDropdown
+          items={[itemA]}
+          selectedItemId="999:0xnotfound"
+          isLoading={false}
+          onItemSelect={jest.fn()}
+        />,
+      )
 
-      expect(screen.queryByText('This Safe is not available on the selected network')).not.toBeInTheDocument()
-      // Skeleton renders a placeholder block; trigger content is not rendered yet
+      const selectRoot = screen.getByTestId('mock-select-root')
+      expect(selectRoot.getAttribute('data-mock-disabled')).toBe('false')
+    })
+
+    it('looks up the chain shortName from chain configs for the fallback trigger', () => {
+      const itemA = createItem()
+      render(
+        <SafeSelectorDropdown
+          items={[itemA]}
+          selectedItemId="137:0xe7255eE8D8A47ee01864241e7475C5c7A9792401"
+          onItemSelect={jest.fn()}
+        />,
+      )
+
+      // Fallback chain entry must pick up shortName (`matic`) from chain configs,
+      // so the trigger renders `matic:0x...` instead of bare `0x...`.
+      expect(screen.getByTestId('safe-selector-trigger-content').getAttribute('data-shortname')).toBe('matic')
+    })
+
+    it('forwards the user pick even from the fallback trigger', async () => {
+      const user = userEvent.setup()
+      const onItemSelect = jest.fn()
+      const itemA = createItem()
+      const itemB = createItem({
+        id: '2:0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+        name: 'Safe B',
+        address: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+        chains: [{ chainId: '2', chainName: 'Another', chainLogoUri: null, shortName: 'oeth' }],
+      })
+
+      render(
+        <SafeSelectorDropdown items={[itemA, itemB]} selectedItemId="999:0xnotfound" onItemSelect={onItemSelect} />,
+      )
+
+      await user.click(screen.getByTestId('simulate-user-pick-new'))
+
+      expect(onItemSelect).toHaveBeenCalledTimes(1)
+      expect(onItemSelect).toHaveBeenCalledWith(itemB.id)
+    })
+
+    it('shows the skeleton while items are still loading and selectedItemId is empty', () => {
+      const itemA = createItem()
+      render(<SafeSelectorDropdown items={[itemA]} selectedItemId="" isLoading={true} />)
+
+      // Empty selectedItemId can't build a fallback item → skeleton
+      expect(screen.queryByTestId('safe-selector-trigger-content')).not.toBeInTheDocument()
+    })
+
+    it('shows the load error when items are empty and isError is true', () => {
+      const onRetry = jest.fn()
+      render(
+        <SafeSelectorDropdown items={[]} selectedItemId="1:0xa" isLoading={false} isError={true} onRetry={onRetry} />,
+      )
+
+      expect(screen.getByText('Failed to load Safe data')).toBeInTheDocument()
+    })
+
+    it('shows the skeleton when items are empty and not yet loaded', () => {
+      const { container } = render(<SafeSelectorDropdown items={[]} selectedItemId="" isLoading={false} />)
+
       expect(screen.queryByTestId('safe-selector-trigger-content')).not.toBeInTheDocument()
       expect(container.firstChild).toBeTruthy()
     })
@@ -288,6 +424,89 @@ describe('SafeSelectorDropdown', () => {
     })
   })
 
+  describe('click delegation from the display layer', () => {
+    const itemB = createItem({
+      id: '2:0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+      name: 'Safe B',
+      address: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+      chains: [{ chainId: '2', chainName: 'Another', chainLogoUri: null, shortName: 'oeth' }],
+    })
+
+    const renderOpenable = () => {
+      const itemA = createItem()
+      render(<SafeSelectorDropdown items={[itemA, itemB]} selectedItemId={itemA.id} onItemSelect={jest.fn()} />)
+      const triggerClicks = jest.fn()
+      screen.getByTestId('open-safes-icon').addEventListener('click', triggerClicks)
+      return { triggerClicks }
+    }
+
+    it('forwards a click on inert trigger content to the select trigger', async () => {
+      const user = userEvent.setup()
+      const { triggerClicks } = renderOpenable()
+
+      await user.click(screen.getByTestId('inert-display-text'))
+
+      expect(triggerClicks).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not forward clicks that land on the row own controls', async () => {
+      const user = userEvent.setup()
+      const { triggerClicks } = renderOpenable()
+
+      await user.click(screen.getByTestId('inline-copy-action'))
+      await user.click(screen.getByTestId('safe-item-explorer-link'))
+
+      expect(triggerClicks).not.toHaveBeenCalled()
+    })
+
+    it('does not re-open the popup when the press closed it', async () => {
+      const user = userEvent.setup()
+      const { triggerClicks } = renderOpenable()
+
+      await user.click(screen.getByTestId('simulate-base-ui-open'))
+      expect(screen.getByTestId('mock-select-root').getAttribute('data-mock-open')).toBe('true')
+
+      // base-ui dismisses the popup mid-pointerdown; forwarding the trailing click would re-open it.
+      await user.click(screen.getByTestId('inert-display-text'))
+
+      expect(triggerClicks).not.toHaveBeenCalled()
+      expect(screen.getByTestId('mock-select-root').getAttribute('data-mock-open')).toBe('false')
+    })
+
+    it('does not forward clicks while the selector is disabled', async () => {
+      const user = userEvent.setup()
+      const itemA = createItem()
+      const value: TxModalContextType = {
+        txFlow: <div data-testid="active-tx-flow" />,
+        setTxFlow: jest.fn(),
+        setFullWidth: jest.fn(),
+      }
+      render(
+        <TxModalContext.Provider value={value}>
+          <SafeSelectorDropdown items={[itemA, itemB]} selectedItemId={itemA.id} onItemSelect={jest.fn()} />
+        </TxModalContext.Provider>,
+      )
+      const triggerClicks = jest.fn()
+      screen.getByTestId('open-safes-icon').addEventListener('click', triggerClicks)
+
+      await user.click(screen.getByTestId('inert-display-text'))
+
+      expect(triggerClicks).not.toHaveBeenCalled()
+    })
+
+    it('does not forward clicks when only one safe makes the row inert', async () => {
+      const user = userEvent.setup()
+      const itemA = createItem()
+      render(<SafeSelectorDropdown items={[itemA]} selectedItemId={itemA.id} onItemSelect={jest.fn()} />)
+      const triggerClicks = jest.fn()
+      screen.getByTestId('open-safes-icon').addEventListener('click', triggerClicks)
+
+      await user.click(screen.getByTestId('inert-display-text'))
+
+      expect(triggerClicks).not.toHaveBeenCalled()
+    })
+  })
+
   describe('disabled while a tx flow is active', () => {
     const renderWithTxFlow = (txFlow: TxModalContextType['txFlow']) => {
       const itemA = createItem()
@@ -303,12 +522,14 @@ describe('SafeSelectorDropdown', () => {
       )
     }
 
-    it('disables the Select and forces it closed when a tx flow is open', () => {
+    it('keeps the Select mounted, not disabled, and forced closed when a tx flow is open', () => {
       renderWithTxFlow(<div data-testid="active-tx-flow" />)
 
       const selectRoot = screen.getByTestId('mock-select-root')
-      expect(selectRoot.getAttribute('data-mock-disabled')).toBe('true')
+      // Not disabled — a disabled <button> would block the nested copy button — but forced closed.
+      expect(selectRoot.getAttribute('data-mock-disabled')).toBe('false')
       expect(selectRoot.getAttribute('data-mock-open')).toBe('false')
+      expect(screen.getByTestId('safe-selector-trigger-content')).toBeInTheDocument()
     })
 
     it('renders the explanatory tooltip when a tx flow is open', () => {
@@ -317,12 +538,15 @@ describe('SafeSelectorDropdown', () => {
       expect(screen.getByTestId('tooltip-content')).toHaveTextContent('Changing the Safe is not allowed in this screen')
     })
 
-    it('applies the disabled styling to the trigger when a tx flow is open', () => {
+    it('dims the trigger and marks it aria-disabled (not native disabled) when a tx flow is open', () => {
       renderWithTxFlow(<div data-testid="active-tx-flow" />)
 
-      const trigger = screen.getByTestId('open-safes-icon')
-      expect(trigger.className).toMatch(/cursor-not-allowed/)
-      expect(trigger.className).toMatch(/opacity-50/)
+      const content = screen.getByTestId('open-safes-icon')
+      expect(content.className).toMatch(/cursor-not-allowed/)
+      expect(content.className).toMatch(/opacity-50/)
+      // Announced as disabled to assistive tech, but NOT the native `disabled` that would block the
+      // nested copy/explorer buttons. ("Not a dead button" is covered by the data-mock-disabled test.)
+      expect(content.getAttribute('aria-disabled')).toBe('true')
     })
 
     it('does not disable the Select or render the tooltip when no tx flow is active', () => {
@@ -335,6 +559,7 @@ describe('SafeSelectorDropdown', () => {
       const trigger = screen.getByTestId('open-safes-icon')
       expect(trigger.className).not.toMatch(/cursor-not-allowed/)
       expect(trigger.className).not.toMatch(/opacity-50/)
+      expect(trigger.getAttribute('aria-disabled')).toBeNull()
     })
   })
 
@@ -347,12 +572,13 @@ describe('SafeSelectorDropdown', () => {
       return render(<SafeSelectorDropdown items={[itemA]} selectedItemId={itemA.id} onItemSelect={jest.fn()} />)
     }
 
-    it('disables the Select on /apps/open when an appUrl is present', () => {
+    it('keeps the Select forced closed and shows the tooltip on /apps/open when an appUrl is present', () => {
       jest.mocked(useSafeAppUrl).mockReturnValue('https://example-safe-app.test')
       renderAtRoute(AppRoutes.apps.open, { appUrl: 'https://example-safe-app.test' })
 
       const selectRoot = screen.getByTestId('mock-select-root')
-      expect(selectRoot.getAttribute('data-mock-disabled')).toBe('true')
+      expect(selectRoot.getAttribute('data-mock-disabled')).toBe('false')
+      expect(selectRoot.getAttribute('data-mock-open')).toBe('false')
       expect(screen.getByTestId('tooltip-content')).toHaveTextContent('Changing the Safe is not allowed in this screen')
     })
 

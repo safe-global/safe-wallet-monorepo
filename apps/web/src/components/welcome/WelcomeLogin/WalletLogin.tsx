@@ -1,6 +1,9 @@
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
 import useWallet from '@/hooks/wallets/useWallet'
-import { Box, Button, CircularProgress, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { Typography } from '@/components/ui/typography'
+import { cn } from '@/utils/cn'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import WalletIcon from '@/components/common/WalletIcon'
 import { useEffect, useState } from 'react'
@@ -52,21 +55,19 @@ const WalletLogin = ({
   if (wallet !== null) {
     return (
       <Button
-        variant="contained"
-        size="xlarge"
+        variant="default"
+        size="lg"
         onClick={onContinue}
-        fullWidth={fullWidth}
-        className={css[buttonStyle]}
+        className={cn(css[buttonStyle], { 'w-full': fullWidth })}
         data-testid="continue-with-wallet-btn"
         disabled={isLoading}
-        disableElevation
       >
         {isLoading ? (
-          <CircularProgress size={20} sx={{ color: '#fff' }} />
+          <Spinner className="size-5" />
         ) : (
-          <Box justifyContent="space-between" display="flex" flexDirection="row" alignItems="center" gap={1}>
-            <Box display="flex" flexDirection="column" alignItems="flex-start">
-              <Typography variant="subtitle2" fontWeight={600}>
+          <div className="flex flex-row items-center justify-between gap-2">
+            <div className="flex flex-col items-start">
+              <Typography variant="paragraph-small-bold">
                 {buttonText?.connected ?? 'Continue with'} {wallet.label}
               </Typography>
               {wallet.address && (
@@ -78,9 +79,9 @@ const WalletLogin = ({
                   copyAddress={false}
                 />
               )}
-            </Box>
+            </div>
             {wallet.icon && <WalletIcon icon={wallet.icon} provider={wallet.label} width={24} height={24} />}
-          </Box>
+          </div>
         )}
       </Button>
     )
@@ -89,14 +90,12 @@ const WalletLogin = ({
   return (
     <Button
       onClick={onConnectWallet}
-      className={css[buttonStyle]}
-      variant="contained"
-      size="small"
-      disableElevation
-      fullWidth={fullWidth}
-      startIcon={buttonStyle === 'walletBtnSecondary' ? <WalletMinimal size={18} /> : undefined}
+      className={cn(css[buttonStyle], { 'w-full': fullWidth })}
+      variant="default"
+      size="sm"
       data-testid="connect-wallet-btn"
     >
+      {buttonStyle === 'walletBtnSecondary' && <WalletMinimal size={18} />}
       {buttonText?.disconnected ?? 'Connect wallet'}
     </Button>
   )

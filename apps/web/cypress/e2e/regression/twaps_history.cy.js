@@ -63,7 +63,7 @@ describe('Twaps history tests', { defaultCommandTimeout: 30000 }, () => {
     const buyAmount = swaps.getTokenPrice('DAI')
     const tokenSoldPrice = swaps.getTokenPrice('WETH')
 
-    create_tx.verifySummaryByName(swapsHistory.twaporder_title, null, [typeGeneral.statusOk])
+    create_tx.verifySummaryByName(swapsHistory.twaporder_title, [typeGeneral.statusOk])
     main.verifyElementsExist([create_tx.altImgDai, create_tx.altImgWeth], create_tx.altImgTwapOrder)
     create_tx.verifyExpandedDetails([swapsHistory.sell, weth, eq, swapsHistory.dai, swapsHistory.filled])
     swaps.checkNumberOfParts(2)

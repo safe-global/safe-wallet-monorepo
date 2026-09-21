@@ -4,10 +4,15 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useRouter } from 'next/router'
 import { type ReactElement, useState } from 'react'
-import { Alert, Box, Button, CircularProgress, DialogActions, DialogContent, Typography } from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
 import NameInput from '@/components/common/NameInput'
+import DialogActions from '@/components/common/DialogActions'
+import { Typography } from '@/components/ui/typography'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { cn } from '@/utils/cn'
+import { useDarkMode } from '@/hooks/useDarkMode'
+import { MEMBER_NAME_MAX_LENGTH, NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 import { AppRoutes } from '@/config/routes'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
@@ -16,10 +21,14 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 import { showNotification } from '@/store/notificationsSlice'
 import ExternalLink from '@/components/common/ExternalLink'
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
+import type { SerializedError } from '@reduxjs/toolkit'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 
 function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClose: () => void }): ReactElement {
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const isDarkMode = useDarkMode()
 
   const dispatch = useAppDispatch()
   const router = useRouter()
@@ -36,72 +45,82 @@ function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClo
 
     try {
       setIsSubmitting(true)
-      const response = await acceptInvite({ spaceId: space.id, acceptInviteDto: { name: data.name } })
+      const response = await acceptInvite({ spaceId: space.uuid, acceptInviteDto: { name: sanitizeName(data.name) } })
 
       if (response.error) {
-        throw response.error
+        setError(getRtkQueryErrorMessage(response.error as FetchBaseQueryError | SerializedError))
+        return
       }
-
-      trackEvent(
-        { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_ACCEPTED, label: String(space.id) },
-        { workspace_id: String(space.id), user_id: currentUser?.id },
-      )
-
-      if (router.pathname === AppRoutes.welcome.spaces) {
-        router.push({ pathname: AppRoutes.spaces.index, query: { spaceId: space.id } })
-      }
-
-      onClose()
-
-      dispatch(
-        showNotification({
-          message: `Accepted invite to ${space.name}`,
-          variant: 'success',
-          groupKey: 'accept-invite-success',
-        }),
-      )
     } catch (e) {
-      setError('Failed accepting the invite. Please try again.')
+      setError(getRtkQueryErrorMessage(e as FetchBaseQueryError | SerializedError))
+      return
     } finally {
       setIsSubmitting(false)
     }
+
+    trackEvent(
+      { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_ACCEPTED, label: space.uuid },
+      { workspace_id: space.uuid, user_id: currentUser?.id },
+    )
+
+    if (router.pathname === AppRoutes.welcome.spaces) {
+      router.push({ pathname: AppRoutes.spaces.index, query: { spaceId: space.uuid } })
+    }
+
+    onClose()
+
+    dispatch(
+      showNotification({
+        message: `Accepted invite to ${space.name}`,
+        variant: 'success',
+        groupKey: 'accept-invite-success',
+      }),
+    )
   })
 
   return (
     <ModalDialog open onClose={onClose} dialogTitle="Accept invite" hideChainIndicator>
-      <FormProvider {...methods}>
-        <form onSubmit={onSubmit}>
-          <DialogContent sx={{ py: 2 }}>
-            <Box mb={2}>
-              <NameInput data-testid="invite-name-input" label="Name" autoFocus name="name" required />
-            </Box>
-            <Typography variant="body2" color="text.secondary">
-              How is my data processed? Read our <ExternalLink href={AppRoutes.privacy}>privacy policy</ExternalLink>
-            </Typography>
+      <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
+        <FormProvider {...methods}>
+          <form onSubmit={onSubmit}>
+            <div className="px-6 py-4">
+              <div className="mb-4">
+                <NameInput
+                  data-testid="invite-name-input"
+                  label="Name"
+                  autoFocus
+                  name="name"
+                  required
+                  validateCharset
+                  minLength={NAME_MIN_LENGTH}
+                  maxLength={MEMBER_NAME_MAX_LENGTH}
+                />
+              </div>
+              <Typography variant="paragraph-small" color="muted">
+                How is my data processed? Read our <ExternalLink href={AppRoutes.privacy}>privacy policy</ExternalLink>
+              </Typography>
 
-            {error && (
-              <Alert severity="error" sx={{ mt: 2 }}>
-                {error}
-              </Alert>
-            )}
-          </DialogContent>
+              {error && (
+                <Alert variant="destructive" className="mt-4">
+                  <AlertSeverityIcon variant="destructive" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+            </div>
 
-          <DialogActions>
-            <Button data-testid="cancel-btn" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button
-              data-testid="confirm-accept-invite-button"
-              type="submit"
-              variant="contained"
-              disabled={!formState.isValid}
-              disableElevation
-            >
-              {isSubmitting ? <CircularProgress size={20} /> : 'Accept invite'}
-            </Button>
-          </DialogActions>
-        </form>
-      </FormProvider>
+            <DialogActions
+              className="px-6 pb-6"
+              onCancel={onClose}
+              cancelTestId="cancel-btn"
+              confirmType="submit"
+              confirmLabel="Accept invite"
+              confirmTestId="confirm-accept-invite-button"
+              confirmDisabled={!formState.isValid}
+              confirmLoading={isSubmitting}
+            />
+          </form>
+        </FormProvider>
+      </div>
     </ModalDialog>
   )
 }

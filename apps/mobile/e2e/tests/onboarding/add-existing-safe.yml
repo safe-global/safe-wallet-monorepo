@@ -34,5 +34,5 @@ tags:
     id: 'signer-0x8aEf2f5c3F17261F6F1C4dA058D022BE92776af8'
 - tapOn:
     id: 'continue-button'
-- assertVisible: '0x9BFC...4596.*'
+- assertVisible: 'My safe.*0x9BFC...4596.*'
 - assertVisible: 'Sepolia'

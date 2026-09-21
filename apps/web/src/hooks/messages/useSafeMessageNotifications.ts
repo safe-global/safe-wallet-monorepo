@@ -4,7 +4,6 @@ import { useEffect, useMemo, useRef } from 'react'
 import { SafeMsgEvent, safeMsgSubscribe } from '@/services/safe-messages/safeMsgEvents'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectNotifications, showNotification } from '@/store/notificationsSlice'
-import { formatError } from '@safe-global/utils/utils/formatters'
 import { isSafeMessageListItem } from '@/utils/safe-message-guards'
 import useSafeMessages from '@/hooks/messages/useSafeMessages'
 import { selectPendingSafeMessages } from '@/store/pendingSafeMessagesSlice'
@@ -14,13 +13,12 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import type { PendingSafeMessagesState } from '@/store/pendingSafeMessagesSlice'
-import { isWalletRejection } from '@/utils/wallets'
 
+// Signing failures are absent by design: `SignMessage` is the only surface that
+// can produce them, and it renders them inline next to its CTA (WA-3502).
 const SafeMessageNotifications: Partial<Record<SafeMsgEvent, string>> = {
   [SafeMsgEvent.PROPOSE]: 'You successfully signed the message.',
-  [SafeMsgEvent.PROPOSE_FAILED]: 'Signing the message failed. Please try again.',
   [SafeMsgEvent.CONFIRM_PROPOSE]: 'You successfully confirmed the message.',
-  [SafeMsgEvent.CONFIRM_PROPOSE_FAILED]: 'Confirming the message failed. Please try again.',
   [SafeMsgEvent.SIGNATURE_PREPARED]: 'The message was successfully confirmed.',
 }
 
@@ -47,19 +45,15 @@ const useSafeMessageNotifications = () => {
   useEffect(() => {
     const entries = Object.entries(SafeMessageNotifications) as [keyof typeof SafeMessageNotifications, string][]
 
-    const unsubFns = entries.map(([event, baseMessage]) =>
+    const unsubFns = entries.map(([event, message]) =>
       safeMsgSubscribe(event, (detail) => {
-        const isError = 'error' in detail
-        if (isError && isWalletRejection(detail.error)) return
         const isSuccess = event === SafeMsgEvent.PROPOSE || event === SafeMsgEvent.SIGNATURE_PREPARED
-        const message = isError ? `${baseMessage}${formatError(detail.error)}` : baseMessage
 
         dispatch(
           showNotification({
             message,
-            detailedMessage: isError ? detail.error.message : undefined,
             groupKey: detail.messageHash,
-            variant: isError ? 'error' : isSuccess ? 'success' : 'info',
+            variant: isSuccess ? 'success' : 'info',
           }),
         )
       }),

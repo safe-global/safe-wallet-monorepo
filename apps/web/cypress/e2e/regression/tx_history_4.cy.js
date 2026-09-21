@@ -24,50 +24,34 @@ describe('Incoming tx history details tests', () => {
 
   it('Verify Incoming details ERC20', () => {
     cy.visit(constants.transactionUrl + safe + dai)
-    createTx.verifySummaryByName(
-      typeReceive.summaryTxInfoDAI,
-      null,
-      [typeReceive.summaryTitle, typeGeneral.statusOk],
-      typeReceive.altImage,
-      typeReceive.altImageDAI,
-    )
-    createTx.verifyExpandedDetails([
-      typeReceive.GPv2Settlement,
-      typeReceive.GPv2SettlementAddress,
-      typeReceive.txHashDAI,
-      typeReceive.executionDateDAI,
-    ])
+    createTx.verifySummaryByName(typeReceive.summaryTxInfoDAI, [typeReceive.summaryTitle, typeGeneral.statusOk], {
+      altToken: typeReceive.altImageDAI,
+    })
+    createTx.verifyExpandedDetails([typeReceive.GPv2Settlement, typeReceive.GPv2SettlementAddress])
+    createTx.verifyTxHashCopied(typeReceive.txHashDAIFull)
     createTx.verifyNumberOfExternalLinks(2)
   })
 
   it('Verify Incoming details ERC721', () => {
     cy.visit(constants.transactionUrl + safe + nft)
-    createTx.verifySummaryByName(
-      typeReceive.summaryTxInfoNFT,
-      null,
-      [typeReceive.summaryTitle, typeGeneral.statusOk],
-      typeReceive.altImage,
-      typeReceive.altTokenNFT,
-    )
+    createTx.verifySummaryByName(typeReceive.summaryTxInfoNFT, [typeReceive.summaryTitle, typeGeneral.statusOk], {
+      altToken: typeReceive.altTokenNFT,
+    })
     createTx.verifyExpandedDetails([
       //typeReceive.Proxy, - the check for contract name is hidden for
       typeReceive.ProxyAddress,
-      typeReceive.nftHash,
-      typeReceive.executionDateNFT,
     ])
+    createTx.verifyTxHashCopied(typeReceive.nftHashFull)
     createTx.verifyNumberOfExternalLinks(2)
   })
 
   it('Verify Incoming details Native token', () => {
     cy.visit(constants.transactionUrl + safe + eth)
-    createTx.verifySummaryByName(
-      typeReceive.summaryTxInfoETH_2,
-      null,
-      [typeReceive.summaryTitle, typeGeneral.statusOk],
-      typeReceive.altImage,
-      typeReceive.altToken,
-    )
-    createTx.verifyExpandedDetails([typeReceive.senderAddressEth, typeReceive.txHashEth, typeReceive.executionDateEth])
+    createTx.verifySummaryByName(typeReceive.summaryTxInfoETH_2, [typeReceive.summaryTitle, typeGeneral.statusOk], {
+      altToken: typeReceive.altToken,
+    })
+    createTx.verifyExpandedDetails([typeReceive.senderAddressEth])
+    createTx.verifyTxHashCopied(typeReceive.txHashEthFull)
     createTx.verifyNumberOfExternalLinks(2)
   })
 

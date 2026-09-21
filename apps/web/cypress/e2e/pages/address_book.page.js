@@ -12,7 +12,7 @@ const beamerInput = 'input[id="beamer"]'
 const exportModalBtn = '[data-testid="export-modal-btn"]'
 export const editEntryBtn = 'button[aria-label="Edit entry"]'
 export const deleteEntryBtn = 'button[aria-label="Delete entry"]'
-export const deleteEntryModalBtnSection = '.MuiDialogActions-root'
+export const deleteEntryModalBtnSection = '[data-testid="modal-view"]'
 const importBtn = '[data-testid="import-btn"]'
 const uploadErrorMsg = '[data-testid="error-message"]'
 const modalSummaryMessage = '[data-testid="summary-message"]'
@@ -22,8 +22,8 @@ const exportSummary = '[data-testid="export-summary"]'
 const sendBtn = '[data-testid="send-btn"]'
 export const entryDialog = '[data-testid="entry-dialog"]'
 
-//TODO Move to specific component
-const moreActionIcon = '[data-testid="MoreHorizIcon"]'
+const moreActionsBtn = '[data-testid="transfer-actions-btn"]'
+const addToAddressBookBtn = '[data-testid="add-to-address-book-btn"]'
 
 export const acceptSelection = main.acceptSelectionStr
 export const addressBook = 'Address book'
@@ -34,10 +34,8 @@ const exportBtn = 'Export'
 const whatsNewBtnStr = "What's new"
 const beamrCookiesStr = 'accept the "Beamer" cookies'
 const headerImportBtnStr = 'Import'
-const mandatoryNameStr = 'Name *'
 const nameSortBtn = 'Name'
 const addressortBtn = 'Address'
-const addToAddressBookStr = 'Add to address book'
 
 export const emptyCSVFile = '../fixtures/address_book_empty_test.csv'
 export const nonCSVFile = '../fixtures/balances.json'
@@ -76,15 +74,15 @@ export function verifyRecipientData(data) {
 }
 
 export function clickOnSendBtn() {
-  cy.get(sendBtn).click()
+  cy.get(sendBtn).filter(':visible').should('be.enabled').click()
 }
 
 export function clickOnMoreActionsBtn() {
-  cy.get(moreActionIcon).click()
+  cy.get(moreActionsBtn).click()
 }
 
 export function clickOnAddToAddressBookBtn() {
-  cy.get('li span').contains(addToAddressBookStr).click()
+  cy.get(addToAddressBookBtn).click()
 }
 
 export function verifyExportMessage(count) {
@@ -197,7 +195,7 @@ export function addEntry(name, address) {
 }
 
 export function clickOnEditEntryBtn() {
-  cy.get(editEntryBtn).click({ force: true })
+  cy.get(main.tableRow).eq(0).find(editEntryBtn).click()
 }
 
 export function typeInNameInput(name) {
@@ -210,11 +208,11 @@ export function verifyNameWasChanged(name, editedName) {
 }
 
 export function clickDeleteEntryButton() {
-  cy.get(deleteEntryBtn).click({ force: true })
+  cy.get(main.tableRow).eq(0).find(deleteEntryBtn).click()
 }
 
 export function clickDeleteEntryModalDeleteButton() {
-  cy.get(deleteEntryModalBtnSection).contains(delteEntryModaldeleteBtn).click()
+  cy.get(deleteEntryModalBtnSection).contains('button', delteEntryModaldeleteBtn).click()
 }
 
 export function verifyEditedNameNotExists(name) {
@@ -241,5 +239,5 @@ export function verifyBeameriFrameExists() {
 export function verifyEmptyOwnerNameNotAllowed() {
   cy.get(main.nameInput).clear()
   main.verifyElementsStatus([saveBtn], constants.enabledStates.disabled)
-  cy.get(divInput).contains(mandatoryNameStr)
+  cy.get(divInput).should('have.attr', 'aria-invalid', 'true')
 }

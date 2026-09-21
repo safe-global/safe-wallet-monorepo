@@ -19,9 +19,8 @@ describe('TWAP tests', { defaultCommandTimeout: 30000 }, () => {
 
   beforeEach(() => {
     cy.intercept('GET', constants.transactionHistoryEndpoint).as('History')
-    cy.visit(constants.swapUrl + staticSafes.SEP_STATIC_SAFE_27)
+    wallet.connectSignerViaStorage(signer, constants.swapUrl + staticSafes.SEP_STATIC_SAFE_27)
     cy.wait('@History', { timeout: 20000 })
-    wallet.connectSigner(signer)
     iframeSelector = `iframe[src*="${constants.swapWidget}"]`
   })
 
@@ -89,7 +88,7 @@ describe('TWAP tests', { defaultCommandTimeout: 30000 }, () => {
   // Validation Tests
   // ========================================
 
-  it('Verify "Insufficient balance" message appears when the entered token amount exceeds "Max" balance', () => {
+  it('Verify "Insufficient COW balance" message appears when the entered token amount exceeds "Max" balance', () => {
     swaps.acceptLegalDisclaimer()
     cy.wait(4000)
     main.getIframeBody(iframeSelector).within(() => {
@@ -104,17 +103,20 @@ describe('TWAP tests', { defaultCommandTimeout: 30000 }, () => {
     })
   })
 
-  it('Verify "Sell amount too low" if the amount of tokens is worth less than 200 USD', () => {
+  // CoW enforces a live per-part minimum ($10); the title's "200 USD" is a stale 2024 assumption.
+  // 4 parts keeps 1 COW under the floor regardless of price; 2 parts flaked in CI.
+  it('Verify "Sell amount too small" is shown when the per-part sell amount is below CoW\'s minimum', () => {
     swaps.acceptLegalDisclaimer()
-    cy.wait(4000)
+    swaps.ensureWidgetWalletConnected(iframeSelector)
     main.getIframeBody(iframeSelector).within(() => {
       swaps.switchToTwap()
     })
     swaps.unlockTwapOrders(iframeSelector)
     main.getIframeBody(iframeSelector).within(() => {
       swaps.selectInputCurrency(swaps.swapTokens.cow)
-      swaps.setInputValue(10)
+      swaps.setInputValue(1)
       swaps.selectOutputCurrency(swaps.swapTokens.dai)
+      swaps.setNumberOfParts(4)
       swaps.checkSmallSellAmountMessageDisplayed()
     })
   })
@@ -144,9 +146,9 @@ describe('TWAP tests', { defaultCommandTimeout: 30000 }, () => {
         swaps.enableTwapCustomRecipient(isCustomRecipientFound(swaps.customRecipient))
         swaps.clickOnSettingsBtnTwaps()
         swaps.enterRecipient(swaps.blockedAddress)
-        swaps.selectOutputCurrency(swaps.swapTokens.dai)
       })
-      cy.contains(swaps.blockedAddressStr)
+
+      swaps.verifyBlockedAddressFormShown()
     },
   )
 

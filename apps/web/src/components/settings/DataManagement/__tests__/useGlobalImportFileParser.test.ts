@@ -323,7 +323,6 @@ describe('useGlobalImportFileParser', () => {
 
     expect(settings.currency).toEqual('usd')
 
-    expect(settings.shortName.copy).toEqual(true)
     expect(settings.shortName.qr).toEqual(true)
 
     expect(settings.theme.darkMode).toEqual(false)

@@ -41,6 +41,7 @@ jest.mock('@/features/__core__', () => ({
       )
     },
     HnCustomChecksCard: () => null,
+    SafenetChecksSection: () => null,
   })),
 }))
 
@@ -74,6 +75,7 @@ describe('SafeShieldWidget', () => {
       isRiskConfirmed: false,
       setIsRiskConfirmed: jest.fn(),
       setRecipientAddresses: jest.fn(),
+      setPoisoningAddresses: jest.fn(),
       setSafeTx: jest.fn(),
       safeAnalysis: null,
       addToTrustedList: jest.fn(),

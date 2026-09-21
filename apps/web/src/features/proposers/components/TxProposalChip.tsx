@@ -1,30 +1,21 @@
-import { Chip, SvgIcon, Tooltip, Typography } from '@mui/material'
+import { Badge } from '@/components/ui/badge'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import InfoIcon from '@/public/images/notifications/info.svg'
 
 const TxProposalChip = () => {
   return (
-    <Tooltip title="This transaction was created by a Proposer. Reject or confirm it to proceed.">
-      <span>
-        <Chip
-          sx={{ backgroundColor: 'background.main', color: 'primary.light' }}
-          size="small"
-          label={
-            <Typography
-              variant="caption"
-              fontWeight="bold"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              gap={0.7}
-            >
-              <SvgIcon component={InfoIcon} inheritViewBox fontSize="small" />
-              <Typography data-testid="proposal-status" variant="caption" fontWeight="bold">
-                Proposal
-              </Typography>
-            </Typography>
-          }
-        />
-      </span>
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <span tabIndex={0}>
+            <Badge variant="subtle">
+              <InfoIcon className="size-3" />
+              <span data-testid="proposal-status">Proposal</span>
+            </Badge>
+          </span>
+        }
+      />
+      <TooltipContent>This transaction was created by a Proposer. Reject or confirm it to proceed.</TooltipContent>
     </Tooltip>
   )
 }

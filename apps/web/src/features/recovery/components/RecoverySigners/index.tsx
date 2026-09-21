@@ -1,13 +1,13 @@
-import { Alert, Box } from '@mui/material'
 import type { ReactElement } from 'react'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 
-import { AuditRow, AuditLogHeader } from '@/components/common/AuditLog'
+import { AuditLog, AuditRow, AuditLogHeader } from '@/components/common/AuditLog'
 import { Countdown } from '@/components/common/Countdown'
 import ExecuteRecoveryButton from '../ExecuteRecoveryButton'
 import CancelRecoveryButton from '../CancelRecoveryButton'
-import { useRecoveryTxState } from '@/features/recovery/hooks/useRecoveryTxState'
+import { useRecoveryTxState } from '../../hooks/useRecoveryTxState'
 import { formatAuditDateTime } from '@/components/common/AuditLog'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import type { RecoveryQueueItem } from '../../services/recovery-state'
 import useAddressBook from '@/hooks/useAddressBook'
 
 export default function RecoverySigners({ item }: { item: RecoveryQueueItem }): ReactElement {
@@ -29,7 +29,7 @@ export default function RecoverySigners({ item }: { item: RecoveryQueueItem }): 
 
   return (
     <>
-      <Box>
+      <AuditLog>
         <AuditLogHeader />
 
         <AuditRow
@@ -42,28 +42,22 @@ export default function RecoverySigners({ item }: { item: RecoveryQueueItem }): 
 
         <AuditRow label={executionLabel} actionType={executionActionType} isLast />
 
-        <Alert severity={isExpired ? 'warning' : 'info'} sx={{ mt: 2, py: 0.5 }}>
-          {desc}
+        <Alert variant={isExpired ? 'warning' : 'info'} outlined={false} className="mt-4">
+          <AlertSeverityIcon variant={isExpired ? 'warning' : 'info'} />
+          <AlertDescription>{desc}</AlertDescription>
         </Alert>
 
         {isNext && remainingSeconds > 0 && (
-          <Box mt={2}>
+          <div className="mt-4">
             <Countdown seconds={remainingSeconds} />
-          </Box>
+          </div>
         )}
-      </Box>
+      </AuditLog>
 
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 1,
-        }}
-      >
+      <div className="flex items-center justify-center gap-2">
         <ExecuteRecoveryButton recovery={item} />
         <CancelRecoveryButton recovery={item} />
-      </Box>
+      </div>
     </>
   )
 }

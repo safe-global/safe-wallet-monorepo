@@ -19,13 +19,7 @@ export const FallbackHandlerCardItem = ({ result, isPrimary = false }: FallbackH
       linkUrl={HelpCenterArticle.FALLBACK_HANDLER}
       noIcon={false}
       linkProps={{
-        color: 'inherit',
-        sx: {
-          fontWeight: 'inherit',
-          '& > span': {
-            textDecoration: 'underline',
-          },
-        },
+        className: 'text-inherit [&>span]:underline',
       }}
     />
   )

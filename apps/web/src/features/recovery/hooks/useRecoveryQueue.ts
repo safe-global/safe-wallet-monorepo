@@ -1,6 +1,6 @@
-import { selectRecoveryQueues } from '@/features/recovery/services/selectors'
-import useRecovery from '@/features/recovery/hooks/useRecovery'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import { selectRecoveryQueues } from '../services/selectors'
+import useRecovery from './useRecovery'
+import type { RecoveryQueueItem } from '../services/recovery-state'
 
 export function useRecoveryQueue(): Array<RecoveryQueueItem> {
   const [recovery] = useRecovery()

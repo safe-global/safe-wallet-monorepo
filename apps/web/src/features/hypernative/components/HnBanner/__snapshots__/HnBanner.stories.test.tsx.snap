@@ -5,86 +5,108 @@ exports[`./HnBanner.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-yx6s02-MuiPaper-root-MuiCard-root"
-    role="button"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
     <div
-      class="MuiStack-root bannerStack mui-style-pl8gqh-MuiStack-root"
+      class="banner"
+      role="button"
+      style="cursor: pointer;"
     >
-      <img
-        alt="Guardian badge"
-        class="bannerImage"
-        data-nimg="1"
-        decoding="async"
-        height="95"
-        loading="lazy"
-        src="/images/hypernative/guardian-badge.svg"
-        style="color: transparent;"
-        width="95"
-      />
       <div
-        class="bannerContent MuiBox-root mui-style-0"
+        class="flex flex-row gap-4 bannerStack"
       >
-        <h4
-          class="MuiTypography-root MuiTypography-h4 bannerText bannerTitle mui-style-1smelnd-MuiTypography-root"
+        <img
+          alt="Guardian badge"
+          class="bannerImage"
+          data-nimg="1"
+          decoding="async"
+          height="95"
+          loading="lazy"
+          src="/images/hypernative/guardian-badge.svg"
+          style="color: transparent;"
+          width="95"
+        />
+        <div
+          class="bannerContent"
         >
-          Enforce enterprise-grade security
-        </h4>
-        <p
-          class="MuiTypography-root MuiTypography-body2 bannerText bannerDescription mui-style-6sro4l-MuiTypography-root"
-        >
-          Automatically monitor and block risky transactions using advanced, user-defined security policies, powered by
-           
-          <span
-            style="color: rgb(0, 180, 96); font-weight: bold;"
+          <h4
+            class="m-0 scroll-m-20 text-xl font-semibold leading-6 tracking-normal bannerText bannerTitle"
+            data-slot="typography"
+            data-variant="h4"
           >
-            Hypernative
-          </span>
-          .
-        </p>
-        <button
-          class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorPrimary bannerCtaText mui-style-mpq9rx-MuiButtonBase-root-MuiButton-root"
-          tabindex="0"
-          type="button"
-        >
-          Learn more
-          <span
-            class="MuiButton-icon MuiButton-endIcon MuiButton-iconSizeSmall mui-style-dp0v3c-MuiButton-endIcon"
+            Enforce enterprise-grade security
+          </h4>
+          <div
+            class="m-0 text-sm leading-5 font-normal bannerText bannerDescription"
+            data-slot="typography"
+            data-variant="paragraph-small"
           >
+            Automatically monitor and block risky transactions using advanced, user-defined security policies, powered by
+             
+            <span
+              style="color: rgb(0, 180, 96); font-weight: bold;"
+            >
+              Hypernative
+            </span>
+            .
+          </div>
+          <button
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground h-8 gap-1 px-4 in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 bannerCtaText"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            Learn more
             <svg
               aria-hidden="true"
-              class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-              data-testid="ArrowForwardIcon"
-              focusable="false"
+              class="lucide lucide-arrow-right size-4"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
               viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                d="m12 4-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"
+                d="M5 12h14"
+              />
+              <path
+                d="m12 5 7 7-7 7"
               />
             </svg>
-          </span>
-        </button>
+          </button>
+        </div>
       </div>
-    </div>
-    <button
-      aria-label="close"
-      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-le4ea9-MuiButtonBase-root-MuiIconButton-root"
-      tabindex="0"
-      type="button"
-    >
-      <svg
-        aria-hidden="true"
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium closeIcon mui-style-1tabcwi-MuiSvgIcon-root"
-        data-testid="CloseIcon"
-        focusable="false"
-        viewBox="0 0 24 24"
+      <button
+        aria-label="close"
+        class="closeButton"
+        type="button"
       >
-        <path
-          d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-        />
-      </svg>
-    </button>
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-x size-6 closeIcon"
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18 6 6 18"
+          />
+          <path
+            d="m6 6 12 12"
+          />
+        </svg>
+      </button>
+    </div>
   </div>
 </div>
 `;
@@ -94,66 +116,80 @@ exports[`./HnBanner.stories NonDismissable 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-yx6s02-MuiPaper-root-MuiCard-root"
-    role="button"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
     <div
-      class="MuiStack-root bannerStack mui-style-pl8gqh-MuiStack-root"
+      class="banner"
+      role="button"
+      style="cursor: pointer;"
     >
-      <img
-        alt="Guardian badge"
-        class="bannerImage"
-        data-nimg="1"
-        decoding="async"
-        height="95"
-        loading="lazy"
-        src="/images/hypernative/guardian-badge.svg"
-        style="color: transparent;"
-        width="95"
-      />
       <div
-        class="bannerContent MuiBox-root mui-style-0"
+        class="flex flex-row gap-4 bannerStack"
       >
-        <h4
-          class="MuiTypography-root MuiTypography-h4 bannerText bannerTitle mui-style-1smelnd-MuiTypography-root"
+        <img
+          alt="Guardian badge"
+          class="bannerImage"
+          data-nimg="1"
+          decoding="async"
+          height="95"
+          loading="lazy"
+          src="/images/hypernative/guardian-badge.svg"
+          style="color: transparent;"
+          width="95"
+        />
+        <div
+          class="bannerContent"
         >
-          Enforce enterprise-grade security
-        </h4>
-        <p
-          class="MuiTypography-root MuiTypography-body2 bannerText bannerDescription mui-style-6sro4l-MuiTypography-root"
-        >
-          Automatically monitor and block risky transactions using advanced, user-defined security policies, powered by
-           
-          <span
-            style="color: rgb(0, 180, 96); font-weight: bold;"
+          <h4
+            class="m-0 scroll-m-20 text-xl font-semibold leading-6 tracking-normal bannerText bannerTitle"
+            data-slot="typography"
+            data-variant="h4"
           >
-            Hypernative
-          </span>
-          .
-        </p>
-        <button
-          class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorPrimary bannerCtaText mui-style-mpq9rx-MuiButtonBase-root-MuiButton-root"
-          tabindex="0"
-          type="button"
-        >
-          Learn more
-          <span
-            class="MuiButton-icon MuiButton-endIcon MuiButton-iconSizeSmall mui-style-dp0v3c-MuiButton-endIcon"
+            Enforce enterprise-grade security
+          </h4>
+          <div
+            class="m-0 text-sm leading-5 font-normal bannerText bannerDescription"
+            data-slot="typography"
+            data-variant="paragraph-small"
           >
+            Automatically monitor and block risky transactions using advanced, user-defined security policies, powered by
+             
+            <span
+              style="color: rgb(0, 180, 96); font-weight: bold;"
+            >
+              Hypernative
+            </span>
+            .
+          </div>
+          <button
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground h-8 gap-1 px-4 in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 bannerCtaText"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            Learn more
             <svg
               aria-hidden="true"
-              class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-              data-testid="ArrowForwardIcon"
-              focusable="false"
+              class="lucide lucide-arrow-right size-4"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
               viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                d="m12 4-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"
+                d="M5 12h14"
+              />
+              <path
+                d="m12 5 7 7-7 7"
               />
             </svg>
-          </span>
-        </button>
+          </button>
+        </div>
       </div>
     </div>
   </div>

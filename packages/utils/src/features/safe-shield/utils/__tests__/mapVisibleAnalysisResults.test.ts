@@ -139,6 +139,36 @@ describe('mapVisibleAnalysisResults', () => {
 
       expect(result).toEqual([])
     })
+
+    it('does not consolidate ADDRESS_POISONING — each look-alike stays individual with its address pair', () => {
+      const impostorA = faker.finance.ethereumAddress()
+      const impostorB = faker.finance.ethereumAddress()
+      const anchorA = faker.finance.ethereumAddress()
+      const anchorB = faker.finance.ethereumAddress()
+
+      const poisoning = (entered: string, anchor: string, name: string) => ({
+        severity: Severity.CRITICAL,
+        type: RecipientStatus.RESEMBLES_TRUSTED_ADDRESS,
+        title: 'Potential address poisoning',
+        description: 'Looks similar to a saved address.',
+        addresses: [{ address: entered }, { address: anchor, name }],
+      })
+
+      const addressesResultsMap = {
+        [impostorA]: { [StatusGroup.ADDRESS_POISONING]: [poisoning(impostorA, anchorA, 'Alice')] },
+        [impostorB]: { [StatusGroup.ADDRESS_POISONING]: [poisoning(impostorB, anchorB, 'Bob')] },
+      } as RecipientAnalysisResults
+
+      const result = mapVisibleAnalysisResults(addressesResultsMap)
+      const poisoningResults = result.filter((r) => r.type === RecipientStatus.RESEMBLES_TRUSTED_ADDRESS)
+
+      // Two separate results (NOT merged into one plural summary), each keeping its entered/anchor pair.
+      expect(poisoningResults).toHaveLength(2)
+      expect(poisoningResults.every((r) => r.addresses?.length === 2)).toBe(true)
+      expect(poisoningResults.flatMap((r) => (r.addresses ?? []).map((a) => a.address))).toEqual(
+        expect.arrayContaining([impostorA, anchorA, impostorB, anchorB]),
+      )
+    })
   })
 
   describe('edge cases', () => {

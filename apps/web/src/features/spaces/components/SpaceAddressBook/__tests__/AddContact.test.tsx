@@ -2,6 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import AddContact from '../AddContact'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
 const mockUpsertAddressBook = jest.fn()
 
@@ -21,8 +22,9 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
 }))
 
 jest.mock('@/features/spaces', () => ({
-  useCurrentSpaceId: () => '42',
+  useCurrentSpaceId: () => '11111111-1111-1111-1111-111111111111',
   useGetSpaceAddressBook: () => [{ id: 1 }, { id: 2 }],
+  useWorkspaceAddressBookLabel: () => 'Acme address book',
 }))
 
 type CapturedProps = {
@@ -56,7 +58,7 @@ describe('AddContact', () => {
 
     expect(lastProps?.triggerLabel).toBe('Add shared contact')
     expect(lastProps?.dialogTitle).toBe('Add contact')
-    expect(lastProps?.successMessage).toBe('Added contact')
+    expect(lastProps?.successMessage).toBe('Contact added to Acme address book')
     expect(lastProps?.successGroupKey).toBe('add-contact-success')
     expect(screen.getByTestId('dialog-stub')).toHaveTextContent('Add shared contact')
   })
@@ -70,10 +72,10 @@ describe('AddContact', () => {
     mockUpsertAddressBook.mockResolvedValue({})
     render(<AddContact />)
 
-    await lastProps!.submit({ name: 'Alice', address: '0xabc', chainIds: ['1'] }, '42')
+    await lastProps!.submit({ name: 'Alice', address: '0xabc', chainIds: ['1'] }, MOCK_SPACE_UUID)
 
     expect(mockUpsertAddressBook).toHaveBeenCalledWith({
-      spaceId: 42,
+      spaceId: MOCK_SPACE_UUID,
       upsertAddressBookItemsDto: { items: [{ name: 'Alice', address: '0xabc', chainIds: ['1'] }] },
     })
   })
@@ -85,14 +87,11 @@ describe('AddContact', () => {
     expect(trackEvent).toHaveBeenCalledWith({ ...SPACE_EVENTS.ADD_ADDRESS_SUBMIT })
   })
 
-  it('onSuccess tracks ADDRESS_BOOK_ENTRY_CREATED with workspace id and post-insert count', () => {
+  it('onSuccess tracks ADDRESS_BOOK_ENTRY_CREATED with the post-insert count', () => {
     render(<AddContact />)
     lastProps!.onSuccess!()
 
-    expect(trackEvent).toHaveBeenCalledWith(
-      { ...SPACE_EVENTS.ADDRESS_BOOK_ENTRY_CREATED },
-      { workspace_id: '42', entry_count_after: 3 },
-    )
+    expect(trackEvent).toHaveBeenCalledWith({ ...SPACE_EVENTS.ADDRESS_BOOK_ENTRY_CREATED }, { 'Entry Count': 3 })
   })
 
   it('renders without crashing when invoked', async () => {

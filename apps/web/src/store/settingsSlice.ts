@@ -42,7 +42,6 @@ export type SettingsState = {
   hideSuspiciousTransactions?: boolean
 
   shortName: {
-    copy: boolean
     qr: boolean
   }
   theme: {
@@ -69,12 +68,10 @@ export const initialState: SettingsState = {
 
   hideSuspiciousTransactions: true,
 
-  // The `shortName` object contains settings related to short name interactions.
-  // The `copy` setting determines if the short name can be copied, while the `qr` setting
-  // determines if a QR code for the short name is displayed. Both are disabled by default
-  // for consistency and to avoid unintended behavior.
+  // The `shortName` object controls QR-code display for chain-specific addresses.
+  // The `qr` setting determines if a QR code for the short name is displayed. Disabled
+  // by default for consistency and to avoid unintended behavior.
   shortName: {
-    copy: false,
     qr: false,
   },
   theme: {},
@@ -98,9 +95,6 @@ export const settingsSlice = createSlice({
   reducers: {
     setCurrency: (state, { payload }: PayloadAction<SettingsState['currency']>) => {
       state.currency = payload
-    },
-    setCopyShortName: (state, { payload }: PayloadAction<SettingsState['shortName']['copy']>) => {
-      state.shortName.copy = payload
     },
     setQrShortName: (state, { payload }: PayloadAction<SettingsState['shortName']['qr']>) => {
       state.shortName.qr = payload
@@ -171,7 +165,6 @@ export const settingsSlice = createSlice({
 
 export const {
   setCurrency,
-  setCopyShortName,
   setQrShortName,
   setDarkMode,
   setHiddenTokensForChain,
@@ -252,3 +245,13 @@ export const selectIsCuratedNestedSafe = createSelector(
     )
   },
 )
+
+/**
+ * All curated nested-safe addresses across every parent, flattened, lowercased
+ * and deduped. Used as an explicit-trust anchor source for address-poisoning
+ * similarity detection (see `selectAnchorIndex`).
+ */
+export const selectAllCuratedNestedSafes = createSelector(selectSettings, (settings): string[] => {
+  const all = Object.values(settings.curatedNestedSafes ?? {}).flatMap((curation) => curation?.selectedAddresses ?? [])
+  return Array.from(new Set(all.map((addr) => addr.toLowerCase())))
+})

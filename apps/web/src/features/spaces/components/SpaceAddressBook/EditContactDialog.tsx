@@ -1,9 +1,12 @@
-import { Alert, DialogActions, Stack, Button, DialogContent, Typography, CircularProgress, Box } from '@mui/material'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { Typography } from '@/components/ui/typography'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
+import DialogActions from '@/components/common/DialogActions'
 import { useState, useMemo } from 'react'
 import AddressInputReadOnly from '@/components/common/AddressInputReadOnly'
 import NameInput from '@/components/common/NameInput'
+import { ADDRESS_BOOK_NAME_MAX_LENGTH, NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/NetworkMultiSelectorInput'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -14,8 +17,15 @@ import {
   useAddressBooksUpsertAddressBookItemsV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { showNotification } from '@/store/notificationsSlice'
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId, useWorkspaceAddressBookLabel } from '@/features/spaces'
 import { useAppDispatch } from '@/store'
+import { cn } from '@/utils/cn'
+import { useDarkMode } from '@/hooks/useDarkMode'
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
+import type { SerializedError } from '@reduxjs/toolkit'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import { getContactUpdatedMessage } from '@/utils/addressBookNotifications'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 type EditContactDialogProps = {
   entry: SpaceAddressBookItemDto
@@ -28,6 +38,8 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
   const { configs } = useChains()
   const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
+  const isDarkMode = useDarkMode()
+  const workspaceAddressBookLabel = useWorkspaceAddressBookLabel()
   const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
 
   const defaultNetworks = entry.chainIds
@@ -57,7 +69,7 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
 
   // Check if any changes were made
   const hasChanges = useMemo(() => {
-    const nameChanged = watchedName !== entry.name
+    const nameChanged = sanitizeName(watchedName ?? '') !== entry.name
 
     const originalChainIds = entry.chainIds.toSorted()
     const currentChainIds = watchedNetworks.map((network) => network.chainId).sort()
@@ -78,7 +90,7 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
     setError(undefined)
 
     const addressBookItem = {
-      name: data.name,
+      name: sanitizeName(data.name),
       address: data.address,
       chainIds: data.networks.map((network) => network.chainId),
     }
@@ -88,18 +100,19 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
       trackEvent({ ...SPACE_EVENTS.EDIT_ADDRESS_SUBMIT })
 
       const result = await upsertAddressBook({
-        spaceId: Number(spaceId),
+        spaceId: spaceId ?? '',
         upsertAddressBookItemsDto: { items: [addressBookItem] },
       })
 
+      if (isElevationRequiredError(result.error)) return
       if (result.error) {
-        setError('Something went wrong. Please try again.')
+        setError(getRtkQueryErrorMessage(result.error as FetchBaseQueryError | SerializedError))
         return
       }
 
       dispatch(
         showNotification({
-          message: `Updated contact`,
+          message: getContactUpdatedMessage(workspaceAddressBookLabel),
           variant: 'success',
           groupKey: 'update-contact-success',
         }),
@@ -107,7 +120,7 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
 
       handleClose()
     } catch (error) {
-      setError('Something went wrong. Please try again.')
+      setError(getRtkQueryErrorMessage(error as FetchBaseQueryError | SerializedError))
     } finally {
       setIsSubmitting(false)
     }
@@ -115,63 +128,70 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
 
   return (
     <ModalDialog open={true} onClose={handleClose} dialogTitle="Edit contact" hideChainIndicator>
-      <FormProvider {...methods}>
-        <form onSubmit={onSubmit}>
-          <DialogContent sx={{ py: 2 }}>
-            <Typography mb={2}>Edit contact details. Anyone in the workspace can see it.</Typography>
-            <Stack spacing={3}>
-              <Box pt={1}>
-                <AddressInputReadOnly address={entry.address} chainId={entry.chainIds[0]} />
-              </Box>
+      <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
+        <FormProvider {...methods}>
+          <form onSubmit={onSubmit}>
+            <div className="px-6 py-4">
+              <Typography className="mb-4">Edit contact details. Anyone in the workspace can see it.</Typography>
+              <div className="flex flex-col gap-6">
+                <div className="pt-2">
+                  <AddressInputReadOnly address={entry.address} chainId={entry.chainIds[0]} />
+                </div>
 
-              <NameInput name="name" label="Name" required />
-
-              <Box>
-                <Typography variant="h5" fontWeight={700} display="inline-flex" alignItems="center" gap={1} mt={2}>
-                  Select networks
-                </Typography>
-                <Typography variant="body2" mb={1}>
-                  Add contact on all networks or only on specific ones of your choice.
-                </Typography>
-                <Controller
-                  name="networks"
-                  control={control}
-                  render={({ field }) => (
-                    <NetworkMultiSelectorInput
-                      name="networks"
-                      showSelectAll
-                      value={field.value || []}
-                      error={!!errors.networks}
-                      helperText={errors.networks ? 'Select at least one network' : ''}
-                    />
-                  )}
-                  rules={{ required: true }}
+                {/* `hero` (66px) to match the AddressInputReadOnly above, whose wrapper is
+                    min-height 66px — the default h-9 left the two fields visibly uneven. */}
+                <NameInput
+                  name="name"
+                  label="Name"
+                  required
+                  validateCharset
+                  minLength={NAME_MIN_LENGTH}
+                  maxLength={ADDRESS_BOOK_NAME_MAX_LENGTH}
+                  inputSize="hero"
                 />
-              </Box>
-            </Stack>
 
-            {error && (
-              <Alert severity="error" sx={{ mt: 2 }}>
-                {error}
-              </Alert>
-            )}
-          </DialogContent>
+                <div>
+                  <p className="mb-1 inline-flex items-center gap-1 text-sm font-bold">Select networks</p>
+                  <p className="text-muted-foreground mb-2 text-sm">
+                    Add contact on all networks or only on specific ones of your choice.
+                  </p>
+                  <Controller
+                    name="networks"
+                    control={control}
+                    render={({ field }) => (
+                      <NetworkMultiSelectorInput
+                        name="networks"
+                        showSelectAll
+                        value={field.value || []}
+                        error={!!errors.networks}
+                        helperText={errors.networks ? 'Select at least one network' : ''}
+                      />
+                    )}
+                    rules={{ required: true }}
+                  />
+                </div>
+              </div>
 
-          <DialogActions>
-            <Button data-testid="cancel-btn" onClick={handleClose}>
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={!formState.isValid || !hasChanges || isSubmitting}
-              disableElevation
-            >
-              {isSubmitting ? <CircularProgress size={20} /> : 'Save'}
-            </Button>
-          </DialogActions>
-        </form>
-      </FormProvider>
+              {error && (
+                <Alert variant="destructive" className="mt-4">
+                  <AlertSeverityIcon variant="destructive" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+            </div>
+
+            <DialogActions
+              className="p-4 pt-0"
+              onCancel={handleClose}
+              cancelTestId="cancel-btn"
+              confirmLabel="Save"
+              confirmType="submit"
+              confirmDisabled={!formState.isValid || !hasChanges}
+              confirmLoading={isSubmitting}
+            />
+          </form>
+        </FormProvider>
+      </div>
     </ModalDialog>
   )
 }

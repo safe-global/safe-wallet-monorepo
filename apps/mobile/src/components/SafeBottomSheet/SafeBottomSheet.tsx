@@ -26,6 +26,7 @@ interface SafeBottomSheetProps<T> {
   renderItem?: React.FC<{ item: T; isDragging?: boolean; drag?: () => void; onClose: () => void }>
   keyExtractor?: ({ item, index }: { item: T; index: number }) => string
   loading?: boolean
+  keyboardBehavior?: BottomSheetModalProps['keyboardBehavior']
 }
 
 export function SafeBottomSheet<T>({
@@ -40,6 +41,7 @@ export function SafeBottomSheet<T>({
   renderItem: Render,
   FooterComponent,
   onDragEnd,
+  keyboardBehavior,
 }: SafeBottomSheetProps<T>) {
   const ref = useRef<BottomSheet>(null)
   const router = useRouter()
@@ -136,6 +138,7 @@ export function SafeBottomSheet<T>({
       // because of this on Android we end up with double navigation back and end up on the wrong screen
       backdropComponent={() => <BackdropComponent shouldNavigateBack={Platform.OS === 'ios'} />}
       footerComponent={isSortable ? undefined : renderFooter}
+      keyboardBehavior={keyboardBehavior}
       topInset={insets.top}
       handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
       accessible={false}

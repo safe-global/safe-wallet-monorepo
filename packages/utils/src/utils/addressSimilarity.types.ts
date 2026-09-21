@@ -1,21 +1,20 @@
 /**
- * Type definitions for address similarity detection algorithm
- *
- * Used to detect potential address poisoning attacks by identifying
- * addresses that share similar prefixes and suffixes.
+ * Type definitions for address similarity detection — see `addressSimilarity.ts`
+ * for how the intra-list and anchor detectors work. Intra-list types come first,
+ * anchor types below.
  */
 
-/** Configuration for similarity detection algorithm */
+import { Severity } from '../features/safe-shield/types'
+
+/** Prefix/suffix lengths for the intra-list detector ({@link detectSimilarAddresses}). */
 export interface SimilarityConfig {
   /** Number of characters from the start (after 0x) to match. Default: 4 */
   prefixLength: number
   /** Number of characters from the end to match. Default: 4 */
   suffixLength: number
-  /** Maximum Hamming distance in middle section to consider similar. Default: 10 */
-  hammingThreshold: number
 }
 
-/** A group of addresses that share similar prefix+suffix patterns */
+/** A group of listed addresses that share a prefix+suffix bucket (intra-list detector). */
 export interface SimilarityGroup {
   /** The bucket key identifying this group (prefix + suffix) */
   bucketKey: string
@@ -23,7 +22,7 @@ export interface SimilarityGroup {
   addresses: string[]
 }
 
-/** Result of similarity detection across a list of addresses */
+/** Result of the intra-list detector ({@link detectSimilarAddresses}). */
 export interface SimilarityDetectionResult {
   /** Groups of similar addresses detected */
   groups: SimilarityGroup[]
@@ -35,11 +34,60 @@ export interface SimilarityDetectionResult {
   getGroup: (address: string) => SimilarityGroup | undefined
 }
 
-/** Default configuration values */
+/** Default prefix/suffix lengths for the intra-list detector. */
 export const DEFAULT_SIMILARITY_CONFIG: SimilarityConfig = {
   prefixLength: 4,
   suffixLength: 4,
-  // High threshold to catch address poisoning attacks - middle section differences are expected
-  // since attackers generate addresses matching prefix/suffix but can't control the middle
-  hammingThreshold: 32,
+}
+
+// Anchor detector — front-OR-back match against a trusted anchor, two severity tiers.
+
+/** Configuration for the anchor-based similarity engine. */
+export interface AnchorSimilarityConfig {
+  /** Min matching leading hex chars (after 0x) to flag. Default: 4 */
+  prefixThreshold: number
+  /** Min matching trailing hex chars to flag. Default: 4 */
+  suffixThreshold: number
+}
+
+/** Default thresholds: a 4-char prefix or 4-char suffix match flags. */
+export const DEFAULT_ANCHOR_SIMILARITY_CONFIG: AnchorSimilarityConfig = {
+  prefixThreshold: 4,
+  suffixThreshold: 4,
+}
+
+/**
+ * A match between a candidate address and a trusted anchor it dangerously
+ * resembles (but is not equal to).
+ */
+export interface SimilarityMatch {
+  /** Normalized (no `0x`, lowercase) anchor address the candidate resembles. */
+  anchor: string
+  /** Longest common prefix length, L. */
+  prefixLen: number
+  /** Longest common suffix length, S. */
+  suffixLen: number
+  /** WARN = one end matches; CRITICAL = both visible ends match (eye-fooling). */
+  severity: Severity
+}
+
+/**
+ * A prebuilt index over the user's trusted anchors enabling cheap per-candidate
+ * lookups. Build once (per anchor-set change), query many.
+ */
+export interface SimilarityIndex {
+  /** True if the address is itself a trusted anchor (exact match). */
+  isAnchor: (address: string) => boolean
+  /** Strongest anchor the candidate resembles, or null if none / exact / invalid. */
+  query: (address: string) => SimilarityMatch | null
+  /** Number of distinct anchors indexed. */
+  size: number
+}
+
+/** Per-list annotation (Mode B): an address plus its strongest anchor match, if any. */
+export interface ListAnnotation {
+  /** The address as supplied to the list. */
+  address: string
+  /** The anchor match, if this address resembles (but isn't) a trusted anchor. */
+  match?: SimilarityMatch
 }

@@ -6,6 +6,7 @@ import logger from '@/src/utils/logger'
 import type { EstimatedFeeValues } from '@/src/store/estimatedFeeSlice'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeInfo } from '@/src/types/address'
+import { PrivateKeyUnavailableError } from './errors'
 
 interface ExecutePrivateKeyTxParams {
   chain: Chain
@@ -41,7 +42,7 @@ export const executePrivateKeyTx = async ({
   }
 
   if (!privateKey) {
-    throw new Error('Private key not found')
+    throw new PrivateKeyUnavailableError()
   }
 
   const walletNonce = await getUserNonce(chain, signerAddress)

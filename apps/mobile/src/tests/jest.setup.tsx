@@ -155,6 +155,8 @@ jest.mock('@gorhom/bottom-sheet', () => {
         return null
       },
     }),
+    // Matches the unsafe variant of the real hook outside a sheet
+    useBottomSheetInternal: () => null,
   }
 })
 

@@ -14,14 +14,20 @@
 import { test as base, expect, type Page, type TestInfo } from '@playwright/test'
 import { SafeApiClient } from '../api/safe-api-client'
 import { LS_KEYS, STAGING_CGW_URL } from '../data/constants'
+import { WalletPage } from '../pages/wallet.page'
+import { getWalletCredentials, type WalletCredentials } from '../data/credentials'
+import { version as TERMS_VERSION } from '@/markdown/terms/version'
 
-// Cookie consent state — mirrors Cypress localstorage_data.js
+// Cookie consent state — mirrors Cypress localstorage_data.js.
+// `hasAcceptedTerms` only treats consent as valid when `termsVersion` matches
+// the app's current terms version, so seeding `undefined` left the banner open.
+// Seed the real version so the banner stays suppressed.
 const COOKIE_STATE = JSON.stringify({
   necessary: true,
   updates: true,
   analytics: true,
   terms: true,
-  termsVersion: undefined, // Will be set dynamically if needed
+  termsVersion: TERMS_VERSION,
 })
 
 /**
@@ -40,10 +46,11 @@ async function seedLocalStorage(page: Page): Promise<void> {
       // Suppress outreach popup
       window.sessionStorage.setItem(outreachKey, String(Date.now()))
 
-      // Suppress Beamer (product updates widget)
+      // Suppress Beamer (product updates widget).
+      // KNOWN GAP: Beamer reads these keys suffixed with its PRODUCT_ID, so these unsuffixed
+      // writes are likely inert. See the Beamer row in docs/CYPRESS_MIGRATION_GUIDE.md.
       const beamerKeys = Object.keys(window.localStorage).filter((k) => k.startsWith('_BEAMER'))
       if (beamerKeys.length === 0) {
-        // Pre-seed with current date to suppress first-visit banner
         const now = new Date().toISOString()
         window.localStorage.setItem('_BEAMER_FIRST_VISIT_', now)
         window.localStorage.setItem('_BEAMER_BOOSTED_ANNOUNCEMENT_DATE_', now)
@@ -170,6 +177,10 @@ type SafeFixtures = {
   safePage: Page
   /** Safe Client Gateway API client — use for API-first test setup */
   safeApiClient: SafeApiClient
+  /** Wallet page object — connect a private-key wallet and SiWE login */
+  walletPage: WalletPage
+  /** Parsed wallet credentials (lazy — only parses env when a test uses it) */
+  credentials: WalletCredentials
 }
 
 // ---------------------------------------------------------------------------
@@ -190,9 +201,17 @@ export const test = base.extend<SafeFixtures>({
     await attachFailureEvidence(testInfo, page, consoleErrors, consoleWarnings, failedRequests)
   },
 
-  safeApiClient: async (_, use) => {
+  safeApiClient: async ({}, use) => {
     const client = new SafeApiClient()
     await use(client)
+  },
+
+  walletPage: async ({ safePage }, use) => {
+    await use(new WalletPage(safePage))
+  },
+
+  credentials: async ({}, use) => {
+    await use(getWalletCredentials())
   },
 })
 

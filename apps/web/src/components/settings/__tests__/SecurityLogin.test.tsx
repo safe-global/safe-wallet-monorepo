@@ -1,15 +1,33 @@
 import { render, screen } from '@/tests/test-utils'
 import SecurityLogin from '../SecurityLogin'
-import * as useIsRecoverySupportedHook from '@/features/recovery/hooks/useIsRecoverySupported'
-import * as useIsHypernativeFeatureHook from '@/features/hypernative/hooks/useIsHypernativeFeature'
-import * as useIsHypernativeGuardHook from '@/features/hypernative/hooks/useIsHypernativeGuard'
+import * as useIsRecoverySupportedHook from '@/features/recovery'
 import * as useIsSafeOwnerHook from '@/hooks/useIsSafeOwner'
-import * as useBannerStorageHook from '@/features/hypernative/hooks/useBannerStorage'
 import * as useVisibleBalancesHook from '@/hooks/useVisibleBalances'
 import * as useIsOutreachSafeHook from '@/features/targeted-features'
 import * as useWalletHook from '@/hooks/wallets/useWallet'
 import * as featureCore from '@/features/__core__'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
+
+// Mock the hypernative hooks at their source modules so internal (relative-import) callers
+// like useBannerVisibility are intercepted too — a barrel-namespace spy would not reach them
+const mockUseIsHypernativeFeature = jest.fn()
+const mockUseIsHypernativeGuard = jest.fn()
+const mockUseBannerStorage = jest.fn()
+
+jest.mock('@/features/hypernative/hooks/useIsHypernativeFeature', () => ({
+  ...jest.requireActual('@/features/hypernative/hooks/useIsHypernativeFeature'),
+  useIsHypernativeFeature: () => mockUseIsHypernativeFeature(),
+}))
+
+jest.mock('@/features/hypernative/hooks/useIsHypernativeGuard', () => ({
+  ...jest.requireActual('@/features/hypernative/hooks/useIsHypernativeGuard'),
+  useIsHypernativeGuard: () => mockUseIsHypernativeGuard(),
+}))
+
+jest.mock('@/features/hypernative/hooks/useBannerStorage', () => ({
+  ...jest.requireActual('@/features/hypernative/hooks/useBannerStorage'),
+  useBannerStorage: (...args: unknown[]) => mockUseBannerStorage(...args),
+}))
 
 // Mock HnBannerForSettings from the public API with simulated HOC behavior
 jest.mock('@/features/hypernative', () => {
@@ -40,8 +58,8 @@ jest.mock('../SecuritySettings', () => ({
 
 // Component that simulates HOC behavior (withHnFeature -> withGuardCheck -> withOwnerCheck)
 const MockHnActivatedSettingsBanner = () => {
-  const isEnabled = useIsHypernativeFeatureHook.useIsHypernativeFeature()
-  const { isHypernativeGuard, loading } = useIsHypernativeGuardHook.useIsHypernativeGuard()
+  const isEnabled = mockUseIsHypernativeFeature()
+  const { isHypernativeGuard, loading } = mockUseIsHypernativeGuard()
   const isOwner = useIsSafeOwnerHook.default()
 
   if (!isEnabled || loading || !isHypernativeGuard || !isOwner) {
@@ -66,10 +84,10 @@ describe('SecurityLogin', () => {
 
     // Default mocks - feature enabled, wallet connected, owner, sufficient balance, not targeted
     jest.spyOn(useIsRecoverySupportedHook, 'useIsRecoverySupported').mockReturnValue(false)
-    jest.spyOn(useIsHypernativeFeatureHook, 'useIsHypernativeFeature').mockReturnValue(true)
+    mockUseIsHypernativeFeature.mockReturnValue(true)
     jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
     jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
-    jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
+    mockUseBannerStorage.mockReturnValue(true)
     jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
       balances: { fiatTotal: '2000000', items: [] },
       loaded: true,
@@ -80,7 +98,7 @@ describe('SecurityLogin', () => {
 
   describe('when Hypernative guard is active', () => {
     beforeEach(() => {
-      jest.spyOn(useIsHypernativeGuardHook, 'useIsHypernativeGuard').mockReturnValue({
+      mockUseIsHypernativeGuard.mockReturnValue({
         isHypernativeGuard: true,
         loading: false,
       })
@@ -103,7 +121,7 @@ describe('SecurityLogin', () => {
     })
 
     it('should NOT show HnActivatedBannerForSettings when guard is active but feature is disabled', () => {
-      jest.spyOn(useIsHypernativeFeatureHook, 'useIsHypernativeFeature').mockReturnValue(false)
+      mockUseIsHypernativeFeature.mockReturnValue(false)
 
       render(<SecurityLogin />)
 
@@ -121,7 +139,7 @@ describe('SecurityLogin', () => {
 
   describe('when Hypernative guard is NOT active', () => {
     beforeEach(() => {
-      jest.spyOn(useIsHypernativeGuardHook, 'useIsHypernativeGuard').mockReturnValue({
+      mockUseIsHypernativeGuard.mockReturnValue({
         isHypernativeGuard: false,
         loading: false,
       })
@@ -158,7 +176,7 @@ describe('SecurityLogin', () => {
     })
 
     it('should NOT show HnBannerForSettings when feature is disabled', () => {
-      jest.spyOn(useIsHypernativeFeatureHook, 'useIsHypernativeFeature').mockReturnValue(false)
+      mockUseIsHypernativeFeature.mockReturnValue(false)
 
       render(<SecurityLogin />)
 
@@ -193,7 +211,7 @@ describe('SecurityLogin', () => {
 
   describe('when guard check is loading', () => {
     it('should NOT show either banner while guard check is loading', () => {
-      jest.spyOn(useIsHypernativeGuardHook, 'useIsHypernativeGuard').mockReturnValue({
+      mockUseIsHypernativeGuard.mockReturnValue({
         isHypernativeGuard: false,
         loading: true,
       })
@@ -208,7 +226,7 @@ describe('SecurityLogin', () => {
   describe('mutual exclusivity', () => {
     it('should never show both banners at the same time', () => {
       // Test with guard active
-      jest.spyOn(useIsHypernativeGuardHook, 'useIsHypernativeGuard').mockReturnValue({
+      mockUseIsHypernativeGuard.mockReturnValue({
         isHypernativeGuard: true,
         loading: false,
       })
@@ -219,7 +237,7 @@ describe('SecurityLogin', () => {
       expect(screen.queryByTestId('hn-banner-for-settings')).not.toBeInTheDocument()
 
       // Test with guard not active
-      jest.spyOn(useIsHypernativeGuardHook, 'useIsHypernativeGuard').mockReturnValue({
+      mockUseIsHypernativeGuard.mockReturnValue({
         isHypernativeGuard: false,
         loading: false,
       })
@@ -231,7 +249,7 @@ describe('SecurityLogin', () => {
     })
 
     it('should show HnActivatedBannerForSettings for targeted Safe with guard active, not HnBannerForSettings', () => {
-      jest.spyOn(useIsHypernativeGuardHook, 'useIsHypernativeGuard').mockReturnValue({
+      mockUseIsHypernativeGuard.mockReturnValue({
         isHypernativeGuard: true,
         loading: false,
       })

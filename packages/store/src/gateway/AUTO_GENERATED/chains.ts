@@ -151,6 +151,12 @@ export type Theme = {
   backgroundColor: string
   textColor: string
 }
+export type Relayer = {
+  type: ('GTF' | 'RELAY_FEE' | 'DAILY_LIMIT' | 'NO_FEE_CAMPAIGN') | null
+  safeCreationSponsored: boolean
+  safeTransactionSponsored: boolean
+  enableTenderlySimulationBeforeRelay: boolean
+}
 export type Chain = {
   chainId: string
   chainName: string
@@ -174,6 +180,7 @@ export type Chain = {
   shortName: string
   theme: Theme
   recommendedMasterCopyVersion?: string | null
+  relayer: Relayer | null
 }
 export type ChainPage = {
   count?: number | null

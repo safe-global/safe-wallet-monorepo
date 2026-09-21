@@ -64,7 +64,10 @@ export const cacheServiceWorkerPushNotificationTrackingEvent = (
         }
       }
 
-      return DEFAULT_WEBHOOK_TRACKING
+      return {
+        ...DEFAULT_WEBHOOK_TRACKING,
+        [property]: (DEFAULT_WEBHOOK_TRACKING[property] ?? 0) + 1,
+      }
     },
     store,
   ).catch(() => null)

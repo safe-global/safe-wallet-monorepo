@@ -19,9 +19,9 @@ const useIsQualifiedSafe = () => {
   const { pathname } = useRouter()
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { currentData: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !isUserSignedIn || !spaceId })
+  const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !isUserSignedIn || !spaceId })
   const { currentData: safes } = useSpaceSafesGetV1Query(
-    { spaceId: Number(spaceId) },
+    { spaceId: spaceId ?? '' },
     { skip: !isUserSignedIn || !spaceId },
   )
   const safeAddress = useSafeAddressFromUrl()

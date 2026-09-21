@@ -1,18 +1,23 @@
 import { useLoadFeature } from '@/features/__core__'
 import { MyAccountsFeature } from '@/features/myAccounts'
-import SpaceCard from 'src/features/spaces/components/SpaceCard'
+import { SafeProFeature, useIsSafeProEnabled } from '@/features/safe-pro-announcement'
+import SpaceRow from './SpaceRow'
 import SignInOptions from '../SignInOptions'
-import LocalSafesAlert from './LocalSafesAlert'
-import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
-import { useIsClassicViewFeatureEnabled } from '@/hooks/useClassicView'
-import ClassicViewLink from '../ClassicViewLink'
-import SpacesIcon from '@/public/images/spaces/spaces.svg'
+import WorkspaceBanner from '../WorkspaceBanner'
+import Image from 'next/image'
+import WorkspacesEmptyIllustration from '@/public/images/spaces/workspaces_empty.png'
+import WorkspacesEmptyIllustrationDark from '@/public/images/spaces/workspaces_empty_dark.webp'
 import SafeMarkIcon from '@/public/images/logo-no-text.svg'
+import SafeProLockup from '@/public/images/safe-pro/safe-pro-lockup.svg'
+import SafeProLockupDark from '@/public/images/safe-pro/safe-pro-lockup-dark.svg'
 import { useAppSelector } from '@/store'
-import { isAuthenticated } from '@/store/authSlice'
-import { Box, Card, Grid2, Link, Typography } from '@mui/material'
+import { isAuthenticated, selectIsStoreHydrated } from '@/store/authSlice'
+import { ArrowRight, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Typography as ShadcnTypography } from '@/components/ui/typography'
+import { Card } from '@/components/ui/card'
+import { Spinner } from '@/components/ui/spinner'
+import { Link } from '@/components/ui/link'
+import { Typography } from '@/components/ui/typography'
 import { type GetSpaceResponse, useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import SpaceListInvite from '../InviteBanner'
@@ -30,22 +35,47 @@ import { AppRoutes } from '@/config/routes'
 import NextLink from 'next/link'
 import { useSignInRedirect } from '@/components/welcome/WelcomeLogin/hooks/useSignInRedirect'
 import AddIcon from '@/public/images/common/add.svg'
-import { SPACES_LIMIT } from '../Sidebar/constants'
+import { SPACES_LIMIT } from '@/features/spaces/constants'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import WelcomeContentCard from '@/components/common/WelcomeContentCard'
 
-const AddSpaceButton = ({ onClick, disabled }: { onClick?: () => void; disabled?: boolean }) => {
+const AddSpaceButton = ({
+  onClick,
+  disabled,
+  size = 'lg',
+  variant = 'default',
+  label = 'Create workspace',
+  icon = 'add',
+}: {
+  onClick?: () => void
+  disabled?: boolean
+  size?: 'lg' | 'default'
+  variant?: 'default' | 'outline'
+  label?: string
+  icon?: 'add' | 'arrow'
+}) => {
+  const iconSize = size === 'lg' ? 'size-5' : 'size-4'
+
   const button = (
     <Button
       data-testid="create-space-button"
-      variant="default"
-      size="lg"
-      className={`h-full rounded-lg px-6 py-3 text-base${disabled ? ' cursor-not-allowed opacity-50 grayscale' : ''}`}
+      variant={variant}
+      size={size}
+      className={cn(
+        // eslint-disable-next-line no-restricted-syntax -- bespoke full-height create-workspace CTA sizing from dev's #8271 redesign
+        size === 'lg' && 'h-full rounded-lg px-6 py-3 text-base',
+        variant === 'outline' && 'hover:bg-muted',
+        disabled && 'cursor-not-allowed opacity-50 grayscale',
+      )}
       render={disabled ? <span /> : <NextLink href={AppRoutes.welcome.createSpace} />}
       disabled={disabled}
       onClick={disabled ? undefined : onClick}
     >
-      <AddIcon className="size-5 fill-primary-foreground" />
-      Create workspace
+      {icon === 'add' && (
+        <AddIcon className={cn(variant === 'default' ? 'fill-primary-foreground' : 'fill-foreground', iconSize)} />
+      )}
+      {label}
+      {icon === 'arrow' && <ArrowRight className={iconSize} />}
     </Button>
   )
 
@@ -60,26 +90,39 @@ const AddSpaceButton = ({ onClick, disabled }: { onClick?: () => void; disabled?
 }
 
 const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => void; redirectLoading: boolean }) => {
-  const isClassicViewFeatureEnabled = useIsClassicViewFeatureEnabled() === true
   const isDarkMode = useDarkMode()
+  const isSafeProEnabled = useIsSafeProEnabled()
+  const { SafeProBanner } = useLoadFeature(SafeProFeature)
 
   return (
     <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
-      <div className={cn('relative flex min-h-screen items-center justify-center bg-background p-6', css.authShell)}>
-        <div className="relative w-full max-w-[440px] rounded-lg bg-card p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]">
-          <div className="mb-6 flex size-10 items-center justify-center text-foreground">
-            <SafeMarkIcon className="size-10" />
+      {/* The page keeps its Topbar + Accounts/Workspaces tabs, so the sign-in
+          card renders inline rather than as a full-screen takeover. */}
+      <div className={cn('relative flex items-center justify-center pb-10', isSafeProEnabled ? 'pt-0' : 'pt-10')}>
+        <div className="flex w-full max-w-[440px] flex-col items-center">
+          {isSafeProEnabled ? <SafeProBanner className="mb-4" /> : <WorkspaceBanner className="mb-3" />}
+
+          <div className="relative w-full">
+            <div className="relative w-full rounded-lg bg-card p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]">
+              <div className="mx-auto mb-6 flex h-10 items-center justify-center text-foreground">
+                {isSafeProEnabled ? (
+                  isDarkMode ? (
+                    <SafeProLockupDark className="h-10 w-auto" />
+                  ) : (
+                    <SafeProLockup className="h-10 w-auto" />
+                  )
+                ) : (
+                  <SafeMarkIcon className="size-10" />
+                )}
+              </div>
+
+              <Typography variant="h3" className="mb-6 text-center">
+                Sign in to your workspace
+              </Typography>
+
+              <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
+            </div>
           </div>
-
-          <ShadcnTypography variant="h3" className="mb-6">
-            Sign in to your workspace
-          </ShadcnTypography>
-
-          <LocalSafesAlert />
-
-          <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
-
-          {isClassicViewFeatureEnabled && <ClassicViewLink />}
 
           <p className="mt-4 text-center text-xs leading-[18px] text-muted-foreground">
             By continuing, you agree to the{' '}
@@ -104,32 +147,59 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
   )
 }
 
+const WORKSPACE_BENEFITS = [
+  'Organize multiple Safe accounts in one place',
+  'Invite members and manage their roles',
+  'Share an address book across your team',
+]
+
 const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
   const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
+  const isDarkMode = useDarkMode()
 
   return (
     <>
-      <Card sx={{ p: 5, textAlign: 'center', width: 1 }}>
-        <Box display="flex" justifyContent="center">
-          <SpacesIcon />
-        </Box>
+      <Card size="none" radius="xl" className="w-full text-center">
+        <div className="flex flex-col items-center gap-8 rounded-t-xl bg-muted p-8 text-left md:flex-row md:items-end md:gap-16">
+          <div className="flex shrink-0 flex-col gap-4 md:self-center">
+            {WORKSPACE_BENEFITS.map((benefit) => (
+              <div key={benefit} className="flex flex-row items-center gap-2">
+                <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[var(--color-background-light-hover)]">
+                  <Check className="size-4 text-badge-dot-success" strokeWidth={1.5} />
+                </div>
+                <Typography variant="paragraph-large" className="font-medium whitespace-nowrap">
+                  {benefit}
+                </Typography>
+              </div>
+            ))}
+          </div>
 
-        <Box mb={3}>
-          <Typography color="text.secondary" mb={1}>
-            No workspaces found.
-            <br />
-          </Typography>
-          <Link onClick={() => setIsInfoOpen(true)} href="#">
-            What are workspaces?
-          </Link>
-        </Box>
-        <div className="h-12">
-          <AddSpaceButton
-            disabled={isAtLimit}
-            onClick={() =>
-              trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
-            }
+          <Image
+            src={isDarkMode ? WorkspacesEmptyIllustrationDark : WorkspacesEmptyIllustration}
+            alt="Workspace dashboard showing accounts grouped by workspace"
+            className="-my-8 h-auto w-full min-w-0 md:-mr-8 md:w-[60%]"
           />
+        </div>
+
+        <div className="flex flex-col items-center gap-6 p-8">
+          <Typography variant="h3">Collaborate on your Safe accounts with your team.</Typography>
+
+          <div className="flex flex-col items-center gap-4">
+            <div className="h-12">
+              <AddSpaceButton
+                label="Create your first workspace"
+                icon="arrow"
+                disabled={isAtLimit}
+                onClick={() =>
+                  trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
+                }
+              />
+            </div>
+
+            <Link variant="muted" className="text-sm underline" onClick={() => setIsInfoOpen(true)} href="#">
+              What are workspaces?
+            </Link>
+          </div>
         </div>
       </Card>
       {isInfoOpen && <SpaceInfoModal onClose={() => setIsInfoOpen(false)} />}
@@ -139,34 +209,35 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
 
 const SpacesList = () => {
   const { AccountsNavigation } = useLoadFeature(MyAccountsFeature)
-  const isRequireLoginEnabled = useIsRequireLoginEnabled() ?? false
+  const { SafeProWorkspacesBanner } = useLoadFeature(SafeProFeature)
+  const isSafeProEnabled = useIsSafeProEnabled()
   const isUserSignedIn = useAppSelector(isAuthenticated)
+  const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const {
     currentData: spaces,
     isFetching,
     isUninitialized,
     error,
+    refetch,
   } = useSpacesGetV1Query(undefined, { skip: !isUserSignedIn })
   const pendingInvites = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.INVITED)
   const activeSpaces = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.ACTIVE)
-  const inviteAmount = pendingInvites?.length
   const isAtSpacesLimit = activeSpaces.length >= SPACES_LIMIT
 
-  const singleSpaceId = activeSpaces.length === 1 ? String(activeSpaces[0].id) : null
+  const singleSpaceId = activeSpaces.length === 1 ? activeSpaces[0].uuid : null
+
+  // Treat any indefinite state as loading. On the skip→unskip flip (re-login
+  // after logout) RTK Query lags one render — isFetching/isUninitialized are
+  // both false while spaces is still undefined. The `spaces === undefined &&
+  // !error` clause covers that gap so an existing user isn't bounced into
+  // /welcome/create-space on a stale spacesAmount=0.
+  const isSpacesLoading = isFetching || isUninitialized || (spaces === undefined && !error)
 
   const { setHasSignedIn, redirectLoading } = useSignInRedirect({
     spacesAmount: spaces?.length || 0,
-    inviteAmount: inviteAmount || 0,
-    // Treat any state without a definitive answer as still loading. The
-    // skip→unskip transition (re-login after logout) returns isFetching=false
-    // and isUninitialized=false on the render where skip flips — RTK Query
-    // dispatches the refetch in a useEffect, so the loading flags lag one
-    // render behind. Without the `spaces === undefined && !error` clause an
-    // existing user gets bounced into /welcome/create-space because the hook
-    // reads spacesAmount=0 with isSpacesLoading=false. Once spaces or error
-    // resolves, this clause becomes false and the normal redirect logic runs.
-    isSpacesLoading: isFetching || isUninitialized || (spaces === undefined && !error),
+    inviteAmount: pendingInvites.length,
+    isSpacesLoading,
     error: error || undefined,
     singleSpaceId,
   })
@@ -175,51 +246,77 @@ const SpacesList = () => {
     setHasSignedIn(true)
   }, [setHasSignedIn])
 
-  // The spaces query is skipped while signed out, so pendingInvites is always
-  // [] — no need to gate the early return on it.
-  if (!isUserSignedIn) {
-    return <SignedOutState afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
-  }
+  const onAddSpaceBtnClick = () =>
+    trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
+
+  const pendingInviteBanners =
+    isUserSignedIn && pendingInvites.length > 0
+      ? pendingInvites.map((invitingSpace: GetSpaceResponse) => (
+          <SpaceListInvite
+            key={invitingSpace.uuid}
+            space={invitingSpace}
+            invitedByName={getInvitedByName(invitingSpace, currentUser?.id)}
+          />
+        ))
+      : null
 
   return (
-    <Box className={css.container}>
-      <Box className={css.mySpaces}>
-        <Box className={css.spacesHeader}>
-          {!isRequireLoginEnabled && <AccountsNavigation />}
+    <div className={css.container}>
+      <div className={css.mySpaces}>
+        <div className={css.spacesHeader}>
+          <AccountsNavigation />
+        </div>
 
-          {isUserSignedIn && activeSpaces.length > 0 && (
-            <AddSpaceButton
-              disabled={isAtSpacesLimit}
-              onClick={() =>
-                trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
-              }
-            />
-          )}
-        </Box>
+        {!isStoreHydrated || (isUserSignedIn && isSpacesLoading) ? (
+          <div className="flex justify-center py-10">
+            <Spinner className="size-6 text-muted-foreground" />
+          </div>
+        ) : !isUserSignedIn ? (
+          <SignedOutState afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
+        ) : error && !spaces?.length ? (
+          <div className="flex flex-col items-center gap-3 py-10 text-center">
+            <Typography color="muted">Couldn&apos;t load your workspaces. Try again, or contact support.</Typography>
+            <Button variant="outline" onClick={() => refetch()}>
+              Try again
+            </Button>
+          </div>
+        ) : activeSpaces.length > 0 ? (
+          <>
+            {isSafeProEnabled && <SafeProWorkspacesBanner className="mb-4" />}
+            <WelcomeContentCard className="flex flex-col gap-4">
+              <div className="flex justify-end">
+                <AddSpaceButton
+                  size="default"
+                  variant="outline"
+                  label="Create"
+                  disabled={isAtSpacesLimit}
+                  onClick={onAddSpaceBtnClick}
+                />
+              </div>
 
-        {isUserSignedIn &&
-          pendingInvites.length > 0 &&
-          pendingInvites.map((invitingSpace: GetSpaceResponse) => (
-            <SpaceListInvite
-              key={invitingSpace.id}
-              space={invitingSpace}
-              invitedByName={getInvitedByName(invitingSpace, currentUser?.id)}
-            />
-          ))}
+              {pendingInviteBanners}
 
-        {activeSpaces.length > 0 ? (
-          <Grid2 container spacing={2} flexWrap="wrap" data-testid="org-list">
-            {activeSpaces.map((space) => (
-              <Grid2 size={{ xs: 12, md: 6 }} key={space.name}>
-                <SpaceCard space={space} currentUserId={currentUser?.id} />
-              </Grid2>
-            ))}
-          </Grid2>
+              <div className="rounded-lg border border-border bg-card px-4 py-1" data-testid="org-list">
+                {activeSpaces.map((space, index) => (
+                  <SpaceRow
+                    key={space.uuid}
+                    space={space}
+                    currentUserId={currentUser?.id}
+                    showDivider={index < activeSpaces.length - 1}
+                  />
+                ))}
+              </div>
+            </WelcomeContentCard>
+          </>
         ) : (
-          isUserSignedIn && <NoSpacesState isAtLimit={isAtSpacesLimit} />
+          <>
+            {isSafeProEnabled && <SafeProWorkspacesBanner className="mb-4" />}
+            {pendingInviteBanners}
+            <NoSpacesState isAtLimit={isAtSpacesLimit} />
+          </>
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }
 

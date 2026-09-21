@@ -1,4 +1,4 @@
-import SafeListContextMenu from '@/components/sidebar/SafeListContextMenu'
+import SafeListContextMenu from '@/components/common/SafeListContextMenu'
 
 export interface AccountItemContextMenuProps {
   address: string

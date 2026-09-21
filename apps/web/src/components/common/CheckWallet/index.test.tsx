@@ -106,7 +106,7 @@ describe('CheckWallet', () => {
     const { getByText, getByLabelText } = renderButton()
 
     expect(getByText('Continue')).toBeDisabled()
-    expect(getByLabelText('Your connected wallet is not a signer of this Safe Account')).toBeInTheDocument()
+    expect(getByLabelText('Your connected wallet is not a signer of this Safe account')).toBeInTheDocument()
   })
 
   it('should be disabled when connected to the wrong network', () => {
@@ -248,7 +248,7 @@ describe('CheckWallet', () => {
     )
 
     expect(getByText('Continue')).toBeDisabled()
-    expect(getByLabelText('SDK is not initialized yet'))
+    expect(getByLabelText('Still loading. Try again in a moment.'))
   })
 
   it('should not disable the button if SDK is not initialized and safe is not loaded', () => {

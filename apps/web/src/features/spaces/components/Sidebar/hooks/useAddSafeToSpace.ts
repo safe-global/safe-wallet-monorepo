@@ -8,6 +8,7 @@ import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import type { SpaceItem } from '../types'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 interface UseAddSafeToSpaceOptions {
   spaces: SpaceItem[]
@@ -15,8 +16,8 @@ interface UseAddSafeToSpaceOptions {
 }
 
 interface UseAddSafeToSpaceResult {
-  addToSpace: (spaceId: number) => Promise<boolean>
-  loadingSpaceId: number | null
+  addToSpace: (spaceId: string) => Promise<boolean>
+  loadingSpaceId: string | null
 }
 
 export const useAddSafeToSpace = ({ spaces, onSpaceAdded }: UseAddSafeToSpaceOptions): UseAddSafeToSpaceResult => {
@@ -24,7 +25,7 @@ export const useAddSafeToSpace = ({ spaces, onSpaceAdded }: UseAddSafeToSpaceOpt
   const chain = useCurrentChain()
   const dispatch = useAppDispatch()
   const [addSafeToSpace] = useSpaceSafesCreateV1Mutation()
-  const [loadingSpaceId, setLoadingSpaceId] = useState<number | null>(null)
+  const [loadingSpaceId, setLoadingSpaceId] = useState<string | null>(null)
 
   const showError = (detail: string) =>
     dispatch(
@@ -35,7 +36,7 @@ export const useAddSafeToSpace = ({ spaces, onSpaceAdded }: UseAddSafeToSpaceOpt
       }),
     )
 
-  const addToSpace = async (spaceId: number): Promise<boolean> => {
+  const addToSpace = async (spaceId: string): Promise<boolean> => {
     if (!chain?.chainId || !safe.address.value) return false
     setLoadingSpaceId(spaceId)
     try {
@@ -43,6 +44,7 @@ export const useAddSafeToSpace = ({ spaces, onSpaceAdded }: UseAddSafeToSpaceOpt
         spaceId,
         createSpaceSafesDto: { safes: [{ chainId: chain.chainId, address: safe.address.value }] },
       })
+      if (isElevationRequiredError(result.error)) return false
       if (result.error) {
         showError(getRtkQueryErrorMessage(result.error))
         return false
@@ -55,10 +57,10 @@ export const useAddSafeToSpace = ({ spaces, onSpaceAdded }: UseAddSafeToSpaceOpt
         }),
       )
       trackEvent(
-        { ...SPACE_EVENTS.WORKSPACE_SAFE_LINKED, label: String(spaceId) },
-        { workspace_id: String(spaceId), safe_address: safe.address.value, chain_id: chain.chainId },
+        { ...SPACE_EVENTS.WORKSPACE_SAFE_LINKED, label: spaceId },
+        { workspace_id: spaceId, safe_address: safe.address.value, chain_id: chain.chainId },
       )
-      const space = spaces.find((s) => s.id === spaceId)
+      const space = spaces.find((s) => s.uuid === spaceId)
       if (space) onSpaceAdded?.(space)
       return true
     } catch (error: unknown) {

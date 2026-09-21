@@ -1,6 +1,8 @@
 export { useCounterpartyAnalysis } from './useCounterpartyAnalysis'
+export { useGuardCheck } from './useGuardCheck'
 export { useRecipientAnalysis } from './useRecipientAnalysis'
 export { useThreatAnalysis } from './useThreatAnalysis'
+export { useFinalizedThreatAnalysis } from './useFinalizedThreatAnalysis'
 export { useThreatAnalysisHypernative } from './useThreatAnalysisHypernative'
 export { useThreatAnalysisHypernativeBatch } from './useThreatAnalysisHypernativeBatch'
 export { useThreatAnalysisHypernativeMessage } from './useThreatAnalysisHypernativeMessage'

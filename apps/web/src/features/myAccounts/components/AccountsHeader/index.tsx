@@ -14,17 +14,19 @@ import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
+import { useNewSafeNextParam } from '@/components/new-safe/getReturnUrl'
 
 const AddSafeButton = ({ trackingLabel, onLinkClick }: { trackingLabel: string; onLinkClick?: () => void }) => {
+  const next = useNewSafeNextParam()
   return (
     <Track {...OVERVIEW_EVENTS.ADD_TO_WATCHLIST} label={trackingLabel}>
       <Button
         data-testid="add-safe-button"
         variant="outline"
-        size="lg"
+        size="action"
         onClick={onLinkClick}
-        className="w-full rounded-lg h-full px-5 text-base "
-        render={<NextLink href={AppRoutes.newSafe.load} />}
+        className="max-[599px]:w-full"
+        render={<NextLink href={{ pathname: AppRoutes.newSafe.load, query: { next } }} />}
       >
         <AddIcon color="currentColor" className="size-5 fill-primary" />
         Add
@@ -60,10 +62,10 @@ const AccountsHeader = ({ isSidebar, onLinkClick }: { isSidebar: boolean; onLink
 
         {wallet ? (
           <Track {...OVERVIEW_EVENTS.CREATE_NEW_SAFE} label={trackingLabel}>
-            <CreateButton isPrimary className="h-full text-base" />
+            <CreateButton isPrimary />
           </Track>
         ) : (
-          <ConnectWalletButton small={true} className="h-full rounded-lg text-base" />
+          <ConnectWalletButton size="action" />
         )}
       </div>
     </div>

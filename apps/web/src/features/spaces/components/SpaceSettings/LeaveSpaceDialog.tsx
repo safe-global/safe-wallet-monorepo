@@ -8,11 +8,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogDescription,
-  AlertDialogFooter,
 } from '@/components/ui/alert-dialog'
-import { Button } from '@/components/ui/button'
+import DialogActions from '@/components/common/DialogActions'
 import { Typography } from '@/components/ui/typography'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { AppRoutes } from '@/config/routes'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
@@ -31,7 +30,7 @@ const LeaveSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undefi
     setError(undefined)
 
     try {
-      await leaveSpace({ spaceId: space.id }).unwrap()
+      await leaveSpace({ spaceId: space.uuid }).unwrap()
       onClose()
 
       trackEvent({ ...SPACE_EVENTS.LEAVE_SPACE })
@@ -65,28 +64,26 @@ const LeaveSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undefi
         </AlertDialogHeader>
 
         <Typography variant="paragraph-small" color="muted">
-          Your wallet and any linked Safe Accounts are not affected.
+          Your wallet and any linked Safe accounts are not affected.
         </Typography>
 
         {error && (
           <Alert variant="destructive">
+            <AlertSeverityIcon variant="destructive" />
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
 
-        <AlertDialogFooter>
-          <Button variant="ghost" onClick={onClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={onLeave}
-            disabled={isLoading || !space}
-            data-testid="space-confirm-leave-button"
-          >
-            {isLoading ? 'Leaving…' : 'Leave workspace'}
-          </Button>
-        </AlertDialogFooter>
+        <DialogActions
+          onCancel={onClose}
+          cancelDisabled={isLoading}
+          confirmLabel="Leave workspace"
+          onConfirm={onLeave}
+          confirmDisabled={isLoading || !space}
+          confirmLoading={isLoading}
+          confirmDestructive
+          confirmTestId="space-confirm-leave-button"
+        />
       </AlertDialogContent>
     </AlertDialog>
   )

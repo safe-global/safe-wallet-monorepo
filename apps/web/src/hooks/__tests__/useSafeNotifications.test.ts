@@ -53,14 +53,14 @@ describe('useSafeNotifications', () => {
       expect(result.current).toBeUndefined()
       expect(showNotification).toHaveBeenCalledWith({
         variant: 'warning',
-        message: `Your Safe Account version 1.1.1 is out of date. Please update it.`,
+        message: `Your Safe account version 1.1.1 is out of date. Please update it.`,
         groupKey: 'safe-outdated-version',
         link: {
           href: {
             pathname: '/settings/setup',
             query: { safe: 'eth:0x123' },
           },
-          title: 'Update Safe Account',
+          title: 'Update Safe account',
         },
         onClose: expect.anything(),
       })
@@ -85,7 +85,7 @@ describe('useSafeNotifications', () => {
       expect(result.current).toBeUndefined()
       expect(showNotification).toHaveBeenCalledWith({
         variant: 'warning',
-        message: `Safe Account version 0.0.1 is not supported by this web app anymore. You can update your Safe Account via the CLI.`,
+        message: `Safe account version 0.0.1 is not supported by this web app anymore. You can update your Safe account via the CLI.`,
         groupKey: 'safe-outdated-version',
         link: {
           href: 'https://github.com/5afe/safe-cli',
@@ -109,6 +109,24 @@ describe('useSafeNotifications', () => {
       const { result } = renderHook(() => useSafeNotifications())
 
       // check that the notification was shown
+      expect(result.current).toBeUndefined()
+      expect(showNotification).not.toHaveBeenCalled()
+    })
+
+    it('should not show a notification for a non-critical outdated version (>= 1.3.0)', () => {
+      ;(useSafeInfo as jest.Mock).mockReturnValue({
+        safe: {
+          implementation: { value: '0x234' },
+          implementationVersionState: 'OUTDATED',
+          version: '1.3.0',
+          address: { value: '0x123' },
+          chainId: '1',
+        },
+        safeAddress: '0x123',
+      })
+
+      const { result } = renderHook(() => useSafeNotifications())
+
       expect(result.current).toBeUndefined()
       expect(showNotification).not.toHaveBeenCalled()
     })

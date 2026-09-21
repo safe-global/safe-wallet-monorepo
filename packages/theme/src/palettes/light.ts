@@ -60,12 +60,17 @@ const lightPalette: ColorPalette = {
     text: '#6C2D19',
     contrastText: '#FF8C00',
   },
+  review: {
+    main: '#D6A100',
+    background: '#FFF8CC',
+  },
   background: {
     default: '#FFFFFF',
     main: '#F4F4F4',
     sheet: '#F4F4F4',
     paper: '#FFFFFF',
     light: '#EFFFF4',
+    lightHover: '#E7FFF2',
     secondary: '#DDDEE0',
     skeleton: 'rgba(0, 0, 0, 0.04)',
     disabled: '#7878801F',

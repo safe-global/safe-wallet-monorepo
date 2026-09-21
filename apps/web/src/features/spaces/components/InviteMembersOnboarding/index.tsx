@@ -1,34 +1,34 @@
 import { useMemo, type ReactElement } from 'react'
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { Button } from '@/components/ui/button'
+import OnboardingFooter from '@/components/common/OnboardingFooter'
 import { Typography } from '@/components/ui/typography'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Spinner } from '@/components/ui/spinner'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import {
   OnboardingLayout,
   StepCounter,
   SafeAppMockup,
   deriveSidePanelAccountsFromSpace,
   useSafeNameLookup,
-} from '@/features/spaces/components/OnboardingLayout'
-import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
+} from '../OnboardingLayout'
+import { useSpaceSafes } from '../../hooks/useSpaceSafes'
+import { useOnboardingStepCount } from '../../hooks/useOnboardingStepCount'
 import { flattenSafeItems } from '@/hooks/safes'
 import MemberInviteRow from './components/MemberInviteRow'
 import useInviteNavigation from './hooks/useInviteNavigation'
 import useInviteForm from './hooks/useInviteForm'
-import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
+import { MemberRole } from '../../hooks/useSpaceMembers'
 
 const ONBOARDING_STEP = 3
-const TOTAL_STEPS = 4
 const FORM_ID = 'invite-members-form'
 
 const InviteMembersOnboarding = (): ReactElement => {
+  const totalSteps = useOnboardingStepCount()
   const { spaceId, goBack, redirectToNextStep } = useInviteNavigation()
   const { control, formState, register, setValue, trigger, fields, append, remove, onSubmit, error, isSubmitting } =
     useInviteForm(spaceId, redirectToNextStep)
 
-  const { data: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !spaceId })
+  const { data: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !spaceId })
   const { allSafes: spaceSafes } = useSpaceSafes()
   const nameLookup = useSafeNameLookup()
   const sidePanelAccounts = useMemo(
@@ -39,7 +39,7 @@ const InviteMembersOnboarding = (): ReactElement => {
 
   const main = (
     <form id={FORM_ID} onSubmit={onSubmit} className="flex flex-col gap-6">
-      <StepCounter currentStep={ONBOARDING_STEP} totalSteps={TOTAL_STEPS} />
+      <StepCounter currentStep={ONBOARDING_STEP} totalSteps={totalSteps} />
 
       <div className="flex flex-col gap-2">
         <Typography variant="h2">Invite your team</Typography>
@@ -69,7 +69,7 @@ const InviteMembersOnboarding = (): ReactElement => {
 
       <button
         type="button"
-        onClick={() => append({ address: '', role: MemberRole.MEMBER })}
+        onClick={() => append({ identifier: '', role: MemberRole.MEMBER })}
         className="flex cursor-pointer items-center justify-center gap-2"
         data-testid="add-another-member"
       >
@@ -79,6 +79,7 @@ const InviteMembersOnboarding = (): ReactElement => {
 
       {error && (
         <Alert variant="destructive">
+          <AlertSeverityIcon variant="destructive" />
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
@@ -87,40 +88,22 @@ const InviteMembersOnboarding = (): ReactElement => {
 
   const footer = (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-col-reverse gap-3 xl:flex-row xl:items-center">
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={goBack}
-          disabled={isSubmitting}
-          className="w-full h-12 rounded-lg bg-muted hover:bg-border xl:flex-1"
-        >
-          <ChevronLeft className="size-4 mr-1" />
-          Back
-        </Button>
-        <Button
-          data-testid="invite-members-continue-button"
-          type="submit"
-          form={FORM_ID}
-          disabled={!formState.isValid || isSubmitting}
-          className="w-full h-12 rounded-lg text-base xl:flex-1"
-        >
-          {isSubmitting ? (
-            <Spinner />
-          ) : (
-            <>
-              Next
-              <ChevronRight className="size-4 ml-1" />
-            </>
-          )}
-        </Button>
-      </div>
+      <OnboardingFooter
+        onBack={goBack}
+        backDisabled={isSubmitting}
+        continueLabel="Next"
+        continueType="submit"
+        continueForm={FORM_ID}
+        continueDisabled={!formState.isValid || isSubmitting}
+        continueLoading={isSubmitting}
+        continueTestId="invite-members-continue-button"
+      />
       <button
         data-testid="invite-members-skip-button"
         type="button"
         onClick={redirectToNextStep}
         disabled={isSubmitting}
-        className="cursor-pointer text-sm text-muted-foreground underline-offset-4 hover:underline disabled:cursor-not-allowed disabled:opacity-50"
+        className="cursor-pointer text-sm font-semibold text-foreground underline-offset-4 hover:underline disabled:cursor-not-allowed disabled:opacity-50"
       >
         Skip, invite later
       </button>

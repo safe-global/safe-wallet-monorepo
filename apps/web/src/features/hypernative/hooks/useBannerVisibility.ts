@@ -59,12 +59,14 @@ export const useBannerVisibility = (bannerType: BannerType): BannerVisibilityRes
   const isTxReportButton = bannerType === BannerType.TxReportButton
   const skipBalanceCheck = bannerType === BannerType.NoBalanceCheck
 
+  // `isEnabled` is already a hard precondition of every `showBanner` branch, so
+  // with the feature off the outreach answer cannot change the outcome (WA-2991).
   const { isTargeted: isPromoTargeted, loading: outreachLoading } = useIsOutreachSafe(HYPERNATIVE_OUTREACH_ID, {
-    skip: isTxReportButton,
+    skip: !isEnabled || isTxReportButton,
   })
   const { isTargeted: isAllowlistedSafe, loading: allowlistLoading } = useIsOutreachSafe(
     HYPERNATIVE_ALLOWLIST_OUTREACH_ID,
-    { skip: !isTxReportButton },
+    { skip: !isEnabled || !isTxReportButton },
   )
 
   const hasEnoughBalance = hasSufficientBalance(balances.fiatTotal)

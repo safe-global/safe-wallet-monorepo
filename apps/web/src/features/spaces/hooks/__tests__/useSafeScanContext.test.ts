@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react'
 import useSafeScanContext from '../useSafeScanContext'
-import type { SelectedSafe, SpaceSafeEntry } from '@/features/spaces/components/SecurityHub'
+import type { SelectedSafe, SpaceSafeEntry } from '../../components/SecurityHub'
 
 // ── mocks ──────────────────────────────────────────────────────────────
 

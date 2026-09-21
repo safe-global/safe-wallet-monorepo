@@ -40,7 +40,6 @@ describe('useVisibleBalances', () => {
         settings: {
           currency: 'USD',
           shortName: {
-            copy: true,
             qr: true,
             show: true,
           },
@@ -104,7 +103,6 @@ describe('useVisibleBalances', () => {
         settings: {
           currency: 'USD',
           shortName: {
-            copy: true,
             qr: true,
             show: true,
           },
@@ -182,7 +180,6 @@ describe('useVisibleBalances', () => {
         settings: {
           currency: 'USD',
           shortName: {
-            copy: true,
             qr: true,
             show: true,
           },
@@ -247,7 +244,6 @@ describe('useVisibleBalances', () => {
         settings: {
           currency: 'USD',
           shortName: {
-            copy: true,
             qr: true,
             show: true,
           },
@@ -311,7 +307,7 @@ describe('useVisibleBalances', () => {
       selector({
         settings: {
           currency: 'USD',
-          shortName: { copy: true, qr: true, show: true },
+          shortName: { qr: true, show: true },
           theme: { darkMode: false },
           hiddenTokens: { ['4']: [] },
           hideDust: true,
@@ -371,7 +367,7 @@ describe('useVisibleBalances', () => {
       selector({
         settings: {
           currency: 'USD',
-          shortName: { copy: true, qr: true, show: true },
+          shortName: { qr: true, show: true },
           theme: { darkMode: false },
           hiddenTokens: { ['4']: [] },
           hideDust: false,

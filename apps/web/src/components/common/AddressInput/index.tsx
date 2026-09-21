@@ -1,33 +1,28 @@
 import AddressInputReadOnly from '@/components/common/AddressInputReadOnly'
 import useAddressBook from '@/hooks/useAddressBook'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import type { ReactElement } from 'react'
-import { useEffect, useCallback, useRef, useMemo } from 'react'
-import {
-  InputAdornment,
-  TextField,
-  type TextFieldProps,
-  CircularProgress,
-  IconButton,
-  SvgIcon,
-  Skeleton,
-  Box,
-} from '@mui/material'
+import type { FocusEvent, KeyboardEvent, ReactElement, ReactNode } from 'react'
+import { useEffect, useCallback, useId, useLayoutEffect, useRef, useMemo, useState } from 'react'
+import { Input as InputPrimitive } from '@base-ui/react/input'
 import { useFormContext, useWatch, type Validate, get } from 'react-hook-form'
 import { validatePrefixedAddress } from '@safe-global/utils/utils/validation'
 import { useCurrentChain } from '@/hooks/useChains'
-import useNameResolver from './useNameResolver'
-import { cleanInputValue, parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
+import useNameResolver, { getEnsNotAvailableError } from './useNameResolver'
+import { isDomain } from '@/services/ens'
+import { cleanInputValue, parsePrefixedAddress, sameAddress } from '@safe-global/utils/utils/addresses'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import CaretDownIcon from '@/public/images/common/caret-down.svg'
 import SaveAddressIcon from '@/public/images/common/save-address.svg'
 import classnames from 'classnames'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Field, FieldLabel } from '@/components/ui/field'
 import css from './styles.module.css'
-import inputCss from '@/styles/inputs.module.css'
 import Identicon from '../Identicon'
-import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import { useEnsHubProvider } from '@/hooks/useEnsHubProvider'
 
-export type AddressInputProps = TextFieldProps & {
+export type AddressInputProps = {
   name: string
   address?: string
   onOpenListClick?: () => void
@@ -38,6 +33,26 @@ export type AddressInputProps = TextFieldProps & {
   chain?: Chain
   showPrefix?: boolean
   onReset?: () => void
+  onEdit?: () => void
+  label?: ReactNode
+  required?: boolean
+  disabled?: boolean
+  focused?: boolean
+  placeholder?: string
+  className?: string
+  'data-testid'?: string
+  // Accepted for backwards-compatibility with the previous MUI TextField API.
+  fullWidth?: boolean
+  variant?: string
+  InputProps?: {
+    endAdornment?: ReactNode
+    startAdornment?: ReactNode
+    readOnly?: boolean
+    className?: string
+  }
+  InputLabelProps?: { shrink?: boolean }
+  // Allow forwarding of arbitrary input attributes (e.g. role, aria-*, onMouseDown from AddressBookInput).
+  [key: string]: unknown
 }
 
 const AddressInput = ({
@@ -51,8 +66,20 @@ const AddressInput = ({
   chain,
   showPrefix = true,
   onReset,
+  onEdit,
+  label,
+  disabled,
+  focused,
+  placeholder,
+  className,
+  InputProps,
+  InputLabelProps,
+  fullWidth,
+  variant,
+  'data-testid': dataTestId,
   ...props
 }: AddressInputProps): ReactElement => {
+  const id = useId()
   const {
     register,
     setValue,
@@ -68,9 +95,29 @@ const AddressInput = ({
 
   const addressBook = useAddressBook()
 
-  // Fetch an ENS resolution for the current address
-  const isDomainLookupEnabled = !!currentChain && hasFeature(currentChain, FEATURES.DOMAIN_LOOKUP)
-  const { address, resolverError, resolving } = useNameResolver(isDomainLookupEnabled ? watchedValue : '')
+  const isSavedContact = Boolean(addressBook[watchedValue])
+  // The contact opened for editing by clicking the chip; any other value shows the chip again.
+  const [editingAddress, setEditingAddress] = useState<string>()
+  const isEditing = editingAddress !== undefined && sameAddress(editingAddress, watchedValue)
+
+  // A disabled field is a read-only display, so render the readable EthHashInfo instead of the
+  // greyed-out input — even when the address isn't in the (source-scoped) address book.
+  const isReadOnly = (isSavedContact && !isEditing) || Boolean(disabled)
+
+  // Target chain for the addr record (e.g. mainnet for Spaces contacts, otherwise the current Safe).
+  // DOMAIN_LOOKUP is hub-only (Mainnet/Sepolia); L2 chain flags are ignored.
+  const ensChain = chain ?? currentChain
+  const { isDomainLookupEnabled } = useEnsHubProvider(ensChain)
+  const {
+    address,
+    name: resolvedName,
+    resolverError,
+    resolving,
+  } = useNameResolver(isDomainLookupEnabled ? watchedValue : '', chain)
+
+  // Remember which ENS name produced the current address so the field can show "Address resolved
+  // from <name>" until the user edits the address away from it.
+  const [resolvedFrom, setResolvedFrom] = useState<{ name: string; address: string }>()
 
   // errors[name] doesn't work with nested field names like 'safe.address', need to use the lodash get
   const fieldError = resolverError || get(errors, name)
@@ -106,12 +153,19 @@ const AddressInput = ({
     [setValue, name],
   )
 
-  // On ENS resolution, update the input value
+  // On ENS resolution, update the input value and remember the name it resolved from
   useEffect(() => {
     if (address) {
+      if (resolvedName) setResolvedFrom({ name: resolvedName, address })
       setAddressValue(`${currentShortName}:${address}`)
     }
-  }, [address, currentShortName, setAddressValue])
+  }, [address, resolvedName, currentShortName, setAddressValue])
+
+  // Label the field with the source ENS name while it still holds that resolved address
+  const resolvedFromLabel =
+    resolvedFrom && sameAddress(watchedValue, resolvedFrom.address)
+      ? `Address resolved from ${resolvedFrom.name}`
+      : undefined
 
   // Retransform the value when chain changes
   useEffect(() => {
@@ -123,100 +177,183 @@ const AddressInput = ({
     }
   }, [address, currentShortName, setAddressValue, transformAddressValue, watchedValue])
 
-  const endAdornment = (
-    <InputAdornment position="end">
-      {resolving || isValidating ? (
-        <CircularProgress size={20} />
-      ) : !props.disabled ? (
-        <>
-          {onAddressBookClick && (
-            <IconButton onClick={onAddressBookClick}>
-              <SvgIcon component={SaveAddressIcon} inheritViewBox fontSize="small" color="primary" />
-            </IconButton>
-          )}
+  const inputRef = useRef<HTMLInputElement | null>(null)
+  const readOnlyRef = useRef<HTMLDivElement>(null)
+  const focusInputWhenShown = useRef(false)
 
-          {onOpenListClick && (
-            <IconButton
-              onClick={onOpenListClick}
-              className={classnames(css.openButton, { [css.rotated]: isAutocompleteOpen })}
-              color="primary"
-            >
-              <SvgIcon component={CaretDownIcon} inheritViewBox fontSize="small" />
-            </IconButton>
-          )}
-        </>
-      ) : null}
-    </InputAdornment>
-  )
+  // Chrome drops focus when the focused input turns `visibility: hidden` and restarts Tab from the
+  // top of the page (Firefox keeps the position). Hand focus to the chip before styles apply, and
+  // back to the input once the chip is opened for editing or cleared.
+  useLayoutEffect(() => {
+    if (isReadOnly && document.activeElement === inputRef.current) {
+      readOnlyRef.current?.focus()
+    } else if (!isReadOnly && focusInputWhenShown.current) {
+      focusInputWhenShown.current = false
+      inputRef.current?.focus()
+      inputRef.current?.select()
+    }
+  }, [isReadOnly])
+
+  const canEditChip = isSavedContact && !disabled
+
+  const startEditing = () => {
+    if (!canEditChip) return
+    focusInputWhenShown.current = true
+    setEditingAddress(watchedValue)
+    onEdit?.()
+  }
 
   const resetName = () => {
-    if (!props.disabled && addressBook[watchedValue]) {
-      setValue(name, '')
-      onReset?.()
+    if (!canEditChip) return
+    focusInputWhenShown.current = true
+    setEditingAddress(undefined)
+    setValue(name, '')
+    onReset?.()
+  }
+
+  const onReadOnlyKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      startEditing()
+    } else if (event.key === 'Backspace' || event.key === 'Delete') {
+      event.preventDefault()
+      resetName()
     }
   }
 
+  const onWrapperBlur = (event: FocusEvent<HTMLDivElement>) => {
+    if (!event.currentTarget.contains(event.relatedTarget)) setEditingAddress(undefined)
+  }
+
+  const labelText =
+    error?.message || resolvedFromLabel || label || `Recipient address${isDomainLookupEnabled ? ' or ENS' : ''}`
+
+  const resolvedPlaceholder = placeholder ?? (required ? undefined : 'Optional')
+
+  const registerProps = register(name, {
+    deps,
+
+    required,
+
+    setValueAs: transformAddressValue,
+
+    // Validate the stored value, not the last typed text: a pick from the address book or an ENS
+    // resolution sets the value programmatically and must not be judged by what was typed before.
+    validate: async (value: string) => {
+      if (!value) return
+
+      const { address } = parsePrefixedAddress(value)
+
+      // An ENS-style name keeps the field invalid until it resolves (the value is replaced by
+      // the resolved address). If it can't be resolved on the lookup chain, say so explicitly
+      // instead of the generic "Invalid address format".
+      if (isDomain(address)) {
+        return getEnsNotAvailableError(ensChain)
+      }
+
+      return validatePrefixed(value) || (await validate?.(address))
+    },
+
+    // Workaround for a bug in react-hook-form that it restores a cached error state on blur
+    onBlur: () => setTimeout(() => trigger(name), 100),
+  })
+
   return (
-    <>
-      <TextField
-        {...props}
-        className={inputCss.input}
-        autoComplete="off"
-        autoFocus={props.focused}
-        label={<>{error?.message || props.label || `Recipient address${isDomainLookupEnabled ? ' or ENS' : ''}`}</>}
-        error={!!error}
-        fullWidth
-        onClick={resetName}
-        spellCheck={false}
-        InputProps={{
-          ...(props.InputProps || {}),
-          className: addressBook[watchedValue] ? css.readOnly : undefined,
+    <Field className={className}>
+      <FieldLabel htmlFor={id} className={error ? 'text-destructive' : undefined}>
+        {labelText}
+      </FieldLabel>
 
-          startAdornment: addressBook[watchedValue] ? (
+      <div
+        data-testid={dataTestId}
+        className={classnames(css.inputWrapper, { [css.error]: !!error, [css.readOnly]: isReadOnly })}
+        onBlur={onWrapperBlur}
+      >
+        {isReadOnly ? (
+          <div
+            ref={readOnlyRef}
+            className="min-w-0 flex-1 outline-none"
+            role={disabled ? undefined : 'button'}
+            tabIndex={disabled ? undefined : 0}
+            onClick={disabled ? undefined : startEditing}
+            onKeyDown={disabled ? undefined : onReadOnlyKeyDown}
+          >
             <AddressInputReadOnly address={watchedValue} showPrefix={showPrefix} chainId={chain?.chainId} />
-          ) : (
-            // Display the current short name in the adornment, unless the value contains the same prefix
-            <InputAdornment position="end" sx={{ ml: 0 }}>
-              <Box mr={1}>
-                {watchedValue && !fieldError ? (
-                  <Identicon address={watchedValue} size={32} />
-                ) : (
-                  <Skeleton variant="circular" width={32} height={32} animation={false} />
-                )}
-              </Box>
+          </div>
+        ) : (
+          <div className={css.startAdornment}>
+            {InputProps?.startAdornment}
+            {watchedValue && !fieldError ? (
+              <Identicon address={watchedValue} size={32} />
+            ) : (
+              <Skeleton className="size-8 rounded-full animate-none" />
+            )}
+          </div>
+        )}
 
-              {showPrefix && !rawValueRef.current.startsWith(`${currentShortName}:`) && <Box>{currentShortName}:</Box>}
-            </InputAdornment>
-          ),
+        {/* The prefix span MUST remain the immediate previous sibling of the input */}
+        {showPrefix && !isReadOnly && !rawValueRef.current.startsWith(`${currentShortName}:`) && (
+          <span className={css.prefix}>{currentShortName}:</span>
+        )}
 
-          endAdornment,
-        }}
-        InputLabelProps={{
-          ...(props.InputLabelProps || {}),
-          shrink: true,
-        }}
-        {...register(name, {
-          deps,
+        <InputPrimitive
+          {...props}
+          {...registerProps}
+          ref={(node: HTMLInputElement | null) => {
+            registerProps.ref(node)
+            inputRef.current = node
+          }}
+          onChange={(event) => {
+            setEditingAddress(undefined)
+            return registerProps.onChange(event)
+          }}
+          id={id}
+          className={classnames(css.input, InputProps?.className)}
+          autoComplete="off"
+          autoFocus={focused}
+          spellCheck={false}
+          disabled={disabled}
+          required={required}
+          placeholder={resolvedPlaceholder}
+          readOnly={InputProps?.readOnly}
+          aria-invalid={!!error || undefined}
+          // Workaround for a bug in react-hook-form when `register().value` is cached after `setValueAs`
+          // Only seems to occur on the `/load` route
+          value={watchedValue}
+        />
 
-          required,
+        <div className={css.endAdornment}>
+          {resolving || isValidating ? (
+            <Spinner role="progressbar" className="size-5" />
+          ) : !disabled ? (
+            <>
+              {InputProps?.endAdornment}
 
-          setValueAs: transformAddressValue,
+              {onAddressBookClick && (
+                <Button type="button" variant="ghost" size="icon-sm" onClick={onAddressBookClick}>
+                  <SaveAddressIcon className="size-4 text-[var(--color-primary-main)]" />
+                </Button>
+              )}
 
-          validate: async () => {
-            const value = rawValueRef.current
-            if (value) {
-              return validatePrefixed(value) || (await validate?.(parsePrefixedAddress(value).address))
-            }
-          },
-
-          // Workaround for a bug in react-hook-form that it restores a cached error state on blur
-          onBlur: () => setTimeout(() => trigger(name), 100),
-        })}
-        // Workaround for a bug in react-hook-form when `register().value` is cached after `setValueAs`
-        // Only seems to occur on the `/load` route
-        value={watchedValue}
-      />
-    </>
+              {onOpenListClick && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  data-testid="address-book-toggle"
+                  // Arrow down on the input opens the list, so the caret is a redundant tab stop.
+                  tabIndex={-1}
+                  onClick={onOpenListClick}
+                  className={classnames(css.openButton, { [css.rotated]: isAutocompleteOpen })}
+                >
+                  <CaretDownIcon className="size-4 text-[var(--color-primary-main)]" />
+                </Button>
+              )}
+            </>
+          ) : null}
+        </div>
+      </div>
+    </Field>
   )
 }
 

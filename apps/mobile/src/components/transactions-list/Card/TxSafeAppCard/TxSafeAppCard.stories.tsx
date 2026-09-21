@@ -17,6 +17,7 @@ const meta: Meta<typeof TxSafeAppCard> = {
   args: {
     bordered: false,
     safeAppInfo: {
+      id: 29,
       name: 'Transaction Builder',
       url: 'http://something.com',
       logoUri: 'https://safe-transaction-assets.safe.global/safe_apps/29/icon.png',

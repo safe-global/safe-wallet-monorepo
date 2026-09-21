@@ -18,6 +18,7 @@ import { Alert } from '@/src/components/Alert'
 
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
+import { ConnectedDappsEntry } from '@/src/features/WalletConnect/Wallet/components/ConnectedDappsEntry'
 
 interface SettingsProps {
   data: SafeState
@@ -163,6 +164,7 @@ export const Settings = ({
                       }
                     />
                   </Pressable>
+                  <ConnectedDappsEntry />
                 </View>
 
                 <View backgroundColor="$backgroundDark" padding="$4" borderRadius="$3" gap={'$2'}>
@@ -227,7 +229,7 @@ export const Settings = ({
               <View flex={1} padding="$5">
                 <Alert
                   type="warning"
-                  info="Your Safe Account's base contract is not supported. You should migrate it to a compatible
+                  info="Your Safe account's base contract is not supported. You should migrate it to a compatible
               version. Use the web app for this."
                   message="Base contract is not supported"
                 />

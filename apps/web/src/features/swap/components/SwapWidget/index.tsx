@@ -1,7 +1,10 @@
 import { TradeType, type CowSwapWidgetParams } from '@cowprotocol/widget-lib'
-import { type OnTradeParamsPayload, type CowEventListeners, CowEvents } from '@cowprotocol/events'
+import {
+  type OnTradeParamsPayload,
+  type CowWidgetEventListeners as CowEventListeners,
+  CowWidgetEvents as CowEvents,
+} from '@cowprotocol/events'
 import { type MutableRefObject, useEffect, useMemo, useRef, useState } from 'react'
-import { Box, useTheme } from '@mui/material'
 import { CowSwapWidget } from '@cowprotocol/widget-react'
 import { SafeAppAccessPolicyTypes, SafeAppFeatures } from '@safe-global/store/gateway/types'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
@@ -22,13 +25,15 @@ import { setSwapOrder } from '@/store/swapOrderSlice'
 import useChainId from '@/hooks/useChainId'
 import { SWAP_TITLE, SWAP_FEE_RECIPIENT } from '../../constants'
 import { calculateFeePercentageInBps } from '../../helpers/fee'
-import { UiOrderTypeToOrderType } from '../../helpers/utils'
+import { UiOrderTypeToOrderType, parseCowTradeParams } from '../../helpers/utils'
 import { useGetIsSanctionedQuery } from '@/store/api/ofac'
 import { skipToken } from '@reduxjs/toolkit/query/react'
 import { getKeyWithTrueValue } from '@/utils/helpers'
 import { BRAND_NAME } from '@/config/constants'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { parseCowSupportedChainId } from '../../helpers/cowSupportedChainId'
+import lightPalette from '@safe-global/theme/palettes/light'
+import darkPalette from '@safe-global/theme/palettes/dark'
 
 const BASE_URL = typeof window !== 'undefined' && window.location.origin ? window.location.origin : ''
 
@@ -41,8 +46,8 @@ type Params = {
 }
 
 const SwapWidget = ({ sell }: Params) => {
-  const { palette } = useTheme()
   const darkMode = useDarkMode()
+  const palette = darkMode ? darkPalette : lightPalette
   const chainId = useChainId()
   const cowChainId = useMemo(() => parseCowSupportedChainId(chainId), [chainId])
   const dispatch = useAppDispatch()
@@ -70,6 +75,9 @@ const SwapWidget = ({ sell }: Params) => {
 
   const [params, setParams] = useState<CowSwapWidgetParams>({
     appCode: 'Safe Wallet Swaps', // Name of your app (max 50 characters)
+    // Must match appData.url (used as the communicator's allowed origin) or the Safe Apps SDK
+    // handshake is dropped and the widget can't auto-connect the Safe
+    baseUrl: cowSwapBaseUrl,
     width: '100%', // Width in pixels (or 100% to use all available space)
     height: '860px',
     chainId: cowChainId,
@@ -193,7 +201,8 @@ const SwapWidget = ({ sell }: Params) => {
       {
         event: CowEvents.ON_CHANGE_TRADE_PARAMS,
         handler: (newTradeParams: OnTradeParamsPayload) => {
-          const { orderType: tradeType, recipient, sellToken, buyToken } = newTradeParams
+          const { recipient } = newTradeParams
+          const { uiOrderType: tradeType, sellAsset, buyAsset } = parseCowTradeParams(newTradeParams)
 
           const newFeeBps = feeEnabled
             ? calculateFeePercentageInBps(newTradeParams, nativeCowSwapFeeV2Enabled, isEurcvBoostEnabled)
@@ -207,10 +216,10 @@ const SwapWidget = ({ sell }: Params) => {
               bps: newFeeBps,
             },
             sell: {
-              asset: sellToken?.address,
+              asset: sellAsset,
             },
             buy: {
-              asset: buyToken?.address,
+              asset: buyAsset,
             },
           }))
 
@@ -227,6 +236,7 @@ const SwapWidget = ({ sell }: Params) => {
   useEffect(() => {
     setParams((params) => ({
       ...params,
+      baseUrl: cowSwapBaseUrl,
       chainId: cowChainId,
       theme: {
         baseTheme: darkMode ? 'dark' : 'light',
@@ -241,7 +251,7 @@ const SwapWidget = ({ sell }: Params) => {
         alert: palette.warning.main,
       },
     }))
-  }, [palette, darkMode, cowChainId])
+  }, [palette, darkMode, cowChainId, cowSwapBaseUrl])
 
   useEffect(() => {
     if (!sell) return
@@ -280,9 +290,9 @@ const SwapWidget = ({ sell }: Params) => {
   }
 
   return (
-    <Box className={css.swapWidget} id="swapWidget">
+    <div className={css.swapWidget} id="swapWidget">
       <CowSwapWidget params={params} listeners={listeners} />
-    </Box>
+    </div>
   )
 }
 

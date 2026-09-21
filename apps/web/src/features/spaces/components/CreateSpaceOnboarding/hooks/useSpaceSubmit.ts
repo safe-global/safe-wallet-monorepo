@@ -9,7 +9,9 @@ import { AppRoutes } from '@/config/routes'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { sanitizeNextUrl } from '@/utils/nextUrl'
+import { sanitizeName } from '@safe-global/utils/validation/names'
 import type { UseFormHandleSubmit } from 'react-hook-form'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 const useSpaceSubmit = (
   handleSubmit: UseFormHandleSubmit<{ name: string }>,
@@ -25,8 +27,9 @@ const useSpaceSubmit = (
   const [updateSpace] = useSpacesUpdateV1Mutation()
 
   const editSpace = async (name: string) => {
-    const response = await updateSpace({ id: Number(spaceId), updateSpaceDto: { name } })
+    const response = await updateSpace({ id: spaceId ?? '', updateSpaceDto: { name: sanitizeName(name) } })
 
+    if (isElevationRequiredError(response.error)) throw response.error
     if (response.error) {
       throw new Error(getRtkQueryErrorMessage(response.error))
     }
@@ -39,10 +42,10 @@ const useSpaceSubmit = (
   }
 
   const createSpace = async (name: string) => {
-    const response = await createSpaceWithUser({ createSpaceDto: { name } })
+    const response = await createSpaceWithUser({ createSpaceDto: { name: sanitizeName(name) } })
 
     if (response.data) {
-      const newSpaceId = response.data.id.toString()
+      const newSpaceId = response.data.uuid
       trackEvent({ ...SPACE_EVENTS.WORKSPACE_CREATED, label: newSpaceId }, { workspace_id: newSpaceId })
 
       dispatch(setLastUsedSpace(newSpaceId))
@@ -71,12 +74,13 @@ const useSpaceSubmit = (
         await createSpace(data.name)
       }
     } catch (error) {
+      setIsSubmitting(false)
+      if (isElevationRequiredError(error)) return
       const errorMessage =
         error instanceof Error
           ? error.message
           : `Failed ${isEditMode ? 'updating' : 'creating'} the workspace. Please try again.`
       setError(errorMessage)
-      setIsSubmitting(false)
     }
   })
 

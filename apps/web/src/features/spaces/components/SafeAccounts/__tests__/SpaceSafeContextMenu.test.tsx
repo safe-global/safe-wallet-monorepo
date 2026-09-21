@@ -1,14 +1,17 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import SpaceSafeContextMenu from '../SpaceSafeContextMenu'
-import { useAppSelector } from '@/store'
 import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/hooks/safes'
-import { useIsAdmin } from '@/features/spaces'
+import { useAddressBookWriteScope, useIsAdmin } from '@/features/spaces'
+import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 
-jest.mock('@/store')
 jest.mock('@/features/spaces', () => ({
   useIsAdmin: jest.fn(),
+  useAddressBookWriteScope: jest.fn(),
+}))
+jest.mock('@/hooks/useSafeDisplayName', () => ({
+  useSafeDisplayName: jest.fn(),
 }))
 jest.mock('@/services/analytics')
 jest.mock('@/hooks/safes', () => ({
@@ -44,16 +47,15 @@ describe('SpaceSafeContextMenu', () => {
     lastVisited: 0,
   }
 
-  const mockAddressBooks = {
-    '5': {
-      '0x123': 'Test Safe Name',
-    },
+  const mockWriteScope = (canRename: boolean) => {
+    ;(useAddressBookWriteScope as jest.Mock).mockReturnValue({ scope: 'workspace', canRename })
   }
 
   beforeEach(() => {
     jest.clearAllMocks()
-    ;(useAppSelector as jest.Mock).mockReturnValue(mockAddressBooks)
+    ;(useSafeDisplayName as jest.Mock).mockReturnValue('Test Safe Name')
     ;(useIsAdmin as jest.Mock).mockReturnValue(false)
+    mockWriteScope(true)
     ;(isMultiChainSafeItem as unknown as jest.Mock).mockImplementation(
       (item) => 'safes' in item && Array.isArray(item.safes),
     )
@@ -84,8 +86,8 @@ describe('SpaceSafeContextMenu', () => {
     })
   })
 
-  it('shows "Give name" when safe has no name', async () => {
-    ;(useAppSelector as jest.Mock).mockReturnValue({})
+  it('shows "Rename" when safe has no name', async () => {
+    ;(useSafeDisplayName as jest.Mock).mockReturnValue('')
 
     render(<SpaceSafeContextMenu safeItem={mockSafeItem} />)
 
@@ -93,7 +95,7 @@ describe('SpaceSafeContextMenu', () => {
     fireEvent.click(menuButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Give name')).toBeInTheDocument()
+      expect(screen.getByText('Rename')).toBeInTheDocument()
     })
   })
 
@@ -128,7 +130,7 @@ describe('SpaceSafeContextMenu', () => {
     fireEvent.click(menuButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Remove')).toBeInTheDocument()
+      expect(screen.getByText('Remove from workspace')).toBeInTheDocument()
     })
   })
 
@@ -139,7 +141,7 @@ describe('SpaceSafeContextMenu', () => {
     fireEvent.click(menuButton)
 
     await waitFor(() => {
-      expect(screen.queryByText('Remove')).not.toBeInTheDocument()
+      expect(screen.queryByText('Remove from workspace')).not.toBeInTheDocument()
     })
   })
 
@@ -158,6 +160,21 @@ describe('SpaceSafeContextMenu', () => {
     expect(screen.getByTestId('entry-dialog')).toBeInTheDocument()
   })
 
+  it('disables Rename for a member looking at a workspace Safe', async () => {
+    mockWriteScope(false)
+
+    render(<SpaceSafeContextMenu safeItem={mockSafeItem} />)
+
+    fireEvent.click(screen.getByRole('button'))
+
+    await waitFor(() => {
+      expect(screen.getByRole('menuitem', { name: 'Rename' })).toHaveAttribute('data-disabled')
+    })
+
+    fireEvent.click(screen.getByText('Rename'))
+    expect(screen.queryByTestId('entry-dialog')).not.toBeInTheDocument()
+  })
+
   it('opens RemoveSafeDialog when clicking Remove option', async () => {
     ;(useIsAdmin as jest.Mock).mockReturnValue(true)
 
@@ -167,7 +184,7 @@ describe('SpaceSafeContextMenu', () => {
     fireEvent.click(menuButton)
 
     await waitFor(() => {
-      const removeOption = screen.getByText('Remove')
+      const removeOption = screen.getByText('Remove from workspace')
       fireEvent.click(removeOption)
     })
 

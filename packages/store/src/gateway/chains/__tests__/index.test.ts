@@ -342,4 +342,48 @@ describe('chains retry functionality', () => {
       expect(result.data?.entities['999']?.chainName).toBe('Test Chain')
     })
   })
+
+  describe('empty responses', () => {
+    it('returns an error instead of caching an empty chains list', async () => {
+      server = setupServer(
+        http.get(`${GATEWAY_URL}/v2/chains`, () => {
+          return HttpResponse.json({ results: [], next: null })
+        }),
+      )
+      server.listen()
+
+      const result = await store.dispatch(
+        apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY),
+      )
+
+      expect(result.isSuccess).toBe(false)
+      expect(result.isError).toBe(true)
+      expect(Object.keys(result.data?.entities ?? {}).length).toBe(0)
+    })
+
+    it('preserves previously cached chains when a later refetch returns empty results', async () => {
+      let returnEmpty = false
+      server = setupServer(
+        http.get(`${GATEWAY_URL}/v2/chains`, () => {
+          return HttpResponse.json({ results: returnEmpty ? [] : mockChains, next: null })
+        }),
+      )
+      server.listen()
+
+      const first = await store.dispatch(
+        apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY),
+      )
+      expect(Object.keys(first.data?.entities ?? {}).length).toBe(3)
+
+      returnEmpty = true
+      await store.dispatch(
+        apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY, { forceRefetch: true }),
+      )
+
+      // The empty refetch must be rejected and must NOT wipe the cached chains.
+      const cached = apiSliceWithChainsConfig.endpoints.getChainsConfigV2.select(CONFIG_SERVICE_KEY)(store.getState())
+      expect(cached.isError).toBe(true)
+      expect(Object.keys(cached.data?.entities ?? {}).length).toBe(3)
+    })
+  })
 })

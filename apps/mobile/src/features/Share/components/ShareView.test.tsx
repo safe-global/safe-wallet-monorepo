@@ -16,14 +16,13 @@ jest.mock('@/src/hooks/useCopyAndDispatchToast', () => ({
   useCopyAndDispatchToast: jest.fn(),
 }))
 
-// Mock chain names util to return a fixed string
-jest.mock('@/src/utils/chains', () => ({
-  getAvailableChainsNames: jest.fn(() => 'Ethereum and Polygon'),
-}))
-
 jest.mock('@tamagui/toast', () => ({
   ToastViewport: () => null,
 }))
+
+const mockPush = jest.fn()
+const mockBack = jest.fn()
+jest.mock('expo-router', () => ({ router: { push: (path: string) => mockPush(path), back: () => mockBack() } }))
 
 const mockCopyAndDispatchToast = jest.fn()
 
@@ -36,7 +35,7 @@ describe('ShareView', () => {
     jest.clearAllMocks()
   })
 
-  it('renders safe address and chain names when activeSafe is provided', () => {
+  it('renders the safe address and contact name when activeSafe is provided', () => {
     const activeSafe = { address: '0x123', chainId: '1' } as SafeInfo
     const availableChains = [{ chainName: 'Ethereum' }, { chainName: 'Polygon' }] as Chain[]
     const { getByText } = render(<ShareView activeSafe={activeSafe} availableChains={availableChains} />, {
@@ -50,8 +49,7 @@ describe('ShareView', () => {
       },
     })
     expect(getByText(activeSafe.address)).toBeTruthy()
-    // Check that the chains text is rendered as expected.
-    expect(getByText(/Ethereum and Polygon/)).toBeTruthy()
+    expect(getByText('Test Safe')).toBeTruthy()
   })
 
   it('calls Share.open with the correct parameters when share button is pressed', async () => {
@@ -75,5 +73,21 @@ describe('ShareView', () => {
     const copyButton = getByText('Copy')
     fireEvent.press(copyButton)
     expect(mockCopyAndDispatchToast).toHaveBeenCalledWith(activeSafe.address)
+  })
+
+  it('opens the supported networks sheet when the chain row is pressed', () => {
+    const activeSafe = { address: '0x123', chainId: '1' } as SafeInfo
+    const availableChains = [{ chainName: 'Ethereum' }] as Chain[]
+    const { getByTestId } = render(<ShareView activeSafe={activeSafe} availableChains={availableChains} />)
+    fireEvent.press(getByTestId('supported-networks-button'))
+    expect(mockPush).toHaveBeenCalledWith('/supported-networks')
+  })
+
+  it('closes the screen when the close button is pressed', () => {
+    const activeSafe = { address: '0x123', chainId: '1' } as SafeInfo
+    const availableChains = [{ chainName: 'Ethereum' }] as Chain[]
+    const { getByTestId } = render(<ShareView activeSafe={activeSafe} availableChains={availableChains} />)
+    fireEvent.press(getByTestId('share-close-button'))
+    expect(mockBack).toHaveBeenCalledTimes(1)
   })
 })

@@ -3,7 +3,8 @@ import { useMemo } from 'react'
 import classnames from 'classnames'
 import css from './styles.module.css'
 import useChainId from '@/hooks/useChainId'
-import { Skeleton, Stack, SvgIcon, Typography } from '@mui/material'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Typography } from '@/components/ui/typography'
 import FiatValue from '../FiatValue'
 import UnknownChainIcon from '@/public/images/common/unknown.svg'
 import useChains from '@/hooks/useChains'
@@ -69,20 +70,14 @@ const ChainIndicator = ({
       style={{ minWidth: imageSize }}
     />
   ) : (
-    <SvgIcon
-      component={UnknownChainIcon}
-      inheritViewBox
-      sx={{
-        height: imageSize,
-        width: imageSize,
-        backgroundColor: (theme) => theme.palette.background.main,
-        borderRadius: '100%',
-      }}
+    <UnknownChainIcon
+      style={{ height: imageSize, width: imageSize }}
+      className="rounded-full bg-[var(--color-background-main)]"
     />
   )
 
   return noChains ? (
-    <Skeleton width="100%" height="22px" variant="rectangular" sx={{ flexShrink: 0 }} />
+    <Skeleton className="h-[22px] w-full shrink-0 rounded-none" />
   ) : chainConfig ? (
     <span
       data-testid="chain-logo"
@@ -97,14 +92,14 @@ const ChainIndicator = ({
     >
       {showLogo && logoComponent}
       {!onlyLogo && (
-        <Stack>
+        <div className="flex flex-col">
           <span className={css.name}>{chainConfig.chainName}</span>
           {fiatValue && (
-            <Typography fontWeight={700} textAlign="left" fontSize="14px">
+            <Typography variant="paragraph-small-bold" align="left">
               <FiatValue value={fiatValue} />
             </Typography>
           )}
-        </Stack>
+        </div>
       )}
     </span>
   ) : null

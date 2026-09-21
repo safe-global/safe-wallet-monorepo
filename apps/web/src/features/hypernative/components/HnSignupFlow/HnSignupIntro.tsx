@@ -1,9 +1,11 @@
-import { Typography, Button } from '@mui/material'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import { CircleCheck } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 import HnSignupLayout from './HnSignupLayout'
 import css from './styles.module.css'
 import Track from '@/components/common/Track'
 import { HYPERNATIVE_EVENTS } from '@/services/analytics'
+import HypernativeLogo from '../HypernativeLogo'
 
 export type HnSignupIntroProps = {
   onGetStarted: () => void
@@ -34,12 +36,12 @@ const HnSignupIntro = ({ onGetStarted, onClose }: HnSignupIntroProps) => {
             Guardian
           </Typography>
           <div className={css.poweredBy}>
-            <Typography variant="body2" className={css.poweredByText}>
+            <Typography variant="paragraph-small" className={css.poweredByText}>
               powered by
             </Typography>
-            <img src="/images/hypernative/hypernative-logo.svg" alt="Hypernative" className={css.logo} />
+            <HypernativeLogo fill="var(--color-primary-light)" className="w-[66px]" />
           </div>
-          <Typography variant="body2" className={css.subtitle}>
+          <Typography variant="paragraph-small" className={css.subtitle}>
             Enterprise-level protection for teams and organizations.
           </Typography>
         </div>
@@ -47,12 +49,12 @@ const HnSignupIntro = ({ onGetStarted, onClose }: HnSignupIntroProps) => {
         <div className={css.features}>
           {features.map((feature, index) => (
             <div key={index} className={css.feature}>
-              <CheckCircleIcon className={css.featureIcon} />
+              <CircleCheck className={css.featureIcon} />
               <div>
-                <Typography variant="body2" fontWeight={600} className={css.featureTitle}>
+                <Typography variant="paragraph-small-bold" className={css.featureTitle}>
                   {feature.title}
                 </Typography>
-                <Typography variant="body2" className={css.featureDescription}>
+                <Typography variant="paragraph-small" className={css.featureDescription}>
                   {feature.description}
                 </Typography>
               </div>
@@ -65,11 +67,11 @@ const HnSignupIntro = ({ onGetStarted, onClose }: HnSignupIntroProps) => {
             // Mixpanel: The event name is automatically determined from the GA_TO_MIXPANEL_MAPPING based on the action
             {...HYPERNATIVE_EVENTS.GUARDIAN_FORM_STARTED}
           >
-            <Button variant="contained" fullWidth onClick={onGetStarted} className={css.primaryButton}>
+            <Button onClick={onGetStarted} className="w-full">
               Get started
             </Button>
           </Track>
-          <Button variant="text" fullWidth onClick={onClose} className={css.secondaryButton}>
+          <Button variant="ghost" onClick={onClose} className="w-full">
             Close
           </Button>
         </div>

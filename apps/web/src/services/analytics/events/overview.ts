@@ -131,7 +131,7 @@ export const OVERVIEW_EVENTS = {
     action: 'Click on SEP5 allocation button',
     category: OVERVIEW_CATEGORY,
   },
-  // Track clicks on links to Safe Accounts
+  // Track clicks on links to Safe accounts
   OPEN_SAFE: {
     action: 'Open Safe',
     category: OVERVIEW_CATEGORY,
@@ -141,7 +141,7 @@ export const OVERVIEW_EVENTS = {
     action: 'Toggle Safe pinned state',
     category: OVERVIEW_CATEGORY,
   },
-  // Track clicks on links to Safe Accounts
+  // Track clicks on links to Safe accounts
   EXPAND_MULTI_SAFE: {
     action: 'Expand multi Safe',
     category: OVERVIEW_CATEGORY,
@@ -168,6 +168,10 @@ export const OVERVIEW_EVENTS = {
   PROCEED_WITH_TX: {
     event: EventType.CLICK,
     action: 'Proceed with transaction',
+    category: OVERVIEW_CATEGORY,
+  },
+  SHOW_STAKING_BANNER: {
+    action: 'Show staking banner',
     category: OVERVIEW_CATEGORY,
   },
   OPEN_STAKING_WIDGET: {
@@ -267,10 +271,8 @@ export enum TRUSTED_SAFE_LABELS {
 export enum OVERVIEW_LABELS {
   sidebar = 'sidebar',
   top_bar = 'top_bar',
-  welcome_page = 'welcome_page',
   login_page = 'login_page',
   settings = 'settings',
   space_list_page = 'space_list_page',
   space_page = 'space_page',
-  owned_safes_modal = 'owned_safes_modal',
 }

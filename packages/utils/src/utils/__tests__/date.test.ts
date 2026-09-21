@@ -1,4 +1,26 @@
-import { getCountdown, getPeriod } from '../date'
+import { formatDate, getCountdown, getPeriod, parseTimestamp } from '../date'
+
+describe('formatDate', () => {
+  it('formats a timestamp as an abbreviated date', () => {
+    expect(formatDate(new Date('2026-04-22T12:00:00.000Z').getTime())).toBe('Apr 22, 2026')
+  })
+})
+
+describe('parseTimestamp', () => {
+  it('parses an ISO string to a timestamp', () => {
+    expect(parseTimestamp('2026-04-22T12:00:00.000Z')).toBe(1776859200000)
+  })
+
+  it('returns null for null, undefined, and empty values', () => {
+    expect(parseTimestamp(null)).toBeNull()
+    expect(parseTimestamp(undefined)).toBeNull()
+    expect(parseTimestamp('')).toBeNull()
+  })
+
+  it('returns null for unparseable values', () => {
+    expect(parseTimestamp('not-a-date')).toBeNull()
+  })
+})
 
 describe('getCountdown', () => {
   it('should convert 0 seconds to 0 days, 0 hours, and 0 minutes', () => {

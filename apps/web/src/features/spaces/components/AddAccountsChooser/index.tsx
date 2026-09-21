@@ -1,16 +1,16 @@
-import { useState, type ReactNode } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
-import { ChevronRight, CirclePlus, Plus, Search } from 'lucide-react'
+import { buildCurrentNextUrl } from '@/utils/nextUrl'
+import { CirclePlus, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { cn } from '@/utils/cn'
-import OwnedSafesModal from '@/features/spaces/components/OwnedSafesModal'
-import AddAccounts from '@/features/spaces/components/AddAccounts'
-import { useCurrentSpaceId, useIsAdmin } from '@/features/spaces'
+import { ChooserRow } from '@/components/common/ChooserRow'
+import AddAccounts from '../AddAccounts'
+import { SAFE_ACCOUNTS_LIMIT, useCurrentSpaceId, useIsAdmin, useIsCurrentSpaceAtSafeLimit } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 type EntryPoint = 'dashboard' | 'safe_accounts'
 
@@ -20,69 +20,25 @@ interface AddAccountsChooserProps {
   entryPoint: EntryPoint
 }
 
-type SubModal = 'find' | 'add' | null
-
-interface ChooserRowProps {
-  icon: ReactNode
-  title: string
-  subtitle: string
-  onClick: () => void
-  disabled?: boolean
-  disabledTooltip?: string
-}
-
-const ChooserRow = ({ icon, title, subtitle, onClick, disabled, disabledTooltip }: ChooserRowProps) => {
-  const row = (
-    <button
-      type="button"
-      onClick={disabled ? undefined : onClick}
-      aria-disabled={disabled || undefined}
-      className={cn(
-        'group flex w-full items-center gap-2 rounded-md p-2 text-left text-sm text-sidebar-foreground transition-colors',
-        '[&_svg]:[stroke-width:2] [&_svg]:transition-colors',
-        disabled
-          ? 'cursor-not-allowed opacity-50'
-          : 'cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:[&_svg]:text-green-500',
-      )}
-    >
-      <span className="shrink-0">{icon}</span>
-      <span className="flex-1 min-w-0">
-        <span className="block font-semibold">{title}</span>
-        <span className="block text-xs text-muted-foreground mt-0.5 group-hover:text-sidebar-accent-foreground/70">
-          {subtitle}
-        </span>
-      </span>
-      <ChevronRight className="size-3.5 shrink-0" />
-    </button>
-  )
-
-  if (disabled && disabledTooltip) {
-    return (
-      <Tooltip>
-        <TooltipTrigger render={row} />
-        <TooltipContent>{disabledTooltip}</TooltipContent>
-      </Tooltip>
-    )
-  }
-
-  return row
-}
-
 const AddAccountsChooser = ({
   buttonVariant = 'outline',
   buttonLabel = 'Add accounts',
   entryPoint,
 }: AddAccountsChooserProps) => {
   const [chooserOpen, setChooserOpen] = useState(false)
-  const [subModal, setSubModal] = useState<SubModal>(null)
+  const [showAddPicker, setShowAddPicker] = useState(false)
   const isAdmin = useIsAdmin()
   const spaceId = useCurrentSpaceId()
+  const isSpaceAtSafeLimit = useIsCurrentSpaceAtSafeLimit()
 
   const router = useRouter()
 
   const handleCreate = () => {
     setChooserOpen(false)
-    router.push(AppRoutes.newSafe.create)
+    router.push({
+      pathname: AppRoutes.newSafe.create,
+      query: { next: buildCurrentNextUrl(router.pathname, router.query) },
+    })
   }
 
   const handleAdd = () => {
@@ -92,7 +48,7 @@ const AddAccountsChooser = ({
       { workspace_id: spaceId, entry_point: entryPoint },
     )
     setChooserOpen(false)
-    setSubModal('add')
+    setShowAddPicker(true)
   }
 
   return (
@@ -100,9 +56,9 @@ const AddAccountsChooser = ({
       <Button
         size="lg"
         variant={buttonVariant}
-        className="font-normal px-4 py-0"
+        className="font-normal"
         onClick={() => setChooserOpen(true)}
-        data-testid="add-space-account-button"
+        data-testid="open-add-accounts-chooser-button"
       >
         <Plus
           className={cn('size-4', {
@@ -113,39 +69,41 @@ const AddAccountsChooser = ({
       </Button>
 
       <Dialog open={chooserOpen} onOpenChange={setChooserOpen}>
-        <DialogContent showCloseButton className="max-w-[440px] p-4 dark:border dark:border-border">
-          <DialogHeader className="p-0 pb-2">
-            <DialogTitle className="font-bold">Manage Safe accounts</DialogTitle>
+        <DialogContent
+          showCloseButton
+          padding="md"
+          // eslint-disable-next-line no-restricted-syntax -- max-w-[440px] bespoke width + dark:border accent, no tokens (grandfathered)
+          className="max-w-[440px] dark:border dark:border-border"
+        >
+          <DialogHeader
+            // eslint-disable-next-line no-restricted-syntax -- p-0 pb-3: bespoke header padding, no token
+            className="p-0 pb-3"
+          >
+            <DialogTitle className="font-bold">Add Safe accounts</DialogTitle>
           </DialogHeader>
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-2">
             <ChooserRow
               icon={<Plus className="size-4" />}
-              title="Add Safe accounts to this workspace"
-              subtitle="Add Safe accounts that are linked to your wallet to this workspace"
+              title="Select from my accounts"
               onClick={handleAdd}
               disabled={!isAdmin}
               disabledTooltip="You need to be an Admin to add accounts"
-            />
-            <ChooserRow
-              icon={<Search className="size-4" />}
-              title="See owned Safe accounts"
-              subtitle="View all Safes linked to your wallet"
-              onClick={() => {
-                setChooserOpen(false)
-                setSubModal('find')
-              }}
+              testId="add-safe-accounts-to-workspace-button"
             />
             <ChooserRow
               icon={<CirclePlus className="size-4" />}
               title="Create new Safe"
-              subtitle="Create a new Safe account"
               onClick={handleCreate}
+              warning={
+                isSpaceAtSafeLimit && isAdmin
+                  ? `This workspace already has ${SAFE_ACCOUNTS_LIMIT} Safes (the maximum). Your new Safe won't be added to it, but you can still create it.`
+                  : undefined
+              }
             />
           </div>
         </DialogContent>
       </Dialog>
-      {subModal === 'find' && <OwnedSafesModal open onClose={() => setSubModal(null)} />}
-      {subModal === 'add' && <AddAccounts externalOpen onExternalClose={() => setSubModal(null)} />}
+      {showAddPicker && <AddAccounts externalOpen onExternalClose={() => setShowAddPicker(false)} />}
     </>
   )
 }

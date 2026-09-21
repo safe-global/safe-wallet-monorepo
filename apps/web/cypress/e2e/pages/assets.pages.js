@@ -11,11 +11,12 @@ export const tableContainer = main.tableContainer
 const tokenNameLink = 'a[href*="sepolia.etherscan.io"]'
 const balanceSingleRow = '[aria-labelledby="tableTitle"] > tbody tr'
 const currencyDropdown = '[id="currency"]'
-const currencyDropdownList = 'ul[role="listbox"]'
-const currencyDropdownListSelected = 'ul[role="listbox"] li[aria-selected="true"]'
+const currencyDropdownList = '[role="listbox"]'
 const hideAssetCheckbox = '[data-testid="hide-asset-checkbox"]'
-const hiddenTokenCheckbox = 'input[type="checkbox"]'
-const paginationPageList = 'ul[role="listbox"]'
+const hiddenTokenCheckbox = '[data-testid="hide-asset-checkbox"]'
+const hiddenTokenCheckboxInput = 'input[type="checkbox"]'
+const rowsPerPageSelect = '[data-testid="rows-per-page"]'
+const paginationPageList = '[data-slot="select-item"]'
 export const tokenListTable = 'table[aria-labelledby="tableTitle"]'
 const manageTokensButton = '[data-testid="manage-tokens-button"]'
 const manageTokensMenu = '[data-testid="manage-tokens-menu"]'
@@ -27,7 +28,8 @@ export const tablePaginationContainer = '[data-testid="table-pagination"]'
 const hiddenTokenSaveBtn = 'span[data-track="assets: Save hide dialog"]'
 const hiddenTokenCancelBtn = 'span[data-track="assets: Cancel hide dialog"]'
 const hiddenTokenDeselectAllBtn = 'span[data-track="assets: Deselect all hide dialog"]'
-const hiddenTokenIcon = 'svg[data-testid="VisibilityOffOutlinedIcon"]'
+const hiddenTokenIcon = 'svg[data-testid="hidden-token-icon"]'
+const hiddenTokenCounter = '[data-testid="hidden-token-count"]'
 const currencySelector = '[data-testid="currency-selector"]'
 const currencyItem = '[data-testid="currency-item"]'
 const tokenAmountFld = '[data-testid="token-amount-field"]'
@@ -41,7 +43,6 @@ const sendBtnStr = 'Send'
 const pageRowsDefault = '25'
 const rowsPerPage10 = '10'
 const tablePageRage21to28 = '21–28 of'
-const rowsPerPageString = 'Rows per page:'
 const pageCountString1to25 = '1–25 of'
 const pageCountString1to10 = '1–10 of'
 const pageCountString10to20 = '11–20 of'
@@ -52,10 +53,26 @@ const assetsTableAssetCell = '[data-testid="table-cell-asset"]'
 const assetsTableBalanceCell = '[data-testid="table-cell-balance"]'
 const assetsTableValueCell = '[data-testid="table-cell-value"]'
 export const assetsTableActionsCell = '[data-testid="table-cell-actions"]'
+const tokenName = '[data-testid="token-name"]'
 const tokenSymbol = '[data-testid="token-symbol"]'
 const tokenBalanceCell = '[data-testid="token-balance"]'
 
 export const fiatRegex = new RegExp(`\\$?(([0-9]{1,3},)*[0-9]{1,3}(\\.[0-9]{2})?|0)`)
+
+// The switch is a Base UI control: the test id sits on the `role="switch"` element itself and the
+// state lives in `aria-checked`. It renders a native `input[type="checkbox"]` only when given a
+// `name`, and even then it is visually hidden — so read and click the switch element directly.
+function setSwitchState(switchSelector, shouldBeOn) {
+  cy.get(switchSelector).then(($switch) => {
+    const isOn = $switch.attr('aria-checked') === 'true'
+    if (isOn !== shouldBeOn) {
+      // A focus-opened info tooltip can overlay the switch inside the menu, so force the click
+      // and assert the resulting state instead of relying on the click landing unobstructed.
+      cy.wrap($switch).click({ force: true })
+    }
+  })
+  cy.get(switchSelector).should('have.attr', 'aria-checked', String(shouldBeOn))
+}
 
 export function toggleShowAllTokens(shouldShow) {
   cy.get(manageTokensButton).click()
@@ -63,16 +80,7 @@ export function toggleShowAllTokens(shouldShow) {
   cy.get(manageTokensMenu)
     .should('be.visible')
     .within(() => {
-      cy.get(showAllTokensSwitch)
-        .find('input[type="checkbox"]')
-        .then(($checkbox) => {
-          const isChecked = $checkbox.is(':checked')
-          if (shouldShow && !isChecked) {
-            cy.wrap($checkbox).click({ force: true })
-          } else if (!shouldShow && isChecked) {
-            cy.wrap($checkbox).click({ force: true })
-          }
-        })
+      setSwitchState(showAllTokensSwitch, shouldShow)
     })
 
   cy.get('body').click(0, 0)
@@ -85,16 +93,7 @@ export function toggleHideDust(shouldHide) {
   cy.get(manageTokensMenu)
     .should('be.visible')
     .within(() => {
-      cy.get(hideSmallBalancesSwitch)
-        .find('input[type="checkbox"]')
-        .then(($checkbox) => {
-          const isChecked = $checkbox.is(':checked')
-          if (shouldHide && !isChecked) {
-            cy.wrap($checkbox).click({ force: true })
-          } else if (!shouldHide && isChecked) {
-            cy.wrap($checkbox).click({ force: true })
-          }
-        })
+      setSwitchState(hideSmallBalancesSwitch, shouldHide)
     })
 
   cy.get('body').click(0, 0)
@@ -180,7 +179,7 @@ function clickOnCurrencySelector() {
 
 export function changeCurrency(currency) {
   clickOnCurrencySelector()
-  cy.get(currencyItem).contains(currency).click()
+  main.selectDropdownOption(currencyItem, currency)
 }
 
 export function clickOnSendBtn(index) {
@@ -214,25 +213,25 @@ export function verifyTableRows(assetsLength) {
 }
 
 export function clickOnTokenNameSortBtn() {
-  cy.get('span').contains(assetNameSortBtnStr).click()
+  cy.get(`${tokenListTable} th`).contains(assetNameSortBtnStr).click()
   cy.wait(500)
 }
 
 export function clickOnTokenBalanceSortBtn() {
-  cy.get('span').contains(assetBalanceSortBtnStr).click()
+  cy.get(`${tokenListTable} th`).contains(assetBalanceSortBtnStr).click()
   cy.wait(500)
 }
 
 export function verifyTokenNamesOrder(option = 'ascending') {
   const tokens = []
 
-  main.getTextToArray(assetsTableRow, tokens)
+  main.getTextToArray(`${assetsTableRow} ${tokenName}`, tokens)
 
   cy.wrap(tokens).then((arr) => {
     cy.log('*** Original array ' + tokens)
-    let sortedNames = [...arr].sort()
+    const sortedNames = [...arr].sort((a, b) => a.localeCompare(b))
     cy.log('*** Sorted array ' + sortedNames)
-    if (option == 'descending') sortedNames = [...arr].sort().reverse()
+    if (option == 'descending') sortedNames.reverse()
     expect(arr).to.deep.equal(sortedNames)
   })
 }
@@ -243,9 +242,10 @@ export function verifyTokenBalanceOrder(option = 'ascending') {
   main.extractDigitsToArray(`${assetsTableRow} ${assetsTableBalanceCell} span`, balances)
 
   cy.wrap(balances).then((arr) => {
-    let sortedBalance = [...arr].sort()
-    if (option == 'descending') sortedBalance = [...arr].sort().reverse()
-    expect(arr).to.deep.equal(sortedBalance)
+    const numericBalances = arr.map(Number)
+    const sortedBalances = [...numericBalances].sort((a, b) => a - b)
+    if (option == 'descending') sortedBalances.reverse()
+    expect(numericBalances).to.deep.equal(sortedBalances)
   })
 }
 
@@ -258,11 +258,7 @@ export function cancelSaveHiddenTokenSelection() {
 }
 
 export function checkTokenCounter(value) {
-  cy.get(hiddenTokenIcon)
-    .parent()
-    .within(() => {
-      cy.get('p').should('include.text', value)
-    })
+  cy.get(hiddenTokenCounter).should('include.text', value)
 }
 
 export function checkHiddenTokenBtnCounter(value) {
@@ -281,7 +277,7 @@ export function verifyEachRowHasCheckbox(state) {
     cy.get('tbody').within(() => {
       cy.get(assetsTableRow).each(($row) => {
         if (state) {
-          cy.wrap($row).find(assetsTableActionsCell).find(hiddenTokenCheckbox).should('exist').should(state)
+          cy.wrap($row).find(assetsTableActionsCell).find(hiddenTokenCheckboxInput).should('exist').should(state)
           return
         }
         cy.wrap($row).find(assetsTableActionsCell).find(hiddenTokenCheckbox).should('exist')
@@ -366,13 +362,8 @@ export function clickOnCurrencyDropdown() {
 }
 
 export function selectCurrency(currency) {
-  cy.get(currencyDropdownList).findByText(currency).click({ force: true })
-  cy.get(currencyDropdownList)
-    .findByText(currency)
-    .click({ force: true })
-    .then(() => {
-      cy.get(currencyDropdownListSelected).should('contain', currency)
-    })
+  main.selectDropdownOption(currencyItem, currency)
+  cy.get(currencySelector).should('contain', currency)
 }
 
 export function hideAsset(asset) {
@@ -385,11 +376,7 @@ export function openHiddenTokensFromManageMenu() {
   cy.get(manageTokensButton).click()
   cy.get(hideTokensMenuItem).should('be.visible').click()
   main.verifyElementsExist([hiddenTokenSaveBtn, hiddenTokenCancelBtn, hiddenTokenDeselectAllBtn, hiddenTokenIcon])
-  cy.get(hiddenTokenIcon)
-    .parent()
-    .within(() => {
-      cy.get('p')
-    })
+  cy.get(hiddenTokenCounter).should('be.visible')
 }
 
 export function clickOnTokenCheckbox(token) {
@@ -401,18 +388,24 @@ export function saveHiddenTokenSelection() {
 }
 
 export function verifyInitialTableState() {
-  cy.contains(rowsPerPageString).next().contains(pageRowsDefault)
+  cy.get(rowsPerPageSelect).contains(pageRowsDefault)
   cy.contains(pageCountString1to25)
   cy.get(balanceSingleRow).should('have.length', 25)
 }
 
 export function changeTo10RowsPerPage() {
-  cy.contains(rowsPerPageString).next().contains(pageRowsDefault).click({ force: true })
-  cy.get(paginationPageList).contains(rowsPerPage10).click()
+  cy.get(rowsPerPageSelect).click()
+  // Base UI select items only commit a click while highlighted: hover the item first,
+  // wait for the highlight to land (tabindex=0), then click. Exact-match the label so
+  // '10' cannot land on the '100' option.
+  cy.contains(paginationPageList, new RegExp(`^\\s*${rowsPerPage10}\\s*$`)).as('rowsPerPageOption')
+  cy.get('@rowsPerPageOption').trigger('mousemove')
+  cy.get('@rowsPerPageOption').should('have.attr', 'tabindex', '0')
+  cy.get('@rowsPerPageOption').click()
 }
 
 export function verifyTableHas10Rows() {
-  cy.contains(rowsPerPageString).next().contains(rowsPerPage10)
+  cy.get(rowsPerPageSelect).contains(rowsPerPage10)
   cy.contains(pageCountString1to10)
   cy.get(balanceSingleRow).should('have.length', 10)
 }

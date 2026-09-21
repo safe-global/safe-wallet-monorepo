@@ -23,12 +23,16 @@ tags:
 - evalScript: '${output.noChange = (typeof NO_CHANGE !== "undefined" && NO_CHANGE === "true")}'
 
 # No balance change scenario
+# The text sits below the fold on the Confirm transaction screen, so scroll it
+# into view rather than asserting on the current viewport.
 - runFlow:
     when:
       true: '${output.noChange === true}'
     commands:
-      - assertVisible:
-          text: 'No balance change detected'
+      - scrollUntilVisible:
+          element:
+            text: 'No balance change detected'
+          centerElement: true
 
 # Balance change with token and amount
 - runFlow:
