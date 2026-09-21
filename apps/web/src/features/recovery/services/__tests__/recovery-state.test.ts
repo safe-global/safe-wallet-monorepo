@@ -322,8 +322,10 @@ describe('recovery-state', () => {
       return { run, getBlock }
     }
 
-    const event = (queueNonce: bigint, safeAddress = faker.finance.ethereumAddress()) => ({
-      args: { queueNonce, to: safeAddress, value: 0n, data: '0x' },
+    // blockNumber 0 is far behind every `latestBlock` below, so these are cacheable by default
+    const event = (queueNonce: bigint, blockNumber = 0) => ({
+      args: { queueNonce, to: faker.finance.ethereumAddress(), value: 0n, data: '0x' },
+      blockNumber,
     })
 
     it('should find recently queued txs in the first window without bisecting', async () => {
@@ -525,6 +527,40 @@ describe('recovery-state', () => {
       await run()
 
       expect(queryFilter).toHaveBeenCalledTimes(2)
+    })
+
+    it('should not cache events still within reorg range of the chain head', async () => {
+      const queryFilter = jest.fn().mockResolvedValue([event(0n, 99_990)])
+      const { run } = setup({
+        txNonce: 0n,
+        queueNonce: 1n,
+        createdAt: BigInt(BLOCK_TIME),
+        latestBlock: 100_000,
+        queryFilter,
+      })
+
+      const first = await run()
+      const second = await run()
+
+      expect(first.queue).toHaveLength(1)
+      expect(second.queue).toHaveLength(1)
+      expect(queryFilter).toHaveBeenCalledTimes(2)
+    })
+
+    it('should cache events buried deeper than the reorg range', async () => {
+      const queryFilter = jest.fn().mockResolvedValue([event(0n, 99_000)])
+      const { run } = setup({
+        txNonce: 0n,
+        queueNonce: 1n,
+        createdAt: BigInt(BLOCK_TIME),
+        latestBlock: 100_000,
+        queryFilter,
+      })
+
+      await run()
+      await run()
+
+      expect(queryFilter).toHaveBeenCalledTimes(1)
     })
   })
 
