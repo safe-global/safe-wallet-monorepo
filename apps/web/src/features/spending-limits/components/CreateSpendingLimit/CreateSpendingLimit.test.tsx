@@ -7,7 +7,8 @@ import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balance
 import type { PortfolioBalances } from '@/hooks/loadables/useLoadBalances'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { SpendingLimitFields, type NewSpendingLimitFlowProps } from '../../types'
-import CreateSpendingLimit, { NO_TOKEN_SELECTED_ERROR } from './index'
+import CreateSpendingLimit from './index'
+import { NO_TOKEN_SELECTED_ERROR } from '../../services/spendingLimitValidation'
 import * as useVisibleBalancesHook from '@/hooks/useVisibleBalances'
 import * as useIsSpendingLimitSupportedHook from '../../hooks/useIsSpendingLimitSupported'
 

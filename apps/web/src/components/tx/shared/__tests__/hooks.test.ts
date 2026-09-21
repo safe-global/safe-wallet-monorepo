@@ -278,27 +278,42 @@ describe('SignOrExecute hooks', () => {
         safeLoaded: true,
       }))
 
-      jest
+      const proposeSpy = jest
         .spyOn(txSender, 'dispatchTxProposal')
         .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
+      const confirmSpy = jest
+        .spyOn(txSender, 'dispatchTxConfirmation')
+        .mockImplementation((() => Promise.resolve({ id: '456' })) as unknown as typeof txSender.dispatchTxConfirmation)
 
-      const signSpy = jest
-        .spyOn(txSender, 'dispatchTxSigning')
-        .mockImplementation(() => Promise.resolve(createSafeTx()))
+      const signedTx = createSafeTx()
+      const signSpy = jest.spyOn(txSender, 'dispatchTxSigning').mockImplementation(() => Promise.resolve(signedTx))
 
       const onchainSignSpy = jest.spyOn(txSender, 'dispatchOnChainSigning').mockImplementation(() => Promise.resolve())
 
       const { result } = renderHook(() => useTxActions())
       const { signTx } = result.current
 
+      // First signature: the tx is not yet known to CGW, so it is proposed
       const id = await signTx(createSafeTx())
       expect(signSpy).toHaveBeenCalled()
       expect(onchainSignSpy).not.toHaveBeenCalled()
+      expect(proposeSpy).toHaveBeenCalledTimes(1)
+      expect(confirmSpy).not.toHaveBeenCalled()
       expect(id).toBe('123')
 
+      // Subsequent signature: the tx already has an id, so only the signature is added
       const id2 = await signTx(createSafeTx(), '456')
-      expect(signSpy).toHaveBeenCalled()
-      expect(id2).toBe('123')
+      expect(signSpy).toHaveBeenCalledTimes(2)
+      expect(proposeSpy).toHaveBeenCalledTimes(1)
+      expect(confirmSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          txId: '456',
+          safeTx: signedTx,
+          sender: '0x1234567890000000000000000000000000000000',
+          chainId: '1',
+        }),
+      )
+      expect(id2).toBe('456')
     })
 
     it('should sign a tx on-chain', async () => {
@@ -537,6 +552,9 @@ describe('SignOrExecute hooks', () => {
       const proposeSpy = jest
         .spyOn(txSender, 'dispatchTxProposal')
         .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
+      const confirmSpy = jest
+        .spyOn(txSender, 'dispatchTxConfirmation')
+        .mockImplementation((() => Promise.resolve({ id: '123' })) as unknown as typeof txSender.dispatchTxConfirmation)
       const signSpy = jest.spyOn(txSender, 'dispatchTxSigning').mockImplementation(() => {
         tx.addSignature({
           signer: '0x12345',
@@ -553,8 +571,9 @@ describe('SignOrExecute hooks', () => {
       const { executeTx } = result.current
 
       const id = await executeTx({ gasPrice: 1 }, tx, '123', 'origin.com', true)
-      expect(proposeSpy).toHaveBeenCalled()
       expect(signSpy).toHaveBeenCalled()
+      expect(proposeSpy).not.toHaveBeenCalled()
+      expect(confirmSpy).toHaveBeenCalledWith(expect.objectContaining({ txId: '123', safeTx: tx }))
       expect(relaySpy).toHaveBeenCalled()
       expect(id).toEqual('123')
     })
