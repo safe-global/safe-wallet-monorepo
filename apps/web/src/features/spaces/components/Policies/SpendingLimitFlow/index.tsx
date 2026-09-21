@@ -5,6 +5,8 @@ import ExternalLink from '@/components/common/ExternalLink'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
 import { TxFlow } from '@/components/tx-flow/TxFlow'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
+import { TxFlowType } from '@/services/analytics'
+import { ExistingSpendingLimitsProvider } from './ExistingSpendingLimitsProvider'
 import CreateSpendingLimitPolicy from './CreateStep'
 import ReviewSpendingLimitPolicy from './ReviewStep'
 import { createDefaultFormValues } from './types'
@@ -38,16 +40,19 @@ const SpendingLimitFlow = (): ReactElement => {
 
   return (
     <SafeScopeProvider>
-      <TxFlow
-        icon={SpendingLimitIcon}
-        subtitle={<FlowSubtitle />}
-        ReviewTransactionComponent={ReviewSpendingLimitPolicy}
-        initialData={createDefaultFormValues()}
-      >
-        <TxFlowStep title={CREATE_STEP_TITLE} hideNonce>
-          <CreateSpendingLimitPolicy isCalloutDismissed={isCalloutDismissed} onDismissCallout={dismissCallout} />
-        </TxFlowStep>
-      </TxFlow>
+      <ExistingSpendingLimitsProvider>
+        <TxFlow
+          icon={SpendingLimitIcon}
+          subtitle={<FlowSubtitle />}
+          ReviewTransactionComponent={ReviewSpendingLimitPolicy}
+          eventCategory={TxFlowType.SETUP_SPENDING_LIMIT_POLICY}
+          initialData={createDefaultFormValues()}
+        >
+          <TxFlowStep title={CREATE_STEP_TITLE} hideNonce>
+            <CreateSpendingLimitPolicy isCalloutDismissed={isCalloutDismissed} onDismissCallout={dismissCallout} />
+          </TxFlowStep>
+        </TxFlow>
+      </ExistingSpendingLimitsProvider>
     </SafeScopeProvider>
   )
 }
