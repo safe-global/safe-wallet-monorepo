@@ -76,11 +76,12 @@ type SpendingLimitState = {
 
 ## Reset Periods
 
-| Environment | Options                          |
-| ----------- | -------------------------------- |
-| Production  | One time, 1 day, 1 week, 1 month |
-| Testnet     | One time, 5 min, 30 min, 1 hour  |
+| Environment                   | Options                                                                                              |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Production                    | One time, 1 day, 1 week, 1 month                                                                     |
+| Test chains (Sepolia, Goerli) | One time, 5 min, 30 min, 1 hour, 1 day, 1 week, 1 month — production periods plus short test periods |
 
+- **Test chains** offer both sets: the short periods keep reset behaviour testable in one session, the production periods keep daily / weekly / monthly verifiable on Sepolia. Both apply to the Safe-level and the Workspace policy flows.
 - **One-time** (`resetTimeMin = "0"`): Allowance is permanent, no automatic refill
 - **Recurring**: Allowance refills to the full amount after the reset period
 
