@@ -30,7 +30,7 @@ export type ClaimTrialCopy = { title: string; subtitle: string; note: string; ba
 
 /** What happens when the trial runs out, behind the info icon next to the note. */
 export const TRIAL_END_TOOLTIP =
-  "Your paid subscription only starts after you add a payment method. If you don't add one or choose another plan before the trial ends, your Workspace will be locked. Nothing is deleted for 90 days and your Safe accounts remain available in My accounts."
+  "Your paid subscription only starts after you add a payment method. If you don't add one or choose another plan before your free access ends, your Workspace will be locked. Nothing is deleted for 90 days and your Safe accounts remain available in My accounts."
 
 /** The price tag's green word: a new Workspace is told how long the free period lasts, an existing one just "Free". */
 export const freeLabel = (trialPeriodDays: number | null, variant: ClaimTrialVariant): string =>
@@ -41,28 +41,28 @@ export const claimCopy = (trialPeriodDays: number | null, variant: ClaimTrialVar
     return {
       title: 'Workspaces run on Safe Pro',
       subtitle: trialPeriodDays === null ? 'Your first days are free.' : `Your first ${trialPeriodDays} days are free.`,
-      note: "No payment method required. We'll remind you 7 and 2 days before the trial ends.",
+      note: "No payment method required. We'll remind you 7 and 2 days before your free access ends.",
       back: 'Go to My accounts',
-      claim: 'Claim free trial',
+      claim: 'Claim free access',
     }
   }
   const existing = {
-    note: "No payment method required. We'll remind you 7 and 2 days before the trial ends.",
+    note: "No payment method required. We'll remind you 7 and 2 days before your free access ends.",
     back: 'Go to My accounts',
-    claim: 'Claim free trial',
+    claim: 'Claim free access',
   }
   return trialPeriodDays === MIGRATED_TRIAL_DAYS
     ? {
         ...existing,
         title: 'Your Workspace moved to Safe Pro on Oct 6, 2026',
-        subtitle: 'You’ve used Safe before, so your trial is 60 days instead of 30.',
+        subtitle: 'You’ve used Safe before, so your free access is 60 days instead of 30.',
       }
     : {
         ...existing,
         title:
           trialPeriodDays === null
-            ? 'Start your free trial of Safe Pro'
-            : `Start your ${trialPeriodDays}-day free trial of Safe Pro`,
+            ? 'Start your free access to Safe Pro'
+            : `Start your ${trialPeriodDays}-day free access to Safe Pro`,
         subtitle: 'All Pro features unlocked. No billing details needed upfront.',
       }
 }
@@ -136,7 +136,7 @@ const TrialOfferCard = ({
 }
 
 /**
- * Blocking offer of the Workspace's free trial. A Workspace that already holds Safes confirms which ones the plan
+ * Blocking offer of the Workspace's free access. A Workspace that already holds Safes confirms which ones the plan
  * covers before Stripe: the Safes left out are removed from the Workspace, not from the user's accounts. A brand-new
  * Workspace (the onboarding wizard) goes straight to Stripe.
  */
@@ -214,7 +214,7 @@ export default function ClaimTrialModal({
               ) : tiers.length === 0 ? (
                 <Alert variant="info">
                   <AlertSeverityIcon variant="info" />
-                  <AlertDescription>There is no free trial available for this Workspace.</AlertDescription>
+                  <AlertDescription>There is no free access available for this Workspace.</AlertDescription>
                 </Alert>
               ) : (
                 <div

@@ -121,7 +121,7 @@ export default function ChangePlanDialog({
 
           {isTrialSwitch ? (
             <Typography color="muted" data-testid="change-plan-trial-note">
-              You&apos;re on a free trial
+              You&apos;re on free access
               {currentPlan.periodEndsAt ? ` until ${formatDate(Date.parse(currentPlan.periodEndsAt))}` : ''}. Nothing is
               charged now. From then on you&apos;ll pay{' '}
               {pick.option.price === null ? 'a custom price' : formatPlanPrice(pick.option.price, pick.tier.currency)}

@@ -221,7 +221,7 @@ describe('ChangePlanDialog', () => {
     expect(mockPreviewChange).not.toHaveBeenCalled()
     expect(screen.queryByTestId('change-plan-skeleton')).not.toBeInTheDocument()
     expect(screen.getByTestId('change-plan-trial-note')).toHaveTextContent(
-      "You're on a free trial until Dec 6, 2026. Nothing is charged now. From then on you'll pay €189/mo for Starter.",
+      "You're on free access until Dec 6, 2026. Nothing is charged now. From then on you'll pay €189/mo for Starter.",
     )
     expect(screen.getByTestId('change-plan-confirm')).toBeEnabled()
 

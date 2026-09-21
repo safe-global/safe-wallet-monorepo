@@ -83,13 +83,13 @@ describe('Plans', () => {
   it.each([
     [null, undefined],
     [active, { label: 'Active', variant: 'brand' }],
-    [trialing(20), { label: 'Free trial', variant: 'brand' }],
-    [trialing(14), { label: 'Free trial · 14 days left', variant: 'brand' }],
-    [trialing(1), { label: 'Free trial · 1 day left', variant: 'warning' }],
-    [trialing(7), { label: 'Free trial · 7 days left', variant: 'warning' }],
+    [trialing(20), { label: 'Free access', variant: 'brand' }],
+    [trialing(14), { label: 'Free access · 14 days left', variant: 'brand' }],
+    [trialing(1), { label: 'Free access · 1 day left', variant: 'warning' }],
+    [trialing(7), { label: 'Free access · 7 days left', variant: 'warning' }],
     [
       { ...trialing(14), daysLeft: null },
-      { label: 'Free trial', variant: 'brand' },
+      { label: 'Free access', variant: 'brand' },
     ],
   ])('derives the plan badge for %p', (plan, badge) => {
     expect(getCurrentBadge(plan)).toEqual(badge)
@@ -109,7 +109,7 @@ describe('Plans', () => {
       />,
     )
 
-    expect(screen.getAllByText('Free trial · 14 days left')).toHaveLength(2)
+    expect(screen.getAllByText('Free access · 14 days left')).toHaveLength(2)
     expect(screen.getByText('Active until Dec 6, 2026.')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Manage plan' })).not.toBeInTheDocument()
     expect(screen.getByTestId('current-plan-card')).toHaveTextContent('€499')
@@ -139,10 +139,10 @@ describe('Plans', () => {
 
     expect(
       screen.getByText(
-        /Your free trial is active until Dec 6, 2026\. Add a payment method before then or choose another plan/,
+        /Your free access is active until Dec 6, 2026\. Add a payment method before then or choose another plan/,
       ),
     ).toBeInTheDocument()
-    expect(screen.getByTestId('plan-status-badge')).toHaveTextContent('Free trial · 7 days left')
+    expect(screen.getByTestId('plan-status-badge')).toHaveTextContent('Free access · 7 days left')
   })
 
   it('renders a paid plan with Manage plan in the header and on its card, and Upgrade to Business on offer', () => {

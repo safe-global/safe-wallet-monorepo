@@ -7,13 +7,13 @@ describe('SafeProNoticeModal', () => {
     render(
       <SafeProNoticeModal
         open
-        title="Your free trial ended on Dec 5, 2026"
+        title="Your free access ended on Dec 5, 2026"
         body="An admin needs to choose a plan to unlock it."
         onAction={onAction}
       />,
     )
 
-    expect(screen.getByRole('heading')).toHaveTextContent('Your free trial ended on Dec 5, 2026')
+    expect(screen.getByRole('heading')).toHaveTextContent('Your free access ended on Dec 5, 2026')
     expect(screen.getByText('An admin needs to choose a plan to unlock it.')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Close' })).not.toBeInTheDocument()
 
@@ -27,7 +27,7 @@ describe('SafeProNoticeModal', () => {
     render(
       <SafeProNoticeModal
         open
-        title="Your free trial will end in 7 days"
+        title="Your free access will end in 7 days"
         body="Acme Inc will be locked on Dec 5, 2026."
         actionLabel="Got it"
         onAction={onAction}

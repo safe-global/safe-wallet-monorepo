@@ -63,7 +63,9 @@ const TrialEndingChooser = ({
       ),
     [paidPlans, subscription, seatsQuota],
   )
-  const endsAt = currentPlan.periodEndsAt ? formatDate(Date.parse(currentPlan.periodEndsAt)) : 'the end of the trial'
+  const endsAt = currentPlan.periodEndsAt
+    ? formatDate(Date.parse(currentPlan.periodEndsAt))
+    : 'the end of your free access'
 
   return (
     <>
@@ -72,7 +74,7 @@ const TrialEndingChooser = ({
           <div className="flex flex-col gap-6 pt-5">
             <div className="flex flex-col gap-1">
               <Typography variant="h3" as={DialogTitle}>
-                Your free trial will end {endsIn(currentPlan.daysLeft ?? null)}
+                Your free access will end {endsIn(currentPlan.daysLeft ?? null)}
               </Typography>
               <Typography color="muted">{reminderSubtitle(endsAt, isAdmin, spaceName)}</Typography>
             </div>

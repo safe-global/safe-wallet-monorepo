@@ -46,7 +46,7 @@ export const chooserCopy = (
         subtitle: 'Choose a plan to keep using your Workspace, everything is exactly as you left it.',
       }
     : {
-        title: `Your Safe Pro free trial ended on ${formatDate(endedAt)}`,
+        title: `Your Safe Pro free access ended on ${formatDate(endedAt)}`,
         subtitle: 'Choose a plan to keep using your Workspace.',
       }
 }

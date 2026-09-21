@@ -6,7 +6,7 @@ import { formatDate } from '@safe-global/utils/utils/date'
 import SafeProHero from '../SafeProHero'
 import css from '../SafeProAnnouncement/styles.module.css'
 
-/** Confirms a plan switched during the free trial: nothing changes until the trial ends, then the new price applies. */
+/** Confirms a plan switched during the free access: nothing changes until the trial ends, then the new price applies. */
 const SafeProPlanSwitchedModal = ({
   open,
   onOpenChange,
@@ -32,7 +32,7 @@ const SafeProPlanSwitchedModal = ({
               You&apos;re on <span className={css.highlight}>{planName}</span>!
             </Typography>
             <Typography color="muted" align="center">
-              Your free trial continues{trialEndsAt !== null ? ` until ${formatDate(trialEndsAt)}` : ''}. After that,
+              Your free access continues{trialEndsAt !== null ? ` until ${formatDate(trialEndsAt)}` : ''}. After that,
               you&apos;ll pay {price}.
             </Typography>
           </div>

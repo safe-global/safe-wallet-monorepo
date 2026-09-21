@@ -10,6 +10,6 @@ describe('highlightSafePro', () => {
   })
 
   it('returns plain text when there is nothing to highlight', () => {
-    expect(highlightSafePro('Your free trial ended on Dec 5, 2026')).toBe('Your free trial ended on Dec 5, 2026')
+    expect(highlightSafePro('Your free access ended on Dec 5, 2026')).toBe('Your free access ended on Dec 5, 2026')
   })
 })

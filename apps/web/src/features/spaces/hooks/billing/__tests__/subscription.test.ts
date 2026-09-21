@@ -89,11 +89,11 @@ describe('subscription', () => {
   })
 
   it.each([
-    [null, 'Free trial'],
-    [20, 'Free trial'],
-    [14, 'Free trial · 14 days left'],
-    [1, 'Free trial · 1 day left'],
-    [0, 'Free trial · 0 days left'],
+    [null, 'Free access'],
+    [20, 'Free access'],
+    [14, 'Free access · 14 days left'],
+    [1, 'Free access · 1 day left'],
+    [0, 'Free access · 0 days left'],
   ])('labels a trial with %p days left as %p', (daysLeft, label) => {
     expect(trialLabel(daysLeft)).toBe(label)
   })

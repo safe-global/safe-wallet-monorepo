@@ -143,7 +143,7 @@ describe('TrialEndingModal', () => {
 
     mockUseSpacePlan.mockReturnValue(trial(2))
     const second = render(<TrialEndingModal spaceId={SPACE_ID} />)
-    expect(screen.getByRole('heading', { name: 'Your free trial will end in 2 days' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Your free access will end in 2 days' })).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Continue without Safe Pro' }))
     expect(storage[`safeProTrialReminderSeen:${SPACE_ID}`]).toBe('2')
@@ -162,7 +162,7 @@ describe('TrialEndingModal', () => {
   it('lets an admin add billing details, switch to Starter or continue without Safe Pro, once per Workspace', () => {
     const { unmount } = render(<TrialEndingModal spaceId={SPACE_ID} />)
 
-    expect(screen.getByRole('heading', { name: 'Your free trial will end in 7 days' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Your free access will end in 7 days' })).toBeInTheDocument()
     expect(screen.getByText(/add a payment method by Dec 5, 2026, your Workspace will be locked/)).toBeInTheDocument()
     expect(screen.queryByText('Enterprise')).not.toBeInTheDocument()
     expect(screen.getByText('Need more than 20?')).toBeInTheDocument()
@@ -176,7 +176,7 @@ describe('TrialEndingModal', () => {
     expect(screen.getByTestId('change-plan-dialog')).toHaveAttribute('data-trial', 'true')
 
     fireEvent.click(screen.getByRole('button', { name: 'Continue without Safe Pro' }))
-    expect(screen.queryByRole('heading', { name: 'Your free trial will end in 7 days' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Your free access will end in 7 days' })).not.toBeInTheDocument()
     unmount()
 
     expect(render(<TrialEndingModal spaceId={SPACE_ID} />).container).toBeEmptyDOMElement()
@@ -188,7 +188,7 @@ describe('TrialEndingModal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Switch to Starter' }))
     fireEvent.click(screen.getByText('plan-changed'))
 
-    expect(screen.queryByRole('heading', { name: 'Your free trial will end in 7 days' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Your free access will end in 7 days' })).not.toBeInTheDocument()
     expect(screen.getByTestId('change-plan-dialog')).toBeInTheDocument()
     expect(storage[`safeProTrialReminderSeen:${SPACE_ID}`]).toBeUndefined()
 
@@ -202,7 +202,7 @@ describe('TrialEndingModal', () => {
     mockUseIsAdmin.mockReturnValue(false)
     render(<TrialEndingModal spaceId={SPACE_ID} />)
 
-    expect(screen.getByRole('heading', { name: 'Your free trial will end in 7 days' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Your free access will end in 7 days' })).toBeInTheDocument()
     expect(
       screen.getByText(
         'Acme Inc will be locked on Dec 5, 2026 unless an admin chooses a plan and adds a payment method. Your Safe accounts remain available in My accounts.',
@@ -215,7 +215,7 @@ describe('TrialEndingModal', () => {
     expect(screen.queryByRole('button', { name: 'Continue without Safe Pro' })).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Got it' }))
-    expect(screen.queryByRole('heading', { name: 'Your free trial will end in 7 days' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Your free access will end in 7 days' })).not.toBeInTheDocument()
     expect(storage[`safeProTrialReminderSeen:${SPACE_ID}`]).toBe('7')
   })
 })

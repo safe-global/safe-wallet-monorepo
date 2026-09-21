@@ -77,19 +77,19 @@ describe('ClaimTrialModal', () => {
   it('adapts the headline to the migrated 60-day grace and to a regular trial', () => {
     expect(claimCopy(60).title).toBe('Your Workspace moved to Safe Pro on Oct 6, 2026')
     expect(claimCopy(30)).toMatchObject({
-      title: 'Start your 30-day free trial of Safe Pro',
+      title: 'Start your 30-day free access to Safe Pro',
       subtitle: 'All Pro features unlocked. No billing details needed upfront.',
-      note: "No payment method required. We'll remind you 7 and 2 days before the trial ends.",
+      note: "No payment method required. We'll remind you 7 and 2 days before your free access ends.",
       back: 'Go to My accounts',
-      claim: 'Claim free trial',
+      claim: 'Claim free access',
     })
-    expect(claimCopy(null).title).toBe('Start your free trial of Safe Pro')
+    expect(claimCopy(null).title).toBe('Start your free access to Safe Pro')
     expect(claimCopy(60, 'new')).toEqual({
       title: 'Workspaces run on Safe Pro',
       subtitle: 'Your first 60 days are free.',
-      note: "No payment method required. We'll remind you 7 and 2 days before the trial ends.",
+      note: "No payment method required. We'll remind you 7 and 2 days before your free access ends.",
       back: 'Go to My accounts',
-      claim: 'Claim free trial',
+      claim: 'Claim free access',
     })
   })
 
@@ -126,7 +126,7 @@ describe('ClaimTrialModal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Go to My accounts' }))
     expect(onBack).toHaveBeenCalled()
 
-    fireEvent.click(screen.getByRole('button', { name: /Claim free trial/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Claim free access/ }))
     expect(mockStartCheckout).toHaveBeenCalledWith(SPACE_ID, undefined, 'pl_business')
     expect(mockRemoveSafes).not.toHaveBeenCalled()
     expect(screen.queryByTestId('select-accounts-step')).not.toBeInTheDocument()
@@ -145,7 +145,7 @@ describe('ClaimTrialModal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Go to My accounts' }))
     expect(onBack).toHaveBeenCalled()
 
-    fireEvent.click(screen.getByRole('button', { name: /Claim free trial/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Claim free access/ }))
     expect(mockStartCheckout).toHaveBeenCalledWith(SPACE_ID, '/welcome/select-safes', 'pl_business')
     expect(mockRemoveSafes).not.toHaveBeenCalled()
     expect(screen.queryByTestId('select-accounts-step')).not.toBeInTheDocument()
@@ -156,15 +156,15 @@ describe('ClaimTrialModal', () => {
     mockSpaceSafes.mockReturnValue({ safes: { '1': ['0xA', '0xB', '0xC'] } })
     render(<ClaimTrialModal spaceId={SPACE_ID} onBack={jest.fn()} returnPathname="/welcome/select-safes" />)
 
-    fireEvent.click(screen.getByRole('button', { name: /Claim free trial/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Claim free access/ }))
     expect(mockStartCheckout).not.toHaveBeenCalled()
     expect(screen.getByTestId('select-accounts-step')).toHaveAttribute('data-limit', '2')
     expect(screen.getByTestId('select-accounts-step')).toHaveAttribute('data-plan', 'Starter')
 
     fireEvent.click(screen.getByText('step-back'))
-    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Start your 30-day free trial of Safe Pro')
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Start your 30-day free access to Safe Pro')
 
-    fireEvent.click(screen.getByRole('button', { name: /Claim free trial/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Claim free access/ }))
     fireEvent.click(screen.getByText('step-continue'))
 
     await waitFor(() => expect(mockStartCheckout).toHaveBeenCalledWith(SPACE_ID, '/welcome/select-safes', 'pl_starter'))
@@ -181,7 +181,7 @@ describe('ClaimTrialModal', () => {
     mockRemoveState = { error: { status: 500, data: { message: 'Boom' } } }
     render(<ClaimTrialModal spaceId={SPACE_ID} onBack={jest.fn()} />)
 
-    fireEvent.click(screen.getByRole('button', { name: /Claim free trial/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Claim free access/ }))
     fireEvent.click(screen.getByText('step-continue'))
 
     await waitFor(() => expect(mockRemoveSafes).toHaveBeenCalled())
@@ -196,7 +196,7 @@ describe('ClaimTrialModal', () => {
 
     expect(screen.getByRole('radio', { name: /Business/ })).toHaveAttribute('aria-checked', 'true')
     fireEvent.click(screen.getByRole('radio', { name: /Starter/ }))
-    fireEvent.click(screen.getByRole('button', { name: /Claim free trial/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Claim free access/ }))
 
     expect(screen.getByTestId('select-accounts-step')).toHaveAttribute('data-plan', 'Starter')
     expect(screen.getByTestId('select-accounts-step')).toHaveAttribute('data-limit', '2')
@@ -209,8 +209,8 @@ describe('ClaimTrialModal', () => {
 
     mockUseSpaceOffers.mockReturnValue({ trialPlans: [], trialPeriodDays: null, isLoading: false })
     rerender(<ClaimTrialModal spaceId={SPACE_ID} onBack={jest.fn()} />)
-    expect(screen.getByText('There is no free trial available for this Workspace.')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Claim free trial/ })).toBeDisabled()
+    expect(screen.getByText('There is no free access available for this Workspace.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Claim free access/ })).toBeDisabled()
   })
 
   it('surfaces a checkout failure', () => {

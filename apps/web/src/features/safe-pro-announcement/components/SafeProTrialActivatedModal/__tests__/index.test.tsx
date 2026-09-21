@@ -6,9 +6,9 @@ describe('SafeProTrialActivatedModal', () => {
     const onOpenChange = jest.fn()
     render(<SafeProTrialActivatedModal open onOpenChange={onOpenChange} trialEndsAt={Date.UTC(2026, 11, 6, 12)} />)
 
-    expect(screen.getByRole('heading')).toHaveTextContent('Your free trial is active until Dec 6, 2026')
+    expect(screen.getByRole('heading')).toHaveTextContent('Your free access is active until Dec 6, 2026')
     expect(
-      screen.getByText(/add a payment method before the trial ends — nothing is charged until you do/),
+      screen.getByText(/add a payment method before your free access ends — nothing is charged until you do/),
     ).toBeInTheDocument()
     expect(screen.getByText('Full details are in your confirmation email.')).toBeInTheDocument()
 

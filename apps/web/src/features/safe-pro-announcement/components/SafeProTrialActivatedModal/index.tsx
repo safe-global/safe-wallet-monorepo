@@ -29,11 +29,11 @@ const SafeProTrialActivatedModal = ({
         <div className="flex flex-col items-center gap-8 px-8 pt-6 pb-4">
           <div className="flex flex-col gap-2">
             <Typography variant="h3" align="center" as={DialogTitle}>
-              Your free trial is active until {formatDate(trialEndsAt)}
+              Your free access is active until {formatDate(trialEndsAt)}
             </Typography>
             <Typography color="muted" align="center">
-              All Pro features are unlocked for your Workspace. We&apos;ll remind you to add a payment method before the
-              trial ends — nothing is charged until you do.
+              All Pro features are unlocked for your Workspace. We&apos;ll remind you to add a payment method before
+              your free access ends — nothing is charged until you do.
             </Typography>
           </div>
 

@@ -16,7 +16,7 @@ describe('SafeProPlanSwitchedModal', () => {
 
     expect(screen.getByRole('heading')).toHaveTextContent("You're on Starter!")
     expect(
-      screen.getByText("Your free trial continues until Sep 20, 2026. After that, you'll pay €189/mo."),
+      screen.getByText("Your free access continues until Sep 20, 2026. After that, you'll pay €189/mo."),
     ).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Get started' }))
@@ -28,6 +28,6 @@ describe('SafeProPlanSwitchedModal', () => {
       <SafeProPlanSwitchedModal open onOpenChange={jest.fn()} planName="Starter" trialEndsAt={null} price="€189/mo" />,
     )
 
-    expect(screen.getByText("Your free trial continues. After that, you'll pay €189/mo.")).toBeInTheDocument()
+    expect(screen.getByText("Your free access continues. After that, you'll pay €189/mo.")).toBeInTheDocument()
   })
 })

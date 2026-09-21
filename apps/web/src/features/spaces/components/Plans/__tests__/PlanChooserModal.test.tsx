@@ -100,7 +100,7 @@ describe('PlanChooserModal', () => {
   })
 
   it('words the headline by lock reason', () => {
-    expect(chooserCopy('lapsed', ENDED_AT).title).toBe('Your Safe Pro free trial ended on Dec 5, 2026')
+    expect(chooserCopy('lapsed', ENDED_AT).title).toBe('Your Safe Pro free access ended on Dec 5, 2026')
     expect(chooserCopy('lapsed', null).title).toBe('Your Workspace has no active plan')
     expect(chooserCopy('payment-failed', null).title).toBe('Your last payment failed')
   })
@@ -109,7 +109,7 @@ describe('PlanChooserModal', () => {
     const onBack = jest.fn()
     render(<PlanChooserModal spaceId={SPACE_ID} reason="lapsed" endedAt={ENDED_AT} onBack={onBack} />)
 
-    expect(screen.getByRole('heading', { name: 'Your Safe Pro free trial ended on Dec 5, 2026' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Your Safe Pro free access ended on Dec 5, 2026' })).toBeInTheDocument()
     expect(screen.getByText('Choose a plan to keep using your Workspace.')).toBeInTheDocument()
     expect(screen.queryByText('Enterprise')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Close' })).not.toBeInTheDocument()
@@ -139,7 +139,7 @@ describe('PlanChooserModal', () => {
     expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument()
 
     fireEvent.click(screen.getByText('step-back'))
-    expect(screen.getByRole('heading', { name: 'Your Safe Pro free trial ended on Dec 5, 2026' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Your Safe Pro free access ended on Dec 5, 2026' })).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Switch to Starter' }))
     fireEvent.click(screen.getByText('step-continue'))

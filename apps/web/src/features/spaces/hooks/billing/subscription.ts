@@ -8,16 +8,16 @@ const ACTIVE_STATUSES = new Set<Subscription['status']>(['active', 'trialing'])
 const PAYMENT_FAILED_STATUSES = new Set<Subscription['status']>(['past_due', 'unpaid'])
 const CANCELED_STATUSES = new Set<Subscription['status']>(['canceled', 'incomplete_expired', 'paused'])
 
-/** From this many days before the trial ends the UI turns to warnings and reminders. */
+/** From this many days before your free access ends the UI turns to warnings and reminders. */
 export const TRIAL_ENDING_SOON_DAYS = 7
-/** The reminder comes back one last time from this many days before the trial ends. */
+/** The reminder comes back one last time from this many days before your free access ends. */
 export const TRIAL_LAST_REMINDER_DAYS = 2
-/** From here on the trial label counts down; further out it just says "Free trial". */
+/** From here on the trial label counts down; further out it just says "Free access". */
 export const TRIAL_COUNTDOWN_DAYS = 14
 
 export const trialLabel = (daysLeft: number | null | undefined): string => {
-  if (daysLeft == null || daysLeft > TRIAL_COUNTDOWN_DAYS) return 'Free trial'
-  return `Free trial · ${daysLeft} ${daysLeft === 1 ? 'day' : 'days'} left`
+  if (daysLeft == null || daysLeft > TRIAL_COUNTDOWN_DAYS) return 'Free access'
+  return `Free access · ${daysLeft} ${daysLeft === 1 ? 'day' : 'days'} left`
 }
 
 export const DAY_MS = 24 * 60 * 60 * 1_000
@@ -27,7 +27,7 @@ export const selectCurrentSubscription = (subscriptions: Subscription[] | undefi
   subscriptions?.find((sub) => ACTIVE_STATUSES.has(sub.status)) ??
   subscriptions?.find((sub) => !CANCELED_STATUSES.has(sub.status))
 
-/** A subscription that grants Safe Pro right now: paid, or on its free trial. */
+/** A subscription that grants Safe Pro right now: paid, or on its free access. */
 export const isLivePlanStatus = (status: PlanStatus): boolean => status === 'active' || status === 'trialing'
 
 /** Mirrors the CGW's UPDATABLE_SUBSCRIPTION_STATUSES, which are the live ones too. */

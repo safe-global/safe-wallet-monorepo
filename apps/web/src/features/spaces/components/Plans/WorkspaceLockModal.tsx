@@ -20,7 +20,7 @@ export const memberCopy = (
   if (reason === 'trial-offered') {
     return {
       title: claimCopy(trialPeriodDays).title,
-      body: `${spaceName} is locked until an admin starts the free trial. Your Safe accounts remain available outside the Workspace.`,
+      body: `${spaceName} is locked until an admin starts the free access. Your Safe accounts remain available outside the Workspace.`,
     }
   }
   return {

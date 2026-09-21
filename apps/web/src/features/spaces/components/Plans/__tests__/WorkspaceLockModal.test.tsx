@@ -120,7 +120,7 @@ describe('WorkspaceLockModal', () => {
       'Your Workspace moved to Safe Pro on Oct 6, 2026',
     )
     expect(screen.getByTestId('locked-member-modal')).toHaveTextContent(
-      'Acme Inc is locked until an admin starts the free trial.',
+      'Acme Inc is locked until an admin starts the free access.',
     )
 
     fireEvent.click(screen.getByRole('button', { name: 'Back to My accounts' }))
@@ -129,10 +129,10 @@ describe('WorkspaceLockModal', () => {
 
   it('words the member explanation by lock reason', () => {
     expect(memberCopy('lapsed', null, ENDED_AT, 'Acme Inc')).toEqual({
-      title: 'Your Safe Pro free trial ended on Dec 5, 2026',
+      title: 'Your Safe Pro free access ended on Dec 5, 2026',
       body: 'An admin needs to choose a plan to unlock it. Your Safe accounts remain available outside the Workspace.',
     })
     expect(memberCopy('payment-failed', null, null, 'Acme Inc').title).toBe('Your Workspace’s last payment failed')
-    expect(memberCopy('trial-offered', 30, null, 'Acme Inc').title).toBe('Start your 30-day free trial of Safe Pro')
+    expect(memberCopy('trial-offered', 30, null, 'Acme Inc').title).toBe('Start your 30-day free access to Safe Pro')
   })
 })

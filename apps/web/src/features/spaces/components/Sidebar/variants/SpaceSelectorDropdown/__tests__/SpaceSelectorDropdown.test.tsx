@@ -1082,11 +1082,11 @@ describe('SpaceSelectorDropdown', () => {
   describe('plan label under the workspace name', () => {
     it.each([
       [false, false, null, 'Workspace', false],
-      [true, true, 20, 'Free trial', false],
-      [true, true, 14, 'Free trial · 14 days left', false],
-      [true, true, 7, 'Free trial · 7 days left', true],
-      [true, true, 1, 'Free trial · 1 day left', true],
-      [true, true, null, 'Free trial', false],
+      [true, true, 20, 'Free access', false],
+      [true, true, 14, 'Free access · 14 days left', false],
+      [true, true, 7, 'Free access · 7 days left', true],
+      [true, true, 1, 'Free access · 1 day left', true],
+      [true, true, null, 'Free access', false],
       [true, false, 20, 'Business', false],
     ])(
       'SAFE_PRO=%s isTrialing=%s daysLeft=%s → "%s", warning=%s',

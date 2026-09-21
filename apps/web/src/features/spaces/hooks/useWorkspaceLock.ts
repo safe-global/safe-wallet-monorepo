@@ -5,7 +5,7 @@ import { useSpacePlan } from './useSpacePlan'
 import { useSpaceOffers } from './billing/useSpaceOffers'
 import { getSubscriptionEndedAt } from './billing/subscription'
 
-/** Why a Workspace is locked: it can still claim its free trial, its last payment failed, or its plan ended. */
+/** Why a Workspace is locked: it can still claim its free access, its last payment failed, or its plan ended. */
 export type WorkspaceLockReason = 'trial-offered' | 'payment-failed' | 'lapsed'
 
 /** A Workspace without a live subscription (never, canceled, unpaid or pending) is locked behind a blocking modal. */
