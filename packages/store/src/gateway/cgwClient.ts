@@ -16,6 +16,9 @@ export const CREDENTIAL_ROUTES = [
 
 const IS_BEHIND_IAP = process.env.NEXT_PUBLIC_IS_BEHIND_IAP === 'true'
 
+// The CGW answers 404 when a Workspace has no subscription at all; resolving it as an empty list lets RTK cache it.
+const SUBSCRIPTIONS_ROUTE = /^\/v1\/billing\/spaces\/[^/]+\/subscriptions(\?.*)?$/
+
 export function isCredentialRoute(url: string) {
   return IS_BEHIND_IAP || CREDENTIAL_ROUTES.some((route) => url.match(route))
 }
@@ -112,6 +115,10 @@ export const dynamicBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBas
   // Apply platform-specific response handling
   if (response.meta?.response) {
     await customHandleResponse(response.meta.response, urlEnd)
+  }
+
+  if (response.error?.status === 404 && SUBSCRIPTIONS_ROUTE.test(urlEnd)) {
+    return { data: [], meta: response.meta }
   }
 
   return response
