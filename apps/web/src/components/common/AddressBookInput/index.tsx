@@ -38,20 +38,17 @@ const groupEntriesBySource = (entries: AddressBookEntry[]): [ContactSource, Addr
   return [...groups.entries()]
 }
 
-/**
- *  Temporary component until revamped safe components are done
- */
-const AddressBookInput = ({
-  name,
-  canAdd,
-  excludeAddresses,
-  ...props
-}: AddressInputProps & {
+export interface AddressBookInputProps extends AddressInputProps {
   canAdd?: boolean
   /** Contacts to leave out of the suggestions. Typing one is still possible, so the caller keeps its
       own `validate` for the message. */
   excludeAddresses?: readonly string[]
-}): ReactElement => {
+}
+
+/**
+ *  Temporary component until revamped safe components are done
+ */
+const AddressBookInput = ({ name, canAdd, excludeAddresses, ...props }: AddressBookInputProps): ReactElement => {
   const listId = useId()
   const [open, setOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
