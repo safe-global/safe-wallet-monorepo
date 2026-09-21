@@ -1,3 +1,4 @@
+import { waitFor } from '@testing-library/react'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { setSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import type Safe from '@safe-global/protocol-kit'
@@ -581,6 +582,7 @@ describe('txSender', () => {
 
       let receivedBody: any
       const chainRelay = jest.fn()
+      const entitlementsRead = jest.fn()
       server.use(
         http.post(`${GATEWAY_URL}/v1/chains/5/relay`, () => {
           chainRelay()
@@ -590,11 +592,16 @@ describe('txSender', () => {
           receivedBody = await request.json()
           return HttpResponse.json({ taskId: '0xspace' })
         }),
+        http.get(`${GATEWAY_URL}/v1/spaces/space-1/entitlements`, () => {
+          entitlementsRead()
+          return HttpResponse.json({ plan: null, entitlements: [] })
+        }),
       )
 
       await dispatchTxRelay(safeTx, safe, 'multisig_0x1', chain, 100000, true, undefined, 'space-1')
 
       expect(chainRelay).not.toHaveBeenCalled()
+      await waitFor(() => expect(entitlementsRead).toHaveBeenCalledTimes(1))
       expect(receivedBody).toEqual({
         to: safeAddress,
         data: '0xabcd',
@@ -603,6 +610,54 @@ describe('txSender', () => {
         acceptUnverifiedSimulation: true,
       })
       expect(txEvents.txDispatch).toHaveBeenCalledWith('RELAYING', expect.objectContaining({ taskId: '0xspace' }))
+    })
+
+    it('types a spent sponsored allowance (402) and re-reads the Workspace entitlements', async () => {
+      const safeAddress = toBeHex('0x789', 20)
+      const safeTx = createMockSafeTransaction({ to: safeAddress, data: '0x', value: '0', operation: 0 })
+      const safe = {
+        address: { value: safeAddress },
+        chainId: '5',
+        version: '1.3.0',
+      } as unknown as Parameters<typeof dispatchTxRelay>[1]
+      const chain = {} as unknown as Parameters<typeof dispatchTxRelay>[3]
+      jest.spyOn(safeContracts, 'getReadOnlyCurrentGnosisSafeContract').mockResolvedValue({
+        encode: jest.fn(() => '0xabcd'),
+      } as any)
+      const entitlementsRead = jest.fn()
+      server.use(
+        http.post(`${GATEWAY_URL}/v1/spaces/space-1/chains/5/relay`, () =>
+          HttpResponse.json(
+            {
+              code: 'QUOTA_EXCEEDED',
+              message: 'Quota exceeded for sponsored_transactions: 50 of 50 used.',
+              feature: 'sponsored_transactions',
+              quota: 50,
+              used: 50,
+              resetsAt: '2026-11-01T00:00:00.000Z',
+            },
+            { status: 402 },
+          ),
+        ),
+        http.get(`${GATEWAY_URL}/v1/spaces/space-1/entitlements`, () => {
+          entitlementsRead()
+          return HttpResponse.json({ plan: null, entitlements: [] })
+        }),
+      )
+
+      await expect(
+        dispatchTxRelay(safeTx, safe, 'multisig_0x1', chain, undefined, undefined, undefined, 'space-1'),
+      ).rejects.toMatchObject({
+        name: 'QuotaExceededError',
+        feature: 'sponsored_transactions',
+        quota: 50,
+        resetsAt: '2026-11-01T00:00:00.000Z',
+      })
+      expect(txEvents.txDispatch).toHaveBeenCalledWith(
+        'FAILED',
+        expect.objectContaining({ error: expect.objectContaining({ name: 'QuotaExceededError' }) }),
+      )
+      await waitFor(() => expect(entitlementsRead).toHaveBeenCalledTimes(1))
     })
   })
 

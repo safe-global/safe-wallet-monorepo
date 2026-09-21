@@ -25,6 +25,9 @@ import TxCard, { TxCardActions } from '../../common/TxCard'
 import CheckWallet from '@/components/common/CheckWallet'
 import type { ExecuteBatchFlowProps } from '.'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { QuotaExceededError } from '@safe-global/utils/services/quotaErrors'
+import ErrorMessage from '@/components/tx/ErrorMessage'
+import { sponsoredQuotaMessage } from '@/components/tx/sponsoredQuotaMessage'
 import SendToBlock from '@/components/tx/SendToBlock'
 import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/shared/ConfirmationTitle'
 import { TxModalContext } from '@/components/tx-flow'
@@ -63,15 +66,18 @@ const buildGasOverrides = (
 const BatchErrorMessages = ({
   estimationError,
   submitError,
+  quotaError,
   isRejectedByUser,
 }: {
   estimationError: unknown
   submitError: Error | undefined
+  quotaError?: QuotaExceededError
   isRejectedByUser: Boolean
 }) => (
   <>
     {estimationError && <TxCheckError error={asError(estimationError)} context="estimation" />}
     {submitError && <TxSubmitError error={submitError} context="execution" />}
+    {quotaError && <ErrorMessage level="warning">{sponsoredQuotaMessage(quotaError)}</ErrorMessage>}
     {isRejectedByUser && <WalletRejectionError />}
   </>
 )
@@ -79,6 +85,7 @@ const BatchErrorMessages = ({
 export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
   const [isSubmittable, setIsSubmittable] = useState<boolean>(true)
   const [submitError, setSubmitError] = useState<Error | undefined>()
+  const [quotaError, setQuotaError] = useState<QuotaExceededError | undefined>()
   const [isRejectedByUser, setIsRejectedByUser] = useState<Boolean>(false)
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
   const chain = useCurrentChain()
@@ -180,6 +187,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
     e.preventDefault()
     setIsSubmittable(false)
     setSubmitError(undefined)
+    setQuotaError(undefined)
     setIsRejectedByUser(false)
 
     try {
@@ -189,6 +197,9 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
       const err = asError(_err)
       if (isWalletRejection(err)) {
         setIsRejectedByUser(true)
+      } else if (err instanceof QuotaExceededError) {
+        setQuotaError(err)
+        setExecutionMethod(ExecutionMethod.WALLET)
       } else {
         logError(Errors._804, err)
         setSubmitError(err)
@@ -249,7 +260,12 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
           the loss of the allocated transaction fees.
         </Alert>
 
-        <BatchErrorMessages estimationError={error} submitError={submitError} isRejectedByUser={isRejectedByUser} />
+        <BatchErrorMessages
+          quotaError={quotaError}
+          estimationError={error}
+          submitError={submitError}
+          isRejectedByUser={isRejectedByUser}
+        />
 
         <div>
           <div className="pt-4">

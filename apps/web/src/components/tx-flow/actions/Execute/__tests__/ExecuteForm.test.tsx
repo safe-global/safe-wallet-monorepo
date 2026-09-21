@@ -5,6 +5,7 @@ import { OperationType } from '@safe-global/types-kit'
 import { type ReactElement } from 'react'
 import { ExecuteForm } from '../ExecuteForm'
 import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
+import { QuotaExceededError } from '@safe-global/utils/services/quotaErrors'
 import * as useGasLimit from '@/hooks/useGasLimit'
 import * as useIsValidExecution from '@/hooks/useIsValidExecution'
 import * as useWalletCanRelay from '@/hooks/useWalletCanRelay'
@@ -269,6 +270,34 @@ describe('ExecuteForm', () => {
     })
     // The doomed tx can no longer be submitted.
     expect(getByText('Execute')).toBeDisabled()
+  })
+
+  it('explains a spent sponsored allowance and falls back to the connected wallet', async () => {
+    const mockExecuteTx = jest
+      .fn()
+      .mockRejectedValue(
+        new QuotaExceededError('sponsored_transactions', 50, 50, '2026-11-01T00:00:00.000Z', 'Quota exceeded'),
+      )
+
+    const { getByText } = render(
+      <ExecuteForm
+        {...defaultProps}
+        safeTx={safeTransaction}
+        txActions={{ ...defaultProps.txActions, executeTx: mockExecuteTx }}
+      />,
+    )
+
+    fireEvent.click(getByText('Execute'))
+
+    await waitFor(() => {
+      expect(
+        getByText(
+          'Your Workspace has used all 50 sponsored transactions of this cycle until Nov 1, 2026. Pay the gas with your connected wallet instead.',
+        ),
+      ).toBeInTheDocument()
+    })
+    // The user can still execute, now paying the gas themselves.
+    expect(getByText('Execute')).toBeEnabled()
   })
 
   it('offers an "Execute anyway" retry with acceptUnverifiedSimulation on INDETERMINATE_SIMULATION', async () => {

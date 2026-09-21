@@ -55,6 +55,8 @@ import { Link } from '@/components/ui/link'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
 import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'
+import { getSeatLimitMessage } from '../../utils/seatLimitError'
 
 const PICKER_COLUMNS: SafeAccountColumnId[] = ['select', 'name', 'threshold', 'networks', 'balance']
 
@@ -257,7 +259,11 @@ const AddAccounts = ({
 
         if (isElevationRequiredError(result.error)) return
         if (result.error) {
-          const msg = getRtkQueryErrorMessage(result.error) || 'Something went wrong adding one or more Safe accounts.'
+          const seatLimit = getSeatLimitMessage(result.error)
+          if (seatLimit && spaceId) refreshSpaceEntitlements(dispatch, spaceId)
+          const msg =
+            seatLimit ??
+            (getRtkQueryErrorMessage(result.error) || 'Something went wrong adding one or more Safe accounts.')
           setError(msg.replace(/:\s*Key\s*\(.*$/, ''))
           return
         }

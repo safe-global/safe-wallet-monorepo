@@ -35,6 +35,8 @@ import { asError } from '@safe-global/utils/services/exceptions/utils'
 import chains from '@safe-global/utils/config/chains'
 import { createExistingTx } from './create'
 import { getRelaySimulationError } from '@safe-global/utils/services/relayErrors'
+import { getQuotaExceededError } from '@safe-global/utils/services/quotaErrors'
+import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'
 
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import type { TxSenderScope } from '@/components/tx-flow/safe-scope/types'
@@ -522,6 +524,11 @@ export const dispatchTxRelay = async (
             }),
           )
           .unwrap()
+          .then((response) => {
+            // The Workspace just spent a sponsored transaction; every meter on screen should say so.
+            refreshSpaceEntitlements(store.dispatch, sponsorSpaceId)
+            return response
+          })
       : await store
           .dispatch(
             relayApi.endpoints.relayRelayV1.initiate({
@@ -555,8 +562,11 @@ export const dispatchTxRelay = async (
     waitForRelayedTx(taskId, [txId], safe.chainId, safe.address.value, safeTx.data.nonce)
   } catch (error) {
     // CGW pre-relay simulation surfaces SIMULATION_FAILED / INDETERMINATE_SIMULATION as a typed
-    // error so the UI can block or offer an explicit retry; everything else stays as-is.
-    const finalError = getRelaySimulationError(error) ?? asError(error)
+    // error so the UI can block or offer an explicit retry; a spent Workspace allowance (402) is typed too and
+    // refreshes the meter, since the cached one let this relay through. Everything else stays as-is.
+    const quotaError = sponsorSpaceId ? getQuotaExceededError(error) : undefined
+    if (quotaError && sponsorSpaceId) refreshSpaceEntitlements(store.dispatch, sponsorSpaceId)
+    const finalError = getRelaySimulationError(error) ?? quotaError ?? asError(error)
     txDispatch(TxEvent.FAILED, {
       txId,
       error: finalError,
@@ -595,20 +605,27 @@ export const dispatchBatchExecutionRelay = async (
             }),
           )
           .unwrap()
+          .then((response) => {
+            refreshSpaceEntitlements(store.dispatch, sponsorSpaceId)
+            return response
+          })
       : await store
           .dispatch(relayApi.endpoints.relayRelayV1.initiate({ chainId, relayDto: { to, data, version: safeVersion } }))
           .unwrap()
   } catch (error) {
+    const quotaError = sponsorSpaceId ? getQuotaExceededError(error) : undefined
+    if (quotaError && sponsorSpaceId) refreshSpaceEntitlements(store.dispatch, sponsorSpaceId)
+    const finalError = quotaError ?? asError(error)
     txs.forEach(({ txId }) => {
       txDispatch(TxEvent.FAILED, {
         txId,
         chainId,
         safeAddress,
-        error: asError(error),
+        error: finalError,
         groupKey,
       })
     })
-    throw error
+    throw finalError
   }
 
   const taskId = relayResponse.taskId

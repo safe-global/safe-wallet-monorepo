@@ -41,6 +41,8 @@ import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { SafeTxContext } from '../../SafeTxProvider'
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
+import { QuotaExceededError } from '@safe-global/utils/services/quotaErrors'
+import { sponsoredQuotaMessage } from '@/components/tx/sponsoredQuotaMessage'
 
 export const ExecuteForm = ({
   safeTx,
@@ -164,10 +166,13 @@ export const ExecuteForm = ({
 
   // CGW pre-relay simulation outcome (SIMULATION_FAILED blocks; INDETERMINATE offers an override).
   const [relaySimError, setRelaySimError] = useState<RelaySimulationError | undefined>(undefined)
+  // The Workspace ran out of sponsored transactions while this one was in flight.
+  const [quotaError, setQuotaError] = useState<QuotaExceededError | undefined>(undefined)
 
   // Clear a stale simulation verdict when the payload changes (e.g. user edits params / gas token).
   useEffect(() => {
     setRelaySimError(undefined)
+    setQuotaError(undefined)
   }, [safeTx?.data])
 
   // `acceptUnverifiedSimulation` is only set when the user explicitly retries past an
@@ -199,6 +204,9 @@ export const ExecuteForm = ({
         setIsRejectedByUser(true)
       } else if (err instanceof RelaySimulationError) {
         setRelaySimError(err)
+      } else if (err instanceof QuotaExceededError) {
+        setQuotaError(err)
+        handleExecutionMethodChange(ExecutionMethod.WALLET)
       } else {
         trackError(Errors._804, err)
         setSubmitError(err)
@@ -302,6 +310,8 @@ export const ExecuteForm = ({
         ) : checkError ? (
           <TxCheckError error={checkError} context="estimation" />
         ) : null}
+
+        {quotaError && <ErrorMessage level="warning">{sponsoredQuotaMessage(quotaError)}</ErrorMessage>}
 
         {/* CGW pre-relay simulation verdict */}
         {relaySimError?.code === 'SIMULATION_FAILED' && (
