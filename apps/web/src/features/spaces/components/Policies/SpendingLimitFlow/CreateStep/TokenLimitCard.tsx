@@ -13,11 +13,17 @@ import { Card } from '@/components/ui/card'
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import TokenSelector from '../TokenSelector'
+import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
 import { findTokenOption, tokenOptionLabel, type TokenOption } from '../utils/tokenOptions'
 import { describeResetPeriod } from '../utils/resetPeriod'
-import { validateLimitAmount, validateUniqueToken } from '../utils/validation'
-import { limitPath, limitsPath, type SpendingLimitPolicyFormValues } from '../types'
+import {
+  existingTokensForSpender,
+  validateLimitAmount,
+  validateNoExistingLimit,
+  validateUniqueToken,
+} from '../utils/validation'
+import { limitPath, limitsPath, spenderAddressPath, type SpendingLimitPolicyFormValues } from '../types'
 import {
   FREQUENCY_LABEL,
   LIMIT_AMOUNT_LABEL,
@@ -73,6 +79,12 @@ const TokenLimitCard = ({
     formState: { errors },
   } = useFormContext<SpendingLimitPolicyFormValues>()
   const { options } = useSpendingLimitTokenOptions()
+  const { limits: existingLimits } = useExistingSpendingLimits()
+  const spenderAddress = watch(spenderAddressPath(spenderIndex)) ?? ''
+  const existingTokens = useMemo(
+    () => existingTokensForSpender(spenderAddress, existingLimits),
+    [spenderAddress, existingLimits],
+  )
 
   const tokenPath = limitPath(spenderIndex, limitIndex, 'tokenAddress')
   const amountPath = limitPath(spenderIndex, limitIndex, 'amount')
@@ -83,10 +95,13 @@ const TokenLimitCard = ({
   // RHF hands back the same mutated array every render, so key on the joined values, not the reference.
   const siblingTokensKey = (watch(limitsPath(spenderIndex)) ?? []).map((limit) => limit?.tokenAddress ?? '').join(',')
 
-  /** Tokens the spender's other rows already use — hidden from this row's list. */
+  /** Tokens the spender's other rows use, plus those the Safe already limits for this spender — hidden from this row. */
   const excludeAddresses = useMemo(
-    () => siblingTokensKey.split(',').filter((address, index) => index !== limitIndex && address !== ''),
-    [siblingTokensKey, limitIndex],
+    () => [
+      ...siblingTokensKey.split(',').filter((address, index) => index !== limitIndex && address !== ''),
+      ...existingTokens,
+    ],
+    [siblingTokensKey, limitIndex, existingTokens],
   )
   /** A token change on a sibling re-validates this row, so a duplicate shows on both. */
   const siblingTokenPaths = useMemo(
@@ -105,6 +120,12 @@ const TokenLimitCard = ({
   useEffect(() => {
     if (getValues(amountPath)) trigger(amountPath)
   }, [decimals, amountPath, getValues, trigger])
+
+  // A token picked before the Safe's limits loaded, or before the spender was typed, is re-checked once they
+  // are — not on every mount, since re-validating while `existingLimits` is still unknown cannot change the result.
+  useEffect(() => {
+    if (existingLimits !== undefined && getValues(tokenPath)) trigger(tokenPath)
+  }, [existingTokens, existingLimits, tokenPath, getValues, trigger])
 
   const tokenError = get(errors, tokenPath)
   const amountError = get(errors, amountPath)
@@ -144,7 +165,8 @@ const TokenLimitCard = ({
                     (getValues(limitsPath(spenderIndex)) ?? [])
                       .map((limit) => limit.tokenAddress)
                       .filter((_, index) => index !== limitIndex),
-                  ),
+                  ) ||
+                  validateNoExistingLimit(value, getValues(spenderAddressPath(spenderIndex)) ?? '', existingLimits),
               }}
               render={({ field }) => (
                 <TokenSelector

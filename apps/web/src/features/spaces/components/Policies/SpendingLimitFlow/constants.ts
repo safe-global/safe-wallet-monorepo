@@ -26,6 +26,7 @@ export const NEXT_LABEL = 'Next'
 
 export const DUPLICATE_SPENDER_ERROR = 'This spender is already in the policy. Add the token to their existing card.'
 export const DUPLICATE_TOKEN_ERROR = 'This token already has a limit for this spender'
+export const EXISTING_LIMIT_ERROR = 'This spender already has a spending limit for this token'
 
 export const REVIEW_STEP_TITLE = 'Review policy'
 export const REVIEW_APPLIES_TO_LABEL = 'Applies to'
