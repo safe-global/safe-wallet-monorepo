@@ -1,6 +1,7 @@
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import { REQUEST_POLICY_FORM_URL } from '../constants'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { PROPOSER_INTRO_SEEN_KEY } from '../ProposerIntroDialog/constants'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from '../SpendingLimitIntroDialog/constants'
@@ -218,13 +219,36 @@ describe('Policies', () => {
     })
   })
 
-  it('opens no intro for the policies that have no flow yet', async () => {
-    const { user } = renderWithUserEvent(<Policies />)
+  describe('the Something missing? tile', () => {
+    const originalOpen = window.open
+    const mockOpen = jest.fn()
 
-    await user.click(screen.getByTestId('policy-catalogue-tile-suggestion'))
+    beforeEach(() => {
+      window.open = mockOpen
+    })
 
-    expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('spending-limit-intro-dialog')).not.toBeInTheDocument()
+    afterAll(() => {
+      window.open = originalOpen
+    })
+
+    it('opens the request-policy form in a new tab', async () => {
+      const { user } = renderWithUserEvent(<Policies />)
+
+      await user.click(screen.getByTestId('policy-catalogue-tile-suggestion'))
+
+      expect(mockOpen).toHaveBeenCalledTimes(1)
+      expect(mockOpen.mock.calls[0][0]).toBe(REQUEST_POLICY_FORM_URL)
+      expect(mockOpen.mock.calls[0][1]).toBe('_blank')
+    })
+
+    it('opens no intro dialog', async () => {
+      const { user } = renderWithUserEvent(<Policies />)
+
+      await user.click(screen.getByTestId('policy-catalogue-tile-suggestion'))
+
+      expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('spending-limit-intro-dialog')).not.toBeInTheDocument()
+    })
   })
 
   describe('starting the spending limit flow', () => {

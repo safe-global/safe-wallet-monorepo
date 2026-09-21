@@ -225,6 +225,28 @@
   }
 }
 
+/* A recovery row fills four cells at most — type, the malicious warning, date, and one of
+   status/actions — and has no nonce, amount or confirmations. The queue templates above name
+   neither `status` nor most of what they place, so below 680px they dropped the recovery's chip
+   onto an implicit track under the row. Higher specificity than `.gridContainer.queue`, so these
+   win inside both container queries above while leaving every other row variant untouched. */
+@container (max-width: 680px) {
+  .gridContainer.queue.recovery {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      'type type info'
+      'date status actions';
+  }
+}
+
+/* The phone rule strips a transfer row down to fit an amount and a nonce; a recovery row carries
+   neither, so it keeps its date. */
+@container (max-width: 380px) {
+  .gridContainer.queue.recovery .date {
+    display: block;
+  }
+}
+
 /* History and bulk-group rows have fewer columns (no confirmations/actions, ~424px of minimums), so
    they hold one line well below the 900px fallback that queue rows need. */
 @media (max-width: 900px) and (min-width: 600px) {
