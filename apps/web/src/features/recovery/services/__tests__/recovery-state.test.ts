@@ -530,7 +530,7 @@ describe('recovery-state', () => {
     })
 
     it('should not cache events still within reorg range of the chain head', async () => {
-      const queryFilter = jest.fn().mockResolvedValue([event(0n, 99_990)])
+      const queryFilter = jest.fn().mockResolvedValue([event(0n, 99_995)])
       const { run } = setup({
         txNonce: 0n,
         queueNonce: 1n,

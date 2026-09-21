@@ -102,9 +102,9 @@ const MIN_LOG_QUERY_BLOCK_RANGE = 1_000
 // Recently queued txs are the common case: walk back this many windows before bisecting
 const RECENT_WINDOWS = 3
 
-// A TransactionAdded event never changes once it is this deep, so found events are kept for the
-// session. Caching a log still within reorg range could serve arguments executeNextTx would revert on.
-const FINALIZED_DEPTH_BLOCKS = 64
+// Past any reorg on record (deepest ever 7 blocks, 1 since the Merge). A log shallower than this
+// can still be replaced, and the cached arguments would then make executeNextTx revert.
+const REORG_DEPTH_BLOCKS = 12
 
 export const _addedTransactionsCache = new Map<string, AddedEvent>()
 
@@ -244,7 +244,7 @@ const queryAddedTransactions = async ({
   const events = await scanAddedTransactions({ delayModifier, provider, topics, missingNonces, latestBlock })
 
   for (const event of events) {
-    if (!event.removed && latestBlock - event.blockNumber >= FINALIZED_DEPTH_BLOCKS) {
+    if (!event.removed && latestBlock - event.blockNumber >= REORG_DEPTH_BLOCKS) {
       _addedTransactionsCache.set(getCacheKey(chainId, delayModifierAddress, event.args.queueNonce), event)
     }
   }
