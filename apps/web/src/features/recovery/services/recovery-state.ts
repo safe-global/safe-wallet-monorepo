@@ -156,7 +156,7 @@ const createLogWindowReader = (delayModifier: Delay, topics: AddedTransactionTop
   return {
     /** Reads the window ending at `toBlock`, not reaching below `floor`. */
     async readDownFrom(toBlock: number, floor: number): Promise<WindowRead> {
-      for (;;) {
+      while (true) {
         const fromBlock = Math.max(toBlock - windowSize + 1, floor)
         try {
           return { events: await read(fromBlock, toBlock), reached: fromBlock }
@@ -168,7 +168,7 @@ const createLogWindowReader = (delayModifier: Delay, topics: AddedTransactionTop
 
     /** Reads the window starting at `fromBlock`, not reaching above `ceiling`. */
     async readUpFrom(fromBlock: number, ceiling: number): Promise<WindowRead> {
-      for (;;) {
+      while (true) {
         const toBlock = Math.min(fromBlock + windowSize - 1, ceiling)
         try {
           return { events: await read(fromBlock, toBlock), reached: toBlock }
