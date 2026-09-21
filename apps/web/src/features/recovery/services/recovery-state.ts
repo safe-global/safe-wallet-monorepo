@@ -97,8 +97,8 @@ export const _getRecoveryQueueItemTimestamps = async ({
 }
 
 // Infura caps eth_getLogs at 10k blocks; the window halves on rejection for stricter RPCs
-const LOG_QUERY_BLOCK_RANGE = 10_000
-const MIN_LOG_QUERY_BLOCK_RANGE = 1_000
+const LOG_WINDOW_BLOCKS = 10_000
+const MIN_LOG_WINDOW_BLOCKS = 1_000
 // Recently queued txs are the common case: walk back this many windows before bisecting
 const RECENT_WINDOWS = 3
 
@@ -106,12 +106,121 @@ const RECENT_WINDOWS = 3
 // can still be replaced, and the cached arguments would then make executeNextTx revert.
 const REORG_DEPTH_BLOCKS = 12
 
+/** Everything a read against one Delay Modifier needs. */
+type DelayModifierContext = {
+  delayModifier: Delay
+  delayModifierAddress: string
+  provider: JsonRpcProvider
+  chainId: string
+}
+
+/** The Delay Modifier's configuration and nonces, as one multicall reads them. */
+type DelayModifierConfig = {
+  recoverers: Array<string>
+  expiry: bigint
+  delay: bigint
+  txNonce: bigint
+  queueNonce: bigint
+}
+
+type AddedTransactionTopics = Array<string | Array<string> | null>
+
+/** Logs from one window, and the furthest block it reached. */
+type WindowRead = { events: Array<AddedEvent>; reached: number }
+
 export const _addedTransactionsCache = new Map<string, AddedEvent>()
 
 const getCacheKey = (chainId: string, delayModifierAddress: string, nonce: bigint) =>
   `${chainId}:${delayModifierAddress.toLowerCase()}:${nonce}`
 
-// First block mined at or after `timestamp`, found by bisecting [0, upperBound]
+/**
+ * Reads TransactionAdded logs one window at a time. The window halves whenever the RPC rejects the
+ * range, and stays narrowed afterwards, so a node with a lower cap than our default still works.
+ */
+const createLogWindowReader = (delayModifier: Delay, topics: AddedTransactionTopics) => {
+  let windowSize = LOG_WINDOW_BLOCKS
+
+  const narrow = () => {
+    if (windowSize <= MIN_LOG_WINDOW_BLOCKS) {
+      return false
+    }
+    windowSize = Math.floor(windowSize / 2)
+    return true
+  }
+
+  const read = async (fromBlock: number, toBlock: number): Promise<Array<AddedEvent>> =>
+    // Zodiac's typings don't cover a raw topic array, which is how we filter by nonce
+    // @ts-expect-error
+    delayModifier.queryFilter(topics, fromBlock, toBlock)
+
+  return {
+    /** Reads the window ending at `toBlock`, not reaching below `floor`. */
+    async readDownFrom(toBlock: number, floor: number): Promise<WindowRead> {
+      for (;;) {
+        const fromBlock = Math.max(toBlock - windowSize + 1, floor)
+        try {
+          return { events: await read(fromBlock, toBlock), reached: fromBlock }
+        } catch (error) {
+          if (!narrow()) throw error
+        }
+      }
+    },
+
+    /** Reads the window starting at `fromBlock`, not reaching above `ceiling`. */
+    async readUpFrom(fromBlock: number, ceiling: number): Promise<WindowRead> {
+      for (;;) {
+        const toBlock = Math.min(fromBlock + windowSize - 1, ceiling)
+        try {
+          return { events: await read(fromBlock, toBlock), reached: toBlock }
+        } catch (error) {
+          if (!narrow()) throw error
+        }
+      }
+    },
+  }
+}
+
+type LogWindowReader = ReturnType<typeof createLogWindowReader>
+type IsDone = (events: Array<AddedEvent>) => boolean
+
+/** The common case: a recently queued tx sits within a few windows of the chain head. */
+const scanRecentBlocks = async (
+  reader: LogWindowReader,
+  latestBlock: number,
+  isDone: IsDone,
+): Promise<{ events: Array<AddedEvent>; oldestUnscanned: number }> => {
+  const events: Array<AddedEvent> = []
+  let toBlock = latestBlock
+
+  for (let window = 0; window < RECENT_WINDOWS && toBlock >= 0 && !isDone(events); window++) {
+    const read = await reader.readDownFrom(toBlock, 0)
+    events.push(...read.events)
+    toBlock = read.reached - 1
+  }
+
+  return { events, oldestUnscanned: toBlock }
+}
+
+/** Anything older: scan forward from where it was queued rather than everything in between. */
+const scanFrom = async (
+  reader: LogWindowReader,
+  fromBlock: number,
+  toBlock: number,
+  isDone: IsDone,
+): Promise<Array<AddedEvent>> => {
+  const events: Array<AddedEvent> = []
+  let nextBlock = fromBlock
+
+  while (nextBlock <= toBlock && !isDone(events)) {
+    const read = await reader.readUpFrom(nextBlock, toBlock)
+    events.push(...read.events)
+    nextBlock = read.reached + 1
+  }
+
+  return events
+}
+
+/** First block mined at or after `timestamp`, found by bisecting [0, upperBound]. */
 const findBlockAtTimestamp = async (provider: JsonRpcProvider, timestamp: number, upperBound: number) => {
   let low = 0
   let high = upperBound
@@ -134,122 +243,105 @@ const findBlockAtTimestamp = async (provider: JsonRpcProvider, timestamp: number
   return low
 }
 
-const scanAddedTransactions = async ({
-  delayModifier,
-  provider,
-  topics,
-  missingNonces,
-  latestBlock,
-}: {
-  delayModifier: Delay
-  provider: JsonRpcProvider
-  topics: Array<string | Array<string> | null>
-  missingNonces: Array<bigint>
-  latestBlock: number
-}): Promise<Array<AddedEvent>> => {
-  const events: Array<AddedEvent> = []
-  const isComplete = () => events.length >= missingNonces.length
-  let range = LOG_QUERY_BLOCK_RANGE
+/** Block the given nonce was queued in. Every missing event was emitted at or after it. */
+const findQueuedBlock = async (
+  { delayModifier, provider }: DelayModifierContext,
+  nonce: bigint,
+  upperBound: number,
+): Promise<number> => {
+  const createdAt = await delayModifier.txCreatedAt(nonce)
 
-  // Returns false after halving the window so the caller recomputes its bounds
-  const queryWindow = async (fromBlock: number, toBlock: number): Promise<boolean> => {
-    try {
-      // @ts-expect-error
-      const chunk: Array<AddedEvent> = await delayModifier.queryFilter(topics, fromBlock, toBlock)
-      events.push(...chunk)
-      return true
-    } catch (error) {
-      if (range <= MIN_LOG_QUERY_BLOCK_RANGE) {
-        throw error
-      }
-      range = Math.floor(range / 2)
-      return false
-    }
-  }
-
-  let toBlock = latestBlock
-  let windows = 0
-  while (toBlock >= 0 && windows < RECENT_WINDOWS && !isComplete()) {
-    const fromBlock = Math.max(toBlock - range + 1, 0)
-    if (await queryWindow(fromBlock, toBlock)) {
-      toBlock = fromBlock - 1
-      windows++
-    }
-  }
-
-  if (isComplete() || toBlock < 0) {
-    return events
-  }
-
-  // Every missing event was emitted at or after the oldest missing nonce was queued
-  const createdAt = await delayModifier.txCreatedAt(missingNonces[0])
   if (createdAt === BigInt(0)) {
-    throw new Error(`Could not determine when recovery ${missingNonces[0]} was queued`)
+    throw new Error(`Could not determine when recovery ${nonce} was queued`)
   }
 
-  let fromBlock = await findBlockAtTimestamp(provider, Number(createdAt), toBlock)
-  while (fromBlock <= toBlock && !isComplete()) {
-    const windowEnd = Math.min(fromBlock + range - 1, toBlock)
-    if (await queryWindow(fromBlock, windowEnd)) {
-      fromBlock = windowEnd + 1
-    }
-  }
-
-  return events
+  return findBlockAtTimestamp(provider, Number(createdAt), upperBound)
 }
 
-const queryAddedTransactions = async ({
-  delayModifier,
-  delayModifierAddress,
-  queueNonce,
-  txNonce,
-  provider,
-  chainId,
-}: {
-  delayModifier: Delay
-  delayModifierAddress: string
-  queueNonce: bigint
-  txNonce: bigint
-  provider: JsonRpcProvider
-  chainId: string
-}): Promise<Array<AddedEvent>> => {
-  if (queueNonce === txNonce) {
-    // There are no queued txs
-    return []
+const findAddedTransactions = async (
+  context: DelayModifierContext,
+  topics: AddedTransactionTopics,
+  missingNonces: Array<bigint>,
+  latestBlock: number,
+): Promise<Array<AddedEvent>> => {
+  const reader = createLogWindowReader(context.delayModifier, topics)
+  const isDone: IsDone = (events) => events.length >= missingNonces.length
+
+  const recent = await scanRecentBlocks(reader, latestBlock, isDone)
+  if (isDone(recent.events) || recent.oldestUnscanned < 0) {
+    return recent.events
   }
 
-  // We filter for the valid nonces while fetching the event logs.
-  // The nonce has to be one between the current queueNonce and the txNonce.
+  const queuedAt = await findQueuedBlock(context, missingNonces[0], recent.oldestUnscanned)
+  const older = await scanFrom(reader, queuedAt, recent.oldestUnscanned, isDone)
+
+  return [...recent.events, ...older]
+}
+
+const splitCachedNonces = (
+  { chainId, delayModifierAddress }: DelayModifierContext,
+  { txNonce, queueNonce }: Pick<DelayModifierConfig, 'txNonce' | 'queueNonce'>,
+) => {
   const cached: Array<AddedEvent> = []
-  const missingNonces: Array<bigint> = []
+  const missing: Array<bigint> = []
+
   for (let nonce = txNonce; nonce < queueNonce; nonce++) {
     const event = _addedTransactionsCache.get(getCacheKey(chainId, delayModifierAddress, nonce))
     if (event) {
       cached.push(event)
     } else {
-      missingNonces.push(nonce)
+      missing.push(nonce)
     }
   }
 
-  if (missingNonces.length === 0) {
-    return cached
-  }
+  return { cached, missing }
+}
 
-  const transactionAddedFilter = delayModifier.filters.TransactionAdded() as TransactionAddedEvent.Filter
-
-  const topics = await transactionAddedFilter.getTopicFilter()
-  topics[1] = missingNonces.map((nonce) => toBeHex(nonce, 32))
-
-  const latestBlock = await provider.getBlockNumber()
-  const events = await scanAddedTransactions({ delayModifier, provider, topics, missingNonces, latestBlock })
-
+const cacheSettledEvents = (
+  { chainId, delayModifierAddress }: DelayModifierContext,
+  events: Array<AddedEvent>,
+  latestBlock: number,
+) => {
   for (const event of events) {
     if (!event.removed && latestBlock - event.blockNumber >= REORG_DEPTH_BLOCKS) {
       _addedTransactionsCache.set(getCacheKey(chainId, delayModifierAddress, event.args.queueNonce), event)
     }
   }
+}
 
-  return [...cached, ...events]
+/** Topic filter for TransactionAdded, narrowed to the nonces we still need. */
+const getAddedTransactionTopics = async (
+  delayModifier: Delay,
+  nonces: Array<bigint>,
+): Promise<AddedTransactionTopics> => {
+  const filter = delayModifier.filters.TransactionAdded() as TransactionAddedEvent.Filter
+  const topics = await filter.getTopicFilter()
+  topics[1] = nonces.map((nonce) => toBeHex(nonce, 32))
+
+  return topics
+}
+
+const queryAddedTransactions = async (
+  context: DelayModifierContext,
+  config: DelayModifierConfig,
+): Promise<Array<AddedEvent>> => {
+  if (config.queueNonce === config.txNonce) {
+    // There are no queued txs
+    return []
+  }
+
+  const { cached, missing } = splitCachedNonces(context, config)
+  if (missing.length === 0) {
+    return cached
+  }
+
+  const topics = await getAddedTransactionTopics(context.delayModifier, missing)
+  const latestBlock = await context.provider.getBlockNumber()
+  const found = await findAddedTransactions(context, topics, missing, latestBlock)
+
+  cacheSettledEvents(context, found, latestBlock)
+
+  return [...cached, ...found]
 }
 
 const getRecoveryQueueItem = async ({
@@ -300,102 +392,87 @@ const getRecoveryQueueItem = async ({
   }
 }
 
+/** Reads the Delay Modifier's configuration and nonces in a single multicall. */
+const readDelayModifierConfig = async ({
+  delayModifier,
+  delayModifierAddress,
+  provider,
+}: DelayModifierContext): Promise<DelayModifierConfig> => {
+  const abi = delayModifier.interface
+  const call = (data: string) => ({ to: delayModifierAddress, data })
+
+  const [modules, expiry, delay, txNonce, queueNonce] = await multicall(provider, [
+    call(abi.encodeFunctionData('getModulesPaginated', [SENTINEL_ADDRESS, MAX_RECOVERER_PAGE_SIZE])),
+    call(abi.encodeFunctionData('txExpiration')),
+    call(abi.encodeFunctionData('txCooldown')),
+    call(abi.encodeFunctionData('txNonce')),
+    call(abi.encodeFunctionData('queueNonce')),
+  ])
+
+  const [recoverers] = abi.decodeFunctionResult('getModulesPaginated', modules.returnData) as unknown as [
+    Array<string>,
+    string,
+  ]
+
+  return {
+    recoverers,
+    expiry: BigInt(expiry.returnData),
+    delay: BigInt(delay.returnData),
+    txNonce: BigInt(txNonce.returnData),
+    queueNonce: BigInt(queueNonce.returnData),
+  }
+}
+
+/** What reading recovery state needs, beyond the Delay Modifier itself. */
+type RecoveryStateQuery = {
+  safeAddress: string
+  provider: JsonRpcProvider
+  chainId: string
+  version: SafeState['version']
+}
+
 export const _getRecoveryStateItem = async ({
   delayModifier,
   safeAddress,
   provider,
   chainId,
   version,
-}: {
-  delayModifier: Delay
-  safeAddress: string
-  provider: JsonRpcProvider
-  chainId: string
-  version: SafeState['version']
-}): Promise<RecoveryStateItem> => {
-  const delayModifierAddress = await delayModifier.getAddress()
-  const calls = [
-    {
-      to: delayModifierAddress,
-      data: delayModifier.interface.encodeFunctionData('getModulesPaginated', [
-        SENTINEL_ADDRESS,
-        MAX_RECOVERER_PAGE_SIZE,
-      ]),
-    },
-    {
-      to: delayModifierAddress,
-      data: delayModifier.interface.encodeFunctionData('txExpiration'),
-    },
-    {
-      to: delayModifierAddress,
-      data: delayModifier.interface.encodeFunctionData('txCooldown'),
-    },
-    {
-      to: delayModifierAddress,
-      data: delayModifier.interface.encodeFunctionData('txNonce'),
-    },
-    {
-      to: delayModifierAddress,
-      data: delayModifier.interface.encodeFunctionData('queueNonce'),
-    },
-  ]
-  const callResults = await multicall(provider, calls)
-
-  const [[recoverers], expiry, delay, txNonce, queueNonce] = [
-    delayModifier.interface.decodeFunctionResult('getModulesPaginated', callResults[0].returnData) as unknown as [
-      string[],
-      string,
-    ],
-    BigInt(callResults[1].returnData),
-    BigInt(callResults[2].returnData),
-    BigInt(callResults[3].returnData),
-    BigInt(callResults[4].returnData),
-  ]
-
-  const queuedTransactionsAdded = await queryAddedTransactions({
+}: RecoveryStateQuery & { delayModifier: Delay }): Promise<RecoveryStateItem> => {
+  const context: DelayModifierContext = {
     delayModifier,
-    delayModifierAddress,
-    queueNonce,
-    txNonce,
+    delayModifierAddress: await delayModifier.getAddress(),
     provider,
     chainId,
-  })
+  }
+
+  const config = await readDelayModifierConfig(context)
+  const transactionsAdded = await queryAddedTransactions(context, config)
 
   const queue = await Promise.all(
-    queuedTransactionsAdded.map((transactionAdded) => {
-      return getRecoveryQueueItem({
+    transactionsAdded.map((transactionAdded) =>
+      getRecoveryQueueItem({
         delayModifier,
         transactionAdded,
-        delay: BigInt(delay),
-        expiry: BigInt(expiry),
+        delay: config.delay,
+        expiry: config.expiry,
         provider,
         chainId,
         version,
         safeAddress,
-      })
-    }),
+      }),
+    ),
   )
 
   return {
-    address: await delayModifier.getAddress(),
-    recoverers,
-    expiry: BigInt(expiry),
-    delay: BigInt(delay),
-    txNonce: BigInt(txNonce),
-    queueNonce: BigInt(queueNonce),
+    ...config,
+    address: context.delayModifierAddress,
     queue: queue.filter((item) => !item.removed),
   }
 }
 
 export function getRecoveryState({
   delayModifiers,
-  ...rest
-}: {
-  delayModifiers: Array<Delay>
-  safeAddress: string
-  provider: JsonRpcProvider
-  chainId: string
-  version: SafeState['version']
-}): Promise<RecoveryState> {
-  return Promise.all(delayModifiers.map((delayModifier) => _getRecoveryStateItem({ delayModifier, ...rest })))
+  ...query
+}: RecoveryStateQuery & { delayModifiers: Array<Delay> }): Promise<RecoveryState> {
+  return Promise.all(delayModifiers.map((delayModifier) => _getRecoveryStateItem({ delayModifier, ...query })))
 }
