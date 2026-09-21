@@ -147,9 +147,6 @@ export const useTxActions = (): TxActions => {
 
       // Smart contract wallets must sign via an on-chain tx
       if (signer.isSafe || (await isSmartContractWallet(signer.chainId, signer.address))) {
-        // If the first signature is a smart contract wallet, we have to propose w/o signatures
-        // Otherwise the backend won't pick up the tx
-        // The signature will be added once the on-chain signature is indexed
         const id = txId || (await _propose(signer.address, safeTx, origin)).txId
         await dispatchOnChainSigning(
           safeTx,
