@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from '@/tests/test-utils'
 import SafeProNoticeModal from '../index'
 
 describe('SafeProNoticeModal', () => {
-  it('explains the lock without a close button and leads back to My accounts', () => {
+  it('explains the lock without a close button and leads to My accounts', () => {
     const onAction = jest.fn()
     render(
       <SafeProNoticeModal
@@ -17,7 +17,7 @@ describe('SafeProNoticeModal', () => {
     expect(screen.getByText('An admin needs to choose a plan to unlock it.')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Close' })).not.toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Back to My accounts' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Go to My accounts' }))
     expect(onAction).toHaveBeenCalled()
   })
 

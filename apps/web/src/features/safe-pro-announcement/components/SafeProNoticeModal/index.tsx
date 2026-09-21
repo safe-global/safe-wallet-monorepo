@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { DialogTitle } from '@/components/ui/dialog'
 import { Typography } from '@/components/ui/typography'
-import SafeProHero from '../SafeProHero'
+import { cn } from '@/utils/cn'
+import SafeProModalFrame from '../SafeProModalFrame'
 
 /**
  * Hero, headline, one paragraph and one button: the notice a member sees when only an admin can act on the
@@ -12,7 +13,7 @@ const SafeProNoticeModal = ({
   open,
   title,
   body,
-  actionLabel = 'Back to My accounts',
+  actionLabel = 'Go to My accounts',
   onAction,
   secondaryActionLabel,
   onSecondaryAction,
@@ -27,36 +28,32 @@ const SafeProNoticeModal = ({
   secondaryActionLabel?: string
   onSecondaryAction?: () => void
   onOpenChange?: (open: boolean) => void
-}) => (
-  <Dialog open={open} onOpenChange={onOpenChange ?? (() => undefined)}>
-    <DialogContent size="sm" surface="card" padding="none" showCloseButton={Boolean(onOpenChange)}>
-      <div className="p-1 pb-2">
-        <SafeProHero variant="tall" />
+}) => {
+  const hasSecondary = Boolean(secondaryActionLabel && onSecondaryAction)
 
-        <div className="flex flex-col items-center gap-6 px-8 pt-6 pb-4">
-          <div className="flex flex-col gap-2">
-            <Typography variant="h3" align="center" as={DialogTitle}>
-              {title}
-            </Typography>
-            <Typography color="muted" align="center">
-              {body}
-            </Typography>
-          </div>
-
-          <div className="flex w-full gap-3">
-            <Button variant="secondary" size="lg" className="flex-1" onClick={onAction}>
-              {actionLabel}
-            </Button>
-            {secondaryActionLabel && onSecondaryAction && (
-              <Button size="lg" className="flex-1" onClick={onSecondaryAction}>
-                {secondaryActionLabel}
-              </Button>
-            )}
-          </div>
-        </div>
+  return (
+    <SafeProModalFrame open={open} onOpenChange={onOpenChange} showCloseButton={Boolean(onOpenChange)}>
+      <div className="flex flex-col gap-3">
+        <Typography variant="h4" as={DialogTitle}>
+          {title}
+        </Typography>
+        <Typography variant="paragraph-small" color="muted">
+          {body}
+        </Typography>
       </div>
-    </DialogContent>
-  </Dialog>
-)
+
+      <div className={cn('flex gap-3', hasSecondary && 'w-full')}>
+        <Button variant="secondary" className={cn(hasSecondary && 'flex-1')} onClick={onAction}>
+          {actionLabel}
+        </Button>
+        {hasSecondary && (
+          <Button className="flex-1" onClick={onSecondaryAction}>
+            {secondaryActionLabel}
+          </Button>
+        )}
+      </div>
+    </SafeProModalFrame>
+  )
+}
 
 export default SafeProNoticeModal
