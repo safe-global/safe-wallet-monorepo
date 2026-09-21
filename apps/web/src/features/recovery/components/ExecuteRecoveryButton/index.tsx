@@ -49,7 +49,7 @@ export default function ExecuteRecoveryButton({
             onClick={onClick}
             variant="default"
             disabled={!isOk || isDisabled}
-            size={compact ? 'sm' : 'action'}
+            size={compact ? 'default' : 'action'}
           >
             Execute
           </Button>

@@ -35,7 +35,7 @@ export default function RecoverySummary({ item }: { item: RecoveryQueueItem }): 
           <RecoveryStatus recovery={item} />
         </div>
       ) : (
-        <div className={css.actions} style={{ gridArea: 'actions' }}>
+        <div data-testid="tx-actions" className="mr-4 flex justify-center" style={{ gridArea: 'actions' }}>
           {!isMalicious && wallet && <ExecuteRecoveryButton recovery={item} compact />}
         </div>
       )}

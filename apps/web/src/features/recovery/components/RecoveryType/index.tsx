@@ -20,7 +20,10 @@ export default function RecoveryType({
         <RecoveryPlusIcon className="size-[1em] [&_path]:fill-[var(--color-warning-main)]" />
       </div>
       <div>
-        <Typography className={isMalicious ? 'text-[var(--color-error-main)]' : undefined}>
+        <Typography
+          variant={isDashboard ? 'paragraph' : 'paragraph-small'}
+          className={isMalicious ? 'text-[var(--color-error-main)]' : undefined}
+        >
           {isMalicious ? 'Malicious transaction' : 'Account recovery'}
         </Typography>
 
