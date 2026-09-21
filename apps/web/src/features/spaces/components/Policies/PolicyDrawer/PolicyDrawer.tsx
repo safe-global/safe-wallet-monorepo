@@ -13,10 +13,14 @@ export type PolicyDrawerProps = {
   /** Reads differently per status, so the caller names the action. */
   actionLabel: string
   onAction: () => void
+  /** Sits above the action to say what it needs first, e.g. a connected signer wallet. */
+  actionHint?: string
+  actionVariant?: 'default' | 'secondary'
+  actionDisabled?: boolean
 } & PolicyVariantContentProps
 
 const PolicyDrawer = (props: PolicyDrawerProps): ReactElement => {
-  const { open, onClose, status, actionLabel, onAction } = props
+  const { open, onClose, status, actionLabel, onAction, actionHint, actionVariant, actionDisabled } = props
 
   return (
     <Drawer open={open} onClose={onClose} ariaLabel="Proposer role">
@@ -33,7 +37,13 @@ const PolicyDrawer = (props: PolicyDrawerProps): ReactElement => {
       <DrawerBody>
         <PolicyVariantContent {...props} />
       </DrawerBody>
-      <PolicyActions actionLabel={actionLabel} onClick={onAction} />
+      <PolicyActions
+        actionLabel={actionLabel}
+        onClick={onAction}
+        hint={actionHint}
+        variant={actionVariant}
+        disabled={actionDisabled}
+      />
     </Drawer>
   )
 }

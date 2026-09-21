@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { NotActivatedPolicy } from './NotActivatedPolicy'
 
 const meta = {
-  title: 'Features/Spaces/Policies/PolicyDrawer/NotActivatedPolicy',
+  title: 'Features/Spaces/Policies/PolicyDrawer/variants/NotActivatedPolicy',
   component: NotActivatedPolicy,
   parameters: {
     layout: 'centered',

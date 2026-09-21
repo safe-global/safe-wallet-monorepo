@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import SafeSignatureInfo from './SafeSignatureInfo'
 
 const meta = {
-  title: 'Features/Spaces/Policies/PolicyDrawer/SafeSignatureInfo',
+  title: 'Features/Spaces/Policies/PolicyDrawer/components/SafeSignatureInfo',
   component: SafeSignatureInfo,
   parameters: {
     layout: 'centered',

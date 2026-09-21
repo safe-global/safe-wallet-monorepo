@@ -8,7 +8,7 @@ const PARENT_SAFE = {
 }
 
 const meta = {
-  title: 'Features/Spaces/Policies/PolicyDrawer/PendingPolicy',
+  title: 'Features/Spaces/Policies/PolicyDrawer/variants/PendingPolicy',
   component: PendingPolicy,
   parameters: {
     layout: 'centered',

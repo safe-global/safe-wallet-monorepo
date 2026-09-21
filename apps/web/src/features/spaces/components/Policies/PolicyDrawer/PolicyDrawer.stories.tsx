@@ -9,6 +9,14 @@ const PARENT_SAFE = {
   threshold: 3,
 }
 
+const OVERVIEW = {
+  proposer: { address: '0x1f9090aaE28b8a3dCeaDf281B0F12828e676c326', name: 'Treasury' },
+  appliesTo: { address: '0x86753FE4b8E29Ce8A38cDf9559D80E05b00cdBA0', name: 'Treasury' },
+  initiatedBy: { address: '0xA77De01c5B6f829Cbe4604cF71dDc8C4d608b000', name: 'Treasury' },
+  lastUpdated: '06.24.26 03:35 AM UTC',
+  enforcedBy: 'Safe module',
+}
+
 const meta = {
   title: 'Features/Spaces/Policies/PolicyDrawer',
   component: PolicyDrawer,
@@ -19,7 +27,6 @@ const meta = {
   args: {
     open: true,
     onClose: fn(),
-    actionLabel: 'Submit delegation',
     onAction: fn(),
   },
 } satisfies Meta<typeof PolicyDrawer>
@@ -27,9 +34,35 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Active: Story = {
+/** A live policy, seen by a signer who can remove it. */
+export const ActiveProposer: Story = {
   args: {
     status: PolicyStatus.ACTIVE,
+    overview: OVERVIEW,
+    actionLabel: 'Remove proposer',
+    actionVariant: 'secondary',
+  },
+}
+
+/** Same policy with no wallet connected — editing needs a signer wallet first. */
+export const WalletNotConnected: Story = {
+  args: {
+    status: PolicyStatus.ACTIVE,
+    overview: OVERVIEW,
+    actionLabel: 'Connect wallet',
+    actionHint: 'Connect a signer wallet of Treasury to edit.',
+  },
+}
+
+/** Connected, but the wallet does not sign for this Safe — the action stays out of reach. */
+export const NotASigner: Story = {
+  args: {
+    status: PolicyStatus.ACTIVE,
+    overview: OVERVIEW,
+    actionLabel: 'Remove proposer',
+    actionVariant: 'secondary',
+    actionDisabled: true,
+    actionHint: 'Only signers of this Treasury can delete or edit this Proposer role.',
   },
 }
 
@@ -42,18 +75,13 @@ export const Pending: Story = {
     safe: PARENT_SAFE,
     signatures: 2,
     expiresLabel: 'Expires in 1h 33 min',
-    overview: {
-      proposer: { address: '0x1f9090aaE28b8a3dCeaDf281B0F12828e676c326', name: 'Marc' },
-      appliesTo: { address: '0x86753FE4b8E29Ce8A38cDf9559D80E05b00cdBA0', name: 'Marketing' },
-      initiatedBy: { address: '0xA77De01c5B6f829Cbe4604cF71dDc8C4d608b000', name: 'Jacob' },
-      lastUpdated: '06.24.26 03:35 AM UTC',
-      enforcedBy: 'Safe module',
-    },
+    overview: OVERVIEW,
   },
 }
 
 export const NotActivated: Story = {
   args: {
     status: PolicyStatus.NOT_ACTIVATED,
+    actionLabel: 'Submit delegation',
   },
 }

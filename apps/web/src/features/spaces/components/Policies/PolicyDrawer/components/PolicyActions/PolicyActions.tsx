@@ -1,19 +1,38 @@
 import type { ReactElement } from 'react'
 import { DrawerFooter } from '@/components/common/Drawer'
 import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 
 export type PolicyActionsProps = {
   /** What the drawer's primary action does here — it reads differently per policy status. */
   actionLabel: string
   onClick: () => void
+  /** Sits above the button to say why the action is unavailable, or what it needs first. */
+  hint?: string
+  variant?: 'default' | 'secondary'
+  disabled?: boolean
 }
 
 /** The drawer's footer action for one policy status. */
-const PolicyActions = ({ actionLabel, onClick }: PolicyActionsProps): ReactElement => (
+const PolicyActions = ({
+  actionLabel,
+  onClick,
+  hint,
+  variant = 'default',
+  disabled = false,
+}: PolicyActionsProps): ReactElement => (
   <DrawerFooter>
-    <Button className="w-full" onClick={onClick}>
-      {actionLabel}
-    </Button>
+    <div className="flex flex-col gap-2">
+      {hint && (
+        <Typography variant="paragraph-mini" color="muted" align="center">
+          {hint}
+        </Typography>
+      )}
+
+      <Button variant={variant} className="w-full" onClick={onClick} disabled={disabled}>
+        {actionLabel}
+      </Button>
+    </div>
   </DrawerFooter>
 )
 

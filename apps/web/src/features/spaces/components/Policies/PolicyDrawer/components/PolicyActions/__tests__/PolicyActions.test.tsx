@@ -16,4 +16,28 @@ describe('PolicyActions', () => {
 
     expect(onClick).toHaveBeenCalledTimes(1)
   })
+
+  it('shows no hint unless one is given', () => {
+    render(<PolicyActions actionLabel="Submit delegation" onClick={jest.fn()} />)
+
+    expect(screen.queryByText(/wallet/i)).not.toBeInTheDocument()
+  })
+
+  it('explains a disabled action and does not fire it', async () => {
+    const onClick = jest.fn()
+    const { user } = renderWithUserEvent(
+      <PolicyActions
+        actionLabel="Remove proposer"
+        onClick={onClick}
+        disabled
+        hint="Only signers of this Treasury can delete or edit this Proposer role."
+      />,
+    )
+
+    expect(screen.getByText('Only signers of this Treasury can delete or edit this Proposer role.')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Remove proposer' }))
+
+    expect(onClick).not.toHaveBeenCalled()
+  })
 })
