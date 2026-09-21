@@ -8,6 +8,7 @@ import type { SafeAccountOption } from '../../SafeAccountSelector/types'
 import ProposerRoleFlow from '../index'
 
 jest.mock('../../SafeAccountSelector/hooks/useEligibleSafeAccounts')
+jest.mock('../hooks/useProposerValidation', () => ({ useProposerValidation: () => async () => undefined }))
 jest.mock('@/features/safe-shield', () => ({
   __esModule: true,
   default: () => <div data-testid="safe-shield-widget" />,

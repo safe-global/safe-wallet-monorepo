@@ -4,6 +4,7 @@ import { parseSafeScopeKey, useSafeScopeControls } from '@/components/tx-flow/sa
 import TxLayoutBase from '@/components/tx-flow/common/TxLayoutBase'
 import { useEligibleSafeAccounts } from '../SafeAccountSelector/hooks/useEligibleSafeAccounts'
 import { CREATE_POLICY_TITLE } from './constants'
+import { useProposerValidation } from './hooks/useProposerValidation'
 import ProposerRoleForm from './ProposerRoleForm'
 import ProposerRoleHeader from './ProposerRoleHeader'
 
@@ -12,6 +13,7 @@ const ProposerRoleFlowContent = (): ReactElement => {
   const [safeAccount, setSafeAccount] = useState<string>()
   const { setScope, clearScope } = useSafeScopeControls()
   const { accounts, isLoading, isError, hasWallet, refetch } = useEligibleSafeAccounts()
+  const validateProposer = useProposerValidation()
 
   const onSafeAccountChange = useCallback(
     (value: string) => {
@@ -43,6 +45,7 @@ const ProposerRoleFlowContent = (): ReactElement => {
         accounts={accounts}
         safeAccount={safeAccount}
         onSafeAccountChange={onSafeAccountChange}
+        validateProposer={validateProposer}
         accountsLoading={isLoading}
         accountsError={isError}
         onAccountsRetry={refetch}
