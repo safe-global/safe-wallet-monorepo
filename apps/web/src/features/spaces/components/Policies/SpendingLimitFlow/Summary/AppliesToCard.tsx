@@ -10,7 +10,7 @@ const AppliesToCard = ({ safe }: { safe: SafeAccountOption }): ReactElement => (
   <Card variant="muted" size="none" radius="lg" data-testid="spending-limit-summary-applies-to">
     <div className="p-3">
       <SummaryField label={APPLIES_TO_LABEL}>
-        <SafeAccountSummary account={safe} />
+        <SafeAccountSummary account={safe} fitStats />
       </SummaryField>
     </div>
   </Card>
