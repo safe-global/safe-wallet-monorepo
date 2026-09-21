@@ -1,7 +1,7 @@
 import { Download } from 'lucide-react'
 import { useAddressBooksGetAddressBookItemsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { Button } from '@/components/ui/button'
-import { downloadCsv, spaceAddressBookToCsv } from './addressBookCsv'
+import { downloadCsv, spaceAddressBookToCsv } from '../../utils/addressBookCsv'
 
 /** Saves the Workspace's shared address book as CSV, so nothing is lost while the Workspace is locked. */
 export default function DownloadAddressBookButton({ spaceId }: { spaceId: string }) {
