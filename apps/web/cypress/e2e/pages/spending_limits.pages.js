@@ -42,6 +42,9 @@ export const timePeriodOptions = {
   fiveMin: '5 minutes',
   thirtyMin: '30 minutes',
   oneHr: '1 hour',
+  oneDay: '1 day',
+  oneWeek: '1 week',
+  oneMonth: '1 month',
 }
 
 const getBeneficiaryInput = () => cy.get(beneficiarySection).find('input')

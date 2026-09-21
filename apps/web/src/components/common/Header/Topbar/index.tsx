@@ -99,7 +99,9 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   // On space routes we show the global search input by default, but when a transaction
   // modal is open (e.g. Send via the Actions Tray) the URL keeps the space pathname —
   // swap in the SpaceSafeBar so the user can see the Safe they're transacting against.
-  const showSpaceSafeBar = !isSpaceRoute || Boolean(txFlow)
+  // It needs a `safeAddress` to mean anything: a flow that picks its Safe inside its own steps (the
+  // policy flows) never touches the URL, so the bar would render an empty selector over the Space.
+  const showSpaceSafeBar = !isSpaceRoute || (Boolean(txFlow) && Boolean(safeAddress))
 
   // Which wrap threshold and slot height apply follow the context variant — see the constants above.
   const contextWrap = showLogo ? undefined : showSpaceSafeBar ? SAFE_BAR_CONTEXT_WRAP : SEARCH_CONTEXT_WRAP

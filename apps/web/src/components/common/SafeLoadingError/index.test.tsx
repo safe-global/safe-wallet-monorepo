@@ -3,12 +3,12 @@ import { render } from '@/tests/test-utils'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
-import * as useSafeLegalBlockMessageHook from '@/hooks/useSafeLegalBlockMessage'
+import * as useSafeUnavailableMessageHook from '@/hooks/useSafeUnavailableMessage'
+import { SAFE_UNAVAILABLE_MESSAGE } from '@/utils/rtkQuery'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import SafeLoadingError, { GENERIC_LOADING_ERROR } from '.'
 
 const SAFE_ADDRESS = '0x87a57cBf742CC1Fc702D0E9BF595b1E056693e2f'
-const LEGAL_BLOCK_MESSAGE = 'Unavailable for legal reasons'
 
 const mockSafeInfo = (safeError?: string) => {
   jest.spyOn(useSafeInfoHook, 'default').mockReturnValue({
@@ -20,8 +20,8 @@ const mockSafeInfo = (safeError?: string) => {
   })
 }
 
-const mockLegalBlockMessage = (message?: string) => {
-  jest.spyOn(useSafeLegalBlockMessageHook, 'default').mockReturnValue(message)
+const mockUnavailableMessage = (message?: string) => {
+  jest.spyOn(useSafeUnavailableMessageHook, 'default').mockReturnValue(message)
 }
 
 // `useSafeAddressFromUrl` reads the `safe` query param, so the real hook only
@@ -31,7 +31,7 @@ const safeInUrl = { routerProps: { query: { safe: `eth:${SAFE_ADDRESS}` } } }
 describe('SafeLoadingError', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockLegalBlockMessage(undefined)
+    mockUnavailableMessage(undefined)
   })
 
   it('renders children when the Safe loaded', () => {
@@ -60,14 +60,14 @@ describe('SafeLoadingError', () => {
     expect(queryByText('Safe content')).not.toBeInTheDocument()
   })
 
-  it('shows the backend reason when the Safe is blocked for legal reasons', async () => {
+  it('shows fixed copy when the Safe is blocked', async () => {
     mockSafeInfo('Error 451')
-    // No `mockLegalBlockMessage` — the real hook reads a real 451 off MSW, so this
-    // covers the component→hook wiring and not just the render given a message.
-    jest.spyOn(useSafeLegalBlockMessageHook, 'default').mockRestore()
+    // No mock — the real hook reads a real 451 off MSW, so this covers the
+    // component→hook wiring and not just the render given a message.
+    jest.spyOn(useSafeUnavailableMessageHook, 'default').mockRestore()
     server.use(
       http.get(`${GATEWAY_URL}/v1/chains/:chainId/safes/:safeAddress`, () =>
-        HttpResponse.json({ code: 451, message: LEGAL_BLOCK_MESSAGE }, { status: 451 }),
+        HttpResponse.json({ code: 451, message: 'Blocked in your region by provider edge-node-7' }, { status: 451 }),
       ),
     )
 
@@ -78,7 +78,8 @@ describe('SafeLoadingError', () => {
       safeInUrl,
     )
 
-    expect(await findByText(LEGAL_BLOCK_MESSAGE)).toBeInTheDocument()
+    expect(await findByText(SAFE_UNAVAILABLE_MESSAGE)).toBeInTheDocument()
+    expect(queryByText('Blocked in your region by provider edge-node-7')).not.toBeInTheDocument()
     expect(queryByText(GENERIC_LOADING_ERROR)).not.toBeInTheDocument()
     expect(getByTestId('safe-loading-error')).toBeInTheDocument()
     expect(getByTestId('safe-loading-error-cta')).toBeInTheDocument()
