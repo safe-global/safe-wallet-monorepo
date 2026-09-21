@@ -4,7 +4,6 @@ import ExternalLink from '@/components/common/ExternalLink'
 import { Typography } from '@/components/ui/typography'
 import { PROPOSER_ROLE_DESCRIPTION, PROPOSER_ROLE_TITLE } from './constants'
 
-/** Rendered as `TxLayoutBase`'s subtitle, which already wraps it in an `h4`. */
 const ProposerRoleHeader = () => (
   <div className="flex items-center gap-4">
     <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-[var(--color-background-light-hover)]">

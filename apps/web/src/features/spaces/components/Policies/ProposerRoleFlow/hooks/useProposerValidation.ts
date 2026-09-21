@@ -21,13 +21,7 @@ export const addressIsNotExistingProposer =
   (address: string): string | undefined =>
     proposers.some((proposer) => sameAddress(proposer, address)) ? message : undefined
 
-/**
- * The proposer address rules, resolved against the Safe the flow is scoped to. Same rules as the
- * per-Safe settings flow plus the existing-proposer check; the Safe-dependent ones wait for a pick.
- * Until the picked Safe, its proposers and its provider are loaded the field stays invalid: with
- * empty owner lists the checks would pass, and without the scoped provider the contract check would
- * read (and cache under this chain) code from the URL chain.
- */
+// Invalid until the picked Safe, its proposers and its provider load: empty owner lists would pass, and the unscoped provider would read code from the URL chain.
 export const useProposerValidation = (): Validate<string> => {
   const { safe, safeAddress, safeLoaded } = useSafeInfo()
   const chainId = useChainId()

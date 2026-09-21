@@ -113,7 +113,7 @@ const meta = {
 
     // Same width as the tx-flow card column the form lives in.
     return (
-      <div className="w-[672px] max-w-[calc(100vw-2rem)]">
+      <div className="w-full min-[900px]:max-w-[672px]">
         <ProposerRoleForm
           {...args}
           safeAccount={safeAccount}
