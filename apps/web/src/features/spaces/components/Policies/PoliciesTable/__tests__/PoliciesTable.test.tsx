@@ -36,27 +36,21 @@ describe('PoliciesTable', () => {
     expect(within(cell).getByText('3 spenders · 4 limits')).toBeInTheDocument()
   })
 
-  it('should, when given several policies, render a row for each distinct one', () => {
+  it('should, when given several policies, render a row for each one', () => {
     render(<PoliciesTable policies={mockPolicies()} />)
 
-    expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(5)
+    expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(6)
   })
 
-  it('should, when the same Safe has the policy on two chains, render one row with both network icons', () => {
+  it('should, when the same Safe has the policy on two chains, render one row per chain', () => {
     render(
       <PoliciesTable
         policies={[asActivePolicy(mockMultiSpenderPolicy()), asActivePolicy(mockPolygonSpendingLimitPolicy())]}
       />,
     )
 
-    expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(1)
-    expect(screen.getByTestId('policy-networks').children).toHaveLength(2)
-  })
-
-  it('should, when a Safe has the policy on one chain, render one network icon', () => {
-    render(<PoliciesTable policies={[asActivePolicy(mockProposerPolicy())]} />)
-
-    expect(screen.getByTestId('policy-networks').children).toHaveLength(1)
+    expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(2)
+    expect(screen.getAllByTestId('policy-cell-network')).toHaveLength(2)
   })
 
   it('should, when a policy module is present but not enabled, render it as not enforced', () => {
@@ -89,24 +83,44 @@ describe('PoliciesTable', () => {
     const policy = asActivePolicy(mockProposerPolicy())
 
     render(<PoliciesTable policies={[policy]} onSelect={onSelect} />)
-    fireEvent.click(screen.getByRole('button', { name: 'Open proposer policy details' }))
+    fireEvent.click(screen.getByTestId('policy-cell-rule'))
 
+    expect(onSelect).toHaveBeenCalledTimes(1)
     expect(onSelect).toHaveBeenCalledWith(policy)
   })
 
-  it('should, when a row is activated with the keyboard, report the policy it belongs to', () => {
+  it('should, when the open button is used, report the policy it belongs to once', () => {
     const onSelect = jest.fn()
     const policy = asActivePolicy(mockProposerPolicy())
 
     render(<PoliciesTable policies={[policy]} onSelect={onSelect} />)
-    fireEvent.keyDown(screen.getByRole('button', { name: 'Open proposer policy details' }), { key: 'Enter' })
+    fireEvent.click(screen.getByRole('button', { name: 'Open Proposer for 0x8675...a19b' }))
 
+    expect(onSelect).toHaveBeenCalledTimes(1)
     expect(onSelect).toHaveBeenCalledWith(policy)
   })
 
-  it('should, when no select handler is given, leave the rows inactive', () => {
+  it('should, when rows are selectable, name each open button after its rule and Safe', () => {
+    render(
+      <PoliciesTable
+        policies={[asActivePolicy(mockProposerPolicy()), asActivePolicy(mockMultiSpenderPolicy())]}
+        onSelect={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Open Proposer for 0x8675...a19b' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Open Spending limit for 0x8675...a19b' })).toBeInTheDocument()
+  })
+
+  it('should, when rows are selectable, keep them table rows rather than buttons', () => {
+    render(<PoliciesTable policies={[asActivePolicy(mockProposerPolicy())]} onSelect={jest.fn()} />)
+
+    expect(screen.getAllByRole('row')[1]).not.toHaveAttribute('role', 'button')
+  })
+
+  it('should, when no select handler is given, render no open button', () => {
     render(<PoliciesTable policies={[asActivePolicy(mockProposerPolicy())]} />)
 
-    expect(screen.queryByRole('button', { name: 'Open proposer policy details' })).not.toBeInTheDocument()
+    expect(screen.queryByTestId('policy-open-button')).not.toBeInTheDocument()
   })
 })

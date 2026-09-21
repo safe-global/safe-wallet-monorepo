@@ -70,13 +70,16 @@ type SortState = { id: string; direction: SortDirection }
 
 const DEFAULT_PAGE_SIZE = 25
 
-/** An activatable row is a keyboard-reachable button, so it needs an accessible name. */
-export type RowActivation<T> =
-  | { onRowClick?: undefined; getRowAriaLabel?: undefined }
-  | { onRowClick: (row: T) => void; getRowAriaLabel: (row: T) => string }
+const NESTED_CONTROLS = 'a, button, [role="button"], input, [role="menuitem"]'
 
-type PaginatedDataTableProps<T> = RowActivation<T> & {
+type PaginatedDataTableProps<T> = {
   columns: DataTableColumn<T>[]
+  /**
+   * Makes the whole row a pointer target. The row stays a plain table row for assistive tech, so
+   * a caller that sets this also renders a focusable control with an accessible name in one of
+   * its cells. Clicks on nested links and buttons are left to those controls.
+   */
+  onRowClick?: (row: T) => void
   rows: T[]
   /** Optional mobile-only collapsible detail row, revealed per row via a toggle */
   renderRowDetail?: (row: T) => ReactNode
@@ -125,7 +128,6 @@ function PaginatedDataTable<T>({
   getRowClassName,
   pageSize = DEFAULT_PAGE_SIZE,
   onRowClick,
-  getRowAriaLabel,
 }: PaginatedDataTableProps<T>) {
   const isMobile = useIsMobile()
   const [page, setPage] = useState(0)
@@ -256,16 +258,10 @@ function PaginatedDataTable<T>({
                   data-testid="table-row"
                   data-no-divider={showDetail ? '' : undefined}
                   className={cn(getRowClassName?.(row), onRowClick && 'cursor-pointer')}
-                  role={onRowClick ? 'button' : undefined}
-                  tabIndex={onRowClick ? 0 : undefined}
-                  aria-label={onRowClick ? getRowAriaLabel?.(row) : undefined}
-                  onClick={onRowClick ? () => onRowClick(row) : undefined}
-                  onKeyDown={
+                  onClick={
                     onRowClick
                       ? (event) => {
-                          if (event.key !== 'Enter' && event.key !== ' ') return
-                          // Space would otherwise scroll the page out from under the row.
-                          event.preventDefault()
+                          if ((event.target as HTMLElement).closest(NESTED_CONTROLS)) return
                           onRowClick(row)
                         }
                       : undefined
@@ -295,10 +291,7 @@ function PaginatedDataTable<T>({
                         aria-expanded={isOpen}
                         aria-controls={isOpen ? detailId : undefined}
                         aria-label={isOpen ? 'Hide details' : 'Show details'}
-                        onClick={(event) => {
-                          event.stopPropagation()
-                          toggleExpanded(key)
-                        }}
+                        onClick={() => toggleExpanded(key)}
                       >
                         <ChevronDown className={cn('size-4 transition-transform', isOpen && 'rotate-180')} />
                       </Button>

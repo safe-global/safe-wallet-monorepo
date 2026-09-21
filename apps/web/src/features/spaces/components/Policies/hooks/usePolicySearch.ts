@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import Fuse from 'fuse.js'
 import useChains from '@/hooks/useChains'
 import { getPolicyLabel, getPolicySummary } from '../utils/policyLabel'
-import { getPolicyTokens } from '../PoliciesTable/components/PolicyTokens'
+import { getPolicyTokens } from '../utils/policyTokens'
 import type { Policy } from '../types'
 
 /** Searches the policies held in the browser. The space address book is not searched: a policy carries no names. */

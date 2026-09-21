@@ -170,7 +170,7 @@ export const asActivePolicy = <T extends ActivePolicy>(policy: T): T & { status:
   status: 'active',
 })
 
-/** The treasury's spending limit as deployed on Polygon: the table shows it on the same row as the mainnet one. */
+/** The treasury's spending limit as deployed on Polygon. */
 export const mockPolygonSpendingLimitPolicy = (): SpendingLimitPolicy =>
   mockSpendingLimitPolicy({ id: '0xspending-limit-treasury-polygon', safe: { ...MOCK_SAFES.treasury, chainId: '137' } })
 

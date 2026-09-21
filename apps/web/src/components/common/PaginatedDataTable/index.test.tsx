@@ -297,57 +297,49 @@ describe('PaginatedDataTable', () => {
     })
   })
 
-  describe('activatable rows', () => {
-    const activatableTable = (onRowClick: (row: string) => void, rows = ['a', 'b']) => (
+  describe('clickable rows', () => {
+    const clickableTable = (onRowClick: (row: string) => void) => (
       <PaginatedDataTable
-        columns={columns}
-        rows={rows}
+        columns={[
+          { id: 'value', header: 'Value', cell: (row) => row },
+          { id: 'open', header: '', cell: (row) => <button onClick={() => onRowClick(row)}>Open {row}</button> },
+        ]}
+        rows={['a', 'b']}
         getRowKey={(row) => row}
         onRowClick={onRowClick}
-        getRowAriaLabel={(row) => `Open ${row}`}
       />
     )
 
-    it('should, when no click handler is given, leave the rows inactive', () => {
+    it('should, when no click handler is given, leave the rows as plain table rows', () => {
       render(tableElement(['a']))
 
-      expect(screen.queryByRole('button')).not.toBeInTheDocument()
+      expect(screen.getAllByRole('row')[1]).not.toHaveClass('cursor-pointer')
     })
 
-    it('should, when a row is clicked, report that row', () => {
+    it('should, when a cell is clicked, report that row', () => {
       const onRowClick = jest.fn()
 
-      render(activatableTable(onRowClick))
-      fireEvent.click(screen.getByRole('button', { name: 'Open b' }))
+      render(clickableTable(onRowClick))
+      fireEvent.click(screen.getByText('b'))
 
+      expect(onRowClick).toHaveBeenCalledTimes(1)
       expect(onRowClick).toHaveBeenCalledWith('b')
     })
 
-    it('should, when a row is activated with Enter, report that row', () => {
+    it('should, when a control inside the row is clicked, leave the click to that control', () => {
       const onRowClick = jest.fn()
 
-      render(activatableTable(onRowClick, ['a']))
-      fireEvent.keyDown(screen.getByRole('button', { name: 'Open a' }), { key: 'Enter' })
+      render(clickableTable(onRowClick))
+      fireEvent.click(screen.getByRole('button', { name: 'Open a' }))
 
-      expect(onRowClick).toHaveBeenCalledWith('a')
+      expect(onRowClick).toHaveBeenCalledTimes(1)
     })
 
-    it('should, when a row is activated with Space, report that row', () => {
-      const onRowClick = jest.fn()
+    it('should, when rows are clickable, keep them table rows rather than buttons', () => {
+      render(clickableTable(jest.fn()))
 
-      render(activatableTable(onRowClick, ['a']))
-      fireEvent.keyDown(screen.getByRole('button', { name: 'Open a' }), { key: ' ' })
-
-      expect(onRowClick).toHaveBeenCalledWith('a')
-    })
-
-    it('should, when another key is pressed on a row, report nothing', () => {
-      const onRowClick = jest.fn()
-
-      render(activatableTable(onRowClick, ['a']))
-      fireEvent.keyDown(screen.getByRole('button', { name: 'Open a' }), { key: 'Escape' })
-
-      expect(onRowClick).not.toHaveBeenCalled()
+      expect(screen.getAllByRole('row')[1]).not.toHaveAttribute('role', 'button')
+      expect(screen.getAllByRole('row')[1]).toHaveClass('cursor-pointer')
     })
 
     it('should, when the mobile detail toggle is used, expand the row without reporting a click', () => {
@@ -361,7 +353,6 @@ describe('PaginatedDataTable', () => {
           getRowKey={(row) => row}
           renderRowDetail={(row) => <span>{`detail-${row}`}</span>}
           onRowClick={onRowClick}
-          getRowAriaLabel={(row) => `Open ${row}`}
         />,
       )
       fireEvent.click(screen.getByRole('button', { name: 'Show details' }))

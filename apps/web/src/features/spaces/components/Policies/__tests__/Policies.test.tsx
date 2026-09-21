@@ -244,7 +244,7 @@ describe('Policies', () => {
       render(<Policies policies={mockPolicies()} />)
 
       expect(screen.getByTestId('policies-list')).toBeInTheDocument()
-      expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(5)
+      expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(6)
       expect(screen.getByPlaceholderText('by name, address or network')).toBeInTheDocument()
     })
   })
@@ -304,7 +304,7 @@ describe('Policies', () => {
       const proposerPolicy = asActivePolicy(mockProposerPolicy())
 
       render(<Policies policies={[proposerPolicy]} onSelectPolicy={onSelectPolicy} />)
-      fireEvent.click(screen.getByRole('button', { name: 'Open proposer policy details' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Open Proposer for 0x8675...a19b' }))
 
       expect(onSelectPolicy).toHaveBeenCalledWith(proposerPolicy)
     })
