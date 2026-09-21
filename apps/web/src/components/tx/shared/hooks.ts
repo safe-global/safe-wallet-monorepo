@@ -6,7 +6,6 @@
  *
  * @module tx/shared/hooks
  */
-import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { assertTx, assertOnboard, assertChainInfo, assertProvider } from '@/utils/helpers'
 import { useContext, useMemo } from 'react'
 import { type TransactionOptions, type SafeTransaction } from '@safe-global/types-kit'
@@ -19,6 +18,7 @@ import { isSmartContractWallet } from '@/utils/wallets'
 import {
   dispatchProposerTxSigning,
   dispatchOnChainSigning,
+  dispatchTxConfirmation,
   dispatchTxExecution,
   dispatchTxProposal,
   dispatchTxRelay,
@@ -49,7 +49,7 @@ type TxActions = {
     acceptUnverifiedSimulation?: boolean,
   ) => Promise<string>
   signProposerTx: (safeTx?: SafeTransaction, origin?: string) => Promise<string>
-  proposeTx: (safeTx: SafeTransaction, txId?: string, origin?: string) => Promise<TransactionDetails>
+  proposeTx: (safeTx: SafeTransaction, txId?: string, origin?: string) => Promise<string>
 }
 
 /**
@@ -90,28 +90,35 @@ export const useTxActions = (): TxActions => {
         dispatch,
       })
 
-    const _propose = async (sender: string, safeTx: SafeTransaction, txId?: string, origin?: string) => {
-      return dispatchTxProposal({
-        chainId,
-        safeAddress,
-        sender,
-        safeTx,
-        txId,
-        origin,
-        scope,
-      })
+    const _propose = async (sender: string, safeTx: SafeTransaction, origin?: string) => {
+      return dispatchTxProposal({ chainId, safeAddress, sender, safeTx, origin, scope })
+    }
+
+    // A tx with a txId is already known to CGW, so only the new signature is sent
+    const _proposeOrConfirm = async (
+      sender: string,
+      safeTx: SafeTransaction,
+      txId?: string,
+      origin?: string,
+    ): Promise<string> => {
+      if (txId) {
+        const confirmedTx = await dispatchTxConfirmation({ chainId, safeAddress, sender, safeTx, txId, scope })
+        return confirmedTx.id
+      }
+      const proposedTx = await _propose(sender, safeTx, origin)
+      return proposedTx.txId
     }
 
     const proposeTx: TxActions['proposeTx'] = async (safeTx, txId, origin) => {
       assertTx(safeTx)
-      return _propose(wallet?.address || safe.owners[0].value, safeTx, txId, origin)
+      return _proposeOrConfirm(wallet?.address || safe.owners[0].value, safeTx, txId, origin)
     }
 
     const addToBatch: TxActions['addToBatch'] = async (safeTx, origin) => {
       assertTx(safeTx)
       assertProvider(signer?.provider)
 
-      const tx = await _propose(signer.address, safeTx, undefined, origin)
+      const tx = await _propose(signer.address, safeTx, origin)
 
       await addTxToBatch(tx)
       return tx.txId
@@ -142,7 +149,7 @@ export const useTxActions = (): TxActions => {
         // If the first signature is a smart contract wallet, we have to propose w/o signatures
         // Otherwise the backend won't pick up the tx
         // The signature will be added once the on-chain signature is indexed
-        const id = txId || (await _propose(signer.address, safeTx, txId, origin)).txId
+        const id = txId || (await _propose(signer.address, safeTx, origin)).txId
         await dispatchOnChainSigning(
           safeTx,
           id,
@@ -158,8 +165,7 @@ export const useTxActions = (): TxActions => {
 
       // Otherwise, sign off-chain
       const signedTx = await dispatchTxSigning(safeTx, signer.provider, txId, scope)
-      const tx = await _propose(signer.address, signedTx, txId, origin)
-      return tx.txId
+      return _proposeOrConfirm(signer.address, signedTx, txId, origin)
     }
 
     const signProposerTx: TxActions['signProposerTx'] = async (safeTx, origin) => {
@@ -169,7 +175,7 @@ export const useTxActions = (): TxActions => {
 
       const signedTx = await dispatchProposerTxSigning(safeTx, wallet, scope)
 
-      const tx = await _propose(wallet.address, signedTx, undefined, origin)
+      const tx = await _propose(wallet.address, signedTx, origin)
       return tx.txId
     }
 
@@ -191,7 +197,6 @@ export const useTxActions = (): TxActions => {
       // revert would cost the user gas for a guaranteed failure (WA-3005).
       await runExecutionPreChecks({ safeTx, safe, signerAddress: signer.address, scope })
 
-      let tx: TransactionDetails | undefined
       let rePropose = false
       // Relayed transactions must be fully signed, so request a final signature if needed
       if (isRelayed && safeTx.signatures.size < safe.threshold) {
@@ -199,10 +204,9 @@ export const useTxActions = (): TxActions => {
         rePropose = true
       }
 
-      // Propose the tx if there's no id yet ("immediate execution")
+      // Propose the tx if there's no id yet, or send the new signature to the already proposed tx
       if (!txId || rePropose) {
-        tx = await _propose(signer.address, safeTx, txId, origin)
-        txId = tx.txId
+        txId = await _proposeOrConfirm(signer.address, safeTx, txId, origin)
       }
 
       // Relay or execute the tx via connected wallet
