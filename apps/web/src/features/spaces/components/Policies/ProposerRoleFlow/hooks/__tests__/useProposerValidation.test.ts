@@ -1,3 +1,4 @@
+import type { JsonRpcProvider } from 'ethers'
 import { renderHook } from '@/tests/test-utils'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/constants'
@@ -17,11 +18,13 @@ import { addressIsNotExistingProposer, useProposerValidation } from '../usePropo
 jest.mock('@/hooks/useSafeInfo')
 jest.mock('@/hooks/useChainId')
 jest.mock('@/hooks/useProposers')
+jest.mock('@/hooks/wallets/web3ReadOnly', () => ({ useWeb3ReadOnly: () => mockProvider }))
 jest.mock('@/features/proposers/utils/utils', () => ({
   ...jest.requireActual('@/features/proposers/utils/utils'),
   addressIsNotSmartContract: jest.fn(),
 }))
 
+const mockProvider = {} as JsonRpcProvider
 const mockUseSafeInfo = jest.mocked(useSafeInfo)
 const mockUseChainId = jest.mocked(useChainId)
 const mockUseProposers = jest.mocked(useProposers)
@@ -93,7 +96,7 @@ describe('useProposerValidation', () => {
     mockAddressIsNotSmartContract.mockReturnValue(async () => SMART_CONTRACT_PROPOSER_ERROR)
 
     await expect(validate()(FRESH)).resolves.toBe(SMART_CONTRACT_PROPOSER_ERROR)
-    expect(mockAddressIsNotSmartContract).toHaveBeenCalledWith('137', SMART_CONTRACT_PROPOSER_ERROR)
+    expect(mockAddressIsNotSmartContract).toHaveBeenCalledWith('137', SMART_CONTRACT_PROPOSER_ERROR, mockProvider)
   })
 
   it('accepts a fresh externally owned account', async () => {

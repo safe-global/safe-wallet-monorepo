@@ -7,6 +7,7 @@ import { addressIsNotSmartContract } from '@/features/proposers/utils/utils'
 import useChainId from '@/hooks/useChainId'
 import useProposers from '@/hooks/useProposers'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import {
   PROPOSER_EXISTS_ERROR,
   PROPOSER_IS_OWNER_ERROR,
@@ -26,6 +27,8 @@ export const addressIsNotExistingProposer =
 export const useProposerValidation = (): Validate<string> => {
   const { safe, safeAddress } = useSafeInfo()
   const chainId = useChainId()
+  // The picked Safe's chain inside the flow; without it the check would read code from the URL chain.
+  const provider = useWeb3ReadOnly()
   const { data: delegates } = useProposers()
 
   const owners = useMemo(() => safe.owners.map((owner) => owner.value), [safe.owners])
@@ -40,9 +43,9 @@ export const useProposerValidation = (): Validate<string> => {
         addressIsNotCurrentSafe(safeAddress, PROPOSER_IS_SAFE_ERROR)(value) ??
         addressIsNotOwner(owners, PROPOSER_IS_OWNER_ERROR)(value) ??
         addressIsNotExistingProposer(existingProposers, PROPOSER_EXISTS_ERROR)(value) ??
-        (await addressIsNotSmartContract(chainId, SMART_CONTRACT_PROPOSER_ERROR)(value))
+        (await addressIsNotSmartContract(chainId, SMART_CONTRACT_PROPOSER_ERROR, provider)(value))
       )
     },
-    [safeAddress, owners, existingProposers, chainId],
+    [safeAddress, owners, existingProposers, chainId, provider],
   )
 }
