@@ -84,10 +84,11 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   const isWelcomeListRoute = pathname === AppRoutes.welcome.accounts || pathname === AppRoutes.welcome.spaces
   const urlSafeAddress = useSafeAddressFromUrl()
   const isSettingsWithoutSafe = pathname?.startsWith(AppRoutes.settings.index) === true && !urlSafeAddress
+  const isPoliciesRoute = pathname === AppRoutes.spaces.policies
   // Routes with no Safe context show the bare logo on the left instead of the safe selector or
   // the search input. It's a 24px mark that always fits beside the actions, so it opts out of
   // the wrapping the two wide variants need — logo left, actions right, at every width.
-  const showLogo = isSettingsWithoutSafe || isWelcomeListRoute
+  const showLogo = isSettingsWithoutSafe || isWelcomeListRoute || isPoliciesRoute
   const safeAddress = useSafeAddress()
   const isProposer = useIsWalletProposer()
   const isSafeOwner = useIsSafeOwner()
