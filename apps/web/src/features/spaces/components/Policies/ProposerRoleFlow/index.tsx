@@ -8,7 +8,6 @@ import { useProposerValidation } from './hooks/useProposerValidation'
 import ProposerRoleForm from './ProposerRoleForm'
 import ProposerRoleHeader from './ProposerRoleHeader'
 
-/** Inside the scope provider, so the form's hooks resolve to the picked Safe. */
 const ProposerRoleFlowContent = (): ReactElement => {
   const [safeAccount, setSafeAccount] = useState<string>()
   const { setScope, clearScope } = useSafeScopeControls()
@@ -25,7 +24,6 @@ const ProposerRoleFlowContent = (): ReactElement => {
     [setScope, clearScope],
   )
 
-  // Signing and submission land with WA-3139.
   const onSubmit = useCallback(() => {}, [])
 
   return (

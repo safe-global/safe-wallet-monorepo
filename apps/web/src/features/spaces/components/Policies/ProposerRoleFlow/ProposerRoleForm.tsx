@@ -22,7 +22,6 @@ export type ProposerRoleFormProps = {
   /** `${chainId}:${address}` */
   safeAccount?: string
   onSafeAccountChange: (value: string) => void
-  /** Runs against the picked Safe: reserved, the Safe itself, owners, existing proposers, contracts. */
   validateProposer?: Validate<string>
   defaultValues?: Partial<ProposerRoleFormValues>
   accountsLoading?: boolean
@@ -30,7 +29,6 @@ export type ProposerRoleFormProps = {
   onAccountsRetry?: () => void
   hasWallet?: boolean
   isSubmitting?: boolean
-  /** Surfaced above the actions — e.g. a failed signature. */
   errorMessage?: ReactNode
 }
 
@@ -54,7 +52,6 @@ const ProposerRoleForm = ({
   })
   const { trigger, getValues, formState } = methods
 
-  // The rules depend on the picked Safe and settle as it loads, so an entered address is re-checked on either change.
   useEffect(() => {
     if (getValues('proposer')) void trigger('proposer')
   }, [safeAccount, validateProposer, trigger, getValues])
