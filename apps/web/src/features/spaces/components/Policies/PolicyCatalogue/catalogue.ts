@@ -25,13 +25,13 @@ export const POLICY_CATALOGUE: PolicyCatalogueEntry[] = [
     Icon: UserRoundPen,
     isAvailable: true,
   },
-  {
-    id: 'account-recovery',
-    title: 'Account recovery',
-    description: 'Choose a trusted Recoverer to recover your Safe account if you ever lose access.',
-    Icon: LockKeyholeOpen,
-    isAvailable: false,
-  },
+  // {
+  //   id: 'account-recovery',
+  //   title: 'Account recovery',
+  //   description: 'Choose a trusted Recoverer to recover your Safe account if you ever lose access.',
+  //   Icon: LockKeyholeOpen,
+  //   isAvailable: false,
+  // },
   {
     id: 'suggestion',
     title: 'Something missing?',
