@@ -6,6 +6,7 @@
  *
  * @module tx/shared/hooks
  */
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { assertTx, assertOnboard, assertChainInfo, assertProvider } from '@/utils/helpers'
 import { useContext, useMemo } from 'react'
 import { type TransactionOptions, type SafeTransaction } from '@safe-global/types-kit'
@@ -49,7 +50,7 @@ type TxActions = {
     acceptUnverifiedSimulation?: boolean,
   ) => Promise<string>
   signProposerTx: (safeTx?: SafeTransaction, origin?: string) => Promise<string>
-  proposeTx: (safeTx: SafeTransaction, txId?: string, origin?: string) => Promise<string>
+  proposeTx: (safeTx: SafeTransaction, origin?: string) => Promise<TransactionDetails>
 }
 
 /**
@@ -109,9 +110,9 @@ export const useTxActions = (): TxActions => {
       return proposedTx.txId
     }
 
-    const proposeTx: TxActions['proposeTx'] = async (safeTx, txId, origin) => {
+    const proposeTx: TxActions['proposeTx'] = async (safeTx, origin) => {
       assertTx(safeTx)
-      return _proposeOrConfirm(wallet?.address || safe.owners[0].value, safeTx, txId, origin)
+      return _propose(wallet?.address || safe.owners[0].value, safeTx, origin)
     }
 
     const addToBatch: TxActions['addToBatch'] = async (safeTx, origin) => {
