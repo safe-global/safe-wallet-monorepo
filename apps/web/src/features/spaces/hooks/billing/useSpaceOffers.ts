@@ -11,9 +11,15 @@ import { useRateLimitRetry } from './useRateLimitRetry'
  */
 export const useSpaceOffers = (spaceId?: string | null) => {
   const gatedSpaceId = useBillingSpaceId(spaceId)
-  const { data, isLoading, isUninitialized, isError, error, refetch } = useBillingGetSpacePaymentLinksV1Query(
-    gatedSpaceId ? { spaceId: gatedSpaceId } : skipToken,
-  )
+  const {
+    currentData: data,
+    isLoading,
+    isFetching,
+    isUninitialized,
+    isError,
+    error,
+    refetch,
+  } = useBillingGetSpacePaymentLinksV1Query(gatedSpaceId ? { spaceId: gatedSpaceId } : skipToken)
   const isRetrying = useRateLimitRetry({ error, refetch })
   const plans = useMemo(() => groupOffersByPlan(data ?? []), [data])
   const { trialPlans, paidPlans } = useMemo(() => splitPlansByTrial(plans), [plans])
@@ -23,7 +29,7 @@ export const useSpaceOffers = (spaceId?: string | null) => {
     trialPlans,
     paidPlans,
     trialPeriodDays: getTrialPeriodDays(trialPlans),
-    isLoading: isLoading || isRetrying,
+    isLoading: isLoading || (isFetching && data === undefined) || isRetrying,
     isUninitialized,
     isError: isError && !isRetrying,
   }

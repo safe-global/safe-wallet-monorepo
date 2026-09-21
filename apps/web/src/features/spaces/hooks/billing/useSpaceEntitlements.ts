@@ -7,10 +7,15 @@ import { useRateLimitRetry } from './useRateLimitRetry'
 
 export const useSpaceEntitlements = (spaceId?: string | null) => {
   const gatedSpaceId = useBillingSpaceId(spaceId)
-  const { data, isLoading, isUninitialized, isError, error, refetch } = useEntitlementsGetEntitlementsV1Query(
-    gatedSpaceId ? { spaceId: gatedSpaceId } : skipToken,
-    SPACE_REFRESH_OPTIONS,
-  )
+  const {
+    currentData: data,
+    isLoading,
+    isFetching,
+    isUninitialized,
+    isError,
+    error,
+    refetch,
+  } = useEntitlementsGetEntitlementsV1Query(gatedSpaceId ? { spaceId: gatedSpaceId } : skipToken, SPACE_REFRESH_OPTIONS)
 
   const isRetrying = useRateLimitRetry({ error, refetch })
 
@@ -18,7 +23,8 @@ export const useSpaceEntitlements = (spaceId?: string | null) => {
     plan: data?.plan ?? null,
     seats: getSeatsMeter(data),
     sponsoredTxs: getSponsoredTxsMeter(data),
-    isLoading: isLoading || isRetrying,
+    // `currentData` is empty while another Workspace's result is on its way; that gap reads as loading, not as no plan.
+    isLoading: isLoading || (isFetching && data === undefined) || isRetrying,
     isUninitialized,
     isError: isError && !isRetrying,
     refetch,

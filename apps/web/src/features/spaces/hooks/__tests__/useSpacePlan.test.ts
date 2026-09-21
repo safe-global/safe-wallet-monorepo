@@ -22,14 +22,14 @@ const SPACE_ID = '11111111-1111-1111-1111-111111111111'
 const OTHER_SPACE_ID = '22222222-2222-2222-2222-222222222222'
 
 const entitlements = (plan: { name: string | null; cycleEndsAt: string | null } | null, quota = 10, used = 6) => ({
-  data: {
+  currentData: {
     plan: plan && { id: 'plan_1', ...plan },
     entitlements: [{ feature: 'safe_seats', type: 'metered', enabled: true, quota, used, resetsAt: null }],
   },
   isLoading: false,
 })
 const subscriptions = (status: string, name = 'Business') => ({
-  data: [{ id: 'sub_1', status, plan: { id: 'plan_1', name } }],
+  currentData: [{ id: 'sub_1', status, plan: { id: 'plan_1', name } }],
   isLoading: false,
 })
 
@@ -38,8 +38,8 @@ describe('useSpacePlan', () => {
     jest.clearAllMocks()
     mockUseHasFeature.mockReturnValue(true)
     mockIsSignedIn.mockReturnValue(true)
-    mockEntitlementsQuery.mockReturnValue({ data: undefined, isLoading: false })
-    mockSubscriptionsQuery.mockReturnValue({ data: undefined, isLoading: false })
+    mockEntitlementsQuery.mockReturnValue({ currentData: undefined, isLoading: false })
+    mockSubscriptionsQuery.mockReturnValue({ currentData: undefined, isLoading: false })
     jest.spyOn(Date, 'now').mockReturnValue(Date.UTC(2026, 10, 22, 12))
   })
 
@@ -82,7 +82,7 @@ describe('useSpacePlan', () => {
   it('falls back to the subscription for the name and the period end while the entitlements lag', () => {
     mockEntitlementsQuery.mockReturnValue(entitlements(null))
     mockSubscriptionsQuery.mockReturnValue({
-      data: [
+      currentData: [
         {
           id: 'sub_1',
           status: 'trialing',
@@ -112,6 +112,17 @@ describe('useSpacePlan', () => {
 
     expect(result.current.plan?.daysLeft).toBe(7)
     expect(result.current.isTrialEndingSoon).toBe(true)
+  })
+
+  it('reads the switch to another Workspace as loading instead of showing the previous plan', () => {
+    mockEntitlementsQuery.mockReturnValue({ currentData: undefined, isLoading: false, isFetching: true })
+    mockSubscriptionsQuery.mockReturnValue({ currentData: undefined, isLoading: false, isFetching: true })
+
+    const { result } = renderHook(() => useSpacePlan())
+
+    expect(result.current.plan).toBeNull()
+    expect(result.current.status).toBe('none')
+    expect(result.current.isLoading).toBe(true)
   })
 
   it('reports no plan without a subscription or when it lapsed', () => {
@@ -147,16 +158,16 @@ describe('useSpacePlan', () => {
   })
 
   it('aggregates loading across both sources', () => {
-    mockSubscriptionsQuery.mockReturnValue({ data: undefined, isLoading: true })
+    mockSubscriptionsQuery.mockReturnValue({ currentData: undefined, isLoading: true })
     expect(renderHook(() => useSpacePlan()).result.current.isLoading).toBe(true)
   })
 
   it('reports uninitialized until both queries have started', () => {
-    mockSubscriptionsQuery.mockReturnValue({ data: undefined, isLoading: false, isUninitialized: true })
+    mockSubscriptionsQuery.mockReturnValue({ currentData: undefined, isLoading: false, isUninitialized: true })
     expect(renderHook(() => useSpacePlan()).result.current.isUninitialized).toBe(true)
 
-    mockSubscriptionsQuery.mockReturnValue({ data: undefined, isLoading: false, isUninitialized: false })
-    mockEntitlementsQuery.mockReturnValue({ data: undefined, isLoading: false, isUninitialized: false })
+    mockSubscriptionsQuery.mockReturnValue({ currentData: undefined, isLoading: false, isUninitialized: false })
+    mockEntitlementsQuery.mockReturnValue({ currentData: undefined, isLoading: false, isUninitialized: false })
     expect(renderHook(() => useSpacePlan()).result.current.isUninitialized).toBe(false)
   })
 })
