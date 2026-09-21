@@ -147,6 +147,8 @@ export const PlanCard = ({
   onOptionChange?: (option: PlanSeatOption) => void
 } & PlanCardActions) => {
   const selectable = onSelect !== undefined
+  // In the catalog the plan in force is the one white, raised card; a chooser marks its pick with the mint border.
+  const isCurrentInCatalog = !selectable && Boolean(tier.isCurrent)
   const currentOption = tier.options.find((candidate) => candidate.priceId === tier.currentPriceId)
   const [option, setOption] = useState<PlanSeatOption | undefined>(currentOption ?? tier.options[0])
   // The subscription can land after the card mounted; the selector must then snap to the plan in force.
@@ -164,10 +166,11 @@ export const PlanCard = ({
 
   return (
     <Card
-      variant="muted-secondary"
+      variant={isCurrentInCatalog ? 'default' : 'muted-secondary'}
+      elevated={isCurrentInCatalog}
       radius="lg-xl"
       className={cn('flex-1', selectable && 'cursor-pointer')}
-      selected={selectable ? Boolean(selected) : tier.isCurrent}
+      selected={selectable ? Boolean(selected) : undefined}
       role={selectable ? 'radio' : undefined}
       aria-checked={selectable ? selected : undefined}
       tabIndex={selectable ? 0 : undefined}

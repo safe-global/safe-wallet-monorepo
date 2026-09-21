@@ -51,7 +51,16 @@ export default function WorkspaceLockModal({ spaceId }: { spaceId: string }) {
 
   if (!isAdmin) {
     const { title, body } = memberCopy(reason, trialPeriodDays, endedAt, space?.name ?? 'This Workspace')
-    return <SafeProNoticeModal open title={highlightSafePro(title)} body={body} onAction={goBack} />
+    return (
+      <SafeProNoticeModal
+        open
+        title={highlightSafePro(title)}
+        body={body}
+        onAction={goBack}
+        secondaryActionLabel={reason === 'lapsed' ? 'Create new Workspace' : undefined}
+        secondaryActionHref={reason === 'lapsed' ? AppRoutes.welcome.spaces : undefined}
+      />
+    )
   }
 
   if (reason === 'trial-offered') return <ClaimTrialModal spaceId={spaceId} onBack={goBack} />

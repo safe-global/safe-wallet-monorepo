@@ -222,6 +222,8 @@ describe('Plans', () => {
 
     expect(screen.getByTestId('current-plan-card')).toHaveTextContent('€499')
     expect(screen.getByTestId('current-plan-card')).toHaveTextContent('20 Safe accounts')
+    expect(screen.getByTestId('current-plan-card')).toHaveClass('bg-card', 'shadow-lg')
+    expect(screen.getByTestId('current-plan-card')).not.toHaveClass('border-mint')
     expect(screen.queryByText('€6,990')).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('tab', { name: /Yearly/ }))

@@ -1,4 +1,7 @@
 import type { ReactNode } from 'react'
+import NextLink from 'next/link'
+import type { LinkProps } from 'next/link'
+import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DialogTitle } from '@/components/ui/dialog'
 import { Typography } from '@/components/ui/typography'
@@ -16,6 +19,7 @@ const SafeProNoticeModal = ({
   actionLabel = 'Go to My accounts',
   onAction,
   secondaryActionLabel,
+  secondaryActionHref,
   onSecondaryAction,
   onOpenChange,
 }: {
@@ -24,12 +28,13 @@ const SafeProNoticeModal = ({
   body: string
   actionLabel?: string
   onAction: () => void
-  /** An optional primary alternative next to the action, e.g. "Try again". */
+  /** An optional primary alternative next to the action, e.g. "Try again", or a way out when given `secondaryActionHref`. */
   secondaryActionLabel?: string
+  secondaryActionHref?: LinkProps['href']
   onSecondaryAction?: () => void
   onOpenChange?: (open: boolean) => void
 }) => {
-  const hasSecondary = Boolean(secondaryActionLabel && onSecondaryAction)
+  const hasSecondary = Boolean(secondaryActionLabel && (onSecondaryAction || secondaryActionHref))
 
   return (
     <SafeProModalFrame open={open} onOpenChange={onOpenChange} showCloseButton={Boolean(onOpenChange)}>
@@ -47,8 +52,14 @@ const SafeProNoticeModal = ({
           {actionLabel}
         </Button>
         {hasSecondary && (
-          <Button className="flex-1" onClick={onSecondaryAction}>
+          <Button
+            className="flex-1"
+            accentIcon={Boolean(secondaryActionHref)}
+            render={secondaryActionHref ? <NextLink href={secondaryActionHref} /> : undefined}
+            onClick={onSecondaryAction}
+          >
             {secondaryActionLabel}
+            {secondaryActionHref && <ArrowRight data-icon="inline-end" />}
           </Button>
         )}
       </div>

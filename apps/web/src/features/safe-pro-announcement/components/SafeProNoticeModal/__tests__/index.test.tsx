@@ -59,4 +59,19 @@ describe('SafeProNoticeModal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
     expect(onSecondaryAction).toHaveBeenCalled()
   })
+
+  it('renders a second action with a destination as a link', () => {
+    render(
+      <SafeProNoticeModal
+        open
+        title="Your free access ended on Dec 5, 2026"
+        body="An admin needs to choose a plan to unlock it."
+        onAction={jest.fn()}
+        secondaryActionLabel="Create new Workspace"
+        secondaryActionHref="/welcome/spaces"
+      />,
+    )
+
+    expect(screen.getByRole('link', { name: 'Create new Workspace' })).toHaveAttribute('href', '/welcome/spaces')
+  })
 })

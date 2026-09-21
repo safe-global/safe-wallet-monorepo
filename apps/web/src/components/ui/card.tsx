@@ -26,6 +26,7 @@ import { cn } from '@/utils/cn'
  * Key Props:
  * - Card: `as`, `size` ('default' | 'sm' | 'lg' | 'none'), `variant` ('default' | 'outlined' | 'muted' | 'muted-secondary'),
  *   `surface` ('default' | 'sunken', default 'default'), `radius` ('lg' | 'lg-xl' | 'xl' | 'none', default 'lg'),
+ *   `selected` (mint border + shadow for a picked option), `elevated` (shadow only, for the one card that stands out),
  *   `className` (layout-only: w-*, margins, flex/grid)
  * - CardHeader / CardTitle / CardDescription / CardAction / CardContent / CardFooter: `className`
  *
@@ -43,6 +44,7 @@ import { cn } from '@/utils/cn'
  * - 2026-07-10: Added `size="lg"` (gap-8/py-8, slot px-8); flipped the default `radius` xl→lg (`--radius-lg`, 16px)
  * - 2026-08-25: Added `surface="sunken"` (bg-surface-sunken) for inset cards nested on the page surface;
  *   orthogonal to `variant`, so it composes with `outlined`
+ * - 2026-09-21: Added `elevated` (shadow-lg without the selection border) for the current plan card
  */
 const cardVariants = cva(
   'bg-card text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col',
@@ -76,6 +78,10 @@ const cardVariants = cva(
         true: 'border-2 border-mint shadow-lg',
         false: 'border-2 border-transparent',
       },
+      elevated: {
+        true: 'shadow-lg',
+        false: '',
+      },
     },
     defaultVariants: {
       variant: 'default',
@@ -99,6 +105,7 @@ function Card<TElement extends React.ElementType = 'div'>({
   surface = 'default',
   radius = 'lg',
   selected,
+  elevated,
   ...props
 }: CardProps<TElement>) {
   const Component = as ?? 'div'
@@ -110,7 +117,7 @@ function Card<TElement extends React.ElementType = 'div'>({
       data-variant={variant}
       data-surface={surface}
       data-radius={radius}
-      className={cn(cardVariants({ size, variant, surface, radius, selected }), className)}
+      className={cn(cardVariants({ size, variant, surface, radius, selected, elevated }), className)}
       {...props}
     />
   )
