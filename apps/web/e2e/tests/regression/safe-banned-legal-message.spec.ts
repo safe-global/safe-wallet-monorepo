@@ -1,11 +1,12 @@
 /**
- * Regression — a Safe that CGW bans shows the backend's reason, not the generic copy.
+ * Regression — a Safe that CGW bans shows the app's own copy, not the gateway's wording.
  *
- * CGW rejects a banned Safe with `451 { code, message }`. Before this fix every
- * safe-info failure rendered the same "This Safe account couldn't be loaded", so a
- * ban was indistinguishable from a transient error. The jest tests cover the message
- * extraction and the component→hook wiring; this spec covers the one seam they can't:
- * a real 451 travelling from the network, through RTK Query, onto the rendered screen.
+ * CGW rejects a banned Safe with `451 { code, message }`. Two behaviours are pinned here:
+ * a ban must be distinguishable from a transient loading error (#8569), and the gateway's
+ * `message` — "Blocked in your region by provider edge-node-7" — must never reach the
+ * screen (#8692). The jest tests cover the message selection and the component→hook
+ * wiring; this spec covers the one seam they can't: a real 451 travelling from the
+ * network, through RTK Query, onto the rendered screen.
  *
  * A 451 cannot be produced by the real staging API, so safe-info is stubbed —
  * the error-state exception in docs/AI_TEST_OUTPUT_FORMAT.md step 6.
@@ -17,18 +18,23 @@ import { test, expect } from '../../src/fixtures/test.fixture'
 import { SAFES } from '../../src/data/constants'
 import {
   SafeLoadingErrorPage,
-  LEGAL_BLOCK_MESSAGE,
+  SAFE_UNAVAILABLE_MESSAGE,
+  GATEWAY_BLOCK_REASON,
   GENERIC_LOADING_ERROR,
 } from '../../src/pages/safe-loading-error.page'
 
 test.describe('Safe loading error — legal block', { tag: '@regression' }, () => {
-  test('should show the backend reason when CGW bans the Safe with 451', async ({ safePage }) => {
+  test('should show the unavailable copy, not the gateway reason, when CGW bans the Safe with 451', async ({
+    safePage,
+  }) => {
     const errorScreen = new SafeLoadingErrorPage(safePage)
-    await errorScreen.stubSafeInfo(451, { code: 451, message: LEGAL_BLOCK_MESSAGE })
+    await errorScreen.stubSafeInfo(451, { code: 451, message: GATEWAY_BLOCK_REASON })
 
     await errorScreen.goto(SAFES.SEP_STATIC_SAFE_2)
 
-    await expect(errorScreen.container).toContainText(LEGAL_BLOCK_MESSAGE)
+    await expect(errorScreen.container).toContainText(SAFE_UNAVAILABLE_MESSAGE)
+    // The gateway's own wording is never shown, and a ban stays distinguishable from a transient error
+    await expect(errorScreen.container).not.toContainText(GATEWAY_BLOCK_REASON)
     await expect(errorScreen.container).not.toContainText(GENERIC_LOADING_ERROR)
     await expect(errorScreen.mainPageButton).toBeVisible()
   })
