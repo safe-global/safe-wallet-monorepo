@@ -13,11 +13,17 @@ import {
   PRICE_UNAVAILABLE_TEXT,
   REMOVE_LIMIT_LABEL,
 } from '../../constants'
-import { createEmptyLimit, type LimitFormValues, type SpendingLimitPolicyFormValues } from '../../types'
+import {
+  createEmptyLimit,
+  spenderAddressPath,
+  type LimitFormValues,
+  type SpendingLimitPolicyFormValues,
+} from '../../types'
 import TokenLimitCard from '../TokenLimitCard'
 
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+const SPENDER = '0x1234567890123456789012345678901234567890'
 
 const mockTokens = [
   tokenOptionBuilder()
@@ -116,6 +122,9 @@ const Harness = ({
       ))}
       <button type="button" onClick={() => methods.trigger()}>
         validate
+      </button>
+      <button type="button" onClick={() => methods.setValue(spenderAddressPath(0), SPENDER, { shouldDirty: true })}>
+        set spender
       </button>
     </FormProvider>
   )
@@ -236,7 +245,6 @@ describe('TokenLimitCard', () => {
   })
 
   describe('existing on-chain limits', () => {
-    const SPENDER = '0x1234567890123456789012345678901234567890'
     const existingUsdc = spendingLimitStateBuilder()
       .with({ beneficiary: SPENDER, token: { ...spendingLimitStateBuilder().build().token, address: USDC } })
       .build()
@@ -273,6 +281,16 @@ describe('TokenLimitCard', () => {
 
       mockUseExisting.mockReturnValue({ limits: [existingUsdc], loading: false })
       rerender(<Harness limits={picked} spender={SPENDER} />)
+
+      await waitFor(() => expect(screen.getByTestId('token-error')).toHaveTextContent(EXISTING_LIMIT_ERROR))
+    })
+
+    it('flags a token once the spender typed later already has a limit for it', async () => {
+      mockUseExisting.mockReturnValue({ limits: [existingUsdc], loading: false })
+      const { user } = renderRows([{ ...createEmptyLimit(), tokenAddress: USDC }])
+      expect(screen.queryByTestId('token-error')).not.toBeInTheDocument()
+
+      await user.click(screen.getByRole('button', { name: 'set spender' }))
 
       await waitFor(() => expect(screen.getByTestId('token-error')).toHaveTextContent(EXISTING_LIMIT_ERROR))
     })

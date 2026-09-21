@@ -1,4 +1,5 @@
-import type { SpendingLimitPair } from '@/features/spending-limits'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+import type { SpendingLimitPair, SpendingLimitState } from '@/features/spending-limits'
 import type { SpendingLimitPolicyFormValues } from '../types'
 import { findTokenOption, type TokenOption } from '../utils/tokenOptions'
 
@@ -32,3 +33,15 @@ export const buildSpendingLimitPairs = (
 
   return { pairs }
 }
+
+/** The first pair the selected Safe already limits, if any — changing it is the edit flow's job. */
+export const findExistingPair = (
+  pairs: readonly SpendingLimitPair[],
+  existing: readonly SpendingLimitState[],
+): SpendingLimitPair | undefined =>
+  pairs.find((pair) =>
+    existing.some(
+      (limit) =>
+        sameAddress(limit.beneficiary, pair.beneficiary) && sameAddress(limit.token.address, pair.tokenAddress),
+    ),
+  )

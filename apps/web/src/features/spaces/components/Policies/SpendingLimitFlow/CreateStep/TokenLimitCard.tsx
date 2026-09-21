@@ -81,10 +81,9 @@ const TokenLimitCard = ({
   const { options } = useSpendingLimitTokenOptions()
   const { limits: existingLimits } = useExistingSpendingLimits()
   const spenderAddress = watch(spenderAddressPath(spenderIndex)) ?? ''
-  const existingTokens = useMemo(
-    () => existingTokensForSpender(spenderAddress, existingLimits),
-    [spenderAddress, existingLimits],
-  )
+  // `existingTokensForSpender` is a new array on every spender keystroke, so key the re-trigger effect on values.
+  const existingTokensKey = existingTokensForSpender(spenderAddress, existingLimits).join(',')
+  const existingTokens = useMemo(() => (existingTokensKey ? existingTokensKey.split(',') : []), [existingTokensKey])
 
   const tokenPath = limitPath(spenderIndex, limitIndex, 'tokenAddress')
   const amountPath = limitPath(spenderIndex, limitIndex, 'amount')

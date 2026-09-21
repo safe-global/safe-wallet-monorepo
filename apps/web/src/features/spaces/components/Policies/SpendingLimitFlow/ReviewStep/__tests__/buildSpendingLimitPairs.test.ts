@@ -1,7 +1,8 @@
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import { tokenOptionBuilder } from '../../utils/tokenOptions.fixtures'
 import type { SpendingLimitPolicyFormValues } from '../../types'
-import { buildSpendingLimitPairs, UNKNOWN_TOKEN_IN_POLICY_ERROR } from '../buildSpendingLimitPairs'
+import { buildSpendingLimitPairs, findExistingPair, UNKNOWN_TOKEN_IN_POLICY_ERROR } from '../buildSpendingLimitPairs'
 
 const ALICE = '0x1234567890123456789012345678901234567890'
 const BOB = '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'
@@ -40,5 +41,36 @@ describe('buildSpendingLimitPairs', () => {
 
     expect(result.pairs).toBeUndefined()
     expect(result.error?.message).toBe(UNKNOWN_TOKEN_IN_POLICY_ERROR)
+  })
+})
+
+describe('findExistingPair', () => {
+  const pair = { beneficiary: ALICE, tokenAddress: USDC, amount: '250', decimals: 6, resetTime: '10080' }
+
+  it('returns the colliding pair regardless of casing', () => {
+    const existing = [
+      spendingLimitStateBuilder()
+        .with({
+          beneficiary: ALICE.toLowerCase(),
+          token: { ...spendingLimitStateBuilder().build().token, address: USDC.toLowerCase() },
+        })
+        .build(),
+    ]
+
+    expect(findExistingPair([pair], existing)).toBe(pair)
+  })
+
+  it('returns undefined when only another spender has that token', () => {
+    const existing = [
+      spendingLimitStateBuilder()
+        .with({ beneficiary: BOB, token: { ...spendingLimitStateBuilder().build().token, address: USDC } })
+        .build(),
+    ]
+
+    expect(findExistingPair([pair], existing)).toBeUndefined()
+  })
+
+  it('returns undefined for an empty existing list', () => {
+    expect(findExistingPair([pair], [])).toBeUndefined()
   })
 })

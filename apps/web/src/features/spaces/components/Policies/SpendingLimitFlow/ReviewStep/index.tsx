@@ -16,8 +16,8 @@ import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
 import SpendingLimitSummary from '../Summary'
 import { toPolicySummaryModel } from '../Summary/toPolicySummaryModel'
 import type { SpendingLimitPolicyFormValues } from '../types'
-import { EXISTING_LIMITS_LOAD_ERROR, REVIEW_STEP_TITLE } from '../constants'
-import { buildSpendingLimitPairs } from './buildSpendingLimitPairs'
+import { EXISTING_LIMITS_LOAD_ERROR, EXISTING_PAIR_IN_POLICY_ERROR, REVIEW_STEP_TITLE } from '../constants'
+import { buildSpendingLimitPairs, findExistingPair } from './buildSpendingLimitPairs'
 
 /**
  * Step 2: the policy in plain language on top of the shared transaction review. The multisend is built for
@@ -31,7 +31,7 @@ const ReviewSpendingLimitPolicy = ({ onSubmit, children }: ReviewTransactionProp
   const { safe, safeLoaded } = useSafeInfo()
   const chain = useCurrentChain()
   const { accounts } = useSpendingLimitSafeAccounts()
-  const { options: tokens, isLoading: tokensLoading } = useSpendingLimitTokenOptions()
+  const { options: tokens, isLoading: tokensLoading, isPopularLoading } = useSpendingLimitTokenOptions()
   const names = useAddressBook()
   const { limits: existingLimits, error: existingLimitsError } = useExistingSpendingLimits()
   const { createSpendingLimitsTx, $isReady } = useLoadFeature(SpendingLimitsFeature)
@@ -42,8 +42,8 @@ const ReviewSpendingLimitPolicy = ({ onSubmit, children }: ReviewTransactionProp
   )
 
   const pairsResult = useMemo(
-    () => (data && !tokensLoading ? buildSpendingLimitPairs(data, tokens) : undefined),
-    [data, tokens, tokensLoading],
+    () => (data && !tokensLoading && !isPopularLoading ? buildSpendingLimitPairs(data, tokens) : undefined),
+    [data, tokens, tokensLoading, isPopularLoading],
   )
   // The builder reads values, not references, so the effect is keyed on them.
   const pairsKey = pairsResult?.pairs ? JSON.stringify(pairsResult.pairs) : undefined
@@ -62,10 +62,25 @@ const ReviewSpendingLimitPolicy = ({ onSubmit, children }: ReviewTransactionProp
     }
     if (!pairsResult?.pairs || !sdk || !chainId || !chain || !$isReady || !safeLoaded || !existingLimits) return
 
+    if (findExistingPair(pairsResult.pairs, existingLimits)) {
+      setSafeTxError(new Error(EXISTING_PAIR_IN_POLICY_ERROR))
+      return
+    }
+
+    let active = true
     setSafeTxError(undefined)
+    // A previous trip's transaction must not stay signable under a summary that no longer describes it.
+    setSafeTx(undefined)
     createSpendingLimitsTx(pairsResult.pairs, existingLimits, chainId, chain, safe.modules, safe.deployed, scope)
-      .then(setSafeTx)
-      .catch(setSafeTxError)
+      .then((tx) => {
+        if (active) setSafeTx(tx)
+      })
+      .catch((e) => {
+        if (active) setSafeTxError(e)
+      })
+    return () => {
+      active = false
+    }
     // `pairsKey` stands in for `pairsResult`, `safe.modules?.length` for the polled array.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [

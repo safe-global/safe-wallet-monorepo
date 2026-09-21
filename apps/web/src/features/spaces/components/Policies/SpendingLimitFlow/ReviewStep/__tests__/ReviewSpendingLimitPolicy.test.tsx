@@ -6,6 +6,7 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { render, screen, waitFor } from '@/tests/test-utils'
 import { chainBuilder } from '@/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
+import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxContext'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
@@ -17,7 +18,7 @@ import * as useChainsModule from '@/hooks/useChains'
 import { tokenOptionBuilder } from '../../utils/tokenOptions.fixtures'
 import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
 import { useExistingSpendingLimits } from '../../ExistingSpendingLimitsProvider'
-import { EXISTING_LIMITS_LOAD_ERROR, REVIEW_STEP_TITLE } from '../../constants'
+import { EXISTING_LIMITS_LOAD_ERROR, EXISTING_PAIR_IN_POLICY_ERROR, REVIEW_STEP_TITLE } from '../../constants'
 import type { SpendingLimitPolicyFormValues } from '../../types'
 import { UNKNOWN_TOKEN_IN_POLICY_ERROR } from '../buildSpendingLimitPairs'
 import ReviewSpendingLimitPolicy from '..'
@@ -136,12 +137,12 @@ const renderReview = (safeTxOverrides: Partial<SafeTxContextParams> = {}) =>
     </TxFlowContext.Provider>,
   )
 
-const optionsResult = (options: (typeof eth)[], isLoading = false) => ({
+const optionsResult = (options: (typeof eth)[], isLoading = false, isPopularLoading = false) => ({
   options,
   isLoading,
   isError: false,
   refetch: jest.fn(),
-  isPopularLoading: false,
+  isPopularLoading,
   isPopularError: false,
   refetchPopular: jest.fn(),
   identityKey: `1:${SAFE_A}`,
@@ -213,6 +214,11 @@ describe('ReviewSpendingLimitPolicy', () => {
     mockUseExisting.mockReturnValue({ loading: true })
     renderReview()
     expect(mockCreate).not.toHaveBeenCalled()
+
+    mockUseExisting.mockReturnValue({ limits: [], loading: false })
+    mockUseOptions.mockReturnValue(optionsResult([eth, usdc], false, true))
+    renderReview()
+    expect(mockCreate).not.toHaveBeenCalled()
   })
 
   it('reports a token it cannot resolve instead of building', async () => {
@@ -244,6 +250,49 @@ describe('ReviewSpendingLimitPolicy', () => {
     renderReview()
 
     await waitFor(() => expect(setSafeTxError).toHaveBeenCalledWith(failure))
+  })
+
+  it('refuses to build over a spender/token pair the Safe already limits', async () => {
+    mockUseExisting.mockReturnValue({
+      limits: [
+        spendingLimitStateBuilder()
+          .with({ beneficiary: SPENDER_A, token: { ...spendingLimitStateBuilder().build().token, address: USDC } })
+          .build(),
+      ],
+      loading: false,
+    })
+
+    renderReview()
+
+    await waitFor(() =>
+      expect(setSafeTxError).toHaveBeenCalledWith(expect.objectContaining({ message: EXISTING_PAIR_IN_POLICY_ERROR })),
+    )
+    expect(mockCreate).not.toHaveBeenCalled()
+  })
+
+  it('clears a stale transaction before rebuilding, so it cannot stay signable under a new summary', () => {
+    mockCreate.mockReturnValue(new Promise(() => {}))
+
+    renderReview({ safeTx: builtTx })
+
+    expect(setSafeTx).toHaveBeenCalledWith(undefined)
+    expect(mockCreate).toHaveBeenCalledTimes(1)
+  })
+
+  it('ignores a build that resolves after the step has unmounted', async () => {
+    let resolve!: (tx: SafeTransaction) => void
+    const pending = new Promise<SafeTransaction>((r) => {
+      resolve = r
+    })
+    mockCreate.mockReturnValue(pending)
+
+    const { unmount } = renderReview()
+    unmount()
+
+    resolve(builtTx)
+    await pending
+
+    expect(setSafeTx).not.toHaveBeenCalledWith(builtTx)
   })
 
   it('renders the summary first inside the shared review once the transaction exists, with the flow children', () => {
