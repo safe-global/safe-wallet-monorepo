@@ -1,0 +1,58 @@
+@property --drawer-fade-top {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --drawer-fade-bottom {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+/* Softens each scroll edge into the drawer surface. Fading to transparent rather than painting the
+   surface colour keeps this correct in both themes and under any SheetContent `surface`. */
+.scrollFade {
+  --drawer-fade-size: 24px;
+
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    black var(--drawer-fade-top),
+    black calc(100% - var(--drawer-fade-bottom)),
+    transparent 100%
+  );
+}
+
+/* Ties each edge to its own end of the scroll range, so an edge with nothing hidden behind it stays crisp.
+   Both fades start at 0px, so a body that does not scroll — or a browser without scroll-driven
+   animations — renders exactly as it did before rather than dimming content it cannot scroll to. */
+@supports (animation-timeline: scroll()) {
+  .scrollFade {
+    animation:
+      drawerFadeTop linear both,
+      drawerFadeBottom linear both;
+    animation-timeline: scroll(self block), scroll(self block);
+    animation-range:
+      0 var(--drawer-fade-size),
+      calc(100% - var(--drawer-fade-size)) 100%;
+  }
+}
+
+@keyframes drawerFadeTop {
+  from {
+    --drawer-fade-top: 0px;
+  }
+  to {
+    --drawer-fade-top: var(--drawer-fade-size);
+  }
+}
+
+@keyframes drawerFadeBottom {
+  from {
+    --drawer-fade-bottom: var(--drawer-fade-size);
+  }
+  to {
+    --drawer-fade-bottom: 0px;
+  }
+}

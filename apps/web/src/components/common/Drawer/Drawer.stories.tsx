@@ -34,7 +34,7 @@ const Paragraphs = ({ count }: { count: number }) => (
   <>
     {Array.from({ length: count }, (_, i) => (
       <Typography key={i} variant="paragraph-small" className="mb-4">
-        Paragraph {i + 1} — the drawer body does not scroll on its own; the content decides.
+        Paragraph {i + 1} — the drawer body scrolls once the content outgrows the panel.
       </Typography>
     ))}
   </>
@@ -184,9 +184,7 @@ export const LongContent: Story = {
           <DrawerTitle>Scrolling body</DrawerTitle>
         </DrawerHeader>
         <DrawerBody>
-          <div className="min-h-0 flex-1 overflow-y-auto">
-            <Paragraphs count={30} />
-          </div>
+          <Paragraphs count={30} />
         </DrawerBody>
         <DrawerFooter>
           <Button className="w-full">Submit delegation</Button>

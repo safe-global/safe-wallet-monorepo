@@ -73,7 +73,7 @@ exports[`./Drawer.stories Full 1`] = `
             </div>
           </div>
           <div
-            class="flex min-h-0 flex-1 flex-col px-6 last:pb-6"
+            class="min-h-0 flex-1 overflow-y-auto overscroll-y-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border scrollFade flex flex-col px-6 last:pb-6"
           >
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -82,7 +82,7 @@ exports[`./Drawer.stories Full 1`] = `
             >
               Paragraph 
               1
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -91,7 +91,7 @@ exports[`./Drawer.stories Full 1`] = `
             >
               Paragraph 
               2
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -100,7 +100,7 @@ exports[`./Drawer.stories Full 1`] = `
             >
               Paragraph 
               3
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
           </div>
           <div
@@ -218,7 +218,7 @@ exports[`./Drawer.stories List 1`] = `
             </p>
           </div>
           <div
-            class="flex min-h-0 flex-1 flex-col px-6 last:pb-6"
+            class="min-h-0 flex-1 overflow-y-auto overscroll-y-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border scrollFade flex flex-col px-6 last:pb-6"
           >
             <dl
               class="flex w-full flex-col gap-3 rounded-lg bg-muted p-3"
@@ -481,282 +481,278 @@ exports[`./Drawer.stories LongContent 1`] = `
             </span>
           </div>
           <div
-            class="flex min-h-0 flex-1 flex-col px-6 last:pb-6"
+            class="min-h-0 flex-1 overflow-y-auto overscroll-y-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border scrollFade flex flex-col px-6 last:pb-6"
           >
-            <div
-              class="min-h-0 flex-1 overflow-y-auto"
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
             >
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                1
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                2
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                3
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                4
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                5
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                6
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                7
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                8
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                9
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                10
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                11
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                12
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                13
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                14
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                15
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                16
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                17
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                18
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                19
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                20
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                21
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                22
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                23
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                24
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                25
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                26
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                27
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                28
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                29
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                30
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-            </div>
+              Paragraph 
+              1
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              2
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              3
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              4
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              5
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              6
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              7
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              8
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              9
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              10
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              11
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              12
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              13
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              14
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              15
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              16
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              17
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              18
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              19
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              20
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              21
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              22
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              23
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              24
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              25
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              26
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              27
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              28
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              29
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              30
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
           </div>
           <div
             class="px-6 pb-6"
@@ -862,7 +858,7 @@ exports[`./Drawer.stories NoHeader 1`] = `
           class="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden"
         >
           <div
-            class="flex min-h-0 flex-1 flex-col px-6 last:pb-6"
+            class="min-h-0 flex-1 overflow-y-auto overscroll-y-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border scrollFade flex flex-col px-6 last:pb-6"
           >
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -871,7 +867,7 @@ exports[`./Drawer.stories NoHeader 1`] = `
             >
               Paragraph 
               1
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -880,7 +876,7 @@ exports[`./Drawer.stories NoHeader 1`] = `
             >
               Paragraph 
               2
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -889,7 +885,7 @@ exports[`./Drawer.stories NoHeader 1`] = `
             >
               Paragraph 
               3
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
           </div>
         </div>
@@ -995,7 +991,7 @@ exports[`./Drawer.stories OnlyTitle 1`] = `
             </span>
           </div>
           <div
-            class="flex min-h-0 flex-1 flex-col px-6 last:pb-6"
+            class="min-h-0 flex-1 overflow-y-auto overscroll-y-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border scrollFade flex flex-col px-6 last:pb-6"
           >
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -1004,7 +1000,7 @@ exports[`./Drawer.stories OnlyTitle 1`] = `
             >
               Paragraph 
               1
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -1013,7 +1009,7 @@ exports[`./Drawer.stories OnlyTitle 1`] = `
             >
               Paragraph 
               2
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -1022,7 +1018,7 @@ exports[`./Drawer.stories OnlyTitle 1`] = `
             >
               Paragraph 
               3
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
           </div>
         </div>
@@ -1128,7 +1124,7 @@ exports[`./Drawer.stories Sections 1`] = `
             </p>
           </div>
           <div
-            class="flex min-h-0 flex-1 flex-col px-6 last:pb-6"
+            class="min-h-0 flex-1 overflow-y-auto overscroll-y-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border scrollFade flex flex-col px-6 last:pb-6"
           >
             <div
               class="flex flex-col gap-4"
@@ -1293,7 +1289,7 @@ exports[`./Drawer.stories SizeLg 1`] = `
             </span>
           </div>
           <div
-            class="flex min-h-0 flex-1 flex-col px-6 last:pb-6"
+            class="min-h-0 flex-1 overflow-y-auto overscroll-y-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border scrollFade flex flex-col px-6 last:pb-6"
           >
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -1302,7 +1298,7 @@ exports[`./Drawer.stories SizeLg 1`] = `
             >
               Paragraph 
               1
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -1311,7 +1307,7 @@ exports[`./Drawer.stories SizeLg 1`] = `
             >
               Paragraph 
               2
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -1320,7 +1316,7 @@ exports[`./Drawer.stories SizeLg 1`] = `
             >
               Paragraph 
               3
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
           </div>
         </div>
@@ -1467,7 +1463,7 @@ exports[`./Drawer.stories StatusHeader 1`] = `
             </span>
           </div>
           <div
-            class="flex min-h-0 flex-1 flex-col px-6 last:pb-6"
+            class="min-h-0 flex-1 overflow-y-auto overscroll-y-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border scrollFade flex flex-col px-6 last:pb-6"
           >
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -1476,7 +1472,7 @@ exports[`./Drawer.stories StatusHeader 1`] = `
             >
               Paragraph 
               1
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -1485,7 +1481,7 @@ exports[`./Drawer.stories StatusHeader 1`] = `
             >
               Paragraph 
               2
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -1494,7 +1490,7 @@ exports[`./Drawer.stories StatusHeader 1`] = `
             >
               Paragraph 
               3
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
           </div>
           <div
