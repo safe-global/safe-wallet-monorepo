@@ -104,7 +104,10 @@ export const AnalysisGroupCard = ({
       }}
     >
       {/* Card header - always visible */}
-      <CollapsibleTrigger render={<div className="flex cursor-pointer flex-row items-center justify-between p-3" />}>
+      <CollapsibleTrigger
+        nativeButton={false}
+        render={<div className="flex cursor-pointer flex-row items-center justify-between p-3" />}
+      >
         <div className="flex flex-row items-center gap-2">
           <SeverityIcon severity={primaryResult.severity} muted={!isHighlighted} />
           <Typography variant="paragraph-small" className="text-[var(--color-primary-light)]">
