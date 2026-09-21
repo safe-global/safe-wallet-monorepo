@@ -36,7 +36,8 @@ export const useProposerValidation = (): Validate<string> => {
 
   const owners = useMemo(() => safe.owners.map((owner) => owner.value), [safe.owners])
   const existingProposers = useMemo(() => delegates?.results.map((delegate) => delegate.delegate) ?? [], [delegates])
-  const isReady = safeLoaded && (delegates !== undefined || delegatesError) && provider !== undefined
+  const delegatesLoadedOrFailed = delegates !== undefined || delegatesError
+  const isReady = safeLoaded && delegatesLoadedOrFailed && provider !== undefined
 
   return useCallback<Validate<string>>(
     async (value) => {
