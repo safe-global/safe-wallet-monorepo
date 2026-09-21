@@ -139,7 +139,7 @@ describe('Plans', () => {
 
     expect(
       screen.getByText(
-        /Your free trial is active until Dec 6, 2026\. Add payment method before then or choose another plan/,
+        /Your free trial is active until Dec 6, 2026\. Add a payment method before then or choose another plan/,
       ),
     ).toBeInTheDocument()
     expect(screen.getByTestId('plan-status-badge')).toHaveTextContent('Free trial · 7 days left')

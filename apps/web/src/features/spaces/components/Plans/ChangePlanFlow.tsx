@@ -54,7 +54,12 @@ export default function ChangePlanFlow({
         onOpenChange={(open) => !open && onClose()}
       />
     ) : (
-      <SafeProSubscriptionActivatedModal open planName={pick.tier.name} onOpenChange={(open) => !open && onClose()} />
+      <SafeProSubscriptionActivatedModal
+        open
+        planName={pick.tier.name}
+        seatsLabel={pick.option.label}
+        onOpenChange={(open) => !open && onClose()}
+      />
     )
   }
 

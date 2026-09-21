@@ -32,6 +32,10 @@ export type ClaimTrialCopy = { title: string; subtitle: string; note: string; ba
 export const TRIAL_END_TOOLTIP =
   "Your paid subscription only starts after you add a payment method. If you don't add one or choose another plan before the trial ends, your Workspace will be locked. Nothing is deleted for 90 days and your Safe accounts remain available in My accounts."
 
+/** The price tag's green word: a new Workspace is told how long the free period lasts, an existing one just "Free". */
+export const freeLabel = (trialPeriodDays: number | null, variant: ClaimTrialVariant): string =>
+  variant === 'new' && trialPeriodDays !== null ? `${trialPeriodDays}-day free` : 'Free'
+
 export const claimCopy = (trialPeriodDays: number | null, variant: ClaimTrialVariant = 'existing'): ClaimTrialCopy => {
   if (variant === 'new') {
     return {
@@ -66,12 +70,14 @@ export const claimCopy = (trialPeriodDays: number | null, variant: ClaimTrialVar
 const TrialOfferCard = ({
   tier,
   availableUntil,
+  freeText,
   selectable,
   selected,
   onSelect,
 }: {
   tier: PlanTier
   availableUntil: string | null
+  freeText: string
   selectable: boolean
   selected: boolean
   onSelect: () => void
@@ -101,7 +107,7 @@ const TrialOfferCard = ({
               </Typography>
               <Typography color="muted">{priceSuffix(tier.billingCycle)}</Typography>
               <Typography variant="paragraph-large-bold" color="success">
-                Free
+                {freeText}
               </Typography>
             </div>
             {availableUntil && (
@@ -221,6 +227,7 @@ export default function ClaimTrialModal({
                       key={candidate.id}
                       tier={candidate}
                       availableUntil={availableUntil}
+                      freeText={freeLabel(trialPeriodDays, variant)}
                       selectable={tiers.length > 1}
                       selected={candidate.id === tier?.id}
                       onSelect={() => setPickedTierId(candidate.id)}

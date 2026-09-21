@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
-import ClaimTrialModal, { claimCopy } from '../ClaimTrialModal'
+import ClaimTrialModal, { claimCopy, freeLabel } from '../ClaimTrialModal'
 
 const mockUseSpaceOffers = jest.fn()
 const mockStartCheckout = jest.fn()
@@ -91,6 +91,12 @@ describe('ClaimTrialModal', () => {
       back: 'Go to My accounts',
       claim: 'Claim free trial',
     })
+  })
+
+  it('tags the price as free, with the length of the free period for a brand-new Workspace', () => {
+    expect(freeLabel(60, 'existing')).toBe('Free')
+    expect(freeLabel(30, 'new')).toBe('30-day free')
+    expect(freeLabel(null, 'new')).toBe('Free')
   })
 
   it('links to the full feature comparison under the header', () => {

@@ -6,6 +6,7 @@ import { SafeProFeature } from '@/features/safe-pro-announcement'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
 import { useCheckoutReturn, type CheckoutReturnStatus } from '../../hooks/billing/useCheckoutReturn'
 import { getSubscriptionPeriodEnd, getSubscriptionPlanName } from '../../hooks/billing/subscription'
+import { seatsLabel } from './planTiers'
 
 const PENDING_STATUSES: CheckoutReturnStatus[] = ['processing', 'activating']
 
@@ -33,7 +34,7 @@ export default function CheckoutReturnModals({
 }) {
   const { SafeProTrialActivatedModal, SafeProSubscriptionActivatedModal, SafeProPendingModal, SafeProNoticeModal } =
     useLoadFeature(SafeProFeature)
-  const { plan, refetch } = useSpacePlan(spaceId)
+  const { plan, seats, refetch } = useSpacePlan(spaceId)
   const checkout = useCheckoutReturn(spaceId)
   const router = useRouter()
   const isComplete = checkout.status === 'complete'
@@ -82,6 +83,7 @@ export default function CheckoutReturnModals({
       open
       onOpenChange={checkout.dismiss}
       planName={getSubscriptionPlanName(checkout.subscription) ?? 'Safe Pro'}
+      seatsLabel={typeof seats?.quota === 'number' ? seatsLabel(seats.quota) : undefined}
     />
   )
 }

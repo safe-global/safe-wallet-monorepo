@@ -15,6 +15,7 @@ import { ENTERPRISE_TIER, RECOMMENDED_PLAN } from './fixtures'
 import { PlanCatalog } from './PlanCards'
 import { buildPlanTiers } from './planTiers'
 import SelectAccountsStep from './SelectAccountsStep'
+import DownloadAddressBookButton from './DownloadAddressBookButton'
 import type { PlanPick, PlanTier } from './types'
 
 const maxSeats = (tier: PlanTier): number => Math.max(0, ...tier.options.map((option) => option.seats ?? 0))
@@ -103,6 +104,23 @@ export default function PlanChooserModal({
                 </Typography>
                 <Typography color="muted">{subtitle}</Typography>
               </div>
+
+              {reason === 'lapsed' && (
+                <Alert variant="success" data-testid="lapsed-data-notice">
+                  <AlertSeverityIcon variant="success" />
+                  <AlertDescription>
+                    <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex flex-col">
+                        <span className="font-medium text-foreground">
+                          Your Safe accounts remain available in My accounts.
+                        </span>
+                        <span>Workspace data is exportable for 90 days.</span>
+                      </div>
+                      <DownloadAddressBookButton spaceId={spaceId} />
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              )}
 
               {reason === 'payment-failed' ? (
                 <Button

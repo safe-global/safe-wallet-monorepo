@@ -36,8 +36,6 @@ import NextLink from 'next/link'
 import { useSignInRedirect } from '@/components/welcome/WelcomeLogin/hooks/useSignInRedirect'
 import AddIcon from '@/public/images/common/add.svg'
 import { SPACES_LIMIT } from '@/features/spaces/constants'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import WelcomeContentCard from '@/components/common/WelcomeContentCard'
 
@@ -225,7 +223,6 @@ const SpacesList = () => {
   const { SafeProWorkspacesBanner } = useLoadFeature(SafeProFeature)
   const isSafeProEnabled = useIsSafeProEnabled()
   // The pre-launch heads-up only makes sense to a user without a Workspace while Safe Pro is not live yet.
-  const isSafeProLive = useHasFeature(FEATURES.SAFE_PRO) === true
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
@@ -325,7 +322,7 @@ const SpacesList = () => {
           </>
         ) : (
           <>
-            {isSafeProEnabled && !isSafeProLive && <SafeProWorkspacesBanner className="mb-4" />}
+            {isSafeProEnabled && <SafeProWorkspacesBanner className="mb-4" />}
             {pendingInviteBanners}
             <NoSpacesState isAtLimit={isAtSpacesLimit} />
           </>

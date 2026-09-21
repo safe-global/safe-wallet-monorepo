@@ -179,7 +179,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
       expect(screen.getByTestId('safe-pro-workspaces-banner')).toBeInTheDocument()
     })
 
-    it('shows the wide Pro banner above the empty state only until Safe Pro is live', () => {
+    it('shows the wide Pro banner above the empty state, before and after Safe Pro is live', () => {
       setAuth(true)
       mockUseIsSafeProEnabled.mockReturnValue(true)
       mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
@@ -192,7 +192,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
       mockUseHasFeature.mockReturnValue(true)
       render(<SpacesList />)
-      expect(screen.queryByTestId('safe-pro-workspaces-banner')).not.toBeInTheDocument()
+      expect(screen.getByTestId('safe-pro-workspaces-banner')).toBeInTheDocument()
       expect(screen.getByText(/create your first workspace/i)).toBeInTheDocument()
     })
 
