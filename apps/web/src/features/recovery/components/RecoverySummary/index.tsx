@@ -17,7 +17,7 @@ export default function RecoverySummary({ item }: { item: RecoveryQueueItem }): 
   const { isMalicious } = item
 
   return (
-    <div data-testid="transaction-item" className={classNames(css.gridContainer, css.queue)}>
+    <div data-testid="transaction-item" className={classNames(css.gridContainer, css.queue, css.recovery)}>
       <div className={css.type} style={{ gridArea: 'type' }}>
         <RecoveryType isMalicious={isMalicious} />
       </div>
