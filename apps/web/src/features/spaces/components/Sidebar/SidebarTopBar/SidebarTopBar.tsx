@@ -16,7 +16,7 @@ export const SidebarTopBar = (): ReactElement => {
   const safeAddress = useSafeAddressFromUrl()
   const isSpaceRoute = useIsSpaceRoute()
   const isHydrated = useIsHydrated()
-  const { plan } = useSpacePlan()
+  const { plan } = useSpacePlan(isSpaceRoute ? undefined : null)
   // On a Safe's pages the last-used Workspace says nothing about this Safe: it must belong to a Workspace on a plan.
   const { isPro: isSafeOnPlan } = useSafeSponsoredTxs()
 

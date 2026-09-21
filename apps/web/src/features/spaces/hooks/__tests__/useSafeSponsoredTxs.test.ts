@@ -12,6 +12,8 @@ jest.mock('@/hooks/useSafeSpaces', () => ({
   useSafeSpaces: (skip: boolean) => mockUseSafeSpaces(skip),
 }))
 jest.mock('../useSpacePlan', () => ({ useSpacePlan: (spaceId: string | null) => mockUseSpacePlan(spaceId) }))
+let mockCurrentSpaceId: string | null = null
+jest.mock('../useCurrentSpaceId', () => ({ useCurrentSpaceId: () => mockCurrentSpaceId }))
 
 const SAFE = { safe: { chainId: '1' }, safeAddress: '0xAbC' }
 const SPACE = { uuid: 'space-1' }
@@ -20,6 +22,7 @@ const meter = { used: 20, quota: 50, resetsAt: '2026-11-01T00:00:00.000Z' }
 describe('useSafeSponsoredTxs', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockCurrentSpaceId = 'space-1'
     mockUseHasFeature.mockReturnValue(true)
     mockUseSafeInfo.mockReturnValue(SAFE)
     mockUseSafeSpaces.mockReturnValue({ safeSpaces: { '1:0xabc': [SPACE] }, isLoading: false })
@@ -40,6 +43,17 @@ describe('useSafeSponsoredTxs', () => {
       canSponsor: true,
       isLoading: false,
     })
+  })
+
+  it('only charges the Workspace the user is working in, and none when that one does not hold the Safe', () => {
+    mockUseSafeSpaces.mockReturnValue({ safeSpaces: { '1:0xabc': [SPACE, { uuid: 'space-2' }] }, isLoading: false })
+    mockCurrentSpaceId = 'space-2'
+    renderHook(() => useSafeSponsoredTxs())
+    expect(mockUseSpacePlan).toHaveBeenLastCalledWith('space-2')
+
+    mockCurrentSpaceId = 'space-elsewhere'
+    expect(renderHook(() => useSafeSponsoredTxs()).result.current).toMatchObject({ isPro: false, spaceId: null })
+    expect(mockUseSpacePlan).toHaveBeenLastCalledWith(null)
   })
 
   it('caps the count at zero and reads a missing quota as unlimited', () => {

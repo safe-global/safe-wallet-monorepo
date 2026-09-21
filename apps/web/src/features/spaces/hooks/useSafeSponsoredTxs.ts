@@ -3,6 +3,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { safeSpaceKey, useSafeSpaces } from '@/hooks/useSafeSpaces'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { SponsoredTxsMeter } from './billing/types'
+import { useCurrentSpaceId } from './useCurrentSpaceId'
 import { useSpacePlan } from './useSpacePlan'
 
 export type SafeSponsoredTxs = {
@@ -25,10 +26,12 @@ export const useSafeSponsoredTxs = (): SafeSponsoredTxs => {
   const isEnabled = useHasFeature(FEATURES.SAFE_PRO) === true
   const { safe, safeAddress } = useSafeInfo()
   const { safeSpaces, isLoading: isSpacesLoading } = useSafeSpaces(!isEnabled)
-  const spaceId =
-    isEnabled && safeAddress && safe.chainId
-      ? (safeSpaces[safeSpaceKey(safe.chainId, safeAddress)]?.[0]?.uuid ?? null)
-      : null
+  const currentSpaceId = useCurrentSpaceId()
+  // The Workspace the user is working in sets the context; a Safe it does not hold is not on a plan here, whatever
+  // other Workspaces it belongs to.
+  const holders =
+    isEnabled && safeAddress && safe.chainId ? (safeSpaces[safeSpaceKey(safe.chainId, safeAddress)] ?? []) : []
+  const spaceId = currentSpaceId && holders.some((space) => space.uuid === currentSpaceId) ? currentSpaceId : null
   const { plan, sponsoredTxs, isLoading: isPlanLoading } = useSpacePlan(spaceId)
 
   const isPro = isEnabled && spaceId !== null && plan !== null && sponsoredTxs !== null
