@@ -52,12 +52,11 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -135,12 +134,11 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -218,12 +216,11 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 400ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -484,12 +481,11 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -567,12 +563,11 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -650,12 +645,11 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 400ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -812,12 +806,11 @@ exports[`./SafeShield.stories HypernativeCustomCheckFailed 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -895,12 +888,11 @@ exports[`./SafeShield.stories HypernativeCustomCheckFailed 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 200ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -1057,12 +1049,11 @@ exports[`./SafeShield.stories HypernativeGuardActive 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -1140,12 +1131,11 @@ exports[`./SafeShield.stories HypernativeGuardActive 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 200ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -1302,12 +1292,11 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -1385,12 +1374,11 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 200ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -1761,12 +1749,11 @@ exports[`./SafeShield.stories HypernativeNotLoggedIn 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -2103,12 +2090,11 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -2186,12 +2172,11 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -2269,12 +2254,11 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 400ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -2645,12 +2629,11 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -2728,12 +2711,11 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -2811,12 +2793,11 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 400ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -3009,12 +2990,11 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -3092,12 +3072,11 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -3175,12 +3154,11 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 400ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -3357,12 +3335,11 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -3440,12 +3417,11 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -3523,12 +3499,11 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 400ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -3685,12 +3660,11 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -4307,12 +4281,11 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -5149,12 +5122,11 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 400ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -5331,12 +5303,11 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -5471,12 +5442,11 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -5663,12 +5633,11 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 400ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -5825,12 +5794,11 @@ exports[`./SafeShield.stories OverflowFindings 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -6085,12 +6053,11 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -6168,12 +6135,11 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -6251,12 +6217,11 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 400ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -6413,12 +6378,11 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -6496,12 +6460,11 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -6688,12 +6651,11 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 400ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -6913,12 +6875,11 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -6996,12 +6957,11 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -7079,12 +7039,11 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 400ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -7260,12 +7219,11 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 500ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -7400,12 +7358,11 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -7581,12 +7538,11 @@ exports[`./SafeShield.stories UnverifiedContract 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"
@@ -7664,12 +7620,11 @@ exports[`./SafeShield.stories UnverifiedContract 1`] = `
                     style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
                   >
                     <div
-                      aria-disabled="false"
                       aria-expanded="false"
                       class="flex cursor-pointer flex-row items-center justify-between p-3"
                       data-slot="collapsible-trigger"
+                      role="button"
                       tabindex="0"
-                      type="button"
                     >
                       <div
                         class="flex flex-row items-center gap-2"

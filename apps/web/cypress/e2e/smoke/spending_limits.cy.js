@@ -61,7 +61,7 @@ describe('[SMOKE] Spending limits tests', () => {
     spendinglimit.verifyDefaultTimeIsSet()
   })
 
-  it('Validate Reset values present in dropdown: One time, 5 minutes, 30 minutes, 1 hr', () => {
+  it('Validate Reset values present in dropdown: One time, 5 minutes, 30 minutes, 1 hr, 1 day, 1 week, 1 month', () => {
     spendinglimit.clickOnTimePeriodDropdown()
     spendinglimit.checkTimeDropdownOptions()
   })
