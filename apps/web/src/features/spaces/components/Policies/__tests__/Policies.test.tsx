@@ -72,8 +72,8 @@ describe('Policies', () => {
 
     expect(screen.getByText('Spending limit')).toBeInTheDocument()
     expect(screen.getByText('Proposer')).toBeInTheDocument()
-    expect(screen.getByText('Account recovery')).toBeInTheDocument()
     expect(screen.getByText('Something missing?')).toBeInTheDocument()
+    expect(screen.queryByText('Account recovery')).not.toBeInTheDocument()
   })
 
   it('renders the catalogue only, with no table, create button or search', () => {

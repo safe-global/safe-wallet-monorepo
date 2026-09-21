@@ -1,4 +1,4 @@
-import { LockKeyholeOpen, MessageSquarePlus, UserRoundPen, WalletCards, type LucideIcon } from 'lucide-react'
+import { MessageSquarePlus, UserRoundPen, WalletCards, type LucideIcon } from 'lucide-react'
 
 export type PolicyCatalogueId = 'spending-limit' | 'proposer' | 'account-recovery' | 'suggestion'
 
