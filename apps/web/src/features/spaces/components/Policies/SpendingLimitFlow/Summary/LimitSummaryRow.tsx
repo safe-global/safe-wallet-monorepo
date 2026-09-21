@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
 import { CalendarClock } from 'lucide-react'
 import { safeParseUnits } from '@safe-global/utils/utils/formatters'
+import { validateDecimalLength } from '@safe-global/utils/utils/validation'
 import TokenAmount from '@/components/common/TokenAmount'
 import { Typography } from '@/components/ui/typography'
 import { describeFrequency } from './frequency'
@@ -10,12 +11,12 @@ const TOKEN_ICON_SIZE = 24
 
 type DisplayAmount = { value: string; decimals?: number }
 
-/** `safeParseUnits` logs every failed parse, and over-precision is expected here, so it is ruled out first. */
-const exceedsPrecision = (amount: string, decimals: number): boolean => (amount.split('.')[1]?.length ?? 0) > decimals
-
-/** Raw units for `TokenAmount`'s formatter; the typed string is kept when the decimals are unknown or parsing fails. */
+/**
+ * Raw units for `TokenAmount`'s formatter; the typed string is kept when the decimals are unknown or parsing fails.
+ * `safeParseUnits` logs every failed parse, and an over-precise amount is expected here, so it is ruled out first.
+ */
 const toDisplayAmount = ({ amount, token }: LimitSummary): DisplayAmount => {
-  if (token.decimals === undefined || exceedsPrecision(amount, token.decimals)) return { value: amount }
+  if (token.decimals === undefined || validateDecimalLength(amount, token.decimals)) return { value: amount }
   const raw = safeParseUnits(amount, token.decimals)
   return raw === undefined ? { value: amount } : { value: raw.toString(), decimals: token.decimals }
 }

@@ -1,3 +1,8 @@
+/**
+ * Builds the two sentences in the summary's callout from the policy model. Pure string work, which is what keeps the
+ * wording rules — when a frequency may be named, singular against plural, how several spenders are joined — readable
+ * and testable on their own.
+ */
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import {
   CALLOUT_DESCRIPTION_PLURAL,
