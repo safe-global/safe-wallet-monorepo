@@ -120,6 +120,55 @@ describe('ProposerRoleForm', () => {
       await waitFor(() => expect(validateProposer).toHaveBeenCalledWith(PROPOSER))
     })
 
+    it('re-validates the proposer when the rule itself changes, e.g. once the Safe has loaded', async () => {
+      const loading = jest.fn().mockResolvedValue('Loading the Safe account details, please wait')
+      const loaded = jest.fn().mockResolvedValue(undefined)
+      const { user, rerender } = renderForm({ safeAccount: treasury.id, validateProposer: loading })
+
+      await user.type(screen.getByRole('combobox', { name: 'Proposer' }), PROPOSER)
+      await waitFor(() => expect(screen.getByText('Loading the Safe account details, please wait')).toBeInTheDocument())
+      expect(submitButton()).toBeDisabled()
+
+      rerender(
+        <ProposerRoleForm
+          onSubmit={jest.fn()}
+          accounts={[treasury]}
+          onSafeAccountChange={jest.fn()}
+          safeAccount={treasury.id}
+          validateProposer={loaded}
+        />,
+      )
+
+      await waitFor(() => expect(loaded).toHaveBeenCalledWith(PROPOSER))
+      await waitFor(() => expect(submitButton()).toBeEnabled())
+      expect(screen.queryByText('Loading the Safe account details, please wait')).not.toBeInTheDocument()
+    })
+
+    it('re-validates a prefilled proposer when the Safe account changes', async () => {
+      const validateProposer = jest.fn().mockResolvedValue(undefined)
+      const { rerender } = renderForm({
+        safeAccount: treasury.id,
+        defaultValues: { proposer: PROPOSER },
+        validateProposer,
+      })
+
+      await waitFor(() => expect(validateProposer).toHaveBeenCalledWith(PROPOSER))
+      validateProposer.mockClear()
+
+      rerender(
+        <ProposerRoleForm
+          onSubmit={jest.fn()}
+          accounts={[treasury]}
+          onSafeAccountChange={jest.fn()}
+          safeAccount="137:0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB"
+          defaultValues={{ proposer: PROPOSER }}
+          validateProposer={validateProposer}
+        />,
+      )
+
+      await waitFor(() => expect(validateProposer).toHaveBeenCalledWith(PROPOSER))
+    })
+
     it('reports the entered values to onSubmit', async () => {
       const onSubmit = jest.fn()
       const { user } = renderForm({

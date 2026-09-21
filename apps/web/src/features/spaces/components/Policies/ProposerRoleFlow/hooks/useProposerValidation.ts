@@ -13,6 +13,7 @@ import {
   PROPOSER_IS_OWNER_ERROR,
   PROPOSER_IS_SAFE_ERROR,
   PROPOSER_RESERVED_ERROR,
+  PROPOSER_SAFE_LOADING_MESSAGE,
 } from '../constants'
 
 export const addressIsNotExistingProposer =
@@ -23,21 +24,25 @@ export const addressIsNotExistingProposer =
 /**
  * The proposer address rules, resolved against the Safe the flow is scoped to. Same rules as the
  * per-Safe settings flow plus the existing-proposer check; the Safe-dependent ones wait for a pick.
+ * Until the picked Safe, its proposers and its provider are loaded the field stays invalid: with
+ * empty owner lists the checks would pass, and without the scoped provider the contract check would
+ * read (and cache under this chain) code from the URL chain.
  */
 export const useProposerValidation = (): Validate<string> => {
-  const { safe, safeAddress } = useSafeInfo()
+  const { safe, safeAddress, safeLoaded } = useSafeInfo()
   const chainId = useChainId()
-  // The picked Safe's chain inside the flow; without it the check would read code from the URL chain.
   const provider = useWeb3ReadOnly()
-  const { data: delegates } = useProposers()
+  const { data: delegates, isError: delegatesError } = useProposers()
 
   const owners = useMemo(() => safe.owners.map((owner) => owner.value), [safe.owners])
   const existingProposers = useMemo(() => delegates?.results.map((delegate) => delegate.delegate) ?? [], [delegates])
+  const isReady = safeLoaded && (delegates !== undefined || delegatesError) && provider !== undefined
 
   return useCallback<Validate<string>>(
     async (value) => {
       const reserved = addressIsNotReserved(PROPOSER_RESERVED_ERROR)(value)
       if (reserved || !safeAddress) return reserved
+      if (!isReady) return PROPOSER_SAFE_LOADING_MESSAGE
 
       return (
         addressIsNotCurrentSafe(safeAddress, PROPOSER_IS_SAFE_ERROR)(value) ??
@@ -46,6 +51,6 @@ export const useProposerValidation = (): Validate<string> => {
         (await addressIsNotSmartContract(chainId, SMART_CONTRACT_PROPOSER_ERROR, provider)(value))
       )
     },
-    [safeAddress, owners, existingProposers, chainId, provider],
+    [safeAddress, isReady, owners, existingProposers, chainId, provider],
   )
 }

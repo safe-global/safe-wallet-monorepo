@@ -6,19 +6,21 @@ import { addressIsNotSmartContract } from '@/features/proposers/utils/utils'
 import useChainId from '@/hooks/useChainId'
 import useProposers from '@/hooks/useProposers'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import {
   PROPOSER_EXISTS_ERROR,
   PROPOSER_IS_OWNER_ERROR,
   PROPOSER_IS_SAFE_ERROR,
   PROPOSER_RESERVED_ERROR,
+  PROPOSER_SAFE_LOADING_MESSAGE,
 } from '../../constants'
 import { addressIsNotExistingProposer, useProposerValidation } from '../useProposerValidation'
 
 jest.mock('@/hooks/useSafeInfo')
 jest.mock('@/hooks/useChainId')
 jest.mock('@/hooks/useProposers')
-jest.mock('@/hooks/wallets/web3ReadOnly', () => ({ useWeb3ReadOnly: () => mockProvider }))
+jest.mock('@/hooks/wallets/web3ReadOnly')
 jest.mock('@/features/proposers/utils/utils', () => ({
   ...jest.requireActual('@/features/proposers/utils/utils'),
   addressIsNotSmartContract: jest.fn(),
@@ -28,6 +30,7 @@ const mockProvider = {} as JsonRpcProvider
 const mockUseSafeInfo = jest.mocked(useSafeInfo)
 const mockUseChainId = jest.mocked(useChainId)
 const mockUseProposers = jest.mocked(useProposers)
+const mockUseWeb3ReadOnly = jest.mocked(useWeb3ReadOnly)
 const mockAddressIsNotSmartContract = jest.mocked(addressIsNotSmartContract)
 
 const OWNER = '0x1111111111111111111111111111111111111111'
@@ -37,11 +40,18 @@ const safe = extendedSafeInfoBuilder()
   .with({ chainId: '137', owners: [{ value: OWNER }] })
   .build()
 
-const mockSafeInfo = (safeAddress: string) =>
-  mockUseSafeInfo.mockReturnValue({ safe, safeAddress, safeLoaded: true, safeLoading: false, safeError: undefined })
+const mockSafeInfo = (safeAddress: string, safeLoaded = true) =>
+  mockUseSafeInfo.mockReturnValue({
+    safe: safeLoaded ? safe : { ...safe, owners: [] },
+    safeAddress,
+    safeLoaded,
+    safeLoading: !safeLoaded,
+    safeError: undefined,
+  })
 
 const mockDelegates = (delegates: string[]) =>
   mockUseProposers.mockReturnValue({
+    isError: false,
     data: {
       count: delegates.length,
       next: null,
@@ -72,6 +82,7 @@ describe('useProposerValidation', () => {
     mockSafeInfo(safe.address.value)
     mockUseChainId.mockReturnValue('137')
     mockDelegates([EXISTING])
+    mockUseWeb3ReadOnly.mockReturnValue(mockProvider)
     mockAddressIsNotSmartContract.mockClear()
     mockAddressIsNotSmartContract.mockReturnValue(async () => undefined)
   })
@@ -104,9 +115,43 @@ describe('useProposerValidation', () => {
   })
 
   it('treats a Safe with no proposers yet like any other', async () => {
-    mockUseProposers.mockReturnValue({ data: undefined } as ReturnType<typeof useProposers>)
+    mockDelegates([])
 
     await expect(validate()(EXISTING)).resolves.toBeUndefined()
+  })
+
+  it('holds the field invalid while the picked Safe is still loading', async () => {
+    mockSafeInfo(safe.address.value, false)
+
+    await expect(validate()(OWNER)).resolves.toBe(PROPOSER_SAFE_LOADING_MESSAGE)
+    expect(mockAddressIsNotSmartContract).not.toHaveBeenCalled()
+  })
+
+  it('holds the field invalid while the proposers are still loading', async () => {
+    mockUseProposers.mockReturnValue({ data: undefined, isError: false } as ReturnType<typeof useProposers>)
+
+    await expect(validate()(EXISTING)).resolves.toBe(PROPOSER_SAFE_LOADING_MESSAGE)
+  })
+
+  it('fails open on the existing-proposer rule once the proposers request errored', async () => {
+    mockUseProposers.mockReturnValue({ data: undefined, isError: true } as ReturnType<typeof useProposers>)
+
+    await expect(validate()(EXISTING)).resolves.toBeUndefined()
+    await expect(validate()(OWNER)).resolves.toBe(PROPOSER_IS_OWNER_ERROR)
+  })
+
+  it('holds the field invalid until the picked chain has a provider, never falling back to the URL chain', async () => {
+    mockUseWeb3ReadOnly.mockReturnValue(undefined)
+
+    await expect(validate()(FRESH)).resolves.toBe(PROPOSER_SAFE_LOADING_MESSAGE)
+    expect(mockAddressIsNotSmartContract).not.toHaveBeenCalled()
+  })
+
+  it('still rejects the Safe itself and reserved addresses while loading', async () => {
+    mockSafeInfo(safe.address.value, false)
+
+    await expect(validate()(ZERO_ADDRESS)).resolves.toBe(PROPOSER_RESERVED_ERROR)
+    await expect(validate()(safe.address.value)).resolves.toBe(PROPOSER_SAFE_LOADING_MESSAGE)
   })
 
   it('only applies the reserved-address rule while no Safe is picked', async () => {

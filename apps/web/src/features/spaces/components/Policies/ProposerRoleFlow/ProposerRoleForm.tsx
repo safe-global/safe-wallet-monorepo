@@ -52,12 +52,12 @@ const ProposerRoleForm = ({
     defaultValues: { proposer: '', name: '', ...defaultValues },
     mode: 'onChange',
   })
-  const { trigger, getFieldState, formState } = methods
+  const { trigger, getValues, formState } = methods
 
-  // The owner and existing-proposer rules depend on the picked Safe, so a typed address is re-checked when it changes.
+  // The rules depend on the picked Safe and settle as it loads, so an entered address is re-checked on either change.
   useEffect(() => {
-    if (getFieldState('proposer').isDirty) void trigger('proposer')
-  }, [safeAccount, trigger, getFieldState])
+    if (getValues('proposer')) void trigger('proposer')
+  }, [safeAccount, validateProposer, trigger, getValues])
 
   const canSubmit = Boolean(safeAccount) && formState.isValid
 

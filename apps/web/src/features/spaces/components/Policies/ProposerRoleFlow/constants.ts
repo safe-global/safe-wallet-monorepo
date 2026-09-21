@@ -10,3 +10,4 @@ export const PROPOSER_IS_SAFE_ERROR = 'Cannot add the Safe account itself as pro
 export const PROPOSER_IS_OWNER_ERROR = 'Cannot add a signer of this Safe account as proposer'
 export const PROPOSER_EXISTS_ERROR = 'This address is already a proposer of this Safe account'
 export const PROPOSER_RESERVED_ERROR = 'This proposer address is not valid'
+export const PROPOSER_SAFE_LOADING_MESSAGE = 'Loading the Safe account details, please wait'
