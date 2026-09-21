@@ -1,8 +1,6 @@
 import { blo } from 'blo'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { TOOLTIP_DELAY_MS, TruncatedText, getInitials, getSafeDisplayInfo } from '@/components/common/AccountRow'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
+import { TruncatedText, getInitials, getSafeDisplayInfo } from '@/components/common/AccountRow'
 
 /**
  * Identity block shared by the rows, the group header and the trigger. Renders two siblings for its
@@ -23,21 +21,14 @@ const SafeIdentity = ({ address, name }: { address: string; name?: string }) => 
           otherwise paint over the threshold badge instead of ellipsizing. */}
       <span className="flex min-w-0 flex-1 flex-col items-start">
         <TruncatedText variant="paragraph-small-medium" className="block min-w-0 max-w-full" text={displayName} />
-
-        {/* Always on: the shortened address is incomplete whether or not the text is also clipped. */}
-        <Tooltip delay={TOOLTIP_DELAY_MS} disableHoverablePopup>
-          <TooltipTrigger render={<span />} className="flex min-w-0 max-w-full">
-            <Typography
-              variant="paragraph-mini"
-              color="muted"
-              className="block min-w-0 max-w-full truncate font-mono"
-              data-testid="safe-account-address"
-            >
-              {shortAddress}
-            </Typography>
-          </TooltipTrigger>
-          <TooltipContent className="pointer-events-none select-none">{address}</TooltipContent>
-        </Tooltip>
+        <TruncatedText
+          variant="paragraph-mini"
+          color="muted"
+          className="block min-w-0 max-w-full font-mono"
+          text={shortAddress}
+          fullText={address}
+          data-testid="safe-account-address"
+        />
       </span>
     </>
   )
