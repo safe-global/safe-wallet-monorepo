@@ -7,8 +7,10 @@ import { PolicyStatus, type PolicyVariantContentProps } from './types'
 /** The drawer body for one policy status. */
 export const PolicyVariantContent = (props: PolicyVariantContentProps): ReactElement => {
   switch (props.status) {
-    case PolicyStatus.ACTIVE:
-      return <ActivePolicy />
+    case PolicyStatus.ACTIVE: {
+      const { status, ...activeProps } = props
+      return <ActivePolicy {...activeProps} />
+    }
 
     case PolicyStatus.PENDING: {
       const { status, ...pendingProps } = props

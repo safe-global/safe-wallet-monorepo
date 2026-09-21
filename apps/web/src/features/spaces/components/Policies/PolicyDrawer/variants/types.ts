@@ -1,3 +1,4 @@
+import type { ActivePolicyProps } from './ActivePolicy'
 import type { PendingPolicyProps } from './PendingPolicy'
 
 export enum PolicyStatus {
@@ -6,8 +7,8 @@ export enum PolicyStatus {
   NOT_ACTIVATED = 'NOT_ACTIVATED',
 }
 
-/** Content props per status — only the pending variant carries data so far. */
+/** Content props per status — the not-activated variant carries no data yet. */
 export type PolicyVariantContentProps =
+  | ({ status: PolicyStatus.ACTIVE } & ActivePolicyProps)
   | ({ status: PolicyStatus.PENDING } & PendingPolicyProps)
-  | { status: PolicyStatus.ACTIVE }
   | { status: PolicyStatus.NOT_ACTIVATED }
