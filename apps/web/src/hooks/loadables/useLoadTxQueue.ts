@@ -11,9 +11,9 @@ const useLoadTxQueue = (): AsyncResult<QueuedItemPage> => {
   const { safe, safeLoaded } = useSafeInfo()
   const { effectiveAddress, effectiveChainId } = useEffectiveSafeParams()
   const { txQueuedTag, txHistoryTag } = safe
-  const [updatedTxId, setUpdatedTxId] = useState<string>('')
-  // N.B. we reload when txQueuedTag/txHistoryTag/updatedTxId changes as txQueuedTag alone is not enough
-  const reloadTag = (txQueuedTag ?? '') + (txHistoryTag ?? '') + updatedTxId
+  const [reloadCount, setReloadCount] = useState(0)
+  // N.B. we reload when txQueuedTag/txHistoryTag/reloadCount changes as txQueuedTag alone is not enough
+  const reloadTag = (txQueuedTag ?? '') + (txHistoryTag ?? '') + reloadCount
 
   // Re-fetch when chainId/address, or txQueueTag change
   const [data, error, loadingQueueItems] = useAsync<QueuedItemPage>(
@@ -32,18 +32,15 @@ const useLoadTxQueue = (): AsyncResult<QueuedItemPage> => {
     false,
   )
 
-  // Track proposed and deleted txs so that we can reload the queue
+  // Adding a confirmation does not bump txQueuedTag, so the queue must reload on the event
   useEffect(() => {
-    const unsubscribeProposed = txSubscribe(TxEvent.PROPOSED, ({ txId }) => {
-      setUpdatedTxId(txId)
-    })
-    const unsubscribeDeleted = txSubscribe(TxEvent.DELETED, ({ safeTxHash }) => {
-      setUpdatedTxId(safeTxHash)
-    })
-    return () => {
-      unsubscribeProposed()
-      unsubscribeDeleted()
-    }
+    const reload = () => setReloadCount((count) => count + 1)
+    const unsubscribers = [
+      txSubscribe(TxEvent.PROPOSED, reload),
+      txSubscribe(TxEvent.SIGNATURE_PROPOSED, reload),
+      txSubscribe(TxEvent.DELETED, reload),
+    ]
+    return () => unsubscribers.forEach((unsubscribe) => unsubscribe())
   }, [])
 
   return [data, error, loadingQueueItems]
