@@ -12,7 +12,7 @@ import SafeProLockup from '@/public/images/safe-pro/safe-pro-lockup.svg'
 import SafeProLockupDark from '@/public/images/safe-pro/safe-pro-lockup-dark.svg'
 import { useAppSelector } from '@/store'
 import { isAuthenticated, selectIsStoreHydrated } from '@/store/authSlice'
-import { ArrowRight, Check } from 'lucide-react'
+import { ArrowRight, Check, ExternalLink as ExternalLinkIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Spinner } from '@/components/ui/spinner'
@@ -92,6 +92,8 @@ const AddSpaceButton = ({
   )
 }
 
+const termsLinkClassName = 'underline underline-offset-2'
+
 const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => void; redirectLoading: boolean }) => {
   const isDarkMode = useDarkMode()
   const isSafeProEnabled = useIsSafeProEnabled()
@@ -119,31 +121,58 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
                 )}
               </div>
 
-              <Typography variant="h3" className="mb-6 text-center">
+              <Typography variant="h3" className={cn('text-center', isSafeProEnabled ? 'mb-4' : 'mb-6')}>
                 Sign in to your workspace
               </Typography>
+
+              {isSafeProEnabled && (
+                <p className="mb-6 text-center text-xs leading-[18px] text-muted-foreground">
+                  By continuing you accept the{' '}
+                  <Link
+                    variant="muted"
+                    href={AppRoutes.terms}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className={termsLinkClassName}
+                  >
+                    Safe Pro User Terms
+                  </Link>{' '}
+                  and{' '}
+                  <Link
+                    variant="muted"
+                    href={AppRoutes.privacy}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className={cn(termsLinkClassName, 'whitespace-nowrap')}
+                  >
+                    Privacy Policy. <ExternalLinkIcon className="ml-0.5 inline size-4 align-text-bottom" />
+                  </Link>
+                </p>
+              )}
 
               <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
             </div>
           </div>
 
-          <p className="mt-4 text-center text-xs leading-[18px] text-muted-foreground">
-            By continuing, you agree to the{' '}
-            <NextLink
-              href={AppRoutes.terms}
-              className="text-muted-foreground underline underline-offset-2 hover:text-foreground"
-            >
-              Terms
-            </NextLink>{' '}
-            and{' '}
-            <NextLink
-              href={AppRoutes.privacy}
-              className="text-muted-foreground underline underline-offset-2 hover:text-foreground"
-            >
-              Privacy Policy
-            </NextLink>
-            .
-          </p>
+          {!isSafeProEnabled && (
+            <p className="mt-4 text-center text-xs leading-[18px] text-muted-foreground">
+              By continuing, you agree to the{' '}
+              <NextLink
+                href={AppRoutes.terms}
+                className="text-muted-foreground underline underline-offset-2 hover:text-foreground"
+              >
+                Terms
+              </NextLink>{' '}
+              and{' '}
+              <NextLink
+                href={AppRoutes.privacy}
+                className="text-muted-foreground underline underline-offset-2 hover:text-foreground"
+              >
+                Privacy Policy
+              </NextLink>
+              .
+            </p>
+          )}
         </div>
       </div>
     </div>

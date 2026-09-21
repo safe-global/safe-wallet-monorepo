@@ -484,7 +484,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
   // WA-2486: the "By continuing…" Terms/Privacy text is moved out of the card
   // (below it) to reduce text overload inside the box.
-  it('renders the "By continuing" text outside the sign-in card', () => {
+  it('renders the "By continuing" text outside the sign-in card when Safe Pro is off', () => {
     setAuth(false)
 
     const { container } = render(<SpacesList />)
@@ -493,6 +493,23 @@ describe('SpacesList — auth/expiry state rendering', () => {
     const termsLink = screen.getByRole('link', { name: /^terms$/i })
     expect(card).toBeInTheDocument()
     expect(card).not.toContainElement(termsLink)
+  })
+
+  it('puts the Safe Pro user terms and privacy links inside the sign-in card, opening in a new tab, when Safe Pro is on', () => {
+    setAuth(false)
+    mockUseIsSafeProEnabled.mockReturnValue(true)
+
+    const { container } = render(<SpacesList />)
+
+    const card = container.querySelector('.bg-card')
+    const termsLink = screen.getByRole('link', { name: /safe pro user terms/i })
+    const privacyLink = screen.getByRole('link', { name: /privacy policy/i })
+    expect(card).toContainElement(termsLink)
+    expect(card).toContainElement(privacyLink)
+    expect(termsLink).toHaveAttribute('href', AppRoutes.terms)
+    expect(termsLink).toHaveAttribute('target', '_blank')
+    expect(privacyLink).toHaveAttribute('href', AppRoutes.privacy)
+    expect(screen.queryByRole('link', { name: /^terms$/i })).not.toBeInTheDocument()
   })
 
   // The Create button sits right-aligned above the workspaces list when the
