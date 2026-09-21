@@ -28,12 +28,15 @@ interface TenderlySimulationProps {
   safeTx?: SafeTransaction
   highlightedSeverity?: Severity
   delay?: number
+  /** Safe Pro: the simulation starts on its own for every transaction, so there is no Run button. */
+  autoRun?: boolean
 }
 
 export const TenderlySimulation = ({
   safeTx,
   highlightedSeverity,
   delay = 0,
+  autoRun = false,
 }: TenderlySimulationProps): ReactElement | null => {
   const { simulation, status, nestedTx } = useContext(TxInfoContext)
   const chain = useCurrentChain()
@@ -72,7 +75,8 @@ export const TenderlySimulation = ({
   const handleRunSimulation = () => {
     if (!safeTx) return
 
-    const executionOwner = isSafeOwner && signer?.address ? signer.address : safe.owners[0].value
+    const executionOwner = isSafeOwner && signer?.address ? signer.address : safe.owners[0]?.value
+    if (!executionOwner) return
 
     const simulationParams = {
       safe,
@@ -96,6 +100,19 @@ export const TenderlySimulation = ({
 
     setSimulationExpanded(true)
   }
+
+  // Once per transaction: the reset effect above clears the previous result, this one starts the next run.
+  const autoRanKeyRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (!autoRun || !showSimulation || !safeTx) return
+    // The run needs an execution owner; until the Safe's owners are known, wait for them.
+    if (!signer?.address && !safe.owners[0]?.value) return
+    const key = JSON.stringify(safeTx.data)
+    if (autoRanKeyRef.current === key) return
+    autoRanKeyRef.current = key
+    handleRunSimulation()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed on the tx data; the handler reads live values
+  }, [autoRun, showSimulation, safeTx, signer?.address, safe.owners])
 
   const { mainIsSuccess, nestedIsSuccess, isSimulationSuccess, isSimulationFinished, isLoading } = getSimulationOutcome(
     status,
@@ -195,7 +212,7 @@ export const TenderlySimulation = ({
           <Typography variant="paragraph-small" className="text-[var(--color-primary-light)]">
             {getSimulationHeaderText()}
           </Typography>
-          {!isSimulationFinished && !isLoading && (
+          {!isSimulationFinished && !isLoading && !autoRun && (
             <Tooltip>
               <TooltipTrigger render={<span className="inline-flex" />}>
                 <InfoIcon className="size-4 text-[var(--color-border-main)]" />
@@ -207,7 +224,11 @@ export const TenderlySimulation = ({
           )}
         </div>
 
-        {!isSimulationFinished ? (
+        {!isSimulationFinished && autoRun ? (
+          <Typography variant="paragraph-mini" className="text-[var(--color-text-secondary)] [letter-spacing:0.4px]">
+            {isLoading ? 'Running...' : ''}
+          </Typography>
+        ) : !isSimulationFinished ? (
           <button
             data-testid="run-simulation-btn"
             onClick={handleRunSimulation}

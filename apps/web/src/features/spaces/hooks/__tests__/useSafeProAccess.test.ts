@@ -32,7 +32,11 @@ describe('useSafeProAccess', () => {
   })
 
   it('grants the Pro features to a Safe in a Workspace with a live subscription', () => {
-    expect(renderHook(() => useSafeProAccess()).result.current).toEqual({ hasProFeatures: true, isLoading: false })
+    expect(renderHook(() => useSafeProAccess()).result.current).toEqual({
+      hasProFeatures: true,
+      isLoading: false,
+      spaceId: SPACE_ID,
+    })
     expect(mockUseSpacePlan).toHaveBeenCalledWith(SPACE_ID)
     expect(mockUseSpaceSafesGetV1Query).toHaveBeenCalledWith(
       { spaceId: SPACE_ID },
@@ -62,16 +66,33 @@ describe('useSafeProAccess', () => {
     expect(renderHook(() => useSafeProAccess()).result.current.hasProFeatures).toBe(false)
   })
 
+  it('names no Workspace to upgrade when the current one does not hold the Safe', () => {
+    mockUseSpaceSafesGetV1Query.mockReturnValue({
+      currentData: { safes: { '1': ['0x00000000000000000000000000000000000000aa'] } },
+      isLoading: false,
+    })
+
+    expect(renderHook(() => useSafeProAccess()).result.current.spaceId).toBeNull()
+  })
+
   it('reports loading while the Workspace safes or the plan are still resolving', () => {
     mockUseSpacePlan.mockReturnValue({ status: 'none', isLoading: true })
 
-    expect(renderHook(() => useSafeProAccess()).result.current).toEqual({ hasProFeatures: false, isLoading: true })
+    expect(renderHook(() => useSafeProAccess()).result.current).toEqual({
+      hasProFeatures: false,
+      isLoading: true,
+      spaceId: SPACE_ID,
+    })
   })
 
   it('keeps everything open while SAFE_PRO is off, without asking for the Workspace safes', () => {
     mockUseHasFeature.mockReturnValue(false)
 
-    expect(renderHook(() => useSafeProAccess()).result.current).toEqual({ hasProFeatures: true, isLoading: false })
+    expect(renderHook(() => useSafeProAccess()).result.current).toEqual({
+      hasProFeatures: true,
+      isLoading: false,
+      spaceId: null,
+    })
     expect(mockUseSpaceSafesGetV1Query).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ skip: true }))
   })
 })

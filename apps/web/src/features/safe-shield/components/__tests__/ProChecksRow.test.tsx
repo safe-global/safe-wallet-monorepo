@@ -2,10 +2,12 @@ import { render, screen } from '@/tests/test-utils'
 import { ProChecksRow } from '../ProChecksRow'
 
 let mockSpaceId: string | null = 'space-1'
-jest.mock('@/features/spaces', () => ({ useCurrentSpaceId: () => mockSpaceId }))
+jest.mock('@/features/spaces', () => ({
+  useSafeProAccess: () => ({ hasProFeatures: false, isLoading: false, spaceId: mockSpaceId }),
+}))
 
 describe('ProChecksRow', () => {
-  it('links to the Workspace plans when the Safe has no Pro features', () => {
+  it('links to the plans of the Workspace holding the Safe when it has no Pro features', () => {
     render(<ProChecksRow hasProFeatures={false} />)
 
     expect(screen.getByLabelText('Safe Pro')).toBeInTheDocument()
@@ -13,7 +15,7 @@ describe('ProChecksRow', () => {
     expect(screen.getByTestId('pro-upgrade-link')).toHaveTextContent('Upgrade')
   })
 
-  it('falls back to the Workspaces list outside a Workspace', () => {
+  it('falls back to the Workspaces list when no Workspace holds the Safe', () => {
     mockSpaceId = null
     render(<ProChecksRow hasProFeatures={false} />)
 

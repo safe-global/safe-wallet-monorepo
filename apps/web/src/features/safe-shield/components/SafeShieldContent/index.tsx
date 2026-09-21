@@ -11,9 +11,11 @@ import { SafeShieldAnalysisLoading } from './SafeShieldAnalysisLoading'
 import { SafeShieldAnalysisEmpty } from './SafeShieldAnalysisEmpty'
 import { AnalysisGroupCard } from '../AnalysisGroupCard'
 import { TenderlySimulation } from '../TenderlySimulation'
-import { TenderlyExternalSimulation } from '../TenderlyExternalSimulation'
+import { TenderlySimulationLocked } from '../TenderlySimulationLocked'
+import { useHasOwnTenderly } from '../../hooks/useHasOwnTenderly'
 import { ProChecksRow } from '../ProChecksRow'
-import { AnalysisGroupCardDisabled } from '../ThreatAnalysis/AnalysisGroupCardDisabled'
+import { LockedCheckRow } from '../LockedCheckRow'
+import { HypernativeLoginLine } from '../HypernativeLoginLine'
 import UntrustedSafeWarning from '../UntrustedSafeWarning'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import isEmpty from 'lodash/isEmpty'
@@ -50,11 +52,12 @@ export const SafeShieldContent = ({
   showHypernativeActiveStatus?: boolean
   safeAnalysis?: SafeAnalysisResult | null
   onAddToTrustedList?: () => void
-  /** Without Safe Pro the simulation is not run for the user; they get a link to Tenderly's public simulator instead. */
+  /** Without Safe Pro the simulation only runs on the user's own Tenderly project, if they set one up; else it is locked. */
   hasProFeatures?: boolean
 }): ReactElement => {
   const hn = useLoadFeature(HypernativeFeature)
   const safenet = useLoadFeature(SafenetChecksFeature)
+  const hasOwnTenderly = useHasOwnTenderly()
   const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient
   const [contractResults = {}, _contractError, contractLoading = false] = contract
   const [threatResults = {}, _threatError, threatLoading = false] = threat
@@ -95,25 +98,6 @@ export const SafeShieldContent = ({
             <UntrustedSafeWarning safeAnalysis={safeAnalysis} onAddToTrustedList={onAddToTrustedList} />
           )}
 
-          {/* The recipient check is Pro-only: labelled with the chip when it runs, locked (with an upgrade) when not. */}
-          {shouldShowContent && (!hasProFeatures || !recipientEmpty) && (
-            <ProChecksRow hasProFeatures={hasProFeatures} />
-          )}
-          {!hasProFeatures && shouldShowContent && (
-            <AnalysisGroupCardDisabled data-testid="recipient-analysis-locked">
-              Known recipient
-            </AnalysisGroupCardDisabled>
-          )}
-          {hasProFeatures && (
-            <AnalysisGroupCard
-              data-testid="recipient-analysis-group-card"
-              delay={recipientDelay}
-              data={recipientResults}
-              highlightedSeverity={highlightedSeverity}
-              analyticsEvent={SAFE_SHIELD_EVENTS.RECIPIENT_DECODED}
-            />
-          )}
-
           <AnalysisGroupCard
             data-testid="contract-analysis-group-card"
             data={contractResults}
@@ -146,18 +130,41 @@ export const SafeShieldContent = ({
           />
 
           {shouldShowContent && <safenet.SafenetChecksSection />}
-
-          {!contractLoading && !threatLoading && !hasProFeatures && (
-            <TenderlyExternalSimulation safeTx={safeTx} delay={simulationAnalysisDelay} />
-          )}
-          {!contractLoading && !threatLoading && hasProFeatures && (
-            <TenderlySimulation
-              safeTx={safeTx}
-              delay={simulationAnalysisDelay}
-              highlightedSeverity={highlightedSeverity}
-            />
-          )}
         </div>
+
+        {/* The Safe Pro checks sit together under the PRO header: recipient analysis and the simulation. Without Pro
+            they are locked (with an upgrade) and a Hypernative customer is offered their own analysis instead. */}
+        {shouldShowContent && (!hasProFeatures || !recipientEmpty || safeTx) && (
+          <div className="flex flex-col rounded-md bg-muted" data-testid="pro-checks-section">
+            <ProChecksRow hasProFeatures={hasProFeatures} />
+            <div className="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary">
+              {hasProFeatures ? (
+                <AnalysisGroupCard
+                  data-testid="recipient-analysis-group-card"
+                  delay={recipientDelay}
+                  data={recipientResults}
+                  highlightedSeverity={highlightedSeverity}
+                  analyticsEvent={SAFE_SHIELD_EVENTS.RECIPIENT_DECODED}
+                />
+              ) : (
+                <LockedCheckRow data-testid="recipient-analysis-locked">Known recipient</LockedCheckRow>
+              )}
+
+              {/* Pro runs the simulation on its own; a user with their own Tenderly project runs it by hand; the rest see a lock. */}
+              {!contractLoading && !threatLoading && (hasProFeatures || hasOwnTenderly) && (
+                <TenderlySimulation
+                  safeTx={safeTx}
+                  delay={simulationAnalysisDelay}
+                  highlightedSeverity={highlightedSeverity}
+                  autoRun={hasProFeatures}
+                />
+              )}
+              {!hasProFeatures && !hasOwnTenderly && <TenderlySimulationLocked />}
+
+              {!hasProFeatures && <HypernativeLoginLine />}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

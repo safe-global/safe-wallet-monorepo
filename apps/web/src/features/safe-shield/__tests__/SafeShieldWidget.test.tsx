@@ -88,7 +88,7 @@ describe('SafeShieldWidget', () => {
       logout: jest.fn(),
     })
     mockUseIsHypernativeEligible.mockReturnValue(makeEligibility())
-    mockUseCheckSimulation.mockReturnValue({ hasSimulationError: false })
+    mockUseCheckSimulation.mockReturnValue({ hasSimulationError: false, isSimulationSuccess: false })
   })
 
   it('does not show Hypernative info when Safe is ineligible', () => {

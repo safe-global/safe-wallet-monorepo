@@ -14,9 +14,9 @@ import { useSpacePlan } from './useSpacePlan'
 /**
  * Whether the Safe being acted on gets the Pro-only Safe Shield features (recipient and counterparty analysis,
  * Tenderly simulation): it must sit in the Workspace of the current context, and that Workspace must hold a live
- * subscription. Everything stays open while SAFE_PRO is off.
+ * subscription. Everything stays open while SAFE_PRO is off. `spaceId` names that Workspace when it holds the Safe.
  */
-export const useSafeProAccess = (): { hasProFeatures: boolean; isLoading: boolean } => {
+export const useSafeProAccess = (): { hasProFeatures: boolean; isLoading: boolean; spaceId: string | null } => {
   const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
   const isSignedIn = useAppSelector(isAuthenticated)
   const spaceId = useCurrentSpaceId()
@@ -33,7 +33,12 @@ export const useSafeProAccess = (): { hasProFeatures: boolean; isLoading: boolea
     [spaceSafes, chainId, safeAddress],
   )
 
-  if (!isSafePro) return { hasProFeatures: true, isLoading: false }
+  if (!isSafePro) return { hasProFeatures: true, isLoading: false, spaceId: null }
 
-  return { hasProFeatures: isSafeInSpace && isLivePlanStatus(status), isLoading: isSafesLoading || isPlanLoading }
+  return {
+    hasProFeatures: isSafeInSpace && isLivePlanStatus(status),
+    isLoading: isSafesLoading || isPlanLoading,
+    // The Workspace an upgrade would apply to: the current one, and only while it holds this Safe.
+    spaceId: isSafeInSpace ? spaceId : null,
+  }
 }

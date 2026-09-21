@@ -18,6 +18,9 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { getOverallStatus } from '@safe-global/utils/features/safe-shield/utils'
 import { useCheckSimulation } from '../hooks/useCheckSimulation'
 import type { HypernativeAuthStatus } from '@/features/hypernative'
+import { useCurrentChain } from '@/hooks/useChains'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import { countChecks } from '../utils/countChecks'
 
 const shieldLogoOnHover = [
   'cursor-pointer',
@@ -57,8 +60,10 @@ export const SafeShieldDisplay = ({
   const [contractResults] = contract || []
   const [threatResults] = threat || []
   const [deadlockResults] = deadlock || []
-  const { hasSimulationError } = useCheckSimulation(safeTx)
+  const { hasSimulationError, isSimulationSuccess } = useCheckSimulation(safeTx)
   const isDarkMode = useDarkMode()
+  const chain = useCurrentChain()
+  const hasSimulation = Boolean(chain && hasFeature(chain, FEATURES.TX_SIMULATION))
 
   const hnLoginRequired = useMemo(
     () => hypernativeAuth !== undefined && (!hypernativeAuth.isAuthenticated || hypernativeAuth.isTokenExpired),
@@ -78,6 +83,28 @@ export const SafeShieldDisplay = ({
     [recipientResults, contractResults, threatResults, hasSimulationError, hnLoginRequired, deadlockResults],
   )
 
+  const checks = useMemo(
+    () =>
+      countChecks({
+        threat: threatResults,
+        recipient: recipientResults,
+        contract: contractResults,
+        deadlock: deadlockResults,
+        hasProFeatures,
+        hasSimulation,
+        isSimulationSuccess,
+      }),
+    [
+      threatResults,
+      recipientResults,
+      contractResults,
+      deadlockResults,
+      hasProFeatures,
+      hasSimulation,
+      isSimulationSuccess,
+    ],
+  )
+
   const SafeShieldLogo = isDarkMode ? SafeShieldLogoFullDark : SafeShieldLogoFull
 
   return (
@@ -91,6 +118,7 @@ export const SafeShieldDisplay = ({
           threat={threat}
           deadlock={deadlock}
           overallStatus={overallStatus}
+          checks={checks}
         />
 
         <SafeShieldContent
