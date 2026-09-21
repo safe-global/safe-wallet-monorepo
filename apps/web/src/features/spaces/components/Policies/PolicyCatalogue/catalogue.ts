@@ -7,7 +7,6 @@ export interface PolicyCatalogueEntry {
   title: string
   description: string
   Icon: LucideIcon
-  /** The label of the tile's button. */
   action: string
 }
 

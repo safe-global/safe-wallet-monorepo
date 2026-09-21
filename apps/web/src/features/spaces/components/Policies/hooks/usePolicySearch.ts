@@ -4,13 +4,7 @@ import { getPolicyLabel, getPolicySummary } from '../utils/policyLabel'
 import { getPolicyTokens } from '../PoliciesTable/components/PolicyTokens'
 import type { Policy } from '../types'
 
-/**
- * Searches the policies held in the browser.
- *
- * This does not search the space address book, because a policy carries no names. It is also not
- * the final behaviour: once CGW paginates the response, a search in the browser would only cover
- * the current page while appearing to cover everything, so WA-3451 moves the search to the server.
- */
+/** Searches the policies held in the browser. The space address book is not searched: a policy carries no names. */
 
 type SearchablePolicy = {
   policy: Policy

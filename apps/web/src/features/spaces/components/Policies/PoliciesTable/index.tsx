@@ -1,7 +1,7 @@
 import { ChevronRight } from 'lucide-react'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import ChainIndicator from '@/components/common/ChainIndicator'
-import PaginatedDataTable, { type DataTableColumn } from '@/components/common/PaginatedDataTable'
+import PaginatedDataTable, { type DataTableColumn, type RowActivation } from '@/components/common/PaginatedDataTable'
 import PolicyRule from './components/PolicyRule'
 import PolicyStatusChip from './components/PolicyStatusChip'
 import PolicyTokens from './components/PolicyTokens'
@@ -13,12 +13,12 @@ export type PoliciesTableProps = {
 }
 
 type PolicyRow = {
-  /** The first policy of the group; the detail panel opens on it. */
+  /** The detail panel opens on this one. */
   policy: Policy
   chainIds: string[]
 }
 
-/** The same policy on the same address across chains is one row. Q55 decides whether CGW groups it. */
+/** The same policy on the same address across chains is one row. */
 const toRows = (policies: Policy[]): PolicyRow[] => {
   const rows = new Map<string, PolicyRow>()
 
@@ -57,7 +57,6 @@ const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
       width: '30%',
       minWidth: 260,
       cellTestId: 'policy-cell-applies-to',
-      // The design shows several stacked avatars here; that is open as Q55 in the acceptance criteria.
       cell: ({ policy }, { isCompact }) => (
         <EthHashInfo
           address={policy.safe.address}
@@ -111,13 +110,19 @@ const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
     },
   ]
 
+  const rowActivation: RowActivation<PolicyRow> = onSelect
+    ? {
+        onRowClick: ({ policy }) => onSelect(policy),
+        getRowAriaLabel: ({ policy }) => `Open ${policy.type} policy details`,
+      }
+    : {}
+
   return (
     <PaginatedDataTable
       columns={columns}
       rows={toRows(policies)}
       getRowKey={({ policy }) => policy.id}
-      onRowClick={onSelect && (({ policy }) => onSelect(policy))}
-      getRowAriaLabel={({ policy }) => `Open ${policy.type} policy details`}
+      {...rowActivation}
     />
   )
 }

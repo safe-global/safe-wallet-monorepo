@@ -9,10 +9,7 @@ import type {
   SpendingLimitPolicy,
 } from '../types'
 
-/**
- * Fixtures shaped like the CGW response agreed in WA-3218. The stories and the unit tests share
- * them so both use the same shapes. WA-3451 replaces the data source, not these shapes.
- */
+/** Shaped like the CGW policy response. The stories and the unit tests share these. */
 
 const DAY = 86_400
 
@@ -92,7 +89,6 @@ export const mockSpendingLimitPolicy = (overrides: Partial<SpendingLimitPolicy> 
   ...overrides,
 })
 
-/** One policy holding three spenders. */
 export const mockMultiSpenderPolicy = (): SpendingLimitPolicy =>
   mockSpendingLimitPolicy({
     id: '0xspending-limit-multi',
@@ -169,7 +165,6 @@ export const mockPendingPolicy = (overrides: Partial<PendingSpendingLimitPolicy>
   ...overrides,
 })
 
-/** Adds the status the table renders to an active policy. */
 export const asActivePolicy = <T extends ActivePolicy>(policy: T): T & { status: 'active' } => ({
   ...policy,
   status: 'active',
@@ -179,7 +174,6 @@ export const asActivePolicy = <T extends ActivePolicy>(policy: T): T & { status:
 export const mockPolygonSpendingLimitPolicy = (): SpendingLimitPolicy =>
   mockSpendingLimitPolicy({ id: '0xspending-limit-treasury-polygon', safe: { ...MOCK_SAFES.treasury, chainId: '137' } })
 
-/** One policy of each kind the table has to render. */
 export const mockPolicies = (): Policy[] => [
   asActivePolicy(mockMultiSpenderPolicy()),
   asActivePolicy(mockPolygonSpendingLimitPolicy()),
@@ -189,7 +183,6 @@ export const mockPolicies = (): Policy[] => [
   asActivePolicy(mockUnenforcedPolicy()),
 ]
 
-/** Used only by the long-list story, to show the table's pagination. */
 export const mockLongPolicyList = (count = 30): Policy[] =>
   Array.from({ length: count }, (_, index) =>
     asActivePolicy(

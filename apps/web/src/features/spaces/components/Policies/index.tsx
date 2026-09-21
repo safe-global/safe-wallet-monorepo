@@ -14,7 +14,7 @@ import { SPENDING_LIMIT_INTRO_SEEN_KEY } from './SpendingLimitIntroDialog/consta
 import type { Policy } from './types'
 
 interface PoliciesProps {
-  /** Fixtures until WA-3451 connects CGW. */
+  /** Supplied by the caller. The page does not fetch. */
   policies?: Policy[]
   isLoading?: boolean
   isError?: boolean
@@ -122,7 +122,7 @@ const Policies = ({
           <Typography variant="paragraph-medium">
             Policies are rules that help you manage your Safe accounts. Set them up once and they will run onchain,
             automatically.{' '}
-            <ExternalLink noIcon href={HelpCenterArticle.POLICIES}>
+            <ExternalLink className="font-bold hover:text-muted-foreground" href={HelpCenterArticle.POLICIES}>
               Learn more
             </ExternalLink>
           </Typography>

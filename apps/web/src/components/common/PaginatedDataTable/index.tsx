@@ -70,7 +70,12 @@ type SortState = { id: string; direction: SortDirection }
 
 const DEFAULT_PAGE_SIZE = 25
 
-type PaginatedDataTableProps<T> = {
+/** An activatable row is a keyboard-reachable button, so it needs an accessible name. */
+export type RowActivation<T> =
+  | { onRowClick?: undefined; getRowAriaLabel?: undefined }
+  | { onRowClick: (row: T) => void; getRowAriaLabel: (row: T) => string }
+
+type PaginatedDataTableProps<T> = RowActivation<T> & {
   columns: DataTableColumn<T>[]
   rows: T[]
   /** Optional mobile-only collapsible detail row, revealed per row via a toggle */
@@ -78,10 +83,6 @@ type PaginatedDataTableProps<T> = {
   getRowKey: (row: T) => string
   getRowClassName?: (row: T) => string
   pageSize?: number
-  /** Makes the whole row activatable. Rows become keyboard-reachable buttons when supplied. */
-  onRowClick?: (row: T) => void
-  /** Accessible name for an activatable row. Required in spirit whenever `onRowClick` is set. */
-  getRowAriaLabel?: (row: T) => string
 }
 
 // Flash guard: hides secondary columns on small viewports during the first render,

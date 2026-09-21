@@ -19,10 +19,7 @@ export type PoliciesListProps = {
 
 /**
  * The Policies page once the space has policies: an Add policy button, a search field, a sort
- * control and the table.
- *
- * Search and sort run in the browser over the fixtures. WA-3451 moves both to the server, because
- * once CGW paginates the response a browser-side filter would only cover the current page.
+ * control and the table. Search and sort run in the browser over the policies the caller passes.
  */
 const PoliciesList = ({ policies, onAddPolicy, onSelectPolicy }: PoliciesListProps) => {
   const [query, setQuery] = useState('')

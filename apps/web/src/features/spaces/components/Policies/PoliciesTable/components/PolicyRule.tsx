@@ -3,7 +3,6 @@ import { getPolicyLabel, getPolicySummary } from '../../utils/policyLabel'
 import { getPolicyIcon } from '../../utils/policyIcon'
 import type { Policy } from '../../types'
 
-/** The RULE cell: the policy type, and one line summarising what the policy contains. */
 const PolicyRule = ({ policy }: { policy: Policy }) => {
   const Icon = getPolicyIcon(policy.type)
 

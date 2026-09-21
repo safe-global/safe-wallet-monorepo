@@ -18,7 +18,6 @@ export const getPolicyTokens = (policy: Policy): PolicyTokenInfo[] => {
   return [...byAddress.values()]
 }
 
-/** The TOKENS cell. Renders nothing at all for a policy that governs no tokens. */
 const PolicyTokens = ({ policy }: { policy: Policy }) => {
   const tokens = getPolicyTokens(policy)
 

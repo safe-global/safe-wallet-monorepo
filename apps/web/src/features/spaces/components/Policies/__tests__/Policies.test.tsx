@@ -61,8 +61,8 @@ describe('Policies', () => {
 
     const link = screen.getByRole('link', { name: 'Learn more' })
 
-    expect(link.querySelector('.external-link-icon')).not.toBeInTheDocument()
-    expect(link).toHaveClass('font-bold', 'underline')
+    expect(link.querySelector('.external-link-icon')).toBeInTheDocument()
+    expect(link).toHaveClass('font-bold', 'hover:text-muted-foreground')
   })
 
   it('renders the policy catalogue', () => {

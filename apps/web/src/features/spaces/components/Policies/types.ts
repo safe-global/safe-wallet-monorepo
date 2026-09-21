@@ -1,6 +1,5 @@
 /**
- * Frontend copy of the policy types CGW will return (WA-3218). Kept close to the wire shape so
- * that WA-3451 can replace the fixtures with the real response without changing these types.
+ * The CGW policy response shape.
  *
  * No type carries a name. Policy names are not stored on chain and are not in the CGW response;
  * they live in the space address book and the frontend resolves them.
