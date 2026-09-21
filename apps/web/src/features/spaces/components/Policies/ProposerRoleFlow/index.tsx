@@ -27,29 +27,31 @@ const ProposerRoleFlowContent = (): ReactElement => {
   const onSubmit = useCallback(() => {}, [])
 
   return (
-    <TxLayoutBase
-      title={CREATE_POLICY_TITLE}
-      subtitle={<ProposerRoleHeader />}
-      step={0}
-      stepCount={1}
-      progress={100}
-      hideStatusRail
-      hideSafeShield
-      hideProgress
-      hideNonce
-    >
-      <ProposerRoleForm
-        onSubmit={onSubmit}
-        accounts={accounts}
-        safeAccount={safeAccount}
-        onSafeAccountChange={onSafeAccountChange}
-        validateProposer={validateProposer}
-        accountsLoading={isLoading}
-        accountsError={isError}
-        onAccountsRetry={refetch}
-        hasWallet={hasWallet}
-      />
-    </TxLayoutBase>
+    <div className="min-[900px]:-mt-9">
+      <TxLayoutBase
+        title={<span className="block max-[899.95px]:px-4">{CREATE_POLICY_TITLE}</span>}
+        subtitle={<ProposerRoleHeader />}
+        step={0}
+        stepCount={1}
+        progress={100}
+        hideStatusRail
+        hideSafeShield
+        hideProgress
+        hideNonce
+      >
+        <ProposerRoleForm
+          onSubmit={onSubmit}
+          accounts={accounts}
+          safeAccount={safeAccount}
+          onSafeAccountChange={onSafeAccountChange}
+          validateProposer={validateProposer}
+          accountsLoading={isLoading}
+          accountsError={isError}
+          onAccountsRetry={refetch}
+          hasWallet={hasWallet}
+        />
+      </TxLayoutBase>
+    </div>
   )
 }
 
