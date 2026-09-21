@@ -47,14 +47,22 @@ jest.mock('@/features/__core__', () => ({
       planName,
       trialEndsAt,
       price,
+      seatsLabel,
       onOpenChange,
     }: {
       planName: string
       trialEndsAt: number | null
       price: string
+      seatsLabel?: string
       onOpenChange: (open: boolean) => void
     }) => (
-      <div data-testid="switched-modal" data-plan={planName} data-ends={String(trialEndsAt)} data-price={price}>
+      <div
+        data-testid="switched-modal"
+        data-plan={planName}
+        data-ends={String(trialEndsAt)}
+        data-price={price}
+        data-seats={seatsLabel}
+      >
         <button onClick={() => onOpenChange(false)}>Get started</button>
       </div>
     ),
@@ -149,6 +157,7 @@ describe('ChangePlanFlow', () => {
     expect(onClose).not.toHaveBeenCalled()
     expect(screen.queryByTestId('change-plan-dialog')).not.toBeInTheDocument()
     expect(screen.getByTestId('switched-modal')).toHaveAttribute('data-plan', 'Starter')
+    expect(screen.getByTestId('switched-modal')).toHaveAttribute('data-seats', '20 Safe accounts')
     expect(screen.getByTestId('switched-modal')).toHaveAttribute('data-ends', String(Date.UTC(2026, 11, 6)))
     expect(screen.getByTestId('switched-modal')).toHaveAttribute('data-price', '€1,669/mo')
 

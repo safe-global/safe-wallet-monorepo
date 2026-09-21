@@ -5,6 +5,7 @@ import {
   getSubscriptionEndedAt,
   getSubscriptionPeriodEnd,
   getSubscriptionPlanName,
+  getSubscriptionSeats,
   trialLabel,
   isPlanChangeable,
   selectCurrentSubscription,
@@ -86,6 +87,14 @@ describe('subscription', () => {
       new Date(1_794_664_499 * 1000).toISOString(),
     )
     expect(getSubscriptionPeriodEnd(sub('a', 'active'))).toBeNull()
+  })
+
+  it('reads the seat quota the CGW copies from the payment link onto the subscription', () => {
+    const seats = (value: string) => ({ ...sub('a', 'active'), metadata: { FEATURE_SAFE_SEATS: value } })
+    expect(getSubscriptionSeats(seats('20') as unknown as Subscription)).toBe(20)
+    expect(getSubscriptionSeats(seats('unlimited') as unknown as Subscription)).toBe('unlimited')
+    expect(getSubscriptionSeats(seats('many') as unknown as Subscription)).toBeNull()
+    expect(getSubscriptionSeats(sub('a', 'active'))).toBeNull()
   })
 
   it.each([

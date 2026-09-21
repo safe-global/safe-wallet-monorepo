@@ -11,10 +11,12 @@ describe('SafeProPlanSwitchedModal', () => {
         planName="Starter"
         trialEndsAt={Date.UTC(2026, 8, 20)}
         price="€189/mo"
+        seatsLabel="2 Safe accounts"
       />,
     )
 
     expect(screen.getByRole('heading')).toHaveTextContent("You're on Starter!")
+    expect(screen.getByTestId('subscription-seats')).toHaveTextContent('Starter · 2 Safe accounts')
     expect(
       screen.getByText("Your free access continues until Sep 20, 2026. After that, you'll pay €189/mo."),
     ).toBeInTheDocument()
@@ -29,5 +31,6 @@ describe('SafeProPlanSwitchedModal', () => {
     )
 
     expect(screen.getByText("Your free access continues. After that, you'll pay €189/mo.")).toBeInTheDocument()
+    expect(screen.queryByTestId('subscription-seats')).not.toBeInTheDocument()
   })
 })

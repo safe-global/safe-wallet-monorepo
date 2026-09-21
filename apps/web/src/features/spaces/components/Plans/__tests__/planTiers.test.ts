@@ -9,8 +9,9 @@ import {
   offersToTiers,
   seatsLabel,
   subscriptionToTier,
+  toCurrentPlan,
 } from '../planTiers'
-import type { CurrentPlan } from '../types'
+import type { CurrentPlan, PlanSummary } from '../types'
 
 const offer = (overrides: Partial<PlanOffer> & Pick<PlanOffer, 'paymentLinkId' | 'planName'>): PlanOffer => ({
   priceId: `price_${overrides.paymentLinkId}`,
@@ -115,6 +116,14 @@ describe('planTiers', () => {
     })
   })
 
+  it('takes the current seats from the subscription tag before the entitlements quota', () => {
+    const plan: PlanSummary = { name: 'Business', status: 'active', periodEndsAt: null, daysLeft: null }
+    const tagged = { ...subscription(), metadata: { FEATURE_SAFE_SEATS: '5' } } as unknown as Subscription
+    expect(subscriptionToTier(tagged, 10).options[0]).toMatchObject({ label: '5 Safe accounts', seats: 5 })
+    expect(toCurrentPlan(tagged, plan, false, 10).seatsLabel).toBe('5 Safe accounts')
+    expect(toCurrentPlan(subscription(), plan, false, 10).seatsLabel).toBe('10 Safe accounts')
+  })
+
   it('orders the offered plans, the current plan and the static Enterprise card', () => {
     const withCurrent = buildPlanTiers([STARTER], { subscription: subscription(), seatsQuota: 20 })
     expect(withCurrent.map((tier) => [tier.name, tier.isCurrent ?? false])).toEqual([
@@ -172,6 +181,24 @@ describe('planTiers', () => {
       kind: 'change',
       direction: 'downgrade',
       label: 'Switch to 10 Safe accounts',
+    })
+  })
+
+  it('words the same plan on the other billing cycle by seats, like the current card', () => {
+    const tiers = buildPlanTiers([BUSINESS], { subscription: subscription({ id: 'price_b20m' }), seatsQuota: 20 })
+    const yearly = tiers.find((tier) => tier.billingCycle === 'year')!
+    expect(yearly).toMatchObject({ name: 'Business', billingCycle: 'year' })
+    expect(yearly.isCurrent).toBeFalsy()
+
+    expect(getPlanCta({ tier: yearly, option: yearly.options[0] }, businessPlan)).toEqual({
+      kind: 'change',
+      direction: 'downgrade',
+      label: 'Switch to 10 Safe accounts',
+    })
+    expect(getPlanCta({ tier: yearly, option: yearly.options[0] }, { ...businessPlan, price: 149 })).toEqual({
+      kind: 'change',
+      direction: 'upgrade',
+      label: 'Upgrade to 10 Safe accounts',
     })
   })
 

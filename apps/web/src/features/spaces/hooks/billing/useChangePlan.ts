@@ -3,7 +3,9 @@ import {
   useBillingUpdateSubscriptionV1Mutation,
   useLazyBillingPreviewSubscriptionUpdateV1Query,
 } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
+import { useAppDispatch } from '@/store'
 import { isPlanChangeable } from './subscription'
+import { syncPlanChange } from './syncPlanChange'
 import { useBillingSpaceId } from './useBillingSpaceId'
 import { useSpaceSubscription } from './useSpaceSubscription'
 
@@ -14,6 +16,7 @@ import { useSpaceSubscription } from './useSpaceSubscription'
  */
 export const useChangePlan = (spaceId?: string | null) => {
   const gatedSpaceId = useBillingSpaceId(spaceId)
+  const dispatch = useAppDispatch()
   const { subscription, status } = useSpaceSubscription(spaceId)
   const [triggerPreview, preview] = useLazyBillingPreviewSubscriptionUpdateV1Query()
   const [update, change] = useBillingUpdateSubscriptionV1Mutation()
@@ -36,9 +39,11 @@ export const useChangePlan = (spaceId?: string | null) => {
         subscriptionId,
         updateSubscriptionDto: { planId: priceId, paymentLinkId },
       })
-      return !('error' in result)
+      if ('error' in result) return false
+      void syncPlanChange(dispatch, gatedSpaceId, priceId)
+      return true
     },
-    [gatedSpaceId, subscriptionId, update],
+    [gatedSpaceId, subscriptionId, update, dispatch],
   )
 
   return {

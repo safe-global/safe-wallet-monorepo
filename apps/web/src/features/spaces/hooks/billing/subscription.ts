@@ -1,5 +1,6 @@
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
-import { getPlanDescriptions } from './paymentLinks'
+import { getPlanDescriptions, getSeatsFromMetadata } from './paymentLinks'
+import type { PlanOffer } from './types'
 
 export type PlanStatus = 'none' | 'trialing' | 'active' | 'pending' | 'payment_failed' | 'canceled'
 
@@ -80,3 +81,10 @@ export const getSubscriptionFeatures = (subscription: Subscription): string[] =>
   subscription.plan.features.length > 0
     ? subscription.plan.features
     : getPlanDescriptions((subscription.metadata ?? {}) as Record<string, string | null | undefined>)
+
+/**
+ * The seat quota the subscription itself carries: the CGW copies the payment link's metadata onto it, so it is right
+ * as soon as a plan change is applied, while the entitlements wait for the billing webhook. Null when untagged.
+ */
+export const getSubscriptionSeats = (subscription: Subscription): PlanOffer['seats'] =>
+  getSeatsFromMetadata((subscription.metadata ?? {}) as Record<string, string | null | undefined>)

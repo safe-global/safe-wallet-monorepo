@@ -227,7 +227,7 @@ describe('Plans', () => {
     fireEvent.click(screen.getByRole('tab', { name: /Yearly/ }))
     expect(screen.queryByTestId('current-plan-card')).not.toBeInTheDocument()
     expect(screen.getByText('€6,990')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Upgrade to Business' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Upgrade to 2 Safe accounts' })).toBeInTheDocument()
   })
 
   it('names the picked seat option on the closed selector instead of its payment link id', () => {

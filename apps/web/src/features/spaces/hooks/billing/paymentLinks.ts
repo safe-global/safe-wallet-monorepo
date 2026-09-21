@@ -22,13 +22,16 @@ const readLineItems = (link: PaymentLink): LineItem[] =>
 
 export const getPlanName = (link: PaymentLink): string | null => readMetadata(link)[PLAN_NAME_METADATA_KEY] ?? null
 
-export const getSeats = (link: PaymentLink): PlanOffer['seats'] => {
-  const raw = readMetadata(link)[SAFE_SEATS_METADATA_KEY]?.trim()
+/** The seat quota a link or subscription carries in its Stripe metadata; null when absent or malformed. */
+export const getSeatsFromMetadata = (metadata: Metadata): PlanOffer['seats'] => {
+  const raw = metadata[SAFE_SEATS_METADATA_KEY]?.trim()
   if (!raw) return null
   if (raw.toLowerCase() === UNLIMITED) return UNLIMITED
   const parsed = Number.parseInt(raw, 10)
   return Number.isNaN(parsed) || parsed < 0 ? null : parsed
 }
+
+export const getSeats = (link: PaymentLink): PlanOffer['seats'] => getSeatsFromMetadata(readMetadata(link))
 
 /** The JSON-encoded list of selling points on the link, or an empty list when missing or malformed. */
 export const getPlanDescriptions = (metadata: Metadata): string[] => {

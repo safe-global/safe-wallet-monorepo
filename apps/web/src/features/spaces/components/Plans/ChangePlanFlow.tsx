@@ -51,6 +51,7 @@ export default function ChangePlanFlow({
         planName={pick.tier.name}
         trialEndsAt={currentPlan.periodEndsAt ? Date.parse(currentPlan.periodEndsAt) : null}
         price={pickedPrice(pick)}
+        seatsLabel={pick.option.label}
         onOpenChange={(open) => !open && onClose()}
       />
     ) : (

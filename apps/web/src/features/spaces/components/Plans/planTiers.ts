@@ -1,6 +1,10 @@
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import type { PlanGroup, PlanOffer } from '../../hooks/billing/types'
-import { getSubscriptionFeatures, getSubscriptionPlanName } from '../../hooks/billing/subscription'
+import {
+  getSubscriptionFeatures,
+  getSubscriptionPlanName,
+  getSubscriptionSeats,
+} from '../../hooks/billing/subscription'
 import { ENTERPRISE_TIER, PLAN_FEATURES, PLAN_ORDER } from './fixtures'
 import type {
   CurrentPlan,
@@ -22,22 +26,36 @@ export const priceSuffix = (billingCycle: 'month' | 'year' | null): string => (b
 const monthlyEquivalent = (price: number, billingCycle: 'month' | 'year' | null): number =>
   billingCycle === 'year' ? price / 12 : price
 
+/**
+ * The current plan's seats: the subscription's own Stripe tag first (right as soon as a change is applied), else the
+ * entitlements quota, which waits for the billing webhook. Undefined while neither is known.
+ */
+const currentSeats = (
+  subscription: Subscription,
+  seatsQuota: number | null | undefined,
+): PlanOffer['seats'] | undefined =>
+  getSubscriptionSeats(subscription) ??
+  (seatsQuota === undefined ? undefined : seatsQuota === null ? 'unlimited' : seatsQuota)
+
 /** The live subscription as the cards and the change dialog need it. */
 export const toCurrentPlan = (
   subscription: Subscription,
   plan: PlanSummary,
   isTrialing: boolean,
   seatsQuota?: number | null,
-): CurrentPlan => ({
-  name: getSubscriptionPlanName(subscription) ?? plan.name,
-  price: subscription.plan.currentPrice,
-  currency: subscription.plan.currency,
-  billingCycle: subscription.plan.billingCycle ?? null,
-  isTrialing,
-  periodEndsAt: plan.periodEndsAt,
-  daysLeft: plan.daysLeft,
-  seatsLabel: seatsQuota === undefined ? undefined : seatsLabel(seatsQuota === null ? 'unlimited' : seatsQuota),
-})
+): CurrentPlan => {
+  const seats = currentSeats(subscription, seatsQuota)
+  return {
+    name: getSubscriptionPlanName(subscription) ?? plan.name,
+    price: subscription.plan.currentPrice,
+    currency: subscription.plan.currency,
+    billingCycle: subscription.plan.billingCycle ?? null,
+    isTrialing,
+    periodEndsAt: plan.periodEndsAt,
+    daysLeft: plan.daysLeft,
+    seatsLabel: seats === undefined ? undefined : seatsLabel(seats),
+  }
+}
 
 /** Compares monthly-equivalent prices, so a yearly plan is not read as a 12x upgrade. */
 export const getChangeDirection = (current: CurrentPlan | undefined, pick: PlanPick): PlanChangeDirection => {
@@ -73,11 +91,13 @@ export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined, rec
       : { kind: 'subscribe', label: `Continue with ${pick.tier.name}` }
   }
 
+  // The same plan on the other billing cycle is a resize too, so it is worded by seats like the current card.
+  const target = pick.tier.name === current.name ? pick.option.label : pick.tier.name
   const direction = getChangeDirection(current, pick)
   return {
     kind: 'change',
     direction,
-    label: direction === 'upgrade' ? `Upgrade to ${pick.tier.name}` : `Switch to ${pick.tier.name}`,
+    label: direction === 'upgrade' ? `Upgrade to ${target}` : `Switch to ${target}`,
   }
 }
 
@@ -127,6 +147,7 @@ export const offersToTiers = (plans: PlanGroup[]): PlanTier[] =>
 export const subscriptionToTier = (subscription: Subscription, seatsQuota: number | null | undefined): PlanTier => {
   const name = getSubscriptionPlanName(subscription) ?? 'Safe Pro'
   const features = getSubscriptionFeatures(subscription)
+  const seats = currentSeats(subscription, seatsQuota) ?? null
 
   return {
     id: 'current',
@@ -137,8 +158,8 @@ export const subscriptionToTier = (subscription: Subscription, seatsQuota: numbe
       {
         paymentLinkId: null,
         priceId: subscription.plan.id,
-        label: seatsLabel(seatsQuota === undefined ? null : seatsQuota === null ? 'unlimited' : seatsQuota),
-        seats: typeof seatsQuota === 'number' ? seatsQuota : null,
+        label: seatsLabel(seats),
+        seats: typeof seats === 'number' ? seats : null,
         price: subscription.plan.currentPrice,
         originalPrice: subscription.plan.originalPrice,
         features,

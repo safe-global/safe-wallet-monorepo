@@ -1,4 +1,5 @@
 import { ArrowRight } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Typography } from '@/components/ui/typography'
@@ -13,6 +14,7 @@ const SafeProPlanSwitchedModal = ({
   planName,
   trialEndsAt,
   price,
+  seatsLabel,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -20,6 +22,8 @@ const SafeProPlanSwitchedModal = ({
   trialEndsAt: number | null
   /** Already formatted, e.g. "€189/mo". */
   price: string
+  /** "5 Safe accounts": the seats the plan covers, shown as a chip under the title when known. */
+  seatsLabel?: string
 }) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent size="sm" surface="card" padding="none">
@@ -35,6 +39,11 @@ const SafeProPlanSwitchedModal = ({
               Your free access continues{trialEndsAt !== null ? ` until ${formatDate(trialEndsAt)}` : ''}. After that,
               you&apos;ll pay {price}.
             </Typography>
+            {seatsLabel && (
+              <Badge variant="secondary" shape="tag" className="self-center" data-testid="subscription-seats">
+                {planName} · {seatsLabel}
+              </Badge>
+            )}
           </div>
 
           <Button size="lg" accentIcon onClick={() => onOpenChange(false)}>

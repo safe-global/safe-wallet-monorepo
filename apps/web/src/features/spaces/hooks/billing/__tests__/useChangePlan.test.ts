@@ -11,6 +11,10 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/billing', () => ({
   useBillingUpdateSubscriptionV1Mutation: () => [mockUpdate, { isLoading: false, error: undefined }],
 }))
 jest.mock('../useBillingSpaceId', () => ({ useBillingSpaceId: () => mockBillingSpaceId() }))
+const mockDispatch = jest.fn()
+jest.mock('@/store', () => ({ useAppDispatch: () => mockDispatch }))
+const mockSyncPlanChange = jest.fn().mockResolvedValue(true)
+jest.mock('../syncPlanChange', () => ({ syncPlanChange: (...args: unknown[]) => mockSyncPlanChange(...args) }))
 jest.mock('../useSpaceSubscription', () => ({ useSpaceSubscription: () => mockUseSpaceSubscription() }))
 
 const SPACE_ID = '11111111-1111-1111-1111-111111111111'
@@ -45,6 +49,7 @@ describe('useChangePlan', () => {
       updateSubscriptionDto: { planId: 'price_starter', paymentLinkId: 'pl_starter' },
     })
     expect(ok).toBe(true)
+    expect(mockSyncPlanChange).toHaveBeenCalledWith(mockDispatch, SPACE_ID, 'price_starter')
   })
 
   it('reports a failed change', async () => {
@@ -56,6 +61,7 @@ describe('useChangePlan', () => {
       ok = await result.current.changePlan('price_starter', 'pl_starter')
     })
     expect(ok).toBe(false)
+    expect(mockSyncPlanChange).not.toHaveBeenCalled()
   })
 
   it.each([
