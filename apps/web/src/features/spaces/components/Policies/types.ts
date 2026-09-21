@@ -130,9 +130,6 @@ export const hasSpendingLimitData = (policy: Policy): policy is Extract<Policy, 
 export const hasRecoveryData = (policy: Policy): policy is Extract<Policy, { type: 'recovery' }> =>
   policy.type === 'recovery'
 
-export const isProposerPolicy = (policy: Policy): policy is ProposerPolicy & { status: 'active' } =>
-  policy.type === 'proposer'
-
 /**
  * The status a row renders. A module that is present but not enabled is shown as unenforced.
  * Calling it active would tell the user the Safe is protected when it is not.
