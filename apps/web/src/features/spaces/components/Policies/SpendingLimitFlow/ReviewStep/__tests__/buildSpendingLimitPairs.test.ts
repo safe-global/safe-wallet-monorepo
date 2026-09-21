@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: FSL-1.1-MIT
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { tokenOptionBuilder } from '../../utils/tokenOptions.fixtures'
 import type { SpendingLimitPolicyFormValues } from '../../types'

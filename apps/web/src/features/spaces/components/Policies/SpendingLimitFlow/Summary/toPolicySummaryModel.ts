@@ -1,10 +1,9 @@
-// SPDX-License-Identifier: FSL-1.1-MIT
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { parseSafeScopeKey } from '@/components/tx-flow/safe-scope'
 import { isSafeAccountGroup, type SafeAccountEntry, type SafeAccountOption } from '../../SafeAccountSelector/types'
 import type { SpendingLimitPolicyFormValues } from '../types'
-import type { TokenOption } from '../utils/tokenOptions'
+import { findTokenOption, type TokenOption } from '../utils/tokenOptions'
 import type { LimitSummaryToken, SpendingLimitSummaryModel } from './types'
 
 export type PolicySummarySources = {
@@ -29,7 +28,7 @@ const resolveSafe = (safeId: string, accounts: readonly SafeAccountEntry[]): Saf
 }
 
 const resolveToken = (tokenAddress: string, tokens: readonly TokenOption[]): LimitSummaryToken => {
-  const match = tokens.find((token) => sameAddress(token.address, tokenAddress))
+  const match = findTokenOption(tokens, tokenAddress)
   return match
     ? { address: match.address, symbol: match.symbol, decimals: match.decimals, logoUri: match.logoUri }
     : { address: tokenAddress, symbol: shortenAddress(tokenAddress) }

@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: FSL-1.1-MIT
 import type { SpendingLimitPair } from '@/features/spending-limits'
 import type { SpendingLimitPolicyFormValues } from '../types'
 import { findTokenOption, type TokenOption } from '../utils/tokenOptions'

@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: FSL-1.1-MIT
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { buildSafeAccountId, groupSafeAccounts } from '../../../SafeAccountSelector/utils'
