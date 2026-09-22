@@ -49,6 +49,12 @@ const buttonVariants = cva(
           'bg-secondary text-secondary-foreground hover:bg-secondary-hover aria-expanded:bg-secondary-hover aria-expanded:text-secondary-foreground',
         ghost:
           'hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground',
+        // Remove/clear affordance that sits inside the thing it deletes (a card's corner ✕ or
+        // trash). Reads as quiet secondary text at rest and only resolves to `destructive` under
+        // the cursor, so a row of them does not turn a form into a wall of red. Pair with
+        // `size="icon-circle"` for the round disc the hover tint paints.
+        'ghost-destructive':
+          'text-muted-foreground hover:bg-destructive/10 hover:text-destructive dark:hover:bg-destructive/20',
         // Figma's Ghost reads muted at rest; `ghost` keeps the foreground for the 130+ existing icon buttons.
         'ghost-muted':
           'text-muted-foreground hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground',
@@ -89,6 +95,10 @@ const buttonVariants = cva(
         icon: 'size-9',
         'icon-xs': "size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3",
         'icon-sm': 'size-8 in-data-[slot=button-group]:rounded-sm',
+        // 24px disc around a 16px glyph: the icon-button geometry the design system uses for a
+        // control tucked into a corner. `icon-xs` shares the box but keeps the square-ish radius
+        // and a 12px glyph, which reads as a different control.
+        'icon-circle': "size-6 rounded-full [&_svg:not([class*='size-'])]:size-4",
       },
       weight: {
         medium: '',

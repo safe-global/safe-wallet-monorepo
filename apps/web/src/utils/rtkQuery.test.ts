@@ -4,8 +4,8 @@ import {
   getRtkQueryErrorMessage,
   RTK_QUERY_ERROR_MESSAGES,
   getGenericErrorWithStatus,
-  getLegalUnavailabilityMessage,
-  LEGAL_UNAVAILABILITY_FALLBACK,
+  getSafeUnavailableMessage,
+  SAFE_UNAVAILABLE_MESSAGE,
 } from './rtkQuery'
 import { ELEVATION_REQUIRED_ERROR, ELEVATION_REQUIRED_MESSAGE } from '@/features/oidc-auth/utils/elevation'
 
@@ -81,28 +81,31 @@ describe('getRtkQueryErrorMessage', () => {
   })
 })
 
-describe('getLegalUnavailabilityMessage', () => {
-  it('returns the backend reason for a 451 response', () => {
-    const error: FetchBaseQueryError = { status: 451, data: { code: 451, message: 'Unavailable for legal reasons' } }
-    expect(getLegalUnavailabilityMessage(error)).toBe('Unavailable for legal reasons')
+describe('getSafeUnavailableMessage', () => {
+  it('hides the backend reason for a blocked Safe', () => {
+    const error: FetchBaseQueryError = {
+      status: 451,
+      data: { code: 451, message: 'Blocked in your region by provider edge-node-7' },
+    }
+    expect(getSafeUnavailableMessage(error)).toBe(SAFE_UNAVAILABLE_MESSAGE)
   })
 
-  it('falls back to default copy for a 451 response without a message', () => {
+  it('returns the same copy for a 451 without a message', () => {
     const error: FetchBaseQueryError = { status: 451, data: {} }
-    expect(getLegalUnavailabilityMessage(error)).toBe(LEGAL_UNAVAILABILITY_FALLBACK)
+    expect(getSafeUnavailableMessage(error)).toBe(SAFE_UNAVAILABLE_MESSAGE)
   })
 
   it('returns undefined for other HTTP errors', () => {
-    expect(getLegalUnavailabilityMessage({ status: 404, data: { message: 'Safe not found' } })).toBeUndefined()
-    expect(getLegalUnavailabilityMessage({ status: 500, data: {} })).toBeUndefined()
+    expect(getSafeUnavailableMessage({ status: 404, data: { message: 'Safe not found' } })).toBeUndefined()
+    expect(getSafeUnavailableMessage({ status: 500, data: {} })).toBeUndefined()
   })
 
   it('returns undefined for transport-level and serialized errors', () => {
-    expect(getLegalUnavailabilityMessage({ status: 'FETCH_ERROR', error: 'Failed to fetch' })).toBeUndefined()
-    expect(getLegalUnavailabilityMessage({ name: 'Error', message: 'Something serialized' })).toBeUndefined()
+    expect(getSafeUnavailableMessage({ status: 'FETCH_ERROR', error: 'Failed to fetch' })).toBeUndefined()
+    expect(getSafeUnavailableMessage({ name: 'Error', message: 'Something serialized' })).toBeUndefined()
   })
 
   it('returns undefined when there is no error', () => {
-    expect(getLegalUnavailabilityMessage(undefined)).toBeUndefined()
+    expect(getSafeUnavailableMessage(undefined)).toBeUndefined()
   })
 })

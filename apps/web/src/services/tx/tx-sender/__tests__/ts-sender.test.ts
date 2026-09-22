@@ -9,6 +9,7 @@ import {
   createTx,
   createExistingTx,
   createRejectTx,
+  dispatchTxConfirmation,
   dispatchTxExecution,
   dispatchTxProposal,
   dispatchTxSigning,
@@ -229,80 +230,7 @@ describe('txSender', () => {
 
       expect(proposedTx.txId).toBe('123')
 
-      expect(txEvents.txDispatch).toHaveBeenCalledWith('PROPOSED', {
-        txId: '123',
-        nonce: 0,
-        signerAddress: undefined,
-        chainId: '4',
-        safeAddress: '0x123',
-      })
-    })
-
-    it('should dispatch a SIGNATURE_PROPOSED event if tx has signatures and an id', async () => {
-      server.use(
-        http.post(`${GATEWAY_URL}/v1/chains/4/transactions/0x123/propose`, () => {
-          return HttpResponse.json({
-            txId: '123',
-            txInfo: {
-              type: 'Custom',
-              to: { value: '0x123' },
-              dataSize: '100',
-              isCancellation: false,
-            },
-            timestamp: Date.now(),
-            txStatus: 'AWAITING_CONFIRMATIONS',
-          })
-        }),
-      )
-
-      const tx = createMockSafeTransaction({
-        to: '0x123',
-        data: '0x0',
-      })
-      tx.addSignature(generatePreValidatedSignature('0x1234567890123456789012345678901234567890'))
-
-      const proposedTx = await dispatchTxProposal({
-        chainId: '4',
-        safeAddress: '0x123',
-        sender: '0x456',
-        safeTx: tx,
-        txId: '345',
-      })
-
-      expect(proposedTx.txId).toBe('123')
-
-      expect(txEvents.txDispatch).toHaveBeenCalledWith('SIGNATURE_PROPOSED', {
-        txId: '123',
-        signerAddress: '0x456',
-        nonce: 0,
-        chainId: '4',
-        safeAddress: '0x123',
-      })
-    })
-
-    it('should fail to propose a signature', async () => {
-      server.use(
-        http.post(`${GATEWAY_URL}/v1/chains/4/transactions/0x123/propose`, () => {
-          return HttpResponse.json({ message: 'Invalid transaction' }, { status: 400 })
-        }),
-      )
-
-      const tx = await createTx({
-        to: '0x123',
-        value: '1',
-        data: '0x0',
-      })
-
-      await expect(
-        dispatchTxProposal({ chainId: '4', safeAddress: '0x123', sender: '0x456', safeTx: tx, txId: '345' }),
-      ).rejects.toThrow()
-
-      expect(txEvents.txDispatch).toHaveBeenCalledWith('SIGNATURE_PROPOSE_FAILED', {
-        txId: '345',
-        error: expect.any(Error),
-        chainId: '4',
-        safeAddress: '0x123',
-      })
+      expect(txEvents.txDispatch).toHaveBeenCalledWith('PROPOSED', { txId: '123', nonce: 0 })
     })
 
     it('should fail to propose a new tx', async () => {
@@ -325,6 +253,193 @@ describe('txSender', () => {
       expect(txEvents.txDispatch).toHaveBeenCalledWith('PROPOSE_FAILED', {
         error: expect.any(Error),
       })
+    })
+  })
+
+  describe('dispatchTxConfirmation', () => {
+    const SAFE_ADDRESS = '0x123'
+    const OTHER_SIGNER = '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'
+    const TX_ID = `multisig_${SAFE_ADDRESS}_${TX_HASH}`
+    const CONFIRMATIONS_URL = `${GATEWAY_URL}/v1/chains/4/transactions/${TX_HASH}/confirmations`
+    const PROPOSE_URL = `${GATEWAY_URL}/v1/chains/4/transactions/${SAFE_ADDRESS}/propose`
+
+    const confirmationResponse = {
+      id: TX_ID,
+      txHash: null,
+      timestamp: Date.now(),
+      txStatus: 'AWAITING_CONFIRMATIONS',
+      txInfo: { type: 'Custom', to: { value: '0x123' }, dataSize: '100', isCancellation: false },
+      executionInfo: { type: 'MULTISIG', nonce: 0, confirmationsRequired: 3, confirmationsSubmitted: 2 },
+    }
+
+    const createSignedTx = (...signers: string[]) => {
+      const tx = createMockSafeTransaction({ to: '0x123', data: '0x0' })
+      signers.forEach((signer) => tx.addSignature(generatePreValidatedSignature(signer)))
+      return tx
+    }
+
+    it('should send the signature to the confirmations endpoint and dispatch SIGNATURE_PROPOSED', async () => {
+      const proposeHandler = jest.fn()
+      let capturedBody: unknown
+
+      server.use(
+        http.post(CONFIRMATIONS_URL, async ({ request }) => {
+          capturedBody = await request.json()
+          return HttpResponse.json(confirmationResponse)
+        }),
+        http.post(PROPOSE_URL, () => {
+          proposeHandler()
+          return HttpResponse.json({ txId: TX_ID })
+        }),
+      )
+
+      const tx = createSignedTx(OTHER_SIGNER, SIGNER_ADDRESS)
+
+      const confirmedTx = await dispatchTxConfirmation({
+        chainId: '4',
+        safeAddress: SAFE_ADDRESS,
+        sender: SIGNER_ADDRESS,
+        safeTx: tx,
+        txId: TX_ID,
+      })
+
+      expect(confirmedTx).toEqual(confirmationResponse)
+      expect(capturedBody).toEqual({ signature: generatePreValidatedSignature(SIGNER_ADDRESS).data })
+      expect(proposeHandler).not.toHaveBeenCalled()
+      expect(txEvents.txDispatch).toHaveBeenCalledWith('SIGNATURE_PROPOSED', {
+        txId: TX_ID,
+        signerAddress: SIGNER_ADDRESS,
+        nonce: 0,
+        chainId: '4',
+        safeAddress: SAFE_ADDRESS,
+      })
+    })
+
+    it('should look up the signature by sender regardless of address casing', async () => {
+      let capturedBody: unknown
+      server.use(
+        http.post(CONFIRMATIONS_URL, async ({ request }) => {
+          capturedBody = await request.json()
+          return HttpResponse.json(confirmationResponse)
+        }),
+      )
+
+      await dispatchTxConfirmation({
+        chainId: '4',
+        safeAddress: SAFE_ADDRESS,
+        sender: OTHER_SIGNER.toUpperCase().replace('0X', '0x'),
+        safeTx: createSignedTx(OTHER_SIGNER),
+        txId: TX_ID,
+      })
+
+      expect(capturedBody).toEqual({ signature: generatePreValidatedSignature(OTHER_SIGNER).data })
+    })
+
+    it('should add each subsequent signature as a confirmation without re-proposing', async () => {
+      const proposeHandler = jest.fn()
+      const capturedBodies: unknown[] = []
+
+      server.use(
+        http.post(CONFIRMATIONS_URL, async ({ request }) => {
+          capturedBodies.push(await request.json())
+          return HttpResponse.json({
+            ...confirmationResponse,
+            executionInfo: { ...confirmationResponse.executionInfo, confirmationsSubmitted: capturedBodies.length + 1 },
+          })
+        }),
+        http.post(PROPOSE_URL, () => {
+          proposeHandler()
+          return HttpResponse.json({ txId: TX_ID })
+        }),
+      )
+
+      const tx = createSignedTx(SIGNER_ADDRESS)
+
+      tx.addSignature(generatePreValidatedSignature(OTHER_SIGNER))
+      await dispatchTxConfirmation({
+        chainId: '4',
+        safeAddress: SAFE_ADDRESS,
+        sender: OTHER_SIGNER,
+        safeTx: tx,
+        txId: TX_ID,
+      })
+
+      const THIRD_SIGNER = '0x9999999999999999999999999999999999999999'
+      tx.addSignature(generatePreValidatedSignature(THIRD_SIGNER))
+      await dispatchTxConfirmation({
+        chainId: '4',
+        safeAddress: SAFE_ADDRESS,
+        sender: THIRD_SIGNER,
+        safeTx: tx,
+        txId: TX_ID,
+      })
+
+      expect(proposeHandler).not.toHaveBeenCalled()
+      expect(capturedBodies).toEqual([
+        { signature: generatePreValidatedSignature(OTHER_SIGNER).data },
+        { signature: generatePreValidatedSignature(THIRD_SIGNER).data },
+      ])
+      expect(txEvents.txDispatch).toHaveBeenCalledTimes(2)
+      expect(txEvents.txDispatch).toHaveBeenNthCalledWith(
+        1,
+        'SIGNATURE_PROPOSED',
+        expect.objectContaining({ signerAddress: OTHER_SIGNER }),
+      )
+      expect(txEvents.txDispatch).toHaveBeenNthCalledWith(
+        2,
+        'SIGNATURE_PROPOSED',
+        expect.objectContaining({ signerAddress: THIRD_SIGNER }),
+      )
+    })
+
+    it('should dispatch SIGNATURE_PROPOSE_FAILED when the gateway rejects the confirmation', async () => {
+      server.use(
+        http.post(CONFIRMATIONS_URL, () => HttpResponse.json({ message: 'Invalid signature' }, { status: 422 })),
+      )
+
+      await expect(
+        dispatchTxConfirmation({
+          chainId: '4',
+          safeAddress: SAFE_ADDRESS,
+          sender: SIGNER_ADDRESS,
+          safeTx: createSignedTx(SIGNER_ADDRESS),
+          txId: TX_ID,
+        }),
+      ).rejects.toThrow('Invalid signature')
+
+      expect(txEvents.txDispatch).toHaveBeenCalledWith('SIGNATURE_PROPOSE_FAILED', {
+        txId: TX_ID,
+        error: expect.any(Error),
+        chainId: '4',
+        safeAddress: SAFE_ADDRESS,
+      })
+      expect(txEvents.txDispatch).not.toHaveBeenCalledWith('SIGNATURE_PROPOSED', expect.anything())
+    })
+
+    it('should fail without calling the gateway when the sender has not signed', async () => {
+      const confirmationsHandler = jest.fn()
+      server.use(
+        http.post(CONFIRMATIONS_URL, () => {
+          confirmationsHandler()
+          return HttpResponse.json(confirmationResponse)
+        }),
+      )
+
+      await expect(
+        dispatchTxConfirmation({
+          chainId: '4',
+          safeAddress: SAFE_ADDRESS,
+          sender: SIGNER_ADDRESS,
+          safeTx: createSignedTx(OTHER_SIGNER),
+          txId: TX_ID,
+        }),
+      ).rejects.toThrow(`No signature from ${SIGNER_ADDRESS} found on transaction ${TX_ID}`)
+
+      expect(confirmationsHandler).not.toHaveBeenCalled()
+      expect(txEvents.txDispatch).toHaveBeenCalledWith(
+        'SIGNATURE_PROPOSE_FAILED',
+        expect.objectContaining({ txId: TX_ID }),
+      )
     })
   })
 

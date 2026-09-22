@@ -11,7 +11,7 @@ exports[`./SecurityDrawerContent.stories Default 1`] = `
       class="bg-card rounded-lg p-4"
     >
       <div
-        class="group/tabs data-[orientation=horizontal]:flex-col flex min-h-0 flex-1 flex-col gap-4 px-6 pb-6"
+        class="group/tabs data-[orientation=horizontal]:flex-col flex min-h-0 flex-1 flex-col gap-4"
         data-activation-direction="none"
         data-orientation="horizontal"
         data-slot="tabs"

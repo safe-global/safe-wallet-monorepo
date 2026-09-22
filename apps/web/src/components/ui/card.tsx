@@ -54,6 +54,10 @@ const cardVariants = cva(
         default: '',
         outlined: 'border border-border',
         muted: 'bg-muted',
+        /* For a card nested inside a `muted` one. Translucent on purpose: over `muted` it resolves to
+           the design's #fafafa in light mode, and in dark mode it keeps stepping toward the dialog
+           surface instead of hard-coding a hex that would flip the nesting. */
+        'muted-nested': 'bg-card/50',
         'muted-secondary': 'bg-muted-secondary',
         brand:
           'bg-muted-secondary bg-[linear-gradient(90deg,color-mix(in_srgb,var(--mint)_40%,var(--muted-secondary)),color-mix(in_srgb,var(--mint)_8%,var(--muted-secondary)))]',

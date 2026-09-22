@@ -1,6 +1,6 @@
 import { type ReactElement, useContext, useState, useEffect, useRef } from 'react'
 import { ChevronDown, ExternalLink as LaunchIcon } from 'lucide-react'
-import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Typography } from '@/components/ui/typography'
 import InfoIcon from '@/public/images/notifications/info.svg'
@@ -67,10 +67,6 @@ export const TenderlySimulation = ({
   }, [safeTx, simulation, nestedTx.simulation])
 
   const { nestedSafeInfo, nestedSafeTx, isNested } = useNestedTransaction(safeTx, chain)
-
-  const handleToggleSimulation = () => {
-    setSimulationExpanded(!simulationExpanded)
-  }
 
   const handleRunSimulation = () => {
     if (!safeTx) return
@@ -182,9 +178,70 @@ export const TenderlySimulation = ({
     </Typography>
   )
 
+  const header = (
+    <>
+      <div className="flex flex-row items-center gap-2">
+        {isSimulationFinished ? (
+          <SeverityIcon
+            severity={isSimulationSuccess ? Severity.OK : Severity.WARN}
+            muted={isMuted}
+            width={16}
+            height={16}
+          />
+        ) : (
+          <UpdateIcon className="size-4" />
+        )}
+        <Typography variant="paragraph-small" className="text-[var(--color-primary-light)]">
+          {getSimulationHeaderText()}
+        </Typography>
+        {!isSimulationFinished && !isLoading && (
+          <Tooltip>
+            <TooltipTrigger render={<span className="inline-flex" />}>
+              <InfoIcon className="size-4 text-[var(--color-border-main)]" />
+            </TooltipTrigger>
+            <TooltipContent className="text-center">
+              Run a simulation to see if the transaction will succeed and get a full report.
+            </TooltipContent>
+          </Tooltip>
+        )}
+      </div>
+
+      {!isSimulationFinished ? (
+        <button
+          data-testid="run-simulation-btn"
+          onClick={handleRunSimulation}
+          disabled={isLoading}
+          className={`rounded-[4px] border-none bg-[var(--color-border-light)] px-2 py-0.5 hover:bg-[var(--color-border-main)] ${
+            isLoading ? 'cursor-default hover:bg-[var(--color-border-light)]' : 'cursor-pointer'
+          }`}
+        >
+          <Typography variant="paragraph-mini" className="text-[var(--color-text-primary)] [letter-spacing:0.4px]">
+            {isLoading ? 'Running...' : 'Run'}
+          </Typography>
+        </button>
+      ) : isNested ? (
+        <ChevronDown
+          className={`size-4 text-[var(--color-text-secondary)] transition-transform ${
+            simulationExpanded ? 'rotate-180' : ''
+          }`}
+        />
+      ) : (
+        simulation.simulationLink && (
+          <ExternalLink noIcon href={simulation.simulationLink}>
+            <span className="inline-flex items-center gap-1">
+              {viewLink}
+              <LaunchIcon className="size-4 text-[var(--color-text-secondary)]" />
+            </span>
+          </ExternalLink>
+        )
+      )}
+    </>
+  )
+
   return (
     <Collapsible
       open={simulationExpanded}
+      onOpenChange={setSimulationExpanded}
       data-testid="tenderly-simulation"
       className="overflow-hidden"
       style={{

@@ -1,8 +1,11 @@
-import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type {
+  Transaction as TransactionSummary,
+  TransactionDetails,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import { isEthSignWallet, isSmartContractWallet } from '@/utils/wallets'
-import type { MultiSendCallOnlyContractImplementationType } from '@safe-global/protocol-kit'
+import { buildSignatureBytes, type MultiSendCallOnlyContractImplementationType } from '@safe-global/protocol-kit'
 import { cgwApi as relayApi } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 import { getStoreInstance } from '@/store'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
@@ -19,6 +22,7 @@ import { didRevert } from '@/utils/ethers-utils'
 import type { Eip1193Provider, Overrides, TransactionResponse } from 'ethers'
 import type { RequestId } from '@safe-global/safe-apps-sdk'
 import proposeTx from '../proposeTransaction'
+import confirmTx from '../confirmTransaction'
 import { txDispatch, TxEvent } from '../txEvents'
 import { waitForRelayedTx } from '@/services/tx/txMonitor'
 import { getReadOnlyCurrentGnosisSafeContract } from '@/services/contracts/safeContracts'
@@ -42,15 +46,13 @@ import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import type { TxSenderScope } from '@/components/tx-flow/safe-scope/types'
 
 /**
- * Propose a transaction
- * If txId is passed, it's an existing tx being signed
+ * Propose a new transaction
  */
 export const dispatchTxProposal = async ({
   chainId,
   safeAddress,
   sender,
   safeTx,
-  txId,
   origin,
   scope,
 }: {
@@ -58,7 +60,6 @@ export const dispatchTxProposal = async ({
   safeAddress: string
   sender: string
   safeTx: SafeTransaction
-  txId?: string
   origin?: string
   scope?: TxSenderScope
 }): Promise<TransactionDetails> => {
@@ -69,27 +70,62 @@ export const dispatchTxProposal = async ({
   try {
     proposedTx = await proposeTx(chainId, safeAddress, sender, safeTx, safeTxHash, origin)
   } catch (error) {
-    if (txId) {
-      txDispatch(TxEvent.SIGNATURE_PROPOSE_FAILED, { txId, chainId, safeAddress, error: asError(error) })
-    } else {
-      txDispatch(TxEvent.PROPOSE_FAILED, { error: asError(error) })
-    }
+    txDispatch(TxEvent.PROPOSE_FAILED, { error: asError(error) })
     throw error
   }
 
   // Dispatch a success event only if the tx is signed
   // Unsigned txs are proposed only temporarily and won't appear in the queue
   if (safeTx.signatures.size > 0) {
-    txDispatch(txId ? TxEvent.SIGNATURE_PROPOSED : TxEvent.PROPOSED, {
-      txId: proposedTx?.txId,
-      signerAddress: txId ? sender : undefined,
-      nonce: safeTx.data.nonce,
-      chainId,
-      safeAddress,
-    })
+    txDispatch(TxEvent.PROPOSED, { txId: proposedTx.txId, nonce: safeTx.data.nonce })
   }
 
   return proposedTx
+}
+
+/**
+ * Add the sender's signature to an already proposed transaction
+ */
+export const dispatchTxConfirmation = async ({
+  chainId,
+  safeAddress,
+  sender,
+  safeTx,
+  txId,
+  scope,
+}: {
+  chainId: string
+  safeAddress: string
+  sender: string
+  safeTx: SafeTransaction
+  txId: string
+  scope?: TxSenderScope
+}): Promise<TransactionSummary> => {
+  const safeSDK = getAndValidateSafeSDK(scope)
+  const safeTxHash = await safeSDK.getTransactionHash(safeTx)
+
+  let confirmedTx: TransactionSummary | undefined
+  try {
+    const signature = safeTx.signatures.get(sender.toLowerCase())
+    if (!signature) {
+      throw new Error(`No signature from ${sender} found on transaction ${txId}`)
+    }
+
+    confirmedTx = await confirmTx(chainId, safeTxHash, buildSignatureBytes([signature]))
+  } catch (error) {
+    txDispatch(TxEvent.SIGNATURE_PROPOSE_FAILED, { txId, chainId, safeAddress, error: asError(error) })
+    throw error
+  }
+
+  txDispatch(TxEvent.SIGNATURE_PROPOSED, {
+    txId: confirmedTx.id,
+    signerAddress: sender,
+    nonce: safeTx.data.nonce,
+    chainId,
+    safeAddress,
+  })
+
+  return confirmedTx
 }
 
 /**

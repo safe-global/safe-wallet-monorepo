@@ -1,9 +1,18 @@
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
-import { render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
+import { fireEvent, render, renderWithUserEvent, screen, waitFor, within } from '@/tests/test-utils'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import { REQUEST_POLICY_FORM_URL } from '../constants'
+import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { PROPOSER_INTRO_SEEN_KEY } from '../ProposerIntroDialog/constants'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from '../SpendingLimitIntroDialog/constants'
+import useWallet from '@/hooks/wallets/useWallet'
+import { asActivePolicy, mockPolicies, mockProposerPolicy } from '../mocks/policies'
 import Policies from '../index'
+import SpendingLimitFlow from '../SpendingLimitFlow'
+
+jest.mock('@/hooks/wallets/useWallet')
+
+const mockUseWallet = useWallet as jest.MockedFunction<typeof useWallet>
 
 let mockHasSeenSpendingLimitIntro: boolean | undefined = false
 let mockHasSeenProposerIntro: boolean | undefined = false
@@ -17,6 +26,12 @@ jest.mock('@/services/local-storage/useLocalStorage', () => ({
       ? [mockHasSeenProposerIntro, mockSetHasSeenProposerIntro]
       : [mockHasSeenSpendingLimitIntro, mockSetHasSeenSpendingLimitIntro],
   ),
+}))
+
+// The flow pulls in the protocol-kit initialiser; the page test only needs the flow's identity.
+jest.mock('../SpendingLimitFlow', () => ({
+  __esModule: true,
+  default: () => <div data-testid="spending-limit-flow" />,
 }))
 
 const mockUseLocalStorage = jest.mocked(useLocalStorage)
@@ -64,7 +79,6 @@ describe('Policies', () => {
 
     expect(screen.getByText('Spending limit')).toBeInTheDocument()
     expect(screen.getByText('Proposer')).toBeInTheDocument()
-    expect(screen.getByText('Account recovery')).toBeInTheDocument()
     expect(screen.getByText('Something missing?')).toBeInTheDocument()
   })
 
@@ -136,7 +150,7 @@ describe('Policies', () => {
     it('explains the proposer role before the flow starts', async () => {
       const { user } = renderWithUserEvent(<Policies />)
 
-      await user.click(screen.getByTestId('policy-catalogue-tile-proposer'))
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
 
       expect(screen.getByTestId('proposer-intro-dialog')).toBeInTheDocument()
     })
@@ -144,7 +158,7 @@ describe('Policies', () => {
     it('returns to the catalogue with nothing started when dismissed', async () => {
       const { user } = renderWithUserEvent(<Policies />)
 
-      await user.click(screen.getByTestId('policy-catalogue-tile-proposer'))
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
       await user.click(screen.getByRole('button', { name: 'Close' }))
 
       await waitFor(() => expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument())
@@ -154,7 +168,7 @@ describe('Policies', () => {
     it('records that it has been shown', async () => {
       const { user } = renderWithUserEvent(<Policies />)
 
-      await user.click(screen.getByTestId('policy-catalogue-tile-proposer'))
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
       await user.click(screen.getByRole('button', { name: 'Close' }))
 
       expect(mockSetHasSeenProposerIntro).toHaveBeenCalledWith(true)
@@ -165,7 +179,7 @@ describe('Policies', () => {
       mockHasSeenProposerIntro = true
       const { user } = renderWithUserEvent(<Policies />)
 
-      await user.click(screen.getByTestId('policy-catalogue-tile-proposer'))
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
 
       expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument()
     })
@@ -174,7 +188,7 @@ describe('Policies', () => {
       mockHasSeenSpendingLimitIntro = true
       const { user } = renderWithUserEvent(<Policies />)
 
-      await user.click(screen.getByTestId('policy-catalogue-tile-proposer'))
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
 
       expect(screen.getByTestId('proposer-intro-dialog')).toBeInTheDocument()
     })
@@ -182,7 +196,7 @@ describe('Policies', () => {
     it('opens the proposer intro and no other policy dialog', async () => {
       const { user } = renderWithUserEvent(<Policies />)
 
-      await user.click(screen.getByTestId('policy-catalogue-tile-proposer'))
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
 
       expect(screen.getByTestId('proposer-intro-dialog')).toBeInTheDocument()
       expect(screen.getAllByRole('dialog')).toHaveLength(1)
@@ -210,12 +224,154 @@ describe('Policies', () => {
     })
   })
 
-  it('opens no intro for the policies that have no flow yet', async () => {
-    const { user } = renderWithUserEvent(<Policies />)
+  describe('the Something missing? tile', () => {
+    const originalOpen = window.open
+    const mockOpen = jest.fn()
 
-    await user.click(screen.getByTestId('policy-catalogue-tile-suggestion'))
+    beforeEach(() => {
+      window.open = mockOpen
+    })
 
-    expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('spending-limit-intro-dialog')).not.toBeInTheDocument()
+    afterAll(() => {
+      window.open = originalOpen
+    })
+
+    it('opens the request-policy form in a new tab', async () => {
+      const { user } = renderWithUserEvent(<Policies />)
+
+      await user.click(within(screen.getByTestId('policy-catalogue-tile-suggestion')).getByRole('button'))
+
+      expect(mockOpen).toHaveBeenCalledTimes(1)
+      expect(mockOpen.mock.calls[0][0]).toBe(REQUEST_POLICY_FORM_URL)
+      expect(mockOpen.mock.calls[0][1]).toBe('_blank')
+    })
+
+    it('opens no intro dialog', async () => {
+      const { user } = renderWithUserEvent(<Policies />)
+
+      await user.click(within(screen.getByTestId('policy-catalogue-tile-suggestion')).getByRole('button'))
+
+      expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('spending-limit-intro-dialog')).not.toBeInTheDocument()
+    })
+  })
+
+  /**
+   * Reviewing what governs a workspace's Safes requires no signing capability, so the page is
+   * readable without a connected wallet. This is what makes the page usable by someone auditing
+   * the workspace rather than operating it.
+   */
+  describe('without a connected wallet', () => {
+    it('should, when no wallet is connected and the space has no policies, render the catalogue', () => {
+      mockUseWallet.mockReturnValue(null)
+
+      render(<Policies />)
+
+      expect(screen.getByTestId('policy-catalogue')).toBeInTheDocument()
+    })
+
+    it('should, when no wallet is connected and the space has policies, render the whole table', () => {
+      mockUseWallet.mockReturnValue(null)
+
+      render(<Policies policies={mockPolicies()} />)
+
+      expect(screen.getByTestId('policies-list')).toBeInTheDocument()
+      expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(6)
+      expect(screen.getByPlaceholderText('by name, address or network')).toBeInTheDocument()
+    })
+  })
+
+  describe('populated mode', () => {
+    it('should, when the space has policies, render the list instead of the catalogue', () => {
+      render(<Policies policies={mockPolicies()} />)
+
+      expect(screen.getByTestId('policies-list')).toBeInTheDocument()
+      expect(screen.queryByTestId('policy-catalogue')).not.toBeInTheDocument()
+    })
+
+    it('should, when the last policy is revoked, render the catalogue again', () => {
+      const { rerender } = render(<Policies policies={mockPolicies()} />)
+      rerender(<Policies policies={[]} />)
+
+      expect(screen.getByTestId('policy-catalogue')).toBeInTheDocument()
+      expect(screen.queryByTestId('policies-list')).not.toBeInTheDocument()
+    })
+
+    it('should, when the policies are still loading, render the heading and the loading state only', () => {
+      render(<Policies policies={[]} isLoading />)
+
+      expect(screen.getByRole('heading', { name: 'Policies' })).toBeInTheDocument()
+      expect(screen.getByTestId('policies-loading')).toHaveTextContent('Almost there…')
+      expect(screen.queryByText(/Policies are rules that help you/)).not.toBeInTheDocument()
+      expect(screen.queryByTestId('policy-catalogue')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('policies-list')).not.toBeInTheDocument()
+    })
+
+    it('should, when the policies failed to load, render the error state instead of the catalogue or the list', () => {
+      render(<Policies policies={mockPolicies()} isError />)
+
+      expect(screen.getByRole('alert')).toHaveTextContent('The website failed to load data. Please try again.')
+      expect(screen.queryByText(/Policies are rules that help you/)).not.toBeInTheDocument()
+      expect(screen.queryByTestId('policy-catalogue')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('policies-list')).not.toBeInTheDocument()
+    })
+
+    it('should, when Reload is clicked in the error state, ask the caller to reload', () => {
+      const onRetry = jest.fn()
+
+      render(<Policies policies={[]} isError onRetry={onRetry} />)
+      fireEvent.click(screen.getByRole('button', { name: 'Reload' }))
+
+      expect(onRetry).toHaveBeenCalledTimes(1)
+    })
+
+    it('should, when the policies failed to load and there is no reload handler, render no Reload button', () => {
+      render(<Policies policies={[]} isError />)
+
+      expect(screen.queryByRole('button', { name: 'Reload' })).not.toBeInTheDocument()
+    })
+
+    it('should, when a table row is clicked, report the policy it belongs to', () => {
+      const onSelectPolicy = jest.fn()
+      const proposerPolicy = asActivePolicy(mockProposerPolicy())
+
+      render(<Policies policies={[proposerPolicy]} onSelectPolicy={onSelectPolicy} />)
+      fireEvent.click(screen.getByRole('button', { name: 'Open Proposer for 0x8675...a19b' }))
+
+      expect(onSelectPolicy).toHaveBeenCalledWith(proposerPolicy)
+    })
+  })
+
+  describe('starting the spending limit flow', () => {
+    const renderWithTxModal = () => {
+      const setTxFlow = jest.fn()
+      const value: TxModalContextType = { txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }
+      const utils = renderWithUserEvent(
+        <TxModalContext.Provider value={value}>
+          <Policies />
+        </TxModalContext.Provider>,
+      )
+      return { ...utils, setTxFlow }
+    }
+
+    it('opens the flow when the intro is confirmed', async () => {
+      const { user, setTxFlow } = renderWithTxModal()
+
+      await user.click(screen.getByRole('button', { name: /Spending limit/ }))
+      await user.click(screen.getByRole('button', { name: 'Set up spending limit' }))
+
+      expect(setTxFlow).toHaveBeenCalledTimes(1)
+      expect(setTxFlow.mock.calls[0][0]).toMatchObject({ type: SpendingLimitFlow })
+    })
+
+    it('opens the flow straight from the tile once the intro has been shown', async () => {
+      mockHasSeenSpendingLimitIntro = true
+      const { user, setTxFlow } = renderWithTxModal()
+
+      await user.click(screen.getByRole('button', { name: /Spending limit/ }))
+
+      expect(setTxFlow).toHaveBeenCalledTimes(1)
+      expect(setTxFlow.mock.calls[0][0]).toMatchObject({ type: SpendingLimitFlow })
+    })
   })
 })

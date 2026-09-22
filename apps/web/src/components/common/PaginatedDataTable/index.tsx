@@ -70,8 +70,16 @@ type SortState = { id: string; direction: SortDirection }
 
 const DEFAULT_PAGE_SIZE = 25
 
+const NESTED_CONTROLS = 'a, button, [role="button"], input, [role="menuitem"]'
+
 type PaginatedDataTableProps<T> = {
   columns: DataTableColumn<T>[]
+  /**
+   * Makes the whole row a pointer target. The row stays a plain table row for assistive tech, so
+   * a caller that sets this also renders a focusable control with an accessible name in one of
+   * its cells. Clicks on nested links and buttons are left to those controls.
+   */
+  onRowClick?: (row: T) => void
   rows: T[]
   /** Optional mobile-only collapsible detail row, revealed per row via a toggle */
   renderRowDetail?: (row: T) => ReactNode
@@ -119,6 +127,7 @@ function PaginatedDataTable<T>({
   getRowKey,
   getRowClassName,
   pageSize = DEFAULT_PAGE_SIZE,
+  onRowClick,
 }: PaginatedDataTableProps<T>) {
   const isMobile = useIsMobile()
   const [page, setPage] = useState(0)
@@ -248,7 +257,15 @@ function PaginatedDataTable<T>({
                 <TableRow
                   data-testid="table-row"
                   data-no-divider={showDetail ? '' : undefined}
-                  className={getRowClassName?.(row)}
+                  className={cn(getRowClassName?.(row), onRowClick && 'cursor-pointer')}
+                  onClick={
+                    onRowClick
+                      ? (event) => {
+                          if ((event.target as HTMLElement).closest(NESTED_CONTROLS)) return
+                          onRowClick(row)
+                        }
+                      : undefined
+                  }
                 >
                   {visibleColumns.map((column) => (
                     <TableCell
