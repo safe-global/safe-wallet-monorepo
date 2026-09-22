@@ -2,23 +2,28 @@ import { renderHook } from '@/tests/test-utils'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUpsertWorkspaceSafeName, useUpsertWorkspaceSafeNames } from '../useUpsertWorkspaceSafeName'
 import { useCurrentSpaceId } from '../useCurrentSpaceId'
-import useGetSpaceAddressBook from '../useGetSpaceAddressBook'
+import { useSpaceAddressBookState } from '../useGetSpaceAddressBook'
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useAddressBooksUpsertAddressBookItemsV1Mutation: jest.fn(),
 }))
 jest.mock('../useCurrentSpaceId', () => ({ useCurrentSpaceId: jest.fn() }))
-jest.mock('../useGetSpaceAddressBook', () => ({ __esModule: true, default: jest.fn() }))
+jest.mock('../useGetSpaceAddressBook', () => ({ __esModule: true, useSpaceAddressBookState: jest.fn() }))
 jest.mock('../useWorkspaceAddressBookLabel', () => ({ useWorkspaceAddressBookLabel: () => 'Acme address book' }))
 
 const ADDRESS = '0x1111111111111111111111111111111111111111'
 const SPACE_ID = 'space-uuid'
 
-const setup = ({ addressBook = [], result = {} }: { addressBook?: unknown[]; result?: unknown } = {}) => {
+const setup = ({
+  addressBook = [],
+  result = {},
+  isLoading = false,
+  isError = false,
+}: { addressBook?: unknown[]; result?: unknown; isLoading?: boolean; isError?: boolean } = {}) => {
   const upsert = jest.fn().mockResolvedValue(result)
   ;(useAddressBooksUpsertAddressBookItemsV1Mutation as jest.Mock).mockReturnValue([upsert])
   ;(useCurrentSpaceId as jest.Mock).mockReturnValue(SPACE_ID)
-  ;(useGetSpaceAddressBook as jest.Mock).mockReturnValue(addressBook)
+  ;(useSpaceAddressBookState as jest.Mock).mockReturnValue({ items: addressBook, isLoading, isError })
   return upsert
 }
 
@@ -105,5 +110,22 @@ describe('useUpsertWorkspaceSafeNames', () => {
     await expect(result.current([{ address: ADDRESS, name: 'Treasury', chainIds: ['1'] }])).resolves.toEqual({
       error: 'Forbidden',
     })
+  })
+})
+
+describe('useUpsertWorkspaceSafeNames — address book not read', () => {
+  beforeEach(() => jest.clearAllMocks())
+
+  it.each([
+    ['still loading', { isLoading: true }],
+    ['failed to load', { isError: true }],
+  ])('refuses to write while the book is %s', async (_label, state) => {
+    const upsert = setup(state)
+    const { result } = renderHook(() => useUpsertWorkspaceSafeNames())
+
+    await expect(result.current([{ address: ADDRESS, name: 'Treasury', chainIds: ['1'] }])).resolves.toEqual({
+      error: 'The workspace address book is unavailable. Try again in a moment.',
+    })
+    expect(upsert).not.toHaveBeenCalled()
   })
 })

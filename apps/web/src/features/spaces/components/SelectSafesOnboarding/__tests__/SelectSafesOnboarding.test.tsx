@@ -70,6 +70,7 @@ jest.mock('../hooks/useOnboardingSubmit', () => ({
       selectedSafesLength: mockStep === 'name' ? 1 : 0,
       error: undefined,
       isSubmitting: false,
+      isAddressBookReady: true,
       step: mockStep,
       safesToName: mockStep === 'name' ? mockTrustedSafes : [],
       showSelectStep: mockShowSelectStep,

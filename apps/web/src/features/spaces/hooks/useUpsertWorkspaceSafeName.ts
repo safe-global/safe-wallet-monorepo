@@ -7,7 +7,7 @@ import { showNotification } from '@/store/notificationsSlice'
 import { getContactUpdatedMessage } from '@/utils/addressBookNotifications'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
-import useGetSpaceAddressBook from './useGetSpaceAddressBook'
+import { useSpaceAddressBookState } from './useGetSpaceAddressBook'
 import { useWorkspaceAddressBookLabel } from './useWorkspaceAddressBookLabel'
 
 export type WorkspaceSafeName = { address: string; name: string; chainIds: string[] }
@@ -17,13 +17,14 @@ type UpsertResult = Promise<{ error?: string }>
 /** Writes several Safe names to the workspace address book in one request, without a notification. */
 export const useUpsertWorkspaceSafeNames = (): ((items: WorkspaceSafeName[]) => UpsertResult) => {
   const spaceId = useCurrentSpaceId()
-  const spaceAddressBook = useGetSpaceAddressBook()
+  const { items: spaceAddressBook, isLoading, isError } = useSpaceAddressBookState()
   const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
 
   return useCallback(
     async (items) => {
       if (items.length === 0) return {}
       if (!spaceId) return { error: 'No workspace is selected. Switch to a workspace and try again.' }
+      if (isLoading || isError) return { error: 'The workspace address book is unavailable. Try again in a moment.' }
 
       // The upsert overwrites `chainIds` wholesale, so an entry that already spans more networks
       // than the Safe being renamed would silently lose them. Merge instead of replace.
@@ -40,7 +41,7 @@ export const useUpsertWorkspaceSafeNames = (): ((items: WorkspaceSafeName[]) => 
 
       return result.error ? { error: getRtkQueryErrorMessage(result.error) } : {}
     },
-    [spaceId, spaceAddressBook, upsertAddressBook],
+    [spaceId, spaceAddressBook, isLoading, isError, upsertAddressBook],
   )
 }
 
