@@ -340,6 +340,39 @@ describe('AddAccounts — naming step', () => {
     expect(screen.queryByText('Name your Safe accounts')).not.toBeInTheDocument()
   })
 
+  it('surfaces a failed name write and keeps the dialog on the naming view', async () => {
+    mockUpsertWorkspaceNames.mockResolvedValue({ error: 'Forbidden' })
+    const form = selectTrusted()
+    fireEvent.click(screen.getByTestId('safe-accounts-table'))
+    fireEvent.submit(form)
+    await screen.findByText('Name your Safe accounts')
+
+    fireEvent.submit(screen.getByTestId('add-accounts-button').closest('form')!)
+
+    expect(await screen.findByText('Forbidden')).toBeInTheDocument()
+    expect(screen.getByTestId('name-accounts-region')).toBeInTheDocument()
+  })
+
+  it('still writes the names when a retry finds the Safes already added', async () => {
+    mockUpsertWorkspaceNames.mockResolvedValueOnce({ error: 'Forbidden' })
+    const form = selectTrusted()
+    fireEvent.click(screen.getByTestId('safe-accounts-table'))
+    fireEvent.submit(form)
+    await screen.findByText('Name your Safe accounts')
+
+    fireEvent.submit(screen.getByTestId('add-accounts-button').closest('form')!)
+    await screen.findByText('Forbidden')
+
+    // The add succeeded, so the retry has nothing left to add.
+    mockSpaceSafes = [{ chainId: '1', address: TRUSTED_ADDRESS }]
+    fireEvent.submit(screen.getByTestId('add-accounts-button').closest('form')!)
+
+    await waitFor(() => expect(mockUpsertWorkspaceNames).toHaveBeenCalledTimes(2))
+    expect(mockUpsertWorkspaceNames).toHaveBeenLastCalledWith([
+      { address: TRUSTED_ADDRESS, name: 'Treasury', chainIds: ['1'] },
+    ])
+  })
+
   it('returns to the picker from the naming view', async () => {
     const form = selectTrusted()
     fireEvent.click(screen.getByTestId('safe-accounts-table'))

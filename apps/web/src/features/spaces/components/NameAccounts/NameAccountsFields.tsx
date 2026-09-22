@@ -35,7 +35,11 @@ const NameAccountCell = ({ item }: { item: Item }) => {
   const isTouched = Boolean(get(formState.touchedFields, key))
   const nameError = validateContactName(value)
   // Shown only while unfocused: the message takes the address line's place, so typing keeps the address visible.
-  const error = focused ? undefined : value === '' ? (isTouched ? 'Name is required' : undefined) : nameError
+  let error: string | undefined
+  if (!focused) {
+    if (value !== '') error = nameError
+    else if (isTouched) error = 'Name is required'
+  }
   const showInput = focused || Boolean(nameError)
   const startEditing = () => setFocused(true)
 

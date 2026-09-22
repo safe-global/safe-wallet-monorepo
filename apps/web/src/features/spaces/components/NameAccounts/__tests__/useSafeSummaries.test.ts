@@ -46,7 +46,7 @@ describe('useSafeSummaries', () => {
     expect(result.current.get(ADDRESS.toLowerCase())).toEqual({
       threshold: undefined,
       owners: undefined,
-      thresholdMixed: true,
+      thresholdMixed: false,
       balance: undefined,
       loaded: true,
     })
@@ -63,6 +63,29 @@ describe('useSafeSummaries', () => {
       balance: '150.5',
       loaded: true,
     })
+  })
+
+  it('does not mark a single-chain Safe as mixed when its overview is missing', () => {
+    mockQuery([])
+    const { result } = renderHook(() => useSafeSummaries([safeItem('1')]))
+
+    expect(result.current.get(ADDRESS.toLowerCase())).toEqual({
+      threshold: undefined,
+      owners: undefined,
+      thresholdMixed: false,
+      balance: undefined,
+      loaded: true,
+    })
+  })
+
+  it('leaves an undeployed Safe out of the overview request and still settles it', () => {
+    const spy = mockQuery([])
+    const { result } = renderHook(() => useSafeSummaries([safeItem('1')]), {
+      initialReduxState: { undeployedSafes: { '1': { [ADDRESS]: { status: {}, props: {} } } } } as never,
+    })
+
+    expect(spy).toHaveBeenCalledWith(expect.anything())
+    expect(result.current.get(ADDRESS.toLowerCase())?.loaded).toBe(true)
   })
 
   it('sums balances across chains and flags a multichain Safe with differing setups', () => {

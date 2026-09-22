@@ -49,7 +49,7 @@ export const useSafeSummaries = (items: AllSafeItems): Map<string, SafeSummary> 
       summaries.set(item.address.toLowerCase(), {
         threshold: setup?.threshold,
         owners: setup?.owners.length,
-        thresholdMixed: loaded && !setup,
+        thresholdMixed: loaded && !setup && isMultiChainSafeItem(item),
         balance: fiatTotals.length > 0 ? String(fiatTotals.reduce((sum, value) => sum + value, 0)) : undefined,
         loaded,
       })
