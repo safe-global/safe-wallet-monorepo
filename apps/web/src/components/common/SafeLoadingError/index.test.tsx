@@ -4,9 +4,10 @@ import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import * as useSafeUnavailableMessageHook from '@/hooks/useSafeUnavailableMessage'
+import * as useChainIdHook from '@/hooks/useChainId'
 import { SAFE_UNAVAILABLE_MESSAGE } from '@/utils/rtkQuery'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
-import SafeLoadingError, { GENERIC_LOADING_ERROR } from '.'
+import SafeLoadingError, { GENERIC_LOADING_ERROR, unsupportedNetworkError } from '.'
 
 const SAFE_ADDRESS = '0x87a57cBf742CC1Fc702D0E9BF595b1E056693e2f'
 
@@ -30,7 +31,7 @@ const safeInUrl = { routerProps: { query: { safe: `eth:${SAFE_ADDRESS}` } } }
 
 describe('SafeLoadingError', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    jest.restoreAllMocks()
     mockUnavailableMessage(undefined)
   })
 
@@ -58,6 +59,33 @@ describe('SafeLoadingError', () => {
 
     expect(getByText(GENERIC_LOADING_ERROR)).toBeInTheDocument()
     expect(queryByText('Safe content')).not.toBeInTheDocument()
+  })
+
+  it('names the network when the URL prefix resolves to no supported chain', () => {
+    mockSafeInfo(undefined)
+    jest.spyOn(useChainIdHook, 'useUrlChain').mockReturnValue({ status: 'unknown', shortName: 'rhood' })
+
+    const { getByText, queryByText } = render(
+      <SafeLoadingError>
+        <div>Safe content</div>
+      </SafeLoadingError>,
+    )
+
+    expect(getByText(unsupportedNetworkError('rhood'))).toBeInTheDocument()
+    expect(queryByText('Safe content')).not.toBeInTheDocument()
+  })
+
+  it('renders children while an unresolved prefix is still pending', () => {
+    mockSafeInfo(undefined)
+    jest.spyOn(useChainIdHook, 'useUrlChain').mockReturnValue({ status: 'pending', shortName: 'robinhood' })
+
+    const { getByText } = render(
+      <SafeLoadingError>
+        <div>Safe content</div>
+      </SafeLoadingError>,
+    )
+
+    expect(getByText('Safe content')).toBeInTheDocument()
   })
 
   it('shows fixed copy when the Safe is blocked', async () => {
