@@ -3,7 +3,7 @@ import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import confirmTx from '../confirmTransaction'
 import { makeStore, setStoreInstance } from '@/store'
-import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 describe('confirmTx', () => {
   const CHAIN_ID = '1'
@@ -13,10 +13,12 @@ describe('confirmTx', () => {
   const CONFIRMATIONS_URL = `${GATEWAY_URL}/v1/chains/${CHAIN_ID}/transactions/${SAFE_TX_HASH}/confirmations`
   const PROPOSE_URL = `${GATEWAY_URL}/v1/chains/${CHAIN_ID}/transactions/${SAFE_ADDRESS}/propose`
 
-  const mockResponse: Transaction = {
-    id: `multisig_${SAFE_ADDRESS}_${SAFE_TX_HASH}`,
+  const TX_ID = `multisig_${SAFE_ADDRESS}_${SAFE_TX_HASH}`
+
+  const mockResponse: TransactionDetails = {
+    txId: TX_ID,
+    safeAddress: SAFE_ADDRESS,
     txHash: null,
-    timestamp: 1700000000000,
     txStatus: 'AWAITING_CONFIRMATIONS',
     txInfo: {
       type: 'Custom',
@@ -27,13 +29,7 @@ describe('confirmTx', () => {
       isCancellation: false,
       methodName: null,
     },
-    executionInfo: {
-      type: 'MULTISIG',
-      nonce: 1,
-      confirmationsRequired: 2,
-      confirmationsSubmitted: 2,
-      missingSigners: null,
-    },
+    detailedExecutionInfo: null,
     safeAppInfo: null,
     note: null,
   }
@@ -42,13 +38,13 @@ describe('confirmTx', () => {
     setStoreInstance(makeStore({}, { skipBroadcast: true }))
   })
 
-  it('should return the updated transaction summary', async () => {
+  it('should return the updated transaction details', async () => {
     server.use(http.post(CONFIRMATIONS_URL, () => HttpResponse.json(mockResponse)))
 
     const confirmedTx = await confirmTx(CHAIN_ID, SAFE_TX_HASH, SIGNATURE)
 
     expect(confirmedTx).toEqual(mockResponse)
-    expect(confirmedTx.id).toBe(`multisig_${SAFE_ADDRESS}_${SAFE_TX_HASH}`)
+    expect(confirmedTx.txId).toBe(TX_ID)
   })
 
   it('should send only the signature as payload to the safeTxHash confirmations endpoint', async () => {
