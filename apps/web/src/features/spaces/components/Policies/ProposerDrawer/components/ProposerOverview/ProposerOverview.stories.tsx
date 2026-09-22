@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import ProposerOverview from './ProposerOverview'
+import ProposerOverview, { ProposerOverviewSkeleton } from './ProposerOverview'
 
 const meta = {
   title: 'Features/Spaces/Policies/ProposerDrawer/components/ProposerOverview',
@@ -36,4 +36,21 @@ export const UnnamedAccounts: Story = {
     appliesTo: { address: '0x86753FE4b8E29Ce8A38cDf9559D80E05b00cdBA0' },
     initiatedBy: { address: '0xA77De01c5B6f829Cbe4604cF71dDc8C4d608b000' },
   },
+}
+
+/** Names longer than the content column — they truncate instead of pushing the address out. */
+export const LongNames: Story = {
+  args: {
+    proposer: { address: '0x1f9090aaE28b8a3dCeaDf281B0F12828e676c326', name: 'Marketing operations treasury proposer' },
+    appliesTo: { address: '0x86753FE4b8E29Ce8A38cDf9559D80E05b00cdBA0', name: 'Marketing operations treasury' },
+    initiatedBy: {
+      address: '0xA77De01c5B6f829Cbe4604cF71dDc8C4d608b000',
+      name: 'Jacob from the marketing operations team',
+    },
+  },
+}
+
+/** The policy is still being fetched — the rows keep their heights so nothing jumps on arrival. */
+export const Loading: Story = {
+  render: () => <ProposerOverviewSkeleton />,
 }

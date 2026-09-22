@@ -4,7 +4,6 @@ import { NotActivatedProposer } from './NotActivatedProposer'
 import { PendingProposer } from './PendingProposer'
 import { ProposerStatus, type ProposerVariantContentProps } from './types'
 
-/** The drawer body for one proposer role status. */
 export const ProposerVariantContent = (props: ProposerVariantContentProps): ReactElement => {
   switch (props.status) {
     case ProposerStatus.ACTIVE: {

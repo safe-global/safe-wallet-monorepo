@@ -1,19 +1,17 @@
 import type { ReactElement } from 'react'
 import { ShieldCheck } from 'lucide-react'
 import { DrawerList, DrawerSection } from '@/components/common/Drawer'
-import { AccountIdentity, type AccountIdentityProps } from '../AccountIdentity'
+import { Skeleton } from '@/components/ui/skeleton'
+import { AccountIdentity, AccountIdentitySkeleton, type AccountIdentityProps } from '../AccountIdentity'
 
 export type ProposerOverviewProps = {
   proposer: AccountIdentityProps
   appliesTo: AccountIdentityProps
   initiatedBy: AccountIdentityProps
-  /** Preformatted — the caller owns locale and timezone. */
   lastUpdated: string
-  /** What executes the proposer role onchain, e.g. `Safe module`. */
   enforcedBy: string
 }
 
-/** The proposer role's facts, as every status shows them. */
 const ProposerOverview = ({
   proposer,
   appliesTo,
@@ -43,3 +41,17 @@ const ProposerOverview = ({
 )
 
 export default ProposerOverview
+
+const ACCOUNT_LABELS = ['Proposer', 'Applies to', 'Initiated by']
+
+export const ProposerOverviewSkeleton = (): ReactElement => (
+  <DrawerSection title="Policy overview">
+    <DrawerList
+      items={[
+        ...ACCOUNT_LABELS.map((label) => ({ label, content: <AccountIdentitySkeleton /> })),
+        { label: 'Last updated', content: <Skeleton className="ml-auto h-4 w-36 bg-border" /> },
+        { label: 'Enforced by', content: <Skeleton className="ml-auto h-4 w-24 bg-border" /> },
+      ]}
+    />
+  </DrawerSection>
+)

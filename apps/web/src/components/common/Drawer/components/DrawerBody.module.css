@@ -10,8 +10,6 @@
   initial-value: 0px;
 }
 
-/* Softens each scroll edge into the drawer surface. Fading to transparent rather than painting the
-   surface colour keeps this correct in both themes and under any SheetContent `surface`. */
 .scrollFade {
   --drawer-fade-size: 24px;
 
@@ -24,9 +22,6 @@
   );
 }
 
-/* Ties each edge to its own end of the scroll range, so an edge with nothing hidden behind it stays crisp.
-   Both fades start at 0px, so a body that does not scroll — or a browser without scroll-driven
-   animations — renders exactly as it did before rather than dimming content it cannot scroll to. */
 @supports (animation-timeline: scroll()) {
   .scrollFade {
     animation:

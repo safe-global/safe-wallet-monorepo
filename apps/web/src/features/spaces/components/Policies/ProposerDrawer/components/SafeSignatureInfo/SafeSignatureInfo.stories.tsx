@@ -59,3 +59,14 @@ export const Failed: Story = {
     badgeVariant: 'destructive',
   },
 }
+
+/** A long Safe name truncates next to the progress badge rather than wrapping the row. */
+export const LongName: Story = {
+  args: {
+    safe: {
+      address: '0x8675B754342754A30A2AeF474D114d8460bca19b',
+      name: 'Operations and treasury management',
+      threshold: 3,
+    },
+  },
+}

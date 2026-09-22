@@ -3,7 +3,6 @@ import { Badge } from '@/components/ui/badge'
 import { Typography } from '@/components/ui/typography'
 import { AccountIdentity } from '../AccountIdentity'
 
-/** The Safe whose signers have to reach the threshold before the proposer role activates. */
 export type SignatureSafeInfo = {
   address: string
   name?: string
@@ -12,14 +11,11 @@ export type SignatureSafeInfo = {
 
 export type SafeSignatureInfoProps = {
   safe: SignatureSafeInfo
-  /** Signatures already collected, out of the Safe's threshold. */
   signatures: number
   label?: string
-  /** Overrides the progress tone — `destructive` once the collection failed or its window lapsed. */
   badgeVariant?: 'warning' | 'destructive'
 }
 
-/** Row pairing a Safe with how far its signature collection has got. */
 const SafeSignatureInfo = ({
   safe,
   signatures,
@@ -27,10 +23,8 @@ const SafeSignatureInfo = ({
   badgeVariant,
 }: SafeSignatureInfoProps): ReactElement => (
   <div className="flex w-full items-center justify-between gap-3 rounded-lg bg-muted p-3">
-    <div className="flex min-w-0 items-center gap-1">
-      <Typography variant="paragraph-small-medium" className="truncate">
-        {label}
-      </Typography>
+    <div className="flex shrink-0 items-center gap-1">
+      <Typography variant="paragraph-small-medium">{label}</Typography>
       <Badge
         variant={badgeVariant ?? (signatures >= safe.threshold ? 'success' : 'warning')}
         size="status"
@@ -41,7 +35,9 @@ const SafeSignatureInfo = ({
       </Badge>
     </div>
 
-    <AccountIdentity address={safe.address} name={safe.name} />
+    <div className="flex min-w-0 justify-end">
+      <AccountIdentity address={safe.address} name={safe.name} />
+    </div>
   </div>
 )
 

@@ -7,7 +7,6 @@ export type DrawerListItem = {
   content: ReactNode
 }
 
-/** Label/value rows on a recessed card, ruled between entries. */
 export const DrawerList = ({ items }: { items: DrawerListItem[] }): ReactElement => (
   <dl className="flex w-full flex-col gap-3 rounded-lg bg-muted p-3">
     {items.map((item, index) => (

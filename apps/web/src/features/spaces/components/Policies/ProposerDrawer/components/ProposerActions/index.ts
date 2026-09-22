@@ -1,2 +1,2 @@
-export { default as ProposerActions } from './ProposerActions'
+export { default as ProposerActions, ProposerActionsSkeleton } from './ProposerActions'
 export type { ProposerActionsProps } from './ProposerActions'

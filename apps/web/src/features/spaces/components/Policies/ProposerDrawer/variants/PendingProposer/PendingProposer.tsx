@@ -5,12 +5,9 @@ import { ProposerOverview, type ProposerOverviewProps } from '../../components/P
 import { SafeSignatureInfo, type SignatureSafeInfo } from '../../components/SafeSignatureInfo'
 
 export type PendingProposerProps = {
-  /** Why the role has not activated yet — the wording depends on the Safe setup. */
   description: ReactNode
-  /** The Safe whose signers still have to sign. */
   safe: SignatureSafeInfo
   signatures: number
-  /** Omitted when the signature request does not expire. */
   expiresLabel?: string
   overview: ProposerOverviewProps
 }

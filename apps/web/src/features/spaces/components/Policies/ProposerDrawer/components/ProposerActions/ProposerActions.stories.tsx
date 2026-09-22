@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
-import ProposerActions from './ProposerActions'
+import ProposerActions, { ProposerActionsSkeleton } from './ProposerActions'
 
 const meta = {
   title: 'Features/Spaces/Policies/ProposerDrawer/components/ProposerActions',
@@ -55,4 +55,9 @@ export const DisabledWithHint: Story = {
     disabled: true,
     hint: 'Only signers of this Treasury can delete or edit this Proposer role.',
   },
+}
+
+/** What the action offers is not known until the policy loads. */
+export const Loading: Story = {
+  render: () => <ProposerActionsSkeleton />,
 }

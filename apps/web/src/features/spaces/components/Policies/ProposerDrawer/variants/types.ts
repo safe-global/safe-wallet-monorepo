@@ -8,7 +8,6 @@ export enum ProposerStatus {
   NOT_ACTIVATED = 'NOT_ACTIVATED',
 }
 
-/** Content props per status. */
 export type ProposerVariantContentProps =
   | ({ status: ProposerStatus.ACTIVE } & ActiveProposerProps)
   | ({ status: ProposerStatus.PENDING } & PendingProposerProps)

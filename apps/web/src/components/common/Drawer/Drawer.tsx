@@ -11,10 +11,6 @@ export type DrawerProps = {
   children?: ReactNode
 }
 
-/**
- * Right-side slide-over panel. Owns the sheet chrome and the close button; the content is composed
- * from DrawerHeader / DrawerBody / DrawerFooter so each surface can shape its own header.
- */
 export const Drawer = ({ open, onClose, size = 'md', ariaLabel, children }: DrawerProps): ReactElement => (
   <Sheet
     open={open}

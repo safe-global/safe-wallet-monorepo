@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import AccountIdentity from './AccountIdentity'
+import AccountIdentity, { AccountIdentitySkeleton } from './AccountIdentity'
 
 const meta = {
   title: 'Features/Spaces/Policies/ProposerDrawer/components/AccountIdentity',
@@ -37,4 +37,9 @@ export const LongName: Story = {
       </div>
     ),
   ],
+}
+
+/** The account is still loading — the identicon, name and address stand in as skeletons. */
+export const Loading: Story = {
+  render: () => <AccountIdentitySkeleton />,
 }

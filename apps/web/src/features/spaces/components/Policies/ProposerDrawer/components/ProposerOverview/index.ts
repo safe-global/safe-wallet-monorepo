@@ -1,2 +1,2 @@
-export { default as ProposerOverview } from './ProposerOverview'
+export { default as ProposerOverview, ProposerOverviewSkeleton } from './ProposerOverview'
 export type { ProposerOverviewProps } from './ProposerOverview'

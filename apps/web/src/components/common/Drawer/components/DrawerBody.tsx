@@ -3,7 +3,6 @@ import { cn } from '@/utils/cn'
 import { SCROLL_AREA } from '@/utils/styles'
 import css from './DrawerBody.module.css'
 
-/** Owns the vertical scroll so content can never paint over a DrawerFooter; `last:pb-6` drops when one follows. */
 export const DrawerBody = ({ children }: { children?: ReactNode }): ReactElement => (
   <div className={cn(SCROLL_AREA, css.scrollFade, 'flex flex-col px-6 last:pb-6')}>{children}</div>
 )

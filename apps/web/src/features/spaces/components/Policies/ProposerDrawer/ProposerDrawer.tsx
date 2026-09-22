@@ -2,25 +2,28 @@ import type { ReactElement } from 'react'
 import { UserRoundPen } from 'lucide-react'
 import { Drawer, DrawerBody, DrawerHeader, DrawerTitle } from '@/components/common/Drawer'
 import { Badge, BadgeDot } from '@/components/ui/badge'
-import { ProposerActions } from './components/ProposerActions'
+import { Skeleton } from '@/components/ui/skeleton'
+import { ProposerActions, ProposerActionsSkeleton } from './components/ProposerActions'
+import { ProposerOverviewSkeleton } from './components/ProposerOverview'
 import { getProposerStatusColor, getProposerStatusLabel } from './utils'
 import { ProposerVariantContent } from './variants'
 import type { ProposerVariantContentProps } from './variants/types'
 
-export type ProposerDrawerProps = {
-  open: boolean
-  onClose: () => void
-  /** Reads differently per status, so the caller names the action. */
+type ProposerDrawerActionProps = {
   actionLabel: string
   onAction: () => void
-  /** Sits above the action to say what it needs first, e.g. a connected signer wallet. */
   actionHint?: string
   actionVariant?: 'default' | 'secondary'
   actionDisabled?: boolean
-} & ProposerVariantContentProps
+}
+
+export type ProposerDrawerProps = {
+  open: boolean
+  onClose: () => void
+} & (({ isLoading?: false } & ProposerDrawerActionProps & ProposerVariantContentProps) | { isLoading: true })
 
 const ProposerDrawer = (props: ProposerDrawerProps): ReactElement => {
-  const { open, onClose, status, actionLabel, onAction, actionHint, actionVariant, actionDisabled } = props
+  const { open, onClose } = props
 
   return (
     <Drawer open={open} onClose={onClose} ariaLabel="Proposer role">
@@ -29,21 +32,27 @@ const ProposerDrawer = (props: ProposerDrawerProps): ReactElement => {
           <UserRoundPen className="size-4 text-success-strong" />
         </div>
         <DrawerTitle size="lg">Proposer role</DrawerTitle>
-        <Badge variant={getProposerStatusColor(status)} size="status" shape="status" className="ml-auto">
-          <BadgeDot />
-          {getProposerStatusLabel(status)}
-        </Badge>
+        {props.isLoading ? (
+          <Skeleton className="ml-auto h-6 w-24 rounded-lg" data-testid="proposer-status-skeleton" />
+        ) : (
+          <Badge variant={getProposerStatusColor(props.status)} size="status" shape="status" className="ml-auto">
+            <BadgeDot />
+            {getProposerStatusLabel(props.status)}
+          </Badge>
+        )}
       </DrawerHeader>
-      <DrawerBody>
-        <ProposerVariantContent {...props} />
-      </DrawerBody>
-      <ProposerActions
-        actionLabel={actionLabel}
-        onClick={onAction}
-        hint={actionHint}
-        variant={actionVariant}
-        disabled={actionDisabled}
-      />
+      <DrawerBody>{props.isLoading ? <ProposerOverviewSkeleton /> : <ProposerVariantContent {...props} />}</DrawerBody>
+      {props.isLoading ? (
+        <ProposerActionsSkeleton />
+      ) : (
+        <ProposerActions
+          actionLabel={props.actionLabel}
+          onClick={props.onAction}
+          hint={props.actionHint}
+          variant={props.actionVariant}
+          disabled={props.actionDisabled}
+        />
+      )}
     </Drawer>
   )
 }

@@ -1,19 +1,17 @@
 import type { ReactElement } from 'react'
 import { DrawerFooter } from '@/components/common/Drawer'
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
 
 export type ProposerActionsProps = {
-  /** What the drawer's primary action does here — it reads differently per proposer role status. */
   actionLabel: string
   onClick: () => void
-  /** Sits above the button to say why the action is unavailable, or what it needs first. */
   hint?: string
   variant?: 'default' | 'secondary'
   disabled?: boolean
 }
 
-/** The drawer's footer action for one proposer role status. */
 const ProposerActions = ({
   actionLabel,
   onClick,
@@ -37,3 +35,9 @@ const ProposerActions = ({
 )
 
 export default ProposerActions
+
+export const ProposerActionsSkeleton = (): ReactElement => (
+  <DrawerFooter>
+    <Skeleton className="h-9 w-full" data-testid="proposer-actions-skeleton" />
+  </DrawerFooter>
+)

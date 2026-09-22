@@ -1,7 +1,6 @@
 import type { ReactElement, ReactNode } from 'react'
 import { Typography } from '@/components/ui/typography'
 
-/** Labelled block inside a DrawerBody: a caps title, an optional trailing note, then the content. */
 export const DrawerSection = ({
   title,
   rightNode,

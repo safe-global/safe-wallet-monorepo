@@ -6,12 +6,9 @@ import { ProposerOverview, type ProposerOverviewProps } from '../../components/P
 import { SafeSignatureInfo, type SignatureSafeInfo } from '../../components/SafeSignatureInfo'
 
 export type NotActivatedProposerProps = {
-  /** What stopped the activation — a rejection reads differently from a lapsed time window. */
   description: ReactNode
-  /** The Safe whose signatures the activation was waiting on. */
   safe: SignatureSafeInfo
   signatures: number
-  /** What is left of the signing window, or that it has closed. */
   expiresLabel?: string
   overview: ProposerOverviewProps
 }

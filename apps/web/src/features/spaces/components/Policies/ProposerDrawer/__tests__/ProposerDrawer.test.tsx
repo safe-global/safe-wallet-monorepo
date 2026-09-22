@@ -117,4 +117,16 @@ describe('ProposerDrawer', () => {
 
     expect(screen.queryByText('Proposer role')).not.toBeInTheDocument()
   })
+
+  it('stands in with skeletons while the policy is still loading', () => {
+    render(<ProposerDrawer open onClose={jest.fn()} isLoading />)
+
+    expect(screen.getByText('Proposer role')).toBeInTheDocument()
+    expect(screen.getByTestId('proposer-status-skeleton')).toBeInTheDocument()
+    expect(screen.getByText('Policy overview')).toBeInTheDocument()
+    expect(screen.getAllByTestId('account-identity-skeleton')).toHaveLength(3)
+    expect(screen.getByTestId('proposer-actions-skeleton')).toBeInTheDocument()
+    expect(screen.queryByText('Active')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /remove proposer|retry|review transaction/i })).not.toBeInTheDocument()
+  })
 })
