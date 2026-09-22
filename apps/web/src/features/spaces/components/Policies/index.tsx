@@ -14,7 +14,6 @@ import SpendingLimitFlow from './SpendingLimitFlow'
 import SpendingLimitIntroDialog from './SpendingLimitIntroDialog'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from './SpendingLimitIntroDialog/constants'
 import { REQUEST_POLICY_FORM_HEIGHT, REQUEST_POLICY_FORM_URL, REQUEST_POLICY_FORM_WIDTH } from './constants'
-import { REQUEST_POLICY_FORM_URL } from './constants'
 import type { Policy } from './types'
 
 interface PoliciesProps {
