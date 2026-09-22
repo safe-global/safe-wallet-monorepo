@@ -1,5 +1,5 @@
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import { useCallback, useContext, useEffect } from 'react'
+import { type ReactNode, useCallback, useContext, useEffect } from 'react'
 import { TxFlowContext } from '../../TxFlowProvider'
 import ExecuteForm from './ExecuteForm'
 import { useIsCounterfactualSafe } from '@/features/counterfactual'
@@ -12,7 +12,7 @@ export const Execute = ({
   disabled = false,
   onChange,
   ...props
-}: SlotComponentProps<SlotName.ComboSubmit>) => {
+}: SlotComponentProps<SlotName.ComboSubmit> & { secondaryAction?: ReactNode }) => {
   const { safeTx, txOrigin } = useContext(SafeTxContext)
   const { txId, isCreation, onlyExecute, isSubmitDisabled, trackTxEvent, setShouldExecute } = useContext(TxFlowContext)
 
