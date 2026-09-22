@@ -10,12 +10,13 @@ import PolicyCatalogue from './PolicyCatalogue'
 import type { PolicyCatalogueId } from './PolicyCatalogue/catalogue'
 import ProposerIntroDialog from './ProposerIntroDialog'
 import { PROPOSER_INTRO_SEEN_KEY } from './ProposerIntroDialog/constants'
+import ProposerDetails from './ProposerDetails'
 import ProposerRoleFlow from './ProposerRoleFlow'
 import SpendingLimitFlow from './SpendingLimitFlow'
 import SpendingLimitIntroDialog from './SpendingLimitIntroDialog'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from './SpendingLimitIntroDialog/constants'
 import { REQUEST_POLICY_FORM_HEIGHT, REQUEST_POLICY_FORM_URL, REQUEST_POLICY_FORM_WIDTH } from './constants'
-import type { Policy } from './types'
+import { isProposerPolicy, type Policy, type Proposer, type ProposerPolicy } from './types'
 
 interface PoliciesProps {
   /** Supplied by the caller. The page does not fetch. */
@@ -59,6 +60,14 @@ const Policies = ({
 
   const [hasSeenProposerIntro = false, setHasSeenProposerIntro] = useLocalStorage<boolean>(PROPOSER_INTRO_SEEN_KEY)
   const [isProposerIntroOpen, setIsProposerIntroOpen] = useState(false)
+  const [openProposer, setOpenProposer] = useState<{ policy: ProposerPolicy; proposer: Proposer } | null>(null)
+
+  // The drawer describes one proposer. A policy holding several has no single one to show yet.
+  const openPolicy = useCallback((policy: Policy) => {
+    if (isProposerPolicy(policy) && policy.data.proposers.length === 1) {
+      setOpenProposer({ policy, proposer: policy.data.proposers[0] })
+    }
+  }, [])
 
   const startSpendingLimitFlow = useCallback(() => setTxFlow(<SpendingLimitFlow />), [setTxFlow])
 
@@ -145,7 +154,7 @@ const Policies = ({
       ) : isError ? (
         <PoliciesLoadError onReload={onRetry} />
       ) : policies.length > 0 ? (
-        <PoliciesList policies={policies} onAddPolicy={onAddPolicy} onSelectPolicy={onSelectPolicy} />
+        <PoliciesList policies={policies} onAddPolicy={onAddPolicy} onSelectPolicy={onSelectPolicy ?? openPolicy} />
       ) : (
         <PolicyCatalogue onSelect={handleSelect} />
       )}
@@ -165,6 +174,8 @@ const Policies = ({
         }}
         onProceed={proceedToProposerFlow}
       />
+
+      {openProposer && <ProposerDetails {...openProposer} onClose={() => setOpenProposer(null)} />}
     </div>
   )
 }

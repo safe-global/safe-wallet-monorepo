@@ -35,6 +35,10 @@ jest.mock('@/services/local-storage/useLocalStorage', () => ({
 }))
 
 // The flow pulls in the protocol-kit initialiser; the page test only needs the flow's identity.
+jest.mock('../../../hooks/useSpaceSafeOverviews', () => ({
+  useSpaceSafeOverviews: () => ({ ownedByChain: {}, isOwnershipResolved: true }),
+}))
+
 jest.mock('../SpendingLimitFlow', () => ({
   __esModule: true,
   default: () => <div data-testid="spending-limit-flow" />,
@@ -383,6 +387,15 @@ describe('Policies', () => {
       render(<Policies policies={[]} isError />)
 
       expect(screen.queryByRole('button', { name: 'Reload' })).not.toBeInTheDocument()
+    })
+
+    it('should, when a proposer row is clicked and no handler is given, open the proposer drawer', () => {
+      const proposerPolicy = asActivePolicy(mockProposerPolicy())
+
+      render(<Policies policies={[proposerPolicy]} />)
+      fireEvent.click(screen.getByRole('button', { name: 'Open Proposer for 0x8675...a19b' }))
+
+      expect(screen.getByText('Proposer role')).toBeInTheDocument()
     })
 
     it('should, when a table row is clicked, report the policy it belongs to', () => {
