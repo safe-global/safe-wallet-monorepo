@@ -3,7 +3,7 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import { NO_TOKEN_SELECTED_ERROR } from '@/features/spending-limits/services'
 import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
-import { tokenOptionBuilder } from '../../utils/testBuilders'
+import { tokenOptionBuilder } from '../../utils/tokenOptions.fixtures'
 import {
   DUPLICATE_TOKEN_ERROR,
   ONE_TIME_HELPER_TEXT,

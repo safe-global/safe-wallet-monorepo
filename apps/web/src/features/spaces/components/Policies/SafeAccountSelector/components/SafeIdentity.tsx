@@ -1,7 +1,6 @@
 import { blo } from 'blo'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { TruncatedText, getInitials, getSafeDisplayInfo } from '@/components/common/AccountRow'
-import { Typography } from '@/components/ui/typography'
 
 /**
  * Identity block shared by the rows, the group header and the trigger. Renders two siblings for its
@@ -18,13 +17,18 @@ const SafeIdentity = ({ address, name }: { address: string; name?: string }) => 
         <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
       </Avatar>
 
-      {/* max-w-full: `items-start` sizes children to their content, so a long name would otherwise paint
-          over the threshold badge instead of ellipsizing. */}
+      {/* max-w-full: `items-start` sizes children to their content, so a long name or the address would
+          otherwise paint over the threshold badge instead of ellipsizing. */}
       <span className="flex min-w-0 flex-1 flex-col items-start">
         <TruncatedText variant="paragraph-small-medium" className="block min-w-0 max-w-full" text={displayName} />
-        <Typography variant="paragraph-mini" color="muted" className="font-mono" data-testid="safe-account-address">
-          {shortAddress}
-        </Typography>
+        <TruncatedText
+          variant="paragraph-mini"
+          color="muted"
+          className="block min-w-0 max-w-full font-mono"
+          text={shortAddress}
+          fullText={address}
+          data-testid="safe-account-address"
+        />
       </span>
     </>
   )
