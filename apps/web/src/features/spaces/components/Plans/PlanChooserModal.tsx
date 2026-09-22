@@ -13,10 +13,13 @@ import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import type { WorkspaceLockReason } from '../../hooks/useWorkspaceLock'
 import { ENTERPRISE_TIER, RECOMMENDED_PLAN } from './fixtures'
 import { PlanCatalog } from './PlanCards'
+import { InfoTip } from './PlanStatusCard'
 import { buildPlanTiers } from './planTiers'
 import SelectAccountsStep from './SelectAccountsStep'
-import DownloadAddressBookButton from './DownloadAddressBookButton'
 import type { PlanPick, PlanTier } from './types'
+
+export const LAPSED_DATA_NOTE =
+  'Nothing was charged. Your paid subscription only starts once you add a payment method. Your Workspace data is kept for 90 days and your Safe accounts stay available in My accounts.'
 
 const maxSeats = (tier: PlanTier): number => Math.max(0, ...tier.options.map((option) => option.seats ?? 0))
 
@@ -47,7 +50,7 @@ export const chooserCopy = (
       }
     : {
         title: `Your Safe Pro free access ended on ${formatDate(endedAt)}`,
-        subtitle: 'Choose a plan to keep using your Workspace.',
+        subtitle: 'Choose a plan to unlock your Workspace.',
       }
 }
 
@@ -102,22 +105,11 @@ export default function PlanChooserModal({
                 <Typography variant="h3" as={DialogTitle}>
                   {highlightSafePro(title)}
                 </Typography>
-                <Typography color="muted">{subtitle}</Typography>
+                <div className="flex items-center gap-1.5">
+                  <Typography color="muted">{subtitle}</Typography>
+                  {reason === 'lapsed' && <InfoTip text={LAPSED_DATA_NOTE} data-testid="lapsed-data-note" />}
+                </div>
               </div>
-
-              {reason === 'lapsed' && (
-                <Alert variant="success" data-testid="lapsed-data-notice">
-                  <AlertSeverityIcon variant="success" />
-                  <AlertDescription>
-                    <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="flex flex-col">
-                        <span>Workspace data is exportable for 90 days.</span>
-                      </div>
-                      <DownloadAddressBookButton spaceId={spaceId} />
-                    </div>
-                  </AlertDescription>
-                </Alert>
-              )}
 
               {reason === 'payment-failed' ? (
                 <Button

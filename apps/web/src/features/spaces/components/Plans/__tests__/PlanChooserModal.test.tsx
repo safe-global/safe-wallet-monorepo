@@ -1,6 +1,6 @@
-import { fireEvent, render, screen } from '@/tests/test-utils'
+import { fireEvent, render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import { SUPPORT_CHAT_URL } from '@/config/constants'
-import PlanChooserModal, { chooserCopy } from '../PlanChooserModal'
+import PlanChooserModal, { chooserCopy, LAPSED_DATA_NOTE } from '../PlanChooserModal'
 
 const mockUseSpaceOffers = jest.fn()
 const mockCheckout = jest.fn()
@@ -23,10 +23,6 @@ jest.mock('../../../hooks/billing/useSeatTrimCheckout', () => ({
 }))
 jest.mock('../../../hooks/billing/useBillingPortal', () => ({
   useBillingPortal: () => ({ openPortal: mockOpenPortal, isRedirecting: false }),
-}))
-const mockAddressBook = { data: [{ address: '0xA', name: 'Treasury', chainIds: ['1', '10'] }] }
-jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
-  useAddressBooksGetAddressBookItemsV1Query: () => ({ currentData: mockAddressBook, isLoading: false }),
 }))
 jest.mock('../SelectAccountsStep', () => ({
   __esModule: true,
@@ -76,25 +72,20 @@ describe('PlanChooserModal', () => {
     mockNeedsTrim.mockImplementation((seats: number | null | undefined) => seats != null && 3 > seats)
   })
 
-  it('reassures a lapsed Workspace about its data and offers the address book as CSV', () => {
-    const createObjectURL = jest.fn(() => 'blob:csv')
-    const revokeObjectURL = jest.fn()
-    Object.assign(window.URL, { createObjectURL, revokeObjectURL })
-    const click = jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined)
+  it('reassures a lapsed Workspace about charges and data in a tooltip next to the subtitle', async () => {
+    const { user } = renderWithUserEvent(
+      <PlanChooserModal spaceId={SPACE_ID} reason="lapsed" endedAt={ENDED_AT} onBack={jest.fn()} />,
+    )
 
-    render(<PlanChooserModal spaceId={SPACE_ID} reason="lapsed" endedAt={ENDED_AT} onBack={jest.fn()} />)
-
-    expect(screen.getByTestId('lapsed-data-notice')).toHaveTextContent('Workspace data is exportable for 90 days.')
-    fireEvent.click(screen.getByRole('button', { name: 'Download shared address book' }))
-    expect(createObjectURL).toHaveBeenCalledTimes(1)
-    expect(click).toHaveBeenCalledTimes(1)
-    click.mockRestore()
+    expect(screen.queryByText(/exportable for 90 days/)).not.toBeInTheDocument()
+    await user.hover(screen.getByTestId('lapsed-data-note'))
+    expect(await screen.findByText(LAPSED_DATA_NOTE)).toBeInTheDocument()
   })
 
-  it('keeps the data notice off a failed-payment Workspace', () => {
+  it('keeps the data note off a failed-payment Workspace', () => {
     render(<PlanChooserModal spaceId={SPACE_ID} reason="payment-failed" endedAt={null} onBack={jest.fn()} />)
 
-    expect(screen.queryByTestId('lapsed-data-notice')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('lapsed-data-note')).not.toBeInTheDocument()
   })
 
   it('words the headline by lock reason', () => {
@@ -108,7 +99,7 @@ describe('PlanChooserModal', () => {
     render(<PlanChooserModal spaceId={SPACE_ID} reason="lapsed" endedAt={ENDED_AT} onBack={onBack} />)
 
     expect(screen.getByRole('heading', { name: 'Your Safe Pro free access ended on Dec 5, 2026' })).toBeInTheDocument()
-    expect(screen.getByText('Choose a plan to keep using your Workspace.')).toBeInTheDocument()
+    expect(screen.getByText('Choose a plan to unlock your Workspace.')).toBeInTheDocument()
     expect(screen.queryByText('Enterprise')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Close' })).not.toBeInTheDocument()
     expect(screen.getByText('Need more than 20?')).toBeInTheDocument()
