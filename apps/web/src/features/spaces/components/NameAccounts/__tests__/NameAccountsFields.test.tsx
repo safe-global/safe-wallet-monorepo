@@ -1,20 +1,28 @@
 import { FormProvider, useForm } from 'react-hook-form'
 import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import type { AllSafeItems, SafeItem } from '@/hooks/safes'
+import type { AccountLine } from '@/features/myAccounts'
 import type { AddAccountsFormValues } from '../../../hooks/addAccounts.types'
-import * as gatewayApi from '@/store/api/gateway'
 import NameAccountsFields from '../NameAccountsFields'
 
-const mockUseIsMobile = jest.fn(() => false)
-jest.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
-jest.mock('@/hooks/wallets/useWallet', () => ({ __esModule: true, default: () => null }))
-jest.mock('@/components/common/Identicon', () => ({ __esModule: true, default: () => <div data-testid="identicon" /> }))
-// Stubbed rather than partially mocked: requiring the real barrel here trips its import cycle.
-jest.mock('@/features/multichain', () => ({
-  NetworkLogosPill: () => <div data-testid="networks" />,
-  getSafeSetups: () => [],
-  getSharedSetup: () => undefined,
+// The table has its own suite; here it only has to hand each row to the name cell.
+jest.mock('@/features/myAccounts', () => ({
+  __esModule: true,
+  SafeAccountsTable: ({
+    items,
+    renderName,
+  }: {
+    items: Array<{ address: string }>
+    renderName: (line: AccountLine) => React.ReactNode
+  }) => (
+    <div data-testid="safe-accounts-table">
+      {items.map((item) => (
+        <div key={item.address}>{renderName({ address: item.address } as AccountLine)}</div>
+      ))}
+    </div>
+  ),
 }))
+jest.mock('@/components/common/Identicon', () => ({ __esModule: true, default: () => <div data-testid="identicon" /> }))
 
 const ADDRESS_A = '0xAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaA'
 const ADDRESS_B = '0xBbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbB'
@@ -38,11 +46,6 @@ const Harness = ({ items, names = {} }: { items: AllSafeItems; names?: Record<st
 }
 
 describe('NameAccountsFields', () => {
-  beforeEach(() => {
-    mockUseIsMobile.mockReturnValue(false)
-    jest.spyOn(gatewayApi, 'useGetMultipleSafeOverviewsQuery').mockReturnValue({ data: [] } as never)
-  })
-
   it('shows a prefilled name as text and an unnamed Safe as an input', () => {
     render(<Harness items={[safeItem(ADDRESS_A, 'Treasury'), safeItem(ADDRESS_B)]} />)
 
@@ -106,29 +109,6 @@ describe('NameAccountsFields', () => {
     fireEvent.blur(input)
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Names must be at least 3 character(s) long')
-  })
-
-  it('shows the threshold, networks and balance columns on desktop', () => {
-    render(<Harness items={[safeItem(ADDRESS_A)]} />)
-
-    expect(screen.getByRole('columnheader', { name: 'Threshold' })).toBeInTheDocument()
-    expect(screen.getByRole('columnheader', { name: 'Networks' })).toBeInTheDocument()
-    expect(screen.getByRole('columnheader', { name: 'Balance' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Show details' })).not.toBeInTheDocument()
-  })
-
-  it('folds the stat columns into a chevron-revealed detail row on mobile', () => {
-    mockUseIsMobile.mockReturnValue(true)
-    render(<Harness items={[safeItem(ADDRESS_A)]} />)
-
-    expect(screen.queryByRole('columnheader', { name: 'Threshold' })).not.toBeInTheDocument()
-    expect(screen.getByTestId('account-name-input')).toBeInTheDocument()
-
-    fireEvent.click(screen.getByRole('button', { name: 'Show details' }))
-
-    expect(screen.getByText('Threshold')).toBeInTheDocument()
-    expect(screen.getByText('Networks')).toBeInTheDocument()
-    expect(screen.getByText('Balance')).toBeInTheDocument()
   })
 
   it('explains that names are shared with the workspace', () => {
