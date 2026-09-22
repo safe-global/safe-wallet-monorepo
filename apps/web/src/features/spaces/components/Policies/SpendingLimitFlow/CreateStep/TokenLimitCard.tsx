@@ -126,6 +126,20 @@ const TokenLimitCard = ({
     if (existingLimits !== undefined && getValues(tokenPath)) trigger(tokenPath)
   }, [existingTokens, existingLimits, tokenPath, getValues, trigger])
 
+  // A token is refused when another row of this spender already has it, or when the Safe already limits it for
+  // this spender. Each check returns the error text or nothing; the first error wins. The form is read at
+  // validation time, because a memo would be one render behind.
+  const validateTokenChoice = (tokenAddress: string): string | undefined => {
+    const siblingTokens = (getValues(limitsPath(spenderIndex)) ?? [])
+      .map((limit) => limit.tokenAddress)
+      .filter((_, index) => index !== limitIndex)
+    const spender = getValues(spenderAddressPath(spenderIndex)) ?? ''
+
+    return (
+      validateUniqueToken(tokenAddress, siblingTokens) ?? validateNoExistingLimit(tokenAddress, spender, existingLimits)
+    )
+  }
+
   const tokenError = get(errors, tokenPath)
   const amountError = get(errors, amountPath)
 
@@ -154,19 +168,7 @@ const TokenLimitCard = ({
             <Controller
               control={control}
               name={tokenPath}
-              rules={{
-                required: NO_TOKEN_SELECTED_ERROR,
-                deps: siblingTokenPaths,
-                // Read the siblings at validation time; a memo would be one render behind.
-                validate: (value) =>
-                  validateUniqueToken(
-                    value,
-                    (getValues(limitsPath(spenderIndex)) ?? [])
-                      .map((limit) => limit.tokenAddress)
-                      .filter((_, index) => index !== limitIndex),
-                  ) ||
-                  validateNoExistingLimit(value, getValues(spenderAddressPath(spenderIndex)) ?? '', existingLimits),
-              }}
+              rules={{ required: NO_TOKEN_SELECTED_ERROR, deps: siblingTokenPaths, validate: validateTokenChoice }}
               render={({ field }) => (
                 <TokenSelector
                   value={field.value || undefined}

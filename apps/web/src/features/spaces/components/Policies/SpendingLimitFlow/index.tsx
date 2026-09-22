@@ -45,7 +45,7 @@ const SpendingLimitFlow = (): ReactElement => {
           icon={SpendingLimitIcon}
           subtitle={<FlowSubtitle />}
           ReviewTransactionComponent={ReviewSpendingLimitPolicy}
-          eventCategory={TxFlowType.SETUP_SPENDING_LIMIT_POLICY}
+          eventCategory={TxFlowType.SETUP_SPACE_SPENDING_LIMIT}
           initialData={createDefaultFormValues()}
         >
           <TxFlowStep title={CREATE_STEP_TITLE} hideNonce>

@@ -13,6 +13,7 @@ import {
 } from './spendingLimitParams'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import type Safe from '@safe-global/protocol-kit'
 import type { ContractTransactionResponse, Eip1193Provider } from 'ethers'
 import { parseUnits } from 'ethers'
 import { currentMinutes } from '@safe-global/utils/utils/date'
@@ -75,6 +76,50 @@ const findExistingLimit = (
     (limit) => sameAddress(limit.beneficiary, pair.beneficiary) && sameAddress(limit.token.address, pair.tokenAddress),
   )
 
+type AllowanceModule = { address: string; isEnabled: boolean }
+
+/** The module the batch talks to: the one the Safe already runs, else the newest one registered on the chain. */
+const resolveAllowanceModule = (
+  chainId: string,
+  safeModules: SafeState['modules'],
+  deployed: boolean,
+): AllowanceModule => {
+  const enabledAddress = deployed ? getDeployedSpendingLimitModuleAddress(chainId, safeModules) : undefined
+  if (enabledAddress) return { address: enabledAddress, isEnabled: true }
+
+  const latestAddress = getLatestSpendingLimitAddress(chainId)
+  if (!latestAddress) throw new Error(NO_ALLOWANCE_MODULE_ERROR)
+  return { address: latestAddress, isEnabled: false }
+}
+
+/** `enableModule` on the Safe; a counterfactual Safe has no contract to ask, so its call is encoded by hand. */
+const createEnableModuleMetaTx = async (
+  sdk: Safe,
+  chain: Chain,
+  deployed: boolean,
+  moduleAddress: string,
+): Promise<MetaTransactionData> => {
+  if (!deployed) {
+    const tx = await createEnableModuleTx(chain, await sdk.getAddress(), sdk.getContractVersion(), moduleAddress)
+    return { to: tx.to, value: '0', data: tx.data }
+  }
+  const { data } = await sdk.createEnableModuleTx(moduleAddress)
+  return { to: data.to, value: '0', data: data.data }
+}
+
+/** One `setAllowance`: the amount in the token's base units, the period in minutes, and when its first window starts. */
+const createSetAllowanceMetaTx = (pair: SpendingLimitPair, moduleAddress: string): MetaTransactionData => {
+  const isOneTime = pair.resetTime === '0'
+  return createSetAllowanceTx(
+    pair.beneficiary,
+    pair.tokenAddress,
+    parseUnits(pair.amount, pair.decimals).toString(),
+    parseInt(pair.resetTime, 10),
+    isOneTime ? 0 : currentMinutes() - RESET_BASE_OFFSET_MIN,
+    moduleAddress,
+  )
+}
+
 /**
  * One multiSend for a whole policy: enable the AllowanceModule if needed, register every new
  * spender, then one `setAllowance` per (spender, token) with that row's own reset period. This
@@ -95,53 +140,26 @@ export const createSpendingLimitsTx = async (
 ): Promise<SafeTransaction> => {
   assertValidPairs(pairs)
   const sdk = getAndValidateSafeSDK(scope)
-
-  let spendingLimitAddress = deployed && getDeployedSpendingLimitModuleAddress(chainId, safeModules)
-  const isModuleEnabled = !!spendingLimitAddress
-  if (!isModuleEnabled) {
-    spendingLimitAddress = getLatestSpendingLimitAddress(chainId)
-  }
-  if (!spendingLimitAddress) {
-    throw new Error(NO_ALLOWANCE_MODULE_ERROR)
-  }
+  const allowanceModule = resolveAllowanceModule(chainId, safeModules, deployed)
 
   const txs: MetaTransactionData[] = []
 
-  if (!deployed) {
-    const enableModuleTx = await createEnableModuleTx(
-      chain,
-      await sdk.getAddress(),
-      sdk.getContractVersion(),
-      spendingLimitAddress,
-    )
-    txs.push({ to: enableModuleTx.to, value: '0', data: enableModuleTx.data })
-  } else if (!isModuleEnabled) {
-    const enableModuleTx = await sdk.createEnableModuleTx(spendingLimitAddress)
-    txs.push({ to: enableModuleTx.data.to, value: '0', data: enableModuleTx.data.data })
+  if (!allowanceModule.isEnabled) {
+    txs.push(await createEnableModuleMetaTx(sdk, chain, deployed, allowanceModule.address))
   }
 
   for (const beneficiary of uniqueBeneficiaries(pairs)) {
     const isDelegate = existingSpendingLimits.some((limit) => sameAddress(limit.beneficiary, beneficiary))
-    if (!isDelegate) txs.push(createAddDelegateTx(beneficiary, spendingLimitAddress))
+    if (!isDelegate) txs.push(createAddDelegateTx(beneficiary, allowanceModule.address))
   }
 
   for (const pair of pairs) {
     const existing = findExistingLimit(existingSpendingLimits, pair)
+    // `setAllowance` keeps `spent`, so a used-up allowance is zeroed first or the new limit starts partly consumed.
     if (existing && existing.spent !== '0') {
-      txs.push(createResetAllowanceTx(pair.beneficiary, pair.tokenAddress, spendingLimitAddress))
+      txs.push(createResetAllowanceTx(pair.beneficiary, pair.tokenAddress, allowanceModule.address))
     }
-
-    const isOneTime = pair.resetTime === '0'
-    txs.push(
-      createSetAllowanceTx(
-        pair.beneficiary,
-        pair.tokenAddress,
-        parseUnits(pair.amount, pair.decimals).toString(),
-        parseInt(pair.resetTime),
-        isOneTime ? 0 : currentMinutes() - RESET_BASE_OFFSET_MIN,
-        spendingLimitAddress,
-      ),
-    )
+    txs.push(createSetAllowanceMetaTx(pair, allowanceModule.address))
   }
 
   return createMultiSendCallOnlyTx(txs, scope)

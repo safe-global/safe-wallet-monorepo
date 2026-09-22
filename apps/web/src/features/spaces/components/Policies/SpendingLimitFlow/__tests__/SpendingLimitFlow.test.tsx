@@ -83,7 +83,7 @@ describe('SpendingLimitFlow', () => {
     )
     expect(props.ReviewTransactionComponent).toBe(ReviewSpendingLimitPolicy)
     expect(props.initialData).toEqual(createDefaultFormValues())
-    expect(props.eventCategory).toBe(TxFlowType.SETUP_SPENDING_LIMIT_POLICY)
+    expect(props.eventCategory).toBe(TxFlowType.SETUP_SPACE_SPENDING_LIMIT)
   })
 
   it('keeps the callout dismissed across a trip to the next step and back', async () => {

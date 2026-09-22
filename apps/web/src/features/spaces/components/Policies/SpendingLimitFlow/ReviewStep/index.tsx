@@ -1,104 +1,37 @@
-import { useContext, useEffect, useMemo, type ReactElement } from 'react'
-import { useSafeScope } from '@/components/tx-flow/safe-scope'
+import { useContext, useMemo, type ReactElement } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxContext'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 import ReviewTransactionSkeleton from '@/components/tx/ReviewTransactionV2/ReviewTransactionSkeleton'
-import { useLoadFeature } from '@/features/__core__'
-import { SpendingLimitsFeature } from '@/features/spending-limits'
 import useAddressBook from '@/hooks/useAddressBook'
-import { useCurrentChain } from '@/hooks/useChains'
-import useSafeInfo from '@/hooks/useSafeInfo'
-import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
 import { useSpendingLimitSafeAccounts } from '../hooks/useSpendingLimitSafeAccounts'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
 import SpendingLimitSummary from '../Summary'
 import { toPolicySummaryModel } from '../Summary/toPolicySummaryModel'
 import type { SpendingLimitPolicyFormValues } from '../types'
-import { EXISTING_LIMITS_LOAD_ERROR, EXISTING_PAIR_IN_POLICY_ERROR, REVIEW_STEP_TITLE } from '../constants'
-import { buildSpendingLimitPairs, findExistingPair } from './buildSpendingLimitPairs'
+import { REVIEW_STEP_TITLE } from '../constants'
+import { useBuildPolicyTransaction } from './useBuildPolicyTransaction'
 
 /**
- * Step 2: the policy in plain language on top of the shared transaction review. The multisend is built for
- * the Safe picked in step 1 (via SafeScope) as soon as its state, the token options and its existing limits
- * are known, and handed to `SafeTxProvider` so the shared Sign/Execute steps take over.
+ * Step 2, "Confirm policy": the policy in plain language on top of the shared transaction review. The multisend
+ * itself is built by `useBuildPolicyTransaction` and handed to `SafeTxProvider`; the shared Sign/Execute steps
+ * take over from there.
  */
 const ReviewSpendingLimitPolicy = ({ onSubmit, children }: ReviewTransactionProps): ReactElement => {
-  const { data } = useContext<TxFlowContextType<SpendingLimitPolicyFormValues>>(TxFlowContext)
-  const { safeTx, safeTxError, setSafeTx, setSafeTxError } = useContext(SafeTxContext)
-  const scope = useSafeScope()
-  const { safe, safeLoaded } = useSafeInfo()
-  const chain = useCurrentChain()
+  // What step 1 submitted: the selected Safe and every spender with their token limits.
+  const { data: formValues } = useContext<TxFlowContextType<SpendingLimitPolicyFormValues>>(TxFlowContext)
+  const { safeTx, safeTxError } = useContext(SafeTxContext)
   const { accounts } = useSpendingLimitSafeAccounts()
-  const { options: tokens, isLoading: tokensLoading, isPopularLoading } = useSpendingLimitTokenOptions()
+  const { options: tokens } = useSpendingLimitTokenOptions()
   const names = useAddressBook()
-  const { limits: existingLimits, error: existingLimitsError } = useExistingSpendingLimits()
-  const { createSpendingLimitsTx, $isReady } = useLoadFeature(SpendingLimitsFeature)
 
-  const policy = useMemo(
-    () => (data ? toPolicySummaryModel(data, { accounts, tokens, names }) : undefined),
-    [data, accounts, tokens, names],
+  useBuildPolicyTransaction(formValues)
+
+  const summary = useMemo(
+    () => (formValues ? toPolicySummaryModel(formValues, { accounts, tokens, names }) : undefined),
+    [formValues, accounts, tokens, names],
   )
-
-  const pairsResult = useMemo(
-    () => (data && !tokensLoading && !isPopularLoading ? buildSpendingLimitPairs(data, tokens) : undefined),
-    [data, tokens, tokensLoading, isPopularLoading],
-  )
-  // The builder reads values, not references, so the effect is keyed on them.
-  const pairsKey = pairsResult?.pairs ? JSON.stringify(pairsResult.pairs) : undefined
-  const pairsError = pairsResult?.error
-  const sdk = scope?.sdk
-  const chainId = scope?.chainId
-
-  useEffect(() => {
-    if (existingLimitsError) {
-      setSafeTxError(new Error(EXISTING_LIMITS_LOAD_ERROR))
-      return
-    }
-    if (pairsError) {
-      setSafeTxError(pairsError)
-      return
-    }
-    if (!pairsResult?.pairs || !sdk || !chainId || !chain || !$isReady || !safeLoaded || !existingLimits) return
-
-    if (findExistingPair(pairsResult.pairs, existingLimits)) {
-      setSafeTxError(new Error(EXISTING_PAIR_IN_POLICY_ERROR))
-      return
-    }
-
-    let active = true
-    setSafeTxError(undefined)
-    // A previous trip's transaction must not stay signable under a summary that no longer describes it.
-    setSafeTx(undefined)
-    createSpendingLimitsTx(pairsResult.pairs, existingLimits, chainId, chain, safe.modules, safe.deployed, scope)
-      .then((tx) => {
-        if (active) setSafeTx(tx)
-      })
-      .catch((e) => {
-        if (active) setSafeTxError(e)
-      })
-    return () => {
-      active = false
-    }
-    // `pairsKey` stands in for `pairsResult`, `safe.modules?.length` for the polled array.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    pairsKey,
-    pairsError,
-    sdk,
-    chainId,
-    chain,
-    $isReady,
-    safeLoaded,
-    existingLimits,
-    existingLimitsError,
-    safe.modules?.length,
-    safe.deployed,
-    createSpendingLimitsTx,
-    setSafeTx,
-    setSafeTxError,
-  ])
 
   if (!safeTx && !safeTxError) {
     return (
@@ -110,7 +43,7 @@ const ReviewSpendingLimitPolicy = ({ onSubmit, children }: ReviewTransactionProp
 
   return (
     <ReviewTransaction title={REVIEW_STEP_TITLE} onSubmit={onSubmit}>
-      {policy && <SpendingLimitSummary policy={policy} />}
+      {summary && <SpendingLimitSummary policy={summary} />}
       {children}
     </ReviewTransaction>
   )
