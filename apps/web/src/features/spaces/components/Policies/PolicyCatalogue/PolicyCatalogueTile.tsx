@@ -1,7 +1,6 @@
-import { ArrowRight, type LucideIcon } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import { type LucideIcon } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
 import { type PolicyCatalogueId } from './catalogue'
 
 export interface PolicyCatalogueTileProps {
@@ -9,45 +8,29 @@ export interface PolicyCatalogueTileProps {
   title: string
   description: string
   Icon: LucideIcon
-  isAvailable: boolean
+  action: string
   onClick: () => void
 }
 
-const PolicyCatalogueTile = ({ id, title, description, Icon, isAvailable, onClick }: PolicyCatalogueTileProps) => (
-  <button
-    type="button"
-    data-testid={`policy-catalogue-tile-${id}`}
-    aria-disabled={isAvailable ? undefined : true}
-    onClick={onClick}
-    className={cn(
-      'flex h-full flex-col items-start gap-2 rounded-xl bg-card p-4 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-      isAvailable ? 'cursor-pointer hover:bg-[var(--color-background-secondary)]' : 'cursor-default',
-    )}
-  >
-    <div className={cn('flex size-10 items-center justify-center rounded-md bg-accent', !isAvailable && 'opacity-60')}>
-      <Icon className="size-4 text-accent-success" />
-    </div>
-
-    <div className="flex flex-col gap-1">
-      <div className="flex items-center gap-1">
-        <Typography variant="paragraph-bold" className={cn(!isAvailable && 'text-muted-foreground')}>
-          {title}
-        </Typography>
-
-        {isAvailable ? (
-          <ArrowRight className="size-4 shrink-0" aria-hidden />
-        ) : (
-          <Badge variant="secondary" size="sm">
-            Soon
-          </Badge>
-        )}
+const PolicyCatalogueTile = ({ id, title, description, Icon, action, onClick }: PolicyCatalogueTileProps) => (
+  <div data-testid={`policy-catalogue-tile-${id}`} className="flex h-full flex-col gap-3 rounded-xl bg-card p-4">
+    <div className="flex flex-1 flex-col gap-2">
+      <div className="flex size-10 items-center justify-center rounded-md bg-muted">
+        <Icon className="size-4 text-muted-foreground" />
       </div>
 
-      <Typography variant="paragraph-small" className="text-muted-foreground">
-        {description}
-      </Typography>
+      <div className="flex flex-col gap-1">
+        <Typography variant="paragraph-bold">{title}</Typography>
+        <Typography variant="paragraph-small" className="text-muted-foreground">
+          {description}
+        </Typography>
+      </div>
     </div>
-  </button>
+
+    <Button variant="outline" className="w-full" onClick={onClick} aria-label={`${action}: ${title}`}>
+      {action}
+    </Button>
+  </div>
 )
 
 export default PolicyCatalogueTile
