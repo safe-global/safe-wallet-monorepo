@@ -4,7 +4,7 @@ import { formatError } from '@safe-global/utils/utils/formatters'
 import { selectNotifications, showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
-import { useCurrentChain } from './useChains'
+import useChains, { useCurrentChain } from './useChains'
 import useTxQueue from './useTxQueue'
 import { isSignableBy, isTransactionQueuedItem } from '@/utils/transaction-guards'
 import { selectPendingTxs } from '@/store/pendingTxsSlice'
@@ -58,6 +58,7 @@ const successEvents = [TxEvent.PROPOSED, TxEvent.SIGNATURE_PROPOSED, TxEvent.ONC
 const useTxNotifications = (): void => {
   const dispatch = useAppDispatch()
   const chain = useCurrentChain()
+  const { configs } = useChains()
   const safeAddress = useSafeAddress()
   const [trigger] = useLazyTransactionsGetTransactionByIdV1Query()
   const isTxFlowOpenRef = useIsTxFlowOpenRef()
@@ -79,6 +80,12 @@ const useTxNotifications = (): void => {
         // notification center — a toast would only repeat what the flow says.
         if (isError && isTxFlowOpenRef.current) return
         const isSuccess = successEvents.includes(event)
+
+        // A Space-level flow acts on a Safe the page is not on, so the event's own Safe beats the URL's.
+        const eventChainId = 'chainId' in detail ? detail.chainId : undefined
+        const eventSafeAddress = 'safeAddress' in detail ? detail.safeAddress : undefined
+        const txChain = (eventChainId && configs.find((config) => config.chainId === eventChainId)) || chain
+        const txSafeAddress = eventSafeAddress ?? safeAddress
 
         // Check if this is a Guard error
         const guardErrorName = isError ? getGuardErrorInfo(detail.error) : undefined
@@ -134,7 +141,7 @@ const useTxNotifications = (): void => {
         const id = txId || txHash
         if (id) {
           try {
-            const { data: txDetails } = await trigger({ chainId: chain.chainId, id })
+            const { data: txDetails } = await trigger({ chainId: txChain.chainId, id })
             humanDescription = txDetails?.txInfo.humanDescription || humanDescription
           } catch {}
         }
@@ -152,9 +159,9 @@ const useTxNotifications = (): void => {
             groupKey,
             variant: isError ? Variant.ERROR : isSuccess ? Variant.SUCCESS : Variant.INFO,
             link: txId
-              ? getTxLink(txId, chain, safeAddress)
+              ? getTxLink(txId, txChain, txSafeAddress)
               : txHash
-                ? getExplorerLink(txHash, chain.blockExplorerUriTemplate)
+                ? getExplorerLink(txHash, txChain.blockExplorerUriTemplate)
                 : undefined,
           }),
         )
@@ -164,7 +171,7 @@ const useTxNotifications = (): void => {
     return () => {
       unsubFns.forEach((unsub) => unsub())
     }
-  }, [dispatch, safeAddress, chain, trigger, isTxFlowOpenRef])
+  }, [dispatch, safeAddress, chain, configs, trigger, isTxFlowOpenRef])
 
   /**
    * If there's at least one transaction awaiting confirmations, show a notification for it
