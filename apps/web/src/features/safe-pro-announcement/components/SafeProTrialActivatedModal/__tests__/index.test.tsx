@@ -10,7 +10,6 @@ describe('SafeProTrialActivatedModal', () => {
     expect(
       screen.getByText(/add a payment method before your free access ends — nothing is charged until you do/),
     ).toBeInTheDocument()
-    expect(screen.getByText('Full details are in your confirmation email.')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Get started' }))
     expect(onOpenChange).toHaveBeenCalledWith(false)

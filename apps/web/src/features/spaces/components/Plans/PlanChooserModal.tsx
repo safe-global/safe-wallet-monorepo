@@ -111,9 +111,6 @@ export default function PlanChooserModal({
                   <AlertDescription>
                     <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex flex-col">
-                        <span className="font-medium text-foreground">
-                          Your Safe accounts remain available in My accounts.
-                        </span>
                         <span>Workspace data is exportable for 90 days.</span>
                       </div>
                       <DownloadAddressBookButton spaceId={spaceId} />

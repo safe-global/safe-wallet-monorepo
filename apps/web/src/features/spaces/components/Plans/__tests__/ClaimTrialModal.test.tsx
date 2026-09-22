@@ -79,7 +79,7 @@ describe('ClaimTrialModal', () => {
     expect(claimCopy(30)).toMatchObject({
       title: 'Start your 30-day free access to Safe Pro',
       subtitle: 'All Pro features unlocked. No billing details needed upfront.',
-      note: "No payment method required. We'll remind you 7 and 2 days before your free access ends.",
+      note: "No payment method required. We'll remind you 7 days before your free access ends.",
       back: 'Go to My accounts',
       claim: 'Claim free access',
     })
@@ -87,7 +87,7 @@ describe('ClaimTrialModal', () => {
     expect(claimCopy(60, 'new')).toEqual({
       title: 'Workspaces run on Safe Pro',
       subtitle: 'Your first 60 days are free.',
-      note: "No payment method required. We'll remind you 7 and 2 days before your free access ends.",
+      note: "No payment method required. We'll remind you 7 days before your free access ends.",
       back: 'Go to My accounts',
       claim: 'Claim free access',
     })
@@ -118,7 +118,7 @@ describe('ClaimTrialModal', () => {
     expect(screen.getByText(/60 days instead of 30/)).toBeInTheDocument()
     expect(screen.getByTestId('trial-offer-Business')).toHaveTextContent('€499')
     expect(screen.getByTestId('trial-offer-Business')).toHaveTextContent('Free')
-    expect(screen.getByText('Available until Dec 5, 2026. You can subscribe any time after that.')).toBeInTheDocument()
+    expect(screen.getByText('Available until Dec 5, 2026.')).toBeInTheDocument()
     expect(screen.getByText('20 Safe accounts')).toBeInTheDocument()
     expect(screen.getByText('Policy engine')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Close' })).not.toBeInTheDocument()

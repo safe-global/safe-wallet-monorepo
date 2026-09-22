@@ -42,9 +42,6 @@ const SafeProTrialActivatedModal = ({
         {ctaLabel}
         <ArrowRight data-icon="inline-end" />
       </Button>
-      <Typography variant="paragraph-mini" color="muted">
-        Full details are in your confirmation email.
-      </Typography>
     </div>
   </SafeProModalFrame>
 )

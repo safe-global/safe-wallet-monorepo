@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { ArrowRight } from 'lucide-react'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { DialogTitle } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -87,10 +87,10 @@ export default function SelectAccountsStep({
 
       <Alert variant="info">
         <AlertSeverityIcon variant="info" />
+        <AlertTitle className="font-semibold">
+          {planName} covers {limit} Safe accounts
+        </AlertTitle>
         <AlertDescription>
-          <span className="block font-medium text-foreground">
-            {planName} covers {limit} Safe accounts
-          </span>
           Safe accounts you leave out remain available in My accounts. You can swap them in any time.
         </AlertDescription>
       </Alert>

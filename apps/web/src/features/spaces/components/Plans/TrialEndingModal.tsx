@@ -7,7 +7,6 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
 import { localItem } from '@/services/local-storage/local'
 import { formatDate } from '@safe-global/utils/utils/date'
-import { TRIAL_ENDING_SOON_DAYS, TRIAL_LAST_REMINDER_DAYS } from '../../hooks/billing/subscription'
 import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import { useCurrentMembership, useIsAdmin } from '../../hooks/useSpaceMembers'
@@ -19,12 +18,8 @@ import { salesHintFor } from './PlanChooserModal'
 import { buildPlanTiers, toCurrentPlan } from './planTiers'
 import type { CurrentPlan, PlanPick } from './types'
 
-/** Remembers the last reminder stage dismissed, so each stage nags exactly once. */
-const reminderSeen = (spaceId: string) => localItem<number>(`safeProTrialReminderSeen:${spaceId}`)
-
-/** The reminder fires twice: on entering the last week, and again in the last two days. */
-export const reminderStage = (daysLeft: number | null | undefined): number =>
-  daysLeft != null && daysLeft <= TRIAL_LAST_REMINDER_DAYS ? TRIAL_LAST_REMINDER_DAYS : TRIAL_ENDING_SOON_DAYS
+/** Remembers that the reminder was dismissed, so it nags exactly once per Workspace. */
+const reminderSeen = (spaceId: string) => localItem<boolean>(`safeProTrialReminderSeen:${spaceId}`)
 
 export const endsIn = (daysLeft: number | null): string =>
   daysLeft === null || daysLeft > 1 ? `in ${daysLeft ?? 7} days` : daysLeft === 1 ? 'in 1 day' : 'today'
@@ -32,8 +27,8 @@ export const endsIn = (daysLeft: number | null): string =>
 /** What the reminder asks of the viewer: an admin can act, a member is told who can. */
 export const reminderSubtitle = (endsAt: string, isAdmin: boolean, spaceName?: string): string =>
   isAdmin
-    ? `If you don't select a plan and add a payment method by ${endsAt}, your Workspace will be locked. Your Safe accounts remain available in My accounts.`
-    : `${spaceName ?? 'This Workspace'} will be locked on ${endsAt} unless an admin chooses a plan and adds a payment method. Your Safe accounts remain available in My accounts.`
+    ? `If you don't select a plan and add a payment method by ${endsAt}, your Workspace will be locked.`
+    : `${spaceName ?? 'This Workspace'} will be locked on ${endsAt} unless an admin chooses a plan and adds a payment method.`
 
 const TrialEndingChooser = ({
   spaceId,
@@ -128,8 +123,8 @@ const TrialEndingChooser = ({
 }
 
 /**
- * Mounted on every Workspace page: when the trial enters its last week, and again in its last two days, an admin gets
- * the plan picker and a member a heads-up. The stage dismissed lives in local storage so each one shows once.
+ * Mounted on every Workspace page: when the trial enters its last week an admin gets the plan picker and a member a
+ * heads-up, once; the dismissal lives in local storage.
  */
 export default function TrialEndingModal({ spaceId }: { spaceId: string }) {
   const { plan, seats, subscription, isTrialing, isTrialEndingSoon } = useSpacePlan(spaceId)
@@ -137,16 +132,15 @@ export default function TrialEndingModal({ spaceId }: { spaceId: string }) {
   const isAdmin = useIsAdmin(spaceId)
   const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId }, { skip: !isTrialEndingSoon || isAdmin })
   const [isOpen, setIsOpen] = useState(false)
-  const stage = reminderStage(plan?.daysLeft)
 
   useEffect(() => {
-    if (isTrialEndingSoon && membership && reminderSeen(spaceId).get() !== stage) setIsOpen(true)
-  }, [isTrialEndingSoon, membership, spaceId, stage])
+    if (isTrialEndingSoon && membership && !reminderSeen(spaceId).get()) setIsOpen(true)
+  }, [isTrialEndingSoon, membership, spaceId])
 
   if (!isOpen || !plan || !subscription) return null
 
   const close = () => {
-    reminderSeen(spaceId).set(stage)
+    reminderSeen(spaceId).set(true)
     setIsOpen(false)
   }
   const currentPlan = toCurrentPlan(subscription, plan, isTrialing, seats?.quota)

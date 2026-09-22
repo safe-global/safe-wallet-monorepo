@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import { SUPPORT_CHAT_URL } from '@/config/constants'
-import TrialEndingModal, { endsIn, reminderStage } from '../TrialEndingModal'
+import TrialEndingModal, { endsIn } from '../TrialEndingModal'
 
 const mockUseSpacePlan = jest.fn()
 const mockUseSpaceOffers = jest.fn()
@@ -125,32 +125,18 @@ describe('TrialEndingModal', () => {
     expect(endsIn(0)).toBe('today')
   })
 
-  it('splits the reminder into a last-week and a last-two-days stage', () => {
-    expect(reminderStage(7)).toBe(7)
-    expect(reminderStage(3)).toBe(7)
-    expect(reminderStage(2)).toBe(2)
-    expect(reminderStage(0)).toBe(2)
-    expect(reminderStage(null)).toBe(7)
-  })
-
-  it('comes back once in the last two days after the last-week reminder was dismissed', () => {
+  it('stays dismissed for the rest of the trial once the last-week reminder was closed', () => {
     const { unmount } = render(<TrialEndingModal spaceId={SPACE_ID} />)
     fireEvent.click(screen.getByRole('button', { name: 'Continue without Safe Pro' }))
+    expect(storage[`safeProTrialReminderSeen:${SPACE_ID}`]).toBe('true')
     unmount()
 
-    mockUseSpacePlan.mockReturnValue(trial(5))
-    expect(render(<TrialEndingModal spaceId={SPACE_ID} />).container).toBeEmptyDOMElement()
-
-    mockUseSpacePlan.mockReturnValue(trial(2))
-    const second = render(<TrialEndingModal spaceId={SPACE_ID} />)
-    expect(screen.getByRole('heading', { name: 'Your free access will end in 2 days' })).toBeInTheDocument()
-
-    fireEvent.click(screen.getByRole('button', { name: 'Continue without Safe Pro' }))
-    expect(storage[`safeProTrialReminderSeen:${SPACE_ID}`]).toBe('2')
-    second.unmount()
-
-    mockUseSpacePlan.mockReturnValue(trial(1))
-    expect(render(<TrialEndingModal spaceId={SPACE_ID} />).container).toBeEmptyDOMElement()
+    for (const daysLeft of [5, 2, 1]) {
+      mockUseSpacePlan.mockReturnValue(trial(daysLeft))
+      const { container, unmount: unmountAgain } = render(<TrialEndingModal spaceId={SPACE_ID} />)
+      expect(container).toBeEmptyDOMElement()
+      unmountAgain()
+    }
   })
 
   it('stays quiet while the trial has more than a week left', () => {
@@ -195,7 +181,7 @@ describe('TrialEndingModal', () => {
     fireEvent.click(screen.getByText('flow-closed'))
 
     expect(screen.queryByTestId('change-plan-dialog')).not.toBeInTheDocument()
-    expect(storage[`safeProTrialReminderSeen:${SPACE_ID}`]).toBe('7')
+    expect(storage[`safeProTrialReminderSeen:${SPACE_ID}`]).toBe('true')
   })
 
   it('shows a member the same plans without buttons, naming the Workspace and who can act', () => {
@@ -205,7 +191,7 @@ describe('TrialEndingModal', () => {
     expect(screen.getByRole('heading', { name: 'Your free access will end in 7 days' })).toBeInTheDocument()
     expect(
       screen.getByText(
-        'Acme Inc will be locked on Dec 5, 2026 unless an admin chooses a plan and adds a payment method. Your Safe accounts remain available in My accounts.',
+        'Acme Inc will be locked on Dec 5, 2026 unless an admin chooses a plan and adds a payment method.',
       ),
     ).toBeInTheDocument()
     expect(screen.getByText('Starter')).toBeInTheDocument()
@@ -216,6 +202,6 @@ describe('TrialEndingModal', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Got it' }))
     expect(screen.queryByRole('heading', { name: 'Your free access will end in 7 days' })).not.toBeInTheDocument()
-    expect(storage[`safeProTrialReminderSeen:${SPACE_ID}`]).toBe('7')
+    expect(storage[`safeProTrialReminderSeen:${SPACE_ID}`]).toBe('true')
   })
 })

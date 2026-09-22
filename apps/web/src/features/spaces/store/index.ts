@@ -10,3 +10,4 @@ export {
 
 export { spaceNavigationSlice, setLastUsedSpaceOrigin, selectLastUsedSpaceOrigin } from './spaceNavigationSlice'
 export type { SpaceNavigationOrigin } from './spaceNavigationSlice'
+export { spaceSafesEntitlementsListener } from './spaceSafesEntitlementsListener'

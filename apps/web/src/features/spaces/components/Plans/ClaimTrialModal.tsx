@@ -41,13 +41,13 @@ export const claimCopy = (trialPeriodDays: number | null, variant: ClaimTrialVar
     return {
       title: 'Workspaces run on Safe Pro',
       subtitle: trialPeriodDays === null ? 'Your first days are free.' : `Your first ${trialPeriodDays} days are free.`,
-      note: "No payment method required. We'll remind you 7 and 2 days before your free access ends.",
+      note: "No payment method required. We'll remind you 7 days before your free access ends.",
       back: 'Go to My accounts',
       claim: 'Claim free access',
     }
   }
   const existing = {
-    note: "No payment method required. We'll remind you 7 and 2 days before your free access ends.",
+    note: "No payment method required. We'll remind you 7 days before your free access ends.",
     back: 'Go to My accounts',
     claim: 'Claim free access',
   }
@@ -112,7 +112,7 @@ const TrialOfferCard = ({
             </div>
             {availableUntil && (
               <Typography variant="paragraph-small" color="muted">
-                Available until {availableUntil}. You can subscribe any time after that.
+                Available until {availableUntil}.
               </Typography>
             )}
           </div>
@@ -236,12 +236,7 @@ export default function ClaimTrialModal({
                 </div>
               )}
 
-              <Typography
-                variant="paragraph-small"
-                color="muted"
-                align="center"
-                className="flex items-center justify-center gap-1.5"
-              >
+              <Typography variant="paragraph-small" align="center" className="flex items-center justify-center gap-1.5">
                 {copy.note}
                 <InfoTip text={TRIAL_END_TOOLTIP} data-testid="trial-end-tooltip" />
               </Typography>

@@ -84,9 +84,7 @@ describe('PlanChooserModal', () => {
 
     render(<PlanChooserModal spaceId={SPACE_ID} reason="lapsed" endedAt={ENDED_AT} onBack={jest.fn()} />)
 
-    expect(screen.getByTestId('lapsed-data-notice')).toHaveTextContent(
-      'Your Safe accounts remain available in My accounts.Workspace data is exportable for 90 days.',
-    )
+    expect(screen.getByTestId('lapsed-data-notice')).toHaveTextContent('Workspace data is exportable for 90 days.')
     fireEvent.click(screen.getByRole('button', { name: 'Download shared address book' }))
     expect(createObjectURL).toHaveBeenCalledTimes(1)
     expect(click).toHaveBeenCalledTimes(1)
