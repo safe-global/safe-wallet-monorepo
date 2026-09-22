@@ -255,7 +255,7 @@ describe('Policies', () => {
     it('centres the popup over the current window', async () => {
       const { user } = renderWithUserEvent(<Policies />)
 
-      await user.click(screen.getByTestId('policy-catalogue-tile-suggestion'))
+      await user.click(within(screen.getByTestId('policy-catalogue-tile-suggestion')).getByRole('button'))
 
       const expectedLeft = window.screenX + (window.outerWidth - REQUEST_POLICY_FORM_WIDTH) / 2
       const expectedTop = window.screenY + (window.outerHeight - REQUEST_POLICY_FORM_HEIGHT) / 2
