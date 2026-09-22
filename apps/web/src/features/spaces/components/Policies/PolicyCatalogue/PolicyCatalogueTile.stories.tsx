@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { UserRoundPen, WalletCards } from 'lucide-react'
+import { fn } from 'storybook/test'
+import { MessageSquarePlus, WalletCards } from 'lucide-react'
 import PolicyCatalogueTile from './PolicyCatalogueTile'
 
 const meta = {
@@ -23,24 +24,25 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Available: Story = {
-  args: {
-    id: 'proposer',
-    title: 'Proposer',
-    description: 'Let teammates without signing rights propose transactions.',
-    Icon: UserRoundPen,
-    isAvailable: true,
-    onClick: () => {},
-  },
-}
-
-export const Unavailable: Story = {
+export const Default: Story = {
   args: {
     id: 'spending-limit',
     title: 'Spending limit',
     description: 'Let spenders access assets without collecting signatures.',
     Icon: WalletCards,
-    isAvailable: false,
-    onClick: () => {},
+    action: 'Set policy',
+    onClick: fn(),
+  },
+}
+
+/** The last tile asks for feedback instead of setting a policy. */
+export const Suggestion: Story = {
+  args: {
+    id: 'suggestion',
+    title: 'Something missing?',
+    description: 'Tell us which rules would help you manage your Safe accounts.',
+    Icon: MessageSquarePlus,
+    action: 'Give feedback',
+    onClick: fn(),
   },
 }
