@@ -10,6 +10,7 @@ import PolicyCatalogue from './PolicyCatalogue'
 import type { PolicyCatalogueId } from './PolicyCatalogue/catalogue'
 import ProposerIntroDialog from './ProposerIntroDialog'
 import { PROPOSER_INTRO_SEEN_KEY } from './ProposerIntroDialog/constants'
+import ProposerRoleFlow from './ProposerRoleFlow'
 import SpendingLimitFlow from './SpendingLimitFlow'
 import SpendingLimitIntroDialog from './SpendingLimitIntroDialog'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from './SpendingLimitIntroDialog/constants'
@@ -62,8 +63,8 @@ const Policies = ({
   const startSpendingLimitFlow = useCallback(() => setTxFlow(<SpendingLimitFlow />), [setTxFlow])
 
   const startProposerFlow = useCallback(() => {
-    // TODO(WA-3138): open the proposer form.
-  }, [])
+    setTxFlow(<ProposerRoleFlow />)
+  }, [setTxFlow])
 
   const handleSelect = useCallback(
     (id: PolicyCatalogueId) => {
