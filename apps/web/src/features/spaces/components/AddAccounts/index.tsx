@@ -18,6 +18,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
 import { useSimilarityClusters } from '@/features/address-poisoning'
 import {
+  ADDRESS_BOOK_UNAVAILABLE,
   getChainIdsParam,
   useCurrentSpaceId,
   useSpaceAddressBookState,
@@ -201,11 +202,10 @@ const AddAccounts = ({
   const namesComplete = view !== 'name' || hasAllNames(watch('names'), safesToName)
   const hasSomethingToSubmit = view === 'name' ? safesToName.length > 0 : isFormDirty
   const isAddressBookReady = !isAddressBookLoading && !isAddressBookError
+  const submitError = error ?? (isAddressBookError ? ADDRESS_BOOK_UNAVAILABLE : undefined)
   const { isSubmitting } = formState
 
-  // Computed inline (not memoised): react-hook-form's watch() mutates and returns the same object
-  // reference, so a useMemo keyed on `selectedSafes` would keep a stale Set and the checkboxes would
-  // never re-render even though the form value (and the footer counter) changed.
+  // Not memoised: watch() returns the same object reference, so a useMemo on it would keep a stale Set.
   const selectedKeys = getSelectedLeafKeys(selectedSafes || {})
 
   // Total checked safes (workspace safes are pre-checked and count toward the per-workspace cap).
@@ -579,10 +579,10 @@ const AddAccounts = ({
                     </>
                   )}
 
-                  {error && (
+                  {submitError && (
                     <Alert variant="destructive" className="mt-4 shrink-0">
                       <AlertSeverityIcon variant="destructive" />
-                      <AlertDescription>{error}</AlertDescription>
+                      <AlertDescription>{submitError}</AlertDescription>
                     </Alert>
                   )}
 

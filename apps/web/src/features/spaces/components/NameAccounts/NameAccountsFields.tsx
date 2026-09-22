@@ -87,11 +87,13 @@ const NameAccountCell = ({ address }: { address: string }) => {
 const NameAccountsFields = ({ items }: { items: AllSafeItems }) => {
   const { getValues, setValue } = useFormContext<AddAccountsFormValues>()
 
+  // Rebuilt rather than merged, so a Safe dropped from the step takes its name with it.
   useEffect(() => {
+    const names: AddAccountsFormValues['names'] = {}
     for (const item of items) {
-      const key = nameFieldKey(item.address)
-      if (getValues(key) === undefined) setValue(key, item.name ?? '')
+      names[item.address.toLowerCase()] = getValues(nameFieldKey(item.address)) ?? item.name ?? ''
     }
+    setValue('names', names)
   }, [items, getValues, setValue])
 
   return (

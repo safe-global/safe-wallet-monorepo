@@ -64,15 +64,21 @@ jest.mock('@/hooks/safes', () => ({
 }))
 
 let mockSpaceAddressBook: Array<{ address: string; name: string; chainIds: string[] }> = []
+let mockAddressBookError = false
 const mockUpsertWorkspaceNames = jest.fn().mockResolvedValue({})
 
 jest.mock('@/features/spaces/hooks/useGetSpaceAddressBook', () => ({
   __esModule: true,
   default: () => mockSpaceAddressBook,
-  useSpaceAddressBookState: () => ({ items: mockSpaceAddressBook, isLoading: false }),
+  useSpaceAddressBookState: () => ({
+    items: mockSpaceAddressBook,
+    isLoading: false,
+    isError: mockAddressBookError,
+  }),
 }))
 
 jest.mock('@/features/spaces/hooks/useUpsertWorkspaceSafeName', () => ({
+  ...jest.requireActual('@/features/spaces/hooks/useUpsertWorkspaceSafeName'),
   useUpsertWorkspaceSafeNames: () => mockUpsertWorkspaceNames,
 }))
 
@@ -105,6 +111,7 @@ describe('useOnboardingSubmit', () => {
     mockSpaceSafes = []
     mockRouterQuery = {}
     mockAddedSafes = {}
+    mockAddressBookError = false
     // Every fixture Safe already carries a workspace name so these cases stay on the direct submit path.
     mockSpaceAddressBook = [
       { address: '0xnew', name: 'Named', chainIds: ['1'] },
@@ -290,6 +297,14 @@ describe('useOnboardingSubmit', () => {
     expect(mockRemoveSafesFromSpace).not.toHaveBeenCalled()
     expect(onSuccess).not.toHaveBeenCalled()
     expect(result.current.error).toBe('No workspace is selected. Reload the page and try again.')
+  })
+
+  it('blocks submit and reports why while the address book could not be read', () => {
+    mockAddressBookError = true
+    const { result } = renderHook(() => useOnboardingSubmit('42', onSuccess))
+
+    expect(result.current.isAddressBookReady).toBe(false)
+    expect(result.current.error).toBe('The workspace address book is unavailable. Try again in a moment.')
   })
 
   it('should set error on add failure', async () => {
@@ -577,6 +592,7 @@ describe('useOnboardingSubmit — naming step', () => {
     mockRouterQuery = {}
     mockAddedSafes = {}
     mockSpaceAddressBook = []
+    mockAddressBookError = false
     mockAddSafesToSpace.mockResolvedValue({ data: {} })
     mockRemoveSafesFromSpace.mockResolvedValue({ data: {} })
     mockUpsertWorkspaceNames.mockResolvedValue({})

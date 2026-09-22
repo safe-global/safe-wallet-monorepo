@@ -21,7 +21,11 @@ import { addOrUpdateSafe, selectAllAddedSafes } from '@/store/addedSafesSlice'
 import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { useSpaceSafes } from '../../../hooks/useSpaceSafes'
 import { useSpaceAddressBookState } from '../../../hooks/useGetSpaceAddressBook'
-import { useUpsertWorkspaceSafeNames, type WorkspaceSafeName } from '../../../hooks/useUpsertWorkspaceSafeName'
+import {
+  ADDRESS_BOOK_UNAVAILABLE,
+  useUpsertWorkspaceSafeNames,
+  type WorkspaceSafeName,
+} from '../../../hooks/useUpsertWorkspaceSafeName'
 import { buildWorkspaceSafeNames, getSafesToName, hasAllNames } from '../../NameAccounts/utils'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { getSafeId, getMultiChainSafeId } from '../utils/safeIds'
@@ -173,8 +177,7 @@ const useOnboardingSubmit = (
     }
   }
 
-  // Newly added Safes are added to the user's global Trusted list too, so a Safe the user
-  // discovered as "owned" and chose to add is trusted going forward. Already-trusted Safes are skipped.
+  // Added Safes join the user's global Trusted list too, unless already there.
   const trustAddedSafes = (safesToAdd: Array<{ chainId: string; address: string }>) => {
     for (const { chainId, address } of safesToAdd) {
       if (addedSafes[chainId]?.[address]) continue
@@ -273,9 +276,10 @@ const useOnboardingSubmit = (
 
       onSuccess()
     } catch (e) {
-      setIsSubmitting(false)
       if (isElevationRequiredError(e)) return
       setError(e instanceof Error ? e.message : 'Something went wrong updating Safe accounts. Please try again.')
+    } finally {
+      setIsSubmitting(false)
     }
   })
 
@@ -283,7 +287,7 @@ const useOnboardingSubmit = (
     formMethods,
     onSubmit,
     selectedSafesLength,
-    error,
+    error: error ?? (isError ? ADDRESS_BOOK_UNAVAILABLE : undefined),
     isSubmitting,
     isAddressBookReady,
     step,
