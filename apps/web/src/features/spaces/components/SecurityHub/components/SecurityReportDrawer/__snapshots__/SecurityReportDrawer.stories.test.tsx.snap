@@ -126,7 +126,7 @@ exports[`./SecurityReportDrawer.stories OpenWithContext 1`] = `
             </div>
           </div>
           <div
-            class="flex min-h-0 flex-1 flex-col px-6 last:pb-6"
+            class="min-h-0 flex-1 overflow-y-auto overscroll-y-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border scrollFade flex flex-col px-6 last:pb-6"
           >
             <div
               class="p-[3px] group-data-horizontal/tabs:h-9 group/tabs-list text-muted-foreground inline-flex items-center justify-center group-data-[orientation=vertical]/tabs:h-fit group-data-[orientation=vertical]/tabs:flex-col rounded-md bg-muted shadow-xs w-fit gap-2"

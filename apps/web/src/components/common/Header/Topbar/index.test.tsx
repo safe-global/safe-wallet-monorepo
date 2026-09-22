@@ -244,6 +244,30 @@ describe('Topbar', () => {
       expect(screen.queryByTestId('space-safe-bar')).not.toBeInTheDocument()
     })
 
+    it('renders SafeLogo on the policies route, with neither the safe bar nor the search input', () => {
+      mockIsSpaceRoute.mockReturnValue(true)
+      mockUsePathname.mockReturnValue('/spaces/policies')
+      mockUseLoadFeature.mockReturnValue({
+        WalletPopover: () => null,
+        GlobalSearchModal: () => null,
+        GlobalSearchInput: () => <div data-testid="global-search-input" />,
+        WalletConnectWidget: () => null,
+      })
+      const txModalValue: TxModalContextType = {
+        txFlow: <div data-testid="mock-tx-flow" />,
+        setTxFlow: jest.fn(),
+        setFullWidth: jest.fn(),
+      }
+      render(
+        <TxModalContext.Provider value={txModalValue}>
+          <Topbar />
+        </TxModalContext.Provider>,
+      )
+      expect(screen.getByTestId('logo-image')).toBeInTheDocument()
+      expect(screen.queryByTestId('space-safe-bar')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('global-search-input')).not.toBeInTheDocument()
+    })
+
     it('renders SafeLogo on settings routes when no safe address is in the URL', () => {
       mockIsSpaceRoute.mockReturnValue(false)
       mockUsePathname.mockReturnValue('/settings/setup')

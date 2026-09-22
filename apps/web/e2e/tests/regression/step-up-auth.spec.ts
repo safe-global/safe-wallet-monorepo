@@ -157,6 +157,9 @@ test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
   test('that it ignores a pending action older than the challenge window', async ({ safePage }) => {
     await safePage.addInitScript(
       ({ key, address, spaceId }) => {
+        // Init scripts also run in child frames; Beamer's iframe shares this sessionStorage while it is still about:blank and would write the record back after the app has removed it.
+        if (window !== window.top) return
+
         window.sessionStorage.setItem(
           key,
           JSON.stringify({
