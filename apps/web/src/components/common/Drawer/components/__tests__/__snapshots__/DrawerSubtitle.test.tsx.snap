@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DrawerSubtitle matches the snapshot 1`] = `
+<div
+  class="flex items-center gap-1 text-xs leading-none text-muted-foreground"
+>
+  Last updated 2 minutes ago
+</div>
+`;

@@ -1,4 +1,4 @@
-import { render, renderWithUserEvent, screen, within } from '@/tests/test-utils'
+import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import { trackEvent } from '@/services/analytics'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
@@ -19,12 +19,12 @@ describe('PolicyCatalogue', () => {
   it('renders the three tiles in the designed order, Spending limit first', () => {
     render(<PolicyCatalogue />)
 
-    const tiles = screen.getAllByRole('button')
+    const buttons = screen.getAllByRole('button')
 
-    expect(tiles).toHaveLength(3)
-    expect(within(tiles[0]).getByText('Spending limit')).toBeInTheDocument()
-    expect(within(tiles[1]).getByText('Proposer')).toBeInTheDocument()
-    expect(within(tiles[2]).getByText('Something missing?')).toBeInTheDocument()
+    expect(buttons).toHaveLength(3)
+    expect(buttons[0]).toHaveAccessibleName('Set policy: Spending limit')
+    expect(buttons[1]).toHaveAccessibleName('Set policy: Proposer')
+    expect(buttons[2]).toHaveAccessibleName('Give feedback: Something missing?')
   })
 
   it('gives every tile a test id of its own', () => {
@@ -35,13 +35,6 @@ describe('PolicyCatalogue', () => {
     expect(screen.getByTestId('policy-catalogue-tile-suggestion')).toBeInTheDocument()
   })
 
-  it('does not offer Account recovery', () => {
-    render(<PolicyCatalogue />)
-
-    expect(screen.queryByTestId('policy-catalogue-tile-account-recovery')).not.toBeInTheDocument()
-    expect(screen.queryByText('Account recovery')).not.toBeInTheDocument()
-  })
-
   it('describes what each policy does', () => {
     render(<PolicyCatalogue />)
 
@@ -50,26 +43,32 @@ describe('PolicyCatalogue', () => {
     expect(screen.getByText('Tell us which rules would help you manage your Safe accounts.')).toBeInTheDocument()
   })
 
-  it('tracks a click on an available tile', async () => {
+  it('tracks a click on a tile', async () => {
     const { user } = renderWithUserEvent(<PolicyCatalogue />)
 
-    await user.click(screen.getByRole('button', { name: /Proposer/ }))
+    await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
 
     expect(mockTrackEvent).toHaveBeenCalledWith(
       { ...POLICY_EVENTS.POLICY_CATALOGUE_TILE_CLICKED, label: 'proposer' },
-      {
-        [MixpanelEventParams.POLICY_TYPE]: 'proposer',
-        [MixpanelEventParams.IS_AVAILABLE]: true,
-      },
+      { [MixpanelEventParams.POLICY_TYPE]: 'proposer' },
     )
   })
 
-  it('opens the flow of an available tile', async () => {
+  it('opens the flow of the clicked tile', async () => {
     const onSelect = jest.fn()
     const { user } = renderWithUserEvent(<PolicyCatalogue onSelect={onSelect} />)
 
-    await user.click(screen.getByRole('button', { name: /Proposer/ }))
+    await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
 
     expect(onSelect).toHaveBeenCalledWith('proposer')
+  })
+
+  it('should, when the feedback tile is clicked, report the suggestion id', async () => {
+    const onSelect = jest.fn()
+    const { user } = renderWithUserEvent(<PolicyCatalogue onSelect={onSelect} />)
+
+    await user.click(screen.getByRole('button', { name: 'Give feedback: Something missing?' }))
+
+    expect(onSelect).toHaveBeenCalledWith('suggestion')
   })
 })
