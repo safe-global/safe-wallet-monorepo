@@ -32,9 +32,7 @@ describe('useLoadSafeInfo', () => {
     )
   })
 
-  // A URL naming a chain we can't resolve used to fall back to the default chain and 404
-  // against it — the request must not be made at all.
-  it('does not query the backend when the chain is unresolved', () => {
+  it('makes no request at all when the chain is unresolved, rather than querying a default', () => {
     jest.spyOn(useChainId, 'default').mockReturnValue('')
 
     renderHook(() => useLoadSafeInfo())
@@ -42,9 +40,7 @@ describe('useLoadSafeInfo', () => {
     expect(querySpy).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ skip: true }))
   })
 
-  // An empty chainId and address must not match the empty defaults on `defaultSafeInfo`, or the
-  // empty Safe is served as loaded data and consumers gated on `safeLoaded` start fetching.
-  it('reports no Safe when both chain and address are empty', () => {
+  it('reports no Safe when chain and address are empty, not the blank defaultSafeInfo', () => {
     jest.spyOn(useChainId, 'default').mockReturnValue('')
     jest.spyOn(useSafeAddressFromUrl, 'useSafeAddressFromUrl').mockReturnValue('')
 

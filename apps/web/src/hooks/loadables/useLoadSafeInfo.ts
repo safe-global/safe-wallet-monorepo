@@ -19,8 +19,7 @@ const useLoadSafeInfo = (): AsyncResult<ExtendedSafeInfo> => {
   const chainId = useChainId()
   const chain = useCurrentChain()
   const { safe } = useSafeInfo()
-  // Empty values must not match the empty defaults on `defaultSafeInfo`, or the blank Safe is
-  // served as loaded data and consumers gated on `safeLoaded` start fetching with empty params.
+  // Without the emptiness checks this matches the blank `defaultSafeInfo` and serves it as loaded.
   const isStoredSafeValid = !!chainId && !!address && safe.chainId === chainId && safe.address.value === address
   const cache = isStoredSafeValid ? safe : undefined
   const undeployedSafe = useAppSelector((state) => selectUndeployedSafe(state, chainId, address))

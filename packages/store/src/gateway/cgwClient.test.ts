@@ -95,8 +95,6 @@ describe('dynamicBaseQuery', () => {
     expect(result).toEqual({ data: 'objectResult' })
   })
 
-  // An empty path param means the caller passed a value it should have skipped on. The request
-  // would 404 and the empty param would be invisible in the response.
   it.each([
     '/v1/chains//about/indexing',
     '/v1/chains//safes//messages',

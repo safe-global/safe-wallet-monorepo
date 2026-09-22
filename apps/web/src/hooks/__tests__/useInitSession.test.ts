@@ -34,9 +34,7 @@ describe('useInitSession', () => {
     expect(result.current.lastChainId).toBe('4663')
   })
 
-  // lastChainId is persisted, so a prefix we can't resolve must not be written through
-  // as the user's last chain.
-  it.each(['unknown', 'pending'] as const)('does not remember a %s URL prefix', (status) => {
+  it.each(['unknown', 'pending'] as const)('does not persist a %s URL prefix as the last chain', (status) => {
     jest.spyOn(useChainId, 'useUrlChain').mockReturnValue({ status, shortName: 'rhood' })
 
     const { result } = renderSession()

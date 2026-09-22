@@ -15,10 +15,7 @@ const getLocationQuery = (): ParsedUrlQuery => {
   return query
 }
 
-/**
- * The chain named by the URL's EIP-3770 prefix. `absent` (no prefix) and `unknown` (a prefix
- * nothing resolves) are distinct on purpose: only the former may fall back to a default chain.
- */
+// `absent` and `unknown` stay distinct because only `absent` may fall back to a default chain.
 export type UrlChain =
   | { status: 'absent' }
   | { status: 'pending'; shortName: string }
@@ -45,8 +42,7 @@ export const useUrlChain = (): UrlChain => {
   return useMemo(() => {
     if (!shortName) return { status: 'absent' }
     if (chainId) return { status: 'resolved', chainId }
-    // The static EIP-3770 list misses chains only the runtime config knows, so a shortName
-    // isn't unknown until that config has actually arrived.
+    // The static EIP-3770 list misses chains only the runtime config knows.
     return hasConfigs ? { status: 'unknown', shortName } : { status: 'pending', shortName }
   }, [shortName, chainId, hasConfigs])
 }
@@ -66,8 +62,7 @@ const useChainId = (): string => {
 
   if (scope?.chainId) return scope.chainId
   if (urlChain.status === 'resolved') return urlChain.chainId
-  // Falling back to the default chain here would query it for the Safe named in the URL,
-  // which 404s on a chain the user never asked for. `''` makes consumers skip instead.
+  // A default here would query the wrong chain for the Safe in the URL; '' makes consumers skip.
   if (urlChain.status !== 'absent') return ''
 
   return walletChainId || String(DEFAULT_CHAIN_ID)

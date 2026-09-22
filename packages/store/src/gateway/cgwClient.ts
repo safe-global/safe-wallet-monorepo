@@ -78,11 +78,7 @@ export const rawBaseQuery = fetchBaseQuery({
   },
 })
 
-/**
- * An interpolated path param that resolved to an empty string, e.g. `/v1/chains//safes//messages`.
- * No endpoint has an empty or trailing segment, so this is always a caller passing a value it
- * should have skipped on — the request would 404 and the empty param would be invisible.
- */
+// An interpolated path param that resolved to '', e.g. `/v1/chains//safes//messages`.
 export const hasEmptyPathSegment = (url: string): boolean =>
   url
     .split('?')[0]
