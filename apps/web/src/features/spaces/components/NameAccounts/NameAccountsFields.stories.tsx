@@ -63,8 +63,5 @@ const items: AllSafeItems = [
   },
 ]
 
-/**
- * One row per Safe: the second row is a multichain Safe with a local name prefilled. Threshold and
- * balance stay skeletons — the story ships no Safe overview fixture, only the form and store context.
- */
+/** One row per Safe. The second is a multichain Safe with a local name prefilled. */
 export const Default: Story = { args: { items } }

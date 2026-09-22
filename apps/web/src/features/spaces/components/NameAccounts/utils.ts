@@ -16,11 +16,7 @@ type SafeRef = { chainId: string; address: string }
 /** Form field path for a Safe's name, keyed by lowercased address so one name covers all its chains. */
 export const nameFieldKey = (address: string) => `names.${address.toLowerCase()}` as const
 
-/**
- * Safes being added that still need a workspace name, one row per address. A workspace entry that
- * misses one of the target chains still needs the upsert, so that Safe is listed with the entry's
- * name prefilled; otherwise the prefill is the user's local name.
- */
+/** Returns the Safes that still need a workspace name, grouped one row per address. */
 export const getSafesToName = (
   safesToAdd: SafeRef[],
   allSafes: AllSafeItems,
@@ -61,9 +57,6 @@ export const buildWorkspaceSafeNames = (
     chainIds: isMultiChainSafeItem(item) ? item.safes.map((safe) => safe.chainId) : [item.chainId],
   }))
 
-/**
- * Whether every Safe in the naming step has a name the workspace address book accepts — gates the
- * submit button. A prefilled name never mounts its input, so this is the only validation it gets.
- */
+/** Returns true when every name passes the address book validation rules. */
 export const hasAllNames = (names: Record<string, string> | undefined, safesToName: AllSafeItems): boolean =>
   safesToName.every((item) => validateContactName(names?.[item.address.toLowerCase()] ?? '') === undefined)

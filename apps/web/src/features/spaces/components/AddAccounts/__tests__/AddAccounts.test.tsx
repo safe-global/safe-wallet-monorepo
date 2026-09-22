@@ -83,13 +83,14 @@ let mockIsAdmin = true
 let mockSpaceSafes: Array<{ chainId: string; address: string }> = []
 let mockSpaceSafesLoading = false
 let mockSpaceAddressBook: Array<{ address: string; name: string; chainIds: string[] }> = []
+let mockAddressBookError = false
 const mockUpsertWorkspaceNames = jest.fn().mockResolvedValue({})
 jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '1',
   useIsAdmin: () => mockIsAdmin,
   useSpaceSafes: () => ({ allSafes: mockSpaceSafes, isLoading: mockSpaceSafesLoading }),
   useIsQualifiedSafe: () => false,
-  useSpaceAddressBookState: () => ({ items: mockSpaceAddressBook, isLoading: false }),
+  useSpaceAddressBookState: () => ({ items: mockSpaceAddressBook, isLoading: false, isError: mockAddressBookError }),
   useUpsertWorkspaceSafeNames: () => mockUpsertWorkspaceNames,
   getChainIdsParam: () => '',
 }))
@@ -297,8 +298,18 @@ describe('AddAccounts — naming step', () => {
     mockSpaceSafes = []
     mockSpaceSafesLoading = false
     mockSpaceAddressBook = []
+    mockAddressBookError = false
     mockAddSafesToSpace.mockResolvedValue({ data: {} })
     mockUpsertWorkspaceNames.mockResolvedValue({})
+  })
+
+  it('blocks submit while the address book could not be read', async () => {
+    mockAddressBookError = true
+    render(<AddAccounts externalOpen onExternalClose={() => {}} />, withTrusted)
+    fireEvent.click(screen.getByTestId('safe-accounts-table'))
+
+    await waitFor(() => expect(screen.getByTestId('add-accounts-button')).toBeDisabled())
+    expect(mockAddSafesToSpace).not.toHaveBeenCalled()
   })
 
   it('opens the naming view instead of submitting when a selected Safe has no workspace name', async () => {

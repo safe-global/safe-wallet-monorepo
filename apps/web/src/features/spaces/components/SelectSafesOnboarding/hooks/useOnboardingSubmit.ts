@@ -221,12 +221,12 @@ const useOnboardingSubmit = (
     names: WorkspaceSafeName[],
   ) => {
     await addNewSafes(safesToAdd, spaceIdStr)
+    trustAddedSafes(safesToAdd)
     const namesResult = await upsertWorkspaceNames(names)
     if (namesResult.error) {
       throw new Error(namesResult.error)
     }
     await removeUnselectedSafes(selectedSafes, spaceIdStr)
-    trustAddedSafes(safesToAdd)
   }
 
   const onSubmit = handleSubmit(async (data) => {

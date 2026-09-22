@@ -707,6 +707,30 @@ describe('useOnboardingSubmit — naming step', () => {
     expect(mockUpsertWorkspaceNames).toHaveBeenCalledWith([])
   })
 
+  it('trusts the added Safes even when the name write fails', async () => {
+    mockUpsertWorkspaceNames.mockResolvedValue({ error: 'Forbidden' })
+    const { result } = renderHook(() => useOnboardingSubmit('42', onSuccess, [buildSafeItem('1', ADDRESS)]))
+
+    act(() => {
+      result.current.formMethods.setValue('selectedSafes', { [`1:${ADDRESS}`]: true })
+    })
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+    act(() => {
+      result.current.formMethods.setValue(`names.${ADDRESS.toLowerCase()}`, 'Treasury')
+    })
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(result.current.error).toBe('Forbidden')
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'addedSafes/addOrUpdateSafe',
+      payload: expect.objectContaining({ safe: expect.objectContaining({ address: { value: ADDRESS } }) }),
+    })
+  })
+
   it('returns to the selection step on demand', async () => {
     const { result } = renderHook(() => useOnboardingSubmit('42', onSuccess, [buildSafeItem('1', ADDRESS)]))
 
