@@ -250,23 +250,6 @@ describe('PaginatedDataTable', () => {
       expect(detailCell).not.toHaveClass('whitespace-nowrap')
     })
 
-    it('drops the muted tint from the detail row when plainDetail is set', () => {
-      mockUseIsMobile.mockReturnValue(true)
-      render(
-        <PaginatedDataTable
-          columns={columns}
-          rows={['a']}
-          getRowKey={(row) => row}
-          renderRowDetail={(row) => <span>detail-{row}</span>}
-          plainDetail
-        />,
-      )
-
-      fireEvent.click(screen.getByRole('button', { name: 'Show details' }))
-
-      expect(screen.getByText('detail-a').closest('td')).not.toHaveClass('bg-muted/30')
-    })
-
     it('expands and collapses the mobile detail row', () => {
       mockUseIsMobile.mockReturnValue(true)
       renderResponsive(true)
