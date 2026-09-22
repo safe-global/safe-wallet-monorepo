@@ -1,3 +1,4 @@
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { TransactionStatus } from '@safe-global/store/gateway/types'
 import { useEffect, useMemo, useRef } from 'react'
 import { formatError } from '@safe-global/utils/utils/formatters'
@@ -55,6 +56,19 @@ enum Variant {
 
 const successEvents = [TxEvent.PROPOSED, TxEvent.SIGNATURE_PROPOSED, TxEvent.ONCHAIN_SIGNATURE_SUCCESS, TxEvent.SUCCESS]
 
+/** Where the toast points: the transaction page for a queued tx, the explorer for a hash, nowhere without a chain. */
+const getNotificationLink = (
+  chain: Chain | undefined,
+  safeAddress: string,
+  txId: string | undefined,
+  txHash: string | undefined,
+): ReturnType<typeof getTxLink> | ReturnType<typeof getExplorerLink> | undefined => {
+  if (!chain) return undefined
+  if (txId) return getTxLink(txId, chain, safeAddress)
+  if (txHash) return getExplorerLink(txHash, chain.blockExplorerUriTemplate)
+  return undefined
+}
+
 const useTxNotifications = (): void => {
   const dispatch = useAppDispatch()
   const chain = useCurrentChain()
@@ -81,11 +95,13 @@ const useTxNotifications = (): void => {
         if (isError && isTxFlowOpenRef.current) return
         const isSuccess = successEvents.includes(event)
 
-        // A Space-level flow acts on a Safe the page is not on, so the event's own Safe beats the URL's.
-        const eventChainId = 'chainId' in detail ? detail.chainId : undefined
-        const eventSafeAddress = 'safeAddress' in detail ? detail.safeAddress : undefined
-        const txChain = (eventChainId && configs.find((config) => config.chainId === eventChainId)) || chain
-        const txSafeAddress = eventSafeAddress ?? safeAddress
+        // A Space-level flow acts on a Safe the page is not on, so the Safe an event names beats the URL's. A chain
+        // the app does not know yields no link at all, never the page's chain paired with the event's address.
+        const eventSafe =
+          'safeAddress' in detail ? { chainId: detail.chainId, safeAddress: detail.safeAddress } : undefined
+        const txChainId = eventSafe?.chainId ?? chain.chainId
+        const txSafeAddress = eventSafe?.safeAddress ?? safeAddress
+        const txChain = eventSafe ? configs.find((config) => config.chainId === eventSafe.chainId) : chain
 
         // Check if this is a Guard error
         const guardErrorName = isError ? getGuardErrorInfo(detail.error) : undefined
@@ -141,7 +157,7 @@ const useTxNotifications = (): void => {
         const id = txId || txHash
         if (id) {
           try {
-            const { data: txDetails } = await trigger({ chainId: txChain.chainId, id })
+            const { data: txDetails } = await trigger({ chainId: txChainId, id })
             humanDescription = txDetails?.txInfo.humanDescription || humanDescription
           } catch {}
         }
@@ -158,11 +174,7 @@ const useTxNotifications = (): void => {
                   : undefined,
             groupKey,
             variant: isError ? Variant.ERROR : isSuccess ? Variant.SUCCESS : Variant.INFO,
-            link: txId
-              ? getTxLink(txId, txChain, txSafeAddress)
-              : txHash
-                ? getExplorerLink(txHash, txChain.blockExplorerUriTemplate)
-                : undefined,
+            link: getNotificationLink(txChain, txSafeAddress, txId, txHash),
           }),
         )
       }),

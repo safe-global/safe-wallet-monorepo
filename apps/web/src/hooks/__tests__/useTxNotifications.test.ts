@@ -388,6 +388,23 @@ describe('the Safe a toast links to', () => {
     )
   })
 
+  it('links nowhere when the event names a chain the app does not know, rather than mixing in the page chain', async () => {
+    renderHook(() => useTxNotifications())
+
+    act(() => {
+      txDispatch(TxEvent.PROPOSED, {
+        txId: 'multisig_0x3_0x999',
+        nonce: 3,
+        chainId: '999',
+        safeAddress: OTHER_SAFE,
+      })
+    })
+
+    await waitFor(() => expect(lastNotification()).toMatchObject({ groupKey: 'multisig_0x3_0x999' }))
+    expect(lastNotification().link).toBeUndefined()
+    expect(mockGetTxDetails).toHaveBeenCalledWith({ chainId: '999', id: 'multisig_0x3_0x999' })
+  })
+
   it("falls back to the page's Safe for an event that names none", async () => {
     renderHook(() => useTxNotifications())
 

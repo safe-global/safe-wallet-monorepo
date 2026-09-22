@@ -243,6 +243,21 @@ describe('ReviewSpendingLimitPolicy', () => {
     expect(mockCreate).not.toHaveBeenCalled()
   })
 
+  it('drops a transaction built earlier when the existing limits then fail to load, and keeps the cause', async () => {
+    const loadError = new Error('rpc down')
+    mockUseExisting.mockReturnValue({ loading: false, error: loadError })
+
+    renderReview({ safeTx: builtTx })
+
+    await waitFor(() =>
+      expect(setSafeTxError).toHaveBeenCalledWith(
+        expect.objectContaining({ message: EXISTING_LIMITS_LOAD_ERROR, cause: loadError }),
+      ),
+    )
+    expect(setSafeTx).toHaveBeenCalledWith(undefined)
+    expect(mockCreate).not.toHaveBeenCalled()
+  })
+
   it('surfaces a builder failure through the flow', async () => {
     const failure = new Error('no module')
     mockCreate.mockRejectedValue(failure)

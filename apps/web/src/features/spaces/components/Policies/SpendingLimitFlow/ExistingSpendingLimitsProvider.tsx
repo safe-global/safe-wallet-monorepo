@@ -45,9 +45,12 @@ export const ExistingSpendingLimitsProvider = ({ children }: { children: ReactNo
   const { loadSpendingLimits, $isReady } = useLoadFeature(SpendingLimitsFeature)
   const { options } = useSpendingLimitTokenOptions()
 
-  const tokenAddressesKey = options.map((option) => option.address).join(',')
+  // The options are a new array on every balance poll, so key on the fields the loader reads (the logo is cosmetic).
+  const tokenInfosKey = options
+    .map((option) => `${option.address}:${option.decimals}:${option.symbol}:${option.name}`)
+    .join(',')
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const tokenInfos = useMemo(() => options.map(toTokenInfo), [tokenAddressesKey])
+  const tokenInfos = useMemo(() => options.map(toTokenInfo), [tokenInfosKey])
 
   const scopeKey = scope?.scopeKey
   const provider = scope?.web3ReadOnly

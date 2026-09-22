@@ -26,7 +26,7 @@ const findBuildBlocker = ({
   existingLimits,
 }: BlockerInputs): Error | undefined => {
   // Building blind over unknown limits could re-add a delegate or skip a reset, so a failed load is final.
-  if (existingLimitsError) return new Error(EXISTING_LIMITS_LOAD_ERROR)
+  if (existingLimitsError) return new Error(EXISTING_LIMITS_LOAD_ERROR, { cause: existingLimitsError })
   if (pairsError) return pairsError
   // Step 1 hides these pairs; this catches one that slipped through, since editing a limit is WA-3156's flow.
   if (pairs && existingLimits && findExistingPair(pairs, existingLimits)) {
@@ -72,6 +72,8 @@ export const useBuildPolicyTransaction = (formValues: SpendingLimitPolicyFormVal
 
   useEffect(() => {
     if (blocker) {
+      // The error replaces the transaction: one built before the blocker appeared must not stay signable beside it.
+      setSafeTx(undefined)
       setSafeTxError(blocker)
       return
     }
