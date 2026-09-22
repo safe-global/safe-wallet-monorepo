@@ -1,4 +1,4 @@
-import { normalizeSpaceId } from '../spaces'
+import { isSpaceAtSafeLimit, normalizeSpaceId } from '../spaces'
 
 describe('normalizeSpaceId', () => {
   it('returns null for null input', () => {
@@ -16,5 +16,21 @@ describe('normalizeSpaceId', () => {
 
   it('passes a legacy numeric string through unchanged', () => {
     expect(normalizeSpaceId('42')).toBe('42')
+  })
+})
+
+describe('isSpaceAtSafeLimit', () => {
+  it('is at the limit once the count reaches the quota', () => {
+    expect(isSpaceAtSafeLimit(20, 20)).toBe(true)
+    expect(isSpaceAtSafeLimit(21, 20)).toBe(true)
+  })
+
+  it('is below the limit while the count is under the quota', () => {
+    expect(isSpaceAtSafeLimit(19, 20)).toBe(false)
+  })
+
+  it('is never at the limit on an unlimited plan or with an unknown count', () => {
+    expect(isSpaceAtSafeLimit(400, null)).toBe(false)
+    expect(isSpaceAtSafeLimit(undefined, 20)).toBe(false)
   })
 })

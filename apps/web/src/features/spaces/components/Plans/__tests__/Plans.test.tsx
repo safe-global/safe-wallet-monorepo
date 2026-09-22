@@ -65,8 +65,8 @@ describe('Plans', () => {
   })
 
   it('adapts the seats tooltip to the tier and quota', () => {
-    expect(seatsTooltip('Business', 10)).toMatch(/^Business includes 10 Safe accounts/)
-    expect(seatsTooltip(undefined, null)).toMatch(/^Your plan includes unlimited Safe accounts/)
+    expect(seatsTooltip('Business', 10)).toMatch(/^Business covers 10 Safe accounts/)
+    expect(seatsTooltip(undefined, null)).toMatch(/^Your plan covers unlimited Safe accounts/)
   })
 
   it('advertises the yearly saving as a fixed ceiling, only when a yearly offer exists', () => {

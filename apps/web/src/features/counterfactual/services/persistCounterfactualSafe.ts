@@ -15,8 +15,7 @@ import { replayCounterfactualSafeDeployment } from './safeDeployment'
 import { enqueuePendingCfDelete } from '../store/pendingCfDeletesSlice'
 import { removeUndeployedSafe } from '../store/undeployedSafesSlice'
 import { showNotification } from '@/store/notificationsSlice'
-import { normalizeSpaceId } from '@/utils/spaces'
-import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/constants'
+import { isSpaceAtSafeLimit, normalizeSpaceId } from '@/utils/spaces'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 type PersistArgs = {
@@ -34,11 +33,15 @@ type PersistArgs = {
    *  safe is not auto-attached to the space (the backend would reject the call
    *  with 403). The safe is still persisted at the user level. */
   isAdminOfActiveSpace: boolean
-  /** Number of safes already in the active space. When at `SAFE_ACCOUNTS_LIMIT`
+  /** Number of Safe accounts already in the active space. At `spaceSafeLimit`
    *  the backend would reject the add; the safe is still persisted at the user
    *  level and the user is informed via a toast. */
   spaceSafeCount?: number
-  /** True when this call is one chain of a multi-chain creation batch. A space
+  /** Seats the space's plan allows (`useSpaceSafeLimit`); `null` = unlimited. */
+  spaceSafeLimit: number | null
+  /** The Safe address is already in the space on another chain, so this add takes no new seat. */
+  holdsSeatInSpace?: boolean
+  /** True when this call is one chain of a multi-chain creation batch. A legacy
    *  limit rejection (400) then means the safe genuinely wasn't attached on this
    *  chain, so we surface it as a failure (after rolling back the user-level
    *  entry) instead of swallowing it as success. Single-create flows keep the
@@ -76,6 +79,8 @@ export const persistCounterfactualSafe = async ({
   isUserAuthenticated,
   isAdminOfActiveSpace,
   spaceSafeCount,
+  spaceSafeLimit,
+  holdsSeatInSpace,
   isMultiChainCreation,
   provider,
   dispatch,
@@ -129,15 +134,13 @@ export const persistCounterfactualSafe = async ({
             message: 'Safe added to your accounts — ask an admin to add it to the workspace',
           }),
         )
-      } else if (spaceSafeCount !== undefined && spaceSafeCount >= SAFE_ACCOUNTS_LIMIT) {
-        // Space is full — the backend would reject the add. Skip it and keep the
-        // user-level safe so creation still succeeds, but tell the user it
-        // wasn't added to the workspace.
+      } else if (!holdsSeatInSpace && isSpaceAtSafeLimit(spaceSafeCount, spaceSafeLimit)) {
+        // The plan has no seat left, so the Safe stays in My accounts (the chooser said so upfront).
         dispatch(
           showNotification({
             variant: 'info',
             groupKey: 'cf-safe-space-limit',
-            message: `Safe created. This workspace is full (${SAFE_ACCOUNTS_LIMIT} Safes), so it wasn't added — switch to another workspace to add it there`,
+            message: seatLimitMessage(spaceSafeLimit),
           }),
         )
       } else {
@@ -152,10 +155,19 @@ export const persistCounterfactualSafe = async ({
           if (isElevationRequiredError(spaceResult.error)) {
             return { ok: false, error: toSpaceError(spaceResult.error), stepUpPending: true }
           }
-          // Use case: another admin added Safes to the same workspace in the meantime.
-          // The cached count was stale and the backend returned 400.
-          // The Safe itself was still created, so keep it and show the warning.
-          if (isLimitRejection(spaceResult.error)) {
+          // The cached count was stale (another admin filled the seats meanwhile). Seats are per
+          // address, so a 402 cannot split a multi-chain batch: keep the Safe in My accounts.
+          const quotaExceeded = getQuotaExceeded(spaceResult.error)
+          if (quotaExceeded) {
+            dispatch(
+              showNotification({
+                variant: 'info',
+                groupKey: 'cf-safe-space-limit',
+                message: seatLimitMessage(quotaExceeded.quota ?? spaceSafeLimit),
+              }),
+            )
+          } else if (isLimitRejection(spaceResult.error)) {
+            // Legacy 400 from a space without a plan: the static cap counts rows, not seats.
             dispatch(
               showNotification({
                 variant: 'info',
@@ -239,7 +251,19 @@ function recoverAlreadyDeployed({
   return { ok: true, skipped: 'already-deployed' }
 }
 
-type BackendError = { status?: number; data?: { message?: string } }
+type BackendError = { status?: number; data?: { message?: string; code?: string; quota?: number } }
+
+/** CGW rejects an add over the plan's seat quota with a typed 402; returns its quota, or undefined for any other error. */
+function getQuotaExceeded(error: unknown): { quota: number | null } | undefined {
+  const { status, data } = (error as BackendError) ?? {}
+  if (status !== 402 || data?.code !== 'QUOTA_EXCEEDED') return undefined
+  return { quota: typeof data.quota === 'number' ? data.quota : null }
+}
+
+function seatLimitMessage(limit: number | null): string {
+  const seats = limit === null ? 'seat limit' : `limit of ${limit} Safe accounts`
+  return `Safe created in My accounts. The Workspace is at its ${seats}, so it wasn't added there.`
+}
 
 function isConflict(error: unknown): boolean {
   return (error as BackendError)?.status === 409
