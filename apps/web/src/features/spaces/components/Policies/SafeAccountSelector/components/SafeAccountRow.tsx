@@ -24,12 +24,18 @@ const NO_PENDING = 0
 export const toStatChains = (options: SafeAccountOption[]): SafeItemDataChain[] =>
   options.flatMap((option) => (option.chain ? [option.chain] : []))
 
-export const AccountBalance = ({ fiatTotal }: { fiatTotal?: string }) => (
-  <BalanceDisplay balance={fiatTotal !== undefined ? <FiatValue value={fiatTotal} /> : undefined} />
+export const AccountBalance = ({ fiatTotal, fitColumn }: { fiatTotal?: string; fitColumn?: boolean }) => (
+  <BalanceDisplay
+    balance={fiatTotal !== undefined ? <FiatValue value={fiatTotal} /> : undefined}
+    className={fitColumn ? 'sm:w-auto sm:shrink' : undefined}
+  />
 )
 
-/** Identity, stat columns and balance — the same column set as the topbar rows. */
-export const SafeAccountSummary = ({ account }: { account: SafeAccountOption }) => (
+/**
+ * Identity, stat columns and balance — the same column set as the topbar rows. `fitStats` is for a
+ * lone row, where the stats' table widths buy no alignment and cost the address 101px.
+ */
+export const SafeAccountSummary = ({ account, fitStats }: { account: SafeAccountOption; fitStats?: boolean }) => (
   <div className="flex w-full min-w-0 items-center gap-3">
     <SafeIdentity address={account.address} name={account.name} />
     <SafeRowStats
@@ -38,8 +44,9 @@ export const SafeAccountSummary = ({ account }: { account: SafeAccountOption }) 
       chains={toStatChains([account])}
       pending={NO_PENDING}
       showPending={false}
+      fitColumns={fitStats}
     />
-    <AccountBalance fiatTotal={account.fiatTotal} />
+    <AccountBalance fiatTotal={account.fiatTotal} fitColumn={fitStats} />
   </div>
 )
 

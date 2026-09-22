@@ -6,6 +6,7 @@ import RecoveryStatus from '../RecoveryStatus'
 import ExecuteRecoveryButton from '../ExecuteRecoveryButton'
 import useWallet from '@/hooks/wallets/useWallet'
 import type { RecoveryQueueItem } from '../../services/recovery-state'
+import classNames from 'classnames'
 import css from '@/components/transactions/TxSummary/styles.module.css'
 import { useRecoveryTxState } from '../../hooks/useRecoveryTxState'
 import DateTime from '@/components/common/DateTime'
@@ -16,12 +17,12 @@ export default function RecoverySummary({ item }: { item: RecoveryQueueItem }): 
   const { isMalicious } = item
 
   return (
-    <div className={css.gridContainer}>
-      <div style={{ gridArea: 'type' }}>
+    <div data-testid="transaction-item" className={classNames(css.gridContainer, css.queue, css.recovery)}>
+      <div className={css.type} style={{ gridArea: 'type' }}>
         <RecoveryType isMalicious={isMalicious} />
       </div>
 
-      <div style={{ gridArea: 'info' }}>
+      <div className={css.info} style={{ gridArea: 'info' }}>
         <RecoveryInfo isMalicious={isMalicious} />
       </div>
 
@@ -30,11 +31,11 @@ export default function RecoverySummary({ item }: { item: RecoveryQueueItem }): 
       </div>
 
       {!isExecutable || isPending ? (
-        <div style={{ gridArea: 'status' }}>
+        <div className={css.status} style={{ gridArea: 'status' }}>
           <RecoveryStatus recovery={item} />
         </div>
       ) : (
-        <div style={{ gridArea: 'actions' }} className="mr-4 flex justify-center">
+        <div data-testid="tx-actions" className="mr-4 flex justify-center" style={{ gridArea: 'actions' }}>
           {!isMalicious && wallet && <ExecuteRecoveryButton recovery={item} compact />}
         </div>
       )}
