@@ -7,3 +7,5 @@ export type { SupportChatContract } from './contract'
 
 export { useSupportChat } from './hooks/useSupportChat'
 export type { SupportChatConfig, UserIdentity } from './hooks/useSupportChat'
+
+export { useSupportEligibility } from './hooks/useSupportEligibility'

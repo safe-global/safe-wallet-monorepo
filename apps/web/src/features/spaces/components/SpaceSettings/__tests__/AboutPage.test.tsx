@@ -18,6 +18,7 @@ jest.mock('@/features/__core__', () => ({
 
 jest.mock('@/features/support-chat', () => ({
   SupportChatFeature: 'support-chat-feature',
+  useSupportEligibility: () => false,
   useSupportChat: () => ({
     config: { appId: 'test-app', chatUrl: 'https://chat.test', aliasDomain: 'test.local', allowedParents: [] },
     user: { email: 'guest@test.local', name: 'Safe{Wallet}' },
@@ -33,7 +34,7 @@ const setSupportFeature = ({ disabled, isOfficialHost }: { disabled: boolean; is
     open ? <div data-testid="support-chat-drawer" /> : null,
   )
   ;(useLoadFeature as jest.Mock).mockReturnValue({
-    SupportChatDrawer: mockSupportChatDrawer,
+    WorkspaceSupportChat: mockSupportChatDrawer,
     $isDisabled: disabled,
   })
   ;(useIsOfficialHost as jest.Mock).mockReturnValue(isOfficialHost)
