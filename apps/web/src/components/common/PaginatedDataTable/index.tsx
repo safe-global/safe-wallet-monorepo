@@ -85,7 +85,6 @@ type PaginatedDataTableProps<T> = {
   renderRowDetail?: (row: T) => ReactNode
   /** Draws the detail row on the table surface instead of the muted tint, so row and detail read as one */
   plainDetail?: boolean
-  /** Set to `false` to turn off the row hover pill, e.g. when cells carry their own hover affordance */
   getRowKey: (row: T) => string
   getRowClassName?: (row: T) => string
   pageSize?: number

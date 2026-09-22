@@ -96,6 +96,7 @@ jest.mock('@/features/spaces', () => ({
 }))
 
 // The naming fields are covered by their own suite; this stub enters a name through the shared form.
+let mockEnteredName = 'Treasury'
 jest.mock('../../NameAccounts', () => ({
   ...jest.requireActual('../../NameAccounts'),
   NameAccountsFields: ({ items }: { items: Array<{ address: string }> }) => {
@@ -103,7 +104,7 @@ jest.mock('../../NameAccounts', () => ({
     const { useFormContext } = require('react-hook-form')
     const { setValue } = useFormContext()
     useEffect(() => {
-      items.forEach((item) => setValue(`names.${item.address.toLowerCase()}`, 'Treasury'))
+      items.forEach((item) => setValue(`names.${item.address.toLowerCase()}`, mockEnteredName))
     }, [items, setValue])
     return <div data-testid="name-accounts-fields" data-count={items.length} />
   },
@@ -299,8 +300,23 @@ describe('AddAccounts — naming step', () => {
     mockSpaceSafesLoading = false
     mockSpaceAddressBook = []
     mockAddressBookError = false
+    mockEnteredName = 'Treasury'
     mockAddSafesToSpace.mockResolvedValue({ data: {} })
     mockUpsertWorkspaceNames.mockResolvedValue({})
+  })
+
+  it('blocks submit while a name is too short to save', async () => {
+    mockEnteredName = 'ab'
+    const form = selectTrusted()
+    fireEvent.click(screen.getByTestId('safe-accounts-table'))
+    fireEvent.submit(form)
+    await screen.findByText('Name your Safe accounts')
+
+    expect(screen.getByTestId('add-accounts-button')).toBeDisabled()
+    fireEvent.submit(screen.getByTestId('add-accounts-button').closest('form')!)
+
+    await waitFor(() => expect(mockUpsertWorkspaceNames).not.toHaveBeenCalled())
+    expect(mockAddSafesToSpace).not.toHaveBeenCalled()
   })
 
   it('blocks submit while the address book could not be read', async () => {

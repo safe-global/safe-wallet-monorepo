@@ -289,6 +289,7 @@ describe('useOnboardingSubmit', () => {
     expect(mockAddSafesToSpace).not.toHaveBeenCalled()
     expect(mockRemoveSafesFromSpace).not.toHaveBeenCalled()
     expect(onSuccess).not.toHaveBeenCalled()
+    expect(result.current.error).toBe('No workspace is selected. Reload the page and try again.')
   })
 
   it('should set error on add failure', async () => {

@@ -230,7 +230,10 @@ const useOnboardingSubmit = (
   }
 
   const onSubmit = handleSubmit(async (data) => {
-    if (!spaceId) return
+    if (!spaceId) {
+      setError('No workspace is selected. Reload the page and try again.')
+      return
+    }
 
     const safesToAdd = getSafesToAdd(data.selectedSafes)
 
