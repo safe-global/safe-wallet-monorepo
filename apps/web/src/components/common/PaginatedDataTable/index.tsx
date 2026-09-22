@@ -70,15 +70,22 @@ type SortState = { id: string; direction: SortDirection }
 
 const DEFAULT_PAGE_SIZE = 25
 
+const NESTED_CONTROLS = 'a, button, [role="button"], input, [role="menuitem"]'
+
 type PaginatedDataTableProps<T> = {
   columns: DataTableColumn<T>[]
+  /**
+   * Makes the whole row a pointer target. The row stays a plain table row for assistive tech, so
+   * a caller that sets this also renders a focusable control with an accessible name in one of
+   * its cells. Clicks on nested links and buttons are left to those controls.
+   */
+  onRowClick?: (row: T) => void
   rows: T[]
   /** Optional mobile-only collapsible detail row, revealed per row via a toggle */
   renderRowDetail?: (row: T) => ReactNode
   /** Draws the detail row on the table surface instead of the muted tint, so row and detail read as one */
   plainDetail?: boolean
   /** Set to `false` to turn off the row hover pill, e.g. when cells carry their own hover affordance */
-  rowHover?: boolean
   getRowKey: (row: T) => string
   getRowClassName?: (row: T) => string
   pageSize?: number
@@ -121,10 +128,10 @@ function PaginatedDataTable<T>({
   rows,
   renderRowDetail,
   plainDetail = false,
-  rowHover = true,
   getRowKey,
   getRowClassName,
   pageSize = DEFAULT_PAGE_SIZE,
+  onRowClick,
 }: PaginatedDataTableProps<T>) {
   const isMobile = useIsMobile()
   const [page, setPage] = useState(0)
@@ -254,8 +261,15 @@ function PaginatedDataTable<T>({
                 <TableRow
                   data-testid="table-row"
                   data-no-divider={showDetail ? '' : undefined}
-                  data-no-hover={rowHover ? undefined : ''}
-                  className={getRowClassName?.(row)}
+                  className={cn(getRowClassName?.(row), onRowClick && 'cursor-pointer')}
+                  onClick={
+                    onRowClick
+                      ? (event) => {
+                          if ((event.target as HTMLElement).closest(NESTED_CONTROLS)) return
+                          onRowClick(row)
+                        }
+                      : undefined
+                  }
                 >
                   {visibleColumns.map((column) => (
                     <TableCell
@@ -290,7 +304,7 @@ function PaginatedDataTable<T>({
                 </TableRow>
 
                 {showDetail && (
-                  <TableRow data-no-hover={rowHover ? undefined : ''} className={getRowClassName?.(row)}>
+                  <TableRow className={getRowClassName?.(row)}>
                     <TableCell
                       id={detailId}
                       colSpan={totalColumns}
