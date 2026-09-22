@@ -34,6 +34,7 @@ type ReceiptProps = {
   txInfo?: TransactionDetails['txInfo']
   grid?: boolean
   withSignatures?: boolean
+  tabsOutside?: boolean
 }
 
 const ScrollWrapper = ({ children }: { children: ReactElement | ReactElement[] }) => (
@@ -46,7 +47,15 @@ const DataStack = ({ children }: { children: ReactNode }) => (
   </div>
 )
 
-export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSignatures = false }: ReceiptProps) => {
+export const Receipt = ({
+  safeTxData,
+  txData,
+  txDetails,
+  txInfo,
+  grid,
+  withSignatures = false,
+  tabsOutside = false,
+}: ReceiptProps) => {
   const chain = useCurrentChain()
   const { safe, safeAddress } = useSafeInfo()
   const { safeTx, gtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
@@ -109,7 +118,7 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
   const messageHash = useMessageHash({ safeTxData: displaySafeTxData })
 
   return (
-    <PaperViewToggle activeView={0} leftAlign={grid}>
+    <PaperViewToggle activeView={0} leftAlign={grid} tabsOutside={tabsOutside}>
       {[
         {
           title: 'Data',

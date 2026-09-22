@@ -60,6 +60,8 @@ export const TxFlow = <T extends unknown>({
 
   const childrenArray = Array.isArray(children) ? children : [children]
   const [signedTxId, setSignedTxId] = useState<string>()
+  // A queued tx the wallet can only execute is already fully signed, so it skips the signing receipt
+  const isReadyToExecute = !!txId && !!onlyExecute && !!isExecutable
   const stepCount = childrenArray.length + (signedTxId ? 3 : 2)
 
   const progress = useMemo(() => Math.round(((step + 1) / stepCount) * 100), [step, stepCount])
@@ -115,20 +117,24 @@ export const TxFlow = <T extends unknown>({
                   <RiskConfirmation />
                 </ReviewTransactionComponent>
 
-                <ConfirmTxReceipt onSubmit={handleFlowSubmit}>
-                  <Counterfactual />
+                {isReadyToExecute ? (
+                  <ExecuteTxStep />
+                ) : (
+                  <ConfirmTxReceipt onSubmit={handleFlowSubmit}>
+                    <Counterfactual />
 
-                  <ComboSubmit>
-                    <Sign />
-                    <Execute />
-                    <ExecuteThroughRole />
-                    <Batching />
-                  </ComboSubmit>
+                    <ComboSubmit>
+                      <Sign />
+                      <Execute />
+                      <ExecuteThroughRole />
+                      <Batching />
+                    </ComboSubmit>
 
-                  <Propose />
-                </ConfirmTxReceipt>
+                    <Propose />
+                  </ConfirmTxReceipt>
+                )}
 
-                {signedTxId && <ExecuteTxStep />}
+                {signedTxId && <ExecuteTxStep afterSigning />}
               </TxFlowContent>
               <LedgerHashComparison />
             </TxFlowProvider>
