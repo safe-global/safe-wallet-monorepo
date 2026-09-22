@@ -32,9 +32,11 @@ const treasury: SafeAccountOption = {
   fiatTotal: '123720',
 }
 
+const eligible = { accounts: [treasury], isLoading: false, isError: false, hasWallet: true, refetch: jest.fn() }
+
 const renderForm = (props: Partial<ProposerRoleFormProps> = {}) =>
   renderWithUserEvent(
-    <ProposerRoleForm onSubmit={jest.fn()} accounts={[treasury]} onSafeAccountChange={jest.fn()} {...props} />,
+    <ProposerRoleForm onSubmit={jest.fn()} safeAccounts={eligible} onSafeAccountChange={jest.fn()} {...props} />,
   )
 
 const submitButton = () => screen.getByRole('button', { name: 'Submit' })
@@ -110,7 +112,7 @@ describe('ProposerRoleForm', () => {
       rerender(
         <ProposerRoleForm
           onSubmit={jest.fn()}
-          accounts={[treasury]}
+          safeAccounts={eligible}
           onSafeAccountChange={jest.fn()}
           safeAccount="137:0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB"
           validateProposer={validateProposer}
@@ -132,7 +134,7 @@ describe('ProposerRoleForm', () => {
       rerender(
         <ProposerRoleForm
           onSubmit={jest.fn()}
-          accounts={[treasury]}
+          safeAccounts={eligible}
           onSafeAccountChange={jest.fn()}
           safeAccount={treasury.id}
           validateProposer={loaded}
@@ -158,7 +160,7 @@ describe('ProposerRoleForm', () => {
       rerender(
         <ProposerRoleForm
           onSubmit={jest.fn()}
-          accounts={[treasury]}
+          safeAccounts={eligible}
           onSafeAccountChange={jest.fn()}
           safeAccount="137:0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB"
           defaultValues={{ proposer: PROPOSER }}
@@ -238,19 +240,19 @@ describe('ProposerRoleForm', () => {
     })
 
     it('passes the loading state through to the account field', () => {
-      renderForm({ accounts: [], accountsLoading: true })
+      renderForm({ safeAccounts: { ...eligible, accounts: [], isLoading: true } })
 
       expect(accountField().querySelector('[data-testid="safe-account-avatar-skeleton"]')).toBeInTheDocument()
     })
 
     it('offers a retry when the accounts failed to load', async () => {
-      const onAccountsRetry = jest.fn()
-      const { user } = renderForm({ accounts: [], accountsError: true, onAccountsRetry })
+      const refetch = jest.fn()
+      const { user } = renderForm({ safeAccounts: { ...eligible, accounts: [], isError: true, refetch } })
 
       await openAccountField(user)
       await user.click(await screen.findByRole('button', { name: /retry/i }))
 
-      expect(onAccountsRetry).toHaveBeenCalled()
+      expect(refetch).toHaveBeenCalled()
     })
   })
 

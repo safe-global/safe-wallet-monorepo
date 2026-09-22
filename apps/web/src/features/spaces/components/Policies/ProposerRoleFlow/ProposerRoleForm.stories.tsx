@@ -47,6 +47,7 @@ if (!isSafeAccountGroup(opsEntry)) throw new Error('Expected the two-chain fixtu
 const opsGroup = opsEntry
 
 const accounts: SafeAccountEntry[] = [treasury, opsGroup]
+const eligible = { accounts, isLoading: false, isError: false, hasWallet: true, refetch: fn() }
 
 const PROPOSER_NAME = 'Test proposer'
 
@@ -104,7 +105,7 @@ const meta = {
   decorators: [setup.decorator],
   tags: ['autodocs'],
   args: {
-    accounts,
+    safeAccounts: eligible,
     onSubmit: fn(),
     onSafeAccountChange: fn(),
   },
@@ -148,20 +149,20 @@ export const MultiChainAccount: Story = {
 }
 
 export const AccountsLoading: Story = {
-  args: { accounts: [], accountsLoading: true },
+  args: { safeAccounts: { ...eligible, accounts: [], isLoading: true } },
 }
 
 export const AccountsError: Story = {
-  args: { accounts: [], accountsError: true, onAccountsRetry: fn() },
+  args: { safeAccounts: { ...eligible, accounts: [], isError: true } },
 }
 
 export const NoWallet: Story = {
-  args: { accounts: [], hasWallet: false },
+  args: { safeAccounts: { ...eligible, accounts: [], hasWallet: false } },
 }
 
 /** The Workspace has Safes, but none this wallet can set a policy on. */
 export const NoEligibleAccounts: Story = {
-  args: { accounts: [] },
+  args: { safeAccounts: { ...eligible, accounts: [] } },
 }
 
 export const Submitting: Story = {

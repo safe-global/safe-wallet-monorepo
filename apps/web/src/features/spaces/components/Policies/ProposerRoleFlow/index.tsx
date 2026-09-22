@@ -11,7 +11,7 @@ import ProposerRoleHeader from './ProposerRoleHeader'
 const ProposerRoleFlowContent = (): ReactElement => {
   const [safeAccount, setSafeAccount] = useState<string>()
   const { setScope, clearScope } = useSafeScopeControls()
-  const { accounts, isLoading, isError, hasWallet, refetch } = useEligibleSafeAccounts()
+  const safeAccounts = useEligibleSafeAccounts()
   const validateProposer = useProposerValidation()
 
   const onSafeAccountChange = useCallback(
@@ -41,14 +41,10 @@ const ProposerRoleFlowContent = (): ReactElement => {
       >
         <ProposerRoleForm
           onSubmit={onSubmit}
-          accounts={accounts}
+          safeAccounts={safeAccounts}
           safeAccount={safeAccount}
           onSafeAccountChange={onSafeAccountChange}
           validateProposer={validateProposer}
-          accountsLoading={isLoading}
-          accountsError={isError}
-          onAccountsRetry={refetch}
-          hasWallet={hasWallet}
         />
       </TxLayoutBase>
     </div>

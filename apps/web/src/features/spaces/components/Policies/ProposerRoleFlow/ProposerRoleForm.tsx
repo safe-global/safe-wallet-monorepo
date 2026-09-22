@@ -7,7 +7,7 @@ import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@/components/ui/alert'
 import { Typography } from '@/components/ui/typography'
 import SafeAccountSelector from '../SafeAccountSelector'
-import type { SafeAccountEntry } from '../SafeAccountSelector/types'
+import type { useEligibleSafeAccounts } from '../SafeAccountSelector/hooks/useEligibleSafeAccounts'
 import { GRANT_INFO_DESCRIPTION, GRANT_INFO_TITLE, PROPOSER_FIELD_HELPER, PROPOSER_NAME_HELPER } from './constants'
 
 export type ProposerRoleFormValues = {
@@ -17,32 +17,23 @@ export type ProposerRoleFormValues = {
 
 export type ProposerRoleFormProps = {
   onSubmit: (values: ProposerRoleFormValues) => void
-  /** Already filtered and grouped — see `useEligibleSafeAccounts`. */
-  accounts: SafeAccountEntry[]
+  safeAccounts: ReturnType<typeof useEligibleSafeAccounts>
   /** `${chainId}:${address}` */
   safeAccount?: string
   onSafeAccountChange: (value: string) => void
   validateProposer?: Validate<string>
   defaultValues?: Partial<ProposerRoleFormValues>
-  accountsLoading?: boolean
-  accountsError?: boolean
-  onAccountsRetry?: () => void
-  hasWallet?: boolean
   isSubmitting?: boolean
   errorMessage?: ReactNode
 }
 
 const ProposerRoleForm = ({
   onSubmit,
-  accounts,
+  safeAccounts,
   safeAccount,
   onSafeAccountChange,
   validateProposer,
   defaultValues,
-  accountsLoading = false,
-  accountsError = false,
-  onAccountsRetry,
-  hasWallet = true,
   isSubmitting = false,
   errorMessage,
 }: ProposerRoleFormProps) => {
@@ -70,13 +61,13 @@ const ProposerRoleForm = ({
             </Alert>
 
             <SafeAccountSelector
-              accounts={accounts}
+              accounts={safeAccounts.accounts}
               value={safeAccount}
               onChange={onSafeAccountChange}
-              isLoading={accountsLoading}
-              isError={accountsError}
-              onRetry={onAccountsRetry}
-              hasWallet={hasWallet}
+              isLoading={safeAccounts.isLoading}
+              isError={safeAccounts.isError}
+              onRetry={safeAccounts.refetch}
+              hasWallet={safeAccounts.hasWallet}
             />
 
             <div className="flex flex-col gap-1">
