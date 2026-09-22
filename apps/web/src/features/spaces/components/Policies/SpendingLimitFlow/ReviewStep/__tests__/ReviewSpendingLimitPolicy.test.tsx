@@ -3,7 +3,7 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import type Safe from '@safe-global/protocol-kit'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { render, screen, waitFor } from '@/tests/test-utils'
+import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import { chainBuilder } from '@/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
@@ -13,6 +13,8 @@ import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 import { useSafeScope } from '@/components/tx-flow/safe-scope'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 import { useLoadFeature } from '@/features/__core__'
+import { trackEvent } from '@/services/analytics'
+import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import * as useChainsModule from '@/hooks/useChains'
 import { tokenOptionBuilder } from '../../utils/tokenOptions.fixtures'
@@ -26,9 +28,10 @@ import ReviewSpendingLimitPolicy from '..'
 jest.mock('@/components/tx-flow/TxFlowStep', () => ({ TxFlowStep: jest.fn(({ children }) => <>{children}</>) }))
 jest.mock('@/components/tx/ReviewTransactionV2', () => ({
   __esModule: true,
-  default: jest.fn(({ title, children }: { title?: string; children?: ReactNode }) => (
+  default: jest.fn(({ title, children, onSubmit }: { title?: string; children?: ReactNode; onSubmit: () => void }) => (
     <div data-testid="review-transaction" data-title={title}>
       {children}
+      <button onClick={() => onSubmit()}>continue</button>
     </div>
   )),
 }))
@@ -46,6 +49,11 @@ jest.mock('@/components/tx-flow/safe-scope', () => ({
   useSafeScope: jest.fn(),
 }))
 jest.mock('@/hooks/useSafeInfo', () => ({ __esModule: true, default: jest.fn() }))
+jest.mock('@/hooks/useChainId', () => ({ __esModule: true, default: () => '1' }))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 jest.mock('@/features/__core__', () => ({
   ...jest.requireActual('@/features/__core__'),
   useLoadFeature: jest.fn(),
@@ -109,6 +117,7 @@ const mockReviewTransaction = ReviewTransaction as jest.Mock
 const mockCreate = jest.fn()
 const setSafeTx = jest.fn()
 const setSafeTxError = jest.fn()
+const onSubmit = jest.fn()
 
 const safeTxContext = (overrides: Partial<SafeTxContextParams> = {}): SafeTxContextParams => ({
   setSafeTx,
@@ -130,7 +139,7 @@ const renderReview = (safeTxOverrides: Partial<SafeTxContextParams> = {}) =>
   render(
     <TxFlowContext.Provider value={{ ...initialContext, data } as TxFlowContextType}>
       <SafeTxContext.Provider value={safeTxContext(safeTxOverrides)}>
-        <ReviewSpendingLimitPolicy onSubmit={jest.fn()}>
+        <ReviewSpendingLimitPolicy onSubmit={onSubmit}>
           <div data-testid="flow-children" />
         </ReviewSpendingLimitPolicy>
       </SafeTxContext.Provider>
@@ -322,6 +331,20 @@ describe('ReviewSpendingLimitPolicy', () => {
     expect(screen.getByTestId('spending-limit-summary-spender')).toHaveTextContent(SPENDER_A)
     expect(screen.getByTestId('flow-children')).toBeInTheDocument()
     expect(screen.queryByTestId('review-skeleton')).not.toBeInTheDocument()
+  })
+
+  it('reports the reset period of every limit to analytics on Continue, then hands off to the flow', () => {
+    renderReview({ safeTx: builtTx })
+
+    fireEvent.click(screen.getByRole('button', { name: 'continue' }))
+
+    expect(trackEvent).toHaveBeenCalledTimes(2)
+    expect(trackEvent).toHaveBeenCalledWith({
+      ...POLICY_EVENTS.SPENDING_LIMIT_RESET_PERIOD,
+      label: 'One-time spending limit',
+    })
+    expect(trackEvent).toHaveBeenCalledWith({ ...POLICY_EVENTS.SPENDING_LIMIT_RESET_PERIOD, label: '1 week' })
+    expect(onSubmit).toHaveBeenCalledTimes(1)
   })
 
   it('shows the shared review when the build failed, so it can display the error', () => {

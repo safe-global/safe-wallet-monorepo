@@ -1,7 +1,7 @@
 import chains from '@safe-global/utils/config/chains'
 import { getResetTimeOptions } from '@/features/spending-limits'
 import { ONE_TIME_HELPER_TEXT } from '../../constants'
-import { describeResetPeriod } from '../resetPeriod'
+import { describeResetPeriod, resetPeriodEventLabel } from '../resetPeriod'
 
 describe('describeResetPeriod', () => {
   it('explains that a one-time limit never resets', () => {
@@ -27,5 +27,27 @@ describe('describeResetPeriod', () => {
 
   it('renders nothing without an option', () => {
     expect(describeResetPeriod(undefined)).toBe('')
+  })
+})
+
+describe('resetPeriodEventLabel', () => {
+  it('reports a one-time limit with the wording the Safe-level flow uses', () => {
+    expect(resetPeriodEventLabel('0', chains.sep)).toBe('One-time spending limit')
+  })
+
+  it.each([
+    ['1440', '1 day'],
+    ['10080', '1 week'],
+    ['43200', '1 month'],
+  ])('reports %s minutes as the dropdown label "%s"', (resetTimeMin, expected) => {
+    expect(resetPeriodEventLabel(resetTimeMin, '1')).toBe(expected)
+  })
+
+  it('knows the short periods a test chain offers', () => {
+    expect(resetPeriodEventLabel('5', chains.sep)).toBe('5 minutes')
+  })
+
+  it('falls back to the raw minutes for a period no dropdown offers', () => {
+    expect(resetPeriodEventLabel('7', '1')).toBe('7 minutes')
   })
 })
