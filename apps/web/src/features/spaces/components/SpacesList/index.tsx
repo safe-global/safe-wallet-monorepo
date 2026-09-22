@@ -64,6 +64,7 @@ const AddSpaceButton = ({
       data-testid="create-space-button"
       variant={variant}
       size={size}
+      accentIcon={icon === 'arrow' && variant === 'default'}
       className={cn(
         // eslint-disable-next-line no-restricted-syntax -- bespoke full-height create-workspace CTA sizing from dev's #8271 redesign
         size === 'lg' && 'h-full rounded-lg px-6 py-3 text-base',
@@ -224,7 +225,7 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
           <div className="flex flex-col items-center gap-4">
             <div className="h-12">
               <AddSpaceButton
-                label="Create your first workspace"
+                label="Get Safe Pro"
                 icon="arrow"
                 disabled={isAtLimit}
                 link
