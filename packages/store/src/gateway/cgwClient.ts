@@ -78,6 +78,18 @@ export const rawBaseQuery = fetchBaseQuery({
   },
 })
 
+/**
+ * An interpolated path param that resolved to an empty string, e.g. `/v1/chains//safes//messages`.
+ * No endpoint has an empty or trailing segment, so this is always a caller passing a value it
+ * should have skipped on — the request would 404 and the empty param would be invisible.
+ */
+export const hasEmptyPathSegment = (url: string): boolean =>
+  url
+    .split('?')[0]
+    .split('/')
+    .slice(1)
+    .some((segment) => segment === '')
+
 export const dynamicBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
   args,
   api,
@@ -90,6 +102,16 @@ export const dynamicBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBas
   }
 
   const urlEnd = typeof args === 'string' ? args : args.url
+
+  if (hasEmptyPathSegment(urlEnd)) {
+    return {
+      error: {
+        status: 'CUSTOM_ERROR',
+        error: `Refusing to request ${urlEnd}: a path parameter is empty`,
+      },
+    }
+  }
+
   const adjustedUrl = `${resolvedBaseUrl}${urlEnd}`
 
   // Check for credential override in extraOptions (this is where RTK Query passes the options)
