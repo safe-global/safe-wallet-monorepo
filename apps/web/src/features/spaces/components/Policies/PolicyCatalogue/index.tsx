@@ -10,20 +10,13 @@ interface PolicyCatalogueProps {
 }
 
 const PolicyCatalogue = ({ onSelect }: PolicyCatalogueProps): ReactElement => {
-  const handleClick = ({ id, isAvailable }: PolicyCatalogueEntry) => {
-    trackEvent(
-      { ...POLICY_EVENTS.POLICY_CATALOGUE_TILE_CLICKED, label: id },
-      {
-        [MixpanelEventParams.POLICY_TYPE]: id,
-        [MixpanelEventParams.IS_AVAILABLE]: isAvailable,
-      },
-    )
-
-    if (isAvailable) onSelect?.(id)
+  const handleClick = ({ id }: PolicyCatalogueEntry) => {
+    trackEvent({ ...POLICY_EVENTS.POLICY_CATALOGUE_TILE_CLICKED, label: id }, { [MixpanelEventParams.POLICY_TYPE]: id })
+    onSelect?.(id)
   }
 
   return (
-    <div data-testid="policy-catalogue" className="grid gap-4 md:grid-cols-2">
+    <div data-testid="policy-catalogue" className="grid gap-4 md:grid-cols-3">
       {POLICY_CATALOGUE.map((entry) => (
         <PolicyCatalogueTile key={entry.id} {...entry} onClick={() => handleClick(entry)} />
       ))}

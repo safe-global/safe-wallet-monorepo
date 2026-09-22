@@ -94,4 +94,36 @@ describe('dynamicBaseQuery', () => {
     )
     expect(result).toEqual({ data: 'objectResult' })
   })
+
+  it.each([
+    '/v1/chains//about/indexing',
+    '/v1/chains//safes//messages',
+    '/v1/chains/1/safes//balances/usd',
+    '/v1/chains//safes/0x0000000000000000000000000000000000000000/messages',
+  ])('refuses to request %s', async (url) => {
+    mockRawBaseQuery.mockResolvedValue({ data: 'objectResult' })
+    cgwClient.setBaseUrl('http://example.com')
+
+    const result = await cgwClient.dynamicBaseQuery(url, api, {})
+
+    expect(mockRawBaseQuery).not.toHaveBeenCalled()
+    expect(result).toEqual({
+      error: { status: 'CUSTOM_ERROR', error: `Refusing to request ${url}: a path parameter is empty` },
+    })
+  })
+
+  it.each([
+    '/v1/chains/1/about/indexing',
+    '/v1/chains/1/safes/0x0000000000000000000000000000000000000000/messages',
+    // `//` inside a query string is data, not an empty path segment
+    '/v1/chains/1/safes/0x0000000000000000000000000000000000000000/transactions/history?cursor=a//b',
+  ])('still requests %s', async (url) => {
+    mockRawBaseQuery.mockResolvedValue({ data: 'objectResult' })
+    cgwClient.setBaseUrl('http://example.com')
+
+    const result = await cgwClient.dynamicBaseQuery(url, api, {})
+
+    expect(mockRawBaseQuery).toHaveBeenCalled()
+    expect(result).toEqual({ data: 'objectResult' })
+  })
 })
