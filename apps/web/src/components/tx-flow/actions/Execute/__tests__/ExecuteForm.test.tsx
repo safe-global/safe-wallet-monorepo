@@ -84,6 +84,18 @@ describe('ExecuteForm', () => {
     expect(getByText('Estimated fee')).toBeInTheDocument()
   })
 
+  it('renders a secondary action before the submit button when one is passed', () => {
+    const { getByTestId, queryByTestId } = render(
+      <ExecuteForm {...defaultProps} secondaryAction={<button data-testid="secondary-action">Later</button>} />,
+    )
+
+    const secondary = getByTestId('secondary-action')
+    const submit = getByTestId('combo-submit-execute')
+
+    expect(secondary.compareDocumentPosition(submit) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(queryByTestId('secondary-action')?.closest('.txCardActions')).toHaveClass('[&>div]:justify-between')
+  })
+
   it('shows a non-owner error if the transaction still needs signatures and its not an owner', () => {
     const { getByText } = render(<ExecuteForm {...defaultProps} isOwner={false} onlyExecute={false} />)
 

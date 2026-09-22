@@ -71,7 +71,13 @@ const mockUseSigner = useSigner as jest.MockedFunction<typeof useSigner>
 const mockIsSmartContractWallet = jest.spyOn(walletUtils, 'isSmartContractWallet')
 const mockUseImmediatelyExecutable = useImmediatelyExecutable as jest.MockedFunction<typeof useImmediatelyExecutable>
 
-const buildSafeTx = ({ signed }: { signed: boolean }): SafeTransaction => {
+const buildSafeTx = ({
+  signed,
+  otherSignatures = 0,
+}: {
+  signed: boolean
+  otherSignatures?: number
+}): SafeTransaction => {
   const safeTx = createMockSafeTransaction({
     to: faker.finance.ethereumAddress(),
     data: '0x',
@@ -79,6 +85,11 @@ const buildSafeTx = ({ signed }: { signed: boolean }): SafeTransaction => {
   })
   if (signed) {
     safeTx.addSignature(new EthSafeSignature(signerAddress, faker.string.hexadecimal({ length: 130 })))
+  }
+  for (let i = 0; i < otherSignatures; i++) {
+    safeTx.addSignature(
+      new EthSafeSignature(faker.finance.ethereumAddress(), faker.string.hexadecimal({ length: 130 })),
+    )
   }
   return safeTx
 }
@@ -176,7 +187,7 @@ describe('Execute slot', () => {
     mockUseImmediatelyExecutable.mockReturnValue(false)
 
     const { result } = renderSlotIds({
-      safeTx: buildSafeTx({ signed: false }),
+      safeTx: buildSafeTx({ signed: false, otherSignatures: 1 }),
       txId: 'multisig_0x1_0x2',
       isExecutable: true,
     })
@@ -184,6 +195,22 @@ describe('Execute slot', () => {
     await waitFor(() => {
       expect(result.current).toContain('execute')
       expect(result.current).toContain('sign')
+    })
+  })
+
+  it('offers Execute for a fully signed transaction on an m/n Safe', async () => {
+    mockSafe(2)
+    mockUseImmediatelyExecutable.mockReturnValue(false)
+
+    const { result } = renderSlotIds({
+      safeTx: buildSafeTx({ signed: false, otherSignatures: 2 }),
+      txId: 'multisig_0x1_0x2',
+      isExecutable: true,
+    })
+
+    await waitFor(() => {
+      expect(result.current).toContain('execute')
+      expect(result.current).not.toContain('sign')
     })
   })
 
