@@ -1,7 +1,7 @@
 import { useContext, useState } from 'react'
 import type { ComponentProps, ReactElement } from 'react'
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import TxListAccordionItem, { TX_LIST_ITEM_VALUE } from '@/components/transactions/TxListItem/TxListAccordionItem'
 import RecoverySummary from '../RecoverySummary'
 import RecoveryDetails from '../RecoveryDetails'
 import { RecoveryListItemContext, RecoveryListItemProvider } from './RecoveryListItemContext'
@@ -23,17 +23,13 @@ function ProvidedRecoveryListItem({ item }: { item: RecoveryQueueItem }): ReactE
   }
 
   return (
-    <Accordion value={isExpanded ? ['recovery'] : []} onValueChange={onChange}>
-      <AccordionItem value="recovery" className="border-b-0">
-        <AccordionTrigger nativeButton={false} render={<div />} className="justify-start gap-2 overflow-x-auto">
-          <RecoverySummary item={item} />
-        </AccordionTrigger>
-
-        <AccordionContent className="p-0">
-          <RecoveryDetails item={item} />
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+    <TxListAccordionItem
+      value={isExpanded ? [TX_LIST_ITEM_VALUE] : []}
+      onValueChange={onChange}
+      testId="recovery-item"
+      summary={<RecoverySummary item={item} />}
+      details={<RecoveryDetails item={item} />}
+    />
   )
 }
 
