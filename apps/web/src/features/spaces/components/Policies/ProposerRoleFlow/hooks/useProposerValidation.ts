@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react'
+import type { JsonRpcProvider } from 'ethers'
 import type { Validate } from 'react-hook-form'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { addressIsNotCurrentSafe, addressIsNotOwner, addressIsNotReserved } from '@safe-global/utils/utils/validation'
@@ -21,6 +22,29 @@ export const addressIsNotExistingProposer =
   (address: string): string | undefined =>
     proposers.some((proposer) => sameAddress(proposer, address)) ? message : undefined
 
+type PickedSafe = {
+  safeAddress: string
+  owners: string[]
+  existingProposers: string[]
+  chainId: string
+  provider?: JsonRpcProvider
+}
+
+const validateAgainstPickedSafe = async (value: string, picked: PickedSafe): Promise<string | undefined> => {
+  const { safeAddress, owners, existingProposers, chainId, provider } = picked
+
+  const isSafeItself = addressIsNotCurrentSafe(safeAddress, PROPOSER_IS_SAFE_ERROR)(value)
+  if (isSafeItself) return isSafeItself
+
+  const isOwner = addressIsNotOwner(owners, PROPOSER_IS_OWNER_ERROR)(value)
+  if (isOwner) return isOwner
+
+  const isExistingProposer = addressIsNotExistingProposer(existingProposers, PROPOSER_EXISTS_ERROR)(value)
+  if (isExistingProposer) return isExistingProposer
+
+  return addressIsNotSmartContract(chainId, SMART_CONTRACT_PROPOSER_ERROR, provider)(value)
+}
+
 // Invalid until the picked Safe, its proposers and its provider load: empty owner lists would pass, and the unscoped provider would read code from the URL chain.
 export const useProposerValidation = (): Validate<string> => {
   const { safe, safeAddress, safeLoaded } = useSafeInfo()
@@ -39,12 +63,7 @@ export const useProposerValidation = (): Validate<string> => {
       if (reserved || !safeAddress) return reserved
       if (!isReady) return PROPOSER_SAFE_LOADING_MESSAGE
 
-      return (
-        addressIsNotCurrentSafe(safeAddress, PROPOSER_IS_SAFE_ERROR)(value) ??
-        addressIsNotOwner(owners, PROPOSER_IS_OWNER_ERROR)(value) ??
-        addressIsNotExistingProposer(existingProposers, PROPOSER_EXISTS_ERROR)(value) ??
-        (await addressIsNotSmartContract(chainId, SMART_CONTRACT_PROPOSER_ERROR, provider)(value))
-      )
+      return validateAgainstPickedSafe(value, { safeAddress, owners, existingProposers, chainId, provider })
     },
     [safeAddress, isReady, owners, existingProposers, chainId, provider],
   )
