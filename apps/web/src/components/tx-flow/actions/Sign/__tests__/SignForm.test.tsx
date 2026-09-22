@@ -43,7 +43,6 @@ describe('SignForm', () => {
     txActions: {
       proposeTx: jest.fn(),
       signTx: jest.fn(),
-      addToBatch: jest.fn(),
       executeTx: jest.fn(),
       signProposerTx: jest.fn(),
     },
@@ -114,7 +113,6 @@ describe('SignForm', () => {
         txActions={{
           proposeTx: jest.fn(),
           signTx: mockSignTx,
-          addToBatch: jest.fn(),
           executeTx: jest.fn(),
           signProposerTx: jest.fn(),
         }}

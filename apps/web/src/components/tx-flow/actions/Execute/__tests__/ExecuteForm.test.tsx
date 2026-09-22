@@ -44,7 +44,6 @@ describe('ExecuteForm', () => {
     txActions: {
       proposeTx: jest.fn(),
       signTx: jest.fn(),
-      addToBatch: jest.fn(),
       executeTx: jest.fn(),
       signProposerTx: jest.fn(),
     },
@@ -147,7 +146,6 @@ describe('ExecuteForm', () => {
         txActions={{
           proposeTx: jest.fn(),
           signTx: jest.fn(),
-          addToBatch: jest.fn(),
           executeTx: jest.fn(),
           signProposerTx: jest.fn(),
         }}
@@ -177,7 +175,6 @@ describe('ExecuteForm', () => {
         txActions={{
           proposeTx: jest.fn(),
           signTx: jest.fn(),
-          addToBatch: jest.fn(),
           executeTx: mockExecuteTx,
           signProposerTx: jest.fn(),
         }}
