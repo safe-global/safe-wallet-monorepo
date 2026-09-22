@@ -49,6 +49,13 @@ const LEGAL_LINKS: LegalLink[] = [
     external: true,
   },
   {
+    title: 'EULA',
+    description: 'For using Safe Pro',
+    href: AppRoutes.eula,
+    icon: <FileText className="h-4 w-4 text-muted-foreground" />,
+    external: true,
+  },
+  {
     title: 'Privacy Policy',
     description: 'What we collect and why',
     href: AppRoutes.privacy,
