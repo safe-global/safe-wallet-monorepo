@@ -57,6 +57,7 @@ export {
 } from '@/features/oidc-auth/store'
 export {
   spaceSafesEntitlementsListener,
+  trialReminderListener,
   safeActionsModalSlice,
   ESafeAction,
   openSafeActionsModal,

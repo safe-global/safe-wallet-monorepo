@@ -5,21 +5,18 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
-import { localItem } from '@/services/local-storage/local'
 import { formatDate } from '@safe-global/utils/utils/date'
 import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import { useCurrentMembership, useIsAdmin } from '../../hooks/useSpaceMembers'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
+import { markTrialReminderSeen, wasTrialReminderSeen } from '../../store/trialReminder'
 import ChangePlanFlow from './ChangePlanFlow'
 import { ENTERPRISE_TIER } from './fixtures'
 import { PlanCatalog } from './PlanCards'
 import { salesHintFor } from './PlanChooserModal'
 import { buildPlanTiers, toCurrentPlan } from './planTiers'
 import type { CurrentPlan, PlanPick } from './types'
-
-/** Remembers that the reminder was dismissed, so it nags exactly once per Workspace. */
-const reminderSeen = (spaceId: string) => localItem<boolean>(`safeProTrialReminderSeen:${spaceId}`)
 
 export const endsIn = (daysLeft: number | null): string =>
   daysLeft === null || daysLeft > 1 ? `in ${daysLeft ?? 7} days` : daysLeft === 1 ? 'in 1 day' : 'today'
@@ -124,7 +121,7 @@ const TrialEndingChooser = ({
 
 /**
  * Mounted on every Workspace page: when the trial enters its last week an admin gets the plan picker and a member a
- * heads-up, once; the dismissal lives in local storage.
+ * heads-up, once per login.
  */
 export default function TrialEndingModal({ spaceId }: { spaceId: string }) {
   const { plan, seats, subscription, isTrialing, isTrialEndingSoon } = useSpacePlan(spaceId)
@@ -134,13 +131,13 @@ export default function TrialEndingModal({ spaceId }: { spaceId: string }) {
   const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
-    if (isTrialEndingSoon && membership && !reminderSeen(spaceId).get()) setIsOpen(true)
+    if (isTrialEndingSoon && membership && !wasTrialReminderSeen(spaceId)) setIsOpen(true)
   }, [isTrialEndingSoon, membership, spaceId])
 
   if (!isOpen || !plan || !subscription) return null
 
   const close = () => {
-    reminderSeen(spaceId).set(true)
+    markTrialReminderSeen(spaceId)
     setIsOpen(false)
   }
   const currentPlan = toCurrentPlan(subscription, plan, isTrialing, seats?.quota)

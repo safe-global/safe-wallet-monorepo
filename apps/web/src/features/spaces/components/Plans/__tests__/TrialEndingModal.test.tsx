@@ -22,13 +22,16 @@ jest.mock('../../../hooks/useSpaceMembers', () => ({
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpacesGetOneV1Query: () => ({ currentData: { name: 'Acme Inc' } }),
 }))
-jest.mock('@/services/local-storage/local', () => ({
+jest.mock('@/services/local-storage/session', () => ({
   __esModule: true,
-  ...jest.requireActual('@/services/local-storage/local'),
-  localItem: (key: string) => ({
+  ...jest.requireActual('@/services/local-storage/session'),
+  sessionItem: (key: string) => ({
     get: () => (storage[key] ? JSON.parse(storage[key]) : undefined),
     set: (value: unknown) => {
       storage[key] = JSON.stringify(value)
+    },
+    remove: () => {
+      delete storage[key]
     },
   }),
 }))
@@ -128,7 +131,7 @@ describe('TrialEndingModal', () => {
   it('stays dismissed for the rest of the trial once the last-week reminder was closed', () => {
     const { unmount } = render(<TrialEndingModal spaceId={SPACE_ID} />)
     fireEvent.click(screen.getByRole('button', { name: 'Continue without Safe Pro' }))
-    expect(storage[`safeProTrialReminderSeen:${SPACE_ID}`]).toBe('true')
+    expect(storage.safeProTrialReminderSeen).toBe(JSON.stringify({ [SPACE_ID]: true }))
     unmount()
 
     for (const daysLeft of [5, 2, 1]) {
@@ -176,12 +179,12 @@ describe('TrialEndingModal', () => {
 
     expect(screen.queryByRole('heading', { name: 'Your free access will end in 7 days' })).not.toBeInTheDocument()
     expect(screen.getByTestId('change-plan-dialog')).toBeInTheDocument()
-    expect(storage[`safeProTrialReminderSeen:${SPACE_ID}`]).toBeUndefined()
+    expect(storage.safeProTrialReminderSeen).toBeUndefined()
 
     fireEvent.click(screen.getByText('flow-closed'))
 
     expect(screen.queryByTestId('change-plan-dialog')).not.toBeInTheDocument()
-    expect(storage[`safeProTrialReminderSeen:${SPACE_ID}`]).toBe('true')
+    expect(storage.safeProTrialReminderSeen).toBe(JSON.stringify({ [SPACE_ID]: true }))
   })
 
   it('shows a member the same plans without buttons, naming the Workspace and who can act', () => {
@@ -202,6 +205,6 @@ describe('TrialEndingModal', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Got it' }))
     expect(screen.queryByRole('heading', { name: 'Your free access will end in 7 days' })).not.toBeInTheDocument()
-    expect(storage[`safeProTrialReminderSeen:${SPACE_ID}`]).toBe('true')
+    expect(storage.safeProTrialReminderSeen).toBe(JSON.stringify({ [SPACE_ID]: true }))
   })
 })
