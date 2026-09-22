@@ -250,17 +250,15 @@ const AddAccounts = ({
 
     const safesToWrite = view === 'select' ? getSafesToName(safesToAdd, trustedSafes, spaceAddressBook) : safesToName
 
-    if (view === 'select') {
-      if (safesToWrite.length > 0) {
-        trackEvent(SPACE_EVENTS.NAME_ACCOUNTS_STEP, {
-          [MixpanelEventParams.ACCOUNT_COUNT]: safesToWrite.length,
-          [MixpanelEventParams.SOURCE]: SPACE_LABELS.add_accounts_modal,
-        })
-        setSafesToName(safesToWrite)
-        setView('name')
-        return
-      }
-    } else if (!hasAllNames(data.names, safesToWrite)) {
+    if (view === 'name' && !hasAllNames(data.names, safesToWrite)) return
+
+    if (view === 'select' && safesToWrite.length > 0) {
+      trackEvent(SPACE_EVENTS.NAME_ACCOUNTS_STEP, {
+        [MixpanelEventParams.ACCOUNT_COUNT]: safesToWrite.length,
+        [MixpanelEventParams.SOURCE]: SPACE_LABELS.add_accounts_modal,
+      })
+      setSafesToName(safesToWrite)
+      setView('name')
       return
     }
 

@@ -242,17 +242,15 @@ const useOnboardingSubmit = (
 
     const safesToWrite = step === 'select' ? getSafesToName(safesToAdd, allSafes, spaceAddressBook) : safesToName
 
-    if (step === 'select') {
-      if (safesToWrite.length > 0) {
-        trackEvent(SPACE_EVENTS.NAME_ACCOUNTS_STEP, {
-          [MixpanelEventParams.ACCOUNT_COUNT]: safesToWrite.length,
-          [MixpanelEventParams.SOURCE]: SPACE_LABELS.onboarding,
-        })
-        setSafesToName(safesToWrite)
-        setStep('name')
-        return
-      }
-    } else if (!hasAllNames(data.names, safesToWrite)) {
+    if (step === 'name' && !hasAllNames(data.names, safesToWrite)) return
+
+    if (step === 'select' && safesToWrite.length > 0) {
+      trackEvent(SPACE_EVENTS.NAME_ACCOUNTS_STEP, {
+        [MixpanelEventParams.ACCOUNT_COUNT]: safesToWrite.length,
+        [MixpanelEventParams.SOURCE]: SPACE_LABELS.onboarding,
+      })
+      setSafesToName(safesToWrite)
+      setStep('name')
       return
     }
 
