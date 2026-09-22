@@ -3,6 +3,7 @@ import { FormProvider, useForm, type Validate } from 'react-hook-form'
 import AddressBookInput from '@/components/common/AddressBookInput'
 import DialogActions from '@/components/common/DialogActions'
 import NameInput from '@/components/common/NameInput'
+import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@/components/ui/alert'
 import { Typography } from '@/components/ui/typography'
@@ -90,6 +91,8 @@ const ProposerRoleForm = ({
               }
               inputSize="hero"
             />
+
+            <NetworkWarning action="sign" />
 
             {errorMessage}
           </div>

@@ -1,5 +1,8 @@
 import type { ReactNode } from 'react'
 import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
+import * as useIsWrongChainHook from '@/hooks/useIsWrongChain'
+import * as useChainsHook from '@/hooks/useChains'
+import { chainBuilder } from '@/tests/builders/chains'
 import { buildSafeAccountId } from '../../SafeAccountSelector/utils'
 import type { SafeAccountOption } from '../../SafeAccountSelector/types'
 import ProposerRoleForm, { type ProposerRoleFormProps } from '../ProposerRoleForm'
@@ -253,6 +256,36 @@ describe('ProposerRoleForm', () => {
       await user.click(await screen.findByRole('button', { name: /retry/i }))
 
       expect(refetch).toHaveBeenCalled()
+    })
+  })
+
+  describe('wallet network', () => {
+    beforeEach(() => {
+      jest
+        .spyOn(useChainsHook, 'useCurrentChain')
+        .mockReturnValue(chainBuilder().with({ chainId: CHAIN_ID, chainName: 'Ethereum' }).build())
+    })
+
+    afterEach(() => {
+      jest.restoreAllMocks()
+    })
+
+    it('asks to change the wallet network when the wallet is on another chain than the picked Safe', () => {
+      jest.spyOn(useIsWrongChainHook, 'default').mockReturnValue(true)
+
+      renderForm({ safeAccount: treasury.id })
+
+      expect(screen.getByText('Change your wallet network')).toBeInTheDocument()
+      expect(screen.getByText(/You are trying to sign on Ethereum/)).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Switch to/ })).toBeInTheDocument()
+    })
+
+    it('shows no network warning when the wallet is on the picked Safe chain', () => {
+      jest.spyOn(useIsWrongChainHook, 'default').mockReturnValue(false)
+
+      renderForm({ safeAccount: treasury.id })
+
+      expect(screen.queryByText('Change your wallet network')).not.toBeInTheDocument()
     })
   })
 
