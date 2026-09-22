@@ -3,7 +3,7 @@ import Fuse from 'fuse.js'
 import useChains from '@/hooks/useChains'
 import { getPolicyLabel, getPolicySummary } from '../utils/policyLabel'
 import { getPolicyTokens } from '../utils/policyTokens'
-import type { Policy } from '../types'
+import { hasSpendingLimitData, type Policy } from '../types'
 
 /** Searches the policies held in the browser. The space address book is not searched: a policy carries no names. */
 
@@ -12,8 +12,16 @@ type SearchablePolicy = {
   rule: string
   summary: string
   safeAddress: string
+  /** The spenders or proposers a policy grants something to. */
+  parties: string
   network: string
   tokens: string
+}
+
+const getParties = (policy: Policy): string[] => {
+  if (hasSpendingLimitData(policy)) return policy.data.spenders.map((spender) => spender.spender)
+  if (policy.type === 'proposer') return policy.data.proposers.map((proposer) => proposer.proposer)
+  return []
 }
 
 const toSearchable = (policy: Policy, chainNames: Map<string, string>): SearchablePolicy => ({
@@ -21,6 +29,7 @@ const toSearchable = (policy: Policy, chainNames: Map<string, string>): Searchab
   rule: getPolicyLabel(policy),
   summary: getPolicySummary(policy),
   safeAddress: policy.safe.address,
+  parties: getParties(policy).join(' '),
   network: [chainNames.get(policy.safe.chainId), policy.safe.chainId].filter(Boolean).join(' '),
   tokens: getPolicyTokens(policy)
     .map((token) => token.symbol)
@@ -36,7 +45,14 @@ const usePolicySearch = (policies: Policy[], query: string): Policy[] => {
   const fuse = useMemo(
     () =>
       new Fuse(searchable, {
-        keys: [{ name: 'rule' }, { name: 'summary' }, { name: 'safeAddress' }, { name: 'network' }, { name: 'tokens' }],
+        keys: [
+          { name: 'rule' },
+          { name: 'summary' },
+          { name: 'safeAddress' },
+          { name: 'parties' },
+          { name: 'network' },
+          { name: 'tokens' },
+        ],
         threshold: 0.2,
         findAllMatches: true,
         ignoreLocation: true,

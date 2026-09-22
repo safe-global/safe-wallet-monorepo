@@ -9,26 +9,6 @@ import { sortPolicies } from '../policySort'
 import { getPolicyStatus } from '../../types'
 
 describe('sortPolicies', () => {
-  it('should, when sorting newest first, put the most recently created policy first', () => {
-    const recovery = asActivePolicy(mockRecoveryPolicy())
-    const proposer = asActivePolicy(mockProposerPolicy())
-    const pending = mockPendingPolicy()
-
-    const sorted = sortPolicies([recovery, proposer, pending], 'newest')
-
-    expect(sorted.map((policy) => policy.id)).toEqual([proposer.id, pending.id, recovery.id])
-  })
-
-  it('should, when sorting oldest first, put the earliest created policy first', () => {
-    const recovery = asActivePolicy(mockRecoveryPolicy())
-    const proposer = asActivePolicy(mockProposerPolicy())
-    const pending = mockPendingPolicy()
-
-    const sorted = sortPolicies([recovery, proposer, pending], 'oldest')
-
-    expect(sorted.map((policy) => policy.id)).toEqual([recovery.id, pending.id, proposer.id])
-  })
-
   it('should, when sorting by rule, order the policies by their derived label', () => {
     const recovery = asActivePolicy(mockRecoveryPolicy())
     const proposer = asActivePolicy(mockProposerPolicy())
@@ -50,11 +30,20 @@ describe('sortPolicies', () => {
     expect(sorted.map(getPolicyStatus)).toEqual(['pending', 'unenforced', 'active', 'active'])
   })
 
+  it('should, when two policies share a status, keep the order they arrived in', () => {
+    const recovery = asActivePolicy(mockRecoveryPolicy())
+    const proposer = asActivePolicy(mockProposerPolicy())
+
+    const sorted = sortPolicies([recovery, proposer], 'status')
+
+    expect(sorted.map((policy) => policy.type)).toEqual(['recovery', 'proposer'])
+  })
+
   it('should, when called, leave the given list unchanged', () => {
-    const policies = [asActivePolicy(mockRecoveryPolicy()), asActivePolicy(mockProposerPolicy())]
+    const policies = [asActivePolicy(mockProposerPolicy()), asActivePolicy(mockRecoveryPolicy())]
 
-    sortPolicies(policies, 'oldest')
+    sortPolicies(policies, 'rule')
 
-    expect(policies.map((policy) => policy.type)).toEqual(['recovery', 'proposer'])
+    expect(policies.map((policy) => policy.type)).toEqual(['proposer', 'recovery'])
   })
 })

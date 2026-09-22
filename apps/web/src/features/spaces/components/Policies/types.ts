@@ -1,5 +1,6 @@
 /**
- * The CGW policy response shape.
+ * What the table and the detail panel render. `mapActivePolicies` builds it from the CGW response,
+ * resolving token metadata and unit conversions on the way in.
  *
  * No type carries a name. Policy names are not stored on chain and are not in the CGW response;
  * they live in the space address book and the frontend resolves them.
@@ -65,11 +66,20 @@ export type RecoveryPolicyData = {
   } | null
 }
 
-export type ProposerPolicyData = {
-  proposer: string
+export type ProposerGrant = {
   /** The grant outlives its granter: this signer may no longer be an owner of the Safe. */
-  grantedBy: string
-  grantedAt: number
+  delegator: string
+  label: string
+}
+
+export type Proposer = {
+  proposer: string
+  delegatedBy: ProposerGrant[]
+}
+
+/** One policy per Safe, holding every proposer registered on it. */
+export type ProposerPolicyData = {
+  proposers: Proposer[]
 }
 
 type PolicyBase = {
@@ -82,9 +92,6 @@ type PolicyBase = {
    * whose module is disabled enforces nothing, and the table says so rather than calling it active.
    */
   enabled: boolean
-  createdBy: string
-  /** Unix seconds. */
-  createdAt: number
 }
 
 export type SpendingLimitPolicy = PolicyBase & { type: 'spending-limit'; data: SpendingLimitPolicyData }

@@ -1,5 +1,11 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
-import { asActivePolicy, mockPolicies, mockProposerPolicy, mockRecoveryPolicy } from '../mocks/policies'
+import {
+  asActivePolicy,
+  mockPendingPolicy,
+  mockPolicies,
+  mockRecoveryPolicy,
+  mockUnenforcedPolicy,
+} from '../mocks/policies'
 import PoliciesList from '../PoliciesList'
 
 describe('PoliciesList', () => {
@@ -29,13 +35,18 @@ describe('PoliciesList', () => {
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
   })
 
-  it('should, when no sort is chosen, order the rows with the most recently created policy first', () => {
-    render(<PoliciesList policies={[asActivePolicy(mockRecoveryPolicy()), asActivePolicy(mockProposerPolicy())]} />)
+  it('should, when no sort is chosen, put the policies that need attention first', () => {
+    render(
+      <PoliciesList
+        policies={[asActivePolicy(mockRecoveryPolicy()), asActivePolicy(mockUnenforcedPolicy()), mockPendingPolicy()]}
+      />,
+    )
 
-    const rules = screen.getAllByTestId('policy-cell-rule')
+    const statuses = screen.getAllByTestId('policy-cell-status')
 
-    expect(rules[0]).toHaveTextContent('Proposer')
-    expect(rules[1]).toHaveTextContent('Account recovery')
+    expect(statuses[0]).toHaveTextContent('Pending')
+    expect(statuses[1]).toHaveTextContent('Not enforced')
+    expect(statuses[2]).toHaveTextContent('Active')
   })
 
   it('should, when Add policy is clicked, ask the caller to open the create flow', () => {
