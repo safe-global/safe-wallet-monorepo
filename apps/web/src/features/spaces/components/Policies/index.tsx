@@ -11,7 +11,15 @@ import { PROPOSER_INTRO_SEEN_KEY } from './ProposerIntroDialog/constants'
 import SpendingLimitFlow from './SpendingLimitFlow'
 import SpendingLimitIntroDialog from './SpendingLimitIntroDialog'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from './SpendingLimitIntroDialog/constants'
-import { REQUEST_POLICY_FORM_URL } from './constants'
+import { REQUEST_POLICY_FORM_HEIGHT, REQUEST_POLICY_FORM_URL, REQUEST_POLICY_FORM_WIDTH } from './constants'
+
+const openRequestPolicyForm = () => {
+  const left = window.screenX + Math.max(0, (window.outerWidth - REQUEST_POLICY_FORM_WIDTH) / 2)
+  const top = window.screenY + Math.max(0, (window.outerHeight - REQUEST_POLICY_FORM_HEIGHT) / 2)
+  const features = `popup=yes,width=${REQUEST_POLICY_FORM_WIDTH},height=${REQUEST_POLICY_FORM_HEIGHT},left=${Math.round(left)},top=${Math.round(top)},noopener,noreferrer`
+
+  window.open(REQUEST_POLICY_FORM_URL, '_blank', features)
+}
 
 const Policies = (): ReactElement => {
   const [hasSeenSpendingLimitIntro = false, setHasSeenSpendingLimitIntro] =
@@ -50,7 +58,7 @@ const Policies = (): ReactElement => {
           return
 
         case 'suggestion':
-          window.open(REQUEST_POLICY_FORM_URL, '_blank', 'noopener,noreferrer')
+          openRequestPolicyForm()
           return
 
         // Only unreachable while `isAvailable` is false in the catalogue; needs a flow before it flips.
