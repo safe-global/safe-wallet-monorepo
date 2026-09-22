@@ -13,6 +13,7 @@ import { PROPOSER_INTRO_SEEN_KEY } from './ProposerIntroDialog/constants'
 import SpendingLimitFlow from './SpendingLimitFlow'
 import SpendingLimitIntroDialog from './SpendingLimitIntroDialog'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from './SpendingLimitIntroDialog/constants'
+import { REQUEST_POLICY_FORM_URL } from './constants'
 import type { Policy } from './types'
 
 interface PoliciesProps {
@@ -78,7 +79,7 @@ const Policies = ({
           return
 
         case 'suggestion':
-          // TODO(WA-3160): open the Suggest a policy dialog.
+          window.open(REQUEST_POLICY_FORM_URL, '_blank', 'noopener,noreferrer')
           return
 
         // A new policy id must pick a branch above rather than silently doing nothing.
