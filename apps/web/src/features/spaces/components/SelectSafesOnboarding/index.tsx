@@ -52,7 +52,7 @@ const SelectSafesOnboarding = (): ReactElement => {
     selectedSafesLength,
     error,
     isSubmitting,
-    isAddressBookLoading,
+    isAddressBookReady,
     step,
     safesToName,
     showSelectStep,
@@ -188,7 +188,7 @@ const SelectSafesOnboarding = (): ReactElement => {
         continueDisabled={
           selectedSafesLength === 0 ||
           isSubmitting ||
-          isAddressBookLoading ||
+          !isAddressBookReady ||
           (isNameStep && !hasAllNames(typedNames, safesToName))
         }
         continueLoading={isSubmitting}

@@ -373,6 +373,22 @@ describe('AddAccounts — naming step', () => {
     ])
   })
 
+  it('keeps the naming step submittable after the Safes are already added', async () => {
+    mockUpsertWorkspaceNames.mockResolvedValueOnce({ error: 'Forbidden' })
+    const form = selectTrusted()
+    fireEvent.click(screen.getByTestId('safe-accounts-table'))
+    fireEvent.submit(form)
+    await screen.findByText('Name your Safe accounts')
+
+    fireEvent.submit(screen.getByTestId('add-accounts-button').closest('form')!)
+    await screen.findByText('Forbidden')
+
+    mockSpaceSafes = [{ chainId: '1', address: TRUSTED_ADDRESS }]
+    fireEvent.click(screen.getByTestId('name-accounts-region'))
+
+    await waitFor(() => expect(screen.getByTestId('add-accounts-button')).not.toBeDisabled())
+  })
+
   it('returns to the picker from the naming view', async () => {
     const form = selectTrusted()
     fireEvent.click(screen.getByTestId('safe-accounts-table'))

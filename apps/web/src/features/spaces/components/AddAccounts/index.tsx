@@ -118,7 +118,11 @@ const AddAccounts = ({
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
   const [removeSafesFromSpace] = useSpaceSafesDeleteV1Mutation()
   const upsertWorkspaceNames = useUpsertWorkspaceSafeNames()
-  const { items: spaceAddressBook, isLoading: isAddressBookLoading } = useSpaceAddressBookState()
+  const {
+    items: spaceAddressBook,
+    isLoading: isAddressBookLoading,
+    isError: isAddressBookError,
+  } = useSpaceAddressBookState()
   const spaceId = useCurrentSpaceId()
   const trustedModal = useTrustedSafesModal()
 
@@ -195,6 +199,8 @@ const AddAccounts = ({
   const removedSafesCount = getRemovedSafes(selectedSafes, spaceSafes).length
   const isFormDirty = selectedSafesLength > 0 || removedSafesCount > 0
   const namesComplete = view !== 'name' || hasAllNames(watch('names'), safesToName)
+  const hasSomethingToSubmit = view === 'name' ? safesToName.length > 0 : isFormDirty
+  const isAddressBookReady = !isAddressBookLoading && !isAddressBookError
   const { isSubmitting } = formState
 
   // Computed inline (not memoised): react-hook-form's watch() mutates and returns the same object
@@ -604,7 +610,7 @@ const AddAccounts = ({
                       data-testid="add-accounts-button"
                       type="submit"
                       size="lg"
-                      disabled={!isFormDirty || !namesComplete || isAddressBookLoading || isSubmitting}
+                      disabled={!hasSomethingToSubmit || !namesComplete || !isAddressBookReady || isSubmitting}
                       className="flex-1"
                     >
                       {isSubmitting ? (

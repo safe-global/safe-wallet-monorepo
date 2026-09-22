@@ -110,6 +110,18 @@ describe('useSpaceAddressBookState', () => {
     expect(result.current).toEqual({ items: [], isLoading: true })
   })
 
+  it('reports a failed read rather than an empty book', () => {
+    mockUseAddressBooksGetAddressBookItemsV1Query.mockReturnValue({
+      currentData: undefined,
+      isLoading: false,
+      isError: true,
+    })
+
+    const { result } = renderHook(() => useSpaceAddressBookState())
+
+    expect(result.current).toEqual({ items: [], isLoading: false, isError: true })
+  })
+
   it('returns the loaded items once the query resolves', () => {
     const items = [{ address: '0x1', name: 'Treasury', chainIds: ['1'] }]
     mockUseAddressBooksGetAddressBookItemsV1Query.mockReturnValue({ currentData: { data: items }, isLoading: false })

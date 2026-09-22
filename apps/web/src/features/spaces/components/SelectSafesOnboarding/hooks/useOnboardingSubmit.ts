@@ -68,7 +68,8 @@ const useOnboardingSubmit = (
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
   const [removeSafesFromSpace] = useSpaceSafesDeleteV1Mutation()
   const upsertWorkspaceNames = useUpsertWorkspaceSafeNames()
-  const { items: spaceAddressBook, isLoading: isAddressBookLoading } = useSpaceAddressBookState()
+  const { items: spaceAddressBook, isLoading, isError } = useSpaceAddressBookState()
+  const isAddressBookReady = !isLoading && !isError
 
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -281,7 +282,7 @@ const useOnboardingSubmit = (
     selectedSafesLength,
     error,
     isSubmitting,
-    isAddressBookLoading,
+    isAddressBookReady,
     step,
     safesToName,
     showSelectStep: () => setStep('select'),

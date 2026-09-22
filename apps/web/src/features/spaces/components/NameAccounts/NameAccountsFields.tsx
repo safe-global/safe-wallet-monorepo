@@ -22,11 +22,6 @@ type Item = AllSafeItems[number]
 
 const EMPTY_SUMMARY: SafeSummary = { thresholdMixed: false, loaded: false }
 
-/**
- * A named row reads as text with a hover pencil; clicking it (or an empty row) shows the boxed input,
- * sized to the text line with its padding hanging into the gutter so the text keeps the row's
- * alignment. Once left, an empty or invalid name shows its message in place of the address.
- */
 const NameAccountCell = ({ item }: { item: Item }) => {
   const key = nameFieldKey(item.address)
   const { formState } = useFormContext<AddAccountsFormValues>()
