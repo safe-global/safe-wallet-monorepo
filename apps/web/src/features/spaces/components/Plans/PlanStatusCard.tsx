@@ -15,7 +15,7 @@ import type { Meter, PlanSummary } from './types'
 export const remaining = ({ used, quota }: Meter): number | null => (quota === null ? null : Math.max(quota - used, 0))
 
 export const seatsTooltip = (tierName: string | undefined, quota: number | null | undefined) =>
-  `${tierName ?? 'Your plan'} includes ${quota ?? 'unlimited'} Safe accounts in the Workspace. Safe accounts you create outside the Workspace remain available in My accounts.`
+  `${tierName ?? 'Your plan'} covers ${quota ?? 'unlimited'} Safe accounts. At ${quota ?? 'unlimited'}, remove one from this Workspace to add another. Safe accounts you leave out remain available in My accounts.`
 
 /** The badge both the status card and the current plan card wear: trial with its countdown, or Active. */
 export const getCurrentBadge = (plan: PlanSummary | null): CurrentBadge | undefined => {
