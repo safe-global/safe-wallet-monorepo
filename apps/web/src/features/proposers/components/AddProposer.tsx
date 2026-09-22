@@ -40,7 +40,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Typography } from '@/components/ui/typography'
 import {
   useDelegatesPostDelegateV1Mutation,
-  useDelegatesPostDelegateV2Mutation,
+  useDelegatesPostDelegateV3Mutation,
   type CreateDelegateDto,
 } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
@@ -50,7 +50,6 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import SignerSelector from '@/components/common/SignerSelector'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import SignatureIcon from '@/public/images/transactions/signature.svg'
-import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 
 type AddProposerProps = {
   onClose: () => void
@@ -73,7 +72,7 @@ const AddProposer = ({ onClose, onSuccess }: AddProposerProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [multiSigInitiated, setMultiSigInitiated] = useState<boolean>(false)
   const [addDelegateV1] = useDelegatesPostDelegateV1Mutation()
-  const [addDelegateV2] = useDelegatesPostDelegateV2Mutation()
+  const [addDelegateV3] = useDelegatesPostDelegateV3Mutation()
   const dispatch = useAppDispatch()
 
   const chainId = useChainId()
@@ -149,8 +148,15 @@ const AddProposer = ({ onClose, onSuccess }: AddProposerProps) => {
       if (parentSafeAddress) {
         if (isMultiSigRequired) {
           // Multi-sig flow: create off-chain message on parent Safe for signature collection
-          const eoaSignature = await signProposerTypedDataForSafe(chainId, data.address, parentSafeAddress, signer)
-          const delegateTypedData = getDelegateTypedData(chainId, data.address) as TypedData
+          const eoaSignature = await signProposerTypedDataForSafe(
+            chainId,
+            data.address,
+            parentSafeAddress,
+            safeAddress,
+            'add',
+            signer,
+          )
+          const delegateTypedData = getDelegateTypedData(chainId, data.address, safeAddress, 'add')
           const origin = buildDelegationOrigin('add', data.address, safeAddress)
 
           await createDelegationMessage(dispatch, chainId, parentSafeAddress, delegateTypedData, eoaSignature, origin)
@@ -163,14 +169,21 @@ const AddProposer = ({ onClose, onSuccess }: AddProposerProps) => {
         }
 
         // Single-sig nested Safe owner: sign and submit immediately
-        const eoaSignature = await signProposerTypedDataForSafe(chainId, data.address, parentSafeAddress, signer)
+        const eoaSignature = await signProposerTypedDataForSafe(
+          chainId,
+          data.address,
+          parentSafeAddress,
+          safeAddress,
+          'add',
+          signer,
+        )
         signature = await encodeEIP1271Signature(parentSafeAddress, eoaSignature)
         delegator = parentSafeAddress
       } else {
         // Direct owner: sign delegate typed data directly
         const eoaSignature = shouldEthSign
           ? await signProposerData(data.address, signer)
-          : await signProposerTypedData(chainId, data.address, signer)
+          : await signProposerTypedData(chainId, data.address, safeAddress, 'add', signer)
         signature = eoaSignature
         delegator = wallet.address
       }
@@ -186,7 +199,7 @@ const AddProposer = ({ onClose, onSuccess }: AddProposerProps) => {
       if (shouldEthSign && !parentSafeAddress) {
         await addDelegateV1({ chainId, createDelegateDto }).unwrap()
       } else {
-        await addDelegateV2({ chainId, createDelegateDto }).unwrap()
+        await addDelegateV3({ chainId, createDelegateDto }).unwrap()
       }
 
       saveNameLocally()
