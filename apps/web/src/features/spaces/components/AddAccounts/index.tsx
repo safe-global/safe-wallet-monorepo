@@ -300,12 +300,6 @@ const AddAccounts = ({
         })
       }
 
-      const namesResult = await upsertWorkspaceNames(buildWorkspaceSafeNames(data.names, safesToWrite))
-      if (namesResult.error) {
-        setError(namesResult.error)
-        return
-      }
-
       // Remove unchecked safes
       if (safesToRemove.length > 0) {
         const result = await removeSafesFromSpace({
@@ -325,6 +319,12 @@ const AddAccounts = ({
             { workspace_id: spaceId, safe_address: address, chain_id: chainId },
           )
         })
+      }
+
+      const namesResult = await upsertWorkspaceNames(buildWorkspaceSafeNames(data.names, safesToWrite))
+      if (namesResult.error) {
+        setError(namesResult.error)
+        return
       }
 
       // Show success notification

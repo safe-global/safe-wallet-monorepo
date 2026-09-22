@@ -225,11 +225,11 @@ const useOnboardingSubmit = (
   ) => {
     await addNewSafes(safesToAdd, spaceIdStr)
     trustAddedSafes(safesToAdd)
+    await removeUnselectedSafes(selectedSafes, spaceIdStr)
     const namesResult = await upsertWorkspaceNames(names)
     if (namesResult.error) {
       throw new Error(namesResult.error)
     }
-    await removeUnselectedSafes(selectedSafes, spaceIdStr)
   }
 
   const onSubmit = handleSubmit(async (data) => {

@@ -748,6 +748,32 @@ describe('useOnboardingSubmit — naming step', () => {
     })
   })
 
+  it('still removes the unselected Safes when the name write fails', async () => {
+    mockUpsertWorkspaceNames.mockResolvedValue({ error: 'Forbidden' })
+    mockSpaceSafes = [buildSafeItem('1', '0xexisting')]
+    const { result } = renderHook(() => useOnboardingSubmit('42', onSuccess, [buildSafeItem('1', ADDRESS)]))
+    await waitFor(() => expect(result.current.selectedSafesLength).toBe(1))
+
+    act(() => {
+      result.current.formMethods.setValue('selectedSafes', { '1:0xexisting': false, [`1:${ADDRESS}`]: true })
+    })
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+    act(() => {
+      result.current.formMethods.setValue(`names.${ADDRESS.toLowerCase()}`, 'Treasury')
+    })
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(result.current.error).toBe('Forbidden')
+    expect(mockRemoveSafesFromSpace).toHaveBeenCalledWith({
+      spaceId: '42',
+      deleteSpaceSafesDto: { safes: [{ chainId: '1', address: '0xexisting' }] },
+    })
+  })
+
   it('returns to the selection step on demand', async () => {
     const { result } = renderHook(() => useOnboardingSubmit('42', onSuccess, [buildSafeItem('1', ADDRESS)]))
 
