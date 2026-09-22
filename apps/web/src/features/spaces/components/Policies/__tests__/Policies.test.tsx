@@ -389,6 +389,29 @@ describe('Policies', () => {
       expect(screen.queryByRole('button', { name: 'Reload' })).not.toBeInTheDocument()
     })
 
+    it('should, when Add policy is clicked and no handler is given, start the proposer flow', async () => {
+      mockHasSeenProposerIntro = true
+      const setTxFlow = jest.fn()
+      const { user } = renderWithUserEvent(
+        <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
+          <Policies policies={mockPolicies()} />
+        </TxModalContext.Provider>,
+      )
+
+      await user.click(screen.getByTestId('add-policy-button'))
+
+      expect(setTxFlow).toHaveBeenCalledTimes(1)
+      expect(setTxFlow.mock.calls[0][0].type).toBe(ProposerRoleFlow)
+    })
+
+    it('should, when Add policy is clicked before the proposer intro was seen, show the intro first', async () => {
+      const { user } = renderWithUserEvent(<Policies policies={mockPolicies()} />)
+
+      await user.click(screen.getByTestId('add-policy-button'))
+
+      expect(screen.getByTestId('proposer-intro-dialog')).toBeInTheDocument()
+    })
+
     it('should, when a proposer row is clicked and no handler is given, open the proposer drawer', () => {
       const proposerPolicy = asActivePolicy(mockProposerPolicy())
 

@@ -24,7 +24,7 @@ interface PoliciesProps {
   isLoading?: boolean
   isError?: boolean
   onRetry?: () => void
-  /** Opens the catalogue picker from the populated mode's `Add policy` button. */
+  /** The populated mode's `Add policy` button. Without it the button starts the proposer flow. */
   onAddPolicy?: () => void
   onSelectPolicy?: (policy: Policy) => void
 }
@@ -154,7 +154,11 @@ const Policies = ({
       ) : isError ? (
         <PoliciesLoadError onReload={onRetry} />
       ) : policies.length > 0 ? (
-        <PoliciesList policies={policies} onAddPolicy={onAddPolicy} onSelectPolicy={onSelectPolicy ?? openPolicy} />
+        <PoliciesList
+          policies={policies}
+          onAddPolicy={onAddPolicy ?? (() => handleSelect('proposer'))}
+          onSelectPolicy={onSelectPolicy ?? openPolicy}
+        />
       ) : (
         <PolicyCatalogue onSelect={handleSelect} />
       )}
