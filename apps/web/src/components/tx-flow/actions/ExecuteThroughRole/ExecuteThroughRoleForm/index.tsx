@@ -128,7 +128,6 @@ export const ExecuteThroughRoleForm = ({
       return
     }
 
-    // The flow's SafeScopeProvider unmounts with the flow, so the success screen gets the Safe explicitly.
     const successScope = scope ? { chainId: scope.chainId, safeAddress: scope.safeAddress } : undefined
 
     // On success, forward to the success screen, initially without a txId

@@ -81,9 +81,10 @@ const TokenLimitCard = ({
   const { options } = useSpendingLimitTokenOptions()
   const { limits: existingLimits } = useExistingSpendingLimits()
   const spenderAddress = watch(spenderAddressPath(spenderIndex)) ?? ''
-  // `existingTokensForSpender` is a new array on every spender keystroke, so key the re-trigger effect on values.
-  const existingTokensKey = existingTokensForSpender(spenderAddress, existingLimits).join(',')
-  const existingTokens = useMemo(() => (existingTokensKey ? existingTokensKey.split(',') : []), [existingTokensKey])
+  const existingTokens = useMemo(
+    () => existingTokensForSpender(spenderAddress, existingLimits),
+    [spenderAddress, existingLimits],
+  )
 
   const tokenPath = limitPath(spenderIndex, limitIndex, 'tokenAddress')
   const amountPath = limitPath(spenderIndex, limitIndex, 'amount')
@@ -120,15 +121,14 @@ const TokenLimitCard = ({
     if (getValues(amountPath)) trigger(amountPath)
   }, [decimals, amountPath, getValues, trigger])
 
-  // A token picked before the Safe's limits loaded, or before the spender was typed, is re-checked once they
-  // are — not on every mount, since re-validating while `existingLimits` is still unknown cannot change the result.
+  // Keyed on the exclusions' values, not the array: every spender keystroke produces a new one, and re-validating
+  // on each would show this row's errors before it has been filled in.
+  const existingTokensKey = existingTokens.join(',')
   useEffect(() => {
     if (existingLimits !== undefined && getValues(tokenPath)) trigger(tokenPath)
-  }, [existingTokens, existingLimits, tokenPath, getValues, trigger])
+  }, [existingTokensKey, existingLimits, tokenPath, getValues, trigger])
 
-  // A token is refused when another row of this spender already has it, or when the Safe already limits it for
-  // this spender. Each check returns the error text or nothing; the first error wins. The form is read at
-  // validation time, because a memo would be one render behind.
+  // Read at validation time: a memo of the sibling rows would be one render behind.
   const validateTokenChoice = (tokenAddress: string): string | undefined => {
     const siblingTokens = (getValues(limitsPath(spenderIndex)) ?? [])
       .map((limit) => limit.tokenAddress)

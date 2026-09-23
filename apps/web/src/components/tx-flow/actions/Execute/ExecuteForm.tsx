@@ -208,7 +208,6 @@ export const ExecuteForm = ({
 
     // On success
     onSubmitSuccess?.({ txId: executedTxId, isExecuted: true })
-    // The flow's SafeScopeProvider unmounts with the flow, so the success screen gets the Safe explicitly.
     const successScope = scope ? { chainId: scope.chainId, safeAddress: scope.safeAddress } : undefined
     setTxFlow(<SuccessScreenFlow txId={executedTxId} scope={successScope} />, undefined, false)
   }

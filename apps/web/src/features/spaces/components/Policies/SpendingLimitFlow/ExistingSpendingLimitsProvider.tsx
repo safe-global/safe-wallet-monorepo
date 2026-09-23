@@ -1,6 +1,7 @@
 import { createContext, useContext, useMemo, type ReactElement, type ReactNode } from 'react'
 import type { Erc20Token, NativeToken } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import useAsync from '@safe-global/utils/hooks/useAsync'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { useSafeScope } from '@/components/tx-flow/safe-scope'
 import { useLoadFeature } from '@/features/__core__'
@@ -33,7 +34,7 @@ const toTokenInfo = (option: TokenOption): Erc20Token | NativeToken => {
     name: option.name,
     logoUri: option.logoUri ?? '',
   }
-  return option.address === ZERO_ADDRESS ? { ...info, type: 'NATIVE_TOKEN' } : { ...info, type: 'ERC20' }
+  return sameAddress(option.address, ZERO_ADDRESS) ? { ...info, type: 'NATIVE_TOKEN' } : { ...info, type: 'ERC20' }
 }
 
 /**
