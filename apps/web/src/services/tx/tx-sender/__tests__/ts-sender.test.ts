@@ -230,7 +230,12 @@ describe('txSender', () => {
 
       expect(proposedTx.txId).toBe('123')
 
-      expect(txEvents.txDispatch).toHaveBeenCalledWith('PROPOSED', { txId: '123', nonce: 0 })
+      expect(txEvents.txDispatch).toHaveBeenCalledWith('PROPOSED', {
+        txId: '123',
+        nonce: 0,
+        chainId: '4',
+        safeAddress: '0x123',
+      })
     })
 
     it('should fail to propose a new tx', async () => {
