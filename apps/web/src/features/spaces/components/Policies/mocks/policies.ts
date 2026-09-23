@@ -8,6 +8,7 @@ import type {
   RecoveryPolicy,
   SpendingLimitPolicy,
 } from '../types'
+import type { Viewer } from '../SpendingLimitDrawer/resolveState'
 
 /** Shaped like the CGW policy response. The stories and the unit tests share these. */
 
@@ -245,4 +246,4 @@ export const MOCK_VIEWERS = {
   signerWhoSigned: { address: MOCK_ADDRESSES.alice, isSigner: true, hasSigned: true },
   nonSigner: { address: MOCK_ADDRESSES.unresolved, isSigner: false, hasSigned: false },
   disconnected: { isSigner: false, hasSigned: false },
-} as const
+} as const satisfies Record<string, Viewer>
