@@ -11,9 +11,11 @@ import { PROPOSER_LABEL_PLACEHOLDER, SMART_CONTRACT_PROPOSER_ERROR } from '@/fea
 import { addressIsNotSmartContract, signProposerData, signProposerTypedData } from '@/features/proposers/utils/utils'
 import useChainId from '@/hooks/useChainId'
 import useSafeAddress from '@/hooks/useSafeAddress'
+import useOnboard from '@/hooks/wallets/useOnboard'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
-import { getAssertedChainSigner } from '@/services/tx/tx-sender/sdk'
+import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
+import { assertWalletChain, getAssertedChainSigner } from '@/services/tx/tx-sender/sdk'
 import { useAppDispatch } from '@/store'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { showNotification } from '@/store/notificationsSlice'
@@ -30,6 +32,7 @@ export type GrantProposer = {
 
 export const useGrantProposer = (): GrantProposer => {
   const wallet = useWallet()
+  const onboard = useOnboard()
   const chainId = useChainId()
   const safeAddress = useSafeAddress()
   const provider = useWeb3ReadOnly()
@@ -47,7 +50,7 @@ export const useGrantProposer = (): GrantProposer => {
 
   const grantProposerRole = useCallback(
     async ({ proposer, name }: ProposerRoleFormValues): Promise<boolean> => {
-      if (!wallet || !safeAddress) return false
+      if (!wallet || !onboard || !safeAddress) return false
 
       reset()
       setIsSubmitting(true)
@@ -63,15 +66,18 @@ export const useGrantProposer = (): GrantProposer => {
           return false
         }
 
-        const shouldEthSign = isEthSignWallet(wallet)
-        const signer = await getAssertedChainSigner(wallet.provider)
+        // The Safe comes from a dropdown, not the URL, so the wallet may sit on any chain at submit time.
+        const activeWallet = await assertWalletChain(onboard, chainId)
+
+        const shouldEthSign = isEthSignWallet(activeWallet)
+        const signer = await getAssertedChainSigner(activeWallet.provider)
         const signature = shouldEthSign
           ? await signProposerData(proposer, signer)
           : await signProposerTypedData(chainId, proposer, signer)
 
         const createDelegateDto: CreateDelegateDto = {
           delegate: proposer,
-          delegator: wallet.address,
+          delegator: activeWallet.address,
           label: PROPOSER_LABEL_PLACEHOLDER,
           signature,
           safe: safeAddress,
@@ -84,6 +90,7 @@ export const useGrantProposer = (): GrantProposer => {
         }
 
         dispatch(upsertAddressBookEntries({ chainIds: [chainId], address: proposer, name: sanitizeName(name) }))
+        trackEvent(SETTINGS_EVENTS.PROPOSERS.SUBMIT_ADD_PROPOSER)
         dispatch(
           showNotification({
             variant: 'success',
@@ -100,7 +107,7 @@ export const useGrantProposer = (): GrantProposer => {
         setIsSubmitting(false)
       }
     },
-    [wallet, safeAddress, chainId, provider, addDelegateV1, addDelegateV2, dispatch, reset],
+    [wallet, onboard, safeAddress, chainId, provider, addDelegateV1, addDelegateV2, dispatch, reset],
   )
 
   return { grantProposerRole, isSubmitting, error, blockedReason, reset }
