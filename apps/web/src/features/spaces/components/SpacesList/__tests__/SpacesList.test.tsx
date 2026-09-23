@@ -61,7 +61,9 @@ jest.mock('@/features/safe-pro-announcement', () => ({
 
 jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
 
-jest.mock('../../../hooks/useSpacePlan', () => ({ useSpacePlan: () => ({ tierName: undefined, isPaidActive: false }) }))
+jest.mock('../../../hooks/billing/useSpaceSubscription', () => ({
+  useSpaceSubscription: () => ({ subscription: undefined, status: 'none' }),
+}))
 
 jest.mock('@/features/spaces', () => ({
   MemberStatus: { ACTIVE: 'ACTIVE', INVITED: 'INVITED', DECLINED: 'DECLINED' },
