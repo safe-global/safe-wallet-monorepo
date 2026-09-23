@@ -28,7 +28,12 @@ const AddPolicyDialog = ({
           <DialogTitle className="text-xl leading-6 font-semibold">Add policy</DialogTitle>
         </DialogHeader>
 
-        <div data-testid="add-policy-options" className={cn('grid gap-3 px-4 pb-4', isTwoColumn && 'sm:grid-cols-2')}>
+        <div
+          data-testid="add-policy-options"
+          className={cn('grid gap-3 px-4 pb-4', {
+            'sm:grid-cols-2': isTwoColumn,
+          })}
+        >
           {options.map((option) => (
             <AddPolicyOptionButton key={option.id} {...option} onClick={() => onSelect?.(option.id)} />
           ))}
