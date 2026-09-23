@@ -5,7 +5,6 @@ import DialogActions from '@/components/common/DialogActions'
 import NameInput from '@/components/common/NameInput'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
-import ErrorMessage from '@/components/tx/ErrorMessage'
 import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@/components/ui/alert'
 import { Typography } from '@/components/ui/typography'
 import SafeAccountSelector from '../SafeAccountSelector'
@@ -27,8 +26,6 @@ export type ProposerRoleFormProps = {
   defaultValues?: Partial<ProposerRoleFormValues>
   isSubmitting?: boolean
   errorMessage?: ReactNode
-  /** Disables submit and explains why, e.g. the wallet cannot sign for the picked Safe. */
-  submitBlockedReason?: string
 }
 
 const ProposerRoleForm = ({
@@ -40,7 +37,6 @@ const ProposerRoleForm = ({
   defaultValues,
   isSubmitting = false,
   errorMessage,
-  submitBlockedReason,
 }: ProposerRoleFormProps) => {
   const methods = useForm<ProposerRoleFormValues>({
     defaultValues: { proposer: '', name: '', ...defaultValues },
@@ -52,7 +48,7 @@ const ProposerRoleForm = ({
     if (getValues('proposer')) void trigger('proposer')
   }, [safeAccount, validateProposer, trigger, getValues])
 
-  const canSubmit = Boolean(safeAccount) && formState.isValid && !submitBlockedReason
+  const canSubmit = Boolean(safeAccount) && formState.isValid
 
   return (
     <FormProvider {...methods}>
@@ -97,8 +93,6 @@ const ProposerRoleForm = ({
             />
 
             <NetworkWarning action="sign" />
-
-            {submitBlockedReason && <ErrorMessage level="warning">{submitBlockedReason}</ErrorMessage>}
 
             {errorMessage}
           </div>

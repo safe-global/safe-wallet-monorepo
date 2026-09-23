@@ -6,9 +6,8 @@ import TxLayoutBase from '@/components/tx-flow/common/TxLayoutBase'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { getProposerErrorText } from '@/features/proposers/utils/proposerErrors'
 import { useEligibleSafeAccounts } from '../SafeAccountSelector/hooks/useEligibleSafeAccounts'
-import { CREATE_POLICY_TITLE, NESTED_OWNER_UNSUPPORTED_MESSAGE } from './constants'
+import { CREATE_POLICY_TITLE } from './constants'
 import { useGrantProposer } from './hooks/useGrantProposer'
-import { useIsNestedOnlyOwner } from './hooks/useIsNestedOnlyOwner'
 import { useProposerValidation } from './hooks/useProposerValidation'
 import ProposerRoleForm, { type ProposerRoleFormValues } from './ProposerRoleForm'
 import ProposerRoleHeader from './ProposerRoleHeader'
@@ -21,7 +20,6 @@ const ProposerRoleFlowContent = (): ReactElement => {
 
   const { setTxFlow } = useContext(TxModalContext)
   const { grantProposerRole, isSubmitting, error, blockedReason, reset } = useGrantProposer()
-  const isNestedOnlyOwner = useIsNestedOnlyOwner()
 
   const onSafeAccountChange = useCallback(
     (value: string) => {
@@ -68,7 +66,6 @@ const ProposerRoleFlowContent = (): ReactElement => {
           validateProposer={validateProposer}
           isSubmitting={isSubmitting}
           errorMessage={errorMessage}
-          submitBlockedReason={isNestedOnlyOwner ? NESTED_OWNER_UNSUPPORTED_MESSAGE : undefined}
         />
       </TxLayoutBase>
     </div>
