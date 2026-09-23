@@ -124,10 +124,18 @@ index 03fd79e8a389f33a2841ecf0e177ffc9ea01b78c..d903b5dc4b0110dab9a8c1a648d34920
              break;
          }
 diff --git a/ios/DeviceCrypto.m b/ios/DeviceCrypto.m
-index 1c05886476b28afcb44eb8fc36f5141593d41b0e..24472762e7fbf2f13e9e1328008ad99d517fa5c1 100644
+index 1c05886476b28afcb44eb8fc36f5141593d41b0e..44f7950d2f058f3093d1294d85074d9b9f4324a4 100644
 --- a/ios/DeviceCrypto.m
 +++ b/ios/DeviceCrypto.m
-@@ -33,46 +33,39 @@ typedef NS_ENUM(NSUInteger, AccessLevel) {
+@@ -1,6 +1,7 @@
+ #import <Security/Security.h>
+ #import <React/RCTConvert.h>
+ #import <React/RCTBridge.h>
++#import <React/RCTLog.h>
+ #import <React/RCTUtils.h>
+ #import <LocalAuthentication/LAContext.h>
+ #import <LocalAuthentication/LAError.h>
+@@ -33,46 +34,39 @@ typedef NS_ENUM(NSUInteger, AccessLevel) {
  
  - (SecKeyRef) getPublicKeyRef:(nonnull NSData*) alias
  {
@@ -202,7 +210,7 @@ index 1c05886476b28afcb44eb8fc36f5141593d41b0e..24472762e7fbf2f13e9e1328008ad99d
  }
  
  - (NSString *) getPublicKeyAsString:(nonnull NSData*) alias
-@@ -112,29 +105,7 @@ - (NSString*) getPublicKeyAsPEM:(nonnull NSData*) alias
+@@ -112,29 +106,7 @@ - (NSString*) getPublicKeyAsPEM:(nonnull NSData*) alias
    return pemString;
  }
  
@@ -233,7 +241,7 @@ index 1c05886476b28afcb44eb8fc36f5141593d41b0e..24472762e7fbf2f13e9e1328008ad99d
  {
    NSDictionary *query = @{
      (id)kSecClass:               (id)kSecClassKey,
-@@ -143,11 +114,9 @@ - (bool) deletePublicKey:(nonnull NSData*) alias
+@@ -143,11 +115,9 @@ - (bool) deletePublicKey:(nonnull NSData*) alias
      (id)kSecAttrApplicationTag:  (id)alias,
    };
    OSStatus status = SecItemDelete((CFDictionaryRef) query);
@@ -247,7 +255,7 @@ index 1c05886476b28afcb44eb8fc36f5141593d41b0e..24472762e7fbf2f13e9e1328008ad99d
  }
  
  - (SecKeyRef) getPrivateKeyRef:(nonnull NSData*)alias withMessage:(NSString *)authPromptMessage
-@@ -171,8 +140,12 @@ - (SecKeyRef) getPrivateKeyRef:(nonnull NSData*)alias withMessage:(NSString *)au
+@@ -171,8 +141,12 @@ - (SecKeyRef) getPrivateKeyRef:(nonnull NSData*)alias withMessage:(NSString *)au
      return (SecKeyRef)resultTypeRef;
    else if (status == errSecItemNotFound)
      return nil;
@@ -262,7 +270,7 @@ index 1c05886476b28afcb44eb8fc36f5141593d41b0e..24472762e7fbf2f13e9e1328008ad99d
    return nil;
  }
  
-@@ -185,9 +158,11 @@ - (bool) deletePrivateKey:(nonnull NSData*) alias
+@@ -185,9 +159,11 @@ - (bool) deletePrivateKey:(nonnull NSData*) alias
      (id)kSecAttrApplicationTag:  (id)alias,
    };
    OSStatus status = SecItemDelete((CFDictionaryRef) query);
@@ -277,7 +285,7 @@ index 1c05886476b28afcb44eb8fc36f5141593d41b0e..24472762e7fbf2f13e9e1328008ad99d
    }
    return true;
  }
-@@ -208,6 +183,7 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+@@ -208,6 +184,7 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
  {
    SecKeyRef privateKeyRef = [self getPrivateKeyRef:alias withMessage:kAuthenticationRequired];
    if (privateKeyRef != nil) {
@@ -285,7 +293,7 @@ index 1c05886476b28afcb44eb8fc36f5141593d41b0e..24472762e7fbf2f13e9e1328008ad99d
      return [self getPublicKeyAsPEM:alias];
    }
  
-@@ -244,7 +220,10 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+@@ -244,7 +221,10 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
    SecAccessControlRef acRef = SecAccessControlCreateWithFlags(kCFAllocatorDefault, keyAccessLevel, acFlag, &error);
    
    if (!acRef) {
@@ -297,7 +305,7 @@ index 1c05886476b28afcb44eb8fc36f5141593d41b0e..24472762e7fbf2f13e9e1328008ad99d
    }
    
    NSDictionary* attributes =
-@@ -265,11 +244,14 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+@@ -265,11 +245,14 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
    };
    
    privateKeyRef = SecKeyCreateRandomKey((__bridge CFDictionaryRef)attributes, &error);
@@ -315,7 +323,7 @@ index 1c05886476b28afcb44eb8fc36f5141593d41b0e..24472762e7fbf2f13e9e1328008ad99d
    return [self getPublicKeyAsPEM:alias];
  }
  
-@@ -288,16 +270,19 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+@@ -288,16 +271,19 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
        resolve(publicKey != nil ? @(YES) : @(NO));
      }
    } @catch(NSException *err) {
@@ -340,7 +348,7 @@ index 1c05886476b28afcb44eb8fc36f5141593d41b0e..24472762e7fbf2f13e9e1328008ad99d
  }
  
  RCT_EXPORT_METHOD(sign:(nonnull NSData *)alias withPlainText:(nonnull NSString *)plainText withOptions:(nonnull NSDictionary *)options resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
-@@ -357,7 +342,7 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+@@ -357,7 +343,7 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
        @"encryptedText": [cipherText base64EncodedStringWithOptions:0],
      });
    } @catch(NSException *err) {
@@ -349,7 +357,7 @@ index 1c05886476b28afcb44eb8fc36f5141593d41b0e..24472762e7fbf2f13e9e1328008ad99d
    }
  }
  
-@@ -369,6 +354,12 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+@@ -369,6 +355,12 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
      NSData *textToBeDecrypted = [[NSData alloc] initWithBase64EncodedString:plainText options:0];
      NSString *authMessage = options[kAuthenticatePrompt];
      SecKeyRef privateKeyRef = [self getPrivateKeyRef:alias withMessage:authMessage];
@@ -362,7 +370,7 @@ index 1c05886476b28afcb44eb8fc36f5141593d41b0e..24472762e7fbf2f13e9e1328008ad99d
      
      BOOL canDecrypt = SecKeyIsAlgorithmSupported(privateKeyRef, kSecKeyOperationTypeDecrypt, kSecKeyAlgorithmECIESEncryptionCofactorX963SHA256AESGCM);
      
-@@ -383,7 +374,10 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+@@ -383,7 +375,10 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
                                                                       &aerr));
      
      if (!clearText || aerr) {
@@ -374,7 +382,7 @@ index 1c05886476b28afcb44eb8fc36f5141593d41b0e..24472762e7fbf2f13e9e1328008ad99d
      }
      
      if (privateKeyRef) { CFRelease(privateKeyRef); }
-@@ -391,7 +385,7 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+@@ -391,7 +386,7 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
      
      resolve([[NSString alloc] initWithData:clearText   encoding:NSUTF8StringEncoding]);
    } @catch(NSException *err) {
@@ -383,7 +391,7 @@ index 1c05886476b28afcb44eb8fc36f5141593d41b0e..24472762e7fbf2f13e9e1328008ad99d
    }
  }
  
-@@ -399,7 +393,11 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+@@ -399,7 +394,11 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
  // ______________________________________________
  RCT_EXPORT_METHOD(getPublicKey:(nonnull NSData *)alias resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
  {
