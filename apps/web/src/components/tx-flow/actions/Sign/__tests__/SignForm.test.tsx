@@ -28,7 +28,7 @@ const setTxFlow = jest.fn()
 
 const render = (ui: ReactElement, txFlowContext: Partial<TxFlowContextType> = {}) => {
   return renderTestUtils(
-    <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow }}>
+    <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
       <TxFlowContext.Provider value={{ ...initialContext, ...txFlowContext }}>{ui}</TxFlowContext.Provider>
     </TxModalContext.Provider>,
   )

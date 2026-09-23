@@ -105,7 +105,7 @@ const buildSafeTxContext = (safeTx: SafeTransaction): SafeTxContextParams => ({
   setSafeTxGas: jest.fn(),
   setTxOrigin: jest.fn(),
   isReadOnly: false,
-  gtfPaymentMode: 'wallet',
+  gtfPaymentMode: 'signer',
   setGtfPaymentMode: jest.fn(),
   setGtfSelectedGasToken: jest.fn(),
 })
