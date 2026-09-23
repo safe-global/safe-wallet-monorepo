@@ -44,7 +44,7 @@ const meta = {
 } satisfies Meta<typeof SpendingLimitDrawer>
 
 export default meta
-type Story = StoryObj<typeof SpendingLimitDrawer>
+type Story = StoryObj<typeof meta>
 
 /** 1 — a live limit seen by a signer, who can change or remove it. */
 export const ActiveSigner: Story = {}
