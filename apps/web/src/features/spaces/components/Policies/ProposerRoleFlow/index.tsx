@@ -19,19 +19,20 @@ const ProposerRoleFlowContent = (): ReactElement => {
   const safeAccounts = useEligibleSafeAccounts()
   const validateProposer = useProposerValidation()
 
+  const { setTxFlow } = useContext(TxModalContext)
+  const { grantProposerRole, isSubmitting, error, blockedReason, reset } = useGrantProposer()
+  const isNestedOnlyOwner = useIsNestedOnlyOwner()
+
   const onSafeAccountChange = useCallback(
     (value: string) => {
+      reset()
       setSafeAccount(value)
       const target = parseSafeScopeKey(value)
       if (target) setScope(target.chainId, target.safeAddress)
       else clearScope()
     },
-    [setScope, clearScope],
+    [reset, setScope, clearScope],
   )
-
-  const { setTxFlow } = useContext(TxModalContext)
-  const { grantProposerRole, isSubmitting, error, blockedReason } = useGrantProposer()
-  const isNestedOnlyOwner = useIsNestedOnlyOwner()
 
   const onSubmit = useCallback(
     async (values: ProposerRoleFormValues) => {

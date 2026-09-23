@@ -71,6 +71,7 @@ const grantState = (overrides: Partial<GrantProposer> = {}): GrantProposer => ({
   isSubmitting: false,
   error: undefined,
   blockedReason: undefined,
+  reset: jest.fn(),
   ...overrides,
 })
 
@@ -94,6 +95,7 @@ const fillAndSubmit = async (user: ReturnType<typeof renderFlow>['user']) => {
 }
 
 const SAFE = '0xAAAAaaaaAAaaaaAAAaAAaaaAaAaaaaaAAAaaAAaA'
+const OTHER_SAFE = '0xBBBBbbbbBBbbbbBBBbBBbbbBbBbbbbbBBBbbBBbB'
 const treasury: SafeAccountOption = {
   id: buildSafeAccountId('137', SAFE),
   chainId: '137',
@@ -103,6 +105,12 @@ const treasury: SafeAccountOption = {
   threshold: 3,
   owners: 5,
   chain: { chainId: '137', chainName: 'Polygon', chainLogoUri: null, shortName: 'matic' },
+}
+const payroll: SafeAccountOption = {
+  ...treasury,
+  id: buildSafeAccountId('137', OTHER_SAFE),
+  address: OTHER_SAFE,
+  name: 'Payroll',
 }
 
 describe('ProposerRoleFlow', () => {
@@ -201,6 +209,24 @@ describe('ProposerRoleFlow', () => {
       expect(setTxFlow).not.toHaveBeenCalled()
       expect(screen.getByRole('combobox', { name: 'Proposer' })).toHaveValue(PROPOSER)
       expect(screen.getByRole('textbox', { name: 'Proposer name' })).toHaveValue('Nicole')
+    })
+
+    it('clears a previous error when another Safe account is picked', async () => {
+      const reset = jest.fn()
+      mockUseGrantProposer.mockReturnValue(grantState({ error: new Error('boom'), reset }))
+      mockUseEligibleSafeAccounts.mockReturnValue({
+        accounts: [treasury, payroll],
+        isLoading: false,
+        isError: false,
+        hasWallet: true,
+        refetch: jest.fn(),
+      })
+      const { user } = renderFlow()
+
+      await user.click(screen.getByTestId('safe-account-selector'))
+      await user.click(await screen.findByRole('option', { name: /Payroll/ }))
+
+      expect(reset).toHaveBeenCalled()
     })
 
     it('shows the signing error under the form', () => {

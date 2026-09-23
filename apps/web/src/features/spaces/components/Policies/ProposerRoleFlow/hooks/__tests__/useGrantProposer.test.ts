@@ -196,4 +196,19 @@ describe('useGrantProposer', () => {
     expect(result.current.error).toBeUndefined()
     expect(result.current.isSubmitting).toBe(false)
   })
+
+  it('clears the error and blocked reason on reset', async () => {
+    addV2.trigger.mockReturnValueOnce({ unwrap: () => Promise.reject(new Error('422')) })
+    const { result } = renderHook(() => useGrantProposer())
+
+    await act(async () => {
+      await result.current.grantProposerRole({ proposer: PROPOSER, name: 'Nicole' })
+    })
+    expect(result.current.error?.message).toBe('422')
+
+    act(() => result.current.reset())
+
+    expect(result.current.error).toBeUndefined()
+    expect(result.current.blockedReason).toBeUndefined()
+  })
 })

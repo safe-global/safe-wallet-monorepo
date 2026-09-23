@@ -25,6 +25,7 @@ export type GrantProposer = {
   isSubmitting: boolean
   error?: Error
   blockedReason?: string
+  reset: () => void
 }
 
 export const useGrantProposer = (): GrantProposer => {
@@ -39,12 +40,16 @@ export const useGrantProposer = (): GrantProposer => {
   const [error, setError] = useState<Error>()
   const [blockedReason, setBlockedReason] = useState<string>()
 
+  const reset = useCallback(() => {
+    setError(undefined)
+    setBlockedReason(undefined)
+  }, [])
+
   const grantProposerRole = useCallback(
     async ({ proposer, name }: ProposerRoleFormValues): Promise<boolean> => {
       if (!wallet || !safeAddress) return false
 
-      setError(undefined)
-      setBlockedReason(undefined)
+      reset()
       setIsSubmitting(true)
 
       try {
@@ -95,8 +100,8 @@ export const useGrantProposer = (): GrantProposer => {
         setIsSubmitting(false)
       }
     },
-    [wallet, safeAddress, chainId, provider, addDelegateV1, addDelegateV2, dispatch],
+    [wallet, safeAddress, chainId, provider, addDelegateV1, addDelegateV2, dispatch, reset],
   )
 
-  return { grantProposerRole, isSubmitting, error, blockedReason }
+  return { grantProposerRole, isSubmitting, error, blockedReason, reset }
 }
