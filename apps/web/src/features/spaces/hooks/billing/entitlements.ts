@@ -16,3 +16,9 @@ export const getSeatsMeter = (data: EntitlementsResponse | undefined): SeatsMete
 /** Sponsored transactions of the current cycle; `resetsAt` says when the count restarts. */
 export const getSponsoredTxsMeter = (data: EntitlementsResponse | undefined): SponsoredTxsMeter | null =>
   getMeter(data, 'sponsored_transactions')
+
+export const POLICY_ENGINE_FEATURE = 'policy_engine'
+
+/** Whether the plan grants the policy engine; undefined while the entitlements catalogue carries no such key. */
+export const getPolicyEngineAccess = (data: EntitlementsResponse | undefined): boolean | undefined =>
+  data?.entitlements.find((candidate) => (candidate.feature as string) === POLICY_ENGINE_FEATURE)?.enabled

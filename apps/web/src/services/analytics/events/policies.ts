@@ -5,4 +5,8 @@ export const POLICY_EVENTS = {
     action: 'Policy catalogue tile clicked',
     category: POLICY_CATEGORY,
   },
+  POLICY_UPGRADE_CLICKED: {
+    action: 'Policy upgrade clicked',
+    category: POLICY_CATEGORY,
+  },
 }
