@@ -1,0 +1,50 @@
+import { render, screen } from '@/tests/test-utils'
+import { mockMultiSpenderPolicy, mockSpendingLimitPolicy } from '../../../../mocks/policies'
+import SpendingLimits from '../SpendingLimits'
+
+const { spenders } = mockSpendingLimitPolicy().data
+
+describe('SpendingLimits', () => {
+  it('shows each token with its amount and period', () => {
+    render(<SpendingLimits spenders={spenders} showUsage />)
+
+    expect(screen.getByText('USDC')).toBeInTheDocument()
+    expect(screen.getByText('1,500/month')).toBeInTheDocument()
+    expect(screen.getByText('USDT')).toBeInTheDocument()
+    expect(screen.getByText('1,000/month')).toBeInTheDocument()
+  })
+
+  it('shows remaining amount, a progress bar and the reset time when active', () => {
+    render(<SpendingLimits spenders={spenders} showUsage />)
+
+    expect(screen.getByText('500 USDC remaining')).toBeInTheDocument()
+    // Both allowances share the fixture's default resetsAt, so the reset line renders twice.
+    expect(screen.getAllByText('Resets Oct 1, 00:00 UTC')).toHaveLength(2)
+    expect(screen.getAllByRole('progressbar')).toHaveLength(2)
+  })
+
+  // Nothing is enforced until the transaction executes, so a bar would imply a measured zero.
+  it('shows no usage at all when the policy is pending', () => {
+    render(<SpendingLimits spenders={spenders} showUsage={false} />)
+
+    expect(screen.getByText('1,500/month')).toBeInTheDocument()
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
+    expect(screen.queryByText(/remaining/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Resets/)).not.toBeInTheDocument()
+  })
+
+  it('repeats the spender block, each with its own tokens', () => {
+    render(<SpendingLimits spenders={mockMultiSpenderPolicy().data.spenders} showUsage />)
+
+    expect(screen.getAllByTestId('spending-limit-spender')).toHaveLength(3)
+    expect(screen.getByText('Spender 1')).toBeInTheDocument()
+    expect(screen.getByText('Spender 3')).toBeInTheDocument()
+  })
+
+  it('falls back to the symbol for a token with no logo', () => {
+    const [, , unknownSpender] = mockMultiSpenderPolicy().data.spenders
+    render(<SpendingLimits spenders={[unknownSpender]} showUsage />)
+
+    expect(screen.getByText('UNKNOWN')).toBeInTheDocument()
+  })
+})
