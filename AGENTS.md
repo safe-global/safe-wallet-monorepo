@@ -38,6 +38,14 @@ yarn turbo run test --filter=...@safe-global/utils     # package + dependents
 
 Cache directory is `.turbo/` (gitignored). Task definitions live in `turbo.json`. Remote-cache setup (one-time, per team): [docs/turbo-remote-cache.md](docs/turbo-remote-cache.md).
 
+### Two TypeScript compilers
+
+Every workspace's `type-check` script runs `yarn run -T -B tsc --noEmit`, which resolves to the native TypeScript 7 compiler installed at the root under the `@typescript/native` alias (TS 7 cannot be installed under its real name with the pinned Yarn). Workspaces keep `typescript@5.9` as their own dependency because TS 7.0 ships no compiler API and typescript-eslint, ts-jest, ts-node, Next and Cypress all load one. Consequences:
+
+- `yarn workspace <name> tsc` is 5.9; `yarn workspace <name> type-check` is 7. Use the script.
+- tsconfigs must satisfy both compilers: no `baseUrl`, `moduleResolution: node`, or `downlevelIteration`; list `types` explicitly (TS 7 does not auto-include `node_modules/@types`). The one exception is `apps/web/cypress/tsconfig.json`, which restores `baseUrl` for the Cypress bundler only.
+- The editor uses 5.9 unless its TypeScript SDK is repointed, so a TS 7-only error can show green locally until `type-check` runs.
+
 ## Architecture Overview
 
 - **apps/web** – the main app (Next.js)
