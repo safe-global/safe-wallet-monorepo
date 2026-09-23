@@ -4,7 +4,6 @@ import { LoadableSwitch } from '@/src/components/LoadableSwitch'
 import { type Info } from '@/src/features/Developer/types'
 import { getCrashlytics } from '@react-native-firebase/crashlytics'
 import { SafeButton } from '@/src/components/SafeButton'
-import { WrappingKeyExperiment } from './WrappingKeyExperiment'
 
 type DeveloperProps = {
   info: Info
@@ -62,7 +61,6 @@ export const Developer = ({ info, screenProtectionDisabled, onToggleScreenProtec
             />
           </View>
         </View>
-        <WrappingKeyExperiment />
         <View marginTop={'$4'}>
           <Text>The button below will crash the app on purpose. This is for testing purposes only.</Text>
           <SafeButton onPress={() => getCrashlytics().crash()}>Crash App</SafeButton>

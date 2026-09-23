@@ -130,7 +130,7 @@ export class KeyStorageService implements IKeyStorageService {
       }
 
       operation = 'persist'
-      await Keychain.setGenericPassword(
+      const stored = await Keychain.setGenericPassword(
         'signer_address',
         JSON.stringify({
           encryptedPassword: encryptedPrivateKey.encryptedText,
@@ -138,13 +138,16 @@ export class KeyStorageService implements IKeyStorageService {
         }),
         { accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY, service: this.getKeyService(userId) },
       )
+      if (!stored) {
+        throw new Error('Failed to persist encrypted private key')
+      }
     } catch (error) {
       Logger.error('Error storing private key', {
         operation,
         code: error instanceof Error && 'code' in error ? error.code : undefined,
         platform: Platform.OS,
       })
-      if (attempt === 0 && isBiometryInvalidationError(error)) {
+      if (operation !== 'persist' && attempt === 0 && isBiometryInvalidationError(error)) {
         // Keep the encrypted blob until its replacement has passed verification.
         if (!(await DeviceCrypto.deleteKey(keyName))) {
           throw new Error('Failed to remove invalidated encryption key')

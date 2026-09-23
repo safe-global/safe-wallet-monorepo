@@ -21,6 +21,10 @@ describe('KeyStorageService', () => {
     ;(Platform.OS as string) = 'ios'
     mockDeviceCrypto.decrypt.mockResolvedValue(privateKey)
     mockDeviceCrypto.deleteKey.mockResolvedValue(true)
+    mockKeychain.setGenericPassword.mockResolvedValue({
+      service: 'test-service',
+      storage: Keychain.STORAGE_TYPE.AES_GCM,
+    })
   })
 
   describe('storePrivateKey', () => {
@@ -421,8 +425,20 @@ describe('KeyStorageService', () => {
       expect(mockDeviceCrypto.deleteKey).not.toHaveBeenCalled()
     })
 
-    it('does not delete the wrapping key when persistence fails', async () => {
-      mockKeychain.setGenericPassword.mockRejectedValueOnce(new Error('Storage unavailable'))
+    it.each(['Storage unavailable', 'AKSError=-536362999'])(
+      'does not delete the wrapping key when persistence fails: %s',
+      async (message) => {
+        mockKeychain.setGenericPassword.mockRejectedValueOnce(new Error(message))
+
+        await expect(service.storePrivateKey(userId, privateKey)).rejects.toThrow('Failed to store private key')
+
+        expect(mockDeviceCrypto.deleteKey).not.toHaveBeenCalled()
+        expect(mockKeychain.setGenericPassword).toHaveBeenCalledTimes(1)
+      },
+    )
+
+    it('rejects import when persistence returns false', async () => {
+      mockKeychain.setGenericPassword.mockResolvedValueOnce(false)
 
       await expect(service.storePrivateKey(userId, privateKey)).rejects.toThrow('Failed to store private key')
 

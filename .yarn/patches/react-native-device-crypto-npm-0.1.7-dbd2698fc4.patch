@@ -124,7 +124,7 @@ index 03fd79e8a389f33a2841ecf0e177ffc9ea01b78c..d903b5dc4b0110dab9a8c1a648d34920
              break;
          }
 diff --git a/ios/DeviceCrypto.m b/ios/DeviceCrypto.m
-index 1c05886476b28afcb44eb8fc36f5141593d41b0e..429bc9c85be59198d60faa7bc00b8f7feb281889 100644
+index 1c05886476b28afcb44eb8fc36f5141593d41b0e..a5ef70c652397aaf8e515c5076f7293f92cfba9f 100644
 --- a/ios/DeviceCrypto.m
 +++ b/ios/DeviceCrypto.m
 @@ -33,46 +33,39 @@ typedef NS_ENUM(NSUInteger, AccessLevel) {
@@ -315,7 +315,7 @@ index 1c05886476b28afcb44eb8fc36f5141593d41b0e..429bc9c85be59198d60faa7bc00b8f7f
    return [self getPublicKeyAsPEM:alias];
  }
  
-@@ -288,16 +270,77 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+@@ -288,16 +270,19 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
        resolve(publicKey != nil ? @(YES) : @(NO));
      }
    } @catch(NSException *err) {
@@ -337,68 +337,10 @@ index 1c05886476b28afcb44eb8fc36f5141593d41b0e..429bc9c85be59198d60faa7bc00b8f7f
 +  } @catch(NSException *err) {
 +    reject(err.name, err.reason, err.userInfo[@"error"]);
 +  }
-+}
-+
-+RCT_EXPORT_METHOD(debugDeletePrivateWrappingKey:(nonnull NSData *)alias resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
-+{
-+  NSString *aliasString = [[NSString alloc] initWithData:alias encoding:NSUTF8StringEncoding];
-+  if (!aliasString || [aliasString rangeOfString:@"^signer_address_0x[0-9a-fA-F]{40}$" options:NSRegularExpressionSearch].location == NSNotFound) {
-+    reject(@"E_DEBUG_ALIAS", @"Expected a signer wrapping-key alias.", nil);
-+    return;
-+  }
-+
-+  NSDictionary *publicQuery = @{
-+    (id)kSecClass: (id)kSecClassKey,
-+    (id)kSecAttrKeyClass: (id)kSecAttrKeyClassPublic,
-+    (id)kSecAttrLabel: @"publicKey",
-+    (id)kSecAttrApplicationTag: alias,
-+    (id)kSecMatchLimit: (id)kSecMatchLimitAll,
-+    (id)kSecReturnData: @YES,
-+  };
-+  CFTypeRef beforeResult = NULL;
-+  OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)publicQuery, &beforeResult);
-+  NSArray *publicKeysBefore = CFBridgingRelease(beforeResult);
-+  if (status != errSecSuccess || publicKeysBefore.count == 0) {
-+    reject(@"E_DEBUG_PUBLIC_KEY", @"Cannot establish the public wrapping-key entries. Nothing was deleted.",
-+           [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil]);
-+    return;
-+  }
-+
-+  NSDictionary *privateQuery = @{
-+    (id)kSecClass: (id)kSecClassKey,
-+    (id)kSecAttrKeyClass: (id)kSecAttrKeyClassPrivate,
-+    (id)kSecAttrLabel: @"privateKey",
-+    (id)kSecAttrApplicationTag: alias,
-+  };
-+  status = SecItemDelete((__bridge CFDictionaryRef)privateQuery);
-+  if (status != errSecSuccess) {
-+    reject(@"E_DEBUG_DELETE_PRIVATE", @"Private wrapping-key deletion failed or the entry was already absent.",
-+           [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil]);
-+    return;
-+  }
-+
-+  status = SecItemCopyMatching((__bridge CFDictionaryRef)privateQuery, NULL);
-+  if (status != errSecItemNotFound) {
-+    reject(@"E_DEBUG_VERIFY_PRIVATE", @"Deletion was attempted, but private-key absence could not be confirmed.",
-+           [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil]);
-+    return;
-+  }
-+
-+  CFTypeRef afterResult = NULL;
-+  status = SecItemCopyMatching((__bridge CFDictionaryRef)publicQuery, &afterResult);
-+  NSArray *publicKeysAfter = CFBridgingRelease(afterResult);
-+  if (status != errSecSuccess || publicKeysBefore.count != publicKeysAfter.count ||
-+      ![[NSSet setWithArray:publicKeysBefore] isEqualToSet:[NSSet setWithArray:publicKeysAfter ?: @[]]]) {
-+    reject(@"E_DEBUG_VERIFY_PUBLIC", @"Private key was deleted, but preservation of the public entries could not be confirmed.",
-+           [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil]);
-+    return;
-+  }
-+
-+  resolve(@{@"publicKeyCount": @(publicKeysAfter.count)});
  }
  
  RCT_EXPORT_METHOD(sign:(nonnull NSData *)alias withPlainText:(nonnull NSString *)plainText withOptions:(nonnull NSDictionary *)options resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
-@@ -357,7 +400,7 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+@@ -357,7 +342,7 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
        @"encryptedText": [cipherText base64EncodedStringWithOptions:0],
      });
    } @catch(NSException *err) {
@@ -407,7 +349,7 @@ index 1c05886476b28afcb44eb8fc36f5141593d41b0e..429bc9c85be59198d60faa7bc00b8f7f
    }
  }
  
-@@ -383,7 +426,10 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+@@ -383,7 +368,10 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
                                                                       &aerr));
      
      if (!clearText || aerr) {
@@ -419,7 +361,7 @@ index 1c05886476b28afcb44eb8fc36f5141593d41b0e..429bc9c85be59198d60faa7bc00b8f7f
      }
      
      if (privateKeyRef) { CFRelease(privateKeyRef); }
-@@ -391,7 +437,7 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+@@ -391,7 +379,7 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
      
      resolve([[NSString alloc] initWithData:clearText   encoding:NSUTF8StringEncoding]);
    } @catch(NSException *err) {
@@ -428,7 +370,7 @@ index 1c05886476b28afcb44eb8fc36f5141593d41b0e..429bc9c85be59198d60faa7bc00b8f7f
    }
  }
  
-@@ -399,7 +445,11 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+@@ -399,7 +387,11 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
  // ______________________________________________
  RCT_EXPORT_METHOD(getPublicKey:(nonnull NSData *)alias resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
  {
