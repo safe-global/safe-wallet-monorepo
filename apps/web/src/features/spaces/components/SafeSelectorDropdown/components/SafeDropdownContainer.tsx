@@ -137,8 +137,12 @@ const SafeDropdownContainer = ({
 
   useEffect(() => {
     if (!selectedItemId || isLoading || query) return
-    const current = scrollAreaRef.current?.querySelector<HTMLElement>('[data-current-safe="true"]')
-    current?.scrollIntoView?.({ block: 'center' })
+    const area = scrollAreaRef.current
+    const current = area?.querySelector<HTMLElement>('[data-current-safe="true"]')
+    if (!area || !current) return
+    // Scroll only this area: scrollIntoView also scrolls the overflow-hidden popup, clipping its header.
+    const offset = current.getBoundingClientRect().top - area.getBoundingClientRect().top
+    area.scrollTop += offset - (area.clientHeight - current.offsetHeight) / 2
   }, [selectedItemId, isLoading, query, items.length])
 
   const renderContent = () => {
@@ -214,7 +218,7 @@ const SafeDropdownContainer = ({
           key={item.id}
           value={item.id}
           hidden={hiddenIds.has(item.id)}
-          // Scroll anchor for the open-to-current-safe behaviour (see the scrollIntoView effect).
+          // Scroll anchor for the open-to-current-safe behaviour (see the scroll-to-current effect).
           data-current-safe={item.id === selectedItemId ? 'true' : undefined}
           // hover/focus:bg-muted is the grey highlight; data-selected keeps the open safe green, and
           // [&[data-selected]:hover/focus] deepens it (wins by specificity). [&>div]:min-w-0/shrink let the name column truncate; [&>span.absolute]:hidden
@@ -239,7 +243,9 @@ const SafeDropdownContainer = ({
       showBackdrop
       // outline-hidden: base-ui focuses the popup on open; typing in the search field makes that
       // :focus-visible and would otherwise draw the browser's blue outline around the whole popup.
-      className="w-[543px] max-w-[calc(100vw-2rem)] overflow-hidden bg-card border-0 ring-0 outline-hidden rounded-lg [&_[data-slot=select-scroll-down-button]]:hidden [&_[data-slot=select-scroll-up-button]]:hidden"
+      // The shared select-list's padding and scrollbar gutter are dropped: the scroll area below owns
+      // both, and the list's extra 12px+ pushed the rows' balance column into a horizontal scroll.
+      className="w-[543px] max-w-[calc(100vw-2rem)] overflow-hidden bg-card border-0 ring-0 outline-hidden rounded-lg [&_[data-slot=select-scroll-down-button]]:hidden [&_[data-slot=select-scroll-up-button]]:hidden [&_[data-slot=select-list]]:p-0 [&_[data-slot=select-list]]:[scrollbar-gutter:auto]"
       sideOffset={20}
       alignOffset={9}
       collisionAvoidance={{ side: 'none', align: 'shift' }}
@@ -277,9 +283,9 @@ const SafeDropdownContainer = ({
           data-testid="dropdown-scroll-area"
           className="min-h-0 flex-1 overflow-y-auto overflow-x-auto overscroll-y-none px-2 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
         >
-          {/* 527px = the 543px popup minus px-2 gutters: rows keep their full-width layout and
-              scroll horizontally when the popup shrinks. */}
-          <div className={cn(showRows && 'min-w-[527px]')}>{renderContent()}</div>
+          {/* Below 575px (the 543px popup + its 2rem viewport margin) the popup shrinks: rows then keep
+              their 527px layout and scroll horizontally. Wider, they fill the popup — no scroll. */}
+          <div className={cn(showRows && 'max-[575px]:min-w-[527px]')}>{renderContent()}</div>
         </div>
 
         {footer && (
