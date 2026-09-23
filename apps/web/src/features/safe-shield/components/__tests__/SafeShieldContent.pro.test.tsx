@@ -74,7 +74,7 @@ describe('SafeShieldContent Safe Pro gating', () => {
     expect(section).toContainElement(screen.getByTestId('recipient-analysis-group-card'))
     expect(section).toContainElement(screen.getByTestId('tenderly-simulation'))
     // The open checks list comes first; the Pro block closes the widget.
-    expect(section.previousElementSibling?.className).toContain('border-t')
+    expect(section.previousElementSibling).toBe(screen.getByTestId('open-checks-list'))
     expect(section.nextElementSibling).toBeNull()
     expect(screen.queryByTestId('hypernative-login-line')).not.toBeInTheDocument()
   })

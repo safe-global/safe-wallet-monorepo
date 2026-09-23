@@ -83,7 +83,7 @@ export const SafeShieldContent = ({
       {/* overflow-hidden clips the last analysis row's square background to the rounded corners;
           rounded-b-md (12px) = the parent's rounded-lg (16px) minus the 4px px-1/pb-1 inset, which
           keeps this curve concentric with the outer one. */}
-      <div className="relative overflow-hidden rounded-b-md border border-t-0 border-[var(--color-background-main)]">
+      <div className="relative overflow-hidden rounded-b-md">
         {showHypernativeInfo && (
           <hn.HnInfoCard hypernativeAuth={hypernativeAuth} showActiveStatus={showHypernativeActiveStatus} />
         )}
@@ -92,7 +92,7 @@ export const SafeShieldContent = ({
 
         {shouldShowContent && !loading && allEmpty && !hypernativeAuth && <SafeShieldAnalysisEmpty />}
 
-        <div className="[&>div]:border-t [&>div]:border-[var(--color-background-main)]">
+        <div data-testid="open-checks-list">
           {/* Untrusted Safe warning - shown at top when Safe is not pinned */}
           {safeAnalysis && onAddToTrustedList && (
             <UntrustedSafeWarning safeAnalysis={safeAnalysis} onAddToTrustedList={onAddToTrustedList} />
