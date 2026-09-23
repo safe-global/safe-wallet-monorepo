@@ -1,7 +1,7 @@
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { validateAmount, validateDecimalLength } from '@safe-global/utils/utils/validation'
 import type { SpendingLimitState } from '@/features/spending-limits'
-import { validateSpendingLimitAmount } from '@/features/spending-limits/services'
+import { isSpendingLimitFor, validateSpendingLimitAmount } from '@/features/spending-limits/services'
 import { DUPLICATE_SPENDER_ERROR, DUPLICATE_TOKEN_ERROR, EXISTING_LIMIT_ERROR } from '../constants'
 
 /** `setAllowance` is keyed on (safe, delegate, token): a second row for the same spender would overwrite the first. */
@@ -15,18 +15,15 @@ export const validateUniqueToken = (tokenAddress: string, siblingTokens: readonl
 export const validateLimitAmount = (value: string, decimals: number | undefined): string | undefined =>
   validateAmount(value) || validateDecimalLength(value, decimals) || validateSpendingLimitAmount(value, decimals)
 
-const isLimitFor = (limit: SpendingLimitState, spenderAddress: string, tokenAddress: string): boolean =>
-  spenderAddress !== '' &&
-  sameAddress(limit.beneficiary, spenderAddress) &&
-  sameAddress(limit.token.address, tokenAddress)
-
 /** The selected Safe already limits this token for this spender; changing it is the edit flow's job (WA-3156). */
 export const validateNoExistingLimit = (
   tokenAddress: string,
   spenderAddress: string,
   existing: readonly SpendingLimitState[] | undefined,
 ): string | undefined =>
-  existing?.some((limit) => isLimitFor(limit, spenderAddress, tokenAddress)) ? EXISTING_LIMIT_ERROR : undefined
+  spenderAddress !== '' && existing?.some((limit) => isSpendingLimitFor(limit, spenderAddress, tokenAddress))
+    ? EXISTING_LIMIT_ERROR
+    : undefined
 
 /** Token addresses the spender already has a limit for on the selected Safe — hidden from their token rows. */
 export const existingTokensForSpender = (

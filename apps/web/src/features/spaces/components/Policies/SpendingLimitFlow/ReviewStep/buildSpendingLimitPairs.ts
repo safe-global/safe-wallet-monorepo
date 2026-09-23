@@ -1,5 +1,5 @@
-import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { SpendingLimitPair, SpendingLimitState } from '@/features/spending-limits'
+import { isSpendingLimitFor } from '@/features/spending-limits/services'
 import type { SpendingLimitPolicyFormValues } from '../types'
 import { findTokenOption, type TokenOption } from '../utils/tokenOptions'
 
@@ -39,9 +39,4 @@ export const findExistingPair = (
   pairs: readonly SpendingLimitPair[],
   existing: readonly SpendingLimitState[],
 ): SpendingLimitPair | undefined =>
-  pairs.find((pair) =>
-    existing.some(
-      (limit) =>
-        sameAddress(limit.beneficiary, pair.beneficiary) && sameAddress(limit.token.address, pair.tokenAddress),
-    ),
-  )
+  pairs.find((pair) => existing.some((limit) => isSpendingLimitFor(limit, pair.beneficiary, pair.tokenAddress)))

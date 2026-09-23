@@ -4,6 +4,7 @@ import {
   getDeployedSpendingLimitModuleAddress,
   getSpendingLimitContract,
 } from './spendingLimitContracts'
+import { isSpendingLimitFor } from './spendingLimitMatching'
 import type { MetaTransactionData, SafeTransaction, TransactionOptions } from '@safe-global/types-kit'
 import {
   createAddDelegateTx,
@@ -72,9 +73,7 @@ const findExistingLimit = (
   existing: readonly SpendingLimitState[],
   pair: SpendingLimitPair,
 ): SpendingLimitState | undefined =>
-  existing.find(
-    (limit) => sameAddress(limit.beneficiary, pair.beneficiary) && sameAddress(limit.token.address, pair.tokenAddress),
-  )
+  existing.find((limit) => isSpendingLimitFor(limit, pair.beneficiary, pair.tokenAddress))
 
 type AllowanceModule = { address: string; isEnabled: boolean }
 
