@@ -83,6 +83,17 @@ describe('ExecutionMethodSelector', () => {
     })
   })
 
+  it('disables sponsoring on a spent allowance even before the chain relay info has loaded', () => {
+    mockUseSafeSponsoredTxs.mockReturnValue(pro(0))
+    const setExecutionMethod = jest.fn()
+    render(<ExecutionMethodSelector executionMethod={ExecutionMethod.RELAY} setExecutionMethod={setExecutionMethod} />)
+
+    expect(screen.getByTestId('relay-execution-method').querySelector('[data-slot=radio-group-item]')).toHaveAttribute(
+      'data-disabled',
+    )
+    expect(setExecutionMethod).toHaveBeenCalledWith(ExecutionMethod.WALLET)
+  })
+
   it('disables sponsoring and falls back to the wallet once the allowance is spent', () => {
     mockUseSafeSponsoredTxs.mockReturnValue(pro(0))
     const setExecutionMethod = jest.fn()

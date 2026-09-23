@@ -21,6 +21,20 @@ import type {
   ThreatAnalysisResults,
 } from '@safe-global/utils/features/safe-shield/types'
 
+const mockUseSafeSponsoredTxs = jest.fn()
+jest.mock('@/features/spaces/hooks/useSafeSponsoredTxs', () => ({
+  useSafeSponsoredTxs: () => mockUseSafeSponsoredTxs(),
+}))
+const noSponsoredTxs = {
+  isEnabled: false,
+  isPro: false,
+  meter: null,
+  left: null,
+  spaceId: null,
+  canSponsor: false,
+  isLoading: false,
+}
+
 // We assume that CheckWallet always returns true
 jest.mock('@/components/common/CheckWallet', () => ({
   __esModule: true,
@@ -76,6 +90,7 @@ describe('ExecuteForm', () => {
   }
 
   beforeEach(() => {
+    mockUseSafeSponsoredTxs.mockReturnValue(noSponsoredTxs)
     jest.clearAllMocks()
 
     jest.spyOn(useValidateTxData, 'useValidateTxData').mockReturnValue([undefined, undefined, false])
@@ -137,6 +152,27 @@ describe('ExecuteForm', () => {
     const { getByText } = render(<ExecuteForm {...defaultProps} />)
 
     expect(getByText('Who will pay gas fees:')).toBeInTheDocument()
+  })
+
+  it('keeps the gas-fee selector on screen, sponsoring disabled, when the Workspace allowance is spent', () => {
+    jest.spyOn(useWalletCanRelay, 'default').mockReturnValue([true, undefined, false])
+    mockUseSafeSponsoredTxs.mockReturnValue({
+      isEnabled: true,
+      isPro: true,
+      meter: { used: 50, quota: 50, resetsAt: '2026-11-01T00:00:00.000Z' },
+      left: 0,
+      spaceId: '11111111-1111-1111-1111-111111111111',
+      canSponsor: false,
+      isLoading: false,
+    })
+
+    const { getByText, getByTestId } = render(<ExecuteForm {...defaultProps} safeTx={safeTransaction} />)
+
+    expect(getByText('Who will pay gas fees:')).toBeInTheDocument()
+    expect(getByTestId('relay-execution-method').querySelector('[data-slot=radio-group-item]')).toHaveAttribute(
+      'data-disabled',
+    )
+    expect(getByText('Execute')).toBeEnabled()
   })
 
   it('shows an execution validation error', () => {

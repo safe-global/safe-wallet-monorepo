@@ -88,7 +88,9 @@ const _ExecutionMethodSelector = ({
   const showsSponsoredTxs = Boolean(
     sponsoredTxs?.isEnabled && relays && !isUnlimitedRelay && !noFeeCampaign?.isEligible,
   )
-  const isProExhausted = Boolean(showsSponsoredTxs && sponsoredTxs?.isPro && sponsoredTxs.left === 0)
+  const isProExhausted = Boolean(
+    sponsoredTxs?.isEnabled && sponsoredTxs.isPro && sponsoredTxs.left === 0 && !noFeeCampaign?.isEligible,
+  )
 
   const onChooseExecutionMethod = (newExecutionMethod: unknown) => {
     setExecutionMethod(newExecutionMethod as ExecutionMethod)

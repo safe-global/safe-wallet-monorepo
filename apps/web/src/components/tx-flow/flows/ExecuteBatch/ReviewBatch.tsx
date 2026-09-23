@@ -102,6 +102,8 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
   // Chain has relaying feature and available relays, or the Safe's Workspace still sponsors transactions
   const canRelay = sponsoredTxs.isPro ? sponsoredTxs.canSponsor : hasRemainingRelays(relays)
   const willRelay = canRelay && executionMethod === ExecutionMethod.RELAY
+  // A spent Pro allowance keeps the selector on screen (sponsoring disabled) so the user sees the count and the reset.
+  const isProExhausted = sponsoredTxs.isPro && sponsoredTxs.left === 0
 
   // EIP-1559 gas pricing support
   const isEIP1559 = Boolean(chain && hasFeature(chain, FEATURES.EIP1559))
@@ -244,7 +246,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
 
         <NetworkWarning />
 
-        {canRelay ? (
+        {canRelay || isProExhausted ? (
           <>
             <ExecutionMethodSelector
               executionMethod={executionMethod}

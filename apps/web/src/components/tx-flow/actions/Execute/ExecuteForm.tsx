@@ -110,16 +110,18 @@ export const ExecuteForm = ({
   const canRelay = walletCanRelay && (requiresRelay || (!isGtfChain && !noFeeCampaignEligible && hasSponsoring))
   const canNoFeeCampaign = !requiresRelay && noFeeCampaignEligible && !gasTooHigh && !!remaining && remaining > 0
   const isLimitReached = noFeeCampaignEligible && remaining === 0
+  // Like the no-fee limit: the selector stays on screen with sponsoring disabled, so the user sees the count and the reset.
+  const isProExhausted = sponsoredTxs.isPro && sponsoredTxs.left === 0
 
   useEffect(() => {
     if (requiresRelay) {
       setExecutionMethod(ExecutionMethod.RELAY)
       return
     }
-    if (gasTooHigh || isLimitReached) {
+    if (gasTooHigh || isLimitReached || isProExhausted) {
       setExecutionMethod(ExecutionMethod.WALLET)
     }
-  }, [requiresRelay, gasTooHigh, isLimitReached])
+  }, [requiresRelay, gasTooHigh, isLimitReached, isProExhausted])
 
   // Handle execution method changes
   const handleExecutionMethodChange = (method: ExecutionMethod | ((prev: ExecutionMethod) => ExecutionMethod)) => {
@@ -136,7 +138,8 @@ export const ExecuteForm = ({
     (canNoFeeCampaign ||
       canRelay ||
       (isNoFeeCampaignEnabled && isNoFeeCampaign && !blockedAddress && gasTooHigh) ||
-      isLimitReached)
+      isLimitReached ||
+      isProExhausted)
 
   // Determine which method will be used
   const willRelay = !!(canRelay && executionMethod === ExecutionMethod.RELAY)
