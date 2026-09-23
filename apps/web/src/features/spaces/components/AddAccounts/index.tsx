@@ -220,7 +220,7 @@ const AddAccounts = ({
 
   const onSubmit = handleSubmit(async (data) => {
     if (!isAdmin) {
-      setError('Only admins can add or remove Safe accounts in this workspace')
+      setError('Only admins can add or remove Safe accounts in this Workspace')
       return
     }
 
@@ -504,7 +504,7 @@ const AddAccounts = ({
                           onToggle: handleTableToggle,
                           isAtLimit,
                           disabledKeys: spaceSafeKeys,
-                          disabledReason: 'This safe is already part of your workspace',
+                          disabledReason: 'This safe is already part of your Workspace',
                         }}
                         data-testid="add-accounts-safes-table"
                       />

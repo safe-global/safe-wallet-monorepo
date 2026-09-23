@@ -25,7 +25,7 @@ export const useUpsertWorkspaceSafeName = (): UpsertWorkspaceSafeName => {
 
   return useCallback(
     async ({ address, name, chainIds }) => {
-      if (!spaceId) return { error: 'No workspace is selected. Switch to a workspace and try again.' }
+      if (!spaceId) return { error: 'No Workspace is selected. Switch to a Workspace and try again.' }
 
       // The upsert overwrites `chainIds` wholesale, so an entry that already spans more networks
       // than the Safe being renamed would silently lose them. Merge instead of replace.

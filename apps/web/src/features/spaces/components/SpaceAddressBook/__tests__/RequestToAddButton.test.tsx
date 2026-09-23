@@ -88,7 +88,7 @@ describe('RequestToAddButton', () => {
 
     await userEvent.hover(screen.getByRole('button', { name: 'Request to add' }).parentElement as HTMLElement)
 
-    await waitFor(() => expect(screen.getByText(/Rename this contact to add it to the workspace/)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/Rename this contact to add it to the Workspace/)).toBeInTheDocument())
   })
 
   it('keeps the button enabled for a valid name', () => {

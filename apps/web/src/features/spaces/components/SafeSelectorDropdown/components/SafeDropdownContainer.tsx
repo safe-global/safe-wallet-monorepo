@@ -110,6 +110,10 @@ const SafeDropdownContainer = ({
         matchesSafeSearch(item, resolveName(item.address, item.chains[0]?.chainId, item.name), query),
       )
     : items
+  // Non-matches stay mounted but hidden: when a base-ui SelectItem unmounts and remounts mid-search,
+  // base-ui moves focus onto an option, off the search input.
+  const matchedIds = new Set(filteredItems.map((item) => item.id))
+  const hiddenIds = new Set(items.map((item) => item.id).filter((id) => !matchedIds.has(id)))
 
   // A controlled search spans both tabs, so it stays visible even when the active tab has no rows.
   const showSearch = !isError && (searchValue !== undefined || items.length > 0)
@@ -133,8 +137,12 @@ const SafeDropdownContainer = ({
 
   useEffect(() => {
     if (!selectedItemId || isLoading || query) return
-    const current = scrollAreaRef.current?.querySelector<HTMLElement>('[data-current-safe="true"]')
-    current?.scrollIntoView?.({ block: 'center' })
+    const area = scrollAreaRef.current
+    const current = area?.querySelector<HTMLElement>('[data-current-safe="true"]')
+    if (!area || !current) return
+    // Scroll only this area: scrollIntoView also scrolls the overflow-hidden popup, clipping its header.
+    const offset = current.getBoundingClientRect().top - area.getBoundingClientRect().top
+    area.scrollTop += offset - (area.clientHeight - current.offsetHeight) / 2
   }, [selectedItemId, isLoading, query, items.length])
 
   const renderContent = () => {
@@ -146,33 +154,41 @@ const SafeDropdownContainer = ({
       return Array.from({ length: SKELETON_COUNT }, (_, i) => <SafeItemSkeleton key={i} />)
     }
 
-    if (filteredItems.length === 0) {
+    const emptyText = (
+      <p className="px-4 py-6 text-center text-sm text-muted-foreground" data-testid="dropdown-empty">
+        {query ? 'No safes match your search' : wallet ? 'No safes yet' : 'Connect a wallet to find your Safe accounts'}
+      </p>
+    )
+
+    if (items.length === 0) {
       // With no safes to search through at all, "no matches" would be misleading — keep the
       // tab's CTA (sign in to a workspace / connect a wallet) even while a query is typed.
-      if (emptyStateOverride && items.length === 0) {
+      if (emptyStateOverride) {
         return (
           <div data-testid="dropdown-empty-override">
             {typeof emptyStateOverride === 'function' ? emptyStateOverride(closeDropdown) : emptyStateOverride}
           </div>
         )
       }
-      return (
-        <p className="px-4 py-6 text-center text-sm text-muted-foreground" data-testid="dropdown-empty">
-          {query
-            ? 'No safes match your search'
-            : wallet
-              ? 'No safes yet'
-              : 'Connect a wallet to find your Safe accounts'}
-        </p>
-      )
+      return emptyText
     }
 
-    // Manual sort turns the list into a drag-to-reorder list (never while searching — a drop would
-    // persist a partial order). Selecting a row navigates and closes, mirroring the Select rows.
-    if (onReorder && !query) {
+    return (
+      <>
+        {renderRows()}
+        {filteredItems.length === 0 && emptyText}
+      </>
+    )
+  }
+
+  const renderRows = () => {
+    // Manual sort turns the list into a drag-to-reorder list, with dragging disabled while searching
+    // (a drop would persist a partial order). Selecting a row navigates and closes, like the Select rows.
+    if (onReorder) {
       return (
         <ReorderableSafeList
-          items={filteredItems}
+          items={items}
+          hiddenIds={hiddenIds}
           selectedItemId={selectedItemId}
           onSelect={(itemId) => {
             onItemSelect?.(itemId)
@@ -180,11 +196,12 @@ const SafeDropdownContainer = ({
           }}
           onRename={handleRename}
           onReorder={onReorder}
+          isDragDisabled={Boolean(query)}
         />
       )
     }
 
-    return filteredItems.map((item) => {
+    return items.map((item) => {
       if (item.chains.length > 1) {
         return (
           <MultiChainSafeItemRow
@@ -192,6 +209,7 @@ const SafeDropdownContainer = ({
             item={item}
             onRename={handleRename}
             isSelected={item.id === selectedItemId}
+            hidden={hiddenIds.has(item.id)}
           />
         )
       }
@@ -199,13 +217,17 @@ const SafeDropdownContainer = ({
         <SelectItem
           key={item.id}
           value={item.id}
-          // Scroll anchor for the open-to-current-safe behaviour (see the scrollIntoView effect).
+          hidden={hiddenIds.has(item.id)}
+          // Scroll anchor for the open-to-current-safe behaviour (see the scroll-to-current effect).
           data-current-safe={item.id === selectedItemId ? 'true' : undefined}
-          // base-ui focuses the hovered/active row, so focus:bg-muted is the hover grey; data-selected
-          // keeps the open safe green, and [&[data-selected]:focus] deepens it on hover (wins by
-          // specificity). [&>div]:min-w-0/shrink let the name column truncate; [&>span.absolute]:hidden
+          // hover/focus:bg-muted is the grey highlight; data-selected keeps the open safe green, and
+          // [&[data-selected]:hover/focus] deepens it (wins by specificity). [&>div]:min-w-0/shrink let the name column truncate; [&>span.absolute]:hidden
           // drops the built-in checkmark that would overlap the balance column.
-          className="group/row h-auto py-3 px-3 rounded-lg my-0.5 cursor-pointer focus:bg-muted data-[selected]:bg-sidebar-accent [&[data-selected]:focus]:bg-[var(--color-background-light-hover)] [&>div]:min-w-0 [&>div]:shrink [&>span.absolute]:hidden"
+          // `hidden` class too: SelectItem's own `flex` utility overrides the [hidden] attribute.
+          className={cn(
+            'group/row h-auto py-3 px-3 rounded-lg my-0.5 cursor-pointer hover:bg-muted focus:bg-muted data-[selected]:bg-sidebar-accent [&[data-selected]:hover]:bg-[var(--color-background-light-hover)] [&[data-selected]:focus]:bg-[var(--color-background-light-hover)] [&>div]:min-w-0 [&>div]:shrink [&>span.absolute]:hidden',
+            hiddenIds.has(item.id) && 'hidden',
+          )}
         >
           <SafeItem {...item} onRename={handleRename} />
         </SelectItem>
@@ -221,7 +243,9 @@ const SafeDropdownContainer = ({
       showBackdrop
       // outline-hidden: base-ui focuses the popup on open; typing in the search field makes that
       // :focus-visible and would otherwise draw the browser's blue outline around the whole popup.
-      className="w-[543px] max-w-[calc(100vw-2rem)] overflow-hidden bg-card border-0 ring-0 outline-hidden rounded-lg [&_[data-slot=select-scroll-down-button]]:hidden [&_[data-slot=select-scroll-up-button]]:hidden"
+      // The shared select-list's padding and scrollbar gutter are dropped: the scroll area below owns
+      // both, and the list's extra 12px+ pushed the rows' balance column into a horizontal scroll.
+      className="w-[543px] max-w-[calc(100vw-2rem)] overflow-hidden bg-card border-0 ring-0 outline-hidden rounded-lg [&_[data-slot=select-scroll-down-button]]:hidden [&_[data-slot=select-scroll-up-button]]:hidden [&_[data-slot=select-list]]:p-0 [&_[data-slot=select-list]]:[scrollbar-gutter:auto]"
       sideOffset={20}
       alignOffset={9}
       collisionAvoidance={{ side: 'none', align: 'shift' }}
@@ -259,9 +283,9 @@ const SafeDropdownContainer = ({
           data-testid="dropdown-scroll-area"
           className="min-h-0 flex-1 overflow-y-auto overflow-x-auto overscroll-y-none px-2 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
         >
-          {/* 527px = the 543px popup minus px-2 gutters: rows keep their full-width layout and
-              scroll horizontally when the popup shrinks. */}
-          <div className={cn(showRows && 'min-w-[527px]')}>{renderContent()}</div>
+          {/* Below 575px (the 543px popup + its 2rem viewport margin) the popup shrinks: rows then keep
+              their 527px layout and scroll horizontally. Wider, they fill the popup — no scroll. */}
+          <div className={cn(showRows && 'max-[575px]:min-w-[527px]')}>{renderContent()}</div>
         </div>
 
         {footer && (

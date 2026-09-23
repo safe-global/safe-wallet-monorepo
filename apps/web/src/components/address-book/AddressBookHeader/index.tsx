@@ -30,7 +30,7 @@ const SpaceAddressBookCTA = () => {
 
   return (
     <Typography className="max-w-[500px] text-sm">
-      This data is stored in your local storage. Do you want to manage your <b>{space?.name}</b> workspace address book
+      This data is stored in your local storage. Do you want to manage your <b>{space?.name}</b> Workspace address book
       instead?{' '}
       <ShadcnLink render={<Link href={{ pathname: AppRoutes.spaces.addressBook, query: { spaceId } }} passHref />}>
         Click here
