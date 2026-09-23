@@ -1,4 +1,4 @@
-import { type LucideIcon } from 'lucide-react'
+import { Lock, type LucideIcon } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
@@ -41,6 +41,7 @@ const PolicyCatalogueTile = ({ id, title, description, Icon, action, onClick, lo
     </div>
 
     <Button variant="outline" className="w-full" onClick={onClick} aria-label={`${action}: ${title}`}>
+      {locked && <Lock aria-hidden data-testid="policy-locked-icon" />}
       {action}
     </Button>
   </div>

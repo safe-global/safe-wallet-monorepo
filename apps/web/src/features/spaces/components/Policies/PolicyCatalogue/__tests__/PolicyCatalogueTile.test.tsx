@@ -62,4 +62,18 @@ describe('PolicyCatalogueTile', () => {
 
     expect(screen.queryByTestId('policy-account-count')).not.toBeInTheDocument()
   })
+
+  it('should, when locked, show a lock on the Set policy button and keep its accessible name', () => {
+    render(<PolicyCatalogueTile {...defaultProps} locked={{ applied: 0, total: 6 }} />)
+
+    const button = screen.getByRole('button', { name: 'Set policy: Spending limit' })
+
+    expect(button).toContainElement(screen.getByTestId('policy-locked-icon'))
+  })
+
+  it('should, when not locked, show no lock on the button', () => {
+    render(<PolicyCatalogueTile {...defaultProps} />)
+
+    expect(screen.queryByTestId('policy-locked-icon')).not.toBeInTheDocument()
+  })
 })
