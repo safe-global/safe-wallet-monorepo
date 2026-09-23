@@ -1,4 +1,4 @@
-import { useCallback, useContext, useState, type ReactElement } from 'react'
+import { useCallback, useContext, useRef, useState, type ReactElement } from 'react'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { formatDate } from '@safe-global/utils/utils/date'
 import { TxModalContext } from '@/components/tx-flow'
@@ -65,6 +65,11 @@ const Policies = ({
   const [isProposerIntroOpen, setIsProposerIntroOpen] = useState(false)
 
   const [openPolicy, setOpenPolicy] = useState<Policy | null>(null)
+  // Keep the last opened policy around so the drawer stays mounted (and its close animation
+  // can play) while `openPolicy` clears — mirrors SecurityReportDrawer's `open={!!selectedSafe}`.
+  const lastOpenSpendingLimitPolicyRef = useRef<Policy | null>(null)
+  if (openPolicy !== null) lastOpenSpendingLimitPolicyRef.current = openPolicy
+  const drawerPolicy = lastOpenSpendingLimitPolicyRef.current
 
   const handleSelectPolicy = useCallback(
     (policy: Policy) => {
@@ -180,18 +185,18 @@ const Policies = ({
         onProceed={proceedToProposerFlow}
       />
 
-      {openPolicy !== null && hasSpendingLimitData(openPolicy) && (
+      {drawerPolicy !== null && hasSpendingLimitData(drawerPolicy) && (
         <SpendingLimitDrawer
-          open
+          open={openPolicy !== null}
           onClose={() => setOpenPolicy(null)}
-          policy={openPolicy}
+          policy={drawerPolicy}
           viewer={{ isSigner: false, hasSigned: false }}
-          safe={{ address: openPolicy.safe.address }}
+          safe={{ address: drawerPolicy.safe.address }}
           overview={{
-            appliesTo: { address: openPolicy.safe.address },
-            initiatedBy: { address: openPolicy.createdBy },
-            lastUpdated: formatDate(openPolicy.createdAt * 1000),
-            enforcedBy: openPolicy.enforcement.via === 'module' ? 'Safe module' : 'Delegates',
+            appliesTo: { address: drawerPolicy.safe.address },
+            initiatedBy: { address: drawerPolicy.createdBy },
+            lastUpdated: formatDate(drawerPolicy.createdAt * 1000),
+            enforcedBy: drawerPolicy.enforcement.via === 'module' ? 'Safe module' : 'Delegates',
           }}
           transactionLink=""
           // The flows behind these land in WA-3156; WA-3451 supplies the viewer and the link.

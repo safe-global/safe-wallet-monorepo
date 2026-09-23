@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
 import {
+  MOCK_ADDRESSES,
   MOCK_SAFE_NAME,
   MOCK_VIEWERS,
   mockActiveSpendingLimit,
@@ -10,6 +11,7 @@ import {
   mockPendingPolicy,
   mockPendingRemoval,
   mockPendingUpdate,
+  mockSpendingLimitPolicy,
   asActivePolicy,
 } from '../mocks/policies'
 import SpendingLimitDrawer from './SpendingLimitDrawer'
@@ -94,6 +96,57 @@ export const UnnamedAccounts: Story = {
       ...OVERVIEW,
       appliesTo: { address: SAFE.address },
       initiatedBy: { address: OVERVIEW.initiatedBy.address },
+    },
+  },
+}
+
+const LONG_NAMES_POLICY = asActivePolicy(
+  mockSpendingLimitPolicy({
+    id: '0xspending-limit-long-names',
+    data: {
+      spenders: [
+        {
+          spender: MOCK_ADDRESSES.alice,
+          allowances: [
+            {
+              token: {
+                ...mockActiveSpendingLimit().data.spenders[0].allowances[0].token,
+                symbol: 'MARKETINGOPSTREASURYTOKEN',
+              },
+              amount: '1500000000',
+              spent: '1000000000',
+              remaining: '500000000',
+              resetPeriodSeconds: 30 * 86_400,
+              resetsAt: 1_790_812_800,
+            },
+          ],
+        },
+      ],
+    },
+  }),
+)
+
+/** Long Safe, spender and token names — they truncate rather than push the layout out of the drawer. */
+export const LongNames: Story = {
+  args: {
+    policy: LONG_NAMES_POLICY,
+    names: { [MOCK_ADDRESSES.alice.toLowerCase()]: 'Marketing operations treasury spender team lead' },
+    safe: { ...SAFE, name: 'Marketing operations and treasury management' },
+    overview: {
+      ...OVERVIEW,
+      appliesTo: { ...OVERVIEW.appliesTo, name: 'Marketing operations and treasury management' },
+      initiatedBy: { ...OVERVIEW.initiatedBy, name: 'Jacob from the marketing operations team' },
+    },
+  },
+}
+
+/** The `names` map resolves a spender's address (keyed in lowercase) to its address book entry. */
+export const WithSpenderNames: Story = {
+  args: {
+    policy: asActivePolicy(mockMultiSpenderPolicy()),
+    names: {
+      [MOCK_ADDRESSES.alice.toLowerCase()]: 'Treasury signer',
+      [MOCK_ADDRESSES.bob.toLowerCase()]: 'Marketing lead',
     },
   },
 }

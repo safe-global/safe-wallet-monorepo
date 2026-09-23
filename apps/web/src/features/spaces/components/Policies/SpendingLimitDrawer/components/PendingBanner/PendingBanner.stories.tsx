@@ -3,7 +3,7 @@ import { PENDING_BANNER_TITLE, executeLine, signAndExecuteLine } from '../../cop
 import PendingBanner from './PendingBanner'
 
 const meta = {
-  title: 'Features/Spaces/Policies/SpendingLimitDrawer/PendingBanner',
+  title: 'Features/Spaces/Policies/SpendingLimitDrawer/components/PendingBanner',
   component: PendingBanner,
   parameters: { layout: 'centered' },
   decorators: [(Story) => <div className="w-[400px]">{Story()}</div>],

@@ -17,7 +17,8 @@ describe('formatResetUtc', () => {
   })
 
   it('uses a 24-hour clock rather than rendering midnight as 24:00', () => {
-    expect(formatResetUtc(1_790_812_800)).toContain('00:00')
+    // A different UTC midnight than the test above, so this assertion can fail independently of it.
+    expect(formatResetUtc(1_793_491_200)).toBe('Nov 1, 00:00 UTC')
   })
 })
 

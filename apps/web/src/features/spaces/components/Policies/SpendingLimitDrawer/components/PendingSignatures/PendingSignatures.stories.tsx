@@ -3,7 +3,7 @@ import { MOCK_SAFES, MOCK_SAFE_NAME, mockPendingPolicy, mockFullySignedPending }
 import PendingSignatures from './PendingSignatures'
 
 const meta = {
-  title: 'Features/Spaces/Policies/SpendingLimitDrawer/PendingSignatures',
+  title: 'Features/Spaces/Policies/SpendingLimitDrawer/components/PendingSignatures',
   component: PendingSignatures,
   parameters: { layout: 'centered' },
   decorators: [(Story) => <div className="w-[400px]">{Story()}</div>],

@@ -52,7 +52,7 @@ const SpendingLimitActions = ({
 
   switch (state.action) {
     case 'review':
-      return <PolicyDrawerActions actionLabel="Review transaction" onClick={onReviewTransaction} hint={state.helper} />
+      return <PolicyDrawerActions actionLabel="Review transaction" onClick={onReviewTransaction} />
 
     case 'copy-link':
       return (

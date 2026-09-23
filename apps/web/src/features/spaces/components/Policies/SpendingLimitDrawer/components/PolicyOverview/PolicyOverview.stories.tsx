@@ -3,7 +3,7 @@ import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_SAFE_NAME } from '../../../mocks/polic
 import PolicyOverview from './PolicyOverview'
 
 const meta = {
-  title: 'Features/Spaces/Policies/SpendingLimitDrawer/PolicyOverview',
+  title: 'Features/Spaces/Policies/SpendingLimitDrawer/components/PolicyOverview',
   component: PolicyOverview,
   parameters: { layout: 'centered' },
   decorators: [(Story) => <div className="w-[400px]">{Story()}</div>],

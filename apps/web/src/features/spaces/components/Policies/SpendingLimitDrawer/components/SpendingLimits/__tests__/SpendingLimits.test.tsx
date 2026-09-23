@@ -1,4 +1,4 @@
-import { render, screen } from '@/tests/test-utils'
+import { render, screen, within } from '@/tests/test-utils'
 import { mockMultiSpenderPolicy, mockSpendingLimitPolicy } from '../../../../mocks/policies'
 import SpendingLimits from '../SpendingLimits'
 
@@ -36,9 +36,13 @@ describe('SpendingLimits', () => {
   it('repeats the spender block, each with its own tokens', () => {
     render(<SpendingLimits spenders={mockMultiSpenderPolicy().data.spenders} showUsage />)
 
-    expect(screen.getAllByTestId('spending-limit-spender')).toHaveLength(3)
-    expect(screen.getByText('Spender 1')).toBeInTheDocument()
-    expect(screen.getByText('Spender 3')).toBeInTheDocument()
+    const cards = screen.getAllByTestId('spending-limit-spender')
+    expect(cards).toHaveLength(3)
+    expect(within(cards[0]).getByText('Spender 1')).toBeInTheDocument()
+    expect(within(cards[0]).getByText('USDC')).toBeInTheDocument()
+    expect(within(cards[0]).queryByText('UNKNOWN')).not.toBeInTheDocument()
+    expect(within(cards[2]).getByText('Spender 3')).toBeInTheDocument()
+    expect(within(cards[2]).getByText('UNKNOWN')).toBeInTheDocument()
   })
 
   it('falls back to the symbol for a token with no logo', () => {

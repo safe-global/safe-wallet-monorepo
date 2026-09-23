@@ -3,7 +3,7 @@ import { mockMultiSpenderPolicy, mockSpendingLimitPolicy } from '../../../mocks/
 import SpendingLimits from './SpendingLimits'
 
 const meta = {
-  title: 'Features/Spaces/Policies/SpendingLimitDrawer/SpendingLimits',
+  title: 'Features/Spaces/Policies/SpendingLimitDrawer/components/SpendingLimits',
   component: SpendingLimits,
   parameters: { layout: 'centered' },
   decorators: [(Story) => <div className="w-[400px]">{Story()}</div>],
