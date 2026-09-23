@@ -12,3 +12,5 @@ export const PROPOSER_EXISTS_ERROR = 'This address is already a proposer of this
 export const PROPOSER_RESERVED_ERROR = 'This proposer address is not valid'
 export const PROPOSER_SAFE_LOADING_MESSAGE = 'Loading the Safe account details, please wait'
 export const PROPOSER_SAFE_ERROR_MESSAGE = 'Could not load the Safe account details, please try again'
+export const NESTED_OWNER_UNSUPPORTED_MESSAGE =
+  'Your wallet owns this Safe account only through another Safe account. Add the proposer from the Safe account settings instead.'

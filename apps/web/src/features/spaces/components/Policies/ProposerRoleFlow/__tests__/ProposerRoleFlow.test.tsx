@@ -7,12 +7,15 @@ import { render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils
 import { useEligibleSafeAccounts } from '../../SafeAccountSelector/hooks/useEligibleSafeAccounts'
 import { buildSafeAccountId } from '../../SafeAccountSelector/utils'
 import type { SafeAccountOption } from '../../SafeAccountSelector/types'
+import { NESTED_OWNER_UNSUPPORTED_MESSAGE } from '../constants'
 import { useGrantProposer, type GrantProposer } from '../hooks/useGrantProposer'
+import { useIsNestedOnlyOwner } from '../hooks/useIsNestedOnlyOwner'
 import ProposerRoleFlow from '../index'
 
 jest.mock('../../SafeAccountSelector/hooks/useEligibleSafeAccounts')
 jest.mock('../hooks/useProposerValidation', () => ({ useProposerValidation: () => async () => undefined }))
 jest.mock('../hooks/useGrantProposer', () => ({ useGrantProposer: jest.fn() }))
+jest.mock('../hooks/useIsNestedOnlyOwner', () => ({ useIsNestedOnlyOwner: jest.fn() }))
 jest.mock('@/features/safe-shield', () => ({
   __esModule: true,
   default: () => <div data-testid="safe-shield-widget" />,
@@ -59,6 +62,7 @@ jest.mock('@/components/tx-flow/safe-scope/SafeScopeProvider', () => {
 
 const mockUseEligibleSafeAccounts = jest.mocked(useEligibleSafeAccounts)
 const mockUseGrantProposer = jest.mocked(useGrantProposer)
+const mockUseIsNestedOnlyOwner = jest.mocked(useIsNestedOnlyOwner)
 
 const PROPOSER = '0x8675B754342754A30A2AeF474D114d8460bca19b'
 
@@ -111,6 +115,7 @@ describe('ProposerRoleFlow', () => {
       refetch: jest.fn(),
     })
     mockUseGrantProposer.mockReturnValue(grantState())
+    mockUseIsNestedOnlyOwner.mockReturnValue(false)
   })
 
   it('renders the page title and the policy header', () => {
@@ -161,6 +166,19 @@ describe('ProposerRoleFlow', () => {
   })
 
   describe('submitting', () => {
+    it('blocks submit with an explanation when the wallet is only a nested owner', async () => {
+      mockUseIsNestedOnlyOwner.mockReturnValue(true)
+      const { user } = renderFlow()
+
+      await user.click(screen.getByTestId('safe-account-selector'))
+      await user.click(await screen.findByRole('option', { name: /Treasury/ }))
+      await user.type(screen.getByRole('combobox', { name: 'Proposer' }), PROPOSER)
+
+      expect(screen.getByText(NESTED_OWNER_UNSUPPORTED_MESSAGE)).toBeInTheDocument()
+      await waitFor(() => expect(screen.getByRole('combobox', { name: 'Proposer' })).toHaveValue(PROPOSER))
+      expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled()
+    })
+
     it('grants the proposer and closes the flow on success', async () => {
       const grantProposerRole = jest.fn().mockResolvedValue(true)
       mockUseGrantProposer.mockReturnValue(grantState({ grantProposerRole }))

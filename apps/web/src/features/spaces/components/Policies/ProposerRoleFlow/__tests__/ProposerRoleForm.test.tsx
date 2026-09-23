@@ -289,6 +289,20 @@ describe('ProposerRoleForm', () => {
     })
   })
 
+  it('disables submit and explains why when submitting is blocked', async () => {
+    renderForm({
+      safeAccount: treasury.id,
+      defaultValues: { proposer: PROPOSER, name: 'Nicole' },
+      submitBlockedReason: 'Your wallet owns this Safe account only through another Safe account.',
+    })
+
+    expect(
+      screen.getByText('Your wallet owns this Safe account only through another Safe account.'),
+    ).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByRole('combobox', { name: 'Proposer' })).toHaveValue(PROPOSER))
+    expect(submitButton()).toBeDisabled()
+  })
+
   it('surfaces a submission error without clearing the form', () => {
     renderForm({
       safeAccount: treasury.id,
