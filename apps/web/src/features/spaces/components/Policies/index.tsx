@@ -8,6 +8,8 @@ import PoliciesList from './PoliciesList'
 import { PoliciesLoadError, PoliciesLoading } from './PoliciesLoadState'
 import PolicyCatalogue from './PolicyCatalogue'
 import type { PolicyCatalogueId } from './PolicyCatalogue/catalogue'
+import type { PolicyLock } from './policyLock'
+import PolicyUpsellBanner from './PolicyUpsellBanner'
 import ProposerIntroDialog from './ProposerIntroDialog'
 import { PROPOSER_INTRO_SEEN_KEY } from './ProposerIntroDialog/constants'
 import ProposerRoleFlow from './ProposerRoleFlow'
@@ -26,6 +28,8 @@ interface PoliciesProps {
   /** Opens the catalogue picker from the populated mode's `Add policy` button. */
   onAddPolicy?: () => void
   onSelectPolicy?: (policy: Policy) => void
+  /** Set when the workspace's plan does not include policies: the banner shows and every tile leads to the upgrade. */
+  locked?: PolicyLock
 }
 
 const openRequestPolicyForm = () => {
@@ -40,7 +44,8 @@ const openRequestPolicyForm = () => {
  * The page has two modes. With no policies it shows the catalogue of policies that can be set up.
  * With policies it shows the list of policies already set up. Revoking the last policy removes it
  * from the CGW response, so the page returns to the catalogue. While the response is pending or
- * failed, only the heading stays and the body is the load state.
+ * failed, only the heading stays and the body is the load state. A plan without policies shows the
+ * upgrade banner and the gated catalogue instead of either.
  */
 const Policies = ({
   policies = [],
@@ -49,6 +54,7 @@ const Policies = ({
   onRetry,
   onAddPolicy,
   onSelectPolicy,
+  locked,
 }: PoliciesProps): ReactElement => {
   const isSettled = !isLoading && !isError
 
@@ -133,7 +139,7 @@ const Policies = ({
           <Typography variant="paragraph-medium">
             Policies are rules that help you manage your Safe accounts. Set them up once and they will run onchain,
             automatically.{' '}
-            <ExternalLink className="font-bold hover:text-muted-foreground" href={HelpCenterArticle.POLICIES}>
+            <ExternalLink noIcon href={HelpCenterArticle.POLICIES}>
               Learn more
             </ExternalLink>
           </Typography>
@@ -144,6 +150,13 @@ const Policies = ({
         <PoliciesLoading />
       ) : isError ? (
         <PoliciesLoadError onReload={onRetry} />
+      ) : locked ? (
+        <>
+          <div className="mb-4">
+            <PolicyUpsellBanner {...locked} />
+          </div>
+          <PolicyCatalogue onSelect={handleSelect} locked={locked} />
+        </>
       ) : policies.length > 0 ? (
         <PoliciesList policies={policies} onAddPolicy={onAddPolicy} onSelectPolicy={onSelectPolicy} />
       ) : (
