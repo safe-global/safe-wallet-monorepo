@@ -193,3 +193,56 @@ export const mockLongPolicyList = (count = 30): Policy[] =>
       }),
     ),
   )
+
+/** The Safe the drawer's copy names when it asks for a signer wallet. */
+export const MOCK_SAFE_NAME = 'Treasury'
+
+export const mockActiveSpendingLimit = (): SpendingLimitPolicy & { status: 'active' } =>
+  asActivePolicy(mockSpendingLimitPolicy())
+
+export const mockPendingRemoval = (): PendingSpendingLimitPolicy =>
+  mockPendingPolicy({
+    id: '0xspending-limit-pending-remove',
+    operation: 'remove',
+    supersedesId: '0xspending-limit-treasury',
+  })
+
+export const mockPendingUpdate = (): PendingSpendingLimitPolicy =>
+  mockPendingPolicy({
+    id: '0xspending-limit-pending-update',
+    operation: 'update',
+    supersedesId: '0xspending-limit-treasury',
+  })
+
+/** Every signature collected; the transaction is waiting only for execution. */
+export const mockFullySignedPending = (): PendingSpendingLimitPolicy =>
+  mockPendingPolicy({
+    id: '0xspending-limit-pending-full',
+    confirmationsSubmitted: 2,
+    confirmationsRequired: 2,
+    missingSigners: [],
+  })
+
+/** A token CGW has no logo for — the row falls back to the symbol. */
+export const mockMissingMetadataPolicy = (): SpendingLimitPolicy & { status: 'active' } =>
+  asActivePolicy(
+    mockSpendingLimitPolicy({
+      id: '0xspending-limit-unknown-token',
+      data: {
+        spenders: [
+          {
+            spender: MOCK_ADDRESSES.alice,
+            allowances: [allowance(MOCK_TOKENS.unknown, '2000000000000000000', '500000000000000000', DAY * 30)],
+          },
+        ],
+      },
+    }),
+  )
+
+/** The viewer's relationship to the Safe. WA-3451 derives this from the connected wallet. */
+export const MOCK_VIEWERS = {
+  signer: { address: MOCK_ADDRESSES.alice, isSigner: true, hasSigned: false },
+  signerWhoSigned: { address: MOCK_ADDRESSES.alice, isSigner: true, hasSigned: true },
+  nonSigner: { address: MOCK_ADDRESSES.unresolved, isSigner: false, hasSigned: false },
+  disconnected: { isSigner: false, hasSigned: false },
+} as const
