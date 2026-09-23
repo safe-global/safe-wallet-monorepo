@@ -6,7 +6,6 @@ import { reorderByKey } from '@/utils/reorder'
 import DragHandle from './DragHandle'
 import SafeItem from './SafeItem'
 import MultiChainSafeItemRow from './MultiChainSafeItemRow'
-import { focusRowOnHover } from './focusRowOnHover'
 import type { SafeItemData, SafeRenameTarget } from '../types'
 
 interface ReorderableSafeListProps {
@@ -17,12 +16,10 @@ interface ReorderableSafeListProps {
   onRename?: (target: SafeRenameTarget) => void
   /** Fired on drop with the reordered top-level addresses, in display order. */
   onReorder: (orderedAddresses: string[]) => void
-  /**
-   * Disables dragging and hides the grips — used while a search query is active, where a drop would
-   * persist a partial (filtered) order. The list stays mounted so filtering never swaps it out for a
-   * different component (which would remount the base-ui rows and steal focus from the search input).
-   */
+  /** Disables dragging and hides the grips — set while searching, where a drop would persist a partial order. */
   isDragDisabled?: boolean
+  /** Search non-matches: hidden rather than unmounted (see SafeDropdownContainer). */
+  hiddenIds?: ReadonlySet<string>
 }
 
 /**
@@ -42,6 +39,7 @@ const ReorderableSafeList = ({
   onRename,
   onReorder,
   isDragDisabled = false,
+  hiddenIds,
 }: ReorderableSafeListProps) => {
   const handleDragEnd = ({ source, destination }: DropResult) => {
     if (!destination || destination.index === source.index) return
@@ -57,6 +55,7 @@ const ReorderableSafeList = ({
               <Draggable key={item.address} draggableId={item.address} index={index} isDragDisabled={isDragDisabled}>
                 {(dragProvided, snapshot) => {
                   const isCurrent = item.id === selectedItemId
+                  const hidden = hiddenIds?.has(item.id)
                   // No grip while dragging is disabled (search) — dnd allows a missing handle only when
                   // the draggable is disabled, and an inert grip would wrongly signal "draggable".
                   const dragHandle = isDragDisabled ? null : (
@@ -69,6 +68,7 @@ const ReorderableSafeList = ({
                       <div
                         ref={dragProvided.innerRef}
                         {...dragProvided.draggableProps}
+                        hidden={hidden}
                         data-testid="reorder-safe-row"
                         className="my-0.5"
                       >
@@ -80,7 +80,12 @@ const ReorderableSafeList = ({
                         />
                       </div>
                     ) : (
-                      <div ref={dragProvided.innerRef} {...dragProvided.draggableProps} className="my-0.5">
+                      <div
+                        ref={dragProvided.innerRef}
+                        {...dragProvided.draggableProps}
+                        hidden={hidden}
+                        className="my-0.5"
+                      >
                         <div
                           role="button"
                           tabIndex={0}
@@ -88,9 +93,6 @@ const ReorderableSafeList = ({
                           data-testid="reorder-safe-row"
                           onClick={() => onSelect(item.id)}
                           onKeyDown={clickOnEnterOrSpace}
-                          // Take focus on hover so base-ui's stale grey highlight leaves the
-                          // previous network row (network sub-rows are base-ui SelectItems).
-                          onMouseEnter={focusRowOnHover}
                           className={cn(
                             'group/row flex cursor-pointer items-center gap-2 rounded-lg py-3 pl-2 pr-3',
                             // The current safe hovers to a deeper green instead of the grey used by the rest.

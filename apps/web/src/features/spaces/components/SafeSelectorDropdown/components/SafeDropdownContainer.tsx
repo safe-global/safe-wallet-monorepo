@@ -110,6 +110,10 @@ const SafeDropdownContainer = ({
         matchesSafeSearch(item, resolveName(item.address, item.chains[0]?.chainId, item.name), query),
       )
     : items
+  // Non-matches stay mounted but hidden: when a base-ui SelectItem unmounts and remounts mid-search,
+  // base-ui moves focus onto an option, off the search input.
+  const matchedIds = new Set(filteredItems.map((item) => item.id))
+  const hiddenIds = new Set(items.map((item) => item.id).filter((id) => !matchedIds.has(id)))
 
   // A controlled search spans both tabs, so it stays visible even when the active tab has no rows.
   const showSearch = !isError && (searchValue !== undefined || items.length > 0)
@@ -146,35 +150,41 @@ const SafeDropdownContainer = ({
       return Array.from({ length: SKELETON_COUNT }, (_, i) => <SafeItemSkeleton key={i} />)
     }
 
-    if (filteredItems.length === 0) {
+    const emptyText = (
+      <p className="px-4 py-6 text-center text-sm text-muted-foreground" data-testid="dropdown-empty">
+        {query ? 'No safes match your search' : wallet ? 'No safes yet' : 'Connect a wallet to find your Safe accounts'}
+      </p>
+    )
+
+    if (items.length === 0) {
       // With no safes to search through at all, "no matches" would be misleading — keep the
       // tab's CTA (sign in to a workspace / connect a wallet) even while a query is typed.
-      if (emptyStateOverride && items.length === 0) {
+      if (emptyStateOverride) {
         return (
           <div data-testid="dropdown-empty-override">
             {typeof emptyStateOverride === 'function' ? emptyStateOverride(closeDropdown) : emptyStateOverride}
           </div>
         )
       }
-      return (
-        <p className="px-4 py-6 text-center text-sm text-muted-foreground" data-testid="dropdown-empty">
-          {query
-            ? 'No safes match your search'
-            : wallet
-              ? 'No safes yet'
-              : 'Connect a wallet to find your Safe accounts'}
-        </p>
-      )
+      return emptyText
     }
 
-    // Manual sort turns the list into a drag-to-reorder list. It stays mounted while searching (with
-    // dragging disabled, since a drop would persist a partial order) rather than swapping to the
-    // plain Select list — the swap would remount the base-ui rows and pull focus off the search input.
-    // Selecting a row navigates and closes, mirroring the Select rows.
+    return (
+      <>
+        {renderRows()}
+        {filteredItems.length === 0 && emptyText}
+      </>
+    )
+  }
+
+  const renderRows = () => {
+    // Manual sort turns the list into a drag-to-reorder list, with dragging disabled while searching
+    // (a drop would persist a partial order). Selecting a row navigates and closes, like the Select rows.
     if (onReorder) {
       return (
         <ReorderableSafeList
-          items={filteredItems}
+          items={items}
+          hiddenIds={hiddenIds}
           selectedItemId={selectedItemId}
           onSelect={(itemId) => {
             onItemSelect?.(itemId)
@@ -187,7 +197,7 @@ const SafeDropdownContainer = ({
       )
     }
 
-    return filteredItems.map((item) => {
+    return items.map((item) => {
       if (item.chains.length > 1) {
         return (
           <MultiChainSafeItemRow
@@ -195,6 +205,7 @@ const SafeDropdownContainer = ({
             item={item}
             onRename={handleRename}
             isSelected={item.id === selectedItemId}
+            hidden={hiddenIds.has(item.id)}
           />
         )
       }
@@ -202,13 +213,17 @@ const SafeDropdownContainer = ({
         <SelectItem
           key={item.id}
           value={item.id}
+          hidden={hiddenIds.has(item.id)}
           // Scroll anchor for the open-to-current-safe behaviour (see the scrollIntoView effect).
           data-current-safe={item.id === selectedItemId ? 'true' : undefined}
-          // base-ui focuses the hovered/active row, so focus:bg-muted is the hover grey; data-selected
-          // keeps the open safe green, and [&[data-selected]:focus] deepens it on hover (wins by
-          // specificity). [&>div]:min-w-0/shrink let the name column truncate; [&>span.absolute]:hidden
+          // hover/focus:bg-muted is the grey highlight; data-selected keeps the open safe green, and
+          // [&[data-selected]:hover/focus] deepens it (wins by specificity). [&>div]:min-w-0/shrink let the name column truncate; [&>span.absolute]:hidden
           // drops the built-in checkmark that would overlap the balance column.
-          className="group/row h-auto py-3 px-3 rounded-lg my-0.5 cursor-pointer focus:bg-muted data-[selected]:bg-sidebar-accent [&[data-selected]:focus]:bg-[var(--color-background-light-hover)] [&>div]:min-w-0 [&>div]:shrink [&>span.absolute]:hidden"
+          // `hidden` class too: SelectItem's own `flex` utility overrides the [hidden] attribute.
+          className={cn(
+            'group/row h-auto py-3 px-3 rounded-lg my-0.5 cursor-pointer hover:bg-muted focus:bg-muted data-[selected]:bg-sidebar-accent [&[data-selected]:hover]:bg-[var(--color-background-light-hover)] [&[data-selected]:focus]:bg-[var(--color-background-light-hover)] [&>div]:min-w-0 [&>div]:shrink [&>span.absolute]:hidden',
+            hiddenIds.has(item.id) && 'hidden',
+          )}
         >
           <SafeItem {...item} onRename={handleRename} />
         </SelectItem>
