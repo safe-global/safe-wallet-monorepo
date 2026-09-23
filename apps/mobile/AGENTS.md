@@ -32,7 +32,6 @@ Standard scripts (`test`, `test:watch`, `lint`, `type-check`, …) follow the us
 
 ## Mobile-specific common pitfalls
 
-- **Native crypto patch** – Keep the existing Android fixes when updating `.yarn/patches/react-native-device-crypto-*.patch`; iOS native changes require a new app build, not an OTA update. iOS recovery must await deletion and must not delete keys on ambiguous authentication failures.
 - **Hardcoding values** – Use Tamagui tokens, not hard-coded values.
 - **Shared code** – Edits to `packages/**` affect both platforms and are NOT covered by app verify scripts — see [packages/AGENTS.md](../../packages/AGENTS.md).
 
