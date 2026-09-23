@@ -118,6 +118,27 @@ describe('SafeShieldContent Safe Pro gating', () => {
     expect(screen.queryByTestId('tenderly-simulation-locked')).not.toBeInTheDocument()
   })
 
+  it('falls back from the automatic simulation to the locked row when the Safe loses Safe Pro', () => {
+    const { rerender } = renderContent(true)
+    expect(screen.getByTestId('tenderly-simulation')).toBeInTheDocument()
+
+    rerender(
+      <SafeShieldContent
+        recipient={emptyAnalysis}
+        contract={emptyAnalysis}
+        threat={emptyAnalysis}
+        deadlock={emptyAnalysis}
+        safeTx={safeTx}
+        hasProFeatures={false}
+      />,
+    )
+
+    expect(screen.queryByTestId('tenderly-simulation')).not.toBeInTheDocument()
+    expect(screen.getByTestId('tenderly-simulation-locked')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Set' })).toBeInTheDocument()
+    expect(screen.getByTestId('pro-upgrade-link')).toBeInTheDocument()
+  })
+
   it('locks the recipient check behind an upgrade without Safe Pro', () => {
     render(
       <SafeShieldContent
