@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DrawerFooter matches the snapshot 1`] = `
+<div
+  class="px-6 pb-6"
+>
+  <button>
+    Footer action
+  </button>
+</div>
+`;

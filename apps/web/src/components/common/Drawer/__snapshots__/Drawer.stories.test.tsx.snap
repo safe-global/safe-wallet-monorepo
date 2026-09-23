@@ -73,7 +73,7 @@ exports[`./Drawer.stories Full 1`] = `
             </div>
           </div>
           <div
-            class="flex min-h-0 flex-1 flex-col px-6 last:pb-6"
+            class="min-h-0 flex-1 overflow-y-auto overscroll-y-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border scrollFade flex flex-col px-6 last:pb-6"
           >
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -82,7 +82,7 @@ exports[`./Drawer.stories Full 1`] = `
             >
               Paragraph 
               1
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -91,7 +91,7 @@ exports[`./Drawer.stories Full 1`] = `
             >
               Paragraph 
               2
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -100,7 +100,7 @@ exports[`./Drawer.stories Full 1`] = `
             >
               Paragraph 
               3
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
           </div>
           <div
@@ -157,7 +157,7 @@ exports[`./Drawer.stories Full 1`] = `
 </div>
 `;
 
-exports[`./Drawer.stories LongContent 1`] = `
+exports[`./Drawer.stories List 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 0px;"
 >
@@ -192,13 +192,276 @@ exports[`./Drawer.stories LongContent 1`] = `
         tabindex="0"
       />
       <div
-        aria-label="Scrolling drawer"
+        aria-label="List drawer"
         class="data-closed:pointer-events-none data-open:animate-in data-closed:animate-out data-[side=right]:data-closed:slide-out-to-right-10 data-[side=right]:data-open:slide-in-from-right-10 data-[side=left]:data-closed:slide-out-to-left-10 data-[side=left]:data-open:slide-in-from-left-10 data-[side=top]:data-closed:slide-out-to-top-10 data-[side=top]:data-open:slide-in-from-top-10 data-closed:fade-out-0 data-open:fade-in-0 data-[side=bottom]:data-closed:slide-out-to-bottom-10 data-[side=bottom]:data-open:slide-in-from-bottom-10 fixed z-[var(--z-overlay)] flex flex-col gap-4 bg-clip-padding text-sm transition duration-200 ease-in-out data-[side=bottom]:inset-x-0 data-[side=bottom]:bottom-0 data-[side=bottom]:h-auto data-[side=bottom]:border-t data-[side=left]:inset-y-0 data-[side=left]:left-0 data-[side=left]:h-full data-[side=left]:border-r data-[side=right]:inset-y-0 data-[side=right]:right-0 data-[side=right]:h-full data-[side=right]:border-l data-[side=top]:inset-x-0 data-[side=top]:top-0 data-[side=top]:h-auto data-[side=top]:border-b inset-y-3! right-3! h-auto! max-w-[calc(100vw-24px)]! rounded-3xl border-0! shadow-xl overflow-hidden data-[side=left]:w-[440px] data-[side=right]:w-[440px] data-[side=left]:max-w-[calc(100vw-24px)] data-[side=right]:max-w-[calc(100vw-24px)] bg-zinc-50 dark:bg-[var(--color-background-main)] p-0"
         data-base-ui-focusable=""
         data-open=""
         data-side="right"
         data-slot="sheet-content"
         id="_r_3_"
+        role="dialog"
+        style="--nested-dialogs: 0;"
+        tabindex="-1"
+      >
+        <div
+          class="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden"
+        >
+          <div
+            class="flex items-center gap-3 px-6 pt-6 pr-18"
+          >
+            <p
+              class="m-0 text-base font-semibold truncate leading-tight"
+              data-slot="typography"
+              data-variant="paragraph-bold"
+            >
+              Proposer role
+            </p>
+          </div>
+          <div
+            class="min-h-0 flex-1 overflow-y-auto overscroll-y-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border scrollFade flex flex-col px-6 last:pb-6"
+          >
+            <dl
+              class="flex w-full flex-col gap-3 rounded-lg bg-muted p-3"
+            >
+              <div
+                class="flex min-h-8 items-center justify-between gap-2"
+              >
+                <dt
+                  class="shrink-0"
+                >
+                  <span
+                    class="m-0 text-sm leading-5 font-medium"
+                    data-slot="typography"
+                    data-variant="paragraph-small-medium"
+                  >
+                    Proposer
+                  </span>
+                </dt>
+                <dd
+                  class="min-w-0"
+                >
+                  <div
+                    class="m-0 text-sm leading-5 font-normal text-right"
+                    data-slot="typography"
+                    data-variant="paragraph-small"
+                  >
+                    Marc
+                  </div>
+                </dd>
+              </div>
+              <div
+                aria-orientation="horizontal"
+                class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:w-full"
+                data-orientation="horizontal"
+                data-slot="separator"
+                role="separator"
+              />
+              <div
+                class="flex min-h-8 items-center justify-between gap-2"
+              >
+                <dt
+                  class="shrink-0"
+                >
+                  <span
+                    class="m-0 text-sm leading-5 font-medium"
+                    data-slot="typography"
+                    data-variant="paragraph-small-medium"
+                  >
+                    Applies to
+                  </span>
+                </dt>
+                <dd
+                  class="min-w-0"
+                >
+                  <div
+                    class="m-0 text-sm leading-5 font-normal text-right"
+                    data-slot="typography"
+                    data-variant="paragraph-small"
+                  >
+                    Marketing
+                  </div>
+                </dd>
+              </div>
+              <div
+                aria-orientation="horizontal"
+                class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:w-full"
+                data-orientation="horizontal"
+                data-slot="separator"
+                role="separator"
+              />
+              <div
+                class="flex min-h-8 items-center justify-between gap-2"
+              >
+                <dt
+                  class="shrink-0"
+                >
+                  <span
+                    class="m-0 text-sm leading-5 font-medium"
+                    data-slot="typography"
+                    data-variant="paragraph-small-medium"
+                  >
+                    Last updated
+                  </span>
+                </dt>
+                <dd
+                  class="min-w-0"
+                >
+                  <div
+                    class="m-0 text-sm leading-5 font-normal text-right"
+                    data-slot="typography"
+                    data-variant="paragraph-small"
+                  >
+                    06.24.26 03:35 AM UTC
+                  </div>
+                </dd>
+              </div>
+              <div
+                aria-orientation="horizontal"
+                class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:w-full"
+                data-orientation="horizontal"
+                data-slot="separator"
+                role="separator"
+              />
+              <div
+                class="flex min-h-8 items-center justify-between gap-2"
+              >
+                <dt
+                  class="shrink-0"
+                >
+                  <span
+                    class="m-0 text-sm leading-5 font-medium"
+                    data-slot="typography"
+                    data-variant="paragraph-small-medium"
+                  >
+                    Enforced by
+                  </span>
+                </dt>
+                <dd
+                  class="min-w-0"
+                >
+                  <div
+                    class="m-0 text-sm leading-5 font-normal text-right"
+                    data-slot="typography"
+                    data-variant="paragraph-small"
+                  >
+                    <span
+                      class="inline-flex items-center gap-1"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="lucide lucide-shield-check size-3.5"
+                        fill="none"
+                        height="24"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"
+                        />
+                        <path
+                          d="m9 12 2 2 4-4"
+                        />
+                      </svg>
+                      <span
+                        class="underline"
+                      >
+                        Safe module
+                      </span>
+                    </span>
+                  </div>
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+        <button
+          aria-label="Close"
+          class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-card text-card-foreground hover:bg-muted hover:text-foreground shadow-xs size-9 absolute top-6 right-6"
+          data-slot="button"
+          tabindex="0"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-x"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M18 6 6 18"
+            />
+            <path
+              d="m6 6 12 12"
+            />
+          </svg>
+        </button>
+      </div>
+      <span
+        data-base-ui-focus-guard=""
+        data-type="inside"
+        role="button"
+        style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;"
+        tabindex="0"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./Drawer.stories LongContent 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 0px;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      data-base-ui-portal=""
+      data-slot="sheet-portal"
+      id="_r_8_"
+    >
+      <div
+        aria-hidden="true"
+        data-base-ui-inert=""
+        role="presentation"
+        style="position: fixed; inset: 0; user-select: none;"
+      />
+      <div
+        aria-hidden="true"
+        class="bg-backdrop supports-backdrop-filter:backdrop-blur-xs fixed inset-0 z-[var(--z-overlay)] duration-100 data-open:animate-in data-closed:animate-out data-open:fade-in-0 data-closed:fade-out-0 data-starting-style:opacity-0 data-ending-style:opacity-0 data-closed:pointer-events-none"
+        data-base-ui-inert=""
+        data-open=""
+        data-slot="sheet-overlay"
+        role="presentation"
+        style="user-select: none;"
+      />
+      <span
+        data-base-ui-focus-guard=""
+        data-type="inside"
+        role="button"
+        style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;"
+        tabindex="0"
+      />
+      <div
+        aria-label="Scrolling drawer"
+        class="data-closed:pointer-events-none data-open:animate-in data-closed:animate-out data-[side=right]:data-closed:slide-out-to-right-10 data-[side=right]:data-open:slide-in-from-right-10 data-[side=left]:data-closed:slide-out-to-left-10 data-[side=left]:data-open:slide-in-from-left-10 data-[side=top]:data-closed:slide-out-to-top-10 data-[side=top]:data-open:slide-in-from-top-10 data-closed:fade-out-0 data-open:fade-in-0 data-[side=bottom]:data-closed:slide-out-to-bottom-10 data-[side=bottom]:data-open:slide-in-from-bottom-10 fixed z-[var(--z-overlay)] flex flex-col gap-4 bg-clip-padding text-sm transition duration-200 ease-in-out data-[side=bottom]:inset-x-0 data-[side=bottom]:bottom-0 data-[side=bottom]:h-auto data-[side=bottom]:border-t data-[side=left]:inset-y-0 data-[side=left]:left-0 data-[side=left]:h-full data-[side=left]:border-r data-[side=right]:inset-y-0 data-[side=right]:right-0 data-[side=right]:h-full data-[side=right]:border-l data-[side=top]:inset-x-0 data-[side=top]:top-0 data-[side=top]:h-auto data-[side=top]:border-b inset-y-3! right-3! h-auto! max-w-[calc(100vw-24px)]! rounded-3xl border-0! shadow-xl overflow-hidden data-[side=left]:w-[440px] data-[side=right]:w-[440px] data-[side=left]:max-w-[calc(100vw-24px)] data-[side=right]:max-w-[calc(100vw-24px)] bg-zinc-50 dark:bg-[var(--color-background-main)] p-0"
+        data-base-ui-focusable=""
+        data-open=""
+        data-side="right"
+        data-slot="sheet-content"
+        id="_r_6_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -218,282 +481,278 @@ exports[`./Drawer.stories LongContent 1`] = `
             </span>
           </div>
           <div
-            class="flex min-h-0 flex-1 flex-col px-6 last:pb-6"
+            class="min-h-0 flex-1 overflow-y-auto overscroll-y-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border scrollFade flex flex-col px-6 last:pb-6"
           >
-            <div
-              class="min-h-0 flex-1 overflow-y-auto"
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
             >
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                1
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                2
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                3
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                4
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                5
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                6
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                7
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                8
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                9
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                10
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                11
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                12
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                13
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                14
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                15
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                16
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                17
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                18
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                19
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                20
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                21
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                22
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                23
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                24
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                25
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                26
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                27
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                28
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                29
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-              <span
-                class="m-0 text-sm leading-5 font-normal mb-4"
-                data-slot="typography"
-                data-variant="paragraph-small"
-              >
-                Paragraph 
-                30
-                 — the drawer body does not scroll on its own; the content decides.
-              </span>
-            </div>
+              Paragraph 
+              1
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              2
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              3
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              4
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              5
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              6
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              7
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              8
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              9
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              10
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              11
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              12
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              13
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              14
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              15
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              16
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              17
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              18
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              19
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              20
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              21
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              22
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              23
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              24
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              25
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              26
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              27
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              28
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              29
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              30
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
           </div>
           <div
             class="px-6 pb-6"
@@ -559,7 +818,7 @@ exports[`./Drawer.stories NoHeader 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_8_"
+      id="_r_b_"
     >
       <div
         aria-hidden="true"
@@ -590,7 +849,7 @@ exports[`./Drawer.stories NoHeader 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_6_"
+        id="_r_9_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -599,7 +858,7 @@ exports[`./Drawer.stories NoHeader 1`] = `
           class="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden"
         >
           <div
-            class="flex min-h-0 flex-1 flex-col px-6 last:pb-6"
+            class="min-h-0 flex-1 overflow-y-auto overscroll-y-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border scrollFade flex flex-col px-6 last:pb-6"
           >
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -608,7 +867,7 @@ exports[`./Drawer.stories NoHeader 1`] = `
             >
               Paragraph 
               1
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -617,7 +876,7 @@ exports[`./Drawer.stories NoHeader 1`] = `
             >
               Paragraph 
               2
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -626,7 +885,7 @@ exports[`./Drawer.stories NoHeader 1`] = `
             >
               Paragraph 
               3
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
           </div>
         </div>
@@ -681,7 +940,7 @@ exports[`./Drawer.stories OnlyTitle 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_b_"
+      id="_r_e_"
     >
       <div
         aria-hidden="true"
@@ -712,7 +971,7 @@ exports[`./Drawer.stories OnlyTitle 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_9_"
+        id="_r_c_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -732,7 +991,7 @@ exports[`./Drawer.stories OnlyTitle 1`] = `
             </span>
           </div>
           <div
-            class="flex min-h-0 flex-1 flex-col px-6 last:pb-6"
+            class="min-h-0 flex-1 overflow-y-auto overscroll-y-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border scrollFade flex flex-col px-6 last:pb-6"
           >
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -741,7 +1000,7 @@ exports[`./Drawer.stories OnlyTitle 1`] = `
             >
               Paragraph 
               1
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -750,7 +1009,7 @@ exports[`./Drawer.stories OnlyTitle 1`] = `
             >
               Paragraph 
               2
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -759,8 +1018,173 @@ exports[`./Drawer.stories OnlyTitle 1`] = `
             >
               Paragraph 
               3
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
+          </div>
+        </div>
+        <button
+          aria-label="Close"
+          class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-card text-card-foreground hover:bg-muted hover:text-foreground shadow-xs size-9 absolute top-6 right-6"
+          data-slot="button"
+          tabindex="0"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-x"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M18 6 6 18"
+            />
+            <path
+              d="m6 6 12 12"
+            />
+          </svg>
+        </button>
+      </div>
+      <span
+        data-base-ui-focus-guard=""
+        data-type="inside"
+        role="button"
+        style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;"
+        tabindex="0"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./Drawer.stories Sections 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 0px;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      data-base-ui-portal=""
+      data-slot="sheet-portal"
+      id="_r_h_"
+    >
+      <div
+        aria-hidden="true"
+        data-base-ui-inert=""
+        role="presentation"
+        style="position: fixed; inset: 0; user-select: none;"
+      />
+      <div
+        aria-hidden="true"
+        class="bg-backdrop supports-backdrop-filter:backdrop-blur-xs fixed inset-0 z-[var(--z-overlay)] duration-100 data-open:animate-in data-closed:animate-out data-open:fade-in-0 data-closed:fade-out-0 data-starting-style:opacity-0 data-ending-style:opacity-0 data-closed:pointer-events-none"
+        data-base-ui-inert=""
+        data-open=""
+        data-slot="sheet-overlay"
+        role="presentation"
+        style="user-select: none;"
+      />
+      <span
+        data-base-ui-focus-guard=""
+        data-type="inside"
+        role="button"
+        style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;"
+        tabindex="0"
+      />
+      <div
+        aria-label="Sectioned drawer"
+        class="data-closed:pointer-events-none data-open:animate-in data-closed:animate-out data-[side=right]:data-closed:slide-out-to-right-10 data-[side=right]:data-open:slide-in-from-right-10 data-[side=left]:data-closed:slide-out-to-left-10 data-[side=left]:data-open:slide-in-from-left-10 data-[side=top]:data-closed:slide-out-to-top-10 data-[side=top]:data-open:slide-in-from-top-10 data-closed:fade-out-0 data-open:fade-in-0 data-[side=bottom]:data-closed:slide-out-to-bottom-10 data-[side=bottom]:data-open:slide-in-from-bottom-10 fixed z-[var(--z-overlay)] flex flex-col gap-4 bg-clip-padding text-sm transition duration-200 ease-in-out data-[side=bottom]:inset-x-0 data-[side=bottom]:bottom-0 data-[side=bottom]:h-auto data-[side=bottom]:border-t data-[side=left]:inset-y-0 data-[side=left]:left-0 data-[side=left]:h-full data-[side=left]:border-r data-[side=right]:inset-y-0 data-[side=right]:right-0 data-[side=right]:h-full data-[side=right]:border-l data-[side=top]:inset-x-0 data-[side=top]:top-0 data-[side=top]:h-auto data-[side=top]:border-b inset-y-3! right-3! h-auto! max-w-[calc(100vw-24px)]! rounded-3xl border-0! shadow-xl overflow-hidden data-[side=left]:w-[440px] data-[side=right]:w-[440px] data-[side=left]:max-w-[calc(100vw-24px)] data-[side=right]:max-w-[calc(100vw-24px)] bg-zinc-50 dark:bg-[var(--color-background-main)] p-0"
+        data-base-ui-focusable=""
+        data-open=""
+        data-side="right"
+        data-slot="sheet-content"
+        id="_r_f_"
+        role="dialog"
+        style="--nested-dialogs: 0;"
+        tabindex="-1"
+      >
+        <div
+          class="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden"
+        >
+          <div
+            class="flex items-center gap-3 px-6 pt-6 pr-18"
+          >
+            <p
+              class="m-0 text-base font-semibold truncate leading-tight"
+              data-slot="typography"
+              data-variant="paragraph-bold"
+            >
+              Proposer role
+            </p>
+          </div>
+          <div
+            class="min-h-0 flex-1 overflow-y-auto overscroll-y-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border scrollFade flex flex-col px-6 last:pb-6"
+          >
+            <div
+              class="flex flex-col gap-4"
+            >
+              <section
+                class="flex w-full flex-col gap-2"
+              >
+                <div
+                  class="flex items-baseline justify-between gap-2"
+                >
+                  <span
+                    class="m-0 text-xs leading-4 font-semibold text-muted-foreground uppercase"
+                    data-slot="typography"
+                    data-variant="paragraph-mini-bold"
+                  >
+                    Pending signatures
+                  </span>
+                  <span
+                    class="m-0 text-sm leading-5 font-normal text-muted-foreground shrink-0"
+                    data-slot="typography"
+                    data-variant="paragraph-small"
+                  >
+                    Expires in 1h 33 min
+                  </span>
+                </div>
+                <div
+                  class="rounded-lg bg-muted p-3"
+                >
+                  <span
+                    class="m-0 text-sm leading-5 font-normal"
+                    data-slot="typography"
+                    data-variant="paragraph-small"
+                  >
+                    Section content
+                  </span>
+                </div>
+              </section>
+              <section
+                class="flex w-full flex-col gap-2"
+              >
+                <div
+                  class="flex items-baseline justify-between gap-2"
+                >
+                  <span
+                    class="m-0 text-xs leading-4 font-semibold text-muted-foreground uppercase"
+                    data-slot="typography"
+                    data-variant="paragraph-mini-bold"
+                  >
+                    Details
+                  </span>
+                </div>
+                <span
+                  class="m-0 text-sm leading-5 font-normal"
+                  data-slot="typography"
+                  data-variant="paragraph-small"
+                >
+                  A section with no trailing note.
+                </span>
+              </section>
+            </div>
           </div>
         </div>
         <button
@@ -814,7 +1238,7 @@ exports[`./Drawer.stories SizeLg 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_e_"
+      id="_r_k_"
     >
       <div
         aria-hidden="true"
@@ -845,7 +1269,7 @@ exports[`./Drawer.stories SizeLg 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_c_"
+        id="_r_i_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -865,7 +1289,7 @@ exports[`./Drawer.stories SizeLg 1`] = `
             </span>
           </div>
           <div
-            class="flex min-h-0 flex-1 flex-col px-6 last:pb-6"
+            class="min-h-0 flex-1 overflow-y-auto overscroll-y-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border scrollFade flex flex-col px-6 last:pb-6"
           >
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -874,7 +1298,7 @@ exports[`./Drawer.stories SizeLg 1`] = `
             >
               Paragraph 
               1
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -883,7 +1307,7 @@ exports[`./Drawer.stories SizeLg 1`] = `
             >
               Paragraph 
               2
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -892,7 +1316,7 @@ exports[`./Drawer.stories SizeLg 1`] = `
             >
               Paragraph 
               3
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
           </div>
         </div>
@@ -947,7 +1371,7 @@ exports[`./Drawer.stories StatusHeader 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_h_"
+      id="_r_n_"
     >
       <div
         aria-hidden="true"
@@ -978,7 +1402,7 @@ exports[`./Drawer.stories StatusHeader 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_f_"
+        id="_r_l_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -1039,7 +1463,7 @@ exports[`./Drawer.stories StatusHeader 1`] = `
             </span>
           </div>
           <div
-            class="flex min-h-0 flex-1 flex-col px-6 last:pb-6"
+            class="min-h-0 flex-1 overflow-y-auto overscroll-y-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border scrollFade flex flex-col px-6 last:pb-6"
           >
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -1048,7 +1472,7 @@ exports[`./Drawer.stories StatusHeader 1`] = `
             >
               Paragraph 
               1
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -1057,7 +1481,7 @@ exports[`./Drawer.stories StatusHeader 1`] = `
             >
               Paragraph 
               2
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
             <span
               class="m-0 text-sm leading-5 font-normal mb-4"
@@ -1066,7 +1490,7 @@ exports[`./Drawer.stories StatusHeader 1`] = `
             >
               Paragraph 
               3
-               — the drawer body does not scroll on its own; the content decides.
+               — the drawer body scrolls once the content outgrows the panel.
             </span>
           </div>
           <div

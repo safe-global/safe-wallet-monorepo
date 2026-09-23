@@ -9,7 +9,7 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { buildSafeAccountId, groupSafeAccounts } from '../SafeAccountSelector/utils'
 import { isSafeAccountGroup, type SafeAccountEntry, type SafeAccountOption } from '../SafeAccountSelector/types'
 import type { ChainInfo } from '@/features/spaces/types'
-import ProposerRoleDialog from './index'
+import ProposerRoleForm from './ProposerRoleForm'
 
 const ETHEREUM = '1'
 const POLYGON = '137'
@@ -47,6 +47,7 @@ if (!isSafeAccountGroup(opsEntry)) throw new Error('Expected the two-chain fixtu
 const opsGroup = opsEntry
 
 const accounts: SafeAccountEntry[] = [treasury, opsGroup]
+const eligible = { accounts, isLoading: false, isError: false, hasWallet: true, refetch: fn() }
 
 const PROPOSER_NAME = 'Test proposer'
 
@@ -93,8 +94,8 @@ const setup = createMockStory({
 })
 
 const meta = {
-  title: 'Features/Spaces/Policies/ProposerRoleDialog',
-  component: ProposerRoleDialog,
+  title: 'Features/Spaces/Policies/ProposerRoleForm',
+  component: ProposerRoleForm,
   parameters: {
     layout: 'centered',
     ...setup.parameters,
@@ -104,27 +105,28 @@ const meta = {
   decorators: [setup.decorator],
   tags: ['autodocs'],
   args: {
-    open: true,
-    accounts,
-    onOpenChange: fn(),
+    safeAccounts: eligible,
     onSubmit: fn(),
     onSafeAccountChange: fn(),
   },
-  render: function ProposerRoleDialogStory(args) {
+  render: function ProposerRoleFormStory(args) {
     const [safeAccount, setSafeAccount] = useState(args.safeAccount)
 
+    // Same width as the tx-flow card column the form lives in.
     return (
-      <ProposerRoleDialog
-        {...args}
-        safeAccount={safeAccount}
-        onSafeAccountChange={(value) => {
-          args.onSafeAccountChange(value)
-          setSafeAccount(value)
-        }}
-      />
+      <div className="w-full min-[900px]:max-w-[672px]">
+        <ProposerRoleForm
+          {...args}
+          safeAccount={safeAccount}
+          onSafeAccountChange={(value) => {
+            args.onSafeAccountChange(value)
+            setSafeAccount(value)
+          }}
+        />
+      </div>
     )
   },
-} satisfies Meta<typeof ProposerRoleDialog>
+} satisfies Meta<typeof ProposerRoleForm>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -147,20 +149,20 @@ export const MultiChainAccount: Story = {
 }
 
 export const AccountsLoading: Story = {
-  args: { accounts: [], accountsLoading: true },
+  args: { safeAccounts: { ...eligible, accounts: [], isLoading: true } },
 }
 
 export const AccountsError: Story = {
-  args: { accounts: [], accountsError: true, onAccountsRetry: fn() },
+  args: { safeAccounts: { ...eligible, accounts: [], isError: true } },
 }
 
 export const NoWallet: Story = {
-  args: { accounts: [], hasWallet: false },
+  args: { safeAccounts: { ...eligible, accounts: [], hasWallet: false } },
 }
 
 /** The Workspace has Safes, but none this wallet can set a policy on. */
 export const NoEligibleAccounts: Story = {
-  args: { accounts: [] },
+  args: { safeAccounts: { ...eligible, accounts: [] } },
 }
 
 export const Submitting: Story = {

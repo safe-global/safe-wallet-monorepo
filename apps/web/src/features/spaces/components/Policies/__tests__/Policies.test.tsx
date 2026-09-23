@@ -1,16 +1,22 @@
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { fireEvent, render, renderWithUserEvent, screen, waitFor, within } from '@/tests/test-utils'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-import { REQUEST_POLICY_FORM_URL } from '../constants'
+import { REQUEST_POLICY_FORM_HEIGHT, REQUEST_POLICY_FORM_URL, REQUEST_POLICY_FORM_WIDTH } from '../constants'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { PROPOSER_INTRO_SEEN_KEY } from '../ProposerIntroDialog/constants'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from '../SpendingLimitIntroDialog/constants'
 import useWallet from '@/hooks/wallets/useWallet'
 import { asActivePolicy, mockPolicies, mockProposerPolicy } from '../mocks/policies'
+import ProposerRoleFlow from '../ProposerRoleFlow'
 import Policies from '../index'
 import SpendingLimitFlow from '../SpendingLimitFlow'
 
 jest.mock('@/hooks/wallets/useWallet')
+
+jest.mock('../ProposerRoleFlow', () => ({
+  __esModule: true,
+  default: () => <div data-testid="proposer-role-flow" />,
+}))
 
 const mockUseWallet = useWallet as jest.MockedFunction<typeof useWallet>
 
@@ -35,6 +41,16 @@ jest.mock('../SpendingLimitFlow', () => ({
 }))
 
 const mockUseLocalStorage = jest.mocked(useLocalStorage)
+
+const renderWithTxModal = () => {
+  const setTxFlow = jest.fn()
+  const utils = renderWithUserEvent(
+    <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
+      <Policies />
+    </TxModalContext.Provider>,
+  )
+  return { ...utils, setTxFlow }
+}
 
 describe('Policies', () => {
   beforeEach(() => {
@@ -201,6 +217,28 @@ describe('Policies', () => {
       expect(screen.getByTestId('proposer-intro-dialog')).toBeInTheDocument()
       expect(screen.getAllByRole('dialog')).toHaveLength(1)
     })
+
+    it('opens the proposer flow from the intro', async () => {
+      const { user, setTxFlow } = renderWithTxModal()
+
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
+      await user.click(await screen.findByRole('button', { name: 'Set up proposer' }))
+
+      expect(setTxFlow).toHaveBeenCalledTimes(1)
+      expect(setTxFlow.mock.calls[0][0].type).toBe(ProposerRoleFlow)
+      await waitFor(() => expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument())
+    })
+
+    it('opens the flow directly once the intro has been seen', async () => {
+      mockHasSeenProposerIntro = true
+      const { user, setTxFlow } = renderWithTxModal()
+
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
+
+      expect(setTxFlow).toHaveBeenCalledTimes(1)
+      expect(setTxFlow.mock.calls[0][0].type).toBe(ProposerRoleFlow)
+      expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument()
+    })
   })
 
   describe('the intro storage keys', () => {
@@ -236,7 +274,7 @@ describe('Policies', () => {
       window.open = originalOpen
     })
 
-    it('opens the request-policy form in a new tab', async () => {
+    it('opens the request-policy form in a popup window', async () => {
       const { user } = renderWithUserEvent(<Policies />)
 
       await user.click(within(screen.getByTestId('policy-catalogue-tile-suggestion')).getByRole('button'))
@@ -244,6 +282,22 @@ describe('Policies', () => {
       expect(mockOpen).toHaveBeenCalledTimes(1)
       expect(mockOpen.mock.calls[0][0]).toBe(REQUEST_POLICY_FORM_URL)
       expect(mockOpen.mock.calls[0][1]).toBe('_blank')
+
+      const features = mockOpen.mock.calls[0][2]
+      expect(features).toContain('popup=yes')
+      expect(features).toContain(`width=${REQUEST_POLICY_FORM_WIDTH}`)
+      expect(features).toContain(`height=${REQUEST_POLICY_FORM_HEIGHT}`)
+      expect(features).toContain('noopener,noreferrer')
+    })
+
+    it('centres the popup over the current window', async () => {
+      const { user } = renderWithUserEvent(<Policies />)
+
+      await user.click(within(screen.getByTestId('policy-catalogue-tile-suggestion')).getByRole('button'))
+
+      const expectedLeft = window.screenX + (window.outerWidth - REQUEST_POLICY_FORM_WIDTH) / 2
+      const expectedTop = window.screenY + (window.outerHeight - REQUEST_POLICY_FORM_HEIGHT) / 2
+      expect(mockOpen.mock.calls[0][2]).toContain(`left=${Math.round(expectedLeft)},top=${Math.round(expectedTop)}`)
     })
 
     it('opens no intro dialog', async () => {
