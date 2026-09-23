@@ -159,8 +159,8 @@ export const cleanupSinglePrivateKey = async (
       )
     }
 
-    // Remove private key from keychain
-    await keyStorageService.removePrivateKey(ownerAddress)
+    // The private-key read already authenticated the user before delegate cleanup.
+    await keyStorageService.removePrivateKey(ownerAddress, { requireAuthentication: false })
 
     // Remove from Redux store
     dispatch(removeSigner(ownerAddress))
@@ -180,11 +180,19 @@ export const cleanupPrivateKeysForOwners = async (
     ownerPrivateKey: string,
   ) => Promise<StandardErrorResult<{ processedCount: number }>>,
   dispatch: AppDispatch,
-): Promise<StandardErrorResult<{ processedCount: number; failures: { address: Address; error: unknown }[] }>> => {
+): Promise<
+  StandardErrorResult<{
+    processedCount: number
+    failures: { address: Address; error: unknown }[]
+    delegateCleanupSkipped: boolean
+  }>
+> => {
   const failures: { address: Address; error: unknown }[] = []
+  let delegateCleanupSkipped = false
 
   for (const ownerAddress of ownerAddresses) {
     const result = await cleanupSinglePrivateKey(ownerAddress, removeAllDelegatesForOwner, dispatch)
+    delegateCleanupSkipped ||= result.data?.delegateCleanupSkipped === true
 
     if (!result.success) {
       Logger.error(`Failed to cleanup private key for ${ownerAddress}:`, result.error)
@@ -199,11 +207,11 @@ export const cleanupPrivateKeysForOwners = async (
       ErrorType.CLEANUP_ERROR,
       `Failed to clean up ${failures.length} out of ${ownerAddresses.length} private keys`,
       failures,
-      { processedCount, failures },
+      { processedCount, failures, delegateCleanupSkipped },
     )
   }
 
-  return createSuccessResult({ processedCount, failures })
+  return createSuccessResult({ processedCount, failures, delegateCleanupSkipped })
 }
 
 export const cleanupLedgerSigners = (
@@ -313,6 +321,20 @@ const handleConfirmedDeletion = async (params: HandleConfirmedDeletionParams) =>
         removeAllDelegatesForOwner,
         reduxDispatch,
       )
+
+      if (
+        privateKeyCleanupResult.data?.delegateCleanupSkipped ||
+        privateKeyCleanupResult.error?.details?.delegateCleanupSkipped
+      ) {
+        await new Promise<void>((acknowledge) => {
+          Alert.alert(
+            'Signer cleanup incomplete',
+            'Some signers were removed from this device, but their delegates, notification subscriptions, and local delegate keys could not be cleaned up because the private keys were unavailable.',
+            [{ text: 'OK', onPress: () => acknowledge() }],
+            { cancelable: false },
+          )
+        })
+      }
 
       if (!privateKeyCleanupResult.success) {
         Logger.error('Failed to clean up private keys during safe deletion:', privateKeyCleanupResult.error)

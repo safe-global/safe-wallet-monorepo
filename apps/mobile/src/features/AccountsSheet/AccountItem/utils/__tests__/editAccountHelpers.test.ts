@@ -4,11 +4,14 @@ import {
   getOwnersToDelete,
   createDeletionMessage,
   cleanupSinglePrivateKey,
+  handleSafeDeletion,
   cleanupPrivateKeysForOwners,
   categorizeOwnersToDelete,
   cleanupLedgerSigners,
   CategorizedOwners,
 } from '../editAccountHelpers'
+import { Alert } from 'react-native'
+import { createTestStore, waitFor } from '@/src/tests/test-utils'
 import { ErrorType } from '@/src/utils/errors'
 import { Address } from '@/src/types/address'
 import { AppDispatch } from '@/src/store'
@@ -20,17 +23,15 @@ jest.mock('@/src/services/key-storage', () => {
   const actual = jest.requireActual('@/src/services/key-storage/errors')
   return {
     keyStorageService: {
+      storePrivateKey: jest.fn(),
       getPrivateKey: jest.fn(),
       removePrivateKey: jest.fn(),
     },
+    walletService: { createMnemonicAccount: jest.fn() },
     BiometryInvalidationError: actual.BiometryInvalidationError,
     MissingWrappingKeyError: actual.MissingWrappingKeyError,
   }
 })
-
-jest.mock('@/src/store/signersSlice', () => ({
-  removeSigner: jest.fn(),
-}))
 
 jest.mock('@/src/utils/logger', () => ({
   __esModule: true,
@@ -221,7 +222,7 @@ describe('editAccountHelpers', () => {
 
       expect(result.success).toBe(true)
       expect(mockRemoveAllDelegatesForOwner).toHaveBeenCalledWith(mockAddress1, 'private-key-data')
-      expect(keyStorageService.removePrivateKey).toHaveBeenCalledWith(mockAddress1)
+      expect(keyStorageService.removePrivateKey).toHaveBeenCalledWith(mockAddress1, { requireAuthentication: false })
       expect(mockDispatch).toHaveBeenCalledWith(removeSigner(mockAddress1))
     })
 
@@ -415,6 +416,21 @@ describe('editAccountHelpers', () => {
       expect(mockDispatch).toHaveBeenCalledTimes(1) // Only successful one
     })
 
+    it.each([false, true])('preserves skipped cleanup when another signer fails: %s', async (fails) => {
+      jest
+        .mocked(keyStorageService.getPrivateKey)
+        .mockRejectedValueOnce(new MissingWrappingKeyError(undefined))
+        .mockResolvedValueOnce('available-key')
+      jest.mocked(keyStorageService.removePrivateKey).mockResolvedValue(undefined)
+      const removeDelegates = jest.fn().mockResolvedValue({ success: !fails })
+
+      const result = await cleanupPrivateKeysForOwners([mockAddress1, mockAddress2], removeDelegates, jest.fn())
+
+      expect(result.success).toBe(!fails)
+      expect(result.data?.delegateCleanupSkipped ?? result.error?.details?.delegateCleanupSkipped).toBe(true)
+      expect(removeDelegates).toHaveBeenCalledTimes(1)
+    })
+
     it('should handle empty owner list', async () => {
       const mockDispatch = jest.fn() as unknown as AppDispatch
       const mockRemoveAllDelegatesForOwner = jest.fn()
@@ -556,6 +572,44 @@ describe('editAccountHelpers', () => {
       expect(result.success).toBe(false)
       expect(result.error?.type).toBe(ErrorType.SYSTEM_ERROR)
       expect(result.error?.message).toBe('Failed to remove Ledger signers from store')
+    })
+  })
+  describe('handleSafeDeletion', () => {
+    it('waits for the skipped-cleanup disclosure before removing the Safe', async () => {
+      const store = createTestStore({ safes: mockSafesInfo })
+      jest.mocked(keyStorageService.getPrivateKey).mockRejectedValue(new MissingWrappingKeyError(undefined))
+      jest.mocked(keyStorageService.removePrivateKey).mockResolvedValue(undefined)
+      const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined)
+
+      try {
+        const deleting = handleSafeDeletion({
+          address: mockSafeAddress1,
+          allSafesInfo: mockSafesInfo,
+          allSigners: mockSigners,
+          removeAllDelegatesForOwner: jest.fn(),
+          deletionContext: { navigation: { dispatch: jest.fn() }, activeSafe: null, safes: mockSafesInfo },
+          reduxDispatch: store.dispatch,
+        })
+        alert.mock.calls[0][2]?.[1].onPress?.()
+
+        await waitFor(() =>
+          expect(alert).toHaveBeenCalledWith(
+            'Signer cleanup incomplete',
+            expect.stringContaining('notification subscriptions'),
+            expect.any(Array),
+            { cancelable: false },
+          ),
+        )
+        expect(store.getState().safes[mockSafeAddress1]).toBeDefined()
+
+        alert.mock.calls[1][2]?.[0].onPress?.()
+        await deleting
+
+        expect(store.getState().safes[mockSafeAddress1]).toBeUndefined()
+        expect(store.getState().safes[mockSafeAddress2]).toBeDefined()
+      } finally {
+        alert.mockRestore()
+      }
     })
   })
 })
