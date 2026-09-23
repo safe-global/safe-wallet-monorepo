@@ -44,7 +44,7 @@ export type SafeAccountsSelection = {
   selectedKeys: Set<string>
   /** Fired on a checkbox toggle; `line` is the toggled row (leaf or group), `nextChecked` the desired state. */
   onToggle: (line: AccountLine, nextChecked: boolean) => void
-  /** Global cap reached — unselected leaves and empty groups render disabled. */
+  /** Seat cap reached — unselected leaves and empty groups render disabled, except another chain of a selected address (same seat). */
   isAtLimit?: boolean
   /** Leaf keys to disable (and dim) regardless of the cap — e.g. safes already in the workspace. */
   disabledKeys?: Set<string>
@@ -71,10 +71,11 @@ const getRowCheckbox = (group: AccountGroup, line: AccountLine, selection: SafeA
 
   const lockedByReason = Boolean(disabledKeys?.has(line.key))
   const checked = selectedKeys.has(line.key)
+  const holdsSeat = group.children.some((child) => child.key !== line.key && selectedKeys.has(child.key))
   return {
     checked,
     indeterminate: false,
-    disabled: lockedByReason || (Boolean(isAtLimit) && !checked),
+    disabled: lockedByReason || (Boolean(isAtLimit) && !checked && !holdsSeat),
     disabledReason: lockedByReason ? disabledReason : undefined,
     ariaLabel: line.displayName,
   }

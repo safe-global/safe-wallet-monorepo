@@ -350,6 +350,32 @@ describe('SafeAccountsTable — selection mode', () => {
     expect(screen.getByTestId('select-0xG')).toHaveAttribute('data-disabled', 'true')
   })
 
+  it('keeps another chain of a selected Safe selectable at the limit, since it takes no new seat', async () => {
+    mockUseSafeAccountRows.mockReturnValue({
+      groups: [
+        ...groups.slice(0, 2),
+        {
+          ...groups[2],
+          children: [
+            line({ key: '0xG:1', displayName: 'Ethereum', variant: 'child', address: '0xG' }),
+            line({ key: '0xG:10', displayName: 'Optimism', variant: 'child', address: '0xG' }),
+          ],
+        },
+      ],
+      isLoading: false,
+    })
+    render(
+      <SafeAccountsTable
+        items={items}
+        selection={{ selectedKeys: new Set(['0xG:1']), onToggle: jest.fn(), isAtLimit: true }}
+      />,
+    )
+    await userEvent.click(screen.getByTestId('toggle-0xG'))
+
+    expect(screen.getByTestId('select-0xG:10')).toHaveAttribute('data-disabled', 'false')
+    expect(screen.getByTestId('select-0xB')).toHaveAttribute('data-disabled', 'true')
+  })
+
   it('disables a leaf listed in disabledKeys and surfaces the disabled reason', () => {
     render(
       <SafeAccountsTable

@@ -67,7 +67,7 @@ export default function SelectAccountsStep({
   const { control, setValue } = useForm<AddAccountsFormValues>({
     defaultValues: { selectedSafes: initialSelection(allSafes) },
   })
-  const { selectedKeys, isAtLimit, isOverLimit, handleToggle } = useOnboardingSelection({
+  const { selectedKeys, seatCount, isAtLimit, isOverLimit, handleToggle } = useOnboardingSelection({
     items: allSafes,
     control,
     setValue,
@@ -99,7 +99,7 @@ export default function SelectAccountsStep({
         <div className="flex items-center gap-3">
           {/* Amber only while the selection still exceeds the plan; sitting exactly at the cap is the goal. */}
           <SelectedCounter
-            count={selectedKeys.size}
+            count={seatCount}
             limit={limit}
             isAtLimit={isOverLimit}
             tooltip={seatsTooltip(planName, limit)}
@@ -135,8 +135,8 @@ export default function SelectAccountsStep({
         <Alert variant="warning">
           <AlertSeverityIcon variant="warning" />
           <AlertDescription>
-            Deselect {selectedKeys.size - limit === 1 ? '1 Safe account' : `${selectedKeys.size - limit} Safe accounts`}{' '}
-            to fit the plan.
+            Deselect {seatCount - limit === 1 ? '1 Safe account' : `${seatCount - limit} Safe accounts`} to fit the
+            plan.
           </AlertDescription>
         </Alert>
       ) : (

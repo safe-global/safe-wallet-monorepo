@@ -52,7 +52,7 @@ const SelectSafesOnboarding = (): ReactElement => {
 
   const { control, setValue } = formMethods
   const { limit } = useSpaceSafeLimit(spaceId)
-  const { selectedKeys, isAtLimit, handleToggle, pendingConfirmation, confirmPending, cancelPending } =
+  const { selectedKeys, seatCount, isAtLimit, handleToggle, pendingConfirmation, confirmPending, cancelPending } =
     useOnboardingSelection({ items: allSafes, control, setValue, flaggedAddresses, limit })
 
   const { data: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !spaceId })
@@ -102,12 +102,7 @@ const SelectSafesOnboarding = (): ReactElement => {
       ) : (
         <>
           <div className="flex shrink-0 items-center gap-3">
-            <SelectedCounter
-              count={selectedKeys.size}
-              limit={limit}
-              isAtLimit={isAtLimit}
-              tooltip={safeLimitTooltip(limit)}
-            />
+            <SelectedCounter count={seatCount} limit={limit} isAtLimit={isAtLimit} tooltip={safeLimitTooltip(limit)} />
             <SearchInput
               className="flex-1"
               placeholder="by name, address or network"

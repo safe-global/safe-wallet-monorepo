@@ -30,6 +30,7 @@ import SeatLimitBanner from './SeatLimitBanner'
 import SelectedCounter from '../SelectedCounter'
 import { seatsTooltip } from '../Plans/PlanStatusCard'
 import { useSeatUpsell } from '../../hooks/useSeatUpsell'
+import { countSeats } from '@/utils/spaces'
 
 const SpaceSafeAccounts = () => {
   const { allSafes, isError: isSpaceSafesError, error: spaceSafesError, refetch: refetchSpaceSafes } = useSpaceSafes()
@@ -64,7 +65,7 @@ const SpaceSafeAccounts = () => {
 
   const isSpaceEmpty = allSafes.length === 0
   const { isSafePro, tierName, limit } = useSeatUpsell()
-  const usedSeats = spaceSafeItems.length
+  const usedSeats = countSeats(spaceSafeAddresses)
   const isAtSeatLimit = isSafePro && limit !== null && usedSeats >= limit
 
   return (

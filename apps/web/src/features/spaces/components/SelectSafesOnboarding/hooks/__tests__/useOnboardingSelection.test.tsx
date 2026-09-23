@@ -98,6 +98,29 @@ describe('useOnboardingSelection', () => {
     expect(result.current.isAtLimit).toBe(true)
   })
 
+  it('counts a Safe on several chains as one seat towards the cap', () => {
+    const multiChainSafe = {
+      address: '0xA',
+      safes: [
+        { chainId: '1', address: '0xA' },
+        { chainId: '10', address: '0xA' },
+      ],
+    }
+    const group = groupLine('0xA', ['1', '10'])
+    const { result } = setup({ items: [multiChainSafe] as unknown as AllSafeItems })
+
+    act(() => result.current.handleToggle(group, true))
+    expect(result.current.selectedKeys.size).toBe(2)
+    expect(result.current.seatCount).toBe(1)
+    expect(result.current.isAtLimit).toBe(false)
+
+    act(() => result.current.handleToggle(singleLine('1', '0xB'), true))
+    act(() => result.current.handleToggle(singleLine('1', '0xC'), true))
+    expect(result.current.seatCount).toBe(3)
+    expect(result.current.isAtLimit).toBe(true)
+    expect(result.current.isOverLimit).toBe(false)
+  })
+
   it('reports a selection above the cap until the user deselects down to it', () => {
     const { result } = setup({ selected: { '1:0xA': true, '1:0xB': true, '1:0xC': true, '1:0xD': true } })
 

@@ -87,6 +87,10 @@ const mockPlans: {
   plan: { daysLeft: number | null } | null
 } = { tierName: 'Business', isTrialing: false, isTrialEndingSoon: false, plan: null }
 jest.mock('../../../../../hooks/useSpacePlan', () => ({ useSpacePlan: () => mockPlans }))
+let mockSeatLimit: number | null = 40
+jest.mock('../../../../../hooks/useSpaceSafeLimit', () => ({
+  useSpaceSafeLimit: () => ({ limit: mockSeatLimit, isLoading: false }),
+}))
 
 jest.mock('@/hooks/useChainId', () => ({
   __esModule: true,
@@ -221,6 +225,7 @@ describe('SpaceSelectorDropdown', () => {
     mockChainId = '1'
     mockIsAuthenticated = true
     mockUseSpaceSafesGetV1Query.mockImplementation(() => ({ currentData: undefined }))
+    mockSeatLimit = 40
   })
 
   it('adds an accessible label to the trigger', () => {
@@ -382,6 +387,35 @@ describe('SpaceSelectorDropdown', () => {
 
       expect(fullButton).toBeDisabled()
       expect(emptyButton).not.toBeDisabled()
+    })
+
+    it("follows the Workspace plan's seats rather than the static cap", () => {
+      mockSeatLimit = 2
+      const spaces = [{ uuid: 'uuid-1', name: 'Small Plan', safeCount: 2, members: adminMembersForCurrentUser }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to Workspace' }))
+
+      expect(
+        screen.getAllByRole('button').find((btn) => btn.querySelector('span')?.textContent === 'Small Plan'),
+      ).toBeDisabled()
+      expect(screen.getByText('You can have up to 2 Safes per Workspace')).toBeInTheDocument()
+    })
+
+    it('still offers a full Workspace that already holds this Safe on another chain (same seat)', () => {
+      mockSafeAddressFromUrl = '0x0000000000000000000000000000000000001234'
+      mockUseSpaceSafesGetV1Query.mockImplementation(() => ({
+        currentData: { safes: { '10': ['0x0000000000000000000000000000000000001234'] } },
+      }))
+      const spaces = [{ uuid: 'uuid-1', name: 'Full Space', safeCount: LIMIT, members: adminMembersForCurrentUser }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to Workspace' }))
+
+      expect(
+        screen.getAllByRole('button').find((btn) => btn.querySelector('span')?.textContent === 'Full Space'),
+      ).not.toBeDisabled()
+      expect(screen.queryByText(/You can have up to /)).not.toBeInTheDocument()
     })
 
     it('shows a tooltip with the limit message for a space at the limit', () => {

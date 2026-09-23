@@ -19,14 +19,22 @@ describe('useSeatTrim', () => {
     mockSafes = { safes: { '1': ['0xA', '0xB'], '10': ['0xC'] } }
   })
 
-  it('counts the Workspace Safes across chains and asks to trim only when the plan covers fewer', () => {
+  it('counts the Workspace seats across chains and asks to trim only when the plan covers fewer', () => {
     const { result } = renderHook(() => useSeatTrim(SPACE_ID))
 
-    expect(result.current.safeCount).toBe(3)
+    expect(result.current.seatCount).toBe(3)
     expect(result.current.needsTrim(2)).toBe(true)
     expect(result.current.needsTrim(3)).toBe(false)
     expect(result.current.needsTrim(null)).toBe(false)
     expect(result.current.needsTrim(undefined)).toBe(false)
+  })
+
+  it('counts a Safe deployed on several chains as one seat', () => {
+    mockSafes = { safes: { '1': ['0xA', '0xB'], '10': ['0xa'] } }
+    const { result } = renderHook(() => useSeatTrim(SPACE_ID))
+
+    expect(result.current.seatCount).toBe(2)
+    expect(result.current.needsTrim(2)).toBe(false)
   })
 
   it('removes the Safes left out and reports whether the removal went through', async () => {

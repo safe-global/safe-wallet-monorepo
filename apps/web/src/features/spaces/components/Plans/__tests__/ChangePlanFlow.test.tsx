@@ -5,7 +5,7 @@ import type { CurrentPlan, PlanPick } from '../types'
 let mockSafeCount = 3
 jest.mock('../../../hooks/billing/useSeatTrim', () => ({
   useSeatTrim: () => ({
-    safeCount: mockSafeCount,
+    seatCount: mockSafeCount,
     needsTrim: (seats: number | null | undefined) => seats != null && mockSafeCount > seats,
   }),
 }))

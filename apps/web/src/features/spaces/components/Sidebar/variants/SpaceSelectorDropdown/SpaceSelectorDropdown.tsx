@@ -17,7 +17,7 @@ import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
 import { cn } from '@/utils/cn'
 import { SPACE_SELECTOR_NAME_MAX_LENGTH } from '../../constants'
-import { SAFE_ACCOUNTS_LIMIT, SPACES_LIMIT } from '@/features/spaces/constants'
+import { SPACES_LIMIT } from '@/features/spaces/constants'
 import css from '../../styles.module.css'
 import type { SpaceItem } from '../../types'
 import { truncateSpaceName } from '../../utils'
@@ -35,6 +35,7 @@ import { getDeterministicColor } from '@/utils/colors'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useSpacePlan } from '../../../../hooks/useSpacePlan'
+import { useSpaceSafeLimit } from '../../../../hooks/useSpaceSafeLimit'
 import { trialLabel } from '../../../../hooks/billing/subscription'
 
 export const SAFE_ALREADY_IN_WORKSPACE_TOOLTIP = 'Safe is already in this Workspace'
@@ -113,12 +114,10 @@ export const SpaceSelectorDropdown = ({
 
   const isAddToWorkspace = triggerVariant === 'addToWorkspace'
 
-  const isAtSafeLimit = (space: SpaceItem) => isAddToWorkspace && space.safeCount >= SAFE_ACCOUNTS_LIMIT
   const isAdminOfSpace = (space: SpaceItem) => isUserActiveAdmin(space.members ?? [], currentUser?.id)
 
   const renderSpaceMenuItem = (space: SpaceItem) => {
     const isAdmin = isAdminOfSpace(space)
-    const atSafeLimit = isAtSafeLimit(space)
     const spaceColor = spaceColors[space.uuid]
 
     return (
@@ -127,7 +126,6 @@ export const SpaceSelectorDropdown = ({
         space={space}
         spaceColor={spaceColor}
         isAdmin={isAdmin}
-        atSafeLimit={atSafeLimit}
         isAddToWorkspace={isAddToWorkspace}
         isSelected={selectedSpace?.uuid === space.uuid}
         loadingSpaceId={loadingSpaceId}
@@ -252,7 +250,6 @@ interface SpaceMenuRowProps {
   space: SpaceItem
   spaceColor: string | undefined
   isAdmin: boolean
-  atSafeLimit: boolean
   isAddToWorkspace: boolean
   isSelected: boolean
   loadingSpaceId: string | null
@@ -267,7 +264,6 @@ const SpaceMenuRow = ({
   space,
   spaceColor,
   isAdmin,
-  atSafeLimit,
   isAddToWorkspace,
   isSelected,
   loadingSpaceId,
@@ -287,6 +283,17 @@ const SpaceMenuRow = ({
     if (!shouldCheckMembership || !spaceSafes) return false
     return spaceSafes.safes[chainId]?.some((addr) => sameAddress(addr, safeAddress)) ?? false
   }, [shouldCheckMembership, spaceSafes, chainId, safeAddress])
+  // Seats are per address: a Safe the Workspace already holds on another chain takes none.
+  const holdsSeat = useMemo(
+    () =>
+      Boolean(spaceSafes) &&
+      Object.values(spaceSafes?.safes ?? {}).some((addresses) =>
+        addresses.some((addr) => sameAddress(addr, safeAddress)),
+      ),
+    [spaceSafes, safeAddress],
+  )
+  const { limit } = useSpaceSafeLimit(shouldCheckMembership ? space.uuid : null)
+  const atSafeLimit = isAddToWorkspace && limit !== null && space.safeCount >= limit && !holdsSeat
 
   const isDisabled = loadingSpaceId !== null || (isAddToWorkspace && (!isAdmin || atSafeLimit || isAlreadyAdded))
 
@@ -329,7 +336,7 @@ const SpaceMenuRow = ({
     return (
       <Tooltip>
         <TooltipTrigger render={<span className="block w-full" />}>{menuItem}</TooltipTrigger>
-        <TooltipContent side="right">{`You can have up to ${SAFE_ACCOUNTS_LIMIT} Safes per Workspace`}</TooltipContent>
+        <TooltipContent side="right">{`You can have up to ${limit} Safes per Workspace`}</TooltipContent>
       </Tooltip>
     )
   }

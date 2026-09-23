@@ -136,6 +136,20 @@ describe('SpaceSafeAccounts', () => {
     expect(screen.getByTestId('seat-limit-banner')).toHaveTextContent('Business includes 2 Safe accounts')
   })
 
+  it('counts a Safe on several chains as one seat', () => {
+    mockUseSpaceSafes.mockReturnValue({
+      allSafes: [...spaceSafes, { chainId: '10', address: '0xTreasury', name: 'Treasury' }],
+      isError: false,
+      error: null,
+      refetch: jest.fn(),
+    })
+    mockUseSeatUpsell.mockReturnValue({ isSafePro: true, tierName: 'Business', limit: 2, plansHref: '/spaces/plans' })
+
+    render(<SpaceSafeAccounts />)
+
+    expect(screen.getByTestId('selected-count')).toHaveTextContent('2 of 2')
+  })
+
   it('shows neither counter nor banner without Safe Pro', () => {
     render(<SpaceSafeAccounts />)
 

@@ -13,7 +13,7 @@ jest.mock('../../../hooks/billing/useSpaceOffers', () => ({
 }))
 jest.mock('../../../hooks/billing/useSeatTrimCheckout', () => ({
   useSeatTrimCheckout: (spaceId: string) => ({
-    safeCount: 3,
+    seatCount: 3,
     needsTrim: (seats: number | null | undefined) => mockNeedsTrim(seats),
     checkout: (paymentLinkId: string, removed?: unknown[]) => mockCheckout(spaceId, paymentLinkId, removed),
     isBusy: false,
