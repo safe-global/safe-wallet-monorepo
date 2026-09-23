@@ -282,7 +282,7 @@ exports[`./TransactionQueueBar.stories Collapsed 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -465,7 +465,7 @@ exports[`./TransactionQueueBar.stories Collapsed 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -648,7 +648,7 @@ exports[`./TransactionQueueBar.stories Collapsed 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -1010,7 +1010,7 @@ exports[`./TransactionQueueBar.stories Expanded 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -1193,7 +1193,7 @@ exports[`./TransactionQueueBar.stories Expanded 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -1376,7 +1376,7 @@ exports[`./TransactionQueueBar.stories Expanded 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -1742,7 +1742,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -1925,7 +1925,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -2108,7 +2108,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -2291,7 +2291,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -2474,7 +2474,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -2657,7 +2657,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -2840,7 +2840,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -3023,7 +3023,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -3206,7 +3206,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -3389,7 +3389,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -3572,7 +3572,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -3755,7 +3755,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -3938,7 +3938,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -4121,7 +4121,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -4304,7 +4304,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -4487,7 +4487,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -4670,7 +4670,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -4853,7 +4853,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -5036,7 +5036,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -5219,7 +5219,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -5402,7 +5402,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -5585,7 +5585,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -5768,7 +5768,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -5951,7 +5951,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -6134,7 +6134,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -6317,7 +6317,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -6500,7 +6500,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -6683,7 +6683,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -6866,7 +6866,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -7049,7 +7049,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
