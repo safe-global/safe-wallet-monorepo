@@ -49,6 +49,28 @@ describe('SafeShieldContent Safe Pro gating', () => {
     mockHasOwnTenderly = false
   })
 
+  it('keeps the pre-Pro layout while SAFE_PRO is off: recipient among the open checks, simulation by hand, no PRO block', () => {
+    const recipient = RecipientAnalysisBuilder.knownRecipient(faker.finance.ethereumAddress()).build()
+    render(
+      <SafeShieldContent
+        recipient={recipient}
+        contract={emptyAnalysis}
+        threat={emptyAnalysis}
+        deadlock={emptyAnalysis}
+        safeTx={safeTx}
+        hasProFeatures
+        isSafePro={false}
+      />,
+    )
+
+    expect(screen.queryByTestId('pro-checks-section')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('pro-checks-row')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('hypernative-login-line')).not.toBeInTheDocument()
+    expect(screen.getByTestId('open-checks-list')).toContainElement(screen.getByTestId('recipient-analysis-group-card'))
+    expect(screen.getByTestId('open-checks-list')).toContainElement(screen.getByTestId('tenderly-simulation'))
+    expect(screen.getByTestId('run-simulation-btn')).toBeInTheDocument()
+  })
+
   it('locks the simulation without Safe Pro and without a Tenderly project of one’s own', () => {
     renderContent(false)
 

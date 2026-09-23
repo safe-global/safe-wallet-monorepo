@@ -34,6 +34,7 @@ describe('useSafeProAccess', () => {
   it('grants the Pro features to a Safe in a Workspace with a live subscription', () => {
     expect(renderHook(() => useSafeProAccess()).result.current).toEqual({
       hasProFeatures: true,
+      isSafePro: true,
       isLoading: false,
       spaceId: SPACE_ID,
     })
@@ -80,6 +81,7 @@ describe('useSafeProAccess', () => {
 
     expect(renderHook(() => useSafeProAccess()).result.current).toEqual({
       hasProFeatures: false,
+      isSafePro: true,
       isLoading: true,
       spaceId: SPACE_ID,
     })
@@ -90,6 +92,7 @@ describe('useSafeProAccess', () => {
 
     expect(renderHook(() => useSafeProAccess()).result.current).toEqual({
       hasProFeatures: true,
+      isSafePro: false,
       isLoading: false,
       spaceId: null,
     })
