@@ -1,4 +1,4 @@
-import { render, screen } from '@/tests/test-utils'
+import { render, screen, within } from '@/tests/test-utils'
 import { PendingBanner } from '../PendingBanner'
 import { PendingSignatures } from '../PendingSignatures'
 import { PolicyOverview } from '../PolicyOverview'
@@ -44,8 +44,18 @@ describe('PolicyOverview', () => {
       />,
     )
 
-    expect(screen.getByText('Applies to')).toBeInTheDocument()
-    expect(screen.getByText('Initiated by')).toBeInTheDocument()
-    expect(screen.getByText('Safe module')).toBeInTheDocument()
+    const appliesToRow = screen.getByText('Applies to').closest('div') as HTMLElement
+    expect(within(appliesToRow).getByText('Treasury')).toBeInTheDocument()
+    expect(within(appliesToRow).queryByText('Alice')).not.toBeInTheDocument()
+
+    const initiatedByRow = screen.getByText('Initiated by').closest('div') as HTMLElement
+    expect(within(initiatedByRow).getByText('Alice')).toBeInTheDocument()
+    expect(within(initiatedByRow).queryByText('Treasury')).not.toBeInTheDocument()
+
+    const lastUpdatedRow = screen.getByText('Last updated').closest('div') as HTMLElement
+    expect(within(lastUpdatedRow).getByText('Sep 22, 2026')).toBeInTheDocument()
+
+    const enforcedByRow = screen.getByText('Enforced by').closest('div') as HTMLElement
+    expect(within(enforcedByRow).getByText('Safe module')).toBeInTheDocument()
   })
 })

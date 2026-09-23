@@ -1,0 +1,21 @@
+import type { Meta, StoryObj } from '@storybook/react'
+import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_SAFE_NAME } from '../../../mocks/policies'
+import PolicyOverview from './PolicyOverview'
+
+const meta = {
+  title: 'Features/Spaces/Policies/SpendingLimitDrawer/PolicyOverview',
+  component: PolicyOverview,
+  parameters: { layout: 'centered' },
+  decorators: [(Story) => <div className="w-[400px]">{Story()}</div>],
+  args: {
+    appliesTo: { address: MOCK_SAFES.treasury.address, name: MOCK_SAFE_NAME },
+    initiatedBy: { address: MOCK_ADDRESSES.alice },
+    lastUpdated: '06.24.26 03:35 AM UTC',
+    enforcedBy: 'Safe module',
+  },
+} satisfies Meta<typeof PolicyOverview>
+
+export default meta
+type Story = StoryObj<typeof PolicyOverview>
+
+export const Default: Story = {}
