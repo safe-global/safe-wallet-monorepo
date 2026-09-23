@@ -26,7 +26,14 @@ import {
   useSpaceSafes,
   useUpsertWorkspaceSafeNames,
 } from '@/features/spaces'
-import { NameAccountsFields, buildWorkspaceSafeNames, getSafesToName, hasAllNames, touchNames } from '../NameAccounts'
+import {
+  NameAccountsFields,
+  buildWorkspaceSafeNames,
+  getSafesToName,
+  hasAllNames,
+  touchNames,
+  withWorkspaceNames,
+} from '../NameAccounts'
 import { AdminOnlyWorkspaceTooltip } from '../AdminOnlyWorkspaceTooltip'
 import {
   useSpaceSafesCreateV1Mutation,
@@ -153,7 +160,7 @@ const AddAccounts = ({
       Object.keys(allAdded[chainId] || {}).map((address) => buildItem(chainId, address)),
     )
 
-    return _groupAndSort([...trusted, ...manualSafes], sortComparator)
+    return _groupAndSort(withWorkspaceNames([...trusted, ...manualSafes], spaceAddressBook), sortComparator)
   }, [
     allChainIds,
     allAdded,
@@ -163,6 +170,7 @@ const AddAccounts = ({
     allVisitedSafes,
     allSafeNames,
     manualSafes,
+    spaceAddressBook,
     sortComparator,
   ])
 

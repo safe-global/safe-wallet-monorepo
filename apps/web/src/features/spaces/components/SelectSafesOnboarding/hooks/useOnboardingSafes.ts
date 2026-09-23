@@ -5,6 +5,8 @@ import useAllSafes, { type SafeItem } from '@/hooks/safes/useAllSafes'
 import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { useSimilarityClusters, bandGroupsForList, buildSimilarWarnings } from '@/features/address-poisoning'
+import useGetSpaceAddressBook from '../../../hooks/useGetSpaceAddressBook'
+import { withWorkspaceNames } from '../../NameAccounts/utils'
 
 const useOnboardingSafes = () => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -13,9 +15,10 @@ const useOnboardingSafes = () => {
   const sortComparator = getComparator(orderBy)
 
   const allSafes = useAllSafes()
+  const spaceAddressBook = useGetSpaceAddressBook()
 
   const { trustedSafeItems, ownedSafeItems } = useMemo(() => {
-    const safes = allSafes ?? []
+    const safes = withWorkspaceNames(allSafes ?? [], spaceAddressBook)
 
     // A safe is trusted if it's pinned (added) on ANY chain — then ALL its chains show under
     // trusted, so the same multi-chain safe never appears split across trusted and owned.
@@ -26,7 +29,7 @@ const useOnboardingSafes = () => {
       trustedSafeItems: safes.filter(isTrusted),
       ownedSafeItems: safes.filter((safe) => !isTrusted(safe)),
     }
-  }, [allSafes])
+  }, [allSafes, spaceAddressBook])
 
   // Cluster the full pool — a pinned/trusted impostor must still be caught (WA-2912).
   const allSafeAddresses = useMemo(() => (allSafes ?? []).map((s) => s.address), [allSafes])

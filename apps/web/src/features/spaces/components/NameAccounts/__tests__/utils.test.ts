@@ -1,6 +1,6 @@
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { AllSafeItems, SafeItem } from '@/hooks/safes'
-import { buildWorkspaceSafeNames, getSafesToName, hasAllNames, nameFieldKey } from '../utils'
+import { buildWorkspaceSafeNames, getSafesToName, hasAllNames, nameFieldKey, withWorkspaceNames } from '../utils'
 
 const ADDRESS_A = '0xAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaA'
 const ADDRESS_B = '0xBbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbB'
@@ -122,5 +122,25 @@ describe('hasAllNames', () => {
 
   it('is true for an empty list', () => {
     expect(hasAllNames({}, [])).toBe(true)
+  })
+})
+
+describe('withWorkspaceNames', () => {
+  it('shows the workspace name over a local one', () => {
+    const [safe] = withWorkspaceNames([safeItem('1', ADDRESS_A, 'Local')], [entry(ADDRESS_A, 'Workspace', ['1'])])
+
+    expect(safe.name).toBe('Workspace')
+  })
+
+  it('shows the workspace name for a Safe with no local name', () => {
+    const [safe] = withWorkspaceNames([safeItem('1', ADDRESS_A)], [entry(ADDRESS_A.toLowerCase(), 'Workspace', ['1'])])
+
+    expect(safe.name).toBe('Workspace')
+  })
+
+  it('keeps the local name when the workspace entry covers another chain', () => {
+    const [safe] = withWorkspaceNames([safeItem('10', ADDRESS_A, 'Local')], [entry(ADDRESS_A, 'Workspace', ['1'])])
+
+    expect(safe.name).toBe('Local')
   })
 })

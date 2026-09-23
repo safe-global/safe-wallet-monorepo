@@ -18,6 +18,13 @@ type SafeRef = { chainId: string; address: string }
 /** Form field path for a Safe's name, keyed by lowercased address so one name covers all its chains. */
 export const nameFieldKey = (address: string) => `names.${address.toLowerCase()}` as const
 
+/** Replaces each Safe's name with the workspace one where the workspace names it on that chain. */
+export const withWorkspaceNames = (safes: SafeItem[], spaceAddressBook: SpaceAddressBookItemDto[]): SafeItem[] =>
+  safes.map((safe) => {
+    const entry = spaceAddressBook.find((item) => sameAddress(item.address, safe.address))
+    return entry?.chainIds.includes(safe.chainId) ? { ...safe, name: entry.name } : safe
+  })
+
 /** Returns the Safes that still need a workspace name, grouped one row per address. */
 export const getSafesToName = (
   safesToAdd: SafeRef[],

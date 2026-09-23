@@ -1,2 +1,2 @@
 export { default as NameAccountsFields } from './NameAccountsFields'
-export { buildWorkspaceSafeNames, getSafesToName, hasAllNames, touchNames } from './utils'
+export { buildWorkspaceSafeNames, getSafesToName, hasAllNames, touchNames, withWorkspaceNames } from './utils'
