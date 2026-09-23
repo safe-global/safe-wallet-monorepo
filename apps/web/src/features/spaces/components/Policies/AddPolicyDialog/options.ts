@@ -7,6 +7,8 @@ export interface AddPolicyOption {
   title: string
   description: string
   Icon: LucideIcon
+  disabled?: boolean
+  disabledTooltip?: string
 }
 
 export const ADD_POLICY_OPTIONS: AddPolicyOption[] = [

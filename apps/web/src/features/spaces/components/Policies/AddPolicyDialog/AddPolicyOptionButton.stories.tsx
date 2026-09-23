@@ -44,3 +44,14 @@ export const Suggestion: Story = {
     Icon: MessageSquarePlus,
   },
 }
+
+export const Disabled: Story = {
+  args: {
+    id: 'spending-limit',
+    title: 'Spending limit',
+    description: 'Let spenders access assets without collecting signatures.',
+    Icon: WalletCards,
+    disabled: true,
+    disabledTooltip: 'You need to be an Admin to add policies',
+  },
+}

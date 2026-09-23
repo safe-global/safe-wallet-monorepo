@@ -29,6 +29,16 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
 
+export const WithDisabledOption: Story = {
+  args: {
+    options: ADD_POLICY_OPTIONS.map((option) =>
+      option.id === 'spending-limit'
+        ? { ...option, disabled: true, disabledTooltip: 'You need to be an Admin to add policies' }
+        : option,
+    ),
+  },
+}
+
 export const TwoColumns: Story = {
   args: {
     options: [

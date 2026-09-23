@@ -40,6 +40,32 @@ describe('AddPolicyDialog', () => {
     expect(screen.getByTestId('add-policy-options')).toHaveClass('sm:grid-cols-2')
   })
 
+  it('ignores clicks on a disabled policy', async () => {
+    const onSelect = jest.fn()
+    const options = ADD_POLICY_OPTIONS.map((option) =>
+      option.id === 'spending-limit' ? { ...option, disabled: true } : option,
+    )
+    const { user } = renderDialog({ options, onSelect })
+
+    await user.click(screen.getByTestId('add-policy-option-spending-limit'))
+
+    expect(onSelect).not.toHaveBeenCalled()
+    expect(screen.getByTestId('add-policy-option-spending-limit')).toHaveAttribute('aria-disabled', 'true')
+  })
+
+  it('explains why a policy is disabled', async () => {
+    const options = ADD_POLICY_OPTIONS.map((option) =>
+      option.id === 'spending-limit'
+        ? { ...option, disabled: true, disabledTooltip: 'You need to be an Admin to add policies' }
+        : option,
+    )
+    const { user } = renderDialog({ options })
+
+    await user.hover(screen.getByTestId('add-policy-option-spending-limit'))
+
+    expect(await screen.findByText('You need to be an Admin to add policies')).toBeInTheDocument()
+  })
+
   it('renders nothing while closed', () => {
     renderWithUserEvent(<AddPolicyDialog open={false} onOpenChange={jest.fn()} />)
 
