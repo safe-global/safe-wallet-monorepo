@@ -41,44 +41,41 @@ jest.mock('../ChangePlanDialog', () => ({
   ),
 }))
 
-jest.mock('@/features/__core__', () => ({
-  useLoadFeature: () => ({
-    SafeProPlanSwitchedModal: ({
-      planName,
-      trialEndsAt,
-      price,
-      seatsLabel,
-      onOpenChange,
-    }: {
-      planName: string
-      trialEndsAt: number | null
-      price: string
-      seatsLabel?: string
-      onOpenChange: (open: boolean) => void
-    }) => (
-      <div
-        data-testid="switched-modal"
-        data-plan={planName}
-        data-ends={String(trialEndsAt)}
-        data-price={price}
-        data-seats={seatsLabel}
-      >
-        <button onClick={() => onOpenChange(false)}>Get started</button>
-      </div>
-    ),
-    SafeProSubscriptionActivatedModal: ({
-      planName,
-      onOpenChange,
-    }: {
-      planName: string
-      onOpenChange: (open: boolean) => void
-    }) => (
-      <div data-testid="activated-modal" data-plan={planName}>
-        <button onClick={() => onOpenChange(false)}>Get started</button>
-      </div>
-    ),
-  }),
-  createFeatureHandle: () => ({}),
+jest.mock('../../SafeProModals', () => ({
+  SafeProPlanSwitchedModal: ({
+    planName,
+    trialEndsAt,
+    price,
+    seatsLabel,
+    onOpenChange,
+  }: {
+    planName: string
+    trialEndsAt: number | null
+    price: string
+    seatsLabel?: string
+    onOpenChange: (open: boolean) => void
+  }) => (
+    <div
+      data-testid="switched-modal"
+      data-plan={planName}
+      data-ends={String(trialEndsAt)}
+      data-price={price}
+      data-seats={seatsLabel}
+    >
+      <button onClick={() => onOpenChange(false)}>Get started</button>
+    </div>
+  ),
+  SafeProSubscriptionActivatedModal: ({
+    planName,
+    onOpenChange,
+  }: {
+    planName: string
+    onOpenChange: (open: boolean) => void
+  }) => (
+    <div data-testid="activated-modal" data-plan={planName}>
+      <button onClick={() => onOpenChange(false)}>Get started</button>
+    </div>
+  ),
 }))
 
 const pick = (seats: number, price: number): PlanPick => ({

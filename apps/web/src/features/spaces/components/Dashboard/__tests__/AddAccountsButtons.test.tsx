@@ -137,7 +137,6 @@ const stubAccountsWidget = () => {
     }
     return {
       PendingTxWidget: () => null,
-      SafeProSubscriptionActivatedModal: () => null,
       SafeProAnnouncementModal: () => null,
       $isReady: true,
     }

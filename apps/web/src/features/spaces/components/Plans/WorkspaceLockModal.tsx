@@ -2,8 +2,7 @@ import { useRouter } from 'next/router'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { AppRoutes } from '@/config/routes'
 import { highlightSafePro } from '@/components/common/ProHighlight'
-import { useLoadFeature } from '@/features/__core__'
-import { SafeProFeature } from '@/features/safe-pro-announcement'
+import { SafeProNoticeModal } from '../SafeProModals'
 import { useCheckoutReturn } from '../../hooks/billing/useCheckoutReturn'
 import { useCurrentMembership, useIsAdmin } from '../../hooks/useSpaceMembers'
 import { useWorkspaceLock, type WorkspaceLockReason } from '../../hooks/useWorkspaceLock'
@@ -39,7 +38,6 @@ export default function WorkspaceLockModal({ spaceId }: { spaceId: string }) {
   const membership = useCurrentMembership(spaceId)
   const isAdmin = useIsAdmin(spaceId)
   const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId }, { skip: !isLocked })
-  const { SafeProNoticeModal } = useLoadFeature(SafeProFeature)
   // Back from Stripe the subscription is still propagating: the checkout modals own the screen until it fails.
   const checkout = useCheckoutReturn(spaceId)
   const isConfirmingCheckout = checkout.isReturning && checkout.status !== 'error' && checkout.status !== 'timeout'

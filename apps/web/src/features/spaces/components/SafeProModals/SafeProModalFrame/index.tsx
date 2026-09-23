@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
-import SafeProHero from '../SafeProHero'
+import SafeProHero from '@/components/common/SafeProHero'
 
 /**
  * The 640px confirmation dialog of Safe Pro: the compact hero on top and a centered body underneath. Without

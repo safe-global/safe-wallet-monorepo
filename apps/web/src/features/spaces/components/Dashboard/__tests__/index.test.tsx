@@ -141,22 +141,6 @@ function setupUseLoadFeature(txEntries: Array<{ safeAddress: string; txId: strin
     PendingTxWidget: makeMockPendingTxWidget(txEntries),
     AccountsWidget: () => null,
     SafeProAnnouncementModal: () => <div data-testid="safe-pro-announcement-modal" />,
-    SafeProTrialActivatedModal: ({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) =>
-      open ? <button data-testid="trial-activated-modal" onClick={() => onOpenChange(false)} /> : null,
-    SafeProSubscriptionActivatedModal: ({
-      open,
-      onOpenChange,
-      planName,
-    }: {
-      open: boolean
-      onOpenChange: (o: boolean) => void
-      planName: string
-    }) =>
-      open ? (
-        <button data-testid="subscription-activated-modal" onClick={() => onOpenChange(false)}>
-          {planName}
-        </button>
-      ) : null,
     $isReady: true,
   })
 }

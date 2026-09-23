@@ -35,27 +35,24 @@ jest.mock('@/services/local-storage/session', () => ({
     },
   }),
 }))
-jest.mock('@/features/__core__', () => ({
-  useLoadFeature: () => ({
-    SafeProNoticeModal: ({
-      title,
-      body,
-      actionLabel,
-      onAction,
-    }: {
-      title: string
-      body: string
-      actionLabel: string
-      onAction: () => void
-    }) => (
-      <div data-testid="notice-modal">
-        <h2>{title}</h2>
-        <p>{body}</p>
-        <button onClick={onAction}>{actionLabel}</button>
-      </div>
-    ),
-  }),
-  createFeatureHandle: () => ({}),
+jest.mock('../../SafeProModals', () => ({
+  SafeProNoticeModal: ({
+    title,
+    body,
+    actionLabel,
+    onAction,
+  }: {
+    title: string
+    body: string
+    actionLabel: string
+    onAction: () => void
+  }) => (
+    <div data-testid="notice-modal">
+      <h2>{title}</h2>
+      <p>{body}</p>
+      <button onClick={onAction}>{actionLabel}</button>
+    </div>
+  ),
 }))
 jest.mock('../ChangePlanFlow', () => ({
   __esModule: true,

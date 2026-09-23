@@ -22,30 +22,27 @@ jest.mock('../../../hooks/useSpaceMembers', () => ({
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpacesGetOneV1Query: () => ({ currentData: { name: 'Acme Inc' } }),
 }))
-jest.mock('@/features/__core__', () => ({
-  useLoadFeature: () => ({
-    SafeProNoticeModal: ({
-      title,
-      body,
-      onAction,
-      secondaryActionLabel,
-      secondaryActionHref,
-    }: {
-      title: string
-      body: string
-      onAction: () => void
-      secondaryActionLabel?: string
-      secondaryActionHref?: string
-    }) => (
-      <div data-testid="locked-member-modal">
-        <h2>{title}</h2>
-        <p>{body}</p>
-        <button onClick={onAction}>Back to My accounts</button>
-        {secondaryActionLabel && <a href={secondaryActionHref}>{secondaryActionLabel}</a>}
-      </div>
-    ),
-  }),
-  createFeatureHandle: () => ({}),
+jest.mock('../../SafeProModals', () => ({
+  SafeProNoticeModal: ({
+    title,
+    body,
+    onAction,
+    secondaryActionLabel,
+    secondaryActionHref,
+  }: {
+    title: string
+    body: string
+    onAction: () => void
+    secondaryActionLabel?: string
+    secondaryActionHref?: string
+  }) => (
+    <div data-testid="locked-member-modal">
+      <h2>{title}</h2>
+      <p>{body}</p>
+      <button onClick={onAction}>Back to My accounts</button>
+      {secondaryActionLabel && <a href={secondaryActionHref}>{secondaryActionLabel}</a>}
+    </div>
+  ),
 }))
 jest.mock('../ClaimTrialModal', () => ({
   __esModule: true,

@@ -1,8 +1,12 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
-import { useLoadFeature } from '@/features/__core__'
-import { SafeProFeature } from '@/features/safe-pro-announcement'
+import {
+  SafeProNoticeModal,
+  SafeProPendingModal,
+  SafeProSubscriptionActivatedModal,
+  SafeProTrialActivatedModal,
+} from '../SafeProModals'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
 import { useCheckoutReturn, type CheckoutReturnStatus } from '../../hooks/billing/useCheckoutReturn'
 import { getSubscriptionPeriodEnd, getSubscriptionPlanName } from '../../hooks/billing/subscription'
@@ -32,8 +36,6 @@ export default function CheckoutReturnModals({
   spaceId?: string | null
   trialCtaLabel?: string
 }) {
-  const { SafeProTrialActivatedModal, SafeProSubscriptionActivatedModal, SafeProPendingModal, SafeProNoticeModal } =
-    useLoadFeature(SafeProFeature)
   const { plan, seats, refetch } = useSpacePlan(spaceId)
   const checkout = useCheckoutReturn(spaceId)
   const router = useRouter()
