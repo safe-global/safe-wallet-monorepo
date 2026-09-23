@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
 
-export type ProposerActionsProps = {
+export type PolicyDrawerActionsProps = {
   actionLabel: string
   onClick: () => void
   hint?: string
@@ -12,13 +12,13 @@ export type ProposerActionsProps = {
   disabled?: boolean
 }
 
-const ProposerActions = ({
+const PolicyDrawerActions = ({
   actionLabel,
   onClick,
   hint,
   variant = 'default',
   disabled = false,
-}: ProposerActionsProps): ReactElement => (
+}: PolicyDrawerActionsProps): ReactElement => (
   <DrawerFooter>
     <div className="flex flex-col gap-2">
       {hint && (
@@ -34,10 +34,10 @@ const ProposerActions = ({
   </DrawerFooter>
 )
 
-export default ProposerActions
+export default PolicyDrawerActions
 
-export const ProposerActionsSkeleton = (): ReactElement => (
+export const PolicyDrawerActionsSkeleton = (): ReactElement => (
   <DrawerFooter>
-    <Skeleton className="h-9 w-full" data-testid="proposer-actions-skeleton" />
+    <Skeleton className="h-9 w-full" data-testid="policy-drawer-actions-skeleton" />
   </DrawerFooter>
 )

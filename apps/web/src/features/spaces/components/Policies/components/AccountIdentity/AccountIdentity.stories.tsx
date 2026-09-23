@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import AccountIdentity, { AccountIdentitySkeleton } from './AccountIdentity'
 
 const meta = {
-  title: 'Features/Spaces/Policies/ProposerDrawer/components/AccountIdentity',
+  title: 'Features/Spaces/Policies/components/AccountIdentity',
   component: AccountIdentity,
   parameters: {
     layout: 'centered',

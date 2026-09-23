@@ -1,16 +1,16 @@
 import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
-import ProposerActions from '../ProposerActions'
+import PolicyDrawerActions from '../PolicyDrawerActions'
 
-describe('ProposerActions', () => {
+describe('PolicyDrawerActions', () => {
   it('labels the action from its prop', () => {
-    render(<ProposerActions actionLabel="Review transaction" onClick={jest.fn()} />)
+    render(<PolicyDrawerActions actionLabel="Review transaction" onClick={jest.fn()} />)
 
     expect(screen.getByRole('button', { name: 'Review transaction' })).toBeInTheDocument()
   })
 
   it('calls back when the action is clicked', async () => {
     const onClick = jest.fn()
-    const { user } = renderWithUserEvent(<ProposerActions actionLabel="Submit delegation" onClick={onClick} />)
+    const { user } = renderWithUserEvent(<PolicyDrawerActions actionLabel="Submit delegation" onClick={onClick} />)
 
     await user.click(screen.getByRole('button', { name: 'Submit delegation' }))
 
@@ -18,7 +18,7 @@ describe('ProposerActions', () => {
   })
 
   it('shows no hint unless one is given', () => {
-    render(<ProposerActions actionLabel="Submit delegation" onClick={jest.fn()} />)
+    render(<PolicyDrawerActions actionLabel="Submit delegation" onClick={jest.fn()} />)
 
     expect(screen.queryByText(/wallet/i)).not.toBeInTheDocument()
   })
@@ -26,7 +26,7 @@ describe('ProposerActions', () => {
   it('explains a disabled action and does not fire it', async () => {
     const onClick = jest.fn()
     const { user } = renderWithUserEvent(
-      <ProposerActions
+      <PolicyDrawerActions
         actionLabel="Remove proposer"
         onClick={onClick}
         disabled
