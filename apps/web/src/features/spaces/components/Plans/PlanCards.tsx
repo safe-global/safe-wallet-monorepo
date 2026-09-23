@@ -183,7 +183,7 @@ export const PlanCard = ({
           <div className="flex flex-1 flex-col gap-6">
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-2">
-                <Typography variant={selectable ? 'paragraph-large-medium' : 'h3'}>{tier.name}</Typography>
+                <Typography variant={selectable ? 'paragraph-large-medium' : 'h4'}>{tier.name}</Typography>
                 {tier.isCurrent && currentBadge && (
                   <Badge variant={currentBadge.variant} size="status" shape="status">
                     {currentBadge.label}
@@ -192,7 +192,7 @@ export const PlanCard = ({
               </div>
 
               <div className="flex items-baseline gap-1">
-                <Typography variant={selectable ? 'h4' : 'h2'} className={cn(selectable && 'line-through')}>
+                <Typography variant="h4" className={cn(selectable && 'line-through')}>
                   {price === null ? 'Custom' : formatPlanPrice(price, tier.currency)}
                 </Typography>
                 <Typography color="muted">{price === null ? 'Annual term' : priceSuffix(tier.billingCycle)}</Typography>
@@ -219,9 +219,9 @@ export const PlanCard = ({
                 </div>
               )}
 
-              <List>
+              <List className="gap-1">
                 {features.map((feature) => (
-                  <ListItem key={feature} size="sm">
+                  <ListItem key={feature} size="sm" className="py-0">
                     <Avatar size="xs">
                       <AvatarFallback>
                         <Check className="size-4" strokeWidth={1.5} />
