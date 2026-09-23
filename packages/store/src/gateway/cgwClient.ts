@@ -16,7 +16,6 @@ export const CREDENTIAL_ROUTES = [
 
 const IS_BEHIND_IAP = process.env.NEXT_PUBLIC_IS_BEHIND_IAP === 'true'
 
-// The CGW answers 404 when a Workspace has no subscription at all; resolving it as an empty list lets RTK cache it.
 const SUBSCRIPTIONS_ROUTE = /^\/v1\/billing\/spaces\/[^/]+\/subscriptions(\?.*)?$/
 
 export function isCredentialRoute(url: string) {
