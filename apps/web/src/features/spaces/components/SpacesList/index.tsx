@@ -32,6 +32,7 @@ import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
 import SpaceInfoModal from '../SpaceInfoModal'
 import { filterSpacesByStatus, getInvitedByName } from '@/features/spaces/utils'
 import { AppRoutes } from '@/config/routes'
+import { SAFE_PRO_USER_TERMS_URL } from '@/config/constants'
 import NextLink from 'next/link'
 import { useSignInRedirect } from '@/components/welcome/WelcomeLogin/hooks/useSignInRedirect'
 import AddIcon from '@/public/images/common/add.svg'
@@ -131,7 +132,7 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
                   By continuing you accept the{' '}
                   <Link
                     variant="muted"
-                    href={AppRoutes.terms}
+                    href={SAFE_PRO_USER_TERMS_URL}
                     target="_blank"
                     rel="noreferrer noopener"
                     className={termsLinkClassName}

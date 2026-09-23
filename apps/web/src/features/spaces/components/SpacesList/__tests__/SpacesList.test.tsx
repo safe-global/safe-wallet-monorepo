@@ -505,7 +505,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
     const privacyLink = screen.getByRole('link', { name: /privacy policy/i })
     expect(card).toContainElement(termsLink)
     expect(card).toContainElement(privacyLink)
-    expect(termsLink).toHaveAttribute('href', AppRoutes.terms)
+    expect(termsLink).toHaveAttribute('href', 'https://safe.global/pro-user-terms')
     expect(termsLink).toHaveAttribute('target', '_blank')
     expect(privacyLink).toHaveAttribute('href', AppRoutes.privacy)
     expect(screen.queryByRole('link', { name: /^terms$/i })).not.toBeInTheDocument()
