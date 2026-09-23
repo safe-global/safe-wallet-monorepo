@@ -6,29 +6,24 @@ export const PLAN_ORDER = ['Starter', 'Business', 'Enterprise']
 /** The plan the trial and lapsed-Workspace modals lead with. */
 export const RECOMMENDED_PLAN = 'Business'
 
-const SHARED_FEATURES = [
-  'Unlimited Workspace members',
-  'Advanced threat analysis',
-  'Transaction simulation',
-  'Shared address book',
-  'MFA Authentication',
-]
+const SECURITY_FEATURES = ['Unlimited Workspace members', 'Advanced threat analysis', 'Transaction simulation']
+const COLLABORATION_FEATURES = ['Shared address book', 'MFA Authentication']
 
 export const PLAN_FEATURES: Record<string, string[]> = {
-  Starter: ['10 sponsored transactions / month', ...SHARED_FEATURES, 'Builder API access'],
+  Starter: ['10 sponsored transactions / month', ...SECURITY_FEATURES, ...COLLABORATION_FEATURES, 'Builder API access'],
   Business: [
     '50 sponsored transactions / month',
-    ...SHARED_FEATURES,
-    'Growth API access',
-    'Pay fees from Safe accounts',
+    ...SECURITY_FEATURES,
     'Policy engine',
+    ...COLLABORATION_FEATURES,
+    'Growth API access',
   ],
   Enterprise: [
     'Unlimited sponsored transactions',
-    ...SHARED_FEATURES,
-    'Scale API access',
-    'Pay fees from Safe accounts',
+    ...SECURITY_FEATURES,
     'Policy engine',
+    ...COLLABORATION_FEATURES,
+    'Scale API access',
   ],
 }
 
