@@ -7,7 +7,7 @@ import type { SafeAccountEntry } from '../../SafeAccountSelector/types'
 import SafeAccountField from './SafeAccountField'
 import SpenderCallout from './SpenderCallout'
 import SpenderCard from './SpenderCard'
-import { createEmptySpender, limitPath, type SpendingLimitPolicyFormValues } from '../types'
+import { createEmptyLimit, createEmptySpender, limitPath, type SpendingLimitPolicyFormValues } from '../types'
 import { ADD_SPENDER_LABEL, NEXT_LABEL } from '../constants'
 
 export type SpendingLimitPolicyFormProps = {
@@ -49,18 +49,24 @@ const SpendingLimitPolicyForm = ({
   const { control, handleSubmit, formState, watch, getValues, setValue } = formMethods
   const { fields, append, remove } = useFieldArray({ control, name: 'spenders' })
 
-  // A token picked for Safe A must not survive switching to Safe B. The picker clears its own value
-  // too; clearing here as well covers every row, open or not. The first selection is not a switch.
+  // Every field of a limit is tied to the Safe it was entered for: its token exists on that chain, and only a test
+  // chain offers the short reset periods. Switching Safe therefore empties the rows rather than leaving an amount
+  // with no token. Spenders are addresses, so they stay. The first selection is not a switch.
   const previousScopeKey = useRef(scopeKey)
   useEffect(() => {
     const previous = previousScopeKey.current
     previousScopeKey.current = scopeKey
     if (previous === undefined || previous === scopeKey) return
 
+    const empty = createEmptyLimit()
     getValues('spenders').forEach((spender, spenderIndex) =>
-      spender.limits.forEach((_, limitIndex) =>
-        setValue(limitPath(spenderIndex, limitIndex, 'tokenAddress'), '', { shouldValidate: true, shouldDirty: true }),
-      ),
+      spender.limits.forEach((_, limitIndex) => {
+        // Validated, so the emptied rows disable Next until they are filled in for the new Safe.
+        const options = { shouldValidate: true, shouldDirty: true }
+        setValue(limitPath(spenderIndex, limitIndex, 'tokenAddress'), empty.tokenAddress, options)
+        setValue(limitPath(spenderIndex, limitIndex, 'amount'), empty.amount, options)
+        setValue(limitPath(spenderIndex, limitIndex, 'resetTime'), empty.resetTime, options)
+      }),
     )
   }, [scopeKey, getValues, setValue])
 

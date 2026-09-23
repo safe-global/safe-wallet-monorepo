@@ -234,15 +234,22 @@ describe('SpendingLimitPolicyForm', () => {
     await waitFor(() => expect(onSpendersChange).toHaveBeenLastCalledWith([SPENDER]))
   })
 
-  it('clears every token selection when the scoped Safe changes, keeping spenders and amounts', async () => {
-    const { user, rerender, buildUi } = renderForm({ scopeKey: `1:${SAFE_A}` })
+  it('empties every limit row when the scoped Safe changes, keeping the spenders', async () => {
+    const { rerender, buildUi } = renderForm({
+      scopeKey: `1:${SAFE_A}`,
+      defaultValues: {
+        safe: `1:${SAFE_A}`,
+        spenders: [{ address: SPENDER, limits: [{ tokenAddress: ZERO_ADDRESS, amount: '1', resetTime: '10080' }] }],
+      },
+    })
 
-    await fillFirstSpender(user)
     rerender(buildUi({ scopeKey: `137:${SAFE_A}` }))
 
     await waitFor(() => expect(screen.getAllByTestId('limit-token-selector')[0]).toHaveValue(''))
+    expect(screen.getAllByTestId('limit-amount-input')[0]).toHaveValue('')
+    expect(screen.getAllByTestId('frequency-select')[0]).toHaveTextContent('One time')
     expect(screen.getAllByTestId('spender-address-input')[0]).toHaveValue(SPENDER)
-    expect(screen.getAllByTestId('limit-amount-input')[0]).toHaveValue('1')
+    await waitFor(() => expect(screen.getByRole('button', { name: NEXT_LABEL })).toBeDisabled())
   })
 
   it('does not clear anything on the first Safe selection', async () => {
