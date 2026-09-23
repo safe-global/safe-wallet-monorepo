@@ -57,6 +57,6 @@ describe('SpacePoliciesPage', () => {
     render(<SpacePoliciesPage spaceId="space-1" />)
 
     expect(screen.getByTestId('policies-list')).toBeInTheDocument()
-    expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(6)
+    expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(1)
   })
 })

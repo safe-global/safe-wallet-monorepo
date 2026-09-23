@@ -8,12 +8,16 @@ import PolicyRule from './components/PolicyRule'
 import PolicyStatusChip from './components/PolicyStatusChip'
 import PolicyTokens from './components/PolicyTokens'
 import { getPolicyLabel } from '../utils/policyLabel'
-import { getPolicyStatus, type Policy } from '../types'
+import { getPolicyStatus, isProposerPolicy, type Policy, type PolicyType } from '../types'
 
 export type PoliciesTableProps = {
   policies: Policy[]
+  /** Set when every row is one type, so the column that only another type fills is left out. */
+  type?: PolicyType
   onSelect?: (policy: Policy) => void
 }
+
+const COLUMNS_ONLY_FOR: Partial<Record<string, PolicyType>> = { proposer: 'proposer', tokens: 'spending-limit' }
 
 /** Every row needs its own name: a screen reader lists them side by side. */
 const getOpenPolicyLabel = (policy: Policy): string =>
@@ -25,12 +29,12 @@ const getOpenPolicyLabel = (policy: Policy): string =>
  *
  * Revoked policies are not in the CGW response, so nothing here has to filter them out.
  */
-const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
-  const columns: DataTableColumn<Policy>[] = [
+const PoliciesTable = ({ policies, type, onSelect }: PoliciesTableProps) => {
+  const allColumns: DataTableColumn<Policy>[] = [
     {
       id: 'rule',
       header: 'RULE',
-      width: '30%',
+      width: '20%',
       sticky: true,
       minWidth: 240,
       cellTestId: 'policy-cell-rule',
@@ -39,14 +43,14 @@ const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
     {
       id: 'appliesTo',
       header: 'APPLIES TO',
-      width: '30%',
-      minWidth: 260,
+      width: '20%',
+      minWidth: 200,
       cellTestId: 'policy-cell-applies-to',
-      cell: (policy, { isCompact }) => (
+      cell: (policy) => (
         <EthHashInfo
           address={policy.safe.address}
           chainId={policy.safe.chainId}
-          shortAddress={isCompact}
+          shortAddress
           showPrefix={false}
           highlight4bytes
           showCopyButton
@@ -55,13 +59,44 @@ const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
       ),
     },
     {
+      id: 'proposer',
+      header: 'PROPOSER',
+      width: '20%',
+      minWidth: 200,
+      cellTestId: 'policy-cell-proposer',
+      cell: (policy) => {
+        if (!isProposerPolicy(policy)) return null
+
+        const [proposer] = policy.data.proposers
+        if (!proposer) return null
+
+        return (
+          <EthHashInfo
+            address={proposer.proposer}
+            chainId={policy.safe.chainId}
+            name={proposer.delegatedBy.find((grant) => grant.label)?.label}
+            shortAddress
+            showPrefix={false}
+            highlight4bytes
+            showCopyButton
+            avatarSize={24}
+          />
+        )
+      },
+    },
+    {
       id: 'network',
       header: 'NETWORK',
       width: '10%',
       minWidth: 120,
+      align: 'center',
       priority: 'secondary',
       cellTestId: 'policy-cell-network',
-      cell: (policy) => <ChainIndicator chainId={policy.safe.chainId} onlyLogo showUnknown imageSize={24} />,
+      cell: (policy) => (
+        <div className="flex justify-center">
+          <ChainIndicator chainId={policy.safe.chainId} onlyLogo showUnknown imageSize={24} />
+        </div>
+      ),
     },
     {
       id: 'tokens',
@@ -101,6 +136,11 @@ const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
         ),
     },
   ]
+
+  const columns = allColumns.filter((column) => {
+    const onlyFor = COLUMNS_ONLY_FOR[column.id]
+    return !type || !onlyFor || onlyFor === type
+  })
 
   return (
     <PaginatedDataTable columns={columns} rows={policies} getRowKey={(policy) => policy.id} onRowClick={onSelect} />

@@ -16,9 +16,24 @@ describe('PoliciesTable', () => {
 
     expect(screen.getByRole('columnheader', { name: 'RULE' })).toBeInTheDocument()
     expect(screen.getByRole('columnheader', { name: 'APPLIES TO' })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: 'PROPOSER' })).toBeInTheDocument()
     expect(screen.getByRole('columnheader', { name: 'NETWORK' })).toBeInTheDocument()
     expect(screen.getByRole('columnheader', { name: 'TOKENS' })).toBeInTheDocument()
     expect(screen.getByRole('columnheader', { name: 'STATUS' })).toBeInTheDocument()
+  })
+
+  it('should, when given a proposer policy, show the proposer with its grant label in the proposer column', () => {
+    render(<PoliciesTable policies={[asActivePolicy(mockProposerPolicy())]} />)
+
+    const cell = screen.getByTestId('policy-cell-proposer')
+
+    expect(within(cell).getByText('Bob')).toBeInTheDocument()
+  })
+
+  it('should, when given a spending limit, leave the proposer column empty', () => {
+    render(<PoliciesTable policies={[asActivePolicy(mockMultiSpenderPolicy())]} />)
+
+    expect(screen.getByTestId('policy-cell-proposer')).toBeEmptyDOMElement()
   })
 
   it('should, when a spending limit holds three spenders, render one row rather than three', () => {
