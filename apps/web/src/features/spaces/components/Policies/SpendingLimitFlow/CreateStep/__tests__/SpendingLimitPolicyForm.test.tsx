@@ -234,21 +234,26 @@ describe('SpendingLimitPolicyForm', () => {
     await waitFor(() => expect(onSpendersChange).toHaveBeenLastCalledWith([SPENDER]))
   })
 
-  it('empties every limit row when the scoped Safe changes, keeping the spenders', async () => {
+  it('starts the policy over when the scoped Safe changes, keeping only the new Safe', async () => {
     const { rerender, buildUi } = renderForm({
       scopeKey: `1:${SAFE_A}`,
       defaultValues: {
         safe: `1:${SAFE_A}`,
-        spenders: [{ address: SPENDER, limits: [{ tokenAddress: ZERO_ADDRESS, amount: '1', resetTime: '10080' }] }],
+        spenders: [
+          { address: SPENDER, limits: [{ tokenAddress: ZERO_ADDRESS, amount: '1', resetTime: '10080' }] },
+          { address: SPENDER_B, limits: [{ tokenAddress: USDC, amount: '2', resetTime: '0' }] },
+        ],
       },
     })
 
     rerender(buildUi({ scopeKey: `137:${SAFE_A}` }))
 
-    await waitFor(() => expect(screen.getAllByTestId('limit-token-selector')[0]).toHaveValue(''))
-    expect(screen.getAllByTestId('limit-amount-input')[0]).toHaveValue('')
-    expect(screen.getAllByTestId('frequency-select')[0]).toHaveTextContent('One time')
-    expect(screen.getAllByTestId('spender-address-input')[0]).toHaveValue(SPENDER)
+    await waitFor(() => expect(screen.getAllByTestId('spender-card')).toHaveLength(1))
+    expect(screen.getByTestId('spender-address-input')).toHaveValue('')
+    expect(screen.getByTestId('limit-token-selector')).toHaveValue('')
+    expect(screen.getByTestId('limit-amount-input')).toHaveValue('')
+    expect(screen.getByTestId('frequency-select')).toHaveTextContent('One time')
+    expect(screen.getByLabelText(SAFE_ACCOUNT_SELECTOR_LABEL)).toHaveTextContent('Treasury')
     await waitFor(() => expect(screen.getByRole('button', { name: NEXT_LABEL })).toBeDisabled())
   })
 

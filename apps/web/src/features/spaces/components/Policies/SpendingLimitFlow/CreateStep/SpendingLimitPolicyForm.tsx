@@ -7,7 +7,7 @@ import type { SafeAccountEntry } from '../../SafeAccountSelector/types'
 import SafeAccountField from './SafeAccountField'
 import SpenderCallout from './SpenderCallout'
 import SpenderCard from './SpenderCard'
-import { createEmptyLimit, createEmptySpender, limitPath, type SpendingLimitPolicyFormValues } from '../types'
+import { createDefaultFormValues, createEmptySpender, type SpendingLimitPolicyFormValues } from '../types'
 import { ADD_SPENDER_LABEL, NEXT_LABEL } from '../constants'
 
 export type SpendingLimitPolicyFormProps = {
@@ -46,29 +46,20 @@ const SpendingLimitPolicyForm = ({
   onDismissCallout,
 }: SpendingLimitPolicyFormProps): ReactElement => {
   const formMethods = useForm<SpendingLimitPolicyFormValues>({ defaultValues, mode: 'onChange' })
-  const { control, handleSubmit, formState, watch, getValues, setValue } = formMethods
+  const { control, handleSubmit, formState, watch, getValues, reset } = formMethods
   const { fields, append, remove } = useFieldArray({ control, name: 'spenders' })
 
-  // Every field of a limit is tied to the Safe it was entered for: its token exists on that chain, and only a test
-  // chain offers the short reset periods. Switching Safe therefore empties the rows rather than leaving an amount
-  // with no token. Spenders are addresses, so they stay. The first selection is not a switch.
+  // A limit is entered for one Safe: its token exists on that Safe's chain, and only a test chain offers the short
+  // reset periods. Switching Safe therefore starts the policy over rather than leaving fields that describe the
+  // previous one. The first selection is not a switch.
   const previousScopeKey = useRef(scopeKey)
   useEffect(() => {
     const previous = previousScopeKey.current
     previousScopeKey.current = scopeKey
     if (previous === undefined || previous === scopeKey) return
 
-    const empty = createEmptyLimit()
-    getValues('spenders').forEach((spender, spenderIndex) =>
-      spender.limits.forEach((_, limitIndex) => {
-        // Validated, so the emptied rows disable Next until they are filled in for the new Safe.
-        const options = { shouldValidate: true, shouldDirty: true }
-        setValue(limitPath(spenderIndex, limitIndex, 'tokenAddress'), empty.tokenAddress, options)
-        setValue(limitPath(spenderIndex, limitIndex, 'amount'), empty.amount, options)
-        setValue(limitPath(spenderIndex, limitIndex, 'resetTime'), empty.resetTime, options)
-      }),
-    )
-  }, [scopeKey, getValues, setValue])
+    reset({ ...createDefaultFormValues(), safe: getValues('safe') })
+  }, [scopeKey, getValues, reset])
 
   // RHF hands back the same mutated array every render, so key on the joined values, not the reference.
   const spenderAddressesKey = (watch('spenders') ?? []).map((spender) => spender?.address ?? '').join(',')
