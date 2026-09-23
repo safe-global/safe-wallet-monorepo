@@ -283,7 +283,8 @@ describe('SignOrExecute hooks', () => {
         .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
       const confirmSpy = jest
         .spyOn(txSender, 'dispatchTxConfirmation')
-        .mockImplementation((() => Promise.resolve({ id: '456' })) as unknown as typeof txSender.dispatchTxConfirmation)
+        .mockImplementation((() =>
+          Promise.resolve({ txId: '456' })) as unknown as typeof txSender.dispatchTxConfirmation)
 
       const signedTx = createSafeTx()
       const signSpy = jest.spyOn(txSender, 'dispatchTxSigning').mockImplementation(() => Promise.resolve(signedTx))
@@ -554,7 +555,8 @@ describe('SignOrExecute hooks', () => {
         .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
       const confirmSpy = jest
         .spyOn(txSender, 'dispatchTxConfirmation')
-        .mockImplementation((() => Promise.resolve({ id: '123' })) as unknown as typeof txSender.dispatchTxConfirmation)
+        .mockImplementation((() =>
+          Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxConfirmation)
       const signSpy = jest.spyOn(txSender, 'dispatchTxSigning').mockImplementation(() => {
         tx.addSignature({
           signer: '0x12345',

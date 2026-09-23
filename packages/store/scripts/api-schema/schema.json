@@ -498,6 +498,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Not an admin"
           }
         },
         "summary": "Get the billing portal session URL for a space",
@@ -584,6 +587,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Not an admin, or a payment link this workspace is not offered"
+          },
+          "409": {
+            "description": "This plan doesn't offer enough Safe seats for the workspace's current Safes"
           }
         },
         "summary": "Create a checkout session for a payment link",
@@ -637,7 +646,7 @@
             }
           },
           "403": {
-            "description": "Not a member, or a plan this workspace is not offered"
+            "description": "Not an admin, or a plan this workspace is not offered"
           },
           "404": {
             "description": "Subscription not found"
@@ -701,13 +710,13 @@
             }
           },
           "403": {
-            "description": "Not a member, or a plan this workspace is not offered"
+            "description": "Not an admin, a plan this workspace is not offered, or a named paymentLinkId this workspace is not offered"
           },
           "404": {
             "description": "Subscription not found"
           },
           "409": {
-            "description": "Already on this plan, the subscription is not updatable, or several offered links sell the plan and none was named"
+            "description": "One of:\n- Already on this plan\n- The subscription is not in an updatable state\n- Several offered links sell the plan and none was named\n- The target plan doesn't offer enough Safe seats for the workspace's current Safes"
           },
           "422": {
             "description": "The named payment link does not offer this plan"
@@ -5329,7 +5338,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Transaction"
+                  "$ref": "#/components/schemas/TransactionDetails"
                 }
               }
             }
