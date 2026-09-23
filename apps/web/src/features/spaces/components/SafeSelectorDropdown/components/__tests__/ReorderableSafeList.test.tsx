@@ -69,14 +69,14 @@ describe('ReorderableSafeList', () => {
     expect(onSelect).not.toHaveBeenCalled()
   })
 
-  it('takes focus on hover so base-ui does not strand the highlight on the previous network row', () => {
+  it('does not take focus on hover, so typing in the search input continues', () => {
     renderList()
     const row = screen.getAllByTestId('reorder-safe-row')[0]
     expect(row).not.toHaveFocus()
 
     fireEvent.mouseEnter(row)
 
-    expect(row).toHaveFocus()
+    expect(row).not.toHaveFocus()
   })
 
   it('hides the grips but keeps click-to-navigate rows while dragging is disabled (search)', () => {
