@@ -31,7 +31,7 @@ export type SpacePoliciesResult = {
 export const useSpacePolicies = (): SpacePoliciesResult => {
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { currentData, isLoading, isError, refetch } = useSpacePoliciesGetActiveV1Query(
+  const { currentData, isFetching, isError, refetch } = useSpacePoliciesGetActiveV1Query(
     { spaceId: spaceId ?? '', types: TABLE_POLICY_TYPES },
     { skip: !isUserSignedIn || !spaceId, ...SPACE_REFRESH_OPTIONS },
   )
@@ -60,5 +60,8 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
 
   const policies = useMemo(() => mapActivePolicies(dtos, resolveToken), [dtos, resolveToken])
 
-  return { policies, isLoading: isLoading || isLoadingTokens, isError, refetch }
+  // RTK's isLoading stays false on a refetch after an error, which would render the empty catalogue.
+  const isLoadingPolicies = isFetching && !currentData
+
+  return { policies, isLoading: isLoadingPolicies || isLoadingTokens, isError, refetch }
 }

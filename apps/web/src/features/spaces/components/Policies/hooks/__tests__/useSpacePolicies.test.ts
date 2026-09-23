@@ -40,7 +40,7 @@ jest.mock('@/hooks/useChains', () => ({
   }),
 }))
 
-const idle = { currentData: undefined, isLoading: false, isError: false, refetch: jest.fn() }
+const idle = { currentData: undefined, isLoading: false, isFetching: false, isError: false, refetch: jest.fn() }
 
 describe('useSpacePolicies', () => {
   beforeEach(() => {
@@ -77,7 +77,7 @@ describe('useSpacePolicies', () => {
   })
 
   it('should, while the policies load, report loading with no rows', () => {
-    mockPoliciesQuery.mockReturnValue({ ...idle, isLoading: true })
+    mockPoliciesQuery.mockReturnValue({ ...idle, isLoading: true, isFetching: true })
 
     const { result } = renderHook(() => useSpacePolicies())
 
@@ -94,6 +94,24 @@ describe('useSpacePolicies', () => {
     expect(result.current.isError).toBe(true)
     result.current.refetch()
     expect(refetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('should, while retrying after a failure, report loading rather than an empty space', () => {
+    mockPoliciesQuery.mockReturnValue({ ...idle, isFetching: true })
+
+    const { result } = renderHook(() => useSpacePolicies())
+
+    expect(result.current.isLoading).toBe(true)
+    expect(result.current.isError).toBe(false)
+  })
+
+  it('should, while refreshing policies already on screen, not report loading', () => {
+    mockPoliciesQuery.mockReturnValue({ ...idle, currentData: [mockProposerDto()], isFetching: true })
+
+    const { result } = renderHook(() => useSpacePolicies())
+
+    expect(result.current.isLoading).toBe(false)
+    expect(result.current.policies).toHaveLength(1)
   })
 
   it('should, when policies reference tokens, look their metadata up and stay loading until it is in', () => {
