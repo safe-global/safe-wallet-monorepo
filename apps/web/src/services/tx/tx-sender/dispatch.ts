@@ -75,7 +75,7 @@ export const dispatchTxProposal = async ({
   // Dispatch a success event only if the tx is signed
   // Unsigned txs are proposed only temporarily and won't appear in the queue
   if (safeTx.signatures.size > 0) {
-    txDispatch(TxEvent.PROPOSED, { txId: proposedTx.txId, nonce: safeTx.data.nonce })
+    txDispatch(TxEvent.PROPOSED, { txId: proposedTx.txId, nonce: safeTx.data.nonce, chainId, safeAddress })
   }
 
   return proposedTx

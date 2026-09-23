@@ -9,7 +9,7 @@
     "build": "vite build",
     "preview": "vite preview --port 3001",
     "serve": "sh -c 'npx -y serve dist -p ${PORT:=3001}'",
-    "type-check": "tsc --noEmit",
+    "type-check": "yarn run -T -B tsc --noEmit",
     "lint": "eslint src",
     "eslint": "eslint",
     "prettier": "prettier --check . --config ../../.prettierrc --ignore-path ../../.prettierignore",

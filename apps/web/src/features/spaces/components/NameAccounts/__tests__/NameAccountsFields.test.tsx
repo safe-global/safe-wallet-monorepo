@@ -128,6 +128,6 @@ describe('NameAccountsFields', () => {
   it('explains that names are shared with the workspace', () => {
     render(<Harness items={[safeItem(ADDRESS_A)]} />)
 
-    expect(screen.getByText(/Everyone on the workspace can see these names/)).toBeInTheDocument()
+    expect(screen.getByText(/Everyone on the Workspace can see these names/)).toBeInTheDocument()
   })
 })

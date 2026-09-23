@@ -296,7 +296,7 @@ describe('useOnboardingSubmit', () => {
     expect(mockAddSafesToSpace).not.toHaveBeenCalled()
     expect(mockRemoveSafesFromSpace).not.toHaveBeenCalled()
     expect(onSuccess).not.toHaveBeenCalled()
-    expect(result.current.error).toBe('No workspace is selected. Reload the page and try again.')
+    expect(result.current.error).toBe('No Workspace is selected. Reload the page and try again.')
   })
 
   it('blocks submit and reports why while the address book could not be read', () => {
@@ -304,7 +304,7 @@ describe('useOnboardingSubmit', () => {
     const { result } = renderHook(() => useOnboardingSubmit('42', onSuccess))
 
     expect(result.current.isAddressBookReady).toBe(false)
-    expect(result.current.error).toBe('The workspace address book is unavailable. Try again in a moment.')
+    expect(result.current.error).toBe('The Workspace address book is unavailable. Try again in a moment.')
   })
 
   it('should set error on add failure', async () => {

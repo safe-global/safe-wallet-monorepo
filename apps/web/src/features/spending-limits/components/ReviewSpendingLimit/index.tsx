@@ -45,32 +45,13 @@ const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => 
   }, [spendingLimits, data])
 
   useEffect(() => {
-    if (!chain || !data) return
+    // Decimals arrive with the balances; building without them would throw a transient error.
+    if (!chain || !data || decimals == null) return
 
-    createNewSpendingLimitTx(
-      data,
-      spendingLimits,
-      chainId,
-      chain,
-      safe.modules,
-      safe.deployed,
-      decimals,
-      existingSpendingLimit,
-    )
+    createNewSpendingLimitTx(data, spendingLimits, chainId, chain, safe.modules, safe.deployed, decimals)
       .then(setSafeTx)
       .catch(setSafeTxError)
-  }, [
-    chain,
-    chainId,
-    decimals,
-    existingSpendingLimit,
-    data,
-    safe.modules,
-    safe.deployed,
-    setSafeTx,
-    setSafeTxError,
-    spendingLimits,
-  ])
+  }, [chain, chainId, decimals, data, safe.modules, safe.deployed, setSafeTx, setSafeTxError, spendingLimits])
 
   const isOneTime = data?.resetTime === '0'
   const resetTime = useMemo(() => {

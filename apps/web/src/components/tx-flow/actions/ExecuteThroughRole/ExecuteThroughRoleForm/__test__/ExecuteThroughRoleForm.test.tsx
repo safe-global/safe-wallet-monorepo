@@ -19,6 +19,15 @@ import * as hooksModule from '../hooks'
 import { chainBuilder } from '@/tests/builders/chains'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { TxModalContext } from '@/components/tx-flow'
+import { SuccessScreenFlow } from '@/components/tx-flow/flows'
+import { useSafeScope } from '@/components/tx-flow/safe-scope'
+
+jest.mock('@/components/tx-flow/safe-scope', () => ({
+  ...jest.requireActual('@/components/tx-flow/safe-scope'),
+  useSafeScope: jest.fn(),
+}))
+const mockUseSafeScope = useSafeScope as jest.MockedFunction<typeof useSafeScope>
 
 const renderWithSafeShield = (ui: ReactElement) => {
   return render(<SafeShieldProvider>{ui}</SafeShieldProvider>)
@@ -216,6 +225,48 @@ describe('ExecuteThroughRoleForm', () => {
     // calls provided onSubmitSuccess callback
     await waitFor(() => {
       expect(onSubmitSuccess).toHaveBeenCalled()
+    })
+  })
+
+  it('hands the selected Safe to the success screen', async () => {
+    mockConnectedWalletAddress(MEMBER_ADDRESS)
+    mockUseSafeScope.mockReturnValue({
+      chainId: '11155111',
+      safeAddress: '0x0000000000000000000000000000000000000001',
+      scopeKey: '11155111:0x0000000000000000000000000000000000000001',
+      safeLoaded: true,
+      safeLoading: false,
+    })
+
+    const safeTx = createMockSafeTransaction({
+      to: WETH_ADDRESS,
+      data: '0xd0e30db0', // deposit()
+      value: AbiCoder.defaultAbiCoder().encode(['uint256'], [123]),
+      operation: OperationType.Call,
+    })
+
+    const setTxFlow = jest.fn()
+
+    const { findByTestId } = renderWithSafeShield(
+      <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
+        <ExecuteThroughRoleForm
+          safeTx={safeTx}
+          role={TEST_ROLE_OK}
+          options={SLOT_OPTIONS}
+          onChange={jest.fn()}
+          slotId="executeThroughRole"
+        />
+      </TxModalContext.Provider>,
+    )
+
+    fireEvent.click(await findByTestId('combo-submit-executeThroughRole'))
+
+    await waitFor(() => expect(setTxFlow).toHaveBeenCalled())
+    const [element] = setTxFlow.mock.calls[0]
+    expect(element.type).toBe(SuccessScreenFlow)
+    expect(element.props).toEqual({
+      txHash: '0xabababababababababababababababababababababababababababababababab',
+      scope: { chainId: '11155111', safeAddress: '0x0000000000000000000000000000000000000001' },
     })
   })
 })

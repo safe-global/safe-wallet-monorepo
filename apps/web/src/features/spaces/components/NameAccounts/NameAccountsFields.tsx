@@ -99,7 +99,7 @@ const NameAccountsFields = ({ items }: { items: AllSafeItems }) => {
   return (
     <div className="flex flex-col gap-4">
       <Typography variant="paragraph" color="muted">
-        Everyone on the workspace can see these names. It is stored in the Workspace address book.
+        Everyone on the Workspace can see these names. It is stored in the Workspace address book.
       </Typography>
 
       <SafeAccountsTable

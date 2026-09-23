@@ -10,7 +10,6 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "outDir": "./dist",
-    "baseUrl": ".",
     "paths": {
       "@/*": ["../src/*"],
       "@fixtures/*": ["./src/fixtures/*"],

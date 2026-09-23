@@ -67,7 +67,7 @@ describe('useUpsertWorkspaceSafeName', () => {
     const { result } = renderHook(() => useUpsertWorkspaceSafeName())
 
     await expect(result.current({ address: ADDRESS, name: 'Treasury', chainIds: ['1'] })).resolves.toEqual({
-      error: 'No workspace is selected. Switch to a workspace and try again.',
+      error: 'No Workspace is selected. Switch to a Workspace and try again.',
     })
     expect(upsert).not.toHaveBeenCalled()
   })
@@ -124,7 +124,7 @@ describe('useUpsertWorkspaceSafeNames — address book not read', () => {
     const { result } = renderHook(() => useUpsertWorkspaceSafeNames())
 
     await expect(result.current([{ address: ADDRESS, name: 'Treasury', chainIds: ['1'] }])).resolves.toEqual({
-      error: 'The workspace address book is unavailable. Try again in a moment.',
+      error: 'The Workspace address book is unavailable. Try again in a moment.',
     })
     expect(upsert).not.toHaveBeenCalled()
   })

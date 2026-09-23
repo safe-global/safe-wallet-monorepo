@@ -19,6 +19,9 @@ import type {
   DeadlockAnalysisResults,
   ThreatAnalysisResults,
 } from '@safe-global/utils/features/safe-shield/types'
+import { TxModalContext } from '@/components/tx-flow'
+import { SuccessScreenFlow } from '@/components/tx-flow/flows'
+import { useSafeScope } from '@/components/tx-flow/safe-scope'
 
 // We assume that CheckWallet always returns true
 jest.mock('@/components/common/CheckWallet', () => ({
@@ -27,6 +30,12 @@ jest.mock('@/components/common/CheckWallet', () => ({
     return children(true)
   },
 }))
+
+jest.mock('@/components/tx-flow/safe-scope', () => ({
+  ...jest.requireActual('@/components/tx-flow/safe-scope'),
+  useSafeScope: jest.fn(),
+}))
+const mockUseSafeScope = useSafeScope as jest.MockedFunction<typeof useSafeScope>
 
 describe('ExecuteForm', () => {
   const safeTransaction = createMockSafeTransaction({
@@ -76,6 +85,7 @@ describe('ExecuteForm', () => {
     jest.clearAllMocks()
 
     jest.spyOn(useValidateTxData, 'useValidateTxData').mockReturnValue([undefined, undefined, false])
+    mockUseSafeScope.mockReturnValue(undefined)
   })
 
   it('shows estimated fees', () => {
@@ -190,6 +200,56 @@ describe('ExecuteForm', () => {
 
     await waitFor(() => {
       expect(mockExecuteTx).toHaveBeenCalled()
+    })
+  })
+
+  describe('success screen scope', () => {
+    const renderWithModal = () => {
+      const setTxFlow = jest.fn()
+      const mockExecuteTx = jest.fn().mockResolvedValue('0xexecuted')
+      const view = render(
+        <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
+          <ExecuteForm
+            {...defaultProps}
+            safeTx={safeTransaction}
+            txActions={{ ...defaultProps.txActions, executeTx: mockExecuteTx }}
+          />
+        </TxModalContext.Provider>,
+      )
+      return { ...view, setTxFlow, mockExecuteTx }
+    }
+
+    it('hands the selected Safe to the success screen when a Space-level scope is active', async () => {
+      mockUseSafeScope.mockReturnValue({
+        chainId: '11155111',
+        safeAddress: '0x0000000000000000000000000000000000000001',
+        scopeKey: '11155111:0x0000000000000000000000000000000000000001',
+        safeLoaded: true,
+        safeLoading: false,
+      })
+      const { getByText, setTxFlow, mockExecuteTx } = renderWithModal()
+
+      fireEvent.click(getByText('Execute'))
+
+      await waitFor(() => expect(mockExecuteTx).toHaveBeenCalled())
+      await waitFor(() => expect(setTxFlow).toHaveBeenCalled())
+      const [element] = setTxFlow.mock.calls[0]
+      expect(element.type).toBe(SuccessScreenFlow)
+      expect(element.props).toEqual({
+        txId: '0xexecuted',
+        scope: { chainId: '11155111', safeAddress: '0x0000000000000000000000000000000000000001' },
+      })
+    })
+
+    it('opens the success screen without a scope on a Safe-level route', async () => {
+      mockUseSafeScope.mockReturnValue(undefined)
+      const { getByText, setTxFlow, mockExecuteTx } = renderWithModal()
+
+      fireEvent.click(getByText('Execute'))
+
+      await waitFor(() => expect(mockExecuteTx).toHaveBeenCalled())
+      await waitFor(() => expect(setTxFlow).toHaveBeenCalled())
+      expect(setTxFlow.mock.calls[0][0].props).toEqual({ txId: '0xexecuted', scope: undefined })
     })
   })
 
