@@ -1,5 +1,6 @@
 import { useCallback, useContext, useState, type ReactElement } from 'react'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import { formatDate } from '@safe-global/utils/utils/date'
 import { TxModalContext } from '@/components/tx-flow'
 import ExternalLink from '@/components/common/ExternalLink'
 import { Typography } from '@/components/ui/typography'
@@ -11,11 +12,14 @@ import type { PolicyCatalogueId } from './PolicyCatalogue/catalogue'
 import ProposerIntroDialog from './ProposerIntroDialog'
 import { PROPOSER_INTRO_SEEN_KEY } from './ProposerIntroDialog/constants'
 import ProposerRoleFlow from './ProposerRoleFlow'
+import { SpendingLimitDrawer } from './SpendingLimitDrawer'
 import SpendingLimitFlow from './SpendingLimitFlow'
 import SpendingLimitIntroDialog from './SpendingLimitIntroDialog'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from './SpendingLimitIntroDialog/constants'
 import { REQUEST_POLICY_FORM_HEIGHT, REQUEST_POLICY_FORM_URL, REQUEST_POLICY_FORM_WIDTH } from './constants'
-import type { Policy } from './types'
+import { hasSpendingLimitData, type Policy } from './types'
+
+const noop = () => {}
 
 interface PoliciesProps {
   /** Supplied by the caller. The page does not fetch. */
@@ -59,6 +63,16 @@ const Policies = ({
 
   const [hasSeenProposerIntro = false, setHasSeenProposerIntro] = useLocalStorage<boolean>(PROPOSER_INTRO_SEEN_KEY)
   const [isProposerIntroOpen, setIsProposerIntroOpen] = useState(false)
+
+  const [openPolicy, setOpenPolicy] = useState<Policy | null>(null)
+
+  const handleSelectPolicy = useCallback(
+    (policy: Policy) => {
+      onSelectPolicy?.(policy)
+      if (hasSpendingLimitData(policy)) setOpenPolicy(policy)
+    },
+    [onSelectPolicy],
+  )
 
   const startSpendingLimitFlow = useCallback(() => setTxFlow(<SpendingLimitFlow />), [setTxFlow])
 
@@ -145,7 +159,7 @@ const Policies = ({
       ) : isError ? (
         <PoliciesLoadError onReload={onRetry} />
       ) : policies.length > 0 ? (
-        <PoliciesList policies={policies} onAddPolicy={onAddPolicy} onSelectPolicy={onSelectPolicy} />
+        <PoliciesList policies={policies} onAddPolicy={onAddPolicy} onSelectPolicy={handleSelectPolicy} />
       ) : (
         <PolicyCatalogue onSelect={handleSelect} />
       )}
@@ -165,6 +179,28 @@ const Policies = ({
         }}
         onProceed={proceedToProposerFlow}
       />
+
+      {openPolicy !== null && hasSpendingLimitData(openPolicy) && (
+        <SpendingLimitDrawer
+          open
+          onClose={() => setOpenPolicy(null)}
+          policy={openPolicy}
+          viewer={{ isSigner: false, hasSigned: false }}
+          safe={{ address: openPolicy.safe.address }}
+          overview={{
+            appliesTo: { address: openPolicy.safe.address },
+            initiatedBy: { address: openPolicy.createdBy },
+            lastUpdated: formatDate(openPolicy.createdAt * 1000),
+            enforcedBy: openPolicy.enforcement.via === 'module' ? 'Safe module' : 'Delegates',
+          }}
+          transactionLink=""
+          // The flows behind these land in WA-3156; WA-3451 supplies the viewer and the link.
+          onEdit={noop}
+          onDelete={noop}
+          onReviewTransaction={noop}
+          onConnectWallet={noop}
+        />
+      )}
     </div>
   )
 }
