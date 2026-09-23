@@ -110,6 +110,7 @@ Verify your changes with the repo's `verify` scripts before committing — runni
 **Rules for agents:**
 
 - Run the scoped check for the workspace you changed and fix all errors before moving on
+- **Always run verify, type-check, lint, and test commands in a sub-agent, never in the main context.** These runs are long and would block all further progress; the parent delegates the run, keeps working, and only waits for the sub-agent's result at the point it needs a pass (before committing). `verify` snapshots the changed-file list when it starts, so if the worktree changes while a check is running (further edits by the user or the parent), the parent must stop that sub-agent and start a fresh run — only a run started after the last edit counts. Fix whatever the sub-agent reports before moving on
 - If a significant code change has no colocated unit test, write one before committing
 - Do NOT run type-check, lint, prettier, and test separately — `verify` runs them all; it only **checks** formatting (never writes), so if it reports formatting errors, run `yarn prettier:fix` once and re-check. **CI rejects unformatted code.**
 - Do NOT commit without a clean scoped-check pass
