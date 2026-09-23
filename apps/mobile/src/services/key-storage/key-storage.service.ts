@@ -3,7 +3,12 @@ import * as Keychain from 'react-native-keychain'
 import DeviceInfo from 'react-native-device-info'
 import { DdRum, ErrorSource } from 'expo-datadog'
 import { IKeyStorageService, PrivateKeyStorageOptions } from './types'
-import { BiometryInvalidationError, isBiometryInvalidationError, KeyStorageError } from './errors'
+import {
+  BiometryInvalidationError,
+  isBiometryInvalidationError,
+  KeyStorageError,
+  MissingWrappingKeyError,
+} from './errors'
 import Logger from '@/src/utils/logger'
 import { Platform } from 'react-native'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
@@ -24,6 +29,11 @@ export class KeyStorageService implements IKeyStorageService {
       biometryTitle: 'Authenticate',
       biometrySubTitle: 'Saving key',
       biometryDescription: 'Please authenticate yourself',
+    },
+    REMOVE: {
+      biometryTitle: 'Authenticate',
+      biometrySubTitle: 'Removing signer',
+      biometryDescription: 'Authenticate to remove this signer from your device',
     },
   }
 
@@ -52,6 +62,10 @@ export class KeyStorageService implements IKeyStorageService {
     } catch (err) {
       if (err === 'user password not found') {
         return undefined
+      }
+
+      if (Platform.OS === 'ios' && err instanceof Error && 'code' in err && err.code === 'E_PRIVATE_KEY_MISSING') {
+        throw new MissingWrappingKeyError(err)
       }
 
       if (isBiometryInvalidationError(err)) {
@@ -186,30 +200,15 @@ export class KeyStorageService implements IKeyStorageService {
     const keyName = this.getKeyNameDeviceCrypto(userId)
     const service = this.getKeyService(userId)
 
-    // First, try to delete from keychain (requires authentication if enabled)
-    const keychainOptions: Keychain.GetOptions = { service }
-    if (requireAuth) {
-      keychainOptions.accessControl = Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE
+    if (requireAuth && !(await DeviceCrypto.authenticateWithBiometry(this.BIOMETRIC_PROMPTS.REMOVE))) {
+      throw new Error('Authentication was cancelled')
     }
 
-    try {
-      // Check if the key exists in keychain
-      const result = await Keychain.getGenericPassword(keychainOptions)
-      if (result) {
-        // Delete from keychain
-        await Keychain.resetGenericPassword({ service })
-      }
-    } catch (error) {
-      // If key doesn't exist, that's fine - we still want to try to remove from device crypto
-      Logger.warn('Key not found in keychain or authentication failed:', asError(error).message)
+    if (!(await DeviceCrypto.deleteKey(keyName))) {
+      throw new Error('Failed to remove encryption key')
     }
-
-    // Try to remove the encryption key from device crypto
-    try {
-      await DeviceCrypto.deleteKey(keyName)
-    } catch (error) {
-      // If the key doesn't exist in device crypto, that's acceptable
-      Logger.warn('Key not found in device crypto:', asError(error).message)
+    if (!(await Keychain.resetGenericPassword({ service }))) {
+      throw new Error('Failed to remove encrypted private key')
     }
   }
 }

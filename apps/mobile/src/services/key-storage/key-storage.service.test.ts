@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { KeyStorageService } from './key-storage.service'
-import { BiometryInvalidationError, KeyStorageError } from './errors'
+import { BiometryInvalidationError, KeyStorageError, MissingWrappingKeyError } from './errors'
 import DeviceCrypto from 'react-native-device-crypto'
 import * as Keychain from 'react-native-keychain'
 import DeviceInfo from 'react-native-device-info'
@@ -198,53 +198,64 @@ describe('KeyStorageService', () => {
   })
 
   describe('removePrivateKey', () => {
-    it('removes key from keychain and device crypto', async () => {
-      mockKeychain.getGenericPassword.mockResolvedValue({
-        username: 'signer_address',
-        password: 'encrypted',
-        service: 'test-service',
-        storage: Keychain.STORAGE_TYPE.AES_GCM,
-      })
+    beforeEach(() => {
+      mockDeviceCrypto.authenticateWithBiometry.mockResolvedValue(true)
       mockKeychain.resetGenericPassword.mockResolvedValue(true)
-      mockDeviceCrypto.deleteKey.mockResolvedValue(true)
-
-      await service.removePrivateKey(userId)
-
-      expect(mockKeychain.resetGenericPassword).toHaveBeenCalled()
-      expect(mockDeviceCrypto.deleteKey).toHaveBeenCalled()
     })
 
-    it('continues to delete crypto key even if keychain key not found', async () => {
-      mockKeychain.getGenericPassword.mockResolvedValue(false)
-      mockDeviceCrypto.deleteKey.mockResolvedValue(true)
-
+    it('authenticates independently and deletes without reading the private key', async () => {
       await service.removePrivateKey(userId)
+
+      expect(mockDeviceCrypto.authenticateWithBiometry).toHaveBeenCalledTimes(1)
+      expect(mockKeychain.getGenericPassword).not.toHaveBeenCalled()
+      expect(mockDeviceCrypto.decrypt).not.toHaveBeenCalled()
+      expect(mockDeviceCrypto.deleteKey).toHaveBeenCalledWith(`signer_address_${userId}`)
+      expect(mockKeychain.resetGenericPassword).toHaveBeenCalledWith({
+        service: `signer_address_${userId}_encrypted_storage`,
+      })
+    })
+
+    it.each(['cancelled', 'rejected'])('does not delete when authentication is %s', async (failure) => {
+      if (failure === 'cancelled') {
+        mockDeviceCrypto.authenticateWithBiometry.mockResolvedValue(false)
+      } else {
+        mockDeviceCrypto.authenticateWithBiometry.mockRejectedValue(new Error('Locked out'))
+      }
+
+      await expect(service.removePrivateKey(userId)).rejects.toThrow('Failed to remove private key')
+
+      expect(mockDeviceCrypto.deleteKey).not.toHaveBeenCalled()
+      expect(mockKeychain.resetGenericPassword).not.toHaveBeenCalled()
+    })
+
+    it('preserves the option to delete delegate keys without authentication', async () => {
+      await service.removePrivateKey(userId, { requireAuthentication: false })
+
+      expect(mockDeviceCrypto.authenticateWithBiometry).not.toHaveBeenCalled()
+      expect(mockDeviceCrypto.deleteKey).toHaveBeenCalled()
+      expect(mockKeychain.resetGenericPassword).toHaveBeenCalled()
+    })
+
+    it.each(['rejected', 'false'])('preserves ciphertext when wrapping-key deletion returns %s', async (failure) => {
+      if (failure === 'rejected') {
+        mockDeviceCrypto.deleteKey.mockRejectedValue(new Error('Deletion failed'))
+      } else {
+        mockDeviceCrypto.deleteKey.mockResolvedValue(false)
+      }
+
+      await expect(service.removePrivateKey(userId)).rejects.toThrow('Failed to remove private key')
 
       expect(mockKeychain.resetGenericPassword).not.toHaveBeenCalled()
-      expect(mockDeviceCrypto.deleteKey).toHaveBeenCalled()
     })
 
-    it('handles keychain authentication failure gracefully', async () => {
-      mockKeychain.getGenericPassword.mockRejectedValue(new Error('Auth failed'))
-      mockDeviceCrypto.deleteKey.mockResolvedValue(true)
+    it.each(['rejected', 'false'])('reports ciphertext deletion failure: %s', async (failure) => {
+      if (failure === 'rejected') {
+        mockKeychain.resetGenericPassword.mockRejectedValue(new Error('Deletion failed'))
+      } else {
+        mockKeychain.resetGenericPassword.mockResolvedValue(false)
+      }
 
-      await service.removePrivateKey(userId)
-
-      expect(mockDeviceCrypto.deleteKey).toHaveBeenCalled()
-    })
-
-    it('handles device crypto delete failure gracefully', async () => {
-      mockKeychain.getGenericPassword.mockResolvedValue(false)
-      mockDeviceCrypto.deleteKey.mockRejectedValue(new Error('Key not found'))
-
-      await expect(service.removePrivateKey(userId)).resolves.not.toThrow()
-    })
-
-    it('handles all failures gracefully without throwing', async () => {
-      mockKeychain.getGenericPassword.mockRejectedValue(new Error('Unexpected error'))
-      mockDeviceCrypto.deleteKey.mockRejectedValue(new Error('Also fails'))
-
-      await expect(service.removePrivateKey(userId)).resolves.not.toThrow()
+      await expect(service.removePrivateKey(userId)).rejects.toThrow('Failed to remove private key')
     })
   })
 
@@ -456,6 +467,23 @@ describe('KeyStorageService', () => {
         storage: Keychain.STORAGE_TYPE.AES_GCM,
       })
     }
+
+    it('reports an explicitly missing iOS wrapping key', async () => {
+      mockKeychainEntry()
+      const cause = Object.assign(new Error('Private wrapping key missing'), { code: 'E_PRIVATE_KEY_MISSING' })
+      mockDeviceCrypto.decrypt.mockRejectedValue(cause)
+
+      await expect(service.getPrivateKey(userId)).rejects.toBeInstanceOf(MissingWrappingKeyError)
+      expect(mockDeviceCrypto.deleteKey).not.toHaveBeenCalled()
+    })
+
+    it('does not interpret a generic item-not-found error as a missing wrapping key', async () => {
+      mockKeychainEntry()
+      mockDeviceCrypto.decrypt.mockRejectedValue(Object.assign(new Error('Item not found'), { code: '-25300' }))
+
+      await expect(service.getPrivateKey(userId)).resolves.toBeUndefined()
+      expect(mockDeviceCrypto.deleteKey).not.toHaveBeenCalled()
+    })
 
     it('throws BiometryInvalidationError for iOS AKSError fingerprint', async () => {
       ;(Platform.OS as string) = 'ios'

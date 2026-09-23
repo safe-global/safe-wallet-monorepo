@@ -12,7 +12,7 @@ import {
 import { ErrorType } from '@/src/utils/errors'
 import { Address } from '@/src/types/address'
 import { AppDispatch } from '@/src/store'
-import { BiometryInvalidationError, keyStorageService } from '@/src/services/key-storage'
+import { BiometryInvalidationError, MissingWrappingKeyError, keyStorageService } from '@/src/services/key-storage'
 import { removeSigner } from '@/src/store/signersSlice'
 import Logger from '@/src/utils/logger'
 
@@ -24,6 +24,7 @@ jest.mock('@/src/services/key-storage', () => {
       removePrivateKey: jest.fn(),
     },
     BiometryInvalidationError: actual.BiometryInvalidationError,
+    MissingWrappingKeyError: actual.MissingWrappingKeyError,
   }
 })
 
@@ -332,21 +333,38 @@ describe('editAccountHelpers', () => {
       expect(mockDispatch).not.toHaveBeenCalled()
     })
 
-    it('should cleanly remove the signer when the wrapping key has been biometry-invalidated', async () => {
-      const mockDispatch = jest.fn() as unknown as AppDispatch
-      const mockRemoveAllDelegatesForOwner = jest.fn()
+    it.each([BiometryInvalidationError, MissingWrappingKeyError])(
+      'removes an unavailable signer: %p',
+      async (UnavailableKeyError) => {
+        const mockDispatch = jest.fn() as unknown as AppDispatch
+        const mockRemoveAllDelegatesForOwner = jest.fn()
 
-      ;(keyStorageService.getPrivateKey as jest.Mock).mockRejectedValue(
-        new BiometryInvalidationError(new Error('SE invalidated')),
-      )
-      ;(keyStorageService.removePrivateKey as jest.Mock).mockResolvedValue(undefined)
+        ;(keyStorageService.getPrivateKey as jest.Mock).mockRejectedValue(
+          new UnavailableKeyError(new Error('Wrapping key unavailable')),
+        )
+        ;(keyStorageService.removePrivateKey as jest.Mock).mockResolvedValue(undefined)
 
-      const result = await cleanupSinglePrivateKey(mockAddress1, mockRemoveAllDelegatesForOwner, mockDispatch)
+        const result = await cleanupSinglePrivateKey(mockAddress1, mockRemoveAllDelegatesForOwner, mockDispatch)
 
-      expect(result.success).toBe(true)
-      expect(mockRemoveAllDelegatesForOwner).not.toHaveBeenCalled()
-      expect(keyStorageService.removePrivateKey).toHaveBeenCalledWith(mockAddress1, { requireAuthentication: false })
-      expect(mockDispatch).toHaveBeenCalledWith(removeSigner(mockAddress1))
+        expect(result.success).toBe(true)
+        expect(result.data?.delegateCleanupSkipped).toBe(true)
+        expect(mockRemoveAllDelegatesForOwner).not.toHaveBeenCalled()
+        expect(keyStorageService.removePrivateKey).toHaveBeenCalledWith(mockAddress1)
+        expect(mockDispatch).toHaveBeenCalledWith(removeSigner(mockAddress1))
+      },
+    )
+
+    it('retains the signer record if unavailable-key removal fails', async () => {
+      const dispatch = jest.fn() as unknown as AppDispatch
+      const removeDelegates = jest.fn()
+      jest.mocked(keyStorageService.getPrivateKey).mockRejectedValue(new MissingWrappingKeyError(undefined))
+      jest.mocked(keyStorageService.removePrivateKey).mockRejectedValue(new Error('Authentication cancelled'))
+
+      const result = await cleanupSinglePrivateKey(mockAddress1, removeDelegates, dispatch)
+
+      expect(result.success).toBe(false)
+      expect(dispatch).not.toHaveBeenCalled()
+      expect(removeDelegates).not.toHaveBeenCalled()
     })
 
     it('should handle keychain errors gracefully', async () => {

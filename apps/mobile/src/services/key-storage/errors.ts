@@ -11,6 +11,13 @@ export class BiometryInvalidationError extends Error {
   }
 }
 
+export class MissingWrappingKeyError extends Error {
+  constructor(cause: unknown) {
+    super('Signer encryption key was not found on this device', { cause })
+    this.name = 'MissingWrappingKeyError'
+  }
+}
+
 const IOS_INVALIDATED_PATTERNS = [
   /AKSError\s*=\s*-?536362999\b/, // kAKSReturnPolicyInvalid
   /AKSError\s*=\s*-?536870203\b/, // kAKSReturnBadDeviceKey

@@ -4,7 +4,7 @@ import { removeSigner } from '@/src/store/signersSlice'
 import { setActiveSafe } from '@/src/store/activeSafeSlice'
 import { removeSafe, SafesSliceItem } from '@/src/store/safesSlice'
 import { setEditMode } from '@/src/store/myAccountsSlice'
-import { BiometryInvalidationError, keyStorageService } from '@/src/services/key-storage'
+import { BiometryInvalidationError, MissingWrappingKeyError, keyStorageService } from '@/src/services/key-storage'
 import Logger from '@/src/utils/logger'
 import { CommonActions } from '@react-navigation/native'
 import { Alert } from 'react-native'
@@ -120,15 +120,15 @@ export const cleanupSinglePrivateKey = async (
     ownerPrivateKey: string,
   ) => Promise<StandardErrorResult<{ processedCount: number }>>,
   dispatch: AppDispatch,
-): Promise<StandardErrorResult<{ success: true }>> => {
+): Promise<StandardErrorResult<{ success: true; delegateCleanupSkipped?: boolean }>> => {
   try {
     let privateKey: string | undefined
     let invalidated = false
     try {
       privateKey = await keyStorageService.getPrivateKey(ownerAddress)
     } catch (err) {
-      if (err instanceof BiometryInvalidationError) {
-        Logger.warn('Skipping delegate cleanup: signer encryption key invalidated', { ownerAddress })
+      if (err instanceof BiometryInvalidationError || err instanceof MissingWrappingKeyError) {
+        Logger.warn('Skipping delegate cleanup: signer encryption key unavailable', { ownerAddress })
         invalidated = true
       } else {
         throw err
@@ -136,18 +136,15 @@ export const cleanupSinglePrivateKey = async (
     }
 
     if (!privateKey) {
-      // Only force-wipe when we know the wrapping key is unusable. Without
-      // this gate, transient failures (user-cancel, lockout, unknown decrypt
-      // errors) would silently delete the signer despite the user not asking
-      // for it.
+      // An unknown read failure must never authorize deleting a signer.
       if (!invalidated) {
         return createErrorResult(ErrorType.STORAGE_ERROR, 'Private key not found for the specified address', null, {
           ownerAddress,
         })
       }
-      await keyStorageService.removePrivateKey(ownerAddress, { requireAuthentication: false })
+      await keyStorageService.removePrivateKey(ownerAddress)
       dispatch(removeSigner(ownerAddress))
-      return createSuccessResult({ success: true as const })
+      return createSuccessResult({ success: true as const, delegateCleanupSkipped: true })
     }
 
     // Remove delegates (includes notification cleanup)

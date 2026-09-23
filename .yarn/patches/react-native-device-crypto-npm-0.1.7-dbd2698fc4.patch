@@ -124,7 +124,7 @@ index 03fd79e8a389f33a2841ecf0e177ffc9ea01b78c..d903b5dc4b0110dab9a8c1a648d34920
              break;
          }
 diff --git a/ios/DeviceCrypto.m b/ios/DeviceCrypto.m
-index 1c05886476b28afcb44eb8fc36f5141593d41b0e..a5ef70c652397aaf8e515c5076f7293f92cfba9f 100644
+index 1c05886476b28afcb44eb8fc36f5141593d41b0e..24472762e7fbf2f13e9e1328008ad99d517fa5c1 100644
 --- a/ios/DeviceCrypto.m
 +++ b/ios/DeviceCrypto.m
 @@ -33,46 +33,39 @@ typedef NS_ENUM(NSUInteger, AccessLevel) {
@@ -349,7 +349,20 @@ index 1c05886476b28afcb44eb8fc36f5141593d41b0e..a5ef70c652397aaf8e515c5076f7293f
    }
  }
  
-@@ -383,7 +368,10 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+@@ -369,6 +354,12 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+     NSData *textToBeDecrypted = [[NSData alloc] initWithBase64EncodedString:plainText options:0];
+     NSString *authMessage = options[kAuthenticatePrompt];
+     SecKeyRef privateKeyRef = [self getPrivateKeyRef:alias withMessage:authMessage];
++    if (!privateKeyRef) {
++      NSError *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:errSecItemNotFound userInfo:nil];
++      reject(@"E_PRIVATE_KEY_MISSING", @"The private wrapping key was not found.", error);
++      return;
++    }
++
+     
+     BOOL canDecrypt = SecKeyIsAlgorithmSupported(privateKeyRef, kSecKeyOperationTypeDecrypt, kSecKeyAlgorithmECIESEncryptionCofactorX963SHA256AESGCM);
+     
+@@ -383,7 +374,10 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
                                                                       &aerr));
      
      if (!clearText || aerr) {
@@ -361,7 +374,7 @@ index 1c05886476b28afcb44eb8fc36f5141593d41b0e..a5ef70c652397aaf8e515c5076f7293f
      }
      
      if (privateKeyRef) { CFRelease(privateKeyRef); }
-@@ -391,7 +379,7 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+@@ -391,7 +385,7 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
      
      resolve([[NSString alloc] initWithData:clearText   encoding:NSUTF8StringEncoding]);
    } @catch(NSException *err) {
@@ -370,7 +383,7 @@ index 1c05886476b28afcb44eb8fc36f5141593d41b0e..a5ef70c652397aaf8e515c5076f7293f
    }
  }
  
-@@ -399,7 +387,11 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+@@ -399,7 +393,11 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
  // ______________________________________________
  RCT_EXPORT_METHOD(getPublicKey:(nonnull NSData *)alias resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
  {
