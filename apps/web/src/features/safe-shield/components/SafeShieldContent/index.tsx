@@ -135,7 +135,7 @@ export const SafeShieldContent = ({
         {/* The Safe Pro checks sit together under the PRO header: recipient analysis and the simulation. Without Pro
             they are locked (with an upgrade) and a Hypernative customer is offered their own analysis instead. */}
         {shouldShowContent && (!hasProFeatures || !recipientEmpty || safeTx) && (
-          <div className="flex flex-col rounded-md bg-muted" data-testid="pro-checks-section">
+          <div className="mt-1 flex flex-col rounded-md bg-muted" data-testid="pro-checks-section">
             <ProChecksRow hasProFeatures={hasProFeatures} />
             <div className="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary">
               {hasProFeatures ? (
