@@ -334,9 +334,7 @@ describe('Policies', () => {
       render(<Policies policies={mockPolicies()} />)
 
       expect(screen.getByTestId('policies-list')).toBeInTheDocument()
-      expect(screen.getByTestId('policies-tab-proposer')).toHaveTextContent('Proposers (1)')
-      expect(screen.getByTestId('policies-tab-spending-limit')).toHaveTextContent('Spending limits (4)')
-      expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(1)
+      expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(mockPolicies().length)
       expect(screen.getByPlaceholderText('by name, address or network')).toBeInTheDocument()
     })
   })

@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, within } from '@/tests/test-utils'
 import {
+  MOCK_SAFES,
   asActivePolicy,
   mockMultiSpenderPolicy,
   mockPendingPolicy,
@@ -10,7 +11,28 @@ import {
 } from '../../mocks/policies'
 import PoliciesTable from '../index'
 
+const mockResolveSafeName = jest.fn()
+
+jest.mock('@/hooks/useAllAddressBooks', () => ({
+  useAddressBookItem: () => undefined,
+  useSafeNameResolver: () => mockResolveSafeName,
+}))
+
 describe('PoliciesTable', () => {
+  beforeEach(() => {
+    mockResolveSafeName.mockReturnValue('')
+  })
+
+  it('should, when the Safe has a name in the space, show it in the applies to column', () => {
+    mockResolveSafeName.mockImplementation((address: string) =>
+      address === MOCK_SAFES.treasury.address ? 'Treasury' : '',
+    )
+
+    render(<PoliciesTable policies={[asActivePolicy(mockProposerPolicy())]} />)
+
+    expect(within(screen.getByTestId('policy-cell-applies-to')).getByText('Treasury')).toBeInTheDocument()
+  })
+
   it('should, when given policies, render the columns the design specifies', () => {
     render(<PoliciesTable policies={mockPolicies()} />)
 

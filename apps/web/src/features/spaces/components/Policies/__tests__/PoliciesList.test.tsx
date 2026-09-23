@@ -36,15 +36,14 @@ describe('PoliciesList', () => {
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
   })
 
-  it('should, when the search is cleared, show every policy of the tab again', async () => {
+  it('should, when the search is cleared, show every policy again', async () => {
     const { user } = renderWithUserEvent(<PoliciesList policies={mockPolicies()} />)
 
-    await user.click(screen.getByTestId('policies-tab-spending-limit'))
     await user.type(screen.getByPlaceholderText('by name, address or network'), 'zzzznothing')
     await user.click(screen.getByTestId('search-clear'))
 
     expect(screen.getByPlaceholderText('by name, address or network')).toHaveValue('')
-    expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(4)
+    expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(mockPolicies().length)
   })
 
   it('should, when no sort is chosen, put the policies that need attention first', () => {
@@ -65,42 +64,62 @@ describe('PoliciesList', () => {
     expect(statuses[2]).toHaveTextContent('Active')
   })
 
-  it('should, when the space has proposers, open on the proposers tab and show only proposers', () => {
-    render(<PoliciesList policies={mockPolicies()} />)
-
-    expect(screen.getByTestId('policies-tab-proposer')).toHaveTextContent('Proposers (1)')
-    expect(screen.getByTestId('policies-tab-spending-limit')).toHaveTextContent('Spending limits (4)')
-    expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(1)
-    expect(screen.getByRole('columnheader', { name: 'PROPOSER' })).toBeInTheDocument()
-    expect(screen.queryByRole('columnheader', { name: 'TOKENS' })).not.toBeInTheDocument()
-  })
-
-  it('should, when the spending limits tab is picked, show only spending limits', async () => {
-    const { user } = renderWithUserEvent(<PoliciesList policies={mockPolicies()} />)
-
-    await user.click(screen.getByTestId('policies-tab-spending-limit'))
+  it('should, when the space has proposers and spending limits, list both in one table with both columns', () => {
+    render(<PoliciesList policies={[asActivePolicy(mockProposerPolicy()), asActivePolicy(mockMultiSpenderPolicy())]} />)
 
     const rules = screen.getAllByTestId('policy-cell-rule')
 
-    expect(rules).toHaveLength(4)
-    rules.forEach((rule) => expect(rule).toHaveTextContent('Spending limit'))
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument()
+    expect(screen.getAllByRole('table')).toHaveLength(1)
+    expect(rules.map((rule) => rule.textContent)).toEqual(
+      expect.arrayContaining([expect.stringContaining('Proposer'), expect.stringContaining('Spending limit')]),
+    )
+    expect(screen.getByRole('columnheader', { name: 'PROPOSER' })).toBeInTheDocument()
     expect(screen.getByRole('columnheader', { name: 'TOKENS' })).toBeInTheDocument()
-    expect(screen.queryByRole('columnheader', { name: 'PROPOSER' })).not.toBeInTheDocument()
   })
 
-  it('should, when the space has no proposers, open on the spending limits tab', () => {
-    render(<PoliciesList policies={[asActivePolicy(mockMultiSpenderPolicy())]} />)
+  it('should, when a type filter is picked, show only policies of that type', async () => {
+    const { user } = renderWithUserEvent(<PoliciesList policies={mockPolicies()} />)
 
-    expect(screen.getByTestId('policies-tab-spending-limit')).toHaveAttribute('aria-selected', 'true')
-    expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(1)
+    await user.click(screen.getByTestId('policies-filter-proposer'))
+
+    const rules = screen.getAllByTestId('policy-cell-rule')
+
+    expect(screen.getByTestId('policies-filter-proposer')).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByTestId('policies-filter-spending-limit')).toHaveAttribute('aria-pressed', 'false')
+    expect(rules).toHaveLength(1)
+    expect(rules[0]).toHaveTextContent('Proposer')
   })
 
-  it('should, when a tab has no policies, say so instead of rendering an empty table', async () => {
-    const { user } = renderWithUserEvent(<PoliciesList policies={[asActivePolicy(mockProposerPolicy())]} />)
+  it('should, when another type filter is picked, switch to that type', async () => {
+    const { user } = renderWithUserEvent(<PoliciesList policies={mockPolicies()} />)
 
-    await user.click(screen.getByTestId('policies-tab-spending-limit'))
+    await user.click(screen.getByTestId('policies-filter-proposer'))
+    await user.click(screen.getByTestId('policies-filter-spending-limit'))
 
-    expect(screen.getByTestId('policies-tab-empty')).toHaveTextContent('No spending limits yet')
+    const rules = screen.getAllByTestId('policy-cell-rule')
+
+    expect(screen.getByTestId('policies-filter-proposer')).toHaveAttribute('aria-pressed', 'false')
+    expect(rules.length).toBeGreaterThan(0)
+    rules.forEach((rule) => expect(rule).toHaveTextContent('Spending limit'))
+  })
+
+  it('should, when the picked type filter is clicked again, show every policy', async () => {
+    const { user } = renderWithUserEvent(<PoliciesList policies={mockPolicies()} />)
+
+    await user.click(screen.getByTestId('policies-filter-proposer'))
+    await user.click(screen.getByTestId('policies-filter-proposer'))
+
+    expect(screen.getByTestId('policies-filter-proposer')).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(mockPolicies().length)
+  })
+
+  it('should, when the space has no policies of the filtered type, say so instead of rendering an empty table', async () => {
+    const { user } = renderWithUserEvent(<PoliciesList policies={[asActivePolicy(mockMultiSpenderPolicy())]} />)
+
+    await user.click(screen.getByTestId('policies-filter-proposer'))
+
+    expect(screen.getByTestId('policies-no-results')).toHaveTextContent('Nothing matches this filter.')
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
   })
 

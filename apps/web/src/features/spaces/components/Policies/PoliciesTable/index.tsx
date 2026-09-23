@@ -2,22 +2,19 @@ import { ChevronRight } from 'lucide-react'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { Button } from '@/components/ui/button'
 import EthHashInfo from '@/components/common/EthHashInfo'
+import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import PaginatedDataTable, { type DataTableColumn } from '@/components/common/PaginatedDataTable'
 import PolicyRule from './components/PolicyRule'
 import PolicyStatusChip from './components/PolicyStatusChip'
 import PolicyTokens from './components/PolicyTokens'
 import { getPolicyLabel } from '../utils/policyLabel'
-import { getPolicyStatus, isProposerPolicy, type Policy, type PolicyType } from '../types'
+import { getPolicyStatus, isProposerPolicy, type Policy } from '../types'
 
 export type PoliciesTableProps = {
   policies: Policy[]
-  /** Set when every row is one type, so the column that only another type fills is left out. */
-  type?: PolicyType
   onSelect?: (policy: Policy) => void
 }
-
-const COLUMNS_ONLY_FOR: Partial<Record<string, PolicyType>> = { proposer: 'proposer', tokens: 'spending-limit' }
 
 /** Every row needs its own name: a screen reader lists them side by side. */
 const getOpenPolicyLabel = (policy: Policy): string =>
@@ -29,8 +26,10 @@ const getOpenPolicyLabel = (policy: Policy): string =>
  *
  * Revoked policies are not in the CGW response, so nothing here has to filter them out.
  */
-const PoliciesTable = ({ policies, type, onSelect }: PoliciesTableProps) => {
-  const allColumns: DataTableColumn<Policy>[] = [
+const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
+  const resolveSafeName = useSafeNameResolver()
+
+  const columns: DataTableColumn<Policy>[] = [
     {
       id: 'rule',
       header: 'RULE',
@@ -50,6 +49,7 @@ const PoliciesTable = ({ policies, type, onSelect }: PoliciesTableProps) => {
         <EthHashInfo
           address={policy.safe.address}
           chainId={policy.safe.chainId}
+          name={resolveSafeName(policy.safe.address, policy.safe.chainId) || undefined}
           shortAddress
           showPrefix={false}
           highlight4bytes
@@ -136,11 +136,6 @@ const PoliciesTable = ({ policies, type, onSelect }: PoliciesTableProps) => {
         ),
     },
   ]
-
-  const columns = allColumns.filter((column) => {
-    const onlyFor = COLUMNS_ONLY_FOR[column.id]
-    return !type || !onlyFor || onlyFor === type
-  })
 
   return (
     <PaginatedDataTable columns={columns} rows={policies} getRowKey={(policy) => policy.id} onRowClick={onSelect} />

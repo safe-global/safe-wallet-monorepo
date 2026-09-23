@@ -1,14 +1,14 @@
 import { useMemo, useState } from 'react'
 import { ArrowDownUp, Plus } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { SearchInput } from '@/components/ui/search-input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import TableCard from '@/components/common/TableCard'
 import useChains from '@/hooks/useChains'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import PoliciesTable from './PoliciesTable'
-import { PoliciesNoSearchResults, PoliciesTabEmpty } from './PoliciesTable/components/PoliciesTableStates'
+import { PoliciesNoSearchResults } from './PoliciesTable/components/PoliciesTableStates'
 import usePolicySearch from './hooks/usePolicySearch'
 import {
   DEFAULT_POLICY_SORT,
@@ -17,17 +17,12 @@ import {
   type PolicySortContext,
   type PolicySortOption,
 } from './utils/policySort'
-import type { Policy } from './types'
+import type { Policy, PolicyType } from './types'
 
-const POLICY_TABS = [
-  { type: 'proposer', label: 'Proposers' },
+const POLICY_TYPE_FILTERS: { type: PolicyType; label: string }[] = [
   { type: 'spending-limit', label: 'Spending limits' },
-] as const
-
-type PolicyTab = (typeof POLICY_TABS)[number]
-
-const getDefaultTab = (policies: Policy[]): PolicyTab['type'] =>
-  (POLICY_TABS.find((tab) => policies.some((policy) => policy.type === tab.type)) ?? POLICY_TABS[0]).type
+  { type: 'proposer', label: 'Proposers' },
+]
 
 export type PoliciesListProps = {
   policies: Policy[]
@@ -38,13 +33,12 @@ export type PoliciesListProps = {
 
 /**
  * The Policies page once the space has policies: an Add policy button, a search field, a sort
- * control and a table per policy type. Search and sort run in the browser over the policies the
- * caller passes.
+ * control and the table. Search and sort run in the browser over the policies the caller passes.
  */
 const PoliciesList = ({ policies, onAddPolicy, onSelectPolicy }: PoliciesListProps) => {
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<PolicySortOption | null>(null)
-  const [activeTab, setActiveTab] = useState(() => getDefaultTab(policies))
+  const [typeFilter, setTypeFilter] = useState<PolicyType | null>(null)
 
   const resolveSafeName = useSafeNameResolver()
   const { configs } = useChains()
@@ -58,19 +52,15 @@ const PoliciesList = ({ policies, onAddPolicy, onSelectPolicy }: PoliciesListPro
   }, [configs, resolveSafeName])
 
   const matches = usePolicySearch(policies, query)
-  const rows = useMemo(
-    () => sortPolicies(matches, sort ?? DEFAULT_POLICY_SORT, sortContext),
-    [matches, sort, sortContext],
-  )
+  const rows = useMemo(() => {
+    const filtered = typeFilter ? matches.filter((policy) => policy.type === typeFilter) : matches
+    return sortPolicies(filtered, sort ?? DEFAULT_POLICY_SORT, sortContext)
+  }, [matches, typeFilter, sort, sortContext])
 
-  const renderTable = ({ type, label }: PolicyTab) => {
-    const tabRows = rows.filter((policy) => policy.type === type)
+  const renderTable = () => {
+    if (rows.length === 0) return <PoliciesNoSearchResults query={query} />
 
-    if (tabRows.length === 0) {
-      return query ? <PoliciesNoSearchResults query={query} /> : <PoliciesTabEmpty label={label} />
-    }
-
-    return <PoliciesTable policies={tabRows} type={type} onSelect={onSelectPolicy} />
+    return <PoliciesTable policies={rows} onSelect={onSelectPolicy} />
   }
 
   return (
@@ -116,26 +106,31 @@ const PoliciesList = ({ policies, onAddPolicy, onSelectPolicy }: PoliciesListPro
         </Select>
       </div>
 
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as PolicyTab['type'])}>
-        <TabsList variant="underline" className="mb-2">
-          {POLICY_TABS.map((tab) => (
-            <TabsTrigger
-              key={tab.type}
-              value={tab.type}
-              className="cursor-pointer"
-              data-testid={`policies-tab-${tab.type}`}
-            >
-              {tab.label} ({rows.filter((policy) => policy.type === tab.type).length})
-            </TabsTrigger>
-          ))}
-        </TabsList>
+      <div className="flex items-center gap-2" role="group" aria-label="Filter by policy type">
+        <span className="text-sm text-muted-foreground">Filter by:</span>
+        {POLICY_TYPE_FILTERS.map(({ type, label }) => {
+          const isSelected = typeFilter === type
+          const count = matches.filter((policy) => policy.type === type).length
 
-        {POLICY_TABS.map((tab) => (
-          <TabsContent key={tab.type} value={tab.type}>
-            <TableCard>{renderTable(tab)}</TableCard>
-          </TabsContent>
-        ))}
-      </Tabs>
+          return (
+            <Badge
+              key={type}
+              variant={isSelected ? 'default' : 'card'}
+              size="chip"
+              render={<button type="button" />}
+              aria-pressed={isSelected}
+              onClick={() => setTypeFilter(isSelected ? null : type)}
+              className="cursor-pointer"
+              data-testid={`policies-filter-${type}`}
+            >
+              {label}
+              <span className={isSelected ? 'text-primary-foreground/70' : 'text-muted-foreground'}>{count}</span>
+            </Badge>
+          )
+        })}
+      </div>
+
+      <TableCard>{renderTable()}</TableCard>
     </div>
   )
 }
