@@ -62,11 +62,11 @@ const Policies = ({
   const [isProposerIntroOpen, setIsProposerIntroOpen] = useState(false)
   const [openProposer, setOpenProposer] = useState<{ policy: ProposerPolicy; proposer: Proposer } | null>(null)
 
-  // The drawer describes one proposer. A policy holding several has no single one to show yet.
   const openPolicy = useCallback((policy: Policy) => {
-    if (isProposerPolicy(policy) && policy.data.proposers.length === 1) {
-      setOpenProposer({ policy, proposer: policy.data.proposers[0] })
-    }
+    if (!isProposerPolicy(policy)) return
+
+    const [proposer] = policy.data.proposers
+    if (proposer) setOpenProposer({ policy, proposer })
   }, [])
 
   const startSpendingLimitFlow = useCallback(() => setTxFlow(<SpendingLimitFlow />), [setTxFlow])

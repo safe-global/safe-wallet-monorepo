@@ -77,7 +77,7 @@ export type Proposer = {
   delegatedBy: ProposerGrant[]
 }
 
-/** One policy per Safe, holding every proposer registered on it. */
+/** CGW sends every proposer of a Safe in one policy; `mapActivePolicies` splits it into one per proposer. */
 export type ProposerPolicyData = {
   proposers: Proposer[]
 }

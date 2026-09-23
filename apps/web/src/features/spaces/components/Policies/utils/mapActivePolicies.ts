@@ -61,31 +61,32 @@ const toSpendingLimit = (dto: ActivePolicyDto, resolveToken: ResolveTokenInfo): 
   }
 }
 
-const toProposer = (dto: ActivePolicyDto): ProposerPolicy | null => {
-  if (dto.enforcement.via !== 'offchain' || !isProposerData(dto.data)) return null
+/** The drawer describes one proposer, so each proposer on a Safe gets its own row. */
+const toProposers = (dto: ActivePolicyDto): ProposerPolicy[] => {
+  if (dto.enforcement.via !== 'offchain' || !isProposerData(dto.data)) return []
 
-  return {
-    id: `proposer:${dto.safe.chainId}:${dto.safe.address}`,
+  const { enforcement } = dto
+
+  return dto.data.proposers.map((proposer) => ({
+    id: `proposer:${dto.safe.chainId}:${dto.safe.address}:${proposer.proposer}`,
     type: 'proposer',
     safe: dto.safe,
-    enforcement: dto.enforcement,
+    enforcement,
     enabled: dto.enabled,
-    data: dto.data,
-  }
+    data: { proposers: [proposer] },
+  }))
 }
 
-const toPolicy = (dto: ActivePolicyDto, resolveToken: ResolveTokenInfo): Policy | null => {
+const toPolicies = (dto: ActivePolicyDto, resolveToken: ResolveTokenInfo): Policy[] => {
   switch (dto.type) {
     case 'spending-limit': {
       const policy = toSpendingLimit(dto, resolveToken)
-      return policy && { ...policy, status: 'active' }
+      return policy ? [{ ...policy, status: 'active' }] : []
     }
-    case 'proposer': {
-      const policy = toProposer(dto)
-      return policy && { ...policy, status: 'active' }
-    }
+    case 'proposer':
+      return toProposers(dto).map((policy) => ({ ...policy, status: 'active' }))
     default:
-      return null
+      return []
   }
 }
 
@@ -113,4 +114,4 @@ export const getReferencedTokens = (dtos: ActivePolicyDto[]): { chainId: string;
 
 /** A policy of a type the page does not render, or with data of another type's shape, is left out. */
 export const mapActivePolicies = (dtos: ActivePolicyDto[], resolveToken: ResolveTokenInfo): Policy[] =>
-  dtos.flatMap((dto) => toPolicy(dto, resolveToken) ?? [])
+  dtos.flatMap((dto) => toPolicies(dto, resolveToken))

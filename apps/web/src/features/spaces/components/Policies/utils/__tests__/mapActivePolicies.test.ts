@@ -82,6 +82,25 @@ describe('mapActivePolicies', () => {
     ])
   })
 
+  it('should, when a Safe has several proposers, give each proposer its own policy and id', () => {
+    const dto = mockProposerDto({
+      data: {
+        proposers: [
+          { proposer: MOCK_ADDRESSES.bob, delegatedBy: [{ delegator: MOCK_ADDRESSES.alice, label: 'Bob' }] },
+          { proposer: MOCK_ADDRESSES.unresolved, delegatedBy: [{ delegator: MOCK_ADDRESSES.alice, label: '' }] },
+        ],
+      },
+    })
+
+    const policies = mapActivePolicies([dto], resolveKnownTokens)
+
+    expect(policies).toHaveLength(2)
+    expect(policies[0].id).not.toBe(policies[1].id)
+    expect(
+      policies.map((policy) => (policy.type === 'proposer' ? policy.data.proposers.map((p) => p.proposer) : [])),
+    ).toEqual([[MOCK_ADDRESSES.bob], [MOCK_ADDRESSES.unresolved]])
+  })
+
   it('should, when the same Safe has a policy on two chains, give each its own id', () => {
     const policies = mapActivePolicies(
       [mockSpendingLimitDto(), mockSpendingLimitDto({ safe: { ...MOCK_SAFES.treasury, chainId: '137' } })],
