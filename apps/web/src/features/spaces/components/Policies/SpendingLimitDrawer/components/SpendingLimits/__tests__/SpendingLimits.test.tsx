@@ -46,5 +46,10 @@ describe('SpendingLimits', () => {
     render(<SpendingLimits spenders={[unknownSpender]} showUsage />)
 
     expect(screen.getByText('UNKNOWN')).toBeInTheDocument()
+
+    // TokenIcon renders an iframe titled with the token symbol; its srcDoc embeds the <img> src it resolved.
+    const iconSrcDoc = screen.getByTitle('UNKNOWN').getAttribute('srcdoc')
+    const imgSrc = iconSrcDoc?.match(/<img src="([^"]*)"/)?.[1]
+    expect(imgSrc).toBe('/images/common/token-placeholder.svg')
   })
 })
