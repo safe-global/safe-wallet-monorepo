@@ -174,7 +174,7 @@ jest.mock('../../SpaceSelectorDropdown', () => ({
   SpaceSelectorDropdown: ({ triggerVariant }: { triggerVariant?: 'default' | 'addToWorkspace' }) =>
     triggerVariant === 'addToWorkspace' ? (
       <button type="button" data-testid="add-safe-to-workspace-button">
-        Add Safe to workspace
+        Add Safe to Workspace
       </button>
     ) : (
       <div data-testid="space-selector-default">Space selector</div>
@@ -269,7 +269,7 @@ describe('SafeSidebarVariant', () => {
     )
 
     expect(screen.queryByTestId('add-safe-to-workspace-button')).not.toBeInTheDocument()
-    expect(screen.queryByText('Add Safe to workspace')).not.toBeInTheDocument()
+    expect(screen.queryByText('Add Safe to Workspace')).not.toBeInTheDocument()
   })
 
   it('still renders backToSpace workspace header when Safe is counterfactual', () => {
@@ -449,7 +449,7 @@ describe('SafeSidebarVariant', () => {
       )
 
       expect(screen.queryByTestId('add-safe-to-workspace-button')).not.toBeInTheDocument()
-      expect(screen.queryByText('Add Safe to workspace')).not.toBeInTheDocument()
+      expect(screen.queryByText('Add Safe to Workspace')).not.toBeInTheDocument()
     })
 
     it('hides the addToWorkspace section entirely when Safe is counterfactual (undeployed)', () => {

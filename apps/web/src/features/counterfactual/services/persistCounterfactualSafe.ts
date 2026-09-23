@@ -126,7 +126,7 @@ export const persistCounterfactualSafe = async ({
           showNotification({
             variant: 'info',
             groupKey: 'cf-safe-space-skipped',
-            message: 'Safe added to your accounts — ask an admin to add it to the workspace',
+            message: 'Safe added to your accounts — ask an admin to add it to the Workspace',
           }),
         )
       } else if (spaceSafeCount !== undefined && spaceSafeCount >= SAFE_ACCOUNTS_LIMIT) {
@@ -137,7 +137,7 @@ export const persistCounterfactualSafe = async ({
           showNotification({
             variant: 'info',
             groupKey: 'cf-safe-space-limit',
-            message: `Safe created. This workspace is full (${SAFE_ACCOUNTS_LIMIT} Safes), so it wasn't added — switch to another workspace to add it there`,
+            message: `Safe created. This Workspace is full (${SAFE_ACCOUNTS_LIMIT} Safes), so it wasn't added — switch to another Workspace to add it there`,
           }),
         )
       } else {
@@ -246,7 +246,7 @@ function isConflict(error: unknown): boolean {
 }
 
 function toSpaceError(error: FetchBaseQueryError | SerializedError | undefined): Error {
-  const fallback = 'Failed to add Safe account to workspace'
+  const fallback = 'Failed to add Safe account to Workspace'
   return new Error(error ? getRtkQueryErrorMessage(error) || fallback : fallback)
 }
 

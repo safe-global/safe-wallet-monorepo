@@ -43,7 +43,7 @@ export const getTokenAllowances = async (
     .map((_, index) => allowanceRequests[index].token)
     .filter((tokenAddress) => !getTokenInfoFromBalances(tokenInfoFromBalances, tokenAddress))
 
-  const missingTokenInfos = await getERC20TokenInfoOnChain(missingTokenAddresses)
+  const missingTokenInfos = await getERC20TokenInfoOnChain(missingTokenAddresses, provider)
 
   return tokenAllowances.map((tokenAllowance, index) => {
     const { delegate, token } = allowanceRequests[index]
