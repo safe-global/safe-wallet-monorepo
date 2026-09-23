@@ -305,14 +305,17 @@ describe('AddAccounts — naming step', () => {
     mockUpsertWorkspaceNames.mockResolvedValue({})
   })
 
-  it('blocks submit while a name is too short to save', async () => {
-    mockEnteredName = 'ab'
+  it.each([
+    ['empty', ''],
+    ['too short to save', 'ab'],
+  ])('keeps submit enabled but does not submit while a name is %s', async (_, name) => {
+    mockEnteredName = name
     const form = selectTrusted()
     fireEvent.click(screen.getByTestId('safe-accounts-table'))
     fireEvent.submit(form)
     await screen.findByText('Name your Safe accounts')
 
-    expect(screen.getByTestId('add-accounts-button')).toBeDisabled()
+    expect(screen.getByTestId('add-accounts-button')).not.toBeDisabled()
     fireEvent.submit(screen.getByTestId('add-accounts-button').closest('form')!)
 
     await waitFor(() => expect(mockUpsertWorkspaceNames).not.toHaveBeenCalled())

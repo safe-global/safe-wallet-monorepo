@@ -26,7 +26,7 @@ import {
   useUpsertWorkspaceSafeNames,
   type WorkspaceSafeName,
 } from '../../../hooks/useUpsertWorkspaceSafeName'
-import { buildWorkspaceSafeNames, getSafesToName, hasAllNames } from '../../NameAccounts/utils'
+import { buildWorkspaceSafeNames, getSafesToName, hasAllNames, touchNames } from '../../NameAccounts/utils'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { getSafeId, getMultiChainSafeId } from '../utils/safeIds'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../constants'
@@ -88,7 +88,7 @@ const useOnboardingSubmit = (
     },
   })
 
-  const { handleSubmit, watch, reset } = formMethods
+  const { handleSubmit, watch, reset, getValues, setValue } = formMethods
 
   const hasInitialized = useRef(false)
 
@@ -232,54 +232,60 @@ const useOnboardingSubmit = (
     }
   }
 
-  const onSubmit = handleSubmit(async (data) => {
-    if (!spaceId) {
-      setError('No workspace is selected. Reload the page and try again.')
-      return
-    }
-
-    const safesToAdd = getSafesToAdd(data.selectedSafes)
-
-    const safesToWrite = step === 'select' ? getSafesToName(safesToAdd, allSafes, spaceAddressBook) : safesToName
-
-    if (step === 'name' && !hasAllNames(data.names, safesToWrite)) return
-
-    if (step === 'select' && safesToWrite.length > 0) {
-      trackEvent(SPACE_EVENTS.NAME_ACCOUNTS_STEP, {
-        [MixpanelEventParams.ACCOUNT_COUNT]: safesToWrite.length,
-        [MixpanelEventParams.SOURCE]: SPACE_LABELS.onboarding,
-      })
-      setSafesToName(safesToWrite)
-      setStep('name')
-      return
-    }
-
-    setError(undefined)
-    setIsSubmitting(true)
-
-    try {
-      if (safesToAdd.length > 0) {
-        trackEvent(SPACE_EVENTS.ADD_ACCOUNTS, {
-          [MixpanelEventParams.ACCOUNT_COUNT]: safesToAdd.length,
-          [MixpanelEventParams.SOURCE]: SPACE_LABELS.onboarding,
-          [MixpanelEventParams.CHAIN_ID]: getChainIdsParam(safesToAdd),
-        })
+  const onSubmit = handleSubmit(
+    async (data) => {
+      if (!spaceId) {
+        setError('No workspace is selected. Reload the page and try again.')
+        return
       }
-      await processSelectedSafes(
-        safesToAdd,
-        data.selectedSafes,
-        spaceId,
-        buildWorkspaceSafeNames(data.names, safesToWrite),
-      )
 
-      onSuccess()
-    } catch (e) {
-      if (isElevationRequiredError(e)) return
-      setError(e instanceof Error ? e.message : 'Something went wrong updating Safe accounts. Please try again.')
-    } finally {
-      setIsSubmitting(false)
-    }
-  })
+      const safesToAdd = getSafesToAdd(data.selectedSafes)
+
+      const safesToWrite = step === 'select' ? getSafesToName(safesToAdd, allSafes, spaceAddressBook) : safesToName
+
+      if (step === 'name' && !hasAllNames(data.names, safesToWrite)) {
+        touchNames(getValues, setValue, safesToWrite)
+        return
+      }
+
+      if (step === 'select' && safesToWrite.length > 0) {
+        trackEvent(SPACE_EVENTS.NAME_ACCOUNTS_STEP, {
+          [MixpanelEventParams.ACCOUNT_COUNT]: safesToWrite.length,
+          [MixpanelEventParams.SOURCE]: SPACE_LABELS.onboarding,
+        })
+        setSafesToName(safesToWrite)
+        setStep('name')
+        return
+      }
+
+      setError(undefined)
+      setIsSubmitting(true)
+
+      try {
+        if (safesToAdd.length > 0) {
+          trackEvent(SPACE_EVENTS.ADD_ACCOUNTS, {
+            [MixpanelEventParams.ACCOUNT_COUNT]: safesToAdd.length,
+            [MixpanelEventParams.SOURCE]: SPACE_LABELS.onboarding,
+            [MixpanelEventParams.CHAIN_ID]: getChainIdsParam(safesToAdd),
+          })
+        }
+        await processSelectedSafes(
+          safesToAdd,
+          data.selectedSafes,
+          spaceId,
+          buildWorkspaceSafeNames(data.names, safesToWrite),
+        )
+
+        onSuccess()
+      } catch (e) {
+        if (isElevationRequiredError(e)) return
+        setError(e instanceof Error ? e.message : 'Something went wrong updating Safe accounts. Please try again.')
+      } finally {
+        setIsSubmitting(false)
+      }
+    },
+    () => touchNames(getValues, setValue, safesToName),
+  )
 
   return {
     formMethods,

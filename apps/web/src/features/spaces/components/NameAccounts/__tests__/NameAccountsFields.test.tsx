@@ -4,6 +4,7 @@ import type { AllSafeItems, SafeItem } from '@/hooks/safes'
 import type { AccountLine } from '@/features/myAccounts'
 import type { AddAccountsFormValues } from '../../../hooks/addAccounts.types'
 import NameAccountsFields from '../NameAccountsFields'
+import { touchNames } from '../utils'
 
 // The table has its own suite; here it only has to hand each row to the name cell.
 jest.mock('@/features/myAccounts', () => ({
@@ -41,6 +42,9 @@ const Harness = ({ items, names = {} }: { items: AllSafeItems; names?: Record<st
   return (
     <FormProvider {...methods}>
       <NameAccountsFields items={items} />
+      <button type="button" onClick={() => touchNames(methods.getValues, methods.setValue, items)}>
+        submit
+      </button>
     </FormProvider>
   )
 }
@@ -93,6 +97,16 @@ describe('NameAccountsFields', () => {
     expect(screen.getByText(ADDRESS_A.slice(-6))).toBeInTheDocument()
   })
 
+  it('turns every empty field red once a submit is attempted', async () => {
+    render(<Harness items={[safeItem(ADDRESS_A), safeItem(ADDRESS_B)]} />)
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'submit' }))
+
+    await waitFor(() => expect(screen.getAllByRole('alert')).toHaveLength(2))
+    screen.getAllByRole('alert').forEach((alert) => expect(alert).toHaveTextContent('Name is required'))
+  })
+
   it('opens the editor and shows the rule for a prefilled name the address book would reject', () => {
     render(<Harness items={[safeItem(ADDRESS_A, 'Op')]} />)
 
@@ -114,6 +128,6 @@ describe('NameAccountsFields', () => {
   it('explains that names are shared with the workspace', () => {
     render(<Harness items={[safeItem(ADDRESS_A)]} />)
 
-    expect(screen.getByText(/Your whole workspace sees these names/)).toBeInTheDocument()
+    expect(screen.getByText(/Everyone on the workspace can see these names/)).toBeInTheDocument()
   })
 })

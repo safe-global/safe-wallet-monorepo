@@ -17,7 +17,7 @@ import { useSpaceSafes } from '../../hooks/useSpaceSafes'
 import { useOnboardingStepCount } from '../../hooks/useOnboardingStepCount'
 import OnboardingSafesList from './components/OnboardingSafesList'
 import ConnectWalletHint from '../ConnectWalletHint'
-import { NameAccountsFields, hasAllNames } from '../NameAccounts'
+import { NameAccountsFields } from '../NameAccounts'
 import useOnboardingNavigation from './hooks/useOnboardingNavigation'
 import useOnboardingSafes from './hooks/useOnboardingSafes'
 import useOnboardingSubmit from './hooks/useOnboardingSubmit'
@@ -185,12 +185,7 @@ const SelectSafesOnboarding = (): ReactElement => {
         continueLabel={isNameStep ? 'Add accounts' : 'Next'}
         continueType="submit"
         continueForm={FORM_ID}
-        continueDisabled={
-          selectedSafesLength === 0 ||
-          isSubmitting ||
-          !isAddressBookReady ||
-          (isNameStep && !hasAllNames(typedNames, safesToName))
-        }
+        continueDisabled={selectedSafesLength === 0 || isSubmitting || !isAddressBookReady}
         continueLoading={isSubmitting}
         continueTestId="select-safes-continue-button"
       />

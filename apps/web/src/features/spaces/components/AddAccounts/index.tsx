@@ -26,7 +26,7 @@ import {
   useSpaceSafes,
   useUpsertWorkspaceSafeNames,
 } from '@/features/spaces'
-import { NameAccountsFields, buildWorkspaceSafeNames, getSafesToName, hasAllNames } from '../NameAccounts'
+import { NameAccountsFields, buildWorkspaceSafeNames, getSafesToName, hasAllNames, touchNames } from '../NameAccounts'
 import { AdminOnlyWorkspaceTooltip } from '../AdminOnlyWorkspaceTooltip'
 import {
   useSpaceSafesCreateV1Mutation,
@@ -193,13 +193,12 @@ const AddAccounts = ({
     },
   })
 
-  const { handleSubmit, watch, setValue, reset, formState } = formMethods
+  const { handleSubmit, watch, getValues, setValue, reset, formState } = formMethods
 
   const selectedSafes = watch(`selectedSafes`)
   const selectedSafesLength = getSelectedSafes(selectedSafes, spaceSafes).length
   const removedSafesCount = getRemovedSafes(selectedSafes, spaceSafes).length
   const isFormDirty = selectedSafesLength > 0 || removedSafesCount > 0
-  const namesComplete = view !== 'name' || hasAllNames(watch('names'), safesToName)
   const hasSomethingToSubmit = view === 'name' ? safesToName.length > 0 : isFormDirty
   const isAddressBookReady = !isAddressBookLoading && !isAddressBookError
   const submitError = error ?? (isAddressBookError ? ADDRESS_BOOK_UNAVAILABLE : undefined)
@@ -232,119 +231,128 @@ const AddAccounts = ({
     }
   }, [isOpen, defaultSelectedSafes, reset, isLoadingSpaceSafes])
 
-  const onSubmit = handleSubmit(async (data) => {
-    if (!isAdmin) {
-      setError('Only admins can add or remove Safe accounts in this workspace')
-      return
-    }
-
-    const safesToAdd = getSelectedSafes(data.selectedSafes, spaceSafes).map(([key]) => {
-      const [chainId, address] = key.split(':')
-      return { chainId, address }
-    })
-
-    const safesToRemove = getRemovedSafes(data.selectedSafes, spaceSafes).map((safe) => ({
-      chainId: safe.chainId,
-      address: safe.address,
-    }))
-
-    const safesToWrite = view === 'select' ? getSafesToName(safesToAdd, trustedSafes, spaceAddressBook) : safesToName
-
-    if (view === 'name' && !hasAllNames(data.names, safesToWrite)) return
-
-    if (view === 'select' && safesToWrite.length > 0) {
-      trackEvent(SPACE_EVENTS.NAME_ACCOUNTS_STEP, {
-        [MixpanelEventParams.ACCOUNT_COUNT]: safesToWrite.length,
-        [MixpanelEventParams.SOURCE]: SPACE_LABELS.add_accounts_modal,
-      })
-      setSafesToName(safesToWrite)
-      setView('name')
-      return
-    }
-
-    // Track event based on what action is being taken
-    if (safesToAdd.length > 0) {
-      trackEvent(SPACE_EVENTS.ADD_ACCOUNTS, {
-        [MixpanelEventParams.ACCOUNT_COUNT]: safesToAdd.length,
-        [MixpanelEventParams.SOURCE]: SPACE_LABELS.add_accounts_modal,
-        [MixpanelEventParams.CHAIN_ID]: getChainIdsParam(safesToAdd),
-      })
-    }
-    if (safesToRemove.length > 0) {
-      trackEvent(SPACE_EVENTS.DELETE_ACCOUNT, {
-        [MixpanelEventParams.ACCOUNT_COUNT]: safesToRemove.length,
-        [MixpanelEventParams.CHAIN_ID]: getChainIdsParam(safesToRemove),
-      })
-    }
-
-    try {
-      // Add new safes
-      if (safesToAdd.length > 0) {
-        const result = await addSafesToSpace({
-          spaceId: spaceId ?? '',
-          createSpaceSafesDto: { safes: safesToAdd },
-        })
-
-        if (isElevationRequiredError(result.error)) return
-        if (result.error) {
-          const msg = getRtkQueryErrorMessage(result.error) || 'Something went wrong adding one or more Safe accounts.'
-          setError(msg.replace(/:\s*Key\s*\(.*$/, ''))
-          return
-        }
-
-        safesToAdd.forEach(({ chainId, address }) => {
-          trackEvent(
-            { ...SPACE_EVENTS.WORKSPACE_SAFE_LINKED, label: spaceId },
-            { workspace_id: spaceId, safe_address: address, chain_id: chainId },
-          )
-        })
-      }
-
-      // Remove unchecked safes
-      if (safesToRemove.length > 0) {
-        const result = await removeSafesFromSpace({
-          spaceId: spaceId ?? '',
-          deleteSpaceSafesDto: { safes: safesToRemove },
-        })
-
-        if (isElevationRequiredError(result.error)) return
-        if (result.error) {
-          setError(getRtkQueryErrorMessage(result.error) || 'Something went wrong removing one or more Safe accounts.')
-          return
-        }
-
-        safesToRemove.forEach(({ chainId, address }) => {
-          trackEvent(
-            { ...SPACE_EVENTS.WORKSPACE_SAFE_UNLINKED, label: spaceId },
-            { workspace_id: spaceId, safe_address: address, chain_id: chainId },
-          )
-        })
-      }
-
-      const namesResult = await upsertWorkspaceNames(buildWorkspaceSafeNames(data.names, safesToWrite))
-      if (namesResult.error) {
-        setError(namesResult.error)
+  const onSubmit = handleSubmit(
+    async (data) => {
+      if (!isAdmin) {
+        setError('Only admins can add or remove Safe accounts in this workspace')
         return
       }
 
-      // Show success notification
-      const messages = []
-      if (safesToAdd.length > 0) messages.push(`Added ${safesToAdd.length} safe account(s)`)
-      if (safesToRemove.length > 0) messages.push(`Removed ${safesToRemove.length} safe account(s)`)
+      const safesToAdd = getSelectedSafes(data.selectedSafes, spaceSafes).map(([key]) => {
+        const [chainId, address] = key.split(':')
+        return { chainId, address }
+      })
 
-      dispatch(
-        showNotification({
-          message: messages.length > 0 ? messages.join(' and ') : 'Safes updated',
-          variant: 'success',
-          groupKey: 'safe-account-update-success',
-        }),
-      )
+      const safesToRemove = getRemovedSafes(data.selectedSafes, spaceSafes).map((safe) => ({
+        chainId: safe.chainId,
+        address: safe.address,
+      }))
 
-      handleClose()
-    } catch {
-      setError('Something went wrong updating Safe accounts. Please try again.')
-    }
-  })
+      const safesToWrite = view === 'select' ? getSafesToName(safesToAdd, trustedSafes, spaceAddressBook) : safesToName
+
+      if (view === 'name' && !hasAllNames(data.names, safesToWrite)) {
+        touchNames(getValues, setValue, safesToWrite)
+        return
+      }
+
+      if (view === 'select' && safesToWrite.length > 0) {
+        trackEvent(SPACE_EVENTS.NAME_ACCOUNTS_STEP, {
+          [MixpanelEventParams.ACCOUNT_COUNT]: safesToWrite.length,
+          [MixpanelEventParams.SOURCE]: SPACE_LABELS.add_accounts_modal,
+        })
+        setSafesToName(safesToWrite)
+        setView('name')
+        return
+      }
+
+      // Track event based on what action is being taken
+      if (safesToAdd.length > 0) {
+        trackEvent(SPACE_EVENTS.ADD_ACCOUNTS, {
+          [MixpanelEventParams.ACCOUNT_COUNT]: safesToAdd.length,
+          [MixpanelEventParams.SOURCE]: SPACE_LABELS.add_accounts_modal,
+          [MixpanelEventParams.CHAIN_ID]: getChainIdsParam(safesToAdd),
+        })
+      }
+      if (safesToRemove.length > 0) {
+        trackEvent(SPACE_EVENTS.DELETE_ACCOUNT, {
+          [MixpanelEventParams.ACCOUNT_COUNT]: safesToRemove.length,
+          [MixpanelEventParams.CHAIN_ID]: getChainIdsParam(safesToRemove),
+        })
+      }
+
+      try {
+        // Add new safes
+        if (safesToAdd.length > 0) {
+          const result = await addSafesToSpace({
+            spaceId: spaceId ?? '',
+            createSpaceSafesDto: { safes: safesToAdd },
+          })
+
+          if (isElevationRequiredError(result.error)) return
+          if (result.error) {
+            const msg =
+              getRtkQueryErrorMessage(result.error) || 'Something went wrong adding one or more Safe accounts.'
+            setError(msg.replace(/:\s*Key\s*\(.*$/, ''))
+            return
+          }
+
+          safesToAdd.forEach(({ chainId, address }) => {
+            trackEvent(
+              { ...SPACE_EVENTS.WORKSPACE_SAFE_LINKED, label: spaceId },
+              { workspace_id: spaceId, safe_address: address, chain_id: chainId },
+            )
+          })
+        }
+
+        // Remove unchecked safes
+        if (safesToRemove.length > 0) {
+          const result = await removeSafesFromSpace({
+            spaceId: spaceId ?? '',
+            deleteSpaceSafesDto: { safes: safesToRemove },
+          })
+
+          if (isElevationRequiredError(result.error)) return
+          if (result.error) {
+            setError(
+              getRtkQueryErrorMessage(result.error) || 'Something went wrong removing one or more Safe accounts.',
+            )
+            return
+          }
+
+          safesToRemove.forEach(({ chainId, address }) => {
+            trackEvent(
+              { ...SPACE_EVENTS.WORKSPACE_SAFE_UNLINKED, label: spaceId },
+              { workspace_id: spaceId, safe_address: address, chain_id: chainId },
+            )
+          })
+        }
+
+        const namesResult = await upsertWorkspaceNames(buildWorkspaceSafeNames(data.names, safesToWrite))
+        if (namesResult.error) {
+          setError(namesResult.error)
+          return
+        }
+
+        // Show success notification
+        const messages = []
+        if (safesToAdd.length > 0) messages.push(`Added ${safesToAdd.length} safe account(s)`)
+        if (safesToRemove.length > 0) messages.push(`Removed ${safesToRemove.length} safe account(s)`)
+
+        dispatch(
+          showNotification({
+            message: messages.length > 0 ? messages.join(' and ') : 'Safes updated',
+            variant: 'success',
+            groupKey: 'safe-account-update-success',
+          }),
+        )
+
+        handleClose()
+      } catch {
+        setError('Something went wrong updating Safe accounts. Please try again.')
+      }
+    },
+    () => touchNames(getValues, setValue, safesToName),
+  )
 
   const handleAddSafe = (data: AddManuallyFormValues) => {
     const alreadyExists = trustedSafes.some((safe) => safe.address === data.address)
@@ -608,7 +616,7 @@ const AddAccounts = ({
                       data-testid="add-accounts-button"
                       type="submit"
                       size="lg"
-                      disabled={!hasSomethingToSubmit || !namesComplete || !isAddressBookReady || isSubmitting}
+                      disabled={!hasSomethingToSubmit || !isAddressBookReady || isSubmitting}
                       className="flex-1"
                     >
                       {isSubmitting ? (

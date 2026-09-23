@@ -1,3 +1,4 @@
+import type { UseFormGetValues, UseFormSetValue } from 'react-hook-form'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import {
@@ -8,6 +9,7 @@ import {
   type AllSafeItems,
   type SafeItem,
 } from '@/hooks/safes'
+import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
 import type { WorkspaceSafeName } from '../../hooks/useUpsertWorkspaceSafeName'
 import { validateContactName } from '../SpaceAddressBook/utils'
 
@@ -60,3 +62,15 @@ export const buildWorkspaceSafeNames = (
 /** Returns true when every name passes the address book validation rules. */
 export const hasAllNames = (names: Record<string, string> | undefined, safesToName: AllSafeItems): boolean =>
   safesToName.every((item) => validateContactName(names?.[item.address.toLowerCase()] ?? '') === undefined)
+
+/** Marks every name field touched, so the empty ones show their error. */
+export const touchNames = (
+  getValues: UseFormGetValues<AddAccountsFormValues>,
+  setValue: UseFormSetValue<AddAccountsFormValues>,
+  safesToName: AllSafeItems,
+) => {
+  for (const item of safesToName) {
+    const key = nameFieldKey(item.address)
+    setValue(key, getValues(key) ?? '', { shouldTouch: true })
+  }
+}
