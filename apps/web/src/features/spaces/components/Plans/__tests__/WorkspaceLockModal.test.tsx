@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
-import WorkspaceLockModal, { memberCopy } from '../WorkspaceLockModal'
+import WorkspaceLockModal, { memberCopy, PLAN_ERROR_COPY } from '../WorkspaceLockModal'
 
 const mockUseWorkspaceLock = jest.fn()
 const mockUseCheckoutReturn = jest.fn()
@@ -29,18 +29,21 @@ jest.mock('../../SafeProModals', () => ({
     onAction,
     secondaryActionLabel,
     secondaryActionHref,
+    onSecondaryAction,
   }: {
     title: string
     body: string
     onAction: () => void
     secondaryActionLabel?: string
     secondaryActionHref?: string
+    onSecondaryAction?: () => void
   }) => (
     <div data-testid="locked-member-modal">
       <h2>{title}</h2>
       <p>{body}</p>
       <button onClick={onAction}>Back to My accounts</button>
-      {secondaryActionLabel && <a href={secondaryActionHref}>{secondaryActionLabel}</a>}
+      {secondaryActionLabel && secondaryActionHref && <a href={secondaryActionHref}>{secondaryActionLabel}</a>}
+      {secondaryActionLabel && onSecondaryAction && <button onClick={onSecondaryAction}>{secondaryActionLabel}</button>}
     </div>
   ),
 }))
@@ -64,6 +67,8 @@ const ENDED_AT = Date.UTC(2026, 11, 5, 12)
 const lock = (overrides: Record<string, unknown>) => ({
   isLocked: true,
   isResolving: false,
+  isError: false,
+  retry: jest.fn(),
   trialPeriodDays: 60,
   reason: 'trial-offered',
   endedAt: null,
@@ -87,6 +92,21 @@ describe('WorkspaceLockModal', () => {
     mockUseCheckoutReturn.mockReturnValue({ isReturning: true, status: 'timeout' })
     render(<WorkspaceLockModal spaceId={SPACE_ID} />)
     expect(screen.getByTestId('claim-trial-modal')).toBeInTheDocument()
+  })
+
+  it('asks to try again instead of locking when the plan could not be checked, admin or not', () => {
+    const retry = jest.fn()
+    mockUseWorkspaceLock.mockReturnValue(lock({ isLocked: false, isError: true, retry }))
+    mockUseIsAdmin.mockReturnValue(false)
+
+    render(<WorkspaceLockModal spaceId={SPACE_ID} />)
+
+    expect(screen.getByRole('heading', { name: PLAN_ERROR_COPY.title })).toBeInTheDocument()
+    expect(screen.queryByTestId('claim-trial-modal')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
+    expect(retry).toHaveBeenCalledTimes(1)
+    fireEvent.click(screen.getByRole('button', { name: 'Back to My accounts' }))
+    expect(mockPush).toHaveBeenCalledWith('/welcome/accounts')
   })
 
   it('renders nothing for a Workspace with a live plan or before the membership is known', () => {

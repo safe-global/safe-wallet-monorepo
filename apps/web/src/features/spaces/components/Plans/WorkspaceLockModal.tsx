@@ -28,13 +28,18 @@ export const memberCopy = (
   }
 }
 
+export const PLAN_ERROR_COPY = {
+  title: 'Your plan could not be checked',
+  body: 'We could not load the plan of this Workspace. Try again, or come back later, your Safe accounts remain available outside the Workspace.',
+}
+
 /**
  * Mounted on every Workspace page: while the Workspace has no live plan it blocks the page behind the trial offer,
  * the plan picker or, for non-admins, an explanation. None of them can be dismissed.
  */
 export default function WorkspaceLockModal({ spaceId }: { spaceId: string }) {
   const router = useRouter()
-  const { isLocked, reason, endedAt, trialPeriodDays } = useWorkspaceLock(spaceId)
+  const { isLocked, isError, retry, reason, endedAt, trialPeriodDays } = useWorkspaceLock(spaceId)
   const membership = useCurrentMembership(spaceId)
   const isAdmin = useIsAdmin(spaceId)
   const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId }, { skip: !isLocked })
@@ -43,9 +48,25 @@ export default function WorkspaceLockModal({ spaceId }: { spaceId: string }) {
   const isConfirmingCheckout = checkout.isReturning && checkout.status !== 'error' && checkout.status !== 'timeout'
 
   // Without the membership the admin check cannot be trusted yet; a non-member never gets this far (AuthState).
-  if (!isLocked || !membership || isConfirmingCheckout) return null
+  if (!membership || isConfirmingCheckout) return null
 
   const goBack = () => void router.push(AppRoutes.welcome.accounts)
+
+  if (isError) {
+    return (
+      <SafeProNoticeModal
+        open
+        title={PLAN_ERROR_COPY.title}
+        body={PLAN_ERROR_COPY.body}
+        actionLabel="Back to My accounts"
+        onAction={goBack}
+        secondaryActionLabel="Try again"
+        onSecondaryAction={retry}
+      />
+    )
+  }
+
+  if (!isLocked) return null
 
   if (!isAdmin) {
     const { title, body } = memberCopy(reason, trialPeriodDays, endedAt, space?.name ?? 'This Workspace')

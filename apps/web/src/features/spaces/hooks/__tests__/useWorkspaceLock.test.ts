@@ -29,6 +29,8 @@ describe('useWorkspaceLock', () => {
     expect(renderHook(() => useWorkspaceLock()).result.current).toEqual({
       isLocked: true,
       isResolving: false,
+      isError: false,
+      retry: expect.any(Function),
       trialPeriodDays: null,
       reason: 'lapsed',
       endedAt: 1_765_000_000_000,
@@ -56,6 +58,8 @@ describe('useWorkspaceLock', () => {
     expect(result.current).toEqual({
       isLocked: true,
       isResolving: false,
+      isError: false,
+      retry: expect.any(Function),
       trialPeriodDays: 60,
       reason: 'trial-offered',
       endedAt: null,
@@ -88,6 +92,29 @@ describe('useWorkspaceLock', () => {
     mockUseSpaceOffers.mockReturnValue({ trialPeriodDays: null, isLoading: false, isUninitialized: false })
     mockUseSpacePlan.mockReturnValue({ status: 'none', isLoading: false, isUninitialized: true })
     expect(renderHook(() => useWorkspaceLock()).result.current).toMatchObject({ isLocked: false, isResolving: true })
+  })
+
+  it('asks for a retry instead of locking when a source failed, and retries both sources', () => {
+    const refetchPlan = jest.fn()
+    const refetchOffers = jest.fn()
+    mockUseSpacePlan.mockReturnValue({ status: 'none', isLoading: false, isError: true, refetch: refetchPlan })
+    mockUseSpaceOffers.mockReturnValue({ trialPeriodDays: null, isLoading: false, refetch: refetchOffers })
+
+    const { result } = renderHook(() => useWorkspaceLock())
+    expect(result.current).toMatchObject({ isLocked: false, isError: true })
+
+    result.current.retry()
+    expect(refetchPlan).toHaveBeenCalledTimes(1)
+    expect(refetchOffers).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not report an error while a source is still resolving or the lock does not apply', () => {
+    mockUseSpaceOffers.mockReturnValue({ trialPeriodDays: null, isLoading: true, isError: true })
+    expect(renderHook(() => useWorkspaceLock()).result.current.isError).toBe(false)
+
+    mockUseHasFeature.mockReturnValue(false)
+    mockUseSpaceOffers.mockReturnValue({ trialPeriodDays: null, isLoading: false, isError: true })
+    expect(renderHook(() => useWorkspaceLock()).result.current.isError).toBe(false)
   })
 
   it('never reports resolving while the lock does not apply', () => {

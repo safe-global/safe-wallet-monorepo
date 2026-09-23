@@ -17,6 +17,7 @@ export const useSpacePlan = (spaceId?: string | null) => {
     status,
     isLoading: isSubscriptionLoading,
     isUninitialized: isSubscriptionUninitialized,
+    isError: isSubscriptionError,
     refetch: refetchSubscription,
   } = useSpaceSubscription(spaceId)
 
@@ -42,6 +43,8 @@ export const useSpacePlan = (spaceId?: string | null) => {
     isLoading: entitlements.isLoading || isSubscriptionLoading,
     /** True until both queries have started (skipped or not yet dispatched), when `status` still reads `none`. */
     isUninitialized: Boolean(entitlements.isUninitialized || isSubscriptionUninitialized),
+    /** A source failed for good (rate-limit retries exhausted included); `status` then reads `none` and cannot be trusted. */
+    isError: entitlements.isError || isSubscriptionError,
     refetch: () => {
       void entitlements.refetch()
       void refetchSubscription()
