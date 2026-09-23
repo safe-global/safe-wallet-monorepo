@@ -49,7 +49,7 @@ describe('ProposerDetails', () => {
     expect(screen.getByText('Bob')).toBeInTheDocument()
     expect(screen.getByText('Treasury')).toBeInTheDocument()
     expect(screen.getByText('Alice')).toBeInTheDocument()
-    expect(screen.getByText('Off-chain, no module')).toBeInTheDocument()
+    expect(screen.getByText('Safe{Wallet}')).toBeInTheDocument()
   })
 
   it('should, when the proposer has an address book entry, prefer it over the grant label', () => {

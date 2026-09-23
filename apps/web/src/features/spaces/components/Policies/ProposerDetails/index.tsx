@@ -16,8 +16,8 @@ export type ProposerDetailsProps = {
 /** The grant carries no timestamp, so the drawer cannot say when it was made. */
 const NO_TIMESTAMP = 'Not available'
 
-/** A proposer is a delegate registration, so nothing on chain enforces it. */
-const ENFORCED_BY = 'Off-chain, no module'
+/** A proposer is a delegate registration that Safe{Wallet} enforces off-chain. */
+const ENFORCED_BY = 'Safe{Wallet}'
 
 const ProposerDetails = ({ policy, proposer, onClose }: ProposerDetailsProps) => {
   const { chainId, address: safeAddress } = policy.safe
