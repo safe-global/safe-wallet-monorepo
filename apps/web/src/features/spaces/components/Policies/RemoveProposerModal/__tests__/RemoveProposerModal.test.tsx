@@ -46,4 +46,17 @@ describe('RemoveProposerModal', () => {
 
     expect(onConfirm).toHaveBeenCalledTimes(1)
   })
+
+  it('should, while removing, disable both actions', () => {
+    render(<RemoveProposerModal open onClose={jest.fn()} onConfirm={jest.fn()} isRemoving />)
+
+    expect(screen.getByTestId('remove-proposer-cancel')).toBeDisabled()
+    expect(screen.getByTestId('remove-proposer-confirm')).toBeDisabled()
+  })
+
+  it('should, when the removal failed, show why', () => {
+    render(<RemoveProposerModal open onClose={jest.fn()} onConfirm={jest.fn()} error="Invalid signature" />)
+
+    expect(screen.getByText('Invalid signature')).toBeInTheDocument()
+  })
 })
