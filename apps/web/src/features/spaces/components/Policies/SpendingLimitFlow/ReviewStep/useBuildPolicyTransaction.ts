@@ -71,19 +71,14 @@ export const useBuildPolicyTransaction = (formValues: SpendingLimitPolicyFormVal
   const moduleCount = safe.modules?.length
 
   useEffect(() => {
-    if (blocker) {
-      // The error replaces the transaction: one built before the blocker appeared must not stay signable beside it.
-      setSafeTx(undefined)
-      setSafeTxError(blocker)
-      return
-    }
-    if (!pairs || !existingLimits || !sdk || !chainId || !chain || !$isReady || !safeLoaded) return
+    // The transaction only ever describes the inputs it was built from, so any change to them invalidates it: it is
+    // dropped here and only a finished build puts one back. Otherwise a stale one stays signable under a new summary.
+    setSafeTx(undefined)
+    setSafeTxError(blocker)
+    if (blocker || !pairs || !existingLimits || !sdk || !chainId || !chain || !$isReady || !safeLoaded) return
 
     // A build that finishes after the inputs changed must not overwrite the newer one.
     let isStale = false
-    setSafeTxError(undefined)
-    // A previous trip's transaction must not stay signable under a summary that no longer describes it.
-    setSafeTx(undefined)
     createSpendingLimitsTx(pairs, existingLimits, chainId, chain, safe.modules, safe.deployed, scope)
       .then((tx) => {
         if (!isStale) setSafeTx(tx)

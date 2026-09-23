@@ -209,25 +209,37 @@ describe('ReviewSpendingLimitPolicy', () => {
     expect(setSafeTxError).toHaveBeenCalledWith(undefined)
   })
 
-  it('waits for the token options, the Safe and the existing limits before building', () => {
+  // Each render starts from a transaction built for earlier inputs: an incomplete input must drop it, not leave it
+  // signable under a summary describing something else.
+  it('drops the transaction and waits when the token options, the Safe or the existing limits are missing', () => {
+    const expectWaiting = () => {
+      expect(setSafeTx).toHaveBeenLastCalledWith(undefined)
+      expect(mockCreate).not.toHaveBeenCalled()
+    }
+
     mockUseOptions.mockReturnValue(optionsResult([eth, usdc], true))
-    renderReview()
-    expect(mockCreate).not.toHaveBeenCalled()
+    renderReview({ safeTx: builtTx })
+    expectWaiting()
 
     mockUseOptions.mockReturnValue(optionsResult([eth, usdc]))
     mockUseSafeInfo.mockReturnValue({ safe, safeAddress: SAFE_A, safeLoaded: false, safeLoading: true })
-    renderReview()
-    expect(mockCreate).not.toHaveBeenCalled()
+    renderReview({ safeTx: builtTx })
+    expectWaiting()
 
     mockUseSafeInfo.mockReturnValue({ safe, safeAddress: SAFE_A, safeLoaded: true, safeLoading: false })
     mockUseExisting.mockReturnValue({ loading: true })
-    renderReview()
-    expect(mockCreate).not.toHaveBeenCalled()
+    renderReview({ safeTx: builtTx })
+    expectWaiting()
 
     mockUseExisting.mockReturnValue({ limits: [], loading: false })
     mockUseOptions.mockReturnValue(optionsResult([eth, usdc], false, true))
-    renderReview()
-    expect(mockCreate).not.toHaveBeenCalled()
+    renderReview({ safeTx: builtTx })
+    expectWaiting()
+
+    mockUseSafeScope.mockReturnValue(undefined)
+    mockUseOptions.mockReturnValue(optionsResult([eth, usdc]))
+    renderReview({ safeTx: builtTx })
+    expectWaiting()
   })
 
   it('reports a token it cannot resolve instead of building', async () => {
