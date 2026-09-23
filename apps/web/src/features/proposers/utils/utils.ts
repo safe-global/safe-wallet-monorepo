@@ -2,7 +2,7 @@ import { hashTypedData, signTypedData } from '@safe-global/utils/utils/web3'
 import { EthSafeSignature, buildContractSignature, buildSignatureBytes } from '@safe-global/protocol-kit'
 import { SigningMethod } from '@safe-global/types-kit'
 import { adjustVInSignature } from '@safe-global/protocol-kit'
-import type { JsonRpcSigner } from 'ethers'
+import type { JsonRpcProvider, JsonRpcSigner } from 'ethers'
 import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
 import { TOTP_INTERVAL_SECONDS } from '@/features/proposers/constants'
 import { isSmartContractWallet } from '@/utils/wallets'
@@ -92,10 +92,10 @@ export const encodeEIP1271Signature = async (parentSafeAddress: string, ownerSig
  * Fails open: returns undefined when the check cannot be performed, e.g. no RPC provider.
  */
 export const addressIsNotSmartContract =
-  (chainId: string, message: string) =>
+  (chainId: string, message: string, provider?: JsonRpcProvider) =>
   async (address: string): Promise<string | undefined> => {
     try {
-      return (await isSmartContractWallet(chainId, address)) ? message : undefined
+      return (await isSmartContractWallet(chainId, address, provider)) ? message : undefined
     } catch {
       return undefined
     }

@@ -16,21 +16,15 @@ const isPolicyEntry = (entry: PolicyCatalogueEntry): entry is PolicyCatalogueEnt
   entry.id !== 'suggestion'
 
 const PolicyCatalogue = ({ onSelect, locked }: PolicyCatalogueProps): ReactElement => {
-  const handleClick = ({ id, isAvailable }: PolicyCatalogueEntry) => {
-    trackEvent(
-      { ...POLICY_EVENTS.POLICY_CATALOGUE_TILE_CLICKED, label: id },
-      {
-        [MixpanelEventParams.POLICY_TYPE]: id,
-        [MixpanelEventParams.IS_AVAILABLE]: isAvailable,
-      },
-    )
+  const handleClick = ({ id }: PolicyCatalogueEntry) => {
+    trackEvent({ ...POLICY_EVENTS.POLICY_CATALOGUE_TILE_CLICKED, label: id }, { [MixpanelEventParams.POLICY_TYPE]: id })
 
     if (locked) {
       locked.onUpgrade()
       return
     }
 
-    if (isAvailable) onSelect?.(id)
+    onSelect?.(id)
   }
 
   if (locked) {
@@ -49,7 +43,7 @@ const PolicyCatalogue = ({ onSelect, locked }: PolicyCatalogueProps): ReactEleme
   }
 
   return (
-    <div data-testid="policy-catalogue" className="grid gap-4 md:grid-cols-2">
+    <div data-testid="policy-catalogue" className="grid gap-4 md:grid-cols-3">
       {POLICY_CATALOGUE.map((entry) => (
         <PolicyCatalogueTile key={entry.id} {...entry} onClick={() => handleClick(entry)} />
       ))}

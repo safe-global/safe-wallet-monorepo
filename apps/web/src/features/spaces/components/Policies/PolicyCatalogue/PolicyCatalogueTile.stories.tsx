@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
-import { UserRoundPen, WalletCards } from 'lucide-react'
+import { MessageSquarePlus, WalletCards } from 'lucide-react'
 import PolicyCatalogueTile from './PolicyCatalogueTile'
 
 const meta = {
@@ -24,37 +24,34 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Available: Story = {
-  args: {
-    id: 'proposer',
-    title: 'Proposer',
-    description: 'Let teammates without signing rights propose transactions.',
-    Icon: UserRoundPen,
-    isAvailable: true,
-    onClick: fn(),
-  },
-}
-
-export const Unavailable: Story = {
+export const Default: Story = {
   args: {
     id: 'spending-limit',
     title: 'Spending limit',
     description: 'Let spenders access assets without collecting signatures.',
     Icon: WalletCards,
-    isAvailable: false,
+    action: 'Set policy',
     onClick: fn(),
   },
 }
 
-/** The plan does not include policies: a counter replaces the arrow and Set policy opens the upgrade flow. */
+/** The last tile asks for feedback instead of setting a policy. */
+export const Suggestion: Story = {
+  args: {
+    id: 'suggestion',
+    title: 'Something missing?',
+    description: 'Tell us which rules would help you manage your Safe accounts.',
+    Icon: MessageSquarePlus,
+    action: 'Give feedback',
+    onClick: fn(),
+  },
+}
+
+/** The plan does not include policies: a counter joins the icon and Set policy opens the upgrade flow. */
 export const Locked: Story = {
   args: {
-    id: 'spending-limit',
-    title: 'Spending limit',
-    description: 'Let spenders access assets without collecting signatures.',
-    Icon: WalletCards,
-    isAvailable: true,
-    onClick: fn(),
+    ...Default.args,
     locked: { applied: 0, total: 6 },
+    onClick: fn(),
   },
 }

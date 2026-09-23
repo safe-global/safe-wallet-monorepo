@@ -94,7 +94,7 @@ describe('LeaveSpaceDialog', () => {
       const notifications = store.getState().notifications
       expect(notifications.length).toBeGreaterThan(0)
       const last = notifications[notifications.length - 1]
-      expect(last.message).toBe('Left workspace My Workspace.')
+      expect(last.message).toBe('Left Workspace My Workspace.')
       expect(last.variant).toBe('success')
     })
   })
@@ -106,7 +106,7 @@ describe('LeaveSpaceDialog', () => {
     fireEvent.click(screen.getByTestId('space-confirm-leave-button'))
 
     await waitFor(() => {
-      expect(screen.getByText('Error leaving the workspace. Please try again.')).toBeInTheDocument()
+      expect(screen.getByText('Error leaving the Workspace. Please try again.')).toBeInTheDocument()
     })
   })
 
@@ -117,7 +117,7 @@ describe('LeaveSpaceDialog', () => {
     fireEvent.click(screen.getByTestId('space-confirm-leave-button'))
 
     await waitFor(() => {
-      expect(screen.getByText('Error leaving the workspace. Please try again.')).toBeInTheDocument()
+      expect(screen.getByText('Error leaving the Workspace. Please try again.')).toBeInTheDocument()
     })
     expect(mockRouterPush).not.toHaveBeenCalled()
   })

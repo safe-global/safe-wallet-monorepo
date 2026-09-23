@@ -35,7 +35,7 @@ describe('Walletconnect UI tests', () => {
 
   views.forEach((link) => {
     it(`Verify clicking on WC icon shows basic elements in view: ${link}`, () => {
-      cy.visit(link + staticSafes.SEP_STATIC_SAFE_4)
+      cy.visit(link.endsWith('safe=') ? link + staticSafes.SEP_STATIC_SAFE_4 : link)
       wc.clickOnWCBtn()
       wc.checkBasicElementsVisible()
     })

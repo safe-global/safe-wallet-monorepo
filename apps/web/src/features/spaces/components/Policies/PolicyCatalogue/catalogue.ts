@@ -1,6 +1,6 @@
-import { LockKeyholeOpen, MessageSquarePlus, UserRoundPen, WalletCards, type LucideIcon } from 'lucide-react'
+import { MessageSquarePlus, UserRoundPen, WalletCards, type LucideIcon } from 'lucide-react'
 
-export type PolicyCatalogueId = 'spending-limit' | 'proposer' | 'account-recovery' | 'suggestion'
+export type PolicyCatalogueId = 'spending-limit' | 'proposer' | 'suggestion'
 
 /** The tiles that stand for a policy, as opposed to the suggestion tile. */
 export type PolicyId = Exclude<PolicyCatalogueId, 'suggestion'>
@@ -10,7 +10,7 @@ export interface PolicyCatalogueEntry {
   title: string
   description: string
   Icon: LucideIcon
-  isAvailable: boolean
+  action: string
 }
 
 export const POLICY_CATALOGUE: PolicyCatalogueEntry[] = [
@@ -19,27 +19,20 @@ export const POLICY_CATALOGUE: PolicyCatalogueEntry[] = [
     title: 'Spending limit',
     description: 'Let spenders access assets without collecting signatures.',
     Icon: WalletCards,
-    isAvailable: true,
+    action: 'Set policy',
   },
   {
     id: 'proposer',
     title: 'Proposer',
     description: 'Let teammates without signing rights propose transactions.',
     Icon: UserRoundPen,
-    isAvailable: true,
-  },
-  {
-    id: 'account-recovery',
-    title: 'Account recovery',
-    description: 'Choose a trusted Recoverer to recover your Safe account if you ever lose access.',
-    Icon: LockKeyholeOpen,
-    isAvailable: false,
+    action: 'Set policy',
   },
   {
     id: 'suggestion',
     title: 'Something missing?',
     description: 'Tell us which rules would help you manage your Safe accounts.',
     Icon: MessageSquarePlus,
-    isAvailable: true,
+    action: 'Give feedback',
   },
 ]

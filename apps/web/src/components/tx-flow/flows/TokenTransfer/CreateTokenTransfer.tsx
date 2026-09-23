@@ -105,7 +105,6 @@ const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElemen
         })) || [],
     },
     mode: 'onChange',
-    delayError: 500,
   })
 
   const { handleSubmit, control, watch, formState } = formMethods

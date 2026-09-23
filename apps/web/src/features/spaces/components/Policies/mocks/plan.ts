@@ -7,6 +7,5 @@ export const mockStarterPlan: Omit<PolicyLock, 'onUpgrade'> = {
   accountCounts: {
     'spending-limit': { applied: 0, total: 6 },
     proposer: { applied: 0, total: 6 },
-    'account-recovery': { applied: 0, total: 6 },
   },
 }

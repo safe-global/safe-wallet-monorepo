@@ -75,6 +75,18 @@ describe('TxLayoutBase', () => {
     expect(screen.queryByTestId('safe-shield-widget')).not.toBeInTheDocument()
   })
 
+  it('hides the status rail but keeps the step content when hideStatusRail is set', () => {
+    render(
+      <TxLayoutBase title="Create new policy" step={0} stepCount={1} progress={100} hideStatusRail hideSafeShield>
+        <Step />
+      </TxLayoutBase>,
+    )
+
+    expect(screen.queryByTestId('tx-status-widget')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('safe-shield-widget')).not.toBeInTheDocument()
+    expect(screen.getByTestId('step-content')).toBeInTheDocument()
+  })
+
   it('renders the sidebar slot content under the widget when provided', () => {
     render(
       <TxLayoutBase
