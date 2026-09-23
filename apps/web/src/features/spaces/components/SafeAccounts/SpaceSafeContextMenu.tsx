@@ -79,7 +79,7 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
               onSelect={(e) => e.stopPropagation()}
             >
               <LogOut className="size-4 text-muted-foreground" />
-              <span>Remove from workspace</span>
+              <span>Remove from Workspace</span>
             </DropdownMenuItem>
           )}
         </DropdownMenuContent>

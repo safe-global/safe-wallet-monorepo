@@ -45,7 +45,14 @@ export const SAFES = {
   SEP_STATIC_SAFE_2: 'sep:0xc2F3645bfd395516d1a18CA6ad9298299d328C01',
   /** Safe owned by OWNER_4 — for tx-creation flows needing a connected owner (mirrors Cypress SEP_STATIC_SAFE_6) */
   SEP_OWNER_4_SAFE: 'sep:0xBf30F749FC027a5d79c4710D988F0D3C8e217A4F',
+  /** 1/4 Safe holding ETH plus six $0 test tokens, OWNER_4 is an owner — for assets-table tests (mirrors Cypress SEP_STATIC_SAFE_2) */
+  SEP_ASSETS_SAFE: 'sep:0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415',
+  /** 1/2 Safe where OWNER_1 is a proposer but not an owner — for proposer-permission tests (mirrors Cypress SEP_STATIC_SAFE_31) */
+  SEP_PROPOSER_SAFE: 'sep:0x09725D3c2f9bE905F8f9f1b11a771122cf9C9f35',
 } as const
+
+/** Fiat value below which "Hide small balances" hides a token — mirrors DUST_THRESHOLD in src/config/constants.ts */
+export const DUST_THRESHOLD_USD = 0.01
 
 // ---------------------------------------------------------------------------
 // Address book seed data (for tests that seed a local contact via localStorage)
@@ -105,6 +112,8 @@ export const TEST_ADDRESSES = {
 
 export const ROUTES = {
   home: '/home',
+  welcomeSpaces: '/welcome/spaces',
+  welcomeAccounts: '/welcome/accounts',
   balances: '/balances',
   transactions: '/transactions',
   transactionsQueue: '/transactions/queue',

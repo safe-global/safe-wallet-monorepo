@@ -18,7 +18,7 @@
     "build": "node scripts/generate-version.mjs && node scripts/generate-robots.mjs && next build",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
-    "type-check": "tsc --noEmit",
+    "type-check": "yarn run -T -B tsc --noEmit",
     "prettier": "prettier --check . --config ../../.prettierrc --ignore-path ../../.prettierignore",
     "prettier:fix": "prettier --write . --config ../../.prettierrc --ignore-path ../../.prettierignore",
     "fix": "yarn lint:fix && ts-prune && yarn prettier:fix",

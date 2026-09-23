@@ -17,4 +17,4 @@ export { SPACE_NAME_MAX_LENGTH } from '@safe-global/utils/validation/names'
 
 /** Friendly notice shown when a workspace is already at the Safe accounts cap. */
 export const safeAccountsLimitReachedText = (limit: number = SAFE_ACCOUNTS_LIMIT) =>
-  `You've reached the maximum of ${limit} Safe accounts per workspace`
+  `You've reached the maximum of ${limit} Safe accounts per Workspace`

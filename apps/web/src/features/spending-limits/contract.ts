@@ -6,7 +6,11 @@ import type RemoveSpendingLimitReview from './components/RemoveSpendingLimitRevi
 import type ReviewSpendingLimitTx from './components/ReviewSpendingLimitTx'
 import type SpendingLimitsLoader from './components/SpendingLimitsLoader'
 import type { loadSpendingLimits } from './services/spendingLimitLoader'
-import type { createNewSpendingLimitTx, dispatchSpendingLimitTxExecution } from './services/spendingLimitExecution'
+import type {
+  createNewSpendingLimitTx,
+  createSpendingLimitsTx,
+  dispatchSpendingLimitTxExecution,
+} from './services/spendingLimitExecution'
 
 export interface SpendingLimitsContract {
   // Components (PascalCase) - stub renders null
@@ -21,5 +25,6 @@ export interface SpendingLimitsContract {
   // Services (camelCase) - undefined when not ready
   loadSpendingLimits: typeof loadSpendingLimits
   createNewSpendingLimitTx: typeof createNewSpendingLimitTx
+  createSpendingLimitsTx: typeof createSpendingLimitsTx
   dispatchSpendingLimitTxExecution: typeof dispatchSpendingLimitTxExecution
 }
