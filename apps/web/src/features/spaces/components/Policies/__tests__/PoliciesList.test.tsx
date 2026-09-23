@@ -64,7 +64,7 @@ describe('PoliciesList', () => {
     expect(statuses[2]).toHaveTextContent('Active')
   })
 
-  it('should, when the space has proposers and spending limits, list both in one table with both columns', () => {
+  it('should, when the space has proposers and spending limits, list both in one table under the proposer / tokens column', () => {
     render(<PoliciesList policies={[asActivePolicy(mockProposerPolicy()), asActivePolicy(mockMultiSpenderPolicy())]} />)
 
     const rules = screen.getAllByTestId('policy-cell-rule')
@@ -74,8 +74,7 @@ describe('PoliciesList', () => {
     expect(rules.map((rule) => rule.textContent)).toEqual(
       expect.arrayContaining([expect.stringContaining('Proposer'), expect.stringContaining('Spending limit')]),
     )
-    expect(screen.getByRole('columnheader', { name: 'PROPOSER' })).toBeInTheDocument()
-    expect(screen.getByRole('columnheader', { name: 'TOKENS' })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: 'PROPOSER / TOKENS' })).toBeInTheDocument()
   })
 
   it('should, when a type filter is picked, show only policies of that type', async () => {

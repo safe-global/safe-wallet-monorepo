@@ -59,13 +59,13 @@ const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
       ),
     },
     {
-      id: 'proposer',
-      header: 'PROPOSER',
-      width: '20%',
+      id: 'proposerTokens',
+      header: 'PROPOSER / TOKENS',
+      width: '30%',
       minWidth: 200,
-      cellTestId: 'policy-cell-proposer',
+      cellTestId: 'policy-cell-proposer-tokens',
       cell: (policy) => {
-        if (!isProposerPolicy(policy)) return null
+        if (!isProposerPolicy(policy)) return <PolicyTokens policy={policy} />
 
         const [proposer] = policy.data.proposers
         if (!proposer) return null
@@ -97,15 +97,6 @@ const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
           <ChainIndicator chainId={policy.safe.chainId} onlyLogo showUnknown imageSize={24} />
         </div>
       ),
-    },
-    {
-      id: 'tokens',
-      header: 'TOKENS',
-      width: '10%',
-      minWidth: 110,
-      priority: 'secondary',
-      cellTestId: 'policy-cell-tokens',
-      cell: (policy) => <PolicyTokens policy={policy} />,
     },
     {
       id: 'status',

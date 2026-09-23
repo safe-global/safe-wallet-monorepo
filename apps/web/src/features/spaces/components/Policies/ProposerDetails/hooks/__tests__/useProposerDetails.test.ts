@@ -4,8 +4,6 @@ import { ProposerStatus } from '../../../ProposerDrawer'
 import { getProposerStatus, useProposerDetails } from '../useProposerDetails'
 
 jest.mock('../useActiveProposer', () => ({ useActiveProposer: () => ({ source: 'active' }) }))
-jest.mock('../usePendingProposer', () => ({ usePendingProposer: () => ({ source: 'pending' }) }))
-jest.mock('../useNotActiveProposer', () => ({ useNotActiveProposer: () => ({ source: 'not-active' }) }))
 
 const enabledPolicy = asActivePolicy(mockProposerPolicy())
 const disabledPolicy = asActivePolicy(mockProposerPolicy({ enabled: false }))
@@ -29,11 +27,11 @@ describe('useProposerDetails', () => {
     expect(result.current).toEqual({ source: 'active' })
   })
 
-  it('should, when the grant is not enabled, return what the not-active hook built', () => {
+  it('should, when the grant is not enabled, fall back to what the active hook built', () => {
     const { result } = renderHook(() =>
       useProposerDetails({ policy: disabledPolicy, proposer: disabledPolicy.data.proposers[0], onRemove: jest.fn() }),
     )
 
-    expect(result.current).toEqual({ source: 'not-active' })
+    expect(result.current).toEqual({ source: 'active' })
   })
 })

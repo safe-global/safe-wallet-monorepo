@@ -38,24 +38,29 @@ describe('PoliciesTable', () => {
 
     expect(screen.getByRole('columnheader', { name: 'RULE' })).toBeInTheDocument()
     expect(screen.getByRole('columnheader', { name: 'APPLIES TO' })).toBeInTheDocument()
-    expect(screen.getByRole('columnheader', { name: 'PROPOSER' })).toBeInTheDocument()
-    expect(screen.getByRole('columnheader', { name: 'NETWORK' })).toBeInTheDocument()
-    expect(screen.getByRole('columnheader', { name: 'TOKENS' })).toBeInTheDocument()
-    expect(screen.getByRole('columnheader', { name: 'STATUS' })).toBeInTheDocument()
+    expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
+      'RULE',
+      'APPLIES TO',
+      'PROPOSER / TOKENS',
+      'NETWORK',
+      'STATUS',
+      '',
+    ])
   })
 
-  it('should, when given a proposer policy, show the proposer with its grant label in the proposer column', () => {
+  it('should, when given a proposer policy, show the proposer with its grant label in the proposer / tokens column', () => {
     render(<PoliciesTable policies={[asActivePolicy(mockProposerPolicy())]} />)
 
-    const cell = screen.getByTestId('policy-cell-proposer')
+    const cell = screen.getByTestId('policy-cell-proposer-tokens')
 
     expect(within(cell).getByText('Bob')).toBeInTheDocument()
+    expect(within(cell).queryByTestId('policy-tokens')).not.toBeInTheDocument()
   })
 
-  it('should, when given a spending limit, leave the proposer column empty', () => {
+  it('should, when given a spending limit, show its tokens in the proposer / tokens column', () => {
     render(<PoliciesTable policies={[asActivePolicy(mockMultiSpenderPolicy())]} />)
 
-    expect(screen.getByTestId('policy-cell-proposer')).toBeEmptyDOMElement()
+    expect(within(screen.getByTestId('policy-cell-proposer-tokens')).getByTestId('policy-tokens')).toBeInTheDocument()
   })
 
   it('should, when a spending limit holds three spenders, render one row rather than three', () => {
