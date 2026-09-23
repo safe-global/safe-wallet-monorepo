@@ -145,12 +145,12 @@ describe('getAuditEventDescription', () => {
         eventType: 'ADDRESS_BOOK_REQUEST_CREATED' as const,
         payload: { address: '0x3333333333333333333333333333333333333333', name: 'Dave' },
       },
-      'requested to add the contact Dave (0x3333333333333333333333333333333333333333) to workspace',
+      'requested to add the contact Dave (0x3333333333333333333333333333333333333333) to Workspace',
     ],
     [
       'ADDRESS_BOOK_REQUEST_CREATED (no contact details)',
       { eventType: 'ADDRESS_BOOK_REQUEST_CREATED' as const, payload: {} },
-      'requested to add a contact to workspace',
+      'requested to add a contact to Workspace',
     ],
     [
       'ADDRESS_BOOK_REQUEST_REJECTED',
@@ -158,12 +158,12 @@ describe('getAuditEventDescription', () => {
         eventType: 'ADDRESS_BOOK_REQUEST_REJECTED' as const,
         payload: { address: '0x4444444444444444444444444444444444444444', name: 'Erin' },
       },
-      'rejected the request to add the contact Erin (0x4444444444444444444444444444444444444444) to workspace',
+      'rejected the request to add the contact Erin (0x4444444444444444444444444444444444444444) to Workspace',
     ],
     [
       'ADDRESS_BOOK_REQUEST_REJECTED (no contact details)',
       { eventType: 'ADDRESS_BOOK_REQUEST_REJECTED' as const, payload: {} },
-      'rejected the request to add a contact to workspace',
+      'rejected the request to add a contact to Workspace',
     ],
   ])('describes %s', (_label, overrides, expected) => {
     expect(describeEvent(overrides)).toBe(expected)

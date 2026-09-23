@@ -184,20 +184,20 @@ export function getAuditEventDescription(
       const contact = asContact(payload)
       return hasContactDetail(contact) ? (
         <>
-          requested to add the contact <ContactRef contact={contact} /> to workspace
+          requested to add the contact <ContactRef contact={contact} /> to Workspace
         </>
       ) : (
-        'requested to add a contact to workspace'
+        'requested to add a contact to Workspace'
       )
     }
     case 'ADDRESS_BOOK_REQUEST_REJECTED': {
       const contact = asContact(payload)
       return hasContactDetail(contact) ? (
         <>
-          rejected the request to add the contact <ContactRef contact={contact} /> to workspace
+          rejected the request to add the contact <ContactRef contact={contact} /> to Workspace
         </>
       ) : (
-        'rejected the request to add a contact to workspace'
+        'rejected the request to add a contact to Workspace'
       )
     }
     default:
