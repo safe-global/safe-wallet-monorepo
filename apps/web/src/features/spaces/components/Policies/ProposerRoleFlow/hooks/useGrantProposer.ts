@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import type { OnboardAPI } from '@web3-onboard/core'
 import {
   useDelegatesPostDelegateV1Mutation,
   useDelegatesPostDelegateV2Mutation,
@@ -30,6 +31,26 @@ export type GrantProposer = {
   reset: () => void
 }
 
+/** The endpoint version is dictated by the signing method, so both are decided together. */
+type SignedDelegation = {
+  signature: string
+  useV1Endpoint: boolean
+  delegator: string
+}
+
+const signDelegation = async (onboard: OnboardAPI, chainId: string, proposer: string): Promise<SignedDelegation> => {
+  // The Safe comes from a dropdown, not the URL, so the wallet may sit on any chain at submit time.
+  const activeWallet = await assertWalletChain(onboard, chainId)
+
+  const useV1Endpoint = isEthSignWallet(activeWallet)
+  const signer = await getAssertedChainSigner(activeWallet.provider)
+  const signature = useV1Endpoint
+    ? await signProposerData(proposer, signer)
+    : await signProposerTypedData(chainId, proposer, signer)
+
+  return { signature, useV1Endpoint, delegator: activeWallet.address }
+}
+
 export const useGrantProposer = (): GrantProposer => {
   const wallet = useWallet()
   const onboard = useOnboard()
@@ -47,6 +68,38 @@ export const useGrantProposer = (): GrantProposer => {
     setError(undefined)
     setBlockedReason(undefined)
   }, [])
+
+  const submitDelegation = useCallback(
+    async (proposer: string, { signature, useV1Endpoint, delegator }: SignedDelegation) => {
+      const createDelegateDto: CreateDelegateDto = {
+        delegate: proposer,
+        delegator,
+        label: PROPOSER_LABEL_PLACEHOLDER,
+        signature,
+        safe: safeAddress,
+      }
+
+      const addDelegate = useV1Endpoint ? addDelegateV1 : addDelegateV2
+      await addDelegate({ chainId, createDelegateDto }).unwrap()
+    },
+    [safeAddress, chainId, addDelegateV1, addDelegateV2],
+  )
+
+  const announceSuccess = useCallback(
+    (proposer: string, name: string) => {
+      dispatch(upsertAddressBookEntries({ chainIds: [chainId], address: proposer, name: sanitizeName(name) }))
+      trackEvent(SETTINGS_EVENTS.PROPOSERS.SUBMIT_ADD_PROPOSER)
+      dispatch(
+        showNotification({
+          variant: 'success',
+          groupKey: 'add-proposer-success',
+          title: 'Proposer added successfully!',
+          message: `${shortenAddress(proposer)} can now suggest transactions for this account.`,
+        }),
+      )
+    },
+    [dispatch, chainId],
+  )
 
   const grantProposerRole = useCallback(
     async ({ proposer, name }: ProposerRoleFormValues): Promise<boolean> => {
@@ -66,39 +119,10 @@ export const useGrantProposer = (): GrantProposer => {
           return false
         }
 
-        // The Safe comes from a dropdown, not the URL, so the wallet may sit on any chain at submit time.
-        const activeWallet = await assertWalletChain(onboard, chainId)
+        const signed = await signDelegation(onboard, chainId, proposer)
+        await submitDelegation(proposer, signed)
+        announceSuccess(proposer, name)
 
-        const shouldEthSign = isEthSignWallet(activeWallet)
-        const signer = await getAssertedChainSigner(activeWallet.provider)
-        const signature = shouldEthSign
-          ? await signProposerData(proposer, signer)
-          : await signProposerTypedData(chainId, proposer, signer)
-
-        const createDelegateDto: CreateDelegateDto = {
-          delegate: proposer,
-          delegator: activeWallet.address,
-          label: PROPOSER_LABEL_PLACEHOLDER,
-          signature,
-          safe: safeAddress,
-        }
-
-        if (shouldEthSign) {
-          await addDelegateV1({ chainId, createDelegateDto }).unwrap()
-        } else {
-          await addDelegateV2({ chainId, createDelegateDto }).unwrap()
-        }
-
-        dispatch(upsertAddressBookEntries({ chainIds: [chainId], address: proposer, name: sanitizeName(name) }))
-        trackEvent(SETTINGS_EVENTS.PROPOSERS.SUBMIT_ADD_PROPOSER)
-        dispatch(
-          showNotification({
-            variant: 'success',
-            groupKey: 'add-proposer-success',
-            title: 'Proposer added successfully!',
-            message: `${shortenAddress(proposer)} can now suggest transactions for this account.`,
-          }),
-        )
         return true
       } catch (err) {
         setError(asError(err))
@@ -107,7 +131,7 @@ export const useGrantProposer = (): GrantProposer => {
         setIsSubmitting(false)
       }
     },
-    [wallet, onboard, safeAddress, chainId, provider, addDelegateV1, addDelegateV2, dispatch, reset],
+    [wallet, onboard, safeAddress, chainId, provider, reset, submitDelegation, announceSuccess],
   )
 
   return { grantProposerRole, isSubmitting, error, blockedReason, reset }
