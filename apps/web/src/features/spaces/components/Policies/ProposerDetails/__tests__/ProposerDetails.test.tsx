@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@/tests/test-utils'
+import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import { asActivePolicy, MOCK_ADDRESSES, MOCK_SAFES, mockProposerPolicy } from '../../mocks/policies'
 import ProposerDetails from '../index'
 
@@ -86,5 +86,28 @@ describe('ProposerDetails', () => {
 
     expect(screen.getByRole('button', { name: 'Remove proposer' })).toBeEnabled()
     expect(screen.queryByText(/Only signers of/)).not.toBeInTheDocument()
+  })
+
+  it('should, when the signer clicks Remove proposer, open the remove confirmation', () => {
+    mockOwnedByChain.mockReturnValue({ [MOCK_SAFES.treasury.chainId]: [MOCK_SAFES.treasury.address] })
+
+    render(<ProposerDetails policy={policy} proposer={proposer} onClose={jest.fn()} />)
+
+    expect(screen.queryByTestId('remove-proposer-modal')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Remove proposer' }))
+
+    expect(screen.getByText('Remove this proposer?')).toBeInTheDocument()
+  })
+
+  it('should, when the removal is kept, close the confirmation and leave the drawer open', async () => {
+    mockOwnedByChain.mockReturnValue({ [MOCK_SAFES.treasury.chainId]: [MOCK_SAFES.treasury.address] })
+
+    render(<ProposerDetails policy={policy} proposer={proposer} onClose={jest.fn()} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Remove proposer' }))
+    fireEvent.click(screen.getByRole('button', { name: 'No, keep it' }))
+
+    await waitFor(() => expect(screen.queryByTestId('remove-proposer-modal')).not.toBeInTheDocument())
+    expect(screen.getByText('Proposer role')).toBeInTheDocument()
   })
 })

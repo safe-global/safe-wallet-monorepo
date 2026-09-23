@@ -26,7 +26,8 @@ jest.mock('@/hooks/useAllAddressBooks', () => ({
 }))
 
 const policy = asActivePolicy(mockProposerPolicy())
-const args = { policy, proposer: policy.data.proposers[0] }
+const onRemove = jest.fn()
+const args = { policy, proposer: policy.data.proposers[0], onRemove }
 
 describe('useActiveProposer', () => {
   beforeEach(() => {
@@ -65,5 +66,14 @@ describe('useActiveProposer', () => {
 
     expect(result.current).toMatchObject({ actionLabel: 'Remove proposer', actionDisabled: false })
     expect(result.current.actionHint).toBeUndefined()
+  })
+
+  it('should, when the signer clicks Remove proposer, ask to confirm the removal', () => {
+    mockOwnedByChain.mockReturnValue({ [MOCK_SAFES.treasury.chainId]: [MOCK_SAFES.treasury.address] })
+
+    const { result } = renderHook(() => useActiveProposer(args))
+    result.current.onAction()
+
+    expect(onRemove).toHaveBeenCalledTimes(1)
   })
 })

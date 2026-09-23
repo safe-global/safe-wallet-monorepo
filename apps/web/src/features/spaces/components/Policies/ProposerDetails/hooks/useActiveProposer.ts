@@ -36,8 +36,6 @@ export const useActiveProposer = (args: ProposerDetailsArgs): ProposerDrawerCont
     actionVariant: 'secondary',
     actionDisabled: !isSigner,
     actionHint: isSigner ? undefined : `Only signers of ${safeName} can delete or edit this Proposer role.`,
-    onAction: () => {
-      // TODO(WA-3142): open the revoke flow.
-    },
+    onAction: args.onRemove,
   }
 }

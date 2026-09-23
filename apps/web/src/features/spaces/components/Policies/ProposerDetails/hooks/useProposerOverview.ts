@@ -1,6 +1,6 @@
 import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
 import type { ProposerOverviewProps } from '../../ProposerDrawer/components/ProposerOverview'
-import type { ProposerDetailsArgs } from './types'
+import type { ProposerRef } from './types'
 
 /** The grant carries no timestamp, so the drawer cannot say when it was made. */
 const NO_TIMESTAMP = 'Not available'
@@ -8,7 +8,7 @@ const NO_TIMESTAMP = 'Not available'
 /** A proposer is a delegate registration that Safe{Wallet} enforces off-chain. */
 const ENFORCED_BY = 'Safe{Wallet}'
 
-export const useProposerOverview = ({ policy, proposer }: ProposerDetailsArgs): ProposerOverviewProps => {
+export const useProposerOverview = ({ policy, proposer }: ProposerRef): ProposerOverviewProps => {
   const { chainId, address: safeAddress } = policy.safe
   const grantor = proposer.delegatedBy[0]?.delegator
   const proposerContact = useAddressBookItem(proposer.proposer, chainId)

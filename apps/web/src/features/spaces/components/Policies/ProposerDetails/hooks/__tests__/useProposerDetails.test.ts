@@ -23,7 +23,7 @@ describe('getProposerStatus', () => {
 describe('useProposerDetails', () => {
   it('should, when the grant is enabled, return what the active hook built', () => {
     const { result } = renderHook(() =>
-      useProposerDetails({ policy: enabledPolicy, proposer: enabledPolicy.data.proposers[0] }),
+      useProposerDetails({ policy: enabledPolicy, proposer: enabledPolicy.data.proposers[0], onRemove: jest.fn() }),
     )
 
     expect(result.current).toEqual({ source: 'active' })
@@ -31,7 +31,7 @@ describe('useProposerDetails', () => {
 
   it('should, when the grant is not enabled, return what the not-active hook built', () => {
     const { result } = renderHook(() =>
-      useProposerDetails({ policy: disabledPolicy, proposer: disabledPolicy.data.proposers[0] }),
+      useProposerDetails({ policy: disabledPolicy, proposer: disabledPolicy.data.proposers[0], onRemove: jest.fn() }),
     )
 
     expect(result.current).toEqual({ source: 'not-active' })
