@@ -1,7 +1,7 @@
 import { render, screen } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
 import { RecipientAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders'
-import type { SafeTransaction } from '@safe-global/types-kit'
+import { safeTxBuilder } from '@/tests/builders/safeTx'
 import { SafeShieldContent } from '../SafeShieldContent'
 
 let mockHasOwnTenderly = false
@@ -18,7 +18,7 @@ jest.mock('@safe-global/utils/components/tx/security/tenderly/utils', () => ({
 jest.mock('../useNestedTransaction', () => ({ useNestedTransaction: () => ({ isNested: false }) }))
 let mockProSpaceId: string | null = null
 jest.mock('@/features/spaces', () => ({
-  useSafeProAccess: () => ({ hasProFeatures: false, isLoading: false, spaceId: mockProSpaceId }),
+  useSafeProAccess: () => ({ hasProFeatures: false, isSafePro: true, isLoading: false, spaceId: mockProSpaceId }),
 }))
 jest.mock('../HypernativeLoginLine', () => ({
   HypernativeLoginLine: () => <div data-testid="hypernative-login-line" />,
@@ -29,9 +29,7 @@ jest.mock('@/hooks/useSafeInfo', () => ({
 }))
 
 const emptyAnalysis: [undefined, undefined, boolean] = [undefined, undefined, false]
-const safeTx = {
-  data: { to: '0x00000000000000000000000000000000000000aa', value: '0', data: '0x', operation: 0 },
-} as unknown as SafeTransaction
+const safeTx = safeTxBuilder().build()
 const renderContent = (hasProFeatures: boolean) =>
   render(
     <SafeShieldContent

@@ -3,10 +3,14 @@ import { ProChecksRow } from '../ProChecksRow'
 
 let mockSpaceId: string | null = 'space-1'
 jest.mock('@/features/spaces', () => ({
-  useSafeProAccess: () => ({ hasProFeatures: false, isLoading: false, spaceId: mockSpaceId }),
+  useSafeProAccess: () => ({ hasProFeatures: false, isSafePro: true, isLoading: false, spaceId: mockSpaceId }),
 }))
 
 describe('ProChecksRow', () => {
+  beforeEach(() => {
+    mockSpaceId = 'space-1'
+  })
+
   it('links to the plans of the Workspace holding the Safe when it has no Pro features', () => {
     render(<ProChecksRow hasProFeatures={false} />)
 

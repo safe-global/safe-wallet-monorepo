@@ -1,5 +1,9 @@
 import { faker } from '@faker-js/faker'
-import { ContractAnalysisBuilder, RecipientAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders'
+import {
+  ContractAnalysisBuilder,
+  DeadlockAnalysisBuilder,
+  RecipientAnalysisBuilder,
+} from '@safe-global/utils/features/safe-shield/builders'
 import { ThreatAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis.builder'
 import { countChecks } from '../countChecks'
 
@@ -36,5 +40,12 @@ describe('countChecks', () => {
       passed: 0,
       total: 0,
     })
+  })
+
+  it('counts a detected deadlock as shown but not passed', () => {
+    const [deadlock] = DeadlockAnalysisBuilder.deadlockDetected()
+    expect(
+      countChecks({ threat, deadlock, hasProFeatures: true, hasSimulation: false, isSimulationSuccess: false }),
+    ).toEqual({ passed: 1, total: 2 })
   })
 })

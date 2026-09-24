@@ -66,13 +66,11 @@ export const TenderlySimulation = ({
     }
   }, [safeTx, simulation, nestedTx.simulation])
 
-  const { nestedSafeInfo, nestedSafeTx, isNested } = useNestedTransaction(safeTx, chain)
+  const { nestedSafeInfo, nestedSafeTx, isNested, isNestedLoading } = useNestedTransaction(safeTx, chain)
+  const executionOwner = isSafeOwner && signer?.address ? signer.address : safe.owners[0]?.value
 
   const handleRunSimulation = () => {
-    if (!safeTx) return
-
-    const executionOwner = isSafeOwner && signer?.address ? signer.address : safe.owners[0]?.value
-    if (!executionOwner) return
+    if (!safeTx || !executionOwner) return
 
     const simulationParams = {
       safe,
@@ -98,17 +96,16 @@ export const TenderlySimulation = ({
   }
 
   // Once per transaction: the reset effect above clears the previous result, this one starts the next run.
+  // A nested tx resolving later changes the key, so its simulation runs too.
   const autoRanKeyRef = useRef<string | null>(null)
   useEffect(() => {
-    if (!autoRun || !showSimulation || !safeTx) return
-    // The run needs an execution owner; until the Safe's owners are known, wait for them.
-    if (!signer?.address && !safe.owners[0]?.value) return
-    const key = JSON.stringify(safeTx.data)
+    if (!autoRun || !showSimulation || !safeTx || !executionOwner || isNestedLoading) return
+    const key = JSON.stringify([safeTx.data, isNested])
     if (autoRanKeyRef.current === key) return
     autoRanKeyRef.current = key
     handleRunSimulation()
     // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed on the tx data; the handler reads live values
-  }, [autoRun, showSimulation, safeTx, signer?.address, safe.owners])
+  }, [autoRun, showSimulation, safeTx, executionOwner, isNested, isNestedLoading])
 
   const { mainIsSuccess, nestedIsSuccess, isSimulationSuccess, isSimulationFinished, isLoading } = getSimulationOutcome(
     status,
