@@ -6,7 +6,7 @@ import SpendingLimitDrawer from '../SpendingLimitDrawer'
 const OVERVIEW = {
   appliesTo: { address: '0x8675B754342754A30A2AeF474D114d8460bca19b', name: 'Treasury' },
   lastUpdated: 'Sep 22, 2026',
-  enforcedBy: 'Safe module',
+  enforcedBy: 'Safe allowance module',
 }
 
 const TRANSACTION_LINK = 'https://app.safe.global/transactions/tx?id=0x9f3c'

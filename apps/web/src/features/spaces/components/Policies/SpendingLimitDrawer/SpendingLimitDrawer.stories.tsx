@@ -21,7 +21,7 @@ const SAFE = { address: '0x8675B754342754A30A2AeF474D114d8460bca19b', name: MOCK
 const OVERVIEW = {
   appliesTo: { address: SAFE.address, name: 'Treasury' },
   lastUpdated: 'Sep 22, 2026 · 03:35 UTC',
-  enforcedBy: 'Safe module',
+  enforcedBy: 'Safe allowance module',
 }
 
 const meta = {

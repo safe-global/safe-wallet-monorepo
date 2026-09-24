@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import TokenIcon from '@/components/common/TokenIcon'
-import { Progress } from '@/components/ui/progress'
+import { Progress, ProgressIndicator, ProgressTrack } from '@/components/ui/progress'
 import { Typography } from '@/components/ui/typography'
 import type { PolicyAllowance } from '../../../types'
 import { formatAllowanceAmount, formatRemaining, formatResetUtc, remainingPercent } from '../../format'
@@ -33,7 +33,12 @@ const AllowanceRow = ({ allowance, showUsage }: AllowanceRowProps): ReactElement
 
     {showUsage && (
       <>
-        <Progress value={remainingPercent(allowance)} indicatorClassName="bg-success-strong" />
+        {/* Track and fill match the preview in SpendingLimitIntroDialog; the default track is the card's own colour. */}
+        <Progress value={remainingPercent(allowance)}>
+          <ProgressTrack className="bg-border">
+            <ProgressIndicator className="bg-badge-dot-success" />
+          </ProgressTrack>
+        </Progress>
 
         <div className="flex items-center justify-between gap-2">
           <Typography variant="paragraph-mini" color="muted">

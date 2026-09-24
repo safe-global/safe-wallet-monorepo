@@ -40,7 +40,7 @@ describe('PolicyOverview', () => {
       <PolicyOverview
         appliesTo={{ address: SAFE.address, name: 'Treasury' }}
         lastUpdated="Sep 22, 2026"
-        enforcedBy="Safe module"
+        enforcedBy="Safe allowance module"
       />,
     )
 
@@ -53,7 +53,7 @@ describe('PolicyOverview', () => {
     expect(within(lastUpdatedRow).getByText('Sep 22, 2026')).toBeInTheDocument()
 
     const enforcedByRow = screen.getByText('Enforced by').closest('div') as HTMLElement
-    expect(within(enforcedByRow).getByText('Safe module')).toBeInTheDocument()
+    expect(within(enforcedByRow).getByText('Safe allowance module')).toBeInTheDocument()
   })
 
   it('binds each account to its own row when an initiator is given', () => {
@@ -62,7 +62,7 @@ describe('PolicyOverview', () => {
         appliesTo={{ address: SAFE.address, name: 'Treasury' }}
         initiatedBy={{ address: SAFE.address, name: 'Alice' }}
         lastUpdated="Sep 22, 2026"
-        enforcedBy="Safe module"
+        enforcedBy="Safe allowance module"
       />,
     )
 

@@ -10,7 +10,7 @@ const meta = {
   args: {
     appliesTo: { address: MOCK_SAFES.treasury.address, name: MOCK_SAFE_NAME },
     lastUpdated: '06.24.26 03:35 AM UTC',
-    enforcedBy: 'Safe module',
+    enforcedBy: 'Safe allowance module',
   },
 } satisfies Meta<typeof PolicyOverview>
 
