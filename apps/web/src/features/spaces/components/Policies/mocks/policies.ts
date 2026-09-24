@@ -13,6 +13,10 @@ import type { Viewer } from '../SpendingLimitDrawer/resolveState'
 /** Shaped like the CGW policy response. The stories and the unit tests share these. */
 
 const DAY = 86_400
+/** Allowance periods are minutes, matching the allowance module and the CGW response. */
+const DAY_MINUTES = 1_440
+/** 2026-10-01T00:00:00Z, in unix minutes. */
+const RESETS_AT_MINUTE = 29_846_880
 
 export const MOCK_SAFES = {
   treasury: { address: '0x8675B754342754A30A2AeF474D114d8460bca19b', chainId: '1' },
@@ -57,15 +61,15 @@ const allowance = (
   token: PolicyTokenInfo,
   amount: string,
   spent: string,
-  resetPeriodSeconds: number,
-  resetsAt: number | null = 1_790_812_800,
+  resetPeriodMinutes: number,
+  resetsAtMinute: number | null = RESETS_AT_MINUTE,
 ) => ({
   token,
   amount,
   spent,
   remaining: (BigInt(amount) - BigInt(spent)).toString(),
-  resetPeriodSeconds,
-  resetsAt: resetPeriodSeconds === 0 ? null : resetsAt,
+  resetPeriodMinutes,
+  resetsAtMinute: resetPeriodMinutes === 0 ? null : resetsAtMinute,
 })
 
 export const mockSpendingLimitPolicy = (overrides: Partial<SpendingLimitPolicy> = {}): SpendingLimitPolicy => ({
@@ -81,8 +85,8 @@ export const mockSpendingLimitPolicy = (overrides: Partial<SpendingLimitPolicy> 
       {
         spender: MOCK_ADDRESSES.alice,
         allowances: [
-          allowance(MOCK_TOKENS.usdc, '1500000000', '1000000000', DAY * 30),
-          allowance(MOCK_TOKENS.usdt, '1000000000', '750000000', DAY * 30),
+          allowance(MOCK_TOKENS.usdc, '1500000000', '1000000000', DAY_MINUTES * 30),
+          allowance(MOCK_TOKENS.usdt, '1000000000', '750000000', DAY_MINUTES * 30),
         ],
       },
     ],
@@ -98,17 +102,17 @@ export const mockMultiSpenderPolicy = (): SpendingLimitPolicy =>
         {
           spender: MOCK_ADDRESSES.alice,
           allowances: [
-            allowance(MOCK_TOKENS.usdc, '1500000000', '1000000000', DAY * 30),
-            allowance(MOCK_TOKENS.usdt, '1000000000', '750000000', DAY * 30),
+            allowance(MOCK_TOKENS.usdc, '1500000000', '1000000000', DAY_MINUTES * 30),
+            allowance(MOCK_TOKENS.usdt, '1000000000', '750000000', DAY_MINUTES * 30),
           ],
         },
         {
           spender: MOCK_ADDRESSES.bob,
-          allowances: [allowance(MOCK_TOKENS.usdc, '5000000000', '0', DAY * 7)],
+          allowances: [allowance(MOCK_TOKENS.usdc, '5000000000', '0', DAY_MINUTES * 7)],
         },
         {
           spender: MOCK_ADDRESSES.unresolved,
-          allowances: [allowance(MOCK_TOKENS.unknown, '2000000000000000000', '2000000000000000000', DAY)],
+          allowances: [allowance(MOCK_TOKENS.unknown, '2000000000000000000', '2000000000000000000', DAY_MINUTES)],
         },
       ],
     },
@@ -233,7 +237,7 @@ export const mockMissingMetadataPolicy = (): SpendingLimitPolicy & { status: 'ac
         spenders: [
           {
             spender: MOCK_ADDRESSES.alice,
-            allowances: [allowance(MOCK_TOKENS.unknown, '2000000000000000000', '500000000000000000', DAY * 30)],
+            allowances: [allowance(MOCK_TOKENS.unknown, '2000000000000000000', '500000000000000000', DAY_MINUTES * 30)],
           },
         ],
       },

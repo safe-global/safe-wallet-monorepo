@@ -12,9 +12,11 @@ const UTC_PARTS = new Intl.DateTimeFormat('en-US', {
   hourCycle: 'h23',
 })
 
-/** The reset instant is chain time; rendering it in the viewer's zone would misstate when it lands. */
-export const formatResetUtc = (resetsAt: number): string => {
-  const parts = UTC_PARTS.formatToParts(new Date(resetsAt * 1000))
+const MS_PER_MINUTE = 60_000
+
+/** Takes unix MINUTES, as CGW returns. The reset instant is chain time; the viewer's zone would misstate it. */
+export const formatResetUtc = (resetsAtMinute: number): string => {
+  const parts = UTC_PARTS.formatToParts(new Date(resetsAtMinute * MS_PER_MINUTE))
   const part = (type: Intl.DateTimeFormatPartTypes): string => parts.find((p) => p.type === type)?.value ?? ''
 
   return `${part('month')} ${part('day')}, ${part('hour')}:${part('minute')} UTC`
@@ -36,9 +38,9 @@ export const remainingPercent = (allowance: Pick<PolicyAllowance, 'amount' | 're
 export const formatAllowanceAmount = (allowance: PolicyAllowance): string => {
   const amount = formatVisualAmount(allowance.amount, allowance.token.decimals)
 
-  return allowance.resetPeriodSeconds === 0
+  return allowance.resetPeriodMinutes === 0
     ? `${amount} one time`
-    : `${amount}/${getResetPeriodLabel(allowance.resetPeriodSeconds)}`
+    : `${amount}/${getResetPeriodLabel(allowance.resetPeriodMinutes)}`
 }
 
 export const formatRemaining = (allowance: PolicyAllowance): string =>

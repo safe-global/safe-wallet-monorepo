@@ -18,7 +18,7 @@ describe('SpendingLimits', () => {
     render(<SpendingLimits spenders={spenders} showUsage />)
 
     expect(screen.getByText('500 USDC remaining')).toBeInTheDocument()
-    // Both allowances share the fixture's default resetsAt, so the reset line renders twice.
+    // Both allowances share the fixture's default resetsAtMinute, so the reset line renders twice.
     expect(screen.getAllByText('Resets Oct 1, 00:00 UTC')).toHaveLength(2)
     expect(screen.getAllByRole('progressbar')).toHaveLength(2)
   })

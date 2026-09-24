@@ -40,9 +40,9 @@ const AllowanceRow = ({ allowance, showUsage }: AllowanceRowProps): ReactElement
             {formatRemaining(allowance)}
           </Typography>
 
-          {allowance.resetsAt !== null && (
+          {allowance.resetsAtMinute !== null && (
             <Typography variant="paragraph-mini" color="muted" className="shrink-0">
-              Resets {formatResetUtc(allowance.resetsAt)}
+              Resets {formatResetUtc(allowance.resetsAtMinute)}
             </Typography>
           )}
         </div>

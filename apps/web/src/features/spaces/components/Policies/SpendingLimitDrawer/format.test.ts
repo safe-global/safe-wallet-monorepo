@@ -11,14 +11,14 @@ import {
 const [usdc, usdt] = mockSpendingLimitPolicy().data.spenders[0].allowances
 
 describe('formatResetUtc', () => {
-  // The suite runs under TZ=CET, so a local-time formatter would render 02:00 here.
+  // Unix MINUTES, as CGW returns. The suite runs under TZ=CET, so a local-time formatter would render 02:00.
   it('renders the reset instant in UTC regardless of the local zone', () => {
-    expect(formatResetUtc(1_790_812_800)).toBe('Oct 1, 00:00 UTC')
+    expect(formatResetUtc(29_846_880)).toBe('Oct 1, 00:00 UTC')
   })
 
   it('uses a 24-hour clock rather than rendering midnight as 24:00', () => {
     // A different UTC midnight than the test above, so this assertion can fail independently of it.
-    expect(formatResetUtc(1_793_491_200)).toBe('Nov 1, 00:00 UTC')
+    expect(formatResetUtc(29_891_520)).toBe('Nov 1, 00:00 UTC')
   })
 })
 
@@ -46,7 +46,7 @@ describe('formatAllowanceAmount', () => {
   })
 
   it('reads as one time when the allowance does not repeat', () => {
-    expect(formatAllowanceAmount({ ...usdt, resetPeriodSeconds: 0 })).toBe('1,000 one time')
+    expect(formatAllowanceAmount({ ...usdt, resetPeriodMinutes: 0 })).toBe('1,000 one time')
   })
 })
 
