@@ -26,6 +26,7 @@ import { useSafeScope } from '@/components/tx-flow/safe-scope'
 
 const mockUseSafeSponsoredTxs = jest.fn()
 jest.mock('@/features/spaces/hooks/useSafeSponsoredTxs', () => ({
+  ...jest.requireActual('@/features/spaces/hooks/useSafeSponsoredTxs'),
   useSafeSponsoredTxs: () => mockUseSafeSponsoredTxs(),
 }))
 const noSponsoredTxs = {
@@ -35,6 +36,7 @@ const noSponsoredTxs = {
   left: null,
   spaceId: null,
   canSponsor: false,
+  isExhausted: false,
   isLoading: false,
 }
 
@@ -173,6 +175,7 @@ describe('ExecuteForm', () => {
       left: 0,
       spaceId: '11111111-1111-1111-1111-111111111111',
       canSponsor: false,
+      isExhausted: true,
       isLoading: false,
     })
 
@@ -192,6 +195,7 @@ describe('ExecuteForm', () => {
       left: 40,
       spaceId: '11111111-1111-1111-1111-111111111111',
       canSponsor: true,
+      isExhausted: false,
       isLoading: false,
     })
     const mockExecuteTx = jest.fn()

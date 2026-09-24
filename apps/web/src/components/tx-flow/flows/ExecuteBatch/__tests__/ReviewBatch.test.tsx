@@ -14,6 +14,7 @@ const mockDispatchBatchExecutionRelay = jest.fn()
 
 // The feature barrel cannot be mocked partially (circular import at init), so the source hook module is.
 jest.mock('@/features/spaces/hooks/useSafeSponsoredTxs', () => ({
+  ...jest.requireActual('@/features/spaces/hooks/useSafeSponsoredTxs'),
   useSafeSponsoredTxs: () => mockUseSafeSponsoredTxs(),
 }))
 jest.mock('@/hooks/useRemainingRelays', () => ({ useRelaysBySafe: () => mockUseRelaysBySafe() }))
@@ -67,6 +68,7 @@ const pro = (left: number) => ({
   left,
   spaceId: SPACE_ID,
   canSponsor: left > 0,
+  isExhausted: left === 0,
   isLoading: false,
 })
 
@@ -119,7 +121,13 @@ describe('ReviewBatch', () => {
   })
 
   it('hides the selector for a Safe with neither a plan nor chain relays left', () => {
-    mockUseSafeSponsoredTxs.mockReturnValue({ ...pro(0), isEnabled: false, isPro: false, spaceId: null })
+    mockUseSafeSponsoredTxs.mockReturnValue({
+      ...pro(0),
+      isEnabled: false,
+      isPro: false,
+      spaceId: null,
+      isExhausted: false,
+    })
     renderReviewBatch()
 
     expect(screen.queryByTestId('execution-method-selector')).not.toBeInTheDocument()

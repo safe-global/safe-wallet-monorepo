@@ -15,11 +15,10 @@ import TxSubmitError from '@/components/tx/TxSubmitError'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
 import DecodedTxs from '@/components/tx-flow/flows/ExecuteBatch/DecodedTxs'
 import { useRelaysBySafe } from '@/hooks/useRemainingRelays'
-import { useSafeSponsoredTxs } from '@/features/spaces'
+import { canRelayWith, useSafeSponsoredTxs } from '@/features/spaces'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import { logError, Errors } from '@/services/exceptions'
 import { createMultiSendCallOnlyTx, dispatchBatchExecution, dispatchBatchExecutionRelay } from '@/services/tx/tx-sender'
-import { hasRemainingRelays } from '@/utils/relaying'
 import { getMultiSendTxs } from '@/utils/transactions'
 import TxCard, { TxCardActions } from '../../common/TxCard'
 import CheckWallet from '@/components/common/CheckWallet'
@@ -100,10 +99,10 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
   const wallet = useWallet()
 
   // Chain has relaying feature and available relays, or the Safe's Workspace still sponsors transactions
-  const canRelay = sponsoredTxs.isPro ? sponsoredTxs.canSponsor : hasRemainingRelays(relays)
+  const canRelay = canRelayWith(sponsoredTxs, relays)
   const willRelay = canRelay && executionMethod === ExecutionMethod.RELAY
   // A spent Pro allowance keeps the selector on screen (sponsoring disabled) so the user sees the count and the reset.
-  const isProExhausted = sponsoredTxs.isPro && sponsoredTxs.left === 0
+  const isProExhausted = sponsoredTxs.isExhausted
 
   // EIP-1559 gas pricing support
   const isEIP1559 = Boolean(chain && hasFeature(chain, FEATURES.EIP1559))
