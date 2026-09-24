@@ -193,16 +193,17 @@ const rank = (name: string): number => {
   return index === -1 ? PLAN_ORDER.length : index
 }
 
-/** The offered plans, the current one (when live) and the static Enterprise card, in catalog order. */
+/** The offered plans, the current one (when live) and, unless left out, the static Enterprise card, in catalog order. */
 export const buildPlanTiers = (
   paidPlans: PlanGroup[],
   current?: { subscription: Subscription; seatsQuota: number | null | undefined },
+  { withEnterprise = true }: { withEnterprise?: boolean } = {},
 ): PlanTier[] => {
   const offered = offersToTiers(paidPlans)
   const tiers = current
     ? mergeCurrentTier(offered, subscriptionToTier(current.subscription, current.seatsQuota))
     : offered
-  return [...tiers, ENTERPRISE_TIER].sort((a, b) => rank(a.name) - rank(b.name))
+  return (withEnterprise ? [...tiers, ENTERPRISE_TIER] : tiers).sort((a, b) => rank(a.name) - rank(b.name))
 }
 
 /** Monthly trial offers for the claim modal: the seat count leads the plan's own selling points, verbatim. */

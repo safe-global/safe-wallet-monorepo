@@ -154,6 +154,11 @@ describe('planTiers', () => {
       'Business',
       'Enterprise',
     ])
+    expect(buildPlanTiers([BUSINESS, STARTER], undefined, { withEnterprise: false }).map((tier) => tier.name)).toEqual([
+      'Starter',
+      'Business',
+      'Business',
+    ])
   })
 
   it('folds the other seat sizes of the current plan into its card and drops its duplicate cards', () => {

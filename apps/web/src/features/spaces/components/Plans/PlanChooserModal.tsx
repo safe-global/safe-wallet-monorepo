@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -8,13 +8,12 @@ import { Typography } from '@/components/ui/typography'
 import { highlightSafePro } from '@/components/common/ProHighlight'
 import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
 import { useSeatTrimCheckout } from '../../hooks/billing/useSeatTrimCheckout'
-import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
+import { usePlanCatalog } from './usePlanCatalog'
 import type { WorkspaceLockReason } from '../../hooks/useWorkspaceLock'
 import { chooserCopy, salesHintFor } from './copy'
-import { ENTERPRISE_TIER, RECOMMENDED_PLAN } from './constants'
+import { RECOMMENDED_PLAN } from './constants'
 import { PlanCatalog } from './PlanCards'
 import { InfoTip } from './PlanStatusCard'
-import { buildPlanTiers } from './planTiers'
 import SelectAccountsStep from './SelectAccountsStep'
 import type { PlanPick } from './types'
 
@@ -36,8 +35,8 @@ export default function PlanChooserModal({
   endedAt: number | null
   onBack: () => void
 }) {
-  const { paidPlans, isLoading } = useSpaceOffers(spaceId)
-  const tiers = useMemo(() => buildPlanTiers(paidPlans).filter((tier) => tier.id !== ENTERPRISE_TIER.id), [paidPlans])
+  // A locked Workspace has no live plan, so the catalog carries no current card.
+  const { tiers, isOffersLoading: isLoading } = usePlanCatalog(spaceId, { withEnterprise: false })
   const { needsTrim, checkout, isBusy, error } = useSeatTrimCheckout(spaceId)
   const { openPortal, isRedirecting: isOpeningPortal } = useBillingPortal(spaceId)
   const [pick, setPick] = useState<PlanPick>()

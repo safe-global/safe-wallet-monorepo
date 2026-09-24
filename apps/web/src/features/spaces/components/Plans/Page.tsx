@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
@@ -10,10 +10,8 @@ import { SafeProFeature } from '@/features/safe-pro-announcement'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import AuthState from '../AuthState'
 import Plans from './index'
-import { buildPlanTiers, toCurrentPlan } from './planTiers'
 import { useIsAdmin } from '../../hooks/useSpaceMembers'
-import { useSpacePlan } from '../../hooks/useSpacePlan'
-import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
+import { usePlanCatalog } from './usePlanCatalog'
 import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
 import { useStartCheckout } from '../../hooks/billing/useStartCheckout'
 import { useChangePlan } from '../../hooks/billing/useChangePlan'
@@ -31,23 +29,14 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
   const isDarkMode = useDarkMode()
   const isSafePro = useHasFeature(FEATURES.SAFE_PRO)
   const { SafeProAnnouncement } = useLoadFeature(SafeProFeature)
-  const { plan, seats, sponsoredTxs, subscription, isTrialing, isLoading: isPlanLoading } = useSpacePlan(spaceId)
-  const { paidPlans, isLoading: isOffersLoading } = useSpaceOffers(spaceId)
+  const { plan, seats, sponsoredTxs, subscription, currentPlan, tiers, isPlanLoading, isOffersLoading } =
+    usePlanCatalog(spaceId)
   const { openPortal, isRedirecting } = useBillingPortal(spaceId)
   const { startCheckout, isRedirecting: isCheckingOut } = useStartCheckout(spaceId)
   const { canChange } = useChangePlan(spaceId)
   const isAdmin = useIsAdmin(spaceId)
   const [pick, setPick] = useState<PlanPick>()
 
-  const currentPlan = useMemo(
-    () => (canChange && subscription && plan ? toCurrentPlan(subscription, plan, isTrialing, seats?.quota) : undefined),
-    [canChange, subscription, plan, isTrialing, seats?.quota],
-  )
-  const tiers = useMemo(
-    () =>
-      buildPlanTiers(paidPlans, currentPlan && subscription ? { subscription, seatsQuota: seats?.quota } : undefined),
-    [paidPlans, currentPlan, subscription, seats?.quota],
-  )
   // The flag is undefined until the chain config loads; the skeleton holds until it is known.
   const isLoading = isSafePro === undefined || isPlanLoading || isOffersLoading
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -7,16 +7,14 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
 import { formatDate } from '@safe-global/utils/utils/date'
 import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
-import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
+import { usePlanCatalog } from './usePlanCatalog'
 import { useCurrentMembership, useIsAdmin } from '../../hooks/useSpaceMembers'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
 import { markTrialReminderSeen, wasTrialReminderSeen } from '../../store/trialReminder'
 import ChangePlanFlow from './ChangePlanFlow'
 import { salesHintFor } from './copy'
-import { ENTERPRISE_TIER } from './constants'
 import { PlanCatalog } from './PlanCards'
-import { buildPlanTiers, toCurrentPlan } from './planTiers'
-import type { CurrentPlan, PlanPick } from './types'
+import type { PlanPick } from './types'
 
 export const endsIn = (daysLeft: number | null): string =>
   daysLeft === null || daysLeft > 1 ? `in ${daysLeft ?? 7} days` : daysLeft === 1 ? 'in 1 day' : 'today'
@@ -30,31 +28,23 @@ export const reminderSubtitle = (endsAt: string, isAdmin: boolean, spaceName?: s
 const TrialEndingChooser = ({
   spaceId,
   spaceName,
-  currentPlan,
-  seatsQuota,
   isAdmin,
   onClose,
 }: {
   spaceId: string
   spaceName?: string
-  currentPlan: CurrentPlan
-  seatsQuota: number | null | undefined
   /** A member sees the same plans without any button to act on them. */
   isAdmin: boolean
   onClose: () => void
 }) => {
-  const { paidPlans, isLoading } = useSpaceOffers(spaceId)
-  const { subscription } = useSpacePlan(spaceId)
+  const { currentPlan, tiers, isOffersLoading: isLoading } = usePlanCatalog(spaceId, { withEnterprise: false })
   const { openPortal, isRedirecting } = useBillingPortal(spaceId)
   const [pick, setPick] = useState<PlanPick>()
   const [isChanged, setIsChanged] = useState(false)
-  const tiers = useMemo(
-    () =>
-      buildPlanTiers(paidPlans, subscription ? { subscription, seatsQuota } : undefined).filter(
-        (tier) => tier.id !== ENTERPRISE_TIER.id,
-      ),
-    [paidPlans, subscription, seatsQuota],
-  )
+
+  // The parent only mounts this for a live plan, so the current plan is known.
+  if (!currentPlan) return null
+
   const endsAt = currentPlan.periodEndsAt
     ? formatDate(Date.parse(currentPlan.periodEndsAt))
     : 'the end of your free access'
@@ -130,7 +120,7 @@ const TrialEndingChooser = ({
  * heads-up, once per login.
  */
 export default function TrialEndingModal({ spaceId }: { spaceId: string }) {
-  const { plan, seats, subscription, isTrialing, isTrialEndingSoon, hasPaymentMethod } = useSpacePlan(spaceId)
+  const { plan, subscription, isTrialEndingSoon, hasPaymentMethod } = useSpacePlan(spaceId)
   const membership = useCurrentMembership(spaceId)
   const isAdmin = useIsAdmin(spaceId)
   const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId }, { skip: !isTrialEndingSoon || isAdmin })
@@ -146,16 +136,6 @@ export default function TrialEndingModal({ spaceId }: { spaceId: string }) {
     markTrialReminderSeen(spaceId)
     setIsOpen(false)
   }
-  const currentPlan = toCurrentPlan(subscription, plan, isTrialing, seats?.quota)
 
-  return (
-    <TrialEndingChooser
-      spaceId={spaceId}
-      spaceName={space?.name}
-      currentPlan={currentPlan}
-      seatsQuota={seats?.quota}
-      isAdmin={isAdmin}
-      onClose={close}
-    />
-  )
+  return <TrialEndingChooser spaceId={spaceId} spaceName={space?.name} isAdmin={isAdmin} onClose={close} />
 }
