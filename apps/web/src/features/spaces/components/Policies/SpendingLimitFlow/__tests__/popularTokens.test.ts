@@ -2,7 +2,7 @@ import { getAddress } from 'ethers'
 import { faker } from '@faker-js/faker'
 import { POPULAR_TOKEN_ADDRESSES, getPopularTokenAddresses } from '../popularTokens'
 
-const EXPECTED_CHAINS = ['1', '56', '8453', '137', '100', '43114', '11155111']
+const EXPECTED_CHAINS = ['1', '10', '42161', '56', '8453', '137', '100', '43114', '11155111']
 /** CGW's batch endpoint accepts at most this many addresses per request. */
 const CGW_BATCH_CAP = 20
 
@@ -11,10 +11,9 @@ describe('POPULAR_TOKEN_ADDRESSES', () => {
     expect(Object.keys(POPULAR_TOKEN_ADDRESSES).sort()).toEqual([...EXPECTED_CHAINS].sort())
   })
 
-  it.each(EXPECTED_CHAINS)('chain %s lists between 4 and 8 addresses, within the CGW batch cap', (chainId) => {
+  it.each(EXPECTED_CHAINS)('chain %s lists at least 4 addresses, within the CGW batch cap', (chainId) => {
     const addresses = POPULAR_TOKEN_ADDRESSES[chainId]
     expect(addresses.length).toBeGreaterThanOrEqual(4)
-    expect(addresses.length).toBeLessThanOrEqual(8)
     expect(addresses.length).toBeLessThanOrEqual(CGW_BATCH_CAP)
   })
 

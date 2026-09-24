@@ -12,7 +12,7 @@ import { getPopularTokenAddresses } from '../popularTokens'
 import { buildTokenOptions, toPopularToken, type NativeCurrencyInfo, type TokenOption } from '../utils/tokenOptions'
 
 export type TokenOptionsResult = {
-  /** Held tokens first (fiat desc), then popular (symbol asc). */
+  /** Held tokens first (fiat desc), then popular in table order (native first). */
   options: TokenOption[]
   /** False while the query is skipped. */
   isLoading: boolean
