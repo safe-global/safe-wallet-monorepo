@@ -28,7 +28,7 @@ const entitlements = (plan: { name: string | null; cycleEndsAt: string | null } 
   },
   isLoading: false,
 })
-const subscriptions = (status: string, name = 'Business') => ({
+const subscriptions = (status: string, name: string | null = 'Business') => ({
   currentData: [{ id: 'sub_1', status, plan: { id: 'plan_1', name } }],
   isLoading: false,
 })
@@ -72,7 +72,7 @@ describe('useSpacePlan', () => {
 
   it('renders a paid plan and falls back to the entitlements plan name', () => {
     mockEntitlementsQuery.mockReturnValue(entitlements({ name: 'Business', cycleEndsAt: null }))
-    mockSubscriptionsQuery.mockReturnValue(subscriptions('active', null as unknown as string))
+    mockSubscriptionsQuery.mockReturnValue(subscriptions('active', null))
 
     const { result } = renderHook(() => useSpacePlan())
 
@@ -110,6 +110,16 @@ describe('useSpacePlan', () => {
       daysLeft: 14,
       hasPaymentMethod: false,
     })
+  })
+
+  it('names a live plan Safe Pro when neither source carries a name', () => {
+    mockEntitlementsQuery.mockReturnValue(entitlements(null))
+    mockSubscriptionsQuery.mockReturnValue(subscriptions('active', null))
+
+    const { result } = renderHook(() => useSpacePlan())
+
+    expect(result.current.plan?.name).toBe('Safe Pro')
+    expect(result.current.tierName).toBeUndefined()
   })
 
   it('flags a trial in its last week', () => {
@@ -177,5 +187,33 @@ describe('useSpacePlan', () => {
     mockSubscriptionsQuery.mockReturnValue({ currentData: undefined, isLoading: false, isUninitialized: false })
     mockEntitlementsQuery.mockReturnValue({ currentData: undefined, isLoading: false, isUninitialized: false })
     expect(renderHook(() => useSpacePlan()).result.current.isUninitialized).toBe(false)
+  })
+
+  it('reports an error when either source failed', () => {
+    mockEntitlementsQuery.mockReturnValue({ currentData: undefined, isLoading: false, isError: true })
+    expect(renderHook(() => useSpacePlan()).result.current.isError).toBe(true)
+
+    mockEntitlementsQuery.mockReturnValue({ currentData: undefined, isLoading: false, isError: false })
+    mockSubscriptionsQuery.mockReturnValue({ currentData: undefined, isLoading: false, isError: true })
+    expect(renderHook(() => useSpacePlan()).result.current.isError).toBe(true)
+
+    mockSubscriptionsQuery.mockReturnValue({ currentData: undefined, isLoading: false, isError: false })
+    expect(renderHook(() => useSpacePlan()).result.current.isError).toBe(false)
+  })
+
+  it('refetches both sources through a stable callback', () => {
+    const refetchEntitlements = jest.fn()
+    const refetchSubscriptions = jest.fn()
+    mockEntitlementsQuery.mockReturnValue({ currentData: undefined, isLoading: false, refetch: refetchEntitlements })
+    mockSubscriptionsQuery.mockReturnValue({ currentData: undefined, isLoading: false, refetch: refetchSubscriptions })
+
+    const { result, rerender } = renderHook(() => useSpacePlan())
+    const { refetch } = result.current
+    rerender()
+    expect(result.current.refetch).toBe(refetch)
+
+    refetch()
+    expect(refetchEntitlements).toHaveBeenCalledTimes(1)
+    expect(refetchSubscriptions).toHaveBeenCalledTimes(1)
   })
 })

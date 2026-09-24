@@ -27,6 +27,11 @@ describe('trialReminder', () => {
     expect(wasTrialReminderSeen('s1')).toBe(false)
   })
 
+  it('never reads an inherited object key as a dismissal', () => {
+    markTrialReminderSeen('s1')
+    expect(wasTrialReminderSeen('constructor')).toBe(false)
+  })
+
   it('forgets every dismissal when the user signs out', () => {
     const listenerMiddleware = createListenerMiddleware<RootState>()
     trialReminderListener(listenerMiddleware)

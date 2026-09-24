@@ -24,10 +24,10 @@ describe('useSafeProAccess', () => {
     jest.clearAllMocks()
     mockUseHasFeature.mockReturnValue(true)
     mockIsSignedIn.mockReturnValue(true)
-    mockUseSpaceSafesGetV1Query.mockReturnValue({
-      currentData: { safes: { '1': [SAFE.toLowerCase()] } },
+    mockUseSpaceSafesGetV1Query.mockImplementation((_, { skip }: { skip: boolean }) => ({
+      currentData: skip ? undefined : { safes: { '1': [SAFE.toLowerCase()] } },
       isLoading: false,
-    })
+    }))
     mockUseSpacePlan.mockReturnValue({ status: 'trialing', isLoading: false })
   })
 
@@ -62,7 +62,6 @@ describe('useSafeProAccess', () => {
     ['the user is signed out', () => mockIsSignedIn.mockReturnValue(false)],
   ])('withholds them when %s', (_, arrange) => {
     arrange()
-    if (!mockIsSignedIn()) mockUseSpaceSafesGetV1Query.mockReturnValue({ currentData: undefined, isLoading: false })
 
     expect(renderHook(() => useSafeProAccess()).result.current.hasProFeatures).toBe(false)
   })

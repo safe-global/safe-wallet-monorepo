@@ -26,7 +26,10 @@ describe('useSeatUpsell', () => {
     mockUseHasFeature.mockReturnValue(true)
     mockUseSpacePlan.mockReturnValue({ seats: { used: 2, quota: 2 }, tierName: 'Starter' })
     mockUseSpaceOffers.mockReturnValue({
-      paidPlans: [{ name: 'Business', offers: [offer('Business', 50), offer('Business', 20)] }],
+      paidPlans: [
+        { name: 'Enterprise', offers: [offer('Enterprise', 'unlimited')] },
+        { name: 'Business', offers: [offer('Business', 50), offer('Business', 20)] },
+      ],
     })
   })
 
@@ -64,5 +67,10 @@ describe('useSeatUpsell', () => {
     mockUseHasFeature.mockReturnValue(true)
     mockUseSpacePlan.mockReturnValue({ seats: { used: 3, quota: null }, tierName: 'Enterprise' })
     expect(renderHook(() => useSeatUpsell()).result.current).toMatchObject({ limit: null, upgradePlanName: undefined })
+  })
+
+  it('links to the Workspaces list when there is no Workspace', () => {
+    expect(renderHook(() => useSeatUpsell(null)).result.current.plansHref).toBe('/welcome/spaces')
+    expect(mockUseSpacePlan).toHaveBeenCalledWith(null)
   })
 })

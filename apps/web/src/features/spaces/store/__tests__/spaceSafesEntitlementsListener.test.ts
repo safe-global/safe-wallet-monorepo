@@ -37,4 +37,16 @@ describe('spaceSafesEntitlementsListener', () => {
 
     expect(dispatch).not.toHaveBeenCalled()
   })
+
+  it('registers nothing when the spaces endpoints are unavailable', () => {
+    const startListening = jest.fn()
+    jest.isolateModules(() => {
+      jest.doMock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({ cgwApi: {} }))
+      const { spaceSafesEntitlementsListener: isolated } = require('../spaceSafesEntitlementsListener')
+      isolated({ startListening })
+    })
+    jest.dontMock('@safe-global/store/gateway/AUTO_GENERATED/spaces')
+
+    expect(startListening).not.toHaveBeenCalled()
+  })
 })
