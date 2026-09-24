@@ -68,8 +68,9 @@ const SpendingLimitPolicyForm = ({
     onSpendersChange?.(spenderAddressesKey.split(',').filter(Boolean))
   }, [spenderAddressesKey, onSpendersChange])
 
-  // Ineligible rows cannot be picked, so only a prefilled Safe can be ineligible once the accounts resolve.
-  const isSafeIneligible = Boolean(findSafeAccount(accounts, watch('safe'))?.ineligibleReason)
+  // The selector shows a placeholder for a Safe the resolved list lacks (prefilled, or a wallet switch after picking).
+  const selectedSafe = findSafeAccount(accounts, watch('safe'))
+  const isSafeBlocked = !selectedSafe || Boolean(selectedSafe.ineligibleReason)
 
   return (
     <TxCard>
@@ -113,12 +114,7 @@ const SpendingLimitPolicyForm = ({
           </div>
 
           <TxCardActions>
-            <Button
-              type="submit"
-              size="submit"
-              disabled={!formState.isValid || isSafeIneligible}
-              data-testid="next-btn"
-            >
+            <Button type="submit" size="submit" disabled={!formState.isValid || isSafeBlocked} data-testid="next-btn">
               {NEXT_LABEL}
             </Button>
           </TxCardActions>

@@ -49,8 +49,9 @@ const ProposerRoleForm = ({
     if (getValues('proposer')) void trigger('proposer')
   }, [safeAccount, validateProposer, trigger, getValues])
 
-  const isSafeAccountIneligible = Boolean(findSafeAccount(safeAccounts.accounts, safeAccount)?.ineligibleReason)
-  const canSubmit = Boolean(safeAccount) && !isSafeAccountIneligible && formState.isValid
+  const selectedSafe = findSafeAccount(safeAccounts.accounts, safeAccount)
+  const isSafeBlocked = !selectedSafe || Boolean(selectedSafe.ineligibleReason)
+  const canSubmit = !isSafeBlocked && formState.isValid
 
   return (
     <FormProvider {...methods}>

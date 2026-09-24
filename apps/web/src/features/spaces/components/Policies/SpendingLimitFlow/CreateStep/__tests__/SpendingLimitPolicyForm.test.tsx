@@ -215,6 +215,18 @@ describe('SpendingLimitPolicyForm', () => {
     expect(screen.getByRole('button', { name: NEXT_LABEL })).toBeDisabled()
   })
 
+  it('keeps Next disabled when the prefilled Safe is missing from the resolved accounts', async () => {
+    const { user } = renderForm({
+      accounts: [treasury],
+      defaultValues: { ...createDefaultFormValues(), safe: notActivated.id },
+    })
+
+    await fillFirstSpender(user)
+
+    await waitFor(() => expect(screen.getAllByTestId('limit-amount-input')[0]).toHaveValue('1'))
+    expect(screen.getByRole('button', { name: NEXT_LABEL })).toBeDisabled()
+  })
+
   it('enables Next when the prefilled Safe is activated', async () => {
     const { user } = renderForm({
       accounts: [treasury, notActivated],
