@@ -1,7 +1,12 @@
 import type { ReactElement } from 'react'
 import { ShieldCheck } from 'lucide-react'
 import { DrawerList, DrawerSection, type DrawerListItem } from '@/components/common/Drawer'
-import { AccountIdentity, type AccountIdentityProps } from '../../../components/AccountIdentity'
+import { Skeleton } from '@/components/ui/skeleton'
+import {
+  AccountIdentity,
+  AccountIdentitySkeleton,
+  type AccountIdentityProps,
+} from '../../../components/AccountIdentity'
 
 export type PolicyOverviewProps = {
   appliesTo: AccountIdentityProps
@@ -39,3 +44,15 @@ const PolicyOverview = ({ appliesTo, initiatedBy, lastUpdated, enforcedBy }: Pol
 }
 
 export default PolicyOverview
+
+export const PolicyOverviewSkeleton = (): ReactElement => (
+  <DrawerSection title="Policy overview">
+    <DrawerList
+      items={[
+        { label: 'Applies to', content: <AccountIdentitySkeleton /> },
+        { label: 'Last updated', content: <Skeleton className="ml-auto h-4 w-36 bg-border" /> },
+        { label: 'Enforced by', content: <Skeleton className="ml-auto h-4 w-24 bg-border" /> },
+      ]}
+    />
+  </DrawerSection>
+)

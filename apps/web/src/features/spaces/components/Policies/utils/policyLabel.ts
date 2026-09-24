@@ -35,6 +35,9 @@ export const POLICY_TYPE_LABELS = {
   proposer: 'Proposer',
 } as const
 
+/** Shared by the table's summary line and the drawer's Limits section, which must not drift apart. */
+export const NO_LIMITS_LABEL = 'No limits set'
+
 export const formatTokenAmount = (amount: string, token: PolicyTokenInfo): string =>
   `${formatVisualAmount(amount, token.decimals)} ${token.symbol}`
 
@@ -62,7 +65,7 @@ export const getPolicySummary = (policy: Policy): string => {
   if (hasSpendingLimitData(policy)) {
     const allowances = getAllowances(policy)
 
-    if (allowances.length === 0) return 'No limits set'
+    if (allowances.length === 0) return NO_LIMITS_LABEL
     if (allowances.length === 1) return formatAllowance(allowances[0])
 
     const spenderCount = policy.data.spenders.length

@@ -1,1 +1,1 @@
-export { default as PolicyOverview, type PolicyOverviewProps } from './PolicyOverview'
+export { default as PolicyOverview, PolicyOverviewSkeleton, type PolicyOverviewProps } from './PolicyOverview'

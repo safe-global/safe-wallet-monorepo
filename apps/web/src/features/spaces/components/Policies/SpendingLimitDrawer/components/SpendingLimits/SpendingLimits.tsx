@@ -1,6 +1,9 @@
 import type { ReactElement } from 'react'
 import { DrawerSection } from '@/components/common/Drawer'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Typography } from '@/components/ui/typography'
 import type { PolicySpender } from '../../../types'
+import { NO_LIMITS_LABEL } from '../../../utils/policyLabel'
 import SpenderCard from './SpenderCard'
 
 export type SpendingLimitsProps = {
@@ -10,20 +13,37 @@ export type SpendingLimitsProps = {
   showUsage: boolean
 }
 
-const SpendingLimits = ({ spenders, names, showUsage }: SpendingLimitsProps): ReactElement => (
-  <DrawerSection title="Limits">
-    <div className="flex flex-col gap-3">
-      {spenders.map((spender, index) => (
-        <SpenderCard
-          key={spender.spender}
-          spender={spender}
-          label={`Spender ${index + 1}`}
-          name={names?.[spender.spender.toLowerCase()]}
-          showUsage={showUsage}
-        />
-      ))}
-    </div>
-  </DrawerSection>
-)
+const SpendingLimits = ({ spenders, names, showUsage }: SpendingLimitsProps): ReactElement => {
+  // A spender with no allowances has nothing to render, and the table's summary counts allowances too.
+  const withAllowances = spenders.filter((spender) => spender.allowances.length > 0)
+
+  return (
+    <DrawerSection title="Limits">
+      {withAllowances.length === 0 ? (
+        <Typography variant="paragraph-small" color="muted">
+          {NO_LIMITS_LABEL}
+        </Typography>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {withAllowances.map((spender, index) => (
+            <SpenderCard
+              key={spender.spender}
+              spender={spender}
+              label={`Spender ${index + 1}`}
+              name={names?.[spender.spender.toLowerCase()]}
+              showUsage={showUsage}
+            />
+          ))}
+        </div>
+      )}
+    </DrawerSection>
+  )
+}
 
 export default SpendingLimits
+
+export const SpendingLimitsSkeleton = (): ReactElement => (
+  <DrawerSection title="Limits">
+    <Skeleton className="h-28 w-full rounded-lg bg-border" data-testid="spending-limits-skeleton" />
+  </DrawerSection>
+)

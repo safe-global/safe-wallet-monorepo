@@ -91,6 +91,17 @@ describe('SpendingLimitDrawer', () => {
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
   })
 
+  it('stands in with skeletons while the policy is still loading', () => {
+    render(<SpendingLimitDrawer open onClose={jest.fn()} isLoading />)
+
+    expect(screen.getByText('Spending limit')).toBeInTheDocument()
+    expect(screen.getByTestId('spending-limit-status-skeleton')).toBeInTheDocument()
+    expect(screen.getByTestId('spending-limits-skeleton')).toBeInTheDocument()
+    expect(screen.getByTestId('policy-drawer-actions-skeleton')).toBeInTheDocument()
+    expect(screen.queryByText('Active')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument()
+  })
+
   describe('a signer who has already signed', () => {
     const originalClipboard = { ...global.navigator.clipboard }
 

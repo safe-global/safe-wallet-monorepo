@@ -3,6 +3,7 @@ import { mockMultiSpenderPolicy, mockSpendingLimitPolicy } from '../../../../moc
 import SpendingLimits from '../SpendingLimits'
 
 const { spenders } = mockSpendingLimitPolicy().data
+const [firstSpender] = spenders
 
 describe('SpendingLimits', () => {
   it('shows each token with its amount and period', () => {
@@ -43,6 +44,29 @@ describe('SpendingLimits', () => {
     expect(within(cards[0]).queryByText('UNKNOWN')).not.toBeInTheDocument()
     expect(within(cards[2]).getByText('Spender 3')).toBeInTheDocument()
     expect(within(cards[2]).getByText('UNKNOWN')).toBeInTheDocument()
+  })
+
+  it('says no limits are set when the policy has no spenders', () => {
+    render(<SpendingLimits spenders={[]} showUsage />)
+
+    expect(screen.getByText('No limits set')).toBeInTheDocument()
+    expect(screen.queryByTestId('spending-limit-spender')).not.toBeInTheDocument()
+  })
+
+  it('says no limits are set when every spender has lost its allowances', () => {
+    render(<SpendingLimits spenders={[{ ...firstSpender, allowances: [] }]} showUsage />)
+
+    expect(screen.getByText('No limits set')).toBeInTheDocument()
+    expect(screen.queryByTestId('spending-limit-spender')).not.toBeInTheDocument()
+  })
+
+  it('skips a spender with no allowances and numbers the rest consecutively', () => {
+    const [alice, bob] = mockMultiSpenderPolicy().data.spenders
+    render(<SpendingLimits spenders={[{ ...alice, allowances: [] }, bob]} showUsage />)
+
+    const cards = screen.getAllByTestId('spending-limit-spender')
+    expect(cards).toHaveLength(1)
+    expect(within(cards[0]).getByText('Spender 1')).toBeInTheDocument()
   })
 
   it('falls back to the symbol for a token with no logo', () => {
