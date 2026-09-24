@@ -6,13 +6,22 @@ import css from '../styles.module.css'
 /** @deprecated MUI `sx` is ignored after the shadcn migration; use `className` instead. */
 type DeprecatedSx = object
 
-const TxCard = ({ children, sx = {} }: { children: ReactNode; sx?: DeprecatedSx }) => {
+type TxCardProps = {
+  children: ReactNode
+  contentPadding?: 'default' | 'compactBottom'
+  sx?: DeprecatedSx
+}
+
+const TxCard = ({ children, contentPadding = 'default', sx = {} }: TxCardProps) => {
   void sx
   return (
     /* radius="xl" (24px) matches TxLayoutBase's header above and the rest of the app's cards —
        Card's own `lg` default left the bottom corners flatter than the top. */
     <Card size="none" radius="xl" className="txCardRoot my-4">
-      <CardContent data-testid="card-content" className={css.cardContent}>
+      <CardContent
+        data-testid="card-content"
+        className={cn(css.cardContent, contentPadding === 'compactBottom' && css.cardContentCompactBottom)}
+      >
         {children}
       </CardContent>
     </Card>
