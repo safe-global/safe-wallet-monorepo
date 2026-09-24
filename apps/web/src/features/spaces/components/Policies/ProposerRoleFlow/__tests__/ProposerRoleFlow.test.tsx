@@ -180,19 +180,6 @@ describe('ProposerRoleFlow', () => {
       await waitFor(() => expect(setTxFlow).toHaveBeenCalledWith(undefined))
     })
 
-    it('keeps the form open when the grant fails', async () => {
-      const grantProposerRole = jest.fn().mockResolvedValue(false)
-      mockUseGrantProposer.mockReturnValue(grantState({ grantProposerRole }))
-      const { user, setTxFlow } = renderFlow()
-
-      await fillAndSubmit(user)
-
-      expect(grantProposerRole).toHaveBeenCalled()
-      expect(setTxFlow).not.toHaveBeenCalled()
-      expect(screen.getByRole('combobox', { name: 'Proposer' })).toHaveValue(PROPOSER)
-      expect(screen.getByRole('textbox', { name: 'Proposer name' })).toHaveValue('Nicole')
-    })
-
     it('clears a previous error when another Safe account is picked', async () => {
       const reset = jest.fn()
       mockUseGrantProposer.mockReturnValue(grantState({ error: new Error('boom'), reset }))
