@@ -40,6 +40,7 @@ packages/utils/src/types/contracts/**/*
 
 # Store package (auto-generated from CGW API)
 packages/store/scripts/api-schema/schema.json
+packages/store/src/gateway/AUTO_GENERATED/
 
 # Expo plugins
 expo-plugins/notification-service-ios/dist
