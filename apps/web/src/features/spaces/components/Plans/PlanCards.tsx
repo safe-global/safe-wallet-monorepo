@@ -98,7 +98,7 @@ const PlanCta = ({
       )
     case 'billing':
       return (
-        <Button size="lg" weight="semibold" className="w-full" disabled={isBusy} onClick={onManage}>
+        <Button size="lg" weight="semibold" accentIcon className="w-full" disabled={isBusy} onClick={onManage}>
           {cta.label}
           <ArrowRight data-icon="inline-end" />
         </Button>
@@ -111,7 +111,14 @@ const PlanCta = ({
       )
     case 'subscribe':
       return (
-        <Button size="lg" weight="semibold" className="w-full" disabled={isBusy} onClick={() => onSubscribe?.(pick)}>
+        <Button
+          size="lg"
+          weight="semibold"
+          accentIcon
+          className="w-full"
+          disabled={isBusy}
+          onClick={() => onSubscribe?.(pick)}
+        >
           {cta.label}
           <ArrowRight data-icon="inline-end" />
         </Button>

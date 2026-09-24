@@ -58,6 +58,7 @@ describe('useSpacePlan', () => {
       status: 'trialing',
       periodEndsAt: '2026-12-06T00:00:00Z',
       daysLeft: 14,
+      hasPaymentMethod: false,
     })
     expect(result.current).toMatchObject({
       tierName: 'Business',
@@ -75,7 +76,13 @@ describe('useSpacePlan', () => {
 
     const { result } = renderHook(() => useSpacePlan())
 
-    expect(result.current.plan).toEqual({ name: 'Business', status: 'active', periodEndsAt: null, daysLeft: null })
+    expect(result.current.plan).toEqual({
+      name: 'Business',
+      status: 'active',
+      periodEndsAt: null,
+      daysLeft: null,
+      hasPaymentMethod: false,
+    })
     expect(result.current.isPaidActive).toBe(true)
   })
 
@@ -101,6 +108,7 @@ describe('useSpacePlan', () => {
       status: 'trialing',
       periodEndsAt: '2026-12-06T00:00:00.000Z',
       daysLeft: 14,
+      hasPaymentMethod: false,
     })
   })
 

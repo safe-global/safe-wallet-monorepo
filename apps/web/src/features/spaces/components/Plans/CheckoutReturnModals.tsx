@@ -79,6 +79,7 @@ export default function CheckoutReturnModals({
       onOpenChange={checkout.dismiss}
       trialEndsAt={periodEndsAt}
       ctaLabel={trialCtaLabel}
+      hasPaymentMethod={checkout.subscription.hasPaymentMethod === true}
     />
   ) : (
     <SafeProSubscriptionActivatedModal

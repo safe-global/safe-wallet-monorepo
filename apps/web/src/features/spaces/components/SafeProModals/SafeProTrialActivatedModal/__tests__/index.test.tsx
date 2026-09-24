@@ -15,6 +15,13 @@ describe('SafeProTrialActivatedModal', () => {
     expect(onOpenChange).toHaveBeenCalledWith(false)
   })
 
+  it('says the subscription starts on its own when checkout already took a payment method', () => {
+    render(<SafeProTrialActivatedModal open onOpenChange={jest.fn()} trialEndsAt={0} hasPaymentMethod />)
+
+    expect(screen.getByText(/starts on its own when your free access ends/)).toBeInTheDocument()
+    expect(screen.queryByText(/add a payment method/)).not.toBeInTheDocument()
+  })
+
   it('links the CTA to the given href', () => {
     render(
       <SafeProTrialActivatedModal

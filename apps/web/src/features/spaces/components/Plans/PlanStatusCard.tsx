@@ -91,7 +91,7 @@ const statusText = (plan: PlanSummary | null, endDate: string | null, isEndingSo
   }
   if (plan.status === 'active') return 'Safe accounts above the limit remain available outside the Workspace.'
   const until = endDate ?? 'the end of the period'
-  return isEndingSoon
+  return isEndingSoon && !plan.hasPaymentMethod
     ? `Your free access is active until ${until}. Add a payment method before then or choose another plan to keep your Workspace.`
     : `Active until ${until}.`
 }
@@ -135,7 +135,9 @@ export default function PlanStatusCard({
               </div>
               <Typography className="flex items-center gap-1">
                 {statusText(plan, endDate, isEndingSoon)}
-                {isTrial && <InfoTip text={TRIAL_DISCLAIMER} />}
+                {isTrial && !plan?.hasPaymentMethod && (
+                  <InfoTip text={TRIAL_DISCLAIMER} data-testid="trial-disclaimer" />
+                )}
               </Typography>
             </div>
             {canManage && (

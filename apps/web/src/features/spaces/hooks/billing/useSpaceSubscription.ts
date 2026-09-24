@@ -23,6 +23,8 @@ export const useSpaceSubscription = (spaceId?: string | null) => {
     subscription,
     latestSubscription: selectLatestSubscription(data),
     status: getPlanStatus(subscription),
+    /** Stripe holds a default payment method for the subscription or its customer; absent from older CGWs reads as false. */
+    hasPaymentMethod: subscription?.hasPaymentMethod === true,
     isLoading: isLoading || (isFetching && data === undefined) || isRetrying,
     isUninitialized,
     isError: isError && !isRetrying,

@@ -15,6 +15,7 @@ export const useSpacePlan = (spaceId?: string | null) => {
     subscription,
     latestSubscription,
     status,
+    hasPaymentMethod,
     isLoading: isSubscriptionLoading,
     isUninitialized: isSubscriptionUninitialized,
     isError: isSubscriptionError,
@@ -26,7 +27,9 @@ export const useSpacePlan = (spaceId?: string | null) => {
   const periodEndsAt = entitlements.plan?.cycleEndsAt ?? getSubscriptionPeriodEnd(subscription)
   const daysLeft = getDaysLeft(periodEndsAt)
   const plan: PlanSummary | null =
-    status === 'trialing' || status === 'active' ? { name: name ?? 'Safe Pro', status, periodEndsAt, daysLeft } : null
+    status === 'trialing' || status === 'active'
+      ? { name: name ?? 'Safe Pro', status, periodEndsAt, daysLeft, hasPaymentMethod }
+      : null
   const isTrialing = status === 'trialing'
 
   return {
@@ -38,6 +41,7 @@ export const useSpacePlan = (spaceId?: string | null) => {
     latestSubscription,
     status,
     isTrialing,
+    hasPaymentMethod,
     isTrialEndingSoon: isTrialing && daysLeft !== null && daysLeft <= TRIAL_ENDING_SOON_DAYS,
     isPaidActive: status === 'active',
     isLoading: entitlements.isLoading || isSubscriptionLoading,

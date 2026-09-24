@@ -13,6 +13,7 @@ const SafeProTrialActivatedModal = ({
   trialEndsAt,
   ctaHref,
   ctaLabel = 'Get started',
+  hasPaymentMethod = false,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -20,6 +21,8 @@ const SafeProTrialActivatedModal = ({
   /** Where the CTA leads; without it the CTA just closes. */
   ctaHref?: LinkProps['href']
   ctaLabel?: string
+  /** Checkout already took a payment method, so the subscription starts on its own. */
+  hasPaymentMethod?: boolean
 }) => (
   <SafeProModalFrame open={open} onOpenChange={onOpenChange}>
     <div className="flex flex-col gap-3">
@@ -27,8 +30,9 @@ const SafeProTrialActivatedModal = ({
         Your free access is active until {formatDate(trialEndsAt)}
       </Typography>
       <Typography variant="paragraph-small" color="muted">
-        All Pro features are unlocked for your Workspace. We&apos;ll remind you to add a payment method before your free
-        access ends — nothing is charged until you do.
+        {hasPaymentMethod
+          ? 'All Pro features are unlocked for your Workspace. Your subscription starts on its own when your free access ends — nothing is charged before.'
+          : 'All Pro features are unlocked for your Workspace. We’ll remind you to add a payment method before your free access ends — nothing is charged until you do.'}
       </Typography>
     </div>
 

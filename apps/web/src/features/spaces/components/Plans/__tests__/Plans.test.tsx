@@ -38,12 +38,13 @@ const subscription = (name: string, currentPrice: number) =>
     },
   }) as unknown as Subscription
 
-const current = (name: string, price: number, isTrialing: boolean): CurrentPlan => ({
+const current = (name: string, price: number, isTrialing: boolean, hasPaymentMethod = false): CurrentPlan => ({
   name,
   price,
   currency: 'eur',
   billingCycle: 'month',
   isTrialing,
+  hasPaymentMethod,
   periodEndsAt: '2026-12-06T00:00:00Z',
 })
 const trialing = (daysLeft: number): PlanSummary => ({
@@ -111,6 +112,7 @@ describe('Plans', () => {
 
     expect(screen.getAllByText('Free access · 14 days left')).toHaveLength(2)
     expect(screen.getByText('Active until Dec 6, 2026.')).toBeInTheDocument()
+    expect(screen.getByTestId('trial-disclaimer')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Manage plan' })).not.toBeInTheDocument()
     expect(screen.getByTestId('current-plan-card')).toHaveTextContent('€499')
     expect(screen.getByText('€149')).toBeInTheDocument()
@@ -125,6 +127,28 @@ describe('Plans', () => {
       option: expect.objectContaining({ paymentLinkId: 'pl_starter_m', priceId: 'price_pl_starter_m' }),
     })
     expect(screen.getByRole('link', { name: 'Talk to sales' })).toHaveAttribute('href', SUPPORT_CHAT_URL)
+  })
+
+  it('swaps the payment nudge and its button for Manage plan once a payment method is on file', () => {
+    render(
+      <Plans
+        plan={{ ...trialing(7), hasPaymentMethod: true }}
+        {...meters}
+        tiers={buildPlanTiers([STARTER], { subscription: subscription('Business', 499), seatsQuota: 20 })}
+        onManage={jest.fn()}
+        onSubscribe={jest.fn()}
+        currentPlan={current('Business', 499, true, true)}
+      />,
+    )
+
+    expect(screen.getByText('Active until Dec 6, 2026.')).toBeInTheDocument()
+    expect(screen.queryByText(/Add a payment method before then/)).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Add payment method' })).not.toBeInTheDocument()
+    expect(screen.getByTestId('current-plan-card')).toContainElement(
+      screen.getByRole('button', { name: 'Manage plan' }),
+    )
+    expect(screen.queryByTestId('trial-disclaimer')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Switch to Starter' })).toBeInTheDocument()
   })
 
   it('turns the trial into a warning in its last week', () => {

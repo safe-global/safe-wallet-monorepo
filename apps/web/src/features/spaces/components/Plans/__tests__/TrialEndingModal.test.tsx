@@ -139,6 +139,13 @@ describe('TrialEndingModal', () => {
     }
   })
 
+  it('stays quiet when a payment method is already on file', () => {
+    mockUseSpacePlan.mockReturnValue({ ...trial(7), hasPaymentMethod: true })
+    render(<TrialEndingModal spaceId={SPACE_ID} />)
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
   it('stays quiet while the trial has more than a week left', () => {
     mockUseSpacePlan.mockReturnValue(trial(14))
 

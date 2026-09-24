@@ -41,6 +41,8 @@ export type CurrentPlan = {
   currency: string
   billingCycle: 'month' | 'year' | null
   isTrialing: boolean
+  /** During the trial: a payment method is already on file, so nothing needs adding. */
+  hasPaymentMethod?: boolean
   periodEndsAt: string | null
   daysLeft?: number | null
   /** "20 Safe accounts", when the seats quota is known. */
@@ -62,4 +64,5 @@ export type PlanSummary = {
   status: 'trialing' | 'active'
   periodEndsAt: string | null
   daysLeft: number | null
+  hasPaymentMethod?: boolean
 }

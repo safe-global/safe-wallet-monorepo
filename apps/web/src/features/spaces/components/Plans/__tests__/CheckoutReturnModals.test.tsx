@@ -16,14 +16,21 @@ jest.mock('../../SafeProModals', () => ({
     onOpenChange,
     trialEndsAt,
     ctaLabel,
+    hasPaymentMethod,
   }: {
     open: boolean
     onOpenChange: (o: boolean) => void
     trialEndsAt: number
     ctaLabel?: string
+    hasPaymentMethod?: boolean
   }) =>
     open ? (
-      <button data-testid="trial-activated-modal" data-ends={trialEndsAt} onClick={() => onOpenChange(false)}>
+      <button
+        data-testid="trial-activated-modal"
+        data-ends={trialEndsAt}
+        data-has-payment-method={hasPaymentMethod}
+        onClick={() => onOpenChange(false)}
+      >
         {ctaLabel ?? 'Go to Workspace'}
       </button>
     ) : null,
@@ -82,9 +89,22 @@ describe('CheckoutReturnModals', () => {
     expect(refetch).toHaveBeenCalled()
     expect(screen.getByTestId('trial-activated-modal')).toHaveAttribute('data-ends', String(Date.UTC(2026, 10, 14)))
     expect(screen.getByRole('button', { name: 'Continue' })).toBeInTheDocument()
+    expect(screen.getByTestId('trial-activated-modal')).toHaveAttribute('data-has-payment-method', 'false')
 
     fireEvent.click(screen.getByTestId('trial-activated-modal'))
     expect(dismiss).toHaveBeenCalled()
+  })
+
+  it('tells the trial confirmation when checkout already stored a payment method', () => {
+    mockUseCheckoutReturn.mockReturnValue({
+      status: 'complete',
+      subscription: { ...subscription('trialing'), hasPaymentMethod: true },
+      dismiss,
+      retry,
+    })
+    render(<CheckoutReturnModals spaceId={SPACE_ID} />)
+
+    expect(screen.getByTestId('trial-activated-modal')).toHaveAttribute('data-has-payment-method', 'true')
   })
 
   it('opens the subscription confirmation for a paid subscription', () => {
