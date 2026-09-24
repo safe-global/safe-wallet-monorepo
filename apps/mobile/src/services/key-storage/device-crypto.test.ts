@@ -1,7 +1,8 @@
 const mockNativeDeleteKey = jest.fn<Promise<boolean>, [string]>()
+const mockNativeAuthenticate = jest.fn()
 
 jest.mock('react-native', () => ({
-  NativeModules: { DeviceCrypto: { deleteKey: mockNativeDeleteKey } },
+  NativeModules: { DeviceCrypto: { deleteKey: mockNativeDeleteKey, authenticateWithBiometry: mockNativeAuthenticate } },
 }))
 
 const DeviceCrypto =
@@ -10,6 +11,28 @@ const DeviceCrypto =
 describe('device crypto native deletion bridge', () => {
   beforeEach(() => {
     mockNativeDeleteKey.mockReset()
+    mockNativeAuthenticate.mockReset()
+  })
+
+  it('forwards biometric prompts to native authentication', async () => {
+    mockNativeAuthenticate.mockResolvedValue(true)
+    const options = {
+      biometryTitle: '',
+      biometrySubTitle: '',
+      biometryDescription: 'Remove signer',
+    }
+
+    await expect(DeviceCrypto.authenticateWithBiometry(options)).resolves.toBe(true)
+    expect(mockNativeAuthenticate).toHaveBeenCalledWith(options)
+  })
+
+  it('preserves structured native authentication errors', async () => {
+    const error = Object.assign(new Error('localized'), { code: 'E_AUTHENTICATION_-8' })
+    mockNativeAuthenticate.mockRejectedValue(error)
+
+    await expect(
+      DeviceCrypto.authenticateWithBiometry({ biometryTitle: '', biometrySubTitle: '', biometryDescription: '' }),
+    ).rejects.toBe(error)
   })
 
   it('waits for native deletion to finish', async () => {

@@ -4,7 +4,13 @@ import { removeSigner } from '@/src/store/signersSlice'
 import { setActiveSafe } from '@/src/store/activeSafeSlice'
 import { removeSafe, SafesSliceItem } from '@/src/store/safesSlice'
 import { setEditMode } from '@/src/store/myAccountsSlice'
-import { BiometryInvalidationError, MissingWrappingKeyError, keyStorageService } from '@/src/services/key-storage'
+import {
+  BiometryInvalidationError,
+  MissingWrappingKeyError,
+  MissingStoredKeyError,
+  KeyStorageError,
+  keyStorageService,
+} from '@/src/services/key-storage'
 import Logger from '@/src/utils/logger'
 import { CommonActions } from '@react-navigation/native'
 import { Alert } from 'react-native'
@@ -123,13 +129,17 @@ export const cleanupSinglePrivateKey = async (
 ): Promise<StandardErrorResult<{ success: true; delegateCleanupSkipped?: boolean }>> => {
   try {
     let privateKey: string | undefined
-    let invalidated = false
+    let unavailable = false
     try {
-      privateKey = await keyStorageService.getPrivateKey(ownerAddress)
+      privateKey = await keyStorageService.getPrivateKey(ownerAddress, { throwIfMissing: true })
     } catch (err) {
-      if (err instanceof BiometryInvalidationError || err instanceof MissingWrappingKeyError) {
+      if (
+        err instanceof BiometryInvalidationError ||
+        err instanceof MissingWrappingKeyError ||
+        err instanceof MissingStoredKeyError
+      ) {
         Logger.warn('Skipping delegate cleanup: signer encryption key unavailable', { ownerAddress })
-        invalidated = true
+        unavailable = true
       } else {
         throw err
       }
@@ -137,7 +147,7 @@ export const cleanupSinglePrivateKey = async (
 
     if (!privateKey) {
       // An unknown read failure must never authorize deleting a signer.
-      if (!invalidated) {
+      if (!unavailable) {
         return createErrorResult(ErrorType.STORAGE_ERROR, 'Private key not found for the specified address', null, {
           ownerAddress,
         })
@@ -159,7 +169,7 @@ export const cleanupSinglePrivateKey = async (
       )
     }
 
-    // The private-key read already authenticated the user before delegate cleanup.
+    // Reuse the key read's authentication policy; do not prompt again after cleanup.
     await keyStorageService.removePrivateKey(ownerAddress, { requireAuthentication: false })
 
     // Remove from Redux store
@@ -167,6 +177,9 @@ export const cleanupSinglePrivateKey = async (
 
     return createSuccessResult({ success: true as const })
   } catch (error) {
+    if (error instanceof KeyStorageError) {
+      return createErrorResult(ErrorType.STORAGE_ERROR, error.message, error, { ownerAddress })
+    }
     return createErrorResult(ErrorType.SYSTEM_ERROR, 'An unexpected error occurred during private key cleanup', error, {
       ownerAddress,
     })

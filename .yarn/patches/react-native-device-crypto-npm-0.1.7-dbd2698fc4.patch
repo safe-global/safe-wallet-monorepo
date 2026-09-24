@@ -124,7 +124,7 @@ index 03fd79e8a389f33a2841ecf0e177ffc9ea01b78c..d903b5dc4b0110dab9a8c1a648d34920
              break;
          }
 diff --git a/ios/DeviceCrypto.m b/ios/DeviceCrypto.m
-index 1c05886476b28afcb44eb8fc36f5141593d41b0e..44f7950d2f058f3093d1294d85074d9b9f4324a4 100644
+index 1c05886476b28afcb44eb8fc36f5141593d41b0e..1c54b14428d738aa0d2dc3f63e3fb403be45be4c 100644
 --- a/ios/DeviceCrypto.m
 +++ b/ios/DeviceCrypto.m
 @@ -1,6 +1,7 @@
@@ -404,6 +404,15 @@ index 1c05886476b28afcb44eb8fc36f5141593d41b0e..44f7950d2f058f3093d1294d85074d9b
  }
  
  RCT_EXPORT_METHOD(isKeyExists:(nonnull NSData *)alias withKeyType:(nonnull NSNumber *) keyType resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+@@ -490,7 +489,7 @@ - (NSString*) getOrCreateKey:(nonnull NSData*) alias withOptions:(nonnull NSDict
+       } else if (aerr.code == LAErrorUserCancel) {
+         resolve(@(NO));
+       } else {
+-        reject(@"Biometry error", aerr.localizedDescription, nil);
++        reject([NSString stringWithFormat:@"E_AUTHENTICATION_%ld", (long)aerr.code], aerr.localizedDescription, aerr);
+       }
+     }];
+   });
 diff --git a/lib/commonjs/index.js b/lib/commonjs/index.js
 index d02926abfdf1d0cbeea5ab109c3239d686eb5d69..a3ab9892e68875dd2930a73d100f4c9021cc4dbc 100644
 --- a/lib/commonjs/index.js

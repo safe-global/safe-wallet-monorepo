@@ -15,7 +15,13 @@ import { createTestStore, waitFor } from '@/src/tests/test-utils'
 import { ErrorType } from '@/src/utils/errors'
 import { Address } from '@/src/types/address'
 import { AppDispatch } from '@/src/store'
-import { BiometryInvalidationError, MissingWrappingKeyError, keyStorageService } from '@/src/services/key-storage'
+import {
+  BiometryInvalidationError,
+  MissingWrappingKeyError,
+  MissingStoredKeyError,
+  KeyStorageError,
+  keyStorageService,
+} from '@/src/services/key-storage'
 import { removeSigner } from '@/src/store/signersSlice'
 import Logger from '@/src/utils/logger'
 
@@ -30,6 +36,8 @@ jest.mock('@/src/services/key-storage', () => {
     walletService: { createMnemonicAccount: jest.fn() },
     BiometryInvalidationError: actual.BiometryInvalidationError,
     MissingWrappingKeyError: actual.MissingWrappingKeyError,
+    MissingStoredKeyError: actual.MissingStoredKeyError,
+    KeyStorageError: actual.KeyStorageError,
   }
 })
 
@@ -366,6 +374,36 @@ describe('editAccountHelpers', () => {
       expect(result.success).toBe(false)
       expect(dispatch).not.toHaveBeenCalled()
       expect(removeDelegates).not.toHaveBeenCalled()
+    })
+
+    it('removes a signer with confirmed missing storage after independent authentication', async () => {
+      const store = createTestStore({ signers: { [mockAddress1]: mockSigners[mockAddress1] } })
+      const removeDelegates = jest.fn()
+      jest.mocked(keyStorageService.getPrivateKey).mockRejectedValue(new MissingStoredKeyError())
+      jest.mocked(keyStorageService.removePrivateKey).mockResolvedValue(undefined)
+
+      const result = await cleanupSinglePrivateKey(mockAddress1, removeDelegates, store.dispatch)
+
+      expect(result.data?.delegateCleanupSkipped).toBe(true)
+      expect(keyStorageService.getPrivateKey).toHaveBeenCalledWith(mockAddress1, { throwIfMissing: true })
+      expect(keyStorageService.removePrivateKey).toHaveBeenCalledWith(mockAddress1)
+      expect(removeDelegates).not.toHaveBeenCalled()
+      expect(store.getState().signers[mockAddress1]).toBeUndefined()
+    })
+
+    it('shows a safe authentication error and retains a signer with missing storage on cancellation', async () => {
+      const store = createTestStore({ signers: { [mockAddress1]: mockSigners[mockAddress1] } })
+      jest.mocked(keyStorageService.getPrivateKey).mockRejectedValue(new MissingStoredKeyError())
+      const error = new KeyStorageError(
+        Object.assign(new Error('localized'), { code: 'E_AUTHENTICATION_-2' }),
+        'remove',
+      )
+      jest.mocked(keyStorageService.removePrivateKey).mockRejectedValue(error)
+
+      const result = await cleanupSinglePrivateKey(mockAddress1, jest.fn(), store.dispatch)
+
+      expect(result.error?.message).toBe(error.message)
+      expect(store.getState().signers[mockAddress1]).toBeDefined()
     })
 
     it('should handle keychain errors gracefully', async () => {

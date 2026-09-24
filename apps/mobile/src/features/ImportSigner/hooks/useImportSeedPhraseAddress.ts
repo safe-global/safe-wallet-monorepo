@@ -5,7 +5,7 @@ import { useAddressOwnershipValidation } from '@/src/hooks/useAddressOwnershipVa
 import { storePrivateKey } from '@/src/hooks/useSign/useSign'
 import useDelegate from '@/src/hooks/useDelegate'
 import Logger from '@/src/utils/logger'
-import { KeyStorageError } from '@/src/services/key-storage/errors'
+import { KeyStorageError } from '@/src/services/key-storage'
 import { useSignerCollisionGuard } from './useSignerCollisionGuard'
 
 interface ImportError {

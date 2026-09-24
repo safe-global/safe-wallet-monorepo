@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { KeyStorageService } from './key-storage.service'
-import { BiometryInvalidationError, KeyStorageError, MissingWrappingKeyError } from './errors'
+import { BiometryInvalidationError, KeyStorageError, MissingWrappingKeyError, MissingStoredKeyError } from './errors'
 import DeviceCrypto from 'react-native-device-crypto'
 import * as Keychain from 'react-native-keychain'
 import DeviceInfo from 'react-native-device-info'
@@ -163,6 +163,22 @@ describe('KeyStorageService', () => {
       expect(result).toBeUndefined()
     })
 
+    it('distinguishes a missing entry when cleanup requests it', async () => {
+      mockKeychain.getGenericPassword.mockResolvedValue(false)
+
+      await expect(service.getPrivateKey(userId, { throwIfMissing: true })).rejects.toBeInstanceOf(
+        MissingStoredKeyError,
+      )
+      expect(mockDeviceCrypto.decrypt).not.toHaveBeenCalled()
+    })
+
+    it('does not classify a cancelled Keychain read as confirmed absence', async () => {
+      mockKeychain.getGenericPassword.mockRejectedValue(new Error('Status: -128'))
+
+      await expect(service.getPrivateKey(userId, { throwIfMissing: true })).resolves.toBeUndefined()
+      expect(mockDeviceCrypto.deleteKey).not.toHaveBeenCalled()
+    })
+
     it('returns undefined on decryption error', async () => {
       const encryptedData = JSON.stringify({ encryptedPassword: 'encrypted', iv: 'iv-value' })
       mockKeychain.getGenericPassword.mockResolvedValue({
@@ -216,6 +232,29 @@ describe('KeyStorageService', () => {
       })
     })
 
+    it.each(['ios', 'android'])('uses biometric authentication for removal on %s', async (platform) => {
+      ;(Platform.OS as string) = platform
+      await service.removePrivateKey(userId)
+
+      expect(mockDeviceCrypto.authenticateWithBiometry).toHaveBeenCalledWith({
+        biometryTitle: 'Authenticate',
+        biometrySubTitle: 'Removing signer',
+        biometryDescription: 'Authenticate to remove this signer from your device',
+      })
+    })
+
+    it('preserves structured removal authentication errors without deleting anything', async () => {
+      const cause = Object.assign(new Error('Localized native description'), { code: 'E_AUTHENTICATION_-7' })
+      mockDeviceCrypto.authenticateWithBiometry.mockRejectedValue(cause)
+
+      await expect(service.removePrivateKey(userId)).rejects.toMatchObject({
+        message: 'Enable biometrics and allow this app to use them, then try again.',
+        cause,
+      })
+      expect(mockDeviceCrypto.deleteKey).not.toHaveBeenCalled()
+      expect(mockKeychain.resetGenericPassword).not.toHaveBeenCalled()
+    })
+
     it.each(['cancelled', 'rejected'])('does not delete when authentication is %s', async (failure) => {
       if (failure === 'cancelled') {
         mockDeviceCrypto.authenticateWithBiometry.mockResolvedValue(false)
@@ -223,7 +262,9 @@ describe('KeyStorageService', () => {
         mockDeviceCrypto.authenticateWithBiometry.mockRejectedValue(new Error('Locked out'))
       }
 
-      await expect(service.removePrivateKey(userId)).rejects.toThrow('Failed to remove private key')
+      await expect(service.removePrivateKey(userId)).rejects.toThrow(
+        failure === 'cancelled' ? 'Authentication was cancelled' : 'Failed to remove private key',
+      )
 
       expect(mockDeviceCrypto.deleteKey).not.toHaveBeenCalled()
       expect(mockKeychain.resetGenericPassword).not.toHaveBeenCalled()
@@ -347,13 +388,33 @@ describe('KeyStorageService', () => {
 
       await service.storePrivateKey(userId, privateKey)
 
-      expect(Logger.info).toHaveBeenCalledWith('Recovering invalidated signer encryption key', {
-        operation: 'verify',
-        code: 'E1760 - Decryption error.',
-        platform: 'ios',
-      })
+      expect(Logger.info).toHaveBeenCalledWith(
+        'Recovering invalidated signer encryption key',
+        expect.objectContaining({
+          operation: 'verify',
+          code: 'E1760 - Decryption error.',
+          aksCode: '-536362999',
+          platform: 'ios',
+        }),
+      )
       expect(Logger.error).not.toHaveBeenCalled()
       expect(Logger.warn).not.toHaveBeenCalled()
+    })
+
+    it('logs the failed phase and native status without arbitrary error messages', async () => {
+      mockDeviceCrypto.decrypt.mockRejectedValue(new Error(`Status: -25293 ${privateKey}`))
+
+      await expect(service.storePrivateKey(userId, privateKey)).rejects.toBeInstanceOf(KeyStorageError)
+
+      expect(Logger.error).toHaveBeenCalledWith(
+        'Error storing private key',
+        expect.objectContaining({
+          operation: 'verify',
+          osStatus: '-25293',
+          domain: 'NSOSStatusErrorDomain',
+        }),
+      )
+      expect(JSON.stringify(jest.mocked(Logger.error).mock.calls)).not.toContain(privateKey)
     })
 
     it('recovers from invalidation during key lookup and retrieves the re-imported key', async () => {

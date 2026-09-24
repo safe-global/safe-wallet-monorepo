@@ -89,6 +89,38 @@ describe('key-storage/errors', () => {
 
   describe('KeyStorageError', () => {
     it.each([
+      ['-1', 'Authentication failed.'],
+      ['-2', 'Authentication was cancelled.'],
+      ['-4', 'Authentication was interrupted.'],
+      ['-5', 'Set up a device passcode'],
+      ['-7', 'Enable biometrics'],
+      ['-8', 'Biometrics are locked.'],
+      ['-9', 'Authentication was interrupted.'],
+    ])('uses structured authentication code %s independently of the localized message', (code, description) => {
+      const cause = Object.assign(new Error('Localized description'), { code: `E_AUTHENTICATION_${code}` })
+      const error = new KeyStorageError(cause, 'remove')
+
+      expect(error.message).toContain(description)
+      expect(error.cause).toBe(cause)
+      expect(error.diagnostics).toMatchObject({ operation: 'remove', authenticationCode: code })
+    })
+
+    it('uses a removal-specific fallback', () => {
+      expect(new KeyStorageError(new Error('Unknown'), 'remove').message).toBe('Failed to remove private key')
+    })
+
+    it('includes known-safe local failure details', () => {
+      const error = new KeyStorageError(new Error('Private key verification failed'), 'store', 'verify')
+      expect(error.diagnostics).toMatchObject({ operation: 'verify', message: 'Private key verification failed' })
+    })
+
+    it('does not include arbitrary messages or codes in diagnostics', () => {
+      const cause = Object.assign(new Error('sensitive payload'), { code: 'sensitive code' })
+      const error = new KeyStorageError(cause)
+      expect(JSON.stringify(error.diagnostics)).not.toContain('sensitive')
+    })
+
+    it.each([
       ['Status: -25293', 'Authentication failed.'],
       ['OSStatus error -25293', 'Authentication failed.'],
       ['Error Domain=NSOSStatusErrorDomain Code=-25293', 'Authentication failed.'],

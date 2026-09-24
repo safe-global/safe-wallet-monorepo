@@ -2,12 +2,14 @@ import DeviceCrypto from 'react-native-device-crypto'
 import * as Keychain from 'react-native-keychain'
 import DeviceInfo from 'react-native-device-info'
 import { DdRum, ErrorSource } from 'expo-datadog'
-import { IKeyStorageService, PrivateKeyStorageOptions } from './types'
+import { IKeyStorageService, PrivateKeyStorageOptions, PrivateKeyReadOptions } from './types'
 import {
   BiometryInvalidationError,
   isBiometryInvalidationError,
   KeyStorageError,
   MissingWrappingKeyError,
+  MissingStoredKeyError,
+  KeyStorageOperation,
 } from './errors'
 import Logger from '@/src/utils/logger'
 import { Platform } from 'react-native'
@@ -49,22 +51,26 @@ export class KeyStorageService implements IKeyStorageService {
       const isEmulator = Platform.OS === 'android' ? false : await DeviceInfo.isEmulator()
       await this.storeKey(userId, privateKey, requireAuthentication, isEmulator, 0)
     } catch (err) {
+      const error = err instanceof KeyStorageError ? err : new KeyStorageError(err)
       Logger.error('Error storing private key', {
-        code: err instanceof Error && 'code' in err ? err.code : undefined,
+        ...error.diagnostics,
         platform: Platform.OS,
       })
-      throw new KeyStorageError(err)
+      throw error
     }
   }
 
   async getPrivateKey(
     userId: string,
-    options: PrivateKeyStorageOptions = { requireAuthentication: true },
+    options: PrivateKeyReadOptions = { requireAuthentication: true },
   ): Promise<string | undefined> {
     try {
       return await this.getKey(userId, options.requireAuthentication ?? true)
     } catch (err) {
-      if (err === 'user password not found') {
+      if (err instanceof MissingStoredKeyError) {
+        if (options.throwIfMissing) {
+          throw err
+        }
         return undefined
       }
 
@@ -95,8 +101,9 @@ export class KeyStorageService implements IKeyStorageService {
       const { requireAuthentication = true } = options
       await this.removeKey(userId, requireAuthentication)
     } catch (err) {
-      Logger.error('Error removing private key:', asError(err).message)
-      throw new Error('Failed to remove private key')
+      const error = new KeyStorageError(err, 'remove')
+      Logger.error('Error removing private key', { ...error.diagnostics, platform: Platform.OS })
+      throw error
     }
   }
 
@@ -117,7 +124,7 @@ export class KeyStorageService implements IKeyStorageService {
   ): Promise<void> {
     const keyName = this.getKeyNameDeviceCrypto(userId)
 
-    let operation = 'create'
+    let operation: KeyStorageOperation = 'create'
 
     try {
       const options = {
@@ -162,17 +169,20 @@ export class KeyStorageService implements IKeyStorageService {
     } catch (error) {
       if (operation !== 'persist' && attempt === 0 && isBiometryInvalidationError(error)) {
         Logger.info('Recovering invalidated signer encryption key', {
-          operation,
-          code: error instanceof Error && 'code' in error ? error.code : undefined,
+          ...new KeyStorageError(error, 'store', operation).diagnostics,
           platform: Platform.OS,
         })
         // Keep the encrypted blob until its replacement has passed verification.
-        if (!(await DeviceCrypto.deleteKey(keyName))) {
-          throw new Error('Failed to remove invalidated encryption key')
+        try {
+          if (!(await DeviceCrypto.deleteKey(keyName))) {
+            throw new Error('Failed to remove invalidated encryption key')
+          }
+        } catch (deletionError) {
+          throw new KeyStorageError(deletionError, 'store', 'recover')
         }
         return await this.storeKey(userId, privateKey, requireAuth, isEmulator, attempt + 1)
       }
-      throw error
+      throw new KeyStorageError(error, 'store', operation)
     }
   }
 
@@ -186,7 +196,7 @@ export class KeyStorageService implements IKeyStorageService {
 
     const result = await Keychain.getGenericPassword(keychainOptions)
     if (!result) {
-      throw 'user password not found'
+      throw new MissingStoredKeyError()
     }
 
     const { encryptedPassword, iv } = JSON.parse(result.password)
@@ -205,7 +215,7 @@ export class KeyStorageService implements IKeyStorageService {
     const service = this.getKeyService(userId)
 
     if (requireAuth && !(await DeviceCrypto.authenticateWithBiometry(this.BIOMETRIC_PROMPTS.REMOVE))) {
-      throw new Error('Authentication was cancelled')
+      throw Object.assign(new Error('Authentication was cancelled'), { code: 'E_AUTHENTICATION_-2' })
     }
 
     if (!(await DeviceCrypto.deleteKey(keyName))) {
