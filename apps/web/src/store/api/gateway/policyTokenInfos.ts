@@ -1,5 +1,6 @@
 import type { fakeBaseQuery } from '@reduxjs/toolkit/query/react'
 import { type EndpointBuilder } from '@reduxjs/toolkit/query/react'
+import chunk from 'lodash/chunk'
 
 import {
   cgwApi as tokensApi,
@@ -54,9 +55,6 @@ const groupByChain = (tokens: TokenRef[]): Map<string, string[]> => {
 
   return new Map([...byChain].map(([chainId, addresses]) => [chainId, [...addresses]]))
 }
-
-const chunk = <T>(items: T[], size: number): T[][] =>
-  Array.from({ length: Math.ceil(items.length / size) }, (_, index) => items.slice(index * size, (index + 1) * size))
 
 /**
  * Token metadata for tokens spread over several chains, in one query. A chunk that fails leaves

@@ -80,17 +80,17 @@ export type SpacePoliciesGetActiveV1ApiArg = {
   types: readonly SpacePolicyType[]
 }
 
-const spacePoliciesApi = cgwClient.enhanceEndpoints({ addTagTypes: ['spaces', 'delegates'] }).injectEndpoints({
-  endpoints: (build) => ({
-    spacePoliciesGetActiveV1: build.query<ActivePolicyDto[], SpacePoliciesGetActiveV1ApiArg>({
-      query: ({ spaceId, types }) => ({
-        url: `/v1/spaces/${spaceId}/policies/active`,
-        params: { types: types.join(',') },
+export const { useSpacePoliciesGetActiveV1Query } = cgwClient
+  .enhanceEndpoints({ addTagTypes: ['spaces', 'delegates'] })
+  .injectEndpoints({
+    endpoints: (build) => ({
+      spacePoliciesGetActiveV1: build.query<ActivePolicyDto[], SpacePoliciesGetActiveV1ApiArg>({
+        query: ({ spaceId, types }) => ({
+          url: `/v1/spaces/${spaceId}/policies/active`,
+          params: { types: types.join(',') },
+        }),
+        // Proposers are delegates, so adding or removing one refetches the policies.
+        providesTags: ['spaces', 'delegates'],
       }),
-      // Proposers are delegates, so adding or removing one refetches the policies.
-      providesTags: ['spaces', 'delegates'],
     }),
-  }),
-})
-
-export const { useSpacePoliciesGetActiveV1Query } = spacePoliciesApi
+  })
