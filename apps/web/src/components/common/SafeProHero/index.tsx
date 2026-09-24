@@ -15,10 +15,9 @@ const SafeProHero = ({ variant = 'wide' }: { variant?: keyof typeof VARIANTS }) 
   <div className={cn('relative w-full overflow-hidden', VARIANTS[variant])}>
     <Image src="/images/safe-pro/pro-announcement-hero.jpg" alt={ALT} fill className="object-cover dark:hidden" />
     <Image
-      src="/images/safe-pro/pro-announcement-hero-dark.svg"
+      src="/images/safe-pro/pro-announcement-hero-dark.jpg"
       alt={ALT}
       fill
-      unoptimized
       className="hidden object-cover dark:block"
     />
   </div>
