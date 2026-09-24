@@ -1,13 +1,17 @@
+import type { ReactNode } from 'react'
 import FiatValue from '@/components/common/FiatValue'
 import { SelectItem } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Typography } from '@/components/ui/typography'
+import { cn } from '@/utils/cn'
+import { INELIGIBILITY_TEXT } from '../constants'
 import BalanceDisplay from '../../../SafeSelectorDropdown/components/BalanceDisplay'
 import RowEndColumn from '../../../SafeSelectorDropdown/components/RowEndColumn'
 import SafeRowStats from '../../../SafeSelectorDropdown/components/SafeRowStats'
 import type { SafeItemDataChain } from '../../../SafeSelectorDropdown/types'
 import SafeIdentity from './SafeIdentity'
-import type { SafeAccountOption } from '../types'
+import type { SafeAccountIneligibility, SafeAccountOption } from '../types'
 
 const ROW_CLASS = [
   'rounded-lg px-3 py-2.5',
@@ -64,19 +68,55 @@ export const SafeAccountRowSkeleton = () => (
   </div>
 )
 
-/** A Safe eligible on exactly one chain. */
-const SafeAccountRow = ({ account }: { account: SafeAccountOption }) => (
-  <SelectItem value={account.id} data-testid="safe-account-option" className={ROW_CLASS}>
-    <SafeAccountSummary account={account} />
-  </SelectItem>
+const IneligibleRow = ({
+  account,
+  reason,
+  testId,
+  children,
+}: {
+  account: SafeAccountOption
+  reason: SafeAccountIneligibility
+  testId: string
+  children: ReactNode
+}) => (
+  <Tooltip>
+    <TooltipTrigger
+      render={
+        <SelectItem value={account.id} data-testid={testId} aria-disabled className={cn(ROW_CLASS, 'opacity-50')} />
+      }
+    >
+      {children}
+    </TooltipTrigger>
+
+    <TooltipContent>{INELIGIBILITY_TEXT[reason]}</TooltipContent>
+  </Tooltip>
 )
+
+/** A Safe eligible on exactly one chain. */
+const SafeAccountRow = ({ account }: { account: SafeAccountOption }) => {
+  const summary = <SafeAccountSummary account={account} />
+
+  if (account.ineligibleReason) {
+    return (
+      <IneligibleRow account={account} reason={account.ineligibleReason} testId="safe-account-option">
+        {summary}
+      </IneligibleRow>
+    )
+  }
+
+  return (
+    <SelectItem value={account.id} data-testid="safe-account-option" className={ROW_CLASS}>
+      {summary}
+    </SelectItem>
+  )
+}
 
 /**
  * One chain of a multi-chain Safe. The identity sits on the header above, so the row carries only what
  * distinguishes it. Indented to line up under the header's name (avatar 32px + gap-3 12px).
  */
-export const SafeAccountChainRow = ({ account }: { account: SafeAccountOption }) => (
-  <SelectItem value={account.id} data-testid="safe-account-chain-option" className={ROW_CLASS}>
+export const SafeAccountChainRow = ({ account }: { account: SafeAccountOption }) => {
+  const summary = (
     <div className="flex w-full min-w-0 items-center gap-3 pl-11">
       <Typography variant="paragraph-small-medium" className="min-w-0 flex-1 truncate">
         {account.chain?.chainName ?? account.chainId}
@@ -90,7 +130,21 @@ export const SafeAccountChainRow = ({ account }: { account: SafeAccountOption })
       />
       <AccountBalance fiatTotal={account.fiatTotal} />
     </div>
-  </SelectItem>
-)
+  )
+
+  if (account.ineligibleReason) {
+    return (
+      <IneligibleRow account={account} reason={account.ineligibleReason} testId="safe-account-chain-option">
+        {summary}
+      </IneligibleRow>
+    )
+  }
+
+  return (
+    <SelectItem value={account.id} data-testid="safe-account-chain-option" className={ROW_CLASS}>
+      {summary}
+    </SelectItem>
+  )
+}
 
 export default SafeAccountRow

@@ -4,6 +4,7 @@ import SafeAccountSelector, { type SafeAccountSelectorProps } from '..'
 import {
   ELIGIBILITY_HELPER_TEXT,
   ELIGIBILITY_RULE,
+  INELIGIBILITY_TEXT,
   LOAD_ERROR_TEXT,
   NO_ELIGIBLE_ACCOUNTS_TEXT,
   NO_WALLET_TEXT,
@@ -323,6 +324,112 @@ describe('SafeAccountSelector', () => {
 
     expect(screen.getByRole('combobox')).toHaveAttribute('aria-expanded', 'false')
     expect(screen.queryAllByRole('option')).toHaveLength(0)
+  })
+
+  describe('counterfactual accounts', () => {
+    const notActivated = option('1', SAFE_B, { name: 'Marketing', ineligibleReason: 'not-activated' })
+
+    it('lists a not-activated account alongside the pickable ones', async () => {
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[singleChainAccount, notActivated]} onChange={jest.fn()} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      expect(rows).toHaveLength(2)
+      expect(rows[1]).toHaveTextContent('Marketing')
+    })
+
+    it('marks the row aria-disabled while leaving it in the accessibility tree', async () => {
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[singleChainAccount, notActivated]} onChange={jest.fn()} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      expect(rows[1]).toHaveAttribute('aria-disabled', 'true')
+      expect(rows[1]).not.toHaveAttribute('data-disabled')
+    })
+
+    it('does not call onChange when a not-activated row is clicked', async () => {
+      const onChange = jest.fn()
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[singleChainAccount, notActivated]} onChange={onChange} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      await user.click(rows[1])
+
+      expect(onChange).not.toHaveBeenCalled()
+    })
+
+    it('still selects a pickable row when the list also holds not-activated ones', async () => {
+      const onChange = jest.fn()
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[singleChainAccount, notActivated]} onChange={onChange} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      await user.click(rows[0])
+
+      expect(onChange).toHaveBeenCalledWith(singleChainAccount.id)
+    })
+
+    it('explains why the row cannot be picked on hover', async () => {
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[singleChainAccount, notActivated]} onChange={jest.fn()} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      await user.hover(rows[1])
+
+      expect(await screen.findByText(INELIGIBILITY_TEXT['not-activated'])).toBeInTheDocument()
+    })
+
+    const groupWithNotActivatedChain: SafeAccountGroup = {
+      ...multiChainGroup,
+      accounts: [
+        option('1', SAFE_B),
+        option('137', SAFE_B, { ineligibleReason: 'not-activated' }),
+        option('11155111', SAFE_B),
+      ],
+    }
+
+    it('rejects a not-activated chain row inside a multi-chain group', async () => {
+      const onChange = jest.fn()
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[groupWithNotActivatedChain]} onChange={onChange} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      await user.click(rows[1])
+
+      expect(onChange).not.toHaveBeenCalled()
+    })
+
+    it('still selects an activated chain row of a group that holds a not-activated one', async () => {
+      const onChange = jest.fn()
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[groupWithNotActivatedChain]} onChange={onChange} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      await user.click(rows[0])
+
+      expect(onChange).toHaveBeenCalledWith(groupWithNotActivatedChain.accounts[0].id)
+    })
   })
 
   it('replaces the helper text with the form validation message', () => {

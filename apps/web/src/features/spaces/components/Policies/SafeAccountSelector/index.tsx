@@ -66,14 +66,22 @@ const SafeAccountSelector = ({
   const fieldId = id ?? generatedId
   const connectWallet = useConnectWallet()
 
+  const flatAccounts = useMemo(
+    () => accounts.flatMap((entry) => (isSafeAccountGroup(entry) ? entry.accounts : [entry])),
+    [accounts],
+  )
+
   // The popup unmounts while closed, so the trigger cannot read a row's label. An unknown `value` falls
   // through to the placeholder rather than rendering a stale name.
-  const selectedAccount = useMemo(() => {
-    if (!value) return undefined
-    return accounts
-      .flatMap((entry) => (isSafeAccountGroup(entry) ? entry.accounts : [entry]))
-      .find((account) => account.id === value)
-  }, [accounts, value])
+  const selectedAccount = useMemo(
+    () => (value ? flatAccounts.find((account) => account.id === value) : undefined),
+    [flatAccounts, value],
+  )
+
+  const handleChange = (next: string) => {
+    if (flatAccounts.find((account) => account.id === next)?.ineligibleReason) return
+    onChange(next)
+  }
 
   const renderPopupContent = () => {
     if (isLoading) {
@@ -109,7 +117,7 @@ const SafeAccountSelector = ({
       <Select
         value={value || null}
         onValueChange={(next) => {
-          if (next != null) onChange(next)
+          if (next != null) handleChange(next)
         }}
         disabled={disabled}
         // On the root, not the trigger: the root owns the hidden input a form submits.
