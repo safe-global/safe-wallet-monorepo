@@ -574,3 +574,93 @@ if (!key) {
 ### Why
 
 A function that returns `undefined`/falsy for cancelled prompts and transient lockouts as well as true key loss must not treat every falsy result as license to perform an irreversible action — a user who cancels would silently lose their signer. Gate destructive operations on the specific confirmed cause, keep the prior error path for ambiguous failures, and never delete existing data before its replacement is durably stored.
+
+## Stabilize callbacks passed into child effect deps
+
+Source: PR #8002 (RL-20260611-008)
+
+### Avoid
+
+```tsx
+// parent
+;<Child
+  onSelect={(address, name) => {
+    setValue('id', address)
+    setValue('name', name)
+  }}
+/>
+
+// child
+useEffect(() => {
+  if (resolved) onSelect(resolved, '')
+}, [resolved, onSelect])
+```
+
+### Prefer
+
+```tsx
+// parent
+const handleSelect = useCallback(
+  (address: string, name: string) => {
+    setValue('id', address)
+    setValue('name', name)
+  },
+  [setValue],
+)
+
+<Child onSelect={handleSelect} />
+```
+
+### Why
+
+An inline callback is a new reference on every parent render, so the child's effect, and any `setValue`/validation it triggers, re-runs each time.
+
+## Clear dependent form fields with setValue, not resetField
+
+Source: PR #8539 (RL-20260821-001)
+
+### Avoid
+
+```ts
+const onChangeToken = () => {
+  resetField(amountField, '') // second arg is options; restores the registered default
+}
+```
+
+### Prefer
+
+```ts
+const onChangeToken = () => {
+  setValue(amountField, '', { shouldValidate: true })
+}
+```
+
+### Why
+
+`resetField` restores the registered default, which multi-step flows re-seed from the previous step, so the stale amount comes back.
+
+## Narrow with a type predicate instead of repeating casts
+
+Source: PR #7714 (RL-20260608-012)
+
+### Avoid
+
+```ts
+const CODES: ReadonlyArray<Code> = ['A', 'B']
+if (!CODES.includes(code as Code)) return undefined
+return new CodedError(code as Code, message)
+```
+
+### Prefer
+
+```ts
+const CODES: ReadonlyArray<Code> = ['A', 'B']
+const isCode = (c: unknown): c is Code => CODES.includes(c as Code)
+
+if (!isCode(code)) return undefined
+return new CodedError(code, message)
+```
+
+### Why
+
+`includes(x as T)` doesn't narrow `x`, so every later use needs another cast; the predicate narrows once and keeps the one unavoidable cast in a single place.

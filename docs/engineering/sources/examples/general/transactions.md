@@ -76,3 +76,29 @@ const handleReview = async () => {
 ### Why
 
 React state updates are async, so two rapid invocations can both read the old `isSubmitting=false` and propose duplicate transactions with conflicting nonces. A ref written synchronously closes the window.
+
+## Allowlist backend-supplied receivers before signing
+
+Source: PR #7714 (RL-20260608-006)
+
+### Avoid
+
+```ts
+const { refundReceiver, ...fees } = (await fetchPreview(tx)).txData
+return mergeIntoSafeTx(tx, { refundReceiver, ...fees })
+```
+
+### Prefer
+
+```ts
+const { refundReceiver, ...fees } = (await fetchPreview(tx)).txData
+if (!TRUSTED_RECEIVERS.some((a) => sameAddress(a, refundReceiver))) {
+  trackError(Errors.UNTRUSTED_RECEIVER, `Untrusted receiver ${refundReceiver} on ${chainId}`)
+  throw new Error('Refusing to sign: untrusted receiver')
+}
+return mergeIntoSafeTx(tx, { refundReceiver, ...fees })
+```
+
+### Why
+
+A compromised or misconfigured backend could otherwise redirect funds through a value every signer approves without seeing; telemetry surfaces a rotated collector address.

@@ -684,3 +684,27 @@ isPublicRoute: PUBLIC_ROUTES.some((route) => pathname === route || pathname.star
 ### Why
 
 Route prefixes describe a hierarchy where pathname is the (possibly nested) child. Inverting the direction lets short / partial pathnames satisfy any longer route, breaking redirect logic.
+
+## Disable link-rendered buttons with aria-disabled
+
+Source: PR #8014 (RL-20260605-002)
+
+### Avoid
+
+```ts
+const buttonVariants = cva('... disabled:cursor-not-allowed disabled:opacity-50')
+// <Button render={<a href={url} />} disabled /> still navigates
+```
+
+### Prefer
+
+```ts
+const buttonVariants = cva(
+  '... disabled:cursor-not-allowed disabled:opacity-50 ' +
+    'aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50',
+)
+```
+
+### Why
+
+Anchors ignore the `disabled` attribute, so a button rendered as a link looks disabled but still navigates unless `aria-disabled` blocks pointer events.
