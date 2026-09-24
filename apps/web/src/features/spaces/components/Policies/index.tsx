@@ -4,10 +4,11 @@ import { TxModalContext } from '@/components/tx-flow'
 import ExternalLink from '@/components/common/ExternalLink'
 import { Typography } from '@/components/ui/typography'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import AddPolicyDialog from './AddPolicyDialog'
+import type { AddPolicyId } from './AddPolicyDialog/options'
 import PoliciesList from './PoliciesList'
 import { PoliciesLoadError, PoliciesLoading } from './PoliciesLoadState'
 import PolicyCatalogue from './PolicyCatalogue'
-import type { PolicyCatalogueId } from './PolicyCatalogue/catalogue'
 import ProposerIntroDialog from './ProposerIntroDialog'
 import { PROPOSER_INTRO_SEEN_KEY } from './ProposerIntroDialog/constants'
 import ProposerDetails from './ProposerDetails'
@@ -24,7 +25,7 @@ interface PoliciesProps {
   isLoading?: boolean
   isError?: boolean
   onRetry?: () => void
-  /** The populated mode's `Add policy` button. Without it the button starts the proposer flow. */
+  /** The populated mode's `Add policy` button. Without it the button opens the add policy dialog. */
   onAddPolicy?: () => void
   onSelectPolicy?: (policy: Policy) => void
 }
@@ -60,6 +61,7 @@ const Policies = ({
 
   const [hasSeenProposerIntro = false, setHasSeenProposerIntro] = useLocalStorage<boolean>(PROPOSER_INTRO_SEEN_KEY)
   const [isProposerIntroOpen, setIsProposerIntroOpen] = useState(false)
+  const [isAddPolicyOpen, setIsAddPolicyOpen] = useState(false)
   const [openProposer, setOpenProposer] = useState<{ policy: ProposerPolicy; proposer: Proposer } | null>(null)
 
   const openPolicy = useCallback((policy: Policy) => {
@@ -76,7 +78,7 @@ const Policies = ({
   }, [setTxFlow])
 
   const handleSelect = useCallback(
-    (id: PolicyCatalogueId) => {
+    (id: AddPolicyId) => {
       switch (id) {
         case 'spending-limit':
           if (hasSeenSpendingLimitIntro) {
@@ -100,6 +102,10 @@ const Policies = ({
           openRequestPolicyForm()
           return
 
+        // Not offered yet: ADD_POLICY_OPTIONS leaves it out.
+        case 'recovery':
+          return
+
         // A new policy id must pick a branch above rather than silently doing nothing.
         default: {
           const _exhaustive: never = id
@@ -120,6 +126,14 @@ const Policies = ({
     closeSpendingLimitIntro()
     startSpendingLimitFlow()
   }, [closeSpendingLimitIntro, startSpendingLimitFlow])
+
+  const selectFromAddPolicyDialog = useCallback(
+    (id: AddPolicyId) => {
+      setIsAddPolicyOpen(false)
+      handleSelect(id)
+    },
+    [handleSelect],
+  )
 
   const closeProposerIntro = useCallback(() => {
     setIsProposerIntroOpen(false)
@@ -156,12 +170,14 @@ const Policies = ({
       ) : policies.length > 0 ? (
         <PoliciesList
           policies={policies}
-          onAddPolicy={onAddPolicy ?? (() => handleSelect('proposer'))}
+          onAddPolicy={onAddPolicy ?? (() => setIsAddPolicyOpen(true))}
           onSelectPolicy={onSelectPolicy ?? openPolicy}
         />
       ) : (
         <PolicyCatalogue onSelect={handleSelect} />
       )}
+
+      <AddPolicyDialog open={isAddPolicyOpen} onOpenChange={setIsAddPolicyOpen} onSelect={selectFromAddPolicyDialog} />
 
       <SpendingLimitIntroDialog
         open={isSpendingLimitIntroOpen}
