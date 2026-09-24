@@ -57,6 +57,25 @@ describe('useSpaceSubscription', () => {
     expect(renderHook(() => useSpaceSubscription()).result.current).toMatchObject({ isLoading: true, status: 'none' })
   })
 
+  it('reads a 404 as no subscriptions, not as an error, also while it refetches', () => {
+    mockQuery.mockReturnValue(queryState({ isError: true, error: { status: 404 } }))
+    expect(renderHook(() => useSpaceSubscription()).result.current).toMatchObject({
+      subscription: undefined,
+      latestSubscription: undefined,
+      status: 'none',
+      isLoading: false,
+      isError: false,
+    })
+
+    mockQuery.mockReturnValue(queryState({ isFetching: true, error: { status: 404 } }))
+    expect(renderHook(() => useSpaceSubscription()).result.current).toMatchObject({ isLoading: false, isError: false })
+  })
+
+  it('keeps other errors as errors', () => {
+    mockQuery.mockReturnValue(queryState({ isError: true, error: { status: 500 } }))
+    expect(renderHook(() => useSpaceSubscription()).result.current).toMatchObject({ status: 'none', isError: true })
+  })
+
   it('reads a rate-limited query as loading, not as an error, while it retries', () => {
     mockQuery.mockReturnValue(queryState({ isError: true, error: { status: 429 } }))
     mockIsRetrying.mockReturnValue(true)

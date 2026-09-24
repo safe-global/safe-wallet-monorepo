@@ -88,6 +88,16 @@ describe('useCheckoutReturn', () => {
     expect(mockSubscriptionsQuery).toHaveBeenLastCalledWith(skipToken, expect.anything())
   })
 
+  it('keeps activating while the subscriptions answer 404, the Workspace having none yet', () => {
+    mockSessionQuery.mockReturnValue(session('paid'))
+    mockSubscriptionsQuery.mockReturnValue({ data: undefined, isError: true, error: { status: 404 } })
+
+    expect(renderHook(() => useCheckoutReturn()).result.current).toMatchObject({
+      status: 'activating',
+      subscription: undefined,
+    })
+  })
+
   it('surfaces a session error', () => {
     mockSessionQuery.mockReturnValue({ data: undefined, isError: true })
     expect(renderHook(() => useCheckoutReturn()).result.current.status).toBe('error')
