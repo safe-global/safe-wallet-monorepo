@@ -1,4 +1,4 @@
-import { render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
+import { render, renderWithUserEvent, screen, waitFor, within } from '@/tests/test-utils'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import SafeAccountSelector, { type SafeAccountSelectorProps } from '..'
 import {
@@ -434,6 +434,32 @@ describe('SafeAccountSelector', () => {
       await user.click(rows[0])
 
       expect(onChange).toHaveBeenCalledWith(singleChainAccount.id)
+    })
+
+    it('shows the not-activated icon in place of the balance', async () => {
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[singleChainAccount, notActivated]} onChange={jest.fn()} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      expect(within(rows[1]).getByTestId('safe-account-not-activated-icon')).toBeInTheDocument()
+      expect(within(rows[0]).queryByTestId('safe-account-not-activated-icon')).not.toBeInTheDocument()
+    })
+
+    it('keeps the row message as the only tooltip on the icon', async () => {
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[singleChainAccount, notActivated]} onChange={jest.fn()} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      await user.hover(within(rows[1]).getByTestId('safe-account-not-activated-icon'))
+
+      expect(await screen.findByText(INELIGIBILITY_TEXT['not-activated'])).toBeInTheDocument()
+      expect(screen.queryByText('Inactive')).not.toBeInTheDocument()
     })
 
     it('explains why the row cannot be picked on hover', async () => {

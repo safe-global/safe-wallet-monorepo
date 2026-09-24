@@ -3,6 +3,7 @@ import FiatValue from '@/components/common/FiatValue'
 import { SelectItem } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import NotActivatedBadge from '@/components/common/NotActivatedBadge'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 import { INELIGIBILITY_TEXT } from '../constants'
@@ -35,6 +36,13 @@ export const AccountBalance = ({ fiatTotal, fitColumn }: { fiatTotal?: string; f
   />
 )
 
+/** The row's own tooltip explains the state, so the badge renders as a bare icon. */
+const NotActivated = () => (
+  <RowEndColumn>
+    <NotActivatedBadge showTooltip={false} data-testid="safe-account-not-activated-icon" />
+  </RowEndColumn>
+)
+
 /**
  * Identity, stat columns and balance — the same column set as the topbar rows. `fitStats` is for a
  * lone row, where the stats' table widths buy no alignment and cost the address 101px.
@@ -50,7 +58,11 @@ export const SafeAccountSummary = ({ account, fitStats }: { account: SafeAccount
       showPending={false}
       fitColumns={fitStats}
     />
-    <AccountBalance fiatTotal={account.fiatTotal} fitColumn={fitStats} />
+    {account.ineligibleReason === 'not-activated' ? (
+      <NotActivated />
+    ) : (
+      <AccountBalance fiatTotal={account.fiatTotal} fitColumn={fitStats} />
+    )}
   </div>
 )
 
@@ -133,7 +145,11 @@ export const SafeAccountChainRow = ({ account }: { account: SafeAccountOption })
         pending={NO_PENDING}
         showPending={false}
       />
-      <AccountBalance fiatTotal={account.fiatTotal} />
+      {account.ineligibleReason === 'not-activated' ? (
+        <NotActivated />
+      ) : (
+        <AccountBalance fiatTotal={account.fiatTotal} />
+      )}
     </div>
   )
 
