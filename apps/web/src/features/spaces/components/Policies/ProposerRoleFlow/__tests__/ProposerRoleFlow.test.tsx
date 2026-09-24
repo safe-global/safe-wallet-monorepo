@@ -84,8 +84,10 @@ const renderFlow = () => {
 const fillAndSubmit = async (user: ReturnType<typeof renderFlow>['user']) => {
   await user.click(screen.getByTestId('safe-account-selector'))
   await user.click(await screen.findByRole('option', { name: /Treasury/ }))
-  await user.type(screen.getByRole('combobox', { name: 'Proposer' }), PROPOSER)
-  await user.type(screen.getByRole('textbox', { name: 'Proposer name' }), 'Nicole')
+  await user.click(screen.getByRole('combobox', { name: 'Proposer' }))
+  await user.paste(PROPOSER)
+  await user.click(screen.getByRole('textbox', { name: 'Proposer name' }))
+  await user.paste('Nicole')
   await waitFor(() => expect(screen.getByRole('button', { name: 'Submit' })).toBeEnabled())
   await user.click(screen.getByRole('button', { name: 'Submit' }))
 }
@@ -146,7 +148,8 @@ describe('ProposerRoleFlow', () => {
     await user.click(await screen.findByRole('option', { name: /Treasury/ }))
     expect(submit).toBeDisabled()
 
-    await user.type(screen.getByRole('combobox', { name: 'Proposer' }), '0x8675B754342754A30A2AeF474D114d8460bca19b')
+    await user.click(screen.getByRole('combobox', { name: 'Proposer' }))
+    await user.paste(PROPOSER)
 
     await waitFor(() => expect(submit).toBeEnabled())
   })
