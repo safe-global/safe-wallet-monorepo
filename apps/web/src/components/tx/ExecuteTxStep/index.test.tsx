@@ -101,6 +101,15 @@ describe('ExecuteTxStep', () => {
     expect(execute.compareDocumentPosition(executeNotice) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
+  it('uses the compact bottom padding on the card', async () => {
+    mockCreateExistingTx.mockResolvedValue(reloadedTx)
+
+    renderStep()
+
+    await screen.findByTestId('execute-action')
+    expect(screen.getByTestId('card-content')).toHaveClass('cardContentCompactBottom')
+  })
+
   it('shows the receipt tabs outside the panel', async () => {
     mockCreateExistingTx.mockResolvedValue(reloadedTx)
 

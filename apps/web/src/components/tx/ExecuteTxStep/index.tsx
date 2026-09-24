@@ -52,7 +52,7 @@ export const ExecuteTxStep = ({ afterSigning = false }: { afterSigning?: boolean
 
   return (
     <TxFlowStep title="Execute transaction" fixedNonce hideBack>
-      <TxCard>
+      <TxCard contentPadding="compactBottom">
         {!safeTx || !isReloaded ? (
           <div className="flex items-center justify-center py-10">
             <Spinner className="size-6" />

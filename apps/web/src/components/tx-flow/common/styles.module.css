@@ -7,6 +7,10 @@
   padding: var(--space-3) !important;
 }
 
+.cardContentCompactBottom {
+  padding-bottom: var(--space-2) !important;
+}
+
 .cardContent :global .errorMessage {
   margin: 0;
 }
