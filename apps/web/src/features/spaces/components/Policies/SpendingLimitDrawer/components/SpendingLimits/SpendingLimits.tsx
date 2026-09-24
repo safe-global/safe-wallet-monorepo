@@ -5,7 +5,7 @@ import SpenderCard from './SpenderCard'
 
 export type SpendingLimitsProps = {
   spenders: PolicySpender[]
-  /** Address book names, resolved by the caller. WA-3451 supplies the real map. */
+  /** Address book names, resolved by the caller. The real map arrives with the CGW wiring. */
   names?: Record<string, string>
   showUsage: boolean
 }

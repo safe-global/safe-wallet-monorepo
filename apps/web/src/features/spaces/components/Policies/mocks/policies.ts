@@ -244,7 +244,7 @@ export const mockMissingMetadataPolicy = (): SpendingLimitPolicy & { status: 'ac
     }),
   )
 
-/** The viewer's relationship to the Safe. WA-3451 derives this from the connected wallet. */
+/** The viewer's relationship to the Safe. Derived from the connected wallet once wired. */
 export const MOCK_VIEWERS = {
   signer: { address: MOCK_ADDRESSES.alice, isSigner: true, hasSigned: false },
   signerWhoSigned: { address: MOCK_ADDRESSES.alice, isSigner: true, hasSigned: true },
