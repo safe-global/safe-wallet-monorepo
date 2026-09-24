@@ -34,7 +34,7 @@ interface TxEvents {
   [TxEvent.SIGNED]: { txId?: string }
   [TxEvent.SIGN_FAILED]: { txId?: string; error: Error }
   [TxEvent.PROPOSE_FAILED]: { error: Error }
-  [TxEvent.PROPOSED]: { txId: string; nonce: number }
+  [TxEvent.PROPOSED]: { txId: string; nonce: number } & SafeContext
   [TxEvent.DELETED]: { safeTxHash: string }
   [TxEvent.SIGNATURE_PROPOSE_FAILED]: { txId: string; error: Error } & SafeContext
   [TxEvent.SIGNATURE_PROPOSED]: { txId: string; nonce: number; signerAddress: string } & SafeContext

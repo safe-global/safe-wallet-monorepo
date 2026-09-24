@@ -194,12 +194,12 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     // The signed-out card with the "Sign in to your workspace" heading +
     // SignInOptions must render…
-    expect(screen.getByRole('heading', { name: /sign in to your workspace/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /sign in to your Workspace/i })).toBeInTheDocument()
     expect(screen.getByTestId('sign-in-options')).toBeInTheDocument()
 
     // …and the Create workspace CTA / no-workspaces empty state must NOT.
-    expect(screen.queryByText(/^create workspace$/i)).not.toBeInTheDocument()
-    expect(screen.queryByText(/create your first workspace/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/^create Workspace$/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/create your first Workspace/i)).not.toBeInTheDocument()
   })
 
   // /welcome/spaces keeps its Topbar + tabbed layout. The Accounts/Workspaces
@@ -231,7 +231,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     render(<SpacesList />)
 
-    const cta = screen.getByRole('link', { name: /create your first workspace/i })
+    const cta = screen.getByRole('link', { name: /create your first Workspace/i })
     expect(cta).toHaveAttribute('href')
 
     // Sign in card must NOT render in this branch.
@@ -453,7 +453,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     render(<SpacesList />)
 
-    const heading = screen.getByRole('heading', { name: /sign in to your workspace/i })
+    const heading = screen.getByRole('heading', { name: /sign in to your Workspace/i })
     expect(heading.className).toContain('text-center')
   })
 
@@ -502,7 +502,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     // The header button is absent; only the empty-state CTA inside the
     // No-workspaces card renders (it lives outside the spacesHeader).
-    expect(screen.getByText(/create your first workspace/i)).toBeInTheDocument()
+    expect(screen.getByText(/create your first Workspace/i)).toBeInTheDocument()
     expect(screen.getAllByTestId('create-space-button')).toHaveLength(1)
   })
 

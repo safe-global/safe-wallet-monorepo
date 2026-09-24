@@ -16,7 +16,7 @@ export const signTxServiceMessage = async (
       ],
     },
     domain: {
-      name: 'Safe Transaction Service',
+      name: 'Safe Queue Service',
       version: '1.0',
       chainId: Number(chainId),
       verifyingContract: safeAddress,

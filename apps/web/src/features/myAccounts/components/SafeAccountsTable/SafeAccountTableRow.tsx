@@ -50,6 +50,8 @@ type SafeAccountTableRowProps = {
   highlighted?: boolean
   /** Replaces the default context-menu actions cell (e.g. an "Add to workspace" button). */
   renderActions?: (line: AccountLine) => ReactNode
+  /** Replaces the identity cell; the cell stops clipping so a field can overhang its padding. */
+  renderName?: (line: AccountLine) => ReactNode
   /** When set, adds the hover rename pencil to the identity cell (non-modal surfaces). */
   onRename?: (line: AccountLine) => void
   /** When set, a leading checkbox cell is rendered in selection mode. */
@@ -279,6 +281,7 @@ const RowCell = ({
   isFirstCell,
   reorderable,
   nameCell,
+  nameOverflows,
   checkbox,
   onSelectToggle,
   renderActions,
@@ -289,6 +292,7 @@ const RowCell = ({
   isFirstCell: boolean
   reorderable: boolean
   nameCell: ReactNode
+  nameOverflows: boolean
   checkbox?: RowCheckbox
   onSelectToggle?: (next: boolean) => void
   renderActions?: (line: AccountLine) => ReactNode
@@ -309,7 +313,10 @@ const RowCell = ({
       data-hosts-handle={hostsHandle && column.id !== 'select' ? '' : undefined}
       // Slim 8px padding (ui default), 16px on the outer cells + the hover-pill inset borders live in
       // the panel variant (they need background-clip + specificity the primitive's classes can't beat).
-      className={cn(hostsHandle ? 'relative overflow-visible' : 'overflow-hidden')}
+      className={cn(
+        hostsHandle ? 'relative overflow-visible' : 'overflow-hidden',
+        nameOverflows && column.id === 'name' && 'overflow-visible',
+      )}
       style={{
         textAlign: column.align ?? 'left',
         ...(reorderable && column.width ? { width: column.width, minWidth: column.width, maxWidth: column.width } : {}),
@@ -343,6 +350,7 @@ const SafeAccountTableRow = ({
   warning,
   highlighted,
   renderActions,
+  renderName,
   onRename,
   checkbox,
   onSelectToggle,
@@ -381,7 +389,7 @@ const SafeAccountTableRow = ({
   // toggle their per-chain children. The name keeps its real <a> (for keyboard focus and modifier-clicks
   // that open a new tab) and the other affordances — copy, explorer, rename, the actions menu — keep
   // their own behaviour, so the row handler bails when the click lands on any of them.
-  const rowNavigable = !checkbox && (line.expandable || line.href != null)
+  const rowNavigable = !checkbox && !renderName && (line.expandable || line.href != null)
 
   const handleRowClick = (event: MouseEvent<HTMLElement>) => {
     if ((event.target as HTMLElement).closest('a, button, [role="button"]')) return
@@ -396,7 +404,9 @@ const SafeAccountTableRow = ({
   // fixed layout — pin each cell's width so the floating row keeps its column alignment.
   const reorderable = Boolean(rowDraggableProps)
 
-  const nameCell = (
+  const nameCell = renderName ? (
+    renderName(line)
+  ) : (
     <NameCell
       line={line}
       expanded={expanded}
@@ -443,6 +453,7 @@ const SafeAccountTableRow = ({
           isFirstCell={index === 0}
           reorderable={reorderable}
           nameCell={nameCell}
+          nameOverflows={Boolean(renderName)}
           checkbox={checkbox}
           onSelectToggle={onSelectToggle}
           renderActions={renderActions}
