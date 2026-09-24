@@ -89,7 +89,7 @@ const config: ConfigFile = {
       filterEndpoints: [/^portfolio/],
     },
     '../src/gateway/AUTO_GENERATED/safe-shield.ts': {
-      filterEndpoints: [/^safeShield/],
+      filterEndpoints: [/^(safeShield|spaceSafeShield)/],
     },
     '../src/gateway/AUTO_GENERATED/billing.ts': {
       filterEndpoints: [/^billing/],
