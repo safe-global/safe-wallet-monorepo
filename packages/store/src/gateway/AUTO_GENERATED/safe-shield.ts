@@ -6,6 +6,26 @@ const injectedRtkApi = api
   })
   .injectEndpoints({
     endpoints: (build) => ({
+      spaceSafeShieldAnalyzeRecipientV1: build.query<
+        SpaceSafeShieldAnalyzeRecipientV1ApiResponse,
+        SpaceSafeShieldAnalyzeRecipientV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/chains/${queryArg.chainId}/security/${queryArg.safeAddress}/recipient/${queryArg.recipientAddress}`,
+        }),
+        providesTags: ['safe-shield'],
+      }),
+      spaceSafeShieldAnalyzeCounterpartyV1: build.mutation<
+        SpaceSafeShieldAnalyzeCounterpartyV1ApiResponse,
+        SpaceSafeShieldAnalyzeCounterpartyV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/chains/${queryArg.chainId}/security/${queryArg.safeAddress}/counterparty-analysis`,
+          method: 'POST',
+          body: queryArg.counterpartyAnalysisRequestDto,
+        }),
+        invalidatesTags: ['safe-shield'],
+      }),
       safeShieldAnalyzeRecipientV1: build.query<
         SafeShieldAnalyzeRecipientV1ApiResponse,
         SafeShieldAnalyzeRecipientV1ApiArg
@@ -49,6 +69,30 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
+export type SpaceSafeShieldAnalyzeRecipientV1ApiResponse =
+  /** status 200 Recipient interaction analysis results */ SingleRecipientAnalysisDto
+export type SpaceSafeShieldAnalyzeRecipientV1ApiArg = {
+  /** Chain ID where the Safe is deployed */
+  chainId: string
+  /** Safe contract address, must be registered to the Space */
+  safeAddress: string
+  /** Recipient address to analyze */
+  recipientAddress: string
+  /** Space UUID */
+  spaceId: string
+}
+export type SpaceSafeShieldAnalyzeCounterpartyV1ApiResponse =
+  /** status 200 Combined counterparty analysis including recipients and contracts grouped by status group and mapped to an address. */ CounterpartyAnalysisDto
+export type SpaceSafeShieldAnalyzeCounterpartyV1ApiArg = {
+  /** Chain ID where the Safe is deployed */
+  chainId: string
+  /** Safe contract address, must be registered to the Space */
+  safeAddress: string
+  /** Space UUID */
+  spaceId: string
+  /** Transaction data used to analyze all counterparties involved. */
+  counterpartyAnalysisRequestDto: CounterpartyAnalysisRequestDto
+}
 export type SafeShieldAnalyzeRecipientV1ApiResponse =
   /** status 200 Recipient interaction analysis results */ SingleRecipientAnalysisDto
 export type SafeShieldAnalyzeRecipientV1ApiArg = {
@@ -389,6 +433,9 @@ export type ReportFalseResultRequestDto = {
   details: string
 }
 export const {
+  useSpaceSafeShieldAnalyzeRecipientV1Query,
+  useLazySpaceSafeShieldAnalyzeRecipientV1Query,
+  useSpaceSafeShieldAnalyzeCounterpartyV1Mutation,
   useSafeShieldAnalyzeRecipientV1Query,
   useLazySafeShieldAnalyzeRecipientV1Query,
   useSafeShieldAnalyzeCounterpartyV1Mutation,
