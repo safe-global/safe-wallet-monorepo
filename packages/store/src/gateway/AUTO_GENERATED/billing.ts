@@ -154,6 +154,8 @@ export type Subscription = {
   currentPeriodStart?: number | null
   currentPeriodEnd?: number | null
   metadata?: object | null
+  /** Whether the subscription has a default payment method, or its customer does as a fallback */
+  hasPaymentMethod?: boolean
 }
 export type MarketingFeature = {
   name: string

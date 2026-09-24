@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@/tests/test-utils'
+import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import AddAccounts from '../index'
 
 jest.mock('@/features/address-poisoning', () => ({
@@ -13,8 +13,18 @@ jest.mock('../AddManually', () => ({
 // The heavy accounts table is exercised in its own suite; here we only need to observe the items it receives.
 jest.mock('@/features/myAccounts', () => ({
   __esModule: true,
-  SafeAccountsTable: (props: { items: unknown[] }) => (
-    <div data-testid="safe-accounts-table" data-count={props.items.length} />
+  SafeAccountsTable: (props: {
+    items: Array<{ chainId: string; address: string }>
+    selection?: { onToggle: (line: unknown, next: boolean) => void }
+  }) => (
+    <div
+      data-testid="safe-accounts-table"
+      data-count={props.items.length}
+      onClick={() => {
+        const [item] = props.items
+        props.selection?.onToggle({ key: `${item.chainId}:${item.address}`, variant: 'single', source: item }, true)
+      }}
+    />
   ),
 }))
 
@@ -72,11 +82,32 @@ jest.mock('@/hooks/safes', () => {
 let mockIsAdmin = true
 let mockSpaceSafes: Array<{ chainId: string; address: string }> = []
 let mockSpaceSafesLoading = false
+let mockSpaceAddressBook: Array<{ address: string; name: string; chainIds: string[] }> = []
+let mockAddressBookError = false
+const mockUpsertWorkspaceNames = jest.fn().mockResolvedValue({})
 jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '1',
   useIsAdmin: () => mockIsAdmin,
   useSpaceSafes: () => ({ allSafes: mockSpaceSafes, isLoading: mockSpaceSafesLoading }),
   useIsQualifiedSafe: () => false,
+  useSpaceAddressBookState: () => ({ items: mockSpaceAddressBook, isLoading: false, isError: mockAddressBookError }),
+  useUpsertWorkspaceSafeNames: () => mockUpsertWorkspaceNames,
+  getChainIdsParam: () => '',
+}))
+
+// The naming fields are covered by their own suite; this stub enters a name through the shared form.
+let mockEnteredName = 'Treasury'
+jest.mock('../../NameAccounts', () => ({
+  ...jest.requireActual('../../NameAccounts'),
+  NameAccountsFields: ({ items }: { items: Array<{ address: string }> }) => {
+    const { useEffect } = require('react')
+    const { useFormContext } = require('react-hook-form')
+    const { setValue } = useFormContext()
+    useEffect(() => {
+      items.forEach((item) => setValue(`names.${item.address.toLowerCase()}`, mockEnteredName))
+    }, [items, setValue])
+    return <div data-testid="name-accounts-fields" data-count={items.length} />
+  },
 }))
 
 const mockAddSafesToSpace = jest.fn()
@@ -249,5 +280,157 @@ describe('AddAccounts — admin guard on submit', () => {
     // Form is clean (nothing to add or remove) → Save disabled. If the empty seed had been finalized,
     // the member would diff as a removal and the button would be enabled.
     expect(screen.getByTestId('add-accounts-button')).toBeDisabled()
+  })
+})
+
+describe('AddAccounts — naming step', () => {
+  const selectTrusted = () => {
+    render(<AddAccounts externalOpen onExternalClose={() => {}} />, withTrusted)
+    // The table is stubbed, so select through the form the same way a checkbox toggle would.
+    const form = screen.getByTestId('add-accounts-button').closest('form')!
+    return form
+  }
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockWalletValue = { address: '0xWallet' }
+    mockAllOwned = {}
+    mockIsAdmin = true
+    mockSpaceSafes = []
+    mockSpaceSafesLoading = false
+    mockSpaceAddressBook = []
+    mockAddressBookError = false
+    mockEnteredName = 'Treasury'
+    mockAddSafesToSpace.mockResolvedValue({ data: {} })
+    mockUpsertWorkspaceNames.mockResolvedValue({})
+  })
+
+  it.each([
+    ['empty', ''],
+    ['too short to save', 'ab'],
+  ])('keeps submit enabled but does not submit while a name is %s', async (_, name) => {
+    mockEnteredName = name
+    const form = selectTrusted()
+    fireEvent.click(screen.getByTestId('safe-accounts-table'))
+    fireEvent.submit(form)
+    await screen.findByText('Name your Safe accounts')
+
+    expect(screen.getByTestId('add-accounts-button')).not.toBeDisabled()
+    fireEvent.submit(screen.getByTestId('add-accounts-button').closest('form')!)
+
+    await waitFor(() => expect(mockUpsertWorkspaceNames).not.toHaveBeenCalled())
+    expect(mockAddSafesToSpace).not.toHaveBeenCalled()
+  })
+
+  it('blocks submit while the address book could not be read', async () => {
+    mockAddressBookError = true
+    render(<AddAccounts externalOpen onExternalClose={() => {}} />, withTrusted)
+    fireEvent.click(screen.getByTestId('safe-accounts-table'))
+
+    await waitFor(() => expect(screen.getByTestId('add-accounts-button')).toBeDisabled())
+    expect(mockAddSafesToSpace).not.toHaveBeenCalled()
+  })
+
+  it('opens the naming view instead of submitting when a selected Safe has no workspace name', async () => {
+    const form = selectTrusted()
+    fireEvent.click(screen.getByTestId('safe-accounts-table'))
+    fireEvent.submit(form)
+
+    expect(await screen.findByText('Name your Safe accounts')).toBeInTheDocument()
+    expect(screen.getByTestId('name-accounts-fields')).toHaveAttribute('data-count', '1')
+    expect(screen.queryByTestId('safe-accounts-table')).not.toBeInTheDocument()
+    expect(mockAddSafesToSpace).not.toHaveBeenCalled()
+  })
+
+  it('adds the Safes and then writes the names on submit from the naming view', async () => {
+    const form = selectTrusted()
+    fireEvent.click(screen.getByTestId('safe-accounts-table'))
+    fireEvent.submit(form)
+    await screen.findByText('Name your Safe accounts')
+
+    fireEvent.submit(screen.getByTestId('add-accounts-button').closest('form')!)
+
+    await waitFor(() => expect(mockUpsertWorkspaceNames).toHaveBeenCalled())
+    expect(mockAddSafesToSpace).toHaveBeenCalledWith({
+      spaceId: '1',
+      createSpaceSafesDto: { safes: [{ chainId: '1', address: TRUSTED_ADDRESS }] },
+    })
+    expect(mockUpsertWorkspaceNames).toHaveBeenCalledWith([
+      { address: TRUSTED_ADDRESS, name: 'Treasury', chainIds: ['1'] },
+    ])
+  })
+
+  it('submits directly when the workspace already names the selected Safe', async () => {
+    mockSpaceAddressBook = [{ address: TRUSTED_ADDRESS, name: 'Named', chainIds: ['1'] }]
+    const form = selectTrusted()
+    fireEvent.click(screen.getByTestId('safe-accounts-table'))
+    fireEvent.submit(form)
+
+    await waitFor(() => expect(mockAddSafesToSpace).toHaveBeenCalled())
+    expect(screen.queryByText('Name your Safe accounts')).not.toBeInTheDocument()
+  })
+
+  it('surfaces a failed name write and keeps the dialog on the naming view', async () => {
+    mockUpsertWorkspaceNames.mockResolvedValue({ error: 'Forbidden' })
+    const form = selectTrusted()
+    fireEvent.click(screen.getByTestId('safe-accounts-table'))
+    fireEvent.submit(form)
+    await screen.findByText('Name your Safe accounts')
+
+    fireEvent.submit(screen.getByTestId('add-accounts-button').closest('form')!)
+
+    expect(await screen.findByText('Forbidden')).toBeInTheDocument()
+    expect(screen.getByTestId('name-accounts-region')).toBeInTheDocument()
+  })
+
+  it('still writes the names when a retry finds the Safes already added', async () => {
+    mockUpsertWorkspaceNames.mockResolvedValueOnce({ error: 'Forbidden' })
+    const form = selectTrusted()
+    fireEvent.click(screen.getByTestId('safe-accounts-table'))
+    fireEvent.submit(form)
+    await screen.findByText('Name your Safe accounts')
+
+    fireEvent.submit(screen.getByTestId('add-accounts-button').closest('form')!)
+    await screen.findByText('Forbidden')
+
+    // The add succeeded, so the retry has nothing left to add.
+    mockSpaceSafes = [{ chainId: '1', address: TRUSTED_ADDRESS }]
+    fireEvent.submit(screen.getByTestId('add-accounts-button').closest('form')!)
+
+    await waitFor(() => expect(mockUpsertWorkspaceNames).toHaveBeenCalledTimes(2))
+    expect(mockUpsertWorkspaceNames).toHaveBeenLastCalledWith([
+      { address: TRUSTED_ADDRESS, name: 'Treasury', chainIds: ['1'] },
+    ])
+  })
+
+  it('keeps the naming step submittable after the Safes are already added', async () => {
+    mockUpsertWorkspaceNames.mockResolvedValueOnce({ error: 'Forbidden' })
+    const { rerender } = render(<AddAccounts externalOpen onExternalClose={() => {}} />, withTrusted)
+    const form = screen.getByTestId('add-accounts-button').closest('form')!
+    fireEvent.click(screen.getByTestId('safe-accounts-table'))
+    fireEvent.submit(form)
+    await screen.findByText('Name your Safe accounts')
+
+    fireEvent.submit(screen.getByTestId('add-accounts-button').closest('form')!)
+    await screen.findByText('Forbidden')
+
+    expect(screen.getByTestId('add-accounts-button')).not.toBeDisabled()
+
+    mockSpaceSafes = [{ chainId: '1', address: TRUSTED_ADDRESS }]
+    rerender(<AddAccounts externalOpen onExternalClose={() => {}} />)
+
+    expect(screen.getByTestId('add-accounts-button')).not.toBeDisabled()
+  })
+
+  it('returns to the picker from the naming view', async () => {
+    const form = selectTrusted()
+    fireEvent.click(screen.getByTestId('safe-accounts-table'))
+    fireEvent.submit(form)
+    await screen.findByText('Name your Safe accounts')
+
+    fireEvent.click(screen.getByTestId('name-accounts-back'))
+
+    expect(screen.getByText('My accounts')).toBeInTheDocument()
+    expect(screen.getByTestId('safe-accounts-table')).toBeInTheDocument()
   })
 })
