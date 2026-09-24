@@ -99,6 +99,16 @@ describe('SelectAccountsStep', () => {
     expect(onContinue).toHaveBeenCalledWith([{ chainId: '1', address: '0xB' }])
   })
 
+  it('counts several Safes in the plural', () => {
+    renderStep({ limit: 1 })
+
+    expect(screen.getByText('Deselect 2 Safe accounts to fit the plan.')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Payroll' }))
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Grants' }))
+    expect(screen.getByText(/2 Safe accounts will be removed from the Workspace/)).toBeInTheDocument()
+  })
+
   it('names where the step leads when it is not a checkout', () => {
     renderStep({ continueLabel: 'Continue to downgrade' })
 
@@ -114,6 +124,15 @@ describe('SelectAccountsStep', () => {
     expect(screen.queryByRole('checkbox', { name: 'Treasury' })).not.toBeInTheDocument()
     expect(screen.getByRole('checkbox', { name: 'Grants' })).toBeInTheDocument()
     expect(screen.getByTestId('selected-count')).toHaveTextContent('3 of 2 selected')
+  })
+
+  it('says so when no Safe matches the search', () => {
+    renderStep()
+
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Search Safe list' }), { target: { value: 'nothing' } })
+
+    expect(screen.getByText('No Safe accounts match your search')).toBeInTheDocument()
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
   })
 
   it('shows the given error and blocks the buttons while submitting', () => {

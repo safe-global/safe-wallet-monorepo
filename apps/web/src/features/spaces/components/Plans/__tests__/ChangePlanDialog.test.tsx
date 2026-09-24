@@ -229,6 +229,39 @@ describe('ChangePlanDialog', () => {
     await waitFor(() => expect(mockChangePlan).toHaveBeenCalledWith('price_starter', 'pl_starter'))
   })
 
+  it('locks both buttons and the dismissal while the change is in flight', () => {
+    mockState = { preview, isChanging: true }
+    const onClose = jest.fn()
+    render(
+      <ChangePlanDialog
+        spaceId="space-1"
+        pick={pick}
+        currentPlan={currentPlan}
+        onClose={onClose}
+        onChanged={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByTestId('change-plan-confirm')).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeDisabled()
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' })
+    expect(onClose).not.toHaveBeenCalled()
+  })
+
+  it('cannot confirm a plan without a payment link', () => {
+    render(
+      <ChangePlanDialog
+        spaceId="space-1"
+        pick={{ ...pick, option: { ...pick.option, paymentLinkId: null } }}
+        currentPlan={{ ...currentPlan, isTrialing: true }}
+        onClose={jest.fn()}
+        onChanged={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByTestId('change-plan-confirm')).toBeDisabled()
+  })
+
   it('surfaces a preview error instead of the breakdown', () => {
     mockState = { previewError: { status: 403, data: { message: 'This plan is not available for this workspace' } } }
     render(

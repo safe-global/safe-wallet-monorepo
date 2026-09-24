@@ -58,6 +58,8 @@ const TrialEndingChooser = ({
   const endsAt = currentPlan.periodEndsAt
     ? formatDate(Date.parse(currentPlan.periodEndsAt))
     : 'the end of your free access'
+  const hasNoPlans = !isLoading && tiers.length === 0
+  const showPlans = !isLoading && tiers.length > 0
 
   return (
     <>
@@ -71,17 +73,21 @@ const TrialEndingChooser = ({
               <Typography color="muted">{reminderSubtitle(endsAt, isAdmin, spaceName)}</Typography>
             </div>
 
-            {isLoading ? (
+            {isLoading && (
               <div className="flex gap-4" data-testid="trial-ending-skeleton">
                 <Skeleton className="h-[420px] flex-1 rounded-lg-xl" />
                 <Skeleton className="h-[420px] flex-1 rounded-lg-xl" />
               </div>
-            ) : tiers.length === 0 ? (
+            )}
+
+            {hasNoPlans && (
               <Alert variant="info">
                 <AlertSeverityIcon variant="info" />
                 <AlertDescription>There is no plan available for this Workspace right now.</AlertDescription>
               </Alert>
-            ) : (
+            )}
+
+            {showPlans && (
               <PlanCatalog
                 tiers={tiers}
                 currentPlan={currentPlan}

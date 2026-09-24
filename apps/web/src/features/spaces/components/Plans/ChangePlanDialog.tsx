@@ -10,6 +10,7 @@ import { Typography } from '@/components/ui/typography'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { isElevationRequiredError } from '@/features/oidc-auth'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { formatDate } from '@safe-global/utils/utils/date'
 import { useChangePlan } from '../../hooks/billing/useChangePlan'
 import { useSeatTrim } from '../../hooks/billing/useSeatTrim'
@@ -92,6 +93,10 @@ export default function ChangePlanDialog({
     trimError ?? (error ? getRtkQueryErrorMessage(error) || 'Something went wrong. Please try again.' : undefined)
   const isBusy = isTrimming || isChanging || isVerifying
   const canConfirm = Boolean(priceId && paymentLinkId) && (isTrialSwitch || (Boolean(preview) && !previewError))
+  const newPrice = pick.option.price === null ? null : formatPlanPrice(pick.option.price, pick.tier.currency)
+  const newPriceSuffix = priceSuffix(pick.tier.billingCycle)
+  const isPreviewPending = !isTrialSwitch && (isPreviewing || (!preview && !previewError))
+  const showBreakdown = !isTrialSwitch && !isPreviewPending && preview !== undefined
 
   return (
     <Dialog open onOpenChange={(open) => !open && !isBusy && onClose()}>
@@ -113,27 +118,30 @@ export default function ChangePlanDialog({
               label="New plan"
               name={pick.tier.name}
               seats={pick.option.label}
-              price={`${pick.option.price === null ? 'Custom' : formatPlanPrice(pick.option.price, pick.tier.currency)}${priceSuffix(pick.tier.billingCycle)}`}
+              price={`${newPrice ?? 'Custom'}${newPriceSuffix}`}
             />
           </div>
 
           <Separator />
 
-          {isTrialSwitch ? (
+          {isTrialSwitch && (
             <Typography color="muted" data-testid="change-plan-trial-note">
               You&apos;re on free access
               {currentPlan.periodEndsAt ? ` until ${formatDate(Date.parse(currentPlan.periodEndsAt))}` : ''}. Nothing is
-              charged now. From then on you&apos;ll pay{' '}
-              {pick.option.price === null ? 'a custom price' : formatPlanPrice(pick.option.price, pick.tier.currency)}
-              {priceSuffix(pick.tier.billingCycle)} for {pick.tier.name}.
+              charged now. From then on you&apos;ll pay {newPrice ?? 'a custom price'}
+              {newPriceSuffix} for {pick.tier.name}.
             </Typography>
-          ) : isPreviewing || (!preview && !previewError) ? (
+          )}
+
+          {isPreviewPending && (
             <div className="flex flex-col gap-2" data-testid="change-plan-skeleton">
               <Skeleton className="h-5 w-full" />
               <Skeleton className="h-5 w-3/4" />
               <Skeleton className="h-6 w-1/2" />
             </div>
-          ) : preview ? (
+          )}
+
+          {showBreakdown && (
             <>
               <div className="flex flex-col gap-3">
                 <Typography variant="paragraph-large-medium">Proration details</Typography>
@@ -166,12 +174,12 @@ export default function ChangePlanDialog({
                 <Typography>{note}</Typography>
               </div>
             </>
-          ) : null}
+          )}
 
           {removed.length > 0 && (
             <Typography color="muted" data-testid="change-plan-removed-note">
-              {removed.length === 1 ? '1 Safe account' : `${removed.length} Safe accounts`} will be removed from the
-              Workspace. They remain available in My accounts.
+              {removed.length} Safe account{maybePlural(removed)} will be removed from the Workspace. They remain
+              available in My accounts.
             </Typography>
           )}
 
