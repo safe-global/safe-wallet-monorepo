@@ -17,6 +17,8 @@ import type { CurrentPlan, PlanPick, PlanSeatOption, PlanTier } from './types'
 
 type Cycle = 'month' | 'year'
 
+const isCycle = (value: unknown): value is Cycle => value === 'month' || value === 'year'
+
 export type CurrentBadge = { label: string; variant: 'brand' | 'warning' }
 
 /** Fixed marketing copy: the saving differs per plan, so the toggle advertises the ceiling rather than a derived figure. */
@@ -46,11 +48,14 @@ const Seats = ({
         <SelectValue>{value.label}</SelectValue>
       </SelectTrigger>
       <SelectContent>
-        {options.map((option) => (
-          <SelectItem key={optionKey(option)} value={optionKey(option)}>
-            {option.label}
-          </SelectItem>
-        ))}
+        {options.map((option) => {
+          const key = optionKey(option)
+          return (
+            <SelectItem key={key} value={key}>
+              {option.label}
+            </SelectItem>
+          )
+        })}
       </SelectContent>
     </Select>
   ) : (
@@ -136,6 +141,11 @@ const PlanCta = ({
           {cta.label}
         </Button>
       )
+    // A new CTA kind must pick a branch above rather than rendering no button.
+    default: {
+      const _exhaustive: never = cta
+      return _exhaustive
+    }
   }
 }
 
@@ -267,7 +277,7 @@ export function PlanCatalog({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between gap-4">
-        <Tabs value={cycle} onValueChange={(value) => setCycle(value as Cycle)}>
+        <Tabs value={cycle} onValueChange={(value) => isCycle(value) && setCycle(value)}>
           <TabsList aria-label="Billing cycle">
             <TabsTrigger value="month">Monthly</TabsTrigger>
             <TabsTrigger value="year">

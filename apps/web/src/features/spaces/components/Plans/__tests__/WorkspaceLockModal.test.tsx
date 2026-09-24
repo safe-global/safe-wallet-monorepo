@@ -157,6 +157,19 @@ describe('WorkspaceLockModal', () => {
     expect(mockPush).toHaveBeenCalledWith('/welcome/accounts')
   })
 
+  it('offers a non-admin of a lapsed Workspace to create a new one, and nobody else', () => {
+    mockUseIsAdmin.mockReturnValue(false)
+    mockUseWorkspaceLock.mockReturnValue(lock({ trialPeriodDays: null, reason: 'lapsed', endedAt: ENDED_AT }))
+    const { unmount } = render(<WorkspaceLockModal spaceId={SPACE_ID} />)
+
+    expect(screen.getByRole('link', { name: 'Create new Workspace' })).toHaveAttribute('href', '/welcome/spaces')
+    unmount()
+
+    mockUseWorkspaceLock.mockReturnValue(lock({ reason: 'payment-failed' }))
+    render(<WorkspaceLockModal spaceId={SPACE_ID} />)
+    expect(screen.queryByRole('link', { name: 'Create new Workspace' })).not.toBeInTheDocument()
+  })
+
   it('words the member explanation by lock reason', () => {
     expect(memberCopy('lapsed', null, ENDED_AT, 'Acme Inc')).toEqual({
       title: 'Your Safe Pro free access ended on Dec 5, 2026',

@@ -48,6 +48,8 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
       buildPlanTiers(paidPlans, currentPlan && subscription ? { subscription, seatsQuota: seats?.quota } : undefined),
     [paidPlans, currentPlan, subscription, seats?.quota],
   )
+  // The flag is undefined until the chain config loads; the skeleton holds until it is known.
+  const isLoading = isSafePro === undefined || isPlanLoading || isOffersLoading
 
   return (
     <AuthState spaceId={spaceId}>
@@ -56,7 +58,7 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
           Plans
         </Typography>
 
-        {!isSafePro ? (
+        {isSafePro === false ? (
           <Card
             size="none"
             // eslint-disable-next-line no-restricted-syntax -- Figma spec calls for a 32px corner one-off; no radius token in the scale matches it
@@ -64,7 +66,7 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
           >
             <SafeProAnnouncement location="plans_page" />
           </Card>
-        ) : isPlanLoading || isOffersLoading ? (
+        ) : isLoading ? (
           <PlansSkeleton />
         ) : (
           <Plans

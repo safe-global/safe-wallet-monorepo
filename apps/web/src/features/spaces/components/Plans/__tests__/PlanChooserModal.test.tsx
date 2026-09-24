@@ -77,7 +77,7 @@ describe('PlanChooserModal', () => {
       <PlanChooserModal spaceId={SPACE_ID} reason="lapsed" endedAt={ENDED_AT} onBack={jest.fn()} />,
     )
 
-    expect(screen.queryByText(/exportable for 90 days/)).not.toBeInTheDocument()
+    expect(screen.queryByText(LAPSED_DATA_NOTE)).not.toBeInTheDocument()
     await user.hover(screen.getByTestId('lapsed-data-note'))
     expect(await screen.findByText(LAPSED_DATA_NOTE)).toBeInTheDocument()
   })

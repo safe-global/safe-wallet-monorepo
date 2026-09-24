@@ -75,7 +75,9 @@ export default function PlanChooserModal({
   const { openPortal, isRedirecting: isOpeningPortal } = useBillingPortal(spaceId)
   const [pick, setPick] = useState<PlanPick>()
   const { title, subtitle } = chooserCopy(reason, endedAt)
-  const trimming = pick && needsTrim(pick.option.seats) ? pick : undefined
+  const trimming = pick && needsTrim(pick.option.seats) ? { ...pick, limit: pick.option.seats } : undefined
+  const isPaymentFailed = reason === 'payment-failed'
+  const hasNoPlans = tiers.length === 0
 
   const subscribe = (picked: PlanPick) => {
     if (!picked.option.paymentLinkId) return
@@ -90,7 +92,7 @@ export default function PlanChooserModal({
           {trimming ? (
             <SelectAccountsStep
               title="Choose Safe accounts for your plan"
-              limit={trimming.option.seats as number}
+              limit={trimming.limit}
               planName={trimming.tier.name}
               onBack={() => setPick(undefined)}
               onContinue={(removed) => {
@@ -111,7 +113,7 @@ export default function PlanChooserModal({
                 </div>
               </div>
 
-              {reason === 'payment-failed' ? (
+              {isPaymentFailed ? (
                 <Button
                   size="lg"
                   accentIcon
@@ -127,7 +129,7 @@ export default function PlanChooserModal({
                   <Skeleton className="h-[420px] flex-1 rounded-lg-xl" />
                   <Skeleton className="h-[420px] flex-1 rounded-lg-xl" />
                 </div>
-              ) : tiers.length === 0 ? (
+              ) : hasNoPlans ? (
                 <Alert variant="info">
                   <AlertSeverityIcon variant="info" />
                   <AlertDescription>There is no plan available for this Workspace right now.</AlertDescription>

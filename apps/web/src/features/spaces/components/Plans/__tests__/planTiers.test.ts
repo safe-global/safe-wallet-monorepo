@@ -44,21 +44,29 @@ const BUSINESS_TRIAL: PlanGroup = {
   offers: [offer({ paymentLinkId: 'b10m', planName: 'Business', trialPeriodDays: 60 })],
 }
 
-const subscription = (plan: Partial<Subscription['plan']> = {}): Subscription =>
-  ({
-    id: 'sub_1',
-    status: 'active',
-    plan: {
-      id: 'price_b10m',
-      name: 'Business',
-      currentPrice: 499,
-      originalPrice: null,
-      currency: 'eur',
-      billingCycle: 'month',
-      features: [],
-      ...plan,
-    },
-  }) as unknown as Subscription
+const subscription = (plan: Partial<Subscription['plan']> = {}): Subscription => ({
+  id: 'sub_1',
+  customerId: 'cus_1',
+  upstreamCustomerId: 'cus_stripe_1',
+  status: 'active',
+  createdAt: 0,
+  startAt: 0,
+  cancelledAt: null,
+  cancelAt: null,
+  plan: {
+    id: 'price_b10m',
+    name: 'Business',
+    currentPrice: 499,
+    originalPrice: null,
+    paymentMethod: 'fiat',
+    currency: 'eur',
+    features: [],
+    billingCycle: 'month',
+    type: 'standard',
+    product: null,
+    ...plan,
+  },
+})
 
 const businessPlan: CurrentPlan = {
   name: 'Business',
@@ -118,10 +126,18 @@ describe('planTiers', () => {
 
   it('takes the current seats from the subscription tag before the entitlements quota', () => {
     const plan: PlanSummary = { name: 'Business', status: 'active', periodEndsAt: null, daysLeft: null }
-    const tagged = { ...subscription(), metadata: { FEATURE_SAFE_SEATS: '5' } } as unknown as Subscription
+    const tagged: Subscription = { ...subscription(), metadata: { FEATURE_SAFE_SEATS: '5' } }
     expect(subscriptionToTier(tagged, 10).options[0]).toMatchObject({ label: '5 Safe accounts', seats: 5 })
     expect(toCurrentPlan(tagged, plan, false, 10).seatsLabel).toBe('5 Safe accounts')
     expect(toCurrentPlan(subscription(), plan, false, 10).seatsLabel).toBe('10 Safe accounts')
+  })
+
+  it('never resolves inherited keys as a plan’s static copy', () => {
+    const [tier] = offersToTiers([
+      { name: 'constructor', offers: [offer({ paymentLinkId: 'c1', planName: 'constructor' })] },
+    ])
+    expect(tier.features).toEqual([])
+    expect(subscriptionToTier(subscription({ name: 'toString' }), 10).features).toEqual([])
   })
 
   it('orders the offered plans, the current plan and the static Enterprise card', () => {
@@ -266,10 +282,10 @@ describe('planTiers', () => {
     expect(tier.features).toEqual(['From Stripe', 'In order'])
     expect(tier.options[0].features).toEqual(['From Stripe', 'In order'])
 
-    const tagged = {
+    const tagged: Subscription = {
       ...subscription({ id: 'price_b20m' }),
       metadata: { planDescriptions: JSON.stringify(['Sub perk']) },
-    } as unknown as Subscription
+    }
     expect(subscriptionToTier(tagged, 20).features).toEqual(['Sub perk'])
 
     const [merged] = buildPlanTiers([stripeBusiness], {

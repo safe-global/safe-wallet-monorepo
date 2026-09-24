@@ -34,8 +34,20 @@ jest.mock('../../SafeProModals', () => ({
         {ctaLabel ?? 'Go to Workspace'}
       </button>
     ) : null,
-  SafeProSubscriptionActivatedModal: ({ open, planName }: { open: boolean; planName: string }) =>
-    open ? <div data-testid="subscription-activated-modal">{planName}</div> : null,
+  SafeProSubscriptionActivatedModal: ({
+    open,
+    planName,
+    seatsLabel,
+  }: {
+    open: boolean
+    planName: string
+    seatsLabel?: string
+  }) =>
+    open ? (
+      <div data-testid="subscription-activated-modal" data-seats={seatsLabel}>
+        {planName}
+      </div>
+    ) : null,
   SafeProPendingModal: ({ title }: { title: string }) => <div data-testid="checkout-pending">{title}</div>,
   SafeProNoticeModal: ({
     title,
@@ -113,6 +125,27 @@ describe('CheckoutReturnModals', () => {
 
     expect(screen.getByTestId('subscription-activated-modal')).toHaveTextContent('Business')
     expect(screen.queryByTestId('trial-activated-modal')).not.toBeInTheDocument()
+  })
+
+  it('names the seats on the subscription confirmation only once the quota is known', () => {
+    mockUseCheckoutReturn.mockReturnValue({ status: 'complete', subscription: subscription('active'), dismiss, retry })
+    mockUseSpacePlan.mockReturnValue({ plan: null, seats: { used: 3, quota: 20 }, refetch })
+    const { unmount } = render(<CheckoutReturnModals />)
+    expect(screen.getByTestId('subscription-activated-modal')).toHaveAttribute('data-seats', '20 Safe accounts')
+    unmount()
+
+    mockUseSpacePlan.mockReturnValue({ plan: null, seats: { used: 3, quota: null }, refetch })
+    render(<CheckoutReturnModals />)
+    expect(screen.getByTestId('subscription-activated-modal')).not.toHaveAttribute('data-seats')
+  })
+
+  it('falls back to the plan’s period end when the subscription carries none', () => {
+    const { currentPeriodEnd: _, ...withoutEnd } = subscription('trialing')
+    mockUseCheckoutReturn.mockReturnValue({ status: 'complete', subscription: withoutEnd, dismiss, retry })
+    mockUseSpacePlan.mockReturnValue({ plan: { periodEndsAt: '2026-12-06T00:00:00Z' }, refetch })
+    render(<CheckoutReturnModals />)
+
+    expect(screen.getByTestId('trial-activated-modal')).toHaveAttribute('data-ends', String(Date.UTC(2026, 11, 6)))
   })
 
   it('renders nothing when the user did not come back from Stripe', () => {
