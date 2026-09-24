@@ -62,6 +62,11 @@ export const SpaceSelectorDropdown = ({
   const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
   const { tierName, isTrialing, isTrialEndingSoon, plan } = useSpacePlan()
   const planLabel = !isSafePro ? 'Workspace' : isTrialing ? trialLabel(plan?.daysLeft) : tierName
+  const planLabelColor = !isSafePro
+    ? 'text-muted-foreground'
+    : isTrialEndingSoon
+      ? 'text-warning-strong'
+      : 'text-green-500'
   const displayName = truncateSpaceName(spaceName, SPACE_SELECTOR_NAME_MAX_LENGTH)
   const initial = spaceName.charAt(0).toUpperCase()
   const selectedSpaceColor = spaceName ? getDeterministicColor(spaceName) : undefined
@@ -191,15 +196,7 @@ export const SpaceSelectorDropdown = ({
                   <span className={css.spaceSelectorName} />
                 )}
               </span>
-              <span
-                className={cn(
-                  css.spaceSelectorSubtitle,
-                  'block truncate',
-                  !isSafePro ? 'text-muted-foreground' : isTrialEndingSoon ? 'text-warning-strong' : 'text-green-500',
-                )}
-              >
-                {planLabel}
-              </span>
+              <span className={cn(css.spaceSelectorSubtitle, 'block truncate', planLabelColor)}>{planLabel}</span>
             </div>
             <ChevronsUpDown className="ml-auto size-4 shrink-0 group-data-[collapsible=icon]:hidden" aria-hidden />
           </>
