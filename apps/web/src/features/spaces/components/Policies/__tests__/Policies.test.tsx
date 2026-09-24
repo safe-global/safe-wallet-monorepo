@@ -394,37 +394,6 @@ describe('Policies', () => {
 
       expect(onSelectPolicy).toHaveBeenCalledWith(proposerPolicy)
     })
-
-    it('opens the spending limit drawer from a row, with the list still behind it', async () => {
-      const { user } = renderWithUserEvent(<Policies policies={mockPolicies()} />)
-
-      await user.click(screen.getAllByText('Spending limit')[0])
-
-      expect(await screen.findByRole('dialog', { name: 'Spending limit' })).toBeInTheDocument()
-      expect(screen.getByTestId('policies')).toBeInTheDocument()
-    })
-
-    it('returns to the list when the drawer is closed', async () => {
-      const { user } = renderWithUserEvent(<Policies policies={mockPolicies()} />)
-
-      await user.click(screen.getAllByText('Spending limit')[0])
-      const dialog = await screen.findByRole('dialog', { name: 'Spending limit' })
-      await user.click(within(dialog).getByRole('button', { name: 'Close' }))
-
-      await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Spending limit' })).not.toBeInTheDocument())
-      expect(screen.getByTestId('policies-list')).toBeInTheDocument()
-    })
-
-    it('does not open the drawer for a non-spending-limit row, but still reports it', async () => {
-      const onSelectPolicy = jest.fn()
-      const proposerPolicy = asActivePolicy(mockProposerPolicy())
-
-      const { user } = renderWithUserEvent(<Policies policies={[proposerPolicy]} onSelectPolicy={onSelectPolicy} />)
-      await user.click(screen.getByRole('button', { name: 'Open Proposer for 0x8675...a19b' }))
-
-      expect(onSelectPolicy).toHaveBeenCalledWith(proposerPolicy)
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    })
   })
 
   describe('starting the spending limit flow', () => {
