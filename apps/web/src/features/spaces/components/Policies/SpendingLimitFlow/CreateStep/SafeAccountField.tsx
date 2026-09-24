@@ -1,9 +1,8 @@
-import { useEffect, type ReactElement } from 'react'
+import type { ReactElement } from 'react'
 import { Controller, useFormContext } from 'react-hook-form'
 import { parseSafeScopeKey } from '@/components/tx-flow/safe-scope'
 import SafeAccountSelector from '../../SafeAccountSelector'
 import type { SafeAccountEntry } from '../../SafeAccountSelector/types'
-import { findSafeAccount } from '../../SafeAccountSelector/utils'
 import type { SpendingLimitPolicyFormValues } from '../types'
 
 export type SafeAccountFieldProps = {
@@ -24,18 +23,13 @@ const SafeAccountField = ({
   hasWallet,
   onSafeChange,
 }: SafeAccountFieldProps): ReactElement => {
-  const { control, getValues, trigger } = useFormContext<SpendingLimitPolicyFormValues>()
-
-  // The prefilled value is validated against a list that resolves later.
-  useEffect(() => {
-    if (getValues('safe')) void trigger('safe')
-  }, [accounts, getValues, trigger])
+  const { control } = useFormContext<SpendingLimitPolicyFormValues>()
 
   return (
     <Controller
       control={control}
       name="safe"
-      rules={{ required: true, validate: (id) => !findSafeAccount(accounts, id)?.ineligibleReason }}
+      rules={{ required: true }}
       render={({ field }) => (
         <SafeAccountSelector
           accounts={accounts}

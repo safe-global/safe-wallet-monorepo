@@ -112,6 +112,13 @@ const treasury: SafeAccountOption = {
   chain: { chainId: '1', chainName: 'Ethereum', chainLogoUri: null, shortName: 'eth' },
 }
 
+const notActivated: SafeAccountOption = {
+  ...treasury,
+  id: buildSafeAccountId('137', SAFE_A),
+  chainId: '137',
+  ineligibleReason: 'not-activated',
+}
+
 const renderForm = (props: Partial<SpendingLimitPolicyFormProps> = {}) => {
   const onSubmit = jest.fn()
   const onSafeChange = jest.fn()
@@ -194,6 +201,29 @@ describe('SpendingLimitPolicyForm', () => {
         expect.anything(),
       ),
     )
+  })
+
+  it('keeps Next disabled when the prefilled Safe is not activated', async () => {
+    const { user } = renderForm({
+      accounts: [treasury, notActivated],
+      defaultValues: { ...createDefaultFormValues(), safe: notActivated.id },
+    })
+
+    await fillFirstSpender(user)
+
+    await waitFor(() => expect(screen.getAllByTestId('limit-amount-input')[0]).toHaveValue('1'))
+    expect(screen.getByRole('button', { name: NEXT_LABEL })).toBeDisabled()
+  })
+
+  it('enables Next when the prefilled Safe is activated', async () => {
+    const { user } = renderForm({
+      accounts: [treasury, notActivated],
+      defaultValues: { ...createDefaultFormValues(), safe: treasury.id },
+    })
+
+    await fillFirstSpender(user)
+
+    await waitFor(() => expect(screen.getByRole('button', { name: NEXT_LABEL })).toBeEnabled())
   })
 
   it('keeps Next disabled while a second spender is incomplete', async () => {

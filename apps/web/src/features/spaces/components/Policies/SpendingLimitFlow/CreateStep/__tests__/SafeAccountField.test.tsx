@@ -25,33 +25,18 @@ const treasury: SafeAccountOption = {
   chain: { chainId: '1', chainName: 'Ethereum', chainLogoUri: null, shortName: 'eth' },
 }
 
-const notActivated: SafeAccountOption = {
-  ...treasury,
-  id: buildSafeAccountId('137', SAFE_A),
-  chainId: '137',
-  ineligibleReason: 'not-activated',
-}
-
 const Harness = ({
   onSafeChange,
   onRead,
-  accounts = [treasury],
-  safe = '',
 }: {
   onSafeChange: (chainId: string, address: string) => void
   onRead: (values: SpendingLimitPolicyFormValues) => void
-  accounts?: SafeAccountOption[]
-  safe?: string
 }) => {
-  const methods = useForm<SpendingLimitPolicyFormValues>({
-    defaultValues: { ...createDefaultFormValues(), safe },
-    mode: 'onChange',
-  })
+  const methods = useForm<SpendingLimitPolicyFormValues>({ defaultValues: createDefaultFormValues() })
   return (
     <FormProvider {...methods}>
-      <span data-testid="safe-valid">{String(methods.formState.isValid)}</span>
       <SafeAccountField
-        accounts={accounts}
+        accounts={[treasury]}
         isLoading={false}
         isError={false}
         onRetry={jest.fn()}
@@ -85,26 +70,5 @@ describe('SafeAccountField', () => {
     expect(onSafeChange).toHaveBeenCalledWith('1', SAFE_A)
     await user.click(screen.getByRole('button', { name: 'read' }))
     expect(onRead).toHaveBeenCalledWith(expect.objectContaining({ safe: `1:${SAFE_A}` }))
-  })
-
-  it('rejects a prefilled Safe that is not activated once the accounts resolve', async () => {
-    renderWithUserEvent(
-      <Harness
-        onSafeChange={jest.fn()}
-        onRead={jest.fn()}
-        accounts={[treasury, notActivated]}
-        safe={notActivated.id}
-      />,
-    )
-
-    await waitFor(() => expect(screen.getByTestId('safe-valid')).toHaveTextContent('false'))
-  })
-
-  it('accepts a prefilled Safe that is activated', async () => {
-    renderWithUserEvent(
-      <Harness onSafeChange={jest.fn()} onRead={jest.fn()} accounts={[treasury, notActivated]} safe={treasury.id} />,
-    )
-
-    await waitFor(() => expect(screen.getByTestId('safe-valid')).toHaveTextContent('true'))
   })
 })
