@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import SelectedCounter, { safeLimitTooltip } from './index'
+import SelectedCounter from './index'
+import { safeLimitTooltip } from '../../constants'
 
 const meta = {
   title: 'Features/Spaces/SelectedCounter',

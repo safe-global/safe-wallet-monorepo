@@ -44,7 +44,7 @@ export { SpacesFeature } from './SpacesFeature'
 export type { SpacesContract } from './contract'
 
 // Domain constants (max accounts/workspaces, shared limit copy)
-export { SAFE_ACCOUNTS_LIMIT, SPACES_LIMIT, safeAccountsLimitReachedText } from './constants'
+export { SAFE_ACCOUNTS_LIMIT, SPACES_LIMIT, seatLimitNotice } from './constants'
 
 // Hooks exported directly (always loaded, not in contract)
 // Keep hooks lightweight - minimal imports, heavy logic in services if needed

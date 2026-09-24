@@ -26,7 +26,8 @@ jest.mock('@/store/notificationsSlice', () => ({
   showNotification: (payload: unknown) => ({ type: 'notifications/add', payload }),
 }))
 
-jest.mock('../../../../utils/seatLimitError', () => ({
+jest.mock('../../../../constants', () => ({
+  ...jest.requireActual('../../../../constants'),
   getSeatLimitMessage: (error: unknown) => mockGetSeatLimitMessage(error),
 }))
 

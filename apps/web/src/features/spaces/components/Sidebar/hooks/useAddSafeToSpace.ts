@@ -9,7 +9,7 @@ import type { SpaceItem } from '../types'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
-import { getSeatLimitMessage } from '../../../utils/seatLimitError'
+import { getSeatLimitMessage } from '../../../constants'
 
 interface UseAddSafeToSpaceOptions {
   spaces: SpaceItem[]

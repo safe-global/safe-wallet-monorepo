@@ -1,3 +1,5 @@
+import { getQuotaExceededError } from '@safe-global/utils/services/quotaErrors'
+
 const safeAccountsLimitRaw = Number.parseInt(process.env.NEXT_PUBLIC_SPACES_SAFE_ACCOUNTS_LIMIT ?? '', 10)
 
 /**
@@ -15,6 +17,31 @@ export const SPACES_LIMIT = 10
 /** Maximum length of a workspace name. Enforced on both create and rename. */
 export { SPACE_NAME_MAX_LENGTH } from '@safe-global/utils/validation/names'
 
-/** Friendly notice shown when a workspace is already at the Safe accounts cap. */
-export const safeAccountsLimitReachedText = (limit: number = SAFE_ACCOUNTS_LIMIT) =>
-  `You've reached the maximum of ${limit} Safe accounts per Workspace`
+/** The CGW refused to add Safes because the plan's seats are spent; undefined for any other error. */
+export const getSeatLimitMessage = (error: unknown): string | undefined => {
+  const quota = getQuotaExceededError(error)
+  if (!quota || quota.feature !== 'safe_seats') return undefined
+  return `Your plan covers ${quota.quota} Safe accounts and this Workspace already holds ${quota.used}. Remove one to add another, or upgrade your plan.`
+}
+
+/** A counterfactual Safe was kept in My accounts because the Workspace has no seat left. */
+export const seatLimitSkippedMessage = (limit: number | null): string => {
+  const seats = limit === null ? 'seat limit' : `limit of ${limit} Safe accounts`
+  return `Safe created in My accounts. The Workspace is at its ${seats}, so it wasn't added there.`
+}
+
+/** Notice before creating a Safe that stays out of a full Workspace; `outcome` names what happens to it. */
+export const seatLimitNotice = (limit: number | null, outcome: string): string =>
+  `This Workspace is at its limit of ${limit} Safe accounts. ${outcome} in My accounts, outside the Workspace.`
+
+export const seatsTooltip = (tierName: string | undefined, quota: number | null | undefined) =>
+  `${tierName ?? 'Your plan'} covers ${quota ?? 'unlimited'} Safe accounts. At ${quota ?? 'unlimited'}, remove one from this Workspace to add another. Safe accounts you leave out remain available in My accounts.`
+
+/** Tooltip on the step that trims a Workspace down to the plan's seats. */
+export const selectSeatsTooltip = (planName: string, limit: number): string =>
+  `${planName} covers ${limit} Safe accounts. Safe accounts you leave out remain available outside the Workspace. You can swap them in any time.`
+
+export const safeLimitTooltip = (limit: number | null): string =>
+  limit === null
+    ? 'Your plan has no limit on Safe accounts per Workspace'
+    : `You can add up to ${limit} Safe accounts per Workspace`

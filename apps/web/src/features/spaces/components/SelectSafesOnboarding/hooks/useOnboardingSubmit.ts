@@ -31,7 +31,7 @@ import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { getSafeId, getMultiChainSafeId } from '../utils/safeIds'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../constants'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
-import { getSeatLimitMessage } from '../../../utils/seatLimitError'
+import { getSeatLimitMessage } from '../../../constants'
 
 // URL safe-param prefix can be either numeric chainId or shortName ("1:" or "eth:").
 const safeParamToFormKey = (safeParam: string, chains: Chain[]): string | undefined => {

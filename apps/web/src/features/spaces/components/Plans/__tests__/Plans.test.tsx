@@ -3,7 +3,8 @@ import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/bil
 import { SUPPORT_CHAT_URL } from '@/config/constants'
 import type { PlanGroup, PlanSummary } from '../../../hooks/billing/types'
 import Plans from '../index'
-import { getCurrentBadge, remaining, seatsTooltip } from '../PlanStatusCard'
+import { getCurrentBadge, remaining } from '../PlanStatusCard'
+import { seatsTooltip } from '../../../constants'
 import { buildPlanTiers } from '../planTiers'
 import type { CurrentPlan } from '../types'
 

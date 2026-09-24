@@ -70,7 +70,7 @@ import uniq from 'lodash/uniq'
 import { selectRpc } from '@/store/settingsSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { isAuthenticated, lastUsedSpace } from '@/store/authSlice'
-import { useIsAdmin, useSpaceSafeCount, useSpaceSafeLimit } from '@/features/spaces'
+import { seatLimitNotice, useIsAdmin, useSpaceSafeCount, useSpaceSafeLimit } from '@/features/spaces'
 import { isSpaceAtSafeLimit, normalizeSpaceId } from '@/utils/spaces'
 import { AppRoutes } from '@/config/routes'
 import type { CreateSafeResult, ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
@@ -526,8 +526,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
             {effectivePayMethod === PayMethod.PayLater && willStayOutsideSpace && (
               <div className="mt-4" data-testid="space-seat-limit-notice">
                 <ErrorMessage level="info">
-                  This Workspace is at its limit of {spaceSafeLimit} Safe accounts. The new Safe will be created in My
-                  accounts, outside the Workspace.
+                  {seatLimitNotice(spaceSafeLimit, 'The new Safe will be created')}
                 </ErrorMessage>
               </div>
             )}
