@@ -341,7 +341,7 @@ describe('SafeAccountSelector', () => {
       expect(rows[1]).toHaveTextContent('Marketing')
     })
 
-    it('marks the row aria-disabled while leaving it in the accessibility tree', async () => {
+    it('marks the row disabled while leaving it in the accessibility tree', async () => {
       const { user } = renderWithUserEvent(
         <SafeAccountSelector accounts={[singleChainAccount, notActivated]} onChange={jest.fn()} />,
       )
@@ -350,7 +350,62 @@ describe('SafeAccountSelector', () => {
 
       const rows = await screen.findAllByRole('option')
       expect(rows[1]).toHaveAttribute('aria-disabled', 'true')
-      expect(rows[1]).not.toHaveAttribute('data-disabled')
+    })
+
+    it('keeps the popup open after a not-activated row is clicked', async () => {
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[singleChainAccount, notActivated]} onChange={jest.fn()} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      await user.click(rows[1])
+
+      expect(screen.getByRole('combobox')).toHaveAttribute('aria-expanded', 'true')
+    })
+
+    it('does not select a not-activated row with the keyboard', async () => {
+      const onChange = jest.fn()
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[notActivated, singleChainAccount]} onChange={onChange} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      rows[0].focus()
+      await user.keyboard('{Enter}')
+
+      expect(onChange).not.toHaveBeenCalledWith(notActivated.id)
+      expect(screen.getByRole('combobox')).toHaveAttribute('aria-expanded', 'true')
+    })
+
+    it('flags a preselected not-activated value as invalid and explains why', () => {
+      render(
+        <SafeAccountSelector
+          accounts={[singleChainAccount, notActivated]}
+          value={notActivated.id}
+          onChange={jest.fn()}
+        />,
+      )
+
+      expect(screen.getByRole('combobox')).toHaveAttribute('aria-invalid', 'true')
+      expect(screen.getByRole('alert')).toHaveTextContent(INELIGIBILITY_TEXT['not-activated'])
+      expect(screen.queryByTestId('safe-account-helper-text')).not.toBeInTheDocument()
+    })
+
+    it('lets the form validation message win over the ineligibility text', () => {
+      render(
+        <SafeAccountSelector
+          accounts={[singleChainAccount, notActivated]}
+          value={notActivated.id}
+          onChange={jest.fn()}
+          errorMessage="Required"
+        />,
+      )
+
+      expect(screen.getByRole('alert')).toHaveTextContent('Required')
     })
 
     it('does not call onChange when a not-activated row is clicked', async () => {

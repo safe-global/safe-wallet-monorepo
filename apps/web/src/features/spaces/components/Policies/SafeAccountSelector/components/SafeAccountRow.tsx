@@ -82,7 +82,12 @@ const IneligibleRow = ({
   <Tooltip>
     <TooltipTrigger
       render={
-        <SelectItem value={account.id} data-testid={testId} aria-disabled className={cn(ROW_CLASS, 'opacity-50')} />
+        <SelectItem
+          value={account.id}
+          data-testid={testId}
+          disabled
+          className={cn(ROW_CLASS, 'data-[disabled]:pointer-events-auto')}
+        />
       }
     >
       {children}

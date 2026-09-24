@@ -9,6 +9,7 @@ import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@/compon
 import { Typography } from '@/components/ui/typography'
 import SafeAccountSelector from '../SafeAccountSelector'
 import type { useEligibleSafeAccounts } from '../SafeAccountSelector/hooks/useEligibleSafeAccounts'
+import { findSafeAccount } from '../SafeAccountSelector/utils'
 import { GRANT_INFO_DESCRIPTION, GRANT_INFO_TITLE, PROPOSER_FIELD_HELPER, PROPOSER_NAME_HELPER } from './constants'
 
 export type ProposerRoleFormValues = {
@@ -48,7 +49,8 @@ const ProposerRoleForm = ({
     if (getValues('proposer')) void trigger('proposer')
   }, [safeAccount, validateProposer, trigger, getValues])
 
-  const canSubmit = Boolean(safeAccount) && formState.isValid
+  const isSafeAccountIneligible = Boolean(findSafeAccount(safeAccounts.accounts, safeAccount)?.ineligibleReason)
+  const canSubmit = Boolean(safeAccount) && !isSafeAccountIneligible && formState.isValid
 
   return (
     <FormProvider {...methods}>
