@@ -34,7 +34,29 @@ describe('PendingSignatures', () => {
 })
 
 describe('PolicyOverview', () => {
-  it('lists who the policy applies to and who set it up', () => {
+  // Spending limits pass no initiator, so the row must not render an empty account.
+  it('omits the initiated-by row when no initiator is given', () => {
+    render(
+      <PolicyOverview
+        appliesTo={{ address: SAFE.address, name: 'Treasury' }}
+        lastUpdated="Sep 22, 2026"
+        enforcedBy="Safe module"
+      />,
+    )
+
+    expect(screen.queryByText('Initiated by')).not.toBeInTheDocument()
+
+    const appliesToRow = screen.getByText('Applies to').closest('div') as HTMLElement
+    expect(within(appliesToRow).getByText('Treasury')).toBeInTheDocument()
+
+    const lastUpdatedRow = screen.getByText('Last updated').closest('div') as HTMLElement
+    expect(within(lastUpdatedRow).getByText('Sep 22, 2026')).toBeInTheDocument()
+
+    const enforcedByRow = screen.getByText('Enforced by').closest('div') as HTMLElement
+    expect(within(enforcedByRow).getByText('Safe module')).toBeInTheDocument()
+  })
+
+  it('binds each account to its own row when an initiator is given', () => {
     render(
       <PolicyOverview
         appliesTo={{ address: SAFE.address, name: 'Treasury' }}
@@ -51,11 +73,5 @@ describe('PolicyOverview', () => {
     const initiatedByRow = screen.getByText('Initiated by').closest('div') as HTMLElement
     expect(within(initiatedByRow).getByText('Alice')).toBeInTheDocument()
     expect(within(initiatedByRow).queryByText('Treasury')).not.toBeInTheDocument()
-
-    const lastUpdatedRow = screen.getByText('Last updated').closest('div') as HTMLElement
-    expect(within(lastUpdatedRow).getByText('Sep 22, 2026')).toBeInTheDocument()
-
-    const enforcedByRow = screen.getByText('Enforced by').closest('div') as HTMLElement
-    expect(within(enforcedByRow).getByText('Safe module')).toBeInTheDocument()
   })
 })

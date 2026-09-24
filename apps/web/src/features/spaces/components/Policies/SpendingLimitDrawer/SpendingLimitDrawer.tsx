@@ -19,7 +19,8 @@ export type SpendingLimitDrawerProps = {
   safe: { address: string; name?: string }
   overview: {
     appliesTo: AccountIdentityProps
-    initiatedBy: AccountIdentityProps
+    /** Not supplied for spending limits — CGW returns no initiator. */
+    initiatedBy?: AccountIdentityProps
     lastUpdated: string
     enforcedBy: string
   }

@@ -20,7 +20,6 @@ const SAFE = { address: '0x8675B754342754A30A2AeF474D114d8460bca19b', name: MOCK
 
 const OVERVIEW = {
   appliesTo: { address: SAFE.address, name: 'Treasury' },
-  initiatedBy: { address: '0x0000000000000000000000000000000000000A11', name: 'Alice' },
   lastUpdated: 'Sep 22, 2026 · 03:35 UTC',
   enforcedBy: 'Safe module',
 }
@@ -95,7 +94,6 @@ export const UnnamedAccounts: Story = {
     overview: {
       ...OVERVIEW,
       appliesTo: { address: SAFE.address },
-      initiatedBy: { address: OVERVIEW.initiatedBy.address },
     },
   },
 }
@@ -135,7 +133,6 @@ export const LongNames: Story = {
     overview: {
       ...OVERVIEW,
       appliesTo: { ...OVERVIEW.appliesTo, name: 'Marketing operations and treasury management' },
-      initiatedBy: { ...OVERVIEW.initiatedBy, name: 'Jacob from the marketing operations team' },
     },
   },
 }

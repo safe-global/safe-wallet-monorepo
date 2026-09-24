@@ -5,7 +5,6 @@ import SpendingLimitDrawer from '../SpendingLimitDrawer'
 
 const OVERVIEW = {
   appliesTo: { address: '0x8675B754342754A30A2AeF474D114d8460bca19b', name: 'Treasury' },
-  initiatedBy: { address: '0x0000000000000000000000000000000000000A11', name: 'Alice' },
   lastUpdated: 'Sep 22, 2026',
   enforcedBy: 'Safe module',
 }

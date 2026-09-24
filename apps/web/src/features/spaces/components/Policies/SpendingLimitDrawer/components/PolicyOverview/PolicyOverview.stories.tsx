@@ -9,13 +9,18 @@ const meta = {
   decorators: [(Story) => <div className="w-[400px]">{Story()}</div>],
   args: {
     appliesTo: { address: MOCK_SAFES.treasury.address, name: MOCK_SAFE_NAME },
-    initiatedBy: { address: MOCK_ADDRESSES.alice },
     lastUpdated: '06.24.26 03:35 AM UTC',
     enforcedBy: 'Safe module',
   },
 } satisfies Meta<typeof PolicyOverview>
 
 export default meta
-type Story = StoryObj<typeof PolicyOverview>
+type Story = StoryObj<typeof meta>
 
+/** How spending limits render it: CGW returns no initiator, so that row is absent. */
 export const Default: Story = {}
+
+/** The optional initiator row, for a policy type that does have one. */
+export const WithInitiator: Story = {
+  args: { initiatedBy: { address: MOCK_ADDRESSES.alice, name: 'Alice' } },
+}
