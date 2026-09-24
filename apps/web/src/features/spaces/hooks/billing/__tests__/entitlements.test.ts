@@ -1,5 +1,5 @@
 import type { EntitlementsResponse } from '@safe-global/store/gateway/AUTO_GENERATED/entitlements'
-import { getSeatsMeter, getSponsoredTxsMeter } from '../entitlements'
+import { getSeatsMeter, getSponsoredTxsMeter, isEntitled } from '../entitlements'
 
 const response = (entitlements: EntitlementsResponse['entitlements']): EntitlementsResponse => ({
   plan: { id: 'plan', name: 'Business', cycleEndsAt: '2026-12-06T00:00:00Z' },
@@ -47,5 +47,19 @@ describe('getSeatsMeter', () => {
     ])
     expect(getSponsoredTxsMeter(data)).toEqual({ used: 0, quota: 10, resetsAt: '2026-10-17T15:52:37.000Z' })
     expect(getSponsoredTxsMeter(response([]))).toBeNull()
+  })
+})
+
+describe('isEntitled', () => {
+  const binary = (enabled: boolean) => response([{ feature: 'sponsored_transactions', type: 'binary', enabled }])
+
+  it('grants a feature only while the plan enables it', () => {
+    expect(isEntitled(binary(true), 'sponsored_transactions')).toBe(true)
+    expect(isEntitled(binary(false), 'sponsored_transactions')).toBe(false)
+  })
+
+  it('does not grant a feature the response does not carry', () => {
+    expect(isEntitled(binary(true), 'policies')).toBe(false)
+    expect(isEntitled(undefined, 'policies')).toBe(false)
   })
 })

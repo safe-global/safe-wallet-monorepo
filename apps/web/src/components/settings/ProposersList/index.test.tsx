@@ -11,6 +11,7 @@ import { useIsWalletProposer } from '@/hooks/useProposers'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import type Safe from '@safe-global/protocol-kit'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const mockWalletAddress = faker.finance.ethereumAddress()
 
@@ -41,6 +42,11 @@ jest.mock('@/hooks/useChains', () => ({
 jest.mock('@/features/spending-limits', () => ({
   __esModule: true,
   useIsOnlySpendingLimitBeneficiary: jest.fn(() => false),
+}))
+
+const mockUsePlanGate = jest.fn()
+jest.mock('@/features/spaces/hooks/usePlanGate', () => ({
+  usePlanGate: (...args: unknown[]) => mockUsePlanGate(...args),
 }))
 
 jest.mock('@/hooks/useIsWrongChain', () => ({
@@ -76,6 +82,7 @@ describe('ProposersList', () => {
     jest.clearAllMocks()
     mockUseSafeSdk.mockReturnValue({} as unknown as Safe)
     mockUseNestedSafeOwners.mockReturnValue([])
+    mockUsePlanGate.mockReturnValue({ isBlocked: false, isLoading: false, upgradeHref: '/spaces/plans' })
     ;(useIsSafeOwner as jest.MockedFunction<typeof useIsSafeOwner>).mockReturnValue(true)
     ;(useIsWalletProposer as jest.MockedFunction<typeof useIsWalletProposer>).mockReturnValue(false)
     ;(useHasFeature as jest.MockedFunction<typeof useHasFeature>).mockReturnValue(true)
@@ -151,5 +158,25 @@ describe('ProposersList', () => {
 
     const button = getByTestId('add-proposer-btn')
     expect(button).toBeDisabled()
+  })
+
+  it('replaces the Add proposer button with the Safe Pro lock while the plan gate blocks it', () => {
+    mockUsePlanGate.mockReturnValue({ isBlocked: true, isLoading: false, upgradeHref: '/spaces/plans' })
+
+    const { getByRole, getByTestId, queryByTestId } = render(<ProposersList />)
+
+    expect(mockUsePlanGate).toHaveBeenCalledWith(FEATURES.PROPOSER_GATING)
+    expect(queryByTestId('add-proposer-btn')).not.toBeInTheDocument()
+    expect(getByTestId('safe-pro-lock')).toHaveTextContent('Existing ones stay active.')
+    expect(getByRole('link', { name: 'Explore Safe Pro' })).toHaveAttribute('href', '/spaces/plans')
+  })
+
+  it('renders neither the button nor the lock while the plan gate is loading', () => {
+    mockUsePlanGate.mockReturnValue({ isBlocked: false, isLoading: true, upgradeHref: '/spaces/plans' })
+
+    const { queryByTestId } = render(<ProposersList />)
+
+    expect(queryByTestId('add-proposer-btn')).not.toBeInTheDocument()
+    expect(queryByTestId('safe-pro-lock')).not.toBeInTheDocument()
   })
 })

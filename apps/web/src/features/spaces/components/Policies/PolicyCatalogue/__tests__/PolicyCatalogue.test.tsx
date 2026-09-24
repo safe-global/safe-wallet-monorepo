@@ -2,6 +2,7 @@ import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import { trackEvent } from '@/services/analytics'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import PolicyCatalogue from '../index'
 
 jest.mock('@/services/analytics', () => ({
@@ -11,9 +12,17 @@ jest.mock('@/services/analytics', () => ({
 
 const mockTrackEvent = trackEvent as jest.MockedFunction<typeof trackEvent>
 
+const mockUsePlanGate = jest.fn()
+jest.mock('../../../../hooks/usePlanGate', () => ({
+  usePlanGate: (...args: unknown[]) => mockUsePlanGate(...args),
+}))
+
+const gate = (isBlocked: boolean, isLoading = false) => ({ isBlocked, isLoading, upgradeHref: '/spaces/plans' })
+
 describe('PolicyCatalogue', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockUsePlanGate.mockReturnValue(gate(false))
   })
 
   it('renders the three tiles in the designed order, Spending limit first', () => {
@@ -70,5 +79,30 @@ describe('PolicyCatalogue', () => {
     await user.click(screen.getByRole('button', { name: 'Give feedback: Something missing?' }))
 
     expect(onSelect).toHaveBeenCalledWith('suggestion')
+  })
+
+  it('swaps the action of a policy the plan does not include for the Safe Pro upsell', () => {
+    mockUsePlanGate.mockImplementation((flag: FEATURES) => gate(flag === FEATURES.SPENDING_LIMIT_GATING))
+
+    render(<PolicyCatalogue />)
+
+    expect(mockUsePlanGate).toHaveBeenCalledWith(FEATURES.SPENDING_LIMIT_GATING)
+    expect(mockUsePlanGate).toHaveBeenCalledWith(FEATURES.PROPOSER_GATING)
+    expect(screen.queryByRole('button', { name: 'Set policy: Spending limit' })).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Explore Safe Pro: Spending limit' })).toHaveAttribute(
+      'href',
+      '/spaces/plans',
+    )
+    expect(screen.getByRole('button', { name: 'Set policy: Proposer' })).toBeEnabled()
+  })
+
+  it('disables a gated action until the plan is known', () => {
+    mockUsePlanGate.mockReturnValue(gate(false, true))
+
+    render(<PolicyCatalogue />)
+
+    expect(screen.getByRole('button', { name: 'Set policy: Spending limit' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Set policy: Proposer' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Give feedback: Something missing?' })).toBeEnabled()
   })
 })

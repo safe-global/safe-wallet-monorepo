@@ -1,3 +1,4 @@
+import NextLink, { type LinkProps } from 'next/link'
 import { type LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
@@ -10,9 +11,21 @@ export interface PolicyCatalogueTileProps {
   Icon: LucideIcon
   action: string
   onClick: () => void
+  /** Replaces the action with the Safe Pro upsell while the plan does not include this policy. */
+  upgradeHref?: LinkProps['href']
+  disabled?: boolean
 }
 
-const PolicyCatalogueTile = ({ id, title, description, Icon, action, onClick }: PolicyCatalogueTileProps) => (
+const PolicyCatalogueTile = ({
+  id,
+  title,
+  description,
+  Icon,
+  action,
+  onClick,
+  upgradeHref,
+  disabled,
+}: PolicyCatalogueTileProps) => (
   <div data-testid={`policy-catalogue-tile-${id}`} className="flex h-full flex-col gap-3 rounded-xl bg-card p-4">
     <div className="flex flex-1 flex-col gap-2">
       <div className="flex size-10 items-center justify-center rounded-md bg-muted">
@@ -27,9 +40,21 @@ const PolicyCatalogueTile = ({ id, title, description, Icon, action, onClick }: 
       </div>
     </div>
 
-    <Button variant="outline" className="w-full" onClick={onClick} aria-label={`${action}: ${title}`}>
-      {action}
-    </Button>
+    {upgradeHref ? (
+      <Button className="w-full" render={<NextLink href={upgradeHref} />} aria-label={`Explore Safe Pro: ${title}`}>
+        Explore Safe Pro
+      </Button>
+    ) : (
+      <Button
+        variant="outline"
+        className="w-full"
+        onClick={onClick}
+        disabled={disabled}
+        aria-label={`${action}: ${title}`}
+      >
+        {action}
+      </Button>
+    )}
   </div>
 )
 
