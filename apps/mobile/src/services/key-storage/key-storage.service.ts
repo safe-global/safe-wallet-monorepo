@@ -49,6 +49,10 @@ export class KeyStorageService implements IKeyStorageService {
       const isEmulator = Platform.OS === 'android' ? false : await DeviceInfo.isEmulator()
       await this.storeKey(userId, privateKey, requireAuthentication, isEmulator, 0)
     } catch (err) {
+      Logger.error('Error storing private key', {
+        code: err instanceof Error && 'code' in err ? err.code : undefined,
+        platform: Platform.OS,
+      })
       throw new KeyStorageError(err)
     }
   }
@@ -156,12 +160,12 @@ export class KeyStorageService implements IKeyStorageService {
         throw new Error('Failed to persist encrypted private key')
       }
     } catch (error) {
-      Logger.error('Error storing private key', {
-        operation,
-        code: error instanceof Error && 'code' in error ? error.code : undefined,
-        platform: Platform.OS,
-      })
       if (operation !== 'persist' && attempt === 0 && isBiometryInvalidationError(error)) {
+        Logger.info('Recovering invalidated signer encryption key', {
+          operation,
+          code: error instanceof Error && 'code' in error ? error.code : undefined,
+          platform: Platform.OS,
+        })
         // Keep the encrypted blob until its replacement has passed verification.
         if (!(await DeviceCrypto.deleteKey(keyName))) {
           throw new Error('Failed to remove invalidated encryption key')

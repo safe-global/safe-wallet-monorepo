@@ -5,6 +5,7 @@ import DeviceCrypto from 'react-native-device-crypto'
 import * as Keychain from 'react-native-keychain'
 import DeviceInfo from 'react-native-device-info'
 import { Platform } from 'react-native'
+import Logger from '@/src/utils/logger'
 
 const mockDeviceCrypto = DeviceCrypto as jest.Mocked<typeof DeviceCrypto>
 const mockKeychain = Keychain as jest.Mocked<typeof Keychain>
@@ -339,6 +340,22 @@ describe('KeyStorageService', () => {
       mockDeviceCrypto.encrypt.mockResolvedValue({ encryptedText: 'encrypted', iv: 'iv-value' })
     })
 
+    it('logs successful invalidation recovery as information without an error or warning', async () => {
+      mockDeviceCrypto.decrypt.mockRejectedValueOnce(
+        Object.assign(new Error('AKSError=-536362999'), { code: 'E1760 - Decryption error.' }),
+      )
+
+      await service.storePrivateKey(userId, privateKey)
+
+      expect(Logger.info).toHaveBeenCalledWith('Recovering invalidated signer encryption key', {
+        operation: 'verify',
+        code: 'E1760 - Decryption error.',
+        platform: 'ios',
+      })
+      expect(Logger.error).not.toHaveBeenCalled()
+      expect(Logger.warn).not.toHaveBeenCalled()
+    })
+
     it('recovers from invalidation during key lookup and retrieves the re-imported key', async () => {
       mockDeviceCrypto.getOrCreateAsymmetricKey.mockRejectedValueOnce(new Error('AKSError=-536362999'))
       mockKeychain.setGenericPassword.mockImplementation(async (_username, password) => {
@@ -394,6 +411,7 @@ describe('KeyStorageService', () => {
       await expect(service.storePrivateKey(userId, privateKey)).rejects.toBeInstanceOf(KeyStorageError)
 
       expect(mockDeviceCrypto.getOrCreateAsymmetricKey).toHaveBeenCalledTimes(1)
+      expect(Logger.error).toHaveBeenCalledTimes(1)
       expect(mockKeychain.setGenericPassword).not.toHaveBeenCalled()
       expect(mockKeychain.resetGenericPassword).not.toHaveBeenCalled()
     })
@@ -404,6 +422,7 @@ describe('KeyStorageService', () => {
 
       await expect(service.storePrivateKey(userId, privateKey)).rejects.toMatchObject({ cause: nativeError })
 
+      expect(Logger.error).toHaveBeenCalledTimes(1)
       expect(mockDeviceCrypto.getOrCreateAsymmetricKey).toHaveBeenCalledTimes(2)
       expect(mockDeviceCrypto.deleteKey).toHaveBeenCalledTimes(1)
       expect(mockKeychain.setGenericPassword).not.toHaveBeenCalled()
@@ -443,6 +462,8 @@ describe('KeyStorageService', () => {
 
         await expect(service.storePrivateKey(userId, privateKey)).rejects.toThrow('Failed to store private key')
 
+        expect(Logger.error).toHaveBeenCalledTimes(1)
+        expect(Logger.info).not.toHaveBeenCalled()
         expect(mockDeviceCrypto.deleteKey).not.toHaveBeenCalled()
         expect(mockKeychain.setGenericPassword).toHaveBeenCalledTimes(1)
       },
