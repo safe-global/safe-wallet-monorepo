@@ -135,12 +135,14 @@ if [[ "$FILTERED_PRS" -eq 0 ]]; then
     --arg since "$SINCE" --arg until "$UNTIL" \
     --arg date_field "$DATE_FIELD" --arg state "$STATE" \
     --arg fetched_at "$FETCHED_AT" \
+    --argjson prs_in_window "$TOTAL_PRS" \
     '{
       out_path: $out, repo: $repo,
       window: { since: $since, until: $until, date_field: $date_field },
       state: $state,
       fetched_at: $fetched_at,
-      prs: 0, comments: 0
+      prs_in_window: $prs_in_window, prs_after_bot_filter: 0,
+      prs_with_comments: 0, comments: 0
     }'
   exit 0
 fi
@@ -311,8 +313,13 @@ jq -rs \
 
 KEPT_COMMENTS=$(grep -c '^>>>' "$OUT" 2>/dev/null || true)
 KEPT_COMMENTS="${KEPT_COMMENTS:-0}"
+# PRs actually written. Lower than $FILTERED_PRS when a PR in the window had no
+# comment on any surface, or only empty-bodied ones (a bodyless approval).
+PRS_WITH_COMMENTS=$(grep -c '^========= PR #' "$OUT" 2>/dev/null || true)
+PRS_WITH_COMMENTS="${PRS_WITH_COMMENTS:-0}"
 
-echo "Wrote $KEPT_COMMENTS comments across $FILTERED_PRS PRs to $OUT" >&2
+echo "Wrote $KEPT_COMMENTS comments across $PRS_WITH_COMMENTS PRs to $OUT" >&2
+echo "  Window: $TOTAL_PRS closed, $FILTERED_PRS after bot-author filtering, $PRS_WITH_COMMENTS with comments." >&2
 
 jq -nc \
   --arg out "$OUT" \
@@ -322,7 +329,9 @@ jq -nc \
   --arg date_field "$DATE_FIELD" \
   --arg state "$STATE" \
   --arg fetched_at "$FETCHED_AT" \
-  --argjson prs "$FILTERED_PRS" \
+  --argjson prs_in_window "$TOTAL_PRS" \
+  --argjson prs_after_bot_filter "$FILTERED_PRS" \
+  --argjson prs_with_comments "$PRS_WITH_COMMENTS" \
   --argjson comments "$KEPT_COMMENTS" \
   '{
     out_path: $out,
@@ -330,6 +339,8 @@ jq -nc \
     window: { since: $since, until: $until, date_field: $date_field },
     state: $state,
     fetched_at: $fetched_at,
-    prs: $prs,
+    prs_in_window: $prs_in_window,
+    prs_after_bot_filter: $prs_after_bot_filter,
+    prs_with_comments: $prs_with_comments,
     comments: $comments
   }'

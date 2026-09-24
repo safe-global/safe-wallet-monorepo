@@ -70,7 +70,10 @@ Tell the user:
 - window fetched, if any
 - PR/comment counts, if any
 - review-learning IDs added or changed
-- project-structure sections or rule objects added or changed
+- project-structure sections changed
+- rules confirmed (learning mapped, text unchanged), advanced (text
+  tightened), and added — with, for each addition, the rules considered
+  and why none could cover it
 - example sections added or changed
 - rule/check areas touched
 - active docs changed

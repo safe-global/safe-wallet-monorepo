@@ -81,15 +81,20 @@ function renderChecklist(rules, projects) {
       lines.push('')
     }
 
-    lines.push(`### ${rule.id} ${rule.title}`)
-    lines.push('')
-    lines.push('- [ ] Checked')
-    lines.push(`- Rule: ${rule.rule}`)
-    lines.push(`- Check: ${rule.check}`)
+    // The check leads: it is the question being answered per PR. The rule is
+    // reference text consulted when the check is ambiguous, so it folds away.
+    lines.push(`- [ ] **${rule.id}** ${rule.check}`)
     const exampleRefs = formatList(rule.exampleRefs)
+    lines.push('')
+    lines.push('  <details><summary>rule</summary>')
+    lines.push('')
+    lines.push(`  ${rule.rule}`)
     if (exampleRefs) {
-      lines.push(`- Examples: ${exampleRefs}`)
+      lines.push('')
+      lines.push(`  Examples: ${exampleRefs}`)
     }
+    lines.push('')
+    lines.push('  </details>')
     lines.push('')
   }
 
