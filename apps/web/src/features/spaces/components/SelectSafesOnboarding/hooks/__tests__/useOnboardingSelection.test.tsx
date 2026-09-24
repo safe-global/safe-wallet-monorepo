@@ -1,6 +1,7 @@
 import { renderHook, act } from '@testing-library/react'
 import { useForm } from 'react-hook-form'
-import type { AllSafeItems } from '@/hooks/safes'
+import type { AllSafeItems, MultiChainSafeItem } from '@/hooks/safes'
+import { safeItemBuilder } from '@/tests/builders/safeItem'
 import type { AddAccountsFormValues } from '../../../../hooks/addAccounts.types'
 import useOnboardingSelection from '../useOnboardingSelection'
 
@@ -99,15 +100,15 @@ describe('useOnboardingSelection', () => {
   })
 
   it('counts a Safe on several chains as one seat towards the cap', () => {
-    const multiChainSafe = {
+    const multiChainSafe: MultiChainSafeItem = {
       address: '0xA',
-      safes: [
-        { chainId: '1', address: '0xA' },
-        { chainId: '10', address: '0xA' },
-      ],
+      safes: ['1', '10'].map((chainId) => safeItemBuilder().with({ chainId, address: '0xA' }).build()),
+      isPinned: false,
+      lastVisited: 0,
+      name: undefined,
     }
     const group = groupLine('0xA', ['1', '10'])
-    const { result } = setup({ items: [multiChainSafe] as unknown as AllSafeItems })
+    const { result } = setup({ items: [multiChainSafe] })
 
     act(() => result.current.handleToggle(group, true))
     expect(result.current.selectedKeys.size).toBe(2)

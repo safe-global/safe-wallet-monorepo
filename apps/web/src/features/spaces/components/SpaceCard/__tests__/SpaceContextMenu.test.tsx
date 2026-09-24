@@ -1,9 +1,9 @@
 import { render, screen } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
-import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import SpaceContextMenu from '../SpaceContextMenu'
 import { downloadCsv } from '../../../utils/addressBookCsv'
 import { showNotification } from '@/store/notificationsSlice'
+import { spaceBuilder } from '@/tests/builders/space'
 
 const mockFetchAddressBook = jest.fn()
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
@@ -19,7 +19,7 @@ jest.mock('@/store/notificationsSlice', () => ({
   showNotification: jest.fn(() => ({ type: 'test/notification' })),
 }))
 
-const space = { uuid: 'space-1', name: 'Acme Inc', members: [] } as unknown as GetSpaceResponse
+const space = spaceBuilder().with({ uuid: 'space-1', name: 'Acme Inc', members: [] }).build()
 
 const openMenu = async () => {
   render(<SpaceContextMenu space={space} />)

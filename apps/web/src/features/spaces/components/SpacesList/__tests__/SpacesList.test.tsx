@@ -52,14 +52,11 @@ jest.mock('@/features/myAccounts', () => ({
 }))
 
 const mockUseIsSafeProEnabled = jest.fn()
-const mockUseHasFeature = jest.fn()
 
 jest.mock('@/features/safe-pro-announcement', () => ({
   SafeProFeature: { name: 'SafeProFeature' },
   useIsSafeProEnabled: () => mockUseIsSafeProEnabled(),
 }))
-
-jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
 
 jest.mock('../../../hooks/billing/useSpaceSubscription', () => ({
   useSpaceSubscription: () => ({ subscription: undefined, status: 'none' }),
@@ -130,11 +127,9 @@ describe('SpacesList — auth/expiry state rendering', () => {
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: undefined })
     mockUseSignInRedirect.mockReturnValue({ setHasSignedIn: jest.fn(), redirectLoading: false })
     mockUseIsSafeProEnabled.mockReturnValue(false)
-    mockUseHasFeature.mockReturnValue(false)
   })
 
   it('leads a first Workspace straight into the onboarding, where the trial is offered', () => {
-    mockUseHasFeature.mockReturnValue(true)
     mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
 
@@ -178,19 +173,14 @@ describe('SpacesList — auth/expiry state rendering', () => {
       expect(screen.getByTestId('safe-pro-workspaces-banner')).toBeInTheDocument()
     })
 
-    it('shows the wide Pro banner above the empty state, before and after Safe Pro is live', () => {
+    it('shows the wide Pro banner above the empty state when signed in with no workspaces', () => {
       setAuth(true)
       mockUseIsSafeProEnabled.mockReturnValue(true)
       mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
       mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
 
-      const { unmount } = render(<SpacesList />)
-      expect(screen.getByTestId('safe-pro-workspaces-banner')).toBeInTheDocument()
-      expect(screen.getByText(/get safe pro/i)).toBeInTheDocument()
-      unmount()
-
-      mockUseHasFeature.mockReturnValue(true)
       render(<SpacesList />)
+
       expect(screen.getByTestId('safe-pro-workspaces-banner')).toBeInTheDocument()
       expect(screen.getByText(/get safe pro/i)).toBeInTheDocument()
     })
@@ -488,9 +478,9 @@ describe('SpacesList — auth/expiry state rendering', () => {
   it('renders the "By continuing" text outside the sign-in card when Safe Pro is off', () => {
     setAuth(false)
 
-    const { container } = render(<SpacesList />)
+    render(<SpacesList />)
 
-    const card = container.querySelector('.bg-card')
+    const card = screen.getByTestId('sign-in-card')
     const termsLink = screen.getByRole('link', { name: /^terms$/i })
     expect(card).toBeInTheDocument()
     expect(card).not.toContainElement(termsLink)
@@ -500,9 +490,9 @@ describe('SpacesList — auth/expiry state rendering', () => {
     setAuth(false)
     mockUseIsSafeProEnabled.mockReturnValue(true)
 
-    const { container } = render(<SpacesList />)
+    render(<SpacesList />)
 
-    const card = container.querySelector('.bg-card')
+    const card = screen.getByTestId('sign-in-card')
     const termsLink = screen.getByRole('link', { name: /safe pro user terms/i })
     const privacyLink = screen.getByRole('link', { name: /privacy policy/i })
     expect(card).toContainElement(termsLink)

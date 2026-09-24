@@ -25,10 +25,8 @@ jest.mock('@/components/common/CheckWallet', () => ({
   default: ({ children }: { children: (ok: boolean) => unknown }) => children(true),
 }))
 
-const mockReplace = jest.fn()
-let mockQuery: Record<string, string> = {}
 jest.mock('next/router', () => ({
-  useRouter: () => ({ push: jest.fn(), replace: mockReplace, pathname: '/spaces', query: mockQuery }),
+  useRouter: () => ({ push: jest.fn() }),
 }))
 
 jest.mock('@/services/analytics', () => ({
@@ -83,20 +81,9 @@ jest.mock('@/features/safe-pro-announcement', () => ({
 
 jest.mock('@/services/local-storage/useLocalStorage', () => jest.fn(() => [{}, jest.fn()]))
 
-const mockUseSpacePlan = jest.fn()
 const mockUseWorkspaceLock = jest.fn()
-const mockUseCheckoutReturn = jest.fn()
-jest.mock('../../../hooks/useSpacePlan', () => ({ useSpacePlan: () => mockUseSpacePlan() }))
 jest.mock('../../../hooks/useWorkspaceLock', () => ({ useWorkspaceLock: () => mockUseWorkspaceLock() }))
-jest.mock('../../../hooks/billing/useCheckoutReturn', () => ({ useCheckoutReturn: () => mockUseCheckoutReturn() }))
 jest.mock('../../Plans/CheckoutReturnModals', () => ({ __esModule: true, default: () => null }))
-
-jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
-  useSpacesGetOneV1Query: () => ({ currentData: { name: 'Acme Inc' } }),
-}))
-
-const mockUseHasFeature = jest.fn()
-jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
 
 jest.mock('@/hooks/safes', () => ({
   flattenSafeItems: jest.fn((items: unknown[]) => items),
@@ -169,11 +156,8 @@ const restoreDefaultMocks = () => {
   })
   useSpaceAccountsDataMock.mockReturnValue({ accounts: [], isLoading: false, error: null, refetch: jest.fn() })
   mockUseIsSafeProEnabled.mockReturnValue(false)
-  mockUseHasFeature.mockReturnValue(false)
   mockUseSafeProAnnouncement.mockReturnValue({ isOpen: false, setIsOpen: jest.fn() })
-  mockUseSpacePlan.mockReturnValue({ plan: null, status: 'none', isLoading: false, refetch: jest.fn() })
   mockUseWorkspaceLock.mockReturnValue({ isLocked: false, isResolving: false, trialPeriodDays: null })
-  mockUseCheckoutReturn.mockReturnValue({ status: 'idle', subscription: undefined, dismiss: jest.fn() })
 }
 
 // ---- Tests ----

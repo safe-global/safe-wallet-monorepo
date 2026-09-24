@@ -13,8 +13,16 @@ jest.mock('../AddManually', () => ({
 // The heavy accounts table is exercised in its own suite; here we only need to observe the items it receives.
 jest.mock('@/features/myAccounts', () => ({
   __esModule: true,
-  SafeAccountsTable: (props: { items: unknown[] }) => (
-    <div data-testid="safe-accounts-table" data-count={props.items.length} />
+  SafeAccountsTable: (props: {
+    items: unknown[]
+    selection: { onToggle: (line: { key: string; variant: 'single' }, checked: boolean) => void }
+  }) => (
+    <div data-testid="safe-accounts-table" data-count={props.items.length}>
+      <button
+        data-testid="toggle-trusted-safe"
+        onClick={() => props.selection.onToggle({ key: `1:${TRUSTED_ADDRESS}`, variant: 'single' }, true)}
+      />
+    </div>
   ),
 }))
 
@@ -72,11 +80,17 @@ jest.mock('@/hooks/safes', () => {
 let mockIsAdmin = true
 let mockSpaceSafes: Array<{ chainId: string; address: string }> = []
 let mockSpaceSafesLoading = false
+let mockSafeLimit = 40
+let mockIsSafePro = false
 jest.mock('../../../hooks/useSpaceSafeLimit', () => ({
-  useSpaceSafeLimit: () => ({ limit: 40, isLoading: false }),
+  useSpaceSafeLimit: () => ({ limit: mockSafeLimit, isLoading: false }),
 }))
 jest.mock('../../../hooks/useSeatUpsell', () => ({
-  useSeatUpsell: () => ({ isSafePro: false, tierName: undefined, limit: null, plansHref: '/spaces/plans' }),
+  useSeatUpsell: () => ({ isSafePro: mockIsSafePro, tierName: undefined, limit: null, plansHref: '/spaces/plans' }),
+}))
+const mockRefreshSpaceEntitlements = jest.fn()
+jest.mock('@/services/entitlements/refreshSpaceEntitlements', () => ({
+  refreshSpaceEntitlements: (...args: unknown[]) => mockRefreshSpaceEntitlements(...args),
 }))
 
 jest.mock('@/features/spaces', () => ({
@@ -84,6 +98,7 @@ jest.mock('@/features/spaces', () => ({
   useIsAdmin: () => mockIsAdmin,
   useSpaceSafes: () => ({ allSafes: mockSpaceSafes, isLoading: mockSpaceSafesLoading }),
   useIsQualifiedSafe: () => false,
+  getChainIdsParam: () => '1',
 }))
 
 const mockAddSafesToSpace = jest.fn()
@@ -256,5 +271,52 @@ describe('AddAccounts — admin guard on submit', () => {
     // Form is clean (nothing to add or remove) → Save disabled. If the empty seed had been finalized,
     // the member would diff as a removal and the button would be enabled.
     expect(screen.getByTestId('add-accounts-button')).toBeDisabled()
+  })
+})
+
+describe('AddAccounts — seat limit', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockWalletValue = { address: '0xWallet' }
+    mockAllOwned = {}
+    mockIsAdmin = true
+    mockSpaceSafes = []
+    mockSpaceSafesLoading = false
+    mockSafeLimit = 40
+    mockIsSafePro = false
+  })
+
+  it('links to the plans once a Safe Pro Workspace fills its seats', () => {
+    mockIsSafePro = true
+    mockSafeLimit = 1
+    mockSpaceSafes = [{ chainId: '1', address: TRUSTED_ADDRESS }]
+    render(<AddAccounts externalOpen onExternalClose={() => {}} />, withTrusted)
+
+    expect(screen.getByTestId('compare-plans-link')).toHaveAttribute('href', '/spaces/plans')
+  })
+
+  it('does not link to the plans at the limit without Safe Pro', () => {
+    mockSafeLimit = 1
+    mockSpaceSafes = [{ chainId: '1', address: TRUSTED_ADDRESS }]
+    render(<AddAccounts externalOpen onExternalClose={() => {}} />, withTrusted)
+
+    expect(screen.queryByTestId('compare-plans-link')).not.toBeInTheDocument()
+  })
+
+  it('shows the seat-limit message and refreshes the entitlements when the CGW refuses the add', async () => {
+    mockAddSafesToSpace.mockResolvedValue({
+      error: { status: 402, data: { code: 'QUOTA_EXCEEDED', feature: 'safe_seats', quota: 2, used: 2 } },
+    })
+    render(<AddAccounts externalOpen onExternalClose={() => {}} />, withTrusted)
+
+    fireEvent.click(screen.getByTestId('toggle-trusted-safe'))
+    fireEvent.submit(screen.getByTestId('add-accounts-button').closest('form')!)
+
+    expect(
+      await screen.findByText(
+        'Your plan covers 2 Safe accounts and this Workspace already holds 2. Remove one to add another, or upgrade your plan.',
+      ),
+    ).toBeInTheDocument()
+    expect(mockRefreshSpaceEntitlements).toHaveBeenCalledWith(expect.any(Function), '1')
   })
 })
