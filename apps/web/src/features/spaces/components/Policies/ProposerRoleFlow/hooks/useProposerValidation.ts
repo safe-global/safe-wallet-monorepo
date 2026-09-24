@@ -14,6 +14,7 @@ import {
   PROPOSER_IS_OWNER_ERROR,
   PROPOSER_IS_SAFE_ERROR,
   PROPOSER_RESERVED_ERROR,
+  PROPOSER_SAFE_ERROR_MESSAGE,
   PROPOSER_SAFE_LOADING_MESSAGE,
 } from '../constants'
 
@@ -47,7 +48,7 @@ const validateAgainstPickedSafe = async (value: string, picked: PickedSafe): Pro
 
 // Invalid until the picked Safe, its proposers and its provider load: empty owner lists would pass, and the unscoped provider would read code from the URL chain.
 export const useProposerValidation = (): Validate<string> => {
-  const { safe, safeAddress, safeLoaded } = useSafeInfo()
+  const { safe, safeAddress, safeLoaded, safeError } = useSafeInfo()
   const chainId = useChainId()
   const provider = useWeb3ReadOnly()
   const { data: delegates, isError: delegatesError } = useProposers()
@@ -61,10 +62,11 @@ export const useProposerValidation = (): Validate<string> => {
     async (value) => {
       const reserved = addressIsNotReserved(PROPOSER_RESERVED_ERROR)(value)
       if (reserved || !safeAddress) return reserved
+      if (!safeLoaded && safeError) return PROPOSER_SAFE_ERROR_MESSAGE
       if (!isReady) return PROPOSER_SAFE_LOADING_MESSAGE
 
       return validateAgainstPickedSafe(value, { safeAddress, owners, existingProposers, chainId, provider })
     },
-    [safeAddress, isReady, owners, existingProposers, chainId, provider],
+    [safeAddress, safeLoaded, safeError, isReady, owners, existingProposers, chainId, provider],
   )
 }
