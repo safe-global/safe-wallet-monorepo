@@ -9,7 +9,6 @@ import type { SpaceItem } from '../types'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
-import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'
 import { getSeatLimitMessage } from '../../../utils/seatLimitError'
 
 interface UseAddSafeToSpaceOptions {
@@ -48,9 +47,8 @@ export const useAddSafeToSpace = ({ spaces, onSpaceAdded }: UseAddSafeToSpaceOpt
       })
       if (isElevationRequiredError(result.error)) return false
       if (result.error) {
-        // A spent seat allowance is worded as such and the cached meter, which let the attempt through, is re-read.
+        // A spent seat allowance is worded as such.
         const seatLimit = getSeatLimitMessage(result.error)
-        if (seatLimit) refreshSpaceEntitlements(dispatch, spaceId)
         showError(seatLimit ?? getRtkQueryErrorMessage(result.error))
         return false
       }

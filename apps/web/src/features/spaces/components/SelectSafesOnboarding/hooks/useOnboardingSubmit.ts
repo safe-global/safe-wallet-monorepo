@@ -31,7 +31,6 @@ import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { getSafeId, getMultiChainSafeId } from '../utils/safeIds'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../constants'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
-import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'
 import { getSeatLimitMessage } from '../../../utils/seatLimitError'
 
 // URL safe-param prefix can be either numeric chainId or shortName ("1:" or "eth:").
@@ -176,7 +175,6 @@ const useOnboardingSubmit = (
     if (isElevationRequiredError(result.error)) throw result.error
     if (result.error) {
       const seatLimit = getSeatLimitMessage(result.error)
-      if (seatLimit) refreshSpaceEntitlements(dispatch, spaceIdStr)
       throw new Error(seatLimit ?? getRtkQueryErrorMessage(result.error))
     }
   }

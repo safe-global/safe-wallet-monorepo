@@ -25,7 +25,7 @@ import {
   counterfactualSyncListener,
   addressBookListener,
   elevationListener,
-  spaceSafesEntitlementsListener,
+  entitlementsListener,
   trialReminderListener,
 } from './slices'
 import * as slices from './slices'
@@ -138,7 +138,7 @@ const listeners = [
   counterfactualSyncListener,
   addressBookListener,
   elevationListener,
-  spaceSafesEntitlementsListener,
+  entitlementsListener,
   trialReminderListener,
   forbiddenSessionListener,
 ]

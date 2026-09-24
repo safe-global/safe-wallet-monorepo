@@ -10,5 +10,5 @@ export {
 
 export { spaceNavigationSlice, setLastUsedSpaceOrigin, selectLastUsedSpaceOrigin } from './spaceNavigationSlice'
 export type { SpaceNavigationOrigin } from './spaceNavigationSlice'
-export { spaceSafesEntitlementsListener } from './spaceSafesEntitlementsListener'
+export { entitlementsListener } from './entitlementsListener'
 export { trialReminderListener } from './trialReminder'

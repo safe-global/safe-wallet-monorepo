@@ -90,10 +90,6 @@ jest.mock('../../../hooks/useSpaceSafeLimit', () => ({
 jest.mock('../../../hooks/useSeatUpsell', () => ({
   useSeatUpsell: () => ({ isSafePro: mockIsSafePro, tierName: undefined, limit: null, plansHref: '/spaces/plans' }),
 }))
-const mockRefreshSpaceEntitlements = jest.fn()
-jest.mock('@/services/entitlements/refreshSpaceEntitlements', () => ({
-  refreshSpaceEntitlements: (...args: unknown[]) => mockRefreshSpaceEntitlements(...args),
-}))
 
 let mockSpaceAddressBook: Array<{ address: string; name: string; chainIds: string[] }> = []
 let mockAddressBookError = false
@@ -481,7 +477,7 @@ describe('AddAccounts — seat limit', () => {
     expect(screen.queryByTestId('compare-plans-link')).not.toBeInTheDocument()
   })
 
-  it('shows the seat-limit message and refreshes the entitlements when the CGW refuses the add', async () => {
+  it('shows the seat-limit message when the CGW refuses the add', async () => {
     mockAddSafesToSpace.mockResolvedValue({
       error: { status: 402, data: { code: 'QUOTA_EXCEEDED', feature: 'safe_seats', quota: 2, used: 2 } },
     })
@@ -497,6 +493,5 @@ describe('AddAccounts — seat limit', () => {
         'Your plan covers 2 Safe accounts and this Workspace already holds 2. Remove one to add another, or upgrade your plan.',
       ),
     ).toBeInTheDocument()
-    expect(mockRefreshSpaceEntitlements).toHaveBeenCalledWith(expect.any(Function), '1')
   })
 })

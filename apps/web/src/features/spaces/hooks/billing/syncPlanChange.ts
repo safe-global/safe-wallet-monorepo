@@ -1,6 +1,6 @@
 import { cgwApi as billingApi } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
+import { cgwApi as entitlementsApi } from '@safe-global/store/gateway/AUTO_GENERATED/entitlements'
 import type { AppDispatch } from '@/store'
-import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'
 
 export const PLAN_SYNC_INTERVAL_MS = 3_000
 export const PLAN_SYNC_TIMEOUT_MS = 60_000
@@ -20,7 +20,12 @@ export const syncPlanChange = async (
 ): Promise<boolean> => {
   const deadline = Date.now() + timeoutMs
   for (;;) {
-    const { data } = await refreshSpaceEntitlements(dispatch, spaceId)
+    const { data } = await dispatch(
+      entitlementsApi.endpoints.entitlementsGetEntitlementsV1.initiate(
+        { spaceId },
+        { subscribe: false, forceRefetch: true },
+      ),
+    )
     if (data?.plan?.id === planId) {
       dispatch(billingApi.util.invalidateTags(['billing']))
       return true
