@@ -59,8 +59,8 @@ const ReplaySafeDialog = ({
   const resolvedSpaceId = normalizeSpaceId(spaceId)
   const isAdminOfActiveSpace = useIsAdmin(resolvedSpaceId ?? undefined)
   const spaceSafeCount = useSpaceSafeCount(spaceId)
-  const { limit: spaceSafeLimit } = useSpaceSafeLimit(spaceId)
-  const { currentData: spaceSafes } = useSpaceSafesGetV1Query(
+  const { limit: spaceSafeLimit, isLoading: isSpaceSafeLimitLoading } = useSpaceSafeLimit(spaceId)
+  const { currentData: spaceSafes, isLoading: isSpaceSafesLoading } = useSpaceSafesGetV1Query(
     { spaceId: resolvedSpaceId ?? '' },
     { skip: !isUserAuthenticated || resolvedSpaceId === null },
   )
@@ -68,7 +68,10 @@ const ReplaySafeDialog = ({
   const holdsSeatInSpace = Object.values(spaceSafes?.safes ?? {}).some((addresses) =>
     addresses.some((address) => sameAddress(address, safeAddress)),
   )
+  // Whether the new network joins the Workspace depends on both; submit waits for them.
+  const isSeatInfoLoading = isSpaceSafeLimitLoading || isSpaceSafesLoading
   const willStayOutsideSpace =
+    !isSeatInfoLoading &&
     isUserAuthenticated &&
     resolvedSpaceId !== null &&
     isAdminOfActiveSpace &&
@@ -216,7 +219,8 @@ const ReplaySafeDialog = ({
     !!safeCreationDataError ||
     safeCreationDataLoading ||
     !formState.isValid ||
-    isSubmitting
+    isSubmitting ||
+    isSeatInfoLoading
 
   const noChainsAvailable =
     !chain && safeCreationData && replayableChains && replayableChains.filter((chain) => chain.available).length === 0

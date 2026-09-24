@@ -850,10 +850,15 @@ describe('txSender', () => {
       } as unknown as MultiSendCallOnlyContractImplementationType
 
       let receivedBody: any
+      const entitlementsRead = jest.fn()
       server.use(
         http.post(`${GATEWAY_URL}/v1/spaces/space-1/chains/5/relay`, async ({ request }) => {
           receivedBody = await request.json()
           return HttpResponse.json({ taskId: '0xspace' })
+        }),
+        http.get(`${GATEWAY_URL}/v1/spaces/space-1/entitlements`, () => {
+          entitlementsRead()
+          return HttpResponse.json({ plan: null, entitlements: [] })
         }),
       )
 
@@ -861,6 +866,48 @@ describe('txSender', () => {
 
       expect(receivedBody).toEqual({ to: mockMultisendAddress, data: '0xfefe', version: '1.3.0' })
       expect(txEvents.txDispatch).toHaveBeenCalledWith('RELAYING', expect.objectContaining({ taskId: '0xspace' }))
+      await waitFor(() => expect(entitlementsRead).toHaveBeenCalledTimes(1))
+    })
+
+    it('types a spent sponsored allowance (402) on a batch and re-reads the Workspace entitlements', async () => {
+      const txs = [{ txId: 'multisig_0x01', detailedExecutionInfo: { type: 'MULTISIG' } } as TransactionDetails]
+      const multisendContractMock = {
+        encode: jest.fn(() => '0xfefe'),
+        getAddress: () => zeroPadValue('0x1234', 20),
+      } as unknown as MultiSendCallOnlyContractImplementationType
+      const entitlementsRead = jest.fn()
+      server.use(
+        http.post(`${GATEWAY_URL}/v1/spaces/space-1/chains/5/relay`, () =>
+          HttpResponse.json(
+            { code: 'QUOTA_EXCEEDED', feature: 'sponsored_transactions', quota: 50, used: 50, resetsAt: null },
+            { status: 402 },
+          ),
+        ),
+        http.get(`${GATEWAY_URL}/v1/spaces/space-1/entitlements`, () => {
+          entitlementsRead()
+          return HttpResponse.json({ plan: null, entitlements: [] })
+        }),
+      )
+
+      await expect(
+        dispatchBatchExecutionRelay(
+          txs,
+          multisendContractMock,
+          '0x1234',
+          '5',
+          toBeHex('0x567', 20),
+          '1.3.0',
+          'space-1',
+        ),
+      ).rejects.toMatchObject({ name: 'QuotaExceededError', quota: 50 })
+      expect(txEvents.txDispatch).toHaveBeenCalledWith(
+        'FAILED',
+        expect.objectContaining({
+          txId: 'multisig_0x01',
+          error: expect.objectContaining({ name: 'QuotaExceededError' }),
+        }),
+      )
+      await waitFor(() => expect(entitlementsRead).toHaveBeenCalledTimes(1))
     })
   })
 })

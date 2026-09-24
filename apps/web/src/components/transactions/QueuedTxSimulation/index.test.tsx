@@ -1,7 +1,7 @@
 import { FETCH_STATUS, type NestedTxStatus } from '@safe-global/utils/components/tx/security/tenderly/types'
 import type { UseSimulationReturn } from '@safe-global/utils/components/tx/security/tenderly/useSimulation'
 import { getSimulationOutcome, type SimulationStatus } from '@safe-global/utils/components/tx/security/tenderly/utils'
-import { render, screen } from '@/tests/test-utils'
+import { render, screen, waitFor } from '@/tests/test-utils'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { _getSimulationIcon, _getSimulationStatusText, _isSimulationSuccessful, QueuedTxSimulation } from './index'
 
@@ -29,11 +29,10 @@ jest.mock('@/hooks/useSafeInfo', () => ({
     },
   }),
 }))
-jest.mock('@/services/tx/tx-sender', () => ({
-  createExistingTx: async () => ({
-    data: { to: '0x00000000000000000000000000000000000000aa', value: '0', data: '0xa9059cbb', operation: 0 },
-  }),
+const mockCreateExistingTx = jest.fn(async () => ({
+  data: { to: '0x00000000000000000000000000000000000000aa', value: '0', data: '0xa9059cbb', operation: 0 },
 }))
+jest.mock('@/services/tx/tx-sender', () => ({ createExistingTx: () => mockCreateExistingTx() }))
 jest.mock('@/components/tx/security/tenderly/useSimulation', () => ({
   useSimulation: () => ({
     simulateTransaction: mockSimulateTransaction,
@@ -130,6 +129,15 @@ describe('QueuedTxSimulation gating', () => {
     expect(url.searchParams.get('from')).toBe('0x1234567890123456789012345678901234567890')
     expect(screen.queryByRole('button', { name: /Simulate/ })).not.toBeInTheDocument()
     expect(mockSimulateTransaction).not.toHaveBeenCalled()
+  })
+
+  it('renders neither the button nor the Tenderly link while Safe Pro access is loading', async () => {
+    mockUseSafeProAccess.mockReturnValue({ hasProFeatures: false, isLoading: true })
+    render(<QueuedTxSimulation transaction={transaction} />)
+
+    await waitFor(() => expect(mockCreateExistingTx).toHaveBeenCalled())
+    expect(screen.queryByTestId('queued-tx-external-simulation')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Simulate/ })).not.toBeInTheDocument()
   })
 
   it('keeps the in-app simulation button with Safe Pro', async () => {

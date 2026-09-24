@@ -1,4 +1,4 @@
-import { render, screen } from '@/tests/test-utils'
+import { render, screen, within } from '@/tests/test-utils'
 import { ExecutionMethod, ExecutionMethodSelector } from '../index'
 
 const mockUseSafeSponsoredTxs = jest.fn()
@@ -66,9 +66,10 @@ describe('ExecutionMethodSelector', () => {
       isPro: false,
     })
     expect(screen.queryByTestId('balance-info')).not.toBeInTheDocument()
-    expect(
-      screen.getByTestId('relay-execution-method').querySelector('[data-slot=radio-group-item]'),
-    ).not.toHaveAttribute('data-disabled')
+    expect(within(screen.getByTestId('relay-execution-method')).getByRole('radio')).not.toHaveAttribute(
+      'aria-disabled',
+      'true',
+    )
   })
 
   it("counts the Workspace's allowance on a Safe Pro Safe", () => {
@@ -88,8 +89,9 @@ describe('ExecutionMethodSelector', () => {
     const setExecutionMethod = jest.fn()
     render(<ExecutionMethodSelector executionMethod={ExecutionMethod.RELAY} setExecutionMethod={setExecutionMethod} />)
 
-    expect(screen.getByTestId('relay-execution-method').querySelector('[data-slot=radio-group-item]')).toHaveAttribute(
-      'data-disabled',
+    expect(within(screen.getByTestId('relay-execution-method')).getByRole('radio')).toHaveAttribute(
+      'aria-disabled',
+      'true',
     )
     expect(setExecutionMethod).toHaveBeenCalledWith(ExecutionMethod.WALLET)
   })
@@ -99,8 +101,9 @@ describe('ExecutionMethodSelector', () => {
     const setExecutionMethod = jest.fn()
     renderSelector(ExecutionMethod.RELAY, setExecutionMethod)
 
-    expect(screen.getByTestId('relay-execution-method').querySelector('[data-slot=radio-group-item]')).toHaveAttribute(
-      'data-disabled',
+    expect(within(screen.getByTestId('relay-execution-method')).getByRole('radio')).toHaveAttribute(
+      'aria-disabled',
+      'true',
     )
     expect(setExecutionMethod).toHaveBeenCalledWith(ExecutionMethod.WALLET)
   })

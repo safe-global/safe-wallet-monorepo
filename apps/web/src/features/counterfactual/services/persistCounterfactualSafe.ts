@@ -17,6 +17,7 @@ import { removeUndeployedSafe } from '../store/undeployedSafesSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { isSpaceAtSafeLimit, normalizeSpaceId } from '@/utils/spaces'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { getQuotaExceededError } from '@safe-global/utils/services/quotaErrors'
 
 type PersistArgs = {
   chainId: string
@@ -157,13 +158,14 @@ export const persistCounterfactualSafe = async ({
           }
           // The cached count was stale (another admin filled the seats meanwhile). Seats are per
           // address, so a 402 cannot split a multi-chain batch: keep the Safe in My accounts.
-          const quotaExceeded = getQuotaExceeded(spaceResult.error)
+          const quotaExceeded = getQuotaExceededError(spaceResult.error)
           if (quotaExceeded) {
             dispatch(
               showNotification({
                 variant: 'info',
                 groupKey: 'cf-safe-space-limit',
-                message: seatLimitMessage(quotaExceeded.quota ?? spaceSafeLimit),
+                // The parser reads a missing quota as 0.
+                message: seatLimitMessage(quotaExceeded.quota || spaceSafeLimit),
               }),
             )
           } else if (isLimitRejection(spaceResult.error)) {
@@ -251,14 +253,7 @@ function recoverAlreadyDeployed({
   return { ok: true, skipped: 'already-deployed' }
 }
 
-type BackendError = { status?: number; data?: { message?: string; code?: string; quota?: number } }
-
-/** CGW rejects an add over the plan's seat quota with a typed 402; returns its quota, or undefined for any other error. */
-function getQuotaExceeded(error: unknown): { quota: number | null } | undefined {
-  const { status, data } = (error as BackendError) ?? {}
-  if (status !== 402 || data?.code !== 'QUOTA_EXCEEDED') return undefined
-  return { quota: typeof data.quota === 'number' ? data.quota : null }
-}
+type BackendError = { status?: number; data?: { message?: string } }
 
 function seatLimitMessage(limit: number | null): string {
   const seats = limit === null ? 'seat limit' : `limit of ${limit} Safe accounts`
