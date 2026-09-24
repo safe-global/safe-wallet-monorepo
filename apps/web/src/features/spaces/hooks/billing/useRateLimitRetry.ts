@@ -4,7 +4,7 @@ const MAX_ATTEMPTS = 3
 const BASE_DELAY_MS = 1_000
 
 export const isRateLimited = (error: unknown): boolean =>
-  typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 429
+  typeof error === 'object' && error !== null && 'status' in error && error.status === 429
 
 /**
  * Re-runs a billing query a few times, with exponential backoff, when the CGW rate-limits it. The shared CGW client

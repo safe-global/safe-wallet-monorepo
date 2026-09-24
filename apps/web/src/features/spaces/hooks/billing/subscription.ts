@@ -1,5 +1,5 @@
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
-import { getPlanDescriptions, getSeatsFromMetadata } from './paymentLinks'
+import { getPlanDescriptions, getSeatsFromMetadata, PLAN_NAME_METADATA_KEY, readMetadata } from './paymentLinks'
 import type { PlanOffer } from './types'
 
 export type PlanStatus = 'none' | 'trialing' | 'active' | 'pending' | 'payment_failed' | 'canceled'
@@ -65,9 +65,7 @@ export const getSubscriptionEndedAt = (subscription: Subscription | undefined): 
 /** The plan's display name: the CGW puts it on the plan or, for Stripe-tagged subscriptions, in `metadata.planName`. */
 export const getSubscriptionPlanName = (subscription: Subscription | undefined): string | null => {
   if (!subscription) return null
-  const metadata = (subscription.metadata ?? {}) as Record<string, unknown>
-  const fromMetadata = metadata.planName
-  return subscription.plan.name ?? (typeof fromMetadata === 'string' && fromMetadata ? fromMetadata : null)
+  return subscription.plan.name ?? (readMetadata(subscription.metadata)[PLAN_NAME_METADATA_KEY] || null)
 }
 
 /** When the current billing period (or trial) ends, as an ISO date; Stripe reports seconds. */
@@ -78,11 +76,11 @@ export const getSubscriptionPeriodEnd = (subscription: Subscription | undefined)
 export const getSubscriptionFeatures = (subscription: Subscription): string[] =>
   subscription.plan.features.length > 0
     ? subscription.plan.features
-    : getPlanDescriptions((subscription.metadata ?? {}) as Record<string, string | null | undefined>)
+    : getPlanDescriptions(readMetadata(subscription.metadata))
 
 /**
  * The seat quota the subscription itself carries: the CGW copies the payment link's metadata onto it, so it is right
  * as soon as a plan change is applied, while the entitlements wait for the billing webhook. Null when untagged.
  */
 export const getSubscriptionSeats = (subscription: Subscription): PlanOffer['seats'] =>
-  getSeatsFromMetadata((subscription.metadata ?? {}) as Record<string, string | null | undefined>)
+  getSeatsFromMetadata(readMetadata(subscription.metadata))

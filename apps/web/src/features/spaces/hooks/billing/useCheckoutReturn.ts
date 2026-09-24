@@ -6,7 +6,7 @@ import {
   useBillingGetSubscriptionsV1Query,
 } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import { CHECKOUT_SESSION_QUERY_PARAM } from './returnUrl'
-import { getPlanStatus, selectCurrentSubscription } from './subscription'
+import { getPlanStatus, isLivePlanStatus, selectCurrentSubscription } from './subscription'
 import { useBillingSpaceId } from './useBillingSpaceId'
 
 const POLL_INTERVAL = 3_000
@@ -43,7 +43,7 @@ export const useCheckoutReturn = (spaceId?: string | null) => {
   )
   const subscription = selectCurrentSubscription(subscriptions)
   const planStatus = getPlanStatus(subscription)
-  const isComplete = planStatus === 'trialing' || planStatus === 'active'
+  const isComplete = isLivePlanStatus(planStatus)
 
   useEffect(() => {
     if (!isReturning || isComplete) {

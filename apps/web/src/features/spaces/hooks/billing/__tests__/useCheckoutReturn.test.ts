@@ -14,7 +14,8 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/billing', () => ({
   useBillingGetCheckoutSessionV1Query: (...args: unknown[]) => mockSessionQuery(...args),
   useBillingGetSubscriptionsV1Query: (...args: unknown[]) => mockSubscriptionsQuery(...args),
 }))
-jest.mock('../useBillingSpaceId', () => ({ useBillingSpaceId: () => SPACE_ID }))
+const mockBillingSpaceId = jest.fn<string | null, []>()
+jest.mock('../useBillingSpaceId', () => ({ useBillingSpaceId: () => mockBillingSpaceId() }))
 
 const SPACE_ID = '11111111-1111-1111-1111-111111111111'
 const session = (paymentStatus: string) => ({ data: { id: 'cs_1', paymentStatus }, isError: false })
@@ -23,9 +24,12 @@ describe('useCheckoutReturn', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockQuery = { spaceId: SPACE_ID, sessionId: 'cs_1' }
+    mockBillingSpaceId.mockReturnValue(SPACE_ID)
     mockSessionQuery.mockReturnValue({ data: undefined, isError: false })
     mockSubscriptionsQuery.mockReturnValue({ data: undefined })
   })
+
+  afterEach(() => jest.useRealTimers())
 
   it('is idle without a session id and skips both queries', () => {
     mockQuery = { spaceId: SPACE_ID }
@@ -74,7 +78,14 @@ describe('useCheckoutReturn', () => {
     expect(result.current.status).toBe('activating')
     act(() => jest.advanceTimersByTime(1_000))
     expect(result.current.status).toBe('timeout')
-    jest.useRealTimers()
+  })
+
+  it('keeps the subscriptions query skipped while billing is gated', () => {
+    mockBillingSpaceId.mockReturnValue(null)
+    mockSessionQuery.mockReturnValue(session('paid'))
+
+    expect(renderHook(() => useCheckoutReturn()).result.current.status).toBe('activating')
+    expect(mockSubscriptionsQuery).toHaveBeenLastCalledWith(skipToken, expect.anything())
   })
 
   it('surfaces a session error', () => {

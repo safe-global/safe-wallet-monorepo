@@ -7,20 +7,24 @@ export const SAFE_SEATS_METADATA_KEY = 'FEATURE_SAFE_SEATS'
 export const PLAN_DESCRIPTIONS_METADATA_KEY = 'planDescriptions'
 const UNLIMITED = 'unlimited'
 
-type Metadata = Record<string, string | null | undefined>
+type Metadata = Record<string, string | undefined>
 
 type LineItem = {
   price?: { id?: string; unitAmount?: number | null; currency?: string; recurring?: { interval?: string } | null }
   quantity?: number
 }
 
-const readMetadata = (link: PaymentLink): Metadata =>
-  link.metadata && typeof link.metadata === 'object' ? (link.metadata as Metadata) : {}
+/** The string entries of Stripe metadata as the CGW forwards it; any other value is dropped. */
+export const readMetadata = (metadata: object | null | undefined): Metadata =>
+  Object.fromEntries(
+    Object.entries(metadata ?? {}).filter((entry): entry is [string, string] => typeof entry[1] === 'string'),
+  )
 
 const readLineItems = (link: PaymentLink): LineItem[] =>
   Array.isArray(link.lineItems) ? (link.lineItems as LineItem[]) : []
 
-export const getPlanName = (link: PaymentLink): string | null => readMetadata(link)[PLAN_NAME_METADATA_KEY] ?? null
+export const getPlanName = (link: PaymentLink): string | null =>
+  readMetadata(link.metadata)[PLAN_NAME_METADATA_KEY] ?? null
 
 /** The seat quota a link or subscription carries in its Stripe metadata; null when absent or malformed. */
 export const getSeatsFromMetadata = (metadata: Metadata): PlanOffer['seats'] => {
@@ -31,7 +35,7 @@ export const getSeatsFromMetadata = (metadata: Metadata): PlanOffer['seats'] => 
   return Number.isNaN(parsed) || parsed < 0 ? null : parsed
 }
 
-export const getSeats = (link: PaymentLink): PlanOffer['seats'] => getSeatsFromMetadata(readMetadata(link))
+export const getSeats = (link: PaymentLink): PlanOffer['seats'] => getSeatsFromMetadata(readMetadata(link.metadata))
 
 /** The JSON-encoded list of selling points on the link, or an empty list when missing or malformed. */
 export const getPlanDescriptions = (metadata: Metadata): string[] => {
@@ -69,7 +73,7 @@ export const toPlanOffer = (link: PaymentLink): PlanOffer | null => {
     planName,
     seats: getSeats(link),
     trialPeriodDays: link.trialPeriodDays ?? null,
-    features: getPlanDescriptions(readMetadata(link)),
+    features: getPlanDescriptions(readMetadata(link.metadata)),
     ...getPrice(link),
   }
 }
