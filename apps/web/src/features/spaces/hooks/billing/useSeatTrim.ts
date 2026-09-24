@@ -5,7 +5,7 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { countSeats } from '@/utils/spaces'
-import type { SafeRef } from '../../components/Plans/types'
+import type { SafeRef } from './types'
 
 /**
  * Fits the Workspace to a seat-limited plan: `needsTrim` tells whether the accounts step is shown (the Workspace holds

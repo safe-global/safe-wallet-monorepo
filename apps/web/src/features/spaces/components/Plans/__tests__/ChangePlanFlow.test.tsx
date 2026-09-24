@@ -41,7 +41,7 @@ jest.mock('../ChangePlanDialog', () => ({
   ),
 }))
 
-jest.mock('../../SafeProModals', () => ({
+jest.mock('../SafeProModals', () => ({
   SafeProPlanSwitchedModal: ({
     planName,
     trialEndsAt,

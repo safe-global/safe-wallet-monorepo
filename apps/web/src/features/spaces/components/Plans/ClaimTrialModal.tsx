@@ -14,19 +14,13 @@ import { formatDate } from '@safe-global/utils/utils/date'
 import { DAY_MS } from '../../hooks/billing/subscription'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import { useSeatTrimCheckout } from '../../hooks/billing/useSeatTrimCheckout'
-import { RECOMMENDED_PLAN } from './fixtures'
+import { claimCopy, type ClaimTrialVariant } from './copy'
+import { RECOMMENDED_PLAN } from './constants'
 import { claimTiers, formatPlanPrice, priceSuffix } from './planTiers'
 import SelectAccountsStep from './SelectAccountsStep'
 import { InfoTip } from './PlanStatusCard'
-import type { PlanTier, SafeRef } from './types'
-
-// The CGW grants the 60-day grace only to Workspaces that predate enforcement; anything else is a new Workspace.
-const MIGRATED_TRIAL_DAYS = 60
-
-/** `existing` locks a Workspace that predates Safe Pro; `new` greets one the wizard just created. */
-export type ClaimTrialVariant = 'existing' | 'new'
-
-export type ClaimTrialCopy = { title: string; subtitle: string; note: string; back: string; claim: string }
+import type { SafeRef } from '../../hooks/billing/types'
+import type { PlanTier } from './types'
 
 /** What happens when the trial runs out, behind the info icon next to the note. */
 export const TRIAL_END_TOOLTIP =
@@ -35,37 +29,6 @@ export const TRIAL_END_TOOLTIP =
 /** The price tag's green word: a new Workspace is told how long the free period lasts, an existing one just "Free". */
 export const freeLabel = (trialPeriodDays: number | null, variant: ClaimTrialVariant): string =>
   variant === 'new' && trialPeriodDays !== null ? `${trialPeriodDays}-day free` : 'Free'
-
-export const claimCopy = (trialPeriodDays: number | null, variant: ClaimTrialVariant = 'existing'): ClaimTrialCopy => {
-  if (variant === 'new') {
-    return {
-      title: 'Workspaces run on Safe Pro',
-      subtitle: trialPeriodDays === null ? 'Your first days are free.' : `Your first ${trialPeriodDays} days are free.`,
-      note: "No payment method required. We'll remind you 7 days before your free access ends.",
-      back: 'Go to My accounts',
-      claim: 'Claim free access',
-    }
-  }
-  const existing = {
-    note: "No payment method required. We'll remind you 7 days before your free access ends.",
-    back: 'Go to My accounts',
-    claim: 'Claim free access',
-  }
-  return trialPeriodDays === MIGRATED_TRIAL_DAYS
-    ? {
-        ...existing,
-        title: 'Your Workspace moved to Safe Pro on Oct 6, 2026',
-        subtitle: 'You’ve used Safe before, so your free access is 60 days instead of 30.',
-      }
-    : {
-        ...existing,
-        title:
-          trialPeriodDays === null
-            ? 'Start your free access to Safe Pro'
-            : `Start your ${trialPeriodDays}-day free access to Safe Pro`,
-        subtitle: 'All Pro features unlocked. No billing details needed upfront.',
-      }
-}
 
 const TrialOfferCard = ({
   tier,

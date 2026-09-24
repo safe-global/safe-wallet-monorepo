@@ -1,6 +1,7 @@
 import PlanCards from './PlanCards'
 import PlanStatusCard, { getCurrentBadge } from './PlanStatusCard'
-import type { CurrentPlan, Meter, PlanPick, PlanSummary, PlanTier } from './types'
+import type { Meter, PlanSummary } from '../../hooks/billing/types'
+import type { CurrentPlan, PlanPick, PlanTier } from './types'
 
 export default function Plans({
   plan,

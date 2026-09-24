@@ -6,53 +6,20 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
 import { highlightSafePro } from '@/components/common/ProHighlight'
-import { formatDate } from '@safe-global/utils/utils/date'
 import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
 import { useSeatTrimCheckout } from '../../hooks/billing/useSeatTrimCheckout'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import type { WorkspaceLockReason } from '../../hooks/useWorkspaceLock'
-import { ENTERPRISE_TIER, RECOMMENDED_PLAN } from './fixtures'
+import { chooserCopy, salesHintFor } from './copy'
+import { ENTERPRISE_TIER, RECOMMENDED_PLAN } from './constants'
 import { PlanCatalog } from './PlanCards'
 import { InfoTip } from './PlanStatusCard'
 import { buildPlanTiers } from './planTiers'
 import SelectAccountsStep from './SelectAccountsStep'
-import type { PlanPick, PlanTier } from './types'
+import type { PlanPick } from './types'
 
 export const LAPSED_DATA_NOTE =
   'Nothing was charged. Your paid subscription only starts once you add a payment method. Your Workspace data is kept for 90 days and your Safe accounts stay available in My accounts.'
-
-const maxSeats = (tier: PlanTier): number => Math.max(0, ...tier.options.map((option) => option.seats ?? 0))
-
-/** "Need more than 20?" under the tier with the most seats, pointing to sales. */
-export const salesHintFor = (tiers: PlanTier[]) => {
-  const largest = tiers.reduce<PlanTier | undefined>(
-    (best, tier) => (!best || maxSeats(tier) > maxSeats(best) ? tier : best),
-    undefined,
-  )
-  return (tier: PlanTier) =>
-    largest && tier.name === largest.name && maxSeats(tier) > 0 ? `Need more than ${maxSeats(tier)}?` : undefined
-}
-
-export const chooserCopy = (
-  reason: Exclude<WorkspaceLockReason, 'trial-offered'>,
-  endedAt: number | null,
-): { title: string; subtitle: string } => {
-  if (reason === 'payment-failed') {
-    return {
-      title: 'Your last payment failed',
-      subtitle: 'Update your billing details to keep using your Workspace, everything is exactly as you left it.',
-    }
-  }
-  return endedAt === null
-    ? {
-        title: 'Your Workspace has no active plan',
-        subtitle: 'Choose a plan to keep using your Workspace, everything is exactly as you left it.',
-      }
-    : {
-        title: `Your Safe Pro free access ended on ${formatDate(endedAt)}`,
-        subtitle: 'Choose a plan to unlock your Workspace.',
-      }
-}
 
 /**
  * Blocking plan picker for a Workspace whose trial or plan ended. Before Stripe the admin confirms which Safes the

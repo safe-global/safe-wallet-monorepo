@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
-import ClaimTrialModal, { claimCopy, freeLabel } from '../ClaimTrialModal'
+import ClaimTrialModal, { freeLabel } from '../ClaimTrialModal'
+import { claimCopy } from '../copy'
 
 const mockUseSpaceOffers = jest.fn()
 const mockStartCheckout = jest.fn()

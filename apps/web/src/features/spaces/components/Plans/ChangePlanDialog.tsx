@@ -15,7 +15,8 @@ import { formatDate } from '@safe-global/utils/utils/date'
 import { useChangePlan } from '../../hooks/billing/useChangePlan'
 import { useSeatTrim } from '../../hooks/billing/useSeatTrim'
 import { formatPlanPrice, getChangeDirection, priceSuffix } from './planTiers'
-import type { CurrentPlan, PlanChangeDirection, PlanPick, SafeRef } from './types'
+import type { SafeRef } from '../../hooks/billing/types'
+import type { CurrentPlan, PlanChangeDirection, PlanPick } from './types'
 
 /** Stripe amounts arrive in minor units and its dates in seconds. */
 const money = (minorUnits: number, currency: string) => formatCurrency(minorUnits / 100, currency.toUpperCase())

@@ -1,7 +1,4 @@
-export type Meter = { used: number; quota: number | null }
-
-/** A Safe as the Workspace endpoints address it. */
-export type SafeRef = { chainId: string; address: string }
+import type { BillingCycle } from '../../hooks/billing/types'
 
 export type PlanSeatOption = {
   /** Null for static tiers, which have no purchasable link. */
@@ -22,7 +19,7 @@ export type PlanTier = {
   id: string
   name: string
   currency: string
-  billingCycle: 'month' | 'year' | null
+  billingCycle: BillingCycle | null
   options: PlanSeatOption[]
   features: string[]
   isCurrent?: boolean
@@ -39,7 +36,7 @@ export type CurrentPlan = {
   name: string
   price: number
   currency: string
-  billingCycle: 'month' | 'year' | null
+  billingCycle: BillingCycle | null
   isTrialing: boolean
   /** During the trial: a payment method is already on file, so nothing needs adding. */
   hasPaymentMethod?: boolean
@@ -58,11 +55,3 @@ export type PlanCta =
   | { kind: 'change'; label: string; direction: PlanChangeDirection }
   | { kind: 'subscribe'; label: string }
   | { kind: 'sales'; label: 'Talk to sales' }
-
-export type PlanSummary = {
-  name: string
-  status: 'trialing' | 'active'
-  periodEndsAt: string | null
-  daysLeft: number | null
-  hasPaymentMethod?: boolean
-}

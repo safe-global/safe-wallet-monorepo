@@ -7,10 +7,10 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Typography } from '@/components/ui/typography'
 import { formatDate } from '@safe-global/utils/utils/date'
-import { TRIAL_DISCLAIMER } from '@/features/safe-pro-announcement'
 import { TRIAL_ENDING_SOON_DAYS, trialLabel } from '../../hooks/billing/subscription'
+import { TRIAL_DISCLAIMER } from './copy'
 import type { CurrentBadge } from './PlanCards'
-import type { Meter, PlanSummary } from './types'
+import type { Meter, PlanSummary } from '../../hooks/billing/types'
 
 export const remaining = ({ used, quota }: Meter): number | null => (quota === null ? null : Math.max(quota - used, 0))
 

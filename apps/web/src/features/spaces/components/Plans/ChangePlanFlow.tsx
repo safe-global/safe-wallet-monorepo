@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
-import { SafeProPlanSwitchedModal, SafeProSubscriptionActivatedModal } from '../SafeProModals'
+import { SafeProPlanSwitchedModal, SafeProSubscriptionActivatedModal } from './SafeProModals'
 import { useSeatTrim } from '../../hooks/billing/useSeatTrim'
 import ChangePlanDialog from './ChangePlanDialog'
 import { formatPlanPrice, getChangeDirection, priceSuffix } from './planTiers'
 import SelectAccountsStep from './SelectAccountsStep'
-import type { CurrentPlan, PlanChangeDirection, PlanPick, SafeRef } from './types'
+import type { SafeRef } from '../../hooks/billing/types'
+import type { CurrentPlan, PlanChangeDirection, PlanPick } from './types'
 
 /** The accounts step leads to the change summary, not to Stripe: a live plan is moved, not bought. */
 export const continueLabelFor = (direction: PlanChangeDirection): string =>

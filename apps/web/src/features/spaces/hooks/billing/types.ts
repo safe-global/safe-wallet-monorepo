@@ -21,10 +21,18 @@ export type PlanGroup = {
   offers: PlanOffer[]
 }
 
-export type SeatsMeter = {
-  used: number
-  quota: number | null
-}
+export type Meter = { used: number; quota: number | null }
 
 /** A metered entitlement that refills: `resetsAt` is when the count restarts (ISO), null when it never does. */
-export type SponsoredTxsMeter = SeatsMeter & { resetsAt: string | null }
+export type SponsoredTxsMeter = Meter & { resetsAt: string | null }
+
+/** A Safe as the Workspace endpoints address it. */
+export type SafeRef = { chainId: string; address: string }
+
+export type PlanSummary = {
+  name: string
+  status: 'trialing' | 'active'
+  periodEndsAt: string | null
+  daysLeft: number | null
+  hasPaymentMethod?: boolean
+}
