@@ -1,11 +1,10 @@
-import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getSafeDisplayInfo } from '@/components/common/AccountRow'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
 import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
 import useWallet from '@/hooks/wallets/useWallet'
-import { useSpaceSafeOverviews } from '../../../../hooks/useSpaceSafeOverviews'
 import { ProposerStatus, type ProposerDrawerContentProps } from '../../ProposerDrawer'
 import { useProposerOverview } from './useProposerOverview'
+import { getRemovableGrantDelegator, REMOVE_PROPOSER_NOT_ALLOWED } from './useRemoveProposer'
 import type { ProposerDetailsArgs } from './types'
 
 export const useActiveProposer = (args: ProposerDetailsArgs): ProposerDrawerContentProps => {
@@ -14,9 +13,6 @@ export const useActiveProposer = (args: ProposerDetailsArgs): ProposerDrawerCont
   const safeContact = useAddressBookItem(safeAddress, chainId)
   const wallet = useWallet()
   const connectWallet = useConnectWallet()
-  const { ownedByChain } = useSpaceSafeOverviews([{ chainId, address: safeAddress }])
-
-  const isSigner = (ownedByChain[chainId] ?? []).some((owned) => sameAddress(owned, safeAddress))
   const safeName = getSafeDisplayInfo(safeContact?.name ?? '', safeAddress).displayName
 
   if (!wallet) {
@@ -29,13 +25,15 @@ export const useActiveProposer = (args: ProposerDetailsArgs): ProposerDrawerCont
     }
   }
 
+  const canRemove = getRemovableGrantDelegator(args.proposer, wallet.address) !== undefined
+
   return {
     status: ProposerStatus.ACTIVE,
     overview,
     actionLabel: 'Remove proposer',
     actionVariant: 'secondary',
-    actionDisabled: !isSigner,
-    actionHint: isSigner ? undefined : `Only signers of ${safeName} can delete or edit this Proposer role.`,
+    actionDisabled: !canRemove,
+    actionHint: canRemove ? undefined : REMOVE_PROPOSER_NOT_ALLOWED,
     onAction: args.onRemove,
   }
 }

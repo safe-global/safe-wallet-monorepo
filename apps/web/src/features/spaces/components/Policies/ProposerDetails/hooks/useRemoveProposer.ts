@@ -12,12 +12,18 @@ import { assertWalletChain, getAssertedChainSigner } from '@/services/tx/tx-send
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { isEthSignWallet } from '@/utils/wallets'
+import type { Proposer } from '../../types'
 import type { ProposerRef } from './types'
 
-/** The grant the connected wallet made, or the first one when the proposer removes itself. */
-const getDelegator = ({ proposer }: ProposerRef, walletAddress: string): string | undefined =>
-  proposer.delegatedBy.find((grant) => sameAddress(grant.delegator, walletAddress))?.delegator ??
-  proposer.delegatedBy[0]?.delegator
+export const REMOVE_PROPOSER_NOT_ALLOWED = 'Only the signer who granted this proposer role can remove it'
+
+/** The grant the wallet made, or any grant when the proposer removes itself. Another owner gets none. */
+export const getRemovableGrantDelegator = (proposer: Proposer, walletAddress?: string): string | undefined => {
+  const ownGrant = proposer.delegatedBy.find((grant) => sameAddress(grant.delegator, walletAddress))
+  if (ownGrant) return ownGrant.delegator
+
+  return sameAddress(proposer.proposer, walletAddress) ? proposer.delegatedBy[0]?.delegator : undefined
+}
 
 /** Mirrors the Safe settings proposer removal for a delegator that is an EOA. */
 export const useRemoveProposer = (ref: ProposerRef, onRemoved: () => void) => {
@@ -43,9 +49,9 @@ export const useRemoveProposer = (ref: ProposerRef, onRemoved: () => void) => {
 
     try {
       const wallet = await assertWalletChain(onboard, chainId)
-      const delegator = getDelegator(ref, wallet.address)
+      const delegator = getRemovableGrantDelegator(ref.proposer, wallet.address)
 
-      if (!delegator) throw new Error('This proposer has no grant to remove')
+      if (!delegator) throw new Error(REMOVE_PROPOSER_NOT_ALLOWED)
 
       const signer = await getAssertedChainSigner(wallet.provider)
 

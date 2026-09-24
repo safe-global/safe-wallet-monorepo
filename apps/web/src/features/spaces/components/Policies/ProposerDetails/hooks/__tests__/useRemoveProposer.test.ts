@@ -120,4 +120,32 @@ describe('useRemoveProposer', () => {
     expect(result.current.error?.message).toBe('Please connect your wallet first')
     expect(mockAssertWalletChain).not.toHaveBeenCalled()
   })
+
+  it('should, when another owner tries to remove the role, refuse before asking for a signature', async () => {
+    mockAssertWalletChain.mockResolvedValue({
+      address: '0x1111111111111111111111111111111111111111',
+      provider: {},
+      label: 'MetaMask',
+    })
+    const { result } = renderHook(() => useRemoveProposer(ref, jest.fn()))
+
+    await act(() => result.current.removeProposer())
+
+    expect(result.current.error?.message).toBe('Only the signer who granted this proposer role can remove it')
+    expect(mockSignTypedData).not.toHaveBeenCalled()
+    expect(mockDeleteV2).not.toHaveBeenCalled()
+  })
+
+  it('should, when the proposer removes itself, delete the grant on behalf of its delegator', async () => {
+    mockAssertWalletChain.mockResolvedValue({ address: MOCK_ADDRESSES.bob, provider: {}, label: 'MetaMask' })
+    const { result } = renderHook(() => useRemoveProposer(ref, jest.fn()))
+
+    await act(() => result.current.removeProposer())
+
+    expect(mockDeleteV2).toHaveBeenCalledWith(
+      expect.objectContaining({
+        deleteDelegateV2Dto: expect.objectContaining({ delegator: MOCK_ADDRESSES.alice }),
+      }),
+    )
+  })
 })

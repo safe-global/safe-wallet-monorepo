@@ -4,7 +4,6 @@ import ProposerDetails from '../index'
 
 const mockUseWallet = jest.fn()
 const mockConnectWallet = jest.fn()
-const mockOwnedByChain = jest.fn()
 const mockUseAddressBookItem = jest.fn()
 
 jest.mock('@/hooks/wallets/useWallet', () => ({
@@ -15,10 +14,6 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
 jest.mock('@/components/common/ConnectWallet/useConnectWallet', () => ({
   __esModule: true,
   default: () => mockConnectWallet,
-}))
-
-jest.mock('../../../../hooks/useSpaceSafeOverviews', () => ({
-  useSpaceSafeOverviews: () => ({ ownedByChain: mockOwnedByChain(), isOwnershipResolved: true }),
 }))
 
 jest.mock('@/hooks/useAllAddressBooks', () => ({
@@ -32,7 +27,6 @@ describe('ProposerDetails', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseWallet.mockReturnValue({ address: '0x1111111111111111111111111111111111111111' })
-    mockOwnedByChain.mockReturnValue({})
     mockUseAddressBookItem.mockReturnValue(undefined)
   })
 
@@ -72,24 +66,24 @@ describe('ProposerDetails', () => {
     expect(mockConnectWallet).toHaveBeenCalledTimes(1)
   })
 
-  it('should, when the wallet does not sign for the Safe, keep the remove action out of reach', () => {
+  it('should, when the wallet did not grant the role, keep the remove action out of reach', () => {
     render(<ProposerDetails policy={policy} proposer={proposer} onClose={jest.fn()} />)
 
     expect(screen.getByRole('button', { name: 'Remove proposer' })).toBeDisabled()
-    expect(screen.getByText(/Only signers of/)).toBeInTheDocument()
+    expect(screen.getByText('Only the signer who granted this proposer role can remove it')).toBeInTheDocument()
   })
 
-  it('should, when the wallet signs for the Safe, enable the remove action', () => {
-    mockOwnedByChain.mockReturnValue({ [MOCK_SAFES.treasury.chainId]: [MOCK_SAFES.treasury.address] })
+  it('should, when the wallet granted the role, enable the remove action', () => {
+    mockUseWallet.mockReturnValue({ address: MOCK_ADDRESSES.alice })
 
     render(<ProposerDetails policy={policy} proposer={proposer} onClose={jest.fn()} />)
 
     expect(screen.getByRole('button', { name: 'Remove proposer' })).toBeEnabled()
-    expect(screen.queryByText(/Only signers of/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Only the signer who granted/)).not.toBeInTheDocument()
   })
 
-  it('should, when the signer clicks Remove proposer, open the remove confirmation', () => {
-    mockOwnedByChain.mockReturnValue({ [MOCK_SAFES.treasury.chainId]: [MOCK_SAFES.treasury.address] })
+  it('should, when the delegator clicks Remove proposer, open the remove confirmation', () => {
+    mockUseWallet.mockReturnValue({ address: MOCK_ADDRESSES.alice })
 
     render(<ProposerDetails policy={policy} proposer={proposer} onClose={jest.fn()} />)
 
@@ -101,7 +95,7 @@ describe('ProposerDetails', () => {
   })
 
   it('should, when the removal is kept, close the confirmation and leave the drawer open', async () => {
-    mockOwnedByChain.mockReturnValue({ [MOCK_SAFES.treasury.chainId]: [MOCK_SAFES.treasury.address] })
+    mockUseWallet.mockReturnValue({ address: MOCK_ADDRESSES.alice })
 
     render(<ProposerDetails policy={policy} proposer={proposer} onClose={jest.fn()} />)
     fireEvent.click(screen.getByRole('button', { name: 'Remove proposer' }))
