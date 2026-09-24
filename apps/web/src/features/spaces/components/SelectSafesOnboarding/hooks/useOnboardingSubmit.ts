@@ -214,8 +214,9 @@ const useOnboardingSubmit = (
     selectedSafes: AddAccountsFormValues['selectedSafes'],
     spaceIdStr: string,
   ) => {
-    await addNewSafes(safesToAdd, spaceIdStr)
+    // Free the seats first: a swap at the plan limit would otherwise 402 on the add.
     await removeUnselectedSafes(selectedSafes, spaceIdStr)
+    await addNewSafes(safesToAdd, spaceIdStr)
     trustAddedSafes(safesToAdd)
   }
 
