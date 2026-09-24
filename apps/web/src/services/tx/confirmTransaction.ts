@@ -1,9 +1,9 @@
-import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getStoreInstance } from '@/store'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 
-const confirmTx = async (chainId: string, safeTxHash: string, signature: string): Promise<Transaction> => {
+const confirmTx = async (chainId: string, safeTxHash: string, signature: string): Promise<TransactionDetails> => {
   const store = getStoreInstance()
 
   const result = await store.dispatch(

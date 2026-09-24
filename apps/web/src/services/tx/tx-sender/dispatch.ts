@@ -1,7 +1,4 @@
-import type {
-  Transaction as TransactionSummary,
-  TransactionDetails,
-} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import { isEthSignWallet, isSmartContractWallet } from '@/utils/wallets'
@@ -100,11 +97,11 @@ export const dispatchTxConfirmation = async ({
   safeTx: SafeTransaction
   txId: string
   scope?: TxSenderScope
-}): Promise<TransactionSummary> => {
+}): Promise<TransactionDetails> => {
   const safeSDK = getAndValidateSafeSDK(scope)
   const safeTxHash = await safeSDK.getTransactionHash(safeTx)
 
-  let confirmedTx: TransactionSummary | undefined
+  let confirmedTx: TransactionDetails | undefined
   try {
     const signature = safeTx.signatures.get(sender.toLowerCase())
     if (!signature) {
@@ -118,7 +115,7 @@ export const dispatchTxConfirmation = async ({
   }
 
   txDispatch(TxEvent.SIGNATURE_PROPOSED, {
-    txId: confirmedTx.id,
+    txId: confirmedTx.txId,
     signerAddress: sender,
     nonce: safeTx.data.nonce,
     chainId,
