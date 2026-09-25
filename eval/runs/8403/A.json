@@ -1,0 +1,19 @@
+{
+  "pr": 8403,
+  "reviewSha": "b13795256ed8a2aa5778fd13339a1870942cdbbd",
+  "baseSha": "5bd8401a0242fe0094465f6e8e577b17ee8702ed",
+  "system": "A",
+  "version": "73bf04408c26562bbf8945904bd1c02d8b9b1603",
+  "model": "claude-opus-5-5[1m]",
+  "runner": "valleXYZ",
+  "usage": {
+    "inputTokens": 16,
+    "outputTokens": 3838,
+    "cacheReadTokens": 519294,
+    "cacheWriteTokens": 62220,
+    "turns": 10,
+    "wallSeconds": 56,
+    "apiEquivalentUsd": 0.6784428
+  },
+  "output": "## Convention review: `5bd8401a0...HEAD` (commit `b13795256`)\n\n**No findings.** None of the 78 rules in `docs/engineering/sources/rules.json` is broken by this diff.\n\n**What the diff does:** it adds one line to the root `resolutions` in `package.json` (`\"axios\": \"1.18.1\"`). The `yarn.lock` changes follow from that line. Five older axios entries are removed (1.8.2, 1.13.2, 1.13.6, 1.15.0, and the `^1.18.1` range), leaving a single `axios@npm:1.18.1`. The now-unused `follow-redirects` ranges are dropped too. No source, test, CI or docs files are touched.\n\n**Checklist:** I generated it for all rules, with no project filter, into the scratchpad instead of the repo, so no tracked file changed. All 78 items are marked checked. I didn't need to look up any review history behind the rules.\n\n**Rules that apply, and why they pass:**\n- **REVIEW-01** (don't mix unrelated changes into an infra PR): passes. The commit only changes dependencies and contains no production refactor.\n- **API-01** (update every consumer when an export changes): passes. The repo's own exports are unchanged. `apps/tx-builder/package.json:30` already asks for `^1.18.1`, and every other axios range in the lockfile allows 1.18.1.\n- **PKG-01** (don't copy shared package files into apps): passes. No config, type or generated file is added under `apps/**`.\n- **MOB-03** (import React Native packages from the provider's entrypoint): passes. No import paths change.\n- **Repo pattern for resolutions:** matches. The new entry is an exact-version pin, like its neighbours (`motion`, `viem`, `webpack`, `stylus`). The commit message uses `chore(deps):`, as AGENTS.md asks.\n\n**Every other rule** covers features, auth, RTK, transactions, UI, mobile, CI workflows, telemetry and similar areas that this diff doesn't touch.\n\n**One risk outside the rules:** before this change, `@ledgerhq/context-module` and `@ledgerhq/device-management-kit` pinned axios to exactly `1.8.2` (`yarn.lock` at the base, around lines 9702 and 9719). The new resolution moves them to 1.18.1 without saying so. It's a minor-version bump within 1.x, but it's worth a quick smoke test of Ledger signing. This is not a convention violation.\n\n**Unresolved rule failures or open questions:** none. I changed no code or docs. I made no changes to rules, review learnings or the ledger.\n\nSeparately, several claude.ai connectors (Slack, Gmail, Google Drive and others) need to be authorised in your claude.ai connector settings before they can be used. This review didn't need any of them."
+}
