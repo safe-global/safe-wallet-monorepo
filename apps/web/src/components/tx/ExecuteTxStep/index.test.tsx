@@ -16,9 +16,7 @@ jest.mock('@/components/tx/confirmation-views/useTxPreview', () => ({
   default: jest.fn(() => [undefined, undefined, false]),
 }))
 jest.mock('@/components/tx/ConfirmTxDetails/Receipt', () => ({
-  Receipt: ({ tabsOutside }: { tabsOutside?: boolean }) => (
-    <div data-testid="receipt" data-tabs-outside={String(!!tabsOutside)} />
-  ),
+  Receipt: ({ outlined }: { outlined?: boolean }) => <div data-testid="receipt" data-outlined={String(!!outlined)} />,
 }))
 jest.mock('@/components/tx-flow/actions/Execute', () => ({
   __esModule: true,
@@ -110,12 +108,12 @@ describe('ExecuteTxStep', () => {
     expect(screen.getByTestId('card-content')).toHaveClass('cardContentCompactBottom')
   })
 
-  it('shows the receipt tabs outside the panel', async () => {
+  it('renders the receipt in an outlined panel', async () => {
     mockCreateExistingTx.mockResolvedValue(reloadedTx)
 
     renderStep()
 
-    expect(await screen.findByTestId('receipt')).toHaveAttribute('data-tabs-outside', 'true')
+    expect(await screen.findByTestId('receipt')).toHaveAttribute('data-outlined', 'true')
   })
 
   it('offers Back in the button row instead of the layout back button when opened from the queue', async () => {

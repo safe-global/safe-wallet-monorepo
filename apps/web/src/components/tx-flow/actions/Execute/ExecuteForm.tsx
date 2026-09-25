@@ -334,7 +334,7 @@ export const ExecuteForm = ({
           </div>
         </ModalDialog>
 
-        <div className="pt-6">
+        <div className="py-6">
           <Separator bleed="6" />
         </div>
 
