@@ -30,15 +30,15 @@ export default function RecoverySummary({ item }: { item: RecoveryQueueItem }): 
         <DateTime value={Number(item.timestamp)} />
       </div>
 
-      {!isExecutable || isPending ? (
-        <div className={css.status} style={{ gridArea: 'status' }}>
+      <div className={css.actions} style={{ gridArea: 'actions' }}>
+        {!isExecutable || isPending ? (
           <RecoveryStatus recovery={item} />
-        </div>
-      ) : (
-        <div data-testid="tx-actions" className="mr-4 flex justify-center" style={{ gridArea: 'actions' }}>
-          {!isMalicious && wallet && <ExecuteRecoveryButton recovery={item} compact />}
-        </div>
-      )}
+        ) : (
+          <div data-testid="tx-actions">
+            {!isMalicious && wallet && <ExecuteRecoveryButton recovery={item} compact />}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

@@ -165,6 +165,19 @@ describe('TxSummary', () => {
     expect(getByTestId('tx-status-label')).toBeInTheDocument()
   })
 
+  it('should place a pending status in the same grid cell as the queue action', () => {
+    jest.spyOn(pending, 'default').mockReturnValue(false)
+    const { getByText, unmount } = render(<TxSummary item={mockTransaction} isConflictGroup={false} />)
+    const actionCell = getByText('Confirm').closest<HTMLElement>('[style*="grid-area"]')
+    expect(actionCell?.style.gridArea).toBe('actions')
+    unmount()
+
+    jest.spyOn(pending, 'default').mockReturnValue(true)
+    const { getByTestId } = render(<TxSummary item={mockTransaction} isConflictGroup={false} />)
+    const statusCell = getByTestId('tx-status-label').closest<HTMLElement>('[style*="grid-area"]')
+    expect(statusCell?.style.gridArea).toBe('actions')
+  })
+
   it('should not display a status label if transaction is in queue and not pending', () => {
     jest.spyOn(pending, 'default').mockReturnValue(false)
     const { queryByTestId } = render(<TxSummary item={mockTransaction} isConflictGroup={false} />)
