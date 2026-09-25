@@ -1,5 +1,5 @@
 import { Badge, BadgeDot } from '@/components/ui/badge'
-import type { PolicyStatus } from '../../types'
+import type { PolicyStatus } from '../types'
 
 const BADGE_BY_STATUS: Record<PolicyStatus, { label: string; variant: 'success' | 'warning' | 'secondary' }> = {
   active: { label: 'Active', variant: 'success' },
