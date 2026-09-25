@@ -1,12 +1,20 @@
 import { renderWithUserEvent, screen } from '@/tests/test-utils'
 import NoEligibleAccounts from '../components/NoEligibleAccounts'
-import { NO_ELIGIBLE_ACCOUNTS_TEXT, NO_WALLET_TEXT } from '../constants'
+import { ELIGIBILITY_COPY, NO_ELIGIBLE_ACCOUNTS_TEXT, NO_WALLET_TEXT } from '../constants'
 
 describe('NoEligibleAccounts', () => {
   it('explains why the list is empty', () => {
     renderWithUserEvent(<NoEligibleAccounts onSwitchWallet={jest.fn()} />)
 
     expect(screen.getByText(NO_ELIGIBLE_ACCOUNTS_TEXT)).toBeInTheDocument()
+  })
+
+  it('uses the signer-only wording when the rule is signer', () => {
+    renderWithUserEvent(<NoEligibleAccounts eligibilityRule="signer" onSwitchWallet={jest.fn()} />)
+
+    expect(screen.getByText(ELIGIBILITY_COPY.signer.noEligibleAccountsText)).toBeInTheDocument()
+    expect(screen.queryByText(NO_ELIGIBLE_ACCOUNTS_TEXT)).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Switch wallet' })).toBeInTheDocument()
   })
 
   it('asks for a wallet instead of blaming one when none is connected', () => {

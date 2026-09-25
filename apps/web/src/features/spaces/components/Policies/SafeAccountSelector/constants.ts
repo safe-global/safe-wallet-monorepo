@@ -1,13 +1,32 @@
-import type { SafeAccountIneligibility } from './types'
+import type { EligibilityRule, SafeAccountIneligibility } from './types'
 
-/** Shared by the helper text and the empty state so the two cannot state different rules. */
-export const ELIGIBILITY_RULE = 'signer or proposer'
+type EligibilityCopy = {
+  rule: string
+  helperText: string
+  noEligibleAccountsText: string
+}
 
-export const ELIGIBILITY_HELPER_TEXT = `You only see accounts where you're a ${ELIGIBILITY_RULE}.`
+/** Built from one rule wording so the helper text and the empty state cannot state different rules. */
+const buildEligibilityCopy = (rule: string): EligibilityCopy => ({
+  rule,
+  helperText: `You only see accounts where you're a ${rule}.`,
+  noEligibleAccountsText:
+    `Your connected wallet isn't a ${rule} on any Safe Account in this Workspace. ` +
+    `Connect a different wallet to set up a policy.`,
+})
 
-export const NO_ELIGIBLE_ACCOUNTS_TEXT =
-  `Your connected wallet isn't a ${ELIGIBILITY_RULE} on any Safe Account in this Workspace. ` +
-  `Connect a different wallet to set up a policy.`
+export const ELIGIBILITY_COPY: Record<EligibilityRule, EligibilityCopy> = {
+  'signer-or-proposer': buildEligibilityCopy('signer or proposer'),
+  signer: buildEligibilityCopy('signer'),
+}
+
+export const DEFAULT_ELIGIBILITY_RULE: EligibilityRule = 'signer-or-proposer'
+
+export const ELIGIBILITY_RULE = ELIGIBILITY_COPY[DEFAULT_ELIGIBILITY_RULE].rule
+
+export const ELIGIBILITY_HELPER_TEXT = ELIGIBILITY_COPY[DEFAULT_ELIGIBILITY_RULE].helperText
+
+export const NO_ELIGIBLE_ACCOUNTS_TEXT = ELIGIBILITY_COPY[DEFAULT_ELIGIBILITY_RULE].noEligibleAccountsText
 
 /** Used instead when no wallet is connected — there is none to blame or switch away from. */
 export const NO_WALLET_TEXT = 'Connect a wallet to see the Safe Accounts you can set a policy on.'

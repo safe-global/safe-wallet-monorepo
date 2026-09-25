@@ -22,7 +22,6 @@ const getEligibility = (isSigner: boolean, isProposer: boolean): SafeAccountElig
 }
 
 export type EligibleSafeAccountsOptions = {
-  /** Lists only Safes the wallet signs for, for actions a proposer cannot take. */
   signersOnly?: boolean
 }
 

@@ -5,6 +5,8 @@ export type SafeAccountEligibility = 'signer' | 'proposer' | 'signer-and-propose
 
 export type SafeAccountIneligibility = 'not-activated'
 
+export type EligibilityRule = 'signer-or-proposer' | 'signer'
+
 /** One selectable entry: a Safe on exactly one chain. */
 export type SafeAccountOption = {
   /** `${chainId}:${address}` — the form value. */
