@@ -8,12 +8,13 @@ const mockUseHasFeature = jest.fn()
 const mockDispatch = jest.fn()
 const mockReplace = jest.fn()
 const mockIsUnauthorized = jest.fn()
+let mockPathname = '/spaces/security'
 let mockIsAuthenticated = true
 let mockIsOidcLoginPending = false
 let mockIsSessionCheckPending = false
 
 jest.mock('next/router', () => ({
-  useRouter: () => ({ replace: mockReplace, pathname: '/spaces/security' }),
+  useRouter: () => ({ replace: mockReplace, pathname: mockPathname }),
 }))
 
 jest.mock('@/store', () => ({
@@ -67,11 +68,20 @@ jest.mock('@/features/spaces/utils', () => ({
 }))
 
 jest.mock('@/config/routes', () => ({
-  AppRoutes: { welcome: { spaces: '/welcome/spaces' } },
+  AppRoutes: { welcome: { spaces: '/welcome/spaces' }, spaces: { index: '/spaces', plans: '/spaces/plans' } },
 }))
 
 jest.mock('@/features/spaces', () => ({
   MemberStatus: { ACTIVE: 'ACTIVE' },
+}))
+
+jest.mock('../Plans/TrialEndingModal', () => ({
+  __esModule: true,
+  default: ({ spaceId }: { spaceId: string }) => <div data-testid="trial-ending-modal" data-space={spaceId} />,
+}))
+jest.mock('../Plans/WorkspaceLockModal', () => ({
+  __esModule: true,
+  default: ({ spaceId }: { spaceId: string }) => <div data-testid="workspace-lock-modal" data-space={spaceId} />,
 }))
 
 describe('AuthState', () => {
@@ -80,6 +90,7 @@ describe('AuthState', () => {
     mockIsAuthenticated = true
     mockIsOidcLoginPending = false
     mockIsSessionCheckPending = false
+    mockPathname = '/spaces/security'
     mockIsUnauthorized.mockReturnValue(false)
     mockUseHasFeature.mockReturnValue(true)
     mockUseSpacesGetOneV1Query.mockReturnValue({
@@ -171,6 +182,22 @@ describe('AuthState', () => {
     )
 
     expect(screen.getByTestId('children')).toBeInTheDocument()
+    expect(mockReplace).not.toHaveBeenCalled()
+  })
+
+  it('mounts the lock modal next to the page instead of redirecting a locked Workspace', () => {
+    render(
+      <AuthState spaceId="11111111-1111-1111-1111-111111111111">
+        <div data-testid="children" />
+      </AuthState>,
+    )
+
+    expect(screen.getByTestId('children')).toBeInTheDocument()
+    expect(screen.getByTestId('workspace-lock-modal')).toHaveAttribute(
+      'data-space',
+      '11111111-1111-1111-1111-111111111111',
+    )
+    expect(screen.getByTestId('trial-ending-modal')).toBeInTheDocument()
     expect(mockReplace).not.toHaveBeenCalled()
   })
 

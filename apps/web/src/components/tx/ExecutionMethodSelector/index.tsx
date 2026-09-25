@@ -6,12 +6,14 @@ import { Typography } from '@/components/ui/typography'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Chip } from '@/components/ui/chip'
 import { Link } from '@/components/ui/link'
-import type { Dispatch, SetStateAction, ReactElement } from 'react'
+import { useEffect, type Dispatch, type SetStateAction, type ReactElement } from 'react'
 import useWallet from '@/hooks/wallets/useWallet'
 import WalletIcon from '@/components/common/WalletIcon'
 import SponsoredBy from '../SponsoredBy'
 
 import RemainingRelays from '../RemainingRelays'
+import SponsoredTxsCounter from '../SponsoredTxsCounter'
+import { useSafeSponsoredTxs, type SafeSponsoredTxs } from '@/features/spaces'
 import { Info } from 'lucide-react'
 import { NoFeeCampaignFeature } from '@/features/no-fee-campaign'
 import { useLoadFeature } from '@/features/__core__'
@@ -36,6 +38,20 @@ const GasTooHighBannerLoader = () => {
   return <GasTooHighBanner />
 }
 
+/** A Pro Safe whose sponsored allowance ran out cannot relay: the selection falls back to the wallet. */
+const RelayExhaustedFallback = ({
+  executionMethod,
+  setExecutionMethod,
+}: {
+  executionMethod: ExecutionMethod
+  setExecutionMethod: Dispatch<SetStateAction<ExecutionMethod>>
+}) => {
+  useEffect(() => {
+    if (executionMethod === ExecutionMethod.RELAY) setExecutionMethod(ExecutionMethod.WALLET)
+  }, [executionMethod, setExecutionMethod])
+  return null
+}
+
 const _ExecutionMethodSelector = ({
   wallet,
   chain,
@@ -46,9 +62,12 @@ const _ExecutionMethodSelector = ({
   tooltip,
   noFeeCampaign,
   gasTooHigh,
+  sponsoredTxs,
 }: {
   wallet: ConnectedWallet | null
   chain?: Chain
+  /** The Safe's Safe Pro sponsored-transactions allowance; drives the counter strip under the SAFE_PRO flag. */
+  sponsoredTxs?: SafeSponsoredTxs
   executionMethod: ExecutionMethod
   setExecutionMethod: Dispatch<SetStateAction<ExecutionMethod>>
   relays?: RelaysRemaining
@@ -64,6 +83,13 @@ const _ExecutionMethodSelector = ({
   const shouldRelay = executionMethod === ExecutionMethod.RELAY || executionMethod === ExecutionMethod.NO_FEE_CAMPAIGN
   // On unlimited-relay (GTF) chains the finite "N free transactions left" counter is meaningless, so hide it.
   const isUnlimitedRelay = !!chain && hasFeature(chain, FEATURES.GTF)
+  // Under SAFE_PRO the relay strip counts sponsored transactions; the no-fee campaign keeps its own counter.
+  const showsSponsoredTxs = Boolean(
+    sponsoredTxs?.isEnabled && relays && !isUnlimitedRelay && !noFeeCampaign?.isEligible,
+  )
+  const isProExhausted = Boolean(
+    sponsoredTxs?.isEnabled && sponsoredTxs.isPro && sponsoredTxs.left === 0 && !noFeeCampaign?.isEligible,
+  )
 
   const onChooseExecutionMethod = (newExecutionMethod: unknown) => {
     setExecutionMethod(newExecutionMethod as ExecutionMethod)
@@ -73,6 +99,9 @@ const _ExecutionMethodSelector = ({
     /* overflow-hidden so the relay counter's own 6px bottom corners are clipped to this 16px
        radius instead of poking outside it. */
     <div className={`${css.container} overflow-hidden rounded-[var(--radius)]`}>
+      {isProExhausted && (
+        <RelayExhaustedFallback executionMethod={executionMethod} setExecutionMethod={setExecutionMethod} />
+      )}
       <div className={css.method}>
         <div className="flex flex-col">
           {!noLabel ? (
@@ -91,7 +120,7 @@ const _ExecutionMethodSelector = ({
               const availabilityLabel = noFeeCampaign?.limit
                 ? `${noFeeCampaign.remaining || 0}/${noFeeCampaign.limit} available`
                 : ''
-              const isDisabled = gasTooHigh || isLimitReached
+              const isDisabled = gasTooHigh || isLimitReached || isProExhausted
 
               const relayValue = noFeeCampaign?.isEligible ? ExecutionMethod.NO_FEE_CAMPAIGN : ExecutionMethod.RELAY
 
@@ -196,6 +225,13 @@ const _ExecutionMethodSelector = ({
         <Typography variant="paragraph-small" className={css.transactionCounter}>
           <span className={css.counterNumber}>{noFeeCampaign.remaining}</span> free transactions left
         </Typography>
+      ) : showsSponsoredTxs && relays && sponsoredTxs ? (
+        <SponsoredTxsCounter
+          left={sponsoredTxs.isPro ? sponsoredTxs.left : relays.remaining}
+          quota={sponsoredTxs.meter?.quota ?? null}
+          resetsAt={sponsoredTxs.meter?.resetsAt ?? null}
+          isPro={sponsoredTxs.isPro}
+        />
       ) : shouldRelay && relays ? (
         isUnlimitedRelay ? null : (
           <RemainingRelays relays={relays} tooltip={tooltip} />
@@ -210,4 +246,5 @@ const _ExecutionMethodSelector = ({
 export const ExecutionMethodSelector = madProps(_ExecutionMethodSelector, {
   wallet: useWallet,
   chain: useCurrentChain,
+  sponsoredTxs: useSafeSponsoredTxs,
 })

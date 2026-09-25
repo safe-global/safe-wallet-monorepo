@@ -25,9 +25,43 @@ jest.mock('./hooks/useOnboardingExit', () => ({
   default: () => ({ onExit: jest.fn(), hasNoSpaces: false }),
 }))
 
+const mockGoToSelectSafes = jest.fn()
+let mockCreatedSpaceId: string | undefined
 jest.mock('./hooks/useSpaceSubmit', () => ({
   __esModule: true,
-  default: () => ({ error: undefined, isSubmitting: false, onSubmit: jest.fn() }),
+  default: () => ({
+    error: undefined,
+    isSubmitting: false,
+    onSubmit: jest.fn(),
+    createdSpaceId: mockCreatedSpaceId,
+    goToSelectSafes: mockGoToSelectSafes,
+  }),
+}))
+
+const mockPush = jest.fn()
+jest.mock('next/router', () => ({ useRouter: () => ({ push: mockPush, query: {} }) }))
+
+const mockUseWorkspaceLock = jest.fn()
+jest.mock('../../hooks/useWorkspaceLock', () => ({
+  useWorkspaceLock: (spaceId?: string | null) => mockUseWorkspaceLock(spaceId),
+}))
+jest.mock('../Plans/ClaimTrialModal', () => ({
+  __esModule: true,
+  default: ({
+    spaceId,
+    variant,
+    returnPathname,
+    onBack,
+  }: {
+    spaceId: string
+    variant?: string
+    returnPathname?: string
+    onBack: () => void
+  }) => (
+    <div data-testid="claim-trial-modal" data-space={spaceId} data-variant={variant} data-return={returnPathname}>
+      <button onClick={onBack}>decline</button>
+    </div>
+  ),
 }))
 
 jest.mock('../../hooks/useSpaceSafes', () => ({
@@ -39,7 +73,12 @@ jest.mock('../../hooks/useOnboardingStepCount', () => ({
 }))
 
 jest.mock('../OnboardingLayout', () => ({
-  OnboardingLayout: ({ main }: { main: React.ReactNode }) => <div>{main}</div>,
+  OnboardingLayout: ({ main, footer }: { main: React.ReactNode; footer: React.ReactNode }) => (
+    <div>
+      {main}
+      {footer}
+    </div>
+  ),
   StepCounter: () => null,
   SafeAppMockup: () => null,
   deriveSidePanelAccountsFromSpace: () => [],
@@ -55,6 +94,77 @@ describe('CreateSpaceOnboarding', () => {
     jest.clearAllMocks()
     mockIsCheckingAccess = false
     mockExistingSpace = { spaceId: undefined, isEditMode: false, isSpaceLoading: false, existingSpace: undefined }
+    mockCreatedSpaceId = undefined
+    mockUseWorkspaceLock.mockReturnValue({ isLocked: true, isResolving: false, reason: 'trial-offered' })
+  })
+
+  it('offers the trial over the step once the Workspace exists; declining leaves for My accounts', () => {
+    mockCreatedSpaceId = 'space-new'
+    render(<CreateSpaceOnboarding />)
+
+    expect(mockUseWorkspaceLock).toHaveBeenCalledWith('space-new')
+    expect(screen.getByTestId('claim-trial-modal')).toHaveAttribute('data-space', 'space-new')
+    expect(screen.getByTestId('claim-trial-modal')).toHaveAttribute('data-return', '/welcome/select-safes')
+    expect(screen.getByTestId('claim-trial-modal')).toHaveAttribute('data-variant', 'new')
+    expect(mockGoToSelectSafes).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole('button', { name: 'decline' }))
+    expect(mockPush).toHaveBeenCalledWith('/welcome/accounts')
+    expect(mockGoToSelectSafes).not.toHaveBeenCalled()
+  })
+
+  it('moves straight to the Safes step when the new Workspace is offered no trial', () => {
+    mockCreatedSpaceId = 'space-new'
+    mockUseWorkspaceLock.mockReturnValue({ isLocked: false, isResolving: false, reason: 'lapsed' })
+    render(<CreateSpaceOnboarding />)
+
+    expect(screen.queryByTestId('claim-trial-modal')).not.toBeInTheDocument()
+    expect(mockGoToSelectSafes).toHaveBeenCalledWith('space-new')
+  })
+
+  it('waits for the offer to resolve before deciding', () => {
+    mockCreatedSpaceId = 'space-new'
+    mockUseWorkspaceLock.mockReturnValue({ isLocked: false, isResolving: true, reason: 'trial-offered' })
+    render(<CreateSpaceOnboarding />)
+
+    expect(screen.queryByTestId('claim-trial-modal')).not.toBeInTheDocument()
+    expect(mockGoToSelectSafes).not.toHaveBeenCalled()
+  })
+
+  it('stays on the step and offers a retry when the trial offer cannot be read', () => {
+    mockCreatedSpaceId = 'space-new'
+    const retry = jest.fn()
+    mockUseWorkspaceLock.mockReturnValue({
+      isLocked: false,
+      isResolving: false,
+      isError: true,
+      reason: 'lapsed',
+      retry,
+    })
+    render(<CreateSpaceOnboarding />)
+
+    expect(mockGoToSelectSafes).not.toHaveBeenCalled()
+    expect(screen.queryByTestId('claim-trial-modal')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
+    expect(retry).toHaveBeenCalled()
+  })
+
+  it('keeps Next and the name field locked once the Workspace is created, so it is never created twice', () => {
+    mockCreatedSpaceId = 'space-new'
+    mockUseWorkspaceLock.mockReturnValue({ isLocked: false, isResolving: true, reason: 'trial-offered' })
+    render(<CreateSpaceOnboarding />)
+
+    expect(screen.getByTestId('create-space-onboarding-continue-button')).toBeDisabled()
+    expect(screen.getByTestId('space-name-input')).toBeDisabled()
+  })
+
+  it('shows no trial offer before the Workspace is created', () => {
+    render(<CreateSpaceOnboarding />)
+
+    expect(screen.queryByTestId('claim-trial-modal')).not.toBeInTheDocument()
+    expect(mockUseWorkspaceLock).toHaveBeenCalledWith(null)
+    expect(mockGoToSelectSafes).not.toHaveBeenCalled()
   })
 
   it('focuses the workspace name input on load in create mode', async () => {

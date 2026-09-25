@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import SpacesList from '../index'
+import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
@@ -51,10 +52,17 @@ jest.mock('@/features/myAccounts', () => ({
 }))
 
 const mockUseIsSafeProEnabled = jest.fn()
+const mockUseHasFeature = jest.fn()
 
 jest.mock('@/features/safe-pro-announcement', () => ({
   SafeProFeature: { name: 'SafeProFeature' },
   useIsSafeProEnabled: () => mockUseIsSafeProEnabled(),
+}))
+
+jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
+
+jest.mock('../../../hooks/billing/useSpaceSubscription', () => ({
+  useSpaceSubscription: () => ({ subscription: undefined, status: 'none' }),
 }))
 
 jest.mock('@/features/spaces', () => ({
@@ -122,6 +130,30 @@ describe('SpacesList — auth/expiry state rendering', () => {
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: undefined })
     mockUseSignInRedirect.mockReturnValue({ setHasSignedIn: jest.fn(), redirectLoading: false })
     mockUseIsSafeProEnabled.mockReturnValue(false)
+    mockUseHasFeature.mockReturnValue(false)
+  })
+
+  it('leads a first Workspace straight into the onboarding, where the trial is offered', () => {
+    mockUseHasFeature.mockReturnValue(true)
+    mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    expect(screen.getByRole('link', { name: /get safe pro/i })).toHaveAttribute('href', AppRoutes.welcome.createSpace)
+  })
+
+  it('keeps the pre-launch first Workspace CTA until Safe Pro is live', () => {
+    mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    expect(screen.getByRole('link', { name: /create your first workspace/i })).toHaveAttribute(
+      'href',
+      AppRoutes.welcome.createSpace,
+    )
+    expect(screen.queryByText(/get safe pro/i)).not.toBeInTheDocument()
   })
 
   describe('SAFE_PRO_ANNOUNCEMENT banner gating', () => {
@@ -159,16 +191,21 @@ describe('SpacesList — auth/expiry state rendering', () => {
       expect(screen.getByTestId('safe-pro-workspaces-banner')).toBeInTheDocument()
     })
 
-    it('shows the wide Pro banner above the empty state when signed in with no workspaces', () => {
+    it('shows the wide Pro banner above the empty state, before and after Safe Pro is live', () => {
       setAuth(true)
       mockUseIsSafeProEnabled.mockReturnValue(true)
       mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
       mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
 
-      render(<SpacesList />)
-
+      const { unmount } = render(<SpacesList />)
       expect(screen.getByTestId('safe-pro-workspaces-banner')).toBeInTheDocument()
       expect(screen.getByText(/create your first workspace/i)).toBeInTheDocument()
+      unmount()
+
+      mockUseHasFeature.mockReturnValue(true)
+      render(<SpacesList />)
+      expect(screen.getByTestId('safe-pro-workspaces-banner')).toBeInTheDocument()
+      expect(screen.getByText(/get safe pro/i)).toBeInTheDocument()
     })
 
     it('hides the wide Pro banner when signed in and the flag is off', () => {
@@ -198,8 +235,8 @@ describe('SpacesList — auth/expiry state rendering', () => {
     expect(screen.getByTestId('sign-in-options')).toBeInTheDocument()
 
     // …and the Create workspace CTA / no-workspaces empty state must NOT.
-    expect(screen.queryByText(/^create Workspace$/i)).not.toBeInTheDocument()
-    expect(screen.queryByText(/create your first Workspace/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/^create workspace$/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/get safe pro/i)).not.toBeInTheDocument()
   })
 
   // /welcome/spaces keeps its Topbar + tabbed layout. The Accounts/Workspaces
@@ -231,8 +268,9 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     render(<SpacesList />)
 
-    const cta = screen.getByRole('link', { name: /create your first Workspace/i })
+    const cta = screen.getByRole('link', { name: /create your first workspace/i })
     expect(cta).toHaveAttribute('href')
+    expect(cta).toHaveClass('[&_svg]:text-green-400')
 
     // Sign in card must NOT render in this branch.
     expect(screen.queryByTestId('sign-in-options')).not.toBeInTheDocument()
@@ -258,7 +296,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
     render(<SpacesList />)
 
     expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument()
-    expect(screen.queryByText(/create your first workspace/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/get safe pro/i)).not.toBeInTheDocument()
   })
 
   it('shows a loading spinner, not the sign-in card or empty state, before the store is hydrated on a hard refresh', () => {
@@ -268,7 +306,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument()
     expect(screen.queryByTestId('sign-in-options')).not.toBeInTheDocument()
-    expect(screen.queryByText(/create your first workspace/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/get safe pro/i)).not.toBeInTheDocument()
   })
 
   it('shows an error message with a retry button, not the empty state, when the spaces query errors', () => {
@@ -285,7 +323,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     expect(screen.getByText(/couldn't load your workspaces/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /try again/i })).toBeInTheDocument()
-    expect(screen.queryByText(/create your first workspace/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/get safe pro/i)).not.toBeInTheDocument()
   })
 
   it('calls refetch when the retry button is clicked in the error state', async () => {
@@ -336,7 +374,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
     render(<SpacesList />)
 
     expect(screen.getByText(/couldn't load your workspaces/i)).toBeInTheDocument()
-    expect(screen.queryByText(/create your first workspace/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/get safe pro/i)).not.toBeInTheDocument()
   })
 
   it('shows a loading spinner, not the spaces list, when the user is signed in but the store is not yet hydrated', () => {
@@ -459,7 +497,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
   // WA-2486: the "By continuing…" Terms/Privacy text is moved out of the card
   // (below it) to reduce text overload inside the box.
-  it('renders the "By continuing" text outside the sign-in card', () => {
+  it('renders the "By continuing" text outside the sign-in card when Safe Pro is off', () => {
     setAuth(false)
 
     const { container } = render(<SpacesList />)
@@ -468,6 +506,34 @@ describe('SpacesList — auth/expiry state rendering', () => {
     const termsLink = screen.getByRole('link', { name: /^terms$/i })
     expect(card).toBeInTheDocument()
     expect(card).not.toContainElement(termsLink)
+  })
+
+  it('keeps the general terms while only the Safe Pro announcement is on', () => {
+    setAuth(false)
+    mockUseIsSafeProEnabled.mockReturnValue(true)
+
+    render(<SpacesList />)
+
+    expect(screen.getByRole('link', { name: /^terms$/i })).toHaveAttribute('href', AppRoutes.terms)
+    expect(screen.queryByRole('link', { name: /safe pro user terms/i })).not.toBeInTheDocument()
+  })
+
+  it('puts the Safe Pro user terms and privacy links inside the sign-in card, opening in a new tab, when Safe Pro is on', () => {
+    setAuth(false)
+    mockUseIsSafeProEnabled.mockReturnValue(true)
+    mockUseHasFeature.mockReturnValue(true)
+
+    const { container } = render(<SpacesList />)
+
+    const card = container.querySelector('.bg-card')
+    const termsLink = screen.getByRole('link', { name: /safe pro user terms/i })
+    const privacyLink = screen.getByRole('link', { name: /privacy policy/i })
+    expect(card).toContainElement(termsLink)
+    expect(card).toContainElement(privacyLink)
+    expect(termsLink).toHaveAttribute('href', 'https://safe.global/pro-user-terms')
+    expect(termsLink).toHaveAttribute('target', '_blank')
+    expect(privacyLink).toHaveAttribute('href', AppRoutes.privacy)
+    expect(screen.queryByRole('link', { name: /^terms$/i })).not.toBeInTheDocument()
   })
 
   // The Create button sits right-aligned above the workspaces list when the
@@ -502,7 +568,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     // The header button is absent; only the empty-state CTA inside the
     // No-workspaces card renders (it lives outside the spacesHeader).
-    expect(screen.getByText(/create your first Workspace/i)).toBeInTheDocument()
+    expect(screen.getByText(/create your first workspace/i)).toBeInTheDocument()
     expect(screen.getAllByTestId('create-space-button')).toHaveLength(1)
   })
 

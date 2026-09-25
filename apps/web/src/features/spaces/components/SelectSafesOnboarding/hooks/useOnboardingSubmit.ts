@@ -31,6 +31,8 @@ import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { getSafeId, getMultiChainSafeId } from '../utils/safeIds'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../constants'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'
+import { getSeatLimitMessage } from '../../../utils/seatLimitError'
 
 // URL safe-param prefix can be either numeric chainId or shortName ("1:" or "eth:").
 const safeParamToFormKey = (safeParam: string, chains: Chain[]): string | undefined => {
@@ -173,7 +175,9 @@ const useOnboardingSubmit = (
     })
     if (isElevationRequiredError(result.error)) throw result.error
     if (result.error) {
-      throw new Error(getRtkQueryErrorMessage(result.error))
+      const seatLimit = getSeatLimitMessage(result.error)
+      if (seatLimit) refreshSpaceEntitlements(dispatch, spaceIdStr)
+      throw new Error(seatLimit ?? getRtkQueryErrorMessage(result.error))
     }
   }
 
@@ -223,9 +227,10 @@ const useOnboardingSubmit = (
     spaceIdStr: string,
     names: WorkspaceSafeName[],
   ) => {
+    // Free the seats first: a swap at the plan limit would otherwise 402 on the add.
+    await removeUnselectedSafes(selectedSafes, spaceIdStr)
     await addNewSafes(safesToAdd, spaceIdStr)
     trustAddedSafes(safesToAdd)
-    await removeUnselectedSafes(selectedSafes, spaceIdStr)
     const namesResult = await upsertWorkspaceNames(names)
     if (namesResult.error) {
       throw new Error(namesResult.error)

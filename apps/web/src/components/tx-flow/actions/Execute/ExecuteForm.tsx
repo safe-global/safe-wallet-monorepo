@@ -17,6 +17,7 @@ import useIsValidExecution from '@/hooks/useIsValidExecution'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useIsExecutionLoop, useTxActions } from '@/components/tx/shared/hooks'
 import { useRelaysBySafe } from '@/hooks/useRemainingRelays'
+import { useSafeSponsoredTxs } from '@/features/spaces'
 import useWalletCanRelay from '@/hooks/useWalletCanRelay'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
 import { useNoFeeCampaignEligibility, useGasTooHigh, useIsNoFeeCampaignEnabled } from '@/features/no-fee-campaign'
@@ -41,6 +42,8 @@ import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { SafeTxContext } from '../../SafeTxProvider'
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
+import { QuotaExceededError } from '@safe-global/utils/services/quotaErrors'
+import { sponsoredQuotaMessage } from '@/components/tx/sponsoredQuotaMessage'
 
 export const ExecuteForm = ({
   safeTx,
@@ -83,6 +86,7 @@ export const ExecuteForm = ({
   // SC wallets can relay fully signed transactions
   const [walletCanRelay, , walletCanRelayLoading] = useWalletCanRelay(safeTx)
   const relays = useRelaysBySafe()
+  const sponsoredTxs = useSafeSponsoredTxs()
   const { isEligible: isNoFeeCampaign, remaining, limit, blockedAddress } = useNoFeeCampaignEligibility()
   const isNoFeeCampaignEnabled = useIsNoFeeCampaignEnabled()
   const gasTooHigh = useGasTooHigh(safeTx)
@@ -102,21 +106,23 @@ export const ExecuteForm = ({
 
   const noFeeCampaignEligible = !isGtfChain && isNoFeeCampaignEnabled && isNoFeeCampaign && !blockedAddress
 
-  // Safe-pays bypasses the no-fee campaign and the daily relay quota (Safe funds its own relay).
-  const canRelay =
-    walletCanRelay && (requiresRelay || (!isGtfChain && !noFeeCampaignEligible && hasRemainingRelays(relays[0])))
+  // Safe-pays bypasses the no-fee campaign and the daily relay quota; a Pro Safe spends its Workspace's allowance.
+  const hasSponsoring = sponsoredTxs.isPro ? sponsoredTxs.canSponsor : hasRemainingRelays(relays[0])
+  const canRelay = walletCanRelay && (requiresRelay || (!isGtfChain && !noFeeCampaignEligible && hasSponsoring))
   const canNoFeeCampaign = !requiresRelay && noFeeCampaignEligible && !gasTooHigh && !!remaining && remaining > 0
   const isLimitReached = noFeeCampaignEligible && remaining === 0
+  // Like the no-fee limit: the selector stays on screen with sponsoring disabled, so the user sees the count and the reset.
+  const isProExhausted = sponsoredTxs.isPro && sponsoredTxs.left === 0
 
   useEffect(() => {
     if (requiresRelay) {
       setExecutionMethod(ExecutionMethod.RELAY)
       return
     }
-    if (gasTooHigh || isLimitReached) {
+    if (gasTooHigh || isLimitReached || isProExhausted) {
       setExecutionMethod(ExecutionMethod.WALLET)
     }
-  }, [requiresRelay, gasTooHigh, isLimitReached])
+  }, [requiresRelay, gasTooHigh, isLimitReached, isProExhausted])
 
   // Handle execution method changes
   const handleExecutionMethodChange = (method: ExecutionMethod | ((prev: ExecutionMethod) => ExecutionMethod)) => {
@@ -133,7 +139,8 @@ export const ExecuteForm = ({
     (canNoFeeCampaign ||
       canRelay ||
       (isNoFeeCampaignEnabled && isNoFeeCampaign && !blockedAddress && gasTooHigh) ||
-      isLimitReached)
+      isLimitReached ||
+      isProExhausted)
 
   // Determine which method will be used
   const willRelay = !!(canRelay && executionMethod === ExecutionMethod.RELAY)
@@ -163,10 +170,13 @@ export const ExecuteForm = ({
 
   // CGW pre-relay simulation outcome (SIMULATION_FAILED blocks; INDETERMINATE offers an override).
   const [relaySimError, setRelaySimError] = useState<RelaySimulationError | undefined>(undefined)
+  // The Workspace ran out of sponsored transactions while this one was in flight.
+  const [quotaError, setQuotaError] = useState<QuotaExceededError | undefined>(undefined)
 
   // Clear a stale simulation verdict when the payload changes (e.g. user edits params / gas token).
   useEffect(() => {
     setRelaySimError(undefined)
+    setQuotaError(undefined)
   }, [safeTx?.data])
 
   // `acceptUnverifiedSimulation` is only set when the user explicitly retries past an
@@ -190,6 +200,7 @@ export const ExecuteForm = ({
         origin,
         willRelay || willNoFeeCampaign,
         acceptUnverifiedSimulation,
+        willRelay ? sponsoredTxs.spaceId : null,
       )
     } catch (_err) {
       const err = asError(_err)
@@ -197,6 +208,9 @@ export const ExecuteForm = ({
         setIsRejectedByUser(true)
       } else if (err instanceof RelaySimulationError) {
         setRelaySimError(err)
+      } else if (err instanceof QuotaExceededError) {
+        setQuotaError(err)
+        handleExecutionMethodChange(ExecutionMethod.WALLET)
       } else {
         trackError(Errors._804, err)
         setSubmitError(err)
@@ -301,6 +315,8 @@ export const ExecuteForm = ({
         ) : checkError ? (
           <TxCheckError error={checkError} context="estimation" />
         ) : null}
+
+        {quotaError && <ErrorMessage level="warning">{sponsoredQuotaMessage(quotaError)}</ErrorMessage>}
 
         {/* CGW pre-relay simulation verdict */}
         {relaySimError?.code === 'SIMULATION_FAILED' && (

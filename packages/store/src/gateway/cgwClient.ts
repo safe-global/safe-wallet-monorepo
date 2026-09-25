@@ -8,12 +8,15 @@ import type { CombinedState } from '@reduxjs/toolkit/query'
 export const CREDENTIAL_ROUTES = [
   /\/v1\/users/,
   /\/v1\/spaces/,
+  /\/v1\/billing/,
   /\/v1\/auth/,
   /\/v2\/register\/notifications$/,
   /\/v2\/chains\/[^/]+\/notifications\/devices/,
 ]
 
 const IS_BEHIND_IAP = process.env.NEXT_PUBLIC_IS_BEHIND_IAP === 'true'
+
+const SUBSCRIPTIONS_ROUTE = /^\/v1\/billing\/spaces\/[^/]+\/subscriptions(\?.*)?$/
 
 export function isCredentialRoute(url: string) {
   return IS_BEHIND_IAP || CREDENTIAL_ROUTES.some((route) => url.match(route))
@@ -129,6 +132,10 @@ export const dynamicBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBas
   // Apply platform-specific response handling
   if (response.meta?.response) {
     await customHandleResponse(response.meta.response, urlEnd)
+  }
+
+  if (response.error?.status === 404 && SUBSCRIPTIONS_ROUTE.test(urlEnd)) {
+    return { data: [], meta: response.meta }
   }
 
   return response

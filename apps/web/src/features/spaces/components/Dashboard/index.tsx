@@ -24,6 +24,8 @@ import AggregatedBalance from './AggregatedBalances'
 import SafeWidget from '../SafeWidget'
 import SetupWidget from '../SetupWidget'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import CheckoutReturnModals from '../Plans/CheckoutReturnModals'
+import { useWorkspaceLock } from '../../hooks/useWorkspaceLock'
 
 const EmptyStateAddAction = () => {
   return (
@@ -58,9 +60,10 @@ const SpaceDashboard = () => {
   useTrackSpace(safes, activeMembers)
   const router = useRouter()
   const isSafeProEnabled = useIsSafeProEnabled()
-  // Not shown over an invite preview: there is no Workspace of theirs to move yet.
+  // The lock modal is mounted by AuthState; the announcement must wait until the lock is known so both never stack.
+  const { isLocked, isResolving: isResolvingPlan } = useWorkspaceLock()
   const { isOpen: isAnnouncementOpen, setIsOpen: setIsAnnouncementOpen } = useSafeProAnnouncement(
-    isSafeProEnabled && Boolean(spaceId) && !isInvited,
+    isSafeProEnabled && !isLocked && !isResolvingPlan && Boolean(spaceId) && !isInvited,
   )
 
   useEffect(() => {
@@ -117,9 +120,12 @@ const SpaceDashboard = () => {
 
   const showSetupWidget = safeItems.length === 0 && !isSafesLoading && !setupDismissed && !isSetupDismissedForSpace
 
+  const checkoutModal = <CheckoutReturnModals />
+
   return (
     <>
       {isSafeProEnabled && <SafeProAnnouncementModal open={isAnnouncementOpen} onOpenChange={setIsAnnouncementOpen} />}
+      {checkoutModal}
 
       {isInvited && <PreviewInvite />}
 

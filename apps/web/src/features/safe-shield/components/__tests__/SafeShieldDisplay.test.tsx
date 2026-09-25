@@ -36,6 +36,7 @@ describe('SafeShieldDisplay', () => {
     // Mock useCheckSimulation to return no simulation error by default
     jest.spyOn(useCheckSimulation, 'useCheckSimulation').mockReturnValue({
       hasSimulationError: false,
+      isSimulationSuccess: false,
     })
 
     // Recreate mocks for each test to avoid mutation issues
@@ -95,7 +96,7 @@ describe('SafeShieldDisplay', () => {
   })
 
   describe('Header States', () => {
-    it('should show "Checks passed" when all results are OK', () => {
+    it('counts the passed checks when all results are OK', () => {
       render(
         <SafeShieldDisplay
           recipient={mockRecipient}
@@ -105,7 +106,21 @@ describe('SafeShieldDisplay', () => {
         />,
       )
 
-      expect(screen.getByText('Checks passed')).toBeInTheDocument()
+      expect(screen.getByText('3 of 3 checks passed')).toBeInTheDocument()
+    })
+
+    it('counts the locked Pro checks as not passed without Safe Pro', () => {
+      render(
+        <SafeShieldDisplay
+          recipient={emptyRecipient}
+          contract={emptyContract}
+          threat={mockThreat}
+          deadlock={emptyDeadlock}
+          hasProFeatures={false}
+        />,
+      )
+
+      expect(screen.getByText('1 of 2 checks passed')).toBeInTheDocument()
     })
 
     it('should show "Risk detected" when there are critical issues', () => {
@@ -241,7 +256,7 @@ describe('SafeShieldDisplay', () => {
       )
 
       // Header should show status
-      expect(screen.getByText('Checks passed')).toBeInTheDocument()
+      expect(screen.getByText(/checks passed/i)).toBeInTheDocument()
       // Content should not show empty state
       expect(
         screen.queryByText(
@@ -261,7 +276,7 @@ describe('SafeShieldDisplay', () => {
       )
 
       // Header should show status
-      expect(screen.getByText('Checks passed')).toBeInTheDocument()
+      expect(screen.getByText(/checks passed/i)).toBeInTheDocument()
       // Content should not show empty state
       expect(
         screen.queryByText(
@@ -281,7 +296,7 @@ describe('SafeShieldDisplay', () => {
       )
 
       // Threat data is displayed with appropriate status
-      expect(screen.getByText('Checks passed')).toBeInTheDocument()
+      expect(screen.getByText(/checks passed/i)).toBeInTheDocument()
       // Content should not show empty state when threat data is present
       expect(
         screen.queryByText(
@@ -300,7 +315,7 @@ describe('SafeShieldDisplay', () => {
         />,
       )
 
-      expect(screen.getByText('Checks passed')).toBeInTheDocument()
+      expect(screen.getByText(/checks passed/i)).toBeInTheDocument()
       expect(container.querySelector('mock-icon')).toBeInTheDocument()
     })
   })
@@ -429,7 +444,7 @@ describe('SafeShieldDisplay', () => {
       )
 
       expect(screen.queryByText('Authentication required')).not.toBeInTheDocument()
-      expect(screen.getByText('Checks passed')).toBeInTheDocument()
+      expect(screen.getByText(/checks passed/i)).toBeInTheDocument()
     })
 
     it('should not show authentication required when hypernativeAuth is not provided', () => {
@@ -443,7 +458,7 @@ describe('SafeShieldDisplay', () => {
       )
 
       expect(screen.queryByText('Authentication required')).not.toBeInTheDocument()
-      expect(screen.getByText('Checks passed')).toBeInTheDocument()
+      expect(screen.getByText(/checks passed/i)).toBeInTheDocument()
     })
   })
 })
