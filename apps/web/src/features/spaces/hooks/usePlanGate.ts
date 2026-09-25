@@ -10,7 +10,7 @@ const POLICIES_ENTITLEMENT = 'policies'
 
 export type PlanGate = {
   /** Show the Safe Pro upsell instead of the action. */
-  isBlocked: boolean
+  mustUpgradeToSafePro: boolean
   /** Neither the action nor the upsell may render yet. */
   isLoading: boolean
   /** The Workspace's plans, or Workspaces when there is none. */
@@ -29,7 +29,7 @@ export const usePlanGate = (gatingFlag: FEATURES): PlanGate => {
   const { isEntitled, isLoading: isEntitlementsLoading } = useSpaceEntitlements(isGateActive ? activeSpaceId : null)
 
   return {
-    isBlocked: isGateActive && !isEntitlementsLoading && !isEntitled(POLICIES_ENTITLEMENT),
+    mustUpgradeToSafePro: isGateActive && !isEntitlementsLoading && !isEntitled(POLICIES_ENTITLEMENT),
     isLoading: isGateActive && isEntitlementsLoading,
     upgradeHref: activeSpaceId
       ? { pathname: AppRoutes.spaces.plans, query: { spaceId: activeSpaceId } }

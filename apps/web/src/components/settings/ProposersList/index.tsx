@@ -79,7 +79,7 @@ const ProposersList = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState<boolean>()
   const proposers = useProposers()
   const isEnabled = useHasFeature(FEATURES.PROPOSERS)
-  const gate = usePlanGate(FEATURES.PROPOSER_GATING)
+  const { mustUpgradeToSafePro, isLoading: isPlanLoading, upgradeHref } = usePlanGate(FEATURES.PROPOSER_GATING)
   useMigrateProposerLabels()
   const { safe } = useSafeInfo()
   const isUndeployedSafe = !safe.deployed
@@ -139,12 +139,12 @@ const ProposersList = () => {
       {showPendingDelegations && <PendingDelegationsList />}
 
       {isEnabled &&
-        (gate.isBlocked ? (
+        (mustUpgradeToSafePro ? (
           <div className="mb-4">
-            <SafeProLock title="Adding proposers requires Safe Pro" href={gate.upgradeHref} />
+            <SafeProLock title="Adding proposers requires Safe Pro" href={upgradeHref} />
           </div>
         ) : (
-          !gate.isLoading && <AddProposerButton onAdd={onAdd} isUndeployedSafe={isUndeployedSafe} />
+          !isPlanLoading && <AddProposerButton onAdd={onAdd} isUndeployedSafe={isUndeployedSafe} />
         ))}
 
       {rows.length > 0 && <EnhancedTable rows={rows} headCells={headCells} />}

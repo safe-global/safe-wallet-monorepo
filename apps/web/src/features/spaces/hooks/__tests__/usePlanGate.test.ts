@@ -36,7 +36,7 @@ describe('usePlanGate', () => {
 
     const { result } = renderHook(() => usePlanGate(FEATURES.PROPOSER_GATING))
 
-    expect(result.current).toEqual({ isBlocked: false, isLoading: false, upgradeHref: PLANS_HREF })
+    expect(result.current).toEqual({ mustUpgradeToSafePro: false, isLoading: false, upgradeHref: PLANS_HREF })
     expect(mockUseSpaceEntitlements).toHaveBeenCalledWith(null)
   })
 
@@ -44,7 +44,7 @@ describe('usePlanGate', () => {
     const { result } = renderHook(() => usePlanGate(FEATURES.PROPOSER_GATING))
 
     expect(mockUseSpaceEntitlements).toHaveBeenCalledWith(SPACE_ID)
-    expect(result.current).toEqual({ isBlocked: true, isLoading: false, upgradeHref: PLANS_HREF })
+    expect(result.current).toEqual({ mustUpgradeToSafePro: true, isLoading: false, upgradeHref: PLANS_HREF })
   })
 
   it('opens once the active Workspace plan grants the entitlement', () => {
@@ -52,7 +52,7 @@ describe('usePlanGate', () => {
 
     const { result } = renderHook(() => usePlanGate(FEATURES.PROPOSER_GATING))
 
-    expect(result.current.isBlocked).toBe(false)
+    expect(result.current.mustUpgradeToSafePro).toBe(false)
   })
 
   it('neither blocks nor opens while the entitlements load', () => {
@@ -60,7 +60,7 @@ describe('usePlanGate', () => {
 
     const { result } = renderHook(() => usePlanGate(FEATURES.PROPOSER_GATING))
 
-    expect(result.current).toMatchObject({ isBlocked: false, isLoading: true })
+    expect(result.current).toMatchObject({ mustUpgradeToSafePro: false, isLoading: true })
   })
 
   it('blocks without an active Workspace and leads to Workspaces instead', () => {
@@ -68,6 +68,6 @@ describe('usePlanGate', () => {
 
     const { result } = renderHook(() => usePlanGate(FEATURES.PROPOSER_GATING))
 
-    expect(result.current).toEqual({ isBlocked: true, isLoading: false, upgradeHref: '/welcome/spaces' })
+    expect(result.current).toEqual({ mustUpgradeToSafePro: true, isLoading: false, upgradeHref: '/welcome/spaces' })
   })
 })
