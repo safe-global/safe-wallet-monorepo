@@ -28,6 +28,8 @@ export const useSpaceSubscription = (spaceId?: string | null) => {
     isLoading: isLoading || (isFetching && data === undefined) || isRetrying,
     isUninitialized,
     isError: isError && !isRetrying,
+    /** A last-known response is cached; a failed refetch keeps it, so `isError` alone does not mean the state is unknown. */
+    hasData: data !== undefined,
     refetch,
   }
 }

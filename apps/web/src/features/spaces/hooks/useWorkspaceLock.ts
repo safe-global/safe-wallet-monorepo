@@ -1,7 +1,7 @@
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useIsInvited } from './useSpaceMembers'
-import { useSpacePlan } from './useSpacePlan'
+import { useSpaceSubscription } from './billing/useSpaceSubscription'
 import { useSpaceOffers } from './billing/useSpaceOffers'
 import { getSubscriptionEndedAt } from './billing/subscription'
 
@@ -12,40 +12,39 @@ export type WorkspaceLockReason = 'trial-offered' | 'payment-failed' | 'lapsed'
 export const useWorkspaceLock = (spaceId?: string | null) => {
   const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
   const isInvited = useIsInvited()
-  const {
-    status,
-    latestSubscription,
-    isLoading: isPlanLoading,
-    isUninitialized: isPlanUninitialized,
-    isError: isPlanError,
-    refetch: refetchPlan,
-  } = useSpacePlan(spaceId)
-  const {
-    trialPeriodDays,
-    isLoading: isOffersLoading,
-    isUninitialized: isOffersUninitialized,
-    isError: isOffersError,
-    refetch: refetchOffers,
-  } = useSpaceOffers(spaceId)
+  const subscription = useSpaceSubscription(spaceId)
+  const offers = useSpaceOffers(spaceId)
   const applies = isSafePro && !isInvited
   // An uninitialized query reads as "no plan, no offers"; resolving keeps the lock from firing on stale emptiness.
   const isResolving =
-    applies && (isPlanLoading || isOffersLoading || Boolean(isPlanUninitialized) || Boolean(isOffersUninitialized))
-  // A failed source reads as "no plan" too; that is a reason to ask for a retry, never to lock.
-  const isError = applies && !isResolving && Boolean(isPlanError || isOffersError)
+    applies &&
+    (subscription.isLoading ||
+      offers.isLoading ||
+      Boolean(subscription.isUninitialized) ||
+      Boolean(offers.isUninitialized))
+  const isLive = subscription.status === 'trialing' || subscription.status === 'active'
+  // Only a failure with no last-known response leaves the lock guessing; offers only matter to a Workspace that is not live.
+  const isError =
+    applies &&
+    !isResolving &&
+    Boolean((subscription.isError && !subscription.hasData) || (!isLive && offers.isError && !offers.hasData))
   const reason: WorkspaceLockReason =
-    trialPeriodDays !== null ? 'trial-offered' : status === 'payment_failed' ? 'payment-failed' : 'lapsed'
+    offers.trialPeriodDays !== null
+      ? 'trial-offered'
+      : subscription.status === 'payment_failed'
+        ? 'payment-failed'
+        : 'lapsed'
 
   return {
-    isLocked: applies && !isResolving && !isError && status !== 'trialing' && status !== 'active',
+    isLocked: applies && !isResolving && !isError && !isLive,
     isResolving,
     isError,
     retry: () => {
-      refetchPlan()
-      void refetchOffers()
+      void subscription.refetch()
+      void offers.refetch()
     },
-    trialPeriodDays,
+    trialPeriodDays: offers.trialPeriodDays,
     reason,
-    endedAt: reason === 'lapsed' ? getSubscriptionEndedAt(latestSubscription) : null,
+    endedAt: reason === 'lapsed' ? getSubscriptionEndedAt(subscription.latestSubscription) : null,
   }
 }

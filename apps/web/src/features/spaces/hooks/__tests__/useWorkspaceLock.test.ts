@@ -3,11 +3,13 @@ import { useWorkspaceLock } from '../useWorkspaceLock'
 
 const mockUseHasFeature = jest.fn()
 const mockUseIsInvited = jest.fn()
-const mockUseSpacePlan = jest.fn()
+const mockUseSpaceSubscription = jest.fn()
 const mockUseSpaceOffers = jest.fn()
 jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
 jest.mock('../useSpaceMembers', () => ({ useIsInvited: () => mockUseIsInvited() }))
-jest.mock('../useSpacePlan', () => ({ useSpacePlan: (spaceId?: string) => mockUseSpacePlan(spaceId) }))
+jest.mock('../billing/useSpaceSubscription', () => ({
+  useSpaceSubscription: (spaceId?: string) => mockUseSpaceSubscription(spaceId),
+}))
 jest.mock('../billing/useSpaceOffers', () => ({ useSpaceOffers: (spaceId?: string) => mockUseSpaceOffers(spaceId) }))
 
 const SPACE_ID = '11111111-1111-1111-1111-111111111111'
@@ -18,12 +20,12 @@ describe('useWorkspaceLock', () => {
     jest.clearAllMocks()
     mockUseHasFeature.mockReturnValue(true)
     mockUseIsInvited.mockReturnValue(false)
-    mockUseSpacePlan.mockReturnValue({ status: 'none', latestSubscription: undefined, isLoading: false })
+    mockUseSpaceSubscription.mockReturnValue({ status: 'none', latestSubscription: undefined, isLoading: false })
     mockUseSpaceOffers.mockReturnValue({ trialPeriodDays: 60, isLoading: false })
   })
 
   it.each(['none', 'canceled', 'pending'])('locks a lapsed Workspace whose plan status is %s', (status) => {
-    mockUseSpacePlan.mockReturnValue({ status, latestSubscription: canceled, isLoading: false })
+    mockUseSpaceSubscription.mockReturnValue({ status, latestSubscription: canceled, isLoading: false })
     mockUseSpaceOffers.mockReturnValue({ trialPeriodDays: null, isLoading: false })
 
     expect(renderHook(() => useWorkspaceLock()).result.current).toEqual({
@@ -38,7 +40,7 @@ describe('useWorkspaceLock', () => {
   })
 
   it('locks a Workspace whose payment failed without reading its period end as an end date', () => {
-    mockUseSpacePlan.mockReturnValue({
+    mockUseSpaceSubscription.mockReturnValue({
       status: 'payment_failed',
       latestSubscription: { ...canceled, status: 'past_due', cancelledAt: null, currentPeriodEnd: 1_770_000_000 },
       isLoading: false,
@@ -64,15 +66,21 @@ describe('useWorkspaceLock', () => {
       reason: 'trial-offered',
       endedAt: null,
     })
-    expect(mockUseSpacePlan).toHaveBeenCalledWith(SPACE_ID)
+    expect(mockUseSpaceSubscription).toHaveBeenCalledWith(SPACE_ID)
     expect(mockUseSpaceOffers).toHaveBeenCalledWith(SPACE_ID)
   })
 
   it.each([
     ['SAFE_PRO is off', () => mockUseHasFeature.mockReturnValue(false)],
     ['the user is only invited', () => mockUseIsInvited.mockReturnValue(true)],
-    ['the Workspace is on a trial', () => mockUseSpacePlan.mockReturnValue({ status: 'trialing', isLoading: false })],
-    ['the Workspace is on a paid plan', () => mockUseSpacePlan.mockReturnValue({ status: 'active', isLoading: false })],
+    [
+      'the Workspace is on a trial',
+      () => mockUseSpaceSubscription.mockReturnValue({ status: 'trialing', isLoading: false }),
+    ],
+    [
+      'the Workspace is on a paid plan',
+      () => mockUseSpaceSubscription.mockReturnValue({ status: 'active', isLoading: false }),
+    ],
   ])('does not lock when %s', (_, arrange) => {
     arrange()
 
@@ -90,14 +98,50 @@ describe('useWorkspaceLock', () => {
     expect(renderHook(() => useWorkspaceLock()).result.current).toMatchObject({ isLocked: false, isResolving: true })
 
     mockUseSpaceOffers.mockReturnValue({ trialPeriodDays: null, isLoading: false, isUninitialized: false })
-    mockUseSpacePlan.mockReturnValue({ status: 'none', isLoading: false, isUninitialized: true })
+    mockUseSpaceSubscription.mockReturnValue({ status: 'none', isLoading: false, isUninitialized: true })
     expect(renderHook(() => useWorkspaceLock()).result.current).toMatchObject({ isLocked: false, isResolving: true })
+  })
+
+  it('keeps the last-known plan when a background refetch fails, instead of blocking the Workspace', () => {
+    mockUseSpaceSubscription.mockReturnValue({ status: 'active', isLoading: false, isError: true, hasData: true })
+
+    expect(renderHook(() => useWorkspaceLock()).result.current).toMatchObject({ isLocked: false, isError: false })
+  })
+
+  it('keeps locking on the last-known lapsed plan when a background refetch fails', () => {
+    mockUseSpaceSubscription.mockReturnValue({
+      status: 'canceled',
+      latestSubscription: canceled,
+      isLoading: false,
+      isError: true,
+      hasData: true,
+    })
+    mockUseSpaceOffers.mockReturnValue({ trialPeriodDays: null, isLoading: false, isError: true, hasData: true })
+
+    expect(renderHook(() => useWorkspaceLock()).result.current).toMatchObject({
+      isLocked: true,
+      isError: false,
+      reason: 'lapsed',
+    })
+  })
+
+  it('ignores a failed offers source while the plan is live', () => {
+    mockUseSpaceSubscription.mockReturnValue({ status: 'trialing', isLoading: false, hasData: true })
+    mockUseSpaceOffers.mockReturnValue({ trialPeriodDays: null, isLoading: false, isError: true })
+
+    expect(renderHook(() => useWorkspaceLock()).result.current).toMatchObject({ isLocked: false, isError: false })
+  })
+
+  it('asks for a retry when a Workspace that is not live cannot read its offers', () => {
+    mockUseSpaceOffers.mockReturnValue({ trialPeriodDays: null, isLoading: false, isError: true })
+
+    expect(renderHook(() => useWorkspaceLock()).result.current).toMatchObject({ isLocked: false, isError: true })
   })
 
   it('asks for a retry instead of locking when a source failed, and retries both sources', () => {
     const refetchPlan = jest.fn()
     const refetchOffers = jest.fn()
-    mockUseSpacePlan.mockReturnValue({ status: 'none', isLoading: false, isError: true, refetch: refetchPlan })
+    mockUseSpaceSubscription.mockReturnValue({ status: 'none', isLoading: false, isError: true, refetch: refetchPlan })
     mockUseSpaceOffers.mockReturnValue({ trialPeriodDays: null, isLoading: false, refetch: refetchOffers })
 
     const { result } = renderHook(() => useWorkspaceLock())
@@ -119,7 +163,7 @@ describe('useWorkspaceLock', () => {
 
   it('never reports resolving while the lock does not apply', () => {
     mockUseHasFeature.mockReturnValue(false)
-    mockUseSpacePlan.mockReturnValue({ status: 'none', isLoading: true })
+    mockUseSpaceSubscription.mockReturnValue({ status: 'none', isLoading: true })
 
     expect(renderHook(() => useWorkspaceLock()).result.current.isResolving).toBe(false)
   })
