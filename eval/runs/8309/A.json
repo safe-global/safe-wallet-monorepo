@@ -1,0 +1,19 @@
+{
+  "pr": 8309,
+  "reviewSha": "f6cf22b3925a9ffb467b6e17af3ca259e0ce2c3c",
+  "baseSha": "ad6d5b93efeff4260af5752de26d217eed2107c7",
+  "system": "A",
+  "version": "73bf04408c26562bbf8945904bd1c02d8b9b1603",
+  "model": "claude-opus-5-5[1m]",
+  "runner": "valleXYZ",
+  "usage": {
+    "inputTokens": 20,
+    "outputTokens": 3727,
+    "cacheReadTokens": 694491,
+    "cacheWriteTokens": 65050,
+    "turns": 12,
+    "wallSeconds": 57,
+    "apiEquivalentUsd": 0.7339182000000001
+  },
+  "output": "I've checked the one-file diff against all 88 rules in `rules.json`. None of them fail, and I made no code changes.\n\n**Mode:** `--review-pr`, on `git diff ad6d5b93e...HEAD`. That's 1 file changed (+2 −1): `apps/mobile/src/features/Send/components/DialogModal.tsx`.\n\n**Checklist:** I generated the full checklist into the scratchpad rather than `docs/engineering/`, so no repo files were touched, and considered every rule.\n\nThe change adds `accessible={false}` to the overlay `Pressable` (line 32) and the container `Pressable` (line 42). Before this, VoiceOver read the whole dialog as one element, so Cancel and Save were read as a single label. The same pattern is already used in `SafeBottomSheet.tsx:144,163`, `NonceBottomSheet.tsx:199`, `RequestSheetHost.tsx:170`, `SoftUpdatePrompt.tsx:75` and others.\n\n**Rules that applied or were close:**\n- **TEST-01 / TEST-02 (tests):** Not triggered. The diff changes no test assertions and adds no branching logic; it only sets a static prop.\n- **PROD-01 (product behavior changes need confirmation):** Not triggered. Nothing visible changes, only how screen readers see the dialog.\n- **REVIEW-01 (don't bundle unrelated refactors):** Passes. The change stays within what the commit message describes.\n- **MOB-01…07, UI-01/02, CODE-01…06:** Not relevant; no permissions, navigation, providers, theme values, colors or z-index are involved.\n\nI didn't need to look up any review learnings or GitHub sources to decide any rule.\n\n**Findings:**\n\n1. **`apps/mobile/src/features/Send/components/DialogModal.tsx:32`** (low, from `AGENTS.md` \"Testing Requirements\", not `rules.json`): the change comes with no test. `AGENTS.md` says every code change must include tests, and there is currently no test for `DialogModal` or for the two components that use it (`AddToAddressBookModal.tsx`, `CustomNonceModal.tsx`). A small render test would stop someone later removing `accessible={false}` and merging the dialog back into one element without anyone noticing. It could check that the `dialog-cancel` and `dialog-save` buttons can each be found by role and label.\n\n2. **`apps/mobile/src/features/Send/components/DialogModal.tsx:32`** (informational, no rule): with `accessible={false}` on the overlay, screen-reader users can no longer reach \"tap outside to cancel\". They can still close the dialog with the Cancel button and, on Android, with the back button (`onRequestClose`). On iOS there is no VoiceOver escape-gesture handler, but this matches the existing bottom-sheet pattern, so no change is needed.\n\n**Unresolved rule failures:** none. **Rule-mapping gaps:** no `rules.json` rule covers mobile accessibility. If reviewers keep raising it, it could become a mobile rule in a future `--compound` run."
+}

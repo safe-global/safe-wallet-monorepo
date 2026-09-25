@@ -1,0 +1,19 @@
+{
+  "pr": 8470,
+  "reviewSha": "8a706fb614de2a574cb8729df0774cab7d0b433b",
+  "baseSha": "4504b364b0b0a53c02a69f73a9a3f456159caf53",
+  "system": "A",
+  "version": "73bf04408c26562bbf8945904bd1c02d8b9b1603",
+  "model": "claude-opus-5-5[1m]",
+  "runner": "valleXYZ",
+  "usage": {
+    "inputTokens": 14,
+    "outputTokens": 2614,
+    "cacheReadTokens": 434595,
+    "cacheWriteTokens": 55611,
+    "turns": 8,
+    "wallSeconds": 44,
+    "apiEquivalentUsd": 0.584143
+  },
+  "output": "## Convention review of `4504b364b...HEAD`\n\n**Mode:** `--review-pr`, covering all 78 rules. I generated the checklist in `docs/engineering/pr-self-review-checklist.generated.md` and worked through every item.\n\n**What the diff contains:** 3 files, +8/−8. `@safe-global/safe-deployments` goes from `^1.37.61` to `^1.37.62` in `apps/web/package.json:83` and `apps/tx-builder/package.json:28`. `yarn.lock:13629` merges the old and new ranges into a single entry that resolves to 1.37.62. No source code, tests, docs or CI files changed.\n\n### Rules that apply\n- **CHAIN-01** (contract addresses come from real deployment data): **passes.** The goal is to pick up safe-deployments' 1.5.0 addresses for the newly registered chains. The address data is updated through the package, not hard-coded.\n- **PKG-01** (no app-local copies of shared files): **passes.** Both apps use the package. No config or ABI copy was added under `apps/**`.\n- **REVIEW-01** (no unrelated changes bundled into infra PRs): **passes.** The PR is a `chore(deps)` bump with nothing else in it.\n- **API-01, CHAIN-03, TEST-02 and the other TEST rules:** none of them trigger. No exports were removed, no contract-resolution logic or branches were added, and no behaviour moved. The dependency is still upgraded for mobile too, but the lockfile handles that correctly: `protocol-kit@^8.0.5`'s `^1.37.61` range (`yarn.lock:13583`) now resolves to the same 1.37.62 entry. That matches what the commit message claims.\n\nThe rest of the rules (web auth, mobile permissions and navigation, RTK, UI, E2E, CI, security, numerics) don't touch this diff.\n\n### Findings\n**None.** No rule check failed.\n\n### Other notes\n- I didn't need to look up any rule's source review comments.\n- One gap in the rules, not a violation: no rule covers dependency bumps directly. For example, nothing requires checking every workspace that uses a package, including indirect use such as mobile via `protocol-kit`, when the version is bumped. That would be worth adding in a later `--compound` run if reviewers keep asking for it.\n- I didn't change any tracked files. The only file I wrote is the checklist above, which is under the untracked `docs/engineering/` directory. `git check-ignore` shows it isn't in `.gitignore`, even though the convention setup expects it to be."
+}
