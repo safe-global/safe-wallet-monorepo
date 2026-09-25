@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
 import { ShieldCheck } from 'lucide-react'
 import { DrawerList, DrawerSection, type DrawerListItem } from '@/components/common/Drawer'
+import { Link } from '@/components/ui/link'
 import { AccountIdentity, type AccountIdentityProps } from '../../../components/AccountIdentity'
 
 export type PolicyOverviewProps = {
@@ -9,9 +10,17 @@ export type PolicyOverviewProps = {
   initiatedBy?: AccountIdentityProps
   lastUpdated: string
   enforcedBy: string
+  /** Block explorer link for the enforcing contract. Without it the name is plain text, not a dead underline. */
+  enforcedByHref?: string
 }
 
-const PolicyOverview = ({ appliesTo, initiatedBy, lastUpdated, enforcedBy }: PolicyOverviewProps): ReactElement => {
+const PolicyOverview = ({
+  appliesTo,
+  initiatedBy,
+  lastUpdated,
+  enforcedBy,
+  enforcedByHref,
+}: PolicyOverviewProps): ReactElement => {
   const items: DrawerListItem[] = [{ label: 'Applies to', content: <AccountIdentity {...appliesTo} /> }]
 
   if (initiatedBy) {
@@ -25,7 +34,20 @@ const PolicyOverview = ({ appliesTo, initiatedBy, lastUpdated, enforcedBy }: Pol
       content: (
         <span className="inline-flex items-center gap-1">
           <ShieldCheck className="size-3.5" />
-          <span className="underline">{enforcedBy}</span>
+          {/* `inherit` keeps the row's text style; the default link variant is bold and primary. */}
+          {enforcedByHref ? (
+            <Link
+              href={enforcedByHref}
+              variant="inherit"
+              className="underline"
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              {enforcedBy}
+            </Link>
+          ) : (
+            <span>{enforcedBy}</span>
+          )}
         </span>
       ),
     },
