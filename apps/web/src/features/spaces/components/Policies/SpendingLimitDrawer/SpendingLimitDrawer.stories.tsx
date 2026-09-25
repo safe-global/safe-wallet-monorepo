@@ -13,6 +13,7 @@ import {
   mockSpendingLimitPolicy,
   asActivePolicy,
 } from '../mocks/policies'
+import { createMockStory } from '@/stories/mocks'
 import SpendingLimitDrawer from './SpendingLimitDrawer'
 
 const SAFE = { address: '0x8675B754342754A30A2AeF474D114d8460bca19b', name: MOCK_SAFE_NAME }
@@ -20,14 +21,17 @@ const SAFE = { address: '0x8675B754342754A30A2AeF474D114d8460bca19b', name: MOCK
 const OVERVIEW = {
   lastUpdated: 'Sep 22, 2026 · 03:35 UTC',
   enforcedBy: 'Safe allowance module',
-  enforcedByHref: 'https://etherscan.io/address/0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134',
 }
+
+// The drawer derives the explorer link from chain config, so the stories need the chains endpoint.
+const setup = createMockStory({ layout: 'none' })
 
 const meta = {
   title: 'Features/Spaces/Policies/SpendingLimitDrawer',
   component: SpendingLimitDrawer,
   tags: ['autodocs', 'skip-visual-test'],
-  parameters: { layout: 'fullscreen' },
+  parameters: { ...setup.parameters, layout: 'fullscreen' },
+  decorators: [setup.decorator],
   args: {
     open: true,
     onClose: fn(),

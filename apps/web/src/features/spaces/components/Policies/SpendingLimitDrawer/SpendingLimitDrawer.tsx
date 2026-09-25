@@ -1,5 +1,7 @@
 import type { ReactElement } from 'react'
 import { Drawer, DrawerBody, DrawerHeader, DrawerTitle } from '@/components/common/Drawer'
+import { useChain } from '@/hooks/useChains'
+import { getBlockExplorerLink } from '@/utils/chains'
 import { getPolicyIcon } from '../utils/policyIcon'
 import { getPolicyLabel } from '../utils/policyLabel'
 import type { AccountIdentityProps } from '../components/AccountIdentity'
@@ -24,7 +26,6 @@ export type SpendingLimitDrawerProps = {
     initiatedBy?: AccountIdentityProps
     lastUpdated: string
     enforcedBy: string
-    enforcedByHref?: string
   }
   names?: Record<string, string>
   transactionLink: string
@@ -43,6 +44,13 @@ const SpendingLimitDrawer = ({
   names,
   ...actions
 }: SpendingLimitDrawerProps): ReactElement => {
+  const chain = useChain(policy.safe.chainId)
+  // Derived here rather than asked of the caller: the policy already carries the module and the chain.
+  const enforcedByHref =
+    chain && policy.enforcement.via === 'module'
+      ? getBlockExplorerLink(chain, policy.enforcement.moduleAddress)?.href
+      : undefined
+
   const state = resolveSpendingLimitDrawerState(policy, viewer, safe.name ?? 'this Safe account')
   const Icon = getPolicyIcon(policy.type)
   const isPending = state.kind === 'pending'
@@ -64,7 +72,7 @@ const SpendingLimitDrawer = ({
           {isPending && <PendingBanner title={state.bannerTitle} line2={state.bannerLine2} />}
           {isPending && <PendingSignatures safe={safe} signed={state.signed} required={state.required} />}
           <SpendingLimits spenders={policy.data.spenders} names={names} showUsage={!isPending} />
-          <PolicyOverview appliesTo={safe} {...overview} />
+          <PolicyOverview {...overview} appliesTo={safe} enforcedByHref={enforcedByHref} />
         </div>
       </DrawerBody>
 
