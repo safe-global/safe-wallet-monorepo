@@ -3,7 +3,7 @@ import { skipToken } from '@reduxjs/toolkit/query'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { useGetPolicyTokenInfosQuery } from '@/store/api/gateway'
 import { tokenRefKey } from '@/store/api/gateway/policyTokenInfos'
-import type { ActivePolicyDto } from '@/store/api/gateway/spacePolicies'
+import type { ActivePolicyDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import useChains from '@/hooks/useChains'
 import { getReferencedTokens, type ResolveTokenInfo } from '../utils/mapActivePolicies'
 

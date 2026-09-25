@@ -26,7 +26,7 @@ jest.mock('@/store/authSlice', () => ({
 }))
 
 jest.mock('@/store/api/gateway/spacePolicies', () => ({
-  useSpacePoliciesGetActiveV1Query: (...args: unknown[]) => mockPoliciesQuery(...args),
+  useSpacePoliciesGetActivePoliciesV1Query: (...args: unknown[]) => mockPoliciesQuery(...args),
 }))
 
 jest.mock('@/store/api/gateway', () => ({

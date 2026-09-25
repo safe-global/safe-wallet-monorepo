@@ -1,4 +1,4 @@
-import type { ActivePolicyDto } from '@/store/api/gateway/spacePolicies'
+import type { ActivePolicyDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { TokenMetadata } from '@/store/api/gateway/policyTokenInfos'
 import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_TOKENS } from './policies'
 

@@ -2,7 +2,8 @@ import { http, HttpResponse } from 'msw'
 import { renderHook, waitFor } from '@/tests/test-utils'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
-import { type ActivePolicyDto, useSpacePoliciesGetActiveV1Query } from '../spacePolicies'
+import type { ActivePolicyDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useSpacePoliciesGetActivePoliciesV1Query } from '../spacePolicies'
 
 const SPACE_ID = '11111111-1111-1111-1111-111111111111'
 
@@ -14,7 +15,7 @@ const proposerPolicy = (): ActivePolicyDto => ({
   data: { proposers: [] },
 })
 
-describe('spacePoliciesGetActiveV1', () => {
+describe('spacePoliciesGetActivePoliciesV1', () => {
   it('should, when asked for a space, request its active policies of the given types', async () => {
     let requestedTypes: string | null = null
     server.use(
@@ -25,7 +26,7 @@ describe('spacePoliciesGetActiveV1', () => {
     )
 
     const { result } = renderHook(() =>
-      useSpacePoliciesGetActiveV1Query({ spaceId: SPACE_ID, types: ['spending-limit', 'proposer'] }),
+      useSpacePoliciesGetActivePoliciesV1Query({ spaceId: SPACE_ID, types: ['spending-limit', 'proposer'] }),
     )
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
@@ -40,7 +41,9 @@ describe('spacePoliciesGetActiveV1', () => {
       ),
     )
 
-    const { result } = renderHook(() => useSpacePoliciesGetActiveV1Query({ spaceId: SPACE_ID, types: ['proposer'] }))
+    const { result } = renderHook(() =>
+      useSpacePoliciesGetActivePoliciesV1Query({ spaceId: SPACE_ID, types: ['proposer'] }),
+    )
 
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(result.current.data).toBeUndefined()

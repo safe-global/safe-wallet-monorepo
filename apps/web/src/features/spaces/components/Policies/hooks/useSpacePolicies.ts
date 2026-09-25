@@ -1,7 +1,11 @@
 import { useMemo } from 'react'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
-import { type ActivePolicyDto, useSpacePoliciesGetActiveV1Query } from '@/store/api/gateway/spacePolicies'
+import type {
+  ActivePolicyDto,
+  SpacePoliciesGetActivePoliciesV1ApiArg,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useSpacePoliciesGetActivePoliciesV1Query } from '@/store/api/gateway/spacePolicies'
 import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
 import { SPACE_REFRESH_OPTIONS } from '../../../hooks/refreshOptions'
 import { mapActivePolicies } from '../utils/mapActivePolicies'
@@ -9,7 +13,7 @@ import { usePolicyTokenResolver } from './usePolicyTokenResolver'
 import type { Policy } from '../types'
 
 /** The types the table renders. Asking for the rest would only return rows it cannot show. */
-export const TABLE_POLICY_TYPES = ['spending-limit', 'proposer'] as const
+export const TABLE_POLICY_TYPES: SpacePoliciesGetActivePoliciesV1ApiArg['types'] = ['spending-limit', 'proposer']
 
 const NO_POLICIES: ActivePolicyDto[] = []
 
@@ -24,7 +28,7 @@ export type SpacePoliciesResult = {
 export const useSpacePolicies = (): SpacePoliciesResult => {
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { currentData, isFetching, isError, refetch } = useSpacePoliciesGetActiveV1Query(
+  const { currentData, isFetching, isError, refetch } = useSpacePoliciesGetActivePoliciesV1Query(
     { spaceId: spaceId ?? '', types: TABLE_POLICY_TYPES },
     { skip: !isUserSignedIn || !spaceId, ...SPACE_REFRESH_OPTIONS },
   )

@@ -5,7 +5,7 @@ import type {
   ProposerPolicyDataDto,
   SpendingLimitAllowanceDto,
   SpendingLimitPolicyDataDto,
-} from '@/store/api/gateway/spacePolicies'
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { Policy, PolicyAllowance, PolicyTokenInfo, ProposerPolicy, SpendingLimitPolicy } from '../types'
 
 export type ResolveTokenInfo = (chainId: string, tokenAddress: string) => PolicyTokenInfo | undefined
