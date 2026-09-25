@@ -35,7 +35,7 @@ export const usePolicyLock = (spaceId: string): PolicyLockState => {
     isResolving: false,
     lock: {
       planName,
-      workspaceName: space?.name ?? 'This workspace',
+      workspaceName: space?.name ?? 'This Workspace',
       accountCounts: { 'spending-limit': count, proposer: count },
     },
   }

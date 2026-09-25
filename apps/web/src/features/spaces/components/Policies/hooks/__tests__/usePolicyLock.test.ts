@@ -114,7 +114,7 @@ describe('usePolicyLock', () => {
 
     const { result } = renderHook(() => usePolicyLock(SPACE_ID))
 
-    expect(result.current.lock?.workspaceName).toBe('This workspace')
+    expect(result.current.lock?.workspaceName).toBe('This Workspace')
   })
 
   it('should, when the seats meter is missing, count zero accounts', () => {
