@@ -5,10 +5,12 @@
  * Assertions belong in the test file, never here.
  */
 import { type Page, type Locator } from '@playwright/test'
+import { SAFE_UNAVAILABLE_MESSAGE } from '@/utils/rtkQuery'
 import { ROUTES } from '../data/constants'
 
-/** Headline shown when CGW blocks the Safe with `451 Unavailable for legal reasons` */
-export const LEGAL_BLOCK_MESSAGE = 'Unavailable for legal reasons'
+export { SAFE_UNAVAILABLE_MESSAGE }
+
+export const GATEWAY_BLOCK_REASON = 'Blocked in your region by provider edge-node-7'
 
 /** Headline shown for every other Safe loading failure — mirrors `GENERIC_LOADING_ERROR` in the app */
 export const GENERIC_LOADING_ERROR = "This Safe account couldn't be loaded"
