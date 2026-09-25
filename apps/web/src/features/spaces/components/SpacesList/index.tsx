@@ -195,8 +195,8 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
     <>
       <Card
         size="none"
-        // eslint-disable-next-line no-restricted-syntax -- Figma spec calls for a 32px corner one-off; no radius token in the scale matches it
-        className="w-full rounded-[2rem] p-1 text-center"
+        // eslint-disable-next-line no-restricted-syntax -- Figma's 32px corner has no Card `radius` option
+        className="w-full rounded-4xl p-1 text-center"
       >
         <div className="relative flex flex-col items-center gap-8 overflow-hidden rounded-t-[calc(2rem-4px)] bg-muted p-8 text-left before:absolute before:top-[72%] before:-left-16 before:size-96 before:-translate-y-1/2 before:rounded-full before:bg-[var(--color-static-text-brand)] before:opacity-45 before:blur-3xl md:flex-row md:items-end md:gap-16">
           <div className="relative flex shrink-0 flex-col gap-4 md:self-center">

@@ -5,7 +5,7 @@ import {
   getSubscriptionPlanName,
   getSubscriptionSeats,
 } from '../../hooks/billing/subscription'
-import { ENTERPRISE_TIER, PLAN_FEATURES, PLAN_ORDER } from './fixtures'
+import { ENTERPRISE_TIER, PLAN_FEATURES, PLAN_ORDER } from './planCatalog'
 import type {
   CurrentPlan,
   PlanChangeDirection,

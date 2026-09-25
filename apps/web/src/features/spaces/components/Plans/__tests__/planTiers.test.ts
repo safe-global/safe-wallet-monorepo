@@ -1,6 +1,6 @@
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import type { PlanGroup, PlanOffer } from '../../../hooks/billing/types'
-import { PLAN_FEATURES } from '../fixtures'
+import { PLAN_FEATURES } from '../planCatalog'
 import {
   buildPlanTiers,
   claimTiers,
