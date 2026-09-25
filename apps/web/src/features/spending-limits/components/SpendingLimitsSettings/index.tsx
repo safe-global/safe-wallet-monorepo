@@ -21,7 +21,7 @@ const SpendingLimitsSettings = () => {
   const { setTxFlow } = useContext(TxModalContext)
   const isEnabled = useHasFeature(FEATURES.SPENDING_LIMIT)
   const isSupported = useIsSpendingLimitSupported()
-  const gate = usePlanGate(FEATURES.SPENDING_LIMIT_GATING)
+  const { mustUpgradeToSafePro, isLoading: isPlanLoading, upgradeHref } = usePlanGate(FEATURES.SPENDING_LIMIT_GATING)
 
   // Read data from store (loaded on app start via SpendingLimitsLoader)
   const spendingLimits = useAppSelector(selectSpendingLimits)
@@ -63,12 +63,12 @@ const SpendingLimitsSettings = () => {
               </Typography>
 
               {isSupported ? (
-                gate.isBlocked ? (
+                mustUpgradeToSafePro ? (
                   <div className="my-4">
-                    <SafeProLock title="Adding spending limits requires Safe Pro" href={gate.upgradeHref} />
+                    <SafeProLock title="Adding spending limits requires Safe Pro" href={upgradeHref} />
                   </div>
                 ) : (
-                  !gate.isLoading && renderNewSpendingLimitButton
+                  !isPlanLoading && renderNewSpendingLimitButton
                 )
               ) : (
                 <Typography className="mt-4 block">

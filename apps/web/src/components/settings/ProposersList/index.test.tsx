@@ -82,7 +82,7 @@ describe('ProposersList', () => {
     jest.clearAllMocks()
     mockUseSafeSdk.mockReturnValue({} as unknown as Safe)
     mockUseNestedSafeOwners.mockReturnValue([])
-    mockUsePlanGate.mockReturnValue({ isBlocked: false, isLoading: false, upgradeHref: '/spaces/plans' })
+    mockUsePlanGate.mockReturnValue({ mustUpgradeToSafePro: false, isLoading: false, upgradeHref: '/spaces/plans' })
     ;(useIsSafeOwner as jest.MockedFunction<typeof useIsSafeOwner>).mockReturnValue(true)
     ;(useIsWalletProposer as jest.MockedFunction<typeof useIsWalletProposer>).mockReturnValue(false)
     ;(useHasFeature as jest.MockedFunction<typeof useHasFeature>).mockReturnValue(true)
@@ -161,7 +161,7 @@ describe('ProposersList', () => {
   })
 
   it('replaces the Add proposer button with the Safe Pro lock while the plan gate blocks it', () => {
-    mockUsePlanGate.mockReturnValue({ isBlocked: true, isLoading: false, upgradeHref: '/spaces/plans' })
+    mockUsePlanGate.mockReturnValue({ mustUpgradeToSafePro: true, isLoading: false, upgradeHref: '/spaces/plans' })
 
     const { getByRole, getByTestId, queryByTestId } = render(<ProposersList />)
 
@@ -172,7 +172,7 @@ describe('ProposersList', () => {
   })
 
   it('renders neither the button nor the lock while the plan gate is loading', () => {
-    mockUsePlanGate.mockReturnValue({ isBlocked: false, isLoading: true, upgradeHref: '/spaces/plans' })
+    mockUsePlanGate.mockReturnValue({ mustUpgradeToSafePro: false, isLoading: true, upgradeHref: '/spaces/plans' })
 
     const { queryByTestId } = render(<ProposersList />)
 

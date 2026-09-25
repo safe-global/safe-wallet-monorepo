@@ -13,7 +13,11 @@ jest.mock('@/hooks/useChains', () => ({
 }))
 jest.mock('../../hooks/useIsSpendingLimitSupported', () => ({ __esModule: true, default: () => true }))
 
-const gate = (isBlocked: boolean, isLoading = false) => ({ isBlocked, isLoading, upgradeHref: '/spaces/plans' })
+const gate = (mustUpgradeToSafePro: boolean, isLoading = false) => ({
+  mustUpgradeToSafePro,
+  isLoading,
+  upgradeHref: '/spaces/plans',
+})
 
 describe('SpendingLimitsSettings', () => {
   beforeEach(() => {
