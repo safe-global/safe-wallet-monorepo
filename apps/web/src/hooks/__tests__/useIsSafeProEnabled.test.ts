@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react'
+import { renderHook } from '@/tests/test-utils'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
@@ -20,7 +20,7 @@ describe('useIsSafeProEnabled', () => {
     expect(mockUseHasFeature).toHaveBeenCalledWith(FEATURES.SAFE_PRO)
   })
 
-  it.each([true, false, undefined])('returns %s when the flag lookup returns %s', (value) => {
+  it.each([true, false, undefined])('returns the flag value as is when it is %s', (value) => {
     mockUseHasFeature.mockReturnValue(value)
 
     const { result } = renderHook(() => useIsSafeProEnabled())

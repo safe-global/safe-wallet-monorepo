@@ -3,8 +3,8 @@ import SpacePlansPage from '../../pages/spaces/plans'
 import { AppRoutes } from '@/config/routes'
 import * as router from 'next/router'
 import * as featureModule from '@/features/__core__'
+import * as spacesFeature from '@/features/spaces'
 
-const mockPush = jest.fn()
 const mockUseIsSafeProAnnouncementEnabled = jest.fn<boolean, []>()
 const mockUseIsSafeProEnabled = jest.fn<boolean | undefined, []>()
 
@@ -17,9 +17,9 @@ jest.mock('@/features/__core__', () => ({
 }))
 
 jest.mock('@/features/spaces', () => ({
-  ...jest.requireActual<Record<string, unknown>>('@/features/spaces/hooks/useFeatureRedirect'),
   SpacesFeature: 'SpacesFeature',
   useFeatureFlagRedirect: jest.fn(),
+  useRedirectWhenOff: jest.fn(),
 }))
 
 jest.mock('@/features/safe-pro-announcement', () => ({
@@ -35,7 +35,7 @@ const SPACE_ID = 'space-uuid-1'
 const SpacePlansPageMock = ({ spaceId }: { spaceId: string }) => <div data-testid="plans">plans {spaceId}</div>
 
 const setup = ({ isAnnounced, isSafePro }: { isAnnounced: boolean; isSafePro: boolean | undefined }) => {
-  ;(router.useRouter as jest.Mock).mockReturnValue({ isReady: true, query: { spaceId: SPACE_ID }, push: mockPush })
+  ;(router.useRouter as jest.Mock).mockReturnValue({ isReady: true, query: { spaceId: SPACE_ID } })
   ;(featureModule.useLoadFeature as jest.Mock).mockReturnValue({ SpacePlansPage: SpacePlansPageMock })
   mockUseIsSafeProAnnouncementEnabled.mockReturnValue(isAnnounced)
   mockUseIsSafeProEnabled.mockReturnValue(isSafePro)
@@ -46,24 +46,24 @@ describe('SpacePlansPage (/spaces/plans)', () => {
     jest.clearAllMocks()
   })
 
-  it('redirects to the spaces index, preserving the spaceId, when both Safe Pro flags are off', () => {
-    setup({ isAnnounced: false, isSafePro: false })
-
-    render(<SpacePlansPage />)
-
-    expect(mockPush).toHaveBeenCalledWith({ pathname: AppRoutes.spaces.index, query: { spaceId: SPACE_ID } })
-  })
-
   it.each([
-    { name: 'Safe Pro is only announced', isAnnounced: true, isSafePro: false },
-    { name: 'Safe Pro is only live', isAnnounced: false, isSafePro: true },
-    { name: 'the chain config is still loading', isAnnounced: false, isSafePro: undefined },
-  ])('renders the plans page without redirecting when $name', ({ isAnnounced, isSafePro }) => {
+    { name: 'both Safe Pro flags are off', isAnnounced: false, isSafePro: false, isOn: false },
+    { name: 'Safe Pro is only announced', isAnnounced: true, isSafePro: false, isOn: true },
+    { name: 'Safe Pro is only live', isAnnounced: false, isSafePro: true, isOn: true },
+    { name: 'the chain config is still loading', isAnnounced: false, isSafePro: undefined, isOn: undefined },
+  ])('hands $isOn to the spaces-index redirect when $name', ({ isAnnounced, isSafePro, isOn }) => {
     setup({ isAnnounced, isSafePro })
 
     render(<SpacePlansPage />)
 
-    expect(mockPush).not.toHaveBeenCalled()
+    expect(spacesFeature.useRedirectWhenOff).toHaveBeenCalledWith(isOn, AppRoutes.spaces.index)
+  })
+
+  it('renders the plans page for the spaceId in the query', () => {
+    setup({ isAnnounced: true, isSafePro: false })
+
+    render(<SpacePlansPage />)
+
     expect(screen.getByTestId('plans')).toHaveTextContent(`plans ${SPACE_ID}`)
   })
 })

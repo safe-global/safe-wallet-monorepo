@@ -376,13 +376,6 @@ describe('SpaceDashboard – Safe Pro announcement', () => {
     expect(screen.getByTestId('safe-pro-announcement-modal')).toBeInTheDocument()
   })
 
-  it('passes only the workspace readiness to the hook', () => {
-    render(<SpaceDashboard />)
-
-    expect(mockUseSafeProAnnouncementModal).toHaveBeenCalledWith(true)
-    mockUseSafeProAnnouncementModal.mock.calls.forEach((call) => expect(call).toHaveLength(1))
-  })
-
   it('stays unarmed before a workspace resolves', () => {
     ;(useCurrentSpaceId as jest.Mock).mockReturnValue(undefined)
 

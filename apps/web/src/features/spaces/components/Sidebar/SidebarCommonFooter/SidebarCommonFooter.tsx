@@ -51,7 +51,7 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
   const { pathname } = useRouter()
   const [isSafeProBannerDismissed, dismissSafeProBanner] = useSafeProSidebarBannerDismissed()
   // A failed chunk counts as no banner: its stub then renders nothing for good.
-  // Its copy is pre-launch only, so it retires once Safe Pro is live and the 2FA card takes the slot.
+  // Its copy is pre-launch only, so it retires once Safe Pro is live.
   const hasSafeProBanner =
     isSafeProAnnouncementEnabled && !isSafePro && pathname !== AppRoutes.spaces.plans && !safeProError
   const showSafeProBanner = hasSafeProBanner && !isSafeProBannerDismissed
