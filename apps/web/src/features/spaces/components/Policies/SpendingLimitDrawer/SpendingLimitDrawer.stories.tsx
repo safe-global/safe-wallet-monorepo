@@ -9,9 +9,7 @@ import {
   mockMissingMetadataPolicy,
   mockMultiSpenderPolicy,
   mockPendingPolicy,
-  mockPendingRemoval,
   mockPendingUpdate,
-  mockUnenforcedPolicy,
   mockSpendingLimitPolicy,
   asActivePolicy,
 } from '../mocks/policies'
@@ -74,9 +72,6 @@ export const PendingNotASigner: Story = { args: { policy: mockPendingPolicy(), v
 export const PendingFullySigned: Story = {
   args: { policy: mockFullySignedPending(), viewer: MOCK_VIEWERS.nonSigner },
 }
-
-/** A queued removal leaves the limit enforced, so the banner must not say it is inactive. */
-export const PendingRemoval: Story = { args: { policy: mockPendingRemoval(), viewer: MOCK_VIEWERS.signer } }
 
 /** A queued edit: the current limits still apply until it executes. */
 export const PendingUpdate: Story = { args: { policy: mockPendingUpdate(), viewer: MOCK_VIEWERS.signer } }
@@ -143,6 +138,3 @@ export const WithSpenderNames: Story = {
     },
   },
 }
-
-/** The module is configured but not enabled on the Safe, so it enforces nothing. */
-export const Unenforced: Story = { args: { policy: asActivePolicy(mockUnenforcedPolicy()) } }
