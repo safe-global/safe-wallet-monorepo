@@ -17,7 +17,13 @@ read -r review_sha base_sha < <(node -e '
   if (!e) { console.error("PR not in prs.json"); process.exit(1) }
   console.log(e.reviewSha, e.baseSha)' "$root/eval/prs.json" "$pr")
 
-git fetch -q origin "pull/$pr/head" valentin/pr-review-learnings-skill
+# SSH auth can fail transiently; skip the fetch when the commits are already local.
+for attempt in 1 2 3 4 5; do
+  git cat-file -e "$review_sha^{commit}" 2>/dev/null && git cat-file -e "$a_pin^{commit}" 2>/dev/null && break
+  git fetch -q origin "pull/$pr/head" valentin/pr-review-learnings-skill && break
+  [ "$attempt" = 5 ] && { echo "fetch failed for $pr" >&2; exit 1; }
+  sleep 15
+done
 wt="$(mktemp -d)/pr-$pr"
 git worktree add -q --detach "$wt" "$review_sha"
 trap 'git -C "$root" worktree remove --force "$wt"' EXIT
