@@ -1,6 +1,7 @@
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getReadOnlyGnosisSafeContract } from '@/services/contracts/safeContracts'
 import { SENTINEL_ADDRESS } from '@safe-global/utils/utils/constants'
+import { toSafeSignature } from '@safe-global/utils/utils/safeTransaction'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { getTransactionDetails } from '@/utils/transactions'
 import type { AddOwnerTxParams, RemoveOwnerTxParams, SwapOwnerTxParams } from '@safe-global/protocol-kit'
@@ -131,13 +132,7 @@ export const createExistingTx = async (
   // Create a tx and add pre-approved signatures
   const safeTx = await createTx(txParams, txParams.nonce, scope)
   Object.entries(signatures).forEach(([signer, data]) => {
-    safeTx.addSignature({
-      signer,
-      data,
-      staticPart: () => data,
-      dynamicPart: () => '',
-      isContractSignature: false,
-    })
+    safeTx.addSignature(toSafeSignature(signer, data))
   })
 
   return safeTx

@@ -1,5 +1,5 @@
-import type { SafeTransaction, SafeTransactionData, SafeVersion } from '@safe-global/types-kit'
-import { calculateSafeTransactionHash } from '@safe-global/protocol-kit'
+import type { SafeSignature, SafeTransaction, SafeTransactionData, SafeVersion } from '@safe-global/types-kit'
+import { calculateSafeTransactionHash, EthSafeSignature } from '@safe-global/protocol-kit'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 /**
@@ -86,4 +86,28 @@ export const getNestedExecTransactionHashFromInfo = ({
     chainId,
     txData,
   })
+}
+
+const STATIC_PART_HEX_LENGTH = 65 * 2
+
+/** v = 0 contract signatures keep only their data, so buildSignatureBytes sets an offset past every static part */
+export const toSafeSignature = (signer: string, signature: string): SafeSignature => {
+  const hex = signature.startsWith('0x') ? signature.slice(2) : signature
+  const isContractSignature = hex.length > STATIC_PART_HEX_LENGTH && hex.slice(128, 130) === '00'
+
+  if (isContractSignature) {
+    const offset = Number.parseInt(hex.slice(64, 128), 16) * 2
+    const length = Number.parseInt(hex.slice(offset, offset + 64), 16) * 2
+
+    if (
+      Number.isSafeInteger(offset) &&
+      offset >= STATIC_PART_HEX_LENGTH &&
+      Number.isSafeInteger(length) &&
+      offset + 64 + length === hex.length
+    ) {
+      return new EthSafeSignature(signer, `0x${hex.slice(offset + 64)}`, true)
+    }
+  }
+
+  return new EthSafeSignature(signer, signature)
 }
