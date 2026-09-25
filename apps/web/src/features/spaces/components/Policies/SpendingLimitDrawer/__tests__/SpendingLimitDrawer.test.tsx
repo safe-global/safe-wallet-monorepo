@@ -10,8 +10,9 @@ import {
 import type { DrawerPolicy, Viewer } from '../resolveState'
 import SpendingLimitDrawer from '../SpendingLimitDrawer'
 
+const SAFE_ADDRESS = '0x8675B754342754A30A2AeF474D114d8460bca19b'
+
 const OVERVIEW = {
-  appliesTo: { address: '0x8675B754342754A30A2AeF474D114d8460bca19b', name: 'Treasury' },
   lastUpdated: 'Sep 22, 2026',
   enforcedBy: 'Safe allowance module',
 }
@@ -25,7 +26,7 @@ const setup = (policy: DrawerPolicy = mockActiveSpendingLimit(), viewer: Viewer 
       onClose={jest.fn()}
       policy={policy}
       viewer={viewer}
-      safe={{ address: OVERVIEW.appliesTo.address, name: MOCK_SAFE_NAME }}
+      safe={{ address: SAFE_ADDRESS, name: MOCK_SAFE_NAME }}
       overview={OVERVIEW}
       transactionLink={TRANSACTION_LINK}
       onEdit={jest.fn()}

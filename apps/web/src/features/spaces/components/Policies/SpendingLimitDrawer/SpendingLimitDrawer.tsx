@@ -17,9 +17,9 @@ export type SpendingLimitDrawerProps = {
   onClose: () => void
   policy: DrawerPolicy
   viewer: Viewer
+  /** The Safe the policy applies to. The overview's "applies to" row derives from it. */
   safe: { address: string; name?: string }
   overview: {
-    appliesTo: AccountIdentityProps
     /** Not supplied for spending limits — CGW returns no initiator. */
     initiatedBy?: AccountIdentityProps
     lastUpdated: string
@@ -65,7 +65,7 @@ const SpendingLimitDrawer = ({
           {isPending && <PendingBanner title={state.bannerTitle} line2={state.bannerLine2} />}
           {isPending && <PendingSignatures safe={safe} signed={state.signed} required={state.required} />}
           <SpendingLimits spenders={policy.data.spenders} names={names} showUsage={!isPending} />
-          <PolicyOverview {...overview} />
+          <PolicyOverview appliesTo={safe} {...overview} />
         </div>
       </DrawerBody>
 

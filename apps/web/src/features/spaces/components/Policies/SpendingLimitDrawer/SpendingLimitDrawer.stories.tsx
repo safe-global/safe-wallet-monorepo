@@ -20,7 +20,6 @@ import SpendingLimitDrawer from './SpendingLimitDrawer'
 const SAFE = { address: '0x8675B754342754A30A2AeF474D114d8460bca19b', name: MOCK_SAFE_NAME }
 
 const OVERVIEW = {
-  appliesTo: { address: SAFE.address, name: 'Treasury' },
   lastUpdated: 'Sep 22, 2026 · 03:35 UTC',
   enforcedBy: 'Safe allowance module',
   enforcedByHref: 'https://etherscan.io/address/0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134',
@@ -95,7 +94,6 @@ export const UnnamedAccounts: Story = {
     safe: { address: SAFE.address },
     overview: {
       ...OVERVIEW,
-      appliesTo: { address: SAFE.address },
     },
   },
 }
@@ -130,12 +128,8 @@ const LONG_NAMES_POLICY = asActivePolicy(
 export const LongNames: Story = {
   args: {
     policy: LONG_NAMES_POLICY,
-    names: { [MOCK_ADDRESSES.alice.toLowerCase()]: 'Marketing operations treasury spender team lead' },
+    names: { [MOCK_ADDRESSES.alice]: 'Marketing operations treasury spender team lead' },
     safe: { ...SAFE, name: 'Marketing operations and treasury management' },
-    overview: {
-      ...OVERVIEW,
-      appliesTo: { ...OVERVIEW.appliesTo, name: 'Marketing operations and treasury management' },
-    },
   },
 }
 
@@ -143,9 +137,10 @@ export const LongNames: Story = {
 export const WithSpenderNames: Story = {
   args: {
     policy: asActivePolicy(mockMultiSpenderPolicy()),
+    // Checksummed keys, as the address book returns them — the lookup is case-insensitive.
     names: {
-      [MOCK_ADDRESSES.alice.toLowerCase()]: 'Treasury signer',
-      [MOCK_ADDRESSES.bob.toLowerCase()]: 'Marketing lead',
+      [MOCK_ADDRESSES.alice]: 'Treasury signer',
+      [MOCK_ADDRESSES.bob]: 'Marketing lead',
     },
   },
 }
