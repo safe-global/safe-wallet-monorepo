@@ -34,7 +34,7 @@ describe('useSeatTrimCheckout', () => {
   it('counts the Workspace Safes across chains and asks to trim only when the plan covers fewer', () => {
     const { result } = renderHook(() => useSeatTrimCheckout(SPACE_ID))
 
-    expect(result.current.safeCount).toBe(3)
+    expect(result.current.seatCount).toBe(3)
     expect(result.current.needsTrim(2)).toBe(true)
     expect(result.current.needsTrim(3)).toBe(false)
     expect(result.current.needsTrim(20)).toBe(false)

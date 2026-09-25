@@ -124,15 +124,15 @@ const TrialEndingChooser = ({
  * heads-up, once per login.
  */
 export default function TrialEndingModal({ spaceId }: { spaceId: string }) {
-  const { plan, seats, subscription, isTrialing, isTrialEndingSoon } = useSpacePlan(spaceId)
+  const { plan, seats, subscription, isTrialing, isTrialEndingSoon, hasPaymentMethod } = useSpacePlan(spaceId)
   const membership = useCurrentMembership(spaceId)
   const isAdmin = useIsAdmin(spaceId)
   const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId }, { skip: !isTrialEndingSoon || isAdmin })
   const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
-    if (isTrialEndingSoon && membership && !wasTrialReminderSeen(spaceId)) setIsOpen(true)
-  }, [isTrialEndingSoon, membership, spaceId])
+    if (isTrialEndingSoon && !hasPaymentMethod && membership && !wasTrialReminderSeen(spaceId)) setIsOpen(true)
+  }, [isTrialEndingSoon, hasPaymentMethod, membership, spaceId])
 
   if (!isOpen || !plan || !subscription) return null
 

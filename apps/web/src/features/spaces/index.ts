@@ -60,7 +60,7 @@ export { useSafeSponsoredTxs, type SafeSponsoredTxs } from './hooks/useSafeSpons
 export { useSafeProAccess } from './hooks/useSafeProAccess'
 export { default as useFeatureFlagRedirect } from './hooks/useFeatureFlagRedirect'
 export { default as useFeatureRedirect } from './hooks/useFeatureRedirect'
-export { default as useGetSpaceAddressBook } from './hooks/useGetSpaceAddressBook'
+export { default as useGetSpaceAddressBook, useSpaceAddressBookState } from './hooks/useGetSpaceAddressBook'
 export { useMemberNameResolver } from './hooks/useMemberNameResolver'
 export { default as useGetSpaceAuditLog } from './hooks/useGetSpaceAuditLog'
 export { default as useGetSpaceAuditLogActors } from './hooks/useGetSpaceAuditLogActors'
@@ -71,7 +71,11 @@ export { useMembersSearch } from './hooks/useMembersSearch'
 export { useInviteNotification } from './hooks/useInviteNotification'
 export { useWorkspaceAddressBookLabel } from './hooks/useWorkspaceAddressBookLabel'
 export { useAddressBookWriteScope, type AddressBookWriteScope } from './hooks/useAddressBookWriteScope'
-export { useUpsertWorkspaceSafeName } from './hooks/useUpsertWorkspaceSafeName'
+export {
+  ADDRESS_BOOK_UNAVAILABLE,
+  useUpsertWorkspaceSafeName,
+  useUpsertWorkspaceSafeNames,
+} from './hooks/useUpsertWorkspaceSafeName'
 export { default as useTrackSpace } from './hooks/useTrackSpace'
 
 // Hooks from useSpaceMembers.tsx

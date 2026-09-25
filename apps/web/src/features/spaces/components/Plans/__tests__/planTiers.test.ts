@@ -222,6 +222,10 @@ describe('planTiers', () => {
       kind: 'billing',
       label: 'Add payment method',
     })
+    expect(getPlanCta(pick(current), { ...businessPlan, isTrialing: true, hasPaymentMethod: true })).toEqual({
+      kind: 'manage',
+      label: 'Manage plan',
+    })
     expect(getPlanCta(pick(starter), businessPlan)).toEqual({
       kind: 'change',
       direction: 'downgrade',

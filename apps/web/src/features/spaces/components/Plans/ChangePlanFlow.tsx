@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
-import { useLoadFeature } from '@/features/__core__'
-import { SafeProFeature } from '@/features/safe-pro-announcement'
+import { SafeProPlanSwitchedModal, SafeProSubscriptionActivatedModal } from '../SafeProModals'
 import { useSeatTrim } from '../../hooks/billing/useSeatTrim'
 import ChangePlanDialog from './ChangePlanDialog'
 import { formatPlanPrice, getChangeDirection, priceSuffix } from './planTiers'
@@ -38,7 +37,6 @@ export default function ChangePlanFlow({
   /** The plan changed and the confirmation is up; a parent chooser can step aside. */
   onChanged?: () => void
 }) {
-  const { SafeProSubscriptionActivatedModal, SafeProPlanSwitchedModal } = useLoadFeature(SafeProFeature)
   const { needsTrim } = useSeatTrim(spaceId)
   const [removed, setRemoved] = useState<SafeRef[]>()
   const [isChanged, setIsChanged] = useState(false)

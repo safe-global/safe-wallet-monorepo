@@ -15,8 +15,10 @@ export const useSpacePlan = (spaceId?: string | null) => {
     subscription,
     latestSubscription,
     status,
+    hasPaymentMethod,
     isLoading: isSubscriptionLoading,
     isUninitialized: isSubscriptionUninitialized,
+    isError: isSubscriptionError,
     refetch: refetchSubscription,
   } = useSpaceSubscription(spaceId)
 
@@ -25,7 +27,9 @@ export const useSpacePlan = (spaceId?: string | null) => {
   const periodEndsAt = entitlements.plan?.cycleEndsAt ?? getSubscriptionPeriodEnd(subscription)
   const daysLeft = getDaysLeft(periodEndsAt)
   const plan: PlanSummary | null =
-    status === 'trialing' || status === 'active' ? { name: name ?? 'Safe Pro', status, periodEndsAt, daysLeft } : null
+    status === 'trialing' || status === 'active'
+      ? { name: name ?? 'Safe Pro', status, periodEndsAt, daysLeft, hasPaymentMethod }
+      : null
   const isTrialing = status === 'trialing'
 
   return {
@@ -37,11 +41,14 @@ export const useSpacePlan = (spaceId?: string | null) => {
     latestSubscription,
     status,
     isTrialing,
+    hasPaymentMethod,
     isTrialEndingSoon: isTrialing && daysLeft !== null && daysLeft <= TRIAL_ENDING_SOON_DAYS,
     isPaidActive: status === 'active',
     isLoading: entitlements.isLoading || isSubscriptionLoading,
     /** True until both queries have started (skipped or not yet dispatched), when `status` still reads `none`. */
     isUninitialized: Boolean(entitlements.isUninitialized || isSubscriptionUninitialized),
+    /** A source failed for good (rate-limit retries exhausted included); `status` then reads `none` and cannot be trusted. */
+    isError: entitlements.isError || isSubscriptionError,
     refetch: () => {
       void entitlements.refetch()
       void refetchSubscription()

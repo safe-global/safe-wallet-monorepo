@@ -61,7 +61,9 @@ jest.mock('@/features/safe-pro-announcement', () => ({
 
 jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
 
-jest.mock('../../../hooks/useSpacePlan', () => ({ useSpacePlan: () => ({ tierName: undefined, isPaidActive: false }) }))
+jest.mock('../../../hooks/billing/useSpaceSubscription', () => ({
+  useSpaceSubscription: () => ({ subscription: undefined, status: 'none' }),
+}))
 
 jest.mock('@/features/spaces', () => ({
   MemberStatus: { ACTIVE: 'ACTIVE', INVITED: 'INVITED', DECLINED: 'DECLINED' },
@@ -216,7 +218,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     // The signed-out card with the "Sign in to your workspace" heading +
     // SignInOptions must render…
-    expect(screen.getByRole('heading', { name: /sign in to your workspace/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /sign in to your Workspace/i })).toBeInTheDocument()
     expect(screen.getByTestId('sign-in-options')).toBeInTheDocument()
 
     // …and the Create workspace CTA / no-workspaces empty state must NOT.
@@ -477,7 +479,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     render(<SpacesList />)
 
-    const heading = screen.getByRole('heading', { name: /sign in to your workspace/i })
+    const heading = screen.getByRole('heading', { name: /sign in to your Workspace/i })
     expect(heading.className).toContain('text-center')
   })
 

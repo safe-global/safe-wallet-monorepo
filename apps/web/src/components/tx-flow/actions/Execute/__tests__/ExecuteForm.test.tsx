@@ -20,6 +20,23 @@ import type {
   DeadlockAnalysisResults,
   ThreatAnalysisResults,
 } from '@safe-global/utils/features/safe-shield/types'
+import { TxModalContext } from '@/components/tx-flow'
+import { SuccessScreenFlow } from '@/components/tx-flow/flows'
+import { useSafeScope } from '@/components/tx-flow/safe-scope'
+
+const mockUseSafeSponsoredTxs = jest.fn()
+jest.mock('@/features/spaces/hooks/useSafeSponsoredTxs', () => ({
+  useSafeSponsoredTxs: () => mockUseSafeSponsoredTxs(),
+}))
+const noSponsoredTxs = {
+  isEnabled: false,
+  isPro: false,
+  meter: null,
+  left: null,
+  spaceId: null,
+  canSponsor: false,
+  isLoading: false,
+}
 
 // We assume that CheckWallet always returns true
 jest.mock('@/components/common/CheckWallet', () => ({
@@ -28,6 +45,12 @@ jest.mock('@/components/common/CheckWallet', () => ({
     return children(true)
   },
 }))
+
+jest.mock('@/components/tx-flow/safe-scope', () => ({
+  ...jest.requireActual('@/components/tx-flow/safe-scope'),
+  useSafeScope: jest.fn(),
+}))
+const mockUseSafeScope = useSafeScope as jest.MockedFunction<typeof useSafeScope>
 
 describe('ExecuteForm', () => {
   const safeTransaction = createMockSafeTransaction({
@@ -65,6 +88,7 @@ describe('ExecuteForm', () => {
       safeAnalysis: null,
       addToTrustedList: jest.fn(),
       hasProFeatures: true,
+      isSafePro: true,
     },
     options: [
       { id: 'execute', label: 'Execute' },
@@ -75,9 +99,11 @@ describe('ExecuteForm', () => {
   }
 
   beforeEach(() => {
+    mockUseSafeSponsoredTxs.mockReturnValue(noSponsoredTxs)
     jest.clearAllMocks()
 
     jest.spyOn(useValidateTxData, 'useValidateTxData').mockReturnValue([undefined, undefined, false])
+    mockUseSafeScope.mockReturnValue(undefined)
   })
 
   it('shows estimated fees', () => {
@@ -138,6 +164,27 @@ describe('ExecuteForm', () => {
     expect(getByText('Who will pay gas fees:')).toBeInTheDocument()
   })
 
+  it('keeps the gas-fee selector on screen, sponsoring disabled, when the Workspace allowance is spent', () => {
+    jest.spyOn(useWalletCanRelay, 'default').mockReturnValue([true, undefined, false])
+    mockUseSafeSponsoredTxs.mockReturnValue({
+      isEnabled: true,
+      isPro: true,
+      meter: { used: 50, quota: 50, resetsAt: '2026-11-01T00:00:00.000Z' },
+      left: 0,
+      spaceId: '11111111-1111-1111-1111-111111111111',
+      canSponsor: false,
+      isLoading: false,
+    })
+
+    const { getByText, getByTestId } = render(<ExecuteForm {...defaultProps} safeTx={safeTransaction} />)
+
+    expect(getByText('Who will pay gas fees:')).toBeInTheDocument()
+    expect(getByTestId('relay-execution-method').querySelector('[data-slot=radio-group-item]')).toHaveAttribute(
+      'data-disabled',
+    )
+    expect(getByText('Execute')).toBeEnabled()
+  })
+
   it('shows an execution validation error', () => {
     jest
       .spyOn(useIsValidExecution, 'default')
@@ -192,6 +239,56 @@ describe('ExecuteForm', () => {
 
     await waitFor(() => {
       expect(mockExecuteTx).toHaveBeenCalled()
+    })
+  })
+
+  describe('success screen scope', () => {
+    const renderWithModal = () => {
+      const setTxFlow = jest.fn()
+      const mockExecuteTx = jest.fn().mockResolvedValue('0xexecuted')
+      const view = render(
+        <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
+          <ExecuteForm
+            {...defaultProps}
+            safeTx={safeTransaction}
+            txActions={{ ...defaultProps.txActions, executeTx: mockExecuteTx }}
+          />
+        </TxModalContext.Provider>,
+      )
+      return { ...view, setTxFlow, mockExecuteTx }
+    }
+
+    it('hands the selected Safe to the success screen when a Space-level scope is active', async () => {
+      mockUseSafeScope.mockReturnValue({
+        chainId: '11155111',
+        safeAddress: '0x0000000000000000000000000000000000000001',
+        scopeKey: '11155111:0x0000000000000000000000000000000000000001',
+        safeLoaded: true,
+        safeLoading: false,
+      })
+      const { getByText, setTxFlow, mockExecuteTx } = renderWithModal()
+
+      fireEvent.click(getByText('Execute'))
+
+      await waitFor(() => expect(mockExecuteTx).toHaveBeenCalled())
+      await waitFor(() => expect(setTxFlow).toHaveBeenCalled())
+      const [element] = setTxFlow.mock.calls[0]
+      expect(element.type).toBe(SuccessScreenFlow)
+      expect(element.props).toEqual({
+        txId: '0xexecuted',
+        scope: { chainId: '11155111', safeAddress: '0x0000000000000000000000000000000000000001' },
+      })
+    })
+
+    it('opens the success screen without a scope on a Safe-level route', async () => {
+      mockUseSafeScope.mockReturnValue(undefined)
+      const { getByText, setTxFlow, mockExecuteTx } = renderWithModal()
+
+      fireEvent.click(getByText('Execute'))
+
+      await waitFor(() => expect(mockExecuteTx).toHaveBeenCalled())
+      await waitFor(() => expect(setTxFlow).toHaveBeenCalled())
+      expect(setTxFlow.mock.calls[0][0].props).toEqual({ txId: '0xexecuted', scope: undefined })
     })
   })
 

@@ -35,27 +35,24 @@ jest.mock('@/services/local-storage/session', () => ({
     },
   }),
 }))
-jest.mock('@/features/__core__', () => ({
-  useLoadFeature: () => ({
-    SafeProNoticeModal: ({
-      title,
-      body,
-      actionLabel,
-      onAction,
-    }: {
-      title: string
-      body: string
-      actionLabel: string
-      onAction: () => void
-    }) => (
-      <div data-testid="notice-modal">
-        <h2>{title}</h2>
-        <p>{body}</p>
-        <button onClick={onAction}>{actionLabel}</button>
-      </div>
-    ),
-  }),
-  createFeatureHandle: () => ({}),
+jest.mock('../../SafeProModals', () => ({
+  SafeProNoticeModal: ({
+    title,
+    body,
+    actionLabel,
+    onAction,
+  }: {
+    title: string
+    body: string
+    actionLabel: string
+    onAction: () => void
+  }) => (
+    <div data-testid="notice-modal">
+      <h2>{title}</h2>
+      <p>{body}</p>
+      <button onClick={onAction}>{actionLabel}</button>
+    </div>
+  ),
 }))
 jest.mock('../ChangePlanFlow', () => ({
   __esModule: true,
@@ -140,6 +137,13 @@ describe('TrialEndingModal', () => {
       expect(container).toBeEmptyDOMElement()
       unmountAgain()
     }
+  })
+
+  it('stays quiet when a payment method is already on file', () => {
+    mockUseSpacePlan.mockReturnValue({ ...trial(7), hasPaymentMethod: true })
+    render(<TrialEndingModal spaceId={SPACE_ID} />)
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
   it('stays quiet while the trial has more than a week left', () => {

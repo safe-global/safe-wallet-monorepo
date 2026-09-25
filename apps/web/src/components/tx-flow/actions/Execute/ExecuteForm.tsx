@@ -25,6 +25,7 @@ import { hasRemainingRelays } from '@/utils/relaying'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { TxModalContext } from '@/components/tx-flow'
 import { SuccessScreenFlow } from '@/components/tx-flow/flows'
+import { useSafeScope } from '@/components/tx-flow/safe-scope'
 import useGasLimit from '@/hooks/useGasLimit'
 import AdvancedParams, { useAdvancedParams } from '@/components/tx/AdvancedParams'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
@@ -77,6 +78,7 @@ export const ExecuteForm = ({
   const currentChain = useCurrentChain()
   const { executeTx } = txActions
   const { setTxFlow } = useContext(TxModalContext)
+  const scope = useSafeScope()
   const { needsRiskConfirmation, isRiskConfirmed } = txSecurity
   const { isSubmitDisabled, isSubmitLoading, setIsSubmitLoading, setSubmitError, setIsRejectedByUser } =
     useContext(TxFlowContext)
@@ -110,16 +112,18 @@ export const ExecuteForm = ({
   const canRelay = walletCanRelay && (requiresRelay || (!isGtfChain && !noFeeCampaignEligible && hasSponsoring))
   const canNoFeeCampaign = !requiresRelay && noFeeCampaignEligible && !gasTooHigh && !!remaining && remaining > 0
   const isLimitReached = noFeeCampaignEligible && remaining === 0
+  // Like the no-fee limit: the selector stays on screen with sponsoring disabled, so the user sees the count and the reset.
+  const isProExhausted = sponsoredTxs.isPro && sponsoredTxs.left === 0
 
   useEffect(() => {
     if (requiresRelay) {
       setExecutionMethod(ExecutionMethod.RELAY)
       return
     }
-    if (gasTooHigh || isLimitReached) {
+    if (gasTooHigh || isLimitReached || isProExhausted) {
       setExecutionMethod(ExecutionMethod.WALLET)
     }
-  }, [requiresRelay, gasTooHigh, isLimitReached])
+  }, [requiresRelay, gasTooHigh, isLimitReached, isProExhausted])
 
   // Handle execution method changes
   const handleExecutionMethodChange = (method: ExecutionMethod | ((prev: ExecutionMethod) => ExecutionMethod)) => {
@@ -136,7 +140,8 @@ export const ExecuteForm = ({
     (canNoFeeCampaign ||
       canRelay ||
       (isNoFeeCampaignEnabled && isNoFeeCampaign && !blockedAddress && gasTooHigh) ||
-      isLimitReached)
+      isLimitReached ||
+      isProExhausted)
 
   // Determine which method will be used
   const willRelay = !!(canRelay && executionMethod === ExecutionMethod.RELAY)
@@ -218,7 +223,8 @@ export const ExecuteForm = ({
 
     // On success
     onSubmitSuccess?.({ txId: executedTxId, isExecuted: true })
-    setTxFlow(<SuccessScreenFlow txId={executedTxId} />, undefined, false)
+    const successScope = scope ? { chainId: scope.chainId, safeAddress: scope.safeAddress } : undefined
+    setTxFlow(<SuccessScreenFlow txId={executedTxId} scope={successScope} />, undefined, false)
   }
 
   // On modal submit

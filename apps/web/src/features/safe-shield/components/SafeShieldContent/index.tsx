@@ -40,6 +40,7 @@ export const SafeShieldContent = ({
   safeAnalysis,
   onAddToTrustedList,
   hasProFeatures = true,
+  isSafePro = true,
 }: {
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
@@ -54,6 +55,8 @@ export const SafeShieldContent = ({
   onAddToTrustedList?: () => void
   /** Without Safe Pro the simulation only runs on the user's own Tenderly project, if they set one up; else it is locked. */
   hasProFeatures?: boolean
+  /** Off: the pre-Pro layout, with the recipient check among the open ones and the simulation run by hand. */
+  isSafePro?: boolean
 }): ReactElement => {
   const hn = useLoadFeature(HypernativeFeature)
   const safenet = useLoadFeature(SafenetChecksFeature)
@@ -98,6 +101,16 @@ export const SafeShieldContent = ({
             <UntrustedSafeWarning safeAnalysis={safeAnalysis} onAddToTrustedList={onAddToTrustedList} />
           )}
 
+          {!isSafePro && (
+            <AnalysisGroupCard
+              data-testid="recipient-analysis-group-card"
+              delay={recipientDelay}
+              data={recipientResults}
+              highlightedSeverity={highlightedSeverity}
+              analyticsEvent={SAFE_SHIELD_EVENTS.RECIPIENT_DECODED}
+            />
+          )}
+
           <AnalysisGroupCard
             data-testid="contract-analysis-group-card"
             data={contractResults}
@@ -130,12 +143,20 @@ export const SafeShieldContent = ({
           />
 
           {shouldShowContent && <safenet.SafenetChecksSection />}
+
+          {!isSafePro && !contractLoading && !threatLoading && (
+            <TenderlySimulation
+              safeTx={safeTx}
+              delay={simulationAnalysisDelay}
+              highlightedSeverity={highlightedSeverity}
+            />
+          )}
         </div>
 
         {/* The Safe Pro checks sit together under the PRO header: recipient analysis and the simulation. Without Pro
             they are locked (with an upgrade) and a Hypernative customer is offered their own analysis instead. */}
-        {shouldShowContent && (!hasProFeatures || !recipientEmpty || safeTx) && (
-          <div className="flex flex-col rounded-md bg-muted" data-testid="pro-checks-section">
+        {isSafePro && shouldShowContent && (!hasProFeatures || !recipientEmpty || safeTx) && (
+          <div className="mt-1 flex flex-col rounded-md bg-muted" data-testid="pro-checks-section">
             <ProChecksRow hasProFeatures={hasProFeatures} />
             <div className="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary">
               {hasProFeatures ? (

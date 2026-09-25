@@ -8,7 +8,7 @@ import { useStartCheckout } from './useStartCheckout'
  * Safes than the plan covers), `checkout` removes the Safes left out (they stay in My accounts) and then goes to Stripe.
  */
 export const useSeatTrimCheckout = (spaceId: string, returnPathname?: string) => {
-  const { safeCount, needsTrim, trim, isTrimming, error: trimError } = useSeatTrim(spaceId)
+  const { seatCount, needsTrim, trim, isTrimming, error: trimError } = useSeatTrim(spaceId)
   const { startCheckout, isRedirecting, isError: isCheckoutError } = useStartCheckout(spaceId, returnPathname)
 
   const checkout = useCallback(
@@ -22,5 +22,5 @@ export const useSeatTrimCheckout = (spaceId: string, returnPathname?: string) =>
 
   const error = trimError ?? (isCheckoutError ? 'We couldn’t start the checkout. Please try again.' : undefined)
 
-  return { safeCount, needsTrim, checkout, isBusy: isRedirecting || isTrimming, error }
+  return { seatCount, needsTrim, checkout, isBusy: isRedirecting || isTrimming, error }
 }

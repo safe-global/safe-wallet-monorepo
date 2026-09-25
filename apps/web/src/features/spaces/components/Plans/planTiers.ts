@@ -51,6 +51,7 @@ export const toCurrentPlan = (
     currency: subscription.plan.currency,
     billingCycle: subscription.plan.billingCycle ?? null,
     isTrialing,
+    hasPaymentMethod: subscription.hasPaymentMethod === true,
     periodEndsAt: plan.periodEndsAt,
     daysLeft: plan.daysLeft,
     seatsLabel: seats === undefined ? undefined : seatsLabel(seats),
@@ -72,9 +73,10 @@ export const getChangeDirection = (current: CurrentPlan | undefined, pick: PlanP
 export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined, recommended?: string): PlanCta => {
   if (pick.tier.isCurrent) {
     if (pick.option.priceId === pick.tier.currentPriceId || !pick.option.paymentLinkId) {
-      return current?.isTrialing
-        ? { kind: 'billing', label: 'Add payment method' }
-        : { kind: 'manage', label: 'Manage plan' }
+      if (!current?.isTrialing) return { kind: 'manage', label: 'Manage plan' }
+      return current.hasPaymentMethod
+        ? { kind: 'manage', label: 'Manage plan' }
+        : { kind: 'billing', label: 'Add payment method' }
     }
     // Another seat size of the same plan: a change, worded by seats rather than by plan name.
     const direction = getChangeDirection(current, pick)

@@ -17,23 +17,34 @@ export const useWorkspaceLock = (spaceId?: string | null) => {
     latestSubscription,
     isLoading: isPlanLoading,
     isUninitialized: isPlanUninitialized,
+    isError: isPlanError,
+    refetch: refetchPlan,
   } = useSpacePlan(spaceId)
   const {
     trialPeriodDays,
     isLoading: isOffersLoading,
     isUninitialized: isOffersUninitialized,
+    isError: isOffersError,
+    refetch: refetchOffers,
   } = useSpaceOffers(spaceId)
   const applies = isSafePro && !isInvited
   // A query that has not started yet (first render after the space id appears, or skipped while signed out) reads as
   // "no plan, no offers"; treating it as resolving keeps the lock from firing, or navigating away, on stale emptiness.
   const isResolving =
     applies && (isPlanLoading || isOffersLoading || Boolean(isPlanUninitialized) || Boolean(isOffersUninitialized))
+  // A failed source reads as "no plan" too; that is a reason to ask for a retry, never to lock.
+  const isError = applies && !isResolving && Boolean(isPlanError || isOffersError)
   const reason: WorkspaceLockReason =
     trialPeriodDays !== null ? 'trial-offered' : status === 'payment_failed' ? 'payment-failed' : 'lapsed'
 
   return {
-    isLocked: applies && !isResolving && status !== 'trialing' && status !== 'active',
+    isLocked: applies && !isResolving && !isError && status !== 'trialing' && status !== 'active',
     isResolving,
+    isError,
+    retry: () => {
+      refetchPlan()
+      void refetchOffers()
+    },
     trialPeriodDays,
     reason,
     endedAt: reason === 'lapsed' ? getSubscriptionEndedAt(latestSubscription) : null,

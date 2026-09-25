@@ -5,7 +5,7 @@ import { DialogTitle } from '@/components/ui/dialog'
 import { Typography } from '@/components/ui/typography'
 import { formatDate } from '@safe-global/utils/utils/date'
 import SafeProModalFrame from '../SafeProModalFrame'
-import css from '../SafeProAnnouncement/styles.module.css'
+import { ProHighlight } from '@/components/common/ProHighlight'
 
 /** Confirms a plan switched during the free access: nothing changes until it ends, then the new price applies. */
 const SafeProPlanSwitchedModal = ({
@@ -28,7 +28,7 @@ const SafeProPlanSwitchedModal = ({
   <SafeProModalFrame open={open} onOpenChange={onOpenChange}>
     <div className="flex flex-col items-center gap-3">
       <Typography variant="h4" as={DialogTitle}>
-        You&apos;re on <span className={css.highlight}>{planName}</span>!
+        You&apos;re on <ProHighlight>{planName}</ProHighlight>!
       </Typography>
       <Typography variant="paragraph-small" color="muted">
         Your free access continues{trialEndsAt !== null ? ` until ${formatDate(trialEndsAt)}` : ''}. After that,

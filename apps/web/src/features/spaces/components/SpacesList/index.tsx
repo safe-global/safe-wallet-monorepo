@@ -45,7 +45,7 @@ const AddSpaceButton = ({
   disabled,
   size = 'lg',
   variant = 'default',
-  label = 'Create workspace',
+  label = 'Create Workspace',
   icon = 'add',
   link = true,
 }: {
@@ -89,7 +89,7 @@ const AddSpaceButton = ({
   return (
     <Tooltip>
       <TooltipTrigger render={<div className="inline-flex" />}>{button}</TooltipTrigger>
-      <TooltipContent>Limit of {SPACES_LIMIT} workspaces reached</TooltipContent>
+      <TooltipContent>Limit of {SPACES_LIMIT} Workspaces reached</TooltipContent>
     </Tooltip>
   )
 }
@@ -124,7 +124,7 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
               </div>
 
               <Typography variant="h3" className={cn('text-center', isSafeProEnabled ? 'mb-4' : 'mb-6')}>
-                Sign in to your workspace
+                Sign in to your Workspace
               </Typography>
 
               {isSafeProEnabled && (
@@ -215,7 +215,7 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
 
           <Image
             src={isDarkMode ? WorkspacesEmptyIllustrationDark : WorkspacesEmptyIllustration}
-            alt="Workspace dashboard showing accounts grouped by workspace"
+            alt="Workspace dashboard showing accounts grouped by Workspace"
             className="relative -my-8 h-auto w-full min-w-0 md:-mr-8 md:w-[60%]"
           />
         </div>
@@ -239,7 +239,7 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
             </div>
 
             <Link variant="muted" className="text-sm underline" onClick={() => setIsInfoOpen(true)} href="#">
-              What are workspaces?
+              What are Workspaces?
             </Link>
           </div>
         </div>
@@ -318,7 +318,7 @@ const SpacesList = () => {
           <SignedOutState afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
         ) : error && !spaces?.length ? (
           <div className="flex flex-col items-center gap-3 py-10 text-center">
-            <Typography color="muted">Couldn&apos;t load your workspaces. Try again, or contact support.</Typography>
+            <Typography color="muted">Couldn&apos;t load your Workspaces. Try again, or contact support.</Typography>
             <Button variant="outline" onClick={() => refetch()}>
               Try again
             </Button>

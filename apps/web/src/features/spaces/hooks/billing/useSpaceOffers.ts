@@ -32,5 +32,6 @@ export const useSpaceOffers = (spaceId?: string | null) => {
     isLoading: isLoading || (isFetching && data === undefined) || isRetrying,
     isUninitialized,
     isError: isError && !isRetrying,
+    refetch,
   }
 }

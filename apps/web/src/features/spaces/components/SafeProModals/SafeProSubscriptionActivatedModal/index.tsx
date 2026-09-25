@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { DialogTitle } from '@/components/ui/dialog'
 import { Typography } from '@/components/ui/typography'
 import SafeProModalFrame from '../SafeProModalFrame'
-import css from '../SafeProAnnouncement/styles.module.css'
+import { ProHighlight } from '@/components/common/ProHighlight'
 
 const SafeProSubscriptionActivatedModal = ({
   open,
@@ -21,7 +21,7 @@ const SafeProSubscriptionActivatedModal = ({
   <SafeProModalFrame open={open} onOpenChange={onOpenChange}>
     <div className="flex flex-col items-center gap-4">
       <Typography variant="h4" as={DialogTitle}>
-        Your paid subscription is active, you&apos;re on <span className={css.highlight}>{planName}</span>!
+        Your paid subscription is active, you&apos;re on <ProHighlight>{planName}</ProHighlight>!
       </Typography>
       {seatsLabel && (
         <Badge variant="secondary" shape="tag" data-testid="subscription-seats">

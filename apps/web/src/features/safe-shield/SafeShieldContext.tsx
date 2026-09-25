@@ -49,6 +49,7 @@ type SafeShieldContextType = {
   addToTrustedList: () => void
   /** Recipient/counterparty analysis and simulation are Safe Pro features; threat analysis (Blockaid) always runs. */
   hasProFeatures: boolean
+  isSafePro: boolean
 }
 
 const SafeShieldContext = createContext<SafeShieldContextType | null>(null)
@@ -60,7 +61,7 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   const [poisoningAddresses, setPoisoningAddresses] = useState<string[] | undefined>(undefined)
   const [safeTx, setSafeTx] = useState<SafeTransaction | undefined>(undefined)
 
-  const { hasProFeatures } = useSafeProAccess()
+  const { hasProFeatures, isSafePro } = useSafeProAccess()
   const recipientOnlyAnalysis = useRecipientAnalysis(hasProFeatures ? recipientAddresses : undefined)
   const counterpartyAnalysis = useCounterpartyAnalysis(safeTx, hasProFeatures)
   const [{ token: hypernativeAuthToken }] = useAuthToken()
@@ -135,6 +136,7 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
         safeAnalysis,
         addToTrustedList,
         hasProFeatures,
+        isSafePro,
       }}
     >
       {children}

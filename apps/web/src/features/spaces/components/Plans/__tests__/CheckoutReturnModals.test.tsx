@@ -10,48 +10,52 @@ jest.mock('../../../hooks/useSpacePlan', () => ({ useSpacePlan: (spaceId?: strin
 jest.mock('../../../hooks/billing/useCheckoutReturn', () => ({
   useCheckoutReturn: (spaceId?: string) => mockUseCheckoutReturn(spaceId),
 }))
-jest.mock('@/features/__core__', () => ({
-  useLoadFeature: () => ({
-    SafeProTrialActivatedModal: ({
-      open,
-      onOpenChange,
-      trialEndsAt,
-      ctaLabel,
-    }: {
-      open: boolean
-      onOpenChange: (o: boolean) => void
-      trialEndsAt: number
-      ctaLabel?: string
-    }) =>
-      open ? (
-        <button data-testid="trial-activated-modal" data-ends={trialEndsAt} onClick={() => onOpenChange(false)}>
-          {ctaLabel ?? 'Go to Workspace'}
-        </button>
-      ) : null,
-    SafeProSubscriptionActivatedModal: ({ open, planName }: { open: boolean; planName: string }) =>
-      open ? <div data-testid="subscription-activated-modal">{planName}</div> : null,
-    SafeProPendingModal: ({ title }: { title: string }) => <div data-testid="checkout-pending">{title}</div>,
-    SafeProNoticeModal: ({
-      title,
-      actionLabel,
-      onAction,
-      secondaryActionLabel,
-      onSecondaryAction,
-    }: {
-      title: string
-      actionLabel: string
-      onAction: () => void
-      secondaryActionLabel?: string
-      onSecondaryAction?: () => void
-    }) => (
-      <div data-testid="checkout-failed">
-        {title}
-        <button onClick={onAction}>{actionLabel}</button>
-        {secondaryActionLabel && <button onClick={onSecondaryAction}>{secondaryActionLabel}</button>}
-      </div>
-    ),
-  }),
-  createFeatureHandle: () => ({}),
+jest.mock('../../SafeProModals', () => ({
+  SafeProTrialActivatedModal: ({
+    open,
+    onOpenChange,
+    trialEndsAt,
+    ctaLabel,
+    hasPaymentMethod,
+  }: {
+    open: boolean
+    onOpenChange: (o: boolean) => void
+    trialEndsAt: number
+    ctaLabel?: string
+    hasPaymentMethod?: boolean
+  }) =>
+    open ? (
+      <button
+        data-testid="trial-activated-modal"
+        data-ends={trialEndsAt}
+        data-has-payment-method={hasPaymentMethod}
+        onClick={() => onOpenChange(false)}
+      >
+        {ctaLabel ?? 'Go to Workspace'}
+      </button>
+    ) : null,
+  SafeProSubscriptionActivatedModal: ({ open, planName }: { open: boolean; planName: string }) =>
+    open ? <div data-testid="subscription-activated-modal">{planName}</div> : null,
+  SafeProPendingModal: ({ title }: { title: string }) => <div data-testid="checkout-pending">{title}</div>,
+  SafeProNoticeModal: ({
+    title,
+    actionLabel,
+    onAction,
+    secondaryActionLabel,
+    onSecondaryAction,
+  }: {
+    title: string
+    actionLabel: string
+    onAction: () => void
+    secondaryActionLabel?: string
+    onSecondaryAction?: () => void
+  }) => (
+    <div data-testid="checkout-failed">
+      {title}
+      <button onClick={onAction}>{actionLabel}</button>
+      {secondaryActionLabel && <button onClick={onSecondaryAction}>{secondaryActionLabel}</button>}
+    </div>
+  ),
 }))
 
 const SPACE_ID = '11111111-1111-1111-1111-111111111111'
@@ -85,9 +89,22 @@ describe('CheckoutReturnModals', () => {
     expect(refetch).toHaveBeenCalled()
     expect(screen.getByTestId('trial-activated-modal')).toHaveAttribute('data-ends', String(Date.UTC(2026, 10, 14)))
     expect(screen.getByRole('button', { name: 'Continue' })).toBeInTheDocument()
+    expect(screen.getByTestId('trial-activated-modal')).toHaveAttribute('data-has-payment-method', 'false')
 
     fireEvent.click(screen.getByTestId('trial-activated-modal'))
     expect(dismiss).toHaveBeenCalled()
+  })
+
+  it('tells the trial confirmation when checkout already stored a payment method', () => {
+    mockUseCheckoutReturn.mockReturnValue({
+      status: 'complete',
+      subscription: { ...subscription('trialing'), hasPaymentMethod: true },
+      dismiss,
+      retry,
+    })
+    render(<CheckoutReturnModals spaceId={SPACE_ID} />)
+
+    expect(screen.getByTestId('trial-activated-modal')).toHaveAttribute('data-has-payment-method', 'true')
   })
 
   it('opens the subscription confirmation for a paid subscription', () => {

@@ -13,7 +13,8 @@ import SpaceContextMenu from '../SpaceCard/SpaceContextMenu'
 import { AdminOnlyWorkspaceTooltip } from '../AdminOnlyWorkspaceTooltip'
 import { isUserActiveAdmin } from '@/features/spaces/utils'
 import ProChip from '@/public/images/safe-pro/pro-chip.svg'
-import { useSpacePlan } from '../../hooks/useSpacePlan'
+import { useSpaceSubscription } from '../../hooks/billing/useSpaceSubscription'
+import { getSubscriptionPlanName } from '../../hooks/billing/subscription'
 
 const MEMBER_NO_EDIT_MESSAGE = 'You need admin access to edit.'
 
@@ -33,8 +34,9 @@ const SpaceRow = ({
   showDivider?: boolean
 }) => {
   const isAdmin = isUserActiveAdmin(space.members, currentUserId)
-  const { tierName, isPaidActive } = useSpacePlan(space.uuid)
-  const planName = isPaidActive ? tierName : undefined
+  // The badge only needs the subscription; the entitlements the Plans page also loads are one request per row too many.
+  const { subscription, status } = useSpaceSubscription(space.uuid)
+  const planName = status === 'active' ? (getSubscriptionPlanName(subscription) ?? undefined) : undefined
 
   const handleOpenWorkspace = () => {
     trackEvent(

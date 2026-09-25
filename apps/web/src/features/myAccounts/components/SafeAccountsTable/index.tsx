@@ -44,7 +44,7 @@ export type SafeAccountsSelection = {
   selectedKeys: Set<string>
   /** Fired on a checkbox toggle; `line` is the toggled row (leaf or group), `nextChecked` the desired state. */
   onToggle: (line: AccountLine, nextChecked: boolean) => void
-  /** Global cap reached — unselected leaves and empty groups render disabled. */
+  /** Seat cap reached — unselected leaves and empty groups render disabled, except another chain of a selected address (same seat). */
   isAtLimit?: boolean
   /** Leaf keys to disable (and dim) regardless of the cap — e.g. safes already in the workspace. */
   disabledKeys?: Set<string>
@@ -71,10 +71,11 @@ const getRowCheckbox = (group: AccountGroup, line: AccountLine, selection: SafeA
 
   const lockedByReason = Boolean(disabledKeys?.has(line.key))
   const checked = selectedKeys.has(line.key)
+  const holdsSeat = group.children.some((child) => child.key !== line.key && selectedKeys.has(child.key))
   return {
     checked,
     indeterminate: false,
-    disabled: lockedByReason || (Boolean(isAtLimit) && !checked),
+    disabled: lockedByReason || (Boolean(isAtLimit) && !checked && !holdsSeat),
     disabledReason: lockedByReason ? disabledReason : undefined,
     ariaLabel: line.displayName,
   }
@@ -94,6 +95,8 @@ export type SafeAccountsTableProps = {
   actionsWidth?: string
   /** Replaces the default context-menu actions cell for each row (e.g. an "Add to workspace" button). */
   renderActions?: (line: AccountLine) => ReactNode
+  /** Replaces the identity cell. Rows stop navigating so the cell can hold its own controls. */
+  renderName?: (line: AccountLine) => ReactNode
   /** Lowercased address → cross-list look-alike peers; drives the inline ⚠️ + tooltip. */
   similarWarnings?: Map<string, SimilarWarning>
   /** Lowercased address → cluster id; contiguous same-cluster rows render inside a warning band. */
@@ -147,6 +150,7 @@ export default function SafeAccountsTable({
   columns,
   actionsWidth,
   renderActions,
+  renderName,
   similarWarnings,
   similarityGroups,
   anchorAddresses,
@@ -364,6 +368,7 @@ export default function SafeAccountsTable({
                     warning={similarWarnings?.get(line.address.toLowerCase())}
                     highlighted={Boolean(clusterId)}
                     renderActions={renderActions}
+                    renderName={renderName}
                     onRename={onRename}
                     checkbox={selection ? getRowCheckbox(group, line, selection) : undefined}
                     onSelectToggle={selection ? (next) => selection.onToggle(line, next) : undefined}

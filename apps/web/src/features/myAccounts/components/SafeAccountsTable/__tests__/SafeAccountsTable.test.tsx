@@ -350,6 +350,32 @@ describe('SafeAccountsTable — selection mode', () => {
     expect(screen.getByTestId('select-0xG')).toHaveAttribute('data-disabled', 'true')
   })
 
+  it('keeps another chain of a selected Safe selectable at the limit, since it takes no new seat', async () => {
+    mockUseSafeAccountRows.mockReturnValue({
+      groups: [
+        ...groups.slice(0, 2),
+        {
+          ...groups[2],
+          children: [
+            line({ key: '0xG:1', displayName: 'Ethereum', variant: 'child', address: '0xG' }),
+            line({ key: '0xG:10', displayName: 'Optimism', variant: 'child', address: '0xG' }),
+          ],
+        },
+      ],
+      isLoading: false,
+    })
+    render(
+      <SafeAccountsTable
+        items={items}
+        selection={{ selectedKeys: new Set(['0xG:1']), onToggle: jest.fn(), isAtLimit: true }}
+      />,
+    )
+    await userEvent.click(screen.getByTestId('toggle-0xG'))
+
+    expect(screen.getByTestId('select-0xG:10')).toHaveAttribute('data-disabled', 'false')
+    expect(screen.getByTestId('select-0xB')).toHaveAttribute('data-disabled', 'true')
+  })
+
   it('disables a leaf listed in disabledKeys and surfaces the disabled reason', () => {
     render(
       <SafeAccountsTable
@@ -358,13 +384,13 @@ describe('SafeAccountsTable — selection mode', () => {
           selectedKeys: new Set(),
           onToggle: jest.fn(),
           disabledKeys: new Set(['0xB']),
-          disabledReason: 'Already in workspace',
+          disabledReason: 'Already in Workspace',
         }}
       />,
     )
     const box = screen.getByTestId('select-0xB')
     expect(box).toHaveAttribute('data-disabled', 'true')
-    expect(box).toHaveAttribute('data-reason', 'Already in workspace')
+    expect(box).toHaveAttribute('data-reason', 'Already in Workspace')
   })
 
   it('locks a multi-chain group whose every child is in disabledKeys', () => {
@@ -375,13 +401,13 @@ describe('SafeAccountsTable — selection mode', () => {
           selectedKeys: new Set(['1:0xG', '2:0xG']),
           onToggle: jest.fn(),
           disabledKeys: new Set(['1:0xG', '2:0xG']),
-          disabledReason: 'Already in workspace',
+          disabledReason: 'Already in Workspace',
         }}
       />,
     )
     const group = screen.getByTestId('select-0xG')
     expect(group).toHaveAttribute('data-disabled', 'true')
-    expect(group).toHaveAttribute('data-reason', 'Already in workspace')
+    expect(group).toHaveAttribute('data-reason', 'Already in Workspace')
   })
 
   it('suppresses the rename action on a selection surface by default', () => {

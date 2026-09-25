@@ -4,6 +4,7 @@ import {
   useSpaceSafesGetV1Query,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import { countSeats } from '@/utils/spaces'
 import type { SafeRef } from '../../components/Plans/types'
 
 /**
@@ -14,14 +15,11 @@ export const useSeatTrim = (spaceId: string) => {
   const { currentData: spaceSafes } = useSpaceSafesGetV1Query({ spaceId })
   const [removeSafes, { isLoading: isTrimming, error: removeError }] = useSpaceSafesDeleteV1Mutation()
 
-  const safeCount = useMemo(
-    () => Object.values(spaceSafes?.safes ?? {}).reduce((total, addresses) => total + addresses.length, 0),
-    [spaceSafes],
-  )
+  const seatCount = useMemo(() => countSeats(Object.values(spaceSafes?.safes ?? {}).flat()), [spaceSafes])
 
   const needsTrim = useCallback(
-    (seats: number | null | undefined): seats is number => seats != null && safeCount > seats,
-    [safeCount],
+    (seats: number | null | undefined): seats is number => seats != null && seatCount > seats,
+    [seatCount],
   )
 
   const trim = useCallback(
@@ -37,5 +35,5 @@ export const useSeatTrim = (spaceId: string) => {
     ? getRtkQueryErrorMessage(removeError) || 'We couldn’t update the Workspace. Please try again.'
     : undefined
 
-  return { safeCount, needsTrim, trim, isTrimming, error }
+  return { seatCount, needsTrim, trim, isTrimming, error }
 }

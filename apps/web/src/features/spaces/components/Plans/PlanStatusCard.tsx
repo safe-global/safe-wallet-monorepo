@@ -91,7 +91,7 @@ const statusText = (plan: PlanSummary | null, endDate: string | null, isEndingSo
   }
   if (plan.status === 'active') return 'Safe accounts above the limit remain available outside the Workspace.'
   const until = endDate ?? 'the end of the period'
-  return isEndingSoon
+  return isEndingSoon && !plan.hasPaymentMethod
     ? `Your free access is active until ${until}. Add a payment method before then or choose another plan to keep your Workspace.`
     : `Active until ${until}.`
 }
@@ -122,43 +122,45 @@ export default function PlanStatusCard({
   return (
     <Card radius="xl">
       <CardContent>
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <Typography variant="h4">{plan?.name ?? 'No active plan'}</Typography>
-              {badge && (
-                <Badge variant={badge.variant} size="status" shape="status" data-testid="plan-status-badge">
-                  {badge.label}
-                </Badge>
-              )}
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <Typography variant="h4">{plan?.name ?? 'No active plan'}</Typography>
+                {badge && (
+                  <Badge variant={badge.variant} size="status" shape="status" data-testid="plan-status-badge">
+                    {badge.label}
+                  </Badge>
+                )}
+              </div>
+              <Typography className="flex items-center gap-1">
+                {statusText(plan, endDate, isEndingSoon)}
+                {isTrial && !plan?.hasPaymentMethod && (
+                  <InfoTip text={TRIAL_DISCLAIMER} data-testid="trial-disclaimer" />
+                )}
+              </Typography>
             </div>
-            <Typography className="flex items-center gap-1">
-              {statusText(plan, endDate, isEndingSoon)}
-              {isTrial && <InfoTip text={TRIAL_DISCLAIMER} />}
-            </Typography>
+            {canManage && (
+              <Button variant="outline" size="lg" onClick={onManage} disabled={isManaging}>
+                Manage plan
+              </Button>
+            )}
           </div>
-          {canManage && (
-            <Button variant="outline" size="lg" onClick={onManage} disabled={isManaging}>
-              Manage plan
-            </Button>
-          )}
-        </div>
-      </CardContent>
 
-      <CardContent>
-        <div className="flex flex-col gap-4 md:flex-row">
-          <UsageMeter
-            icon={<WalletCards className="size-5" strokeWidth={1.5} />}
-            label="Safe accounts available"
-            tooltip={seatsTooltip(tierName, safeAccounts?.quota)}
-            meter={safeAccounts}
-          />
-          <UsageMeter
-            icon={<Fuel className="size-5" strokeWidth={1.5} />}
-            label="Sponsored transactions remaining"
-            tooltip="Transactions above the limit bill at pay-as-you-go rates."
-            meter={sponsoredTxs}
-          />
+          <div className="flex flex-col gap-4 md:flex-row">
+            <UsageMeter
+              icon={<WalletCards className="size-5" strokeWidth={1.5} />}
+              label="Safe accounts available"
+              tooltip={seatsTooltip(tierName, safeAccounts?.quota)}
+              meter={safeAccounts}
+            />
+            <UsageMeter
+              icon={<Fuel className="size-5" strokeWidth={1.5} />}
+              label="Sponsored transactions remaining"
+              tooltip="Transactions above the limit bill at pay-as-you-go rates."
+              meter={sponsoredTxs}
+            />
+          </div>
         </div>
       </CardContent>
     </Card>

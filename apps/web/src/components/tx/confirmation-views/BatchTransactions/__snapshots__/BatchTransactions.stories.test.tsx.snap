@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`./BatchTransactions.stories Default 1`] = `
 <div
@@ -11,7 +11,8 @@ exports[`./BatchTransactions.stories Default 1`] = `
       class="w-[400px] p-4"
     >
       <ul
-        class="m-0 flex list-none flex-col p-0 gap-4"
+        class="m-0 flex list-none p-0 flex-col gap-4"
+        data-orientation="vertical"
         data-slot="list"
       />
     </div>

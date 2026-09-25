@@ -230,7 +230,12 @@ describe('txSender', () => {
 
       expect(proposedTx.txId).toBe('123')
 
-      expect(txEvents.txDispatch).toHaveBeenCalledWith('PROPOSED', { txId: '123', nonce: 0 })
+      expect(txEvents.txDispatch).toHaveBeenCalledWith('PROPOSED', {
+        txId: '123',
+        nonce: 0,
+        chainId: '4',
+        safeAddress: '0x123',
+      })
     })
 
     it('should fail to propose a new tx', async () => {
@@ -264,12 +269,12 @@ describe('txSender', () => {
     const PROPOSE_URL = `${GATEWAY_URL}/v1/chains/4/transactions/${SAFE_ADDRESS}/propose`
 
     const confirmationResponse = {
-      id: TX_ID,
+      txId: TX_ID,
+      safeAddress: SAFE_ADDRESS,
       txHash: null,
-      timestamp: Date.now(),
       txStatus: 'AWAITING_CONFIRMATIONS',
       txInfo: { type: 'Custom', to: { value: '0x123' }, dataSize: '100', isCancellation: false },
-      executionInfo: { type: 'MULTISIG', nonce: 0, confirmationsRequired: 3, confirmationsSubmitted: 2 },
+      detailedExecutionInfo: { type: 'MULTISIG', nonce: 0, confirmationsRequired: 3, confirmations: [] },
     }
 
     const createSignedTx = (...signers: string[]) => {
@@ -342,10 +347,7 @@ describe('txSender', () => {
       server.use(
         http.post(CONFIRMATIONS_URL, async ({ request }) => {
           capturedBodies.push(await request.json())
-          return HttpResponse.json({
-            ...confirmationResponse,
-            executionInfo: { ...confirmationResponse.executionInfo, confirmationsSubmitted: capturedBodies.length + 1 },
-          })
+          return HttpResponse.json(confirmationResponse)
         }),
         http.post(PROPOSE_URL, () => {
           proposeHandler()

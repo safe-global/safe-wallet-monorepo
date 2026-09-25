@@ -86,7 +86,7 @@ describe('useSignInRedirect', () => {
   // -----------------------------------------------------------------------
 
   describe('when user is new (no spaces)', () => {
-    it('does not redirect after sign-in (they stay on the Workspaces tab)', async () => {
+    it('does not redirect after sign-in (they stay on the workspaces tab)', async () => {
       setupMocks()
 
       const { result } = renderHook(() => useSignInRedirect(defaultProps))

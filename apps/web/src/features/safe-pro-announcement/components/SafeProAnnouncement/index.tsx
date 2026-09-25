@@ -4,7 +4,7 @@ import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
 import { trackSafeProBannerClick, type SafeProBannerLocation } from '../../utils/trackSafeProBannerClick'
-import SafeProHero from '../SafeProHero'
+import SafeProHero from '@/components/common/SafeProHero'
 import css from './styles.module.css'
 
 const SafeProAnnouncement = ({ location, onDismiss }: { location: SafeProBannerLocation; onDismiss?: () => void }) => (

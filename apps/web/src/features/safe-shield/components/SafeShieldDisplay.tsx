@@ -43,6 +43,7 @@ export const SafeShieldDisplay = ({
   safeAnalysis,
   onAddToTrustedList,
   hasProFeatures = true,
+  isSafePro = true,
 }: {
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
@@ -55,6 +56,8 @@ export const SafeShieldDisplay = ({
   safeAnalysis?: SafeAnalysisResult | null
   onAddToTrustedList?: () => void
   hasProFeatures?: boolean
+  /** While SAFE_PRO is off the widget keeps its pre-Pro layout: no PRO block, simulation run by hand. */
+  isSafePro?: boolean
 }): ReactElement => {
   const [recipientResults] = recipient || []
   const [contractResults] = contract || []
@@ -134,6 +137,7 @@ export const SafeShieldDisplay = ({
           safeAnalysis={safeAnalysis}
           onAddToTrustedList={onAddToTrustedList}
           hasProFeatures={hasProFeatures}
+          isSafePro={isSafePro}
         />
       </div>
 

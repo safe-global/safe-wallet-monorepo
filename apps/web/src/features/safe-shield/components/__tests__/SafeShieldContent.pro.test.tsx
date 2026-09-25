@@ -49,6 +49,28 @@ describe('SafeShieldContent Safe Pro gating', () => {
     mockHasOwnTenderly = false
   })
 
+  it('keeps the pre-Pro layout while SAFE_PRO is off: recipient among the open checks, simulation by hand, no PRO block', () => {
+    const recipient = RecipientAnalysisBuilder.knownRecipient(faker.finance.ethereumAddress()).build()
+    render(
+      <SafeShieldContent
+        recipient={recipient}
+        contract={emptyAnalysis}
+        threat={emptyAnalysis}
+        deadlock={emptyAnalysis}
+        safeTx={safeTx}
+        hasProFeatures
+        isSafePro={false}
+      />,
+    )
+
+    expect(screen.queryByTestId('pro-checks-section')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('pro-checks-row')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('hypernative-login-line')).not.toBeInTheDocument()
+    expect(screen.getByTestId('open-checks-list')).toContainElement(screen.getByTestId('recipient-analysis-group-card'))
+    expect(screen.getByTestId('open-checks-list')).toContainElement(screen.getByTestId('tenderly-simulation'))
+    expect(screen.getByTestId('run-simulation-btn')).toBeInTheDocument()
+  })
+
   it('locks the simulation without Safe Pro and without a Tenderly project of one’s own', () => {
     renderContent(false)
 
@@ -94,6 +116,27 @@ describe('SafeShieldContent Safe Pro gating', () => {
     expect(screen.getByTestId('tenderly-simulation')).toBeInTheDocument()
     expect(screen.queryByTestId('run-simulation-btn')).not.toBeInTheDocument()
     expect(screen.queryByTestId('tenderly-simulation-locked')).not.toBeInTheDocument()
+  })
+
+  it('falls back from the automatic simulation to the locked row when the Safe loses Safe Pro', () => {
+    const { rerender } = renderContent(true)
+    expect(screen.getByTestId('tenderly-simulation')).toBeInTheDocument()
+
+    rerender(
+      <SafeShieldContent
+        recipient={emptyAnalysis}
+        contract={emptyAnalysis}
+        threat={emptyAnalysis}
+        deadlock={emptyAnalysis}
+        safeTx={safeTx}
+        hasProFeatures={false}
+      />,
+    )
+
+    expect(screen.queryByTestId('tenderly-simulation')).not.toBeInTheDocument()
+    expect(screen.getByTestId('tenderly-simulation-locked')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Set' })).toBeInTheDocument()
+    expect(screen.getByTestId('pro-upgrade-link')).toBeInTheDocument()
   })
 
   it('locks the recipient check behind an upgrade without Safe Pro', () => {
