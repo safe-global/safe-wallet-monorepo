@@ -7086,7 +7086,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main",
+    "version": "main-3c0d475",
     "contact": {}
   },
   "tags": [],
@@ -12166,7 +12166,8 @@
         "enum": [
           "safe_seats",
           "copilot_scans",
-          "sponsored_transactions"
+          "sponsored_transactions",
+          "policies"
         ],
         "description": "Feature key from the entitlements catalog."
       },
