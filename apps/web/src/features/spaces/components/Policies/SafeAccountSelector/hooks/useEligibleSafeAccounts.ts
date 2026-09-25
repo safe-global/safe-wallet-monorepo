@@ -10,9 +10,10 @@ import { useGetMultipleSafeOverviewsQuery, useGetProposerSafesQuery } from '@/st
 import { selectUndeployedSafes } from '@/store/slices'
 import { selectCurrency } from '@/store/settingsSlice'
 import { useSpaceSafes } from '../../../../hooks/useSpaceSafes'
+import { DEFAULT_ELIGIBILITY_RULE } from '../constants'
 import { buildSafeAccountId, groupSafeAccounts } from '../utils'
 import type { ChainInfo } from '@/features/spaces/types'
-import type { SafeAccountEligibility, SafeAccountEntry, SafeAccountOption } from '../types'
+import type { EligibilityRule, SafeAccountEligibility, SafeAccountEntry, SafeAccountOption } from '../types'
 
 const overviewKey = (chainId: string, address: string) => `${chainId}:${address.toLowerCase()}`
 
@@ -22,14 +23,18 @@ const getEligibility = (isSigner: boolean, isProposer: boolean): SafeAccountElig
 }
 
 export type EligibleSafeAccountsOptions = {
-  signersOnly?: boolean
+  eligibilityRule?: EligibilityRule
 }
 
 /**
- * Safes in the current Space on which the connected wallet is a signer or a proposer, grouped by
- * address. Safes the wallet has no role on are absent; counterfactual ones are listed but disabled.
+ * Safes in the current Space on which the connected wallet has the role `eligibilityRule` asks for
+ * (a signer or a proposer by default), grouped by address. Safes the wallet has no such role on are
+ * absent; counterfactual ones are listed but disabled. Returns the rule so the selector's copy matches.
  */
-export const useEligibleSafeAccounts = ({ signersOnly = false }: EligibleSafeAccountsOptions = {}) => {
+export const useEligibleSafeAccounts = ({
+  eligibilityRule = DEFAULT_ELIGIBILITY_RULE,
+}: EligibleSafeAccountsOptions = {}) => {
+  const signersOnly = eligibilityRule === 'signer'
   const {
     allSafes,
     isLoading: isSafesLoading,
@@ -140,5 +145,5 @@ export const useEligibleSafeAccounts = ({ signersOnly = false }: EligibleSafeAcc
     isProposerSafesUninitialized,
   ])
 
-  return { accounts, isLoading, isError, hasWallet: !!wallet, refetch }
+  return { accounts, isLoading, isError, hasWallet: !!wallet, eligibilityRule, refetch }
 }

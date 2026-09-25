@@ -117,6 +117,7 @@ describe('useEligibleSafeAccounts', () => {
       name: 'Treasury',
       eligibility: 'signer',
     })
+    expect(result.current.eligibilityRule).toBe('signer-or-proposer')
   })
 
   it('includes a Safe the wallet only proposes for', async () => {
@@ -161,13 +162,13 @@ describe('useEligibleSafeAccounts', () => {
     expect(result.current.accounts[0].address).toBe(SAFE_B)
   })
 
-  describe('signersOnly', () => {
+  describe('signer rule', () => {
     it('leaves out a Safe the wallet only proposes for', async () => {
       mockSpaceSafes([safeItem('1', SAFE_A, true), safeItem('1', SAFE_B, false)])
       mockOverviews([overview('1', SAFE_A), overview('1', SAFE_B)])
       mockProposerSafes({ '1': [SAFE_A] })
 
-      const { result } = renderHook(() => useEligibleSafeAccounts({ signersOnly: true }))
+      const { result } = renderHook(() => useEligibleSafeAccounts({ eligibilityRule: 'signer' }))
 
       await waitFor(() => expect(result.current.accounts).toHaveLength(1))
       expect(result.current.accounts[0]).toMatchObject({ address: SAFE_B, eligibility: 'signer' })
@@ -178,7 +179,7 @@ describe('useEligibleSafeAccounts', () => {
       mockOverviews([overview('1', SAFE_A)])
       mockProposerSafes({ '1': [SAFE_A] })
 
-      const { result } = renderHook(() => useEligibleSafeAccounts({ signersOnly: true }))
+      const { result } = renderHook(() => useEligibleSafeAccounts({ eligibilityRule: 'signer' }))
 
       await waitFor(() => expect(result.current.accounts).toHaveLength(1))
       expect(result.current.accounts[0]).toMatchObject({ eligibility: 'signer' })
@@ -189,10 +190,21 @@ describe('useEligibleSafeAccounts', () => {
       mockOverviews([overview('1', SAFE_A), overview('137', SAFE_A)])
       mockProposerSafes({ '137': [SAFE_A] })
 
-      const { result } = renderHook(() => useEligibleSafeAccounts({ signersOnly: true }))
+      const { result } = renderHook(() => useEligibleSafeAccounts({ eligibilityRule: 'signer' }))
 
       await waitFor(() => expect(result.current.accounts).toHaveLength(1))
       expect(result.current.accounts[0]).toMatchObject({ id: `1:${SAFE_A}`, chainId: '1' })
+    })
+
+    it('returns the rule it filtered by', async () => {
+      mockSpaceSafes([safeItem('1', SAFE_A, false)])
+      mockOverviews([overview('1', SAFE_A)])
+      mockProposerSafes(undefined, { isUninitialized: true })
+
+      const { result } = renderHook(() => useEligibleSafeAccounts({ eligibilityRule: 'signer' }))
+
+      await waitFor(() => expect(result.current.accounts).toHaveLength(1))
+      expect(result.current.eligibilityRule).toBe('signer')
     })
 
     it('does not request proposer status', async () => {
@@ -200,7 +212,7 @@ describe('useEligibleSafeAccounts', () => {
       mockOverviews([overview('1', SAFE_A)])
       mockProposerSafes(undefined, { isUninitialized: true })
 
-      const { result } = renderHook(() => useEligibleSafeAccounts({ signersOnly: true }))
+      const { result } = renderHook(() => useEligibleSafeAccounts({ eligibilityRule: 'signer' }))
 
       await waitFor(() => expect(result.current.accounts).toHaveLength(1))
       expect(mockUseGetProposerSafesQuery).toHaveBeenCalledWith(skipToken)

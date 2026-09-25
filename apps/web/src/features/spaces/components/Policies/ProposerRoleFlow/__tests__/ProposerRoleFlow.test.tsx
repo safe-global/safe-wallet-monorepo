@@ -119,6 +119,7 @@ describe('ProposerRoleFlow', () => {
       isLoading: false,
       isError: false,
       hasWallet: true,
+      eligibilityRule: 'signer',
       refetch: jest.fn(),
     })
     mockUseGrantProposer.mockReturnValue(grantState())
@@ -158,7 +159,7 @@ describe('ProposerRoleFlow', () => {
   it('lists only Safes the wallet signs for', () => {
     render(<ProposerRoleFlow />)
 
-    expect(mockUseEligibleSafeAccounts).toHaveBeenCalledWith({ signersOnly: true })
+    expect(mockUseEligibleSafeAccounts).toHaveBeenCalledWith({ eligibilityRule: 'signer' })
   })
 
   it('explains the signer-only rule in the helper text and the empty state', async () => {
@@ -167,6 +168,7 @@ describe('ProposerRoleFlow', () => {
       isLoading: false,
       isError: false,
       hasWallet: true,
+      eligibilityRule: 'signer',
       refetch: jest.fn(),
     })
     const { user } = renderWithUserEvent(<ProposerRoleFlow />)
@@ -186,6 +188,7 @@ describe('ProposerRoleFlow', () => {
       isLoading: false,
       isError: true,
       hasWallet: true,
+      eligibilityRule: 'signer',
       refetch,
     })
     const { user } = renderWithUserEvent(<ProposerRoleFlow />)
@@ -216,6 +219,7 @@ describe('ProposerRoleFlow', () => {
         isLoading: false,
         isError: false,
         hasWallet: true,
+        eligibilityRule: 'signer',
         refetch: jest.fn(),
       })
       const { user } = renderFlow()

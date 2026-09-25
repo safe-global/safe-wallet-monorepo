@@ -35,7 +35,14 @@ const treasury: SafeAccountOption = {
   fiatTotal: '123720',
 }
 
-const eligible = { accounts: [treasury], isLoading: false, isError: false, hasWallet: true, refetch: jest.fn() }
+const eligible = {
+  accounts: [treasury],
+  isLoading: false,
+  isError: false,
+  hasWallet: true,
+  eligibilityRule: 'signer' as const,
+  refetch: jest.fn(),
+}
 
 const renderForm = (props: Partial<ProposerRoleFormProps> = {}) =>
   renderWithUserEvent(

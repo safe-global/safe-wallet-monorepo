@@ -38,6 +38,7 @@ describe('useSpendingLimitSafeAccounts', () => {
       isLoading: false,
       isError: false,
       hasWallet: true,
+      eligibilityRule: 'signer-or-proposer',
       refetch: jest.fn(),
     })
   })
@@ -55,6 +56,7 @@ describe('useSpendingLimitSafeAccounts', () => {
       isLoading: true,
       isError: false,
       hasWallet: false,
+      eligibilityRule: 'signer-or-proposer',
       refetch,
     })
 
