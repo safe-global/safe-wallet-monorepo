@@ -1,5 +1,12 @@
-import { act, render, screen, waitFor } from '@/tests/test-utils'
-import { MOCK_SAFE_NAME, MOCK_VIEWERS, mockActiveSpendingLimit, mockPendingPolicy } from '../../mocks/policies'
+import { act, mockClipboard, render, screen, waitFor } from '@/tests/test-utils'
+import {
+  MOCK_SAFE_NAME,
+  MOCK_VIEWERS,
+  asActivePolicy,
+  mockActiveSpendingLimit,
+  mockPendingPolicy,
+  mockUnenforcedPolicy,
+} from '../../mocks/policies'
 import type { DrawerPolicy, Viewer } from '../resolveState'
 import SpendingLimitDrawer from '../SpendingLimitDrawer'
 
@@ -27,18 +34,6 @@ const setup = (policy: DrawerPolicy = mockActiveSpendingLimit(), viewer: Viewer 
       onConnectWallet={jest.fn()}
     />,
   )
-
-class FakeClipboard {
-  private text = ''
-  readText() {
-    return Promise.resolve(this.text)
-  }
-
-  writeText(text: string) {
-    this.text = text
-    return Promise.resolve()
-  }
-}
 
 describe('SpendingLimitDrawer', () => {
   it('titles itself from the policy type rather than a stored name', () => {
@@ -91,21 +86,19 @@ describe('SpendingLimitDrawer', () => {
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
   })
 
-  describe('a signer who has already signed', () => {
-    const originalClipboard = { ...global.navigator.clipboard }
+  // A module that is configured but not enabled protects nothing, so calling it Active would be a lie.
+  it('calls a policy whose module is disabled not enforced, never active', () => {
+    setup(asActivePolicy(mockUnenforcedPolicy()))
 
-    beforeAll(() => {
-      // @ts-expect-error read-only in the lib types, but jsdom lets a test replace it
-      navigator.clipboard = new FakeClipboard()
-    })
+    expect(screen.getByText('Not enforced')).toBeInTheDocument()
+    expect(screen.queryByText('Active')).not.toBeInTheDocument()
+  })
+
+  describe('a signer who has already signed', () => {
+    let writeText: jest.Mock
 
     beforeEach(() => {
-      navigator.clipboard.writeText('')
-    })
-
-    afterAll(() => {
-      // @ts-expect-error see above
-      navigator.clipboard = originalClipboard
+      writeText = mockClipboard()
     })
 
     it('offers a copy-link button', () => {
@@ -121,8 +114,8 @@ describe('SpendingLimitDrawer', () => {
         screen.getByRole('button', { name: /Copy transaction link/ }).click()
       })
 
-      await waitFor(async () => {
-        expect(await navigator.clipboard.readText()).toEqual(TRANSACTION_LINK)
+      await waitFor(() => {
+        expect(writeText).toHaveBeenCalledWith(TRANSACTION_LINK)
       })
     })
   })
