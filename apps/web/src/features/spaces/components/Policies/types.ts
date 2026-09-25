@@ -1,6 +1,6 @@
 /**
- * What the table and the detail panel render. `mapActivePolicies` builds it from the CGW response,
- * resolving token metadata and unit conversions on the way in.
+ * The resolved policy shape the UI consumes. It mirrors the CGW response, except that
+ * `token` is joined from the tokens endpoint and `remaining` is derived.
  *
  * No type carries a name. Policy names are not stored on chain and are not in the CGW response;
  * they live in the space address book and the frontend resolves them.
@@ -29,17 +29,18 @@ export type PolicyTokenInfo = {
 }
 
 export type PolicyAllowance = {
+  /** Resolved from the response's `tokenAddress` via the CGW tokens endpoint. */
   token: PolicyTokenInfo
   /** Base units. */
   amount: string
   /** Base units, spent in the current period. */
   spent: string
-  /** Base units, `amount - spent`. */
+  /** Base units, `amount - spent`. Derived — CGW does not return it. */
   remaining: string
-  /** 0 means the allowance does not repeat. The allowance module stores this per token. */
-  resetPeriodSeconds: number
-  /** Unix seconds; null when one-time. */
-  resetsAt: number | null
+  /** Minutes, matching the allowance module's own unit. 0 means the allowance does not repeat. */
+  resetPeriodMinutes: number
+  /** Unix MINUTES; null when one-time. */
+  resetsAtMinute: number | null
 }
 
 export type PolicySpender = {

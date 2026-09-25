@@ -13,7 +13,7 @@ const resolveKnownTokens: ResolveTokenInfo = (_chainId, address) => {
 }
 
 describe('mapActivePolicies', () => {
-  it('should, when given a spending limit, convert minutes to seconds and compute the remaining amount', () => {
+  it('should, when given a spending limit, keep the reset in minutes and compute the remaining amount', () => {
     const [policy] = mapActivePolicies([mockSpendingLimitDto()], resolveKnownTokens)
 
     expect(policy.type).toBe('spending-limit')
@@ -24,8 +24,8 @@ describe('mapActivePolicies', () => {
 
     expect(allowance.token).toEqual(MOCK_TOKENS.usdc)
     expect(allowance.remaining).toBe('500000000')
-    expect(allowance.resetPeriodSeconds).toBe(43_200 * 60)
-    expect(allowance.resetsAt).toBe(29_846_880 * 60)
+    expect(allowance.resetPeriodMinutes).toBe(43_200)
+    expect(allowance.resetsAtMinute).toBe(29_846_880)
   })
 
   it('should, when the allowance never resets, leave the reset time empty', () => {
@@ -37,8 +37,8 @@ describe('mapActivePolicies', () => {
     const [policy] = mapActivePolicies([dto], resolveKnownTokens)
     if (policy.type !== 'spending-limit') throw new Error('expected a spending limit')
 
-    expect(policy.data.spenders[0].allowances[0].resetPeriodSeconds).toBe(0)
-    expect(policy.data.spenders[0].allowances[0].resetsAt).toBeNull()
+    expect(policy.data.spenders[0].allowances[0].resetPeriodMinutes).toBe(0)
+    expect(policy.data.spenders[0].allowances[0].resetsAtMinute).toBeNull()
   })
 
   it('should, when more was spent than allowed, floor the remaining amount at zero', () => {

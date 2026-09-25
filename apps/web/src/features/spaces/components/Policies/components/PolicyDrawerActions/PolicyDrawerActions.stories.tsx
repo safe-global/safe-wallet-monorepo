@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
-import ProposerActions, { ProposerActionsSkeleton } from './ProposerActions'
+import PolicyDrawerActions, { PolicyDrawerActionsSkeleton } from './PolicyDrawerActions'
 
 const meta = {
-  title: 'Features/Spaces/Policies/ProposerDrawer/components/ProposerActions',
-  component: ProposerActions,
+  title: 'Features/Spaces/Policies/components/PolicyDrawerActions',
+  component: PolicyDrawerActions,
   parameters: {
     layout: 'centered',
   },
@@ -20,7 +20,7 @@ const meta = {
       </div>
     ),
   ],
-} satisfies Meta<typeof ProposerActions>
+} satisfies Meta<typeof PolicyDrawerActions>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -59,5 +59,5 @@ export const DisabledWithHint: Story = {
 
 /** What the action offers is not known until the policy loads. */
 export const Loading: Story = {
-  render: () => <ProposerActionsSkeleton />,
+  render: () => <PolicyDrawerActionsSkeleton />,
 }

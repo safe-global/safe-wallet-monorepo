@@ -498,6 +498,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Not an admin"
           }
         },
         "summary": "Get the billing portal session URL for a space",
@@ -584,6 +587,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Not an admin, or a payment link this workspace is not offered"
+          },
+          "409": {
+            "description": "This plan doesn't offer enough Safe seats for the workspace's current Safes"
           }
         },
         "summary": "Create a checkout session for a payment link",
@@ -637,7 +646,7 @@
             }
           },
           "403": {
-            "description": "Not a member, or a plan this workspace is not offered"
+            "description": "Not an admin, or a plan this workspace is not offered"
           },
           "404": {
             "description": "Subscription not found"
@@ -701,13 +710,13 @@
             }
           },
           "403": {
-            "description": "Not a member, or a plan this workspace is not offered"
+            "description": "Not an admin, a plan this workspace is not offered, or a named paymentLinkId this workspace is not offered"
           },
           "404": {
             "description": "Subscription not found"
           },
           "409": {
-            "description": "Already on this plan, the subscription is not updatable, or several offered links sell the plan and none was named"
+            "description": "One of:\n- Already on this plan\n- The subscription is not in an updatable state\n- Several offered links sell the plan and none was named\n- The target plan doesn't offer enough Safe seats for the workspace's current Safes"
           },
           "422": {
             "description": "The named payment link does not offer this plan"
@@ -3768,6 +3777,152 @@
         ]
       }
     },
+    "/v1/spaces/{spaceId}/chains/{chainId}/security/{safeAddress}/recipient/{recipientAddress}": {
+      "get": {
+        "description": "Performs real-time security analysis of a recipient address for a Safe registered to a Space, gated by the copilot_scans plan entitlement.",
+        "operationId": "spaceSafeShieldAnalyzeRecipientV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "description": "Safe contract address, must be registered to the Space",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "recipientAddress",
+            "required": true,
+            "in": "path",
+            "description": "Recipient address to analyze",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recipient interaction analysis results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleRecipientAnalysisDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid space identifier"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "402": {
+            "description": "The Space has no copilot_scans entitlement. The body carries `{ code: \"FEATURE_NOT_GRANTED\", feature }`"
+          },
+          "403": {
+            "description": "Not a member of this Space, or the Safe is not registered to it"
+          }
+        },
+        "summary": "Analyze recipient address on a Space",
+        "tags": [
+          "safe-shield"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/chains/{chainId}/security/{safeAddress}/counterparty-analysis": {
+      "post": {
+        "description": "Performs combined contract and recipient analysis for a Safe transaction on a Safe registered to a Space, gated by the copilot_scans plan entitlement.",
+        "operationId": "spaceSafeShieldAnalyzeCounterpartyV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "description": "Safe contract address, must be registered to the Space",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Transaction data used to analyze all counterparties involved.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CounterpartyAnalysisRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Combined counterparty analysis including recipients and contracts grouped by status group and mapped to an address.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CounterpartyAnalysisDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid space identifier"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "402": {
+            "description": "The Space has no copilot_scans entitlement. The body carries `{ code: \"FEATURE_NOT_GRANTED\", feature }`"
+          },
+          "403": {
+            "description": "Not a member of this Space, or the Safe is not registered to it"
+          }
+        },
+        "summary": "Analyze transaction counterparties on a Space",
+        "tags": [
+          "safe-shield"
+        ]
+      }
+    },
     "/v1/spaces/{spaceId}/surveys/{slug}/state": {
       "get": {
         "description": "Returns the active survey definition and this space's response (if any) in a single round trip. Only active admins of the space can read survey state.",
@@ -4668,6 +4823,9 @@
                 }
               }
             }
+          },
+          "402": {
+            "description": "Disabled on Core. The body carries `{ code: \"SAFE_SHIELD_DISABLED_ON_CORE\", message }`."
           }
         },
         "summary": "Analyze recipient address",
@@ -5329,7 +5487,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Transaction"
+                  "$ref": "#/components/schemas/TransactionDetails"
                 }
               }
             }
@@ -7327,6 +7485,10 @@
           "metadata": {
             "type": "object",
             "nullable": true
+          },
+          "hasPaymentMethod": {
+            "type": "boolean",
+            "description": "Whether the subscription has a default payment method, or its customer does as a fallback"
           }
         },
         "required": [
@@ -11211,6 +11373,565 @@
           "safes"
         ]
       },
+      "SingleRecipientAnalysisResultDto": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "description": "Severity level indicating the importance and risk",
+            "enum": [
+              "OK",
+              "INFO",
+              "WARN",
+              "CRITICAL"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "Recipient interaction status code",
+            "enum": [
+              "NEW_RECIPIENT",
+              "RECURRING_RECIPIENT",
+              "LOW_ACTIVITY",
+              "FAILED"
+            ],
+            "example": "NEW_RECIPIENT"
+          },
+          "title": {
+            "type": "string",
+            "description": "User-facing title of the finding"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description explaining the finding and its implications"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message for failed analysis"
+          }
+        },
+        "required": [
+          "severity",
+          "type",
+          "title",
+          "description"
+        ]
+      },
+      "SingleRecipientAnalysisDto": {
+        "type": "object",
+        "properties": {
+          "RECIPIENT_INTERACTION": {
+            "description": "Analysis results related to recipient interaction history. Shows whether this is a new or recurring recipient.",
+            "example": [
+              {
+                "severity": "INFO",
+                "type": "NEW_RECIPIENT",
+                "title": "New recipient",
+                "description": "This is the first time you are interacting with this recipient."
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SingleRecipientAnalysisResultDto"
+            }
+          },
+          "RECIPIENT_ACTIVITY": {
+            "description": "Analysis results related to recipient activity. Shows whether this is a low activity recipient. (Available only for Safes)",
+            "example": [
+              {
+                "severity": "WARN",
+                "type": "LOW_ACTIVITY",
+                "title": "Low activity recipient",
+                "description": "This address has few transactions."
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SingleRecipientAnalysisResultDto"
+            }
+          },
+          "isSafe": {
+            "type": "boolean",
+            "description": "Indicates whether the analyzed recipient address is a Safe.",
+            "example": false
+          }
+        },
+        "required": [
+          "RECIPIENT_INTERACTION",
+          "isSafe"
+        ]
+      },
+      "CounterpartyAnalysisRequestDto": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "type": "string",
+            "description": "Recipient address of the transaction."
+          },
+          "value": {
+            "type": "string",
+            "description": "Amount to send with the transaction."
+          },
+          "data": {
+            "type": "string",
+            "description": "Hex-encoded data payload for the transaction."
+          },
+          "operation": {
+            "type": "number",
+            "enum": [
+              0,
+              1
+            ],
+            "description": "Operation type: 0 for CALL, 1 for DELEGATECALL."
+          }
+        },
+        "required": [
+          "to",
+          "value",
+          "data",
+          "operation"
+        ]
+      },
+      "RecipientResultDto": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "description": "Severity level indicating the importance and risk",
+            "enum": [
+              "OK",
+              "INFO",
+              "WARN",
+              "CRITICAL"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "Bridge compatibility status code",
+            "enum": [
+              "NEW_RECIPIENT",
+              "RECURRING_RECIPIENT",
+              "LOW_ACTIVITY",
+              "INCOMPATIBLE_SAFE",
+              "MISSING_OWNERSHIP",
+              "UNSUPPORTED_NETWORK",
+              "DIFFERENT_SAFE_SETUP",
+              "FAILED"
+            ],
+            "example": "MISSING_OWNERSHIP"
+          },
+          "title": {
+            "type": "string",
+            "description": "User-facing title of the finding"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description explaining the finding and its implications"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message for failed analysis"
+          },
+          "targetChainId": {
+            "type": "string",
+            "description": "Target chain ID for bridge operations. Only present for BridgeStatus."
+          }
+        },
+        "required": [
+          "severity",
+          "type",
+          "title",
+          "description"
+        ]
+      },
+      "RecipientAnalysisDto": {
+        "type": "object",
+        "properties": {
+          "isSafe": {
+            "type": "boolean",
+            "description": "Indicates whether the analyzed recipient address is a Safe.",
+            "example": true
+          },
+          "RECIPIENT_INTERACTION": {
+            "description": "Analysis results related to recipient interaction history. Shows whether this is a new or recurring recipient.",
+            "example": [
+              {
+                "severity": "INFO",
+                "type": "NEW_RECIPIENT",
+                "title": "New recipient",
+                "description": "This is the first time you are interacting with this recipient."
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecipientResultDto"
+            }
+          },
+          "RECIPIENT_ACTIVITY": {
+            "description": "Analysis results related to recipient activity frequency. Shows whether this is a low activity recipient.",
+            "example": [
+              {
+                "severity": "WARN",
+                "type": "LOW_ACTIVITY",
+                "title": "Low activity recipient",
+                "description": "This address has few transactions."
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecipientResultDto"
+            }
+          },
+          "BRIDGE": {
+            "description": "Analysis results for cross-chain bridge operations. Identifies compatibility issues, ownership problems, or unsupported networks.",
+            "example": [
+              {
+                "severity": "WARN",
+                "type": "MISSING_OWNERSHIP",
+                "title": "No ownership on target chain",
+                "description": "You do not have ownership of a Safe on the target chain.",
+                "targetChainId": "137"
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecipientResultDto"
+            }
+          }
+        },
+        "required": [
+          "isSafe"
+        ]
+      },
+      "ContractAnalysisResultDto": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "description": "Severity level indicating the importance and risk",
+            "enum": [
+              "OK",
+              "INFO",
+              "WARN",
+              "CRITICAL"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "Contract verification status code",
+            "enum": [
+              "VERIFIED",
+              "NOT_VERIFIED",
+              "NOT_VERIFIED_BY_SAFE",
+              "VERIFICATION_UNAVAILABLE",
+              "NEW_CONTRACT",
+              "KNOWN_CONTRACT",
+              "UNEXPECTED_DELEGATECALL",
+              "UNOFFICIAL_FALLBACK_HANDLER",
+              "FAILED"
+            ],
+            "example": "VERIFIED"
+          },
+          "title": {
+            "type": "string",
+            "description": "User-facing title of the finding"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description explaining the finding and its implications"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message for failed analysis"
+          }
+        },
+        "required": [
+          "severity",
+          "type",
+          "title",
+          "description"
+        ]
+      },
+      "FallbackHandlerInfoDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "Address of the fallback handler contract"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the fallback handler contract"
+          },
+          "logoUrl": {
+            "type": "string",
+            "description": "Logo URL for the fallback handler contract"
+          }
+        },
+        "required": [
+          "address"
+        ]
+      },
+      "FallbackHandlerAnalysisResultDto": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "description": "Severity level indicating the importance and risk",
+            "enum": [
+              "OK",
+              "INFO",
+              "WARN",
+              "CRITICAL"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "Status code for unofficial fallback handler",
+            "enum": [
+              "UNOFFICIAL_FALLBACK_HANDLER"
+            ],
+            "example": "VERIFIED"
+          },
+          "title": {
+            "type": "string",
+            "description": "User-facing title of the finding"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description explaining the finding and its implications"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message for failed analysis"
+          },
+          "fallbackHandler": {
+            "description": "Information about the fallback handler",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FallbackHandlerInfoDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "severity",
+          "type",
+          "title",
+          "description"
+        ]
+      },
+      "ContractAnalysisDto": {
+        "type": "object",
+        "properties": {
+          "logoUrl": {
+            "type": "string",
+            "description": "Logo URL for the contract",
+            "example": "https://example.com/logo.png"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the contract",
+            "example": "Uniswap V3 Router"
+          },
+          "CONTRACT_VERIFICATION": {
+            "description": "Analysis results for contract verification status. Shows whether contracts are verified and source code is available.",
+            "example": [
+              {
+                "severity": "INFO",
+                "type": "VERIFIED",
+                "title": "Verified contract",
+                "description": "This contract has been verified and its source code is available"
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContractAnalysisResultDto"
+            }
+          },
+          "CONTRACT_INTERACTION": {
+            "description": "Analysis results related to contract interaction history. Shows whether this is a new or previously interacted contract.",
+            "example": [
+              {
+                "severity": "INFO",
+                "type": "NEW_CONTRACT",
+                "title": "New contract",
+                "description": "This is the first time you are interacting with this contract"
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContractAnalysisResultDto"
+            }
+          },
+          "DELEGATECALL": {
+            "description": "Analysis results for delegatecall operations. Identifies unexpected or potentially dangerous delegate calls.",
+            "example": [
+              {
+                "severity": "CRITICAL",
+                "type": "UNEXPECTED_DELEGATECALL",
+                "title": "Unexpected delegatecall",
+                "description": "An unexpected delegatecall operation was detected that could be dangerous"
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContractAnalysisResultDto"
+            }
+          },
+          "FALLBACK_HANDLER": {
+            "description": "Analysis results for setFallbackHandler operations. Identifies untrusted or unofficial fallback handlers in the transactions.",
+            "example": [
+              {
+                "severity": "WARN",
+                "type": "UNOFFICIAL_FALLBACK_HANDLER",
+                "title": "Unofficial fallback handler",
+                "description": "Verify the fallback handler is trusted and secure before proceeding.",
+                "fallbackHandler": {
+                  "address": "0x123",
+                  "name": "CompatibilityFallbackHandler",
+                  "logoUrl": "https://example.com/logo.png"
+                }
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FallbackHandlerAnalysisResultDto"
+            }
+          }
+        }
+      },
+      "DeadlockAnalysisResultDto": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "description": "Severity level indicating the importance and risk",
+            "enum": [
+              "OK",
+              "INFO",
+              "WARN",
+              "CRITICAL"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "Deadlock analysis status code",
+            "enum": [
+              "DEADLOCK_DETECTED",
+              "NESTED_SAFE_WARNING",
+              "FAILED"
+            ],
+            "example": "DEADLOCK_DETECTED"
+          },
+          "title": {
+            "type": "string",
+            "description": "User-facing title of the finding"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description explaining the finding and its implications"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message for failed analysis"
+          }
+        },
+        "required": [
+          "severity",
+          "type",
+          "title",
+          "description"
+        ]
+      },
+      "DeadlockAnalysisDto": {
+        "type": "object",
+        "properties": {
+          "DEADLOCK": {
+            "description": "Deadlock analysis findings. Identifies signing deadlock risks in nested Safe configurations.",
+            "example": [
+              {
+                "severity": "CRITICAL",
+                "type": "DEADLOCK_DETECTED",
+                "title": "Signing deadlock risk detected",
+                "description": "This change may create a signing cycle between Safes and can permanently lock funds. You will not be allowed to proceed forward."
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeadlockAnalysisResultDto"
+            }
+          }
+        }
+      },
+      "CounterpartyAnalysisDto": {
+        "type": "object",
+        "properties": {
+          "recipient": {
+            "type": "object",
+            "description": "Recipient analysis results mapped by address. Contains recipient interaction history and bridge analysis.type: Record<Address, RecipientAnalysisDto>.",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/RecipientAnalysisDto"
+            },
+            "example": {
+              "0x0000000000000000000000000000000000000000": {
+                "isSafe": true,
+                "RECIPIENT_INTERACTION": [
+                  {
+                    "severity": "INFO",
+                    "type": "NEW_RECIPIENT",
+                    "title": "New recipient",
+                    "description": "This is the first time you are interacting with this recipient"
+                  }
+                ]
+              }
+            }
+          },
+          "contract": {
+            "type": "object",
+            "description": "Contract analysis results mapped by address. Contains contract verification, interaction history, and delegatecall analysis.type: Record<Address, ContractAnalysisDto>.",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ContractAnalysisDto"
+            },
+            "example": {
+              "0x0000000000000000000000000000000000000000": {
+                "CONTRACT_VERIFICATION": [
+                  {
+                    "severity": "INFO",
+                    "type": "VERIFIED",
+                    "title": "Verified contract",
+                    "description": "This contract has been verified and its source code is available"
+                  }
+                ]
+              }
+            }
+          },
+          "deadlock": {
+            "type": "object",
+            "description": "Deadlock analysis results mapped by Safe address. Contains signing deadlock risk findings for owner/threshold management transactions.",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/DeadlockAnalysisDto"
+            },
+            "example": {
+              "0x0000000000000000000000000000000000000000": {
+                "DEADLOCK": [
+                  {
+                    "severity": "CRITICAL",
+                    "type": "DEADLOCK_DETECTED",
+                    "title": "Signing deadlock risk detected",
+                    "description": "This change may create a signing cycle between Safes and can permanently lock funds. You will not be allowed to proceed forward."
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "required": [
+          "recipient",
+          "contract",
+          "deadlock"
+        ]
+      },
       "SurveyOptionDto": {
         "type": "object",
         "properties": {
@@ -11444,6 +12165,7 @@
         "type": "string",
         "enum": [
           "safe_seats",
+          "copilot_scans",
           "sponsored_transactions"
         ],
         "description": "Feature key from the entitlements catalog."
@@ -12058,565 +12780,6 @@
           "owners",
           "fiatTotal",
           "queued"
-        ]
-      },
-      "SingleRecipientAnalysisResultDto": {
-        "type": "object",
-        "properties": {
-          "severity": {
-            "type": "string",
-            "description": "Severity level indicating the importance and risk",
-            "enum": [
-              "OK",
-              "INFO",
-              "WARN",
-              "CRITICAL"
-            ]
-          },
-          "type": {
-            "type": "string",
-            "description": "Recipient interaction status code",
-            "enum": [
-              "NEW_RECIPIENT",
-              "RECURRING_RECIPIENT",
-              "LOW_ACTIVITY",
-              "FAILED"
-            ],
-            "example": "NEW_RECIPIENT"
-          },
-          "title": {
-            "type": "string",
-            "description": "User-facing title of the finding"
-          },
-          "description": {
-            "type": "string",
-            "description": "Detailed description explaining the finding and its implications"
-          },
-          "error": {
-            "type": "string",
-            "description": "Error message for failed analysis"
-          }
-        },
-        "required": [
-          "severity",
-          "type",
-          "title",
-          "description"
-        ]
-      },
-      "SingleRecipientAnalysisDto": {
-        "type": "object",
-        "properties": {
-          "RECIPIENT_INTERACTION": {
-            "description": "Analysis results related to recipient interaction history. Shows whether this is a new or recurring recipient.",
-            "example": [
-              {
-                "severity": "INFO",
-                "type": "NEW_RECIPIENT",
-                "title": "New recipient",
-                "description": "This is the first time you are interacting with this recipient."
-              }
-            ],
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SingleRecipientAnalysisResultDto"
-            }
-          },
-          "RECIPIENT_ACTIVITY": {
-            "description": "Analysis results related to recipient activity. Shows whether this is a low activity recipient. (Available only for Safes)",
-            "example": [
-              {
-                "severity": "WARN",
-                "type": "LOW_ACTIVITY",
-                "title": "Low activity recipient",
-                "description": "This address has few transactions."
-              }
-            ],
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SingleRecipientAnalysisResultDto"
-            }
-          },
-          "isSafe": {
-            "type": "boolean",
-            "description": "Indicates whether the analyzed recipient address is a Safe.",
-            "example": false
-          }
-        },
-        "required": [
-          "RECIPIENT_INTERACTION",
-          "isSafe"
-        ]
-      },
-      "CounterpartyAnalysisRequestDto": {
-        "type": "object",
-        "properties": {
-          "to": {
-            "type": "string",
-            "description": "Recipient address of the transaction."
-          },
-          "value": {
-            "type": "string",
-            "description": "Amount to send with the transaction."
-          },
-          "data": {
-            "type": "string",
-            "description": "Hex-encoded data payload for the transaction."
-          },
-          "operation": {
-            "type": "number",
-            "enum": [
-              0,
-              1
-            ],
-            "description": "Operation type: 0 for CALL, 1 for DELEGATECALL."
-          }
-        },
-        "required": [
-          "to",
-          "value",
-          "data",
-          "operation"
-        ]
-      },
-      "RecipientResultDto": {
-        "type": "object",
-        "properties": {
-          "severity": {
-            "type": "string",
-            "description": "Severity level indicating the importance and risk",
-            "enum": [
-              "OK",
-              "INFO",
-              "WARN",
-              "CRITICAL"
-            ]
-          },
-          "type": {
-            "type": "string",
-            "description": "Bridge compatibility status code",
-            "enum": [
-              "NEW_RECIPIENT",
-              "RECURRING_RECIPIENT",
-              "LOW_ACTIVITY",
-              "INCOMPATIBLE_SAFE",
-              "MISSING_OWNERSHIP",
-              "UNSUPPORTED_NETWORK",
-              "DIFFERENT_SAFE_SETUP",
-              "FAILED"
-            ],
-            "example": "MISSING_OWNERSHIP"
-          },
-          "title": {
-            "type": "string",
-            "description": "User-facing title of the finding"
-          },
-          "description": {
-            "type": "string",
-            "description": "Detailed description explaining the finding and its implications"
-          },
-          "error": {
-            "type": "string",
-            "description": "Error message for failed analysis"
-          },
-          "targetChainId": {
-            "type": "string",
-            "description": "Target chain ID for bridge operations. Only present for BridgeStatus."
-          }
-        },
-        "required": [
-          "severity",
-          "type",
-          "title",
-          "description"
-        ]
-      },
-      "RecipientAnalysisDto": {
-        "type": "object",
-        "properties": {
-          "isSafe": {
-            "type": "boolean",
-            "description": "Indicates whether the analyzed recipient address is a Safe.",
-            "example": true
-          },
-          "RECIPIENT_INTERACTION": {
-            "description": "Analysis results related to recipient interaction history. Shows whether this is a new or recurring recipient.",
-            "example": [
-              {
-                "severity": "INFO",
-                "type": "NEW_RECIPIENT",
-                "title": "New recipient",
-                "description": "This is the first time you are interacting with this recipient."
-              }
-            ],
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RecipientResultDto"
-            }
-          },
-          "RECIPIENT_ACTIVITY": {
-            "description": "Analysis results related to recipient activity frequency. Shows whether this is a low activity recipient.",
-            "example": [
-              {
-                "severity": "WARN",
-                "type": "LOW_ACTIVITY",
-                "title": "Low activity recipient",
-                "description": "This address has few transactions."
-              }
-            ],
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RecipientResultDto"
-            }
-          },
-          "BRIDGE": {
-            "description": "Analysis results for cross-chain bridge operations. Identifies compatibility issues, ownership problems, or unsupported networks.",
-            "example": [
-              {
-                "severity": "WARN",
-                "type": "MISSING_OWNERSHIP",
-                "title": "No ownership on target chain",
-                "description": "You do not have ownership of a Safe on the target chain.",
-                "targetChainId": "137"
-              }
-            ],
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RecipientResultDto"
-            }
-          }
-        },
-        "required": [
-          "isSafe"
-        ]
-      },
-      "ContractAnalysisResultDto": {
-        "type": "object",
-        "properties": {
-          "severity": {
-            "type": "string",
-            "description": "Severity level indicating the importance and risk",
-            "enum": [
-              "OK",
-              "INFO",
-              "WARN",
-              "CRITICAL"
-            ]
-          },
-          "type": {
-            "type": "string",
-            "description": "Contract verification status code",
-            "enum": [
-              "VERIFIED",
-              "NOT_VERIFIED",
-              "NOT_VERIFIED_BY_SAFE",
-              "VERIFICATION_UNAVAILABLE",
-              "NEW_CONTRACT",
-              "KNOWN_CONTRACT",
-              "UNEXPECTED_DELEGATECALL",
-              "UNOFFICIAL_FALLBACK_HANDLER",
-              "FAILED"
-            ],
-            "example": "VERIFIED"
-          },
-          "title": {
-            "type": "string",
-            "description": "User-facing title of the finding"
-          },
-          "description": {
-            "type": "string",
-            "description": "Detailed description explaining the finding and its implications"
-          },
-          "error": {
-            "type": "string",
-            "description": "Error message for failed analysis"
-          }
-        },
-        "required": [
-          "severity",
-          "type",
-          "title",
-          "description"
-        ]
-      },
-      "FallbackHandlerInfoDto": {
-        "type": "object",
-        "properties": {
-          "address": {
-            "type": "string",
-            "description": "Address of the fallback handler contract"
-          },
-          "name": {
-            "type": "string",
-            "description": "Name of the fallback handler contract"
-          },
-          "logoUrl": {
-            "type": "string",
-            "description": "Logo URL for the fallback handler contract"
-          }
-        },
-        "required": [
-          "address"
-        ]
-      },
-      "FallbackHandlerAnalysisResultDto": {
-        "type": "object",
-        "properties": {
-          "severity": {
-            "type": "string",
-            "description": "Severity level indicating the importance and risk",
-            "enum": [
-              "OK",
-              "INFO",
-              "WARN",
-              "CRITICAL"
-            ]
-          },
-          "type": {
-            "type": "string",
-            "description": "Status code for unofficial fallback handler",
-            "enum": [
-              "UNOFFICIAL_FALLBACK_HANDLER"
-            ],
-            "example": "VERIFIED"
-          },
-          "title": {
-            "type": "string",
-            "description": "User-facing title of the finding"
-          },
-          "description": {
-            "type": "string",
-            "description": "Detailed description explaining the finding and its implications"
-          },
-          "error": {
-            "type": "string",
-            "description": "Error message for failed analysis"
-          },
-          "fallbackHandler": {
-            "description": "Information about the fallback handler",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/FallbackHandlerInfoDto"
-              }
-            ]
-          }
-        },
-        "required": [
-          "severity",
-          "type",
-          "title",
-          "description"
-        ]
-      },
-      "ContractAnalysisDto": {
-        "type": "object",
-        "properties": {
-          "logoUrl": {
-            "type": "string",
-            "description": "Logo URL for the contract",
-            "example": "https://example.com/logo.png"
-          },
-          "name": {
-            "type": "string",
-            "description": "Name of the contract",
-            "example": "Uniswap V3 Router"
-          },
-          "CONTRACT_VERIFICATION": {
-            "description": "Analysis results for contract verification status. Shows whether contracts are verified and source code is available.",
-            "example": [
-              {
-                "severity": "INFO",
-                "type": "VERIFIED",
-                "title": "Verified contract",
-                "description": "This contract has been verified and its source code is available"
-              }
-            ],
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ContractAnalysisResultDto"
-            }
-          },
-          "CONTRACT_INTERACTION": {
-            "description": "Analysis results related to contract interaction history. Shows whether this is a new or previously interacted contract.",
-            "example": [
-              {
-                "severity": "INFO",
-                "type": "NEW_CONTRACT",
-                "title": "New contract",
-                "description": "This is the first time you are interacting with this contract"
-              }
-            ],
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ContractAnalysisResultDto"
-            }
-          },
-          "DELEGATECALL": {
-            "description": "Analysis results for delegatecall operations. Identifies unexpected or potentially dangerous delegate calls.",
-            "example": [
-              {
-                "severity": "CRITICAL",
-                "type": "UNEXPECTED_DELEGATECALL",
-                "title": "Unexpected delegatecall",
-                "description": "An unexpected delegatecall operation was detected that could be dangerous"
-              }
-            ],
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ContractAnalysisResultDto"
-            }
-          },
-          "FALLBACK_HANDLER": {
-            "description": "Analysis results for setFallbackHandler operations. Identifies untrusted or unofficial fallback handlers in the transactions.",
-            "example": [
-              {
-                "severity": "WARN",
-                "type": "UNOFFICIAL_FALLBACK_HANDLER",
-                "title": "Unofficial fallback handler",
-                "description": "Verify the fallback handler is trusted and secure before proceeding.",
-                "fallbackHandler": {
-                  "address": "0x123",
-                  "name": "CompatibilityFallbackHandler",
-                  "logoUrl": "https://example.com/logo.png"
-                }
-              }
-            ],
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FallbackHandlerAnalysisResultDto"
-            }
-          }
-        }
-      },
-      "DeadlockAnalysisResultDto": {
-        "type": "object",
-        "properties": {
-          "severity": {
-            "type": "string",
-            "description": "Severity level indicating the importance and risk",
-            "enum": [
-              "OK",
-              "INFO",
-              "WARN",
-              "CRITICAL"
-            ]
-          },
-          "type": {
-            "type": "string",
-            "description": "Deadlock analysis status code",
-            "enum": [
-              "DEADLOCK_DETECTED",
-              "NESTED_SAFE_WARNING",
-              "FAILED"
-            ],
-            "example": "DEADLOCK_DETECTED"
-          },
-          "title": {
-            "type": "string",
-            "description": "User-facing title of the finding"
-          },
-          "description": {
-            "type": "string",
-            "description": "Detailed description explaining the finding and its implications"
-          },
-          "error": {
-            "type": "string",
-            "description": "Error message for failed analysis"
-          }
-        },
-        "required": [
-          "severity",
-          "type",
-          "title",
-          "description"
-        ]
-      },
-      "DeadlockAnalysisDto": {
-        "type": "object",
-        "properties": {
-          "DEADLOCK": {
-            "description": "Deadlock analysis findings. Identifies signing deadlock risks in nested Safe configurations.",
-            "example": [
-              {
-                "severity": "CRITICAL",
-                "type": "DEADLOCK_DETECTED",
-                "title": "Signing deadlock risk detected",
-                "description": "This change may create a signing cycle between Safes and can permanently lock funds. You will not be allowed to proceed forward."
-              }
-            ],
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DeadlockAnalysisResultDto"
-            }
-          }
-        }
-      },
-      "CounterpartyAnalysisDto": {
-        "type": "object",
-        "properties": {
-          "recipient": {
-            "type": "object",
-            "description": "Recipient analysis results mapped by address. Contains recipient interaction history and bridge analysis.type: Record<Address, RecipientAnalysisDto>.",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/RecipientAnalysisDto"
-            },
-            "example": {
-              "0x0000000000000000000000000000000000000000": {
-                "isSafe": true,
-                "RECIPIENT_INTERACTION": [
-                  {
-                    "severity": "INFO",
-                    "type": "NEW_RECIPIENT",
-                    "title": "New recipient",
-                    "description": "This is the first time you are interacting with this recipient"
-                  }
-                ]
-              }
-            }
-          },
-          "contract": {
-            "type": "object",
-            "description": "Contract analysis results mapped by address. Contains contract verification, interaction history, and delegatecall analysis.type: Record<Address, ContractAnalysisDto>.",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/ContractAnalysisDto"
-            },
-            "example": {
-              "0x0000000000000000000000000000000000000000": {
-                "CONTRACT_VERIFICATION": [
-                  {
-                    "severity": "INFO",
-                    "type": "VERIFIED",
-                    "title": "Verified contract",
-                    "description": "This contract has been verified and its source code is available"
-                  }
-                ]
-              }
-            }
-          },
-          "deadlock": {
-            "type": "object",
-            "description": "Deadlock analysis results mapped by Safe address. Contains signing deadlock risk findings for owner/threshold management transactions.",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/DeadlockAnalysisDto"
-            },
-            "example": {
-              "0x0000000000000000000000000000000000000000": {
-                "DEADLOCK": [
-                  {
-                    "severity": "CRITICAL",
-                    "type": "DEADLOCK_DETECTED",
-                    "title": "Signing deadlock risk detected",
-                    "description": "This change may create a signing cycle between Safes and can permanently lock funds. You will not be allowed to proceed forward."
-                  }
-                ]
-              }
-            }
-          }
-        },
-        "required": [
-          "recipient",
-          "contract",
-          "deadlock"
         ]
       },
       "ThreatAnalysisRequestDto": {

@@ -1,3 +1,5 @@
+import type { SafeAccountIneligibility } from './types'
+
 /** Shared by the helper text and the empty state so the two cannot state different rules. */
 export const ELIGIBILITY_RULE = 'signer or proposer'
 
@@ -11,6 +13,10 @@ export const NO_ELIGIBLE_ACCOUNTS_TEXT =
 export const NO_WALLET_TEXT = 'Connect a wallet to see the Safe Accounts you can set a policy on.'
 
 export const LOAD_ERROR_TEXT = 'Failed to load Safe Accounts'
+
+export const INELIGIBILITY_TEXT: Record<SafeAccountIneligibility, string> = {
+  'not-activated': 'You need to activate this Safe before transacting',
+}
 
 export const SAFE_ACCOUNT_SELECTOR_LABEL = 'Which Safe Account does this apply to?'
 

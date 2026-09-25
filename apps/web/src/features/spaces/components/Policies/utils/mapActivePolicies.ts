@@ -10,8 +10,6 @@ import type { Policy, PolicyAllowance, PolicyTokenInfo, ProposerPolicy, Spending
 
 export type ResolveTokenInfo = (chainId: string, tokenAddress: string) => PolicyTokenInfo | undefined
 
-const SECONDS_PER_MINUTE = 60
-
 /** A token the gateway does not know still has to render its amount, so it shows base units. */
 const unknownToken = (address: string): PolicyTokenInfo => ({
   address,
@@ -32,8 +30,8 @@ const toAllowance = (
     amount: allowance.amount,
     spent: allowance.spent,
     remaining: (remaining > 0n ? remaining : 0n).toString(),
-    resetPeriodSeconds: allowance.resetPeriodMinutes * SECONDS_PER_MINUTE,
-    resetsAt: allowance.resetsAtMinute === null ? null : allowance.resetsAtMinute * SECONDS_PER_MINUTE,
+    resetPeriodMinutes: allowance.resetPeriodMinutes,
+    resetsAtMinute: allowance.resetsAtMinute,
   }
 }
 

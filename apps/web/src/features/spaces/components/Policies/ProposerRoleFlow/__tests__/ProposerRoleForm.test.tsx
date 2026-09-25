@@ -91,6 +91,30 @@ describe('ProposerRoleForm', () => {
       await waitFor(() => expect(submitButton()).toBeEnabled())
     })
 
+    it('keeps submit disabled while the picked Safe account is not activated', async () => {
+      const notActivated: SafeAccountOption = {
+        ...treasury,
+        id: buildSafeAccountId('137', SAFE),
+        chainId: '137',
+        ineligibleReason: 'not-activated',
+      }
+      renderForm({
+        safeAccounts: { ...eligible, accounts: [treasury, notActivated] },
+        safeAccount: notActivated.id,
+        defaultValues: { proposer: PROPOSER },
+      })
+
+      await screen.findByText('You need to activate this Safe before transacting')
+      expect(submitButton()).toBeDisabled()
+    })
+
+    it('keeps submit disabled while the picked Safe account is missing from the resolved accounts', async () => {
+      renderForm({ safeAccount: buildSafeAccountId('137', SAFE), defaultValues: { proposer: PROPOSER } })
+
+      await waitFor(() => expect(screen.getByRole('combobox', { name: 'Proposer' })).toHaveValue(PROPOSER))
+      expect(submitButton()).toBeDisabled()
+    })
+
     it('runs the proposer rule on the typed address and blocks submit on its message', async () => {
       const validateProposer = jest.fn().mockResolvedValue('Cannot add a signer of this Safe account as proposer')
       const { user } = renderForm({ safeAccount: treasury.id, validateProposer })

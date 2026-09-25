@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Typography } from '@/components/ui/typography'
-import { AccountIdentity } from '../AccountIdentity'
+import { AccountIdentity } from '../../../components/AccountIdentity'
 
 export type SignatureSafeInfo = {
   address: string

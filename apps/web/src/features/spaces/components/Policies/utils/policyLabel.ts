@@ -13,21 +13,23 @@ import {
  * here, which is what keeps the two consistent.
  */
 
+const MINUTES_PER_DAY = 1_440
+/** Recovery windows are seconds, unlike allowance periods. */
 const SECONDS_PER_DAY = 86_400
 
 const RESET_PERIOD_LABELS: Record<number, string> = {
   0: 'one time',
-  300: '5 minutes',
-  1_800: '30 minutes',
-  3_600: 'hour',
-  [SECONDS_PER_DAY]: 'day',
-  [SECONDS_PER_DAY * 7]: 'week',
-  [SECONDS_PER_DAY * 30]: 'month',
+  5: '5 minutes',
+  30: '30 minutes',
+  60: 'hour',
+  [MINUTES_PER_DAY]: 'day',
+  [MINUTES_PER_DAY * 7]: 'week',
+  [MINUTES_PER_DAY * 30]: 'month',
 }
 
-/** Returns the noun used after a slash, as in `5,000 USDC / day`. */
-export const getResetPeriodLabel = (resetPeriodSeconds: number): string =>
-  RESET_PERIOD_LABELS[resetPeriodSeconds] ?? `${resetPeriodSeconds} seconds`
+/** Returns the noun used after a slash, as in `5,000 USDC / day`. Takes MINUTES. */
+export const getResetPeriodLabel = (resetPeriodMinutes: number): string =>
+  RESET_PERIOD_LABELS[resetPeriodMinutes] ?? `${resetPeriodMinutes} minutes`
 
 export const POLICY_TYPE_LABELS = {
   'spending-limit': 'Spending limit',
@@ -41,9 +43,9 @@ export const formatTokenAmount = (amount: string, token: PolicyTokenInfo): strin
 /** For example `5,000 USDC / month`, or `5,000 USDC one time` if the allowance does not repeat. */
 export const formatAllowance = (allowance: PolicyAllowance): string => {
   const amount = formatTokenAmount(allowance.amount, allowance.token)
-  const period = getResetPeriodLabel(allowance.resetPeriodSeconds)
+  const period = getResetPeriodLabel(allowance.resetPeriodMinutes)
 
-  return allowance.resetPeriodSeconds === 0 ? `${amount} one time` : `${amount} / ${period}`
+  return allowance.resetPeriodMinutes === 0 ? `${amount} one time` : `${amount} / ${period}`
 }
 
 const formatDays = (seconds: number): string => {
