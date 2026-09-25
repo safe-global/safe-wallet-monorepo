@@ -46,3 +46,12 @@ export const Suggestion: Story = {
     onClick: fn(),
   },
 }
+
+/** The plan does not include policies: a counter joins the icon and Set policy opens the upgrade flow. */
+export const Locked: Story = {
+  args: {
+    ...Default.args,
+    locked: { applied: 0, total: 6 },
+    onClick: fn(),
+  },
+}
