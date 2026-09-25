@@ -14,6 +14,8 @@ import {
  */
 
 const MINUTES_PER_DAY = 1_440
+/** Recovery windows are seconds, unlike allowance periods. */
+const SECONDS_PER_DAY = 86_400
 
 const RESET_PERIOD_LABELS: Record<number, string> = {
   0: 'one time',
@@ -47,7 +49,7 @@ export const formatAllowance = (allowance: PolicyAllowance): string => {
 }
 
 const formatDays = (seconds: number): string => {
-  const days = Math.round(seconds / 86_400)
+  const days = Math.round(seconds / SECONDS_PER_DAY)
   return `${days} ${days === 1 ? 'day' : 'days'}`
 }
 
