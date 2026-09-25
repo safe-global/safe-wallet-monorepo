@@ -125,7 +125,7 @@ describe('ProposerDrawer', () => {
     expect(screen.getByTestId('proposer-status-skeleton')).toBeInTheDocument()
     expect(screen.getByText('Policy overview')).toBeInTheDocument()
     expect(screen.getAllByTestId('account-identity-skeleton')).toHaveLength(3)
-    expect(screen.getByTestId('proposer-actions-skeleton')).toBeInTheDocument()
+    expect(screen.getByTestId('policy-drawer-actions-skeleton')).toBeInTheDocument()
     expect(screen.queryByText('Active')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /remove proposer|retry|review transaction/i })).not.toBeInTheDocument()
   })

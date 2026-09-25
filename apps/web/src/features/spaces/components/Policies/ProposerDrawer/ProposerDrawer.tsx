@@ -3,7 +3,7 @@ import { UserRoundPen } from 'lucide-react'
 import { Drawer, DrawerBody, DrawerHeader, DrawerTitle } from '@/components/common/Drawer'
 import { Badge, BadgeDot } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ProposerActions, ProposerActionsSkeleton } from './components/ProposerActions'
+import { PolicyDrawerActions, PolicyDrawerActionsSkeleton } from '../components/PolicyDrawerActions'
 import { ProposerOverviewSkeleton } from './components/ProposerOverview'
 import { getProposerStatusColor, getProposerStatusLabel } from './utils'
 import { ProposerVariantContent } from './variants'
@@ -43,9 +43,9 @@ const ProposerDrawer = (props: ProposerDrawerProps): ReactElement => {
       </DrawerHeader>
       <DrawerBody>{props.isLoading ? <ProposerOverviewSkeleton /> : <ProposerVariantContent {...props} />}</DrawerBody>
       {props.isLoading ? (
-        <ProposerActionsSkeleton />
+        <PolicyDrawerActionsSkeleton />
       ) : (
-        <ProposerActions
+        <PolicyDrawerActions
           actionLabel={props.actionLabel}
           onClick={props.onAction}
           hint={props.actionHint}
