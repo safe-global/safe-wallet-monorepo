@@ -1,0 +1,19 @@
+{
+  "pr": 8219,
+  "reviewSha": "878a50a51e496b8f2158ae3c25a55eb84d9a0920",
+  "baseSha": "041ed590cd22a873ec57d0af8f4b0f9b980631b6",
+  "system": "A",
+  "version": "73bf04408c26562bbf8945904bd1c02d8b9b1603",
+  "model": "claude-opus-5-5[1m]",
+  "runner": "valleXYZ",
+  "usage": {
+    "inputTokens": 20,
+    "outputTokens": 3789,
+    "cacheReadTokens": 683766,
+    "cacheWriteTokens": 67499,
+    "turns": 11,
+    "wallSeconds": 63,
+    "apiEquivalentUsd": 0.7526052000000001
+  },
+  "output": "Checklist done (65 rules). Writing the report now.\n\nI ran `/code-conventions --review-pr` on `041ed590c...HEAD`. That range is one commit (878a50a51) changing one file, `apps/mobile/src/components/SafeAccountInput/index.tsx` (+4/−3). The change drops `watch('importedSafeResult')` and reads the field with `useWatch({ control, name: 'importedSafeResult' })` instead, plus a 2-line comment.\n\n**Checklist:** I generated all 65 rules and went through each one against the diff. I wrote the checklist to the scratchpad, not `docs/engineering/`, so nothing in the repo was created or changed. Nothing was modified, installed or run beyond that, and there were no PR, gh or network calls.\n\n**Rules that apply:** TEST-01, TEST-02 and API-01. None of the others touch this change: it has no permissions, navigation, providers, RTK, addresses, numerics, UI tokens or CI.\n\n- **API-01 (public exports):** passes. `SafeAccountInput` is still a default export with the same props. The only consumer is `apps/mobile/src/features/ImportReadOnly/components/ImportAccountFormView.tsx`, and it is unaffected. Removing `watch` from the destructure is local to the component.\n- **TEST-01 / TEST-02 (branch tests):** fail. See finding 1.\n\n**Zoom-in:** I tried a Level 1 lookup for TEST-02, but it printed nothing. The rule text was clear enough without it, so I didn't use Level 2 and made no gh calls.\n\n## Findings\n\n**1. The fix has no regression test (TEST-02, TEST-01). Severity: medium**\n`apps/mobile/src/components/SafeAccountInput/index.tsx:21`\n\n- **Rule:** new or changed conditional-rendering behavior needs a test that fails if the fix is removed.\n- **Missing test:** the bug is the child component not re-rendering when `useImportSafe` writes `importedSafeResult` with `setValue`. The only colocated test is `hooks/useImportSafe.test.tsx`, which covers the hook, not the component's re-render. There is no `SafeAccountInput` component test.\n- **Failure scenario:** if someone later switches back to `watch(...)`, which reads like a harmless simplification, the success icon (`testID=\"success-icon\"`, line 40) would stop appearing after a valid Safe resolves. Only the Maestro e2e flows in `apps/mobile/e2e/tests/onboarding/*.yml` might catch it.\n- **Recommendation:** add `SafeAccountInput.test.tsx`. It should render the component inside a real `FormProvider`, mock `useLazySafeOverviews` to resolve with data, then assert that `success-icon` appears. It should also assert the `<View width={20} />` placeholder while `isFetching` is true or `errors.safeAddress` is set.\n\n**2. The new inline comment is optional; there is no convention to cite (AGENTS.md \"treat comments as tech debt\"). Severity: low, informational**\n`apps/mobile/src/components/SafeAccountInput/index.tsx:19-20`\n\n- **Observation:** the only other `useWatch` call in mobile uses it with no comment: `apps/mobile/src/features/ImportReadOnly/components/ImportAccountFormView.tsx:26`.\n- **Judgment:** the `watch` vs `useWatch` subscription difference really isn't obvious, so the comment is defensible under the \"only when really necessary\" clause.\n- **Recommendation:** keep it, or replace it with the regression test from finding 1. That test would guard the behavior without relying on prose. This is not blocking.\n\n**Unresolved:** only finding 1 fails a rule. No rule needs a new question for the team."
+}

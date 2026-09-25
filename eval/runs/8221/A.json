@@ -1,0 +1,19 @@
+{
+  "pr": 8221,
+  "reviewSha": "1c3cce426274409aa4bfa1dba4b99ae782ca16e1",
+  "baseSha": "e51c1262f6dded794b172789dfb87302c457f323",
+  "system": "A",
+  "version": "73bf04408c26562bbf8945904bd1c02d8b9b1603",
+  "model": "claude-opus-5-5[1m]",
+  "runner": "valleXYZ",
+  "usage": {
+    "inputTokens": 20,
+    "outputTokens": 4862,
+    "cacheReadTokens": 698132,
+    "cacheWriteTokens": 67193,
+    "turns": 11,
+    "wallSeconds": 75,
+    "apiEquivalentUsd": 0.7744904
+  },
+  "output": "I've worked through all 78 convention rules for this change. There are two low-severity findings, and neither blocks the merge.\n\n**Scope:** `e51c1262f...HEAD` is one commit (`1c3cce426`) touching one file, `apps/web/src/features/spaces/components/SafeSelectorDropdown/components/MultiChainSafeItemRow.tsx` (+4/−6). It moves `StatusBadge` out from under the chain name so it sits at the right, next to the pending count and balance. I wrote the checklist to the scratchpad instead of `docs/engineering/`, so no repo files were touched. I didn't need to zoom into review learnings or GitHub history for any rule.\n\n## Findings\n\n**1. UX-01: the \"Read-only\" pill can wrap at its hyphen** (low)\n`MultiChainSafeItemRow.tsx:25` and `MultiChainSafeItemRow.tsx:79`\n- The pill used to sit alone in a column under the name. Now it shares a row with the chain name (which takes the leftover width and truncates), the \"N pending\" badge and the balance.\n- The pending badge (line 81) and the balance (line 88) both have `whitespace-nowrap`. The Read-only `<span>` has neither `whitespace-nowrap` nor `shrink-0`.\n- When the row runs out of room, the span can shrink to its narrowest width and break \"Read-only\" into \"Read-\" / \"only\". The `leading-none` style makes that look especially broken.\n- This can happen in practice: `hasQueued` only requires the chain to be deployed and have queued transactions, so a read-only chain can show both pills.\n- Fix: add `shrink-0 whitespace-nowrap` to the span, matching the other trailing items. `NotActivatedBadge` already applies `shrink-0` itself.\n\n**2. TEST-02 / AGENTS.md \"every code change must include tests\": the moved badge isn't covered** (low)\n`apps/web/src/features/spaces/components/SafeSelectorDropdown/components/__tests__/MultiChainSafeItemRow.test.tsx`\n- No tests changed. The existing tests only check that the Inactive/Activating badge exists, and they would still pass if the badge went back under the name.\n- The `isReadOnly` branch of `StatusBadge` (`MultiChainSafeItemRow.tsx:23-29`) has no test at all.\n- `SafeSelectorDropdown.stories.tsx` has no story for an expanded multi-chain row with an undeployed or read-only chain. `MixedActivationStates` only has single-chain rows, so there's no Storybook view to check the new layout visually.\n- Suggestion: add a Read-only test case, and optionally a story for a multi-chain Safe with a mix of undeployed and read-only chains.\n\n## Rules that applied and passed\n- **PROD-01** (visible behaviour change): the commit message explains the reason (the icon-only badge from #8013 looked orphaned). Carry that into the PR description, and add design sign-off if you have it.\n- **CODE-02, UI-01, UI-02, CODE-04:** nothing new was added. The hardcoded `text-[11px]` on the pill was already there before this change.\n- **FEAT-04:** no files under `components/ui/*` were edited.\n- **UX-03:** no shell component was replaced.\n- The inline comment at `MultiChainSafeItemRow.tsx:72`, which says the badge is right-aligned, now matches what the code does.\n\nThe other 65 rules (auth, RTK, data, chain, transactions, mobile, CI, security, docs and similar) don't touch this change."
+}
