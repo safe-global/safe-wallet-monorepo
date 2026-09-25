@@ -9,11 +9,7 @@ import { syncPlanChange } from './syncPlanChange'
 import { useBillingSpaceId } from './useBillingSpaceId'
 import { useSpaceSubscription } from './useSpaceSubscription'
 
-/**
- * Moves a live subscription onto another offered plan: `previewChange` fetches the prorated cost, `changePlan`
- * applies it. The PATCH needs a fresh second factor; the store's elevation listener handles the step-up and
- * replays the request on return, so callers only need to tolerate an `elevation_required` rejection.
- */
+/** The elevation listener steps up the PATCH's second factor and replays it; callers tolerate `elevation_required`. */
 export const useChangePlan = (spaceId?: string | null) => {
   const gatedSpaceId = useBillingSpaceId(spaceId)
   const dispatch = useAppDispatch()

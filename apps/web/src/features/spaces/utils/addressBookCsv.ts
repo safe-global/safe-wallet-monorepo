@@ -12,7 +12,6 @@ export const spaceAddressBookToCsv = (items: SpaceAddressBookItemDto[]): string 
   return rows.length === 0 ? COLUMNS.join(',') : jsonToCSV(rows, { columns: COLUMNS })
 }
 
-/** Hands the browser a CSV file to save. */
 export const downloadCsv = (fileName: string, csv: string) => {
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
   const link = document.createElement('a')

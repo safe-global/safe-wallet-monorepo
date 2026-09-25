@@ -25,10 +25,6 @@ const FAILURE_COPY = {
   },
 } as const
 
-/**
- * Owns the screen while Stripe sends the user back: a blocking loader until the session settles and the subscription
- * lands, then the trial or subscription confirmation, or an error when the session fails or never propagates.
- */
 export default function CheckoutReturnModals({
   spaceId,
   trialCtaLabel,

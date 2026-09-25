@@ -6,7 +6,6 @@ import { HYPERNATIVE_EVENTS, trackEvent } from '@/services/analytics'
 import { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 
-/** Under the locked Pro checks: a Hypernative customer can still bring their own analysis by logging in. */
 export const HypernativeLoginLine = (): ReactElement | null => {
   const { isAuthenticated, isTokenExpired, initiateLogin } = useHypernativeOAuth()
   if (isAuthenticated && !isTokenExpired) return null

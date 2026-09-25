@@ -257,8 +257,7 @@ export function PlanCatalog({
 } & PlanCardActions) {
   const [cycle, setCycle] = useState<Cycle>('month')
   const hasYearly = tiers.some((tier) => tier.billingCycle === 'year')
-  // The current plan's card follows the toggle like any other, except it stays put when the other cycle has no
-  // offer of that plan to show in its place.
+  // The current card stays put when the other cycle has no offer of that plan to replace it.
   const visible = tiers.filter((tier) => {
     if (tier.billingCycle === null || tier.billingCycle === cycle) return true
     return Boolean(tier.isCurrent) && !tiers.some((other) => other.name === tier.name && other.billingCycle === cycle)

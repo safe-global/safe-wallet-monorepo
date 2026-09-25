@@ -18,9 +18,11 @@ import { cn } from '@/utils/cn'
  *
  * @remarks
  * Key Props:
- * - `variant` ('default' | 'outline' | 'secondary' | 'ghost' | 'destructive' | 'surface')
+ * - `variant` ('default' | 'outline' | 'secondary' | 'ghost' | 'ghost-muted' | 'destructive' | 'surface')
+ *   `ghost-muted`: the Figma Ghost, muted at rest; `ghost` keeps the foreground
  * - `size` ('default' | 'xs' | 'sm' | 'lg' | 'action' | 'submit' | 'xl' | 'icon' | 'icon-xs' | 'icon-sm')
  * - `weight` ('medium' | 'semibold')
+ * - `accentIcon` (boolean): brand-green icon on a primary CTA
  * - `render`
  * - `className`
  */

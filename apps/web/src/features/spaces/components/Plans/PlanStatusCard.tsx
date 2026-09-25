@@ -12,7 +12,7 @@ import { TRIAL_ENDING_SOON_DAYS, trialLabel } from '../../hooks/billing/subscrip
 import type { CurrentBadge } from './PlanCards'
 import type { Meter, PlanSummary } from './types'
 
-export const remaining = ({ used, quota }: Meter): number | null => (quota === null ? null : Math.max(quota - used, 0))
+export const _remaining = ({ used, quota }: Meter): number | null => (quota === null ? null : Math.max(quota - used, 0))
 
 export const seatsTooltip = (tierName: string | undefined, quota: number | null | undefined) =>
   `${tierName ?? 'Your plan'} covers ${quota ?? 'unlimited'} Safe accounts. At ${quota ?? 'unlimited'}, remove one from this Workspace to add another. Safe accounts you leave out remain available in My accounts.`
@@ -33,7 +33,7 @@ export const InfoTip = ({ text, 'data-testid': testId }: { text: string; 'data-t
     <TooltipTrigger render={<span className="inline-flex" data-testid={testId} />}>
       <Info className="size-4 text-muted-foreground" />
     </TooltipTrigger>
-    <TooltipContent className="max-w-[260px]">{text}</TooltipContent>
+    <TooltipContent className="max-w-65">{text}</TooltipContent>
   </Tooltip>
 )
 
@@ -48,7 +48,7 @@ const UsageMeter = ({
   tooltip: string
   meter: Meter | null
 }) => {
-  const left = meter && remaining(meter)
+  const left = meter && _remaining(meter)
   const isExhausted = left === 0
 
   return (

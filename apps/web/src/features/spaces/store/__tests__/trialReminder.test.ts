@@ -2,7 +2,7 @@ import { createListenerMiddleware } from '@reduxjs/toolkit'
 import type { RootState } from '@/store/index'
 import { setUnauthenticated, setAuthenticated } from '@/store/authSlice'
 import {
-  clearTrialReminders,
+  _clearTrialReminders,
   markTrialReminderSeen,
   trialReminderListener,
   wasTrialReminderSeen,
@@ -23,7 +23,7 @@ describe('trialReminder', () => {
     expect(wasTrialReminderSeen('s1')).toBe(true)
     expect(wasTrialReminderSeen('s2')).toBe(true)
 
-    clearTrialReminders()
+    _clearTrialReminders()
     expect(wasTrialReminderSeen('s1')).toBe(false)
   })
 

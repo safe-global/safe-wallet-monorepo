@@ -6,11 +6,7 @@ const BASE_DELAY_MS = 1_000
 export const isRateLimited = (error: unknown): boolean =>
   typeof error === 'object' && error !== null && 'status' in error && (error as { status: unknown }).status === 429
 
-/**
- * Re-runs a billing query a few times, with exponential backoff, when the CGW rate-limits it. The shared CGW client
- * deliberately never retries (WA-3252), and a 429 read as "no plan / no offers" would lock or skip flows wrongly.
- * Returns true while a retry is pending, so callers can keep reporting the query as loading.
- */
+/** The shared CGW client never retries (WA-3252), and a 429 read as "no plan / no offers" would lock flows wrongly. */
 export const useRateLimitRetry = ({ error, refetch }: { error: unknown; refetch: () => unknown }): boolean => {
   const attempts = useRef(0)
   const [isRetrying, setIsRetrying] = useState(false)

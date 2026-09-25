@@ -7,10 +7,6 @@ import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { countSeats } from '@/utils/spaces'
 import type { SafeRef } from '../../components/Plans/types'
 
-/**
- * Fits the Workspace to a seat-limited plan: `needsTrim` tells whether the accounts step is shown (the Workspace holds
- * more Safes than the plan covers) and `trim` removes the Safes left out, which stay in My accounts.
- */
 export const useSeatTrim = (spaceId: string) => {
   const { currentData: spaceSafes } = useSpaceSafesGetV1Query({ spaceId })
   const [removeSafes, { isLoading: isTrimming, error: removeError }] = useSpaceSafesDeleteV1Mutation()

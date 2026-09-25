@@ -1,11 +1,11 @@
 import { render, screen } from '@/tests/test-utils'
 import { TenderlySimulationLocked } from '../TenderlySimulationLocked'
 
-const mockUseCurrentChain = jest.fn()
-jest.mock('@/hooks/useChains', () => ({ useCurrentChain: () => mockUseCurrentChain() }))
+const mockUseHasFeature = jest.fn()
+jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
 
 describe('TenderlySimulationLocked', () => {
-  beforeEach(() => mockUseCurrentChain.mockReturnValue({ chainId: '1', features: ['TX_SIMULATION'] }))
+  beforeEach(() => mockUseHasFeature.mockReturnValue(true))
 
   it('shows the locked row with a Set link to the environment variables of this Safe instead of a Run button', () => {
     render(<TenderlySimulationLocked />, { routerProps: { query: { safe: 'eth:0x1234' } } })
@@ -19,7 +19,7 @@ describe('TenderlySimulationLocked', () => {
   })
 
   it('renders nothing on a chain without simulation', () => {
-    mockUseCurrentChain.mockReturnValue({ chainId: '1', features: [] })
+    mockUseHasFeature.mockReturnValue(false)
     expect(render(<TenderlySimulationLocked />).container).toBeEmptyDOMElement()
   })
 })

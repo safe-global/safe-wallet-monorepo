@@ -3,7 +3,6 @@ import { useLazyBillingGetSessionUrlV1Query } from '@safe-global/store/gateway/A
 import { getPortalReturnUrl } from './returnUrl'
 import { useBillingSpaceId } from './useBillingSpaceId'
 
-/** Opens the Stripe customer portal (billing details, invoices, cancellation). */
 export const useBillingPortal = (spaceId?: string | null) => {
   const gatedSpaceId = useBillingSpaceId(spaceId)
   const [trigger, { isFetching, isError }] = useLazyBillingGetSessionUrlV1Query()

@@ -22,8 +22,8 @@ import type { PlanPick } from './types'
 
 const PlansSkeleton = () => (
   <div className="flex flex-col gap-6" data-testid="plans-skeleton">
-    <Skeleton className="h-[196px] w-full rounded-xl" />
-    <Skeleton className="h-[560px] w-full rounded-xl" />
+    <Skeleton className="h-49 w-full rounded-xl" />
+    <Skeleton className="h-140 w-full rounded-xl" />
   </div>
 )
 

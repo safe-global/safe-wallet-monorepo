@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import { SUPPORT_CHAT_URL } from '@/config/constants'
-import TrialEndingModal, { endsIn } from '../TrialEndingModal'
+import TrialEndingModal, { _endsIn } from '../TrialEndingModal'
 
 const mockUseSpacePlan = jest.fn()
 const mockUseSpaceOffers = jest.fn()
@@ -120,9 +120,9 @@ describe('TrialEndingModal', () => {
   })
 
   it('words the countdown', () => {
-    expect(endsIn(7)).toBe('in 7 days')
-    expect(endsIn(1)).toBe('in 1 day')
-    expect(endsIn(0)).toBe('today')
+    expect(_endsIn(7)).toBe('in 7 days')
+    expect(_endsIn(1)).toBe('in 1 day')
+    expect(_endsIn(0)).toBe('today')
   })
 
   it('stays dismissed for the rest of the trial once the last-week reminder was closed', () => {

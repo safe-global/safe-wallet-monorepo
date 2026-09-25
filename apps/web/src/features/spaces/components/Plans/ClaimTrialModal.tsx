@@ -33,7 +33,7 @@ export const TRIAL_END_TOOLTIP =
   "Your paid subscription only starts after you add a payment method. If you don't add one or choose another plan before your free access ends, your Workspace will be locked. Nothing is deleted for 90 days and your Safe accounts remain available in My accounts."
 
 /** The price tag's green word: a new Workspace is told how long the free period lasts, an existing one just "Free". */
-export const freeLabel = (trialPeriodDays: number | null, variant: ClaimTrialVariant): string =>
+export const _freeLabel = (trialPeriodDays: number | null, variant: ClaimTrialVariant): string =>
   variant === 'new' && trialPeriodDays !== null ? `${trialPeriodDays}-day free` : 'Free'
 
 export const claimCopy = (trialPeriodDays: number | null, variant: ClaimTrialVariant = 'existing'): ClaimTrialCopy => {
@@ -135,11 +135,7 @@ const TrialOfferCard = ({
   )
 }
 
-/**
- * Blocking offer of the Workspace's free access. A Workspace that already holds Safes confirms which ones the plan
- * covers before Stripe: the Safes left out are removed from the Workspace, not from the user's accounts. A brand-new
- * Workspace (the onboarding wizard) goes straight to Stripe.
- */
+/** The Safes left out are removed from the Workspace, not from the user's accounts. */
 export default function ClaimTrialModal({
   spaceId,
   onBack,
@@ -210,7 +206,7 @@ export default function ClaimTrialModal({
               </Link>
 
               {isLoading ? (
-                <Skeleton className="h-[260px] w-full rounded-lg-xl" data-testid="claim-trial-skeleton" />
+                <Skeleton className="h-65 w-full rounded-lg-xl" data-testid="claim-trial-skeleton" />
               ) : tiers.length === 0 ? (
                 <Alert variant="info">
                   <AlertSeverityIcon variant="info" />
@@ -227,7 +223,7 @@ export default function ClaimTrialModal({
                       key={candidate.id}
                       tier={candidate}
                       availableUntil={availableUntil}
-                      freeText={freeLabel(trialPeriodDays, variant)}
+                      freeText={_freeLabel(trialPeriodDays, variant)}
                       selectable={tiers.length > 1}
                       selected={candidate.id === tier?.id}
                       onSelect={() => setPickedTierId(candidate.id)}

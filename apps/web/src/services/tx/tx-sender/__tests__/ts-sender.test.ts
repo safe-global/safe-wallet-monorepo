@@ -1,5 +1,6 @@
 import { waitFor } from '@testing-library/react'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { SpaceRelayDto } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 import { setSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import type Safe from '@safe-global/protocol-kit'
 import type { MultiSendCallOnlyContractImplementationType } from '@safe-global/protocol-kit'
@@ -695,9 +696,9 @@ describe('txSender', () => {
 
       jest.spyOn(safeContracts, 'getReadOnlyCurrentGnosisSafeContract').mockResolvedValue({
         encode: jest.fn(() => '0xabcd'),
-      } as any)
+      } as unknown as Awaited<ReturnType<typeof safeContracts.getReadOnlyCurrentGnosisSafeContract>>)
 
-      let receivedBody: any
+      let receivedBody: SpaceRelayDto | undefined
       const chainRelay = jest.fn()
       const entitlementsRead = jest.fn()
       server.use(
@@ -706,7 +707,7 @@ describe('txSender', () => {
           return HttpResponse.json({ taskId: '0xchain' })
         }),
         http.post(`${GATEWAY_URL}/v1/spaces/space-1/chains/5/relay`, async ({ request }) => {
-          receivedBody = await request.json()
+          receivedBody = (await request.json()) as SpaceRelayDto
           return HttpResponse.json({ taskId: '0xspace' })
         }),
         http.get(`${GATEWAY_URL}/v1/spaces/space-1/entitlements`, () => {
@@ -740,7 +741,7 @@ describe('txSender', () => {
       const chain = {} as unknown as Parameters<typeof dispatchTxRelay>[3]
       jest.spyOn(safeContracts, 'getReadOnlyCurrentGnosisSafeContract').mockResolvedValue({
         encode: jest.fn(() => '0xabcd'),
-      } as any)
+      } as unknown as Awaited<ReturnType<typeof safeContracts.getReadOnlyCurrentGnosisSafeContract>>)
       const entitlementsRead = jest.fn()
       server.use(
         http.post(`${GATEWAY_URL}/v1/spaces/space-1/chains/5/relay`, () =>
@@ -846,10 +847,10 @@ describe('txSender', () => {
         getAddress: () => mockMultisendAddress,
       } as unknown as MultiSendCallOnlyContractImplementationType
 
-      let receivedBody: any
+      let receivedBody: SpaceRelayDto | undefined
       server.use(
         http.post(`${GATEWAY_URL}/v1/spaces/space-1/chains/5/relay`, async ({ request }) => {
-          receivedBody = await request.json()
+          receivedBody = (await request.json()) as SpaceRelayDto
           return HttpResponse.json({ taskId: '0xspace' })
         }),
       )

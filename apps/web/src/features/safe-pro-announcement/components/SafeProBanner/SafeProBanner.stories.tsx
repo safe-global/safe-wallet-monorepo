@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { StoreDecorator } from '@/stories/storeDecorator'
+import { withMockProvider } from '@/storybook/preview'
 import SafeProBanner from './index'
 
 const meta = {
@@ -7,15 +7,14 @@ const meta = {
   title: 'Features/SafePro/SafeProBanner',
   tags: ['autodocs'],
   decorators: [
-    (Story, context) => (
-      <StoreDecorator initialState={{ settings: { theme: {} } }} context={context}>
-        <div className="flex justify-center bg-background p-6">
-          <div className="w-full max-w-[440px]">
-            <Story />
-          </div>
+    (Story) => (
+      <div className="flex justify-center bg-background p-6">
+        <div className="w-full max-w-[440px]">
+          <Story />
         </div>
-      </StoreDecorator>
+      </div>
     ),
+    withMockProvider({ initialState: { settings: { theme: {} } } }),
   ],
 } satisfies Meta<typeof SafeProBanner>
 

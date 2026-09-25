@@ -6,7 +6,6 @@ import { AppRoutes } from '@/config/routes'
 import { useSafeProAccess } from '@/features/spaces'
 import ProChip from '@/public/images/safe-pro/pro-chip.svg'
 
-/** Labels the checks that come with Safe Pro; without it, leads to the plans of the Safe's Workspace, or to Workspaces. */
 export const ProChecksRow = ({ hasProFeatures }: { hasProFeatures: boolean }): ReactElement => {
   const { spaceId } = useSafeProAccess()
   const href = spaceId ? { pathname: AppRoutes.spaces.plans, query: { spaceId } } : AppRoutes.welcome.spaces

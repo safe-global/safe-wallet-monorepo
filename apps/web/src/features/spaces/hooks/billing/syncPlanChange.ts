@@ -7,11 +7,7 @@ export const PLAN_SYNC_TIMEOUT_MS = 60_000
 
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms))
 
-/**
- * After a plan change the subscription is already new, but the CGW derives entitlements and the offered plans from a
- * copy it only updates on the billing webhook. Re-reads the entitlements until they name the new plan, then refetches
- * the billing queries so the offers stop listing it. Resolves false when the webhook has not landed in time.
- */
+/** The CGW updates entitlements and offers only on the billing webhook, so poll until they name the new plan. */
 export const syncPlanChange = async (
   dispatch: AppDispatch,
   spaceId: string,

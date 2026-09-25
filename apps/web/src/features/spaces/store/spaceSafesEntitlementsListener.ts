@@ -3,10 +3,7 @@ import type { listenerMiddlewareInstance } from '@/store/index'
 import { cgwApi as spacesApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { cgwApi as entitlementsApi } from '@safe-global/store/gateway/AUTO_GENERATED/entitlements'
 
-/**
- * Adding or removing Safes changes the seats in use, which only the entitlements report and whose tag the Safes
- * mutations do not invalidate: invalidate it as soon as such a change lands, so every meter moves at once.
- */
+/** The Safes mutations don't invalidate the entitlements tag, yet they change the seats in use. */
 export const spaceSafesEntitlementsListener = (listenerMiddleware: typeof listenerMiddlewareInstance) => {
   const create = spacesApi?.endpoints?.spaceSafesCreateV1?.matchFulfilled
   const remove = spacesApi?.endpoints?.spaceSafesDeleteV1?.matchFulfilled

@@ -8,10 +8,7 @@ import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 import SafeProModalFrame from '../SafeProModalFrame'
 
-/**
- * Hero, headline, one paragraph and one button: the notice a member sees when only an admin can act on the
- * Workspace. Without `onOpenChange` the notice cannot be dismissed (a locked Workspace).
- */
+/** Without `onOpenChange` the notice cannot be dismissed (a locked Workspace). */
 const SafeProNoticeModal = ({
   open,
   title,

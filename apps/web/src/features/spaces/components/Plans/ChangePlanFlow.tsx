@@ -8,20 +8,15 @@ import SelectAccountsStep from './SelectAccountsStep'
 import type { CurrentPlan, PlanChangeDirection, PlanPick, SafeRef } from './types'
 
 /** The accounts step leads to the change summary, not to Stripe: a live plan is moved, not bought. */
-export const continueLabelFor = (direction: PlanChangeDirection): string =>
+export const _continueLabelFor = (direction: PlanChangeDirection): string =>
   direction === 'change' ? 'Continue' : `Continue to ${direction}`
 
 /** What the picked plan costs once the trial is over, as the confirmation words it. */
-export const pickedPrice = (pick: PlanPick): string =>
+export const _pickedPrice = (pick: PlanPick): string =>
   pick.option.price === null
     ? 'a custom price'
     : `${formatPlanPrice(pick.option.price, pick.tier.currency)}${priceSuffix(pick.tier.billingCycle)}`
 
-/**
- * Moves a live plan onto the picked one. When the Workspace holds more Safes than the new plan covers, the user first
- * chooses which ones stay; the change summary then confirms both the removal and the plan change, and a confirmation
- * closes the flow.
- */
 export default function ChangePlanFlow({
   spaceId,
   pick,
@@ -48,7 +43,7 @@ export default function ChangePlanFlow({
         open
         planName={pick.tier.name}
         trialEndsAt={currentPlan.periodEndsAt ? Date.parse(currentPlan.periodEndsAt) : null}
-        price={pickedPrice(pick)}
+        price={_pickedPrice(pick)}
         seatsLabel={pick.option.label}
         onOpenChange={(open) => !open && onClose()}
       />
@@ -70,7 +65,7 @@ export default function ChangePlanFlow({
             <SelectAccountsStep
               limit={seats}
               planName={pick.tier.name}
-              continueLabel={continueLabelFor(getChangeDirection(currentPlan, pick))}
+              continueLabel={_continueLabelFor(getChangeDirection(currentPlan, pick))}
               onBack={onClose}
               onContinue={setRemoved}
             />

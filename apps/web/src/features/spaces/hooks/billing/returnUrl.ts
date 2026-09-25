@@ -1,7 +1,7 @@
 import { AppRoutes } from '@/config/routes'
 
 /** Stripe replaces this literal with the session id on the way back; it must travel un-encoded. */
-export const CHECKOUT_SESSION_ID_PLACEHOLDER = '{CHECKOUT_SESSION_ID}'
+export const _CHECKOUT_SESSION_ID_PLACEHOLDER = '{CHECKOUT_SESSION_ID}'
 export const CHECKOUT_SESSION_QUERY_PARAM = 'sessionId'
 
 // The CGW rejects non-public return URLs, so local development returns to the staging web app.
@@ -18,9 +18,7 @@ const buildSpaceUrl = (pathname: string, spaceId: string): URL => {
   return url
 }
 
-/** Where Stripe Checkout sends the user back, carrying the session id: Workspace Home unless a flow asks otherwise. */
 export const getCheckoutReturnUrl = (spaceId: string, pathname: string = AppRoutes.spaces.index): string =>
-  `${buildSpaceUrl(pathname, spaceId)}&${CHECKOUT_SESSION_QUERY_PARAM}=${CHECKOUT_SESSION_ID_PLACEHOLDER}`
+  `${buildSpaceUrl(pathname, spaceId)}&${CHECKOUT_SESSION_QUERY_PARAM}=${_CHECKOUT_SESSION_ID_PLACEHOLDER}`
 
-/** Where the Stripe customer portal sends the user back: the Plans page. */
 export const getPortalReturnUrl = (spaceId: string): string => buildSpaceUrl(AppRoutes.spaces.plans, spaceId).toString()

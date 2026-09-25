@@ -106,8 +106,7 @@ export const ExecuteForm = ({
 
   const noFeeCampaignEligible = !isGtfChain && isNoFeeCampaignEnabled && isNoFeeCampaign && !blockedAddress
 
-  // Safe-pays bypasses the no-fee campaign and the daily relay quota (Safe funds its own relay). A Safe on a Safe Pro
-  // plan relays against its Workspace's allowance instead of the chain's daily quota.
+  // Safe-pays bypasses the no-fee campaign and the daily relay quota; a Pro Safe spends its Workspace's allowance.
   const hasSponsoring = sponsoredTxs.isPro ? sponsoredTxs.canSponsor : hasRemainingRelays(relays[0])
   const canRelay = walletCanRelay && (requiresRelay || (!isGtfChain && !noFeeCampaignEligible && hasSponsoring))
   const canNoFeeCampaign = !requiresRelay && noFeeCampaignEligible && !gasTooHigh && !!remaining && remaining > 0

@@ -48,7 +48,6 @@ export const useAddSafeToSpace = ({ spaces, onSpaceAdded }: UseAddSafeToSpaceOpt
       })
       if (isElevationRequiredError(result.error)) return false
       if (result.error) {
-        // A spent seat allowance is worded as such and the cached meter, which let the attempt through, is re-read.
         const seatLimit = getSeatLimitMessage(result.error)
         if (seatLimit) refreshSpaceEntitlements(dispatch, spaceId)
         showError(seatLimit ?? getRtkQueryErrorMessage(result.error))

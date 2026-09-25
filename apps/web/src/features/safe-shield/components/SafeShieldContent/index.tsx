@@ -153,8 +153,6 @@ export const SafeShieldContent = ({
           )}
         </div>
 
-        {/* The Safe Pro checks sit together under the PRO header: recipient analysis and the simulation. Without Pro
-            they are locked (with an upgrade) and a Hypernative customer is offered their own analysis instead. */}
         {isSafePro && shouldShowContent && (!hasProFeatures || !recipientEmpty || safeTx) && (
           <div className="mt-1 flex flex-col rounded-md bg-muted" data-testid="pro-checks-section">
             <ProChecksRow hasProFeatures={hasProFeatures} />
@@ -171,7 +169,6 @@ export const SafeShieldContent = ({
                 <LockedCheckRow data-testid="recipient-analysis-locked">Known recipient</LockedCheckRow>
               )}
 
-              {/* Pro runs the simulation on its own; a user with their own Tenderly project runs it by hand; the rest see a lock. */}
               {!contractLoading && !threatLoading && (hasProFeatures || hasOwnTenderly) && (
                 <TenderlySimulation
                   safeTx={safeTx}

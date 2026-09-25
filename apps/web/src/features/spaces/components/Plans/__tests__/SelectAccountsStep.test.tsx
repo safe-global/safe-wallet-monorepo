@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import type { AccountLine } from '@/features/myAccounts'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
-import SelectAccountsStep, { initialSelection } from '../SelectAccountsStep'
+import SelectAccountsStep, { _initialSelection } from '../SelectAccountsStep'
 
 const safe = (address: string, name: string, chainId = '1') => ({
   chainId,
@@ -70,7 +70,7 @@ const renderStep = (props: Partial<React.ComponentProps<typeof SelectAccountsSte
 
 describe('SelectAccountsStep', () => {
   it('preselects every Safe, multi-chain groups included', () => {
-    expect(initialSelection([multi, treasury])).toEqual({
+    expect(_initialSelection([multi, treasury])).toEqual({
       '1:0xD': true,
       '10:0xD': true,
       multichain_0xD: true,

@@ -393,7 +393,6 @@ describe('ExecuteForm', () => {
         ),
       ).toBeInTheDocument()
     })
-    // The user can still execute, now paying the gas themselves.
     expect(getByText('Execute')).toBeEnabled()
   })
 

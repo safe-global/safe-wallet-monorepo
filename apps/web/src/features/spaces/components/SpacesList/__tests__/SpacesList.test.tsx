@@ -257,7 +257,6 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     const cta = screen.getByRole('link', { name: /get safe pro/i })
     expect(cta).toHaveAttribute('href')
-    // The arrow is the brand accent on the dark CTA, like the wallet icon on "Connect wallet".
     expect(cta).toHaveClass('[&_svg]:text-green-400')
 
     // Sign in card must NOT render in this branch.

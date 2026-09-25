@@ -7,7 +7,7 @@ import { AppRoutes } from '@/config/routes'
 import ProChip from '@/public/images/safe-pro/pro-chip.svg'
 
 /** "Nov 1, 00:00 UTC": the reset moment of a sponsored-transactions cycle, always in UTC so every member reads the same. */
-export const formatResetsAt = (iso: string | null): string | null => {
+export const _formatResetsAt = (iso: string | null): string | null => {
   if (!iso) return null
   const timestamp = Date.parse(iso)
   if (Number.isNaN(timestamp)) return null
@@ -22,10 +22,6 @@ export const formatResetsAt = (iso: string | null): string | null => {
   return `${formatted} UTC`
 }
 
-/**
- * The strip under "Who will pay gas fees". On a Safe Pro plan it counts the Workspace's sponsored transactions and
- * wears the PRO chip; elsewhere it shows the free allowance and nudges towards Safe Pro.
- */
 const SponsoredTxsCounter = ({
   left,
   quota,
@@ -38,7 +34,7 @@ const SponsoredTxsCounter = ({
   resetsAt: string | null
   isPro: boolean
 }): ReactElement => {
-  const resets = formatResetsAt(resetsAt)
+  const resets = _formatResetsAt(resetsAt)
 
   return (
     <div className="flex items-center justify-between gap-3 bg-muted px-4 py-2" data-testid="sponsored-txs-counter">

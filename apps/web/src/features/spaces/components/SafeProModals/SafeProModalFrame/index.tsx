@@ -2,11 +2,7 @@ import type { ReactNode } from 'react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import SafeProHero from '@/components/common/SafeProHero'
 
-/**
- * The 640px confirmation dialog of Safe Pro: the compact hero on top and a centered body underneath. Without
- * `onOpenChange` the dialog cannot be dismissed. The design carries no close button; pass `showCloseButton` for
- * the notices that need one.
- */
+/** Without `onOpenChange` the dialog cannot be dismissed; the design has no close button unless `showCloseButton`. */
 const SafeProModalFrame = ({
   open,
   onOpenChange,

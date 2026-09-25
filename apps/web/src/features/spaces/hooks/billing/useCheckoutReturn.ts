@@ -17,10 +17,7 @@ const SETTLED_PAYMENT_STATUSES = new Set(['paid', 'no_payment_required'])
 
 export type CheckoutReturnStatus = 'idle' | 'processing' | 'activating' | 'complete' | 'timeout' | 'error'
 
-/**
- * Drives the return from Stripe Checkout: while the URL carries a session id it polls the session until it
- * settles, then the subscriptions until the new one propagates through the billing webhook (or times out).
- */
+/** Polls the checkout session until it settles, then the subscriptions until the billing webhook propagates it. */
 export const useCheckoutReturn = (spaceId?: string | null) => {
   const router = useRouter()
   const gatedSpaceId = useBillingSpaceId(spaceId)
