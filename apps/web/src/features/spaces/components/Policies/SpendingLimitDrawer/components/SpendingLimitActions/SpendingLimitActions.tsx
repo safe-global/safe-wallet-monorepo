@@ -2,7 +2,6 @@ import type { ReactElement } from 'react'
 import { DrawerFooter } from '@/components/common/Drawer'
 import CopyButton from '@/components/common/CopyButton'
 import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
 import { PolicyDrawerActions } from '../../../components/PolicyDrawerActions'
 import type { SpendingLimitDrawerState } from '../../resolveState'
 
@@ -10,7 +9,6 @@ export type SpendingLimitActionsProps = {
   state: SpendingLimitDrawerState
   transactionLink: string
   onEdit: () => void
-  onDelete: () => void
   onReviewTransaction: () => void
   onConnectWallet: () => void
 }
@@ -19,7 +17,6 @@ const SpendingLimitActions = ({
   state,
   transactionLink,
   onEdit,
-  onDelete,
   onReviewTransaction,
   onConnectWallet,
 }: SpendingLimitActionsProps): ReactElement => {
@@ -27,27 +24,9 @@ const SpendingLimitActions = ({
     return <PolicyDrawerActions actionLabel="Connect wallet" onClick={onConnectWallet} hint={state.helper} />
   }
 
+  // Editing covers removal too: the edit flow can drop individual limits or all of them.
   if (state.kind === 'active') {
-    return (
-      <DrawerFooter>
-        <div className="flex flex-col gap-2">
-          {state.helper && (
-            <Typography variant="paragraph-mini" color="muted" align="center">
-              {state.helper}
-            </Typography>
-          )}
-
-          <div className="flex gap-3">
-            <Button variant="secondary" className="flex-1" onClick={onDelete} disabled={state.disabled}>
-              Delete
-            </Button>
-            <Button className="flex-1" onClick={onEdit} disabled={state.disabled}>
-              Edit
-            </Button>
-          </div>
-        </div>
-      </DrawerFooter>
-    )
+    return <PolicyDrawerActions actionLabel="Edit" onClick={onEdit} hint={state.helper} disabled={state.disabled} />
   }
 
   switch (state.action) {

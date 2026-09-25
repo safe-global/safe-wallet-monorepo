@@ -29,7 +29,6 @@ export type SpendingLimitDrawerProps = {
   names?: Record<string, string>
   transactionLink: string
   onEdit: () => void
-  onDelete: () => void
   onReviewTransaction: () => void
   onConnectWallet: () => void
 }

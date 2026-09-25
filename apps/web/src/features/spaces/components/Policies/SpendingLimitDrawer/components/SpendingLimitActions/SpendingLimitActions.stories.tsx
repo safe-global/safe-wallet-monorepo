@@ -10,7 +10,6 @@ const meta = {
   args: {
     transactionLink: 'https://app.safe.global/transactions/tx?id=0x9f3c',
     onEdit: fn(),
-    onDelete: fn(),
     onReviewTransaction: fn(),
     onConnectWallet: fn(),
   },

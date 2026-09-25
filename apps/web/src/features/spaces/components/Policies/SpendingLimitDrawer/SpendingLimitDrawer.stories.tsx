@@ -37,7 +37,6 @@ const meta = {
     overview: OVERVIEW,
     transactionLink: 'https://app.safe.global/transactions/tx?id=0x9f3c&safe=eth:0x8675',
     onEdit: fn(),
-    onDelete: fn(),
     onReviewTransaction: fn(),
     onConnectWallet: fn(),
     policy: mockActiveSpendingLimit(),

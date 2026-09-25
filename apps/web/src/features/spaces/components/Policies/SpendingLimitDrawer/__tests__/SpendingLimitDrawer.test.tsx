@@ -30,7 +30,6 @@ const setup = (policy: DrawerPolicy = mockActiveSpendingLimit(), viewer: Viewer 
       overview={OVERVIEW}
       transactionLink={TRANSACTION_LINK}
       onEdit={jest.fn()}
-      onDelete={jest.fn()}
       onReviewTransaction={jest.fn()}
       onConnectWallet={jest.fn()}
     />,
@@ -44,11 +43,12 @@ describe('SpendingLimitDrawer', () => {
     expect(screen.getByText('Active')).toBeInTheDocument()
   })
 
-  it('offers delete and edit to a connected signer', () => {
+  // Editing covers removal, so Edit is the only action an active policy offers.
+  it('offers edit, and only edit, to a connected signer', () => {
     setup()
 
-    expect(screen.getByRole('button', { name: 'Delete' })).toBeEnabled()
     expect(screen.getByRole('button', { name: 'Edit' })).toBeEnabled()
+    expect(screen.queryByRole('button', { name: 'Delete' })).not.toBeInTheDocument()
   })
 
   it('shows a usage bar per allowance for an active policy', () => {
@@ -58,14 +58,11 @@ describe('SpendingLimitDrawer', () => {
   })
 
   // The helper explains a disabled control, so hiding it behind hover would hide the explanation.
-  it('disables both actions for a non-signer and explains why without hover', () => {
+  it('disables editing for a non-signer and explains why without hover', () => {
     setup(mockActiveSpendingLimit(), MOCK_VIEWERS.nonSigner)
 
-    expect(screen.getByRole('button', { name: 'Delete' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled()
-    expect(
-      screen.getByText('Only signers of this Safe account can delete or edit this spending limit.'),
-    ).toBeInTheDocument()
+    expect(screen.getByText('Only signers of this Safe account can edit this spending limit.')).toBeInTheDocument()
   })
 
   it('asks a disconnected viewer to connect instead of showing dead controls', () => {

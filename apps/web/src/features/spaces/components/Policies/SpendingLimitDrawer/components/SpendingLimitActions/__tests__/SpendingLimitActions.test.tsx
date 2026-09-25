@@ -10,7 +10,6 @@ const setup = (state: SpendingLimitDrawerState) =>
       state={state}
       transactionLink={TRANSACTION_LINK}
       onEdit={jest.fn()}
-      onDelete={jest.fn()}
       onReviewTransaction={jest.fn()}
       onConnectWallet={jest.fn()}
     />,
@@ -24,7 +23,6 @@ describe('SpendingLimitActions', () => {
         state={{ kind: 'active', action: 'connect', disabled: false, helper: 'Connect a signer wallet to edit.' }}
         transactionLink={TRANSACTION_LINK}
         onEdit={jest.fn()}
-        onDelete={jest.fn()}
         onReviewTransaction={jest.fn()}
         onConnectWallet={onConnectWallet}
       />,
@@ -55,40 +53,35 @@ describe('SpendingLimitActions', () => {
     expect(screen.queryByText('should never render')).not.toBeInTheDocument()
   })
 
-  it('manage-pair: offers a connected signer delete and edit', async () => {
-    const onDelete = jest.fn()
+  it('manage: offers a connected signer edit, and no delete', async () => {
     const onEdit = jest.fn()
     const { user } = renderWithUserEvent(
       <SpendingLimitActions
         state={{ kind: 'active', action: 'manage', disabled: false }}
         transactionLink={TRANSACTION_LINK}
         onEdit={onEdit}
-        onDelete={onDelete}
         onReviewTransaction={jest.fn()}
         onConnectWallet={jest.fn()}
       />,
     )
 
-    await user.click(screen.getByRole('button', { name: 'Delete' }))
+    expect(screen.queryByRole('button', { name: 'Delete' })).not.toBeInTheDocument()
+
     await user.click(screen.getByRole('button', { name: 'Edit' }))
 
-    expect(onDelete).toHaveBeenCalledTimes(1)
     expect(onEdit).toHaveBeenCalledTimes(1)
   })
 
-  it('manage-pair: disables both actions for a non-signer and explains why', () => {
+  it('manage: disables editing for a non-signer and explains why', () => {
     setup({
       kind: 'active',
       action: 'manage',
       disabled: true,
-      helper: 'Only signers of this Safe account can delete or edit this spending limit.',
+      helper: 'Only signers of this Safe account can edit this spending limit.',
     })
 
-    expect(screen.getByRole('button', { name: 'Delete' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled()
-    expect(
-      screen.getByText('Only signers of this Safe account can delete or edit this spending limit.'),
-    ).toBeInTheDocument()
+    expect(screen.getByText('Only signers of this Safe account can edit this spending limit.')).toBeInTheDocument()
   })
 
   describe('copy-link', () => {

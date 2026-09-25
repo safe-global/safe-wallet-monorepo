@@ -36,7 +36,7 @@ describe('active states', () => {
       kind: 'active',
       action: 'manage',
       disabled: true,
-      helper: 'Only signers of this Safe account can delete or edit this spending limit.',
+      helper: 'Only signers of this Safe account can edit this spending limit.',
     })
   })
 })
