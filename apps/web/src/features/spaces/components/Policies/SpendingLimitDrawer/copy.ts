@@ -1,4 +1,5 @@
 import type { PendingPolicyOperation } from '../types'
+import { formatAwaitingSignatures } from './format'
 
 export const PENDING_BANNER_TITLE: Record<PendingPolicyOperation, string> = {
   create: 'The spending limit is not active as the transaction is not yet executed.',
@@ -25,3 +26,6 @@ export const connectHelper = (safeName: string): string => `Connect a signer wal
 export const ACTIVE_CONNECT_HELPER = 'Connect a signer wallet to edit.'
 
 export const NOT_A_SIGNER_HELPER = 'Only signers of this Safe account can delete or edit this spending limit.'
+
+/** The trailing full stop lives here, not at the call site, so the sentence is punctuated in one place. */
+export const signedAndWaitingLine = (missing: number): string => `You've signed. ${formatAwaitingSignatures(missing)}.`

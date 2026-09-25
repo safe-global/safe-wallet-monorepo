@@ -6,9 +6,9 @@ import {
   PENDING_BANNER_TITLE,
   connectHelper,
   executeLine,
+  signedAndWaitingLine,
   signAndExecuteLine,
 } from './copy'
-import { formatAwaitingSignatures } from './format'
 
 export type Viewer = {
   address?: string
@@ -68,7 +68,7 @@ const resolvePending = (policy: PendingSpendingLimitPolicy, viewer: Viewer, safe
   if (viewer.hasSigned) {
     const missing = policy.confirmationsRequired - policy.confirmationsSubmitted
 
-    return { ...base, action: 'copy-link', bannerLine2: `You've signed. ${formatAwaitingSignatures(missing)}.` }
+    return { ...base, action: 'copy-link', bannerLine2: signedAndWaitingLine(missing) }
   }
 
   return { ...base, action: 'review', bannerLine2: signAndExecuteLine(policy.operation) }

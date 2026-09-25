@@ -1,4 +1,4 @@
-import { PENDING_BANNER_TITLE, connectHelper, executeLine, signAndExecuteLine } from './copy'
+import { PENDING_BANNER_TITLE, connectHelper, executeLine, signAndExecuteLine, signedAndWaitingLine } from './copy'
 
 describe('pending banner copy', () => {
   it('tells a creating user the limit is not active yet', () => {
@@ -36,5 +36,16 @@ describe('action lines', () => {
 describe('connectHelper', () => {
   it('names the Safe whose signer wallet is wanted', () => {
     expect(connectHelper('Treasury')).toBe('Connect a signer wallet of Treasury to sign.')
+  })
+})
+
+describe('signedAndWaitingLine', () => {
+  // formatAwaitingSignatures returns an unterminated clause; the full stop belongs to this sentence only.
+  it('punctuates the sentence once, and stays singular for the last signature', () => {
+    expect(signedAndWaitingLine(1)).toBe("You've signed. Waiting for 1 more signature.")
+  })
+
+  it('pluralises beyond one', () => {
+    expect(signedAndWaitingLine(2)).toBe("You've signed. Waiting for 2 more signatures.")
   })
 })
