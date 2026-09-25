@@ -4,10 +4,11 @@ import { FormProvider, useFieldArray, useForm } from 'react-hook-form'
 import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import { Button } from '@/components/ui/button'
 import type { SafeAccountEntry } from '../../SafeAccountSelector/types'
+import { findSafeAccount } from '../../SafeAccountSelector/utils'
 import SafeAccountField from './SafeAccountField'
 import SpenderCallout from './SpenderCallout'
 import SpenderCard from './SpenderCard'
-import { createEmptySpender, limitPath, type SpendingLimitPolicyFormValues } from '../types'
+import { createDefaultFormValues, createEmptySpender, type SpendingLimitPolicyFormValues } from '../types'
 import { ADD_SPENDER_LABEL, NEXT_LABEL } from '../constants'
 
 export type SpendingLimitPolicyFormProps = {
@@ -46,29 +47,30 @@ const SpendingLimitPolicyForm = ({
   onDismissCallout,
 }: SpendingLimitPolicyFormProps): ReactElement => {
   const formMethods = useForm<SpendingLimitPolicyFormValues>({ defaultValues, mode: 'onChange' })
-  const { control, handleSubmit, formState, watch, getValues, setValue } = formMethods
+  const { control, handleSubmit, formState, watch, getValues, reset } = formMethods
   const { fields, append, remove } = useFieldArray({ control, name: 'spenders' })
 
-  // A token picked for Safe A must not survive switching to Safe B. The picker clears its own value
-  // too; clearing here as well covers every row, open or not. The first selection is not a switch.
+  // A limit is entered for one Safe: its token exists on that Safe's chain, and only a test chain offers the short
+  // reset periods. Switching Safe therefore starts the policy over rather than leaving fields that describe the
+  // previous one. The first selection is not a switch.
   const previousScopeKey = useRef(scopeKey)
   useEffect(() => {
     const previous = previousScopeKey.current
     previousScopeKey.current = scopeKey
     if (previous === undefined || previous === scopeKey) return
 
-    getValues('spenders').forEach((spender, spenderIndex) =>
-      spender.limits.forEach((_, limitIndex) =>
-        setValue(limitPath(spenderIndex, limitIndex, 'tokenAddress'), '', { shouldValidate: true, shouldDirty: true }),
-      ),
-    )
-  }, [scopeKey, getValues, setValue])
+    reset({ ...createDefaultFormValues(), safe: getValues('safe') })
+  }, [scopeKey, getValues, reset])
 
   // RHF hands back the same mutated array every render, so key on the joined values, not the reference.
   const spenderAddressesKey = (watch('spenders') ?? []).map((spender) => spender?.address ?? '').join(',')
   useEffect(() => {
     onSpendersChange?.(spenderAddressesKey.split(',').filter(Boolean))
   }, [spenderAddressesKey, onSpendersChange])
+
+  // The selector shows a placeholder for a Safe the resolved list lacks (prefilled, or a wallet switch after picking).
+  const selectedSafe = findSafeAccount(accounts, watch('safe'))
+  const isSafeBlocked = !selectedSafe || Boolean(selectedSafe.ineligibleReason)
 
   return (
     <TxCard>
@@ -112,7 +114,7 @@ const SpendingLimitPolicyForm = ({
           </div>
 
           <TxCardActions>
-            <Button type="submit" size="submit" disabled={!formState.isValid} data-testid="next-btn">
+            <Button type="submit" size="submit" disabled={!formState.isValid || isSafeBlocked} data-testid="next-btn">
               {NEXT_LABEL}
             </Button>
           </TxCardActions>

@@ -1,20 +1,29 @@
 import { FormProvider, useForm } from 'react-hook-form'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
+import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import { NO_TOKEN_SELECTED_ERROR } from '@/features/spending-limits/services'
 import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
+import { useExistingSpendingLimits } from '../../ExistingSpendingLimitsProvider'
 import { tokenOptionBuilder } from '../../utils/tokenOptions.fixtures'
 import {
   DUPLICATE_TOKEN_ERROR,
+  EXISTING_LIMIT_ERROR,
   ONE_TIME_HELPER_TEXT,
   PRICE_UNAVAILABLE_TEXT,
   REMOVE_LIMIT_LABEL,
 } from '../../constants'
-import { createEmptyLimit, type LimitFormValues, type SpendingLimitPolicyFormValues } from '../../types'
+import {
+  createEmptyLimit,
+  spenderAddressPath,
+  type LimitFormValues,
+  type SpendingLimitPolicyFormValues,
+} from '../../types'
 import TokenLimitCard from '../TokenLimitCard'
 
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+const SPENDER = '0x1234567890123456789012345678901234567890'
 
 const mockTokens = [
   tokenOptionBuilder()
@@ -79,13 +88,25 @@ jest.mock('../../TokenSelector', () => ({
 
 jest.mock('../../hooks/useSpendingLimitTokenOptions', () => ({ __esModule: true, default: jest.fn() }))
 jest.mock('@/hooks/useChainId', () => ({ __esModule: true, default: () => '1' }))
+jest.mock('../../ExistingSpendingLimitsProvider', () => ({
+  useExistingSpendingLimits: jest.fn(() => ({ loading: false })),
+}))
 
 const mockUseOptions = useSpendingLimitTokenOptions as jest.MockedFunction<typeof useSpendingLimitTokenOptions>
+const mockUseExisting = useExistingSpendingLimits as jest.MockedFunction<typeof useExistingSpendingLimits>
 
-const Harness = ({ limits, onRemove = jest.fn() }: { limits: LimitFormValues[]; onRemove?: () => void }) => {
+const Harness = ({
+  limits,
+  spender = '',
+  onRemove = jest.fn(),
+}: {
+  limits: LimitFormValues[]
+  spender?: string
+  onRemove?: () => void
+}) => {
   const methods = useForm<SpendingLimitPolicyFormValues>({
     mode: 'onChange',
-    defaultValues: { safe: `1:${ZERO_ADDRESS}`, spenders: [{ address: '', limits }] },
+    defaultValues: { safe: `1:${ZERO_ADDRESS}`, spenders: [{ address: spender, limits }] },
   })
   return (
     <FormProvider {...methods}>
@@ -102,12 +123,15 @@ const Harness = ({ limits, onRemove = jest.fn() }: { limits: LimitFormValues[]; 
       <button type="button" onClick={() => methods.trigger()}>
         validate
       </button>
+      <button type="button" onClick={() => methods.setValue(spenderAddressPath(0), SPENDER, { shouldDirty: true })}>
+        set spender
+      </button>
     </FormProvider>
   )
 }
 
-const renderRows = (limits: LimitFormValues[] = [createEmptyLimit()], onRemove?: () => void) =>
-  renderWithUserEvent(<Harness limits={limits} onRemove={onRemove} />)
+const renderRows = (limits: LimitFormValues[] = [createEmptyLimit()], onRemove?: () => void, spender?: string) =>
+  renderWithUserEvent(<Harness limits={limits} onRemove={onRemove} spender={spender} />)
 
 describe('TokenLimitCard', () => {
   beforeEach(() => {
@@ -218,6 +242,58 @@ describe('TokenLimitCard', () => {
     await user.click(screen.getByRole('button', { name: 'validate' }))
 
     expect(await screen.findAllByText(DUPLICATE_TOKEN_ERROR)).not.toHaveLength(0)
+  })
+
+  describe('existing on-chain limits', () => {
+    const existingUsdc = spendingLimitStateBuilder()
+      .with({ beneficiary: SPENDER, token: { ...spendingLimitStateBuilder().build().token, address: USDC } })
+      .build()
+
+    afterEach(() => {
+      mockUseExisting.mockReturnValue({ loading: false })
+    })
+
+    it('hides a token the spender already has a limit for', () => {
+      mockUseExisting.mockReturnValue({ limits: [existingUsdc], loading: false })
+
+      renderRows([createEmptyLimit()], undefined, SPENDER)
+
+      const options = Array.from(screen.getByTestId('limit-token-selector').querySelectorAll('option')).map(
+        (option) => option.textContent,
+      )
+      expect(options).toEqual(['none', 'ETH', 'DAI'])
+    })
+
+    it('keeps the token for a spender without a limit on it', () => {
+      mockUseExisting.mockReturnValue({ limits: [existingUsdc], loading: false })
+
+      renderRows([createEmptyLimit()], undefined, '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd')
+
+      expect(screen.getByRole('option', { name: 'USDC' })).toBeInTheDocument()
+    })
+
+    it('flags a token picked before the limits loaded once they arrive', async () => {
+      // Same element type on rerender keeps the Harness instance, so the form state survives and only the hook changes.
+      const picked = [{ ...createEmptyLimit(), tokenAddress: USDC }]
+      mockUseExisting.mockReturnValue({ loading: true })
+      const { rerender } = renderRows(picked, undefined, SPENDER)
+      expect(screen.queryByTestId('token-error')).not.toBeInTheDocument()
+
+      mockUseExisting.mockReturnValue({ limits: [existingUsdc], loading: false })
+      rerender(<Harness limits={picked} spender={SPENDER} />)
+
+      await waitFor(() => expect(screen.getByTestId('token-error')).toHaveTextContent(EXISTING_LIMIT_ERROR))
+    })
+
+    it('flags a token once the spender typed later already has a limit for it', async () => {
+      mockUseExisting.mockReturnValue({ limits: [existingUsdc], loading: false })
+      const { user } = renderRows([{ ...createEmptyLimit(), tokenAddress: USDC }])
+      expect(screen.queryByTestId('token-error')).not.toBeInTheDocument()
+
+      await user.click(screen.getByRole('button', { name: 'set spender' }))
+
+      await waitFor(() => expect(screen.getByTestId('token-error')).toHaveTextContent(EXISTING_LIMIT_ERROR))
+    })
   })
 
   it('offers to remove the row only when the spender has more than one', async () => {

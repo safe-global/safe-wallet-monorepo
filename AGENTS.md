@@ -38,6 +38,14 @@ yarn turbo run test --filter=...@safe-global/utils     # package + dependents
 
 Cache directory is `.turbo/` (gitignored). Task definitions live in `turbo.json`. Remote-cache setup (one-time, per team): [docs/turbo-remote-cache.md](docs/turbo-remote-cache.md).
 
+### Two TypeScript compilers
+
+Every workspace's `type-check` script runs `yarn run -T -B tsc --noEmit`, which resolves to the native TypeScript 7 compiler installed at the root under the `@typescript/native` alias (TS 7 cannot be installed under its real name with the pinned Yarn). Workspaces keep `typescript@5.9` as their own dependency because TS 7.0 ships no compiler API and typescript-eslint, ts-jest, ts-node, Next and Cypress all load one. Consequences:
+
+- `yarn workspace <name> tsc` is 5.9; `yarn workspace <name> type-check` is 7. Use the script.
+- tsconfigs must satisfy both compilers: no `baseUrl`, `moduleResolution: node`, or `downlevelIteration`; list `types` explicitly (TS 7 does not auto-include `node_modules/@types`). The one exception is `apps/web/cypress/tsconfig.json`, which restores `baseUrl` for the Cypress bundler only.
+- The editor uses 5.9 unless its TypeScript SDK is repointed, so a TS 7-only error can show green locally until `type-check` runs.
+
 ## Architecture Overview
 
 - **apps/web** – the main app (Next.js)
@@ -102,6 +110,7 @@ Verify your changes with the repo's `verify` scripts before committing — runni
 **Rules for agents:**
 
 - Run the scoped check for the workspace you changed and fix all errors before moving on
+- **Always run verify, type-check, lint, and test commands in a sub-agent, never in the main context.** These runs are long and would block all further progress; the parent delegates the run, keeps working, and only waits for the sub-agent's result at the point it needs a pass (before committing). `verify` snapshots the changed-file list when it starts, so if the worktree changes while a check is running (further edits by the user or the parent), the parent must stop that sub-agent and start a fresh run — only a run started after the last edit counts. Fix whatever the sub-agent reports before moving on
 - If a significant code change has no colocated unit test, write one before committing
 - Do NOT run type-check, lint, prettier, and test separately — `verify` runs them all; it only **checks** formatting (never writes), so if it reports formatting errors, run `yarn prettier:fix` once and re-check. **CI rejects unformatted code.**
 - Do NOT commit without a clean scoped-check pass

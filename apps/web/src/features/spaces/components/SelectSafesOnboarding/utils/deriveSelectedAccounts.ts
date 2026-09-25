@@ -3,7 +3,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { SafeAppMockupAccount } from '../../OnboardingLayout/mockup/types'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../constants'
 
-// Dedupes by address: a Safe deployed on multiple chains appears once.
+/** The selected Safes as side-panel accounts, deduped by address so a multichain Safe appears once. */
 export const deriveSidePanelAccounts = (
   selectedSafes: Record<string, boolean>,
   allSafes: AllSafeItems,
@@ -55,8 +55,11 @@ export const deriveSidePanelAccounts = (
   return accounts
 }
 
-// Falls back to flattening the persisted Space safes when the form is not yet initialised —
-// otherwise navigating back from a later step would leave the mockup empty.
+/**
+ * The per-chain Safes behind the current selection, which the mockup totals a balance from. Falls back
+ * to the persisted Space safes while the form is uninitialised, so navigating back from a later step
+ * does not leave the mockup empty.
+ */
 export const deriveSelectedBalanceSafes = (
   selectedSafes: Record<string, boolean>,
   allSafes: AllSafeItems,
@@ -91,8 +94,10 @@ export const deriveSelectedBalanceSafes = (
   return result
 }
 
-// spaceSafes only carry names the user manually set in the Space address book and are
-// usually empty for freshly-added safes — fall back to the user's global trusted + owned safes.
+/**
+ * Address to name across the user's trusted and owned safes. spaceSafes only carry names set in the
+ * Space address book and are usually empty for freshly-added safes, so this stands in for them.
+ */
 export const deriveNameByAddress = (allSafes: AllSafeItems): Map<string, string> => {
   const map = new Map<string, string>()
   const add = (address: string, name: string | undefined) => {

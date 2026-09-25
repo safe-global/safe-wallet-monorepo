@@ -100,7 +100,7 @@ function EntryDialog({
           <div className="p-6">
             {scope === 'workspace' && (
               <p data-testid="entry-scope-notice" className="text-muted-foreground mb-4 text-sm">
-                This name is saved to {workspaceLabel} and is visible to everyone in the workspace.
+                This name is saved to {workspaceLabel} and is visible to everyone in the Workspace.
               </p>
             )}
 

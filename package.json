@@ -45,6 +45,7 @@
   "devDependencies": {
     "@storybook/builder-webpack5": "^10.2.6",
     "@storybook/react": "^10.2.6",
+    "@typescript/native": "npm:typescript@7.0.2",
     "ajv": "^8.18.0",
     "ajv-formats": "^3.0.1",
     "husky": "^9.1.6",

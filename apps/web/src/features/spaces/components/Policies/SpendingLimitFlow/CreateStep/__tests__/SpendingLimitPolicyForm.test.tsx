@@ -112,6 +112,13 @@ const treasury: SafeAccountOption = {
   chain: { chainId: '1', chainName: 'Ethereum', chainLogoUri: null, shortName: 'eth' },
 }
 
+const notActivated: SafeAccountOption = {
+  ...treasury,
+  id: buildSafeAccountId('137', SAFE_A),
+  chainId: '137',
+  ineligibleReason: 'not-activated',
+}
+
 const renderForm = (props: Partial<SpendingLimitPolicyFormProps> = {}) => {
   const onSubmit = jest.fn()
   const onSafeChange = jest.fn()
@@ -196,6 +203,41 @@ describe('SpendingLimitPolicyForm', () => {
     )
   })
 
+  it('keeps Next disabled when the prefilled Safe is not activated', async () => {
+    const { user } = renderForm({
+      accounts: [treasury, notActivated],
+      defaultValues: { ...createDefaultFormValues(), safe: notActivated.id },
+    })
+
+    await fillFirstSpender(user)
+
+    await waitFor(() => expect(screen.getAllByTestId('limit-amount-input')[0]).toHaveValue('1'))
+    expect(screen.getByRole('button', { name: NEXT_LABEL })).toBeDisabled()
+  })
+
+  it('keeps Next disabled when the prefilled Safe is missing from the resolved accounts', async () => {
+    const { user } = renderForm({
+      accounts: [treasury],
+      defaultValues: { ...createDefaultFormValues(), safe: notActivated.id },
+    })
+
+    await fillFirstSpender(user)
+
+    await waitFor(() => expect(screen.getAllByTestId('limit-amount-input')[0]).toHaveValue('1'))
+    expect(screen.getByRole('button', { name: NEXT_LABEL })).toBeDisabled()
+  })
+
+  it('enables Next when the prefilled Safe is activated', async () => {
+    const { user } = renderForm({
+      accounts: [treasury, notActivated],
+      defaultValues: { ...createDefaultFormValues(), safe: treasury.id },
+    })
+
+    await fillFirstSpender(user)
+
+    await waitFor(() => expect(screen.getByRole('button', { name: NEXT_LABEL })).toBeEnabled())
+  })
+
   it('keeps Next disabled while a second spender is incomplete', async () => {
     const { user } = renderForm()
 
@@ -234,15 +276,27 @@ describe('SpendingLimitPolicyForm', () => {
     await waitFor(() => expect(onSpendersChange).toHaveBeenLastCalledWith([SPENDER]))
   })
 
-  it('clears every token selection when the scoped Safe changes, keeping spenders and amounts', async () => {
-    const { user, rerender, buildUi } = renderForm({ scopeKey: `1:${SAFE_A}` })
+  it('starts the policy over when the scoped Safe changes, keeping only the new Safe', async () => {
+    const { rerender, buildUi } = renderForm({
+      scopeKey: `1:${SAFE_A}`,
+      defaultValues: {
+        safe: `1:${SAFE_A}`,
+        spenders: [
+          { address: SPENDER, limits: [{ tokenAddress: ZERO_ADDRESS, amount: '1', resetTime: '10080' }] },
+          { address: SPENDER_B, limits: [{ tokenAddress: USDC, amount: '2', resetTime: '0' }] },
+        ],
+      },
+    })
 
-    await fillFirstSpender(user)
     rerender(buildUi({ scopeKey: `137:${SAFE_A}` }))
 
-    await waitFor(() => expect(screen.getAllByTestId('limit-token-selector')[0]).toHaveValue(''))
-    expect(screen.getAllByTestId('spender-address-input')[0]).toHaveValue(SPENDER)
-    expect(screen.getAllByTestId('limit-amount-input')[0]).toHaveValue('1')
+    await waitFor(() => expect(screen.getAllByTestId('spender-card')).toHaveLength(1))
+    expect(screen.getByTestId('spender-address-input')).toHaveValue('')
+    expect(screen.getByTestId('limit-token-selector')).toHaveValue('')
+    expect(screen.getByTestId('limit-amount-input')).toHaveValue('')
+    expect(screen.getByTestId('frequency-select')).toHaveTextContent('One time')
+    expect(screen.getByLabelText(SAFE_ACCOUNT_SELECTOR_LABEL)).toHaveTextContent('Treasury')
+    await waitFor(() => expect(screen.getByRole('button', { name: NEXT_LABEL })).toBeDisabled())
   })
 
   it('does not clear anything on the first Safe selection', async () => {

@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card'
 import { Typography } from '@/components/ui/typography'
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
 import type { CreateSafeInfoVariant } from '@/components/new-safe/create/CreateSafeInfos'
-import css from 'src/components/new-safe/create/InfoWidget/styles.module.css'
+import css from '@/components/new-safe/create/InfoWidget/styles.module.css'
 import { CREATE_SAFE_EVENTS, trackEvent } from '@/services/analytics'
 
 type InfoWidgetProps = {

@@ -1,10 +1,11 @@
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { TransactionStatus } from '@safe-global/store/gateway/types'
 import { useEffect, useMemo, useRef } from 'react'
 import { formatError } from '@safe-global/utils/utils/formatters'
 import { selectNotifications, showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
-import { useCurrentChain } from './useChains'
+import useChains, { useCurrentChain } from './useChains'
 import useTxQueue from './useTxQueue'
 import { isSignableBy, isTransactionQueuedItem } from '@/utils/transaction-guards'
 import { selectPendingTxs } from '@/store/pendingTxsSlice'
@@ -55,9 +56,23 @@ enum Variant {
 
 const successEvents = [TxEvent.PROPOSED, TxEvent.SIGNATURE_PROPOSED, TxEvent.ONCHAIN_SIGNATURE_SUCCESS, TxEvent.SUCCESS]
 
+/** Where the toast points: the transaction page for a queued tx, the explorer for a hash, nowhere without a chain. */
+const getNotificationLink = (
+  chain: Chain | undefined,
+  safeAddress: string,
+  txId: string | undefined,
+  txHash: string | undefined,
+): ReturnType<typeof getTxLink> | ReturnType<typeof getExplorerLink> | undefined => {
+  if (!chain) return undefined
+  if (txId) return getTxLink(txId, chain, safeAddress)
+  if (txHash) return getExplorerLink(txHash, chain.blockExplorerUriTemplate)
+  return undefined
+}
+
 const useTxNotifications = (): void => {
   const dispatch = useAppDispatch()
   const chain = useCurrentChain()
+  const { configs } = useChains()
   const safeAddress = useSafeAddress()
   const [trigger] = useLazyTransactionsGetTransactionByIdV1Query()
   const isTxFlowOpenRef = useIsTxFlowOpenRef()
@@ -79,6 +94,14 @@ const useTxNotifications = (): void => {
         // notification center — a toast would only repeat what the flow says.
         if (isError && isTxFlowOpenRef.current) return
         const isSuccess = successEvents.includes(event)
+
+        // A Space-level flow acts on a Safe the page is not on, so the Safe an event names beats the URL's. A chain
+        // the app does not know yields no link at all, never the page's chain paired with the event's address.
+        const eventSafe =
+          'safeAddress' in detail ? { chainId: detail.chainId, safeAddress: detail.safeAddress } : undefined
+        const txChainId = eventSafe?.chainId ?? chain.chainId
+        const txSafeAddress = eventSafe?.safeAddress ?? safeAddress
+        const txChain = eventSafe ? configs.find((config) => config.chainId === eventSafe.chainId) : chain
 
         // Check if this is a Guard error
         const guardErrorName = isError ? getGuardErrorInfo(detail.error) : undefined
@@ -134,7 +157,7 @@ const useTxNotifications = (): void => {
         const id = txId || txHash
         if (id) {
           try {
-            const { data: txDetails } = await trigger({ chainId: chain.chainId, id })
+            const { data: txDetails } = await trigger({ chainId: txChainId, id })
             humanDescription = txDetails?.txInfo.humanDescription || humanDescription
           } catch {}
         }
@@ -151,11 +174,7 @@ const useTxNotifications = (): void => {
                   : undefined,
             groupKey,
             variant: isError ? Variant.ERROR : isSuccess ? Variant.SUCCESS : Variant.INFO,
-            link: txId
-              ? getTxLink(txId, chain, safeAddress)
-              : txHash
-                ? getExplorerLink(txHash, chain.blockExplorerUriTemplate)
-                : undefined,
+            link: getNotificationLink(txChain, txSafeAddress, txId, txHash),
           }),
         )
       }),
@@ -164,7 +183,7 @@ const useTxNotifications = (): void => {
     return () => {
       unsubFns.forEach((unsub) => unsub())
     }
-  }, [dispatch, safeAddress, chain, trigger, isTxFlowOpenRef])
+  }, [dispatch, safeAddress, chain, configs, trigger, isTxFlowOpenRef])
 
   /**
    * If there's at least one transaction awaiting confirmations, show a notification for it

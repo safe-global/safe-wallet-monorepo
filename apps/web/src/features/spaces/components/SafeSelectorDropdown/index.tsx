@@ -154,6 +154,9 @@ function SafeSelectorDropdown({
       onValueChange={handleSafeChange}
       open={isPopupOpen}
       onOpenChange={isDisabled ? undefined : handleOpenChangeWithReset}
+      // base-ui highlights by moving DOM focus with the pointer, pulling it off the search input on
+      // hover and on leaving the popup. Rows use :hover styles instead.
+      highlightItemOnHover={false}
       // Deliberately not disabled: a disabled <button> blocks the inline address actions (copy,
       // explorer, env hint). Safe switching is prevented by the forced-closed `open` above instead.
     >
