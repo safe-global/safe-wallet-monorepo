@@ -14,6 +14,7 @@ import { useSpaceSafes } from '../../hooks/useSpaceSafes'
 import { useOnboardingStepCount } from '../../hooks/useOnboardingStepCount'
 import OnboardingSafesList from './components/OnboardingSafesList'
 import SelectedCounter, { safeLimitTooltip } from '../SelectedCounter'
+import SafeLimitError from '../SelectedCounter/SafeLimitError'
 import { useSpaceSafeLimit } from '../../hooks/useSpaceSafeLimit'
 import ConnectWalletHint from '../ConnectWalletHint'
 import { NameAccountsFields } from '../NameAccounts'
@@ -59,9 +60,17 @@ const SelectSafesOnboarding = (): ReactElement => {
   const isNameStep = step === 'name'
 
   const { control, setValue } = formMethods
-  const { limit } = useSpaceSafeLimit(spaceId)
-  const { selectedKeys, seatCount, isAtLimit, handleToggle, pendingConfirmation, confirmPending, cancelPending } =
-    useOnboardingSelection({ items: allSafes, control, setValue, flaggedAddresses, limit })
+  const { limit, isError: isLimitError, retry: retryLimit } = useSpaceSafeLimit(spaceId)
+  const {
+    selectedKeys,
+    seatCount,
+    isAtLimit,
+    isSelectionLocked,
+    handleToggle,
+    pendingConfirmation,
+    confirmPending,
+    cancelPending,
+  } = useOnboardingSelection({ items: allSafes, control, setValue, flaggedAddresses, limit })
 
   const { data: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !spaceId })
   const { allSafes: spaceSafes } = useSpaceSafes()
@@ -147,10 +156,12 @@ const SelectSafesOnboarding = (): ReactElement => {
                   similarWarnings={similarWarnings}
                   selectedKeys={selectedKeys}
                   onToggle={handleToggle}
-                  isAtLimit={isAtLimit}
+                  isAtLimit={isSelectionLocked}
                 />
               )}
             </div>
+
+            {isLimitError && <SafeLimitError onRetry={retryLimit} />}
           </>
         )}
 

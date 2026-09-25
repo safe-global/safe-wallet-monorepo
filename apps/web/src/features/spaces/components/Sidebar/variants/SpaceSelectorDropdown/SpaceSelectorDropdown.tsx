@@ -36,6 +36,7 @@ import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useSpacePlan } from '../../../../hooks/useSpacePlan'
 import { useSpaceSafeLimit } from '../../../../hooks/useSpaceSafeLimit'
+import { isSpaceAtSafeLimit } from '@/utils/spaces'
 import { trialLabel } from '../../../../hooks/billing/subscription'
 
 export const SAFE_ALREADY_IN_WORKSPACE_TOOLTIP = 'Safe is already in this Workspace'
@@ -293,7 +294,7 @@ const SpaceMenuRow = ({
     [spaceSafes, safeAddress],
   )
   const { limit } = useSpaceSafeLimit(shouldCheckMembership ? space.uuid : null)
-  const atSafeLimit = isAddToWorkspace && limit !== null && space.safeCount >= limit && !holdsSeat
+  const atSafeLimit = isAddToWorkspace && isSpaceAtSafeLimit(space.safeCount, limit) && !holdsSeat
 
   const isDisabled = loadingSpaceId !== null || (isAddToWorkspace && (!isAdmin || atSafeLimit || isAlreadyAdded))
 
