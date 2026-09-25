@@ -1,5 +1,3 @@
-import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import { useCallback } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store'
 import useChainId from '@/hooks/useChainId'
@@ -11,40 +9,16 @@ import { txDispatch, TxEvent } from '@/services/tx/txEvents'
 import { shallowEqual } from 'react-redux'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import { decodeMultiSendData } from '@safe-global/protocol-kit'
-import { OperationType } from '@safe-global/types-kit'
+import { OperationType, type SafeTransaction } from '@safe-global/types-kit'
 
-/**
- * Get the call-only transactions from the transaction details
- * @param txDetails - The transaction details
- * @returns The call-only transactions
- */
-const getCallOnlyTxsFromDetails = (txDetails: TransactionDetails): CallOnlyTxData[] => {
-  const hexData = txDetails.txData?.hexData
+const getCallOnlyTxs = (safeTx: SafeTransaction): CallOnlyTxData[] => {
+  const { to, value, data } = safeTx.data
 
-  // If it is a multisend, we decode the data to get the individual transactions
-  if (hexData && isMultiSendCalldata(hexData)) {
-    const decodedTxs = decodeMultiSendData(hexData)
-    return decodedTxs.map((tx) => ({
-      to: tx.to,
-      value: tx.value,
-      data: tx.data,
-      operation: OperationType.Call,
-    }))
+  if (isMultiSendCalldata(data)) {
+    return decodeMultiSendData(data).map((tx) => ({ ...tx, operation: OperationType.Call }))
   }
 
-  // If it is a single transaction, we return the transaction data
-  if (txDetails.txData) {
-    return [
-      {
-        to: txDetails.txData.to.value,
-        value: txDetails.txData.value ?? '0',
-        operation: OperationType.Call,
-        data: txDetails.txData.hexData ?? '0x',
-      },
-    ]
-  }
-
-  return []
+  return [{ to, value, data, operation: OperationType.Call }]
 }
 
 export const useUpdateBatch = () => {
@@ -53,23 +27,14 @@ export const useUpdateBatch = () => {
   const dispatch = useAppDispatch()
 
   const onAdd = useCallback(
-    async (txDetails: TransactionDetails): Promise<void> => {
-      const txs: CallOnlyTxData[] = getCallOnlyTxsFromDetails(txDetails)
-      txs.forEach((tx) => {
-        dispatch(
-          addTx({
-            chainId,
-            safeAddress,
-            txData: tx,
-          }),
-        )
+    async (safeTx: SafeTransaction): Promise<void> => {
+      getCallOnlyTxs(safeTx).forEach((txData) => {
+        dispatch(addTx({ chainId, safeAddress, txData }))
       })
 
-      if (isMultisigExecutionInfo(txDetails.detailedExecutionInfo)) {
-        txDispatch(TxEvent.BATCH_ADD, { txId: txDetails.txId, nonce: txDetails.detailedExecutionInfo.nonce })
-      }
+      txDispatch(TxEvent.BATCH_ADD, { nonce: safeTx.data.nonce })
 
-      trackEvent({ ...BATCH_EVENTS.BATCH_TX_APPENDED, label: txDetails.txInfo.type })
+      trackEvent(BATCH_EVENTS.BATCH_TX_APPENDED)
     },
     [dispatch, chainId, safeAddress],
   )

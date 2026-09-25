@@ -29,7 +29,6 @@ import { useHasPendingTxs } from '@/hooks/usePendingTxs'
 import { runExecutionPreChecks } from '@/services/tx/executionPreChecks'
 import { getSafeTxGas, getNonces } from '@/services/tx/tx-sender/recommendedNonce'
 import useAsync from '@safe-global/utils/hooks/useAsync'
-import { useUpdateBatch } from '@/features/batching'
 import { useCurrentChain } from '@/hooks/useChains'
 import { useLoadFeature } from '@/features/__core__'
 import { GTFFeature } from '@/features/gtf'
@@ -39,7 +38,6 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 
 type TxActions = {
-  addToBatch: (safeTx?: SafeTransaction, origin?: string) => Promise<string>
   signTx: (safeTx?: SafeTransaction, txId?: string, origin?: string) => Promise<string>
   executeTx: (
     txOptions: TransactionOptions,
@@ -54,9 +52,9 @@ type TxActions = {
 }
 
 /**
- * Returns transaction action functions for signing, executing, and batching
+ * Returns transaction action functions for signing, executing and proposing
  *
- * @returns Object containing signTx, executeTx, addToBatch, signProposerTx, proposeTx
+ * @returns Object containing signTx, executeTx, signProposerTx, proposeTx
  */
 export const useTxActions = (): TxActions => {
   const { safe } = useSafeInfo()
@@ -64,7 +62,6 @@ export const useTxActions = (): TxActions => {
   const onboard = useOnboard()
   const signer = useSigner()
   const wallet = useWallet()
-  const [addTxToBatch] = useUpdateBatch()
   const chain = useCurrentChain()
   const dispatch = useAppDispatch()
   const gtfFeature = useLoadFeature(GTFFeature)
@@ -113,16 +110,6 @@ export const useTxActions = (): TxActions => {
     const proposeTx: TxActions['proposeTx'] = async (safeTx, origin) => {
       assertTx(safeTx)
       return _propose(wallet?.address || safe.owners[0].value, safeTx, origin)
-    }
-
-    const addToBatch: TxActions['addToBatch'] = async (safeTx, origin) => {
-      assertTx(safeTx)
-      assertProvider(signer?.provider)
-
-      const tx = await _propose(signer.address, safeTx, origin)
-
-      await addTxToBatch(tx)
-      return tx.txId
     }
 
     const signRelayedTx = async (safeTx: SafeTransaction, txId?: string): Promise<SafeTransaction> => {
@@ -228,7 +215,7 @@ export const useTxActions = (): TxActions => {
       return txId
     }
 
-    return { addToBatch, signTx, executeTx, signProposerTx, proposeTx }
+    return { signTx, executeTx, signProposerTx, proposeTx }
   }, [
     safe,
     scope,
@@ -237,7 +224,6 @@ export const useTxActions = (): TxActions => {
     signer?.address,
     signer?.chainId,
     signer?.isSafe,
-    addTxToBatch,
     onboard,
     chain,
     dispatch,
