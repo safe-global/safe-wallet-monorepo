@@ -6,21 +6,24 @@ import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 import type { AnalyticsEvent } from '@/services/analytics/types'
 import { ProHighlight } from '@/components/common/ProHighlight'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { cn } from '@/utils/cn'
 
 type Item = {
   label: string
   url: string
   trackEvent?: AnalyticsEvent
-  /** Workspaces are the Safe Pro side of the app: the tab is named after it and wears the brand underline. */
-  pro?: boolean
+  /** Under SAFE_PRO the Workspaces tab is named after Safe Pro and wears the brand underline. */
+  proLabel?: string
 }
 
 const navItems: Item[] = [
   {
-    label: 'Safe Pro',
+    label: 'Workspaces',
     url: AppRoutes.welcome.spaces,
     trackEvent: { ...SPACE_EVENTS.OPEN_SPACE_LIST_PAGE, label: SPACE_LABELS.accounts_page },
-    pro: true,
+    proLabel: 'Safe Pro',
   },
   {
     label: 'My accounts',
@@ -30,6 +33,7 @@ const navItems: Item[] = [
 
 const AccountsNavigation = () => {
   const router = useRouter()
+  const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
 
   const activeUrl = navItems.some((item) => item.url === router.pathname) ? router.pathname : navItems[0].url
 
@@ -40,7 +44,7 @@ const AccountsNavigation = () => {
   }
 
   return (
-    <Tabs value={activeUrl} className="w-full max-w-116">
+    <Tabs value={activeUrl} className={cn('w-full', isSafePro ? 'max-w-116' : 'max-w-110')}>
       <TabsList variant="toggle" size="lg" aria-label="Accounts navigation" className="w-full">
         {navItems.map((item) => (
           <TabsTrigger
@@ -49,7 +53,7 @@ const AccountsNavigation = () => {
             nativeButton={false}
             render={<NextLink href={item.url} onClick={handleClick(item)} />}
           >
-            {item.pro ? <ProHighlight>{item.label}</ProHighlight> : item.label}
+            {isSafePro && item.proLabel ? <ProHighlight>{item.proLabel}</ProHighlight> : item.label}
           </TabsTrigger>
         ))}
       </TabsList>
