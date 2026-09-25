@@ -1,4 +1,5 @@
 import { getQuotaExceededError } from '@safe-global/utils/services/quotaErrors'
+import type { SafeLimit } from '@/utils/spaces'
 
 const safeAccountsLimitRaw = Number.parseInt(process.env.NEXT_PUBLIC_SPACES_SAFE_ACCOUNTS_LIMIT ?? '', 10)
 
@@ -25,13 +26,13 @@ export const getSeatLimitMessage = (error: unknown): string | undefined => {
 }
 
 /** A counterfactual Safe was kept in My accounts because the Workspace has no seat left. */
-export const seatLimitSkippedMessage = (limit: number | null): string => {
-  const seats = limit === null ? 'seat limit' : `limit of ${limit} Safe accounts`
+export const seatLimitSkippedMessage = (limit: SafeLimit): string => {
+  const seats = typeof limit === 'number' ? `limit of ${limit} Safe accounts` : 'seat limit'
   return `Safe created in My accounts. The Workspace is at its ${seats}, so it wasn't added there.`
 }
 
 /** Notice before creating a Safe that stays out of a full Workspace; `outcome` names what happens to it. */
-export const seatLimitNotice = (limit: number | null, outcome: string): string =>
+export const seatLimitNotice = (limit: SafeLimit, outcome: string): string =>
   `This Workspace is at its limit of ${limit} Safe accounts. ${outcome} in My accounts, outside the Workspace.`
 
 export const seatsTooltip = (tierName: string | undefined, quota: number | null | undefined) =>
@@ -41,7 +42,8 @@ export const seatsTooltip = (tierName: string | undefined, quota: number | null 
 export const selectSeatsTooltip = (planName: string, limit: number): string =>
   `${planName} covers ${limit} Safe accounts. Safe accounts you leave out remain available outside the Workspace. You can swap them in any time.`
 
-export const safeLimitTooltip = (limit: number | null): string =>
-  limit === null
-    ? 'Your plan has no limit on Safe accounts per Workspace'
-    : `You can add up to ${limit} Safe accounts per Workspace`
+export const safeLimitTooltip = (limit: SafeLimit): string => {
+  if (limit === undefined) return "Your plan's Safe account limit isn't available yet"
+  if (limit === null) return 'Your plan has no limit on Safe accounts per Workspace'
+  return `You can add up to ${limit} Safe accounts per Workspace`
+}

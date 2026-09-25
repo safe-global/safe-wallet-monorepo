@@ -1,6 +1,7 @@
 import { Info } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Typography } from '@/components/ui/typography'
+import type { SafeLimit } from '@/utils/spaces'
 
 const SelectedCounter = ({
   count,
@@ -10,8 +11,8 @@ const SelectedCounter = ({
   showSelected = true,
 }: {
   count: number
-  /** Null when the plan has no cap on Safe accounts. */
-  limit: number | null
+  /** Null when the plan has no cap on Safe accounts, undefined while the cap is unknown. */
+  limit: SafeLimit
   isAtLimit: boolean
   tooltip: string
   /** Off for a plain usage readout ("3 of 20") rather than a selection ("3 of 20 selected"). */
@@ -26,7 +27,7 @@ const SelectedCounter = ({
     <span>
       {/* Fixed-width, right-aligned digit cell so the row doesn't shift when the count changes width. */}
       <span className="inline-block min-w-[2ch] text-right tabular-nums">{count}</span>
-      {limit === null ? '' : ` of ${limit}`}
+      {typeof limit === 'number' ? ` of ${limit}` : ''}
       {showSelected && ' selected'}
     </span>
     <Tooltip>

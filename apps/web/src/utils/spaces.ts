@@ -8,9 +8,12 @@ export const normalizeSpaceId = (spaceId: string | null): string | null => {
   return spaceId
 }
 
-/** False when the count is unknown or the plan is unlimited (`limit === null`). */
-export const isSpaceAtSafeLimit = (safeCount: number | undefined, limit: number | null): boolean =>
-  safeCount !== undefined && limit !== null && safeCount >= limit
+/** A Workspace's Safe account cap: `null` is unlimited, `undefined` is not known yet (loading or failed). */
+export type SafeLimit = number | null | undefined
+
+/** False when the count or the limit is unknown, or the plan is unlimited. */
+export const isSpaceAtSafeLimit = (safeCount: number | undefined, limit: SafeLimit): boolean =>
+  safeCount !== undefined && typeof limit === 'number' && safeCount >= limit
 
 /** The address of a `chainId:address` Safe key. */
 export const addressOfSafeKey = (key: string): string => key.slice(key.indexOf(':') + 1)

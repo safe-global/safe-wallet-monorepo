@@ -15,7 +15,7 @@ import { replayCounterfactualSafeDeployment } from './safeDeployment'
 import { enqueuePendingCfDelete } from '../store/pendingCfDeletesSlice'
 import { removeUndeployedSafe } from '../store/undeployedSafesSlice'
 import { showNotification } from '@/store/notificationsSlice'
-import { isSpaceAtSafeLimit, normalizeSpaceId } from '@/utils/spaces'
+import { isSpaceAtSafeLimit, normalizeSpaceId, type SafeLimit } from '@/utils/spaces'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 import { seatLimitSkippedMessage } from '@/features/spaces/constants'
 import { getQuotaExceededError } from '@safe-global/utils/services/quotaErrors'
@@ -39,8 +39,8 @@ type PersistArgs = {
    *  the backend would reject the add; the safe is still persisted at the user
    *  level and the user is informed via a toast. */
   spaceSafeCount?: number
-  /** Seats the space's plan allows (`useSpaceSafeLimit`); `null` = unlimited. */
-  spaceSafeLimit: number | null
+  /** Seats the space's plan allows (`useSpaceSafeLimit`); `null` = unlimited, `undefined` = unknown, so the backend decides. */
+  spaceSafeLimit: SafeLimit
   /** The Safe address is already in the space on another chain, so this add takes no new seat. */
   holdsSeatInSpace?: boolean
   /** True when this call is one chain of a multi-chain creation batch. A legacy

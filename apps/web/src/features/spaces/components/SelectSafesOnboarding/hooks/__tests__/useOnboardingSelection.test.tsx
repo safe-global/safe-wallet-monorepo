@@ -3,12 +3,8 @@ import { useForm } from 'react-hook-form'
 import type { AllSafeItems, MultiChainSafeItem } from '@/hooks/safes'
 import { safeItemBuilder } from '@/tests/builders/safeItem'
 import type { AddAccountsFormValues } from '../../../../hooks/addAccounts.types'
+import type { SafeLimit } from '@/utils/spaces'
 import useOnboardingSelection from '../useOnboardingSelection'
-
-jest.mock('@/features/spaces/constants', () => ({
-  ...jest.requireActual('@/features/spaces/constants'),
-  SAFE_ACCOUNTS_LIMIT: 3,
-}))
 
 // Minimal AccountLine shapes — the hook only reads key/variant/address/source.
 const singleLine = (chainId: string, address: string) =>
@@ -22,7 +18,9 @@ const groupLine = (address: string, chainIds: string[]) =>
     source: { address, safes: chainIds.map((chainId) => ({ chainId, address })) },
   }) as never
 
-const setup = (opts: { items?: AllSafeItems; flagged?: Set<string>; selected?: Record<string, boolean> } = {}) =>
+const setup = (
+  opts: { items?: AllSafeItems; flagged?: Set<string>; selected?: Record<string, boolean>; limit?: SafeLimit } = {},
+) =>
   renderHook(() => {
     const { control, setValue } = useForm<AddAccountsFormValues>({
       defaultValues: { selectedSafes: opts.selected ?? {} },
@@ -32,6 +30,7 @@ const setup = (opts: { items?: AllSafeItems; flagged?: Set<string>; selected?: R
       control,
       setValue,
       flaggedAddresses: opts.flagged ?? new Set<string>(),
+      limit: 'limit' in opts ? opts.limit : 3,
     })
   })
 
@@ -131,5 +130,20 @@ describe('useOnboardingSelection', () => {
     act(() => result.current.handleToggle(singleLine('1', '0xD'), false))
     expect(result.current.isOverLimit).toBe(false)
     expect(result.current.isAtLimit).toBe(true)
+  })
+
+  it('locks further picks without flagging the cap while the limit is unknown', () => {
+    const { result } = setup({ limit: undefined, selected: { '1:0xA': true } })
+
+    expect(result.current.isSelectionLocked).toBe(true)
+    expect(result.current.isAtLimit).toBe(false)
+    expect(result.current.isOverLimit).toBe(false)
+  })
+
+  it('never locks an unlimited plan', () => {
+    const { result } = setup({ limit: null, selected: { '1:0xA': true, '1:0xB': true, '1:0xC': true, '1:0xD': true } })
+
+    expect(result.current.isSelectionLocked).toBe(false)
+    expect(result.current.isAtLimit).toBe(false)
   })
 })

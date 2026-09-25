@@ -33,6 +33,10 @@ describe('isSpaceAtSafeLimit', () => {
     expect(isSpaceAtSafeLimit(400, null)).toBe(false)
     expect(isSpaceAtSafeLimit(undefined, 20)).toBe(false)
   })
+
+  it('is never at the limit while the limit itself is unknown', () => {
+    expect(isSpaceAtSafeLimit(400, undefined)).toBe(false)
+  })
 })
 
 describe('countSeats', () => {

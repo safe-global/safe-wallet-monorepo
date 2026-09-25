@@ -9,7 +9,11 @@ jest.mock('@/features/spaces/constants', () => ({
 }))
 
 jest.mock('@/hooks/useIsSurveyEnabled')
-jest.mock('../../../hooks/useSpaceSafeLimit', () => ({ useSpaceSafeLimit: () => ({ limit: 10, isLoading: false }) }))
+let mockSafeLimit: { limit: number | null | undefined; isError: boolean } = { limit: 10, isError: false }
+const mockRetryLimit = jest.fn()
+jest.mock('../../../hooks/useSpaceSafeLimit', () => ({
+  useSpaceSafeLimit: () => ({ ...mockSafeLimit, isLoading: false, retry: mockRetryLimit }),
+}))
 const mockedUseIsSurveyEnabled = useIsSurveyEnabled as jest.MockedFunction<typeof useIsSurveyEnabled>
 
 // Captured props from OnboardingSafesList renders
@@ -137,6 +141,7 @@ describe('SelectSafesOnboarding — selection wiring', () => {
     mockOwnedSafes = []
     mockFlagged = new Set<string>()
     mockWalletValue = { address: '0xWallet' }
+    mockSafeLimit = { limit: 10, isError: false }
   })
 
   it('shows a selected-count of the per-workspace cap instead of a select-all control', () => {
@@ -167,6 +172,23 @@ describe('SelectSafesOnboarding — selection wiring', () => {
     act(() => onToggle({ key: '1:0xA', variant: 'single', address: '0xA', source: makeSafe('1', '0xA') }, true))
 
     expect(screen.getByTestId('selected-count')).toHaveTextContent('1 of 10 selected')
+  })
+
+  it('shows no limit and locks the list while the limit is unknown', () => {
+    mockSafeLimit = { limit: undefined, isError: false }
+    render(<SelectSafesOnboarding />)
+
+    expect(screen.getByTestId('selected-count')).toHaveTextContent(/^\s*0 selected$/)
+    expect(capturedListProps.isAtLimit).toBe(true)
+    expect(screen.queryByTestId('safe-limit-error')).not.toBeInTheDocument()
+  })
+
+  it('offers a retry when the limit fails to load', () => {
+    mockSafeLimit = { limit: undefined, isError: true }
+    render(<SelectSafesOnboarding />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
+    expect(mockRetryLimit).toHaveBeenCalled()
   })
 })
 

@@ -2,8 +2,7 @@ import { useMemo, useState } from 'react'
 import { useWatch, type Control, type UseFormSetValue } from 'react-hook-form'
 import { type AllSafeItems } from '@/hooks/safes'
 import type { AccountLine } from '@/features/myAccounts'
-import { SAFE_ACCOUNTS_LIMIT } from '../../../constants'
-import { addressOfSafeKey, countSeats } from '@/utils/spaces'
+import { addressOfSafeKey, countSeats, isSpaceAtSafeLimit, type SafeLimit } from '@/utils/spaces'
 import { applySafeSelectionToggle, getSelectedLeafKeys } from '../utils/selection'
 import type { AddAccountsFormValues } from '../../../hooks/addAccounts.types'
 
@@ -14,8 +13,8 @@ interface Args {
   setValue: UseFormSetValue<AddAccountsFormValues>
   /** Lowercased addresses flagged as look-alikes — selecting one requires confirmation. */
   flaggedAddresses: Set<string>
-  /** Max seats (distinct addresses); defaults to the per-Workspace cap, null means unlimited. */
-  limit?: number | null
+  /** Max seats (distinct addresses): null means unlimited, undefined means not known yet. */
+  limit: SafeLimit
 }
 
 /**
@@ -23,7 +22,7 @@ interface Args {
  * `selectedSafes` record, reconciling multi-chain parent keys, and gates selection of
  * address-poisoning-flagged safes behind a confirmation dialog.
  */
-const useOnboardingSelection = ({ items, control, setValue, flaggedAddresses, limit = SAFE_ACCOUNTS_LIMIT }: Args) => {
+const useOnboardingSelection = ({ items, control, setValue, flaggedAddresses, limit }: Args) => {
   const selectedSafes = useWatch({ control, name: 'selectedSafes' }) ?? {}
   const [pendingConfirmation, setPendingConfirmation] = useState<AccountLine | null>(null)
 
@@ -31,8 +30,10 @@ const useOnboardingSelection = ({ items, control, setValue, flaggedAddresses, li
   // Checked leaves across both sections count toward the cap, one seat per address however many chains. Everything
   // starts selected, so the count can sit above the cap until the user deselects down to it.
   const seatCount = useMemo(() => countSeats(Array.from(selectedKeys, addressOfSafeKey)), [selectedKeys])
-  const isAtLimit = limit !== null && seatCount >= limit
-  const isOverLimit = limit !== null && seatCount > limit
+  const isAtLimit = isSpaceAtSafeLimit(seatCount, limit)
+  const isOverLimit = typeof limit === 'number' && seatCount > limit
+  // Nothing more can be picked until the cap is known.
+  const isSelectionLocked = isAtLimit || limit === undefined
 
   const applyToggle = (line: AccountLine, nextChecked: boolean) =>
     applySafeSelectionToggle(setValue, items, selectedSafes, line, nextChecked)
@@ -58,6 +59,7 @@ const useOnboardingSelection = ({ items, control, setValue, flaggedAddresses, li
     seatCount,
     isAtLimit,
     isOverLimit,
+    isSelectionLocked,
     handleToggle,
     pendingConfirmation,
     confirmPending,

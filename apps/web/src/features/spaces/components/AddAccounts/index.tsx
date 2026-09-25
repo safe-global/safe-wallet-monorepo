@@ -64,8 +64,9 @@ import { showNotification } from '@/store/notificationsSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import { cn } from '@/utils/cn'
 import SelectedCounter from '../SelectedCounter'
+import SafeLimitError from '../SelectedCounter/SafeLimitError'
 import { useSpaceSafeLimit } from '../../hooks/useSpaceSafeLimit'
-import { addressOfSafeKey, countSeats } from '@/utils/spaces'
+import { addressOfSafeKey, countSeats, isSpaceAtSafeLimit } from '@/utils/spaces'
 import { useSeatUpsell } from '../../hooks/useSeatUpsell'
 import { Link } from '@/components/ui/link'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
@@ -221,10 +222,12 @@ const AddAccounts = ({
 
   // Checked Safes, one seat per address (workspace Safes are pre-checked and count toward the plan's cap).
   const seatCount = countSeats(Array.from(selectedKeys, addressOfSafeKey))
-  const { limit } = useSpaceSafeLimit(spaceId)
-  const isAtLimit = limit !== null && seatCount >= limit
+  const { limit, isError: isLimitError, retry: retryLimit } = useSpaceSafeLimit(spaceId)
+  const isAtLimit = isSpaceAtSafeLimit(seatCount, limit)
+  // Nothing more can be picked until the cap is known.
+  const isSelectionLocked = isAtLimit || limit === undefined
   const { isSafePro, tierName, plansHref } = useSeatUpsell(spaceId)
-  const limitTooltip = isSafePro && limit !== null ? seatsTooltip(tierName, limit) : safeLimitTooltip(limit)
+  const limitTooltip = isSafePro && typeof limit === 'number' ? seatsTooltip(tierName, limit) : safeLimitTooltip(limit)
 
   // Safes already in the workspace stay visible but locked: shown checked, dimmed, and not toggleable.
   const spaceSafeKeys = useMemo(
@@ -582,7 +585,7 @@ const AddAccounts = ({
                             selection={{
                               selectedKeys,
                               onToggle: handleTableToggle,
-                              isAtLimit,
+                              isAtLimit: isSelectionLocked,
                               disabledKeys: spaceSafeKeys,
                               disabledReason: 'This safe is already part of your Workspace',
                             }}
@@ -591,6 +594,12 @@ const AddAccounts = ({
                         )}
                       </div>
                     </>
+                  )}
+
+                  {isLimitError && view === 'select' && (
+                    <div className="mt-4">
+                      <SafeLimitError onRetry={retryLimit} />
+                    </div>
                   )}
 
                   {submitError && (
@@ -624,7 +633,7 @@ const AddAccounts = ({
                         </Button>
                       ) : (
                         <Track {...SPACE_EVENTS.ADD_ACCOUNT_MANUALLY_MODAL}>
-                          <AddManually handleAddSafe={handleAddSafe} disabled={isAtLimit} />
+                          <AddManually handleAddSafe={handleAddSafe} disabled={isSelectionLocked} />
                         </Track>
                       )}
                     </div>
