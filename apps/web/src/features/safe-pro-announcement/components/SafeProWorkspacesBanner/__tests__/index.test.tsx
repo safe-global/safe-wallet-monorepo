@@ -3,7 +3,7 @@ import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
 import SafeProWorkspacesBanner from '../index'
 
 let mockIsLive = false
-jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockIsLive }))
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockIsLive }))
 
 describe('SafeProWorkspacesBanner', () => {
   beforeEach(() => {

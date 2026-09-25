@@ -1,7 +1,6 @@
-import { useHasFeature } from '@/hooks/useChains'
+import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { safeSpaceKey, useSafeSpaces } from '@/hooks/useSafeSpaces'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { SponsoredTxsMeter } from './billing/types'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
 import { useSpacePlan } from './useSpacePlan'
@@ -22,7 +21,7 @@ export type SafeSponsoredTxs = {
 
 /** The sponsored-transactions allowance of the Workspace the current Safe belongs to, if it belongs to one. */
 export const useSafeSponsoredTxs = (): SafeSponsoredTxs => {
-  const isEnabled = useHasFeature(FEATURES.SAFE_PRO) === true
+  const isEnabled = useIsSafeProEnabled() === true
   const { safe, safeAddress } = useSafeInfo()
   const { safeSpaces, isLoading: isSpacesLoading } = useSafeSpaces(!isEnabled)
   const currentSpaceId = useCurrentSpaceId()

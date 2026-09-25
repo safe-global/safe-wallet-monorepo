@@ -4,11 +4,11 @@ import { useSafeProAccess } from '../useSafeProAccess'
 const SPACE_ID = '11111111-1111-1111-1111-111111111111'
 const SAFE = '0x1234567890123456789012345678901234567890'
 
-const mockUseHasFeature = jest.fn()
+const mockUseIsSafeProEnabled = jest.fn()
 const mockIsSignedIn = jest.fn()
 const mockUseSpaceSafesGetV1Query = jest.fn()
 const mockUseSpacePlan = jest.fn()
-jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockUseIsSafeProEnabled() }))
 jest.mock('@/store', () => ({ useAppSelector: () => mockIsSignedIn() }))
 jest.mock('@/store/authSlice', () => ({ isAuthenticated: jest.fn() }))
 jest.mock('@/hooks/useChainId', () => ({ __esModule: true, default: () => '1' }))
@@ -22,7 +22,7 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
 describe('useSafeProAccess', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseHasFeature.mockReturnValue(true)
+    mockUseIsSafeProEnabled.mockReturnValue(true)
     mockIsSignedIn.mockReturnValue(true)
     mockUseSpaceSafesGetV1Query.mockReturnValue({
       currentData: { safes: { '1': [SAFE.toLowerCase()] } },
@@ -88,7 +88,7 @@ describe('useSafeProAccess', () => {
   })
 
   it('keeps everything open while SAFE_PRO is off, without asking for the Workspace safes', () => {
-    mockUseHasFeature.mockReturnValue(false)
+    mockUseIsSafeProEnabled.mockReturnValue(false)
 
     expect(renderHook(() => useSafeProAccess()).result.current).toEqual({
       hasProFeatures: true,

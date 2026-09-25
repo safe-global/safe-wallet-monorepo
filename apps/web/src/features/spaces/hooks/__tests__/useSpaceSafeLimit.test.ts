@@ -1,10 +1,10 @@
 import { renderHook } from '@testing-library/react'
 import { useSpaceSafeLimit } from '../useSpaceSafeLimit'
 
-const mockUseHasFeature = jest.fn()
+const mockUseIsSafeProEnabled = jest.fn()
 const mockUseSpaceEntitlements = jest.fn()
 const mockRefetch = jest.fn()
-jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockUseIsSafeProEnabled() }))
 jest.mock('../billing/useSpaceEntitlements', () => ({
   useSpaceEntitlements: (spaceId?: string) => mockUseSpaceEntitlements(spaceId),
 }))
@@ -21,7 +21,7 @@ const entitlements = (overrides: Record<string, unknown>) => ({
 describe('useSpaceSafeLimit', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseHasFeature.mockReturnValue(true)
+    mockUseIsSafeProEnabled.mockReturnValue(true)
     mockUseSpaceEntitlements.mockReturnValue(entitlements({}))
   })
 
@@ -40,7 +40,7 @@ describe('useSpaceSafeLimit', () => {
   })
 
   it('falls back to the static cap only while Safe Pro is off', () => {
-    mockUseHasFeature.mockReturnValue(false)
+    mockUseIsSafeProEnabled.mockReturnValue(false)
     mockUseSpaceEntitlements.mockReturnValue(entitlements({ seats: null, isError: true }))
     expect(renderHook(() => useSpaceSafeLimit()).result.current).toMatchObject({
       limit: 40,

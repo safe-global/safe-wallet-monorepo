@@ -10,7 +10,7 @@ const mockUpdateSpace = jest.fn()
 
 let mockRouterQuery: Record<string, string> = {}
 let mockIsSafePro = false
-jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockIsSafePro }))
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockIsSafePro }))
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),

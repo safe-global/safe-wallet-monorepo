@@ -5,14 +5,13 @@ import { Card } from '@/components/ui/card'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { trackSafeProBannerClick } from '../../utils/trackSafeProBannerClick'
 import css from './styles.module.css'
 import { safeProMoveHeadline } from '../../utils/safeProMoveHeadline'
 
 const SafeProBanner = ({ className }: { className?: string }) => {
-  const isLive = useHasFeature(FEATURES.SAFE_PRO) === true
+  const isLive = useIsSafeProEnabled() === true
 
   return (
     <Card

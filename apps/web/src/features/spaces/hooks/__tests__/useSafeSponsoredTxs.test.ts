@@ -1,11 +1,11 @@
 import { renderHook } from '@testing-library/react'
 import { useSafeSponsoredTxs } from '../useSafeSponsoredTxs'
 
-const mockUseHasFeature = jest.fn()
+const mockUseIsSafeProEnabled = jest.fn()
 const mockUseSafeInfo = jest.fn()
 const mockUseSafeSpaces = jest.fn()
 const mockUseSpacePlan = jest.fn()
-jest.mock('@/hooks/useChains', () => ({ useHasFeature: (feature: string) => mockUseHasFeature(feature) }))
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockUseIsSafeProEnabled() }))
 jest.mock('@/hooks/useSafeInfo', () => ({ __esModule: true, default: () => mockUseSafeInfo() }))
 jest.mock('@/hooks/useSafeSpaces', () => ({
   ...jest.requireActual('@/hooks/useSafeSpaces'),
@@ -23,7 +23,7 @@ describe('useSafeSponsoredTxs', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockCurrentSpaceId = 'space-1'
-    mockUseHasFeature.mockReturnValue(true)
+    mockUseIsSafeProEnabled.mockReturnValue(true)
     mockUseSafeInfo.mockReturnValue(SAFE)
     mockUseSafeSpaces.mockReturnValue({ safeSpaces: { '1:0xabc': [SPACE] }, isLoading: false })
     mockUseSpacePlan.mockReturnValue({ plan: { status: 'active' }, sponsoredTxs: meter, isLoading: false })
@@ -94,7 +94,7 @@ describe('useSafeSponsoredTxs', () => {
   })
 
   it('stays off and skips the lookup while SAFE_PRO is off', () => {
-    mockUseHasFeature.mockReturnValue(false)
+    mockUseIsSafeProEnabled.mockReturnValue(false)
     const { result } = renderHook(() => useSafeSponsoredTxs())
 
     expect(mockUseSafeSpaces).toHaveBeenCalledWith(true)

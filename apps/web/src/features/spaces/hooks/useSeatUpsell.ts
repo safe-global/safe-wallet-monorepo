@@ -1,5 +1,4 @@
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { AppRoutes } from '@/config/routes'
 import { useSpaceOffers } from './billing/useSpaceOffers'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
@@ -8,7 +7,7 @@ import { useSpacePlan } from './useSpacePlan'
 export const useSeatUpsell = (spaceId?: string | null) => {
   const currentSpaceId = useCurrentSpaceId()
   const resolvedSpaceId = spaceId === undefined ? currentSpaceId : spaceId
-  const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
+  const isSafePro = useIsSafeProEnabled() === true
   const { seats, tierName } = useSpacePlan(resolvedSpaceId)
   const { paidPlans } = useSpaceOffers(resolvedSpaceId)
   const limit = isSafePro ? (seats?.quota ?? null) : null

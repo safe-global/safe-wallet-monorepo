@@ -6,8 +6,7 @@ import { cn } from '@/utils/cn'
 import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { safeProMoveHeadline } from '../../utils/safeProMoveHeadline'
 import ProWordmark from '@/public/images/safe-pro/pro-wordmark.svg'
 import { trackSafeProBannerClick } from '../../utils/trackSafeProBannerClick'
@@ -15,7 +14,7 @@ import css from './styles.module.css'
 
 const SafeProWorkspacesBanner = ({ className }: { className?: string }) => {
   const isDarkMode = useDarkMode()
-  const isLive = useHasFeature(FEATURES.SAFE_PRO) === true
+  const isLive = useIsSafeProEnabled() === true
 
   return (
     <ShadcnProvider dark={isDarkMode} className={className}>

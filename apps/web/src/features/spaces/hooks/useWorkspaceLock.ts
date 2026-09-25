@@ -1,5 +1,4 @@
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { useIsInvited } from './useSpaceMembers'
 import { useSpaceSubscription } from './billing/useSpaceSubscription'
 import { useSpaceOffers } from './billing/useSpaceOffers'
@@ -10,7 +9,7 @@ export type WorkspaceLockReason = 'trial-offered' | 'payment-failed' | 'lapsed'
 
 /** A Workspace without a live subscription (never, canceled, unpaid or pending) is locked behind a blocking modal. */
 export const useWorkspaceLock = (spaceId?: string | null) => {
-  const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
+  const isSafePro = useIsSafeProEnabled() === true
   const isInvited = useIsInvited()
   const subscription = useSpaceSubscription(spaceId)
   const offers = useSpaceOffers(spaceId)
