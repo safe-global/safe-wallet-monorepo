@@ -66,7 +66,7 @@ export const TenderlySimulation = ({
     }
   }, [safeTx, simulation, nestedTx.simulation])
 
-  const { nestedSafeInfo, nestedSafeTx, isNested } = useNestedTransaction(safeTx, chain)
+  const { nestedSafeInfo, nestedSafeTx, isNested, isNestedLoading } = useNestedTransaction(safeTx, chain)
 
   const handleRunSimulation = () => {
     if (!safeTx) return
@@ -101,13 +101,15 @@ export const TenderlySimulation = ({
   const autoRanKeyRef = useRef<string | null>(null)
   useEffect(() => {
     if (!autoRun || !showSimulation || !safeTx) return
+    // A nested Safe's data arrives later; running before it would skip the nested simulation for good.
+    if (isNestedLoading) return
     if (!signer?.address && !safe.owners[0]?.value) return
     const key = JSON.stringify(safeTx.data)
     if (autoRanKeyRef.current === key) return
     autoRanKeyRef.current = key
     handleRunSimulation()
     // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed on the tx data; the handler reads live values
-  }, [autoRun, showSimulation, safeTx, signer?.address, safe.owners])
+  }, [autoRun, showSimulation, safeTx, signer?.address, safe.owners, isNestedLoading])
 
   const { mainIsSuccess, nestedIsSuccess, isSimulationSuccess, isSimulationFinished, isLoading } = getSimulationOutcome(
     status,
@@ -207,7 +209,7 @@ export const TenderlySimulation = ({
 
       {!isSimulationFinished && autoRun ? (
         <Typography variant="paragraph-mini" className="text-[var(--color-text-secondary)] [letter-spacing:0.4px]">
-          {isLoading ? 'Running...' : ''}
+          {isLoading || isNestedLoading ? 'Running...' : ''}
         </Typography>
       ) : !isSimulationFinished ? (
         <button

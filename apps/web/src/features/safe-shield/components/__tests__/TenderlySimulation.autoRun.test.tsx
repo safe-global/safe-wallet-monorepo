@@ -23,7 +23,8 @@ jest.mock('@/hooks/useSafeAddress', () => ({
   __esModule: true,
   default: () => '0x1234567890123456789012345678901234567890',
 }))
-jest.mock('../useNestedTransaction', () => ({ useNestedTransaction: () => ({ isNested: false }) }))
+const mockUseNestedTransaction = jest.fn()
+jest.mock('../useNestedTransaction', () => ({ useNestedTransaction: () => mockUseNestedTransaction() }))
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
   trackEvent: jest.fn(),
@@ -44,17 +45,21 @@ const renderWithContext = (ui: React.ReactElement, simulateTransaction = jest.fn
     requestError: undefined,
     _simulationRequestStatus: FETCH_STATUS.NOT_ASKED,
   } as never
-  return {
-    simulateTransaction,
-    ...render(
-      <TxInfoContext.Provider value={{ simulation, status: idle, nestedTx: { simulation, status: idle } }}>
-        {ui}
-      </TxInfoContext.Provider>,
-    ),
-  }
+  const withContext = (node: React.ReactElement) => (
+    <TxInfoContext.Provider value={{ simulation, status: idle, nestedTx: { simulation, status: idle } }}>
+      {node}
+    </TxInfoContext.Provider>
+  )
+  const result = render(withContext(ui))
+  return { simulateTransaction, rerender: (node: React.ReactElement) => result.rerender(withContext(node)) }
 }
 
 describe('TenderlySimulation auto-run', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockUseNestedTransaction.mockReturnValue({ isNested: false, isNestedLoading: false })
+  })
+
   it('starts the simulation on its own, once per transaction, and shows no Run button', () => {
     const { simulateTransaction, rerender } = renderWithContext(<TenderlySimulation safeTx={safeTx} autoRun />)
 
@@ -67,6 +72,27 @@ describe('TenderlySimulation auto-run', () => {
 
     rerender(<TenderlySimulation safeTx={{ ...safeTx } as SafeTransaction} autoRun />)
     expect(simulateTransaction).toHaveBeenCalledTimes(1)
+  })
+
+  it('waits for a nested Safe to load, then runs both simulations once', () => {
+    mockUseNestedTransaction.mockReturnValue({ isNested: false, isNestedLoading: true })
+    const { simulateTransaction, rerender } = renderWithContext(<TenderlySimulation safeTx={safeTx} autoRun />)
+
+    expect(simulateTransaction).not.toHaveBeenCalled()
+    expect(screen.getByText('Running...')).toBeInTheDocument()
+
+    const nestedSafeTx = { data: { to: '0x00000000000000000000000000000000000000bb' } } as unknown as SafeTransaction
+    mockUseNestedTransaction.mockReturnValue({
+      isNested: true,
+      isNestedLoading: false,
+      nestedSafeInfo: { address: { value: '0x00000000000000000000000000000000000000bb' } },
+      nestedSafeTx,
+    })
+    rerender(<TenderlySimulation safeTx={safeTx} autoRun />)
+
+    expect(simulateTransaction).toHaveBeenCalledTimes(2)
+    expect(simulateTransaction.mock.calls[0][0]).toMatchObject({ transactions: safeTx })
+    expect(simulateTransaction.mock.calls[1][0]).toMatchObject({ transactions: nestedSafeTx })
   })
 
   it('waits for a click without auto-run', () => {
