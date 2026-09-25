@@ -3923,6 +3923,77 @@
         ]
       }
     },
+    "/v1/spaces/{spaceId}/policies/active": {
+      "get": {
+        "description": "Returns the policies of every Safe in the Space. A Safe whose spending-limit or proposer data could not be read is omitted from the corresponding policies.",
+        "operationId": "spacePoliciesGetActivePoliciesV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "types",
+            "required": true,
+            "in": "query",
+            "description": "The policy types to report, comma-separated.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "safes",
+            "required": false,
+            "in": "query",
+            "description": "Narrow the read to a subset of the Space's Safes, comma-separated as `{chainId}:{safeAddress}`",
+            "schema": {
+              "example": "11155111:0x0000000000000000000000000000000000000000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ActivePolicyDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid space identifier"
+          },
+          "403": {
+            "description": "Access forbidden - authentication missing or invalid, or user is not a member of this space"
+          },
+          "422": {
+            "description": "Invalid CAIP-10 address, a Safe outside this space, or a missing or unknown policy type"
+          },
+          "503": {
+            "description": "The policy api is unavailable"
+          }
+        },
+        "summary": "Get the active policies on Safes in a Space",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
     "/v1/spaces/{spaceId}/surveys/{slug}/state": {
       "get": {
         "description": "Returns the active survey definition and this space's response (if any) in a single round trip. Only active admins of the space can read survey state.",
@@ -7086,7 +7157,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main",
+    "version": "main-bb4ea72",
     "contact": {}
   },
   "tags": [],
@@ -11932,6 +12003,314 @@
           "deadlock"
         ]
       },
+      "ModuleEnforcementDto": {
+        "type": "object",
+        "properties": {
+          "via": {
+            "type": "string",
+            "enum": [
+              "module"
+            ]
+          },
+          "moduleAddress": {
+            "type": "string",
+            "description": "The module enforcing the policy"
+          }
+        },
+        "required": [
+          "via",
+          "moduleAddress"
+        ]
+      },
+      "PolicyContractsDto": {
+        "type": "object",
+        "properties": {
+          "policyContract": {
+            "type": "string",
+            "description": "The policy implementation the guard delegates to"
+          },
+          "safePolicyGuard": {
+            "type": "string",
+            "description": "The SafePolicyGuard deployment"
+          }
+        },
+        "required": [
+          "policyContract",
+          "safePolicyGuard"
+        ]
+      },
+      "GuardSlotsDto": {
+        "type": "object",
+        "properties": {
+          "transactionGuard": {
+            "$ref": "#/components/schemas/PolicyContractsDto"
+          },
+          "moduleGuard": {
+            "$ref": "#/components/schemas/PolicyContractsDto"
+          }
+        }
+      },
+      "GuardEnforcementDto": {
+        "type": "object",
+        "properties": {
+          "via": {
+            "type": "string",
+            "enum": [
+              "guard"
+            ]
+          },
+          "guards": {
+            "$ref": "#/components/schemas/GuardSlotsDto"
+          }
+        },
+        "required": [
+          "via",
+          "guards"
+        ]
+      },
+      "OffChainEnforcementDto": {
+        "type": "object",
+        "properties": {
+          "via": {
+            "type": "string",
+            "enum": [
+              "offchain"
+            ],
+            "description": "Nothing on chain enforces the policy, so it is access rather than an audited restriction"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "delegates"
+            ],
+            "description": "Where the grant is held"
+          }
+        },
+        "required": [
+          "via",
+          "source"
+        ]
+      },
+      "SpendingLimitAllowanceDto": {
+        "type": "object",
+        "properties": {
+          "tokenAddress": {
+            "type": "string",
+            "description": "The token the limit applies to; zero address for native"
+          },
+          "amount": {
+            "type": "string",
+            "description": "Per-window ceiling, in base units"
+          },
+          "spent": {
+            "type": "string",
+            "description": "Spent in the current window, in base units"
+          },
+          "resetPeriodMinutes": {
+            "type": "number",
+            "description": "Window length in minutes; 0 never resets"
+          },
+          "resetsAtMinute": {
+            "type": "number",
+            "nullable": true,
+            "description": "Minutes since the epoch of the next reset, the unit the module counts windows in; null when it never resets"
+          },
+          "resetBoundaryIsExact": {
+            "type": "boolean",
+            "description": "False when the reset boundary could not be recovered exactly, so `resetsAtMinute` may be up to one period out. `amount` is unaffected."
+          },
+          "isDelegateActive": {
+            "type": "boolean",
+            "description": "False when the spender's delegate registration was removed: nothing is spendable now, but the allowance returns to effect if the delegate is re-added"
+          }
+        },
+        "required": [
+          "tokenAddress",
+          "amount",
+          "spent",
+          "resetPeriodMinutes",
+          "resetsAtMinute",
+          "resetBoundaryIsExact",
+          "isDelegateActive"
+        ]
+      },
+      "SpendingLimitSpenderDto": {
+        "type": "object",
+        "properties": {
+          "spender": {
+            "type": "string",
+            "description": "Name resolved by the client, never carried here"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "False when the spender is deregistered: nothing is spendable now, but the allowances survive and return if it is re-added"
+          },
+          "allowances": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpendingLimitAllowanceDto"
+            }
+          }
+        },
+        "required": [
+          "spender",
+          "isActive",
+          "allowances"
+        ]
+      },
+      "SpendingLimitPolicyDataDto": {
+        "type": "object",
+        "properties": {
+          "module": {
+            "type": "string",
+            "description": "The allowance module holding this state"
+          },
+          "spenders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpendingLimitSpenderDto"
+            }
+          }
+        },
+        "required": [
+          "module",
+          "spenders"
+        ]
+      },
+      "ProposerGrantDto": {
+        "type": "object",
+        "properties": {
+          "delegator": {
+            "type": "string",
+            "description": "The owner that granted the proposer"
+          },
+          "label": {
+            "type": "string",
+            "description": "The label this owner gave the proposer; empty when unlabelled"
+          }
+        },
+        "required": [
+          "delegator",
+          "label"
+        ]
+      },
+      "ProposerDto": {
+        "type": "object",
+        "properties": {
+          "proposer": {
+            "type": "string",
+            "description": "The address allowed to propose transactions"
+          },
+          "delegatedBy": {
+            "description": "The owners that granted it, each with the label they gave. The label is stored per grant, so two owners can label the same proposer differently",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProposerGrantDto"
+            }
+          }
+        },
+        "required": [
+          "proposer",
+          "delegatedBy"
+        ]
+      },
+      "ProposerPolicyDataDto": {
+        "type": "object",
+        "properties": {
+          "proposers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProposerDto"
+            }
+          }
+        },
+        "required": [
+          "proposers"
+        ]
+      },
+      "SafeRefDto": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "chainId",
+          "address"
+        ]
+      },
+      "ActivePolicyDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "spending-limit",
+              "recovery",
+              "proposer",
+              "erc20-transfer",
+              "cosigner",
+              "allow",
+              "native-transfer",
+              "deny"
+            ]
+          },
+          "enforcement": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ModuleEnforcementDto"
+              },
+              {
+                "$ref": "#/components/schemas/GuardEnforcementDto"
+              },
+              {
+                "$ref": "#/components/schemas/OffChainEnforcementDto"
+              }
+            ],
+            "discriminator": {
+              "propertyName": "via",
+              "mapping": {
+                "module": "#/components/schemas/ModuleEnforcementDto",
+                "guard": "#/components/schemas/GuardEnforcementDto",
+                "offchain": "#/components/schemas/OffChainEnforcementDto"
+              }
+            }
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "False when the policy is configured but not enforced"
+          },
+          "data": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/SpendingLimitPolicyDataDto"
+              },
+              {
+                "$ref": "#/components/schemas/ProposerPolicyDataDto"
+              }
+            ]
+          },
+          "safe": {
+            "description": "The Safe the policy is in effect on",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SafeRefDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "enforcement",
+          "enabled",
+          "data",
+          "safe"
+        ]
+      },
       "SurveyOptionDto": {
         "type": "object",
         "properties": {
@@ -12166,7 +12545,8 @@
         "enum": [
           "safe_seats",
           "copilot_scans",
-          "sponsored_transactions"
+          "sponsored_transactions",
+          "policies"
         ],
         "description": "Feature key from the entitlements catalog."
       },
