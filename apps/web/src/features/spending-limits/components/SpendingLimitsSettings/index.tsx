@@ -8,10 +8,12 @@ import { useHasFeature } from '@/hooks/useChains'
 import { NewSpendingLimitFlow } from '@/components/tx-flow/flows'
 import { SETTINGS_EVENTS } from '@/services/analytics'
 import CheckWallet from '@/components/common/CheckWallet'
+import SafeProLock from '@/components/common/SafeProLock'
 import Track from '@/components/common/Track'
 import { TxModalContext } from '@/components/tx-flow'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useAppSelector } from '@/store'
+import { usePlanGate } from '@/features/spaces'
 import { selectSpendingLimits, selectSpendingLimitsLoading } from '../../store/spendingLimitsSlice'
 import useIsSpendingLimitSupported from '../../hooks/useIsSpendingLimitSupported'
 
@@ -19,10 +21,29 @@ const SpendingLimitsSettings = () => {
   const { setTxFlow } = useContext(TxModalContext)
   const isEnabled = useHasFeature(FEATURES.SPENDING_LIMIT)
   const isSupported = useIsSpendingLimitSupported()
+  const { mustUpgradeToSafePro, isLoading: isPlanLoading, upgradeHref } = usePlanGate(FEATURES.SPENDING_LIMIT_GATING)
 
   // Read data from store (loaded on app start via SpendingLimitsLoader)
   const spendingLimits = useAppSelector(selectSpendingLimits)
   const spendingLimitsLoading = useAppSelector(selectSpendingLimitsLoading)
+
+  const renderNewSpendingLimitButton = (
+    <CheckWallet>
+      {(isOk) => (
+        <Track {...SETTINGS_EVENTS.SPENDING_LIMIT.NEW_LIMIT}>
+          <Button
+            data-testid="new-spending-limit"
+            onClick={() => setTxFlow(<NewSpendingLimitFlow />)}
+            className="my-4"
+            disabled={!isOk}
+          >
+            <AddIcon className="size-4" />
+            New spending limit
+          </Button>
+        </Track>
+      )}
+    </CheckWallet>
+  )
 
   return (
     <div data-testid="spending-limit-section" className="bg-card text-card-foreground rounded-lg p-8">
@@ -42,21 +63,13 @@ const SpendingLimitsSettings = () => {
               </Typography>
 
               {isSupported ? (
-                <CheckWallet>
-                  {(isOk) => (
-                    <Track {...SETTINGS_EVENTS.SPENDING_LIMIT.NEW_LIMIT}>
-                      <Button
-                        data-testid="new-spending-limit"
-                        onClick={() => setTxFlow(<NewSpendingLimitFlow />)}
-                        className="my-4"
-                        disabled={!isOk}
-                      >
-                        <AddIcon className="size-4" />
-                        New spending limit
-                      </Button>
-                    </Track>
-                  )}
-                </CheckWallet>
+                mustUpgradeToSafePro ? (
+                  <div className="my-4">
+                    <SafeProLock title="Adding spending limits requires Safe Pro" href={upgradeHref} />
+                  </div>
+                ) : (
+                  !isPlanLoading && renderNewSpendingLimitButton
+                )
               ) : (
                 <Typography className="mt-4 block">
                   The spending limit module isn&apos;t deployed on this chain yet, so new spending limits can&apos;t be

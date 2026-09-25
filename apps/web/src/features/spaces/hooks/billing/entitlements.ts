@@ -16,3 +16,7 @@ export const getSeatsMeter = (data: EntitlementsResponse | undefined): SeatsMete
 /** Sponsored transactions of the current cycle; `resetsAt` says when the count restarts. */
 export const getSponsoredTxsMeter = (data: EntitlementsResponse | undefined): SponsoredTxsMeter | null =>
   getMeter(data, 'sponsored_transactions')
+
+/** The plan grants `feature`; a key the response does not carry counts as not granted. */
+export const isEntitled = (data: EntitlementsResponse | undefined, feature: string): boolean =>
+  data?.entitlements.some((entitlement) => entitlement.feature === feature && entitlement.enabled) ?? false
