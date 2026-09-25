@@ -3956,10 +3956,8 @@
             "in": "query",
             "description": "Narrow the read to a subset of the Space's Safes, comma-separated as `{chainId}:{safeAddress}`",
             "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
+              "example": "11155111:0x0000000000000000000000000000000000000000",
+              "type": "string"
             }
           }
         ],
@@ -7159,7 +7157,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main-e539b12",
+    "version": "main-bb4ea72",
     "contact": {}
   },
   "tags": [],
@@ -12274,7 +12272,12 @@
               }
             ],
             "discriminator": {
-              "propertyName": "via"
+              "propertyName": "via",
+              "mapping": {
+                "module": "#/components/schemas/ModuleEnforcementDto",
+                "guard": "#/components/schemas/GuardEnforcementDto",
+                "offchain": "#/components/schemas/OffChainEnforcementDto"
+              }
             }
           },
           "enabled": {

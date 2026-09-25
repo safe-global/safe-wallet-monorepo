@@ -407,7 +407,7 @@ export type SpacePoliciesGetActivePoliciesV1ApiArg = {
   /** The policy types to report, comma-separated. */
   types: string[]
   /** Narrow the read to a subset of the Space's Safes, comma-separated as `{chainId}:{safeAddress}` */
-  safes?: string[]
+  safes?: string
 }
 export type SpaceAddressBookItemDto = {
   name: string
@@ -720,13 +720,13 @@ export type ActivePolicyDto = {
     | 'deny'
   enforcement:
     | ({
-        via: 'ModuleEnforcementDto'
+        via: 'module'
       } & ModuleEnforcementDto)
     | ({
-        via: 'GuardEnforcementDto'
+        via: 'guard'
       } & GuardEnforcementDto)
     | ({
-        via: 'OffChainEnforcementDto'
+        via: 'offchain'
       } & OffChainEnforcementDto)
   /** False when the policy is configured but not enforced */
   enabled: boolean
