@@ -3,11 +3,10 @@ import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { useHasFeature } from '@/hooks/useChains'
+import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { cn } from '@/utils/cn'
 import { useLoadFeature } from '@/features/__core__'
 import { SafeProFeature } from '@/features/safe-pro-announcement'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 import AuthState from '../AuthState'
 import Plans from './index'
 import { buildPlanTiers, toCurrentPlan } from './planTiers'
@@ -29,7 +28,7 @@ const PlansSkeleton = () => (
 
 export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
   const isDarkMode = useDarkMode()
-  const isSafePro = useHasFeature(FEATURES.SAFE_PRO)
+  const isSafePro = useIsSafeProEnabled()
   const { SafeProAnnouncement } = useLoadFeature(SafeProFeature)
   const { plan, seats, sponsoredTxs, subscription, isTrialing, isLoading: isPlanLoading } = useSpacePlan(spaceId)
   const { paidPlans, isLoading: isOffersLoading } = useSpaceOffers(spaceId)

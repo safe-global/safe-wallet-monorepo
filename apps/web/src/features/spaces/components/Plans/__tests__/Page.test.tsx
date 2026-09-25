@@ -7,15 +7,16 @@ const mockUseChangePlan = jest.fn()
 let mockIsAdmin = true
 const mockStartCheckout = jest.fn()
 const mockOpenPortal = jest.fn()
+const mockUseIsSafeProEnabled = jest.fn<boolean | undefined, []>()
 
 jest.mock('../../AuthState', () => ({
   __esModule: true,
   default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }))
-jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => true }))
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockUseIsSafeProEnabled() }))
 jest.mock('@/hooks/useDarkMode', () => ({ useDarkMode: () => false }))
 jest.mock('@/features/__core__', () => ({
-  useLoadFeature: () => ({ SafeProAnnouncement: () => null }),
+  useLoadFeature: () => ({ SafeProAnnouncement: () => <div data-testid="safe-pro-announcement" /> }),
   createFeatureHandle: () => ({}),
 }))
 jest.mock('../../../hooks/useSpacePlan', () => ({ useSpacePlan: (spaceId?: string) => mockUseSpacePlan(spaceId) }))
@@ -103,7 +104,17 @@ describe('SpacePlansPage', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockIsAdmin = true
+    mockUseIsSafeProEnabled.mockReturnValue(true)
     mockUseSpaceOffers.mockReturnValue({ paidPlans: [STARTER], isLoading: false })
+  })
+
+  it.each([false, undefined])('shows the Safe Pro teaser instead of the plans when Safe Pro is %s', (isSafePro) => {
+    mockUseIsSafeProEnabled.mockReturnValue(isSafePro)
+    onPlan('Business', 499, 'active')
+    render(<SpacePlansPage spaceId={SPACE_ID} />)
+
+    expect(screen.getByTestId('safe-pro-announcement')).toBeInTheDocument()
+    expect(screen.queryByTestId('current-plan-card')).not.toBeInTheDocument()
   })
 
   it('shows a member who is not an admin the plans without any button to act on them', () => {

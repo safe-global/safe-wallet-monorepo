@@ -10,6 +10,7 @@ import { CookieAndTermType } from '@/store/cookiesAndTermsSlice'
 import { useLoadFeature } from '@/features/__core__'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement'
+import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 
 const mockSupportChatDrawer = jest.fn()
 
@@ -31,6 +32,10 @@ jest.mock('@/hooks/useIsOfficialHost', () => ({
 
 jest.mock('@/features/safe-pro-announcement', () => ({
   useIsSafeProAnnouncementEnabled: jest.fn(),
+}))
+
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({
+  useIsSafeProEnabled: jest.fn(),
 }))
 
 const setSupportFeature = ({ disabled, isOfficialHost }: { disabled: boolean; isOfficialHost: boolean }) => {
@@ -61,6 +66,7 @@ describe('AboutPage', () => {
     jest.clearAllMocks()
     setSupportFeature({ disabled: false, isOfficialHost: true })
     ;(useIsSafeProAnnouncementEnabled as jest.Mock).mockReturnValue(true)
+    ;(useIsSafeProEnabled as jest.Mock).mockReturnValue(false)
   })
 
   describe('legal links', () => {
@@ -129,13 +135,26 @@ describe('AboutPage', () => {
       expect(third).toHaveTextContent(/^Terms & Conditions/)
     })
 
-    it('leaves the Safe Pro terms out while Safe Pro is not announced', () => {
+    it('keeps the Safe Pro terms once Safe Pro is live without the announcement', () => {
       ;(useIsSafeProAnnouncementEnabled as jest.Mock).mockReturnValue(false)
+      ;(useIsSafeProEnabled as jest.Mock).mockReturnValue(true)
       renderWithStore()
 
-      expect(screen.queryByRole('link', { name: /^Pro /i })).not.toBeInTheDocument()
-      expect(screen.getByRole('link', { name: /^Terms & Conditions/i })).toHaveAttribute('href', AppRoutes.terms)
+      expect(screen.getByRole('link', { name: /^Pro User Terms & Conditions/i })).toBeInTheDocument()
+      expect(screen.getByRole('link', { name: /^Pro Terms & Conditions/i })).toBeInTheDocument()
     })
+
+    it.each([false, undefined])(
+      'leaves the Safe Pro terms out while Safe Pro is neither announced nor live (live flag %s)',
+      (isSafePro) => {
+        ;(useIsSafeProAnnouncementEnabled as jest.Mock).mockReturnValue(false)
+        ;(useIsSafeProEnabled as jest.Mock).mockReturnValue(isSafePro)
+        renderWithStore()
+
+        expect(screen.queryByRole('link', { name: /^Pro /i })).not.toBeInTheDocument()
+        expect(screen.getByRole('link', { name: /^Terms & Conditions/i })).toHaveAttribute('href', AppRoutes.terms)
+      },
+    )
   })
 
   describe('help links', () => {
