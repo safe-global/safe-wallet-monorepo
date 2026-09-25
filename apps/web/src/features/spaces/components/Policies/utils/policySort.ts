@@ -20,7 +20,7 @@ export type PolicySortContext = {
 }
 
 // Pending is first because it is the only status where the user has something to do.
-const STATUS_ORDER = { pending: 0, unenforced: 1, 'not-activated': 1, active: 2 } as const
+const STATUS_ORDER = { pending: 0, activating: 1, unenforced: 2, 'not-activated': 2, active: 3 } as const
 
 // A named Safe is listed before an unnamed one, which only has its address to sort by.
 const compareSafes = (a: PolicySafe, b: PolicySafe, getSafeName: PolicySortContext['getSafeName']): number => {

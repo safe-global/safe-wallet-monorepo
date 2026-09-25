@@ -119,6 +119,13 @@ describe('PoliciesTable', () => {
     expect(screen.getByTestId('policy-pending-progress')).toHaveTextContent('New · 1 of 2 signed')
   })
 
+  it('should, when an executed change is not yet indexed, show it as activating without signatures', () => {
+    render(<PoliciesTable policies={[mockPendingPolicy({ status: 'activating' })]} />)
+
+    expect(screen.getByTestId('policy-status-activating')).toHaveTextContent('Activating')
+    expect(screen.queryByTestId('policy-pending-progress')).not.toBeInTheDocument()
+  })
+
   it('should, when an edit and a removal are queued, tell them apart from a creation', () => {
     render(<PoliciesTable policies={[mockPendingUpdate(), mockPendingRemoval()]} />)
 

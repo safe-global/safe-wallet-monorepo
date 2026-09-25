@@ -17,6 +17,7 @@ import { SPACE_REFRESH_OPTIONS } from '../../../hooks/refreshOptions'
 import { mapActivePolicies } from '../utils/mapActivePolicies'
 import { mapPendingPolicies } from '../utils/mapPendingPolicies'
 import { usePolicyTokenResolver } from './usePolicyTokenResolver'
+import { useActivatingPolicies } from './useActivatingPolicies'
 import { useRefetchOnTxEvents } from './useRefetchOnTxEvents'
 import type { Policy } from '../types'
 
@@ -63,10 +64,17 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
 
   const { resolveToken, isLoading: isLoadingTokens } = usePolicyTokenResolver(dtos, pendingDtos)
 
-  const policies = useMemo(() => {
-    const activeRows = mapActivePolicies(dtos, resolveToken)
-    return [...activeRows, ...mapPendingPolicies(pendingDtos, activeRows, resolveToken)]
-  }, [dtos, pendingDtos, resolveToken])
+  const activeRows = useMemo(() => mapActivePolicies(dtos, resolveToken), [dtos, resolveToken])
+  const pendingRows = useMemo(
+    () => mapPendingPolicies(pendingDtos, activeRows, resolveToken),
+    [pendingDtos, activeRows, resolveToken],
+  )
+  const activatingRows = useActivatingPolicies(pendingRows, dtos, active.refetch)
+
+  const policies = useMemo(
+    () => [...activeRows, ...pendingRows, ...activatingRows],
+    [activeRows, pendingRows, activatingRows],
+  )
 
   // RTK's isLoading stays false on a refetch after an error, which would render the empty catalogue.
   const isLoadingActive = active.isFetching && !active.currentData

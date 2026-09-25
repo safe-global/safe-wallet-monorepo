@@ -11,7 +11,7 @@ const OPERATION_LABELS: Record<PendingPolicyOperation, string> = {
 const PolicyStatusCell = ({ policy }: { policy: Policy }) => {
   const chip = <PolicyStatusChip status={getPolicyStatus(policy)} />
 
-  if (!isPendingPolicy(policy)) return chip
+  if (!isPendingPolicy(policy) || policy.status !== 'pending') return chip
 
   return (
     <div className="flex flex-col items-start gap-1">

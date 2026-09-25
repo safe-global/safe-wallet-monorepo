@@ -5,7 +5,7 @@ import { TxEvent, txDispatch } from '@/services/tx/txEvents'
 import { SPACE_REFRESH_OPTIONS } from '../../../../hooks/refreshOptions'
 import { mockProposerDto, mockSpendingLimitDto, mockUsdcMetadata } from '../../mocks/activePolicies'
 import { mockPendingDto } from '../../mocks/pendingPolicies'
-import { MOCK_TOKENS } from '../../mocks/policies'
+import { MOCK_TOKENS, mockPendingPolicy } from '../../mocks/policies'
 import { PENDING_POLICY_TYPES, TABLE_POLICY_TYPES, useSpacePolicies } from '../useSpacePolicies'
 
 const SPACE_ID = '11111111-1111-1111-1111-111111111111'
@@ -14,6 +14,7 @@ const mockUseCurrentSpaceId = jest.fn()
 const mockPoliciesQuery = jest.fn()
 const mockPendingQuery = jest.fn()
 const mockTokenInfosQuery = jest.fn()
+const mockUseActivatingPolicies = jest.fn()
 let mockIsAuthenticated = true
 
 jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
@@ -37,6 +38,10 @@ jest.mock('@/store/api/gateway', () => ({
   useGetPolicyTokenInfosQuery: (...args: unknown[]) => mockTokenInfosQuery(...args),
 }))
 
+jest.mock('../useActivatingPolicies', () => ({
+  useActivatingPolicies: (...args: unknown[]) => mockUseActivatingPolicies(...args),
+}))
+
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
   default: () => ({
@@ -54,6 +59,7 @@ describe('useSpacePolicies', () => {
     mockPoliciesQuery.mockReturnValue(idle)
     mockPendingQuery.mockReturnValue(idle)
     mockTokenInfosQuery.mockReturnValue(idle)
+    mockUseActivatingPolicies.mockReturnValue([])
   })
 
   it('should, when signed in with a space, ask for the types the table renders', () => {
@@ -189,6 +195,16 @@ describe('useSpacePolicies', () => {
     const { result } = renderHook(() => useSpacePolicies())
 
     expect(result.current.policies.map((policy) => policy.status)).toEqual(['active', 'pending'])
+  })
+
+  it('should, when an executed change is not yet indexed, append its activating row', () => {
+    mockPoliciesQuery.mockReturnValue({ ...idle, currentData: [mockSpendingLimitDto()] })
+    mockPendingQuery.mockReturnValue({ ...idle, currentData: [mockPendingDto()] })
+    mockUseActivatingPolicies.mockReturnValue([mockPendingPolicy({ status: 'activating' })])
+
+    const { result } = renderHook(() => useSpacePolicies())
+
+    expect(result.current.policies.map((policy) => policy.status)).toEqual(['active', 'pending', 'activating'])
   })
 
   it('should, when only a queued creation exists, still return a row', () => {

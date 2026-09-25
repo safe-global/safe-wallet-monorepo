@@ -49,6 +49,16 @@ describe('sortPolicies', () => {
     expect(sorted.map(getPolicyStatus)).toEqual(['pending', 'not-activated', 'active'])
   })
 
+  it('should, when sorting by status, put an activating row between pending and active', () => {
+    const active = asActivePolicy(mockSpendingLimitPolicy())
+    const activating = mockPendingPolicy({ id: 'activating', status: 'activating' })
+    const pending = mockPendingPolicy()
+
+    const sorted = sortPolicies([active, activating, pending], 'status', context)
+
+    expect(sorted).toEqual([pending, activating, active])
+  })
+
   it('should, when two policies share a status, keep the order they arrived in', () => {
     const recovery = asActivePolicy(mockRecoveryPolicy())
     const proposer = asActivePolicy(mockProposerPolicy())
