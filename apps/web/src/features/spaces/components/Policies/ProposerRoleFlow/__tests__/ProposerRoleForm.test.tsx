@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
+import { act, fireEvent, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import * as useIsWrongChainHook from '@/hooks/useIsWrongChain'
 import * as useChainsHook from '@/hooks/useChains'
 import { chainBuilder } from '@/tests/builders/chains'
@@ -247,6 +247,37 @@ describe('ProposerRoleForm', () => {
       await user.click(submitButton())
 
       await waitFor(() => expect(onSubmit).toHaveBeenCalled())
+    })
+  })
+
+  describe('proposer field', () => {
+    const proposerField = () => screen.getByRole('combobox', { name: 'Proposer' })
+
+    it('does not take focus when the form opens', () => {
+      renderForm({ safeAccount: treasury.id })
+
+      expect(proposerField()).not.toHaveFocus()
+    })
+
+    it('is not marked invalid when focus leaves it while still empty', async () => {
+      jest.useFakeTimers()
+      try {
+        renderForm({ safeAccount: treasury.id })
+        const field = proposerField()
+
+        fireEvent.focus(field)
+        fireEvent.blur(field)
+        await act(async () => {
+          jest.advanceTimersByTime(200)
+        })
+        await act(async () => {
+          jest.advanceTimersByTime(1000)
+        })
+
+        expect(field).not.toHaveAttribute('aria-invalid')
+      } finally {
+        jest.useRealTimers()
+      }
     })
   })
 

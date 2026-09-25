@@ -76,7 +76,7 @@ const ProposerRoleForm = ({
             />
 
             <div className="flex flex-col gap-1">
-              <AddressBookInput name="proposer" label="Proposer" required validate={validateProposer} />
+              <AddressBookInput name="proposer" label="Proposer" required focused={false} validate={validateProposer} />
 
               <Typography variant="paragraph-mini" color="muted">
                 {PROPOSER_FIELD_HELPER}
