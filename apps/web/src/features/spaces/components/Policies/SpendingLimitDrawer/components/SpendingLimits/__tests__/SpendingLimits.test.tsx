@@ -1,5 +1,5 @@
 import { render, screen, within } from '@/tests/test-utils'
-import { mockMultiSpenderPolicy, mockSpendingLimitPolicy } from '../../../../mocks/policies'
+import { MOCK_ADDRESSES, mockMultiSpenderPolicy, mockSpendingLimitPolicy } from '../../../../mocks/policies'
 import SpendingLimits from '../SpendingLimits'
 
 const { spenders } = mockSpendingLimitPolicy().data
@@ -55,5 +55,13 @@ describe('SpendingLimits', () => {
     const iconSrcDoc = screen.getByTitle('UNKNOWN').getAttribute('srcdoc')
     const imgSrc = iconSrcDoc?.match(/<img src="([^"]*)"/)?.[1]
     expect(imgSrc).toBe('/images/common/token-placeholder.svg')
+  })
+
+  // The address book returns checksummed keys; matching only on a lowercased key
+  // would leave every spender anonymous once this is wired to real data.
+  it('resolves a spender name whatever case the names map is keyed in', () => {
+    render(<SpendingLimits spenders={spenders} names={{ [MOCK_ADDRESSES.alice]: 'Treasury signer' }} showUsage />)
+
+    expect(screen.getByText('Treasury signer')).toBeInTheDocument()
   })
 })
