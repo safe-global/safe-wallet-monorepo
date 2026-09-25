@@ -250,10 +250,10 @@ describe('ProposerRoleForm', () => {
       expect(accountField()).toHaveTextContent('Treasury')
     })
 
-    it('states the eligibility rule below the field', () => {
+    it('states the signer-only rule below the field', () => {
       renderForm()
 
-      expect(screen.getByText("You only see accounts where you're a signer or proposer.")).toBeInTheDocument()
+      expect(screen.getByText("You only see accounts where you're a signer.")).toBeInTheDocument()
     })
 
     it('reports a picked account to onSafeAccountChange', async () => {
