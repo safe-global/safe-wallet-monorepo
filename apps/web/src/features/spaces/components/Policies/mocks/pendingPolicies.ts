@@ -1,4 +1,4 @@
-import type { PendingPolicyDto } from '@/store/api/gateway/spacePolicies'
+import type { PendingPolicyDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { MOCK_SAFES } from './policies'
 
 /** Shaped like the CGW `policies/pending` response. */

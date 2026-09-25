@@ -1,5 +1,5 @@
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import type { PendingPolicyDto } from '@/store/api/gateway/spacePolicies'
+import type { PendingPolicyDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type {
   PendingPolicyOperation,
   PendingSpendingLimitPolicy,

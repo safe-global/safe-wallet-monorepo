@@ -2,11 +2,11 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type {
   ActivePolicyDto,
+  PendingPolicyDto,
   ProposerPolicyDataDto,
   SpendingLimitAllowanceDto,
   SpendingLimitPolicyDataDto,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import type { PendingPolicyDto } from '@/store/api/gateway/spacePolicies'
 import type { Policy, PolicyAllowance, PolicyTokenInfo, ProposerPolicy, SpendingLimitPolicy } from '../types'
 
 export type ResolveTokenInfo = (chainId: string, tokenAddress: string) => PolicyTokenInfo | undefined
