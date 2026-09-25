@@ -28,7 +28,7 @@ import SecurityBanner from '@/components/common/TrustedSafesModal/SecurityBanner
 import SpaceSafeContextMenu from './SpaceSafeContextMenu'
 import SeatLimitBanner from './SeatLimitBanner'
 import SelectedCounter from '../SelectedCounter'
-import { seatsTooltip } from '../Plans/PlanStatusCard'
+import { seatsTooltip } from '../../constants'
 import { useSeatUpsell } from '../../hooks/useSeatUpsell'
 import { countSeats } from '@/utils/spaces'
 

@@ -1,5 +1,5 @@
 import type { EntitlementsResponse, FeatureKey } from '@safe-global/store/gateway/AUTO_GENERATED/entitlements'
-import type { SeatsMeter, SponsoredTxsMeter } from './types'
+import type { Meter, SponsoredTxsMeter } from './types'
 
 const getMeter = (data: EntitlementsResponse | undefined, feature: FeatureKey): SponsoredTxsMeter | null => {
   const entitlement = data?.entitlements.find((candidate) => candidate.feature === feature)
@@ -8,7 +8,7 @@ const getMeter = (data: EntitlementsResponse | undefined, feature: FeatureKey): 
     : null
 }
 
-export const getSeatsMeter = (data: EntitlementsResponse | undefined): SeatsMeter | null => {
+export const getSeatsMeter = (data: EntitlementsResponse | undefined): Meter | null => {
   const meter = getMeter(data, 'safe_seats')
   return meter && { used: meter.used, quota: meter.quota }
 }

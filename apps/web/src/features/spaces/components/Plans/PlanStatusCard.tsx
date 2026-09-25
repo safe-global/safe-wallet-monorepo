@@ -7,15 +7,13 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Typography } from '@/components/ui/typography'
 import { formatDate } from '@safe-global/utils/utils/date'
-import { TRIAL_DISCLAIMER } from '@/features/safe-pro-announcement'
 import { TRIAL_ENDING_SOON_DAYS, trialLabel } from '../../hooks/billing/subscription'
+import { seatsTooltip } from '../../constants'
+import { TRIAL_DISCLAIMER } from './copy'
 import type { CurrentBadge } from './PlanCards'
-import type { Meter, PlanSummary } from './types'
+import type { Meter, PlanSummary } from '../../hooks/billing/types'
 
 export const remaining = ({ used, quota }: Meter): number | null => (quota === null ? null : Math.max(quota - used, 0))
-
-export const seatsTooltip = (tierName: string | undefined, quota: number | null | undefined) =>
-  `${tierName ?? 'Your plan'} covers ${quota ?? 'unlimited'} Safe accounts. At ${quota ?? 'unlimited'}, remove one from this Workspace to add another. Safe accounts you leave out remain available in My accounts.`
 
 /** The badge both the status card and the current plan card wear: trial with its countdown, or Active. */
 export const getCurrentBadge = (plan: PlanSummary | null): CurrentBadge | undefined => {

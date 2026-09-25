@@ -17,6 +17,7 @@ import { removeUndeployedSafe } from '../store/undeployedSafesSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { isSpaceAtSafeLimit, normalizeSpaceId, type SafeLimit } from '@/utils/spaces'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { seatLimitSkippedMessage } from '@/features/spaces/constants'
 import { getQuotaExceededError } from '@safe-global/utils/services/quotaErrors'
 
 type PersistArgs = {
@@ -141,7 +142,7 @@ export const persistCounterfactualSafe = async ({
           showNotification({
             variant: 'info',
             groupKey: 'cf-safe-space-limit',
-            message: seatLimitMessage(spaceSafeLimit),
+            message: seatLimitSkippedMessage(spaceSafeLimit),
           }),
         )
       } else {
@@ -165,7 +166,7 @@ export const persistCounterfactualSafe = async ({
                 variant: 'info',
                 groupKey: 'cf-safe-space-limit',
                 // The parser reads a missing quota as 0.
-                message: seatLimitMessage(quotaExceeded.quota || spaceSafeLimit),
+                message: seatLimitSkippedMessage(quotaExceeded.quota || spaceSafeLimit),
               }),
             )
           } else if (isLimitRejection(spaceResult.error)) {
@@ -254,11 +255,6 @@ function recoverAlreadyDeployed({
 }
 
 type BackendError = { status?: number; data?: { message?: string } }
-
-function seatLimitMessage(limit: SafeLimit): string {
-  const seats = typeof limit === 'number' ? `limit of ${limit} Safe accounts` : 'seat limit'
-  return `Safe created in My accounts. The Workspace is at its ${seats}, so it wasn't added there.`
-}
 
 function isConflict(error: unknown): boolean {
   return (error as BackendError)?.status === 409

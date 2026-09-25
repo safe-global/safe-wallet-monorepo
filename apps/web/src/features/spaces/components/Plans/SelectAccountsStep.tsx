@@ -10,7 +10,8 @@ import { SearchInput } from '@/components/ui/search-input'
 import { Typography } from '@/components/ui/typography'
 import { SafeAccountsTable, type SafeAccountColumnId } from '@/features/myAccounts'
 import { isMultiChainSafeItem, useSafesSearch, type AllSafeItems, type SafeItem } from '@/hooks/safes'
-import type { SafeRef } from './types'
+import { selectSeatsTooltip } from '../../constants'
+import type { SafeRef } from '../../hooks/billing/types'
 import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
 import { useSpaceSafes } from '../../hooks/useSpaceSafes'
 import SelectedCounter from '../SelectedCounter'
@@ -36,9 +37,6 @@ export const initialSelection = (items: AllSafeItems): Record<string, boolean> =
   }
   return selected
 }
-
-export const seatsTooltip = (planName: string, limit: number): string =>
-  `${planName} covers ${limit} Safe accounts. Safe accounts you leave out remain available outside the Workspace. You can swap them in any time.`
 
 /** Trims the Workspace to the plan's seats before the plan is taken; the Safes deselected are removed from it. */
 export default function SelectAccountsStep({
@@ -106,7 +104,7 @@ export default function SelectAccountsStep({
             count={seatCount}
             limit={limit}
             isAtLimit={isOverLimit}
-            tooltip={seatsTooltip(planName, limit)}
+            tooltip={selectSeatsTooltip(planName, limit)}
           />
           <SearchInput
             className="flex-1"

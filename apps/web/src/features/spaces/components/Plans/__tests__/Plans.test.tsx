@@ -1,11 +1,12 @@
 import { fireEvent, render, screen, within } from '@/tests/test-utils'
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import { SUPPORT_CHAT_URL } from '@/config/constants'
-import type { PlanGroup } from '../../../hooks/billing/types'
+import type { PlanGroup, PlanSummary } from '../../../hooks/billing/types'
 import Plans from '../index'
-import { getCurrentBadge, remaining, seatsTooltip } from '../PlanStatusCard'
+import { getCurrentBadge, remaining } from '../PlanStatusCard'
+import { seatsTooltip } from '../../../constants'
 import { buildPlanTiers } from '../planTiers'
-import type { CurrentPlan, PlanSummary } from '../types'
+import type { CurrentPlan } from '../types'
 
 const offer = (planName: string, paymentLinkId: string, price: number, billingCycle: 'month' | 'year') => ({
   paymentLinkId,

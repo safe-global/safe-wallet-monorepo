@@ -1,6 +1,6 @@
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
-import type { PlanGroup, PlanOffer } from '../../../hooks/billing/types'
-import { PLAN_FEATURES } from '../fixtures'
+import type { PlanGroup, PlanOffer, PlanSummary } from '../../../hooks/billing/types'
+import { PLAN_FEATURES } from '../constants'
 import {
   buildPlanTiers,
   claimTiers,
@@ -11,7 +11,7 @@ import {
   subscriptionToTier,
   toCurrentPlan,
 } from '../planTiers'
-import type { CurrentPlan, PlanSummary } from '../types'
+import type { CurrentPlan } from '../types'
 
 const offer = (overrides: Partial<PlanOffer> & Pick<PlanOffer, 'paymentLinkId' | 'planName'>): PlanOffer => ({
   priceId: `price_${overrides.paymentLinkId}`,
@@ -153,6 +153,11 @@ describe('planTiers', () => {
       'Business',
       'Business',
       'Enterprise',
+    ])
+    expect(buildPlanTiers([BUSINESS, STARTER], undefined, { withEnterprise: false }).map((tier) => tier.name)).toEqual([
+      'Starter',
+      'Business',
+      'Business',
     ])
   })
 

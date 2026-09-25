@@ -2,13 +2,13 @@ import { useRouter } from 'next/router'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { AppRoutes } from '@/config/routes'
 import { highlightSafePro } from '@/components/common/ProHighlight'
-import { SafeProNoticeModal } from '../SafeProModals'
+import { SafeProNoticeModal } from './SafeProModals'
 import { useCheckoutReturn } from '../../hooks/billing/useCheckoutReturn'
 import { useCurrentMembership, useIsAdmin } from '../../hooks/useSpaceMembers'
 import { useWorkspaceLock, type WorkspaceLockReason } from '../../hooks/useWorkspaceLock'
-import { claimCopy } from './ClaimTrialModal'
 import ClaimTrialModal from './ClaimTrialModal'
-import PlanChooserModal, { chooserCopy } from './PlanChooserModal'
+import { chooserCopy, claimCopy } from './copy'
+import PlanChooserModal from './PlanChooserModal'
 
 export const memberCopy = (
   reason: WorkspaceLockReason,

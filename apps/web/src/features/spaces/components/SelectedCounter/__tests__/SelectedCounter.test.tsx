@@ -1,5 +1,6 @@
 import { render, screen } from '@/tests/test-utils'
-import SelectedCounter, { safeLimitTooltip } from '..'
+import SelectedCounter from '..'
+import { safeLimitTooltip } from '../../../constants'
 
 describe('SelectedCounter', () => {
   it('shows the count against a known limit', () => {

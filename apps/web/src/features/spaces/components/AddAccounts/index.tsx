@@ -63,18 +63,16 @@ import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { showNotification } from '@/store/notificationsSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import { cn } from '@/utils/cn'
-import SelectedCounter, { safeLimitTooltip } from '../SelectedCounter'
+import SelectedCounter from '../SelectedCounter'
 import SafeLimitError from '../SelectedCounter/SafeLimitError'
 import { useSpaceSafeLimit } from '../../hooks/useSpaceSafeLimit'
 import { addressOfSafeKey, countSeats, isSpaceAtSafeLimit } from '@/utils/spaces'
 import { useSeatUpsell } from '../../hooks/useSeatUpsell'
-import { seatsTooltip } from '../Plans/PlanStatusCard'
 import { Link } from '@/components/ui/link'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
 import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
-import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'
-import { getSeatLimitMessage } from '../../utils/seatLimitError'
+import { getSeatLimitMessage, safeLimitTooltip, seatsTooltip } from '../../constants'
 
 const PICKER_COLUMNS: SafeAccountColumnId[] = ['select', 'name', 'threshold', 'networks', 'balance']
 
@@ -312,7 +310,6 @@ const AddAccounts = ({
           if (isElevationRequiredError(result.error)) return
           if (result.error) {
             const seatLimit = getSeatLimitMessage(result.error)
-            if (seatLimit && spaceId) refreshSpaceEntitlements(dispatch, spaceId)
             const msg =
               seatLimit ??
               (getRtkQueryErrorMessage(result.error) || 'Something went wrong adding one or more Safe accounts.')

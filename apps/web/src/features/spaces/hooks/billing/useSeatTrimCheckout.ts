@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import type { SafeRef } from '../../components/Plans/types'
+import type { SafeRef } from './types'
 import { useSeatTrim } from './useSeatTrim'
 import { useStartCheckout } from './useStartCheckout'
 

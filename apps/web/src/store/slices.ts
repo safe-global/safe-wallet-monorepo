@@ -56,7 +56,7 @@ export {
   selectStepUpPhase,
 } from '@/features/oidc-auth/store'
 export {
-  spaceSafesEntitlementsListener,
+  entitlementsListener,
   trialReminderListener,
   safeActionsModalSlice,
   ESafeAction,

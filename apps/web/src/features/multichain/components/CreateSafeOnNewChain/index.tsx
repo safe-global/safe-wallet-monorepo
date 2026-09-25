@@ -29,7 +29,7 @@ import { AppRoutes, UNDEPLOYED_SAFE_BLOCKED_ROUTES } from '@/config/routes'
 import type { CreateSafeOnNewChainForm, ReplaySafeDialogProps } from '../../types'
 import { persistCounterfactualSafe } from '@/features/counterfactual/services'
 import { isAuthenticated, lastUsedSpace } from '@/store/authSlice'
-import { useIsAdmin, useSpaceSafeCount, useSpaceSafeLimit } from '@/features/spaces'
+import { seatLimitNotice, useIsAdmin, useSpaceSafeCount, useSpaceSafeLimit } from '@/features/spaces'
 import { isSpaceAtSafeLimit, normalizeSpaceId } from '@/utils/spaces'
 import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
@@ -247,8 +247,7 @@ const ReplaySafeDialog = ({
               {willStayOutsideSpace && (
                 <div data-testid="space-seat-limit-notice">
                   <ErrorMessage level="info">
-                    This Workspace is at its limit of {spaceSafeLimit} Safe accounts. The new network will be added in
-                    My accounts, outside the Workspace.
+                    {seatLimitNotice(spaceSafeLimit, 'The new network will be added')}
                   </ErrorMessage>
                 </div>
               )}

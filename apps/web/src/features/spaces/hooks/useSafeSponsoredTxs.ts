@@ -1,9 +1,7 @@
-import { useHasFeature } from '@/hooks/useChains'
-import useSafeInfo from '@/hooks/useSafeInfo'
-import { safeSpaceKey, useSafeSpaces } from '@/hooks/useSafeSpaces'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import type { RelaysRemaining } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
+import { hasRemainingRelays } from '@/utils/relaying'
 import type { SponsoredTxsMeter } from './billing/types'
-import { useCurrentSpaceId } from './useCurrentSpaceId'
+import { useSafeProAccess } from './useSafeProAccess'
 import { useSpacePlan } from './useSpacePlan'
 
 export type SafeSponsoredTxs = {
@@ -18,23 +16,17 @@ export type SafeSponsoredTxs = {
   spaceId: string | null
   /** The Workspace can still sponsor a transaction right now. */
   canSponsor: boolean
+  /** The Safe is on a plan whose allowance is spent for this cycle. */
+  isExhausted: boolean
   isLoading: boolean
 }
 
 /** The sponsored-transactions allowance of the Workspace the current Safe belongs to, if it belongs to one. */
 export const useSafeSponsoredTxs = (): SafeSponsoredTxs => {
-  const isEnabled = useHasFeature(FEATURES.SAFE_PRO) === true
-  const { safe, safeAddress } = useSafeInfo()
-  const { safeSpaces, isLoading: isSpacesLoading } = useSafeSpaces(!isEnabled)
-  const currentSpaceId = useCurrentSpaceId()
-  // The Workspace the user is working in sets the context; a Safe it does not hold is not on a plan here, whatever
-  // other Workspaces it belongs to.
-  const holders =
-    isEnabled && safeAddress && safe.chainId ? (safeSpaces[safeSpaceKey(safe.chainId, safeAddress)] ?? []) : []
-  const spaceId = currentSpaceId && holders.some((space) => space.uuid === currentSpaceId) ? currentSpaceId : null
-  const { plan, sponsoredTxs, isLoading: isPlanLoading } = useSpacePlan(spaceId)
+  const { isSafePro: isEnabled, hasProFeatures, spaceId, isLoading } = useSafeProAccess()
+  const { sponsoredTxs } = useSpacePlan(spaceId)
 
-  const isPro = isEnabled && spaceId !== null && plan !== null && sponsoredTxs !== null
+  const isPro = isEnabled && hasProFeatures && sponsoredTxs !== null
   const left = isPro && sponsoredTxs.quota !== null ? Math.max(sponsoredTxs.quota - sponsoredTxs.used, 0) : null
 
   return {
@@ -44,6 +36,11 @@ export const useSafeSponsoredTxs = (): SafeSponsoredTxs => {
     left,
     spaceId: isPro ? spaceId : null,
     canSponsor: isPro && (left === null || left > 0),
-    isLoading: isEnabled && (isSpacesLoading || (spaceId !== null && isPlanLoading)),
+    isExhausted: isPro && left === 0,
+    isLoading,
   }
 }
+
+/** A Safe on a plan relays against its Workspace's allowance; any other Safe against the chain's daily relays. */
+export const canRelayWith = (sponsoredTxs: SafeSponsoredTxs, relays?: RelaysRemaining): boolean =>
+  sponsoredTxs.isPro ? sponsoredTxs.canSponsor : hasRemainingRelays(relays)

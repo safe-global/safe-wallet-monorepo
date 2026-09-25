@@ -26,13 +26,14 @@ jest.mock('../../SponsoredTxsCounter', () => ({
   ),
 }))
 
-const off = { isEnabled: false, isPro: false, meter: null, left: null, isLoading: false }
+const off = { isEnabled: false, isPro: false, meter: null, left: null, isExhausted: false, isLoading: false }
 const free = { ...off, isEnabled: true }
 const pro = (left: number) => ({
   isEnabled: true,
   isPro: true,
   meter: { used: 50 - left, quota: 50, resetsAt: '2026-11-01T00:00:00.000Z' },
   left,
+  isExhausted: left === 0,
   isLoading: false,
 })
 const relays = { remaining: 5, limit: 5 }

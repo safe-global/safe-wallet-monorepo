@@ -10,7 +10,7 @@ jest.mock('../../../hooks/useSpacePlan', () => ({ useSpacePlan: (spaceId?: strin
 jest.mock('../../../hooks/billing/useCheckoutReturn', () => ({
   useCheckoutReturn: (spaceId?: string) => mockUseCheckoutReturn(spaceId),
 }))
-jest.mock('../../SafeProModals', () => ({
+jest.mock('../SafeProModals', () => ({
   SafeProTrialActivatedModal: ({
     open,
     onOpenChange,

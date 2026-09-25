@@ -2,9 +2,9 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import { withMockProvider } from '@/storybook/preview'
-import type { PlanGroup, PlanOffer } from '../../hooks/billing/types'
+import type { PlanGroup, PlanOffer, PlanSummary } from '../../hooks/billing/types'
 import { buildPlanTiers } from './planTiers'
-import type { CurrentPlan, PlanSummary } from './types'
+import type { CurrentPlan } from './types'
 import Plans from './index'
 
 const offer = (planName: string, seats: number, price: number, billingCycle: 'month' | 'year'): PlanOffer => ({

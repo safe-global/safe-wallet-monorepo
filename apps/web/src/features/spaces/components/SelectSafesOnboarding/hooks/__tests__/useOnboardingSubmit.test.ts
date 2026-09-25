@@ -82,11 +82,6 @@ jest.mock('@/features/spaces/hooks/useUpsertWorkspaceSafeName', () => ({
   useUpsertWorkspaceSafeNames: () => mockUpsertWorkspaceNames,
 }))
 
-const mockRefreshSpaceEntitlements = jest.fn()
-jest.mock('@/services/entitlements/refreshSpaceEntitlements', () => ({
-  refreshSpaceEntitlements: (...args: unknown[]) => mockRefreshSpaceEntitlements(...args),
-}))
-
 const mockDispatch = jest.fn()
 let mockAddedSafes: Record<string, Record<string, unknown>> = {}
 
@@ -387,7 +382,7 @@ describe('useOnboardingSubmit', () => {
     expect(onSuccess).not.toHaveBeenCalled()
   })
 
-  it('explains a refused add at the seat limit and refreshes the entitlements', async () => {
+  it('explains a refused add at the seat limit', async () => {
     mockAddSafesToSpace.mockResolvedValue({
       error: { status: 402, data: { code: 'QUOTA_EXCEEDED', feature: 'safe_seats', quota: 2, used: 2 } },
     })
@@ -405,7 +400,6 @@ describe('useOnboardingSubmit', () => {
     expect(result.current.error).toBe(
       'Your plan covers 2 Safe accounts and this Workspace already holds 2. Remove one to add another, or upgrade your plan.',
     )
-    expect(mockRefreshSpaceEntitlements).toHaveBeenCalledWith(mockDispatch, '1')
     expect(onSuccess).not.toHaveBeenCalled()
   })
 

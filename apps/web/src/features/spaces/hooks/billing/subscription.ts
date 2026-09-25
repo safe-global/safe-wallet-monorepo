@@ -26,6 +26,10 @@ export const selectCurrentSubscription = (subscriptions: Subscription[] | undefi
   subscriptions?.find((sub) => ACTIVE_STATUSES.has(sub.status)) ??
   subscriptions?.find((sub) => !CANCELED_STATUSES.has(sub.status))
 
+/** The CGW answers 404 for the subscriptions of a Workspace that never had one. */
+export const isNoSubscription = (error: unknown): boolean =>
+  typeof error === 'object' && error !== null && 'status' in error && error.status === 404
+
 /** A subscription that grants Safe Pro right now: paid, or on its free access. */
 export const isLivePlanStatus = (status: PlanStatus): boolean => status === 'active' || status === 'trialing'
 

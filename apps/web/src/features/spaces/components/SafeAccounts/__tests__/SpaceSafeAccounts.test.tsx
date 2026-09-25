@@ -103,7 +103,10 @@ jest.mock('../../InviteBanner/PreviewInvite', () => ({ __esModule: true, default
 
 const mockUseSeatUpsell = jest.fn()
 jest.mock('../../../hooks/useSeatUpsell', () => ({ useSeatUpsell: () => mockUseSeatUpsell() }))
-jest.mock('../../Plans/PlanStatusCard', () => ({ seatsTooltip: (tier: string, limit: number) => `${tier}/${limit}` }))
+jest.mock('../../../constants', () => ({
+  ...jest.requireActual('../../../constants'),
+  seatsTooltip: (tier: string, limit: number) => `${tier}/${limit}`,
+}))
 
 const spaceSafes = [
   { chainId: '1', address: '0xTreasury', name: 'Treasury' },

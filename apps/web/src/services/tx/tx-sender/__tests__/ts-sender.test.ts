@@ -34,6 +34,8 @@ import { generatePreValidatedSignature } from '@safe-global/protocol-kit'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { MockEip1193Provider } from '@/tests/mocks/providers'
 import { SimpleTxWatcher } from '@/utils/SimpleTxWatcher'
+import { getStoreInstance } from '@/store'
+import { cgwApi as entitlementsApi } from '@safe-global/store/gateway/AUTO_GENERATED/entitlements'
 
 const SIGNER_ADDRESS = '0x1234567890123456789012345678901234567890'
 const TX_HASH = '0x1234567890'
@@ -77,6 +79,15 @@ const mockSafeSDK = {
     getSignerAddress: jest.fn(() => Promise.resolve(SIGNER_ADDRESS)),
   })),
 } as unknown as Safe
+
+// Subscribes to the Workspace entitlements like an on-screen meter, so invalidating them refetches.
+const watchEntitlements = async (entitlementsRead: jest.Mock) => {
+  const subscription = getStoreInstance().dispatch(
+    entitlementsApi.endpoints.entitlementsGetEntitlementsV1.initiate({ spaceId: 'space-1' }, { forceRefetch: true }),
+  )
+  await waitFor(() => expect(entitlementsRead).toHaveBeenCalledTimes(1))
+  return subscription.unsubscribe
+}
 
 describe('txSender', () => {
   beforeAll(() => {
@@ -715,10 +726,13 @@ describe('txSender', () => {
         }),
       )
 
+      const unwatchEntitlements = await watchEntitlements(entitlementsRead)
+
       await dispatchTxRelay(safeTx, safe, 'multisig_0x1', chain, 100000, true, undefined, 'space-1')
 
       expect(chainRelay).not.toHaveBeenCalled()
-      await waitFor(() => expect(entitlementsRead).toHaveBeenCalledTimes(1))
+      await waitFor(() => expect(entitlementsRead).toHaveBeenCalledTimes(2))
+      unwatchEntitlements()
       expect(receivedBody).toEqual({
         to: safeAddress,
         data: '0xabcd',
@@ -762,6 +776,8 @@ describe('txSender', () => {
         }),
       )
 
+      const unwatchEntitlements = await watchEntitlements(entitlementsRead)
+
       await expect(
         dispatchTxRelay(safeTx, safe, 'multisig_0x1', chain, undefined, undefined, undefined, 'space-1'),
       ).rejects.toMatchObject({
@@ -774,7 +790,8 @@ describe('txSender', () => {
         'FAILED',
         expect.objectContaining({ error: expect.objectContaining({ name: 'QuotaExceededError' }) }),
       )
-      await waitFor(() => expect(entitlementsRead).toHaveBeenCalledTimes(1))
+      await waitFor(() => expect(entitlementsRead).toHaveBeenCalledTimes(2))
+      unwatchEntitlements()
     })
   })
 
@@ -859,11 +876,14 @@ describe('txSender', () => {
         }),
       )
 
+      const unwatchEntitlements = await watchEntitlements(entitlementsRead)
+
       await dispatchBatchExecutionRelay(txs, multisendContractMock, '0x1234', '5', safeAddress, '1.3.0', 'space-1')
 
       expect(receivedBody).toEqual({ to: mockMultisendAddress, data: '0xfefe', version: '1.3.0' })
       expect(txEvents.txDispatch).toHaveBeenCalledWith('RELAYING', expect.objectContaining({ taskId: '0xspace' }))
-      await waitFor(() => expect(entitlementsRead).toHaveBeenCalledTimes(1))
+      await waitFor(() => expect(entitlementsRead).toHaveBeenCalledTimes(2))
+      unwatchEntitlements()
     })
 
     it('types a spent sponsored allowance (402) on a batch and re-reads the Workspace entitlements', async () => {
@@ -886,6 +906,8 @@ describe('txSender', () => {
         }),
       )
 
+      const unwatchEntitlements = await watchEntitlements(entitlementsRead)
+
       await expect(
         dispatchBatchExecutionRelay(
           txs,
@@ -904,7 +926,8 @@ describe('txSender', () => {
           error: expect.objectContaining({ name: 'QuotaExceededError' }),
         }),
       )
-      await waitFor(() => expect(entitlementsRead).toHaveBeenCalledTimes(1))
+      await waitFor(() => expect(entitlementsRead).toHaveBeenCalledTimes(2))
+      unwatchEntitlements()
     })
   })
 })

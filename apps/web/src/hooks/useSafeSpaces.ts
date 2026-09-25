@@ -11,7 +11,7 @@ import { isAuthenticated } from '@/store/authSlice'
 export type SafeSpacesMap = Record<string, GetSpaceResponse[]>
 
 /** Chain-qualified key for the reverse lookup. Matches the accounts table's row keys. */
-export const safeSpaceKey = (chainId: string, address: string) => `${chainId}:${address.toLowerCase()}`
+const safeSpaceKey = (chainId: string, address: string) => `${chainId}:${address.toLowerCase()}`
 
 /**
  * Builds a reverse lookup from a chain-qualified Safe key to the Spaces it belongs to.
@@ -26,9 +26,9 @@ export const safeSpaceKey = (chainId: string, address: string) => `${chainId}:${
  * accounts table can use it without importing the heavy `@/features/spaces` barrel,
  * which would form a circular dependency.
  */
-export const useSafeSpaces = (skip = false): { safeSpaces: SafeSpacesMap; isLoading: boolean } => {
+export const useSafeSpaces = (): { safeSpaces: SafeSpacesMap; isLoading: boolean } => {
   const isSignedIn = useAppSelector(isAuthenticated)
-  const { data: spaces, isLoading: isLoadingSpaces } = useSpacesGetV1Query(undefined, { skip: !isSignedIn || skip })
+  const { data: spaces, isLoading: isLoadingSpaces } = useSpacesGetV1Query(undefined, { skip: !isSignedIn })
   const [triggerSpaceSafes] = useLazySpaceSafesGetV1Query()
   const [safeSpaces, setSafeSpaces] = useState<SafeSpacesMap>({})
   const [isResolving, setIsResolving] = useState(false)

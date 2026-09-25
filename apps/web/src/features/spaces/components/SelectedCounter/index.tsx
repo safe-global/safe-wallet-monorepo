@@ -39,10 +39,4 @@ const SelectedCounter = ({
   </Typography>
 )
 
-export const safeLimitTooltip = (limit: SafeLimit): string => {
-  if (limit === undefined) return "Your plan's Safe account limit isn't available yet"
-  if (limit === null) return 'Your plan has no limit on Safe accounts per Workspace'
-  return `You can add up to ${limit} Safe accounts per Workspace`
-}
-
 export default SelectedCounter

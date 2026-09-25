@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import type { PlanSummary } from '../components/Plans/types'
+import type { PlanSummary } from './billing/types'
 import {
   getDaysLeft,
   getSubscriptionPeriodEnd,

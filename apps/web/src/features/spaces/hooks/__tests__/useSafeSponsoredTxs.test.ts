@@ -1,38 +1,24 @@
 import { renderHook } from '@testing-library/react'
-import { useSafeSponsoredTxs } from '../useSafeSponsoredTxs'
+import { canRelayWith, useSafeSponsoredTxs, type SafeSponsoredTxs } from '../useSafeSponsoredTxs'
 
-const mockUseHasFeature = jest.fn()
-const mockUseSafeInfo = jest.fn()
-const mockUseSafeSpaces = jest.fn()
+const mockUseSafeProAccess = jest.fn()
 const mockUseSpacePlan = jest.fn()
-jest.mock('@/hooks/useChains', () => ({ useHasFeature: (feature: string) => mockUseHasFeature(feature) }))
-jest.mock('@/hooks/useSafeInfo', () => ({ __esModule: true, default: () => mockUseSafeInfo() }))
-jest.mock('@/hooks/useSafeSpaces', () => ({
-  ...jest.requireActual('@/hooks/useSafeSpaces'),
-  useSafeSpaces: (skip: boolean) => mockUseSafeSpaces(skip),
-}))
+jest.mock('../useSafeProAccess', () => ({ useSafeProAccess: () => mockUseSafeProAccess() }))
 jest.mock('../useSpacePlan', () => ({ useSpacePlan: (spaceId: string | null) => mockUseSpacePlan(spaceId) }))
-let mockCurrentSpaceId: string | null = null
-jest.mock('../useCurrentSpaceId', () => ({ useCurrentSpaceId: () => mockCurrentSpaceId }))
 
-const SAFE = { safe: { chainId: '1' }, safeAddress: '0xAbC' }
-const SPACE = { uuid: 'space-1' }
+const ACCESS = { isSafePro: true, hasProFeatures: true, spaceId: 'space-1', isLoading: false }
 const meter = { used: 20, quota: 50, resetsAt: '2026-11-01T00:00:00.000Z' }
 
 describe('useSafeSponsoredTxs', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockCurrentSpaceId = 'space-1'
-    mockUseHasFeature.mockReturnValue(true)
-    mockUseSafeInfo.mockReturnValue(SAFE)
-    mockUseSafeSpaces.mockReturnValue({ safeSpaces: { '1:0xabc': [SPACE] }, isLoading: false })
-    mockUseSpacePlan.mockReturnValue({ plan: { status: 'active' }, sponsoredTxs: meter, isLoading: false })
+    mockUseSafeProAccess.mockReturnValue(ACCESS)
+    mockUseSpacePlan.mockReturnValue({ sponsoredTxs: meter })
   })
 
   it('reads the allowance of the Workspace the Safe belongs to', () => {
     const { result } = renderHook(() => useSafeSponsoredTxs())
 
-    expect(mockUseSafeSpaces).toHaveBeenCalledWith(false)
     expect(mockUseSpacePlan).toHaveBeenCalledWith('space-1')
     expect(result.current).toEqual({
       isEnabled: true,
@@ -41,43 +27,31 @@ describe('useSafeSponsoredTxs', () => {
       left: 30,
       spaceId: 'space-1',
       canSponsor: true,
+      isExhausted: false,
       isLoading: false,
     })
-  })
-
-  it('only charges the Workspace the user is working in, and none when that one does not hold the Safe', () => {
-    mockUseSafeSpaces.mockReturnValue({ safeSpaces: { '1:0xabc': [SPACE, { uuid: 'space-2' }] }, isLoading: false })
-    mockCurrentSpaceId = 'space-2'
-    renderHook(() => useSafeSponsoredTxs())
-    expect(mockUseSpacePlan).toHaveBeenLastCalledWith('space-2')
-
-    mockCurrentSpaceId = 'space-elsewhere'
-    expect(renderHook(() => useSafeSponsoredTxs()).result.current).toMatchObject({ isPro: false, spaceId: null })
-    expect(mockUseSpacePlan).toHaveBeenLastCalledWith(null)
   })
 
   it('caps the count at zero and reads a missing quota as unlimited', () => {
-    mockUseSpacePlan.mockReturnValue({
-      plan: { status: 'active' },
-      sponsoredTxs: { ...meter, used: 60 },
-      isLoading: false,
+    mockUseSpacePlan.mockReturnValue({ sponsoredTxs: { ...meter, used: 60 } })
+    expect(renderHook(() => useSafeSponsoredTxs()).result.current).toMatchObject({
+      left: 0,
+      canSponsor: false,
+      isExhausted: true,
     })
-    expect(renderHook(() => useSafeSponsoredTxs()).result.current).toMatchObject({ left: 0, canSponsor: false })
 
-    mockUseSpacePlan.mockReturnValue({
-      plan: { status: 'active' },
-      sponsoredTxs: { ...meter, quota: null },
-      isLoading: false,
-    })
+    mockUseSpacePlan.mockReturnValue({ sponsoredTxs: { ...meter, quota: null } })
     expect(renderHook(() => useSafeSponsoredTxs()).result.current).toMatchObject({
       isPro: true,
       left: null,
       canSponsor: true,
+      isExhausted: false,
     })
   })
 
-  it('is not Pro for a Safe outside any Workspace, or in one without a live plan', () => {
-    mockUseSafeSpaces.mockReturnValue({ safeSpaces: {}, isLoading: false })
+  it('is not Pro for a Safe outside the Workspace, or in one without a live plan', () => {
+    mockUseSafeProAccess.mockReturnValue({ ...ACCESS, hasProFeatures: false, spaceId: null })
+    mockUseSpacePlan.mockReturnValue({ sponsoredTxs: null })
     expect(renderHook(() => useSafeSponsoredTxs()).result.current).toMatchObject({
       isEnabled: true,
       isPro: false,
@@ -85,37 +59,58 @@ describe('useSafeSponsoredTxs', () => {
       left: null,
       spaceId: null,
       canSponsor: false,
+      isExhausted: false,
     })
     expect(mockUseSpacePlan).toHaveBeenCalledWith(null)
 
-    mockUseSafeSpaces.mockReturnValue({ safeSpaces: { '1:0xabc': [SPACE] }, isLoading: false })
-    mockUseSpacePlan.mockReturnValue({ plan: null, sponsoredTxs: null, isLoading: false })
-    expect(renderHook(() => useSafeSponsoredTxs()).result.current.isPro).toBe(false)
+    mockUseSafeProAccess.mockReturnValue({ ...ACCESS, hasProFeatures: false })
+    mockUseSpacePlan.mockReturnValue({ sponsoredTxs: meter })
+    expect(renderHook(() => useSafeSponsoredTxs()).result.current).toMatchObject({ isPro: false, spaceId: null })
   })
 
-  it('stays off and skips the lookup while SAFE_PRO is off', () => {
-    mockUseHasFeature.mockReturnValue(false)
-    const { result } = renderHook(() => useSafeSponsoredTxs())
+  it('stays off while SAFE_PRO is off, though the access check then opens everything', () => {
+    mockUseSafeProAccess.mockReturnValue({ isSafePro: false, hasProFeatures: true, spaceId: null, isLoading: false })
+    mockUseSpacePlan.mockReturnValue({ sponsoredTxs: null })
 
-    expect(mockUseSafeSpaces).toHaveBeenCalledWith(true)
-    expect(mockUseSpacePlan).toHaveBeenCalledWith(null)
-    expect(result.current).toEqual({
+    expect(renderHook(() => useSafeSponsoredTxs()).result.current).toEqual({
       isEnabled: false,
       isPro: false,
       meter: null,
       left: null,
       spaceId: null,
       canSponsor: false,
+      isExhausted: false,
       isLoading: false,
     })
   })
 
-  it('reports loading while the Workspaces or the plan resolve', () => {
-    mockUseSafeSpaces.mockReturnValue({ safeSpaces: {}, isLoading: true })
+  it('reports loading while the Workspace membership or plan resolves', () => {
+    mockUseSafeProAccess.mockReturnValue({ ...ACCESS, isLoading: true })
     expect(renderHook(() => useSafeSponsoredTxs()).result.current.isLoading).toBe(true)
+  })
+})
 
-    mockUseSafeSpaces.mockReturnValue({ safeSpaces: { '1:0xabc': [SPACE] }, isLoading: false })
-    mockUseSpacePlan.mockReturnValue({ plan: null, sponsoredTxs: null, isLoading: true })
-    expect(renderHook(() => useSafeSponsoredTxs()).result.current.isLoading).toBe(true)
+describe('canRelayWith', () => {
+  const relays = { remaining: 3, limit: 5 }
+  const sponsored = (isPro: boolean, canSponsor: boolean): SafeSponsoredTxs => ({
+    isEnabled: true,
+    isPro,
+    meter: null,
+    left: null,
+    spaceId: null,
+    canSponsor,
+    isExhausted: false,
+    isLoading: false,
+  })
+
+  it("relays a Safe on a plan against its Workspace's allowance only", () => {
+    expect(canRelayWith(sponsored(true, true), undefined)).toBe(true)
+    expect(canRelayWith(sponsored(true, false), relays)).toBe(false)
+  })
+
+  it("relays any other Safe against the chain's daily relays", () => {
+    expect(canRelayWith(sponsored(false, false), relays)).toBe(true)
+    expect(canRelayWith(sponsored(false, false), { ...relays, remaining: 0 })).toBe(false)
+    expect(canRelayWith(sponsored(false, false), undefined)).toBe(false)
   })
 })

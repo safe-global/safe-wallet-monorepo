@@ -1,4 +1,4 @@
-import { getSeatLimitMessage } from '../seatLimitError'
+import { getSeatLimitMessage } from './constants'
 
 describe('getSeatLimitMessage', () => {
   it('words the spent seat allowance', () => {

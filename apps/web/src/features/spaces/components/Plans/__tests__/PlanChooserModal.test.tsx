@@ -1,6 +1,7 @@
 import { fireEvent, render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import { SUPPORT_CHAT_URL } from '@/config/constants'
-import PlanChooserModal, { chooserCopy, LAPSED_DATA_NOTE } from '../PlanChooserModal'
+import { chooserCopy } from '../copy'
+import PlanChooserModal, { LAPSED_DATA_NOTE } from '../PlanChooserModal'
 
 const mockUseSpaceOffers = jest.fn()
 const mockCheckout = jest.fn()

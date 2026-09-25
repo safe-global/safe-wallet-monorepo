@@ -1,29 +1,21 @@
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
-import type { PlanGroup, PlanOffer } from '../../hooks/billing/types'
+import type { BillingCycle, PlanGroup, PlanOffer, PlanSummary } from '../../hooks/billing/types'
 import {
   getSubscriptionFeatures,
   getSubscriptionPlanName,
   getSubscriptionSeats,
 } from '../../hooks/billing/subscription'
-import { ENTERPRISE_TIER, PLAN_FEATURES, PLAN_ORDER } from './fixtures'
-import type {
-  CurrentPlan,
-  PlanChangeDirection,
-  PlanCta,
-  PlanPick,
-  PlanSeatOption,
-  PlanSummary,
-  PlanTier,
-} from './types'
+import { ENTERPRISE_TIER, PLAN_FEATURES, PLAN_ORDER } from './constants'
+import type { CurrentPlan, PlanChangeDirection, PlanCta, PlanPick, PlanSeatOption, PlanTier } from './types'
 
 const CYCLES = ['month', 'year'] as const
 
 export const formatPlanPrice = (price: number, currency: string): string =>
   new Intl.NumberFormat('en', { style: 'currency', currency, maximumFractionDigits: 0 }).format(price)
 
-export const priceSuffix = (billingCycle: 'month' | 'year' | null): string => (billingCycle === 'year' ? '/yr' : '/mo')
+export const priceSuffix = (billingCycle: BillingCycle | null): string => (billingCycle === 'year' ? '/yr' : '/mo')
 
-const monthlyEquivalent = (price: number, billingCycle: 'month' | 'year' | null): number =>
+const monthlyEquivalent = (price: number, billingCycle: BillingCycle | null): number =>
   billingCycle === 'year' ? price / 12 : price
 
 /**
@@ -201,16 +193,17 @@ const rank = (name: string): number => {
   return index === -1 ? PLAN_ORDER.length : index
 }
 
-/** The offered plans, the current one (when live) and the static Enterprise card, in catalog order. */
+/** The offered plans, the current one (when live) and, unless left out, the static Enterprise card, in catalog order. */
 export const buildPlanTiers = (
   paidPlans: PlanGroup[],
   current?: { subscription: Subscription; seatsQuota: number | null | undefined },
+  { withEnterprise = true }: { withEnterprise?: boolean } = {},
 ): PlanTier[] => {
   const offered = offersToTiers(paidPlans)
   const tiers = current
     ? mergeCurrentTier(offered, subscriptionToTier(current.subscription, current.seatsQuota))
     : offered
-  return [...tiers, ENTERPRISE_TIER].sort((a, b) => rank(a.name) - rank(b.name))
+  return (withEnterprise ? [...tiers, ENTERPRISE_TIER] : tiers).sort((a, b) => rank(a.name) - rank(b.name))
 }
 
 /** Monthly trial offers for the claim modal: the seat count leads the plan's own selling points, verbatim. */
