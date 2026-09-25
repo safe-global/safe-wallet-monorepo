@@ -13,23 +13,28 @@ describe('getResetPeriodLabel', () => {
   })
 
   it('should, when the period is one day, label it as day', () => {
-    expect(getResetPeriodLabel(86_400)).toBe('day')
+    expect(getResetPeriodLabel(1_440)).toBe('day')
   })
 
   it('should, when the period is seven days, label it as week', () => {
-    expect(getResetPeriodLabel(86_400 * 7)).toBe('week')
+    expect(getResetPeriodLabel(1_440 * 7)).toBe('week')
   })
 
   it('should, when the period is thirty days, label it as month', () => {
-    expect(getResetPeriodLabel(86_400 * 30)).toBe('month')
+    expect(getResetPeriodLabel(1_440 * 30)).toBe('month')
   })
 
   it('should, when the period is one of the short test periods, label it in minutes', () => {
-    expect(getResetPeriodLabel(300)).toBe('5 minutes')
+    expect(getResetPeriodLabel(5)).toBe('5 minutes')
   })
 
-  it('should, when the period is not one the design names, fall back to seconds', () => {
-    expect(getResetPeriodLabel(1234)).toBe('1234 seconds')
+  it('should, when the period is not one the design names, fall back to minutes', () => {
+    expect(getResetPeriodLabel(1234)).toBe('1234 minutes')
+  })
+
+  // CGW returns minutes; reading them as seconds silently mislabels every repeating period.
+  it('should, when handed a seconds-valued period, not resolve a named label', () => {
+    expect(getResetPeriodLabel(86_400)).toBe('86400 minutes')
   })
 })
 
@@ -43,7 +48,7 @@ describe('formatAllowance', () => {
   it('should, when the allowance does not repeat, render it as one time', () => {
     const allowance = mockSpendingLimitPolicy().data.spenders[0].allowances[0]
 
-    expect(formatAllowance({ ...allowance, resetPeriodSeconds: 0, resetsAt: null })).toBe('1,500 USDC one time')
+    expect(formatAllowance({ ...allowance, resetPeriodMinutes: 0, resetsAtMinute: null })).toBe('1,500 USDC one time')
   })
 })
 

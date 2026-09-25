@@ -4,6 +4,7 @@ import { FormProvider, useFieldArray, useForm } from 'react-hook-form'
 import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import { Button } from '@/components/ui/button'
 import type { SafeAccountEntry } from '../../SafeAccountSelector/types'
+import { findSafeAccount } from '../../SafeAccountSelector/utils'
 import SafeAccountField from './SafeAccountField'
 import SpenderCallout from './SpenderCallout'
 import SpenderCard from './SpenderCard'
@@ -67,6 +68,10 @@ const SpendingLimitPolicyForm = ({
     onSpendersChange?.(spenderAddressesKey.split(',').filter(Boolean))
   }, [spenderAddressesKey, onSpendersChange])
 
+  // The selector shows a placeholder for a Safe the resolved list lacks (prefilled, or a wallet switch after picking).
+  const selectedSafe = findSafeAccount(accounts, watch('safe'))
+  const isSafeBlocked = !selectedSafe || Boolean(selectedSafe.ineligibleReason)
+
   return (
     <TxCard>
       <FormProvider {...formMethods}>
@@ -109,7 +114,7 @@ const SpendingLimitPolicyForm = ({
           </div>
 
           <TxCardActions>
-            <Button type="submit" size="submit" disabled={!formState.isValid} data-testid="next-btn">
+            <Button type="submit" size="submit" disabled={!formState.isValid || isSafeBlocked} data-testid="next-btn">
               {NEXT_LABEL}
             </Button>
           </TxCardActions>

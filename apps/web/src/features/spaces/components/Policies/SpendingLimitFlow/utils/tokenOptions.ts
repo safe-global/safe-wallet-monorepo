@@ -85,8 +85,6 @@ const byFiatDescThenSymbol = (a: TokenOption, b: TokenOption): number => {
   return fiatDiff !== 0 ? fiatDiff : a.symbol.localeCompare(b.symbol)
 }
 
-const bySymbol = (a: TokenOption, b: TokenOption): number => a.symbol.localeCompare(b.symbol)
-
 /** Zero balances are kept so a limit can be set before funding; held wins on a duplicate address. */
 export const buildTokenOptions = ({
   balances,
@@ -102,10 +100,10 @@ export const buildTokenOptions = ({
 
   const candidates: PopularToken[] = [...(native ? [{ ...native, address: ZERO_ADDRESS }] : []), ...popular]
 
+  // Native first, then the popular table's own order — product-defined, so it is never sorted here.
   const popularOptions = candidates
     .filter((candidate) => !held.some((option) => sameAddress(option.address, candidate.address)))
     .map(toPopularOption)
-    .sort(bySymbol)
 
   return [...held, ...popularOptions]
 }

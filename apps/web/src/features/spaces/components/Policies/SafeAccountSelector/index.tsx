@@ -14,8 +14,14 @@ import SafeAccountRow, {
   SafeAccountRowSkeleton,
   SafeAccountSummary,
 } from './components/SafeAccountRow'
-import { ELIGIBILITY_HELPER_TEXT, SAFE_ACCOUNT_SELECTOR_LABEL, SAFE_ACCOUNT_SELECTOR_PLACEHOLDER } from './constants'
+import {
+  ELIGIBILITY_HELPER_TEXT,
+  INELIGIBILITY_TEXT,
+  SAFE_ACCOUNT_SELECTOR_LABEL,
+  SAFE_ACCOUNT_SELECTOR_PLACEHOLDER,
+} from './constants'
 import { isSafeAccountGroup, type SafeAccountEntry } from './types'
+import { findSafeAccount } from './utils'
 
 export type SafeAccountSelectorProps = {
   /** Already filtered and grouped — see `useEligibleSafeAccounts`. */
@@ -68,12 +74,9 @@ const SafeAccountSelector = ({
 
   // The popup unmounts while closed, so the trigger cannot read a row's label. An unknown `value` falls
   // through to the placeholder rather than rendering a stale name.
-  const selectedAccount = useMemo(() => {
-    if (!value) return undefined
-    return accounts
-      .flatMap((entry) => (isSafeAccountGroup(entry) ? entry.accounts : [entry]))
-      .find((account) => account.id === value)
-  }, [accounts, value])
+  const selectedAccount = useMemo(() => findSafeAccount(accounts, value), [accounts, value])
+  const ineligibilityText = selectedAccount?.ineligibleReason && INELIGIBILITY_TEXT[selectedAccount.ineligibleReason]
+  const shownError = errorMessage ?? ineligibilityText
 
   const renderPopupContent = () => {
     if (isLoading) {
@@ -118,7 +121,7 @@ const SafeAccountSelector = ({
         <SelectTrigger
           id={fieldId}
           aria-label={label}
-          aria-invalid={errorMessage ? true : undefined}
+          aria-invalid={shownError ? true : undefined}
           data-testid="safe-account-selector"
           className="w-full"
         >
@@ -154,9 +157,9 @@ const SafeAccountSelector = ({
         </SelectContent>
       </Select>
 
-      {errorMessage ? (
+      {shownError ? (
         <Typography variant="paragraph-mini" role="alert" className="text-destructive">
-          {errorMessage}
+          {shownError}
         </Typography>
       ) : (
         <Typography variant="paragraph-mini" color="muted" data-testid="safe-account-helper-text">
