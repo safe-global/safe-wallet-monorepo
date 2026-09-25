@@ -101,6 +101,8 @@ const termsLinkClassName = 'underline underline-offset-2'
 const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => void; redirectLoading: boolean }) => {
   const isDarkMode = useDarkMode()
   const isSafeProEnabled = useIsSafeProEnabled()
+  // The announcement brands the card; the Safe Pro terms only apply once Safe Pro is live.
+  const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
   const { SafeProBanner } = useLoadFeature(SafeProFeature)
 
   return (
@@ -108,7 +110,7 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
       {/* The page keeps its Topbar + Accounts/Workspaces tabs, so the sign-in
           card renders inline rather than as a full-screen takeover. */}
       <div className={cn('relative flex items-center justify-center pb-10', isSafeProEnabled ? 'pt-0' : 'pt-10')}>
-        <div className="flex w-full max-w-116 flex-col items-center">
+        <div className={cn('flex w-full flex-col items-center', isSafePro ? 'max-w-116' : 'max-w-110')}>
           {isSafeProEnabled ? <SafeProBanner className="mb-4" /> : <WorkspaceBanner className="mb-3" />}
 
           <div className="relative w-full">
@@ -125,11 +127,11 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
                 )}
               </div>
 
-              <Typography variant="h3" className={cn('text-center', isSafeProEnabled ? 'mb-4' : 'mb-6')}>
+              <Typography variant="h3" className={cn('text-center', isSafePro ? 'mb-4' : 'mb-6')}>
                 Sign in to your Workspace
               </Typography>
 
-              {isSafeProEnabled && (
+              {isSafePro && (
                 <p className="mb-6 text-center text-xs leading-[18px] text-muted-foreground">
                   By continuing you accept the{' '}
                   <Link
@@ -158,7 +160,7 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
             </div>
           </div>
 
-          {!isSafeProEnabled && (
+          {!isSafePro && (
             <p className="mt-4 text-center text-xs leading-[18px] text-muted-foreground">
               By continuing, you agree to the{' '}
               <NextLink

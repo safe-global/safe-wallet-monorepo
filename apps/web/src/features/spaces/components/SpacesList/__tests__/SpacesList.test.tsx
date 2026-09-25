@@ -508,9 +508,20 @@ describe('SpacesList — auth/expiry state rendering', () => {
     expect(card).not.toContainElement(termsLink)
   })
 
+  it('keeps the general terms while only the Safe Pro announcement is on', () => {
+    setAuth(false)
+    mockUseIsSafeProEnabled.mockReturnValue(true)
+
+    render(<SpacesList />)
+
+    expect(screen.getByRole('link', { name: /^terms$/i })).toHaveAttribute('href', AppRoutes.terms)
+    expect(screen.queryByRole('link', { name: /safe pro user terms/i })).not.toBeInTheDocument()
+  })
+
   it('puts the Safe Pro user terms and privacy links inside the sign-in card, opening in a new tab, when Safe Pro is on', () => {
     setAuth(false)
     mockUseIsSafeProEnabled.mockReturnValue(true)
+    mockUseHasFeature.mockReturnValue(true)
 
     const { container } = render(<SpacesList />)
 
