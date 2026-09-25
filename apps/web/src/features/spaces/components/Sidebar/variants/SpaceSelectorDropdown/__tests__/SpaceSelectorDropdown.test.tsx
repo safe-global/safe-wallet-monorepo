@@ -77,6 +77,21 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
   useSafeAddressFromUrl: () => mockSafeAddressFromUrl,
 }))
 
+const mockUseHasFeature = jest.fn()
+jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
+jest.mock('@/public/images/safe-pro/pro-chip.svg', () => 'svg')
+const mockPlans: {
+  tierName: string
+  isTrialing: boolean
+  isTrialEndingSoon: boolean
+  plan: { daysLeft: number | null } | null
+} = { tierName: 'Business', isTrialing: false, isTrialEndingSoon: false, plan: null }
+jest.mock('../../../../../hooks/useSpacePlan', () => ({ useSpacePlan: () => mockPlans }))
+let mockSeatLimit: number | null = 40
+jest.mock('../../../../../hooks/useSpaceSafeLimit', () => ({
+  useSpaceSafeLimit: () => ({ limit: mockSeatLimit, isLoading: false }),
+}))
+
 jest.mock('@/hooks/useChainId', () => ({
   __esModule: true,
   default: () => mockChainId,
@@ -210,6 +225,7 @@ describe('SpaceSelectorDropdown', () => {
     mockChainId = '1'
     mockIsAuthenticated = true
     mockUseSpaceSafesGetV1Query.mockImplementation(() => ({ currentData: undefined }))
+    mockSeatLimit = 40
   })
 
   it('adds an accessible label to the trigger', () => {
@@ -371,6 +387,35 @@ describe('SpaceSelectorDropdown', () => {
 
       expect(fullButton).toBeDisabled()
       expect(emptyButton).not.toBeDisabled()
+    })
+
+    it("follows the Workspace plan's seats rather than the static cap", () => {
+      mockSeatLimit = 2
+      const spaces = [{ uuid: 'uuid-1', name: 'Small Plan', safeCount: 2, members: adminMembersForCurrentUser }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to Workspace' }))
+
+      expect(
+        screen.getAllByRole('button').find((btn) => btn.querySelector('span')?.textContent === 'Small Plan'),
+      ).toBeDisabled()
+      expect(screen.getByText('You can have up to 2 Safes per Workspace')).toBeInTheDocument()
+    })
+
+    it('still offers a full Workspace that already holds this Safe on another chain (same seat)', () => {
+      mockSafeAddressFromUrl = '0x0000000000000000000000000000000000001234'
+      mockUseSpaceSafesGetV1Query.mockImplementation(() => ({
+        currentData: { safes: { '10': ['0x0000000000000000000000000000000000001234'] } },
+      }))
+      const spaces = [{ uuid: 'uuid-1', name: 'Full Space', safeCount: LIMIT, members: adminMembersForCurrentUser }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to Workspace' }))
+
+      expect(
+        screen.getAllByRole('button').find((btn) => btn.querySelector('span')?.textContent === 'Full Space'),
+      ).not.toBeDisabled()
+      expect(screen.queryByText(/You can have up to /)).not.toBeInTheDocument()
     })
 
     it('shows a tooltip with the limit message for a space at the limit', () => {
@@ -1066,5 +1111,34 @@ describe('SpaceSelectorDropdown', () => {
 
       expect(screen.getByText(`Limit of ${SPACES_LIMIT} Workspaces reached`)).toBeInTheDocument()
     })
+  })
+
+  describe('plan label under the workspace name', () => {
+    it.each([
+      [false, false, null, 'Workspace', false],
+      [true, true, 20, 'Free access', false],
+      [true, true, 14, 'Free access · 14 days left', false],
+      [true, true, 7, 'Free access · 7 days left', true],
+      [true, true, 1, 'Free access · 1 day left', true],
+      [true, true, null, 'Free access', false],
+      [true, false, 20, 'Business', false],
+    ])(
+      'SAFE_PRO=%s isTrialing=%s daysLeft=%s → "%s", warning=%s',
+      (isSafePro, isTrialing, daysLeft, label, isWarning) => {
+        mockUseHasFeature.mockReturnValue(isSafePro)
+        mockPlans.isTrialing = isTrialing
+        mockPlans.isTrialEndingSoon = isTrialing && daysLeft !== null && daysLeft <= 7
+        mockPlans.plan = daysLeft === null && !isTrialing ? null : { daysLeft }
+        const spaces = [{ uuid: 'uuid-1', name: 'Alpha', safeCount: 0 }]
+
+        render(<SpaceSelectorDropdown spaces={spaces} selectedSpace={spaces[0]} />)
+
+        const subtitle = screen.getByText(label)
+        expect(subtitle).toBeInTheDocument()
+        expect(subtitle.classList.contains('text-warning-strong')).toBe(isWarning)
+        expect(subtitle.classList.contains('text-green-500')).toBe(isSafePro && !isWarning)
+        expect(screen.queryByTestId('space-selector-pro-chip')).not.toBeInTheDocument()
+      },
+    )
   })
 })

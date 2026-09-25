@@ -36,6 +36,8 @@ import { asError } from '@safe-global/utils/services/exceptions/utils'
 import chains from '@safe-global/utils/config/chains'
 import { createExistingTx } from './create'
 import { getRelaySimulationError } from '@safe-global/utils/services/relayErrors'
+import { getQuotaExceededError } from '@safe-global/utils/services/quotaErrors'
+import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'
 
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import type { TxSenderScope } from '@/components/tx-flow/safe-scope/types'
@@ -521,6 +523,8 @@ export const dispatchTxRelay = async (
   gasLimit?: string | number | bigint,
   acceptUnverifiedSimulation?: boolean,
   scope?: TxSenderScope,
+  /** A Safe Pro Workspace paying for the relay out of its allowance; without it the chain's relayer policy applies. */
+  sponsorSpaceId?: string | null,
 ) => {
   const store = getStoreInstance()
   const readOnlySafeContract = await getReadOnlyCurrentGnosisSafeContract(safe, scope)
@@ -542,19 +546,37 @@ export const dispatchTxRelay = async (
   ])
 
   try {
-    const relayAction = relayApi.endpoints.relayRelayV1.initiate({
-      chainId: safe.chainId,
-      relayDto: {
-        to: safe.address.value,
-        data,
-        gasLimit: gasLimit?.toString(),
-        version: safe.version ?? getLatestSafeVersion(chain),
-        safeTxHash,
-        acceptUnverifiedSimulation,
-      },
-    })
-
-    const relayResponse = await store.dispatch(relayAction).unwrap()
+    const version = safe.version ?? getLatestSafeVersion(chain)
+    const relayResponse = sponsorSpaceId
+      ? await store
+          .dispatch(
+            relayApi.endpoints.spaceRelayRelayV1.initiate({
+              spaceId: sponsorSpaceId,
+              chainId: safe.chainId,
+              spaceRelayDto: { to: safe.address.value, data, version, safeTxHash, acceptUnverifiedSimulation },
+            }),
+          )
+          .unwrap()
+          .then((response) => {
+            // The Workspace just spent a sponsored transaction; every meter on screen should say so.
+            refreshSpaceEntitlements(store.dispatch, sponsorSpaceId)
+            return response
+          })
+      : await store
+          .dispatch(
+            relayApi.endpoints.relayRelayV1.initiate({
+              chainId: safe.chainId,
+              relayDto: {
+                to: safe.address.value,
+                data,
+                gasLimit: gasLimit?.toString(),
+                version,
+                safeTxHash,
+                acceptUnverifiedSimulation,
+              },
+            }),
+          )
+          .unwrap()
     const taskId = relayResponse.taskId
 
     if (!taskId) {
@@ -573,8 +595,10 @@ export const dispatchTxRelay = async (
     waitForRelayedTx(taskId, [txId], safe.chainId, safe.address.value, safeTx.data.nonce)
   } catch (error) {
     // CGW pre-relay simulation surfaces SIMULATION_FAILED / INDETERMINATE_SIMULATION as a typed
-    // error so the UI can block or offer an explicit retry; everything else stays as-is.
-    const finalError = getRelaySimulationError(error) ?? asError(error)
+    // error so the UI can block or offer an explicit retry; a spent allowance (402) also refreshes the stale meter.
+    const quotaError = sponsorSpaceId ? getQuotaExceededError(error) : undefined
+    if (quotaError && sponsorSpaceId) refreshSpaceEntitlements(store.dispatch, sponsorSpaceId)
+    const finalError = getRelaySimulationError(error) ?? quotaError ?? asError(error)
     txDispatch(TxEvent.FAILED, {
       txId,
       error: finalError,
@@ -593,6 +617,7 @@ export const dispatchBatchExecutionRelay = async (
   chainId: string,
   safeAddress: string,
   safeVersion: string,
+  sponsorSpaceId?: string | null,
 ) => {
   const store = getStoreInstance()
   const to = multiSendContract.getAddress()
@@ -602,27 +627,37 @@ export const dispatchBatchExecutionRelay = async (
 
   let relayResponse
   try {
-    const relayAction = relayApi.endpoints.relayRelayV1.initiate({
-      chainId,
-      relayDto: {
-        to,
-        data,
-        version: safeVersion,
-      },
-    })
-
-    relayResponse = await store.dispatch(relayAction).unwrap()
+    relayResponse = sponsorSpaceId
+      ? await store
+          .dispatch(
+            relayApi.endpoints.spaceRelayRelayV1.initiate({
+              spaceId: sponsorSpaceId,
+              chainId,
+              spaceRelayDto: { to, data, version: safeVersion },
+            }),
+          )
+          .unwrap()
+          .then((response) => {
+            refreshSpaceEntitlements(store.dispatch, sponsorSpaceId)
+            return response
+          })
+      : await store
+          .dispatch(relayApi.endpoints.relayRelayV1.initiate({ chainId, relayDto: { to, data, version: safeVersion } }))
+          .unwrap()
   } catch (error) {
+    const quotaError = sponsorSpaceId ? getQuotaExceededError(error) : undefined
+    if (quotaError && sponsorSpaceId) refreshSpaceEntitlements(store.dispatch, sponsorSpaceId)
+    const finalError = quotaError ?? asError(error)
     txs.forEach(({ txId }) => {
       txDispatch(TxEvent.FAILED, {
         txId,
         chainId,
         safeAddress,
-        error: asError(error),
+        error: finalError,
         groupKey,
       })
     })
-    throw error
+    throw finalError
   }
 
   const taskId = relayResponse.taskId

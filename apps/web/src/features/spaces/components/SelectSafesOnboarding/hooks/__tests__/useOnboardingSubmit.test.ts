@@ -240,6 +240,36 @@ describe('useOnboardingSubmit', () => {
     expect(onSuccess).toHaveBeenCalled()
   })
 
+  it('removes unselected safes before adding new ones so a swap at the seat limit frees the seat first', async () => {
+    mockSpaceSafes = [buildSafeItem('1', '0xexisting')]
+    const calls: string[] = []
+    mockRemoveSafesFromSpace.mockImplementation(async () => {
+      calls.push('remove')
+      return { data: {} }
+    })
+    mockAddSafesToSpace.mockImplementation(async () => {
+      calls.push('add')
+      return { data: {} }
+    })
+
+    const { result } = renderHook(() => useOnboardingSubmit('42', onSuccess))
+
+    await waitFor(() => {
+      expect(result.current.selectedSafesLength).toBe(1)
+    })
+
+    act(() => {
+      result.current.formMethods.setValue('selectedSafes', { '1:0xexisting': false, '1:0xnew': true })
+    })
+
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(calls).toEqual(['remove', 'add'])
+    expect(onSuccess).toHaveBeenCalled()
+  })
+
   it('should not add safes that already exist in the space', async () => {
     mockSpaceSafes = [buildSafeItem('1', '0xexisting')]
 

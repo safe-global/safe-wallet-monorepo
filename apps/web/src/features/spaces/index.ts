@@ -55,6 +55,9 @@ export {
   useCurrentSpaceSafeCount,
   useSpaceSafeCount,
 } from './hooks/useIsCurrentSpaceAtSafeLimit'
+export { useSpaceSafeLimit } from './hooks/useSpaceSafeLimit'
+export { useSafeSponsoredTxs, type SafeSponsoredTxs } from './hooks/useSafeSponsoredTxs'
+export { useSafeProAccess } from './hooks/useSafeProAccess'
 export { default as useFeatureFlagRedirect } from './hooks/useFeatureFlagRedirect'
 export { default as useFeatureRedirect } from './hooks/useFeatureRedirect'
 export { default as useGetSpaceAddressBook, useSpaceAddressBookState } from './hooks/useGetSpaceAddressBook'

@@ -11,6 +11,11 @@ import { SafeShieldAnalysisLoading } from './SafeShieldAnalysisLoading'
 import { SafeShieldAnalysisEmpty } from './SafeShieldAnalysisEmpty'
 import { AnalysisGroupCard } from '../AnalysisGroupCard'
 import { TenderlySimulation } from '../TenderlySimulation'
+import { TenderlySimulationLocked } from '../TenderlySimulationLocked'
+import { useHasOwnTenderly } from '../../hooks/useHasOwnTenderly'
+import { ProChecksRow } from '../ProChecksRow'
+import { LockedCheckRow } from '../LockedCheckRow'
+import { HypernativeLoginLine } from '../HypernativeLoginLine'
 import UntrustedSafeWarning from '../UntrustedSafeWarning'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import isEmpty from 'lodash/isEmpty'
@@ -34,6 +39,8 @@ export const SafeShieldContent = ({
   showHypernativeActiveStatus = true,
   safeAnalysis,
   onAddToTrustedList,
+  hasProFeatures = true,
+  isSafePro = true,
 }: {
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
@@ -46,9 +53,14 @@ export const SafeShieldContent = ({
   showHypernativeActiveStatus?: boolean
   safeAnalysis?: SafeAnalysisResult | null
   onAddToTrustedList?: () => void
+  /** Without Safe Pro the simulation only runs on the user's own Tenderly project, if they set one up; else it is locked. */
+  hasProFeatures?: boolean
+  /** Off: the pre-Pro layout, with the recipient check among the open ones and the simulation run by hand. */
+  isSafePro?: boolean
 }): ReactElement => {
   const hn = useLoadFeature(HypernativeFeature)
   const safenet = useLoadFeature(SafenetChecksFeature)
+  const hasOwnTenderly = useHasOwnTenderly()
   const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient
   const [contractResults = {}, _contractError, contractLoading = false] = contract
   const [threatResults = {}, _threatError, threatLoading = false] = threat
@@ -74,7 +86,7 @@ export const SafeShieldContent = ({
       {/* overflow-hidden clips the last analysis row's square background to the rounded corners;
           rounded-b-md (12px) = the parent's rounded-lg (16px) minus the 4px px-1/pb-1 inset, which
           keeps this curve concentric with the outer one. */}
-      <div className="relative overflow-hidden rounded-b-md border border-t-0 border-[var(--color-background-main)]">
+      <div className="relative overflow-hidden rounded-b-md">
         {showHypernativeInfo && (
           <hn.HnInfoCard hypernativeAuth={hypernativeAuth} showActiveStatus={showHypernativeActiveStatus} />
         )}
@@ -83,19 +95,21 @@ export const SafeShieldContent = ({
 
         {shouldShowContent && !loading && allEmpty && !hypernativeAuth && <SafeShieldAnalysisEmpty />}
 
-        <div className="[&>div]:border-t [&>div]:border-[var(--color-background-main)]">
+        <div data-testid="open-checks-list">
           {/* Untrusted Safe warning - shown at top when Safe is not pinned */}
           {safeAnalysis && onAddToTrustedList && (
             <UntrustedSafeWarning safeAnalysis={safeAnalysis} onAddToTrustedList={onAddToTrustedList} />
           )}
 
-          <AnalysisGroupCard
-            data-testid="recipient-analysis-group-card"
-            delay={recipientDelay}
-            data={recipientResults}
-            highlightedSeverity={highlightedSeverity}
-            analyticsEvent={SAFE_SHIELD_EVENTS.RECIPIENT_DECODED}
-          />
+          {!isSafePro && (
+            <AnalysisGroupCard
+              data-testid="recipient-analysis-group-card"
+              delay={recipientDelay}
+              data={recipientResults}
+              highlightedSeverity={highlightedSeverity}
+              analyticsEvent={SAFE_SHIELD_EVENTS.RECIPIENT_DECODED}
+            />
+          )}
 
           <AnalysisGroupCard
             data-testid="contract-analysis-group-card"
@@ -130,7 +144,7 @@ export const SafeShieldContent = ({
 
           {shouldShowContent && <safenet.SafenetChecksSection />}
 
-          {!contractLoading && !threatLoading && (
+          {!isSafePro && !contractLoading && !threatLoading && (
             <TenderlySimulation
               safeTx={safeTx}
               delay={simulationAnalysisDelay}
@@ -138,6 +152,37 @@ export const SafeShieldContent = ({
             />
           )}
         </div>
+
+        {isSafePro && shouldShowContent && (!hasProFeatures || !recipientEmpty || safeTx) && (
+          <div className="mt-1 flex flex-col rounded-md bg-muted" data-testid="pro-checks-section">
+            <ProChecksRow hasProFeatures={hasProFeatures} />
+            <div className="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary">
+              {hasProFeatures ? (
+                <AnalysisGroupCard
+                  data-testid="recipient-analysis-group-card"
+                  delay={recipientDelay}
+                  data={recipientResults}
+                  highlightedSeverity={highlightedSeverity}
+                  analyticsEvent={SAFE_SHIELD_EVENTS.RECIPIENT_DECODED}
+                />
+              ) : (
+                <LockedCheckRow data-testid="recipient-analysis-locked">Known recipient</LockedCheckRow>
+              )}
+
+              {!contractLoading && !threatLoading && (hasProFeatures || hasOwnTenderly) && (
+                <TenderlySimulation
+                  safeTx={safeTx}
+                  delay={simulationAnalysisDelay}
+                  highlightedSeverity={highlightedSeverity}
+                  autoRun={hasProFeatures}
+                />
+              )}
+              {!hasProFeatures && !hasOwnTenderly && <TenderlySimulationLocked />}
+
+              {!hasProFeatures && <HypernativeLoginLine />}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

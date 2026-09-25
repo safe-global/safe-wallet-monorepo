@@ -17,7 +17,7 @@ const SignInOptions = ({ afterSignIn, redirectLoading = false }: SignInOptionsPr
         afterSignIn={afterSignIn}
         redirectLoading={redirectLoading}
         buttonStyle="walletBtnSecondary"
-        buttonText={{ connected: 'Continue with', disconnected: 'Continue with wallet' }}
+        buttonText={{ connected: 'Continue with', disconnected: 'Connect wallet' }}
       />
 
       {showOidc && (

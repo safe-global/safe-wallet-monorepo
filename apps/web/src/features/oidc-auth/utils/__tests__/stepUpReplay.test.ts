@@ -33,6 +33,9 @@ describe('getReplayableAction', () => {
     expect(getReplayableAction(rejectedMutation('membersInviteUserV1', {}))?.endpoint).toBe('membersInviteUserV1')
     expect(getReplayableAction(rejectedMutation('membersUpdateRoleV1', {}))?.endpoint).toBe('membersUpdateRoleV1')
     expect(getReplayableAction(rejectedMutation('membersRemoveUserV1', {}))?.endpoint).toBe('membersRemoveUserV1')
+    expect(getReplayableAction(rejectedMutation('billingUpdateSubscriptionV1', {}))?.endpoint).toBe(
+      'billingUpdateSubscriptionV1',
+    )
     expect(getReplayableAction(rejectedMutation('addressBooksUpsertAddressBookItemsV1', {}))?.endpoint).toBe(
       'addressBooksUpsertAddressBookItemsV1',
     )

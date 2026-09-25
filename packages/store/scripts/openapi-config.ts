@@ -53,7 +53,7 @@ const config: ConfigFile = {
       filterEndpoints: [/^owners/],
     },
     '../src/gateway/AUTO_GENERATED/relay.ts': {
-      filterEndpoints: [/^relay/],
+      filterEndpoints: [/^(relay|spaceRelay)/],
     },
     '../src/gateway/AUTO_GENERATED/safe-apps.ts': {
       filterEndpoints: [/^safeApps/],

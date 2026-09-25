@@ -2,7 +2,21 @@ import { render, screen } from '@/tests/test-utils'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
 import SafeProBanner from '../index'
 
+let mockIsLive = false
+jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockIsLive }))
+
 describe('SafeProBanner', () => {
+  beforeEach(() => {
+    mockIsLive = false
+  })
+
+  it('speaks in the past once Safe Pro is live', () => {
+    mockIsLive = true
+    render(<SafeProBanner />)
+
+    expect(screen.getByText('Workspaces moved to Safe Pro on Oct 6, 2026')).toBeInTheDocument()
+  })
+
   it('renders the headline and the New tag', () => {
     render(<SafeProBanner />)
 

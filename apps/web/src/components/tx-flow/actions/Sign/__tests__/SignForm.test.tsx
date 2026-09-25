@@ -62,6 +62,8 @@ describe('SignForm', () => {
       setIsRiskConfirmed: jest.fn(),
       safeAnalysis: null,
       addToTrustedList: jest.fn(),
+      hasProFeatures: true,
+      isSafePro: true,
     },
     options: [
       { id: 'sign', label: 'Sign' },

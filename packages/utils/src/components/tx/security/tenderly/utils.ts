@@ -21,6 +21,29 @@ import { UseSimulationReturn } from './useSimulation'
 
 const TENDERLY_DASHBOARD_URL = 'https://dashboard.tenderly.co'
 
+/** Lets a Workspace without Safe Pro simulate by hand instead of through our Tenderly project. */
+export const getPublicSimulatorLink = ({
+  chainId,
+  from,
+  to,
+  value,
+  data,
+}: {
+  chainId: string
+  from: string
+  to: string
+  value: string
+  data: string
+}): string => {
+  const url = new URL(`${TENDERLY_DASHBOARD_URL}/simulator/new`)
+  url.searchParams.set('network', chainId)
+  url.searchParams.set('from', from)
+  url.searchParams.set('contractAddress', to)
+  url.searchParams.set('value', value)
+  url.searchParams.set('rawFunctionInput', data)
+  return url.toString()
+}
+
 const getTenderlyProjectFromUrl = (tenderlyUrl?: string): { org: string; project: string } | undefined => {
   if (!tenderlyUrl) {
     return

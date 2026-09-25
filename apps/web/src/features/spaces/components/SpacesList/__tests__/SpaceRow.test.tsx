@@ -6,6 +6,11 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import userEvent from '@testing-library/user-event'
 
+jest.mock('@/public/images/safe-pro/pro-chip.svg', () => 'svg')
+const mockUseSpaceSubscription = jest.fn()
+jest.mock('../../../hooks/billing/useSpaceSubscription', () => ({
+  useSpaceSubscription: (spaceId: string) => mockUseSpaceSubscription(spaceId),
+}))
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
   trackEvent: jest.fn(),
@@ -22,6 +27,7 @@ const space = {
 describe('SpaceRow', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockUseSpaceSubscription.mockReturnValue({ subscription: undefined, status: 'none' })
   })
 
   it('renders the workspace summary as a link into the workspace', () => {
@@ -33,6 +39,17 @@ describe('SpaceRow', () => {
 
     const link = screen.getByRole('link')
     expect(link).toHaveAttribute('href', `${AppRoutes.spaces.index}?spaceId=${space.uuid}`)
+  })
+
+  it('shows the PRO pill with the tier only for paid workspaces, asking the plan of that workspace', () => {
+    mockUseSpaceSubscription.mockReturnValue({ subscription: { plan: { name: 'Business' } }, status: 'active' })
+    const { rerender } = render(<SpaceRow space={space} />)
+    expect(screen.getByTestId('space-row-pro-badge')).toHaveTextContent('· Business')
+    expect(mockUseSpaceSubscription).toHaveBeenCalledWith(space.uuid)
+
+    mockUseSpaceSubscription.mockReturnValue({ subscription: { plan: { name: 'Business' } }, status: 'trialing' })
+    rerender(<SpaceRow space={space} />)
+    expect(screen.queryByTestId('space-row-pro-badge')).not.toBeInTheDocument()
   })
 
   it('tracks the workspace switch when the row is clicked', async () => {
