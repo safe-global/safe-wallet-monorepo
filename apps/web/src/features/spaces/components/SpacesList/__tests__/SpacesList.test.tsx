@@ -143,6 +143,19 @@ describe('SpacesList — auth/expiry state rendering', () => {
     expect(screen.getByRole('link', { name: /get safe pro/i })).toHaveAttribute('href', AppRoutes.welcome.createSpace)
   })
 
+  it('keeps the pre-launch first Workspace CTA until Safe Pro is live', () => {
+    mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    expect(screen.getByRole('link', { name: /create your first workspace/i })).toHaveAttribute(
+      'href',
+      AppRoutes.welcome.createSpace,
+    )
+    expect(screen.queryByText(/get safe pro/i)).not.toBeInTheDocument()
+  })
+
   describe('SAFE_PRO_ANNOUNCEMENT banner gating', () => {
     it('keeps the pre-Pro Workspace banner when the flag is off', () => {
       setAuth(false)
@@ -186,7 +199,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
       const { unmount } = render(<SpacesList />)
       expect(screen.getByTestId('safe-pro-workspaces-banner')).toBeInTheDocument()
-      expect(screen.getByText(/get safe pro/i)).toBeInTheDocument()
+      expect(screen.getByText(/create your first workspace/i)).toBeInTheDocument()
       unmount()
 
       mockUseHasFeature.mockReturnValue(true)
@@ -255,7 +268,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     render(<SpacesList />)
 
-    const cta = screen.getByRole('link', { name: /get safe pro/i })
+    const cta = screen.getByRole('link', { name: /create your first workspace/i })
     expect(cta).toHaveAttribute('href')
     expect(cta).toHaveClass('[&_svg]:text-green-400')
 
@@ -544,7 +557,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     // The header button is absent; only the empty-state CTA inside the
     // No-workspaces card renders (it lives outside the spacesHeader).
-    expect(screen.getByText(/get safe pro/i)).toBeInTheDocument()
+    expect(screen.getByText(/create your first workspace/i)).toBeInTheDocument()
     expect(screen.getAllByTestId('create-space-button')).toHaveLength(1)
   })
 

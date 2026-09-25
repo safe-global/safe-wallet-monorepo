@@ -33,6 +33,8 @@ import SpaceInfoModal from '../SpaceInfoModal'
 import { filterSpacesByStatus, getInvitedByName } from '@/features/spaces/utils'
 import { AppRoutes } from '@/config/routes'
 import { SAFE_PRO_USER_TERMS_URL } from '@/config/constants'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import NextLink from 'next/link'
 import { useSignInRedirect } from '@/components/welcome/WelcomeLogin/hooks/useSignInRedirect'
 import AddIcon from '@/public/images/common/add.svg'
@@ -190,6 +192,7 @@ const WORKSPACE_BENEFITS = [
 const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
   const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
   const isDarkMode = useDarkMode()
+  const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
 
   return (
     <>
@@ -225,7 +228,7 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
           <div className="flex flex-col items-center gap-4">
             <div className="h-12">
               <AddSpaceButton
-                label="Get Safe Pro"
+                label={isSafePro ? 'Get Safe Pro' : 'Create your first Workspace'}
                 icon="arrow"
                 disabled={isAtLimit}
                 link
