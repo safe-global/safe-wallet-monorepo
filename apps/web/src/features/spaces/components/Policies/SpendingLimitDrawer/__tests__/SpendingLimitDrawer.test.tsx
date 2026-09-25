@@ -16,15 +16,17 @@ const setup = (policy: DrawerPolicy = mockActiveSpendingLimit(), viewer: Viewer 
     <SpendingLimitDrawer
       open
       onClose={jest.fn()}
-      policy={policy}
-      viewer={viewer}
-      safe={{ address: OVERVIEW.appliesTo.address, name: MOCK_SAFE_NAME }}
-      overview={OVERVIEW}
-      transactionLink={TRANSACTION_LINK}
-      onEdit={jest.fn()}
-      onDelete={jest.fn()}
-      onReviewTransaction={jest.fn()}
-      onConnectWallet={jest.fn()}
+      content={{
+        policy,
+        viewer,
+        safe: { address: OVERVIEW.appliesTo.address, name: MOCK_SAFE_NAME },
+        overview: OVERVIEW,
+        transactionLink: TRANSACTION_LINK,
+        onEdit: jest.fn(),
+        onDelete: jest.fn(),
+        onReviewTransaction: jest.fn(),
+        onConnectWallet: jest.fn(),
+      }}
     />,
   )
 
@@ -91,8 +93,8 @@ describe('SpendingLimitDrawer', () => {
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
   })
 
-  it('stands in with skeletons while the policy is still loading', () => {
-    render(<SpendingLimitDrawer open onClose={jest.fn()} isLoading />)
+  it('stands in with skeletons while the policy has not arrived', () => {
+    render(<SpendingLimitDrawer open onClose={jest.fn()} />)
 
     expect(screen.getByText('Spending limit')).toBeInTheDocument()
     expect(screen.getByTestId('spending-limit-status-skeleton')).toBeInTheDocument()

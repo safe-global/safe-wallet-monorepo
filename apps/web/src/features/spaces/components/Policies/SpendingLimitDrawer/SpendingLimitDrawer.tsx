@@ -39,7 +39,9 @@ export type SpendingLimitDrawerContentProps = {
 export type SpendingLimitDrawerProps = {
   open: boolean
   onClose: () => void
-} & (({ isLoading?: false } & SpendingLimitDrawerContentProps) | { isLoading: true })
+  /** Absent while the policy is still being fetched, which is what the drawer renders skeletons for. */
+  content?: SpendingLimitDrawerContentProps
+}
 
 const Header = ({ children }: { children: ReactNode }): ReactElement => (
   <DrawerHeader>
@@ -102,9 +104,9 @@ const DrawerContent = ({
   )
 }
 
-const SpendingLimitDrawer = (props: SpendingLimitDrawerProps): ReactElement => (
-  <Drawer open={props.open} onClose={props.onClose} ariaLabel={TITLE}>
-    {props.isLoading ? <LoadingContent /> : <DrawerContent {...props} />}
+const SpendingLimitDrawer = ({ open, onClose, content }: SpendingLimitDrawerProps): ReactElement => (
+  <Drawer open={open} onClose={onClose} ariaLabel={TITLE}>
+    {content ? <DrawerContent {...content} /> : <LoadingContent />}
   </Drawer>
 )
 
