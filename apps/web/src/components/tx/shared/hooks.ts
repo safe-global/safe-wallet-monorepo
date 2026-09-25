@@ -104,7 +104,7 @@ export const useTxActions = (): TxActions => {
     ): Promise<string> => {
       if (txId) {
         const confirmedTx = await dispatchTxConfirmation({ chainId, safeAddress, sender, safeTx, txId, scope })
-        return confirmedTx.id
+        return confirmedTx.txId
       }
       const proposedTx = await _propose(sender, safeTx, origin)
       return proposedTx.txId

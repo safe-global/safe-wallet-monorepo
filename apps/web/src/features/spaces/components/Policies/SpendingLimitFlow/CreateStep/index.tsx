@@ -16,7 +16,7 @@ const CreateSpendingLimitPolicy = ({
   isCalloutDismissed,
   onDismissCallout,
 }: CreateSpendingLimitPolicyProps): ReactElement => {
-  const { data, onNext } = useContext<TxFlowContextType<SpendingLimitPolicyFormValues>>(TxFlowContext)
+  const { data: formValues, onNext } = useContext<TxFlowContextType<SpendingLimitPolicyFormValues>>(TxFlowContext)
   const { accounts, isLoading, isError, refetch, hasWallet } = useSpendingLimitSafeAccounts()
   const { setScope } = useSafeScopeControls()
   const scopeKey = useSafeScope()?.scopeKey
@@ -27,7 +27,7 @@ const CreateSpendingLimitPolicy = ({
 
   return (
     <SpendingLimitPolicyForm
-      defaultValues={data ?? createDefaultFormValues()}
+      defaultValues={formValues ?? createDefaultFormValues()}
       onSubmit={onNext}
       accounts={accounts}
       isAccountsLoading={isLoading}

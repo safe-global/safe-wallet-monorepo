@@ -94,6 +94,8 @@ export type SafeAccountsTableProps = {
   actionsWidth?: string
   /** Replaces the default context-menu actions cell for each row (e.g. an "Add to workspace" button). */
   renderActions?: (line: AccountLine) => ReactNode
+  /** Replaces the identity cell. Rows stop navigating so the cell can hold its own controls. */
+  renderName?: (line: AccountLine) => ReactNode
   /** Lowercased address → cross-list look-alike peers; drives the inline ⚠️ + tooltip. */
   similarWarnings?: Map<string, SimilarWarning>
   /** Lowercased address → cluster id; contiguous same-cluster rows render inside a warning band. */
@@ -147,6 +149,7 @@ export default function SafeAccountsTable({
   columns,
   actionsWidth,
   renderActions,
+  renderName,
   similarWarnings,
   similarityGroups,
   anchorAddresses,
@@ -364,6 +367,7 @@ export default function SafeAccountsTable({
                     warning={similarWarnings?.get(line.address.toLowerCase())}
                     highlighted={Boolean(clusterId)}
                     renderActions={renderActions}
+                    renderName={renderName}
                     onRename={onRename}
                     checkbox={selection ? getRowCheckbox(group, line, selection) : undefined}
                     onSelectToggle={selection ? (next) => selection.onToggle(line, next) : undefined}

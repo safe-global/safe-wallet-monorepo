@@ -206,7 +206,7 @@ export type TransactionsGetModuleTransactionsV1ApiArg = {
   cursor?: string
 }
 export type TransactionsAddConfirmationV1ApiResponse =
-  /** status 200 Transaction details with updated confirmation status */ Transaction
+  /** status 200 Transaction details with updated confirmation status */ TransactionDetails
 export type TransactionsAddConfirmationV1ApiArg = {
   /** Chain ID where the Safe is deployed */
   chainId: string

@@ -7,6 +7,7 @@ import useChains from '@/hooks/useChains'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useAppSelector } from '@/store'
 import { useGetMultipleSafeOverviewsQuery, useGetProposerSafesQuery } from '@/store/api/gateway'
+import { selectUndeployedSafes } from '@/store/slices'
 import { selectCurrency } from '@/store/settingsSlice'
 import { useSpaceSafes } from '../../../../hooks/useSpaceSafes'
 import { buildSafeAccountId, groupSafeAccounts } from '../utils'
@@ -22,7 +23,7 @@ const getEligibility = (isSigner: boolean, isProposer: boolean): SafeAccountElig
 
 /**
  * Safes in the current Space on which the connected wallet is a signer or a proposer, grouped by
- * address. Ineligible Safes are absent rather than disabled.
+ * address. Safes the wallet has no role on are absent; counterfactual ones are listed but disabled.
  */
 export const useEligibleSafeAccounts = () => {
   const {
@@ -34,6 +35,7 @@ export const useEligibleSafeAccounts = () => {
   } = useSpaceSafes()
   const { address: wallet = '' } = useWallet() || {}
   const currency = useAppSelector(selectCurrency)
+  const undeployedSafes = useAppSelector(selectUndeployedSafes)
   const { configs: chains } = useChains()
 
   const safeItems = useMemo(() => flattenSafeItems(allSafes), [allSafes])
@@ -107,12 +109,13 @@ export const useEligibleSafeAccounts = () => {
           eligibility: getEligibility(isSigner, isProposer),
           chain: chainsById.get(item.chainId),
           fiatTotal: overview?.fiatTotal,
+          ineligibleReason: undeployedSafes[item.chainId]?.[item.address] ? 'not-activated' : undefined,
         },
       ]
     })
 
     return groupSafeAccounts(options)
-  }, [wallet, isLoading, safeItems, proposerSafes, overviewsByKey, chainsById])
+  }, [wallet, isLoading, safeItems, proposerSafes, overviewsByKey, chainsById, undeployedSafes])
 
   // Destructured for stable deps: the whole query objects would hand consumers a new `onRetry` per render.
   const { refetch: refetchOverviews, isUninitialized: isOverviewsUninitialized } = overviewsQuery
