@@ -34,7 +34,10 @@ const AllowanceRow = ({ allowance, showUsage }: AllowanceRowProps): ReactElement
     {showUsage && (
       <>
         {/* Track and fill match the preview in SpendingLimitIntroDialog; the default track is the card's own colour. */}
-        <Progress value={remainingPercent(allowance)}>
+        <Progress
+          value={remainingPercent(allowance)}
+          aria-label={`${allowance.token.symbol}: ${formatRemaining(allowance)}`}
+        >
           <ProgressTrack className="bg-border">
             <ProgressIndicator className="bg-badge-dot-success" />
           </ProgressTrack>
