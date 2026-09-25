@@ -2,7 +2,11 @@ import type { ReactElement } from 'react'
 import { ShieldCheck } from 'lucide-react'
 import { DrawerList, DrawerSection } from '@/components/common/Drawer'
 import { Skeleton } from '@/components/ui/skeleton'
-import { AccountIdentity, AccountIdentitySkeleton, type AccountIdentityProps } from '../AccountIdentity'
+import {
+  AccountIdentity,
+  AccountIdentitySkeleton,
+  type AccountIdentityProps,
+} from '../../../components/AccountIdentity'
 
 export type ProposerOverviewProps = {
   proposer: AccountIdentityProps

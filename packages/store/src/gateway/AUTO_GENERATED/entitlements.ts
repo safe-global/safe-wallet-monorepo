@@ -29,7 +29,7 @@ export type EntitlementsPlan = {
   /** End of the current billing cycle */
   cycleEndsAt: string | null
 }
-export type FeatureKey = 'safe_seats' | 'copilot_scans' | 'sponsored_transactions'
+export type FeatureKey = 'safe_seats' | 'copilot_scans' | 'sponsored_transactions' | 'policies'
 export type BinaryEntitlement = {
   /** Feature key from the entitlements catalog. */
   feature: FeatureKey
