@@ -126,6 +126,25 @@ describe('CreateSpaceOnboarding', () => {
     expect(mockGoToSelectSafes).not.toHaveBeenCalled()
   })
 
+  it('stays on the step and offers a retry when the trial offer cannot be read', () => {
+    mockCreatedSpaceId = 'space-new'
+    const retry = jest.fn()
+    mockUseWorkspaceLock.mockReturnValue({
+      isLocked: false,
+      isResolving: false,
+      isError: true,
+      reason: 'lapsed',
+      retry,
+    })
+    render(<CreateSpaceOnboarding />)
+
+    expect(mockGoToSelectSafes).not.toHaveBeenCalled()
+    expect(screen.queryByTestId('claim-trial-modal')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
+    expect(retry).toHaveBeenCalled()
+  })
+
   it('shows no trial offer before the Workspace is created', () => {
     render(<CreateSpaceOnboarding />)
 

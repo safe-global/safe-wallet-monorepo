@@ -3,7 +3,8 @@ import { useForm, useWatch } from 'react-hook-form'
 import OnboardingFooter from '@/components/common/OnboardingFooter'
 import { Input } from '@/components/ui/input'
 import { Typography } from '@/components/ui/typography'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { Alert, AlertAction, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import {
   OnboardingLayout,
@@ -53,9 +54,10 @@ const CreateSpaceOnboarding = (): ReactElement => {
   // The new Workspace is offered its trial right here; without an offer the wizard moves on to the Safes step.
   const trialLock = useWorkspaceLock(createdSpaceId ?? null)
   const offersTrial = Boolean(createdSpaceId) && trialLock.isLocked && trialLock.reason === 'trial-offered'
+  const isTrialCheckFailed = Boolean(createdSpaceId) && trialLock.isError
   useEffect(() => {
-    if (createdSpaceId && !trialLock.isResolving && !offersTrial) goToSelectSafes(createdSpaceId)
-  }, [createdSpaceId, trialLock.isResolving, offersTrial, goToSelectSafes])
+    if (createdSpaceId && !trialLock.isResolving && !trialLock.isError && !offersTrial) goToSelectSafes(createdSpaceId)
+  }, [createdSpaceId, trialLock.isResolving, trialLock.isError, offersTrial, goToSelectSafes])
   const watchedName = useWatch({ control, name: 'name' }) ?? ''
 
   // Tracks whether the user has typed in the input at least once. We can't use
@@ -148,6 +150,20 @@ const CreateSpaceOnboarding = (): ReactElement => {
           <Alert variant="destructive">
             <AlertSeverityIcon variant="destructive" />
             <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {isTrialCheckFailed && (
+          <Alert variant="destructive" data-testid="trial-check-error">
+            <AlertSeverityIcon variant="destructive" />
+            <AlertDescription>
+              We couldn&apos;t check your Workspace&apos;s free access. Please try again.
+            </AlertDescription>
+            <AlertAction>
+              <Button type="button" variant="outline" size="sm" onClick={trialLock.retry}>
+                Try again
+              </Button>
+            </AlertAction>
           </Alert>
         )}
       </form>

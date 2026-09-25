@@ -37,6 +37,18 @@ describe('useRateLimitRetry', () => {
     expect(refetch).toHaveBeenCalledTimes(3)
   })
 
+  it('reads the first 429 as retrying in the same render, before its effect runs', () => {
+    const refetch = jest.fn()
+    const seen: boolean[] = []
+    renderHook(() => {
+      const isRetrying = useRateLimitRetry({ error: { status: 429 }, refetch })
+      seen.push(isRetrying)
+      return isRetrying
+    })
+
+    expect(seen[0]).toBe(true)
+  })
+
   it('stops and resets once the query recovers or fails for another reason', () => {
     const refetch = jest.fn()
     const { result, rerender } = renderHook(({ error }) => useRateLimitRetry({ error, refetch }), {

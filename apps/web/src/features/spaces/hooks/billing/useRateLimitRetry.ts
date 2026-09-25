@@ -9,19 +9,18 @@ export const isRateLimited = (error: unknown): boolean =>
 /** The shared CGW client never retries (WA-3252), and a 429 read as "no plan / no offers" would lock flows wrongly. */
 export const useRateLimitRetry = ({ error, refetch }: { error: unknown; refetch: () => unknown }): boolean => {
   const attempts = useRef(0)
-  const [isRetrying, setIsRetrying] = useState(false)
+  const [isExhausted, setIsExhausted] = useState(false)
 
   useEffect(() => {
     if (!isRateLimited(error)) {
       attempts.current = 0
-      setIsRetrying(false)
+      setIsExhausted(false)
       return
     }
     if (attempts.current >= MAX_ATTEMPTS) {
-      setIsRetrying(false)
+      setIsExhausted(true)
       return
     }
-    setIsRetrying(true)
     const id = setTimeout(
       () => {
         attempts.current += 1
@@ -32,5 +31,6 @@ export const useRateLimitRetry = ({ error, refetch }: { error: unknown; refetch:
     return () => clearTimeout(id)
   }, [error, refetch])
 
-  return isRetrying
+  // Derived in render: the effect runs a commit late, and a 429 read as an error in between skips flows for good.
+  return isRateLimited(error) && !isExhausted
 }
