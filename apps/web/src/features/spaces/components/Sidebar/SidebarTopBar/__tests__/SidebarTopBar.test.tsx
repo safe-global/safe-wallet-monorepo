@@ -67,6 +67,7 @@ describe('SidebarTopBar', () => {
     mockUseRouter.mockReturnValue({ pathname: AppRoutes.welcome.accounts })
     mockUseSafeAddressFromUrl.mockReturnValue('')
     mockUseIsSpaceRoute.mockReturnValue(false)
+    mockUseHasFeature.mockReturnValue(true)
     const { useSidebar } = require('@/components/ui/sidebar')
     useSidebar.mockReturnValue({ state: 'expanded' })
   })
@@ -114,6 +115,19 @@ describe('SidebarTopBar', () => {
     const logo = screen.getByTestId('logo-container')
     expect(logo).toHaveAttribute('data-home-label', 'true')
     expect(logo).toHaveAttribute('href', AppRoutes.welcome.accounts)
+  })
+
+  it('keeps the dev logo and its link to My accounts until Safe Pro is live', () => {
+    mockUseHasFeature.mockReturnValue(false)
+    mockUseRouter.mockReturnValue({ pathname: AppRoutes.spaces.index })
+    mockUseIsSpaceRoute.mockReturnValue(true)
+    mockPlans.plan = { status: 'active' }
+
+    render(<SidebarTopBar />)
+
+    const logo = screen.getByTestId('logo-container')
+    expect(logo).toHaveAttribute('href', AppRoutes.welcome.accounts)
+    expect(logo).toHaveAttribute('data-pro-lockup', 'false')
   })
 
   it('shows the Home label pill inside a space route, linking back to the Workspaces list', () => {
