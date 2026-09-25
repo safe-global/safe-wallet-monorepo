@@ -11,6 +11,7 @@ import {
   mockPendingPolicy,
   mockPendingRemoval,
   mockPendingUpdate,
+  mockUnenforcedPolicy,
   mockSpendingLimitPolicy,
   asActivePolicy,
 } from '../mocks/policies'
@@ -22,6 +23,7 @@ const OVERVIEW = {
   appliesTo: { address: SAFE.address, name: 'Treasury' },
   lastUpdated: 'Sep 22, 2026 · 03:35 UTC',
   enforcedBy: 'Safe allowance module',
+  enforcedByHref: 'https://etherscan.io/address/0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134',
 }
 
 const meta = {
@@ -147,3 +149,6 @@ export const WithSpenderNames: Story = {
     },
   },
 }
+
+/** The module is configured but not enabled on the Safe, so it enforces nothing. */
+export const Unenforced: Story = { args: { policy: asActivePolicy(mockUnenforcedPolicy()) } }

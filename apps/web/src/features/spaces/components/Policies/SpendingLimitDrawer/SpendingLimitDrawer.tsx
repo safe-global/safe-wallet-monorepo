@@ -1,6 +1,5 @@
 import type { ReactElement } from 'react'
 import { Drawer, DrawerBody, DrawerHeader, DrawerTitle } from '@/components/common/Drawer'
-import { Badge, BadgeDot } from '@/components/ui/badge'
 import { getPolicyIcon } from '../utils/policyIcon'
 import { getPolicyLabel } from '../utils/policyLabel'
 import type { AccountIdentityProps } from '../components/AccountIdentity'
@@ -9,6 +8,8 @@ import { PendingSignatures } from './components/PendingSignatures'
 import { PolicyOverview } from './components/PolicyOverview'
 import { SpendingLimitActions } from './components/SpendingLimitActions'
 import { SpendingLimits } from './components/SpendingLimits'
+import PolicyStatusChip from '../components/PolicyStatusChip'
+import { getPolicyStatus } from '../types'
 import { resolveSpendingLimitDrawerState, type DrawerPolicy, type Viewer } from './resolveState'
 
 export type SpendingLimitDrawerProps = {
@@ -23,6 +24,7 @@ export type SpendingLimitDrawerProps = {
     initiatedBy?: AccountIdentityProps
     lastUpdated: string
     enforcedBy: string
+    enforcedByHref?: string
   }
   names?: Record<string, string>
   transactionLink: string
@@ -53,10 +55,9 @@ const SpendingLimitDrawer = ({
           <Icon className="size-4 text-success-strong" />
         </div>
         <DrawerTitle size="lg">{getPolicyLabel(policy)}</DrawerTitle>
-        <Badge variant={isPending ? 'warning' : 'success'} size="status" shape="status" className="ml-auto">
-          <BadgeDot />
-          {isPending ? 'Pending' : 'Active'}
-        </Badge>
+        <div className="ml-auto">
+          <PolicyStatusChip status={getPolicyStatus(policy)} />
+        </div>
       </DrawerHeader>
 
       <DrawerBody>
