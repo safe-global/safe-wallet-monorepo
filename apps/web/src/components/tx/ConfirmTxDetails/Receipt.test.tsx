@@ -44,7 +44,7 @@ jest.mock('@/components/transactions/TxDetails/Summary/SafeTxHashDataRow', () =>
 }))
 
 // Stub heavy children that pull in unrelated hook chains (address book, ENS, explorer links).
-jest.mock('./NameChip', () => ({ __esModule: true, default: () => null }))
+jest.mock('./NameChip', () => ({ __esModule: true, default: () => <span data-testid="name-chip" /> }))
 jest.mock('@/components/common/EthHashInfo', () => ({
   __esModule: true,
   default: ({ address, children }: { address: string; children?: unknown }) => (
@@ -194,5 +194,23 @@ describe('Receipt GasToken identity', () => {
     const { queryByTestId } = renderReceipt({ gtfSelectedGasToken: ERC20_GAS_TOKEN }, erc20Data)
 
     expect(queryByTestId('gas-token-icon')).not.toBeInTheDocument()
+  })
+})
+
+describe('Receipt To row', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockRelayer = { type: 'RELAY_FEE' }
+    mockUseGtfFeePreview.mockReturnValue({ data: undefined })
+  })
+
+  it('renders the address and its name chip on a full-width line of their own, aligned right', () => {
+    const { getByTestId } = renderReceipt({})
+
+    const line = getByTestId('name-chip').parentElement
+
+    expect(line).toHaveClass('w-full', 'justify-end')
+    expect(line?.firstElementChild).toHaveTextContent(baseSafeTxData.to)
+    expect(line?.lastElementChild).toHaveAttribute('data-testid', 'name-chip')
   })
 })

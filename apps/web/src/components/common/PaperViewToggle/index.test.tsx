@@ -1,4 +1,4 @@
-import { render, screen } from '@/tests/test-utils'
+import { fireEvent, render, screen } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
 import { PaperViewToggle } from '.'
 
@@ -14,19 +14,27 @@ describe('PaperViewToggle', () => {
     const group = screen.getByRole('group')
     const panel = screen.getByTestId('first-view').parentElement
 
-    expect(screen.queryByTestId('paper-view-toggle-outside')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('paper-view-toggle-outlined')).not.toBeInTheDocument()
     expect(panel).toContainElement(group)
   })
 
-  it('renders the tabs above and outside the panel when tabsOutside is set', () => {
-    render(<PaperViewToggle tabsOutside>{views}</PaperViewToggle>)
+  it('renders the tabs and the active view inside an outlined panel when outlined is set', () => {
+    render(<PaperViewToggle outlined>{views}</PaperViewToggle>)
 
-    const group = screen.getByRole('group')
-    const view = screen.getByTestId('first-view')
+    const panel = screen.getByTestId('paper-view-toggle-outlined')
 
-    expect(screen.getByTestId('paper-view-toggle-outside')).toContainElement(group)
-    expect(group.compareDocumentPosition(view) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    expect(group.parentElement).not.toHaveClass('bg-[var(--color-background-main)]')
-    expect(group.parentElement).not.toHaveClass('flex')
+    expect(screen.queryByRole('group')).not.toBeInTheDocument()
+    expect(panel).toContainElement(screen.getByRole('tablist'))
+    expect(panel).toContainElement(screen.getByTestId('first-view'))
+    expect(screen.queryByTestId('second-view')).not.toBeInTheDocument()
+  })
+
+  it('switches the view when another tab is selected in the outlined panel', () => {
+    render(<PaperViewToggle outlined>{views}</PaperViewToggle>)
+
+    fireEvent.click(screen.getAllByRole('tab')[1])
+
+    expect(screen.getByTestId('second-view')).toBeInTheDocument()
+    expect(screen.queryByTestId('first-view')).not.toBeInTheDocument()
   })
 })

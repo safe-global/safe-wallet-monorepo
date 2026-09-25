@@ -71,7 +71,7 @@ export const ExecuteTxStep = ({ afterSigning = false }: { afterSigning?: boolean
               </AlertDescription>
             </Alert>
 
-            <Receipt safeTxData={safeTx.data} txData={txPreview?.txData} txInfo={txPreview?.txInfo} tabsOutside />
+            <Receipt safeTxData={safeTx.data} txData={txPreview?.txData} txInfo={txPreview?.txInfo} outlined />
 
             <Execute
               options={EXECUTE_OPTIONS}
