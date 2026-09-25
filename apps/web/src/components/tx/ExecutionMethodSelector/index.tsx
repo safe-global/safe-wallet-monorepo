@@ -83,8 +83,7 @@ const _ExecutionMethodSelector = ({
   const shouldRelay = executionMethod === ExecutionMethod.RELAY || executionMethod === ExecutionMethod.NO_FEE_CAMPAIGN
   // On unlimited-relay (GTF) chains the finite "N free transactions left" counter is meaningless, so hide it.
   const isUnlimitedRelay = !!chain && hasFeature(chain, FEATURES.GTF)
-  // Under SAFE_PRO the relay strip talks about sponsored transactions: the Workspace's allowance on a plan, the free
-  // one with an upgrade nudge otherwise. The no-fee campaign keeps its own counter.
+  // Under SAFE_PRO the relay strip counts sponsored transactions; the no-fee campaign keeps its own counter.
   const showsSponsoredTxs = Boolean(
     sponsoredTxs?.isEnabled && relays && !isUnlimitedRelay && !noFeeCampaign?.isEligible,
   )

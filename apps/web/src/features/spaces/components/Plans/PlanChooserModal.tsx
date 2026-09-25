@@ -11,14 +11,14 @@ import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
 import { useSeatTrimCheckout } from '../../hooks/billing/useSeatTrimCheckout'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import type { WorkspaceLockReason } from '../../hooks/useWorkspaceLock'
-import { ENTERPRISE_TIER, RECOMMENDED_PLAN } from './fixtures'
+import { ENTERPRISE_TIER, RECOMMENDED_PLAN } from './planCatalog'
 import { PlanCatalog } from './PlanCards'
 import { InfoTip } from './PlanStatusCard'
 import { buildPlanTiers } from './planTiers'
 import SelectAccountsStep from './SelectAccountsStep'
 import type { PlanPick, PlanTier } from './types'
 
-export const LAPSED_DATA_NOTE =
+export const _LAPSED_DATA_NOTE =
   'Nothing was charged. Your paid subscription only starts once you add a payment method. Your Workspace data is kept for 90 days and your Safe accounts stay available in My accounts.'
 
 const maxSeats = (tier: PlanTier): number => Math.max(0, ...tier.options.map((option) => option.seats ?? 0))
@@ -54,10 +54,6 @@ export const chooserCopy = (
       }
 }
 
-/**
- * Blocking plan picker for a Workspace whose trial or plan ended. Before Stripe the admin confirms which Safes the
- * picked plan covers when the Workspace holds more than it allows.
- */
 export default function PlanChooserModal({
   spaceId,
   reason,
@@ -107,7 +103,7 @@ export default function PlanChooserModal({
                 </Typography>
                 <div className="flex items-center gap-1.5">
                   <Typography color="muted">{subtitle}</Typography>
-                  {reason === 'lapsed' && <InfoTip text={LAPSED_DATA_NOTE} data-testid="lapsed-data-note" />}
+                  {reason === 'lapsed' && <InfoTip text={_LAPSED_DATA_NOTE} data-testid="lapsed-data-note" />}
                 </div>
               </div>
 
@@ -124,8 +120,8 @@ export default function PlanChooserModal({
                 </Button>
               ) : isLoading ? (
                 <div className="flex gap-4" data-testid="plan-chooser-skeleton">
-                  <Skeleton className="h-[420px] flex-1 rounded-lg-xl" />
-                  <Skeleton className="h-[420px] flex-1 rounded-lg-xl" />
+                  <Skeleton className="h-105 flex-1 rounded-lg-xl" />
+                  <Skeleton className="h-105 flex-1 rounded-lg-xl" />
                 </div>
               ) : tiers.length === 0 ? (
                 <Alert variant="info">

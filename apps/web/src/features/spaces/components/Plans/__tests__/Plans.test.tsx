@@ -3,7 +3,7 @@ import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/bil
 import { SUPPORT_CHAT_URL } from '@/config/constants'
 import type { PlanGroup } from '../../../hooks/billing/types'
 import Plans from '../index'
-import { getCurrentBadge, remaining, seatsTooltip } from '../PlanStatusCard'
+import { getCurrentBadge, _remaining, seatsTooltip } from '../PlanStatusCard'
 import { buildPlanTiers } from '../planTiers'
 import type { CurrentPlan, PlanSummary } from '../types'
 
@@ -61,8 +61,8 @@ describe('Plans', () => {
     [{ used: 6, quota: 10 }, 4],
     [{ used: 12, quota: 10 }, 0],
     [{ used: 3, quota: null }, null],
-  ])('remaining(%p) → %p', (meter, expected) => {
-    expect(remaining(meter)).toBe(expected)
+  ])('_remaining(%p) → %p', (meter, expected) => {
+    expect(_remaining(meter)).toBe(expected)
   })
 
   it('adapts the seats tooltip to the tier and quota', () => {

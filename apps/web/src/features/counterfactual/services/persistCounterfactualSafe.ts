@@ -33,9 +33,7 @@ type PersistArgs = {
    *  safe is not auto-attached to the space (the backend would reject the call
    *  with 403). The safe is still persisted at the user level. */
   isAdminOfActiveSpace: boolean
-  /** Number of Safe accounts already in the active space. At `spaceSafeLimit`
-   *  the backend would reject the add; the safe is still persisted at the user
-   *  level and the user is informed via a toast. */
+  /** At `spaceSafeLimit` the add is skipped; the Safe stays at the user level and a toast tells the user. */
   spaceSafeCount?: number
   /** Seats the space's plan allows (`useSpaceSafeLimit`); `null` = unlimited, `undefined` = unknown, so the backend decides. */
   spaceSafeLimit: SafeLimit
@@ -155,8 +153,7 @@ export const persistCounterfactualSafe = async ({
           if (isElevationRequiredError(spaceResult.error)) {
             return { ok: false, error: toSpaceError(spaceResult.error), stepUpPending: true }
           }
-          // The cached count was stale (another admin filled the seats meanwhile). Seats are per
-          // address, so a 402 cannot split a multi-chain batch: keep the Safe in My accounts.
+          // Stale cached count (another admin filled the seats); seats are per address, so a 402 never splits a batch.
           const quotaExceeded = getQuotaExceeded(spaceResult.error)
           if (quotaExceeded) {
             dispatch(

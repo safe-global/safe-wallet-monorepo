@@ -226,7 +226,6 @@ const AddAccounts = ({
   const seatCount = countSeats(Array.from(selectedKeys, addressOfSafeKey))
   const { limit, isError: isLimitError, retry: retryLimit } = useSpaceSafeLimit(spaceId)
   const isAtLimit = isSpaceAtSafeLimit(seatCount, limit)
-  // Nothing more can be picked until the cap is known.
   const isSelectionLocked = isAtLimit || limit === undefined
   const { isSafePro, tierName, plansHref } = useSeatUpsell(spaceId)
   const limitTooltip = isSafePro && typeof limit === 'number' ? seatsTooltip(tierName, limit) : safeLimitTooltip(limit)

@@ -4,7 +4,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Typography } from '@/components/ui/typography'
 import InfoIcon from '@/public/images/notifications/info.svg'
 
-/** A Pro-only check the user does not get: named, locked, with an optional word on how to unlock it. */
 export const LockedCheckRow = ({
   children,
   tooltip,

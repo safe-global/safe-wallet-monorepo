@@ -6,7 +6,6 @@ export const ProHighlight = ({ children }: { children: ReactNode }) => <span cla
 
 const SAFE_PRO = 'Safe Pro'
 
-/** Wraps every "Safe Pro" in a sentence with the highlight, leaving the rest of the text untouched. */
 export const highlightSafePro = (text: string): ReactNode => {
   const parts = text.split(SAFE_PRO)
   if (parts.length === 1) return text

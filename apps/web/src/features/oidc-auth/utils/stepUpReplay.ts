@@ -86,7 +86,6 @@ export const takeStepUpTrip = (): StepUpTrip | undefined => {
   }
 }
 
-// Both generated modules inject into the same api instance; merging the endpoint maps just types the lookup.
 // Built on demand: tests mock the generated modules partially, and a module-load spread would read `undefined`.
 const replayableEndpoints = () => ({ ...cgwApi.endpoints, ...billingApi.endpoints })
 

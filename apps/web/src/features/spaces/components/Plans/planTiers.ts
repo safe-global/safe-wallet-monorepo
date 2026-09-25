@@ -5,7 +5,7 @@ import {
   getSubscriptionPlanName,
   getSubscriptionSeats,
 } from '../../hooks/billing/subscription'
-import { ENTERPRISE_TIER, PLAN_FEATURES, PLAN_ORDER } from './fixtures'
+import { ENTERPRISE_TIER, PLAN_FEATURES, PLAN_ORDER } from './planCatalog'
 import type {
   CurrentPlan,
   PlanChangeDirection,
@@ -26,10 +26,7 @@ export const priceSuffix = (billingCycle: 'month' | 'year' | null): string => (b
 const monthlyEquivalent = (price: number, billingCycle: 'month' | 'year' | null): number =>
   billingCycle === 'year' ? price / 12 : price
 
-/**
- * The current plan's seats: the subscription's own Stripe tag first (right as soon as a change is applied), else the
- * entitlements quota, which waits for the billing webhook. Undefined while neither is known.
- */
+/** The subscription's own seats tag wins: the entitlements quota lags until the billing webhook lands. */
 const currentSeats = (
   subscription: Subscription,
   seatsQuota: number | null | undefined,
@@ -66,10 +63,7 @@ export const getChangeDirection = (current: CurrentPlan | undefined, pick: PlanP
   return next > now ? 'upgrade' : next < now ? 'downgrade' : 'change'
 }
 
-/**
- * The button a catalog card shows, given the Workspace's live plan (if any). Without one, `recommended` names the
- * plan that gets the primary "Continue with" button while the others read as a switch.
- */
+/** Without a live plan, `recommended` names the tier that gets the primary "Continue with" button. */
 export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined, recommended?: string): PlanCta => {
   if (pick.tier.isCurrent) {
     if (pick.option.priceId === pick.tier.currentPriceId || !pick.option.paymentLinkId) {
@@ -121,7 +115,7 @@ const featuresOf = (name: string, offers: Pick<PlanOffer, 'features'>[]): string
   offers.find((offer) => offer.features && offer.features.length > 0)?.features ?? PLAN_FEATURES[name] ?? []
 
 /** One tier per plan and billing cycle; a yearly option carries twelve monthly payments as its reference price. */
-export const offersToTiers = (plans: PlanGroup[]): PlanTier[] =>
+export const _offersToTiers = (plans: PlanGroup[]): PlanTier[] =>
   plans.flatMap((plan) => {
     const monthlyBySeats = new Map(
       plan.offers.filter((offer) => offer.billingCycle === 'month').map((offer) => [String(offer.seats), offer]),
@@ -146,7 +140,7 @@ export const offersToTiers = (plans: PlanGroup[]): PlanTier[] =>
   })
 
 /** The CGW never offers the current plan, so its card is rebuilt from the subscription and the seats entitlement. */
-export const subscriptionToTier = (subscription: Subscription, seatsQuota: number | null | undefined): PlanTier => {
+export const _subscriptionToTier = (subscription: Subscription, seatsQuota: number | null | undefined): PlanTier => {
   const name = getSubscriptionPlanName(subscription) ?? 'Safe Pro'
   const features = getSubscriptionFeatures(subscription)
   const seats = currentSeats(subscription, seatsQuota) ?? null
@@ -179,10 +173,7 @@ const bySeats = (a: PlanSeatOption, b: PlanSeatOption): number =>
 const getSubscriptionFeaturesOrFallback = (current: PlanTier, offered: PlanTier | undefined): string[] =>
   current.options[0]?.features?.length ? current.features : (offered?.features ?? current.features)
 
-/**
- * One card per plan and cycle: the current plan's card absorbs the other seat sizes the CGW offers for its billing
- * cycle (so the user can resize from it); the same plan on the other cycle stays a regular offer.
- */
+/** The current card absorbs the same-cycle seat sizes so the user can resize from it; the other cycle stays an offer. */
 const mergeCurrentTier = (offered: PlanTier[], current: PlanTier): PlanTier[] => {
   const isSameCycle = (tier: PlanTier) => tier.name === current.name && tier.billingCycle === current.billingCycle
   const sameCycle = offered.find(isSameCycle)
@@ -203,16 +194,16 @@ export const buildPlanTiers = (
   paidPlans: PlanGroup[],
   current?: { subscription: Subscription; seatsQuota: number | null | undefined },
 ): PlanTier[] => {
-  const offered = offersToTiers(paidPlans)
+  const offered = _offersToTiers(paidPlans)
   const tiers = current
-    ? mergeCurrentTier(offered, subscriptionToTier(current.subscription, current.seatsQuota))
+    ? mergeCurrentTier(offered, _subscriptionToTier(current.subscription, current.seatsQuota))
     : offered
   return [...tiers, ENTERPRISE_TIER].sort((a, b) => rank(a.name) - rank(b.name))
 }
 
 /** Monthly trial offers for the claim modal: the seat count leads the plan's own selling points, verbatim. */
 export const claimTiers = (trialPlans: PlanGroup[]): PlanTier[] =>
-  offersToTiers(trialPlans)
+  _offersToTiers(trialPlans)
     .filter((tier) => tier.billingCycle === 'month')
     .map((tier) => ({ ...tier, features: [tier.options[0].label, ...tier.features] }))
     .sort((a, b) => rank(a.name) - rank(b.name))

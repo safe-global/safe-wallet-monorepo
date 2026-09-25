@@ -5,10 +5,7 @@ import { getTrialPeriodDays, groupOffersByPlan, splitPlansByTrial } from './paym
 import { useBillingSpaceId } from './useBillingSpaceId'
 import { useRateLimitRetry } from './useRateLimitRetry'
 
-/**
- * The plans the CGW offers this Workspace, already filtered server-side for trial eligibility and current plan.
- * `trialPlans` feed the first-entry trial flows; `paidPlans` feed the Plans page.
- */
+/** Already filtered server-side for trial eligibility and the current plan. */
 export const useSpaceOffers = (spaceId?: string | null) => {
   const gatedSpaceId = useBillingSpaceId(spaceId)
   const {

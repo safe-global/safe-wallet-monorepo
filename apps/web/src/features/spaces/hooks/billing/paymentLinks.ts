@@ -20,7 +20,7 @@ const readMetadata = (link: PaymentLink): Metadata =>
 const readLineItems = (link: PaymentLink): LineItem[] =>
   Array.isArray(link.lineItems) ? (link.lineItems as LineItem[]) : []
 
-export const getPlanName = (link: PaymentLink): string | null => readMetadata(link)[PLAN_NAME_METADATA_KEY] ?? null
+export const _getPlanName = (link: PaymentLink): string | null => readMetadata(link)[PLAN_NAME_METADATA_KEY] ?? null
 
 /** The seat quota a link or subscription carries in its Stripe metadata; null when absent or malformed. */
 export const getSeatsFromMetadata = (metadata: Metadata): PlanOffer['seats'] => {
@@ -31,7 +31,7 @@ export const getSeatsFromMetadata = (metadata: Metadata): PlanOffer['seats'] => 
   return Number.isNaN(parsed) || parsed < 0 ? null : parsed
 }
 
-export const getSeats = (link: PaymentLink): PlanOffer['seats'] => getSeatsFromMetadata(readMetadata(link))
+export const _getSeats = (link: PaymentLink): PlanOffer['seats'] => getSeatsFromMetadata(readMetadata(link))
 
 /** The JSON-encoded list of selling points on the link, or an empty list when missing or malformed. */
 export const getPlanDescriptions = (metadata: Metadata): string[] => {
@@ -48,7 +48,7 @@ export const getPlanDescriptions = (metadata: Metadata): string[] => {
 const toCycle = (interval: string | undefined): BillingCycle | null =>
   interval === 'month' || interval === 'year' ? interval : null
 
-export const getPrice = (link: PaymentLink): Pick<PlanOffer, 'price' | 'currency' | 'billingCycle'> => {
+export const _getPrice = (link: PaymentLink): Pick<PlanOffer, 'price' | 'currency' | 'billingCycle'> => {
   const items = readLineItems(link)
   const cents = items.reduce((sum, item) => sum + (item.price?.unitAmount ?? 0) * (item.quantity ?? 1), 0)
 
@@ -59,18 +59,18 @@ export const getPrice = (link: PaymentLink): Pick<PlanOffer, 'price' | 'currency
   }
 }
 
-export const toPlanOffer = (link: PaymentLink): PlanOffer | null => {
-  const planName = getPlanName(link)
+export const _toPlanOffer = (link: PaymentLink): PlanOffer | null => {
+  const planName = _getPlanName(link)
   if (!link.active || !planName) return null
 
   return {
     paymentLinkId: link.id,
     priceId: readLineItems(link)[0]?.price?.id ?? null,
     planName,
-    seats: getSeats(link),
+    seats: _getSeats(link),
     trialPeriodDays: link.trialPeriodDays ?? null,
     features: getPlanDescriptions(readMetadata(link)),
-    ...getPrice(link),
+    ..._getPrice(link),
   }
 }
 
@@ -87,7 +87,7 @@ export const groupOffersByPlan = (links: PaymentLink[]): PlanGroup[] => {
   const groups = new Map<string, PlanOffer[]>()
 
   for (const link of links) {
-    const offer = toPlanOffer(link)
+    const offer = _toPlanOffer(link)
     if (!offer) continue
     const offers = groups.get(offer.planName) ?? []
     offers.push(offer)
@@ -101,10 +101,7 @@ export const groupOffersByPlan = (links: PaymentLink[]): PlanGroup[] => {
 export const getTrialPeriodDays = (plans: PlanGroup[]): number | null =>
   plans.flatMap((plan) => plan.offers).find((offer) => offer.trialPeriodDays !== null)?.trialPeriodDays ?? null
 
-/**
- * The CGW offers a Workspace either trial links (never subscribed) or paid links (subscribed, minus its current
- * plan), so in practice one side is empty; splitting keeps the trial flows and the Plans page reading the right one.
- */
+/** The CGW offers either trial links (never subscribed) or paid links, so in practice one side is empty. */
 export const splitPlansByTrial = (plans: PlanGroup[]): { trialPlans: PlanGroup[]; paidPlans: PlanGroup[] } => {
   const pick = (isTrial: boolean): PlanGroup[] =>
     plans

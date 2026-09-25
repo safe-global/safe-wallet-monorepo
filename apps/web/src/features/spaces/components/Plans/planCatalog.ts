@@ -7,7 +7,7 @@ export const PLAN_ORDER = ['Starter', 'Business', 'Enterprise']
 export const RECOMMENDED_PLAN = 'Business'
 
 const SECURITY_FEATURES = ['Unlimited Workspace members', 'Advanced threat analysis', 'Transaction simulation']
-const COLLABORATION_FEATURES = ['Shared address book', 'MFA Authentication']
+const COLLABORATION_FEATURES = ['Shared address book', 'MFA authentication']
 
 export const PLAN_FEATURES: Record<string, string[]> = {
   Starter: ['10 sponsored transactions / month', ...SECURITY_FEATURES, ...COLLABORATION_FEATURES, 'Builder API access'],

@@ -11,12 +11,7 @@ import { isLivePlanStatus } from './billing/subscription'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
 import { useSpacePlan } from './useSpacePlan'
 
-/**
- * Whether the Safe being acted on gets the Pro-only Safe Shield features (recipient and counterparty analysis,
- * Tenderly simulation): it must sit in the Workspace of the current context, and that Workspace must hold a live
- * subscription. Everything stays open while SAFE_PRO is off, and `isSafePro` lets a surface keep its pre-Pro layout
- * then. `spaceId` names that Workspace when it holds the Safe.
- */
+/** Pro features need the Safe in the current Workspace with a live plan; all stays open while SAFE_PRO is off. */
 export const useSafeProAccess = (): {
   hasProFeatures: boolean
   isSafePro: boolean

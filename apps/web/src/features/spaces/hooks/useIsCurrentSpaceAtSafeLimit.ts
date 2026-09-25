@@ -29,13 +29,7 @@ export const useCurrentSpaceSafeCount = (): number | undefined => {
   return useSpaceSafeCount(useCurrentSpaceId())
 }
 
-/**
- * Whether the current space already holds as many Safe accounts as its plan allows.
- * New Safes can still be created, but they won't be added to a space that is at the
- * limit, so callers can warn the user upfront.
- *
- * Returns false when there is no current space, the count is unknown or the plan is unlimited.
- */
+/** New Safes can still be created at the limit but won't be added to the space, so callers warn upfront. */
 export const useIsCurrentSpaceAtSafeLimit = (): boolean => {
   const spaceId = useCurrentSpaceId()
   const safeCount = useSpaceSafeCount(spaceId)

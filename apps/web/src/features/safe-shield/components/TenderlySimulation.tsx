@@ -101,7 +101,6 @@ export const TenderlySimulation = ({
   const autoRanKeyRef = useRef<string | null>(null)
   useEffect(() => {
     if (!autoRun || !showSimulation || !safeTx) return
-    // The run needs an execution owner; until the Safe's owners are known, wait for them.
     if (!signer?.address && !safe.owners[0]?.value) return
     const key = JSON.stringify(safeTx.data)
     if (autoRanKeyRef.current === key) return

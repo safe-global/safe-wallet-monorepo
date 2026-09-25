@@ -16,7 +16,6 @@ export type SafeSponsoredTxs = {
   left: number | null
   /** The Workspace whose allowance pays for a relay; null unless the Safe is on a plan. */
   spaceId: string | null
-  /** The Workspace can still sponsor a transaction right now. */
   canSponsor: boolean
   isLoading: boolean
 }
@@ -27,8 +26,7 @@ export const useSafeSponsoredTxs = (): SafeSponsoredTxs => {
   const { safe, safeAddress } = useSafeInfo()
   const { safeSpaces, isLoading: isSpacesLoading } = useSafeSpaces(!isEnabled)
   const currentSpaceId = useCurrentSpaceId()
-  // The Workspace the user is working in sets the context; a Safe it does not hold is not on a plan here, whatever
-  // other Workspaces it belongs to.
+  // Only the current Workspace counts, whatever other Workspaces hold the Safe.
   const holders =
     isEnabled && safeAddress && safe.chainId ? (safeSpaces[safeSpaceKey(safe.chainId, safeAddress)] ?? []) : []
   const spaceId = currentSpaceId && holders.some((space) => space.uuid === currentSpaceId) ? currentSpaceId : null

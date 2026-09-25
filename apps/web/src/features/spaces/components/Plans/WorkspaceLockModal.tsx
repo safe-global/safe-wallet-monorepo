@@ -10,7 +10,7 @@ import { claimCopy } from './ClaimTrialModal'
 import ClaimTrialModal from './ClaimTrialModal'
 import PlanChooserModal, { chooserCopy } from './PlanChooserModal'
 
-export const memberCopy = (
+export const _memberCopy = (
   reason: WorkspaceLockReason,
   trialPeriodDays: number | null,
   endedAt: number | null,
@@ -28,15 +28,12 @@ export const memberCopy = (
   }
 }
 
-export const PLAN_ERROR_COPY = {
+export const _PLAN_ERROR_COPY = {
   title: 'Your plan could not be checked',
   body: 'We could not load the plan of this Workspace. Try again, or come back later, your Safe accounts remain available outside the Workspace.',
 }
 
-/**
- * Mounted on every Workspace page: while the Workspace has no live plan it blocks the page behind the trial offer,
- * the plan picker or, for non-admins, an explanation. None of them can be dismissed.
- */
+/** Mounted on every Workspace page; none of the modals it shows can be dismissed. */
 export default function WorkspaceLockModal({ spaceId }: { spaceId: string }) {
   const router = useRouter()
   const { isLocked, isError, retry, reason, endedAt, trialPeriodDays } = useWorkspaceLock(spaceId)
@@ -56,8 +53,8 @@ export default function WorkspaceLockModal({ spaceId }: { spaceId: string }) {
     return (
       <SafeProNoticeModal
         open
-        title={PLAN_ERROR_COPY.title}
-        body={PLAN_ERROR_COPY.body}
+        title={_PLAN_ERROR_COPY.title}
+        body={_PLAN_ERROR_COPY.body}
         actionLabel="Back to My accounts"
         onAction={goBack}
         secondaryActionLabel="Try again"
@@ -69,7 +66,7 @@ export default function WorkspaceLockModal({ spaceId }: { spaceId: string }) {
   if (!isLocked) return null
 
   if (!isAdmin) {
-    const { title, body } = memberCopy(reason, trialPeriodDays, endedAt, space?.name ?? 'This Workspace')
+    const { title, body } = _memberCopy(reason, trialPeriodDays, endedAt, space?.name ?? 'This Workspace')
     return (
       <SafeProNoticeModal
         open

@@ -23,7 +23,7 @@ const leavesOf = (items: AllSafeItems): SafeItem[] =>
   items.flatMap((item) => (isMultiChainSafeItem(item) ? item.safes : [item]))
 
 /** Every Safe starts selected (multi-chain parents included); the user deselects down to the plan's seats. */
-export const initialSelection = (items: AllSafeItems): Record<string, boolean> => {
+export const _initialSelection = (items: AllSafeItems): Record<string, boolean> => {
   const selected: Record<string, boolean> = {}
   for (const item of items) {
     if (isMultiChainSafeItem(item)) {
@@ -65,7 +65,7 @@ export default function SelectAccountsStep({
   const filtered = useSafesSearch(allSafes, query.trim())
   const items = query.trim() ? filtered : allSafes
   const { control, setValue } = useForm<AddAccountsFormValues>({
-    defaultValues: { selectedSafes: initialSelection(allSafes) },
+    defaultValues: { selectedSafes: _initialSelection(allSafes) },
   })
   const { selectedKeys, seatCount, isAtLimit, isOverLimit, handleToggle } = useOnboardingSelection({
     items: allSafes,
@@ -114,7 +114,7 @@ export default function SelectAccountsStep({
           />
         </div>
 
-        <ScrollArea className="h-[364px]">
+        <ScrollArea className="h-91">
           {!isLoading && items.length === 0 ? (
             <Typography align="center" color="muted" className="py-8">
               No Safe accounts match your search

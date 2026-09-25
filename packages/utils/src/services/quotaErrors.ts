@@ -3,10 +3,7 @@ export const QUOTA_EXCEEDED_CODE = 'QUOTA_EXCEEDED'
 /** The metered features the CGW gates today; kept open for the ones it adds later. */
 export type QuotaFeature = 'safe_seats' | 'sponsored_transactions' | (string & {})
 
-/**
- * The CGW's HTTP 402 for a Workspace that spent its plan's allowance: `{ code: 'QUOTA_EXCEEDED', feature, quota,
- * used, resetsAt }`. `resetsAt` is null for a feature whose count never restarts (seats).
- */
+/** The CGW's HTTP 402 body; `resetsAt` is null for a feature whose count never restarts (seats). */
 export class QuotaExceededError extends Error {
   constructor(
     readonly feature: QuotaFeature,
@@ -20,10 +17,6 @@ export class QuotaExceededError extends Error {
   }
 }
 
-/**
- * Extracts a `QuotaExceededError` from an RTK Query `FetchBaseQueryError` ({ status, data }); undefined for any other
- * error so the caller falls back to its generic handling.
- */
 export const getQuotaExceededError = (thrown: unknown): QuotaExceededError | undefined => {
   if (typeof thrown !== 'object' || thrown === null || !('data' in thrown)) return undefined
   const data = (thrown as { data?: unknown }).data

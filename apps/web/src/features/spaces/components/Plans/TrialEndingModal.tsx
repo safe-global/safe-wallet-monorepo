@@ -12,13 +12,13 @@ import { useCurrentMembership, useIsAdmin } from '../../hooks/useSpaceMembers'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
 import { markTrialReminderSeen, wasTrialReminderSeen } from '../../store/trialReminder'
 import ChangePlanFlow from './ChangePlanFlow'
-import { ENTERPRISE_TIER } from './fixtures'
+import { ENTERPRISE_TIER } from './planCatalog'
 import { PlanCatalog } from './PlanCards'
 import { salesHintFor } from './PlanChooserModal'
 import { buildPlanTiers, toCurrentPlan } from './planTiers'
 import type { CurrentPlan, PlanPick } from './types'
 
-export const endsIn = (daysLeft: number | null): string =>
+export const _endsIn = (daysLeft: number | null): string =>
   daysLeft === null || daysLeft > 1 ? `in ${daysLeft ?? 7} days` : daysLeft === 1 ? 'in 1 day' : 'today'
 
 /** What the reminder asks of the viewer: an admin can act, a member is told who can. */
@@ -66,15 +66,15 @@ const TrialEndingChooser = ({
           <div className="flex flex-col gap-6 pt-5">
             <div className="flex flex-col gap-1">
               <Typography variant="h3" as={DialogTitle}>
-                Your free access will end {endsIn(currentPlan.daysLeft ?? null)}
+                Your free access will end {_endsIn(currentPlan.daysLeft ?? null)}
               </Typography>
               <Typography color="muted">{reminderSubtitle(endsAt, isAdmin, spaceName)}</Typography>
             </div>
 
             {isLoading ? (
               <div className="flex gap-4" data-testid="trial-ending-skeleton">
-                <Skeleton className="h-[420px] flex-1 rounded-lg-xl" />
-                <Skeleton className="h-[420px] flex-1 rounded-lg-xl" />
+                <Skeleton className="h-105 flex-1 rounded-lg-xl" />
+                <Skeleton className="h-105 flex-1 rounded-lg-xl" />
               </div>
             ) : tiers.length === 0 ? (
               <Alert variant="info">
@@ -119,10 +119,7 @@ const TrialEndingChooser = ({
   )
 }
 
-/**
- * Mounted on every Workspace page: when the trial enters its last week an admin gets the plan picker and a member a
- * heads-up, once per login.
- */
+/** Mounted on every Workspace page; shows once per login when the trial enters its last week. */
 export default function TrialEndingModal({ spaceId }: { spaceId: string }) {
   const { plan, seats, subscription, isTrialing, isTrialEndingSoon, hasPaymentMethod } = useSpacePlan(spaceId)
   const membership = useCurrentMembership(spaceId)

@@ -1,14 +1,14 @@
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import type { PlanGroup, PlanOffer } from '../../../hooks/billing/types'
-import { PLAN_FEATURES } from '../fixtures'
+import { PLAN_FEATURES } from '../planCatalog'
 import {
   buildPlanTiers,
   claimTiers,
   getChangeDirection,
   getPlanCta,
-  offersToTiers,
+  _offersToTiers,
   seatsLabel,
-  subscriptionToTier,
+  _subscriptionToTier,
   toCurrentPlan,
 } from '../planTiers'
 import type { CurrentPlan, PlanSummary } from '../types'
@@ -79,7 +79,7 @@ describe('planTiers', () => {
   })
 
   it('splits a plan into one tier per cycle and prices the yearly option against twelve monthly payments', () => {
-    const [monthly, yearly] = offersToTiers([BUSINESS])
+    const [monthly, yearly] = _offersToTiers([BUSINESS])
 
     expect(monthly).toMatchObject({ id: 'Business-month', billingCycle: 'month', features: PLAN_FEATURES.Business })
     expect(monthly.options.map((option) => [option.paymentLinkId, option.label, option.price])).toEqual([
@@ -99,18 +99,18 @@ describe('planTiers', () => {
   })
 
   it('rebuilds the current plan card from the subscription and the seats entitlement', () => {
-    expect(subscriptionToTier(subscription(), 20)).toMatchObject({
+    expect(_subscriptionToTier(subscription(), 20)).toMatchObject({
       id: 'current',
       name: 'Business',
       isCurrent: true,
       options: [{ paymentLinkId: null, priceId: 'price_b10m', label: '20 Safe accounts', price: 499 }],
       features: PLAN_FEATURES.Business,
     })
-    expect(subscriptionToTier(subscription({ features: ['Custom perk'] }), null)).toMatchObject({
+    expect(_subscriptionToTier(subscription({ features: ['Custom perk'] }), null)).toMatchObject({
       options: [expect.objectContaining({ label: 'Unlimited Safe accounts' })],
       features: ['Custom perk'],
     })
-    expect(subscriptionToTier(subscription({ name: null }), undefined)).toMatchObject({
+    expect(_subscriptionToTier(subscription({ name: null }), undefined)).toMatchObject({
       name: 'Safe Pro',
       options: [expect.objectContaining({ label: 'Safe accounts' })],
     })
@@ -119,7 +119,7 @@ describe('planTiers', () => {
   it('takes the current seats from the subscription tag before the entitlements quota', () => {
     const plan: PlanSummary = { name: 'Business', status: 'active', periodEndsAt: null, daysLeft: null }
     const tagged = { ...subscription(), metadata: { FEATURE_SAFE_SEATS: '5' } } as unknown as Subscription
-    expect(subscriptionToTier(tagged, 10).options[0]).toMatchObject({ label: '5 Safe accounts', seats: 5 })
+    expect(_subscriptionToTier(tagged, 10).options[0]).toMatchObject({ label: '5 Safe accounts', seats: 5 })
     expect(toCurrentPlan(tagged, plan, false, 10).seatsLabel).toBe('5 Safe accounts')
     expect(toCurrentPlan(subscription(), plan, false, 10).seatsLabel).toBe('10 Safe accounts')
   })
@@ -203,7 +203,7 @@ describe('planTiers', () => {
   })
 
   it('tells an upgrade from a downgrade by monthly-equivalent price', () => {
-    const [monthly, yearly] = offersToTiers([BUSINESS])
+    const [monthly, yearly] = _offersToTiers([BUSINESS])
     const pickOf = (tier: typeof monthly, index: number) => ({ tier, option: tier.options[index] })
 
     expect(getChangeDirection({ ...businessPlan, price: 149 }, pickOf(monthly, 0))).toBe('upgrade')
@@ -262,7 +262,7 @@ describe('planTiers', () => {
       name: 'Business',
       offers: [offer({ paymentLinkId: 'b10m', planName: 'Business', features: ['From Stripe', 'In order'] })],
     }
-    const [tier] = offersToTiers([stripeBusiness])
+    const [tier] = _offersToTiers([stripeBusiness])
     expect(tier.features).toEqual(['From Stripe', 'In order'])
     expect(tier.options[0].features).toEqual(['From Stripe', 'In order'])
 
@@ -270,7 +270,7 @@ describe('planTiers', () => {
       ...subscription({ id: 'price_b20m' }),
       metadata: { planDescriptions: JSON.stringify(['Sub perk']) },
     } as unknown as Subscription
-    expect(subscriptionToTier(tagged, 20).features).toEqual(['Sub perk'])
+    expect(_subscriptionToTier(tagged, 20).features).toEqual(['Sub perk'])
 
     const [merged] = buildPlanTiers([stripeBusiness], {
       subscription: subscription({ id: 'price_b20m' }),

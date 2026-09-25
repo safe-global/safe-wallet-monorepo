@@ -28,8 +28,7 @@ export const useWorkspaceLock = (spaceId?: string | null) => {
     refetch: refetchOffers,
   } = useSpaceOffers(spaceId)
   const applies = isSafePro && !isInvited
-  // A query that has not started yet (first render after the space id appears, or skipped while signed out) reads as
-  // "no plan, no offers"; treating it as resolving keeps the lock from firing, or navigating away, on stale emptiness.
+  // An uninitialized query reads as "no plan, no offers"; resolving keeps the lock from firing on stale emptiness.
   const isResolving =
     applies && (isPlanLoading || isOffersLoading || Boolean(isPlanUninitialized) || Boolean(isOffersUninitialized))
   // A failed source reads as "no plan" too; that is a reason to ask for a retry, never to lock.

@@ -1,12 +1,12 @@
 import type { PaymentLink } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import {
-  getPlanName,
-  getPrice,
-  getSeats,
+  _getPlanName,
+  _getPrice,
+  _getSeats,
   getTrialPeriodDays,
   groupOffersByPlan,
   splitPlansByTrial,
-  toPlanOffer,
+  _toPlanOffer,
 } from '../paymentLinks'
 
 const link = (overrides: Partial<PaymentLink> & { id: string }): PaymentLink => ({
@@ -52,8 +52,8 @@ const starter = link({
 
 describe('paymentLinks', () => {
   it('reads the plan name and falls back to null when untagged', () => {
-    expect(getPlanName(business10)).toBe('Business')
-    expect(getPlanName(link({ id: 'x' }))).toBeNull()
+    expect(_getPlanName(business10)).toBe('Business')
+    expect(_getPlanName(link({ id: 'x' }))).toBeNull()
   })
 
   it.each([
@@ -67,46 +67,47 @@ describe('paymentLinks', () => {
     [undefined, null],
   ])('parses FEATURE_SAFE_SEATS=%p as %p', (raw, expected) => {
     const metadata = raw === undefined ? {} : { FEATURE_SAFE_SEATS: raw }
-    expect(getSeats(link({ id: 'x', metadata }))).toBe(expected)
+    expect(_getSeats(link({ id: 'x', metadata }))).toBe(expected)
   })
 
   it('sums line items in whole currency units and reads the cycle', () => {
-    expect(getPrice(business10)).toEqual({ price: 499, currency: 'eur', billingCycle: 'month' })
-    expect(getPrice(business10Yearly)).toEqual({ price: 5389, currency: 'eur', billingCycle: 'year' })
-    expect(getPrice(link({ id: 'x', lineItems: priced(1_000, 'month', 3) }))).toMatchObject({ price: 30 })
+    expect(_getPrice(business10)).toEqual({ price: 499, currency: 'eur', billingCycle: 'month' })
+    expect(_getPrice(business10Yearly)).toEqual({ price: 5389, currency: 'eur', billingCycle: 'year' })
+    expect(_getPrice(link({ id: 'x', lineItems: priced(1_000, 'month', 3) }))).toMatchObject({ price: 30 })
   })
 
   it('returns a null price without priced line items', () => {
-    expect(getPrice(link({ id: 'x' }))).toEqual({ price: null, currency: 'eur', billingCycle: null })
-    expect(getPrice(link({ id: 'x', lineItems: [{ price: { unitAmount: null } }] }))).toMatchObject({ price: null })
+    expect(_getPrice(link({ id: 'x' }))).toEqual({ price: null, currency: 'eur', billingCycle: null })
+    expect(_getPrice(link({ id: 'x', lineItems: [{ price: { unitAmount: null } }] }))).toMatchObject({ price: null })
   })
 
   it('drops inactive and untagged links', () => {
-    expect(toPlanOffer(link({ ...business10, active: false }))).toBeNull()
-    expect(toPlanOffer(link({ id: 'x', lineItems: priced(100, 'month') }))).toBeNull()
+    expect(_toPlanOffer(link({ ...business10, active: false }))).toBeNull()
+    expect(_toPlanOffer(link({ id: 'x', lineItems: priced(100, 'month') }))).toBeNull()
   })
 
   it('reads the selling points verbatim and in order, tolerating missing or malformed metadata', () => {
     const descriptions = ['50 sponsored transactions per month', 'Policy engine']
     expect(
-      toPlanOffer(
+      _toPlanOffer(
         link({
           id: 'd',
           metadata: { planName: 'Business', planDescriptions: JSON.stringify(descriptions) },
         }),
       )?.features,
     ).toEqual(descriptions)
-    expect(toPlanOffer(link({ id: 'e', metadata: { planName: 'Business' } }))?.features).toEqual([])
+    expect(_toPlanOffer(link({ id: 'e', metadata: { planName: 'Business' } }))?.features).toEqual([])
     expect(
-      toPlanOffer(link({ id: 'f', metadata: { planName: 'Business', planDescriptions: 'not json' } }))?.features,
+      _toPlanOffer(link({ id: 'f', metadata: { planName: 'Business', planDescriptions: 'not json' } }))?.features,
     ).toEqual([])
     expect(
-      toPlanOffer(link({ id: 'g', metadata: { planName: 'Business', planDescriptions: '["ok", 3, null]' } }))?.features,
+      _toPlanOffer(link({ id: 'g', metadata: { planName: 'Business', planDescriptions: '["ok", 3, null]' } }))
+        ?.features,
     ).toEqual(['ok'])
   })
 
   it('maps a link to an offer', () => {
-    expect(toPlanOffer(business10)).toEqual({
+    expect(_toPlanOffer(business10)).toEqual({
       paymentLinkId: 'pl_business_10',
       priceId: 'price_49900_month',
       planName: 'Business',
@@ -117,8 +118,8 @@ describe('paymentLinks', () => {
       trialPeriodDays: 60,
       features: [],
     })
-    expect(toPlanOffer(starter)?.trialPeriodDays).toBeNull()
-    expect(toPlanOffer(link({ id: 'x', metadata: { planName: 'Starter' } }))?.priceId).toBeNull()
+    expect(_toPlanOffer(starter)?.trialPeriodDays).toBeNull()
+    expect(_toPlanOffer(link({ id: 'x', metadata: { planName: 'Starter' } }))?.priceId).toBeNull()
   })
 
   it('groups offers by plan name in catalog order, monthly before yearly, seats ascending', () => {

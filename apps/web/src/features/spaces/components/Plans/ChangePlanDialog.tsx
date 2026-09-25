@@ -68,8 +68,7 @@ export default function ChangePlanDialog({
   const direction = getChangeDirection(currentPlan, pick)
   const title = changeTitle(direction, pick.option.label)
   const note = NOTES[direction]
-  // A trial has no invoice to prorate against (Stripe rejects the preview without a payment method), and nothing is
-  // charged until it ends, so the switch is explained instead of previewed.
+  // Stripe rejects a proration preview for a trial without a payment method, so the switch is explained instead.
   const isTrialSwitch = currentPlan.isTrialing
 
   useEffect(() => {

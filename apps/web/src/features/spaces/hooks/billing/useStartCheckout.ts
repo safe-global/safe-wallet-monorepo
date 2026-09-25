@@ -3,7 +3,6 @@ import { useLazyBillingGetCheckoutUrlV1Query } from '@safe-global/store/gateway/
 import { getCheckoutReturnUrl } from './returnUrl'
 import { useBillingSpaceId } from './useBillingSpaceId'
 
-/** Requests a Stripe Checkout URL for an offered payment link and sends the browser there. */
 export const useStartCheckout = (spaceId?: string | null, returnPathname?: string) => {
   const gatedSpaceId = useBillingSpaceId(spaceId)
   const [trigger, { isFetching, isError }] = useLazyBillingGetCheckoutUrlV1Query()

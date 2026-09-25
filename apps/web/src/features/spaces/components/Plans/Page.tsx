@@ -22,8 +22,8 @@ import type { PlanPick } from './types'
 
 const PlansSkeleton = () => (
   <div className="flex flex-col gap-6" data-testid="plans-skeleton">
-    <Skeleton className="h-[196px] w-full rounded-xl" />
-    <Skeleton className="h-[560px] w-full rounded-xl" />
+    <Skeleton className="h-49 w-full rounded-xl" />
+    <Skeleton className="h-140 w-full rounded-xl" />
   </div>
 )
 
@@ -59,8 +59,8 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
         {!isSafePro ? (
           <Card
             size="none"
-            // eslint-disable-next-line no-restricted-syntax -- Figma spec calls for a 32px corner one-off; no radius token in the scale matches it
-            className="w-full rounded-[2rem]"
+            // eslint-disable-next-line no-restricted-syntax -- Figma's 32px corner has no Card `radius` option
+            className="w-full rounded-4xl"
           >
             <SafeProAnnouncement location="plans_page" />
           </Card>

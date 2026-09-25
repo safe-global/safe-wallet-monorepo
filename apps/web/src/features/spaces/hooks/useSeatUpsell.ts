@@ -5,10 +5,6 @@ import { useSpaceOffers } from './billing/useSpaceOffers'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
 import { useSpacePlan } from './useSpacePlan'
 
-/**
- * What the seat-limit banners need: the plan's name and quota, the next offered plan with more seats (an upgrade
- * CTA) or none (a sales CTA), and where the Plans page lives. Everything is null while SAFE_PRO is off.
- */
 export const useSeatUpsell = (spaceId?: string | null) => {
   const currentSpaceId = useCurrentSpaceId()
   const resolvedSpaceId = spaceId === undefined ? currentSpaceId : spaceId

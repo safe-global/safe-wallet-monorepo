@@ -10,11 +10,7 @@ import { getOverallStatus } from '@safe-global/utils/features/safe-shield/utils'
 
 export type ChecksCount = { passed: number; total: number }
 
-/**
- * The header's "N of M checks passed": every row the widget shows is a check. The threat, contract and deadlock
- * analyses count once they have results; the recipient check and the simulation count whenever they are on
- * screen, locked included, so a Workspace without Safe Pro reads as "1 of 3".
- */
+/** Locked recipient and simulation rows count as checks too, so a Workspace without Safe Pro reads as "1 of 3". */
 export const countChecks = ({
   threat,
   recipient,

@@ -25,10 +25,6 @@ const FAILURE_COPY = {
   },
 } as const
 
-/**
- * Owns the screen while Stripe sends the user back: a blocking loader until the session settles and the subscription
- * lands, then the trial or subscription confirmation, or an error when the session fails or never propagates.
- */
 export default function CheckoutReturnModals({
   spaceId,
   trialCtaLabel,
@@ -45,7 +41,7 @@ export default function CheckoutReturnModals({
 
   useEffect(() => {
     if (isComplete) refetch()
-  }, [isComplete]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isComplete]) // eslint-disable-line react-hooks/exhaustive-deps -- refetch is a new function every render
 
   if (PENDING_STATUSES.includes(checkout.status)) {
     return <SafeProPendingModal title="Confirming your subscription" body="This usually takes a few seconds." />

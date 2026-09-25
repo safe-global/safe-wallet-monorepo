@@ -24,7 +24,8 @@ import { cn } from '@/utils/cn'
  *
  * @remarks
  * Key Props:
- * - Card: `as`, `size` ('default' | 'sm' | 'lg' | 'none'), `variant` ('default' | 'outlined' | 'muted' | 'muted-secondary'),
+ * - Card: `as`, `size` ('default' | 'sm' | 'lg' | 'none'),
+ *   `variant` ('default' | 'outlined' | 'muted' | 'muted-secondary' | 'brand'),
  *   `surface` ('default' | 'sunken', default 'default'), `radius` ('lg' | 'lg-xl' | 'xl' | 'none', default 'lg'),
  *   `selected` (mint border + shadow for a picked option), `elevated` (shadow only, for the one card that stands out),
  *   `className` (layout-only: w-*, margins, flex/grid)
@@ -44,6 +45,10 @@ import { cn } from '@/utils/cn'
  * - 2026-07-10: Added `size="lg"` (gap-8/py-8, slot px-8); flipped the default `radius` xl→lg (`--radius-lg`, 16px)
  * - 2026-08-25: Added `surface="sunken"` (bg-surface-sunken) for inset cards nested on the page surface;
  *   orthogonal to `variant`, so it composes with `outlined`
+ * - 2026-09-02: Added `variant="muted-secondary"` (bg-muted-secondary) from the Figma DS, for plan cards
+ * - 2026-09-02: Added `radius="lg-xl"` (rounded-lg-xl, 20px) from the Figma DS, for plan cards
+ * - 2026-09-09: Added `variant="brand"` (mint gradient over muted-secondary) for Safe Pro entry points
+ * - 2026-09-09: Added `selected` (2px mint border + shadow-lg; transparent border when false) for a picked option
  * - 2026-09-21: Added `elevated` (shadow-lg without the selection border) for the current plan card
  */
 const cardVariants = cva(

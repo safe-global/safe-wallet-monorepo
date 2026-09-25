@@ -21,10 +21,7 @@ import { UseSimulationReturn } from './useSimulation'
 
 const TENDERLY_DASHBOARD_URL = 'https://dashboard.tenderly.co'
 
-/**
- * Pre-fills Tenderly's public simulator with the Safe's inner call, sent from the Safe itself, so a Workspace
- * without Safe Pro can still simulate a transaction by hand instead of through our Tenderly project.
- */
+/** Lets a Workspace without Safe Pro simulate by hand instead of through our Tenderly project. */
 export const getPublicSimulatorLink = ({
   chainId,
   from,

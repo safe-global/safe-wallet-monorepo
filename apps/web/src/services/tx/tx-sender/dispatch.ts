@@ -595,8 +595,7 @@ export const dispatchTxRelay = async (
     waitForRelayedTx(taskId, [txId], safe.chainId, safe.address.value, safeTx.data.nonce)
   } catch (error) {
     // CGW pre-relay simulation surfaces SIMULATION_FAILED / INDETERMINATE_SIMULATION as a typed
-    // error so the UI can block or offer an explicit retry; a spent Workspace allowance (402) is typed too and
-    // refreshes the meter, since the cached one let this relay through. Everything else stays as-is.
+    // error so the UI can block or offer an explicit retry; a spent allowance (402) also refreshes the stale meter.
     const quotaError = sponsorSpaceId ? getQuotaExceededError(error) : undefined
     if (quotaError && sponsorSpaceId) refreshSpaceEntitlements(store.dispatch, sponsorSpaceId)
     const finalError = getRelaySimulationError(error) ?? quotaError ?? asError(error)

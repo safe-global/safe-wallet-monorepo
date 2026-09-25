@@ -2,8 +2,6 @@ import { render, screen } from '@testing-library/react'
 import SafeLogo from '../index'
 import { AppRoutes } from '@/config/routes'
 
-jest.mock('@/public/images/safe-pro/safe-mark.svg', () => 'svg')
-jest.mock('@/public/images/safe-pro/safe-wordmark.svg', () => 'svg')
 jest.mock('@/public/images/safe-pro/pro-chip.svg', () => 'svg')
 
 jest.mock('next/link', () => {

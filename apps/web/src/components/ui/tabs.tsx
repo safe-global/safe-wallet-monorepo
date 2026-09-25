@@ -29,6 +29,10 @@ import { cn } from '@/utils/cn'
  * - TabsList: `variant` ('underline' | 'toggle'); on `underline`, `tone` ('brand' | 'neutral');
  *   on `toggle`, `size` ('default' | 'lg')
  * - TabsTrigger: `value`, `disabled`
+ *
+ * Changelog:
+ * - 2026-09-02: `toggle` default track restyled to the Figma DS Tabs (rounded-md, shadow-xs)
+ * - 2026-09-02: Active `toggle` default trigger is `font-semibold` with shadow-xs
  */
 
 function Tabs({ className, orientation = 'horizontal', ...props }: TabsPrimitive.Root.Props) {

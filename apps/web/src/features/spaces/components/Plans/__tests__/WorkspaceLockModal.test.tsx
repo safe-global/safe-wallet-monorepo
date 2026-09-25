@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
-import WorkspaceLockModal, { memberCopy, PLAN_ERROR_COPY } from '../WorkspaceLockModal'
+import WorkspaceLockModal, { _memberCopy, _PLAN_ERROR_COPY } from '../WorkspaceLockModal'
 
 const mockUseWorkspaceLock = jest.fn()
 const mockUseCheckoutReturn = jest.fn()
@@ -101,7 +101,7 @@ describe('WorkspaceLockModal', () => {
 
     render(<WorkspaceLockModal spaceId={SPACE_ID} />)
 
-    expect(screen.getByRole('heading', { name: PLAN_ERROR_COPY.title })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: _PLAN_ERROR_COPY.title })).toBeInTheDocument()
     expect(screen.queryByTestId('claim-trial-modal')).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
     expect(retry).toHaveBeenCalledTimes(1)
@@ -158,11 +158,11 @@ describe('WorkspaceLockModal', () => {
   })
 
   it('words the member explanation by lock reason', () => {
-    expect(memberCopy('lapsed', null, ENDED_AT, 'Acme Inc')).toEqual({
+    expect(_memberCopy('lapsed', null, ENDED_AT, 'Acme Inc')).toEqual({
       title: 'Your Safe Pro free access ended on Dec 5, 2026',
       body: 'An admin needs to choose a plan to unlock it. Your Safe accounts remain available outside the Workspace.',
     })
-    expect(memberCopy('payment-failed', null, null, 'Acme Inc').title).toBe('Your Workspace’s last payment failed')
-    expect(memberCopy('trial-offered', 30, null, 'Acme Inc').title).toBe('Start your 30-day free access to Safe Pro')
+    expect(_memberCopy('payment-failed', null, null, 'Acme Inc').title).toBe('Your Workspace’s last payment failed')
+    expect(_memberCopy('trial-offered', 30, null, 'Acme Inc').title).toBe('Start your 30-day free access to Safe Pro')
   })
 })

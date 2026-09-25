@@ -1,6 +1,6 @@
 import { fireEvent, render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import { SUPPORT_CHAT_URL } from '@/config/constants'
-import PlanChooserModal, { chooserCopy, LAPSED_DATA_NOTE } from '../PlanChooserModal'
+import PlanChooserModal, { chooserCopy, _LAPSED_DATA_NOTE } from '../PlanChooserModal'
 
 const mockUseSpaceOffers = jest.fn()
 const mockCheckout = jest.fn()
@@ -79,7 +79,7 @@ describe('PlanChooserModal', () => {
 
     expect(screen.queryByText(/exportable for 90 days/)).not.toBeInTheDocument()
     await user.hover(screen.getByTestId('lapsed-data-note'))
-    expect(await screen.findByText(LAPSED_DATA_NOTE)).toBeInTheDocument()
+    expect(await screen.findByText(_LAPSED_DATA_NOTE)).toBeInTheDocument()
   })
 
   it('keeps the data note off a failed-payment Workspace', () => {

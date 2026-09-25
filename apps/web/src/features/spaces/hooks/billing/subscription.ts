@@ -80,9 +80,6 @@ export const getSubscriptionFeatures = (subscription: Subscription): string[] =>
     ? subscription.plan.features
     : getPlanDescriptions((subscription.metadata ?? {}) as Record<string, string | null | undefined>)
 
-/**
- * The seat quota the subscription itself carries: the CGW copies the payment link's metadata onto it, so it is right
- * as soon as a plan change is applied, while the entitlements wait for the billing webhook. Null when untagged.
- */
+/** Right as soon as a plan change applies, while the entitlements still wait for the billing webhook. */
 export const getSubscriptionSeats = (subscription: Subscription): PlanOffer['seats'] =>
   getSeatsFromMetadata((subscription.metadata ?? {}) as Record<string, string | null | undefined>)

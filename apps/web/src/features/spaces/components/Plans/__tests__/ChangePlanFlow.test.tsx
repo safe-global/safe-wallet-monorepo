@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
-import ChangePlanFlow, { continueLabelFor, pickedPrice } from '../ChangePlanFlow'
+import ChangePlanFlow, { _continueLabelFor, _pickedPrice } from '../ChangePlanFlow'
 import type { CurrentPlan, PlanPick } from '../types'
 
 let mockSafeCount = 3
@@ -181,14 +181,14 @@ describe('ChangePlanFlow', () => {
   })
 
   it('words the picked price, custom ones included', () => {
-    expect(pickedPrice(pick(2, 189))).toBe('€189/mo')
+    expect(_pickedPrice(pick(2, 189))).toBe('€189/mo')
     const custom = pick(2, 189)
-    expect(pickedPrice({ ...custom, option: { ...custom.option, price: null } })).toBe('a custom price')
+    expect(_pickedPrice({ ...custom, option: { ...custom.option, price: null } })).toBe('a custom price')
   })
 
   it('words the step button after the direction of the change', () => {
-    expect(continueLabelFor('downgrade')).toBe('Continue to downgrade')
-    expect(continueLabelFor('upgrade')).toBe('Continue to upgrade')
-    expect(continueLabelFor('change')).toBe('Continue')
+    expect(_continueLabelFor('downgrade')).toBe('Continue to downgrade')
+    expect(_continueLabelFor('upgrade')).toBe('Continue to upgrade')
+    expect(_continueLabelFor('change')).toBe('Continue')
   })
 })

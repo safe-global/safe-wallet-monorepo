@@ -6,10 +6,7 @@ import { useSpaceEntitlements } from './billing/useSpaceEntitlements'
 
 type SpaceSafeLimit = { limit: SafeLimit; isLoading: boolean; isError: boolean; retry: () => void }
 
-/**
- * How many Safe accounts the Workspace may hold: under Safe Pro only the entitlements' seats meter decides, and the
- * limit is `undefined` until it arrives, so a load or a failure never reads as a quota. Without Safe Pro, the static cap.
- */
+/** Under Safe Pro the limit is `undefined` until the seats meter arrives, so a failure never reads as a quota. */
 export const useSpaceSafeLimit = (spaceId?: string | null): SpaceSafeLimit => {
   const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
   const { seats, isLoading, isError, refetch } = useSpaceEntitlements(spaceId)

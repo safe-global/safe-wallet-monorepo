@@ -20,9 +20,7 @@ export const SidebarTopBar = (): ReactElement => {
   // On a Safe's pages the last-used Workspace says nothing about this Safe: it must belong to a Workspace on a plan.
   const { isPro: isSafeOnPlan } = useSafeSponsoredTxs()
 
-  // Inside a space or an individual safe the logo turns into a "Home" label pill; while the Workspace is on a Safe
-  // Pro plan (the current one on its routes, the Safe's own one on a Safe's pages) the pill wears the PRO chip
-  // instead and leads back to the Workspaces list. From anywhere else it returns to the accounts view.
+  // Inside a space or a safe the logo becomes a "Home" pill, or on Safe Pro a PRO chip back to the Workspaces list.
   //
   // Gated on hydration because both inputs are client-only: the safe address lives in a query param
   // the server can't see during SSG (useSafeAddressFromUrl falls back to `location.search`), and the
@@ -40,7 +38,7 @@ export const SidebarTopBar = (): ReactElement => {
     <div
       data-testid="sidebar-top-bar"
       data-sidebar-state={state}
-      className={cn('relative w-full', isCollapsed ? (showCollapsedChip ? 'min-h-[88px]' : 'min-h-15') : 'h-10')}
+      className={cn('relative w-full', isCollapsed ? (showCollapsedChip ? 'min-h-22' : 'min-h-15') : 'h-10')}
     >
       <SafeLogo
         href={logoHref}

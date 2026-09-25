@@ -10,12 +10,12 @@ export const wasTrialReminderSeen = (spaceId: string): boolean => Boolean(seenRe
 export const markTrialReminderSeen = (spaceId: string) =>
   seenReminders.set({ ...(seenReminders.get() ?? {}), [spaceId]: true })
 
-export const clearTrialReminders = () => seenReminders.remove()
+export const _clearTrialReminders = () => seenReminders.remove()
 
 /** Each login gets the reminder once: signing out forgets the dismissals. */
 export const trialReminderListener = (listenerMiddleware: typeof listenerMiddlewareInstance) => {
   listenerMiddleware.startListening({
     actionCreator: setUnauthenticated,
-    effect: () => clearTrialReminders(),
+    effect: () => _clearTrialReminders(),
   })
 }

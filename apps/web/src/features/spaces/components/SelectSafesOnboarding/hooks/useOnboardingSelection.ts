@@ -27,12 +27,10 @@ const useOnboardingSelection = ({ items, control, setValue, flaggedAddresses, li
   const [pendingConfirmation, setPendingConfirmation] = useState<AccountLine | null>(null)
 
   const selectedKeys = useMemo(() => getSelectedLeafKeys(selectedSafes), [selectedSafes])
-  // Checked leaves across both sections count toward the cap, one seat per address however many chains. Everything
-  // starts selected, so the count can sit above the cap until the user deselects down to it.
+  // Everything starts selected, so the seat count can sit above the cap until the user deselects down to it.
   const seatCount = useMemo(() => countSeats(Array.from(selectedKeys, addressOfSafeKey)), [selectedKeys])
   const isAtLimit = isSpaceAtSafeLimit(seatCount, limit)
   const isOverLimit = typeof limit === 'number' && seatCount > limit
-  // Nothing more can be picked until the cap is known.
   const isSelectionLocked = isAtLimit || limit === undefined
 
   const applyToggle = (line: AccountLine, nextChecked: boolean) =>
