@@ -7,8 +7,8 @@ const VARIANTS = {
   wide: 'aspect-[1141/268] rounded-t-[calc(2rem-4px)] *:object-top',
   // Crops to the left third for a narrow dialog.
   tall: 'aspect-[568/369] rounded-t-[calc(var(--radius-xl)-4px)] *:object-left',
-  // The 632x244 strip of the confirmation dialogs: the lockup and the first rows.
-  compact: 'aspect-[632/244] rounded-t-[calc(var(--radius-xl)-4px)] *:object-left-top',
+  // The top-left 632x244 of the 1056-wide artwork at 1:1, so the lockup reads large in the confirmation dialogs.
+  compact: 'aspect-[632/244] rounded-t-[calc(var(--radius-xl)-4px)] *:object-left-top *:origin-top-left *:scale-151',
 }
 
 const SafeProHero = ({ variant = 'wide' }: { variant?: keyof typeof VARIANTS }) => (
