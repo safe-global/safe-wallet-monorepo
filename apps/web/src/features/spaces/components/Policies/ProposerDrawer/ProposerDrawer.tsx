@@ -17,10 +17,19 @@ type ProposerDrawerActionProps = {
   actionDisabled?: boolean
 }
 
-export type ProposerDrawerProps = {
+/** Everything the drawer shows once loaded: the status variant and its action. */
+export type ProposerDrawerContentProps = ProposerDrawerActionProps & ProposerVariantContentProps
+
+type ProposerDrawerBaseProps = {
   open: boolean
   onClose: () => void
-} & (({ isLoading?: false } & ProposerDrawerActionProps & ProposerVariantContentProps) | { isLoading: true })
+}
+
+type LoadingProposerDrawerProps = ProposerDrawerBaseProps & { isLoading: true }
+
+type LoadedProposerDrawerProps = ProposerDrawerBaseProps & { isLoading?: false } & ProposerDrawerContentProps
+
+export type ProposerDrawerProps = LoadingProposerDrawerProps | LoadedProposerDrawerProps
 
 const ProposerDrawer = (props: ProposerDrawerProps): ReactElement => {
   const { open, onClose } = props

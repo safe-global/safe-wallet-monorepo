@@ -10,7 +10,7 @@ import type {
 } from '../types'
 import type { Viewer } from '../SpendingLimitDrawer/resolveState'
 
-/** Shaped like the CGW policy response. The stories and the unit tests share these. */
+/** Policies as the table renders them. The stories and the unit tests share these; the wire shape is in activePolicies.ts. */
 
 const DAY = 86_400
 /** Allowance periods are minutes, matching the allowance module and the CGW response. */
@@ -78,8 +78,6 @@ export const mockSpendingLimitPolicy = (overrides: Partial<SpendingLimitPolicy> 
   safe: MOCK_SAFES.treasury,
   enforcement: { via: 'module', moduleAddress: ALLOWANCE_MODULE },
   enabled: true,
-  createdBy: MOCK_ADDRESSES.alice,
-  createdAt: 1_781_000_100,
   data: {
     spenders: [
       {
@@ -128,8 +126,6 @@ export const mockRecoveryPolicy = (overrides: Partial<RecoveryPolicy> = {}): Rec
   safe: MOCK_SAFES.payroll,
   enforcement: { via: 'module', moduleAddress: DELAY_MODULE },
   enabled: true,
-  createdBy: MOCK_ADDRESSES.bob,
-  createdAt: 1_780_500_000,
   data: {
     recoverers: [MOCK_ADDRESSES.bob],
     reviewWindowSeconds: DAY * 28,
@@ -146,12 +142,8 @@ export const mockProposerPolicy = (overrides: Partial<ProposerPolicy> = {}): Pro
   safe: MOCK_SAFES.treasury,
   enforcement: { via: 'offchain', source: 'delegates' },
   enabled: true,
-  createdBy: MOCK_ADDRESSES.alice,
-  createdAt: 1_781_200_000,
   data: {
-    proposer: MOCK_ADDRESSES.bob,
-    grantedBy: MOCK_ADDRESSES.alice,
-    grantedAt: 1_781_200_000,
+    proposers: [{ proposer: MOCK_ADDRESSES.bob, delegatedBy: [{ delegator: MOCK_ADDRESSES.alice, label: 'Bob' }] }],
   },
   ...overrides,
 })
@@ -194,7 +186,6 @@ export const mockLongPolicyList = (count = 30): Policy[] =>
       mockSpendingLimitPolicy({
         id: `0xspending-limit-${index}`,
         safe: [MOCK_SAFES.treasury, MOCK_SAFES.payroll, MOCK_SAFES.grants][index % 3],
-        createdAt: 1_781_000_000 + index * 3_600,
       }),
     ),
   )

@@ -67,11 +67,20 @@ export type RecoveryPolicyData = {
   } | null
 }
 
-export type ProposerPolicyData = {
-  proposer: string
+export type ProposerGrant = {
   /** The grant outlives its granter: this signer may no longer be an owner of the Safe. */
-  grantedBy: string
-  grantedAt: number
+  delegator: string
+  label: string
+}
+
+export type Proposer = {
+  proposer: string
+  delegatedBy: ProposerGrant[]
+}
+
+/** CGW sends every proposer of a Safe in one policy; `mapActivePolicies` splits it into one per proposer. */
+export type ProposerPolicyData = {
+  proposers: Proposer[]
 }
 
 type PolicyBase = {
@@ -84,10 +93,6 @@ type PolicyBase = {
    * whose module is disabled enforces nothing, and the table says so rather than calling it active.
    */
   enabled: boolean
-  /** Mocked: not in the CGW response yet, and likely to be dropped. */
-  createdBy: string
-  /** Unix seconds. Mocked: not in the CGW response yet, expected to land later. */
-  createdAt: number
 }
 
 export type SpendingLimitPolicy = PolicyBase & { type: 'spending-limit'; data: SpendingLimitPolicyData }
@@ -129,6 +134,9 @@ export const isPendingPolicy = (policy: Policy): policy is PendingPolicy => poli
 /** Active and pending spending limits carry the same data, so both render the same limits. */
 export const hasSpendingLimitData = (policy: Policy): policy is Extract<Policy, { type: 'spending-limit' }> =>
   policy.type === 'spending-limit'
+
+export const isProposerPolicy = (policy: Policy): policy is ProposerPolicy & { status: 'active' } =>
+  policy.type === 'proposer'
 
 export const hasRecoveryData = (policy: Policy): policy is Extract<Policy, { type: 'recovery' }> =>
   policy.type === 'recovery'

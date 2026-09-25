@@ -8,7 +8,11 @@ export const PoliciesNoSearchResults = ({ query }: { query: string }) => (
     <div className="flex flex-col gap-1">
       <Typography variant="paragraph-bold">No policies found</Typography>
       <Typography variant="paragraph-small" className="text-muted-foreground">
-        Nothing matches &ldquo;{query}&rdquo;. Try a different name, address or network.
+        {query ? (
+          <>Nothing matches &ldquo;{query}&rdquo;. Try a different name, address or network.</>
+        ) : (
+          'Nothing matches this filter.'
+        )}
       </Typography>
     </div>
   </div>

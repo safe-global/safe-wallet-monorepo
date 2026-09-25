@@ -15,6 +15,10 @@ jest.mock('@/hooks/useChains', () => ({
   useChain: (chainId: string) => mockChains.find((chain) => chain.chainId === chainId),
 }))
 
+// The shared fixtures are mostly zeros, which reads as one address to a fuzzy matcher.
+const SPENDER = '0x9a2C4e5F7b1D3a6E8c0B2d4F6a8C1e3B5d7F9a1C'
+const PROPOSER = '0x4B6d8F1a3C5e7B9d2F4a6C8e0B1d3F5a7C9e2B4D'
+
 const chainIdsOf = (policies: Policy[]) => policies.map((policy) => policy.safe.chainId)
 
 describe('usePolicySearch', () => {
@@ -47,6 +51,31 @@ describe('usePolicySearch', () => {
 
     expect(result.current).toHaveLength(1)
     expect(result.current[0].safe.address).toBe('0x1F2504De05f5167650bE5B28c472601Be434b60A')
+  })
+
+  it('should, when the query is a spender address, return the policy that grants it', () => {
+    const base = mockSpendingLimitPolicy()
+    const spendingLimit = mockSpendingLimitPolicy({
+      data: { spenders: [{ ...base.data.spenders[0], spender: SPENDER }] },
+    })
+    const policies = [asActivePolicy(spendingLimit), asActivePolicy(mockProposerPolicy())]
+
+    const { result } = renderHook(() => usePolicySearch(policies, SPENDER))
+
+    expect(result.current).toHaveLength(1)
+    expect(result.current[0].type).toBe('spending-limit')
+  })
+
+  it('should, when the query is a proposer address, return the grant naming it', () => {
+    const proposer = mockProposerPolicy({
+      data: { proposers: [{ proposer: PROPOSER, delegatedBy: [] }] },
+    })
+    const policies = [asActivePolicy(mockSpendingLimitPolicy()), asActivePolicy(proposer)]
+
+    const { result } = renderHook(() => usePolicySearch(policies, PROPOSER))
+
+    expect(result.current).toHaveLength(1)
+    expect(result.current[0].type).toBe('proposer')
   })
 
   it('should, when the query is a token symbol, return the spending limits on that token', () => {

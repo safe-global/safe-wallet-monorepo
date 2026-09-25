@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, within } from '@/tests/test-utils'
 import {
+  MOCK_SAFES,
   asActivePolicy,
   mockMultiSpenderPolicy,
   mockPendingPolicy,
@@ -10,15 +11,56 @@ import {
 } from '../../mocks/policies'
 import PoliciesTable from '../index'
 
+const mockResolveSafeName = jest.fn()
+
+jest.mock('@/hooks/useAllAddressBooks', () => ({
+  useAddressBookItem: () => undefined,
+  useSafeNameResolver: () => mockResolveSafeName,
+}))
+
 describe('PoliciesTable', () => {
+  beforeEach(() => {
+    mockResolveSafeName.mockReturnValue('')
+  })
+
+  it('should, when the Safe has a name in the space, show it in the applies to column', () => {
+    mockResolveSafeName.mockImplementation((address: string) =>
+      address === MOCK_SAFES.treasury.address ? 'Treasury' : '',
+    )
+
+    render(<PoliciesTable policies={[asActivePolicy(mockProposerPolicy())]} />)
+
+    expect(within(screen.getByTestId('policy-cell-applies-to')).getByText('Treasury')).toBeInTheDocument()
+  })
+
   it('should, when given policies, render the columns the design specifies', () => {
     render(<PoliciesTable policies={mockPolicies()} />)
 
     expect(screen.getByRole('columnheader', { name: 'RULE' })).toBeInTheDocument()
     expect(screen.getByRole('columnheader', { name: 'APPLIES TO' })).toBeInTheDocument()
-    expect(screen.getByRole('columnheader', { name: 'NETWORK' })).toBeInTheDocument()
-    expect(screen.getByRole('columnheader', { name: 'TOKENS' })).toBeInTheDocument()
-    expect(screen.getByRole('columnheader', { name: 'STATUS' })).toBeInTheDocument()
+    expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
+      'RULE',
+      'APPLIES TO',
+      'PROPOSER / TOKENS',
+      'NETWORK',
+      'STATUS',
+      '',
+    ])
+  })
+
+  it('should, when given a proposer policy, show the proposer with its grant label in the proposer / tokens column', () => {
+    render(<PoliciesTable policies={[asActivePolicy(mockProposerPolicy())]} />)
+
+    const cell = screen.getByTestId('policy-cell-proposer-tokens')
+
+    expect(within(cell).getByText('Bob')).toBeInTheDocument()
+    expect(within(cell).queryByTestId('policy-tokens')).not.toBeInTheDocument()
+  })
+
+  it('should, when given a spending limit, show its tokens in the proposer / tokens column', () => {
+    render(<PoliciesTable policies={[asActivePolicy(mockMultiSpenderPolicy())]} />)
+
+    expect(within(screen.getByTestId('policy-cell-proposer-tokens')).getByTestId('policy-tokens')).toBeInTheDocument()
   })
 
   it('should, when a spending limit holds three spenders, render one row rather than three', () => {

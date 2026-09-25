@@ -2,13 +2,14 @@ import { ChevronRight } from 'lucide-react'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { Button } from '@/components/ui/button'
 import EthHashInfo from '@/components/common/EthHashInfo'
+import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import PaginatedDataTable, { type DataTableColumn } from '@/components/common/PaginatedDataTable'
 import PolicyRule from './components/PolicyRule'
 import PolicyStatusChip from '../components/PolicyStatusChip'
 import PolicyTokens from './components/PolicyTokens'
 import { getPolicyLabel } from '../utils/policyLabel'
-import { getPolicyStatus, type Policy } from '../types'
+import { getPolicyStatus, isProposerPolicy, type Policy } from '../types'
 
 export type PoliciesTableProps = {
   policies: Policy[]
@@ -26,11 +27,13 @@ const getOpenPolicyLabel = (policy: Policy): string =>
  * Revoked policies are not in the CGW response, so nothing here has to filter them out.
  */
 const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
+  const resolveSafeName = useSafeNameResolver()
+
   const columns: DataTableColumn<Policy>[] = [
     {
       id: 'rule',
       header: 'RULE',
-      width: '30%',
+      width: '20%',
       sticky: true,
       minWidth: 240,
       cellTestId: 'policy-cell-rule',
@@ -39,14 +42,15 @@ const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
     {
       id: 'appliesTo',
       header: 'APPLIES TO',
-      width: '30%',
-      minWidth: 260,
+      width: '20%',
+      minWidth: 200,
       cellTestId: 'policy-cell-applies-to',
-      cell: (policy, { isCompact }) => (
+      cell: (policy) => (
         <EthHashInfo
           address={policy.safe.address}
           chainId={policy.safe.chainId}
-          shortAddress={isCompact}
+          name={resolveSafeName(policy.safe.address, policy.safe.chainId) || undefined}
+          shortAddress
           showPrefix={false}
           highlight4bytes
           showCopyButton
@@ -55,22 +59,44 @@ const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
       ),
     },
     {
+      id: 'proposerTokens',
+      header: 'PROPOSER / TOKENS',
+      width: '30%',
+      minWidth: 200,
+      cellTestId: 'policy-cell-proposer-tokens',
+      cell: (policy) => {
+        if (!isProposerPolicy(policy)) return <PolicyTokens policy={policy} />
+
+        const [proposer] = policy.data.proposers
+        if (!proposer) return null
+
+        return (
+          <EthHashInfo
+            address={proposer.proposer}
+            chainId={policy.safe.chainId}
+            name={proposer.delegatedBy.find((grant) => grant.label)?.label}
+            shortAddress
+            showPrefix={false}
+            highlight4bytes
+            showCopyButton
+            avatarSize={24}
+          />
+        )
+      },
+    },
+    {
       id: 'network',
       header: 'NETWORK',
       width: '10%',
       minWidth: 120,
+      align: 'center',
       priority: 'secondary',
       cellTestId: 'policy-cell-network',
-      cell: (policy) => <ChainIndicator chainId={policy.safe.chainId} onlyLogo showUnknown imageSize={24} />,
-    },
-    {
-      id: 'tokens',
-      header: 'TOKENS',
-      width: '10%',
-      minWidth: 110,
-      priority: 'secondary',
-      cellTestId: 'policy-cell-tokens',
-      cell: (policy) => <PolicyTokens policy={policy} />,
+      cell: (policy) => (
+        <div className="flex justify-center">
+          <ChainIndicator chainId={policy.safe.chainId} onlyLogo showUnknown imageSize={24} />
+        </div>
+      ),
     },
     {
       id: 'status',
