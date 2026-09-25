@@ -35,6 +35,8 @@ Each PR is reviewed at one **review SHA**, and A and B run on exactly that commi
    - writes `runs/<pr>/A.json` and `runs/<pr>/B.json`.
 3. **Submit:** open a PR into `eval/pr-reviewers` that adds only `runs/<pr>/`, then tick the line in the ticket.
 
+A whole batch runs with `eval/run-batch.sh <batch>`. It skips PRs that already have both run files, so an interrupted batch can simply be started again. The ticket's "Instructions for Claude" section turns this into one prompt: "work on batch N of WA-3632".
+
 Never change prompts, pins or other PRs' folders. Each PR owns its own folder, so parallel PRs never conflict. This branch starts from `dev` and never merges back.
 
 ### Run file
