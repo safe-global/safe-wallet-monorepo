@@ -1,0 +1,19 @@
+{
+  "pr": 8579,
+  "reviewSha": "102a0449972e69d3438e775f17f081b3ea64fa5f",
+  "baseSha": "d8bd88967f883b543e5a575445166586ae845c8c",
+  "system": "A",
+  "version": "73bf04408c26562bbf8945904bd1c02d8b9b1603",
+  "model": "claude-opus-5-5[1m]",
+  "runner": "valleXYZ",
+  "usage": {
+    "inputTokens": 26,
+    "outputTokens": 7597,
+    "cacheReadTokens": 1104324,
+    "cacheWriteTokens": 109882,
+    "turns": 17,
+    "wallSeconds": 107,
+    "apiEquivalentUsd": 1.2519648
+  },
+  "output": "I ran `/code-conventions --review-pr` on `d8bd88967...HEAD` (17 files, the Safenet window-coverage and shared-aim changes). I found one real issue, one minor test issue and one out-of-scope note. I changed no tracked files: the full rules checklist was written to my scratchpad instead of `docs/engineering/`.\n\n## Checklist\nI went through every rule in `rules.json`. These applied to the diff:\n\n- **Passed:** API-01, FEAT-01, FEAT-03, DATA-02, DATA-06, NUM-02, CODE-06, TEST-02, TEST-03, TEST-04, TEST-05.\n- **Flagged:** PROD-01, and a small TEST-01 hygiene issue.\n- **Not applicable:** the rest (auth, mobile, CI, transactions, E2E, config, CHAIN, UI tokens and others).\n\nI didn't need to look up the review history behind any rule.\n\n## Findings\n\n**1. PROD-01: a visible copy change with no stated product sign-off (medium)**\n`apps/web/src/features/safenet-checks/statusPresentation.ts:69` (copy defined at `:49-52`, chosen in `packages/utils/src/features/safenet-checks/hooks/useSafenetCheck.ts:42`)\n\n- **What changes:** before, an empty read in the confirm/execute flow (`SafenetChecksSection`) showed \"Not checked · No Safenet check was requested for this transaction.\" Now any empty read whose window isn't `proven` shows \"Status unavailable · The Safenet check status could not be read. Retry later.\" That covers every head-relative scan, every block estimate that didn't converge, and every transaction older than about 12.5h.\n- **Why it's a problem:**\n  - Nothing actually failed: the read succeeded.\n  - \"Retry later\" suggests retrying will help. For an old transaction the window will never reach `proven`, so the message stays the same forever.\n- **Fix:** get explicit product/design approval for the state change and cite it in the PR, or give `WINDOW_UNCERTAIN` its own neutral copy (e.g. \"Check status can't be confirmed for this transaction\") instead of reusing the read-failed text.\n\n**2. TEST-01 / test hygiene: fake timers reset only at the end of the test (low)**\n`packages/utils/src/features/safenet-checks/hooks/__tests__/useSafenetCheck.test.ts:157-174`\n\n- **What happens:** the new test \"anchors the UNAVAILABLE grace window…\" calls `jest.useFakeTimers()` and only restores real timers on its last line (`:174`).\n- **Why it matters:** if the assertion fails, fake timers leak into later tests. Every other fake-timer block in this file uses `afterEach(() => jest.useRealTimers())` (`:224`, `:271`), so this one is also inconsistent within the diff.\n- **Fix:** add an `afterEach(() => jest.useRealTimers())` to the `block window aim` describe block.\n\n**3. Stale comment in a file the diff didn't touch (note)**\n`apps/web/src/features/safenet-checks/components/SafenetAuditRow.tsx:37`\n\n- The prop doc still says the timestamp \"aims the reader's block window\". After this change it's only offered to the aim registry, which keeps the earliest time any surface offered.\n- `SafenetQueueStatus.tsx` got the matching comment update; this file didn't. The file is outside the diff, so this is a note, not a finding.\n\n## Open questions\n- **PROD-01:** did product/design approve showing \"Status unavailable / Retry later\" instead of \"Not checked\" for empty reads that can't be proven?"
+}
