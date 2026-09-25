@@ -1,6 +1,7 @@
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import {
   hasRecoveryData,
+  isPendingPolicy,
   isSpendingLimitPolicy,
   type Policy,
   type PolicyAllowance,
@@ -56,22 +57,32 @@ const formatDays = (seconds: number): string => {
 const getAllowances = (policy: Extract<Policy, { type: 'spending-limit' }>): PolicyAllowance[] =>
   policy.data.spenders.flatMap((spender) => spender.allowances)
 
+const describeSpendingLimit = (policy: Extract<Policy, { type: 'spending-limit' }>): string => {
+  const allowances = getAllowances(policy)
+
+  if (allowances.length === 0) return 'No limits set'
+  if (allowances.length === 1) return formatAllowance(allowances[0])
+
+  const spenderCount = policy.data.spenders.length
+  const spenders = `${spenderCount} ${spenderCount === 1 ? 'spender' : 'spenders'}`
+  const tokens = `${allowances.length} ${allowances.length === 1 ? 'limit' : 'limits'}`
+
+  return `${spenders} · ${tokens}`
+}
+
 /**
  * The line shown under the policy type. A spending limit with several spenders and tokens has no
  * single allowance that represents it, so the summary counts them instead.
  */
 export const getPolicySummary = (policy: Policy): string => {
   if (isSpendingLimitPolicy(policy)) {
-    const allowances = getAllowances(policy)
+    if (!isPendingPolicy(policy) || policy.operation !== 'remove') return describeSpendingLimit(policy)
 
-    if (allowances.length === 0) return 'No limits set'
-    if (allowances.length === 1) return formatAllowance(allowances[0])
+    // Still enforced until the transaction executes, so the copy is in progress, not done.
+    if (getAllowances(policy).length > 0) return `Removing ${describeSpendingLimit(policy)}`
 
-    const spenderCount = policy.data.spenders.length
-    const spenders = `${spenderCount} ${spenderCount === 1 ? 'spender' : 'spenders'}`
-    const tokens = `${allowances.length} ${allowances.length === 1 ? 'limit' : 'limits'}`
-
-    return `${spenders} · ${tokens}`
+    const count = policy.data.spenders.length
+    return `Removing ${count} ${count === 1 ? 'spender' : 'spenders'}`
   }
 
   if (hasRecoveryData(policy)) {
