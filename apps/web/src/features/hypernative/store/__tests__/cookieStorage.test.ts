@@ -360,4 +360,84 @@ describe('cookieStorage', () => {
       expect(result?.tokenType).toBe('')
     })
   })
+
+  describe('refresh token support', () => {
+    it('should store the refresh token and set the cookie lifetime from the refresh window, not the access token', () => {
+      const now = 1000000000
+      Date.now = jest.fn(() => now)
+
+      setAuthCookie('access-token', 'Bearer', 300, 'refresh-token', 2592000)
+
+      const [, cookieValue, options] = mockCookiesSet.mock.calls[0]
+      const parsedValue = JSON.parse(cookieValue as string)
+
+      expect(parsedValue.expiry).toBe(now + 300 * 1000)
+      expect(parsedValue.refreshToken).toBe('refresh-token')
+      expect(parsedValue.refreshExpiry).toBe(now + 2592000 * 1000)
+      expect(options?.expires).toBe(30) // cookie lives for the refresh window (30 days), not 5 minutes
+    })
+
+    it('should survive access-token expiry while the refresh window is still open', () => {
+      const now = 1000000000
+      Date.now = jest.fn(() => now)
+      const cookieValue = JSON.stringify({
+        token: 'stale-token',
+        tokenType: 'Bearer',
+        expiry: now - 1000, // access token already expired
+        refreshToken: 'refresh-token',
+        refreshExpiry: now + 2591000000, // refresh window still open
+      })
+
+      mockGetReturn(cookieValue)
+
+      const result = getAuthCookieData()
+
+      expect(result).toBeDefined()
+      expect(result?.token).toBe('stale-token')
+      expect(result?.refreshToken).toBe('refresh-token')
+      expect(mockCookiesRemove).not.toHaveBeenCalled()
+    })
+
+    it('should clear the cookie once the refresh window itself has closed', () => {
+      const now = 1000000000
+      Date.now = jest.fn(() => now)
+      const cookieValue = JSON.stringify({
+        token: 'stale-token',
+        tokenType: 'Bearer',
+        expiry: now - 1000,
+        refreshToken: 'refresh-token',
+        refreshExpiry: now - 1,
+      })
+
+      mockGetReturn(cookieValue)
+
+      const result = getAuthCookieData()
+
+      expect(result).toBeUndefined()
+      expect(mockCookiesRemove).toHaveBeenCalledWith('hn_auth', { path: '/' })
+    })
+
+    it('should degrade a legacy cookie with no refreshToken to clearing on the access token expiry', () => {
+      const now = 1000000000
+      Date.now = jest.fn(() => now)
+      const cookieValue = JSON.stringify({ token: 'legacy-token', tokenType: 'Bearer', expiry: now - 1 })
+
+      mockGetReturn(cookieValue)
+
+      const result = getAuthCookieData()
+
+      expect(result).toBeUndefined()
+      expect(mockCookiesRemove).toHaveBeenCalledWith('hn_auth', { path: '/' })
+    })
+
+    it('should not set a refreshToken/refreshExpiry when no refresh args are given (legacy call sites)', () => {
+      setAuthCookie('access-token', 'Bearer', 300)
+
+      const [, cookieValue] = mockCookiesSet.mock.calls[0]
+      const parsedValue = JSON.parse(cookieValue as string)
+
+      expect(parsedValue.refreshToken).toBeUndefined()
+      expect(parsedValue.refreshExpiry).toBeUndefined()
+    })
+  })
 })
