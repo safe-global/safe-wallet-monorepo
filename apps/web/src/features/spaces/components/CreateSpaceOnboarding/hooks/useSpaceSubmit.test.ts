@@ -136,6 +136,23 @@ describe('useSpaceSubmit under Safe Pro', () => {
     })
   })
 
+  it('never creates a second Workspace while the first waits on its trial offer', async () => {
+    mockCreateSpaceWithUser.mockResolvedValue({
+      data: { id: 7, uuid: '11111111-1111-1111-1111-111111111111', name: 'My Space' },
+    })
+    const handleSubmit = (fn: (data: { name: string }) => Promise<void>) => () => fn({ name: 'My Space' })
+    const { result } = renderHook(() => useSpaceSubmit(handleSubmit as never, undefined, false))
+
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(mockCreateSpaceWithUser).toHaveBeenCalledTimes(1)
+  })
+
   it('still moves straight on after editing an existing Workspace', async () => {
     mockUpdateSpace.mockResolvedValue({ data: {} })
     const handleSubmit = (fn: (data: { name: string }) => Promise<void>) => () => fn({ name: 'My Space' })

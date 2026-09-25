@@ -73,7 +73,12 @@ jest.mock('../../hooks/useOnboardingStepCount', () => ({
 }))
 
 jest.mock('../OnboardingLayout', () => ({
-  OnboardingLayout: ({ main }: { main: React.ReactNode }) => <div>{main}</div>,
+  OnboardingLayout: ({ main, footer }: { main: React.ReactNode; footer: React.ReactNode }) => (
+    <div>
+      {main}
+      {footer}
+    </div>
+  ),
   StepCounter: () => null,
   SafeAppMockup: () => null,
   deriveSidePanelAccountsFromSpace: () => [],
@@ -143,6 +148,15 @@ describe('CreateSpaceOnboarding', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
     expect(retry).toHaveBeenCalled()
+  })
+
+  it('keeps Next and the name field locked once the Workspace is created, so it is never created twice', () => {
+    mockCreatedSpaceId = 'space-new'
+    mockUseWorkspaceLock.mockReturnValue({ isLocked: false, isResolving: true, reason: 'trial-offered' })
+    render(<CreateSpaceOnboarding />)
+
+    expect(screen.getByTestId('create-space-onboarding-continue-button')).toBeDisabled()
+    expect(screen.getByTestId('space-name-input')).toBeDisabled()
   })
 
   it('shows no trial offer before the Workspace is created', () => {

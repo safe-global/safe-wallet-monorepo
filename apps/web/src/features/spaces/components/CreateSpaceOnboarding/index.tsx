@@ -75,7 +75,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
     },
   })
 
-  const isInputDisabled = isCheckingAccess || isSpaceLoading
+  const isInputDisabled = isCheckingAccess || isSpaceLoading || Boolean(createdSpaceId)
   useEffect(() => {
     if (!isEditMode && !isInputDisabled) {
       setFocus('name')
@@ -177,8 +177,8 @@ const CreateSpaceOnboarding = (): ReactElement => {
       continueLabel="Next"
       continueType="submit"
       continueForm={FORM_ID}
-      continueDisabled={!isValid || isSubmitting || isCheckingAccess || isSpaceLoading}
-      continueLoading={isSubmitting}
+      continueDisabled={!isValid || isSubmitting || isCheckingAccess || isSpaceLoading || Boolean(createdSpaceId)}
+      continueLoading={isSubmitting || (Boolean(createdSpaceId) && trialLock.isResolving)}
       continueTestId="create-space-onboarding-continue-button"
     />
   )

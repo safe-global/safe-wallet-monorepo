@@ -76,6 +76,8 @@ const useSpaceSubmit = (
   }
 
   const onSubmit = handleSubmit(async (data) => {
+    // The Workspace exists and waits on its trial offer; submitting again would create a second one.
+    if (createdSpaceId) return
     setError(undefined)
 
     try {
