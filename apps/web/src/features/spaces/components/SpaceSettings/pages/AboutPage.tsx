@@ -24,7 +24,7 @@ import { Badge } from '@/components/ui/badge'
 import { Typography } from '@/components/ui/typography'
 import { useLoadFeature } from '@/features/__core__'
 import { SupportChatFeature, useSupportChat } from '@/features/support-chat'
-import { useIsSafeProEnabled } from '@/features/safe-pro-announcement'
+import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 import ProChip from '@/public/images/safe-pro/pro-chip.svg'
 import SpaceSettingsSection, { SpaceSettingsSectionTitle } from '../SpaceSettingsSection'
@@ -144,8 +144,8 @@ const AboutPage = () => {
   const { config, user } = useSupportChat()
   const isOfficialHost = useIsOfficialHost()
   const showSupport = !$isDisabled && isOfficialHost
-  const isSafeProEnabled = useIsSafeProEnabled()
-  const legalLinks = isSafeProEnabled ? [...SAFE_PRO_LEGAL_LINKS, ...LEGAL_LINKS] : LEGAL_LINKS
+  const isSafeProAnnouncementEnabled = useIsSafeProAnnouncementEnabled()
+  const legalLinks = isSafeProAnnouncementEnabled ? [...SAFE_PRO_LEGAL_LINKS, ...LEGAL_LINKS] : LEGAL_LINKS
 
   const handleContactSupportClick = useCallback(() => {
     setSupportOpen(true)

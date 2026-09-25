@@ -72,13 +72,13 @@ jest.mock('@/features/__core__', () => ({
   useLoadFeature: jest.fn(),
 }))
 
-const mockUseIsSafeProEnabled = jest.fn()
-const mockUseSafeProAnnouncement = jest.fn()
+const mockUseIsSafeProAnnouncementEnabled = jest.fn()
+const mockUseSafeProAnnouncementModal = jest.fn()
 
 jest.mock('@/features/safe-pro-announcement', () => ({
   SafeProFeature: { name: 'safe-pro-announcement' },
-  useIsSafeProEnabled: () => mockUseIsSafeProEnabled(),
-  useSafeProAnnouncement: (isReady: boolean) => mockUseSafeProAnnouncement(isReady),
+  useIsSafeProAnnouncementEnabled: () => mockUseIsSafeProAnnouncementEnabled(),
+  useSafeProAnnouncementModal: (isReady: boolean) => mockUseSafeProAnnouncementModal(isReady),
 }))
 
 jest.mock('@/services/local-storage/useLocalStorage', () => jest.fn(() => [{}, jest.fn()]))
@@ -168,9 +168,9 @@ const restoreDefaultMocks = () => {
     refetch: jest.fn(),
   })
   useSpaceAccountsDataMock.mockReturnValue({ accounts: [], isLoading: false, error: null, refetch: jest.fn() })
-  mockUseIsSafeProEnabled.mockReturnValue(false)
+  mockUseIsSafeProAnnouncementEnabled.mockReturnValue(false)
   mockUseHasFeature.mockReturnValue(false)
-  mockUseSafeProAnnouncement.mockReturnValue({ isOpen: false, setIsOpen: jest.fn() })
+  mockUseSafeProAnnouncementModal.mockReturnValue({ isOpen: false, setIsOpen: jest.fn() })
   mockUseSpacePlan.mockReturnValue({ plan: null, status: 'none', isLoading: false, refetch: jest.fn() })
   mockUseWorkspaceLock.mockReturnValue({ isLocked: false, isResolving: false, trialPeriodDays: null })
   mockUseCheckoutReturn.mockReturnValue({ status: 'idle', subscription: undefined, dismiss: jest.fn() })
@@ -371,30 +371,30 @@ describe('SpaceDashboard – Safe Pro announcement', () => {
   })
 
   it('mounts and arms the announcement on a workspace once the flag is on', () => {
-    mockUseIsSafeProEnabled.mockReturnValue(true)
+    mockUseIsSafeProAnnouncementEnabled.mockReturnValue(true)
 
     render(<SpaceDashboard />)
 
     expect(screen.getByTestId('safe-pro-announcement-modal')).toBeInTheDocument()
-    expect(mockUseSafeProAnnouncement).toHaveBeenCalledWith(true)
+    expect(mockUseSafeProAnnouncementModal).toHaveBeenCalledWith(true)
   })
 
   it('stays unarmed before a workspace resolves', () => {
-    mockUseIsSafeProEnabled.mockReturnValue(true)
+    mockUseIsSafeProAnnouncementEnabled.mockReturnValue(true)
     ;(useCurrentSpaceId as jest.Mock).mockReturnValue(undefined)
 
     render(<SpaceDashboard />)
 
-    expect(mockUseSafeProAnnouncement).toHaveBeenCalledWith(false)
+    expect(mockUseSafeProAnnouncementModal).toHaveBeenCalledWith(false)
   })
 
   it('stays unarmed over an invite preview', () => {
-    mockUseIsSafeProEnabled.mockReturnValue(true)
+    mockUseIsSafeProAnnouncementEnabled.mockReturnValue(true)
     ;(useIsInvited as jest.Mock).mockReturnValue(true)
 
     render(<SpaceDashboard />)
 
-    expect(mockUseSafeProAnnouncement).toHaveBeenCalledWith(false)
+    expect(mockUseSafeProAnnouncementModal).toHaveBeenCalledWith(false)
   })
 })
 
@@ -403,7 +403,7 @@ describe('SpaceDashboard – locked Workspace (SAFE_PRO)', () => {
     jest.clearAllMocks()
     restoreDefaultMocks()
     setupUseLoadFeature([{ safeAddress: MOCK_SAFE_ADDRESS, txId: MOCK_TX_ID }])
-    mockUseIsSafeProEnabled.mockReturnValue(true)
+    mockUseIsSafeProAnnouncementEnabled.mockReturnValue(true)
     mockUseWorkspaceLock.mockReturnValue({ isLocked: true, isResolving: false, trialPeriodDays: 60 })
   })
 
@@ -411,7 +411,7 @@ describe('SpaceDashboard – locked Workspace (SAFE_PRO)', () => {
     render(<SpaceDashboard />)
 
     expect(screen.getByTestId(`pending-tx-row-${MOCK_TX_ID}`)).toBeInTheDocument()
-    expect(mockUseSafeProAnnouncement).toHaveBeenCalledWith(false)
+    expect(mockUseSafeProAnnouncementModal).toHaveBeenCalledWith(false)
   })
 
   it('keeps the announcement when the Workspace is not locked', () => {
@@ -419,7 +419,7 @@ describe('SpaceDashboard – locked Workspace (SAFE_PRO)', () => {
 
     render(<SpaceDashboard />)
 
-    expect(mockUseSafeProAnnouncement).toHaveBeenCalledWith(true)
+    expect(mockUseSafeProAnnouncementModal).toHaveBeenCalledWith(true)
   })
 
   it('holds the announcement back while the lock is still resolving', () => {
@@ -428,6 +428,6 @@ describe('SpaceDashboard – locked Workspace (SAFE_PRO)', () => {
     render(<SpaceDashboard />)
 
     expect(screen.getByTestId(`pending-tx-row-${MOCK_TX_ID}`)).toBeInTheDocument()
-    expect(mockUseSafeProAnnouncement).toHaveBeenCalledWith(false)
+    expect(mockUseSafeProAnnouncementModal).toHaveBeenCalledWith(false)
   })
 })

@@ -122,12 +122,12 @@ jest.mock('../../ApiCtaSidebar', () => ({
   ApiCtaSidebar: () => <div data-testid="api-cta-sidebar" />,
 }))
 
-let mockIsSafeProEnabled = false
+let mockIsSafeProAnnouncementEnabled = false
 let mockIsSafeProBannerDismissed = false
 const mockDismissSafeProBanner = jest.fn()
 jest.mock('@/features/safe-pro-announcement', () => ({
   SafeProFeature: { name: 'safe-pro-announcement' },
-  useIsSafeProEnabled: () => mockIsSafeProEnabled,
+  useIsSafeProAnnouncementEnabled: () => mockIsSafeProAnnouncementEnabled,
   useSafeProSidebarBannerDismissed: () => [mockIsSafeProBannerDismissed, mockDismissSafeProBanner],
 }))
 
@@ -204,7 +204,7 @@ describe('SidebarCommonFooter', () => {
     mockHasBeamerConsent = true
     mockUseAppDispatch.mockReturnValue(jest.fn())
     mockUseDarkMode.mockReturnValue(false)
-    mockIsSafeProEnabled = false
+    mockIsSafeProAnnouncementEnabled = false
     mockIsSafeProBannerDismissed = false
     mockIsSafeProLoaded = true
     mockSafeProError = undefined
@@ -283,7 +283,7 @@ describe('SidebarCommonFooter', () => {
   describe('banner slot', () => {
     it('shows the Safe Pro banner and keeps the 2FA card invisible behind it while both are on', () => {
       mockIsTwoFactorBannerEnabled = true
-      mockIsSafeProEnabled = true
+      mockIsSafeProAnnouncementEnabled = true
       render(<SidebarCommonFooter />)
 
       expect(screen.getByTestId('safe-pro-sidebar-banner')).not.toHaveClass('invisible')
@@ -291,7 +291,7 @@ describe('SidebarCommonFooter', () => {
     })
 
     it('dismisses the Safe Pro banner through its persisted dismissal state', () => {
-      mockIsSafeProEnabled = true
+      mockIsSafeProAnnouncementEnabled = true
       render(<SidebarCommonFooter />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Dismiss Safe Pro' }))
@@ -301,7 +301,7 @@ describe('SidebarCommonFooter', () => {
 
     it('shows the 2FA card once the Safe Pro banner was dismissed', () => {
       mockIsTwoFactorBannerEnabled = true
-      mockIsSafeProEnabled = true
+      mockIsSafeProAnnouncementEnabled = true
       mockIsSafeProBannerDismissed = true
       render(<SidebarCommonFooter />)
 
@@ -311,7 +311,7 @@ describe('SidebarCommonFooter', () => {
 
     it('leaves the slot out of the layout while the Safe Pro banner is still loading', () => {
       mockIsTwoFactorBannerEnabled = true
-      mockIsSafeProEnabled = true
+      mockIsSafeProAnnouncementEnabled = true
       mockIsSafeProLoaded = false
       render(<SidebarCommonFooter />)
 
@@ -321,7 +321,7 @@ describe('SidebarCommonFooter', () => {
 
     it('gives the slot to the 2FA card when the Safe Pro banner fails to load', () => {
       mockIsTwoFactorBannerEnabled = true
-      mockIsSafeProEnabled = true
+      mockIsSafeProAnnouncementEnabled = true
       mockIsSafeProLoaded = false
       mockSafeProError = new Error('chunk load failed')
       render(<SidebarCommonFooter />)
@@ -331,7 +331,7 @@ describe('SidebarCommonFooter', () => {
 
     it('keeps showing the 2FA card while Safe Pro loads, when Safe Pro was already dismissed', () => {
       mockIsTwoFactorBannerEnabled = true
-      mockIsSafeProEnabled = true
+      mockIsSafeProAnnouncementEnabled = true
       mockIsSafeProBannerDismissed = true
       mockIsSafeProLoaded = false
       render(<SidebarCommonFooter />)
@@ -357,7 +357,7 @@ describe('SidebarCommonFooter', () => {
 
     it('shows the 2FA card where the Safe Pro banner hides itself', () => {
       mockIsTwoFactorBannerEnabled = true
-      mockIsSafeProEnabled = true
+      mockIsSafeProAnnouncementEnabled = true
       mockPathname = '/spaces/plans'
       render(<SidebarCommonFooter />)
 
@@ -368,21 +368,21 @@ describe('SidebarCommonFooter', () => {
 
   describe('Safe Pro banner', () => {
     it('shows the banner on the Workspaces sidebar when the flag is on', () => {
-      mockIsSafeProEnabled = true
+      mockIsSafeProAnnouncementEnabled = true
       render(<SidebarCommonFooter />)
 
       expect(screen.getByTestId('safe-pro-sidebar-banner')).toBeInTheDocument()
     })
 
     it('shows the banner on the Safe sidebar when the flag is on', () => {
-      mockIsSafeProEnabled = true
+      mockIsSafeProAnnouncementEnabled = true
       render(<SidebarCommonFooter isSafeSidebar />)
 
       expect(screen.getByTestId('safe-pro-sidebar-banner')).toBeInTheDocument()
     })
 
     it('hides the banner on the Plans page, which is where it links to', () => {
-      mockIsSafeProEnabled = true
+      mockIsSafeProAnnouncementEnabled = true
       mockPathname = '/spaces/plans'
       render(<SidebarCommonFooter />)
 
@@ -396,7 +396,7 @@ describe('SidebarCommonFooter', () => {
     })
 
     it('keeps the dismissed banner mounted but invisible, so the slot does not shrink', () => {
-      mockIsSafeProEnabled = true
+      mockIsSafeProAnnouncementEnabled = true
       mockIsSafeProBannerDismissed = true
       mockIsTwoFactorBannerEnabled = true
       render(<SidebarCommonFooter />)
@@ -405,7 +405,7 @@ describe('SidebarCommonFooter', () => {
     })
 
     it('drops the slot entirely once the dismissed banner has nothing to give way to', () => {
-      mockIsSafeProEnabled = true
+      mockIsSafeProAnnouncementEnabled = true
       mockIsSafeProBannerDismissed = true
       render(<SidebarCommonFooter />)
 

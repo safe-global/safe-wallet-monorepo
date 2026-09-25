@@ -15,7 +15,11 @@ import { CookieAndTermType, hasConsentFor } from '@/store/cookiesAndTermsSlice'
 import { openCookieBanner } from '@/store/popupSlice'
 import { BEAMER_SELECTOR } from '@/services/beamer'
 import { ApiCtaSidebar } from '../ApiCtaSidebar'
-import { SafeProFeature, useIsSafeProEnabled, useSafeProSidebarBannerDismissed } from '@/features/safe-pro-announcement'
+import {
+  SafeProFeature,
+  useIsSafeProAnnouncementEnabled,
+  useSafeProSidebarBannerDismissed,
+} from '@/features/safe-pro-announcement'
 import { useLoadFeature } from '@/features/__core__'
 import { SidebarIndexingStatus } from '../SidebarIndexingStatus'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
@@ -41,11 +45,11 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
     $isReady: isTwoFactorCardLoaded,
     $error: twoFactorCardError,
   } = useLoadFeature(OidcAuthFeature)
-  const isSafeProEnabled = useIsSafeProEnabled()
+  const isSafeProAnnouncementEnabled = useIsSafeProAnnouncementEnabled()
   const { pathname } = useRouter()
   const [isSafeProBannerDismissed, dismissSafeProBanner] = useSafeProSidebarBannerDismissed()
   // A failed chunk counts as no banner: its stub then renders nothing for good.
-  const hasSafeProBanner = isSafeProEnabled && pathname !== AppRoutes.spaces.plans && !safeProError
+  const hasSafeProBanner = isSafeProAnnouncementEnabled && pathname !== AppRoutes.spaces.plans && !safeProError
   const showSafeProBanner = hasSafeProBanner && !isSafeProBannerDismissed
 
   const spaceId = useCurrentSpaceId()

@@ -18,3 +18,7 @@ export { SPACE_NAME_MAX_LENGTH } from '@safe-global/utils/validation/names'
 /** Friendly notice shown when a workspace is already at the Safe accounts cap. */
 export const safeAccountsLimitReachedText = (limit: number = SAFE_ACCOUNTS_LIMIT) =>
   `You've reached the maximum of ${limit} Safe accounts per Workspace`
+
+/** Trial terms shown wherever a free Safe Pro trial is offered or running. */
+export const TRIAL_DISCLAIMER =
+  "Your paid subscription only starts after you add billing details. If you don't add them before your free access ends, your Workspace will be locked. Your Safe accounts remain available outside the Workspace."

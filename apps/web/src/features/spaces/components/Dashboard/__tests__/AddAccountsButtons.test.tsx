@@ -68,8 +68,8 @@ jest.mock('../../Plans/CheckoutReturnModals', () => ({ __esModule: true, default
 
 jest.mock('@/features/safe-pro-announcement', () => ({
   SafeProFeature: { name: 'safe-pro-announcement' },
-  useIsSafeProEnabled: () => false,
-  useSafeProAnnouncement: () => ({ isOpen: false, setIsOpen: jest.fn() }),
+  useIsSafeProAnnouncementEnabled: () => false,
+  useSafeProAnnouncementModal: () => ({ isOpen: false, setIsOpen: jest.fn() }),
 }))
 
 jest.mock('@/services/local-storage/useLocalStorage', () => jest.fn(() => [{}, jest.fn()]))

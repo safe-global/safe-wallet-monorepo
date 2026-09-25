@@ -9,7 +9,7 @@ import { selectCookieBanner } from '@/store/popupSlice'
 import { CookieAndTermType } from '@/store/cookiesAndTermsSlice'
 import { useLoadFeature } from '@/features/__core__'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
-import { useIsSafeProEnabled } from '@/features/safe-pro-announcement'
+import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement'
 
 const mockSupportChatDrawer = jest.fn()
 
@@ -30,7 +30,7 @@ jest.mock('@/hooks/useIsOfficialHost', () => ({
 }))
 
 jest.mock('@/features/safe-pro-announcement', () => ({
-  useIsSafeProEnabled: jest.fn(),
+  useIsSafeProAnnouncementEnabled: jest.fn(),
 }))
 
 const setSupportFeature = ({ disabled, isOfficialHost }: { disabled: boolean; isOfficialHost: boolean }) => {
@@ -60,7 +60,7 @@ describe('AboutPage', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     setSupportFeature({ disabled: false, isOfficialHost: true })
-    ;(useIsSafeProEnabled as jest.Mock).mockReturnValue(true)
+    ;(useIsSafeProAnnouncementEnabled as jest.Mock).mockReturnValue(true)
   })
 
   describe('legal links', () => {
@@ -130,7 +130,7 @@ describe('AboutPage', () => {
     })
 
     it('leaves the Safe Pro terms out while Safe Pro is not announced', () => {
-      ;(useIsSafeProEnabled as jest.Mock).mockReturnValue(false)
+      ;(useIsSafeProAnnouncementEnabled as jest.Mock).mockReturnValue(false)
       renderWithStore()
 
       expect(screen.queryByRole('link', { name: /^Pro /i })).not.toBeInTheDocument()

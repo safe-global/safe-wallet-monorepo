@@ -7,7 +7,7 @@ const seenStore = localItem<boolean>(SAFE_PRO_ANNOUNCEMENT_SEEN_KEY)
 
 // Read synchronously, not via useLocalStorage: its store hydrates in an effect, flashing the modal
 // at returning visitors for one render.
-export function useSafeProAnnouncement(isReady: boolean) {
+export function useSafeProAnnouncementModal(isReady: boolean) {
   const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {

@@ -51,12 +51,12 @@ jest.mock('@/features/myAccounts', () => ({
   MyAccountsFeature: { name: 'MyAccountsFeature' },
 }))
 
-const mockUseIsSafeProEnabled = jest.fn()
+const mockUseIsSafeProAnnouncementEnabled = jest.fn()
 const mockUseHasFeature = jest.fn()
 
 jest.mock('@/features/safe-pro-announcement', () => ({
   SafeProFeature: { name: 'SafeProFeature' },
-  useIsSafeProEnabled: () => mockUseIsSafeProEnabled(),
+  useIsSafeProAnnouncementEnabled: () => mockUseIsSafeProAnnouncementEnabled(),
 }))
 
 jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
@@ -129,7 +129,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
     mockUseSpacesGetV1Query.mockReturnValue({ currentData: undefined, isFetching: false, error: undefined })
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: undefined })
     mockUseSignInRedirect.mockReturnValue({ setHasSignedIn: jest.fn(), redirectLoading: false })
-    mockUseIsSafeProEnabled.mockReturnValue(false)
+    mockUseIsSafeProAnnouncementEnabled.mockReturnValue(false)
     mockUseHasFeature.mockReturnValue(false)
   })
 
@@ -168,7 +168,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     it('swaps in the Safe Pro banner when the flag is on', () => {
       setAuth(false)
-      mockUseIsSafeProEnabled.mockReturnValue(true)
+      mockUseIsSafeProAnnouncementEnabled.mockReturnValue(true)
 
       render(<SpacesList />)
 
@@ -178,7 +178,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     it('shows the wide Pro banner above the workspaces list when signed in and the flag is on', () => {
       setAuth(true)
-      mockUseIsSafeProEnabled.mockReturnValue(true)
+      mockUseIsSafeProAnnouncementEnabled.mockReturnValue(true)
       mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
       mockUseSpacesGetV1Query.mockReturnValue({
         currentData: [{ uuid: 'a', name: 'Acme', memberStatus: 'ACTIVE' }],
@@ -193,7 +193,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     it('shows the wide Pro banner above the empty state, before and after Safe Pro is live', () => {
       setAuth(true)
-      mockUseIsSafeProEnabled.mockReturnValue(true)
+      mockUseIsSafeProAnnouncementEnabled.mockReturnValue(true)
       mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
       mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
 
@@ -510,7 +510,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
   it('keeps the general terms while only the Safe Pro announcement is on', () => {
     setAuth(false)
-    mockUseIsSafeProEnabled.mockReturnValue(true)
+    mockUseIsSafeProAnnouncementEnabled.mockReturnValue(true)
 
     render(<SpacesList />)
 
@@ -520,7 +520,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
   it('puts the Safe Pro user terms and privacy links inside the sign-in card, opening in a new tab, when Safe Pro is on', () => {
     setAuth(false)
-    mockUseIsSafeProEnabled.mockReturnValue(true)
+    mockUseIsSafeProAnnouncementEnabled.mockReturnValue(true)
     mockUseHasFeature.mockReturnValue(true)
 
     const { container } = render(<SpacesList />)

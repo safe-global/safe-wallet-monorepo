@@ -5,7 +5,6 @@ export const SafeProFeature = createFeatureHandle<SafeProContract>('safe-pro-ann
 
 export type { SafeProContract } from './contract'
 
-export { useIsSafeProEnabled } from './hooks/useIsSafeProEnabled'
-export { useSafeProAnnouncement } from './hooks/useSafeProAnnouncement'
+export { useIsSafeProAnnouncementEnabled } from './hooks/useIsSafeProAnnouncementEnabled'
+export { useSafeProAnnouncementModal } from './hooks/useSafeProAnnouncementModal'
 export { useSafeProSidebarBannerDismissed } from './hooks/useSafeProSidebarBannerDismissed'
-export { TRIAL_DISCLAIMER } from './constants'
