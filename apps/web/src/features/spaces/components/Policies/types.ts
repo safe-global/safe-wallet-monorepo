@@ -112,8 +112,6 @@ type PendingPolicyBase = PolicyBase & {
   nonce: number
   confirmationsSubmitted: number
   confirmationsRequired: number
-  /** Signers who have not yet confirmed. */
-  missingSigners: string[]
   proposedAt: number
   /** The active policy this replaces, so a queued edit is not rendered as a second policy. */
   supersedesId: string | null

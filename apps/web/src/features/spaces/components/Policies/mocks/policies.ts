@@ -156,7 +156,6 @@ export const mockPendingPolicy = (overrides: Partial<PendingSpendingLimitPolicy>
   nonce: 42,
   confirmationsSubmitted: 1,
   confirmationsRequired: 2,
-  missingSigners: [MOCK_ADDRESSES.bob],
   proposedAt: 1_781_300_000,
   supersedesId: null,
   ...overrides,
@@ -216,7 +215,6 @@ export const mockFullySignedPending = (): PendingSpendingLimitPolicy =>
     id: '0xspending-limit-pending-full',
     confirmationsSubmitted: 2,
     confirmationsRequired: 2,
-    missingSigners: [],
   })
 
 /** A token CGW has no logo for — the row falls back to the symbol. */
