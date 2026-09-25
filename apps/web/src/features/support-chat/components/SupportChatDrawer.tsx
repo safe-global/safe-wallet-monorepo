@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Typography } from '@/components/ui/typography'
 import { Spinner } from '@/components/ui/spinner'
+import { Button } from '@/components/ui/button'
 import { overlayVariants } from '@/components/ui/overlay'
 import { cn } from '@/utils/cn'
 
@@ -19,7 +20,7 @@ type SupportChatMessage =
 
 // Constants
 const RATE_LIMIT_CONFIG = { MAX_MESSAGES: 10, WINDOW_MS: 1000 } as const
-const PYLON_TIMING = { RETRY_DELAY_MS: 200 } as const
+const CONNECTION_TIMEOUT_MS = 20_000
 const FRAME_DIMENSIONS = {
   DEFAULT_WIDTH: 360,
   DEFAULT_HEIGHT: 520,
@@ -56,21 +57,21 @@ import type { SupportChatConfig, UserIdentity } from '../hooks/useSupportChat'
 export interface SupportChatDrawerProps {
   open: boolean
   onClose: () => void
+  onRetry?: () => void
   config: SupportChatConfig
   user: UserIdentity
 }
 
 const ERROR_STATE = {
   heading: 'Support chat is unavailable',
-  subheading: 'Please try again later or reach out via support@safe.global.',
+  subheading: 'Please try again or visit our help center.',
 }
 
-function SupportChatDrawer({ open, onClose, config, user }: SupportChatDrawerProps) {
+function SupportChatDrawer({ open, onClose, onRetry, config, user }: SupportChatDrawerProps) {
   const iframeRef = useRef<HTMLIFrameElement | null>(null)
   const [status, setStatus] = useState<ChatStatus>('idle')
   const [error, setError] = useState<string>('')
-  const [frameKey] = useState<number>(() => Date.now())
-  const hasInitializedRef = useRef(false)
+  const [frameKey, setFrameKey] = useState(0)
   const [frameDimensions, setFrameDimensions] = useState<{ width: number; height: number }>({
     width: FRAME_DIMENSIONS.DEFAULT_WIDTH,
     height: FRAME_DIMENSIONS.DEFAULT_HEIGHT,
@@ -110,25 +111,27 @@ function SupportChatDrawer({ open, onClose, config, user }: SupportChatDrawerPro
 
     if (isRateLimited()) return
 
-    const chatSettings = {
-      app_id: config.appId,
-      email: user.email || `guest@${config.aliasDomain}`,
-      name: displayName,
-      avatar_url: user.avatarUrl,
-      account_id: user.accountId,
-      account_external_id: user.accountId,
-    }
+    const chatSettings = user.jwt
+      ? {
+          app_id: config.appId,
+          email: user.email,
+          jwt: user.jwt,
+          support_eligible: user.supportEligible,
+          identity_type: user.identityType,
+        }
+      : {
+          app_id: config.appId,
+          email: user.email || `guest@${config.aliasDomain}`,
+          name: displayName,
+          avatar_url: user.avatarUrl,
+          account_id: user.accountId,
+          account_external_id: user.accountId,
+        }
 
     try {
       iframeRef.current.contentWindow?.postMessage({ type: 'pylon-config', payload: { chatSettings } }, chatOrigin)
 
-      iframeRef.current.contentWindow?.postMessage({ type: 'pylon-open-chat' }, chatOrigin)
-
-      setTimeout(() => {
-        iframeRef.current?.contentWindow?.postMessage({ type: 'pylon-open-chat' }, chatOrigin)
-      }, PYLON_TIMING.RETRY_DELAY_MS)
-
-      setStatus('config-sent')
+      setStatus((current) => (current === 'ready' || current === 'error' ? current : 'config-sent'))
     } catch {
       setError('Failed to configure support chat')
       setStatus('error')
@@ -142,6 +145,9 @@ function SupportChatDrawer({ open, onClose, config, user }: SupportChatDrawerPro
     user.accountId,
     user.avatarUrl,
     user.email,
+    user.jwt,
+    user.supportEligible,
+    user.identityType,
   ])
 
   useEffect(() => {
@@ -153,15 +159,34 @@ function SupportChatDrawer({ open, onClose, config, user }: SupportChatDrawerPro
       return
     }
 
-    if (!hasInitializedRef.current && status === 'idle') {
-      hasInitializedRef.current = true
-      setStatus('waiting')
-    }
+    setError('')
+    setStatus('waiting')
+  }, [open, chatUrl, chatOrigin])
 
-    if (status === 'ready' && iframeRef.current && chatOrigin) {
-      iframeRef.current.contentWindow?.postMessage({ type: 'pylon-open-chat' }, chatOrigin)
+  const waitingForChat = open && status !== 'ready' && status !== 'error'
+  useEffect(() => {
+    if (!waitingForChat) return
+    const timer = setTimeout(() => {
+      setError('Support did not connect. Check your connection and try again.')
+      setStatus('error')
+    }, CONNECTION_TIMEOUT_MS)
+    return () => clearTimeout(timer)
+  }, [waitingForChat, frameKey])
+
+  // Refresh the host's token without replacing an open conversation.
+  useEffect(() => {
+    if (open && user.jwt && status === 'ready') sendConfig()
+  }, [open, user.jwt, status, sendConfig])
+
+  const retry = () => {
+    if (onRetry) {
+      onRetry()
+      return
     }
-  }, [open, chatUrl, chatOrigin, status])
+    setError('')
+    setStatus('waiting')
+    setFrameKey((key) => key + 1)
+  }
 
   useEffect(() => {
     if (!open || !chatOrigin) return
@@ -172,10 +197,7 @@ function SupportChatDrawer({ open, onClose, config, user }: SupportChatDrawerPro
       const isPylonMessage = event.data.type?.startsWith('pylon-')
       if (!isPylonMessage) return
 
-      const isValidOrigin =
-        event.origin === chatOrigin ||
-        (chatOrigin.startsWith('http://localhost') && event.origin.startsWith('http://localhost')) ||
-        (chatOrigin.startsWith('https://localhost') && event.origin.startsWith('https://localhost'))
+      const isValidOrigin = event.origin === chatOrigin && event.source === iframeRef.current?.contentWindow
 
       if (!isValidOrigin) return
       if (isRateLimited()) return
@@ -187,7 +209,6 @@ function SupportChatDrawer({ open, onClose, config, user }: SupportChatDrawerPro
 
         case 'pylon-chat-ready':
           setStatus('ready')
-          iframeRef.current?.contentWindow?.postMessage({ type: 'pylon-open-chat' }, chatOrigin)
           break
 
         case 'pylon-chat-error':
@@ -201,8 +222,6 @@ function SupportChatDrawer({ open, onClose, config, user }: SupportChatDrawerPro
               width: Math.min(FRAME_DIMENSIONS.MAX_WIDTH, Math.max(FRAME_DIMENSIONS.MIN_WIDTH, event.data.width)),
               height: Math.min(window.innerHeight - 32, Math.max(FRAME_DIMENSIONS.MIN_HEIGHT, event.data.height)),
             })
-            setStatus((prev) => (prev === 'error' ? prev : 'ready'))
-            iframeRef.current?.contentWindow?.postMessage({ type: 'pylon-open-chat' }, chatOrigin)
           }
           break
 
@@ -218,7 +237,7 @@ function SupportChatDrawer({ open, onClose, config, user }: SupportChatDrawerPro
 
     window.addEventListener('message', listener)
     return () => window.removeEventListener('message', listener)
-  }, [chatOrigin, open, sendConfig, isRateLimited])
+  }, [chatOrigin, open, sendConfig, isRateLimited, onClose])
 
   const isError = status === 'error'
   const showPlaceholder = status !== 'ready'
@@ -262,6 +281,16 @@ function SupportChatDrawer({ open, onClose, config, user }: SupportChatDrawerPro
                   <Typography variant="paragraph-small" color="muted">
                     {error || ERROR_STATE.subheading}
                   </Typography>
+                  <Button onClick={retry}>Try again</Button>
+                  <Button onClick={onClose}>Close support</Button>
+                  <a
+                    href="https://help.safe.global"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-primary underline"
+                  >
+                    Help center
+                  </a>
                 </div>
               ) : (
                 <>
@@ -291,7 +320,7 @@ function SupportChatDrawer({ open, onClose, config, user }: SupportChatDrawerPro
                 visibility: isError ? 'hidden' : 'visible',
               }}
               onLoad={() => {
-                setStatus((prev) => (prev === 'ready' ? prev : 'waiting'))
+                setStatus((prev) => (prev === 'ready' || prev === 'error' ? prev : 'waiting'))
               }}
             />
           )}

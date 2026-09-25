@@ -23,7 +23,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Typography } from '@/components/ui/typography'
 import { useLoadFeature } from '@/features/__core__'
-import { SupportChatFeature, useSupportChat } from '@/features/support-chat'
+import { SupportChatFeature, useSupportEligibility } from '@/features/support-chat'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 import SpaceSettingsSection, { SpaceSettingsSectionTitle } from '../SpaceSettingsSection'
 
@@ -115,10 +115,10 @@ const LinkRow = ({
 const AboutPage = () => {
   const dispatch = useAppDispatch()
   const [isSupportOpen, setSupportOpen] = useState(false)
-  const { SupportChatDrawer, $isDisabled } = useLoadFeature(SupportChatFeature)
-  const { config, user } = useSupportChat()
+  const { WorkspaceSupportChat, $isDisabled } = useLoadFeature(SupportChatFeature)
   const isOfficialHost = useIsOfficialHost()
   const showSupport = !$isDisabled && isOfficialHost
+  const isSupportEligible = useSupportEligibility(showSupport)
 
   const handleContactSupportClick = useCallback(() => {
     setSupportOpen(true)
@@ -165,8 +165,19 @@ const AboutPage = () => {
                 >
                   Contact Support
                 </Typography>
-                <Typography variant="paragraph-mini" color="muted" className="block mt-0.5">
-                  Get help from our team
+                <Typography variant="paragraph-mini" color="muted" className="inline-flex items-center gap-1.5 mt-0.5">
+                  Live chat with{' '}
+                  <Badge
+                    variant={isSupportEligible ? 'success' : 'secondary'}
+                    title={isSupportEligible ? 'Premium support active' : 'Live chat requires Safe Pro'}
+                    style={{
+                      boxShadow: isSupportEligible
+                        ? '0 0 8px color-mix(in srgb, var(--color-success-main) 24%, transparent)'
+                        : undefined,
+                    }}
+                  >
+                    Safe Pro
+                  </Badge>
                 </Typography>
               </span>
               <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground shrink-0 transition-colors group-hover:text-accent-success" />
@@ -249,9 +260,7 @@ const AboutPage = () => {
         </div>
       </SpaceSettingsSection>
 
-      {showSupport && (
-        <SupportChatDrawer open={isSupportOpen} onClose={handleSupportClose} config={config} user={user} />
-      )}
+      {showSupport && <WorkspaceSupportChat open={isSupportOpen} onClose={handleSupportClose} />}
     </div>
   )
 }

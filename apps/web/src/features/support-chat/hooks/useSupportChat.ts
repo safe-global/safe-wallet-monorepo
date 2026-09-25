@@ -19,6 +19,9 @@ export type UserIdentity = {
   name: string
   avatarUrl?: string
   accountId?: string
+  jwt?: string
+  supportEligible?: boolean
+  identityType?: 'email' | 'wallet'
 }
 
 const deriveAliasEmail = (address: string): string => {

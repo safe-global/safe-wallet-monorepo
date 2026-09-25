@@ -2,8 +2,10 @@ import { useState, useCallback, type ReactElement } from 'react'
 import { HelpCircle, MessageCircle, ExternalLink } from 'lucide-react'
 import { Popover, PopoverContent } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
+import ProWordmark from '@/public/images/safe-pro/pro-wordmark.svg'
+import { cn } from '@/utils/cn'
 import { useLoadFeature } from '@/features/__core__'
-import { SupportChatFeature, useSupportChat } from '@/features/support-chat'
+import { SupportChatFeature, useSupportEligibility } from '@/features/support-chat'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 
 const HELP_CENTER_URL = 'https://help.safe.global'
@@ -15,12 +17,12 @@ type HelpMenuProps = {
 
 const HelpMenu = ({ anchorEl, onClose }: HelpMenuProps): ReactElement | null => {
   const [isSupportOpen, setSupportOpen] = useState(false)
-  const { SupportChatDrawer, $isDisabled } = useLoadFeature(SupportChatFeature)
-  const { config, user } = useSupportChat()
+  const { WorkspaceSupportChat, $isDisabled } = useLoadFeature(SupportChatFeature)
   const isOfficialHost = useIsOfficialHost()
 
   const isMenuOpen = Boolean(anchorEl)
   const showSupport = !$isDisabled && isOfficialHost
+  const isSupportEligible = useSupportEligibility(showSupport && isMenuOpen)
 
   const handleHelpCenterClick = useCallback(() => {
     window.open(HELP_CENTER_URL, '_blank', 'noopener,noreferrer')
@@ -65,14 +67,29 @@ const HelpMenu = ({ anchorEl, onClose }: HelpMenuProps): ReactElement | null => 
             >
               <MessageCircle className="size-4" />
               <span className="flex-1 text-left">Contact support</span>
+              <span
+                className={cn(
+                  'flex shrink-0 items-center rounded-sm px-2 py-1.5',
+                  isSupportEligible
+                    ? 'bg-[var(--color-secondary-light)] text-foreground dark:bg-muted dark:text-[var(--color-secondary-light)]'
+                    : 'bg-muted/50 text-muted-foreground/60',
+                )}
+                title={isSupportEligible ? 'Premium support active' : 'Live chat requires Safe Pro'}
+                style={{
+                  boxShadow: isSupportEligible
+                    ? '0 0 8px color-mix(in srgb, var(--color-secondary-light) 24%, transparent)'
+                    : undefined,
+                }}
+              >
+                <ProWordmark aria-hidden="true" className="size-auto h-2 w-[21px] overflow-visible" />
+                <span className="sr-only">PRO</span>
+              </span>
             </Button>
           ) : null}
         </PopoverContent>
       </Popover>
 
-      {showSupport ? (
-        <SupportChatDrawer open={isSupportOpen} onClose={handleSupportClose} config={config} user={user} />
-      ) : null}
+      {showSupport ? <WorkspaceSupportChat open={isSupportOpen} onClose={handleSupportClose} /> : null}
     </>
   )
 }
