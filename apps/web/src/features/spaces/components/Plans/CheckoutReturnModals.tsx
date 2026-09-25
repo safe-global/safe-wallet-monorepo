@@ -67,13 +67,14 @@ export default function CheckoutReturnModals({
 
   // The fresh subscription knows its own period end; the entitlements it feeds may not have caught up yet.
   const endsAt = getSubscriptionPeriodEnd(checkout.subscription) ?? plan?.periodEndsAt
-  const periodEndsAt = endsAt ? Date.parse(endsAt) : 0
+  const parsedEndsAt = endsAt ? Date.parse(endsAt) : Number.NaN
+  const trialEndsAt = Number.isFinite(parsedEndsAt) ? parsedEndsAt : null
 
   return checkout.subscription.status === 'trialing' ? (
     <SafeProTrialActivatedModal
       open
       onOpenChange={checkout.dismiss}
-      trialEndsAt={periodEndsAt}
+      trialEndsAt={trialEndsAt}
       ctaLabel={trialCtaLabel}
       hasPaymentMethod={checkout.subscription.hasPaymentMethod === true}
     />

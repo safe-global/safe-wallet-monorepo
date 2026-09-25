@@ -20,7 +20,7 @@ jest.mock('../../SafeProModals', () => ({
   }: {
     open: boolean
     onOpenChange: (o: boolean) => void
-    trialEndsAt: number
+    trialEndsAt: number | null
     ctaLabel?: string
     hasPaymentMethod?: boolean
   }) =>
@@ -93,6 +93,18 @@ describe('CheckoutReturnModals', () => {
 
     fireEvent.click(screen.getByTestId('trial-activated-modal'))
     expect(dismiss).toHaveBeenCalled()
+  })
+
+  it('passes no trial end when neither the subscription nor the plan has one, instead of the epoch', () => {
+    mockUseCheckoutReturn.mockReturnValue({
+      status: 'complete',
+      subscription: { ...subscription('trialing'), currentPeriodEnd: null },
+      dismiss,
+      retry,
+    })
+    render(<CheckoutReturnModals spaceId={SPACE_ID} />)
+
+    expect(screen.getByTestId('trial-activated-modal')).not.toHaveAttribute('data-ends')
   })
 
   it('tells the trial confirmation when checkout already stored a payment method', () => {

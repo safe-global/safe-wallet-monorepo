@@ -15,6 +15,12 @@ describe('SafeProTrialActivatedModal', () => {
     expect(onOpenChange).toHaveBeenCalledWith(false)
   })
 
+  it('leaves the date out when the trial end is unknown', () => {
+    render(<SafeProTrialActivatedModal open onOpenChange={jest.fn()} trialEndsAt={null} />)
+
+    expect(screen.getByRole('heading')).toHaveTextContent(/^Your free access is active$/)
+  })
+
   it('says the subscription starts on its own when checkout already took a payment method', () => {
     render(<SafeProTrialActivatedModal open onOpenChange={jest.fn()} trialEndsAt={0} hasPaymentMethod />)
 

@@ -17,7 +17,8 @@ const SafeProTrialActivatedModal = ({
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
-  trialEndsAt: number
+  /** Null when neither the subscription nor the plan knows its period end yet. */
+  trialEndsAt: number | null
   /** Where the CTA leads; without it the CTA just closes. */
   ctaHref?: LinkProps['href']
   ctaLabel?: string
@@ -27,7 +28,7 @@ const SafeProTrialActivatedModal = ({
   <SafeProModalFrame open={open} onOpenChange={onOpenChange}>
     <div className="flex flex-col gap-3">
       <Typography variant="h4" as={DialogTitle}>
-        Your free access is active until {formatDate(trialEndsAt)}
+        Your free access is active{trialEndsAt !== null ? ` until ${formatDate(trialEndsAt)}` : ''}
       </Typography>
       <Typography variant="paragraph-small" color="muted">
         {hasPaymentMethod
