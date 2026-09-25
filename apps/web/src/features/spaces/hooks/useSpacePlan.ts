@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import type { PlanSummary } from '../components/Plans/types'
 import {
   getDaysLeft,
@@ -31,6 +32,11 @@ export const useSpacePlan = (spaceId?: string | null) => {
       ? { name: name ?? 'Safe Pro', status, periodEndsAt, daysLeft, hasPaymentMethod }
       : null
   const isTrialing = status === 'trialing'
+  const { refetch: refetchEntitlements } = entitlements
+  const refetch = useCallback(() => {
+    void refetchEntitlements()
+    void refetchSubscription()
+  }, [refetchEntitlements, refetchSubscription])
 
   return {
     plan,
@@ -49,9 +55,6 @@ export const useSpacePlan = (spaceId?: string | null) => {
     isUninitialized: Boolean(entitlements.isUninitialized || isSubscriptionUninitialized),
     /** A source failed for good (rate-limit retries exhausted included); `status` then reads `none` and cannot be trusted. */
     isError: entitlements.isError || isSubscriptionError,
-    refetch: () => {
-      void entitlements.refetch()
-      void refetchSubscription()
-    },
+    refetch,
   }
 }

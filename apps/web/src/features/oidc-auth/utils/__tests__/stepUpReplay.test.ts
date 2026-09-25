@@ -2,6 +2,7 @@ import { faker } from '@faker-js/faker'
 import { http, HttpResponse } from 'msw'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { cgwApi as usersApi } from '@safe-global/store/gateway/AUTO_GENERATED/users'
+import { cgwApi as billingApi } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import { GATEWAY_URL } from '@/config/gateway'
 import { makeStore } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
@@ -295,6 +296,32 @@ describe('replayStepUpAction', () => {
     expect(userRequests).toHaveLength(1)
     expect(selectNotifications(store.getState())).toEqual([
       expect.objectContaining({ message: 'Safe account added', variant: 'success' }),
+    ])
+  })
+
+  it('should, when a plan update is replayed, fetch the billing queries after the mutation and once more before the toast', async () => {
+    const spaceId = faker.string.uuid()
+    const subscriptionRequests: string[] = []
+
+    server.use(
+      http.get(`${GATEWAY_URL}/v1/billing/spaces/${spaceId}/subscriptions`, () => {
+        subscriptionRequests.push('GET')
+        return HttpResponse.json([])
+      }),
+      http.patch(`${GATEWAY_URL}/v1/billing/spaces/${spaceId}/subscriptions/sub_1`, () => HttpResponse.json({})),
+    )
+
+    const store = makeStore(undefined, { skipBroadcast: true })
+    await store.dispatch(billingApi.endpoints.billingGetSubscriptionsV1.initiate({ spaceId }))
+
+    await replayStepUpAction(store.dispatch, {
+      endpoint: 'billingUpdateSubscriptionV1',
+      args: { spaceId, subscriptionId: 'sub_1', updateSubscriptionDto: { planId: 'price_1' } },
+    })
+
+    expect(subscriptionRequests).toHaveLength(3)
+    expect(selectNotifications(store.getState())).toEqual([
+      expect.objectContaining({ message: 'Plan updated', variant: 'success' }),
     ])
   })
 

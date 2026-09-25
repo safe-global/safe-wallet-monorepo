@@ -487,6 +487,20 @@ describe('ReviewStep', () => {
       )
     })
 
+    it("keeps the submit disabled and shows no notice while the plan's seat limit loads", () => {
+      mockUseIsAdmin.mockReturnValue(true)
+      mockUseSpaceSafeCount.mockReturnValue(40)
+      mockUseSpaceSafeLimit.mockReturnValue({ limit: 40, isLoading: true })
+      mockCreation()
+
+      render(<ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+        initialReduxState: spaceReduxState,
+      })
+
+      expect(screen.getByTestId('review-step-next-btn')).toBeDisabled()
+      expect(screen.queryByTestId('space-seat-limit-notice')).not.toBeInTheDocument()
+    })
+
     it('shows no notice below the plan limit', () => {
       mockUseIsAdmin.mockReturnValue(true)
       mockUseSpaceSafeCount.mockReturnValue(19)

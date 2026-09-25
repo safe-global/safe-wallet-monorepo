@@ -201,8 +201,8 @@ export function clickOnSignInBtn() {
   cy.get(continueWithWalletBtn).click()
 }
 
-// Full workspace sign-in from the signed-out /welcome/spaces card. Clicking the card's "Continue
-// with wallet" button opens onboard; after injecting the signer the card flips to a "Continue with
+// Full workspace sign-in from the signed-out /welcome/spaces card. Clicking the card's "Connect
+// wallet" button opens onboard; after injecting the signer the card flips to a "Continue with
 // <wallet>" button that runs SIWE, which finishes signing into the workspace.
 export function signInWithWallet(signer) {
   cy.contains(connectWalletBtn, workspaceWalletBtnText, { timeout: 30000 }).should('be.visible').click()

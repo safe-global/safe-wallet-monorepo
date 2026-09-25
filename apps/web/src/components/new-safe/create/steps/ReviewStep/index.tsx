@@ -192,8 +192,9 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
   const spaceId = useAppSelector(lastUsedSpace)
   const isAdminOfActiveSpace = useIsAdmin(normalizeSpaceId(spaceId) ?? undefined)
   const spaceSafeCount = useSpaceSafeCount(spaceId)
-  const { limit: spaceSafeLimit } = useSpaceSafeLimit(spaceId)
+  const { limit: spaceSafeLimit, isLoading: isSpaceSafeLimitLoading } = useSpaceSafeLimit(spaceId)
   const willStayOutsideSpace =
+    !isSpaceSafeLimitLoading &&
     isUserAuthenticated &&
     normalizeSpaceId(spaceId) !== null &&
     isAdminOfActiveSpace &&
@@ -481,7 +482,8 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
   // disabled and Pay later is forced); single-chain Pay later falls back to
   // Pay now when not signed in, so effectivePayMethod is never PayLater there.
   const requiresSignIn = effectivePayMethod === PayMethod.PayLater && !isUserAuthenticated
-  const isDisabled = showNetworkWarning || isCreating || requiresSignIn
+  // The plan's seat limit decides whether the Safe joins the Workspace.
+  const isDisabled = showNetworkWarning || isCreating || requiresSignIn || isSpaceSafeLimitLoading
 
   return (
     <>

@@ -77,6 +77,7 @@ export const SafeShieldContent = ({
   const deadlockEmpty = isEmpty(deadlockResults)
   const analysesEmpty = recipientEmpty && contractEmpty && threatEmpty && deadlockEmpty
   const allEmpty = recipientEmpty && contractEmpty && threatEmpty && deadlockEmpty && !safeTx
+  const analysesSettled = !contractLoading && !threatLoading
 
   const { recipientDelay, contractAnalysisDelay, deadlockAnalysisDelay, threatAnalysisDelay, simulationAnalysisDelay } =
     calculateAnalysisDelays(recipientEmpty, contractEmpty, deadlockEmpty)
@@ -144,7 +145,7 @@ export const SafeShieldContent = ({
 
           {shouldShowContent && <safenet.SafenetChecksSection />}
 
-          {!isSafePro && !contractLoading && !threatLoading && (
+          {!isSafePro && analysesSettled && (
             <TenderlySimulation
               safeTx={safeTx}
               delay={simulationAnalysisDelay}
@@ -172,7 +173,7 @@ export const SafeShieldContent = ({
               )}
 
               {/* Pro runs the simulation on its own; a user with their own Tenderly project runs it by hand; the rest see a lock. */}
-              {!contractLoading && !threatLoading && (hasProFeatures || hasOwnTenderly) && (
+              {analysesSettled && (hasProFeatures || hasOwnTenderly) && (
                 <TenderlySimulation
                   safeTx={safeTx}
                   delay={simulationAnalysisDelay}

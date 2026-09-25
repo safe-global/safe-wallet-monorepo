@@ -13,7 +13,7 @@ import * as relayUtils from '@/utils/relaying'
 import * as walletCanPay from '@/hooks/useWalletCanPay'
 import * as useValidateTxData from '@/hooks/useValidateTxData'
 import { render } from '@/tests/test-utils'
-import { fireEvent, waitFor } from '@testing-library/react'
+import { fireEvent, waitFor, within } from '@testing-library/react'
 import type {
   RecipientAnalysisResults,
   ContractAnalysisResults,
@@ -179,10 +179,43 @@ describe('ExecuteForm', () => {
     const { getByText, getByTestId } = render(<ExecuteForm {...defaultProps} safeTx={safeTransaction} />)
 
     expect(getByText('Who will pay gas fees:')).toBeInTheDocument()
-    expect(getByTestId('relay-execution-method').querySelector('[data-slot=radio-group-item]')).toHaveAttribute(
-      'data-disabled',
-    )
+    expect(within(getByTestId('relay-execution-method')).getByRole('radio')).toHaveAttribute('aria-disabled', 'true')
     expect(getByText('Execute')).toBeEnabled()
+  })
+
+  it("relays a Safe Pro Safe's transaction against its Workspace's allowance", async () => {
+    jest.spyOn(useWalletCanRelay, 'default').mockReturnValue([true, undefined, false])
+    mockUseSafeSponsoredTxs.mockReturnValue({
+      isEnabled: true,
+      isPro: true,
+      meter: { used: 10, quota: 50, resetsAt: '2026-11-01T00:00:00.000Z' },
+      left: 40,
+      spaceId: '11111111-1111-1111-1111-111111111111',
+      canSponsor: true,
+      isLoading: false,
+    })
+    const mockExecuteTx = jest.fn()
+
+    const { getByText } = render(
+      <ExecuteForm
+        {...defaultProps}
+        safeTx={safeTransaction}
+        txActions={{ ...defaultProps.txActions, executeTx: mockExecuteTx }}
+      />,
+    )
+    fireEvent.click(getByText('Execute'))
+
+    await waitFor(() =>
+      expect(mockExecuteTx).toHaveBeenCalledWith(
+        expect.anything(),
+        safeTransaction,
+        defaultProps.txId,
+        undefined,
+        true,
+        false,
+        '11111111-1111-1111-1111-111111111111',
+      ),
+    )
   })
 
   it('shows an execution validation error', () => {
@@ -376,7 +409,7 @@ describe('ExecuteForm', () => {
         new QuotaExceededError('sponsored_transactions', 50, 50, '2026-11-01T00:00:00.000Z', 'Quota exceeded'),
       )
 
-    const { getByText } = render(
+    const { getByText, queryByText } = render(
       <ExecuteForm
         {...defaultProps}
         safeTx={safeTransaction}
@@ -395,6 +428,10 @@ describe('ExecuteForm', () => {
     })
     // The user can still execute, now paying the gas themselves.
     expect(getByText('Execute')).toBeEnabled()
+
+    mockExecuteTx.mockResolvedValueOnce('0xexecuted')
+    fireEvent.click(getByText('Execute'))
+    await waitFor(() => expect(queryByText(/sponsored transactions of this cycle/)).not.toBeInTheDocument())
   })
 
   it('offers an "Execute anyway" retry with acceptUnverifiedSimulation on INDETERMINATE_SIMULATION', async () => {

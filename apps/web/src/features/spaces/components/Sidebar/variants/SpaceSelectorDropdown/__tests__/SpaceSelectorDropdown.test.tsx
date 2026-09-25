@@ -79,13 +79,14 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
 
 const mockUseHasFeature = jest.fn()
 jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
-jest.mock('@/public/images/safe-pro/pro-chip.svg', () => 'svg')
-const mockPlans: {
+type MockPlans = {
   tierName: string
   isTrialing: boolean
   isTrialEndingSoon: boolean
   plan: { daysLeft: number | null } | null
-} = { tierName: 'Business', isTrialing: false, isTrialEndingSoon: false, plan: null }
+}
+const DEFAULT_PLANS: MockPlans = { tierName: 'Business', isTrialing: false, isTrialEndingSoon: false, plan: null }
+const mockPlans: MockPlans = { ...DEFAULT_PLANS }
 jest.mock('../../../../../hooks/useSpacePlan', () => ({ useSpacePlan: () => mockPlans }))
 let mockSeatLimit: number | null = 40
 jest.mock('../../../../../hooks/useSpaceSafeLimit', () => ({
@@ -226,6 +227,8 @@ describe('SpaceSelectorDropdown', () => {
     mockIsAuthenticated = true
     mockUseSpaceSafesGetV1Query.mockImplementation(() => ({ currentData: undefined }))
     mockSeatLimit = 40
+    mockUseHasFeature.mockReset()
+    Object.assign(mockPlans, DEFAULT_PLANS)
   })
 
   it('adds an accessible label to the trigger', () => {
@@ -1137,7 +1140,6 @@ describe('SpaceSelectorDropdown', () => {
         expect(subtitle).toBeInTheDocument()
         expect(subtitle.classList.contains('text-warning-strong')).toBe(isWarning)
         expect(subtitle.classList.contains('text-green-500')).toBe(isSafePro && !isWarning)
-        expect(screen.queryByTestId('space-selector-pro-chip')).not.toBeInTheDocument()
       },
     )
   })

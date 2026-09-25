@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { ArrowRight } from 'lucide-react'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { DialogTitle } from '@/components/ui/dialog'
@@ -62,8 +63,9 @@ export default function SelectAccountsStep({
 }) {
   const { allSafes, isLoading } = useSpaceSafes()
   const [query, setQuery] = useState('')
-  const filtered = useSafesSearch(allSafes, query.trim())
-  const items = query.trim() ? filtered : allSafes
+  const search = query.trim()
+  const filtered = useSafesSearch(allSafes, search)
+  const items = search ? filtered : allSafes
   const { control, setValue } = useForm<AddAccountsFormValues>({
     defaultValues: { selectedSafes: initialSelection(allSafes) },
   })
@@ -78,6 +80,8 @@ export default function SelectAccountsStep({
     () => leavesOf(allSafes).filter((safe) => !selectedKeys.has(getSafeId(safe))),
     [allSafes, selectedKeys],
   )
+  const excess = seatCount - limit
+  const showRemovedNote = !isOverLimit && removed.length > 0
 
   return (
     <>
@@ -131,24 +135,23 @@ export default function SelectAccountsStep({
         </ScrollArea>
       </div>
 
-      {isOverLimit ? (
+      {isOverLimit && (
         <Alert variant="warning">
           <AlertSeverityIcon variant="warning" />
           <AlertDescription>
-            Deselect {seatCount - limit === 1 ? '1 Safe account' : `${seatCount - limit} Safe accounts`} to fit the
-            plan.
+            Deselect {excess} Safe account{maybePlural(excess)} to fit the plan.
           </AlertDescription>
         </Alert>
-      ) : (
-        removed.length > 0 && (
-          <Alert variant="warning">
-            <AlertSeverityIcon variant="warning" />
-            <AlertDescription>
-              {removed.length === 1 ? '1 Safe account' : `${removed.length} Safe accounts`} will be removed from the
-              Workspace. They remain available in My accounts.
-            </AlertDescription>
-          </Alert>
-        )
+      )}
+
+      {showRemovedNote && (
+        <Alert variant="warning">
+          <AlertSeverityIcon variant="warning" />
+          <AlertDescription>
+            {removed.length} Safe account{maybePlural(removed)} will be removed from the Workspace. They remain
+            available in My accounts.
+          </AlertDescription>
+        </Alert>
       )}
 
       {error && (

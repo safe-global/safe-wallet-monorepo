@@ -22,7 +22,7 @@ export const SidebarTopBar = (): ReactElement => {
 
   // Inside a space or an individual safe the logo turns into a "Home" label pill; while the Workspace is on a Safe
   // Pro plan (the current one on its routes, the Safe's own one on a Safe's pages) the pill wears the PRO chip
-  // instead and leads back to the Workspaces list. From anywhere else it returns to the accounts view.
+  // instead. From a space or such a Safe it leads to the Workspaces list, from anywhere else to the accounts view.
   //
   // Gated on hydration because both inputs are client-only: the safe address lives in a query param
   // the server can't see during SSG (useSafeAddressFromUrl falls back to `location.search`), and the
@@ -35,12 +35,15 @@ export const SidebarTopBar = (): ReactElement => {
   const logoHref = isSpaceRoute || showProLockup ? AppRoutes.welcome.spaces : AppRoutes.welcome.accounts
   // Collapsed, the pill has no room: the chip stacks under the logo and the trigger moves down to make way.
   const showCollapsedChip = isCollapsed && showProLockup
+  const collapsedLayout = showCollapsedChip
+    ? { bar: 'min-h-[88px]', trigger: 'left-1/2 top-[66px] -translate-x-1/2' }
+    : { bar: 'min-h-15', trigger: 'left-1/2 top-[38px] -translate-x-1/2' }
 
   return (
     <div
       data-testid="sidebar-top-bar"
       data-sidebar-state={state}
-      className={cn('relative w-full', isCollapsed ? (showCollapsedChip ? 'min-h-[88px]' : 'min-h-15') : 'h-10')}
+      className={cn('relative w-full', isCollapsed ? collapsedLayout.bar : 'h-10')}
     >
       <SafeLogo
         href={logoHref}
@@ -72,11 +75,7 @@ export const SidebarTopBar = (): ReactElement => {
         className={cn(
           'absolute z-10 shrink-0 cursor-pointer text-sidebar-foreground/65 hover:text-sidebar-foreground hover:secondary',
           'transition-[left,transform] duration-200 ease-linear',
-          isCollapsed
-            ? showCollapsedChip
-              ? 'left-1/2 top-[66px] -translate-x-1/2'
-              : 'left-1/2 top-[38px] -translate-x-1/2'
-            : 'left-[calc(100%-2rem)] -top-2',
+          isCollapsed ? collapsedLayout.trigger : 'left-[calc(100%-2rem)] -top-2',
         )}
         data-testid="sidebar-trigger"
       />

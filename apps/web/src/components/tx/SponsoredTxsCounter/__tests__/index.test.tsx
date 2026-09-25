@@ -25,7 +25,7 @@ describe('SponsoredTxsCounter', () => {
     expect(screen.getByTestId('sponsored-txs-counter')).toHaveTextContent('0 sponsored transactions left')
     expect(screen.queryByText(/Resets/)).not.toBeInTheDocument()
     expect(screen.getByTestId('sponsored-txs-upgrade')).toHaveAttribute('href', '/welcome/spaces')
-    expect(screen.getByTestId('sponsored-txs-upgrade')).toHaveTextContent('Upgrade to')
+    expect(screen.getByRole('link', { name: 'Upgrade to Safe Pro' })).toBe(screen.getByTestId('sponsored-txs-upgrade'))
   })
 
   it('reads an uncapped plan as unlimited', () => {

@@ -71,7 +71,7 @@ const SponsoredTxsCounter = ({
           data-testid="sponsored-txs-upgrade"
         >
           Upgrade to
-          <span className="block h-4 w-6" aria-label="Safe Pro">
+          <span className="block h-4 w-6" role="img" aria-label="Safe Pro">
             <ProChip className="size-full" />
           </span>
           <ArrowRight data-icon="inline-end" className="text-badge-dot-success" />

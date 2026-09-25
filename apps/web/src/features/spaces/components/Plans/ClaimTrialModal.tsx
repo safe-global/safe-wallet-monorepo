@@ -166,6 +166,10 @@ export default function ClaimTrialModal({
   const seats = option?.seats ?? null
   const copy = claimCopy(trialPeriodDays, variant)
   const availableUntil = trialPeriodDays === null ? null : formatDate(Date.now() + trialPeriodDays * DAY_MS)
+  const hasNoTrial = !isLoading && tiers.length === 0
+  const showOffers = !isLoading && tiers.length > 0
+  const isSelectable = tiers.length > 1
+  const freeText = freeLabel(trialPeriodDays, variant)
 
   const claim = () => {
     if (!option?.paymentLinkId) return
@@ -209,17 +213,19 @@ export default function ClaimTrialModal({
                 Compare all features <ArrowUpRight />
               </Link>
 
-              {isLoading ? (
-                <Skeleton className="h-[260px] w-full rounded-lg-xl" data-testid="claim-trial-skeleton" />
-              ) : tiers.length === 0 ? (
+              {isLoading && <Skeleton className="h-[260px] w-full rounded-lg-xl" data-testid="claim-trial-skeleton" />}
+
+              {hasNoTrial && (
                 <Alert variant="info">
                   <AlertSeverityIcon variant="info" />
                   <AlertDescription>There is no free access available for this Workspace.</AlertDescription>
                 </Alert>
-              ) : (
+              )}
+
+              {showOffers && (
                 <div
-                  role={tiers.length > 1 ? 'radiogroup' : undefined}
-                  aria-label={tiers.length > 1 ? 'Plan' : undefined}
+                  role={isSelectable ? 'radiogroup' : undefined}
+                  aria-label={isSelectable ? 'Plan' : undefined}
                   className="flex flex-col gap-4 md:flex-row"
                 >
                   {tiers.map((candidate) => (
@@ -227,8 +233,8 @@ export default function ClaimTrialModal({
                       key={candidate.id}
                       tier={candidate}
                       availableUntil={availableUntil}
-                      freeText={freeLabel(trialPeriodDays, variant)}
-                      selectable={tiers.length > 1}
+                      freeText={freeText}
+                      selectable={isSelectable}
                       selected={candidate.id === tier?.id}
                       onSelect={() => setPickedTierId(candidate.id)}
                     />

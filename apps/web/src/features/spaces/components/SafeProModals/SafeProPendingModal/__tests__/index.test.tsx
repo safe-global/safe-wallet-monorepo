@@ -7,7 +7,7 @@ describe('SafeProPendingModal', () => {
 
     expect(screen.getByRole('heading')).toHaveTextContent('Confirming your subscription')
     expect(screen.getByText('This usually takes a few seconds.')).toBeInTheDocument()
-    expect(screen.getByTestId('safe-pro-pending')).toBeInTheDocument()
+    expect(screen.getByRole('status', { name: 'Loading' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Close' })).not.toBeInTheDocument()
   })
 })

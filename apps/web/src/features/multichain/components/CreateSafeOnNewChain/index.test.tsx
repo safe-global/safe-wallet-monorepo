@@ -172,6 +172,15 @@ describe('CreateSafeOnSpecificChain', () => {
       expect(mockPersist).toHaveBeenCalledWith(expect.objectContaining({ holdsSeatInSpace: true }))
     })
 
+    it("keeps Add network disabled and shows no notice while the Workspace's Safes load", () => {
+      mockUseSpaceSafes.mockReturnValue({ currentData: undefined, isLoading: true })
+
+      renderDialog(jest.fn(), spaceReduxState)
+
+      expect(screen.queryByTestId('space-seat-limit-notice')).not.toBeInTheDocument()
+      expect(screen.getByTestId('modal-add-network-btn')).toBeDisabled()
+    })
+
     it('shows no notice to a member, whose Safes are never auto-added', () => {
       mockUseIsAdmin.mockReturnValue(false)
 

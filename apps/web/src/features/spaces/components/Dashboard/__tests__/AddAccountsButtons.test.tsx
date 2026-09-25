@@ -11,13 +11,8 @@ import {
 import { useSpaceAccountsData } from '@/features/myAccounts'
 import type { ReactNode } from 'react'
 
-jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => false }))
-jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
-  useSpacesGetOneV1Query: () => ({ currentData: undefined }),
-}))
-
 jest.mock('next/router', () => ({
-  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), pathname: '/spaces', query: {} }),
+  useRouter: () => ({ push: jest.fn() }),
 }))
 
 jest.mock('@/services/analytics', () => ({
@@ -58,9 +53,6 @@ jest.mock('@/features/__core__', () => ({
   useLoadFeature: jest.fn(),
 }))
 
-jest.mock('../../../hooks/useSpacePlan', () => ({
-  useSpacePlan: () => ({ plan: null, status: 'none', isLoading: false, refetch: jest.fn() }),
-}))
 jest.mock('../../../hooks/useWorkspaceLock', () => ({
   useWorkspaceLock: () => ({ isLocked: false, isResolving: false, trialPeriodDays: null }),
 }))

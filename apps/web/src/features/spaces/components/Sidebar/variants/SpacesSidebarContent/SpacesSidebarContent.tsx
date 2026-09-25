@@ -59,10 +59,7 @@ export const SpacesSidebarContent = ({
   )
 
   const filteredSetupGroup = useMemo(
-    () => ({
-      ...spacesSetupGroup,
-      items: spacesSetupGroup.items.filter((i) => !gatedOffHrefs.has(i.href)),
-    }),
+    () => ({ ...spacesSetupGroup, items: spacesSetupGroup.items.filter((i) => !gatedOffHrefs.has(i.href)) }),
     [gatedOffHrefs],
   )
 

@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import { SUPPORT_CHAT_URL } from '@/config/constants'
-import TrialEndingModal, { endsIn } from '../TrialEndingModal'
+import TrialEndingModal, { endsIn, reminderSubtitle } from '../TrialEndingModal'
 
 const mockUseSpacePlan = jest.fn()
 const mockUseSpaceOffers = jest.fn()
@@ -34,25 +34,6 @@ jest.mock('@/services/local-storage/session', () => ({
       delete storage[key]
     },
   }),
-}))
-jest.mock('../../SafeProModals', () => ({
-  SafeProNoticeModal: ({
-    title,
-    body,
-    actionLabel,
-    onAction,
-  }: {
-    title: string
-    body: string
-    actionLabel: string
-    onAction: () => void
-  }) => (
-    <div data-testid="notice-modal">
-      <h2>{title}</h2>
-      <p>{body}</p>
-      <button onClick={onAction}>{actionLabel}</button>
-    </div>
-  ),
 }))
 jest.mock('../ChangePlanFlow', () => ({
   __esModule: true,
@@ -123,6 +104,13 @@ describe('TrialEndingModal', () => {
     expect(endsIn(7)).toBe('in 7 days')
     expect(endsIn(1)).toBe('in 1 day')
     expect(endsIn(0)).toBe('today')
+    expect(endsIn(null)).toBe('in 7 days')
+  })
+
+  it('falls back to a generic Workspace name in the member reminder', () => {
+    expect(reminderSubtitle('Dec 5, 2026', false)).toBe(
+      'This Workspace will be locked on Dec 5, 2026 unless an admin chooses a plan and adds a payment method.',
+    )
   })
 
   it('stays dismissed for the rest of the trial once the last-week reminder was closed', () => {
@@ -173,6 +161,14 @@ describe('TrialEndingModal', () => {
     unmount()
 
     expect(render(<TrialEndingModal spaceId={SPACE_ID} />).container).toBeEmptyDOMElement()
+  })
+
+  it('holds the plans behind a skeleton while the offers load', () => {
+    mockUseSpaceOffers.mockReturnValue({ paidPlans: [], isLoading: true })
+    render(<TrialEndingModal spaceId={SPACE_ID} />)
+
+    expect(screen.getByTestId('trial-ending-skeleton')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Add payment method' })).not.toBeInTheDocument()
   })
 
   it('closes the reminder for good once the plan changed', () => {

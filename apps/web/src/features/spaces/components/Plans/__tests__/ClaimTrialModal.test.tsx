@@ -122,6 +122,7 @@ describe('ClaimTrialModal', () => {
     expect(screen.getByText('20 Safe accounts')).toBeInTheDocument()
     expect(screen.getByText('Policy engine')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Close' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('radio')).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Go to My accounts' }))
     expect(onBack).toHaveBeenCalled()
@@ -200,6 +201,17 @@ describe('ClaimTrialModal', () => {
 
     expect(screen.getByTestId('select-accounts-step')).toHaveAttribute('data-plan', 'Starter')
     expect(screen.getByTestId('select-accounts-step')).toHaveAttribute('data-limit', '2')
+  })
+
+  it('picks a trial offer from the keyboard', () => {
+    mockUseSpaceOffers.mockReturnValue({ trialPlans: [BUSINESS, STARTER], trialPeriodDays: 60, isLoading: false })
+    render(<ClaimTrialModal spaceId={SPACE_ID} onBack={jest.fn()} />)
+
+    fireEvent.keyDown(screen.getByRole('radio', { name: /Starter/ }), { key: 'Enter' })
+    expect(screen.getByRole('radio', { name: /Starter/ })).toHaveAttribute('aria-checked', 'true')
+
+    fireEvent.keyDown(screen.getByRole('radio', { name: /Business/ }), { key: ' ' })
+    expect(screen.getByRole('radio', { name: /Business/ })).toHaveAttribute('aria-checked', 'true')
   })
 
   it('shows a skeleton while the offers load and an empty state without a trial', () => {

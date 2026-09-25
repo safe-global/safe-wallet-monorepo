@@ -3,7 +3,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useIsInvited } from './useSpaceMembers'
 import { useSpacePlan } from './useSpacePlan'
 import { useSpaceOffers } from './billing/useSpaceOffers'
-import { getSubscriptionEndedAt } from './billing/subscription'
+import { getSubscriptionEndedAt, isLivePlanStatus } from './billing/subscription'
 
 /** Why a Workspace is locked: it can still claim its free access, its last payment failed, or its plan ended. */
 export type WorkspaceLockReason = 'trial-offered' | 'payment-failed' | 'lapsed'
@@ -38,7 +38,7 @@ export const useWorkspaceLock = (spaceId?: string | null) => {
     trialPeriodDays !== null ? 'trial-offered' : status === 'payment_failed' ? 'payment-failed' : 'lapsed'
 
   return {
-    isLocked: applies && !isResolving && !isError && status !== 'trialing' && status !== 'active',
+    isLocked: applies && !isResolving && !isError && !isLivePlanStatus(status),
     isResolving,
     isError,
     retry: () => {

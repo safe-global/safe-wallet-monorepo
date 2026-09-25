@@ -3,13 +3,13 @@ import AddAccountsChooser from '../index'
 
 let mockIsAdmin = true
 let mockIsAtSafeLimit = false
-jest.mock('@/features/spaces', () => ({
-  useCurrentSpaceId: () => '1',
-  useIsAdmin: () => mockIsAdmin,
+jest.mock('../../../hooks/useCurrentSpaceId', () => ({ useCurrentSpaceId: () => '1' }))
+jest.mock('../../../hooks/useSpaceMembers', () => ({ useIsAdmin: () => mockIsAdmin }))
+jest.mock('../../../hooks/useIsCurrentSpaceAtSafeLimit', () => ({
   useIsCurrentSpaceAtSafeLimit: () => mockIsAtSafeLimit,
-  useSpaceSafeLimit: () => ({ limit: 40, isLoading: false }),
   useCurrentSpaceSafeCount: () => 40,
 }))
+jest.mock('../../../hooks/useSpaceSafeLimit', () => ({ useSpaceSafeLimit: () => ({ limit: 40, isLoading: false }) }))
 jest.mock('../../../hooks/useSeatUpsell', () => ({
   useSeatUpsell: () => ({
     isSafePro: true,

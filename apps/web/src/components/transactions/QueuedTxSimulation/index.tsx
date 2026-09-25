@@ -88,7 +88,7 @@ const InlineTxSimulation = ({ transaction }: { transaction: TransactionDetails }
   const simulation = useSimulation()
   const { simulationLink, simulateTransaction } = simulation
   const status = simulation ? getSimulationStatus(simulation) : undefined
-  const { hasProFeatures } = useSafeProAccess()
+  const { hasProFeatures, isLoading: isProAccessLoading } = useSafeProAccess()
 
   const handleSimulation = () => {
     if (safeTransaction && executionOwner) {
@@ -96,7 +96,7 @@ const InlineTxSimulation = ({ transaction }: { transaction: TransactionDetails }
     }
   }
 
-  if (safeTransactionError || !canSimulate || !executionOwner) {
+  if (safeTransactionError || !canSimulate || !executionOwner || isProAccessLoading) {
     return null
   }
 

@@ -5,6 +5,7 @@ const mockUseSpacePlan = jest.fn()
 const mockUseSpaceOffers = jest.fn()
 const mockUseChangePlan = jest.fn()
 let mockIsAdmin = true
+let mockIsSafePro: boolean | undefined = true
 const mockStartCheckout = jest.fn()
 const mockOpenPortal = jest.fn()
 
@@ -12,10 +13,10 @@ jest.mock('../../AuthState', () => ({
   __esModule: true,
   default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }))
-jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => true }))
+jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockIsSafePro }))
 jest.mock('@/hooks/useDarkMode', () => ({ useDarkMode: () => false }))
 jest.mock('@/features/__core__', () => ({
-  useLoadFeature: () => ({ SafeProAnnouncement: () => null }),
+  useLoadFeature: () => ({ SafeProAnnouncement: () => <div data-testid="safe-pro-announcement" /> }),
   createFeatureHandle: () => ({}),
 }))
 jest.mock('../../../hooks/useSpacePlan', () => ({ useSpacePlan: (spaceId?: string) => mockUseSpacePlan(spaceId) }))
@@ -103,7 +104,46 @@ describe('SpacePlansPage', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockIsAdmin = true
+    mockIsSafePro = true
     mockUseSpaceOffers.mockReturnValue({ paidPlans: [STARTER], isLoading: false })
+  })
+
+  it('shows the Safe Pro announcement instead of the plans where Safe Pro is off', () => {
+    mockIsSafePro = false
+    onPlan('Business', 499, 'active')
+    render(<SpacePlansPage spaceId={SPACE_ID} />)
+
+    expect(screen.getByTestId('safe-pro-announcement')).toBeInTheDocument()
+    expect(screen.queryByTestId('current-plan-card')).not.toBeInTheDocument()
+  })
+
+  it.each([
+    ['the Safe Pro flag', () => (mockIsSafePro = undefined)],
+    ['the plan', () => mockUseSpacePlan.mockReturnValue({ ...mockUseSpacePlan(), isLoading: true })],
+    ['the offers', () => mockUseSpaceOffers.mockReturnValue({ paidPlans: [], isLoading: true })],
+  ])('holds a skeleton, not the announcement, while loading %s', (_, setLoading) => {
+    onPlan('Business', 499, 'active')
+    setLoading()
+    render(<SpacePlansPage spaceId={SPACE_ID} />)
+
+    expect(screen.getByTestId('plans-skeleton')).toBeInTheDocument()
+    expect(screen.queryByTestId('safe-pro-announcement')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('current-plan-card')).not.toBeInTheDocument()
+  })
+
+  it('keeps Manage plan for a lapsed Workspace that still has a subscription, and not without one', () => {
+    const lapsed = { plan: null, seats: null, sponsoredTxs: null, status: 'none', isTrialing: false, isLoading: false }
+    mockUseChangePlan.mockReturnValue({ canChange: false })
+    mockUseSpacePlan.mockReturnValue({ ...lapsed, subscription: subscription('Business', 499, 'canceled') })
+    const { unmount } = render(<SpacePlansPage spaceId={SPACE_ID} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Manage plan' }))
+    expect(mockOpenPortal).toHaveBeenCalled()
+    unmount()
+
+    mockUseSpacePlan.mockReturnValue({ ...lapsed, subscription: undefined })
+    render(<SpacePlansPage spaceId={SPACE_ID} />)
+    expect(screen.queryByRole('button', { name: 'Manage plan' })).not.toBeInTheDocument()
   })
 
   it('shows a member who is not an admin the plans without any button to act on them', () => {

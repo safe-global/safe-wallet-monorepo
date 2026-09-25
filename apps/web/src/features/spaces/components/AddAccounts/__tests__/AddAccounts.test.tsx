@@ -87,11 +87,16 @@ let mockSpaceSafes: Array<{ chainId: string; address: string }> = []
 let mockSpaceSafesLoading = false
 let mockSafeLimit: { limit: number | null | undefined; isError: boolean } = { limit: 40, isError: false }
 const mockRetryLimit = jest.fn()
+let mockIsSafePro = false
 jest.mock('../../../hooks/useSpaceSafeLimit', () => ({
   useSpaceSafeLimit: () => ({ ...mockSafeLimit, isLoading: false, retry: mockRetryLimit }),
 }))
 jest.mock('../../../hooks/useSeatUpsell', () => ({
-  useSeatUpsell: () => ({ isSafePro: false, tierName: undefined, limit: null, plansHref: '/spaces/plans' }),
+  useSeatUpsell: () => ({ isSafePro: mockIsSafePro, tierName: undefined, limit: null, plansHref: '/spaces/plans' }),
+}))
+const mockRefreshSpaceEntitlements = jest.fn()
+jest.mock('@/services/entitlements/refreshSpaceEntitlements', () => ({
+  refreshSpaceEntitlements: (...args: unknown[]) => mockRefreshSpaceEntitlements(...args),
 }))
 
 let mockSpaceAddressBook: Array<{ address: string; name: string; chainIds: string[] }> = []
@@ -482,5 +487,58 @@ describe('AddAccounts — naming step', () => {
 
     expect(screen.getByText('My accounts')).toBeInTheDocument()
     expect(screen.getByTestId('safe-accounts-table')).toBeInTheDocument()
+  })
+})
+
+describe('AddAccounts — seat limit', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockWalletValue = { address: '0xWallet' }
+    mockAllOwned = {}
+    mockIsAdmin = true
+    mockSpaceSafes = []
+    mockSpaceSafesLoading = false
+    mockSpaceAddressBook = []
+    mockAddressBookError = false
+    mockEnteredName = 'Treasury'
+    mockSafeLimit = { limit: 40, isError: false }
+    mockIsSafePro = false
+    mockUpsertWorkspaceNames.mockResolvedValue({})
+  })
+
+  it('links to the plans once a Safe Pro Workspace fills its seats', () => {
+    mockIsSafePro = true
+    mockSafeLimit = { limit: 1, isError: false }
+    mockSpaceSafes = [{ chainId: '1', address: TRUSTED_ADDRESS }]
+    render(<AddAccounts externalOpen onExternalClose={() => {}} />, withTrusted)
+
+    expect(screen.getByTestId('compare-plans-link')).toHaveAttribute('href', '/spaces/plans')
+  })
+
+  it('does not link to the plans at the limit without Safe Pro', () => {
+    mockSafeLimit = { limit: 1, isError: false }
+    mockSpaceSafes = [{ chainId: '1', address: TRUSTED_ADDRESS }]
+    render(<AddAccounts externalOpen onExternalClose={() => {}} />, withTrusted)
+
+    expect(screen.queryByTestId('compare-plans-link')).not.toBeInTheDocument()
+  })
+
+  it('shows the seat-limit message and refreshes the entitlements when the CGW refuses the add', async () => {
+    mockAddSafesToSpace.mockResolvedValue({
+      error: { status: 402, data: { code: 'QUOTA_EXCEEDED', feature: 'safe_seats', quota: 2, used: 2 } },
+    })
+    render(<AddAccounts externalOpen onExternalClose={() => {}} />, withTrusted)
+
+    fireEvent.click(screen.getByTestId('safe-accounts-table'))
+    fireEvent.submit(screen.getByTestId('add-accounts-button').closest('form')!)
+    await screen.findByText('Name your Safe accounts')
+    fireEvent.submit(screen.getByTestId('add-accounts-button').closest('form')!)
+
+    expect(
+      await screen.findByText(
+        'Your plan covers 2 Safe accounts and this Workspace already holds 2. Remove one to add another, or upgrade your plan.',
+      ),
+    ).toBeInTheDocument()
+    expect(mockRefreshSpaceEntitlements).toHaveBeenCalledWith(expect.any(Function), '1')
   })
 })

@@ -47,7 +47,6 @@ const AddSpaceButton = ({
   variant = 'default',
   label = 'Create Workspace',
   icon = 'add',
-  link = true,
 }: {
   onClick?: () => void
   disabled?: boolean
@@ -55,8 +54,6 @@ const AddSpaceButton = ({
   variant?: 'default' | 'outline'
   label?: string
   icon?: 'add' | 'arrow'
-  /** Off when the click opens a dialog instead of navigating to the onboarding. */
-  link?: boolean
 }) => {
   const iconSize = size === 'lg' ? 'size-5' : 'size-4'
 
@@ -72,7 +69,7 @@ const AddSpaceButton = ({
         variant === 'outline' && 'hover:bg-muted',
         disabled && 'cursor-not-allowed opacity-50 grayscale',
       )}
-      render={disabled ? <span /> : link ? <NextLink href={AppRoutes.welcome.createSpace} /> : undefined}
+      render={disabled ? <span /> : <NextLink href={AppRoutes.welcome.createSpace} />}
       disabled={disabled}
       onClick={disabled ? undefined : onClick}
     >
@@ -110,7 +107,10 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
           {isSafeProEnabled ? <SafeProBanner className="mb-4" /> : <WorkspaceBanner className="mb-3" />}
 
           <div className="relative w-full">
-            <div className="relative w-full rounded-lg bg-card p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]">
+            <div
+              className="relative w-full rounded-lg bg-card p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]"
+              data-testid="sign-in-card"
+            >
               <div className="mx-auto mb-6 flex h-10 items-center justify-center text-foreground">
                 {isSafeProEnabled ? (
                   isDarkMode ? (
@@ -229,7 +229,6 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
                 label="Get Safe Pro"
                 icon="arrow"
                 disabled={isAtLimit}
-                link
                 onClick={() =>
                   trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, {
                     entry_point: WorkspaceCreateEntryPoint.WELCOME,
@@ -253,7 +252,6 @@ const SpacesList = () => {
   const { AccountsNavigation } = useLoadFeature(MyAccountsFeature)
   const { SafeProWorkspacesBanner } = useLoadFeature(SafeProFeature)
   const isSafeProEnabled = useIsSafeProEnabled()
-  // The pre-launch heads-up only makes sense to a user without a Workspace while Safe Pro is not live yet.
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })

@@ -1,8 +1,10 @@
-import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
+import type { Subscription, SubscriptionPlan } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
+import { Builder } from '@/tests/Builder'
 import {
   getDaysLeft,
   getPlanStatus,
   getSubscriptionEndedAt,
+  getSubscriptionFeatures,
   getSubscriptionPeriodEnd,
   getSubscriptionPlanName,
   getSubscriptionSeats,
@@ -12,8 +14,11 @@ import {
   selectLatestSubscription,
 } from '../subscription'
 
-const sub = (id: string, status: Subscription['status']): Subscription =>
-  ({ id, status, plan: { id: 'plan', name: 'Business' } }) as unknown as Subscription
+const plan = (override: Partial<SubscriptionPlan> = {}): SubscriptionPlan =>
+  Builder.new<SubscriptionPlan>().with({ id: 'plan', name: 'Business', features: [] }).with(override).build()
+
+const sub = (id: string, status: Subscription['status'], override: Partial<Subscription> = {}): Subscription =>
+  Builder.new<Subscription>().with({ id, status, plan: plan() }).with(override).build()
 
 describe('subscription', () => {
   it('prefers the subscription holding the slot over historical entries', () => {
@@ -60,8 +65,8 @@ describe('subscription', () => {
   })
 
   it('picks the most recently created subscription and reads when it stopped covering the Workspace', () => {
-    const older = { ...sub('old', 'canceled'), createdAt: 1, cancelledAt: 1_700_000_000 }
-    const newer = { ...sub('new', 'canceled'), createdAt: 2, cancelledAt: null, currentPeriodEnd: 1_765_000_000 }
+    const older = sub('old', 'canceled', { createdAt: 1, cancelledAt: 1_700_000_000 })
+    const newer = sub('new', 'canceled', { createdAt: 2, cancelledAt: null, currentPeriodEnd: 1_765_000_000 })
 
     expect(selectLatestSubscription([older, newer])).toBe(newer)
     expect(selectLatestSubscription(undefined)).toBeUndefined()
@@ -72,29 +77,36 @@ describe('subscription', () => {
   })
 
   it('reads the plan name from the plan or from the Stripe metadata, and the period end as an ISO date', () => {
-    const tagged = {
-      ...sub('a', 'trialing'),
-      plan: { id: 'p' },
+    const tagged = sub('a', 'trialing', {
+      plan: plan({ id: 'p', name: undefined }),
       metadata: { planName: 'Business' },
       currentPeriodEnd: 1_794_664_499,
-    }
+    })
 
     expect(getSubscriptionPlanName(sub('a', 'active'))).toBe('Business')
-    expect(getSubscriptionPlanName(tagged as unknown as Subscription)).toBe('Business')
-    expect(getSubscriptionPlanName({ ...tagged, metadata: null } as unknown as Subscription)).toBeNull()
+    expect(getSubscriptionPlanName(tagged)).toBe('Business')
+    expect(getSubscriptionPlanName({ ...tagged, metadata: null })).toBeNull()
     expect(getSubscriptionPlanName(undefined)).toBeNull()
-    expect(getSubscriptionPeriodEnd(tagged as unknown as Subscription)).toBe(
-      new Date(1_794_664_499 * 1000).toISOString(),
-    )
+    expect(getSubscriptionPeriodEnd(tagged)).toBe(new Date(1_794_664_499 * 1000).toISOString())
     expect(getSubscriptionPeriodEnd(sub('a', 'active'))).toBeNull()
   })
 
   it('reads the seat quota the CGW copies from the payment link onto the subscription', () => {
-    const seats = (value: string) => ({ ...sub('a', 'active'), metadata: { FEATURE_SAFE_SEATS: value } })
-    expect(getSubscriptionSeats(seats('20') as unknown as Subscription)).toBe(20)
-    expect(getSubscriptionSeats(seats('unlimited') as unknown as Subscription)).toBe('unlimited')
-    expect(getSubscriptionSeats(seats('many') as unknown as Subscription)).toBeNull()
+    const seats = (value: unknown) => sub('a', 'active', { metadata: { FEATURE_SAFE_SEATS: value } })
+    expect(getSubscriptionSeats(seats('20'))).toBe(20)
+    expect(getSubscriptionSeats(seats('unlimited'))).toBe('unlimited')
+    expect(getSubscriptionSeats(seats('many'))).toBeNull()
+    expect(getSubscriptionSeats(seats(20))).toBeNull()
     expect(getSubscriptionSeats(sub('a', 'active'))).toBeNull()
+  })
+
+  it('reads the selling points from the plan, else from the Stripe metadata', () => {
+    const planDescriptions = JSON.stringify(['From metadata'])
+    expect(getSubscriptionFeatures(sub('a', 'active', { plan: plan({ features: ['From plan'] }) }))).toEqual([
+      'From plan',
+    ])
+    expect(getSubscriptionFeatures(sub('a', 'active', { metadata: { planDescriptions } }))).toEqual(['From metadata'])
+    expect(getSubscriptionFeatures(sub('a', 'active'))).toEqual([])
   })
 
   it.each([

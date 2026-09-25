@@ -13,10 +13,15 @@ const SPACE_ID = '11111111-1111-1111-1111-111111111111'
 
 describe('useStartCheckout', () => {
   const assign = jest.fn()
+  const originalLocation = window.location
 
   beforeEach(() => {
     jest.clearAllMocks()
-    Object.defineProperty(window, 'location', { value: { ...window.location, assign }, writable: true })
+    Object.defineProperty(window, 'location', { value: { ...originalLocation, assign }, writable: true })
+  })
+
+  afterAll(() => {
+    Object.defineProperty(window, 'location', { value: originalLocation, writable: true })
   })
 
   it('requests the checkout URL with the Home return URL and redirects to it', async () => {

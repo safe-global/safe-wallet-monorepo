@@ -4,6 +4,7 @@ import { AppRoutes } from '@/config/routes'
 import { useSpaceOffers } from './billing/useSpaceOffers'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
 import { useSpacePlan } from './useSpacePlan'
+import type { PlanOffer } from './billing/types'
 
 /**
  * What the seat-limit banners need: the plan's name and quota, the next offered plan with more seats (an upgrade
@@ -22,8 +23,10 @@ export const useSeatUpsell = (spaceId?: string | null) => {
       ? undefined
       : paidPlans
           .flatMap((plan) => plan.offers)
-          .filter((offer) => typeof offer.seats === 'number' && offer.seats > limit)
-          .sort((a, b) => (a.seats as number) - (b.seats as number))[0]
+          .filter(
+            (offer): offer is PlanOffer & { seats: number } => typeof offer.seats === 'number' && offer.seats > limit,
+          )
+          .sort((a, b) => a.seats - b.seats)[0]
 
   return {
     isSafePro,

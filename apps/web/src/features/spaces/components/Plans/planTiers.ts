@@ -116,9 +116,12 @@ const toOption = (offer: PlanOffer, monthly: PlanOffer | undefined): PlanSeatOpt
   features: offer.features,
 })
 
+/** Plan names come from Stripe, so only own keys count (`constructor` must not resolve). */
+const staticFeatures = (name: string): string[] => (Object.hasOwn(PLAN_FEATURES, name) ? PLAN_FEATURES[name] : [])
+
 /** Stripe's own list when the offer carries one, else the static copy for that plan. */
 const featuresOf = (name: string, offers: Pick<PlanOffer, 'features'>[]): string[] =>
-  offers.find((offer) => offer.features && offer.features.length > 0)?.features ?? PLAN_FEATURES[name] ?? []
+  offers.find((offer) => offer.features && offer.features.length > 0)?.features ?? staticFeatures(name)
 
 /** One tier per plan and billing cycle; a yearly option carries twelve monthly payments as its reference price. */
 export const offersToTiers = (plans: PlanGroup[]): PlanTier[] =>
@@ -167,7 +170,7 @@ export const subscriptionToTier = (subscription: Subscription, seatsQuota: numbe
         features,
       },
     ],
-    features: features.length > 0 ? features : (PLAN_FEATURES[name] ?? []),
+    features: features.length > 0 ? features : staticFeatures(name),
     isCurrent: true,
     currentPriceId: subscription.plan.id,
   }

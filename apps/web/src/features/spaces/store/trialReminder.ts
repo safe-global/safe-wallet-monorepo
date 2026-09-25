@@ -5,7 +5,7 @@ import { sessionItem } from '@/services/local-storage/session'
 /** The Workspaces whose trial-ending reminder was dismissed in this session; a sign-out starts over. */
 const seenReminders = sessionItem<Record<string, true>>('safeProTrialReminderSeen')
 
-export const wasTrialReminderSeen = (spaceId: string): boolean => Boolean(seenReminders.get()?.[spaceId])
+export const wasTrialReminderSeen = (spaceId: string): boolean => Object.hasOwn(seenReminders.get() ?? {}, spaceId)
 
 export const markTrialReminderSeen = (spaceId: string) =>
   seenReminders.set({ ...(seenReminders.get() ?? {}), [spaceId]: true })

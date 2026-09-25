@@ -16,6 +16,11 @@ import { cn } from '@/utils/cn'
  *   </ListItem>
  * </List>
  * ```
+ *
+ * @remarks
+ * Key Props:
+ * - List: `orientation` ('vertical' | 'horizontal', default 'vertical')
+ * - ListItem: `size` ('default' | 'sm', default 'default')
  */
 function List({
   className,

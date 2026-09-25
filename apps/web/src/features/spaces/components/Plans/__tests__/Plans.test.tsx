@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@/tests/test-utils'
+import { fireEvent, render, screen, within } from '@/tests/test-utils'
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import { SUPPORT_CHAT_URL } from '@/config/constants'
 import type { PlanGroup } from '../../../hooks/billing/types'
@@ -23,20 +23,28 @@ const STARTER: PlanGroup = {
 }
 const BUSINESS: PlanGroup = { name: 'Business', offers: [offer('Business', 'pl_business_m', 499, 'month')] }
 
-const subscription = (name: string, currentPrice: number) =>
-  ({
-    id: 'sub_1',
-    status: 'active',
-    plan: {
-      id: `price_${name}`,
-      name,
-      currentPrice,
-      originalPrice: null,
-      currency: 'eur',
-      billingCycle: 'month',
-      features: [],
-    },
-  }) as unknown as Subscription
+const subscription = (name: string, currentPrice: number): Subscription => ({
+  id: 'sub_1',
+  customerId: 'cus_1',
+  upstreamCustomerId: 'cus_stripe_1',
+  status: 'active',
+  createdAt: 0,
+  startAt: 0,
+  cancelledAt: null,
+  cancelAt: null,
+  plan: {
+    id: `price_${name}`,
+    name,
+    currentPrice,
+    originalPrice: null,
+    paymentMethod: 'fiat',
+    currency: 'eur',
+    features: [],
+    billingCycle: 'month',
+    type: 'standard',
+    product: null,
+  },
+})
 
 const current = (name: string, price: number, isTrialing: boolean, hasPaymentMethod = false): CurrentPlan => ({
   name,
@@ -254,6 +262,33 @@ describe('Plans', () => {
     expect(screen.queryByTestId('current-plan-card')).not.toBeInTheDocument()
     expect(screen.getByText('€6,990')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Upgrade to 2 Safe accounts' })).toBeInTheDocument()
+  })
+
+  it('snaps the seat selector to the plan in force when the subscription changes under the card', () => {
+    const business: PlanGroup = {
+      name: 'Business',
+      offers: [
+        { ...offer('Business', 'pl_business_10', 299, 'month'), seats: 10 },
+        { ...offer('Business', 'pl_business_50', 999, 'month'), seats: 50 },
+      ],
+    }
+    const props = { plan: active, ...meters, currentPlan: current('Business', 499, false) }
+    const onPlan = (planId: string, seatsQuota: number) => {
+      const sub = subscription('Business', 499)
+      return buildPlanTiers([business], { subscription: { ...sub, plan: { ...sub.plan, id: planId } }, seatsQuota })
+    }
+    const { rerender } = render(<Plans {...props} tiers={onPlan('price_Business', 20)} />)
+    expect(within(screen.getByTestId('current-plan-card')).getByText('20 Safe accounts')).toBeInTheDocument()
+
+    rerender(<Plans {...props} tiers={onPlan('price_pl_business_50', 50)} />)
+    expect(within(screen.getByTestId('current-plan-card')).getByText('50 Safe accounts')).toBeInTheDocument()
+    expect(within(screen.getByTestId('current-plan-card')).queryByText('20 Safe accounts')).not.toBeInTheDocument()
+  })
+
+  it('falls back to the end of the period when a trial has no end date', () => {
+    render(<Plans plan={{ ...trialing(20), periodEndsAt: null }} {...meters} tiers={buildPlanTiers([])} />)
+
+    expect(screen.getByText('Active until the end of the period.')).toBeInTheDocument()
   })
 
   it('names the picked seat option on the closed selector instead of its payment link id', () => {
