@@ -94,7 +94,7 @@ describe('buildTokenOptions', () => {
     expect(options).toEqual([expect.objectContaining({ address: popular.address, group: 'popular' })])
   })
 
-  it('sorts held by fiat balance descending, then popular alphabetically by symbol', () => {
+  it('sorts held by fiat balance descending and keeps popular in the given order', () => {
     const rich = balanceBuilder().with({ fiatBalance: '300' }).build()
     const poor = balanceBuilder().with({ fiatBalance: '5' }).build()
     const zero = balanceBuilder().with({ fiatBalance: '0', balance: '0' }).build()
@@ -107,9 +107,18 @@ describe('buildTokenOptions', () => {
       rich.tokenInfo.address,
       poor.tokenInfo.address,
       zero.tokenInfo.address,
-      alpha.address,
       zed.address,
+      alpha.address,
     ])
+  })
+
+  it('puts the native currency ahead of the popular table', () => {
+    const first = popularTokenBuilder({ symbol: 'AAA' })
+    const second = popularTokenBuilder({ symbol: 'BBB' })
+
+    const options = buildTokenOptions({ balances: [], popular: [first, second], native })
+
+    expect(options.map((option) => option.address)).toEqual([ZERO_ADDRESS, first.address, second.address])
   })
 
   it('carries the fiat conversion rate of a held token and none for a popular one', () => {
