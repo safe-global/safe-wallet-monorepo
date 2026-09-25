@@ -8,8 +8,7 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { AppRoutes } from '@/config/routes'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { sanitizeNextUrl } from '@/utils/nextUrl'
 import { sanitizeName } from '@safe-global/utils/validation/names'
 import type { UseFormHandleSubmit } from 'react-hook-form'
@@ -27,7 +26,7 @@ const useSpaceSubmit = (
   const router = useRouter()
   const dispatch = useAppDispatch()
   const safe = useSafeQueryParam() || undefined
-  const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
+  const isSafePro = useIsSafeProEnabled() === true
   const [createSpaceWithUser] = useSpacesCreateV1Mutation()
   const [updateSpace] = useSpacesUpdateV1Mutation()
 

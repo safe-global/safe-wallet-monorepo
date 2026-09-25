@@ -1,6 +1,6 @@
 import { useLoadFeature } from '@/features/__core__'
 import { MyAccountsFeature } from '@/features/myAccounts'
-import { SafeProFeature, useIsSafeProEnabled } from '@/features/safe-pro-announcement'
+import { SafeProFeature, useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement'
 import SpaceRow from './SpaceRow'
 import SignInOptions from '../SignInOptions'
 import WorkspaceBanner from '../WorkspaceBanner'
@@ -33,8 +33,7 @@ import SpaceInfoModal from '../SpaceInfoModal'
 import { filterSpacesByStatus, getInvitedByName } from '@/features/spaces/utils'
 import { AppRoutes } from '@/config/routes'
 import { SAFE_PRO_USER_TERMS_URL } from '@/config/constants'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import NextLink from 'next/link'
 import { useSignInRedirect } from '@/components/welcome/WelcomeLogin/hooks/useSignInRedirect'
 import AddIcon from '@/public/images/common/add.svg'
@@ -100,23 +99,29 @@ const termsLinkClassName = 'underline underline-offset-2'
 
 const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => void; redirectLoading: boolean }) => {
   const isDarkMode = useDarkMode()
-  const isSafeProEnabled = useIsSafeProEnabled()
-  // The announcement brands the card; the Safe Pro terms only apply once Safe Pro is live.
-  const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
+  const isSafeProAnnouncementEnabled = useIsSafeProAnnouncementEnabled()
+  // The Safe Pro terms only apply once Safe Pro is live.
+  const isSafePro = useIsSafeProEnabled() === true
   const { SafeProBanner } = useLoadFeature(SafeProFeature)
 
   return (
     <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
       {/* The page keeps its Topbar + Accounts/Workspaces tabs, so the sign-in
           card renders inline rather than as a full-screen takeover. */}
-      <div className={cn('relative flex items-center justify-center pb-10', isSafeProEnabled ? 'pt-0' : 'pt-10')}>
+      <div
+        className={cn(
+          'relative flex items-center justify-center pb-10',
+          isSafeProAnnouncementEnabled ? 'pt-0' : 'pt-10',
+        )}
+      >
         <div className={cn('flex w-full flex-col items-center', isSafePro ? 'max-w-116' : 'max-w-110')}>
-          {isSafeProEnabled ? <SafeProBanner className="mb-4" /> : <WorkspaceBanner className="mb-3" />}
+          {isSafeProAnnouncementEnabled ? <SafeProBanner className="mb-4" /> : <WorkspaceBanner className="mb-3" />}
 
           <div className="relative w-full">
             <div className="relative w-full rounded-lg bg-card p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]">
               <div className="mx-auto mb-6 flex h-10 items-center justify-center text-foreground">
-                {isSafeProEnabled ? (
+                {/* The Pro brand stays once Safe Pro exists, banner or not. */}
+                {isSafeProAnnouncementEnabled || isSafePro ? (
                   isDarkMode ? (
                     <SafeProLockupDark className="h-10 w-auto" />
                   ) : (
@@ -194,7 +199,7 @@ const WORKSPACE_BENEFITS = [
 const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
   const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
   const isDarkMode = useDarkMode()
-  const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
+  const isSafePro = useIsSafeProEnabled() === true
 
   return (
     <>
@@ -256,7 +261,7 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
 const SpacesList = () => {
   const { AccountsNavigation } = useLoadFeature(MyAccountsFeature)
   const { SafeProWorkspacesBanner } = useLoadFeature(SafeProFeature)
-  const isSafeProEnabled = useIsSafeProEnabled()
+  const isSafeProAnnouncementEnabled = useIsSafeProAnnouncementEnabled()
   // The pre-launch heads-up only makes sense to a user without a Workspace while Safe Pro is not live yet.
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
@@ -329,7 +334,7 @@ const SpacesList = () => {
           </div>
         ) : activeSpaces.length > 0 ? (
           <>
-            {isSafeProEnabled && <SafeProWorkspacesBanner className="mb-4" />}
+            {isSafeProAnnouncementEnabled && <SafeProWorkspacesBanner className="mb-4" />}
             <WelcomeContentCard className="flex flex-col gap-4">
               <div className="flex justify-end">
                 <AddSpaceButton
@@ -357,7 +362,7 @@ const SpacesList = () => {
           </>
         ) : (
           <>
-            {isSafeProEnabled && <SafeProWorkspacesBanner className="mb-4" />}
+            {isSafeProAnnouncementEnabled && <SafeProWorkspacesBanner className="mb-4" />}
             {pendingInviteBanners}
             <NoSpacesState isAtLimit={isAtSpacesLimit} />
           </>

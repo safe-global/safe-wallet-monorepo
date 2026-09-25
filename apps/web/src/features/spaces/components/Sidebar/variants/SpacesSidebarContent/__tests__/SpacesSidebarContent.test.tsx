@@ -8,6 +8,8 @@ const mockUseCurrentSpaceId = jest.fn()
 const mockUseIsActiveMember = jest.fn()
 const mockUseResolvedSidebarNav = jest.fn()
 const mockUseHasFeature = jest.fn()
+const mockUseIsSafeProAnnouncementEnabled = jest.fn<boolean, []>()
+const mockUseIsSafeProEnabled = jest.fn<boolean | undefined, []>()
 
 jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => mockUseCurrentSpaceId(),
@@ -19,6 +21,14 @@ jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
 
 jest.mock('@/hooks/useChains', () => ({
   useHasFeature: jest.fn((feature) => mockUseHasFeature(feature)),
+}))
+
+jest.mock('@/features/safe-pro-announcement', () => ({
+  useIsSafeProAnnouncementEnabled: () => mockUseIsSafeProAnnouncementEnabled(),
+}))
+
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({
+  useIsSafeProEnabled: () => mockUseIsSafeProEnabled(),
 }))
 
 jest.mock('../../../hooks/useResolvedSidebarNav', () => ({
@@ -134,6 +144,8 @@ describe('SpacesSidebarContent', () => {
     mockUseIsActiveMember.mockReturnValue(true)
     mockUseResolvedSidebarNav.mockReturnValue(mockResolvedNavItems)
     mockUseHasFeature.mockReturnValue(true)
+    mockUseIsSafeProAnnouncementEnabled.mockReturnValue(true)
+    mockUseIsSafeProEnabled.mockReturnValue(undefined)
   })
 
   it('renders SpacesSidebarVariant with resolved navigation', () => {
@@ -190,8 +202,7 @@ describe('SpacesSidebarContent', () => {
       render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
 
       const [, setupGroup] = mockUseResolvedSidebarNav.mock.calls[0]
-      // The mocked config has Team + Security; only Team should remain.
-      expect(setupGroup.items.map((i: { href: string }) => i.href)).toEqual(['/spaces/members'])
+      expect(setupGroup.items.map((i: { href: string }) => i.href)).toEqual(['/spaces/plans', '/spaces/members'])
     })
 
     it('keeps the Security entry while the flag is undefined (chain config still loading)', () => {
@@ -200,7 +211,7 @@ describe('SpacesSidebarContent', () => {
       render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
 
       const [, setupGroup] = mockUseResolvedSidebarNav.mock.calls[0]
-      expect(setupGroup.items).toHaveLength(2)
+      expect(setupGroup.items.map((i: { href: string }) => i.href)).toContain('/spaces/security')
     })
 
     it('keeps the Security entry when the flag is enabled', () => {
@@ -213,23 +224,34 @@ describe('SpacesSidebarContent', () => {
     })
   })
 
-  describe('SAFE_PRO_ANNOUNCEMENT feature flag', () => {
-    it.each([false, undefined])('hides the Plans entry when the flag is %s', (flag) => {
-      mockUseHasFeature.mockImplementation((feature) => (feature === FEATURES.SAFE_PRO_ANNOUNCEMENT ? flag : true))
+  describe('Plans nav item', () => {
+    const setupHrefs = () => {
+      const [, setupGroup] = mockUseResolvedSidebarNav.mock.calls[0]
+      return setupGroup.items.map((i: { href: string }) => i.href)
+    }
+
+    it.each([
+      { name: 'Safe Pro is only announced', isAnnounced: true, isSafePro: false },
+      { name: 'Safe Pro is only live', isAnnounced: false, isSafePro: true },
+    ])('shows the Plans entry when $name', ({ isAnnounced, isSafePro }) => {
+      mockUseIsSafeProAnnouncementEnabled.mockReturnValue(isAnnounced)
+      mockUseIsSafeProEnabled.mockReturnValue(isSafePro)
 
       render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
 
-      const [, setupGroup] = mockUseResolvedSidebarNav.mock.calls[0]
-      expect(setupGroup.items.map((i: { href: string }) => i.href)).toEqual(['/spaces/members', '/spaces/security'])
+      expect(setupHrefs()).toContain('/spaces/plans')
     })
 
-    it('shows the Plans entry when the flag is enabled', () => {
-      mockUseHasFeature.mockReturnValue(true)
+    it.each([
+      { name: 'both Safe Pro flags are off', isSafePro: false },
+      { name: 'the chain config is still loading', isSafePro: undefined },
+    ])('hides the Plans entry when $name', ({ isSafePro }) => {
+      mockUseIsSafeProAnnouncementEnabled.mockReturnValue(false)
+      mockUseIsSafeProEnabled.mockReturnValue(isSafePro)
 
       render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
 
-      const [, setupGroup] = mockUseResolvedSidebarNav.mock.calls[0]
-      expect(setupGroup.items.map((i: { href: string }) => i.href)).toContain('/spaces/plans')
+      expect(setupHrefs()).toEqual(['/spaces/members', '/spaces/security'])
     })
   })
 

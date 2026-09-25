@@ -6,8 +6,7 @@ import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 import type { AnalyticsEvent } from '@/services/analytics/types'
 import { ProHighlight } from '@/components/common/ProHighlight'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { cn } from '@/utils/cn'
 
 type Item = {
@@ -33,7 +32,7 @@ const navItems: Item[] = [
 
 const AccountsNavigation = () => {
   const router = useRouter()
-  const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
+  const isSafePro = useIsSafeProEnabled() === true
 
   const activeUrl = navItems.some((item) => item.url === router.pathname) ? router.pathname : navItems[0].url
 

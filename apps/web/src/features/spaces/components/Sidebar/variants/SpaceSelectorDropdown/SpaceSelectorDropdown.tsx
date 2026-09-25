@@ -32,8 +32,7 @@ import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERAT
 import { AdminOnlyWorkspaceTooltip } from '../../../AdminOnlyWorkspaceTooltip'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getDeterministicColor } from '@/utils/colors'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { useSpacePlan } from '../../../../hooks/useSpacePlan'
 import { useSpaceSafeLimit } from '../../../../hooks/useSpaceSafeLimit'
 import { isSpaceAtSafeLimit } from '@/utils/spaces'
@@ -60,7 +59,7 @@ export const SpaceSelectorDropdown = ({
   const [isOpen, setIsOpen] = useState(false)
   const menuId = useId()
   const spaceName = selectedSpace?.name ?? ''
-  const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
+  const isSafePro = useIsSafeProEnabled() === true
   const { tierName, isTrialing, isTrialEndingSoon, plan } = useSpacePlan()
   const planLabel = !isSafePro ? 'Workspace' : isTrialing ? trialLabel(plan?.daysLeft) : tierName
   const displayName = truncateSpaceName(spaceName, SPACE_SELECTOR_NAME_MAX_LENGTH)

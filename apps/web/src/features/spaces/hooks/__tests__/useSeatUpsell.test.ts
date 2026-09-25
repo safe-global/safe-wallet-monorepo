@@ -1,10 +1,10 @@
 import { renderHook } from '@testing-library/react'
 import { useSeatUpsell } from '../useSeatUpsell'
 
-const mockUseHasFeature = jest.fn()
+const mockUseIsSafeProEnabled = jest.fn()
 const mockUseSpacePlan = jest.fn()
 const mockUseSpaceOffers = jest.fn()
-jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockUseIsSafeProEnabled() }))
 jest.mock('../useCurrentSpaceId', () => ({ useCurrentSpaceId: () => 'space-current' }))
 jest.mock('../useSpacePlan', () => ({ useSpacePlan: (spaceId?: string) => mockUseSpacePlan(spaceId) }))
 jest.mock('../billing/useSpaceOffers', () => ({ useSpaceOffers: (spaceId?: string) => mockUseSpaceOffers(spaceId) }))
@@ -23,7 +23,7 @@ const offer = (planName: string, seats: number | 'unlimited') => ({
 describe('useSeatUpsell', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseHasFeature.mockReturnValue(true)
+    mockUseIsSafeProEnabled.mockReturnValue(true)
     mockUseSpacePlan.mockReturnValue({ seats: { used: 2, quota: 2 }, tierName: 'Starter' })
     mockUseSpaceOffers.mockReturnValue({
       paidPlans: [{ name: 'Business', offers: [offer('Business', 50), offer('Business', 20)] }],
@@ -58,10 +58,10 @@ describe('useSeatUpsell', () => {
   })
 
   it('reports no limit while SAFE_PRO is off or the plan is unlimited', () => {
-    mockUseHasFeature.mockReturnValue(false)
+    mockUseIsSafeProEnabled.mockReturnValue(false)
     expect(renderHook(() => useSeatUpsell()).result.current).toMatchObject({ isSafePro: false, limit: null })
 
-    mockUseHasFeature.mockReturnValue(true)
+    mockUseIsSafeProEnabled.mockReturnValue(true)
     mockUseSpacePlan.mockReturnValue({ seats: { used: 3, quota: null }, tierName: 'Enterprise' })
     expect(renderHook(() => useSeatUpsell()).result.current).toMatchObject({ limit: null, upgradePlanName: undefined })
   })

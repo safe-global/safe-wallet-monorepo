@@ -1,11 +1,11 @@
 import { renderHook } from '@testing-library/react'
 import { useWorkspaceLock } from '../useWorkspaceLock'
 
-const mockUseHasFeature = jest.fn()
+const mockUseIsSafeProEnabled = jest.fn()
 const mockUseIsInvited = jest.fn()
 const mockUseSpaceSubscription = jest.fn()
 const mockUseSpaceOffers = jest.fn()
-jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockUseIsSafeProEnabled() }))
 jest.mock('../useSpaceMembers', () => ({ useIsInvited: () => mockUseIsInvited() }))
 jest.mock('../billing/useSpaceSubscription', () => ({
   useSpaceSubscription: (spaceId?: string) => mockUseSpaceSubscription(spaceId),
@@ -18,7 +18,7 @@ const canceled = { status: 'canceled', createdAt: 1, cancelledAt: 1_765_000_000,
 describe('useWorkspaceLock', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseHasFeature.mockReturnValue(true)
+    mockUseIsSafeProEnabled.mockReturnValue(true)
     mockUseIsInvited.mockReturnValue(false)
     mockUseSpaceSubscription.mockReturnValue({ status: 'none', latestSubscription: undefined, isLoading: false })
     mockUseSpaceOffers.mockReturnValue({ trialPeriodDays: 60, isLoading: false })
@@ -71,7 +71,7 @@ describe('useWorkspaceLock', () => {
   })
 
   it.each([
-    ['SAFE_PRO is off', () => mockUseHasFeature.mockReturnValue(false)],
+    ['SAFE_PRO is off', () => mockUseIsSafeProEnabled.mockReturnValue(false)],
     ['the user is only invited', () => mockUseIsInvited.mockReturnValue(true)],
     [
       'the Workspace is on a trial',
@@ -156,13 +156,13 @@ describe('useWorkspaceLock', () => {
     mockUseSpaceOffers.mockReturnValue({ trialPeriodDays: null, isLoading: true, isError: true })
     expect(renderHook(() => useWorkspaceLock()).result.current.isError).toBe(false)
 
-    mockUseHasFeature.mockReturnValue(false)
+    mockUseIsSafeProEnabled.mockReturnValue(false)
     mockUseSpaceOffers.mockReturnValue({ trialPeriodDays: null, isLoading: false, isError: true })
     expect(renderHook(() => useWorkspaceLock()).result.current.isError).toBe(false)
   })
 
   it('never reports resolving while the lock does not apply', () => {
-    mockUseHasFeature.mockReturnValue(false)
+    mockUseIsSafeProEnabled.mockReturnValue(false)
     mockUseSpaceSubscription.mockReturnValue({ status: 'none', isLoading: true })
 
     expect(renderHook(() => useWorkspaceLock()).result.current.isResolving).toBe(false)

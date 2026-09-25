@@ -2,10 +2,9 @@ import { useMemo } from 'react'
 import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
-import { useHasFeature } from '@/hooks/useChains'
+import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import useChainId from '@/hooks/useChainId'
 import useSafeAddress from '@/hooks/useSafeAddress'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { isLivePlanStatus } from './billing/subscription'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
@@ -18,7 +17,7 @@ export const useSafeProAccess = (): {
   isLoading: boolean
   spaceId: string | null
 } => {
-  const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
+  const isSafePro = useIsSafeProEnabled() === true
   const isSignedIn = useAppSelector(isAuthenticated)
   const spaceId = useCurrentSpaceId()
   const chainId = useChainId()

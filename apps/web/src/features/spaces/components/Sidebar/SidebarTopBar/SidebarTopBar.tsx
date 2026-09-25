@@ -7,8 +7,7 @@ import ProChip from '@/public/images/safe-pro/pro-chip.svg'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { useIsHydrated } from '@/hooks/useIsHydrated'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { useSpacePlan } from '../../../hooks/useSpacePlan'
 import { useSafeSponsoredTxs } from '../../../hooks/useSafeSponsoredTxs'
 
@@ -18,7 +17,7 @@ export const SidebarTopBar = (): ReactElement => {
   const safeAddress = useSafeAddressFromUrl()
   const isSpaceRoute = useIsSpaceRoute()
   const isHydrated = useIsHydrated()
-  const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
+  const isSafePro = useIsSafeProEnabled() === true
   const { plan } = useSpacePlan(isSpaceRoute ? undefined : null)
   // On a Safe's pages the last-used Workspace says nothing about this Safe: it must belong to a Workspace on a plan.
   const { isPro: isSafeOnPlan } = useSafeSponsoredTxs()
