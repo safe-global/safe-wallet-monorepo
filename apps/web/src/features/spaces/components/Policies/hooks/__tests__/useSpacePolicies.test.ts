@@ -1,15 +1,18 @@
 import { renderHook } from '@testing-library/react'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import { TxEvent, txDispatch } from '@/services/tx/txEvents'
 import { SPACE_REFRESH_OPTIONS } from '../../../../hooks/refreshOptions'
 import { mockProposerDto, mockSpendingLimitDto, mockUsdcMetadata } from '../../mocks/activePolicies'
+import { mockPendingDto } from '../../mocks/pendingPolicies'
 import { MOCK_TOKENS } from '../../mocks/policies'
-import { TABLE_POLICY_TYPES, useSpacePolicies } from '../useSpacePolicies'
+import { PENDING_POLICY_TYPES, TABLE_POLICY_TYPES, useSpacePolicies } from '../useSpacePolicies'
 
 const SPACE_ID = '11111111-1111-1111-1111-111111111111'
 
 const mockUseCurrentSpaceId = jest.fn()
 const mockPoliciesQuery = jest.fn()
+const mockPendingQuery = jest.fn()
 const mockTokenInfosQuery = jest.fn()
 let mockIsAuthenticated = true
 
@@ -27,6 +30,7 @@ jest.mock('@/store/authSlice', () => ({
 
 jest.mock('@/store/api/gateway/spacePolicies', () => ({
   useSpacePoliciesGetActivePoliciesV1Query: (...args: unknown[]) => mockPoliciesQuery(...args),
+  useSpacePoliciesGetPendingPoliciesV1Query: (...args: unknown[]) => mockPendingQuery(...args),
 }))
 
 jest.mock('@/store/api/gateway', () => ({
@@ -48,6 +52,7 @@ describe('useSpacePolicies', () => {
     mockIsAuthenticated = true
     mockUseCurrentSpaceId.mockReturnValue(SPACE_ID)
     mockPoliciesQuery.mockReturnValue(idle)
+    mockPendingQuery.mockReturnValue(idle)
     mockTokenInfosQuery.mockReturnValue(idle)
   })
 
@@ -166,5 +171,61 @@ describe('useSpacePolicies', () => {
     expect(mockTokenInfosQuery).toHaveBeenCalledWith(skipToken)
     expect(result.current.policies).toHaveLength(1)
     expect(result.current.policies[0].type).toBe('proposer')
+  })
+
+  it('should ask for the pending spending limits of the space', () => {
+    renderHook(() => useSpacePolicies())
+
+    expect(mockPendingQuery).toHaveBeenCalledWith(
+      { spaceId: SPACE_ID, types: PENDING_POLICY_TYPES },
+      { skip: false, ...SPACE_REFRESH_OPTIONS },
+    )
+  })
+
+  it('should, when a Safe has an active limit and a queued change, return both rows', () => {
+    mockPoliciesQuery.mockReturnValue({ ...idle, currentData: [mockSpendingLimitDto()] })
+    mockPendingQuery.mockReturnValue({ ...idle, currentData: [mockPendingDto()] })
+
+    const { result } = renderHook(() => useSpacePolicies())
+
+    expect(result.current.policies.map((policy) => policy.status)).toEqual(['active', 'pending'])
+  })
+
+  it('should, when only a queued creation exists, still return a row', () => {
+    mockPendingQuery.mockReturnValue({ ...idle, currentData: [mockPendingDto()] })
+
+    const { result } = renderHook(() => useSpacePolicies())
+
+    expect(result.current.policies).toHaveLength(1)
+  })
+
+  it('should, when the pending request fails, keep the active rows and report no error', () => {
+    mockPoliciesQuery.mockReturnValue({ ...idle, currentData: [mockSpendingLimitDto()] })
+    mockPendingQuery.mockReturnValue({ ...idle, isError: true })
+
+    const { result } = renderHook(() => useSpacePolicies())
+
+    expect(result.current.isError).toBe(false)
+    expect(result.current.isLoading).toBe(false)
+    expect(result.current.policies).toHaveLength(1)
+  })
+
+  it('should, while pending rows load for the first time, count as loading', () => {
+    mockPoliciesQuery.mockReturnValue({ ...idle, currentData: [] })
+    mockPendingQuery.mockReturnValue({ ...idle, isFetching: true })
+
+    const { result } = renderHook(() => useSpacePolicies())
+
+    expect(result.current.isLoading).toBe(true)
+  })
+
+  it('should, when a Safe transaction is proposed, refetch the pending rows', () => {
+    const refetchPending = jest.fn()
+    mockPendingQuery.mockReturnValue({ ...idle, currentData: [], refetch: refetchPending })
+    renderHook(() => useSpacePolicies())
+
+    txDispatch(TxEvent.PROPOSED, { txId: 'multisig_0x1_0xabc', nonce: 1, chainId: '1', safeAddress: '0x1' })
+
+    expect(refetchPending).toHaveBeenCalled()
   })
 })
