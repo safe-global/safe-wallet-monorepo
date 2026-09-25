@@ -1,0 +1,19 @@
+{
+  "pr": 8715,
+  "reviewSha": "baf871ca5957f5d62948fa03f91043b742c9d9b1",
+  "baseSha": "d0e03bb0be6a53c87efb97052c9265524ebe7329",
+  "system": "A",
+  "version": "73bf04408c26562bbf8945904bd1c02d8b9b1603",
+  "model": "claude-opus-5-5[1m]",
+  "runner": "valleXYZ",
+  "usage": {
+    "inputTokens": 14,
+    "outputTokens": 2559,
+    "cacheReadTokens": 411748,
+    "cacheWriteTokens": 54489,
+    "turns": 8,
+    "wallSeconds": 44,
+    "apiEquivalentUsd": 0.5694976
+  },
+  "output": "No convention findings: nothing in this change breaks any of the 78 rules in `docs/engineering/sources/rules.json`.\n\n**Mode:** `--review-pr`. I regenerated the checklist and considered every item (78 of 78 marked checked). The checklist file is git-ignored and untracked, and no tracked files were changed.\n\n**Scope:** `git diff d0e03bb0b...HEAD` is a single commit, `e7c495346 ci: Drop Docker Hub -> GHCR tag mirror`. It deletes `.github/workflows/mirror-to-ghcr.yml` (170 lines removed, nothing added).\n\n**Rules that applied, and why each passes:**\n- **CI-01** (concurrency scoping), **CI-02** (release workflows), **CI-03** (codegen drift) and **CI-04** (`permissions: {}` needs `contents: read`): these only matter for workflows being added or edited. Removing a manually triggered one-off workflow changes no concurrency, release or permission setup elsewhere.\n- **API-01** (search consumers when removing something) and **DOC-02** (operational docs): `git grep` finds no remaining references to `mirror-to-ghcr`, to \"Mirror Docker Hub\" or to its destination image outside `docs/engineering`. No docs or other workflows depend on it.\n- **REVIEW-01** (don't mix unrelated changes into CI PRs): the change touches one CI file and nothing else.\n- **DOC-01**, **TEST-04**, **SEC-02** and **PROD-01**: none apply. There are no docs, tests, runtime code, destructive runtime actions or user-facing behaviour in the diff.\n- All web, mobile, state, data, transaction, UI and end-to-end test rules: no surface in this diff.\n\n**Rules that led to changes:** none, since this was a read-only review. I didn't need to look up any rule's history (no Level 1 or Level 2 zoom).\n\n**Open question (not a rule failure):** the deleted file's header said \"Delete once the Docker Hub migration is signed off.\" Nothing in the repo records that sign-off, so the PR description should confirm it happened. Otherwise tags that were never copied to GHCR can't be re-mirrored without restoring the workflow from `322235464` (#8710).\n\n## Findings report\n\n| # | Rule | File:line | Status |\n|---|------|-----------|--------|\n| — | — | — | No findings |\n\nInformational only, not scored: `.github/workflows/mirror-to-ghcr.yml:3`. Confirm in the PR description that the Docker Hub → GHCR migration was signed off."
+}
