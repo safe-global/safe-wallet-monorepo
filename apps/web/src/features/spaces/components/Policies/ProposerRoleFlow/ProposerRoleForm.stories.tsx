@@ -47,7 +47,14 @@ if (!isSafeAccountGroup(opsEntry)) throw new Error('Expected the two-chain fixtu
 const opsGroup = opsEntry
 
 const accounts: SafeAccountEntry[] = [treasury, opsGroup]
-const eligible = { accounts, isLoading: false, isError: false, hasWallet: true, refetch: fn() }
+const eligible = {
+  accounts,
+  isLoading: false,
+  isError: false,
+  hasWallet: true,
+  eligibilityRule: 'signer' as const,
+  refetch: fn(),
+}
 
 const PROPOSER_NAME = 'Test proposer'
 

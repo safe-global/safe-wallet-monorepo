@@ -230,7 +230,7 @@ const AddressBookInput = ({ name, canAdd, excludeAddresses, ...props }: AddressB
           {...props}
           data-testid={props['data-testid'] ?? 'address-book-input'}
           name={name}
-          focused={props.focused || !addressValue}
+          focused={props.focused ?? !addressValue}
           onOpenListClick={hasVisibleOptions ? handleToggleAutocomplete : undefined}
           isAutocompleteOpen={open}
           onAddressBookClick={canAdd && !isInAddressBook ? onAddressBookClick : undefined}

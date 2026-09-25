@@ -10,9 +10,10 @@ import { useGetMultipleSafeOverviewsQuery, useGetProposerSafesQuery } from '@/st
 import { selectUndeployedSafes } from '@/store/slices'
 import { selectCurrency } from '@/store/settingsSlice'
 import { useSpaceSafes } from '../../../../hooks/useSpaceSafes'
+import { DEFAULT_ELIGIBILITY_RULE } from '../constants'
 import { buildSafeAccountId, groupSafeAccounts } from '../utils'
 import type { ChainInfo } from '@/features/spaces/types'
-import type { SafeAccountEligibility, SafeAccountEntry, SafeAccountOption } from '../types'
+import type { EligibilityRule, SafeAccountEligibility, SafeAccountEntry, SafeAccountOption } from '../types'
 
 const overviewKey = (chainId: string, address: string) => `${chainId}:${address.toLowerCase()}`
 
@@ -21,11 +22,19 @@ const getEligibility = (isSigner: boolean, isProposer: boolean): SafeAccountElig
   return isSigner ? 'signer' : 'proposer'
 }
 
+export type EligibleSafeAccountsOptions = {
+  eligibilityRule?: EligibilityRule
+}
+
 /**
- * Safes in the current Space on which the connected wallet is a signer or a proposer, grouped by
- * address. Safes the wallet has no role on are absent; counterfactual ones are listed but disabled.
+ * Safes in the current Space on which the connected wallet has the role `eligibilityRule` asks for
+ * (a signer or a proposer by default), grouped by address. Safes the wallet has no such role on are
+ * absent; counterfactual ones are listed but disabled. Returns the rule so the selector's copy matches.
  */
-export const useEligibleSafeAccounts = () => {
+export const useEligibleSafeAccounts = ({
+  eligibilityRule = DEFAULT_ELIGIBILITY_RULE,
+}: EligibleSafeAccountsOptions = {}) => {
+  const signersOnly = eligibilityRule === 'signer'
   const {
     allSafes,
     isLoading: isSafesLoading,
@@ -49,7 +58,7 @@ export const useEligibleSafeAccounts = () => {
   // One delegates request per distinct chain the Space actually uses, not one per Safe.
   const chainIds = useMemo(() => Array.from(new Set(safeItems.map((item) => item.chainId))), [safeItems])
   const proposerSafesQuery = useGetProposerSafesQuery(
-    wallet && chainIds.length > 0 ? { chainIds, delegate: wallet } : skipToken,
+    wallet && !signersOnly && chainIds.length > 0 ? { chainIds, delegate: wallet } : skipToken,
   )
 
   // A delegates failure only under-reports proposer access, so it degrades instead of failing the field.
@@ -92,7 +101,8 @@ export const useEligibleSafeAccounts = () => {
 
     const options = safeItems.flatMap<SafeAccountOption>((item) => {
       const isSigner = !item.isReadOnly
-      const isProposer = (proposerSafes?.[item.chainId] ?? []).some((safe) => sameAddress(safe, item.address))
+      const isProposer =
+        !signersOnly && (proposerSafes?.[item.chainId] ?? []).some((safe) => sameAddress(safe, item.address))
 
       if (!isSigner && !isProposer) return []
 
@@ -115,7 +125,7 @@ export const useEligibleSafeAccounts = () => {
     })
 
     return groupSafeAccounts(options)
-  }, [wallet, isLoading, safeItems, proposerSafes, overviewsByKey, chainsById, undeployedSafes])
+  }, [wallet, isLoading, safeItems, signersOnly, proposerSafes, overviewsByKey, chainsById, undeployedSafes])
 
   // Destructured for stable deps: the whole query objects would hand consumers a new `onRetry` per render.
   const { refetch: refetchOverviews, isUninitialized: isOverviewsUninitialized } = overviewsQuery
@@ -135,5 +145,5 @@ export const useEligibleSafeAccounts = () => {
     isProposerSafesUninitialized,
   ])
 
-  return { accounts, isLoading, isError, hasWallet: !!wallet, refetch }
+  return { accounts, isLoading, isError, hasWallet: !!wallet, eligibilityRule, refetch }
 }

@@ -1,7 +1,8 @@
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
-import { NO_ELIGIBLE_ACCOUNTS_TEXT, NO_WALLET_TEXT } from '../constants'
+import { DEFAULT_ELIGIBILITY_RULE, ELIGIBILITY_COPY, NO_WALLET_TEXT } from '../constants'
 import PopupMessage from '../../components/PopupMessage'
+import type { EligibilityRule } from '../types'
 
 /**
  * The Space has Safes, but none this wallet may set a policy on. Says why in the same words as the
@@ -10,9 +11,11 @@ import PopupMessage from '../../components/PopupMessage'
 const NoEligibleAccounts = ({
   onSwitchWallet,
   hasWallet = true,
+  eligibilityRule = DEFAULT_ELIGIBILITY_RULE,
 }: {
   onSwitchWallet: () => void
   hasWallet?: boolean
+  eligibilityRule?: EligibilityRule
 }) => (
   <PopupMessage
     data-testid="no-eligible-accounts"
@@ -23,7 +26,7 @@ const NoEligibleAccounts = ({
     }
   >
     <Typography variant="paragraph-small" color="muted" className="w-full">
-      {hasWallet ? NO_ELIGIBLE_ACCOUNTS_TEXT : NO_WALLET_TEXT}
+      {hasWallet ? ELIGIBILITY_COPY[eligibilityRule].noEligibleAccountsText : NO_WALLET_TEXT}
     </Typography>
   </PopupMessage>
 )

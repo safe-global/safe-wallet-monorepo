@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
+import { act, fireEvent, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import * as useIsWrongChainHook from '@/hooks/useIsWrongChain'
 import * as useChainsHook from '@/hooks/useChains'
 import { chainBuilder } from '@/tests/builders/chains'
@@ -35,7 +35,14 @@ const treasury: SafeAccountOption = {
   fiatTotal: '123720',
 }
 
-const eligible = { accounts: [treasury], isLoading: false, isError: false, hasWallet: true, refetch: jest.fn() }
+const eligible = {
+  accounts: [treasury],
+  isLoading: false,
+  isError: false,
+  hasWallet: true,
+  eligibilityRule: 'signer' as const,
+  refetch: jest.fn(),
+}
 
 const renderForm = (props: Partial<ProposerRoleFormProps> = {}) =>
   renderWithUserEvent(
@@ -243,6 +250,37 @@ describe('ProposerRoleForm', () => {
     })
   })
 
+  describe('proposer field', () => {
+    const proposerField = () => screen.getByRole('combobox', { name: 'Proposer' })
+
+    it('does not take focus when the form opens', () => {
+      renderForm({ safeAccount: treasury.id })
+
+      expect(proposerField()).not.toHaveFocus()
+    })
+
+    it('is not marked invalid when focus leaves it while still empty', async () => {
+      jest.useFakeTimers()
+      try {
+        renderForm({ safeAccount: treasury.id })
+        const field = proposerField()
+
+        fireEvent.focus(field)
+        fireEvent.blur(field)
+        await act(async () => {
+          jest.advanceTimersByTime(200)
+        })
+        await act(async () => {
+          jest.advanceTimersByTime(1000)
+        })
+
+        expect(field).not.toHaveAttribute('aria-invalid')
+      } finally {
+        jest.useRealTimers()
+      }
+    })
+  })
+
   describe('Safe account field', () => {
     it('shows the picked account on the trigger', () => {
       renderForm({ safeAccount: treasury.id })
@@ -250,10 +288,10 @@ describe('ProposerRoleForm', () => {
       expect(accountField()).toHaveTextContent('Treasury')
     })
 
-    it('states the eligibility rule below the field', () => {
+    it('states the signer-only rule below the field', () => {
       renderForm()
 
-      expect(screen.getByText("You only see accounts where you're a signer or proposer.")).toBeInTheDocument()
+      expect(screen.getByText("You only see accounts where you're a signer.")).toBeInTheDocument()
     })
 
     it('reports a picked account to onSafeAccountChange', async () => {
