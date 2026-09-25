@@ -3,7 +3,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 import { createTx } from '@/services/tx/tx-sender'
 import { gatewayApi } from '@/store/api/gateway'
-import { toSupportedFiatCode } from '@/store/api/gateway/gtfFeePreview'
+import { buildFeePreviewTx } from '@/store/api/gateway/gtfFeePreview'
 import type { AppDispatch } from '@/store'
 import { FEE_COLLECTORS } from '../constants'
 import { trackError, Errors } from '@/services/exceptions'
@@ -15,6 +15,7 @@ export type ResolveFeeParamsArgs = {
   gasToken: string
   numberSignatures: number
   currency?: string
+  safenetCheck: boolean
   dispatch: AppDispatch
 }
 
@@ -30,25 +31,17 @@ export const resolveFeeParams = async ({
   gasToken,
   numberSignatures,
   currency,
+  safenetCheck,
   dispatch,
 }: ResolveFeeParamsArgs): Promise<SafeTransaction> => {
-  const { to, value, data, operation, nonce } = safeTx.data
+  const { nonce } = safeTx.data
 
   const preview = await dispatch(
     gatewayApi.endpoints.getGtfFeePreview.initiate(
       {
         chainId,
         safeAddress,
-        tx: {
-          to,
-          value,
-          data,
-          operation,
-          gasToken,
-          numberSignatures,
-          nonce,
-          fiatCode: toSupportedFiatCode(currency),
-        },
+        tx: buildFeePreviewTx({ safeTx, gasToken, numberSignatures, currency, safenetCheck }),
       },
       { forceRefetch: true },
     ),

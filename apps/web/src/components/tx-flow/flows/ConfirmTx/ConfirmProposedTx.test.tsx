@@ -34,6 +34,8 @@ const renderWithContexts = (safeTxContext: Partial<SafeTxContextParams>) => {
     gtfPaymentMode: 'safe',
     setGtfPaymentMode: jest.fn(),
     setGtfSelectedGasToken: jest.fn(),
+    safenetCheckEnabled: false,
+    setSafenetCheckEnabled: jest.fn(),
     ...safeTxContext,
   }
 

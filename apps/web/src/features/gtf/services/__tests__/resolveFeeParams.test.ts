@@ -73,6 +73,7 @@ describe('resolveFeeParams', () => {
       safeTx,
       gasToken: '0xa0b86991000000000000000000000000000000aa',
       numberSignatures: 3,
+      safenetCheck: false,
       dispatch,
     })
 
@@ -119,6 +120,7 @@ describe('resolveFeeParams', () => {
       safeTx,
       gasToken: '0xa0b86991000000000000000000000000000000aa',
       numberSignatures: 3,
+      safenetCheck: false,
       currency: 'eur',
       dispatch: buildDispatch(buildThunk(Promise.resolve(previewResponse))),
     })
@@ -134,6 +136,7 @@ describe('resolveFeeParams', () => {
       safeTx,
       gasToken: '0xa0b86991000000000000000000000000000000aa',
       numberSignatures: 3,
+      safenetCheck: false,
       currency: 'COP',
       dispatch: buildDispatch(buildThunk(Promise.resolve(previewResponse))),
     })
@@ -158,6 +161,7 @@ describe('resolveFeeParams', () => {
         safeTx,
         gasToken: '0xa0b86991000000000000000000000000000000aa',
         numberSignatures: 3,
+        safenetCheck: false,
         dispatch,
       }),
     ).rejects.toThrow(/untrusted refundReceiver/)
@@ -180,6 +184,7 @@ describe('resolveFeeParams', () => {
         safeTx,
         gasToken: '0xa0b86991000000000000000000000000000000aa',
         numberSignatures: 3,
+        safenetCheck: false,
         dispatch,
       }),
     ).rejects.toThrow('CGW 403')
