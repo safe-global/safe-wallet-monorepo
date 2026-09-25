@@ -30,6 +30,7 @@ import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
+import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { OidcAuthFeature, useTwoFactorAwarenessDismissed } from '@/features/oidc-auth'
 import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
 
@@ -46,10 +47,13 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
     $error: twoFactorCardError,
   } = useLoadFeature(OidcAuthFeature)
   const isSafeProAnnouncementEnabled = useIsSafeProAnnouncementEnabled()
+  const isSafePro = useIsSafeProEnabled() === true
   const { pathname } = useRouter()
   const [isSafeProBannerDismissed, dismissSafeProBanner] = useSafeProSidebarBannerDismissed()
   // A failed chunk counts as no banner: its stub then renders nothing for good.
-  const hasSafeProBanner = isSafeProAnnouncementEnabled && pathname !== AppRoutes.spaces.plans && !safeProError
+  // Its copy is pre-launch only, so it retires once Safe Pro is live and the 2FA card takes the slot.
+  const hasSafeProBanner =
+    isSafeProAnnouncementEnabled && !isSafePro && pathname !== AppRoutes.spaces.plans && !safeProError
   const showSafeProBanner = hasSafeProBanner && !isSafeProBannerDismissed
 
   const spaceId = useCurrentSpaceId()

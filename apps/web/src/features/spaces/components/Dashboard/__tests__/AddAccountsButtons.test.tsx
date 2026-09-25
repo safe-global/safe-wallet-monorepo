@@ -68,7 +68,6 @@ jest.mock('../../Plans/CheckoutReturnModals', () => ({ __esModule: true, default
 
 jest.mock('@/features/safe-pro-announcement', () => ({
   SafeProFeature: { name: 'safe-pro-announcement' },
-  useIsSafeProAnnouncementEnabled: () => false,
   useSafeProAnnouncementModal: () => ({ isOpen: false, setIsOpen: jest.fn() }),
 }))
 

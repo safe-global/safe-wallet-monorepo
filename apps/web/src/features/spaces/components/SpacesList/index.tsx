@@ -33,8 +33,7 @@ import SpaceInfoModal from '../SpaceInfoModal'
 import { filterSpacesByStatus, getInvitedByName } from '@/features/spaces/utils'
 import { AppRoutes } from '@/config/routes'
 import { SAFE_PRO_USER_TERMS_URL } from '@/config/constants'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import NextLink from 'next/link'
 import { useSignInRedirect } from '@/components/welcome/WelcomeLogin/hooks/useSignInRedirect'
 import AddIcon from '@/public/images/common/add.svg'
@@ -101,8 +100,8 @@ const termsLinkClassName = 'underline underline-offset-2'
 const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => void; redirectLoading: boolean }) => {
   const isDarkMode = useDarkMode()
   const isSafeProAnnouncementEnabled = useIsSafeProAnnouncementEnabled()
-  // The announcement brands the card; the Safe Pro terms only apply once Safe Pro is live.
-  const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
+  // The Safe Pro terms only apply once Safe Pro is live.
+  const isSafePro = useIsSafeProEnabled() === true
   const { SafeProBanner } = useLoadFeature(SafeProFeature)
 
   return (
@@ -121,7 +120,8 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
           <div className="relative w-full">
             <div className="relative w-full rounded-lg bg-card p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]">
               <div className="mx-auto mb-6 flex h-10 items-center justify-center text-foreground">
-                {isSafeProAnnouncementEnabled ? (
+                {/* The Pro brand stays once Safe Pro exists, banner or not. */}
+                {isSafeProAnnouncementEnabled || isSafePro ? (
                   isDarkMode ? (
                     <SafeProLockupDark className="h-10 w-auto" />
                   ) : (
@@ -199,7 +199,7 @@ const WORKSPACE_BENEFITS = [
 const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
   const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
   const isDarkMode = useDarkMode()
-  const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
+  const isSafePro = useIsSafeProEnabled() === true
 
   return (
     <>

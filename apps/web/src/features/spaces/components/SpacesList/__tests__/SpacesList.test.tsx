@@ -52,14 +52,14 @@ jest.mock('@/features/myAccounts', () => ({
 }))
 
 const mockUseIsSafeProAnnouncementEnabled = jest.fn()
-const mockUseHasFeature = jest.fn()
+const mockUseIsSafeProEnabled = jest.fn()
 
 jest.mock('@/features/safe-pro-announcement', () => ({
   SafeProFeature: { name: 'SafeProFeature' },
   useIsSafeProAnnouncementEnabled: () => mockUseIsSafeProAnnouncementEnabled(),
 }))
 
-jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockUseIsSafeProEnabled() }))
 
 jest.mock('../../../hooks/billing/useSpaceSubscription', () => ({
   useSpaceSubscription: () => ({ subscription: undefined, status: 'none' }),
@@ -111,6 +111,10 @@ jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
 }))
 
+// Every svg import resolves to one stub, so the mark and the lockup are told apart by their sizing.
+const querySafeMark = (container: HTMLElement) => container.querySelector('.size-10')
+const queryProLockup = (container: HTMLElement) => container.querySelector('.h-10.w-auto')
+
 describe('SpacesList — auth/expiry state rendering', () => {
   // The component reads two auth selectors. Route them through the mocked
   // selector sentinels so a test can set signed-in and store-hydration
@@ -130,11 +134,11 @@ describe('SpacesList — auth/expiry state rendering', () => {
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: undefined })
     mockUseSignInRedirect.mockReturnValue({ setHasSignedIn: jest.fn(), redirectLoading: false })
     mockUseIsSafeProAnnouncementEnabled.mockReturnValue(false)
-    mockUseHasFeature.mockReturnValue(false)
+    mockUseIsSafeProEnabled.mockReturnValue(false)
   })
 
   it('leads a first Workspace straight into the onboarding, where the trial is offered', () => {
-    mockUseHasFeature.mockReturnValue(true)
+    mockUseIsSafeProEnabled.mockReturnValue(true)
     mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
 
@@ -156,24 +160,41 @@ describe('SpacesList — auth/expiry state rendering', () => {
     expect(screen.queryByText(/get safe pro/i)).not.toBeInTheDocument()
   })
 
-  describe('SAFE_PRO_ANNOUNCEMENT banner gating', () => {
+  describe('Safe Pro banner gating', () => {
     it('keeps the pre-Pro Workspace banner when the flag is off', () => {
       setAuth(false)
 
-      render(<SpacesList />)
+      const { container } = render(<SpacesList />)
 
       expect(screen.getByText('Introducing Workspace')).toBeInTheDocument()
       expect(screen.queryByTestId('safe-pro-banner')).not.toBeInTheDocument()
+      expect(querySafeMark(container)).toBeInTheDocument()
+      expect(queryProLockup(container)).not.toBeInTheDocument()
     })
 
     it('swaps in the Safe Pro banner when the flag is on', () => {
       setAuth(false)
       mockUseIsSafeProAnnouncementEnabled.mockReturnValue(true)
 
-      render(<SpacesList />)
+      const { container } = render(<SpacesList />)
 
       expect(screen.getByTestId('safe-pro-banner')).toBeInTheDocument()
       expect(screen.queryByText('Introducing Workspace')).not.toBeInTheDocument()
+      expect(queryProLockup(container)).toBeInTheDocument()
+      expect(querySafeMark(container)).not.toBeInTheDocument()
+    })
+
+    it('keeps the Pro lockup and terms once Safe Pro is live without the announcement', () => {
+      setAuth(false)
+      mockUseIsSafeProEnabled.mockReturnValue(true)
+
+      const { container } = render(<SpacesList />)
+
+      expect(queryProLockup(container)).toBeInTheDocument()
+      expect(querySafeMark(container)).not.toBeInTheDocument()
+      expect(screen.getByText('Introducing Workspace')).toBeInTheDocument()
+      expect(screen.queryByTestId('safe-pro-banner')).not.toBeInTheDocument()
+      expect(screen.getByRole('link', { name: /safe pro user terms/i })).toBeInTheDocument()
     })
 
     it('shows the wide Pro banner above the workspaces list when signed in and the flag is on', () => {
@@ -202,7 +223,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
       expect(screen.getByText(/create your first workspace/i)).toBeInTheDocument()
       unmount()
 
-      mockUseHasFeature.mockReturnValue(true)
+      mockUseIsSafeProEnabled.mockReturnValue(true)
       render(<SpacesList />)
       expect(screen.getByTestId('safe-pro-workspaces-banner')).toBeInTheDocument()
       expect(screen.getByText(/get safe pro/i)).toBeInTheDocument()
@@ -521,7 +542,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
   it('puts the Safe Pro user terms and privacy links inside the sign-in card, opening in a new tab, when Safe Pro is on', () => {
     setAuth(false)
     mockUseIsSafeProAnnouncementEnabled.mockReturnValue(true)
-    mockUseHasFeature.mockReturnValue(true)
+    mockUseIsSafeProEnabled.mockReturnValue(true)
 
     const { container } = render(<SpacesList />)
 
