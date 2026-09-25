@@ -6,6 +6,14 @@ const injectedRtkApi = api
   })
   .injectEndpoints({
     endpoints: (build) => ({
+      spaceRelayRelayV1: build.mutation<SpaceRelayRelayV1ApiResponse, SpaceRelayRelayV1ApiArg>({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/chains/${queryArg.chainId}/relay`,
+          method: 'POST',
+          body: queryArg.spaceRelayDto,
+        }),
+        invalidatesTags: ['relay'],
+      }),
       relayRelayV1: build.mutation<RelayRelayV1ApiResponse, RelayRelayV1ApiArg>({
         query: (queryArg) => ({ url: `/v1/chains/${queryArg.chainId}/relay`, method: 'POST', body: queryArg.relayDto }),
         invalidatesTags: ['relay'],
@@ -27,6 +35,14 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
+export type SpaceRelayRelayV1ApiResponse = /** status 201 Transaction relayed */ Relay
+export type SpaceRelayRelayV1ApiArg = {
+  /** Chain ID where the Safe transaction will be executed */
+  chainId: string
+  /** Space UUID */
+  spaceId: string
+  spaceRelayDto: SpaceRelayDto
+}
 export type RelayRelayV1ApiResponse = /** status 200 Transaction relayed successfully */ Relay
 export type RelayRelayV1ApiArg = {
   /** Chain ID where the Safe transaction will be executed */
@@ -53,6 +69,15 @@ export type RelayGetRelaysRemainingV1ApiArg = {
 }
 export type Relay = {
   taskId: string
+}
+export type SpaceRelayDto = {
+  version: string
+  to: string
+  data: string
+  /** Safe transaction hash, forwarded to the relay provider for traceability. Not verified against the calldata on this route. */
+  safeTxHash?: string
+  /** Set to true to proceed with the relay when a previous attempt returned INDETERMINATE_SIMULATION. The user has acknowledged the simulation could not be completed and accepts the risk. */
+  acceptUnverifiedSimulation?: boolean
 }
 export type RelayErrorResponse = {
   /** Stable identifier of the error condition. The frontend MUST branch on this value (not on `message`, which is informational and may change). */
@@ -86,6 +111,7 @@ export type RelaysRemaining = {
   limit: number
 }
 export const {
+  useSpaceRelayRelayV1Mutation,
   useRelayRelayV1Mutation,
   useRelayGetTaskStatusV1Query,
   useLazyRelayGetTaskStatusV1Query,

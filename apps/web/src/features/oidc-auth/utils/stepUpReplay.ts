@@ -1,4 +1,5 @@
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { cgwApi as billingApi } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import type { SerializedError, ThunkAction, UnknownAction } from '@reduxjs/toolkit'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { AppDispatch, RootState } from '@/store'
@@ -28,6 +29,7 @@ const REPLAYABLE_ENDPOINTS = {
   addressBooksUpsertAddressBookItemsV1: 'Address book updated',
   addressBooksDeleteByAddressV1: 'Address removed from the address book',
   addressBookRequestsApproveRequestV1: 'Address book request approved',
+  billingUpdateSubscriptionV1: 'Plan updated',
 } as const
 
 type ReplayableEndpoint = keyof typeof REPLAYABLE_ENDPOINTS
@@ -84,8 +86,8 @@ export const takeStepUpTrip = (): StepUpTrip | undefined => {
   }
 }
 
-/** Every endpoint in `REPLAYABLE_ENDPOINTS` invalidates this tag and no other. */
-const REPLAY_INVALIDATED_TAGS = ['spaces'] as const
+// Built on demand: tests mock the generated modules partially, and a module-load spread would read `undefined`.
+const replayableEndpoints = () => ({ ...cgwApi.endpoints, ...billingApi.endpoints })
 
 type ReplayOutcome = { error?: FetchBaseQueryError | SerializedError }
 
@@ -99,7 +101,7 @@ type ReplayOutcome = { error?: FetchBaseQueryError | SerializedError }
 type ReplayInitiator = (args: unknown) => ThunkAction<Promise<ReplayOutcome>, RootState, unknown, UnknownAction>
 
 const asReplayInitiator = (endpoint: ReplayableEndpoint): ReplayInitiator =>
-  cgwApi.endpoints[endpoint].initiate as unknown as ReplayInitiator
+  replayableEndpoints()[endpoint].initiate as unknown as ReplayInitiator
 
 export const replayStepUpAction = async (dispatch: AppDispatch, pending: PendingStepUpAction): Promise<void> => {
   const result = await dispatch(asReplayInitiator(pending.endpoint)(pending.args))
@@ -131,7 +133,9 @@ export const replayStepUpAction = async (dispatch: AppDispatch, pending: Pending
   // zero while the first request is still open. The query then keeps the response
   // it gets, which may have been produced before the write. Invalidating again
   // once nothing is in flight fetches every affected query with the written data.
-  dispatch(cgwApi.util.invalidateTags([...REPLAY_INVALIDATED_TAGS]))
+  // Every endpoint in `REPLAYABLE_ENDPOINTS` invalidates one of these two tags; refetching the other is harmless.
+  dispatch(cgwApi.util.invalidateTags(['spaces']))
+  dispatch(billingApi.util.invalidateTags(['billing']))
   await Promise.all(dispatch(cgwApi.util.getRunningQueriesThunk()))
 
   dispatch(

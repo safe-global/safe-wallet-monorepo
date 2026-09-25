@@ -201,6 +201,10 @@ export const SPACE_EVENTS = {
     action: 'Submit import address book',
     category: SPACE_CATEGORY,
   },
+  EXPORT_ADDRESS_BOOK: {
+    action: 'Export address book',
+    category: SPACE_CATEGORY,
+  },
   EDIT_ADDRESS: {
     action: 'Open edit address',
     category: SPACE_CATEGORY,

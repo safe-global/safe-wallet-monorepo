@@ -118,9 +118,9 @@ const sidebarProfileSignOutBtn = '[data-testid="sidebar-profile-sign-out"]'
 const continueWithWalletBtn = '[data-testid="continue-with-wallet-btn"]'
 // The signed-out /welcome/spaces keeps the Topbar, which renders its own generic "Connect Wallet"
 // button with the same data-testid as the sign-in card's button — so the card button is matched by
-// its "Continue with wallet" text instead of by index.
+// its "Connect wallet" text instead of by index.
 const connectWalletBtn = '[data-testid="connect-wallet-btn"]'
-const workspaceWalletBtnText = 'Continue with wallet'
+const workspaceWalletBtnText = 'Connect wallet'
 const onboardV2 = 'onboard-v2'
 const pkInput = '[data-testid="private-key-input"]'
 const pkConnectBtn = '[data-testid="pk-connect-btn"]'

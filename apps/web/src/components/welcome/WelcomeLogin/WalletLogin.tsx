@@ -93,6 +93,7 @@ const WalletLogin = ({
       className={cn(css[buttonStyle], { 'w-full': fullWidth })}
       variant="default"
       size="sm"
+      accentIcon={buttonStyle === 'walletBtnSecondary'}
       data-testid="connect-wallet-btn"
     >
       {buttonStyle === 'walletBtnSecondary' && <WalletMinimal size={18} />}

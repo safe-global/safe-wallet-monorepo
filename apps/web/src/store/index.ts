@@ -25,6 +25,8 @@ import {
   counterfactualSyncListener,
   addressBookListener,
   elevationListener,
+  spaceSafesEntitlementsListener,
+  trialReminderListener,
 } from './slices'
 import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
@@ -136,6 +138,8 @@ const listeners = [
   counterfactualSyncListener,
   addressBookListener,
   elevationListener,
+  spaceSafesEntitlementsListener,
+  trialReminderListener,
   forbiddenSessionListener,
 ]
 

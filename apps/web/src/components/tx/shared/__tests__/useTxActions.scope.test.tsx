@@ -152,6 +152,7 @@ describe('useTxActions under a SafeScope', () => {
       100000,
       true,
       relayScope,
+      undefined,
     )
   })
 })

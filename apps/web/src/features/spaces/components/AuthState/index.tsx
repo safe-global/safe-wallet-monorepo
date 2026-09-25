@@ -18,6 +18,8 @@ import { MemberStatus } from '@/features/spaces'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { AppRoutes } from '@/config/routes'
+import TrialEndingModal from '../Plans/TrialEndingModal'
+import WorkspaceLockModal from '../Plans/WorkspaceLockModal'
 
 const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode }) => {
   const router = useRouter()
@@ -63,7 +65,14 @@ const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode
 
   if (isInactiveMember) return <LoadingState />
 
-  return children
+  // A Workspace without a live plan keeps its pages underneath a blocking modal instead of bouncing elsewhere.
+  return (
+    <>
+      {children}
+      <WorkspaceLockModal spaceId={spaceId} />
+      <TrialEndingModal spaceId={spaceId} />
+    </>
+  )
 }
 
 export default AuthState

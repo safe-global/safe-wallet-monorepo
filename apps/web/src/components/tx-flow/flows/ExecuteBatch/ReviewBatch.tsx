@@ -15,6 +15,7 @@ import TxSubmitError from '@/components/tx/TxSubmitError'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
 import DecodedTxs from '@/components/tx-flow/flows/ExecuteBatch/DecodedTxs'
 import { useRelaysBySafe } from '@/hooks/useRemainingRelays'
+import { useSafeSponsoredTxs } from '@/features/spaces'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import { logError, Errors } from '@/services/exceptions'
 import { createMultiSendCallOnlyTx, dispatchBatchExecution, dispatchBatchExecutionRelay } from '@/services/tx/tx-sender'
@@ -24,6 +25,9 @@ import TxCard, { TxCardActions } from '../../common/TxCard'
 import CheckWallet from '@/components/common/CheckWallet'
 import type { ExecuteBatchFlowProps } from '.'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { QuotaExceededError } from '@safe-global/utils/services/quotaErrors'
+import ErrorMessage from '@/components/tx/ErrorMessage'
+import { sponsoredQuotaMessage } from '@/components/tx/sponsoredQuotaMessage'
 import SendToBlock from '@/components/tx/SendToBlock'
 import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/shared/ConfirmationTitle'
 import { TxModalContext } from '@/components/tx-flow'
@@ -62,15 +66,18 @@ const buildGasOverrides = (
 const BatchErrorMessages = ({
   estimationError,
   submitError,
+  quotaError,
   isRejectedByUser,
 }: {
   estimationError: unknown
   submitError: Error | undefined
+  quotaError?: QuotaExceededError
   isRejectedByUser: Boolean
 }) => (
   <>
     {estimationError && <TxCheckError error={asError(estimationError)} context="estimation" />}
     {submitError && <TxSubmitError error={submitError} context="execution" />}
+    {quotaError && <ErrorMessage level="warning">{sponsoredQuotaMessage(quotaError)}</ErrorMessage>}
     {isRejectedByUser && <WalletRejectionError />}
   </>
 )
@@ -78,11 +85,13 @@ const BatchErrorMessages = ({
 export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
   const [isSubmittable, setIsSubmittable] = useState<boolean>(true)
   const [submitError, setSubmitError] = useState<Error | undefined>()
+  const [quotaError, setQuotaError] = useState<QuotaExceededError | undefined>()
   const [isRejectedByUser, setIsRejectedByUser] = useState<Boolean>(false)
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
   const chain = useCurrentChain()
   const { safe } = useSafeInfo()
   const [relays] = useRelaysBySafe()
+  const sponsoredTxs = useSafeSponsoredTxs()
   const { setTxFlow } = useContext(TxModalContext)
   const [gasPrice] = useGasPrice()
   const userNonce = useUserNonce()
@@ -90,9 +99,11 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
   const onboard = useOnboard()
   const wallet = useWallet()
 
-  // Chain has relaying feature and available relays
-  const canRelay = hasRemainingRelays(relays)
+  // Chain has relaying feature and available relays, or the Safe's Workspace still sponsors transactions
+  const canRelay = sponsoredTxs.isPro ? sponsoredTxs.canSponsor : hasRemainingRelays(relays)
   const willRelay = canRelay && executionMethod === ExecutionMethod.RELAY
+  // A spent Pro allowance keeps the selector on screen (sponsoring disabled) so the user sees the count and the reset.
+  const isProExhausted = sponsoredTxs.isPro && sponsoredTxs.left === 0
 
   // EIP-1559 gas pricing support
   const isEIP1559 = Boolean(chain && hasFeature(chain, FEATURES.EIP1559))
@@ -170,6 +181,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
       safe.chainId,
       safe.address.value,
       safe.version ?? latestSafeVersion,
+      sponsoredTxs.spaceId,
     )
   }
 
@@ -177,6 +189,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
     e.preventDefault()
     setIsSubmittable(false)
     setSubmitError(undefined)
+    setQuotaError(undefined)
     setIsRejectedByUser(false)
 
     try {
@@ -186,6 +199,9 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
       const err = asError(_err)
       if (isWalletRejection(err)) {
         setIsRejectedByUser(true)
+      } else if (err instanceof QuotaExceededError) {
+        setQuotaError(err)
+        setExecutionMethod(ExecutionMethod.WALLET)
       } else {
         logError(Errors._804, err)
         setSubmitError(err)
@@ -230,7 +246,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
 
         <NetworkWarning />
 
-        {canRelay ? (
+        {canRelay || isProExhausted ? (
           <>
             <ExecutionMethodSelector
               executionMethod={executionMethod}
@@ -246,7 +262,12 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
           the loss of the allocated transaction fees.
         </Alert>
 
-        <BatchErrorMessages estimationError={error} submitError={submitError} isRejectedByUser={isRejectedByUser} />
+        <BatchErrorMessages
+          quotaError={quotaError}
+          estimationError={error}
+          submitError={submitError}
+          isRejectedByUser={isRejectedByUser}
+        />
 
         <div>
           <div className="pt-4">

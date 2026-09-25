@@ -4,18 +4,20 @@ import { TxModalContext } from '@/components/tx-flow'
 import ExternalLink from '@/components/common/ExternalLink'
 import { Typography } from '@/components/ui/typography'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import AddPolicyDialog from './AddPolicyDialog'
+import type { AddPolicyId } from './AddPolicyDialog/options'
 import PoliciesList from './PoliciesList'
 import { PoliciesLoadError, PoliciesLoading } from './PoliciesLoadState'
 import PolicyCatalogue from './PolicyCatalogue'
-import type { PolicyCatalogueId } from './PolicyCatalogue/catalogue'
 import ProposerIntroDialog from './ProposerIntroDialog'
 import { PROPOSER_INTRO_SEEN_KEY } from './ProposerIntroDialog/constants'
+import ProposerDetails from './ProposerDetails'
 import ProposerRoleFlow from './ProposerRoleFlow'
 import SpendingLimitFlow from './SpendingLimitFlow'
 import SpendingLimitIntroDialog from './SpendingLimitIntroDialog'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from './SpendingLimitIntroDialog/constants'
 import { REQUEST_POLICY_FORM_HEIGHT, REQUEST_POLICY_FORM_URL, REQUEST_POLICY_FORM_WIDTH } from './constants'
-import type { Policy } from './types'
+import { isProposerPolicy, type Policy, type Proposer, type ProposerPolicy } from './types'
 
 interface PoliciesProps {
   /** Supplied by the caller. The page does not fetch. */
@@ -23,7 +25,7 @@ interface PoliciesProps {
   isLoading?: boolean
   isError?: boolean
   onRetry?: () => void
-  /** Opens the catalogue picker from the populated mode's `Add policy` button. */
+  /** The populated mode's `Add policy` button. Without it the button opens the add policy dialog. */
   onAddPolicy?: () => void
   onSelectPolicy?: (policy: Policy) => void
 }
@@ -59,6 +61,15 @@ const Policies = ({
 
   const [hasSeenProposerIntro = false, setHasSeenProposerIntro] = useLocalStorage<boolean>(PROPOSER_INTRO_SEEN_KEY)
   const [isProposerIntroOpen, setIsProposerIntroOpen] = useState(false)
+  const [isAddPolicyOpen, setIsAddPolicyOpen] = useState(false)
+  const [openProposer, setOpenProposer] = useState<{ policy: ProposerPolicy; proposer: Proposer } | null>(null)
+
+  const openPolicy = useCallback((policy: Policy) => {
+    if (!isProposerPolicy(policy)) return
+
+    const [proposer] = policy.data.proposers
+    if (proposer) setOpenProposer({ policy, proposer })
+  }, [])
 
   const startSpendingLimitFlow = useCallback(() => setTxFlow(<SpendingLimitFlow />), [setTxFlow])
 
@@ -67,7 +78,7 @@ const Policies = ({
   }, [setTxFlow])
 
   const handleSelect = useCallback(
-    (id: PolicyCatalogueId) => {
+    (id: AddPolicyId) => {
       switch (id) {
         case 'spending-limit':
           if (hasSeenSpendingLimitIntro) {
@@ -91,6 +102,10 @@ const Policies = ({
           openRequestPolicyForm()
           return
 
+        // Not offered yet: ADD_POLICY_OPTIONS leaves it out.
+        case 'recovery':
+          return
+
         // A new policy id must pick a branch above rather than silently doing nothing.
         default: {
           const _exhaustive: never = id
@@ -111,6 +126,14 @@ const Policies = ({
     closeSpendingLimitIntro()
     startSpendingLimitFlow()
   }, [closeSpendingLimitIntro, startSpendingLimitFlow])
+
+  const selectFromAddPolicyDialog = useCallback(
+    (id: AddPolicyId) => {
+      setIsAddPolicyOpen(false)
+      handleSelect(id)
+    },
+    [handleSelect],
+  )
 
   const closeProposerIntro = useCallback(() => {
     setIsProposerIntroOpen(false)
@@ -145,10 +168,16 @@ const Policies = ({
       ) : isError ? (
         <PoliciesLoadError onReload={onRetry} />
       ) : policies.length > 0 ? (
-        <PoliciesList policies={policies} onAddPolicy={onAddPolicy} onSelectPolicy={onSelectPolicy} />
+        <PoliciesList
+          policies={policies}
+          onAddPolicy={onAddPolicy ?? (() => setIsAddPolicyOpen(true))}
+          onSelectPolicy={onSelectPolicy ?? openPolicy}
+        />
       ) : (
         <PolicyCatalogue onSelect={handleSelect} />
       )}
+
+      <AddPolicyDialog open={isAddPolicyOpen} onOpenChange={setIsAddPolicyOpen} onSelect={selectFromAddPolicyDialog} />
 
       <SpendingLimitIntroDialog
         open={isSpendingLimitIntroOpen}
@@ -165,6 +194,8 @@ const Policies = ({
         }}
         onProceed={proceedToProposerFlow}
       />
+
+      {openProposer && <ProposerDetails {...openProposer} onClose={() => setOpenProposer(null)} />}
     </div>
   )
 }

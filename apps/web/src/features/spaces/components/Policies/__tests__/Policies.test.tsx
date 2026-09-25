@@ -35,6 +35,10 @@ jest.mock('@/services/local-storage/useLocalStorage', () => ({
 }))
 
 // The flow pulls in the protocol-kit initialiser; the page test only needs the flow's identity.
+jest.mock('../../../hooks/useSpaceSafeOverviews', () => ({
+  useSpaceSafeOverviews: () => ({ ownedByChain: {}, isOwnershipResolved: true }),
+}))
+
 jest.mock('../SpendingLimitFlow', () => ({
   __esModule: true,
   default: () => <div data-testid="spending-limit-flow" />,
@@ -330,7 +334,7 @@ describe('Policies', () => {
       render(<Policies policies={mockPolicies()} />)
 
       expect(screen.getByTestId('policies-list')).toBeInTheDocument()
-      expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(6)
+      expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(mockPolicies().length)
       expect(screen.getByPlaceholderText('by name, address or network')).toBeInTheDocument()
     })
   })
@@ -383,6 +387,77 @@ describe('Policies', () => {
       render(<Policies policies={[]} isError />)
 
       expect(screen.queryByRole('button', { name: 'Reload' })).not.toBeInTheDocument()
+    })
+
+    it('should, when Add policy is clicked and no handler is given, open the add policy dialog', async () => {
+      const { user } = renderWithUserEvent(<Policies policies={mockPolicies()} />)
+
+      await user.click(screen.getByTestId('add-policy-button'))
+
+      expect(screen.getByTestId('add-policy-dialog')).toBeInTheDocument()
+      expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument()
+    })
+
+    it('should, when Add policy is clicked and a handler is given, call it instead of opening the dialog', async () => {
+      const onAddPolicy = jest.fn()
+      const { user } = renderWithUserEvent(<Policies policies={mockPolicies()} onAddPolicy={onAddPolicy} />)
+
+      await user.click(screen.getByTestId('add-policy-button'))
+
+      expect(onAddPolicy).toHaveBeenCalledTimes(1)
+      expect(screen.queryByTestId('add-policy-dialog')).not.toBeInTheDocument()
+    })
+
+    it('should, when the proposer is picked in the add policy dialog, close it and start the proposer flow', async () => {
+      mockHasSeenProposerIntro = true
+      const setTxFlow = jest.fn()
+      const { user } = renderWithUserEvent(
+        <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
+          <Policies policies={mockPolicies()} />
+        </TxModalContext.Provider>,
+      )
+
+      await user.click(screen.getByTestId('add-policy-button'))
+      await user.click(screen.getByTestId('add-policy-option-proposer'))
+
+      await waitFor(() => expect(screen.queryByTestId('add-policy-dialog')).not.toBeInTheDocument())
+      expect(setTxFlow).toHaveBeenCalledTimes(1)
+      expect(setTxFlow.mock.calls[0][0].type).toBe(ProposerRoleFlow)
+    })
+
+    it('should, when the proposer is picked before its intro was seen, show the intro first', async () => {
+      const { user } = renderWithUserEvent(<Policies policies={mockPolicies()} />)
+
+      await user.click(screen.getByTestId('add-policy-button'))
+      await user.click(screen.getByTestId('add-policy-option-proposer'))
+
+      expect(await screen.findByTestId('proposer-intro-dialog')).toBeInTheDocument()
+      expect(screen.queryByTestId('add-policy-dialog')).not.toBeInTheDocument()
+    })
+
+    it('should, when a spending limit is picked in the add policy dialog, start the spending limit flow', async () => {
+      mockHasSeenSpendingLimitIntro = true
+      const setTxFlow = jest.fn()
+      const { user } = renderWithUserEvent(
+        <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
+          <Policies policies={mockPolicies()} />
+        </TxModalContext.Provider>,
+      )
+
+      await user.click(screen.getByTestId('add-policy-button'))
+      await user.click(screen.getByTestId('add-policy-option-spending-limit'))
+
+      expect(setTxFlow).toHaveBeenCalledTimes(1)
+      expect(setTxFlow.mock.calls[0][0]).toMatchObject({ type: SpendingLimitFlow })
+    })
+
+    it('should, when a proposer row is clicked and no handler is given, open the proposer drawer', () => {
+      const proposerPolicy = asActivePolicy(mockProposerPolicy())
+
+      render(<Policies policies={[proposerPolicy]} />)
+      fireEvent.click(screen.getByRole('button', { name: 'Open Proposer for 0x8675...a19b' }))
+
+      expect(screen.getByText('Proposer role')).toBeInTheDocument()
     })
 
     it('should, when a table row is clicked, report the policy it belongs to', () => {

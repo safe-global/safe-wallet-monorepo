@@ -9,6 +9,8 @@ import type { SpaceItem } from '../types'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'
+import { getSeatLimitMessage } from '../../../utils/seatLimitError'
 
 interface UseAddSafeToSpaceOptions {
   spaces: SpaceItem[]
@@ -46,7 +48,9 @@ export const useAddSafeToSpace = ({ spaces, onSpaceAdded }: UseAddSafeToSpaceOpt
       })
       if (isElevationRequiredError(result.error)) return false
       if (result.error) {
-        showError(getRtkQueryErrorMessage(result.error))
+        const seatLimit = getSeatLimitMessage(result.error)
+        if (seatLimit) refreshSpaceEntitlements(dispatch, spaceId)
+        showError(seatLimit ?? getRtkQueryErrorMessage(result.error))
         return false
       }
       dispatch(

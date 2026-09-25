@@ -9,6 +9,7 @@ import { selectCookieBanner } from '@/store/popupSlice'
 import { CookieAndTermType } from '@/store/cookiesAndTermsSlice'
 import { useLoadFeature } from '@/features/__core__'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
+import { useIsSafeProEnabled } from '@/features/safe-pro-announcement'
 
 const mockSupportChatDrawer = jest.fn()
 
@@ -26,6 +27,10 @@ jest.mock('@/features/support-chat', () => ({
 
 jest.mock('@/hooks/useIsOfficialHost', () => ({
   useIsOfficialHost: jest.fn(),
+}))
+
+jest.mock('@/features/safe-pro-announcement', () => ({
+  useIsSafeProEnabled: jest.fn(),
 }))
 
 const setSupportFeature = ({ disabled, isOfficialHost }: { disabled: boolean; isOfficialHost: boolean }) => {
@@ -55,12 +60,13 @@ describe('AboutPage', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     setSupportFeature({ disabled: false, isOfficialHost: true })
+    ;(useIsSafeProEnabled as jest.Mock).mockReturnValue(true)
   })
 
   describe('legal links', () => {
     it('renders Terms & Conditions with correct href', () => {
       renderWithStore()
-      const link = screen.getByRole('link', { name: /Terms & Conditions/i })
+      const link = screen.getByRole('link', { name: /^Terms & Conditions/i })
       expect(link).toHaveAttribute('href', AppRoutes.terms)
     })
 
@@ -91,7 +97,7 @@ describe('AboutPage', () => {
     it('opens all legal links in a new tab with noopener', () => {
       renderWithStore()
       const legalLinks = [
-        screen.getByRole('link', { name: /Terms & Conditions/i }),
+        screen.getByRole('link', { name: /^Terms & Conditions/i }),
         screen.getByRole('link', { name: /Privacy Policy/i }),
         screen.getByRole('link', { name: /Licenses/i }),
         screen.getByRole('link', { name: /Imprint/i }),
@@ -101,6 +107,34 @@ describe('AboutPage', () => {
         expect(link).toHaveAttribute('target', '_blank')
         expect(link).toHaveAttribute('rel', 'noreferrer noopener')
       })
+    })
+
+    it('leads with the Safe Pro terms, opening on safe.global in a new tab', () => {
+      renderWithStore()
+      const userTerms = screen.getByRole('link', { name: /^Pro User Terms & Conditions/i })
+      const proTerms = screen.getByRole('link', { name: /^Pro Terms & Conditions/i })
+
+      expect(userTerms).toHaveAttribute('href', 'https://safe.global/pro-user-terms')
+      expect(proTerms).toHaveAttribute('href', 'https://safe.global/pro-terms')
+      for (const link of [userTerms, proTerms]) {
+        expect(link).toHaveAttribute('target', '_blank')
+        expect(link).toHaveAttribute('rel', 'noreferrer noopener')
+        expect(link).toHaveTextContent('For using Safe Pro')
+      }
+
+      const legal = screen.getByText('Legal & Policies').parentElement as HTMLElement
+      const [first, second, third] = Array.from(legal.querySelectorAll('a'))
+      expect(first).toBe(userTerms)
+      expect(second).toBe(proTerms)
+      expect(third).toHaveTextContent(/^Terms & Conditions/)
+    })
+
+    it('leaves the Safe Pro terms out while Safe Pro is not announced', () => {
+      ;(useIsSafeProEnabled as jest.Mock).mockReturnValue(false)
+      renderWithStore()
+
+      expect(screen.queryByRole('link', { name: /^Pro /i })).not.toBeInTheDocument()
+      expect(screen.getByRole('link', { name: /^Terms & Conditions/i })).toHaveAttribute('href', AppRoutes.terms)
     })
   })
 

@@ -24,6 +24,8 @@ import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useMemo } from 'react'
 import { useCurrentChain } from '@/hooks/useChains'
+import { useSafeProAccess } from '@/features/spaces'
+import { getPublicSimulatorLink } from '@safe-global/utils/components/tx/security/tenderly/utils'
 
 export const _isSimulationSuccessful = ({ isSuccess, isError, isCallTraceError }: SimulationStatus): boolean =>
   isSuccess && !isError && !isCallTraceError
@@ -86,6 +88,7 @@ const InlineTxSimulation = ({ transaction }: { transaction: TransactionDetails }
   const simulation = useSimulation()
   const { simulationLink, simulateTransaction } = simulation
   const status = simulation ? getSimulationStatus(simulation) : undefined
+  const { hasProFeatures } = useSafeProAccess()
 
   const handleSimulation = () => {
     if (safeTransaction && executionOwner) {
@@ -95,6 +98,28 @@ const InlineTxSimulation = ({ transaction }: { transaction: TransactionDetails }
 
   if (safeTransactionError || !canSimulate || !executionOwner) {
     return null
+  }
+
+  // Without Safe Pro the simulation is not run through our Tenderly project; hand the inner call to Tenderly's public simulator.
+  if (!hasProFeatures) {
+    if (!safeTransaction) return null
+    return (
+      <ExternalLink
+        href={getPublicSimulatorLink({
+          chainId,
+          from: safe.address.value,
+          to: safeTransaction.data.to,
+          value: safeTransaction.data.value,
+          data: safeTransaction.data.data,
+        })}
+        data-testid="queued-tx-external-simulation"
+      >
+        <div className="flex flex-row items-center gap-1">
+          <TenderlyIcon className="h-4" />
+          Simulate on Tenderly
+        </div>
+      </ExternalLink>
+    )
   }
 
   if (status?.isLoading) {

@@ -12,7 +12,7 @@ import SafeProLockup from '@/public/images/safe-pro/safe-pro-lockup.svg'
 import SafeProLockupDark from '@/public/images/safe-pro/safe-pro-lockup-dark.svg'
 import { useAppSelector } from '@/store'
 import { isAuthenticated, selectIsStoreHydrated } from '@/store/authSlice'
-import { ArrowRight, Check } from 'lucide-react'
+import { ArrowRight, Check, ExternalLink as ExternalLinkIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Spinner } from '@/components/ui/spinner'
@@ -32,6 +32,9 @@ import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
 import SpaceInfoModal from '../SpaceInfoModal'
 import { filterSpacesByStatus, getInvitedByName } from '@/features/spaces/utils'
 import { AppRoutes } from '@/config/routes'
+import { SAFE_PRO_USER_TERMS_URL } from '@/config/constants'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import NextLink from 'next/link'
 import { useSignInRedirect } from '@/components/welcome/WelcomeLogin/hooks/useSignInRedirect'
 import AddIcon from '@/public/images/common/add.svg'
@@ -46,6 +49,7 @@ const AddSpaceButton = ({
   variant = 'default',
   label = 'Create Workspace',
   icon = 'add',
+  link = true,
 }: {
   onClick?: () => void
   disabled?: boolean
@@ -53,6 +57,8 @@ const AddSpaceButton = ({
   variant?: 'default' | 'outline'
   label?: string
   icon?: 'add' | 'arrow'
+  /** Off when the click opens a dialog instead of navigating to the onboarding. */
+  link?: boolean
 }) => {
   const iconSize = size === 'lg' ? 'size-5' : 'size-4'
 
@@ -61,13 +67,14 @@ const AddSpaceButton = ({
       data-testid="create-space-button"
       variant={variant}
       size={size}
+      accentIcon={icon === 'arrow' && variant === 'default'}
       className={cn(
         // eslint-disable-next-line no-restricted-syntax -- bespoke full-height create-workspace CTA sizing from dev's #8271 redesign
         size === 'lg' && 'h-full rounded-lg px-6 py-3 text-base',
         variant === 'outline' && 'hover:bg-muted',
         disabled && 'cursor-not-allowed opacity-50 grayscale',
       )}
-      render={disabled ? <span /> : <NextLink href={AppRoutes.welcome.createSpace} />}
+      render={disabled ? <span /> : link ? <NextLink href={AppRoutes.welcome.createSpace} /> : undefined}
       disabled={disabled}
       onClick={disabled ? undefined : onClick}
     >
@@ -89,9 +96,13 @@ const AddSpaceButton = ({
   )
 }
 
+const termsLinkClassName = 'underline underline-offset-2'
+
 const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => void; redirectLoading: boolean }) => {
   const isDarkMode = useDarkMode()
   const isSafeProEnabled = useIsSafeProEnabled()
+  // The announcement brands the card; the Safe Pro terms only apply once Safe Pro is live.
+  const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
   const { SafeProBanner } = useLoadFeature(SafeProFeature)
 
   return (
@@ -99,7 +110,7 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
       {/* The page keeps its Topbar + Accounts/Workspaces tabs, so the sign-in
           card renders inline rather than as a full-screen takeover. */}
       <div className={cn('relative flex items-center justify-center pb-10', isSafeProEnabled ? 'pt-0' : 'pt-10')}>
-        <div className="flex w-full max-w-[440px] flex-col items-center">
+        <div className={cn('flex w-full flex-col items-center', isSafePro ? 'max-w-116' : 'max-w-110')}>
           {isSafeProEnabled ? <SafeProBanner className="mb-4" /> : <WorkspaceBanner className="mb-3" />}
 
           <div className="relative w-full">
@@ -116,31 +127,58 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
                 )}
               </div>
 
-              <Typography variant="h3" className="mb-6 text-center">
+              <Typography variant="h3" className={cn('text-center', isSafePro ? 'mb-4' : 'mb-6')}>
                 Sign in to your Workspace
               </Typography>
+
+              {isSafePro && (
+                <p className="mb-6 text-center text-xs leading-[18px] text-muted-foreground">
+                  By continuing you accept the{' '}
+                  <Link
+                    variant="muted"
+                    href={SAFE_PRO_USER_TERMS_URL}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className={termsLinkClassName}
+                  >
+                    Safe Pro User Terms
+                  </Link>{' '}
+                  and{' '}
+                  <Link
+                    variant="muted"
+                    href={AppRoutes.privacy}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className={cn(termsLinkClassName, 'whitespace-nowrap')}
+                  >
+                    Privacy Policy. <ExternalLinkIcon className="ml-0.5 inline size-4 align-text-bottom" />
+                  </Link>
+                </p>
+              )}
 
               <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
             </div>
           </div>
 
-          <p className="mt-4 text-center text-xs leading-[18px] text-muted-foreground">
-            By continuing, you agree to the{' '}
-            <NextLink
-              href={AppRoutes.terms}
-              className="text-muted-foreground underline underline-offset-2 hover:text-foreground"
-            >
-              Terms
-            </NextLink>{' '}
-            and{' '}
-            <NextLink
-              href={AppRoutes.privacy}
-              className="text-muted-foreground underline underline-offset-2 hover:text-foreground"
-            >
-              Privacy Policy
-            </NextLink>
-            .
-          </p>
+          {!isSafePro && (
+            <p className="mt-4 text-center text-xs leading-[18px] text-muted-foreground">
+              By continuing, you agree to the{' '}
+              <NextLink
+                href={AppRoutes.terms}
+                className="text-muted-foreground underline underline-offset-2 hover:text-foreground"
+              >
+                Terms
+              </NextLink>{' '}
+              and{' '}
+              <NextLink
+                href={AppRoutes.privacy}
+                className="text-muted-foreground underline underline-offset-2 hover:text-foreground"
+              >
+                Privacy Policy
+              </NextLink>
+              .
+            </p>
+          )}
         </div>
       </div>
     </div>
@@ -156,12 +194,17 @@ const WORKSPACE_BENEFITS = [
 const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
   const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
   const isDarkMode = useDarkMode()
+  const isSafePro = useHasFeature(FEATURES.SAFE_PRO) === true
 
   return (
     <>
-      <Card size="none" radius="xl" className="w-full text-center">
-        <div className="flex flex-col items-center gap-8 rounded-t-xl bg-muted p-8 text-left md:flex-row md:items-end md:gap-16">
-          <div className="flex shrink-0 flex-col gap-4 md:self-center">
+      <Card
+        size="none"
+        // eslint-disable-next-line no-restricted-syntax -- Figma's 32px corner has no Card `radius` option
+        className="w-full rounded-4xl p-1 text-center"
+      >
+        <div className="relative flex flex-col items-center gap-8 overflow-hidden rounded-t-[calc(2rem-4px)] bg-muted p-8 text-left before:absolute before:top-[72%] before:-left-16 before:size-96 before:-translate-y-1/2 before:rounded-full before:bg-[var(--color-static-text-brand)] before:opacity-45 before:blur-3xl md:flex-row md:items-end md:gap-16">
+          <div className="relative flex shrink-0 flex-col gap-4 md:self-center">
             {WORKSPACE_BENEFITS.map((benefit) => (
               <div key={benefit} className="flex flex-row items-center gap-2">
                 <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[var(--color-background-light-hover)]">
@@ -177,7 +220,7 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
           <Image
             src={isDarkMode ? WorkspacesEmptyIllustrationDark : WorkspacesEmptyIllustration}
             alt="Workspace dashboard showing accounts grouped by Workspace"
-            className="-my-8 h-auto w-full min-w-0 md:-mr-8 md:w-[60%]"
+            className="relative -my-8 h-auto w-full min-w-0 md:-mr-8 md:w-[60%]"
           />
         </div>
 
@@ -187,11 +230,14 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
           <div className="flex flex-col items-center gap-4">
             <div className="h-12">
               <AddSpaceButton
-                label="Create your first Workspace"
+                label={isSafePro ? 'Get Safe Pro' : 'Create your first Workspace'}
                 icon="arrow"
                 disabled={isAtLimit}
+                link
                 onClick={() =>
-                  trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
+                  trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, {
+                    entry_point: WorkspaceCreateEntryPoint.WELCOME,
+                  })
                 }
               />
             </div>
@@ -211,6 +257,7 @@ const SpacesList = () => {
   const { AccountsNavigation } = useLoadFeature(MyAccountsFeature)
   const { SafeProWorkspacesBanner } = useLoadFeature(SafeProFeature)
   const isSafeProEnabled = useIsSafeProEnabled()
+  // The pre-launch heads-up only makes sense to a user without a Workspace while Safe Pro is not live yet.
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })

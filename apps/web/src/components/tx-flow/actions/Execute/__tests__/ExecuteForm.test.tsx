@@ -5,6 +5,7 @@ import { OperationType } from '@safe-global/types-kit'
 import { type ReactElement } from 'react'
 import { ExecuteForm } from '../ExecuteForm'
 import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
+import { QuotaExceededError } from '@safe-global/utils/services/quotaErrors'
 import * as useGasLimit from '@/hooks/useGasLimit'
 import * as useIsValidExecution from '@/hooks/useIsValidExecution'
 import * as useWalletCanRelay from '@/hooks/useWalletCanRelay'
@@ -22,6 +23,20 @@ import type {
 import { TxModalContext } from '@/components/tx-flow'
 import { SuccessScreenFlow } from '@/components/tx-flow/flows'
 import { useSafeScope } from '@/components/tx-flow/safe-scope'
+
+const mockUseSafeSponsoredTxs = jest.fn()
+jest.mock('@/features/spaces/hooks/useSafeSponsoredTxs', () => ({
+  useSafeSponsoredTxs: () => mockUseSafeSponsoredTxs(),
+}))
+const noSponsoredTxs = {
+  isEnabled: false,
+  isPro: false,
+  meter: null,
+  left: null,
+  spaceId: null,
+  canSponsor: false,
+  isLoading: false,
+}
 
 // We assume that CheckWallet always returns true
 jest.mock('@/components/common/CheckWallet', () => ({
@@ -72,6 +87,8 @@ describe('ExecuteForm', () => {
       setIsRiskConfirmed: jest.fn(),
       safeAnalysis: null,
       addToTrustedList: jest.fn(),
+      hasProFeatures: true,
+      isSafePro: true,
     },
     options: [
       { id: 'execute', label: 'Execute' },
@@ -82,6 +99,7 @@ describe('ExecuteForm', () => {
   }
 
   beforeEach(() => {
+    mockUseSafeSponsoredTxs.mockReturnValue(noSponsoredTxs)
     jest.clearAllMocks()
 
     jest.spyOn(useValidateTxData, 'useValidateTxData').mockReturnValue([undefined, undefined, false])
@@ -144,6 +162,27 @@ describe('ExecuteForm', () => {
     const { getByText } = render(<ExecuteForm {...defaultProps} />)
 
     expect(getByText('Who will pay gas fees:')).toBeInTheDocument()
+  })
+
+  it('keeps the gas-fee selector on screen, sponsoring disabled, when the Workspace allowance is spent', () => {
+    jest.spyOn(useWalletCanRelay, 'default').mockReturnValue([true, undefined, false])
+    mockUseSafeSponsoredTxs.mockReturnValue({
+      isEnabled: true,
+      isPro: true,
+      meter: { used: 50, quota: 50, resetsAt: '2026-11-01T00:00:00.000Z' },
+      left: 0,
+      spaceId: '11111111-1111-1111-1111-111111111111',
+      canSponsor: false,
+      isLoading: false,
+    })
+
+    const { getByText, getByTestId } = render(<ExecuteForm {...defaultProps} safeTx={safeTransaction} />)
+
+    expect(getByText('Who will pay gas fees:')).toBeInTheDocument()
+    expect(getByTestId('relay-execution-method').querySelector('[data-slot=radio-group-item]')).toHaveAttribute(
+      'data-disabled',
+    )
+    expect(getByText('Execute')).toBeEnabled()
   })
 
   it('shows an execution validation error', () => {
@@ -330,6 +369,33 @@ describe('ExecuteForm', () => {
     expect(getByText('Execute')).toBeDisabled()
   })
 
+  it('explains a spent sponsored allowance and falls back to the connected wallet', async () => {
+    const mockExecuteTx = jest
+      .fn()
+      .mockRejectedValue(
+        new QuotaExceededError('sponsored_transactions', 50, 50, '2026-11-01T00:00:00.000Z', 'Quota exceeded'),
+      )
+
+    const { getByText } = render(
+      <ExecuteForm
+        {...defaultProps}
+        safeTx={safeTransaction}
+        txActions={{ ...defaultProps.txActions, executeTx: mockExecuteTx }}
+      />,
+    )
+
+    fireEvent.click(getByText('Execute'))
+
+    await waitFor(() => {
+      expect(
+        getByText(
+          'Your Workspace has used all 50 sponsored transactions of this cycle until Nov 1, 2026. Pay the gas with your connected wallet instead.',
+        ),
+      ).toBeInTheDocument()
+    })
+    expect(getByText('Execute')).toBeEnabled()
+  })
+
   it('offers an "Execute anyway" retry with acceptUnverifiedSimulation on INDETERMINATE_SIMULATION', async () => {
     const mockExecuteTx = jest
       .fn()
@@ -358,6 +424,7 @@ describe('ExecuteForm', () => {
       undefined,
       expect.anything(),
       false,
+      null,
     )
 
     fireEvent.click(getByTestId('relay-accept-unverified-btn'))
@@ -371,6 +438,7 @@ describe('ExecuteForm', () => {
         undefined,
         expect.anything(),
         true,
+        null,
       )
     })
   })
