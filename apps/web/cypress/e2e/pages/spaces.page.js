@@ -87,6 +87,8 @@ const addSpaceAccountManuallyBtn = '[data-testid="add-space-account-manually-but
 const addSpaceAccountManuallyModalBtn = '[data-testid="add-manually-button"]'
 const addAccountsBtn = '[data-testid="add-accounts-button"]'
 const addAddressInput = '[data-testid="add-address-input"]'
+const nameAccountsRegion = '[data-testid="name-accounts-region"]'
+const nameAccountInput = '[data-testid="account-name-input"]'
 const networkSelector = '[data-testid="network-selector"]'
 const networkItem = '[data-testid="network-item"]'
 
@@ -162,7 +164,7 @@ export const zeroBalanceRegex = /\$[\u200a\s]*0(?:\.00)?/
 export const txDetailsLabel = 'Transaction details'
 export const pendingTxName = 'Send'
 export const pendingTxStatus = 'Needs confirmation'
-export const deleteSpaceConfirmationMsg = (name) => `Deleted workspace ${name}`
+export const deleteSpaceConfirmationMsg = (name) => `Deleted Workspace ${name}`
 export const acceptInviteConfirmationMsg = (spaceName) => `Accepted invite to ${spaceName}`
 
 // ===========================================
@@ -604,7 +606,7 @@ export function openAddAccountsToWorkspace() {
     })
 }
 
-export function addAccountManually(address, network) {
+export function addAccountManually(address, network, name = 'E2E account') {
   openAddAccountsToWorkspace()
   cy.get(addSpaceAccountManuallyModalBtn).should('be.visible').click()
   selectNetwork(network)
@@ -612,8 +614,11 @@ export function addAccountManually(address, network) {
   cy.get(addAddressInput).find('input').should('have.value', address)
   cy.get(addSpaceAccountManuallyBtn).should('be.enabled').click()
   cy.get(addAccountsBtn).should('be.enabled').click()
-  // Added accounts land in the Safe accounts table; FullAddress keeps the whole address in the DOM.
+  cy.get(nameAccountsRegion).should('be.visible')
+  cy.get(nameAccountInput).first().clear().type(name)
+  cy.get(addAccountsBtn).should('be.enabled').click()
   cy.contains(accountAddress, address, { timeout: 30000 }).should('be.visible')
+  cy.contains(name, { timeout: 30000 }).should('be.visible')
 }
 
 // ===========================================

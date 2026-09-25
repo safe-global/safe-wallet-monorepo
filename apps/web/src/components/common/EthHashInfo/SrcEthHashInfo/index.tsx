@@ -120,7 +120,7 @@ const SrcEthHashInfo = ({
                       )}
                     </TooltipTrigger>
                     <TooltipContent>
-                      From your {addressBookNameSource === ContactSource.space ? 'workspace' : 'local'} address book
+                      From your {addressBookNameSource === ContactSource.space ? 'Workspace' : 'local'} address book
                     </TooltipContent>
                   </Tooltip>
                 )}

@@ -13,6 +13,7 @@ import {
   PROPOSER_IS_OWNER_ERROR,
   PROPOSER_IS_SAFE_ERROR,
   PROPOSER_RESERVED_ERROR,
+  PROPOSER_SAFE_ERROR_MESSAGE,
   PROPOSER_SAFE_LOADING_MESSAGE,
 } from '../../constants'
 import { addressIsNotExistingProposer, useProposerValidation } from '../useProposerValidation'
@@ -40,13 +41,13 @@ const safe = extendedSafeInfoBuilder()
   .with({ chainId: '137', owners: [{ value: OWNER }] })
   .build()
 
-const mockSafeInfo = (safeAddress: string, safeLoaded = true) =>
+const mockSafeInfo = (safeAddress: string, safeLoaded = true, safeError?: string) =>
   mockUseSafeInfo.mockReturnValue({
     safe: safeLoaded ? safe : { ...safe, owners: [] },
     safeAddress,
     safeLoaded,
-    safeLoading: !safeLoaded,
-    safeError: undefined,
+    safeLoading: !safeLoaded && !safeError,
+    safeError,
   })
 
 const mockDelegates = (delegates: string[]) =>
@@ -152,6 +153,20 @@ describe('useProposerValidation', () => {
 
     await expect(validate()(ZERO_ADDRESS)).resolves.toBe(PROPOSER_RESERVED_ERROR)
     await expect(validate()(safe.address.value)).resolves.toBe(PROPOSER_SAFE_LOADING_MESSAGE)
+  })
+
+  it('reports a failed Safe load instead of claiming to still be loading', async () => {
+    mockSafeInfo(safe.address.value, false, 'Failed to load safe info')
+
+    await expect(validate()(OWNER)).resolves.toBe(PROPOSER_SAFE_ERROR_MESSAGE)
+    expect(mockAddressIsNotSmartContract).not.toHaveBeenCalled()
+  })
+
+  it('still rejects the Safe itself and reserved addresses after the Safe failed to load', async () => {
+    mockSafeInfo(safe.address.value, false, 'Failed to load safe info')
+
+    await expect(validate()(ZERO_ADDRESS)).resolves.toBe(PROPOSER_RESERVED_ERROR)
+    await expect(validate()(safe.address.value)).resolves.toBe(PROPOSER_SAFE_ERROR_MESSAGE)
   })
 
   it('only applies the reserved-address rule while no Safe is picked', async () => {

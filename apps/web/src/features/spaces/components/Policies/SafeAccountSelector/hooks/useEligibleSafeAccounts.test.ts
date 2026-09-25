@@ -2,11 +2,14 @@ import { renderHook, waitFor } from '@/tests/test-utils'
 import { skipToken } from '@reduxjs/toolkit/query'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { AllSafeItems, SafeItem } from '@/hooks/safes'
+import { PendingSafeStatus, type UndeployedSafe } from '@safe-global/utils/features/counterfactual/store/types'
+import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
+import type { RootState } from '@/store'
 // Spied, not module-mocked: `@/store` builds the real store from `gatewayApi`, and a `requireActual`
 // round-trip through this barrel re-enters the safeOverviews ↔ index cycle.
 import * as gatewayApi from '@/store/api/gateway'
 import { useEligibleSafeAccounts } from './useEligibleSafeAccounts'
-import { isSafeAccountGroup } from '../types'
+import { isSafeAccountGroup, type SafeAccountEntry, type SafeAccountOption } from '../types'
 
 const mockUseSpaceSafes = jest.fn()
 const mockUseGetMultipleSafeOverviewsQuery = jest.spyOn(gatewayApi, 'useGetMultipleSafeOverviewsQuery')
@@ -156,6 +159,80 @@ describe('useEligibleSafeAccounts', () => {
 
     await waitFor(() => expect(result.current.accounts).toHaveLength(1))
     expect(result.current.accounts[0].address).toBe(SAFE_B)
+  })
+
+  const undeployedSafe: UndeployedSafe = {
+    status: { status: PendingSafeStatus.AWAITING_EXECUTION, type: PayMethod.PayLater },
+    props: {
+      factoryAddress: '0x0000000000000000000000000000000000000001',
+      masterCopy: '0x0000000000000000000000000000000000000002',
+      safeAccountConfig: {
+        threshold: 1,
+        owners: [WALLET],
+        fallbackHandler: '0x0000000000000000000000000000000000000003',
+        to: '0x0000000000000000000000000000000000000000',
+        data: '0x',
+        paymentReceiver: '0x0000000000000000000000000000000000000000',
+      },
+      saltNonce: '0',
+      safeVersion: '1.4.1',
+    },
+  }
+
+  const undeployedState = (chainId: string, address: string): Pick<RootState, 'undeployedSafes'> => ({
+    undeployedSafes: { [chainId]: { [address]: undeployedSafe } },
+  })
+
+  const asOption = (entry: SafeAccountEntry): SafeAccountOption => {
+    if (isSafeAccountGroup(entry)) throw new Error('expected a flat row')
+    return entry
+  }
+
+  it('marks a counterfactual Safe as not activated', async () => {
+    mockSpaceSafes([safeItem('1', SAFE_A, false, 'Treasury')])
+    mockOverviews([overview('1', SAFE_A)])
+
+    const { result } = renderHook(() => useEligibleSafeAccounts(), {
+      initialReduxState: undeployedState('1', SAFE_A),
+    })
+
+    await waitFor(() => expect(result.current.accounts).toHaveLength(1))
+    expect(asOption(result.current.accounts[0]).ineligibleReason).toBe('not-activated')
+  })
+
+  it('leaves a deployed Safe pickable', async () => {
+    mockSpaceSafes([safeItem('1', SAFE_A, false, 'Treasury')])
+    mockOverviews([overview('1', SAFE_A)])
+
+    const { result } = renderHook(() => useEligibleSafeAccounts())
+
+    await waitFor(() => expect(result.current.accounts).toHaveLength(1))
+    expect(asOption(result.current.accounts[0]).ineligibleReason).toBeUndefined()
+  })
+
+  it('marks only the chains a multi-chain Safe is counterfactual on', async () => {
+    mockSpaceSafes([
+      {
+        address: SAFE_A,
+        name: 'Ops',
+        isPinned: false,
+        lastVisited: 0,
+        safes: [safeItem('1', SAFE_A, false, 'Ops'), safeItem('137', SAFE_A, false, 'Ops')],
+      },
+    ])
+    mockOverviews([overview('1', SAFE_A), overview('137', SAFE_A)])
+
+    const { result } = renderHook(() => useEligibleSafeAccounts(), {
+      initialReduxState: undeployedState('137', SAFE_A),
+    })
+
+    await waitFor(() => expect(result.current.accounts).toHaveLength(1))
+    const [entry] = result.current.accounts
+    if (!isSafeAccountGroup(entry)) throw new Error('expected a group')
+    expect(entry.accounts.map(({ chainId, ineligibleReason }) => ({ chainId, ineligibleReason }))).toEqual([
+      { chainId: '1', ineligibleReason: undefined },
+      { chainId: '137', ineligibleReason: 'not-activated' },
+    ])
   })
 
   it('populates the threshold and owner count from the overviews', async () => {

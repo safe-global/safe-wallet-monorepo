@@ -30,7 +30,7 @@ export const useAddSafeToSpace = ({ spaces, onSpaceAdded }: UseAddSafeToSpaceOpt
   const showError = (detail: string) =>
     dispatch(
       showNotification({
-        message: `Failed to add Safe to workspace. ${detail}`,
+        message: `Failed to add Safe to Workspace. ${detail}`,
         variant: 'error',
         groupKey: 'add-safe-to-workspace-error',
       }),
@@ -51,7 +51,7 @@ export const useAddSafeToSpace = ({ spaces, onSpaceAdded }: UseAddSafeToSpaceOpt
       }
       dispatch(
         showNotification({
-          message: 'Successfully added Safe to workspace.',
+          message: 'Successfully added Safe to Workspace.',
           variant: 'success',
           groupKey: 'add-safe-to-workspace-success',
         }),
