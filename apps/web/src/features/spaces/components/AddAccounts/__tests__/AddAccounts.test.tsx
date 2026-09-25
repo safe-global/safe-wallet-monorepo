@@ -7,7 +7,9 @@ jest.mock('@/features/address-poisoning', () => ({
 
 jest.mock('../AddManually', () => ({
   __esModule: true,
-  default: () => <div data-testid="add-manually" />,
+  default: ({ disabled }: { disabled?: boolean }) => (
+    <div data-testid="add-manually" data-disabled={String(!!disabled)} />
+  ),
 }))
 
 // The heavy accounts table is exercised in its own suite; here we only need to observe the items it receives.
@@ -15,11 +17,12 @@ jest.mock('@/features/myAccounts', () => ({
   __esModule: true,
   SafeAccountsTable: (props: {
     items: Array<{ chainId: string; address: string }>
-    selection?: { onToggle: (line: unknown, next: boolean) => void }
+    selection?: { onToggle: (line: unknown, next: boolean) => void; isAtLimit?: boolean }
   }) => (
     <div
       data-testid="safe-accounts-table"
       data-count={props.items.length}
+      data-locked={String(Boolean(props.selection?.isAtLimit))}
       onClick={() => {
         const [item] = props.items
         props.selection?.onToggle({ key: `${item.chainId}:${item.address}`, variant: 'single', source: item }, true)
@@ -82,10 +85,11 @@ jest.mock('@/hooks/safes', () => {
 let mockIsAdmin = true
 let mockSpaceSafes: Array<{ chainId: string; address: string }> = []
 let mockSpaceSafesLoading = false
-let mockSafeLimit = 40
+let mockSafeLimit: { limit: number | null | undefined; isError: boolean } = { limit: 40, isError: false }
+const mockRetryLimit = jest.fn()
 let mockIsSafePro = false
 jest.mock('../../../hooks/useSpaceSafeLimit', () => ({
-  useSpaceSafeLimit: () => ({ limit: mockSafeLimit, isLoading: false }),
+  useSpaceSafeLimit: () => ({ ...mockSafeLimit, isLoading: false, retry: mockRetryLimit }),
 }))
 jest.mock('../../../hooks/useSeatUpsell', () => ({
   useSeatUpsell: () => ({ isSafePro: mockIsSafePro, tierName: undefined, limit: null, plansHref: '/spaces/plans' }),
@@ -186,6 +190,44 @@ describe('AddAccounts — wallet connection state', () => {
   it('keeps the manual add affordance available', () => {
     render(<AddAccounts externalOpen onExternalClose={() => {}} />)
     expect(screen.getByTestId('add-manually')).toBeInTheDocument()
+  })
+})
+
+describe('AddAccounts — Safe account limit', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockWalletValue = { address: '0xWallet' }
+    mockAllOwned = {}
+    mockIsAdmin = true
+    mockSpaceSafes = []
+    mockSpaceSafesLoading = false
+    mockSafeLimit = { limit: 40, isError: false }
+  })
+
+  it('counts against a known limit and leaves picking open below it', () => {
+    render(<AddAccounts externalOpen onExternalClose={() => {}} />, withTrusted)
+
+    expect(screen.getByTestId('selected-count')).toHaveTextContent('0 of 40 selected')
+    expect(screen.getByTestId('safe-accounts-table')).toHaveAttribute('data-locked', 'false')
+    expect(screen.getByTestId('add-manually')).toHaveAttribute('data-disabled', 'false')
+  })
+
+  it('shows no limit and locks picking while the limit is unknown', () => {
+    mockSafeLimit = { limit: undefined, isError: false }
+    render(<AddAccounts externalOpen onExternalClose={() => {}} />, withTrusted)
+
+    expect(screen.getByTestId('selected-count')).toHaveTextContent(/^\s*0 selected$/)
+    expect(screen.getByTestId('safe-accounts-table')).toHaveAttribute('data-locked', 'true')
+    expect(screen.getByTestId('add-manually')).toHaveAttribute('data-disabled', 'true')
+    expect(screen.queryByTestId('safe-limit-error')).not.toBeInTheDocument()
+  })
+
+  it('offers a retry when the limit fails to load', () => {
+    mockSafeLimit = { limit: undefined, isError: true }
+    render(<AddAccounts externalOpen onExternalClose={() => {}} />, withTrusted)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
+    expect(mockRetryLimit).toHaveBeenCalled()
   })
 })
 
@@ -459,14 +501,14 @@ describe('AddAccounts — seat limit', () => {
     mockSpaceAddressBook = []
     mockAddressBookError = false
     mockEnteredName = 'Treasury'
-    mockSafeLimit = 40
+    mockSafeLimit = { limit: 40, isError: false }
     mockIsSafePro = false
     mockUpsertWorkspaceNames.mockResolvedValue({})
   })
 
   it('links to the plans once a Safe Pro Workspace fills its seats', () => {
     mockIsSafePro = true
-    mockSafeLimit = 1
+    mockSafeLimit = { limit: 1, isError: false }
     mockSpaceSafes = [{ chainId: '1', address: TRUSTED_ADDRESS }]
     render(<AddAccounts externalOpen onExternalClose={() => {}} />, withTrusted)
 
@@ -474,7 +516,7 @@ describe('AddAccounts — seat limit', () => {
   })
 
   it('does not link to the plans at the limit without Safe Pro', () => {
-    mockSafeLimit = 1
+    mockSafeLimit = { limit: 1, isError: false }
     mockSpaceSafes = [{ chainId: '1', address: TRUSTED_ADDRESS }]
     render(<AddAccounts externalOpen onExternalClose={() => {}} />, withTrusted)
 

@@ -635,6 +635,30 @@ describe('persistCounterfactualSafe', () => {
     expect(showNotificationImpl).not.toHaveBeenCalled()
   })
 
+  it('leaves the decision to the backend while the seat limit is unknown', async () => {
+    const dispatch = jest.fn((action) => {
+      if (action.type === 'space-create-thunk') return { error: quotaExceeded() }
+      return action
+    }) as unknown as AppDispatch
+
+    const result = await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: MOCK_SPACE_UUID,
+      isUserAuthenticated: true,
+      spaceSafeCount: 400,
+      spaceSafeLimit: undefined,
+      dispatch,
+    })
+
+    expect(spaceInitiate).toHaveBeenCalled()
+    expect(showNotificationImpl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "Safe created in My accounts. The Workspace is at its seat limit, so it wasn't added there.",
+      }),
+    )
+    expect(result).toEqual({ ok: true })
+  })
+
   it('POSTs to the space endpoint at the limit when the Safe address already holds a seat there', async () => {
     const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
 
