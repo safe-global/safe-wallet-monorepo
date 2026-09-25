@@ -166,3 +166,10 @@ describe('operation', () => {
     })
   })
 })
+
+describe('activating rows', () => {
+  it('are not drawer policies, so they never resolve to the manage action', () => {
+    // @ts-expect-error an executed change waiting for the indexer has nothing to manage or sign
+    resolve({ ...mockPendingPolicy(), status: 'activating' }, MOCK_VIEWERS.signer)
+  })
+})

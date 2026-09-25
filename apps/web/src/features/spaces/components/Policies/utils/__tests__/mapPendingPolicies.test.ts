@@ -91,6 +91,20 @@ describe('mapPendingPolicies', () => {
     })
   })
 
+  it('should match the active policy on the enforcing module', () => {
+    const active = activeRows()
+    const dto = withChanges([
+      { kind: 'reset-allowance', operation: 'update', delegate: MOCK_ADDRESSES.alice, token: MOCK_TOKENS.usdc.address },
+    ])
+    const [row] = mapPendingPolicies(
+      [{ ...dto, data: { ...dto.data, module: '0x0000000000000000000000000000000000000001' } }],
+      active,
+      resolveKnownTokens,
+    )
+
+    expect(row.supersedesId).toBe(active[0].id)
+  })
+
   it('should, when an allowance is deleted, render a removal of the active allowance', () => {
     const active = activeRows()
     const [row] = mapPendingPolicies(

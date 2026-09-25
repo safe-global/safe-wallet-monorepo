@@ -24,7 +24,7 @@ const findActive = (dto: PendingPolicyDto, active: Policy[]): ActiveSpendingLimi
         policy.safe.chainId === dto.safe.chainId &&
         sameAddress(policy.safe.address, dto.safe.address) &&
         policy.enforcement.via === 'module' &&
-        sameAddress(policy.enforcement.moduleAddress, dto.data.module),
+        sameAddress(policy.enforcement.moduleAddress, dto.enforcement.moduleAddress),
     )
 
 const findActiveAllowance = (

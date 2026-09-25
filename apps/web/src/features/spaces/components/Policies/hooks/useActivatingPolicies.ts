@@ -25,33 +25,52 @@ const snapshotFor = (policy: PendingSpendingLimitPolicy, dtos: ActivePolicyDto[]
 const isStillHeld = (entry: Held, dtos: ActivePolicyDto[]): boolean =>
   Date.now() - entry.since < HOLD_MS && snapshotFor(entry.policy, dtos) === entry.snapshot
 
+type Options = {
+  refetchActive: () => void
+  /** Held rows belong to one space; a new key drops them. */
+  resetKey: string | null
+  /** False while the policy queries are skipped, so there is nothing to refetch. */
+  enabled: boolean
+}
+
 /** Executed transactions leave the queue before the indexer reports them; this keeps their row on screen meanwhile. */
 export const useActivatingPolicies = (
   pending: PendingSpendingLimitPolicy[],
   activeDtos: ActivePolicyDto[],
-  refetchActive: () => void,
+  { refetchActive, resetKey, enabled }: Options,
 ): PendingSpendingLimitPolicy[] => {
   const [held, setHeld] = useState<Held[]>([])
   const previous = useRef<PendingSpendingLimitPolicy[]>([])
   const latestDtos = useRef(activeDtos)
+  const latestKey = useRef(resetKey)
   const [getTransaction] = useLazyTransactionsGetTransactionByIdV1Query()
 
+  // Declared before the queue effect, so a space switch is not read as every row leaving the queue.
   useEffect(() => {
-    const gone = previous.current.filter((row) => !pending.some((next) => next.safeTxHash === row.safeTxHash))
+    latestKey.current = resetKey
+    previous.current = []
+    setHeld((current) => (current.length === 0 ? current : []))
+  }, [resetKey])
+
+  useEffect(() => {
+    const gone = previous.current.filter((row) => !pending.some((next) => next.id === row.id))
     previous.current = pending
 
     gone.forEach(async (row) => {
+      const key = latestKey.current
       // Still the dtos of the last render in which the row was queued: this effect runs before the ref is updated.
       const snapshot = snapshotFor(row, latestDtos.current)
-      const { data } = await getTransaction({
+      const { data, error } = await getTransaction({
         chainId: row.safe.chainId,
         id: `multisig_${row.safe.address}_${row.safeTxHash}`,
       })
+      if (error && 'status' in error && error.status === 404) return
       if (data && data.txStatus !== 'SUCCESS') return
+      if (latestKey.current !== key) return
       if (snapshotFor(row, latestDtos.current) !== snapshot) return
 
       setHeld((current) =>
-        current.some((entry) => entry.policy.safeTxHash === row.safeTxHash)
+        current.some((entry) => entry.policy.id === row.id)
           ? current
           : [...current, { policy: { ...row, status: 'activating' }, since: Date.now(), snapshot }],
       )
@@ -67,14 +86,14 @@ export const useActivatingPolicies = (
   }, [activeDtos])
 
   useEffect(() => {
-    if (held.length === 0) return
+    if (!enabled || held.length === 0) return
 
     const interval = setInterval(() => {
       refetchActive()
       setHeld((current) => current.filter((entry) => isStillHeld(entry, latestDtos.current)))
     }, POLL_MS)
     return () => clearInterval(interval)
-  }, [held.length, refetchActive])
+  }, [enabled, held.length, refetchActive])
 
   return held.map((entry) => entry.policy)
 }

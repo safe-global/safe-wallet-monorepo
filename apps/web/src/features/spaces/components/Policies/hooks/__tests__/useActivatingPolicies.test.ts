@@ -11,16 +11,20 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/transactions', () => ({
   useLazyTransactionsGetTransactionByIdV1Query: () => [mockGetTransaction],
 }))
 
-type Props = { pending: PendingSpendingLimitPolicy[]; dtos: ActivePolicyDto[] }
+type Props = { pending: PendingSpendingLimitPolicy[]; dtos: ActivePolicyDto[]; resetKey: string; enabled: boolean }
 
 const setup = (refetchActive = jest.fn()) => {
   const initialProps: Props = {
     pending: [mockPendingPolicy({ safe: MOCK_SAFES.treasury })],
     dtos: [mockSpendingLimitDto()],
+    resetKey: 'space-1',
+    enabled: true,
   }
-  const hook = renderHook(({ pending, dtos }: Props) => useActivatingPolicies(pending, dtos, refetchActive), {
-    initialProps,
-  })
+  const hook = renderHook(
+    ({ pending, dtos, resetKey, enabled }: Props) =>
+      useActivatingPolicies(pending, dtos, { refetchActive, resetKey, enabled }),
+    { initialProps },
+  )
   return { ...hook, refetchActive, initialProps }
 }
 
@@ -42,6 +46,18 @@ describe('useActivatingPolicies', () => {
   })
 
   it('should, when a pending row leaves the queue because it was deleted, drop it', async () => {
+    mockGetTransaction.mockResolvedValue({ error: { status: 404 } })
+    const { result, rerender, initialProps } = setup()
+
+    rerender({ ...initialProps, pending: [] })
+
+    await act(async () => {})
+
+    expect(mockGetTransaction).toHaveBeenCalled()
+    expect(result.current).toEqual([])
+  })
+
+  it('should, when the transaction left the queue without executing, drop it', async () => {
     mockGetTransaction.mockResolvedValue({ data: { txStatus: 'AWAITING_CONFIRMATIONS' } })
     const { result, rerender, initialProps } = setup()
 
@@ -63,9 +79,9 @@ describe('useActivatingPolicies', () => {
   })
 
   it('should, when the active policy changes in the same update the row leaves the queue, not hold it', async () => {
-    const { result, rerender } = setup()
+    const { result, rerender, initialProps } = setup()
 
-    rerender({ pending: [], dtos: [mockSpendingLimitDto({ enabled: false })] })
+    rerender({ ...initialProps, pending: [], dtos: [mockSpendingLimitDto({ enabled: false })] })
     await act(async () => {})
 
     expect(mockGetTransaction).toHaveBeenCalled()
@@ -78,7 +94,7 @@ describe('useActivatingPolicies', () => {
     const { result, rerender, initialProps } = setup()
     rerender({ ...initialProps, pending: [] })
 
-    rerender({ pending: [], dtos: [mockSpendingLimitDto({ enabled: false })] })
+    rerender({ ...initialProps, pending: [], dtos: [mockSpendingLimitDto({ enabled: false })] })
     await act(async () => resolveLookup({ data: { txStatus: 'SUCCESS' } }))
 
     expect(result.current).toEqual([])
@@ -102,7 +118,7 @@ describe('useActivatingPolicies', () => {
     rerender({ ...initialProps, pending: [] })
     await waitFor(() => expect(result.current).toHaveLength(1))
 
-    rerender({ pending: [], dtos: [mockSpendingLimitDto({ enabled: false })] })
+    rerender({ ...initialProps, pending: [], dtos: [mockSpendingLimitDto({ enabled: false })] })
 
     expect(result.current).toEqual([])
   })
@@ -125,5 +141,53 @@ describe('useActivatingPolicies', () => {
     act(() => jest.advanceTimersByTime(30_000))
 
     expect(refetchActive).toHaveBeenCalledTimes(2)
+  })
+
+  it('should, when one transaction changes two modules, hold both rows', async () => {
+    const { result, rerender, initialProps } = setup()
+    const [allowanceRow] = initialProps.pending
+    const otherModuleRow = mockPendingPolicy({
+      id: 'pending:other-module',
+      safe: MOCK_SAFES.treasury,
+      enforcement: { via: 'module', moduleAddress: '0x0000000000000000000000000000000000000001' },
+    })
+    rerender({ ...initialProps, pending: [allowanceRow, otherModuleRow] })
+
+    rerender({ ...initialProps, pending: [] })
+
+    await waitFor(() => expect(result.current.map((row) => row.id)).toEqual([allowanceRow.id, otherModuleRow.id]))
+  })
+
+  it('should, when the space changes, clear the held rows', async () => {
+    const { result, rerender, initialProps } = setup()
+    rerender({ ...initialProps, pending: [] })
+    await waitFor(() => expect(result.current).toHaveLength(1))
+
+    rerender({ ...initialProps, pending: [], resetKey: 'space-2' })
+
+    expect(result.current).toEqual([])
+  })
+
+  it('should, when the space changes while the lookup is in flight, not hold the row', async () => {
+    let resolveLookup: (value: { data: { txStatus: string } }) => void = () => {}
+    mockGetTransaction.mockReturnValue(new Promise((resolve) => (resolveLookup = resolve)))
+    const { result, rerender, initialProps } = setup()
+    rerender({ ...initialProps, pending: [] })
+
+    rerender({ ...initialProps, pending: [], resetKey: 'space-2' })
+    await act(async () => resolveLookup({ data: { txStatus: 'SUCCESS' } }))
+
+    expect(result.current).toEqual([])
+  })
+
+  it('should, while disabled, not refetch active', async () => {
+    const { result, rerender, initialProps, refetchActive } = setup()
+    rerender({ ...initialProps, pending: [] })
+    await waitFor(() => expect(result.current).toHaveLength(1))
+
+    rerender({ ...initialProps, pending: [], enabled: false })
+    act(() => jest.advanceTimersByTime(30_000))
+
+    expect(refetchActive).not.toHaveBeenCalled()
   })
 })

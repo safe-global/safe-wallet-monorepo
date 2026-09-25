@@ -1,6 +1,7 @@
 import {
   MOCK_SAFES,
   asActivePolicy,
+  mockActivatingPolicy,
   mockPendingPolicy,
   mockProposerPolicy,
   mockRecoveryPolicy,
@@ -51,7 +52,7 @@ describe('sortPolicies', () => {
 
   it('should, when sorting by status, put an activating row between pending and active', () => {
     const active = asActivePolicy(mockSpendingLimitPolicy())
-    const activating = mockPendingPolicy({ id: 'activating', status: 'activating' })
+    const activating = mockActivatingPolicy({ id: 'activating' })
     const pending = mockPendingPolicy()
 
     const sorted = sortPolicies([active, activating, pending], 'status', context)

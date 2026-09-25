@@ -5,7 +5,7 @@ import { TxEvent, txDispatch } from '@/services/tx/txEvents'
 import { SPACE_REFRESH_OPTIONS } from '../../../../hooks/refreshOptions'
 import { mockProposerDto, mockSpendingLimitDto, mockUsdcMetadata } from '../../mocks/activePolicies'
 import { mockPendingDto } from '../../mocks/pendingPolicies'
-import { MOCK_TOKENS, mockPendingPolicy } from '../../mocks/policies'
+import { MOCK_TOKENS, mockActivatingPolicy } from '../../mocks/policies'
 import { PENDING_POLICY_TYPES, TABLE_POLICY_TYPES, useSpacePolicies } from '../useSpacePolicies'
 
 const SPACE_ID = '11111111-1111-1111-1111-111111111111'
@@ -200,7 +200,7 @@ describe('useSpacePolicies', () => {
   it('should, when an executed change is not yet indexed, append its activating row', () => {
     mockPoliciesQuery.mockReturnValue({ ...idle, currentData: [mockSpendingLimitDto()] })
     mockPendingQuery.mockReturnValue({ ...idle, currentData: [mockPendingDto()] })
-    mockUseActivatingPolicies.mockReturnValue([mockPendingPolicy({ status: 'activating' })])
+    mockUseActivatingPolicies.mockReturnValue([mockActivatingPolicy()])
 
     const { result } = renderHook(() => useSpacePolicies())
 
@@ -228,11 +228,33 @@ describe('useSpacePolicies', () => {
 
   it('should, while pending rows load for the first time, count as loading', () => {
     mockPoliciesQuery.mockReturnValue({ ...idle, currentData: [] })
-    mockPendingQuery.mockReturnValue({ ...idle, isFetching: true })
+    mockPendingQuery.mockReturnValue({ ...idle, isLoading: true, isFetching: true })
 
     const { result } = renderHook(() => useSpacePolicies())
 
     expect(result.current.isLoading).toBe(true)
+  })
+
+  it('should, while retrying the pending rows after a failure, keep the active rows on screen', () => {
+    mockPoliciesQuery.mockReturnValue({ ...idle, currentData: [mockSpendingLimitDto()] })
+    mockPendingQuery.mockReturnValue({ ...idle, isFetching: true })
+
+    const { result } = renderHook(() => useSpacePolicies())
+
+    expect(result.current.isLoading).toBe(false)
+    expect(result.current.policies).toHaveLength(1)
+  })
+
+  it('should hand the activating rows the space and whether the requests run', () => {
+    mockIsAuthenticated = false
+
+    renderHook(() => useSpacePolicies())
+
+    expect(mockUseActivatingPolicies).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
+      refetchActive: idle.refetch,
+      resetKey: SPACE_ID,
+      enabled: false,
+    })
   })
 
   it('should, when a Safe transaction is proposed, refetch the pending rows', () => {

@@ -69,16 +69,20 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
     () => mapPendingPolicies(pendingDtos, activeRows, resolveToken),
     [pendingDtos, activeRows, resolveToken],
   )
-  const activatingRows = useActivatingPolicies(pendingRows, dtos, active.refetch)
+  const activatingRows = useActivatingPolicies(pendingRows, dtos, {
+    refetchActive: active.refetch,
+    resetKey: spaceId,
+    enabled: !skip,
+  })
 
   const policies = useMemo(
     () => [...activeRows, ...pendingRows, ...activatingRows],
     [activeRows, pendingRows, activatingRows],
   )
 
-  // RTK's isLoading stays false on a refetch after an error, which would render the empty catalogue.
+  // RTK's isLoading stays false on a refetch after an error: wanted for the optional pending rows, not for active ones.
   const isLoadingActive = active.isFetching && !active.currentData
-  const isLoadingPending = pending.isFetching && !pending.currentData && !pending.isError
+  const isLoadingPending = pending.isLoading
 
   const refetch = () => {
     active.refetch()

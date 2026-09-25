@@ -2,6 +2,7 @@ import { fireEvent, render, screen, within } from '@/tests/test-utils'
 import {
   MOCK_SAFES,
   asActivePolicy,
+  mockActivatingPolicy,
   mockActiveSpendingLimit,
   mockMultiSpenderPolicy,
   mockPendingPolicy,
@@ -120,7 +121,7 @@ describe('PoliciesTable', () => {
   })
 
   it('should, when an executed change is not yet indexed, show it as activating without signatures', () => {
-    render(<PoliciesTable policies={[mockPendingPolicy({ status: 'activating' })]} />)
+    render(<PoliciesTable policies={[mockActivatingPolicy()]} />)
 
     expect(screen.getByTestId('policy-status-activating')).toHaveTextContent('Activating')
     expect(screen.queryByTestId('policy-pending-progress')).not.toBeInTheDocument()
