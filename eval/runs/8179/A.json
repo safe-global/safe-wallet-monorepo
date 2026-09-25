@@ -1,0 +1,19 @@
+{
+  "pr": 8179,
+  "reviewSha": "ab035b78e9f08875746b4dfe6e52bae638c9468f",
+  "baseSha": "c9b7d88ffbff528f07ca1636a59d49c66c9592c5",
+  "system": "A",
+  "version": "73bf04408c26562bbf8945904bd1c02d8b9b1603",
+  "model": "claude-opus-5-5[1m]",
+  "runner": "valleXYZ",
+  "usage": {
+    "inputTokens": 26,
+    "outputTokens": 5665,
+    "cacheReadTokens": 1006220,
+    "cacheWriteTokens": 83582,
+    "turns": 14,
+    "wallSeconds": 86,
+    "apiEquivalentUsd": 0.9833040000000001
+  },
+  "output": "I went through all 76 rules in the generated checklist against `git diff c9b7d88f...HEAD`: 2 files, +77/−2. I found two possible convention issues and nothing that clearly breaks a rule. I made no changes to tracked files. The checklist went to the scratchpad instead of `docs/engineering/`, and I didn't run tests or use `gh`.\n\n**The change:** in `apps/web/src/components/tx-flow/common/TxNonce/index.tsx`, the label for a previous nonce in the dropdown now shows the transaction's note (trimmed) first. If there's no note, it falls back to `humanDescription`, then to the transaction type. Four new tests in `__tests__/TxNonce.test.tsx` cover the note, the missing note, a whitespace-only note, and a nonce with no queued transaction.\n\n## Findings\n\n**1. PROD-01 / FEAT-01 (possible, medium): the note shows even when the tx-notes feature is off**\n- **Where:** `apps/web/src/components/tx-flow/common/TxNonce/index.tsx:70`\n- **What:** everywhere else, notes are shown through the tx-notes feature (`features/tx-notes/components/TxNote/index.tsx:8`), which loads only when the `TX_NOTES` flag is on (see `features/tx-notes/feature.ts`). This change reads `transaction.note` directly, with no flag check.\n- **When it matters:** on a chain where the flag is off, or after it's switched off, any note the backend still returns will show in this dropdown but nowhere else.\n- **Fix:** either confirm the flag isn't meant to gate this label and say so in the PR description, or check the flag before using the note.\n\n**2. UX-01 (possible, low): long notes may widen the dropdown**\n- **Where:** `apps/web/src/components/tx-flow/common/TxNonce/index.tsx:81`, and `styles.module.css` (`.popper`)\n- **What:** notes are free text up to 60 characters (`MAX_NOTE_LENGTH` in `features/tx-notes/components/TxNoteInput/index.tsx:6`). The dropdown is deliberately not tied to the field's width, and nothing sets a maximum width or truncation for the label.\n- **When it matters:** a 60-character note with no spaces could make the dropdown very wide. The server-generated descriptions shown before were less likely to do this.\n- **Fix:** add a maximum width with ellipsis on the option text, or confirm the current look is fine at 60 characters.\n\n## Rules that applied and passed\n- **TEST-01:** the note test also checks the fallback text is absent, so it would fail if the old order came back.\n- **TEST-02:** the new branches (note, trimmed empty note, fallbacks) each have a test.\n- **TEST-05:** the tests build fixtures inline. That's acceptable here because `tests/builders` has no builder for queued transaction summaries.\n- **TX-01:** it only changes how the label reads; the nonce-locking logic for rejections and signed transactions is untouched.\n- **CODE-04:** the label is computed once in the existing `useMemo`.\n- **General rule against `any`:** none was added.\n\n## Other rules\nAll other rules don't apply to this diff: auth, RTK Query, mobile, CI, E2E, chain, security, docs and the rest.\n\nI didn't need to look up the review history behind any rule. I can't see the PR description, so if it already states the product decision on notes, finding 1 is resolved."
+}

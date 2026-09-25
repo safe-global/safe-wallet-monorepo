@@ -1,0 +1,19 @@
+{
+  "pr": 8152,
+  "reviewSha": "d52cb04a0bbb7cd63e1f5b00d0b853dac077b59c",
+  "baseSha": "e7d8ae85613328030e0fe90659bbd9fc0db6cb9e",
+  "system": "A",
+  "version": "73bf04408c26562bbf8945904bd1c02d8b9b1603",
+  "model": "claude-opus-5-5[1m]",
+  "runner": "valleXYZ",
+  "usage": {
+    "inputTokens": 28,
+    "outputTokens": 5283,
+    "cacheReadTokens": 1036338,
+    "cacheWriteTokens": 66935,
+    "turns": 16,
+    "wallSeconds": 87,
+    "apiEquivalentUsd": 0.8485195999999999
+  },
+  "output": "## Convention review (`/code-conventions --review-pr`): 1 finding\n\nI checked the three files in `e7d8ae856...HEAD` against all 78 rules in `docs/engineering/sources/rules.json` and marked every one checked. The diff adds a reusable mobile component: `apps/mobile/src/components/SegmentedControl/` (`SegmentedControl.tsx`, `index.ts`, `SegmentedControl.test.tsx`).\n\nNothing in the repo changed. I wrote the checklist to the scratchpad, not to `docs/engineering/`, and ran no tests.\n\n### Finding\n\n**1. Hard-coded `borderRadius` numbers instead of Tamagui radius tokens (low)**\n- **Where:** `apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx:19` (`borderRadius={12}`) and `SegmentedControl.tsx:37` (`borderRadius={8}`).\n- **Rule broken:** `docs/engineering/conventions/mobile/project-structure.md` (\"UI Conventions\") says mobile UI should use Tamagui tokens \"instead of magic numbers\". The only allowed exception is `100`/`150` for circular clipping. The root `AGENTS.md` also says to always use theme tokens. The closest checklist rule is UI-01, which covers colours and assets.\n- **Why it matters:** `packages/theme/src/tokens/radius.ts` already has exact matches: `5: 12` and `4: 8`. `$3`, `$2` and `$4` are the repo's most common `borderRadius` values. This is a new shared building block, and hard-coded values here will get copied into every screen that uses it.\n- **Fix:** Use `borderRadius=\"$5\"` on the outer track and `borderRadius=\"$4\"` on the selected pill.\n- **Note:** The codebase already mixes styles (`borderRadius={8}` appears 16 times), so this is a small cleanup, not a blocker.\n\n### Rules that applied and passed\n- **UI-01 (colours):** every colour is a theme token (`$backgroundSecondary`, `$background`, `$color`, `$colorSecondary`). Spacing uses tokens too (`$1`, `$3`).\n- **CODE-01 (reuse):** the existing `SafeTab` / `SafeTabBar` is a collapsible, underline-style tab bar for tab views. It isn't the same as a pill-style segmented control, so this isn't a duplicate.\n- **TEST-01 / TEST-02 (tests):** the tests check that labels render, that `onChange` gets the pressed value, and that `accessibilityState.selected` is set for both selected and unselected options. They would fail if the selected branch broke. The one untested branch is the optional per-option `testID` (`SegmentedControl.tsx:30`); it's minor and I didn't report it.\n- **API-01, PKG-01, MOB-03:** nothing is removed or renamed, nothing is copied from `packages/**`, and nothing is imported from a non-standard React Native entry point.\n- **CODE-04, PERF-01:** no derived value is repeated in the JSX and there are no regexes or expensive work inside the `map`.\n\nAll other rules are about web, CI, auth, transactions, RTK or chains and don't touch this diff. I didn't need to look up the review history behind any rule. No rule failures or questions are left open apart from the finding above."
+}
