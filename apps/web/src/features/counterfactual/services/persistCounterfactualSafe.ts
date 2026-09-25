@@ -15,7 +15,7 @@ import { replayCounterfactualSafeDeployment } from './safeDeployment'
 import { enqueuePendingCfDelete } from '../store/pendingCfDeletesSlice'
 import { removeUndeployedSafe } from '../store/undeployedSafesSlice'
 import { showNotification } from '@/store/notificationsSlice'
-import { isSpaceAtSafeLimit, normalizeSpaceId } from '@/utils/spaces'
+import { isSpaceAtSafeLimit, normalizeSpaceId, type SafeLimit } from '@/utils/spaces'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 type PersistArgs = {
@@ -37,8 +37,8 @@ type PersistArgs = {
    *  the backend would reject the add; the safe is still persisted at the user
    *  level and the user is informed via a toast. */
   spaceSafeCount?: number
-  /** Seats the space's plan allows (`useSpaceSafeLimit`); `null` = unlimited. */
-  spaceSafeLimit: number | null
+  /** Seats the space's plan allows (`useSpaceSafeLimit`); `null` = unlimited, `undefined` = unknown, so the backend decides. */
+  spaceSafeLimit: SafeLimit
   /** The Safe address is already in the space on another chain, so this add takes no new seat. */
   holdsSeatInSpace?: boolean
   /** True when this call is one chain of a multi-chain creation batch. A legacy
@@ -260,8 +260,8 @@ function getQuotaExceeded(error: unknown): { quota: number | null } | undefined 
   return { quota: typeof data.quota === 'number' ? data.quota : null }
 }
 
-function seatLimitMessage(limit: number | null): string {
-  const seats = limit === null ? 'seat limit' : `limit of ${limit} Safe accounts`
+function seatLimitMessage(limit: SafeLimit): string {
+  const seats = typeof limit === 'number' ? `limit of ${limit} Safe accounts` : 'seat limit'
   return `Safe created in My accounts. The Workspace is at its ${seats}, so it wasn't added there.`
 }
 
