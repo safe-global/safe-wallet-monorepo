@@ -40,7 +40,12 @@
     "isows": "1.0.7",
     "webpack": "5.97.1",
     "react-native-quick-base64": "2.2.2",
-    "@tamagui/image@npm:2.0.0-rc.26": "patch:@tamagui/image@npm%3A2.0.0-rc.26#~/.yarn/patches/@tamagui-image-npm-2.0.0-rc.26-04087a216c.patch"
+    "@tamagui/image@npm:2.0.0-rc.26": "patch:@tamagui/image@npm%3A2.0.0-rc.26#~/.yarn/patches/@tamagui-image-npm-2.0.0-rc.26-04087a216c.patch",
+    "lodash": "4.18.1",
+    "glob@^10.2.2": "10.5.0",
+    "glob@^10.3.7": "10.5.0",
+    "glob@^10.3.10": "10.5.0",
+    "minimatch@^10.1.1": "10.2.2"
   },
   "devDependencies": {
     "@storybook/builder-webpack5": "^10.2.6",
