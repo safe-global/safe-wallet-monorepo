@@ -121,6 +121,14 @@ export const useTxActions = (): TxActions => {
       assertTx(safeTx)
       assertProvider(signer?.provider)
 
+      // EOA wallets sign off-chain before adding to the batch so every transaction is recorded
+      // with an explicit signature. SC wallets (nested Safes, smart accounts) keep the unsigned
+      // proposal path, mirroring the sign-before-execute flow.
+      const isSmartAccount = await isSmartContractWallet(signer.chainId, signer.address)
+      if (!signer.isSafe && !isSmartAccount && safeTx.signatures.size < safe.threshold) {
+        safeTx = await dispatchTxSigning(safeTx, signer.provider)
+      }
+
       const tx = await _propose(signer.address, safeTx, origin)
 
       await addTxToBatch(tx)
@@ -205,6 +213,21 @@ export const useTxActions = (): TxActions => {
         rePropose = true
       }
 
+      // Hoist SC-wallet check so we can reuse it for the sign guard and dispatchTxExecution
+      const isSmartAccount = !isRelayed ? await isSmartContractWallet(signer.chainId, signer.address) : false
+
+      // Non-relayed EOA wallets must sign before executing so every transaction is
+      // recorded with an explicit signature before execution. SC wallets (signer.isSafe
+      // or isSmartAccount) use the implicit executor approval path instead.
+      if (!isRelayed && !signer.isSafe && !isSmartAccount && safeTx.signatures.size < safe.threshold) {
+        safeTx = await dispatchTxSigning(safeTx, signer.provider, txId)
+        rePropose = true
+        // The UI-computed gasLimit was estimated with a pre-validated signature (near-zero cost
+        // when executor == owner). EIP-712 verification costs ~3 000 gas more (ecrecover).
+        // Clear the stale limit so sdk.executeTransaction re-estimates with the real signature.
+        txOptions = { ...txOptions, gasLimit: undefined }
+      }
+
       // Propose the tx if there's no id yet, or send the new signature to the already proposed tx
       if (!txId || rePropose) {
         txId = await _proposeOrConfirm(signer.address, safeTx, txId, origin)
@@ -223,7 +246,6 @@ export const useTxActions = (): TxActions => {
           sponsorSpaceId,
         )
       } else {
-        const isSmartAccount = await isSmartContractWallet(signer.chainId, signer.address)
         await dispatchTxExecution(
           safe.chainId,
           safeTx,
