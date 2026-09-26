@@ -7,6 +7,7 @@ import { storePrivateKey } from '@/src/hooks/useSign/useSign'
 import useDelegate from '@/src/hooks/useDelegate'
 import { useAddressOwnershipValidation } from '@/src/hooks/useAddressOwnershipValidation'
 import type { Signer } from '@/src/store/signersSlice'
+import { KeyStorageError } from '@/src/services/key-storage/errors'
 
 // Mock ONLY I/O boundaries
 jest.mock('@/src/hooks/useSign/useSign')
@@ -390,6 +391,24 @@ describe('useImportSeedPhraseAddress', () => {
   })
 
   describe('importAddress - storage errors', () => {
+    it('shows an actionable authentication error from key storage', async () => {
+      const { result } = renderHook(() => useImportSeedPhraseAddress())
+      mockValidateAddressOwnership.mockResolvedValue({
+        isOwner: true,
+        ownerInfo: { value: VALID_ADDRESS },
+      })
+      const error = new KeyStorageError(new Error('Status: -25293'))
+      mockStorePrivateKey.mockRejectedValueOnce(error)
+
+      await act(async () => {
+        await result.current.importAddress(VALID_ADDRESS, DERIVATION_PATH, ACCOUNT_INDEX, VALID_PRIVATE_KEY)
+      })
+
+      expect(result.current.error).toEqual({ code: 'IMPORT', message: error.message })
+      expect(result.current.isImporting).toBe(false)
+      expect(mockCreateDelegate).not.toHaveBeenCalled()
+    })
+
     it('should fail import when storage fails', async () => {
       const { result } = renderHook(() => useImportSeedPhraseAddress())
 
