@@ -1,0 +1,15 @@
+{
+  "usd": 0.032437999999999995,
+  "findings": [
+    {
+      "file": "apps/web/src/components/tx-flow/common/TxNonce/index.tsx",
+      "line": 70,
+      "claim": "In the \"Replace existing\" nonce option, the free-text note written by the proposer now replaces the decoded human-readable label instead of appearing alongside it, so a signer choosing which transaction to replace only sees the note text and cannot tell what the transaction actually does. This could lead a signer to skip replacing (cancel) the wrong transaction or replace the wrong one, whereas elsewhere in the app the note is shown next to the type or attributed to its author rather than substituting for the decoded label."
+    },
+    {
+      "file": "apps/web/src/components/tx-flow/common/TxNonce/index.tsx",
+      "line": 70,
+      "claim": "The note is rendered at full length in the dropdown instead of being truncated with ellipsis and a title tooltip, unlike the existing pattern used elsewhere (ellipsis(tx.note, 25) plus title={tx.note}). Since notes can be up to 60 characters and the containing popper has no width constraint, a long note can stretch the nonce dropdown on narrow screens; it is also unclear whether the backend enforces this length cap, so a note sent directly to the API could be even longer."
+    }
+  ]
+}

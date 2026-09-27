@@ -1,0 +1,60 @@
+{
+  "usd": 0.058616,
+  "findings": [
+    {
+      "file": "apps/web/src/components/common/SafeListSortToggle/index.tsx",
+      "line": 15,
+      "claim": "The new sort control duplicates the label map from OrderByButton instead of sharing it, creating duplicated logic that can drift out of sync."
+    },
+    {
+      "file": "apps/web/src/components/common/SafeListSortToggle/index.tsx",
+      "line": 53,
+      "claim": "Unlike OrderByButton, which sends a trackEvent with OVERVIEW_EVENTS.SORT_SAFES on sort change, the new toggle's onValueChange sends no analytics event, so sort changes made from the account selector and the All accounts modal are not tracked."
+    },
+    {
+      "file": "apps/web/src/store/index.ts",
+      "line": 149,
+      "claim": "The one-time reset overrides any persisted state whose resetVersion is not 1, so it cannot distinguish a user who stayed on the old default from one who deliberately chose \"Most recent\"; everyone gets moved to Name regardless of intent."
+    },
+    {
+      "file": "apps/web/src/store/orderByPreferenceSlice.ts",
+      "line": 10,
+      "claim": "The comment states the reset only \"resets users still on the previous default,\" but the actual code resets all users regardless of their chosen preference, so the comment is inaccurate and should be corrected."
+    },
+    {
+      "file": "apps/web/src/store/orderByPreferenceSlice.test.ts",
+      "line": 27,
+      "claim": "The test only asserts that ORDER_BY_RESET_VERSION is of type number, which passes regardless of what the migration actually does and therefore cannot catch a regression in the reset behavior; since the real reset behavior is already covered in store/__tests__/index.test.ts, this test should be removed."
+    },
+    {
+      "file": "apps/web/src/components/common/SpaceSafeBar/hooks/useSafeBarSafes.ts",
+      "line": 100,
+      "claim": "spaceDropdownSafes now puts the current Safe first and sorts the rest in the space dropdown, but the only space-context tests use a one-item list, so neither the \"current first\" rule nor the sort behavior is exercised."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "When a space route has a URL Safe that isn't part of the space, the new code adds fallbackCurrentSafe to the top of the space list; this new visible behavior has no test, so nothing confirms it is intended."
+    },
+    {
+      "file": "apps/web/src/store/index.ts",
+      "line": 149,
+      "claim": "The orderByState && guard, which leaves state without the slice untouched, is not covered by any test."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/SafeDropdownContainer.tsx",
+      "line": 154,
+      "claim": "The search placeholder now reads \"by name, address or network,\" which is a sentence fragment and no longer matches the wording used in the neighboring All accounts modal, which still says \"Search by name or address\"."
+    },
+    {
+      "file": "apps/web/src/components/common/SafeListSortToggle/index.tsx",
+      "line": 37,
+      "claim": "The trigger's long class list repeats the adjacent InputGroup styling (rounded-md border-gray-100 shadow-none) instead of being named/shared, though this is acceptable while used only once."
+    },
+    {
+      "file": "apps/web/src/features/spaces/hooks/useSpaceSafes.tsx",
+      "line": 27,
+      "claim": "A 4-line comment here, along with inline comments at SafeListSortToggle/index.tsx:34-35, could be trimmed per the project's guidance that comments are tech debt."
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "usd": 0.052843600000000004,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spending-limits/components/CreateSpendingLimit/index.tsx",
+      "line": 24,
+      "claim": "When the token's decimals are not yet known, validation returns early and treats any amount as valid, so the form does not block submission while the token is missing from the balances list."
+    },
+    {
+      "file": "apps/web/src/features/spending-limits/components/ReviewSpendingLimit/index.tsx",
+      "line": 33,
+      "claim": "Because decimals can be undefined at this point, undefined is passed into the transaction creation call instead of a real decimals value."
+    },
+    {
+      "file": "services/spendingLimitExecution.ts",
+      "line": 101,
+      "claim": "parseUnits is called with tokenDecimals ?? undefined, so when decimals are unknown it silently falls back to 18 decimals, which can produce an allowance far larger than the user intended for tokens with fewer decimals (e.g. 6-decimal ERC-20s)."
+    },
+    {
+      "file": "apps/web/src/features/spending-limits/components/ReviewSpendingLimit/index.tsx",
+      "line": 98,
+      "claim": "The SendAmountBlock is hidden when the token is missing, so the user ends up signing an allowance transaction without ever seeing the amount they are approving."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The check that rejects amounts too large for the contract's int96 allowance field is skipped in this flow, only surfacing as an error later at the review step instead of blocking earlier."
+    },
+    {
+      "file": "apps/web/src/features/spending-limits/components/CreateSpendingLimit/index.tsx",
+      "line": 27,
+      "claim": "The decimals ?? 'Gwei' fallback is now unreachable dead code because of the new early return above it, and it should be simplified to parseUnits(val, decimals)."
+    },
+    {
+      "file": "apps/web/src/features/spending-limits/components/CreateSpendingLimit/CreateSpendingLimit.test.tsx",
+      "line": 21,
+      "claim": "The nativeBalance test fixture is written out by hand instead of using the existing balanceBuilder()/nativeTokenBuilder() helpers already available in the test builders, so the new test does not follow the project's convention of using builders for unit test fixtures."
+    },
+    {
+      "file": "apps/web/src/components/tx-flow/flows/NewSpendingLimit/__tests__/SpendingLimitForm.test.ts",
+      "line": 25,
+      "claim": "The new 'unknown decimals' test case was added to a test file outside the feature that imports _validateSpendingLimit from deep inside the feature, requiring an eslint-disable for no-restricted-imports; it should instead be placed in the new test file already added inside the feature, which would avoid the deep import and the lint suppression."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The change alters user-facing behavior: Safes with no balance can now create a spending limit with an unchecked amount and the token selector can show blank, and the PR description does not state whether product or design signed off on this behavior change."
+    }
+  ]
+}

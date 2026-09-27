@@ -1,0 +1,30 @@
+{
+  "usd": 0.0642656,
+  "findings": [
+    {
+      "file": "apps/web/src/features/swap/helpers/utils.ts",
+      "line": 222,
+      "claim": "The code looks up the order type by enum name (UiOrderType[params.orderType as keyof typeof UiOrderType]), but the adjacent comment says the lookup is by value; this only works because the local enum's names happen to equal its values, and an inherited property name such as 'constructor' would not be nullish and would skip the intended fallback to SWAP, though this can only be triggered by a value outside the widget's own typed payload."
+    },
+    {
+      "file": "apps/web/src/features/swap/helpers/fee.ts",
+      "line": 70,
+      "claim": "The fix for the crash where buyToken?.address.toLowerCase() threw when buyToken had no address is not covered by any test, since every case in fee.test.ts passes a string address for both tokens, so reverting the fix would not cause any test to fail."
+    },
+    {
+      "file": "apps/web/src/features/swap/helpers/utils.ts",
+      "line": 5,
+      "claim": "The package @cowprotocol/events is imported (including in this diff's new import) but is not declared as a dependency in apps/web/package.json; the diff also removes the root version pin, so the version apps/web compiles against now depends on whatever range widget-react requires, and the import only resolves because the node-modules linker hoists it."
+    },
+    {
+      "file": "apps/web/src/features/swap/helpers/__tests__/utils.test.ts",
+      "line": 439,
+      "claim": "The test 'does not silently reset LIMIT/TWAP to SWAP' duplicates the assertions already made by the preceding test, which shows LIMIT maps to LIMIT and TWAP maps to TWAP."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "widget-react@3.2.2 requires exactly react 19.1.2, while the web app uses react 19.2.0; this mismatch predates the change but could still produce install warnings worth watching for."
+    }
+  ]
+}

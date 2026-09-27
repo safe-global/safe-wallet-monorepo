@@ -1,0 +1,65 @@
+{
+  "usd": 0.062477599999999994,
+  "findings": [
+    {
+      "file": "apps/web/src/components/nested-safes/NestedSafesList/useManageNestedSafes.ts",
+      "line": 177,
+      "claim": "The new getSimilarAddresses filter compares addresses with a.toLowerCase() !== address.toLowerCase() instead of using the sameAddress helper, deviating from the required pattern for address equality checks."
+    },
+    {
+      "file": "packages/utils/src/utils/addressSimilarity.ts",
+      "line": 133,
+      "claim": "The always-on look-alike detection changed from requiring addresses to share both the front and back characters to flagging a match when they share either the front-4 or the back-4 and chaining matches together, broadening what gets flagged even when the address-poisoning protection flag is off, with no cited product or design decision for the change."
+    },
+    {
+      "file": "apps/web/src/features/address-poisoning/hooks/useSimilarityClusters.ts",
+      "line": 25,
+      "claim": "This hook consumes the broadened detectListClusters logic across five web surfaces (onboarding, add-accounts, space safe-accounts, the trusted-safes modal, and nested safes), so users will see more badges, confirm prompts, and Select-all exclusions than before, while mobile's useSuspiciousAddressDetection still uses the old front-and-back rule, leaving the two platforms inconsistent."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/hooks/useOnboardingSafes.ts",
+      "line": 41,
+      "claim": "Trust is no longer decided per chain and address: an address trusted on one chain now causes all of its owned or undeployed copies on other chains to be moved into the trusted set and out of the owned set, which is a behavior change outside the stated scope of address-poisoning clustering and needs explicit product sign-off."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/hooks/useOnboardingSafes.ts",
+      "line": 79,
+      "claim": "Because the flagged set is filtered to owned Safes only, chain copies that get reclassified as trusted due to the cross-chain trust change stop receiving look-alike warnings in onboarding."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/hooks/useOnboardingSafes.ts",
+      "line": 46,
+      "claim": "The new cross-chain trusted branch has no test coverage: the existing test file only covers excluding trusted safes from the owned list and multi-chain grouping for owned safes, with no case pinning a safe as trusted on one chain and owned on another chain to verify both copies land under trusted and none under owned."
+    },
+    {
+      "file": "apps/web/src/components/nested-safes/NestedSafesList/useManageNestedSafes.ts",
+      "line": 172,
+      "claim": "getSimilarAddresses was rewritten to rebuild groups from groupIdByAddress and the address list, and groupSafesBySimilarity and the flagged gate on selectAll switched source, but this hook has no test file covering the change."
+    },
+    {
+      "file": "apps/web/src/features/address-poisoning/hooks/useSimilarityClusters.ts",
+      "line": 21,
+      "claim": "This new hook has no test of its own; the branch where an anchor-only match is flagged but has no group id is untested, and the imitated-original branch is only covered indirectly through a different hook's test file."
+    },
+    {
+      "file": "AGENTS.md",
+      "line": null,
+      "claim": "The diff adds long explanatory comments at nearly every call site (e.g. ManageTrustedSafesContent.tsx:100-101, useTrustedSafesModal.ts:110-112, useManageNestedSafes.ts:71-73), repeating the same note across five files even though the JSDoc on the hooks already conveys it, conflicting with the project guidance to treat code comments as tech debt."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/hooks/useTrustedSafesModal.ts",
+      "line": 114,
+      "claim": "The isAddressFlagged = useCallback(a => flaggedAll.has(a.toLowerCase())) wrapper is duplicated in useTrustedSafesModal.ts and useManageNestedSafes.ts instead of being returned once from useSimilarityClusters."
+    },
+    {
+      "file": "apps/web/docs/spaces-accounts-architecture.md",
+      "line": 231,
+      "claim": "The documentation still describes detectSimilarAddresses as used for space similarity, but this PR moves web code off that function, making the doc further out of date; the underlying getFlaggedSimilarAddressSet also has no remaining callers outside its own module and tests."
+    },
+    {
+      "file": "useFlaggedSimilarAddresses.test.ts",
+      "line": 34,
+      "claim": "A test case is named \"the flag-off path\" but it only returns an empty anchor map and never actually disables the feature flag, so the name misrepresents what the test verifies."
+    }
+  ]
+}

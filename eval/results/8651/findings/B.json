@@ -1,0 +1,70 @@
+{
+  "usd": 0.0674296,
+  "findings": [
+    {
+      "file": "apps/web/src/services/sessionExpiry/useSessionExpiryGuard.ts",
+      "line": 22,
+      "claim": "isSpacesRoute only matches /welcome/spaces, /spaces and /spaces/*, leaving out the signed-in workspace onboarding routes /welcome/create-space, /welcome/select-safes, /welcome/invite-members and /welcome/survey defined in apps/web/src/config/routes.ts:83-87."
+    },
+    {
+      "file": "apps/web/src/services/sessionExpiry/useSessionExpiryGuard.ts",
+      "line": 22,
+      "claim": "Because those onboarding routes are not matched, a user creating a workspace who hits session expiry has expireNow() clear auth without showing a toast."
+    },
+    {
+      "file": "apps/web/src/hooks/useRouterGuard/activationGuards/useFlowActivationGuard.ts",
+      "line": 18,
+      "claim": "useFlowActivationGuard then redirects the user off the onboarding page after expiry, and since this happens after pathnameRef has already been read, the toast cannot be brought back; the redirect can land on /welcome/accounts, leaving the user removed from onboarding with no explanation."
+    },
+    {
+      "file": "apps/web/src/services/sessionExpiry/useSessionExpiryGuard.ts",
+      "line": 46,
+      "claim": "If excluding the onboarding routes from the toast is intentional, this should be stated in the doc comment rather than left unexplained."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The fix should include the onboarding routes in the match, ideally by sharing the ONBOARDING_ROUTES list from useFlowActivationGuard.ts:18 instead of duplicating it."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "SESSION_EXPIRED_SIGN_IN_LABEL was removed but no other code, e2e test, or Cypress test references it or the 'Sign in to workspaces' text it represented, indicating a regression risk from the removal."
+    },
+    {
+      "file": "apps/web/src/services/sessionExpiry/useSessionExpiryGuard.ts",
+      "line": 22,
+      "claim": "apps/web/src/hooks/useIsSpaceRoute.ts:6-26 already determines what counts as a workspace route, but the new check disagrees with it: it additionally matches /welcome/spaces, /spaces/create-space and /spaces/transactions, and ignores lastUsedSpace, creating two diverging definitions of a workspace route."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The useIsSpaceRoute hook cannot be called inside a timer callback, but its route lists could be exported so both places share one source instead of duplicating route logic."
+    },
+    {
+      "file": "__tests__/useSessionExpiryGuard.test.tsx",
+      "line": 316,
+      "claim": "No test covers a nested route like /spaces/members, which is the only case that exercises the startsWith('/spaces/') branch."
+    },
+    {
+      "file": "__tests__/useSessionExpiryGuard.test.tsx",
+      "line": 316,
+      "claim": "There is no test that navigates between arming the timer and the timer firing, which is the scenario that justifies keeping the pathname in a ref."
+    },
+    {
+      "file": "__tests__/useSessionExpiryGuard.test.tsx",
+      "line": 316,
+      "claim": "The 403 probe path outside workspaces is untested."
+    },
+    {
+      "file": "__tests__/useSessionExpiryGuard.test.tsx",
+      "line": 316,
+      "claim": "Because of these gaps, deleting the startsWith branch or the ref update would still pass every existing test, showing the tests don't actually guard that behavior."
+    },
+    {
+      "file": "useSessionExpiryGuard.ts",
+      "line": 84,
+      "claim": "With autoHideDuration set to null, a toast raised on /spaces stays visible after the user navigates to /home until they dismiss it or sign in again, which partly contradicts the goal of showing the toast only within workspaces."
+    }
+  ]
+}

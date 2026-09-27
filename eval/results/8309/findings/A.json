@@ -1,0 +1,15 @@
+{
+  "usd": 0.038855600000000004,
+  "findings": [
+    {
+      "file": "apps/mobile/src/features/Send/components/DialogModal.tsx",
+      "line": 32,
+      "claim": "The change adds no test, and there is currently no test for DialogModal or for the two components that use it (AddToAddressBookModal.tsx, CustomNonceModal.tsx). A small render test would prevent someone later removing accessible={false} and merging the dialog back into one element without anyone noticing, for example by checking that the dialog-cancel and dialog-save buttons can each be found by role and label."
+    },
+    {
+      "file": "apps/mobile/src/features/Send/components/DialogModal.tsx",
+      "line": 32,
+      "claim": "With accessible={false} set on the overlay, screen-reader users can no longer reach the tap-outside-to-cancel interaction, since VoiceOver can no longer see that element as tappable."
+    }
+  ]
+}

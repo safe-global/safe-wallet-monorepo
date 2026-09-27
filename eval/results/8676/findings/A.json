@@ -1,0 +1,30 @@
+{
+  "usd": 0.058794,
+  "findings": [
+    {
+      "file": "SpendingLimitIntroDialog/constants.ts",
+      "line": 1,
+      "claim": "Several comment blocks across the changed files span 2-8 lines explaining design rationale or describing what the code does (e.g. noting that copy is verbatim from the design, why a key is browser-wide, how cards visually recede, and a story walkthrough), rather than a single line covering only the non-obvious reason. These should be cut to one line each or deleted, though the one-line JSDoc on props is fine as is."
+    },
+    {
+      "file": "Policies/index.tsx",
+      "line": 44,
+      "claim": "The 'proceed' path (proceedToSpendingLimitFlow -> closeSpendingLimitIntro -> setHasSeenSpendingLimitIntro(true)) has no page-level test; the existing 'records that it has been shown' test only exercises the Close button. If the proceed action stopped persisting the flag, the intro dialog would reappear on every visit and no test would catch it, so a test clicking 'Set up spending limit' and asserting setHasSeenSpendingLimitIntro is called with true should be added."
+    },
+    {
+      "file": "__tests__/Policies.test.tsx",
+      "line": 101,
+      "claim": "The test 'does not explain again once it has been shown' only checks that the dialog is absent, so it would still pass even if the tile were disabled again or the select handler were not wired up, meaning it doesn't actually prove the 'already seen' branch executed. Since the flow behind it is an empty placeholder pending a follow-up ticket, the test should either note that the stronger assertion is deferred or first verify the tile is enabled and the click reaches the handler."
+    },
+    {
+      "file": "PolicyCatalogue/catalogue.ts",
+      "line": 19,
+      "claim": "The Spending limit tile is now shown as available even though its startSpendingLimitFlow handler is empty, so after the first dismissal clicking the tile does nothing and gives no feedback to the user; this should be confirmed as acceptable with product or the feature flag should stay off in production until the flow is implemented."
+    },
+    {
+      "file": "SpendingLimitIntroDialog/index.tsx",
+      "line": 89,
+      "claim": "The dark:text-black class uses a raw Tailwind color instead of a theme token, and it is also redundant because the default Button variant already applies dark:[&_svg]:text-black which takes precedence in dark mode; the class and its explanatory comment should be removed."
+    }
+  ]
+}

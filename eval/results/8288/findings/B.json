@@ -1,0 +1,30 @@
+{
+  "usd": 0.05535999999999999,
+  "findings": [
+    {
+      "file": "apps/web/src/features/feature-flags/store/index.ts",
+      "line": 1,
+      "claim": "The new features/feature-flags/ folder only contains a store/ folder, missing a contract.ts, feature.ts, top-level index.ts, and a feature flag, which conflicts with the documented requirement that every feature export a contract and sit behind a feature flag; other feature folders such as gtf/ follow the full structure. The slice should either be given the full feature structure or moved to apps/web/src/store/featureFlagOverridesSlice.ts alongside other slices of its kind."
+    },
+    {
+      "file": "apps/web/src/store/index.ts",
+      "line": 95,
+      "claim": "The feature flag overrides are added to persistedSlices, meaning they are saved to localStorage, shared across tabs, and reloaded on startup without validation in every environment including production. Although nothing currently reads the overrides, once a consumer such as useHasFeature honors them, values left in localStorage would override real chain feature flags in production and a stale dev override could persist silently; saving and reading overrides should be restricted to non-production builds or an explicit dev gate, and loaded keys should be validated against FEATURES."
+    },
+    {
+      "file": "featureFlagOverridesSlice.ts",
+      "line": 29,
+      "claim": "Saved override keys for a FEATURES value that is later removed or renamed are never cleaned up, so selectOverrideCount still counts them while the typed clearOverride cannot remove them; counting or loading should filter to Object.values(FEATURES)."
+    },
+    {
+      "file": "featureFlagOverridesSlice.ts",
+      "line": 24,
+      "claim": "setOverride, clearOverride, clearAllOverrides, and both selectors are unused outside the slice and its test, making them dead code at merge unless a stacked PR consumes them, which should be noted in the PR description."
+    },
+    {
+      "file": "featureFlagOverridesSlice.test.ts",
+      "line": 30,
+      "claim": "No test covers the store change that adds the slice to the saved-state list, and the existing 'clears a single override' test starts from a single key so it cannot distinguish clearOverride removing just that key from it wiping everything; the test should start with two keys and assert only one remains, and a load-from-storage case should be added in store/__tests__/index.test.ts."
+    }
+  ]
+}

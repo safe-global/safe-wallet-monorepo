@@ -1,0 +1,105 @@
+{
+  "usd": 0.0870396,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesTable/index.tsx",
+      "line": 22,
+      "claim": "toRows groups rows only by type, Safe address and proposer, keeping just the first chain's policy data, so on other chains spenders, tokens, status and id can differ but never show; a policy pending on one chain and active on another displays only the first chain's status, and the TOKENS column, summary and click target all come from that first chain only."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesTable/__tests__/PoliciesTable.test.tsx",
+      "line": 45,
+      "claim": "The test merging mockMultiSpenderPolicy (mainnet) with mockPolygonSpendingLimitPolicy only asserts that two network icons appear, so the data loss from merging rows across chains is not caught and becomes locked in as expected behavior."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesTable/index.tsx",
+      "line": null,
+      "claim": "A pending edit and its active policy on the same chain share the same grouping key, which puts the same chainId in the list twice and triggers a duplicate React key warning in ChainIndicator."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesTable/index.tsx",
+      "line": null,
+      "claim": "Rows should only be grouped when status and data actually match, or the policy for each chain should be kept in the row so status and tokens are derived from all of them, rather than losing per-chain data."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesList.tsx",
+      "line": 48,
+      "claim": "The search placeholder text promises search 'by name, address or network' but the underlying Fuse search only indexes rule, summary, safeAddress and tokens; chainId is built into SearchablePolicy but never listed as a search key, and no network name is indexed at all, so searching by network term like 'Polygon' returns no results despite the copy implying it should work."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesTable/components/PoliciesTableStates.tsx",
+      "line": 11,
+      "claim": "The no-results message 'Try a different name, address or network' similarly implies network search works when it does not, since network names are not indexed anywhere in the search."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/hooks/usePolicySearch.ts",
+      "line": 35,
+      "claim": "chainId is included in SearchablePolicy but never added as a Fuse search key, making it effectively unused for its apparent purpose; either index chain names for search or change the copy to stop promising a network search, and either way the unused chainId field needs to be addressed."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesLoadState/index.tsx",
+      "line": 8,
+      "claim": "PoliciesLoadError duplicates the structure of TransactionDetailsError (Empty + SafeLogoHalo + description + optional Reload button) instead of reusing a shared component, even though this PR already extracted SafeLogoHalo into shared code, meaning the same extraction should have been applied to the error block."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesLoadState/index.tsx",
+      "line": 32,
+      "claim": "The POLICIES_LOAD_ERROR string is identical to TX_DETAILS_LOAD_ERROR in components/transactions/SingleTx/TransactionDetailsError.tsx:6, indicating duplicated code that could be consolidated into a shared component accepting testId and role as props."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/PolicyCatalogue/index.tsx",
+      "line": 14,
+      "claim": "MixpanelEventParams.IS_AVAILABLE is now dead code because its only producer and its tests were removed in this PR, leaving no references to the enum member at apps/web/src/services/analytics/mixpanel-events.ts:161; it should be deleted or confirmed as still needed by the analytics team."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/utils/policyLabel.ts",
+      "line": 18,
+      "claim": "POLICY_TYPE_LABELS[policy.type] and RESET_PERIOD_LABELS[resetPeriodSeconds] index plain objects directly with values from the CGW response with no fallback, so if CGW adds a new policy type or sends an inherited key like 'constructor', the lookup returns undefined or an Object method, which crashes the Icon component in PolicyRule.tsx when rendering the table."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/utils/policyIcon.ts",
+      "line": 11,
+      "claim": "POLICY_ICONS[type] has the same unsafe plain-object indexing issue as policyLabel.ts, with no Object.hasOwn check, fallback, or Map used to guard against unexpected or inherited keys from server data."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesTable/index.tsx",
+      "line": 27,
+      "claim": "Map keys are built using .toLowerCase() on addresses instead of using the sameAddress() convention used elsewhere for address equality, so this location doesn't share normalisation logic with other places doing the same comparison."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesTable/components/PolicyTokens.tsx",
+      "line": 14,
+      "claim": "This file also compares/keys addresses via .toLowerCase() rather than the shared sameAddress() helper, duplicating the normalisation logic instead of sharing one helper with PoliciesTable/index.tsx."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/mocks/policies.ts",
+      "line": 70,
+      "claim": "Unit tests use hand-written fixed-literal fixtures with overrides spreads instead of the Builder pattern (Builder.new<T>().with()) that the codebase convention prefers, which uses random data to expose hidden assumptions; the same feature already has an example builder (tokenOptionBuilder) that could be followed for the unit tests, though keeping fixed literals for stories is fine."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/hooks/usePolicySearch.ts",
+      "line": 4,
+      "claim": "The pure function getPolicyTokens is exported from a component file (PoliciesTable/components/PolicyTokens.tsx) and imported into a hook, but it belongs in utils/ alongside policyLabel.ts; moving it would also let it have its own dedicated test instead of only being exercised indirectly through the component."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesLoadState/index.tsx",
+      "line": 27,
+      "claim": "A 5-line multi-line comment explains rather than records a non-obvious reason, violating the repo rule that allows only a single line of comment reserved for a reason the code itself can't express."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesTable/index.tsx",
+      "line": 37,
+      "claim": "This block also contains a multi-line explanatory comment that violates the one-line-comment convention limited to non-obvious reasons."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/utils/policyLabel.ts",
+      "line": 10,
+      "claim": "Multi-line comments at lines 10-14 and 57-60 explain rather than record a non-obvious reason, exceeding the allowed one-line comment convention."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/types.ts",
+      "line": 1,
+      "claim": "Multi-line doc-style comment blocks at lines 1-6, 10-14, 80-83, and 136-139 explain rather than record a non-obvious reason, exceeding the repo's one-line comment convention."
+    }
+  ]
+}

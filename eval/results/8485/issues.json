@@ -1,0 +1,228 @@
+{
+  "usage": {
+    "usd": 0.8313052000000001,
+    "turns": 11,
+    "wallSeconds": 97
+  },
+  "issues": [
+    {
+      "findings": [
+        "F1",
+        "F21"
+      ],
+      "summary": "Preceding rows' isLast ignores the Safenet row",
+      "label": "wrong",
+      "evidence": "TxSigners/index.tsx:281 and :292 now compute isLast with `!showsSafenetRow && !showExecutionRow`, and the Safenet row itself gets `isLast={!showExecutionRow}`. So the preceding rows already account for the Safenet step."
+    },
+    {
+      "findings": [
+        "F28"
+      ],
+      "summary": "Parent can't know whether SafenetAuditRow will render",
+      "label": "wrong",
+      "evidence": "TxSigners/index.tsx:170-174 subscribes to the same useSafenetCheck cache entry and mirrors the row's render gate in `showsSafenetRow`. That is exactly how the parent learns whether the row will render."
+    },
+    {
+      "findings": [
+        "F7",
+        "F17"
+      ],
+      "summary": "showsSafenetRow can be true before the lazy chunk loads, leaving a dangling connector",
+      "label": "low",
+      "evidence": "TxSigners/index.tsx:173 never checks `safenet.$isReady`. If check data is already cached (keepUnusedDataFor 300) before the chunk resolves, the last signed row loses isLast while the stub renders null. The effect is a brief visual glitch."
+    },
+    {
+      "findings": [
+        "F25"
+      ],
+      "summary": "Render gate duplicated between TxSigners and SafenetAuditRow",
+      "label": "low",
+      "evidence": "TxSigners/index.tsx:173-174 re-implements the check at SafenetAuditRow.tsx:68, and the comment admits the two must stay in sync. Drift would silently break the connector math."
+    },
+    {
+      "findings": [
+        "F36",
+        "F26",
+        "F30"
+      ],
+      "summary": "useLoadFeature triggers the import even when disabled; enabled check should move into the row",
+      "label": "wrong",
+      "evidence": "useLoadFeature.ts:194 returns early unless `isEnabled === true`, so no import happens while the flag is off. isSafenetEnabled in TxSigners gates the hash subscription for the isLast math, not the row's render (the registry stub already covers that)."
+    },
+    {
+      "findings": [
+        "F32"
+      ],
+      "summary": "`=== true` collapses loading undefined to false",
+      "label": "low",
+      "evidence": "index.ts:10 turns undefined into false, so `$isDisabled` briefly reads true while the chain config resolves. Nothing reads `$isDisabled` here, and the row loads once the flag resolves, so the impact is negligible."
+    },
+    {
+      "findings": [
+        "F3"
+      ],
+      "summary": "Hand-written feature handle instead of createFeatureHandle",
+      "label": "low",
+      "evidence": "createFeatureHandle('safenet-checks') would auto-derive FEATURES.SAFENET_CHECKS and build the same load path (createFeatureHandle.ts). index.ts:12-16 duplicates that, with only the `=== true` coercion as a difference."
+    },
+    {
+      "findings": [
+        "F6",
+        "F9",
+        "F29"
+      ],
+      "summary": "Redundant NEXT_PUBLIC_SAFENET_CHECKS_FORCE env override",
+      "label": "wrong",
+      "evidence": "NEXT_PUBLIC_SAFENET_CHECKS_FORCE does not appear anywhere in apps/ or packages/ at HEAD. index.ts:10 uses only useHasFeature, and .env.example has no such variable."
+    },
+    {
+      "findings": [
+        "F19",
+        "F34"
+      ],
+      "summary": "NEXT_PUBLIC_SAFENET_EXPLORER_URL not documented in .env.example",
+      "label": "low",
+      "evidence": "constants.ts:53 reads NEXT_PUBLIC_/EXPO_PUBLIC_SAFENET_EXPLORER_URL, but grep finds no EXPLORER entry in apps/web/.env.example, even though that file's new Safenet section documents the other SAFENET_* variables."
+    },
+    {
+      "findings": [
+        "F35"
+      ],
+      "summary": ".env.example lacks trailing newline",
+      "label": "nit",
+      "evidence": "od shows the file ends with `NEXT_PUBLIC_SAFENET_ORACLE_ADDRESSES=` and no final newline. This is cosmetic."
+    },
+    {
+      "findings": [
+        "F2",
+        "F12"
+      ],
+      "summary": "No Storybook story for SafenetAuditRow",
+      "label": "low",
+      "evidence": "apps/web/AGENTS.md:10 and :148 require a story for a new component with logic, and none was added for the five status states or dark mode."
+    },
+    {
+      "findings": [
+        "F5"
+      ],
+      "summary": "'One RPC per settled check' comment inaccurate while verification is PENDING",
+      "label": "low",
+      "evidence": "safenetReader.ts:430 can return PENDING (AWAITING_VERIFICATION). computePollingInterval.ts:27-44 keeps polling for that status, and safenetCheckApi.ts:56-59 calls blockTimeMs on every such poll. That means one extra header read per poll in that rare state."
+    },
+    {
+      "findings": [
+        "F11"
+      ],
+      "summary": "No-attestation test doesn't assert blockTimeMs not called",
+      "label": "low",
+      "evidence": "safenetCheckApi.test.ts:104-117 asserts verifyAttestation is not called but never checks blockTimeMs, so the gate is only partly pinned."
+    },
+    {
+      "findings": [
+        "F8"
+      ],
+      "summary": "Oracle-preferred attestation selection duplicated in component and API",
+      "label": "low",
+      "evidence": "SafenetAuditRow.tsx:78-80 repeats the find-oracle-then-plain logic from safenetCheckApi.ts:50-52. If the API's choice changed, the link could point at an event other than the one verified."
+    },
+    {
+      "findings": [
+        "F37"
+      ],
+      "summary": "ORACLE_ATTESTED-preferred link path untested",
+      "label": "low",
+      "evidence": "The component tests build only plainAttestedEvent snapshots, so the oracle-preferred branch at SafenetAuditRow.tsx:79 has no coverage. The API-side oracle preference is tested (safenetCheckApi.test.ts:223), but the link selection is not."
+    },
+    {
+      "findings": [
+        "F14",
+        "F20"
+      ],
+      "summary": "TIMED_OUT label and dark-mode icon colors untested",
+      "label": "low",
+      "evidence": "grep finds no TIMED_OUT or dark-mode case in SafenetAuditRow.test.tsx, so the DARK_STEP_COLOR branch (SafenetAuditRow.tsx:94) and the 'Safenet check failed' label are not covered."
+    },
+    {
+      "findings": [
+        "F22"
+      ],
+      "summary": "Flag-off TxSigners test weakly proves the gate",
+      "label": "low",
+      "evidence": "The claim is partly true. TxSigners always calls useSafenetCheck, so the loop at index.test.tsx:719 isn't vacuous and does catch a broken hash gate. But the negative text assertion depends on a return value leaking from the prior test (clearAllMocks keeps implementations), so it wouldn't catch a broken registry stub in isolation."
+    },
+    {
+      "findings": [
+        "F33"
+      ],
+      "summary": "MALICIOUS and TIMED_OUT rows never get a timestamp",
+      "label": "low",
+      "evidence": "MALICIOUS comes from ORACLE_RESULT and TIMED_OUT from the deadline (deriveCheckState:66,88), but attestedAtMs is computed only when an attested event exists (safenetCheckApi.ts:56). So those rows show no date, and the comment at SafenetAuditRow.tsx:104 doesn't mention it."
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "Light mode doesn't color error/warning icons",
+      "label": "wrong",
+      "evidence": "This is intended. SafenetAuditRow.tsx:31 says 'Dark mode only', and the PR description says status colors apply in dark mode only, with the label carrying severity in light mode."
+    },
+    {
+      "findings": [
+        "F10",
+        "F27"
+      ],
+      "summary": "Long explanatory comments conflict with the comments-as-debt guidance",
+      "label": "nit",
+      "evidence": "Several block comments (TxSigners/index.tsx:166-168, :296-298; SafenetAuditRow.tsx:97) are verbose, and some restate the code. This is style, with no functional cost."
+    },
+    {
+      "findings": [
+        "F13",
+        "F15"
+      ],
+      "summary": "Redundant optional chaining on snapshot after early return",
+      "label": "nit",
+      "evidence": "SafenetAuditRow.tsx:68 returns when !snapshot, so `snapshot?.events` at :79-80 is redundant. Harmless."
+    },
+    {
+      "findings": [
+        "F4"
+      ],
+      "summary": "useChain('') empty-string fallback",
+      "label": "nit",
+      "evidence": "SafenetAuditRow.tsx:65 calls useChain with '' until a snapshot exists. It returns undefined, so this is readability only."
+    },
+    {
+      "findings": [
+        "F23"
+      ],
+      "summary": "TxSigners imports useSafenetCheck from the utils package, bypassing the feature boundary",
+      "label": "wrong",
+      "evidence": "useSafenetCheck is a shared-package hook (packages/utils), not a web-feature internal. The web feature doesn't re-export it, and AGENTS.md allows importing hooks directly."
+    },
+    {
+      "findings": [
+        "F24"
+      ],
+      "summary": "feature.tsx instead of feature.ts",
+      "label": "nit",
+      "evidence": "Every other feature uses feature.ts, and this file contains no JSX, so .tsx is needless. The dynamic import still resolves, so it's only an inconsistency."
+    },
+    {
+      "findings": [
+        "F18"
+      ],
+      "summary": "Component not in components/<Component>/index.tsx layout",
+      "label": "nit",
+      "evidence": "Other features also use flat component files, e.g. feature-flag-overrides/components/FeatureFlagRow.tsx and proposers/components/DeleteProposerDialog.tsx. The convention isn't enforced."
+    },
+    {
+      "findings": [
+        "F31"
+      ],
+      "summary": "Test in __tests__ directory rather than colocated",
+      "label": "nit",
+      "evidence": "__tests__ directories are an established pattern in this repo (safe-shield/components/__tests__, and AGENTS.md:146 lists hooks/__tests__). It's a style preference."
+    }
+  ]
+}

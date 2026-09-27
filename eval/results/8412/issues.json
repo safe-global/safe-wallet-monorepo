@@ -1,0 +1,63 @@
+{
+  "usage": {
+    "usd": 0.43626660000000006,
+    "turns": 6,
+    "wallSeconds": 40
+  },
+  "issues": [
+    {
+      "findings": [
+        "F1",
+        "F8",
+        "F12"
+      ],
+      "summary": "parseCowTradeParams indexes the enum object by name, so inherited keys like 'constructor' skip the SWAP fallback; the comment says 'by value'; no test covers such keys",
+      "label": "low",
+      "evidence": "apps/web/src/features/swap/helpers/utils.ts:223 does `UiOrderType[params.orderType as keyof typeof UiOrderType] ?? UiOrderType.SWAP`. A TS string enum compiles to a plain object, so 'constructor' or 'toString' returns an Object.prototype function instead of undefined. This is real, but the value comes from the widget's typed payload with enabledTradeTypes limited to SWAP/LIMIT/ADVANCED, and names equal values in the local enum (packages/utils/src/features/swap/types.ts:12-16), so the practical impact is small."
+    },
+    {
+      "findings": [
+        "F3",
+        "F4"
+      ],
+      "summary": "@cowprotocol/events is imported directly by apps/web but not declared as a dependency, and it resolves only because it is hoisted from widget-react/widget-lib",
+      "label": "low",
+      "evidence": "apps/web/package.json only declares widget-react (line 61), yet SwapWidget/index.tsx, helpers/utils.ts:5 and fee.ts import @cowprotocol/events. With the root resolution removed, the version comes from widget-react's `^4.8.0` range (yarn.lock:3997). It works now (only one version is in the lockfile), but this is a real phantom-dependency maintainability risk."
+    },
+    {
+      "findings": [
+        "F6",
+        "F7",
+        "F11"
+      ],
+      "summary": "The new fee.ts guard for a token without an address has no test",
+      "label": "low",
+      "evidence": "apps/web/src/features/swap/helpers/fee.ts:70-72 now guards `buyToken?.address?.toLowerCase()`. fee.test.ts cases either pass `{ address: '...' }` or omit the tokens entirely (e.g. lines 8-9, 20-21), so a `buyToken: {}` case is never tested. The fix is a simple optional chain and unlikely to regress, which makes this minor."
+    },
+    {
+      "findings": [
+        "F5",
+        "F9"
+      ],
+      "summary": "The 'does not silently reset LIMIT/TWAP to SWAP' test repeats what the preceding mapping test already asserts",
+      "label": "nit",
+      "evidence": "utils.test.ts:439-442 asserts `not.toBe(SWAP)` for LIMIT and TWAP, but the test before it already asserts `toBe(LIMIT)` and `toBe(TWAP)`, which imply this. It adds no coverage; the cost is minor redundancy."
+    },
+    {
+      "findings": [
+        "F10"
+      ],
+      "summary": "The makePayload helper uses an `as unknown as OnTradeParamsPayload` cast, so fixtures are not type-checked",
+      "label": "nit",
+      "evidence": "utils.test.ts:430-431 casts `Record<string, unknown>` through unknown. The cast is deliberate so the test can inject untyped values like 'SOMETHING_NEW' and HOOKS, so the loss of type checking is intended and costs little."
+    },
+    {
+      "findings": [
+        "F2"
+      ],
+      "summary": "widget-react's peer dependency on react 19.1.2 does not match the app's react 19.2.0",
+      "label": "low",
+      "evidence": "yarn.lock:4000-4001 shows `react: 19.1.2` as the peer for widget-react 3.2.2, while apps/web/package.json:120 uses 19.2.0. The base commit's widget-react 1.3.5 had the same peer (base yarn.lock:4126-4127), so the PR did not introduce this and the only effect is an install warning."
+    }
+  ]
+}

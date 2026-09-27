@@ -1,0 +1,275 @@
+{
+  "usage": {
+    "usd": 0.6707134,
+    "turns": 10,
+    "wallSeconds": 88
+  },
+  "issues": [
+    {
+      "findings": [
+        "F44",
+        "F12"
+      ],
+      "summary": "Reset effect clears the selection on an X→''→X identity blip, and no test covers it",
+      "label": "low",
+      "evidence": "TokenSelector/index.tsx:129 fires onChange(undefined) when previous is non-empty and differs, so a transition to '' does clear the selection. The comment at lines 122-124 says this is deliberate ('whenever the identity changes'). useSafeInfo keeps `data` across refreshes, and nothing in the current code produces a transient '' for the same Safe, so this is a speculative edge case until SafeScopeProvider lands."
+    },
+    {
+      "findings": [
+        "F8"
+      ],
+      "summary": "'No tokens found' can show next to a load-error row",
+      "label": "low",
+      "evidence": "index.tsx:208 gates ComboboxEmpty only on the loading flags. So when the held query fails (lines 177-184) and the filtered list is empty, both the error and the empty text render. This needs an empty popular list or a query with no matches, so the impact is minor."
+    },
+    {
+      "findings": [
+        "F24"
+      ],
+      "summary": "isLoading doc comment says it is always false while the query is skipped, which is wrong",
+      "label": "low",
+      "evidence": "useSpendingLimitTokenOptions.ts:17 says 'Always false while the query is skipped'. But line 61 sets skip=true when trusted===undefined, and line 98 then returns isLoading=true for a valid Safe."
+    },
+    {
+      "findings": [
+        "F13"
+      ],
+      "summary": "TokenOption doc says group decides whether a balance is shown, but no balance is rendered",
+      "label": "low",
+      "evidence": "utils/tokenOptions.ts:30 claims group controls balance display. TokenOptionRow.tsx:10-11 says explicitly that no balance is shown there, and index.tsx never renders one."
+    },
+    {
+      "findings": [
+        "F15"
+      ],
+      "summary": "buildIdentityKey is exported only for tests and has no `_` prefix",
+      "label": "low",
+      "evidence": "apps/web/docs/code-style.md:39 requires a `_` prefix on test-only exports. buildIdentityKey (hook line 30) is only imported by the hook's test (test line 17)."
+    },
+    {
+      "findings": [
+        "F45"
+      ],
+      "summary": "Held-balances isError ignores stale currentData, unlike the popular case, and this is untested",
+      "label": "low",
+      "evidence": "Line 99 is `isError: !skip && isError`, while line 102 also requires `popularData === undefined`. The popular stale-data case is tested (test line 315), but the held one is not, so a held error shows even when cached items exist."
+    },
+    {
+      "findings": [
+        "F4"
+      ],
+      "summary": "No test covers the empty state with only one of the two loading flags set",
+      "label": "low",
+      "evidence": "TokenSelector.test.tsx lines 278 and 301 set a single loading flag but with non-empty options. Lines 323 and 332 set both flags. So an `||`/`&&` mix-up at index.tsx:208 would not be caught."
+    },
+    {
+      "findings": [
+        "F35"
+      ],
+      "summary": "No test for trusted=false combined with an empty safeAddress",
+      "label": "nit",
+      "evidence": "hasValidSafe is false whenever safeAddress is empty (line 60), so isLoading is trivially false (line 98). The case is already covered by the no-Safe logic, so the extra test adds little."
+    },
+    {
+      "findings": [
+        "F1",
+        "F3",
+        "F7",
+        "F11",
+        "F28"
+      ],
+      "summary": "Multi-paragraph comments and ticket references in useSpendingLimitTokenOptions break the one-line comment rule",
+      "label": "low",
+      "evidence": "The hook file has a 12-line, three-paragraph JSDoc citing WA-3146, #8646 and AC C16 (lines 35-46), plus multi-line inline comments at lines 54-59 and 96-97. Root AGENTS.md explicitly forbids multi-paragraph comment blocks."
+    },
+    {
+      "findings": [
+        "F2",
+        "F20",
+        "F21"
+      ],
+      "summary": "popularTokens.ts opens with a long header full of process notes (tickets, traffic stats, verification dates)",
+      "label": "low",
+      "evidence": "popularTokens.ts:1-16 is a multi-paragraph block citing WA-3149, AC C14, production-log traffic stats and verification notes. AGENTS.md's comment rule forbids this kind of narrative block."
+    },
+    {
+      "findings": [
+        "F26",
+        "F31",
+        "F30",
+        "F43"
+      ],
+      "summary": "TokenSelector/index.tsx has several multi-line comment blocks with ticket or AC references",
+      "label": "low",
+      "evidence": "index.tsx:39-42, 71-76 (WA-3149), 90-91 and 122-124 (AC C15) are all multi-line comments. That conflicts with AGENTS.md's one-line comment guidance."
+    },
+    {
+      "findings": [
+        "F36",
+        "F37"
+      ],
+      "summary": "TokenOptionRow has a 5-line comment block citing WA-3150",
+      "label": "low",
+      "evidence": "TokenOptionRow.tsx:7-12 is a multi-line narrative comment with a ticket reference. The one-line comment rule applies."
+    },
+    {
+      "findings": [
+        "F42"
+      ],
+      "summary": "buildTokenOptions doc cites acceptance criteria across several lines",
+      "label": "low",
+      "evidence": "utils/tokenOptions.ts:88-91 is a multi-line JSDoc referencing AC C16 and AC C14. That goes against the AGENTS.md comment rule."
+    },
+    {
+      "findings": [
+        "F19",
+        "F38",
+        "F41"
+      ],
+      "summary": "Nested ternary for the secondary label in TokenOptionRow is hard to read",
+      "label": "nit",
+      "evidence": "TokenOptionRow.tsx:15-16 nests `symbol && name ? name : symbol || name ? shortenAddress : ''`. It is correct, and readability is the only cost."
+    },
+    {
+      "findings": [
+        "F18",
+        "F47"
+      ],
+      "summary": "TokenGroupError duplicates the icon + message + retry pattern of SafeAccountSelector's LoadError",
+      "label": "low",
+      "evidence": "TokenGroupState.tsx:28-47 matches SafeAccountSelector/components/LoadError.tsx almost exactly (AlertCircle, destructive Typography, a RotateCw Retry button). LoadError hardcodes its text and testid, so reusing it would need a refactor, but the duplication is real."
+    },
+    {
+      "findings": [
+        "F48"
+      ],
+      "summary": "SKELETON_ROW_COUNT is duplicated between SafeAccountSelector and TokenSelector",
+      "label": "nit",
+      "evidence": "SafeAccountSelector/index.tsx:41 and TokenSelector/constants.ts:9 both define SKELETON_ROW_COUNT = 3. These are independent UI tuning values, so the concrete cost is negligible."
+    },
+    {
+      "findings": [
+        "F9",
+        "F25",
+        "F34",
+        "F46",
+        "F49"
+      ],
+      "summary": "Test files use hand-written data factories instead of the shared Builder pattern or erc20TokenBuilder",
+      "label": "nit",
+      "evidence": "The test files define local factories (popularTokenBuilder, option(), tokenMetadataBuilder) and don't use Builder.new<T>().with() or the existing erc20TokenBuilder. This is a test-style consistency point with no functional cost."
+    },
+    {
+      "findings": [
+        "F5"
+      ],
+      "summary": "Number(fiatBalance) may produce NaN and silently skip the symbol tie-break",
+      "label": "nit",
+      "evidence": "tokenOptions.ts:82 applies Number() to CGW fiatBalance strings. The generated types and CGW always return numeric strings, so NaN is unlikely in practice."
+    },
+    {
+      "findings": [
+        "F6"
+      ],
+      "summary": "excludeAddresses lookup is O(n*m) and could be a Set",
+      "label": "nit",
+      "evidence": "index.tsx:96-104 uses .some(sameAddress) inside a memo. Token and exclusion counts are tiny, so there is no measurable cost."
+    },
+    {
+      "findings": [
+        "F39"
+      ],
+      "summary": "Inline filter / itemToStringValue / onValueChange callbacks defeat memoisation",
+      "label": "nit",
+      "evidence": "index.tsx:141-145 pass new function references each render. With a few dozen tokens the extra filtering pass is negligible and not a demonstrated problem."
+    },
+    {
+      "findings": [
+        "F22"
+      ],
+      "summary": "Held balances are fetched and rendered without paging or a spam filter",
+      "label": "low",
+      "evidence": "Line 63 fetches every balance, and the combobox renders all of them. The default trusted setting limits spam, but with 'All tokens' a Safe with a large history renders a big list. This matches how the assets page fetches, so the impact is minor."
+    },
+    {
+      "findings": [
+        "F33"
+      ],
+      "summary": "trusted: undefined is passed in the query args while skipped",
+      "label": "nit",
+      "evidence": "When trusted is undefined, skip is true (line 61), so the request is never issued. Type-check passes, and the undefined value is harmless."
+    },
+    {
+      "findings": [
+        "F10"
+      ],
+      "summary": "PopularToken and NativeCurrencyInfo are near-duplicate types",
+      "label": "nit",
+      "evidence": "tokenOptions.ts:12-18 and 46-51 differ only by `address`. One could be derived from the other with Omit, but the only cost is style."
+    },
+    {
+      "findings": [
+        "F27"
+      ],
+      "summary": "unknownTokenOption hardcodes decimals: 0, which would break any future amount calculation that uses it",
+      "label": "nit",
+      "evidence": "index.tsx:61-67 only feeds display (selectedOption label and icon). No current code path uses its decimals, so the concern is hypothetical."
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "Inline comment about base-ui unmount behaviour could later become a shared test util",
+      "label": "nit",
+      "evidence": "This is a speculative suggestion that only applies once a second consumer exists. There is no current cost."
+    },
+    {
+      "findings": [
+        "F17"
+      ],
+      "summary": "apps/web/AGENTS.md says utility tests are colocated as utils.test.ts, but __tests__/ is the common layout",
+      "label": "low",
+      "evidence": "apps/web/AGENTS.md:88 does say `utils.test.ts` colocated, while this PR (and most features) use __tests__/. The PR does not touch AGENTS.md, so this is a pre-existing documentation mismatch outside its changes."
+    },
+    {
+      "findings": [
+        "F29"
+      ],
+      "summary": "Unsure whether createMockStory supports shadcn: true",
+      "label": "wrong",
+      "evidence": "apps/web/src/stories/mocks/createMockStory.tsx:70 destructures `shadcn = false` and passes it to MockContextProvider (line 112), which declares `shadcn?: boolean`. The flag is supported."
+    },
+    {
+      "findings": [
+        "F23"
+      ],
+      "summary": "Truncated symbol/name has no tooltip to reveal the full text",
+      "label": "low",
+      "evidence": "TokenOptionRow.tsx:23-29 applies `truncate` with no title attribute or tooltip, so long names cannot be read in full. The name is still searchable, so the impact is minor."
+    },
+    {
+      "findings": [
+        "F14"
+      ],
+      "summary": "Unclear whether Enter selects the highlighted match",
+      "label": "unverifiable",
+      "evidence": "This depends on base-ui Combobox keyboard defaults and autoHighlight behaviour, which the PR does not configure and which cannot be confirmed without running it."
+    },
+    {
+      "findings": [
+        "F32"
+      ],
+      "summary": "Component width may differ between default and empty states",
+      "label": "unverifiable",
+      "evidence": "The field is w-full (index.tsx:135, 150) and the popup is anchored to the field, so its width comes from the parent. Any jump would have to be confirmed visually in Storybook."
+    },
+    {
+      "findings": [
+        "F40"
+      ],
+      "summary": "Error message and retry on one row wraps awkwardly; suggests two rows",
+      "label": "nit",
+      "evidence": "TokenGroupState.tsx:36-45 puts the icon, message and Retry button in one flex row. Splitting it is a design preference."
+    }
+  ]
+}

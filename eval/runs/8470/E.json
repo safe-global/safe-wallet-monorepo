@@ -1,0 +1,11 @@
+{
+  "pr": 8470,
+  "reviewSha": "8a706fb614de2a574cb8729df0774cab7d0b433b",
+  "baseSha": "4504b364b0b0a53c02a69f73a9a3f456159caf53",
+  "system": "E",
+  "version": "github",
+  "runner": "collect",
+  "model": "human",
+  "commentSha": "8a706fb614de2a574cb8729df0774cab7d0b433b",
+  "output": "@tongyaosafe - it seems you didn't update` safe-core-sdk `on your PR. You can check how this is done here: https://github.com/safe-global/safe-wallet-monorepo/pull/8433/changes"
+}

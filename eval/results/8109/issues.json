@@ -1,0 +1,91 @@
+{
+  "usage": {
+    "usd": 0.5644052,
+    "turns": 9,
+    "wallSeconds": 55
+  },
+  "issues": [
+    {
+      "findings": [
+        "F1",
+        "F7",
+        "F12"
+      ],
+      "summary": "The access-loss redirect fires on any 401/404 or declined status, so wrong-wallet deep links, mistyped IDs and deleted spaces now redirect instead of showing an explanation.",
+      "label": "low",
+      "evidence": "AuthState/index.tsx:33 builds hasLostAccess from isUnauthorized, which treats 404 as unauthorized (utils.ts:12-14; the TODO says the endpoint returns 404, not 401). So the 404 cases are just how access loss shows up, and the PR description says unauthorized users should be redirected. The only cost is losing the explanation for never-members; UnauthorizedState is not dead code because it still renders while the redirect is pending."
+    },
+    {
+      "findings": [
+        "F6"
+      ],
+      "summary": "Inside a space, the empty dropdown message says to connect a wallet, but the list comes from the space's Safes, so connecting a wallet would not change it.",
+      "label": "low",
+      "evidence": "useSafeBarSafes.ts:87 returns spaceSafes when in space context, while SafeDropdownContainer.tsx:109-113 shows 'Connect a wallet to find your Safe Accounts' whenever no wallet is connected. The copy is misleading for users signed in without a wallet, but the impact is minor."
+    },
+    {
+      "findings": [
+        "F11"
+      ],
+      "summary": "The empty-state tests use items=[], which the parent never passes; the real case (only the selected item, no wallet) is not tested.",
+      "label": "low",
+      "evidence": "SafeSelectorDropdown/index.tsx:105-108 renders a skeleton when items.length===0, so the container never receives an empty list. The empty message is actually reached when structuralItems filters out the single selected item (SafeDropdownContainer.tsx:85), and no test covers that."
+    },
+    {
+      "findings": [
+        "F2"
+      ],
+      "summary": "The test's redux state is cast with `as never`, which turns off type checking of the store shape.",
+      "label": "low",
+      "evidence": "SelectSafeModal/__tests__/index.test.tsx:60 casts to never, and cfState builds an untyped `{status:{}}` object. This goes against the AGENTS.md guidance to avoid any-style casts and create typed helpers, and it could hide drift in the store shape."
+    },
+    {
+      "findings": [
+        "F10"
+      ],
+      "summary": "The test fixtures are written by hand instead of using the existing safeItem and chain builders.",
+      "label": "nit",
+      "evidence": "apps/web/src/tests/builders/safeItem.ts and chains.ts exist, but the fixtures work and are readable. This is a style preference with no concrete defect."
+    },
+    {
+      "findings": [
+        "F3"
+      ],
+      "summary": "The nested ternary for the empty-state message could be pulled out into a named variable.",
+      "label": "nit",
+      "evidence": "SafeDropdownContainer.tsx:109-113 has a short, readable, prettier-formatted nested ternary. This is purely stylistic."
+    },
+    {
+      "findings": [
+        "F4"
+      ],
+      "summary": "The placeholder `<div />` could be replaced by ml-auto on the AccountInfo wrapper.",
+      "label": "nit",
+      "evidence": "SpacesList/index.tsx:241 uses an empty div to keep the justify-between layout. It works correctly, and the alternative is only a style choice."
+    },
+    {
+      "findings": [
+        "F5"
+      ],
+      "summary": "The promise from router.replace is not caught inside the effect.",
+      "label": "nit",
+      "evidence": "AuthState/index.tsx:40-42 calls router.replace without handling the promise. Next's router.replace rarely rejects (cancellations resolve), and fire-and-forget router calls in effects are common across the codebase."
+    },
+    {
+      "findings": [
+        "F8"
+      ],
+      "summary": "UnauthorizedState flashes briefly while the redirect is pending.",
+      "label": "nit",
+      "evidence": "AuthState/index.tsx:51 deliberately returns UnauthorizedState when hasLostAccess is true, and the new test at index.test.tsx:152 asserts it renders. The brief interim render is clearly intended."
+    },
+    {
+      "findings": [
+        "F9"
+      ],
+      "summary": "The claim that the behaviour changes are not tied to tickets or design decisions.",
+      "label": "wrong",
+      "evidence": "The PR description links WA-2563 (CF Safes in swap), WA-2568 (redirect after leaving) and WA-2569 (empty-state/sign-out), and includes screenshots."
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "usd": 0.043643600000000005,
+  "findings": [
+    {
+      "file": "apps/web/src/features/feature-flags/store/index.ts",
+      "line": 1,
+      "claim": "The new feature-flags feature folder only contains a store subdirectory with its own index.ts, but lacks a feature-root index.ts exporting its public hooks, selectors, actions and types. Without it, any future consumer of selectFeatureFlagOverrides, selectOverrideCount or setOverride would have to deep-import from the store path instead of the feature's public API, which is the pattern the feature-boundary convention and public-API rule are meant to prevent."
+    }
+  ]
+}

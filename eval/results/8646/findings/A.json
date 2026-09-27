@@ -1,0 +1,70 @@
+{
+  "usd": 0.0555456,
+  "findings": [
+    {
+      "file": "apps/web/src/components/tx/security/tenderly/utils.ts",
+      "line": 41,
+      "claim": "This code still calls getReadOnlyCurrentGnosisSafeContract(params.safe) without passing a scope, but that function now routes through getAndValidateSafeSDK(scope) which throws whenever a SafeScopeProvider is mounted, so Tenderly simulation fails inside Space-level flows reached from TxInfoProvider, useSimulation, useCheckSimulation and QueuedTxSimulation."
+    },
+    {
+      "file": "apps/web/src/services/tx/executionPreChecks.ts",
+      "line": 138,
+      "claim": "The check calls getAndValidateSafeSDK(scope) inside a try/catch that swallows every error, including the deliberate 'scope forgotten' throw, which silently skips the BAD_SIGNATURE check in that case."
+    },
+    {
+      "file": "apps/web/src/services/tx/__tests__/executionPreChecks.test.ts",
+      "line": null,
+      "claim": "This test file was not updated and still only mocks getSafeSDK, leaving the new scope-based branches in executionPreChecks untested."
+    },
+    {
+      "file": "apps/web/src/services/tx/__tests__/useTxActions.scope.test.tsx",
+      "line": 28,
+      "claim": "This test mocks runExecutionPreChecks away entirely, so it does not exercise the new scope-related behavior."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "Missing test coverage should include: the check using scope.sdk when a scope is provided, the check being skipped when a provided scope's sdk is undefined, and the check being skipped with _822 logged when there is an active scope but none is passed."
+    },
+    {
+      "file": "apps/web/src/components/tx-flow/safe-scope/SafeScopeProvider.tsx",
+      "line": 65,
+      "claim": "The dynamic import('@/hooks/wallets/web3').then(...) has no .catch, so if the chunk fails to load or createWeb3ReadOnly throws, the rejection goes unhandled and the scope is left with web3ReadOnly undefined with no error shown; a .catch reporting through trackError, as the SDK effect at line 109 does, would fix this."
+    },
+    {
+      "file": "apps/web/src/hooks/wallets/useInitWeb3.ts",
+      "line": 34,
+      "claim": "The missing rejection handler in SafeScopeProvider.tsx copies an existing gap already present in this file."
+    },
+    {
+      "file": "apps/web/src/components/tx/shared/hooks.ts",
+      "line": 210,
+      "claim": "dispatchTxRelay now takes 7 positional arguments, and dispatchTxExecution in the same file now takes 8, called inside useTxActions' useMemo, making already long signatures longer and harder to work with."
+    },
+    {
+      "file": "apps/web/src/components/tx-flow/flows/ConfirmTx/ConfirmProposedTx.tsx",
+      "line": 29,
+      "claim": "createExistingTx(chainId, txId, undefined, scope) passes undefined purely as a placeholder to reach the 4th argument slot; scope could instead go into an options object or be closed over in useTxActions."
+    },
+    {
+      "file": "apps/web/src/components/tx-flow/safe-scope/index.ts",
+      "line": 1,
+      "claim": "Nothing imports the safe-scope barrel file; every caller deep-imports /context or /types instead, with comments in safeCoreSDK.ts:23 and web3ReadOnly.ts:8 stating this is deliberate for bundle size, making the barrel unused."
+    },
+    {
+      "file": "apps/web/src/components/tx-flow/safe-scope/index.ts",
+      "line": 4,
+      "claim": "The barrel re-exports registerActiveScope and hasActiveScope, which should only be used by the provider and sdk.ts, exposing internals that shouldn't be part of the public surface; the barrel should be dropped or cut down to only the public types and hooks."
+    },
+    {
+      "file": "apps/web/src/components/tx-flow/SafeTxProvider.tsx",
+      "line": 6,
+      "claim": "This file imports ./safe-scope/context using a relative path, while every other file in this change uses the @/components/tx-flow/safe-scope/context absolute alias, making import style inconsistent within the diff."
+    },
+    {
+      "file": "apps/web/src/components/tx-flow/safe-scope/SafeScopeProvider.tsx",
+      "line": 88,
+      "claim": "An eslint-disable-next-line react-hooks/exhaustive-deps suppresses the exclusion of 'safe' from a dependency array; deriving sdkInputs from a memo keyed on the stable fields would avoid needing this suppression."
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "pr": 8557,
+  "title": "fix(web): restore version-upgrade indicators for 1.5.0 migrations (WA-3261)",
+  "description": "## What it solves\r\n\r\nResolves: WA-3261\r\n\r\nUpgrading a Safe to v1.5.0 lost both version-upgrade indicators that v1.4.1 upgrades still show:\r\n\r\n- the confirmation view no longer showed the \"Current version X → New version Y\" banner (and the changelog link),\r\n- the transaction-history details for a migration no longer showed the version-upgrade info box.\r\n\r\nBoth fell back to the generic decoded-data view instead.\r\n\r\nAdditionally, in the \"Update Safe account base contract\" flow (`MigrateSafeL2`), the header card and the content card were rendered as two disconnected cards with a gap, instead of one joined card like every other flow.\r\n\r\n## How this PR fixes it\r\n\r\n**Version indicators:** `isSafeUpdateTxData` only matched the SafeMigration deployment of the hardcoded `LATEST_SAFE_VERSION` (1.4.1) — and only its canonical `defaultAddress`. Transaction *creation* is chain-aware (`getLatestSafeVersion(chain)`), so on chains recommending 1.5.0 the tx delegate-calls the 1.5.0 SafeMigration contract, which the guard didn't recognise. The guard now reuses the existing `isSafeMigrationCall` helper, which matches **any** official SafeMigration deployment (any version, canonical or zksync variant) and additionally verifies the calldata is one of the four migrate method selectors — so arbitrary calldata sent to a SafeMigration address is no longer misclassified as an upgrade (a slight tightening over the old behaviour).\r\n\r\n**Card gap:** `MigrateSafeL2Review` wrapped `<ReviewTransaction>` in a functionless `<div>`, which broke the `.step > .txCardRoot:first-child` card-joining CSS in `TxLayoutBase` (it requires the card to be a *direct* child). Removed the wrapper, aligning it with `UpdateSafeReview`.\r\n\r\n## How to test it\r\n\r\n1. On a chain whose recommended Safe version is 1.5.0, open a Safe on an older version (e.g. 1.3.0) and start the contract update flow.\r\n2. The review screen shows the \"Current version: X → New version: 1.5.0\" banner with the changelog link (previously: raw decoded data only).\r\n3. In the `MigrateSafeL2` flow, the header card and content card are joined with no gap.\r\n4. Queue/execute the migration and open it in the transaction list — the details show the Safe update info instead of raw decoded data.\r\n5. Regression: a 1.4.1 upgrade still renders both indicators unchanged, and the pre-1.3.0 path (e.g. 1.1.1 → 1.5.0 via `changeMasterCopy` multisend) was manually verified to render correctly.\r\n\r\nUnit tests: `apps/web/src/utils/__tests__/transaction-guards.test.ts` adds a 1.5.0 recognition case and a negative case (non-migrate calldata to a SafeMigration address).\r\n\r\n## Affected flows\r\n\r\n- Owner upgrades a Safe's base contract from the update banner / Settings (review + confirmation view)\r\n- Anyone views a queued or executed base-contract upgrade in the transaction list (details view)\r\n- Owner migrates an unsupported L2 base contract (\"Update Safe account base contract\" flow — layout only)\r\n\r\n## Blast radius\r\n\r\n- `isSafeUpdateTxData` (`transaction-guards.ts`) — consumers: `confirmation-views/index.tsx` (review screen) and `TxDetails/TxData/index.tsx` (queue/history details). Behaviour widens to all official SafeMigration versions/variants and narrows to migrate-method calldata only.\r\n- `MigrateSafeL2Review` — layout-only change; no logic touched.\r\n- No RTK Query endpoints, feature flags, chain configs, persistence, or routes touched.\r\n- Mobile: not affected — change is in `apps/web` only; the shared guard lives in the web app, not a shared package.\r\n\r\n## Risks / not checked\r\n\r\n- Did not test the zksync SafeMigration variant on a live zksync chain (covered by the variant-matching logic in `isSafeMigrationCall` and its tests).\r\n- Did not verify on mobile (web-only change).\r\n- The guard no longer matches arbitrary calldata delegate-called to a SafeMigration address; such txs now render as generic decoded data. This is intended, but no real-world tx of that shape was checked.\r\n\r\n## Visual summary\r\n\r\n```mermaid\r\nflowchart TD\r\n    A[txData: delegate call, trusted target] --> B{old guard}\r\n    B -->|to == SafeMigration of LATEST_SAFE_VERSION 1.4.1 only| C[UpdateSafe banner + history info box]\r\n    B -->|SafeMigration 1.5.0| D[❌ generic decoded data]\r\n\r\n    A --> E{new guard: isSafeMigrationCall}\r\n    E -->|to == any official SafeMigration version/variant AND calldata is a migrate method| C\r\n    E -->|otherwise| F[generic decoded data]\r\n```\r\nBefore:\r\n<img width=\"1145\" height=\"544\" alt=\"Screenshot 2026-08-24 at 14 00 58\" src=\"https://github.com/user-attachments/assets/0500f3e8-866d-4428-82a0-6defdf262b3a\" />\r\n\r\nAfter:\r\n<img width=\"1154\" height=\"596\" alt=\"Screenshot 2026-08-24 at 14 00 52\" src=\"https://github.com/user-attachments/assets/5437ea85-0fa6-4403-aced-18c426c5dd7e\" />\r\n\r\nBefore:\r\n<img width=\"1265\" height=\"381\" alt=\"Screenshot 2026-08-24 at 14 03 09\" src=\"https://github.com/user-attachments/assets/e77df0d6-3e90-46f6-b354-ce048a51e5eb\" />\r\n\r\nAfter:\r\n<img width=\"1275\" height=\"463\" alt=\"Screenshot 2026-08-24 at 14 02 08\" src=\"https://github.com/user-attachments/assets/1e249221-7785-4dc4-8471-565a67d69798\" />\r\n\r\n\r\n\r\n## Checklist\r\n\r\n- [ ] I've tested the branch on mobile 📱\r\n- [x] I've documented how it affects the analytics (if at all) 📊 — no analytics impact\r\n- [x] I've written a unit/e2e test for it (if applicable) 🧑‍💻\r\n- [x] I've listed affected flows and blast radius, and named what I did not verify 🎯\r\n\r\n---\r\n\r\n## CLA signature\r\n\r\nWith the submission of this Pull Request, I confirm that I have read and agree to the terms of the [Contributor License Agreement](https://safe.global/cla).\r\n",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/components/tx-flow/flows/MigrateSafeL2/MigrateSafeL2Review.tsx",
+      "line": 26,
+      "claim": "The layout fix from removing the wrapper div relies on a CSS selector (.step > .txCardRoot:first-child) matching correctly, but there is no test or story guarding this behavior, so a wrapper added later could silently reintroduce the layout gap without any warning."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/components/tx-flow/flows/MigrateSafeL2/MigrateSafeL2Review.tsx",
+      "line": 26,
+      "claim": "Removal of the wrapper div is a layout-only change with no accompanying test, and a screenshot demonstrating the visual fix should be included in the PR's visual summary."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/utils/safe-migrations.ts",
+      "line": 101,
+      "claim": "The JSDoc comment on isSafeMigrationCall still describes its use only for avoiding flagging the migration transaction as an unsupported-contract interaction, but the function is now also used to detect a version upgrade elsewhere, so the comment no longer reflects all of the function's callers and should describe what the function detects rather than who calls it."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/utils/__tests__/transaction-guards.test.ts",
+      "line": 205,
+      "claim": "The two new tests construct TransactionData using hand-written object literals instead of the already-imported txDataBuilder, which does not follow the preferred builder pattern for constructing test data even though it matches a neighboring test in the same file."
+    },
+    {
+      "id": "F5",
+      "file": "transaction-guards.test.ts",
+      "line": 205,
+      "claim": "The 1.5.0 test case only exercises the canonical selector and address; it should also include a case for the zksync variant address to lock in the 'any variant' matching behavior the guard now depends on, otherwise a future regression back to canonical-only matching would not be caught by the suite."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/src/utils/transaction-guards.ts",
+      "line": 450,
+      "claim": "The new two-line comment explaining that the check now matches any version, canonical or zksync variant, with a migrate method duplicates what the isSafeMigrationCall docstring already states, and repo guidance treats code comments as tech debt to be minimized. It could be shortened back to the original one-line comment."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/utils/transaction-guards.ts",
+      "line": 452,
+      "claim": "The updated check matches official migration addresses across every Safe version and variant and does not filter by chain ID, which is a deliberate widening of what is accepted even though it is constrained by requiring a trusted delegate-call target and a delegate call."
+    },
+    {
+      "id": "F8",
+      "file": "transaction-guards.ts",
+      "line": 452,
+      "claim": "isSafeMigrationCall recomputes the SAFE_VERSIONS.flatMap address list and re-decodes the migration interface selectors on every invocation, and since isSafeUpdateTxData is called from render paths, this address list and the four selectors should be hoisted to module-level constants (e.g. in safe-migrations.ts) instead of being recomputed each call."
+    },
+    {
+      "id": "F9",
+      "file": "transaction-guards.test.ts",
+      "line": 220,
+      "claim": "The negative test case only covers non-migrate calldata sent to a SafeMigration address; a symmetrical positive counter-example (a migrate selector sent to a non-SafeMigration address) is missing and would be needed to fully verify that the guard requires both the address and the selector to match."
+    },
+    {
+      "id": "F10",
+      "file": "apps/web/src/utils/transaction-guards.ts",
+      "line": 450,
+      "claim": "The zksync variant address newly matched by isSafeUpdateTxData (e.g. the 1.4.1 zksync address) is not covered by a test at this call site, relying only on tests of isSafeMigrationCall itself, so behavior specific to this caller is not pinned down by a test."
+    },
+    {
+      "id": "F11",
+      "file": null,
+      "line": null,
+      "claim": "It is unverified whether the Client Gateway returns trustedDelegateCallTarget: true for the 1.5.0 SafeMigration addresses; if it does not, isSafeUpdateTxData will still return false at the trusted-call check and the banner will not appear in production even with this fix, and the unit tests cannot catch this because they hard-code that flag to true."
+    }
+  ]
+}

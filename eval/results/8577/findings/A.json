@@ -1,0 +1,40 @@
+{
+  "usd": 0.041187600000000005,
+  "findings": [
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/attestations.ts",
+      "line": 45,
+      "claim": "bindAttestations compares event.safe.toLowerCase() === safeAddress instead of using the shared sameAddress(a, b) helper for address equality, so it duplicates normalization logic and skips the helper's empty-string handling."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/attestations.ts",
+      "line": 43,
+      "claim": "safeAddress is lowercased by hand as a setup step for the manual comparison, which should be removed once sameAddress is used instead."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/attestations.ts",
+      "line": 18,
+      "claim": "attestationCandidates, a new pure helper that orders attestations oracle-first then newest-first by block and log index, has no dedicated unit test file, unlike sibling utils in utils/__tests__/."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/attestations.ts",
+      "line": 39,
+      "claim": "bindAttestations is only exercised indirectly through safenetCheckApi.test.ts and SafenetAuditRow.test.tsx rather than through its own unit tests, leaving cases like binding filters on other chain, other Safe, and mixed-case address untested directly."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/attestations.ts",
+      "line": 55,
+      "claim": "verdictAttestation lacks direct unit tests for choosing between several attestations by signatureId (e.g. an oracle versus a plain one, or two in the same family), for returning undefined when signatureId is null, and for the logIndex tie-break between two events in the same block; existing component tests only pass a single plain event."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The generated checklist was written to the scratchpad instead of docs/engineering/, so it was not saved in the expected location."
+    },
+    {
+      "file": "TxSigners/index.tsx",
+      "line": 171,
+      "claim": "This caller passes safe.address.value while the other two callers pass the safeAddress value returned by useSafeInfo; although both currently hold the same value, the inconsistency in which form is used could cause divergence later."
+    }
+  ]
+}

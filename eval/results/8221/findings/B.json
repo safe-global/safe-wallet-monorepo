@@ -1,0 +1,40 @@
+{
+  "usd": 0.057894,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/MultiChainSafeItemRow.tsx",
+      "line": 76,
+      "claim": "The status badge now shares the same line as the chain name, the pending-count badge, and the balance, but the row's wrapper (ItemText, which has flex-1 shrink-0 whitespace-nowrap) does not allow shrinking, so the name's truncate class likely never takes effect and the row grows to fit all content combined rather than truncating."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/MultiChainSafeItemRow.tsx",
+      "line": 76,
+      "claim": "Because the dropdown popup has a fixed/limited width, a long chain name combined with a Read-only badge, pending count, and balance can exceed the available width on narrow screens, causing the balance to be clipped or the row to scroll sideways where it previously fit."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/MultiChainSafeItemRow.tsx",
+      "line": 76,
+      "claim": "To fix the overflow risk, min-w-0/shrink should be applied to the row content (e.g. overriding ItemText for this row) so truncate works, and shrink-0 should be added to the badge so the chain name shrinks first instead of the badge."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/SafeSelectorDropdown.stories.tsx",
+      "line": 205,
+      "claim": "No Storybook story renders a multi-chain row with Inactive or Read-only chain states, even though this is exactly the layout affected by the commit, leaving the visual change without story coverage."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/__tests__/MultiChainSafeItemRow.test.tsx",
+      "line": null,
+      "claim": "The unit tests replace SelectItem with a plain div and only assert that the badge exists, so they would not fail and no snapshot would change if the commit were reverted, and there is no test at all for the Read-only badge."
+    },
+    {
+      "file": "apps/web/AGENTS.md",
+      "line": 148,
+      "claim": "The project's own testing guidance states that layout-only changes must be covered by a Storybook story, and this change lacks one for the affected multi-chain badge layout, so a regression here would not be caught by the visual snapshot check."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/MultiChainSafeItemRow.tsx",
+      "line": 25,
+      "claim": "The Read-only badge is implemented as a hand-built styled span instead of reusing the shared Badge component already used elsewhere in the same file for the pending-count badge, which is an unnecessary duplication."
+    }
+  ]
+}

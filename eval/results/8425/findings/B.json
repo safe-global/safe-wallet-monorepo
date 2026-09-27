@@ -1,0 +1,70 @@
+{
+  "usd": 0.072136,
+  "findings": [
+    {
+      "file": "apps/web/src/components/common/SpaceSafeBar/index.tsx",
+      "line": 296,
+      "claim": "The topbar wrapper's stacking context is removed via `.topbarAboveOverlay { z-index: auto }` so that the safe bar's elevated z-index can beat the dropdown backdrop, but the bar renders inside a `<header className=\"@container …\">` element, and `container-type: inline-size` applies layout containment which always creates its own stacking context. As a result the bar's z-index only wins within the header, and the whole header still paints below the Select backdrop, so opening the safe-selector dropdown dims the entire topbar including the trigger, defeating the purpose of the elevation hooks."
+    },
+    {
+      "file": "apps/web/src/styles/shadcn.css",
+      "line": 34,
+      "claim": "The shared shadcn `--accent` token was changed from a neutral color to green in both light mode (`#f5f5f5` to `#f0fdf4`) and dark mode (`#12ff8033` to `#052e16`) to restyle three Spaces surfaces, but this token is also used as the hover/focus background for every menu item across dropdown-menu, context-menu, select, combobox, and global search components, so every menu highlight app-wide turns green with nothing overriding it; if this is unintended it needs a scoped token instead, and if intended it should be called out in the PR description."
+    },
+    {
+      "file": "apps/web/src/features/multichain/components/NetworkLogosList/styles.module.css",
+      "line": 19,
+      "claim": "The crescent mask rule targets `span:not(:last-child)`, but the `.networks` container uses `flex-wrap: wrap`, so the last logo on each wrapped row (not just the true last item) ends up with an uncovered crescent cutout since no neighbour logo overlaps it on that row."
+    },
+    {
+      "file": "apps/web/src/features/multichain/components/ReviewStep/index.tsx",
+      "line": 145,
+      "claim": "This consumer of the logo list does not cap the number of logos shown, which interacts with the wrap-related masking bug and can produce more uncovered crescent cutouts as more logos wrap onto new rows."
+    },
+    {
+      "file": "apps/web/src/features/multichain/components/CounterfactualSuccessScreen/index.tsx",
+      "line": 122,
+      "claim": "Like the ReviewStep consumer, this component does not cap the logo list length, exposing the same wrap-related masking issue."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "Fallback SvgIcon logos that render without an `<img>` element are never masked by the crescent-cutout styling, leaving them visually inconsistent with masked image logos."
+    },
+    {
+      "file": "apps/web/src/hooks/useTopbarElevation.ts",
+      "line": 54,
+      "claim": "There is no test coverage for the new `useTopbarOverlayElevation` / `useIsTopbarAboveOverlay` hooks, and the existing test file only exercises the pre-existing modal elevation pair, not the new overlay pair."
+    },
+    {
+      "file": "apps/web/src/components/common/SafeSelectorDropdown/index.tsx",
+      "line": 104,
+      "claim": "No test verifies that the dropdown registers overlay elevation only when the dropdown is actually open, as opposed to when it is disabled or when `canOpen` is false; removing this registration line would not cause any test to fail, indicating a coverage gap."
+    },
+    {
+      "file": "apps/web/src/components/ui/select.tsx",
+      "line": 109,
+      "claim": "The `showBackdrop` behavior introduced alongside the overlay elevation changes has no test coverage."
+    },
+    {
+      "file": "apps/web/src/components/common/SafeSelectorDropdown/components/SafeRowStats.tsx",
+      "line": 10,
+      "claim": "The stacked-logo crescent geometry is duplicated between an inline constant here and a CSS rule in NetworkLogosList's stylesheet, with comments in each referencing the other as the source of truth, creating a maintenance risk if one is changed without the other."
+    },
+    {
+      "file": "apps/web/src/components/common/SafeSelectorDropdown/components/SafeRowStats.tsx",
+      "line": 10,
+      "claim": "The comment states the logo radius is 12px, but the actual logo size is 22px (making the radius 11px), so the comment is incorrect; if this duplication is addressed, the constant should also be replaced with a CSS-variable-driven class like the one used in NetworkLogosList and the radius comment corrected."
+    },
+    {
+      "file": "apps/web/src/components/common/SpaceSafeContextMenu.tsx",
+      "line": 37,
+      "claim": "Anchoring the context menu to `closest('tr')` and applying right alignment now applies to every consumer of this component, including non-table consumers such as SafeListItem, MultiAccountItem, and SafeCardReadOnly, which changes menu placement behavior for those cases even though a fallback prevents a crash."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "If the sticky `.topbarElevated` state and the overlay are ever active at the same time, the sticky positioning would create its own stacking context and could similarly defeat the intended z-index lift of the safe bar above the backdrop."
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "usd": 0.0384496,
+  "findings": [
+    {
+      "file": "apps/web/src/components/tx-flow/common/TxNonce/index.tsx",
+      "line": 70,
+      "claim": "The dropdown label reads transaction.note directly with no check on the TX_NOTES feature flag, unlike other places that render notes only through the tx-notes feature component which is gated by that flag. On a chain where the flag is off, or after it is switched off, a note the backend still returns would show in this dropdown even though it appears nowhere else."
+    },
+    {
+      "file": "apps/web/src/components/tx-flow/common/TxNonce/index.tsx",
+      "line": 81,
+      "claim": "Notes can be up to 60 characters of free text (MAX_NOTE_LENGTH) and nothing sets a maximum width or truncation for the label in the dropdown, which is not tied to the field's width. A 60-character note with no spaces could make the dropdown very wide, which was less likely with the previous server-generated descriptions."
+    }
+  ]
+}

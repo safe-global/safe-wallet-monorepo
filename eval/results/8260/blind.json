@@ -1,0 +1,139 @@
+{
+  "pr": 8260,
+  "title": "fix: hide full list of chains in the Safe apps drawer in favor of a shorter list + tooltip",
+  "description": "## What it solves\r\n\r\nResolves: [WA-2793](https://linear.app/safe-global/issue/WA-2793/tx-builder-network-list-too-big)\r\nThe Transaction Builder (and every Safe App) preview drawer listed all \"Available networks\" as a flat, wrapped row of chain icons — long for multi-chain apps.\r\n\r\n## How this PR fixes it\r\n\r\nRenders the networks as the same collapsed logo cluster used in the Space address book: overlapping logos with a `+N` overflow badge (`maxVisible={3}`) and a hover tooltip listing every chain. Chains not recognized by the current environment's config service are filtered out first, preserving the prior `showUnknown={false}` behavior.\r\n\r\n## How to test it\r\n\r\n1. Go to `/apps`, search \"Transaction Builder\", click the card to open the preview drawer.\r\n2. Under \"Available networks\", confirm 3 logos + a `+N` circle.\r\n3. Hover the cluster → tooltip lists all supported chains.\r\n\r\n## Affected flows\r\n\r\n- Safe App preview drawer (opened from `/apps`) — \"Available networks\" display.\r\n\r\n## Blast radius\r\n\r\n- `SafeAppPreviewDrawer` only (leaf presentational component).\r\n- Reuses shared `NetworkLogosList`, `ui/tooltip`, `useChains` — none modified.\r\n\r\n## Risks / not checked\r\n\r\n- Did not add a mobile-specific variant (drawer is desktop-oriented).\r\n- Unit tests mock `NetworkLogosList`/`ChainIndicator`/`useChains`, so they assert wiring + unknown-chain filtering, not the real `+N` rendering (owned by `NetworkLogosList`).\r\n\r\n## Visual summary\r\n\r\n### Before\r\nBefore: the chains list was too long, users had to scroll down to see the CTA button, and it was not obvious that they have to scroll:\r\n<img width=\"638\" height=\"791\" alt=\"image\" src=\"https://github.com/user-attachments/assets/69a8b6ec-5563-418a-9860-392bb0f6b796\" />\r\n\r\n### After\r\nAfter: chains are in a small list with a tooltip. The CTA button is in the viewport.\r\n<img width=\"554\" height=\"793\" alt=\"image\" src=\"https://github.com/user-attachments/assets/0634d6cb-7e7b-48a1-abe0-a91afb478878\" />\r\n\r\n\r\n```mermaid\r\nflowchart LR\r\n  A[safeApp.chainIds] --> B[filter by useChains configs]\r\n  B --> C[NetworkLogosList: 3 logos + N]\r\n  B --> D[Tooltip: full chain list on hover]\r\n```\r\n\r\n## Checklist\r\n\r\n- [x] I've tested the branch on mobile 📱\r\n- [ ] I've documented how it affects the analytics (if at all) 📊\r\n- [x] I've written a unit/e2e test for it (if applicable) 🧑‍💻\r\n- [ ] I've listed affected flows and blast radius, and named what I did not verify 🎯\r\n\r\n---\r\n\r\n## CLA signature\r\n\r\nWith the submission of this Pull Request, I confirm that I have read and agree to the terms of the [Contributor License Agreement](https://safe.global/cla).\r\n",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.tsx",
+      "line": 100,
+      "claim": "Screen readers only announce the three visible logos' alt text and the literal string \"+N\"; the remaining network names hidden behind the tooltip are not present in the accessibility tree."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.test.tsx",
+      "line": 71,
+      "claim": "The test asserting that every chain is passed to the cluster only checks that a data attribute splits into 5 entries, which is a strict subset of an earlier test's assertion, and the overflow-collapse behavior named in its description actually lives inside the mocked-out component, so the test doesn't cover what its name claims."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.tsx",
+      "line": 101,
+      "claim": "knownChainIds.map((chainId) => ({ chainId })) allocates a new array inline in the JSX attribute on every render; hoisting it next to knownChainIds would avoid the unnecessary re-allocation."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.test.tsx",
+      "line": 78,
+      "claim": "The hover test relies on the tooltip's real 600ms open delay against waitFor's default 1000ms timeout, leaving only about 400ms of margin, which risks flaking under CI load; the only other user.hover test in the repo targets a different (MUI) tooltip without this delay, so it isn't a validated precedent for this pattern."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.tsx",
+      "line": 100,
+      "claim": "The trigger's `origin-left scale-85` CSS transform duplicates an existing but suboptimal approach to resizing network logos; NetworkLogosList already exposes a purpose-built `imageSize` prop that other call sites use instead, so this scaling approach should eventually be replaced rather than propagated further."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.test.tsx",
+      "line": 8,
+      "claim": "The component mock types its props as any, which both violates the project's ban on the any type and weakens the test as a contract check, since a typed mock would fail to compile if the real NetworkLogosList prop names changed while the any-typed version keeps passing silently."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.test.tsx",
+      "line": 7,
+      "claim": "Both NetworkLogosList and ChainIndicator are replaced with stubs in the test suite, so the tests verify only prop plumbing rather than actual rendering; removing the tooltip trigger's focusability, or the `render` prop entirely, would still leave every test passing."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.tsx",
+      "line": 98,
+      "claim": "The Tooltip still mounts even when knownChainIds is empty, so hovering can pop up an empty tooltip bubble; the block should be guarded on knownChainIds.length > 0."
+    },
+    {
+      "id": "F9",
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.tsx",
+      "line": 42,
+      "claim": "The new code discards the `loading` flag returned by useChains(), so while chain configs are still being fetched every chain ID is filtered out of an empty array, and the drawer renders the same empty \"Available networks\" box it would show for a safe app with genuinely no supported networks; the previous implementation showed a loading skeleton in that state instead, and a new test now locks in the empty render as expected behavior."
+    },
+    {
+      "id": "F10",
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.tsx",
+      "line": 9,
+      "claim": "The file now imports two different Tooltip implementations (MUI and shadcn), which forces renaming imports with Networks* aliases to avoid collisions; extracting the duplicated cluster block into its own component would remove this collision."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.tsx",
+      "line": 99,
+      "claim": "This code duplicates a pattern also found in AccountItemChainBadge.tsx:21-33, PendingRequestsTable.tsx:129-148, SpaceAddressBookTable.tsx:61-76, and RequestToAddButton.tsx:145-160, and these should be considered for refactoring into a reusable component."
+    },
+    {
+      "id": "F12",
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.tsx",
+      "line": 99,
+      "claim": "This tooltip/network-cluster block is a near-verbatim third copy of the same pattern already implemented in SpaceAddressBookTable.tsx and AccountItemChainBadge.tsx (same class string, same showHasMore/maxVisible usage, same tooltip body layout), and the absence of a shared component is why this copy silently diverged from the others on trigger focusability."
+    },
+    {
+      "id": "F13",
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.tsx",
+      "line": 100,
+      "claim": "The tooltip trigger is overridden with a bare span instead of the default button, and that span is never given a tabIndex, so the cluster of additional network chains cannot be opened via keyboard focus; the hover interaction is also set to mouseOnly, so touch users cannot open it either. Previously all chains were rendered inline and visible to everyone, so this change makes chains beyond the first few unreachable for keyboard and touch users."
+    },
+    {
+      "id": "F14",
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.tsx",
+      "line": null,
+      "claim": "The component gained conditional rendering logic (collapsed, overflow, and empty states) but has no Storybook story, even though project guidance asks for a story for components with logic."
+    },
+    {
+      "id": "F15",
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.test.tsx",
+      "line": 78,
+      "claim": "The tooltip test sets the known chain IDs equal to the mock safe app's chain IDs, so it cannot detect whether the tooltip body would render unfiltered chains; the filtering logic is covered for the visible cluster but not for the tooltip."
+    },
+    {
+      "id": "F16",
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.test.tsx",
+      "line": 8,
+      "claim": "The test mock's props are typed as `any`, conflicting with the root AGENTS.md rule against using the `any` type and its guidance to properly type test helpers; the repo already has a fully typed mock of the same module elsewhere that this could have copied."
+    },
+    {
+      "id": "F17",
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.tsx",
+      "line": 43,
+      "claim": "The loading and error values returned by useChains() are unused, so while the chains config is still loading, knownChainIds is empty and the available-networks section renders an empty cluster instead of the skeleton the previous ChainIndicator-based implementation showed during loading."
+    },
+    {
+      "id": "F18",
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.test.tsx",
+      "line": 67,
+      "claim": "Assertions on data-max-visible and data-show-has-more only check that two literal props were forwarded to a mock, so the test breaks on a harmless prop rename while still passing if the actual rendering is broken; asserting on rendered output instead, as done elsewhere in the repo, would be more robust."
+    },
+    {
+      "id": "F19",
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.tsx",
+      "line": 98,
+      "claim": "The chain-cluster-with-tooltip block (Tooltip/TooltipTrigger, NetworkLogosList with showHasMore/maxVisible, and the ChainIndicator list) is duplicated verbatim from two other files, so any fix, such as the keyboard accessibility issue, has to be made in three separate places instead of one shared component."
+    },
+    {
+      "id": "F20",
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.test.tsx",
+      "line": 71,
+      "claim": "The test named to describe overflow collapsing beyond the visible limit only asserts the length of the array passed to a mocked NetworkLogosList component, so no actual collapsing occurs and the +N overflow indicator is never verified; the test name overstates what is being checked."
+    },
+    {
+      "id": "F21",
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer",
+      "line": null,
+      "claim": "The component directory has no SafeAppPreviewDrawer.stories.tsx even though apps/web/AGENTS.md requires a story per component; a story would be especially useful here since it could show the overflow (3-vs-N), empty, and tooltip states that the current mock-based tests cannot exercise."
+    },
+    {
+      "id": "F22",
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.tsx",
+      "line": 100,
+      "claim": "The tooltip trigger's `render` prop replaces the default focusable button with a plain `<span>`, so it has no role and is not in the tab order; since the change moved every network name except the three visible logos into that tooltip, keyboard users can no longer reach the rest of the network list at all."
+    }
+  ]
+}

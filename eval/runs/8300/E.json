@@ -1,0 +1,11 @@
+{
+  "pr": 8300,
+  "reviewSha": "abe00f96258684994622390667fcba85432ea5db",
+  "baseSha": "5bd8401a0242fe0094465f6e8e577b17ee8702ed",
+  "system": "E",
+  "version": "github",
+  "runner": "collect",
+  "model": "human",
+  "commentSha": "abe00f96258684994622390667fcba85432ea5db",
+  "output": "[review by Zalens]\nSeems solid to me. Just added two questions you can check :) \n\n---\n\napps/web/src/features/counterfactual/services/persistCounterfactualSafe.ts:101\nAre we sure this shouldn't still attach the Safe to the active space? We return before `spaceSafesCreateV1` (L145), so the account only exists in this browser's Redux. Members and other devices won't see it, but the toast says success.\n\n---\n\napps/web/src/features/counterfactual/services/persistCounterfactualSafe.ts:100\nDoes this actually delete the backend row? "
+}

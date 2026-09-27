@@ -1,0 +1,120 @@
+{
+  "usage": {
+    "usd": 0.5836210000000001,
+    "turns": 10,
+    "wallSeconds": 61
+  },
+  "issues": [
+    {
+      "findings": [
+        "F15",
+        "F7"
+      ],
+      "summary": "In compact mode, the 'Requested' and 'Already shared' states put aria-label on a plain span, and their only content is an icon hidden from screen readers",
+      "label": "medium",
+      "evidence": "RequestToAddButton.tsx:105 and SpaceAddressBook/index.tsx:196 put aria-label on a `<span>` that has no role. ARIA prohibits naming a generic element, so most screen readers ignore the label. Lucide icons are aria-hidden by default, so a narrow-screen screen-reader user gets no status text."
+    },
+    {
+      "findings": [
+        "F1",
+        "F11"
+      ],
+      "summary": "The new compact layout of the Safe address book (address under the name, Address column dropped) has no tests",
+      "label": "medium",
+      "evidence": "The new AddressBookTable/index.test.tsx always mocks useIsMobile as false and only tests pagination. The compact name cell at index.tsx:167-182 replaces the deleted mobile card but no test exercises it, so a regression there would go unnoticed."
+    },
+    {
+      "findings": [
+        "F6",
+        "F14"
+      ],
+      "summary": "The Safe address book lost its rows-per-page selector (10/25/100) when it moved to PaginatedDataTable",
+      "label": "medium",
+      "evidence": "The old table used EnhancedTable, which has pageSizes [10, 25, 100] (EnhancedTable/index.tsx:131). The new index.tsx:221 renders PaginatedDataTable, which has a fixed page size and, per the EnhancedTable doc comment, no rows-per-page option. Users lose a visible feature, and the PR description does not mention it."
+    },
+    {
+      "findings": [
+        "F5"
+      ],
+      "summary": "The action cell reuses tableCss.actions, which left-aligns below 900px while the header stays right-aligned, so on phones the buttons sit out of line with the header",
+      "label": "low",
+      "evidence": "EnhancedTable/styles.module.css:41-44 sets justify-content: flex-start below 899.95px. The column is align: 'end' (index.tsx:201-205). Phones used to get the separate card layout; now they get this misalignment. The impact is cosmetic."
+    },
+    {
+      "findings": [
+        "F2",
+        "F10"
+      ],
+      "summary": "The EnhancedTable deprecation comment still says 'nine existing consumers', but only eight remain after the address book migration",
+      "label": "low",
+      "evidence": "grep finds 8 non-story, non-test importers of EnhancedTable. The PR edited the comment at EnhancedTable/index.tsx:135-137 but kept 'nine'. The story's '~9' is approximate, and its claim that no consumer passes panel is accurate."
+    },
+    {
+      "findings": [
+        "F3",
+        "F9"
+      ],
+      "summary": ".storybook/COVERAGE.md still lists PaginatedDataTable at its old features/spaces path",
+      "label": "low",
+      "evidence": "apps/web/.storybook/COVERAGE.md:807 and :1741 still reference features/spaces/components/PaginatedDataTable, but the PR moved it to components/common. This is a documentation mismatch only."
+    },
+    {
+      "findings": [
+        "F17",
+        "F20"
+      ],
+      "summary": "A code comment now stops mid-sentence ('…left the search almost touching') because the PR deleted its second line",
+      "label": "low",
+      "evidence": "The diff for SpaceAddressBook/index.tsx:142 removes the line '// the table card below it.' but keeps the first line, leaving an incomplete sentence."
+    },
+    {
+      "findings": [
+        "F12",
+        "F13"
+      ],
+      "summary": "The Safe address book rebuilds the name-plus-address cell inline instead of sharing AddressCell, which lives under features/spaces",
+      "label": "low",
+      "evidence": "AddressBookTable/index.tsx:167-182 renders EthHashInfo inline with different props from AddressCell.tsx (no mono font, no avatar or highlight). This partly duplicates the shared cell, with some maintenance cost. The styles differ, so they are not strict copies."
+    },
+    {
+      "findings": [
+        "F19"
+      ],
+      "summary": "No tests cover the compact icon button combined with a name error, or the compact 'Already shared' icon",
+      "label": "low",
+      "evidence": "The new tests cover compact mode with no error and the compact 'Requested' state only. The nameError branch (RequestToAddButton.tsx:139, AddToWorkspaceButton.tsx:89-91) and the compact 'Already shared' branch in index.tsx:193-205 are untested. Both are small branches."
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "The icon + tooltip + aria-label compact pattern is repeated in several places instead of being extracted into a shared component",
+      "label": "nit",
+      "evidence": "AddToWorkspaceButton, RequestToAddButton and SpaceAddressBook/index.tsx use similar but short inline Tooltip wrappers. Extracting them is a preference, with no concrete defect today."
+    },
+    {
+      "findings": [
+        "F18"
+      ],
+      "summary": "The Cypress test calls verifyEntriesOrder('descending') after an ascending address sort, which is confusing",
+      "label": "nit",
+      "evidence": "address_book_2.cy.js:33 now has a comment explaining that the order is the inverse of the name order, so the test is correct. Readability is the only concern."
+    },
+    {
+      "findings": [
+        "F8"
+      ],
+      "summary": "The PR description should state whether design or product signed off on removing the mobile card view and the rows-per-page picker",
+      "label": "nit",
+      "evidence": "The PR description explicitly describes replacing the mobile card view. Asking for sign-off is a process request, not a code defect. The rows-per-page loss is covered separately."
+    },
+    {
+      "findings": [
+        "F4"
+      ],
+      "summary": "The PR edits components/ui/stories without saying whether it is coordinated with any design-system rewrite",
+      "label": "nit",
+      "evidence": "design-system.stories.tsx:938 only gets path and text updates. Nothing concrete breaks, so this is a process preference."
+    }
+  ]
+}

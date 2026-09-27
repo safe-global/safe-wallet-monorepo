@@ -1,0 +1,90 @@
+{
+  "usd": 0.055075599999999995,
+  "findings": [
+    {
+      "file": "apps/web/src/hooks/useIsValidExecution.ts",
+      "line": 76,
+      "claim": "The call to safeContract.isValidTransaction(...) is returned without an await, so if the underlying promise rejects, the error is not caught by the surrounding catch block."
+    },
+    {
+      "file": "apps/web/src/hooks/useIsValidExecution.ts",
+      "line": 83,
+      "claim": "The GS error code to message mapping only runs on a caught exception, but protocol-kit's isValidTransaction wraps its body in its own try/catch and returns false instead of throwing in every contract version, so the mapping code path is never actually reached for a real revert."
+    },
+    {
+      "file": "apps/web/src/components/tx/ExecuteForm.tsx",
+      "line": 294,
+      "claim": "The UI shows hard-coded copy instead of rendering the mapped error reason, so the new GS error messages are not surfaced to users even if the mapping logic ran."
+    },
+    {
+      "file": "apps/web/src/components/tx/ErrorMessage/index.tsx",
+      "line": 101,
+      "claim": "The error display component renders error.message, not error.reason, so the new mapped GS messages, which are assigned to reason, are never shown to the user."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The isValidTransaction result of false is not handled as a failure case, and the contract's own simulation is not called directly, so no revert reason is captured; the mapped message should instead be passed into ErrorMessage as visible text rather than overwriting err.reason."
+    },
+    {
+      "file": "apps/web/src/features/recovery/hooks/__tests__/useIsValidExecution.test.ts",
+      "line": 66,
+      "claim": "The test mock throws synchronously (isValidTransaction: () => { throw error }), which does not match the real SDK's async behavior of never throwing, so the test passes even though the underlying feature does not work in production."
+    },
+    {
+      "file": "apps/web/src/features/recovery/hooks/__tests__/useIsValidExecution.test.ts",
+      "line": null,
+      "claim": "There is no test verifying that nativeAsset is filled in from chain."
+    },
+    {
+      "file": "apps/web/src/features/recovery/hooks/__tests__/useIsValidExecution.test.ts",
+      "line": null,
+      "claim": "There is no test verifying that a non-GS reason is left unmodified."
+    },
+    {
+      "file": "apps/web/src/hooks/useIsValidExecution.ts",
+      "line": 80,
+      "claim": "A comment states that the raw GS code belongs in the support reference (Details panel), but the code actually overwrites reason, losing the one structured copy of the code, and the Details panel reads message, not reason, so the comment describes behavior that does not exist."
+    },
+    {
+      "file": "apps/web/src/services/contracts/__tests__/contractErrorsParity.test.ts",
+      "line": 14,
+      "claim": "This test and its mobile counterpart both call the same pure function from the same shared module, so they cannot disagree with each other, making one of them redundant given the package's own test and snapshot already cover the same strings."
+    },
+    {
+      "file": "apps/mobile/src/services/__tests__/contractErrorsParity.test.ts",
+      "line": 14,
+      "claim": "This test duplicates the web app's parity test by calling the same pure shared function, adding a third copy of coverage for strings already locked by the package test and snapshot; a single import smoke test per app would suffice."
+    },
+    {
+      "file": "packages/utils/src/services/exceptions/contractErrors.ts",
+      "line": 118,
+      "claim": "Comments use planning labels such as \"Topic 2/4/6\", \"AC #2\", \"Bucket A/B/C\", and \"WA-3005\" that will become stale over time and conflict with the project's guidance to treat comments as tech debt."
+    },
+    {
+      "file": "apps/web/src/components/tx/ErrorMessage/ContractErrorMessages.stories.tsx",
+      "line": 12,
+      "claim": "Comments use planning labels such as \"Topic 2/4/6\", \"AC #2\", \"Bucket A/B/C\", and \"WA-3005\" that will become stale over time and conflict with the project's guidance to treat comments as tech debt."
+    },
+    {
+      "file": "packages/utils/src/services/exceptions/contractErrors.ts",
+      "line": 66,
+      "claim": "The fallback copy tells the user to \"contact support with the reference below,\" but no such reference is rendered below it anywhere in the current implementation; the story's own copy indicates that feature is planned for later."
+    },
+    {
+      "file": "apps/web/src/components/tx/ErrorMessage/ContractErrorMessages.stories.tsx",
+      "line": 29,
+      "claim": "The heading hard-codes the text \"All 32 GS codes\" instead of deriving the count from CODES.length, so it can go out of sync if the code list changes."
+    },
+    {
+      "file": "packages/utils/src/services/exceptions/contractErrors.ts",
+      "line": 79,
+      "claim": "The message \"Could not verify your signature. Sign the transaction again.\" is duplicated across three GS codes (GS020, GS023, GS026 BAD_SIGNATURE) instead of being defined once as a shared constant."
+    },
+    {
+      "file": "packages/utils/src/services/exceptions/contractErrors.ts",
+      "line": 92,
+      "claim": "The GS400 message has a full stop in the middle of the sentence and none at the end, inconsistent with the other inline-validation messages, which are single sentences with no full stop."
+    }
+  ]
+}

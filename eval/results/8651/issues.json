@@ -1,0 +1,99 @@
+{
+  "usage": {
+    "usd": 0.44019159999999996,
+    "turns": 5,
+    "wallSeconds": 39
+  },
+  "issues": [
+    {
+      "findings": [
+        "F10",
+        "F15",
+        "F18",
+        "F19",
+        "F8"
+      ],
+      "summary": "Signed-in workspace onboarding routes (/welcome/create-space, select-safes, invite-members, survey) are excluded from the toast, so expiry during workspace creation is silent",
+      "label": "low",
+      "evidence": "useSessionExpiryGuard.ts:22-23 matches only /welcome/spaces, /spaces and /spaces/*; the onboarding routes in routes.ts:83-87 fall through to the silent path, and useFlowActivationGuard then redirects the user via getWelcomeRoute() with no explanation. The PR deliberately scopes the toast to /welcome/spaces + /spaces/*, so this is a small UX gap in an edge flow, not a defect in what the PR set out to do."
+    },
+    {
+      "findings": [
+        "F3",
+        "F13",
+        "F6"
+      ],
+      "summary": "A new spaces-route predicate duplicates, and differs from, the existing ones in useIsSpaceRoute and useIsQualifiedSafe",
+      "label": "low",
+      "evidence": "useIsSpaceRoute.ts:6-26 (a fixed list plus the lastUsedSpace check) and useIsQualifiedSafe.ts:29 (a bare startsWith) each define spaces routes differently from the new isSpacesRoute at useSessionExpiryGuard.ts:22. There are now three definitions that can drift apart, which is a real but minor maintenance cost."
+    },
+    {
+      "findings": [
+        "F7",
+        "F20",
+        "F5"
+      ],
+      "summary": "The startsWith('/spaces/') branch for nested routes is untested",
+      "label": "medium",
+      "evidence": "The new tests cover only /welcome/spaces (the default), /spaces and /welcome/accounts (test.tsx:307-340). Nested routes like /spaces/members, where users spend most of their time in a space, are covered by no test. Deleting the branch would still pass everything and break the PR's main scenario."
+    },
+    {
+      "findings": [
+        "F4",
+        "F11"
+      ],
+      "summary": "No test checks that the pathname is read when the timer fires (navigating between arming the timer and expiry)",
+      "label": "low",
+      "evidence": "pathnameRef.current = router.pathname (useSessionExpiryGuard.ts:55-56) exists so the route is read when the timer fires, but no test changes the route in between, so removing the ref update would go unnoticed. The code is correct as written, so the risk is only a future regression."
+    },
+    {
+      "findings": [
+        "F12",
+        "F17"
+      ],
+      "summary": "The /me 403 probe path outside workspaces routes is untested",
+      "label": "low",
+      "evidence": "The 403 path calls the same expireNow (useSessionExpiryGuard.ts:124), which is already covered for gating by the pre-flight and timer tests outside workspaces. A missing test for this path adds little risk."
+    },
+    {
+      "findings": [
+        "F9"
+      ],
+      "summary": "The prefix check uses a hard-coded '/spaces/' instead of AppRoutes.spaces.index",
+      "label": "nit",
+      "evidence": "useSessionExpiryGuard.ts:23 mixes AppRoutes constants with a literal '/spaces/'. It is equivalent today (AppRoutes.spaces.index === '/spaces'), so this is style only."
+    },
+    {
+      "findings": [
+        "F2"
+      ],
+      "summary": "A sticky toast raised on a spaces route stays visible after navigating to non-space pages",
+      "label": "low",
+      "evidence": "autoHideDuration: null (useSessionExpiryGuard.ts:84) plus Redux-backed notifications that survive navigation are intended so the toast lives through the redirect (per the PR description). Lingering on /home after a manual navigation is a minor side effect, and the user can dismiss it or sign in to clear it (closeByGroupKey at line 101)."
+    },
+    {
+      "findings": [
+        "F1"
+      ],
+      "summary": "Expiry on a non-workspace page followed by navigating to /welcome/spaces shows no toast",
+      "label": "wrong",
+      "evidence": "The PR explicitly makes expiry outside workspaces routes silent ('auth is still cleared silently everywhere else'). The toast is decided at expiry time by design (line 78)."
+    },
+    {
+      "findings": [
+        "F14"
+      ],
+      "summary": "Removing SESSION_EXPIRED_SIGN_IN_LABEL is a regression risk",
+      "label": "wrong",
+      "evidence": "The finding itself says nothing else references the constant or its text, and the only consumer (the test) was updated. With no references there is no regression risk."
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "The behaviour changes lack a cited product decision",
+      "label": "wrong",
+      "evidence": "The PR description links ticket WA-3251 ('show workspace session expiry prompt only on spaces') and spells out the variant and auto-hide changes and the reasons for them."
+    }
+  ]
+}

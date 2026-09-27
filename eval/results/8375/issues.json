@@ -1,0 +1,139 @@
+{
+  "usage": {
+    "usd": 0.6435953999999999,
+    "turns": 8,
+    "wallSeconds": 68
+  },
+  "issues": [
+    {
+      "findings": [
+        "F21",
+        "F22"
+      ],
+      "summary": "The effect that handles network switches runs updateAddressState after every external address change. So ENS resolution, proxy/implementation switches and form resets all fire 'Address manually entered'.",
+      "label": "medium",
+      "evidence": "AddressInput.tsx:106-121 sets inputValueRef to 'eth:0xNew'. The later effect at :146-152 then sees 'eth:0xNew' !== '0xNew' and calls updateAddressState. Because lastTrackedAddressRef (:135) was never set to the new address, the event fires. This inflates the adoption metric the PR says it is adding."
+    },
+    {
+      "findings": [
+        "F7",
+        "F11",
+        "F18"
+      ],
+      "summary": "selectedName is never cleared when the address prop changes from outside. The helper text keeps showing the old contact's name under a different or empty address.",
+      "label": "medium",
+      "evidence": "The only calls to setSelectedName('') are in onInputChange for reason 'input' (AddressInput.tsx:188); the external-change effect at :106-121 never clears it. Dashboard.tsx onConfirm (pages/Dashboard.tsx:188-190) swaps abiAddress to the implementation address. SolidityForm resets contract fields, and the fields keep key={name} (SolidityForm.tsx:221). In both cases the component is not remounted, so a wrong contact label shows under the new address."
+    },
+    {
+      "findings": [
+        "F12"
+      ],
+      "summary": "The existing outside-change and ENS tests don't assert the helper text or the analytics calls, so the stale-name and mislogged-analytics defects go uncaught.",
+      "label": "low",
+      "evidence": "The tests at AddressInput.test.tsx:161 and :190 only check the displayed input value. The two real defects above slip through because of this gap."
+    },
+    {
+      "findings": [
+        "F3",
+        "F15",
+        "F24"
+      ],
+      "summary": "A failed or rejected requestAddressBook is caught as [] and cached at module level. A dismissed dialog, a transient error or any non-4001 error leaves every field empty until reload, with no retry and no logging.",
+      "label": "low",
+      "evidence": "useKnownAddresses.ts:33-34 caches `requestAddressBook().catch(() => [])` in addressBookCache, and nothing evicts it. The behaviour is real, but the impact is limited: users can still paste addresses. The PR already accepts per-session staleness and the collapsed empty state as follow-ups."
+    },
+    {
+      "findings": [
+        "F6"
+      ],
+      "summary": "No test covers reopening the dropdown after a rejection.",
+      "label": "low",
+      "evidence": "useKnownAddresses.test.ts has only one rejection test (lines 72-85), and it calls loadAddressBook once. A test that reopens the dropdown would pin down the retry behaviour whichever way it is decided."
+    },
+    {
+      "findings": [
+        "F20"
+      ],
+      "summary": "The rejection test passes whether or not the .catch exists, because knownAddresses is [] both before and after the rejection is handled.",
+      "label": "low",
+      "evidence": "useKnownAddresses.test.ts:80-84 waits only until the mock has been called, which happens synchronously inside act, and then asserts []. That is also the initial state. Without the .catch, an unhandled rejection would not normally fail a Jest test, so the test does not really protect the catch path."
+    },
+    {
+      "findings": [
+        "F1"
+      ],
+      "summary": "The cached items are filtered only by chainId, so if the Safe changes in place, the previous Safe's address book could show until the dropdown is reopened.",
+      "label": "low",
+      "evidence": "useKnownAddresses.ts:21 and :40-42 keep addressBookItems across changes to safeAddress. In practice the host reloads the Safe App iframe when the Safe changes, so this edge case is very unlikely."
+    },
+    {
+      "findings": [
+        "F2",
+        "F14"
+      ],
+      "summary": "knownAddresses is recomputed on every render instead of being memoized.",
+      "label": "nit",
+      "evidence": "useKnownAddresses.ts:40-42 runs a filter/map over a small address book list. MUI Autocomplete handles a new options array identity without any correctness problem, so the performance cost is negligible."
+    },
+    {
+      "findings": [
+        "F4",
+        "F5"
+      ],
+      "summary": "A local const named checksumAddress shadows the imported helper.",
+      "label": "nit",
+      "evidence": "Both shadowing locals (AddressInput.tsx:74 and :133) already existed before this PR; the diff only renamed the nearby inputValue variable. It's a style point with no bug today."
+    },
+    {
+      "findings": [
+        "F9",
+        "F10"
+      ],
+      "summary": "setAddressBookItems can be called after unmount, and no test covers this.",
+      "label": "nit",
+      "evidence": "useKnownAddresses.ts:37 can set state after unmount. React 18 treats that as a harmless no-op and no longer warns, as the finding itself admits, so no guard or test is needed."
+    },
+    {
+      "findings": [
+        "F8"
+      ],
+      "summary": "The sticky header uses zIndex: 2, which matches no other value in tx-builder and has no comment.",
+      "label": "nit",
+      "evidence": "KnownAddressGroupHeader.tsx:12 only needs to sit above the sibling options in the listbox. The exact value is a style choice with no concrete cost."
+    },
+    {
+      "findings": [
+        "F19",
+        "F23"
+      ],
+      "summary": "The hardcoded top: '-8px' is coupled to MUI's listbox padding.",
+      "label": "nit",
+      "evidence": "KnownAddressGroupHeader.tsx:10-11 explains the offset in a comment. This is only a fragility concern, with no current defect."
+    },
+    {
+      "findings": [
+        "F13",
+        "F25"
+      ],
+      "summary": "The analytics events carry no label, so you can't tell which entry point (contract address, To address, or ABI parameter) was used.",
+      "label": "nit",
+      "evidence": "trackSafeAppEvent accepts an optional label (lib/analytics.ts:3), but AddressInput.tsx:137 and :161 don't pass one. The PR's stated goal is dropdown vs. paste adoption, which the events as written support; a per-field breakdown is a nice-to-have."
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "Children.count is a legacy API, and Array.isArray would be clearer.",
+      "label": "nit",
+      "evidence": "AddressInput.tsx:203 counts the group's children correctly. The suggestion is purely stylistic."
+    },
+    {
+      "findings": [
+        "F17"
+      ],
+      "summary": "No filter test uses a fully checksummed address.",
+      "label": "nit",
+      "evidence": "KnownAddressOption.tsx:9-11 uses createFilterOptions, which ignores case by default, so checksummed input matches the same way lowercase does. The extra test would add little."
+    }
+  ]
+}

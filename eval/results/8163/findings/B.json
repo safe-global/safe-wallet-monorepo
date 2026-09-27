@@ -1,0 +1,85 @@
+{
+  "usd": 0.0585736,
+  "findings": [
+    {
+      "file": "apps/web/src/features/myAccounts/components/MyAccountsV2/components/AccountItem/SingleAccountItem.tsx",
+      "line": 68,
+      "claim": "Track listens for clicks with a native addEventListener('click') on its wrapper, while CopyTooltip only calls stopPropagation() inside a React onClick handler; because React 19 handles events at the root, Track's native listener fires before React stops the event, so navigation is blocked but every copy click is still recorded as an 'open Safe' analytics event, and the shouldTrack check (which only looks for a disabled child) does not catch this."
+    },
+    {
+      "file": "apps/web/src/components/sidebar/NestedSafesList/index.tsx",
+      "line": 106,
+      "claim": "The same event-propagation issue causes copy clicks in the nested safes sidebar list to be recorded as 'open nested Safe' analytics events even though navigation is blocked."
+    },
+    {
+      "file": "apps/web/src/features/myAccounts/components/MyAccountsV2/components/AccountItem/SingleAccountItem.tsx",
+      "line": 98,
+      "claim": "The existing pin/menu stopPropagation div already has the same analytics-leak issue, and this PR extends the same pattern to new rows instead of fixing it."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The fix should stop the event natively before it reaches Track (for example via a native click listener through a ref on the copy element) or change Track to ignore clicks from elements marked with an opt-out attribute, and a test should be added that renders the button inside Track and asserts trackEvent isn't called, since the current parent-click test only uses a React onClick parent and can't catch this leak."
+    },
+    {
+      "file": "apps/web/src/components/common/CopyAddressIconButton/index.tsx",
+      "line": 1,
+      "claim": "The new CopyAddressIconButton component has no Storybook story file, which apps/web/AGENTS.md (line 10 and the table at line 147) requires for new components with logic; the sibling CopyButton component has one (index.stories.tsx)."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/components/SafeCardLayout.tsx",
+      "line": 98,
+      "claim": "The copy control (span role=\"button\") is nested inside a button with role=\"checkbox\"; ARIA treats a checkbox's children as presentational, so screen readers cannot reach the nested copy control."
+    },
+    {
+      "file": "apps/web/src/features/myAccounts/components/MyAccountsV2/components/AccountItem/MultiAccountItem.tsx",
+      "line": 156,
+      "claim": "The copy control is nested inside the CollapsibleTrigger button, which is still nested interactive content and problematic for accessibility."
+    },
+    {
+      "file": "apps/web/src/components/common/CopyAddressIconButton/index.tsx",
+      "line": null,
+      "claim": "The component's doc comment states it is 'safe to nest', but that is only true for valid HTML nesting, not for accessibility, so the comment is misleading given the a11y issues in SafeCardLayout and MultiAccountItem; the copy control should be moved out of the clickable element as a sibling, or the comment corrected to acknowledge the accessibility gap."
+    },
+    {
+      "file": "apps/web/src/components/sidebar/NestedSafesList/index.tsx",
+      "line": 86,
+      "claim": "NestedSafesList uses a different copy mechanism (showCopyButton via EthHashInfo → CopyButton) that renders an MUI IconButton rather than the new CopyAddressIconButton component, causing inconsistency with the other account list rows."
+    },
+    {
+      "file": "apps/web/src/components/sidebar/NestedSafesList/index.tsx",
+      "line": 106,
+      "claim": "The IconButton rendered here sits inside a ListItemButton > Link, producing the button-in-link markup that the new copy component was specifically built to avoid."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SafeAccounts/SafeCardReadOnly.tsx",
+      "line": 136,
+      "claim": "The copy feedback in SafeCardReadOnly was weakened: the green check icon and 'Copied!' message shown for 2 seconds were removed and replaced with a tooltip reading 'Copied' for only 750 ms; this UX regression should be confirmed as intentional."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The same wrapper markup (a flex div containing address text and CopyAddressIconButton) is duplicated across six files (AccountItemContent, AccountWidgetItem, MultiAccountItem, SingleAccountItem, MultichainSafeRow, SafeCardLayout), and could be consolidated into a single AddressWithCopy component, which would also centralize the fixes for the analytics and accessibility findings."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "Three test files overwrite navigator.clipboard using Object.defineProperty and never restore it afterward, which can leak state between tests."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The keyboard interaction test covers the Enter key but not the Space key."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "It was not verified whether WidgetItem (used by AccountWidgetItem) or the pages hosting SafeCardReadOnly and the Security Hub rows are also wrapped in Track; if they are, the spurious analytics event issue would apply there as well."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "It was not verified whether clicks on children of a disabled SafeCardLayout button still reach the nested copy control."
+    }
+  ]
+}

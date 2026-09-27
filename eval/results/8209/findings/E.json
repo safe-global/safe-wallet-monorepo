@@ -1,0 +1,10 @@
+{
+  "usd": 0.0315156,
+  "findings": [
+    {
+      "file": "packages/utils/src/utils/date.ts",
+      "line": 22,
+      "claim": "The code does not catch the exception that can be thrown here; it should be caught and null returned instead."
+    }
+  ]
+}

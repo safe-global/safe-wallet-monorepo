@@ -1,0 +1,11 @@
+{
+  "pr": 8363,
+  "reviewSha": "a408a4d7e848e482f43f18da356a631db0e2ca8a",
+  "baseSha": "0aa27aff847301ee5248431cedff9c659dd01add",
+  "system": "E",
+  "version": "github",
+  "runner": "collect",
+  "model": "human",
+  "commentSha": "45b900e16974c9a686cea942fdfa2c4aaf142916",
+  "output": "apps/web/src/features/spaces/components/SelectSafesOnboarding/hooks/useOnboardingSafes.ts:32\nMaybe just name it allSafeAddresses now, because it does not combine anything anymore"
+}

@@ -1,0 +1,55 @@
+{
+  "pr": 8219,
+  "title": "fix(mobile): subscribe SafeAccountInput to importedSafeResult via useWatch",
+  "description": "## What it solves\r\n\r\nWhen importing a read-only Safe, the success check icon never appeared next to the address input — `importedSafeResult` was always `undefined` in `SafeAccountInput`.\r\n\r\n## How this PR fixes it\r\n\r\n`importedSafeResult` is written only via `setValue` in `useImportSafe` and isn't in the form's `defaultValues`. `SafeAccountInput` read it with the `watch()` method, which subscribes the form root (the component calling `useForm()`), not this child — so the child never re-rendered when the field changed and kept its initial `undefined`.\r\n\r\n`useWatch({ control, name: 'importedSafeResult' })` subscribes the child itself, so it re-renders on `setValue` and the icon shows once a Safe is found. (Sibling `ImportAccountFormView` already uses `useWatch`.)\r\n\r\n<img width=\"374\" height=\"843\" alt=\"image\" src=\"https://github.com/user-attachments/assets/573c37df-b790-4a11-8440-7748bf8fdcbd\" />\r\n\r\n## How to test it\r\n\r\n1. Add account → import a read-only Safe.\r\n2. Paste a valid, deployed Safe address → success check icon (`success-icon`) appears.\r\n3. Paste an invalid/undeployed address → error shown instead.\r\n\r\n## Affected flows\r\n\r\n- Import read-only Safe: address input success/error indicator.\r\n\r\n## Blast radius\r\n\r\n- Only `SafeAccountInput` changes; no API/signature change. Reads the `importedSafeResult` field already populated by `useImportSafe` — hook, schema, and `defaultValues` untouched. Mobile-only, no shared-package impact.\r\n\r\n## Risks / not checked\r\n\r\n- Verified via type-check + lint only; not run on simulator/device.\r\n- No unit test added; error path not exercised manually.\r\n\r\n## Visual summary\r\n\r\n```mermaid\r\nflowchart LR\r\n  subgraph Before\r\n    H1[useImportSafe setValue] --> R1[form root re-renders]\r\n    C1[SafeAccountInput watch] -. not subscribed .-> X1[stays undefined → no icon]\r\n  end\r\n  subgraph After\r\n    H2[useImportSafe setValue] --> S2[field subject emits]\r\n    S2 --> C2[SafeAccountInput useWatch] --> OK[re-renders → icon shows]\r\n  end\r\n",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/mobile/src/components/SafeAccountInput/index.tsx",
+      "line": 37,
+      "claim": "The cast addressWithoutPrefix as `0x${string}` is applied without validating the string is actually hex, so if parsePrefixedAddress ever returns a non-hex string, downstream consumers like Identicon receive a value the type system incorrectly guarantees is hex; gating usage on isAddress(addressWithoutPrefix) rather than truthiness would avoid this."
+    },
+    {
+      "id": "F2",
+      "file": "apps/mobile/src/components/SafeAccountInput/index.tsx",
+      "line": 19,
+      "claim": "The newly added inline comment explaining the watch vs useWatch difference is not required by any cited convention, and the only other useWatch call in the mobile app (ImportAccountFormView.tsx:26) has no such comment, so the comment's presence is inconsistent with existing usage; it could instead be replaced by the recommended regression test, which would guard the behavior without relying on prose."
+    },
+    {
+      "id": "F3",
+      "file": "apps/mobile/src/components/SafeAccountInput/index.tsx",
+      "line": 40,
+      "claim": "A SafeAccountInput.test.tsx should be added that renders the component inside a real FormProvider, mocks useLazySafeOverviews to resolve with data, and asserts that the success-icon test ID appears; it should also assert the width-20 placeholder view renders while isFetching is true or errors.safeAddress is set."
+    },
+    {
+      "id": "F4",
+      "file": "apps/mobile/src/components/SafeAccountInput/index.tsx",
+      "line": 21,
+      "claim": "No Jest test fails if this fix is reverted, because Jest does not apply React Compiler (jest-expo's babel caller doesn't set supportsReactCompiler, so babel-preset-expo disables it), meaning a render test would pass with either watch or useWatch. The only existing regression coverage for this behavior is two Maestro flows (add-existing-safe.yml:24 and add-safe-and-import-signer.yml:49) that assert the success icon, but these only run nightly or when a PR is labelled mobile-e2e-test, so they would not automatically catch a regression on this PR."
+    },
+    {
+      "id": "F5",
+      "file": "apps/mobile/src/components/SafeAccountInput/index.tsx",
+      "line": 21,
+      "claim": "The change has no regression test covering the fix: the only colocated test covers the useImportSafe hook, not the component's re-render behavior, so there is no SafeAccountInput component test verifying that the success icon appears after a valid Safe resolves. If someone later reverts useWatch back to watch(...), which looks like a harmless simplification, this regression would only be caught by Maestro e2e flows, if at all."
+    },
+    {
+      "id": "F6",
+      "file": "apps/mobile/src/components/SafeAccountInput/index.tsx",
+      "line": 19,
+      "claim": "The comment explaining the useWatch vs watch distinction could be shortened, e.g. to something like 'subscribe at child level — watch() only re-renders the form root', so it reads better and is less likely to become outdated."
+    },
+    {
+      "id": "F7",
+      "file": "apps/mobile/src/components/SafeAccountInput/index.tsx",
+      "line": null,
+      "claim": "There is no colocated unit test (e.g. index.test.tsx) for SafeAccountInput verifying that the success icon renders once importedSafeResult.data is populated via the form, so the exact bug this change fixes is not locked in by a regression test."
+    },
+    {
+      "id": "F8",
+      "file": "apps/mobile/src/components/SafeAccountInput/hooks/useImportSafe.ts",
+      "line": 31,
+      "claim": "This line uses the same watch()-from-useFormContext pattern in a child component that the commit just fixed elsewhere for a different field, so by the same reasoning SafeAccountInput may not re-render when safeAddress changes. If a user pastes a new valid address over another valid one, errors, dirtyFields, and isValid don't change, so the debounced address lookup could run using the stale address until some other state update triggers a re-render."
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "usd": 0.0368816,
+  "findings": [
+    {
+      "claim": "Expanding a row in the mobile view forces a 471px-wide table inside a 311px-wide scroller, causing columns to push off-screen and the detail content to clip.",
+      "file": "Storybook PaginatedDataTable/WithRowDetail",
+      "line": null
+    },
+    {
+      "claim": "The hydration-guard empty-state row does not carry a data-no-hover attribute, so in panel mode hovering the empty area incorrectly paints a one-cell hover pill.",
+      "file": "EnhancedTable/index.tsx",
+      "line": null
+    },
+    {
+      "claim": "The Tables section sample in the design-system story now renders the panel variant but its swatch label still says the default grid, so the label no longer matches what is shown.",
+      "file": "design-system.stories.tsx",
+      "line": null
+    }
+  ]
+}

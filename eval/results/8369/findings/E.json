@@ -1,0 +1,10 @@
+{
+  "usd": 0.022792,
+  "findings": [
+    {
+      "file": "packages/utils/src/features/safenet-checks/types/events.ts",
+      "line": 7,
+      "claim": "The type or definition introduced here may duplicate something that already exists elsewhere in the codebase, so it should be reused instead of redefined."
+    }
+  ]
+}

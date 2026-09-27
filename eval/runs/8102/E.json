@@ -1,0 +1,11 @@
+{
+  "pr": 8102,
+  "reviewSha": "4cb481effaf355b0c3dd00beeb94ab1973ed48d5",
+  "baseSha": "b248e3e292a523b2dda95c1f11f4a594c8d97dd7",
+  "system": "E",
+  "version": "github",
+  "runner": "collect",
+  "model": "human",
+  "commentSha": "4cb481effaf355b0c3dd00beeb94ab1973ed48d5",
+  "output": "[review by vmosharova]\nI agree with the AI reviewer and would add an extra guard for `useSpaceMembers` - `useAllMembers` to make sure the member list is cleared on 403."
+}

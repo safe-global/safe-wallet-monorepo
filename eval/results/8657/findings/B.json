@@ -1,0 +1,40 @@
+{
+  "usd": 0.066344,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/ChainSelectorBlock.tsx",
+      "line": 113,
+      "claim": "Picking a deployed-chain row or an add-network row closes the menu with a direct setOpen(false) instead of going through handleOpenChange, so setSearch('') never runs because base-ui does not call onOpenChange when the open prop is controlled and set directly. Since this chain picker stays mounted in the safe bar and switching chains only updates a query, the search text typed before selecting a row (e.g. \"poly\") is still applied the next time the picker is opened, even though a comment in the same file claims this case is handled."
+    },
+    {
+      "file": "apps/web/src/components/common/NetworkSelector/index.tsx",
+      "line": 439,
+      "claim": "In the header network picker, having any search query hides the \"Show all networks\" section entirely, so a network that could still be added shows the message \"No networks match your search\" even though it does exist. This also makes the header picker behave inconsistently with the space-bar picker, which does search its \"All networks\" section."
+    },
+    {
+      "file": "apps/web/src/components/common/NetworkSelector/AllNetworksSection.tsx",
+      "line": 58,
+      "claim": "When unavailableReason is set, the component returns only the unavailable notice without checking nothingToShow, so a search that matches no networks displays just \"Adding another network is not possible…\" with no accompanying \"No networks match your search\" message, in both the feature-disabled and empty-results branches."
+    },
+    {
+      "file": "apps/web/src/components/ui/search-input.tsx",
+      "line": 38,
+      "claim": "Clicking the clear button makes it disappear (showClear becomes false) without moving focus back to the search input, so focus falls to the body and the user has to click the field again before they can keep typing."
+    },
+    {
+      "file": "apps/web/src/components/common/NetworkSelector/index.tsx",
+      "line": 306,
+      "claim": "The same chain-name matching logic (chainName.toLowerCase().includes(query)) is duplicated across NetworkSelector/index.tsx, ChainSelectorBlock.tsx, and AllNetworksSection.tsx, the \"No networks match your search\" text is duplicated between index.tsx and AllNetworksSection.tsx, and the rule allowing Escape through is duplicated between index.tsx and ChainSelectorBlock.tsx; this duplication lets the two pickers drift apart in behavior, as already shown by the discrepancies described elsewhere in the review."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/__tests__/ChainSelectorBlock.test.tsx",
+      "line": 248,
+      "claim": "There is no test covering reopening the picker after clicking a row or clicking add-network, which is why the search-not-cleared bug was not caught; the header picker has the same test gap, though there item selection does go through onOpenChange."
+    },
+    {
+      "file": "apps/web/src/components/common/NetworkSelector/index.tsx",
+      "line": 404,
+      "claim": "The same eslint-disable-next-line no-restricted-syntax comment for the \"concentric radius\" case appears twice (also in ChainSelectorBlock.tsx), each accompanied by a JSX comment repeating the same explanation, which conflicts with project guidance that a repeated escape should become a variant rather than another disable, and that only one comment line should be used."
+    }
+  ]
+}

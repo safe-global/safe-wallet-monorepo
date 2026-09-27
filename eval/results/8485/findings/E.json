@@ -1,0 +1,20 @@
+{
+  "usd": 0.0341716,
+  "findings": [
+    {
+      "file": "apps/web/src/components/transactions/TxSigners/index.tsx",
+      "line": 287,
+      "claim": "The isSafenetEnabled check is placed outside the SafenetAuditRow component and should instead be moved directly inside it."
+    },
+    {
+      "file": "apps/web/.env.example",
+      "line": 31,
+      "claim": "This feature flag environment variable and its related logic can be removed because feature flags can now be overridden locally through the UI's 'Feature flags' sidebar entry, making the env variable redundant."
+    },
+    {
+      "file": "apps/web/src/components/transactions/TxSigners/index.tsx",
+      "line": 270,
+      "claim": "The isLast prop on this row and the next one is now incorrect because a new Safenet audit row was added below them, so it needs to be updated to reflect the new last item."
+    }
+  ]
+}

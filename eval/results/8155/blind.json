@@ -1,0 +1,163 @@
+{
+  "pr": 8155,
+  "title": "fix(test): Cypress tests",
+  "description": "> Twenty dead specs swept away,\r\n> spaces speak in UUIDs now,\r\n> test ids realigned, one div wraps the pinned Safes.\r\n\r\n## What it solves\r\n\r\nA backlog of skipped/obsolete Cypress specs cluttering the suite, plus flaky Spaces basic-flow tests, stale fixtures, and test ids that drifted out of sync with the source.\r\n\r\n## How this PR fixes it\r\n\r\n**1. Removed obsolete/skipped specs (bulk of the PR).** Deleted 20 spec files:\r\n- Sidebar (12): `regression/sidebar.cy.js`, `sidebar_2`–`sidebar_9`, `sidebar_nonowner.cy.js`, `multichain_sidebar.cy.js`, `smoke/sidebar.cy.js`\r\n- Swaps/limit (3): `regression/swaps_2.cy.js`, `regression/limit_order.cy.js`, `happypath_2/swaps.cy.js`\r\n- Recovery/misc (5): `recovery_hp_2.cy.js`, `recovery_hp_3.cy.js`, `tx_history_filter_hp_1.cy.js`, `multichain_setup.cy.js`, `prodhealthcheck/create_tx.cy.js`\r\n\r\nAlso trimmed dead `it` blocks from kept specs (`swaps.cy.js`, `sendfunds_queue_1.cy.js`, `dashboard.cy.js`, `multichain_network.cy.js`, `multichain_networkswitch.cy.js`, `proposers_2.cy.js`, `spaces_basicflow.cy.js`, `staking_history.cy.js`, `tx_history.cy.js`, `prodhealthcheck/recovery.cy.js`, `prodhealthcheck/multichain_network.cy.js`) and unused entries in `support/localstorage_data.js`.\r\n\r\n**2. Fixed Spaces basic flow against the single-space redirect.** A single-space account auto-redirects into its dashboard (no Create button, no space card). New helpers `goToSpacesView()` / `openFirstSpaceFromSpacesView()` return to the Spaces View first; `interceptSpacesList()` + `blockBeamer()` register interceptors before `cy.visit()` so the redirect is detected on a settled page and the Beamer popup never covers buttons.\r\n\r\n**3. Hardened create / member-invite.** `ensureReadyToCreateSpace()` reads the card count synchronously (no hang on empty list); at-limit deletion extracted to `deleteOneSpace()`. The member-invite test (was `it.only`, now `it`) clears cookies + re-visits between sessions; the skipped re-sign-in test (can't log out on localhost) was removed.\r\n\r\n**4. Renamed the \"Add accounts\" trigger test id (source + tests).** `add-space-account-button` → `open-add-accounts-chooser-button` in `AddAccountsChooser`; colocated unit test and page object updated. Page object's `addAccountManually()` split out `openAddAccountsToWorkspace()`, scoping clicks inside the \"Manage Safe accounts\" dialog.\r\n\r\n**5. Synced Add Member input test id.** `member-address-input` → `member-invitee-identifier-input`.\r\n\r\n**6. Migrated spaces fixtures from numeric id to uuid.** Regex `spaceId=(\\d+)` → `spaceId=([^&]+)`; `staticSpaces.js` entries carry `uuid` instead of `id`.\r\n\r\n**7. Fixed the assets regression test.** Sepolia has no portfolio support, so trusted-token filtering is off and \"Default\"/\"All tokens\" are identical. Test now expects the same list for both modes, mirroring `smoke/assets.cy.js`.\r\n\r\n**8. Fixed the Safe selector dropdown (source change).** `AccountsModal`'s `renderSection` wraps each section in one `<div data-testid={sectionTestId}>` (was `headerTestId` on a fragment), so the pinned list is one queryable container. Page object queries inside it (`.find(safeItemCard)`) instead of sibling-walking with `.parent()` / `.nextUntil(...)`.\r\n\r\n**9. Removed Cypress tests for Spaces that were checking the UI (the behavior is covered with unit tests) in order to make the e2e test suite lighter without duplicates.\r\n\r\n## How to test it\r\n\r\n```bash\r\nyarn workspace @safe-global/web cypress:open\r\n```\r\n\r\n- Deleted specs no longer appear in the runner; suite loads cleanly.\r\n- `regression/spaces_basicflow.cy.js` — create space, add account manually, invite + accept a member; no single-space hang, no Beamer overlay, UUID navigation works.\r\n- `regression/spaces_dashboard.cy.js`, `regression/assets.cy.js` pass.\r\n- `yarn workspace @safe-global/web test AddAccountsChooser`.\r\n\r\n## Affected flows\r\n\r\n- Cypress suite composition (20 specs removed + dead `it` blocks trimmed)\r\n- Spaces onboarding/dashboard E2E (create, single-space redirect, add account manually, member invite/accept)\r\n- \"Add accounts\" chooser trigger + Add Member input — test id renames\r\n- Space Safe selector dropdown — pinned accounts rendering\r\n- Assets token-filter regression\r\n\r\n## Blast radius\r\n\r\n- **Tests/fixtures (vast majority):** all under `apps/web/cypress/**`. Removing sidebar/swaps/recovery specs reduces E2E coverage of those flows — verify they're covered elsewhere (Playwright) or intentionally dropped.\r\n- **Source (two files, markup/test-id only):**\r\n  - `AddAccountsChooser/index.tsx` — `data-testid` rename, no behavior change; unit test updated in lockstep.\r\n  - `SpaceSafeBar/AccountsModal/index.tsx` — fragment → wrapping `<div>` (no layout classes), `headerTestId` → `sectionTestId`. DOM nesting deepens one level, no styling change.\r\n  - No shared packages, no mobile impact.\r\n\r\n## Risks / not checked\r\n\r\n- Did not run the full Cypress suite in CI — only reviewed the diff and targeted changes.\r\n- Did not confirm the 20 deleted specs' flows are covered elsewhere — removal assumes obsolete/superseded.\r\n- Did not run the live Spaces specs against staging (single-space redirect, Beamer block, invite cookie/re-visit not observed end-to-end).\r\n- Did not verify the new `uuid`s point to live staging spaces.\r\n- Did not visually verify dropdown spacing after the fragment → `<div>` change (no layout classes added).\r\n\r\n## Visual summary\r\n\r\n```mermaid\r\nflowchart TB\r\n  subgraph Before[\"renderSection — before\"]\r\n    F[\"fragment\"] --> H1[\"header div (data-testid=headerTestId)\"]\r\n    F --> I1[\"safe-item-card x N\"]\r\n  end\r\n  subgraph After[\"renderSection — after\"]\r\n    D[\"div (data-testid=sectionTestId)\"] --> H2[\"header div\"]\r\n    D --> I2[\"safe-item-card x N\"]\r\n  end\r\n  Before -->|\".parent() / .nextUntil() sibling walking\"| R[\"fragile DOM queries\"]\r\n  After -->|\".find(safeItemCard) inside one container\"| S[\"stable DOM queries\"]\r\n```\r\n\r\n## Checklist\r\n\r\n- [ ] I've tested the branch on mobile 📱\r\n- [ ] I've documented how it affects the analyt",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/cypress/e2e/pages/spaces.page.js",
+      "line": 163,
+      "claim": "Several helper functions (getPendingTxItem, signOutViaSidebarProfile, verifyOnSingleSpaceDashboard, clickExpandedPanelSubAccountRow, verifyAccountRowDetails, verifyExpandedPanelSubAccountRowsCount, verifyAccountExpandedPanelVisible) are now unused because their only callers were in the deleted specs, and should be removed."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/cypress/e2e/pages/spaces.page.js",
+      "line": 656,
+      "claim": "The same issue applies to the related page-object helper used by the \"Add account manually\" flow, referenced alongside spaces.page.js:555, since it relies on the same space/Safe reuse instead of a fresh or dedicated space."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/cypress/e2e/pages/spaces.page.js",
+      "line": 664,
+      "claim": "This is the second occurrence of the duplicated 'wait for spaces → click logo → assert URL' block referenced at spaces.page.js:232."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/cypress/support/localstorage_data.js",
+      "line": 810,
+      "claim": "The \"Used in:\" comment was not updated to match the current consumers: it still cites sidebar3.cy.js and sidebar5.cy.js, but regression/sidebar_5 was deleted and the real consumer is now safe_selector.cy.js:75."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/cypress/e2e/pages/spaces.page.js",
+      "line": 537,
+      "claim": "A click({ force: true }) is used immediately after asserting the element is visible and enabled; forcing the click can mask a real overlay regression that a non-forced click would have caught."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/cypress/fixtures/safes/static.js",
+      "line": 30,
+      "claim": "SEP_STATIC_SAFE_9 lost its consumer list in the comment even though six specs still use it (safe_selector, sidebar_new, prodhealthcheck/sidebar*, visual/sidebar, smoke/safe_selector), making the documentation incomplete."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/cypress/e2e/regression/spaces_basicflow.cy.js",
+      "line": 72,
+      "claim": "A hard-coded cy.wait(3000) is followed by revisiting the same page again, an unreliable pattern for synchronization that should use a proper retrying assertion instead."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/cypress/e2e/pages/spaces.page.js",
+      "line": 554,
+      "claim": "Because the Safe is already present on rerun, AddAccounts excludes it from the selection so isFormDirty stays false and the submit button remains disabled, causing addAccountsBtn.should('be.enabled') to time out on subsequent runs."
+    },
+    {
+      "id": "F9",
+      "file": "apps/web/cypress/e2e/pages/spaces.page.js",
+      "line": 665,
+      "claim": "The same one-shot cy.url() check without retry exists in openFirstSpaceFromSpacesView(), producing the same unreliable redirect handling as the goToSpacesView() case."
+    },
+    {
+      "id": "F10",
+      "file": "apps/web/cypress/e2e/pages/spaces.page.js",
+      "line": 517,
+      "claim": "A cy.wait(2000) is followed by a one-shot $body.find(spaceCard).length check instead of the previous retrying cy.get('body').find(spaceCard), reintroducing a race condition, though the window is small since goToSpacesView() already waits for @spacesList; a retrying check that passes on either state (with or without spaces) would fix this without reintroducing the old hang that occurred when the account had no spaces."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/cypress/e2e/pages/spaces.page.js",
+      "line": 226,
+      "claim": "goToSpacesView() and openFirstSpaceFromSpacesView() (the latter at lines 661-670) repeat the same block of logic: waiting for @spacesList, checking for a dashboard URL, clicking the logo, and asserting the URL. This duplication violates DRY, and openFirstSpaceFromSpacesView should instead call goToSpacesView() (or a shared private helper) before openFirstExistingSpace()."
+    },
+    {
+      "id": "F12",
+      "file": "apps/web/cypress/fixtures/spaces/staticSpaces.js",
+      "line": 45,
+      "claim": "The fixture comment still says \"Row 2\" even though the singleChainAccountRowIndex was removed, leaving a stale reference in the comment."
+    },
+    {
+      "id": "F13",
+      "file": "apps/web/cypress/e2e/pages/spaces.page.js",
+      "line": 573,
+      "claim": "In verifySpaceInviteBannerVisible, the 30s timeout is applied to cy.get(inviteBanner), but the check that actually waits is the chained .contains(spaceName), which uses the default 10s timeout instead. If an older invite banner already exists, the get resolves immediately and the new space name only gets 10 seconds to appear, which can cause flaky failures. The fix would be to put the timeout on .contains, or use cy.contains(inviteBanner, spaceName, { timeout })."
+    },
+    {
+      "id": "F14",
+      "file": "apps/web/cypress/e2e/regression/spaces_basicflow.cy.js",
+      "line": 47,
+      "claim": "The \"Add account manually\" test no longer creates a new space; it adds SEP_STATIC_SAFE_35 to whatever space comes first for OWNER_4 and never removes it. Because of this, the final assertion that the dashboard Safe list contains the shortened address will still pass on a subsequent run even if adding a Safe is broken, since the Safe already exists from the previous run, and the test may also fail simply because the Safe is now a duplicate."
+    },
+    {
+      "id": "F15",
+      "file": "apps/web/cypress/e2e/regression/assets.cy.js",
+      "line": 47,
+      "claim": "The \"Default tokens\" / \"All tokens\" regression test now asserts the same token list in both modes, mirroring smoke/assets.cy.js:41-49, so it can no longer fail if default-token filtering regresses and merely duplicates the smoke test. It should be deleted or moved to a portfolio-supported chain, as its own comment suggests."
+    },
+    {
+      "id": "F16",
+      "file": "apps/web/cypress/e2e/regression/spaces_basicflow.cy.js",
+      "line": 64,
+      "claim": "The invite test creates a space and never deletes it, so the admin account drifts toward the 10-space limit; this pre-existing leak affects the reliability of the F1, F2 and F3 findings since ensureReadyToCreateSpace ends up deleting whichever space happens to be first."
+    },
+    {
+      "id": "F17",
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/index.tsx",
+      "line": 53,
+      "claim": "The pinned-accounts test ID moved from the section header to a wrapper around the whole section, and Cypress helpers now depend on Safe cards being rendered inside that wrapper, but no unit test in index.test.tsx (line 136) verifies that trusted items actually render inside pinned-accounts. This means moving the test ID back to the header would still pass the unit tests while breaking only the Cypress tests. Adding a within(getByTestId('pinned-accounts')) assertion would close this gap."
+    },
+    {
+      "id": "F18",
+      "file": "apps/web/cypress/e2e/pages/spaces.page.js",
+      "line": 233,
+      "claim": "goToSpacesView() and openFirstSpaceFromSpacesView() wait for the @spacesList network response and then read cy.url() once inside a .then(), but that read does not retry. The single-space redirect happens later in a useEffect that calls router.push after the spaces list has rendered, and nothing hides the org-list while this happens, so for an account with exactly one space the URL check can still see /welcome/spaces and skip the logo click, causing the redirect to land on the dashboard and the subsequent org list assertion to fail or run against a page that is about to disappear."
+    },
+    {
+      "id": "F19",
+      "file": "apps/web/cypress/e2e/regression/spaces_basicflow.cy.js",
+      "line": 50,
+      "claim": "The test 'Verify an account can be added manually' no longer creates a fresh space; instead it adds SEP_STATIC_SAFE_35 to the admin's first existing staging space and never cleans it up afterward, making the test non-repeatable and causing it to keep mutating a shared, persistent space."
+    },
+    {
+      "id": "F20",
+      "file": "apps/web/cypress/e2e/pages/spaces.page.js",
+      "line": 143,
+      "claim": "Deleting the associated tests left several page-object exports with no remaining callers: txDetailsLabel, pendingTxName, pendingTxStatus, getPendingTxItem, signOutViaSidebarProfile, verifyOnSingleSpaceDashboard, clickExpandedPanelSubAccountRow, verifyAccountRowDetails, verifyExpandedPanelSubAccountRowsCount and verifyAccountExpandedPanelVisible, which is inconsistent with the PR's stated goal of removing orphaned tests."
+    },
+    {
+      "id": "F21",
+      "file": "apps/web/cypress/fixtures/spaces/staticSpaces.js",
+      "line": 23,
+      "claim": "Fixture fields unnamedAccount*, multichainAccount*, and multichainSubAccounts are unused, and accountsWidgetRowCount is set to 9 while the test that uses it asserts a count of 3, an inconsistency in the fixture data."
+    },
+    {
+      "id": "F22",
+      "file": "apps/web/cypress/fixtures/spaces/staticSpaces.js",
+      "line": 23,
+      "claim": "Fixture fields unnamedAccount*, multichainAccountRowIndex and multichainSubAccounts are also unused after the test deletions, again inconsistent with the stated \"remove orphaned tests\" goal."
+    },
+    {
+      "id": "F23",
+      "file": "apps/web/cypress/e2e/regression/spaces_dashboard.cy.js",
+      "line": 38,
+      "claim": "This test (and the one at line 76) depends on clickSingleChainAccountRow() selecting the correct row by position rather than by name, which is fragile if the fixture space's single-chain row count changes."
+    },
+    {
+      "id": "F24",
+      "file": "apps/web/cypress/e2e/pages/spaces.page.js",
+      "line": 232,
+      "claim": "The same 'wait for spaces → if on dashboard, click logo → assert spaces URL' block is duplicated in two places in this file rather than factored into a single helper, and consolidating it would also let the underlying redirect-timing bug be fixed in one place instead of two."
+    },
+    {
+      "id": "F25",
+      "file": "apps/web/cypress/e2e/pages/sidebar.pages.js",
+      "line": null,
+      "claim": "With 11 sidebar specs deleted, many helpers in this file likely have no remaining callers, though this was not verified helper by helper."
+    },
+    {
+      "id": "F26",
+      "file": "apps/web/cypress/e2e/pages/spaces.page.js",
+      "line": 157,
+      "claim": "clickSingleChainAccountRow() clicks the first single-chain row and the test then checks that this opened the pendingTxAccount Safe (\"Pending tx\"), which only works while the fixture space has exactly one single-chain row; adding another single-chain row would cause the click to open a different Safe and break the assumption. The fix would be to target the row by name, e.g. cy.contains(singleChainAccountRow, row.name)."
+    }
+  ]
+}

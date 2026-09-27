@@ -1,0 +1,49 @@
+{
+  "pr": 7974,
+  "title": "fix(web): Hide checkmark on indeterminate checkbox",
+  "description": "> base-ui shows its indicator for checked and mixed alike, so \"select all\" wore a tick it hadn't earned — one CSS rule, and the half-state goes blank.\r\n\r\nFixes [WA-2387](https://linear.app/safe-global/issue/WA-2387/select-all-checkbox-appears-fully-selected-with-one-account-selected)\r\n\r\n## What it solves\r\n\r\nResolves: the \"Select all\" checkbox rendered a full checkmark in its *indeterminate* state, so selecting one of several accounts made it look like all accounts were selected.\r\n\r\n## How this PR fixes it\r\n\r\nbase-ui renders the `Checkbox.Indicator` for both the `checked` and `indeterminate` states, and we always drew a `CheckIcon`. Added `data-indeterminate:[&>svg]:hidden` so the checkmark is hidden when indeterminate. base-ui doesn't apply `data-checked` styling in that state, so the box correctly reads as empty.\r\n\r\n## How to test it\r\n\r\n1. Open a Space → Manage accounts → \"Add Safe accounts\".\r\n2. With ≥2 safes in a section, select exactly one.\r\n3. \"Select all\" shows `(1/2)` as an **empty box** (previously a checkmark).\r\n4. Select the rest → checkmark; deselect all → empty box.\r\n\r\nI navigated to the pages and checked myself\r\n<img width=\"629\" height=\"630\" alt=\"Screenshot 2026-06-02 at 09 33 17\" src=\"https://github.com/user-attachments/assets/4186d2ea-5a1f-4d6f-ab09-20962782a68e\" />\r\n<img width=\"773\" height=\"679\" alt=\"Screenshot 2026-06-02 at 09 32 13\" src=\"https://github.com/user-attachments/assets/3638808f-0e96-4557-bbd6-baa655ea83c1\" />\r\n\r\n## Blast radius\r\n\r\n- CSS-only change\r\n\r\n## Checklist\r\n\r\n- [ ] I've tested the branch on mobile 📱 (N/A — web-only component)\r\n- [x] I've documented how it affects the analytics (if at all) 📊 (none)\r\n- [ ] I've written a unit/e2e test for it (if applicable) 🧑‍💻 (CSS-only change)\r\n- [x] I've listed affected flows and blast radius, and named what I did not verify 🎯\r\n\r\n---\r\n\r\n## CLA signature\r\n\r\nWith the submission of this Pull Request, I confirm that I have read and agree to the terms of the [Contributor License Agreement](https://safe.global/cla).\r\n",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/components/ui/checkbox.tsx",
+      "line": null,
+      "claim": "SelectAllToggle passes indeterminate for the partial-selection state, and this component is used in the Spaces onboarding flow's safes list, so when some safes are selected the Select all checkbox looks the same as when none are selected, misleading sighted users about selection state."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/components/ui/checkbox.tsx",
+      "line": 42,
+      "claim": "The class data-indeterminate:[&>svg]:hidden hides the checkmark glyph when a checkbox is indeterminate, but nothing replaces it. Because base-ui 1.2.0 never sets data-checked on an indeterminate checkbox, and the Root element has no data-indeterminate styling for fill or border, the resulting box renders identically to an unchecked checkbox, making the indeterminate state visually indistinguishable from unchecked even though aria-checked is still mixed for screen readers."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/components/ui/checkbox.tsx",
+      "line": null,
+      "claim": "The fix should render a distinct glyph (e.g., a dash/minus icon) for the indeterminate state alongside the existing checkmark, toggled with data-indeterminate: and not-data-indeterminate: modifiers, and add data-indeterminate: background/border/text color classes to the Root so the box visually reads as selected; if an empty box is actually the intended design, that should be explicitly stated in the linked ticket and PR description rather than left ambiguous."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/components/ui/checkbox.tsx",
+      "line": 42,
+      "claim": "The change hides the checkbox icon in the indeterminate state via `data-indeterminate:[&>svg]:hidden`, and since the filled background only applies when checked, an indeterminate-but-unchecked box now renders as an empty grey-bordered square identical to an unchecked box. This affects the 'Select all' toggle in apps/web/src/features/spaces/components/SelectAllToggle/SelectAllToggle.tsx:53, where a partial selection now looks the same as no selection for sighted users, even though the aria-checked=\"mixed\" attribute is still correct for screen readers."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/components/ui/stories/checkbox.stories.tsx",
+      "line": 39,
+      "claim": "The new indeterminate-state styling is not exercised by any story: the checkbox stories only cover unchecked, checked, disabled, and checked+disabled, so a visual regression in the indeterminate appearance would not be caught by the story snapshot workflow, and no other test checks the checkbox's visual appearance in that state."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/src/components/ui/stories/checkbox.stories.tsx",
+      "line": 36,
+      "claim": "The Storybook 'States' grid has no indeterminate example, and AllVariants is tagged !chromatic, so there is no automated visual check that would catch this indeterminate-state regression or a future one; an Indeterminate story with Chromatic snapshotting should be added."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/components/ui/checkbox.tsx",
+      "line": 42,
+      "claim": "The PR description does not state whether any open design-system rewrite of the shared UI primitives under apps/web/src/components/ui/ is in progress or needs coordination, which has previously led to edits being lost to merge conflicts."
+    }
+  ]
+}

@@ -1,0 +1,180 @@
+{
+  "usage": {
+    "usd": 0.6795243999999999,
+    "turns": 10,
+    "wallSeconds": 86
+  },
+  "issues": [
+    {
+      "findings": [
+        "F5",
+        "F6"
+      ],
+      "summary": "The full 'Requested by' address can't fit in the 20% column, so it overflows the cell or gets clipped",
+      "label": "medium",
+      "evidence": "PendingRequestsTable.tsx:110 makes the column w-[20%], which is about 144px at min-w-[720px]. :175-183 renders a 42-char mono address with shortAddress={false}, and it needs about 280px or more. TableCell is whitespace-nowrap with no overflow hidden (ui/table.tsx:56), and the inline-flex trigger span does not limit the width, so the address spills into the next column or is cut off by ellipsis. This undercuts the PR's stated 'full, bold ends' goal."
+    },
+    {
+      "findings": [
+        "F4"
+      ],
+      "summary": "The Pending tab uses the MUI lg breakpoint (1200px), while the sibling tab uses useIsMobile (768px)",
+      "label": "low",
+      "evidence": "PendingRequestsTable.tsx:41 uses useMediaQuery(theme.breakpoints.down('lg')), but SpaceAddressBookTable.tsx:57 uses useIsMobile (MOBILE_BREAKPOINT 768 in hooks/use-mobile). Tabs on the same page therefore change layout at different widths."
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "The column widths set through useMediaQuery can jump after hydration",
+      "label": "low",
+      "evidence": "MUI's useMediaQuery returns false on the first (SSR) render unless noSsr is set, so small screens first get the desktop widths and then re-render. The effect is a brief visual jump."
+    },
+    {
+      "findings": [
+        "F3"
+      ],
+      "summary": "The isSmallScreen ternary is repeated on the header classes where Tailwind breakpoint classes would do",
+      "label": "nit",
+      "evidence": "PendingRequestsTable.tsx:107-109 repeats the same ternary three times. Tailwind responsive classes would do the same job, so this is style only."
+    },
+    {
+      "findings": [
+        "F11"
+      ],
+      "summary": "The small-screen column widths add up to 105%",
+      "label": "low",
+      "evidence": "Lines 107-111 give 15+40+15+20+15 = 105% on small screens (desktop adds up to 100%). A table-fixed layout scales the columns proportionally, so the intended ratios are only slightly off, not ignored as the finding claims."
+    },
+    {
+      "findings": [
+        "F13"
+      ],
+      "summary": "The Name tooltip trigger renders a focusable button that does nothing, and the tooltip shows even when the name isn't truncated",
+      "label": "low",
+      "evidence": "SpaceAddressBookTable.tsx:101 uses TooltipTrigger without render, so Base UI renders a <button> (the test at :172 confirms this with getByRole('button')). Every row gets an extra tab stop that does nothing, while other call sites pass render={<span/>}."
+    },
+    {
+      "findings": [
+        "F1",
+        "F17"
+      ],
+      "summary": "The name-tooltip test only checks that the trigger exists, not what the tooltip shows",
+      "label": "low",
+      "evidence": "SpaceAddressBookTable.test.tsx:170-175 only asserts getByRole('button', {name}). It never opens or checks TooltipContent, so a regression in the tooltip content would go unnoticed."
+    },
+    {
+      "findings": [
+        "F7",
+        "F22"
+      ],
+      "summary": "The single-chain test's check that the heading is absent can never fail",
+      "label": "low",
+      "evidence": "In the base version of AccountItemChainBadge, the single-chain branch only rendered ChainIndicator and never the heading. So the queryByText('Multichain account on:') assertion at test:42 passes whether or not the change is there."
+    },
+    {
+      "findings": [
+        "F2"
+      ],
+      "summary": "The new test imports render from @testing-library/react instead of @/tests/test-utils",
+      "label": "low",
+      "evidence": "PendingRequestsTable.test.tsx:1 imports from @testing-library/react, while apps/web/docs/TESTING.md:62 documents importing from @/tests/test-utils. The cited docs path doesn't exist, but the convention is real."
+    },
+    {
+      "findings": [
+        "F8"
+      ],
+      "summary": "No tests cover the small-screen widths or the showHasMore/maxVisible props",
+      "label": "low",
+      "evidence": "The NetworkLogosList mock at PendingRequestsTable.test.tsx:41-44 only reads networks, and no test changes the viewport. These are presentational props with little regression risk."
+    },
+    {
+      "findings": [
+        "F15"
+      ],
+      "summary": "The 'Requested by' tooltip and other non-address values aren't tested",
+      "label": "low",
+      "evidence": "The tests cover the address and email branches but never check the TooltipContent value. The 'Unknown user'/'Deleted user' strings don't appear anywhere in the web codebase, so that part can't be confirmed, but the tooltip really is untested."
+    },
+    {
+      "findings": [
+        "F12"
+      ],
+      "summary": "The email branch renders EthHashInfo, with an identicon, for an email string instead of EmailInfo",
+      "label": "low",
+      "evidence": "PendingRequestsTable.tsx:186-192 passes a non-address string to EthHashInfo with onlyName, which draws an identicon for the email. The AddedBy helper in SpaceAddressBookTable.tsx:36-41 handles this with EmailInfo. The behaviour predates the PR but sits in lines it restructured."
+    },
+    {
+      "findings": [
+        "F18"
+      ],
+      "summary": "The Pending tab's Name cell has no tooltip for long names",
+      "label": "low",
+      "evidence": "PendingRequestsTable.tsx:120 still uses a bare truncate span without a tooltip, even though the PR adds one to the other tab's Name column to fix long names (WA-2649), and the column shrinks to 15% on small screens."
+    },
+    {
+      "findings": [
+        "F10"
+      ],
+      "summary": "The tooltip trigger <span> wraps a <div>, which is invalid nesting",
+      "label": "low",
+      "evidence": "PendingRequestsTable.tsx:173-175 puts <div className=\"text-[0.8em] font-mono\"> inside a span trigger. Browsers tolerate this, but it isn't valid phrasing content."
+    },
+    {
+      "findings": [
+        "F14"
+      ],
+      "summary": "The change to the multichain tooltip heading goes beyond the address book",
+      "label": "wrong",
+      "evidence": "The PR description says outright: 'Accounts tooltip: removed the \"Multichain account on:\" heading' and lists My Accounts under affected flows. The change is intended and documented."
+    },
+    {
+      "findings": [
+        "F24"
+      ],
+      "summary": "showName={false} hides the resolved requester name",
+      "label": "wrong",
+      "evidence": "The PR description says 'Requested by' should render an address 'like the Address column (full, bold ends)', which matches the Address column's showName={false}. The change is deliberate."
+    },
+    {
+      "findings": [
+        "F19"
+      ],
+      "summary": "The test fixture is hand-written even though safeItemBuilder exists",
+      "label": "nit",
+      "evidence": "apps/web/src/tests/builders/safeItem.ts exists and could replace createSafeItem at AccountItemChainBadge.test.tsx:20. The fixed values have no concrete cost in this test."
+    },
+    {
+      "findings": [
+        "F20"
+      ],
+      "summary": "The Tooltip mock can't show that the content is inside the tooltip",
+      "label": "nit",
+      "evidence": "The Tooltip* mocks are plain divs. Checking the multichain-tooltip count would be a slightly stronger test but wouldn't catch any realistic bug."
+    },
+    {
+      "findings": [
+        "F21"
+      ],
+      "summary": "The EthHashInfo wrapper and props are repeated across the requestedBy branches",
+      "label": "nit",
+      "evidence": "The font-mono wrapper plus highlight4bytes appears at lines 131 and 175 and in SpaceAddressBookTable. The duplication is small, so this is a preference."
+    },
+    {
+      "findings": [
+        "F9"
+      ],
+      "summary": "react is imported twice",
+      "label": "nit",
+      "evidence": "Lines 1 and 23 both import from 'react'. The double import already existed in the base (lines 1 and 20) and the PR didn't touch those lines."
+    },
+    {
+      "findings": [
+        "F23"
+      ],
+      "summary": "`spaceId ?? ''` is redundant after the guard",
+      "label": "nit",
+      "evidence": "Line 57 follows `if (!spaceId) return`, so the fallback can never apply. This predates the PR and the lines weren't changed."
+    }
+  ]
+}

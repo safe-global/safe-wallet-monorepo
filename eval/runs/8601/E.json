@@ -1,0 +1,11 @@
+{
+  "pr": 8601,
+  "reviewSha": "d9b7f01a90a2cbeb9449879c0500b301af0e3f26",
+  "baseSha": "359fb9d1af125284cc5c0f72f1c3960a53bc4448",
+  "system": "E",
+  "version": "github",
+  "runner": "collect",
+  "model": "human",
+  "commentSha": "d9b7f01a90a2cbeb9449879c0500b301af0e3f26",
+  "output": "[review by LucieFaire]\nLGTM"
+}

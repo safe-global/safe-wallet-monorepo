@@ -1,0 +1,50 @@
+{
+  "usd": 0.0736816,
+  "findings": [
+    {
+      "file": "apps/web/src/styles/shadcn.css",
+      "line": 34,
+      "claim": "The global --accent token is changed app-wide from a neutral grey to green in both light and dark themes, but the change is only needed for the dashboard and header pills; every surface using focus:bg-accent or data-highlighted:bg-accent (Select, DropdownMenu, ContextMenu, Combobox items, and global search) will now highlight green, and --accent becomes identical to --sidebar-accent. This needs an explicit design decision, or the green should be scoped to a separate token rather than changing the shared one."
+    },
+    {
+      "file": "apps/web/src/components/ui/select.tsx",
+      "line": 90,
+      "claim": "The PR edits shared shadcn primitives, adding a showBackdrop prop to SelectContent and changing the SidebarTrigger icon and SidebarHeader padding/gap in sidebar.tsx, affecting every consumer of these components; it is unverified whether this was coordinated with the design-system rewrite or whether no such conflicting PR is open, since the PR description could not be checked."
+    },
+    {
+      "file": "apps/web/src/hooks/useTopbarElevation.ts",
+      "line": 21,
+      "claim": "The new useTopbarOverlayElevation and useIsTopbarAboveOverlay hooks and the createElevationHooks refactor have no tests; the existing test file was not updated to cover the overlay hooks, and the only reference is an unrelated jest mock. Missing coverage includes register/unregister behavior on open/close/unmount and verification that the two stores remain independent."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/index.tsx",
+      "line": null,
+      "claim": "No test covers the new isDropdownActuallyOpen branches, including backdrop rendering only when showBackdrop is set and elevation triggering only when the dropdown is actually open; a regression in the disabled or !canOpen cases could leave the topbar elevated above a backdrop that isn't shown."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SafeAccounts/SpaceSafeContextMenu.tsx",
+      "line": 39,
+      "claim": "The component has no test file, so the new behavior where the menu anchors to the closest table row, falls back to the button, and hides the backdrop is untested."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Sidebar/SidebarTopBar/SidebarTopBar.tsx",
+      "line": 36,
+      "claim": "The new nested isCollapsed branch, which renders a centred size-10 logo tile, is not covered by tests, and the existing test file for this component was not updated."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/SafeRowStats.tsx",
+      "line": 15,
+      "claim": "The same crescent-mask geometry for stacked logos is duplicated: once as a hard-coded inline JS string of pixel values and once as a parameterised CSS rule that explicitly comments it replicates the JS version exactly, so if one is tuned the other will not follow; SafeRowStats could reuse the CSS-module class, or both could share a single helper."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpacesList/AccountInfo.tsx",
+      "line": 28,
+      "claim": "The component uses the raw palette class text-green-500 instead of a theme token."
+    },
+    {
+      "file": "apps/web/src/features/multichain/components/NetworkLogosList/NetworkLogosList.stories.tsx",
+      "line": 87,
+      "claim": "The story decorator hard-codes the color value rgba(0, 0, 0, 0.05) instead of using a theme token."
+    }
+  ]
+}

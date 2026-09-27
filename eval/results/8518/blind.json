@@ -1,0 +1,157 @@
+{
+  "pr": 8518,
+  "title": "[WA-2952] Remove the third-party script triggering blocked-code errors",
+  "description": "## What it solves\n\nResolves: https://linear.app/safe-global/issue/WA-2952/remove-the-third-party-script-triggering-blocked-code-errors\n\nDatadog RUM has been recording ~72 `EvalError` events / 45 sessions over 30 days. These come from a third-party marketing/vendor script (Beamer, GTM, Calendly, Cloudflare Turnstile, or HubSpot forms — see investigation below) calling `eval()`/`new Function()`, which our production `script-src` CSP correctly blocks (it only allows `'wasm-unsafe-eval'`, never `'unsafe-eval'`). The block is working as intended and no user is affected, but the resulting `EvalError` was still being counted as a real error in Datadog, adding unexplained noise to the error report.\n\n**Vendor attribution — not conclusively identified.** See \"How this PR fixes it\" for the full static-attribution pass and why the responsible vendor could not be named from this environment. No vendor script was removed and the CSP was **not** loosened.\n\n## How this PR fixes it\n\nShips the \"accept and filter\" branch of the ticket's three options (drop the vendor / ask for a non-eval build / accept and filter), since naming the vendor and deciding to drop marketing tooling is explicitly called out in the ticket as **not Wallet's call to make alone**.\n\nAdded a filter to the existing Datadog RUM `beforeSend` noise-filtering pipeline (`filterRumEvent` in `apps/web/src/services/observability/providers/datadog.ts`), following the same pattern already used there for `ResizeObserver` noise, browser-extension errors, and expected resource failures:\n\n- `error.type === 'EvalError'` alone is not proof of a CSP-blocked `eval()` — a thrown string `\"EvalError: …\"`, an explicit `new EvalError()`, or any custom class setting `name = 'EvalError'` all produce the same `type` in `@datadog/browser-core`'s `computeRawError`. So the check is **narrowed**: `isCspBlockedEval` requires `error.type === 'EvalError'` **and** a stack that does not point at our own webpack output (`_next/static/`), via a new `isNotFirstPartyStack` helper that mirrors the existing `originatesFromExtension` pattern-matching, inverted. Grepped the whole `apps/web/src` and `packages/` trees to confirm **our own code never calls `eval()`** today — so a same-bundle `EvalError` would mean something new started calling eval() and is worth surfacing, not silencing; a missing stack defaults to \"not first-party\" (we have no eval() call site of our own to attribute it to).\n  - **Discriminator choice, documented per review request:** considered narrowing via the CSP-block message text instead (Chrome/Safari: `\"Refused to evaluate a string as JavaScript because 'unsafe-eval'…\"`; Firefox: `\"call to eval() blocked by CSP\"`), matched through the existing `KNOWN_NOISE_PATTERNS`/`isKnownNoise` mechanism. **Declined that route**: those exact strings are from model knowledge, not observed in this environment (no network egress to reproduce a real CSP violation here — see below), so encoding them as fact in a noise-filter would risk silently under-matching on any it got wrong. Took the stack-based route instead, since it only depends on facts already verifiable from this repo (our own bundle path), not on unverified third-party message text.\n  - **Trade-off accepted:** `'unsafe-eval'` **is** permitted in dev and Cypress (`config/securityHeaders.ts:19-23`), so a first-party `eval()`/`Function()` call would pass locally and only throw — as this same `EvalError` type — in production, where this filter would otherwise hide it. Accepted because (a) no current bundle path constructs code dynamically, and (b) the stack check above still surfaces it if that stack ever does point at `_next/static/`.\n- Genuine `TypeError`/`RangeError`/plain `Error` events are untouched — only the reserved `EvalError` type (further narrowed by the stack check) is dropped.\n\n### Vendor attribution (static pass — this PR's investigation)\n\nTraced how each of the six candidate vendor scripts named in the ticket is loaded in `apps/web`:\n\n| Vendor | Script URL | Loaded from | Gating | Reach |\n|---|---|---|---|---|\n| **GTM/GA** (`googletagmanager.com`) | `https://www.googletagmanager.com/gtag/js?id=...` | `@next/third-parties`'s `GoogleAnalytics` component (`services/analytics/Analytics.tsx`), rendered unconditionally in `_app.tsx` | Cookie-consent gates *tracking*, not the script load itself | **Every page view** |\n| **Beamer** (`getbeamer.com`) | Self-hosted `/beamer-embed.js` (vendored in `public/`) | `services/beamer/index.ts`, invoked by `useBeamer()` in `_app.tsx` | Loads only after the user accepts the \"Updates\" cookie | Every page view, post-consent |\n| **Calendly** (`calendly.com`) | `https://assets.calendly.com/assets/external/widget.js` | `features/hypernative/hooks/useCalendly.ts` | Only inside `HnCalendlyStep`, one step of the Hypernative signup flow, itself behind the `HYPERNATIVE` chain feature flag | Narrow |\n| **Cloudflare Turnstile** (`challenges.cloudflare.com`) | `https://challenges.cloudflare.com/turnstile/v0/api.js` | `components/common/Captcha/CaptchaProvider.tsx` | Only loads once captcha is actually activated for a specific action | Narrow, event-driven |\n| **HubSpot forms** (`hsforms.net`) | `https://js-eu1.hsforms.net/forms/embed/v2.js` | `features/hypernative/components/HubSpotForm/HubSpotForm.tsx` | Same Hypernative-flag-gated signup flow as Calendly | Narrow |\n| **HubSpot / hs-scripts.com** | *(no script load found)* | — | The CSP allowlists `https://*.hubspot.com` and `https://*.hs-scripts.com` in `script-src`, but no current code loads a script from either domain. Likely a vestigial/future-proofing CSP entry. | None found |\n\nFindings:\n- The self-hosted `public/beamer-embed.js` bundle (vendored Beamer script) contains **zero** occurrences of `eval(` and its 25 `Function(`-adjacent hits are all calls to `Beamer.isFunction(...)`, a type-check helper — not the `Function` constructor. However, once loaded, it dynamically injects two further same-origin-context `<script>` tags (`",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/services/observability/providers/__tests__/datadog.test.ts",
+      "line": 409,
+      "claim": "This new test also uses a '{} as any' context argument instead of a typed alternative."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/services/observability/providers/datadog.ts",
+      "line": 83,
+      "claim": "The comment mentioning 'grepped apps/web/src and packages/' is PR narration rather than lasting guidance and will go stale over time."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/services/observability/providers/__tests__/datadog.test.ts",
+      "line": 412,
+      "claim": "The 'keeps other reserved-name errors (TypeError, RangeError)' test also uses a first-party stack, so the stack check alone makes it pass without exercising the EvalError type condition."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/services/observability/providers/datadog.ts",
+      "line": 95,
+      "claim": "The rationale for the filtering behavior is repeated three times across isNotFirstPartyStack, isCspBlockedEval, and the filterRumEvent JSDoc, which is redundant."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/services/observability/providers/datadog.ts",
+      "line": 76,
+      "claim": "The comment stating 'We ship no eval()/Function() call of our own today' is PR narration rather than lasting guidance and will go stale over time."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/src/services/observability/providers/__tests__/datadog.test.ts",
+      "line": 401,
+      "claim": "The 'keeps a plain Error whose message merely mentions eval' test uses a first-party stack, so it passes regardless of whether the EvalError type check is present, meaning the type check itself is not actually verified."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/services/observability/providers/datadog.ts",
+      "line": 62,
+      "claim": "isNotFirstPartyStack has the same shape as originatesFromExtension; both could be served by a single stackIncludesAny(stack, patterns) helper, saving roughly 6 lines."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/src/services/observability/providers/datadog.ts",
+      "line": 111,
+      "claim": "If the 'errorEvent.error.type === \"EvalError\" &&' condition were removed from isCspBlockedEval, all five new tests would still pass, so the filter could silently drop every non-EvalError error from a third-party or stackless source without any test catching it."
+    },
+    {
+      "id": "F9",
+      "file": "apps/web/src/services/observability/providers/__tests__/datadog.test.ts",
+      "line": 401,
+      "claim": "The Error, TypeError, RangeError and undefined test cases should use a third-party stack (e.g. googletagmanager.com/gtm.js) or no stack at all, so that only the type check can cause them to be kept, properly covering the EvalError type condition."
+    },
+    {
+      "id": "F10",
+      "file": "apps/web/src/services/observability/providers/datadog.ts",
+      "line": 157,
+      "claim": "Nearby helper functions originatesFromExtension and isKnownNoise have no JSDoc at all, creating an inconsistency with the heavily commented predicates elsewhere in the file."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/src/services/observability/providers/__tests__/datadog.test.ts",
+      "line": 433,
+      "claim": "This new test also uses a '{} as any' context argument instead of a typed alternative."
+    },
+    {
+      "id": "F12",
+      "file": "apps/web/src/services/observability/providers/__tests__/datadog.test.ts",
+      "line": 397,
+      "claim": "The five new tests each add a '{} as any' context argument, increasing the file's total any-casts from 16 to 21, which conflicts with the project rule against using the any type or any type assertions."
+    },
+    {
+      "id": "F13",
+      "file": "apps/web/src/services/observability/providers/__tests__/datadog.test.ts",
+      "line": 421,
+      "claim": "This new test also uses a '{} as any' context argument instead of a typed alternative."
+    },
+    {
+      "id": "F14",
+      "file": "apps/web/src/services/observability/providers/__tests__/datadog.test.ts",
+      "line": 288,
+      "claim": "The file already has a typed alternative pattern, 'const resourceContext = {} as RumEventDomainContext', that could be reused instead of the untyped any casts."
+    },
+    {
+      "id": "F15",
+      "file": "apps/web/src/services/observability/providers/__tests__/datadog.test.ts",
+      "line": 444,
+      "claim": "This new test also uses a '{} as any' context argument instead of a typed alternative."
+    },
+    {
+      "id": "F16",
+      "file": "apps/web/src/services/observability/providers/datadog.ts",
+      "line": 72,
+      "claim": "About 38 lines of comments surround two small predicates that are each only 2-3 lines long, which is excessive given the project convention that code comments should be treated as tech debt."
+    },
+    {
+      "id": "F17",
+      "file": "apps/web/src/services/observability/providers/__tests__/datadog.test.ts",
+      "line": 389,
+      "claim": "The test includes a 'console' case that is redundant because that source is already excluded by a separate guard checking NON_USER_IMPACTING_SOURCES, which includes 'console' and 'report'."
+    },
+    {
+      "id": "F18",
+      "file": "apps/web/src/services/observability/providers/datadog.ts",
+      "line": 72,
+      "claim": "About 40 lines of comments support roughly 3 lines of logic, which conflicts with AGENTS.md guidance to treat comments as tech debt; some of the comment claims will go stale, such as the statement that the code grepped apps/web/src and packages/ and the hardcoded list of vendors, and a trade-off paragraph duplicates the commit message."
+    },
+    {
+      "id": "F19",
+      "file": "apps/web/src/services/observability/providers/datadog.ts",
+      "line": 76,
+      "claim": "The comment attached to isNotFirstPartyStack discusses error.type, which is a different concern from what the function does, and the function name is a negation; naming it isFirstPartyStack and negating at the call site would read more clearly."
+    },
+    {
+      "id": "F20",
+      "file": "apps/web/src/services/observability/providers/datadog.ts",
+      "line": 90,
+      "claim": "isNotFirstPartyStack checks whether '_next/static/' appears anywhere in the full stack trace rather than only in the frame that threw, so when first-party code calls directly into a vendor script (e.g. HubSpotForm.tsx onload calling window.hbspt.forms.create, useCalendly.ts, services/beamer/index.ts) the resulting blocked EvalError is kept instead of dropped because a first-party frame still appears lower in the stack. This means the noise this change is meant to remove from named vendors will not fully go away, and it may look like the fix did not work even though there is no direct user-facing consequence."
+    },
+    {
+      "id": "F21",
+      "file": "apps/web/src/services/observability/providers/__tests__/datadog.test.ts",
+      "line": 389,
+      "claim": "In the test 'drops an EvalError regardless of source', the 'console' case proves nothing because NON_USER_IMPACTING_SOURCES already drops that source regardless of this change, and the test suite does not cover a mixed stack containing both vendor and first-party frames or a 'custom' source case."
+    },
+    {
+      "id": "F22",
+      "file": "apps/web/src/services/observability/providers/datadog.ts",
+      "line": 174,
+      "claim": "Dropping the CSP-eval-blocked errors removes the only remaining in-app signal for this condition, since 'report' events are already dropped and the CSP configuration has no report-uri/report-to (securityHeaders.ts:16-29); if a vendor script were compromised and attempted eval, nothing would surface it. A report-to endpoint or a sampled addAction instead of a full drop should be considered."
+    },
+    {
+      "id": "F23",
+      "file": "apps/web/src/services/observability/providers/datadog.ts",
+      "line": 90,
+      "claim": "The fix should look only at the frame that actually threw (the first 'at ...' line that is not eval/<anonymous>), and a test should be added covering a stack with a vendor top frame and a _next/static/ caller frame below it."
+    },
+    {
+      "id": "F24",
+      "file": "apps/web/src/services/observability/providers/datadog.ts",
+      "line": 72,
+      "claim": "The comments should be reduced to a single short JSDoc on isCspBlockedEval covering what is dropped, the first-party exception, and WA-2952, with the dev/Cypress 'unsafe-eval' trade-off moved to the PR description instead of left in code."
+    },
+    {
+      "id": "F25",
+      "file": "apps/web/src/services/observability/providers/__tests__/datadog.test.ts",
+      "line": 397,
+      "claim": "The new tests add five more '{} as any' casts (also at lines 409, 421, 433, 444), and while the file already does this, AGENTS.md says never to use any; a typed buildErrorEvent and emptyContext helper would remove all of them, saving roughly 10 lines."
+    }
+  ]
+}

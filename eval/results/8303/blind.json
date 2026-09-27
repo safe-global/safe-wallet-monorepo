@@ -1,0 +1,181 @@
+{
+  "pr": 8303,
+  "title": "# tests(mobile): E2E transaction-request flow for WalletConnect dApps",
+  "description": "## What it solves\r\n\r\nResolves: [WA-2326](https://linear.app/safe-global/issue/WA-2326/e2e-transaction-request-flow)\r\n\r\n## How this PR fixes it\r\n\r\nFive Maestro flows for the WC tx-request path: happy (real signing + staging `/propose`, `safeTxHash` delivery asserted end-to-end), reject (5000), EIP-5792 batch (`{ id: safeTxHash }`), read-only Safe (4100, no sheet), CGW failure (500 via e2e fetch interceptor; rejected only on abandon — `-32603` is never sent by design).\r\n\r\nE2E-only harness: the fake WalletKit records dApp responses, `WcResponseIndicator` exposes them as Maestro markers, and fixture values carry wei jitter so reruns can't collide on the same safeTxHash.\r\n\r\nIncludes the not-yet-merged WA-2325 commit (tx flows depend on its session seeding).\r\n\r\n## How to test it\r\n\r\n```bash\r\nyarn workspace @safe-global/mobile e2e:metro-ios\r\n# Simulator: Features → Face ID → Enrolled, then:\r\nmaestro test --include-tags walletconnect-dapps apps/mobile/e2e\r\n```\r\n\r\n## Affected flows\r\n\r\n- None in production (e2e overrides only, plus one `testID` in `ReviewFooter`).\r\n\r\n## Blast radius\r\n\r\n- Shared e2e harness (pairing/management suites still pass); happy/batch runs append one queued tx per run to the Sepolia staging test Safe.\r\n\r\n## Risks / not checked\r\n\r\n- batch + cgw-failure flows not yet green on a simulator; iOS only.\r\n\r\n## Visual summary\r\n\r\n```mermaid\r\nflowchart LR\r\n    A[synth eth_sendTransaction] --> B[sheet → review → sign]\r\n    B --> C[CGW /propose 200 or mocked 500]\r\n    C --> D[respondSessionRequest recorded]\r\n    D --> E[Maestro asserts hash-match marker]\r\n```\r\n\r\n## Checklist\r\n\r\n- [x] I've tested the branch on mobile 📱\r\n- [x] I've documented how it affects the analytics (if at all) 📊\r\n- [x] I've written a unit/e2e test for it (if applicable) 🧑‍💻\r\n- [x] I've listed affected flows and blast radius, and named what I did not verify 🎯\r\n\r\n---\r\n\r\n## CLA signature\r\n\r\nWith the submission of this Pull Request, I confirm that I have read and agree to the terms of the [Contributor License Agreement](https://safe.global/cla).\r\n",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/walletKitE2eState.ts",
+      "line": 73,
+      "claim": "The doc comment for proposeBehavior describes an e2e fetch interceptor for CGW's /propose endpoint that does not exist anywhere in the diff or repo, so the comment documents behavior that isn't actually implemented."
+    },
+    {
+      "id": "F2",
+      "file": "tx-send-happy.yml",
+      "line": 97,
+      "claim": "The assertVisible selector text: 'Send' matches any UI element containing the substring 'Send', including a Send action, Send button, or Send tab, so it is not specific enough to reliably target the intended element; a stable testID on the queued tx row or a tighter regex match would be more robust."
+    },
+    {
+      "id": "F3",
+      "file": "proposeFetchMock.ts",
+      "line": null,
+      "claim": "installProposeFetchMock captures global.fetch at install time and never restores it; if Jest test isolation ever unhooks or swaps global.fetch between suites, a second installProposeFetchMock() call returns early because of the module-scoped installed flag, silently leaving the interceptor uninstalled from the new fetch."
+    },
+    {
+      "id": "F4",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/walletKit.e2e.ts",
+      "line": 72,
+      "claim": "The code uses two different presence checks for the same purpose: 'result' in response (key-presence, prototype-chain-walking) versus response.error (truthiness check), so a response with result: undefined records {result: undefined} while one with error: undefined records nothing, an inconsistent trap for future callers even though current call sites avoid triggering it."
+    },
+    {
+      "id": "F5",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/walletKitE2eState.ts",
+      "line": 66,
+      "claim": "A second comment repeats the same false claim about WcResponseIndicator, and as a result lastRequestResponse is write-only: there is no indicator component, no test-id, and no consuming e2e flow that reads it."
+    },
+    {
+      "id": "F6",
+      "file": "walletConnectDappsSetup.ts",
+      "line": 54,
+      "claim": "The private key should be gated behind an environment variable, defaulting to the committed value for CI convenience, or documented in a SECURITY.md-adjacent note explaining it is intentionally public."
+    },
+    {
+      "id": "F7",
+      "file": "tx-send-happy.yml",
+      "line": 48,
+      "claim": "The assertVisible selector text: '.*0\\.001.*' can match multiple UI surfaces that render the same fixture value, making the assertion insufficiently specific."
+    },
+    {
+      "id": "F8",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/__tests__/walletKit.e2e.test.ts",
+      "line": 48,
+      "claim": "The tests hardcode the literal string 'e2e-session-topic' instead of using the exported E2E_SESSION_TOPIC constant that holds the same value, which is unnecessary duplication of a value already available as a named constant."
+    },
+    {
+      "id": "F9",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/walletKitE2eState.ts",
+      "line": 72,
+      "claim": "The proposeBehavior field and its accompanying comment describe a fetch interceptor for CGW's /propose endpoint that does not exist anywhere in the codebase, so a developer relying on the comment to build the CGW-failure test flow (setting proposeBehavior to 'fail500') would get a live passthrough to staging instead of a synthetic failure."
+    },
+    {
+      "id": "F10",
+      "file": "WcResponseIndicator.tsx",
+      "line": 34,
+      "claim": "The effect should depend on outstanding (e.g. useEffect(..., [outstanding])) or compute the ref update via useMemo on outstanding instead of running unconditionally."
+    },
+    {
+      "id": "F11",
+      "file": "WcResponseIndicator.tsx",
+      "line": 34,
+      "claim": "Object.keys(outstanding) returns keys in insertion order, so treating the last key as the newest transaction hash is not guaranteed by ordering semantics; this works only for one-at-a-time flows and should be documented as an explicit invariant tied to the flow contract so future readers don't assume general ordering."
+    },
+    {
+      "id": "F12",
+      "file": "walletConnectDappsSetup.ts",
+      "line": 54,
+      "claim": "A raw private key (E2E_TX_OWNER_PRIVATE_KEY) is committed directly in the source file; even though it is a throwaway Sepolia-only key per the accompanying comment, committing raw keys attracts secret-scanner alerts and false positives on downstream forks."
+    },
+    {
+      "id": "F13",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/__tests__/walletKitE2eState.test.ts",
+      "line": 13,
+      "claim": "The test asserts proposeBehavior: 'live', providing coverage for a behavior that has no real implementation yet, which is misleading test coverage."
+    },
+    {
+      "id": "F14",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/walletKitE2eState.ts",
+      "line": 25,
+      "claim": "The proposeBehavior field, its type, and its initial value are added but nothing in the codebase reads them; the only fetch override in the app does not consult this state, so this is dead, unused state."
+    },
+    {
+      "id": "F15",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/walletKit.e2e.ts",
+      "line": 54,
+      "claim": "The hand-rolled JsonRpcResponseLike type is justified in a comment as avoiding a dependency on @walletconnect/jsonrpc-types, but @walletconnect/jsonrpc-utils is already a declared dependency and already used by production code, so the type could be derived from it at no extra dependency cost, making the stated justification inaccurate."
+    },
+    {
+      "id": "F16",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/__tests__/walletKit.e2e.test.ts",
+      "line": 43,
+      "claim": "No test verifies that a second call to respondSessionRequest overwrites the first, even though that last-write-wins behavior is the entire contract implied by the field name lastRequestResponse and matters because a single flow can produce multiple responses on one topic."
+    },
+    {
+      "id": "F17",
+      "file": "TestCtrls.e2e.tsx",
+      "line": 342,
+      "claim": "The setup failure should be surfaced as a marker (e.g. e2e-wc-setup-failed) via walletKitE2eState so flows can assertNotVisible it before proceeding, mirroring the existing rejectSessionCalled / lastRequestResponse side-channels."
+    },
+    {
+      "id": "F18",
+      "file": "proposeFetchMock.ts",
+      "line": null,
+      "claim": "The install-once, per-Metro-lifetime contract should be documented explicitly, or an uninstallProposeFetchMock() function should be exposed so tests running against the module in isolation can rebind fetch."
+    },
+    {
+      "id": "F19",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/walletKit.e2e.ts",
+      "line": 56,
+      "claim": "The hand-duplicated type already diverges from the real JsonRpcError shape by omitting error.data, and because the fake object is cast through unknown to IWalletKit, TypeScript cannot catch this or any future drift if the SDK's shape changes."
+    },
+    {
+      "id": "F20",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/walletKit.e2e.ts",
+      "line": 65,
+      "claim": "The comment claims that WcResponseIndicator surfaces the recorded response to Maestro via error-code/safeTxHash-match test-ids, but no such component exists anywhere in the repository, so the comment asserts something false."
+    },
+    {
+      "id": "F21",
+      "file": "walletConnectDappsSetup.ts",
+      "line": 66,
+      "claim": "The jittered value function relies on Date.now() combined with an incrementing jitterSeq to avoid zero and collisions; two flows starting within the same wall-clock millisecond and hitting the same jitterSeq value across module reloads could theoretically produce colliding values, though this is very unlikely in practice."
+    },
+    {
+      "id": "F22",
+      "file": "tx-send-happy.yml",
+      "line": null,
+      "claim": "extendedWaitUntil timeout values (e.g. 30000 for sign, 10000 for sheet) are duplicated across all five new Maestro flows, so a future CI-slowness adjustment would require editing every occurrence instead of a single shared value; a shared constants.yml or Maestro environment variables would consolidate these."
+    },
+    {
+      "id": "F23",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/walletKitE2eState.ts",
+      "line": 66,
+      "claim": "The lastRequestResponse field is currently written by the fake WalletKit but read by nothing except its own unit tests, so the stated purpose of letting tx-request flows assert exactly what was delivered is not yet achievable."
+    },
+    {
+      "id": "F24",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/walletKit.e2e.ts",
+      "line": 54,
+      "claim": "JsonRpcResponseLike hand-duplicates a type already exported by the installed @walletconnect/jsonrpc-utils dependency, which is already used elsewhere in this same feature, making the justification for avoiding a direct dependency invalid."
+    },
+    {
+      "id": "F25",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/__tests__/walletKit.e2e.test.ts",
+      "line": 48,
+      "claim": "The test hardcodes the topic literal 'e2e-session-topic' instead of using the exported E2E_SESSION_TOPIC constant that every other consumer in the codebase imports for this purpose, breaking the file's own established pattern and reducing readability."
+    },
+    {
+      "id": "F26",
+      "file": "TestCtrls.e2e.tsx",
+      "line": 342,
+      "claim": "The onPress handler calls setupWcDappsTx and only logs a caught error to console.error; since setupWcDappsTx awaits keyStorageService.storePrivateKey which can fail on a simulator due to biometrics or keychain issues, a rejection lets the flow proceed to synthTxRequest, producing a confusing downstream failure with no clear pointer back to the setup failure, and Maestro cannot observe console.error output."
+    },
+    {
+      "id": "F27",
+      "file": "WcResponseIndicator.tsx",
+      "line": 34,
+      "claim": "The useEffect has no dependency array, so it runs on every render; since hashes = Object.keys(outstanding) creates a fresh array each render, this causes unnecessary re-execution of the effect."
+    },
+    {
+      "id": "F28",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/walletKit.e2e.ts",
+      "line": 65,
+      "claim": "Comments reference a WcResponseIndicator component and associated test-ids (error-code, safeTxHash-match) that do not exist anywhere in the repository, making the documentation misleading since an adjacent, similarly-worded comment for a different field is actually accurate, giving readers no way to distinguish true documentation from aspirational documentation."
+    },
+    {
+      "id": "F29",
+      "file": "walletConnectDappsSetup.ts",
+      "line": 66,
+      "claim": "Consider sourcing the jitter from crypto.getRandomValues instead of Date.now() to remove the dependency on wall-clock time, which is also noted in the code comment as having a roughly 4.7 hour cycle."
+    }
+  ]
+}

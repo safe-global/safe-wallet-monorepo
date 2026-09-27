@@ -1,0 +1,89 @@
+{
+  "usage": {
+    "usd": 0.6690974,
+    "turns": 6,
+    "wallSeconds": 40
+  },
+  "issues": [
+    {
+      "findings": [
+        "F7",
+        "F17",
+        "F18",
+        "F19",
+        "F23",
+        "F24"
+      ],
+      "summary": "The floating-point tests use inputs whose ×1e9 products are already exact integers, and their expected values reuse the implementation's own formula, so removing Math.round would not fail any test.",
+      "label": "medium",
+      "evidence": "node shows 22.846685108*1e9=22846685108, 20.123456789*1e9=20123456789 and 25.5*1e9=25500000000, all exact integers (test lines 241-280). An input like 0.1*3 gives a fractional product. The rounding half of the fix (useDefaultGasPrice.ts:64-65,95) has no test protecting it."
+    },
+    {
+      "findings": [
+        "F5",
+        "F6",
+        "F8",
+        "F10",
+        "F11",
+        "F14",
+        "F15",
+        "F22"
+      ],
+      "summary": "The Number.isFinite guard accepts null, empty and whitespace strings (they coerce to 0) and negative values, so a 0n or negative gas price can win instead of falling back to the next oracle.",
+      "label": "low",
+      "evidence": "useDefaultGasPrice.ts:55-58 and 89-91 check only isFinite, and Number(null), Number('') and Number(' ') all equal 0. The old code also produced 0n for these inputs, so this is not a regression. Real oracles rarely return such values, which makes it a minor edge case in the changed lines."
+    },
+    {
+      "findings": [
+        "F3",
+        "F9"
+      ],
+      "summary": "The multiply, check, round and BigInt steps are repeated three times (lines 55-65 and 89-95) instead of being pulled into one helper.",
+      "label": "low",
+      "evidence": "useDefaultGasPrice.ts:55-65 and 89-95 repeat the same steps. A future fix, such as adding a positivity check, could easily reach only some of the copies."
+    },
+    {
+      "findings": [
+        "F2"
+      ],
+      "summary": "The tests replace global.fetch with a jest mock instead of using MSW as AGENTS.md asks.",
+      "label": "low",
+      "evidence": "useDefaultGasPrice.test.ts:41-50 assigns global.fetch = mockFetchFn. This departs from the documented MSW rule, though several other test files in the repo mock fetch the same way."
+    },
+    {
+      "findings": [
+        "F4",
+        "F12"
+      ],
+      "summary": "The test helpers build Chain, FeeData and the provider with type casts (as unknown as / as never) instead of the typed chainBuilder.",
+      "label": "low",
+      "evidence": "useDefaultGasPrice.test.ts:13-25 uses `as unknown as FeeData`, `as unknown as Chain` and `as never`, even though packages/utils/src/tests/builders/chains.ts exists. This is a small conflict with the repo's guidance to use builders and avoid type casts."
+    },
+    {
+      "findings": [
+        "F21"
+      ],
+      "summary": "An empty-string gweiFactor would coerce to 0 and silently turn every result into 0n.",
+      "label": "low",
+      "evidence": "useDefaultGasPrice.ts:55,89 use Number(gweiFactor), and Number('') is 0, which passes isFinite. gweiFactor comes from the config service and the behaviour predates the PR, so this is unlikely in practice."
+    },
+    {
+      "findings": [
+        "F1",
+        "F13"
+      ],
+      "summary": "The new utils tests repeat cases already covered in apps/web useGasPrice.test.ts, including the identical getTotalFee large-values case.",
+      "label": "nit",
+      "evidence": "apps/web/src/hooks/__tests__/useGasPrice.test.ts:61-212 and 334-337 already cover first oracle, fallback, fixed, fixed 1559 and large numbers. The extra tests cost little and sit in the package that owns the code."
+    },
+    {
+      "findings": [
+        "F16",
+        "F20"
+      ],
+      "summary": "Suggests exporting the parsing logic as a pure function so edge cases can be tested directly instead of through renderHook.",
+      "label": "nit",
+      "evidence": "parseEtherscanOracleResult and the conversion in fetchGasOracle (useDefaultGasPrice.ts:54,76) are not exported. Testing them through the hook works, so this is a design preference with no defect."
+    }
+  ]
+}

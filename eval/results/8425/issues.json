@@ -1,0 +1,143 @@
+{
+  "usage": {
+    "usd": 0.7315068,
+    "turns": 9,
+    "wallSeconds": 94
+  },
+  "issues": [
+    {
+      "findings": [
+        "F11",
+        "F19"
+      ],
+      "summary": "No test covers the SafeSelectorDropdown gating of overlay elevation/backdrop to isDropdownActuallyOpen (disabled / !canOpen cases).",
+      "label": "medium",
+      "evidence": "apps/web/src/features/spaces/components/SafeSelectorDropdown/index.tsx:103-104 adds `isDropdownActuallyOpen` and registers `useTopbarOverlayElevation`. No test in the diff references it (grep for useTopbarOverlayElevation/showBackdrop in tests finds nothing), so if the gating broke, the topbar could stay elevated with no backdrop and no test would fail."
+    },
+    {
+      "findings": [
+        "F9",
+        "F22"
+      ],
+      "summary": "The new useTopbarOverlayElevation / useIsTopbarAboveOverlay pair and the createElevationHooks refactor are not tested directly.",
+      "label": "low",
+      "evidence": "apps/web/src/hooks/__tests__/useTopbarElevation.test.ts only tests the modal pair. Both pairs come from the same factory (useTopbarElevation.ts:21-58), so the shared logic is partly exercised, but nothing checks that the two stores stay independent or that the overlay pair registers and unregisters."
+    },
+    {
+      "findings": [
+        "F13"
+      ],
+      "summary": "The showBackdrop prop on SelectContent has no test.",
+      "label": "low",
+      "evidence": "apps/web/src/components/ui/select.tsx:109-114 conditionally renders SelectPrimitive.Backdrop, and no test covers it. It is an opt-in, purely presentational branch, so the cost of a regression is small."
+    },
+    {
+      "findings": [
+        "F1",
+        "F14"
+      ],
+      "summary": "The stacked-logo crescent mask geometry is duplicated between an inline constant in SafeRowStats and the CSS-variable rule in NetworkLogosList.",
+      "label": "low",
+      "evidence": "SafeRowStats.tsx:15 hard-codes `radial-gradient(circle at 28px 50%, transparent 12.5px, black 13px)`, while NetworkLogosList/styles.module.css:13-24 parameterises the same shape and says in its comment that it replicates SafeRowStats. If one is tuned the other drifts, and that is a concrete maintenance cost. (Only the CSS comment points at the other copy, not both ways.)"
+    },
+    {
+      "findings": [
+        "F7"
+      ],
+      "summary": "The claim that the SafeRowStats mask comment has the wrong radius (should be 11px for 22px logos).",
+      "label": "wrong",
+      "evidence": "The mask is applied to the StatTooltip trigger, which is `size-6` (24px, SafeRowStats.tsx:79), and the ChainLogo wrapper is also `size-6`. So 24px width, 8px overlap, a 28px centre and a 12px radius are all correct for the masked element, even though the image inside is 22px."
+    },
+    {
+      "findings": [
+        "F15",
+        "F4",
+        "F8"
+      ],
+      "summary": "`span:not(:last-child)` masking combined with `flex-wrap: wrap` leaves a crescent cut on the last logo of each wrapped row. Uncapped consumers (ReviewStep, CounterfactualSuccessScreen) can wrap.",
+      "label": "low",
+      "evidence": "NetworkLogosList/styles.module.css:1-5 sets `flex-wrap: wrap`, and the new rule at :19 masks every non-last span, so a logo that ends a row but is not last keeps its cutout. ReviewStep/index.tsx:145 and CounterfactualSuccessScreen/index.tsx:122 pass uncapped lists. The PR's Risks section acknowledges this as a rare case, and the impact is cosmetic."
+    },
+    {
+      "findings": [
+        "F21"
+      ],
+      "summary": "Fallback SvgIcon chain logos (no <img>) are not masked, so the crescent gap is missing for them.",
+      "label": "low",
+      "evidence": "The mask selector targets `span:not(:last-child) > img` (styles.module.css:19), so an SVG fallback gets no cutout. The PR's Risks section acknowledges this, and it only matters when a logo fails to load."
+    },
+    {
+      "findings": [
+        "F5",
+        "F12"
+      ],
+      "summary": "Changing the global shadcn --accent to green changes the hover/focus highlight of every menu item app-wide.",
+      "label": "wrong",
+      "evidence": "shadcn.css:34/78 does change --accent, and dropdown-menu/select/context-menu/combobox use bg-accent. But the PR description's Blast radius section explicitly says '`--accent` change affects every shadcn component using accent (e.g. select/dropdown focus states) — now green-tinted instead of gray', so this is an intended, documented design change."
+    },
+    {
+      "findings": [
+        "F17"
+      ],
+      "summary": "The claim that `@container` (container-type: inline-size) on the header creates a stacking context, so the safe bar can't rise above the backdrop.",
+      "label": "wrong",
+      "evidence": "Under the current CSS Containment spec, container-type: inline-size applies style and inline-size containment, not layout containment. Neither creates a stacking context, and browsers ship it that way. The header (Topbar/index.tsx:95) has no position or z-index, so after .topbarAboveOverlay sets z-index:auto on the relative wrapper, the bar's `relative z-[calc(var(--z-overlay)+1)]` takes part in the root stacking context as intended."
+    },
+    {
+      "findings": [
+        "F2"
+      ],
+      "summary": "If the sticky .topbarElevated state and .topbarAboveOverlay were active together, sticky positioning would keep a stacking context and defeat the safe bar's lift.",
+      "label": "low",
+      "evidence": "PageLayout/styles.module.css:21-25 makes .topbarElevated `position: sticky`, and sticky always forms a stacking context, so `z-index: auto` at :31 would not dissolve it. That needs a tx-flow/recovery modal open at the same time as the safe-selector dropdown, which is unlikely in practice."
+    },
+    {
+      "findings": [
+        "F18"
+      ],
+      "summary": "The row-anchoring and right-alignment change in SpaceSafeContextMenu (and the transparent backdrop) applies to non-table consumers too.",
+      "label": "low",
+      "evidence": "SpaceSafeContextMenu.tsx:39 uses `closest('tr') ?? currentTarget`, and :82-83 force right alignment, while SafeListItem.tsx:83, MultiAccountItem.tsx:164 and SafeCardReadOnly.tsx:196 also render it. Outside a table the menu falls back to the button but is now right-aligned instead of left-aligned. The file path in the finding is wrong, but the effect is real and minor."
+    },
+    {
+      "findings": [
+        "F6"
+      ],
+      "summary": "The claim that SpaceSafeContextMenu has no test file.",
+      "label": "wrong",
+      "evidence": "apps/web/src/features/spaces/components/SafeAccounts/__tests__/SpaceSafeContextMenu.test.tsx exists and covers opening the menu and its items. The new code only changes anchoring and styling props, so the claim's premise is false."
+    },
+    {
+      "findings": [
+        "F3"
+      ],
+      "summary": "The new collapsed-sidebar logo tile styling in SidebarTopBar is not asserted in its tests.",
+      "label": "low",
+      "evidence": "SidebarTopBar/__tests__/SidebarTopBar.test.tsx:75-83 tests the collapsed state but not the new logo className branch (SidebarTopBar.tsx:31-38). The change is purely class-based styling, so a regression would be visual only."
+    },
+    {
+      "findings": [
+        "F10"
+      ],
+      "summary": "AccountInfo uses the raw palette class text-green-500 instead of a theme token.",
+      "label": "nit",
+      "evidence": "AccountInfo.tsx:28 uses `text-green-500`. The guidelines prefer theme tokens, but raw green-500 already appears about 10 times in apps/web/src, and this has no functional cost."
+    },
+    {
+      "findings": [
+        "F20"
+      ],
+      "summary": "The NetworkLogosList story decorator hard-codes rgba(0,0,0,0.05).",
+      "label": "nit",
+      "evidence": "NetworkLogosList.stories.tsx:87 is a Storybook-only decorator that imitates the pill background. It has no effect on production."
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "Edits to the shared shadcn primitives (select showBackdrop, sidebar icon/padding) may conflict with a design-system rewrite.",
+      "label": "unverifiable",
+      "evidence": "select.tsx:90 and sidebar.tsx:429/489 are changed. Whether this was coordinated with some other effort can't be settled from the code, and the showBackdrop prop defaults to off."
+    }
+  ]
+}

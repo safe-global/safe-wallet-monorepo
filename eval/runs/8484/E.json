@@ -1,0 +1,11 @@
+{
+  "pr": 8484,
+  "reviewSha": "09d2e26d2c4823d459e96ecedbcf505dfea5ddf0",
+  "baseSha": "7399f2d95ac0ae479b944e274c02bbd11887ba28",
+  "system": "E",
+  "version": "github",
+  "runner": "collect",
+  "model": "human",
+  "commentSha": "09d2e26d2c4823d459e96ecedbcf505dfea5ddf0",
+  "output": "[review by vmosharova]\nNice! A small change to double-check :) \n\n---\n\napps/web/src/hooks/useIsValidExecution.ts:101\nWe should also pass `token` here as a second parameter for GS012:\n`Not enough {token} to cover the network fee. Pay with {nativeAsset} instead.`"
+}

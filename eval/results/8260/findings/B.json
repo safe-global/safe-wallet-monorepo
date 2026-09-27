@@ -1,0 +1,55 @@
+{
+  "usd": 0.0898196,
+  "findings": [
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.tsx",
+      "line": 100,
+      "claim": "The tooltip trigger's `render` prop replaces the default focusable button with a plain `<span>`, so it has no role and is not in the tab order; since the change moved every network name except the three visible logos into that tooltip, keyboard users can no longer reach the rest of the network list at all."
+    },
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.tsx",
+      "line": 100,
+      "claim": "Screen readers only announce the three visible logos' alt text and the literal string \"+N\"; the remaining network names hidden behind the tooltip are not present in the accessibility tree."
+    },
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.tsx",
+      "line": 99,
+      "claim": "This tooltip/network-cluster block is a near-verbatim third copy of the same pattern already implemented in SpaceAddressBookTable.tsx and AccountItemChainBadge.tsx (same class string, same showHasMore/maxVisible usage, same tooltip body layout), and the absence of a shared component is why this copy silently diverged from the others on trigger focusability."
+    },
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.tsx",
+      "line": 100,
+      "claim": "The trigger's `origin-left scale-85` CSS transform duplicates an existing but suboptimal approach to resizing network logos; NetworkLogosList already exposes a purpose-built `imageSize` prop that other call sites use instead, so this scaling approach should eventually be replaced rather than propagated further."
+    },
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.test.tsx",
+      "line": 7,
+      "claim": "Both NetworkLogosList and ChainIndicator are replaced with stubs in the test suite, so the tests verify only prop plumbing rather than actual rendering; removing the tooltip trigger's focusability, or the `render` prop entirely, would still leave every test passing."
+    },
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.test.tsx",
+      "line": 71,
+      "claim": "The test asserting that every chain is passed to the cluster only checks that a data attribute splits into 5 entries, which is a strict subset of an earlier test's assertion, and the overflow-collapse behavior named in its description actually lives inside the mocked-out component, so the test doesn't cover what its name claims."
+    },
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.test.tsx",
+      "line": 78,
+      "claim": "The tooltip test sets the known chain IDs equal to the mock safe app's chain IDs, so it cannot detect whether the tooltip body would render unfiltered chains; the filtering logic is covered for the visible cluster but not for the tooltip."
+    },
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.test.tsx",
+      "line": 8,
+      "claim": "The test mock's props are typed as `any`, conflicting with the root AGENTS.md rule against using the `any` type and its guidance to properly type test helpers; the repo already has a fully typed mock of the same module elsewhere that this could have copied."
+    },
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.tsx",
+      "line": 42,
+      "claim": "The new code discards the `loading` flag returned by useChains(), so while chain configs are still being fetched every chain ID is filtered out of an empty array, and the drawer renders the same empty \"Available networks\" box it would show for a safe app with genuinely no supported networks; the previous implementation showed a loading skeleton in that state instead, and a new test now locks in the empty render as expected behavior."
+    },
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer",
+      "line": null,
+      "claim": "The component directory has no SafeAppPreviewDrawer.stories.tsx even though apps/web/AGENTS.md requires a story per component; a story would be especially useful here since it could show the overflow (3-vs-N), empty, and tooltip states that the current mock-based tests cannot exercise."
+    }
+  ]
+}

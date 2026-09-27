@@ -1,0 +1,35 @@
+{
+  "usd": 0.0639776,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/PolicySummary/PolicySummary.stories.tsx",
+      "line": 72,
+      "claim": "The stories file includes `loaders: [mswLoader]` in the meta object along with an unused top-level import of mswLoader, but this loader is already applied globally in preview.tsx, so the addition is redundant and should be removed."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/LimitSummaryRow.tsx",
+      "line": 16,
+      "claim": "safeParseUnits unconditionally calls console.error inside its catch block, and since toDisplayAmount runs on every render, a legitimate case such as a typed amount with more precision than the token's decimals will spam the console on every re-render, including for every row in a list; the existing test silences console.error to work around this, which is itself a sign the error is expected rather than a fault and should not be logged."
+    },
+    {
+      "file": "index.tsx",
+      "line": 18,
+      "claim": "List keys combine a stable identifier with the array index (e.g. `${spender.address}-${index}` and `${limit.token.address}-${index}`), which is redundant since spender.address is already guaranteed unique; mixing an index into an otherwise-unique key causes unnecessary remounts when a row's position changes and represents the worst of both approaches."
+    },
+    {
+      "file": "SpenderSummaryCard.tsx",
+      "line": 38,
+      "claim": "The list key `${limit.token.address}-${index}` mixes a token address with the array index; if a token address could ever repeat, indexing still causes remounts on reorder, so either the pure address or the pure index should be used, not both."
+    },
+    {
+      "file": "copy.ts",
+      "line": 46,
+      "claim": "Calling describePolicy with an empty spenders array produces the ungrammatical string \"You are giving spending limits.\"; although this is effectively dead code in practice, if it ever surfaces it will look like a bug, so it should either return an empty string/no title or short-circuit with a neutral sentence."
+    },
+    {
+      "file": "SpenderSummaryCard.tsx",
+      "line": 9,
+      "claim": "AVATAR_SIZE is hard-coded to 24 in SpenderSummaryCard.tsx and TOKEN_ICON_SIZE is separately hard-coded to 24 in LimitSummaryRow.tsx for the same visual role (a small round icon in a summary row), which is accidental duplication worth noting if a spacing pass ever unifies these values."
+    }
+  ]
+}

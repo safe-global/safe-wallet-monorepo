@@ -1,0 +1,35 @@
+{
+  "usd": 0.0620516,
+  "findings": [
+    {
+      "file": "apps/web/src/components/common/AccountItemContent.tsx",
+      "line": null,
+      "claim": "The PR's goal is DRY, but the same address+copy-button block is duplicated across at least seven consumer components (AccountItemContent.tsx, AccountWidgetItem.tsx, SingleAccountItem.tsx, MultiAccountItem.tsx, SingleSafeRow.tsx, MultichainSafeRow.tsx, SafeCardLayout.tsx, SafeCardReadOnly.tsx) instead of being extracted into a shared wrapper component, and the Security Hub rows use MUI Typography while the others use shadcn Typography, so this styling drift will worsen over time."
+    },
+    {
+      "file": "apps/web/src/components/common/SafeCardLayout.tsx",
+      "line": 47,
+      "claim": "SafeCardLayout wraps the row in a <button type=\"button\" role=\"checkbox\"> that now contains CopyAddressIconButton, which itself renders <span role=\"button\" tabIndex={0}>, creating nested interactive ARIA roles inside a single interactive element, which is invalid ARIA and can confuse assistive technology; this should be verified with a screen reader or the checkbox affordance should be moved out of the outer button."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "Every account row now gains a new tabIndex={0} element for the copy button, adding an extra tab stop per row in long lists such as My accounts V2, Security Hub table, and Spaces dashboard, so the keyboard navigation experience on these lists should be confirmed as acceptable."
+    },
+    {
+      "file": "apps/web/src/components/common/CopyAddressIconButton/index.test.tsx",
+      "line": 33,
+      "claim": "The keyboard handler test only covers the Enter key, but the component (index.tsx:14) also handles the Space key, so a Space key test case should be added."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "No unit tests were added for SingleSafeRow, MultichainSafeRow, SingleAccountItem, AccountItemContent, AccountWidgetItem, or SafeCardReadOnly even though each gained a new interactive child element, leaving a coverage gap that a simple per-surface test (copy button is present and does not trigger the row click) would address."
+    },
+    {
+      "file": "apps/web/src/components/common/AccountsWidget.test.tsx",
+      "line": 85,
+      "claim": "AccountsWidget.test.tsx redefines navigator.clipboard inline while CopyAddressIconButton/index.test.tsx and MultiAccountItem.test.tsx set it up via beforeAll, creating inconsistency that could be resolved with a shared helper in tests/test-utils."
+    }
+  ]
+}

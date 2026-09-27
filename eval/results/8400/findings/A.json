@@ -1,0 +1,50 @@
+{
+  "usd": 0.0686476,
+  "findings": [
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/decodeLogs.ts",
+      "line": 42,
+      "claim": "The bare catch block in decodeOne collapses three different outcomes into a single null return: an unrecognized topic0, a log with no topics, and a log whose topic0 is recognized but whose payload fails to parse. Only the first two are benign, so a genuine decode failure on a recognized event (e.g. an OracleResult(approved: false) log corrupted by ABI drift or a truncated RPC response) is silently dropped, causing hasNegativeVerdict to return false and the check to resolve as IN_PROGRESS/TIMED_OUT instead of MALICIOUS, with no logging, counter, or returned drop count to signal the failure."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/deriveCheckState.ts",
+      "line": 88,
+      "claim": "The plain-attested branch has an identical body to the oracle-attested branch because attestation is a single value for the whole check rather than per-event, so both branches always produce the same result; the accompanying comment claims an ordering precedence ('oracle branch wins') that can never actually be observed given the current inputs, making the structure misleading dead code."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/deriveCheckState.ts",
+      "line": 71,
+      "claim": "The JSDoc precedence table states that step 5 falls through to SUBMITTED, but the implementation returns SUBMITTED only when hasAnyProposal is true and otherwise returns UNAVAILABLE, so the documented contract does not match the code; the table also omits the plain-attested branch (step 2b) even though it is a path the live beta actually emits."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/types/status.ts",
+      "line": 32,
+      "claim": "UNAVAILABLE is documented as meaning the reader could not determine state due to an RPC/config failure, but deriveCheckState now also returns UNAVAILABLE for the ordinary case of a transaction having no Safenet check at all, conflating two different situations; mergeMonotonic.ts:66 treats every incoming UNAVAILABLE as transient and ignorable based on the RPC-failure reading, which is inconsistent with the second use."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/types/status.ts",
+      "line": 52,
+      "claim": "toPublicStatus contains new branch logic with an explicitly security-relevant contract (an untrusted attestation must be treated as not-completed, never as safe), but unlike every other unit in the diff it has no dedicated test file, so deleting the VERIFICATION_FAILED to TIMED_OUT mapping or changing it to return BENIGN would break no test."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/types/snapshot.ts",
+      "line": 13,
+      "claim": "SafenetCheckSnapshot.chainId is documented as the Safenet chain the Consensus contract lives on, but the chainId field on the decoded events it is built from actually represents the Safe's home chain (confirmed by a test fixture pinning a home chain of 42161 for a Safe checked on Gnosis beta), so the obvious way to populate the snapshot field (chainId: proposedEvent.chainId) would silently produce the wrong chain value; the two same-named fields should be renamed to distinguish them before any consumer is built on top of this."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/deriveCheckState.ts",
+      "line": 78,
+      "claim": "deriveCheckState reads only attestation.status and never correlates attestation.signatureId with the signatureId of the specific event it is meant to attest, even though AttestationVerification carries signatureId and message precisely to identify which attestation was verified; since events and attestation are independent arguments, a caller that supplies a VERIFIED result computed for a different or stale (e.g. post-reorg) attestation would get BENIGN, the only safe/green state, without any check catching the mismatch."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/mergeMonotonic.ts",
+      "line": 67,
+      "claim": "The lookup ALLOWED_TRANSITIONS[pinned] is unguarded, and although TypeScript enforces valid keys within this PR, pinned is a previously-persisted status intended to live in Redux, so a rehydrated value from an older build with a renamed enum member could hit an inherited key (e.g. toString/constructor), causing ALLOWED_TRANSITIONS[unknownKey].includes(...) to throw a TypeError; using ?? [] or a Map/null-prototype object would prevent this."
+    },
+    {
+      "file": "docs/engineering/pr-self-review-checklist.generated.md",
+      "line": null,
+      "claim": "This generated checklist file is not listed in .gitignore even though the skill's own schema requires it to be, so the file is currently untracked and shows up in git status; it should be deleted or its path added to .gitignore so future review runs do not leak it into commits."
+    }
+  ]
+}

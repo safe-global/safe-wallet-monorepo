@@ -1,0 +1,85 @@
+{
+  "usd": 0.0687916,
+  "findings": [
+    {
+      "file": "apps/web/src/services/observability/providers/__tests__/datadog.test.ts",
+      "line": 401,
+      "claim": "The 'keeps a plain Error whose message merely mentions eval' test uses a first-party stack, so it passes regardless of whether the EvalError type check is present, meaning the type check itself is not actually verified."
+    },
+    {
+      "file": "apps/web/src/services/observability/providers/__tests__/datadog.test.ts",
+      "line": 412,
+      "claim": "The 'keeps other reserved-name errors (TypeError, RangeError)' test also uses a first-party stack, so the stack check alone makes it pass without exercising the EvalError type condition."
+    },
+    {
+      "file": "apps/web/src/services/observability/providers/datadog.ts",
+      "line": 111,
+      "claim": "If the 'errorEvent.error.type === \"EvalError\" &&' condition were removed from isCspBlockedEval, all five new tests would still pass, so the filter could silently drop every non-EvalError error from a third-party or stackless source without any test catching it."
+    },
+    {
+      "file": "apps/web/src/services/observability/providers/__tests__/datadog.test.ts",
+      "line": 401,
+      "claim": "The Error, TypeError, RangeError and undefined test cases should use a third-party stack (e.g. googletagmanager.com/gtm.js) or no stack at all, so that only the type check can cause them to be kept, properly covering the EvalError type condition."
+    },
+    {
+      "file": "apps/web/src/services/observability/providers/__tests__/datadog.test.ts",
+      "line": 397,
+      "claim": "The five new tests each add a '{} as any' context argument, increasing the file's total any-casts from 16 to 21, which conflicts with the project rule against using the any type or any type assertions."
+    },
+    {
+      "file": "apps/web/src/services/observability/providers/__tests__/datadog.test.ts",
+      "line": 288,
+      "claim": "The file already has a typed alternative pattern, 'const resourceContext = {} as RumEventDomainContext', that could be reused instead of the untyped any casts."
+    },
+    {
+      "file": "apps/web/src/services/observability/providers/__tests__/datadog.test.ts",
+      "line": 409,
+      "claim": "This new test also uses a '{} as any' context argument instead of a typed alternative."
+    },
+    {
+      "file": "apps/web/src/services/observability/providers/__tests__/datadog.test.ts",
+      "line": 421,
+      "claim": "This new test also uses a '{} as any' context argument instead of a typed alternative."
+    },
+    {
+      "file": "apps/web/src/services/observability/providers/__tests__/datadog.test.ts",
+      "line": 433,
+      "claim": "This new test also uses a '{} as any' context argument instead of a typed alternative."
+    },
+    {
+      "file": "apps/web/src/services/observability/providers/__tests__/datadog.test.ts",
+      "line": 444,
+      "claim": "This new test also uses a '{} as any' context argument instead of a typed alternative."
+    },
+    {
+      "file": "apps/web/src/services/observability/providers/datadog.ts",
+      "line": 72,
+      "claim": "About 38 lines of comments surround two small predicates that are each only 2-3 lines long, which is excessive given the project convention that code comments should be treated as tech debt."
+    },
+    {
+      "file": "apps/web/src/services/observability/providers/datadog.ts",
+      "line": 83,
+      "claim": "The comment mentioning 'grepped apps/web/src and packages/' is PR narration rather than lasting guidance and will go stale over time."
+    },
+    {
+      "file": "apps/web/src/services/observability/providers/datadog.ts",
+      "line": 76,
+      "claim": "The comment stating 'We ship no eval()/Function() call of our own today' is PR narration rather than lasting guidance and will go stale over time."
+    },
+    {
+      "file": "apps/web/src/services/observability/providers/datadog.ts",
+      "line": 95,
+      "claim": "The rationale for the filtering behavior is repeated three times across isNotFirstPartyStack, isCspBlockedEval, and the filterRumEvent JSDoc, which is redundant."
+    },
+    {
+      "file": "apps/web/src/services/observability/providers/datadog.ts",
+      "line": 157,
+      "claim": "Nearby helper functions originatesFromExtension and isKnownNoise have no JSDoc at all, creating an inconsistency with the heavily commented predicates elsewhere in the file."
+    },
+    {
+      "file": "apps/web/src/services/observability/providers/datadog.ts",
+      "line": 72,
+      "claim": "The comments should be reduced to a single short JSDoc on isCspBlockedEval covering what is dropped, the first-party exception, and WA-2952, with the dev/Cypress 'unsafe-eval' trade-off moved to the PR description instead of left in code."
+    }
+  ]
+}

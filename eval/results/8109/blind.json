@@ -1,0 +1,79 @@
+{
+  "pr": 8109,
+  "title": "fix(web/Spaces): disable CF safes in Swap popup; new Logout btn; add redirect after leaving workspace; minor UI fixes",
+  "description": "> Spaces gets a logout door,<br>swap greys out the un-deployed,<br>kicked members land safe home.\n\n## What it solves\n\nResolves: [WA-2563](https://linear.app/safe-global/issue/WA-2563/swaptx-builder-counterfactual-unactivated-safes-should-be-disabled-in)<br>Resolves: [WA-2568](https://linear.app/safe-global/issue/WA-2568/workspace-user-stays-on-workspace-pages-after-leaving-should-redirect)<br>Resolves: [WA-2569](<https://linear.app/safe-global/issue/WA-2569/empty-workspace-screen-no-account-menu-or-sign-out-option-user-is>)<br><br>Several small UX/correctness issues in the Spaces (workspaces) area:\n\n* Users with **no workspaces** had no way to log out from the workspaces overview list.\n* The **swap** action in the Safe selector popup offered un-deployed (counterfactual) Safes, which can't swap.\n* Members who **lose access** (declined invite / unauthorized) to a workspace saw an `Unauthorized` screen instead of being returned to the overview.\n* The Safe selector dropdown copy was unclear when no wallet is connected.\n* `SpaceBackLink` typed its `space` prop with an invented `{ id: number; name: string }` shape instead of the generated gateway type.\n* Removes leftovers from numeric spaceId\n\n## How this PR fixes it\n\n* **AuthState**: derive `hasLostAccess` (signed-in, not loading, and unauthorized or declined) and `router.replace` to the spaces overview when it becomes true, instead of rendering `UnauthorizedState` in place.\n* **SelectSafeModal**: replace the boolean `isSwapDisabledForSafe` with `getSwapDisabledTooltip`, which now also disables un-deployed Safes (`selectUndeployedSafes`) with a dedicated \"This account is not activated yet and cannot swap.\" tooltip.\n* **SpacesList**: always render the header action row for signed-in users so the logout button is reachable even when `activeSpaces` is empty (spacer `<div />` stands in for the Add button).\n* **SpaceBackLink**: type the `space` prop as `Pick<GetSpaceResponse, 'name'>`, dropping the unused numeric `id`.\n* Removes leftovers from numeric spaceId\n\n## How to test it\n\n1. Sign in with an account that has **no workspaces** → confirm a logout control is visible on the overview and works.\n2. Open the **Safe selector → Swap**: un-deployed Safes are disabled with the \"not activated yet\" tooltip; unsupported-chain Safes keep the existing \"Swap is not supported on this chain\" tooltip.\n3. As a member, get **declined / removed** from a workspace you're viewing → you're redirected to the spaces overview, not shown `Unauthorized`.\n4. Open the Safe selector with **no wallet connected** → confirm the updated wording.\n\n## Affected flows\n\n* Workspaces overview for users with zero workspaces (logout entry point).\n* Swap action from the Safe selector modal.\n* Workspace member access loss (declined invite / unauthorized) while viewing a workspace.\n\n## Blast radius\n\n* `AuthState` (`features/spaces/components/AuthState`) — wraps workspace-scoped views; now performs a navigation side-effect on access loss. Consumers relying on the in-place `UnauthorizedState` render will instead see a redirect.\n* `SelectSafeModal` (`features/spaces/components/SelectSafeModal`) — reads `selectUndeployedSafes` from the store; disable logic for swap changed from boolean to tooltip-string.\n* `SpacesList` header layout — markup change for signed-in users with no spaces.\n* `SpaceBackLink` prop type now depends on `GetSpaceResponse` (`@safe-global/store` AUTO_GENERATED) — callers passing a numeric `id` are unaffected (extra prop), callers relying on `id` being read are not.\n* No RTK Query endpoint, feature flag, route, or persistence changes. No shared-package (mobile) impact.\n\n## Risks / not checked\n\n* Did not exercise the access-loss redirect against every error variant — covered unauthorized + declined paths via unit tests.\n\n## Visual summary\n\nSign Out btn when 0 spaces (case: user is invited to a Space and logged themvelsev in): <img src=\"https://uploads.linear.app/cf187dcd-b206-4218-b688-803174268fff/50cf3821-4c4f-4750-9d45-f8de00cc2918/f9181b9c-0aaa-4b5a-80e4-1712d5342b86?signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXRoIjoiL2NmMTg3ZGNkLWIyMDYtNDIxOC1iNjg4LTgwMzE3NDI2OGZmZi81MGNmMzgyMS00YzRmLTQ3NTAtOWQ0NS1mOGRlMDBjYzI5MTgvZjkxODFiOWMtMGFhYS00YjVhLTgwZTQtMTcxMmQ1MzQyYjg2IiwiaWF0IjoxNzgxNTEwODk4LCJleHAiOjE4MTMwODE0NTh9.GMWtQ9yqkgfETOk0jCxhp5ldaETfybBSJ1pUadNb0DI \" alt=\"image\" width=\"908\" data-linear-height=\"700\" />\n\nCF Safes disabled from the Swap popup: <img src=\"https://uploads.linear.app/cf187dcd-b206-4218-b688-803174268fff/59cae11c-39dd-4973-8a96-5541ff443101/b854f791-a922-4a07-a06f-feeb15d861fa?signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXRoIjoiL2NmMTg3ZGNkLWIyMDYtNDIxOC1iNjg4LTgwMzE3NDI2OGZmZi81OWNhZTExYy0zOWRkLTQ5NzMtOGE5Ni01NTQxZmY0NDMxMDEvYjg1NGY3OTEtYTkyMi00YTA3LWEwNmYtZmVlYjE1ZDg2MWZhIiwiaWF0IjoxNzgxNTEwODk4LCJleHAiOjE4MTMwODE0NTh9.nshorDyilRpXU2kfB9hsz9PoYklDvUHCRn2R8XSn3bY \" alt=\"image\" width=\"597\" data-linear-height=\"610\" />\n\n```mermaid\nflowchart TD\n  A[AuthState mounts] --> B{Signed in & not loading?}\n  B -->|No| L[LoadingState / SignedOutState]\n  B -->|Yes| C{Unauthorized or Declined?}\n  C -->|Yes| R[router.replace → spaces overview]\n  C -->|No| K[Render children]\n\n  subgraph Swap selector\n    S[Safe in list] --> T{Swap supported on chain?}\n    T -->|No| U[Disabled: not supported on chain]\n    T -->|Yes| V{Safe deployed?}\n    V -->|No| W[Disabled: not activated yet]\n    V -->|Yes| X[Enabled]\n  end\n```\n\n## Checklist\n\n- [X] I've tested the branch on mobile 📱\n- [X] I've documented how it affects the analytics (if at all) 📊\n- [X] I've written a unit/e2e test for it (if applicable) 🧑‍💻\n- [X] I've listed affected flows and blast radius, and named what I did not verify 🎯\n- [ ] For web feature/bugfix PRs, I've added a Playwright one-shot happy-path clickthrough under apps/web/e2e/tests/one-shots/ and run it locally — CI records and posts the clickthrough GIF 🎬\n\n---\n\n## CLA signature\n\nWith the submission of this Pull Request, I confirm that I have rea",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/features/spaces/components/AuthState/index.tsx",
+      "line": 33,
+      "claim": "The hasLostAccess flag is true for any 401 or 404 response from the space query and for any declined member, so the new router.replace to the spaces list also fires when a user opens a shared space link with the wrong wallet and was never a member, when the space ID is mistyped or the space was deleted, or when the backend returns 401 for an expired session while Redux still thinks the user is signed in. In these cases the user previously saw UnauthorizedState explaining the problem, but is now silently redirected with no explanation, effectively making UnauthorizedState dead code, and the name hasLostAccess suggests a narrower meaning than what it actually covers."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/features/spaces/components/SelectSafeModal/__tests__/index.test.tsx",
+      "line": 60,
+      "claim": "initialReduxState is typed with `as never`, which switches off type checking of the store shape and could hide drift in the safeActionsModal and undeployedSafes state, since the cfState helper builds an untyped object; it should instead be typed as Partial<RootState> with a real UndeployedSafe shape or a small typed helper."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/SafeDropdownContainer.tsx",
+      "line": 109,
+      "claim": "The nested ternary inside the JSX is hard to read and would be clearer as a named value (e.g. an emptyMessage variable) computed before the return statement."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/features/spaces/components/SpacesList/index.tsx",
+      "line": 241,
+      "claim": "An empty div is used only to preserve justify-between layout; applying ml-auto to the AccountInfo wrapper would achieve the same layout without the placeholder element."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/features/spaces/components/AuthState/index.tsx",
+      "line": 41,
+      "claim": "router.replace(AppRoutes.welcome.spaces) runs inside a useEffect without being awaited or caught, so a rejected navigation would surface as an unhandled rejection; it should be fixed with a .catch(() => {}) or an awaited IIFE with try/catch."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/SafeDropdownContainer.tsx",
+      "line": 111,
+      "claim": "Inside a space, the dropdown lists the space's Safes rather than wallet-owned ones, but the empty-list message tells the user to connect a wallet to find their Safe Accounts; a user signed in by email with no wallet in a one-Safe space sees this message even though connecting a wallet would not change the list."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/features/spaces/utils.ts",
+      "line": 13,
+      "claim": "isUnauthorized treats both 401 and 404 as unauthorized, which feeds into the overly broad hasLostAccess redirect condition described for AuthState/index.tsx."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/src/features/spaces/components/AuthState/index.tsx",
+      "line": null,
+      "claim": "UnauthorizedState still renders briefly until the redirect finishes, and it should be confirmed whether this brief flash is intended."
+    },
+    {
+      "id": "F9",
+      "file": "apps/web/src/features/spaces/components/AuthState/index.tsx",
+      "line": 33,
+      "claim": "Three visible behaviour changes (redirect to /welcome/spaces instead of staying on UnauthorizedState, undeployed Safes disabled for swap with new tooltip copy, and a new empty-state message when no wallet is connected) are not tied to a named product/design decision in the PR description; the ticket or design should be linked."
+    },
+    {
+      "id": "F10",
+      "file": "apps/web/src/features/spaces/components/SelectSafeModal/__tests__/index.test.tsx",
+      "line": 10,
+      "claim": "The SafeItem fixtures (deployedSafe, cfSafe) and chain configs (chainWithSwap, chainWithoutSwap) are hand-written with fixed addresses instead of using the existing safeItemBuilder() and chainBuilder() test builders, which would fix only the fields under test and randomise the rest."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/__tests__/SafeDropdownContainer.test.tsx",
+      "line": 90,
+      "claim": "The new empty-state tests render the container with items={[]}, an input the production code never passes since the parent only renders this container when the list still contains the already-selected item; the actual case that occurs in the app, one item that is the selected one plus no wallet, is left untested."
+    },
+    {
+      "id": "F12",
+      "file": "apps/web/src/features/spaces/components/AuthState/index.test.tsx",
+      "line": 142,
+      "claim": "The new test redirects on a 404 response, which locks in the overly broad redirect behaviour rather than testing the narrower intended case, and there is no test covering the wrong-wallet deep-link flow."
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "usd": 0.0596836,
+  "findings": [
+    {
+      "file": "apps/web/src/services/contracts/__tests__/safeContracts.test.ts",
+      "line": 78,
+      "claim": "A duplicate copy of the isMigrationToL2Possible test suite in the web app was not updated to match the new nonce/version logic. Since safeInfoBuilder() pins version '1.4.1' and the SafeMigration 1.4.1 deployment resolves for chain '10', the case with nonce: 2 and chainId: '10' now actually returns true but is asserted with toBeFalsy(), causing the test to fail and contradicting its own title."
+    },
+    {
+      "file": "packages/utils/src/services/contracts/safeContracts.ts",
+      "line": 63,
+      "claim": "When the gateway reports a null version for a Safe with an unknown mastercopy, the new version guard causes isMigrationToL2Possible to return false where nonce-0 Safes previously returned true. The web app is unaffected because of a separate bytecode-comparison fallback, but the security scanner and mobile Settings screen have no such fallback and will silently stop showing migrate guidance in this case."
+    },
+    {
+      "file": "apps/web/src/features/security/data/scanners/__tests__/contractVersion.test.ts",
+      "line": 30,
+      "claim": "isMigrationToL2Possible is fully mocked in this test, so there is no coverage for the behavioral change in contractVersion.ts regarding which fields (version vs nonce) get forwarded to it; reverting the field passed would not cause any test to fail."
+    },
+    {
+      "file": "apps/web/src/features/security/data/scanners/contractVersion.ts",
+      "line": 51,
+      "claim": "The code uses a double cast (as Pick<SafeState, 'version' | 'chainId'> as SafeState) plus an explanatory comment only because the helper function requires a full SafeState parameter type that it does not actually read; narrowing the parameter type to the Pick would remove the need for both casts and the comment."
+    },
+    {
+      "file": "packages/utils/src/services/contracts/__tests__/safeContracts.test.ts",
+      "line": 55,
+      "claim": "Two instances of a typeof === 'boolean' non-assertion pattern remain in the canMigrateUnsupportedMastercopy test block, in the same file where the analogous pattern was correctly replaced in the isMigrationToL2Possible tests, even though these tests rely on the same getSafeMigrationDeployments lookup whose semantics changed; as a result, tests titled 'should return true' pass even when the actual value is false."
+    }
+  ]
+}

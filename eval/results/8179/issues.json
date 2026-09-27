@@ -1,0 +1,42 @@
+{
+  "usage": {
+    "usd": 0.40628279999999994,
+    "turns": 7,
+    "wallSeconds": 38
+  },
+  "issues": [
+    {
+      "findings": [
+        "F2",
+        "F3"
+      ],
+      "summary": "Long notes are shown untruncated in the nonce dropdown, which has no width limit",
+      "label": "low",
+      "evidence": "TxNonce/index.tsx:70-81 renders the trimmed note in full. CustomPopper (line 34-39) deliberately doesn't match the field width, and styles.module.css sets no max-width. TxSummary/index.tsx:85-86 uses ellipsis(tx.note, 25) plus a title tooltip. Notes are capped at 60 characters in the input (TxNoteInput:6), so the result is a wider dropdown, which is a minor layout issue."
+    },
+    {
+      "findings": [
+        "F4"
+      ],
+      "summary": "A free-text note written by the proposer replaces the decoded or human description instead of being shown next to it",
+      "label": "low",
+      "evidence": "TxNonce/index.tsx:70-72 puts note ahead of humanDescription and the type label. The PR says this is intended (per issue #7517), while TxSummary:82-88 shows the note next to TxType. A misleading note could hide what the queued tx does in this informational label, but no funds move from this choice, so the risk is minor."
+    },
+    {
+      "findings": [
+        "F5"
+      ],
+      "summary": "The note is shown without checking the TX_NOTES feature flag",
+      "label": "wrong",
+      "evidence": "The claim that other places render notes only through the flag-gated tx-notes feature is false. TxSummary/index.tsx:84-86 renders tx.note directly with no flag check, so this ungated use matches existing behaviour."
+    },
+    {
+      "findings": [
+        "F1"
+      ],
+      "summary": "The commit is unsigned",
+      "label": "unverifiable",
+      "evidence": "`git log --format=%G?` returns N for HEAD, so the commit is unsigned. Whether signing is required to merge depends on the repo's branch-protection settings, which the code can't show, and it isn't a code defect."
+    }
+  ]
+}

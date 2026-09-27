@@ -1,0 +1,11 @@
+{
+  "pr": 8108,
+  "reviewSha": "3e3e650e5469af52d8ddf47f113648f56c452cef",
+  "baseSha": "682bd0ecd87f80a69723cc8cd61cb805e230196f",
+  "system": "E",
+  "version": "github",
+  "runner": "collect",
+  "model": "human",
+  "commentSha": "3e3e650e5469af52d8ddf47f113648f56c452cef",
+  "output": "[review by vseehausen]\nGreat PR that consolidates the design and is a step towards the new design system. \n\nI added a few comments that will make the design system even more consistent in the future.\n\n---\n\napps/web/src/features/spaces/components/Members/index.tsx:21\nWe should not rely on hooks for dark mode, ideally. Dark mode should be set globally and then affed stylesheets.\n\n---\n\napps/web/src/features/spaces/components/Members/index.tsx:34\nLet's use only variants and sizes, no custom styling on standard components.\n\n---\n\napps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx:64\nThe font-bold/line-through/duplicate-dimming is data-specific and fine at the call site. But column.className is applied to headers only — body cells are hand-rendered, so every caller re-implements column layout. Consider per-column cell renderers so the table owns structural styling for both header and body.\n\n---\n\napps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx:109\nSame here, this should be done by `renderRow` at the Table component."
+}

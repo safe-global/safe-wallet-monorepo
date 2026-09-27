@@ -1,0 +1,11 @@
+{
+  "pr": 8646,
+  "reviewSha": "5636a0acfc08b591751c6839240c24821055f9b4",
+  "baseSha": "9060a3519d5bcd3b747405c42caef89963d28ec8",
+  "system": "E",
+  "version": "github",
+  "runner": "collect",
+  "model": "human",
+  "commentSha": "32c7b6b9326186edf6f481d3ec32de4b58e8a484",
+  "output": "[review by clovisdasilvaneto]\nJust as a suggestion, lets move the safe-scope folder to be inside spaces."
+}

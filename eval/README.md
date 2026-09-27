@@ -84,7 +84,10 @@ eval/
   README.md    this spec
   prs.json     PR number, review SHA, base SHA
   run.sh       runs A and B for one PR
-  runs/<pr>/   A.json, B.json (added by devs)
+  runs/<pr>/   A.json, B.json (added by devs); C.json, E.json (collected from GitHub)
+  judge/       collect.js → extract.js → blind.js → judge.js → metrics.js
+  results/<pr>/  findings/<system>.json, blind.json, key.json, issues.json
+  results/summary.json  scores per reviewer and combination
 ```
 
-Judging scripts and results are added centrally once the runs are in.
+Judging runs centrally, in the order listed under `judge/`. Each step skips PRs it has already done.

@@ -1,0 +1,79 @@
+{
+  "pr": 8363,
+  "title": "fix(web): surface address-poisoning flags on trusted rows in onboarding Select Safe accounts [WA-2912]",
+  "description": "## What it solves\r\n\r\nResolves: [WA-2912](https://linear.app/safe-global/issue/WA-2912/add-address-poisoning-protection-to-onboarding-select-safe-accounts)\r\n\r\nOn space onboarding **Step 2 — Select Safe accounts**, look-alike detection already ran over the combined trusted+owned pool, but the result was filtered to owned rows only (\"a safe the user trusted at some point is treated as vetted\"). When the impostor of a look-alike pair is already pinned, both rows land in **My accounts** and the entire defence goes silent: no banner, no \"High similarity\" badge, no selection confirmation — exactly the scenario QA reproduced.\r\n\r\n\"Trusted = real\" is the presumption a successful poisoning attack breaks (the victim pins the impostor), so the intra-list warning must mark the whole pair, not just the unpinned side.\r\n\r\n## How this PR fixes it\r\n\r\n- `useOnboardingSafes`: drop the owned-only post-filter and return the full `useSimilarityClusters` flag set (`flaggedAddresses`). Detection input is unchanged (same combined pool, now mapped directly from `allSafes`).\r\n- `OnboardingSafesList`: pass `flaggedAddresses` to **both** section tables; hoist the \"Verify before you trust\" banner above the sections, rendered when any row is flagged.\r\n- `useOnboardingSelection`: unchanged confirm-gate now naturally covers trusted rows — selecting any flagged row opens `SimilarityConfirmDialog` first.\r\n- Bonus: on **workspace → Safe accounts**, the \"Similar addresses detected\" alert sat flush against the table (no spacing); wrapped both in the same `flex-col gap-4` used by the onboarding list.\r\n\r\nThis matches the semantics of the \"Manage trusted Safes\" modal, which uses the same `useSimilarityClusters` hook without an owned-only filter.\r\n\r\n## How to test it\r\n\r\n1. Pin two Safes whose addresses share the first 4 or last 4 hex chars (e.g. `0xABCD…1234` and `0xABCD…ffff`), so both appear under **My accounts**.\r\n2. Start space onboarding and go to Step 2 — expect: banner at the top of the list, \"High similarity\" badge on both rows, and a confirmation dialog when selecting either.\r\n3. Unpin one of them so it moves to **Owned safe accounts** — the pair stays flagged across both sections.\r\n4. Search for one of the addresses — flags persist in search results.\r\n5. Workspace → Safe accounts with a flagged pair — the alert now has spacing above the table.\r\n\r\n## Affected flows\r\n\r\n- Space onboarding Step 2 \"Select Safe accounts\": flag badges, security banner, and selection confirm-gate now also apply to pinned (My accounts) rows.\r\n- Workspace → Safe accounts: visual spacing between the similar-address alert and the table.\r\n\r\n## Blast radius\r\n\r\n- `SelectSafesOnboarding` internals only (`useOnboardingSafes`, `useOnboardingSelection`, `OnboardingSafesList`, `index`) — no other consumers; the renamed `flaggedAddresses` prop is internal to this feature.\r\n- Reads `useSimilarityClusters` (shared, `@/features/address-poisoning`) — read-only consumer, no changes to the detection engine, thresholds, or the flag-gated anchor path (`ADDRESS_POISONING_PROTECTION`).\r\n- `SafeAccountsTable` consumed with its existing `flaggedAddresses` prop — no changes to the shared table.\r\n- One-line JSX wrapper in `SafeAccounts/index.tsx` (workspace accounts page), layout only.\r\n- No RTK Query, persistence, routing, or mobile impact.\r\n\r\n## Risks / not checked\r\n\r\n- Did not test on mobile (web-only surface).\r\n- Did not verify with `ADDRESS_POISONING_PROTECTION` disabled (only gates the anchor engine; the intra-list clustering exercised here is always-on).\r\n- Large-account noise: users holding many vanity-prefixed Safes will now see badges on pinned rows too — intended, but not exercised with real large accounts.\r\n\r\n## Visual summary\r\n\r\n```mermaid\r\nflowchart LR\r\n    A[allSafes] --> B[useSimilarityClusters\\nintra-list OR clustering + flag-gated anchor check]\r\n    B --> C{flagged set}\r\n    C -- before --> D[filter to owned only] --> E[owned table badges + banner]\r\n    C -- after --> F[both tables: badges\\nbanner above sections\\nconfirm-gate on any flagged row]\r\n    style D stroke-dasharray: 5 5\r\n```\r\n### Flag Pinned Safes when there is a similar\r\n- Before:\r\n<img width=\"1154\" height=\"642\" alt=\"Screenshot 2026-07-27 at 13 03 25\" src=\"https://github.com/user-attachments/assets/b376be7f-8b07-45e6-89c5-edd6da5ce368\" />\r\n\r\n- After:\r\n<img width=\"910\" height=\"344\" alt=\"Screenshot 2026-07-27 at 13 02 05\" src=\"https://github.com/user-attachments/assets/dc839048-aaf9-4239-96cc-4400652f4365\" />\r\n\r\n### Adding some space between banner and table\r\n- Before:\r\n<img width=\"1661\" height=\"413\" alt=\"Screenshot 2026-07-27 at 13 02 58\" src=\"https://github.com/user-attachments/assets/dba6ab86-9e4c-4215-97dc-4d0be94dcf5a\" />\r\n\r\n- After:\r\n<img width=\"1105\" height=\"501\" alt=\"Screenshot 2026-07-27 at 13 01 00\" src=\"https://github.com/user-attachments/assets/44cdb519-b80e-4e4c-a2de-164cada043c6\" />\r\n\r\n\r\n\r\n## Checklist\r\n\r\n- [ ] I've tested the branch on mobile 📱 (N/A — web-only)\r\n- [x] I've documented how it affects the analytics (if at all) 📊 (no analytics changes)\r\n- [x] I've written a unit/e2e test for it (if applicable) 🧑‍💻\r\n- [x] I've listed affected flows and blast radius, and named what I did not verify 🎯\r\n\r\n---\r\n\r\n## CLA signature\r\n\r\nWith the submission of this Pull Request, I confirm that I have read and agree to the terms of the [Contributor License Agreement](https://safe.global/cla).",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/hooks/useOnboardingSafes.ts",
+      "line": 32,
+      "claim": "The variable name no longer reflects what it holds, since it no longer combines multiple sources; it should be renamed to allSafeAddresses for clarity."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/hooks/useOnboardingSubmit.ts",
+      "line": 100,
+      "claim": "The `?safe=` URL pre-selection path writes directly to the form via `reset()` and bypasses the look-alike confirmation dialog. Because pinned rows are now included in the flagged set, a pinned look-alike Safe opened via a link can now be pre-checked without the user seeing the confirm step, though the flag badge and banner still appear."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/components/OnboardingSafesList.test.tsx",
+      "line": 112,
+      "claim": "The test assertion chain combining `banner && trustedTable && banner.compareDocumentPosition(...)` in one expression is hard to read and produces unclear failure messages; asserting that both elements exist first before comparing their positions would be clearer."
+    },
+    {
+      "id": "F4",
+      "file": "OnboardingSafesList.test.tsx",
+      "line": null,
+      "claim": "The banner position assertion uses compareDocumentPosition with strict equality against DOCUMENT_POSITION_FOLLOWING, which only works because there is no ancestor/descendant relationship between the nodes; using a bitwise AND against the mask would be more robust if that relationship ever changes."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/components/__tests__/OnboardingSafesList.test.tsx",
+      "line": 115,
+      "claim": "The test retrieves the banner and trusted table elements with queryByTestId and chains them with a nullable &&, so a missing element silently passes null through instead of the test failing with a clear error, unlike other tests in the feature that use getByTestId."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/components/__tests__/OnboardingSafesList.test.tsx",
+      "line": 119,
+      "claim": "The test is named to verify the banner appears above both sections but only checks its position relative to the trusted table, leaving the ordering against the owned table (onboarding-owned-table) unverified."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/components/__tests__/OnboardingSafesList.test.tsx",
+      "line": 115,
+      "claim": "The position check compares the full compareDocumentPosition bitmask for exact equality to Node.DOCUMENT_POSITION_FOLLOWING instead of masking with & as other tests in the feature do, which makes the assertion more brittle than the repo's established pattern."
+    },
+    {
+      "id": "F8",
+      "file": "index.tsx",
+      "line": 207,
+      "claim": "The confirm dialog's copy may still assume the flagged row is being newly added as a look-alike, but with pinned rows the flagged address can already be in My accounts, so the wording may need to change to reflect that a trusted safe resembles another rather than a new safe being added."
+    },
+    {
+      "id": "F9",
+      "file": "OnboardingSafesList.tsx",
+      "line": 11,
+      "claim": "The doc comment phrase 'trusted and owned rows alike' reads awkwardly and could be reworded to something like 'Lowercased addresses flagged as look-alikes; applies to both trusted and owned rows.'"
+    },
+    {
+      "id": "F10",
+      "file": "useOnboardingSafes.ts",
+      "line": 33,
+      "claim": "combinedAddresses is built by concatenating trustedSafeItems.map(...) and ownedSafeItems.map(...), but since both already derive from allSafes, this could be simplified to (allSafes ?? []).map((s) => s.address), removing the concat and the two-array dependency."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/components/OnboardingSafesList.tsx",
+      "line": 34,
+      "claim": "The security banner is shown whenever the unfiltered flagged-address set is non-empty, rather than whenever a currently visible row is flagged. If a user searches and the results hide all flagged rows, the banner still displays, producing a spurious warning that doesn't match what's on screen."
+    },
+    {
+      "id": "F12",
+      "file": null,
+      "line": null,
+      "claim": "The banner was previously documented or referenced as an 'owned-section warning' in UX or spec references, but it now appears above My accounts instead of inside the Owned group, so any such reference documentation is now inaccurate and should be updated."
+    }
+  ]
+}

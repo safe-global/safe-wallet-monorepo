@@ -1,0 +1,60 @@
+{
+  "usd": 0.10186999999999999,
+  "findings": [
+    {
+      "file": "packages/utils/src/hooks/__tests__/useDefaultGasPrice.test.ts",
+      "line": 241,
+      "claim": "The test inputs '22.846685108', '20.123456789' and 25.5, when multiplied by 1e9, all produce exact integers, so BigInt() accepts them without needing Math.round; these tests do not actually exercise the fractional-value fix."
+    },
+    {
+      "file": "packages/utils/src/hooks/__tests__/useDefaultGasPrice.test.ts",
+      "line": 262,
+      "claim": "This second float test case has the same problem as the one at line 241: its inputs yield exact integer wei values, so it passes even without Math.round and does not verify the fix."
+    },
+    {
+      "file": "packages/utils/src/hooks/useDefaultGasPrice.ts",
+      "line": 64,
+      "claim": "Because no test produces a fractional wei value, removing Math.round here would not cause any test to fail, leaving the new rounding behavior unprotected by tests."
+    },
+    {
+      "file": "packages/utils/src/hooks/useDefaultGasPrice.ts",
+      "line": 95,
+      "claim": "Same as the line 64/65 issue: this second Math.round call is also not covered by a test that would fail if the rounding were removed."
+    },
+    {
+      "file": "packages/utils/src/hooks/useDefaultGasPrice.ts",
+      "line": 58,
+      "claim": "Number(''), Number(' ') and Number(null) all evaluate to 0, which passes the Number.isFinite check, and negative numeric strings also pass; this lets an oracle response with an empty, null, or negative gas price value be treated as a valid, winning price instead of being rejected so the code falls through to the next oracle or fixed config."
+    },
+    {
+      "file": "packages/utils/src/hooks/useDefaultGasPrice.ts",
+      "line": 91,
+      "claim": "The same missing positivity check exists at this second location, allowing zero, empty, null, or negative oracle values to be accepted as a valid gas price."
+    },
+    {
+      "file": "packages/utils/src/hooks/__tests__/useDefaultGasPrice.test.ts",
+      "line": 41,
+      "claim": "The tests replace global.fetch with a jest mock instead of using MSW, which deviates from the project's stated rule (AGENTS.md:374) to use MSW rather than mocking fetch directly."
+    },
+    {
+      "file": "packages/utils/src/hooks/__tests__/useDefaultGasPrice.test.ts",
+      "line": 53,
+      "claim": "Much of this new test suite duplicates cases already covered in apps/web/src/hooks/__tests__/useGasPrice.test.ts (first oracle, fallback to second oracle, fixed fallback, fixed 1559, speed-up), creating redundant test coverage across the two files."
+    },
+    {
+      "file": "packages/utils/src/hooks/__tests__/useDefaultGasPrice.test.ts",
+      "line": 415,
+      "claim": "The getTotalFee 'large values' test case is identical to the one in apps/web/src/hooks/__tests__/useGasPrice.test.ts:334-337, duplicating test logic instead of consolidating it."
+    },
+    {
+      "file": "packages/utils/src/hooks/useDefaultGasPrice.ts",
+      "line": 55,
+      "claim": "The sequence of multiplying by gweiFactor, checking finiteness, rounding, and converting to BigInt is repeated three times in the file instead of being extracted into a shared helper, making it easy for a future fix (such as the positivity check) to be applied in only some of the places."
+    },
+    {
+      "file": "packages/utils/src/hooks/useDefaultGasPrice.ts",
+      "line": 89,
+      "claim": "This is a second repetition of the same multiply/check/round/convert logic noted at lines 55-65, reinforcing the duplication issue."
+    }
+  ]
+}

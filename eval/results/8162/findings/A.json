@@ -1,0 +1,30 @@
+{
+  "usd": 0.048451600000000004,
+  "findings": [
+    {
+      "file": "apps/mobile/src/features/Send/hooks/useScannedAddressToSend.ts",
+      "line": 22,
+      "claim": "The hook's comment describes it as shared by the in-Send scanner and a header scanner at /wallet-connect-scan, but that route renders ScanConnect, which does not import this hook; the only actual caller is ScanQrSend.container.tsx. The comment also documents a 'replace' NavigateMode option that is never passed by any caller, so it describes code that doesn't exist yet."
+    },
+    {
+      "file": "apps/mobile/src/features/Send/hooks/useScannedAddressToSend.ts",
+      "line": 11,
+      "claim": "The new hook has far more comment lines than sibling hooks in the same directory, most of which have none and at most five. Some of the comments, such as the note that parsePrefixedAddress never throws and the block explaining the hook's purpose, restate what the code and its name already convey."
+    },
+    {
+      "file": "apps/mobile/src/features/Send/hooks/useScannedAddressToSend.test.tsx",
+      "line": 4,
+      "claim": "The test uses a hardcoded literal address (VALID_ADDRESS) instead of generating one with the faker helpers used elsewhere, and no sibling test in the same hooks directory hardcodes an address this way."
+    },
+    {
+      "file": "apps/mobile/src/features/Send/hooks/useScannedAddressToSend.test.tsx",
+      "line": 82,
+      "claim": "The chain-mismatch logic was rewritten inline to '!prefix || !activeShortName || prefix === activeShortName', but no test covers the case where there is no active chain while the scan does have a prefix."
+    },
+    {
+      "file": "apps/mobile/src/features/Send/hooks/useScannedAddressToSend.test.tsx",
+      "line": 82,
+      "claim": "The dedupe test only verifies that showing the same value twice produces a single toast; it does not verify that a different value still produces its own toast, so a bug that suppressed every toast after the first would not be caught."
+    }
+  ]
+}

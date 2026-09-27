@@ -1,0 +1,50 @@
+{
+  "usd": 0.043534,
+  "findings": [
+    {
+      "file": "apps/mobile/src/features/Send/hooks/useScannedAddressToSend.ts",
+      "line": 22,
+      "claim": "The doc comment states the hook is shared with the header scanner used at /wallet-connect-scan, and the NavigateMode/'replace' option exists only for that scanner, but no code path in the repo (ScanConnect, WalletConnectScan.container, useWalletConnectScan) actually imports or uses this hook, so the 'replace' branch has no production caller and the comment describes something untrue at HEAD."
+    },
+    {
+      "file": "apps/mobile/src/features/Send/hooks/useScannedAddressToSend.ts",
+      "line": 22,
+      "claim": "Either the unused 'replace' navigation mode should be removed, or the header scanner should be wired up to use it within this PR."
+    },
+    {
+      "file": "apps/mobile/src/features/Send/ScanQrSend.container.tsx",
+      "line": 57,
+      "claim": "The rewritten onScan function has no test coverage: nothing verifies the invalid-code-to-toast path, the valid-code warn-and-navigate path, the ignored second scan via the hasScanned guard, or the empty codes array case, so reverting the container change would not cause any test to fail."
+    },
+    {
+      "file": "apps/mobile/src/features/Send/ScanQrSend.container.tsx",
+      "line": 57,
+      "claim": "A container test should be added that mocks QrCamera's onScan and checks the guard behavior and the order of calls."
+    },
+    {
+      "file": "apps/mobile/src/features/Send/hooks/useScannedAddressToSend.test.tsx",
+      "line": 91,
+      "claim": "The 'once per value' test only checks that the same value is shown once, so a bug that deduplicates every value using a single boolean flag rather than per-value tracking would still pass the test."
+    },
+    {
+      "file": "apps/mobile/src/features/Send/hooks/useScannedAddressToSend.test.tsx",
+      "line": 91,
+      "claim": "The test should also call the scan handler again with a different value (e.g. 'bar') and expect two toast calls to properly verify per-value deduplication."
+    },
+    {
+      "file": "apps/mobile/src/features/Send/hooks/useScannedAddressToSend.ts",
+      "line": 11,
+      "claim": "The file contains three comment blocks totaling 11 lines in a 77-line file, which conflicts with the project convention (AGENTS.md) to treat code comments as tech debt and add them only when really necessary; most of these comments repeat what the names and types already convey and should be trimmed to only what isn't obvious from the code."
+    },
+    {
+      "file": "apps/mobile/src/features/ImportReadOnly/hooks/useScan/index.ts",
+      "line": 38,
+      "claim": "This file re-implements the same parse, validate, and 'toast once per value' logic introduced by the new hook, but keeps its deduplication set in a module-level object (toastForValueShown) instead of a per-instance ref, so the dedup state never resets across mounts; it could instead reuse resolveScannedAddress and a per-instance ref matching the pattern this PR introduces."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The test setup mocks all of expo-router but exports only useRouter; whether this is sufficient depends on whether the test-utils' renderHook needs other expo-router exports, which was not confirmed."
+    }
+  ]
+}

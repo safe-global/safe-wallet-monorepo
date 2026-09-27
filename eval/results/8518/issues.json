@@ -1,0 +1,104 @@
+{
+  "usage": {
+    "usd": 0.5445122,
+    "turns": 7,
+    "wallSeconds": 62
+  },
+  "issues": [
+    {
+      "findings": [
+        "F20",
+        "F23"
+      ],
+      "summary": "isNotFirstPartyStack scans the whole stack for `_next/static/`, so a vendor eval() called synchronously from first-party code (e.g. a HubSpot onload callback calling hbspt.forms.create) is kept instead of dropped.",
+      "label": "low",
+      "evidence": "datadog.ts:90-93 uses `stack.includes('_next/static/')` over the full stack string, so any first-party caller frame lower in the stack stops the drop. The only cost is some leftover noise (the filter errs toward keeping errors), and no test covers a mixed stack."
+    },
+    {
+      "findings": [
+        "F3",
+        "F6",
+        "F9"
+      ],
+      "summary": "The new 'keeps' tests all use first-party stacks, so they would pass even without the `type === 'EvalError'` condition.",
+      "label": "low",
+      "evidence": "Tests at datadog.test.ts:400-423 use `_next/static/` stacks, so isNotFirstPartyStack alone returns false for them. The type condition is still covered indirectly: the existing test at :357-361 (non-first-party stack, no type, expects true) and the WA-2950 tests expecting addAction would fail if it were removed. So the gap is small."
+    },
+    {
+      "findings": [
+        "F8"
+      ],
+      "summary": "Claim that removing the EvalError type check would go unnoticed by every test.",
+      "label": "wrong",
+      "evidence": "The five new tests alone would pass, but the existing test 'keeps errors when context.error is not an Error instance' (datadog.test.ts:357-361, stack `https://app.safe.global/x.js`, no type, expects true) would fail. So would the user-outcome tests at :467-490, whose default empty stack would drop the event before addAction is called. The suite does catch it."
+    },
+    {
+      "findings": [
+        "F2",
+        "F5",
+        "F16",
+        "F18",
+        "F24",
+        "F4"
+      ],
+      "summary": "The comments are long and repeat each other, and they include PR narration ('grepped apps/web/src and packages/', 'we ship no eval() today', a hardcoded vendor list) that will go stale.",
+      "label": "low",
+      "evidence": "datadog.ts:72-111 has about 35 comment lines around two one-line predicates, and filterRumEvent's JSDoc at :157-161 restates the rationale. AGENTS.md says to treat comments as tech debt, and statements like the grep claim at :83-84 and the vendor list at :96-97 describe a moment in time rather than an invariant."
+    },
+    {
+      "findings": [
+        "F1",
+        "F11",
+        "F12",
+        "F13",
+        "F14",
+        "F15",
+        "F25"
+      ],
+      "summary": "The new tests add five `{} as any` context casts, although a typed `{} as RumEventDomainContext` pattern already exists in the file.",
+      "label": "low",
+      "evidence": "datadog.test.ts:397,409,421,433,444 add `{} as any`, while :288 already defines `resourceContext = {} as RumEventDomainContext`. The file already uses `as any` heavily (buildErrorEvent returns `any`), but AGENTS.md says never to use `any`, and the typed alternative is right there."
+    },
+    {
+      "findings": [
+        "F17",
+        "F21"
+      ],
+      "summary": "The 'console' case in the drops-EvalError test never reaches the new code, and there is no mixed-stack or 'custom' source case.",
+      "label": "nit",
+      "evidence": "filterRumEvent returns false at datadog.ts:172 for source 'console' before isCspBlockedEval runs at :174, so that loop iteration proves nothing about the new filter. It is harmless redundancy (the mixed-stack gap is covered under F20/F23)."
+    },
+    {
+      "findings": [
+        "F22"
+      ],
+      "summary": "Dropping CSP-blocked eval errors removes the last in-app signal, since there is no report-uri/report-to and 'report' events are already dropped.",
+      "label": "low",
+      "evidence": "apps/web/src/config/securityHeaders.ts has no report-uri/report-to directive, and datadog.ts:113/172 already drops source 'report', so the claim is factually right. Dropping these errors is the stated intent of the PR (the 'accept and filter' option), so it is only a minor observability trade-off."
+    },
+    {
+      "findings": [
+        "F7"
+      ],
+      "summary": "isNotFirstPartyStack and originatesFromExtension could share a stackIncludesAny helper.",
+      "label": "nit",
+      "evidence": "datadog.ts:62-65 and :90-93 have a similar shape, but one checks a single pattern with inverted, null-true semantics and the other a pattern list with null-false semantics. Merging them saves a few lines and has no concrete cost either way."
+    },
+    {
+      "findings": [
+        "F19"
+      ],
+      "summary": "isNotFirstPartyStack is a negated name, and its JSDoc talks about error.type instead of what the function does.",
+      "label": "nit",
+      "evidence": "datadog.ts:76-93: the JSDoc explains the EvalError rationale rather than the stack check. Renaming it to isFirstPartyStack and negating at the call site is a readability preference."
+    },
+    {
+      "findings": [
+        "F10"
+      ],
+      "summary": "originatesFromExtension and isKnownNoise have no JSDoc, unlike the new predicates.",
+      "label": "nit",
+      "evidence": "datadog.ts:62-70 is pre-existing code the PR doesn't touch. Leaving small self-explanatory helpers without docs fits AGENTS.md's comment guidance, so there's nothing concrete to fix."
+    }
+  ]
+}

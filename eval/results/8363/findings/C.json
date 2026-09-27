@@ -1,0 +1,30 @@
+{
+  "usd": 0.020163399999999998,
+  "findings": [
+    {
+      "file": "index.tsx",
+      "line": 207,
+      "claim": "The confirm dialog's copy may still assume the flagged row is being newly added as a look-alike, but with pinned rows the flagged address can already be in My accounts, so the wording may need to change to reflect that a trusted safe resembles another rather than a new safe being added."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The banner was previously documented or referenced as an 'owned-section warning' in UX or spec references, but it now appears above My accounts instead of inside the Owned group, so any such reference documentation is now inaccurate and should be updated."
+    },
+    {
+      "file": "OnboardingSafesList.tsx",
+      "line": 11,
+      "claim": "The doc comment phrase 'trusted and owned rows alike' reads awkwardly and could be reworded to something like 'Lowercased addresses flagged as look-alikes; applies to both trusted and owned rows.'"
+    },
+    {
+      "file": "OnboardingSafesList.test.tsx",
+      "line": null,
+      "claim": "The banner position assertion uses compareDocumentPosition with strict equality against DOCUMENT_POSITION_FOLLOWING, which only works because there is no ancestor/descendant relationship between the nodes; using a bitwise AND against the mask would be more robust if that relationship ever changes."
+    },
+    {
+      "file": "useOnboardingSafes.ts",
+      "line": 33,
+      "claim": "combinedAddresses is built by concatenating trustedSafeItems.map(...) and ownedSafeItems.map(...), but since both already derive from allSafes, this could be simplified to (allSafes ?? []).map((s) => s.address), removing the concat and the two-array dependency."
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "usd": 0.041322,
+  "findings": [
+    {
+      "file": "apps/web/src/components/common/NetworkSelector/index.tsx",
+      "line": 439,
+      "claim": "When a search query is entered, the `!query &&` condition removes the undeployed-networks section, so networks that could still be added are hidden while searching."
+    },
+    {
+      "file": "apps/web/src/components/common/NetworkSelector/index.tsx",
+      "line": 429,
+      "claim": "The empty-state check only looks at the deployed networks list, so searching for a network that exists only in the undeployed/addable list shows \"No networks match your search\" with no way to add it, even though it could be added."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/AllNetworksSection.tsx",
+      "line": 100,
+      "claim": "The equivalent spaces network picker behaves inconsistently with the header picker: it filters the \"All networks\" list by the search query and opens it automatically instead of hiding it."
+    },
+    {
+      "file": "apps/web/src/components/common/NetworkSelector/index.test.tsx",
+      "line": 68,
+      "claim": "Tests mock `useSafeAddress` to return an empty string and `hasMultiChainAddNetworkFeature` to return false, so the undeployed-networks section never renders in any test and the new `!query &&` branch is untested; removing or flipping that guard would not be caught by any test."
+    },
+    {
+      "file": "apps/web/src/components/ui/search-input.tsx",
+      "line": 12,
+      "claim": "A new `onClear` prop was added to a shared design-system component (components/ui/*) without the PR description stating whether this was coordinated with the in-flight design-system rewrite, which such changes are required to note."
+    },
+    {
+      "file": "apps/web/src/components/common/NetworkSelector/NetworkSelector.stories.tsx",
+      "line": 6,
+      "claim": "A five-line comment explaining how the mock works violates the root AGENTS.md rule requiring single-line comments; it should be shortened to one line or removed."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/AllNetworksSection.tsx",
+      "line": 23,
+      "claim": "JSDoc and inline comments are stacked on one small component (also at lines 25, 42, and 45), which is more commentary than needed given the code is already self-explanatory, and should be trimmed."
+    },
+    {
+      "file": "apps/web/src/components/common/NetworkSelector/index.tsx",
+      "line": 408,
+      "claim": "An `eslint-disable-next-line no-restricted-syntax` for a custom border radius is duplicated (also in ChainSelectorBlock.tsx:96) instead of being addressed by adding a reusable variant, contrary to the convention of adding a variant rather than disabling the lint rule when a pattern recurs."
+    },
+    {
+      "file": "apps/web/src/components/common/ChainSelectorBlock.tsx",
+      "line": 96,
+      "claim": "The same border-radius eslint-disable comment as in NetworkSelector/index.tsx is duplicated here, indicating the styling pattern should be shared or given a preset instead of repeatedly suppressing the lint rule."
+    },
+    {
+      "file": "apps/web/src/components/common/NetworkSelector/index.tsx",
+      "line": 306,
+      "claim": "The name-filter logic for the network search field is duplicated across NetworkSelector/index.tsx, ChainSelectorBlock.tsx, and AllNetworksSection.tsx rather than being shared, along with duplicated Escape-key handling and the \"No networks match your search\" empty-state UI."
+    },
+    {
+      "file": "apps/web/src/components/common/ChainSelectorBlock.tsx",
+      "line": 58,
+      "claim": "ArrowUp/ArrowDown key handling prevents these keys from reaching the menu but does not move focus into the rows the way NetworkSelector does, so keyboard users in the spaces picker may not be able to arrow from the search field into the list."
+    }
+  ]
+}

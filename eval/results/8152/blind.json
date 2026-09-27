@@ -1,0 +1,109 @@
+{
+  "pr": 8152,
+  "title": "feat(mobile): My code tab in the WalletConnect scanner sheet",
+  "description": "> Header scan opens once;\r\n> Scan QR ⇄ My code — the thumb springs across.\r\n> Chain icons reveal the supported networks.\r\n\r\n## What it solves\r\n\r\nResolves [WA-2323](https://linear.app/safe-global/issue/WA-2323/my-code-tab-reuse-sharereceive-component): the WalletConnect scanner sheet needs a **My code** tab showing the Safe's address QR — reusing the home-screen **Receive** surface instead of re-implementing QR/copy/chain logic.\r\n\r\n> Stacked on `tim/wa-2322-…` (not in `dev` yet); retarget to `dev` once the parent merges.\r\n\r\n## How this PR fixes it\r\n\r\n- **`ScanConnect` shell** with a segmented control: **Scan QR** (default camera scanner) ⇄ **My code**, which mounts `ShareContainer` directly — no new QR/copy/chain code under `Wallet/`.\r\n- Reusable **`SegmentedControl`**: equal-width, percentage-positioned thumb (no layout measurement → correct on first frame incl. Android) with a spring \"snap\".\r\n- **Supported networks** sheet opened by tapping the share view's chain icons (mainnets, then a \"Testnets\" divider).\r\n- Fixes/polish: camera pauses off-tab; opacity-based tab switch (state preserved); header button can't open the sheet twice; QR render deferred so the sheet opens fast; close button added; availability footer removed.\r\n\r\n## Video \r\n\r\nhttps://github.com/user-attachments/assets/c4e40674-21da-46a5-adec-956211ac26a9\r\n\r\n\r\n## How to test it\r\n\r\n1. Assets header → tap **scan**: sheet opens fast on **Scan QR**; rapid taps open it once.\r\n2. Switch to **My code**: thumb springs over; Safe QR + copy/share + chains render.\r\n3. Tap the **chain icons** → **Supported networks** sheet.\r\n4. Home-screen **Receive** (`/share`) still works (now with close button + tappable chains, no footer).\r\n\r\n## Affected flows\r\n\r\n- WC scanner: Scan QR / My code tabs and pairing.\r\n- Home **Receive** (`/share`) — shares `ShareView`, so it also gets the close button + tappable chains and loses the footer.\r\n\r\n## Blast radius\r\n\r\n- **`ShareView`/`ShareContainer`** (shared by `/share` and the My code tab): footer removed (+ deleted unused `getAvailableChainsNames`), chain row now pressable, close button, centered `maxWidth` layout.\r\n- **`useWalletConnectScan`/`WalletConnectScanContainer`**: optional `isActive` (default `true`) to pause the camera — standalone unchanged.\r\n- **`HeaderQrButton`**: open-once guard. New `supported-networks` route + new `SegmentedControl` (no other consumers).\r\n- No store/API/feature-flag changes.\r\n\r\n## Risks / not checked\r\n\r\n- Camera live-feed warm-up is device-specific (not profiled separately).\r\n- Theme-followed (Figma frames are the dark variant); no pixel-diff.\r\n- `SupportedNetworksSheet` container untested (presentational `SupportedNetworksList` is); camera permission-denied paths unchanged/untested here.\r\n\r\n## Visual summary\r\n\r\n```mermaid\r\nflowchart TD\r\n  H[Header scan button<br/>open-once guard] -->|/wallet-connect-scan| SC[ScanConnect sheet]\r\n  SC --> SEG[SegmentedControl<br/>Scan QR ⇄ My code]\r\n  SEG -->|Scan QR default| CAM[Camera scanner<br/>paused when inactive]\r\n  SEG -->|My code| SHARE[ShareContainer<br/>= /share Receive surface]\r\n  SHARE -->|tap chain icons| NET[Supported networks sheet]\r\n```\r\n\r\nDesigns: [My code tab](https://www.figma.com/design/vu5wqi31TtoJGpx3JfMR10/Wallet-Connect-dapps?node-id=16202-4931) · [Supported networks](https://www.figma.com/design/vu5wqi31TtoJGpx3JfMR10/Wallet-Connect-dapps?node-id=16203-5157)\r\n\r\n## Checklist\r\n\r\n- [x] Tested on mobile 📱 (iOS + Android)\r\n- [x] Analytics 📊 — no impact\r\n- [x] Unit tests 🧑‍💻\r\n- [x] Affected flows / blast radius / not-verified listed 🎯\r\n- [ ] Web Playwright one-shot — N/A (mobile-only)\r\n\r\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\r\n",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
+      "line": 19,
+      "claim": "borderRadius is hard-coded to 12 instead of using the Tamagui radius token \"$5\", which maps to the same value; mobile UI conventions require theme tokens instead of magic numbers, and since this is a new shared component the hard-coded value risks being copied into other screens."
+    },
+    {
+      "id": "F2",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/components/ScanConnect.tsx",
+      "line": 28,
+      "claim": "The check typeof insets.bottom === 'number' ? insets.bottom : 0 is unnecessary since useSafeAreaInsets() is typed to always return numbers."
+    },
+    {
+      "id": "F3",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/hooks/useWalletConnectScan.ts",
+      "line": 48,
+      "claim": "The focus effect does not check isActive before enabling the camera, so if the screen first focuses while isActive is false, the focus effect turns the camera on and the isActive/permission effect immediately turns it off again, creating a race."
+    },
+    {
+      "id": "F4",
+      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.test.tsx",
+      "line": null,
+      "claim": "No test asserts that the thumb position actually animates in response to the value prop, leaving that behavior uncovered."
+    },
+    {
+      "id": "F5",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/components/HeaderQrButton.tsx",
+      "line": 25,
+      "claim": "The isOpeningRef guard only resets when useFocusEffect fires again, so if the navigation push is ever swallowed (e.g. by a transient guard upstream), the button becomes permanently unresponsive until the user navigates away and back."
+    },
+    {
+      "id": "F6",
+      "file": "apps/mobile/src/features/Share/components/ShareView.tsx",
+      "line": 47,
+      "claim": "paddingTop={30}, paddingLeft={20}, and maxWidth={260} are raw pixel numbers in a file that otherwise uses Tamagui design tokens, making the styling inconsistent with the rest of the file."
+    },
+    {
+      "id": "F7",
+      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
+      "line": 36,
+      "claim": "The outer track is hard-coded to width=\"50%\", which conflicts with the component otherwise being generic over N options since a 3-option control inside a half-width track would be cramped."
+    },
+    {
+      "id": "F8",
+      "file": "apps/mobile/src/features/Share/components/SupportedNetworksList.tsx",
+      "line": 35,
+      "claim": "The useMemo wraps a filter-twice operation that is cheap enough on small arrays that the memoization adds noise without meaningful benefit; a single-pass partition would be simpler."
+    },
+    {
+      "id": "F9",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/components/ScanConnect.tsx",
+      "line": 28,
+      "claim": "controlClearance = insets.bottom + 64 does not match where the floating control actually sits (bottom=\"$8\" ≈ 32 + insets.bottom + padding), so the derived constant is inaccurate even though the mismatch is currently harmless."
+    },
+    {
+      "id": "F10",
+      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
+      "line": 37,
+      "claim": "borderRadius is hard-coded to 8 instead of using the Tamagui radius token \"$4\", which maps to the same value; mobile UI conventions require theme tokens instead of magic numbers, and since this is a new shared component the hard-coded value risks being copied into other screens."
+    },
+    {
+      "id": "F11",
+      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
+      "line": 30,
+      "claim": "The testID handling (container testID and the per-segment `${testID}-${option.value}` construction at line 19) has no test coverage; none of the three existing tests pass a testID or use getByTestId, so a change that breaks this logic would not be caught, and E2E selectors will depend on these IDs."
+    },
+    {
+      "id": "F12",
+      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
+      "line": 19,
+      "claim": "borderRadius={12} is hard-coded even though a Tamagui token with the same value ($5 = 12) exists, violating the project rule to use tokens instead of hard-coded values; the rest of the file already uses tokens."
+    },
+    {
+      "id": "F13",
+      "file": "apps/mobile/src/components/SegmentedControl/",
+      "line": null,
+      "claim": "The new component folder is missing a SegmentedControl.stories.tsx file, even though the project's documented folder layout includes a stories file alongside the component, test, and index files, and mobile Storybook is already set up."
+    },
+    {
+      "id": "F14",
+      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
+      "line": 37,
+      "claim": "borderRadius={8} is hard-coded even though a Tamagui token with the same value ($4 = 8) exists, violating the project rule to use tokens instead of hard-coded values."
+    },
+    {
+      "id": "F15",
+      "file": "apps/mobile/src/features/Share/components/SupportedNetworksSheet.tsx",
+      "line": null,
+      "claim": "This component is untested despite doing selector wiring (selectSafeChains to getChainsByIds), so future selector signature drift would not be caught by tests."
+    },
+    {
+      "id": "F16",
+      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
+      "line": 26,
+      "claim": "Each segment uses accessibilityRole=\"button\" with a selected state, and the container has no accessibility role, so VoiceOver and TalkBack will announce the segments as separate buttons instead of as a single either/or group with position information (e.g. \"2 of 2\"). The segments should use accessibilityRole=\"tab\" with the container as \"tablist\", or a radio/radiogroup pairing."
+    },
+    {
+      "id": "F17",
+      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
+      "line": 29,
+      "claim": "progress is initialised to selectedIndex and the useEffect immediately runs withSpring(selectedIndex, ...) on first mount, causing an unnecessary no-op spring animation on every fresh mount."
+    }
+  ]
+}

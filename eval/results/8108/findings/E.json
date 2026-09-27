@@ -1,0 +1,25 @@
+{
+  "usd": 0.0529976,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/Members/index.tsx",
+      "line": 21,
+      "claim": "The component relies on a hook to determine dark mode instead of having dark mode set globally through stylesheets, which is inconsistent with how dark mode should ideally be handled."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Members/index.tsx",
+      "line": 34,
+      "claim": "The component applies custom styling on top of standard components instead of using only the available variants and sizes, which undermines design system consistency."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx",
+      "line": 64,
+      "claim": "column.className is only applied to header cells while body cells are hand-rendered, forcing every caller to re-implement column layout instead of the table owning structural styling for both header and body via per-column cell renderers."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx",
+      "line": 109,
+      "claim": "The same header/body styling duplication issue recurs here and should instead be handled by a renderRow implementation in the Table component."
+    }
+  ]
+}

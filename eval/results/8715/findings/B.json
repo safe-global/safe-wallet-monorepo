@@ -1,0 +1,10 @@
+{
+  "usd": 0.029612,
+  "findings": [
+    {
+      "file": ".github/workflows/mirror-to-ghcr.yml",
+      "line": 1,
+      "claim": "If the two related pull requests merge far apart, there could be a period where nothing writes to GHCR, since the GHCR push step only exists in the other pull request; any Docker Hub tag pushed between the mirror workflow's last real run and that other pull request merging would not exist on GHCR, and this deletion removes the tool that could have backfilled it. It is unclear from the repository whether the mirror workflow ever ran for real (non-dry-run) or whether the Docker Hub migration was actually signed off, which the deleted file's own header said was a precondition for deleting it."
+    }
+  ]
+}

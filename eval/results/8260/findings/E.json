@@ -1,0 +1,10 @@
+{
+  "usd": 0.0497576,
+  "findings": [
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.tsx",
+      "line": 99,
+      "claim": "This code duplicates a pattern also found in AccountItemChainBadge.tsx:21-33, PendingRequestsTable.tsx:129-148, SpaceAddressBookTable.tsx:61-76, and RequestToAddButton.tsx:145-160, and these should be considered for refactoring into a reusable component."
+    }
+  ]
+}

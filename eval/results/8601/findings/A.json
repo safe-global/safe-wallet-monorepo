@@ -1,0 +1,75 @@
+{
+  "usd": 0.0594736,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/SecurityHub/components/SecurityReportDrawer/SecurityReportDrawer.test.tsx",
+      "line": 16,
+      "claim": "The test asserts the class dark:bg-card, but the surface=\"muted\" implementation actually applies dark:bg-[var(--color-background-main)], so the test will fail against the current code."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SecurityHub/components/SecurityReportDrawer/SecurityReportDrawer.test.tsx",
+      "line": 10,
+      "claim": "The test's description still refers to a '#fafafa surface ... not white bg-card' scenario that no longer matches the updated implementation or expected class, so the test name is now inaccurate."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SecurityHub/components/SafeGradeChip/SafeGradeChip.tsx",
+      "line": 15,
+      "claim": "The grade colors were moved from an inline className (which had an explicit eslint-disable comment for the no-restricted-syntax rule) into a module-level constant GRADE_PILL_STYLES, and the lint rule only scans class strings written directly in the className attribute, so the raw color classes now bypass the lint check without anyone deciding to allow that."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SecurityHub/components/SafeGradeChip/SafeGradeChip.tsx",
+      "line": 15,
+      "claim": "Because the raw color classes no longer flow through the className attribute the way the Badge component expects, the Badge falls back to its default variant and relies on tailwind-merge to override the styling, leaving snapshots with a leftover default-variant class such as [a]:hover:bg-primary/80."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SecurityHub/components/SafeGradeChip/SafeGradeChip.tsx",
+      "line": 15,
+      "claim": "Using *-main text color on its matching tint background can fail the WCAG AA minimum contrast standard for some of the colors involved, per the warning already documented in badge.tsx."
+    },
+    {
+      "file": "apps/web/src/components/ui/sheet.tsx",
+      "line": 72,
+      "claim": "The new muted sheet surface hard-codes bg-zinc-50, a raw Tailwind color not used elsewhere in the codebase, instead of reusing the existing --surface-sunken token that Card already exposes via bg-surface-sunken for the same visual purpose."
+    },
+    {
+      "file": "apps/web/src/components/ui/sheet.tsx",
+      "line": 72,
+      "claim": "The light and dark variants of the new muted surface pull their colors from different sources (a raw Tailwind class versus a CSS variable), making the styling inconsistent between light and dark mode."
+    },
+    {
+      "file": "apps/web/src/components/ui/sheet.tsx",
+      "line": 38,
+      "claim": "This PR edits a shared UI primitive under apps/web/src/components/ui/*, which requires either noting coordination with the in-flight design-system rewrite or stating that no such rewrite PR is open, and the PR description does neither."
+    },
+    {
+      "file": "apps/web/src/components/ui/sheet.tsx",
+      "line": 72,
+      "claim": "card.tsx maintains a dated Changelog entry in its header comment, but the new sheet variant added here is not recorded anywhere in sheet.tsx, leaving the change history undocumented."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SecurityHub/index.tsx",
+      "line": 37,
+      "claim": "The h1 Typography variant is overridden with custom text-[32px] leading-9 values that are not part of the typography scale, replacing the standard 48px h1 size with an arbitrary one-off value."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SecurityHub/index.tsx",
+      "line": null,
+      "claim": "This change also renames the page heading from 'Security' to 'Security hub' and removes the subtitle, and the PR description does not state whether this came from a design decision."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SecurityHub/components/SafeGradeChip/SafeGradeChip.tsx",
+      "line": 65,
+      "claim": "There is a stray blank line inside the cn(...) argument list."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SecurityHub/components/SafeGradeChip/SafeGradeChip.stories.test.tsx.snap",
+      "line": 1,
+      "claim": "The snapshot file's header link changed from https://jestjs.io/docs/snapshot-testing to https://goo.gl/fbAQLP, suggesting the snapshots were regenerated with a different Jest version than the one the repo uses, which means they will change back on the next snapshot update."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SecurityHub/components/SectionPanel/SectionPanel.tsx",
+      "line": 30,
+      "claim": "Each row manually applies overflow-hidden rounded-lg bg-card, even though the Card component already provides this styling through its own props, making the hand-written classes redundant."
+    }
+  ]
+}

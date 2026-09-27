@@ -1,0 +1,37 @@
+{
+  "pr": 8179,
+  "title": "feat(web): show transaction note in nonce replacement label",
+  "description": "## What it solves\n\nResolves: #7517\n\nWhen the user opens the nonce selector to replace an existing transaction, queued transactions are labeled generically (e.g. \"Transaction Builder transaction\"). The issue requests preferring the transaction's note (from `origin['note']`) so users can identify what they're about to overwrite.\n\n## How this PR fixes it\n\nIn `apps/web/src/components/tx-flow/common/TxNonce/index.tsx`, the `txLabel` derivation now prefers `transaction.note` (trimmed) when present, then falls back to the existing `humanDescription`, then the transaction-type label. Whitespace-only notes are treated as missing so a stray space doesn't replace a useful label with blanks.\n\n## How to test it\n\n1. Create a transaction via Transaction Builder with a note (e.g. \"Treasury payout\") and queue it for some nonce N.\n2. Start a new transaction and open the nonce selector.\n3. The entry for nonce N should display \"Treasury payout\" instead of \"Transaction Builder transaction\".\n4. Remove the note and confirm the label falls back to the previous behavior.\n\nUnit tests in `TxNonce.test.tsx` cover: note present, note missing (fallback to human description), whitespace-only note, and no queued tx for the nonce.\n\n## Affected flows\n\n- New transaction → nonce selector → \"Replace existing nonce\" option labels\n\n## Blast radius\n\n- `apps/web/src/components/tx-flow/common/TxNonce/index.tsx` — purely label-derivation change inside `NonceFormOption`. No consumers, no API/store/route changes. `transaction.note` already exists on the `TransactionSummary` type from `@safe-global/safe-gateway-typescript-sdk`.\n\n## Risks / not checked\n\n- Did not test on mobile (web-only component).\n- Did not exercise localization of the fallback strings (none added/changed).\n- Did not verify behavior across every `txInfo.type` variant — only the label string is affected, no behavior changes.\n\n## Visual summary\n\nLabel resolution order: `transaction.note?.trim()` → `transaction.txInfo.humanDescription` → `\"<type> transaction\"`.\n\n## Checklist\n\n- [ ] I've tested the branch on mobile 📱\n- [ ] I've documented how it affects the analytics (if at all) 📊\n- [x] I've written a unit/e2e test for it (if applicable) 🧑‍💻\n- [x] I've listed affected flows and blast radius, and named what I did not verify 🎯",
+  "findings": [
+    {
+      "id": "F1",
+      "file": null,
+      "line": null,
+      "claim": "The commit is unsigned, which must be fixed before the pull request can be merged."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/components/tx-flow/common/TxNonce/index.tsx",
+      "line": 70,
+      "claim": "The note is rendered at full length in the dropdown instead of being truncated with ellipsis and a title tooltip, unlike the existing pattern used elsewhere (ellipsis(tx.note, 25) plus title={tx.note}). Since notes can be up to 60 characters and the containing popper has no width constraint, a long note can stretch the nonce dropdown on narrow screens; it is also unclear whether the backend enforces this length cap, so a note sent directly to the API could be even longer."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/components/tx-flow/common/TxNonce/index.tsx",
+      "line": 81,
+      "claim": "Notes can be up to 60 characters of free text (MAX_NOTE_LENGTH) and nothing sets a maximum width or truncation for the label in the dropdown, which is not tied to the field's width. A 60-character note with no spaces could make the dropdown very wide, which was less likely with the previous server-generated descriptions."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/components/tx-flow/common/TxNonce/index.tsx",
+      "line": 70,
+      "claim": "In the \"Replace existing\" nonce option, the free-text note written by the proposer now replaces the decoded human-readable label instead of appearing alongside it, so a signer choosing which transaction to replace only sees the note text and cannot tell what the transaction actually does. This could lead a signer to skip replacing (cancel) the wrong transaction or replace the wrong one, whereas elsewhere in the app the note is shown next to the type or attributed to its author rather than substituting for the decoded label."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/components/tx-flow/common/TxNonce/index.tsx",
+      "line": 70,
+      "claim": "The dropdown label reads transaction.note directly with no check on the TX_NOTES feature flag, unlike other places that render notes only through the tx-notes feature component which is gated by that flag. On a chain where the flag is off, or after it is switched off, a note the backend still returns would show in this dropdown even though it appears nowhere else."
+    }
+  ]
+}

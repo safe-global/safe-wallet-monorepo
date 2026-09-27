@@ -1,0 +1,95 @@
+{
+  "usd": 0.06540760000000001,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceSettings/sections/IdentitySection.tsx",
+      "line": 62,
+      "claim": "The catch block now builds its error message with getRtkQueryErrorMessage(e) instead of a fixed string, but no test exists for IdentitySection or its parent GeneralPage, and the only coverage nearby exercises a separate copy of this logic in useUpdateSpace.ts used by UpdateSpaceDialog. As a result this line could be reverted to the old fixed-string behavior and the full test suite would still pass, leaving the main workspace-rename page covered only by a Cypress happy-path test."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceSettings/sections/IdentitySection.tsx",
+      "line": 62,
+      "claim": "No test exists that rejects unwrap() with a {status: 422, data: {message}} shape and checks the message is shown, nor one covering the {status: 500, data: {}} fallback case."
+    },
+    {
+      "file": "SpaceAddressBook/EditContactDialog.tsx",
+      "line": 113,
+      "claim": "The value caught in catch (e) is unknown but is force-cast to FetchBaseQueryError | SerializedError with `as`, without any runtime check that it actually matches either shape."
+    },
+    {
+      "file": "utils/rtkQuery.ts",
+      "line": 57,
+      "claim": "If a plain JS Error is thrown inside the try block, the cast in the catch sends it down the SerializedError branch and the raw error.message (e.g. a property-access error) is shown to the user, which is exactly what this helper's doc comment says must never happen; before this change users saw fixed friendly copy instead."
+    },
+    {
+      "file": "SpaceAddressBook/EditContactDialog.tsx",
+      "line": 113,
+      "claim": "If a primitive value (a string or undefined) is thrown instead of an object, the `'status' in error` check inside the helper throws a TypeError from within the catch block, so no error message is shown to the user and the resulting promise rejection goes unhandled."
+    },
+    {
+      "file": "SpaceAddressBook/AddContactDialog.tsx",
+      "line": 126,
+      "claim": "The same unchecked cast of a caught unknown error to FetchBaseQueryError | SerializedError already exists here, outside this diff, so the same failure mode applies."
+    },
+    {
+      "file": "SpaceAddressBook/ImportAddressBookDialog.tsx",
+      "line": 115,
+      "claim": "The same unchecked cast of a caught unknown error to FetchBaseQueryError | SerializedError already exists here, outside this diff, so the same failure mode applies."
+    },
+    {
+      "file": "utils/rtkQuery.ts",
+      "line": null,
+      "claim": "The helper that formats RTK error messages has no guard for values that are not RTK error shapes; it should accept unknown and fall back to RTK_QUERY_ERROR_MESSAGES.generic for anything that isn't a recognizable FetchBaseQueryError or SerializedError, and callers should use that guard instead of casting with `as`."
+    },
+    {
+      "file": "MembersList/__tests__/EditMemberDialog.test.tsx",
+      "line": 79,
+      "claim": "The new error-path tests only check that the error text appears; they never assert that the success actions (trackEvent, the success notification, handleClose/onClose) were not called, so deleting the early return that guards them would not be caught by any test."
+    },
+    {
+      "file": "MembersList/EditMemberDialog.tsx",
+      "line": 57,
+      "claim": "Only an early return at this line prevents the success actions from running after a failed operation, and this behavior is untested, so a failed role change could show a success message and close the dialog without any test failing."
+    },
+    {
+      "file": "MembersList/__tests__/EditMemberDialog.test.tsx",
+      "line": null,
+      "claim": "EditMemberDialog has no success-path test at all, and the thrown-exception branch (as opposed to a rejected unwrap) is not tested."
+    },
+    {
+      "file": "InviteBanner/__tests__/AcceptInviteDialog.test.tsx",
+      "line": 105,
+      "claim": "The new error-path tests only check that the error text appears; they never assert that the success actions were not called, and the thrown-exception branch is not tested."
+    },
+    {
+      "file": "InviteBanner/AcceptInviteDialog.tsx",
+      "line": 46,
+      "claim": "Only an early return at this line prevents the success actions from running after a failed operation, and this behavior is untested."
+    },
+    {
+      "file": "AcceptInviteDialog.tsx",
+      "line": 45,
+      "claim": "The `as` cast on response.error/result.error adds nothing because the value is already typed as FetchBaseQueryError | SerializedError; other callers such as AddMemberModal/index.tsx:176 and Sidebar/hooks/useAddSafeToSpace.ts:47 pass the same value without a cast."
+    },
+    {
+      "file": "EditMemberDialog.tsx",
+      "line": 56,
+      "claim": "The `as` cast on result.error adds nothing because the value is already typed as FetchBaseQueryError | SerializedError."
+    },
+    {
+      "file": "EditContactDialog.tsx",
+      "line": 99,
+      "claim": "The `as` cast on the caught error adds nothing because the value is already typed as FetchBaseQueryError | SerializedError."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "Adding the suggested unknown-safe guard in the error-message helper would make the ten added `import type { FetchBaseQueryError }` / `SerializedError` lines across five files unnecessary and they could be dropped."
+    },
+    {
+      "file": "AddMemberModal/index.tsx",
+      "line": 179,
+      "claim": "This catch block still shows a fixed 'Something went wrong' message, the same shortcoming this PR fixes in the sibling dialogs, but this file is outside the current diff so it remains unaddressed."
+    }
+  ]
+}

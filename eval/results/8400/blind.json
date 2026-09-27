@@ -1,0 +1,187 @@
+{
+  "pr": 8400,
+  "title": "feat(safenet): derive check status from decoded events",
+  "description": "## What it solves\n\nPart 4 of the Safenet read-layer sequence: the state machine over the decoder's events.\n\n> **Stacked on #8398** (the decoder — base your review there first; GitHub's diff here shows only this slice). Sequence: #8369 FROST (merged) → #8381 vocabulary (merged) → #8398 decoder → **this: status derivation** → reader → wiring.\n\nThis PR answers one question: **are the state transitions right?**\n\n## How this PR fixes it\n\n- **`utils/deriveCheckState.ts`** — pure recompute-from-scratch fold over one check's events (idempotent, reorg-self-healing). Verdict precedence documented at the definition: negative `OracleResult` → `MALICIOUS` beats everything; attested → `BENIGN` **only on a VERIFIED FROST signature** (`VERIFICATION_FAILED` otherwise — never green); a late verified attestation replaces a would-be `TIMED_OUT`; `SUBMITTED` requires an actual proposal event.\n- **`utils/mergeMonotonic.ts`** — the \"never take back a shown verdict\" layer. `MALICIOUS` terminal; `BENIGN → MALICIOUS` is the one allowed override (a late arbitration result is the only safety-increasing correction); a transient `UNAVAILABLE` never clobbers a known status.\n- **`types/status.ts`** — internal statuses + the public projection (`AWAITING_VERIFICATION` reads as in-progress; `VERIFICATION_FAILED` reads timeout-style, never safe).\n\nTwo semantics verified against the contracts/RFC while preparing this:\n\n- **A single sentinel dissent is never a verdict** — the oracle resolves by unanimity and a split goes to arbitration; only `OracleResult(approved=false)` is terminal. Verified that `resolveDispute` emits `OracleResult` alongside `DisputeResolved` ([SentinelOracle.sol#L170-L180](https://github.com/safe-research/safenet/blob/main/contracts/src/SentinelOracle.sol)), so an arbitrated rejection does reach the negative-verdict path.\n- **Frozen disputes** (no resolving `OracleResult` ever) surface as `TIMED_OUT` via the deadline block, not as a hang.\n\nSizing note per review agreement: the former status slice (926) is re-cut — `constants.ts` + `computePollingInterval` move to the reader PR, where the `SAFENET_ORACLE_ADDRESSES` allowlist is consumed and its security rationale can be reviewed in context. This slice is 684 (293 source, the rest tests/builders).\n\n## How to test it\n\n```bash\nyarn workspace @safe-global/utils test --testPathPattern 'safenet-checks'\nyarn workspace @safe-global/utils type-check\n```\n\nIncludes live-data composition tests: the checked-in beta-captured pair is decoded by the real decoder and derived — `BENIGN` with a verified attestation, `AWAITING_VERIFICATION` without one, `SUBMITTED` for the proposal alone.\n\n## Affected flows\n\nNone — nothing imports these yet; the reader (next PR) is the first consumer.\n\n## Blast radius\n\n- New files only under `packages/utils/src/features/safenet-checks/`; `types/index.ts` gains two re-export lines.\n- Shared with mobile; nothing calls it there.\n- No dependencies added.\n\n## Risks / not checked\n\n- The oracle-path transitions (`MALICIOUS`, `TIMED_OUT` from sentinel deadlines) are exercised against synthetic events only — nothing on any live chain emits the sentinel lifecycle yet. The plain path (all live beta traffic) is covered with captured bytes.\n- Statuses assume one attestation per check; re-check semantics (RFC D3) are deliberately out of scope until specified.\n\n## Checklist\n\n- [ ] I've tested the branch on mobile 📱 — n/a, no mobile code path reaches this yet\n- [x] I've documented how it affects the analytics (if at all) 📊 — no analytics impact\n- [x] I've written a unit/e2e test for it (if applicable) 🧑‍💻\n- [x] I've listed affected flows and blast radius, and named what I did not verify 🎯\n\n---\n\n## CLA signature\n\nWith the submission of this Pull Request, I confirm that I have read and agree to the terms of the [Contributor License Agreement](https://safe.global/cla).\n",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "packages/utils/src/features/safenet-checks/utils/mergeMonotonic.ts",
+      "line": 67,
+      "claim": "ALLOWED_TRANSITIONS[pinned] would throw if given a status rehydrated from an older persisted build that is not present in the map; using '?? []' would guard against this once persistence is introduced."
+    },
+    {
+      "id": "F2",
+      "file": "docs/engineering/pr-self-review-checklist.generated.md",
+      "line": null,
+      "claim": "This generated checklist file is not listed in .gitignore even though the skill's own schema requires it to be, so the file is currently untracked and shows up in git status; it should be deleted or its path added to .gitignore so future review runs do not leak it into commits."
+    },
+    {
+      "id": "F3",
+      "file": "packages/utils/src/features/safenet-checks/types/snapshot.ts",
+      "line": 13,
+      "claim": "SafenetCheckSnapshot.chainId is documented as the Safenet chain the Consensus contract lives on, but the chainId field on the decoded events it is built from actually represents the Safe's home chain (confirmed by a test fixture pinning a home chain of 42161 for a Safe checked on Gnosis beta), so the obvious way to populate the snapshot field (chainId: proposedEvent.chainId) would silently produce the wrong chain value; the two same-named fields should be renamed to distinguish them before any consumer is built on top of this."
+    },
+    {
+      "id": "F4",
+      "file": "packages/utils/src/features/safenet-checks/utils/decodeLogs.ts",
+      "line": 15,
+      "claim": "The local str() function reimplements the package's existing toDecimalString helper, which is already imported elsewhere in the codebase for the same purpose, and the two disagree on undefined input, returning '0' versus the literal string \"undefined\"."
+    },
+    {
+      "id": "F5",
+      "file": "packages/utils/src/features/safenet-checks/utils/mergeMonotonic.ts",
+      "line": 67,
+      "claim": "The lookup ALLOWED_TRANSITIONS[pinned] is unguarded, and although TypeScript enforces valid keys within this PR, pinned is a previously-persisted status intended to live in Redux, so a rehydrated value from an older build with a renamed enum member could hit an inherited key (e.g. toString/constructor), causing ALLOWED_TRANSITIONS[unknownKey].includes(...) to throw a TypeError; using ?? [] or a Map/null-prototype object would prevent this."
+    },
+    {
+      "id": "F6",
+      "file": "packages/utils/src/features/safenet-checks/utils/deriveCheckState.ts",
+      "line": 88,
+      "claim": "The plainAttested branch is accepted without requiring a matching PLAIN_PROPOSED event, and the oracle branch above it similarly doesn't require a matching ORACLE_PROPOSED. On a reorg or partial fetch, a lone *_ATTESTED event could survive while its proposal has dropped, causing the state to jump straight to BENIGN, AWAITING_VERIFICATION, or VERIFICATION_FAILED without the expected proposal having occurred."
+    },
+    {
+      "id": "F7",
+      "file": "packages/utils/src/features/safenet-checks/types/snapshot.ts",
+      "line": 27,
+      "claim": "The snapshot type declares NormalizedCheckEvent[] as a mutable array while deriveCheckState.ts uses ReadonlyArray for the same kind of collection; since the snapshot is described as recomputed from scratch, the event list should also be typed as ReadonlyArray to prevent mutation of the collected events."
+    },
+    {
+      "id": "F8",
+      "file": null,
+      "line": null,
+      "claim": "There is no test asserting that deriveCheckState is order-independent with respect to event ordering (block/logIndex), even though the documentation states it is order-independent since derive is a fold; a test using a reversed event list would help lock in this invariant."
+    },
+    {
+      "id": "F9",
+      "file": "packages/utils/src/features/safenet-checks/utils/deriveCheckState.ts",
+      "line": 76,
+      "claim": "The attested-to-verified/invalid/awaiting logic is duplicated across two near-identical branches; extracting a small verdictFromAttestation helper would remove the repetition and centralize the mapping."
+    },
+    {
+      "id": "F10",
+      "file": "packages/utils/src/features/safenet-checks/utils/deriveCheckState.ts",
+      "line": 78,
+      "claim": "deriveCheckState reads only attestation.status and never correlates attestation.signatureId with the signatureId of the specific event it is meant to attest, even though AttestationVerification carries signatureId and message precisely to identify which attestation was verified; since events and attestation are independent arguments, a caller that supplies a VERIFIED result computed for a different or stale (e.g. post-reorg) attestation would get BENIGN, the only safe/green state, without any check catching the mismatch."
+    },
+    {
+      "id": "F11",
+      "file": "packages/utils/src/features/safenet-checks/utils/decodeLogs.ts",
+      "line": 5,
+      "claim": "The RawLog documentation describes it as 'ethers Log-shaped', but ethers names the corresponding field 'index', not 'logIndex' as used here."
+    },
+    {
+      "id": "F12",
+      "file": "packages/utils/src/features/safenet-checks/utils/deriveCheckState.ts",
+      "line": 77,
+      "claim": "The attestation-to-status mapping logic is written twice, byte-identical, once here and again at line 89 of the same file."
+    },
+    {
+      "id": "F13",
+      "file": "packages/utils/src/features/safenet-checks/builders/rawLogs.ts",
+      "line": 20,
+      "claim": "The logCounter module-level state is reset in only 3 of the log-building tests, risking state leaking between test cases."
+    },
+    {
+      "id": "F14",
+      "file": "packages/utils/src/features/safenet-checks/utils/deriveCheckState.ts",
+      "line": 76,
+      "claim": "AttestationVerificationStatus.UNVERIFIED is not matched explicitly and falls through (along with PENDING) into the AWAITING_VERIFICATION case; this fallthrough is easy to miss, so a future added status case (e.g. TIMED_OUT) could silently be treated as still-in-progress instead of being handled correctly."
+    },
+    {
+      "id": "F15",
+      "file": "packages/utils/src/features/safenet-checks/utils/deriveCheckState.ts",
+      "line": 71,
+      "claim": "The JSDoc precedence table states that step 5 falls through to SUBMITTED, but the implementation returns SUBMITTED only when hasAnyProposal is true and otherwise returns UNAVAILABLE, so the documented contract does not match the code; the table also omits the plain-attested branch (step 2b) even though it is a path the live beta actually emits."
+    },
+    {
+      "id": "F16",
+      "file": "packages/utils/src/features/safenet-checks/utils/decodeLogs.ts",
+      "line": 42,
+      "claim": "The bare catch block in decodeOne collapses three different outcomes into a single null return: an unrecognized topic0, a log with no topics, and a log whose topic0 is recognized but whose payload fails to parse. Only the first two are benign, so a genuine decode failure on a recognized event (e.g. an OracleResult(approved: false) log corrupted by ABI drift or a truncated RPC response) is silently dropped, causing hasNegativeVerdict to return false and the check to resolve as IN_PROGRESS/TIMED_OUT instead of MALICIOUS, with no logging, counter, or returned drop count to signal the failure."
+    },
+    {
+      "id": "F17",
+      "file": "packages/utils/src/features/safenet-checks/types/snapshot.ts",
+      "line": 10,
+      "claim": "SafenetCheckSnapshot is declared and exported but is never constructed anywhere in the change."
+    },
+    {
+      "id": "F18",
+      "file": "packages/utils/src/features/safenet-checks/utils/decodeLogs.ts",
+      "line": 20,
+      "claim": "The claim that decoding 'never throws' is a universal claim backed by only 4 hand-picked test inputs."
+    },
+    {
+      "id": "F19",
+      "file": "packages/utils/src/features/safenet-checks/utils/decodeLogs.ts",
+      "line": 60,
+      "claim": "There are 22 'as Hex'/'as string' casts applied to ethers' Result type, which is declared as Array<any>, effectively bypassing the no-any convention in substance without any lint rule catching it."
+    },
+    {
+      "id": "F20",
+      "file": "packages/utils/src/features/safenet-checks/utils/decodeLogs.ts",
+      "line": 37,
+      "claim": "decodeLogs dispatches purely on topic0 and does not carry the emitting contract's address forward, even though RawLog declares an address field; since sentinel events like OracleResult carry no signature, the emitter address is the only thing that could authenticate them, so a forged OracleResult(approved=false) could reach a terminal MALICIOUS status."
+    },
+    {
+      "id": "F21",
+      "file": "packages/utils/src/features/safenet-checks/utils/deriveCheckState.ts",
+      "line": 88,
+      "claim": "The plain-attested branch has an identical body to the oracle-attested branch because attestation is a single value for the whole check rather than per-event, so both branches always produce the same result; the accompanying comment claims an ordering precedence ('oracle branch wins') that can never actually be observed given the current inputs, making the structure misleading dead code."
+    },
+    {
+      "id": "F22",
+      "file": "packages/utils/src/features/safenet-checks/utils/deriveCheckState.ts",
+      "line": 56,
+      "claim": "The precedence docblock lists five outcomes but the function actually has seven branches, omitting the plainAttested branch and UNAVAILABLE."
+    },
+    {
+      "id": "F23",
+      "file": "packages/utils/src/features/safenet-checks/types/status.ts",
+      "line": 52,
+      "claim": "toPublicStatus has no test and no caller, so swapping the VERIFICATION_FAILED branch to return BENIGN instead of TIMED_OUT would type-check cleanly and pass CI undetected."
+    },
+    {
+      "id": "F24",
+      "file": "packages/utils/src/features/safenet-checks/types/status.ts",
+      "line": 52,
+      "claim": "toPublicStatus contains new branch logic with an explicitly security-relevant contract (an untrusted attestation must be treated as not-completed, never as safe), but unlike every other unit in the diff it has no dedicated test file, so deleting the VERIFICATION_FAILED to TIMED_OUT mapping or changing it to return BENIGN would break no test."
+    },
+    {
+      "id": "F25",
+      "file": "packages/utils/src/features/safenet-checks/utils/deriveCheckState.ts",
+      "line": 39,
+      "claim": "DISPUTE_RESOLVED alone is not treated as a verdict; the derivation relies on resolveDispute always emitting OracleResult alongside DisputeResolved. If a future contract path ever emits DisputeResolved without a paired OracleResult, the derivation would read as IN_PROGRESS indefinitely (or TIMED_OUT past deadline) and never reach MALICIOUS, since this coupling to contract behavior is not documented or enforced in code."
+    },
+    {
+      "id": "F26",
+      "file": "packages/utils/src/features/safenet-checks/utils/deriveCheckState.ts",
+      "line": 76,
+      "claim": "deriveCheckState grants a BENIGN status whenever some event is attested and attestation.status equals VERIFIED, without checking that the attested event and the verified attestation are the same one, even though signatureId and message exist on the type for exactly that binding."
+    },
+    {
+      "id": "F27",
+      "file": "packages/utils/src/features/safenet-checks/utils/deriveCheckState.ts",
+      "line": 19,
+      "claim": "deadlineBlockOf allocates a bigint per event for comparisons; comparing decimal-string lengths first and only converting to BigInt for tie-breakers would avoid unnecessary allocations if this code path ends up folding many checks per poll."
+    },
+    {
+      "id": "F28",
+      "file": "packages/utils/src/features/safenet-checks/builders/rawLogs.ts",
+      "line": 287,
+      "claim": "buildV1Lifecycle and buildV2Lifecycle are unused, and the tests hand-assemble the same event sequences instead of calling them."
+    },
+    {
+      "id": "F29",
+      "file": "packages/utils/src/features/safenet-checks/utils/mergeMonotonic.ts",
+      "line": 36,
+      "claim": "The transition table's exhaustive tests only sweep the BENIGN and MALICIOUS pinned rows; the AWAITING_VERIFICATION row is never tested as pinned, and the ordinary IN_PROGRESS to BENIGN/MALICIOUS transitions are untested, so removing BENIGN from the allowed transitions would leave every test passing while a check gets stuck in progress forever."
+    },
+    {
+      "id": "F30",
+      "file": "packages/utils/src/features/safenet-checks/types/status.ts",
+      "line": 32,
+      "claim": "UNAVAILABLE is documented as meaning the reader could not determine state due to an RPC/config failure, but deriveCheckState now also returns UNAVAILABLE for the ordinary case of a transaction having no Safenet check at all, conflating two different situations; mergeMonotonic.ts:66 treats every incoming UNAVAILABLE as transient and ignorable based on the RPC-failure reading, which is inconsistent with the second use."
+    }
+  ]
+}

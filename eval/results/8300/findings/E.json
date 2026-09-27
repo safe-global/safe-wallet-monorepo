@@ -1,0 +1,15 @@
+{
+  "usd": 0.050359600000000004,
+  "findings": [
+    {
+      "file": "apps/web/src/features/counterfactual/services/persistCounterfactualSafe.ts",
+      "line": 101,
+      "claim": "The function returns before spaceSafesCreateV1 is called, so the Safe is never attached to the active space; the account only exists in this browser's Redux state, meaning other members and devices won't see it even though the UI reports success."
+    },
+    {
+      "file": "apps/web/src/features/counterfactual/services/persistCounterfactualSafe.ts",
+      "line": 100,
+      "claim": "It is unclear whether this code actually deletes the corresponding backend row."
+    }
+  ]
+}

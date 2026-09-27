@@ -1,0 +1,35 @@
+{
+  "usd": 0.057132,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/AuthState/index.tsx",
+      "line": 33,
+      "claim": "The hasLostAccess flag is true for any 401 or 404 response from the space query and for any declined member, so the new router.replace to the spaces list also fires when a user opens a shared space link with the wrong wallet and was never a member, when the space ID is mistyped or the space was deleted, or when the backend returns 401 for an expired session while Redux still thinks the user is signed in. In these cases the user previously saw UnauthorizedState explaining the problem, but is now silently redirected with no explanation, effectively making UnauthorizedState dead code, and the name hasLostAccess suggests a narrower meaning than what it actually covers."
+    },
+    {
+      "file": "apps/web/src/features/spaces/utils.ts",
+      "line": 13,
+      "claim": "isUnauthorized treats both 401 and 404 as unauthorized, which feeds into the overly broad hasLostAccess redirect condition described for AuthState/index.tsx."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/AuthState/index.test.tsx",
+      "line": 142,
+      "claim": "The new test redirects on a 404 response, which locks in the overly broad redirect behaviour rather than testing the narrower intended case, and there is no test covering the wrong-wallet deep-link flow."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/SafeDropdownContainer.tsx",
+      "line": 111,
+      "claim": "Inside a space, the dropdown lists the space's Safes rather than wallet-owned ones, but the empty-list message tells the user to connect a wallet to find their Safe Accounts; a user signed in by email with no wallet in a one-Safe space sees this message even though connecting a wallet would not change the list."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/__tests__/SafeDropdownContainer.test.tsx",
+      "line": 90,
+      "claim": "The new empty-state tests render the container with items={[]}, an input the production code never passes since the parent only renders this container when the list still contains the already-selected item; the actual case that occurs in the app, one item that is the selected one plus no wallet, is left untested."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpacesList/index.tsx",
+      "line": 241,
+      "claim": "An empty div is used only to preserve justify-between layout; applying ml-auto to the AccountInfo wrapper would achieve the same layout without the placeholder element."
+    }
+  ]
+}

@@ -1,0 +1,205 @@
+{
+  "pr": 8484,
+  "title": "feat: show on-chain (GS) error messages clearly (WA-3005)",
+  "description": "## What it solves\n\nPart of **[WA-3005 — Show errors clearly: on-chain error messages](https://linear.app/safe-global/issue/WA-3005/show-errors-clearly-on-chain-error-messages)**. Makes Safe{Wallet}'s on-chain (GS) transaction errors honest and actionable: one shared source of copy both apps read, a Details panel that never leaks raw payloads, and error states that stop blaming the transaction when the real problem is our infrastructure. (Still to come on separate PRs: GS026 pre-checks, Bucket A inline validation, GS013 selector decoding.)\n\n## What's in this PR\n\n**Shared message source**\n- `packages/utils/src/services/exceptions/contractErrors.ts` — all 32 GS codes (`GS000`–`GS400`) → user-facing copy + a `handling` tag (`inline-validation` / `runtime` / `internal`), with `{nativeAsset}` / `{token}` interpolation. GS026 carries its three cause messages; `internal` codes and the still-undecodable GS013 share one fallback. Both web and mobile read it (parity test); a content-lint test forbids URLs, versions, request bodies, \"please\", \"!\" and technical identifiers.\n- Web's `useIsValidExecution` reads the shared resolver (and resolves the gas-token symbol so GS012 reads \"Not enough USDC …\", not `{token}`). The web-only `ContractErrorCodes` enum is removed.\n\n**Details = support reference (GS errors only)**\n- For a GS error, the \"Details\" panel shows **just the error code** (`ErrorDetails`) — never the raw ethers/viem payload (provider URLs, request bodies, library versions). Non-GS errors keep their existing Details unchanged (off-chain wording is out of scope / WA-3006). The full support reference is intended to live in the support tool.\n\n**Infrastructure failure ≠ transaction prediction**\n- `isRevertError()` treats an error as a genuine on-chain revert only on a decodable signal (GS code / `CALL_EXCEPTION` / \"execution reverted\"); everything else (RPC 500, timeout, rate-limit) is infra.\n- `TxCheckError` (pre-execution validity/estimation): a revert warns *\"This transaction will most likely fail. To save gas costs, reject this transaction.\"*; an infra failure says *\"Could not check this transaction. {network} is not responding. Nothing was signed.\"* — never a prediction. Wired to all 7 surfaces that previously hardcoded \"most likely fail\". This fixes the ticket's flagship case (an HTTP 500 from the RPC previously rendered \"will most likely fail\").\n- `TxSubmitError` (submit/execution): only claims *\"Transaction reverted on {network}. Gas was spent.\"* on a mined receipt (status 0); a pre-broadcast failure never claims gas, and a deterministic revert is not offered a retry. Replaces *\"Error submitting the transaction. Please try again.\"* across 8 surfaces.\n\n## How to test it\n\n```bash\nyarn workspace @safe-global/utils test src/services/exceptions/__tests__/contractErrors.test.ts\nyarn workspace @safe-global/web test src/services/contracts/__tests__/contractErrorsParity.test.ts src/features/recovery/hooks/__tests__/useIsValidExecution.test.ts src/components/common/ErrorDetails src/components/tx/ErrorMessage src/components/tx/TxCheckError src/components/tx/TxSubmitError src/utils/__tests__/transaction-errors.test.ts\nyarn workspace @safe-global/mobile test src/services/__tests__/contractErrorsParity.test.ts\n```\n\nStorybook: **Errors → Contract error messages** — each error is fed a realistic raw payload; a GS error's \"Details\" shows only the code.\n\n## Affected flows\n\n- **Execute / confirm a transaction** — pre-execution check now shows \"will fail\" only for real reverts, \"could not check\" for infra; the submit error states gas only when actually spent.\n- **Recovery, batch execution, execute-through-role, counterfactual activation, spending limits** — same check/submit error components.\n- **Any inline `ErrorMessage`** — GS errors show a code-only Details; non-GS unchanged.\n\n## Blast radius\n\n- `ErrorMessage` (shared) — Details branches on GS-vs-not; non-GS path is byte-for-byte unchanged. Body untouched.\n- New shared components `TxCheckError` / `TxSubmitError` wrap `ErrorMessage`; the 15 surfaces that hardcoded the old strings now use them.\n- `contractErrors.ts` adds `getGsCodeFromError`; `transaction-errors.ts` adds `isRevertError`.\n- `useIsValidExecution` reads `useBalances` (cached) for the gas-token symbol.\n- Toasts / `notificationsSlice` unchanged from `dev`.\n- `packages/utils` — additive; mobile reads shared strings via a parity test; no mobile runtime change.\n- No RTK endpoints, feature flags, chain configs, routes, or migrations touched.\n\n## Risks / not checked\n\n- Off-chain / generic copy is largely untouched (WA-3006), except the submit-error path where the gas-spent claim is in WA-3005 scope.\n- `TxSubmitError` infers \"gas was spent\" from a mined receipt on the error; if a flow surfaces a mined revert without a receipt, it falls back to the no-gas-claim copy (safe default).\n- No mobile runtime consumption beyond the parity test.\n- Most GS codes can't be reproduced in-app by design (they're prevented); covered by unit tests + Storybook.\n\n## Visual summary\n\n```mermaid\nflowchart LR\n  SRC[\"packages/utils · contractErrors.ts<br/>32 GS codes + getGsCodeFromError\"]\n  SRC --> HOOK[\"useIsValidExecution\"]\n  SRC --> EM[\"ErrorMessage · Details\"]\n  EM -->|GS error| CODE[\"error code only\"]\n  EM -->|other| RAW[\"original raw message\"]\n  ERR[\"tx error\"] --> CLS{\"isRevertError?\"}\n  CLS -->|revert| FAIL[\"will most likely fail / reverted, gas spent\"]\n  CLS -->|infra| CHECK[\"could not check / could not submit\"]\n```\n\n## Checklist\n\n- [ ] I've tested the branch on mobile 📱 — _shared strings only; no mobile runtime change_\n- [x] I've documented how it affects the analytics (if at all) 📊 — _no taxonomy change_\n- [x] I've written a unit/e2e test for it (if applicable) 🧑‍💻\n- [x] I've listed affected flows and blast radius, and named what I did not verify 🎯\n\n---\n\n## CLA signature\n\nWith the submission of this Pull Request, I confirm that I have read and agree to the terms of the [Contributor License Agreement](https://s",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "packages/utils/src/services/exceptions/contractErrors.ts",
+      "line": 92,
+      "claim": "The GS400 message has a full stop in the middle of the sentence and none at the end, inconsistent with the other inline-validation messages, which are single sentences with no full stop."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/features/recovery/hooks/__tests__/useIsValidExecution.test.ts",
+      "line": null,
+      "claim": "There is no test verifying that nativeAsset is filled in from chain."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/components/tx/ErrorMessage/index.tsx",
+      "line": 101,
+      "claim": "The error display component renders error.message, not error.reason, so the new mapped GS messages, which are assigned to reason, are never shown to the user."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/services/contracts/__tests__/contractErrorsParity.test.ts",
+      "line": 1,
+      "claim": "This test and its mobile counterpart both check the same strings as the shared package's contractErrors.test.ts, but since both apps read from one shared module, neither parity test can catch a divergence between web and mobile that the package-level test would already catch, making them redundant."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/components/tx/ErrorMessage/ContractErrorMessages.stories.tsx",
+      "line": 12,
+      "claim": "Comments use planning labels such as \"Topic 2/4/6\", \"AC #2\", \"Bucket A/B/C\", and \"WA-3005\" that will become stale over time and conflict with the project's guidance to treat comments as tech debt."
+    },
+    {
+      "id": "F6",
+      "file": "packages/utils/src/services/exceptions/contractErrors.ts",
+      "line": 118,
+      "claim": "Comments use planning labels such as \"Topic 2/4/6\", \"AC #2\", \"Bucket A/B/C\", and \"WA-3005\" that will become stale over time and conflict with the project's guidance to treat comments as tech debt."
+    },
+    {
+      "id": "F7",
+      "file": "packages/utils/src/services/exceptions/contractErrors.ts",
+      "line": 48,
+      "claim": "Code comments reference internal ticket/planning labels such as 'Topic 2/4/6', 'Bucket A/B/C', 'AC #2', and 'WA-3005', which are meaningless outside the originating ticket and will become stale over time."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/src/hooks/useIsValidExecution.ts",
+      "line": 101,
+      "claim": "The GS012 error message call is missing the `token` value as a second parameter, so the message 'Not enough {token} to cover the network fee. Pay with {nativeAsset} instead.' will not have its {token} placeholder filled in correctly."
+    },
+    {
+      "id": "F9",
+      "file": "apps/web/src/components/tx/ExecuteForm.tsx",
+      "line": 294,
+      "claim": "The UI shows hard-coded copy instead of rendering the mapped error reason, so the new GS error messages are not surfaced to users even if the mapping logic ran."
+    },
+    {
+      "id": "F10",
+      "file": "apps/mobile/src/services/__tests__/contractErrorsParity.test.ts",
+      "line": 14,
+      "claim": "This test duplicates the web app's parity test by calling the same pure shared function, adding a third copy of coverage for strings already locked by the package test and snapshot; a single import smoke test per app would suffice."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/src/features/recovery/hooks/__tests__/useIsValidExecution.test.ts",
+      "line": 60,
+      "claim": "The test titled 'should map a known GS revert reason to its user-facing message' only asserts on the .reason property and does not check that the message is rendered anywhere, so it would still pass even if no UI ever displayed the message."
+    },
+    {
+      "id": "F12",
+      "file": "packages/utils/src/services/exceptions/contractErrors.ts",
+      "line": 79,
+      "claim": "The message \"Could not verify your signature. Sign the transaction again.\" is duplicated across three GS codes (GS020, GS023, GS026 BAD_SIGNATURE) instead of being defined once as a shared constant."
+    },
+    {
+      "id": "F13",
+      "file": "packages/utils/src/services/exceptions/contractErrors.ts",
+      "line": 66,
+      "claim": "The fallback copy tells the user to \"contact support with the reference below,\" but no such reference is rendered below it anywhere in the current implementation; the story's own copy indicates that feature is planned for later."
+    },
+    {
+      "id": "F14",
+      "file": "apps/web/src/services/contracts/__tests__/contractErrorsParity.test.ts",
+      "line": 14,
+      "claim": "This test and its mobile counterpart both call the same pure function from the same shared module, so they cannot disagree with each other, making one of them redundant given the package's own test and snapshot already cover the same strings."
+    },
+    {
+      "id": "F15",
+      "file": "apps/web/src/components/tx/ErrorMessage/ContractErrorMessages.stories.tsx",
+      "line": 29,
+      "claim": "The heading hard-codes the text \"All 32 GS codes\" instead of deriving the count from CODES.length, so it can go out of sync if the code list changes."
+    },
+    {
+      "id": "F16",
+      "file": "apps/web/src/services/contracts/__tests__/contractErrorsParity.test.ts",
+      "line": 1,
+      "claim": "This test file now sits in a directory whose corresponding source file, ContractErrorCodes.ts, was deleted in this change, leaving the test without an adjacent source file."
+    },
+    {
+      "id": "F17",
+      "file": "apps/web/src/components/tx/ErrorMessage/ContractErrorMessages.stories.tsx",
+      "line": 24,
+      "claim": "The handlingColor function is typed to accept a plain string parameter, but it could instead take the more specific ContractErrorHandling type for better type safety."
+    },
+    {
+      "id": "F18",
+      "file": "apps/web/src/components/tx/ErrorMessage/ContractErrorMessages.stories.tsx",
+      "line": 29,
+      "claim": "The story heading hardcodes the text 'All 32 GS codes' instead of deriving the count from CODES.length, so the heading will become inaccurate if codes are added or removed."
+    },
+    {
+      "id": "F19",
+      "file": "apps/web/src/hooks/useIsValidExecution.ts",
+      "line": 83,
+      "claim": "The GS error code to message mapping only runs on a caught exception, but protocol-kit's isValidTransaction wraps its body in its own try/catch and returns false instead of throwing in every contract version, so the mapping code path is never actually reached for a real revert."
+    },
+    {
+      "id": "F20",
+      "file": "apps/web/src/hooks/useIsValidExecution.ts",
+      "line": 84,
+      "claim": "The mapped user-facing error message is written into err.reason, but no UI consumer reads that field: ExecuteForm.tsx and RecoverAccountReview/index.tsx show fixed generic text, and the Details panel in ErrorMessage/index.tsx shows error.message, which ethers sets at error-creation time and is unaffected by this change. As a result the new copy is never actually displayed to a user."
+    },
+    {
+      "id": "F21",
+      "file": "apps/web/src/hooks/useIsValidExecution.ts",
+      "line": 84,
+      "claim": "The interpolation call only passes nativeAsset, so the {token} placeholder in the GS012 message is never filled and is shown literally as '{token}' to users."
+    },
+    {
+      "id": "F22",
+      "file": "apps/web/src/features/recovery/hooks/__tests__/useIsValidExecution.test.ts",
+      "line": null,
+      "claim": "There is no test verifying that a non-GS reason is left unmodified."
+    },
+    {
+      "id": "F23",
+      "file": "apps/web/src/services/contracts/__tests__/contractErrorsParity.test.ts",
+      "line": 7,
+      "claim": "The parity test file header also carries the same internal ticket/planning labels referenced elsewhere in the change."
+    },
+    {
+      "id": "F24",
+      "file": "apps/web/src/hooks/useIsValidExecution.ts",
+      "line": 86,
+      "claim": "The GS011 message's {nativeAsset} placeholder is left unfilled and shown literally whenever chain is undefined."
+    },
+    {
+      "id": "F25",
+      "file": null,
+      "line": null,
+      "claim": "The isValidTransaction result of false is not handled as a failure case, and the contract's own simulation is not called directly, so no revert reason is captured; the mapped message should instead be passed into ErrorMessage as visible text rather than overwriting err.reason."
+    },
+    {
+      "id": "F26",
+      "file": "packages/utils/src/services/exceptions/contractErrors.ts",
+      "line": 92,
+      "claim": "The GS400 message consists of two sentences but is missing a final period, while other two-sentence messages in the same file end with a period and the one-line field-validation messages do not, making the punctuation convention inconsistent across the new copy."
+    },
+    {
+      "id": "F27",
+      "file": "apps/web/src/hooks/useIsValidExecution.ts",
+      "line": 76,
+      "claim": "The call to safeContract.isValidTransaction(...) is returned without an await, so if the underlying promise rejects, the error is not caught by the surrounding catch block."
+    },
+    {
+      "id": "F28",
+      "file": "apps/web/src/hooks/useIsValidExecution.ts",
+      "line": 80,
+      "claim": "A comment states that the raw GS code belongs in the support reference (Details panel), but the code actually overwrites reason, losing the one structured copy of the code, and the Details panel reads message, not reason, so the comment describes behavior that does not exist."
+    },
+    {
+      "id": "F29",
+      "file": "apps/web/src/components/tx/ErrorMessage/ContractErrorMessages.stories.tsx",
+      "line": 13,
+      "claim": "The story file also contains the same internal ticket/planning labels in comments, and the 'Topic' label additionally appears visibly in the story's on-screen headings and alert text, exposing internal-only terminology to anyone viewing the story."
+    },
+    {
+      "id": "F30",
+      "file": "apps/web/src/components/tx/ErrorMessage/ContractErrorMessages.stories.tsx",
+      "line": 47,
+      "claim": "CONTRACT_ERRORS[code].handling is looked up twice within the JSX instead of being stored in a local variable once, which is unnecessary repetition."
+    },
+    {
+      "id": "F31",
+      "file": "apps/web/src/components/tx/ErrorMessage/ContractErrorMessages.stories.tsx",
+      "line": 99,
+      "claim": "The story claims 'The message you see is the new copy,' but it passes the message in via the children prop, which production code never does, so the story does not demonstrate the actual rendering path."
+    },
+    {
+      "id": "F32",
+      "file": "apps/web/src/features/recovery/hooks/__tests__/useIsValidExecution.test.ts",
+      "line": 66,
+      "claim": "The test mock throws synchronously (isValidTransaction: () => { throw error }), which does not match the real SDK's async behavior of never throwing, so the test passes even though the underlying feature does not work in production."
+    },
+    {
+      "id": "F33",
+      "file": "packages/utils/src/services/exceptions/__tests__/contractErrors.test.ts",
+      "line": 67,
+      "claim": "This test treats a leftover unfilled placeholder in the message as expected/intended behavior rather than as a bug, and there is no hook-level test covering the chain-symbol interpolation branch, so the unfilled-placeholder regression is not caught."
+    }
+  ]
+}

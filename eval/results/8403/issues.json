@@ -1,0 +1,35 @@
+{
+  "usage": {
+    "usd": 0.303347,
+    "turns": 3,
+    "wallSeconds": 23
+  },
+  "issues": [
+    {
+      "findings": [
+        "F1",
+        "F3"
+      ],
+      "summary": "PR description allegedly does not mention the Ledger axios 1.8.2 → 1.18.1 override",
+      "label": "wrong",
+      "evidence": "The PR description explicitly says the only exact pin overridden is `@ledgerhq/*` (`1.8.2`), explains why it is low-risk, and asks for a Ledger connect/sign smoke test. The claim that this was left out is factually incorrect (yarn.lock:9702/9719 are the Ledger entries the description refers to)."
+    },
+    {
+      "findings": [
+        "F2",
+        "F4"
+      ],
+      "summary": "Global axios resolution overrides the Ledger SDKs' exact axios@1.8.2 pin on web and mobile; a scoped resolution could be used instead",
+      "label": "low",
+      "evidence": "package.json:29 adds a global `axios: \"1.18.1\"` resolution. It overrides the exact `npm:1.8.2` pins at yarn.lock:9702/9719 for @ledgerhq packages, which both apps/web/package.json:70-71 and apps/mobile/package.json:52-53 depend on. The override is intended and its risk is acknowledged in the PR description. The only thing left open is that the mobile/BLE runtime is not discussed, so the remaining concern is minor."
+    },
+    {
+      "findings": [
+        "F5"
+      ],
+      "summary": "Ledger over mobile BLE, and the mobile bundle, should be checked before merge",
+      "label": "low",
+      "evidence": "The test plan asks for a smoke test on a web deploy preview plus mobile type-check, and the \"tested on mobile\" checkbox is not ticked. Mobile does use the Ledger SDKs (apps/mobile/package.json:52-55), so this is a reasonable gap in testing. But axios 1.8→1.18 is a semver-minor bump within the same major version, so the risk is small."
+    }
+  ]
+}

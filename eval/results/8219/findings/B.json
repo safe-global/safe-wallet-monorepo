@@ -1,0 +1,15 @@
+{
+  "usd": 0.0621316,
+  "findings": [
+    {
+      "file": "apps/mobile/src/components/SafeAccountInput/index.tsx",
+      "line": 21,
+      "claim": "No Jest test fails if this fix is reverted, because Jest does not apply React Compiler (jest-expo's babel caller doesn't set supportsReactCompiler, so babel-preset-expo disables it), meaning a render test would pass with either watch or useWatch. The only existing regression coverage for this behavior is two Maestro flows (add-existing-safe.yml:24 and add-safe-and-import-signer.yml:49) that assert the success icon, but these only run nightly or when a PR is labelled mobile-e2e-test, so they would not automatically catch a regression on this PR."
+    },
+    {
+      "file": "apps/mobile/src/components/SafeAccountInput/hooks/useImportSafe.ts",
+      "line": 31,
+      "claim": "This line uses the same watch()-from-useFormContext pattern in a child component that the commit just fixed elsewhere for a different field, so by the same reasoning SafeAccountInput may not re-render when safeAddress changes. If a user pastes a new valid address over another valid one, errors, dirtyFields, and isValid don't change, so the debounced address lookup could run using the stale address until some other state update triggers a re-render."
+    }
+  ]
+}

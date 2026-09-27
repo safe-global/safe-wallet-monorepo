@@ -1,0 +1,45 @@
+{
+  "usd": 0.0474856,
+  "findings": [
+    {
+      "file": "apps/web/src/components/transactions/TxSigners/index.tsx",
+      "line": 270,
+      "claim": "The last 'Signed (…)' row and the 'Created' row compute isLast as !showExecutionRow, but a Safenet row can now render after them. When !showExecutionRow is true and SafenetAuditRow actually renders, two adjacent rows both claim isLast=true, dropping the vertical connector between them."
+    },
+    {
+      "file": "apps/web/src/components/transactions/TxSigners/index.tsx",
+      "line": 281,
+      "claim": "SafenetAuditRow can return null at render time (no snapshot yet, or UNAVAILABLE), so the parent has no way of knowing whether a real row will follow, making it impossible to correctly compute isLast for the preceding rows without additional state passed up from the child."
+    },
+    {
+      "file": "apps/web/src/components/transactions/TxSigners/index.tsx",
+      "line": 159,
+      "claim": "useLoadFeature(SafenetChecksFeature) triggers the dynamic import() for every rendered TxSigners regardless of isSafenetEnabled, causing a wasted network round trip on non-Safenet chains and undermining the PR's claim that disabled sessions pay no bundle cost."
+    },
+    {
+      "file": "apps/web/src/components/transactions/TxSigners/index.tsx",
+      "line": 287,
+      "claim": "The enabled check should be moved inside SafenetAuditRow itself, or the enabled state should be checked first so useLoadFeature is only called conditionally, to avoid the unnecessary lazy import when Safenet is disabled."
+    },
+    {
+      "file": "apps/web/.env.example",
+      "line": 30,
+      "claim": "NEXT_PUBLIC_SAFENET_CHECKS_FORCE duplicates the local feature-flag override UI added previously, creating two override paths for a single flag, which is a maintenance hazard."
+    },
+    {
+      "file": "apps/web/src/features/safenet-checks/index.ts",
+      "line": 11,
+      "claim": "The process.env branch backing the duplicate NEXT_PUBLIC_SAFENET_CHECKS_FORCE override should be dropped along with the env var since the flag can already be overridden via the feature-flag override UI."
+    },
+    {
+      "file": "apps/web/src/features/safenet-checks/components/SafenetAuditRow.tsx",
+      "line": 79,
+      "claim": "Line 68 already returns early if !snapshot, so the optional chaining in snapshot?.events.find(...) on lines 79-80 is redundant and can be simplified to snapshot.events.find(...)."
+    },
+    {
+      "file": "apps/web/src/features/safenet-checks/components/SafenetAuditRow.tsx",
+      "line": 65,
+      "claim": "useChain(snapshot?.chainId ?? '') is invoked with an empty-string fallback before the snapshot check; although useChain('') currently returns undefined, the code would read more clearly if the empty-string fallback were dropped or the lookup were gated on snapshot?.chainId."
+    }
+  ]
+}

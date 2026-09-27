@@ -1,0 +1,223 @@
+{
+  "pr": 8646,
+  "title": "feat(tx-flow): parameterise the transaction flow for Space-level use (SafeScope)",
+  "description": "## What it solves\r\n\r\nResolves: [WA-3146](https://linear.app/safe-global/issue/WA-3146/parameterise-the-transaction-flow-for-space-level-use)\r\n\r\nThe transaction flow derives the target Safe, chain and Safe config from the route the user is on (`useSafeInfo` ← Redux ← `?safe=`, `useChainId` ← URL, plus two app-wide instances bound to that Safe: the protocol-kit SDK and the read-only provider). Policy creation (M1.2/M1.3) runs on `/spaces/policies`, where there is no ambient Safe — and the existing workaround (shallow-writing `?safe=` into the URL) is what AC C17b forbids, with a real window where the previous Safe's nonce/fee/Safe Shield result is shown before the swap settles.\r\n\r\n## How this PR fixes it\r\n\r\nA **SafeScope** — the Safe a flow explicitly operates on — wraps the existing flow; nothing is duplicated (decision Q27).\r\n\r\n- **`components/tx-flow/safe-scope/`** — `SafeScopeProvider` holds `(chainId, safeAddress)` (mutable mid-flow: per the designs the Safe selector lives inside step 1) and resolves the full SafeState (CGW), a per-chain read-only provider (honouring custom RPC) and a per-Safe protocol-kit SDK, all keyed on `scopeKey = \"${chainId}:${safeAddress}\"` — the same id format as `SafeAccountSelector`'s `buildSafeAccountId` (#8580), so the create form (WA-3150) wires `onChange → setScope` directly. One provider per flow instance; unmount on close, so consecutive flows share nothing.\r\n- **Hooks**: `useSafeInfo`, `useChainId` (→ `useCurrentChain` derives), `useSafeSDK`, `useWeb3ReadOnly` return the scope when one is mounted and take their **original branch when absent** — the ~90 tx-flow components that call them are untouched.\r\n- **tx-sender**: the generic `create*` / `dispatch*` functions (incl. `dispatchTxRelay`), `getAndValidateSafeSDK`, `getSafeProvider`, `getSafeSDKWithSigner`, `prepareTxExecution`, `prepareApproveTxHash`, `runExecutionPreChecks` and `getReadOnlyCurrentGnosisSafeContract` gain a **trailing optional `scope`**; `useTxActions`, `SafeTxProvider` and `ConfirmProposedTx` pass it. `createNewSpendingLimitTx` gains the param WA-3152 will use.\r\n- **Never the wrong Safe**: a scope passed without its SDK/provider **throws** instead of falling back to the URL-Safe instance; reaching the URL-Safe SDK while a Space provider is mounted logs `ErrorCodes._822` **and throws** — nothing can be signed for the URL Safe before a Safe is selected.\r\n\r\n## How to test it\r\n\r\n- Storybook: `yarn workspace @safe-global/web storybook` → **Components/TxFlow/SafeScope** — `NoScope` (Safe-level baseline), `Probe` (URL says Sepolia, scope says Polygon — every hook resolves Polygon), `SwitchScope` (A→B→Clear, no residue).\r\n- `yarn workspace @safe-global/web test src/components/tx-flow/safe-scope src/hooks src/services/tx src/components/tx` — scope switch/mid-flow-loading/same-chain-switch, singleton-guard throw, relay threading, and no-provider baselines pinned against frozen copies of the pre-change implementations.\r\n- Full suite: 919 suites / 8143+ tests green; lint / prettier / type-check clean.\r\n- Safe-level manual pass: send + spending limit on any Safe — identical behaviour, no `822` in the console.\r\n\r\n## Affected flows\r\n\r\n- **None user-visible.** This ticket ships infrastructure only (agreed deliverable on WA-3146); Space-level entry points land with WA-3150/3151/3152 (create form / confirm summary / multisend) and WA-3155 (sign/execute from the Policies detail panel — `ConfirmProposedTx` under a scope already supports it).\r\n- Every Safe-level transaction flow (send, swap, settings, spending limit, …) is intentionally unchanged; the formal regression pass is WA-3147.\r\n\r\n## Blast radius\r\n\r\n- **tx-sender API**: all new params trailing and optional — no existing caller changed semantics; one pre-existing test updated for call arity only.\r\n- **`useSafeSDK` / `useWeb3ReadOnly`**: now thin wrappers over their `ExternalStore`s (same names/import paths; `get*`/`set*` untouched, 13 existing consumers unaffected).\r\n- **`getAndValidateSafeSDK`**: throws when called unscoped while a Space provider is mounted — a state that cannot occur on Safe-level routes (no provider mounts there).\r\n- **`packages/utils`**: one additive `ErrorCodes` entry (`_822`) — shared with mobile, additive only.\r\n- **RTK Query**: the provider subscribes to `useSafesGetSafeV1Query` with the same cache keys the app already uses — no extra traffic for an already-viewed Safe.\r\n- Remaining direct `getSafeSDK()` readers (`safeContracts.ts` helpers other than `getReadOnlyCurrentGnosisSafeContract`, `utils/tokens.ts`, tenderly utils) are Safe-level-only paths, listed in the design notes for WA-3147.\r\n\r\n## Risks / not checked\r\n\r\n- No e2e/cypress in this PR (agreed scope); the Space-level path has no entry point yet, so it cannot be exercised in the real app until WA-3150.\r\n- The relay (gasless) execution path under a scope is covered by unit tests only — not manually exercised (needs a relay-enabled chain + a real flow).\r\n- Counterfactual (undeployed) Safes are out of scope by design: `getGnosisSafeContract`'s `safe.version`-fallback still reads the URL-Safe SDK on that path (documented for WA-3147).\r\n- `_822` guard fires per call with no dedupe — could be noisy in monitoring once a Space flow ships; revisit with WA-3150.\r\n- Storybook stories verified by headless build + manual click-through; no visual snapshot tests.\r\n\r\n## Visual summary\r\n\r\n```mermaid\r\nflowchart TB\r\n    subgraph safe_level [\"Safe level (unchanged)\"]\r\n        URL[\"?safe=sep:0xA…\"] --> Redux[\"Redux safeInfoSlice\"]\r\n        Redux --> Stores[\"app-wide SDK + provider(bound to URL Safe)\"]\r\n    end\r\n\r\n    subgraph space_level [\"Space level (new)\"]\r\n        Selector[\"SafeAccountSelector.onChange\"] --> SetScope[\"setScope(chainId, address)\"]\r\n        SetScope --> Provider[\"SafeScopeProvider(SafeState + provider + SDK per scopeKey)\"]\r\n    end\r\n\r\n    Stores -->|no scope mounted| Hooks[\"useSafeInfo / useChainId / useSafeSDK / useWeb3ReadOnly\"]\r\n    Provider -->|scope wins| Hooks",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/components/tx-flow/safe-scope/SafeScopeProvider.tsx",
+      "line": 88,
+      "claim": "An eslint-disable-next-line react-hooks/exhaustive-deps suppresses the exclusion of 'safe' from a dependency array; deriving sdkInputs from a memo keyed on the stable fields would avoid needing this suppression."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/components/tx-flow/safe-scope/activeScope.ts",
+      "line": 8,
+      "claim": "The active-scope guard is a process-wide counter rather than being tied to the React tree, so while any SafeScopeProvider is mounted anywhere in the app, every unscoped getAndValidateSafeSDK() call throws, including the six scope-less create*Tx helpers in create.ts."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/components/tx-flow/safe-scope/SafeScopeProvider.tsx",
+      "line": 65,
+      "claim": "The dynamic import('@/hooks/wallets/web3').then(...) has no .catch, so if the chunk fails to load or createWeb3ReadOnly throws, the rejection goes unhandled and the scope is left with web3ReadOnly undefined with no error shown; a .catch reporting through trackError, as the SDK effect at line 109 does, would fix this."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/components/tx-flow/safe-scope/index.ts",
+      "line": 4,
+      "claim": "The barrel re-exports registerActiveScope and hasActiveScope, which should only be used by the provider and sdk.ts, exposing internals that shouldn't be part of the public surface; the barrel should be dropped or cut down to only the public types and hooks."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/components/tx/shared/hooks.ts",
+      "line": 210,
+      "claim": "dispatchTxRelay now takes 7 positional arguments, and dispatchTxExecution in the same file now takes 8, called inside useTxActions' useMemo, making already long signatures longer and harder to work with."
+    },
+    {
+      "id": "F6",
+      "file": null,
+      "line": null,
+      "claim": "The _822 guard logs on every call, which could become noisy in monitoring once a Space flow ships; a first-hit-only dedupe at the module level should be considered before the first Space entry point lands so the guard does not drown legitimate signal in the observability pipeline."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/services/contracts/safeContracts.ts",
+      "line": 64,
+      "claim": "getReadOnlyMultiSendCallOnlyContract, getReadOnlySignMessageLibContract, and the proxy-factory and fallback-handler getters take no scope parameter, so they cannot honor an active scope."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/src/components/tx-flow/flows/ConfirmTx/ConfirmProposedTx.tsx",
+      "line": 29,
+      "claim": "createExistingTx(chainId, txId, undefined, scope) passes undefined purely as a placeholder to reach the 4th argument slot; scope could instead go into an options object or be closed over in useTxActions."
+    },
+    {
+      "id": "F9",
+      "file": "apps/web/src/components/tx-flow/safe-scope/activeScope.ts",
+      "line": null,
+      "claim": "hasActiveScope() relies on a plain module-scope counter (activeScopes), making SSR-safe reasoning in Next.js depend on the module being re-evaluated per request, which it is not; since getAndValidateSafeSDK only runs client-side this works in practice, but the client-only invariant that the counter depends on should be documented with a comment."
+    },
+    {
+      "id": "F10",
+      "file": null,
+      "line": null,
+      "claim": "The safe-scope folder should be moved so that it is located inside the spaces folder, as its current location outside of it is considered incorrect."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/src/components/tx-flow/safe-scope/context.ts",
+      "line": 10,
+      "claim": "A SafeScopeProvider mounted with no target selected yet yields scope === undefined, which is indistinguishable from there being no provider at all."
+    },
+    {
+      "id": "F12",
+      "file": "apps/web/src/components/tx-flow/safe-scope/index.ts",
+      "line": null,
+      "claim": "The SafeScope barrel re-exports SafeScopeProvider, which pulls in ethers and protocol-kit for any consumer that imports from the barrel; two files already deep-import to avoid this, and a future contributor importing useSafeScope from the barrel would regress bundle size on any page that hook lands in."
+    },
+    {
+      "id": "F13",
+      "file": "apps/web/src/services/tx/tx-sender/dispatch.ts",
+      "line": 307,
+      "claim": "In a scoped flow targeting a different chain than the URL, the stored signerNonce ends up coming from the wrong chain; since SimpleTxWatcher compares this value against the scoped chain's live nonce to detect replacements, this can wrongly flag a successful transaction as replaced or fail to detect an actual replacement, and the same value is reused by the speed-up flow (SpeedUpModal:83)."
+    },
+    {
+      "id": "F14",
+      "file": "apps/web/src/components/tx-flow/safe-scope/index.ts",
+      "line": 1,
+      "claim": "Nothing imports the safe-scope barrel file; every caller deep-imports /context or /types instead, with comments in safeCoreSDK.ts:23 and web3ReadOnly.ts:8 stating this is deliberate for bundle size, making the barrel unused."
+    },
+    {
+      "id": "F15",
+      "file": "apps/web/src/components/tx-flow/flows/ConfirmTx/ConfirmProposedTx.tsx",
+      "line": 29,
+      "claim": "Because scope is in this effect's dependency array and gets a new identity on every poll, createExistingTx re-runs twice per poll, refetching the transaction details from the backend and replacing safeTx with a new object in the middle of a review."
+    },
+    {
+      "id": "F16",
+      "file": null,
+      "line": null,
+      "claim": "Missing test coverage should include: the check using scope.sdk when a scope is provided, the check being skipped when a provided scope's sdk is undefined, and the check being skipped with _822 logged when there is an active scope but none is passed."
+    },
+    {
+      "id": "F17",
+      "file": "apps/web/src/services/tx/__tests__/useTxActions.scope.test.tsx",
+      "line": 28,
+      "claim": "This test mocks runExecutionPreChecks away entirely, so it does not exercise the new scope-related behavior."
+    },
+    {
+      "id": "F18",
+      "file": "apps/web/src/services/tx/executionPreChecks.ts",
+      "line": 136,
+      "claim": "executionPreChecks.test.ts was not extended to cover the new scope parameter or the added try/catch around the SDK guard."
+    },
+    {
+      "id": "F19",
+      "file": "apps/web/src/services/tx/executionPreChecks.ts",
+      "line": 137,
+      "claim": "The bare catch around getAndValidateSafeSDK swallows the guard's _822 throw along with the intended 'SDK not ready' case, so if a Space-level caller forgets to pass scope into runExecutionPreChecks, the signature-check guard's throw-and-log contract is silently downgraded to no signature check running at all, letting a transaction proceed without local signature verification."
+    },
+    {
+      "id": "F20",
+      "file": "apps/web/src/services/contracts/safeContracts.ts",
+      "line": 30,
+      "claim": "getGnosisSafeContract falls back to the unscoped getSafeSDK() to read the Safe version, and this path is reachable from the scoped dispatchTxRelay when safe.version is null, so the rule that scoped flows should never silently use the URL Safe is not fully enforced there."
+    },
+    {
+      "id": "F21",
+      "file": "apps/web/src/components/tx-flow/safe-scope/SafeScopeProvider.tsx",
+      "line": 123,
+      "claim": "Because a mounted-but-unselected scope looks the same as no scope, useSafeInfo, useChainId, useSafeSDK, and useWeb3ReadOnly fall back to the URL Safe inside the scoped flow until the user picks a target, rather than returning empty values while a scope is pending selection."
+    },
+    {
+      "id": "F22",
+      "file": "apps/web/src/services/tx/executionPreChecks.ts",
+      "line": 138,
+      "claim": "The check calls getAndValidateSafeSDK(scope) inside a try/catch that swallows every error, including the deliberate 'scope forgotten' throw, which silently skips the BAD_SIGNATURE check in that case."
+    },
+    {
+      "id": "F23",
+      "file": "apps/web/src/components/tx-flow/flows/ConfirmTx/__tests__/ConfirmProposedTx.scope.test.tsx",
+      "line": 17,
+      "claim": "There is no test covering ConfirmProposedTx's behavior before the SDK is ready under a scope, so the stale safeTxError-not-cleared case is untested."
+    },
+    {
+      "id": "F24",
+      "file": "apps/web/src/components/tx-flow/safe-scope/__tests__/SafeScopeProvider.test.tsx",
+      "line": 275,
+      "claim": "The existing poll test only checks scope values, not object identity, so it would not catch scope getting a new identity on every poll."
+    },
+    {
+      "id": "F25",
+      "file": "apps/web/src/components/tx-flow/flows/ConfirmTx/ConfirmProposedTx.tsx",
+      "line": 29,
+      "claim": "The stale safeTxError causes ReviewTransactionContent.tsx:78 to keep showing a TxCheckError banner next to what is actually a valid transaction, and logError(_103) fires on every scoped mount."
+    },
+    {
+      "id": "F26",
+      "file": "apps/web/src/services/tx/executionPreChecks.ts",
+      "line": 137,
+      "claim": "executionPreChecks.ts catches the throw from the unscoped SDK guard and silently skips the BAD_SIGNATURE check instead of distinguishing a genuine 'missing scope' condition from an 'SDK not initialized' condition, so the missing-scope case should be rethrown rather than swallowed."
+    },
+    {
+      "id": "F27",
+      "file": "apps/web/src/components/tx-flow/flows/ConfirmTx/ConfirmProposedTx.tsx",
+      "line": 29,
+      "claim": "Under a scope, this component runs on mount before scope.sdk has resolved, so getAndValidateSafeSDK(scope) throws and the resulting error is stored via setSafeTxError; when the SDK later resolves and setSafeTx succeeds, nothing clears safeTxError, since the only place that clears it is an unrelated effect in SafeTxProvider.tsx:112."
+    },
+    {
+      "id": "F28",
+      "file": "apps/web/src/components/tx-flow/safe-scope/SafeScopeProvider.tsx",
+      "line": 48,
+      "claim": "The scope's SafeState always sets deployed to true regardless of what CGW actually reports, so any downstream consumer that branches on safe.deployed, including runExecutionPreChecks which skips the STALE_NONCE check for undeployed Safes, will get incorrect results once a Space-level entry point relies on this data."
+    },
+    {
+      "id": "F29",
+      "file": "apps/web/src/hooks/wallets/useInitWeb3.ts",
+      "line": 34,
+      "claim": "The missing rejection handler in SafeScopeProvider.tsx copies an existing gap already present in this file."
+    },
+    {
+      "id": "F30",
+      "file": null,
+      "line": null,
+      "claim": "The bundle analyzer shows the global bundle grew by 1.24 KB even though this PR ships no user-facing entry point, so it should be verified that SafeScopeProvider and its ethers/protocol-kit dependencies are not being pulled into the global bundle via the barrel or a stray import, since the scope should only be paid for on /spaces/* routes."
+    },
+    {
+      "id": "F31",
+      "file": "apps/web/src/services/tx/tx-sender/sdk.ts",
+      "line": 69,
+      "claim": "The unscoped getSafeProvider() has no hasActiveScope() guard, so under an active scope it can still be called and silently return the URL chain's provider for batch execution, on-chain message signing, or relaying involving a Safe with no reported version."
+    },
+    {
+      "id": "F32",
+      "file": "apps/web/src/components/tx/security/tenderly/utils.ts",
+      "line": 41,
+      "claim": "This code still calls getReadOnlyCurrentGnosisSafeContract(params.safe) without passing a scope, but that function now routes through getAndValidateSafeSDK(scope) which throws whenever a SafeScopeProvider is mounted, so Tenderly simulation fails inside Space-level flows reached from TxInfoProvider, useSimulation, useCheckSimulation and QueuedTxSimulation."
+    },
+    {
+      "id": "F33",
+      "file": "apps/web/src/services/tx/tx-sender/dispatch.ts",
+      "line": 307,
+      "claim": "dispatchTxExecution receives a scope parameter but still calls getUserNonce(signerAddress), which reads the URL-chain getWeb3ReadOnly() instead of the scoped provider, so txOptions.nonce is only correct when the user manually overrides the nonce."
+    },
+    {
+      "id": "F34",
+      "file": "apps/web/src/components/tx-flow/SafeTxProvider.tsx",
+      "line": 6,
+      "claim": "This file imports ./safe-scope/context using a relative path, while every other file in this change uses the @/components/tx-flow/safe-scope/context absolute alias, making import style inconsistent within the diff."
+    },
+    {
+      "id": "F35",
+      "file": "apps/web/src/components/tx-flow/safe-scope/SafeScopeProvider.tsx",
+      "line": 139,
+      "claim": "isFetching is included in the scope useMemo dependencies, so it toggles true then false on every 15-second poll and produces a new scope object identity even when the underlying data hasn't changed."
+    },
+    {
+      "id": "F36",
+      "file": "apps/web/src/services/tx/__tests__/executionPreChecks.test.ts",
+      "line": null,
+      "claim": "This test file was not updated and still only mocks getSafeSDK, leaving the new scope-based branches in executionPreChecks untested."
+    }
+  ]
+}

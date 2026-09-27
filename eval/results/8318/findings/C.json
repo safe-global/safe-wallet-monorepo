@@ -1,0 +1,40 @@
+{
+  "usd": 0.0480756,
+  "findings": [
+    {
+      "file": "useTrustedSafesModal.ts",
+      "line": 113,
+      "claim": "Clusters are computed over the full allSafes list here, while ManageTrustedSafesContent.tsx separately re-runs useFlaggedSimilarAddresses over the filtered availableItems, causing two full hook chains (useSimilarityClusters -> useListSimilarities -> detectListSimilarities) to run per render."
+    },
+    {
+      "file": "ManageTrustedSafesContent.tsx",
+      "line": 102,
+      "claim": "The select-all confirmation gating (similarAddressesForSelectAll, toggleSelection) uses the full-list flaggedAll via isAddressFlagged, while the table's per-row badge uses the filtered flagged set computed from availableItems; when a search filters the list so only one address of a poisoned pair is visible, the row shows no similarity badge but selecting it still triggers the confirm-similar-address dialog, so the two flagged sources disagree and mislead the user."
+    },
+    {
+      "file": "useSimilarityClusters.ts",
+      "line": 35,
+      "claim": "When an impostor imitates an in-list trusted anchor, the anchor itself is not added to groupIdByAddress; grouping relies on the untested assumption that detectListClusters already grouped anchor and impostor because both SimilarityConfig and AnchorSimilarityConfig default to the same 4/4 thresholds, which is a silent coupling that breaks if the two configs are ever tuned independently, causing the anchor-impostor pair to lose its visual grouping while still being flagged."
+    },
+    {
+      "file": "useSimilarityClusters.ts",
+      "line": 35,
+      "claim": "The loop over all addresses to mark imitated ones runs even when imitated.size is 0 (the common case when the feature flag is off or no anchor matches), which is unnecessary work that could be skipped with a simple guard."
+    },
+    {
+      "file": "useSimilarityClusters.ts",
+      "line": null,
+      "claim": "useSimilarityClusters, which performs the interesting composition logic (union-find plus anchor annotations plus flagging the imitated original), has no direct test, even though detectListClusters is tested at the engine level and useFlaggedSimilarAddresses is tested with useListSimilarities mocked."
+    },
+    {
+      "file": "useOnboardingSafes.ts",
+      "line": 41,
+      "claim": "trustedAddresses is derived only from allAdded (pinned safes), so undeployed safes are not treated as trusted anywhere; an undeployed safe sharing an address with an owned safe on another chain would still be categorized as owned rather than trusted, unless the keys of allUndeployed[chainId] are also unioned into the trusted set."
+    },
+    {
+      "file": "useListSimilarities.ts",
+      "line": null,
+      "claim": "The name useListSimilarities is misleading because the hook only runs the anchor detector and returns a Map<address, ListAnnotation> based on anchor matches, not a general list-clustering result, which is confusing now that 'list clustering' is used by the differently-behaving useSimilarityClusters and detectListClusters."
+    }
+  ]
+}

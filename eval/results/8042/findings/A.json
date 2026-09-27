@@ -1,0 +1,35 @@
+{
+  "usd": 0.0635816,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/__tests__/AddContactDialog.test.tsx",
+      "line": 72,
+      "claim": "The mocked AddressInput component uses the label prop as the input's aria-label, and the shared fillForm helper looks up the field via screen.getByLabelText('Address'), which matches the full label text exactly. Since the label was changed to 'Address or ENS', this lookup throws, causing every test that fills the form (submit success, notification, error result, rejected promise) to fail."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/AddContactDialog.tsx",
+      "line": 137,
+      "claim": "The test should be updated to use getByLabelText('Address or ENS') to match the new label, and an assertion on the rendered label text should be added so the label change itself is covered by a test."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/AddContactDialog.tsx",
+      "line": 137,
+      "claim": "The new label hardcodes the ' or ENS' suffix regardless of whether the current chain supports ENS resolution, whereas AddressInput itself only appends that suffix when FEATURES.DOMAIN_LOOKUP is enabled for the chain (as seen at apps/web/src/components/common/AddressInput/index.tsx:72 and :166). Since the contact dialog is used across many networks while name resolution only runs for the current chain, this can invite users on unsupported networks to enter ENS names that never resolve and fail validation."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/AddContactDialog.tsx",
+      "line": 137,
+      "claim": "The label should be computed from the same domain-lookup condition already used elsewhere, for example 'Address' + (' or ENS' if domain lookup is enabled), instead of duplicating the logic with a hardcoded string; alternatively, product should confirm ENS should be advertised on every network."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/AddContactDialog.tsx",
+      "line": 137,
+      "claim": "The commit message describes the change as labeling the private contact field, but AddContactDialog is shared between AddPrivateContact.tsx and AddContact.tsx, so the new label also applies to the shared workspace 'Add contact' dialog, not only the private one."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/AddContactDialog.tsx",
+      "line": 137,
+      "claim": "It should be confirmed whether both the private and shared/workspace dialogs are intended to receive the new label, and the commit or PR description should be reworded to match; if only the private dialog should change, the label should instead be passed in as a prop."
+    }
+  ]
+}

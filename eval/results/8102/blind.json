@@ -1,0 +1,73 @@
+{
+  "pr": 8102,
+  "title": "fix: refetch space data on window focus and stale remounts",
+  "description": "> Stale space lists linger on,\n> now focus and fresh mounts refetch —\n> accounts, members, contacts current.\n\n## What it solves\n\nWorkspace data (accounts, members/invites, space address book) edited by an admin in one session stayed stale in other members' sessions until a full page reload — RTK Query's tag invalidation is local to the store that ran the mutation, and no refetch triggers were configured.\n\nResolves: https://linear.app/safe-global/issue/WA-2564/workspace-changes-require-manual-refresh-in-other-sessions\n\n## How this PR fixes it\n\nAdds a shared `SPACE_REFRESH_OPTIONS` constant (`refetchOnFocus: true`, `refetchOnMountOrArgChange: 30`) applied to the three queries where staleness is harmful: space safes, members, and the space address book.\n\nNon-obvious decisions:\n\n- `refetchOnMountOrArgChange: 30` is a staleness threshold checked only on new subscriptions (page navigation), **not** polling — zero background traffic.\n- The spaces sidebar shares the `spaceSafesGetV1` cache entry, so it freshens for free; `SpaceSelectorDropdown` (other spaces' safes, different cache keys) is deliberately left on cache-only behavior.\n- All call sites keep serving previous data during refetch, so lists and `useIsAdmin` permission gates don't flash empty.\n- Known accepted gap: a user staring at the page without a focus change or navigation still sees stale data (would need polling/push, out of scope per ticket severity).\n\n## How to test it\n\n1. Log in to the same space as admin (browser A) and member (browser B).\n2. In browser A, remove a Safe account / add a contact / invite a member.\n3. Switch to browser B — the focus event alone should refresh the lists (no reload).\n4. In browser B, navigate away from e.g. the address book, wait >30s, navigate back — data refetches.\n\n## Visual summary\n\n```mermaid\nflowchart LR\n  A[Window refocus] -->|refetchOnFocus| Q\n  B[Page navigation<br/>data older than 30s] -->|refetchOnMountOrArgChange| Q\n  C[Own mutation] -->|invalidatesTags 'spaces'| Q\n  Q[spaceSafes / members /<br/>space address book queries] --> D[Fresh data,<br/>previous data shown while fetching]\n```\n\n## Screenshots\n\nN/A - no UI changes\n\n## Checklist\n\n- [ ] I've tested the branch on mobile 📱\n- [x] I've documented how it affects the analytics (if at all) 📊 — no analytics impact\n- [x] I've written a unit/e2e test for it (if applicable) 🧑‍💻\n\n---\n\n## CLA signature\n\nWith the submission of this Pull Request, I confirm that I have read and agree to the terms of the [Contributor License Agreement](https://safe.global/cla).\n",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/features/spaces/hooks/refreshOptions.ts",
+      "line": 1,
+      "claim": "The JSDoc comment restates what the RTK Query options refetchOnFocus and refetchOnMountOrArgChange already do rather than explaining repo-specific intent; it should be trimmed to keep only the rationale for why Space data needs refreshing and to explain or name the 30-value staleness window if it is worth keeping."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/features/spaces/hooks/useIsQualifiedSafe.ts",
+      "line": 23,
+      "claim": "Two other subscribers to the same useSpaceSafesGetV1Query (useIsQualifiedSafe.ts and SpaceSelectorDropdown.tsx) do not pass the new refresh options, and although this isn't a functional bug since RTK Query merges focus-refetch settings across subscribers, the PR description should mention that this omission was a deliberate choice so reviewers are aware of it."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/features/spaces/hooks/__tests__/useSpaceSafes.test.tsx",
+      "line": 82,
+      "claim": "The tests spread SPACE_REFRESH_OPTIONS back into the expected values, so they only confirm the constant is passed through rather than verifying its actual contents; changing the constant's values (e.g. disabling refetchOnFocus or removing the 30-second threshold) would still pass, and the same pattern appears in useAllMembers.test.ts:51 and useGetSpaceAddressBook.test.ts:41."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/features/spaces/hooks/refreshOptions.ts",
+      "line": 9,
+      "claim": "The new SPACE_REFRESH_OPTIONS constant is placed in a hooks/ file even though it is shared by three hooks and their tests, while the feature already has a constants.ts file holding other shared constants; it should be moved into features/spaces/constants.ts and imported from there instead."
+    },
+    {
+      "id": "F5",
+      "file": null,
+      "line": null,
+      "claim": "The useSpaceMembers/useAllMembers hook should have an additional guard to ensure the member list is cleared when a 403 response is received."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/src/features/spaces/hooks/__tests__/useSpaceSafes.test.tsx",
+      "line": 106,
+      "claim": "The tests in useSpaceSafes.test.tsx, useAllMembers.test.ts, and useGetSpaceAddressBook.test.ts only assert that the same imported SPACE_REFRESH_OPTIONS object is spread into the query options, so they would still pass if the constant's values were weakened to an empty object or refetchOnFocus: false, which is the exact stale-data bug being fixed; at least one test should assert the literal expected values instead of just the imported reference."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/features/spaces/hooks/useSpaceSafes.tsx",
+      "line": 22,
+      "claim": "Because refetchOnFocus now triggers a request whenever the window regains focus (and on remount when the cache is older than 30 seconds), a stale session or offline reconnect can produce a 401 or network error that wipes out the previously visible Safe accounts list."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/src/features/spaces/components/SafeAccounts/index.tsx",
+      "line": 77,
+      "claim": "SafeAccounts chooses between the error banner and the safe list using isError alone, but RTK Query sets isError to true whenever the latest request failed even if earlier data is still cached, so a failed background refetch on focus or remount now replaces an already-displayed list with a failure banner."
+    },
+    {
+      "id": "F9",
+      "file": "apps/web/src/features/spaces/hooks/useSpaceMembers.tsx",
+      "line": 72,
+      "claim": "The useMembersGetMembershipV1Query call inside useCurrentMemberProfile was not given the new refetch options, so member profile data may not refresh on focus/stale remount even though the PR description says it refetches space data."
+    },
+    {
+      "id": "F10",
+      "file": null,
+      "line": null,
+      "claim": "Every useSpacesGetOneV1Query call (space name, breadcrumbs, settings) was left without the new refetch options, so renames or other space changes made in other sessions may not be picked up if that is intended to be covered by this change."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/src/features/spaces/hooks/refreshOptions.ts",
+      "line": 9,
+      "claim": "The new refresh-options constant is placed in the hooks/ directory, which otherwise contains only hooks, while the feature already stores its constants in features/spaces/constants.ts, so the file location is inconsistent with the existing layout."
+    }
+  ]
+}

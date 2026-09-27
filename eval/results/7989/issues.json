@@ -1,0 +1,160 @@
+{
+  "usage": {
+    "usd": 0.6881346,
+    "turns": 8,
+    "wallSeconds": 85
+  },
+  "issues": [
+    {
+      "findings": [
+        "F17",
+        "F19"
+      ],
+      "summary": "Workspace loading guard `isQualifiedSafe && spaceSafesLoading` can never be true, and its test mocks an impossible state",
+      "label": "medium",
+      "evidence": "useIsQualifiedSafe.ts only returns true once `currentData` of useSpaceSafesGetV1Query (same args/skip as in useSpaceSafes.tsx) exists, and at that point RTK's `isLoading` is false. That makes useAccountsModalItems.ts:139 dead, and the test at useAccountsModalItems.test.ts:87-95 checks a state that can't happen. While loading, the modal really shows 'All Accounts' unfiltered and then switches, so the flash the PR says it fixes is still there."
+    },
+    {
+      "findings": [
+        "F8"
+      ],
+      "summary": "Similarity check runs on the list after workspace safes are removed, so lookalikes of workspace safes go unflagged",
+      "label": "medium",
+      "evidence": "useAccountsModalItems.ts:102 computes getFlaggedSimilarAddressSet over allItems, which is built from filteredAllSafes (line 89-94). Before the PR the modal included workspace safes in this check. The PR calls this a v1 limitation, but it still weakens address-poisoning detection in workspace context."
+    },
+    {
+      "findings": [
+        "F5"
+      ],
+      "summary": "Hook tests never assert on similarAddresses",
+      "label": "medium",
+      "evidence": "No test in useAccountsModalItems.test.ts checks `similarAddresses`, although the set it's computed over changed (now the filtered list). A regression in this security-related output would go unnoticed."
+    },
+    {
+      "findings": [
+        "F1",
+        "F18",
+        "F24"
+      ],
+      "summary": "Owned-safes error notification effect and debounced search analytics in the hook are untested",
+      "label": "low",
+      "evidence": "The test mocks useOwnersGetAllSafesByOwnerV2Query to always return `error: undefined` (useAccountsModalItems.test.ts:30-32), and nothing asserts trackEvent or dispatch. The code moved over unchanged from the old index.tsx, which had no tests for it either."
+    },
+    {
+      "findings": [
+        "F14"
+      ],
+      "summary": "useSpaceSafes returns a new allSafes array every render, so the exclusion/filter/group/similarity chain recomputes every render",
+      "label": "low",
+      "evidence": "useSpaceSafes.tsx builds `safeItems` without memoization, so useAllSafesGrouped's memo and then allSafes change on every render. spaceExclusionKey (useAccountsModalItems.ts:71-74) and everything after it recompute even when the modal is closed, because the hook runs before `if (!open)`. It's a real performance cost but a small one."
+    },
+    {
+      "findings": [
+        "F6",
+        "F13"
+      ],
+      "summary": "The 40-line docblock is long, and one line wrongly says callers render the retry notification",
+      "label": "low",
+      "evidence": "useAccountsModalItems.ts:57-58 says errors are surfaced 'so callers can render a retry notification', but the hook dispatches showNotification itself (lines 76-87). The claim that the docblock is out of date on similarity is wrong (that part is accurate). The length is a style concern."
+    },
+    {
+      "findings": [
+        "F22"
+      ],
+      "summary": "Comment says search analytics fires once per non-empty query; the code fires once until the search is cleared",
+      "label": "low",
+      "evidence": "useAccountsModalItems.ts:117-130: `searchTracked` resets only when the search is empty, so typing 'a'→'ab'→'abc' fires one event. The behaviour predates the PR; only the misleading comment is new."
+    },
+    {
+      "findings": [
+        "F9"
+      ],
+      "summary": "arrayContaining(['1111','1111']) passes even if only one group is bolded",
+      "label": "low",
+      "evidence": "MultiSafeItemCard.test.tsx:123: arrayContaining doesn't count duplicates, and with an all-1s address it can't tell the first group from the last. The test would pass if only one <b> rendered."
+    },
+    {
+      "findings": [
+        "F12"
+      ],
+      "summary": "Loading-skeleton test only asserts that other content is absent",
+      "label": "low",
+      "evidence": "index.test.tsx:118-125 checks only that the empty state and card mocks are absent. It would still pass if the list rendered nothing at all."
+    },
+    {
+      "findings": [
+        "F7",
+        "F15",
+        "F23"
+      ],
+      "summary": "'All Accounts' is Title Case, against the sentence-case convention",
+      "label": "nit",
+      "evidence": "The string at AccountsModal/index.tsx:42 and SpaceSafeBar/index.tsx:176 already existed before the PR and matches the neighbouring pre-existing headings ('Trusted Safes', 'Other Safes'). It is a convention mismatch with no functional cost."
+    },
+    {
+      "findings": [
+        "F10",
+        "F20"
+      ],
+      "summary": "Duplicated section/card render JSX in AccountsModal",
+      "label": "nit",
+      "evidence": "AccountsModal/index.tsx:77-133 repeats almost the same blocks, and the PR adds hidePinControls to all four branches. Extracting a helper would be cleaner, but the duplication was already there and has no concrete cost."
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "Both modal modes send the same analytics events and labels",
+      "label": "nit",
+      "evidence": "useAccountsModalItems.ts:126 and index.tsx:144/162 use the same events in both contexts. Whether the funnels need to be told apart is a product decision, not a defect."
+    },
+    {
+      "findings": [
+        "F11"
+      ],
+      "summary": "The isSimilar bold branch has no length guard, unlike TooltipFullAddress",
+      "label": "nit",
+      "evidence": "shared.tsx:158-164 slices without the check used at line 121. Callers always pass full 0x addresses, so it's only an inconsistency."
+    },
+    {
+      "findings": [
+        "F4"
+      ],
+      "summary": "New tests hand-roll a safeItem factory instead of using the existing safeItemBuilder",
+      "label": "nit",
+      "evidence": "apps/web/src/tests/builders/safeItem.ts exists. The inline factories in index.test.tsx:48 and useAccountsModalItems.test.ts:43 duplicate it, which matters only for test maintenance."
+    },
+    {
+      "findings": [
+        "F2"
+      ],
+      "summary": "`filteredAllSafes ?? []` creates a new array each render while loading",
+      "label": "nit",
+      "evidence": "useAccountsModalItems.ts:94: the new [] appears only while allSafes is undefined, and grouping an empty array costs almost nothing. isLoading is true in that state anyway."
+    },
+    {
+      "findings": [
+        "F3"
+      ],
+      "summary": "Test depends on underscore-prefixed exports",
+      "label": "nit",
+      "evidence": "useAccountsModalItems.test.ts:21-22 uses _getMultiChainAccounts/_getSingleChainAccounts. Production code already relies on this export convention (e.g. _buildSafeItems in useSpaceSafes.tsx), so it adds no new fragility."
+    },
+    {
+      "findings": [
+        "F21"
+      ],
+      "summary": "Early return keys off a null spaceExclusionKey rather than isQualifiedSafe",
+      "label": "nit",
+      "evidence": "useAccountsModalItems.ts:90: spaceExclusionKey is null exactly when !isQualifiedSafe (line 72), and an empty Set would filter nothing anyway. The concern is only about readability."
+    },
+    {
+      "findings": [
+        "F25"
+      ],
+      "summary": "Multi-chain partial-workspace degrade path is said to be untested",
+      "label": "wrong",
+      "evidence": "useAccountsModalItems.test.ts:107-119 puts ADDR_A on chains 1 and 100, excludes chain 1, and asserts `100:ADDR_A` using `(item as SafeItem).chainId`. That assertion would fail if the item were still a MultiChainSafeItem (it has no chainId), so the degrade path is covered."
+    }
+  ]
+}

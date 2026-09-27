@@ -1,0 +1,19 @@
+{
+  "pr": 8715,
+  "title": "ci: Drop Docker Hub -> GHCR tag mirror",
+  "description": "## What it solves\n\nResolves: the one-off mirror workflow from #8710 has done its job and should not stay in the repo.\n\n## How this PR fixes it\n\nDeletes `.github/workflows/mirror-to-ghcr.yml`. Two runs copied all 171 Docker Hub tags into `ghcr.io/safe-global/safe-wallet-web` with every digest preserved and verified in-run: run 34964635702 copied 99 tags before the 6-hour job cap cancelled it, and run 35003010621 copied the remaining 72. No failures, no digest mismatches, no retries across both. The package is public.\n\n## How to test it\n\n`crane digest ghcr.io/safe-global/safe-wallet-web:v1.99.1` and `crane digest safeglobal/safe-wallet-web:v1.99.1` return the same `sha256:e1503fd9…`. Any other tag behaves the same way.\n\n## Affected flows\n\n- None. CI-only change; the hosted app and the Docker Hub publish workflow are untouched.\n\n## Blast radius\n\n- `.github/workflows/mirror-to-ghcr.yml` only. `web-deploy-dockerhub.yml` keeps publishing to Docker Hub until the CI step of the migration.\n\n## Risks / not checked\n\n- Did not re-verify every one of the 171 digests from outside the runs; each run's own per-tag digest comparison is the evidence.\n\n## Visual summary\n\nDeletion only, no logic or UI change.\n\n## Checklist\n\n- [ ] I've tested the branch on mobile 📱 (not applicable)\n- [ ] I've documented how it affects the analytics (if at all) 📊 (no effect)\n- [ ] I've written a unit/e2e test for it (if applicable) 🧑‍💻 (not applicable)\n- [x] I've listed affected flows and blast radius, and named what I did not verify 🎯\n\n---\n\n## CLA signature\n\nWith the submission of this Pull Request, I confirm that I have read and agree to the terms of the [Contributor License Agreement](https://safe.global/cla).\n",
+  "findings": [
+    {
+      "id": "F1",
+      "file": ".github/workflows/mirror-to-ghcr.yml",
+      "line": 3,
+      "claim": "The deleted workflow's header stated it should be removed once the Docker Hub to GHCR migration was signed off, but nothing in the repository records that sign-off, so the PR description should confirm it actually happened. If it did not happen, tags that were never copied to GHCR can no longer be re-mirrored without restoring the deleted workflow."
+    },
+    {
+      "id": "F2",
+      "file": ".github/workflows/mirror-to-ghcr.yml",
+      "line": 1,
+      "claim": "If the two related pull requests merge far apart, there could be a period where nothing writes to GHCR, since the GHCR push step only exists in the other pull request; any Docker Hub tag pushed between the mirror workflow's last real run and that other pull request merging would not exist on GHCR, and this deletion removes the tool that could have backfilled it. It is unclear from the repository whether the mirror workflow ever ran for real (non-dry-run) or whether the Docker Hub migration was actually signed off, which the deleted file's own header said was a precondition for deleting it."
+    }
+  ]
+}

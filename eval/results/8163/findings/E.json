@@ -1,0 +1,20 @@
+{
+  "usd": 0.042106,
+  "findings": [
+    {
+      "file": null,
+      "line": null,
+      "claim": "The new component duplicates logic already present in the CopyTooltip wrapper, and should instead wrap the shadcn button inside CopyTooltip to remove the duplicated logic and keep the copy wording consistent."
+    },
+    {
+      "file": "apps/web/src/features/myAccounts/components/MyAccountsV2/components/AccountItem/MultiAccountItem.tsx",
+      "line": 156,
+      "claim": "A button element is nested inside another button element, which can cause hydration problems."
+    },
+    {
+      "file": "apps/web/src/components/common/CopyAddressIconButton/index.tsx",
+      "line": 40,
+      "claim": "A hardcoded value is used where a design token should be used instead."
+    }
+  ]
+}

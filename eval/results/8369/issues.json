@@ -1,0 +1,80 @@
+{
+  "usage": {
+    "usd": 0.45493400000000006,
+    "turns": 5,
+    "wallSeconds": 46
+  },
+  "issues": [
+    {
+      "findings": [
+        "F1",
+        "F2",
+        "F15"
+      ],
+      "summary": "Doc comments cite paths in an external repo (repos/safenet/...) and line numbers (FROST.sol:157-161) with no commit SHA or permalink, so readers can't resolve them and the line numbers will go stale",
+      "label": "low",
+      "evidence": "frost.ts:9-12 and oracleProposalHash.ts:5-7 cite `repos/safenet/...` local paths and `contracts/src/libraries/FROST.sol:157-161` with no repo URL or pinned SHA. The cost is small, but these comments are the audit trail for a signature-verification port, so an unresolvable reference has a real cost."
+    },
+    {
+      "findings": [
+        "F10",
+        "F12"
+      ],
+      "summary": "BigInt('') / BigInt('  ') silently return 0n, so a blank chainId or epoch produces a valid-looking hash (and wrong oracle requestId) instead of an error",
+      "label": "low",
+      "evidence": "oracleProposalHash.ts:34-35 and :60-61 call BigInt(chainId)/BigInt(epoch) directly, and `node -e \"BigInt('')\"` gives 0n. Nothing calls these yet and the inputs will come from decoded onchain data, so this is unlikely in practice. With verification it fails safe, but a requestId used for correlation would be silently wrong."
+    },
+    {
+      "findings": [
+        "F8",
+        "F13"
+      ],
+      "summary": "The proposal-hash functions throw on non-numeric input, while verifyAttestation is documented as never throwing, so error handling is inconsistent across the module",
+      "label": "low",
+      "evidence": "oracleProposalHash.ts:33-38 and :59-63 have no try/catch, so BigInt('abc') or a bad address makes TypedDataEncoder throw. frost.ts:57-77 is total by design. The hash functions never claim to be total and have no callers yet, so this is a minor contract gap to settle when the poll loop wires them in."
+    },
+    {
+      "findings": [
+        "F5",
+        "F6",
+        "F9"
+      ],
+      "summary": "Test fixtures are loaded via JSON.parse (returns any) and cast to a declared shape with no check, so a renamed fixture key isn't caught by type-check. Importing the JSON directly (resolveJsonModule is enabled) would infer the real types",
+      "label": "low",
+      "evidence": "frost.test.ts:31-32 `load<T>` returns JSON.parse's `any` as T, and oracleProposalHash.test.ts:13-14 annotates the parsed `any`. resolveJsonModule is true at config/tsconfig/confs/base.json:35, so a typed import is available. The golden tests would fail at runtime if a key were renamed, so the impact is minor."
+    },
+    {
+      "findings": [
+        "F14"
+      ],
+      "summary": "The EIP-712 domain test hashes a hand-built EIP712Domain rather than the domain the production functions use, so it wouldn't catch a change to the production domain",
+      "label": "low",
+      "evidence": "oracleProposalHash.test.ts:63-71 builds its own domain type literal and never touches the `{ chainId, verifyingContract }` object in oracleProposalHash.ts:34/60, so as written it's tautological. A production domain change would still be caught by the golden requestId test (oracleProposalHash.test.ts:25-27) and the frost golden vectors, so the real coverage gap is small."
+    },
+    {
+      "findings": [
+        "F4"
+      ],
+      "summary": "The test comment says out-of-range z and off-curve points are rejected by @noble/curves before our own guards run, but the z guard actually runs first, and the off-curve check is the assertValidity call in toPoint",
+      "label": "low",
+      "evidence": "frost.ts:62-66 checks `z < 0n || z >= N` before any noble scalar operation, and frost.ts:35-38 `toPoint` calls noble's assertValidity as the off-curve guard. So the order described in frost.test.ts:86-89 is wrong, as is the matching 'currently unobservable' note at frost.ts:63-65. It's a documentation mismatch only, with no behavioural effect."
+    },
+    {
+      "findings": [
+        "F3",
+        "F7"
+      ],
+      "summary": "types/events.ts only holds a Hex type, while its filename and header anticipate event types that land later",
+      "label": "nit",
+      "evidence": "events.ts:1-7 is described as 'Shared primitives' and holds only `Hex`, and the header says outright that the event types come with the decoder. The PR description says nothing imports these modules yet on purpose, so the only cost is a filename that will make sense in the next PR."
+    },
+    {
+      "findings": [
+        "F11"
+      ],
+      "summary": "The Hex type may duplicate an existing definition and should be reused",
+      "label": "wrong",
+      "evidence": "A grep of packages/, apps/web/src and apps/mobile/src for a `0x${string}` Hex alias turns up only events.ts:7, so there is nothing in the repo to reuse. The finding also names no duplicate."
+    }
+  ]
+}

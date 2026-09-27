@@ -1,0 +1,40 @@
+{
+  "usd": 0.0620616,
+  "findings": [
+    {
+      "file": "apps/web/src/features/swap/helpers/utils.ts",
+      "line": 223,
+      "claim": "The enum lookup `UiOrderType[params.orderType as keyof typeof UiOrderType] ?? UiOrderType.SWAP` reads a string taken from a cross-origin widget payload directly off the enum object, so a value like 'constructor', 'toString' or '__proto__' resolves to an inherited Object.prototype member instead of undefined, bypassing the SWAP fallback and letting a function value flow into UiOrderTypeToOrderType and setSwapParams. Using Object.values().includes(), Object.hasOwn(), or a Map instead would avoid this and remove the need for the 'as keyof' cast."
+    },
+    {
+      "file": "apps/web/src/features/swap/helpers/__tests__/utils.test.ts",
+      "line": null,
+      "claim": "The new test covering the SWAP fallback for an unknown orderType only exercises the value 'SOMETHING_NEW', so it does not exercise inherited-property keys such as 'constructor' and would not catch the enum lookup issue; a test case using such a key should be added."
+    },
+    {
+      "file": "apps/web/src/features/swap/helpers/fee.ts",
+      "line": 70,
+      "claim": "isStableCoin now guards against a missing token address, changing prior behavior where buyToken?.address.toLowerCase() would throw if buyToken existed but lacked an address; since the CoW v4 payload makes that field optional, this change is needed to avoid crashing the ON_CHANGE_TRADE_PARAMS handler, but it is not covered by any test."
+    },
+    {
+      "file": "apps/web/src/features/swap/helpers/fee.ts",
+      "line": null,
+      "claim": "fee.test.ts was not updated as part of this PR and none of its existing cases pass a token without an address, so a case (e.g. calculateFeePercentageInBps with buyToken: {} or sellToken: undefined) should be added asserting the call does not throw and returns the non-stablecoin fee tier."
+    },
+    {
+      "file": "apps/web/src/features/swap/helpers/__tests__/utils.test.ts",
+      "line": 439,
+      "claim": "The test 'does not silently reset LIMIT/TWAP to SWAP' can only fail if the mapping test above it (lines 433-437) also fails, so it adds no additional coverage and should be dropped or merged into that test."
+    },
+    {
+      "file": "apps/web/src/features/swap/helpers/__tests__/utils.test.ts",
+      "line": 431,
+      "claim": "The makePayload test helper casts its fixture with 'as unknown as OnTradeParamsPayload' rather than using a properly typed helper (e.g. based on Partial<OnTradeParamsPayload>), which loses type checking of the fixture against the v4 payload type."
+    },
+    {
+      "file": "apps/web/package.json",
+      "line": 61,
+      "claim": "apps/web imports @cowprotocol/events directly in SwapWidget/index.tsx, helpers/utils.ts and helpers/fee.ts but does not declare it as a dependency, relying instead on it arriving transitively through @cowprotocol/widget-lib; with the root package.json resolution pinning it to 1.3.0 now removed, the version apps/web compiles against depends on Yarn's hoisting, so a future widget bump could silently change event names or types. Adding @cowprotocol/events as an explicit dependency, pinned to the lockfile version, would prevent this."
+    }
+  ]
+}

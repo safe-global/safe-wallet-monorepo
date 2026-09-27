@@ -1,0 +1,151 @@
+{
+  "pr": 8731,
+  "title": "feat(policies): add the policy summary block for the spending limit confirm step",
+  "description": "## What it solves\r\n\r\nResolves: [WA-3151](https://linear.app/safe-global/issue/WA-3151/build-the-policy-summary-block-on-the-confirm-step)\r\n\r\nA signer confirming a Space-level spending limit has nothing above the transaction detail that says, in plain\r\nlanguage, what the policy actually grants — who may spend, from which Safe, how much of which token, and how often\r\neach limit resets. Reading raw calldata is the only alternative.\r\n\r\n## How this PR fixes it\r\n\r\nAdds `PolicySummary`, the block the confirm frame puts at the top of the step: an info callout describing the grant,\r\nan **Applies to** row for the Safe, and one card per spender listing that spender's limits with **each row's own\r\nfrequency**.\r\n\r\nThree decisions worth calling out:\r\n\r\n- **It ships unwired, on purpose.** The component renders from its own view model (`PolicySummaryModel`) and imports\r\n  nothing from WA-3150's form. WA-3152 wires it into the Review step at the same time as it builds the real\r\n  multisend, so the step title, the close affordance and the rest of the confirm chrome are settled once, against a\r\n  transaction that exists. Until then the folder is reachable only from its stories — `knip --exports` stays quiet,\r\n  because an unreachable file is knip's `files` issue type, which CI does not enable.\r\n- **The callout names a frequency only when there is one to name.** The adjective appears when every limit shares one\r\n  production period (`You are giving Alice a one-time spending limit.`); a mixed set says `spending limits` and lets\r\n  the rows carry the frequency. One sentence cannot enumerate a mixed set, and the design's own copy gets this wrong.\r\n- **Reset periods reuse the form's vocabulary.** `One time only / Daily / Weekly / Monthly` for the four production\r\n  periods; anything else, including the Sepolia test periods, falls back to the label the frequency dropdown itself\r\n  showed, so the summary never invents a word.\r\n\r\n**Applies to** delegates to the Safe selector's own `SafeAccountSummary`, so name, threshold, chain and fiat balance\r\ncannot drift from what step 1 displayed.\r\n\r\n## How to test it\r\n\r\nStorybook only — nothing in the app renders this yet.\r\n\r\n1. `yarn workspace @safe-global/web storybook`\r\n2. Open **Features → Spaces → Policies → PolicySummary**\r\n3. Walk the six stories and read each callout sentence against the rows beneath it:\r\n\r\n| Story | What it should show |\r\n| --- | --- |\r\n| `Mixed` | The Figma frame. Two spenders, mixed periods, so no adjective: *\"You are giving Alice and Bob spending limits.\"* |\r\n| `Single Limit` | Singular throughout: *\"a one-time spending limit\"*, and `limit you set` in the description |\r\n| `Uniform Weekly` | One shared period, so the adjective survives: *\"weekly spending limits\"* |\r\n| `Three Spenders` | *\"Alice, Bob and Carol\"*, three cards, three identicons |\r\n| `Unnamed Spender` | A spender with no address-book entry reads as its shortened address, in the callout and on the card |\r\n| `Test Period On Sepolia` | Row reads `30 minutes` (the dropdown's own label), callout drops the adjective |\r\n\r\nUnit tests: `yarn workspace @safe-global/web test src/features/spaces/components/Policies/SpendingLimitFlow/PolicySummary`\r\n\r\n## Affected flows\r\n\r\n- **None.** No user journey changes: nothing in the app imports this component yet. The Space-level spending-limit\r\n  flow behaves exactly as it does on `dev` after WA-3150, placeholder Review step included.\r\n\r\n## Blast radius\r\n\r\n- **New files only** — everything lands in the new folder\r\n  `apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/PolicySummary/`. No existing file is modified;\r\n  `git diff --stat origin/dev...HEAD` is 19 files, all additions.\r\n- **Consumed, not changed:** `SafeAccountSummary` and `SafeAccountOption` (`Policies/SafeAccountSelector/`),\r\n  `EthHashInfo`, `TokenAmount`, `Alert`, `Card`, `Typography`, `getResetTimeOptions`\r\n  (`features/spending-limits/constants`). Each is imported read-only; no prop, signature or style of theirs changes,\r\n  so their existing consumers are unaffected.\r\n- **No RTK Query endpoint, no API contract, no Redux slice, no persistence, no migration.** The component takes a\r\n  plain object and renders it; it makes no requests and reads no store beyond what `EthHashInfo` already does to\r\n  resolve address-book names.\r\n- **No feature flag, no chain config, no route.** Once WA-3152 renders it, it sits behind the gate the Policies page\r\n  already has (`FEATURES.POLICIES`).\r\n- **Mobile:** none. Nothing under `packages/` or `apps/mobile/` is touched.\r\n\r\n## Risks / not checked\r\n\r\n- **Not rendered in the app, so not verified in the real flow.** Safe Shield on the batch, the threshold rail count\r\n  and the nonce chip all need a `safeTx`; they are WA-3152's to verify.\r\n- **Address-book provenance badge not exercised.** The Storybook mock harness seeds no address book, so the badge\r\n  `EthHashInfo` shows beside a known name cannot appear in any story. Needs a browser pass in WA-3152.\r\n- **Dark mode not inspected.** Colours are tokens only (`bg-muted`, `text-muted-foreground`), so it should follow, but\r\n  I did not look at it.\r\n- **Mobile viewport not tested** — web-only component, and the tx-flow card it will live in is desktop-width.\r\n- **Two design questions left open, deliberately.** The spender address renders in the body font while the Safe's\r\n  address one card above is monospaced (the design's prose and its component spec disagree), and the limit rows may\r\n  sit tighter than the frame. Both are questions for design, not defects here — flagged for the WA-3152 browser pass.\r\n- **One design-system inconsistency found, not fixed here.** `Alert`'s `info` variant forces\r\n  `*:data-[slot=alert-description]:text-foreground`, where `destructive`/`warning`/`success` keep\r\n  `text-muted-foreground` — so the callout's title and description render at the same weight and colour instead of the\r\n  frame's two-tier hierarchy. It affects every `info` alert in the app, including WA-3150's st",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/PolicySummary/index.tsx",
+      "line": 9,
+      "claim": "A comment references ticket WA-3152, which goes against the project convention (stated in the root AGENTS.md) that comments should be one line and reserved for non-obvious information, since ticket references are tech debt that will go stale."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/PolicySummary/copy.ts",
+      "line": 36,
+      "claim": "A multi-line JSDoc comment block here goes against the project's convention that comments should be one line and reserved for non-obvious information."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/PolicySummary/PolicySummary.stories.tsx",
+      "line": 72,
+      "claim": "The stories file includes `loaders: [mswLoader]` in the meta object along with an unused top-level import of mswLoader, but this loader is already applied globally in preview.tsx, so the addition is redundant and should be removed."
+    },
+    {
+      "id": "F4",
+      "file": "PolicySummary/constants.ts",
+      "line": 14,
+      "claim": "CANONICAL_FREQUENCIES re-keys the reset-period minute values ('0' / '1440' / '10080' / '43200') that already live in src/features/spending-limits/constants.ts, and PRODUCTION_PERIODS in testBuilders.ts repeats the same values a third time, so if the canonical option set ever changes, the summary could silently fall back to the dropdown wording instead of staying in sync."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/PolicySummary/AppliesToRow.tsx",
+      "line": 9,
+      "claim": "The same Card wrapper shape (variant=\"muted\" size=\"none\" radius=\"lg\" wrapping a div with p-3) plus an identical explanatory comment is duplicated between AppliesToRow.tsx and SpenderSummaryCard.tsx instead of being factored into a small shared component, so the padding decision is stated twice rather than once."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/LimitSummaryRow.tsx",
+      "line": 16,
+      "claim": "safeParseUnits unconditionally calls console.error inside its catch block, and since toDisplayAmount runs on every render, a legitimate case such as a typed amount with more precision than the token's decimals will spam the console on every re-render, including for every row in a list; the existing test silences console.error to work around this, which is itself a sign the error is expected rather than a fault and should not be logged."
+    },
+    {
+      "id": "F7",
+      "file": null,
+      "line": null,
+      "claim": "Entering a value with a comma instead of a period (e.g. \"1,5\" instead of \"1.5\") may not be handled correctly; the existing Safe-level Spending Limits feature casts a comma to a period, so this input handling should be checked for consistency."
+    },
+    {
+      "id": "F8",
+      "file": "PolicySummary/LimitSummaryRow.tsx",
+      "line": 33,
+      "claim": "TokenAmount is rendered without a preciseAmount, so it falls back to formatAmount which uses 5 decimal places and switches to compact notation for longer numbers, causing the displayed granted limit to be rounded or abbreviated rather than exact. This matters because the summary is meant to show the amount exactly as typed so a signer knows precisely what they are granting, and a typed value like 0.123456 ETH would display as 0.12346 ETH (higher than the real limit) while 1234.56789 would display as 1.23K ETH, with the exact number only visible in a hover tooltip."
+    },
+    {
+      "id": "F9",
+      "file": "PolicySummary/__tests__/LimitSummaryRow.test.tsx",
+      "line": 24,
+      "claim": "The expected value in the amount test is built using the same formatVisualAmount formatter used by the component code, and the test input '1000' never triggers rounding, so the test cannot detect the rounding/abbreviation problem in the granted-limit display."
+    },
+    {
+      "id": "F10",
+      "file": "PolicySummary/copy.ts",
+      "line": 17,
+      "claim": "spenderDisplayName derives the callout's spender name using only the spender.name field, while the spender card (EthHashInfo) prefers the address-book name over any provided name prop, so if name is undefined but an address-book entry exists, the callout could show a truncated address while the card shows the address-book name for the same spender; the comment claiming this is 'the same fallback the spender card shows' would then be inaccurate."
+    },
+    {
+      "id": "F11",
+      "file": "PolicySummary/frequency.ts",
+      "line": 1,
+      "claim": "frequency.ts deep-imports from @/features/spending-limits/constants, which apps/web/AGENTS.md's Feature Architecture Import Rules forbid, even though getResetTimeOptions is already exported from the spending-limits barrel and other code already imports it that way."
+    },
+    {
+      "id": "F12",
+      "file": null,
+      "line": null,
+      "claim": "The added dialogs are not responsive on smaller screens."
+    },
+    {
+      "id": "F13",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/PolicySummary/frequency.ts",
+      "line": 1,
+      "claim": "This file imports getResetTimeOptions directly from the spending-limits feature's internal constants module instead of through its public barrel export, reaching into another feature's internals in a way the existing ESLint rules don't catch because they only restrict components/, hooks/, services/* and store/*."
+    },
+    {
+      "id": "F14",
+      "file": "SpenderSummaryCard.tsx",
+      "line": 38,
+      "claim": "The list key `${limit.token.address}-${index}` mixes a token address with the array index; if a token address could ever repeat, indexing still causes remounts on reorder, so either the pure address or the pure index should be used, not both."
+    },
+    {
+      "id": "F15",
+      "file": "PolicySummary/testBuilders.ts",
+      "line": 8,
+      "claim": "The comment in testBuilders.ts states the builders 'must stay importable from stories', but PolicySummary.stories.tsx actually uses inline fixtures and never imports these builders, making the comment's stated reason untrue for this diff."
+    },
+    {
+      "id": "F16",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/Summary/describePolicy.ts",
+      "line": 54,
+      "claim": "The file copy.ts is not descriptively named and should be renamed to something clearer, such as describeSpendingLimits.ts or policyCopy.ts."
+    },
+    {
+      "id": "F17",
+      "file": "index.tsx",
+      "line": 18,
+      "claim": "List keys combine a stable identifier with the array index (e.g. `${spender.address}-${index}` and `${limit.token.address}-${index}`), which is redundant since spender.address is already guaranteed unique; mixing an index into an otherwise-unique key causes unnecessary remounts when a row's position changes and represents the worst of both approaches."
+    },
+    {
+      "id": "F18",
+      "file": null,
+      "line": null,
+      "claim": "The summary's frequency labels ('One time only', 'Weekly') deliberately differ from the wording used in the form's dropdown ('One time', '1 week'), and it is unconfirmed whether this wording divergence between the two UI surfaces is intentional."
+    },
+    {
+      "id": "F19",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/PolicySummary/frequency.ts",
+      "line": 11,
+      "claim": "A multi-line JSDoc comment block here goes against the project's convention that comments should be one line and reserved for non-obvious information."
+    },
+    {
+      "id": "F20",
+      "file": "SpenderSummaryCard.tsx",
+      "line": 9,
+      "claim": "AVATAR_SIZE is hard-coded to 24 in SpenderSummaryCard.tsx and TOKEN_ICON_SIZE is separately hard-coded to 24 in LimitSummaryRow.tsx for the same visual role (a small round icon in a summary row), which is accidental duplication worth noting if a spacing pass ever unifies these values."
+    },
+    {
+      "id": "F21",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/PolicySummary/__tests__/AppliesToRow.test.tsx",
+      "line": 25,
+      "claim": "The test title claims to cover the fiat balance but the assertion toHaveTextContent('$') would pass for any fiat value, including $0 or a different Safe's balance, so it would not fail if the actual formatted amount regressed; it should assert the specific formatted value (e.g. 123720) instead."
+    },
+    {
+      "id": "F22",
+      "file": "copy.ts",
+      "line": 46,
+      "claim": "Calling describePolicy with an empty spenders array produces the ungrammatical string \"You are giving spending limits.\"; although this is effectively dead code in practice, if it ever surfaces it will look like a bug, so it should either return an empty string/no title or short-circuit with a neutral sentence."
+    },
+    {
+      "id": "F23",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/PolicySummary/frequency.ts",
+      "line": 16,
+      "claim": "CANONICAL_FREQUENCIES[resetTimeMin] looks up a string key on a plain object literal (defined in constants.ts:14), so a key such as 'constructor' or 'toString' would resolve to an inherited value and silently return a label of undefined; this is unlikely today since resetTimeMin comes from a dropdown, but the model is meant to later be built from form data, so the lookup should be guarded (e.g. with Object.hasOwn or a Map) rather than relying on the input staying constrained."
+    },
+    {
+      "id": "F24",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/PolicySummary/types.ts",
+      "line": 26,
+      "claim": "A comment names a function toPolicySummaryModel described as 'Phase 2', but that function does not exist yet, which conflicts with the project's comment convention and risks becoming an inaccurate or misleading reference once the phase changes."
+    }
+  ]
+}

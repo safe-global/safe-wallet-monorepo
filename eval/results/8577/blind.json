@@ -1,0 +1,139 @@
+{
+  "pr": 8577,
+  "title": "fix(safenet): harden check verification and lifecycle",
+  "description": "## What it solves\n\nResolves: a set of correctness and lifecycle gaps in the Safenet checks feature, found in a\ndeep review of the verification and polling paths after #8573.\n\n- A check with more than one attestation (a re-proposal across epochs) was verified against\n  the **earliest** attested event, so one early invalid attestation permanently failed a\n  check that a later valid attestation vouches for.\n- An attestation was accepted without comparing its own `chainId`/`safe` fields to the Safe\n  being viewed. For Safes older than 1.3.0 (no `chainId` in the EIP-712 domain), the same\n  `safeTxHash` can exist on two chains — a verified attestation from chain A rendered a\n  green verdict for the chain-B transaction. The session pin had the same hole one layer up\n  (keyed by hash alone).\n- One RPC endpoint failure destroyed the shared provider mid-flight and cancelled every\n  concurrent read — a queue page of rows flipped to \"unavailable\" together.\n- A `BENIGN` check stopped polling forever, so a late arbitration reversal (the one\n  correction that increases safety) could never surface in a session.\n- Subscribing before the Safe context resolved opened a phantom cache entry and a second\n  poll loop.\n\n## How this PR fixes it\n\nOne commit per concern, in review order:\n\n1. `fix(safenet): verify attestations newest-first until one verifies` — candidates ordered\n   oracle-family-first, newest inside each family; verification stops at the first signature\n   that verifies; a retryable pending result is never overwritten by a terminal invalid one.\n   The audit row's proof link now follows the event that produced the verdict.\n2. `fix(safenet): bind attestations to the Safe being viewed` — an attested event whose\n   `chainId`/`safe` do not match the viewing Safe reads as no attestation at all (never\n   green, never failed-verification). The Safe context is plumbed explicitly and the cache\n   key becomes `chainId:safeAddress:safeTxHash`.\n3. `feat(safenet): keep polling a benign check through the arbitration window` — slow poll\n   (5 min) within 24 h of the attestation, then stop. Window length is provisional pending\n   an arbitration SLA from the protocol side; clock-skew guarded the same way as the\n   UNAVAILABLE grace window.\n4. `fix(safenet): scope rpc endpoint failure handling to the failing read` — the shared\n   provider is reference-counted; rotation uninstalls a failed provider without destroying\n   it under concurrent readers.\n5. `docs(safenet): correct the claims the check comments make` — comments that overstated\n   guarantees (proof-link invariant, reorg self-healing, header-read cost, wrong-chain\n   diagnostic) now state what actually holds.\n6. `fix(safenet): key the session pin by the check's Safe and hash` — the pinned-verdict\n   slice uses the same `chainId:safeAddress:safeTxHash` identity as the query cache, and the\n   hook skips subscribing until the Safe context is resolved.\n\n## How to test it\n\n- `yarn workspace @safe-global/utils test --testPathPattern safenet-checks` → 205 passing\n  (new: candidate ordering, binding, arbitration window, provider scoping, context gating).\n- `yarn workspace @safe-global/store test src/safenet` → 32 passing (pin identity,\n  cross-chain isolation).\n- `yarn workspace @safe-global/web test src/features/safenet-checks\n  src/components/transactions/TxSigners src/components/transactions/TxSummary` → all passing.\n- Every behavioral change is mutation-tested: reverting the selection order, the binding\n  comparison, the arbitration branch, the provider scoping, or the pin keying makes the\n  corresponding new tests fail by name.\n\n## Affected flows\n\n- Confirm/execute flow: Safenet section verdict resolution (selection + binding).\n- Transaction queue rows and audit log: same read path; audit-row proof link now requires\n  the attestation it points to.\n- Background behavior: a benign check keeps a slow poll while its arbitration window is\n  open; a transaction older than the window behaves exactly as before.\n\n## Blast radius\n\n- `useSafenetCheck` (shared hook): new Safe-context parameter, subscribe gate. Consumers:\n  the flow section, queue row, audit row, TxSigners — all updated in this PR.\n- `safenetCheckApi` (RTK Query): cache key now includes the Safe context; single-poll-loop\n  property preserved (probed: one entry, one loop per resolved Safe; no phantom entries\n  before resolution).\n- `safenetCheckSlice`: pin identity change — session-scoped, not persisted, so no migration.\n- `computePollingInterval`: new BENIGN branch; every other status byte-identical (existing\n  spec unchanged and green).\n- `SafenetReader` singleton: provider lifecycle change is internal; public API unchanged.\n- Mobile: no mobile surface consumes these hooks today; shared-package changes are covered\n  by the package unit tests.\n\n## Risks / not checked\n\n- The 24 h arbitration window is a judgement call, not a protocol-backed number, and the\n  targeted read window can see roughly the first half of it — both are documented at the\n  constant and intentionally conservative until an SLA exists.\n- A failed header read that loses the attestation timestamp closes an open arbitration\n  window for that session; known, low-frequency, documented in-code.\n- No live-chain run in this PR; verification is unit/integration-level against the repo's\n  own harnesses and fixtures.\n- Not tested on mobile (no consuming surface).\n\n## Visual summary\n\n```mermaid\nflowchart TD\n    E[\"attested events for hash\"] --> O[\"order: oracle family first,<br/>newest first\"]\n    O --> B[\"bind: event chainId + safe<br/>== viewing Safe?\"]\n    B -- no --> U[\"treat as unattested\"]\n    B -- yes --> V[\"verify FROST signature\"]\n    V -- fails --> N[\"next candidate\"]\n    V -- verifies --> G[\"verdict + proof link<br/>from this event\"]\n    G --> P[\"session pin keyed<br/>chain:safe:hash\"]\n    G --> W[\"BENIGN: slow poll while<br/>arbitration window open\"]\n```\n\n## Checklist\n\n- [ ] I've tested the branch on mobile 📱\n- [x] I've documented how it ",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "packages/utils/src/features/safenet-checks/utils/attestations.ts",
+      "line": 44,
+      "claim": "The fix should also bind proposal events to the target chain/Safe (since they carry chainId/safe fields), and requestIds and sentinel events should only be derived from proposals that are bound to the target, either by passing the target into fetchCheckState or by mapping each event to its requestId after the read."
+    },
+    {
+      "id": "F2",
+      "file": "services/safenetReader.ts",
+      "line": 322,
+      "claim": "The reader builds its sentinel query from every allowlisted proposal for a given transaction hash regardless of which chain or Safe it names, so events for other chains or Safes are pulled into the same result set."
+    },
+    {
+      "id": "F3",
+      "file": "hooks/useSafenetCheck.ts",
+      "line": 97,
+      "claim": "Once the polling interval becomes 0, no further fetches occur, and because the effect's dependencies only change when a fetch lands, polling never restarts while the component stays mounted, so a later BENIGN-to-MALICIOUS arbitration only becomes visible after a reload or a remount once the cache expires."
+    },
+    {
+      "id": "F4",
+      "file": null,
+      "line": null,
+      "claim": "The generated checklist was written to the scratchpad instead of docs/engineering/, so it was not saved in the expected location."
+    },
+    {
+      "id": "F5",
+      "file": "safenetCheckApi.ts",
+      "line": 93,
+      "claim": "The incorrect malicious/timed-out status gets pinned under the viewed Safe's key, and since the pin cannot move back down, a legitimate transaction can continue to show as malicious for the rest of the session."
+    },
+    {
+      "id": "F6",
+      "file": null,
+      "line": null,
+      "claim": "The scenario of an INVALID oracle attestation followed by a VERIFIED plain attestation has no test coverage, even though the current code handles it correctly."
+    },
+    {
+      "id": "F7",
+      "file": "packages/utils/src/features/safenet-checks/utils/attestations.ts",
+      "line": 18,
+      "claim": "attestationCandidates, a new pure helper that orders attestations oracle-first then newest-first by block and log index, has no dedicated unit test file, unlike sibling utils in utils/__tests__/."
+    },
+    {
+      "id": "F8",
+      "file": "packages/utils/src/features/safenet-checks/utils/attestations.ts",
+      "line": 39,
+      "claim": "bindAttestations is only exercised indirectly through safenetCheckApi.test.ts and SafenetAuditRow.test.tsx rather than through its own unit tests, leaving cases like binding filters on other chain, other Safe, and mixed-case address untested directly."
+    },
+    {
+      "id": "F9",
+      "file": "packages/utils/src/features/safenet-checks/utils/attestations.ts",
+      "line": 6,
+      "claim": "A comment states that plain attestations aren't checked while oracle attestations exist, but selectAttestation does check plain attestations, making the comment inaccurate and in need of correction."
+    },
+    {
+      "id": "F10",
+      "file": "packages/utils/src/features/safenet-checks/utils/attestations.ts",
+      "line": 45,
+      "claim": "bindAttestations compares event.safe.toLowerCase() === safeAddress instead of using the shared sameAddress(a, b) helper for address equality, so it duplicates normalization logic and skips the helper's empty-string handling."
+    },
+    {
+      "id": "F11",
+      "file": "packages/utils/src/features/safenet-checks/utils/computePollingInterval.ts",
+      "line": 65,
+      "claim": "BENIGN returns a polling interval of 0 when attestedAtMs is null or when nowMs minus attestedAtMs is negative, which can happen from ordinary client clock skew of a few seconds relative to the chain's block timestamp, since BENIGN is first observed within about one 6-second poll of the attestation."
+    },
+    {
+      "id": "F12",
+      "file": "utils/__tests__/computePollingInterval.test.ts",
+      "line": 54,
+      "claim": "Existing tests assert the current stop-polling behavior for the null/negative-age case and need to be updated once the fix (treating negative age as zero for BENIGN, and continuing to poll at ARBITRATION_POLL_MS when attestedAtMs is null) is applied."
+    },
+    {
+      "id": "F13",
+      "file": "packages/utils/src/features/safenet-checks/utils/attestations.ts",
+      "line": 44,
+      "claim": "bindAttestations only filters out attested events that name a different chain or Safe; proposal events pass through unfiltered, so events belonging to another chain or Safe are not excluded from the current Safe's view."
+    },
+    {
+      "id": "F14",
+      "file": "packages/store/src/safenet/__tests__/safenetCheckApi.test.ts",
+      "line": 495,
+      "claim": "An existing test expects the chain-B view to be SUBMITTED, which can only happen because a proposal bound to chain A is leaking into chain B's state; the test should instead expect UNAVAILABLE, and currently locks in the incorrect behavior."
+    },
+    {
+      "id": "F15",
+      "file": "utils/deriveCheckState.ts",
+      "line": 36,
+      "claim": "Because foreign proposal and oracle-result events reach deriveCheckState unfiltered, a rejection or timeout that belongs to a sibling chain's transaction gets turned into a MALICIOUS or TIMED_OUT verdict for the Safe currently being viewed."
+    },
+    {
+      "id": "F16",
+      "file": "services/safenetReader.ts",
+      "line": 318,
+      "claim": "proposeOracleTransaction is open to anyone, so an attacker could potentially propose a victim's safeTxHash with a wrong chain or Safe to an allowlisted oracle and obtain a rejection that then paints the victim's transaction as malicious; whether the protocol prevents this on-chain was not verified."
+    },
+    {
+      "id": "F17",
+      "file": "constants.ts",
+      "line": 26,
+      "claim": "blockTimeMs returns null on any failure and relies on a single URL by default, so one failed header read can also produce a null attestedAtMs and trigger the same zero-interval condition."
+    },
+    {
+      "id": "F18",
+      "file": "packages/utils/src/features/safenet-checks/utils/attestations.ts",
+      "line": 43,
+      "claim": "safeAddress is lowercased by hand as a setup step for the manual comparison, which should be removed once sameAddress is used instead."
+    },
+    {
+      "id": "F19",
+      "file": null,
+      "line": null,
+      "claim": "No test covers the case of a foreign ORACLE_RESULT event or a foreign REQUEST_CREATED event leaking into another chain's or Safe's check state; such tests should be added alongside the fix."
+    },
+    {
+      "id": "F20",
+      "file": "packages/utils/src/features/safenet-checks/utils/attestations.ts",
+      "line": 55,
+      "claim": "verdictAttestation lacks direct unit tests for choosing between several attestations by signatureId (e.g. an oracle versus a plain one, or two in the same family), for returning undefined when signatureId is null, and for the logIndex tie-break between two events in the same block; existing component tests only pass a single plain event."
+    },
+    {
+      "id": "F21",
+      "file": "TxSigners/index.tsx",
+      "line": 171,
+      "claim": "This caller passes safe.address.value while the other two callers pass the safeAddress value returned by useSafeInfo; although both currently hold the same value, the inconsistency in which form is used could cause divergence later."
+    },
+    {
+      "id": "F22",
+      "file": "packages/utils/src/features/safenet-checks/utils/deriveCheckState.ts",
+      "line": 73,
+      "claim": "The oracle-attested and plain-attested branches contain identical code and could be merged into a single conditional using the existing isAttested check, reducing duplication."
+    }
+  ]
+}

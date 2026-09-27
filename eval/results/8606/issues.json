@@ -1,0 +1,82 @@
+{
+  "usage": {
+    "usd": 0.5039534,
+    "turns": 6,
+    "wallSeconds": 47
+  },
+  "issues": [
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "Slider container now scrolls vertically but scrollTop is never reset between slides, so a later short slide (e.g. the unknown-app warning) can appear blank.",
+      "label": "medium",
+      "evidence": "styles.module.css:8 changes the container to `overflow-y: auto`, and Slider.tsx:33-50 only changes the translateX, with no scrollTop reset or remount. All slides sit in one `.sliderInner` row that is as tall as the tallest slide, so after scrolling down a long permissions list, Continue shows the warning slide scrolled past its content. The buttons stay visible, so the user could continue without seeing the warning."
+    },
+    {
+      "findings": [
+        "F6",
+        "F14"
+      ],
+      "summary": "The SafeAppsPermissions story writes to real localStorage when the module loads and never cleans up, so the seeded data leaks into other stories and persists across reloads.",
+      "label": "low",
+      "evidence": "index.stories.tsx:12 calls `local.setItem` at the top level, and `.storybook/preview.tsx` never clears localStorage. The page story `stories/pages/settings/safe-apps/SafeApps.stories.tsx` renders the same component, so its output depends on whether this file loaded first. This only affects Storybook, so the impact is minor."
+    },
+    {
+      "findings": [
+        "F13",
+        "F15"
+      ],
+      "summary": "The story hard-codes the 'SafeApps__browserPermissions' key instead of sharing the private BROWSER_PERMISSIONS constant.",
+      "label": "low",
+      "evidence": "useBrowserPermissions.ts:7 declares `const BROWSER_PERMISSIONS` without exporting it, and the story repeats the string literal. If the key is renamed, the story would silently seed nothing."
+    },
+    {
+      "findings": [
+        "F2",
+        "F4",
+        "F5",
+        "F7"
+      ],
+      "summary": "FEATURES has no `as const`, so AllowedFeatures is just `string` and the new `as AllowedFeatures[]` casts in the stories check nothing.",
+      "label": "low",
+      "evidence": "types.ts:9-41 is a plain `string[]` array, so `AllowedFeatures = FeaturesType[number]` is `string`. The casts at index.stories.tsx:16/38/46 therefore do nothing. The weak type predates the PR, but the PR exports FEATURES and adds new casts on top of it."
+    },
+    {
+      "findings": [
+        "F10"
+      ],
+      "summary": "The postcss declOf/findRule helpers are copied again into another styles.test.ts.",
+      "label": "low",
+      "evidence": "The same `declOf` exists in TxStatusWidget, TxLayoutBase, TxModalDialog and PageLayout styles.test.ts. `findRule` exists elsewhere only in PageLayout, with a different implementation, so the claim of 'five identical pairs' is overstated. It is still duplication that AGENTS.md's DRY rule discourages."
+    },
+    {
+      "findings": [
+        "F9"
+      ],
+      "summary": "The new style test covers only the CSS module half of the scroll fix; the Tailwind classes it depends on are untested.",
+      "label": "low",
+      "evidence": "styles.test.ts checks only the rules in styles.module.css. Removing `min-h-0 flex-auto` (index.tsx:137), `flex max-h-full` (index.tsx:121) or `shrink-0` (Slider.tsx:71) would break long-list scrolling without failing any test."
+    },
+    {
+      "findings": [
+        "F8",
+        "F11",
+        "F12",
+        "F17"
+      ],
+      "summary": "The scroll layout fix is split between Tailwind utilities (index.tsx, Slider.tsx) and CSS module rules.",
+      "label": "nit",
+      "evidence": "index.tsx:121/137 and Slider.tsx:71 add flex/min-h/shrink utilities, while styles.module.css:5-9 holds the matching container rules. Mixing the two is a style preference and the layout works, so there is no concrete defect."
+    },
+    {
+      "findings": [
+        "F1",
+        "F3"
+      ],
+      "summary": "mswLoader is declared on both the meta and the Default story.",
+      "label": "nit",
+      "evidence": "index.stories.tsx:25 sets `loaders: [mswLoader]` on the meta, and line 38 sets it again on Default. This is redundant and runs the loader twice, but it has no functional effect."
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "pr": 8485,
+  "reviewSha": "eb4efccb921e431d9e3fd64278332b27a9d7eb5d",
+  "baseSha": "a9c863e3068a15352379740ea5af61ba5d32a7ae",
+  "system": "E",
+  "version": "github",
+  "runner": "collect",
+  "model": "human",
+  "commentSha": "8006ed77a51e3adb47a694809eb03b9b919569ad",
+  "output": "apps/web/src/components/transactions/TxSigners/index.tsx:287\nHow about moving the `isSafenetEnabled` check directly inside the SafenetAuditRow component? \n\n---\n\napps/web/.env.example:31\nWe have the possibility to override any feature flag locally now through our UI. It was added with #8288 and can be reached via the \"Feature flags\" entry in the sidebar. So I think we can remove this env variable and related logic.\n\n\n---\n\napps/web/src/components/transactions/TxSigners/index.tsx:270\nThe isLast prop for this and the next one need to be updated now with the Safenet audit row being added below"
+}

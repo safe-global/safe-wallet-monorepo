@@ -1,0 +1,229 @@
+{
+  "pr": 8485,
+  "title": "feat(safenet): surface the check as an audit-log step with attestation link",
+  "description": "## What it solves\n\nResolves: the first visible surface of the Safenet checks integration (PRD\nhistory design) — the read layer merged in #8424/#8448/#8469/#8482/#8483 had\nno UI. A transaction's audit log now shows whether Safenet checked it and\nwith what verdict.\n\n## How this PR fixes it\n\n`SafenetAuditRow` renders the check as an audit-log step — Simulating / No\nissues found / Risk detected · By Safenet — between the signatures and the\nexecution row. Labels and copy follow the PRD states table.\n\n- Renders nothing until a check has been observed for the hash: most\n  transactions never had one, so an UNAVAILABLE row per transaction would be\n  noise. No skeleton; an entrance animation softens the late insert.\n- \"Safenet\" in the actor line is the proof link, shown only on \"No issues\n  found\": BENIGN is underivable without a FROST-verified attestation, so the\n  label and the link always travel together. It targets the attestation\n  transaction on the Safenet chain's block explorer, falling back to the\n  Safenet explorer's `/#/safeTx` hash route when the chain config is\n  unavailable.\n- Status colors apply in dark mode only; in light mode every icon uses the\n  sibling rows' default color and the severity signal is the label.\n- The step is dated from the attested block on the Safenet chain (one header\n  read per settled check; null never suppresses a verdict). The row keeps its\n  lifecycle position, so its date can read later than Executed below it — the\n  attestation settles on another chain and the column reports the truth.\n\nGating: the CGW `SAFENET_CHECKS` flag (new `FEATURES` entry), loaded lazily\nthrough the feature registry so disabled sessions pay no bundle cost. The\nregistry stubs the row to null while the flag is off — TxSigners mounts it\nbare. TxSigners also subscribes to the same check cache entry so the sibling\nrows' `isLast` accounts for the Safenet step (one chain read, shared).\n\n## How to test it\n\nBranch preview (staging CGW serves the flag for chain 1, no env override\nneeded):\n`/transactions/tx?safe=eth:0xF89f49e21A2Bd1fb24332462cB21dc1378aA25e1&id=multisig_0xF89f49e21A2Bd1fb24332462cB21dc1378aA25e1_0x10b35caca9bfe3afa5270b7f0c2e3a7501eaf5df8da07d894d022d5be9cb478a`\n→ \"No issues found · By Safenet · 11:41:00 AM\" between Signed and Executed;\nthe actor link opens the attestation. Nonce 66 of the same Safe is a second\nlive check. Any tx without a check (e.g. nonce 64) shows no row and stops\npolling after one read. Locally: `yarn workspace @safe-global/web dev`, then\nenable `SAFENET_CHECKS` in the sidebar's \"Feature flags\" override panel.\n\n## Affected flows\n\n- Owner opens a transaction's details (history or queue) and reads the audit\n  log — a Safenet step appears for checked transactions.\n\n## Blast radius\n\n- `AuditRow` (`components/common/AuditLog`) gains two additive props\n  (`actor`, `iconColor`); consumers TxSigners and MsgAuditLog are untouched\n  by default values.\n- New `FEATURES.SAFENET_CHECKS` entry (utils `chains.ts`) — inert on chains\n  whose CGW config does not serve the flag.\n- New lazy feature `safenet-checks` in the web feature registry; no bundle\n  cost when disabled.\n- Chain reads go through the already-merged reader/store/hook (packages\n  utils/store) — no RTK endpoint or CGW contract changes.\n- Mobile: none. Shared packages were merged earlier; this PR mounts web-only.\n\n## Risks / not checked\n\n- MALICIOUS / TIMED_OUT / SUBMITTED / IN_PROGRESS never observed live (the\n  beta settles in ~5 blocks); those renders are pinned by component tests\n  only.\n- The gnosisscan link path needs a CGW that serves chain-100 config — staging\n  does not, so the deployed preview exercises only the explorer fallback\n  (gnosisscan path verified locally against prod CGW).\n- Checks attested long after submission (outside the aimed read window) read\n  UNAVAILABLE by design and render nothing.\n- Not tested on mobile (no mobile surface).\n\n## Visual summary\n\nLive on the branch preview against staging CGW (mainnet Safe, real\nGnosis-beta check, FROST-verified client-side):\n\n| light | dark |\n| --- | --- |\n| ![light](https://gist.githubusercontent.com/Fbartoli/42d353ade65f55cd206edf9b79e1572d/raw/light-nonce65.png) | ![dark](https://gist.githubusercontent.com/Fbartoli/42d353ade65f55cd206edf9b79e1572d/raw/dark-nonce65.png) |\n\nA second live check in history context (nonce 66, attested ~70s after\nexecution):\n\n![history](https://gist.githubusercontent.com/Fbartoli/42d353ade65f55cd206edf9b79e1572d/raw/history-nonce66.webp)\n\n```mermaid\nflowchart LR\n  A[CGW SAFENET_CHECKS flag] --> B[lazy feature registry]\n  B --> C[SafenetAuditRow]\n  C --> D[useSafenetCheck]\n  D --> E[RTK query safenetCheckApi]\n  E --> F[SafenetReader: aimed getLogs + group key]\n  F --> G[client-side FROST verify]\n  G --> H[status -> label/icon/link/date]\n```\n\n## Checklist\n\n- [ ] I've tested the branch on mobile 📱 (no mobile surface in this PR)\n- [x] I've documented how it affects the analytics (if at all) 📊 — no\n      analytics events added or changed\n- [x] I've written a unit/e2e test for it (if applicable) 🧑‍💻\n- [x] I've listed affected flows and blast radius, and named what I did not\n      verify 🎯\n\n---\n\n## CLA signature\n\nWith the submission of this Pull Request, I confirm that I have read and agree to the terms of the [Contributor License Agreement](https://safe.global/cla).\n",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/components/transactions/TxSigners/index.tsx",
+      "line": 270,
+      "claim": "The last 'Signed (…)' row and the 'Created' row compute isLast as !showExecutionRow, but a Safenet row can now render after them. When !showExecutionRow is true and SafenetAuditRow actually renders, two adjacent rows both claim isLast=true, dropping the vertical connector between them."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/features/safenet-checks/components/SafenetAuditRow.tsx",
+      "line": 1,
+      "claim": "The new component has no Storybook story, despite project conventions requiring a story for new components and for components with logic; the five status states plus dark mode are exactly what such a story should cover."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/features/safenet-checks/index.ts",
+      "line": 12,
+      "claim": "The feature handle in this file is constructed by manually writing name, useIsEnabled, and load instead of using createFeatureHandle, duplicating logic the core helper already provides and deriving FEATURES.SAFENET_CHECKS automatically."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/features/safenet-checks/components/SafenetAuditRow.tsx",
+      "line": 65,
+      "claim": "useChain(snapshot?.chainId ?? '') is invoked with an empty-string fallback before the snapshot check; although useChain('') currently returns undefined, the code would read more clearly if the empty-string fallback were dropped or the lookup were gated on snapshot?.chainId."
+    },
+    {
+      "id": "F5",
+      "file": "packages/store/src/safenet/safenetCheckApi.ts",
+      "line": 53,
+      "claim": "The comment claiming the header read costs only one RPC per settled check is inaccurate: while a check is in the AWAITING_VERIFICATION state, verifyAttestation can return PENDING and polling continues every 6 seconds, with each poll also calling blockTimeMs, adding one RPC per poll rather than one total."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/.env.example",
+      "line": 30,
+      "claim": "NEXT_PUBLIC_SAFENET_CHECKS_FORCE duplicates the local feature-flag override UI added previously, creating two override paths for a single flag, which is a maintenance hazard."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/components/transactions/TxSigners/index.tsx",
+      "line": 173,
+      "claim": "showsSafenetRow can become true before the lazily loaded SafenetAuditRow chunk finishes loading, so during that window the row renders as a stub and the row above it loses its isLast state with no row actually rendered below it."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/src/features/safenet-checks/components/SafenetAuditRow.tsx",
+      "line": 78,
+      "claim": "The logic for preferring the oracle attestation and falling back to the plain one is duplicated in two places (also in safenetCheckApi.ts around lines 50-52); if the store's selection logic changes in one place but not the other, the displayed link could point to a different transaction than the one actually verified."
+    },
+    {
+      "id": "F9",
+      "file": "apps/web/src/features/safenet-checks/index.ts",
+      "line": 11,
+      "claim": "The process.env branch backing the duplicate NEXT_PUBLIC_SAFENET_CHECKS_FORCE override should be dropped along with the env var since the flag can already be overridden via the feature-flag override UI."
+    },
+    {
+      "id": "F10",
+      "file": "apps/web/src/components/transactions/TxSigners/index.tsx",
+      "line": 167,
+      "claim": "This diff adds long explanatory comments across multiple files, including this one, SafenetAuditRow.tsx, and the test files, conflicting with the project guidance to treat comments as tech debt and add them only when necessary; some comments merely restate the code, such as one just describing the theme-default link color."
+    },
+    {
+      "id": "F11",
+      "file": "packages/store/src/safenet/__tests__/safenetCheckApi.test.ts",
+      "line": 104,
+      "claim": "The no-attestation test doesn't assert that blockTimeMs was not called, so it fails to verify the one-RPC-per-settled-check behavior that the new code's comment claims."
+    },
+    {
+      "id": "F12",
+      "file": "apps/web/src/features/safenet-checks/components/SafenetAuditRow.tsx",
+      "line": null,
+      "claim": "This new component with logic has no Storybook story, even though its five status states and separate dark-mode colors are exactly the kind of visual variants a story is meant to cover."
+    },
+    {
+      "id": "F13",
+      "file": "apps/web/src/features/safenet-checks/components/SafenetAuditRow.tsx",
+      "line": 79,
+      "claim": "The optional chaining on snapshot?.events is redundant since the code already returns earlier when snapshot is falsy, and its presence misleadingly suggests snapshot could still be undefined at that point."
+    },
+    {
+      "id": "F14",
+      "file": "apps/web/src/features/safenet-checks/components/__tests__/SafenetAuditRow.test.tsx",
+      "line": null,
+      "claim": "No test covers the TIMED_OUT state producing the \"Safenet check failed\" label, and no test covers the dark-mode icon colors (DARK_STEP_COLOR), even though MALICIOUS, BENIGN, and in-flight states are covered."
+    },
+    {
+      "id": "F15",
+      "file": "apps/web/src/features/safenet-checks/components/SafenetAuditRow.tsx",
+      "line": 79,
+      "claim": "Line 68 already returns early if !snapshot, so the optional chaining in snapshot?.events.find(...) on lines 79-80 is redundant and can be simplified to snapshot.events.find(...)."
+    },
+    {
+      "id": "F16",
+      "file": "apps/web/src/features/safenet-checks/components/SafenetAuditRow.tsx",
+      "line": 31,
+      "claim": "In light mode, the Risk detected and Safenet check failed states keep the default primary icon color instead of using error or warning colors, while dark mode does apply those colors, and it's unclear whether this inconsistency is an intended design choice."
+    },
+    {
+      "id": "F17",
+      "file": "apps/web/src/components/transactions/TxSigners/index.tsx",
+      "line": 173,
+      "claim": "The row's render check does not verify that the Safenet feature chunk has finished loading, so if the audit data arrives before the lazy feature loads, the check is true while the feature's component still renders a null stub. This causes the last signing row to lose its isLast flag and the timeline connector to hang with nothing under it until the chunk loads."
+    },
+    {
+      "id": "F18",
+      "file": "apps/web/src/features/safenet-checks/components/SafenetAuditRow.tsx",
+      "line": null,
+      "claim": "The component file lives directly at components/SafenetAuditRow.tsx instead of the documented components/<Component>/index.tsx layout."
+    },
+    {
+      "id": "F19",
+      "file": "apps/web/.env.example",
+      "line": 1,
+      "claim": "The documented Safenet section in this file omits the new NEXT_PUBLIC_SAFENET_EXPLORER_URL variable, which is read in packages/utils/src/features/safenet-checks/constants.ts, leaving the config undocumented."
+    },
+    {
+      "id": "F20",
+      "file": "apps/web/src/features/safenet-checks/components/SafenetAuditRow.tsx",
+      "line": 66,
+      "claim": "The dark-mode iconColor branch, using DARK_STEP_COLOR, has no test coverage."
+    },
+    {
+      "id": "F21",
+      "file": "apps/web/src/components/transactions/TxSigners/index.tsx",
+      "line": 270,
+      "claim": "The isLast prop on this row and the next one is now incorrect because a new Safenet audit row was added below them, so it needs to be updated to reflect the new last item."
+    },
+    {
+      "id": "F22",
+      "file": "apps/web/src/components/transactions/TxSigners/index.test.tsx",
+      "line": 711,
+      "claim": "The loop over useSafenetCheck.mock.calls passes even when there are zero calls, and the negative text assertion only works because a mockReturnValue set in a prior test leaks through clearAllMocks; run in isolation the hook returns UNAVAILABLE, so the assertion still passes even if the flag gate is broken, meaning the test doesn't actually prove the flag-off behavior."
+    },
+    {
+      "id": "F23",
+      "file": "apps/web/src/components/transactions/TxSigners/index.tsx",
+      "line": 31,
+      "claim": "TxSigners imports useSafenetCheck directly from the underlying package instead of going through the feature's own module, reaching past the feature boundary other consumers are expected to respect."
+    },
+    {
+      "id": "F24",
+      "file": "apps/web/src/features/safenet-checks/feature.tsx",
+      "line": null,
+      "claim": "The feature entry file is named feature.tsx while all 27 other features use feature.ts, breaking the documented naming convention for this file."
+    },
+    {
+      "id": "F25",
+      "file": "apps/web/src/components/transactions/TxSigners/index.tsx",
+      "line": 173,
+      "claim": "The visibility check for the signing row is re-implemented here rather than reused from SafenetAuditRow's own render gate, so the two implementations can drift out of sync, a risk the code's own comment acknowledges."
+    },
+    {
+      "id": "F26",
+      "file": "apps/web/src/components/transactions/TxSigners/index.tsx",
+      "line": 287,
+      "claim": "The enabled check should be moved inside SafenetAuditRow itself, or the enabled state should be checked first so useLoadFeature is only called conditionally, to avoid the unnecessary lazy import when Safenet is disabled."
+    },
+    {
+      "id": "F27",
+      "file": "apps/web/src/components/transactions/TxSigners/index.tsx",
+      "line": 166,
+      "claim": "The diff contains long block comments that are disproportionate to the surrounding code, conflicting with project guidance to treat code comments as tech debt; these comments (also at line 296-298 and in safenetCheckApi.ts around lines 53-55) could be shortened, particularly once the related correctness issues are fixed."
+    },
+    {
+      "id": "F28",
+      "file": "apps/web/src/components/transactions/TxSigners/index.tsx",
+      "line": 281,
+      "claim": "SafenetAuditRow can return null at render time (no snapshot yet, or UNAVAILABLE), so the parent has no way of knowing whether a real row will follow, making it impossible to correctly compute isLast for the preceding rows without additional state passed up from the child."
+    },
+    {
+      "id": "F29",
+      "file": "apps/web/.env.example",
+      "line": 31,
+      "claim": "This feature flag environment variable and its related logic can be removed because feature flags can now be overridden locally through the UI's 'Feature flags' sidebar entry, making the env variable redundant."
+    },
+    {
+      "id": "F30",
+      "file": "apps/web/src/components/transactions/TxSigners/index.tsx",
+      "line": 287,
+      "claim": "The isSafenetEnabled check is placed outside the SafenetAuditRow component and should instead be moved directly inside it."
+    },
+    {
+      "id": "F31",
+      "file": "apps/web/src/features/safenet-checks/components/__tests__/SafenetAuditRow.test.tsx",
+      "line": null,
+      "claim": "The test file sits in a __tests__ directory instead of next to the component as <Component>.test.tsx, as the layout convention requires."
+    },
+    {
+      "id": "F32",
+      "file": "apps/web/src/features/safenet-checks/index.ts",
+      "line": 10,
+      "claim": "useHasFeature(...) === true collapses the still-loading undefined state into false, so useIsEnabled reports false while chain config is still resolving; since useLoadFeature treats isEnabled === false as $isDisabled true, and TxSigners uses this same hook to gate safenetHash, the row can appear disabled even though the feature status hasn't actually been determined yet."
+    },
+    {
+      "id": "F33",
+      "file": "apps/web/src/features/safenet-checks/components/SafenetAuditRow.tsx",
+      "line": 104,
+      "claim": "The timestamp is only populated when an attestation event exists, so the MALICIOUS (risk detected) and TIMED_OUT (check failed) outcomes never display a date even though they are the most important statuses to show a time for; the accompanying comment does not mention either case."
+    },
+    {
+      "id": "F34",
+      "file": "packages/utils/src/features/safenet-checks/constants.ts",
+      "line": 53,
+      "claim": "The commit adds new environment variables (NEXT_PUBLIC_SAFENET_EXPLORER_URL / EXPO_PUBLIC_SAFENET_EXPLORER_URL) but does not add them to apps/web/.env.example, even though the same commit documents every other SAFENET_* variable there."
+    },
+    {
+      "id": "F35",
+      "file": "apps/web/.env.example",
+      "line": null,
+      "claim": "The file still has no trailing newline."
+    },
+    {
+      "id": "F36",
+      "file": "apps/web/src/components/transactions/TxSigners/index.tsx",
+      "line": 159,
+      "claim": "useLoadFeature(SafenetChecksFeature) triggers the dynamic import() for every rendered TxSigners regardless of isSafenetEnabled, causing a wasted network round trip on non-Safenet chains and undermining the PR's claim that disabled sessions pay no bundle cost."
+    },
+    {
+      "id": "F37",
+      "file": null,
+      "line": null,
+      "claim": "The ORACLE_ATTESTED-preferred link lookup path is untested; only the plain-attested case is covered."
+    }
+  ]
+}

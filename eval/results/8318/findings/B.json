@@ -1,0 +1,90 @@
+{
+  "usd": 0.067326,
+  "findings": [
+    {
+      "file": "apps/web/src/components/common/TrustedSafesModal/ManageTrustedSafesContent.tsx",
+      "line": 103,
+      "claim": "The row badge set is computed from availableItems, which is filtered by the active search, while the confirm gate and Select-All exclusion are computed from the full allSafes list. As a result, when a search hides an address that shares its similarity cluster with a visible one, the visible address shows no warning badge even though clicking it still triggers the similarity confirm dialog, so the badge and the gate disagree."
+    },
+    {
+      "file": "apps/web/src/components/common/TrustedSafesModal/ManageTrustedSafesContent.tsx",
+      "line": 103,
+      "claim": "availableItems is rebuilt on every checkbox toggle, causing both similarity detectors to rerun on every click instead of only when the underlying list changes."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/hooks/useOnboardingSafes.ts",
+      "line": 41,
+      "claim": "A Safe added on any chain now automatically pulls its owned and undeployed instances on every other chain into the trusted list and out of owned, but only owned items get look-alike warnings, so the moved instances silently lose their similarity warnings."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/hooks/useOnboardingSafes.ts",
+      "line": 41,
+      "claim": "None of the existing test file's cases place an address on two different chains, so reverting the new cross-chain promotion behavior would not fail any test; the hook is also mocked out entirely in SelectSafesOnboarding.test.tsx, leaving this behavior untested."
+    },
+    {
+      "file": "packages/utils/src/utils/addressSimilarity.ts",
+      "line": 133,
+      "claim": "The within-list similarity detector used on all five list surfaces changed from requiring a match on both the first 4 and last 4 hex characters to accepting a match on either end, and it now chains matches together so that a matches b and b matches c places a and c in the same group; this ships unconditionally to every user with no feature flag, unlike the anchor-based half of the check which is gated by ADDRESS_POISONING_PROTECTION."
+    },
+    {
+      "file": "packages/utils/src/utils/addressSimilarity.ts",
+      "line": 133,
+      "claim": "Matching on only 4 hex characters at either end is effectively a 16-bit collision check, so a list of roughly 300 Safes has a rough 75% chance of producing at least one false similarity cluster; affected Safes are excluded from Select-All and require an extra confirm click, and the chaining behavior lets these false clusters grow."
+    },
+    {
+      "file": "apps/web/src/components/nested-safes/NestedSafesList/useManageNestedSafes.ts",
+      "line": 172,
+      "claim": "The rewritten getSimilarAddresses and groupSafesBySimilarity functions have no tests, and useSimilarityClusters is only exercised indirectly through a mock rather than directly tested."
+    },
+    {
+      "file": "packages/utils/src/utils/addressSimilarity.ts",
+      "line": 9,
+      "claim": "The file header comment still states that within-list matching requires a match on the front AND the back of the address, but the logic was changed to match on either end, so the comment is now inaccurate."
+    },
+    {
+      "file": "apps/web/src/components/common/TrustedSafesModal/ManageTrustedSafesContent.tsx",
+      "line": 100,
+      "claim": "A comment states that similarityGroup drives the visual grouping in the UI, but no UI code actually reads that field, making the comment misleading."
+    },
+    {
+      "file": "packages/utils/src/utils/addressSimilarity.ts",
+      "line": 120,
+      "claim": "The group id is documented as \"stable\" but it is actually the union-find root, whose value depends on input order, so it is not stable across different orderings of the same input."
+    },
+    {
+      "file": "packages/utils/src/utils/addressSimilarity.ts",
+      "line": 107,
+      "claim": "getFlaggedSimilarAddressSet now has no production callers and is only exercised by its own tests, making it dead code in production."
+    },
+    {
+      "file": "apps/web/docs/spaces-accounts-architecture.md",
+      "line": 92,
+      "claim": "The architecture doc (also at lines 234 and 664) still describes the old detectSimilarAddresses flow for the web surfaces, which no longer matches the updated implementation."
+    },
+    {
+      "file": "apps/web/src/components/nested-safes/NestedSafesList/SimilarityConfirmDialog.tsx",
+      "line": 30,
+      "claim": "A Safe flagged only for resembling a trusted address has no similarity group, so the confirm dialog ends up listing no similar addresses while still displaying the message \"similar to other addresses in your list,\" which is inaccurate copy for that case."
+    },
+    {
+      "file": "apps/web/src/components/common/TrustedSafesModal/useTrustedSafesModal.ts",
+      "line": 114,
+      "claim": "The same useCallback pattern for checking whether an address is flagged (checking a lowercase address against a flagged set) is duplicated between useTrustedSafesModal.ts and useManageNestedSafes.ts; it could be pulled into a shared isFlagged helper returned from useSimilarityClusters."
+    },
+    {
+      "file": "packages/utils/src/utils/addressSimilarity.ts",
+      "line": 107,
+      "claim": "getFlaggedSimilarAddressSet, being unused in production, should either be deleted along with its tests or explicitly marked deprecated if mobile might still adopt it."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/hooks/useOnboardingSafes.ts",
+      "line": 47,
+      "claim": "Duplicate removal across the owned, undeployed, and added address lists uses a case-sensitive Set, so if these lists ever disagree on checksum casing for the same address, that address could appear twice instead of being deduplicated."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "Anchor-based matches treat a one-end WARN-level match the same as a CRITICAL match for gating purposes, which can produce false flags for users with a large address book; this half of the check is behind the feature flag."
+    }
+  ]
+}

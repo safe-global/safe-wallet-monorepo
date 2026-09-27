@@ -1,0 +1,25 @@
+{
+  "usd": 0.0412476,
+  "findings": [
+    {
+      "file": "apps/web/src/features/safenet-checks/statusPresentation.ts",
+      "line": 69,
+      "claim": "The copy shown for any empty read whose window is not proven was changed from 'Not checked' to 'Status unavailable ... Retry later', without a stated product or design sign-off for this visible behavior change. The read did not actually fail, and for transactions old enough that the window will never reach proven, the 'Retry later' message is misleading since retrying will never help."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/hooks/useSafenetCheck.ts",
+      "line": 42,
+      "claim": "This is where the status copy choice described above is made, feeding into the same unapproved behavior change for empty reads whose window isn't proven."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/hooks/__tests__/useSafenetCheck.test.ts",
+      "line": 174,
+      "claim": "The test that anchors the UNAVAILABLE grace window calls jest.useFakeTimers() but only restores real timers on the test's last line instead of in an afterEach, so if an assertion fails partway through, fake timers leak into later tests. This is inconsistent with the other fake-timer blocks in the same file, which use afterEach(() => jest.useRealTimers())."
+    },
+    {
+      "file": "apps/web/src/features/safenet-checks/components/SafenetAuditRow.tsx",
+      "line": 37,
+      "claim": "The prop doc comment still says the timestamp 'aims the reader's block window', but after this change it is only offered to the aim registry, which keeps the earliest time any surface offered; the matching comment was updated in SafenetQueueStatus.tsx but not here."
+    }
+  ]
+}

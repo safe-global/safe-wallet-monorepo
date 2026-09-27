@@ -1,0 +1,139 @@
+{
+  "pr": 8601,
+  "title": "fix(UI): Security Hub UI",
+  "description": "## What it solves\r\n\r\nResolves: [WA-3445](https://linear.app/safe-global/issue/WA-3445/security-hub-report-drawer-surface-changed-from-fafafa-to-white-in)\r\n\r\nSecurity Hub UI regressed in the shadcn migration (PR #8040):\r\n- \"At risk\" and \"Needs review\" looked almost the same\r\n- Report drawer surface turned white (`bg-card`) → white cards inside became invisible.\r\n- Grade pills (Critical / At risk / Healthy) took wrong badge-variant colours instead of score-ramp tokens.\r\n- Header became \"Security\" @ 48px; should be \"Security hub\" @ main's 32px.\r\n\r\n## How this PR fixes it\r\n\r\n- **Drawer surface:** added a `muted` (`bg-zinc-50 dark:bg-card`) variant to `sheet.tsx`, switched the drawer to it. Corrected the stale comment.\r\n- **Grade pills:** `SafeGradeChip` owns its per-grade colours (`GRADE_PILL_STYLES`) from the score-ramp tokens instead of Badge variants. No change to `badge.tsx`.\r\n- **Header:** text → \"Security hub\"; size overridden to `text-[32px] leading-9` at the call site. Subtitle kept. `typography.tsx` untouched.\r\n- Added a surface regression test (drawer renders `bg-zinc-50`, not `bg-card`).\r\n\r\n## How to test it\r\n\r\n1.  Go to Security Hub for a workspace.\r\n2. Open a Safe's report drawer → grey #fafafa surface, cards visibly raised.\r\n3. Grade pills (Critical / At risk / Healthy) match main's muted tints.\r\n4. Header reads \"Security hub\" @ 32px.\r\n\r\n## Affected flows\r\n\r\n- Security Hub → per-Safe report drawer (light mode)\r\n- Security Hub grade pills (status cells + workspace health filter chips)\r\n- Security Hub page header\r\n\r\n## Blast radius\r\n\r\n- `components/ui/sheet.tsx` — **additive only** (`muted` variant); `card`/`paper` and all other Sheet consumers unchanged. No `surface` default.\r\n- `SafeGradeChip.tsx` — dropped dependency on `badge.tsx` variant; `badge.tsx` untouched, other badges unaffected.\r\n- `SecurityHub/index.tsx` — call-site-only style override; shared `typography.tsx` untouched.\r\n\r\n## Risks / not checked\r\n\r\n- Header weight left at shadcn 600 (main's MUI h1 was 700) — size matched per request, weight not.\r\n\r\n## Visual summary\r\n\r\nBefore:\r\n<img width=\"530\" height=\"278\" alt=\"image\" src=\"https://github.com/user-attachments/assets/8a6c9a3c-cd56-4dfb-98c6-68cb04b90c02\" />\r\n<img width=\"524\" height=\"282\" alt=\"image\" src=\"https://github.com/user-attachments/assets/77bbf2ed-3a5f-435c-bb0c-60e7fde50f39\" />\r\n<img width=\"384\" height=\"513\" alt=\"image\" src=\"https://github.com/user-attachments/assets/e4514e72-3e6a-4941-bc8e-423e2b6ac4b0\" />\r\n\r\n\r\nAfter:\r\n<img width=\"521\" height=\"225\" alt=\"image\" src=\"https://github.com/user-attachments/assets/396cbf30-5d20-4861-975d-4edc81cd829a\" />\r\n<img width=\"538\" height=\"234\" alt=\"image\" src=\"https://github.com/user-attachments/assets/9f0e1514-89bd-4fad-a6df-5484a14ba87e\" />\r\n<img width=\"391\" height=\"462\" alt=\"image\" src=\"https://github.com/user-attachments/assets/7cd1ebdd-dffc-4a56-9189-c8ffd44f0586\" />\r\n\r\n\r\n\r\n```mermaid\r\nflowchart TB\r\n  subgraph Before[\"Before (dev — regressed)\"]\r\n    D1[Drawer: surface=card → white] --> C1[White cards invisible]\r\n    P1[Pills → Badge variant colours]\r\n    H1[\"Header: 'Security' @ 48px\"]\r\n  end\r\n  subgraph After[\"After (this PR)\"]\r\n    D2[Drawer: surface=muted → #fafafa] --> C2[Cards raised & visible]\r\n    P2[Pills → score-ramp *-background/*-main]\r\n    H2[\"Header: 'Security hub' @ 32px\"]\r\n  end\r\n```\r\n\r\n## Checklist\r\n\r\n- [x] I've tested the branch on mobile 📱\r\n- [ ] I've documented how it affects the analytics (if at all) 📊\r\n- [x] I've written a unit/e2e test for it (if applicable) 🧑‍💻\r\n- [x] I've listed affected flows and blast radius, and named what I did not verify 🎯\r\n",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/features/spaces/components/SecurityHub/index.tsx",
+      "line": 37,
+      "claim": "The h1 Typography variant is overridden with custom text-[32px] leading-9 values that are not part of the typography scale, replacing the standard 48px h1 size with an arbitrary one-off value."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/features/spaces/components/SecurityHub/components/SafeGradeChip/SafeGradeChip.tsx",
+      "line": 65,
+      "claim": "There is a stray blank line inside the cn(...) argument list."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/components/ui/sheet.tsx",
+      "line": 72,
+      "claim": "The new muted sheet surface hard-codes bg-zinc-50, a raw Tailwind color not used elsewhere in the codebase, instead of reusing the existing --surface-sunken token that Card already exposes via bg-surface-sunken for the same visual purpose."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/features/spaces/components/SecurityHub/components/SecurityReportDrawer/SecurityReportDrawer.test.tsx",
+      "line": 16,
+      "claim": "The test name hard-codes color values like \"#fafafa\" and \"white bg-card\", which will become stale the next time the underlying design tokens change."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/features/spaces/components/SecurityHub/components/SafeGradeChip.tsx",
+      "line": 65,
+      "claim": "A stray blank line was left inside a `cn(...)` call where a removed ESLint disable comment used to be."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/src/features/spaces/components/SecurityHub/components/SecurityReportDrawer/SecurityReportDrawer.test.tsx",
+      "line": 10,
+      "claim": "The test's description still refers to a '#fafafa surface ... not white bg-card' scenario that no longer matches the updated implementation or expected class, so the test name is now inaccurate."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/components/ui/sheet.tsx",
+      "line": 72,
+      "claim": "`bg-zinc-50` is a raw Tailwind palette color rather than a theme token, violating the project convention of always using theme tokens instead of hard-coded colors, and it is the only such raw color in the web app's source."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/src/features/spaces/components/SecurityHub/components/SectionPanel/SectionPanel.tsx",
+      "line": 30,
+      "claim": "Each row manually applies overflow-hidden rounded-lg bg-card, even though the Card component already provides this styling through its own props, making the hand-written classes redundant."
+    },
+    {
+      "id": "F9",
+      "file": "apps/web/src/features/spaces/components/SecurityHub/components/SafeGradeChip.tsx",
+      "line": 66,
+      "claim": "Every chip now renders with `data-variant=\"default\"` plus a leftover `[a]:hover:bg-primary/80` class that no longer serves a purpose given the new color lookup approach."
+    },
+    {
+      "id": "F10",
+      "file": "apps/web/src/components/ui/sheet.tsx",
+      "line": 72,
+      "claim": "The light and dark variants of the new muted surface pull their colors from different sources (a raw Tailwind class versus a CSS variable), making the styling inconsistent between light and dark mode."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/src/features/spaces/components/SecurityHub/components/SafeGradeChip.tsx",
+      "line": 15,
+      "claim": "Badge colors are now assigned via a `GRADE_PILL_STYLES[grade]` lookup that the project's ESLint rule restricting direct badge/chip color usage cannot detect, so all four grade variants bypass the guard silently instead of using the sanctioned disable-with-reason escape hatch that was previously used for one grade."
+    },
+    {
+      "id": "F12",
+      "file": "apps/web/src/features/spaces/components/SecurityHub/components/SecurityReportDrawer/SecurityReportDrawer.test.tsx",
+      "line": 16,
+      "claim": "The test asserts the element has class `dark:bg-card`, but the `muted` surface in sheet.tsx was changed to use `dark:bg-[var(--color-background-main)]`, so the element no longer has that class and the test fails against the current implementation."
+    },
+    {
+      "id": "F13",
+      "file": "apps/web/src/features/spaces/components/SecurityHub/components/SafeGradeChip.tsx",
+      "line": 15,
+      "claim": "Pill text now uses `*-main` ink color on the `*-background` tint, producing contrast ratios of roughly 2.4-2.6:1 in light mode, well below the 4.5:1 required by WCAG AA; the previous variants were chosen specifically to meet AA contrast."
+    },
+    {
+      "id": "F14",
+      "file": "apps/web/src/features/spaces/components/SecurityHub/components/SafeGradeChip/SafeGradeChip.tsx",
+      "line": 15,
+      "claim": "Using *-main text color on its matching tint background can fail the WCAG AA minimum contrast standard for some of the colors involved, per the warning already documented in badge.tsx."
+    },
+    {
+      "id": "F15",
+      "file": "apps/web/src/components/ui/sheet.tsx",
+      "line": 38,
+      "claim": "This PR edits a shared UI primitive under apps/web/src/components/ui/*, which requires either noting coordination with the in-flight design-system rewrite or stating that no such rewrite PR is open, and the PR description does neither."
+    },
+    {
+      "id": "F16",
+      "file": "apps/web/src/components/ui/sheet.tsx",
+      "line": 72,
+      "claim": "card.tsx maintains a dated Changelog entry in its header comment, but the new sheet variant added here is not recorded anywhere in sheet.tsx, leaving the change history undocumented."
+    },
+    {
+      "id": "F17",
+      "file": "apps/web/src/features/spaces/components/SecurityHub/components/SafeGradeChip/SafeGradeChip.tsx",
+      "line": 15,
+      "claim": "Because the raw color classes no longer flow through the className attribute the way the Badge component expects, the Badge falls back to its default variant and relies on tailwind-merge to override the styling, leaving snapshots with a leftover default-variant class such as [a]:hover:bg-primary/80."
+    },
+    {
+      "id": "F18",
+      "file": "apps/web/src/features/spaces/components/SecurityHub/components/SafeGradeChip/SafeGradeChip.stories.test.tsx.snap",
+      "line": 1,
+      "claim": "The snapshot file's header link changed from https://jestjs.io/docs/snapshot-testing to https://goo.gl/fbAQLP, suggesting the snapshots were regenerated with a different Jest version than the one the repo uses, which means they will change back on the next snapshot update."
+    },
+    {
+      "id": "F19",
+      "file": "apps/web/src/features/spaces/components/SecurityHub/index.tsx",
+      "line": null,
+      "claim": "This change also renames the page heading from 'Security' to 'Security hub' and removes the subtitle, and the PR description does not state whether this came from a design decision."
+    },
+    {
+      "id": "F20",
+      "file": "apps/web/src/features/spaces/components/SecurityHub/components/SecurityReportDrawer/SecurityReportDrawer.test.tsx",
+      "line": 16,
+      "claim": "The test asserts the class dark:bg-card, but the surface=\"muted\" implementation actually applies dark:bg-[var(--color-background-main)], so the test will fail against the current code."
+    },
+    {
+      "id": "F21",
+      "file": "apps/web/src/features/spaces/components/SecurityHub/index.tsx",
+      "line": 37,
+      "claim": "The heading uses a one-off `text-[32px] leading-9` override instead of an existing typography variant, when the h1 variant (48px) or h2 variant (30px) could otherwise apply; no other page overrides heading size this way."
+    },
+    {
+      "id": "F22",
+      "file": "apps/web/src/features/spaces/components/SecurityHub/components/SafeGradeChip/SafeGradeChip.tsx",
+      "line": 15,
+      "claim": "The grade colors were moved from an inline className (which had an explicit eslint-disable comment for the no-restricted-syntax rule) into a module-level constant GRADE_PILL_STYLES, and the lint rule only scans class strings written directly in the className attribute, so the raw color classes now bypass the lint check without anyone deciding to allow that."
+    }
+  ]
+}

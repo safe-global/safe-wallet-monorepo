@@ -1,0 +1,193 @@
+{
+  "usage": {
+    "usd": 0.7456568,
+    "turns": 12,
+    "wallSeconds": 84
+  },
+  "issues": [
+    {
+      "findings": [
+        "F4"
+      ],
+      "summary": "Page resets to 0 whenever the rows reference changes, including refetches after member mutations",
+      "label": "medium",
+      "evidence": "PaginatedDataTable/index.tsx:67-69 runs setPage(0) on every new `rows` reference. Editing a role, removing or renewing a member refetches the members list, which produces a new array (useSpaceMembers.tsx memoizes on allMembers). So an admin on page 2 lands back on page 1. The old EnhancedTable (EnhancedTable/index.tsx:142-157) only reset the page when rows-per-page changed."
+    },
+    {
+      "findings": [
+        "F13",
+        "F25"
+      ],
+      "summary": "Removing the name tooltip leaves long contact names truncated with no way to read them",
+      "label": "medium",
+      "evidence": "SpaceAddressBookTable.tsx:63-67 still truncates the name in a w-[20%] column of a table-fixed layout, with no tooltip and no title attribute. The merge-base version wrapped the name in a Tooltip showing the full name, so calling it redundant is only true for names that fit."
+    },
+    {
+      "findings": [
+        "F20"
+      ],
+      "summary": "String sort is case-sensitive raw comparison",
+      "label": "low",
+      "evidence": "PaginatedDataTable/index.tsx:41-42 compares strings with raw `<` and `>`, so 'alice' < 'Zoe' is false and lowercase names sort after uppercase ones. This is user-visible but minor, because most names start with a capital letter."
+    },
+    {
+      "findings": [
+        "F21"
+      ],
+      "summary": "'Added by' sorts by raw createdBy while the cell shows a resolved name",
+      "label": "low",
+      "evidence": "SpaceAddressBookTable.tsx:46-47 sorts by `entry.createdBy` (an address or email). The cell at :113-119 renders EthHashInfo with `onlyName`, which shows a resolved name, so the order users see can look unsorted."
+    },
+    {
+      "findings": [
+        "F27"
+      ],
+      "summary": "'Last updated' branch is dead and would sort local contacts first",
+      "label": "low",
+      "evidence": "Grep finds no caller that passes showLastUpdated. Local entries are built with createdAt: '' and updatedAt: '' (SpaceAddressBook/index.tsx:79-80), and an empty string is not null, so compareNullable would put local contacts first in ascending order instead of last."
+    },
+    {
+      "findings": [
+        "F12",
+        "F24"
+      ],
+      "summary": "Column className only styles header cells; each caller hand-renders body cells",
+      "label": "low",
+      "evidence": "PaginatedDataTable/index.tsx:106 applies column.className only to TableHead, and SpaceAddressBookTable.tsx:60-136 / MembersList render every TableCell themselves through renderRow. Column layout therefore lives in two places. The per-column `cell` renderers the PR description claims are not in this code."
+    },
+    {
+      "findings": [
+        "F29"
+      ],
+      "summary": "Members page adds a per-component shadcn-scope/dark wrapper via useDarkMode",
+      "label": "low",
+      "evidence": "Members/index.tsx:21,27 adds `cn('shadcn-scope', isDarkMode && 'dark')`, even though _app.tsx:166 already wraps the app in ShadcnProvider with dark mode. The PR description says these wrappers were dropped, so the code contradicts it. The same pattern does exist elsewhere in the codebase."
+    },
+    {
+      "findings": [
+        "F2",
+        "F5"
+      ],
+      "summary": "Hand-built pagination footer instead of reusing components/ui/pagination",
+      "label": "low",
+      "evidence": "PaginatedDataTable/index.tsx:135-160 builds its own prev/next buttons and range label, although components/ui/pagination.tsx exists. It is a small DRY and consistency cost (the ui component is link-oriented but adaptable)."
+    },
+    {
+      "findings": [
+        "F17"
+      ],
+      "summary": "Icon-only prev/next buttons lack aria-label",
+      "label": "low",
+      "evidence": "PaginatedDataTable/index.tsx:142-157 renders Buttons that contain only chevron icons and have no aria-label, so screen readers announce them without a name."
+    },
+    {
+      "findings": [
+        "F19",
+        "F28"
+      ],
+      "summary": "Address book columns rebuilt each render, defeating the sortedRows memo",
+      "label": "low",
+      "evidence": "SpaceAddressBookTable.tsx:36 builds `columns` inline, and it is a useMemo dependency at PaginatedDataTable/index.tsx:87, so rows are re-sorted on every render. MembersList's columns are a module constant, so only the address book is affected, and the cost is small for these list sizes."
+    },
+    {
+      "findings": [
+        "F14"
+      ],
+      "summary": "No Storybook story for new PaginatedDataTable component",
+      "label": "low",
+      "evidence": "The PaginatedDataTable/ directory contains only index.tsx and index.test.tsx. apps/web/AGENTS.md requires a story for every new component."
+    },
+    {
+      "findings": [
+        "F11",
+        "F26"
+      ],
+      "summary": "Email tooltip test weakened to a class check",
+      "label": "low",
+      "evidence": "MembersList/index.test.tsx:80-97 dropped the hover-and-findByRole('tooltip') assertion and now only checks the `truncate` class. The test name still claims tooltip behaviour, but it would pass with the tooltip content removed."
+    },
+    {
+      "findings": [
+        "F3",
+        "F22",
+        "F30"
+      ],
+      "summary": "Column-specific sortValue accessors (address book, members) are untested",
+      "label": "low",
+      "evidence": "The PaginatedDataTable tests cover generic sorting with a single name column, but nothing tests the sortValue functions in SpaceAddressBookTable.tsx:37-47 or MembersList/index.tsx:26-29. These are mostly trivial accessors, so the regression risk is modest."
+    },
+    {
+      "findings": [
+        "F10"
+      ],
+      "summary": "Middle-column (Added by vs Last updated) switching untested",
+      "label": "low",
+      "evidence": "No test renders SpaceAddressBookTable with showLastUpdated or with showAddedBy={false}. The branch at SpaceAddressBookTable.tsx:40-50 and :109-127 is also dead in production, which limits the impact."
+    },
+    {
+      "findings": [
+        "F7"
+      ],
+      "summary": "No test that changing sort resets to page 1",
+      "label": "low",
+      "evidence": "handleSort calls setPage(0) (PaginatedDataTable/index.tsx:73), but the test file has no case that paginates and then sorts."
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "Page clamping not tested",
+      "label": "low",
+      "evidence": "No test covers the clamp at PaginatedDataTable/index.tsx:89-91. In practice the rows-change useEffect already resets the page, so the gap has little impact."
+    },
+    {
+      "findings": [
+        "F15"
+      ],
+      "summary": "Null/undefined values sorting last not tested",
+      "label": "low",
+      "evidence": "The sorting tests (index.test.tsx:66+) use only non-null names, so compareNullable's rule that empty values sort last (index.tsx:37-40) is not exercised in either direction."
+    },
+    {
+      "findings": [
+        "F23"
+      ],
+      "summary": "aria-sort values not asserted",
+      "label": "low",
+      "evidence": "The test file never asserts aria-sort, so a regression in ariaSortValue (index.tsx:46-47,105) would go unnoticed."
+    },
+    {
+      "findings": [
+        "F6"
+      ],
+      "summary": "No Playwright one-shot clickthrough added and no reason given",
+      "label": "low",
+      "evidence": "The PR checklist marks the one-shot item as \"not added in this PR\" with no justification. AGENTS.md treats this as an advisory reminder that should either be done or explained."
+    },
+    {
+      "findings": [
+        "F8"
+      ],
+      "summary": "updatedAt || createdAt duplicated in sort and cell",
+      "label": "nit",
+      "evidence": "SpaceAddressBookTable.tsx:47 and :124 repeat the same expression. The duplication is small and sits in dead code."
+    },
+    {
+      "findings": [
+        "F9",
+        "F18"
+      ],
+      "summary": "Card borders removed without stated rationale",
+      "label": "nit",
+      "evidence": "Members/index.tsx:57 and SpaceAddressBook/index.tsx:181 drop `border`, which makes the two cards consistent. This is a visual design choice with no functional cost."
+    },
+    {
+      "findings": [
+        "F1"
+      ],
+      "summary": "Custom classes on the shadcn Button instead of variants",
+      "label": "nit",
+      "evidence": "`className=\"px-4 py-0\"` at Members/index.tsx:37 predates the PR; the diff only re-indents it inside the new wrapper."
+    }
+  ]
+}

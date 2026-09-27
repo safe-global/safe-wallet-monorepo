@@ -1,0 +1,35 @@
+{
+  "usd": 0.039470000000000005,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/SelectSafeModal/__tests__/index.test.tsx",
+      "line": 10,
+      "claim": "The SafeItem fixtures (deployedSafe, cfSafe) and chain configs (chainWithSwap, chainWithoutSwap) are hand-written with fixed addresses instead of using the existing safeItemBuilder() and chainBuilder() test builders, which would fix only the fields under test and randomise the rest."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SelectSafeModal/__tests__/index.test.tsx",
+      "line": 60,
+      "claim": "initialReduxState is typed with `as never`, which switches off type checking of the store shape and could hide drift in the safeActionsModal and undeployedSafes state, since the cfState helper builds an untyped object; it should instead be typed as Partial<RootState> with a real UndeployedSafe shape or a small typed helper."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/AuthState/index.tsx",
+      "line": 41,
+      "claim": "router.replace(AppRoutes.welcome.spaces) runs inside a useEffect without being awaited or caught, so a rejected navigation would surface as an unhandled rejection; it should be fixed with a .catch(() => {}) or an awaited IIFE with try/catch."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/AuthState/index.tsx",
+      "line": 33,
+      "claim": "Three visible behaviour changes (redirect to /welcome/spaces instead of staying on UnauthorizedState, undeployed Safes disabled for swap with new tooltip copy, and a new empty-state message when no wallet is connected) are not tied to a named product/design decision in the PR description; the ticket or design should be linked."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/AuthState/index.tsx",
+      "line": null,
+      "claim": "UnauthorizedState still renders briefly until the redirect finishes, and it should be confirmed whether this brief flash is intended."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/SafeDropdownContainer.tsx",
+      "line": 109,
+      "claim": "The nested ternary inside the JSX is hard to read and would be clearer as a named value (e.g. an emptyMessage variable) computed before the return statement."
+    }
+  ]
+}

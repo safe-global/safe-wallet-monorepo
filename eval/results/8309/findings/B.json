@@ -1,0 +1,15 @@
+{
+  "usd": 0.033018000000000006,
+  "findings": [
+    {
+      "file": "apps/mobile/src/features/Send/components/DialogModal.tsx",
+      "line": 32,
+      "claim": "No test covers the new accessible={false} props on the backdrop and dialog-card Pressables, so reverting them would still let CI pass. DialogModal, CustomNonceModal and AddToAddressBookModal have no tests at all, and if the prop is later dropped or the dialog is wrapped in another accessible parent, screen-reader users would lose access to the nonce and contact-name inputs again with nothing to warn anyone."
+    },
+    {
+      "file": "apps/mobile/src/features/Send/components/DialogModal.tsx",
+      "line": 57,
+      "claim": "The Cancel and Save Pressables lack accessibilityRole=\"button\", so now that screen readers can reach them individually they are announced as plain text rather than as buttons, unlike the 40+ other Pressables in apps/mobile/src that already set this role."
+    }
+  ]
+}

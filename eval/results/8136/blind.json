@@ -1,0 +1,115 @@
+{
+  "pr": 8136,
+  "title": "fix(web): Add workspace name char limit",
+  "description": "Fixes https://linear.app/safe-global/issue/WA-2642/when-renaming-a-workspace-on-welcomespaces-the-workspace-name-input#comment-83d6c5f6",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/features/spaces/components/SpaceSettings/UpdateSpaceForm.tsx",
+      "line": 40,
+      "claim": "The rename dialog only sets the HTML maxLength attribute on the input, so typing or pasting text beyond 30 characters is silently truncated rather than showing a validation error, unlike the create flow which shows an explicit 'Workspace name must be 30 characters or less' message."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/features/spaces/components/SpaceSettings/sections/IdentitySection.tsx",
+      "line": 79,
+      "claim": "The local 60-character limit is actually applied to the input field, meaning a workspace name of 31-60 characters that is rejected at creation or in the rename dialog can still be saved via the Settings page, leaving two different enforced limits for the same field."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/features/spaces/components/SpaceSettings/UpdateSpaceForm.tsx",
+      "line": null,
+      "claim": "A workspace name already stored with more than 30 characters loads unchanged in the rename dialog and can be re-saved without being flagged or corrected."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/features/spaces/components/SpaceSettings/sections/IdentitySection.tsx",
+      "line": 81,
+      "claim": "The local 60-character limit is applied at this usage site rather than the shared constant, meaning an admin can save a workspace name up to 60 characters through Settings → General."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/features/spaces/constants.ts",
+      "line": 14,
+      "claim": "The new doc comment states the limit is 'Enforced on both create and rename', but this is inaccurate since the rename screen in IdentitySection does not enforce it."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/src/features/spaces/components/SpaceSettings/UpdateSpaceForm.tsx",
+      "line": null,
+      "claim": "Because the rename dialog does not validate length on submit, an existing name already over 30 characters can be resaved unchanged without any error being shown."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/features/spaces/components/SpaceSettings/UpdateSpaceForm.tsx",
+      "line": null,
+      "claim": "The fix should add the same maxLength, pattern, and validate rules to the Controller (via a rules prop) and render fieldState.error so users get the same feedback as on create."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/src/features/spaces/components/SpaceSettings/sections/IdentitySection.tsx",
+      "line": null,
+      "claim": "There is currently no test file for IdentitySection; a test checking the maxlength attribute should be added once it is fixed to use the shared constant."
+    },
+    {
+      "id": "F9",
+      "file": "apps/web/src/features/spaces/components/SpaceSettings/UpdateSpaceForm.tsx",
+      "line": null,
+      "claim": "The rename dialog is missing the special-character validation rule that the create form applies, so names with special characters can be saved via rename even though they would be rejected on create."
+    },
+    {
+      "id": "F10",
+      "file": "apps/web/src/features/spaces/components/SpaceSettings/UpdateSpaceForm.tsx",
+      "line": 40,
+      "claim": "The rename dialog enforces the character limit only via the HTML maxLength attribute rather than a react-hook-form validation rule, so pasting a name longer than the limit silently truncates it instead of showing an error message like the create form does."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/src/features/spaces/components/SpaceSettings/sections/IdentitySection.tsx",
+      "line": null,
+      "claim": "Because the settings page still allows longer names, an admin can save a name (e.g. 45 characters) that later fails the maxLength check in CreateSpaceOnboarding if they open the onboarding flow in edit mode, blocking them there."
+    },
+    {
+      "id": "F12",
+      "file": "apps/web/src/features/spaces/constants.ts",
+      "line": 14,
+      "claim": "The comment on the new SPACE_NAME_MAX_LENGTH constant states it is enforced on both create and rename, but this is inaccurate since it is not enforced on the Settings page rename path, so the comment should be corrected or the enforcement gap fixed."
+    },
+    {
+      "id": "F13",
+      "file": "apps/web/src/features/spaces/components/SpaceSettings/__tests__/UpdateSpaceForm.test.tsx",
+      "line": 82,
+      "claim": "There is no test covering the rename limit on the Settings page's IdentitySection component, which is why the divergent 60-character limit there went unnoticed; only the dialog's maxlength attribute is tested."
+    },
+    {
+      "id": "F14",
+      "file": "apps/web/src/features/spaces/components/SpaceSettings/sections/IdentitySection.tsx",
+      "line": 12,
+      "claim": "IdentitySection still defines its own local MAX_NAME_LENGTH constant set to 60 instead of using the new shared 30-character limit, so the rename field on the Settings page still allows names up to 60 characters."
+    },
+    {
+      "id": "F15",
+      "file": "apps/web/src/features/spaces/components/SpaceSettings/sections/IdentitySection.tsx",
+      "line": 12,
+      "claim": "IdentitySection, which is rendered by the settings general page, defines its own local MAX_NAME_LENGTH of 60 instead of using the new shared SPACE_NAME_MAX_LENGTH constant, so this rename screen still allows names longer than the intended 30-character limit."
+    },
+    {
+      "id": "F16",
+      "file": "apps/web/src/features/spaces/components/SpaceSettings/__tests__/UpdateSpaceForm.test.tsx",
+      "line": 82,
+      "claim": "The new test only checks the maxlength attribute on the rename dialog and does not test the create-flow limit or the settings page, leaving the actual bug (finding about IdentitySection) uncovered by tests."
+    },
+    {
+      "id": "F17",
+      "file": "apps/web/src/components/common/NameInput/index.tsx",
+      "line": 24,
+      "claim": "This shared NameInput component allows up to 50 characters and appears to be used only by SpaceCreationModal, whose own test is the only thing importing it, suggesting it is effectively unused or inconsistent; it should either be removed or updated to use the shared constant so a fourth, divergent limit doesn't reappear later."
+    },
+    {
+      "id": "F18",
+      "file": null,
+      "line": null,
+      "claim": "The backend's actual enforcement of the 30-character limit was not confirmed: the generated CreateSpaceDto and UpdateSpaceDto types have no maxLength, so the server may not enforce the limit at all."
+    }
+  ]
+}

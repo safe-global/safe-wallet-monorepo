@@ -1,0 +1,271 @@
+{
+  "pr": 8611,
+  "title": "feat(policies): show the space's policies in a table",
+  "description": "## What it solves\n\nFixes WA-3140\n\nAdds the policies table.\n\n## How this PR fixes it\n\nAdds the Policies table as designed in Figma and specified in Linear. It renders from fixtures in Storybook and is not wired to CGW.\n\n## How to test it\n\n1. Open the branch preview: [populated table](https://claude-m1-policies-frontend-gk8sln-wa-3140--walletweb.review.5afe.dev/storybook/?path=/story/features-spaces-policies--populated), [empty catalogue](https://claude-m1-policies-frontend-gk8sln-wa-3140--walletweb.review.5afe.dev/storybook/?path=/story/features-spaces-policies--default), [loading](https://claude-m1-policies-frontend-gk8sln-wa-3140--walletweb.review.5afe.dev/storybook/?path=/story/features-spaces-policies--loading) and [error](https://claude-m1-policies-frontend-gk8sln-wa-3140--walletweb.review.5afe.dev/storybook/?path=/story/features-spaces-policies--error). The table states (multi-spender, unenforced, pending, proposer, long list, no search results) are under Features › Spaces › Policies › PoliciesList in the same Storybook.\n2. Compare them with the [Figma frame](https://www.figma.com/design/cOOeHQK12YR2SAKYKiNW5S/Workspaces-%E2%80%93-UX-UI-Review?node-id=15568-76377) and the acceptance criteria on [WA-3140](https://linear.app/safe-global/issue/WA-3140/build-the-active-policies-table-ui-with-storybook-mocked-data).\n\n## Affected flows\n\n- Space › Policies page: it receives no policies yet, so it keeps rendering the empty catalogue, now with the updated cards. The table, loading and error states render in Storybook only.\n\n## Blast radius\n\n- `PaginatedDataTable` gains an optional `onRowClick`. The row stays a plain table row; clicks on nested links and buttons are left to those controls. Its other consumers (address book, enhanced table, members list, space address book, pending requests) pass no handler, so their rows are unchanged.\n- `TransactionDetailsError` renders the new shared `SafeLogoHalo`; its CSS module moved with it. No visual change intended.\n- `Policies` takes `policies`, `isLoading`, `isError`, `onRetry`, `onAddPolicy` and `onSelectPolicy` as props. Its only consumer is `Policies/Page.tsx`, which passes none of them.\n- Analytics: `POLICY_CATALOGUE_TILE_CLICKED` no longer sends `IS_AVAILABLE`; the catalogue has no unavailable tiles anymore.\n- No RTK Query endpoints, feature flags, persisted state or shared packages touched.\n\n## Risks / not checked\n\n- Address book name resolution is covered by unit tests but not visible in Storybook, which seeds no address book.\n- Not tested on a mobile device; only the table's compact mode in Storybook.\n\n## Visual summary\n\nSee the Storybook links under \"How to test it\".\n\n## Checklist\n\n- [ ] I've tested the branch on mobile 📱 — Storybook compact mode only\n- [x] I've documented how it affects the analytics (if at all) 📊\n- [x] I've written a unit/e2e test for it (if applicable) 🧑‍💻\n- [x] I've listed affected flows and blast radius, and named what I did not verify 🎯\n\n---\n\n## CLA signature\n\nWith the submission of this Pull Request, I confirm that I have read and agree to the terms of the [Contributor License Agreement](https://safe.global/cla).",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/features/spaces/components/Policies/hooks/usePolicySearch.ts",
+      "line": 7,
+      "claim": "A file-level documentation comment in usePolicySearch.ts is not attached to any declaration, leaving it orphaned."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/features/spaces/components/Policies/mocks/policies.ts",
+      "line": 70,
+      "claim": "Unit tests use hand-written fixed-literal fixtures with overrides spreads instead of the Builder pattern (Builder.new<T>().with()) that the codebase convention prefers, which uses random data to expose hidden assumptions; the same feature already has an example builder (tokenOptionBuilder) that could be followed for the unit tests, though keeping fixed literals for stories is fine."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesLoadState/index.tsx",
+      "line": 8,
+      "claim": "POLICIES_LOAD_ERROR duplicates the text used by TX_DETAILS_LOAD_ERROR, and the PoliciesLoadError component copies the structure of TransactionDetailsError instead of reusing it, creating duplication between the two."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesLoadState/index.tsx",
+      "line": 8,
+      "claim": "PoliciesLoadError duplicates the structure of TransactionDetailsError (Empty + SafeLogoHalo + description + optional Reload button) instead of reusing a shared component, even though this PR already extracted SafeLogoHalo into shared code, meaning the same extraction should have been applied to the error block."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesTable/index.tsx",
+      "line": 82,
+      "claim": "Merging rows also collapses an active policy with its own pending update on the same Safe and chain into a single row, hiding the pending state and duplicating the chain ID, which produces duplicate React keys and a duplicate icon."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/src/features/spaces/components/Policies/hooks/usePolicySearch.ts",
+      "line": 4,
+      "claim": "A utility function is imported directly from the React component file; it should be moved to a separate location such as a utils folder."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesTable/index.tsx",
+      "line": 22,
+      "claim": "toRows appears to omit the chainId, status and token fields, which may cause the status column to display incorrectly in the table."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesList.stories.tsx",
+      "line": 55,
+      "claim": "The long list story does not appear to include pagination."
+    },
+    {
+      "id": "F9",
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesTable/index.tsx",
+      "line": 37,
+      "claim": "This block also contains a multi-line explanatory comment that violates the one-line-comment convention limited to non-obvious reasons."
+    },
+    {
+      "id": "F10",
+      "file": null,
+      "line": null,
+      "claim": "Searching by chain name or id does not show the related chain in the results."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/src/features/spaces/components/Policies/utils/policyIcon.ts",
+      "line": 11,
+      "claim": "POLICY_ICONS[type] has the same unsafe plain-object indexing issue as policyLabel.ts, with no Object.hasOwn check, fallback, or Map used to guard against unexpected or inherited keys from server data."
+    },
+    {
+      "id": "F12",
+      "file": "apps/web/src/features/spaces/components/Policies/hooks/usePolicySearch.ts",
+      "line": 1,
+      "claim": "usePolicySearch has no dedicated unit tests; its matching across address, token and summary fields, and its fuzzy-match threshold, are only indirectly exercised through a PoliciesList test."
+    },
+    {
+      "id": "F13",
+      "file": "apps/web/src/features/spaces/components/Policies/types.ts",
+      "line": 1,
+      "claim": "Several files (including types.ts, PoliciesTable/index.tsx, PoliciesLoadState/index.tsx and policyLabel.ts) contain multi-line or multi-paragraph comment blocks, which conflicts with the repository rule to keep comments to a single line."
+    },
+    {
+      "id": "F14",
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesTable/components/PoliciesTableStates.tsx",
+      "line": 11,
+      "claim": "The no-results message 'Try a different name, address or network' similarly implies network search works when it does not, since network names are not indexed anywhere in the search."
+    },
+    {
+      "id": "F15",
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesTable/__tests__/PoliciesTable.test.tsx",
+      "line": 45,
+      "claim": "The test merging mockMultiSpenderPolicy (mainnet) with mockPolygonSpendingLimitPolicy only asserts that two network icons appear, so the data loss from merging rows across chains is not caught and becomes locked in as expected behavior."
+    },
+    {
+      "id": "F16",
+      "file": null,
+      "line": null,
+      "claim": "For a long list of chains, excess chains should be truncated with an ellipsis instead of overflowing, and the existing NetworkLogosPill component could be reused for this."
+    },
+    {
+      "id": "F17",
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesList.tsx",
+      "line": 48,
+      "claim": "The search placeholder text promises search 'by name, address or network' but the underlying Fuse search only indexes rule, summary, safeAddress and tokens; chainId is built into SearchablePolicy but never listed as a search key, and no network name is indexed at all, so searching by network term like 'Polygon' returns no results despite the copy implying it should work."
+    },
+    {
+      "id": "F18",
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesTable/index.tsx",
+      "line": 116,
+      "claim": "The row's aria-label is built from the raw policy type identifier (e.g. \"spending-limit\") and is identical for every row of the same type; since it overrides the row's accessible name, a screen reader user cannot distinguish between different Safes' policies of the same type."
+    },
+    {
+      "id": "F19",
+      "file": "apps/web/src/features/spaces/components/Policies/hooks/usePolicySearch.ts",
+      "line": 4,
+      "claim": "The pure function getPolicyTokens is exported from a component file (PoliciesTable/components/PolicyTokens.tsx) and imported into a hook, but it belongs in utils/ alongside policyLabel.ts; moving it would also let it have its own dedicated test instead of only being exercised indirectly through the component."
+    },
+    {
+      "id": "F20",
+      "file": "apps/web/src/features/spaces/components/Policies/hooks/usePolicySearch.ts",
+      "line": 35,
+      "claim": "The placeholder and empty-state text advertise searching \"by name, address or network,\" but policies have no name field and the chain ID is collected without being added to the Fuse search keys, so searching by a network name like \"Polygon\" returns no results."
+    },
+    {
+      "id": "F21",
+      "file": "apps/web/src/components/common/PaginatedDataTable/index.tsx",
+      "line": 259,
+      "claim": "A table row is assigned role=button when clicked, which may not be good practice for a row that is semantically a table row."
+    },
+    {
+      "id": "F22",
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesTable/index.tsx",
+      "line": null,
+      "claim": "There are no tests covering the row-merging edge cases, such as mixed policy status across chains or an active policy together with a pending edit on the same chain."
+    },
+    {
+      "id": "F23",
+      "file": "apps/web/src/features/spaces/components/Policies/Page.tsx",
+      "line": 12,
+      "claim": "Page.tsx still renders <Policies /> without any props, so the new table, loading and error states cannot be reached in production; only the catalogue changes (tile removal, 3-column grid, button tile) are actually live."
+    },
+    {
+      "id": "F24",
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesTable/index.tsx",
+      "line": null,
+      "claim": "A pending edit and its active policy on the same chain share the same grouping key, which puts the same chainId in the list twice and triggers a duplicate React key warning in ChainIndicator."
+    },
+    {
+      "id": "F25",
+      "file": null,
+      "line": null,
+      "claim": "The PR description does not follow the required template."
+    },
+    {
+      "id": "F26",
+      "file": "apps/web/src/features/spaces/components/Policies/types.ts",
+      "line": 111,
+      "claim": "The supersedesId field on a policy is never read anywhere in the code, so relationships between a policy and the one it supersedes are not handled."
+    },
+    {
+      "id": "F27",
+      "file": "apps/web/src/features/spaces/components/Policies/utils/policyLabel.ts",
+      "line": 10,
+      "claim": "Multi-line comments at lines 10-14 and 57-60 explain rather than record a non-obvious reason, exceeding the allowed one-line comment convention."
+    },
+    {
+      "id": "F28",
+      "file": "apps/web/src/features/spaces/components/Policies/types.ts",
+      "line": 1,
+      "claim": "Multi-line doc-style comment blocks at lines 1-6, 10-14, 80-83, and 136-139 explain rather than record a non-obvious reason, exceeding the repo's one-line comment convention."
+    },
+    {
+      "id": "F29",
+      "file": "apps/web/src/features/spaces/components/Policies/hooks/usePolicySearch.ts",
+      "line": 4,
+      "claim": "The usePolicySearch hook imports getPolicyTokens from a component file rather than from the utils directory where similar helpers such as policyLabel and policySort live, mixing architectural layers."
+    },
+    {
+      "id": "F30",
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesTable/index.tsx",
+      "line": 116,
+      "claim": "getRowAriaLabel does not differentiate rows, so all rows will likely get the same aria label; it should use getPolicyLabel and shortenAddress to produce a label like \"Open Account recovery for 0x1F25...b60A\", since identical labels create difficulties for screen reader users."
+    },
+    {
+      "id": "F31",
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesTable/components/PolicyTokens.tsx",
+      "line": 14,
+      "claim": "This file also compares/keys addresses via .toLowerCase() rather than the shared sameAddress() helper, duplicating the normalisation logic instead of sharing one helper with PoliciesTable/index.tsx."
+    },
+    {
+      "id": "F32",
+      "file": "apps/web/src/services/analytics/mixpanel-events.ts",
+      "line": 161,
+      "claim": "MixpanelEventParams.IS_AVAILABLE is now unused and catalogue click events no longer send it, which is a regression that could affect any Mixpanel dashboard relying on that field."
+    },
+    {
+      "id": "F33",
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesTable/index.tsx",
+      "line": 27,
+      "claim": "The row-grouping logic keys rows only on type, address and proposer and keeps the first matched policy's status and data, so a policy that is active on one chain but not enforced on another displays as active overall."
+    },
+    {
+      "id": "F34",
+      "file": "apps/web/src/features/spaces/components/Policies/utils/policyLabel.ts",
+      "line": 50,
+      "claim": "formatDays rounds its result, so a review window of under 12 hours is displayed as \"0 days review window\" instead of reflecting the actual duration."
+    },
+    {
+      "id": "F35",
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesList.stories.tsx",
+      "line": 55,
+      "claim": "The LongList story generates 30 mock policies that collapse to 3 rows with 10 duplicate chain IDs each due to the row-merging logic, so it never actually exercises pagination even though its comment states that it does."
+    },
+    {
+      "id": "F36",
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesLoadState/index.tsx",
+      "line": 32,
+      "claim": "The POLICIES_LOAD_ERROR string is identical to TX_DETAILS_LOAD_ERROR in components/transactions/SingleTx/TransactionDetailsError.tsx:6, indicating duplicated code that could be consolidated into a shared component accepting testId and role as props."
+    },
+    {
+      "id": "F37",
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesTable/index.tsx",
+      "line": null,
+      "claim": "Rows should only be grouped when status and data actually match, or the policy for each chain should be kept in the row so status and tokens are derived from all of them, rather than losing per-chain data."
+    },
+    {
+      "id": "F38",
+      "file": "apps/web/src/features/spaces/components/Policies/PolicyCatalogue/index.tsx",
+      "line": 14,
+      "claim": "MixpanelEventParams.IS_AVAILABLE is now dead code because its only producer and its tests were removed in this PR, leaving no references to the enum member at apps/web/src/services/analytics/mixpanel-events.ts:161; it should be deleted or confirmed as still needed by the analytics team."
+    },
+    {
+      "id": "F39",
+      "file": "apps/web/src/features/spaces/components/Policies/hooks/usePolicySearch.ts",
+      "line": 35,
+      "claim": "chainId is included in SearchablePolicy but never added as a Fuse search key, making it effectively unused for its apparent purpose; either index chain names for search or change the copy to stop promising a network search, and either way the unused chainId field needs to be addressed."
+    },
+    {
+      "id": "F40",
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesTable/index.tsx",
+      "line": 22,
+      "claim": "toRows groups rows only by type, Safe address and proposer, keeping just the first chain's policy data, so on other chains spenders, tokens, status and id can differ but never show; a policy pending on one chain and active on another displays only the first chain's status, and the TOKENS column, summary and click target all come from that first chain only."
+    },
+    {
+      "id": "F41",
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesLoadState/index.tsx",
+      "line": 27,
+      "claim": "A 5-line multi-line comment explains rather than records a non-obvious reason, violating the repo rule that allows only a single line of comment reserved for a reason the code itself can't express."
+    },
+    {
+      "id": "F42",
+      "file": "apps/web/src/components/common/PaginatedDataTable/index.tsx",
+      "line": 259,
+      "claim": "A table row with role=\"button\" now contains other interactive elements — the copy and explorer buttons from EthHashInfo and a mobile toggle — which nests interactive controls inside an interactive element; clicks currently work only because those child controls call stopPropagation."
+    },
+    {
+      "id": "F43",
+      "file": "apps/web/src/features/spaces/components/Policies/utils/policyLabel.ts",
+      "line": 18,
+      "claim": "POLICY_TYPE_LABELS[policy.type] and RESET_PERIOD_LABELS[resetPeriodSeconds] index plain objects directly with values from the CGW response with no fallback, so if CGW adds a new policy type or sends an inherited key like 'constructor', the lookup returns undefined or an Object method, which crashes the Icon component in PolicyRule.tsx when rendering the table."
+    },
+    {
+      "id": "F44",
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesTable/index.tsx",
+      "line": 27,
+      "claim": "Map keys are built using .toLowerCase() on addresses instead of using the sameAddress() convention used elsewhere for address equality, so this location doesn't share normalisation logic with other places doing the same comparison."
+    }
+  ]
+}

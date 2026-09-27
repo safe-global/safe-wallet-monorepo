@@ -1,0 +1,97 @@
+{
+  "pr": 8369,
+  "title": "feat(safenet): verify FROST attestations and derive EIP-712 preimages",
+  "description": "## What it solves\r\n\r\nSafenet is Safe's onchain transaction-security protocol, currently in beta on Gnosis Chain. We want the wallet to read a check's status straight from chain. Before any of that is worth building, one question has to be settled: when the wallet sees an attestation onchain, how does it know the Safenet validator set actually signed it?\r\n\r\nThis PR builds the signature check, plus the two message formats it runs against.\r\n\r\n## How this PR fixes it\r\n\r\nTwo files.\r\n\r\n`utils/frost.ts` verifies a FROST group signature (RFC-9591, secp256k1/SHA-256) against the epoch group public key. It recomputes `R = z·G - c·Y` and checks that it matches the commitment in the attestation. Ported from the protocol repo's explorer (`explorer/src/lib/frost/`), plus the `z < N` range check `FROST.sol` enforces. It never throws: bad input returns `false`, so a malformed attestation can't take down a poll.\r\n\r\n`utils/oracleProposalHash.ts` builds the two EIP-712 messages a Consensus attestation can sign:\r\n\r\n| function | struct | used by |\r\n| --- | --- | --- |\r\n| `plainProposalHash` | `TransactionProposal(uint64 epoch,bytes32 safeTxHash)` | the non-oracle path, which is all of beta traffic today |\r\n| `oracleProposalHash` | `OracleTransactionProposal(uint64 epoch,address oracle,bytes32 safeTxHash)` | the sentinel-oracle path; doubles as the oracle `requestId` |\r\n\r\n### What we checked\r\n\r\n- `gnosis-plain-attestation.golden.json` — a real `TransactionAttested` from Gnosis beta at block 47435266, with the group key read from the deployed FROSTCoordinator.\r\n- `devnet-attestation.golden.json` — an oracle attestation from a devnet run. Its onchain `requestId` matches what `oracleProposalHash` derives, which pins the domain, the typehash and the field encoding in a single comparison.\r\n\r\nBeyond those two, we ran this code over a wider slice of live beta: 213 real attestations, sampled across three 10k-block windows spread over roughly 1.4M blocks (about three months), covering 24 different epochs and therefore 24 different group keys.\r\n\r\n```\r\nwindow [47425614, 47435613] → 3362 attestations, sampled 71\r\nwindow [46725614, 46735613] → 3082 attestations, sampled 71\r\nwindow [46025614, 46035613] → 3044 attestations, sampled 71\r\nRESULT: 213/213 verified across 24 distinct epochs\r\n```\r\n\r\nThat run needs network, so it isn't in CI. The two committed vectors are the part you can reproduce offline.\r\n\r\n`frost.test.ts` also signs 32 keypairs locally (deterministic, derived from keccak so runs are reproducible) and checks the verifier from both directions: honest signatures pass, and every single-field mutation, cross-key swap and identity commitment fails. The signer is built on `@noble/curves` and shares exactly one thing with `frost.ts`: `h2`. So it catches a wrong challenge preimage — it re-derives the concat order itself — but not a wrong DST inside `h2`. The RFC-9591 known-answer vector and the two golden vectors are what pin that.\r\n\r\nTo make sure the tests aren't passing by accident, we mutated the code and checked they fail: swapping the two arguments to the challenge hash breaks 4 tests and drops the live sample to 0/213; changing `epoch` from `uint64` to `uint256` in the struct definition breaks the typehash check; breaking the verification equation itself breaks 7.\r\n\r\nWe also lined the port up against [safe-research/safenet](https://github.com/safe-research/safenet) at current `main`:\r\n\r\n- All three typehashes match the `hex\"...\"` constants in `ConsensusMessages.sol` byte for byte.\r\n- `FROST.sol` computes the challenge as `h2(r ‖ y ‖ message)` with both points SEC1-compressed (`prefix := add(2, and(y, 1))`). Same preimage, same order as ours.\r\n- `FROST.sol` has `require(signature.z < Secp256k1.N)`, which is the check we mirror.\r\n- `FROST.sol`, `ConsensusMessages.sol` and both TypeScript FROST implementations are unchanged upstream, so the thing we ported from hasn't moved.\r\n\r\n## How to test it\r\n\r\n```bash\r\nyarn workspace @safe-global/utils test --testPathPattern 'safenet-checks'\r\nyarn workspace @safe-global/utils type-check\r\n```\r\n\r\n27 tests, 2 suites, no network. Each fixture's `provenance` field says where it came from and how to re-capture it.\r\n\r\n## Affected flows\r\n\r\nNone. Nothing imports this yet — it sits unused until the next PR wires it into the reader.\r\n\r\n## Blast radius\r\n\r\n- Eight new files, all under `packages/utils/src/features/safenet-checks/`. Nothing existing imports them.\r\n- `packages/utils/package.json` gains `@noble/curves@1.9.7` and `@noble/hashes@1.8.0`. Both are already in the lockfile as transitive deps, so `yarn.lock` moves by two lines. Pinned exactly rather than with a caret, since they sit on a signature-verification path.\r\n- `packages/utils` is shared with mobile, so the dependency reaches mobile too. No mobile code calls it.\r\n- No feature flags, no chain config, no persistence, no routes.\r\n\r\n## Risks / not checked\r\n\r\n- The oracle preimage rests on one devnet vector. It has to, since beta has no oracle path to sample. It'll need re-checking against real traffic when the oracle ships.\r\n- The 213-signature run is manual, not CI. Only the two committed vectors are reproducible offline. Worth adding as an opt-in spec once the `test:integration` config lands in the reader PR.\r\n- No differential test against `FROST.sol` itself. We compared it by reading, and the preimage and range check line up, but nobody has pushed random vectors through it via `eth_call`. That would be stronger than what we have.\r\n- Not run on mobile. `yarn workspace @safe-global/mobile type-check` passes, and verification needs no randomness so there's no `crypto.getRandomValues` problem, but the maths is all `bigint` and hasn't executed under Hermes. Running the golden vectors in the mobile jest project is the cheap next step.\r\n- `h2`'s known-answer value is copied from the protocol repo's own test, not from RFC 9591 directly. The 213-signature sample constrains it far more tightly than that one assertion does.\r\n- The Gnosis",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "packages/utils/src/features/safenet-checks/utils/oracleProposalHash.ts",
+      "line": 5,
+      "claim": "A comment pins specific line numbers in contracts/src/libraries/FROST.sol:157-161, a file outside this repository, which will go stale as that external file changes since the reference cannot be validated or updated automatically."
+    },
+    {
+      "id": "F2",
+      "file": "packages/utils/src/features/safenet-checks/utils/frost.ts",
+      "line": 9,
+      "claim": "Long comments referencing repos/safenet/explorer/src/lib/frost/ and repos/safenet/validator/... point to local paths in another repository that cannot be resolved from this monorepo, making the comments unverifiable for future readers."
+    },
+    {
+      "id": "F3",
+      "file": "packages/utils/src/features/safenet-checks/types/events.ts",
+      "line": 1,
+      "claim": "The header comment states that event types will 'land with the decoder' as future work, but the file currently only contains the Hex type, so the file's name and header description do not match its actual contents. The file should be renamed (e.g. to primitives.ts) or its header trimmed until the event types are added."
+    },
+    {
+      "id": "F4",
+      "file": "packages/utils/src/features/safenet-checks/utils/__tests__/frost.test.ts",
+      "line": 86,
+      "claim": "The comment states that out-of-range z and off-curve points are rejected by @noble/curves before the code's own guards run, but for z the guard actually runs first, and for off-curve points there is no separate noble check that runs ahead of the assertValidity guard, so the comment misdescribes the code's behavior."
+    },
+    {
+      "id": "F5",
+      "file": "packages/utils/src/features/safenet-checks/utils/__tests__/frost.test.ts",
+      "line": 31,
+      "claim": "JSON.parse(readFileSync(...)) returns an any-typed value that is cast to the declared fixture shape without any runtime check, via a load<T> helper and a type annotation on golden, so a renamed fixture key would not be caught by type-checking. This violates the project's guidance against using any or any-type assertions in tests."
+    },
+    {
+      "id": "F6",
+      "file": "packages/utils/src/features/safenet-checks/utils/__tests__/oracleProposalHash.test.ts",
+      "line": 13,
+      "claim": "The same unchecked JSON.parse-to-any casting pattern appears here as in frost.test.ts, with the same risk that a renamed fixture key would go undetected by the type checker."
+    },
+    {
+      "id": "F7",
+      "file": "packages/utils/src/features/safenet-checks/types/events.ts",
+      "line": null,
+      "claim": "Nothing outside the tests imports these modules yet, and types/events.ts currently only holds a Hex type plus a comment saying the event types will come later."
+    },
+    {
+      "id": "F8",
+      "file": "packages/utils/src/features/safenet-checks/utils/oracleProposalHash.ts",
+      "line": 34,
+      "claim": "Non-numeric input to these BigInt calls throws, which is inconsistent with verifyAttestation, which never throws, creating inconsistent error-handling behavior across the module."
+    },
+    {
+      "id": "F9",
+      "file": "packages/utils/src/features/safenet-checks/utils/frost.ts",
+      "line": 9,
+      "claim": "Fixture files could instead be imported directly (e.g. import devnet from '../../__fixtures__/devnet-attestation.golden.json') since resolveJsonModule is already enabled in config/tsconfig/confs/base.json:35, which would infer the real type and also remove the need for the node:fs/node:path usage."
+    },
+    {
+      "id": "F10",
+      "file": "packages/utils/src/features/safenet-checks/utils/oracleProposalHash.ts",
+      "line": 34,
+      "claim": "BigInt(chainId) and BigInt(epoch) parse externally supplied decimal strings without validation, and BigInt('') or BigInt('  ') silently return 0n rather than throwing, so an empty field produces a valid-looking hash for chain 0 or epoch 0 instead of an error."
+    },
+    {
+      "id": "F11",
+      "file": "packages/utils/src/features/safenet-checks/types/events.ts",
+      "line": 7,
+      "claim": "The type or definition introduced here may duplicate something that already exists elsewhere in the codebase, so it should be reused instead of redefined."
+    },
+    {
+      "id": "F12",
+      "file": "packages/utils/src/features/safenet-checks/utils/oracleProposalHash.ts",
+      "line": 34,
+      "claim": "Because this hash is also used as the oracle requestId, an empty chainId or epoch field would silently produce a wrong ID rather than failing, even though the same issue fails safe during signature verification. A guarded helper that rejects blank or non-integer strings should be used to parse these values, or callers should be required to validate input first, with that requirement documented."
+    },
+    {
+      "id": "F13",
+      "file": "packages/utils/src/features/safenet-checks/utils/oracleProposalHash.ts",
+      "line": null,
+      "claim": "oracleProposalHash and plainProposalHash can throw because they call BigInt(chainId) and BigInt(epoch), which throw on non-numeric input, whereas verifyAttestation never throws; this inconsistency should be resolved once the read layer starts calling them from its poll loop."
+    },
+    {
+      "id": "F14",
+      "file": "packages/utils/src/features/safenet-checks/utils/__tests__/oracleProposalHash.test.ts",
+      "line": 63,
+      "claim": "This test builds its own inline EIP712Domain type and hashes that instead of using the actual domain passed by oracleProposalHash and plainProposalHash, so it would not catch a change to the production domain, such as adding a name field."
+    },
+    {
+      "id": "F15",
+      "file": "packages/utils/src/features/safenet-checks/utils/frost.ts",
+      "line": 10,
+      "claim": "Doc comments cite external files by path and line number, such as contracts/src/libraries/FROST.sol:157-161 and a repos/safenet/explorer path, which will stop matching as those files change; a commit SHA or permalink would keep the references accurate."
+    }
+  ]
+}

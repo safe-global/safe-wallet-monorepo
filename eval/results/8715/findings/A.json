@@ -1,0 +1,10 @@
+{
+  "usd": 0.0545676,
+  "findings": [
+    {
+      "file": ".github/workflows/mirror-to-ghcr.yml",
+      "line": 3,
+      "claim": "The deleted workflow's header stated it should be removed once the Docker Hub to GHCR migration was signed off, but nothing in the repository records that sign-off, so the PR description should confirm it actually happened. If it did not happen, tags that were never copied to GHCR can no longer be re-mirrored without restoring the deleted workflow."
+    }
+  ]
+}

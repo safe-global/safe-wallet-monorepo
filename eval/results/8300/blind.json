@@ -1,0 +1,109 @@
+{
+  "pr": 8300,
+  "title": "fix: don't store already-deployed Safes as counterfactual",
+  "description": "## What it solves\r\n\r\nResolves: [WA-2866](https://linear.app/safe-global/issue/WA-2866/prevent-deployed-safes-from-being-saved-as-counterfactual-frontend)\r\n\r\nA Safe that is already deployed on-chain being stored as **counterfactual** during creation / \"Add another network\", which then surfaces as **\"Not activated\"** for the user (and every space member).\r\n\r\nRelated BE changes:\r\n- (merged) [Filter deployed Safes from the counterfactual space endpoint](https://github.com/safe-global/safe-client-gateway/pull/3247)\r\n- (merged) [Reject deployed safes on POST for counterfactual safes](https://github.com/safe-global/safe-client-gateway/pull/3250)\r\n\r\n## How this PR fixes it\r\n\r\nAlready-deployed Safes are now recovered instead of stored as counterfactual, on **both** the authenticated and unauthenticated paths.\r\n\r\n`persistCounterfactualSafe`:\r\n- **Authenticated users** rely on the backend: the CGW `create` endpoint returns **409** for a deployed Safe. This is now caught (`isConflict`) and recovered.\r\n- **Unauthenticated users** never reach the backend, so a client-side `isSmartContract(address, provider)` check catches the deployed address locally. This check is gated to the unauth path only, so authed users no longer pay a redundant RPC round-trip.\r\n- Both paths funnel into a shared `recoverAlreadyDeployed`: add the Safe to My accounts as a regular deployed Safe (`addOrUpdateSafe`), drop any stale undeployed entry (`removeUndeployedSafe`), and return `{ ok: true, skipped: 'already-deployed' }`.\r\n- No provider → skip the client check (avoids running against another chain's provider). Check throws → fail open and persist as before.\r\n- Non-409 backend errors now surface the backend's own `data.message` instead of a generic fallback.\r\n\r\n`ReviewStep`:\r\n- Suppresses counterfactual-creation analytics (`CREATED_SAFE` / `PROCEED_WITH_TX`) and the `AWAITING_EXECUTION` event for already-deployed Safes.\r\n- Shows an **info toast** naming the chains where the Safe was already deployed (`\"This account is already deployed on …\"`) so the user understands why nothing activated.\r\n- On a persist failure, surfaces the returned error message (e.g. backend conflict guidance) instead of the generic wallet-error fallback.\r\n\r\n## How to test it\r\n\r\nThe normal create flow auto-picks an unused salt nonce, so use the advanced creation flow.\r\n\r\n1. Open an already existing (deployed) Safe you own.\r\n2. Start advanced creation flow with the same owners, threshold, and salt nonce → the predicted address is now already deployed (the step shows *\"The Safe is already deployed. Use a different salt nonce.\"* and disables **Next**).\r\n3. Re-enable the **Next** button in DevTools, continue to Review → **Pay later** → submit.\r\n\r\nExpected:\r\n- **Authenticated:** CGW returns 409 → Safe appears in My accounts as a regular deployed account (not \"Not activated\"), info toast reads \"already deployed on …\".\r\n- **Unauthenticated:** same outcome via the client-side check (no backend call).\r\n- A genuinely counterfactual Safe → unchanged (persisted, \"Not activated\", creation tracked).\r\n\r\n## Affected flows\r\n\r\n- New Safe creation (PayLater / counterfactual), single and multi-chain\r\n- \"Add another network\" (replay Safe on a new chain)\r\n- Advanced create\r\n\r\n## Blast radius\r\n\r\n- `persistCounterfactualSafe` (shared by ReviewStep and CreateSafeOnNewChain) — auth-gated client check, new 409-recovery branch, `skipped` on `PersistResult`\r\n- Redux: `addedSafesSlice` (`addOrUpdateSafe`), `undeployedSafesSlice` (`removeUndeployedSafe`)\r\n- `CreateSafeResult` type gains `alreadyDeployed?` (packages/utils, shared)\r\n- Analytics: `CREATED_SAFE` / `PROCEED_WITH_TX` / `AWAITING_EXECUTION` suppressed for already-deployed\r\n- Non-409 error messages now pass through the backend `data.message`\r\n- No API contract / feature flag / route changes\r\n\r\n## Risks / not checked\r\n\r\n- Fail-open (RPC-down) path on the unauth client check — covered by unit test only, not manually exercised\r\n\r\n## Visual summary\r\n\r\n```mermaid\r\nflowchart TD\r\n  A[persistCounterfactualSafe] --> B{isUserAuthenticated?}\r\n  B -->|No| C{isSmartContract via provider?}\r\n  C -->|Yes| R[recoverAlreadyDeployed]\r\n  C -->|No| L[Persist locally]\r\n  B -->|Yes| D[POST to CGW create]\r\n  D -->|409 conflict| R\r\n  D -->|other error| E[Return backend data.message]\r\n  D -->|ok| P[Persist as counterfactual]\r\n  R --> S[\"addOrUpdateSafe + removeUndeployedSafe<br/>ok: true, skipped: 'already-deployed'\"]\r\n  S --> T[ReviewStep: skip analytics + AWAITING_EXECUTION,<br/>show 'already deployed' toast]\r\n```\r\n\r\n## Checklist\r\n\r\n- [ ] I've tested the branch on mobile 📱\r\n- [x] I've documented how it affects the analytics (if at all) 📊\r\n- [x] I've written a unit/e2e test for it (if applicable) 🧑‍💻\r\n- [x] I've listed affected flows and blast radius, and named what I did not verify 🎯\r\n\r\n---\r\n\r\n## CLA signature\r\n\r\nWith the submission of this Pull Request, I confirm that I have read and agree to the terms of the [Contributor License Agreement](https://safe.global/cla).\r\n",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/features/counterfactual/services/persistCounterfactualSafe.ts",
+      "line": 78,
+      "claim": "When the Safe is already deployed, the function returns before the workspace step (spaceSafesCreateV1) and before the user-level backend save, so an admin creating a Safe with pay later inside a workspace using an already-deployed salt/address ends up with the Safe visible only in that browser's My accounts and never added to the workspace, instead of being attached to the workspace as before."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/components/new-safe/create/steps/ReviewStep/index.test.tsx",
+      "line": 264,
+      "claim": "The new tests only assert that AWAITING_EXECUTION and CREATED_SAFE (with label 'counterfactual') are not called, but no test verifies these events do fire when a Safe isn't yet deployed. This means the tests would still pass if the PayLater branch were never reached, if the spies failed to intercept the barrel import, or if the alreadyDeployed filter were removed entirely."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/features/counterfactual/services/persistCounterfactualSafe.ts",
+      "line": 101,
+      "claim": "The function returns before spaceSafesCreateV1 is called, so the Safe is never attached to the active space; the account only exists in this browser's Redux state, meaning other members and devices won't see it even though the UI reports success."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/features/multichain/components/CreateSafeOnNewChain/index.test.tsx",
+      "line": null,
+      "claim": "The test file was not updated to cover the skipped: 'already-deployed' branch, where tracking is suppressed and the message differs, leaving that code path untested."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/components/new-safe/create/steps/ReviewStep/index.test.tsx",
+      "line": 264,
+      "claim": "Only the all-deployed case is tested; there is no test for a mixed multi-chain run where only the not-yet-deployed chains should be sent in AWAITING_EXECUTION.networks, so if that filter logic were reverted no test would catch it."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/src/components/new-safe/create/steps/ReviewStep/index.tsx",
+      "line": 337,
+      "claim": "Previously CREATED_SAFE and PROCEED_WITH_TX (counterfactual) fired before the persist call, so they fired even when persist failed and threw. Now, on the PayLater path, they fire only after a successful persist, changing the create-Safe analytics funnel timing for all counterfactual creations, not just already-deployed Safes; this may be intended but the PR should state it since it will shift before/after dashboard comparisons."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/features/multichain/components/CreateSafeOnNewChain/index.tsx",
+      "line": 137,
+      "claim": "The new branch that skips PROCEED_WITH_TX and CREATED_SAFE analytics has no test coverage, so deleting it would not cause any existing test to fail."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/src/components/new-safe/create/steps/ReviewStep/index.test.tsx",
+      "line": null,
+      "claim": "A test should be added where persistCounterfactualSafe resolves { ok: true } and asserts that AWAITING_EXECUTION and CREATED_SAFE are actually called, to complement the existing negative assertions."
+    },
+    {
+      "id": "F9",
+      "file": "apps/web/src/features/multichain/components/CreateSafeOnNewChain/index.tsx",
+      "line": 166,
+      "claim": "When a Safe is already deployed, the user now sees a success-variant notification ('This account is already deployed on {chain}') sharing the replay-safe-success groupKey, and is still redirected. Whether this should be a success notification versus an info notification is a product decision not mechanically implied by the code, and should be confirmed."
+    },
+    {
+      "id": "F10",
+      "file": "apps/web/src/features/counterfactual/services/persistCounterfactualSafe.ts",
+      "line": 88,
+      "claim": "The new addOrUpdateSafe dispatch duplicates work already performed by both callers, which dispatch updateAddressBook right after a successful persist, and updateAddressBook already calls addOrUpdateSafe for each chain with owner names included, so this dispatch is always overwritten and needlessly makes the counterfactual persistence service write to the addedSafes slice."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/src/features/counterfactual/services/persistCounterfactualSafe.ts",
+      "line": 207,
+      "claim": "The 409 conflict message was rewritten to tell users to 'Try adding it as a regular Safe account instead,' changing the guidance given to users; the PR should cite product or design sign-off for this wording change."
+    },
+    {
+      "id": "F12",
+      "file": "apps/web/src/features/counterfactual/services/persistCounterfactualSafe.test.ts",
+      "line": 86,
+      "claim": "The test sets up mockProvider, and a later test at line 261-274 builds an identical second one instead of reusing the existing mockProvider."
+    },
+    {
+      "id": "F13",
+      "file": "apps/web/src/components/new-safe/create/steps/ReviewStep/index.tsx",
+      "line": 314,
+      "claim": "In single-chain pay later, an already-deployed result now skips the AWAITING_EXECUTION event, which is the only thing that opens CounterfactualSuccessScreen, so the user is sent to the home page with no message at all, unlike the add-another-network flow which shows an explicit 'This account is already deployed on …' notification."
+    },
+    {
+      "id": "F14",
+      "file": "apps/web/src/features/counterfactual/services/persistCounterfactualSafe.ts",
+      "line": 52,
+      "claim": "The function's doc comment still states it always saves to the backend and then updates Redux, without mentioning the new already-deployed early return or the skipped value that callers now have to handle."
+    },
+    {
+      "id": "F15",
+      "file": "apps/web/src/features/counterfactual/services/persistCounterfactualSafe.ts",
+      "line": 80,
+      "claim": "The fail-open catch block swallows RPC failures without logging them, whereas neighboring sync code in this feature logs errors with logError(Errors._6xx, e), making the fail-open behavior invisible when it occurs."
+    },
+    {
+      "id": "F16",
+      "file": "apps/web/src/features/counterfactual/services/persistCounterfactualSafe.ts",
+      "line": 100,
+      "claim": "It is unclear whether this code actually deletes the corresponding backend row."
+    },
+    {
+      "id": "F17",
+      "file": "apps/web/src/features/multichain/components/CreateSafeOnNewChain/index.tsx",
+      "line": 169,
+      "claim": "The new branch that shows 'This account is already deployed on …' instead of 'Successfully added…' has no test coverage; the colocated test file mocks persistCounterfactualSafe but no test uses the { ok: true, skipped: 'already-deployed' } case, so deleting this branch would not break any test."
+    }
+  ]
+}

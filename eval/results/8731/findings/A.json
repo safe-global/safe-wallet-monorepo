@@ -1,0 +1,50 @@
+{
+  "usd": 0.0636816,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/PolicySummary/frequency.ts",
+      "line": 1,
+      "claim": "This file imports getResetTimeOptions directly from the spending-limits feature's internal constants module instead of through its public barrel export, reaching into another feature's internals in a way the existing ESLint rules don't catch because they only restrict components/, hooks/, services/* and store/*."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/PolicySummary/frequency.ts",
+      "line": 16,
+      "claim": "CANONICAL_FREQUENCIES[resetTimeMin] looks up a string key on a plain object literal (defined in constants.ts:14), so a key such as 'constructor' or 'toString' would resolve to an inherited value and silently return a label of undefined; this is unlikely today since resetTimeMin comes from a dropdown, but the model is meant to later be built from form data, so the lookup should be guarded (e.g. with Object.hasOwn or a Map) rather than relying on the input staying constrained."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/PolicySummary/AppliesToRow.tsx",
+      "line": 9,
+      "claim": "The same Card wrapper shape (variant=\"muted\" size=\"none\" radius=\"lg\" wrapping a div with p-3) plus an identical explanatory comment is duplicated between AppliesToRow.tsx and SpenderSummaryCard.tsx instead of being factored into a small shared component, so the padding decision is stated twice rather than once."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/PolicySummary/__tests__/AppliesToRow.test.tsx",
+      "line": 25,
+      "claim": "The test title claims to cover the fiat balance but the assertion toHaveTextContent('$') would pass for any fiat value, including $0 or a different Safe's balance, so it would not fail if the actual formatted amount regressed; it should assert the specific formatted value (e.g. 123720) instead."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/PolicySummary/index.tsx",
+      "line": 9,
+      "claim": "A comment references ticket WA-3152, which goes against the project convention (stated in the root AGENTS.md) that comments should be one line and reserved for non-obvious information, since ticket references are tech debt that will go stale."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/PolicySummary/types.ts",
+      "line": 26,
+      "claim": "A comment names a function toPolicySummaryModel described as 'Phase 2', but that function does not exist yet, which conflicts with the project's comment convention and risks becoming an inaccurate or misleading reference once the phase changes."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/PolicySummary/copy.ts",
+      "line": 36,
+      "claim": "A multi-line JSDoc comment block here goes against the project's convention that comments should be one line and reserved for non-obvious information."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/PolicySummary/frequency.ts",
+      "line": 11,
+      "claim": "A multi-line JSDoc comment block here goes against the project's convention that comments should be one line and reserved for non-obvious information."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The summary's frequency labels ('One time only', 'Weekly') deliberately differ from the wording used in the form's dropdown ('One time', '1 week'), and it is unconfirmed whether this wording divergence between the two UI surfaces is intentional."
+    }
+  ]
+}

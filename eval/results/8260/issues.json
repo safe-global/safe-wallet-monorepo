@@ -1,0 +1,129 @@
+{
+  "usage": {
+    "usd": 0.539561,
+    "turns": 7,
+    "wallSeconds": 57
+  },
+  "issues": [
+    {
+      "findings": [
+        "F13",
+        "F22"
+      ],
+      "summary": "Tooltip trigger rendered as a bare <span> without tabIndex, so keyboard users can't open it (and touch users can't either), and every network after the first three is now out of their reach",
+      "label": "medium",
+      "evidence": "index.tsx:100 uses `render={<span .../>}` and never sets tabIndex, so the non-button trigger can't take focus. The sibling AccountItemChainBadge.tsx:21 does the same override but adds `tabIndex={0}`, and SpaceAddressBookTable keeps the default button trigger. Before this PR every chain was shown inline, so this is an accessibility regression."
+    },
+    {
+      "findings": [
+        "F1"
+      ],
+      "summary": "Screen readers only get the visible logos' alt text and '+N'; the other network names are reachable only through the hover tooltip",
+      "label": "low",
+      "evidence": "NetworkLogosList (features/multichain/components/NetworkLogosList/index.tsx) renders maxVisible logos plus a '+N' Box. The full list is only in the portaled TooltipContent, which opens on hover or focus, and the trigger can't be focused. The fix overlaps with the focusability issue, and the impact is modest."
+    },
+    {
+      "findings": [
+        "F9",
+        "F17"
+      ],
+      "summary": "The useChains loading state is ignored, so while configs load the section renders empty where the old ChainIndicator showed a skeleton",
+      "label": "low",
+      "evidence": "index.tsx:42-43 destructures only `configs`. knownChainIds is [] until configs load, so NetworkLogosList renders nothing. The old ChainIndicator showed a Skeleton when `chains.length === 0` (ChainIndicator/index.tsx:84). Chain configs normally load at app init, well before a user opens this drawer, so users will rarely see this."
+    },
+    {
+      "findings": [
+        "F8"
+      ],
+      "summary": "The tooltip still mounts when knownChainIds is empty",
+      "label": "low",
+      "evidence": "index.tsx:98-110 has no length guard. With no known chains the trigger span has essentially zero size, so hovering it and getting an empty bubble is unlikely in practice."
+    },
+    {
+      "findings": [
+        "F11",
+        "F12",
+        "F19"
+      ],
+      "summary": "The chain-cluster + tooltip block is copied from SpaceAddressBookTable and AccountItemChainBadge instead of being a shared component",
+      "label": "low",
+      "evidence": "SpaceAddressBookTable.tsx:61-76 has the same class string ('inline-flex origin-left scale-85'), the same NetworkLogosList showHasMore maxVisible={3}, and the same tooltip body. The copies have already drifted on focusability (tabIndex present in AccountItemChainBadge, missing here), so the duplication has a real cost."
+    },
+    {
+      "findings": [
+        "F6",
+        "F16"
+      ],
+      "summary": "The NetworkLogosList mock types its props as `any`",
+      "label": "low",
+      "evidence": "index.test.tsx:8 has `({ networks, maxVisible, showHasMore }: any)`, which breaks the AGENTS.md rule against `any` and would let a prop rename slip through without a compile error."
+    },
+    {
+      "findings": [
+        "F2",
+        "F20"
+      ],
+      "summary": "The 'overflow collapses beyond the visible limit' test only checks the length of the array passed to a mock, which is redundant and doesn't match its name",
+      "label": "low",
+      "evidence": "index.test.tsx:71-76 only asserts that data-networks splits into 5 entries, which the first test's exact-string assertion already covers. The collapse to '+N' happens inside the mocked NetworkLogosList, so no overflow is actually tested."
+    },
+    {
+      "findings": [
+        "F7",
+        "F18"
+      ],
+      "summary": "The tests stub NetworkLogosList and ChainIndicator, so they only check prop plumbing, not rendering or trigger behaviour",
+      "label": "low",
+      "evidence": "index.test.tsx:7-21 mocks both components and asserts on data-* attributes. Dropping the render prop or focusability would still pass. The PR description acknowledges this trade-off, so the cost is limited."
+    },
+    {
+      "findings": [
+        "F15"
+      ],
+      "summary": "The tooltip test can't catch unfiltered chains appearing in the tooltip body",
+      "label": "low",
+      "evidence": "The hover test uses chainIds equal to KNOWN_CHAIN_IDS, so filtering is only checked for the cluster. Both the cluster and the tooltip read the same `knownChainIds` (index.tsx:101,105), so the real risk is small."
+    },
+    {
+      "findings": [
+        "F14",
+        "F21"
+      ],
+      "summary": "SafeAppPreviewDrawer has no Storybook story",
+      "label": "low",
+      "evidence": "The directory only contains index.tsx, index.test.tsx and styles.module.css. apps/web/AGENTS.md:147 asks for stories for new components with logic. This is an existing component, so the rule applies only loosely."
+    },
+    {
+      "findings": [
+        "F4"
+      ],
+      "summary": "The hover test is said to depend on a 600ms tooltip delay that could flake",
+      "label": "wrong",
+      "evidence": "ui/tooltip.tsx wraps every Tooltip in a TooltipProvider whose `delay` defaults to 0 (lines 28-37), so there is no 600ms open delay racing waitFor's timeout."
+    },
+    {
+      "findings": [
+        "F5"
+      ],
+      "summary": "Uses a scale-85 CSS transform instead of NetworkLogosList's imageSize prop",
+      "label": "nit",
+      "evidence": "index.tsx:100 copies the scale-85 approach from SpaceAddressBookTable. NetworkLogosList does accept `imageSize`, but this is a styling preference with no functional cost."
+    },
+    {
+      "findings": [
+        "F10"
+      ],
+      "summary": "The file imports both the MUI and shadcn Tooltip, so the shadcn one is aliased with a Networks* prefix",
+      "label": "nit",
+      "evidence": "index.tsx:9-17 aliases the shadcn tooltip imports. This is a naming and style concern with no behavioural impact."
+    },
+    {
+      "findings": [
+        "F3"
+      ],
+      "summary": "An inline `.map` builds the networks array on every render",
+      "label": "nit",
+      "evidence": "index.tsx:101 maps a tiny array in a leaf drawer, and knownChainIds itself is recomputed every render anyway. The performance cost is negligible."
+    }
+  ]
+}

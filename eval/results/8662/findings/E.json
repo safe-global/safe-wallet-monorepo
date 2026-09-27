@@ -1,0 +1,55 @@
+{
+  "usd": 0.034297999999999995,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/hooks/__tests__/useSpendingLimitTokenOptions.test.ts",
+      "line": 77,
+      "claim": "The test data setup is duplicated inline rather than using a reusable builder, which could be extracted so the same construction logic can be reused across tests."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/index.tsx",
+      "line": 72,
+      "claim": "Comments in this and other changed files should be trimmed."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/__tests__/TokenSelector.test.tsx",
+      "line": 31,
+      "claim": "The same test data construction is duplicated across this test file and another test file; a shared builder could avoid the duplication."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants.ts",
+      "line": 9,
+      "claim": "This constant is already defined in SafeAccountSelector/index.tsx, so it is duplicated; it should be moved to a shared parent Policies/constants.ts file."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/TokenOptionRow.tsx",
+      "line": 15,
+      "claim": "This code is hard to read."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/TokenGroupState.tsx",
+      "line": 35,
+      "claim": "The TokenGroupError code closely duplicates the existing Policies/SafeAccountSelector/components/LoadError.tsx component; the existing error component should be reused instead if possible."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "Showing the error and retry as a single row causes text to wrap awkwardly and take up too much space; splitting them into two separate rows, one after the other, may look better."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "It is unclear whether truncated data has a tooltip or horizontal scroll to reveal the full content."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The component's width appears to differ between the default and empty states, which could cause the layout to jump while loading if the width is not fixed."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "It could not be verified in storybook whether pressing Enter after typing a token name that matches a result selects that token automatically, or whether the user must explicitly click the token in the list; this behavior needs clarification."
+    }
+  ]
+}

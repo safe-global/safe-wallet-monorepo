@@ -1,0 +1,51 @@
+{
+  "usage": {
+    "usd": 0.44410039999999995,
+    "turns": 7,
+    "wallSeconds": 40
+  },
+  "issues": [
+    {
+      "findings": [
+        "F4"
+      ],
+      "summary": "The trigger badge reads the item-level threshold instead of the selected chain's own threshold, so it is only correct because of how the caller builds the item.",
+      "label": "low",
+      "evidence": "SafeSelectorTriggerContent.tsx:85 passes selectedItem.threshold. buildMultiChainItem (useSpaceSafeSelectorItems.ts:96-106) puts the current chain first and fills the item-level value via resolveThresholdAndOwners from the current safe's info, so today's output is right. Using selectedChain?.threshold ?? selectedItem.threshold would be sturdier, but no wrong behaviour happens now."
+    },
+    {
+      "findings": [
+        "F1",
+        "F6"
+      ],
+      "summary": "The renamed test claims to check the active chain's threshold, but its fixture has no per-chain thresholds, so it can't tell which value the component uses.",
+      "label": "low",
+      "evidence": "In SafeSelectorTriggerContent.test.tsx:147 createItem's chains carry no threshold/owners, and the test only sets item-level threshold 2 and owners 3. A change to read selectedChain?.threshold ?? item.threshold would pass unchanged, so the name promises more than the test checks."
+    },
+    {
+      "findings": [
+        "F3",
+        "F5"
+      ],
+      "summary": "The new two-line JSX comment arguably goes against the 'comments are tech debt' guideline and could be shorter.",
+      "label": "nit",
+      "evidence": "SafeSelectorTriggerContent.tsx:83-84 replaces an existing one-line comment with a two-line one. It explains non-obvious intent and is accurate for the only real caller, so it's a style preference with no concrete cost."
+    },
+    {
+      "findings": [
+        "F2"
+      ],
+      "summary": "The trigger and the dropdown rows now differ (count vs icon-only), and the finding asks to confirm this is intended.",
+      "label": "wrong",
+      "evidence": "The PR description says leaving the dropdown list rows icon-only is deliberate, and gives the reason (a collapsed group can't show differing per-chain thresholds). The code comment at line 84 says the same."
+    },
+    {
+      "findings": [
+        "F7"
+      ],
+      "summary": "The change reverses an earlier icon-only decision without recorded product sign-off.",
+      "label": "wrong",
+      "evidence": "The reversal is the stated purpose of the PR: the trigger always stands for one specific chain, so the threshold is known and not misleading. Before/after screenshots are attached. Whether design signed off can't be seen in the code, but the behaviour is clearly intended."
+    }
+  ]
+}

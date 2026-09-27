@@ -1,0 +1,60 @@
+{
+  "usd": 0.0436322,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/PendingRequestsTable.tsx",
+      "line": 40,
+      "claim": "This component detects small screens using MUI's useMediaQuery(theme.breakpoints.down('lg')), which switches at about 1200px, while the adjacent SpaceAddressBookTable.tsx uses the repo's useIsMobile() hook, which switches at 768px, so the two tabs on the same page change layout at different widths. The fix would be to use useIsMobile or plain Tailwind responsive classes, removing the MUI imports from this shadcn/Tailwind component."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/PendingRequestsTable.tsx",
+      "line": 107,
+      "claim": "The same isSmallScreen ternary condition is repeated across three header cell class names; using Tailwind breakpoint classes instead would remove the JS branching entirely."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/PendingRequestsTable.tsx",
+      "line": 175,
+      "claim": "The full \"Requested by\" address is now rendered with shortAddress={false} inside a column about 144px wide at the new 720px minimum table width, and nothing truncates the text (only inline-flex min-w-0 is applied), so it will likely wrap or overflow; since the tooltip already shows the full value, the cell could instead use a short address or a truncate class."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/PendingRequestsTable.tsx",
+      "line": 131,
+      "claim": "The wrapper <div className=\"text-[0.8em] font-mono\"><EthHashInfo … highlight4bytes …/></div> now appears twice in this file and again in SpaceAddressBookTable.tsx, and the two requestedBy branches differ only in a few props, so a small FullAddress helper or computing the props once would prevent the duplicated branches from drifting apart."
+    },
+    {
+      "file": "apps/web/src/features/myAccounts/components/AccountItem/AccountItemChainBadge.tsx",
+      "line": 26,
+      "claim": "Removing the \"Multichain account on:\" heading changes the multichain tooltip everywhere this shared badge is used (it is exported through features/myAccounts/feature.ts, not only in the address book), which is a visible behaviour change outside the PR's stated address-book scope, and the PR description should reference the design decision behind it."
+    },
+    {
+      "file": "apps/web/src/features/myAccounts/components/AccountItem/__tests__/AccountItemChainBadge.test.tsx",
+      "line": 42,
+      "claim": "The single-chain test asserts that \"Multichain account on:\" is absent, but the single-chain branch never rendered that heading even before this change, so the assertion passes regardless of the change and cannot catch a regression."
+    },
+    {
+      "file": "apps/web/src/features/myAccounts/components/AccountItem/__tests__/AccountItemChainBadge.test.tsx",
+      "line": null,
+      "claim": "Tooltip* is mocked as a plain div in these tests, so the multichain test cannot verify that the content actually lives inside the tooltip; asserting that there is exactly one multichain-tooltip element would give a stronger check."
+    },
+    {
+      "file": "apps/web/src/features/myAccounts/components/AccountItem/__tests__/AccountItemChainBadge.test.tsx",
+      "line": 20,
+      "claim": "The createSafeItem test fixture is hand-written with a hard-coded address and fixed values, even though the repo already provides safeItemBuilder() in apps/web/src/tests/builders/safeItem.ts that could be used instead, e.g. safeItemBuilder().with({ chainId }).build()."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/__tests__/SpaceAddressBookTable.test.tsx",
+      "line": 170,
+      "claim": "The test \"exposes the full name via a tooltip trigger\" only checks that the trigger button exists and never checks the tooltip content, so it does not assert the behaviour described by its own name."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/__tests__/PendingRequestsTable.test.tsx",
+      "line": null,
+      "claim": "There are no tests covering the new small-screen column widths or the new showHasMore/maxVisible={3} props on NetworkLogosList, and the NetworkLogosList mock in this test file drops those props, so this new behaviour is untested."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/__tests__/PendingRequestsTable.test.tsx",
+      "line": 1,
+      "claim": "The new test imports render from @testing-library/react instead of from @/tests/test-utils as required by the documented web testing convention (docs/engineering/conventions/web/project-structure.md, Testing section); most neighboring tests share this same violation, but AccountItemChainBadge.test.tsx in the same PR does it correctly."
+    }
+  ]
+}

@@ -1,0 +1,120 @@
+{
+  "usage": {
+    "usd": 0.6413502000000001,
+    "turns": 11,
+    "wallSeconds": 74
+  },
+  "issues": [
+    {
+      "findings": [
+        "F4",
+        "F7",
+        "F17",
+        "F19",
+        "F14"
+      ],
+      "summary": "The error-path tests only check the error text; they never assert that the success side effects (trackEvent, notification, close, navigation) did not run. So removing the new early returns would go unnoticed.",
+      "label": "medium",
+      "evidence": "The PR moved the success actions out of the try block in AcceptInviteDialog.tsx:55-72 and EditMemberDialog.tsx:63-81, so only the `return` at :46/:50 and :57/:61 stops them. The new tests (AcceptInviteDialog.test.tsx:105-133, EditMemberDialog.test.tsx:79-96) only use findByText and never check `not.toHaveBeenCalled`."
+    },
+    {
+      "findings": [
+        "F6",
+        "F27"
+      ],
+      "summary": "No test covers the branch where the mutation throws, in AcceptInviteDialog or EditMemberDialog. EditMemberDialog also has no success-path test.",
+      "label": "low",
+      "evidence": "EditMemberDialog.test.tsx has only two tests, both error paths resolving with `{error}` (:79, :88). AcceptInviteDialog tests resolve with `{error}` only. EditContactDialog does have a 'mutation throws' test. This is a real gap, but the thrown branch is rarely hit because RTK trigger results don't throw."
+    },
+    {
+      "findings": [
+        "F10",
+        "F12",
+        "F22"
+      ],
+      "summary": "IdentitySection's changed catch branch (the main workspace-rename page) has no unit test. Only the separate copy in useUpdateSpace is tested.",
+      "label": "medium",
+      "evidence": "SpaceSettings/__tests__ has tests for AppearanceSection, DangerZoneSection, UpdateSpaceForm and useUpdateSpace, but none for IdentitySection. So the change at IdentitySection.tsx:62 could be reverted with no test failing. F12 is slightly wrong that sections have no tests at all, since the sibling sections are tested under __tests__."
+    },
+    {
+      "findings": [
+        "F9",
+        "F18",
+        "F25",
+        "F26"
+      ],
+      "summary": "A caught `unknown` is cast to FetchBaseQueryError | SerializedError without a runtime check. A plain JS Error thrown inside the try (from dispatch, handleClose or setName) would take the SerializedError branch, and its raw message would be shown to the user.",
+      "label": "low",
+      "evidence": "rtkQuery.ts:57 returns `error.message` for anything without `status`. EditContactDialog.tsx:102-110 and IdentitySection.tsx:52-58 wrap non-mutation calls inside the try, so a TypeError there would surface raw text. That goes against the helper's doc comment, but it's unlikely in practice."
+    },
+    {
+      "findings": [
+        "F11",
+        "F21"
+      ],
+      "summary": "If a primitive (a string or undefined) is thrown, `'status' in error` inside the helper throws a TypeError from the catch block, and the rejection escapes handleSubmit.",
+      "label": "low",
+      "evidence": "rtkQuery.ts:29 uses the `in` operator, which throws on primitives. The catch at EditContactDialog.tsx:112-113 would then rethrow and no error would be shown. RTK mutations don't throw primitives, so this is a very unlikely edge case."
+    },
+    {
+      "findings": [
+        "F1",
+        "F3"
+      ],
+      "summary": "The same unchecked cast of a caught error already exists in AddContactDialog and ImportAddressBookDialog, both outside the diff.",
+      "label": "low",
+      "evidence": "AddContactDialog.tsx:126 and Import/ImportAddressBookDialog.tsx:115 both do `getRtkQueryErrorMessage(e as FetchBaseQueryError | SerializedError)`. The claim is accurate, but the code predates the PR and sits outside its changes."
+    },
+    {
+      "findings": [
+        "F5",
+        "F13",
+        "F20",
+        "F24"
+      ],
+      "summary": "The `as FetchBaseQueryError | SerializedError` cast on the mutation result's `.error` is redundant, because it is already typed that way.",
+      "label": "nit",
+      "evidence": "useAddSafeToSpace.ts:47 and AddMemberModal/index.tsx:176 pass `result.error` straight to getRtkQueryErrorMessage without a cast and still compile, which shows the type already matches. The only cost is extra imports and noise."
+    },
+    {
+      "findings": [
+        "F23"
+      ],
+      "summary": "If the helper accepted `unknown` behind a guard, the added type imports in the five files could be dropped.",
+      "label": "nit",
+      "evidence": "This follows from the suggested refactor and is only a cleanup. Leaving the imports has no functional cost."
+    },
+    {
+      "findings": [
+        "F8"
+      ],
+      "summary": "The EditMemberDialog test builds a MemberDto literal by hand instead of using the existing memberBuilder().",
+      "label": "nit",
+      "evidence": "EditMemberDialog.test.tsx:56-65 builds the object by hand. memberBuilder exists in tests/builders/member.ts:15 and is used in MembersList/index.test.tsx and RenewInviteButton.test.tsx. This is a style inconsistency only."
+    },
+    {
+      "findings": [
+        "F2"
+      ],
+      "summary": "The EditContactDialog test builds a SpaceAddressBookItemDto by hand, and no builder exists for that type.",
+      "label": "nit",
+      "evidence": "tests/builders contains no address-book builder, so the literal at EditContactDialog.test.tsx:61 is reasonable. The observation describes no defect."
+    },
+    {
+      "findings": [
+        "F15"
+      ],
+      "summary": "The catch block in AddMemberModal still shows the fixed 'Something went wrong' copy.",
+      "label": "low",
+      "evidence": "AddMemberModal/index.tsx:178-180 still calls setError('Something went wrong. Please try again.'). The claim is correct, but the file is outside the diff, and its result.error path already uses the helper (:176)."
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "The claim is that surfacing backend messages lacks a product decision, and that the hard-coded fallbacks make error handling inconsistent.",
+      "label": "wrong",
+      "evidence": "The PR description and the linked ticket WA-2748 explicitly ask for backend messages to be shown. The `!spaceId` guard at EditMemberDialog.tsx:42 is a client-side precondition, not a backend error. The status-bearing fallback is the helper's intended design (rtkQuery.ts:17-18)."
+    }
+  ]
+}

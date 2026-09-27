@@ -1,0 +1,70 @@
+{
+  "usd": 0.07892960000000002,
+  "findings": [
+    {
+      "file": "apps/mobile/src/features/ExecuteTx/hooks/useExecutionFlow.ts",
+      "line": 114,
+      "claim": "confirmExecuteAnyway has no guard against being triggered twice; unlike handleConfirmPress which checks isExecuting, a double tap on \"Execute anyway\" before the sheet closes can send two relay requests, both with acceptUnverifiedSimulation: true. A synchronous ref guard shared with runExecution should be added."
+    },
+    {
+      "file": "apps/mobile/src/features/ExecuteTx/hooks/useTransactionExecution.ts",
+      "line": 151,
+      "claim": "retryWithAcceptUnverified calls execute(true) without awaiting or catching it, and since execute re-throws, any failure becomes an unhandled promise rejection; the existing retry function has the same problem and this change copies it."
+    },
+    {
+      "file": "apps/mobile/src/features/ExecuteTx/hooks/useTransactionExecution.ts",
+      "line": 45,
+      "claim": "The new return fields simulationError and retryWithAcceptUnverified are only used in the hook's own test file, while the real flow goes through useExecutionFlow.confirmExecuteAnyway instead, leaving two parallel retry APIs; they should either be removed or wired up."
+    },
+    {
+      "file": "apps/mobile/src/features/HowToExecuteSheet/HowToExecuteSheet.container.tsx",
+      "line": 101,
+      "claim": "The new Safe-pays logic has no tests: the effect that forces relay, the terminal RelayUnavailableSheet branch, and the hidden signer list and divider are all untested, and there is no test file for this container at all."
+    },
+    {
+      "file": "apps/mobile/src/features/ExecuteTx/components/ReviewAndExecute/ReviewAndExecuteContainer.tsx",
+      "line": 138,
+      "claim": "The terminal state rendered when requiresRelay && !isRelayEnabled is untested; existing tests cover the pure helper functions txRequiresRelay and getExecutionMethod but not this rendering branch, and neither new sheet component has a test."
+    },
+    {
+      "file": "apps/mobile/src/features/ConfirmTx/components/confirmation-views/TokenTransfer/TokenTransfer.tsx",
+      "line": 43,
+      "claim": "The new safePaidFee branch, which decides whether to show \"amount · fee\" when the gas token differs from the transfer token, has no test; the existing test only covers the pure builder function."
+    },
+    {
+      "file": "apps/mobile/src/features/ConfirmTx/components/TransactionInfo/FeesBreakdown.tsx",
+      "line": 137,
+      "claim": "Two different ways to find the transfer token address were added in the same change: FeesBreakdown uses a loosely typed transferTokenAddress helper taking a Record<string, unknown>, while TokenTransfer.tsx uses the existing isERC20Transfer guard; both should use isERC20Transfer, and both files also duplicate the same native-currency object construction ({ address: ZERO_ADDRESS, symbol, decimals })."
+    },
+    {
+      "file": "apps/mobile/src/features/ExecuteTx/components/IndeterminateSimulationSheet/IndeterminateSimulationSheet.tsx",
+      "line": 38,
+      "claim": "IndeterminateSimulationSheet and RelayUnavailableSheet are nearly identical (same BottomSheetModal setup, badge, title, text and button layout) and differ only in icon theme, copy and buttons; a single configurable alert sheet could cover both, similar to how ReadOnlyWarningModal and SoftUpdatePrompt already repeat this pattern."
+    },
+    {
+      "file": "apps/mobile/src/features/ConfirmTx/components/TransactionInfo/FeesBreakdown.tsx",
+      "line": 61,
+      "claim": "useTokenDetails(transfer ?? ({ transferInfo: {} } as never)) passes a fake object with an as never cast to bypass the type system, which has the same risk as using any; the hook should instead accept an optional argument or support being skipped."
+    },
+    {
+      "file": "apps/mobile/src/features/HowToExecuteSheet/HowToExecuteSheet.container.tsx",
+      "line": 35,
+      "claim": "txRequiresRelay is imported from another feature's internals (features/ExecuteTx/components/ReviewAndExecute/helpers) even though it is a pure check with no component dependency; it could move to packages/utils alongside isGtfSafePaid or into a shared util."
+    },
+    {
+      "file": "apps/mobile/src/features/ConfirmTx/components/TransactionInfo/FeesBreakdown.tsx",
+      "line": 102,
+      "claim": "The label \"FREE\" is rendered in all caps instead of sentence case; additionally, fees are now always shown on the confirm screen, a \"Sending\" label was added to the transfer header, and signer execution was removed for Safe-pays transactions, and these visible product changes should link to the product or design decision in the PR description."
+    },
+    {
+      "file": "apps/mobile/src/features/ConfirmTx/components/TransactionInfo/feeRows.ts",
+      "line": 36,
+      "claim": "Number(fiatConversion) converts an empty or whitespace-only string to 0, which passes the Number.isFinite check, so a price that is actually unknown would display as $0 instead of being omitted; an empty or trimmed-empty string should be treated as undefined."
+    },
+    {
+      "file": "apps/mobile/src/features/ExecuteTx/components/IndeterminateSimulationSheet/IndeterminateSimulationSheet.tsx",
+      "line": 66,
+      "claim": "fontSize={16} lineHeight={24} are hardcoded numeric values rather than Tamagui design tokens (e.g. fontSize=\"$4\"), which the project's structure guidelines call for, though this raw-number pattern already exists elsewhere in the codebase."
+    }
+  ]
+}

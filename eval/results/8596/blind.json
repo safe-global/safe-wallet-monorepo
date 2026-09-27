@@ -1,0 +1,91 @@
+{
+  "pr": 8596,
+  "title": "fix(UI): Spending Limits UI for Safes with 0 balance",
+  "description": "## What it solves\r\n\r\nResolves: [WA-3452](https://linear.app/safe-global/issue/WA-3452/fix-spending-limit-token-display-and-button-layout)\r\n\r\nIn the New spending limit flow, on a Safe with no balances the Amount token selector rendered the raw zero address (`0x0000…0000`) instead of a token, and typing an amount produced a misleading validation error (\"Amount is too small\" for `1`, \"Amount is too big\" for `1.1`).\r\n\r\n## How this PR fixes it\r\n\r\nTwo root causes, both from the MUI → shadcn migration:\r\n\r\n1. **Selector showed the raw address.** base-ui's `SelectValue` falls back to rendering the raw `value` when its child resolves to `undefined`. `TokenAmountInput` now always passes a non-null child (empty string when the selected token isn't in balances), so the trigger stays **blank** — matching `main`'s MUI behavior.\r\n2. **Fabricated size errors.** With no selected token, `decimals` was `undefined`, so `_validateSpendingLimit` hit the dead `parseUnits(val, 'Gwei')` fallback (`'Gwei'` is an invalid unit in ethers v6 → always throws), and the `catch` guessed the message from `Number(val) > 1`. Added a `if (decimals == null) return` guard so the range check is skipped until a real token (with real decimals) is selected.\r\n\r\n## How to test it\r\n\r\n1. Open a brand-new Safe with a 0 balance.\r\n2. New transaction → Spending limit.\r\n3. Amount token selector should be **blank** (not `0x000…`).\r\n4. Type `1` or `1.1` — **no** \"Amount is too small/big\" error appears.\r\n5. On a funded Safe, the selected token still shows and amount validation still works.\r\n\r\n## Affected flows\r\n\r\n- New spending limit → Amount field token selector + amount validation (empty-balance Safe).\r\n\r\n## Blast radius\r\n\r\n- **`TokenAmountInput`** (`components/common/`) — shared; other consumer is the **Token transfer** flow. Change only affects the unmatched-token case (blank vs raw value); tested both flows, no regression.\r\n- **`_validateSpendingLimit`** — used only by the New spending limit form.\r\n- No `ui/` primitives, hooks, selectors, slices, endpoints, flags, or routes touched.\r\n\r\n## Risks / not checked\r\n\r\n- Amount field stays enabled with a blank token — a user could type an amount and click Next without selecting a token (pre-existing; not gated in this PR).\r\n- Not tested on mobile (change is web-only; shared packages untouched).\r\n- Did not exercise the full submit/review path manually.\r\n\r\n## Visual summary\r\n\r\n```mermaid\r\nflowchart LR\r\n  A[Empty Safe: tokenAddress = ZERO_ADDRESS] --> B{token in balances?}\r\n  B -- no --> C[SelectValue child = '' → blank trigger]\r\n  B -- no --> D[decimals == null → skip range check]\r\n  B -- yes --> E[show token + validate normally]\r\n```\r\n\r\nBefore:\r\n<img width=\"1460\" height=\"1226\" alt=\"image\" src=\"https://github.com/user-attachments/assets/13b4560a-46fa-4dd7-9c4c-2e411ce9bfc4\" />\r\n<img width=\"655\" height=\"134\" alt=\"image\" src=\"https://github.com/user-attachments/assets/e7e92f17-9880-457c-b634-ea5309a01b49\" />\r\n<img width=\"653\" height=\"136\" alt=\"image\" src=\"https://github.com/user-attachments/assets/beb92824-cfbe-4d6a-b30d-7a0b998b4f9e\" />\r\n\r\nAfter:\r\n<img width=\"1418\" height=\"1308\" alt=\"image\" src=\"https://github.com/user-attachments/assets/8c8eecd2-6a06-4551-ac09-87aa79eef493\" />\r\n<img width=\"657\" height=\"127\" alt=\"image\" src=\"https://github.com/user-attachments/assets/0c265260-4ac4-45f3-b823-00f9c1e154f2\" />\r\n<img width=\"651\" height=\"125\" alt=\"image\" src=\"https://github.com/user-attachments/assets/47011b24-f3da-4d51-a3c3-ea1d2b280d8f\" />\r\n\r\n\r\n## Checklist\r\n\r\n- [ ] I've tested the branch on mobile 📱\r\n- [ ] I've documented how it affects the analytics (if at all) 📊\r\n- [x] I've written a unit/e2e test for it (if applicable) 🧑‍💻\r\n- [x] I've listed affected flows and blast radius, and named what I did not verify 🎯\r\n\r\n---\r\n\r\n## CLA signature\r\n\r\nWith the submission of this Pull Request, I confirm that I have read and agree to the terms of the [Contributor License Agreement](https://safe.global/cla).\r\n",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/features/spending-limits/components/TokenAmountInput/index.tsx",
+      "line": 64,
+      "claim": "In a Safe with no funds, the token selector now renders blank with an empty options list, so the user cannot see which token the spending limit applies to even though it silently defaults to the native token; showing the chain's native currency symbol would make this clearer."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/features/spending-limits/components/CreateSpendingLimit/index.tsx",
+      "line": 24,
+      "claim": "When the token's decimals are not yet known, validation returns early and treats any amount as valid, so the form does not block submission while the token is missing from the balances list."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/features/spending-limits/components/CreateSpendingLimit/CreateSpendingLimit.test.tsx",
+      "line": 21,
+      "claim": "The nativeBalance test fixture is written out by hand instead of using the existing balanceBuilder()/nativeTokenBuilder() helpers already available in the test builders, so the new test does not follow the project's convention of using builders for unit test fixtures."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/components/tx-flow/flows/NewSpendingLimit/__tests__/SpendingLimitForm.test.ts",
+      "line": 25,
+      "claim": "The new 'unknown decimals' test case was added to a test file outside the feature that imports _validateSpendingLimit from deep inside the feature, requiring an eslint-disable for no-restricted-imports; it should instead be placed in the new test file already added inside the feature, which would avoid the deep import and the lint suppression."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/components/tx-flow/flows/NewSpendingLimit/__tests__/SpendingLimitForm.test.ts",
+      "line": 25,
+      "claim": "The new test for unknown token decimals only checks the inputs '1' and '1.1', so it locks in the skipped validation without covering inputs with too many decimals or too large an amount that would later fail on the review step; a case exercising those inputs and asserting the intended behavior should be added."
+    },
+    {
+      "id": "F6",
+      "file": "services/spendingLimitExecution.ts",
+      "line": 101,
+      "claim": "parseUnits is called with tokenDecimals ?? undefined, so when decimals are unknown it silently falls back to 18 decimals, which can produce an allowance far larger than the user intended for tokens with fewer decimals (e.g. 6-decimal ERC-20s)."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/features/spending-limits/components/TokenAmountInput/index.tsx",
+      "line": 171,
+      "claim": "This file uses the bracket syntax `max-w-[var(--available-width)]` for an arbitrary Tailwind value, while ui/combobox.tsx uses the Tailwind v4 shorthand `max-w-(--available-width)` and navigation-menu.tsx uses the bracket form again, showing the repository has no single convention for this syntax."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/src/features/spending-limits/components/CreateSpendingLimit/index.tsx",
+      "line": 24,
+      "claim": "The early return added when decimals is null (for a token not returned by useVisibleBalances, such as the zero-balance default token, or a dust token hidden by default) disables the amount range and decimal-length checks, since validateDecimalLength also does nothing when decimals is null. As a result a Safe with no balance can submit an amount with far too many decimal places or a value exceeding what uint96 can hold at 18 decimals; the transaction is never sent on-chain, but createNewSpendingLimitTx fails later in parseUnits or when encoding setAllowance, so the user only sees a generic error on the review step instead of inline validation."
+    },
+    {
+      "id": "F9",
+      "file": "apps/web/src/features/spending-limits/components/ReviewSpendingLimit/index.tsx",
+      "line": 33,
+      "claim": "Because decimals can be undefined at this point, undefined is passed into the transaction creation call instead of a real decimals value."
+    },
+    {
+      "id": "F10",
+      "file": "apps/web/src/features/spending-limits/components/ReviewSpendingLimit/index.tsx",
+      "line": 98,
+      "claim": "The SendAmountBlock is hidden when the token is missing, so the user ends up signing an allowance transaction without ever seeing the amount they are approving."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/src/features/spending-limits/components/CreateSpendingLimit/index.tsx",
+      "line": 27,
+      "claim": "The `decimals ?? 'Gwei'` fallback can never be reached now that the preceding line returns early when decimals is null, making it dead code that should be removed or reused as part of fixing the early-return issue."
+    },
+    {
+      "id": "F12",
+      "file": "apps/web/src/features/spending-limits/components/CreateSpendingLimit/index.tsx",
+      "line": 27,
+      "claim": "The decimals ?? 'Gwei' fallback is now unreachable dead code because of the new early return above it, and it should be simplified to parseUnits(val, decimals)."
+    },
+    {
+      "id": "F13",
+      "file": null,
+      "line": null,
+      "claim": "The change alters user-facing behavior: Safes with no balance can now create a spending limit with an unchecked amount and the token selector can show blank, and the PR description does not state whether product or design signed off on this behavior change."
+    },
+    {
+      "id": "F14",
+      "file": null,
+      "line": null,
+      "claim": "The check that rejects amounts too large for the contract's int96 allowance field is skipped in this flow, only surfacing as an error later at the review step instead of blocking earlier."
+    }
+  ]
+}

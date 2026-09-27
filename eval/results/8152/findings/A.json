@@ -1,0 +1,15 @@
+{
+  "usd": 0.0380856,
+  "findings": [
+    {
+      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
+      "line": 19,
+      "claim": "borderRadius is hard-coded to 12 instead of using the Tamagui radius token \"$5\", which maps to the same value; mobile UI conventions require theme tokens instead of magic numbers, and since this is a new shared component the hard-coded value risks being copied into other screens."
+    },
+    {
+      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
+      "line": 37,
+      "claim": "borderRadius is hard-coded to 8 instead of using the Tamagui radius token \"$4\", which maps to the same value; mobile UI conventions require theme tokens instead of magic numbers, and since this is a new shared component the hard-coded value risks being copied into other screens."
+    }
+  ]
+}

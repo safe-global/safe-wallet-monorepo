@@ -1,0 +1,40 @@
+{
+  "usd": 0.0646396,
+  "findings": [
+    {
+      "file": "apps/web/src/services/sessionExpiry/useSessionExpiryGuard.ts",
+      "line": 23,
+      "claim": "The prefix check uses the hard-coded string '/spaces/' while the other two comparisons on the same line use AppRoutes, so the check would not follow AppRoutes if that route ever changes; it should be written using AppRoutes.spaces.index instead."
+    },
+    {
+      "file": "apps/web/src/services/sessionExpiry/__tests__/useSessionExpiryGuard.test.tsx",
+      "line": 317,
+      "claim": "No test covers the nested-route branch pathname.startsWith('/spaces/'); only the exact /spaces and /welcome/spaces matches are tested, so that branch could be deleted and all tests would still pass. A case using a nested route like AppRoutes.spaces.settings that expects the toast should be added."
+    },
+    {
+      "file": "apps/web/src/services/sessionExpiry/useSessionExpiryGuard.ts",
+      "line": 55,
+      "claim": "The ref that lets the route be read at the moment the timer fires (rather than when it was set) is not covered by any test, such as a case where the timer is set on /welcome/accounts, the user navigates to /spaces, and the timer then fires and should show the toast."
+    },
+    {
+      "file": "apps/web/src/services/sessionExpiry/useSessionExpiryGuard.ts",
+      "line": 55,
+      "claim": "There is no test for a /me 403 occurring while outside a workspaces route, which should clear auth and show no toast."
+    },
+    {
+      "file": "apps/web/src/services/sessionExpiry/useSessionExpiryGuard.ts",
+      "line": 22,
+      "claim": "This new spaces-route check duplicates and disagrees with the existing one in apps/web/src/features/spaces/hooks/useIsQualifiedSafe.ts:29: the existing check uses a bare startsWith that also matches paths like /spaces-foo and /welcome/spaces/*, while the new helper matches only exactly or with a trailing slash. A single shared helper should be used, or the difference should be explicitly noted."
+    },
+    {
+      "file": "apps/web/src/services/sessionExpiry/useSessionExpiryGuard.ts",
+      "line": 78,
+      "claim": "Several visible behavior changes (toast no longer shown outside workspaces routes, error styling replaced by info, toast now persists until dismissed, and the 'Sign in to workspaces' link removed) are not backed by any cited product or design decision in the diff, even though commit messages claim they are intended; this decision should be added to the PR description."
+    },
+    {
+      "file": "apps/web/src/services/sessionExpiry/useSessionExpiryGuard.ts",
+      "line": 78,
+      "claim": "If the session expires on a non-workspaces page and the user then navigates to /welcome/spaces, they will be signed out with no toast explaining why, a consequence of the new behavior that needs confirmation."
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "usd": 0.06595960000000001,
+  "findings": [
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/deriveCheckState.ts",
+      "line": 88,
+      "claim": "The plainAttested branch is accepted without requiring a matching PLAIN_PROPOSED event, and the oracle branch above it similarly doesn't require a matching ORACLE_PROPOSED. On a reorg or partial fetch, a lone *_ATTESTED event could survive while its proposal has dropped, causing the state to jump straight to BENIGN, AWAITING_VERIFICATION, or VERIFICATION_FAILED without the expected proposal having occurred."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/deriveCheckState.ts",
+      "line": 76,
+      "claim": "AttestationVerificationStatus.UNVERIFIED is not matched explicitly and falls through (along with PENDING) into the AWAITING_VERIFICATION case; this fallthrough is easy to miss, so a future added status case (e.g. TIMED_OUT) could silently be treated as still-in-progress instead of being handled correctly."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/deriveCheckState.ts",
+      "line": 39,
+      "claim": "DISPUTE_RESOLVED alone is not treated as a verdict; the derivation relies on resolveDispute always emitting OracleResult alongside DisputeResolved. If a future contract path ever emits DisputeResolved without a paired OracleResult, the derivation would read as IN_PROGRESS indefinitely (or TIMED_OUT past deadline) and never reach MALICIOUS, since this coupling to contract behavior is not documented or enforced in code."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/deriveCheckState.ts",
+      "line": 76,
+      "claim": "The attested-to-verified/invalid/awaiting logic is duplicated across two near-identical branches; extracting a small verdictFromAttestation helper would remove the repetition and centralize the mapping."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/types/snapshot.ts",
+      "line": 27,
+      "claim": "The snapshot type declares NormalizedCheckEvent[] as a mutable array while deriveCheckState.ts uses ReadonlyArray for the same kind of collection; since the snapshot is described as recomputed from scratch, the event list should also be typed as ReadonlyArray to prevent mutation of the collected events."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/deriveCheckState.ts",
+      "line": 19,
+      "claim": "deadlineBlockOf allocates a bigint per event for comparisons; comparing decimal-string lengths first and only converting to BigInt for tie-breakers would avoid unnecessary allocations if this code path ends up folding many checks per poll."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "There is no test asserting that deriveCheckState is order-independent with respect to event ordering (block/logIndex), even though the documentation states it is order-independent since derive is a fold; a test using a reversed event list would help lock in this invariant."
+    }
+  ]
+}

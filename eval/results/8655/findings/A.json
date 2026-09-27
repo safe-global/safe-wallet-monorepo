@@ -1,0 +1,55 @@
+{
+  "usd": 0.0552396,
+  "findings": [
+    {
+      "file": "apps/web/src/components/address-book/AddressBookTable/index.tsx",
+      "line": 221,
+      "claim": "The Safe address book table lost its rows-per-page selector when switching from EnhancedTable (which offered 10, 25 or 100 rows per page) to PaginatedDataTable, which has a fixed page size of 25 and is already documented as lacking a rows-per-page option."
+    },
+    {
+      "file": "apps/web/src/components/address-book/AddressBookTable/index.tsx",
+      "line": null,
+      "claim": "The custom mobile card view for the address book, along with its styles.module.css (about 80 lines), was removed and replaced by responsive column dropping; since both this and the rows-per-page removal are user-visible, the PR description should state whether design/product signed off on these changes."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/AddToWorkspaceButton.tsx",
+      "line": 98,
+      "claim": "The 'icon + tooltip + aria-label' compact pattern (swap label for a lucide icon, move label into aria-label and a tooltip, wrap in a TooltipTrigger span) is duplicated across four locations instead of being extracted into a shared component like CompactLabel or IconWithTooltip, risking inconsistent accessibility handling as the copies diverge."
+    },
+    {
+      "file": "apps/web/src/components/address-book/AddressBookTable/index.tsx",
+      "line": 167,
+      "claim": "The Safe address book rebuilds the same 'name with address underneath when compact' cell layout inline with different EthHashInfo props instead of reusing the shared AddressCell component, because AddressCell lives inside features/spaces and cannot be imported due to feature-boundary rules; moving AddressCell to a shared location (e.g., alongside PaginatedDataTable or into components/address-book) would let all three tables share one cell instead of maintaining three copies."
+    },
+    {
+      "file": "apps/web/src/components/address-book/AddressBookTable/index.test.tsx",
+      "line": null,
+      "claim": "The branches that replace the Safe address book's mobile layout have no test coverage: the compact name cell (address under the name, name not truncated) at index.tsx:171-182 and the dropping of the Address column (priority: 'secondary') on mobile are untested, even though this new code replaces the deleted mobile card and the existing test file only exercises pagination with useIsMobile returning false."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/RequestToAddButton.tsx",
+      "line": 139,
+      "claim": "There is no test for the compact state combined with a name error being sent through InvalidContactNameTooltip alongside the icon-only button (also present in AddToWorkspaceButton.tsx:89-91), and no test for the compact 'Already shared' icon badge in SpaceAddressBook/index.tsx:193-205."
+    },
+    {
+      "file": "apps/web/src/components/ui/stories/design-system.stories.tsx",
+      "line": 938,
+      "claim": "The PR edits a file under components/ui/* without stating in the description whether the change is coordinated with any open design-system rewrite of components/ui/*, or confirming that no such PR is open."
+    },
+    {
+      "file": "apps/web/cypress/e2e/regression/address_book_2.cy.js",
+      "line": 33,
+      "claim": "After one click on the Address sort (ascending), the test calls verifyEntriesOrder('descending') because that helper's parameter actually refers to sorting by name rather than the literal sort direction; while a comment explains this, the mismatch between the parameter's apparent meaning and its actual effect is easy to break in future changes, and an explicit expected-first-row argument would be clearer."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/index.tsx",
+      "line": 142,
+      "claim": "A comment now ends mid-sentence at '…left the search almost touching' because its second line ('the table card below it.') was deleted."
+    },
+    {
+      "file": "apps/web/src/components/common/EnhancedTable/index.tsx",
+      "line": 137,
+      "claim": "The comment still states 'its nine existing consumers' and the story at design-system.stories.tsx:943 still says '~9', but with the address book's usage removed there are now only 8 consumers; the story text also claims no consumer passes panel anymore, meaning panel is now used only by the story itself."
+    }
+  ]
+}

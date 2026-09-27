@@ -1,0 +1,102 @@
+{
+  "usage": {
+    "usd": 0.47993240000000004,
+    "turns": 7,
+    "wallSeconds": 53
+  },
+  "issues": [
+    {
+      "findings": [
+        "F1",
+        "F7"
+      ],
+      "summary": "Spending limit tile is enabled, but a repeat click does nothing because startSpendingLimitFlow is an empty TODO",
+      "label": "wrong",
+      "evidence": "catalogue.ts:19 flips isAvailable to true and Policies/index.tsx:16-18 leaves the handler as a TODO. The PR description says this is the intended in-between state until WA-3150 lands."
+    },
+    {
+      "findings": [
+        "F2",
+        "F3",
+        "F5"
+      ],
+      "summary": "Several long, multi-line comment blocks go against the repo rule to use few comments of one line each",
+      "label": "low",
+      "evidence": "constants.ts:1-8 has a 7-line JSDoc on one key, SpendingLimitIntroDialog/index.tsx:10-14,38-41 and SpendingLimitPreview.tsx:7-12,24-27,57-61 have multi-line blocks, and Policies/index.tsx:25-26,37-38 add more. Root AGENTS.md asks for no comments by default and one line at most, so this is a real convention violation with a small maintenance cost."
+    },
+    {
+      "findings": [
+        "F4",
+        "F12"
+      ],
+      "summary": "No page-level test covers the proceed path saving the seen flag",
+      "label": "medium",
+      "evidence": "In __tests__/Policies.test.tsx, 'records that it has been shown' only clicks Close. Nothing clicks 'Set up spending limit' and checks setHasSeenSpendingLimitIntro(true), so if proceedToSpendingLimitFlow (index.tsx:44-47) stopped calling closeSpendingLimitIntro, no test would fail."
+    },
+    {
+      "findings": [
+        "F6",
+        "F13"
+      ],
+      "summary": "ArrowRight uses a raw dark:text-black that the Button variant already applies",
+      "label": "low",
+      "evidence": "button.tsx:37 already applies dark:[&_svg]:text-black. With the `:is(.dark *)` variant (shadcn.css:6) that rule's specificity is (0,2,1), which beats the icon's own classes, so dark:text-black on SpendingLimitIntroDialog/index.tsx:89 and its comment do nothing. It is also a raw color, while web AGENTS.md asks for theme variables."
+    },
+    {
+      "findings": [
+        "F8"
+      ],
+      "summary": "The 'already seen' test only checks that the dialog is absent, which is a weak check",
+      "label": "low",
+      "evidence": "Policies.test.tsx 'does not explain again once it has been shown' only asserts queryByTestId is null. That would also pass if the click never reached handleSelect. The weakness is real but small, since other tests show the tile is clickable."
+    },
+    {
+      "findings": [
+        "F10"
+      ],
+      "summary": "Screen readers can read the preview's placeholder spender addresses and amounts",
+      "label": "low",
+      "evidence": "SpendingLimitPreview.tsx:63-66 has no aria-hidden or role=img on the container. Only the Progress bar at :84 is hidden, so the placeholder addresses and '500 USDC remaining' are read out. This is a real but minor accessibility issue."
+    },
+    {
+      "findings": [
+        "F11"
+      ],
+      "summary": "A comment sits above an it() case, which the testing conventions forbid",
+      "label": "low",
+      "evidence": "SpendingLimitIntroDialog.test.tsx:21 has a comment directly above it(...). docs/ai/testing-conventions.md:10 says 'No comments above test cases'."
+    },
+    {
+      "findings": [
+        "F9"
+      ],
+      "summary": "The preview token logo loads from a remote CDN URL",
+      "label": "nit",
+      "evidence": "SpendingLimitPreview.tsx:17 uses the same Safe asset CDN the app already uses for token logos. jsdom does not fetch <img> sources, so Jest is not affected. The cost is negligible."
+    },
+    {
+      "findings": [
+        "F14"
+      ],
+      "summary": "useLocalStorage returns undefined on first render, so the default of false applies until it loads",
+      "label": "nit",
+      "evidence": "The finding itself says this is harmless. The flag is only read in the click handler at Policies/index.tsx:27, after the mount effect has filled in the stored value."
+    },
+    {
+      "findings": [
+        "F15"
+      ],
+      "summary": "The primary button mixes w-full and gap-2 in its className",
+      "label": "nit",
+      "evidence": "The default Button size sets gap-1.5 (button.tsx:60), and gap-2 is a plain design adjustment. No lint suppression is involved, so this is a style preference."
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "The page cannot be scrolled on the Nest screen size",
+      "label": "unverifiable",
+      "evidence": "The finding has no file or line, and nothing in this diff changes page layout or overflow. It cannot be checked from the code."
+    }
+  ]
+}

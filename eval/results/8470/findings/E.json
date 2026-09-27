@@ -1,0 +1,10 @@
+{
+  "usd": 0.032417600000000005,
+  "findings": [
+    {
+      "file": null,
+      "line": null,
+      "claim": "The pull request does not update safe-core-sdk, which needs to be updated as part of this change."
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "usage": {
+    "usd": 0.3746518,
+    "turns": 5,
+    "wallSeconds": 34
+  },
+  "issues": [
+    {
+      "findings": [
+        "F2",
+        "F6"
+      ],
+      "summary": "accessible={false} on the backdrop takes tap-outside-to-dismiss away from screen readers",
+      "label": "low",
+      "evidence": "DialogModal.tsx:32 does set accessible={false} on the overlay. Before this, though, the accessible overlay grouped the whole dialog into one element, so screen-reader users never had tap-outside as a separate action. The Cancel button (line 57) still dismisses the dialog, so the cost is small."
+    },
+    {
+      "findings": [
+        "F7"
+      ],
+      "summary": "Cancel/Save Pressables lack accessibilityRole=\"button\"",
+      "label": "low",
+      "evidence": "DialogModal.tsx:57 and :63 have no accessibilityRole. These lines existed before the PR, but the PR makes them individually reachable by screen readers for the first time, so they are now read out without a button role. Real but minor accessibility polish."
+    },
+    {
+      "findings": [
+        "F9",
+        "F12"
+      ],
+      "summary": "No test locks in the accessible={false} fix for DialogModal and its consumers",
+      "label": "low",
+      "evidence": "The diff only changes DialogModal.tsx:32 and :42 and adds no tests. No test file references DialogModal, CustomNonceModal or AddToAddressBookModal. If someone reverted the fix, only screen-reader users would be affected and CI would not notice, but the impact is limited to accessibility."
+    },
+    {
+      "findings": [
+        "F1",
+        "F3",
+        "F5",
+        "F8",
+        "F10"
+      ],
+      "summary": "Claims about draftEditorsSetup.ts and its unit test",
+      "label": "wrong",
+      "evidence": "`git diff ad6d5b93...HEAD` touches only DialogModal.tsx. apps/mobile/src/tests/e2e-maestro/setup/ has no draftEditorsSetup.ts and no matching test at the reviewed commit, so these findings describe code that is not there."
+    },
+    {
+      "findings": [
+        "F4"
+      ],
+      "summary": "Spender regex in verify-approve-amount.yml is too loose",
+      "label": "wrong",
+      "evidence": "No apps/mobile/e2e/utils/components/draft-editors/ directory exists at HEAD, and the diff has no YAML changes. The claim is about a file that is not in the reviewed code."
+    },
+    {
+      "findings": [
+        "F11"
+      ],
+      "summary": "send-nonce-editor.yml hardcodes nonce 99999",
+      "label": "wrong",
+      "evidence": "apps/mobile/e2e/tests/transactions/ contains only history/ and pending/, with no draft-editors suite, and the diff changes only DialogModal.tsx. The referenced file does not exist at the reviewed commit."
+    }
+  ]
+}

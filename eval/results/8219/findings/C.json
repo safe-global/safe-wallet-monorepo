@@ -1,0 +1,20 @@
+{
+  "usd": 0.0582796,
+  "findings": [
+    {
+      "file": "apps/mobile/src/components/SafeAccountInput/index.tsx",
+      "line": null,
+      "claim": "There is no colocated unit test (e.g. index.test.tsx) for SafeAccountInput verifying that the success icon renders once importedSafeResult.data is populated via the form, so the exact bug this change fixes is not locked in by a regression test."
+    },
+    {
+      "file": "apps/mobile/src/components/SafeAccountInput/index.tsx",
+      "line": 37,
+      "claim": "The cast addressWithoutPrefix as `0x${string}` is applied without validating the string is actually hex, so if parsePrefixedAddress ever returns a non-hex string, downstream consumers like Identicon receive a value the type system incorrectly guarantees is hex; gating usage on isAddress(addressWithoutPrefix) rather than truthiness would avoid this."
+    },
+    {
+      "file": "apps/mobile/src/components/SafeAccountInput/index.tsx",
+      "line": 19,
+      "claim": "The comment explaining the useWatch vs watch distinction could be shortened, e.g. to something like 'subscribe at child level — watch() only re-renders the form root', so it reads better and is less likely to become outdated."
+    }
+  ]
+}

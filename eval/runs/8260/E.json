@@ -1,0 +1,11 @@
+{
+  "pr": 8260,
+  "reviewSha": "11b6884701012c59fc3279f15c9a09eeb4bb6a41",
+  "baseSha": "72e6925bf86cebb255113ea607209f315ac13f94",
+  "system": "E",
+  "version": "github",
+  "runner": "collect",
+  "model": "human",
+  "commentSha": "11b6884701012c59fc3279f15c9a09eeb4bb6a41",
+  "output": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.tsx:99\nnit:\nfind some similar patterns by:\n\n`AccountItemChainBadge.tsx:21-33`\n`PendingRequestsTable.tsx:129-148`\n`SpaceAddressBookTable.tsx:61-76`\n`RequestToAddButton.tsx:145-160`\n\nWe can consider if we can refactor them to a reusable component.\n\n---\n\napproved with one small suggestion"
+}

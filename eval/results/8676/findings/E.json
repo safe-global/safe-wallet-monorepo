@@ -1,0 +1,10 @@
+{
+  "usd": 0.0322536,
+  "findings": [
+    {
+      "file": null,
+      "line": null,
+      "claim": "On the Nest screen size, the page could not be scrolled, which prevents access to content that overflows the viewport at that size."
+    }
+  ]
+}

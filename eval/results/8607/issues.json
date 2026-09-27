@@ -1,0 +1,103 @@
+{
+  "usage": {
+    "usd": 0.5478419999999999,
+    "turns": 9,
+    "wallSeconds": 53
+  },
+  "issues": [
+    {
+      "findings": [
+        "F1",
+        "F16",
+        "F17",
+        "F9",
+        "F7"
+      ],
+      "summary": "The spinner condition uses isSpacesLoading, which includes isFetching, so a background refetch swaps the cached spaces list and invite banners for a spinner (unmounting open invite dialogs).",
+      "label": "medium",
+      "evidence": "index.tsx:245 was added by this PR, and isSpacesLoading (index.tsx:210) is true whenever isFetching is true, even while currentData still holds cached spaces. Every spaces mutation invalidates the bare 'spaces' tag (AUTO_GENERATED/spaces.ts:25 and others), so accepting or declining an invite refetches the list, the spinner replaces the list, and SpaceListInvite/AcceptInviteDialog unmount in the middle of the flow."
+    },
+    {
+      "findings": [
+        "F2",
+        "F13"
+      ],
+      "summary": "No test covers cached active spaces combined with isFetching=true, which is the case that shows the spinner replacing the list.",
+      "label": "medium",
+      "evidence": "The new tests in __tests__/SpacesList.test.tsx cover only fetching with no data, the store not hydrated, and cached data with an error. None covers currentData=[space] with isFetching=true, so the regression above goes undetected."
+    },
+    {
+      "findings": [
+        "F6"
+      ],
+      "summary": "The claim is that Try again hides the cached list.",
+      "label": "wrong",
+      "evidence": "The error/Try-again branch only renders when `error && !spaces?.length` (index.tsx:251), so there is no cached list for a retry to hide."
+    },
+    {
+      "findings": [
+        "F10",
+        "F14"
+      ],
+      "summary": "The claim is that the PR description doesn't record why the Receive icon changed.",
+      "label": "wrong",
+      "evidence": "The PR description links WA-3443 ('Receive button icon changed from QR code to a generic down-left arrow') and explains the swap back to QrCode."
+    },
+    {
+      "findings": [
+        "F5"
+      ],
+      "summary": "The error copy says 'contact support' but gives no link or route.",
+      "label": "low",
+      "evidence": "index.tsx:253 renders plain text with no support link next to it. This is a minor UX gap."
+    },
+    {
+      "findings": [
+        "F15"
+      ],
+      "summary": "A 401 from /v1/spaces now shows the generic error rather than a re-sign-in prompt.",
+      "label": "low",
+      "evidence": "Any error with no cached spaces takes the generic error branch (index.tsx:251). Before this PR it fell through to the misleading empty state, so this is an improvement, and a tailored 401 message would be a nice-to-have."
+    },
+    {
+      "findings": [
+        "F3"
+      ],
+      "summary": "The new loading and error states have no Storybook story.",
+      "label": "low",
+      "evidence": "The web guidelines expect stories for UI states, and the PR adds spinner and error branches without one. The behaviour is still covered by unit tests."
+    },
+    {
+      "findings": [
+        "F4"
+      ],
+      "summary": "Tests assert on styling classes and props (gap-3, data-size='none'), which is brittle.",
+      "label": "nit",
+      "evidence": "The SpacesList.test.tsx tests check for class names and data-size attributes. They break on unrelated restyling and don't catch real visual regressions, but they cost nothing functionally."
+    },
+    {
+      "findings": [
+        "F12"
+      ],
+      "summary": "The not.toHaveClass('gap-1.5') assertion is redundant.",
+      "label": "nit",
+      "evidence": "The element is located via closest('.gap-3'), so the extra negative class check adds almost nothing."
+    },
+    {
+      "findings": [
+        "F8"
+      ],
+      "summary": "WORKSPACE_BENEFITS is exported only so the test can use it.",
+      "label": "nit",
+      "evidence": "index.tsx:133 changed to `export const` solely for the test's WORKSPACE_BENEFITS[0]. Matching the literal text would keep the constant private."
+    },
+    {
+      "findings": [
+        "F11"
+      ],
+      "summary": "The five-branch nested ternary in the render is hard to read.",
+      "label": "nit",
+      "evidence": "index.tsx:245-296 chains the ternaries. This is a readability preference with no functional cost."
+    }
+  ]
+}

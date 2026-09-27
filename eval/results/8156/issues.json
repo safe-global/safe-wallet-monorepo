@@ -1,0 +1,286 @@
+{
+  "usage": {
+    "usd": 1.2062624000000002,
+    "turns": 15,
+    "wallSeconds": 135
+  },
+  "issues": [
+    {
+      "findings": [
+        "F21",
+        "F31"
+      ],
+      "summary": "FeesBreakdown renders on every pending tx with no GTF/Safe-pays gating, so signer-pays txs show 'Max gas fee 0' and a misleading total",
+      "label": "medium",
+      "evidence": "TransactionInfo.tsx:49 renders FeesBreakdown unconditionally. For signer-pays payloads gasPrice is '0', so feeRows.ts:363 gives gasWei=0 and the sheet shows 'Max gas fee 0 MATIC', with Total outgoing built from that. Web gates this behind GTF and shows 'Calculated at execution'. The PR description's claim of 'Calculated at execution' isn't in this code."
+    },
+    {
+      "findings": [
+        "F12",
+        "F32"
+      ],
+      "summary": "The relay UI still says 'Free' / 'Sponsored by Safe · We pay fees · N left/day' for Safe-pays txs, where the Safe actually pays the gas",
+      "label": "medium",
+      "evidence": "The container forces isRelayAvailable for requiresRelay (HowToExecuteSheet.container.tsx:104-106) and renders the unchanged RelayAvailable, whose copy is 'Sponsored by Safe'/'We pay transactions fees for you' plus remaining quota. The footer's RelayFee.tsx:27 shows 'Free' plus 'N left / day'. 'Paid from your Safe' appears only in the FeesBreakdown tooltip."
+    },
+    {
+      "findings": [
+        "F1",
+        "F5",
+        "F34"
+      ],
+      "summary": "No tests for the container-level Safe-pays guards: forced relay, hidden signer list, RelayUnavailableSheet, and the ReviewAndExecute terminal state",
+      "label": "medium",
+      "evidence": "No test file exists for HowToExecuteSheet.container.tsx or ReviewAndExecuteContainer.tsx, and the new sheets have no tests. Only the pure helpers are tested (helpers.test.ts). These guards are the only thing stopping the double-pay signer route on chains without relaying."
+    },
+    {
+      "findings": [
+        "F43"
+      ],
+      "summary": "Claim: txRequiresRelay and the requiresRelay branch of getExecutionMethod have no tests",
+      "label": "wrong",
+      "evidence": "helpers.test.ts adds a txRequiresRelay describe block with 6 cases, plus two getExecutionMethod cases passing requiresRelay=true (forced WITH_RELAY, and no force without the chain feature)."
+    },
+    {
+      "findings": [
+        "F7",
+        "F25"
+      ],
+      "summary": "Relay gating (isRelayEnabled/requiresRelay/isRelayAvailable) is derived twice, and the 'relay not available' terminal state renders different UI in each place",
+      "label": "low",
+      "evidence": "HowToExecuteSheet.container.tsx:99-118 renders RelayUnavailableSheet, while ReviewAndExecuteContainer.tsx:136-144 renders inline Text for the same condition. The useRequiresRelay hook described in the PR does not exist in the code."
+    },
+    {
+      "findings": [
+        "F4",
+        "F28",
+        "F44"
+      ],
+      "summary": "IndeterminateSimulationSheet and RelayUnavailableSheet duplicate the same BottomSheetModal/badge/title/body scaffolding",
+      "label": "low",
+      "evidence": "The two files (IndeterminateSimulationSheet.tsx and RelayUnavailableSheet.tsx) are near copies that differ only in badge theme, copy and buttons. The same pattern exists in SoftUpdatePrompt/ReadOnlyWarningModal, and the ConfirmationSheet the PR describes was never added."
+    },
+    {
+      "findings": [
+        "F13",
+        "F39"
+      ],
+      "summary": "simulationError and retryWithAcceptUnverified returned by useTransactionExecution are unused; useExecutionFlow owns the retry flow",
+      "label": "low",
+      "evidence": "A grep outside tests finds these only at useTransactionExecution.ts:45,151,155. The real path is useExecutionFlow.confirmExecuteAnyway, which calls execute(true), so there are two parallel retry APIs."
+    },
+    {
+      "findings": [
+        "F36"
+      ],
+      "summary": "retryWithAcceptUnverified calls execute(true) without awaiting or catching, so its rejection goes unhandled",
+      "label": "low",
+      "evidence": "At useTransactionExecution.ts:151-153, execute re-throws in its catch, so a failed retry becomes an unhandled promise rejection. It copies the existing retry pattern, and the new function currently has no production callers."
+    },
+    {
+      "findings": [
+        "F6"
+      ],
+      "summary": "confirmExecuteAnyway has no re-entrancy guard, so a fast double tap could send two relay requests",
+      "label": "low",
+      "evidence": "confirmExecuteAnyway (useExecutionFlow.ts:1022-1025) calls runExecution(true) without checking isExecuting or a ref. The sheet unmounts on the next render, so a second tap is possible but unlikely. The existing guard is also only state-based."
+    },
+    {
+      "findings": [
+        "F23",
+        "F42"
+      ],
+      "summary": "useTokenDetails is fed a stub `{ transferInfo: {} } as never` to bypass typing",
+      "label": "low",
+      "evidence": "FeesBreakdown.tsx:67 uses an `as never` cast, which is equivalent to `any` and goes against repo rules. useTokenDetails still takes a required TransferTransactionInfo (useTokenDetails.ts:15), contrary to the PR description."
+    },
+    {
+      "findings": [
+        "F15",
+        "F30"
+      ],
+      "summary": "FeesBreakdown reads tokenAddress via a loosely typed Record helper, while TokenTransfer uses the isERC20Transfer guard",
+      "label": "low",
+      "evidence": "FeesBreakdown.tsx:143-146 has transferTokenAddress on Record<string, unknown>, while TokenTransfer.tsx:463 uses isERC20Transfer. The results differ for ERC-721 (NFT address vs ZERO_ADDRESS). This is an inconsistency, not a visible bug today, since an NFT line just shows separately."
+    },
+    {
+      "findings": [
+        "F20",
+        "F37"
+      ],
+      "summary": "The native-currency mapping and buildFeesBreakdown call are duplicated across FeesBreakdown.tsx and TokenTransfer.tsx",
+      "label": "low",
+      "evidence": "The same selectActiveChainCurrency → {ZERO_ADDRESS, symbol, decimals} mapping and !nativeCurrency guard appear at FeesBreakdown.tsx:61-90 and TokenTransfer.tsx:450-462. F37's mention of ReviewExecuteFooter is wrong: that file doesn't call it."
+    },
+    {
+      "findings": [
+        "F14",
+        "F45"
+      ],
+      "summary": "The new safePaidFee header logic in TokenTransfer has no test",
+      "label": "low",
+      "evidence": "The safePaidFee branch in TokenTransfer.tsx:455-468 has no component test. Only buildFeesBreakdown is tested, in feeRows.test.ts."
+    },
+    {
+      "findings": [
+        "F22"
+      ],
+      "summary": "There is no component test for FeesBreakdown (the null return or the 'Paid from your Safe/signer' wording)",
+      "label": "low",
+      "evidence": "No FeesBreakdown.test.tsx exists. gasFeeInfo and the null-return branch at FeesBreakdown.tsx:96-141 are untested."
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "useTransactionExecution tests exercise only the WITH_RELAY executor",
+      "label": "low",
+      "evidence": "useTransactionExecution.test.tsx always renders with executionMethod WITH_RELAY. The PK/Ledger/WC dispatch is mocked but never selected."
+    },
+    {
+      "findings": [
+        "F9"
+      ],
+      "summary": "The mobile gas fee tooltip text has drifted from web's",
+      "label": "low",
+      "evidence": "Mobile has 'Network cost required to process this transaction.' (FeesBreakdown.tsx:29), while web's tooltips.ts:4 adds 'on the blockchain.' The copy is duplicated rather than shared."
+    },
+    {
+      "findings": [
+        "F24"
+      ],
+      "summary": "The total-outgoing summing logic re-implements web's totalOutgoing service instead of sharing it",
+      "label": "low",
+      "evidence": "apps/web/src/features/gtf/services has a tested totalOutgoing service, and mobile's feeRows.ts:380-407 reimplements it rather than using a shared packages/utils version."
+    },
+    {
+      "findings": [
+        "F29"
+      ],
+      "summary": "The useEffect dispatching WITH_RELAY in the picker duplicates getExecutionMethod's forcing",
+      "label": "low",
+      "evidence": "HowToExecuteSheet.container.tsx:108-112 still exists even though the PR says it was removed. getExecutionMethod already forces relay at review time. The effect only serves the picker highlight, at the cost of an extra Redux write and render."
+    },
+    {
+      "findings": [
+        "F38"
+      ],
+      "summary": "An empty fiatConversion string becomes rate 0 and would show $0",
+      "label": "low",
+      "evidence": "In feeRows.ts:335-338, Number('') === 0 passes Number.isFinite. That is a real edge case, but CGW is unlikely to send an empty string."
+    },
+    {
+      "findings": [
+        "F18",
+        "F40"
+      ],
+      "summary": "'FREE' is rendered in all caps (plus a request to link product decisions)",
+      "label": "nit",
+      "evidence": "FeesBreakdown.tsx:108 matches web's GTF UI, whose tests assert 'FREE' (FeesPreview.test.tsx:45), so it is intentional design parity. Linking to design decisions is process, not code."
+    },
+    {
+      "findings": [
+        "F2"
+      ],
+      "summary": "determineExecutionPath returns 'biometrics' to mean the biometrics opt-in route",
+      "label": "nit",
+      "evidence": "helpers.ts:113-115 predates this PR, which didn't change it. It's a naming preference with no functional cost."
+    },
+    {
+      "findings": [
+        "F17"
+      ],
+      "summary": "The executors dispatch table is re-created every render",
+      "label": "nit",
+      "evidence": "useTransactionExecution.ts had this pattern before the PR. It's only read inside the callback and is cheap, so there's no concrete cost."
+    },
+    {
+      "findings": [
+        "F10"
+      ],
+      "summary": "SIMULATION_CODES lists the union's values by hand",
+      "label": "nit",
+      "evidence": "relayErrors.ts was only moved in this PR. The array is typed ReadonlyArray<RelayErrorResponse['code']>, so removed codes would fail to compile, and a runtime array can't be derived from a type anyway."
+    },
+    {
+      "findings": [
+        "F19"
+      ],
+      "summary": "The new IndeterminateSimulationSheet/RelayUnavailableSheet folders lack the index.ts barrels their siblings have",
+      "label": "nit",
+      "evidence": "Neither new folder has an index.ts, while sibling folders under ExecuteTx/components and HowToExecuteSheet/components do. It's a style inconsistency only."
+    },
+    {
+      "findings": [
+        "F26"
+      ],
+      "summary": "The FeesBreakdown interface in feeRows.ts shares its name with the FeesBreakdown component",
+      "label": "nit",
+      "evidence": "FeesBreakdown.tsx imports only buildFeesBreakdown and FeeLine, so there's no actual clash. Renaming would only help readability."
+    },
+    {
+      "findings": [
+        "F33"
+      ],
+      "summary": "HowToExecuteSheet imports txRequiresRelay from ExecuteTx feature internals",
+      "label": "nit",
+      "evidence": "HowToExecuteSheet.container.tsx:35 imports the pure helper across features. Moving it would be tidier, but there's no concrete cost."
+    },
+    {
+      "findings": [
+        "F35"
+      ],
+      "summary": "Number(formatUnits()) loses precision for 18-decimal amounts",
+      "label": "nit",
+      "evidence": "feeRows.ts:339 only feeds fiat display, where double precision is fine. The finding itself says a comment is all that's needed."
+    },
+    {
+      "findings": [
+        "F41"
+      ],
+      "summary": "Hardcoded fontSize={16} and lineHeight={24} instead of tokens",
+      "label": "nit",
+      "evidence": "This follows the existing pattern in SoftUpdatePrompt/ReadOnlyWarningModal. It's style only."
+    },
+    {
+      "findings": [
+        "F11"
+      ],
+      "summary": "Claim: dropping zero-amount outgoing lines hides the destination for zero-value calls",
+      "label": "wrong",
+      "evidence": "Outgoing is only built for transfer txInfo (FeesBreakdown.tsx:66-82), and Total outgoing lists token amounts, not destinations. Falling back to just the gas line for a zero transfer (feeRows.ts:404-407) is correct."
+    },
+    {
+      "findings": [
+        "F8"
+      ],
+      "summary": "Claim: ReviewExecuteFooter re-implements the fee rows inline with a different style",
+      "label": "wrong",
+      "evidence": "ReviewExecuteFooter.tsx contains no Execution fee or Max gas fee rows. It renders only SelectExecutor, EstimatedNetworkFee and the button, so the described code doesn't exist."
+    },
+    {
+      "findings": [
+        "F27"
+      ],
+      "summary": "Claim: the simulation error is never displayed to the user",
+      "label": "wrong",
+      "evidence": "useExecutionFlow.ts:967-984 routes SIMULATION_FAILED and other errors to /execution-error with the message, and shows IndeterminateSimulationSheet for INDETERMINATE_SIMULATION."
+    },
+    {
+      "findings": [
+        "F3"
+      ],
+      "summary": "Claim: `safe` from useSafeInfo is an unstable reference that invalidates the useCallback",
+      "label": "wrong",
+      "evidence": "useSafeInfo returns RTK Query currentData, which structural sharing keeps referentially stable between identical polls. The dependency also predates this PR."
+    },
+    {
+      "findings": [
+        "F46"
+      ],
+      "summary": "The relay executor now throws when getSafeSDK() is unset",
+      "label": "unverifiable",
+      "evidence": "relayExecutor.ts:1657-1660 adds the guard, which mirrors the WC executor. Whether the SDK is always initialized on this path depends on runtime app state, which the diff can't settle."
+    }
+  ]
+}

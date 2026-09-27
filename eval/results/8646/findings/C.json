@@ -1,0 +1,35 @@
+{
+  "usd": 0.0461496,
+  "findings": [
+    {
+      "file": "apps/web/src/components/tx-flow/safe-scope/SafeScopeProvider.tsx",
+      "line": 48,
+      "claim": "The scope's SafeState always sets deployed to true regardless of what CGW actually reports, so any downstream consumer that branches on safe.deployed, including runExecutionPreChecks which skips the STALE_NONCE check for undeployed Safes, will get incorrect results once a Space-level entry point relies on this data."
+    },
+    {
+      "file": "apps/web/src/services/tx/executionPreChecks.ts",
+      "line": 137,
+      "claim": "The bare catch around getAndValidateSafeSDK swallows the guard's _822 throw along with the intended 'SDK not ready' case, so if a Space-level caller forgets to pass scope into runExecutionPreChecks, the signature-check guard's throw-and-log contract is silently downgraded to no signature check running at all, letting a transaction proceed without local signature verification."
+    },
+    {
+      "file": "apps/web/src/components/tx-flow/safe-scope/index.ts",
+      "line": null,
+      "claim": "The SafeScope barrel re-exports SafeScopeProvider, which pulls in ethers and protocol-kit for any consumer that imports from the barrel; two files already deep-import to avoid this, and a future contributor importing useSafeScope from the barrel would regress bundle size on any page that hook lands in."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The bundle analyzer shows the global bundle grew by 1.24 KB even though this PR ships no user-facing entry point, so it should be verified that SafeScopeProvider and its ethers/protocol-kit dependencies are not being pulled into the global bundle via the barrel or a stray import, since the scope should only be paid for on /spaces/* routes."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The _822 guard logs on every call, which could become noisy in monitoring once a Space flow ships; a first-hit-only dedupe at the module level should be considered before the first Space entry point lands so the guard does not drown legitimate signal in the observability pipeline."
+    },
+    {
+      "file": "apps/web/src/components/tx-flow/safe-scope/activeScope.ts",
+      "line": null,
+      "claim": "hasActiveScope() relies on a plain module-scope counter (activeScopes), making SSR-safe reasoning in Next.js depend on the module being re-evaluated per request, which it is not; since getAndValidateSafeSDK only runs client-side this works in practice, but the client-only invariant that the counter depends on should be documented with a comment."
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "usd": 0.0772016,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/utils/__tests__/tokenOptions.test.ts",
+      "line": 15,
+      "claim": "This test file defines its own hand-written popularTokenBuilder factory instead of using the existing Builder.new<T>().with() pattern, making it inconsistent with the builder style used elsewhere in the test suite."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/hooks/__tests__/useSpendingLimitTokenOptions.test.ts",
+      "line": 66,
+      "claim": "This test file defines its own hand-written tokenMetadataBuilder that mostly duplicates fields already covered by the existing erc20TokenBuilder in apps/web/src/tests/builders/balances.ts, plus a trusted field, instead of extending or reusing the shared builder pattern."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/__tests__/TokenSelector.test.tsx",
+      "line": 23,
+      "claim": "This test file defines its own hand-written option(overrides) factory instead of using the shared Builder.new<T>().with() pattern used by other builders in the codebase."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/utils/tokenOptions.ts",
+      "line": 82,
+      "claim": "The sort comparator converts fiatBalance values with a bare Number(), so a malformed or non-numeric value becomes NaN; since sort treats a NaN comparator result as a tie, this silently skips the fallback sort by symbol, and an empty string is silently coerced to 0 with no signal that the value was invalid."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/popularTokens.ts",
+      "line": 1,
+      "claim": "This file opens with a 16-line comment block covering ticket and acceptance-criteria references, traffic statistics, and verification dates, which goes well beyond the one-line, non-narrative comment style the project expects; the ticket, AC, and traffic context belongs in the PR description instead."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/hooks/useSpendingLimitTokenOptions.ts",
+      "line": 34,
+      "claim": "This function has a three-paragraph JSDoc comment citing specific ticket and acceptance-criteria identifiers (WA-3146, #8646, AC C16), which is longer and more narrative than the one-line comment style the project expects; that context belongs in the PR description instead."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/index.tsx",
+      "line": 38,
+      "claim": "This file contains multiple multi-line comment blocks (also at lines 71-76 and 122-124) citing ticket and acceptance-criteria references, which exceeds the one-line, non-narrative comment style the project expects; that context belongs in the PR description instead."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/TokenOptionRow.tsx",
+      "line": 7,
+      "claim": "This file has a 4-line comment block that includes a ticket-specific rationale (WA-3150), which is longer than the one-line comment style the project expects; only the reason the code itself cannot show should remain, in a single line."
+    }
+  ]
+}

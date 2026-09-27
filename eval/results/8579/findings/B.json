@@ -1,0 +1,55 @@
+{
+  "usd": 0.08349960000000001,
+  "findings": [
+    {
+      "file": "apps/web/src/features/safenet-checks/statusPresentation.ts",
+      "line": 64,
+      "claim": "The WINDOW_UNCERTAIN status reuses copy borrowed from READ_FAILED (\"Retry later\"), which tells the user to retry a condition that retrying can never resolve, since polling stops permanently after 10 minutes and a page reload recomputes the same heuristic result."
+    },
+    {
+      "file": "apps/web/src/features/safenet-checks/__tests__/statusPresentation.test.ts",
+      "line": 17,
+      "claim": "The test asserts that the WINDOW_UNCERTAIN copy equals the READ_FAILED copy, so it will need to be updated once WINDOW_UNCERTAIN is given its own distinct message."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/hooks/useSafenetCheck.ts",
+      "line": 150,
+      "claim": "The re-aim effect that triggers a refetch when the aim timestamp changes has no guard for a prior fetch error, no retry cap, and no backoff, so a failed refetch leaves the old snapshot and its old aimedAtMs in place, causing the effect to fire again and refetch repeatedly against the RPC, bypassing pollingInterval and skipPollingIfUnfocused."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/hooks/useSafenetCheck.ts",
+      "line": 147,
+      "claim": "The comment stating \"Exactly one refetch\" does not hold on the failure path, since a failed refetch can trigger repeated additional refetches."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/hooks/useSafenetCheck.ts",
+      "line": 150,
+      "claim": "There is no test covering a failed refetch whose retained aimedAtMs still does not match the current aim, leaving the unbounded-retry behavior unverified."
+    },
+    {
+      "file": "packages/store/src/safenet/safenetAimRegistry.ts",
+      "line": 24,
+      "claim": "The module-level aims Map lives outside Redux, is written during render, and is cleared as part of another package's cache lifecycle, with nothing structurally pairing the two so they can drift out of sync."
+    },
+    {
+      "file": "packages/store/src/safenet/safenetAimRegistry.ts",
+      "line": 26,
+      "claim": "isUsableAim treats a value as usable only when greater than 0, while the reader's timestamp guard at safenetReader.ts:249 handles 0 differently, so the two pieces of logic disagree on how a zero timestamp should be treated."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/hooks/useSafenetCheck.ts",
+      "line": 57,
+      "claim": "The hook grew from 103 to 113 lines, exceeding the stated 80-line limit, and took on a third responsibility (aim coordination) that could be split out into its own hook, such as useCheckAim."
+    },
+    {
+      "file": "packages/store/src/safenet/safenetAimRegistry.ts",
+      "line": 1,
+      "claim": "The registry machinery may be more elaborate than what today's callers need, since every current surface supplies the same timestamp value."
+    },
+    {
+      "file": "packages/store/src/safenet/safenetAimRegistry.ts",
+      "line": 24,
+      "claim": "The aims map has no size cap, so an entry recorded during a render that React later discards before committing is only freed when the page unloads."
+    }
+  ]
+}

@@ -1,0 +1,224 @@
+{
+  "usage": {
+    "usd": 0.6986272,
+    "turns": 11,
+    "wallSeconds": 95
+  },
+  "issues": [
+    {
+      "findings": [
+        "F27"
+      ],
+      "summary": "Clicking the clear button unmounts it while focused, dropping focus to body instead of the input",
+      "label": "low",
+      "evidence": "apps/web/src/components/ui/search-input.tsx:24-49 renders the clear button only while `value` is non-empty and `onClear` just resets state; nothing refocuses the input, so the focused button unmounts and the user has to click back into the field. It is a real usability gap but a minor one.",
+      "summary_extra": ""
+    },
+    {
+      "findings": [
+        "F12"
+      ],
+      "summary": "With unavailableReason set, a search matching nothing shows only the unavailable notice and no 'No networks match' line",
+      "label": "low",
+      "evidence": "features/spaces/.../AllNetworksSection.tsx:58-88 returns the unavailable notice without `nothingToShow`, so a query with zero deployed matches shows no empty-state line. The 'feature-disabled' half of the claim is wrong: line 56 returns `nothingToShow`. The finding's file path also points to the wrong directory.",
+      "summary_extra": ""
+    },
+    {
+      "findings": [
+        "F3"
+      ],
+      "summary": "The `!query &&` guard on UndeployedNetworks is untested because the tests stub the Safe/feature off",
+      "label": "low",
+      "evidence": "NetworkSelector/index.test.tsx:68-78 mocks `useSafeAddress` to '' and `hasMultiChainAddNetworkFeature` to false, so the branch at index.tsx:439 never renders in tests. No consumer passes `offerSafeCreation` (only index.tsx references it), so the branch is unreachable in production and a regression would not reach users.",
+      "summary_extra": ""
+    },
+    {
+      "findings": [
+        "F14",
+        "F30"
+      ],
+      "summary": "Name-filter logic, Escape pass-through handler and the 'No networks match' empty state are duplicated across the pickers",
+      "label": "low",
+      "evidence": "The same `chainName.toLowerCase().includes(query)` appears at NetworkSelector/index.tsx:306, ChainSelectorBlock.tsx:42 and AllNetworksSection.tsx:101. The Escape handler is at index.tsx:364 and ChainSelectorBlock.tsx:58-62, and the empty-state copy at index.tsx:435 and AllNetworksSection.tsx. The duplication is real and small, and it does let the two pickers drift.",
+      "summary_extra": ""
+    },
+    {
+      "findings": [
+        "F26"
+      ],
+      "summary": "Five-line comment in NetworkSelector stories violates the one-line comment rule",
+      "label": "low",
+      "evidence": "NetworkSelector.stories.tsx:6-10 is a five-line comment block. Root AGENTS.md says to keep comments to one line and never write multi-line blocks.",
+      "summary_extra": ""
+    },
+    {
+      "findings": [
+        "F17"
+      ],
+      "summary": "ChainSelectorBlock search field does not move focus into rows on ArrowUp/ArrowDown",
+      "label": "low",
+      "evidence": "ChainSelectorBlock.tsx:58-62 swallows every non-Escape key and has no arrow handling, so you cannot arrow from the field into the rows. The PR description says the rows are plain buttons that never had menu arrow navigation, so this keyboard gap predates the PR and is not a regression.",
+      "summary_extra": ""
+    },
+    {
+      "findings": [
+        "F20",
+        "F25",
+        "F31"
+      ],
+      "summary": "The border-radius eslint-disable (with its explanatory comment) is duplicated in two pickers instead of being a variant",
+      "label": "nit",
+      "evidence": "NetworkSelector/index.tsx:405-408 and ChainSelectorBlock.tsx:93-96 each carry a JSX comment plus an eslint-disable, with different radii (6px vs 16px). The 'add a variant when it recurs' rule in apps/web/AGENTS.md:25-26 is about Button and a threshold of about 3 places. With two occurrences and container-dependent values, a preset buys little.",
+      "summary_extra": ""
+    },
+    {
+      "findings": [
+        "F24"
+      ],
+      "summary": "Too many JSDoc/inline comments in AllNetworksSection",
+      "label": "nit",
+      "evidence": "AllNetworksSection.tsx:23,25,42,45,117 each carry a one-line comment. Each is single-line and explains a non-obvious why, so trimming them is a style preference.",
+      "summary_extra": ""
+    },
+    {
+      "findings": [
+        "F4",
+        "F22"
+      ],
+      "summary": "Filter computations should be wrapped in useMemo",
+      "label": "nit",
+      "evidence": "ChainSelectorBlock.tsx:41-43 and AllNetworksSection.tsx:100-102 filter a handful of chains on each render. That cost is negligible and memoising would not change behaviour.",
+      "summary_extra": ""
+    },
+    {
+      "findings": [
+        "F7"
+      ],
+      "summary": "Clear button should be size-4 rather than size-6",
+      "label": "nit",
+      "evidence": "search-input.tsx uses `size=\"icon-xs\"`, which is a size-6 hit area (input-group.tsx:133), with a size-4 icon inside. Shrinking the hit area is a visual preference with no concrete defect.",
+      "summary_extra": ""
+    },
+    {
+      "findings": [
+        "F10"
+      ],
+      "summary": "Use an array of per-row refs instead of querying rows from a container ref",
+      "label": "nit",
+      "evidence": "index.tsx:346-353 queries `[data-slot=\"select-item\"]` from the popup and works. Per-row refs would be an alternative style, not a fix.",
+      "summary_extra": ""
+    },
+    {
+      "findings": [
+        "F1"
+      ],
+      "summary": "PR adds too much code for a search bar",
+      "label": "nit",
+      "evidence": "Only about 214 lines of the diff are production code; the rest are tests and a story. Whether that is too much is a subjective size judgement.",
+      "summary_extra": ""
+    },
+    {
+      "findings": [
+        "F8"
+      ],
+      "summary": "Header picker and Safe-deployment selector are two separate components",
+      "label": "nit",
+      "evidence": "They are separate (ChainSelectorBlock on DropdownMenu vs NetworkSelector on Select), and the PR description explains why. The split predates the PR, so reconciling them is outside this change.",
+      "summary_extra": ""
+    },
+    {
+      "findings": [
+        "F11",
+        "F16",
+        "F18"
+      ],
+      "summary": "`!query &&` hides the addable/undeployed networks section while searching in NetworkSelector",
+      "label": "wrong",
+      "evidence": "index.tsx:439 also requires `offerSafeCreation`, and no consumer passes it (SetAddressStep is the only importer), so UndeployedNetworks is unreachable today, as the PR says. NetworkSelector is also not the header picker; the header uses ChainSelectorBlock, which does filter its All networks section.",
+      "summary_extra": ""
+    },
+    {
+      "findings": [
+        "F6"
+      ],
+      "summary": "Spaces picker filters and auto-opens 'All networks' instead of hiding it, inconsistent with the header picker",
+      "label": "wrong",
+      "evidence": "The spaces ChainSelectorBlock is the header picker. Filtering and force-expanding the accordion (AllNetworksSection.tsx:118-121) is the behaviour the PR description states it intends.",
+      "summary_extra": ""
+    },
+    {
+      "findings": [
+        "F21",
+        "F28"
+      ],
+      "summary": "Selecting a row closes via setOpen(false) so the search is never cleared on reopen",
+      "label": "wrong",
+      "evidence": "ChainSelectorBlock.tsx:50-55 `handleOpenChange` calls `setSearch('')` whether `next` is true or false. Reopening from the trigger goes through `onOpenChange(true)`, so the search is cleared on open even though row clicks bypass it. The test at ChainSelectorBlock.test.tsx:248 covers reopening.",
+      "summary_extra": ""
+    },
+    {
+      "findings": [
+        "F15"
+      ],
+      "summary": "Search added only to the deploy-flow selector, not the main header picker",
+      "label": "wrong",
+      "evidence": "ChainSelectorBlock.tsx:94-106, the header picker rendered via SpaceSafeBar, gains a SearchInput in this PR.",
+      "summary_extra": ""
+    },
+    {
+      "findings": [
+        "F5"
+      ],
+      "summary": "onClear added to a shared ui component without noting coordination with a design-system rewrite",
+      "label": "wrong",
+      "evidence": "No repo guidance requires such a note: grep of AGENTS.md, docs/ai and components/ui/README.md finds no in-flight rewrite rule. The prop is additive and optional (search-input.tsx:12-13), so existing consumers are unaffected.",
+      "summary_extra": ""
+    },
+    {
+      "findings": [
+        "F9",
+        "F29"
+      ],
+      "summary": "Clear X icon colour/design should follow an existing Figma component and be consistent app-wide",
+      "label": "unverifiable",
+      "evidence": "The code sets `text-foreground` on the button (search-input.tsx). Whether that matches a Figma component or the rendered colour cannot be settled from the code.",
+      "summary_extra": ""
+    },
+    {
+      "findings": [
+        "F23"
+      ],
+      "summary": "Check for an existing Figma/app pattern for dropdown plus search",
+      "label": "unverifiable",
+      "evidence": "This depends on design files that are not in the repo, so it cannot be checked from the code.",
+      "summary_extra": ""
+    },
+    {
+      "findings": [
+        "F19"
+      ],
+      "summary": "Search bar outline overlaps the popup outline awkwardly",
+      "label": "unverifiable",
+      "evidence": "This is a rendered-visual claim. The code picks concentric radii on purpose (index.tsx:405, ChainSelectorBlock.tsx:93), but how it actually looks cannot be judged without rendering.",
+      "summary_extra": ""
+    },
+    {
+      "findings": [
+        "F13"
+      ],
+      "summary": "'No networks match your search' misaligned when wrapping",
+      "label": "unverifiable",
+      "evidence": "AllNetworksSection adds `block` specifically so the padding applies to wrapped lines. Whether any misalignment is left needs a rendered view.",
+      "summary_extra": ""
+    },
+    {
+      "findings": [
+        "F2"
+      ],
+      "summary": "PR screenshots show 404 icon placeholders",
+      "label": "unverifiable",
+      "evidence": "This is about screenshots in the PR description, not code. Icons come from chain config URLs that are not in the repo.",
+      "summary_extra": ""
+    }
+  ]
+}

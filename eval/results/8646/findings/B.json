@@ -1,0 +1,85 @@
+{
+  "usd": 0.07690359999999999,
+  "findings": [
+    {
+      "file": "apps/web/src/components/tx-flow/safe-scope/SafeScopeProvider.tsx",
+      "line": 139,
+      "claim": "isFetching is included in the scope useMemo dependencies, so it toggles true then false on every 15-second poll and produces a new scope object identity even when the underlying data hasn't changed."
+    },
+    {
+      "file": "apps/web/src/components/tx-flow/flows/ConfirmTx/ConfirmProposedTx.tsx",
+      "line": 29,
+      "claim": "Because scope is in this effect's dependency array and gets a new identity on every poll, createExistingTx re-runs twice per poll, refetching the transaction details from the backend and replacing safeTx with a new object in the middle of a review."
+    },
+    {
+      "file": "apps/web/src/components/tx-flow/flows/ConfirmTx/ConfirmProposedTx.tsx",
+      "line": 29,
+      "claim": "Under a scope, this component runs on mount before scope.sdk has resolved, so getAndValidateSafeSDK(scope) throws and the resulting error is stored via setSafeTxError; when the SDK later resolves and setSafeTx succeeds, nothing clears safeTxError, since the only place that clears it is an unrelated effect in SafeTxProvider.tsx:112."
+    },
+    {
+      "file": "apps/web/src/components/tx-flow/flows/ConfirmTx/ConfirmProposedTx.tsx",
+      "line": 29,
+      "claim": "The stale safeTxError causes ReviewTransactionContent.tsx:78 to keep showing a TxCheckError banner next to what is actually a valid transaction, and logError(_103) fires on every scoped mount."
+    },
+    {
+      "file": "apps/web/src/services/tx/tx-sender/dispatch.ts",
+      "line": 307,
+      "claim": "dispatchTxExecution receives a scope parameter but still calls getUserNonce(signerAddress), which reads the URL-chain getWeb3ReadOnly() instead of the scoped provider, so txOptions.nonce is only correct when the user manually overrides the nonce."
+    },
+    {
+      "file": "apps/web/src/services/tx/tx-sender/dispatch.ts",
+      "line": 307,
+      "claim": "In a scoped flow targeting a different chain than the URL, the stored signerNonce ends up coming from the wrong chain; since SimpleTxWatcher compares this value against the scoped chain's live nonce to detect replacements, this can wrongly flag a successful transaction as replaced or fail to detect an actual replacement, and the same value is reused by the speed-up flow (SpeedUpModal:83)."
+    },
+    {
+      "file": "apps/web/src/services/contracts/safeContracts.ts",
+      "line": 30,
+      "claim": "getGnosisSafeContract falls back to the unscoped getSafeSDK() to read the Safe version, and this path is reachable from the scoped dispatchTxRelay when safe.version is null, so the rule that scoped flows should never silently use the URL Safe is not fully enforced there."
+    },
+    {
+      "file": "apps/web/src/services/contracts/safeContracts.ts",
+      "line": 64,
+      "claim": "getReadOnlyMultiSendCallOnlyContract, getReadOnlySignMessageLibContract, and the proxy-factory and fallback-handler getters take no scope parameter, so they cannot honor an active scope."
+    },
+    {
+      "file": "apps/web/src/services/tx/tx-sender/sdk.ts",
+      "line": 69,
+      "claim": "The unscoped getSafeProvider() has no hasActiveScope() guard, so under an active scope it can still be called and silently return the URL chain's provider for batch execution, on-chain message signing, or relaying involving a Safe with no reported version."
+    },
+    {
+      "file": "apps/web/src/components/tx-flow/safe-scope/activeScope.ts",
+      "line": 8,
+      "claim": "The active-scope guard is a process-wide counter rather than being tied to the React tree, so while any SafeScopeProvider is mounted anywhere in the app, every unscoped getAndValidateSafeSDK() call throws, including the six scope-less create*Tx helpers in create.ts."
+    },
+    {
+      "file": "apps/web/src/services/tx/executionPreChecks.ts",
+      "line": 137,
+      "claim": "executionPreChecks.ts catches the throw from the unscoped SDK guard and silently skips the BAD_SIGNATURE check instead of distinguishing a genuine 'missing scope' condition from an 'SDK not initialized' condition, so the missing-scope case should be rethrown rather than swallowed."
+    },
+    {
+      "file": "apps/web/src/components/tx-flow/safe-scope/context.ts",
+      "line": 10,
+      "claim": "A SafeScopeProvider mounted with no target selected yet yields scope === undefined, which is indistinguishable from there being no provider at all."
+    },
+    {
+      "file": "apps/web/src/components/tx-flow/safe-scope/SafeScopeProvider.tsx",
+      "line": 123,
+      "claim": "Because a mounted-but-unselected scope looks the same as no scope, useSafeInfo, useChainId, useSafeSDK, and useWeb3ReadOnly fall back to the URL Safe inside the scoped flow until the user picks a target, rather than returning empty values while a scope is pending selection."
+    },
+    {
+      "file": "apps/web/src/components/tx-flow/safe-scope/__tests__/SafeScopeProvider.test.tsx",
+      "line": 275,
+      "claim": "The existing poll test only checks scope values, not object identity, so it would not catch scope getting a new identity on every poll."
+    },
+    {
+      "file": "apps/web/src/components/tx-flow/flows/ConfirmTx/__tests__/ConfirmProposedTx.scope.test.tsx",
+      "line": 17,
+      "claim": "There is no test covering ConfirmProposedTx's behavior before the SDK is ready under a scope, so the stale safeTxError-not-cleared case is untested."
+    },
+    {
+      "file": "apps/web/src/services/tx/executionPreChecks.ts",
+      "line": 136,
+      "claim": "executionPreChecks.test.ts was not extended to cover the new scope parameter or the added try/catch around the SDK guard."
+    }
+  ]
+}

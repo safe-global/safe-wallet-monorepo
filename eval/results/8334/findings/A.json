@@ -1,0 +1,30 @@
+{
+  "usd": 0.03518,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/SafeSelectorTriggerContent.tsx",
+      "line": 85,
+      "claim": "The trigger's threshold badge now always shows the count (e.g. 2/3) for multi-chain safes, reversing a deliberate prior change that made it icon-only because setup can differ per chain and the count could be misleading, and there is no recorded product or design sign-off for this behaviour reversal in the PR."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/SafeSelectorTriggerContent.tsx",
+      "line": 85,
+      "claim": "The dropdown rows remain icon-only, so the trigger and the list now intentionally behave differently, which should be confirmed as an intended product decision rather than an inconsistency."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/__tests__/SafeSelectorTriggerContent.test.tsx",
+      "line": 147,
+      "claim": "The test name says it verifies the active chain's threshold, but the component reads the item-level selectedItem.threshold and the test's selectedChainId prop has no effect on the assertion, so the test name promises more than what is actually being checked; it should be renamed or the fixture should use differing per-chain thresholds so the active-chain behaviour is genuinely tested."
+    },
+    {
+      "file": "SafeSelectorTriggerContent.tsx",
+      "line": 83,
+      "claim": "The new two-line comment explaining why the trigger differs from the dropdown states something the component doesn't actually enforce, and per the AGENTS.md guideline treating comments as tech debt, it should be shortened or corrected to be accurate."
+    },
+    {
+      "file": "SafeSelectorTriggerContent.tsx",
+      "line": 85,
+      "claim": "The badge uses the item-level selectedItem.threshold rather than the chain-specific selectedChain?.threshold, and is only correct today because the sole caller (buildMultiChainItem in useSpaceSafeSelectorItems.ts:96-106) happens to put the current chain first and fill the item-level threshold from the current safe's info; the component itself does not guarantee that the displayed threshold belongs to the selected chain, so relying on selectedChain?.threshold ?? selectedItem.threshold would make this hold independent of the caller."
+    }
+  ]
+}

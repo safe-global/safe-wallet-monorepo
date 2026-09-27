@@ -1,0 +1,11 @@
+{
+  "pr": 8209,
+  "reviewSha": "cea9e9de411423116dfad0bb6a6f39abc7fe3561",
+  "baseSha": "f901f918ef6e3d0ae3c72edc0958ff91d7755ab9",
+  "system": "E",
+  "version": "github",
+  "runner": "collect",
+  "model": "human",
+  "commentSha": "cea9e9de411423116dfad0bb6a6f39abc7fe3561",
+  "output": "packages/utils/src/utils/date.ts:22\nwell, if it throws doesn't it make sense to catch it and return null there?"
+}

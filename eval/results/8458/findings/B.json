@@ -1,0 +1,20 @@
+{
+  "usd": 0.044784000000000004,
+  "findings": [
+    {
+      "file": "apps/web/src/features/security/data/scanners/constants.ts",
+      "line": 12,
+      "claim": "KNOWN_SAFE_VERSIONS is a duplicate of the already-exported SAFE_VERSIONS list (packages/utils/src/services/contracts/utils.ts:6), containing the same six versions in reverse order, and SAFE_VERSIONS already includes '1.5.0'. Maintaining two separate copies means they can drift apart when the next Safe version is released, and this duplication made the current edit unnecessary in the first place."
+    },
+    {
+      "file": "apps/web/src/utils/transaction-guards.ts",
+      "line": 160,
+      "claim": "The inline list ['1.3.0', '1.4.1', '1.5.0'] is repeated across four locations (transaction-guards.ts:160, transaction-guards.ts:420, useHasUntrustedFallbackHandler.ts:29-33, and fallbackHandler.ts:17), each edited by hand for this PR. The repo already derives this same 'post-legacy' version set in one place via SAFE_VERSIONS.filter((v) => !isLegacyVersion(v)) in bytecodeComparison.ts:13, and without a shared constant, a future version bump risks missing one of the four copies, which would silently mark an official contract as untrusted."
+    },
+    {
+      "file": "packages/utils/src/features/multichain/hooks/useCompatibleNetworks.ts",
+      "line": 15,
+      "claim": "SUPPORTED_VERSIONS is still ['1.4.1', '1.3.0'] and was not updated to include '1.5.0', so a 1.5.0 Safe likely cannot be added to another network even though the commit title describes the version support as being added 'across the app'. It's unclear whether omitting this list from the update was intentional, since it governs multichain replication rather than trust checks, so the scope should be confirmed."
+    }
+  ]
+}

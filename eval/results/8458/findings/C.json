@@ -1,0 +1,25 @@
+{
+  "usd": 0.053104,
+  "findings": [
+    {
+      "file": "apps/web/src/hooks/useHasUntrustedFallbackHandler.ts",
+      "line": 29,
+      "claim": "The array ['1.3.0', '1.4.1', '1.5.0'] is duplicated across four call sites (this file, scanners/fallbackHandler.ts, and two locations in transaction-guards.ts) instead of being defined once as a shared constant. This duplication is why the version list was missed at some sites when 1.5.0 shipped, and the same risk will recur when 1.6.0 is added unless the values are consolidated into a shared constant."
+    },
+    {
+      "file": "apps/web/src/hooks/useHasUntrustedFallbackHandler.ts",
+      "line": 29,
+      "claim": "This hook only checks getCompatibilityFallbackHandlerDeployments and does not recognize the ExtensibleFallbackHandler that the Security Hub scanner also trusts for 1.5.0+. As a result, a 1.5.0 Safe using the extensible handler could be reported as trusted by Security Hub while the Settings banner still flags it as untrusted, reintroducing the inconsistency the PR is meant to fix."
+    },
+    {
+      "file": "apps/web/src/utils/__tests__/transaction-guards.test.ts",
+      "line": 387,
+      "claim": "The test hardcodes getSafeL2SingletonDeployment({ version: '1.4.1' }) as the inner migrateToL2 argument even in the 1.5.0 MultiSend test case, so the '1.5.0 MultiSend + 1.5.0 L2 singleton' scenario is never exercised end-to-end even though the test still passes because isMigrateToL2TxData doesn't validate the L2 singleton version."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The positive test for factoryValidationScanner on chainId '1' only passes because the 1.5.0 SafeProxyFactory happens to be deployed on mainnet; adding a future version to KNOWN_SAFE_VERSIONS without a corresponding deployment on a given chain would silently produce an 'unknown to partial' result rather than a hard error, since SafeVersion typing and hasMatchingDeployment are the only guards."
+    }
+  ]
+}

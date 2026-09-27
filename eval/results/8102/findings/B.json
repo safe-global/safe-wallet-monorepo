@@ -1,0 +1,35 @@
+{
+  "usd": 0.06233760000000001,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/SafeAccounts/index.tsx",
+      "line": 77,
+      "claim": "SafeAccounts chooses between the error banner and the safe list using isError alone, but RTK Query sets isError to true whenever the latest request failed even if earlier data is still cached, so a failed background refetch on focus or remount now replaces an already-displayed list with a failure banner."
+    },
+    {
+      "file": "apps/web/src/features/spaces/hooks/useSpaceSafes.tsx",
+      "line": 22,
+      "claim": "Because refetchOnFocus now triggers a request whenever the window regains focus (and on remount when the cache is older than 30 seconds), a stale session or offline reconnect can produce a 401 or network error that wipes out the previously visible Safe accounts list."
+    },
+    {
+      "file": "apps/web/src/features/spaces/hooks/__tests__/useSpaceSafes.test.tsx",
+      "line": 82,
+      "claim": "The tests spread SPACE_REFRESH_OPTIONS back into the expected values, so they only confirm the constant is passed through rather than verifying its actual contents; changing the constant's values (e.g. disabling refetchOnFocus or removing the 30-second threshold) would still pass, and the same pattern appears in useAllMembers.test.ts:51 and useGetSpaceAddressBook.test.ts:41."
+    },
+    {
+      "file": "apps/web/src/features/spaces/hooks/refreshOptions.ts",
+      "line": 9,
+      "claim": "The new refresh-options constant is placed in the hooks/ directory, which otherwise contains only hooks, while the feature already stores its constants in features/spaces/constants.ts, so the file location is inconsistent with the existing layout."
+    },
+    {
+      "file": "apps/web/src/features/spaces/hooks/useSpaceMembers.tsx",
+      "line": 72,
+      "claim": "The useMembersGetMembershipV1Query call inside useCurrentMemberProfile was not given the new refetch options, so member profile data may not refresh on focus/stale remount even though the PR description says it refetches space data."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "Every useSpacesGetOneV1Query call (space name, breadcrumbs, settings) was left without the new refetch options, so renames or other space changes made in other sessions may not be picked up if that is intended to be covered by this change."
+    }
+  ]
+}

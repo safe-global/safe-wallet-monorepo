@@ -1,0 +1,55 @@
+{
+  "usd": 0.0671496,
+  "findings": [
+    {
+      "file": "apps/web/src/components/address-book/AddressBookTable/index.tsx",
+      "line": 221,
+      "claim": "The Safe address book no longer offers a rows-per-page picker (10 / 25 / 100) and always shows 25 rows, which is a regression compared to the previous table; this is a visible feature loss for users with many contacts who now must page through more pages to see the same number of entries."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/RequestToAddButton.tsx",
+      "line": 105,
+      "claim": "The 'Requested' and 'Already shared' labels use an aria-label on a plain span with no role, and the icons themselves are hidden from screen readers, so most screen readers will skip these labels; the existing test passes only because the testing library accepts the label regardless of accessibility semantics, masking the real issue."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/index.tsx",
+      "line": 196,
+      "claim": "The same aria-label-on-plain-span issue affects this location, meaning a screen-reader user on a narrow screen would hear nothing for these rows."
+    },
+    {
+      "file": "apps/web/src/components/address-book/AddressBookTable/index.tsx",
+      "line": 205,
+      "claim": "The action buttons reuse the old table's .actions CSS class, which switches to justify-content: flex-start below 900px while the header stays right-aligned, causing the buttons to be misaligned under the header on narrow screens including phones, which previously used a separate mobile card layout."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/index.tsx",
+      "line": 141,
+      "claim": "A comment was truncated during the diff, cutting off mid-sentence at 'almost touching' after the line 'the table card below it' was deleted; the comment should be restored."
+    },
+    {
+      "file": "apps/web/src/components/common/EnhancedTable/index.tsx",
+      "line": 137,
+      "claim": "The doc comment still states 'nine existing consumers' but after removing the address book there are now only eight consumers, so the count is out of date."
+    },
+    {
+      "file": "apps/web/src/components/address-book/AddressBookTable/index.test.tsx",
+      "line": null,
+      "claim": "No unit tests cover the new narrow-screen layout of the Safe address book (address appearing under the name, address column being dropped) or sorting by address, so a regression in the compact/narrow-screen behavior would not be caught by unit tests even though Cypress covers the sorting behavior."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The Safe address book's own 'address under the name' cell duplicates the new AddressCell component, but AddressCell lives in the Spaces feature, which a shared component should not import from; moving AddressCell to components/common would let both features share it."
+    },
+    {
+      "file": ".storybook/COVERAGE.md",
+      "line": 807,
+      "claim": "This file still lists the table at its old features/spaces/... path, which is now outdated after the move."
+    },
+    {
+      "file": ".storybook/COVERAGE.md",
+      "line": 1741,
+      "claim": "This location also still lists the table at its old features/spaces/... path, which is now outdated after the move."
+    }
+  ]
+}

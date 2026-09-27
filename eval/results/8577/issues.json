@@ -1,0 +1,122 @@
+{
+  "usage": {
+    "usd": 0.6829122000000001,
+    "turns": 8,
+    "wallSeconds": 92
+  },
+  "issues": [
+    {
+      "findings": [
+        "F1",
+        "F2",
+        "F13",
+        "F14",
+        "F15",
+        "F5",
+        "F16",
+        "F19"
+      ],
+      "summary": "Binding only filters attested events. Proposals from another chain or Safe for the same safeTxHash, plus the requestIds, sentinel logs and ORACLE_RESULT events derived from them, still reach deriveCheckState. A foreign rejection can therefore show MALICIOUS (or TIMED_OUT) for the Safe being viewed and get pinned. The existing test locks this in.",
+      "label": "medium",
+      "evidence": "attestations.ts:44-46 keeps any non-attested event (`!isAttested(event) || ...`), even though proposal events carry chainId/safe (types/events.ts:42-43,71-72). safenetReader.ts:318-337 builds requestIds from every allowlisted proposal. deriveCheckState.ts:71 then returns MALICIOUS on any negative ORACLE_RESULT, and safenetCheckApi.ts:99-100 pins it. The chain-B test (safenetCheckApi.test.ts:495-505) expects SUBMITTED from a proposal bound to chain A. The attacker-driven variant in F16 depends on on-chain validation that can't be checked here, but the cross-chain leak itself is real."
+    },
+    {
+      "findings": [
+        "F11",
+        "F12"
+      ],
+      "summary": "The BENIGN arbitration window returns 0 when the client clock is slightly behind the attested block's timestamp (negative age). A check is usually first seen as BENIGN seconds after it is attested, so a few seconds of skew turns off the new arbitration poll for that mount.",
+      "label": "medium",
+      "evidence": "computePollingInterval.ts:66-68 returns 0 whenever age < 0. With interval 0 no fetch lands, so fulfilledAt never changes and the effect in useSafenetCheck.ts:97-126 never re-runs. The zero is never re-evaluated, so the feature is quietly lost for fresh checks. The tests at computePollingInterval.test.ts:57-64 assert this stop behaviour."
+    },
+    {
+      "findings": [
+        "F3"
+      ],
+      "summary": "Once the interval is 0, polling never restarts during the mount.",
+      "label": "wrong",
+      "evidence": "This is the intended, documented ceiling: computePollingInterval.ts:63-64 says an arbitration landing after the window is 'only picked up by a page reload'. Past the window, stopping is the design. The skew-triggered early stop is covered separately under F11."
+    },
+    {
+      "findings": [
+        "F17"
+      ],
+      "summary": "A failed blockTimeMs read gives a null attestedAtMs and stops BENIGN polling.",
+      "label": "wrong",
+      "evidence": "This is deliberate and documented. The PR's Risks section says a failed header read closes the arbitration window for that session, and safenetReader.ts:465-467 returns null on purpose so a missing date never suppresses a verdict."
+    },
+    {
+      "findings": [
+        "F20"
+      ],
+      "summary": "verdictAttestation, which picks the audit row's proof link, has no test covering several candidates, null signatureId, or the logIndex tie-break.",
+      "label": "low",
+      "evidence": "Its only consumer is SafenetAuditRow.tsx:67, and the SafenetAuditRow tests (lines 68-143) use a single attested event. So choosing the proof link among several attestations, which this PR changed, goes untested."
+    },
+    {
+      "findings": [
+        "F6"
+      ],
+      "summary": "No test covers an INVALID oracle attestation followed by a VERIFIED plain one.",
+      "label": "low",
+      "evidence": "The selection tests (safenetCheckApi.test.ts:357-428) cover newest vs earliest within a family and the oracle-first order, but not this mixed-family fall-through. With oracle events present, deriveCheckState.ts:75-78 would return BENIGN on the plain event's VERIFIED result, and nothing pins that down."
+    },
+    {
+      "findings": [
+        "F9"
+      ],
+      "summary": "The familyRank comment implies plain attestations aren't verified while oracle ones exist, but selectAttestation falls through to them.",
+      "label": "low",
+      "evidence": "attestations.ts:7-9 says verifying a plain event while an oracle one exists 'would answer a question the status machine never asks'. But safenetCheckApi.ts:48-54 keeps verifying later candidates, including plain ones, after an oracle event fails."
+    },
+    {
+      "findings": [
+        "F7"
+      ],
+      "summary": "attestationCandidates has no dedicated unit test file.",
+      "label": "nit",
+      "evidence": "It isn't exported, and its ordering is exercised through the selection tests in safenetCheckApi.test.ts:357-428 (newest-first, oracle-first). A separate file would add little."
+    },
+    {
+      "findings": [
+        "F8"
+      ],
+      "summary": "bindAttestations is only tested indirectly.",
+      "label": "nit",
+      "evidence": "The cases F8 lists as untested (other chain, other Safe, mixed-case address) are tested at safenetCheckApi.test.ts:447-493, just through the query rather than directly."
+    },
+    {
+      "findings": [
+        "F10",
+        "F18"
+      ],
+      "summary": "bindAttestations lowercases the address by hand instead of calling sameAddress.",
+      "label": "nit",
+      "evidence": "attestations.ts:43-45 compares lowercased strings. sameAddress (packages/utils/src/utils/addresses.ts:24) does the same thing plus empty-string handling, and the hook already gates out an empty safeAddress (useSafenetCheck.ts:50). This is a consistency point with no concrete cost."
+    },
+    {
+      "findings": [
+        "F21"
+      ],
+      "summary": "TxSigners passes safe.address.value while the other callers pass useSafeInfo's safeAddress.",
+      "label": "nit",
+      "evidence": "TxSigners/index.tsx:173 uses safe.address.value, which is exactly the value useSafeInfo exposes as safeAddress. The values are the same, so this is purely stylistic."
+    },
+    {
+      "findings": [
+        "F22"
+      ],
+      "summary": "The oracle and plain attested branches in deriveCheckState are identical and could be merged.",
+      "label": "nit",
+      "evidence": "deriveCheckState.ts:75-89 repeats the same three-way return. Merging them would keep the behaviour unchanged, so this is purely a readability preference."
+    },
+    {
+      "findings": [
+        "F4"
+      ],
+      "summary": "The checklist was written to the scratchpad instead of docs/engineering/.",
+      "label": "unverifiable",
+      "evidence": "This is about where a generated artifact was saved, not about the PR's code, and the diff gives no way to settle it."
+    }
+  ]
+}

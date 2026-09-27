@@ -1,0 +1,55 @@
+{
+  "pr": 8470,
+  "title": "chore(deps): bump safe-deployments to 1.37.62 — 1.5.0 addresses on 32 new chains (WA-2936)",
+  "description": "## What it solves\r\n\r\nResolves: [WA-2936](https://linear.app/safe-global/issue/WA-2936/second-safe-deployments-bump-pick-up-the-newly-registered-chains)\r\n\r\n## How this PR fixes it\r\n\r\nAddress-only dependency bump — no new ABIs, no contract-type regeneration, no protocol-kit change (unlike the first-round bump in WA-2859 / #8395):\r\n\r\n- `apps/web` and `apps/tx-builder`: `@safe-global/safe-deployments` `^1.37.61` → `^1.37.62`\r\n- `yarn.lock`: deduped to a **single entry** so that protocol-kit's own `^1.37.61` range also resolves to 1.37.62 — without the dedupe the lockfile splits into two entries and **mobile (which consumes safe-deployments only transitively via `@safe-global/protocol-kit@8.0.5`) would silently stay on 1.37.61**.\r\n\r\nAll 13 v1.5.0 assets (`safe` … `safe_to_l2_setup`) were verified present for all 32 chains in 1.37.62.\r\n\r\n## How to test it\r\n\r\n1. `yarn why @safe-global/safe-deployments` — every consumer (web, tx-builder, protocol-kit) resolves to **1.37.62**; the lockfile has exactly one `@safe-global/safe-deployments` entry.\r\n2. Sanity-check an address, e.g.:\r\n   ```js\r\n   require('@safe-global/safe-deployments').getSafeL2SingletonDeployment({ version: '1.5.0', network: '137' })\r\n   ```\r\n   returns the canonical singleton for Polygon (and likewise for the other WA-2918 chains: 10, 56, 100, 42161, …).\r\n3. CI: regular unit/e2e suites — no behaviour change expected on chains whose `recommendedMasterCopyVersion` config has not been flipped.\r\n\r\n## Affected flows\r\n\r\n- Safe creation and mastercopy-upgrade flows on the 32 newly registered chains — `getLatestSafeVersion` can return 1.5.0 there **once each chain's config is flipped** (separate rollout ticket); until then behaviour is unchanged.\r\n- Contract-address lookups (singleton, proxy factory, fallback handler, MultiSend, SignMessageLib, `safe_migration`, `safe_to_l2_setup`) on those chains.\r\n\r\n## Blast radius\r\n\r\n- **web** and **tx-builder**: direct dependency bumped.\r\n- **mobile**: transitive via `@safe-global/protocol-kit@8.0.5` — picks up 1.37.62 through the deduped lockfile entry (this is the easy-to-miss part of the change).\r\n- No API contracts, RTK Query endpoints, feature flags, persistence, or routes touched.\r\n- Rollout gating stays in chain config (`recommendedMasterCopyVersion` / config-service), not in this PR.\r\n- Companion bumps in other services: CGW is bumped to 1.37.62 on the WA-2921 branch; tx-service (`safe-eth-py` 7.23.0 + per-env contract setup) is handled separately.\r\n\r\n## Risks / not checked\r\n\r\n- Lockfile was updated with `--mode=update-lockfile` (no local install/link step) — relying on CI for install + test validation.\r\n- Did not manually exercise creation/upgrade flows on the new chains; on-chain 1.5.0 support there is not yet config-enabled, so no user-visible change was expected or verified in-app.\r\n- Did not test on mobile.\r\n- Did not independently verify the on-chain bytecode of the newly registered addresses (they are canonical deterministic-deployment addresses, verified upstream in the safe-deployments repo).\r\n\r\n## Visual summary\r\n\r\n```mermaid\r\ngraph LR\r\n    subgraph before dedupe\r\n        W1[web ^1.37.62] --> B[1.37.62]\r\n        T1[tx-builder ^1.37.62] --> B\r\n        PK1[protocol-kit ^1.37.61] --> A[1.37.61 ⚠️ mobile left behind]\r\n    end\r\n    subgraph after dedupe\r\n        W2[web ^1.37.62] --> C[single lockfile entry 1.37.62]\r\n        T2[tx-builder ^1.37.62] --> C\r\n        PK2[protocol-kit ^1.37.61<br/>used by mobile] --> C\r\n    end\r\n```\r\n\r\n## Checklist\r\n\r\n- [ ] I've tested the branch on mobile 📱\r\n- [x] I've documented how it affects the analytics (if at all) 📊 — no analytics impact\r\n- [ ] I've written a unit/e2e test for it (if applicable) 🧑‍💻 — not applicable, dependency bump\r\n- [x] I've listed affected flows and blast radius, and named what I did not verify 🎯\r\n\r\n---\r\n\r\n## CLA signature\r\n\r\nWith the submission of this Pull Request, I confirm that I have read and agree to the terms of the [Contributor License Agreement](https://safe.global/cla).",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/tx-builder/package.json",
+      "line": 28,
+      "claim": "This package.json also bumps to the same safe-deployments version that only covers 13 chains rather than the 32 described, so it shares the same description/scope mismatch."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/features/multichain/hooks/__tests__/useCompatibleNetworks.test.ts",
+      "line": 75,
+      "claim": "No test covers 1.5.0 support on any of the newly added chains, even though this is the main user-facing effect of the version bump; the existing test file already references chains 10 and 324, which both gained 1.5.0 support in this release, but no assertions were added for them."
+    },
+    {
+      "id": "F3",
+      "file": "packages/utils/package.json",
+      "line": 38,
+      "claim": "packages/utils imports @safe-global/safe-deployments directly in its source but does not list it as a dependency in package.json, relying on Yarn's deduplication to get the correct version, which is a pre-existing issue unrelated to this change."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/package.json",
+      "line": 83,
+      "claim": "The commit message states that 32 chains were newly registered, but the safe-deployments 1.37.62 upgrade only adds 1.5.0 support for 13 chains (10, 146, 196, 232, 324, 3338, 5000, 42161, 43114, 57073, 59144, 80094, 1313161554), so the commit/PR description does not match the actual change."
+    },
+    {
+      "id": "F5",
+      "file": "apps/mobile/src/hooks/coreSDK/safeCoreSDK.ts",
+      "line": 2,
+      "claim": "apps/mobile also imports @safe-global/safe-deployments directly without declaring it as a dependency, so if Yarn's single merged lockfile entry for the package ever splits, mobile and utils could silently end up running different deployment data than the web app."
+    },
+    {
+      "id": "F6",
+      "file": null,
+      "line": null,
+      "claim": "A newer version, 1.37.63, is already published and adds 1.5.0 support for additional chains (1328, 2818, 6498, 314159, 936485), suggesting the dependency should potentially be bumped to ^1.37.63 instead of 1.37.62, or the discrepancy should be reconciled before merging."
+    },
+    {
+      "id": "F7",
+      "file": null,
+      "line": null,
+      "claim": "The pull request does not update safe-core-sdk, which needs to be updated as part of this change."
+    },
+    {
+      "id": "F8",
+      "file": null,
+      "line": null,
+      "claim": "If the referenced WA-2918 ticket lists 32 chains, then 1.5.0 Safes on the roughly 19 chains not covered by this bump will continue to receive 'not compatible' or untrusted-handler results after the merge."
+    }
+  ]
+}

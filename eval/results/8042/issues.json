@@ -1,0 +1,49 @@
+{
+  "usage": {
+    "usd": 0.390158,
+    "turns": 6,
+    "wallSeconds": 37
+  },
+  "issues": [
+    {
+      "findings": [
+        "F8",
+        "F9",
+        "F10",
+        "F3"
+      ],
+      "summary": "AddContactDialog test still queries getByLabelText('Address'), so it breaks after the label changed to 'Address or ENS'",
+      "label": "medium",
+      "evidence": "The test mock sets aria-label={label} (AddContactDialog.test.tsx:50-52), and fillRequiredFields calls screen.getByLabelText('Address') at line 72. That is an exact full-string match by default, so it will not find 'Address or ENS' (AddContactDialog.tsx:137). Every test that fills the form will throw, and the PR does not touch the test file."
+    },
+    {
+      "findings": [
+        "F1",
+        "F2",
+        "F5",
+        "F6"
+      ],
+      "summary": "The ' or ENS' suffix is hardcoded, even on chains where DOMAIN_LOOKUP is off and names never resolve",
+      "label": "low",
+      "evidence": "AddressInput only resolves names when hasFeature(currentChain, FEATURES.DOMAIN_LOOKUP) (AddressInput/index.tsx:72). Its own default label adds ' or ENS' only under that same condition (index.tsx:166). AddContactDialog.tsx:137 now always advertises ENS, so on unsupported chains an ENS entry just fails validation. That makes the label misleading, but the impact is minor UX."
+    },
+    {
+      "findings": [
+        "F4",
+        "F11",
+        "F12"
+      ],
+      "summary": "The PR/commit wording says 'priv contact', but AddContactDialog is shared, so the shared-contact dialog changes too",
+      "label": "nit",
+      "evidence": "AddContactDialog is used by both AddPrivateContact.tsx and AddContact.tsx. Both flows go through the same AddressInput, which also accepts ENS, so the label change is correct for both. Only the wording of the title is narrower than the change."
+    },
+    {
+      "findings": [
+        "F7"
+      ],
+      "summary": "The wording 'Address or ENS' differs from the 'Recipient address or ENS' default used elsewhere",
+      "label": "nit",
+      "evidence": "AddressInput's default label is 'Recipient address or ENS' (index.tsx:166), but 'Recipient' does not fit an address-book contact. The shorter wording is a reasonable choice with no concrete cost."
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "usd": 0.1062016,
+  "findings": [
+    {
+      "file": "apps/web/src/features/safenet-checks/index.ts",
+      "line": 12,
+      "claim": "The feature handle in this file is constructed by manually writing name, useIsEnabled, and load instead of using createFeatureHandle, duplicating logic the core helper already provides and deriving FEATURES.SAFENET_CHECKS automatically."
+    },
+    {
+      "file": "apps/web/src/features/safenet-checks/index.ts",
+      "line": 10,
+      "claim": "useHasFeature(...) === true collapses the still-loading undefined state into false, so useIsEnabled reports false while chain config is still resolving; since useLoadFeature treats isEnabled === false as $isDisabled true, and TxSigners uses this same hook to gate safenetHash, the row can appear disabled even though the feature status hasn't actually been determined yet."
+    },
+    {
+      "file": "apps/web/src/components/transactions/TxSigners/index.tsx",
+      "line": 31,
+      "claim": "TxSigners imports useSafenetCheck directly from the underlying package instead of going through the feature's own module, reaching past the feature boundary other consumers are expected to respect."
+    },
+    {
+      "file": "apps/web/src/components/transactions/TxSigners/index.tsx",
+      "line": 173,
+      "claim": "The visibility check for the signing row is re-implemented here rather than reused from SafenetAuditRow's own render gate, so the two implementations can drift out of sync, a risk the code's own comment acknowledges."
+    },
+    {
+      "file": "apps/web/src/components/transactions/TxSigners/index.tsx",
+      "line": 173,
+      "claim": "showsSafenetRow can become true before the lazily loaded SafenetAuditRow chunk finishes loading, so during that window the row renders as a stub and the row above it loses its isLast state with no row actually rendered below it."
+    },
+    {
+      "file": "apps/web/src/features/safenet-checks/feature.tsx",
+      "line": null,
+      "claim": "The feature entry file is named feature.tsx while all 27 other features use feature.ts, breaking the documented naming convention for this file."
+    },
+    {
+      "file": "apps/web/src/features/safenet-checks/components/SafenetAuditRow.tsx",
+      "line": null,
+      "claim": "The component file lives directly at components/SafenetAuditRow.tsx instead of the documented components/<Component>/index.tsx layout."
+    },
+    {
+      "file": "apps/web/src/features/safenet-checks/components/__tests__/SafenetAuditRow.test.tsx",
+      "line": null,
+      "claim": "The test file sits in a __tests__ directory instead of next to the component as <Component>.test.tsx, as the layout convention requires."
+    },
+    {
+      "file": "apps/web/src/features/safenet-checks/components/SafenetAuditRow.tsx",
+      "line": null,
+      "claim": "This new component with logic has no Storybook story, even though its five status states and separate dark-mode colors are exactly the kind of visual variants a story is meant to cover."
+    },
+    {
+      "file": "apps/web/src/components/transactions/TxSigners/index.test.tsx",
+      "line": 711,
+      "claim": "The loop over useSafenetCheck.mock.calls passes even when there are zero calls, and the negative text assertion only works because a mockReturnValue set in a prior test leaks through clearAllMocks; run in isolation the hook returns UNAVAILABLE, so the assertion still passes even if the flag gate is broken, meaning the test doesn't actually prove the flag-off behavior."
+    },
+    {
+      "file": "apps/web/src/features/safenet-checks/components/SafenetAuditRow.tsx",
+      "line": 66,
+      "claim": "The dark-mode iconColor branch, using DARK_STEP_COLOR, has no test coverage."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The ORACLE_ATTESTED-preferred link lookup path is untested; only the plain-attested case is covered."
+    },
+    {
+      "file": "packages/store/src/safenet/__tests__/safenetCheckApi.test.ts",
+      "line": 104,
+      "claim": "The no-attestation test doesn't assert that blockTimeMs was not called, so it fails to verify the one-RPC-per-settled-check behavior that the new code's comment claims."
+    },
+    {
+      "file": "apps/web/src/components/transactions/TxSigners/index.tsx",
+      "line": 167,
+      "claim": "This diff adds long explanatory comments across multiple files, including this one, SafenetAuditRow.tsx, and the test files, conflicting with the project guidance to treat comments as tech debt and add them only when necessary; some comments merely restate the code, such as one just describing the theme-default link color."
+    },
+    {
+      "file": "apps/web/.env.example",
+      "line": 1,
+      "claim": "The documented Safenet section in this file omits the new NEXT_PUBLIC_SAFENET_EXPLORER_URL variable, which is read in packages/utils/src/features/safenet-checks/constants.ts, leaving the config undocumented."
+    },
+    {
+      "file": "apps/web/.env.example",
+      "line": null,
+      "claim": "The file still has no trailing newline."
+    },
+    {
+      "file": "apps/web/src/features/safenet-checks/components/SafenetAuditRow.tsx",
+      "line": 31,
+      "claim": "In light mode, the Risk detected and Safenet check failed states keep the default primary icon color instead of using error or warning colors, while dark mode does apply those colors, and it's unclear whether this inconsistency is an intended design choice."
+    }
+  ]
+}

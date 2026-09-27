@@ -1,0 +1,193 @@
+{
+  "pr": 8657,
+  "title": "feat: add a search field to the network pickers (WA-3477)",
+  "description": "> **This pull request was produced entirely by an automated Claude run.** A human wrote the ticket. The research, the code, the tests and this description all came from the automated run, with no human in the loop. Please review it the way you would a new colleague's first pull request.\n\n**Ticket:** https://linear.app/safe-global/issue/WA-3477/user-story\n\n## What it solves\n\nFinding a network in a picker meant scrolling. This adds a search field to two of them.\n\nThe ticket named one component. A reviewer pointed out that the request was actually about the main header's picker, which is a different component, so both are covered here:\n\n| Picker | Component | Primitive | Where |\n|---|---|---|---|\n| Main header | `ChainSelectorBlock` | `DropdownMenu` | every Safe route, via `SpaceSafeBar` |\n| Add existing Safe | `NetworkSelector` | `Select` | `/new-safe/load` |\n\n## How this PR fixes it\n\nA field sits at the top of each popup. Typing filters by name, case-insensitively, on a substring match. An empty or whitespace-only query lists everything, and the query resets when the popup is reopened. A query matching nothing shows \"No networks match your search\", which carries `role=\"status\"` because the rows disappear without focus moving.\n\n**The header picker holds two lists.** The top one is only the chains the Safe is deployed on, one row for a single-chain Safe. The long one is the \"All networks\" accordion, where a row opens the add-network dialog rather than switching network. The field filters both, and the accordion expands on its own while a query is active so matches you cannot switch to are still findable. Only one no-matches line can appear, and the two lists live in two components, so the parent passes down whether its own rows matched.\n\nBoth primitives read printable keys as list typeahead and call `preventDefault` on them, so each field keeps every key but Escape from reaching its popup. Escape has to get through for the popup to close.\n\n`NetworkSelector` needs more than that. Its `Select` holds the highlighted row as an index into the rendered rows and never re-derives it when the list shrinks, so passing the arrows up would navigate from a row that is no longer there. The field handles them itself and focuses a row it picks, which resets the index because the row's own `onFocus` writes it back. The header picker needs none of this: its rows are plain buttons that were never registered with the menu's list navigation, so the arrows did nothing there before this change and still do nothing.\n\n```mermaid\nflowchart LR\n  Q[Type a query] --> H[\"Header picker (DropdownMenu)\"]\n  Q --> N[\"Add existing Safe (Select)\"]\n  H --> H1[Deployed chains, filtered]\n  H --> H2[\"All networks, filtered and expanded\"]\n  N --> N1[All networks, filtered]\n  H1 --> E{Any match?}\n  H2 --> E\n  N1 --> E\n  E -->|no| M[\"No networks match your search\"]\n  E -->|yes| P[Pick a network]\n```\n\n## How to test it\n\n```\nyarn workspace @safe-global/web test src/features/spaces/components/SafeSelectorDropdown src/components/common/NetworkSelector\n```\n\nBy hand, in Storybook (`yarn workspace @safe-global/web storybook`):\n\n**Features → Spaces → SpaceChainSelector → MultiChain.** Click the trigger. The field is focused already, so type `pol` without clicking it: the list narrows to Polygon. Press Escape, the popup closes. Reopen, the field is empty.\n\n**Components → Common → NetworkSelector → Default.** Type `pol`, the list narrows to Polygon and Sepolia (Sepolia's name contains `pol`). Type `zzzz` for the no-matches line. Press ArrowDown after filtering, focus lands on the first match; ArrowUp lands on the last.\n\nIn the app the header picker is on every Safe route; the other is on the \"Add existing Safe\" step at `/new-safe/load`.\n\n## Affected flows\n\n- **Switch network from the header.** Gains the field. The switch list itself is unchanged.\n- **Add a Safe to a new network.** The \"All networks\" accordion gains filtering and auto-expands while searching. `CreateSafeOnNewChain` and the add-network dialog are untouched.\n- **Add existing Safe.** Gains the field.\n- **Header picker while a transaction flow is open.** Disabled, as before. The `disabled` guard runs before any search state.\n\n## Blast radius\n\n- `AllNetworksSection` has exactly one consumer, `ChainSelectorBlock`. `ChainSelectorBlock` has one, `SpaceChainSelector`, which imports it through the feature barrel. `NetworkSelector`'s default export has one, the Add existing Safe step.\n- Its `Accordion` moves from uncontrolled to controlled so a query can force it open. Every pre-existing branch (feature off, cannot-add notice, loader, empty list, normal list) is reached the same way and renders the same thing.\n- `OVERVIEW_EVENTS.SHOW_ALL_NETWORKS` still fires once per trigger click and not on collapse. It does **not** fire when a query expands the section, because the Accordion only calls `onValueChange` from a trigger interaction. See Risks.\n- No `data-testid` changed. The Cypress page objects for the multichain flows select by test id and aria-label, never by position, and none of them types into the new fields or asserts focus order.\n- `offerSafeCreation` and `compactButton` on `NetworkSelector` have no consumers, so the \"Show all networks\" block they gate is unreachable today. This PR does not remove it; its trigger hides while a query is active.\n- No shared hook, selector, Redux slice, RTK Query endpoint, feature flag, route or persisted state. Nothing under `packages/**`, so no mobile impact.\n\n## Risks / not checked\n\n- **The header popup is `role=\"menu\"`, and a free-text search box is not a valid child of one.** Both other search-in-a-popup components here are built on `Select`, a listbox, where a search input is the standard pattern. Moving this picker to `Select` is the correct fix and is a larger change than this PR. Not done. Tab still reaches every row, as before.\n- **`SHOW_ALL_NETWORKS` is silent on a search-driven expansion.** Left as-is and pinned with a test, but whether ty",
+  "findings": [
+    {
+      "id": "F1",
+      "file": null,
+      "line": null,
+      "claim": "The PR adds 415 lines of code to implement a search bar, and the amount of code should be reduced since this seems excessive for the feature being added."
+    },
+    {
+      "id": "F2",
+      "file": null,
+      "line": null,
+      "claim": "The screenshots included in the PR description show 404 error placeholders instead of the actual network icons, indicating the icons are not loading correctly."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/components/common/NetworkSelector/index.test.tsx",
+      "line": 68,
+      "claim": "Tests mock `useSafeAddress` to return an empty string and `hasMultiChainAddNetworkFeature` to return false, so the undeployed-networks section never renders in any test and the new `!query &&` branch is untested; removing or flipping that guard would not be caught by any test."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/AllNetworksSection.tsx",
+      "line": 102,
+      "claim": "This computation should be wrapped in useMemo instead of being recalculated on every render."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/components/ui/search-input.tsx",
+      "line": 12,
+      "claim": "A new `onClear` prop was added to a shared design-system component (components/ui/*) without the PR description stating whether this was coordinated with the in-flight design-system rewrite, which such changes are required to note."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/AllNetworksSection.tsx",
+      "line": 100,
+      "claim": "The equivalent spaces network picker behaves inconsistently with the header picker: it filters the \"All networks\" list by the search query and opens it automatically instead of hiding it."
+    },
+    {
+      "id": "F7",
+      "file": null,
+      "line": null,
+      "claim": "The X clear button should use size-4 instead of size-6, since size-6 is too large for this element."
+    },
+    {
+      "id": "F8",
+      "file": null,
+      "line": null,
+      "claim": "It is unclear whether the network picker in the main header and the network selector in the Safe deployment flow are implemented as two different components, which could indicate duplicated or inconsistent implementations that should be reconciled."
+    },
+    {
+      "id": "F9",
+      "file": null,
+      "line": null,
+      "claim": "The X icon used to clear typed text in the search input is not black as it should be, and there should be a consistent way of styling such clear icons across the app, referencing an existing design if one exists."
+    },
+    {
+      "id": "F10",
+      "file": "apps/web/src/components/common/NetworkSelector/index.tsx",
+      "line": 369,
+      "claim": "The current approach stores a single ref on a parent container and selects child items from it, instead of using an array of refs created individually for each child via React.createRef; the alternative approach may be cleaner or more correct."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/src/components/common/NetworkSelector/index.tsx",
+      "line": 429,
+      "claim": "The empty-state check only looks at the deployed networks list, so searching for a network that exists only in the undeployed/addable list shows \"No networks match your search\" with no way to add it, even though it could be added."
+    },
+    {
+      "id": "F12",
+      "file": "apps/web/src/components/common/NetworkSelector/AllNetworksSection.tsx",
+      "line": 58,
+      "claim": "When unavailableReason is set, the component returns only the unavailable notice without checking nothingToShow, so a search that matches no networks displays just \"Adding another network is not possible…\" with no accompanying \"No networks match your search\" message, in both the feature-disabled and empty-results branches."
+    },
+    {
+      "id": "F13",
+      "file": null,
+      "line": null,
+      "claim": "The \"No networks match your search\" empty-state message is misaligned on the left when it wraps to a new line, an effect caused by the element's large border radius."
+    },
+    {
+      "id": "F14",
+      "file": "apps/web/src/components/common/NetworkSelector/index.tsx",
+      "line": 306,
+      "claim": "The same chain-name matching logic (chainName.toLowerCase().includes(query)) is duplicated across NetworkSelector/index.tsx, ChainSelectorBlock.tsx, and AllNetworksSection.tsx, the \"No networks match your search\" text is duplicated between index.tsx and AllNetworksSection.tsx, and the rule allowing Escape through is duplicated between index.tsx and ChainSelectorBlock.tsx; this duplication lets the two pickers drift apart in behavior, as already shown by the discrepancies described elsewhere in the review."
+    },
+    {
+      "id": "F15",
+      "file": null,
+      "line": null,
+      "claim": "The search bar was added only to the network selector shown when deploying a new Safe, but not to the network picker in the main header, even though the search bar was specifically requested for the main header's network picker."
+    },
+    {
+      "id": "F16",
+      "file": "apps/web/src/components/common/NetworkSelector/index.tsx",
+      "line": 439,
+      "claim": "In the header network picker, having any search query hides the \"Show all networks\" section entirely, so a network that could still be added shows the message \"No networks match your search\" even though it does exist. This also makes the header picker behave inconsistently with the space-bar picker, which does search its \"All networks\" section."
+    },
+    {
+      "id": "F17",
+      "file": "apps/web/src/components/common/ChainSelectorBlock.tsx",
+      "line": 58,
+      "claim": "ArrowUp/ArrowDown key handling prevents these keys from reaching the menu but does not move focus into the rows the way NetworkSelector does, so keyboard users in the spaces picker may not be able to arrow from the search field into the list."
+    },
+    {
+      "id": "F18",
+      "file": "apps/web/src/components/common/NetworkSelector/index.tsx",
+      "line": 439,
+      "claim": "When a search query is entered, the `!query &&` condition removes the undeployed-networks section, so networks that could still be added are hidden while searching."
+    },
+    {
+      "id": "F19",
+      "file": null,
+      "line": null,
+      "claim": "The outline of the search bar overlaps with the outline of the modal in a visually awkward way and the two should be made to match."
+    },
+    {
+      "id": "F20",
+      "file": "apps/web/src/components/common/ChainSelectorBlock.tsx",
+      "line": 96,
+      "claim": "The same border-radius eslint-disable comment as in NetworkSelector/index.tsx is duplicated here, indicating the styling pattern should be shared or given a preset instead of repeatedly suppressing the lint rule."
+    },
+    {
+      "id": "F21",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/ChainSelectorBlock.tsx",
+      "line": 113,
+      "claim": "Picking a deployed-chain row or an add-network row closes the menu with a direct setOpen(false) instead of going through handleOpenChange, so setSearch('') never runs because base-ui does not call onOpenChange when the open prop is controlled and set directly. Since this chain picker stays mounted in the safe bar and switching chains only updates a query, the search text typed before selecting a row (e.g. \"poly\") is still applied the next time the picker is opened, even though a comment in the same file claims this case is handled."
+    },
+    {
+      "id": "F22",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/ChainSelectorBlock.tsx",
+      "line": 43,
+      "claim": "This computation should also be wrapped in useMemo if possible, to avoid unnecessary recalculation."
+    },
+    {
+      "id": "F23",
+      "file": null,
+      "line": null,
+      "claim": "There may be an existing Figma design for a dropdown-plus-search-bar pattern, and other components in the app should be checked for an existing implementation of this pattern to ensure the new search bar is consistent with, or reuses, an established design rather than introducing a new custom one."
+    },
+    {
+      "id": "F24",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/AllNetworksSection.tsx",
+      "line": 23,
+      "claim": "JSDoc and inline comments are stacked on one small component (also at lines 25, 42, and 45), which is more commentary than needed given the code is already self-explanatory, and should be trimmed."
+    },
+    {
+      "id": "F25",
+      "file": "apps/web/src/components/common/NetworkSelector/index.tsx",
+      "line": 404,
+      "claim": "The same eslint-disable-next-line no-restricted-syntax comment for the \"concentric radius\" case appears twice (also in ChainSelectorBlock.tsx), each accompanied by a JSX comment repeating the same explanation, which conflicts with project guidance that a repeated escape should become a variant rather than another disable, and that only one comment line should be used."
+    },
+    {
+      "id": "F26",
+      "file": "apps/web/src/components/common/NetworkSelector/NetworkSelector.stories.tsx",
+      "line": 6,
+      "claim": "A five-line comment explaining how the mock works violates the root AGENTS.md rule requiring single-line comments; it should be shortened to one line or removed."
+    },
+    {
+      "id": "F27",
+      "file": "apps/web/src/components/ui/search-input.tsx",
+      "line": 38,
+      "claim": "Clicking the clear button makes it disappear (showClear becomes false) without moving focus back to the search input, so focus falls to the body and the user has to click the field again before they can keep typing."
+    },
+    {
+      "id": "F28",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/__tests__/ChainSelectorBlock.test.tsx",
+      "line": 248,
+      "claim": "There is no test covering reopening the picker after clicking a row or clicking add-network, which is why the search-not-cleared bug was not caught; the header picker has the same test gap, though there item selection does go through onOpenChange."
+    },
+    {
+      "id": "F29",
+      "file": null,
+      "line": null,
+      "claim": "The X clear button should use the specific design referenced in a linked Figma component rather than an ad hoc implementation."
+    },
+    {
+      "id": "F30",
+      "file": "apps/web/src/components/common/NetworkSelector/index.tsx",
+      "line": 306,
+      "claim": "The name-filter logic for the network search field is duplicated across NetworkSelector/index.tsx, ChainSelectorBlock.tsx, and AllNetworksSection.tsx rather than being shared, along with duplicated Escape-key handling and the \"No networks match your search\" empty-state UI."
+    },
+    {
+      "id": "F31",
+      "file": "apps/web/src/components/common/NetworkSelector/index.tsx",
+      "line": 408,
+      "claim": "An `eslint-disable-next-line no-restricted-syntax` for a custom border radius is duplicated (also in ChainSelectorBlock.tsx:96) instead of being addressed by adding a reusable variant, contrary to the convention of adding a variant rather than disabling the lint rule when a pattern recurs."
+    }
+  ]
+}

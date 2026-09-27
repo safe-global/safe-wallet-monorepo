@@ -1,0 +1,55 @@
+{
+  "usd": 0.0638116,
+  "findings": [
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/components/HeaderQrButton.tsx",
+      "line": 25,
+      "claim": "The isOpeningRef guard only resets when useFocusEffect fires again, so if the navigation push is ever swallowed (e.g. by a transient guard upstream), the button becomes permanently unresponsive until the user navigates away and back."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/hooks/useWalletConnectScan.ts",
+      "line": 48,
+      "claim": "The focus effect does not check isActive before enabling the camera, so if the screen first focuses while isActive is false, the focus effect turns the camera on and the isActive/permission effect immediately turns it off again, creating a race."
+    },
+    {
+      "file": "apps/mobile/src/features/Share/components/ShareView.tsx",
+      "line": 47,
+      "claim": "paddingTop={30}, paddingLeft={20}, and maxWidth={260} are raw pixel numbers in a file that otherwise uses Tamagui design tokens, making the styling inconsistent with the rest of the file."
+    },
+    {
+      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
+      "line": 36,
+      "claim": "The outer track is hard-coded to width=\"50%\", which conflicts with the component otherwise being generic over N options since a 3-option control inside a half-width track would be cramped."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/components/ScanConnect.tsx",
+      "line": 28,
+      "claim": "The check typeof insets.bottom === 'number' ? insets.bottom : 0 is unnecessary since useSafeAreaInsets() is typed to always return numbers."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/components/ScanConnect.tsx",
+      "line": 28,
+      "claim": "controlClearance = insets.bottom + 64 does not match where the floating control actually sits (bottom=\"$8\" ≈ 32 + insets.bottom + padding), so the derived constant is inaccurate even though the mismatch is currently harmless."
+    },
+    {
+      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
+      "line": 29,
+      "claim": "progress is initialised to selectedIndex and the useEffect immediately runs withSpring(selectedIndex, ...) on first mount, causing an unnecessary no-op spring animation on every fresh mount."
+    },
+    {
+      "file": "apps/mobile/src/features/Share/components/SupportedNetworksSheet.tsx",
+      "line": null,
+      "claim": "This component is untested despite doing selector wiring (selectSafeChains to getChainsByIds), so future selector signature drift would not be caught by tests."
+    },
+    {
+      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.test.tsx",
+      "line": null,
+      "claim": "No test asserts that the thumb position actually animates in response to the value prop, leaving that behavior uncovered."
+    },
+    {
+      "file": "apps/mobile/src/features/Share/components/SupportedNetworksList.tsx",
+      "line": 35,
+      "claim": "The useMemo wraps a filter-twice operation that is cheap enough on small arrays that the memoization adds noise without meaningful benefit; a single-pass partition would be simpler."
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "usd": 0.0605976,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/MembersList/EditMemberDialog.tsx",
+      "line": 57,
+      "claim": "Moving the success side effects (tracking, notification, close, navigation) out of the try block means only the added early return prevents them from also firing on failure, but the new tests (also apps/web/src/features/spaces/components/InviteBanner/AcceptInviteDialog.tsx:46) only assert the error message appears, so removing that return would leave all tests passing while the success actions incorrectly run on failure."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/InviteBanner/AcceptInviteDialog.tsx",
+      "line": 48,
+      "claim": "The catch branch for when the mutation throws is not covered by a test, unlike the equivalent case in the EditContactDialog suite; the same gap exists in apps/web/src/features/spaces/components/MembersList/EditMemberDialog.tsx:59-61."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceSettings/sections/IdentitySection.tsx",
+      "line": 62,
+      "claim": "This file changes its error copy but the sections/ directory has no tests at all, so the changed behavior is unverified."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/MembersList/__tests__/EditMemberDialog.test.tsx",
+      "line": 240,
+      "claim": "A MemberDto object is constructed by hand instead of using the existing memberBuilder() helper from @/tests/builders/member, which is already used elsewhere in the spaces feature, creating inconsistency in test data construction."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/__tests__/EditContactDialog.test.tsx",
+      "line": 379,
+      "claim": "A SpaceAddressBookItemDto object is constructed by hand in a test, and no builder currently exists for that type, so a hand-written literal was unavoidable."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/EditContactDialog.tsx",
+      "line": 113,
+      "claim": "The catch block casts the caught error to FetchBaseQueryError | SerializedError without checking its shape; since the surrounding try also wraps trackEvent, dispatch, and handleClose calls, a runtime error thrown by one of those (e.g. a TypeError) would have its raw message shown to the user, which contradicts the assumption documented in utils/rtkQuery.ts that this should never happen. The same casting pattern appears in useUpdateSpace.ts:37, IdentitySection.tsx:62, AcceptInviteDialog.tsx:49, and EditMemberDialog.tsx:60."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/EditContactDialog.tsx",
+      "line": 113,
+      "claim": "If something other than an object (a string, undefined) is thrown, the `'status' in error` check inside the catch block itself throws, producing an unhandled rejection that escapes the handleSubmit callback."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/MembersList/EditMemberDialog.tsx",
+      "line": 42,
+      "claim": "The dialogs now display raw backend message strings to users instead of fixed copy, but this user-visible behavior change is not accompanied by a cited product or design decision in the PR description; a hard-coded fallback message ('Something went wrong. Please try again.') is still used when spaceId is missing, and a separate hard-coded status fallback message ('Something went wrong (500)…') also remains, creating inconsistent handling of error messaging."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/InviteBanner/AcceptInviteDialog.tsx",
+      "line": 45,
+      "claim": "The mutation result's error is cast (e.g. `response.error as …`) even though it is already correctly typed, unlike other callers (Sidebar/hooks/useAddSafeToSpace.ts:47, AddMemberModal/index.tsx:176) that pass result.error straight through without casting; the same unnecessary cast appears in EditMemberDialog.tsx:56 and EditContactDialog.tsx:99, and removing it would also remove the extra type imports added for it."
+    }
+  ]
+}

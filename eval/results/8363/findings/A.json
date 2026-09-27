@@ -1,0 +1,20 @@
+{
+  "usd": 0.252878,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/components/__tests__/OnboardingSafesList.test.tsx",
+      "line": 115,
+      "claim": "The position check compares the full compareDocumentPosition bitmask for exact equality to Node.DOCUMENT_POSITION_FOLLOWING instead of masking with & as other tests in the feature do, which makes the assertion more brittle than the repo's established pattern."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/components/__tests__/OnboardingSafesList.test.tsx",
+      "line": 115,
+      "claim": "The test retrieves the banner and trusted table elements with queryByTestId and chains them with a nullable &&, so a missing element silently passes null through instead of the test failing with a clear error, unlike other tests in the feature that use getByTestId."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/components/__tests__/OnboardingSafesList.test.tsx",
+      "line": 119,
+      "claim": "The test is named to verify the banner appears above both sections but only checks its position relative to the trusted table, leaving the ordering against the owned table (onboarding-owned-table) unverified."
+    }
+  ]
+}

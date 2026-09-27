@@ -1,0 +1,11 @@
+{
+  "pr": 8156,
+  "reviewSha": "e4c8fb409b2b4e41eeabaa6c5bc9b1a16ffd14ec",
+  "baseSha": "cd18bc4463e367b0ec87dd800b6a870545d8a69c",
+  "system": "E",
+  "version": "github",
+  "runner": "collect",
+  "model": "human",
+  "commentSha": "4d03d6a0b1e72538d9153c92499c64ca8a1b683e",
+  "output": "apps/mobile/src/features/ExecuteTx/hooks/useTransactionExecution.ts:127\nwhat are we supposed to do with the simulation Error? Right now we are not displaying it anywhere? Is this intentional. What happens if cgw is not able to relay the tx\n\n---\n\napps/mobile/src/features/ConfirmTx/components/TransactionInfo/feeRows.ts:56\nbuildFeesBreakdown is the right shared primitive, but each of the three callers repeats the same store-reading + native-currency mapping:\n\nFeesBreakdown.tsx\nReviewExecuteFooter.tsx (the safePaysGasFee block)\nTokenTransfer.tsx (the safePaidFee memo)\n\nAll three independently do useAppSelector(selectActiveChainCurrency) and build { address: ZERO_ADDRESS, symbol, decimals }. A thin useFeesBreakdown(detailedExecutionInfo, transfer?) hook would own the store reads + native-currency mapping and return the breakdown, removing the repetition and the if (!nativeCurrency) return undefined guard from each call site. This is the \"write it three times, then extract\" trigger — you've now written it three times.\n\n---\n\napps/mobile/src/features/ExecuteTx/components/ReviewAndExecute/ReviewExecuteFooter.tsx:89\nWe extract feeInfoText and FeeLabelWithInfo so copy can't drift — good. But the row markup still diverges: FeesBreakdown.tsx: defines FeeRow/FeeAmount, while ReviewExecuteFooter re-implements fee rows inline with raw View flexDirection=\"row\" + TokenAmount. The \"Execution fee · FREE\" and \"Max gas fee\" rows exist in both with subtly different styling (e.g. footer uses fontWeight={700}, breakdown uses $success text only). \n\nCan't we  export FeeRow/FeeAmount alongside FeeLabelWithInfo so the visual contract is shared too.\n\n\n\n---\n\napps/mobile/src/features/ConfirmTx/components/TransactionInfo/feeRows.ts:21\nwe also have a function named FeesBreakdown, maybe it would be better to rename this to FeesBreakdownData?"
+}

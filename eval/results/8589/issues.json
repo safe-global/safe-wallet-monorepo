@@ -1,0 +1,41 @@
+{
+  "usage": {
+    "usd": 0.37096860000000004,
+    "turns": 5,
+    "wallSeconds": 29
+  },
+  "issues": [
+    {
+      "findings": [
+        "F2"
+      ],
+      "summary": "Nested \"Add manually\" dialog renders without a backdrop, so it visually merges into the \"My accounts\" picker behind it",
+      "label": "low",
+      "evidence": "At the reviewed HEAD (6e8e123), AddManually.tsx:82-85 renders ModalDialog with no forceBackdrop prop, and ModalDialog/index.tsx:135 only draws the nested backdrop when forceBackdrop is set. The PR description's fix #3 (commit 99ed87f) isn't in this tree, so the problem is real. The ModalDialog props lines weren't changed and the bug predates the PR, so the rule caps it at low."
+    },
+    {
+      "findings": [
+        "F3"
+      ],
+      "summary": "No test checks that the closed trigger updates after picking a different network",
+      "label": "low",
+      "evidence": "AddManually.test.tsx:58-66 only asserts the default chain (`Chain 1`), even though Polygon (137) is in the fixtures. A render function that hard-codes the default, or a dropped value={chainId} binding (AddManually.tsx:108), would still pass. It's a real coverage gap, but the risk is modest."
+    },
+    {
+      "findings": [
+        "F1"
+      ],
+      "summary": "chainName fixture values are unused because ChainIndicator is mocked",
+      "label": "nit",
+      "evidence": "ChainIndicator is mocked at AddManually.test.tsx:27-30 to render `Chain {chainId}`, so 'Ethereum'/'Polygon' (lines 7-8) never show up in any assertion. The test still catches the original bug, since a bare value would render `1`, not `Chain 1`. The fixture names are only mildly misleading."
+    },
+    {
+      "findings": [
+        "F4"
+      ],
+      "summary": "waitFor is unnecessary because the mocked dialog renders synchronously",
+      "label": "nit",
+      "evidence": "ModalDialog is mocked at AddManually.test.tsx:32-36 to render its children synchronously when open, so the waitFor at line 63 isn't needed. Leaving it in costs nothing beyond style."
+    }
+  ]
+}

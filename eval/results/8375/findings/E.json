@@ -1,0 +1,10 @@
+{
+  "usd": 0.0485276,
+  "findings": [
+    {
+      "file": "apps/tx-builder/src/hooks/useKnownAddresses.ts",
+      "line": 42,
+      "claim": "This value is recomputed on every render instead of being memoized, which is unnecessary overhead."
+    }
+  ]
+}

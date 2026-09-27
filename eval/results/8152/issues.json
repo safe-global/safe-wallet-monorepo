@@ -1,0 +1,131 @@
+{
+  "usage": {
+    "usd": 0.4648526,
+    "turns": 7,
+    "wallSeconds": 52
+  },
+  "issues": [
+    {
+      "findings": [
+        "F1",
+        "F12"
+      ],
+      "summary": "Outer track borderRadius={12} is a raw number; the token $5 has the same value",
+      "label": "nit",
+      "evidence": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx:19 uses 12, and packages/theme/src/tokens/radius.ts sets 5: 12, so there is no visual difference. Raw radii are common in apps/mobile/src/components (19 numeric uses against 6 token uses), so this is style only."
+    },
+    {
+      "findings": [
+        "F10",
+        "F14"
+      ],
+      "summary": "Segment borderRadius={8} is a raw number; the token $4 has the same value",
+      "label": "nit",
+      "evidence": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx:37 uses 8, which equals radius token 4. Nothing changes on screen, and numeric radii are widespread in mobile components."
+    },
+    {
+      "findings": [
+        "F13"
+      ],
+      "summary": "The SegmentedControl folder has no stories file",
+      "label": "low",
+      "evidence": "apps/mobile/docs/code-style.md:10-16 lists Component.stories.tsx in the standard folder layout, and 32 mobile components have stories. The new folder has only the .tsx, test and index files, which is a small convention gap."
+    },
+    {
+      "findings": [
+        "F11"
+      ],
+      "summary": "The testID handling and the per-segment testID pattern are untested",
+      "label": "low",
+      "evidence": "SegmentedControl.tsx:19 and :30 build `${testID}-${option.value}`, but none of the three tests pass a testID. The logic is trivial, so a missing test costs little."
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "Segments use accessibilityRole=\"button\" instead of tab or radio roles, so screen readers get no group or position information",
+      "label": "low",
+      "evidence": "SegmentedControl.tsx:26 sets role \"button\" with a selected state, and the container at :19 has no role. The selected state is still announced, so the impact is minor."
+    },
+    {
+      "findings": [
+        "F4"
+      ],
+      "summary": "No test covers the thumb animation",
+      "label": "wrong",
+      "evidence": "The reviewed SegmentedControl.tsx has no animated thumb, spring or progress value. Selection only swaps the background at :38, so there is nothing to animate or test."
+    },
+    {
+      "findings": [
+        "F17"
+      ],
+      "summary": "A no-op spring runs on first mount",
+      "label": "wrong",
+      "evidence": "SegmentedControl.tsx (49 lines) has no useEffect, withSpring or progress value, so the claimed code does not exist at the reviewed commit."
+    },
+    {
+      "findings": [
+        "F7"
+      ],
+      "summary": "The outer track is hard-coded to width=\"50%\"",
+      "label": "wrong",
+      "evidence": "No width prop exists in SegmentedControl.tsx, and line 36 is paddingVertical=\"$3\". The claim does not match the code."
+    },
+    {
+      "findings": [
+        "F3"
+      ],
+      "summary": "The camera focus effect ignores isActive",
+      "label": "wrong",
+      "evidence": "useWalletConnectScan.ts has no isActive parameter at the reviewed commit (grep finds only useFocusEffect at :48), and the PR diff does not touch this file."
+    },
+    {
+      "findings": [
+        "F5"
+      ],
+      "summary": "The isOpeningRef guard can lock the header button",
+      "label": "wrong",
+      "evidence": "apps/mobile/src/features/WalletConnect/Wallet/components/HeaderQrButton.tsx:20-28 calls router.push directly. There is no isOpeningRef or focus-reset guard, and the file is not in the diff."
+    },
+    {
+      "findings": [
+        "F2"
+      ],
+      "summary": "ScanConnect has an unnecessary typeof check on insets.bottom",
+      "label": "wrong",
+      "evidence": "ScanConnect.tsx does not exist at the reviewed commit, since the diff only adds the SegmentedControl files."
+    },
+    {
+      "findings": [
+        "F9"
+      ],
+      "summary": "The controlClearance constant does not match where the control sits",
+      "label": "wrong",
+      "evidence": "ScanConnect.tsx does not exist in the tree or the diff, so the claim refers to code that is not under review."
+    },
+    {
+      "findings": [
+        "F6"
+      ],
+      "summary": "ShareView uses raw paddingTop, paddingLeft and maxWidth numbers",
+      "label": "wrong",
+      "evidence": "ShareView.tsx is unchanged by the diff, and the lines around :47 have no paddingTop={30}, paddingLeft={20} or maxWidth={260}."
+    },
+    {
+      "findings": [
+        "F8"
+      ],
+      "summary": "SupportedNetworksList wraps a cheap double filter in useMemo",
+      "label": "wrong",
+      "evidence": "SupportedNetworksList.tsx does not exist at the reviewed commit. apps/mobile/src/features/Share/components has only ShareView files and index.ts."
+    },
+    {
+      "findings": [
+        "F15"
+      ],
+      "summary": "SupportedNetworksSheet is untested",
+      "label": "wrong",
+      "evidence": "SupportedNetworksSheet.tsx does not exist in the reviewed tree, and the diff only adds SegmentedControl."
+    }
+  ]
+}

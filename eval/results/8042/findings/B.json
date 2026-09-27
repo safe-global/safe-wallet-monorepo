@@ -1,0 +1,35 @@
+{
+  "usd": 0.04581160000000001,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/__tests__/AddContactDialog.test.tsx",
+      "line": 72,
+      "claim": "fillRequiredFields() looks up the address field with screen.getByLabelText('Address'), but the mock now sets the aria-label to \"Address or ENS\", and Testing Library requires the full label text to match, so this lookup will no longer find the field."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/__tests__/AddContactDialog.test.tsx",
+      "line": 72,
+      "claim": "Every test that calls fillRequiredFields() (submit, success notification, onSubmitStart, and both error paths) will fail with \"Unable to find a label with the text of: Address\", turning CI red, and the commit does not update the test file to match the new label."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/AddContactDialog.tsx",
+      "line": 137,
+      "claim": "The label is hardcoded to \"Address or ENS\" without checking whether the current chain has the DOMAIN_LOOKUP feature enabled, unlike AddressInput's own default label which conditionally appends \" or ENS\" only when ENS lookup is actually available."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/AddContactDialog.tsx",
+      "line": 137,
+      "claim": "On a chain without DOMAIN_LOOKUP support, a user who enters an ENS name like vitalik.eth will see only an invalid address error even though the label told them ENS input would work, since AddressInput only resolves names when DOMAIN_LOOKUP is enabled for the current chain."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The commit message describes the change as affecting the \"priv contact\" field, but AddContactDialog is shared by both AddPrivateContact.tsx and AddContact.tsx, so the label change also affects the shared (non-private) contacts flow, which the commit message does not make clear."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The label wording is inconsistent across related flows: EditContactDialog.tsx uses a read-only address field, and other places in the app use the wording \"Recipient address or ENS\", creating a minor inconsistency in terminology."
+    }
+  ]
+}

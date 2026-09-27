@@ -1,0 +1,40 @@
+{
+  "usd": 0.0466896,
+  "findings": [
+    {
+      "file": "apps/web/package.json",
+      "line": 83,
+      "claim": "The commit message states that 32 chains were newly registered, but the safe-deployments 1.37.62 upgrade only adds 1.5.0 support for 13 chains (10, 146, 196, 232, 324, 3338, 5000, 42161, 43114, 57073, 59144, 80094, 1313161554), so the commit/PR description does not match the actual change."
+    },
+    {
+      "file": "apps/tx-builder/package.json",
+      "line": 28,
+      "claim": "This package.json also bumps to the same safe-deployments version that only covers 13 chains rather than the 32 described, so it shares the same description/scope mismatch."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "If the referenced WA-2918 ticket lists 32 chains, then 1.5.0 Safes on the roughly 19 chains not covered by this bump will continue to receive 'not compatible' or untrusted-handler results after the merge."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "A newer version, 1.37.63, is already published and adds 1.5.0 support for additional chains (1328, 2818, 6498, 314159, 936485), suggesting the dependency should potentially be bumped to ^1.37.63 instead of 1.37.62, or the discrepancy should be reconciled before merging."
+    },
+    {
+      "file": "packages/utils/package.json",
+      "line": 38,
+      "claim": "packages/utils imports @safe-global/safe-deployments directly in its source but does not list it as a dependency in package.json, relying on Yarn's deduplication to get the correct version, which is a pre-existing issue unrelated to this change."
+    },
+    {
+      "file": "apps/mobile/src/hooks/coreSDK/safeCoreSDK.ts",
+      "line": 2,
+      "claim": "apps/mobile also imports @safe-global/safe-deployments directly without declaring it as a dependency, so if Yarn's single merged lockfile entry for the package ever splits, mobile and utils could silently end up running different deployment data than the web app."
+    },
+    {
+      "file": "apps/web/src/features/multichain/hooks/__tests__/useCompatibleNetworks.test.ts",
+      "line": 75,
+      "claim": "No test covers 1.5.0 support on any of the newly added chains, even though this is the main user-facing effect of the version bump; the existing test file already references chains 10 and 324, which both gained 1.5.0 support in this release, but no assertions were added for them."
+    }
+  ]
+}

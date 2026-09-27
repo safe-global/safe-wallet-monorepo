@@ -1,0 +1,11 @@
+{
+  "pr": 8163,
+  "reviewSha": "4213de0104de565afbc37055823c3fcfaf2cc289",
+  "baseSha": "f306e397e59723c4125a146ce57415393a34dabc",
+  "system": "E",
+  "version": "github",
+  "runner": "collect",
+  "model": "human",
+  "commentSha": "1dfd902904d04817b3312ae1c6853c7c417da989",
+  "output": "[review by vmosharova]\nNice! \nThere is one refactoring I'd suggest: we have `CopyTooltip` wrapper that has a similar logic as the new component. It makes sense to wrap the shadcn button into that like:\n```\n<CopyTooltip text={address}>\n  <button className={cn('shrink-0 ...', className)} aria-label=\"Copy address\" type=\"button\">\n    <Copy className=\"size-3.5 ...\" />\n  </button>\n</CopyTooltip>\n```\n\nIt removes some duplicated logic and makes the wording consistent. \n\n---\n\napps/web/src/features/myAccounts/components/MyAccountsV2/components/AccountItem/MultiAccountItem.tsx:156\nIn this case we have a `button` inside another `button` that might cause hydration problems.\n\n---\n\napps/web/src/components/common/CopyAddressIconButton/index.tsx:40\nLet's add a token instead of hardcoded value :)"
+}

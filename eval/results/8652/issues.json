@@ -1,0 +1,126 @@
+{
+  "usage": {
+    "usd": 0.5063924,
+    "turns": 7,
+    "wallSeconds": 57
+  },
+  "issues": [
+    {
+      "findings": [
+        "F19",
+        "F15"
+      ],
+      "summary": "Suppressed occurrence counts are only flushed when the same key is sent again after the window, so they are lost if the error stops recurring or the tab closes, and sum(Error Occurrences) undercounts despite the docstring's claim.",
+      "label": "medium",
+      "evidence": "error-tracking.ts:75-80 only folds `state.suppressed` into a later send; nothing flushes on expiry or unload. So a poll that fails 4 times in 50s and then recovers sends occurrences=1 and drops 3. That contradicts the 'Totals are therefore sum(Error Occurrences)' docstring at lines 102-106 and the PR description."
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "pruneSentErrors deletes expired entries that still hold a nonzero suppressed count, which discards those counts.",
+      "label": "low",
+      "evidence": "error-tracking.ts:56-59 deletes entries past the window whatever their `suppressed` value, and 62-65 does the same for LRU entries. This only runs when the map passes 500 keys (line 87), so it is a rare extra path to the same lost-count problem."
+    },
+    {
+      "findings": [
+        "F3",
+        "F7"
+      ],
+      "summary": "Suppressed counts are sent later with whatever Mixpanel super-properties (Safe, chain) are active then, so occurrences can be attributed to the wrong Safe, chain or time.",
+      "label": "low",
+      "evidence": "error-tracking.ts:80 and 136-139 send the collapsed count with the super-properties active at send time. The comment at lines 11-13 admits a cross-Safe collapse but not the misattribution. The 60s window limits the impact."
+    },
+    {
+      "findings": [
+        "F6",
+        "F18"
+      ],
+      "summary": "The new Datadog attempt/is_retry tags have no unit test, unlike the sibling rpc_host/http_status tags.",
+      "label": "medium",
+      "evidence": "exceptions/index.ts:80 adds the tags, but grepping for `is_retry` finds only that line, while exceptions/__tests__/index.test.ts does test http_status and rpc_host. A regression to a truthiness check or a wrong is_retry value would go unnoticed."
+    },
+    {
+      "findings": [
+        "F12"
+      ],
+      "summary": "No test checks that the suppressed counter resets after a re-emit.",
+      "label": "low",
+      "evidence": "error-tracking.test.ts:203-219 checks the second send's occurrences=3 but never a third cycle. The code resets `suppressed: 0` at error-tracking.ts:85, so it is correct today and only the coverage is thin."
+    },
+    {
+      "findings": [
+        "F4"
+      ],
+      "summary": "The claim that the dedupe key only covers mapContext-whitelisted fields, so new facets can be forgotten.",
+      "label": "wrong",
+      "evidence": "The key is JSON.stringify of exactly what is sent to Mixpanel (error-tracking.ts:119-131). A context field not emitted is invisible in Mixpanel, so collapsing on it loses nothing, and any emitted facet joins the key automatically, as the PR says."
+    },
+    {
+      "findings": [
+        "F5"
+      ],
+      "summary": "The dedupe key depends on the property order JSON.stringify produces.",
+      "label": "nit",
+      "evidence": "mapContext (error-tracking.ts:32-49) builds keys in a fixed order, so identical inputs serialize identically. The concern only applies to a hypothetical future refactor."
+    },
+    {
+      "findings": [
+        "F2"
+      ],
+      "summary": "pruneSentErrors makes two passes over the map on overflow.",
+      "label": "nit",
+      "evidence": "error-tracking.ts:55-66 only runs when size > 500 (line 87), and O(n) over at most 501 entries costs nothing that matters."
+    },
+    {
+      "findings": [
+        "F9",
+        "F14"
+      ],
+      "summary": "httpStatus is included on a truthiness check rather than a presence check, inconsistent with the new attempt guard.",
+      "label": "nit",
+      "evidence": "error-tracking.ts:40 and exceptions/index.ts:78 are unchanged lines that use `context.httpStatus &&`. Only status 0 would be dropped, which is not a meaningful HTTP status here."
+    },
+    {
+      "findings": [
+        "F10",
+        "F11"
+      ],
+      "summary": "Deduping changes Error Surfaced counting semantics (including for user-facing errors), which breaks event-count dashboards.",
+      "label": "wrong",
+      "evidence": "This is intended and documented. The PR description has a 'Note for whoever owns the WA-2775 dashboards' saying totals are now sum(Error Occurrences), and the docstring at error-tracking.ts:102-106 says the same. F11's claim that the description does not note it is false."
+    },
+    {
+      "findings": [
+        "F1"
+      ],
+      "summary": "The comment above the composite dedupe test restates the test name.",
+      "label": "nit",
+      "evidence": "composite.test.ts:136-137. The comment adds a bit of 'why' (Datadog fidelity) but mostly repeats the test title, which is a style matter."
+    },
+    {
+      "findings": [
+        "F8"
+      ],
+      "summary": "The comment in the CF sync attempt test restates the test name.",
+      "label": "nit",
+      "evidence": "useCounterfactualSafeSync.test.ts:479-480 explains why attempts are needed, which overlaps with the test name. Style only."
+    },
+    {
+      "findings": [
+        "F13"
+      ],
+      "summary": "The comment by the attempt-tagged logError calls restates what the code already shows.",
+      "label": "nit",
+      "evidence": "useCounterfactualSafeSync.ts:163-164 gives the rationale (separable in analytics) behind `{ attempt: 1 }`. Style preference with no concrete cost."
+    },
+    {
+      "findings": [
+        "F17"
+      ],
+      "summary": "The Datadog comment only points to the Mixpanel mapper's note.",
+      "label": "nit",
+      "evidence": "exceptions/index.ts:79 says 'Presence, not truthiness', which does carry the key point in a few words. Style only."
+    }
+  ]
+}

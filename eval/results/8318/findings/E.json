@@ -1,0 +1,25 @@
+{
+  "usd": 0.0522796,
+  "findings": [
+    {
+      "file": "packages/utils/src/utils/addressSimilarity.ts",
+      "line": 115,
+      "claim": "The code uses while/for loops that could be refactored to use map/forEach, and variable names should be made more self-explanatory to improve readability."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/hooks/useOnboardingSafes.ts",
+      "line": 57,
+      "claim": "This logic may be able to reuse the existing useAllSafes hook instead of duplicating functionality."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/hooks/useOnboardingSafes.ts",
+      "line": 34,
+      "claim": "The list should be checked to ensure it contains only unique values, since it may currently allow duplicates."
+    },
+    {
+      "file": "apps/web/src/components/common/TrustedSafesModal/useTrustedSafesModal.ts",
+      "line": 115,
+      "claim": "This pattern is repeated in many places throughout the PR and should be extracted into a separate reusable hook to avoid duplication."
+    }
+  ]
+}

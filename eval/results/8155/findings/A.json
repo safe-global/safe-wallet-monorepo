@@ -1,0 +1,70 @@
+{
+  "usd": 0.06219960000000001,
+  "findings": [
+    {
+      "file": "apps/web/cypress/e2e/regression/spaces_basicflow.cy.js",
+      "line": 47,
+      "claim": "The \"Add account manually\" test no longer creates a new space; it adds SEP_STATIC_SAFE_35 to whatever space comes first for OWNER_4 and never removes it. Because of this, the final assertion that the dashboard Safe list contains the shortened address will still pass on a subsequent run even if adding a Safe is broken, since the Safe already exists from the previous run, and the test may also fail simply because the Safe is now a duplicate."
+    },
+    {
+      "file": "apps/web/cypress/e2e/pages/spaces.page.js",
+      "line": 656,
+      "claim": "The same issue applies to the related page-object helper used by the \"Add account manually\" flow, referenced alongside spaces.page.js:555, since it relies on the same space/Safe reuse instead of a fresh or dedicated space."
+    },
+    {
+      "file": "apps/web/cypress/e2e/pages/spaces.page.js",
+      "line": 157,
+      "claim": "clickSingleChainAccountRow() clicks the first single-chain row and the test then checks that this opened the pendingTxAccount Safe (\"Pending tx\"), which only works while the fixture space has exactly one single-chain row; adding another single-chain row would cause the click to open a different Safe and break the assumption. The fix would be to target the row by name, e.g. cy.contains(singleChainAccountRow, row.name)."
+    },
+    {
+      "file": "apps/web/cypress/e2e/regression/spaces_dashboard.cy.js",
+      "line": 38,
+      "claim": "This test (and the one at line 76) depends on clickSingleChainAccountRow() selecting the correct row by position rather than by name, which is fragile if the fixture space's single-chain row count changes."
+    },
+    {
+      "file": "apps/web/cypress/fixtures/spaces/staticSpaces.js",
+      "line": 45,
+      "claim": "The fixture comment still says \"Row 2\" even though the singleChainAccountRowIndex was removed, leaving a stale reference in the comment."
+    },
+    {
+      "file": "apps/web/cypress/e2e/pages/spaces.page.js",
+      "line": 573,
+      "claim": "In verifySpaceInviteBannerVisible, the 30s timeout is applied to cy.get(inviteBanner), but the check that actually waits is the chained .contains(spaceName), which uses the default 10s timeout instead. If an older invite banner already exists, the get resolves immediately and the new space name only gets 10 seconds to appear, which can cause flaky failures. The fix would be to put the timeout on .contains, or use cy.contains(inviteBanner, spaceName, { timeout })."
+    },
+    {
+      "file": "apps/web/cypress/e2e/pages/spaces.page.js",
+      "line": 226,
+      "claim": "goToSpacesView() and openFirstSpaceFromSpacesView() (the latter at lines 661-670) repeat the same block of logic: waiting for @spacesList, checking for a dashboard URL, clicking the logo, and asserting the URL. This duplication violates DRY, and openFirstSpaceFromSpacesView should instead call goToSpacesView() (or a shared private helper) before openFirstExistingSpace()."
+    },
+    {
+      "file": "apps/web/cypress/e2e/regression/assets.cy.js",
+      "line": 47,
+      "claim": "The \"Default tokens\" / \"All tokens\" regression test now asserts the same token list in both modes, mirroring smoke/assets.cy.js:41-49, so it can no longer fail if default-token filtering regresses and merely duplicates the smoke test. It should be deleted or moved to a portfolio-supported chain, as its own comment suggests."
+    },
+    {
+      "file": "apps/web/cypress/e2e/pages/spaces.page.js",
+      "line": 143,
+      "claim": "Deleting the associated tests left several page-object exports with no remaining callers: txDetailsLabel, pendingTxName, pendingTxStatus, getPendingTxItem, signOutViaSidebarProfile, verifyOnSingleSpaceDashboard, clickExpandedPanelSubAccountRow, verifyAccountRowDetails, verifyExpandedPanelSubAccountRowsCount and verifyAccountExpandedPanelVisible, which is inconsistent with the PR's stated goal of removing orphaned tests."
+    },
+    {
+      "file": "apps/web/cypress/fixtures/spaces/staticSpaces.js",
+      "line": 23,
+      "claim": "Fixture fields unnamedAccount*, multichainAccountRowIndex and multichainSubAccounts are also unused after the test deletions, again inconsistent with the stated \"remove orphaned tests\" goal."
+    },
+    {
+      "file": "apps/web/cypress/support/localstorage_data.js",
+      "line": 810,
+      "claim": "The \"Used in:\" comment was not updated to match the current consumers: it still cites sidebar3.cy.js and sidebar5.cy.js, but regression/sidebar_5 was deleted and the real consumer is now safe_selector.cy.js:75."
+    },
+    {
+      "file": "apps/web/cypress/fixtures/safes/static.js",
+      "line": 30,
+      "claim": "SEP_STATIC_SAFE_9 lost its consumer list in the comment even though six specs still use it (safe_selector, sidebar_new, prodhealthcheck/sidebar*, visual/sidebar, smoke/safe_selector), making the documentation incomplete."
+    },
+    {
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/index.tsx",
+      "line": 53,
+      "claim": "The pinned-accounts test ID moved from the section header to a wrapper around the whole section, and Cypress helpers now depend on Safe cards being rendered inside that wrapper, but no unit test in index.test.tsx (line 136) verifies that trusted items actually render inside pinned-accounts. This means moving the test ID back to the header would still pass the unit tests while breaking only the Cypress tests. Adding a within(getByTestId('pinned-accounts')) assertion would close this gap."
+    }
+  ]
+}

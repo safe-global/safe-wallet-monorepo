@@ -1,0 +1,45 @@
+{
+  "usd": 0.07613160000000001,
+  "findings": [
+    {
+      "file": "apps/web/src/components/common/CopyAddressIconButton/index.tsx",
+      "line": 12,
+      "claim": "This new component duplicates functionality already provided by at least three existing copy-address components in the codebase (in SpaceSafeBar/AccountsModal/shared.tsx, SafeSelectorDropdown/components/CopyAddressButton.tsx, and CopyAddressButton/CopyButton built on CopyTooltip), instead of reusing or consolidating them."
+    },
+    {
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/shared.tsx",
+      "line": 181,
+      "claim": "The inline copy button was removed from SafeCardReadOnly but the near-identical CopyAddressButton in shared.tsx was left in place, so the two copy implementations now behave differently: one shows a check icon for 2 seconds while the other shows a \"Copied\" tooltip for 750ms."
+    },
+    {
+      "file": "apps/web/src/features/myAccounts/components/AccountsWidget/AccountItemContent.tsx",
+      "line": 26,
+      "claim": "The same address-plus-copy-button layout (a flex wrapper with address text and CopyAddressIconButton) is copy-pasted across seven different files instead of being extracted into a shared component, risking inconsistent spacing and truncation over time."
+    },
+    {
+      "file": "apps/web/src/components/common/CopyAddressIconButton/index.test.tsx",
+      "line": 7,
+      "claim": "The clipboard mock used across several tests is a bare jest.fn(), which returns undefined; since CopyTooltip calls navigator.clipboard.writeText(text).then(...), calling .then on undefined throws and the catch branch sets isCopyEnabled=false, so tests intended to exercise the successful copy path actually run the \"copying disabled\" failure path."
+    },
+    {
+      "file": "apps/web/src/components/common/CopyAddressIconButton/index.test.tsx",
+      "line": 7,
+      "claim": "These tests only assert that writeText was called, not that the copy succeeded or that the UI reflects a successful copy, so a regression that breaks the actual copy behavior after the writeText call would not be caught."
+    },
+    {
+      "file": "apps/web/src/components/common/CopyAddressIconButton/index.tsx",
+      "line": 14,
+      "claim": "The component handles both Enter and Space key presses, but the corresponding test file only covers the Enter case, so removing the Space-key handling would not cause any test to fail."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SafeAccounts/SafeCardReadOnly.tsx",
+      "line": 136,
+      "claim": "The copy control in SafeCardReadOnly changed from a real button with a green check icon and a 2-second \"Copied!\" tooltip to a span with role=\"button\" and a 750ms \"Copied\" tooltip with no check icon; this is a visible behavior change that the PR description should note was agreed to by design."
+    },
+    {
+      "file": "apps/web/src/components/common/CopyAddressIconButton/index.tsx",
+      "line": 1,
+      "claim": "The new component has a unit test but no Storybook story, even though the web guidelines (apps/web/AGENTS.md) require a .stories.tsx file for new components that contain logic, unlike the comparable CopyAddressButton which has both a story and a story snapshot test."
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "usage": {
+    "usd": 0.45168379999999997,
+    "turns": 7,
+    "wallSeconds": 52
+  },
+  "issues": [
+    {
+      "findings": [
+        "F1",
+        "F4",
+        "F8"
+      ],
+      "summary": "safe-deployments 1.37.62 adds v1.5.0 addresses for only 13 chains, not the 32 the commit and PR claim. If the rollout config is flipped for all 32 chains, 19 of them would not be covered.",
+      "label": "medium",
+      "evidence": "I diffed v1.5.0/safe_l2.json in the cached 1.37.61 and 1.37.62 tarballs. 1.37.62 adds exactly 13 networks (10,146,196,232,324,3338,5000,42161,43114,57073,59144,80094,1313161554), going from 107 to 120. Chains 137, 56 and 100, which the PR gives as examples, were already in 1.37.61. The PR says it verified \"all 32 chains\", which is false, and the separate rollout ticket depends on that claim, so the risk is moderate even though the code change itself is correct."
+    },
+    {
+      "findings": [
+        "F6"
+      ],
+      "summary": "1.37.63 is already published and adds v1.5.0 for 5 more chains, so the bump target could be reconsidered.",
+      "label": "low",
+      "evidence": "The cached 1.37.63 tarball adds 1328, 2818, 6498, 314159 and 936485 to v1.5.0 safe_l2 compared with 1.37.62. Which version to target is a scope choice, not a defect in this PR."
+    },
+    {
+      "findings": [
+        "F3",
+        "F5"
+      ],
+      "summary": "packages/utils and apps/mobile import @safe-global/safe-deployments directly but do not declare it as a dependency. They get it only through hoisting of protocol-kit's transitive dependency.",
+      "label": "low",
+      "evidence": "packages/utils/package.json and apps/mobile/package.json list only protocol-kit, not safe-deployments, yet apps/mobile/src/hooks/coreSDK/safeCoreSDK.ts:2 and several packages/utils/src files import it directly. This predates the PR and sits outside its diff, but it is why the lockfile dedupe matters, as the PR itself notes."
+    },
+    {
+      "findings": [
+        "F2"
+      ],
+      "summary": "No test asserts v1.5.0 compatibility on the newly covered chains (for example 10 and 324) in useCompatibleNetworks.",
+      "label": "low",
+      "evidence": "apps/web/src/features/multichain/hooks/__tests__/useCompatibleNetworks.test.ts:33-35 already mocks chains 10 and 324, but its cases only cover 1.1.1, 1.3.0 and 1.4.1. The PR is a data-only dependency bump, so a regression test would mostly be testing the library's data. It is still a small, cheap gap."
+    },
+    {
+      "findings": [
+        "F7"
+      ],
+      "summary": "The claim that safe-core-sdk (protocol-kit) must be updated is wrong.",
+      "label": "wrong",
+      "evidence": "The yarn.lock diff merges protocol-kit's ^1.37.61 range into the single 1.37.62 entry, so protocol-kit already resolves the new data. The PR explicitly says no ABI or protocol-kit change is needed for an address-only bump."
+    }
+  ]
+}

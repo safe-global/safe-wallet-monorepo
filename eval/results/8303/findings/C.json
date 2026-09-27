@@ -1,0 +1,75 @@
+{
+  "usd": 0.0722576,
+  "findings": [
+    {
+      "file": "TestCtrls.e2e.tsx",
+      "line": 342,
+      "claim": "The onPress handler calls setupWcDappsTx and only logs a caught error to console.error; since setupWcDappsTx awaits keyStorageService.storePrivateKey which can fail on a simulator due to biometrics or keychain issues, a rejection lets the flow proceed to synthTxRequest, producing a confusing downstream failure with no clear pointer back to the setup failure, and Maestro cannot observe console.error output."
+    },
+    {
+      "file": "TestCtrls.e2e.tsx",
+      "line": 342,
+      "claim": "The setup failure should be surfaced as a marker (e.g. e2e-wc-setup-failed) via walletKitE2eState so flows can assertNotVisible it before proceeding, mirroring the existing rejectSessionCalled / lastRequestResponse side-channels."
+    },
+    {
+      "file": "WcResponseIndicator.tsx",
+      "line": 34,
+      "claim": "The useEffect has no dependency array, so it runs on every render; since hashes = Object.keys(outstanding) creates a fresh array each render, this causes unnecessary re-execution of the effect."
+    },
+    {
+      "file": "WcResponseIndicator.tsx",
+      "line": 34,
+      "claim": "The effect should depend on outstanding (e.g. useEffect(..., [outstanding])) or compute the ref update via useMemo on outstanding instead of running unconditionally."
+    },
+    {
+      "file": "WcResponseIndicator.tsx",
+      "line": 34,
+      "claim": "Object.keys(outstanding) returns keys in insertion order, so treating the last key as the newest transaction hash is not guaranteed by ordering semantics; this works only for one-at-a-time flows and should be documented as an explicit invariant tied to the flow contract so future readers don't assume general ordering."
+    },
+    {
+      "file": "proposeFetchMock.ts",
+      "line": null,
+      "claim": "installProposeFetchMock captures global.fetch at install time and never restores it; if Jest test isolation ever unhooks or swaps global.fetch between suites, a second installProposeFetchMock() call returns early because of the module-scoped installed flag, silently leaving the interceptor uninstalled from the new fetch."
+    },
+    {
+      "file": "proposeFetchMock.ts",
+      "line": null,
+      "claim": "The install-once, per-Metro-lifetime contract should be documented explicitly, or an uninstallProposeFetchMock() function should be exposed so tests running against the module in isolation can rebind fetch."
+    },
+    {
+      "file": "walletConnectDappsSetup.ts",
+      "line": 66,
+      "claim": "The jittered value function relies on Date.now() combined with an incrementing jitterSeq to avoid zero and collisions; two flows starting within the same wall-clock millisecond and hitting the same jitterSeq value across module reloads could theoretically produce colliding values, though this is very unlikely in practice."
+    },
+    {
+      "file": "walletConnectDappsSetup.ts",
+      "line": 66,
+      "claim": "Consider sourcing the jitter from crypto.getRandomValues instead of Date.now() to remove the dependency on wall-clock time, which is also noted in the code comment as having a roughly 4.7 hour cycle."
+    },
+    {
+      "file": "walletConnectDappsSetup.ts",
+      "line": 54,
+      "claim": "A raw private key (E2E_TX_OWNER_PRIVATE_KEY) is committed directly in the source file; even though it is a throwaway Sepolia-only key per the accompanying comment, committing raw keys attracts secret-scanner alerts and false positives on downstream forks."
+    },
+    {
+      "file": "walletConnectDappsSetup.ts",
+      "line": 54,
+      "claim": "The private key should be gated behind an environment variable, defaulting to the committed value for CI convenience, or documented in a SECURITY.md-adjacent note explaining it is intentionally public."
+    },
+    {
+      "file": "tx-send-happy.yml",
+      "line": 97,
+      "claim": "The assertVisible selector text: 'Send' matches any UI element containing the substring 'Send', including a Send action, Send button, or Send tab, so it is not specific enough to reliably target the intended element; a stable testID on the queued tx row or a tighter regex match would be more robust."
+    },
+    {
+      "file": "tx-send-happy.yml",
+      "line": 48,
+      "claim": "The assertVisible selector text: '.*0\\.001.*' can match multiple UI surfaces that render the same fixture value, making the assertion insufficiently specific."
+    },
+    {
+      "file": "tx-send-happy.yml",
+      "line": null,
+      "claim": "extendedWaitUntil timeout values (e.g. 30000 for sign, 10000 for sheet) are duplicated across all five new Maestro flows, so a future CI-slowness adjustment would require editing every occurrence instead of a single shared value; a shared constants.yml or Maestro environment variables would consolidate these."
+    }
+  ]
+}

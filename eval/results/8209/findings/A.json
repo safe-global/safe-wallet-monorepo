@@ -1,0 +1,40 @@
+{
+  "usd": 0.0393132,
+  "findings": [
+    {
+      "claim": "There are two functions named formatDate with incompatible meanings inside features/spaces: one produces an absolute date and the other a relative date, and both are imported from sibling files in the same feature, so an IDE auto-import can silently pick the wrong one. This already forced a workaround in a new test that aliases one import and redeclares a local formatDate. One side should be renamed to disambiguate them.",
+      "file": "packages/utils/src/utils/date.ts",
+      "line": 20
+    },
+    {
+      "claim": "The new parseTimestamp helper duplicates an existing private helper elsewhere in the codebase, differing only in returning null versus undefined; now that a shared version exists, the local copy should be deleted and callers repointed to the package entrypoint.",
+      "file": "packages/utils/src/utils/date.ts",
+      "line": 23
+    },
+    {
+      "claim": "The compact-mode width threshold sums the minWidth of all columns including secondary ones, and this PR added two 110px date columns without revisiting existing 180px email and 130px 2FA minimums, pushing the total to about 900px for one configuration. Since the page content area sits inside a sidebar layout, common desktop viewports (1280px, 1024px) can fall under that threshold, causing columns to collapse into the compact view on ordinary desktops rather than only on mobile; this should be confirmed as intended or the column minWidths should be lowered.",
+      "file": "PaginatedDataTable/index.tsx",
+      "line": 176
+    },
+    {
+      "claim": "Two comments in PaginatedDataTable still describe the old mobile-only behavior model even though the code now behaves differently: one says the detail row is mobile-only when it now renders in any compact layout, and another calls minWidth a desktop-only floor when it now also drives the compact threshold. Nearby JSDoc comments were correctly updated in the same diff, but these two were missed.",
+      "file": "PaginatedDataTable/index.tsx",
+      "line": 76
+    },
+    {
+      "claim": "A CSS class is applied whenever showHasMore is true, but the actual '+N' badge that the class is meant to support also requires networks.length to exceed maxVisible, so the class is being applied to lists where no '+N' badge is rendered, as shown by updated snapshots. This removes wrapping from those lists for no stated reason; the condition should be gated to match when '+N' actually renders, or the justifying comment should be reworded to match current behavior.",
+      "file": "NetworkLogosList/index.tsx",
+      "line": 24
+    },
+    {
+      "claim": "The variant prop on MembersList has a default value even though its only consumer always passes the value explicitly at both call sites, so the default provides no benefit and only risks a future call site silently rendering the wrong content (e.g., \"Member since\" for pending invites) instead of failing type-check. The prop should be made required.",
+      "file": "MembersList/index.tsx",
+      "line": 131
+    },
+    {
+      "claim": "The generated file docs/engineering/pr-self-review-checklist.generated.md is not covered by .gitignore even though it is meant to be gitignored by design, so it appears as an untracked file; the gitignore setup needs to be fixed when the docs/engineering directory is first committed.",
+      "file": "docs/engineering/pr-self-review-checklist.generated.md",
+      "line": null
+    }
+  ]
+}

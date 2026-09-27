@@ -1,0 +1,35 @@
+{
+  "usd": 0.04335,
+  "findings": [
+    {
+      "file": "packages/utils/src/services/contracts/safeContracts.ts",
+      "line": 40,
+      "claim": "isCanonicalDeployment only matches the canonical variant, not the eip155 variant, even though eip155 and canonical are the same delegatecall-compatible EVM bytecode. On a zkSync-family chain where both zksync and eip155 v1.3.0 singletons are registered, a Safe using the eip155 implementation fails this predicate, gets misclassified as an EraVM Safe, and is offered redeploy instead of the valid update/migrate path. Resolving the deployment type with the utility that already distinguishes canonical, eip155, and zksync variants would avoid this misclassification."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "No test covers an eip155 v1.3.0 fixture on chain 324 targeting version 1.5.0, which is the case that would catch the eip155/EraVM misclassification."
+    },
+    {
+      "file": "apps/web/src/features/multichain/utils/utils.ts",
+      "line": 107,
+      "claim": "Of the two pinned EraVM bytecode hash constants, only the 1.3.0 hash is checked against a real on-chain zkSync Safe; the 1.4.1 hash has no such fixture, so a typo in that constant would silently produce wrong predicted addresses, which could cause a user to pre-fund an incorrectly predicted counterfactual Safe on zkSync."
+    },
+    {
+      "file": "apps/web/src/features/multichain/utils/utils.ts",
+      "line": 118,
+      "claim": "getZkSyncProxyBytecodeHash only reads deployments.zksync?.address; if a zk-stack chain registers a zksync-flavour factory only in networkAddresses[chainId] and not in the deployment-type record, the function returns undefined and the code falls back to the EVM CREATE2 formula, reproducing the bug this PR is meant to fix. Mirroring the fallback used in getChainAgnosticAddress and adding a test for a chain-registered-but-not-deployment-type factory would guard against this."
+    },
+    {
+      "file": "apps/web/src/features/multichain/utils/utils.ts",
+      "line": 107,
+      "claim": "ZKSYNC_PROXY_BYTECODE_HASH duplicates a private bytecode table maintained inside protocol-kit, creating a risk that the two tables drift out of sync over time."
+    },
+    {
+      "file": "apps/web/src/features/multichain/components/MastercopyWarning/MastercopyWarning.tsx",
+      "line": 52,
+      "claim": "The redeploy warning title has a trailing space after \"... on this network\", and the body text hardcodes \"zkSync\" even though the copy would need to be generalized if the redeploy path is ever reused for another VM-stack chain."
+    }
+  ]
+}

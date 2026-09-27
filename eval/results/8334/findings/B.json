@@ -1,0 +1,15 @@
+{
+  "usd": 0.056645600000000004,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/__tests__/SafeSelectorTriggerContent.test.tsx",
+      "line": 147,
+      "claim": "The test titled 'shows the active chain threshold' only sets item-level threshold/owner numbers while leaving the per-chain threshold/owners fields empty, so it would not catch a regression where the trigger reads chains[n].threshold instead of the item-level value. Giving the per-chain entries different values and asserting the item-level value still displays would make the test actually verify which value is used."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/SafeSelectorTriggerContent.tsx",
+      "line": 83,
+      "claim": "A two-line comment explaining why the trigger differs from the icon-only dropdown summary conflicts with the project convention that treats comments as tech debt; it could be shortened to one line or moved into the test name instead."
+    }
+  ]
+}

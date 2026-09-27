@@ -1,0 +1,175 @@
+{
+  "usage": {
+    "usd": 0.6605439999999999,
+    "turns": 8,
+    "wallSeconds": 103
+  },
+  "issues": [
+    {
+      "findings": [
+        "F3",
+        "F9",
+        "F20"
+      ],
+      "summary": "The mapped GS message is written to err.reason, but nothing in the UI reads reason, so users never see the new copy",
+      "label": "medium",
+      "evidence": "ErrorMessage/index.tsx:101 renders error.message in Details. ExecuteForm.tsx:294-303 and RecoverAccountReview/index.tsx:162-164 pass hardcoded children ('will most likely fail'). So useIsValidExecution.ts:83-87 has no visible effect, which defeats the PR's stated goal of showing GS errors clearly."
+    },
+    {
+      "findings": [
+        "F27"
+      ],
+      "summary": "isValidTransaction is returned without await inside try, so an async rejection skips the catch that does the GS mapping",
+      "label": "medium",
+      "evidence": "useIsValidExecution.ts:76 does `return safeContract.isValidTransaction(...)` inside try in an async function. A rejected promise returned this way is not caught by the local catch, so the new mapping at :83 only runs on synchronous throws. The test mock at useIsValidExecution.test.ts:66 throws synchronously, which hides this."
+    },
+    {
+      "findings": [
+        "F19",
+        "F32",
+        "F25"
+      ],
+      "summary": "Claim that protocol-kit's isValidTransaction swallows reverts and returns false, so the mapping is never reached and the test mock is unrealistic",
+      "label": "unverifiable",
+      "evidence": "node_modules isn't installed in this checkout, so protocol-kit's isValidTransaction implementation can't be inspected. The code comment at useIsValidExecution.ts:70-74 assumes errors propagate. Whether they do depends on the SDK version."
+    },
+    {
+      "findings": [
+        "F8",
+        "F21"
+      ],
+      "summary": "GS012 interpolation never passes `token`, so '{token}' would appear literally",
+      "label": "low",
+      "evidence": "useIsValidExecution.ts:84-86 passes only nativeAsset, yet the GS012 template at contractErrors.ts:104 contains {token}. The PR description says the gas-token symbol is resolved, but it isn't. Impact is limited because GS012 is rare and reason isn't rendered."
+    },
+    {
+      "findings": [
+        "F24"
+      ],
+      "summary": "{nativeAsset} is left unfilled when chain is undefined",
+      "label": "low",
+      "evidence": "interpolate at contractErrors.ts:144-148 keeps the placeholder when the value is missing, and useIsValidExecution.ts:85 uses chain?.nativeCurrency.symbol. chain is almost always loaded when executing, so this edge case is unlikely."
+    },
+    {
+      "findings": [
+        "F2",
+        "F33"
+      ],
+      "summary": "No hook-level test covers placeholder interpolation from chain, and the package test treats a leftover placeholder as intended",
+      "label": "low",
+      "evidence": "useIsValidExecution.test.ts only tests GS026, which has no placeholders. contractErrors.test.ts:67-71 locks in literal '{nativeAsset}' output. So the missing-token and missing-chain interpolation bugs would go unnoticed."
+    },
+    {
+      "findings": [
+        "F22"
+      ],
+      "summary": "No test checks that a non-GS reason is left unmodified",
+      "label": "low",
+      "evidence": "useIsValidExecution.test.ts has a single test (GS026). The isGsCode guard branch at useIsValidExecution.ts:83 has no negative case."
+    },
+    {
+      "findings": [
+        "F11"
+      ],
+      "summary": "The hook test asserts only on .reason and not on anything a user sees",
+      "label": "low",
+      "evidence": "useIsValidExecution.test.ts:91 checks reason only. It passes even though no UI displays reason, so it gives false confidence about the PR's user-facing goal."
+    },
+    {
+      "findings": [
+        "F28"
+      ],
+      "summary": "The comment about the GS code belonging in Details is misleading, and overwriting reason loses the structured code",
+      "label": "low",
+      "evidence": "useIsValidExecution.ts:80-86 replaces reason (the only structured copy of the GS code) with prose. Details (ErrorMessage:101) shows the raw error.message, not a support reference, so the comment describes behaviour that doesn't exist yet."
+    },
+    {
+      "findings": [
+        "F13"
+      ],
+      "summary": "The fallback copy mentions a 'reference below' that isn't rendered",
+      "label": "low",
+      "evidence": "contractErrors.ts:66 says 'contact support with the reference below'. ErrorMessage renders only a raw Details dump or nothing, and the story (stories.tsx:17-18, 76-77) says the support reference is future work."
+    },
+    {
+      "findings": [
+        "F5",
+        "F6",
+        "F7",
+        "F23",
+        "F29"
+      ],
+      "summary": "Comments, and visible story text, carry internal planning labels (Topic N, Bucket A/B/C, AC #2, WA-3005) that will go stale",
+      "label": "low",
+      "evidence": "contractErrors.ts:48-52 and :118, parity test :8, and stories.tsx:13-18, 57, 99 all reference ticket-internal labels. 'Topic 2/4' also shows on screen in the story headings and alert. AGENTS.md treats comments as tech debt."
+    },
+    {
+      "findings": [
+        "F31"
+      ],
+      "summary": "The story implies the new copy renders in ErrorMessage, but production never passes it as children",
+      "label": "low",
+      "evidence": "stories.tsx:98 and :109 pass getContractErrorMessage output as children. Production call sites (ExecuteForm.tsx:295-303) pass hardcoded text, so the story shows a rendering path that doesn't exist."
+    },
+    {
+      "findings": [
+        "F1",
+        "F26"
+      ],
+      "summary": "GS400 copy has a mid-sentence full stop but none at the end, unlike the other messages",
+      "label": "nit",
+      "evidence": "contractErrors.ts:92 reads 'The fallback handler cannot be this Safe Account. Use another address'. That's two sentences with no final period, while the other two-sentence messages end with one."
+    },
+    {
+      "findings": [
+        "F4",
+        "F10",
+        "F14"
+      ],
+      "summary": "The web and mobile parity tests duplicate each other and the package test",
+      "label": "nit",
+      "evidence": "Both parity files make the same pure calls against one shared module. They are intentional (they prove the alias resolves in each app, per their header comment), so the redundancy costs little."
+    },
+    {
+      "findings": [
+        "F12"
+      ],
+      "summary": "The same signature message is duplicated across GS020, GS023 and GS026 BAD_SIGNATURE",
+      "label": "nit",
+      "evidence": "contractErrors.ts:79, 107 and 108 repeat the same string. Copy may diverge per code later, so duplicating it is a reasonable choice."
+    },
+    {
+      "findings": [
+        "F15",
+        "F18"
+      ],
+      "summary": "The story heading hardcodes '32' instead of using CODES.length",
+      "label": "nit",
+      "evidence": "stories.tsx:29 hardcodes the count. The GsCode union is fixed, so drift is unlikely and only affects Storybook."
+    },
+    {
+      "findings": [
+        "F17"
+      ],
+      "summary": "handlingColor takes a string instead of ContractErrorHandling",
+      "label": "nit",
+      "evidence": "stories.tsx:24 types the parameter loosely. This is Storybook-only code with no runtime cost."
+    },
+    {
+      "findings": [
+        "F30"
+      ],
+      "summary": "CONTRACT_ERRORS[code].handling is looked up twice in the JSX",
+      "label": "nit",
+      "evidence": "stories.tsx:47-48 does a trivial duplicate property access in a story."
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "The parity test sits in services/contracts/__tests__ after ContractErrorCodes.ts was deleted",
+      "label": "nit",
+      "evidence": "The test covers a shared-package module, so where it lives is an organisational preference with no functional impact."
+    }
+  ]
+}

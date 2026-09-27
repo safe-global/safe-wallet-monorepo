@@ -1,0 +1,83 @@
+{
+  "usage": {
+    "usd": 0.4184006,
+    "turns": 6,
+    "wallSeconds": 36
+  },
+  "issues": [
+    {
+      "findings": [
+        "F1",
+        "F2"
+      ],
+      "summary": "No test or story guards the MigrateSafeL2Review layout fix (wrapper div removal); F2 also asks for a screenshot.",
+      "label": "nit",
+      "evidence": "MigrateSafeL2Review.tsx:26 is a markup-only change. A unit test that checks CSS child-selector structure would be brittle and add little. The PR already includes before/after screenshots, so F2's screenshot request is already met."
+    },
+    {
+      "findings": [
+        "F3"
+      ],
+      "summary": "The isSafeMigrationCall JSDoc still describes only the unsupported-contract use case, but the function now also drives version-upgrade detection.",
+      "label": "low",
+      "evidence": "safe-migrations.ts:101-106 says it is \"Used to avoid flagging the migration tx itself as an unsupported-contract interaction\". The PR now also calls it from transaction-guards.ts:452, so the comment no longer matches its callers."
+    },
+    {
+      "findings": [
+        "F4"
+      ],
+      "summary": "The new tests use object literals instead of txDataBuilder.",
+      "label": "nit",
+      "evidence": "transaction-guards.test.ts:190-233: the new tests copy the shape of the existing 1.3.0+ test right above them in the same describe block. txDataBuilder is used elsewhere in the file (line 338), but following the local pattern has no concrete cost."
+    },
+    {
+      "findings": [
+        "F5",
+        "F10"
+      ],
+      "summary": "No isSafeUpdateTxData test covers the zksync SafeMigration variant.",
+      "label": "low",
+      "evidence": "safe-migrations.test.ts:57 already checks that isSafeMigrationCall matches the zksync variant, and isSafeUpdateTxData hands that check straight to the helper (transaction-guards.ts:452). A test at the call site would add only a little protection."
+    },
+    {
+      "findings": [
+        "F6"
+      ],
+      "summary": "The new two-line comment repeats the helper's docstring.",
+      "label": "nit",
+      "evidence": "transaction-guards.ts:450-451 restates what the isSafeMigrationCall JSDoc says. This is purely a style preference."
+    },
+    {
+      "findings": [
+        "F7"
+      ],
+      "summary": "Matching any version/variant SafeMigration address without a chain filter widens what the guard accepts.",
+      "label": "wrong",
+      "evidence": "The PR description says this widening is intentional. The guard is still gated by trustedDelegateCallTarget plus DELEGATE operation (transaction-guards.ts:446-448) and a migrate-method selector check. Official deployment addresses are deterministic across chains, so leaving out a chain filter is not a defect."
+    },
+    {
+      "findings": [
+        "F8"
+      ],
+      "summary": "isSafeMigrationCall rebuilds its address list and interface selectors on every call.",
+      "label": "nit",
+      "evidence": "safe-migrations.ts:113-120 flatMaps over a small SAFE_VERSIONS list and creates an interface on each call. That is cheap in-memory work, and the function body is outside the PR's diff. Hoisting it would be a micro-optimisation."
+    },
+    {
+      "findings": [
+        "F9"
+      ],
+      "summary": "No negative test for a migrate selector sent to a non-SafeMigration address.",
+      "label": "nit",
+      "evidence": "The address check lives in isSafeMigrationCall, which safe-migrations.test.ts already covers. The existing 'arbitrary txData' test at the call site also shows that a non-migration address returns false."
+    },
+    {
+      "findings": [
+        "F11"
+      ],
+      "summary": "It is unclear whether the Client Gateway marks the 1.5.0 SafeMigration as a trusted delegate-call target.",
+      "label": "unverifiable",
+      "evidence": "Whether data.trustedDelegateCallTarget is true for the 1.5.0 SafeMigration depends on how the CGW backend is configured, and this repo can't show that. The PR's screenshots suggest it works in practice."
+    }
+  ]
+}

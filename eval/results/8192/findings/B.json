@@ -1,0 +1,40 @@
+{
+  "usd": 0.0454096,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceActivityLog/ActivityLogFilters.tsx",
+      "line": 92,
+      "claim": "The date range validation only sets the error message shown on the fields; invalid dates are still passed through onFiltersChange and end up in the query sent to useGetSpaceAuditLog, which only skips fetching when the user isn't signed in or there's no space. As a result a user can enter an inverted or otherwise invalid date range, see a validation error, and still have the activity log re-query and show stale or erroneous results (e.g. 'No results' or 'Could not load activity.'), so the UI contradicts itself."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceActivityLog/ActivityLogFilters.tsx",
+      "line": 130,
+      "claim": "The change handler still calls onFiltersChange with dates that getDateFilterValidation has flagged as invalid instead of withholding them."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceActivityLog/ActivityLogFilters.tsx",
+      "line": 140,
+      "claim": "Like the other date field's handler, this one also forwards invalid dates to onFiltersChange rather than blocking them."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceActivityLog/index.tsx",
+      "line": 67,
+      "claim": "queryArgs is built and passed to the audit log hook without checking whether the current date range is valid, so an invalid range still reaches the query."
+    },
+    {
+      "file": "apps/web/src/features/spaces/hooks/useGetSpaceAuditLog.ts",
+      "line": 27,
+      "claim": "The hook only skips fetching when the user is unauthenticated or there is no space; it has no guard for an invalid/inverted date range, so it will query the backend with bad dates."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceActivityLog/__tests__/index.test.tsx",
+      "line": null,
+      "claim": "There is no test covering the query side of the invalid date range case; existing tests only cover the validation helpers, not that an inverted range is prevented from reaching the query."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceActivityLog/ActivityLogFilters.tsx",
+      "line": 91,
+      "claim": "The 'today' value used for the max date limit is recalculated on every render rather than kept in sync with the actual date, so if a tab stays open past midnight without re-rendering, the max limit remains stuck on the previous day until something triggers a re-render."
+    }
+  ]
+}

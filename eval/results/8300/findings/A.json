@@ -1,0 +1,40 @@
+{
+  "usd": 0.0646436,
+  "findings": [
+    {
+      "file": "apps/web/src/components/new-safe/create/steps/ReviewStep/index.test.tsx",
+      "line": 264,
+      "claim": "The new tests only assert that AWAITING_EXECUTION and CREATED_SAFE (with label 'counterfactual') are not called, but no test verifies these events do fire when a Safe isn't yet deployed. This means the tests would still pass if the PayLater branch were never reached, if the spies failed to intercept the barrel import, or if the alreadyDeployed filter were removed entirely."
+    },
+    {
+      "file": "apps/web/src/components/new-safe/create/steps/ReviewStep/index.test.tsx",
+      "line": null,
+      "claim": "A test should be added where persistCounterfactualSafe resolves { ok: true } and asserts that AWAITING_EXECUTION and CREATED_SAFE are actually called, to complement the existing negative assertions."
+    },
+    {
+      "file": "apps/web/src/features/multichain/components/CreateSafeOnNewChain/index.tsx",
+      "line": 137,
+      "claim": "The new branch that skips PROCEED_WITH_TX and CREATED_SAFE analytics has no test coverage, so deleting it would not cause any existing test to fail."
+    },
+    {
+      "file": "apps/web/src/features/multichain/components/CreateSafeOnNewChain/index.tsx",
+      "line": 169,
+      "claim": "The new branch that shows 'This account is already deployed on …' instead of 'Successfully added…' has no test coverage; the colocated test file mocks persistCounterfactualSafe but no test uses the { ok: true, skipped: 'already-deployed' } case, so deleting this branch would not break any test."
+    },
+    {
+      "file": "apps/web/src/components/new-safe/create/steps/ReviewStep/index.tsx",
+      "line": 337,
+      "claim": "Previously CREATED_SAFE and PROCEED_WITH_TX (counterfactual) fired before the persist call, so they fired even when persist failed and threw. Now, on the PayLater path, they fire only after a successful persist, changing the create-Safe analytics funnel timing for all counterfactual creations, not just already-deployed Safes; this may be intended but the PR should state it since it will shift before/after dashboard comparisons."
+    },
+    {
+      "file": "apps/web/src/features/counterfactual/services/persistCounterfactualSafe.ts",
+      "line": 207,
+      "claim": "The 409 conflict message was rewritten to tell users to 'Try adding it as a regular Safe account instead,' changing the guidance given to users; the PR should cite product or design sign-off for this wording change."
+    },
+    {
+      "file": "apps/web/src/features/multichain/components/CreateSafeOnNewChain/index.tsx",
+      "line": 166,
+      "claim": "When a Safe is already deployed, the user now sees a success-variant notification ('This account is already deployed on {chain}') sharing the replay-safe-success groupKey, and is still redirected. Whether this should be a success notification versus an info notification is a product decision not mechanically implied by the code, and should be confirmed."
+    }
+  ]
+}

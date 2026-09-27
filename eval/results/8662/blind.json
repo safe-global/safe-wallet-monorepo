@@ -1,0 +1,301 @@
+{
+  "pr": 8662,
+  "title": "feat(policies): add the chain-aware token selector for spending limits",
+  "description": "## What it solves\r\n\r\n\r\nResolves: WA-3149\r\n\r\n\r\nSetting a spending limit needs a token picker that works from a Space-level flow, where the Safe — and therefore the chain — is chosen inside the form and can change mid-flow. The list has to cover tokens the Safe already holds *and* the common ones it does not, so a limit can be set ahead of funding, and it must never carry a token from a previously selected Safe into the new one.\r\n\r\n## How this PR fixes it\r\n\r\nA controlled, form-agnostic `TokenSelector` built on the base-ui Combobox, plus the data layer behind it.\r\n\r\nThe list is assembled from three sources. Held tokens come from the Transaction-Service-backed balances endpoint, which returns every token the Safe ever received including zero balances. Popular tokens come from a per-chain list of **addresses only**, with symbol, name, decimals and logo resolved at runtime through a new CGW endpoint (`GET /v1/chains/{chainId}/tokens?addresses=`, safe-client-gateway#3419, WA-3516) so the metadata can never drift from what the assets page shows. The native currency is synthesised from the chain config without a request. De-duplication is one-directional: a token the Safe holds always wins and the popular copy is dropped.\r\n\r\nThe chain-correctness requirement is handled by the selector itself. It derives its identity from `useSafeInfo()` / `useChainId()` rather than props, so it follows a Space-level scope once WA-3146 lands and the URL Safe otherwise, and it clears the selection whenever `${chainId}:${safeAddress}` changes after the first non-empty one. The hook additionally treats the identity as valid only when `safe.chainId === chainId`, because the two hooks can disagree for a render during navigation between Safes on different chains.\r\n\r\n**Depends on safe-client-gateway#3419.** The `Store Codegen Check` stays red until that PR is merged and deployed to staging: the check re-derives the client from the *live* staging OpenAPI spec, which has no token paths yet. Once it is deployed, re-run `yarn workspace @safe-global/store build:dev` and commit the result.\r\n\r\n## How to test it\r\n\r\nThe selector is not mounted in the app yet — the form that consumes it is WA-3150 — so Storybook is the surface:\r\n\r\n```\r\nyarn workspace @safe-global/web storybook\r\n# Features / Spaces / Policies / TokenSelector\r\n```\r\n\r\nEvery story opens its popup automatically. Worth checking:\r\n\r\n- **Default** — two groups; USDC and DAI appear once each under *Your tokens*, not in *Popular*, because the `efSafe` fixture holds them.\r\n- **EmptySafe** — no held group at all, just the native currency and the eight popular tokens.\r\n- **DegradedMetadata** — a zero-balance USDC is still selectable, a token with no logo still renders, and a token with neither symbol nor name falls back to its shortened address.\r\n- **Loading / LoadError** and **PopularLoading / PopularLoadError** — each group loads and fails independently; the other stays selectable.\r\n- Type `usd`, then a name fragment, then part of an address: all three filter both groups. Pasting a valid address that is not in the list selects nothing.\r\n\r\n```\r\nyarn workspace @safe-global/web test src/features/spaces/components/Policies/SpendingLimitFlow\r\n```\r\n\r\n## Affected flows\r\n\r\n- No user-facing flow changes in this PR. The component, its hook and its data utilities are new and have no consumer yet; the Safe-level spending-limit flow under Settings is untouched and still uses `TokenAmountInput`.\r\n- First consumer will be the Space-level spending-limit create form (WA-3150).\r\n\r\n## Blast radius\r\n\r\n- **New files only, all under `apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/`.** Nothing in `features/spending-limits/` is imported or modified, so the shipped Safe-level flow cannot regress.\r\n- **`packages/store`**: adds an `AUTO_GENERATED/tokens.ts` output entry to `openapi-config.ts` and the generated client. `schema.json` and `.schema-hash` are regenerated, which is why this branch conflicts with any other branch that also regenerates them — it was already merged with `dev` once for exactly that reason.\r\n- **RTK Query**: one new query hook, `useTokensGetTokensV1Query`. It is keyed on `chainId` only and is skipped for chains with no popular list.\r\n- **Upstream load**: one extra CGW request per chain switch, at most 20 addresses, cached on the CGW side per `(chainId, address)`.\r\n- **No feature flag, no chain config, no persistence, no migration.** No mobile impact: nothing in `packages/store` changes shape for existing consumers, only new exports are added.\r\n\r\n## Risks / not checked\r\n\r\n- **Not verified against real staging data.** Storybook mocks the CGW response with MSW, and the endpoint it mocks is only live on a local CGW today. The response shape is pinned by the generated types, but no browser has yet rendered this selector against a deployed backend.\r\n- **Not exercised inside a `SafeScopeProvider`.** The scope-aware `useSafeInfo` / `useChainId` land in WA-3146 (#8646), which is not merged. Between picking a Safe and its `SafeState` arriving, the selector will render disabled rather than loading — acceptable, but WA-3150 may want to soften it.\r\n- **Retry inside the popup is not keyboard reachable.** base-ui's Combobox closes the popup on Tab, so the error state's Retry button can only be clicked. Pre-existing primitive behaviour, not introduced here.\r\n- **A single malformed token record fails the whole batch.** CGW's `TokenSchema` is strict, so one token whose `logoUri` is not a URL turns the batch into a 502 and Retry cannot help. Flagged as a follow-up on the CGW side rather than worked around here.\r\n- Not tested on mobile — the component is web-only and not reachable from any route.\r\n\r\n## Visual summary\r\n\r\nHow the two requests and the local synthesis become one list:\r\n\r\n```mermaid\r\nflowchart TD\r\n    A[\"GET /chains/{id}/safes/{safe}/balances/{fiat}\"] -->|\"items[]\"| B[\"drop ERC721<br/>zero balances kept\"]\r\n    B --> C[\"<b>Your tokens</b><br/>fiat desc, then symbol\"]\r",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/hooks/useSpendingLimitTokenOptions.ts",
+      "line": 53,
+      "claim": "A comment contains a useful rationale (the reference to useLoadSafeInfo's isStoredSafeValid) mixed with additional text that is not load-bearing and could be trimmed to keep the comment concise."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/popularTokens.ts",
+      "line": 1,
+      "claim": "The file header comment includes 'Coverage' and 'Every address was verified…' paragraphs that are process notes rather than code documentation, and would fit better in the PR description or a maintenance doc than as an inline comment."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/hooks/useSpendingLimitTokenOptions.ts",
+      "line": 35,
+      "claim": "A docstring spans three paragraphs, exceeding the project's guidance (in AGENTS.md) against multi-paragraph comment blocks."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/.../SpendingLimitFlow/TokenSelector/index.tsx",
+      "line": 208,
+      "claim": "No test exercises the case where only one of isLoading or isPopularLoading is set with an empty options array, so a bug where the two flags are combined with the wrong boolean logic would not be caught."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/utils/tokenOptions.ts",
+      "line": 82,
+      "claim": "The sort comparator converts fiatBalance values with a bare Number(), so a malformed or non-numeric value becomes NaN; since sort treats a NaN comparator result as a tie, this silently skips the fallback sort by symbol, and an empty string is silently coerced to 0 with no signal that the value was invalid."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/index.tsx",
+      "line": 96,
+      "claim": "excludeAddresses is matched against each option using .some(), which is O(n*m) and will grow with the number of spending-limit rows for the same spender; converting the array once into a lowercase Set inside the memo would make lookups O(1) and remove the per-option sameAddress call and the associated JSDoc caveat."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/.../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions.ts",
+      "line": 54,
+      "claim": "Several multi-line comments give real reasoning the code can't express but still exceed the one-line comment limit and should be shortened rather than removed."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/.../SpendingLimitFlow/TokenSelector/index.tsx",
+      "line": 208,
+      "claim": "The empty-state check that shows \"No tokens found\" only looks at the loading flags and ignores the error flags, so when the held-balances load fails and the filtered list is also empty, the UI shows both the load-error message and the empty-state message at the same time."
+    },
+    {
+      "id": "F9",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/utils/__tests__/tokenOptions.test.ts",
+      "line": 15,
+      "claim": "This test file defines its own hand-written popularTokenBuilder factory instead of using the existing Builder.new<T>().with() pattern, making it inconsistent with the builder style used elsewhere in the test suite."
+    },
+    {
+      "id": "F10",
+      "file": "apps/web/.../SpendingLimitFlow/utils/tokenOptions.ts",
+      "line": 12,
+      "claim": "PopularToken and NativeCurrencyInfo are near-duplicate types differing only in that the latter lacks an address field, indicating potential duplication that could be consolidated."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/.../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions.ts",
+      "line": 35,
+      "claim": "A multi-line comment citing a ticket and issue number violates the one-line comment rule and should be shortened, with ticket references moved to the PR description."
+    },
+    {
+      "id": "F12",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/index.tsx",
+      "line": 126,
+      "claim": "This spurious reset scenario (identityKey going 'X' -> '' -> 'X') is not covered by any existing test, so the bug would not be caught by the current test suite."
+    },
+    {
+      "id": "F13",
+      "file": "apps/web/.../SpendingLimitFlow/utils/tokenOptions.ts",
+      "line": 30,
+      "claim": "A comment states that group decides whether a balance is shown, but no balance is currently rendered anywhere in the code, making the comment inaccurate until that functionality is added."
+    },
+    {
+      "id": "F14",
+      "file": null,
+      "line": null,
+      "claim": "It could not be verified in storybook whether pressing Enter after typing a token name that matches a result selects that token automatically, or whether the user must explicitly click the token in the list; this behavior needs clarification."
+    },
+    {
+      "id": "F15",
+      "file": "apps/web/.../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions.ts",
+      "line": 30,
+      "claim": "buildIdentityKey is exported only so it can be unit tested, but the project's code-style doc requires test-only exports to use a leading underscore prefix, which this export lacks; it should be renamed with the prefix or tested indirectly through the hook instead of being exported."
+    },
+    {
+      "id": "F16",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector.test.tsx",
+      "line": 184,
+      "claim": "A comment explaining base-ui popup unmount behavior is currently only used by one test consumer; once a second consumer needs the same explanation, it should become a shared test utility instead of a repeated inline comment."
+    },
+    {
+      "id": "F17",
+      "file": "apps/web/AGENTS.md",
+      "line": 88,
+      "claim": "The \"New utility/service\" row documents utils.test.ts as colocated, but most feature utility tests actually live under a __tests__/ directory, which this PR's diff correctly follows; the documentation itself is out of date and should be corrected."
+    },
+    {
+      "id": "F18",
+      "file": "apps/web/.../SpendingLimitFlow/TokenSelector/TokenGroupState.tsx",
+      "line": 28,
+      "claim": "This component reimplements an icon-plus-message-plus-retry-button pattern that an existing shared component already provides, duplicating logic that could be reused; the existing shared component would need a compact variant (it currently lacks a className or testid prop) before it could be swapped in directly."
+    },
+    {
+      "id": "F19",
+      "file": "apps/web/.../SpendingLimitFlow/TokenSelector/TokenOptionRow.tsx",
+      "line": 16,
+      "claim": "A nested ternary checks symbol and name twice, once with && and once with ||, which is harder to read than an if-chain would be."
+    },
+    {
+      "id": "F20",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/popularTokens.ts",
+      "line": 1,
+      "claim": "This file opens with a 16-line comment block covering ticket and acceptance-criteria references, traffic statistics, and verification dates, which goes well beyond the one-line, non-narrative comment style the project expects; the ticket, AC, and traffic context belongs in the PR description instead."
+    },
+    {
+      "id": "F21",
+      "file": "apps/web/.../SpendingLimitFlow/utils/popularTokens.ts",
+      "line": 1,
+      "claim": "A 16-line, four-paragraph comment citing ticket references, an acceptance criterion, a verification date, and a verification method violates the repository rule limiting comments to one line and disallowing multi-paragraph blocks or change-justification notes; the ticket/AC traceability should move to the PR description instead."
+    },
+    {
+      "id": "F22",
+      "file": "apps/web/.../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions.ts",
+      "line": 63,
+      "claim": "All held tokens are fetched with no paging and no excludeSpam filter, and are rendered with the combobox's default unlimited render limit, so the DOM grows with the Safe's entire token history; this is worse when the user selects \"All tokens\" rather than the trusted-token default."
+    },
+    {
+      "id": "F23",
+      "file": null,
+      "line": null,
+      "claim": "It is unclear whether truncated data has a tooltip or horizontal scroll to reveal the full content."
+    },
+    {
+      "id": "F24",
+      "file": "apps/web/.../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions.ts",
+      "line": 17,
+      "claim": "The doc comment states that isLoading is always false while the query is skipped, but the code and an accompanying test show isLoading can be true when the Safe is valid and the trusted setting is still undefined, so the comment is inaccurate and should be reworded."
+    },
+    {
+      "id": "F25",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/__tests__/TokenSelector.test.tsx",
+      "line": 23,
+      "claim": "This test file defines its own hand-written option(overrides) factory instead of using the shared Builder.new<T>().with() pattern used by other builders in the codebase."
+    },
+    {
+      "id": "F26",
+      "file": "apps/web/.../SpendingLimitFlow/TokenSelector/index.tsx",
+      "line": 71,
+      "claim": "Multi-line comments citing a ticket and an acceptance criterion violate the one-line comment rule and should be shortened, with ticket references moved to the PR description."
+    },
+    {
+      "id": "F27",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/index.tsx",
+      "line": 61,
+      "claim": "unknownTokenOption sets decimals: 0, which is fine for display-only use today, but if this option is ever consumed by an amount calculation via findTokenOption, the hardcoded 0 decimals would silently produce incorrect amounts; a distinct branded shape or an explicit number | undefined type for decimals would guard against this."
+    },
+    {
+      "id": "F28",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/hooks/useSpendingLimitTokenOptions.ts",
+      "line": 34,
+      "claim": "This function has a three-paragraph JSDoc comment citing specific ticket and acceptance-criteria identifiers (WA-3146, #8646, AC C16), which is longer and more narrative than the one-line comment style the project expects; that context belongs in the PR description instead."
+    },
+    {
+      "id": "F29",
+      "file": null,
+      "line": null,
+      "claim": "Stories rely on a shadcn: true flag passed to createMockStory, but this flag is not part of the documented createMockStory shape in apps/web/AGENTS.md, so it should be verified that the mock helper actually supports this flag."
+    },
+    {
+      "id": "F30",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/index.tsx",
+      "line": 72,
+      "claim": "Comments in this and other changed files should be trimmed."
+    },
+    {
+      "id": "F31",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/index.tsx",
+      "line": 38,
+      "claim": "This file contains multiple multi-line comment blocks (also at lines 71-76 and 122-124) citing ticket and acceptance-criteria references, which exceeds the one-line, non-narrative comment style the project expects; that context belongs in the PR description instead."
+    },
+    {
+      "id": "F32",
+      "file": null,
+      "line": null,
+      "claim": "The component's width appears to differ between the default and empty states, which could cause the layout to jump while loading if the width is not fixed."
+    },
+    {
+      "id": "F33",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/hooks/useSpendingLimitTokenOptions.ts",
+      "line": 63,
+      "claim": "When trusted is undefined, the balances query is skipped but the query argument object still includes trusted: undefined; relying on RTK Query's serializeQueryArgs to strip undefined values is fragile, and the generated argument type expects a boolean, so trusted should be normalized (e.g. with trusted ?? false) or narrowed before the call."
+    },
+    {
+      "id": "F34",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/hooks/__tests__/useSpendingLimitTokenOptions.test.ts",
+      "line": 77,
+      "claim": "The test data setup is duplicated inline rather than using a reusable builder, which could be extracted so the same construction logic can be reused across tests."
+    },
+    {
+      "id": "F35",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/hooks/useSpendingLimitTokenOptions.ts",
+      "line": null,
+      "claim": "There is no test verifying that useSpendingLimitTokenOptions reports isLoading as false and returns empty options when trusted resolves to false and safeAddress is empty at the same time, leaving this edge-case boundary uncovered."
+    },
+    {
+      "id": "F36",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/TokenOptionRow.tsx",
+      "line": 7,
+      "claim": "This file has a 4-line comment block that includes a ticket-specific rationale (WA-3150), which is longer than the one-line comment style the project expects; only the reason the code itself cannot show should remain, in a single line."
+    },
+    {
+      "id": "F37",
+      "file": "apps/web/.../SpendingLimitFlow/TokenSelector/TokenOptionRow.tsx",
+      "line": 7,
+      "claim": "A multi-line comment citing a ticket reference violates the one-line comment rule and should be shortened, with the ticket reference moved to the PR description."
+    },
+    {
+      "id": "F38",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/TokenOptionRow.tsx",
+      "line": 15,
+      "claim": "This code is hard to read."
+    },
+    {
+      "id": "F39",
+      "file": "apps/web/.../SpendingLimitFlow/TokenSelector/index.tsx",
+      "line": 141,
+      "claim": "The filter, itemToStringValue, and onValueChange props are passed as inline arrow functions, so the combobox library's memoization of the filtered results keyed on those references is defeated and the full token list is rescanned on every re-render; wrapping them in useCallback or hoisting them to module scope would fix this."
+    },
+    {
+      "id": "F40",
+      "file": null,
+      "line": null,
+      "claim": "Showing the error and retry as a single row causes text to wrap awkwardly and take up too much space; splitting them into two separate rows, one after the other, may look better."
+    },
+    {
+      "id": "F41",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/TokenOptionRow.tsx",
+      "line": 15,
+      "claim": "The nested ternary computing the 'secondary' display value is hard to read at a glance and would be clearer as an early if/else chain or a small helper function."
+    },
+    {
+      "id": "F42",
+      "file": "apps/web/.../SpendingLimitFlow/utils/tokenOptions.ts",
+      "line": 88,
+      "claim": "A multi-line comment citing acceptance criteria violates the one-line comment rule and should be shortened, with the references moved to the PR description."
+    },
+    {
+      "id": "F43",
+      "file": "apps/web/.../SpendingLimitFlow/TokenSelector/index.tsx",
+      "line": 90,
+      "claim": "A multi-line comment gives real reasoning the code can't express but still exceeds the one-line comment limit and should be shortened rather than removed."
+    },
+    {
+      "id": "F44",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/index.tsx",
+      "line": 126,
+      "claim": "During navigation, identityKey can briefly transition from a valid value to an empty string and back to the same value as useSafeInfo catches up, but the reset effect treats the transition into the empty string as an identity change and calls onChange(undefined), wiping the user's token selection even though the target Safe never actually changed."
+    },
+    {
+      "id": "F45",
+      "file": "apps/web/.../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions.ts",
+      "line": 99,
+      "claim": "The held-balances isError case is not tested with stale currentData present, unlike the equivalent popular-token error case, leaving that code path unverified."
+    },
+    {
+      "id": "F46",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/__tests__/TokenSelector.test.tsx",
+      "line": 31,
+      "claim": "The same test data construction is duplicated across this test file and another test file; a shared builder could avoid the duplication."
+    },
+    {
+      "id": "F47",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/TokenGroupState.tsx",
+      "line": 35,
+      "claim": "The TokenGroupError code closely duplicates the existing Policies/SafeAccountSelector/components/LoadError.tsx component; the existing error component should be reused instead if possible."
+    },
+    {
+      "id": "F48",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants.ts",
+      "line": 9,
+      "claim": "This constant is already defined in SafeAccountSelector/index.tsx, so it is duplicated; it should be moved to a shared parent Policies/constants.ts file."
+    },
+    {
+      "id": "F49",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/hooks/__tests__/useSpendingLimitTokenOptions.test.ts",
+      "line": 66,
+      "claim": "This test file defines its own hand-written tokenMetadataBuilder that mostly duplicates fields already covered by the existing erc20TokenBuilder in apps/web/src/tests/builders/balances.ts, plus a trusted field, instead of extending or reusing the shared builder pattern."
+    }
+  ]
+}

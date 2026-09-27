@@ -1,0 +1,109 @@
+{
+  "pr": 8458,
+  "title": "feat(web): recognise Safe 1.5.0 as a known, trusted version (WA-2860, WA-2862)",
+  "description": "\r\n## What it solves\r\n\r\nResolves [WA-2860](https://linear.app/safe-global/issue/WA-2860/recognise-150-as-a-known-trusted-version-across-the-app)\r\nResolves [WA-2862](https://linear.app/safe-global/issue/WA-2862/security-hub-accepts-150-without-false-flags)\r\n\r\nThe web app's trusted-contract checks are hardcoded version lists that stop at `1.4.1`, so a 1.5.0 Safe (already deployable and recognised by CGW) gets falsely flagged all over the app:\r\n\r\n- Settings → Fallback handler shows \"An **unofficial** fallback handler is currently set\" for the official 1.5.0 `CompatibilityFallbackHandler` — and for the official 1.5.0 `ExtensibleFallbackHandler` (`0x85a8…42c3`), right next to its correct \"ExtensibleFallbackHandler\" label. The same false warning appears on `setFallbackHandler` confirmation views and history entries.\r\n- Security Hub raises false flags: unrecognized implementation (1.5.0 singletons), unrecognized deployment factory (1.5.0 `SafeProxyFactory`), and untrusted fallback handler.\r\n- `migrateToL2` batches routed through the 1.5.0 `MultiSend` and `signMessage` delegatecalls to the 1.5.0 `SignMessageLib` are not recognised, so they lose their dedicated tx views.\r\n\r\n## How this PR fixes it\r\n\r\nAdds `'1.5.0'` to the four hardcoded known-version lists (one commit per ticket):\r\n\r\n**WA-2860 — app-wide trust (`cd13c0224`)**\r\n\r\n- `useHasUntrustedFallbackHandler`: fixes both the Settings banner and `UntrustedFallbackHandlerTxAlert` (same hook).\r\n- `transaction-guards.ts`: `isMigrateToL2TxData` (MultiSend allowlist) and `isOnChainSignMessageTxData` (SignMessageLib allowlist).\r\n\r\n**WA-2862 — Security Hub (`80020fcc6`)**\r\n\r\n- `scanners/constants.ts` `KNOWN_SAFE_VERSIONS`: contract-version + factory-validation scanners.\r\n- `scanners/fallbackHandler.ts` `COMPATIBILITY_HANDLER_VERSIONS`: fallback-handler scanner.\r\n\r\n**Follow-ups from review/self-audit**\r\n\r\n- `6a5d47de2` — extract the shared `TRUSTED_DEPLOYMENT_VERSIONS` list into `packages/utils` instead of four inline copies.\r\n- `741fb57b9` — `useFallbackHandlerName`: only label the fallback handler with an address-verified deployment name (unknown handlers were previously all mislabelled \"CompatibilityFallbackHandler\").\r\n- `d85b9e6ba` — trust the official **ExtensibleFallbackHandler** (1.5.0 ships TWO official handlers): consolidate the three separate \"is this handler official\" implementations (`useHasUntrustedFallbackHandler`, `useFallbackHandlerName`, Security Hub scanner) into a single `identifyOfficialFallbackHandler` util in `packages/utils` that checks both official handler deployment tables. CoW's TWAP handler stays a separate, network-gated check at the call sites. Also replaces a hard-coded TWAP address copy in the hook test with the real constant.\r\n\r\nNo new trust sources — all deployment addresses come from `@safe-global/safe-deployments` (already bumped, WA-2859), which carries canonical 1.5.0 addresses for 88+ networks incl. mainnet and Sepolia.\r\n\r\n## How to test it\r\n\r\nTDD: 7 new tests were written first and watched fail (1.5.0 addresses reported untrusted/unknown), then pass after the whitelist change. Also backfills test coverage for `isMigrateToL2TxData`, which had none.\r\n\r\nManual (Sepolia 1.5.0 Safe, e.g. fallback handler `0x3EfC…77f4`):\r\n\r\n1. Settings → Setup → Fallback handler: no \"unofficial fallback handler\" banner; handler shows name + address only.\r\n2. Security Hub: contract version / deployment factory / fallback handler checks report clear instead of flagging.\r\n3. ExtensibleFallbackHandler (`0x85a8…42c3`): Settings shows the \"ExtensibleFallbackHandler\" label with **no** unofficial-handler banner; a `setFallbackHandler(0x85a8…42c3)` confirmation view shows no untrusted-handler alert (a random address still does).\r\n\r\n## Affected flows\r\n\r\n- Owner reviews fallback handler in Settings → Setup.\r\n- Owner reviews Safe health in Security Hub.\r\n- Signer opens tx details / confirmation for an on-chain `signMessage` or a `migrateToL2` batch on a 1.5.0 Safe.\r\n\r\n## Blast radius\r\n\r\n- `useHasUntrustedFallbackHandler` consumers: Settings `FallbackHandler`, `UntrustedFallbackHandlerTxAlert` (tx confirmation).\r\n- `transaction-guards` consumers: `TxData` (migration view), confirmation views (on-chain sign-message rendering).\r\n- Security Hub scanners: per-Safe grades and workspace aggregate scores can only improve (fewer false flags); no score can get worse from adding versions to a known-list.\r\n- No API contracts, feature flags, storage, or routes touched. `packages/utils` gains two additive exports (`TRUSTED_DEPLOYMENT_VERSIONS`, `identifyOfficialFallbackHandler`) with no changes to existing functions → no mobile behaviour change.\r\n\r\n## Risks / not checked\r\n\r\n- Did not browser-verify the `migrateToL2`-via-1.5.0-MultiSend and 1.5.0 `SignMessageLib` tx views — the app does not yet build these txs at 1.5.0 addresses (multichain/creation flows are WA-2930/WA-2929); covered by unit tests only.\r\n- Not tested on mobile (web-only change).\r\n- Out of scope, known remaining 1.5.0 gaps: add-network dropdown (\"Adding another network is not possible\") = WA-2930; Hoodi \"Unsupported\" version state comes from the chain's Transaction Service missing 1.5.0 singletons (WA-2922), not from the web app.\r\n\r\n## Visual summary\r\n\r\nBefore:\r\n<img width=\"1118\" height=\"287\" alt=\"image\" src=\"https://github.com/user-attachments/assets/7afab300-76e3-405e-9808-5bd040eda493\" />\r\n<img width=\"494\" height=\"923\" alt=\"image\" src=\"https://github.com/user-attachments/assets/8f0f53e7-f978-454c-b37f-c028aec2a0e8\" />\r\n<img width=\"1634\" height=\"273\" alt=\"Screenshot 2026-08-10 at 17 20 49\" src=\"https://github.com/user-attachments/assets/18f4690d-3c2e-443a-ac30-3849db6f7737\" />\r\n\r\n\r\n\r\nAfter:\r\n<img width=\"1622\" height=\"262\" alt=\"image\" src=\"https://github.com/user-attachments/assets/fc72f5c3-edf9-475e-873f-9bc0a973b69c\" />\r\n<img width=\"509\" height=\"949\" alt=\"image\" src=\"https://github.com/user-attachments/assets/222501c5-4ead-4913-9f72-5134c96676f6\" />\r\n<img width=\"1677\" height=\"232\" alt=\"Screen",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/features/security/data/scanners/__tests__/contractVersion.test.ts",
+      "line": 211,
+      "claim": "This is another instance of a hard-coded 1.5.0 contract address in the new tests that was not verified against safe-deployments and could instead be resolved dynamically."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/features/security/data/scanners/__tests__/fallbackHandler.test.ts",
+      "line": 35,
+      "claim": "This test hard-codes the 1.5.0 fallback handler address rather than resolving it dynamically, and the value was not verified against safe-deployments."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/utils/__tests__/transaction-guards.test.ts",
+      "line": 387,
+      "claim": "The test hardcodes getSafeL2SingletonDeployment({ version: '1.4.1' }) as the inner migrateToL2 argument even in the 1.5.0 MultiSend test case, so the '1.5.0 MultiSend + 1.5.0 L2 singleton' scenario is never exercised end-to-end even though the test still passes because isMigrateToL2TxData doesn't validate the L2 singleton version."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/utils/transaction-guards.ts",
+      "line": 160,
+      "claim": "The same trusted-version array is duplicated across four locations (transaction-guards.ts at two places, useHasUntrustedFallbackHandler.ts, and fallbackHandler.ts) rather than defined once, requiring this PR to edit each copy by hand. If a future version update misses one of the copies, official contracts could be incorrectly marked as untrusted, producing a false untrusted-fallback-handler warning or causing a sign-message or migrate-to-L2 transaction to go unrecognized."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/utils/transaction-guards.ts",
+      "line": 160,
+      "claim": "The inline list ['1.3.0', '1.4.1', '1.5.0'] is repeated across four locations (transaction-guards.ts:160, transaction-guards.ts:420, useHasUntrustedFallbackHandler.ts:29-33, and fallbackHandler.ts:17), each edited by hand for this PR. The repo already derives this same 'post-legacy' version set in one place via SAFE_VERSIONS.filter((v) => !isLegacyVersion(v)) in bytecodeComparison.ts:13, and without a shared constant, a future version bump risks missing one of the four copies, which would silently mark an official contract as untrusted."
+    },
+    {
+      "id": "F6",
+      "file": null,
+      "line": null,
+      "claim": "The positive test for factoryValidationScanner on chainId '1' only passes because the 1.5.0 SafeProxyFactory happens to be deployed on mainnet; adding a future version to KNOWN_SAFE_VERSIONS without a corresponding deployment on a given chain would silently produce an 'unknown to partial' result rather than a hard error, since SafeVersion typing and hasMatchingDeployment are the only guards."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/hooks/useHasUntrustedFallbackHandler.ts",
+      "line": 32,
+      "claim": "This file holds another duplicate of the trusted-version array, adding to the risk that a future version bump is applied inconsistently across the codebase."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/src/features/security/data/scanners/__tests__/contractVersion.test.ts",
+      "line": 197,
+      "claim": "The new tests hard-code the 1.5.0 mainnet singleton, factory, and fallback handler addresses instead of resolving them dynamically, and these values could not be verified against safe-deployments because node_modules was not installed. A more robust approach would resolve the addresses at test time using get*Deployment({ network: '1', version: '1.5.0' }), matching the pattern already used in useHasUntrustedFallbackHandler.test.ts and transaction-guards.test.ts."
+    },
+    {
+      "id": "F9",
+      "file": "packages/utils/src/features/multichain/hooks/useCompatibleNetworks.ts",
+      "line": 15,
+      "claim": "SUPPORTED_VERSIONS in this shared web/mobile module still excludes 1.5.0, meaning a 1.5.0 Safe will show no compatible networks when replayed to another chain, even though the PR description states the version is now trusted across the app. The author should confirm whether this omission is intentional (e.g., because replay depends on the 1.4.1 SafeToL2Setup contract) or document it as a known gap."
+    },
+    {
+      "id": "F10",
+      "file": "apps/web/src/features/security/data/scanners/fallbackHandler.ts",
+      "line": 19,
+      "claim": "The doc comment on isExtensibleFallbackHandler states that 1.5.0 is not yet in the SafeVersion type, but the diff two lines above now uses '1.5.0' as a SafeVersion, making the comment inaccurate. It should be corrected to remove the outdated claim while keeping the explanation that the extensible handler lookup has no version filter."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/src/hooks/useHasUntrustedFallbackHandler.ts",
+      "line": 29,
+      "claim": "The array ['1.3.0', '1.4.1', '1.5.0'] is duplicated across four call sites (this file, scanners/fallbackHandler.ts, and two locations in transaction-guards.ts) instead of being defined once as a shared constant. This duplication is why the version list was missed at some sites when 1.5.0 shipped, and the same risk will recur when 1.6.0 is added unless the values are consolidated into a shared constant."
+    },
+    {
+      "id": "F12",
+      "file": "apps/web/src/utils/transaction-guards.ts",
+      "line": 420,
+      "claim": "This is a second copy of the same duplicated trusted-version array described elsewhere, contributing to the same maintenance risk of an inconsistent update across copies."
+    },
+    {
+      "id": "F13",
+      "file": "apps/web/src/features/security/data/scanners/constants.ts",
+      "line": 12,
+      "claim": "KNOWN_SAFE_VERSIONS is a duplicate of the already-exported SAFE_VERSIONS list (packages/utils/src/services/contracts/utils.ts:6), containing the same six versions in reverse order, and SAFE_VERSIONS already includes '1.5.0'. Maintaining two separate copies means they can drift apart when the next Safe version is released, and this duplication made the current edit unnecessary in the first place."
+    },
+    {
+      "id": "F14",
+      "file": "packages/utils/src/features/multichain/hooks/useCompatibleNetworks.ts",
+      "line": 15,
+      "claim": "SUPPORTED_VERSIONS is still ['1.4.1', '1.3.0'] and was not updated to include '1.5.0', so a 1.5.0 Safe likely cannot be added to another network even though the commit title describes the version support as being added 'across the app'. It's unclear whether omitting this list from the update was intentional, since it governs multichain replication rather than trust checks, so the scope should be confirmed."
+    },
+    {
+      "id": "F15",
+      "file": "apps/web/src/features/security/data/scanners/__tests__/factoryValidation.test.ts",
+      "line": 52,
+      "claim": "This test hard-codes the 1.5.0 factory address rather than resolving it dynamically, and the value was not verified against safe-deployments."
+    },
+    {
+      "id": "F16",
+      "file": "apps/web/src/hooks/useHasUntrustedFallbackHandler.ts",
+      "line": 29,
+      "claim": "This hook only checks getCompatibilityFallbackHandlerDeployments and does not recognize the ExtensibleFallbackHandler that the Security Hub scanner also trusts for 1.5.0+. As a result, a 1.5.0 Safe using the extensible handler could be reported as trusted by Security Hub while the Settings banner still flags it as untrusted, reintroducing the inconsistency the PR is meant to fix."
+    },
+    {
+      "id": "F17",
+      "file": "apps/web/src/features/security/data/scanners/fallbackHandler.ts",
+      "line": 17,
+      "claim": "This file holds another duplicate of the trusted-version array; the suggested fix is to export a single named constant alongside hasMatchingDeployment in the shared deployments module and reuse it in all four places instead of maintaining separate inline arrays."
+    }
+  ]
+}

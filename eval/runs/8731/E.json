@@ -1,0 +1,11 @@
+{
+  "pr": 8731,
+  "reviewSha": "6dde346f76150ecc8184c975bb85a01410f98ee3",
+  "baseSha": "d78dc8e526d7e97468344cdd30294a46371a36ba",
+  "system": "E",
+  "version": "github",
+  "runner": "collect",
+  "model": "human",
+  "commentSha": "55fea332a13f11bbf4467b821ebc6960886b6f4b",
+  "output": "[review by vmosharova]\nNice 🔥 \nLeft a little nit comment, plus some other observations:\n- What if user enters a value with a comma - not `1.5` but `1,5`? In the existing Spending Limits on the Safe level a comma `,` is casted to a period `.`. Worth double-checking :)\n- The added dialogs are not responsive on smaller screens:\n<img width=\"421\" height=\"542\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/1f7f5100-ad5d-49df-9168-6e0c21eeeedf\" />\n- Imo it makes sense to rename `copy.ts` to something more descriptive (see my comment in the review).\n\nThe rest looks good!\n\n---\n\napps/web/src/features/spaces/components/Policies/SpendingLimitFlow/Summary/describePolicy.ts:54\nNit: `copy.ts` is not very descriptive file naming; I would rename it to `describeSpendingLimits.ts` or `policyCopy.ts`"
+}

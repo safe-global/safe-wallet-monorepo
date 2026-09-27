@@ -1,0 +1,122 @@
+{
+  "usage": {
+    "usd": 0.5778976,
+    "turns": 8,
+    "wallSeconds": 66
+  },
+  "issues": [
+    {
+      "findings": [
+        "F12",
+        "F20"
+      ],
+      "summary": "New drawer surface test asserts `dark:bg-card`, but the muted variant applies `dark:bg-[var(--color-background-main)]`, so the test fails",
+      "label": "medium",
+      "evidence": "sheet.tsx:72 defines `muted: 'bg-zinc-50 dark:bg-[var(--color-background-main)]'`, while SecurityReportDrawer.test.tsx:16 expects `toHaveClass('dark:bg-card')`. The rendered element has no such class, so the PR's only new regression test fails and would break CI."
+    },
+    {
+      "findings": [
+        "F13",
+        "F14"
+      ],
+      "summary": "Grade pills use `*-main` ink on the `*-background` tint, which fails WCAG AA contrast",
+      "label": "medium",
+      "evidence": "SafeGradeChip.tsx:15-19 pairs, for example, #FF5F72 on #FFE0E6. With the light palette values (packages/theme/src/palettes/light.ts), node gives ratios of 2.39, 2.24, 2.00 and 2.18:1, all far below 4.5:1. badge.tsx:39-42 warns that the previous variants were chosen specifically to clear AA."
+    },
+    {
+      "findings": [
+        "F11",
+        "F22"
+      ],
+      "summary": "Moving the grade colours into the `GRADE_PILL_STYLES` constant lets them slip past the Badge className lint guard",
+      "label": "low",
+      "evidence": "eslint.config.mjs:59-61 only matches `Literal` nodes directly under the Badge `className` JSXAttribute. `GRADE_PILL_STYLES[grade]` is a member expression, so all four grades' `bg-`/`text-` classes now go unflagged, where before one grade used the sanctioned eslint-disable. This is a maintainability and consistency issue, not broken behaviour."
+    },
+    {
+      "findings": [
+        "F3",
+        "F7",
+        "F10"
+      ],
+      "summary": "The muted sheet surface hard-codes raw `bg-zinc-50` for light mode but uses a CSS token for dark mode, instead of an existing theme token",
+      "label": "low",
+      "evidence": "sheet.tsx:72 is the only `zinc-` usage in apps/web/src (outside the new test). An `--surface-sunken` token already exists (shadcn.css:40, card.tsx:58, `bg-surface-sunken`). Mixing a raw palette colour with a CSS variable goes against the AGENTS.md rule to always use theme tokens."
+    },
+    {
+      "findings": [
+        "F9",
+        "F17"
+      ],
+      "summary": "Dropping `variant` makes the Badge fall back to `default`, which leaves `data-variant=\"default\"` and an inert `[a]:hover:bg-primary/80` class on every pill",
+      "label": "low",
+      "evidence": "The updated SafeGradeChip snapshot shows `data-variant=\"default\"` and `[a]:hover:bg-primary/80` on every chip, with the colours applied by tailwind-merge overrides. The `[a]` selector never matches a span, so nothing is visibly wrong, but the misleading data attribute and dead class are small upkeep costs."
+    },
+    {
+      "findings": [
+        "F18"
+      ],
+      "summary": "The snapshot header changed from the jestjs.io URL to goo.gl",
+      "label": "low",
+      "evidence": "The SafeGradeChip snap diff line 1 changes the header while package.json pins jest ^29.7.0. The repo already mixes both headers (43 of 78 snap files use goo.gl), so this is only a little snapshot churn."
+    },
+    {
+      "findings": [
+        "F2",
+        "F5"
+      ],
+      "summary": "A stray blank line was left inside the `cn(...)` call where the eslint-disable comment used to be",
+      "label": "nit",
+      "evidence": "SafeGradeChip.tsx:65 has an empty line before `GRADE_PILL_STYLES[grade],`. This is purely cosmetic."
+    },
+    {
+      "findings": [
+        "F1",
+        "F21"
+      ],
+      "summary": "The heading uses a one-off `text-[32px] leading-9` override instead of a typography variant",
+      "label": "nit",
+      "evidence": "index.tsx:37 overrides the h1 size (typography.tsx:20 defines h1 as 48px). The PR description explicitly chose a call-site override to match main's 32px without touching the shared typography.tsx, so this is a style preference."
+    },
+    {
+      "findings": [
+        "F4",
+        "F6"
+      ],
+      "summary": "The test name hard-codes '#fafafa' and 'white bg-card'",
+      "label": "nit",
+      "evidence": "SecurityReportDrawer.test.tsx:10: `bg-zinc-50` is #fafafa, so the name currently describes what the test checks (F6's claim that it is already inaccurate does not hold). It could only go stale if the tokens change later."
+    },
+    {
+      "findings": [
+        "F8"
+      ],
+      "summary": "SectionPanel rows hand-apply `overflow-hidden rounded-lg bg-card` instead of using the Card component",
+      "label": "nit",
+      "evidence": "SectionPanel.tsx:30 moves the pre-existing wrapper classes onto each motion.div row. The result renders correctly, so switching to Card is a preference with no concrete defect."
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "The new sheet variant is not recorded in a changelog comment like the one in card.tsx",
+      "label": "nit",
+      "evidence": "sheet.tsx has no changelog block to update, and the PR did update the prop docs at sheet.tsx:38 to list 'muted'. There is no concrete cost."
+    },
+    {
+      "findings": [
+        "F15"
+      ],
+      "summary": "The PR supposedly needed to note coordination with an in-flight design-system rewrite",
+      "label": "wrong",
+      "evidence": "Neither the root AGENTS.md nor apps/web/AGENTS.md contains any rule requiring coordination with a design-system rewrite for edits to components/ui. The PR description also covers the sheet.tsx blast radius."
+    },
+    {
+      "findings": [
+        "F19"
+      ],
+      "summary": "The heading rename and subtitle removal are supposedly unexplained",
+      "label": "wrong",
+      "evidence": "The PR description explicitly states the header text changes to 'Security hub'. The removed subtitle already renders in WorkspaceHealthCard.tsx:149, which matches the branch's 'remove duplicated subtitle' commit, so the removal is intentional."
+    }
+  ]
+}

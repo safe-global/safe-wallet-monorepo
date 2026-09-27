@@ -1,0 +1,10 @@
+{
+  "usd": 0.0321236,
+  "findings": [
+    {
+      "file": "apps/web/src/features/feature-flag-overrides/__tests__/bundleExclusion.test.ts",
+      "line": 1,
+      "claim": "The folder name feature-flags is unclear or poorly chosen and should be renamed to something else."
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "pr": 8369,
+  "reviewSha": "b832e7ebaa2414698bd1efbf98bc937d9bf17e85",
+  "baseSha": "4d266c76f05dc2ca726176263f5e8d667f6c6378",
+  "system": "E",
+  "version": "github",
+  "runner": "collect",
+  "model": "human",
+  "commentSha": "b832e7ebaa2414698bd1efbf98bc937d9bf17e85",
+  "output": "[review by gjeanmart]\nLooks good to me 💪 \n\n---\n\npackages/utils/src/features/safenet-checks/types/events.ts:7\nIsn't something we can reuse from elsewhere?"
+}

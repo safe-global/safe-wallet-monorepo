@@ -1,0 +1,45 @@
+{
+  "usd": 0.0592496,
+  "findings": [
+    {
+      "file": "apps/web/src/services/observability/providers/datadog.ts",
+      "line": 90,
+      "claim": "isNotFirstPartyStack checks whether '_next/static/' appears anywhere in the full stack trace rather than only in the frame that threw, so when first-party code calls directly into a vendor script (e.g. HubSpotForm.tsx onload calling window.hbspt.forms.create, useCalendly.ts, services/beamer/index.ts) the resulting blocked EvalError is kept instead of dropped because a first-party frame still appears lower in the stack. This means the noise this change is meant to remove from named vendors will not fully go away, and it may look like the fix did not work even though there is no direct user-facing consequence."
+    },
+    {
+      "file": "apps/web/src/services/observability/providers/datadog.ts",
+      "line": 90,
+      "claim": "The fix should look only at the frame that actually threw (the first 'at ...' line that is not eval/<anonymous>), and a test should be added covering a stack with a vendor top frame and a _next/static/ caller frame below it."
+    },
+    {
+      "file": "apps/web/src/services/observability/providers/__tests__/datadog.test.ts",
+      "line": 389,
+      "claim": "In the test 'drops an EvalError regardless of source', the 'console' case proves nothing because NON_USER_IMPACTING_SOURCES already drops that source regardless of this change, and the test suite does not cover a mixed stack containing both vendor and first-party frames or a 'custom' source case."
+    },
+    {
+      "file": "apps/web/src/services/observability/providers/datadog.ts",
+      "line": 72,
+      "claim": "About 40 lines of comments support roughly 3 lines of logic, which conflicts with AGENTS.md guidance to treat comments as tech debt; some of the comment claims will go stale, such as the statement that the code grepped apps/web/src and packages/ and the hardcoded list of vendors, and a trade-off paragraph duplicates the commit message."
+    },
+    {
+      "file": "apps/web/src/services/observability/providers/datadog.ts",
+      "line": 76,
+      "claim": "The comment attached to isNotFirstPartyStack discusses error.type, which is a different concern from what the function does, and the function name is a negation; naming it isFirstPartyStack and negating at the call site would read more clearly."
+    },
+    {
+      "file": "apps/web/src/services/observability/providers/datadog.ts",
+      "line": 174,
+      "claim": "Dropping the CSP-eval-blocked errors removes the only remaining in-app signal for this condition, since 'report' events are already dropped and the CSP configuration has no report-uri/report-to (securityHeaders.ts:16-29); if a vendor script were compromised and attempted eval, nothing would surface it. A report-to endpoint or a sampled addAction instead of a full drop should be considered."
+    },
+    {
+      "file": "apps/web/src/services/observability/providers/datadog.ts",
+      "line": 62,
+      "claim": "isNotFirstPartyStack has the same shape as originatesFromExtension; both could be served by a single stackIncludesAny(stack, patterns) helper, saving roughly 6 lines."
+    },
+    {
+      "file": "apps/web/src/services/observability/providers/__tests__/datadog.test.ts",
+      "line": 397,
+      "claim": "The new tests add five more '{} as any' casts (also at lines 409, 421, 433, 444), and while the file already does this, AGENTS.md says never to use any; a typed buildErrorEvent and emptyContext helper would remove all of them, saving roughly 10 lines."
+    }
+  ]
+}

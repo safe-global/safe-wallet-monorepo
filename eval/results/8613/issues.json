@@ -1,0 +1,137 @@
+{
+  "usage": {
+    "usd": 0.7061474000000001,
+    "turns": 11,
+    "wallSeconds": 77
+  },
+  "issues": [
+    {
+      "findings": [
+        "F3"
+      ],
+      "summary": "Deleting cardTable.module.css drops the rule that inverted hovered row buttons/links to --card, so ghost buttons (hover:bg-muted) become invisible against the muted row hover pill",
+      "label": "medium",
+      "evidence": "The old cardTable.module.css had `.container tbody tr button:hover, a:hover { background-color: var(--card) }`, and its comment said it existed because the button hover vanished on a lit row. The new table.module.css:76 paints hovered cells with var(--muted), which is the same fill as the ghost variant's `hover:bg-muted` (button.tsx:49). No replacement rule exists, so the address book and Spaces ghost action buttons (AddressBookTable:99/117/138, SpaceAddressBookActions, LocalContactActions) lose their hover feedback.",
+      "label_note": ""
+    },
+    {
+      "findings": [
+        "F5",
+        "F14",
+        "F22"
+      ],
+      "summary": "No test covers the mapping from highlighted/showDivider to data-no-divider/data-no-hover on SafeAccountTableRow",
+      "label": "medium",
+      "evidence": "SafeAccountTableRow.tsx:420 and :424 add the new attribute mapping, but no file in SafeAccountsTable/__tests__ references highlighted, data-no-divider or data-no-hover. Reverting either branch would pass CI and bring back a divider or hover pill over the similarity band."
+    },
+    {
+      "findings": [
+        "F2",
+        "F17"
+      ],
+      "summary": "The table.module.css comment still says the rule outranks TableCard's `.container thead th`, but that stylesheet is deleted",
+      "label": "low",
+      "evidence": "table.module.css:13 refers to `.container thead th`, which lived only in the cardTable.module.css this PR deletes. TableCard now renders a plain div, so the comment is stale."
+    },
+    {
+      "findings": [
+        "F20"
+      ],
+      "summary": "The SafeAccountTableRow comment puts the grip-cell widening in the panel variant, but it lives in the local styles module",
+      "label": "low",
+      "evidence": "SafeAccountTableRow.tsx:305-306 says the widening happens in the panel variant. The rule is actually `.accounts tbody td:first-of-type[data-hosts-handle]` in SafeAccountsTable/styles.module.css, and table.module.css has no data-hosts-handle rule."
+    },
+    {
+      "findings": [
+        "F19"
+      ],
+      "summary": "The design-system Tables swatch is still labelled 'Default grid' even though it now renders the panel variant",
+      "label": "low",
+      "evidence": "design-system.stories.tsx keeps `label=\"Default grid — EnhancedTable\"`, but the PR changed the sample to `<EnhancedTable ... panel />`, so the label no longer matches what the swatch shows."
+    },
+    {
+      "findings": [
+        "F21"
+      ],
+      "summary": "The @deprecated note points consumers outside the spaces feature at a spaces-internal component that the feature does not export",
+      "label": "low",
+      "evidence": "EnhancedTable/index.tsx:135 points to features/spaces/components/PaginatedDataTable, but features/spaces/index.ts does not export PaginatedDataTable. Consumers in components/settings, balances and so on would have to deep-import another feature's internals."
+    },
+    {
+      "findings": [
+        "F1",
+        "F6"
+      ],
+      "summary": "The EnhancedTable 'panel' tests only check that one background class is present or absent",
+      "label": "low",
+      "evidence": "index.test.tsx:33 and :39 only check that `bg-[var(--color-background-paper)]` is on the container. They never assert the `variant='panel'` class (css.table) reaches the <table>, so passing the wrong variant would still pass."
+    },
+    {
+      "findings": [
+        "F11",
+        "F18"
+      ],
+      "summary": "TableSortIcon, a new shared component with asc/desc/unsorted branches, has no unit test",
+      "label": "low",
+      "evidence": "There is no table.test.tsx in components/ui, and no test references TableSortIcon. The PaginatedDataTable tests added in this PR cover only dividers. The component is small but is shared by three tables."
+    },
+    {
+      "findings": [
+        "F7"
+      ],
+      "summary": "The empty-state placeholder row in EnhancedTable has no data-no-hover, so in panel mode it could show a hover pill",
+      "label": "low",
+      "evidence": "At EnhancedTable/index.tsx:219 the placeholder <TableRow><TableCell/></TableRow> has no opt-out attribute. However, the only panel consumer, AddressBookTable:185-209, renders EnhancedTable only when filteredEntries.length > 0, so today no one reaches this."
+    },
+    {
+      "findings": [
+        "F4",
+        "F8",
+        "F12"
+      ],
+      "summary": "The sort-header class string, including group/sort, is repeated in three tables instead of living in a shared sort-button helper",
+      "label": "nit",
+      "evidence": "EnhancedTable/index.tsx:102, PaginatedDataTable/index.tsx:215 and SafeAccountsTable/index.tsx:314 each spell out 'hover:text-foreground group/sort inline-flex ... items-center gap-1'. That is minor duplication with a small drift risk and no current defect."
+    },
+    {
+      "findings": [
+        "F9"
+      ],
+      "summary": "The claim is that PaginatedDataTable's sort icon changed from chevrons to arrows and its idle hint from 50% opacity to hidden, without design backing",
+      "label": "wrong",
+      "evidence": "The removed PaginatedDataTable SortIcon already used ArrowUp/ArrowDown/ArrowUpDown, so there was no chevron-to-arrow change there. The switch to a hint that fades in on hover is described explicitly in the PR's 'Sort affordance' section, so it is intended."
+    },
+    {
+      "findings": [
+        "F15"
+      ],
+      "summary": "The claim is that the non-panel EnhancedTable radius change from rounded-3xl to rounded-lg is an unbacked design change",
+      "label": "wrong",
+      "evidence": "The PR description says 'Radius normalised from a hardcoded 24px / rounded-3xl to --radius-lg across the table surfaces', and testing step 4 mentions the slightly tighter radius. The change is intended."
+    },
+    {
+      "findings": [
+        "F13"
+      ],
+      "summary": "The claim is that the invisible unsorted sort icon still takes up width in narrow fixed-layout headers",
+      "label": "wrong",
+      "evidence": "Reserving the space is deliberate: the table.tsx:93-95 docstring says the hint 'holds its space either way, so a header never reflows'. The reviewer also admits the overflow was never confirmed by rendering."
+    },
+    {
+      "findings": [
+        "F10"
+      ],
+      "summary": "The claim is that the PR does not say whether it was coordinated with other design-system PRs touching ui/table.tsx",
+      "label": "unverifiable",
+      "evidence": "Whether any competing open PR exists cannot be settled from the code in this checkout."
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "The claim is that expanding a row in the mobile PaginatedDataTable WithRowDetail story overflows its 311px scroller",
+      "label": "unverifiable",
+      "evidence": "This is a rendered-layout claim about a Storybook viewport. It cannot be confirmed without rendering, which is out of scope for a read-only review."
+    }
+  ]
+}

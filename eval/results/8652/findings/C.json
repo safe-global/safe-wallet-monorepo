@@ -1,0 +1,35 @@
+{
+  "usd": 0.0605136,
+  "findings": [
+    {
+      "file": "apps/web/src/services/observability/providers/mixpanel/error-tracking.ts",
+      "line": 40,
+      "claim": "httpStatus is guarded with a truthiness check (context.httpStatus && …) instead of an explicit undefined check, which is inconsistent with the attempt guard's explicit rationale and could invite copy-paste mistakes when new facets are added."
+    },
+    {
+      "file": "apps/web/src/services/exceptions/index.ts",
+      "line": 78,
+      "claim": "httpStatus is guarded with a truthiness check (context.httpStatus && …) instead of an explicit undefined check, mirroring the same inconsistency found in the mixpanel error-tracking mapper."
+    },
+    {
+      "file": "error-tracking.ts",
+      "line": 131,
+      "claim": "The dedupe key is computed by hashing only the emitted properties from the hand-maintained mapContext whitelist, not the full ErrorContext, so the PR description's claim that a newly added facet cannot be forgotten only holds if that new field is also wired into mapContext; this invariant is undocumented and unenforced."
+    },
+    {
+      "file": "error-tracking.ts",
+      "line": 131,
+      "claim": "Dedupe correctness relies on JSON.stringify iterating object properties in a stable insertion order; if mapContext is later refactored to conditionally build keys in a different order (e.g. via Object.fromEntries with filtering), logically identical events could produce different serialized keys and stop being deduplicated."
+    },
+    {
+      "file": "error-tracking.ts",
+      "line": 55,
+      "claim": "pruneSentErrors scans the whole map twice on overflow (once for expired entries, once for LRU eviction), which is an unnecessary O(n) pass that could be addressed with Map#entries() slicing if the tracked-error ceiling grows."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "Test coverage does not verify that the suppressed occurrence counter resets to 0 when the same error key resurfaces after the dedupe window; there is no test asserting that a re-emit following the window, followed immediately by another failure, reports 1 occurrence rather than continuing from the prior count (e.g. 4)."
+    }
+  ]
+}

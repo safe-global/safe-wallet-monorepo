@@ -1,0 +1,11 @@
+{
+  "pr": 8288,
+  "reviewSha": "ab3a7e735893385864b80c38aaa0559139ed9f8a",
+  "baseSha": "191d616e15c229c533474bf6b29da9e1ee7e939c",
+  "system": "E",
+  "version": "github",
+  "runner": "collect",
+  "model": "human",
+  "commentSha": "3f734769b24e1c42fd5114994637a369aea62c25",
+  "output": "apps/web/src/features/feature-flag-overrides/__tests__/bundleExclusion.test.ts:1\nMaybe rename the `feature-flags` folder name to another name."
+}

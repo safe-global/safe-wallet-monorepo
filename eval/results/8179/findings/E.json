@@ -1,0 +1,10 @@
+{
+  "usd": 0.039448,
+  "findings": [
+    {
+      "file": null,
+      "line": null,
+      "claim": "The commit is unsigned, which must be fixed before the pull request can be merged."
+    }
+  ]
+}

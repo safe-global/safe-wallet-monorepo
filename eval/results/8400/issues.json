@@ -1,0 +1,207 @@
+{
+  "usage": {
+    "usd": 0.6894589999999998,
+    "turns": 7,
+    "wallSeconds": 78
+  },
+  "issues": [
+    {
+      "findings": [
+        "F1",
+        "F5"
+      ],
+      "summary": "Unguarded ALLOWED_TRANSITIONS[pinned] lookup could throw on a stale rehydrated status",
+      "label": "low",
+      "evidence": "mergeMonotonic.ts:67 indexes a typed Record. TypeScript makes this safe today and nothing persists yet, so the risk only exists once Redux rehydration is added. A `?? []` guard is cheap hardening, not a fix for a current bug."
+    },
+    {
+      "findings": [
+        "F2"
+      ],
+      "summary": "Generated checklist file leaks into git status",
+      "label": "wrong",
+      "evidence": "`docs/engineering` does not exist in the worktree, `git status` is clean, and the file is not in the PR diff."
+    },
+    {
+      "findings": [
+        "F3"
+      ],
+      "summary": "Snapshot chainId (Safenet chain) shares a name with event chainId (Safe home chain)",
+      "label": "low",
+      "evidence": "snapshot.ts:12-13 documents the Safenet chain, while decodeLogs.test.ts:141 pins the event chainId as the Safe's home chain (42161). Nothing builds the snapshot yet, but the shared name invites filling it with the wrong value."
+    },
+    {
+      "findings": [
+        "F4"
+      ],
+      "summary": "Local str() duplicates toDecimalString and differs on undefined",
+      "label": "low",
+      "evidence": "decodeLogs.ts:15 `String(undefined)` gives 'undefined', while packages/utils/src/utils/numbers.ts:1 returns '0'. This is small duplication with a real divergence, though decoded args are rarely undefined."
+    },
+    {
+      "findings": [
+        "F6"
+      ],
+      "summary": "An attested event is accepted without its matching proposal event",
+      "label": "low",
+      "evidence": "deriveCheckState.ts:76-93 checks only for *_ATTESTED. A lone attestation still needs a VERIFIED FROST signature to reach BENIGN, and a proposal and its attestation normally reorg out together, so the edge case is unlikely."
+    },
+    {
+      "findings": [
+        "F7"
+      ],
+      "summary": "Snapshot events typed as a mutable array",
+      "label": "nit",
+      "evidence": "snapshot.ts:27 uses NormalizedCheckEvent[] where deriveCheckState uses ReadonlyArray. This is a style consistency point with no consumer yet."
+    },
+    {
+      "findings": [
+        "F8"
+      ],
+      "summary": "No test for order independence",
+      "label": "nit",
+      "evidence": "deriveCheckState.ts uses only `some` and a max fold (lines 19-54), which cannot depend on order. A reversal test would add little."
+    },
+    {
+      "findings": [
+        "F9",
+        "F12",
+        "F21"
+      ],
+      "summary": "The oracle-attested and plain-attested branches are duplicated, and their precedence comment has no observable effect",
+      "label": "low",
+      "evidence": "deriveCheckState.ts:77-81 and 89-93 are identical and both read the same single `attestation` input. The 'oracle branch wins' comment at lines 86-87 therefore describes an ordering that never changes the result, which is a small maintainability cost."
+    },
+    {
+      "findings": [
+        "F10",
+        "F26"
+      ],
+      "summary": "The attestation verification result is not tied to the attested event's signatureId",
+      "label": "low",
+      "evidence": "deriveCheckState.ts:78/90 reads only `attestation.status` and never compares `attestation.signatureId` (status.ts:78) with the event's signatureId. The caller (the reader, not in this PR) is trusted to pass the matching result. This is a missing defence-in-depth check, not a reachable bug today."
+    },
+    {
+      "findings": [
+        "F11"
+      ],
+      "summary": "RawLog is described as ethers Log-shaped, but ethers names the field `index`",
+      "label": "low",
+      "evidence": "decodeLogs.ts:5 says 'ethers `Log`-shaped' but uses `logIndex` (line 11), which matches raw eth_getLogs rather than ethers' Log.index. This is a minor documentation mismatch."
+    },
+    {
+      "findings": [
+        "F13"
+      ],
+      "summary": "logCounter is reset in only some tests",
+      "label": "nit",
+      "evidence": "rawLogs.ts:20 is module state. The tests do not assert auto-assigned block numbers or log indices, so a leaked counter changes no test outcome."
+    },
+    {
+      "findings": [
+        "F14"
+      ],
+      "summary": "UNVERIFIED and PENDING implicitly fall through to AWAITING_VERIFICATION",
+      "label": "nit",
+      "evidence": "deriveCheckState.ts:78-80 falls through to AWAITING_VERIFICATION, which is the safe default (never green). An exhaustive switch would be a style improvement only."
+    },
+    {
+      "findings": [
+        "F15",
+        "F22"
+      ],
+      "summary": "The precedence docblock omits the plain-attested branch and the UNAVAILABLE fallback",
+      "label": "low",
+      "evidence": "deriveCheckState.ts:71 says 'Otherwise → SUBMITTED', but lines 88-93 and 105-107 add the plain branch and UNAVAILABLE for the no-proposal case. The doc no longer matches the code."
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "A bare catch drops recognised-but-malformed logs, including a negative OracleResult, with no signal",
+      "label": "low",
+      "evidence": "decodeLogs.ts:42-44 returns null for every failure, and lines 20-21 document dropping malformed logs as intended. Losing a corrupted rejection silently is a real observability gap, but ABI drift or a truncated RPC response on exactly that log is unlikely."
+    },
+    {
+      "findings": [
+        "F17"
+      ],
+      "summary": "SafenetCheckSnapshot is never constructed",
+      "label": "wrong",
+      "evidence": "This is intentional in a stacked PR: the description says the reader (next PR) is the first consumer and that nothing imports these types yet."
+    },
+    {
+      "findings": [
+        "F18"
+      ],
+      "summary": "The 'never throws' claim rests on only a few tests",
+      "label": "nit",
+      "evidence": "The claim is structurally guaranteed by the try/catch around the whole decode at decodeLogs.ts:34-44, so extra inputs would add little."
+    },
+    {
+      "findings": [
+        "F19"
+      ],
+      "summary": "Many casts on ethers' untyped Result",
+      "label": "nit",
+      "evidence": "decodeLogs.ts:60-146 casts fields of ethers' `Result` (Array<any>). The casts sit right after ABI-validated parseLog and are the usual pattern, with no concrete defect."
+    },
+    {
+      "findings": [
+        "F20"
+      ],
+      "summary": "The decoder drops the emitter address, so a forged OracleResult could reach MALICIOUS",
+      "label": "low",
+      "evidence": "decodeLogs.ts:37-41 dispatches on topic0 only and never carries `address` forward. The PR moves the SAFENET_ORACLE_ADDRESSES allowlist to the reader, which filters by address at eth_getLogs, so this layer is not the trust boundary. Not exploitable within this PR."
+    },
+    {
+      "findings": [
+        "F23",
+        "F24"
+      ],
+      "summary": "toPublicStatus has no test",
+      "label": "medium",
+      "evidence": "status.ts:52-61 holds the security-relevant rule that VERIFICATION_FAILED never renders as safe, and grep finds no test or caller. Changing that branch to return BENIGN would type-check and pass CI."
+    },
+    {
+      "findings": [
+        "F25"
+      ],
+      "summary": "DISPUTE_RESOLVED depends on a paired OracleResult",
+      "label": "wrong",
+      "evidence": "This is intended and documented: deriveCheckState.ts:30-38 says only OracleResult counts, and the PR description says it verified that resolveDispute emits OracleResult alongside DisputeResolved."
+    },
+    {
+      "findings": [
+        "F27"
+      ],
+      "summary": "BigInt allocation per event in deadlineBlockOf",
+      "label": "nit",
+      "evidence": "deriveCheckState.ts:23 makes a handful of BigInts per check, which is negligible. This is premature optimisation."
+    },
+    {
+      "findings": [
+        "F28"
+      ],
+      "summary": "buildV1Lifecycle and buildV2Lifecycle are unused",
+      "label": "low",
+      "evidence": "grep shows no callers of rawLogs.ts:291/309, and decodeLogs.test.ts:30-38 builds the same sequences by hand. These are dead test helpers."
+    },
+    {
+      "findings": [
+        "F29"
+      ],
+      "summary": "mergeMonotonic tests miss the ordinary transitions to BENIGN",
+      "label": "medium",
+      "evidence": "mergeMonotonic.test.ts tests only UNAVAILABLE→BENIGN and TIMED_OUT→BENIGN; IN_PROGRESS/AWAITING_VERIFICATION/SUBMITTED→BENIGN are never checked. Removing BENIGN from mergeMonotonic.ts:40 or :46 would pass every test while checks stay stuck in progress."
+    },
+    {
+      "findings": [
+        "F30"
+      ],
+      "summary": "UNAVAILABLE now also means 'no check exists', but it is documented as an RPC failure",
+      "label": "low",
+      "evidence": "status.ts:31 says RPC/config failure, but deriveCheckState.ts:107 returns it for an empty event set. mergeMonotonic.ts:66 then treats it as transient, so a check that reorgs away entirely keeps its pinned status. This is a documentation and semantics mismatch with limited impact."
+    }
+  ]
+}

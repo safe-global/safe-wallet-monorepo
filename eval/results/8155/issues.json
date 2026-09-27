@@ -1,0 +1,154 @@
+{
+  "usage": {
+    "usd": 0.9104666,
+    "turns": 13,
+    "wallSeconds": 112
+  },
+  "issues": [
+    {
+      "findings": [
+        "F8",
+        "F14",
+        "F19",
+        "F2"
+      ],
+      "summary": "The 'Add account manually' test now adds SEP_STATIC_SAFE_35 to the admin's first existing space and never removes it, so it cannot be rerun: on the next run the submit button stays disabled.",
+      "label": "medium",
+      "evidence": "spaces_basicflow.cy.js:47-52 calls openFirstSpaceFromSpacesView() and then addAccountManually() with no cleanup. In AddAccounts/index.tsx:53-65, getSelectedSafes skips Safes already in the space, so isFormDirty (line 205) stays false, the button is disabled (line 494), and `addAccountsBtn.should('be.enabled')` at spaces.page.js:554 times out on a rerun against the same space."
+    },
+    {
+      "findings": [
+        "F18",
+        "F9"
+      ],
+      "summary": "goToSpacesView() and openFirstSpaceFromSpacesView() read cy.url() only once after @spacesList, so a single-space redirect that happens afterwards (router.push in a useEffect) can be missed.",
+      "label": "medium",
+      "evidence": "At spaces.page.js:233-238 and 664-669, `cy.url().then(...)` carries no assertion, so Cypress does not retry it. The next check for `orgList, createSpaceBtn` can pass on /welcome/spaces just before the redirect. In the create test, the Create button then disappears after ensureReadyToCreateSpace's 2s wait, which is the flakiness the PR set out to fix."
+    },
+    {
+      "findings": [
+        "F11",
+        "F24",
+        "F3"
+      ],
+      "summary": "The same 'wait for @spacesList → if on dashboard, click logo → assert URL' block appears in both goToSpacesView and openFirstSpaceFromSpacesView.",
+      "label": "low",
+      "evidence": "spaces.page.js:232-238 and 663-669 are the same block. openFirstSpaceFromSpacesView could call goToSpacesView(). Keeping two copies means the redirect-timing issue above has to be fixed in two places."
+    },
+    {
+      "findings": [
+        "F1",
+        "F20"
+      ],
+      "summary": "Page-object exports in spaces.page.js were left with no callers after the PR removed the tests that used them.",
+      "label": "low",
+      "evidence": "grep over apps/web/cypress finds getPendingTxItem, signOutViaSidebarProfile, verifyOnSingleSpaceDashboard, clickExpandedPanelSubAccountRow, verifyAccountRowDetails, txDetailsLabel and pendingTxName only in spaces.page.js. At the base commit they were used in spaces_basicflow.cy.js and spaces_dashboard.cy.js, where this PR removed their callers."
+    },
+    {
+      "findings": [
+        "F25"
+      ],
+      "summary": "Many sidebar.pages.js helpers have no callers left after the sidebar specs were deleted.",
+      "label": "low",
+      "evidence": "A word-match grep over apps/web/cypress finds 82 of the 102 `export function`s in sidebar.pages.js used nowhere outside that file. That is dead code the deletions left behind."
+    },
+    {
+      "findings": [
+        "F21",
+        "F22"
+      ],
+      "summary": "staticSpaces.js still holds fields nothing reads (unnamedAccount*, multichainAccount*, multichainSubAccounts), and accountsWidgetRowCount is 9 while the live test hard-codes 3.",
+      "label": "low",
+      "evidence": "staticSpaces.js:18-41. The only user of accountsWidgetRowCount is inside the commented-out block in spaces_dashboard.cy.js, and the live test at line 25 asserts `verifySpaceDashboardAccountsWidgetRowCount(3)`. The stale fixture data could mislead maintainers."
+    },
+    {
+      "findings": [
+        "F12"
+      ],
+      "summary": "The pendingTxAccount comment still says 'Row 2' even though singleChainAccountRowIndex was removed.",
+      "label": "nit",
+      "evidence": "staticSpaces.js:45 keeps 'Row 2 —' while the diff removes singleChainAccountRowIndex: 2. The row is now found via `:has(single-account-name)`, so the position note is just stale documentation."
+    },
+    {
+      "findings": [
+        "F26",
+        "F23"
+      ],
+      "summary": "clickSingleChainAccountRow() clicks the first single-chain row rather than targeting the 'Pending tx' row by name, so it depends on the fixture space having only one single-chain row.",
+      "label": "low",
+      "evidence": "spaces.page.js:157 and 275-277 use `cy.get(singleChainAccountRow).first()`. spaces_dashboard.cy.js:38 and :76 then assert the pendingTxAccount details. This works with today's fixture (the other rows are multichain), but it breaks if another single-chain Safe is added."
+    },
+    {
+      "findings": [
+        "F10"
+      ],
+      "summary": "ensureReadyToCreateSpace swapped the retrying `cy.get('body').find(spaceCard)` for a fixed cy.wait(2000) followed by a single synchronous count, so a list that renders slowly can be under-counted.",
+      "label": "low",
+      "evidence": "The old code at base spaces.page.js:466-468 retried, but it hung when there were no spaces. The new code at spaces.page.js:515-520 reads `$body.find(spaceCard).length` once. The window is small because goToSpacesView has already waited for @spacesList and the list container."
+    },
+    {
+      "findings": [
+        "F13"
+      ],
+      "summary": "In verifySpaceInviteBannerVisible, the 30s timeout sits on cy.get(inviteBanner), so the chained .contains(spaceName) uses the 10s default.",
+      "label": "low",
+      "evidence": "spaces.page.js:572-574. defaultCommandTimeout is 10000 (cypress.config:78). If another invite banner is already rendered, the new space name gets only 10s to appear. This is a minor source of flakiness."
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "The invite test creates a space and never deletes it, so the admin account keeps drifting toward the space limit.",
+      "label": "low",
+      "evidence": "spaces_basicflow.cy.js:54-78 has no delete step. The old version didn't delete either, so the leak predates this PR, and ensureReadyToCreateSpace/deleteOneSpace handle the limit. It does make 'first space' unstable across runs."
+    },
+    {
+      "findings": [
+        "F7"
+      ],
+      "summary": "The invite test uses a hard-coded cy.wait(3000) followed by a second cy.visit instead of a retrying assertion.",
+      "label": "low",
+      "evidence": "spaces_basicflow.cy.js:74-75 have `cy.wait(3000)` and then `cy.visit(constants.spacesUrl)`. A fixed sleep for synchronization is fragile and slow, but it's a minor test-quality issue."
+    },
+    {
+      "findings": [
+        "F15"
+      ],
+      "summary": "The regression assets test now asserts the same list in both token modes, so it can't catch a regression in default-token filtering and mostly duplicates the smoke test.",
+      "label": "low",
+      "evidence": "assets.cy.js:47-57 expect Sepolia Ether plus the spam tokens in both modes. The comment and the PR description say this is deliberate because Sepolia has no portfolio support, but the test now gives little coverage beyond smoke/assets.cy.js."
+    },
+    {
+      "findings": [
+        "F17"
+      ],
+      "summary": "No unit test checks that trusted Safe cards render inside the 'pinned-accounts' wrapper, even though the Cypress helpers now depend on that nesting.",
+      "label": "low",
+      "evidence": "index.test.tsx:136 only asserts `getByTestId('pinned-accounts')` is in the document. Moving the test id back onto the header would still pass the unit tests. Cypress (accounts_modal.pages.js:39) would still catch it, so the gap is minor."
+    },
+    {
+      "findings": [
+        "F4"
+      ],
+      "summary": "The 'Used in:' comment on sidebarTrustedSafe1Safe2 still names sidebar3/sidebar5 specs instead of the actual consumer, safe_selector.cy.js.",
+      "label": "low",
+      "evidence": "The comment in localstorage_data.js sits right after the block this PR removed and still says 'sidebar3.cy.js, sidebar5.cy.js'. grep shows the only consumer is regression/safe_selector.cy.js. It's a documentation mismatch next to lines the PR changed."
+    },
+    {
+      "findings": [
+        "F6"
+      ],
+      "summary": "The PR cut SEP_STATIC_SAFE_9's comment down to 'Sidebar testing', dropping its consumer list even though several specs still use it.",
+      "label": "low",
+      "evidence": "static.js:30 changed from 'Used in: sidebar_2…sidebar_8' to '/** Sidebar testing */'. grep finds SEP_STATIC_SAFE_9 in safe_selector (regression and smoke), sidebar_new, prodhealthcheck/sidebar, prodhealthcheck/sidebar_3 and visual/sidebar. The file is inconsistent now, since the other entries were updated to list consumers."
+    },
+    {
+      "findings": [
+        "F5"
+      ],
+      "summary": "openAddAccountsToWorkspace uses click({ force: true }) right after asserting the element is visible and enabled, which can hide an overlay regression.",
+      "label": "nit",
+      "evidence": "spaces.page.js:537 does `.should('be.visible').and('be.enabled').click({ force: true })`. It's a test-robustness preference, and Beamer is already blocked, so there is no concrete defect."
+    }
+  ]
+}

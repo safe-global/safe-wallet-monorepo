@@ -1,0 +1,35 @@
+{
+  "usd": 0.03688,
+  "findings": [
+    {
+      "file": "apps/web/src/components/ui/table.module.css",
+      "line": 76,
+      "claim": "The new panel table CSS deletes cardTable.module.css, which contained a rule keeping hovered row buttons/links styled with the card background color; the replacement panel rule only paints hovered cells with a muted background and does not restore this override, so ghost buttons (which also hover to a muted background) lose visible hover feedback whenever their row is hovered. This affects the edit/delete/send buttons in the global address book, the edit/remove buttons in Spaces members, and the actions in the Spaces address book and pending requests."
+    },
+    {
+      "file": "features/myAccounts/components/SafeAccountsTable/SafeAccountTableRow.tsx",
+      "line": 420,
+      "claim": "The mapping from the `highlighted` and `showDivider` props to the `data-no-divider` / `data-no-hover` attributes has no test coverage; existing tests mock the row and only check its own attribute, so reverting this mapping would not be caught by any test and would cause address-band-highlighted rows to incorrectly show the grey divider and rounded hover fill over their tint."
+    },
+    {
+      "file": "components/ui/table.tsx",
+      "line": 96,
+      "claim": "`TableSortIcon` is a new shared component with three conditional branches but has no unit test, even though it is now reused across three different tables."
+    },
+    {
+      "file": "components/ui/table.module.css",
+      "line": 13,
+      "claim": "A comment stating that a `tr` rule outranks TableCard's `.container thead th` rule is now incorrect, because this change removes the `.container` rule the comment refers to."
+    },
+    {
+      "file": "features/myAccounts/components/SafeAccountsTable/SafeAccountTableRow.tsx",
+      "line": 305,
+      "claim": "A comment claims the grip-cell widening behavior happens in the panel variant, but it actually lives in `SafeAccountsTable/styles.module.css:32` (`.accounts tbody td:first-of-type[data-hosts-handle]`), making the comment inaccurate."
+    },
+    {
+      "file": "features/myAccounts/components/SafeAccountsTable/index.tsx",
+      "line": 370,
+      "claim": "The unsorted sort icon is only faded to zero opacity rather than removed from layout, so it still occupies its width plus a gap in narrow table headers; with a fixed column layout, a header label in a narrow column may spill past its header cell, though this was not confirmed by rendering."
+    }
+  ]
+}

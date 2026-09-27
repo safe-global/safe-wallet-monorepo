@@ -1,0 +1,70 @@
+{
+  "usd": 0.0830196,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/PendingRequestsTable.tsx",
+      "line": 174,
+      "claim": "The address branch of the 'Requested by' cell now passes showName={false} to EthHashInfo, so admins always see the raw hex address instead of the requester's resolved name, even when that wallet is in the local or space address book, making it harder to identify who is asking for approval."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/PendingRequestsTable.tsx",
+      "line": 174,
+      "claim": "The email branch of the same cell renders an identicon for an email string instead of using EmailInfo, which is a rendering mismatch that a shared component like AddedBy already handles correctly."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/PendingRequestsTable.tsx",
+      "line": 110,
+      "claim": "The 'Requested by' column is fixed at w-[20%] (about 144-200px) while the full 42-character address with highlight4bytes needs roughly 300px, so combined with nowrap/ellipsis CSS the address is clipped from the right, hiding exactly the bold last-4-bytes highlight that the ellipsis cuts."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/PendingRequestsTable.tsx",
+      "line": 107,
+      "claim": "On small screens the table's column width percentages sum to 105% (15+40+15+20+15), and because the table uses table-fixed the browser rescales them, so the intended column proportions are never actually applied."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/PendingRequestsTable.tsx",
+      "line": 107,
+      "claim": "Column widths are switched in JavaScript via MUI's useMediaQuery(down('lg')) (1200px breakpoint), which returns false during server rendering, causing the widths to visibly jump after hydration; sibling tables instead use Tailwind responsive classes or a useIsMobile hook, which would avoid this jump."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/PendingRequestsTable.tsx",
+      "line": 120,
+      "claim": "This PR adds a long-name tooltip to the address book Name column, but the Pending tab's own Name cell remains a bare truncate span without a tooltip; since that column also shrinks to 15% on small screens, long requester names get cut off with no way to read the full value."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx",
+      "line": 101,
+      "claim": "TooltipTrigger renders a <button> by default, so every row gets a focusable button that performs no action, and the tooltip appears even for names that are not actually truncated; other places in the codebase instead pass render={<span .../>} to avoid this."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/__tests__/AccountItemChainBadge.test.tsx",
+      "line": 42,
+      "claim": "The single-chain test asserts that a heading is absent, but that heading was never rendered in single-chain mode to begin with, so the assertion cannot actually fail and does not verify the intended behavior."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/__tests__/SpaceAddressBookTable.test.tsx",
+      "line": 169,
+      "claim": "The name-tooltip test only checks that a button element exists rather than verifying the tooltip's content, so it would not catch a regression in what the tooltip actually displays."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/__tests__/PendingRequestsTable.test.tsx",
+      "line": null,
+      "claim": "The pending-requests tests do not cover the showName behavior, the 'Requested by' tooltip, or the non-address strings returned by the API such as 'Unknown user' and 'Deleted user', leaving those code paths untested."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/PendingRequestsTable.tsx",
+      "line": 173,
+      "claim": "The tooltip trigger renders a <span> that wraps a <div>, which is invalid HTML nesting; using a <span> wrapper consistently or render={<div .../>} would fix it."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/PendingRequestsTable.tsx",
+      "line": 1,
+      "claim": "react is imported twice in this file, once for useState and once for useMemo; these should be merged into a single import statement."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/PendingRequestsTable.tsx",
+      "line": 57,
+      "claim": "The expression spaceId ?? '' is redundant at these locations because an earlier guard (if (!spaceId) return) already ensures spaceId is defined."
+    }
+  ]
+}

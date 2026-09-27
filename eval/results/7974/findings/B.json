@@ -1,0 +1,25 @@
+{
+  "usd": 0.0437576,
+  "findings": [
+    {
+      "file": "apps/web/src/components/ui/checkbox.tsx",
+      "line": 42,
+      "claim": "The class data-indeterminate:[&>svg]:hidden hides the checkmark glyph when a checkbox is indeterminate, but nothing replaces it. Because base-ui 1.2.0 never sets data-checked on an indeterminate checkbox, and the Root element has no data-indeterminate styling for fill or border, the resulting box renders identically to an unchecked checkbox, making the indeterminate state visually indistinguishable from unchecked even though aria-checked is still mixed for screen readers."
+    },
+    {
+      "file": "apps/web/src/components/ui/checkbox.tsx",
+      "line": null,
+      "claim": "SelectAllToggle passes indeterminate for the partial-selection state, and this component is used in the Spaces onboarding flow's safes list, so when some safes are selected the Select all checkbox looks the same as when none are selected, misleading sighted users about selection state."
+    },
+    {
+      "file": "apps/web/src/components/ui/checkbox.tsx",
+      "line": null,
+      "claim": "The fix should render a distinct glyph (e.g., a dash/minus icon) for the indeterminate state alongside the existing checkmark, toggled with data-indeterminate: and not-data-indeterminate: modifiers, and add data-indeterminate: background/border/text color classes to the Root so the box visually reads as selected; if an empty box is actually the intended design, that should be explicitly stated in the linked ticket and PR description rather than left ambiguous."
+    },
+    {
+      "file": "apps/web/src/components/ui/stories/checkbox.stories.tsx",
+      "line": 36,
+      "claim": "The Storybook 'States' grid has no indeterminate example, and AllVariants is tagged !chromatic, so there is no automated visual check that would catch this indeterminate-state regression or a future one; an Indeterminate story with Chromatic snapshotting should be added."
+    }
+  ]
+}

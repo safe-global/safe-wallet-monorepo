@@ -1,0 +1,15 @@
+{
+  "usd": 0.097494,
+  "findings": [
+    {
+      "file": "useDefaultGasPrice.ts",
+      "line": 89,
+      "claim": "When data[gasParameter] is null, Number(null) evaluates to 0, which passes the Number.isFinite() check even though it is not a valid oracle value; the code should explicitly check for null and throw a missing-parameter error instead of silently treating it as zero."
+    },
+    {
+      "file": "useDefaultGasPrice.ts",
+      "line": 55,
+      "claim": "The Etherscan parsing path has the same issue as the non-Etherscan path: null values in the response would be coerced to 0 by Number(null) and pass validation instead of being treated as missing data."
+    }
+  ]
+}

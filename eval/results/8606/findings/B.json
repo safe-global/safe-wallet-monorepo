@@ -1,0 +1,35 @@
+{
+  "usd": 0.0710876,
+  "findings": [
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppsInfoModal/styles.module.css",
+      "line": 8,
+      "claim": "The slider container's overflow was changed from hidden to overflow-y: auto, but nextSlide and prevSlide never reset scrollTop and no key forces a remount, so the next slide keeps the previous slide's scroll position. Since all slides are stretched to the tallest slide's height, this can make a subsequent slide such as the safety warning appear blank until the user scrolls back up."
+    },
+    {
+      "file": "apps/web/src/components/settings/SafeAppsPermissions/index.stories.tsx",
+      "line": 12,
+      "claim": "local.setItem('SafeApps__browserPermissions', …) runs at module import time and writes to real localStorage with no cleanup, and preview.tsx never clears it, so this data can leak into another story (SafeApps.stories.tsx) that renders the same component, making its rendered output depend on story load order."
+    },
+    {
+      "file": "apps/web/src/components/settings/SafeAppsPermissions/index.stories.tsx",
+      "line": 12,
+      "claim": "The storage key is hard-coded instead of importing BROWSER_PERMISSIONS from useBrowserPermissions.ts, which is currently private, so if the key is ever renamed the story will silently seed nothing."
+    },
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppsInfoModal/styles.test.ts",
+      "line": 7,
+      "claim": "The file contains a sixth local copy of the postcss findRule/declOf helper functions, duplicating the same pair already present in five other styles.test.ts files across the codebase."
+    },
+    {
+      "file": "apps/web/src/components/settings/SafeAppsPermissions/index.stories.tsx",
+      "line": 38,
+      "claim": "loaders: [mswLoader] is declared on both the story meta and on the Default story, registering it twice, whereas sibling stories declare it only on the meta."
+    },
+    {
+      "file": "apps/web/src/components/safe-apps/types.ts",
+      "line": 9,
+      "claim": "FEATURES lacks an `as const` assertion, so AllowedFeatures resolves to plain string and every `as AllowedFeatures[]` cast becomes a no-op, meaning a misspelled feature name would still type-check; this includes new casts added in SafeAppsInfoModal/index.stories.tsx."
+    }
+  ]
+}

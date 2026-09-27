@@ -1,0 +1,93 @@
+{
+  "usage": {
+    "usd": 0.5158656,
+    "turns": 6,
+    "wallSeconds": 52
+  },
+  "issues": [
+    {
+      "findings": [
+        "F2",
+        "F3",
+        "F10"
+      ],
+      "summary": "Re-aim effect can loop refetches when a refetch fails, contradicting the 'Exactly one refetch' comment, and no test covers it",
+      "label": "medium",
+      "evidence": "useSafenetCheck.ts:150-153: after a failed refetch RTK keeps the old snapshot (same aimedAtMs) and isFetching goes true→false, so the effect runs again, still sees aimedAtMs !== aim, and calls queryRefetch() again with no backoff. That bypasses pollingInterval and skipPollingIfUnfocused. It only happens when aims differ, which the PR says is inert today, and none of the new tests cover the failure path."
+    },
+    {
+      "findings": [
+        "F5",
+        "F9",
+        "F11"
+      ],
+      "summary": "WINDOW_UNCERTAIN reuses READ_FAILED's 'could not be read. Retry later.' copy, which is inaccurate when the read succeeded and retrying may never help",
+      "label": "low",
+      "evidence": "statusPresentation.ts:49-52,69 give WINDOW_UNCERTAIN the STATUS_UNKNOWN copy, and useSafenetCheck.ts:42 selects that reason for every non-proven empty read. The PR says reusing this copy was deliberate, so the missing sign-off part is not a defect. Still, 'could not be read… Retry later' is misleading for a window that stays heuristic permanently."
+    },
+    {
+      "findings": [
+        "F14"
+      ],
+      "summary": "SafenetAuditRow prop doc still says the timestamp aims the block window directly",
+      "label": "low",
+      "evidence": "SafenetAuditRow.tsx:37 still reads 'aims the reader's block window'. The PR changed the matching comment in SafenetQueueStatus.tsx to describe the registry offer but left this one as it was."
+    },
+    {
+      "findings": [
+        "F12"
+      ],
+      "summary": "Grace-window test restores real timers inline rather than in afterEach",
+      "label": "nit",
+      "evidence": "useSafenetCheck.test.ts:158,174 call jest.useFakeTimers() and restore real timers on the test's last line. The other fake-timer blocks in the file (lines 224 and 271) use afterEach. Timers would only leak if this test's assertion fails, which is a hygiene issue."
+    },
+    {
+      "findings": [
+        "F13"
+      ],
+      "summary": "isUsableAim rejects 0 while the reader's guard accepts it",
+      "label": "nit",
+      "evidence": "safenetAimRegistry.ts:26 requires a value > 0, while safenetReader.ts:249 checks only for null and finiteness. The registry turns 0 into null before it reaches the reader, so in practice the reader never sees 0 and the difference has no effect."
+    },
+    {
+      "findings": [
+        "F7"
+      ],
+      "summary": "Test asserts WINDOW_UNCERTAIN copy equals READ_FAILED copy",
+      "label": "nit",
+      "evidence": "statusPresentation.test.ts:20 pins the intended design, since the PR deliberately shares the copy. It would only need updating if the design changes, which is expected for any test."
+    },
+    {
+      "findings": [
+        "F1"
+      ],
+      "summary": "Aim registry is more machinery than current callers need",
+      "label": "nit",
+      "evidence": "The PR and the registry doc (safenetAimRegistry.ts:3-14) openly say the fold is a no-op today and exists so the guarantee holds by construction. This is a design preference, not a defect."
+    },
+    {
+      "findings": [
+        "F4"
+      ],
+      "summary": "Module-level Map outside Redux with lifecycle coupled to another module's cache callback",
+      "label": "nit",
+      "evidence": "safenetAimRegistry.ts:16-22 documents why it is not a slice, and safenetCheckApi.ts:135-138 pairs forgetAim with cache eviction through onCacheEntryAdded. Any drift is limited to aims recorded by discarded renders, which the doc acknowledges and which errs in the safe direction."
+    },
+    {
+      "findings": [
+        "F6"
+      ],
+      "summary": "Aims map is uncapped; entries from discarded renders persist until unload",
+      "label": "wrong",
+      "evidence": "safenetAimRegistry.ts:19-22 documents this exact behaviour as intended: one bounded entry per check rendered, freed on unload, and always in the safe direction."
+    },
+    {
+      "findings": [
+        "F8"
+      ],
+      "summary": "Hook exceeds an 80-line limit and should be split",
+      "label": "wrong",
+      "evidence": "No 80-line limit appears in AGENTS.md, apps/web/AGENTS.md, packages/AGENTS.md or apps/web/docs/code-style.md. Splitting out useCheckAim would be a matter of preference."
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "pr": 8518,
+  "reviewSha": "89979c027d45d82dff240b496d3accb041331916",
+  "baseSha": "c47ad802c2eb9473e00564317e78ebe372ef9fde",
+  "system": "E",
+  "version": "github",
+  "runner": "collect",
+  "model": "human",
+  "commentSha": "89979c027d45d82dff240b496d3accb041331916",
+  "output": "[review by vmosharova]\nLGTM 👍🏻 \n\n---\n\napps/web/src/services/observability/providers/__tests__/datadog.test.ts:389\nNit: the `console` case can be removed from this test because it is filtered out by another guard:\n\n```\nconst NON_USER_IMPACTING_SOURCES = new Set(['console', 'report'])\n...\n(NON_USER_IMPACTING_SOURCES.has(errorEvent.error.source)) return false```"
+}

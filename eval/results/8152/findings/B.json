@@ -1,0 +1,30 @@
+{
+  "usd": 0.053767999999999996,
+  "findings": [
+    {
+      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
+      "line": 30,
+      "claim": "The testID handling (container testID and the per-segment `${testID}-${option.value}` construction at line 19) has no test coverage; none of the three existing tests pass a testID or use getByTestId, so a change that breaks this logic would not be caught, and E2E selectors will depend on these IDs."
+    },
+    {
+      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
+      "line": 26,
+      "claim": "Each segment uses accessibilityRole=\"button\" with a selected state, and the container has no accessibility role, so VoiceOver and TalkBack will announce the segments as separate buttons instead of as a single either/or group with position information (e.g. \"2 of 2\"). The segments should use accessibilityRole=\"tab\" with the container as \"tablist\", or a radio/radiogroup pairing."
+    },
+    {
+      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
+      "line": 19,
+      "claim": "borderRadius={12} is hard-coded even though a Tamagui token with the same value ($5 = 12) exists, violating the project rule to use tokens instead of hard-coded values; the rest of the file already uses tokens."
+    },
+    {
+      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
+      "line": 37,
+      "claim": "borderRadius={8} is hard-coded even though a Tamagui token with the same value ($4 = 8) exists, violating the project rule to use tokens instead of hard-coded values."
+    },
+    {
+      "file": "apps/mobile/src/components/SegmentedControl/",
+      "line": null,
+      "claim": "The new component folder is missing a SegmentedControl.stories.tsx file, even though the project's documented folder layout includes a stories file alongside the component, test, and index files, and mobile Storybook is already set up."
+    }
+  ]
+}

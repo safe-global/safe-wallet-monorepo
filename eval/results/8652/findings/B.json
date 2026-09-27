@@ -1,0 +1,40 @@
+{
+  "usd": 0.050435600000000004,
+  "findings": [
+    {
+      "file": "apps/web/src/services/observability/providers/mixpanel/error-tracking.ts",
+      "line": 75,
+      "claim": "Suppressed occurrence counts are only reported when the same error key is sent again after the 60s window; if the error stops recurring or the tab closes before that, the accumulated suppressed count is never flushed and those occurrences are lost, causing sum(Error Occurrences) to undercount actual failures."
+    },
+    {
+      "file": "apps/web/src/services/observability/providers/mixpanel/error-tracking.ts",
+      "line": 57,
+      "claim": "The time-based sweep in pruneSentErrors deletes expired entries even when they still have a nonzero suppressed count, discarding that data instead of flushing it."
+    },
+    {
+      "file": "apps/web/src/services/observability/providers/mixpanel/error-tracking.ts",
+      "line": 103,
+      "claim": "The docstring states that totals equal sum(Error Occurrences) and that recurrence information is not lost, but this is contradicted by the lost-suppressed-count behavior, so the documentation is inaccurate unless the underlying flushing issue is fixed or the wording is corrected."
+    },
+    {
+      "file": "apps/web/src/services/observability/providers/mixpanel/error-tracking.ts",
+      "line": 131,
+      "claim": "Deduplication is applied even to isUserFacing: true errors from track(), which previously produced one event per failed user action; collapsing repeated user-facing errors (e.g. two retries within 60s) changes the semantics of Error Surfaced event counts, silently breaking any existing dashboards, funnels, or alerts that count these events rather than summing occurrences."
+    },
+    {
+      "file": "apps/web/src/services/observability/providers/mixpanel/error-tracking.ts",
+      "line": 80,
+      "claim": "Chain ID and Safe address are set as Mixpanel super-properties and are not part of the dedupe key, so a suppressed count accumulated while on one Safe/chain can be sent later tagged with whatever super-properties are active at that later time, attributing the occurrences to the wrong Safe, chain, or time."
+    },
+    {
+      "file": "apps/web/src/services/observability/providers/mixpanel/error-tracking.ts",
+      "line": 11,
+      "claim": "The comment acknowledges that errors can collapse across Safes but does not mention that the eventually-sent suppressed count can be attributed to different super-properties (Safe/chain) than those active when the occurrences actually happened."
+    },
+    {
+      "file": "apps/web/src/services/exceptions/index.ts",
+      "line": 79,
+      "claim": "The new Datadog attempt and is_retry tags have no test coverage; unlike the sibling http_status and rpc_host tags, reverting this line would not cause any test to fail, and there is no test verifying that attempt: 1 results in is_retry: false or that the keys are absent when no attempt is passed."
+    }
+  ]
+}

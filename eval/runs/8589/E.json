@@ -1,0 +1,11 @@
+{
+  "pr": 8589,
+  "reviewSha": "6e8e123d9e8b3b5075c240de2f8dae62c52f9ca3",
+  "baseSha": "725dbf4060982a7ff951f5493f73c7e3e7650684",
+  "system": "E",
+  "version": "github",
+  "runner": "collect",
+  "model": "human",
+  "commentSha": "6e8e123d9e8b3b5075c240de2f8dae62c52f9ca3",
+  "output": "[review by vmosharova]\nNice fix but there is one more piece of regression worth fixing: the background of the \"Add manually\" popup is not blurred, so both popups \"My accounts\" and \"Add manually\" look merged in the UI. The bg of the popup should be blurred.\nCurrent branch (not blurred):\n<img width=\"971\" height=\"719\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/c847e9a2-85ee-4069-8efe-de45e8bb4b5a\" />\n\nMain (blurred):\n<img width=\"966\" height=\"726\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/ea64b439-dd88-4da9-91b9-37e54dca6004\" />"
+}

@@ -1,0 +1,10 @@
+{
+  "usd": 0.039937600000000004,
+  "findings": [
+    {
+      "file": "yarn.lock",
+      "line": 9702,
+      "claim": "The dependency resolution change silently bumps the axios version used by @ledgerhq/context-module and @ledgerhq/device-management-kit from 1.8.2 to 1.18.1, without this being called out in the change description; a manual smoke test of Ledger signing is recommended to confirm the minor-version bump does not break that flow."
+    }
+  ]
+}

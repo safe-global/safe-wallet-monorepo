@@ -1,0 +1,121 @@
+{
+  "pr": 8652,
+  "title": "fix: stop duplicated Error Surfaced Mixpanel events at source and at the emitter",
+  "description": "## What it solves\n\nResolves: the large volume of duplicated `Error Surfaced` events reaching Mixpanel.\n\nThere is exactly one emission point for the event, and it had **no deduplication, throttling or rate limiting anywhere on the path** — one `logError`/`trackError` call meant one Mixpanel event, across ~96 call sites.\n\nThe dominant source is polling. `useLoadSafeInfo` polls CGW every 15s, and RTK Query writes a **new** error object into store state on every rejection (`fetchBaseQuery` builds a fresh `{ status, data }` per request). The error's *reference* therefore changes on every failed poll even when the failure is identical, re-running the logging effect and emitting one event **every 15 seconds** for as long as a Safe keeps failing. `skipPollingIfUnfocused` was not set either, so a backgrounded tab left open on a broken Safe kept this up indefinitely.\n\nTwo further multipliers:\n\n- The same hook mounted concurrently reports the same failure once per owner. `useGasLimit` has 3–4 concurrent owners on the Execute step (`ExecuteForm` directly, `useGasTooHigh`, the `FeesPreview`/GTF slot, plus the Execute-through-role flow's own variant) — one failed estimation, 2–3 identical events **and** 2–3 redundant `estimateGas` RPC calls.\n- Bounded retries log every attempt. The counterfactual sync retries 2s after its first failure and both attempts carry identical taxonomy, so they were indistinguishable duplicates in Mixpanel.\n\nA related gap: there was no way to tell a retry from a first failure in analytics at all.\n\n## How this PR fixes it\n\nBoth layers, because the emitter-level dedupe alone would only mask the re-fires (and would do nothing about the redundant RPC calls).\n\n### 1. Stop the re-fires at source\n\n**New shared `useLogErrorOnce(code, message, context)` hook** that keys on what is actually reported rather than on the error's object identity. Five hand-rolled effects had copy-pasted the `[error]`-in-deps pattern, so all of them re-fired whenever the error's identity churned. A failure whose message or context changes, and one that returns after recovering, both still report — passing `undefined` re-arms the hook.\n\nReplaces those effects in `useLoadSafeInfo` (`_600`), `useLoadTxHistory` (`_602`), `useLoadTxQueue` (`_603`), `useSpendingLimits` (`_609`), `useHistoryFeesBreakdown` (`_612`) and the Execute-through-role gas estimation (`_612`).\n\n**`skipPollingIfUnfocused: true`** on the CGW safe query, so a backgrounded tab stops polling and reporting.\n\n**`useGasLimit` no longer reports its own failure.** A hook with 3–4 concurrent owners should not own the reporting; `ExecuteForm` — the owner that surfaces the failure to the user — reports it instead, keeping `_612` coverage intact.\n\n### 2. Deduplicate at the Mixpanel emission boundary\n\nThis still earns its place: it covers all ~96 call sites including future ones, and catches concurrent-mount duplication generally rather than case by case.\n\nIdentical events inside a 60s cooldown collapse into one, which then reports the collapsed count as a new `Error Occurrences` property, so recurrence stays measurable rather than being silently dropped.\n\nTwo design points worth reviewer attention:\n\n- **The dedupe key is derived from the emitted properties themselves** (`JSON.stringify(properties)`) rather than a hand-maintained field list. Every facet that makes two events genuinely different separates them for free, and a facet added later cannot be forgotten. `attempt` participating in the key is essential, not incidental — see below.\n- **Deduplication is deliberately Mixpanel-only.** `captureError` also fans out to Datadog RUM, which keeps full per-occurrence fidelity. There is a composite-level test pinning this invariant.\n\nThe map is bounded (500 keys, expired entries evicted first, then least-recently-sent) so a long-lived session cannot grow it without limit.\n\n### 3. Tag retry attempts\n\n`ErrorContext` gains a 1-based `attempt`, emitted as **both** `Error Attempt` and `Is Retry`. `Is Retry` is *derived* (`attempt > 1`) rather than being a second input field, so the two can never disagree. It is presence-checked (`!== undefined`), not truthiness-checked — distinguishing \"attempt 1\" from \"untagged\" is the entire point of the facet, and a truthy spread would silently collapse them. The same facet is mirrored into the Datadog tags so the two tools stay reconcilable (the WA-2775 intent).\n\nThis interacts with the dedupe by design: the CF-sync retry fires 2s after the first failure, well inside the cooldown, with identical taxonomy. Because `attempt` is part of the key, attempts 1 and 2 stay distinct events — while the 15s poll repeats this PR targets all share the same `attempt` value and still collapse.\n\n### Note for whoever owns the WA-2775 dashboards\n\nThis changes counting semantics: totals are now `sum(Error Occurrences)`, not an event count. Dashboards or alerts assuming one-event-per-occurrence need updating.\n\n## How to test it\n\n```bash\nyarn workspace @safe-global/web test --testPathPattern \"(services/observability|services/exceptions|useLogErrorOnce|useLoadSafeInfo|useCounterfactualSafeSync)\"\nyarn verify:changed:web\n```\n\nManually, against a Safe whose CGW request fails: previously one `Error Surfaced` event landed every 15s indefinitely, including in a backgrounded tab; now one lands and repeats stop at the source, with the emitter collapsing anything that slips through.\n\n## Affected flows\n\n- Safe load / polling — a persistently failing CGW poll reports once instead of every 15s, and stops entirely while the tab is unfocused\n- Transaction history / queue loading — failures report once per distinct failure\n- Spending limits loading — same\n- Transaction execution (Execute, Execute-through-role, GTF fee preview) — one failed gas estimation reports once, from `ExecuteForm`\n- Counterfactual Safe sync — both retry attempts still reported, now distinguishable via `Error Attempt` / `Is Retry`\n- Every `logError` / `trackError` call site (~96) — all sit be",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/services/observability/providers/__tests__/composite.test.ts",
+      "line": 136,
+      "claim": "The comment here duplicates intent already conveyed by the test's name, making it unnecessary and against the repo's guideline to avoid comments that aren't really necessary."
+    },
+    {
+      "id": "F2",
+      "file": "error-tracking.ts",
+      "line": 55,
+      "claim": "pruneSentErrors scans the whole map twice on overflow (once for expired entries, once for LRU eviction), which is an unnecessary O(n) pass that could be addressed with Map#entries() slicing if the tracked-error ceiling grows."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/services/observability/providers/mixpanel/error-tracking.ts",
+      "line": 80,
+      "claim": "Chain ID and Safe address are set as Mixpanel super-properties and are not part of the dedupe key, so a suppressed count accumulated while on one Safe/chain can be sent later tagged with whatever super-properties are active at that later time, attributing the occurrences to the wrong Safe, chain, or time."
+    },
+    {
+      "id": "F4",
+      "file": "error-tracking.ts",
+      "line": 131,
+      "claim": "The dedupe key is computed by hashing only the emitted properties from the hand-maintained mapContext whitelist, not the full ErrorContext, so the PR description's claim that a newly added facet cannot be forgotten only holds if that new field is also wired into mapContext; this invariant is undocumented and unenforced."
+    },
+    {
+      "id": "F5",
+      "file": "error-tracking.ts",
+      "line": 131,
+      "claim": "Dedupe correctness relies on JSON.stringify iterating object properties in a stable insertion order; if mapContext is later refactored to conditionally build keys in a different order (e.g. via Object.fromEntries with filtering), logically identical events could produce different serialized keys and stop being deduplicated."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/src/services/exceptions/index.ts",
+      "line": 79,
+      "claim": "The new Datadog attempt and is_retry tags have no test coverage; unlike the sibling http_status and rpc_host tags, reverting this line would not cause any test to fail, and there is no test verifying that attempt: 1 results in is_retry: false or that the keys are absent when no attempt is passed."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/services/observability/providers/mixpanel/error-tracking.ts",
+      "line": 11,
+      "claim": "The comment acknowledges that errors can collapse across Safes but does not mention that the eventually-sent suppressed count can be attributed to different super-properties (Safe/chain) than those active when the occurrences actually happened."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/src/features/counterfactual/hooks/__tests__/useCounterfactualSafeSync.test.ts",
+      "line": 479,
+      "claim": "The comment here duplicates intent already conveyed by the test's name, making it unnecessary and against the repo's guideline to avoid comments that aren't really necessary."
+    },
+    {
+      "id": "F9",
+      "file": "apps/web/src/services/observability/providers/mixpanel/error-tracking.ts",
+      "line": 40,
+      "claim": "httpStatus is guarded with a truthiness check (context.httpStatus && …) instead of an explicit undefined check, which is inconsistent with the attempt guard's explicit rationale and could invite copy-paste mistakes when new facets are added."
+    },
+    {
+      "id": "F10",
+      "file": "apps/web/src/services/observability/providers/mixpanel/error-tracking.ts",
+      "line": 131,
+      "claim": "Deduplication is applied even to isUserFacing: true errors from track(), which previously produced one event per failed user action; collapsing repeated user-facing errors (e.g. two retries within 60s) changes the semantics of Error Surfaced event counts, silently breaking any existing dashboards, funnels, or alerts that count these events rather than summing occurrences."
+    },
+    {
+      "id": "F11",
+      "file": null,
+      "line": null,
+      "claim": "Deduping changes what the Error Surfaced event means in Mixpanel: totals must now be computed as sum(Error Occurrences) rather than by counting events, so any existing Mixpanel report or alert that counts events will silently produce wrong numbers after deploy. This has not been confirmed with the owners of those dashboards, and the PR description does not note the change in semantics."
+    },
+    {
+      "id": "F12",
+      "file": null,
+      "line": null,
+      "claim": "Test coverage does not verify that the suppressed occurrence counter resets to 0 when the same error key resurfaces after the dedupe window; there is no test asserting that a re-emit following the window, followed immediately by another failure, reports 1 occurrence rather than continuing from the prior count (e.g. 4)."
+    },
+    {
+      "id": "F13",
+      "file": "apps/web/src/features/counterfactual/hooks/useCounterfactualSafeSync.ts",
+      "line": 163,
+      "claim": "The comment here merely restates what the adjacent { attempt: 1 } / { attempt: 2 } arguments already make clear, adding no information and going against the repo's guideline to add comments only when truly necessary."
+    },
+    {
+      "id": "F14",
+      "file": "apps/web/src/services/exceptions/index.ts",
+      "line": 78,
+      "claim": "httpStatus is guarded with a truthiness check (context.httpStatus && …) instead of an explicit undefined check, mirroring the same inconsistency found in the mixpanel error-tracking mapper."
+    },
+    {
+      "id": "F15",
+      "file": "apps/web/src/services/observability/providers/mixpanel/error-tracking.ts",
+      "line": 103,
+      "claim": "The docstring states that totals equal sum(Error Occurrences) and that recurrence information is not lost, but this is contradicted by the lost-suppressed-count behavior, so the documentation is inaccurate unless the underlying flushing issue is fixed or the wording is corrected."
+    },
+    {
+      "id": "F16",
+      "file": "apps/web/src/services/observability/providers/mixpanel/error-tracking.ts",
+      "line": 57,
+      "claim": "The time-based sweep in pruneSentErrors deletes expired entries even when they still have a nonzero suppressed count, discarding that data instead of flushing it."
+    },
+    {
+      "id": "F17",
+      "file": "apps/web/src/services/exceptions/index.ts",
+      "line": 79,
+      "claim": "The comment only says to see the same note in the Mixpanel mapper without conveying anything itself, making it an unnecessary comment per the repo's guideline to treat comments as tech debt."
+    },
+    {
+      "id": "F18",
+      "file": "apps/web/src/services/exceptions/index.ts",
+      "line": 80,
+      "claim": "The new branch in getObservabilityContext that emits attempt and is_retry into the Datadog RUM context has no corresponding test, unlike the sibling rpc_host and http_status tags which each have a present-value and omitted-value test case. Existing tests only check the arguments passed to a mocked logError, so if the undefined check became a truthiness check, or is_retry were dropped or computed incorrectly, all tests would still pass while Datadog would silently stop distinguishing first attempts from retries."
+    },
+    {
+      "id": "F19",
+      "file": "apps/web/src/services/observability/providers/mixpanel/error-tracking.ts",
+      "line": 75,
+      "claim": "Suppressed occurrence counts are only reported when the same error key is sent again after the 60s window; if the error stops recurring or the tab closes before that, the accumulated suppressed count is never flushed and those occurrences are lost, causing sum(Error Occurrences) to undercount actual failures."
+    }
+  ]
+}

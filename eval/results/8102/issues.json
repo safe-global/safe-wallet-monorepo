@@ -1,0 +1,76 @@
+{
+  "usage": {
+    "usd": 0.46355879999999994,
+    "turns": 5,
+    "wallSeconds": 43
+  },
+  "issues": [
+    {
+      "findings": [
+        "F7",
+        "F8"
+      ],
+      "summary": "Failed background refetch (focus/remount) flips SafeAccounts to the error banner, hiding the cached list",
+      "label": "medium",
+      "evidence": "components/SafeAccounts/index.tsx:77 renders the error banner whenever `isSpaceSafesError` is true, and it checks this before the list branch. RTK Query sets isError on a rejected refetch even though cached data is kept. Before this PR a refetch only happened after a mutation; with refetchOnFocus (hooks/useSpaceSafes.tsx:22-25) any transient network failure or expired session on refocus now replaces a visible list with 'Failed to load'. That contradicts the PR's claim that previous data stays visible during refetch."
+    },
+    {
+      "findings": [
+        "F3",
+        "F6"
+      ],
+      "summary": "Tests spread the imported SPACE_REFRESH_OPTIONS into expectations, so they never check its actual values",
+      "label": "low",
+      "evidence": "hooks/__tests__/useSpaceSafes.test.tsx:82,106, plus the same pattern in useAllMembers.test.ts and useGetSpaceAddressBook.test.ts, build the expected options from the constant itself. Setting refetchOnFocus to false, or emptying the object, would still pass. The constant is small, but nothing guards the regression the PR fixes."
+    },
+    {
+      "findings": [
+        "F4",
+        "F11"
+      ],
+      "summary": "SPACE_REFRESH_OPTIONS lives in hooks/refreshOptions.ts instead of the feature's existing constants.ts",
+      "label": "nit",
+      "evidence": "features/spaces/constants.ts already holds shared domain constants (SAFE_ACCOUNTS_LIMIT, SPACES_LIMIT). Putting this constant in a hooks/ file is a small layout inconsistency with no functional cost."
+    },
+    {
+      "findings": [
+        "F1"
+      ],
+      "summary": "JSDoc on SPACE_REFRESH_OPTIONS restates what the RTK Query options do",
+      "label": "nit",
+      "evidence": "hooks/refreshOptions.ts:1-8 explains refetchOnFocus and refetchOnMountOrArgChange, which is standard RTK behaviour. The comment is harmless, and it does give the reason for the constant; trimming it is a style preference."
+    },
+    {
+      "findings": [
+        "F2"
+      ],
+      "summary": "useIsQualifiedSafe subscribes to spaceSafesGetV1 without the refresh options, and the PR description doesn't mention it",
+      "label": "nit",
+      "evidence": "hooks/useIsQualifiedSafe.ts:23-26 subscribes to the same cache entry that useSpaceSafes refreshes, so it gets refreshed data anyway. The PR description already calls out the SpaceSelectorDropdown omission. The finding itself admits there is no functional bug."
+    },
+    {
+      "findings": [
+        "F9"
+      ],
+      "summary": "useCurrentMemberProfile's membership query didn't get the refresh options",
+      "label": "low",
+      "evidence": "hooks/useSpaceMembers.tsx:72-75 calls useMembersGetMembershipV1Query without SPACE_REFRESH_OPTIONS, so the current user's own membership record can stay stale across sessions. The PR deliberately limits scope to safes, members and the address book, so this is a minor coverage gap, not a defect in the change."
+    },
+    {
+      "findings": [
+        "F10"
+      ],
+      "summary": "useSpacesGetOneV1Query calls (space name, settings) don't refetch on focus",
+      "label": "low",
+      "evidence": "Callers such as hooks/useIsQualifiedSafe.ts:22 use useSpacesGetOneV1Query without the new options, so a rename made in another session won't show up on focus. The PR names only three queries as in scope, so this is a possible follow-up, not a bug in the diff."
+    },
+    {
+      "findings": [
+        "F5"
+      ],
+      "summary": "The members list isn't cleared when a refetch returns 403 (for example, the user was removed from the space)",
+      "label": "low",
+      "evidence": "useAllMembers (hooks/useSpaceMembers.tsx:40-44) reads `data`, which RTK keeps after a failed refetch, so a removed user keeps the old list and the useIsAdmin gate after refocusing. The backend still enforces permissions and this behaviour predates the PR; the finding is also vague and cites no location."
+    }
+  ]
+}

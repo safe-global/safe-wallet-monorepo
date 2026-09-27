@@ -1,0 +1,30 @@
+{
+  "usd": 0.0468696,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitIntroDialog/constants.ts",
+      "line": 1,
+      "claim": "The diff adds around 15 multi-line comment blocks (several 2-5 lines, including a 5-line JSDoc on a single key) that narrate design decisions, whereas the repo convention calls for comments to be one line, rare, and reserved for explaining a non-obvious why."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitIntroDialog/__tests__/SpendingLimitIntroDialog.test.tsx",
+      "line": 21,
+      "claim": "A comment is placed directly above an it(...) test case, which the testing conventions doc prohibits ('No comments above test cases')."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/PolicyCatalogue/catalogue.ts",
+      "line": 19,
+      "claim": "The spending limit tile is now marked isAvailable: true and clickable, but startSpendingLimitFlow is an empty TODO (WA-3150), so after the first click (which only closes the intro dialog and marks it seen) the tile does nothing on subsequent clicks."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/index.tsx",
+      "line": 45,
+      "claim": "There is no test verifying that clicking 'Set up spending limit' calls closeSpendingLimitIntro(); if this call were removed from index.tsx, no existing test would catch the regression."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitIntroDialog/index.tsx",
+      "line": 89,
+      "claim": "dark:text-black is a hard-coded color value instead of a theme variable, which apps/web/AGENTS.md requires; --primary-foreground already resolves to the same color (#0a0a0a) in the dark theme and could be used instead."
+    }
+  ]
+}

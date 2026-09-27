@@ -1,0 +1,30 @@
+{
+  "usd": 0.052192,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceActivityLog/ActivityLogFilters.tsx",
+      "line": 127,
+      "claim": "toDateInputValue(filters.createdAtGte) is called inline within JSX attributes rather than being computed once as a local const before the return, causing the same date conversion to run multiple times per render."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceActivityLog/ActivityLogFilters.tsx",
+      "line": 136,
+      "claim": "toDateInputValue(filters.createdAtLte) is called again here even though its result is already stored as toDateBound at line 94, duplicating the computation instead of reusing the existing value."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceActivityLog/dateFilters.ts",
+      "line": 24,
+      "claim": "The PR introduces user-facing behavior changes (blocking future dates on both pickers, showing the out-of-order error only on the From field, and two new error messages) without the diff showing where this decision comes from, so it is unclear whether product or design has signed off on this exact behavior and wording."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceActivityLog/ActivityLogFilters.tsx",
+      "line": 90,
+      "claim": "The PR description should link the ticket or design spec (e.g. WA-2617) that specifies which field gets flagged for the out-of-order error and the exact error message wording, since this isn't otherwise traceable from the diff."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceActivityLog/ActivityLogFilters.tsx",
+      "line": 28,
+      "claim": "The new FilterField and DateFilter sub-components introduce validation/error states but have no Storybook story showing them in an error state (e.g. out-of-order range or future date), leaving the new inline error UI without visual coverage, per the story guideline in apps/web/AGENTS.md."
+    }
+  ]
+}

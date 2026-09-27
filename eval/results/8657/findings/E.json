@@ -1,0 +1,70 @@
+{
+  "usd": 0.08681559999999999,
+  "findings": [
+    {
+      "file": "apps/web/src/components/common/NetworkSelector/index.tsx",
+      "line": 369,
+      "claim": "The current approach stores a single ref on a parent container and selects child items from it, instead of using an array of refs created individually for each child via React.createRef; the alternative approach may be cleaner or more correct."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/AllNetworksSection.tsx",
+      "line": 102,
+      "claim": "This computation should be wrapped in useMemo instead of being recalculated on every render."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/ChainSelectorBlock.tsx",
+      "line": 43,
+      "claim": "This computation should also be wrapped in useMemo if possible, to avoid unnecessary recalculation."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The PR adds 415 lines of code to implement a search bar, and the amount of code should be reduced since this seems excessive for the feature being added."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The screenshots included in the PR description show 404 error placeholders instead of the actual network icons, indicating the icons are not loading correctly."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The search bar was added only to the network selector shown when deploying a new Safe, but not to the network picker in the main header, even though the search bar was specifically requested for the main header's network picker."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "It is unclear whether the network picker in the main header and the network selector in the Safe deployment flow are implemented as two different components, which could indicate duplicated or inconsistent implementations that should be reconciled."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "There may be an existing Figma design for a dropdown-plus-search-bar pattern, and other components in the app should be checked for an existing implementation of this pattern to ensure the new search bar is consistent with, or reuses, an established design rather than introducing a new custom one."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The \"No networks match your search\" empty-state message is misaligned on the left when it wraps to a new line, an effect caused by the element's large border radius."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The outline of the search bar overlaps with the outline of the modal in a visually awkward way and the two should be made to match."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The X icon used to clear typed text in the search input is not black as it should be, and there should be a consistent way of styling such clear icons across the app, referencing an existing design if one exists."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The X clear button should use the specific design referenced in a linked Figma component rather than an ad hoc implementation."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The X clear button should use size-4 instead of size-6, since size-6 is too large for this element."
+    }
+  ]
+}

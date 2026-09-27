@@ -1,0 +1,259 @@
+{
+  "usage": {
+    "usd": 0.9350214000000001,
+    "turns": 10,
+    "wallSeconds": 111
+  },
+  "issues": [
+    {
+      "findings": [
+        "F2",
+        "F21"
+      ],
+      "summary": "Trusted-safes modal badge set is computed over the search-filtered list while the confirm gate and Select-all use the full list, so they disagree",
+      "label": "medium",
+      "evidence": "ManageTrustedSafesContent.tsx:102-103 runs useFlaggedSimilarAddresses(availableItems), which is search-filtered, while useTrustedSafesModal.ts:205-206/263/273 gate on flaggedAll from allSafes. If a search hides one of a look-alike pair, the visible row has no badge but clicking it still opens the confirm dialog. Before this PR the badge came from similarityGroup, which was computed on the full list, so this is a regression."
+    },
+    {
+      "findings": [
+        "F6"
+      ],
+      "summary": "The similarity hook chain runs twice per render in the trusted-safes modal (full list plus filtered list)",
+      "label": "low",
+      "evidence": "useTrustedSafesModal.ts:205 calls useSimilarityClusters(allSafes addresses) and ManageTrustedSafesContent.tsx:103 calls useFlaggedSimilarAddresses(availableItems) again. Both run detectListClusters and detectListSimilarities. The cost is real but small."
+    },
+    {
+      "findings": [
+        "F37"
+      ],
+      "summary": "availableItems changes on every checkbox toggle, so the badge hook reruns detection on each click",
+      "label": "low",
+      "evidence": "availableItems is the selection overlay (useTrustedSafesModal.ts ~157-195) and depends on selectedAddresses, so availableAddresses at ManageTrustedSafesContent.tsx:102 is a new array on every toggle and both detectors rerun. This wastes some work but has little user-visible effect for typical list sizes."
+    },
+    {
+      "findings": [
+        "F1"
+      ],
+      "summary": "Comment claims similarityGroup drives the visual grouping in the modal, but nothing in the UI reads it",
+      "label": "low",
+      "evidence": "A grep for similarityGroup finds only the type definitions, stories, and the assignments in useTrustedSafesModal.ts. No component reads it, so the comments at ManageTrustedSafesContent.tsx:100-101 and useTrustedSafesModal.ts:111 are misleading."
+    },
+    {
+      "findings": [
+        "F3"
+      ],
+      "summary": "Anchor matches on one end only (WARN) flag and gate rows the same way as CRITICAL matches",
+      "label": "low",
+      "evidence": "useSimilarityClusters.ts:40-44 adds every annotation that has a match to flagged, whatever its severity. The PR describes the anchor rule as front-4 OR back-4, so this is intended, but a large address book raises false positives. The anchor layer is behind the feature flag."
+    },
+    {
+      "findings": [
+        "F35"
+      ],
+      "summary": "The always-on OR rule on 4 hex chars gives a high false-cluster rate for large lists",
+      "label": "low",
+      "evidence": "addressSimilarity.ts:133 onward matches on either 16-bit end. For 300 addresses that is about 44,850 pairs × 2/65536 ≈ 1.4 expected collisions, so roughly a 75% chance of at least one false cluster, and chaining makes clusters grow. The PR accepts this as \"false-positive-tolerant by design\", but the cost to Select-all is concrete."
+    },
+    {
+      "findings": [
+        "F36",
+        "F38"
+      ],
+      "summary": "The within-list rule was broadened to OR plus chaining and runs even with the feature flag off",
+      "label": "wrong",
+      "evidence": "The PR description says explicitly that the within-list check is first-4 OR last-4 by design, that it still runs with the flag off, and that this was reconciled in WA-2823. The behaviour is intended and documented."
+    },
+    {
+      "findings": [
+        "F25"
+      ],
+      "summary": "Mobile's useSuspiciousAddressDetection still uses the AND-based detectSimilarAddresses rule",
+      "label": "low",
+      "evidence": "apps/mobile/src/features/Send/hooks/useSuspiciousAddressDetection.ts:85 still calls detectSimilarAddresses. That hook serves a different surface (send recipient), so the inconsistency across platforms is real but minor."
+    },
+    {
+      "findings": [
+        "F4",
+        "F9"
+      ],
+      "summary": "The rewritten useManageNestedSafes (getSimilarAddresses, groupSafesBySimilarity, selectAll gating) has no tests",
+      "label": "medium",
+      "evidence": "NestedSafesList has no __tests__ directory, and no test references useManageNestedSafes. The grouping and similar-address logic were rewritten at useManageNestedSafes.ts:172-185 and 18-35 with no coverage."
+    },
+    {
+      "findings": [
+        "F16",
+        "F40"
+      ],
+      "summary": "useSimilarityClusters has no direct test; groupIdByAddress output and the anchor-only case are untested",
+      "label": "low",
+      "evidence": "useFlaggedSimilarAddresses.test.ts uses the real useSimilarityClusters with useListSimilarities mocked, so the flagged and imitated branches are covered indirectly. The cluster ids returned alongside the anchor-only no-group case are never asserted."
+    },
+    {
+      "findings": [
+        "F5",
+        "F29"
+      ],
+      "summary": "The new cross-chain trusted partition in useOnboardingSafes is untested",
+      "label": "medium",
+      "evidence": "useOnboardingSafes.test.ts:78-125 never has an address added on one chain and owned on another. Reverting lines 41-58 of useOnboardingSafes.ts would not fail any test."
+    },
+    {
+      "findings": [
+        "F7",
+        "F32"
+      ],
+      "summary": "Chain copies moved into Trusted by the cross-chain change stop getting look-alike warnings in onboarding",
+      "label": "low",
+      "evidence": "useOnboardingSafes.ts:81-84 keeps only flags on owned items, and copies of an address trusted on another chain are now in trusted. This matches the stated rule that trusted is treated as vetted, and the address itself is trusted, so the loss is marginal."
+    },
+    {
+      "findings": [
+        "F13"
+      ],
+      "summary": "Cross-chain trust promotion in onboarding is out of scope and needs sign-off",
+      "label": "wrong",
+      "evidence": "The PR description lists the change explicitly under \"Onboarding partition fix\" as intended behaviour, and the code comment at useOnboardingSafes.ts:39-40 explains it."
+    },
+    {
+      "findings": [
+        "F10"
+      ],
+      "summary": "Undeployed safes are not treated as trusted",
+      "label": "wrong",
+      "evidence": "By design the trusted set is added/pinned safes only, and undeployed safes belong to owned (useOnboardingSafes.ts:61), as they did before the PR. Nothing suggests undeployed safes should count as trusted."
+    },
+    {
+      "findings": [
+        "F15"
+      ],
+      "summary": "The onboarding list may contain duplicates",
+      "label": "wrong",
+      "evidence": "trustedAddresses is a Set, and chainAddresses and the owned combined list are both deduplicated with new Set (useOnboardingSafes.ts:41-61)."
+    },
+    {
+      "findings": [
+        "F22"
+      ],
+      "summary": "The case-sensitive Set dedupe of owned, undeployed and added addresses could duplicate an address whose checksum casing differs",
+      "label": "low",
+      "evidence": "useOnboardingSafes.ts:46-51 deduplicates the raw strings. The stores normally hold checksummed addresses, so this is an unlikely edge case, and the owned list used the same pattern before the PR."
+    },
+    {
+      "findings": [
+        "F20"
+      ],
+      "summary": "The onboarding logic could reuse useAllSafes",
+      "label": "nit",
+      "evidence": "useAllSafes returns a flat list with no trusted/owned partition, so reusing it is a suggestion with no clear concrete gain."
+    },
+    {
+      "findings": [
+        "F14",
+        "F30"
+      ],
+      "summary": "getFlaggedSimilarAddressSet has no remaining production callers",
+      "label": "low",
+      "evidence": "A grep shows its only uses are its definition at addressSimilarity.ts:107 and tests. This PR replaced its three web callers, so it is now dead code."
+    },
+    {
+      "findings": [
+        "F27",
+        "F33"
+      ],
+      "summary": "The architecture doc still describes detectSimilarAddresses for the web space surfaces",
+      "label": "low",
+      "evidence": "apps/web/docs/spaces-accounts-architecture.md:92 and ~231-237 still show detectSimilarAddresses, but SafeAccounts/index.tsx now uses useFlaggedSimilarAddresses. The documentation is out of date."
+    },
+    {
+      "findings": [
+        "F23"
+      ],
+      "summary": "The file header describes intra-list detection as front AND back only, which does not match the new OR-based detectListClusters",
+      "label": "low",
+      "evidence": "addressSimilarity.ts:9-10 still says intra-list matches on front AND back. The new detectListClusters, now used on every web list surface, uses OR."
+    },
+    {
+      "findings": [
+        "F24"
+      ],
+      "summary": "The group id is documented as \"stable\" but is the union-find root, which depends on input order",
+      "label": "low",
+      "evidence": "addressSimilarity.ts:120 says \"opaque, stable key\", but the root comes from parent.set(ra, rb) and the iteration order, so reordering the same input changes the id. It is deterministic only for a fixed input."
+    },
+    {
+      "findings": [
+        "F26"
+      ],
+      "summary": "Grouping of an in-list anchor with its impostor relies on the intra-list and anchor configs sharing the same 4/4 thresholds",
+      "label": "low",
+      "evidence": "useSimilarityClusters.ts:46-49 flags the imitated anchor but adds no group id. Grouping only works because DEFAULT_SIMILARITY_CONFIG (4/4) matches DEFAULT_ANCHOR_SIMILARITY_CONFIG (4/4) in addressSimilarity.types.ts:38-57. It works today, but the coupling is latent."
+    },
+    {
+      "findings": [
+        "F17"
+      ],
+      "summary": "For an anchor-only match, the nested-safes confirm dialog lists no similar addresses but still says \"similar to other addresses in your list\"",
+      "label": "low",
+      "evidence": "An anchor-only flagged address has no groupId, so getSimilarAddresses returns [] (useManageNestedSafes.ts:177). SimilarityConfirmDialog.tsx:30 still shows the \"in your list\" copy, which is inaccurate when the look-alike is an out-of-list anchor."
+    },
+    {
+      "findings": [
+        "F8",
+        "F19",
+        "F34"
+      ],
+      "summary": "The isAddressFlagged useCallback wrapper is duplicated in useTrustedSafesModal and useManageNestedSafes",
+      "label": "nit",
+      "evidence": "useTrustedSafesModal.ts:206 and useManageNestedSafes.ts:356 hold the same one-line callback. This is a small duplication with no concrete cost."
+    },
+    {
+      "findings": [
+        "F11"
+      ],
+      "summary": "getSimilarAddresses compares addresses with toLowerCase instead of sameAddress",
+      "label": "nit",
+      "evidence": "useManageNestedSafes.ts:177 carries over the same toLowerCase comparison the old code used. Both addresses are hex, so the result is equivalent."
+    },
+    {
+      "findings": [
+        "F12"
+      ],
+      "summary": "Repeated explanatory comments at each call site",
+      "label": "nit",
+      "evidence": "The same short comment is repeated in AddAccounts, SafeAccounts, useOnboardingSafes and elsewhere. This is style and has no functional cost."
+    },
+    {
+      "findings": [
+        "F18"
+      ],
+      "summary": "The test named \"the flag-off path\" does not actually disable the flag",
+      "label": "nit",
+      "evidence": "useFlaggedSimilarAddresses.test.ts:34 mocks useListSimilarities to return an empty map, which is what the hook returns when the flag is off, so the name is only loosely accurate."
+    },
+    {
+      "findings": [
+        "F28"
+      ],
+      "summary": "The imitated-address loop runs even when imitated is empty",
+      "label": "nit",
+      "evidence": "The loop at useSimilarityClusters.ts:47-49 is a trivial O(n) pass, and a guard would save almost nothing."
+    },
+    {
+      "findings": [
+        "F31"
+      ],
+      "summary": "The name useListSimilarities is misleading next to useSimilarityClusters",
+      "label": "nit",
+      "evidence": "This is a naming preference. The hook's JSDoc describes it clearly as the anchor-based Mode B annotator."
+    },
+    {
+      "findings": [
+        "F39"
+      ],
+      "summary": "Loops in detectListClusters could be map/forEach, and the variable names could be clearer",
+      "label": "nit",
+      "evidence": "The loops in union-find path compression at addressSimilarity.ts:115-160 are idiomatic. This is a style preference."
+    }
+  ]
+}

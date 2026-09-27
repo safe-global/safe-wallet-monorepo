@@ -1,0 +1,30 @@
+{
+  "usd": 0.05204160000000001,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spending-limits/components/CreateSpendingLimit/index.tsx",
+      "line": 24,
+      "claim": "The early return added when decimals is null (for a token not returned by useVisibleBalances, such as the zero-balance default token, or a dust token hidden by default) disables the amount range and decimal-length checks, since validateDecimalLength also does nothing when decimals is null. As a result a Safe with no balance can submit an amount with far too many decimal places or a value exceeding what uint96 can hold at 18 decimals; the transaction is never sent on-chain, but createNewSpendingLimitTx fails later in parseUnits or when encoding setAllowance, so the user only sees a generic error on the review step instead of inline validation."
+    },
+    {
+      "file": "apps/web/src/features/spending-limits/components/CreateSpendingLimit/index.tsx",
+      "line": 27,
+      "claim": "The `decimals ?? 'Gwei'` fallback can never be reached now that the preceding line returns early when decimals is null, making it dead code that should be removed or reused as part of fixing the early-return issue."
+    },
+    {
+      "file": "apps/web/src/components/tx-flow/flows/NewSpendingLimit/__tests__/SpendingLimitForm.test.ts",
+      "line": 25,
+      "claim": "The new test for unknown token decimals only checks the inputs '1' and '1.1', so it locks in the skipped validation without covering inputs with too many decimals or too large an amount that would later fail on the review step; a case exercising those inputs and asserting the intended behavior should be added."
+    },
+    {
+      "file": "apps/web/src/features/spending-limits/components/TokenAmountInput/index.tsx",
+      "line": 64,
+      "claim": "In a Safe with no funds, the token selector now renders blank with an empty options list, so the user cannot see which token the spending limit applies to even though it silently defaults to the native token; showing the chain's native currency symbol would make this clearer."
+    },
+    {
+      "file": "apps/web/src/features/spending-limits/components/TokenAmountInput/index.tsx",
+      "line": 171,
+      "claim": "This file uses the bracket syntax `max-w-[var(--available-width)]` for an arbitrary Tailwind value, while ui/combobox.tsx uses the Tailwind v4 shorthand `max-w-(--available-width)` and navigation-menu.tsx uses the bracket form again, showing the repository has no single convention for this syntax."
+    }
+  ]
+}

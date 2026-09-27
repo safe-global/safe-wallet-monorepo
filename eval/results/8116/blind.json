@@ -1,0 +1,151 @@
+{
+  "pr": 8116,
+  "title": "feat(web): unify Safe list sorting order (WA-2567)",
+  "description": "> Two ways to sort, one shared switch:\r\n> Name from A→Z (now the default), or most-recently-seen on top —\r\n> dropdown and modal finally agree on one order.\r\n\r\n## What it solves\r\n\r\nResolves: https://linear.app/safe-global/issue/WA-2567/unify-sorting-order-for-safe-lists\r\n\r\nThe Safe lists sorted inconsistently depending on context and surface:\r\n\r\n- **Account selector dropdown — space mode**: sorted via the comparator, but `lastVisited` was hardcoded to `0`, so **\"Most recent\" was a no-op**, and **\"Name\" sorted by an empty key** for address-book-named safes (so e.g. `XYZ` appeared before `ABC`).\r\n- **Account selector dropdown — non-space mode**: not sorted by the preference at all (current safe pinned, then pinned safes in raw address order).\r\n- **All accounts modal**: hardcoded `lastVisited` descending, ignored the user preference.\r\n- The default was **Last visited**, and these surfaces had **no sort control**.\r\n\r\nNet: order shifted depending on whether the current safe was a member of the current Space, and differed between the dropdown, the modal, and the My accounts page.\r\n\r\n## How this PR fixes it\r\n\r\n- **Shared sort control** (`SafeListSortToggle`, shadcn) right of the search box in the **account selector dropdown** and the **All accounts modal**, reading/writing the persisted `orderByPreference`.\r\n- **Default flips to Name (A→Z)**; a **one-time, version-gated reset** in `_hydrationReducer` (mirrors the existing `termsVersion` reset) moves existing users off the old `Last visited` default. Their later choice persists normally.\r\n- **Dropdown unified (both modes)**: the current safe is pinned to the top, the rest sorted by the chosen comparator — **by account** (a multi-chain account is one row).\r\n- **Space-mode fixes**: real `lastVisited` (read from the `visitedSafes` slice via `_buildSafeItems`) so \"Most recent\" actually orders; and the user's address book is folded into the name source (space contacts take priority) so **\"Name\" sorts by the name actually displayed**.\r\n- **Modal**: sorts **within** the `Trusted Safes` / `Other Safes` sections by the preference.\r\n\r\n## How to test it\r\n\r\n1. Open a Safe. Open the **account selector dropdown** (top bar) and the **All accounts modal** — each has a `Sort by` control to the right of the search box.\r\n2. Toggle **Name ↔ Most recent**: both surfaces reorder consistently, and the choice **persists across reload** (and across tabs).\r\n3. In a workspace, named safes sort **A→Z by their displayed name** (`ABC` before `XYZ`); unnamed safes sort last; the current safe stays on top.\r\n4. **Most recent**: visit a few safes, reopen — they order by most-recently-visited first.\r\n5. As an existing user (previously on `Last visited`), you land on **A→Z once** (forced reset), after which your own choice sticks.\r\n\r\n## Affected flows\r\n\r\n- Account selector dropdown ordering — space and non-space contexts.\r\n- All accounts modal ordering — within the Trusted / Other sections.\r\n- Sort-preference persistence and cross-tab broadcast.\r\n- My accounts page ordering — inherits the new A→Z default (no toggle added there by design).\r\n\r\n## Blast radius\r\n\r\n- **`orderByPreferenceSlice`** — default changed to `NAME` + new `resetVersion`; persisted and broadcast. Consumers: My accounts (v1/v2), Spaces SafeAccounts page, onboarding, the dropdown, the modal.\r\n- **`_hydrationReducer`** (`store/index.ts`) — one-time order reset on hydrate (guarded on the slice being present).\r\n- **`_buildSafeItems`** (`useAllSafesGrouped`) — new **optional** `allVisitedSafes` param; only `useSpaceSafes` passes it. `useOwnedSafesGrouped` is unchanged (still `lastVisited: 0`).\r\n- **`useSafeBarSafes`**, **`useSpaceSafes`**, **`useAccountsModalItems`** — ordering logic.\r\n- No RTK Query endpoint / API contract changes. No new feature flag. No mobile (shared-package) changes.\r\n\r\n## Risks / not checked\r\n\r\n- The sort control is a base-ui `dropdown-menu` nested inside the base-ui `Select` popup (dropdown surface) — **verified visually**; base-ui menus don't open in jsdom, so the open-state isn't unit-tested (the repo mocks `dropdown-menu` in tests).\r\n- The one-time reset **overrides** anyone who previously chose `Most recent` (intended per product).\r\n- The name-source fix folds in the **local** address book; a safe named **only** in a *private* space address book (not space contacts, not local) would still sort by an empty key — rare edge, easy follow-up.\r\n- **Not tested on mobile** (web-only surfaces).\r\n- **No Playwright one-shot** clickthrough added yet.\r\n\r\n## Visual summary\r\n\r\n<img width=\"469\" height=\"454\" alt=\"Screenshot 2026-06-15 at 09 46 25\" src=\"https://github.com/user-attachments/assets/bf882ac3-4343-4d09-b764-ec80d7f94941\" />\r\n<img width=\"597\" height=\"600\" alt=\"Screenshot 2026-06-15 at 09 46 30\" src=\"https://github.com/user-attachments/assets/e64e65d1-6b13-4550-a9ea-04fa827c3b42\" />\r\n\r\n\r\n```mermaid\r\nflowchart TD\r\n  T[\"SafeListSortToggle<br/>(Name / Most recent)\"] -->|writes| P[(\"orderByPreference<br/>persisted · default Name\")]\r\n  H[\"_hydrationReducer\"] -->|one-time reset to Name| P\r\n  P --> C{\"getComparator(orderBy)\"}\r\n  C --> D[\"Dropdown · useSafeBarSafes<br/>current pinned top + rest sorted<br/>(space &amp; non-space, by account)\"]\r\n  C --> M[\"All accounts modal<br/>sorted within Trusted / Other\"]\r\n  D --> R1[\"SafeDropdownContainer renders\"]\r\n  M --> R2[\"AccountsModal renders\"]\r\n```\r\n\r\n> _UI: attach a screenshot of the dropdown + modal showing the `Sort by` control to the right of the search box (toggle open with Name / Most recent)._\r\n\r\n## Checklist\r\n\r\n- [ ] I've tested the branch on mobile 📱\r\n- [ ] I've documented how it affects the analytics (if at all) 📊\r\n- [x] I've written a unit/e2e test for it (if applicable) 🧑‍💻\r\n- [x] I've listed affected flows and blast radius, and named what I did not verify 🎯\r\n- [ ] For web feature/bugfix PRs, I've added a Playwright one-shot happy-path clickthrough under apps/web/e2e/tests/one-shots/ and run it locally — CI records and posts the clickthrough GIF ",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/components/common/SafeListSortToggle/index.tsx",
+      "line": null,
+      "claim": "SafeListSortToggle is a DropdownMenu rendered inside a base-ui Select popup, and whether clicking the toggle also closes the parent Select popup can only be verified in a real browser; the container test replaces the toggle with a stub, so this interaction is not covered."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/store/index.ts",
+      "line": 146,
+      "claim": "After merge({}, state, payload) the orderBy slice is always present, so the `orderByState &&` guard is always true and does not actually check for a real store as its accompanying comment claims, making that comment misleading."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/store/__tests__/index.test.ts",
+      "line": 149,
+      "claim": "This test currently asserts the existing (problematic) override behavior of the migration reset, so it needs to be updated together with any fix to that reset logic, or it will lock in the wrong behavior."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/store/index.ts",
+      "line": 146,
+      "claim": "Because the HYDRATE action is not a slice action, the migration's resetVersion flag is never persisted when the store hydrates, so the reset logic re-runs on every page load until the user manually changes the sort order again."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/components/common/SpaceSafeBar/hooks/useSafeBarSafes.ts",
+      "line": 99,
+      "claim": "On a space route, safeAddress falls back to the Redux safeInfo, which can still hold a safe from outside the current space; spaceDropdownSafes would then place that unrelated safe at the top of the list, whereas before this change the space list was passed through untouched, and it is unclear whether a filter elsewhere reliably hides this in multi-chain or stale-state cases."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/src/store/orderByPreferenceSlice.test.ts",
+      "line": 27,
+      "claim": "The test only asserts that ORDER_BY_RESET_VERSION is of type number, which passes regardless of what the migration actually does and therefore cannot catch a regression in the reset behavior; since the real reset behavior is already covered in store/__tests__/index.test.ts, this test should be removed."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/components/common/SafeListSortToggle/index.tsx",
+      "line": 24,
+      "claim": "The new SafeListSortToggle component has logic but no Storybook story, even though the project's contribution guidelines require a story for new components with logic; only an index.test.tsx file was added."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/src/store/index.ts",
+      "line": 149,
+      "claim": "The one-time reset overrides any persisted state whose resetVersion is not 1, so it cannot distinguish a user who stayed on the old default from one who deliberately chose \"Most recent\"; everyone gets moved to Name regardless of intent."
+    },
+    {
+      "id": "F9",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/SafeDropdownContainer.tsx",
+      "line": 154,
+      "claim": "The search input has no aria-label, so the placeholder text is the field's only accessible name, making its unclear, verbless phrasing more impactful for screen reader users."
+    },
+    {
+      "id": "F10",
+      "file": "apps/web/src/components/common/SafeListSortToggle/index.test.tsx",
+      "line": 8,
+      "claim": "The only test for this component checks the default trigger label; it does not exercise the onValueChange to setOrderByPreference wiring or the unchecked `value as OrderByOption` cast, so breaking or deleting that dispatch logic would not be caught by any test."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/src/components/common/SafeListSortToggle/index.tsx",
+      "line": 15,
+      "claim": "The new sort control duplicates the label map from OrderByButton instead of sharing it, creating duplicated logic that can drift out of sync."
+    },
+    {
+      "id": "F12",
+      "file": "apps/web/src/store/orderByPreferenceSlice.ts",
+      "line": 10,
+      "claim": "The comment describing the reset says it 'resets users still on the previous default,' but the actual behavior only affects users who explicitly picked a non-default sort, contradicting the comment."
+    },
+    {
+      "id": "F13",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/SafeDropdownContainer.tsx",
+      "line": 154,
+      "claim": "The search placeholder now reads \"by name, address or network,\" which is a sentence fragment and no longer matches the wording used in the neighboring All accounts modal, which still says \"Search by name or address\"."
+    },
+    {
+      "id": "F14",
+      "file": "apps/web/src/components/common/SpaceSafeBar/hooks/useSafeBarSafes.ts",
+      "line": 100,
+      "claim": "spaceDropdownSafes now puts the current Safe first and sorts the rest in the space dropdown, but the only space-context tests use a one-item list, so neither the \"current first\" rule nor the sort behavior is exercised."
+    },
+    {
+      "id": "F15",
+      "file": "apps/web/src/components/common/SafeListSortToggle/index.tsx",
+      "line": 53,
+      "claim": "Unlike OrderByButton, which sends a trackEvent with OVERVIEW_EVENTS.SORT_SAFES on sort change, the new toggle's onValueChange sends no analytics event, so sort changes made from the account selector and the All accounts modal are not tracked."
+    },
+    {
+      "id": "F16",
+      "file": "apps/web/src/store/index.ts",
+      "line": 146,
+      "claim": "The one-time migration that resets the sort preference to name order only changes behavior for users who had explicitly chosen the 'most recent' sort, while users who never changed the setting already get the new default from initialState without needing the reset; this is the opposite of the stated intent to reset users left on the previous default, and it discards a deliberate user choice."
+    },
+    {
+      "id": "F17",
+      "file": "apps/web/src/features/spaces/hooks/useSpaceSafes.tsx",
+      "line": 31,
+      "claim": "The local address book and space contacts are merged with lodash/merge while keeping each address key's original casing, and name lookups against this merged map use exact-case matching; if a local entry and the CGW space-safe address differ only in casing, the item gets no name and sorts last under 'Name' even though the row still displays an address-book name, and a differently-cased local key can also incorrectly override the space contact's name."
+    },
+    {
+      "id": "F18",
+      "file": "apps/web/src/features/spaces/hooks/useSpaceSafes.tsx",
+      "line": 27,
+      "claim": "A 4-line comment here, along with inline comments at SafeListSortToggle/index.tsx:34-35, could be trimmed per the project's guidance that comments are tech debt."
+    },
+    {
+      "id": "F19",
+      "file": "apps/web/src/store/index.ts",
+      "line": 149,
+      "claim": "The orderByState && guard, which leaves state without the slice untouched, is not covered by any test."
+    },
+    {
+      "id": "F20",
+      "file": null,
+      "line": null,
+      "claim": "When a space route has a URL Safe that isn't part of the space, the new code adds fallbackCurrentSafe to the top of the space list; this new visible behavior has no test, so nothing confirms it is intended."
+    },
+    {
+      "id": "F21",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/SafeDropdownContainer.tsx",
+      "line": 154,
+      "claim": "The search placeholder text 'by name, address or network' is lowercase and lacks a verb, which conflicts with the project's sentence-case convention for UI text, and it is inconsistent with the sibling modal's placeholder 'Search by name or address'."
+    },
+    {
+      "id": "F22",
+      "file": "apps/web/src/components/common/SafeListSortToggle/index.tsx",
+      "line": 37,
+      "claim": "The trigger's long class list repeats the adjacent InputGroup styling (rounded-md border-gray-100 shadow-none) instead of being named/shared, though this is acceptable while used only once."
+    },
+    {
+      "id": "F23",
+      "file": "apps/web/src/components/common/SpaceSafeBar/hooks/useSafeBarSafes.ts",
+      "line": 99,
+      "claim": "The new spaceDropdownSafes logic pins the current safe first and re-sorts the rest for space contexts, but the existing space-context tests only use a single safe and the new sorting tests only cover the non-space case, so a regression in space ordering or current-safe pinning would not be caught."
+    },
+    {
+      "id": "F24",
+      "file": "apps/web/src/store/orderByPreferenceSlice.ts",
+      "line": 10,
+      "claim": "The comment states the reset only \"resets users still on the previous default,\" but the actual code resets all users regardless of their chosen preference, so the comment is inaccurate and should be corrected."
+    }
+  ]
+}

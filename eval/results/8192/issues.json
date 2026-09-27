@@ -1,0 +1,77 @@
+{
+  "usage": {
+    "usd": 0.4024198,
+    "turns": 5,
+    "wallSeconds": 32
+  },
+  "issues": [
+    {
+      "findings": [
+        "F2",
+        "F3",
+        "F4",
+        "F6",
+        "F10"
+      ],
+      "summary": "Invalid/inverted date range is still forwarded to onFiltersChange and the audit-log query",
+      "label": "wrong",
+      "evidence": "ActivityLogFilters.tsx:130,140 do forward the value, and index.tsx/useGetSpaceAuditLog.ts do not guard on it. The PR description's Blast radius section says outright that this is intended: \"an invalid range still issues the request and returns no results, now accompanied by the inline error\"."
+    },
+    {
+      "findings": [
+        "F5"
+      ],
+      "summary": "No test that an inverted range is kept out of the query",
+      "label": "wrong",
+      "evidence": "By design, the PR does not keep an inverted range out of the query (see the Blast radius note in the description). There is no such behaviour to test, and the validation itself is covered in dateFilters.test.ts and ActivityLogFilters.test.tsx."
+    },
+    {
+      "findings": [
+        "F1"
+      ],
+      "summary": "`today` is computed at render time, so the max cap goes stale past midnight until the next re-render",
+      "label": "low",
+      "evidence": "ActivityLogFilters.tsx:91 derives `today` from `new Date()` only during render. If the tab sits idle across midnight, `max` keeps the previous day until something re-renders. That makes the picker one day too strict, which is harmless and rare."
+    },
+    {
+      "findings": [
+        "F7"
+      ],
+      "summary": "`toDateInputValue(filters.createdAtLte)` is recomputed at line 136 even though `toDateBound` already holds it",
+      "label": "nit",
+      "evidence": "ActivityLogFilters.tsx:94 already stores the result in `toDateBound`, and line 136 calls it again. This is a trivially cheap duplicate with no behavioural cost."
+    },
+    {
+      "findings": [
+        "F9"
+      ],
+      "summary": "`toDateInputValue(filters.createdAtGte)` is called inline twice rather than hoisted into a local",
+      "label": "nit",
+      "evidence": "ActivityLogFilters.tsx:127 and :137 each call `toDateInputValue(filters.createdAtGte)`. It is a cheap pure function, so this is style only."
+    },
+    {
+      "findings": [
+        "F11"
+      ],
+      "summary": "No Storybook story shows the filters in their new error states",
+      "label": "low",
+      "evidence": "SpaceActivityLog.stories.tsx only has Populated, Empty, Paginated and Error (a fetch error). None of them sets an inverted or future date filter, so the new inline error UI has no visual coverage, even though apps/web/AGENTS.md:10,147 asks for stories. FilterField and DateFilter are private sub-components, so this is minor."
+    },
+    {
+      "findings": [
+        "F8"
+      ],
+      "summary": "The PR description should link the ticket or spec",
+      "label": "wrong",
+      "evidence": "The PR description already links WA-2617 (a Linear URL) at the top of \"What it solves\"."
+    },
+    {
+      "findings": [
+        "F12"
+      ],
+      "summary": "Unclear whether product or design signed off on the exact behaviour and copy",
+      "label": "unverifiable",
+      "evidence": "The copy is in dateFilters.ts:24-25. Whether product or design approved it can't be settled from the code; the linked ticket is outside the repo."
+    }
+  ]
+}

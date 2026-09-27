@@ -1,0 +1,115 @@
+{
+  "pr": 8288,
+  "title": "feat(web): developer-only feature flag editor",
+  "description": "## What it solves\r\n\r\nNo way to locally toggle the feature flags the web app gets from the config service without changing the service or rebuilding.\r\n\r\n## How this PR fixes it\r\n\r\nA **dev/staging-only** editor that stores per-flag overrides in the browser and applies them instantly across all chains, no reload. It opens as a dialog from the sidebar's Developer group — there is no route.\r\n\r\n- Persisted `featureFlagOverrides` slice + a pure `applyFeatureOverrides` helper wired into `useChain` / `useChains` / `useCurrentChain`, so all ~134 `useHasFeature` consumers and every route/nav gate inherit overrides automatically.\r\n- The sidebar gained **action items** — entries that run a callback instead of navigating — since this one has no route. `ResolvedSidebarItem` is now a discriminated union, so the compiler enforces that nav items always carry a link.\r\n- **Production exclusion:** `FeatureFlagEditorDialogLoader` is the single boundary, wrapping `dynamic(() => import(...))` in an inlined `process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true'` check so the editor graph is dead-code-eliminated. The feature's `index.ts` barrel is deleted — it re-exported the editor and was a live static path into that graph. `applyFeatureOverrides` is also a hard prod no-op, so hand-edited `localStorage` cannot flip flags in production.\r\n\r\nhttps://github.com/user-attachments/assets/abfbfb97-7a68-4a70-991c-6f673aba8025\r\n\r\n## How to test it\r\n\r\n1. In dev, open any Safe → sidebar **Developer → Feature flags** → toggle a flag (e.g. `EARN`). Nav/route/feature UI update instantly, no reload; the sidebar badge tracks the override count; overrides survive reload.\r\n2. `/feature-flags` should 404 — the route is gone.\r\n3. `yarn workspace @safe-global/web test src/features/feature-flags src/hooks/useChains.test.ts src/features/spaces/components/Sidebar`\r\n4. Prod exclusion: `RUN_BUNDLE_TESTS=true yarn workspace @safe-global/web test bundleExclusion`\r\n\r\n## Affected flows\r\n\r\n- Local override → global, reload-free effect on nav visibility, route gating, and feature UI.\r\n- Dev-only Developer sidebar group opening the dialog (hidden entirely in production).\r\n- Every sidebar entry in both the Safe and Spaces sidebars now flows through the nav/action union in `NavItem`.\r\n\r\n## Blast radius\r\n\r\n- **Shared chain hooks** (`useChains.ts`) — ~134 `useHasFeature` consumers plus route/nav gating; behaviour-preserving with no overrides.\r\n- **Sidebar types** — `ResolvedSidebarItem` union, consumed by the main nav, Settings, the DeFi group, and the Spaces sidebar. `useResolvedSidebarNav` lost its developer-group parameter; the other caller is unaffected.\r\n- **Store** — new persisted `featureFlagOverridesSlice`.\r\n- **Routing** — `/feature-flags` and `AppRoutes.featureFlags` removed, no redirect; existing bookmarks 404.\r\n- **Mobile** — no mobile-app changes (web-only). Mobile *web* drawer fixed: dismissing it no longer unmounts the component owning the dialog's state.\r\n\r\n## Risks / not checked\r\n\r\n- `bundleExclusion.test.ts` is the only end-to-end proof the editor is absent from production chunks, and it **runs in no CI job** (`RUN_BUNDLE_TESTS` appears nowhere in `.github/`). Validated locally on this branch against a real production `next build`; nothing currently stops a future regression.\r\n- The loader's guard test pins the `process.env` comparison but not the `dynamic()` import shape — a rewrite to a static import with the same guard would still pass the unit tests.\r\n- The mobile drawer fix is unit-covered only; no integration test mounts the real `SheetContent` portal at phone width.\r\n- Chains read straight from the store (not via the hooks) don't see overrides. Route/nav gating uses the hooks, so it is covered.\r\n- The feature intentionally has **no `index.ts`**, unlike every other feature — the barrel was a production-leak path. Deliberate deviation from `docs/feature-architecture.md`.\r\n\r\n## Checklist\r\n\r\n- [x] I've tested the branch on mobile 📱 — web-only; mobile-web drawer interaction fixed and unit-tested\r\n- [x] I've documented how it affects the analytics (if at all) 📊 — action items still emit `SIDEBAR_CLICKED`; no new events\r\n- [x] I've written a unit/e2e test for it (if applicable) 🧑‍💻\r\n- [x] I've listed affected flows and blast radius, and named what I did not verify 🎯\r\n",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "useFeatureFlagEditorData.ts",
+      "line": 32,
+      "claim": "The editor's configValue and chainScope fields reflect the raw config-service data, not the overridden value used by useHasFeature, creating an intentional but undocumented split between what the 'Config service' column shows and what the switch below it controls; this should be documented with a comment explaining the distinction."
+    },
+    {
+      "id": "F2",
+      "file": "FeatureFlagRow.tsx",
+      "line": 59,
+      "claim": "The switch's onCheckedChange always dispatches setOverride, even when the new value equals the config value, so toggling a row off and back on leaves it in an overridden state that merely happens to match the current chain instead of returning to a clean, non-overridden state. Users relying on the switch as their primary control will accumulate silent overrides that are indistinguishable from normal config values except via the 'matchesCurrentChain' indicator."
+    },
+    {
+      "id": "F3",
+      "file": "featureFlagOverridesSlice.ts",
+      "line": 29,
+      "claim": "Saved override keys for a FEATURES value that is later removed or renamed are never cleaned up, so selectOverrideCount still counts them while the typed clearOverride cannot remove them; counting or loading should filter to Object.values(FEATURES)."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/features/feature-flags/store/index.ts",
+      "line": 1,
+      "claim": "The new features/feature-flags/ folder only contains a store/ folder, missing a contract.ts, feature.ts, top-level index.ts, and a feature flag, which conflicts with the documented requirement that every feature export a contract and sit behind a feature flag; other feature folders such as gtf/ follow the full structure. The slice should either be given the full feature structure or moved to apps/web/src/store/featureFlagOverridesSlice.ts alongside other slices of its kind."
+    },
+    {
+      "id": "F5",
+      "file": "bundleExclusion.test.ts",
+      "line": 18,
+      "claim": "The marker string 'local feature-flag overrides' used in the bundle exclusion test is generic enough that an unrelated future copy change could accidentally satisfy or invalidate the assertion; a longer, editor-specific sentinel string or a dedicated data attribute would make the test more robust."
+    },
+    {
+      "id": "F6",
+      "file": "FeatureFlagRow.tsx",
+      "line": 65,
+      "claim": "The check icon uses visibility: hidden combined with an aria-label, but visibility: hidden removes the element from the accessibility tree, so a screen reader never announces the match state, and the actual accessible content lives inside TooltipContent which is only exposed on focus or hover; either add sr-only text alongside the visible check or drop the aria-label on the icon since the tooltip content already provides the announcement."
+    },
+    {
+      "id": "F7",
+      "file": "featureFlagOverridesSlice.ts",
+      "line": 24,
+      "claim": "setOverride, clearOverride, clearAllOverrides, and both selectors are unused outside the slice and its test, making them dead code at merge unless a stacked PR consumes them, which should be noted in the PR description."
+    },
+    {
+      "id": "F8",
+      "file": "store/index.ts",
+      "line": 67,
+      "claim": "featureFlagOverridesSlice's reducer is registered unconditionally and included in persistedSlices and broadcastState even in production, where applyFeatureOverrides is a no-op; this means a stale featureFlagOverrides localStorage entry from prior use on the same origin will silently persist in production with no UI available to clear it."
+    },
+    {
+      "id": "F9",
+      "file": "featureFlagOverridesSlice.test.ts",
+      "line": 30,
+      "claim": "No test covers the store change that adds the slice to the saved-state list, and the existing 'clears a single override' test starts from a single key so it cannot distinguish clearOverride removing just that key from it wiping everything; the test should start with two keys and assert only one remains, and a load-from-storage case should be added in store/__tests__/index.test.ts."
+    },
+    {
+      "id": "F10",
+      "file": "FeatureFlagRow.tsx",
+      "line": 58,
+      "claim": "The empty span used as an alignment spacer relies on an existing grid comment for context and could be lost or misunderstood in future edits without more explicit annotation."
+    },
+    {
+      "id": "F11",
+      "file": "useFeatureFlagEditorData.ts",
+      "line": 53,
+      "claim": "Sorting is performed inline with localeCompare on every render even though FEATURES is a fixed enum; alphabetizing once at module scope would avoid repeated re-sorting."
+    },
+    {
+      "id": "F12",
+      "file": "apps/web/src/store/index.ts",
+      "line": 95,
+      "claim": "The feature flag overrides are added to persistedSlices, meaning they are saved to localStorage, shared across tabs, and reloaded on startup without validation in every environment including production. Although nothing currently reads the overrides, once a consumer such as useHasFeature honors them, values left in localStorage would override real chain feature flags in production and a stale dev override could persist silently; saving and reading overrides should be restricted to non-production builds or an explicit dev gate, and loaded keys should be validated against FEATURES."
+    },
+    {
+      "id": "F13",
+      "file": null,
+      "line": null,
+      "claim": "There is no test covering applyFeatureOverrides when a chain has an override for a feature that is not present in the Chain['features'] enum type; the cast to string is safe but lacks a coverage anchor."
+    },
+    {
+      "id": "F14",
+      "file": "SafeSidebarContent.tsx",
+      "line": 114,
+      "claim": "selectOverrideCount subscribes the sidebar to the store in production even though the feature-flag group is hidden there, causing an unnecessary (if cheap) subscription; hoisting the IS_PRODUCTION check above useAppSelector would avoid this at the cost of a conditional-hook pattern."
+    },
+    {
+      "id": "F15",
+      "file": "apps/web/src/features/feature-flag-overrides/__tests__/bundleExclusion.test.ts",
+      "line": 1,
+      "claim": "The folder name feature-flags is unclear or poorly chosen and should be renamed to something else."
+    },
+    {
+      "id": "F16",
+      "file": null,
+      "line": null,
+      "claim": "There is no unit test for FeatureFlagSection verifying it returns null when rows.length is 0."
+    },
+    {
+      "id": "F17",
+      "file": "apps/web/src/features/feature-flags/store/index.ts",
+      "line": 1,
+      "claim": "The new feature-flags feature folder only contains a store subdirectory with its own index.ts, but lacks a feature-root index.ts exporting its public hooks, selectors, actions and types. Without it, any future consumer of selectFeatureFlagOverrides, selectOverrideCount or setOverride would have to deep-import from the store path instead of the feature's public API, which is the pattern the feature-boundary convention and public-API rule are meant to prevent."
+    },
+    {
+      "id": "F18",
+      "file": null,
+      "line": null,
+      "claim": "There is no unit test for FeatureFlagEditor covering the search filter, the enable/disable and dispatch behavior of 'Reset all overrides', or the empty overridden section."
+    }
+  ]
+}

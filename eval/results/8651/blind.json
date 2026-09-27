@@ -1,0 +1,127 @@
+{
+  "pr": 8651,
+  "title": "feat: do not show the logout toast outside of Spaces",
+  "description": "## What it solves\r\n\r\nResolves: [WA-3251](https://linear.app/safe-global/issue/WA-3251/show-workspace-session-expiry-prompt-only-on-spaces)\r\n\r\nThe session-expiry toast fired on every route (incl. Safe-level), and when the session expired **inside a space** the user was redirected to `/welcome/spaces` with **no toast**.\r\n\r\n## How this PR fixes it\r\n\r\n- Scope the toast to **workspaces routes only** (`/welcome/spaces` + `/spaces/*`); auth is still cleared silently everywhere else.\r\n- Toast is dispatched at expiry fire-time on the `/spaces/*` route and **survives the redirect** to `/welcome/spaces` (Redux-backed, not cleared on nav).\r\n- Variant `error` → `info`, `autoHideDuration: null` so the \"logged out\" message stays until dismissed (info toasts otherwise auto-hide after 5s).\r\n\r\n## How to test it\r\n\r\nForce a session expiry from the browser console (expires 5s after reload):\r\n\r\n```js\r\nconst KEY = 'SAFE_v2__auth'\r\nconst auth = JSON.parse(localStorage.getItem(KEY) ?? '{}')\r\nauth.sessionExpiresAt = Date.now() + 5_000\r\nlocalStorage.setItem(KEY, JSON.stringify(auth))\r\nlocation.reload()\r\n```\r\n\r\n1. Inside a space (`/spaces/...`), run the script → redirected to `/welcome/spaces` **with** toast.\r\n2. On the Safe level, run the script → auth cleared, **no** toast.\r\n\r\n## Affected flows\r\n\r\n- Session expiry inside a space — redirect + toast\r\n- Session expiry on `/accounts` / other routes — silent, no toast\r\n\r\n## Blast radius\r\n\r\n- `useSessionExpiryGuard` (global in `_app.tsx`) — only the toast dispatch is route-gated; `setUnauthenticated()` unchanged.\r\n- Notification `session-expired` — variant/auto-hide changed.\r\n- No API / flag / persistence / mobile changes.\r\n\r\n## Risks / not checked\r\n\r\n- Copy unchanged (differs slightly from ticket wording).\r\n\r\n## Visual summary\r\n\r\n```mermaid\r\nflowchart TD\r\n  E[Session expires] --> C[setUnauthenticated - every route]\r\n  C --> Q{isSpacesRoute?}\r\n  Q -->|/welcome/spaces or /spaces/*| T[Show info toast - sticky]\r\n  Q -->|/accounts, other| S[Silent, no toast]\r\n  T --> R[AuthState redirect to /welcome/spaces]\r\n  R --> V[Toast survives navigation]\r\n```\r\n\r\n<img width=\"373\" height=\"212\" alt=\"image\" src=\"https://github.com/user-attachments/assets/b2a0bfde-d349-4f5d-82b0-93c67fb3d14d\" />\r\n\r\n\r\n## Checklist\r\n\r\n- [x] I've tested the branch on mobile 📱\r\n- [ ] I've documented how it affects the analytics (if at all) 📊\r\n- [x] I've written a unit/e2e test for it (if applicable) 🧑‍💻\r\n- [x] I've listed affected flows and blast radius, and named what I did not verify 🎯\r\n",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/services/sessionExpiry/useSessionExpiryGuard.ts",
+      "line": 78,
+      "claim": "If the session expires on a non-workspaces page and the user then navigates to /welcome/spaces, they will be signed out with no toast explaining why, a consequence of the new behavior that needs confirmation."
+    },
+    {
+      "id": "F2",
+      "file": "useSessionExpiryGuard.ts",
+      "line": 84,
+      "claim": "With autoHideDuration set to null, a toast raised on /spaces stays visible after the user navigates to /home until they dismiss it or sign in again, which partly contradicts the goal of showing the toast only within workspaces."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/services/sessionExpiry/useSessionExpiryGuard.ts",
+      "line": 22,
+      "claim": "This new spaces-route check duplicates and disagrees with the existing one in apps/web/src/features/spaces/hooks/useIsQualifiedSafe.ts:29: the existing check uses a bare startsWith that also matches paths like /spaces-foo and /welcome/spaces/*, while the new helper matches only exactly or with a trailing slash. A single shared helper should be used, or the difference should be explicitly noted."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/services/sessionExpiry/useSessionExpiryGuard.ts",
+      "line": 55,
+      "claim": "The ref that lets the route be read at the moment the timer fires (rather than when it was set) is not covered by any test, such as a case where the timer is set on /welcome/accounts, the user navigates to /spaces, and the timer then fires and should show the toast."
+    },
+    {
+      "id": "F5",
+      "file": "__tests__/useSessionExpiryGuard.test.tsx",
+      "line": 316,
+      "claim": "Because of these gaps, deleting the startsWith branch or the ref update would still pass every existing test, showing the tests don't actually guard that behavior."
+    },
+    {
+      "id": "F6",
+      "file": null,
+      "line": null,
+      "claim": "The useIsSpaceRoute hook cannot be called inside a timer callback, but its route lists could be exported so both places share one source instead of duplicating route logic."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/services/sessionExpiry/__tests__/useSessionExpiryGuard.test.tsx",
+      "line": 317,
+      "claim": "No test covers the nested-route branch pathname.startsWith('/spaces/'); only the exact /spaces and /welcome/spaces matches are tested, so that branch could be deleted and all tests would still pass. A case using a nested route like AppRoutes.spaces.settings that expects the toast should be added."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/src/services/sessionExpiry/useSessionExpiryGuard.ts",
+      "line": 46,
+      "claim": "If excluding the onboarding routes from the toast is intentional, this should be stated in the doc comment rather than left unexplained."
+    },
+    {
+      "id": "F9",
+      "file": "apps/web/src/services/sessionExpiry/useSessionExpiryGuard.ts",
+      "line": 23,
+      "claim": "The prefix check uses the hard-coded string '/spaces/' while the other two comparisons on the same line use AppRoutes, so the check would not follow AppRoutes if that route ever changes; it should be written using AppRoutes.spaces.index instead."
+    },
+    {
+      "id": "F10",
+      "file": "apps/web/src/services/sessionExpiry/useSessionExpiryGuard.ts",
+      "line": 22,
+      "claim": "Because those onboarding routes are not matched, a user creating a workspace who hits session expiry has expireNow() clear auth without showing a toast."
+    },
+    {
+      "id": "F11",
+      "file": "__tests__/useSessionExpiryGuard.test.tsx",
+      "line": 316,
+      "claim": "There is no test that navigates between arming the timer and the timer firing, which is the scenario that justifies keeping the pathname in a ref."
+    },
+    {
+      "id": "F12",
+      "file": "__tests__/useSessionExpiryGuard.test.tsx",
+      "line": 316,
+      "claim": "The 403 probe path outside workspaces is untested."
+    },
+    {
+      "id": "F13",
+      "file": "apps/web/src/services/sessionExpiry/useSessionExpiryGuard.ts",
+      "line": 22,
+      "claim": "apps/web/src/hooks/useIsSpaceRoute.ts:6-26 already determines what counts as a workspace route, but the new check disagrees with it: it additionally matches /welcome/spaces, /spaces/create-space and /spaces/transactions, and ignores lastUsedSpace, creating two diverging definitions of a workspace route."
+    },
+    {
+      "id": "F14",
+      "file": null,
+      "line": null,
+      "claim": "SESSION_EXPIRED_SIGN_IN_LABEL was removed but no other code, e2e test, or Cypress test references it or the 'Sign in to workspaces' text it represented, indicating a regression risk from the removal."
+    },
+    {
+      "id": "F15",
+      "file": "apps/web/src/services/sessionExpiry/useSessionExpiryGuard.ts",
+      "line": 22,
+      "claim": "isSpacesRoute only matches /welcome/spaces, /spaces and /spaces/*, leaving out the signed-in workspace onboarding routes /welcome/create-space, /welcome/select-safes, /welcome/invite-members and /welcome/survey defined in apps/web/src/config/routes.ts:83-87."
+    },
+    {
+      "id": "F16",
+      "file": "apps/web/src/services/sessionExpiry/useSessionExpiryGuard.ts",
+      "line": 78,
+      "claim": "Several visible behavior changes (toast no longer shown outside workspaces routes, error styling replaced by info, toast now persists until dismissed, and the 'Sign in to workspaces' link removed) are not backed by any cited product or design decision in the diff, even though commit messages claim they are intended; this decision should be added to the PR description."
+    },
+    {
+      "id": "F17",
+      "file": "apps/web/src/services/sessionExpiry/useSessionExpiryGuard.ts",
+      "line": 55,
+      "claim": "There is no test for a /me 403 occurring while outside a workspaces route, which should clear auth and show no toast."
+    },
+    {
+      "id": "F18",
+      "file": null,
+      "line": null,
+      "claim": "The fix should include the onboarding routes in the match, ideally by sharing the ONBOARDING_ROUTES list from useFlowActivationGuard.ts:18 instead of duplicating it."
+    },
+    {
+      "id": "F19",
+      "file": "apps/web/src/hooks/useRouterGuard/activationGuards/useFlowActivationGuard.ts",
+      "line": 18,
+      "claim": "useFlowActivationGuard then redirects the user off the onboarding page after expiry, and since this happens after pathnameRef has already been read, the toast cannot be brought back; the redirect can land on /welcome/accounts, leaving the user removed from onboarding with no explanation."
+    },
+    {
+      "id": "F20",
+      "file": "__tests__/useSessionExpiryGuard.test.tsx",
+      "line": 316,
+      "claim": "No test covers a nested route like /spaces/members, which is the only case that exercises the startsWith('/spaces/') branch."
+    }
+  ]
+}

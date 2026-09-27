@@ -1,0 +1,35 @@
+{
+  "usd": 0.0814416,
+  "findings": [
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/walletKitE2eState.ts",
+      "line": 72,
+      "claim": "The proposeBehavior field and its accompanying comment describe a fetch interceptor for CGW's /propose endpoint that does not exist anywhere in the codebase, so a developer relying on the comment to build the CGW-failure test flow (setting proposeBehavior to 'fail500') would get a live passthrough to staging instead of a synthetic failure."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/walletKit.e2e.ts",
+      "line": 65,
+      "claim": "Comments reference a WcResponseIndicator component and associated test-ids (error-code, safeTxHash-match) that do not exist anywhere in the repository, making the documentation misleading since an adjacent, similarly-worded comment for a different field is actually accurate, giving readers no way to distinguish true documentation from aspirational documentation."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/walletKitE2eState.ts",
+      "line": 66,
+      "claim": "The lastRequestResponse field is currently written by the fake WalletKit but read by nothing except its own unit tests, so the stated purpose of letting tx-request flows assert exactly what was delivered is not yet achievable."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/walletKit.e2e.ts",
+      "line": 54,
+      "claim": "The hand-rolled JsonRpcResponseLike type is justified in a comment as avoiding a dependency on @walletconnect/jsonrpc-types, but @walletconnect/jsonrpc-utils is already a declared dependency and already used by production code, so the type could be derived from it at no extra dependency cost, making the stated justification inaccurate."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/__tests__/walletKit.e2e.test.ts",
+      "line": 43,
+      "claim": "No test verifies that a second call to respondSessionRequest overwrites the first, even though that last-write-wins behavior is the entire contract implied by the field name lastRequestResponse and matters because a single flow can produce multiple responses on one topic."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/__tests__/walletKit.e2e.test.ts",
+      "line": 48,
+      "claim": "The test hardcodes the topic literal 'e2e-session-topic' instead of using the exported E2E_SESSION_TOPIC constant that every other consumer in the codebase imports for this purpose, breaking the file's own established pattern and reducing readability."
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "usd": 0.051294,
+  "findings": [
+    {
+      "claim": "The Read-only pill span has neither whitespace-nowrap nor shrink-0, unlike the pending badge and balance beside it, so when the row runs out of space it can shrink and wrap its text between the hyphen, breaking 'Read-only' into 'Read-' and 'only', an effect made more visible by the leading-none style.",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/MultiChainSafeItemRow.tsx",
+      "line": 25
+    },
+    {
+      "claim": "This wrapping can occur in practice because a chain only needs to be deployed and have queued transactions to show the pending badge, so a read-only chain can display both the pending badge and the Read-only pill together, increasing crowding in the row.",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/MultiChainSafeItemRow.tsx",
+      "line": 79
+    },
+    {
+      "claim": "No tests were changed for this commit; the existing tests only check for the Inactive/Activating badge and would still pass even if the badge layout reverted to sitting under the name, so they do not cover the new position.",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/__tests__/MultiChainSafeItemRow.test.tsx",
+      "line": null
+    },
+    {
+      "claim": "The isReadOnly branch of StatusBadge has no test coverage at all.",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/MultiChainSafeItemRow.tsx",
+      "line": 23
+    },
+    {
+      "claim": "There is no Storybook story showing an expanded multi-chain row with an undeployed or read-only chain; the existing MixedActivationStates story only covers single-chain rows, leaving no visual check of the new layout.",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/SafeSelectorDropdown.stories.tsx",
+      "line": null
+    },
+    {
+      "claim": "The PR description should carry forward the reasoning given in the commit message (that the icon-only badge from a prior change looked orphaned) and include design sign-off if available, since this is a visible behavior change.",
+      "file": null,
+      "line": null
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "usd": 0.062360000000000006,
+  "findings": [
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/attestations.ts",
+      "line": 44,
+      "claim": "bindAttestations only filters out attested events that name a different chain or Safe; proposal events pass through unfiltered, so events belonging to another chain or Safe are not excluded from the current Safe's view."
+    },
+    {
+      "file": "services/safenetReader.ts",
+      "line": 322,
+      "claim": "The reader builds its sentinel query from every allowlisted proposal for a given transaction hash regardless of which chain or Safe it names, so events for other chains or Safes are pulled into the same result set."
+    },
+    {
+      "file": "utils/deriveCheckState.ts",
+      "line": 36,
+      "claim": "Because foreign proposal and oracle-result events reach deriveCheckState unfiltered, a rejection or timeout that belongs to a sibling chain's transaction gets turned into a MALICIOUS or TIMED_OUT verdict for the Safe currently being viewed."
+    },
+    {
+      "file": "safenetCheckApi.ts",
+      "line": 93,
+      "claim": "The incorrect malicious/timed-out status gets pinned under the viewed Safe's key, and since the pin cannot move back down, a legitimate transaction can continue to show as malicious for the rest of the session."
+    },
+    {
+      "file": "packages/store/src/safenet/__tests__/safenetCheckApi.test.ts",
+      "line": 495,
+      "claim": "An existing test expects the chain-B view to be SUBMITTED, which can only happen because a proposal bound to chain A is leaking into chain B's state; the test should instead expect UNAVAILABLE, and currently locks in the incorrect behavior."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "No test covers the case of a foreign ORACLE_RESULT event or a foreign REQUEST_CREATED event leaking into another chain's or Safe's check state; such tests should be added alongside the fix."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/attestations.ts",
+      "line": 44,
+      "claim": "The fix should also bind proposal events to the target chain/Safe (since they carry chainId/safe fields), and requestIds and sentinel events should only be derived from proposals that are bound to the target, either by passing the target into fetchCheckState or by mapping each event to its requestId after the read."
+    },
+    {
+      "file": "services/safenetReader.ts",
+      "line": 318,
+      "claim": "proposeOracleTransaction is open to anyone, so an attacker could potentially propose a victim's safeTxHash with a wrong chain or Safe to an allowlisted oracle and obtain a rejection that then paints the victim's transaction as malicious; whether the protocol prevents this on-chain was not verified."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/computePollingInterval.ts",
+      "line": 65,
+      "claim": "BENIGN returns a polling interval of 0 when attestedAtMs is null or when nowMs minus attestedAtMs is negative, which can happen from ordinary client clock skew of a few seconds relative to the chain's block timestamp, since BENIGN is first observed within about one 6-second poll of the attestation."
+    },
+    {
+      "file": "constants.ts",
+      "line": 26,
+      "claim": "blockTimeMs returns null on any failure and relies on a single URL by default, so one failed header read can also produce a null attestedAtMs and trigger the same zero-interval condition."
+    },
+    {
+      "file": "hooks/useSafenetCheck.ts",
+      "line": 97,
+      "claim": "Once the polling interval becomes 0, no further fetches occur, and because the effect's dependencies only change when a fetch lands, polling never restarts while the component stays mounted, so a later BENIGN-to-MALICIOUS arbitration only becomes visible after a reload or a remount once the cache expires."
+    },
+    {
+      "file": "utils/__tests__/computePollingInterval.test.ts",
+      "line": 54,
+      "claim": "Existing tests assert the current stop-polling behavior for the null/negative-age case and need to be updated once the fix (treating negative age as zero for BENIGN, and continuing to poll at ARBITRATION_POLL_MS when attestedAtMs is null) is applied."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/deriveCheckState.ts",
+      "line": 73,
+      "claim": "The oracle-attested and plain-attested branches contain identical code and could be merged into a single conditional using the existing isAttested check, reducing duplication."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/attestations.ts",
+      "line": 6,
+      "claim": "A comment states that plain attestations aren't checked while oracle attestations exist, but selectAttestation does check plain attestations, making the comment inaccurate and in need of correction."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The scenario of an INVALID oracle attestation followed by a VERIFIED plain attestation has no test coverage, even though the current code handles it correctly."
+    }
+  ]
+}

@@ -1,0 +1,189 @@
+{
+  "usage": {
+    "usd": 0.8192780000000001,
+    "turns": 12,
+    "wallSeconds": 104
+  },
+  "issues": [
+    {
+      "findings": [
+        "F28",
+        "F12",
+        "F3"
+      ],
+      "summary": "Copy clicks inside Track-wrapped rows (SingleAccountItem, NestedSafesList) still fire 'open Safe' / 'open nested Safe' analytics events, because Track's native listener runs before React's stopPropagation",
+      "label": "medium",
+      "evidence": "Track/index.tsx:36 attaches a native `click` listener on its wrapper. CopyTooltip/index.tsx:29 calls stopPropagation only inside React's delegated root handler, which runs after the native bubble has already reached the wrapper. SingleAccountItem.tsx:44 and NestedSafesList/index.tsx:100 (plus the Track inside AccountItemLink.tsx:47) wrap the new copy controls, so every copy click is logged as a navigation event. The test only uses a React onClick parent, so it can't catch this."
+    },
+    {
+      "findings": [
+        "F6"
+      ],
+      "summary": "Nobody checked whether WidgetItem, SafeCardReadOnly or the Security Hub rows are also wrapped in Track",
+      "label": "wrong",
+      "evidence": "WidgetItem.tsx uses only a React onClick/href and has no Track. Grepping AccountWidgetItem, SafeCardReadOnly, SingleSafeRow, MultichainSafeRow and SafeCardLayout finds no Track either, so the leak does not reach those surfaces."
+    },
+    {
+      "findings": [
+        "F26"
+      ],
+      "summary": "The existing pin/menu stopPropagation div in SingleAccountItem already had the same analytics leak",
+      "label": "low",
+      "evidence": "SingleAccountItem.tsx:98 has a React onClick stopPropagation inside Track, so it has the same native-listener ordering problem. The PR did not change these lines, so this is pre-existing."
+    },
+    {
+      "findings": [
+        "F13",
+        "F31",
+        "F17",
+        "F18"
+      ],
+      "summary": "The copy control (span role=button) sits inside other interactive elements (a role=checkbox button, a CollapsibleTrigger button), and the doc comment claims it is 'safe to nest'",
+      "label": "low",
+      "evidence": "SafeCardLayout.tsx:47-51 renders `<button role=\"checkbox\">` around the copy span, and ARIA treats a checkbox's children as presentational. MultiAccountItem.tsx:135-156 puts it inside a trigger `<button>`. The HTML is technically valid (span, not button), so the CopyAddressIconButton/index.tsx:6-11 comment only covers markup validity, not accessibility."
+    },
+    {
+      "findings": [
+        "F7"
+      ],
+      "summary": "MultiAccountItem nests a button element inside another button",
+      "label": "wrong",
+      "evidence": "CopyAddressIconButton renders a `<span role=\"button\">` (index.tsx:22), not a `<button>`, and CopyTooltip wraps it in a span. There is no button-in-button DOM nesting and no hydration problem."
+    },
+    {
+      "findings": [
+        "F5"
+      ],
+      "summary": "NestedSafesList's showCopyButton renders an MUI IconButton `<button>` inside the ListItemButton > Link `<a>`",
+      "label": "low",
+      "evidence": "The EthHashInfo showCopyButton path goes CopyAddressButton → CopyButton, which renders an IconButton (CopyButton/index.tsx:27). At NestedSafesList/index.tsx:106 that lands inside AccountItemLink's `<Link>`, producing interactive content inside `<a>`. This is the very nesting the new component was built to avoid."
+    },
+    {
+      "findings": [
+        "F2"
+      ],
+      "summary": "NestedSafesList uses a different copy mechanism and visual (EthHashInfo CopyButton) from the other rows",
+      "label": "low",
+      "evidence": "NestedSafesList/index.tsx:86,106 use `showCopyButton` (MUI IconButton with the svg copy icon), while the other surfaces use the lucide-based CopyAddressIconButton. The PR description states this choice openly, but it is still a UI inconsistency."
+    },
+    {
+      "findings": [
+        "F15",
+        "F23"
+      ],
+      "summary": "The bare jest.fn() clipboard mock returns undefined, so `.then` throws and the tests actually run CopyTooltip's 'copying disabled' branch; they only assert that writeText was called",
+      "label": "low",
+      "evidence": "CopyTooltip/index.tsx:38 calls `navigator.clipboard.writeText(text).then(...)`. With `writeText = jest.fn()` (index.test.tsx:7) that throws a TypeError, and the catch sets isCopyEnabled=false. The tests pass anyway because they assert only on `writeText` calls, so the success/tooltip path is never exercised."
+    },
+    {
+      "findings": [
+        "F14",
+        "F29",
+        "F33"
+      ],
+      "summary": "The keyboard test covers Enter but not Space",
+      "label": "low",
+      "evidence": "index.tsx:14 handles both 'Enter' and ' ', but index.test.tsx:36 only fires Enter, so removing Space support would not fail any test."
+    },
+    {
+      "findings": [
+        "F19",
+        "F20"
+      ],
+      "summary": "The new CopyAddressIconButton component has no Storybook story, which apps/web/AGENTS.md requires",
+      "label": "low",
+      "evidence": "The CopyAddressIconButton/ directory holds only index.tsx and index.test.tsx. The apps/web/AGENTS.md:147 matrix requires a unit test plus a story for a new component with logic, and the sibling CopyButton has index.stories.tsx."
+    },
+    {
+      "findings": [
+        "F21",
+        "F25"
+      ],
+      "summary": "SafeCardReadOnly copy feedback changed from a green check icon with 'Copied!' for 2s to a 'Copied' tooltip for 750ms, even though the PR says there is no behaviour change",
+      "label": "low",
+      "evidence": "The diff removes the Check icon and the 2000ms timeout in SafeCardReadOnly.tsx, and CopyTooltip/index.tsx:39-46 shows 'Copied' for 750ms. The PR description claims 'same markup/behaviour', so the description does not match the change."
+    },
+    {
+      "findings": [
+        "F11"
+      ],
+      "summary": "The near-identical CopyAddressButton in SpaceSafeBar/AccountsModal/shared.tsx remains, with different feedback (check icon, 2s)",
+      "label": "low",
+      "evidence": "shared.tsx:180-199 still implements its own copy button with a Check icon and a 2s timeout. SafeCardReadOnly used to match it and now uses the 750ms tooltip version, so there are now two diverging copy UX patterns."
+    },
+    {
+      "findings": [
+        "F27"
+      ],
+      "summary": "The new component duplicates existing copy-address components instead of consolidating them",
+      "label": "nit",
+      "evidence": "CopyAddressIconButton reuses CopyTooltip (index.tsx:21) and deliberately renders a span instead of CopyButton's IconButton so it can be nested. Its only real overlap is with shared.tsx's button (see F11)."
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "The component duplicates CopyTooltip logic and should wrap CopyTooltip instead",
+      "label": "wrong",
+      "evidence": "CopyAddressIconButton/index.tsx:21 already wraps its content in `<CopyTooltip text={address} ...>`. None of CopyTooltip's copy logic is duplicated."
+    },
+    {
+      "findings": [
+        "F10"
+      ],
+      "summary": "A hardcoded value is used instead of a design token at line 40",
+      "label": "wrong",
+      "evidence": "index.tsx has only 38 lines, and its classes are all Tailwind theme tokens (text-muted-foreground, hover:bg-muted, size-3.5). There is no hardcoded color or pixel value."
+    },
+    {
+      "findings": [
+        "F1",
+        "F4",
+        "F24"
+      ],
+      "summary": "The address + copy-button flex wrapper is duplicated across the consumer components instead of being extracted",
+      "label": "nit",
+      "evidence": "The same ~5-line `<div className=\"flex min-w-0 items-center gap-1.5\">` wrapper appears in AccountItemContent, AccountWidgetItem, SingleAccountItem, MultiAccountItem, MultichainSafeRow and SafeCardLayout, with MUI Stack in SingleSafeRow. The text elements differ per surface (MUI vs shadcn Typography, similar-address highlighting), so extracting them has limited value."
+    },
+    {
+      "findings": [
+        "F8"
+      ],
+      "summary": "There are no per-surface tests for SingleSafeRow, MultichainSafeRow, SingleAccountItem, SafeCardReadOnly or NestedSafesList",
+      "label": "low",
+      "evidence": "Tests were added only for the shared component, AccountsWidget, MultiAccountItem and SafeCardLayout. The other consumers have no test confirming the copy click doesn't trigger row navigation, which matters given the Track leak."
+    },
+    {
+      "findings": [
+        "F9"
+      ],
+      "summary": "Each row gains an extra tab stop",
+      "label": "nit",
+      "evidence": "`tabIndex={0}` (index.tsx:24) is needed for a keyboard-accessible copy action and is the feature's intent. The extra tab stop is expected and costs nothing concrete."
+    },
+    {
+      "findings": [
+        "F22"
+      ],
+      "summary": "navigator.clipboard is overridden with Object.defineProperty and never restored",
+      "label": "nit",
+      "evidence": "Jest gives each test file its own jsdom environment, so the override cannot leak across files. Within a file, every test expects the mocked clipboard anyway."
+    },
+    {
+      "findings": [
+        "F30"
+      ],
+      "summary": "The clipboard mock setup is inconsistent across test files (inline vs beforeAll)",
+      "label": "nit",
+      "evidence": "AccountsWidget.test.tsx and SafeCardLayout.test.tsx define the mock inline, while the other files use beforeAll. This is purely stylistic."
+    },
+    {
+      "findings": [
+        "F32"
+      ],
+      "summary": "Unverified whether clicks on children of a disabled SafeCardLayout button still reach the nested copy control",
+      "label": "unverifiable",
+      "evidence": "SafeCardLayout.tsx:51 sets `disabled` on the outer button. Whether clicks on a descendant span get dispatched differs by browser and can't be settled from the code alone."
+    }
+  ]
+}

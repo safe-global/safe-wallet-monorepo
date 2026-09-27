@@ -1,0 +1,10 @@
+{
+  "usd": 0.022422,
+  "findings": [
+    {
+      "file": null,
+      "line": null,
+      "claim": "The safe-scope folder should be moved so that it is located inside the spaces folder, as its current location outside of it is considered incorrect."
+    }
+  ]
+}

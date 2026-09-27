@@ -1,0 +1,20 @@
+{
+  "usd": 0.0345196,
+  "findings": [
+    {
+      "claim": "Entering a value with a comma instead of a period (e.g. \"1,5\" instead of \"1.5\") may not be handled correctly; the existing Safe-level Spending Limits feature casts a comma to a period, so this input handling should be checked for consistency.",
+      "file": null,
+      "line": null
+    },
+    {
+      "claim": "The added dialogs are not responsive on smaller screens.",
+      "file": null,
+      "line": null
+    },
+    {
+      "claim": "The file copy.ts is not descriptively named and should be renamed to something clearer, such as describeSpendingLimits.ts or policyCopy.ts.",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/Summary/describePolicy.ts",
+      "line": 54
+    }
+  ]
+}

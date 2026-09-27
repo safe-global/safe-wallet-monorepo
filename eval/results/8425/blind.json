@@ -1,0 +1,139 @@
+{
+  "pr": 8425,
+  "title": "feat: Dashboard design inconsistencies",
+  "description": "## What it solves\r\n\r\nResolves: [part 2 of WA-2892](https://linear.app/safe-global/issue/WA-2892/fix-design-inconsistencies)\r\n\r\nDesign inconsistencies across the web app: network-logo badges looked different in every surface (borders vs none, different sizes, opaque `+N` bubbles), hover/selected states used opaque grays that broke on non-white surfaces and in dark mode, the safe-selector dropdown had no page dimming, and assorted spacing/radius drift in the sidebar, dashboard, and topbar.\r\n\r\n## How this PR fixes it\r\n\r\n**Network-logo badges — one design everywhere** (reference: the safe-selector dropdown's `SafeRowStats`):\r\n- Logo separation is now a `mask-image` radial-gradient cutout instead of a painted border/ring — the gap is truly transparent, so it works on any background. Applied in `SafeRowStats` (inline) and in the shared `NetworkLogosList` stylesheet, where the geometry is driven by a `--network-logo-size` CSS variable so 18px/22px/24px stacks all get correct crescents.\r\n- The `+N` overflow indicator is transparent text (no more opaque `bg-muted` bubble) and sizes with the logos.\r\n- The accounts-table badge (`AccountItemChainBadge`) renders 22px logos capped at 3 + `+N`, matching the dropdown pill exactly (28px pill, 16px logo advance, 12.5→13px cut).\r\n\r\n**Adaptive tints instead of opaque grays:**\r\n- Row action icons (copy/explorer/rename) hover with `bg-foreground/5`; the pending-badge dot ring is `ring-white/50` — both composite correctly on any surface and in dark mode.\r\n- New theme token `background.lightHover` (`#E7FFF2` light / `#12FF801A` dark) for hovering the selected dropdown row; promoted into `@safe-global/theme` and generated into `vars.css`.\r\n- shadcn `--accent` aligned to the green accent scale (`#f0fdf4` / `#052e16`).\r\n\r\n**Safe-selector dropdown backdrop:**\r\n- Opening the dropdown dims the whole page (`SelectContent` gained an opt-in `showBackdrop` that renders base-ui's `Select.Backdrop` with the dialog-overlay styling).\r\n- The `SpaceSafeBar` pill and the popup stay lit: a second topbar-elevation tier (`useTopbarOverlayElevation`) dissolves the topbar's stacking context while open, and the bar lifts itself one step above the backdrop.\r\n- Dropdown balances render in primary color at 14px (was muted 12px).\r\n\r\n**Layout polish:** topbar gets 24px top padding; sidebar header spacing, switch-sidebar icon (`PanelRightIcon`), Safe logo radius, dashboard icon chips, and various spaces CSS fixes.\r\n\r\n## How to test it\r\n\r\n1. **Accounts table** (`/welcome/accounts` or spaces safe accounts): multi-chain rows show ≤3 stacked network logos with transparent gaps between them and a `+N` matching the pill background; hover a row — the pill tint follows.\r\n2. **Safe-selector dropdown** (topbar): open it — page dims, the white SpaceSafeBar pill and the popup stay lit. The current safe's row is green; hovering it deepens the green (both themes). Row balances are 14px primary text. Network pills in rows match the accounts table.\r\n3. **Row actions**: hover copy/explorer/rename icons on light and dark themes — subtle adaptive tint, no flat gray chips.\r\n4. **Storybook**: `NetworkLogosList` → `InsideAccountBadgePill` story shows the badge configuration.\r\n\r\n<img width=\"1512\" height=\"529\" alt=\"Screenshot 2026-08-03 at 12 22 52 PM\" src=\"https://github.com/user-attachments/assets/cdc218b1-83a8-4625-ade2-c86d64ff7296\" />\r\n<img width=\"1512\" height=\"529\" alt=\"Screenshot 2026-08-03 at 12 22 24 PM\" src=\"https://github.com/user-attachments/assets/ff46001c-ec07-4f25-ab49-4059fee67664\" />\r\n\r\n\r\n## Affected flows\r\n\r\n- Account list / accounts table browsing (network badges, workspace badges, row hover actions)\r\n- Safe switching via the topbar safe-selector dropdown (backdrop, selected-row highlight, balances)\r\n- Tx-flow / recovery topbar elevation (mechanism refactored, behavior unchanged)\r\n- Sidebar & dashboard visual polish (logo, header spacing, icon chips)\r\n\r\n## Blast radius\r\n\r\n- `NetworkLogosList` (shared): consumers include address book tables, request-to-add, safe app preview drawer, new-safe review/overview, counterfactual success screen, SecurityHub table (18px logos) — all inherit the mask cutouts and transparent `+N`.\r\n- `RowIconAction` (shared): all AccountRow surfaces get the new hover tint.\r\n- `SelectContent` (`showBackdrop` opt-in): default unchanged — no other select gets a backdrop.\r\n- `useTopbarElevation`: refactored into a factory; existing `tx-flow`/`recovery` behavior preserved (covered by PageLayout tests).\r\n- `@safe-global/theme`: additive `background.lightHover` key — flows into generated Tamagui tokens; no mobile behavior change until used.\r\n- `--accent` change affects every shadcn component using accent (e.g. select/dropdown focus states) — now green-tinted instead of gray.\r\n\r\n## Risks / not checked\r\n\r\n- Did not test on mobile app (theme key is additive only).\r\n- Storybook test-runner / Chromatic visual diffs not run locally — the intended diffs will appear on this PR and need accepting.\r\n- Mask cutouts skip chains whose logo fails to load (SVG fallback icon isn't masked) — same as before, no border either.\r\n- Wrapped logo rows (`flex-wrap` in `NetworkLogosList`) keep a masked right edge when a neighbor wraps to the next line — pre-existing rare case.\r\n- Backdrop layering verified on the topbar placement only; the safe selector is not rendered elsewhere today.\r\n\r\n## Visual summary\r\n\r\n```mermaid\r\nflowchart TB\r\n  subgraph Before\r\n    B1[Each surface: own borders,<br/>sizes, opaque +N bubble] --> B2[Opaque grays break on<br/>hover/dark surfaces]\r\n  end\r\n  subgraph After\r\n    A0[SafeRowStats = reference design] --> A1[mask-image cutout<br/>--network-logo-size var]\r\n    A1 --> A2[NetworkLogosList<br/>all badge surfaces]\r\n    A0 --> A3[translucent tints:<br/>bg-foreground/5, background.lightHover]\r\n  end\r\n```\r\n\r\n```mermaid\r\nflowchart TB\r\n  subgraph \"Dropdown open — z-layers\"\r\n    Z1[page + sidebar + rest of header<br/>dimmed under backdrop 1400]\r\n    Z2[SpaceSafeBar pill — 1401<br/>to",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/components/common/SafeSelectorDropdown/components/SafeRowStats.tsx",
+      "line": 10,
+      "claim": "The stacked-logo crescent geometry is duplicated between an inline constant here and a CSS rule in NetworkLogosList's stylesheet, with comments in each referencing the other as the source of truth, creating a maintenance risk if one is changed without the other."
+    },
+    {
+      "id": "F2",
+      "file": null,
+      "line": null,
+      "claim": "If the sticky `.topbarElevated` state and the overlay are ever active at the same time, the sticky positioning would create its own stacking context and could similarly defeat the intended z-index lift of the safe bar above the backdrop."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/features/spaces/components/Sidebar/SidebarTopBar/SidebarTopBar.tsx",
+      "line": 36,
+      "claim": "The new nested isCollapsed branch, which renders a centred size-10 logo tile, is not covered by tests, and the existing test file for this component was not updated."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/features/multichain/components/CounterfactualSuccessScreen/index.tsx",
+      "line": 122,
+      "claim": "Like the ReviewStep consumer, this component does not cap the logo list length, exposing the same wrap-related masking issue."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/styles/shadcn.css",
+      "line": 34,
+      "claim": "The global --accent token is changed app-wide from a neutral grey to green in both light and dark themes, but the change is only needed for the dashboard and header pills; every surface using focus:bg-accent or data-highlighted:bg-accent (Select, DropdownMenu, ContextMenu, Combobox items, and global search) will now highlight green, and --accent becomes identical to --sidebar-accent. This needs an explicit design decision, or the green should be scoped to a separate token rather than changing the shared one."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/src/features/spaces/components/SafeAccounts/SpaceSafeContextMenu.tsx",
+      "line": 39,
+      "claim": "The component has no test file, so the new behavior where the menu anchors to the closest table row, falls back to the button, and hides the backdrop is untested."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/components/common/SafeSelectorDropdown/components/SafeRowStats.tsx",
+      "line": 10,
+      "claim": "The comment states the logo radius is 12px, but the actual logo size is 22px (making the radius 11px), so the comment is incorrect; if this duplication is addressed, the constant should also be replaced with a CSS-variable-driven class like the one used in NetworkLogosList and the radius comment corrected."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/src/features/multichain/components/ReviewStep/index.tsx",
+      "line": 145,
+      "claim": "This consumer of the logo list does not cap the number of logos shown, which interacts with the wrap-related masking bug and can produce more uncovered crescent cutouts as more logos wrap onto new rows."
+    },
+    {
+      "id": "F9",
+      "file": "apps/web/src/hooks/useTopbarElevation.ts",
+      "line": 54,
+      "claim": "There is no test coverage for the new `useTopbarOverlayElevation` / `useIsTopbarAboveOverlay` hooks, and the existing test file only exercises the pre-existing modal elevation pair, not the new overlay pair."
+    },
+    {
+      "id": "F10",
+      "file": "apps/web/src/features/spaces/components/SpacesList/AccountInfo.tsx",
+      "line": 28,
+      "claim": "The component uses the raw palette class text-green-500 instead of a theme token."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/index.tsx",
+      "line": null,
+      "claim": "No test covers the new isDropdownActuallyOpen branches, including backdrop rendering only when showBackdrop is set and elevation triggering only when the dropdown is actually open; a regression in the disabled or !canOpen cases could leave the topbar elevated above a backdrop that isn't shown."
+    },
+    {
+      "id": "F12",
+      "file": "apps/web/src/styles/shadcn.css",
+      "line": 34,
+      "claim": "The shared shadcn `--accent` token was changed from a neutral color to green in both light mode (`#f5f5f5` to `#f0fdf4`) and dark mode (`#12ff8033` to `#052e16`) to restyle three Spaces surfaces, but this token is also used as the hover/focus background for every menu item across dropdown-menu, context-menu, select, combobox, and global search components, so every menu highlight app-wide turns green with nothing overriding it; if this is unintended it needs a scoped token instead, and if intended it should be called out in the PR description."
+    },
+    {
+      "id": "F13",
+      "file": "apps/web/src/components/ui/select.tsx",
+      "line": 109,
+      "claim": "The `showBackdrop` behavior introduced alongside the overlay elevation changes has no test coverage."
+    },
+    {
+      "id": "F14",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/SafeRowStats.tsx",
+      "line": 15,
+      "claim": "The same crescent-mask geometry for stacked logos is duplicated: once as a hard-coded inline JS string of pixel values and once as a parameterised CSS rule that explicitly comments it replicates the JS version exactly, so if one is tuned the other will not follow; SafeRowStats could reuse the CSS-module class, or both could share a single helper."
+    },
+    {
+      "id": "F15",
+      "file": "apps/web/src/features/multichain/components/NetworkLogosList/styles.module.css",
+      "line": 19,
+      "claim": "The crescent mask rule targets `span:not(:last-child)`, but the `.networks` container uses `flex-wrap: wrap`, so the last logo on each wrapped row (not just the true last item) ends up with an uncovered crescent cutout since no neighbour logo overlaps it on that row."
+    },
+    {
+      "id": "F16",
+      "file": "apps/web/src/components/ui/select.tsx",
+      "line": 90,
+      "claim": "The PR edits shared shadcn primitives, adding a showBackdrop prop to SelectContent and changing the SidebarTrigger icon and SidebarHeader padding/gap in sidebar.tsx, affecting every consumer of these components; it is unverified whether this was coordinated with the design-system rewrite or whether no such conflicting PR is open, since the PR description could not be checked."
+    },
+    {
+      "id": "F17",
+      "file": "apps/web/src/components/common/SpaceSafeBar/index.tsx",
+      "line": 296,
+      "claim": "The topbar wrapper's stacking context is removed via `.topbarAboveOverlay { z-index: auto }` so that the safe bar's elevated z-index can beat the dropdown backdrop, but the bar renders inside a `<header className=\"@container …\">` element, and `container-type: inline-size` applies layout containment which always creates its own stacking context. As a result the bar's z-index only wins within the header, and the whole header still paints below the Select backdrop, so opening the safe-selector dropdown dims the entire topbar including the trigger, defeating the purpose of the elevation hooks."
+    },
+    {
+      "id": "F18",
+      "file": "apps/web/src/components/common/SpaceSafeContextMenu.tsx",
+      "line": 37,
+      "claim": "Anchoring the context menu to `closest('tr')` and applying right alignment now applies to every consumer of this component, including non-table consumers such as SafeListItem, MultiAccountItem, and SafeCardReadOnly, which changes menu placement behavior for those cases even though a fallback prevents a crash."
+    },
+    {
+      "id": "F19",
+      "file": "apps/web/src/components/common/SafeSelectorDropdown/index.tsx",
+      "line": 104,
+      "claim": "No test verifies that the dropdown registers overlay elevation only when the dropdown is actually open, as opposed to when it is disabled or when `canOpen` is false; removing this registration line would not cause any test to fail, indicating a coverage gap."
+    },
+    {
+      "id": "F20",
+      "file": "apps/web/src/features/multichain/components/NetworkLogosList/NetworkLogosList.stories.tsx",
+      "line": 87,
+      "claim": "The story decorator hard-codes the color value rgba(0, 0, 0, 0.05) instead of using a theme token."
+    },
+    {
+      "id": "F21",
+      "file": null,
+      "line": null,
+      "claim": "Fallback SvgIcon logos that render without an `<img>` element are never masked by the crescent-cutout styling, leaving them visually inconsistent with masked image logos."
+    },
+    {
+      "id": "F22",
+      "file": "apps/web/src/hooks/useTopbarElevation.ts",
+      "line": 21,
+      "claim": "The new useTopbarOverlayElevation and useIsTopbarAboveOverlay hooks and the createElevationHooks refactor have no tests; the existing test file was not updated to cover the overlay hooks, and the only reference is an unrelated jest mock. Missing coverage includes register/unregister behavior on open/close/unmount and verification that the two stores remain independent."
+    }
+  ]
+}

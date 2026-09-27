@@ -1,0 +1,45 @@
+{
+  "usd": 0.0552836,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/SecurityHub/components/SecurityReportDrawer/SecurityReportDrawer.test.tsx",
+      "line": 16,
+      "claim": "The test asserts the element has class `dark:bg-card`, but the `muted` surface in sheet.tsx was changed to use `dark:bg-[var(--color-background-main)]`, so the element no longer has that class and the test fails against the current implementation."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SecurityHub/components/SafeGradeChip.tsx",
+      "line": 15,
+      "claim": "Pill text now uses `*-main` ink color on the `*-background` tint, producing contrast ratios of roughly 2.4-2.6:1 in light mode, well below the 4.5:1 required by WCAG AA; the previous variants were chosen specifically to meet AA contrast."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SecurityHub/components/SafeGradeChip.tsx",
+      "line": 15,
+      "claim": "Badge colors are now assigned via a `GRADE_PILL_STYLES[grade]` lookup that the project's ESLint rule restricting direct badge/chip color usage cannot detect, so all four grade variants bypass the guard silently instead of using the sanctioned disable-with-reason escape hatch that was previously used for one grade."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SecurityHub/components/SafeGradeChip.tsx",
+      "line": 66,
+      "claim": "Every chip now renders with `data-variant=\"default\"` plus a leftover `[a]:hover:bg-primary/80` class that no longer serves a purpose given the new color lookup approach."
+    },
+    {
+      "file": "apps/web/src/components/ui/sheet.tsx",
+      "line": 72,
+      "claim": "`bg-zinc-50` is a raw Tailwind palette color rather than a theme token, violating the project convention of always using theme tokens instead of hard-coded colors, and it is the only such raw color in the web app's source."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SecurityHub/index.tsx",
+      "line": 37,
+      "claim": "The heading uses a one-off `text-[32px] leading-9` override instead of an existing typography variant, when the h1 variant (48px) or h2 variant (30px) could otherwise apply; no other page overrides heading size this way."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SecurityHub/components/SafeGradeChip.tsx",
+      "line": 65,
+      "claim": "A stray blank line was left inside a `cn(...)` call where a removed ESLint disable comment used to be."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SecurityHub/components/SecurityReportDrawer/SecurityReportDrawer.test.tsx",
+      "line": 16,
+      "claim": "The test name hard-codes color values like \"#fafafa\" and \"white bg-card\", which will become stale the next time the underlying design tokens change."
+    }
+  ]
+}

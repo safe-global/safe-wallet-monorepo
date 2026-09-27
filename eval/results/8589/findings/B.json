@@ -1,0 +1,10 @@
+{
+  "usd": 0.0388476,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/AddAccounts/__tests__/AddManually.test.tsx",
+      "line": 58,
+      "claim": "The test suite only covers the default chain (Ethereum) and does not verify that the closed trigger updates after selecting a different network, even though Polygon (137) is already present in the test data. As a result, a regression that hard-codes the default chain in the render function or drops the value={chainId} binding would not be caught; a test should be added that opens the select, picks 137, and asserts the trigger contains \"Chain 137\"."
+    }
+  ]
+}

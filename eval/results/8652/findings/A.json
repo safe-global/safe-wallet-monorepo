@@ -1,0 +1,35 @@
+{
+  "usd": 0.0568776,
+  "findings": [
+    {
+      "file": "apps/web/src/services/exceptions/index.ts",
+      "line": 80,
+      "claim": "The new branch in getObservabilityContext that emits attempt and is_retry into the Datadog RUM context has no corresponding test, unlike the sibling rpc_host and http_status tags which each have a present-value and omitted-value test case. Existing tests only check the arguments passed to a mocked logError, so if the undefined check became a truthiness check, or is_retry were dropped or computed incorrectly, all tests would still pass while Datadog would silently stop distinguishing first attempts from retries."
+    },
+    {
+      "file": "apps/web/src/features/counterfactual/hooks/useCounterfactualSafeSync.ts",
+      "line": 163,
+      "claim": "The comment here merely restates what the adjacent { attempt: 1 } / { attempt: 2 } arguments already make clear, adding no information and going against the repo's guideline to add comments only when truly necessary."
+    },
+    {
+      "file": "apps/web/src/services/exceptions/index.ts",
+      "line": 79,
+      "claim": "The comment only says to see the same note in the Mixpanel mapper without conveying anything itself, making it an unnecessary comment per the repo's guideline to treat comments as tech debt."
+    },
+    {
+      "file": "apps/web/src/features/counterfactual/hooks/__tests__/useCounterfactualSafeSync.test.ts",
+      "line": 479,
+      "claim": "The comment here duplicates intent already conveyed by the test's name, making it unnecessary and against the repo's guideline to avoid comments that aren't really necessary."
+    },
+    {
+      "file": "apps/web/src/services/observability/providers/__tests__/composite.test.ts",
+      "line": 136,
+      "claim": "The comment here duplicates intent already conveyed by the test's name, making it unnecessary and against the repo's guideline to avoid comments that aren't really necessary."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "Deduping changes what the Error Surfaced event means in Mixpanel: totals must now be computed as sum(Error Occurrences) rather than by counting events, so any existing Mixpanel report or alert that counts events will silently produce wrong numbers after deploy. This has not been confirmed with the owners of those dashboards, and the PR description does not note the change in semantics."
+    }
+  ]
+}

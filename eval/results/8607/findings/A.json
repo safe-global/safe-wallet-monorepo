@@ -1,0 +1,45 @@
+{
+  "usd": 0.0646376,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/SpacesList/index.tsx",
+      "line": 245,
+      "claim": "The loading condition '!isStoreHydrated || (isUserSignedIn && isSpacesLoading)' uses isSpacesLoading, which is also true during background refetches (isFetching), so the component swaps the already-loaded spaces list and invite banners for a spinner whenever the spaces query refetches, even though cached spaces data is already on screen."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpacesList/index.tsx",
+      "line": 245,
+      "claim": "Because the spaces query uses the bare 'spaces' cache tag, accepting or declining an invite invalidates it and triggers this spinner swap, unmounting components rendered under the list (such as an open invite dialog) in the middle of that flow."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpacesList/index.tsx",
+      "line": 254,
+      "claim": "Clicking the Try again button calls refetch(), which also triggers the spinner-replaces-list behavior, so retrying after an error hides the cached list again instead of just updating it in place."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpacesList/index.tsx",
+      "line": 245,
+      "claim": "The prior fix in commit 4bb5a6c69 only keeps the cached list visible when a refetch fails, not while the refetch is in progress, so the underlying flash-to-spinner issue during active refetches remains unaddressed."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpacesList/__tests__/SpacesList.test.tsx",
+      "line": 193,
+      "claim": "There is no test covering the case where currentData already contains an active space while isFetching is true; the existing loading-branch tests only cover no data with isFetching true, store not hydrated, and cached data with an error, so the scenario that exposes the spinner-replacing-list bug is not tested."
+    },
+    {
+      "file": "apps/web/src/features/actions-tray/components/ActionsTray/ActionsTray.tsx",
+      "line": 134,
+      "claim": "The Receive icon is changed from ArrowDownLeft to QrCode without the PR description recording the product or design decision behind this visible change."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Dashboard/HeaderActions.tsx",
+      "line": 31,
+      "claim": "The Receive icon is changed from ArrowDownLeft to QrCode without the PR description recording the product or design decision behind this visible change."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpacesList/index.tsx",
+      "line": 253,
+      "claim": "The new error copy \"Couldn't load your workspaces. Try again, or contact support.\" mentions contacting support but provides no support link or route next to it, and the PR description does not record the product/design intent behind this new copy."
+    }
+  ]
+}

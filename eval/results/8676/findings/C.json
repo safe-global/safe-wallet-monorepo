@@ -1,0 +1,30 @@
+{
+  "usd": 0.0455616,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitIntroDialog/SpendingLimitPreview.tsx",
+      "line": 63,
+      "claim": "Only the Progress bar carries aria-hidden, so the spender rows and token card with illustrative fake data are exposed to screen readers, causing them to announce placeholder spender addresses and amounts as if they were real. Adding aria-hidden to the outer container (or role=\"img\" with a single descriptive aria-label) would remove this noise since the surrounding text already describes the illustration."
+    },
+    {
+      "file": "SpendingLimitIntroDialog/index.tsx",
+      "line": 10,
+      "claim": "Several new files (index.tsx, SpendingLimitPreview.tsx, constants.ts, Policies/index.tsx) contain multi-paragraph JSDoc/block comments of 3-8 lines, which violates the repo's AGENTS.md rule to default to no comments and keep any comment to one line, never multi-paragraph blocks. Much of the content in these comments is either obvious from the code or duplicated from the PR description and should be trimmed to one line each, keeping only non-obvious rationale."
+    },
+    {
+      "file": "SpendingLimitIntroDialog/SpendingLimitPreview.tsx",
+      "line": 17,
+      "claim": "PREVIEW_TOKEN.logoUri points to safe-transaction-assets.safe.global, so the illustration issues a real network request on every render, including in Jest (where there is no MSW handler for that URL) and in Storybook. Pointing to a local placeholder image or omitting the URL so TokenIcon renders its own placeholder would avoid this unnecessary network call for purely illustrative data."
+    },
+    {
+      "file": "Policies/index.tsx",
+      "line": 12,
+      "claim": "useLocalStorage returns undefined synchronously and only populates from localStorage inside a useEffect, so with a default of false the first render always treats hasSeenSpendingLimitIntro as false regardless of the actual stored value. This is harmless for the current click-gated usage, but if the flag is ever used to gate something during the first render the value would be incorrect; a one-line comment on the default or a bias-safe default (e.g. ?? true) would make the intent explicit."
+    },
+    {
+      "file": "SpendingLimitIntroDialog/index.tsx",
+      "line": 86,
+      "claim": "className=\"w-full gap-2\" on the primary Button mixes layout (w-full) with internal icon/text spacing (gap-2); if ESLint flags this as a disallowed inline class, a Button variant/size that already sets the gap would be a cleaner fix than disabling the lint rule."
+    }
+  ]
+}

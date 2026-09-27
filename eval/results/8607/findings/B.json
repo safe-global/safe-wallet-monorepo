@@ -1,0 +1,50 @@
+{
+  "usd": 0.0511256,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/SpacesList/index.tsx",
+      "line": 245,
+      "claim": "The spinner condition `isUserSignedIn && isSpacesLoading` uses `isSpacesLoading`, which includes RTK Query's `isFetching`, so a spinner replaces the already-loaded spaces list and invite banners whenever the list refetches in the background (e.g. after declining an invite, which invalidates the `spaces` tag, or possibly on navigation via `useFlowActivationGuard`'s `fetchSpaces()`), even though cached data is still available. This undoes the intent of a prior commit that kept the cached list visible, since that fix only handled the error case and not the refetch case."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpacesList/index.tsx",
+      "line": 245,
+      "claim": "The spinner should only show when there is no data yet, e.g. `!isStoreHydrated || (isUserSignedIn && spaces === undefined && isSpacesLoading)`, while the full `isSpacesLoading` value should still be passed to `useSignInRedirect` since its redirect guard depends on it."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpacesList/SpacesList.test.tsx",
+      "line": 180,
+      "claim": "No test covers the case where cached data exists and `isFetching` is true (e.g. `{ currentData: [activeSpace], isFetching: true }`), so there is no assertion that `space-row` renders and the spinner does not appear in that state."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpacesList/SpacesList.test.tsx",
+      "line": 180,
+      "claim": "The test checking '12px spacing' asserts on CSS classes `.gap-3` / `gap-1.5`, and the `data-size=\"none\"` test checks a styling prop; these tests break on any restyle unrelated to behavior but do not catch actual visual regressions, whereas a Storybook story is the repo's established tool for covering visual states."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpacesList/SpacesList.test.tsx",
+      "line": null,
+      "claim": "The `not.toHaveClass('gap-1.5')` assertion adds little value because the element being checked was already located via the `.gap-3` selector, making the negative assertion largely redundant."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpacesList/SpacesList.test.tsx",
+      "line": null,
+      "claim": "The new loading and error branches added to the component have no corresponding Storybook story, so the retry UI and spinner states are only exercised by DOM-level tests rather than visual/story coverage."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpacesList/index.tsx",
+      "line": 133,
+      "claim": "`WORKSPACE_BENEFITS` is exported from the component module solely so the test can index into it (`[0]`), when the test could instead match the literal displayed text and the constant could remain private to the module."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpacesList/index.tsx",
+      "line": 245,
+      "claim": "The JSX rendering logic is a five-branch nested ternary (spinner, signed out, error, list, empty), which is hard to read; extracting it into a small helper function or using early returns would make the ordering of conditions clearer."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpacesList/index.tsx",
+      "line": 251,
+      "claim": "A 401 response from `/v1/spaces` while the session is not yet expired now shows a generic 'contact support' error message instead of falling through to the empty state as before; a re-sign-in prompt may be a more appropriate response to a 401 than a support-contact message."
+    }
+  ]
+}

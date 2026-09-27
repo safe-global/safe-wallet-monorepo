@@ -1,0 +1,139 @@
+{
+  "pr": 8613,
+  "title": "fix: Unify Tables across the app",
+  "description": "## What it solves\r\n\r\nResolves: [WA-3444](https://linear.app/safe-global/issue/WA-3444)\r\n\r\nColumn headers looked different depending on which table you were on: Safe accounts drew a grey inset uppercase bar, the Spaces tables drew plain muted title-case text, and the ten legacy `EnhancedTable` screens drew the bare primitive default. Three treatments, ~15 tables, three shells — the condition that makes every future \"why does this table look different?\" ticket possible.\r\n\r\n## How this PR fixes it\r\n\r\n**The look moves onto the shared primitive.** `components/ui/table.tsx` gains a bounded `variant=\"panel\"` (cva + `table.module.css`): grey rounded header bar, inset rounded hover pills painted on the cells, gradient row dividers. It stays a CSS module because `background-clip`, the divider gradient and the band's `clip-path`s have no utility equivalent. `tableVariants` is exported for the two tables that assemble their own `<table>` element.\r\n\r\n**All three shells consume it, none restyles headers itself:**\r\n\r\n| Shell | Before | After |\r\n| -- | -- | -- |\r\n| `SafeAccountsTable` | 169-line local module owning the bar, pills and divider | `tableVariants({ variant: 'panel' })`; local module down to 62 lines |\r\n| `PaginatedDataTable` | plain muted headers, own `SortIcon` | `<Table variant=\"panel\">`, shared `TableSortIcon` |\r\n| `EnhancedTable` (legacy) | primitive default | new `panel` prop, opt-in |\r\n\r\n`SafeAccountsTable/styles.module.css` keeps only what is genuinely local and cannot be expressed as the shared variant: the NAME-column indent, the reorder grip's cell widening, and the address-poisoning similarity band. `EnhancedTable/cardTable.module.css` (99 lines) is deleted — `TableCard` now draws the surface only, because the table inside brings its own edge insets and must not be padded a second time.\r\n\r\n**Sort affordance.** `TableSortIcon` on the primitive: `ArrowUp` / `ArrowDown` when the column is sorted, otherwise an `ArrowUpDown` hint at `opacity-0` that fades in on `group-hover/sort` or `group-focus-visible/sort`. It holds its space either way, so a header never reflows as the icon appears.\r\n\r\n**Divider contract inverted.** The variant now draws a divider under every row but the last, and rows opt *out* via `data-no-divider` (a `PaginatedDataTable` row that hands its divider to the detail row below it; a `SafeAccountsTable` row inside a group or a similarity band). Hover pills opt out via `data-disabled` (locked rows) or the new `data-no-hover` (band rows, which carry a fill of their own). This replaces the old `data-divider` opt-in, so `SafeAccountsTable`'s internal `showDivider` prop is now asserted through `data-show-divider` in its tests.\r\n\r\n**Dead weight dropped from `EnhancedTable`** — no consumers for any of it: `mobileVariant`, `fixedLayout`, the row-level `collapsed` state and its transition, cell-level `mobileLabel`, and the body-cell `sticky` flag (removed from seven call sites). The component also picks up an `@deprecated` tag pointing at `PaginatedDataTable`, naming why the two have not converged: `PaginatedDataTable` lacks rows-per-page pagination and a footer slot, `EnhancedTable` lacks typed columns and responsive column dropping.\r\n\r\n**Radius normalised** from a hardcoded 24px / `rounded-3xl` to `--radius-lg` across the table surfaces.\r\n\r\n**EnhancedTable consumers audited** per the ticket's acceptance criteria. Only the global **Address Book** opted into `panel` — it is the one `EnhancedTable` consumer rendered inside a `TableCard`, and the panel look's insets are measured against a parent-drawn surface. The other nine (Assets, NFTs, Owners, Proposers, Nested Safes, Spending limits, Positions, PositionGroup, Recovery) render bare on the page background with no card, so they keep the default variant and are explicitly scoped out; they still pick up the new sort affordance and the corrected radius.\r\n\r\n## How to test it\r\n\r\n1. **Safe accounts** (`/welcome/accounts`) — header bar, hover pills, group dividers, drag-to-reorder and the address-poisoning similarity band should all look unchanged.\r\n2. **Spaces → Members / Pending invites** and **Spaces → Address book / Pending requests** — headers now render as the grey bar. Sort a column, then hover an unsorted one: the hint icon fades in without shifting the label.\r\n3. **Global address book** (`/address-book`) — now matches the two above.\r\n4. **Assets / Owners / Proposers / Spending limits / Nested Safes / Positions** — unchanged apart from the hover sort hint and a slightly tighter corner radius.\r\n5. Empty states — Spaces \"No pending members / requests\", \"Found 0 results\", \"No contacts in this workspace yet\" — should still be padded inside their card now that `TableCard` no longer pads its children.\r\n6. Storybook: `Components/UI/Design System → Tables` shows the shells side by side; `Components/Common/EnhancedTable → Panel` and `Features/Spaces/PaginatedDataTable` render inside a `TableCard`, as every real consumer does.\r\n\r\n## Affected flows\r\n\r\n- Safe accounts list — sorting, reordering, multi-select, similarity band, embedded (headerless) variant\r\n- Spaces Members and Pending invites lists\r\n- Spaces Address book: workspace tab, my-contacts tab, pending requests, mobile detail-row expansion\r\n- Global address book table\r\n- Assets, Positions, Owners, Proposers, Nested Safes, Spending limits, Recovery settings — header sort affordance and card radius only\r\n\r\n## Blast radius\r\n\r\n- **`components/ui/table.tsx`** — shared primitive; new `variant` prop defaults to `default`, so every existing `<Table>` renders identically. New exports: `TableSortIcon`, `tableVariants`.\r\n- **`components/common/TableCard`** — 3 consumers (global address book, Spaces Members, Spaces Address book). Now draws the surface only; children own their padding.\r\n- **`components/common/EnhancedTable`** — 10 consumers. Removed props were unused across the repo (verified with `git grep` against `origin/dev`), so the removals are non-breaking; the type narrowing would fai",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/components/common/EnhancedTable/index.test.tsx",
+      "line": 39,
+      "claim": "The same shallow class-only assertion problem also appears in this test."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/components/ui/table.module.css",
+      "line": 13,
+      "claim": "A comment claiming this rule outranks TableCard's '.container thead th' is now incorrect, because the PR deletes the cardTable.module.css stylesheet that comment refers to."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/components/ui/table.module.css",
+      "line": 76,
+      "claim": "The new panel table CSS deletes cardTable.module.css, which contained a rule keeping hovered row buttons/links styled with the card background color; the replacement panel rule only paints hovered cells with a muted background and does not restore this override, so ghost buttons (which also hover to a muted background) lose visible hover feedback whenever their row is hovered. This affects the edit/delete/send buttons in the global address book, the edit/remove buttons in Spaces members, and the actions in the Spaces address book and pending requests."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/components/common/EnhancedTable/index.tsx",
+      "line": 102,
+      "claim": "The same sort-header class list (including group/sort, which TableSortIcon's documentation requires its parent to carry) is duplicated across three files instead of being centralized, e.g. as a shared TableSortButton or class next to TableSortIcon in ui/table.tsx."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/features/myAccounts/components/SafeAccountsTable/SafeAccountTableRow.tsx",
+      "line": 420,
+      "claim": "The new data-no-divider behavior when highlighted is true has no test coverage; SafeAccountTableRow.test.tsx never checks the highlighted state or the divider, so removing this branch would not fail any test."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/src/components/common/EnhancedTable/index.test.tsx",
+      "line": 33,
+      "claim": "The panel-variant tests only assert the presence or absence of the background class string bg-[var(--color-background-paper)] rather than checking actual behavior, so the test would still pass even if the panel variant stopped correctly applying its header bar, pills, and dividers."
+    },
+    {
+      "id": "F7",
+      "file": "EnhancedTable/index.tsx",
+      "line": null,
+      "claim": "The hydration-guard empty-state row does not carry a data-no-hover attribute, so in panel mode hovering the empty area incorrectly paints a one-cell hover pill."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx",
+      "line": 215,
+      "claim": "The same duplicated sort-header class list also appears here."
+    },
+    {
+      "id": "F9",
+      "file": "apps/web/src/components/ui/table.tsx",
+      "line": 101,
+      "claim": "In PaginatedDataTable, the idle sort hint changed from showing at 50% opacity to being hidden until hover or focus, and all sortable headers changed from chevrons to arrows, both visible design changes not backed by a cited design decision in the PR."
+    },
+    {
+      "id": "F10",
+      "file": "apps/web/src/components/ui/table.tsx",
+      "line": 49,
+      "claim": "The PR adds a panel variant, a TableSortIcon component and a new stylesheet to the shared table primitive in components/ui without a note on whether this was coordinated with any open design-system PR that also rewrites components/ui/table.tsx."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/src/components/ui/table.tsx",
+      "line": 96,
+      "claim": "TableSortIcon's three direction branches are untested."
+    },
+    {
+      "id": "F12",
+      "file": "apps/web/src/features/myAccounts/components/SafeAccountsTable/index.tsx",
+      "line": 314,
+      "claim": "The same duplicated sort-header class list also appears here."
+    },
+    {
+      "id": "F13",
+      "file": "features/myAccounts/components/SafeAccountsTable/index.tsx",
+      "line": 370,
+      "claim": "The unsorted sort icon is only faded to zero opacity rather than removed from layout, so it still occupies its width plus a gap in narrow table headers; with a fixed column layout, a header label in a narrow column may spill past its header cell, though this was not confirmed by rendering."
+    },
+    {
+      "id": "F14",
+      "file": "features/myAccounts/components/SafeAccountsTable/SafeAccountTableRow.tsx",
+      "line": 420,
+      "claim": "The mapping from the `highlighted` and `showDivider` props to the `data-no-divider` / `data-no-hover` attributes has no test coverage; existing tests mock the row and only check its own attribute, so reverting this mapping would not be caught by any test and would cause address-band-highlighted rows to incorrectly show the grey divider and rounded hover fill over their tint."
+    },
+    {
+      "id": "F15",
+      "file": "apps/web/src/components/common/EnhancedTable/index.tsx",
+      "line": 179,
+      "claim": "Non-panel EnhancedTable instances (AssetsTable, OwnerList, ProposersList, and others) change corner radius from rounded-3xl to rounded-lg, a visible design change that is not backed by a cited design decision in the PR."
+    },
+    {
+      "id": "F16",
+      "file": "Storybook PaginatedDataTable/WithRowDetail",
+      "line": null,
+      "claim": "Expanding a row in the mobile view forces a 471px-wide table inside a 311px-wide scroller, causing columns to push off-screen and the detail content to clip."
+    },
+    {
+      "id": "F17",
+      "file": "components/ui/table.module.css",
+      "line": 13,
+      "claim": "A comment stating that a `tr` rule outranks TableCard's `.container thead th` rule is now incorrect, because this change removes the `.container` rule the comment refers to."
+    },
+    {
+      "id": "F18",
+      "file": "components/ui/table.tsx",
+      "line": 96,
+      "claim": "`TableSortIcon` is a new shared component with three conditional branches but has no unit test, even though it is now reused across three different tables."
+    },
+    {
+      "id": "F19",
+      "file": "design-system.stories.tsx",
+      "line": null,
+      "claim": "The Tables section sample in the design-system story now renders the panel variant but its swatch label still says the default grid, so the label no longer matches what is shown."
+    },
+    {
+      "id": "F20",
+      "file": "features/myAccounts/components/SafeAccountsTable/SafeAccountTableRow.tsx",
+      "line": 305,
+      "claim": "A comment claims the grip-cell widening behavior happens in the panel variant, but it actually lives in `SafeAccountsTable/styles.module.css:32` (`.accounts tbody td:first-of-type[data-hosts-handle]`), making the comment inaccurate."
+    },
+    {
+      "id": "F21",
+      "file": "apps/web/src/components/common/EnhancedTable/index.tsx",
+      "line": 135,
+      "claim": "The new @deprecated note on EnhancedTable directs its 9 consumers to features/spaces/components/PaginatedDataTable, but features/spaces/index.ts does not export PaginatedDataTable and the consumers (components/settings, balances, recovery, spending-limits) live outside that feature, so following the note requires deep-importing another feature's internals."
+    },
+    {
+      "id": "F22",
+      "file": "apps/web/src/features/myAccounts/components/SafeAccountsTable/SafeAccountTableRow.tsx",
+      "line": 424,
+      "claim": "The new data-no-hover attribute set when highlighted is true has no test coverage, so removing this branch would not fail any test."
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "usd": 0.08278959999999999,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx",
+      "line": 94,
+      "claim": "The address column width changed from `width: '40%', minWidth: 360` to `width: hasMiddleColumn ? '30%' : '40%', minWidth: 240`, and because `md:table-fixed` CSS ignores `min-width` on cells, the minWidth no longer reserves space and only feeds the compact-mode threshold calculation."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx",
+      "line": 94,
+      "claim": "A full 42-character Safe address rendered with identicon and copy button needs about 330px, but between the compact threshold (~650px with a middle column) and ~1100px the table stays in full (non-compact) layout, giving the address only 30% of container width (e.g. 270px at 900px, 210px at 700px), which is too narrow to fit the address."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx",
+      "line": 94,
+      "claim": "SrcEthHashInfo wraps the address in a `Box` with `overflow: hidden` and `textOverflow: ellipsis` applied only to the name box, not the address box, so when the address doesn't fit it is cut off mid-string with no ellipsis, silently dropping the trailing bytes of the address."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx",
+      "line": 94,
+      "claim": "Before this change, the same 900px container gave the address 40% (360px) width, which fit; the diff both narrowed the share (40%→30%) and lowered the minWidth floor that would otherwise trigger compact/shortened-address mode, making this a regression for existing users rather than a pre-existing bug."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/PendingRequestsTable.tsx",
+      "line": 164,
+      "claim": "The same address column width/minWidth regression present in SpaceAddressBookTable.tsx also exists here, risking address clipping without ellipsis at mid-width desktop containers."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx",
+      "line": 94,
+      "claim": "The fix should either keep `shortAddress` enabled whenever the computed column width falls below ~330px, or raise `minWidth` back toward 330 so the table switches to compact mode before the address stops fitting."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx",
+      "line": 180,
+      "claim": "On a desktop viewport with a narrow container, `containerWidth` is `null` on first paint so `isCompact` evaluates to `false`, causing the full column set to render at full width before collapsing once the ResizeObserver fires, producing a layout flash."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx",
+      "line": 84,
+      "claim": "The `hideClass` flash guard is `max-[767px]:hidden`, which only covers viewports below 768px, so it does not mask the new first-paint flash that can occur at ≥768px viewports with narrow containers."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx",
+      "line": 140,
+      "claim": "`setContainerWidth(entry.contentRect.width)` stores the raw pixel width on every resize observer frame, causing a new state value and a full table re-render (up to pageSize 25 rows × 7 columns) on each frame, when only the boolean compact/non-compact threshold actually matters; storing `containerWidth < tableMinWidth` instead would limit re-renders to the two threshold-crossing transitions."
+    },
+    {
+      "file": "packages/utils/src/utils/__tests__/date.test.ts",
+      "line": 5,
+      "claim": "The test asserts `formatDate(new Date('2026-04-22T12:00:00.000Z').getTime())` equals `'Apr 22, 2026'`, but `date-fns` `format` uses local time, and since `packages/utils`'s test script runs bare `jest` with no `TZ` pin (unlike `apps/web`, which pins `TZ=CET`), the test would resolve to Apr 23 and fail in timezones at UTC+13/+14."
+    },
+    {
+      "file": "packages/utils/src/utils/__tests__/date.test.ts",
+      "line": 5,
+      "claim": "The fix is to assert against a locally-constructed date instead of a UTC ISO string, or to pin `TZ` for the workspace's test script."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/MembersList/index.tsx",
+      "line": 45,
+      "claim": "The invariant that column widths must sum to 100% (stated at index.tsx:160) is enforced in two separate places 115 lines apart: `dateColumn` hardcodes `width: '15%'` while the other widths (`badgeWidth`/name/email) are computed from `isCondensed`, with nothing checking that they still total 100% if either side changes independently."
+    },
+    {
+      "file": "packages/utils/src/utils/date.ts",
+      "line": 20,
+      "claim": "The new `formatDate` utility (format `'MMM d, yyyy'`) has the same name as a pre-existing `formatDate` in `apps/web/src/features/spaces/utils.ts:72` (format `'Today at 9:41 AM'`), and both are now imported within the same `features/spaces` directory (`MembersList/index.tsx:2` uses the new one, `SpaceAddressBookTable.tsx:13` uses the old one), creating a same-name/different-behavior collision risk within one feature area."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/LocalContactActions.tsx",
+      "line": null,
+      "claim": "Now that `SpaceAddressBookActions` collapses into a kebab menu when `isCompact` is true, local contacts remain the only rows in the same column still showing two raw icon buttons in compact mode, creating an inconsistent affordance; threading `isCompact` through `LocalContactActions` the same way would make it consistent."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/MembersList/index.test.tsx",
+      "line": 7,
+      "claim": "A locally defined `const formatDate = (iso: string) => ...` shadows the imported `formatDate` that it wraps/aliases, which is confusing; renaming the local helper to `formatIso` would make the code clearer."
+    }
+  ]
+}

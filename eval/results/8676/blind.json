@@ -1,0 +1,103 @@
+{
+  "pr": 8676,
+  "title": "feat(policies): explain the spending limit before the flow starts",
+  "description": "\r\n## What it solves\r\n\r\nResolves: [WA-3148](https://linear.app/safe-global/issue/WA-3148/build-the-spending-limit-intro-dialog)\r\n\r\nOpening the Spending limit tile used to do nothing — the tile was marked `Soon` — and once the flow lands, someone would meet a token/amount/period form with no explanation of what a spending limit actually is, discovering the consequences (a spender is not a signer; creating the limit costs a transaction) only after signing.\r\n\r\n## How this PR fixes it\r\n\r\nThe tile now opens an explanatory dialog that states the three things someone must understand before signing, and previews the end result — spenders, a token limit, the balance left in the period — so the shape of what they are about to create is visible before any form appears.\r\n\r\nDecisions worth a reviewer's attention:\r\n\r\n- **Frequency (ticket Q25, was open).** The intro is shown **on the first entry only**: it explains the concept, not a particular Safe account, so a single browser-wide `localStorage` flag records that it has been shown and later entries go straight to the flow ([`Policies/index.tsx#L12-L47`](https://github.com/safe-global/safe-wallet-monorepo/blob/97ae7fc44ed573cc177b5fe27d7858bf4564b06d/apps/web/src/features/spaces/components/Policies/index.tsx#L12-L47), key at [`constants.ts#L9`](https://github.com/safe-global/safe-wallet-monorepo/blob/97ae7fc44ed573cc177b5fe27d7858bf4564b06d/apps/web/src/features/spaces/components/Policies/SpendingLimitIntroDialog/constants.ts#L9)). Consequences, stated plainly: a different browser, cleared site data or a private window shows it again, and it does not sync across devices — there is no server-side \"already read\" store to hang this on. Keying it per space or per Safe would replay the same explanation on every new account, hence one global key.\r\n- **Any dismissal counts as shown** ([`index.tsx#L39-L42`](https://github.com/safe-global/safe-wallet-monorepo/blob/97ae7fc44ed573cc177b5fe27d7858bf4564b06d/apps/web/src/features/spaces/components/Policies/index.tsx#L39-L42)) — an explainer that comes back after you closed it reads as a bug, and the ⓘ link in the title is there for a second look. If Design would rather re-explain to anyone who never started the flow, moving `setHasSeenSpendingLimitIntro(true)` into `proceedToSpendingLimitFlow` is the whole change.\r\n- **The flow behind the CTA is WA-3150**, so `startSpendingLimitFlow()` is a documented no-op for now ([`index.tsx#L16-L18`](https://github.com/safe-global/safe-wallet-monorepo/blob/97ae7fc44ed573cc177b5fe27d7858bf4564b06d/apps/web/src/features/spaces/components/Policies/index.tsx#L16-L18)). The semantics are already correct, which means that in this PR a second entry to the tile does nothing visible; that is the intended intermediate state rather than an oversight.\r\n- **The dialog lives under `Policies/`, not in the `spending-limits` feature.** It is pure explanatory UI with no chain logic, and `spending-limits` is a lazily-loaded feature whose components are stubbed to `null` when `FEATURES.SPENDING_LIMIT` is off — routing the intro through it would make the tile silently do nothing on such a chain.\r\n- **Focus opens on the CTA** ([`SpendingLimitIntroDialog/index.tsx#L49`](https://github.com/safe-global/safe-wallet-monorepo/blob/97ae7fc44ed573cc177b5fe27d7858bf4564b06d/apps/web/src/features/spaces/components/Policies/SpendingLimitIntroDialog/index.tsx#L49)). Base UI's default lands on the first tabbable element — the title's help link — which rings a 16px icon and puts \"open a new tab\" one Enter away from someone who only meant to read.\r\n- **Design-system token drift, flagged rather than papered over.** The chip fill and icon green come from repo variables whose values match the design frame exactly: `--color-background-light-hover` (#e7fff2) and `--badge-dot-success` (#22c55e) ([`index.tsx#L75-L76`](https://github.com/safe-global/safe-wallet-monorepo/blob/97ae7fc44ed573cc177b5fe27d7858bf4564b06d/apps/web/src/features/spaces/components/Policies/SpendingLimitIntroDialog/index.tsx#L75-L76)). The semantically right tokens, shadcn's `--accent` (#f0fdf4) and `--accent-success` (#16a34a), have drifted from the design system's values. No hex is hard-coded, but the names read oddly — aligning those two tokens is the real fix and belongs outside this feature.\r\n\r\nCopy is verbatim from the design; the AC's examples (\"a bot, a teammate or an external wallet\") are not in the Figma copy and were left out. Geometry follows the frame's measured values — a 200px well holding a receding stack of cards (245/279/319px wide, 50%/80%/100% opaque), points 32px apart behind 36px chips, and the brand-green arrow on the CTA. The dialog uses the design system's `size=\"xs\"` (444px) rather than the frame's 430px, since overriding a dialog width means bypassing the DS width scale.\r\n\r\n## How to test it\r\n\r\nTwo surfaces; Storybook needs no chain or wallet.\r\n\r\n**Storybook** — `yarn workspace @safe-global/web storybook`\r\n\r\n1. `Features/Spaces/Policies/SpendingLimitIntroDialog → Default` — the design, open. Toggle the theme globals to check dark.\r\n2. `… → Dismissible` — close button, Escape and click-outside all dismiss it; the Actions panel shows `onProceed` was never called.\r\n3. `Features/Spaces/Policies → Spending Limit Intro` — the page with a `Forget that the intro was seen` button, since first-entry-only is not otherwise demoable:\r\n   - click the **Spending limit** tile → the intro opens\r\n   - dismiss it, click the tile again → nothing opens (the flow is WA-3150)\r\n   - reload the page, click the tile → still nothing (the flag is in `localStorage`)\r\n   - click **Forget that the intro was seen**, click the tile → the intro is back\r\n\r\n**The live page** — a Space on a chain with `FEATURES.POLICIES` enabled, at `/spaces/policies`. Clear `SAFE_v2__spendingLimitIntroSeen` from `localStorage` first to see the first-entry behaviour. Expect: the **Spending limit** tile no longer carries the `Soon` badge and is clickable; **Account recovery**",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "PolicyCatalogue/catalogue.ts",
+      "line": 19,
+      "claim": "The Spending limit tile is now shown as available even though its startSpendingLimitFlow handler is empty, so after the first dismissal clicking the tile does nothing and gives no feedback to the user; this should be confirmed as acceptable with product or the feature flag should stay off in production until the flow is implemented."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitIntroDialog/constants.ts",
+      "line": 1,
+      "claim": "The diff adds around 15 multi-line comment blocks (several 2-5 lines, including a 5-line JSDoc on a single key) that narrate design decisions, whereas the repo convention calls for comments to be one line, rare, and reserved for explaining a non-obvious why."
+    },
+    {
+      "id": "F3",
+      "file": "SpendingLimitIntroDialog/index.tsx",
+      "line": 10,
+      "claim": "Several new files (index.tsx, SpendingLimitPreview.tsx, constants.ts, Policies/index.tsx) contain multi-paragraph JSDoc/block comments of 3-8 lines, which violates the repo's AGENTS.md rule to default to no comments and keep any comment to one line, never multi-paragraph blocks. Much of the content in these comments is either obvious from the code or duplicated from the PR description and should be trimmed to one line each, keeping only non-obvious rationale."
+    },
+    {
+      "id": "F4",
+      "file": "Policies/index.tsx",
+      "line": 44,
+      "claim": "The 'proceed' path (proceedToSpendingLimitFlow -> closeSpendingLimitIntro -> setHasSeenSpendingLimitIntro(true)) has no page-level test; the existing 'records that it has been shown' test only exercises the Close button. If the proceed action stopped persisting the flag, the intro dialog would reappear on every visit and no test would catch it, so a test clicking 'Set up spending limit' and asserting setHasSeenSpendingLimitIntro is called with true should be added."
+    },
+    {
+      "id": "F5",
+      "file": "SpendingLimitIntroDialog/constants.ts",
+      "line": 1,
+      "claim": "Several comment blocks across the changed files span 2-8 lines explaining design rationale or describing what the code does (e.g. noting that copy is verbatim from the design, why a key is browser-wide, how cards visually recede, and a story walkthrough), rather than a single line covering only the non-obvious reason. These should be cut to one line each or deleted, though the one-line JSDoc on props is fine as is."
+    },
+    {
+      "id": "F6",
+      "file": "SpendingLimitIntroDialog/index.tsx",
+      "line": 89,
+      "claim": "The dark:text-black class uses a raw Tailwind color instead of a theme token, and it is also redundant because the default Button variant already applies dark:[&_svg]:text-black which takes precedence in dark mode; the class and its explanatory comment should be removed."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/features/spaces/components/Policies/PolicyCatalogue/catalogue.ts",
+      "line": 19,
+      "claim": "The spending limit tile is now marked isAvailable: true and clickable, but startSpendingLimitFlow is an empty TODO (WA-3150), so after the first click (which only closes the intro dialog and marks it seen) the tile does nothing on subsequent clicks."
+    },
+    {
+      "id": "F8",
+      "file": "__tests__/Policies.test.tsx",
+      "line": 101,
+      "claim": "The test 'does not explain again once it has been shown' only checks that the dialog is absent, so it would still pass even if the tile were disabled again or the select handler were not wired up, meaning it doesn't actually prove the 'already seen' branch executed. Since the flow behind it is an empty placeholder pending a follow-up ticket, the test should either note that the stronger assertion is deferred or first verify the tile is enabled and the click reaches the handler."
+    },
+    {
+      "id": "F9",
+      "file": "SpendingLimitIntroDialog/SpendingLimitPreview.tsx",
+      "line": 17,
+      "claim": "PREVIEW_TOKEN.logoUri points to safe-transaction-assets.safe.global, so the illustration issues a real network request on every render, including in Jest (where there is no MSW handler for that URL) and in Storybook. Pointing to a local placeholder image or omitting the URL so TokenIcon renders its own placeholder would avoid this unnecessary network call for purely illustrative data."
+    },
+    {
+      "id": "F10",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitIntroDialog/SpendingLimitPreview.tsx",
+      "line": 63,
+      "claim": "Only the Progress bar carries aria-hidden, so the spender rows and token card with illustrative fake data are exposed to screen readers, causing them to announce placeholder spender addresses and amounts as if they were real. Adding aria-hidden to the outer container (or role=\"img\" with a single descriptive aria-label) would remove this noise since the surrounding text already describes the illustration."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitIntroDialog/__tests__/SpendingLimitIntroDialog.test.tsx",
+      "line": 21,
+      "claim": "A comment is placed directly above an it(...) test case, which the testing conventions doc prohibits ('No comments above test cases')."
+    },
+    {
+      "id": "F12",
+      "file": "apps/web/src/features/spaces/components/Policies/index.tsx",
+      "line": 45,
+      "claim": "There is no test verifying that clicking 'Set up spending limit' calls closeSpendingLimitIntro(); if this call were removed from index.tsx, no existing test would catch the regression."
+    },
+    {
+      "id": "F13",
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitIntroDialog/index.tsx",
+      "line": 89,
+      "claim": "dark:text-black is a hard-coded color value instead of a theme variable, which apps/web/AGENTS.md requires; --primary-foreground already resolves to the same color (#0a0a0a) in the dark theme and could be used instead."
+    },
+    {
+      "id": "F14",
+      "file": "Policies/index.tsx",
+      "line": 12,
+      "claim": "useLocalStorage returns undefined synchronously and only populates from localStorage inside a useEffect, so with a default of false the first render always treats hasSeenSpendingLimitIntro as false regardless of the actual stored value. This is harmless for the current click-gated usage, but if the flag is ever used to gate something during the first render the value would be incorrect; a one-line comment on the default or a bias-safe default (e.g. ?? true) would make the intent explicit."
+    },
+    {
+      "id": "F15",
+      "file": "SpendingLimitIntroDialog/index.tsx",
+      "line": 86,
+      "claim": "className=\"w-full gap-2\" on the primary Button mixes layout (w-full) with internal icon/text spacing (gap-2); if ESLint flags this as a disallowed inline class, a Button variant/size that already sets the gap would be a cleaner fix than disabling the lint rule."
+    },
+    {
+      "id": "F16",
+      "file": null,
+      "line": null,
+      "claim": "On the Nest screen size, the page could not be scrolled, which prevents access to content that overflows the viewport at that size."
+    }
+  ]
+}

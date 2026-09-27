@@ -1,0 +1,117 @@
+{
+  "usage": {
+    "usd": 0.6619928,
+    "turns": 9,
+    "wallSeconds": 71
+  },
+  "issues": [
+    {
+      "findings": [
+        "F1",
+        "F3"
+      ],
+      "summary": "Already-deployed early return skips attaching the Safe to the active workspace (spaceSafesCreateV1), so it only lands in local My accounts",
+      "label": "low",
+      "evidence": "persistCounterfactualSafe.ts:86-101 returns before the space block at :121-196, so an admin creating in a workspace never gets the deployed Safe attached, and other members won't see it. This is a real gap, but it only shows up on the uncommon path of reusing a deployed address inside a workspace. Before this PR, the backend would have 409'd that case anyway, so it isn't a regression from a working state."
+    },
+    {
+      "findings": [
+        "F2",
+        "F8"
+      ],
+      "summary": "ReviewStep tests only make negative assertions; no test shows AWAITING_EXECUTION / CREATED_SAFE still fire for real counterfactual Safes",
+      "label": "medium",
+      "evidence": "ReviewStep/index.test.tsx:264-317 only uses not.toHaveBeenCalledWith. The existing positive test at :235-262 checks persistSpy calls but never the event or trackEvent spies. So the new tests would still pass if the dispatch or tracking were removed or the spies never intercepted anything."
+    },
+    {
+      "findings": [
+        "F5"
+      ],
+      "summary": "No test for a mixed multi-chain run where only non-deployed chains go into AWAITING_EXECUTION.networks",
+      "label": "low",
+      "evidence": "ReviewStep/index.tsx:314-321 filters successfulChains by alreadyDeployed, but the only test mocks every chain as already-deployed (index.test.tsx:278). The partial-filter logic has no coverage."
+    },
+    {
+      "findings": [
+        "F4",
+        "F7",
+        "F17"
+      ],
+      "summary": "The already-deployed branches in CreateSafeOnNewChain (analytics suppression, changed notification text) have no tests",
+      "label": "medium",
+      "evidence": "CreateSafeOnNewChain/index.tsx:137-140 and :168-171 add skipped-based branches, and a grep of the colocated test file finds no 'already-deployed' or 'skipped' case. Deleting either branch would break no test."
+    },
+    {
+      "findings": [
+        "F13"
+      ],
+      "summary": "Single-chain Pay later with an already-deployed Safe redirects home silently; the promised 'already deployed' toast doesn't exist in ReviewStep",
+      "label": "medium",
+      "evidence": "ReviewStep/index.tsx:308-321 pushes to home and, when every chain is alreadyDeployed, skips AWAITING_EXECUTION (the trigger for CounterfactualSuccessScreen, CounterfactualSuccessScreen/index.tsx:22). There is no showNotification in ReviewStep, which contradicts the PR description's info toast. The user gets no feedback."
+    },
+    {
+      "findings": [
+        "F9"
+      ],
+      "summary": "The already-deployed notice in the add-network flow uses the 'success' variant, while the PR description promises an info toast",
+      "label": "low",
+      "evidence": "CreateSafeOnNewChain/index.tsx:163-171 dispatches variant 'success' with groupKey 'replay-safe-success' for the already-deployed message. The PR description says an info toast is shown, so code and description disagree. The impact is minor UX."
+    },
+    {
+      "findings": [
+        "F6"
+      ],
+      "summary": "CREATED_SAFE / PROCEED_WITH_TX for Pay later now fire only after a successful persist, not before it, which changes funnel semantics for all counterfactual creations",
+      "label": "low",
+      "evidence": "Before this PR, trackEvent(CREATED_SAFE) ran before the try block and PROCEED_WITH_TX before persist. Now both sit behind `if (!result.ok) throw` (ReviewStep/index.tsx:373-380), so persist failures no longer count. This is a real undocumented analytics change, but arguably more correct."
+    },
+    {
+      "findings": [
+        "F10"
+      ],
+      "summary": "addOrUpdateSafe in the already-deployed path is redundant, since both callers dispatch updateAddressBook, which also calls addOrUpdateSafe",
+      "label": "low",
+      "evidence": "persistCounterfactualSafe.ts:89-99 adds the Safe, then ReviewStep/index.tsx:282-291 and CreateSafeOnNewChain/index.tsx:150-161 call updateAddressBook, which dispatches addOrUpdateSafe for each chain with owner names (address-book.ts:30-44). The first write is overwritten. The duplication costs little but blurs responsibility."
+    },
+    {
+      "findings": [
+        "F14"
+      ],
+      "summary": "The persistCounterfactualSafe doc comment doesn't mention the already-deployed early return or the skipped result",
+      "label": "low",
+      "evidence": "persistCounterfactualSafe.ts:51-61 still says it always persists to the backend and then Redux. The new skip path at :76-103 and `skipped` on PersistResult (:49) aren't documented for callers."
+    },
+    {
+      "findings": [
+        "F15"
+      ],
+      "summary": "The fail-open catch around isSmartContract swallows RPC errors without logging them",
+      "label": "low",
+      "evidence": "persistCounterfactualSafe.ts:82-84 is an empty catch, while the same feature logs failures with logError(Errors._650, e) (useCounterfactualSafeSync.ts:81). Fail-open events stay invisible in monitoring."
+    },
+    {
+      "findings": [
+        "F11"
+      ],
+      "summary": "The 409 conflict copy was changed to 'Try adding it as a regular Safe account instead' without citing product sign-off",
+      "label": "nit",
+      "evidence": "persistCounterfactualSafe.ts:207-208 replaces the old 'already exists... contact support' message. Changing copy is a product preference and causes no concrete defect."
+    },
+    {
+      "findings": [
+        "F12"
+      ],
+      "summary": "The test builds a second provider mock identical to mockProvider",
+      "label": "nit",
+      "evidence": "persistCounterfactualSafe.test.ts:261 creates a local provider with the same shape as mockProvider (:86). Arguably this is deliberate, to assert that a distinct provider object is passed. Either way it's purely stylistic."
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "Unclear whether removeUndeployedSafe deletes the backend row",
+      "label": "wrong",
+      "evidence": "counterfactualSyncListener.ts:12-50 listens for removeUndeployedSafe and, when an entry was actually removed and the user is its creator, calls counterfactualSafesDeleteV1 (or queues the delete if the user is unauthenticated). The behaviour is well defined."
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "usd": 0.0417336,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesTable/index.tsx",
+      "line": 22,
+      "claim": "toRows appears to omit the chainId, status and token fields, which may cause the status column to display incorrectly in the table."
+    },
+    {
+      "file": "apps/web/src/components/common/PaginatedDataTable/index.tsx",
+      "line": 259,
+      "claim": "A table row is assigned role=button when clicked, which may not be good practice for a row that is semantically a table row."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesList.stories.tsx",
+      "line": 55,
+      "claim": "The long list story does not appear to include pagination."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesTable/index.tsx",
+      "line": 116,
+      "claim": "getRowAriaLabel does not differentiate rows, so all rows will likely get the same aria label; it should use getPolicyLabel and shortenAddress to produce a label like \"Open Account recovery for 0x1F25...b60A\", since identical labels create difficulties for screen reader users."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/hooks/usePolicySearch.ts",
+      "line": 4,
+      "claim": "A utility function is imported directly from the React component file; it should be moved to a separate location such as a utils folder."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The PR description does not follow the required template."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "Searching by chain name or id does not show the related chain in the results."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "For a long list of chains, excess chains should be truncated with an ellipsis instead of overflowing, and the existing NetworkLogosPill component could be reused for this."
+    }
+  ]
+}

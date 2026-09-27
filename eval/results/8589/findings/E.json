@@ -1,0 +1,10 @@
+{
+  "usd": 0.0325916,
+  "findings": [
+    {
+      "file": null,
+      "line": null,
+      "claim": "The background of the \"Add manually\" popup is not blurred, unlike on main, causing the \"My accounts\" and \"Add manually\" popups to visually merge together in the UI. The popup background should be blurred to match the previous behavior."
+    }
+  ]
+}

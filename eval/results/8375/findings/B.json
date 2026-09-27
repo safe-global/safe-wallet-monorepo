@@ -1,0 +1,40 @@
+{
+  "usd": 0.0698696,
+  "findings": [
+    {
+      "file": "apps/tx-builder/src/components/forms/fields/AddressInput.tsx",
+      "line": 106,
+      "claim": "The effect that updates the input when the address prop changes from outside never clears selectedName, so a previously selected contact's name keeps showing as helper text even though it now belongs to a different or empty address."
+    },
+    {
+      "file": "apps/tx-builder/src/components/forms/fields/SolidityForm.tsx",
+      "line": 123,
+      "claim": "After 'Add transaction' resets contract-method address parameters to an empty string, the AddressInput field is not remounted (its key depends only on contractMethodIndex, which is usually '0'), so the stale contact name remains displayed under the now-empty field."
+    },
+    {
+      "file": "apps/tx-builder/src/components/Dashboard.tsx",
+      "line": 189,
+      "claim": "When a user picks a proxy contact and confirms the implementation-ABI dialog, the implementation address is set but the proxy contact's name remains shown underneath the new address."
+    },
+    {
+      "file": "apps/tx-builder/src/components/forms/fields/AddressInput.tsx",
+      "line": 149,
+      "claim": "The effect intended for network switches actually fires whenever inputValueRef.current differs from address, which is true after every externally-driven change when a network prefix is shown (input holds 'eth:0x…' while the prop holds '0x…'), causing it to call updateAddressState and fire a tracking event."
+    },
+    {
+      "file": "apps/tx-builder/src/components/forms/fields/AddressInput.tsx",
+      "line": 137,
+      "claim": "Because lastTrackedAddressRef is only updated on mount, on typing, and on contact selection, and never in the ENS-resolution path or the outside-change path, nothing prevents the tracking event from firing for those paths, so ENS resolutions, proxy/implementation switches, and batch-edit prefills are all logged as 'Address manually entered', inflating the manual-entry metric."
+    },
+    {
+      "file": "apps/tx-builder/src/components/forms/fields/AddressInput.test.tsx",
+      "line": 161,
+      "claim": "The tests 'updates the displayed value when the address changes from outside' and 'resolves an ENS name' use networkPrefix=\"eth\" but neither asserts the helper text (selectedName) nor trackSafeAppEvent, so they do not cover the stale-name or mislogged-analytics defects."
+    },
+    {
+      "file": "apps/tx-builder/src/hooks/useKnownAddresses.ts",
+      "line": 33,
+      "claim": "requestAddressBook().catch(() => []) stores an empty result in the module-level cache for the rest of the session when the request fails or is rejected, so the address-book dropdown stays empty until the app reloads even if the user dismisses the consent dialog, the request only failed temporarily, or a contact is added later in Safe{Wallet}; if leaving it empty is intentional, this should be documented with a comment, and if not, only successful results should be cached."
+    }
+  ]
+}

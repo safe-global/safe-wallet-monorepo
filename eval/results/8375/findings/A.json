@@ -1,0 +1,40 @@
+{
+  "usd": 0.0476856,
+  "findings": [
+    {
+      "file": "apps/tx-builder/src/hooks/useKnownAddresses.ts",
+      "line": 33,
+      "claim": "The address-book request cache is module level and shared across all address fields, and a failed or rejected request is caught and cached as an empty array with no expiry or reset. This treats a denied permission, a dismissed consent dialog, and a network or host error the same way, so a single failure or accidental dismissal leaves the dropdown empty for every address field on that Safe and chain until the page is reloaded, and reopening the dropdown never retries."
+    },
+    {
+      "file": "apps/tx-builder/src/components/forms/fields/AddressInput.tsx",
+      "line": 137,
+      "claim": "The 'Address manually entered' and 'Address book entry selected' analytics events are hardcoded and never pass a label, even though trackSafeAppEvent accepts one."
+    },
+    {
+      "file": "apps/tx-builder/src/components/forms/fields/AddressInput.tsx",
+      "line": 161,
+      "claim": "Because AddressInput is reused across the contract address/ABI field, the To address field, and address-type method parameters, but its tracking events carry no identifying label, it is impossible to tell from analytics which entry point users are using the address book from."
+    },
+    {
+      "file": "apps/tx-builder/src/hooks/useKnownAddresses.test.ts",
+      "line": 80,
+      "claim": "The rejection-handling test calls waitFor on a mock that resolves synchronously and then asserts knownAddresses equals [], which is already true before the rejection is actually processed, so the test would still pass even if the .catch handling were removed and would not catch a resulting unhandled rejection."
+    },
+    {
+      "file": "apps/tx-builder/src/hooks/useKnownAddresses.test.ts",
+      "line": 83,
+      "claim": "There is no test covering what happens when the dropdown is reopened after a rejection, which is the behavior most affected by the permanent empty-result caching issue."
+    },
+    {
+      "file": "apps/tx-builder/src/components/forms/fields/KnownAddressGroupHeader.tsx",
+      "line": 12,
+      "claim": "The sticky group header uses zIndex: 2, which does not match any of the other z-index values used elsewhere in tx-builder (1, 10, 2001), and there is no comment explaining what layer it is meant to sit above."
+    },
+    {
+      "file": "apps/tx-builder/src/components/forms/fields/KnownAddressGroupHeader.tsx",
+      "line": 11,
+      "claim": "The hardcoded top: '-8px' offset depends on MUI's listbox padding and would be clearer expressed via theme.spacing(-1) or similar rather than a magic number."
+    }
+  ]
+}

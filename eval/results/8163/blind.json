@@ -1,0 +1,205 @@
+{
+  "pr": 8163,
+  "title": "feat: add copy address button to account cards (WA-2681)",
+  "description": "## What it solves\r\n\r\nResolves: [WA-2681](https://linear.app/safe-global/issue/WA-2681/add-copy-address-button-on-home-account-list)\r\n\r\nAccount list rows across the app were missing a copy-address button, while the Spaces **Safe accounts** cards already showed one. This adds the same copy action to every account card/row that displays an address.\r\n\r\n## How this PR fixes it\r\n\r\nThe copy button that lived inline in `SafeCardReadOnly` is extracted into a shared, reusable component and wired into every account card/row that shows an address:\r\n\r\n- **New** `components/common/CopyAddressIconButton` — lucide copy/check icon + tooltip, copies to clipboard, and `stopPropagation`/`preventDefault` so it never triggers the surrounding link, row click, expand toggle, or selection checkbox.\r\n- `SafeCardReadOnly` now consumes the shared component (DRY, no behaviour change).\r\n\r\nSurfaces that gained the copy button:\r\n\r\n| Surface | Component | Mechanism |\r\n| --- | --- | --- |\r\n| Spaces dashboard accounts widget (`/spaces?spaceId=…`) | `AccountWidgetItem`, `AccountItemContent` | `CopyAddressIconButton` |\r\n| My accounts page – redesign / V2 | `SingleAccountItem`, `MultiAccountItem` | `CopyAddressIconButton` |\r\n| Security Hub safes table | `SingleSafeRow`, `MultichainSafeRow` (parent row) | `CopyAddressIconButton` |\r\n| Add-accounts onboarding | `SafeCardLayout` | `CopyAddressIconButton` |\r\n| Nested safes list (manage + read-only) | `NestedSafesList` | `EthHashInfo showCopyButton` |\r\n\r\nParent rows only — per-chain sub-rows in multichain expansions show a chain name (not an address), so they are intentionally left unchanged.\r\n\r\n## How to test it\r\n\r\n1. Open a workspace dashboard (`/spaces?spaceId=…`) → the Accounts widget rows show a copy icon next to each truncated address.\r\n2. Open the My accounts page (redesign on), the Security Hub safes table, the add-accounts onboarding, and the nested-safes list → each account row shows the copy icon.\r\n3. Click a copy icon → the address is copied (tooltip: \"Copied!\") and the row does **not** navigate, expand, or toggle its selection.\r\n\r\n## Affected flows\r\n\r\n- View account list on the Spaces dashboard → copy a Safe's address.\r\n- View / browse the My accounts (V2) list → copy a Safe's address.\r\n- View the Security Hub safes table → copy a Safe's address (single + multichain parent rows).\r\n- Select Safes in the add-accounts onboarding → copy an address without toggling the selection.\r\n- Open the nested-safes list (manage + read-only) → copy a nested Safe's address.\r\n- Spaces \"Safe accounts\" cards (`SafeCardReadOnly`) — unchanged behaviour, now backed by the shared component.\r\n\r\n## Blast radius\r\n\r\n- **New shared component** `CopyAddressIconButton` (`@/components/common`) — consumed by `AccountWidgetItem`, `AccountItemContent`, `SingleAccountItem`, `MultiAccountItem` (V2), `SingleSafeRow`, `MultichainSafeRow`, `SafeCardLayout`, and `SafeCardReadOnly`.\r\n- **`SafeCardReadOnly` refactor** — the inline copy button was replaced by the shared component; same markup/behaviour. Consumers: Spaces Safe accounts page, `SelectSafeModal`, global search (Accounts / Trusted safes).\r\n- **`EthHashInfo showCopyButton`** enabled on `NestedSafesList` (via `AccountItem.Info`) — existing, well-used prop; no API change.\r\n- **Feature flags:** `WELCOME_ACCOUNTS_REDESIGN` gates V1 vs V2 of the My accounts page. V2 rows are covered here; the deprecated V1 sidebar list (`SafeListItem` / `AccountItems/MultiAccountItem`) is intentionally left unchanged and is **not** marked `@deprecated` because `/welcome/accounts` (flag off) still renders it.\r\n- **No** RTK Query / API contract, persistence, migration, or shared-package (`packages/**`) changes.\r\n\r\n## Risks / not checked\r\n\r\n- Did not test on **mobile** — this is a web-only change (`apps/web`), no shared-package code touched.\r\n- Did not manually verify the **deprecated V1 sidebar** list (left unchanged by design).\r\n- Nested-list copy buttons were verified via unit-level reasoning + type/lint/tests, not a full manual click-through of every modal state.\r\n- Visual placement was reasoned from the code/screenshots; final pixel placement should be confirmed on the preview deploy.\r\n\r\n## Visual summary\r\n<img width=\"553\" height=\"284\" alt=\"Screenshot 2026-06-19 at 16 01 45\" src=\"https://github.com/user-attachments/assets/443864c2-c87e-47b3-b9d8-4449c26b96f6\" />\r\n<img width=\"523\" height=\"509\" alt=\"Screenshot 2026-06-19 at 16 01 55\" src=\"https://github.com/user-attachments/assets/50f0740e-9367-4757-8d8a-56e9e7aba5cf\" />\r\n<img width=\"558\" height=\"532\" alt=\"Screenshot 2026-06-19 at 16 02 06\" src=\"https://github.com/user-attachments/assets/e562314e-2a80-45b1-b7a0-25c538c1ff66\" />\r\n<img width=\"520\" height=\"595\" alt=\"Screenshot 2026-06-19 at 16 02 17\" src=\"https://github.com/user-attachments/assets/711c374d-21e9-4d10-9e0e-d751a45a003b\" />\r\n<img width=\"349\" height=\"358\" alt=\"Screenshot 2026-06-19 at 16 02 49\" src=\"https://github.com/user-attachments/assets/2e8cdf6f-66f3-4214-bcc8-07043acd2664\" />\r\n<img width=\"792\" height=\"589\" alt=\"Screenshot 2026-06-19 at 16 03 41\" src=\"https://github.com/user-attachments/assets/0a223d59-4010-40a3-bf14-9b35392a9851\" />\r\n\r\n\r\n```mermaid\r\nflowchart LR\r\n  SCRO[SafeCardReadOnly - Spaces Safe accounts] -->|extract| CAB[CopyAddressIconButton - shared]\r\n  CAB -.reused.-> SCRO\r\n  CAB --> AWI[AccountWidgetItem / AccountItemContent - Spaces dashboard]\r\n  CAB --> SAI[SingleAccountItem / MultiAccountItem - My accounts V2]\r\n  CAB --> SEC[SingleSafeRow / MultichainSafeRow - Security Hub]\r\n  CAB --> SCL[SafeCardLayout - Add accounts]\r\n  NSL[NestedSafesList] -->|showCopyButton| EHI[EthHashInfo CopyAddressButton]\r\n```\r\n\r\nBefore: account row = avatar + name + `0xA98A…32F8` (no copy). After: same row + a copy icon next to the address.\r\n\r\n\r\n\r\n## Checklist\r\n\r\n- [ ] I've tested the branch on mobile 📱\r\n- [x] I've documented how it affects the analytics (if at all) 📊 — no analytics impact (presentational copy button only)\r\n- [x] I've written a unit/e2e test for it (",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/features/myAccounts/components/AccountsWidget/AccountItemContent.tsx",
+      "line": 26,
+      "claim": "The same address-plus-copy-button layout (a flex wrapper with address text and CopyAddressIconButton) is copy-pasted across seven different files instead of being extracted into a shared component, risking inconsistent spacing and truncation over time."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/components/sidebar/NestedSafesList/index.tsx",
+      "line": 86,
+      "claim": "NestedSafesList uses a different copy mechanism (showCopyButton via EthHashInfo → CopyButton) that renders an MUI IconButton rather than the new CopyAddressIconButton component, causing inconsistency with the other account list rows."
+    },
+    {
+      "id": "F3",
+      "file": null,
+      "line": null,
+      "claim": "The fix should stop the event natively before it reaches Track (for example via a native click listener through a ref on the copy element) or change Track to ignore clicks from elements marked with an opt-out attribute, and a test should be added that renders the button inside Track and asserts trackEvent isn't called, since the current parent-click test only uses a React onClick parent and can't catch this leak."
+    },
+    {
+      "id": "F4",
+      "file": null,
+      "line": null,
+      "claim": "The same wrapper markup (a flex div containing address text and CopyAddressIconButton) is duplicated across six files (AccountItemContent, AccountWidgetItem, MultiAccountItem, SingleAccountItem, MultichainSafeRow, SafeCardLayout), and could be consolidated into a single AddressWithCopy component, which would also centralize the fixes for the analytics and accessibility findings."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/components/sidebar/NestedSafesList/index.tsx",
+      "line": 106,
+      "claim": "The IconButton rendered here sits inside a ListItemButton > Link, producing the button-in-link markup that the new copy component was specifically built to avoid."
+    },
+    {
+      "id": "F6",
+      "file": null,
+      "line": null,
+      "claim": "It was not verified whether WidgetItem (used by AccountWidgetItem) or the pages hosting SafeCardReadOnly and the Security Hub rows are also wrapped in Track; if they are, the spurious analytics event issue would apply there as well."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/features/myAccounts/components/MyAccountsV2/components/AccountItem/MultiAccountItem.tsx",
+      "line": 156,
+      "claim": "A button element is nested inside another button element, which can cause hydration problems."
+    },
+    {
+      "id": "F8",
+      "file": null,
+      "line": null,
+      "claim": "No unit tests were added for SingleSafeRow, MultichainSafeRow, SingleAccountItem, AccountItemContent, AccountWidgetItem, or SafeCardReadOnly even though each gained a new interactive child element, leaving a coverage gap that a simple per-surface test (copy button is present and does not trigger the row click) would address."
+    },
+    {
+      "id": "F9",
+      "file": null,
+      "line": null,
+      "claim": "Every account row now gains a new tabIndex={0} element for the copy button, adding an extra tab stop per row in long lists such as My accounts V2, Security Hub table, and Spaces dashboard, so the keyboard navigation experience on these lists should be confirmed as acceptable."
+    },
+    {
+      "id": "F10",
+      "file": "apps/web/src/components/common/CopyAddressIconButton/index.tsx",
+      "line": 40,
+      "claim": "A hardcoded value is used where a design token should be used instead."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/shared.tsx",
+      "line": 181,
+      "claim": "The inline copy button was removed from SafeCardReadOnly but the near-identical CopyAddressButton in shared.tsx was left in place, so the two copy implementations now behave differently: one shows a check icon for 2 seconds while the other shows a \"Copied\" tooltip for 750ms."
+    },
+    {
+      "id": "F12",
+      "file": "apps/web/src/components/sidebar/NestedSafesList/index.tsx",
+      "line": 106,
+      "claim": "The same event-propagation issue causes copy clicks in the nested safes sidebar list to be recorded as 'open nested Safe' analytics events even though navigation is blocked."
+    },
+    {
+      "id": "F13",
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/components/SafeCardLayout.tsx",
+      "line": 98,
+      "claim": "The copy control (span role=\"button\") is nested inside a button with role=\"checkbox\"; ARIA treats a checkbox's children as presentational, so screen readers cannot reach the nested copy control."
+    },
+    {
+      "id": "F14",
+      "file": null,
+      "line": null,
+      "claim": "The keyboard interaction test covers the Enter key but not the Space key."
+    },
+    {
+      "id": "F15",
+      "file": "apps/web/src/components/common/CopyAddressIconButton/index.test.tsx",
+      "line": 7,
+      "claim": "The clipboard mock used across several tests is a bare jest.fn(), which returns undefined; since CopyTooltip calls navigator.clipboard.writeText(text).then(...), calling .then on undefined throws and the catch branch sets isCopyEnabled=false, so tests intended to exercise the successful copy path actually run the \"copying disabled\" failure path."
+    },
+    {
+      "id": "F16",
+      "file": null,
+      "line": null,
+      "claim": "The new component duplicates logic already present in the CopyTooltip wrapper, and should instead wrap the shadcn button inside CopyTooltip to remove the duplicated logic and keep the copy wording consistent."
+    },
+    {
+      "id": "F17",
+      "file": "apps/web/src/features/myAccounts/components/MyAccountsV2/components/AccountItem/MultiAccountItem.tsx",
+      "line": 156,
+      "claim": "The copy control is nested inside the CollapsibleTrigger button, which is still nested interactive content and problematic for accessibility."
+    },
+    {
+      "id": "F18",
+      "file": "apps/web/src/components/common/CopyAddressIconButton/index.tsx",
+      "line": null,
+      "claim": "The component's doc comment states it is 'safe to nest', but that is only true for valid HTML nesting, not for accessibility, so the comment is misleading given the a11y issues in SafeCardLayout and MultiAccountItem; the copy control should be moved out of the clickable element as a sibling, or the comment corrected to acknowledge the accessibility gap."
+    },
+    {
+      "id": "F19",
+      "file": "apps/web/src/components/common/CopyAddressIconButton/index.tsx",
+      "line": 1,
+      "claim": "The new component has a unit test but no Storybook story, even though the web guidelines (apps/web/AGENTS.md) require a .stories.tsx file for new components that contain logic, unlike the comparable CopyAddressButton which has both a story and a story snapshot test."
+    },
+    {
+      "id": "F20",
+      "file": "apps/web/src/components/common/CopyAddressIconButton/index.tsx",
+      "line": 1,
+      "claim": "The new CopyAddressIconButton component has no Storybook story file, which apps/web/AGENTS.md (line 10 and the table at line 147) requires for new components with logic; the sibling CopyButton component has one (index.stories.tsx)."
+    },
+    {
+      "id": "F21",
+      "file": "apps/web/src/features/spaces/components/SafeAccounts/SafeCardReadOnly.tsx",
+      "line": 136,
+      "claim": "The copy control in SafeCardReadOnly changed from a real button with a green check icon and a 2-second \"Copied!\" tooltip to a span with role=\"button\" and a 750ms \"Copied\" tooltip with no check icon; this is a visible behavior change that the PR description should note was agreed to by design."
+    },
+    {
+      "id": "F22",
+      "file": null,
+      "line": null,
+      "claim": "Three test files overwrite navigator.clipboard using Object.defineProperty and never restore it afterward, which can leak state between tests."
+    },
+    {
+      "id": "F23",
+      "file": "apps/web/src/components/common/CopyAddressIconButton/index.test.tsx",
+      "line": 7,
+      "claim": "These tests only assert that writeText was called, not that the copy succeeded or that the UI reflects a successful copy, so a regression that breaks the actual copy behavior after the writeText call would not be caught."
+    },
+    {
+      "id": "F24",
+      "file": "apps/web/src/components/common/AccountItemContent.tsx",
+      "line": null,
+      "claim": "The PR's goal is DRY, but the same address+copy-button block is duplicated across at least seven consumer components (AccountItemContent.tsx, AccountWidgetItem.tsx, SingleAccountItem.tsx, MultiAccountItem.tsx, SingleSafeRow.tsx, MultichainSafeRow.tsx, SafeCardLayout.tsx, SafeCardReadOnly.tsx) instead of being extracted into a shared wrapper component, and the Security Hub rows use MUI Typography while the others use shadcn Typography, so this styling drift will worsen over time."
+    },
+    {
+      "id": "F25",
+      "file": "apps/web/src/features/spaces/components/SafeAccounts/SafeCardReadOnly.tsx",
+      "line": 136,
+      "claim": "The copy feedback in SafeCardReadOnly was weakened: the green check icon and 'Copied!' message shown for 2 seconds were removed and replaced with a tooltip reading 'Copied' for only 750 ms; this UX regression should be confirmed as intentional."
+    },
+    {
+      "id": "F26",
+      "file": "apps/web/src/features/myAccounts/components/MyAccountsV2/components/AccountItem/SingleAccountItem.tsx",
+      "line": 98,
+      "claim": "The existing pin/menu stopPropagation div already has the same analytics-leak issue, and this PR extends the same pattern to new rows instead of fixing it."
+    },
+    {
+      "id": "F27",
+      "file": "apps/web/src/components/common/CopyAddressIconButton/index.tsx",
+      "line": 12,
+      "claim": "This new component duplicates functionality already provided by at least three existing copy-address components in the codebase (in SpaceSafeBar/AccountsModal/shared.tsx, SafeSelectorDropdown/components/CopyAddressButton.tsx, and CopyAddressButton/CopyButton built on CopyTooltip), instead of reusing or consolidating them."
+    },
+    {
+      "id": "F28",
+      "file": "apps/web/src/features/myAccounts/components/MyAccountsV2/components/AccountItem/SingleAccountItem.tsx",
+      "line": 68,
+      "claim": "Track listens for clicks with a native addEventListener('click') on its wrapper, while CopyTooltip only calls stopPropagation() inside a React onClick handler; because React 19 handles events at the root, Track's native listener fires before React stops the event, so navigation is blocked but every copy click is still recorded as an 'open Safe' analytics event, and the shouldTrack check (which only looks for a disabled child) does not catch this."
+    },
+    {
+      "id": "F29",
+      "file": "apps/web/src/components/common/CopyAddressIconButton/index.test.tsx",
+      "line": 33,
+      "claim": "The keyboard handler test only covers the Enter key, but the component (index.tsx:14) also handles the Space key, so a Space key test case should be added."
+    },
+    {
+      "id": "F30",
+      "file": "apps/web/src/components/common/AccountsWidget.test.tsx",
+      "line": 85,
+      "claim": "AccountsWidget.test.tsx redefines navigator.clipboard inline while CopyAddressIconButton/index.test.tsx and MultiAccountItem.test.tsx set it up via beforeAll, creating inconsistency that could be resolved with a shared helper in tests/test-utils."
+    },
+    {
+      "id": "F31",
+      "file": "apps/web/src/components/common/SafeCardLayout.tsx",
+      "line": 47,
+      "claim": "SafeCardLayout wraps the row in a <button type=\"button\" role=\"checkbox\"> that now contains CopyAddressIconButton, which itself renders <span role=\"button\" tabIndex={0}>, creating nested interactive ARIA roles inside a single interactive element, which is invalid ARIA and can confuse assistive technology; this should be verified with a screen reader or the checkbox affordance should be moved out of the outer button."
+    },
+    {
+      "id": "F32",
+      "file": null,
+      "line": null,
+      "claim": "It was not verified whether clicks on children of a disabled SafeCardLayout button still reach the nested copy control."
+    },
+    {
+      "id": "F33",
+      "file": "apps/web/src/components/common/CopyAddressIconButton/index.tsx",
+      "line": 14,
+      "claim": "The component handles both Enter and Space key presses, but the corresponding test file only covers the Enter case, so removing the Space-key handling would not cause any test to fail."
+    }
+  ]
+}

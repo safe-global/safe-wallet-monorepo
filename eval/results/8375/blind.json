@@ -1,0 +1,157 @@
+{
+  "pr": 8375,
+  "title": "feat(tx-builder): add known-address dropdown to address fields",
+  "description": "## What it solves\r\n\r\nResolves: [WA-1362](https://linear.app/safe-global/issue/WA-1362/add-address-dropdown-tx-builder)\r\n\r\nTx Builder forces users to paste raw addresses into every address field. That is friction and a typo risk for anyone who already curates an address book in the wallet, and it leaves Tx Builder inconsistent with the rest of Safe{Wallet}, where address fields offer known contacts.\r\n\r\n## How this PR fixes it\r\n\r\nEvery address-type field in Tx Builder now offers a dropdown of the Safe's address book contacts, with type-to-filter on both name and address substring.\r\n\r\n**Data comes over the existing SDK bridge.** `sdk.safe.requestAddressBook()` is already implemented and permission-gated on the host side ([`AppFrame/index.tsx:68`](https://github.com/safe-global/safe-wallet-monorepo/blob/dev/apps/web/src/components/safe-apps/AppFrame/index.tsx#L68)), so **`apps/web` is untouched**. The new `useKnownAddresses` hook fetches **lazily on first dropdown open** — the SDK auto-negotiates the `requestAddressBook` permission, so an eager fetch would pop the host consent dialog before the user has touched a field. The request is cached per Safe, so all fields on a page share one fetch and one prompt. A rejected permission resolves to an empty list rather than an error.\r\n\r\n## How to test it\r\n\r\n- The dropdown only has data inside the wallet iframe, so a standalone tx-builder shows no dropdown at all.\r\n- Open `localhost:3000`, pick a Safe with at least one address book contact, then **Apps → My custom apps → Add custom Safe App** → `http://localhost:4000`.\r\n\r\n## Affected flows\r\n\r\n- Tx Builder: entering a contract address on the Dashboard (feeds ABI fetch + proxy detection)\r\n- Tx Builder: entering \"To Address\" on a new transaction\r\n- Tx Builder: filling any `address`-typed ABI parameter\r\n- Tx Builder: editing an address on an already-batched transaction (`EditTransactionModal`)\r\n- Safe Apps permissions: first use now requests `requestAddressBook` consent for Transaction Builder\r\n\r\n## Blast radius\r\n\r\n**Contained to `apps/tx-builder`.** No `apps/web` and no `packages/**` source changes.\r\n\r\n- `apps/tx-builder/src/components/forms/fields/AddressInput.tsx` — the single choke point for all address entry in the app. Two consumers, both in-app: `Dashboard.tsx` (direct) and `AddressContractField.tsx` (via `Field.tsx`, covering To Address, all address ABI params, and `EditTransactionModal`). This is **not** the wallet's `common/AddressInput` or `AddressBookInput`, which are untouched.\r\n- `AddressContractField.tsx` — removed `inputProps={{ value }}`; display now syncs from the `address` prop via the existing external-value effect. Side effect: Field-chain inputs now *display* the network prefix, consistent with the Dashboard field. Form state stays unprefixed and checksummed, so validation, ABI encoding and batch payloads are unchanged.\r\n- **Downstream of the money path:** `parseFormToProposedTransaction` → batch serialization → `sdk.txs.send` all consume this component's output. Behaviour is unchanged and covered by tests.\r\n- `apps/tx-builder/package.json` + `yarn.lock` — declares `lucide-react@^0.563.0`, already in the lockfile via `apps/web`. Nothing new downloaded; it makes the group-header icon identical to the wallet's rather than an MUI approximation.\r\n- **Persistence/cache:** in-memory only, module-level, per Safe, cleared on reload. The Safe Apps permission grant persists in the host's localStorage under `SafeApps__safePermissions` and is revocable from the Safe App info modal.\r\n- **Mobile:** none. Tx Builder is web-only and no shared package changed.\r\n- **Feature flags / chain configs:** none.\r\n\r\n## Risks / not checked\r\n\r\n- **No visual verification.** The tx-builder running locally during development turned out to be the old `safe-react-apps` clone on `:3001`, not this code. Nothing here has been seen on screen — the tests prove behaviour, not pixels. Steps 1–4 above still need a human pass.\r\n- **Design QA not done.** Rows mirror the wallet's `RecipientOption` markup, but parity is partial by design: still missing row dividers, 12px/16px option padding, the `SF Mono` address treatment, paper elevation, and the chevron toggle that opens the list.\r\n- **Empty state is silent.** With `freeSolo`, MUI renders no popup when there are zero options, so a user with no contacts — or who rejected the permission — sees a plain text field with no hint the dropdown exists. The two cases are distinguishable (rejection throws `PermissionsError` 4001; a granted-but-empty book resolves to `[]`) but are currently collapsed into one empty list. Worth a follow-up.\r\n- **Address book staleness.** The per-session cache means a contact added in the wallet while Tx Builder is open won't appear until the app reloads.\r\n- **Not tested against a real host** for the consent dialog, iframe popup clipping (`disablePortal`), or dark mode.\r\n- **No Playwright coverage.** Tx Builder is a Safe App loaded in an iframe; existing E2E does not cover it. Unit and component tests only.\r\n- Did not test with the permission previously granted-then-revoked mid-session.\r\n\r\n## Checklist\r\n\r\n- [ ] I've tested the branch on mobile 📱 — N/A, Tx Builder is web-only\r\n- [x] I've documented how it affects the analytics (if at all) 📊 — two new `trackSafeAppEvent` actions: `Address book entry selected` and `Address manually entered`, to measure dropdown adoption versus paste. Fired once per distinct address, never both for the same selection.\r\n- [x] I've written a unit/e2e test for it (if applicable) 🧑‍💻 — 15 new tests (`useKnownAddresses.test.ts`, `AddressInput.test.tsx`, which had no coverage before) plus a To-Address dropdown submission case in `SolidityForm.test.tsx`\r\n- [x] I've listed affected flows and blast radius, and named what I did not verify 🎯\r\n\r\n---\r\n\r\n## CLA signature\r\n\r\nWith the submission of this Pull Request, I confirm that I have read and agree to the terms of the [Contributor License Agreement](https://safe.global/cla).\r\n\r\n",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/tx-builder/src/hooks/useKnownAddresses.ts",
+      "line": null,
+      "claim": "knownAddresses is filtered only by chainId while the cache key is `${chainId}:${safeAddress}`, so if the Safe context changes before the dropdown reopens and loadAddressBook reruns, addressBookItems can still hold the previous Safe's data, making the derived list not fully authoritative for the current Safe; filtering by safeAddress too, or resetting addressBookItems when the cache key changes, would fix this."
+    },
+    {
+      "id": "F2",
+      "file": "apps/tx-builder/src/hooks/useKnownAddresses.ts",
+      "line": 42,
+      "claim": "This value is recomputed on every render instead of being memoized, which is unnecessary overhead."
+    },
+    {
+      "id": "F3",
+      "file": "apps/tx-builder/src/hooks/useKnownAddresses.ts",
+      "line": 33,
+      "claim": "requestAddressBook().catch(() => []) stores an empty result in the module-level cache for the rest of the session when the request fails or is rejected, so the address-book dropdown stays empty until the app reloads even if the user dismisses the consent dialog, the request only failed temporarily, or a contact is added later in Safe{Wallet}; if leaving it empty is intentional, this should be documented with a comment, and if not, only successful results should be cached."
+    },
+    {
+      "id": "F4",
+      "file": "apps/tx-builder/src/components/forms/fields/AddressInput.tsx",
+      "line": 74,
+      "claim": "A local const named checksumAddress shadows the imported checksumAddress helper, which is a pre-existing issue in one spot that has now been propagated into the new code; renaming the local variable would remove a footgun for future edits that need to call the imported helper."
+    },
+    {
+      "id": "F5",
+      "file": "apps/tx-builder/src/components/forms/fields/AddressInput.tsx",
+      "line": 133,
+      "claim": "The same local variable shadowing the imported checksumAddress helper recurs here, creating the same risk of accidentally using the wrong value in future edits."
+    },
+    {
+      "id": "F6",
+      "file": "apps/tx-builder/src/hooks/useKnownAddresses.test.ts",
+      "line": 83,
+      "claim": "There is no test covering what happens when the dropdown is reopened after a rejection, which is the behavior most affected by the permanent empty-result caching issue."
+    },
+    {
+      "id": "F7",
+      "file": "apps/tx-builder/src/components/Dashboard.tsx",
+      "line": 189,
+      "claim": "When a user picks a proxy contact and confirms the implementation-ABI dialog, the implementation address is set but the proxy contact's name remains shown underneath the new address."
+    },
+    {
+      "id": "F8",
+      "file": "apps/tx-builder/src/components/forms/fields/KnownAddressGroupHeader.tsx",
+      "line": 12,
+      "claim": "The sticky group header uses zIndex: 2, which does not match any of the other z-index values used elsewhere in tx-builder (1, 10, 2001), and there is no comment explaining what layer it is meant to sit above."
+    },
+    {
+      "id": "F9",
+      "file": "apps/tx-builder/src/hooks/useKnownAddresses.ts",
+      "line": 37,
+      "claim": "request.then(setAddressBookItems) can call setAddressBookItems after the component has unmounted (e.g. if the app frame is closed or AddressInput unmounts before the promise resolves), and while React 18+ tolerates this silently, a mounted-ref guard would prevent the state update on an unmounted component."
+    },
+    {
+      "id": "F10",
+      "file": null,
+      "line": null,
+      "claim": "There is no test covering the case where loadAddressBook runs but the promise resolves after the component unmounts, which is needed to lock in the fix for the unmount state-update issue."
+    },
+    {
+      "id": "F11",
+      "file": "apps/tx-builder/src/components/forms/fields/SolidityForm.tsx",
+      "line": 123,
+      "claim": "After 'Add transaction' resets contract-method address parameters to an empty string, the AddressInput field is not remounted (its key depends only on contractMethodIndex, which is usually '0'), so the stale contact name remains displayed under the now-empty field."
+    },
+    {
+      "id": "F12",
+      "file": "apps/tx-builder/src/components/forms/fields/AddressInput.test.tsx",
+      "line": 161,
+      "claim": "The tests 'updates the displayed value when the address changes from outside' and 'resolves an ENS name' use networkPrefix=\"eth\" but neither asserts the helper text (selectedName) nor trackSafeAppEvent, so they do not cover the stale-name or mislogged-analytics defects."
+    },
+    {
+      "id": "F13",
+      "file": "apps/tx-builder/src/components/forms/fields/AddressInput.tsx",
+      "line": 137,
+      "claim": "The 'Address manually entered' and 'Address book entry selected' analytics events are hardcoded and never pass a label, even though trackSafeAppEvent accepts one."
+    },
+    {
+      "id": "F14",
+      "file": "apps/tx-builder/src/hooks/useKnownAddresses.ts",
+      "line": 40,
+      "claim": "knownAddresses is computed via addressBookItems.filter(...).map(...) directly in the render body, producing a new array identity on every render, which causes MUI's options prop to churn and filterOptions to rerun unnecessarily; wrapping this computation in useMemo keyed on addressBookItems and chainId would avoid the extra work."
+    },
+    {
+      "id": "F15",
+      "file": "apps/tx-builder/src/hooks/useKnownAddresses.ts",
+      "line": 33,
+      "claim": "The address-book request cache is module level and shared across all address fields, and a failed or rejected request is caught and cached as an empty array with no expiry or reset. This treats a denied permission, a dismissed consent dialog, and a network or host error the same way, so a single failure or accidental dismissal leaves the dropdown empty for every address field on that Safe and chain until the page is reloaded, and reopening the dropdown never retries."
+    },
+    {
+      "id": "F16",
+      "file": "apps/tx-builder/src/components/forms/fields/AddressInput.tsx",
+      "line": 203,
+      "claim": "Children.count(params.children) relies on the legacy React.Children API; using Array.isArray(params.children) ? params.children.length : 0 would be clearer, even though the current code still functions correctly."
+    },
+    {
+      "id": "F17",
+      "file": null,
+      "line": null,
+      "claim": "The tests only cover lowercase address slices for filtering and lack a filter case using a fully-checksummed address input."
+    },
+    {
+      "id": "F18",
+      "file": "apps/tx-builder/src/components/forms/fields/AddressInput.tsx",
+      "line": 106,
+      "claim": "The effect that updates the input when the address prop changes from outside never clears selectedName, so a previously selected contact's name keeps showing as helper text even though it now belongs to a different or empty address."
+    },
+    {
+      "id": "F19",
+      "file": "apps/tx-builder/src/components/forms/fields/KnownAddressGroupHeader.tsx",
+      "line": 11,
+      "claim": "The sticky header uses a hard-coded top: '-8px' to cancel out MUI's current listbox top padding, which is fragile because if MUI changes that padding value or the theme spacing changes, the header will float or clip; using top: 0 and instead zeroing the listbox's padding-top via ListboxProps on the Autocomplete would keep the coupling local and more robust."
+    },
+    {
+      "id": "F20",
+      "file": "apps/tx-builder/src/hooks/useKnownAddresses.test.ts",
+      "line": 80,
+      "claim": "The rejection-handling test calls waitFor on a mock that resolves synchronously and then asserts knownAddresses equals [], which is already true before the rejection is actually processed, so the test would still pass even if the .catch handling were removed and would not catch a resulting unhandled rejection."
+    },
+    {
+      "id": "F21",
+      "file": "apps/tx-builder/src/components/forms/fields/AddressInput.tsx",
+      "line": 149,
+      "claim": "The effect intended for network switches actually fires whenever inputValueRef.current differs from address, which is true after every externally-driven change when a network prefix is shown (input holds 'eth:0x…' while the prop holds '0x…'), causing it to call updateAddressState and fire a tracking event."
+    },
+    {
+      "id": "F22",
+      "file": "apps/tx-builder/src/components/forms/fields/AddressInput.tsx",
+      "line": 137,
+      "claim": "Because lastTrackedAddressRef is only updated on mount, on typing, and on contact selection, and never in the ENS-resolution path or the outside-change path, nothing prevents the tracking event from firing for those paths, so ENS resolutions, proxy/implementation switches, and batch-edit prefills are all logged as 'Address manually entered', inflating the manual-entry metric."
+    },
+    {
+      "id": "F23",
+      "file": "apps/tx-builder/src/components/forms/fields/KnownAddressGroupHeader.tsx",
+      "line": 11,
+      "claim": "The hardcoded top: '-8px' offset depends on MUI's listbox padding and would be clearer expressed via theme.spacing(-1) or similar rather than a magic number."
+    },
+    {
+      "id": "F24",
+      "file": "apps/tx-builder/src/hooks/useKnownAddresses.ts",
+      "line": 33,
+      "claim": "The catch(() => []) handler swallows every error from requestAddressBook, not just the documented 4001 permission-denial case, so SDK bugs, iframe/postMessage timeouts, malformed responses, or future non-4001 error codes are all silently treated the same as a granted-but-empty address book. Because the resulting promise is cached, this incorrect empty state persists for the entire session, and the error should instead be gated on the 4001 code with other errors logged or rethrown so real bugs remain diagnosable."
+    },
+    {
+      "id": "F25",
+      "file": "apps/tx-builder/src/components/forms/fields/AddressInput.tsx",
+      "line": 161,
+      "claim": "Because AddressInput is reused across the contract address/ABI field, the To address field, and address-type method parameters, but its tracking events carry no identifying label, it is impossible to tell from analytics which entry point users are using the address book from."
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "pr": 8334,
+  "title": "fix(web): show active chain threshold in multi-chain safe selector trigger",
+  "description": "## What it solves\r\n\r\nWhen a multi-chain Safe is the active account, the safe-selector trigger (the header pill) showed a generic multi-chain icon with no threshold — even though the trigger always represents the active safe on one specific chain, so the threshold is known.\r\n\r\nResolves: N/A — no Linear issue\r\n\r\n## How this PR fixes it\r\n\r\nThe trigger already had the active chain's threshold/owners in hand (sourced from `useSafeInfo` via the item builder); they were just rendered icon-only through the multi-chain branch. Removing that branch makes the trigger always show the active chain's `M/N`.\r\n\r\nDeliberately **not** changed: the dropdown list rows. A collapsed multi-chain group can't summarize differing per-chain thresholds into one number, so it stays icon-only and expanding still shows each chain's own. Also removed the now-dead `isMultiChain` / `isTriggerSafeMultiChain` plumbing.\r\n\r\n## How to test it\r\n\r\n1. Connect a wallet with a multi-chain Safe (same address on 2+ networks, ideally with differing thresholds).\r\n2. Open the Safe on one of those networks.\r\n3. Check the safe-selector pill in the header — it should show the active network's threshold (e.g. `2/2`) next to the people icon, not an icon-only badge.\r\n4. Open the dropdown: the multi-chain group summary row stays icon-only; expand it to confirm each chain still shows its own threshold.\r\n\r\n## Screenshots\r\nbefore\r\n<img width=\"678\" height=\"80\" alt=\"image\" src=\"https://github.com/user-attachments/assets/31b531a1-1205-42b3-8126-e6c1a830ebbc\" />\r\n\r\nafter\r\n<img width=\"681\" height=\"84\" alt=\"image\" src=\"https://github.com/user-attachments/assets/7e2f9084-941c-46c8-81cd-58510e068de7\" />\r\n\r\n\r\n\r\n## Checklist\r\n\r\n- [ ] I've tested the branch on mobile 📱\r\n- [ ] I've documented how it affects the analytics (if at all) 📊\r\n- [ ] I've written a unit/e2e test for it (if applicable) 🧑‍💻\r\n\r\n---\r\n\r\n## CLA signature\r\n\r\nWith the submission of this Pull Request, I confirm that I have read and agree to the terms of the [Contributor License Agreement](https://safe.global/cla).",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/__tests__/SafeSelectorTriggerContent.test.tsx",
+      "line": 147,
+      "claim": "The test name says it verifies the active chain's threshold, but the component reads the item-level selectedItem.threshold and the test's selectedChainId prop has no effect on the assertion, so the test name promises more than what is actually being checked; it should be renamed or the fixture should use differing per-chain thresholds so the active-chain behaviour is genuinely tested."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/SafeSelectorTriggerContent.tsx",
+      "line": 85,
+      "claim": "The dropdown rows remain icon-only, so the trigger and the list now intentionally behave differently, which should be confirmed as an intended product decision rather than an inconsistency."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/SafeSelectorTriggerContent.tsx",
+      "line": 83,
+      "claim": "A two-line comment explaining why the trigger differs from the icon-only dropdown summary conflicts with the project convention that treats comments as tech debt; it could be shortened to one line or moved into the test name instead."
+    },
+    {
+      "id": "F4",
+      "file": "SafeSelectorTriggerContent.tsx",
+      "line": 85,
+      "claim": "The badge uses the item-level selectedItem.threshold rather than the chain-specific selectedChain?.threshold, and is only correct today because the sole caller (buildMultiChainItem in useSpaceSafeSelectorItems.ts:96-106) happens to put the current chain first and fill the item-level threshold from the current safe's info; the component itself does not guarantee that the displayed threshold belongs to the selected chain, so relying on selectedChain?.threshold ?? selectedItem.threshold would make this hold independent of the caller."
+    },
+    {
+      "id": "F5",
+      "file": "SafeSelectorTriggerContent.tsx",
+      "line": 83,
+      "claim": "The new two-line comment explaining why the trigger differs from the dropdown states something the component doesn't actually enforce, and per the AGENTS.md guideline treating comments as tech debt, it should be shortened or corrected to be accurate."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/__tests__/SafeSelectorTriggerContent.test.tsx",
+      "line": 147,
+      "claim": "The test titled 'shows the active chain threshold' only sets item-level threshold/owner numbers while leaving the per-chain threshold/owners fields empty, so it would not catch a regression where the trigger reads chains[n].threshold instead of the item-level value. Giving the per-chain entries different values and asserting the item-level value still displays would make the test actually verify which value is used."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/SafeSelectorTriggerContent.tsx",
+      "line": 85,
+      "claim": "The trigger's threshold badge now always shows the count (e.g. 2/3) for multi-chain safes, reversing a deliberate prior change that made it icon-only because setup can differ per chain and the count could be misleading, and there is no recorded product or design sign-off for this behaviour reversal in the PR."
+    }
+  ]
+}

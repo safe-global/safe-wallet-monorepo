@@ -1,0 +1,11 @@
+{
+  "pr": 8606,
+  "reviewSha": "9b3ea5d2e16dcf80d62c66e4ee1cc29a622f7e7e",
+  "baseSha": "1fb2fdc11b5aee909b2acebfcce3f0e841a00fc1",
+  "system": "E",
+  "version": "github",
+  "runner": "collect",
+  "model": "human",
+  "commentSha": "9b3ea5d2e16dcf80d62c66e4ee1cc29a622f7e7e",
+  "output": "[review by vmosharova]\nLGTM 🚀 \n\n---\n\napps/web/src/components/safe-apps/SafeAppsInfoModal/styles.test.ts:37\n👏🏻 for adding a separate file for styles tests"
+}

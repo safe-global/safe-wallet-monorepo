@@ -1,0 +1,139 @@
+{
+  "usage": {
+    "usd": 0.4800322,
+    "turns": 7,
+    "wallSeconds": 55
+  },
+  "issues": [
+    {
+      "findings": [
+        "F1"
+      ],
+      "summary": "Editor's config-service column shows raw data rather than overridden values",
+      "label": "wrong",
+      "evidence": "useFeatureFlagEditorData.ts doesn't exist at the reviewed commit. The diff only adds the slice, its test, the store barrel and store wiring, and grep finds no editor hook anywhere in apps/web/src."
+    },
+    {
+      "findings": [
+        "F2"
+      ],
+      "summary": "Switch always dispatches setOverride, so overrides pile up",
+      "label": "wrong",
+      "evidence": "FeatureFlagRow.tsx doesn't exist in the reviewed tree (`git ls-files` has no match). The PR adds no UI, only featureFlagOverridesSlice.ts."
+    },
+    {
+      "findings": [
+        "F3"
+      ],
+      "summary": "Stale override keys for removed FEATURES values are never pruned and still count toward selectOverrideCount",
+      "label": "low",
+      "evidence": "featureFlagOverridesSlice.ts:29-32 counts Object.keys of the persisted state with no check against FEATURES, and nothing validates the state loaded from storage. clearAllOverrides still removes stale keys and nothing consumes the count yet, so the impact is minor."
+    },
+    {
+      "findings": [
+        "F4",
+        "F17"
+      ],
+      "summary": "The feature-flags folder lacks the standard feature structure (no root index.ts, contract or feature.ts)",
+      "label": "low",
+      "evidence": "apps/web/src/features/feature-flags holds only store/, and slices.ts:42 deep-imports '@/features/feature-flags/store'. The inconsistency is real, but address-poisoning (hooks/index/store, no contract) is precedent for a store-only folder, and the PR description calls the missing index.ts deliberate."
+    },
+    {
+      "findings": [
+        "F5"
+      ],
+      "summary": "The bundle-exclusion marker string is too generic",
+      "label": "wrong",
+      "evidence": "No bundleExclusion test exists in the reviewed commit (`git ls-files` has no match), and the string 'local feature-flag overrides' appears nowhere in apps/web/src."
+    },
+    {
+      "findings": [
+        "F6"
+      ],
+      "summary": "Check icon uses visibility:hidden together with aria-label, which hurts accessibility",
+      "label": "wrong",
+      "evidence": "FeatureFlagRow.tsx isn't in the reviewed tree, so the component this claim describes doesn't exist."
+    },
+    {
+      "findings": [
+        "F7"
+      ],
+      "summary": "Slice actions and selectors have no consumer outside the test",
+      "label": "low",
+      "evidence": "grep finds setOverride, clearOverride and selectOverrideCount only in featureFlagOverridesSlice.ts and its test. At this commit the slice is dead code, even though the PR description describes an editor, hook wiring and sidebar changes that aren't here."
+    },
+    {
+      "findings": [
+        "F8",
+        "F12"
+      ],
+      "summary": "Overrides are persisted and broadcast in every environment, production included, and loaded without validation",
+      "label": "low",
+      "evidence": "store/index.ts:67 and :95 register and persist the slice unconditionally, and lines 105-106 persist and broadcast it. Nothing reads the overrides yet, so they have no effect in production today. The only concrete cost is a harmless stale localStorage key."
+    },
+    {
+      "findings": [
+        "F9"
+      ],
+      "summary": "Weak clearOverride test and no persistence test",
+      "label": "low",
+      "evidence": "featureFlagOverridesSlice.test.ts:30-34 starts from one key, so a reducer that wiped all state would still pass. Persisting the slice has no test. Both are simple code paths, so the regression risk is small."
+    },
+    {
+      "findings": [
+        "F10"
+      ],
+      "summary": "Spacer span in FeatureFlagRow needs a comment",
+      "label": "wrong",
+      "evidence": "FeatureFlagRow.tsx doesn't exist at the reviewed commit."
+    },
+    {
+      "findings": [
+        "F11"
+      ],
+      "summary": "FEATURES gets re-sorted on every render",
+      "label": "wrong",
+      "evidence": "useFeatureFlagEditorData.ts doesn't exist in the reviewed tree. The PR adds no sorting code."
+    },
+    {
+      "findings": [
+        "F13"
+      ],
+      "summary": "No test for applyFeatureOverrides with an unknown feature",
+      "label": "wrong",
+      "evidence": "grep finds applyFeatureOverrides nowhere in apps/web/src at this commit, so there is no function to test."
+    },
+    {
+      "findings": [
+        "F14"
+      ],
+      "summary": "selectOverrideCount subscribes the sidebar to the store in production",
+      "label": "wrong",
+      "evidence": "SafeSidebarContent.tsx exists but never references selectOverrideCount (grep matches only the slice and its test). The PR diff doesn't touch that file."
+    },
+    {
+      "findings": [
+        "F15"
+      ],
+      "summary": "The feature-flags folder name is unclear",
+      "label": "nit",
+      "evidence": "This is a naming preference with no concrete cost. The file it cites (features/feature-flag-overrides/__tests__/bundleExclusion.test.ts) doesn't exist."
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "No test for FeatureFlagSection's empty state",
+      "label": "wrong",
+      "evidence": "No FeatureFlagSection component exists in the reviewed commit (grep finds no match)."
+    },
+    {
+      "findings": [
+        "F18"
+      ],
+      "summary": "No tests for FeatureFlagEditor search or reset-all",
+      "label": "wrong",
+      "evidence": "No FeatureFlagEditor component exists in the reviewed commit. The PR adds only the slice and store wiring."
+    }
+  ]
+}

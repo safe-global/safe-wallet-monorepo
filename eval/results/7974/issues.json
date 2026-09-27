@@ -1,0 +1,37 @@
+{
+  "usage": {
+    "usd": 0.3339498,
+    "turns": 4,
+    "wallSeconds": 23
+  },
+  "issues": [
+    {
+      "findings": [
+        "F1",
+        "F2",
+        "F4",
+        "F3"
+      ],
+      "summary": "Indeterminate checkbox renders as an empty box, same as unchecked; suggests adding a dash glyph and data-indeterminate styling instead",
+      "label": "wrong",
+      "evidence": "checkbox.tsx:42 does hide the only glyph, and the Root has no data-indeterminate styling. But the PR description says outright that an empty box is the intended result (\"the box correctly reads as empty\"; the test step expects `(1/2)` shown as an **empty box*), and SelectAllToggle.tsx:46-53 shows the (n/m) count and sets aria-checked=\"mixed\". So this is the chosen design, not a defect. F3's request for an explicit statement is already met by the description."
+    },
+    {
+      "findings": [
+        "F5",
+        "F6"
+      ],
+      "summary": "No Storybook story covers the indeterminate checkbox state",
+      "label": "low",
+      "evidence": "checkbox.stories.tsx:36-55 shows only unchecked, checked, disabled, and checked+disabled, and AllVariants is tagged `!chromatic`. The new indeterminate styling therefore has no visual coverage. Since the change is one CSS class, the cost of missing a regression here is small."
+    },
+    {
+      "findings": [
+        "F7"
+      ],
+      "summary": "PR description doesn't mention coordination with any design-system rewrite",
+      "label": "nit",
+      "evidence": "This is about the PR process, not a code defect. Nothing in the repo shows a conflicting rewrite of apps/web/src/components/ui/, and a one-class change to checkbox.tsx:42 carries negligible merge risk."
+    }
+  ]
+}

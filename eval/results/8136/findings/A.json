@@ -1,0 +1,35 @@
+{
+  "usd": 0.043783600000000006,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceSettings/sections/IdentitySection.tsx",
+      "line": 12,
+      "claim": "IdentitySection still defines its own local MAX_NAME_LENGTH constant set to 60 instead of using the new shared 30-character limit, so the rename field on the Settings page still allows names up to 60 characters."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceSettings/sections/IdentitySection.tsx",
+      "line": 79,
+      "claim": "The local 60-character limit is actually applied to the input field, meaning a workspace name of 31-60 characters that is rejected at creation or in the rename dialog can still be saved via the Settings page, leaving two different enforced limits for the same field."
+    },
+    {
+      "file": "apps/web/src/features/spaces/constants.ts",
+      "line": 14,
+      "claim": "The comment on the new SPACE_NAME_MAX_LENGTH constant states it is enforced on both create and rename, but this is inaccurate since it is not enforced on the Settings page rename path, so the comment should be corrected or the enforcement gap fixed."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceSettings/UpdateSpaceForm.tsx",
+      "line": 40,
+      "claim": "The rename dialog only sets the HTML maxLength attribute on the input, so typing or pasting text beyond 30 characters is silently truncated rather than showing a validation error, unlike the create flow which shows an explicit 'Workspace name must be 30 characters or less' message."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceSettings/UpdateSpaceForm.tsx",
+      "line": null,
+      "claim": "Because the rename dialog does not validate length on submit, an existing name already over 30 characters can be resaved unchanged without any error being shown."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceSettings/__tests__/UpdateSpaceForm.test.tsx",
+      "line": 82,
+      "claim": "There is no test covering the rename limit on the Settings page's IdentitySection component, which is why the divergent 60-character limit there went unnoticed; only the dialog's maxlength attribute is tested."
+    }
+  ]
+}

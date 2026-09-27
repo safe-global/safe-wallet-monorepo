@@ -1,0 +1,79 @@
+{
+  "pr": 8042,
+  "title": "fix: label priv contact field as \"Address or ENS\"",
+  "description": "In Enterprise Workspace, when we add a private contact, the input field for Address looks like this\r\n\r\n<img width=\"1256\" height=\"1218\" alt=\"image\" src=\"https://github.com/user-attachments/assets/ca6e9210-1786-4d72-992f-646bb49a5d2e\" />\r\n\r\nBut actually one can also write e.g. \"vitalik.eth\" in that field and the ENS address is then resolved. So a signifier is missing that shows to the user that they can also use ENS names in that field.\r\n\r\nHow it looks now: \r\n\r\n<img width=\"620\" height=\"602\" alt=\"image\" src=\"https://github.com/user-attachments/assets/305d4529-2562-42b5-babc-fce2c0cda429\" />\r\n",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/AddContactDialog.tsx",
+      "line": 137,
+      "claim": "On a chain without DOMAIN_LOOKUP support, a user who enters an ENS name like vitalik.eth will see only an invalid address error even though the label told them ENS input would work, since AddressInput only resolves names when DOMAIN_LOOKUP is enabled for the current chain."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/AddContactDialog.tsx",
+      "line": 137,
+      "claim": "The label should be computed from the same domain-lookup condition already used elsewhere, for example 'Address' + (' or ENS' if domain lookup is enabled), instead of duplicating the logic with a hardcoded string; alternatively, product should confirm ENS should be advertised on every network."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/AddContactDialog.tsx",
+      "line": 137,
+      "claim": "The test should be updated to use getByLabelText('Address or ENS') to match the new label, and an assertion on the rendered label text should be added so the label change itself is covered by a test."
+    },
+    {
+      "id": "F4",
+      "file": null,
+      "line": null,
+      "claim": "The commit message describes the change as affecting the \"priv contact\" field, but AddContactDialog is shared by both AddPrivateContact.tsx and AddContact.tsx, so the label change also affects the shared (non-private) contacts flow, which the commit message does not make clear."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/AddContactDialog.tsx",
+      "line": 137,
+      "claim": "The new label hardcodes the ' or ENS' suffix regardless of whether the current chain supports ENS resolution, whereas AddressInput itself only appends that suffix when FEATURES.DOMAIN_LOOKUP is enabled for the chain (as seen at apps/web/src/components/common/AddressInput/index.tsx:72 and :166). Since the contact dialog is used across many networks while name resolution only runs for the current chain, this can invite users on unsupported networks to enter ENS names that never resolve and fail validation."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/AddContactDialog.tsx",
+      "line": 137,
+      "claim": "The label is hardcoded to \"Address or ENS\" without checking whether the current chain has the DOMAIN_LOOKUP feature enabled, unlike AddressInput's own default label which conditionally appends \" or ENS\" only when ENS lookup is actually available."
+    },
+    {
+      "id": "F7",
+      "file": null,
+      "line": null,
+      "claim": "The label wording is inconsistent across related flows: EditContactDialog.tsx uses a read-only address field, and other places in the app use the wording \"Recipient address or ENS\", creating a minor inconsistency in terminology."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/__tests__/AddContactDialog.test.tsx",
+      "line": 72,
+      "claim": "Every test that calls fillRequiredFields() (submit, success notification, onSubmitStart, and both error paths) will fail with \"Unable to find a label with the text of: Address\", turning CI red, and the commit does not update the test file to match the new label."
+    },
+    {
+      "id": "F9",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/__tests__/AddContactDialog.test.tsx",
+      "line": 72,
+      "claim": "The mocked AddressInput component uses the label prop as the input's aria-label, and the shared fillForm helper looks up the field via screen.getByLabelText('Address'), which matches the full label text exactly. Since the label was changed to 'Address or ENS', this lookup throws, causing every test that fills the form (submit success, notification, error result, rejected promise) to fail."
+    },
+    {
+      "id": "F10",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/__tests__/AddContactDialog.test.tsx",
+      "line": 72,
+      "claim": "fillRequiredFields() looks up the address field with screen.getByLabelText('Address'), but the mock now sets the aria-label to \"Address or ENS\", and Testing Library requires the full label text to match, so this lookup will no longer find the field."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/AddContactDialog.tsx",
+      "line": 137,
+      "claim": "The commit message describes the change as labeling the private contact field, but AddContactDialog is shared between AddPrivateContact.tsx and AddContact.tsx, so the new label also applies to the shared workspace 'Add contact' dialog, not only the private one."
+    },
+    {
+      "id": "F12",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/AddContactDialog.tsx",
+      "line": 137,
+      "claim": "It should be confirmed whether both the private and shared/workspace dialogs are intended to receive the new label, and the commit or PR description should be reworded to match; if only the private dialog should change, the label should instead be passed in as a prop."
+    }
+  ]
+}

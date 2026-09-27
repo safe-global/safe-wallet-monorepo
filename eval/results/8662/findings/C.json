@@ -1,0 +1,65 @@
+{
+  "usd": 0.0568376,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/index.tsx",
+      "line": 126,
+      "claim": "During navigation, identityKey can briefly transition from a valid value to an empty string and back to the same value as useSafeInfo catches up, but the reset effect treats the transition into the empty string as an identity change and calls onChange(undefined), wiping the user's token selection even though the target Safe never actually changed."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/index.tsx",
+      "line": 126,
+      "claim": "This spurious reset scenario (identityKey going 'X' -> '' -> 'X') is not covered by any existing test, so the bug would not be caught by the current test suite."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/hooks/useSpendingLimitTokenOptions.ts",
+      "line": 63,
+      "claim": "When trusted is undefined, the balances query is skipped but the query argument object still includes trusted: undefined; relying on RTK Query's serializeQueryArgs to strip undefined values is fragile, and the generated argument type expects a boolean, so trusted should be normalized (e.g. with trusted ?? false) or narrowed before the call."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/index.tsx",
+      "line": 96,
+      "claim": "excludeAddresses is matched against each option using .some(), which is O(n*m) and will grow with the number of spending-limit rows for the same spender; converting the array once into a lowercase Set inside the memo would make lookups O(1) and remove the per-option sameAddress call and the associated JSDoc caveat."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/hooks/useSpendingLimitTokenOptions.ts",
+      "line": 35,
+      "claim": "A docstring spans three paragraphs, exceeding the project's guidance (in AGENTS.md) against multi-paragraph comment blocks."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/hooks/useSpendingLimitTokenOptions.ts",
+      "line": 53,
+      "claim": "A comment contains a useful rationale (the reference to useLoadSafeInfo's isStoredSafeValid) mixed with additional text that is not load-bearing and could be trimmed to keep the comment concise."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/popularTokens.ts",
+      "line": 1,
+      "claim": "The file header comment includes 'Coverage' and 'Every address was verified…' paragraphs that are process notes rather than code documentation, and would fit better in the PR description or a maintenance doc than as an inline comment."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/index.tsx",
+      "line": 61,
+      "claim": "unknownTokenOption sets decimals: 0, which is fine for display-only use today, but if this option is ever consumed by an amount calculation via findTokenOption, the hardcoded 0 decimals would silently produce incorrect amounts; a distinct branded shape or an explicit number | undefined type for decimals would guard against this."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/TokenOptionRow.tsx",
+      "line": 15,
+      "claim": "The nested ternary computing the 'secondary' display value is hard to read at a glance and would be clearer as an early if/else chain or a small helper function."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector.test.tsx",
+      "line": 184,
+      "claim": "A comment explaining base-ui popup unmount behavior is currently only used by one test consumer; once a second consumer needs the same explanation, it should become a shared test utility instead of a repeated inline comment."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "Stories rely on a shadcn: true flag passed to createMockStory, but this flag is not part of the documented createMockStory shape in apps/web/AGENTS.md, so it should be verified that the mock helper actually supports this flag."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/SpendingLimitFlow/hooks/useSpendingLimitTokenOptions.ts",
+      "line": null,
+      "claim": "There is no test verifying that useSpendingLimitTokenOptions reports isLoading as false and returns empty options when trusted resolves to false and safeAddress is empty at the same time, leaving this edge-case boundary uncovered."
+    }
+  ]
+}

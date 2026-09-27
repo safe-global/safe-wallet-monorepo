@@ -1,0 +1,55 @@
+{
+  "usd": 0.0672696,
+  "findings": [
+    {
+      "file": "apps/tx-builder/src/hooks/useKnownAddresses.ts",
+      "line": 33,
+      "claim": "The catch(() => []) handler swallows every error from requestAddressBook, not just the documented 4001 permission-denial case, so SDK bugs, iframe/postMessage timeouts, malformed responses, or future non-4001 error codes are all silently treated the same as a granted-but-empty address book. Because the resulting promise is cached, this incorrect empty state persists for the entire session, and the error should instead be gated on the 4001 code with other errors logged or rethrown so real bugs remain diagnosable."
+    },
+    {
+      "file": "apps/tx-builder/src/hooks/useKnownAddresses.ts",
+      "line": 37,
+      "claim": "request.then(setAddressBookItems) can call setAddressBookItems after the component has unmounted (e.g. if the app frame is closed or AddressInput unmounts before the promise resolves), and while React 18+ tolerates this silently, a mounted-ref guard would prevent the state update on an unmounted component."
+    },
+    {
+      "file": "apps/tx-builder/src/hooks/useKnownAddresses.ts",
+      "line": null,
+      "claim": "knownAddresses is filtered only by chainId while the cache key is `${chainId}:${safeAddress}`, so if the Safe context changes before the dropdown reopens and loadAddressBook reruns, addressBookItems can still hold the previous Safe's data, making the derived list not fully authoritative for the current Safe; filtering by safeAddress too, or resetting addressBookItems when the cache key changes, would fix this."
+    },
+    {
+      "file": "apps/tx-builder/src/hooks/useKnownAddresses.ts",
+      "line": 40,
+      "claim": "knownAddresses is computed via addressBookItems.filter(...).map(...) directly in the render body, producing a new array identity on every render, which causes MUI's options prop to churn and filterOptions to rerun unnecessarily; wrapping this computation in useMemo keyed on addressBookItems and chainId would avoid the extra work."
+    },
+    {
+      "file": "apps/tx-builder/src/components/forms/fields/KnownAddressGroupHeader.tsx",
+      "line": 11,
+      "claim": "The sticky header uses a hard-coded top: '-8px' to cancel out MUI's current listbox top padding, which is fragile because if MUI changes that padding value or the theme spacing changes, the header will float or clip; using top: 0 and instead zeroing the listbox's padding-top via ListboxProps on the Autocomplete would keep the coupling local and more robust."
+    },
+    {
+      "file": "apps/tx-builder/src/components/forms/fields/AddressInput.tsx",
+      "line": 74,
+      "claim": "A local const named checksumAddress shadows the imported checksumAddress helper, which is a pre-existing issue in one spot that has now been propagated into the new code; renaming the local variable would remove a footgun for future edits that need to call the imported helper."
+    },
+    {
+      "file": "apps/tx-builder/src/components/forms/fields/AddressInput.tsx",
+      "line": 133,
+      "claim": "The same local variable shadowing the imported checksumAddress helper recurs here, creating the same risk of accidentally using the wrong value in future edits."
+    },
+    {
+      "file": "apps/tx-builder/src/components/forms/fields/AddressInput.tsx",
+      "line": 203,
+      "claim": "Children.count(params.children) relies on the legacy React.Children API; using Array.isArray(params.children) ? params.children.length : 0 would be clearer, even though the current code still functions correctly."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "There is no test covering the case where loadAddressBook runs but the promise resolves after the component unmounts, which is needed to lock in the fix for the unmount state-update issue."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The tests only cover lowercase address slices for filtering and lack a filter case using a fully-checksummed address input."
+    }
+  ]
+}

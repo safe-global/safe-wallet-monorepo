@@ -1,0 +1,187 @@
+{
+  "pr": 8108,
+  "title": "refactor(spaces): unify + harden Members and Address book tables (shadcn, responsive, variant-styled)",
+  "description": "> Two tables, one shell —\n> sortable, mobile-aware,\n> styled by variants, not strings.\n\n**Linear:** [WA-2610](https://linear.app/safe-global/issue/WA-2610/unify-team-and-address-book-tables-on-shadcn-with-sortable-columns) · design-system follow-up: [WA-2676](https://linear.app/safe-global/issue/WA-2676/datatable-molecule-config-driven-variant-styled-extracted-to-safe)\n\n## What it solves\n\nIn Spaces, the **Members (Team)** table used the legacy MUI `EnhancedTable` while the **Address book** used shadcn primitives — different look and behavior. This PR started as \"unify them on shadcn\" and grew to **unify, harden, and make both tables mobile-responsive**, and to **remove the open styling escape hatches** that let tables drift from the design system.\n\n## How this PR fixes it\n\n- **Shared `PaginatedDataTable`** — shadcn `Table` + client-side pagination + column sorting; both tables render through one shell (DRY).\n- **`MembersList` rewritten** off MUI `EnhancedTable` → `PaginatedDataTable`, preserving all behavior (edit / renew / remove, last-admin guards, declined/expired states). Row actions extracted into `MemberRowActionsMenu` + a shared `useRenewInvite` hook (desktop button **and** mobile kebab).\n- **`SpaceAddressBookTable` refactored** through the same shell, with member-name resolution in \"Added by\" and local-vs-space contact actions (folded in from a `dev` merge).\n- **Mobile-responsive** — secondary columns collapse into a tap-to-expand detail row, the name column is pinned, addresses shorten, and row actions become a kebab.\n- **Per-column `cell` renderers** replace a magic-string `switch (column.id)` — each column owns its rendering next to its config.\n- **Bounded, variant-based styling** — columns expose `align` / `emphasis` / `width` (CVA-backed); the open `className` / `cellClassName` props are gone, so a column can no longer carry a one-off color/radius/font.\n- **Dark mode** — dropped the redundant per-component `shadcn-scope`/`dark` wrappers; the tables inherit dark mode from the root `ShadcnProvider`.\n- **Stability** — memoized members data + page clamping so a shrinking data set can't strand the user on an empty page.\n\n## How to test it\n\n1. Open a Space → **Members**. Sort by name / email / role; confirm **edit / renew / remove** still work and the \"last admin\" disabled tooltips appear. Switch to **Pending** for Expired/Declined badges and the empty state.\n2. **Address book** → Workspace / My contacts: confirm sorting, pagination, duplicate dimming, \"Added by\" resolving to the member name, and local-vs-space row actions.\n3. Resize to a phone width: secondary columns hide and surface in the expandable detail row; the name stays pinned; actions collapse into a kebab.\n4. Toggle dark mode on both pages and confirm tokens resolve.\n\n## Affected flows\n\n- **Spaces → Members:** view team, pending invites, member actions (edit / renew / remove).\n- **Spaces → Address book:** workspace contacts, my contacts, pending requests, activity log, import.\n\n## Blast radius\n\n- **Shared** `features/spaces/components/PaginatedDataTable` — consumed **only** by `MembersList` and `SpaceAddressBookTable` (verified no other consumers).\n- `MembersList`, `Members`, `SpaceAddressBook*`, and `hooks/useSpaceMembers` — all within `features/spaces`.\n- **No shared `ui/*` primitive was modified** — the table styling/variants are scoped to `PaginatedDataTable`, so other app tables are untouched.\n- No API / RTK Query / feature-flag / persistence changes; no mobile or shared-package changes.\n- **16 files, +1309 / −348, all under `features/spaces`.**\n\n## Risks / not checked\n\n- Not exercised on a real device — only an emulated narrow viewport; no visual pixel-diff run.\n- `style={{ minWidth }}` and the `width` scale (`md:w-[N%]`) remain inline/arbitrary **inside the table primitive** — acceptable for now; tracked to become tokens + a lint allowlist in the design-system project ([WA-2676](https://linear.app/safe-global/issue/WA-2676/datatable-molecule-config-driven-variant-styled-extracted-to-safe)).\n- base-ui tooltip open-on-hover is not asserted in unit tests (truncation is).\n\n## Visual summary\n\n```mermaid\nflowchart TB\n  subgraph Before\n    M1[MembersList] --> E[MUI EnhancedTable]\n    A1[SpaceAddressBookTable] --> S1[shadcn Table + inline pagination]\n  end\n  subgraph After\n    M2[MembersList] --> P[PaginatedDataTable]\n    A2[SpaceAddressBookTable] --> P\n    P --> C1[per-column cell renderers]\n    P --> C2[bounded CVA variants<br/>align / emphasis / width<br/>no className escape hatch]\n    P --> C3[client sort + pagination<br/>page clamping]\n    P --> C4[mobile: collapse to detail row<br/>sticky name, kebab actions]\n  end\n```\n\n## Checklist\n\n- [x] I've tested the branch on mobile 📱 — emulated narrow viewport only; not on a real device\n- [x] I've documented how it affects the analytics (if at all) 📊 — no analytics changes; existing `Track` events preserved (renew tracked on both desktop button + kebab)\n- [x] I've written a unit/e2e test for it (if applicable) 🧑‍💻 — `PaginatedDataTable`, `MemberRowActionsMenu`, `SpaceAddressBookActions`/`Table` tests added/updated\n- [x] I've listed affected flows and blast radius, and named what I did not verify 🎯\n- [ ] For web feature/bugfix PRs, I've added a Playwright one-shot happy-path clickthrough under apps/web/e2e/tests/one-shots/ — not added in this PR\n\n---\n\n## CLA signature\n\nWith the submission of this Pull Request, I confirm that I have read and agree to the terms of the [Contributor License Agreement](https://safe.global/cla).\n\n---\n_Generated with [Claude Code](https://claude.com/claude-code)_\n",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/features/spaces/components/Members/index.tsx",
+      "line": 34,
+      "claim": "The component applies custom styling on top of standard components instead of using only the available variants and sizes, which undermines design system consistency."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx",
+      "line": 135,
+      "claim": "The new shared table hand-builds its own previous/next buttons and range label instead of using the existing pagination component at apps/web/src/components/ui/pagination.tsx, duplicating functionality carried over from the old address-book table."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/__tests__/SpaceAddressBookTable.test.tsx",
+      "line": null,
+      "claim": "The new sortValue functions added for the address book (name, address, chain count, \"Added by\") and for the members table have no tests, so reverting or breaking any of that sort logic would not be caught by the test suite."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx",
+      "line": 67,
+      "claim": "The page index is reset via useEffect(() => setPage(0), [rows]) whenever the rows array is a new object reference, which happens after any mutation that invalidates the members query cache tag. As a result, an admin working on page 2 of a space with more than 25 members gets bounced back to page 1 after editing a role, removing, or renewing a member, a regression from the previous EnhancedTable which did not reset the page when data changed."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/components/ui/pagination.tsx",
+      "line": null,
+      "claim": "An existing pagination UI component (components/ui/pagination.tsx) could be reused instead of the hand-built previous/next footer that was added."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/src/features/spaces/components/MembersList/index.tsx",
+      "line": 1,
+      "claim": "The change alters rendering, sorting, and pagination behavior in both the members table and the address-book table under apps/web/src/**, but no corresponding one-shot Playwright clickthrough test was added under apps/web/e2e/tests/one-shots/, and the PR description does not explain why one is unnecessary."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx",
+      "line": 72,
+      "claim": "There is no test verifying that clicking a column header to change the sort resets the table back to the first page."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx",
+      "line": 47,
+      "claim": "The expression entry.updatedAt || entry.createdAt is written out separately in both the sort function and the rendered cell, so the two copies can drift out of sync if one is changed without the other."
+    },
+    {
+      "id": "F9",
+      "file": "apps/web/src/features/spaces/components/Members/index.tsx",
+      "line": 57,
+      "claim": "The members card was restyled without a border, again with no stated design rationale in the PR description."
+    },
+    {
+      "id": "F10",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx",
+      "line": 46,
+      "claim": "The logic that switches the middle column between createdBy and updatedAt-or-createdAt has no test coverage."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/src/features/spaces/components/MembersList/index.test.tsx",
+      "line": 80,
+      "claim": "The test named \"truncates long member emails inside a tooltip trigger\" only checks for the presence of the truncate class and no longer verifies that hovering the trigger reveals the full email in a tooltip, so it would still pass even if the tooltip content were deleted entirely."
+    },
+    {
+      "id": "F12",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx",
+      "line": 109,
+      "claim": "The same header/body styling duplication issue recurs here and should instead be handled by a renderRow implementation in the Table component."
+    },
+    {
+      "id": "F13",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx",
+      "line": 66,
+      "claim": "The name tooltip was removed as redundant, but the name cell still uses truncate inside a table-fixed column sized w-[20%] and has no title attribute, so long contact names are cut off with no way to see the full text anywhere."
+    },
+    {
+      "id": "F14",
+      "file": "apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx",
+      "line": 1,
+      "claim": "The new PaginatedDataTable component has no Storybook story, which apps/web/AGENTS.md (lines 10 and 160) requires for new components."
+    },
+    {
+      "id": "F15",
+      "file": "apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx",
+      "line": 32,
+      "claim": "There is no test verifying that rows with null or undefined values always sort to the end of the list in both ascending and descending order."
+    },
+    {
+      "id": "F16",
+      "file": "apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx",
+      "line": 89,
+      "claim": "There is no test verifying that the current page is clamped to the last valid page when the underlying data shrinks, which otherwise would leave the user viewing an empty page."
+    },
+    {
+      "id": "F17",
+      "file": "apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx",
+      "line": 142,
+      "claim": "The previous and next pagination buttons are icon-only with no aria-label, a gap carried over from the old table implementation."
+    },
+    {
+      "id": "F18",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/index.tsx",
+      "line": 181,
+      "claim": "The border was removed from the address-book card with no stated design rationale in the PR description."
+    },
+    {
+      "id": "F19",
+      "file": "apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx",
+      "line": 87,
+      "claim": "The columns array is rebuilt as a new object on every render and is used as a useMemo dependency for sorting rows, so the memoization never hits and rows are re-sorted on every render."
+    },
+    {
+      "id": "F20",
+      "file": "apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx",
+      "line": 41,
+      "claim": "Sorting compares strings with raw < and > operators, making the comparison case-sensitive so that, for example, \"alice\" sorts after \"Zoe\" and checksummed addresses sort by character code rather than in a locale-aware way; this is new behavior for the address book, which previously had no sorting at all. Using localeCompare with sensitivity: 'base' would fix this."
+    },
+    {
+      "id": "F21",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx",
+      "line": 46,
+      "claim": "The \"Added by\" column sorts by the raw createdBy address or email, but the displayed cell shows the name resolved by EthHashInfo onlyName, so the sort order does not match what users actually see in the column."
+    },
+    {
+      "id": "F22",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx",
+      "line": 39,
+      "claim": "The chain-count sorting logic has no test coverage."
+    },
+    {
+      "id": "F23",
+      "file": "apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx",
+      "line": 105,
+      "claim": "There is no test verifying the aria-sort attribute values that communicate sort state to screen readers."
+    },
+    {
+      "id": "F24",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx",
+      "line": 64,
+      "claim": "column.className is only applied to header cells while body cells are hand-rendered, forcing every caller to re-implement column layout instead of the table owning structural styling for both header and body via per-column cell renderers."
+    },
+    {
+      "id": "F25",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx",
+      "line": 63,
+      "claim": "Long contact names are still truncated in a narrow column, but the tooltip that previously showed the full name has been removed, leaving no way to read a name that gets cut off; the commit describes this as redundant, but it is not when a name is actually truncated, so it should either be reinstated conditionally on truncation or the removal called out as an intentional design decision in the PR description."
+    },
+    {
+      "id": "F26",
+      "file": "apps/web/src/features/spaces/components/MembersList/index.test.tsx",
+      "line": 97,
+      "claim": "The test that hovered the email cell and checked the actual tooltip content was reduced to just checking for a truncate class, so nothing now verifies that the tooltip itself still works."
+    },
+    {
+      "id": "F27",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx",
+      "line": 44,
+      "claim": "The \"Last updated\" sort branch is dead code because nothing in apps/web/src passes showLastUpdated, and its value expression updatedAt || createdAt would evaluate to an empty string for local contacts, which would cause them to sort first rather than last if this path were ever exercised."
+    },
+    {
+      "id": "F28",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx",
+      "line": 36,
+      "claim": "The columns array is rebuilt on every render, and since it is a dependency of the useMemo that produces sortedRows in PaginatedDataTable, this causes the entire row list to be re-sorted on every render instead of only when needed. Memoizing columns on [hasMiddleColumn, showAddedBy] would avoid the redundant re-sorting."
+    },
+    {
+      "id": "F29",
+      "file": "apps/web/src/features/spaces/components/Members/index.tsx",
+      "line": 21,
+      "claim": "The component relies on a hook to determine dark mode instead of having dark mode set globally through stylesheets, which is inconsistent with how dark mode should ideally be handled."
+    },
+    {
+      "id": "F30",
+      "file": "apps/web/src/features/spaces/components/MembersList/index.tsx",
+      "line": 26,
+      "claim": "The email-sorting logic has no test coverage."
+    }
+  ]
+}

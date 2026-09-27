@@ -1,0 +1,103 @@
+{
+  "pr": 8316,
+  "title": "fix(web): offer in-app L2 migration regardless of nonce (WA-1685)",
+  "description": "## What it solves\r\n\r\nResolves: [WA-1685](https://linear.app/safe-global/issue/WA-1685/ui-shows-unsupported-mastercopy-use-cli-instead-of-migrate) (duplicate: WA-2874)\r\n\r\nSafes deployed with an **official L1 mastercopy** on an L2 chain (1.3.0 L1 on Katana / Unichain, 1.4.1 L1 on Arbitrum — real customer Safes from HN and Morpho) that had already executed transactions were shown the dead-end **\"Unsupported mastercopy → Use CLI\"** card instead of the in-app **Migrate** flow.\r\n\r\nRoot cause: `isMigrationToL2Possible` gated the Migrate CTA on `safe.nonce === 0`. That constraint belongs to the retired **SafeToL2Migration** contract (`0xfF83F6...`, whose `migrateToL2()` requires nonce 0). The current flow (since #5207) executes **SafeMigration** (`0x526643...`) `migrateL2Singleton()`, which has **no nonce requirement** and supports `1.3.0 L1 → 1.4.1 L2` and `1.4.1 L1 → 1.4.1 L2` per the [official migration docs](https://docs.safe.global/advanced/smart-account-migration). The nonce gate was never removed when the contract was swapped.\r\n\r\n## How this PR fixes it\r\n\r\n`isMigrationToL2Possible` now gates on the **Safe version** instead of the nonce, matching what the SafeMigration contract actually supports:\r\n\r\n- version base `1.3.0` / `1.4.1` (build metadata like `+L2` tolerated, via the existing `isSupportedL2Version`) → **Migrate**\r\n- `1.1.1` and older, or unknown version → still **Use CLI** (SafeMigration does not support them; 1.1.1 needs the separate `migrateFromV111` path)\r\n- the existing per-chain SafeMigration deployment check is unchanged\r\n\r\nCGW's `implementationVersionState = UNKNOWN` classification is intentionally untouched — the backend is correct; only the frontend's migrate-eligibility decision was wrong.\r\n\r\n## How to test it\r\n\r\n1. In a dev build, run `localStorage.setItem('debugProdCgw', 'true')` in the console and reload (routes the app to prod CGW, read-only).\r\n2. Open the affected customer Safe from WA-2874: `unichain:0xF057afeEc22E220f47AD4220871364e9E828b2e9` (official 1.3.0 L1 mastercopy, nonce 20, `implementationVersionState: UNKNOWN`).\r\n3. The dashboard banner and Settings → Security now show **Migrate** (previously \"Get CLI\"); the flow builds a `SafeMigration.migrateL2Singleton` delegatecall.\r\n4. A supported Safe shows no banner; a pre-1.3.0 unsupported Safe still shows the CLI link.\r\n5. Unit specs: `packages/utils` → `yarn jest src/services/contracts/__tests__/safeContracts.test.ts`.\r\n\r\n## Affected flows\r\n\r\n- Owner of an unsupported-mastercopy Safe (official L1 singleton, any nonce) sees the dashboard attention card and can start the in-app **Migrate** tx flow instead of being sent to the CLI\r\n- Same decision in **Settings → Security** (contract version scanner remediation + CTA)\r\n- Same decision in the **unknown-contract transaction error** shown when composing a tx from such a Safe\r\n- Mobile **Settings** screen uses the same helper for its unsupported-mastercopy alert\r\n\r\n## Blast radius\r\n\r\n- `packages/utils/src/services/contracts/safeContracts.ts` → `isMigrationToL2Possible` is a **shared helper** with four consumers, all of which now offer migration to more Safes (nonce > 0) and to fewer Safes (pre-1.3.0, previously offered migration at nonce 0 even though SafeMigration doesn't support them):\r\n  - web: `UnsupportedMastercopyWarning` (dashboard banner), `contractVersion` Security Hub scanner, `UnknownContractError`\r\n  - mobile: `Settings.container.tsx` (shared package — behavior change ships to mobile too)\r\n- The scanner call site now reads `safe.version` instead of `safe.nonce` (both already present in `SafeState`; no API/RTK-Query contract changes)\r\n- No feature flags, chain configs, persistence, or routes involved; CGW untouched\r\n\r\n## Risks / not checked\r\n\r\n- Did not execute an actual migration transaction on-chain; verified up to the tx preview (delegatecall to `SafeMigration.migrateL2Singleton`)\r\n- Did not test the mobile app; its behavior change is inferred from the shared helper (unit-tested only)\r\n- Did not verify a chain where SafeMigration is genuinely undeployed — `getChainAgnosticAddress` deliberately falls back to the canonical deterministic address for unregistered chains (pre-existing semantics, unchanged)\r\n- Behavior for pre-1.3.0 Safes at nonce 0 changes from \"Migrate\" to \"Use CLI\" — this is intended (SafeMigration doesn't support them) but was not exercised against a live 1.1.1 Safe\r\n- Ticket Case 3 (add-network flow for Ethereum 1.3.0 Safes) was not separately exercised; it shares this decision path via the banner on the newly added chain\r\n\r\n## Visual summary\r\nBefore\r\n<img width=\"1807\" height=\"530\" alt=\"Screenshot 2026-07-20 at 14 28 40\" src=\"https://github.com/user-attachments/assets/32534bbf-bd00-45cc-a7c8-550fc85dd2af\" />\r\n\r\n\r\nAfter\r\n<img width=\"1904\" height=\"510\" alt=\"Screenshot 2026-07-20 at 14 29 12\" src=\"https://github.com/user-attachments/assets/e82b0e32-10a4-46f5-b7ba-1968c30b61c8\" />\r\n\r\n\r\n```mermaid\r\nflowchart TD\r\n    A[implementationVersionState = UNKNOWN] --> B{Before:<br/>nonce === 0?}\r\n    B -- yes --> C[Migrate]\r\n    B -- \"no (customer Safes)\" --> D[Use CLI ❌]\r\n\r\n    A2[implementationVersionState = UNKNOWN] --> E{After:<br/>version base is<br/>1.3.0 or 1.4.1?}\r\n    E -- yes --> F{SafeMigration<br/>deployed on chain?}\r\n    F -- yes --> G[Migrate ✅<br/>SafeMigration.migrateL2Singleton<br/>— no nonce requirement]\r\n    F -- no --> H[Use CLI]\r\n    E -- \"no (≤1.1.1 / unknown)\" --> H\r\n```\r\n\r\n## Checklist\r\n\r\n- [ ] I've tested the branch on mobile 📱\r\n- [x] I've documented how it affects the analytics (if at all) 📊 — no analytics changes; existing `MIGRATE_MASTERCOPY` / `GET_CLI_MASTERCOPY` events unchanged, their relative volume will shift toward Migrate\r\n- [x] I've written a unit/e2e test for it (if applicable) 🧑‍💻\r\n- [x] I've listed affected flows and blast radius, and named what I did not verify 🎯\r\n\r\n---\r\n\r\n## CLA signature\r\n\r\nWith the submission of this Pull Request, I confirm that I have read and agree to the terms of the [Contributor Lic",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/features/security/data/scanners/contractVersion.ts",
+      "line": 47,
+      "claim": "The comment stating this check is the same as UnsupportedMastercopyWarning is inaccurate: that component also ORs in canMigrateUnsupportedMastercopy (a bytecode match), which the scanner does not, and this diff makes the divergence larger."
+    },
+    {
+      "id": "F2",
+      "file": null,
+      "line": null,
+      "claim": "The new JSDoc on isMigrationToL2Possible states the supported versions as '1.3.0 and 1.4.1' but does not mention that the match is on the base version only, tolerating build metadata suffixes like +L2/+Circles via isSupportedL2Version; omitting this caveat obscures the reason the WA-2874 customer Safes are now correctly handled."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/features/security/data/scanners/contractVersion.ts",
+      "line": 51,
+      "claim": "It is unverified what the CGW returns for `version` when implementationVersionState is UNKNOWN; if it returns null for the real target population, the new `!safe.version` guard would turn off the Migrate action for exactly those Safes. On web this is masked by the bytecode-based canMigrateUnsupportedMastercopy fallback, but the Security Hub scanner and the mobile app (apps/mobile/src/features/Settings/Settings.container.tsx:24) have no such fallback and could silently regress to showing the CLI-tool instructions instead of the in-app migration."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/features/security/data/scanners/contractVersion.ts",
+      "line": 49,
+      "claim": "The `as Pick<SafeState, ...> as SafeState` double cast encodes which fields the callee reads as a hand-maintained comment, and this is the second time that comment has had to be edited to track the callee. Narrowing the function signature to accept Pick<SafeState, 'version' | 'chainId'> instead would remove both the cast and the comment and remains source-compatible with existing callers, which all pass a full SafeState."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/services/contracts/__tests__/safeContracts.test.ts",
+      "line": 78,
+      "claim": "A duplicate copy of the isMigrationToL2Possible test suite in the web app was not updated to match the new nonce/version logic. Since safeInfoBuilder() pins version '1.4.1' and the SafeMigration 1.4.1 deployment resolves for chain '10', the case with nonce: 2 and chainId: '10' now actually returns true but is asserted with toBeFalsy(), causing the test to fail and contradicting its own title."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/src/services/contracts/__tests__/safeContracts.test.ts",
+      "line": 78,
+      "claim": "This test still asserts that Safes with nonce > 0 cannot migrate, using a default version (1.4.1) that isSupportedL2Version now accepts; since the nonce check was removed, isMigrationToL2Possible now returns true here, so the test fails and breaks the web workspace test run. The equivalent suite in packages/utils/.../safeContracts.test.ts was updated but this duplicate copy in the web package was not, and should be removed since the utils suite now covers the function and this file's remaining blocks test unrelated web-local code."
+    },
+    {
+      "id": "F7",
+      "file": "packages/utils/src/services/contracts/safeContracts.ts",
+      "line": 62,
+      "claim": "With the nonce === 0 check removed, isMigrationToL2Possible now depends only on the singleton's self-reported version string, since getChainAgnosticAddress falls back to a canonical address for any chain and makes the chainId clause always truthy for SafeMigration 1.4.1; no code on this path, in UnsupportedMasterCopyWarning.tsx:35, or in createMigrateToL2 (apps/web/src/utils/safe-migrations.ts:54) checks chain.l2, unlike createUpdateMigration which does branch on chain.l2. Because this path is only reached when implementationVersionState is UNKNOWN (i.e. the singleton is not a recognized Safe deployment), the version value is effectively chosen by whoever deployed the unrecognized contract, so a mainnet Safe with a custom singleton reporting an accepted version string could have the Migrate action offered and, if signed, trigger a delegatecall that rewrites slot 0 to the L2 singleton on an L1 chain."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/src/services/contracts/__tests__/safeContracts.test.ts",
+      "line": 82,
+      "claim": "This test duplicates assertions already added in packages/utils/src/services/contracts/__tests__/safeContracts.test.ts, which is now the source of truth; the duplicate suite should be updated to reflect the new version-based behavior or deleted."
+    },
+    {
+      "id": "F9",
+      "file": "packages/utils/src/services/contracts/__tests__/safeContracts.test.ts",
+      "line": 82,
+      "claim": "No test covers the UI-level behavior the PR is meant to enable (offering in-app L2 migration regardless of nonce): reverting the nonce === 0 removal only breaks this one unit file, since contractVersion.test.ts mocks isMigrationToL2Possible outright and UnsupportedMastercopyWarning has no test for nonce > 0. A component test on UnsupportedMastercopyWarning with implementationVersionState 'UNKNOWN', version '1.3.0', and nonce 5, asserting that the migrate-mastercopy-btn action renders instead of the CLI link, is missing."
+    },
+    {
+      "id": "F10",
+      "file": "packages/utils/src/services/contracts/__tests__/safeContracts.test.ts",
+      "line": 55,
+      "claim": "Two instances of a typeof === 'boolean' non-assertion pattern remain in the canMigrateUnsupportedMastercopy test block, in the same file where the analogous pattern was correctly replaced in the isMigrationToL2Possible tests, even though these tests rely on the same getSafeMigrationDeployments lookup whose semantics changed; as a result, tests titled 'should return true' pass even when the actual value is false."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/src/services/contracts/__tests__/safeContracts.test.ts",
+      "line": 78,
+      "claim": "This test asserts Safes with nonce > 0 cannot migrate, but since safeInfoBuilder() defaults version to '1.4.1' and isMigrationToL2Possible now gates on version rather than nonce, the helper will return true for chain 10 while the test still asserts toBeFalsy(), causing the test to fail on CI."
+    },
+    {
+      "id": "F12",
+      "file": "apps/web/src/features/security/data/scanners/contractVersion.ts",
+      "line": 51,
+      "claim": "The double cast (`as Pick<SafeState, 'version' | 'chainId'> as SafeState`) combined with a comment explaining that only two fields are accessed is a workaround that could be avoided by narrowing the parameter type of isMigrationToL2Possible to Pick<SafeState, 'version' | 'chainId'> directly, making the minimal field requirement explicit in the type signature instead of a comment and cast at the call site."
+    },
+    {
+      "id": "F13",
+      "file": "apps/web/src/features/security/data/scanners/contractVersion.ts",
+      "line": 51,
+      "claim": "The code uses a double cast (as Pick<SafeState, 'version' | 'chainId'> as SafeState) plus an explanatory comment only because the helper function requires a full SafeState parameter type that it does not actually read; narrowing the parameter type to the Pick would remove the need for both casts and the comment."
+    },
+    {
+      "id": "F14",
+      "file": "packages/utils/src/services/contracts/safeContracts.ts",
+      "line": 8,
+      "claim": "Migration eligibility is now keyed to SUPPORTED_L2_VERSIONS, a list documented as being for bytecode comparison, while the new JSDoc on this function asserts a different fact (what SafeMigration itself accepts); editing that list for bytecode-comparison reasons would silently change who is offered an onchain migration. A migration-owned constant alongside SAFE_TO_L2_MIGRATION_VERSION (packages/utils/src/config/constants.ts:71) would separate the two concerns."
+    },
+    {
+      "id": "F15",
+      "file": "packages/utils/src/services/contracts/safeContracts.ts",
+      "line": 63,
+      "claim": "When the gateway reports a null version for a Safe with an unknown mastercopy, the new version guard causes isMigrationToL2Possible to return false where nonce-0 Safes previously returned true. The web app is unaffected because of a separate bytecode-comparison fallback, but the security scanner and mobile Settings screen have no such fallback and will silently stop showing migrate guidance in this case."
+    },
+    {
+      "id": "F16",
+      "file": "apps/web/src/features/security/data/scanners/__tests__/contractVersion.test.ts",
+      "line": 30,
+      "claim": "isMigrationToL2Possible is fully mocked in this test, so there is no coverage for the behavioral change in contractVersion.ts regarding which fields (version vs nonce) get forwarded to it; reverting the field passed would not cause any test to fail."
+    }
+  ]
+}

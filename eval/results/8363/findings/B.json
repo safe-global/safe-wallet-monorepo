@@ -1,0 +1,20 @@
+{
+  "usd": 0.392118,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/components/OnboardingSafesList.tsx",
+      "line": 34,
+      "claim": "The security banner is shown whenever the unfiltered flagged-address set is non-empty, rather than whenever a currently visible row is flagged. If a user searches and the results hide all flagged rows, the banner still displays, producing a spurious warning that doesn't match what's on screen."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/hooks/useOnboardingSubmit.ts",
+      "line": 100,
+      "claim": "The `?safe=` URL pre-selection path writes directly to the form via `reset()` and bypasses the look-alike confirmation dialog. Because pinned rows are now included in the flagged set, a pinned look-alike Safe opened via a link can now be pre-checked without the user seeing the confirm step, though the flag badge and banner still appear."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/components/OnboardingSafesList.test.tsx",
+      "line": 112,
+      "claim": "The test assertion chain combining `banner && trustedTable && banner.compareDocumentPosition(...)` in one expression is hard to read and produces unclear failure messages; asserting that both elements exist first before comparing their positions would be clearer."
+    }
+  ]
+}

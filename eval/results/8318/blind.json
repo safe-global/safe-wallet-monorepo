@@ -1,0 +1,247 @@
+{
+  "pr": 8318,
+  "title": "feat(web): flag look-alike Safes across account lists — address poisoning Mode B [WA-2823]",
+  "description": "## What it solves\r\n\r\nResolves: [WA-2823](https://linear.app/safe-global/issue/WA-2823/address-poisoning-flag-look-alike-safes-across-account-lists-mode-b)\r\n\r\nA Safe whose address is a **look-alike** of one the user trusts can sit unnoticed in an account list — a classic address-poisoning trap. Today the account lists only run a basic within-list similarity check; they don't cross-reference the user's trusted anchors. This PR (\"Mode B\") flags look-alikes across all the account-list surfaces so a poisoned address stands out for a second look.\r\n\r\n## How this PR fixes it\r\n\r\n- **Engine primitive** — `detectListClusters` in `packages/utils` runs union-find over \"shares **first-4 OR last-4** hex\" among the addresses in a list, deduping identical addresses (the same Safe on multiple chains never matches itself). Returns `{ flagged, groupIdByAddress }`.\r\n- **Two layers, one hook** — `useSimilarityClusters(addresses)` combines:\r\n  1. the **within-list** cluster check (always on), and\r\n  2. the **anchor** check (`useAnchorListMatches`) — flags a list member that resembles a trusted anchor (address book / added / pinned / curated / undeployed), even when that trusted address is not in the list. This layer is gated by the `ADDRESS_POISONING_PROTECTION` chain flag. Anchors are derived from local trust state, never fetched, so they can't be poisoned.\r\n  - `useFlaggedSimilarAddresses` is the thin flat-set wrapper for surfaces that only need per-row badges.\r\n- **Surfaces wired in** via their existing similarity inputs (`flaggedAddresses` set / `similarityGroup` per item) — no change to the shared `SafeAccountsTable`:\r\n  - Manage trusted Safes modal + Nested Safes curation → grouping (look-alikes boxed together via `groupIdByAddress`).\r\n  - Onboarding Select Safes, Add Safe accounts, Safe accounts list → per-row flag.\r\n- **Onboarding partition fix** — a Safe trusted on any chain now shows all its chains under Trusted (removed from Owned), so the same multichain Safe never splits across the two sections.\r\n\r\n## How to test it\r\n\r\n1. Enable `ADDRESS_POISONING_PROTECTION` for a chain (config service).\r\n2. Have a trusted anchor (e.g. an address-book entry) and a Safe whose address shares its first-4 or last-4 hex.\r\n3. **Manage trusted Safes / Nested Safes:** the look-alike is flagged and grouped next to the address it resembles.\r\n4. **Onboarding Select Safes / Add accounts / Safe accounts list:** the look-alike shows the flag badge.\r\n5. Confirm a multichain Safe (same address on N chains) is **not** flagged as its own look-alike.\r\n6. Turn the flag **off** → only the always-on within-list check runs; the anchor comparison goes dark on every surface.\r\n\r\n## Affected flows\r\n\r\n- Manage trusted Safes (modal)\r\n- Workspace onboarding — Select Safes\r\n- Workspace — Add Safe accounts\r\n- Workspace — Safe accounts list\r\n- Nested Safes — curation list\r\n\r\n## Blast radius\r\n\r\n- **New code**\r\n  - `packages/utils` `addressSimilarity`: `detectListClusters` + `ListClusterResult` type (pure additions; existing exports unchanged).\r\n  - `features/address-poisoning` hooks: `useSimilarityClusters`, `useFlaggedSimilarAddresses`, `useAnchorListMatches` + barrel exports; store selectors `selectAnchorIndex` / `selectAnchorAddresses` (from the engine, already in dev).\r\n- **Modified consumers** (fed the flagged set / cluster ids into their existing similarity props):\r\n  - `SafeAccounts/index.tsx`, `AddAccounts/index.tsx`, `SelectSafesOnboarding` `useOnboardingSafes`\r\n  - `TrustedSafesModal` `useTrustedSafesModal` + `ManageTrustedSafesContent`\r\n  - `NestedSafesList` `useManageNestedSafes`\r\n  - `SafeAccountsTable` itself is **unchanged** — it still reads `flaggedAddresses` / `similarityGroup`.\r\n- **Feature flag:** `ADDRESS_POISONING_PROTECTION` (config service) gates the anchor layer only.\r\n- **Persistence / API:** none. No new endpoints, no migrations, no cache changes.\r\n- **Mobile:** the shared `packages/utils` change is a pure additive function; no existing shared behavior changed.\r\n\r\n## Risks / not checked\r\n\r\n- **Not browser-verified end-to-end on every surface** — validated via `tsc` + unit tests (utils + web suites green). A manual walk of each of the 5 surfaces is still recommended before merge.\r\n- **Deviations from the original ticket ACs** (now reconciled in WA-2823, not in code):\r\n  - Within-list check is **first-4 OR last-4** (was AND) — broader, more false-positive-tolerant by design.\r\n  - A trusted Safe that happens to sit next to its look-alike **in the same list** is also flagged (the within-list check can't tell which is the real one). Only a trusted anchor **not** in the list is never flagged.\r\n  - With the flag off, the within-list check still runs the OR criterion (not the old AND).\r\n- Not tested on mobile.\r\n- Analytics: no new events added.\r\n\r\n## Visual summary\r\n<img width=\"940\" height=\"638\" alt=\"Screenshot 2026-07-20 at 17 59 14\" src=\"https://github.com/user-attachments/assets/8e202bc3-f9fe-4ef4-980a-2514d6c6f87e\" />\r\n<img width=\"796\" height=\"604\" alt=\"Screenshot 2026-07-20 at 17 59 48\" src=\"https://github.com/user-attachments/assets/4e30947e-b218-499a-be55-2000ee6d31f6\" />\r\n<img width=\"710\" height=\"586\" alt=\"Screenshot 2026-07-20 at 18 00 29\" src=\"https://github.com/user-attachments/assets/cd35b98a-854b-4672-865d-348ac213233b\" />\r\n<img width=\"1107\" height=\"480\" alt=\"Screenshot 2026-07-20 at 18 03 41\" src=\"https://github.com/user-attachments/assets/a311853b-444f-4d4e-a2db-55bd386a4cf9\" />\r\n\r\n\r\n```mermaid\r\nflowchart TD\r\n    A[addresses in a list] --> B[detectListClusters<br/>within-list, always on<br/>shares first-4 OR last-4]\r\n    A --> C[useAnchorListMatches<br/>vs trusted anchors]\r\n    C -->|ADDRESS_POISONING_PROTECTION off| D[empty map]\r\n    C -->|flag on| E[anchor look-alikes]\r\n    B --> F[useSimilarityClusters]\r\n    D --> F\r\n    E --> F\r\n    F --> G[\"{ flagged: Set, groupIdByAddress: Map }\"]\r\n    G --> H[per-row badge<br/>onboarding / add / safe-accounts]\r\n    G --> I[grouped box<br/>manage-trusted / nested-safes]\r\n```",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/components/common/TrustedSafesModal/ManageTrustedSafesContent.tsx",
+      "line": 100,
+      "claim": "A comment states that similarityGroup drives the visual grouping in the UI, but no UI code actually reads that field, making the comment misleading."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/components/common/TrustedSafesModal/ManageTrustedSafesContent.tsx",
+      "line": 103,
+      "claim": "The row badge set is computed from availableItems, which is filtered by the active search, while the confirm gate and Select-All exclusion are computed from the full allSafes list. As a result, when a search hides an address that shares its similarity cluster with a visible one, the visible address shows no warning badge even though clicking it still triggers the similarity confirm dialog, so the badge and the gate disagree."
+    },
+    {
+      "id": "F3",
+      "file": null,
+      "line": null,
+      "claim": "Anchor-based matches treat a one-end WARN-level match the same as a CRITICAL match for gating purposes, which can produce false flags for users with a large address book; this half of the check is behind the feature flag."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/components/nested-safes/NestedSafesList/useManageNestedSafes.ts",
+      "line": 172,
+      "claim": "The rewritten getSimilarAddresses and groupSafesBySimilarity functions have no tests, and useSimilarityClusters is only exercised indirectly through a mock rather than directly tested."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/hooks/useOnboardingSafes.ts",
+      "line": 46,
+      "claim": "The new cross-chain trusted branch has no test coverage: the existing test file only covers excluding trusted safes from the owned list and multi-chain grouping for owned safes, with no case pinning a safe as trusted on one chain and owned on another chain to verify both copies land under trusted and none under owned."
+    },
+    {
+      "id": "F6",
+      "file": "useTrustedSafesModal.ts",
+      "line": 113,
+      "claim": "Clusters are computed over the full allSafes list here, while ManageTrustedSafesContent.tsx separately re-runs useFlaggedSimilarAddresses over the filtered availableItems, causing two full hook chains (useSimilarityClusters -> useListSimilarities -> detectListSimilarities) to run per render."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/hooks/useOnboardingSafes.ts",
+      "line": 79,
+      "claim": "Because the flagged set is filtered to owned Safes only, chain copies that get reclassified as trusted due to the cross-chain trust change stop receiving look-alike warnings in onboarding."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/src/components/common/TrustedSafesModal/useTrustedSafesModal.ts",
+      "line": 115,
+      "claim": "This pattern is repeated in many places throughout the PR and should be extracted into a separate reusable hook to avoid duplication."
+    },
+    {
+      "id": "F9",
+      "file": "apps/web/src/components/nested-safes/NestedSafesList/useManageNestedSafes.ts",
+      "line": 172,
+      "claim": "getSimilarAddresses was rewritten to rebuild groups from groupIdByAddress and the address list, and groupSafesBySimilarity and the flagged gate on selectAll switched source, but this hook has no test file covering the change."
+    },
+    {
+      "id": "F10",
+      "file": "useOnboardingSafes.ts",
+      "line": 41,
+      "claim": "trustedAddresses is derived only from allAdded (pinned safes), so undeployed safes are not treated as trusted anywhere; an undeployed safe sharing an address with an owned safe on another chain would still be categorized as owned rather than trusted, unless the keys of allUndeployed[chainId] are also unioned into the trusted set."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/src/components/nested-safes/NestedSafesList/useManageNestedSafes.ts",
+      "line": 177,
+      "claim": "The new getSimilarAddresses filter compares addresses with a.toLowerCase() !== address.toLowerCase() instead of using the sameAddress helper, deviating from the required pattern for address equality checks."
+    },
+    {
+      "id": "F12",
+      "file": "AGENTS.md",
+      "line": null,
+      "claim": "The diff adds long explanatory comments at nearly every call site (e.g. ManageTrustedSafesContent.tsx:100-101, useTrustedSafesModal.ts:110-112, useManageNestedSafes.ts:71-73), repeating the same note across five files even though the JSDoc on the hooks already conveys it, conflicting with the project guidance to treat code comments as tech debt."
+    },
+    {
+      "id": "F13",
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/hooks/useOnboardingSafes.ts",
+      "line": 41,
+      "claim": "Trust is no longer decided per chain and address: an address trusted on one chain now causes all of its owned or undeployed copies on other chains to be moved into the trusted set and out of the owned set, which is a behavior change outside the stated scope of address-poisoning clustering and needs explicit product sign-off."
+    },
+    {
+      "id": "F14",
+      "file": "packages/utils/src/utils/addressSimilarity.ts",
+      "line": 107,
+      "claim": "getFlaggedSimilarAddressSet now has no production callers and is only exercised by its own tests, making it dead code in production."
+    },
+    {
+      "id": "F15",
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/hooks/useOnboardingSafes.ts",
+      "line": 34,
+      "claim": "The list should be checked to ensure it contains only unique values, since it may currently allow duplicates."
+    },
+    {
+      "id": "F16",
+      "file": "useSimilarityClusters.ts",
+      "line": null,
+      "claim": "useSimilarityClusters, which performs the interesting composition logic (union-find plus anchor annotations plus flagging the imitated original), has no direct test, even though detectListClusters is tested at the engine level and useFlaggedSimilarAddresses is tested with useListSimilarities mocked."
+    },
+    {
+      "id": "F17",
+      "file": "apps/web/src/components/nested-safes/NestedSafesList/SimilarityConfirmDialog.tsx",
+      "line": 30,
+      "claim": "A Safe flagged only for resembling a trusted address has no similarity group, so the confirm dialog ends up listing no similar addresses while still displaying the message \"similar to other addresses in your list,\" which is inaccurate copy for that case."
+    },
+    {
+      "id": "F18",
+      "file": "useFlaggedSimilarAddresses.test.ts",
+      "line": 34,
+      "claim": "A test case is named \"the flag-off path\" but it only returns an empty anchor map and never actually disables the feature flag, so the name misrepresents what the test verifies."
+    },
+    {
+      "id": "F19",
+      "file": "apps/web/src/components/common/TrustedSafesModal/useTrustedSafesModal.ts",
+      "line": 114,
+      "claim": "The same useCallback pattern for checking whether an address is flagged (checking a lowercase address against a flagged set) is duplicated between useTrustedSafesModal.ts and useManageNestedSafes.ts; it could be pulled into a shared isFlagged helper returned from useSimilarityClusters."
+    },
+    {
+      "id": "F20",
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/hooks/useOnboardingSafes.ts",
+      "line": 57,
+      "claim": "This logic may be able to reuse the existing useAllSafes hook instead of duplicating functionality."
+    },
+    {
+      "id": "F21",
+      "file": "ManageTrustedSafesContent.tsx",
+      "line": 102,
+      "claim": "The select-all confirmation gating (similarAddressesForSelectAll, toggleSelection) uses the full-list flaggedAll via isAddressFlagged, while the table's per-row badge uses the filtered flagged set computed from availableItems; when a search filters the list so only one address of a poisoned pair is visible, the row shows no similarity badge but selecting it still triggers the confirm-similar-address dialog, so the two flagged sources disagree and mislead the user."
+    },
+    {
+      "id": "F22",
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/hooks/useOnboardingSafes.ts",
+      "line": 47,
+      "claim": "Duplicate removal across the owned, undeployed, and added address lists uses a case-sensitive Set, so if these lists ever disagree on checksum casing for the same address, that address could appear twice instead of being deduplicated."
+    },
+    {
+      "id": "F23",
+      "file": "packages/utils/src/utils/addressSimilarity.ts",
+      "line": 9,
+      "claim": "The file header comment still states that within-list matching requires a match on the front AND the back of the address, but the logic was changed to match on either end, so the comment is now inaccurate."
+    },
+    {
+      "id": "F24",
+      "file": "packages/utils/src/utils/addressSimilarity.ts",
+      "line": 120,
+      "claim": "The group id is documented as \"stable\" but it is actually the union-find root, whose value depends on input order, so it is not stable across different orderings of the same input."
+    },
+    {
+      "id": "F25",
+      "file": "apps/web/src/features/address-poisoning/hooks/useSimilarityClusters.ts",
+      "line": 25,
+      "claim": "This hook consumes the broadened detectListClusters logic across five web surfaces (onboarding, add-accounts, space safe-accounts, the trusted-safes modal, and nested safes), so users will see more badges, confirm prompts, and Select-all exclusions than before, while mobile's useSuspiciousAddressDetection still uses the old front-and-back rule, leaving the two platforms inconsistent."
+    },
+    {
+      "id": "F26",
+      "file": "useSimilarityClusters.ts",
+      "line": 35,
+      "claim": "When an impostor imitates an in-list trusted anchor, the anchor itself is not added to groupIdByAddress; grouping relies on the untested assumption that detectListClusters already grouped anchor and impostor because both SimilarityConfig and AnchorSimilarityConfig default to the same 4/4 thresholds, which is a silent coupling that breaks if the two configs are ever tuned independently, causing the anchor-impostor pair to lose its visual grouping while still being flagged."
+    },
+    {
+      "id": "F27",
+      "file": "apps/web/docs/spaces-accounts-architecture.md",
+      "line": 231,
+      "claim": "The documentation still describes detectSimilarAddresses as used for space similarity, but this PR moves web code off that function, making the doc further out of date; the underlying getFlaggedSimilarAddressSet also has no remaining callers outside its own module and tests."
+    },
+    {
+      "id": "F28",
+      "file": "useSimilarityClusters.ts",
+      "line": 35,
+      "claim": "The loop over all addresses to mark imitated ones runs even when imitated.size is 0 (the common case when the feature flag is off or no anchor matches), which is unnecessary work that could be skipped with a simple guard."
+    },
+    {
+      "id": "F29",
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/hooks/useOnboardingSafes.ts",
+      "line": 41,
+      "claim": "None of the existing test file's cases place an address on two different chains, so reverting the new cross-chain promotion behavior would not fail any test; the hook is also mocked out entirely in SelectSafesOnboarding.test.tsx, leaving this behavior untested."
+    },
+    {
+      "id": "F30",
+      "file": "packages/utils/src/utils/addressSimilarity.ts",
+      "line": 107,
+      "claim": "getFlaggedSimilarAddressSet, being unused in production, should either be deleted along with its tests or explicitly marked deprecated if mobile might still adopt it."
+    },
+    {
+      "id": "F31",
+      "file": "useListSimilarities.ts",
+      "line": null,
+      "claim": "The name useListSimilarities is misleading because the hook only runs the anchor detector and returns a Map<address, ListAnnotation> based on anchor matches, not a general list-clustering result, which is confusing now that 'list clustering' is used by the differently-behaving useSimilarityClusters and detectListClusters."
+    },
+    {
+      "id": "F32",
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/hooks/useOnboardingSafes.ts",
+      "line": 41,
+      "claim": "A Safe added on any chain now automatically pulls its owned and undeployed instances on every other chain into the trusted list and out of owned, but only owned items get look-alike warnings, so the moved instances silently lose their similarity warnings."
+    },
+    {
+      "id": "F33",
+      "file": "apps/web/docs/spaces-accounts-architecture.md",
+      "line": 92,
+      "claim": "The architecture doc (also at lines 234 and 664) still describes the old detectSimilarAddresses flow for the web surfaces, which no longer matches the updated implementation."
+    },
+    {
+      "id": "F34",
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/hooks/useTrustedSafesModal.ts",
+      "line": 114,
+      "claim": "The isAddressFlagged = useCallback(a => flaggedAll.has(a.toLowerCase())) wrapper is duplicated in useTrustedSafesModal.ts and useManageNestedSafes.ts instead of being returned once from useSimilarityClusters."
+    },
+    {
+      "id": "F35",
+      "file": "packages/utils/src/utils/addressSimilarity.ts",
+      "line": 133,
+      "claim": "Matching on only 4 hex characters at either end is effectively a 16-bit collision check, so a list of roughly 300 Safes has a rough 75% chance of producing at least one false similarity cluster; affected Safes are excluded from Select-All and require an extra confirm click, and the chaining behavior lets these false clusters grow."
+    },
+    {
+      "id": "F36",
+      "file": "packages/utils/src/utils/addressSimilarity.ts",
+      "line": 133,
+      "claim": "The within-list similarity detector used on all five list surfaces changed from requiring a match on both the first 4 and last 4 hex characters to accepting a match on either end, and it now chains matches together so that a matches b and b matches c places a and c in the same group; this ships unconditionally to every user with no feature flag, unlike the anchor-based half of the check which is gated by ADDRESS_POISONING_PROTECTION."
+    },
+    {
+      "id": "F37",
+      "file": "apps/web/src/components/common/TrustedSafesModal/ManageTrustedSafesContent.tsx",
+      "line": 103,
+      "claim": "availableItems is rebuilt on every checkbox toggle, causing both similarity detectors to rerun on every click instead of only when the underlying list changes."
+    },
+    {
+      "id": "F38",
+      "file": "packages/utils/src/utils/addressSimilarity.ts",
+      "line": 133,
+      "claim": "The always-on look-alike detection changed from requiring addresses to share both the front and back characters to flagging a match when they share either the front-4 or the back-4 and chaining matches together, broadening what gets flagged even when the address-poisoning protection flag is off, with no cited product or design decision for the change."
+    },
+    {
+      "id": "F39",
+      "file": "packages/utils/src/utils/addressSimilarity.ts",
+      "line": 115,
+      "claim": "The code uses while/for loops that could be refactored to use map/forEach, and variable names should be made more self-explanatory to improve readability."
+    },
+    {
+      "id": "F40",
+      "file": "apps/web/src/features/address-poisoning/hooks/useSimilarityClusters.ts",
+      "line": 21,
+      "claim": "This new hook has no test of its own; the branch where an anchor-only match is flagged but has no group id is untested, and the imitated-original branch is only covered indirectly through a different hook's test file."
+    }
+  ]
+}

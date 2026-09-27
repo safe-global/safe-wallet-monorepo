@@ -1,0 +1,10 @@
+{
+  "usd": 0.0491276,
+  "findings": [
+    {
+      "file": "apps/web/src/hooks/useIsValidExecution.ts",
+      "line": 101,
+      "claim": "The GS012 error message call is missing the `token` value as a second parameter, so the message 'Not enough {token} to cover the network fee. Pay with {nativeAsset} instead.' will not have its {token} placeholder filled in correctly."
+    }
+  ]
+}

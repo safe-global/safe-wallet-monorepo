@@ -1,0 +1,55 @@
+{
+  "usd": 0.0660896,
+  "findings": [
+    {
+      "file": "packages/utils/src/services/contracts/safeContracts.ts",
+      "line": 76,
+      "claim": "A new 'redeploy' value was added to MastercopyAction and canUpgradeInPlace now blocks isUnsupportedMastercopyMigratable for stranded zkSync EraVM Safes, but only the MastercopyWarning component was updated to reflect this new state, leaving other code that makes the same decision out of sync."
+    },
+    {
+      "file": "apps/web/src/features/security/data/scanners/contractVersion.ts",
+      "line": 49,
+      "claim": "For a stranded Safe with an unknown master copy, the security scanner now suggests using the CLI tool to migrate while the dashboard suggests creating a new Safe, and the comment stating this check matches MastercopyWarning (via getMastercopyAction) is no longer accurate."
+    },
+    {
+      "file": "apps/web/src/features/security/data/scanners/contractVersion.ts",
+      "line": 93,
+      "claim": "A stranded EraVM Safe flagged as OUTDATED still receives the message that a newer version is available and prompts the user to update, which contradicts the redeploy branch's premise that in-place upgrade is not possible for this case."
+    },
+    {
+      "file": "apps/mobile/src/features/Settings/Settings.container.tsx",
+      "line": 26,
+      "claim": "The mobile settings screen offers an update for any Safe flagged OUTDATED, so a stranded EraVM Safe is still offered an in-place update there even though it should require redeployment instead."
+    },
+    {
+      "file": "apps/web/src/services/tx/safeUpdateParams.ts",
+      "line": 116,
+      "claim": "The loop that maps a SafeMigration address to its version by iterating SAFE_VERSIONS and getSafeMigrationDeployments().deployments duplicates logic that already exists in isSafeMigrationCall in apps/web/src/utils/safe-migrations.ts, rather than reusing a shared helper."
+    },
+    {
+      "file": "apps/web/src/services/tx/safeUpdateParams.ts",
+      "line": 116,
+      "claim": "The migration-target lookup now matches a SafeMigration address against any chain's deployment variant instead of scoping the match to networkAddresses[safe.chainId] as the previous code did, so it no longer derives the match from the Safe's own chain ID."
+    },
+    {
+      "file": "packages/utils/src/config/constants.ts",
+      "line": 71,
+      "claim": "SAFE_TO_L2_MIGRATION_VERSION lost its last consumer when safeUpdateParams.ts was changed, and no code in apps/ or packages/ still references it, so the constant is now unused."
+    },
+    {
+      "file": "apps/web/src/features/multichain/components/MastercopyWarning/MastercopyWarning.tsx",
+      "line": 48,
+      "claim": "The new card telling users to create a new Safe and transfer their assets introduces a new user-facing flow without any cited product or design sign-off, and unlike its sibling cards it has no link or trackingEvent."
+    },
+    {
+      "file": "apps/web/src/features/multichain/components/MastercopyWarning/MastercopyWarning.stories.tsx",
+      "line": null,
+      "claim": "The stories file has a story for each existing MastercopyWarning action (Migrate, Cli, Update, UpdateSettings, UpdateSettingsNonCritical, None) but none for the new redeploy card, leaving that state uncovered in Storybook."
+    },
+    {
+      "file": "packages/utils/src/services/contracts/safeContracts.ts",
+      "line": 31,
+      "claim": "The step-by-step comments added inside canUpgradeInPlace and getMastercopyAction are unnecessary and could be removed, as part of roughly 35 new comment lines introduced by the change."
+    }
+  ]
+}

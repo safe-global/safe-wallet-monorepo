@@ -1,0 +1,35 @@
+{
+  "usd": 0.0668396,
+  "findings": [
+    {
+      "file": "PolicySummary/LimitSummaryRow.tsx",
+      "line": 33,
+      "claim": "TokenAmount is rendered without a preciseAmount, so it falls back to formatAmount which uses 5 decimal places and switches to compact notation for longer numbers, causing the displayed granted limit to be rounded or abbreviated rather than exact. This matters because the summary is meant to show the amount exactly as typed so a signer knows precisely what they are granting, and a typed value like 0.123456 ETH would display as 0.12346 ETH (higher than the real limit) while 1234.56789 would display as 1.23K ETH, with the exact number only visible in a hover tooltip."
+    },
+    {
+      "file": "PolicySummary/__tests__/LimitSummaryRow.test.tsx",
+      "line": 24,
+      "claim": "The expected value in the amount test is built using the same formatVisualAmount formatter used by the component code, and the test input '1000' never triggers rounding, so the test cannot detect the rounding/abbreviation problem in the granted-limit display."
+    },
+    {
+      "file": "PolicySummary/copy.ts",
+      "line": 17,
+      "claim": "spenderDisplayName derives the callout's spender name using only the spender.name field, while the spender card (EthHashInfo) prefers the address-book name over any provided name prop, so if name is undefined but an address-book entry exists, the callout could show a truncated address while the card shows the address-book name for the same spender; the comment claiming this is 'the same fallback the spender card shows' would then be inaccurate."
+    },
+    {
+      "file": "PolicySummary/frequency.ts",
+      "line": 1,
+      "claim": "frequency.ts deep-imports from @/features/spending-limits/constants, which apps/web/AGENTS.md's Feature Architecture Import Rules forbid, even though getResetTimeOptions is already exported from the spending-limits barrel and other code already imports it that way."
+    },
+    {
+      "file": "PolicySummary/constants.ts",
+      "line": 14,
+      "claim": "CANONICAL_FREQUENCIES re-keys the reset-period minute values ('0' / '1440' / '10080' / '43200') that already live in src/features/spending-limits/constants.ts, and PRODUCTION_PERIODS in testBuilders.ts repeats the same values a third time, so if the canonical option set ever changes, the summary could silently fall back to the dropdown wording instead of staying in sync."
+    },
+    {
+      "file": "PolicySummary/testBuilders.ts",
+      "line": 8,
+      "claim": "The comment in testBuilders.ts states the builders 'must stay importable from stories', but PolicySummary.stories.tsx actually uses inline fixtures and never imports these builders, making the comment's stated reason untrue for this diff."
+    }
+  ]
+}

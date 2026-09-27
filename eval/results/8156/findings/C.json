@@ -1,0 +1,80 @@
+{
+  "usd": 0.0742736,
+  "findings": [
+    {
+      "file": "HowToExecuteSheet.container.tsx",
+      "line": 99,
+      "claim": "This container and ReviewAndExecuteContainer both independently re-derive isRelayEnabled, requiresRelay, and isRelayAvailable, and each renders a different UI for the 'relay not available' terminal state (RelayUnavailableSheet in one, an inline Text in the other), creating duplicated logic and inconsistent UX."
+    },
+    {
+      "file": "ReviewAndExecuteContainer.tsx",
+      "line": 52,
+      "claim": "This container duplicates the relay-availability derivation logic and renders a different 'relay not available' UI than HowToExecuteSheet.container.tsx, compounding the duplication described for that file."
+    },
+    {
+      "file": "HowToExecuteSheet.container.tsx",
+      "line": 108,
+      "claim": "An effect dispatches setExecutionMethod(WITH_RELAY) when requiresRelay && isRelayEnabled, but getExecutionMethod() in helpers.ts already enforces this at compute-time, so the effect causes an unnecessary extra render and redundant write to the Redux slice."
+    },
+    {
+      "file": "FeesBreakdown.tsx",
+      "line": 61,
+      "claim": "useTokenDetails is called with a stub value cast away with 'as never' (transfer ?? ({ transferInfo: {} } as never)), which hides a type mismatch; the hook's parameter should be made explicitly optional or the values should be lifted out conditionally before calling it."
+    },
+    {
+      "file": "FeesBreakdown.tsx",
+      "line": 137,
+      "claim": "transferTokenAddress reads transferInfo.tokenAddress from an untyped Record<string, unknown>, losing the Erc20/Erc721/NativeCoin type distinction that TokenTransfer.tsx already obtains via the isERC20Transfer type guard, which could let ERC-721 transfers fall through incorrectly."
+    },
+    {
+      "file": "feeRows.ts",
+      "line": 94,
+      "claim": "The condition BigInt(outgoing.amount) > 0n drops the outgoing line entirely when the amount is zero, which is correct for value transfers but incorrect for zero-value calls that should still display the destination, such as NFT mints or contract calls shown as transfers."
+    },
+    {
+      "file": "useTransactionExecution.ts",
+      "line": 53,
+      "claim": "The executors dispatch table is reallocated on every render even though it is only used inside the useCallback defined at lines 99-144; it should be moved inside the callback or wrapped in useMemo."
+    },
+    {
+      "file": "useTransactionExecution.ts",
+      "line": 99,
+      "claim": "The useCallback's dependency array includes safe from useSafeInfo(), which has an unstable reference, so it will keep invalidating the memoization of the callback (and the executors table it uses)."
+    },
+    {
+      "file": "IndeterminateSimulationSheet.tsx",
+      "line": null,
+      "claim": "IndeterminateSimulationSheet and RelayUnavailableSheet share nearly identical BottomSheetModal scaffolding, badge, title, body, and button layout, with subtle inconsistencies in icon names, paddings, and badge themes, indicating they should share a common ConfirmationSheet component to prevent drift."
+    },
+    {
+      "file": "helpers.ts",
+      "line": 113,
+      "claim": "determineExecutionPath returns the string 'biometrics' when isBiometricsEnabled is false, which is confusing because it actually signals that the user should be routed to the biometrics opt-in screen; the value should be renamed (e.g. to 'biometrics-opt-in') or the branch inverted."
+    },
+    {
+      "file": "useTransactionExecution.test.tsx",
+      "line": null,
+      "claim": "The tests only exercise the WITH_RELAY branch of the four-branch dispatcher refactor (executors object at lines 53-97 of useTransactionExecution.ts), so a regression in executors[executionMethod] selecting PK/Ledger/WC would not be caught."
+    },
+    {
+      "file": "helpers.test.ts",
+      "line": null,
+      "claim": "There is no test coverage for the new txRequiresRelay function or for the requiresRelay = true branch of getExecutionMethod, even though these gate the no-fallback execution flow."
+    },
+    {
+      "file": "FeesBreakdown.tsx",
+      "line": 102,
+      "claim": "The UI string \"FREE\" is rendered in all caps, which is the only all-caps label in the sheet and is inconsistent with the project's sentence-case convention for labels."
+    },
+    {
+      "file": "feeRows.ts",
+      "line": 32,
+      "claim": "Number(formatUnits(...)) loses precision for amounts with 18 decimals; this is acceptable for fiat display but should have a comment noting the tradeoff."
+    },
+    {
+      "file": "FeesBreakdown.tsx",
+      "line": null,
+      "claim": "The fee-breakdown computation is duplicated in both TokenTransfer.tsx and FeesBreakdown.tsx for the same transaction, and should be cached via a single shared hook (e.g. useFeesBreakdown(executionInfo, txInfo)) so the two computations cannot drift apart."
+    }
+  ]
+}

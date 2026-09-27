@@ -1,0 +1,157 @@
+{
+  "pr": 7989,
+  "title": "feat(spaces): rework safe selector for workspace context (WA-2462)",
+  "description": "> Safes in this workspace —\r\n> the rest one button away,\r\n> bold hex catches eyes.\r\n\r\n## What it solves\r\n\r\nResolves: [WA-2462](https://linear.app/safe-global/issue/WA-2462)\r\n\r\nThe safe selector dropdown was missing the \"All Accounts\" footer button when viewing a safe inside a workspace, so users had no escape hatch to their global account list. While in there, the broader workspace-context UX of the dropdown + the AccountsModal had several gaps:\r\n\r\n- No header explaining what the dropdown contents are.\r\n- AccountsModal showed _all_ accounts (including the workspace's own safes) — confusing when launched from a workspace.\r\n- Pin/unpin controls were visible inside workspace context but had no real meaning there.\r\n- No visual cue for poisoning-similar addresses despite the data being computed.\r\n\r\n## How this PR fixes it\r\n\r\n**Original ticket fix:**\r\n\r\n- Show the \"All Accounts\" footer button in workspace context (was hidden — the WA-2462 proper).\r\n\r\n**Scoped UX refinements** (workspace context only — non-workspace UX is unchanged):\r\n\r\n- New dropdown header `Safes in this workspace` (replaces the bookmark/Trust header for that context).\r\n- Footer button retitled `Safes not in this workspace`; AccountsModal title matches.\r\n- AccountsModal filters out safes already in the current workspace by exact `(chainId, address)` match. Multi-chain safes whose chains straddle the boundary gracefully degrade via re-grouping.\r\n- AccountsModal hides per-card pin/unpin controls.\r\n- Skeleton stays visible until BOTH `useAllSafes` and `useSpaceSafes` finish — prevents a flash of unfiltered content that contradicts the new title.\r\n\r\n**Always-on improvement:**\r\n\r\n- `ShortAddressWithTooltip` gained an `isSimilar` prop — when true, renders the shortened form with the first 4 and last 4 hex chars bolded (poisoning-attack visual aid). Strengthens the existing `<SimilarityBadge />`.\r\n\r\n**Refactor:**\r\n\r\n- AccountsModal's 8-step data pipeline (fetch → space-exclude → group → merge+sort → similarity → search → split) extracted into a `useAccountsModalItems` hook with a top-of-file docstring and dedicated unit tests. Modal shrank from 258 → 162 lines.\r\n\r\n## How to test it\r\n\r\n1. **WA-2462 proper:** Open a safe that's part of a workspace. Open the safe selector dropdown. There should now be a `Safes not in this workspace` button at the bottom. (Before this PR: no button.)\r\n2. **Workspace header:** Same dropdown. There should be a `Safes in this workspace` header at the top instead of the bookmark/Trust strip.\r\n3. **Modal filter:** Click the button. The opened modal should be titled `Safes not in this workspace` and must not show any safe that's already in your current workspace.\r\n4. **Hidden pin controls:** In the modal, every safe card should be missing the bookmark icon and 3-dot context menu (workspace context only).\r\n5. **Loading guard:** Open the modal cold (right after navigating to a workspace safe, on slow network if possible). You should see the skeleton, _not_ an unfiltered list flashing then re-filtering.\r\n6. **Similar address visual:** If you have two address-poisoning-similar safes pinned, both should show the existing \"High similarity\" pill AND the shortened address should have its first 4 + last 4 hex chars bolded (e.g. `0x**1234**...**7890**`).\r\n7. **Non-workspace unchanged:** Visit a non-workspace safe. Dropdown should still show `Trusted Safes` header with bookmark + `All Accounts` button + modal title `All Accounts`. No filter applied.\r\n8. **Multi-chain partial workspace:** If a multi-chain safe has chain A in your workspace and chain B not, the modal should show that safe with only chain B visible (auto-downgraded to single-chain item).\r\n\r\n## Affected flows\r\n\r\n- **Workspace-safe dropdown** — adds header, footer; conditional on `isQualifiedSafe`.\r\n- **AccountsModal opened from a workspace** — items filtered, pin controls hidden, retitled, loading-guarded.\r\n- **Address-similarity warning surface** — strengthened visual on all AccountsModal cards regardless of context (additive, no removal).\r\n- **Non-workspace dropdown / modal** — unchanged.\r\n\r\n## Blast radius\r\n\r\n- **Direct file scope:** `apps/web/src/components/common/SpaceSafeBar/` subtree only.\r\n- **New hook `useAccountsModalItems`** consumes (read-only): `useAllSafes`, `useSpaceSafes`, `useIsQualifiedSafe`, `useWallet`, `useOwnersGetAllSafesByOwnerV2Query`, `useAllSafesGrouped`. No new dispatch surface beyond the pre-existing notification on owned-safes error (preserved verbatim from the modal).\r\n- **`ShortAddressWithTooltip`** gained an optional prop (`isSimilar?: boolean`, default `false`). Only consumers in this subtree pass it; other consumers (if any) get default `false` — behavior unchanged.\r\n- **Card components** (`SafeItemCard`, `MultiSafeItemCard`) gained `hidePinControls?: boolean` (default `false`). Same backward-compat story.\r\n- **No RTK Query endpoints / API contracts / feature flags / chain configs / persistence migrations touched.**\r\n- **No mobile impact** — all touched files are web-only. No shared package changes.\r\n\r\n## Risks / not checked\r\n\r\n- **Did not browser-verify the loading-race fix on a real slow network.** The reasoning is code-level (the hook now exposes `isLoading` correctly; hook + UI tests assert it) but a network-throttled walkthrough wasn't done.\r\n- **Similarity detection is computed on the FILTERED set, not the full set.** A non-workspace safe that visually resembles a workspace safe will _not_ be flagged in the modal. Known v1 limitation, documented in the hook's docstring.\r\n- **Did not test on mobile** — these files are web-only; no mobile entry-point consumes them.\r\n- **Did not exercise the `useOwnersGetAllSafesByOwnerV2Query` failure path manually** — the inline `<InlineRetryError />` rendering is preserved from pre-existing code; the new notification dispatch hits the same source.\r\n- **Search analytics tracking** moved into the hook from the modal. No behavioral difference expected but not explicitly tested.\r\n\r\n## Vi",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/useAccountsModalItems.ts",
+      "line": null,
+      "claim": "The showNotification effect for owned-safes errors, which was moved into the hook, has no test coverage."
+    },
+    {
+      "id": "F2",
+      "file": "useAccountsModalItems.ts",
+      "line": 94,
+      "claim": "Calling useAllSafesGrouped(filteredAllSafes ?? []) creates a new array reference on every render while loading, which defeats referential-equality-based memoization inside useAllSafesGrouped; the fallback should be memoized or the code should rely on filteredAllSafes being stable instead."
+    },
+    {
+      "id": "F3",
+      "file": "useAccountsModalItems.test.ts",
+      "line": 20,
+      "claim": "The test calls the underscore-prefixed exports actual._getMultiChainAccounts and actual._getSingleChainAccounts, which function as a private contract; renaming those exports later would produce confusing test failures, so they should either be documented as test-only exports or the grouped result should be built via a public helper instead."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/index.test.tsx",
+      "line": 48,
+      "claim": "Both new test files hand-write the same safeItem(chainId, address, overrides) factory with fixed values instead of using the existing safeItemBuilder from @/tests/builders/safeItem that the neighbouring SafeItemCard.test.tsx already uses, duplicating test setup logic."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/useAccountsModalItems.test.ts",
+      "line": null,
+      "claim": "The hook's tests never assert on similarAddresses—neither which addresses get flagged nor which list the similarity check runs against—and this coverage is needed to validate the fix for the lookalike-safes issue."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/useAccountsModalItems.ts",
+      "line": 19,
+      "claim": "The docblock spans 40 lines despite project guidance to treat code comments as tech debt, and part of it is already out of date, describing the similarity-check limitation and the loading-flicker case that are themselves flagged as problems elsewhere; it should be trimmed once those issues are addressed."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/index.tsx",
+      "line": 42,
+      "claim": "The diff rewrites this line but keeps the Title Case string 'All Accounts', inconsistent with the sentence case used by the neighboring new string 'Safes not in this workspace', and with the project's sentence-case convention for UI text; fixing it requires updating the corresponding tests as well."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/useAccountsModalItems.ts",
+      "line": 102,
+      "claim": "The similarity check that flags lookalike addresses is run only after workspace safes have already been removed from the list, so a malicious safe that mimics a workspace safe's address is not flagged with the 'High similarity' badge or bold highlighting in the 'Safes not in this workspace' view. An attacker could deploy a safe listing the victim as an owner, have it appear via the owned-safes endpoint, and go undetected as a lookalike because the safe it imitates was already filtered out before the check ran."
+    },
+    {
+      "id": "F9",
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/MultiSafeItemCard.test.tsx",
+      "line": 123,
+      "claim": "The assertion arrayContaining(['1111', '1111']) passes even if '1111' appears only once, so because the test address is all 1s it cannot distinguish the first group from the last and would still pass if only one group were bolded; a varied address with toEqual([...]) should be used instead."
+    },
+    {
+      "id": "F10",
+      "file": "AccountsModal/index.tsx",
+      "line": 77,
+      "claim": "The Trusted and Other sections (lines 77-133) are nearly identical JSX differing only in heading and source array; extracting an inline renderSection(title, items, testId?) helper would reduce roughly 60 lines to about 25 and make future per-section changes safer."
+    },
+    {
+      "id": "F11",
+      "file": "shared.tsx",
+      "line": 158,
+      "claim": "In ShortAddressWithTooltip, the bolded-similar branch slices address.slice(2, 6) and address.slice(-4) without the same length guard used in TooltipFullAddress at line 121, which is inconsistent even though current callers always pass a validated 0x-address of sufficient length."
+    },
+    {
+      "id": "F12",
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/index.test.tsx",
+      "line": 118,
+      "claim": "The test named 'renders the loading skeleton' only checks that the empty state and cards are absent, so it would also pass if nothing rendered at all; it should assert the skeleton itself is present, which may require adding a test ID to SafeListSkeleton in shared.tsx:219."
+    },
+    {
+      "id": "F13",
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/useAccountsModalItems.ts",
+      "line": 57,
+      "claim": "The hook's roughly 40-line doc comment is long relative to the codebase's norms and is inaccurate in one place: it states errors are surfaced 'so callers can render a retry notification', but the hook itself sends that notification rather than leaving it to callers."
+    },
+    {
+      "id": "F14",
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/useAccountsModalItems.ts",
+      "line": 71,
+      "claim": "useSpaceSafes returns a new allSafes array on every render because safeItems isn't memoized, causing the exclusion set, filter, grouping, sort, and similarity check to be recomputed on every SpaceSafeBar render even while the modal is closed, since these hooks run before the `if (!open)` check in AccountsModal/index.tsx:34; this cost scales with the number of safes the user has."
+    },
+    {
+      "id": "F15",
+      "file": "apps/web/src/components/common/SpaceSafeBar/index.tsx",
+      "line": 176,
+      "claim": "The new code uses the Title Case string \"All Accounts\", but the project's conventions require sentence case (\"All accounts\"); although the string already existed elsewhere, these are new lines introducing the same inconsistency."
+    },
+    {
+      "id": "F16",
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/useAccountsModalItems.ts",
+      "line": 126,
+      "claim": "The modal's two modes ('All Accounts' and 'Safes not in this workspace') both send the same OVERVIEW_EVENTS.SEARCH event and the same default top_bar label when a safe is opened, making it impossible to distinguish the two funnels in analytics unless a separate label per mode is intended."
+    },
+    {
+      "id": "F17",
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/useAccountsModalItems.ts",
+      "line": 139,
+      "claim": "The condition `isQualifiedSafe && spaceSafesLoading` can never be true because `useIsQualifiedSafe` only returns true once `currentData` exists for the same query that drives `spaceSafesLoading`, at which point RTK Query's `isLoading` is already false; the flicker this check is meant to prevent cannot occur, so the check (and the comment describing it) is dead code."
+    },
+    {
+      "id": "F18",
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/useAccountsModalItems.ts",
+      "line": 76,
+      "claim": "Two behaviours moved into the new hook have no tests: the error notification shown when owned safes fail to load (which only fires while the modal is open), and the debounced search analytics event, because the hook test always mocks the query as succeeding so neither code path runs."
+    },
+    {
+      "id": "F19",
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/useAccountsModalItems.test.ts",
+      "line": 87,
+      "claim": "A test at lines 87-95 mocks a combination of hook states (isQualifiedSafe true together with spaceSafesLoading true) that the real hooks can never produce together, meaning the test validates an impossible scenario rather than real behavior."
+    },
+    {
+      "id": "F20",
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/index.tsx",
+      "line": 91,
+      "claim": "Four near-identical card-render branches each repeat the hidePinControls={isQualifiedSafe} prop and the similarAddresses.has(...) check, duplicating logic that a small renderItem helper could remove."
+    },
+    {
+      "id": "F21",
+      "file": "useAccountsModalItems.ts",
+      "line": 89,
+      "claim": "In filteredAllSafes, the early return `if (!allSafes || !spaceExclusionKey) return allSafes` relies on spaceExclusionKey being null only when isQualifiedSafe is false; if a future change made spaceExclusionKey an empty Set instead of null when a space loads with zero safes, the truthiness check would behave unexpectedly, so the intent would be clearer expressed as `if (!allSafes || !isQualifiedSafe) return allSafes`."
+    },
+    {
+      "id": "F22",
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/useAccountsModalItems.ts",
+      "line": 117,
+      "claim": "The comment states that search analytics fires once per non-empty query (debounced), but searchTracked only resets when the search becomes empty, so typing 'a' then 'ab' then 'abc' only fires the event once total instead of once per distinct query. Either the code should reset searchTracked.current to false in the timer-clear path so each distinct query fires its own event, or the comment should be updated to describe the actual once-per-session behavior."
+    },
+    {
+      "id": "F23",
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/index.tsx",
+      "line": 42,
+      "claim": "The new code uses the Title Case string \"All Accounts\" instead of the required sentence case \"All accounts\"."
+    },
+    {
+      "id": "F24",
+      "file": "useAccountsModalItems.test.ts",
+      "line": null,
+      "claim": "The no-op behavior for the error notification when open=false is not asserted; a test should verify that with ownedSafesError set but open=false, dispatch is not called."
+    },
+    {
+      "id": "F25",
+      "file": "useAccountsModalItems.test.ts",
+      "line": null,
+      "claim": "The multi-chain partial-workspace degrade path described in the PR is not directly tested as a multi-to-single transformation; a targeted test is needed where an address exists on chains 1 and 100, the workspace excludes chain 1, and the result should contain a single-chain item on chain 100 rather than a MultiChainSafeItem."
+    }
+  ]
+}

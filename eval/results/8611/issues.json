@@ -1,0 +1,200 @@
+{
+  "usage": {
+    "usd": 0.6673042,
+    "turns": 7,
+    "wallSeconds": 82
+  },
+  "issues": [
+    {
+      "findings": [
+        "F7",
+        "F33",
+        "F37",
+        "F40"
+      ],
+      "summary": "toRows merges policies across chains, keeping only the first policy's status, tokens, summary and id",
+      "label": "medium",
+      "evidence": "PoliciesTable/index.tsx:22-34 builds the key from type, address and proposer, and keeps only the first `policy`. The status (line 102), tokens and click target all come from that one policy, so a policy that is unenforced or pending on another chain shows as active. F7's wording ('omits fields') is loose, but its concern about the status column is this same defect."
+    },
+    {
+      "findings": [
+        "F5",
+        "F24"
+      ],
+      "summary": "A pending edit and its active policy on the same Safe and chain are merged into one row, which hides the pending state and duplicates the chainId",
+      "label": "medium",
+      "evidence": "The key at PoliciesTable/index.tsx:27 ignores status and chainId, so an active and a pending spending limit on the same Safe land in one row. That pushes the same chainId twice, giving duplicate React keys at line 82, and only the first policy's status is shown."
+    },
+    {
+      "findings": [
+        "F15",
+        "F22"
+      ],
+      "summary": "Merge tests only check the icon count and skip the lossy edge cases (mixed status across chains, pending plus active on the same chain)",
+      "label": "medium",
+      "evidence": "PoliciesTable.test.tsx:45-54 only asserts one row and two network icons. No test covers mixed status or duplicate chains, so the defects above go unnoticed."
+    },
+    {
+      "findings": [
+        "F10",
+        "F14",
+        "F17",
+        "F20",
+        "F39"
+      ],
+      "summary": "Search copy promises search by network (and name), but network is not indexed",
+      "label": "medium",
+      "evidence": "The Fuse keys at usePolicySearch.ts:35 are rule, summary, safeAddress and tokens. chainId is built into SearchablePolicy but never indexed, and no chain name is indexed at all. So typing 'Polygon' returns nothing, even though the placeholder (PoliciesList.tsx:48) and the no-results copy (PoliciesTableStates.tsx:11) advertise it."
+    },
+    {
+      "findings": [
+        "F21",
+        "F42"
+      ],
+      "summary": "The clickable row is given role=button and nests copy and explorer controls; Enter or Space on a nested control bubbles to the row's onKeyDown",
+      "label": "medium",
+      "evidence": "PaginatedDataTable/index.tsx:258-272 puts role=button on the <tr>, which drops its row semantics, and its onKeyDown fires onRowClick for any Enter or Space that bubbles up. CopyTooltip and ExplorerButton only stop click propagation, not keydown, so activating the copy button by keyboard also opens the row. This also contradicts the PR's claim that 'the row stays a plain table row'."
+    },
+    {
+      "findings": [
+        "F12"
+      ],
+      "summary": "usePolicySearch has no dedicated tests for its keys or threshold",
+      "label": "medium",
+      "evidence": "The only search tests (PoliciesList.test.tsx:14-30) match on 'Proposer' and on a nonsense string. Address, token and summary matching and the 0.2 threshold are untested, which is how the network-search gap slipped through."
+    },
+    {
+      "findings": [
+        "F8",
+        "F35"
+      ],
+      "summary": "The LongList story collapses 30 policies into 3 rows, so it never paginates and it renders duplicate chain keys",
+      "label": "low",
+      "evidence": "mockLongPolicyList (mocks/policies.ts:183-193) cycles 3 Safes with the same type and chain, so toRows produces 3 rows with 10 identical chainIds each. With a page size of 25 there is no pagination, which contradicts the story comment at PoliciesList.stories.tsx:54. The impact is limited to Storybook."
+    },
+    {
+      "findings": [
+        "F18",
+        "F30"
+      ],
+      "summary": "The row aria-label uses the raw type id and is identical for every row of the same type",
+      "label": "low",
+      "evidence": "PoliciesTable/index.tsx:116 builds `Open ${policy.type} policy details` (e.g. 'spending-limit'), with no label or Safe address. Screen reader users cannot tell rows apart. This is a real accessibility problem, and the handler is not wired in production yet."
+    },
+    {
+      "findings": [
+        "F26"
+      ],
+      "summary": "supersedesId is never read, even though its comment says it keeps queued edits from rendering as a second policy",
+      "label": "low",
+      "evidence": "grep finds supersedesId only in types.ts:111 and in the mocks. toRows does not use it, so the relationship the type comment promises is not implemented. The data is not wired to CGW yet."
+    },
+    {
+      "findings": [
+        "F34"
+      ],
+      "summary": "formatDays rounds, so a review window under 12h shows '0 days'",
+      "label": "low",
+      "evidence": "policyLabel.ts:49-52 uses Math.round(seconds/86400), so for example 3600 s becomes '0 days review window'. Sub-day review windows are an unlikely but possible edge case."
+    },
+    {
+      "findings": [
+        "F11",
+        "F43"
+      ],
+      "summary": "Policy type label and icon lookups have no fallback for an unknown type from CGW",
+      "label": "low",
+      "evidence": "POLICY_ICONS[type] (policyIcon.ts:11) and POLICY_TYPE_LABELS[policy.type] (policyLabel.ts:83) have no fallback, so a new backend type would crash the Icon render. The RESET_PERIOD_LABELS part of F43 is wrong: it has a `??` fallback (line 30) and a numeric key cannot be 'constructor'."
+    },
+    {
+      "findings": [
+        "F9",
+        "F13",
+        "F27",
+        "F28",
+        "F41"
+      ],
+      "summary": "Multi-line comment blocks violate the AGENTS.md one-line comment rule",
+      "label": "low",
+      "evidence": "Multi-line blocks sit at types.ts:1-6, 10-14, 80-83 and 136-139, PoliciesTable/index.tsx:37-42, PoliciesLoadState/index.tsx:27-31 and policyLabel.ts:10-14 and 57-60. AGENTS.md explicitly asks for single-line comments."
+    },
+    {
+      "findings": [
+        "F3",
+        "F4",
+        "F36"
+      ],
+      "summary": "PoliciesLoadError duplicates TransactionDetailsError and its message string",
+      "label": "low",
+      "evidence": "POLICIES_LOAD_ERROR (PoliciesLoadState/index.tsx:8) is identical to TX_DETAILS_LOAD_ERROR. TransactionDetailsError already takes a `message` prop and has the same Empty + SafeLogoHalo + Reload structure, so the two could share one component."
+    },
+    {
+      "findings": [
+        "F6",
+        "F19",
+        "F29"
+      ],
+      "summary": "getPolicyTokens is a pure helper exported from a component file and imported by a hook",
+      "label": "low",
+      "evidence": "usePolicySearch.ts:4 imports from PoliciesTable/components/PolicyTokens.tsx:8, while sibling helpers live in utils/. This is a small layering and maintainability cost."
+    },
+    {
+      "findings": [
+        "F32",
+        "F38"
+      ],
+      "summary": "MixpanelEventParams.IS_AVAILABLE is now unused",
+      "label": "low",
+      "evidence": "grep finds IS_AVAILABLE only at mixpanel-events.ts:161. Dropping it from the event is intentional and documented in the PR description, so this is not a regression, but the enum member is now dead code."
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "The network column has no overflow handling for many chains; NetworkLogosPill exists and could be reused",
+      "label": "low",
+      "evidence": "PoliciesTable/index.tsx:79-84 renders every ChainIndicator with no cap, while features/multichain/components/NetworkLogosPill already exists for this. A long chain list would overflow the 10% column."
+    },
+    {
+      "findings": [
+        "F2"
+      ],
+      "summary": "Unit tests use fixed-literal fixtures instead of the Builder pattern",
+      "label": "low",
+      "evidence": "mocks/policies.ts:70 uses override-spread factories, while the same feature already uses tokenOptionBuilder().with() in the SpendingLimitFlow tests. This is a convention inconsistency."
+    },
+    {
+      "findings": [
+        "F1"
+      ],
+      "summary": "Orphaned file-level doc comment in usePolicySearch",
+      "label": "nit",
+      "evidence": "usePolicySearch.ts:7 is a JSDoc comment followed by a blank line and a type alias, so it attaches to nothing. This is purely cosmetic."
+    },
+    {
+      "findings": [
+        "F31",
+        "F44"
+      ],
+      "summary": "Map keys use toLowerCase rather than sameAddress",
+      "label": "nit",
+      "evidence": "PoliciesTable/index.tsx:27 and PolicyTokens.tsx:14 build Map keys, which need a normalised string. sameAddress is a comparison and does not apply here, so toLowerCase is appropriate."
+    },
+    {
+      "findings": [
+        "F23"
+      ],
+      "summary": "Page.tsx renders <Policies /> without props, so the table is unreachable in production",
+      "label": "wrong",
+      "evidence": "This is intended. The PR description says the table renders from fixtures in Storybook only and is not wired to CGW, and that Page.tsx passes no props."
+    },
+    {
+      "findings": [
+        "F25"
+      ],
+      "summary": "PR description does not follow the template",
+      "label": "wrong",
+      "evidence": "The description contains every template section: What it solves, How this PR fixes it, How to test it, Affected flows, Blast radius, Risks, Visual summary, Checklist and CLA."
+    }
+  ]
+}

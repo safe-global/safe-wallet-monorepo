@@ -1,0 +1,25 @@
+{
+  "usd": 0.0425416,
+  "findings": [
+    {
+      "file": "package.json",
+      "line": 29,
+      "claim": "The axios resolution is applied globally, which forces the Ledger SDKs (@ledgerhq/context-module@1.8.0 and @ledgerhq/device-management-kit@0.9.1) off their exact declared axios@1.8.2 dependency and onto axios 1.18.1 instead, even though both SDKs are runtime dependencies of apps/web and apps/mobile and mobile previously only ever received axios 1.8.2."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "Ledger connect and sign functionality should be smoke-tested on web and over Bluetooth on mobile, and the mobile bundle should be built once (e.g. with expo export), to confirm the axios version bump does not break the Ledger SDK integrations before merging."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "If overriding the vendor's exact pin is undesirable, a scoped resolution (for example targeting only \"@ledgerhq/device-management-kit/axios\") could be used instead of a global resolution, or the change could wait until Ledger raises their own axios range."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "The PR description only states that the change dedupes axios; it should also note that the Ledger SDK impact was checked, since the pin overrides an exact version pinned by a third-party vendor."
+    }
+  ]
+}

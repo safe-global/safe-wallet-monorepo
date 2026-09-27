@@ -1,0 +1,37 @@
+{
+  "pr": 8403,
+  "title": "chore(deps): pin axios to 1.18.1 via resolution to dedupe transitive …",
+  "description": "## What it solves\r\n\r\nThe lockfile was resolving five separate axios copies (`1.8.2`, `1.13.2`, `1.13.6`, `1.15.0`, `1.18.1`) pulled in by different transitive dependencies. This consolidates them onto a single up-to-date 1.18.1 and clears the outstanding Dependabot dependency alerts.\r\n\r\nResolves: N/A (no Linear issue)\r\n\r\n## How this PR fixes it\r\n\r\nAdds a single global `axios: \"1.18.1\"` entry to the root `package.json` `resolutions` block — the same mechanism the repo already uses for `viem`, `webpack`, and `isows`.\r\n\r\nNotes for reviewers:\r\n- Our only direct axios dependency (`apps/tx-builder`, `^1.18.1`) was already on 1.18.1; every other copy was transitive.\r\n- Five of the six consumers declare caret ranges (`^1.6.1`, `^1.6.8`, `^1.12.2`, `^1.13.2`, `^1.13.5`), so 1.18.1 is already within their own declared compatibility. The only exact-pin overridden is `@ledgerhq/*` (`1.8.2`); Ledger uses axios for a plain authenticated GET and dropped axios entirely in their v2 line, so the override is low-risk.\r\n- 1.19.0 (latest) is intentionally **not** used: it's within the repo's 7-day supply-chain age gate (`.yarnrc.yml`) and is quarantined. Can revisit once it ages out.\r\n\r\n## How to test it\r\n\r\n1. `yarn install` — confirm the lockfile resolves a single `axios@npm:1.18.1` (`grep '^\"axios@' yarn.lock` returns one entry).\r\n2. `yarn verify:web` and mobile `type-check` pass.\r\n3. On a deploy preview, smoke-test the network-facing integrations that used the overridden copies: Ledger connect/sign, Trezor connect, and a CoW swap/bridge quote.\r\n\r\n## Screenshots\r\n\r\nN/A - no UI changes\r\n\r\n## Checklist\r\n\r\n- [ ] I've tested the branch on mobile 📱\r\n- [ ] I've documented how it affects the analytics (if at all) 📊\r\n- [ ] I've written a unit/e2e test for it (if applicable) 🧑‍💻\r\n\r\n---\r\n\r\n## CLA signature\r\n\r\nWith the submission of this Pull Request, I confirm that I have read and agree to the terms of the [Contributor License Agreement](https://safe.global/cla).\r\n",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "yarn.lock",
+      "line": 9702,
+      "claim": "The dependency resolution change silently bumps the axios version used by @ledgerhq/context-module and @ledgerhq/device-management-kit from 1.8.2 to 1.18.1, without this being called out in the change description; a manual smoke test of Ledger signing is recommended to confirm the minor-version bump does not break that flow."
+    },
+    {
+      "id": "F2",
+      "file": "package.json",
+      "line": 29,
+      "claim": "The axios resolution is applied globally, which forces the Ledger SDKs (@ledgerhq/context-module@1.8.0 and @ledgerhq/device-management-kit@0.9.1) off their exact declared axios@1.8.2 dependency and onto axios 1.18.1 instead, even though both SDKs are runtime dependencies of apps/web and apps/mobile and mobile previously only ever received axios 1.8.2."
+    },
+    {
+      "id": "F3",
+      "file": null,
+      "line": null,
+      "claim": "The PR description only states that the change dedupes axios; it should also note that the Ledger SDK impact was checked, since the pin overrides an exact version pinned by a third-party vendor."
+    },
+    {
+      "id": "F4",
+      "file": null,
+      "line": null,
+      "claim": "If overriding the vendor's exact pin is undesirable, a scoped resolution (for example targeting only \"@ledgerhq/device-management-kit/axios\") could be used instead of a global resolution, or the change could wait until Ledger raises their own axios range."
+    },
+    {
+      "id": "F5",
+      "file": null,
+      "line": null,
+      "claim": "Ledger connect and sign functionality should be smoke-tested on web and over Bluetooth on mobile, and the mobile bundle should be built once (e.g. with expo export), to confirm the axios version bump does not break the Ledger SDK integrations before merging."
+    }
+  ]
+}

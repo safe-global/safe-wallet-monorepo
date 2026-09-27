@@ -1,0 +1,11 @@
+{
+  "pr": 8375,
+  "reviewSha": "53b0b1010c992f4dcfb32299f6c6ad347de6aa95",
+  "baseSha": "be6e6dacd9d0b0bee4fe591551e77ce70483e647",
+  "system": "E",
+  "version": "github",
+  "runner": "collect",
+  "model": "human",
+  "commentSha": "1012f8f9d15e565ab4361fa144de3798b66a08f4",
+  "output": "apps/tx-builder/src/hooks/useKnownAddresses.ts:42\ncan we memoize it?"
+}

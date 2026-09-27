@@ -1,0 +1,10 @@
+{
+  "usd": 0.0484296,
+  "findings": [
+    {
+      "file": null,
+      "line": null,
+      "claim": "The useSpaceMembers/useAllMembers hook should have an additional guard to ensure the member list is cleared when a 403 response is received."
+    }
+  ]
+}

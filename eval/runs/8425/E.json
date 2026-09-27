@@ -1,0 +1,11 @@
+{
+  "pr": 8425,
+  "reviewSha": "bbadffe15fb3340a1c13c85f13e60f55840f1d52",
+  "baseSha": "c82ccf019c2520c7806751bc11466eaef72a67e9",
+  "system": "E",
+  "version": "github",
+  "runner": "collect",
+  "model": "human",
+  "commentSha": "bbadffe15fb3340a1c13c85f13e60f55840f1d52",
+  "output": "[review by vmosharova]\nLGTM 👍🏻 "
+}

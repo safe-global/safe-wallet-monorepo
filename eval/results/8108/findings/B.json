@@ -1,0 +1,60 @@
+{
+  "usd": 0.052744,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx",
+      "line": 67,
+      "claim": "The page index is reset via useEffect(() => setPage(0), [rows]) whenever the rows array is a new object reference, which happens after any mutation that invalidates the members query cache tag. As a result, an admin working on page 2 of a space with more than 25 members gets bounced back to page 1 after editing a role, removing, or renewing a member, a regression from the previous EnhancedTable which did not reset the page when data changed."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx",
+      "line": 66,
+      "claim": "The name tooltip was removed as redundant, but the name cell still uses truncate inside a table-fixed column sized w-[20%] and has no title attribute, so long contact names are cut off with no way to see the full text anywhere."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx",
+      "line": 41,
+      "claim": "Sorting compares strings with raw < and > operators, making the comparison case-sensitive so that, for example, \"alice\" sorts after \"Zoe\" and checksummed addresses sort by character code rather than in a locale-aware way; this is new behavior for the address book, which previously had no sorting at all. Using localeCompare with sensitivity: 'base' would fix this."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx",
+      "line": 46,
+      "claim": "The \"Added by\" column sorts by the raw createdBy address or email, but the displayed cell shows the name resolved by EthHashInfo onlyName, so the sort order does not match what users actually see in the column."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx",
+      "line": 36,
+      "claim": "The columns array is rebuilt on every render, and since it is a dependency of the useMemo that produces sortedRows in PaginatedDataTable, this causes the entire row list to be re-sorted on every render instead of only when needed. Memoizing columns on [hasMiddleColumn, showAddedBy] would avoid the redundant re-sorting."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/MembersList/index.test.tsx",
+      "line": 97,
+      "claim": "The test that hovered the email cell and checked the actual tooltip content was reduced to just checking for a truncate class, so nothing now verifies that the tooltip itself still works."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/__tests__/SpaceAddressBookTable.test.tsx",
+      "line": null,
+      "claim": "The new sortValue functions added for the address book (name, address, chain count, \"Added by\") and for the members table have no tests, so reverting or breaking any of that sort logic would not be caught by the test suite."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx",
+      "line": 1,
+      "claim": "The new PaginatedDataTable component has no Storybook story, which apps/web/AGENTS.md (lines 10 and 160) requires for new components."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx",
+      "line": 44,
+      "claim": "The \"Last updated\" sort branch is dead code because nothing in apps/web/src passes showLastUpdated, and its value expression updatedAt || createdAt would evaluate to an empty string for local contacts, which would cause them to sort first rather than last if this path were ever exercised."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx",
+      "line": 142,
+      "claim": "The previous and next pagination buttons are icon-only with no aria-label, a gap carried over from the old table implementation."
+    },
+    {
+      "file": "apps/web/src/components/ui/pagination.tsx",
+      "line": null,
+      "claim": "An existing pagination UI component (components/ui/pagination.tsx) could be reused instead of the hand-built previous/next footer that was added."
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "usd": 0.06614,
+  "findings": [
+    {
+      "file": "FeatureFlagRow.tsx",
+      "line": 59,
+      "claim": "The switch's onCheckedChange always dispatches setOverride, even when the new value equals the config value, so toggling a row off and back on leaves it in an overridden state that merely happens to match the current chain instead of returning to a clean, non-overridden state. Users relying on the switch as their primary control will accumulate silent overrides that are indistinguishable from normal config values except via the 'matchesCurrentChain' indicator."
+    },
+    {
+      "file": "useFeatureFlagEditorData.ts",
+      "line": 32,
+      "claim": "The editor's configValue and chainScope fields reflect the raw config-service data, not the overridden value used by useHasFeature, creating an intentional but undocumented split between what the 'Config service' column shows and what the switch below it controls; this should be documented with a comment explaining the distinction."
+    },
+    {
+      "file": "FeatureFlagRow.tsx",
+      "line": 65,
+      "claim": "The check icon uses visibility: hidden combined with an aria-label, but visibility: hidden removes the element from the accessibility tree, so a screen reader never announces the match state, and the actual accessible content lives inside TooltipContent which is only exposed on focus or hover; either add sr-only text alongside the visible check or drop the aria-label on the icon since the tooltip content already provides the announcement."
+    },
+    {
+      "file": "store/index.ts",
+      "line": 67,
+      "claim": "featureFlagOverridesSlice's reducer is registered unconditionally and included in persistedSlices and broadcastState even in production, where applyFeatureOverrides is a no-op; this means a stale featureFlagOverrides localStorage entry from prior use on the same origin will silently persist in production with no UI available to clear it."
+    },
+    {
+      "file": "bundleExclusion.test.ts",
+      "line": 18,
+      "claim": "The marker string 'local feature-flag overrides' used in the bundle exclusion test is generic enough that an unrelated future copy change could accidentally satisfy or invalidate the assertion; a longer, editor-specific sentinel string or a dedicated data attribute would make the test more robust."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "There is no unit test for FeatureFlagEditor covering the search filter, the enable/disable and dispatch behavior of 'Reset all overrides', or the empty overridden section."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "There is no unit test for FeatureFlagSection verifying it returns null when rows.length is 0."
+    },
+    {
+      "file": null,
+      "line": null,
+      "claim": "There is no test covering applyFeatureOverrides when a chain has an override for a feature that is not present in the Chain['features'] enum type; the cast to string is safe but lacks a coverage anchor."
+    },
+    {
+      "file": "FeatureFlagRow.tsx",
+      "line": 58,
+      "claim": "The empty span used as an alignment spacer relies on an existing grid comment for context and could be lost or misunderstood in future edits without more explicit annotation."
+    },
+    {
+      "file": "useFeatureFlagEditorData.ts",
+      "line": 53,
+      "claim": "Sorting is performed inline with localeCompare on every render even though FEATURES is a fixed enum; alphabetizing once at module scope would avoid repeated re-sorting."
+    },
+    {
+      "file": "SafeSidebarContent.tsx",
+      "line": 114,
+      "claim": "selectOverrideCount subscribes the sidebar to the store in production even though the feature-flag group is hidden there, causing an unnecessary (if cheap) subscription; hoisting the IS_PRODUCTION check above useAppSelector would avoid this at the cost of a conditional-hook pattern."
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "pr": 8579,
+  "title": "fix(safenet): canonical read aim and coverage-gated absent-check claim",
+  "description": "## What it solves\n\nTwo gaps in the Safenet check read path, found in a deep review of the aiming and\nclassification logic after #8577.\n\n- **The read-window aim belonged to whichever surface subscribed first.** All surfaces share\n  one cache entry and one poll loop, but RTK Query replays the `originalArgs` of the fetch\n  that created the entry — so the first subscriber's timestamp aimed every later poll, and a\n  later surface could neither refetch nor re-aim. Today every shipped surface offers the same\n  `submissionDate` (verified against CGW v1.122.0: the queue summary `timestamp` and\n  `detailedExecutionInfo.submittedAt` both map to it, and the queue chip only renders while\n  `executionDate` is null), so the guarantee currently holds **by accident**. This makes it\n  hold by construction, so a future surface with a worse timestamp cannot silently mis-aim\n  the shared read.\n- **\"No Safenet check was requested\" rendered for any empty read.** An empty snapshot only\n  means \"no matching logs in the chosen range\", and several real paths produce an empty\n  snapshot from a window that cannot support the claim: a non-converged block estimate, the\n  head-relative fallback, a targeted window whose forward reach has closed behind the head —\n  and a chain head lagging the submission stamp, where a lag inside the 600s estimate\n  tolerance read as \"converged\" and asserted the confident copy over blocks the endpoint had\n  not served yet.\n\n## How this PR fixes it\n\nOne commit per concern:\n\n1. `fix(safenet): make a check's read aim canonical instead of first-subscriber` — a\n   module-level aim registry keyed by the same `chainId:safeAddress:safeTxHash` identity as\n   the cache entry. Surfaces offer timestamps; the registry keeps the minimum (submission\n   time is by definition the earliest any surface can offer); `queryFn` resolves the aim at\n   execution time, so every poll replays the best aim known then. `timestampMs` is removed\n   from the query args entirely, which makes \"the query never aims by its own stale args\"\n   structural. If a later surface offers an earlier time, the hook refetches exactly once\n   (guarded on `isFetching`; terminates because the aim only decreases on external input).\n   Registry lifetime is tied to the cache entry via `onCacheEntryAdded`.\n2. `fix(safenet): claim an absent check only from a window that covers one` — the reader now\n   reports `windowCoverage: 'proven' | 'heuristic'` alongside the snapshot. `proven` requires\n   all three: the chain head has actually reached the submission time, the block estimate\n   converged on a real past timestamp, and the window still runs to the head (no block the\n   check could live in went unread). Only a `proven` empty read renders \"No Safenet check was\n   requested\" (`NO_CHECK`); every other empty read is the new `WINDOW_UNCERTAIN` reason,\n   wearing the existing non-committal \"Status unavailable\" copy — no new product copy, never\n   an error tone. Chosen block ranges are byte-identical to before; coverage is a report\n   about the window, not a change to it.\n\n## How to test it\n\n- `yarn workspace @safe-global/utils test --testPathPattern safenet-checks` → 223 passing\n  (new: aim registry fold/lifetime, one-shot re-aim, window-coverage classification with the\n  lagging-head boundary tested on both sides of the tolerance, reason projection).\n- `yarn workspace @safe-global/store test src/safenet` → 50 passing (canonical aim replayed\n  on every poll, first-subscriber inversion probe, coverage carried onto the snapshot).\n- `yarn workspace @safe-global/web test src/features/safenet-checks` → 45 passing\n  (`WINDOW_UNCERTAIN` presentation, absent-check copy gated on the proving reason).\n- Every behavioral change is mutation-tested: inverting the registry fold (max instead of\n  min), ignoring the registry in `queryFn`, dropping the refetch guard, forcing\n  `coverage: 'proven'`, collapsing the reason projection, or giving `WINDOW_UNCERTAIN` the\n  confident copy each makes named tests fail.\n- Verified on a full local stack (config service, transaction service, CGW, chain +\n  validators): BENIGN unchanged; a fresh unproposed transaction renders `NO_CHECK` from a\n  proven window; a staged 300s-lagging head renders `WINDOW_UNCERTAIN` with the\n  non-committal copy where it previously asserted the confident claim; opening a second\n  surface over a mounted one produces no extra read burst (no re-aim loop).\n\n## Affected flows\n\n- Confirm/execute flow (Safe Shield section): the only surface that renders the absent-check\n  copy — now gated on proven coverage.\n- Transaction queue rows and audit log: same shared read; aim now canonical across surfaces.\n- Polling: `UNAVAILABLE` cadence and the 10-minute grace window are unchanged; the grace\n  anchor now uses the resolved aim (identical in practice — all surfaces offer the same\n  date; a surface offering nothing now inherits the shared anchor instead of disabling the\n  window).\n\n## Blast radius\n\n- `safenetCheckApi`: endpoint arg type narrowed to the check identity; cache key unchanged;\n  single-entry/single-loop property preserved and still probed by tests.\n- New `safenetAimRegistry` (store package): render-safe min-fold; not persisted; bounded by\n  checks rendered per session.\n- `useSafenetCheck`: offers timestamps to the registry instead of passing them as args; new\n  one-shot re-aim effect (inert today — all surfaces offer the same value).\n- `SafenetReader.readRange`: classification added; ranges untouched (every coverage test\n  also asserts the exact `[fromBlock, toBlock]`).\n- `statusPresentation`: three-valued `UnavailableReason`; presentation table is exhaustive\n  by construction (a fourth reason cannot ship without a presentation).\n- Mobile: no mobile surface consumes these modules; shared-package changes covered by the\n  package suites.\n\n## Risks / not checked\n\n- `proven` rests on an upstream contract this repo cannot assert: every shipped surface\n  offers CGW's `submissionDate`. If an upstream mapping ",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "packages/store/src/safenet/safenetAimRegistry.ts",
+      "line": 1,
+      "claim": "The registry machinery may be more elaborate than what today's callers need, since every current surface supplies the same timestamp value."
+    },
+    {
+      "id": "F2",
+      "file": "packages/utils/src/features/safenet-checks/hooks/useSafenetCheck.ts",
+      "line": 147,
+      "claim": "The comment stating \"Exactly one refetch\" does not hold on the failure path, since a failed refetch can trigger repeated additional refetches."
+    },
+    {
+      "id": "F3",
+      "file": "packages/utils/src/features/safenet-checks/hooks/useSafenetCheck.ts",
+      "line": 150,
+      "claim": "The re-aim effect that triggers a refetch when the aim timestamp changes has no guard for a prior fetch error, no retry cap, and no backoff, so a failed refetch leaves the old snapshot and its old aimedAtMs in place, causing the effect to fire again and refetch repeatedly against the RPC, bypassing pollingInterval and skipPollingIfUnfocused."
+    },
+    {
+      "id": "F4",
+      "file": "packages/store/src/safenet/safenetAimRegistry.ts",
+      "line": 24,
+      "claim": "The module-level aims Map lives outside Redux, is written during render, and is cleared as part of another package's cache lifecycle, with nothing structurally pairing the two so they can drift out of sync."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/features/safenet-checks/statusPresentation.ts",
+      "line": 69,
+      "claim": "The copy shown for any empty read whose window is not proven was changed from 'Not checked' to 'Status unavailable ... Retry later', without a stated product or design sign-off for this visible behavior change. The read did not actually fail, and for transactions old enough that the window will never reach proven, the 'Retry later' message is misleading since retrying will never help."
+    },
+    {
+      "id": "F6",
+      "file": "packages/store/src/safenet/safenetAimRegistry.ts",
+      "line": 24,
+      "claim": "The aims map has no size cap, so an entry recorded during a render that React later discards before committing is only freed when the page unloads."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/features/safenet-checks/__tests__/statusPresentation.test.ts",
+      "line": 17,
+      "claim": "The test asserts that the WINDOW_UNCERTAIN copy equals the READ_FAILED copy, so it will need to be updated once WINDOW_UNCERTAIN is given its own distinct message."
+    },
+    {
+      "id": "F8",
+      "file": "packages/utils/src/features/safenet-checks/hooks/useSafenetCheck.ts",
+      "line": 57,
+      "claim": "The hook grew from 103 to 113 lines, exceeding the stated 80-line limit, and took on a third responsibility (aim coordination) that could be split out into its own hook, such as useCheckAim."
+    },
+    {
+      "id": "F9",
+      "file": "apps/web/src/features/safenet-checks/statusPresentation.ts",
+      "line": 64,
+      "claim": "The WINDOW_UNCERTAIN status reuses copy borrowed from READ_FAILED (\"Retry later\"), which tells the user to retry a condition that retrying can never resolve, since polling stops permanently after 10 minutes and a page reload recomputes the same heuristic result."
+    },
+    {
+      "id": "F10",
+      "file": "packages/utils/src/features/safenet-checks/hooks/useSafenetCheck.ts",
+      "line": 150,
+      "claim": "There is no test covering a failed refetch whose retained aimedAtMs still does not match the current aim, leaving the unbounded-retry behavior unverified."
+    },
+    {
+      "id": "F11",
+      "file": "packages/utils/src/features/safenet-checks/hooks/useSafenetCheck.ts",
+      "line": 42,
+      "claim": "This is where the status copy choice described above is made, feeding into the same unapproved behavior change for empty reads whose window isn't proven."
+    },
+    {
+      "id": "F12",
+      "file": "packages/utils/src/features/safenet-checks/hooks/__tests__/useSafenetCheck.test.ts",
+      "line": 174,
+      "claim": "The test that anchors the UNAVAILABLE grace window calls jest.useFakeTimers() but only restores real timers on the test's last line instead of in an afterEach, so if an assertion fails partway through, fake timers leak into later tests. This is inconsistent with the other fake-timer blocks in the same file, which use afterEach(() => jest.useRealTimers())."
+    },
+    {
+      "id": "F13",
+      "file": "packages/store/src/safenet/safenetAimRegistry.ts",
+      "line": 26,
+      "claim": "isUsableAim treats a value as usable only when greater than 0, while the reader's timestamp guard at safenetReader.ts:249 handles 0 differently, so the two pieces of logic disagree on how a zero timestamp should be treated."
+    },
+    {
+      "id": "F14",
+      "file": "apps/web/src/features/safenet-checks/components/SafenetAuditRow.tsx",
+      "line": 37,
+      "claim": "The prop doc comment still says the timestamp 'aims the reader's block window', but after this change it is only offered to the aim registry, which keeps the earliest time any surface offered; the matching comment was updated in SafenetQueueStatus.tsx but not here."
+    }
+  ]
+}

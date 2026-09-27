@@ -1,0 +1,20 @@
+{
+  "usd": 0.045419600000000004,
+  "findings": [
+    {
+      "file": "apps/web/src/components/ui/checkbox.tsx",
+      "line": 42,
+      "claim": "The change hides the checkbox icon in the indeterminate state via `data-indeterminate:[&>svg]:hidden`, and since the filled background only applies when checked, an indeterminate-but-unchecked box now renders as an empty grey-bordered square identical to an unchecked box. This affects the 'Select all' toggle in apps/web/src/features/spaces/components/SelectAllToggle/SelectAllToggle.tsx:53, where a partial selection now looks the same as no selection for sighted users, even though the aria-checked=\"mixed\" attribute is still correct for screen readers."
+    },
+    {
+      "file": "apps/web/src/components/ui/checkbox.tsx",
+      "line": 42,
+      "claim": "The PR description does not state whether any open design-system rewrite of the shared UI primitives under apps/web/src/components/ui/ is in progress or needs coordination, which has previously led to edits being lost to merge conflicts."
+    },
+    {
+      "file": "apps/web/src/components/ui/stories/checkbox.stories.tsx",
+      "line": 39,
+      "claim": "The new indeterminate-state styling is not exercised by any story: the checkbox stories only cover unchecked, checked, disabled, and checked+disabled, so a visual regression in the indeterminate appearance would not be caught by the story snapshot workflow, and no other test checks the checkbox's visual appearance in that state."
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "usage": {
+    "usd": 0.513972,
+    "turns": 6,
+    "wallSeconds": 53
+  },
+  "issues": [
+    {
+      "findings": [
+        "F3",
+        "F4",
+        "F5"
+      ],
+      "summary": "Hook doc comment claims it is shared with the header /wallet-connect-scan scanner and a 'replace' mode exists for it, but no such caller exists at HEAD",
+      "label": "low",
+      "evidence": "useScannedAddressToSend.ts:20-25,57-71 describe a header-scanner consumer and 'replace' mode; grep shows only ScanQrSend.container.tsx:40 imports the hook and it never passes 'replace'. The comment is inaccurate and the branch is dead code, but it doesn't change runtime behaviour."
+    },
+    {
+      "findings": [
+        "F2",
+        "F11"
+      ],
+      "summary": "Rewritten ScanQrSend onScan has no container-level test",
+      "label": "medium",
+      "evidence": "ScanQrSend.container.tsx:57-77 was rewritten (the guard/setIsCameraActive moved out of navigateToRecipient into onScan), and no ScanQrSend test exists in features/Send. Reverting or breaking this ordering would not fail any test."
+    },
+    {
+      "findings": [
+        "F8",
+        "F10",
+        "F20"
+      ],
+      "summary": "Dedupe test doesn't check that a different value still toasts",
+      "label": "low",
+      "evidence": "useScannedAddressToSend.test.tsx:91-98 only calls with 'foo' twice and checks one call, so a single-boolean dedupe would still pass. The weakness is real, but the impact is small."
+    },
+    {
+      "findings": [
+        "F13"
+      ],
+      "summary": "No test for a prefix with no active chain",
+      "label": "low",
+      "evidence": "The inline condition at useScannedAddressToSend.ts:48 is never tested with a prefix and activeChain undefined. The tests at :72-89 always set shortName 'eth'. It's equivalent to the old isChainMismatch, so the risk is small."
+    },
+    {
+      "findings": [
+        "F9"
+      ],
+      "summary": "ImportReadOnly useScan duplicates parse/validate/dedupe logic with a module-level dedupe map",
+      "label": "low",
+      "evidence": "features/ImportReadOnly/hooks/useScan/index.ts:10,38-54 does keep a module-level toastForValueShown and duplicates resolveScannedAddress logic. The file is untouched by this diff, so this is at most low."
+    },
+    {
+      "findings": [
+        "F1"
+      ],
+      "summary": "Claim that the ImportReadOnly test mocks internals while the hook calls resolveScannedAddress",
+      "label": "wrong",
+      "evidence": "At HEAD, ImportReadOnly/hooks/useScan/index.ts:6-7,38-40 calls parsePrefixedAddress/isValidAddress directly and never uses resolveScannedAddress. The test mocks match what the hook actually calls, and the file isn't in the diff."
+    },
+    {
+      "findings": [
+        "F15"
+      ],
+      "summary": "Focus effect re-activates the camera behind an error overlay in ScanQrSend",
+      "label": "wrong",
+      "evidence": "ScanQrSend.container.tsx at HEAD has no error overlay: errors are toasts (showInvalidAddressToast, :67) and there's no ScanErrorOverlay in components/Camera. The camera/overlay disagreement described can't happen."
+    },
+    {
+      "findings": [
+        "F19"
+      ],
+      "summary": "Same overlay/focus mismatch in ImportReadOnly useScan",
+      "label": "wrong",
+      "evidence": "ImportReadOnly/hooks/useScan/index.ts:19-30 has no error-message state or overlay (it uses a toast at :50), and the file is unchanged by the PR."
+    },
+    {
+      "findings": [
+        "F12"
+      ],
+      "summary": "handledRef in useWalletConnectScan is never reset",
+      "label": "wrong",
+      "evidence": "grep finds no handledRef or onAddressScanned under features/WalletConnect at HEAD, and useWalletConnectScan isn't in the diff. The code this finding describes doesn't exist."
+    },
+    {
+      "findings": [
+        "F7"
+      ],
+      "summary": "The expo-router mock exports only useRouter",
+      "label": "wrong",
+      "evidence": "useScannedAddressToSend.ts:2 imports only useRouter, and tests/test-utils.tsx doesn't import expo-router, so the mock at test:8-10 is enough."
+    },
+    {
+      "findings": [
+        "F14",
+        "F16"
+      ],
+      "summary": "New hook is comment-heavy compared with its siblings",
+      "label": "nit",
+      "evidence": "useScannedAddressToSend.ts has 11 comment lines, while sibling hooks have 0-5. AGENTS.md discourages unneeded comments, but this is style (the factual inaccuracy is covered separately)."
+    },
+    {
+      "findings": [
+        "F6"
+      ],
+      "summary": "Import skips the Camera barrel for useCameraPermissionFlow",
+      "label": "nit",
+      "evidence": "ScanQrSend.container.tsx:7 is an unchanged pre-existing line. The barrel at components/Camera/index.ts does export it, and ScanQrAccount.container.tsx uses the same direct path. It's a pure style inconsistency."
+    },
+    {
+      "findings": [
+        "F17"
+      ],
+      "summary": "Test hardcodes an address literal instead of using faker",
+      "label": "nit",
+      "evidence": "useScannedAddressToSend.test.tsx:4 hardcodes a checksummed address. A fixed known-valid checksummed value is reasonable for resolveScannedAddress assertions, so this is only a convention preference."
+    },
+    {
+      "findings": [
+        "F18"
+      ],
+      "summary": "Date.now() scanTimestamp could collide within one millisecond",
+      "label": "nit",
+      "evidence": "useScannedAddressToSend.ts:64 keeps the pre-existing Date.now() behaviour. The hasScanned guard at ScanQrSend.container.tsx:59,72 stops a second navigation, so a same-millisecond collision is practically unreachable."
+    }
+  ]
+}

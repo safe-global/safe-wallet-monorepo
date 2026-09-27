@@ -1,0 +1,79 @@
+{
+  "pr": 8192,
+  "title": "feat: add date validation to activity filter",
+  "description": "## What it solves\r\n\r\nResolves **[WA-2617](https://linear.app/safe-global/issue/WA-2617/activity-no-date-validation-from-date-can-be-after-to-date-showing)** — the Space activity log date filters had no validation. You could set **From** to a date *after* **To**, or pick **future dates**, and the UI gave no feedback — the query just silently returned \"No results\".\r\n\r\n## How this PR fixes it\r\n\r\n`ActivityLogFilters` now validates the date range and constrains the pickers:\r\n\r\n- **From-after-To is flagged.** When both bounds are set and From starts after To ends, both date inputs go into an invalid state (`aria-invalid`) and an inline error appears below the row: *\"'From' date can't be after the 'To' date\"*.\r\n- **Pickers are constrained at the source.** From's `max` is the To date (or today), To's `min` is the From date — and both are capped at **today**, since activity is historical and future dates are meaningless. The inline error remains as a backstop for typed input that bypasses the native picker.\r\n- **Accessibility.** Invalid date inputs are linked to the error text via `aria-describedby`, so screen readers announce *why* the field is invalid.\r\n- **Same-day ranges stay valid** (From is start-of-day, To is end-of-day).\r\n- **From/To dates is capped to today** preventing them to ever be in the future\r\n\r\nAlongside the fix, the component was refactored and the styling matched to the activity log:\r\n\r\n- Extracted `FilterField` (label + column) and `DateFilter` to remove ~duplicated JSX across the four filters.\r\n- Moved the pure date helpers (`toIsoBound`, `toDateInputValue`, `isInvalidDateRange`) into `dateFilters.ts` with dedicated unit tests.\r\n- Date inputs and select triggers now use `dark:bg-card` so they match the grey of the activity log entries panel in dark mode (previously the date inputs rendered the `Input`'s faint translucent `dark:bg-input/30`).\r\n\r\n## How to test it\r\n\r\n1. Open a Space → **Activity** tab.\r\n2. Set **From** to a later date than **To** → both fields turn red and the inline error shows.\r\n3. Try to pick a **future** date in either field → the native picker blocks it (capped at today).\r\n4. Set a valid range, a same-day range, or only one bound → no error.\r\n5. Switch to **dark mode** → the filter inputs match the grey of the activity entries panel below.\r\n\r\n<img width=\"898\" height=\"265\" alt=\"Screenshot 2026-06-24 at 5 31 15 PM\" src=\"https://github.com/user-attachments/assets/891fed57-7b65-48a7-8d44-f994e43364b4\" />\r\n<img width=\"898\" height=\"265\" alt=\"Screenshot 2026-06-24 at 5 32 08 PM\" src=\"https://github.com/user-attachments/assets/ee29c9cc-39bd-41a4-a8e4-4f01488eec25\" />\r\n\r\n## Affected flows\r\n\r\n- Space activity log filtering (Member / From / To / Sort). Only consumer is `SpaceActivityLog/index.tsx`, which feeds the filters into the audit-log query.\r\n\r\n## Blast radius\r\n\r\n- Self-contained presentational component + a new colocated helper file. No shared hooks, selectors, slices, or endpoints touched. The query in `index.tsx` is unchanged (an invalid range still issues the request and returns no results, now accompanied by the inline error).\r\n\r\n## Risks / not checked\r\n\r\n- `min`/`max`/`today` only constrain the native date picker; typed-in out-of-range dates aren't *blocked*, but the From-after-To case is still surfaced via the inline error. A future typed date isn't separately flagged (it simply returns no results).\r\n- Dark-mode colour match confirmed against tokens (`--card: #171717`); a quick visual check in the running app is recommended.\r\n\r\n## Visual summary\r\n\r\n```mermaid\r\nflowchart TD\r\n  A[From / To date inputs] --> B{Both bounds set?}\r\n  B -->|No| OK[Valid - no error]\r\n  B -->|Yes| C{From after To?}\r\n  C -->|Yes| ERR[aria-invalid on both inputs<br/>+ inline error + aria-describedby]\r\n  C -->|No| OK\r\n  A --> D[Native picker constraints]\r\n  D --> E[From.max = To or today]\r\n  D --> F[To.min = From, To.max = today]\r\n```\r\n\r\n## Checklist\r\n\r\n- [x] I've added/updated unit tests (range validation, today caps, picker constraints, helper unit tests)\r\n- [x] Lint, prettier, type-check, and tests pass\r\n- [x] UI copy uses sentence case\r\n- [ ] Visual confirmation in dark mode in a running build\r\n",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/features/spaces/components/SpaceActivityLog/ActivityLogFilters.tsx",
+      "line": 91,
+      "claim": "The 'today' value used for the max date limit is recalculated on every render rather than kept in sync with the actual date, so if a tab stays open past midnight without re-rendering, the max limit remains stuck on the previous day until something triggers a re-render."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/features/spaces/components/SpaceActivityLog/index.tsx",
+      "line": 67,
+      "claim": "queryArgs is built and passed to the audit log hook without checking whether the current date range is valid, so an invalid range still reaches the query."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/features/spaces/hooks/useGetSpaceAuditLog.ts",
+      "line": 27,
+      "claim": "The hook only skips fetching when the user is unauthenticated or there is no space; it has no guard for an invalid/inverted date range, so it will query the backend with bad dates."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/features/spaces/components/SpaceActivityLog/ActivityLogFilters.tsx",
+      "line": 92,
+      "claim": "The date range validation only sets the error message shown on the fields; invalid dates are still passed through onFiltersChange and end up in the query sent to useGetSpaceAuditLog, which only skips fetching when the user isn't signed in or there's no space. As a result a user can enter an inverted or otherwise invalid date range, see a validation error, and still have the activity log re-query and show stale or erroneous results (e.g. 'No results' or 'Could not load activity.'), so the UI contradicts itself."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/features/spaces/components/SpaceActivityLog/__tests__/index.test.tsx",
+      "line": null,
+      "claim": "There is no test covering the query side of the invalid date range case; existing tests only cover the validation helpers, not that an inverted range is prevented from reaching the query."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/src/features/spaces/components/SpaceActivityLog/ActivityLogFilters.tsx",
+      "line": 140,
+      "claim": "Like the other date field's handler, this one also forwards invalid dates to onFiltersChange rather than blocking them."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/features/spaces/components/SpaceActivityLog/ActivityLogFilters.tsx",
+      "line": 136,
+      "claim": "toDateInputValue(filters.createdAtLte) is called again here even though its result is already stored as toDateBound at line 94, duplicating the computation instead of reusing the existing value."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/src/features/spaces/components/SpaceActivityLog/ActivityLogFilters.tsx",
+      "line": 90,
+      "claim": "The PR description should link the ticket or design spec (e.g. WA-2617) that specifies which field gets flagged for the out-of-order error and the exact error message wording, since this isn't otherwise traceable from the diff."
+    },
+    {
+      "id": "F9",
+      "file": "apps/web/src/features/spaces/components/SpaceActivityLog/ActivityLogFilters.tsx",
+      "line": 127,
+      "claim": "toDateInputValue(filters.createdAtGte) is called inline within JSX attributes rather than being computed once as a local const before the return, causing the same date conversion to run multiple times per render."
+    },
+    {
+      "id": "F10",
+      "file": "apps/web/src/features/spaces/components/SpaceActivityLog/ActivityLogFilters.tsx",
+      "line": 130,
+      "claim": "The change handler still calls onFiltersChange with dates that getDateFilterValidation has flagged as invalid instead of withholding them."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/src/features/spaces/components/SpaceActivityLog/ActivityLogFilters.tsx",
+      "line": 28,
+      "claim": "The new FilterField and DateFilter sub-components introduce validation/error states but have no Storybook story showing them in an error state (e.g. out-of-order range or future date), leaving the new inline error UI without visual coverage, per the story guideline in apps/web/AGENTS.md."
+    },
+    {
+      "id": "F12",
+      "file": "apps/web/src/features/spaces/components/SpaceActivityLog/dateFilters.ts",
+      "line": 24,
+      "claim": "The PR introduces user-facing behavior changes (blocking future dates on both pickers, showing the out-of-order error only on the From field, and two new error messages) without the diff showing where this decision comes from, so it is unclear whether product or design has signed off on this exact behavior and wording."
+    }
+  ]
+}

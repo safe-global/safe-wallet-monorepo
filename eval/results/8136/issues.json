@@ -1,0 +1,83 @@
+{
+  "usage": {
+    "usd": 0.42017699999999997,
+    "turns": 5,
+    "wallSeconds": 44
+  },
+  "issues": [
+    {
+      "findings": [
+        "F2",
+        "F4",
+        "F14",
+        "F15",
+        "F11"
+      ],
+      "summary": "Settings → General IdentitySection still uses its own 60-char limit instead of SPACE_NAME_MAX_LENGTH, so names of 31–60 chars can be saved there (and then fail the create/edit onboarding maxLength check).",
+      "label": "low",
+      "evidence": "IdentitySection.tsx:12 defines MAX_NAME_LENGTH = 60 and applies it at line 81; the PR never touches this file, so the gap is real. It is a pre-existing inconsistency outside the diff (the Linear issue targets the rename dialog), which caps it at low. The onboarding edit-mode fallout (CreateSpaceOnboarding validates maxLength on submit) follows from the same root cause."
+    },
+    {
+      "findings": [
+        "F5",
+        "F12"
+      ],
+      "summary": "The new constant's doc comment claims the limit is 'Enforced on both create and rename', but the Settings page rename path (IdentitySection) doesn't use it.",
+      "label": "low",
+      "evidence": "constants.ts:14 was added by this PR, while IdentitySection.tsx:12/81 still enforces 60. The comment is misleading documentation, which is a minor issue."
+    },
+    {
+      "findings": [
+        "F1",
+        "F10",
+        "F7"
+      ],
+      "summary": "The rename dialog enforces the limit only with the HTML maxLength attribute, so over-long input is silently truncated with no validation message, unlike create.",
+      "label": "low",
+      "evidence": "UpdateSpaceForm.tsx:40 sets htmlInput.maxLength, and the Controller has no rules and renders no fieldState.error. The limit is still enforced, so the only cost is inconsistent UX feedback on paste."
+    },
+    {
+      "findings": [
+        "F3",
+        "F6"
+      ],
+      "summary": "An existing name longer than 30 chars isn't flagged in the rename dialog and can still be saved after a minor edit.",
+      "label": "low",
+      "evidence": "The claim that the name can be re-saved *unchanged* is wrong: the Save button is disabled when formName === space.name (UpdateSpaceForm.tsx:23-25). But maxLength only blocks growing the value, so deleting or changing a single character of a 40-char legacy name saves it with no error. That is a minor edge case."
+    },
+    {
+      "findings": [
+        "F9"
+      ],
+      "summary": "The rename dialog doesn't apply the create form's special-character pattern validation.",
+      "label": "low",
+      "evidence": "CreateSpaceOnboarding has pattern /^[a-zA-Z0-9 ]+$/, while UpdateSpaceForm's Controller (lines 32-43) has no rules, so rename accepts special characters. This inconsistency predates the PR and is outside its scope."
+    },
+    {
+      "findings": [
+        "F8",
+        "F13",
+        "F16"
+      ],
+      "summary": "The tests don't cover the IdentitySection rename limit or the create-flow limit; only the dialog's maxlength attribute is tested.",
+      "label": "low",
+      "evidence": "The only new test is UpdateSpaceForm.test.tsx:82-87, and IdentitySection has no test file. The untested area is mostly code the PR didn't change, so the coverage gap is minor."
+    },
+    {
+      "findings": [
+        "F17"
+      ],
+      "summary": "The claim is that NameInput is effectively unused (only SpaceCreationModal) and should be removed or aligned to the shared constant.",
+      "label": "wrong",
+      "evidence": "grep shows common/NameInput imported in many places (address book EntryDialog, AddOwner, SetNameStep, proposers, and others), so it is far from unused. It is a generic name input with its own 50-char contract, not a workspace-name field."
+    },
+    {
+      "findings": [
+        "F18"
+      ],
+      "summary": "It's unclear whether the backend enforces the 30-char limit.",
+      "label": "unverifiable",
+      "evidence": "The generated CreateSpaceDto and UpdateSpaceDto (spaces.ts:468, 499) carry no maxLength, but generated types don't prove what the server validates. This can't be settled from this repo."
+    }
+  ]
+}

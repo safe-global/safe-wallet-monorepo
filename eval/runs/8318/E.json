@@ -1,0 +1,11 @@
+{
+  "pr": 8318,
+  "reviewSha": "f5f546d5837d3677f80f5c15b62bfa185287aa91",
+  "baseSha": "f4937ec08eead60f98666a6852a8a0c9980b6bdb",
+  "system": "E",
+  "version": "github",
+  "runner": "collect",
+  "model": "human",
+  "commentSha": "8ae9b8437120a61e641cc832f0878902c7cd1cd8",
+  "output": "packages/utils/src/utils/addressSimilarity.ts:115\nCan we try to refactor so that we use e.g. map/forEach instead of while/for loops? And also use more self-explanatory variable names. Just to make it easier to read.\n\n---\n\napps/web/src/features/spaces/components/SelectSafesOnboarding/hooks/useOnboardingSafes.ts:57\nCan you check if we can re-use `useAllSafes` here in any way? \n\n---\n\napps/web/src/features/spaces/components/SelectSafesOnboarding/hooks/useOnboardingSafes.ts:34\nShould we make sure that the list has unique values only?\n\n---\n\napps/web/src/components/common/TrustedSafesModal/useTrustedSafesModal.ts:115\nThis pattern is used in many places on this PR. Can we extract it into a separate hook?"
+}

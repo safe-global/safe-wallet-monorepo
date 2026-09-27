@@ -1,0 +1,18 @@
+{
+  "usage": {
+    "usd": 0.26309499999999997,
+    "turns": 3,
+    "wallSeconds": 20
+  },
+  "issues": [
+    {
+      "findings": [
+        "F1",
+        "F2"
+      ],
+      "summary": "Deleting the mirror workflow before the migration is signed off removes the only way to backfill Docker Hub tags into GHCR (for example, tags published before the GHCR push step lands).",
+      "label": "low",
+      "evidence": "The deleted file's header (.github/workflows/mirror-to-ghcr.yml:3 at base) says to delete it once the migration is signed off, and web-deploy-dockerhub.yml still publishes only to Docker Hub, so any release made before the GHCR push step lands will be missing from GHCR. The PR description says all 171 existing tags were copied and digest-verified, which answers F1's worry about tags that were never copied. The workflow can also be restored from git history in one step, so the remaining cost is small."
+    }
+  ]
+}

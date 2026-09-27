@@ -1,0 +1,93 @@
+{
+  "usage": {
+    "usd": 0.48627360000000003,
+    "turns": 7,
+    "wallSeconds": 51
+  },
+  "issues": [
+    {
+      "findings": [
+        "F2",
+        "F8",
+        "F14"
+      ],
+      "summary": "Early return on unknown decimals skips all inline amount validation (int96 range and decimal length), so bad amounts only fail later on the review step",
+      "label": "low",
+      "evidence": "CreateSpendingLimit/index.tsx:24 returns undefined when decimals is null, and validateDecimalLength (packages/utils/src/utils/validation.ts:120) also returns early for null maxLen, so nothing checks the amount. The PR intends this and names the unguarded Next click as a risk. The later failure is a generic error in createNewSpendingLimitTx, with no funds at risk, and only very large or >18-decimal amounts on a zero-balance Safe hit it."
+    },
+    {
+      "findings": [
+        "F6",
+        "F9"
+      ],
+      "summary": "Review step passes undefined decimals to createNewSpendingLimitTx, which silently defaults parseUnits to 18 decimals",
+      "label": "low",
+      "evidence": "ReviewSpendingLimit/index.tsx:33 and spendingLimitExecution.ts:99 (`tokenDecimals ?? undefined`) are unchanged by the PR. In practice only the native token (the default, almost always 18 decimals) can be missing from balances, because the selector offers only visible balances. So a wrong allowance for a 6-decimal token is theoretical."
+    },
+    {
+      "findings": [
+        "F10"
+      ],
+      "summary": "Review hides SendAmountBlock when the token is missing, so the amount is not shown before signing",
+      "label": "low",
+      "evidence": "ReviewSpendingLimit/index.tsx:101 renders the amount block only when `token` is set. This code predates the PR and sits outside the diff, but zero-balance Safes can now reach review with an amount."
+    },
+    {
+      "findings": [
+        "F11",
+        "F12"
+      ],
+      "summary": "`decimals ?? 'Gwei'` fallback is now unreachable dead code",
+      "label": "low",
+      "evidence": "CreateSpendingLimit/index.tsx:24 returns when decimals == null, so at line 27 `?? 'Gwei'` can never apply and just leaves a confusing, invalid ethers v6 unit in the code."
+    },
+    {
+      "findings": [
+        "F5"
+      ],
+      "summary": "Unknown-decimals test covers only '1' and '1.1', not too-large or too-many-decimals inputs",
+      "label": "low",
+      "evidence": "SpendingLimitForm.test.ts's new case asserts undefined only for '1' and '1.1'. It pins the skip but does not document what happens to out-of-range inputs, which now pass through to review."
+    },
+    {
+      "findings": [
+        "F3"
+      ],
+      "summary": "Test fixture is hand-written instead of using balanceBuilder/nativeTokenBuilder",
+      "label": "nit",
+      "evidence": "CreateSpendingLimit.test.tsx:21 builds nativeBalance by hand, although apps/web/src/tests/builders/balances.ts provides nativeTokenBuilder/balanceBuilder that could be overridden with ZERO_ADDRESS. This is a convention preference with no functional cost."
+    },
+    {
+      "findings": [
+        "F4"
+      ],
+      "summary": "New test added to the legacy out-of-feature test file with deep import and eslint-disable instead of the new in-feature test",
+      "label": "nit",
+      "evidence": "The eslint-disable deep import at SpendingLimitForm.test.ts:1 was already there. The PR only added a case to an existing describe block. Moving it would be tidier, but nothing concrete breaks."
+    },
+    {
+      "findings": [
+        "F7"
+      ],
+      "summary": "Inconsistent Tailwind arbitrary-value syntax (`max-w-[var(--available-width)]` vs `max-w-(--available-width)`)",
+      "label": "nit",
+      "evidence": "TokenAmountInput/index.tsx uses the bracket form, ui/combobox.tsx:140 uses the v4 shorthand, and navigation-menu.tsx:114 uses brackets. Both forms work, so this is purely stylistic."
+    },
+    {
+      "findings": [
+        "F1"
+      ],
+      "summary": "Blank token selector on zero-balance Safe; suggest showing native currency",
+      "label": "wrong",
+      "evidence": "TokenAmountInput/index.tsx renders '' when the selected token is missing from balances. The PR description says a blank trigger is the intended behaviour, matching main's MUI behaviour. This is a UX suggestion, not a defect in the change."
+    },
+    {
+      "findings": [
+        "F13"
+      ],
+      "summary": "No stated product/design sign-off for the behaviour change",
+      "label": "unverifiable",
+      "evidence": "Whether product or design approved this can't be settled from the code. The PR links a Linear ticket (WA-3452) that describes the fix."
+    }
+  ]
+}

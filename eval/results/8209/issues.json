@@ -1,0 +1,151 @@
+{
+  "usage": {
+    "usd": 0.792598,
+    "turns": 12,
+    "wallSeconds": 103
+  },
+  "issues": [
+    {
+      "findings": [
+        "F7",
+        "F12",
+        "F14",
+        "F19"
+      ],
+      "summary": "SpaceAddressBookTable address column narrowed to 30% with middle column and minWidth lowered to 240, so full addresses clip in non-compact mid-width layouts",
+      "label": "medium",
+      "evidence": "SpaceAddressBookTable.tsx:94-95 now gives 30% when hasMiddleColumn. Before, the widths summed to 110%, so the address got about 36% (≈327px at a 900px container); now it gets 270px. The compact floor is 120+240+90+120+80=650, so between ~650px and ~1100px the full 40-char mono address plus its buttons overflows the cell. PaginatedDataTable/index.tsx:174 confirms that minWidth only feeds the threshold under table-fixed."
+    },
+    {
+      "findings": [
+        "F9"
+      ],
+      "summary": "PendingRequestsTable address column may clip at mid-width containers",
+      "label": "low",
+      "evidence": "PendingRequestsTable.tsx:164: the old widths summed to 110% (address ≈27%), and the new ones sum to 100% (address 30%). The address cell actually gets wider at the same container width, so this is not a regression. Some clipping between ~670px and ~1100px still predates the PR."
+    },
+    {
+      "findings": [
+        "F20"
+      ],
+      "summary": "Claim that the address is cut off with no ellipsis",
+      "label": "wrong",
+      "evidence": "SrcEthHashInfo/index.tsx:148 wraps the address element in a Box with overflow=\"hidden\" and textOverflow=\"ellipsis\", inside a nowrap .addressContainer. The address does get an ellipsis, so the claim is factually incorrect."
+    },
+    {
+      "findings": [
+        "F1",
+        "F21"
+      ],
+      "summary": "formatDate test depends on local timezone; packages/utils test script has no TZ pin",
+      "label": "low",
+      "evidence": "date.test.ts:5 formats 2026-04-22T12:00Z with date-fns format, which uses local time. packages/utils/package.json:7 runs bare `jest`, unlike web's `TZ=CET`. At UTC+13/+14 the result becomes Apr 23. This is real, but only machines in those timezones would hit it."
+    },
+    {
+      "findings": [
+        "F3",
+        "F6"
+      ],
+      "summary": "First-paint flash before ResizeObserver measures the container on ≥768px viewports",
+      "label": "low",
+      "evidence": "PaginatedDataTable/index.tsx:134 and :180 set containerWidth=null initially, so isCompact is false on first paint, and hideClass (:86) only covers <768px viewports. The PR's Risks section explicitly accepts this one-frame flash."
+    },
+    {
+      "findings": [
+        "F8",
+        "F10"
+      ],
+      "summary": "Two formatDate functions with different semantics now coexist in features/spaces",
+      "label": "low",
+      "evidence": "packages/utils/src/utils/date.ts:20 (absolute 'MMM d, yyyy') and apps/web/src/features/spaces/utils.ts:72 (relative 'Today at …') are both imported in features/spaces (MembersList/index.tsx:2, SpaceAddressBookTable.tsx). The test already had to alias one import, which shows the auto-import confusion has a concrete cost."
+    },
+    {
+      "findings": [
+        "F2"
+      ],
+      "summary": "New shared parseTimestamp duplicates a private helper in AddressBookInput/provenance.ts",
+      "label": "low",
+      "evidence": "apps/web/src/components/common/AddressBookInput/provenance.ts:6 defines a private parseTimestamp that returns undefined instead of null. The logic is otherwise the same as the new packages/utils/src/utils/date.ts:22, so this is a real, minor duplication."
+    },
+    {
+      "findings": [
+        "F13"
+      ],
+      "summary": "Stale comments still describe mobile-only detail row / desktop-only minWidth",
+      "label": "low",
+      "evidence": "PaginatedDataTable/index.tsx:76 still says 'Optional mobile-only collapsible detail row', but showDetailToggle (:183) now depends on isCompact. Line 92 doesn't mention that minWidth now also drives the compact threshold (:176)."
+    },
+    {
+      "findings": [
+        "F15"
+      ],
+      "summary": "ResizeObserver stores the raw width, so the table re-renders on every resize frame",
+      "label": "low",
+      "evidence": "PaginatedDataTable/index.tsx:140 calls setContainerWidth(entry.contentRect.width) on every observation, but only the boolean at :180 matters. Storing the comparison would cut re-renders to the threshold crossings. This is a minor perf cost during resizing."
+    },
+    {
+      "findings": [
+        "F17"
+      ],
+      "summary": "LocalContactActions doesn't follow compact mode (still shows two icon buttons)",
+      "label": "low",
+      "evidence": "SpaceAddressBookTable.tsx passes isCompact only to SpaceAddressBookActions. LocalContactActions.tsx:19 takes no isCompact and always renders two IconButtons, so the actions column is inconsistent in compact mode."
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "Summed minWidths (~900px for pending+2FA) may push ordinary desktop viewports into compact mode",
+      "label": "nit",
+      "evidence": "MembersList minWidths for pending+2FA: 200+130+180+90+110+110+80=900. Going compact when the full set doesn't fit is the PR's stated, container-based design, so this is at most a tuning question."
+    },
+    {
+      "findings": [
+        "F4"
+      ],
+      "summary": "MembersList variant prop has an unnecessary default",
+      "label": "nit",
+      "evidence": "MembersList/index.tsx:131 defaults variant to 'active', and both call sites in Members/index.tsx pass it explicitly. Making it required is a style preference with little concrete cost."
+    },
+    {
+      "findings": [
+        "F11"
+      ],
+      "summary": "100% width invariant is split between dateColumn and the computed widths",
+      "label": "nit",
+      "evidence": "All four configurations sum to exactly 100% (e.g. pending+2FA: 20+10+15+10+15+15+15). The concern is only about future maintainability."
+    },
+    {
+      "findings": [
+        "F18"
+      ],
+      "summary": "capped class applied when showHasMore is true even if no +N badge renders",
+      "label": "nit",
+      "evidence": "NetworkLogosList/index.tsx:24 vs :28. When no +N renders there are at most maxVisible (4) logos, so nowrap has no practical effect."
+    },
+    {
+      "findings": [
+        "F23"
+      ],
+      "summary": "Test's local formatDate helper shadows/aliases the imported util",
+      "label": "nit",
+      "evidence": "MembersList/index.test.tsx:3,7 aliases the import as formatDateUtil and defines a local formatDate. Renaming it is purely a naming preference."
+    },
+    {
+      "findings": [
+        "F5"
+      ],
+      "summary": "Claim that parseTimestamp can throw and needs a catch",
+      "label": "wrong",
+      "evidence": "date.ts:22-26: `new Date(string).getTime()` never throws; invalid input gives NaN, which the Number.isFinite check turns into null."
+    },
+    {
+      "findings": [
+        "F22"
+      ],
+      "summary": "Generated docs/engineering checklist file not gitignored",
+      "label": "wrong",
+      "evidence": "docs/engineering does not exist in the tree, and the PR diff doesn't touch it. The finding has nothing to do with this PR."
+    }
+  ]
+}

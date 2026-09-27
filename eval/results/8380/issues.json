@@ -1,0 +1,130 @@
+{
+  "usage": {
+    "usd": 0.704089,
+    "turns": 10,
+    "wallSeconds": 92
+  },
+  "issues": [
+    {
+      "findings": [
+        "F14",
+        "F15",
+        "F7"
+      ],
+      "summary": "canUpgradeInPlace treats any non-canonical implementation on an EraVM chain as EraVM, so an eip155 (EVM) singleton would be classified as stranded and told to redeploy; no test covers this case",
+      "label": "low",
+      "evidence": "packages/utils/src/services/contracts/safeContracts.ts:40 uses `!isCanonicalDeployment(...)`, and deployments.ts:324-327 only compares against `deployments.canonical`, so an eip155 implementation would count as EraVM. The logic flaw is real, but it only fires once 1.5.0 is registered on zkSync (per the PR, redeploy is dormant until then) and only if an eip155 singleton is registered on a zk chain, so the practical impact is small for now."
+    },
+    {
+      "findings": [
+        "F6",
+        "F22"
+      ],
+      "summary": "The pinned 1.4.1 EraVM proxy bytecode hash is not checked against any on-chain fixture",
+      "label": "medium",
+      "evidence": "predictSafeAddress.test.ts only has a 1.3.0 EraVM mainnet fixture (factory 0xDAec…, singleton 0x1727…). The 1.4.1 hash in utils.ts:107-110 is never exercised, so a typo would silently produce wrong counterfactual addresses on a funds-sensitive path."
+    },
+    {
+      "findings": [
+        "F10"
+      ],
+      "summary": "ZKSYNC_PROXY_BYTECODE_HASH duplicates protocol-kit's private table and could drift",
+      "label": "nit",
+      "evidence": "utils.ts:101-110 says the set is closed because EraVM deployments end at 1.4.1, so no new entries can appear and the drift risk is negligible. The real risk is the untested 1.4.1 value, which is covered by the separate issue above."
+    },
+    {
+      "findings": [
+        "F3",
+        "F18",
+        "F19",
+        "F23",
+        "F4"
+      ],
+      "summary": "The security scanner does not use getMastercopyAction and never produces 'redeploy', so it gives update/CLI advice to stranded EraVM Safes and its comment is now inaccurate",
+      "label": "low",
+      "evidence": "contractVersion.ts:49-77 calls isUnsupportedMastercopyMigratable directly and falls through to the CLI text, and lines 92-109 say 'Update now' for OUTDATED, while getMastercopyAction would return 'redeploy'. The inconsistency is real, but the redeploy state is dormant until 1.5.0 is registered on zkSync."
+    },
+    {
+      "findings": [
+        "F8",
+        "F21"
+      ],
+      "summary": "Mobile settings still shows an update as available for a stranded EraVM Safe",
+      "label": "low",
+      "evidence": "Settings.container.tsx:26 derives needsUpdate from implementationVersionState === 'OUTDATED' only and never looks at the redeploy action. This is pre-existing code outside the diff, and the redeploy case is dormant."
+    },
+    {
+      "findings": [
+        "F1"
+      ],
+      "summary": "The redeploy card has no isCritical or owner gate and cannot be dismissed",
+      "label": "wrong",
+      "evidence": "MastercopyWarning.tsx:48-57 is a text-only warning with no action button, so an owner gate adds nothing. Per the PR description, showing a stranded Safe a warning to create a new Safe is the intended behaviour, not a regression."
+    },
+    {
+      "findings": [
+        "F2"
+      ],
+      "summary": "No Storybook story for the new redeploy state",
+      "label": "low",
+      "evidence": "MastercopyWarning.stories.tsx has Migrate, Cli, Update, UpdateSettings, UpdateSettingsNonCritical and None, but no Redeploy story, although the web guidelines ask for stories that cover component states."
+    },
+    {
+      "findings": [
+        "F5"
+      ],
+      "summary": "Migration-target lookup matches deployment variant addresses rather than networkAddresses[safe.chainId]",
+      "label": "wrong",
+      "evidence": "safeUpdateParams.ts:116-120 matches the deterministic official SafeMigration addresses per variant, which are the same on every chain. This is intentional so both canonical and zksync variants are recognized, and it mirrors isSafeMigrationCall in safe-migrations.ts:113-116. No wrong version can come from it."
+    },
+    {
+      "findings": [
+        "F11"
+      ],
+      "summary": "The SafeMigration address-to-version loop duplicates the logic in isSafeMigrationCall",
+      "label": "low",
+      "evidence": "safeUpdateParams.ts:116-120 and safe-migrations.ts:113-116 both iterate SAFE_VERSIONS over getSafeMigrationDeployments().deployments. A shared helper returning the matched version would avoid two copies drifting apart."
+    },
+    {
+      "findings": [
+        "F13"
+      ],
+      "summary": "getZkSyncProxyBytecodeHash only checks deployments.zksync.address, not networkAddresses",
+      "label": "wrong",
+      "evidence": "EraVM factory addresses are deterministic, and the one the formula applies to is exactly deployments.zksync.address (utils.ts:118-122). Any chain that registers the zksync factory in networkAddresses lists that same address, so the scenario described cannot happen."
+    },
+    {
+      "findings": [
+        "F9",
+        "F20"
+      ],
+      "summary": "The redeploy copy hardcodes 'zkSync' even though isEraVmChain covers other zk-stack chains; the trailing space in the title is not a problem",
+      "label": "low",
+      "evidence": "MastercopyWarning.tsx:53 names zkSync, but isEraVmChain (deployments.ts:287) matches any chain that registers the zksync-flavour singleton, so the copy could be inaccurate elsewhere. The trailing title space follows the same pattern as the sibling migrate and cli cards (title and content are joined), so that part is intended."
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "SAFE_TO_L2_MIGRATION_VERSION is now unused",
+      "label": "low",
+      "evidence": "grep finds only its definition at packages/utils/src/config/constants.ts:71 after safeUpdateParams.ts dropped the import. It is dead code left behind by this PR."
+    },
+    {
+      "findings": [
+        "F12"
+      ],
+      "summary": "Step-by-step comments in canUpgradeInPlace and getMastercopyAction are unnecessary",
+      "label": "nit",
+      "evidence": "safeContracts.ts:31-96 adds several inline comments. The repo treats comments as tech debt, but these explain non-obvious VM-stack and CGW-cap reasoning, so this is a style preference."
+    },
+    {
+      "findings": [
+        "F17"
+      ],
+      "summary": "The redeploy card has no product sign-off, link or tracking event",
+      "label": "nit",
+      "evidence": "Whether product or design signed off cannot be told from the code. The missing link and trackingEvent (MastercopyWarning.tsx:48-57) is a preference for a dormant, text-only warning."
+    }
+  ]
+}

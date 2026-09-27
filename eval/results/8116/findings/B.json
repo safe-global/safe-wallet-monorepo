@@ -1,0 +1,70 @@
+{
+  "usd": 0.09354159999999999,
+  "findings": [
+    {
+      "file": "apps/web/src/store/index.ts",
+      "line": 146,
+      "claim": "The one-time migration that resets the sort preference to name order only changes behavior for users who had explicitly chosen the 'most recent' sort, while users who never changed the setting already get the new default from initialState without needing the reset; this is the opposite of the stated intent to reset users left on the previous default, and it discards a deliberate user choice."
+    },
+    {
+      "file": "apps/web/src/store/index.ts",
+      "line": 146,
+      "claim": "Because the HYDRATE action is not a slice action, the migration's resetVersion flag is never persisted when the store hydrates, so the reset logic re-runs on every page load until the user manually changes the sort order again."
+    },
+    {
+      "file": "apps/web/src/store/index.ts",
+      "line": 146,
+      "claim": "After merge({}, state, payload) the orderBy slice is always present, so the `orderByState &&` guard is always true and does not actually check for a real store as its accompanying comment claims, making that comment misleading."
+    },
+    {
+      "file": "apps/web/src/store/orderByPreferenceSlice.ts",
+      "line": 10,
+      "claim": "The comment describing the reset says it 'resets users still on the previous default,' but the actual behavior only affects users who explicitly picked a non-default sort, contradicting the comment."
+    },
+    {
+      "file": "apps/web/src/store/__tests__/index.test.ts",
+      "line": 149,
+      "claim": "This test currently asserts the existing (problematic) override behavior of the migration reset, so it needs to be updated together with any fix to that reset logic, or it will lock in the wrong behavior."
+    },
+    {
+      "file": "apps/web/src/features/spaces/hooks/useSpaceSafes.tsx",
+      "line": 31,
+      "claim": "The local address book and space contacts are merged with lodash/merge while keeping each address key's original casing, and name lookups against this merged map use exact-case matching; if a local entry and the CGW space-safe address differ only in casing, the item gets no name and sorts last under 'Name' even though the row still displays an address-book name, and a differently-cased local key can also incorrectly override the space contact's name."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/SafeDropdownContainer.tsx",
+      "line": 154,
+      "claim": "The search placeholder text 'by name, address or network' is lowercase and lacks a verb, which conflicts with the project's sentence-case convention for UI text, and it is inconsistent with the sibling modal's placeholder 'Search by name or address'."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/SafeDropdownContainer.tsx",
+      "line": 154,
+      "claim": "The search input has no aria-label, so the placeholder text is the field's only accessible name, making its unclear, verbless phrasing more impactful for screen reader users."
+    },
+    {
+      "file": "apps/web/src/components/common/SafeListSortToggle/index.tsx",
+      "line": 24,
+      "claim": "The new SafeListSortToggle component has logic but no Storybook story, even though the project's contribution guidelines require a story for new components with logic; only an index.test.tsx file was added."
+    },
+    {
+      "file": "apps/web/src/components/common/SafeListSortToggle/index.test.tsx",
+      "line": 8,
+      "claim": "The only test for this component checks the default trigger label; it does not exercise the onValueChange to setOrderByPreference wiring or the unchecked `value as OrderByOption` cast, so breaking or deleting that dispatch logic would not be caught by any test."
+    },
+    {
+      "file": "apps/web/src/components/common/SpaceSafeBar/hooks/useSafeBarSafes.ts",
+      "line": 99,
+      "claim": "The new spaceDropdownSafes logic pins the current safe first and re-sorts the rest for space contexts, but the existing space-context tests only use a single safe and the new sorting tests only cover the non-space case, so a regression in space ordering or current-safe pinning would not be caught."
+    },
+    {
+      "file": "apps/web/src/components/common/SpaceSafeBar/hooks/useSafeBarSafes.ts",
+      "line": 99,
+      "claim": "On a space route, safeAddress falls back to the Redux safeInfo, which can still hold a safe from outside the current space; spaceDropdownSafes would then place that unrelated safe at the top of the list, whereas before this change the space list was passed through untouched, and it is unclear whether a filter elsewhere reliably hides this in multi-chain or stale-state cases."
+    },
+    {
+      "file": "apps/web/src/components/common/SafeListSortToggle/index.tsx",
+      "line": null,
+      "claim": "SafeListSortToggle is a DropdownMenu rendered inside a base-ui Select popup, and whether clicking the toggle also closes the parent Select popup can only be verified in a real browser; the container test replaces the toggle with a stub, so this interaction is not covered."
+    }
+  ]
+}

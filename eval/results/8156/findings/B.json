@@ -1,0 +1,75 @@
+{
+  "usd": 0.0667356,
+  "findings": [
+    {
+      "claim": "The fee breakdown component is rendered on every pending transaction without checking whether the GTF feature is enabled, so it can show fee information on chains or configurations where it shouldn't appear at all.",
+      "file": "apps/mobile/src/features/ConfirmTx/components/TransactionInfo/TransactionInfo.tsx",
+      "line": 49
+    },
+    {
+      "claim": "The max gas fee is displayed even when the fee is not paid from the Safe; for an ordinary transaction this computes to 0, so co-signers see wording like \"Execution fee FREE / Max gas fee 0 MATIC / Paid from the signer\" instead of an accurate state, whereas web hides this behind a feature check and shows \"Calculated at execution\".",
+      "file": "apps/mobile/src/features/ConfirmTx/components/TransactionInfo/FeesBreakdown.tsx",
+      "line": 106
+    },
+    {
+      "claim": "Relay is now forced for Safe-pays transactions, but the UI text still says \"Sponsored by Safe · We pay transactions fees for you · {remaining} left / day\", and the remaining count can incorrectly show \"0 left / day\" because the daily limit is skipped for these transactions.",
+      "file": "apps/mobile/src/features/ConfirmTx/components/HowToExecuteSheet/components/RelayAvailable/RelayAvailable.tsx",
+      "line": 19
+    },
+    {
+      "claim": "The execute button area shows \"Free\" for Safe-pays transactions even though the Safe actually pays the relayer back through handlePayment, so the correct \"Paid from your Safe\" wording only appears inside an info tooltip rather than in the primary fee display.",
+      "file": "apps/mobile/src/features/ExecuteTx/components/RelayFee/RelayFee.tsx",
+      "line": 27
+    },
+    {
+      "claim": "The container guards that prevent falling back to the no-signer/double-pay execution route have no tests, even though on chains without relaying the execution-method logic deliberately falls back to WITH_PK, making these guards the only protection against the double-pay path.",
+      "file": "apps/mobile/src/features/ConfirmTx/components/HowToExecuteSheet/HowToExecuteSheet.container.tsx",
+      "line": 99
+    },
+    {
+      "claim": "The new safe-paid fee header amount has no tests.",
+      "file": "apps/mobile/src/features/ConfirmTx/components/confirmation-views/TokenTransfer/TokenTransfer.tsx",
+      "line": 39
+    },
+    {
+      "claim": "There is no component test covering the null-return case of the fees breakdown component or the \"Paid from your Safe / signer\" wording.",
+      "file": "apps/mobile/src/features/ConfirmTx/components/TransactionInfo/FeesBreakdown.tsx",
+      "line": 96
+    },
+    {
+      "claim": "simulationError and retryWithAcceptUnverified appear to be dead code since nothing reads them and useExecutionFlow already owns this flow.",
+      "file": "apps/mobile/src/features/ExecuteTx/hooks/useTransactionExecution.ts",
+      "line": 45
+    },
+    {
+      "claim": "The tooltip text was copied from the web app's tooltip source and has already drifted out of sync, missing the trailing phrase \"...on the blockchain.\"",
+      "file": "apps/mobile/src/features/ConfirmTx/components/TransactionInfo/FeesBreakdown.tsx",
+      "line": 21
+    },
+    {
+      "claim": "The rule that sums fee rows for the same token into one line re-implements logic that already exists in web's totalOutgoing service, duplicating logic that should live in the shared packages directory per project conventions.",
+      "file": "apps/mobile/src/features/ConfirmTx/components/TransactionInfo/feeRows.ts",
+      "line": 94
+    },
+    {
+      "claim": "The same bottom-sheet boilerplate is duplicated a third time across two components instead of reusing the existing implementation from SoftUpdatePrompt.tsx.",
+      "file": "apps/mobile/src/features/ExecuteTx/components/IndeterminateSimulationSheet/IndeterminateSimulationSheet.tsx",
+      "line": 1
+    },
+    {
+      "claim": "These two folders are missing the index.ts barrel file that all seven sibling folders have, so their imports go directly to the file instead of through a barrel, inconsistent with documented code style.",
+      "file": "apps/mobile/src/features/ExecuteTx/components/IndeterminateSimulationSheet/IndeterminateSimulationSheet.tsx",
+      "line": null
+    },
+    {
+      "claim": "SIMULATION_CODES manually copies a generated union type rather than referencing it directly, risking drift if the generated type changes.",
+      "file": "relayErrors.ts",
+      "line": 23
+    },
+    {
+      "claim": "The relay execution flow now fails whenever getSafeSDK() is not set, matching a guard already present in the WalletConnect executor, but worth confirming is intentional and consistent.",
+      "file": "relayExecutor.ts",
+      "line": 63
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "usd": 0.0752376,
+  "findings": [
+    {
+      "file": "apps/web/src/components/transactions/TxSigners/index.tsx",
+      "line": 173,
+      "claim": "The row's render check does not verify that the Safenet feature chunk has finished loading, so if the audit data arrives before the lazy feature loads, the check is true while the feature's component still renders a null stub. This causes the last signing row to lose its isLast flag and the timeline connector to hang with nothing under it until the chunk loads."
+    },
+    {
+      "file": "packages/store/src/safenet/safenetCheckApi.ts",
+      "line": 53,
+      "claim": "The comment claiming the header read costs only one RPC per settled check is inaccurate: while a check is in the AWAITING_VERIFICATION state, verifyAttestation can return PENDING and polling continues every 6 seconds, with each poll also calling blockTimeMs, adding one RPC per poll rather than one total."
+    },
+    {
+      "file": "apps/web/src/features/safenet-checks/components/SafenetAuditRow.tsx",
+      "line": 104,
+      "claim": "The timestamp is only populated when an attestation event exists, so the MALICIOUS (risk detected) and TIMED_OUT (check failed) outcomes never display a date even though they are the most important statuses to show a time for; the accompanying comment does not mention either case."
+    },
+    {
+      "file": "apps/web/src/features/safenet-checks/components/SafenetAuditRow.tsx",
+      "line": 78,
+      "claim": "The logic for preferring the oracle attestation and falling back to the plain one is duplicated in two places (also in safenetCheckApi.ts around lines 50-52); if the store's selection logic changes in one place but not the other, the displayed link could point to a different transaction than the one actually verified."
+    },
+    {
+      "file": "apps/web/src/features/safenet-checks/components/SafenetAuditRow.tsx",
+      "line": 1,
+      "claim": "The new component has no Storybook story, despite project conventions requiring a story for new components and for components with logic; the five status states plus dark mode are exactly what such a story should cover."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/constants.ts",
+      "line": 53,
+      "claim": "The commit adds new environment variables (NEXT_PUBLIC_SAFENET_EXPLORER_URL / EXPO_PUBLIC_SAFENET_EXPLORER_URL) but does not add them to apps/web/.env.example, even though the same commit documents every other SAFENET_* variable there."
+    },
+    {
+      "file": "apps/web/src/features/safenet-checks/components/__tests__/SafenetAuditRow.test.tsx",
+      "line": null,
+      "claim": "No test covers the TIMED_OUT state producing the \"Safenet check failed\" label, and no test covers the dark-mode icon colors (DARK_STEP_COLOR), even though MALICIOUS, BENIGN, and in-flight states are covered."
+    },
+    {
+      "file": "apps/web/src/features/safenet-checks/components/SafenetAuditRow.tsx",
+      "line": 79,
+      "claim": "The optional chaining on snapshot?.events is redundant since the code already returns earlier when snapshot is falsy, and its presence misleadingly suggests snapshot could still be undefined at that point."
+    },
+    {
+      "file": "apps/web/src/components/transactions/TxSigners/index.tsx",
+      "line": 166,
+      "claim": "The diff contains long block comments that are disproportionate to the surrounding code, conflicting with project guidance to treat code comments as tech debt; these comments (also at line 296-298 and in safenetCheckApi.ts around lines 53-55) could be shortened, particularly once the related correctness issues are fixed."
+    }
+  ]
+}

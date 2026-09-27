@@ -1,0 +1,45 @@
+{
+  "usd": 0.0499976,
+  "findings": [
+    {
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/index.test.tsx",
+      "line": 48,
+      "claim": "Both new test files hand-write the same safeItem(chainId, address, overrides) factory with fixed values instead of using the existing safeItemBuilder from @/tests/builders/safeItem that the neighbouring SafeItemCard.test.tsx already uses, duplicating test setup logic."
+    },
+    {
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/MultiSafeItemCard.test.tsx",
+      "line": 123,
+      "claim": "The assertion arrayContaining(['1111', '1111']) passes even if '1111' appears only once, so because the test address is all 1s it cannot distinguish the first group from the last and would still pass if only one group were bolded; a varied address with toEqual([...]) should be used instead."
+    },
+    {
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/index.test.tsx",
+      "line": 118,
+      "claim": "The test named 'renders the loading skeleton' only checks that the empty state and cards are absent, so it would also pass if nothing rendered at all; it should assert the skeleton itself is present, which may require adding a test ID to SafeListSkeleton in shared.tsx:219."
+    },
+    {
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/useAccountsModalItems.ts",
+      "line": 76,
+      "claim": "Two behaviours moved into the new hook have no tests: the error notification shown when owned safes fail to load (which only fires while the modal is open), and the debounced search analytics event, because the hook test always mocks the query as succeeding so neither code path runs."
+    },
+    {
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/index.tsx",
+      "line": 42,
+      "claim": "The diff rewrites this line but keeps the Title Case string 'All Accounts', inconsistent with the sentence case used by the neighboring new string 'Safes not in this workspace', and with the project's sentence-case convention for UI text; fixing it requires updating the corresponding tests as well."
+    },
+    {
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/useAccountsModalItems.ts",
+      "line": 126,
+      "claim": "The modal's two modes ('All Accounts' and 'Safes not in this workspace') both send the same OVERVIEW_EVENTS.SEARCH event and the same default top_bar label when a safe is opened, making it impossible to distinguish the two funnels in analytics unless a separate label per mode is intended."
+    },
+    {
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/index.tsx",
+      "line": 91,
+      "claim": "Four near-identical card-render branches each repeat the hidePinControls={isQualifiedSafe} prop and the similarAddresses.has(...) check, duplicating logic that a small renderItem helper could remove."
+    },
+    {
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/useAccountsModalItems.ts",
+      "line": 57,
+      "claim": "The hook's roughly 40-line doc comment is long relative to the codebase's norms and is inaccurate in one place: it states errors are surfaced 'so callers can render a retry notification', but the hook itself sends that notification rather than leaving it to callers."
+    }
+  ]
+}

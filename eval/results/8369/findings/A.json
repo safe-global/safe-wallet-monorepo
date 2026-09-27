@@ -1,0 +1,50 @@
+{
+  "usd": 0.0679576,
+  "findings": [
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/oracleProposalHash.ts",
+      "line": 34,
+      "claim": "BigInt(chainId) and BigInt(epoch) parse externally supplied decimal strings without validation, and BigInt('') or BigInt('  ') silently return 0n rather than throwing, so an empty field produces a valid-looking hash for chain 0 or epoch 0 instead of an error."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/oracleProposalHash.ts",
+      "line": 34,
+      "claim": "Non-numeric input to these BigInt calls throws, which is inconsistent with verifyAttestation, which never throws, creating inconsistent error-handling behavior across the module."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/oracleProposalHash.ts",
+      "line": 34,
+      "claim": "Because this hash is also used as the oracle requestId, an empty chainId or epoch field would silently produce a wrong ID rather than failing, even though the same issue fails safe during signature verification. A guarded helper that rejects blank or non-integer strings should be used to parse these values, or callers should be required to validate input first, with that requirement documented."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/__tests__/frost.test.ts",
+      "line": 31,
+      "claim": "JSON.parse(readFileSync(...)) returns an any-typed value that is cast to the declared fixture shape without any runtime check, via a load<T> helper and a type annotation on golden, so a renamed fixture key would not be caught by type-checking. This violates the project's guidance against using any or any-type assertions in tests."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/__tests__/oracleProposalHash.test.ts",
+      "line": 13,
+      "claim": "The same unchecked JSON.parse-to-any casting pattern appears here as in frost.test.ts, with the same risk that a renamed fixture key would go undetected by the type checker."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/frost.ts",
+      "line": 9,
+      "claim": "Fixture files could instead be imported directly (e.g. import devnet from '../../__fixtures__/devnet-attestation.golden.json') since resolveJsonModule is already enabled in config/tsconfig/confs/base.json:35, which would infer the real type and also remove the need for the node:fs/node:path usage."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/frost.ts",
+      "line": 9,
+      "claim": "Long comments referencing repos/safenet/explorer/src/lib/frost/ and repos/safenet/validator/... point to local paths in another repository that cannot be resolved from this monorepo, making the comments unverifiable for future readers."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/oracleProposalHash.ts",
+      "line": 5,
+      "claim": "A comment pins specific line numbers in contracts/src/libraries/FROST.sol:157-161, a file outside this repository, which will go stale as that external file changes since the reference cannot be validated or updated automatically."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/types/events.ts",
+      "line": 1,
+      "claim": "The header comment states that event types will 'land with the decoder' as future work, but the file currently only contains the Hex type, so the file's name and header description do not match its actual contents. The file should be renamed (e.g. to primitives.ts) or its header trimmed until the event types are added."
+    }
+  ]
+}

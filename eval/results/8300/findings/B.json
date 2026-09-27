@@ -1,0 +1,45 @@
+{
+  "usd": 0.06934960000000001,
+  "findings": [
+    {
+      "file": "apps/web/src/features/counterfactual/services/persistCounterfactualSafe.ts",
+      "line": 78,
+      "claim": "When the Safe is already deployed, the function returns before the workspace step (spaceSafesCreateV1) and before the user-level backend save, so an admin creating a Safe with pay later inside a workspace using an already-deployed salt/address ends up with the Safe visible only in that browser's My accounts and never added to the workspace, instead of being attached to the workspace as before."
+    },
+    {
+      "file": "apps/web/src/features/counterfactual/services/persistCounterfactualSafe.ts",
+      "line": 88,
+      "claim": "The new addOrUpdateSafe dispatch duplicates work already performed by both callers, which dispatch updateAddressBook right after a successful persist, and updateAddressBook already calls addOrUpdateSafe for each chain with owner names included, so this dispatch is always overwritten and needlessly makes the counterfactual persistence service write to the addedSafes slice."
+    },
+    {
+      "file": "apps/web/src/components/new-safe/create/steps/ReviewStep/index.tsx",
+      "line": 314,
+      "claim": "In single-chain pay later, an already-deployed result now skips the AWAITING_EXECUTION event, which is the only thing that opens CounterfactualSuccessScreen, so the user is sent to the home page with no message at all, unlike the add-another-network flow which shows an explicit 'This account is already deployed on …' notification."
+    },
+    {
+      "file": "apps/web/src/features/multichain/components/CreateSafeOnNewChain/index.test.tsx",
+      "line": null,
+      "claim": "The test file was not updated to cover the skipped: 'already-deployed' branch, where tracking is suppressed and the message differs, leaving that code path untested."
+    },
+    {
+      "file": "apps/web/src/components/new-safe/create/steps/ReviewStep/index.test.tsx",
+      "line": 264,
+      "claim": "Only the all-deployed case is tested; there is no test for a mixed multi-chain run where only the not-yet-deployed chains should be sent in AWAITING_EXECUTION.networks, so if that filter logic were reverted no test would catch it."
+    },
+    {
+      "file": "apps/web/src/features/counterfactual/services/persistCounterfactualSafe.ts",
+      "line": 80,
+      "claim": "The fail-open catch block swallows RPC failures without logging them, whereas neighboring sync code in this feature logs errors with logError(Errors._6xx, e), making the fail-open behavior invisible when it occurs."
+    },
+    {
+      "file": "apps/web/src/features/counterfactual/services/persistCounterfactualSafe.ts",
+      "line": 52,
+      "claim": "The function's doc comment still states it always saves to the backend and then updates Redux, without mentioning the new already-deployed early return or the skipped value that callers now have to handle."
+    },
+    {
+      "file": "apps/web/src/features/counterfactual/services/persistCounterfactualSafe.test.ts",
+      "line": 86,
+      "claim": "The test sets up mockProvider, and a later test at line 261-274 builds an identical second one instead of reusing the existing mockProvider."
+    }
+  ]
+}

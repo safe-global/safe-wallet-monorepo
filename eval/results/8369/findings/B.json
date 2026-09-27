@@ -1,0 +1,30 @@
+{
+  "usd": 0.0719216,
+  "findings": [
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/__tests__/oracleProposalHash.test.ts",
+      "line": 63,
+      "claim": "This test builds its own inline EIP712Domain type and hashes that instead of using the actual domain passed by oracleProposalHash and plainProposalHash, so it would not catch a change to the production domain, such as adding a name field."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/__tests__/frost.test.ts",
+      "line": 86,
+      "claim": "The comment states that out-of-range z and off-curve points are rejected by @noble/curves before the code's own guards run, but for z the guard actually runs first, and for off-curve points there is no separate noble check that runs ahead of the assertValidity guard, so the comment misdescribes the code's behavior."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/oracleProposalHash.ts",
+      "line": null,
+      "claim": "oracleProposalHash and plainProposalHash can throw because they call BigInt(chainId) and BigInt(epoch), which throw on non-numeric input, whereas verifyAttestation never throws; this inconsistency should be resolved once the read layer starts calling them from its poll loop."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/frost.ts",
+      "line": 10,
+      "claim": "Doc comments cite external files by path and line number, such as contracts/src/libraries/FROST.sol:157-161 and a repos/safenet/explorer path, which will stop matching as those files change; a commit SHA or permalink would keep the references accurate."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/types/events.ts",
+      "line": null,
+      "claim": "Nothing outside the tests imports these modules yet, and types/events.ts currently only holds a Hex type plus a comment saying the event types will come later."
+    }
+  ]
+}

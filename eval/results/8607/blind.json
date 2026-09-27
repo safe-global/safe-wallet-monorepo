@@ -1,0 +1,109 @@
+{
+  "pr": 8607,
+  "title": "fix(UI/UX): minor UI fixes (layouts, icon replacement); Spaces List error state",
+  "description": "## What it solves\r\n\r\nResolves: [WA-3443](https://linear.app/safe-global/issue/WA-3443/receive-button-icon-changed-from-qr-code-to-a-generic-down-left-arrow)\r\nResolves: [WA-3441](https://linear.app/safe-global/issue/WA-3441/workspaces-empty-state-is-taller-than-production-shadcn-cards-default)\r\nResolves: [WA-3464](https://linear.app/safe-global/issue/WA-3464/do-now-show-create-new-workspace-page-on-be-error)\r\n\r\nMinor UI fixes after the shadcn migration:\r\n- **Receive** buttons used a directional arrow (`ArrowDownLeft`) instead of a QR-code icon.\r\n- **Create your first workspace** empty state had inflated height (default `Card` gap) and cramped benefit-list spacing.\r\n\r\nUX improvements:\r\n- **SpacesList** had no loading or error UI: a hard refresh flashed the sign-in/empty state before the store hydrated, and a failed spaces query silently fell through to the empty \"create your first workspace\" state.\r\n\r\n## How this PR fixes it\r\n\r\n- Swap `ArrowDownLeft` → `QrCode` on the Receive buttons (`ActionsTray`, `HeaderActions`).\r\n- `NoSpacesState`: `Card size=\"none\"` + padding moved to an inner div; benefit list bumped to `gap-3`.\r\n- `SpacesList` render ladder now handles all states in order:\r\n  - **Not hydrated / signed-in + loading** → spinner\r\n  - **Signed out** → sign-in card\r\n  - **Error with no cached spaces** → error message + Try again (calls `refetch`)\r\n  - **Error but cached spaces exist** → keep showing the list (transient refetch failure doesn't blank the page)\r\n  - Otherwise → spaces list / empty state\r\n\r\n## How to test it\r\n\r\n- Open Safe dashboard and Workspace dashboard — Receive buttons show a QR icon.\r\n- Signed in, no spaces → tidy \"Create your first workspace\" card, not cut on the bottom on 14' screen.\r\n- Force the spaces query to `500` with no data (empty Spaces list): → Try again page appears; retries on button click.\r\n\r\n## Visual summary\r\n\r\n**Before:**\r\n\r\n- Page layout:\r\n<img width=\"2984\" height=\"1530\" alt=\"image\" src=\"https://github.com/user-attachments/assets/a514a52a-8696-45a5-a1f1-00e3364e5343\" />\r\n</br>\r\n- Receive btn:\r\n<img width=\"288\" height=\"106\" alt=\"image\" src=\"https://github.com/user-attachments/assets/11747cbf-f75d-4f32-a773-7b7ce1159e15\" />\r\n</br>\r\n- User-facing page on Spaces error (even when the user actually has spaces):\r\n<img width=\"2984\" height=\"1530\" alt=\"image\" src=\"https://github.com/user-attachments/assets/a514a52a-8696-45a5-a1f1-00e3364e5343\" />\r\n</br>\r\n\r\n\r\n**After:**\r\n\r\n- Page layout:\r\n<img width=\"2978\" height=\"1526\" alt=\"image\" src=\"https://github.com/user-attachments/assets/1d5828b8-69c9-47d0-b1f6-797c6c38ad0d\" />\r\n</br>\r\n- Receive btn:\r\n<img width=\"276\" height=\"92\" alt=\"image\" src=\"https://github.com/user-attachments/assets/e9dfce8d-53e3-4d5c-9ff8-02653b60200d\" />\r\n</br>\r\n- User-facing page on Spaces fetch error:\r\n<img width=\"3006\" height=\"1520\" alt=\"image\" src=\"https://github.com/user-attachments/assets/96fb36a8-4d38-4a44-817b-edaa9164f55b\" />\r\n\r\n\r\n\r\n```mermaid\r\nflowchart TD\r\n  A[SpacesList] --> B{store hydrated?}\r\n  B -->|no| S[Spinner]\r\n  B -->|yes| C{signed in & loading?}\r\n  C -->|yes| S\r\n  C -->|no| D{signed in?}\r\n  D -->|no| SO[Sign-in card]\r\n  D -->|yes| E{error && no cached spaces?}\r\n  E -->|yes| ER[Error + Try again]\r\n  E -->|no| F{active spaces?}\r\n  F -->|yes| L[Spaces list]\r\n  F -->|no| N[Create-first-workspace empty state]\r\n```\r\n\r\n**Affected flows:** welcome/spaces list, empty state, Receive button icon.\r\n**Blast radius:** `SpacesList` render tree; icon-only change in `ActionsTray`/`HeaderActions` (no logic).\r\n**Risks / not checked:** full `verify`/E2E not run locally (Turbo/watchman sandbox-blocked); ran jest + tsc directly instead.\r\n\r\n\r\n## Checklist\r\n\r\n- [x] I've tested the branch on mobile 📱\r\n- [ ] I've documented how it affects the analytics (if at all) 📊\r\n- [x] I've written a unit/e2e test for it (if applicable) 🧑‍💻\r\n- [x] I've listed affected flows and blast radius, and named what I did not verify 🎯\r\n\r\n---\r\n\r\n## CLA signature\r\n\r\nWith the submission of this Pull Request, I confirm that I have read and agree to the terms of the [Contributor License Agreement](https://safe.global/cla).\r\n\r\n",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/features/spaces/components/SpacesList/index.tsx",
+      "line": 245,
+      "claim": "The spinner should only show when there is no data yet, e.g. `!isStoreHydrated || (isUserSignedIn && spaces === undefined && isSpacesLoading)`, while the full `isSpacesLoading` value should still be passed to `useSignInRedirect` since its redirect guard depends on it."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/features/spaces/components/SpacesList/SpacesList.test.tsx",
+      "line": 180,
+      "claim": "No test covers the case where cached data exists and `isFetching` is true (e.g. `{ currentData: [activeSpace], isFetching: true }`), so there is no assertion that `space-row` renders and the spinner does not appear in that state."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/features/spaces/components/SpacesList/SpacesList.test.tsx",
+      "line": null,
+      "claim": "The new loading and error branches added to the component have no corresponding Storybook story, so the retry UI and spinner states are only exercised by DOM-level tests rather than visual/story coverage."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/features/spaces/components/SpacesList/SpacesList.test.tsx",
+      "line": 180,
+      "claim": "The test checking '12px spacing' asserts on CSS classes `.gap-3` / `gap-1.5`, and the `data-size=\"none\"` test checks a styling prop; these tests break on any restyle unrelated to behavior but do not catch actual visual regressions, whereas a Storybook story is the repo's established tool for covering visual states."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/features/spaces/components/SpacesList/index.tsx",
+      "line": 253,
+      "claim": "The new error copy \"Couldn't load your workspaces. Try again, or contact support.\" mentions contacting support but provides no support link or route next to it, and the PR description does not record the product/design intent behind this new copy."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/src/features/spaces/components/SpacesList/index.tsx",
+      "line": 254,
+      "claim": "Clicking the Try again button calls refetch(), which also triggers the spinner-replaces-list behavior, so retrying after an error hides the cached list again instead of just updating it in place."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/features/spaces/components/SpacesList/index.tsx",
+      "line": 245,
+      "claim": "Because the spaces query uses the bare 'spaces' cache tag, accepting or declining an invite invalidates it and triggers this spinner swap, unmounting components rendered under the list (such as an open invite dialog) in the middle of that flow."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/src/features/spaces/components/SpacesList/index.tsx",
+      "line": 133,
+      "claim": "`WORKSPACE_BENEFITS` is exported from the component module solely so the test can index into it (`[0]`), when the test could instead match the literal displayed text and the constant could remain private to the module."
+    },
+    {
+      "id": "F9",
+      "file": "apps/web/src/features/spaces/components/SpacesList/index.tsx",
+      "line": 245,
+      "claim": "The prior fix in commit 4bb5a6c69 only keeps the cached list visible when a refetch fails, not while the refetch is in progress, so the underlying flash-to-spinner issue during active refetches remains unaddressed."
+    },
+    {
+      "id": "F10",
+      "file": "apps/web/src/features/spaces/components/Dashboard/HeaderActions.tsx",
+      "line": 31,
+      "claim": "The Receive icon is changed from ArrowDownLeft to QrCode without the PR description recording the product or design decision behind this visible change."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/src/features/spaces/components/SpacesList/index.tsx",
+      "line": 245,
+      "claim": "The JSX rendering logic is a five-branch nested ternary (spinner, signed out, error, list, empty), which is hard to read; extracting it into a small helper function or using early returns would make the ordering of conditions clearer."
+    },
+    {
+      "id": "F12",
+      "file": "apps/web/src/features/spaces/components/SpacesList/SpacesList.test.tsx",
+      "line": null,
+      "claim": "The `not.toHaveClass('gap-1.5')` assertion adds little value because the element being checked was already located via the `.gap-3` selector, making the negative assertion largely redundant."
+    },
+    {
+      "id": "F13",
+      "file": "apps/web/src/features/spaces/components/SpacesList/__tests__/SpacesList.test.tsx",
+      "line": 193,
+      "claim": "There is no test covering the case where currentData already contains an active space while isFetching is true; the existing loading-branch tests only cover no data with isFetching true, store not hydrated, and cached data with an error, so the scenario that exposes the spinner-replacing-list bug is not tested."
+    },
+    {
+      "id": "F14",
+      "file": "apps/web/src/features/actions-tray/components/ActionsTray/ActionsTray.tsx",
+      "line": 134,
+      "claim": "The Receive icon is changed from ArrowDownLeft to QrCode without the PR description recording the product or design decision behind this visible change."
+    },
+    {
+      "id": "F15",
+      "file": "apps/web/src/features/spaces/components/SpacesList/index.tsx",
+      "line": 251,
+      "claim": "A 401 response from `/v1/spaces` while the session is not yet expired now shows a generic 'contact support' error message instead of falling through to the empty state as before; a re-sign-in prompt may be a more appropriate response to a 401 than a support-contact message."
+    },
+    {
+      "id": "F16",
+      "file": "apps/web/src/features/spaces/components/SpacesList/index.tsx",
+      "line": 245,
+      "claim": "The spinner condition `isUserSignedIn && isSpacesLoading` uses `isSpacesLoading`, which includes RTK Query's `isFetching`, so a spinner replaces the already-loaded spaces list and invite banners whenever the list refetches in the background (e.g. after declining an invite, which invalidates the `spaces` tag, or possibly on navigation via `useFlowActivationGuard`'s `fetchSpaces()`), even though cached data is still available. This undoes the intent of a prior commit that kept the cached list visible, since that fix only handled the error case and not the refetch case."
+    },
+    {
+      "id": "F17",
+      "file": "apps/web/src/features/spaces/components/SpacesList/index.tsx",
+      "line": 245,
+      "claim": "The loading condition '!isStoreHydrated || (isUserSignedIn && isSpacesLoading)' uses isSpacesLoading, which is also true during background refetches (isFetching), so the component swaps the already-loaded spaces list and invite banners for a spinner whenever the spaces query refetches, even though cached spaces data is already on screen."
+    }
+  ]
+}

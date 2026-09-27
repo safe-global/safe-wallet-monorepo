@@ -1,0 +1,30 @@
+{
+  "usd": 0.0517596,
+  "findings": [
+    {
+      "file": "apps/web/src/utils/safe-migrations.ts",
+      "line": 101,
+      "claim": "The JSDoc comment on isSafeMigrationCall still describes its use only for avoiding flagging the migration transaction as an unsupported-contract interaction, but the function is now also used to detect a version upgrade elsewhere, so the comment no longer reflects all of the function's callers and should describe what the function detects rather than who calls it."
+    },
+    {
+      "file": "apps/web/src/utils/__tests__/transaction-guards.test.ts",
+      "line": 205,
+      "claim": "The two new tests construct TransactionData using hand-written object literals instead of the already-imported txDataBuilder, which does not follow the preferred builder pattern for constructing test data even though it matches a neighboring test in the same file."
+    },
+    {
+      "file": "apps/web/src/utils/transaction-guards.ts",
+      "line": 450,
+      "claim": "The zksync variant address newly matched by isSafeUpdateTxData (e.g. the 1.4.1 zksync address) is not covered by a test at this call site, relying only on tests of isSafeMigrationCall itself, so behavior specific to this caller is not pinned down by a test."
+    },
+    {
+      "file": "apps/web/src/utils/transaction-guards.ts",
+      "line": 452,
+      "claim": "The updated check matches official migration addresses across every Safe version and variant and does not filter by chain ID, which is a deliberate widening of what is accepted even though it is constrained by requiring a trusted delegate-call target and a delegate call."
+    },
+    {
+      "file": "apps/web/src/components/tx-flow/flows/MigrateSafeL2/MigrateSafeL2Review.tsx",
+      "line": 26,
+      "claim": "Removal of the wrapper div is a layout-only change with no accompanying test, and a screenshot demonstrating the visual fix should be included in the PR's visual summary."
+    }
+  ]
+}

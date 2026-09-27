@@ -1,0 +1,15 @@
+{
+  "usd": 0.0390876,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/AddAccounts/__tests__/AddManually.test.tsx",
+      "line": 7,
+      "claim": "The chainName fixture values ('Ethereum', 'Polygon') are unused because ChainIndicator is mocked to render 'Chain {chainId}', so the test only verifies delegation to ChainIndicator rather than that a network name actually appears, and the fixture names could be misleading about what is being tested."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/AddAccounts/__tests__/AddManually.test.tsx",
+      "line": 63,
+      "claim": "The dialog renders synchronously after the click, so using waitFor is probably unnecessary; a findByText await or a plain synchronous assertion would suffice instead."
+    }
+  ]
+}

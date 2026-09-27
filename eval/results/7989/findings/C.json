@@ -1,0 +1,45 @@
+{
+  "usd": 0.719508,
+  "findings": [
+    {
+      "file": "apps/web/src/components/common/SpaceSafeBar/AccountsModal/useAccountsModalItems.ts",
+      "line": 117,
+      "claim": "The comment states that search analytics fires once per non-empty query (debounced), but searchTracked only resets when the search becomes empty, so typing 'a' then 'ab' then 'abc' only fires the event once total instead of once per distinct query. Either the code should reset searchTracked.current to false in the timer-clear path so each distinct query fires its own event, or the comment should be updated to describe the actual once-per-session behavior."
+    },
+    {
+      "file": "useAccountsModalItems.ts",
+      "line": 89,
+      "claim": "In filteredAllSafes, the early return `if (!allSafes || !spaceExclusionKey) return allSafes` relies on spaceExclusionKey being null only when isQualifiedSafe is false; if a future change made spaceExclusionKey an empty Set instead of null when a space loads with zero safes, the truthiness check would behave unexpectedly, so the intent would be clearer expressed as `if (!allSafes || !isQualifiedSafe) return allSafes`."
+    },
+    {
+      "file": "useAccountsModalItems.ts",
+      "line": 94,
+      "claim": "Calling useAllSafesGrouped(filteredAllSafes ?? []) creates a new array reference on every render while loading, which defeats referential-equality-based memoization inside useAllSafesGrouped; the fallback should be memoized or the code should rely on filteredAllSafes being stable instead."
+    },
+    {
+      "file": "AccountsModal/index.tsx",
+      "line": 77,
+      "claim": "The Trusted and Other sections (lines 77-133) are nearly identical JSX differing only in heading and source array; extracting an inline renderSection(title, items, testId?) helper would reduce roughly 60 lines to about 25 and make future per-section changes safer."
+    },
+    {
+      "file": "useAccountsModalItems.test.ts",
+      "line": 20,
+      "claim": "The test calls the underscore-prefixed exports actual._getMultiChainAccounts and actual._getSingleChainAccounts, which function as a private contract; renaming those exports later would produce confusing test failures, so they should either be documented as test-only exports or the grouped result should be built via a public helper instead."
+    },
+    {
+      "file": "shared.tsx",
+      "line": 158,
+      "claim": "In ShortAddressWithTooltip, the bolded-similar branch slices address.slice(2, 6) and address.slice(-4) without the same length guard used in TooltipFullAddress at line 121, which is inconsistent even though current callers always pass a validated 0x-address of sufficient length."
+    },
+    {
+      "file": "useAccountsModalItems.test.ts",
+      "line": null,
+      "claim": "The multi-chain partial-workspace degrade path described in the PR is not directly tested as a multi-to-single transformation; a targeted test is needed where an address exists on chains 1 and 100, the workspace excludes chain 1, and the result should contain a single-chain item on chain 100 rather than a MultiChainSafeItem."
+    },
+    {
+      "file": "useAccountsModalItems.test.ts",
+      "line": null,
+      "claim": "The no-op behavior for the error notification when open=false is not asserted; a test should verify that with ownedSafesError set but open=false, dispatch is not called."
+    }
+  ]
+}

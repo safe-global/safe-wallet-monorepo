@@ -1,0 +1,80 @@
+{
+  "usd": 0.0839096,
+  "findings": [
+    {
+      "file": "apps/web/src/hooks/useIsValidExecution.ts",
+      "line": 84,
+      "claim": "The mapped user-facing error message is written into err.reason, but no UI consumer reads that field: ExecuteForm.tsx and RecoverAccountReview/index.tsx show fixed generic text, and the Details panel in ErrorMessage/index.tsx shows error.message, which ethers sets at error-creation time and is unaffected by this change. As a result the new copy is never actually displayed to a user."
+    },
+    {
+      "file": "apps/web/src/features/recovery/hooks/__tests__/useIsValidExecution.test.ts",
+      "line": 60,
+      "claim": "The test titled 'should map a known GS revert reason to its user-facing message' only asserts on the .reason property and does not check that the message is rendered anywhere, so it would still pass even if no UI ever displayed the message."
+    },
+    {
+      "file": "apps/web/src/components/tx/ErrorMessage/ContractErrorMessages.stories.tsx",
+      "line": 99,
+      "claim": "The story claims 'The message you see is the new copy,' but it passes the message in via the children prop, which production code never does, so the story does not demonstrate the actual rendering path."
+    },
+    {
+      "file": "apps/web/src/hooks/useIsValidExecution.ts",
+      "line": 84,
+      "claim": "The interpolation call only passes nativeAsset, so the {token} placeholder in the GS012 message is never filled and is shown literally as '{token}' to users."
+    },
+    {
+      "file": "apps/web/src/hooks/useIsValidExecution.ts",
+      "line": 86,
+      "claim": "The GS011 message's {nativeAsset} placeholder is left unfilled and shown literally whenever chain is undefined."
+    },
+    {
+      "file": "packages/utils/src/services/exceptions/__tests__/contractErrors.test.ts",
+      "line": 67,
+      "claim": "This test treats a leftover unfilled placeholder in the message as expected/intended behavior rather than as a bug, and there is no hook-level test covering the chain-symbol interpolation branch, so the unfilled-placeholder regression is not caught."
+    },
+    {
+      "file": "packages/utils/src/services/exceptions/contractErrors.ts",
+      "line": 48,
+      "claim": "Code comments reference internal ticket/planning labels such as 'Topic 2/4/6', 'Bucket A/B/C', 'AC #2', and 'WA-3005', which are meaningless outside the originating ticket and will become stale over time."
+    },
+    {
+      "file": "apps/web/src/components/tx/ErrorMessage/ContractErrorMessages.stories.tsx",
+      "line": 13,
+      "claim": "The story file also contains the same internal ticket/planning labels in comments, and the 'Topic' label additionally appears visibly in the story's on-screen headings and alert text, exposing internal-only terminology to anyone viewing the story."
+    },
+    {
+      "file": "apps/web/src/services/contracts/__tests__/contractErrorsParity.test.ts",
+      "line": 7,
+      "claim": "The parity test file header also carries the same internal ticket/planning labels referenced elsewhere in the change."
+    },
+    {
+      "file": "apps/web/src/services/contracts/__tests__/contractErrorsParity.test.ts",
+      "line": 1,
+      "claim": "This test file now sits in a directory whose corresponding source file, ContractErrorCodes.ts, was deleted in this change, leaving the test without an adjacent source file."
+    },
+    {
+      "file": "apps/web/src/services/contracts/__tests__/contractErrorsParity.test.ts",
+      "line": 1,
+      "claim": "This test and its mobile counterpart both check the same strings as the shared package's contractErrors.test.ts, but since both apps read from one shared module, neither parity test can catch a divergence between web and mobile that the package-level test would already catch, making them redundant."
+    },
+    {
+      "file": "apps/web/src/components/tx/ErrorMessage/ContractErrorMessages.stories.tsx",
+      "line": 29,
+      "claim": "The story heading hardcodes the text 'All 32 GS codes' instead of deriving the count from CODES.length, so the heading will become inaccurate if codes are added or removed."
+    },
+    {
+      "file": "apps/web/src/components/tx/ErrorMessage/ContractErrorMessages.stories.tsx",
+      "line": 47,
+      "claim": "CONTRACT_ERRORS[code].handling is looked up twice within the JSX instead of being stored in a local variable once, which is unnecessary repetition."
+    },
+    {
+      "file": "apps/web/src/components/tx/ErrorMessage/ContractErrorMessages.stories.tsx",
+      "line": 24,
+      "claim": "The handlingColor function is typed to accept a plain string parameter, but it could instead take the more specific ContractErrorHandling type for better type safety."
+    },
+    {
+      "file": "packages/utils/src/services/exceptions/contractErrors.ts",
+      "line": 92,
+      "claim": "The GS400 message consists of two sentences but is missing a final period, while other two-sentence messages in the same file end with a period and the one-line field-validation messages do not, making the punctuation convention inconsistent across the new copy."
+    }
+  ]
+}

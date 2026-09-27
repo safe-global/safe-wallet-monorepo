@@ -1,0 +1,129 @@
+{
+  "usage": {
+    "usd": 0.48255059999999994,
+    "turns": 6,
+    "wallSeconds": 49
+  },
+  "issues": [
+    {
+      "findings": [
+        "F1",
+        "F9",
+        "F14",
+        "F13"
+      ],
+      "summary": "proposeBehavior state and its doc comment describe a CGW /propose fetch interceptor that doesn't exist, so the field is dead state",
+      "label": "low",
+      "evidence": "walletKitE2eState.ts:72-77 documents an interceptor, but grep finds no reader of proposeBehavior outside the state file and its initial-state test (walletKitE2eState.test.ts:13). The comment is aspirational and could mislead someone writing the CGW-failure flow. The impact is limited because this is e2e-only harness code."
+    },
+    {
+      "findings": [
+        "F5",
+        "F20",
+        "F28",
+        "F23"
+      ],
+      "summary": "Comments name a WcResponseIndicator component that doesn't exist, so lastRequestResponse is write-only",
+      "label": "low",
+      "evidence": "walletKit.e2e.ts:65 and walletKitE2eState.ts:66-68 refer to WcResponseIndicator and its test-ids, but grep finds no such component. lastRequestResponse is only read in unit tests. This is a documentation mismatch in e2e-only code with no production impact."
+    },
+    {
+      "findings": [
+        "F15",
+        "F24",
+        "F19"
+      ],
+      "summary": "Hand-rolled JsonRpcResponseLike duplicates SDK types that are already reachable through the jsonrpc-utils dependency, and it omits error.data",
+      "label": "low",
+      "evidence": "walletKit.e2e.ts:54-56: @walletconnect/jsonrpc-utils is already in apps/mobile/package.json:88 and used in methodRouter.ts and walletKitListeners.ts, and it re-exports the jsonrpc-types. So the stated reason for the twin type doesn't hold, and the cast through unknown hides any drift. The cost is small in a test fake."
+    },
+    {
+      "findings": [
+        "F4"
+      ],
+      "summary": "Mixed presence checks: 'result' in response vs truthy response.error",
+      "label": "nit",
+      "evidence": "walletKit.e2e.ts:72-73 uses two check styles. The asymmetry is harmless for real JSON-RPC responses, which carry either result or a non-null error object."
+    },
+    {
+      "findings": [
+        "F8",
+        "F25"
+      ],
+      "summary": "Tests hardcode 'e2e-session-topic' instead of using E2E_SESSION_TOPIC",
+      "label": "nit",
+      "evidence": "walletKit.e2e.test.ts:48,60 repeat the literal even though walletKitE2eState.ts:16 exports it and other tests import it. This is a style consistency point with no functional cost."
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "No test for last-write-wins overwrite of lastRequestResponse",
+      "label": "nit",
+      "evidence": "respondSessionRequest does a plain walletKitE2eState.set (walletKit.e2e.ts:68), so overwrite is trivially guaranteed by the store. A dedicated test would add little."
+    },
+    {
+      "findings": [
+        "F2",
+        "F7",
+        "F22"
+      ],
+      "summary": "Maestro selector/timeout concerns in tx-send-happy.yml",
+      "label": "wrong",
+      "evidence": "No tx-send-happy.yml or any new Maestro flow exists in the repo or in the PR diff (git ls-files shows none). The diff only touches four walletKit files."
+    },
+    {
+      "findings": [
+        "F3",
+        "F18"
+      ],
+      "summary": "proposeFetchMock install-once / no-restore concerns",
+      "label": "wrong",
+      "evidence": "No proposeFetchMock.ts exists anywhere in the repo at HEAD, and the PR diff adds none."
+    },
+    {
+      "findings": [
+        "F10",
+        "F27"
+      ],
+      "summary": "WcResponseIndicator useEffect lacks a dependency array",
+      "label": "wrong",
+      "evidence": "WcResponseIndicator.tsx doesn't exist in the repo or the diff (grep only finds the name in comments)."
+    },
+    {
+      "findings": [
+        "F11"
+      ],
+      "summary": "WcResponseIndicator relies on Object.keys insertion order for newest hash",
+      "label": "wrong",
+      "evidence": "WcResponseIndicator.tsx doesn't exist, so there is no such code to judge."
+    },
+    {
+      "findings": [
+        "F6",
+        "F12"
+      ],
+      "summary": "Committed raw private key E2E_TX_OWNER_PRIVATE_KEY in walletConnectDappsSetup.ts",
+      "label": "wrong",
+      "evidence": "walletConnectDappsSetup.ts isn't changed by this PR and contains no private key. Around line 54 is the buildProposal fixture, and grep finds no E2E_TX_OWNER_PRIVATE_KEY."
+    },
+    {
+      "findings": [
+        "F21",
+        "F29"
+      ],
+      "summary": "Date.now()-based wei jitter could collide / should use crypto randomness",
+      "label": "wrong",
+      "evidence": "walletConnectDappsSetup.ts has no jitter function or jitterSeq. Line 66 is inside buildProposal's verifyContext, and the file isn't in the PR diff."
+    },
+    {
+      "findings": [
+        "F17",
+        "F26"
+      ],
+      "summary": "setupWcDappsTx failure only logged to console.error in TestCtrls",
+      "label": "wrong",
+      "evidence": "TestCtrls.e2e.tsx isn't modified by the PR and has no setupWcDappsTx. Only setupWcDappsBase is wired (line 299), so the described handler doesn't exist."
+    }
+  ]
+}

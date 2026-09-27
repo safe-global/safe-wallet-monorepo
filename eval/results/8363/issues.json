@@ -1,0 +1,84 @@
+{
+  "usage": {
+    "usd": 0.5519555999999999,
+    "turns": 8,
+    "wallSeconds": 46
+  },
+  "issues": [
+    {
+      "findings": [
+        "F1",
+        "F10"
+      ],
+      "summary": "combinedAddresses concatenates trusted+owned partitions that both derive from allSafes; could be simplified/renamed",
+      "label": "nit",
+      "evidence": "useOnboardingSafes.ts:33-36 spreads trustedSafeItems and ownedSafeItems, which partition allSafes (lines 17-28), so mapping allSafes directly would give the same set. The PR description even says it was mapped directly from allSafes, but the code doesn't do that. This is naming and simplification only, with no behavioural cost."
+    },
+    {
+      "findings": [
+        "F2"
+      ],
+      "summary": "?safe= URL pre-selection uses reset() and skips the look-alike confirmation dialog",
+      "label": "low",
+      "evidence": "useOnboardingSubmit.ts:100-128 writes the selection with reset() and never goes through handleToggle's confirm gate. This gap predates the PR: flagged owned safes already skipped it, and pinned safes weren't flagged at all before. The PR adds visible badges and a banner here but doesn't cause the bypass."
+    },
+    {
+      "findings": [
+        "F3",
+        "F5"
+      ],
+      "summary": "Banner-position test chains nullable queryByTestId results with &&, which makes failures unclear",
+      "label": "nit",
+      "evidence": "OnboardingSafesList.test.tsx:115-119 uses queryByTestId and `banner && trustedTable && ...`. If an element is missing, the test still fails (null !== 2), but the message is unclear. getByTestId would read better. Style only."
+    },
+    {
+      "findings": [
+        "F4",
+        "F7"
+      ],
+      "summary": "compareDocumentPosition is compared with strict equality instead of the bitmask pattern used elsewhere",
+      "label": "nit",
+      "evidence": "OnboardingSafesList.test.tsx:117 uses toBe(Node.DOCUMENT_POSITION_FOLLOWING). Other tests (SignInOptions/__tests__/index.test.tsx:63, SecurityChecksSection.test.tsx:124) mask with &. The nodes are siblings, so it works today; the only cost is brittleness and inconsistency."
+    },
+    {
+      "findings": [
+        "F6"
+      ],
+      "summary": "The test says the banner renders above both sections but only checks it against the trusted table",
+      "label": "nit",
+      "evidence": "OnboardingSafesList.test.tsx:115-119 only compares against onboarding-trusted-table. The owned section renders after the trusted one in the JSX (OnboardingSafesList.tsx:36-61), so the claim holds by transitivity. The missing assertion has little practical cost."
+    },
+    {
+      "findings": [
+        "F8"
+      ],
+      "summary": "Confirm dialog copy may assume the flagged safe is new rather than already trusted",
+      "label": "wrong",
+      "evidence": "SimilarityConfirmDialog.tsx:24-44 reads 'This address is similar to another safe in your list… Continue only if you recognize this Safe.' That wording is neutral and fits pinned rows as well; it doesn't imply the safe is being newly added."
+    },
+    {
+      "findings": [
+        "F9"
+      ],
+      "summary": "Doc comment wording 'trusted and owned rows alike' is awkward",
+      "label": "nit",
+      "evidence": "OnboardingSafesList.tsx:11. This is a pure wording preference."
+    },
+    {
+      "findings": [
+        "F11"
+      ],
+      "summary": "Banner is driven by the unfiltered flag set, so it stays visible when search hides every flagged row",
+      "label": "low",
+      "evidence": "OnboardingSafesList.tsx:34 renders the banner when flaggedAddresses.size > 0, and flaggedAddresses is computed from all safes regardless of searchQuery (useOnboardingSafes.ts:37). So a search that hides every flagged row still shows the banner. It's a minor, conservative false positive in a security warning."
+    },
+    {
+      "findings": [
+        "F12"
+      ],
+      "summary": "External UX/spec docs may still call the banner an 'owned-section warning'",
+      "label": "unverifiable",
+      "evidence": "A repo-wide grep finds no docs mentioning an owned-section warning. Only the component itself and ManageTrustedSafesContent.tsx:125 use the banner title. Any external spec can't be checked from the code."
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "usd": 0.054037600000000005,
+  "findings": [
+    {
+      "file": "apps/web/src/utils/transaction-guards.ts",
+      "line": 160,
+      "claim": "The same trusted-version array is duplicated across four locations (transaction-guards.ts at two places, useHasUntrustedFallbackHandler.ts, and fallbackHandler.ts) rather than defined once, requiring this PR to edit each copy by hand. If a future version update misses one of the copies, official contracts could be incorrectly marked as untrusted, producing a false untrusted-fallback-handler warning or causing a sign-message or migrate-to-L2 transaction to go unrecognized."
+    },
+    {
+      "file": "apps/web/src/utils/transaction-guards.ts",
+      "line": 420,
+      "claim": "This is a second copy of the same duplicated trusted-version array described elsewhere, contributing to the same maintenance risk of an inconsistent update across copies."
+    },
+    {
+      "file": "apps/web/src/hooks/useHasUntrustedFallbackHandler.ts",
+      "line": 32,
+      "claim": "This file holds another duplicate of the trusted-version array, adding to the risk that a future version bump is applied inconsistently across the codebase."
+    },
+    {
+      "file": "apps/web/src/features/security/data/scanners/fallbackHandler.ts",
+      "line": 17,
+      "claim": "This file holds another duplicate of the trusted-version array; the suggested fix is to export a single named constant alongside hasMatchingDeployment in the shared deployments module and reuse it in all four places instead of maintaining separate inline arrays."
+    },
+    {
+      "file": "apps/web/src/features/security/data/scanners/fallbackHandler.ts",
+      "line": 19,
+      "claim": "The doc comment on isExtensibleFallbackHandler states that 1.5.0 is not yet in the SafeVersion type, but the diff two lines above now uses '1.5.0' as a SafeVersion, making the comment inaccurate. It should be corrected to remove the outdated claim while keeping the explanation that the extensible handler lookup has no version filter."
+    },
+    {
+      "file": "apps/web/src/features/security/data/scanners/__tests__/contractVersion.test.ts",
+      "line": 197,
+      "claim": "The new tests hard-code the 1.5.0 mainnet singleton, factory, and fallback handler addresses instead of resolving them dynamically, and these values could not be verified against safe-deployments because node_modules was not installed. A more robust approach would resolve the addresses at test time using get*Deployment({ network: '1', version: '1.5.0' }), matching the pattern already used in useHasUntrustedFallbackHandler.test.ts and transaction-guards.test.ts."
+    },
+    {
+      "file": "apps/web/src/features/security/data/scanners/__tests__/contractVersion.test.ts",
+      "line": 211,
+      "claim": "This is another instance of a hard-coded 1.5.0 contract address in the new tests that was not verified against safe-deployments and could instead be resolved dynamically."
+    },
+    {
+      "file": "apps/web/src/features/security/data/scanners/__tests__/factoryValidation.test.ts",
+      "line": 52,
+      "claim": "This test hard-codes the 1.5.0 factory address rather than resolving it dynamically, and the value was not verified against safe-deployments."
+    },
+    {
+      "file": "apps/web/src/features/security/data/scanners/__tests__/fallbackHandler.test.ts",
+      "line": 35,
+      "claim": "This test hard-codes the 1.5.0 fallback handler address rather than resolving it dynamically, and the value was not verified against safe-deployments."
+    },
+    {
+      "file": "packages/utils/src/features/multichain/hooks/useCompatibleNetworks.ts",
+      "line": 15,
+      "claim": "SUPPORTED_VERSIONS in this shared web/mobile module still excludes 1.5.0, meaning a 1.5.0 Safe will show no compatible networks when replayed to another chain, even though the PR description states the version is now trusted across the app. The author should confirm whether this omission is intentional (e.g., because replay depends on the 1.4.1 SafeToL2Setup contract) or document it as a known gap."
+    }
+  ]
+}

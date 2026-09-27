@@ -1,0 +1,75 @@
+{
+  "usd": 0.10684360000000001,
+  "findings": [
+    {
+      "file": "packages/utils/src/features/safenet-checks/types/status.ts",
+      "line": 52,
+      "claim": "toPublicStatus has no test and no caller, so swapping the VERIFICATION_FAILED branch to return BENIGN instead of TIMED_OUT would type-check cleanly and pass CI undetected."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/mergeMonotonic.ts",
+      "line": 36,
+      "claim": "The transition table's exhaustive tests only sweep the BENIGN and MALICIOUS pinned rows; the AWAITING_VERIFICATION row is never tested as pinned, and the ordinary IN_PROGRESS to BENIGN/MALICIOUS transitions are untested, so removing BENIGN from the allowed transitions would leave every test passing while a check gets stuck in progress forever."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/decodeLogs.ts",
+      "line": 37,
+      "claim": "decodeLogs dispatches purely on topic0 and does not carry the emitting contract's address forward, even though RawLog declares an address field; since sentinel events like OracleResult carry no signature, the emitter address is the only thing that could authenticate them, so a forged OracleResult(approved=false) could reach a terminal MALICIOUS status."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/deriveCheckState.ts",
+      "line": 76,
+      "claim": "deriveCheckState grants a BENIGN status whenever some event is attested and attestation.status equals VERIFIED, without checking that the attested event and the verified attestation are the same one, even though signatureId and message exist on the type for exactly that binding."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/decodeLogs.ts",
+      "line": 15,
+      "claim": "The local str() function reimplements the package's existing toDecimalString helper, which is already imported elsewhere in the codebase for the same purpose, and the two disagree on undefined input, returning '0' versus the literal string \"undefined\"."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/deriveCheckState.ts",
+      "line": 56,
+      "claim": "The precedence docblock lists five outcomes but the function actually has seven branches, omitting the plainAttested branch and UNAVAILABLE."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/types/snapshot.ts",
+      "line": 10,
+      "claim": "SafenetCheckSnapshot is declared and exported but is never constructed anywhere in the change."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/builders/rawLogs.ts",
+      "line": 287,
+      "claim": "buildV1Lifecycle and buildV2Lifecycle are unused, and the tests hand-assemble the same event sequences instead of calling them."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/decodeLogs.ts",
+      "line": 60,
+      "claim": "There are 22 'as Hex'/'as string' casts applied to ethers' Result type, which is declared as Array<any>, effectively bypassing the no-any convention in substance without any lint rule catching it."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/deriveCheckState.ts",
+      "line": 77,
+      "claim": "The attestation-to-status mapping logic is written twice, byte-identical, once here and again at line 89 of the same file."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/builders/rawLogs.ts",
+      "line": 20,
+      "claim": "The logCounter module-level state is reset in only 3 of the log-building tests, risking state leaking between test cases."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/decodeLogs.ts",
+      "line": 20,
+      "claim": "The claim that decoding 'never throws' is a universal claim backed by only 4 hand-picked test inputs."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/decodeLogs.ts",
+      "line": 5,
+      "claim": "The RawLog documentation describes it as 'ethers Log-shaped', but ethers names the corresponding field 'index', not 'logIndex' as used here."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/utils/mergeMonotonic.ts",
+      "line": 67,
+      "claim": "ALLOWED_TRANSITIONS[pinned] would throw if given a status rehydrated from an older persisted build that is not present in the map; using '?? []' would guard against this once persistence is introduced."
+    }
+  ]
+}

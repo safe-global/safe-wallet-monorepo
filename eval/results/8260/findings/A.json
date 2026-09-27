@@ -1,0 +1,60 @@
+{
+  "usd": 0.07779,
+  "findings": [
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.tsx",
+      "line": 100,
+      "claim": "The tooltip trigger is overridden with a bare span instead of the default button, and that span is never given a tabIndex, so the cluster of additional network chains cannot be opened via keyboard focus; the hover interaction is also set to mouseOnly, so touch users cannot open it either. Previously all chains were rendered inline and visible to everyone, so this change makes chains beyond the first few unreachable for keyboard and touch users."
+    },
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.tsx",
+      "line": 98,
+      "claim": "The chain-cluster-with-tooltip block (Tooltip/TooltipTrigger, NetworkLogosList with showHasMore/maxVisible, and the ChainIndicator list) is duplicated verbatim from two other files, so any fix, such as the keyboard accessibility issue, has to be made in three separate places instead of one shared component."
+    },
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.tsx",
+      "line": 43,
+      "claim": "The loading and error values returned by useChains() are unused, so while the chains config is still loading, knownChainIds is empty and the available-networks section renders an empty cluster instead of the skeleton the previous ChainIndicator-based implementation showed during loading."
+    },
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.tsx",
+      "line": 98,
+      "claim": "The Tooltip still mounts even when knownChainIds is empty, so hovering can pop up an empty tooltip bubble; the block should be guarded on knownChainIds.length > 0."
+    },
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.test.tsx",
+      "line": 8,
+      "claim": "The component mock types its props as any, which both violates the project's ban on the any type and weakens the test as a contract check, since a typed mock would fail to compile if the real NetworkLogosList prop names changed while the any-typed version keeps passing silently."
+    },
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.test.tsx",
+      "line": 71,
+      "claim": "The test named to describe overflow collapsing beyond the visible limit only asserts the length of the array passed to a mocked NetworkLogosList component, so no actual collapsing occurs and the +N overflow indicator is never verified; the test name overstates what is being checked."
+    },
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.test.tsx",
+      "line": 67,
+      "claim": "Assertions on data-max-visible and data-show-has-more only check that two literal props were forwarded to a mock, so the test breaks on a harmless prop rename while still passing if the actual rendering is broken; asserting on rendered output instead, as done elsewhere in the repo, would be more robust."
+    },
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.test.tsx",
+      "line": 78,
+      "claim": "The hover test relies on the tooltip's real 600ms open delay against waitFor's default 1000ms timeout, leaving only about 400ms of margin, which risks flaking under CI load; the only other user.hover test in the repo targets a different (MUI) tooltip without this delay, so it isn't a validated precedent for this pattern."
+    },
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.tsx",
+      "line": 101,
+      "claim": "knownChainIds.map((chainId) => ({ chainId })) allocates a new array inline in the JSX attribute on every render; hoisting it next to knownChainIds would avoid the unnecessary re-allocation."
+    },
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.tsx",
+      "line": null,
+      "claim": "The component gained conditional rendering logic (collapsed, overflow, and empty states) but has no Storybook story, even though project guidance asks for a story for components with logic."
+    },
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppPreviewDrawer/index.tsx",
+      "line": 9,
+      "claim": "The file now imports two different Tooltip implementations (MUI and shadcn), which forces renaming imports with Networks* aliases to avoid collisions; extracting the duplicated cluster block into its own component would remove this collision."
+    }
+  ]
+}

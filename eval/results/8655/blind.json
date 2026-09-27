@@ -1,0 +1,127 @@
+{
+  "pr": 8655,
+  "title": "fix: Compact table view",
+  "description": "## What it solves\r\n\r\nResolves: [follow-up to WA-3444](https://linear.app/safe-global/issue/WA-3444/table-headers-are-inconsistent-across-the-app-three-different)\r\n\r\nThe Safe address book and the Spaces tables each solved \"narrow viewport\" differently, and none of them well:\r\n\r\n- **Safe address book** rendered two parallel trees — an `EnhancedTable` for desktop and a hand-rolled card list in `styles.module.css` for mobile, gated on a `max-width: 599.95px` media query. Two markup paths, two sets of styling, one CSS module keeping them apart.\r\n- **Spaces address book / pending requests** kept the address in its own column at every width, so on mobile the name column squeezed down while a shortened address sat beside it. Long names truncated to a few characters.\r\n- **Spaces members** rendered the rigid `2FA` badge as an always-visible column, which on mobile crushed the name column to roughly one character.\r\n- **Space contacts row actions** were full-text buttons (`Add to workspace`, `Request to add`, `Requested`, `Already shared`) that cannot shrink, so on mobile they pushed the row wider than the viewport.\r\n- **Safe accounts** laid its \"Add accounts\" button, search input and sort control in one non-wrapping flex row; below ~600px the search bar was pushed out of view.\r\n\r\n`PaginatedDataTable` — the typed-column table already powering the Spaces tables — lived under `features/spaces/components/`, so the Safe address book could not reasonably import it.\r\n\r\n## How this PR fixes it\r\n\r\n**Promote the shared table.** `features/spaces/components/PaginatedDataTable` → `components/common/PaginatedDataTable` (move + Storybook retitle `Features/Spaces/…` → `Components/Common/…`). Three Spaces consumers updated to the new import path. No API change in the move itself.\r\n\r\n**Migrate the Safe address book onto it.** `AddressBookTable` now passes typed `DataTableColumn<Entry>[]` instead of untyped `headCells` + `rows` cell maps. The desktop/mobile fork and `styles.module.css` (80 lines) are deleted — the single table handles both widths via `priority: 'secondary'` column dropping.\r\n\r\n**One compact pattern across all four tables.** The `Address` column is `priority: 'secondary'` everywhere, so compact drops it and the address rides under the name via a shared `AddressCell` (extracted from the duplicated `EthHashInfo` blocks in `SpaceAddressBookTable` and `PendingRequestsTable`). The name stops truncating in compact and wraps into the freed width instead.\r\n\r\n**Compact-aware row actions.** `renderExtraAction` now receives `{ isCompact }`. `AddToWorkspaceButton` and `RequestToAddButton` collapse to `size=\"icon-sm\"` with the label moved into `aria-label` + a tooltip; `Requested` and `Already shared` become icons the same way. Accessible names are preserved at both widths.\r\n\r\n**Members 2FA badge.** Marked `priority: 'secondary'` so it drops on mobile and joins the row detail — but only where the member actually has a status (declined invites have none).\r\n\r\n**Table-level fixes in `PaginatedDataTable`.** Compact cells and the detail cell get `whitespace-normal wrap-anywhere`, so expanding a detail row can no longer widen the table. Added `data-testid=\"table-row\"`, `prev-page-btn`, `next-page-btn` to match the `EnhancedTable` test surface.\r\n\r\n**Layout wrapping.** `SafeAccounts` header stacks below `sm:`; the Spaces address book search row gets `flex-wrap`.\r\n\r\n**Housekeeping.** `EnhancedTable`'s empty placeholder row gets `data-no-hover` (a hover pill on an empty row); its `@deprecated` pointer and the design-system catalog entries updated to the new path.\r\n\r\n## How to test it\r\n\r\n```bash\r\nyarn workspace @safe-global/web jest src/components/common/PaginatedDataTable src/components/common/EnhancedTable src/components/address-book src/features/spaces/components/MembersList src/features/spaces/components/SpaceAddressBook\r\nyarn turbo run type-check --filter=@safe-global/web\r\nyarn workspace @safe-global/web storybook   # Components/Common/PaginatedDataTable\r\n```\r\n\r\nManually, at a narrow viewport (≤767px) and at desktop width:\r\n\r\n1. **Safe address book** (`/address-book?safe=…`) — address sits under the name on mobile, its own column on desktop; long names wrap on mobile, truncate on desktop; edit/delete/send actions reachable at both widths.\r\n2. **Space address book → Workspace / Mine tabs** — same, plus the row action renders as an icon-only button with a tooltip on mobile; `Already shared` / `Requested` render as icons.\r\n3. **Space address book → Pending requests** — `Already in workspace` badge still shows next to the name; approve/reject reachable on mobile.\r\n4. **Space members** — 2FA badge gone from the row on mobile, present in the expanded detail; absent from the detail for a declined invite.\r\n5. **Safe accounts page** — search input visible and full-width below `sm:`, inline with the button above it.\r\n\r\n## Affected flows\r\n\r\n- Safe address book: browse, sort by name/address, edit entry, delete entry, send tokens to an entry, import/export\r\n- Space address book (Workspace tab): browse, sort, edit/delete workspace contact\r\n- Space address book (Mine tab): browse, add local contact to workspace, request to add contact, `Already shared` state\r\n- Space address book (Pending requests tab): browse, approve, reject\r\n- Space members list (active + invited variants): browse, sort, expand row detail on mobile, 2FA badge visibility\r\n- Space Safe accounts page: search and sort accounts\r\n\r\n## Blast radius\r\n\r\n- **`components/common/PaginatedDataTable` (moved from `features/spaces/components/`)** — now 4 consumers: `AddressBookTable`, `SpaceAddressBookTable`, `PendingRequestsTable`, `MembersList`. Behaviour changes (compact `whitespace-normal wrap-anywhere`, new `data-testid`s) hit all four.\r\n- **`SpaceAddressBookTable.renderExtraAction`** — signature widened to `(entry, { isCompact })`. Sole caller is `SpaceAddressBook/index.tsx`; the added second argument is source-compatible for any future caller that ignores it.\r\n- **`AddToWor",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/components/address-book/AddressBookTable/index.test.tsx",
+      "line": null,
+      "claim": "No unit tests cover the new narrow-screen layout of the Safe address book (address appearing under the name, address column being dropped) or sorting by address, so a regression in the compact/narrow-screen behavior would not be caught by unit tests even though Cypress covers the sorting behavior."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/components/common/EnhancedTable/index.tsx",
+      "line": 137,
+      "claim": "The comment still states 'its nine existing consumers' and the story at design-system.stories.tsx:943 still says '~9', but with the address book's usage removed there are now only 8 consumers; the story text also claims no consumer passes panel anymore, meaning panel is now used only by the story itself."
+    },
+    {
+      "id": "F3",
+      "file": ".storybook/COVERAGE.md",
+      "line": 1741,
+      "claim": "This location also still lists the table at its old features/spaces/... path, which is now outdated after the move."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/components/ui/stories/design-system.stories.tsx",
+      "line": 938,
+      "claim": "The PR edits a file under components/ui/* without stating in the description whether the change is coordinated with any open design-system rewrite of components/ui/*, or confirming that no such PR is open."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/components/address-book/AddressBookTable/index.tsx",
+      "line": 205,
+      "claim": "The action buttons reuse the old table's .actions CSS class, which switches to justify-content: flex-start below 900px while the header stays right-aligned, causing the buttons to be misaligned under the header on narrow screens including phones, which previously used a separate mobile card layout."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/src/components/address-book/AddressBookTable/index.tsx",
+      "line": 221,
+      "claim": "The Safe address book no longer offers a rows-per-page picker (10 / 25 / 100) and always shows 25 rows, which is a regression compared to the previous table; this is a visible feature loss for users with many contacts who now must page through more pages to see the same number of entries."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/index.tsx",
+      "line": 196,
+      "claim": "The same aria-label-on-plain-span issue affects this location, meaning a screen-reader user on a narrow screen would hear nothing for these rows."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/src/components/address-book/AddressBookTable/index.tsx",
+      "line": null,
+      "claim": "The custom mobile card view for the address book, along with its styles.module.css (about 80 lines), was removed and replaced by responsive column dropping; since both this and the rows-per-page removal are user-visible, the PR description should state whether design/product signed off on these changes."
+    },
+    {
+      "id": "F9",
+      "file": ".storybook/COVERAGE.md",
+      "line": 807,
+      "claim": "This file still lists the table at its old features/spaces/... path, which is now outdated after the move."
+    },
+    {
+      "id": "F10",
+      "file": "apps/web/src/components/common/EnhancedTable/index.tsx",
+      "line": 137,
+      "claim": "The doc comment still states 'nine existing consumers' but after removing the address book there are now only eight consumers, so the count is out of date."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/src/components/address-book/AddressBookTable/index.test.tsx",
+      "line": null,
+      "claim": "The branches that replace the Safe address book's mobile layout have no test coverage: the compact name cell (address under the name, name not truncated) at index.tsx:171-182 and the dropping of the Address column (priority: 'secondary') on mobile are untested, even though this new code replaces the deleted mobile card and the existing test file only exercises pagination with useIsMobile returning false."
+    },
+    {
+      "id": "F12",
+      "file": "apps/web/src/components/address-book/AddressBookTable/index.tsx",
+      "line": 167,
+      "claim": "The Safe address book rebuilds the same 'name with address underneath when compact' cell layout inline with different EthHashInfo props instead of reusing the shared AddressCell component, because AddressCell lives inside features/spaces and cannot be imported due to feature-boundary rules; moving AddressCell to a shared location (e.g., alongside PaginatedDataTable or into components/address-book) would let all three tables share one cell instead of maintaining three copies."
+    },
+    {
+      "id": "F13",
+      "file": null,
+      "line": null,
+      "claim": "The Safe address book's own 'address under the name' cell duplicates the new AddressCell component, but AddressCell lives in the Spaces feature, which a shared component should not import from; moving AddressCell to components/common would let both features share it."
+    },
+    {
+      "id": "F14",
+      "file": "apps/web/src/components/address-book/AddressBookTable/index.tsx",
+      "line": 221,
+      "claim": "The Safe address book table lost its rows-per-page selector when switching from EnhancedTable (which offered 10, 25 or 100 rows per page) to PaginatedDataTable, which has a fixed page size of 25 and is already documented as lacking a rows-per-page option."
+    },
+    {
+      "id": "F15",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/RequestToAddButton.tsx",
+      "line": 105,
+      "claim": "The 'Requested' and 'Already shared' labels use an aria-label on a plain span with no role, and the icons themselves are hidden from screen readers, so most screen readers will skip these labels; the existing test passes only because the testing library accepts the label regardless of accessibility semantics, masking the real issue."
+    },
+    {
+      "id": "F16",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/AddToWorkspaceButton.tsx",
+      "line": 98,
+      "claim": "The 'icon + tooltip + aria-label' compact pattern (swap label for a lucide icon, move label into aria-label and a tooltip, wrap in a TooltipTrigger span) is duplicated across four locations instead of being extracted into a shared component like CompactLabel or IconWithTooltip, risking inconsistent accessibility handling as the copies diverge."
+    },
+    {
+      "id": "F17",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/index.tsx",
+      "line": 142,
+      "claim": "A comment now ends mid-sentence at '…left the search almost touching' because its second line ('the table card below it.') was deleted."
+    },
+    {
+      "id": "F18",
+      "file": "apps/web/cypress/e2e/regression/address_book_2.cy.js",
+      "line": 33,
+      "claim": "After one click on the Address sort (ascending), the test calls verifyEntriesOrder('descending') because that helper's parameter actually refers to sorting by name rather than the literal sort direction; while a comment explains this, the mismatch between the parameter's apparent meaning and its actual effect is easy to break in future changes, and an explicit expected-first-row argument would be clearer."
+    },
+    {
+      "id": "F19",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/RequestToAddButton.tsx",
+      "line": 139,
+      "claim": "There is no test for the compact state combined with a name error being sent through InvalidContactNameTooltip alongside the icon-only button (also present in AddToWorkspaceButton.tsx:89-91), and no test for the compact 'Already shared' icon badge in SpaceAddressBook/index.tsx:193-205."
+    },
+    {
+      "id": "F20",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/index.tsx",
+      "line": 141,
+      "claim": "A comment was truncated during the diff, cutting off mid-sentence at 'almost touching' after the line 'the table card below it' was deleted; the comment should be restored."
+    }
+  ]
+}

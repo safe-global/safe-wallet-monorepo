@@ -1,0 +1,100 @@
+{
+  "usd": 0.0950036,
+  "findings": [
+    {
+      "file": "apps/web/.../SpendingLimitFlow/TokenSelector/index.tsx",
+      "line": 208,
+      "claim": "The empty-state check that shows \"No tokens found\" only looks at the loading flags and ignores the error flags, so when the held-balances load fails and the filtered list is also empty, the UI shows both the load-error message and the empty-state message at the same time."
+    },
+    {
+      "file": "apps/web/.../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions.ts",
+      "line": 17,
+      "claim": "The doc comment states that isLoading is always false while the query is skipped, but the code and an accompanying test show isLoading can be true when the Safe is valid and the trusted setting is still undefined, so the comment is inaccurate and should be reworded."
+    },
+    {
+      "file": "apps/web/.../SpendingLimitFlow/utils/popularTokens.ts",
+      "line": 1,
+      "claim": "A 16-line, four-paragraph comment citing ticket references, an acceptance criterion, a verification date, and a verification method violates the repository rule limiting comments to one line and disallowing multi-paragraph blocks or change-justification notes; the ticket/AC traceability should move to the PR description instead."
+    },
+    {
+      "file": "apps/web/.../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions.ts",
+      "line": 35,
+      "claim": "A multi-line comment citing a ticket and issue number violates the one-line comment rule and should be shortened, with ticket references moved to the PR description."
+    },
+    {
+      "file": "apps/web/.../SpendingLimitFlow/TokenSelector/index.tsx",
+      "line": 71,
+      "claim": "Multi-line comments citing a ticket and an acceptance criterion violate the one-line comment rule and should be shortened, with ticket references moved to the PR description."
+    },
+    {
+      "file": "apps/web/.../SpendingLimitFlow/TokenSelector/TokenOptionRow.tsx",
+      "line": 7,
+      "claim": "A multi-line comment citing a ticket reference violates the one-line comment rule and should be shortened, with the ticket reference moved to the PR description."
+    },
+    {
+      "file": "apps/web/.../SpendingLimitFlow/utils/tokenOptions.ts",
+      "line": 88,
+      "claim": "A multi-line comment citing acceptance criteria violates the one-line comment rule and should be shortened, with the references moved to the PR description."
+    },
+    {
+      "file": "apps/web/.../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions.ts",
+      "line": 54,
+      "claim": "Several multi-line comments give real reasoning the code can't express but still exceed the one-line comment limit and should be shortened rather than removed."
+    },
+    {
+      "file": "apps/web/.../SpendingLimitFlow/TokenSelector/index.tsx",
+      "line": 90,
+      "claim": "A multi-line comment gives real reasoning the code can't express but still exceeds the one-line comment limit and should be shortened rather than removed."
+    },
+    {
+      "file": "apps/web/.../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions.ts",
+      "line": 30,
+      "claim": "buildIdentityKey is exported only so it can be unit tested, but the project's code-style doc requires test-only exports to use a leading underscore prefix, which this export lacks; it should be renamed with the prefix or tested indirectly through the hook instead of being exported."
+    },
+    {
+      "file": "apps/web/.../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions.ts",
+      "line": 63,
+      "claim": "All held tokens are fetched with no paging and no excludeSpam filter, and are rendered with the combobox's default unlimited render limit, so the DOM grows with the Safe's entire token history; this is worse when the user selects \"All tokens\" rather than the trusted-token default."
+    },
+    {
+      "file": "apps/web/.../SpendingLimitFlow/TokenSelector/index.tsx",
+      "line": 141,
+      "claim": "The filter, itemToStringValue, and onValueChange props are passed as inline arrow functions, so the combobox library's memoization of the filtered results keyed on those references is defeated and the full token list is rescanned on every re-render; wrapping them in useCallback or hoisting them to module scope would fix this."
+    },
+    {
+      "file": "apps/web/.../SpendingLimitFlow/TokenSelector/TokenGroupState.tsx",
+      "line": 28,
+      "claim": "This component reimplements an icon-plus-message-plus-retry-button pattern that an existing shared component already provides, duplicating logic that could be reused; the existing shared component would need a compact variant (it currently lacks a className or testid prop) before it could be swapped in directly."
+    },
+    {
+      "file": "apps/web/.../SpendingLimitFlow/TokenSelector/index.tsx",
+      "line": 208,
+      "claim": "No test exercises the case where only one of isLoading or isPopularLoading is set with an empty options array, so a bug where the two flags are combined with the wrong boolean logic would not be caught."
+    },
+    {
+      "file": "apps/web/.../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions.ts",
+      "line": 99,
+      "claim": "The held-balances isError case is not tested with stale currentData present, unlike the equivalent popular-token error case, leaving that code path unverified."
+    },
+    {
+      "file": "apps/web/.../SpendingLimitFlow/utils/tokenOptions.ts",
+      "line": 12,
+      "claim": "PopularToken and NativeCurrencyInfo are near-duplicate types differing only in that the latter lacks an address field, indicating potential duplication that could be consolidated."
+    },
+    {
+      "file": "apps/web/.../SpendingLimitFlow/TokenSelector/TokenOptionRow.tsx",
+      "line": 16,
+      "claim": "A nested ternary checks symbol and name twice, once with && and once with ||, which is harder to read than an if-chain would be."
+    },
+    {
+      "file": "apps/web/.../SpendingLimitFlow/utils/tokenOptions.ts",
+      "line": 30,
+      "claim": "A comment states that group decides whether a balance is shown, but no balance is currently rendered anywhere in the code, making the comment inaccurate until that functionality is added."
+    },
+    {
+      "file": "apps/web/AGENTS.md",
+      "line": 88,
+      "claim": "The \"New utility/service\" row documents utils.test.ts as colocated, but most feature utility tests actually live under a __tests__/ directory, which this PR's diff correctly follows; the documentation itself is out of date and should be corrected."
+    }
+  ]
+}

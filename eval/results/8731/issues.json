@@ -1,0 +1,166 @@
+{
+  "usage": {
+    "usd": 0.5834944,
+    "turns": 7,
+    "wallSeconds": 69
+  },
+  "issues": [
+    {
+      "findings": [
+        "F8"
+      ],
+      "summary": "Granted limit amount is rounded or compacted by TokenAmount's default formatter instead of shown exactly",
+      "label": "medium",
+      "evidence": "LimitSummaryRow.tsx:33 passes no preciseAmount, so formatVisualAmount uses formatAmount (formatNumber.ts:47-58): 5-digit precision, and compact notation when the string is longer than 9 characters. So 0.123456 shows as 0.12346 (more than the real limit) and 1234.56789 shows as 1.23K. On a confirm step whose job is to say exactly what a signer grants, that is misleading."
+    },
+    {
+      "findings": [
+        "F9"
+      ],
+      "summary": "The amount test builds its expected value with the same formatter the component uses, and its input never rounds",
+      "label": "low",
+      "evidence": "LimitSummaryRow.test.tsx:24 expects formatVisualAmount('1000000000', 6) for the input '1000'. That mirrors the implementation and can never catch rounding or compaction, so the F8 behaviour goes untested."
+    },
+    {
+      "findings": [
+        "F11",
+        "F13"
+      ],
+      "summary": "frequency.ts deep-imports spending-limits/constants although the barrel already re-exports getResetTimeOptions",
+      "label": "low",
+      "evidence": "frequency.ts:1 imports '@/features/spending-limits/constants'. The same function is exported from spending-limits/index.ts, and this is the only import from outside the feature that reaches in this way. apps/web/AGENTS.md forbids deep imports, but ESLint does not flag this path. constants.ts is lightweight, so the cost is only a convention breach."
+    },
+    {
+      "findings": [
+        "F10"
+      ],
+      "summary": "The callout name uses only spender.name, while EthHashInfo prefers the address-book name",
+      "label": "low",
+      "evidence": "copy.ts:17-19 uses name?.trim() || shortenAddress(address). EthHashInfo/index.tsx:17 uses addressBookItem?.name || props.name, so the callout and the card can disagree when the model's name is missing or differs from the address book. That makes the comment's 'same fallback the spender card shows' inaccurate. Low impact because the component is unwired and the model builder does not exist yet."
+    },
+    {
+      "findings": [
+        "F6"
+      ],
+      "summary": "safeParseUnits logs console.error on every render when an amount has more decimals than the token allows",
+      "label": "low",
+      "evidence": "formatters.ts:47-53 always logs in its catch block, and LimitSummaryRow.tsx:16 calls it during every render. The test at LimitSummaryRow.test.tsx:28 has to silence console.error for exactly this case. It is console noise, not a user-facing defect, and the logging itself lives outside the PR."
+    },
+    {
+      "findings": [
+        "F15"
+      ],
+      "summary": "The testBuilders comment says the builders must stay importable from stories, but no story imports them",
+      "label": "low",
+      "evidence": "testBuilders.ts:8 gives story importability as the reason for not using test-utils. PolicySummary.stories.tsx defines its own inline fixtures, and a grep finds no non-test importer of testBuilders, so the stated reason does not hold today."
+    },
+    {
+      "findings": [
+        "F22"
+      ],
+      "summary": "describePolicy with no spenders produces 'You are giving spending limits.'",
+      "label": "low",
+      "evidence": "copy.ts:42-49: with an empty spenders array, count is 0 and names is empty, which yields that ungrammatical sentence. The component is unwired and a policy always has at least one spender, so this is an unlikely edge case."
+    },
+    {
+      "findings": [
+        "F23"
+      ],
+      "summary": "CANONICAL_FREQUENCIES lookup on a plain object can resolve inherited prototype keys",
+      "label": "low",
+      "evidence": "frequency.ts:16 indexes an object literal (constants.ts:14). A key like 'constructor' would return a truthy function and give label undefined. resetTimeMin comes from a fixed dropdown, so this is very unlikely in practice."
+    },
+    {
+      "findings": [
+        "F21"
+      ],
+      "summary": "The AppliesToRow fiat assertion only checks for '$'",
+      "label": "low",
+      "evidence": "AppliesToRow.test.tsx:25 asserts toHaveTextContent('$'), which passes for any fiat value. A regression in the formatted balance (123720) would go unnoticed, even though the test title claims to cover the fiat balance."
+    },
+    {
+      "findings": [
+        "F4"
+      ],
+      "summary": "The canonical reset-period minute values are duplicated from spending-limits constants",
+      "label": "low",
+      "evidence": "constants.ts:14-19 re-keys '0'/'1440'/'10080'/'43200', which already exist in features/spending-limits/constants.ts, and testBuilders.ts:11 repeats them a third time. If the option set changes, the summary silently falls back to dropdown labels. This is a real but small maintenance cost."
+    },
+    {
+      "findings": [
+        "F14",
+        "F17"
+      ],
+      "summary": "List keys combine an identifier with the array index",
+      "label": "nit",
+      "evidence": "index.tsx:18 and SpenderSummaryCard.tsx:38 use `${address}-${index}`. The lists are static, render-only props with no reorder or state, so there is no concrete cost. Uniqueness of spender or token addresses is also not guaranteed, which is why the index was added."
+    },
+    {
+      "findings": [
+        "F3"
+      ],
+      "summary": "The story repeats the loaders: [mswLoader] that preview.tsx already applies globally",
+      "label": "nit",
+      "evidence": "preview.tsx:141 applies mswLoader globally, so the story's loader is redundant. The import is used, not unused, and several existing stories (e.g. spending-limits stories) follow the same pattern."
+    },
+    {
+      "findings": [
+        "F5"
+      ],
+      "summary": "The Card-plus-padded-div wrapper and its comment are duplicated in two components",
+      "label": "nit",
+      "evidence": "AppliesToRow.tsx:10-12 and SpenderSummaryCard.tsx:19-21 repeat the same wrapper and comment. With only two sites and slightly different inner classes, extracting a component is a preference."
+    },
+    {
+      "findings": [
+        "F1",
+        "F2",
+        "F19",
+        "F24"
+      ],
+      "summary": "Multi-line JSDoc blocks and ticket or phase references in comments go against the comment convention",
+      "label": "nit",
+      "evidence": "index.tsx:9-12, copy.ts:36-39 and frequency.ts:11-14 are two-line JSDoc blocks, and index.tsx:11 and types.ts:26 name WA-3152 and a not-yet-existing toPolicySummaryModel (Phase 2). AGENTS.md prefers one-line comments, so this is a style breach with no functional cost."
+    },
+    {
+      "findings": [
+        "F20"
+      ],
+      "summary": "Two separate size constants of 24 for avatar and token icon",
+      "label": "nit",
+      "evidence": "SpenderSummaryCard.tsx:9 and LimitSummaryRow.tsx:9 each define 24 for different elements. This is pure preference with no concrete cost."
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "The copy.ts file name could be more descriptive",
+      "label": "nit",
+      "evidence": "The cited file, Summary/describePolicy.ts, does not exist; the logic lives in PolicySummary/copy.ts. The rename is a naming preference only."
+    },
+    {
+      "findings": [
+        "F18"
+      ],
+      "summary": "The summary's frequency labels differ from the dropdown's wording",
+      "label": "wrong",
+      "evidence": "The PR description says this is deliberate: the four production periods use 'One time only / Daily / Weekly / Monthly', and other periods fall back to the dropdown's label. constants.ts:13-19 and frequency.ts:15-20 implement exactly that."
+    },
+    {
+      "findings": [
+        "F7"
+      ],
+      "summary": "Comma decimal separator in amount input",
+      "label": "wrong",
+      "evidence": "This PR has no input field. LimitSummaryRow only renders an amount string it is given (types.ts:14), so input parsing belongs to the form, not this component."
+    },
+    {
+      "findings": [
+        "F12"
+      ],
+      "summary": "The added dialogs are not responsive",
+      "label": "wrong",
+      "evidence": "The PR adds no dialogs, only an inline summary block (index.tsx) and its sub-cards."
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "usage": {
+    "usd": 0.5420522,
+    "turns": 8,
+    "wallSeconds": 64
+  },
+  "issues": [
+    {
+      "findings": [
+        "F5",
+        "F6",
+        "F8",
+        "F11"
+      ],
+      "summary": "A web copy of the isMigrationToL2Possible tests was not updated. Its nonce > 0 case now returns true but still asserts falsy, so the test fails.",
+      "label": "medium",
+      "evidence": "apps/web/src/services/contracts/__tests__/safeContracts.test.ts:78-79 asserts toBeFalsy() for nonce 2 on chain 10. safeInfoBuilder defaults version to '1.4.1' (apps/web/src/tests/builders/safe.ts:37), and the new helper (packages/utils/.../safeContracts.ts:62-66) no longer checks the nonce, so it returns true. The web test suite fails in CI; users are not affected."
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "The contractVersion scanner test mocks isMigrationToL2Possible, so no test checks that `version` (not `nonce`) is the field passed to it.",
+      "label": "medium",
+      "evidence": "contractVersion.ts:51-54 builds the argument with a double cast, so passing the wrong field still type-checks. With the helper mocked, a regression that sends `nonce` would make `version` undefined and quietly turn the scanner's migrate option off, and no test would fail."
+    },
+    {
+      "findings": [
+        "F4",
+        "F12",
+        "F13"
+      ],
+      "summary": "The double cast plus a hand-written comment at the scanner call site could be replaced by narrowing the helper's parameter to Pick<SafeState, 'version' | 'chainId'>.",
+      "label": "low",
+      "evidence": "contractVersion.ts:49-54: the PR had to edit the comment again to match the callee. The cast means the compiler would not flag it if the helper started reading another field. Narrowing the parameter type works with existing callers, which pass a full SafeState."
+    },
+    {
+      "findings": [
+        "F9"
+      ],
+      "summary": "There is no component-level test showing UnsupportedMastercopyWarning offers Migrate for a Safe with nonce > 0.",
+      "label": "low",
+      "evidence": "The UnsupportedMastercopyWarning directory has no test file. However, the new utils unit tests (packages/utils/.../__tests__/safeContracts.test.ts:88-99) would fail if the nonce gate came back, so the core behaviour change is covered. A UI test would add little."
+    },
+    {
+      "findings": [
+        "F1"
+      ],
+      "summary": "The scanner comment 'same check as UnsupportedMastercopyWarning' is inaccurate: the warning also ORs in the bytecode-based canMigrateUnsupportedMastercopy check.",
+      "label": "low",
+      "evidence": "The comment at contractVersion.ts:47 predates the PR and was not changed. UnsupportedMasterCopyWarning.tsx:33-35 adds the bytecode fallback, which the scanner lacks. The divergence already existed; the PR does not really make it larger."
+    },
+    {
+      "findings": [
+        "F7"
+      ],
+      "summary": "Without the nonce gate, eligibility rests on the version the singleton reports about itself, and no code checks chain.l2. An L1 Safe with an unknown singleton could be offered migration to the L2 singleton.",
+      "label": "low",
+      "evidence": "safeContracts.ts:62-66 and createMigrateToL2 (apps/web/src/utils/safe-migrations.ts:54-70) do not check chain.l2. But the target is always the official SafeMigration/L2 singleton, which also works on L1 (it only costs more gas), and before this PR nonce-0 Safes of any version were offered migration anyway. This is a rare edge case with no loss of funds."
+    },
+    {
+      "findings": [
+        "F10"
+      ],
+      "summary": "The canMigrateUnsupportedMastercopy tests still use a `typeof === 'boolean'` check, so tests titled 'should return true' cannot fail.",
+      "label": "low",
+      "evidence": "packages/utils/.../__tests__/safeContracts.test.ts:55-72 is outside the lines the PR changed and predates it. It is a real weak test, but only a minor one here."
+    },
+    {
+      "findings": [
+        "F2"
+      ],
+      "summary": "The new JSDoc does not say that version matching is on the base version and tolerates build metadata such as +L2.",
+      "label": "nit",
+      "evidence": "safeContracts.ts:57-61 JSDoc. The tolerance is covered by a test (test file line ~94, '1.3.0+L2'). Leaving it out of the doc has no concrete cost."
+    },
+    {
+      "findings": [
+        "F3",
+        "F15"
+      ],
+      "summary": "The new `!safe.version` guard returns false when CGW reports a null version, which could remove Migrate on the scanner and on mobile, where there is no bytecode fallback.",
+      "label": "wrong",
+      "evidence": "The PR description says 'unknown version → still Use CLI', so this is deliberate and has a test (safeContracts.test.ts 'should return false when the Safe version is unknown'). The affected customer Safes report 1.3.0/1.4.1, as the PR's before/after screenshots show, and SafeMigration only supports those versions."
+    },
+    {
+      "findings": [
+        "F14"
+      ],
+      "summary": "Migration eligibility reuses SUPPORTED_L2_VERSIONS, which the finding says is documented only for bytecode comparison.",
+      "label": "wrong",
+      "evidence": "packages/utils/src/services/contracts/bytecodeComparison.ts:5-8 documents the constant as 'Supported L2 versions for bytecode comparison and migration', so it is already meant for both uses."
+    }
+  ]
+}

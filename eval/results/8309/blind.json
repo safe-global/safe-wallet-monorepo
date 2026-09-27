@@ -1,0 +1,79 @@
+{
+  "pr": 8309,
+  "title": "tests(mobile): E2E for the nonce & approval draft editors",
+  "description": "## What it solves\r\n\r\nAdds Maestro coverage for the two draft-transaction editors on the confirm screen (nonce editor, approval editor), which had none.\r\n\r\n## How this PR fixes it\r\n\r\nNew `transactions/draft-editors/` suite:\r\n\r\n- **send-nonce-editor** — drives the real send flow to a draft, edits the nonce (too-low validation, custom rebuild, recommended re-pick), and verifies the transaction details show the same nonce after each change.\r\n- **approval-editor** — composes an approve multiSend draft (the editors only render for drafts), edits the amount and toggles unlimited, and verifies the approve action's on-chain `_value` and spender after each change.\r\n\r\nHarness: a `draftEditorsSetup` that seeds the send flow / composes the draft and surfaces its async outcome as `e2e-draft-setup-*` markers. Two small product tweaks make elements addressable: `accessible={false}` on `DialogModal` (also fixes a real VoiceOver grouping bug) and a `testID` on the review-and-confirm button.\r\n\r\n## How to test it\r\n\r\n```bash\r\nyarn workspace @safe-global/mobile e2e:metro-ios\r\nmaestro test --include-tags draft-editors apps/mobile/e2e\r\n```\r\n\r\n## Affected flows\r\n\r\n- None in production — e2e-only, plus `accessible={false}` on `DialogModal` and one `testID`.\r\n\r\n## Blast radius\r\n\r\n- `DialogModal` (used by `CustomNonceModal`, `AddToAddressBookModal`) and `ReviewFooter` — additive, no behavior change.\r\n- Flows read live Sepolia staging (Safe data, COW balance); nothing is signed or proposed.\r\n\r\n## Risks / not checked\r\n\r\n- Approval flow depends on the test Safe holding COW on staging (token symbol/metadata).\r\n\r\n## Visual summary\r\n\r\n```mermaid\r\nflowchart LR\r\n    A[compose / send-flow draft] --> B[confirm screen editor]\r\n    B --> C[edit nonce / approval]\r\n    C --> D[draft rebuilds under new safeTxHash]\r\n    D --> E[assert row + tx details / action value]\r\n```\r\n\r\n## Checklist\r\n\r\n- [x] I've tested the branch on mobile 📱\r\n- [x] I've documented how it affects the analytics (if at all) 📊\r\n- [x] I've written a unit/e2e test for it (if applicable) 🧑‍💻\r\n- [x] I've listed affected flows and blast radius, and named what I did not verify 🎯\r\n\r\n---\r\n\r\n## CLA signature\r\n\r\nWith the submission of this Pull Request, I confirm that I have read and agree to the terms of the [Contributor License Agreement](https://safe.global/cla).\r\n",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/__tests__/draftEditorsSetup.test.ts",
+      "line": null,
+      "claim": "The setupSendFlow unit test does not assert that router.replace('/(tabs)') was called, leaving a coverage gap since navigation to the home tab is core to the setup's job and Maestro flows depend on it."
+    },
+    {
+      "id": "F2",
+      "file": "apps/mobile/src/features/Send/components/DialogModal.tsx",
+      "line": 32,
+      "claim": "With accessible={false} set on the overlay, screen-reader users can no longer reach the tap-outside-to-cancel interaction, since VoiceOver can no longer see that element as tappable."
+    },
+    {
+      "id": "F3",
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
+      "line": null,
+      "claim": "The setup-status marker only signals ready/failed and never resets to idle between runs; correctness currently depends on setupSendFlow resetting it before setupApprovalDraft flips it to ready, so if that ordering changes the marker could remain ready from a prior run."
+    },
+    {
+      "id": "F4",
+      "file": "apps/mobile/e2e/utils/components/draft-editors/verify-approve-amount.yml",
+      "line": 35,
+      "claim": "The spender text assertion regex '.*0x81Bd.*4fec.*' matches only 8 hex characters total, so any address rendered in short form that happens to start with 0x81Bd and end with 4fec would incorrectly pass; matching the full shortened form the UI actually produces would make the assertion stronger."
+    },
+    {
+      "id": "F5",
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
+      "line": null,
+      "claim": "There is no test covering the waitFor timeout path for 'chain config' or 'Safe SDK' in setupApprovalDraft, even though these are the most likely places to surface real E2E flakiness from SDK init timing; a test asserting the failure marker/throw when the value resolves to undefined would catch regressions in that error path."
+    },
+    {
+      "id": "F6",
+      "file": "apps/mobile/src/features/Send/components/DialogModal.tsx",
+      "line": 32,
+      "claim": "Setting accessible={false} on the outer overlay Pressable removes the tap-outside-to-dismiss action from screen readers (VoiceOver/TalkBack), forcing screen-reader users to rely solely on the Cancel button; this tradeoff should be explicitly noted in the PR description rather than framed as a pure accessibility improvement."
+    },
+    {
+      "id": "F7",
+      "file": "apps/mobile/src/features/Send/components/DialogModal.tsx",
+      "line": 57,
+      "claim": "The Cancel and Save Pressables lack accessibilityRole=\"button\", so now that screen readers can reach them individually they are announced as plain text rather than as buttons, unlike the 40+ other Pressables in apps/mobile/src that already set this role."
+    },
+    {
+      "id": "F8",
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
+      "line": 38,
+      "claim": "The waitFor helper uses a truthy check (if (value)) which rejects falsy-but-valid values like 0, '', or false; while it works today since both readers return objects, this is a footgun for a generic helper and should use value != null instead."
+    },
+    {
+      "id": "F9",
+      "file": "apps/mobile/src/features/Send/components/DialogModal.tsx",
+      "line": 32,
+      "claim": "The change adds no test, and there is currently no test for DialogModal or for the two components that use it (AddToAddressBookModal.tsx, CustomNonceModal.tsx). A small render test would prevent someone later removing accessible={false} and merging the dialog back into one element without anyone noticing, for example by checking that the dialog-cancel and dialog-save buttons can each be found by role and label."
+    },
+    {
+      "id": "F10",
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
+      "line": 61,
+      "claim": "setupApprovalDraft mixes dispatch sources, using the passed-in Dispatch for setupSendFlow but store.dispatch for RTKQ and compose calls; since this is E2E-only code and store is already imported, consistently using store.dispatch throughout would be simpler."
+    },
+    {
+      "id": "F11",
+      "file": "apps/mobile/e2e/tests/transactions/draft-editors/send-nonce-editor.yml",
+      "line": 93,
+      "claim": "The nonce test's too-low branch hardcodes 99999 and depends on the live staging Safe's current nonce being below that value, silently coupling the test to on-chain state that could eventually change as the Safe ages."
+    },
+    {
+      "id": "F12",
+      "file": "apps/mobile/src/features/Send/components/DialogModal.tsx",
+      "line": 32,
+      "claim": "No test covers the new accessible={false} props on the backdrop and dialog-card Pressables, so reverting them would still let CI pass. DialogModal, CustomNonceModal and AddToAddressBookModal have no tests at all, and if the prop is later dropped or the dialog is wrapped in another accessible parent, screen-reader users would lose access to the nonce and contact-name inputs again with nothing to warn anyone."
+    }
+  ]
+}

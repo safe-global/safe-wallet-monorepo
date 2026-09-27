@@ -1,0 +1,85 @@
+{
+  "usd": 0.0926256,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesTable/index.tsx",
+      "line": 27,
+      "claim": "The row-grouping logic keys rows only on type, address and proposer and keeps the first matched policy's status and data, so a policy that is active on one chain but not enforced on another displays as active overall."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesTable/index.tsx",
+      "line": 82,
+      "claim": "Merging rows also collapses an active policy with its own pending update on the same Safe and chain into a single row, hiding the pending state and duplicating the chain ID, which produces duplicate React keys and a duplicate icon."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/types.ts",
+      "line": 111,
+      "claim": "The supersedesId field on a policy is never read anywhere in the code, so relationships between a policy and the one it supersedes are not handled."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesList.stories.tsx",
+      "line": 55,
+      "claim": "The LongList story generates 30 mock policies that collapse to 3 rows with 10 duplicate chain IDs each due to the row-merging logic, so it never actually exercises pagination even though its comment states that it does."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesTable/index.tsx",
+      "line": null,
+      "claim": "There are no tests covering the row-merging edge cases, such as mixed policy status across chains or an active policy together with a pending edit on the same chain."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/hooks/usePolicySearch.ts",
+      "line": 35,
+      "claim": "The placeholder and empty-state text advertise searching \"by name, address or network,\" but policies have no name field and the chain ID is collected without being added to the Fuse search keys, so searching by a network name like \"Polygon\" returns no results."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesTable/index.tsx",
+      "line": 116,
+      "claim": "The row's aria-label is built from the raw policy type identifier (e.g. \"spending-limit\") and is identical for every row of the same type; since it overrides the row's accessible name, a screen reader user cannot distinguish between different Safes' policies of the same type."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/hooks/usePolicySearch.ts",
+      "line": 1,
+      "claim": "usePolicySearch has no dedicated unit tests; its matching across address, token and summary fields, and its fuzzy-match threshold, are only indirectly exercised through a PoliciesList test."
+    },
+    {
+      "file": "apps/web/src/components/common/PaginatedDataTable/index.tsx",
+      "line": 259,
+      "claim": "A table row with role=\"button\" now contains other interactive elements — the copy and explorer buttons from EthHashInfo and a mobile toggle — which nests interactive controls inside an interactive element; clicks currently work only because those child controls call stopPropagation."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/utils/policyLabel.ts",
+      "line": 50,
+      "claim": "formatDays rounds its result, so a review window of under 12 hours is displayed as \"0 days review window\" instead of reflecting the actual duration."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/types.ts",
+      "line": 1,
+      "claim": "Several files (including types.ts, PoliciesTable/index.tsx, PoliciesLoadState/index.tsx and policyLabel.ts) contain multi-line or multi-paragraph comment blocks, which conflicts with the repository rule to keep comments to a single line."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/hooks/usePolicySearch.ts",
+      "line": 7,
+      "claim": "A file-level documentation comment in usePolicySearch.ts is not attached to any declaration, leaving it orphaned."
+    },
+    {
+      "file": "apps/web/src/services/analytics/mixpanel-events.ts",
+      "line": 161,
+      "claim": "MixpanelEventParams.IS_AVAILABLE is now unused and catalogue click events no longer send it, which is a regression that could affect any Mixpanel dashboard relying on that field."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/PoliciesLoadState/index.tsx",
+      "line": 8,
+      "claim": "POLICIES_LOAD_ERROR duplicates the text used by TX_DETAILS_LOAD_ERROR, and the PoliciesLoadError component copies the structure of TransactionDetailsError instead of reusing it, creating duplication between the two."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/hooks/usePolicySearch.ts",
+      "line": 4,
+      "claim": "The usePolicySearch hook imports getPolicyTokens from a component file rather than from the utils directory where similar helpers such as policyLabel and policySort live, mixing architectural layers."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Policies/Page.tsx",
+      "line": 12,
+      "claim": "Page.tsx still renders <Policies /> without any props, so the new table, loading and error states cannot be reached in production; only the catalogue changes (tile removal, 3-column grid, button tile) are actually live."
+    }
+  ]
+}

@@ -1,0 +1,145 @@
+{
+  "pr": 8380,
+  "title": "fix: zkSync flavour-aware upgrades, decoding and address prediction",
+  "description": "## What it solves\n\nFollow-ups to the review comments on #8355. Safe contracts on zkSync exist in two flavours — EraVM (`zksync`) and EVM (`canonical`) — and several code paths picked a flavour by chain instead of by the Safe's own contracts. Testing surfaced four bugs:\n\n1. EraVM Safes could be offered an in-place upgrade to an EVM-only version (1.5.0+), which is impossible — an EraVM proxy cannot delegatecall an EVM singleton.\n2. The transaction review screen showed \"Unknown contract\" for migrations via the canonical SafeMigration on zkSync, because decoding only recognized one variant per chain.\n3. Counterfactual address prediction applied the EVM CREATE2 formula to EraVM factories, predicting addresses the factory never deploys to (funds sent there would be lost).\n4. Any 1.4.1 Safe offered an update was routed to the legacy pre-1.3.0 `changeMasterCopy` path, freezing the review screen on a spinner — this would break every 1.4.1 → 1.5.0 update once 1.5.0 becomes the recommended version.\n\nResolves: n/a (follow-up to #8355 review)\n\n## How this PR fixes it\n\nIn-place upgrades are only valid within the same VM stack, so the mastercopy decision gains a `canUpgradeInPlace` predicate and a new `redeploy` action: a stranded EraVM Safe gets a text-only warning to create a new Safe and transfer assets, instead of update/migrate/CLI. Migration decoding now matches every SafeMigration variant and version, updates for `>=1.3.0` (not exactly 1.3.0) go through SafeMigration, and review-screen failures surface as errors instead of spinning. Address prediction derives EraVM factory addresses with zkSync's native CREATE2 formula.\n\nGotchas:\n\n- An `OUTDATED` Safe whose capped target equals its current version now gets no action — the gateway flags `OUTDATED` against the raw recommended version, while the wallet caps the target at what is deployed on the chain, so the two can disagree.\n- The EraVM proxy bytecode hashes are pinned constants: protocol-kit holds identical values but doesn't export them, and no package ships the raw EraVM bytecode to compute them from. The set is closed — EraVM deployments end at 1.4.1.\n- The `redeploy` state is dormant until safe-deployments registers 1.5.0 on zkSync; tests exercise it by passing the target version directly.\n- The address-prediction regression fixture is a real zkSync mainnet Safe creation, so the EraVM formula and bytecode hash are verified against on-chain data.\n\n## How to test it\n\n1. On a chain where the recommended mastercopy version is above the Safe's version (e.g. 1.5.0 on Sepolia), open a 1.4.1 Safe and click Update: the review screen builds a SafeMigration delegatecall instead of freezing on a spinner.\n2. On zkSync, migrate a Safe running the canonical mastercopy to 1.4.1: the review screen shows the version change instead of an \"Unknown contract\" error.\n3. Create a Safe on a chain flagged `zk` (EraVM contracts): the predicted counterfactual address matches the address actually deployed.\n\n## Screenshots\n\nN/A — the only new UI is the `redeploy` warning, which is not reachable until 1.5.0 is registered on zkSync.\n\n## Visual summary\n\n```mermaid\nflowchart TD\n    A[Mastercopy state] -->|UP_TO_DATE| N[none]\n    A -->|OUTDATED| C{current >= capped target?}\n    C -->|yes| N\n    C -->|no| D{canUpgradeInPlace?<br/>same VM stack at target}\n    D -->|yes| U[update - SafeMigration for >=1.3.0]\n    D -->|no| R[redeploy - new Safe + move assets]\n    A -->|UNKNOWN| E{provably official?}\n    E -->|no| CLI[cli]\n    E -->|yes| F{canUpgradeInPlace?}\n    F -->|yes| M[migrate]\n    F -->|no| R\n```\n\n## Checklist\n\n- [ ] I've tested the branch on mobile 📱\n- [ ] I've documented how it affects the analytics (if at all) 📊\n- [x] I've written a unit/e2e test for it (if applicable) 🧑‍💻\n\n---\n\n## CLA signature\n\nWith the submission of this Pull Request, I confirm that I have read and agree to the terms of the [Contributor License Agreement](https://safe.global/cla).\n",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/features/multichain/components/MastercopyWarning/MastercopyWarning.tsx",
+      "line": 48,
+      "claim": "The redeploy card is shown on the dashboard with no isCritical flag or owner check and cannot be dismissed, so every outdated EraVM Safe (1.3.0 or 1.4.1) on zkSync now sees a permanent warning where previously it saw none, since those upgrades are treated as non-critical."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/features/multichain/components/MastercopyWarning/MastercopyWarning.stories.tsx",
+      "line": null,
+      "claim": "The stories file has a story for each existing MastercopyWarning action (Migrate, Cli, Update, UpdateSettings, UpdateSettingsNonCritical, None) but none for the new redeploy card, leaving that state uncovered in Storybook."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/src/features/security/data/scanners/contractVersion.ts",
+      "line": 49,
+      "claim": "For a stranded Safe with an unknown master copy, the security scanner now suggests using the CLI tool to migrate while the dashboard suggests creating a new Safe, and the comment stating this check matches MastercopyWarning (via getMastercopyAction) is no longer accurate."
+    },
+    {
+      "id": "F4",
+      "file": "packages/utils/src/services/contracts/safeContracts.ts",
+      "line": 76,
+      "claim": "A new 'redeploy' value was added to MastercopyAction and canUpgradeInPlace now blocks isUnsupportedMastercopyMigratable for stranded zkSync EraVM Safes, but only the MastercopyWarning component was updated to reflect this new state, leaving other code that makes the same decision out of sync."
+    },
+    {
+      "id": "F5",
+      "file": "apps/web/src/services/tx/safeUpdateParams.ts",
+      "line": 116,
+      "claim": "The migration-target lookup now matches a SafeMigration address against any chain's deployment variant instead of scoping the match to networkAddresses[safe.chainId] as the previous code did, so it no longer derives the match from the Safe's own chain ID."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/src/features/multichain/utils/utils.ts",
+      "line": 111,
+      "claim": "The 1.4.1 EraVM proxy bytecode hash used for zkSync address prediction is copied by hand from a protocol-kit table that isn't exported and is not covered by any test against a real on-chain deployment; if the hash is wrong, every predicted address for a 1.4.1 EraVM Safe would be wrong, affecting nested Safe creation, counterfactual Safes, and adding a network."
+    },
+    {
+      "id": "F7",
+      "file": null,
+      "line": null,
+      "claim": "No test covers an eip155 v1.3.0 fixture on chain 324 targeting version 1.5.0, which is the case that would catch the eip155/EraVM misclassification."
+    },
+    {
+      "id": "F8",
+      "file": "apps/mobile/src/features/Settings/Settings.container.tsx",
+      "line": 26,
+      "claim": "The mobile settings screen offers an update for any Safe flagged OUTDATED, so a stranded EraVM Safe is still offered an in-place update there even though it should require redeployment instead."
+    },
+    {
+      "id": "F9",
+      "file": "apps/web/src/features/multichain/components/MastercopyWarning/MastercopyWarning.tsx",
+      "line": 52,
+      "claim": "The redeploy warning title has a trailing space after \"... on this network\", and the body text hardcodes \"zkSync\" even though the copy would need to be generalized if the redeploy path is ever reused for another VM-stack chain."
+    },
+    {
+      "id": "F10",
+      "file": "apps/web/src/features/multichain/utils/utils.ts",
+      "line": 107,
+      "claim": "ZKSYNC_PROXY_BYTECODE_HASH duplicates a private bytecode table maintained inside protocol-kit, creating a risk that the two tables drift out of sync over time."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/src/services/tx/safeUpdateParams.ts",
+      "line": 116,
+      "claim": "The loop that maps a SafeMigration address to its version by iterating SAFE_VERSIONS and getSafeMigrationDeployments().deployments duplicates logic that already exists in isSafeMigrationCall in apps/web/src/utils/safe-migrations.ts, rather than reusing a shared helper."
+    },
+    {
+      "id": "F12",
+      "file": "packages/utils/src/services/contracts/safeContracts.ts",
+      "line": 31,
+      "claim": "The step-by-step comments added inside canUpgradeInPlace and getMastercopyAction are unnecessary and could be removed, as part of roughly 35 new comment lines introduced by the change."
+    },
+    {
+      "id": "F13",
+      "file": "apps/web/src/features/multichain/utils/utils.ts",
+      "line": 118,
+      "claim": "getZkSyncProxyBytecodeHash only reads deployments.zksync?.address; if a zk-stack chain registers a zksync-flavour factory only in networkAddresses[chainId] and not in the deployment-type record, the function returns undefined and the code falls back to the EVM CREATE2 formula, reproducing the bug this PR is meant to fix. Mirroring the fallback used in getChainAgnosticAddress and adding a test for a chain-registered-but-not-deployment-type factory would guard against this."
+    },
+    {
+      "id": "F14",
+      "file": "packages/utils/src/services/contracts/safeContracts.ts",
+      "line": 40,
+      "claim": "isCanonicalDeployment only matches the canonical variant, not the eip155 variant, even though eip155 and canonical are the same delegatecall-compatible EVM bytecode. On a zkSync-family chain where both zksync and eip155 v1.3.0 singletons are registered, a Safe using the eip155 implementation fails this predicate, gets misclassified as an EraVM Safe, and is offered redeploy instead of the valid update/migrate path. Resolving the deployment type with the utility that already distinguishes canonical, eip155, and zksync variants would avoid this misclassification."
+    },
+    {
+      "id": "F15",
+      "file": "packages/utils/src/services/contracts/safeContracts.ts",
+      "line": 40,
+      "claim": "canUpgradeInPlace classifies a Safe as EraVM whenever isEraVmChain(...) is true and isCanonicalDeployment(...) is false, but isCanonicalDeployment only compares against the canonical address and does not account for the eip155 singleton, which shares the same codeHash as canonical and is EVM bytecode. As a result, a 1.3.0 Safe deployed on the eip155 singleton on a zkSync-type chain targeting 1.5.0 is incorrectly returned 'redeploy' instead of 'update', telling the owner to create a new Safe and migrate assets even though an in-place update path exists via the canonical SafeMigration mapping in safe-migrations.ts:49-52."
+    },
+    {
+      "id": "F16",
+      "file": "packages/utils/src/config/constants.ts",
+      "line": 71,
+      "claim": "SAFE_TO_L2_MIGRATION_VERSION lost its last consumer when safeUpdateParams.ts was changed, and no code in apps/ or packages/ still references it, so the constant is now unused."
+    },
+    {
+      "id": "F17",
+      "file": "apps/web/src/features/multichain/components/MastercopyWarning/MastercopyWarning.tsx",
+      "line": 48,
+      "claim": "The new card telling users to create a new Safe and transfer their assets introduces a new user-facing flow without any cited product or design sign-off, and unlike its sibling cards it has no link or trackingEvent."
+    },
+    {
+      "id": "F18",
+      "file": "apps/web/src/features/security/data/scanners/contractVersion.ts",
+      "line": 49,
+      "claim": "For a stuck EraVM Safe that should show 'redeploy', the scanner instead shows 'Update now' when status is OUTDATED, or 'Use the CLI tool to migrate' with a Migrate button when status is UNKNOWN, even though the CLI tool cannot migrate these Safes either."
+    },
+    {
+      "id": "F19",
+      "file": "apps/web/src/features/security/data/scanners/contractVersion.ts",
+      "line": 92,
+      "claim": "The security scanner computes the mastercopy upgrade action itself instead of calling getMastercopyAction, even though its own comment claims it performs the same check as MastercopyWarning, so it can drift out of sync with the shared logic."
+    },
+    {
+      "id": "F20",
+      "file": "apps/web/src/features/multichain/components/MastercopyWarning/MastercopyWarning.tsx",
+      "line": 53,
+      "claim": "The redeploy warning copy says 'zkSync Safes created before the EVM upgrade...' but isEraVmChain also covers Lens (chain 232) and Abstract (chain 2741), so the message is inaccurate on those chains and should use neutral wording instead of naming zkSync specifically."
+    },
+    {
+      "id": "F21",
+      "file": "apps/mobile/src/features/Settings/Settings.container.tsx",
+      "line": 24,
+      "claim": "The mobile settings container does not account for the 'redeploy' action and still shows 'New version is available' for Safes that actually require redeployment rather than an in-place update."
+    },
+    {
+      "id": "F22",
+      "file": "apps/web/src/features/multichain/utils/utils.ts",
+      "line": 107,
+      "claim": "Of the two pinned EraVM bytecode hash constants, only the 1.3.0 hash is checked against a real on-chain zkSync Safe; the 1.4.1 hash has no such fixture, so a typo in that constant would silently produce wrong predicted addresses, which could cause a user to pre-fund an incorrectly predicted counterfactual Safe on zkSync."
+    },
+    {
+      "id": "F23",
+      "file": "apps/web/src/features/security/data/scanners/contractVersion.ts",
+      "line": 93,
+      "claim": "A stranded EraVM Safe flagged as OUTDATED still receives the message that a newer version is available and prompts the user to update, which contradicts the redeploy branch's premise that in-place upgrade is not possible for this case."
+    }
+  ]
+}

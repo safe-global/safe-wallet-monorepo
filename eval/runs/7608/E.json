@@ -1,0 +1,11 @@
+{
+  "pr": 7608,
+  "reviewSha": "5c2e2903d2f2293d2cc431ef3fe96cb5e0730da4",
+  "baseSha": "26f9c874c4ddcb48b797957cbe6ae1faf60c6827",
+  "system": "E",
+  "version": "github",
+  "runner": "collect",
+  "model": "human",
+  "commentSha": "5c2e2903d2f2293d2cc431ef3fe96cb5e0730da4",
+  "output": "[review by vmosharova]\n👍🏻 "
+}

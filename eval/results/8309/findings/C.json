@@ -1,0 +1,45 @@
+{
+  "usd": 0.0670356,
+  "findings": [
+    {
+      "claim": "Setting accessible={false} on the outer overlay Pressable removes the tap-outside-to-dismiss action from screen readers (VoiceOver/TalkBack), forcing screen-reader users to rely solely on the Cancel button; this tradeoff should be explicitly noted in the PR description rather than framed as a pure accessibility improvement.",
+      "file": "apps/mobile/src/features/Send/components/DialogModal.tsx",
+      "line": 32
+    },
+    {
+      "claim": "The waitFor helper uses a truthy check (if (value)) which rejects falsy-but-valid values like 0, '', or false; while it works today since both readers return objects, this is a footgun for a generic helper and should use value != null instead.",
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
+      "line": 38
+    },
+    {
+      "claim": "setupApprovalDraft mixes dispatch sources, using the passed-in Dispatch for setupSendFlow but store.dispatch for RTKQ and compose calls; since this is E2E-only code and store is already imported, consistently using store.dispatch throughout would be simpler.",
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
+      "line": 61
+    },
+    {
+      "claim": "The setup-status marker only signals ready/failed and never resets to idle between runs; correctness currently depends on setupSendFlow resetting it before setupApprovalDraft flips it to ready, so if that ordering changes the marker could remain ready from a prior run.",
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
+      "line": null
+    },
+    {
+      "claim": "The spender text assertion regex '.*0x81Bd.*4fec.*' matches only 8 hex characters total, so any address rendered in short form that happens to start with 0x81Bd and end with 4fec would incorrectly pass; matching the full shortened form the UI actually produces would make the assertion stronger.",
+      "file": "apps/mobile/e2e/utils/components/draft-editors/verify-approve-amount.yml",
+      "line": 35
+    },
+    {
+      "claim": "The nonce test's too-low branch hardcodes 99999 and depends on the live staging Safe's current nonce being below that value, silently coupling the test to on-chain state that could eventually change as the Safe ages.",
+      "file": "apps/mobile/e2e/tests/transactions/draft-editors/send-nonce-editor.yml",
+      "line": 93
+    },
+    {
+      "claim": "The setupSendFlow unit test does not assert that router.replace('/(tabs)') was called, leaving a coverage gap since navigation to the home tab is core to the setup's job and Maestro flows depend on it.",
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/__tests__/draftEditorsSetup.test.ts",
+      "line": null
+    },
+    {
+      "claim": "There is no test covering the waitFor timeout path for 'chain config' or 'Safe SDK' in setupApprovalDraft, even though these are the most likely places to surface real E2E flakiness from SDK init timing; a test asserting the failure marker/throw when the value resolves to undefined would catch regressions in that error path.",
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
+      "line": null
+    }
+  ]
+}

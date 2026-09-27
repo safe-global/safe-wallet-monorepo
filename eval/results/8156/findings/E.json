@@ -1,0 +1,25 @@
+{
+  "usd": 0.0576816,
+  "findings": [
+    {
+      "file": "apps/mobile/src/features/ExecuteTx/hooks/useTransactionExecution.ts",
+      "line": 127,
+      "claim": "The simulation error is not displayed anywhere to the user, and it is unclear whether this is intentional; it is also unclear what happens if the CGW is unable to relay the transaction."
+    },
+    {
+      "file": "apps/mobile/src/features/ConfirmTx/components/TransactionInfo/feeRows.ts",
+      "line": 56,
+      "claim": "Three callers of buildFeesBreakdown (FeesBreakdown.tsx, ReviewExecuteFooter.tsx, and TokenTransfer.tsx) each independently read selectActiveChainCurrency from the store and build the same native-currency object with address, symbol, and decimals, duplicating logic and the if (!nativeCurrency) return undefined guard across call sites; this repetition should be extracted into a shared hook such as useFeesBreakdown that owns the store reads and native-currency mapping."
+    },
+    {
+      "file": "apps/mobile/src/features/ExecuteTx/components/ReviewAndExecute/ReviewExecuteFooter.tsx",
+      "line": 89,
+      "claim": "The fee row markup diverges between components: FeesBreakdown.tsx defines and uses FeeRow/FeeAmount components, while ReviewExecuteFooter.tsx re-implements the fee rows inline with raw View flexDirection=\"row\" and TokenAmount, resulting in subtly different styling (e.g. the footer uses fontWeight={700} while the breakdown uses $success text only) for what should be the same 'Execution fee · FREE' and 'Max gas fee' rows; FeeRow/FeeAmount should be exported and shared alongside FeeLabelWithInfo so the visual contract is consistent."
+    },
+    {
+      "file": "apps/mobile/src/features/ConfirmTx/components/TransactionInfo/feeRows.ts",
+      "line": 21,
+      "claim": "The name FeesBreakdown is used both for a function and elsewhere, creating a naming collision; it may be clearer to rename this to FeesBreakdownData."
+    }
+  ]
+}

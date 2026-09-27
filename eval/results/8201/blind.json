@@ -1,0 +1,169 @@
+{
+  "pr": 8201,
+  "title": "fix(web): surface backend error messages in workspace dialogs",
+  "description": "## What it solves\r\n\r\nResolves: [WA-2748](https://linear.app/safe-global/issue/WA-2748/show-backend-error-msg-instead-of-generic-error-on-name-validation)\r\n\r\nSeveral workspace dialogs swallowed backend validation errors (e.g. \"invalid characters\" in a name) and showed a generic \"Please try again\" message instead, leaving users unable to tell why an action failed.\r\n\r\n## How this PR fixes it\r\n\r\nReplaces the hardcoded error strings with the shared `getRtkQueryErrorMessage` helper, which returns the backend's own `data.message` when present and falls back to friendly copy for transport-level failures. Applied to the accept-invite, edit-contact, edit-member, and workspace-rename flows.\r\n\r\n## How to test it\r\n\r\n1. Trigger any of these actions with input the backend rejects (e.g. a name with invalid characters): accept a workspace invite, edit a contact, edit a member's role, or rename a workspace.\r\n2. Confirm the alert now shows the backend's specific message, not \"Please try again\".\r\n\r\n## Affected flows\r\n\r\n- Accept workspace invite (`AcceptInviteDialog`)\r\n- Edit shared contact (`EditContactDialog`)\r\n- Edit member role (`EditMemberDialog`)\r\n- Rename workspace (`IdentitySection`, `useUpdateSpace` / `UpdateSpaceForm`)\r\n\r\n## Blast radius\r\n\r\n- Reuses the existing shared helper `getRtkQueryErrorMessage` (`apps/web/src/utils/rtkQuery.ts`) — no change to the helper itself.\r\n- Touches only the catch/`result.error` branches of the four flows above; success paths unchanged.\r\n- No API contract, feature flag, route, persistence, or shared-package (mobile) changes.\r\n\r\n## Risks / not checked\r\n\r\n- Lower-priority non-text actions (delete/leave/reject/remove dialogs) left showing generic copy.\r\n\r\n## Visual summary\r\n\r\n<img width=\"707\" height=\"523\" alt=\"image\" src=\"https://github.com/user-attachments/assets/2c2c3103-14ea-4706-9804-f67469750b42\" />\r\n<img width=\"782\" height=\"234\" alt=\"image\" src=\"https://github.com/user-attachments/assets/4c9c157c-f83f-4cd0-9c96-12c4dd47b3ea\" />\r\n\r\n\r\n```mermaid\r\nflowchart LR\r\n  A[Mutation fails] --> B{getRtkQueryErrorMessage}\r\n  B -->|backend data.message| C[Show specific error<br/>e.g. invalid characters]\r\n  B -->|network / timeout / no message| D[Friendly fallback copy]\r\n```\r\n\r\n## Checklist\r\n\r\n- [x] I've tested the branch on mobile 📱\r\n- [ ] I've documented how it affects the analytics (if at all) 📊\r\n- [x] I've written a unit/e2e test for it (if applicable) 🧑‍💻\r\n- [x] I've listed affected flows and blast radius, and named what I did not verify 🎯\r\n\r\n---\r\n\r\n## CLA signature\r\n\r\nWith the submission of this Pull Request, I confirm that I have read and agree to the terms of the [Contributor License Agreement](https://safe.global/cla).\r\n",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "SpaceAddressBook/AddContactDialog.tsx",
+      "line": 126,
+      "claim": "The same unchecked cast of a caught unknown error to FetchBaseQueryError | SerializedError already exists here, outside this diff, so the same failure mode applies."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/__tests__/EditContactDialog.test.tsx",
+      "line": 379,
+      "claim": "A SpaceAddressBookItemDto object is constructed by hand in a test, and no builder currently exists for that type, so a hand-written literal was unavoidable."
+    },
+    {
+      "id": "F3",
+      "file": "SpaceAddressBook/ImportAddressBookDialog.tsx",
+      "line": 115,
+      "claim": "The same unchecked cast of a caught unknown error to FetchBaseQueryError | SerializedError already exists here, outside this diff, so the same failure mode applies."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/features/spaces/components/MembersList/EditMemberDialog.tsx",
+      "line": 57,
+      "claim": "Moving the success side effects (tracking, notification, close, navigation) out of the try block means only the added early return prevents them from also firing on failure, but the new tests (also apps/web/src/features/spaces/components/InviteBanner/AcceptInviteDialog.tsx:46) only assert the error message appears, so removing that return would leave all tests passing while the success actions incorrectly run on failure."
+    },
+    {
+      "id": "F5",
+      "file": "EditMemberDialog.tsx",
+      "line": 56,
+      "claim": "The `as` cast on result.error adds nothing because the value is already typed as FetchBaseQueryError | SerializedError."
+    },
+    {
+      "id": "F6",
+      "file": "MembersList/__tests__/EditMemberDialog.test.tsx",
+      "line": null,
+      "claim": "EditMemberDialog has no success-path test at all, and the thrown-exception branch (as opposed to a rejected unwrap) is not tested."
+    },
+    {
+      "id": "F7",
+      "file": "MembersList/EditMemberDialog.tsx",
+      "line": 57,
+      "claim": "Only an early return at this line prevents the success actions from running after a failed operation, and this behavior is untested, so a failed role change could show a success message and close the dialog without any test failing."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/src/features/spaces/components/MembersList/__tests__/EditMemberDialog.test.tsx",
+      "line": 240,
+      "claim": "A MemberDto object is constructed by hand instead of using the existing memberBuilder() helper from @/tests/builders/member, which is already used elsewhere in the spaces feature, creating inconsistency in test data construction."
+    },
+    {
+      "id": "F9",
+      "file": "SpaceAddressBook/EditContactDialog.tsx",
+      "line": 113,
+      "claim": "The value caught in catch (e) is unknown but is force-cast to FetchBaseQueryError | SerializedError with `as`, without any runtime check that it actually matches either shape."
+    },
+    {
+      "id": "F10",
+      "file": "apps/web/src/features/spaces/components/SpaceSettings/sections/IdentitySection.tsx",
+      "line": 62,
+      "claim": "No test exists that rejects unwrap() with a {status: 422, data: {message}} shape and checks the message is shown, nor one covering the {status: 500, data: {}} fallback case."
+    },
+    {
+      "id": "F11",
+      "file": "SpaceAddressBook/EditContactDialog.tsx",
+      "line": 113,
+      "claim": "If a primitive value (a string or undefined) is thrown instead of an object, the `'status' in error` check inside the helper throws a TypeError from within the catch block, so no error message is shown to the user and the resulting promise rejection goes unhandled."
+    },
+    {
+      "id": "F12",
+      "file": "apps/web/src/features/spaces/components/SpaceSettings/sections/IdentitySection.tsx",
+      "line": 62,
+      "claim": "This file changes its error copy but the sections/ directory has no tests at all, so the changed behavior is unverified."
+    },
+    {
+      "id": "F13",
+      "file": "EditContactDialog.tsx",
+      "line": 99,
+      "claim": "The `as` cast on the caught error adds nothing because the value is already typed as FetchBaseQueryError | SerializedError."
+    },
+    {
+      "id": "F14",
+      "file": "InviteBanner/__tests__/AcceptInviteDialog.test.tsx",
+      "line": 105,
+      "claim": "The new error-path tests only check that the error text appears; they never assert that the success actions were not called, and the thrown-exception branch is not tested."
+    },
+    {
+      "id": "F15",
+      "file": "AddMemberModal/index.tsx",
+      "line": 179,
+      "claim": "This catch block still shows a fixed 'Something went wrong' message, the same shortcoming this PR fixes in the sibling dialogs, but this file is outside the current diff so it remains unaddressed."
+    },
+    {
+      "id": "F16",
+      "file": "apps/web/src/features/spaces/components/MembersList/EditMemberDialog.tsx",
+      "line": 42,
+      "claim": "The dialogs now display raw backend message strings to users instead of fixed copy, but this user-visible behavior change is not accompanied by a cited product or design decision in the PR description; a hard-coded fallback message ('Something went wrong. Please try again.') is still used when spaceId is missing, and a separate hard-coded status fallback message ('Something went wrong (500)…') also remains, creating inconsistent handling of error messaging."
+    },
+    {
+      "id": "F17",
+      "file": "InviteBanner/AcceptInviteDialog.tsx",
+      "line": 46,
+      "claim": "Only an early return at this line prevents the success actions from running after a failed operation, and this behavior is untested."
+    },
+    {
+      "id": "F18",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/EditContactDialog.tsx",
+      "line": 113,
+      "claim": "The catch block casts the caught error to FetchBaseQueryError | SerializedError without checking its shape; since the surrounding try also wraps trackEvent, dispatch, and handleClose calls, a runtime error thrown by one of those (e.g. a TypeError) would have its raw message shown to the user, which contradicts the assumption documented in utils/rtkQuery.ts that this should never happen. The same casting pattern appears in useUpdateSpace.ts:37, IdentitySection.tsx:62, AcceptInviteDialog.tsx:49, and EditMemberDialog.tsx:60."
+    },
+    {
+      "id": "F19",
+      "file": "MembersList/__tests__/EditMemberDialog.test.tsx",
+      "line": 79,
+      "claim": "The new error-path tests only check that the error text appears; they never assert that the success actions (trackEvent, the success notification, handleClose/onClose) were not called, so deleting the early return that guards them would not be caught by any test."
+    },
+    {
+      "id": "F20",
+      "file": "AcceptInviteDialog.tsx",
+      "line": 45,
+      "claim": "The `as` cast on response.error/result.error adds nothing because the value is already typed as FetchBaseQueryError | SerializedError; other callers such as AddMemberModal/index.tsx:176 and Sidebar/hooks/useAddSafeToSpace.ts:47 pass the same value without a cast."
+    },
+    {
+      "id": "F21",
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/EditContactDialog.tsx",
+      "line": 113,
+      "claim": "If something other than an object (a string, undefined) is thrown, the `'status' in error` check inside the catch block itself throws, producing an unhandled rejection that escapes the handleSubmit callback."
+    },
+    {
+      "id": "F22",
+      "file": "apps/web/src/features/spaces/components/SpaceSettings/sections/IdentitySection.tsx",
+      "line": 62,
+      "claim": "The catch block now builds its error message with getRtkQueryErrorMessage(e) instead of a fixed string, but no test exists for IdentitySection or its parent GeneralPage, and the only coverage nearby exercises a separate copy of this logic in useUpdateSpace.ts used by UpdateSpaceDialog. As a result this line could be reverted to the old fixed-string behavior and the full test suite would still pass, leaving the main workspace-rename page covered only by a Cypress happy-path test."
+    },
+    {
+      "id": "F23",
+      "file": null,
+      "line": null,
+      "claim": "Adding the suggested unknown-safe guard in the error-message helper would make the ten added `import type { FetchBaseQueryError }` / `SerializedError` lines across five files unnecessary and they could be dropped."
+    },
+    {
+      "id": "F24",
+      "file": "apps/web/src/features/spaces/components/InviteBanner/AcceptInviteDialog.tsx",
+      "line": 45,
+      "claim": "The mutation result's error is cast (e.g. `response.error as …`) even though it is already correctly typed, unlike other callers (Sidebar/hooks/useAddSafeToSpace.ts:47, AddMemberModal/index.tsx:176) that pass result.error straight through without casting; the same unnecessary cast appears in EditMemberDialog.tsx:56 and EditContactDialog.tsx:99, and removing it would also remove the extra type imports added for it."
+    },
+    {
+      "id": "F25",
+      "file": "utils/rtkQuery.ts",
+      "line": 57,
+      "claim": "If a plain JS Error is thrown inside the try block, the cast in the catch sends it down the SerializedError branch and the raw error.message (e.g. a property-access error) is shown to the user, which is exactly what this helper's doc comment says must never happen; before this change users saw fixed friendly copy instead."
+    },
+    {
+      "id": "F26",
+      "file": "utils/rtkQuery.ts",
+      "line": null,
+      "claim": "The helper that formats RTK error messages has no guard for values that are not RTK error shapes; it should accept unknown and fall back to RTK_QUERY_ERROR_MESSAGES.generic for anything that isn't a recognizable FetchBaseQueryError or SerializedError, and callers should use that guard instead of casting with `as`."
+    },
+    {
+      "id": "F27",
+      "file": "apps/web/src/features/spaces/components/InviteBanner/AcceptInviteDialog.tsx",
+      "line": 48,
+      "claim": "The catch branch for when the mutation throws is not covered by a test, unlike the equivalent case in the EditContactDialog suite; the same gap exists in apps/web/src/features/spaces/components/MembersList/EditMemberDialog.tsx:59-61."
+    }
+  ]
+}

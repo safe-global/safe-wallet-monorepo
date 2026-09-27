@@ -1,0 +1,127 @@
+{
+  "pr": 8162,
+  "title": "feat(mobile): scan addresses from the header QR scanner and unify on-lens scan errors",
+  "description": "> Header scan now sends,\r\n> one lens shows every error—\r\n> three scanners aligned.\r\n\r\n## What it solves\r\n\r\nThe mobile header QR scanner only paired WalletConnect codes — scanning an address did nothing. This adds address scanning there (into the Send flow), and unifies how all three QR scanners show scan errors: on the camera lens, not a toast.\r\n\r\n## How this PR fixes it\r\n\r\n- **Header scanner reads addresses.** `wc:` URIs still pair; a scanned address now routes into `/(send)/recipient` prefilled (like the home Send button); anything else keeps the \"Unrecognised QR code\" error. Wired via an injected `onAddressScanned` callback so the hook stays navigation-agnostic.\r\n- **Unified on-lens errors.** Shared `ScanErrorOverlay` (message + Try again, dimmed/red lens) replaces the toast in the in-Send and add-account scanners; the camera pauses until Try again.\r\n- **Single-sourced address contract.** `resolveScannedAddress` + the shared message live in `components/Camera/scannedAddress`, consumed by all three scanners.\r\n- **Guarded the new path.** A `handledRef` stops the header address path double-navigating on vision-camera's burst frames (mirrors the existing `pairingRef`).\r\n\r\n## How to test it\r\n\r\nOn mobile, with an active Safe:\r\n\r\n1. **Header QR button → Scan QR:** WalletConnect QR pairs; an address QR → Send recipient prefilled; other QR → on-lens \"Unrecognised QR code\" + Try again.\r\n2. **Home → Send → Scan QR code:** invalid QR → on-lens error + Try again (not a toast); valid address proceeds.\r\n3. **Add existing account → scan:** invalid QR → on-lens error + Try again; valid Safe address → import form.\r\n\r\n## Affected flows\r\n\r\n- Header scanner — branches `wc:` pair vs. address → Send vs. unrecognised.\r\n- In-Send and add-account scanners — invalid-address error moved to the lens.\r\n- WalletConnect pairing — unchanged (`wc:` still checked first).\r\n\r\n## Blast radius\r\n\r\n- `useWalletConnectScan` — new optional `onAddressScanned` + `handledRef`; pairing untouched.\r\n- `components/Camera/scannedAddress` (new) — single source of \"is this a scannable address\", used by all three scanners.\r\n- `components/Camera/ScanErrorOverlay` (new) — shared error UI.\r\n- `useScannedAddressToSend` — chain-mismatch toast + Send navigation, used by Send + header scanners.\r\n- `ImportReadOnly/useScan` — toast → lens error; module-level dedupe + local `ToastViewport` removed (no toast left on that screen).\r\n- No shared `packages/**`, API, feature-flag, route, or persisted-state changes. Mobile-only.\r\n\r\n## Risks / not checked\r\n\r\n- Not run on a device: `router.replace` from the header modal into the `(send)` stack is verified by reasoning + unit tests only.\r\n- EIP-681 full URIs still unsupported (out of scope, matches prior behavior).\r\n- No analytics impact.\r\n\r\n## Visual summary\r\n\r\n```mermaid\r\nflowchart TD\r\n  subgraph shared[\"components/Camera (shared)\"]\r\n    RSA[resolveScannedAddress]\r\n    SEO[ScanErrorOverlay]\r\n  end\r\n\r\n  H[\"Header scanner\"] -->|\"wc: URI\"| P[Pair WalletConnect]\r\n  H -->|valid address| SEND[\"Send → recipient (prefilled)\"]\r\n  H -->|else| SEO\r\n\r\n  S[\"In-Send scanner\"] -->|valid address| SEND\r\n  S -->|invalid| SEO\r\n\r\n  I[\"Add-account scanner\"] -->|valid address| IMP[Import account form]\r\n  I -->|invalid| SEO\r\n\r\n  H -. uses .-> RSA\r\n  S -. uses .-> RSA\r\n  I -. uses .-> RSA\r\n```\r\n\r\n## Checklist\r\n\r\n- [ ] I've tested the branch on mobile 📱\r\n- [x] I've documented how it affects the analytics (if at all) 📊 — none\r\n- [x] I've written a unit/e2e test for it (if applicable) 🧑‍💻\r\n- [x] I've listed affected flows and blast radius, and named what I did not verify 🎯\r\n- [ ] For web feature/bugfix PRs, I've added a Playwright one-shot clickthrough — N/A (mobile-only)\r\n\r\n---\r\n\r\n## CLA signature\r\n\r\nWith the submission of this Pull Request, I confirm that I have read and agree to the terms of the [Contributor License Agreement](https://safe.global/cla).\r\n\r\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\r\n",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/mobile/src/features/ImportReadOnly/hooks/useScan/useScan.test.tsx",
+      "line": 32,
+      "claim": "The test mocks parsePrefixedAddress and isValidAddress even though the hook now calls resolveScannedAddress, coupling the test to internal helpers rather than mocking @/src/components/Camera/scannedAddress directly."
+    },
+    {
+      "id": "F2",
+      "file": "apps/mobile/src/features/Send/ScanQrSend.container.tsx",
+      "line": 57,
+      "claim": "A container test should be added that mocks QrCamera's onScan and checks the guard behavior and the order of calls."
+    },
+    {
+      "id": "F3",
+      "file": "apps/mobile/src/features/Send/hooks/useScannedAddressToSend.ts",
+      "line": 22,
+      "claim": "Either the unused 'replace' navigation mode should be removed, or the header scanner should be wired up to use it within this PR."
+    },
+    {
+      "id": "F4",
+      "file": "apps/mobile/src/features/Send/hooks/useScannedAddressToSend.ts",
+      "line": 22,
+      "claim": "The hook's comment describes it as shared by the in-Send scanner and a header scanner at /wallet-connect-scan, but that route renders ScanConnect, which does not import this hook; the only actual caller is ScanQrSend.container.tsx. The comment also documents a 'replace' NavigateMode option that is never passed by any caller, so it describes code that doesn't exist yet."
+    },
+    {
+      "id": "F5",
+      "file": "apps/mobile/src/features/Send/hooks/useScannedAddressToSend.ts",
+      "line": 22,
+      "claim": "The doc comment states the hook is shared with the header scanner used at /wallet-connect-scan, and the NavigateMode/'replace' option exists only for that scanner, but no code path in the repo (ScanConnect, WalletConnectScan.container, useWalletConnectScan) actually imports or uses this hook, so the 'replace' branch has no production caller and the comment describes something untrue at HEAD."
+    },
+    {
+      "id": "F6",
+      "file": "apps/mobile/src/features/Send/ScanQrSend.container.tsx",
+      "line": 7,
+      "claim": "The import reaches directly into @/src/components/Camera/useCameraPermissionFlow instead of using the Camera barrel export at apps/mobile/src/components/Camera/index.ts:4, which is inconsistent with the other Camera import in the same file."
+    },
+    {
+      "id": "F7",
+      "file": null,
+      "line": null,
+      "claim": "The test setup mocks all of expo-router but exports only useRouter; whether this is sufficient depends on whether the test-utils' renderHook needs other expo-router exports, which was not confirmed."
+    },
+    {
+      "id": "F8",
+      "file": "apps/mobile/src/features/Send/hooks/useScannedAddressToSend.test.tsx",
+      "line": 91,
+      "claim": "The 'once per value' test only checks that the same value is shown once, so a bug that deduplicates every value using a single boolean flag rather than per-value tracking would still pass the test."
+    },
+    {
+      "id": "F9",
+      "file": "apps/mobile/src/features/ImportReadOnly/hooks/useScan/index.ts",
+      "line": 38,
+      "claim": "This file re-implements the same parse, validate, and 'toast once per value' logic introduced by the new hook, but keeps its deduplication set in a module-level object (toastForValueShown) instead of a per-instance ref, so the dedup state never resets across mounts; it could instead reuse resolveScannedAddress and a per-instance ref matching the pattern this PR introduces."
+    },
+    {
+      "id": "F10",
+      "file": "apps/mobile/src/features/Send/hooks/useScannedAddressToSend.test.tsx",
+      "line": 91,
+      "claim": "The test should also call the scan handler again with a different value (e.g. 'bar') and expect two toast calls to properly verify per-value deduplication."
+    },
+    {
+      "id": "F11",
+      "file": "apps/mobile/src/features/Send/ScanQrSend.container.tsx",
+      "line": 57,
+      "claim": "The rewritten onScan function has no test coverage: nothing verifies the invalid-code-to-toast path, the valid-code warn-and-navigate path, the ignored second scan via the hasScanned guard, or the empty codes array case, so reverting the container change would not cause any test to fail."
+    },
+    {
+      "id": "F12",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/hooks/useWalletConnectScan.ts",
+      "line": 42,
+      "claim": "handledRef is never reset on focus/cleanup and currently only works because the address path uses router.replace to unmount the scanner; if a future navigation path keeps the scanner mounted, handledRef.current staying true would silently swallow all subsequent scans with no user feedback, and the reliance on replace unmounting the modal is undocumented."
+    },
+    {
+      "id": "F13",
+      "file": "apps/mobile/src/features/Send/hooks/useScannedAddressToSend.test.tsx",
+      "line": 82,
+      "claim": "The chain-mismatch logic was rewritten inline to '!prefix || !activeShortName || prefix === activeShortName', but no test covers the case where there is no active chain while the scan does have a prefix."
+    },
+    {
+      "id": "F14",
+      "file": "apps/mobile/src/features/Send/hooks/useScannedAddressToSend.ts",
+      "line": 11,
+      "claim": "The new hook has far more comment lines than sibling hooks in the same directory, most of which have none and at most five. Some of the comments, such as the note that parsePrefixedAddress never throws and the block explaining the hook's purpose, restate what the code and its name already convey."
+    },
+    {
+      "id": "F15",
+      "file": "apps/mobile/src/features/Send/ScanQrSend.container.tsx",
+      "line": 43,
+      "claim": "The focus effect unconditionally sets the camera active and resets the scanned flag even when an error overlay is currently displayed, so regaining focus after a blur shows a live camera behind the 'Not a valid address' overlay and can trigger a new scan before the user taps 'Try again'."
+    },
+    {
+      "id": "F16",
+      "file": "apps/mobile/src/features/Send/hooks/useScannedAddressToSend.ts",
+      "line": 11,
+      "claim": "The file contains three comment blocks totaling 11 lines in a 77-line file, which conflicts with the project convention (AGENTS.md) to treat code comments as tech debt and add them only when really necessary; most of these comments repeat what the names and types already convey and should be trimmed to only what isn't obvious from the code."
+    },
+    {
+      "id": "F17",
+      "file": "apps/mobile/src/features/Send/hooks/useScannedAddressToSend.test.tsx",
+      "line": 4,
+      "claim": "The test uses a hardcoded literal address (VALID_ADDRESS) instead of generating one with the faker helpers used elsewhere, and no sibling test in the same hooks directory hardcodes an address this way."
+    },
+    {
+      "id": "F18",
+      "file": "apps/mobile/src/features/Send/hooks/useScannedAddressToSend.ts",
+      "line": 38,
+      "claim": "scanTimestamp is generated with Date.now().toString(), so two rapid taps within the same millisecond produce identical values and the route would not treat them as distinct new scans; a monotonic counter would avoid this."
+    },
+    {
+      "id": "F19",
+      "file": "apps/mobile/src/features/ImportReadOnly/hooks/useScan/index.ts",
+      "line": 15,
+      "claim": "The same focus effect issue applies here: it re-activates the camera and resets the scanned ref without checking whether an error message is currently shown, allowing the camera and error overlay states to disagree."
+    },
+    {
+      "id": "F20",
+      "file": "apps/mobile/src/features/Send/hooks/useScannedAddressToSend.test.tsx",
+      "line": 82,
+      "claim": "The dedupe test only verifies that showing the same value twice produces a single toast; it does not verify that a different value still produces its own toast, so a bug that suppressed every toast after the first would not be caught."
+    }
+  ]
+}

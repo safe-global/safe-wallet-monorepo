@@ -1,0 +1,10 @@
+{
+  "usd": 0.5786279999999999,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/SelectSafesOnboarding/hooks/useOnboardingSafes.ts",
+      "line": 32,
+      "claim": "The variable name no longer reflects what it holds, since it no longer combines multiple sources; it should be renamed to allSafeAddresses for clarity."
+    }
+  ]
+}

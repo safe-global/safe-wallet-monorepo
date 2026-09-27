@@ -1,0 +1,64 @@
+{
+  "usage": {
+    "usd": 0.43698820000000005,
+    "turns": 5,
+    "wallSeconds": 46
+  },
+  "issues": [
+    {
+      "findings": [
+        "F1",
+        "F4",
+        "F12",
+        "F7"
+      ],
+      "summary": "The sub-row now puts name, status badge, pending badge and balance on one line inside ItemText (flex-1 shrink-0 whitespace-nowrap, no min-w-0), so the name's truncate cannot take effect and long rows can overflow.",
+      "label": "low",
+      "evidence": "select.tsx:153 gives ItemText `shrink-0` and no `min-w-0`, so the `min-w-0 flex-1 truncate` at MultiChainSafeItemRow.tsx:76 never shrinks, and a read-only chain can also show the pending badge (line 67 only excludes undeployed chains). The popup is anchor-width (430px) with overflow-x-hidden, so a long name plus Read-only plus pending plus balance gets clipped rather than scrolled. This needs an uncommon combination and the root cause (ItemText) predates the PR."
+    },
+    {
+      "findings": [
+        "F6",
+        "F11",
+        "F13"
+      ],
+      "summary": "The tests don't cover the Read-only branch or the new badge position, so they would still pass if the layout change were reverted.",
+      "label": "low",
+      "evidence": "MultiChainSafeItemRow.test.tsx:88-123 only checks that the Inactive/Activating badges are present and has no isReadOnly case. The PR itself says layout can't be unit-tested in jsdom, so the gap is real but small."
+    },
+    {
+      "findings": [
+        "F2",
+        "F8",
+        "F3"
+      ],
+      "summary": "No Storybook story renders an expanded multi-chain row with undeployed or read-only chains, so the changed layout has no visual coverage.",
+      "label": "low",
+      "evidence": "In SafeSelectorDropdown.stories.tsx:205-231, MixedActivationStates only uses single-chain items (`chains: [{...isUndeployed}]`), and no story sets isReadOnly. AGENTS.md prefers stories for visual states, so this is a minor coverage gap for a layout-only fix."
+    },
+    {
+      "findings": [
+        "F9"
+      ],
+      "summary": "The claim that the Read-only pill can wrap into 'Read-' / 'only'.",
+      "label": "wrong",
+      "evidence": "The pill is rendered inside ItemText, which sets `whitespace-nowrap` (select.tsx:153). white-space is inherited, so the text can't wrap at the hyphen."
+    },
+    {
+      "findings": [
+        "F10"
+      ],
+      "summary": "The Read-only pill is a hand-styled span instead of the shared Badge component.",
+      "label": "nit",
+      "evidence": "MultiChainSafeItemRow.tsx:24-29 is unchanged by this PR (the diff only touches lines 76-79). It's a style preference with no concrete cost."
+    },
+    {
+      "findings": [
+        "F5"
+      ],
+      "summary": "The claim that the PR description should add the commit's reasoning about the icon-only badge.",
+      "label": "wrong",
+      "evidence": "The description already explains that #8013 made the badge icon-only and that the icon then looked orphaned or broken. It also includes a screenshot."
+    }
+  ]
+}

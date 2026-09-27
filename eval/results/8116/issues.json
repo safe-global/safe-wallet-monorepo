@@ -1,0 +1,159 @@
+{
+  "usage": {
+    "usd": 0.870301,
+    "turns": 14,
+    "wallSeconds": 113
+  },
+  "issues": [
+    {
+      "findings": [
+        "F4"
+      ],
+      "summary": "The HYDRATE action never persists the reset, so resetVersion is never written to localStorage.",
+      "label": "low",
+      "evidence": "persistState (store/persistStore.ts:26-29) persists a slice only when the action type prefix matches the slice name. '@@HYDRATE' never matches, so the reset reruns on every load until setOrderByPreference is dispatched. The result is always NAME, so the only effect is redundant work; users see nothing wrong."
+    },
+    {
+      "findings": [
+        "F8",
+        "F16",
+        "F3"
+      ],
+      "summary": "The one-time reset overrides users who deliberately chose \"Most recent\" (and the test asserts that).",
+      "label": "wrong",
+      "evidence": "The PR description says the reset \"overrides anyone who previously chose Most recent (intended per product)\". store/index.ts:146-154 and the test in store/__tests__/index.test.ts:149 implement and lock in that intended behaviour."
+    },
+    {
+      "findings": [
+        "F12",
+        "F24"
+      ],
+      "summary": "The slice comment says the reset targets \"users still on the previous default\", but it resets every user who has no resetVersion.",
+      "label": "low",
+      "evidence": "orderByPreferenceSlice.ts:10-11 describes the targets as users on the previous default. The guard at store/index.ts:149 fires for anyone without resetVersion, and it only changes the outcome for users who persisted LAST_VISITED by choosing it. The comment is imprecise, but the behaviour it drives is intended."
+    },
+    {
+      "findings": [
+        "F2"
+      ],
+      "summary": "The claim is that the orderByState guard is always true, which would make its comment misleading.",
+      "label": "wrong",
+      "evidence": "In the real store the slice is always present, which is exactly what the comment means by \"a real store\". With synthetic state that lacks the slice (the existing hydration tests at store/__tests__/index.test.ts:6-45 use toStrictEqual), the guard is false and prevents the slice from being injected."
+    },
+    {
+      "findings": [
+        "F19"
+      ],
+      "summary": "The claim is that no test covers the case where the slice is absent.",
+      "label": "wrong",
+      "evidence": "The existing 'should return a merged state' tests pass synthetic state without orderByPreference and assert the exact result with toStrictEqual (store/__tests__/index.test.ts:32). Those tests would fail if the guard were removed."
+    },
+    {
+      "findings": [
+        "F5",
+        "F20"
+      ],
+      "summary": "On a space route, a fallback current safe from outside the space is injected into the space dropdown list, and this is not tested.",
+      "label": "low",
+      "evidence": "useSafeBarSafes.ts:100-105 now prepends fallbackCurrentSafe when the safe is not in spaceSafes. It is a single-chain item and is selected, so SafeDropdownContainer.tsx:84 filters it out of the list. It only shows in the trigger and adds an overview fetch. The visible impact is small and depends on stale state."
+    },
+    {
+      "findings": [
+        "F14",
+        "F23"
+      ],
+      "summary": "Space-context dropdown ordering (current safe pinned first, rest sorted) has no multi-item test.",
+      "label": "low",
+      "evidence": "The space tests (useSafeBarSafes.test.ts:99-121) use a single safe, and the new ordering tests cover only non-space context. Both paths share the orderDropdownSafes helper, which the non-space tests exercise, so only the space-specific wiring is uncovered."
+    },
+    {
+      "findings": [
+        "F15"
+      ],
+      "summary": "The new sort toggle does not fire the SORT_SAFES analytics event that OrderByButton fires.",
+      "label": "medium",
+      "evidence": "OrderByButton calls trackEvent({...OVERVIEW_EVENTS.SORT_SAFES}) on change (features/myAccounts/components/OrderByButton/index.tsx:31). SafeListSortToggle/index.tsx:53 only dispatches, so sorting from the dropdown and the modal, the new primary sort surfaces, goes untracked."
+    },
+    {
+      "findings": [
+        "F13",
+        "F21"
+      ],
+      "summary": "The search placeholder was shortened to a verbless lowercase fragment that no longer matches the modal's wording.",
+      "label": "low",
+      "evidence": "SafeDropdownContainer.tsx:154 changed \"Search by name, address or network\" to \"by name, address or network\". The All accounts modal still reads \"Search by name or address\", which is inconsistent and conflicts with the sentence-case copy guideline."
+    },
+    {
+      "findings": [
+        "F9"
+      ],
+      "summary": "The search input has no aria-label, so the new fragment placeholder is its only accessible name.",
+      "label": "low",
+      "evidence": "InputGroupInput at SafeDropdownContainer.tsx:153-160 has no aria-label. The missing label predates the PR, but shortening the placeholder makes the accessible name less clear."
+    },
+    {
+      "findings": [
+        "F1"
+      ],
+      "summary": "The toggle, a DropdownMenu nested inside the Select popup, is not covered by an interaction test.",
+      "label": "low",
+      "evidence": "The PR acknowledges that base-ui menus don't open in jsdom and that this was verified visually. The container test stubs the toggle, so nothing automated checks how it interacts with the Select popup."
+    },
+    {
+      "findings": [
+        "F10"
+      ],
+      "summary": "The toggle's test covers only the default label, not the dispatch wiring.",
+      "label": "low",
+      "evidence": "SafeListSortToggle/index.test.tsx:8-14 asserts only the trigger text. The onValueChange path to setOrderByPreference (index.tsx:53) is untested, though a regression would be visible straight away in the UI."
+    },
+    {
+      "findings": [
+        "F7"
+      ],
+      "summary": "The new component has logic but no Storybook story, which the web guidelines require.",
+      "label": "low",
+      "evidence": "apps/web/AGENTS.md:10 and :160 require a story for a new component with logic. The SafeListSortToggle directory contains only index.tsx and index.test.tsx."
+    },
+    {
+      "findings": [
+        "F11"
+      ],
+      "summary": "The sort-option label map is duplicated from OrderByButton.",
+      "label": "low",
+      "evidence": "SafeListSortToggle/index.tsx:15-18 and OrderByButton/index.tsx:15-18 define the same Record<OrderByOption,string>, so the two can drift apart if an option is added or renamed."
+    },
+    {
+      "findings": [
+        "F17"
+      ],
+      "summary": "Merging the local address book with space contacts keeps each key's casing, so name lookups can miss when casings differ.",
+      "label": "low",
+      "evidence": "useSpaceSafes.tsx:31 merges keyed maps, and the lookup at useAllSafesGrouped.ts:58 is exact-case. Address-book, space-contact and CGW addresses are all normally checksummed, so a casing mismatch is unlikely in practice."
+    },
+    {
+      "findings": [
+        "F6"
+      ],
+      "summary": "The test that ORDER_BY_RESET_VERSION is a number is trivial.",
+      "label": "nit",
+      "evidence": "orderByPreferenceSlice.test.ts:27-29 only checks typeof and cannot fail in a useful way. The real reset behaviour is covered in store/__tests__/index.test.ts, so this test is just noise."
+    },
+    {
+      "findings": [
+        "F18"
+      ],
+      "summary": "Some explanatory comments are long given the guideline that comments are tech debt.",
+      "label": "nit",
+      "evidence": "useSpaceSafes.tsx:27-30 and SafeListSortToggle/index.tsx:34-35 explain non-obvious intent. Trimming them is a style preference with no concrete cost."
+    },
+    {
+      "findings": [
+        "F22"
+      ],
+      "summary": "The trigger's class list repeats the adjacent InputGroup styling.",
+      "label": "nit",
+      "evidence": "SafeListSortToggle/index.tsx:37 repeats 'rounded-md border-gray-100 shadow-none' for visual parity. The class list is used once, and the finding itself calls this acceptable."
+    }
+  ]
+}

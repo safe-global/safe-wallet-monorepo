@@ -1,0 +1,25 @@
+{
+  "usd": 0.0639836,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/hooks/refreshOptions.ts",
+      "line": 9,
+      "claim": "The new SPACE_REFRESH_OPTIONS constant is placed in a hooks/ file even though it is shared by three hooks and their tests, while the feature already has a constants.ts file holding other shared constants; it should be moved into features/spaces/constants.ts and imported from there instead."
+    },
+    {
+      "file": "apps/web/src/features/spaces/hooks/__tests__/useSpaceSafes.test.tsx",
+      "line": 106,
+      "claim": "The tests in useSpaceSafes.test.tsx, useAllMembers.test.ts, and useGetSpaceAddressBook.test.ts only assert that the same imported SPACE_REFRESH_OPTIONS object is spread into the query options, so they would still pass if the constant's values were weakened to an empty object or refetchOnFocus: false, which is the exact stale-data bug being fixed; at least one test should assert the literal expected values instead of just the imported reference."
+    },
+    {
+      "file": "apps/web/src/features/spaces/hooks/refreshOptions.ts",
+      "line": 1,
+      "claim": "The JSDoc comment restates what the RTK Query options refetchOnFocus and refetchOnMountOrArgChange already do rather than explaining repo-specific intent; it should be trimmed to keep only the rationale for why Space data needs refreshing and to explain or name the 30-value staleness window if it is worth keeping."
+    },
+    {
+      "file": "apps/web/src/features/spaces/hooks/useIsQualifiedSafe.ts",
+      "line": 23,
+      "claim": "Two other subscribers to the same useSpaceSafesGetV1Query (useIsQualifiedSafe.ts and SpaceSelectorDropdown.tsx) do not pass the new refresh options, and although this isn't a functional bug since RTK Query merges focus-refetch settings across subscribers, the PR description should mention that this omission was a deliberate choice so reviewers are aware of it."
+    }
+  ]
+}

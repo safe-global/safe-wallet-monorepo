@@ -1,0 +1,10 @@
+{
+  "usd": 0.049235600000000004,
+  "findings": [
+    {
+      "file": "apps/web/src/services/observability/providers/__tests__/datadog.test.ts",
+      "line": 389,
+      "claim": "The test includes a 'console' case that is redundant because that source is already excluded by a separate guard checking NON_USER_IMPACTING_SOURCES, which includes 'console' and 'report'."
+    }
+  ]
+}

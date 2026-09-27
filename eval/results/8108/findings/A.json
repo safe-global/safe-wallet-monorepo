@@ -1,0 +1,80 @@
+{
+  "usd": 0.09472560000000001,
+  "findings": [
+    {
+      "file": "apps/web/src/features/spaces/components/MembersList/index.test.tsx",
+      "line": 80,
+      "claim": "The test named \"truncates long member emails inside a tooltip trigger\" only checks for the presence of the truncate class and no longer verifies that hovering the trigger reveals the full email in a tooltip, so it would still pass even if the tooltip content were deleted entirely."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx",
+      "line": 32,
+      "claim": "There is no test verifying that rows with null or undefined values always sort to the end of the list in both ascending and descending order."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx",
+      "line": 72,
+      "claim": "There is no test verifying that clicking a column header to change the sort resets the table back to the first page."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx",
+      "line": 89,
+      "claim": "There is no test verifying that the current page is clamped to the last valid page when the underlying data shrinks, which otherwise would leave the user viewing an empty page."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx",
+      "line": 105,
+      "claim": "There is no test verifying the aria-sort attribute values that communicate sort state to screen readers."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx",
+      "line": 39,
+      "claim": "The chain-count sorting logic has no test coverage."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx",
+      "line": 46,
+      "claim": "The logic that switches the middle column between createdBy and updatedAt-or-createdAt has no test coverage."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/MembersList/index.tsx",
+      "line": 26,
+      "claim": "The email-sorting logic has no test coverage."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx",
+      "line": 63,
+      "claim": "Long contact names are still truncated in a narrow column, but the tooltip that previously showed the full name has been removed, leaving no way to read a name that gets cut off; the commit describes this as redundant, but it is not when a name is actually truncated, so it should either be reinstated conditionally on truncation or the removal called out as an intentional design decision in the PR description."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/index.tsx",
+      "line": 181,
+      "claim": "The border was removed from the address-book card with no stated design rationale in the PR description."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Members/index.tsx",
+      "line": 57,
+      "claim": "The members card was restyled without a border, again with no stated design rationale in the PR description."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx",
+      "line": 47,
+      "claim": "The expression entry.updatedAt || entry.createdAt is written out separately in both the sort function and the rendered cell, so the two copies can drift out of sync if one is changed without the other."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx",
+      "line": 87,
+      "claim": "The columns array is rebuilt as a new object on every render and is used as a useMemo dependency for sorting rows, so the memoization never hits and rows are re-sorted on every render."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx",
+      "line": 135,
+      "claim": "The new shared table hand-builds its own previous/next buttons and range label instead of using the existing pagination component at apps/web/src/components/ui/pagination.tsx, duplicating functionality carried over from the old address-book table."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/MembersList/index.tsx",
+      "line": 1,
+      "claim": "The change alters rendering, sorting, and pagination behavior in both the members table and the address-book table under apps/web/src/**, but no corresponding one-shot Playwright clickthrough test was added under apps/web/e2e/tests/one-shots/, and the PR description does not explain why one is unnecessary."
+    }
+  ]
+}

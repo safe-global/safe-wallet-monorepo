@@ -1,0 +1,20 @@
+{
+  "usd": 0.037774,
+  "findings": [
+    {
+      "file": "transaction-guards.ts",
+      "line": 452,
+      "claim": "isSafeMigrationCall recomputes the SAFE_VERSIONS.flatMap address list and re-decodes the migration interface selectors on every invocation, and since isSafeUpdateTxData is called from render paths, this address list and the four selectors should be hoisted to module-level constants (e.g. in safe-migrations.ts) instead of being recomputed each call."
+    },
+    {
+      "file": "transaction-guards.test.ts",
+      "line": 205,
+      "claim": "The 1.5.0 test case only exercises the canonical selector and address; it should also include a case for the zksync variant address to lock in the 'any variant' matching behavior the guard now depends on, otherwise a future regression back to canonical-only matching would not be caught by the suite."
+    },
+    {
+      "file": "transaction-guards.test.ts",
+      "line": 220,
+      "claim": "The negative test case only covers non-migrate calldata sent to a SafeMigration address; a symmetrical positive counter-example (a migrate selector sent to a non-SafeMigration address) is missing and would be needed to fully verify that the guard requires both the address and the selector to match."
+    }
+  ]
+}

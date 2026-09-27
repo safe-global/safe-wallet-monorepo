@@ -1,0 +1,60 @@
+{
+  "usd": 0.0536036,
+  "findings": [
+    {
+      "file": "apps/web/src/components/settings/SafeAppsPermissions/index.stories.tsx",
+      "line": 12,
+      "claim": "The story calls local.setItem with a hardcoded storage key at the top level of the file, so it writes to real localStorage as soon as the file loads. This overwrites the viewer's actual Storybook localStorage, the change persists across other stories and reloads, and the key duplicates the unexported BROWSER_PERMISSIONS constant from useBrowserPermissions.ts, so renaming that constant would silently break the story."
+    },
+    {
+      "file": "apps/web/src/hooks/safe-apps/permissions/useBrowserPermissions.ts",
+      "line": 7,
+      "claim": "BROWSER_PERMISSIONS is not exported from this file even though its value is duplicated as a hardcoded string in the story, creating a hidden coupling between the two files."
+    },
+    {
+      "file": "apps/web/src/components/settings/SafeAppsPermissions/index.stories.tsx",
+      "line": 38,
+      "claim": "loaders: [mswLoader] is declared a second time even though meta already sets it, which does not match the documented pattern of using an empty Default story object."
+    },
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppsInfoModal/index.stories.tsx",
+      "line": 16,
+      "claim": "The `as AllowedFeatures[]` cast has no effect because FEATURES in types.ts is not declared with `as const`, making AllowedFeatures resolve to plain string; the cast therefore validates nothing and misleadingly implies the values are checked."
+    },
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppsInfoModal/index.stories.tsx",
+      "line": 38,
+      "claim": "The same ineffective `as AllowedFeatures[]` cast appears again here, repeating the misleading type assertion."
+    },
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppsInfoModal/index.stories.tsx",
+      "line": 46,
+      "claim": "The same ineffective `as AllowedFeatures[]` cast appears again here, repeating the misleading type assertion."
+    },
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppsInfoModal/index.tsx",
+      "line": 121,
+      "claim": "The scroll layout fix is split between Tailwind utility classes here and CSS module rules elsewhere, so the fix only works if every nesting level is set up correctly in both places; the long inline class string at this line also keeps growing, which is the pattern the relevant convention warns against."
+    },
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppsInfoModal/index.tsx",
+      "line": 137,
+      "claim": "Part of the scroll layout's Tailwind classes (min-h-0 flex-auto) live here, separate from the corresponding CSS module rules, spreading a single layout fix across multiple files."
+    },
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppsInfoModal/Slider.tsx",
+      "line": 71,
+      "claim": "A shrink-0 Tailwind class here is another piece of the scroll layout fix that lives outside the CSS module, contributing to the same split-layout problem."
+    },
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppsInfoModal/styles.module.css",
+      "line": 5,
+      "claim": "The .sliderContainer rules (flex: 1 1 auto; min-height: 0; overflow-y: auto) here hold only half of the scroll layout fix, with the other half implemented as Tailwind classes in index.tsx and Slider.tsx."
+    },
+    {
+      "file": "apps/web/src/components/safe-apps/SafeAppsInfoModal/styles.test.ts",
+      "line": 13,
+      "claim": "The new postcss-based style test only verifies the CSS module half of the scroll fix; reverting the Tailwind classes in index.tsx (lines 121/137) or Slider.tsx (line 71) would break the long-list-scrolls behavior without causing this or any other test to fail."
+    }
+  ]
+}

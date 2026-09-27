@@ -1,0 +1,85 @@
+{
+  "pr": 8221,
+  "title": "fix(web): right-align Inactive/Read-only badge in account selector sub-rows",
+  "description": "## What it solves\r\n\r\nResolves: the \"Inactive\" status icon looking broken/orphaned in the topbar account-selector dropdown.\r\n\r\nWhen a multi-chain Safe is **expanded** in the account selector, each per-chain sub-row rendered its status badge (Inactive / Activating / Read-only) **stacked under the chain name on the left**. That was fine while the badge was a labeled pill (\"Not activated\"), but once #8013 swapped it for an **icon-only** badge, the lone warning icon read as broken — see the reported screenshot where the ⚠ icon hangs under \"Ethereum\" on the left. It should sit on the right, next to the balance.\r\n\r\nThe collapsed multi-chain summary row was already fixed to right-align this badge (via `RowEndColumn`), but the **expanded per-chain sub-rows** were never updated — so the bug only shows in the expanded state.\r\n\r\n## How this PR fixes it\r\n\r\nIn `MultiChainSafeItemRow`'s expanded sub-row, `StatusBadge` is pulled out of the left `flex-col` and made a **right-aligned sibling**. The chain name now takes `flex-1` and truncates, so `StatusBadge` → `pending` → balance all line up on the right.\r\n\r\nThis matches both the collapsed summary row and the component's own comment, which already documented the intent: _\"this row uses its own right-aligned StatusBadge / queued count / balance\"_.\r\n\r\n```diff\r\n-                <div className=\"flex min-w-0 flex-1 flex-col gap-0.5\">\r\n-                  <Typography variant=\"paragraph-small-medium\" className=\"truncate\">\r\n-                    {chain.chainName}\r\n-                  </Typography>\r\n-                  <StatusBadge chain={chain} />\r\n-                </div>\r\n+                <Typography variant=\"paragraph-small-medium\" className=\"min-w-0 flex-1 truncate\">\r\n+                  {chain.chainName}\r\n+                </Typography>\r\n+                <StatusBadge chain={chain} />\r\n```\r\n\r\n## How to test it\r\n\r\n1. Connect a wallet that owns a **multi-chain Safe with at least one counterfactual (undeployed) chain**.\r\n2. Open the account selector dropdown in the topbar.\r\n3. **Expand** that multi-chain Safe.\r\n4. The **Inactive** (or **Activating**) icon for the undeployed chain now appears **right-aligned**, in line with the balance column — not stacked under the chain name.\r\n5. For a **read-only** chain, the \"Read-only\" pill is likewise right-aligned.\r\n6. Long chain names still truncate; `N pending` badge and balance still align right.\r\n\r\n## Affected flows\r\n\r\n- Account selector dropdown → expand a multi-chain Safe → per-chain sub-row: status-badge placement (Inactive / Activating / Read-only).\r\n\r\n## Blast radius\r\n\r\n- **`MultiChainSafeItemRow`** (the `CollapsibleContent` per-chain sub-row) only. Its sole consumer is **`SafeDropdownContainer`** (the topbar account dropdown) — no other consumers.\r\n- **`StatusBadge`** handles both branches and both move right: `isUndeployed` → `NotActivatedBadge` (icon) and `isReadOnly` → \"Read-only\" pill.\r\n- No shared hooks / selectors / slices / RTK Query endpoints / feature flags / routes touched.\r\n- Web-only component → no mobile or shared-package (`packages/**`) impact.\r\n\r\n## Risks / not checked\r\n\r\n- Pixel-exact alignment vs. the collapsed summary row — visual check only.\r\n- Not tested on mobile — this component is web-only (N/A).\r\n- Read-only sub-row right-alignment confirmed by reasoning + reviewer's in-app check; if a read-only multi-chain Safe is handy, worth a glance.\r\n- Layout/position is not unit-testable in jsdom (no layout engine); covered by in-app verification on a running build.\r\n\r\n## Visual summary\r\n\r\nUI change — layout of the expanded per-chain sub-row:\r\n\r\n```\r\nBefore:  [logo]  chainName ........................   [balance]\r\n                 ⚠            ← icon orphaned on the left\r\n\r\nAfter:   [logo]  chainName .............  ⚠  [N pending]  [balance]\r\n                                          ↑ right-aligned with the trailing column\r\n```\r\n\r\n```mermaid\r\nflowchart LR\r\n  subgraph Before[\"Before — sub-row\"]\r\n    L1[ChainLogo] --> C1[\"flex-col: chainName / StatusBadge (stacked, left)\"]\r\n    C1 --> B1[balance]\r\n  end\r\n  subgraph After[\"After — sub-row\"]\r\n    L2[ChainLogo] --> N2[\"chainName (flex-1, truncate)\"]\r\n    N2 --> S2[StatusBadge]\r\n    S2 --> P2[pending]\r\n    P2 --> B2[balance]\r\n  end\r\n```\r\n\r\n<img width=\"472\" height=\"313\" alt=\"Screenshot 2026-06-30 at 12 05 35\" src=\"https://github.com/user-attachments/assets/5dc5dd93-afbe-43ba-903b-62541fd28daf\" />\r\n\r\n\r\n## Checklist\r\n\r\n- [ ] I've tested the branch on mobile 📱 — N/A (web-only component)\r\n- [x] I've documented how it affects the analytics (if at all) 📊 — no analytics change\r\n- [x] I've written a unit/e2e test for it (if applicable) 🧑‍💻 — existing `MultiChainSafeItemRow.test.tsx` covers badge presence/label; layout position is not unit-testable in jsdom\r\n- [x] I've listed affected flows and blast radius, and named what I did not verify 🎯\r\n\r\n---\r\n\r\n## CLA signature\r\n\r\nWith the submission of this Pull Request, I confirm that I have read and agree to the terms of the [Contributor License Agreement](https://safe.global/cla).",
+  "findings": [
+    {
+      "id": "F1",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/MultiChainSafeItemRow.tsx",
+      "line": 76,
+      "claim": "To fix the overflow risk, min-w-0/shrink should be applied to the row content (e.g. overriding ItemText for this row) so truncate works, and shrink-0 should be added to the badge so the chain name shrinks first instead of the badge."
+    },
+    {
+      "id": "F2",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/SafeSelectorDropdown.stories.tsx",
+      "line": 205,
+      "claim": "No Storybook story renders a multi-chain row with Inactive or Read-only chain states, even though this is exactly the layout affected by the commit, leaving the visual change without story coverage."
+    },
+    {
+      "id": "F3",
+      "file": "apps/web/AGENTS.md",
+      "line": 148,
+      "claim": "The project's own testing guidance states that layout-only changes must be covered by a Storybook story, and this change lacks one for the affected multi-chain badge layout, so a regression here would not be caught by the visual snapshot check."
+    },
+    {
+      "id": "F4",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/MultiChainSafeItemRow.tsx",
+      "line": 76,
+      "claim": "Because the dropdown popup has a fixed/limited width, a long chain name combined with a Read-only badge, pending count, and balance can exceed the available width on narrow screens, causing the balance to be clipped or the row to scroll sideways where it previously fit."
+    },
+    {
+      "id": "F5",
+      "file": null,
+      "line": null,
+      "claim": "The PR description should carry forward the reasoning given in the commit message (that the icon-only badge from a prior change looked orphaned) and include design sign-off if available, since this is a visible behavior change."
+    },
+    {
+      "id": "F6",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/MultiChainSafeItemRow.tsx",
+      "line": 23,
+      "claim": "The isReadOnly branch of StatusBadge has no test coverage at all."
+    },
+    {
+      "id": "F7",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/MultiChainSafeItemRow.tsx",
+      "line": 79,
+      "claim": "This wrapping can occur in practice because a chain only needs to be deployed and have queued transactions to show the pending badge, so a read-only chain can display both the pending badge and the Read-only pill together, increasing crowding in the row."
+    },
+    {
+      "id": "F8",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/SafeSelectorDropdown.stories.tsx",
+      "line": null,
+      "claim": "There is no Storybook story showing an expanded multi-chain row with an undeployed or read-only chain; the existing MixedActivationStates story only covers single-chain rows, leaving no visual check of the new layout."
+    },
+    {
+      "id": "F9",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/MultiChainSafeItemRow.tsx",
+      "line": 25,
+      "claim": "The Read-only pill span has neither whitespace-nowrap nor shrink-0, unlike the pending badge and balance beside it, so when the row runs out of space it can shrink and wrap its text between the hyphen, breaking 'Read-only' into 'Read-' and 'only', an effect made more visible by the leading-none style."
+    },
+    {
+      "id": "F10",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/MultiChainSafeItemRow.tsx",
+      "line": 25,
+      "claim": "The Read-only badge is implemented as a hand-built styled span instead of reusing the shared Badge component already used elsewhere in the same file for the pending-count badge, which is an unnecessary duplication."
+    },
+    {
+      "id": "F11",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/__tests__/MultiChainSafeItemRow.test.tsx",
+      "line": null,
+      "claim": "The unit tests replace SelectItem with a plain div and only assert that the badge exists, so they would not fail and no snapshot would change if the commit were reverted, and there is no test at all for the Read-only badge."
+    },
+    {
+      "id": "F12",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/MultiChainSafeItemRow.tsx",
+      "line": 76,
+      "claim": "The status badge now shares the same line as the chain name, the pending-count badge, and the balance, but the row's wrapper (ItemText, which has flex-1 shrink-0 whitespace-nowrap) does not allow shrinking, so the name's truncate class likely never takes effect and the row grows to fit all content combined rather than truncating."
+    },
+    {
+      "id": "F13",
+      "file": "apps/web/src/features/spaces/components/SafeSelectorDropdown/components/__tests__/MultiChainSafeItemRow.test.tsx",
+      "line": null,
+      "claim": "No tests were changed for this commit; the existing tests only check for the Inactive/Activating badge and would still pass even if the badge layout reverted to sitting under the name, so they do not cover the new position."
+    }
+  ]
+}
