@@ -1,3 +1,4 @@
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { mockSpendingLimitDto } from '../../mocks/activePolicies'
 import { mockPendingDto, PENDING_MOCK_DELEGATE } from '../../mocks/pendingPolicies'
@@ -9,8 +10,8 @@ import { mapPendingPolicies } from '../mapPendingPolicies'
 const ETH: PolicyTokenInfo = { address: ZERO_ADDRESS, symbol: 'ETH', decimals: 18, logoUri: null }
 
 const resolveKnownTokens: ResolveTokenInfo = (_chainId, address) => {
-  if (address === ZERO_ADDRESS) return ETH
-  if (address.toLowerCase() === MOCK_TOKENS.usdc.address.toLowerCase()) return MOCK_TOKENS.usdc
+  if (sameAddress(address, ZERO_ADDRESS)) return ETH
+  if (sameAddress(address, MOCK_TOKENS.usdc.address)) return MOCK_TOKENS.usdc
   return undefined
 }
 

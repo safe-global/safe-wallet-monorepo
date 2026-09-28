@@ -1,4 +1,4 @@
-import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
+import { formatVisualAmount, maybePlural } from '@safe-global/utils/utils/formatters'
 import {
   hasRecoveryData,
   isPendingPolicy,
@@ -64,8 +64,8 @@ const describeSpendingLimit = (policy: Extract<Policy, { type: 'spending-limit' 
   if (allowances.length === 1) return formatAllowance(allowances[0])
 
   const spenderCount = policy.data.spenders.length
-  const spenders = `${spenderCount} ${spenderCount === 1 ? 'spender' : 'spenders'}`
-  const tokens = `${allowances.length} ${allowances.length === 1 ? 'limit' : 'limits'}`
+  const spenders = `${spenderCount} spender${maybePlural(spenderCount)}`
+  const tokens = `${allowances.length} limit${maybePlural(allowances)}`
 
   return `${spenders} · ${tokens}`
 }
@@ -81,8 +81,8 @@ export const getPolicySummary = (policy: Policy): string => {
     // Still enforced until the transaction executes, so the copy is in progress, not done.
     if (getAllowances(policy).length > 0) return `Removing ${describeSpendingLimit(policy)}`
 
-    const count = policy.data.spenders.length
-    return `Removing ${count} ${count === 1 ? 'spender' : 'spenders'}`
+    const { spenders } = policy.data
+    return `Removing ${spenders.length} spender${maybePlural(spenders)}`
   }
 
   if (hasRecoveryData(policy)) {

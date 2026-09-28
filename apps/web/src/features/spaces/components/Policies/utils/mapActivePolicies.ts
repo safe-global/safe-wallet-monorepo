@@ -111,8 +111,9 @@ export const getReferencedTokens = (
 
   const seen = new Set<string>()
   return refs.filter(({ chainId, address }) => {
-    const key = `${chainId}:${address.toLowerCase()}`
-    if (address.toLowerCase() === ZERO_ADDRESS || seen.has(key)) return false
+    const lowerCaseAddress = address.toLowerCase()
+    const key = `${chainId}:${lowerCaseAddress}`
+    if (lowerCaseAddress === ZERO_ADDRESS || seen.has(key)) return false
     seen.add(key)
     return true
   })
