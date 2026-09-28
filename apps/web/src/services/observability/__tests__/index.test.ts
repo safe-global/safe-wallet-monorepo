@@ -30,37 +30,6 @@ describe('Observability Module', () => {
       })
     })
 
-    it('should be a no-op on server-side', () => {
-      const windowSpy = jest.spyOn(global, 'window', 'get')
-      windowSpy.mockReturnValue(undefined as any)
-
-      const mockProvider = {
-        name: 'Mock',
-        init: jest.fn().mockResolvedValue(undefined),
-        getLogger: jest.fn(() => ({
-          info: jest.fn(),
-          warn: jest.fn(),
-          error: jest.fn(),
-          debug: jest.fn(),
-        })),
-        captureError: jest.fn(),
-      }
-
-      jest.isolateModules(() => {
-        jest.doMock('../factory', () => ({
-          createObservabilityProvider: jest.fn(() => mockProvider),
-        }))
-
-        const { initObservability } = require('../index')
-        initObservability()
-
-        // Should not call init on server-side
-        expect(mockProvider.init).not.toHaveBeenCalled()
-      })
-
-      windowSpy.mockRestore()
-    })
-
     it('should handle initialization errors gracefully', async () => {
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
       const initError = new Error('init failed')

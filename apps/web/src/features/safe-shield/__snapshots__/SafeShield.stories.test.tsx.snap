@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./SafeShield.stories ChecksPassed 1`] = `
 <div
@@ -26,11 +26,13 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
               <div
                 class="flex flex-row rounded-md px-4 py-2"
                 data-testid="safe-shield-status"
+                style="background-color: var(--color-success-background);"
               >
                 <span
                   class="m-0 text-xs leading-4 font-semibold uppercase"
                   data-slot="typography"
                   data-variant="paragraph-mini-bold"
+                  style="color: var(--color-success-main);"
                 >
                   3 of 4 checks passed
                 </span>
@@ -63,6 +65,7 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
                       >
                         <mock-icon
                           height="16"
+                          style="color: var(--color-success-main);"
                           width="16"
                         />
                         <span
@@ -109,6 +112,7 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-success-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -145,6 +149,7 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
                       >
                         <mock-icon
                           height="16"
+                          style="color: var(--color-success-main);"
                           width="16"
                         />
                         <span
@@ -191,6 +196,7 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-success-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -210,6 +216,7 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-border-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -267,6 +274,7 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
                         >
                           <mock-icon
                             height="16"
+                            style="color: var(--color-success-main);"
                             width="16"
                           />
                           <span
@@ -313,6 +321,7 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
+                                style="border-left-color: var(--color-success-main);"
                               >
                                 <div
                                   class="flex flex-col gap-4"
@@ -392,11 +401,13 @@ exports[`./SafeShield.stories Empty 1`] = `
               <div
                 class="flex flex-row rounded-md px-4 py-2"
                 data-testid="safe-shield-status"
+                style="background-color: var(--color-background-default);"
               >
                 <span
                   class="m-0 text-xs leading-4 font-semibold uppercase"
                   data-slot="typography"
                   data-variant="paragraph-mini-bold"
+                  style="color: var(--color-text-secondary);"
                 >
                   Copilot
                 </span>
@@ -477,11 +488,13 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
               <div
                 class="flex flex-row rounded-md px-4 py-2"
                 data-testid="safe-shield-status"
+                style="background-color: var(--color-warning-background);"
               >
                 <span
                   class="m-0 text-xs leading-4 font-semibold uppercase"
                   data-slot="typography"
                   data-variant="paragraph-mini-bold"
+                  style="color: var(--color-warning-main);"
                 >
                   Issues found
                 </span>
@@ -514,6 +527,7 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
                       >
                         <mock-icon
                           height="16"
+                          style="color: var(--color-border-main);"
                           width="16"
                         />
                         <span
@@ -560,6 +574,7 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-border-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -596,6 +611,7 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
                       >
                         <mock-icon
                           height="16"
+                          style="color: var(--color-warning-main);"
                           width="16"
                         />
                         <span
@@ -642,6 +658,7 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-warning-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -699,6 +716,7 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
                         >
                           <mock-icon
                             height="16"
+                            style="color: var(--color-border-main);"
                             width="16"
                           />
                           <span
@@ -745,6 +763,7 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
+                                style="border-left-color: var(--color-border-main);"
                               >
                                 <div
                                   class="flex flex-col gap-4"
@@ -824,11 +843,13 @@ exports[`./SafeShield.stories HypernativeCustomCheckFailed 1`] = `
               <div
                 class="flex flex-row rounded-md px-4 py-2"
                 data-testid="safe-shield-status"
+                style="background-color: var(--color-warning-background);"
               >
                 <span
                   class="m-0 text-xs leading-4 font-semibold uppercase"
                   data-slot="typography"
                   data-variant="paragraph-mini-bold"
+                  style="color: var(--color-warning-main);"
                 >
                   Issues found
                 </span>
@@ -861,6 +882,7 @@ exports[`./SafeShield.stories HypernativeCustomCheckFailed 1`] = `
                       >
                         <mock-icon
                           height="16"
+                          style="color: var(--color-border-main);"
                           width="16"
                         />
                         <span
@@ -907,6 +929,7 @@ exports[`./SafeShield.stories HypernativeCustomCheckFailed 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-border-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -964,6 +987,7 @@ exports[`./SafeShield.stories HypernativeCustomCheckFailed 1`] = `
                         >
                           <mock-icon
                             height="16"
+                            style="color: var(--color-border-main);"
                             width="16"
                           />
                           <span
@@ -1010,6 +1034,7 @@ exports[`./SafeShield.stories HypernativeCustomCheckFailed 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
+                                style="border-left-color: var(--color-border-main);"
                               >
                                 <div
                                   class="flex flex-col gap-4"
@@ -1089,11 +1114,13 @@ exports[`./SafeShield.stories HypernativeGuardActive 1`] = `
               <div
                 class="flex flex-row rounded-md px-4 py-2"
                 data-testid="safe-shield-status"
+                style="background-color: var(--color-success-background);"
               >
                 <span
                   class="m-0 text-xs leading-4 font-semibold uppercase"
                   data-slot="typography"
                   data-variant="paragraph-mini-bold"
+                  style="color: var(--color-success-main);"
                 >
                   2 of 3 checks passed
                 </span>
@@ -1126,6 +1153,7 @@ exports[`./SafeShield.stories HypernativeGuardActive 1`] = `
                       >
                         <mock-icon
                           height="16"
+                          style="color: var(--color-success-main);"
                           width="16"
                         />
                         <span
@@ -1172,6 +1200,7 @@ exports[`./SafeShield.stories HypernativeGuardActive 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-success-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -1229,6 +1258,7 @@ exports[`./SafeShield.stories HypernativeGuardActive 1`] = `
                         >
                           <mock-icon
                             height="16"
+                            style="color: var(--color-success-main);"
                             width="16"
                           />
                           <span
@@ -1275,6 +1305,7 @@ exports[`./SafeShield.stories HypernativeGuardActive 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
+                                style="border-left-color: var(--color-success-main);"
                               >
                                 <div
                                   class="flex flex-col gap-4"
@@ -1354,11 +1385,13 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
               <div
                 class="flex flex-row rounded-md px-4 py-2"
                 data-testid="safe-shield-status"
+                style="background-color: var(--color-error-background);"
               >
                 <span
                   class="m-0 text-xs leading-4 font-semibold uppercase"
                   data-slot="typography"
                   data-variant="paragraph-mini-bold"
+                  style="color: var(--color-error-main);"
                 >
                   Risk detected
                 </span>
@@ -1391,6 +1424,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                       >
                         <mock-icon
                           height="16"
+                          style="color: var(--color-error-main);"
                           width="16"
                         />
                         <span
@@ -1437,6 +1471,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-error-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -1495,6 +1530,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                                     </div>
                                     <div
                                       class="px-2 py-1"
+                                      style="background-color: var(--color-error-background);"
                                     >
                                       <span
                                         class="m-0 text-xs font-normal leading-[14px] text-[var(--color-primary-light)]"
@@ -1549,6 +1585,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                                     </div>
                                     <div
                                       class="px-2 py-1"
+                                      style="background-color: var(--color-error-background);"
                                     >
                                       <span
                                         class="m-0 text-xs font-normal leading-[14px] text-[var(--color-primary-light)]"
@@ -1603,6 +1640,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                                     </div>
                                     <div
                                       class="px-2 py-1"
+                                      style="background-color: var(--color-error-background);"
                                     >
                                       <span
                                         class="m-0 text-xs font-normal leading-[14px] text-[var(--color-primary-light)]"
@@ -1708,6 +1746,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                         >
                           <mock-icon
                             height="16"
+                            style="color: var(--color-border-main);"
                             width="16"
                           />
                           <span
@@ -1754,6 +1793,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
+                                style="border-left-color: var(--color-border-main);"
                               >
                                 <div
                                   class="flex flex-col gap-4"
@@ -1833,11 +1873,13 @@ exports[`./SafeShield.stories HypernativeNotLoggedIn 1`] = `
               <div
                 class="flex flex-row rounded-md px-4 py-2"
                 data-testid="safe-shield-status"
+                style="background-color: var(--color-info-background);"
               >
                 <span
                   class="m-0 text-xs leading-4 font-semibold uppercase"
                   data-slot="typography"
                   data-variant="paragraph-mini-bold"
+                  style="color: var(--color-info-main);"
                 >
                   Authentication required
                 </span>
@@ -1931,6 +1973,7 @@ exports[`./SafeShield.stories HypernativeNotLoggedIn 1`] = `
                         >
                           <mock-icon
                             height="16"
+                            style="color: var(--color-border-main);"
                             width="16"
                           />
                           <span
@@ -1977,6 +2020,7 @@ exports[`./SafeShield.stories HypernativeNotLoggedIn 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
+                                style="border-left-color: var(--color-border-main);"
                               >
                                 <div
                                   class="flex flex-col gap-4"
@@ -2056,11 +2100,13 @@ exports[`./SafeShield.stories Loading 1`] = `
               <div
                 class="flex flex-row rounded-md px-4 py-2"
                 data-testid="safe-shield-status"
+                style="background-color: var(--color-background-default);"
               >
                 <span
                   class="m-0 text-xs leading-4 font-semibold uppercase"
                   data-slot="typography"
                   data-variant="paragraph-mini-bold"
+                  style="color: var(--color-text-secondary);"
                 >
                   Analyzing...
                 </span>
@@ -2196,11 +2242,13 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
               <div
                 class="flex flex-row rounded-md px-4 py-2"
                 data-testid="safe-shield-status"
+                style="background-color: var(--color-error-background);"
               >
                 <span
                   class="m-0 text-xs leading-4 font-semibold uppercase"
                   data-slot="typography"
                   data-variant="paragraph-mini-bold"
+                  style="color: var(--color-error-main);"
                 >
                   Risk detected
                 </span>
@@ -2233,6 +2281,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                       >
                         <mock-icon
                           height="16"
+                          style="color: var(--color-border-main);"
                           width="16"
                         />
                         <span
@@ -2279,6 +2328,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-border-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -2315,6 +2365,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                       >
                         <mock-icon
                           height="16"
+                          style="color: var(--color-error-main);"
                           width="16"
                         />
                         <span
@@ -2361,6 +2412,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-error-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -2419,6 +2471,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                                     </div>
                                     <div
                                       class="px-2 py-1"
+                                      style="background-color: var(--color-error-background);"
                                     >
                                       <span
                                         class="m-0 text-xs font-normal leading-[14px] text-[var(--color-primary-light)]"
@@ -2473,6 +2526,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                                     </div>
                                     <div
                                       class="px-2 py-1"
+                                      style="background-color: var(--color-error-background);"
                                     >
                                       <span
                                         class="m-0 text-xs font-normal leading-[14px] text-[var(--color-primary-light)]"
@@ -2527,6 +2581,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                                     </div>
                                     <div
                                       class="px-2 py-1"
+                                      style="background-color: var(--color-error-background);"
                                     >
                                       <span
                                         class="m-0 text-xs font-normal leading-[14px] text-[var(--color-primary-light)]"
@@ -2632,6 +2687,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                         >
                           <mock-icon
                             height="16"
+                            style="color: var(--color-border-main);"
                             width="16"
                           />
                           <span
@@ -2678,6 +2734,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
+                                style="border-left-color: var(--color-border-main);"
                               >
                                 <div
                                   class="flex flex-col gap-4"
@@ -2757,11 +2814,13 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
               <div
                 class="flex flex-row rounded-md px-4 py-2"
                 data-testid="safe-shield-status"
+                style="background-color: var(--color-warning-background);"
               >
                 <span
                   class="m-0 text-xs leading-4 font-semibold uppercase"
                   data-slot="typography"
                   data-variant="paragraph-mini-bold"
+                  style="color: var(--color-warning-main);"
                 >
                   Issues found
                 </span>
@@ -2794,6 +2853,7 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
                       >
                         <mock-icon
                           height="16"
+                          style="color: var(--color-border-main);"
                           width="16"
                         />
                         <span
@@ -2840,6 +2900,7 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-border-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -2876,6 +2937,7 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
                       >
                         <mock-icon
                           height="16"
+                          style="color: var(--color-warning-main);"
                           width="16"
                         />
                         <span
@@ -2922,6 +2984,7 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-warning-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -3015,6 +3078,7 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
                         >
                           <mock-icon
                             height="16"
+                            style="color: var(--color-border-main);"
                             width="16"
                           />
                           <span
@@ -3061,6 +3125,7 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
+                                style="border-left-color: var(--color-border-main);"
                               >
                                 <div
                                   class="flex flex-col gap-4"
@@ -3140,11 +3205,13 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
               <div
                 class="flex flex-row rounded-md px-4 py-2"
                 data-testid="safe-shield-status"
+                style="background-color: var(--color-warning-background);"
               >
                 <span
                   class="m-0 text-xs leading-4 font-semibold uppercase"
                   data-slot="typography"
                   data-variant="paragraph-mini-bold"
+                  style="color: var(--color-warning-main);"
                 >
                   Issues found
                 </span>
@@ -3177,6 +3244,7 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
                       >
                         <mock-icon
                           height="16"
+                          style="color: var(--color-border-main);"
                           width="16"
                         />
                         <span
@@ -3223,6 +3291,7 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-border-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -3259,6 +3328,7 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
                       >
                         <mock-icon
                           height="16"
+                          style="color: var(--color-warning-main);"
                           width="16"
                         />
                         <span
@@ -3305,6 +3375,7 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-warning-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -3382,6 +3453,7 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
                         >
                           <mock-icon
                             height="16"
+                            style="color: var(--color-border-main);"
                             width="16"
                           />
                           <span
@@ -3428,6 +3500,7 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
+                                style="border-left-color: var(--color-border-main);"
                               >
                                 <div
                                   class="flex flex-col gap-4"
@@ -3507,11 +3580,13 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
               <div
                 class="flex flex-row rounded-md px-4 py-2"
                 data-testid="safe-shield-status"
+                style="background-color: var(--color-warning-background);"
               >
                 <span
                   class="m-0 text-xs leading-4 font-semibold uppercase"
                   data-slot="typography"
                   data-variant="paragraph-mini-bold"
+                  style="color: var(--color-warning-main);"
                 >
                   Issues found
                 </span>
@@ -3544,6 +3619,7 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
                       >
                         <mock-icon
                           height="16"
+                          style="color: var(--color-border-main);"
                           width="16"
                         />
                         <span
@@ -3590,6 +3666,7 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-border-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -3626,6 +3703,7 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
                       >
                         <mock-icon
                           height="16"
+                          style="color: var(--color-warning-main);"
                           width="16"
                         />
                         <span
@@ -3672,6 +3750,7 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-warning-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -3729,6 +3808,7 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
                         >
                           <mock-icon
                             height="16"
+                            style="color: var(--color-border-main);"
                             width="16"
                           />
                           <span
@@ -3775,6 +3855,7 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
+                                style="border-left-color: var(--color-border-main);"
                               >
                                 <div
                                   class="flex flex-col gap-4"
@@ -3854,11 +3935,13 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
               <div
                 class="flex flex-row rounded-md px-4 py-2"
                 data-testid="safe-shield-status"
+                style="background-color: var(--color-error-background);"
               >
                 <span
                   class="m-0 text-xs leading-4 font-semibold uppercase"
                   data-slot="typography"
                   data-variant="paragraph-mini-bold"
+                  style="color: var(--color-error-main);"
                 >
                   Risk detected
                 </span>
@@ -3891,6 +3974,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                       >
                         <mock-icon
                           height="16"
+                          style="color: var(--color-border-main);"
                           width="16"
                         />
                         <span
@@ -3937,6 +4021,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-warning-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -4146,6 +4231,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-border-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -4345,6 +4431,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-border-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -4530,6 +4617,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-border-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -4732,6 +4820,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                       >
                         <mock-icon
                           height="16"
+                          style="color: var(--color-border-main);"
                           width="16"
                         />
                         <span
@@ -4778,6 +4867,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-border-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -4855,6 +4945,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                         >
                           <mock-icon
                             height="16"
+                            style="color: var(--color-error-main);"
                             width="16"
                           />
                           <span
@@ -4901,6 +4992,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
+                                style="border-left-color: var(--color-error-main);"
                               >
                                 <div
                                   class="flex flex-col gap-4"
@@ -5019,6 +5111,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
+                                style="border-left-color: var(--color-border-main);"
                               >
                                 <div
                                   class="flex flex-col gap-4"
@@ -5137,6 +5230,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
+                                style="border-left-color: var(--color-border-main);"
                               >
                                 <div
                                   class="flex flex-col gap-4"
@@ -5298,6 +5392,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
+                                style="border-left-color: var(--color-border-main);"
                               >
                                 <div
                                   class="flex flex-col gap-4"
@@ -5519,11 +5614,13 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
               <div
                 class="flex flex-row rounded-md px-4 py-2"
                 data-testid="safe-shield-status"
+                style="background-color: var(--color-error-background);"
               >
                 <span
                   class="m-0 text-xs leading-4 font-semibold uppercase"
                   data-slot="typography"
                   data-variant="paragraph-mini-bold"
+                  style="color: var(--color-error-main);"
                 >
                   Risk detected
                 </span>
@@ -5556,6 +5653,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                       >
                         <mock-icon
                           height="16"
+                          style="color: var(--color-border-main);"
                           width="16"
                         />
                         <span
@@ -5602,6 +5700,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-warning-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -5659,6 +5758,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-border-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -5692,6 +5792,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-border-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -5711,6 +5812,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-border-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -5747,6 +5849,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                       >
                         <mock-icon
                           height="16"
+                          style="color: var(--color-border-main);"
                           width="16"
                         />
                         <span
@@ -5793,6 +5896,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-border-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -5850,6 +5954,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                         >
                           <mock-icon
                             height="16"
+                            style="color: var(--color-error-main);"
                             width="16"
                           />
                           <span
@@ -5896,6 +6001,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
+                                style="border-left-color: var(--color-error-main);"
                               >
                                 <div
                                   class="flex flex-col gap-4"
@@ -5915,6 +6021,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
+                                style="border-left-color: var(--color-border-main);"
                               >
                                 <div
                                   class="flex flex-col gap-4"
@@ -5934,6 +6041,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
+                                style="border-left-color: var(--color-border-main);"
                               >
                                 <div
                                   class="flex flex-col gap-4"
@@ -5953,6 +6061,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
+                                style="border-left-color: var(--color-border-main);"
                               >
                                 <div
                                   class="flex flex-col gap-4"
@@ -6032,11 +6141,13 @@ exports[`./SafeShield.stories OverflowFindings 1`] = `
               <div
                 class="flex flex-row rounded-md px-4 py-2"
                 data-testid="safe-shield-status"
+                style="background-color: var(--color-warning-background);"
               >
                 <span
                   class="m-0 text-xs leading-4 font-semibold uppercase"
                   data-slot="typography"
                   data-variant="paragraph-mini-bold"
+                  style="color: var(--color-warning-main);"
                 >
                   Issues found
                 </span>
@@ -6069,6 +6180,7 @@ exports[`./SafeShield.stories OverflowFindings 1`] = `
                       >
                         <mock-icon
                           height="16"
+                          style="color: var(--color-warning-main);"
                           width="16"
                         />
                         <span
@@ -6115,6 +6227,7 @@ exports[`./SafeShield.stories OverflowFindings 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-warning-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -6154,6 +6267,7 @@ exports[`./SafeShield.stories OverflowFindings 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-border-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -6193,6 +6307,7 @@ exports[`./SafeShield.stories OverflowFindings 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-border-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -6291,11 +6406,13 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
               <div
                 class="flex flex-row rounded-md px-4 py-2"
                 data-testid="safe-shield-status"
+                style="background-color: var(--color-warning-background);"
               >
                 <span
                   class="m-0 text-xs leading-4 font-semibold uppercase"
                   data-slot="typography"
                   data-variant="paragraph-mini-bold"
+                  style="color: var(--color-warning-main);"
                 >
                   Issues found
                 </span>
@@ -6328,6 +6445,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
                       >
                         <mock-icon
                           height="16"
+                          style="color: var(--color-border-main);"
                           width="16"
                         />
                         <span
@@ -6374,6 +6492,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-border-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -6410,6 +6529,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
                       >
                         <mock-icon
                           height="16"
+                          style="color: var(--color-warning-main);"
                           width="16"
                         />
                         <span
@@ -6456,6 +6576,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-warning-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -6513,6 +6634,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
                         >
                           <mock-icon
                             height="16"
+                            style="color: var(--color-border-main);"
                             width="16"
                           />
                           <span
@@ -6559,6 +6681,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
+                                style="border-left-color: var(--color-border-main);"
                               >
                                 <div
                                   class="flex flex-col gap-4"
@@ -6638,11 +6761,13 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
               <div
                 class="flex flex-row rounded-md px-4 py-2"
                 data-testid="safe-shield-status"
+                style="background-color: var(--color-warning-background);"
               >
                 <span
                   class="m-0 text-xs leading-4 font-semibold uppercase"
                   data-slot="typography"
                   data-variant="paragraph-mini-bold"
+                  style="color: var(--color-warning-main);"
                 >
                   Issues found
                 </span>
@@ -6675,6 +6800,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                       >
                         <mock-icon
                           height="16"
+                          style="color: var(--color-warning-main);"
                           width="16"
                         />
                         <span
@@ -6721,6 +6847,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-warning-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -6778,6 +6905,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-border-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -6811,6 +6939,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-border-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -6830,6 +6959,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-border-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -6866,6 +6996,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                       >
                         <mock-icon
                           height="16"
+                          style="color: var(--color-warning-main);"
                           width="16"
                         />
                         <span
@@ -6912,6 +7043,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-warning-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -7032,6 +7164,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                         >
                           <mock-icon
                             height="16"
+                            style="color: var(--color-border-main);"
                             width="16"
                           />
                           <span
@@ -7078,6 +7211,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
+                                style="border-left-color: var(--color-border-main);"
                               >
                                 <div
                                   class="flex flex-col gap-4"
@@ -7157,11 +7291,13 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
               <div
                 class="flex flex-row rounded-md px-4 py-2"
                 data-testid="safe-shield-status"
+                style="background-color: var(--color-warning-background);"
               >
                 <span
                   class="m-0 text-xs leading-4 font-semibold uppercase"
                   data-slot="typography"
                   data-variant="paragraph-mini-bold"
+                  style="color: var(--color-warning-main);"
                 >
                   Issues found
                 </span>
@@ -7194,6 +7330,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
                       >
                         <mock-icon
                           height="16"
+                          style="color: var(--color-warning-main);"
                           width="16"
                         />
                         <span
@@ -7240,6 +7377,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-warning-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -7276,6 +7414,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
                       >
                         <mock-icon
                           height="16"
+                          style="color: var(--color-border-main);"
                           width="16"
                         />
                         <span
@@ -7322,6 +7461,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-border-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -7341,6 +7481,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-border-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -7398,6 +7539,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
                         >
                           <mock-icon
                             height="16"
+                            style="color: var(--color-border-main);"
                             width="16"
                           />
                           <span
@@ -7444,6 +7586,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
+                                style="border-left-color: var(--color-border-main);"
                               >
                                 <div
                                   class="flex flex-col gap-4"
@@ -7523,11 +7666,13 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
               <div
                 class="flex flex-row rounded-md px-4 py-2"
                 data-testid="safe-shield-status"
+                style="background-color: var(--color-warning-background);"
               >
                 <span
                   class="m-0 text-xs leading-4 font-semibold uppercase"
                   data-slot="typography"
                   data-variant="paragraph-mini-bold"
+                  style="color: var(--color-warning-main);"
                 >
                   Issues found
                 </span>
@@ -7560,6 +7705,7 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
                       >
                         <mock-icon
                           height="16"
+                          style="color: var(--color-warning-main);"
                           width="16"
                         />
                         <span
@@ -7606,6 +7752,7 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-warning-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -7625,6 +7772,7 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-border-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -7699,6 +7847,7 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
                       >
                         <mock-icon
                           height="16"
+                          style="color: var(--color-border-main);"
                           width="16"
                         />
                         <span
@@ -7745,6 +7894,7 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-border-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -7764,6 +7914,7 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-border-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -7842,11 +7993,13 @@ exports[`./SafeShield.stories UnverifiedContract 1`] = `
               <div
                 class="flex flex-row rounded-md px-4 py-2"
                 data-testid="safe-shield-status"
+                style="background-color: var(--color-info-background);"
               >
                 <span
                   class="m-0 text-xs leading-4 font-semibold uppercase"
                   data-slot="typography"
                   data-variant="paragraph-mini-bold"
+                  style="color: var(--color-info-main);"
                 >
                   Review details
                 </span>
@@ -7879,6 +8032,7 @@ exports[`./SafeShield.stories UnverifiedContract 1`] = `
                       >
                         <mock-icon
                           height="16"
+                          style="color: var(--color-info-main);"
                           width="16"
                         />
                         <span
@@ -7925,6 +8079,7 @@ exports[`./SafeShield.stories UnverifiedContract 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
+                              style="border-left-color: var(--color-info-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -7982,6 +8137,7 @@ exports[`./SafeShield.stories UnverifiedContract 1`] = `
                         >
                           <mock-icon
                             height="16"
+                            style="color: var(--color-border-main);"
                             width="16"
                           />
                           <span
@@ -8028,6 +8184,7 @@ exports[`./SafeShield.stories UnverifiedContract 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
+                                style="border-left-color: var(--color-border-main);"
                               >
                                 <div
                                   class="flex flex-col gap-4"

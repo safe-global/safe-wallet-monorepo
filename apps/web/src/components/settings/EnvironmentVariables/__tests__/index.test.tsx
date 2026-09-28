@@ -8,6 +8,7 @@ import EnvironmentVariables from '..'
 import { faker } from '@faker-js/faker'
 import { chainBuilder } from '@/tests/builders/chains'
 import * as analytics from '@/services/analytics'
+import { reloadPage } from '@/utils/navigation'
 
 // Mock chain data
 const mockChain = chainBuilder()
@@ -16,6 +17,8 @@ const mockChain = chainBuilder()
   .build()
 
 // Mock hooks
+jest.mock('@/utils/navigation')
+
 jest.mock('@/hooks/useChainId', () => ({
   __esModule: true,
   default: jest.fn(() => '1'),
@@ -50,9 +53,6 @@ describe('EnvironmentVariables', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    // Mock location.reload
-    delete (window as any).location
-    window.location = { reload: jest.fn() } as any
   })
 
   afterEach(() => {
@@ -191,8 +191,7 @@ describe('EnvironmentVariables', () => {
       expect(state.settings.env.tenderly.url).toBe(mockTenderlyUrl)
       expect(state.settings.env.tenderly.accessToken).toBe(mockTenderlyToken)
 
-      // Check that location.reload was called
-      expect(window.location.reload).toHaveBeenCalled()
+      expect(reloadPage).toHaveBeenCalled()
     })
   })
 

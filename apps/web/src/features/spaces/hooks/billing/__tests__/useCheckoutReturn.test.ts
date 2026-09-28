@@ -22,7 +22,10 @@ const polling = (interval: number) => expect.objectContaining({ pollingInterval:
 const active = (subscriptionStatus: string) => ({
   data: [{ id: 'sub_1', status: subscriptionStatus, plan: { name: 'Business' } }],
 })
-const session = (paymentStatus: string) => ({ data: { id: 'cs_1', paymentStatus }, isError: false })
+const session = (paymentStatus: string, status = 'complete') => ({
+  data: { id: 'cs_1', paymentStatus, status },
+  isError: false,
+})
 
 describe('useCheckoutReturn', () => {
   beforeEach(() => {
@@ -159,5 +162,52 @@ describe('useCheckoutReturn', () => {
     expect(first.result.current.status).toBe('activating')
     expect(second.result.current.status).toBe('activating')
     jest.useRealTimers()
+  })
+
+  describe('abandoned checkout (Back from Stripe)', () => {
+    it.each(['open', 'expired'])('reports canceled for an %s unpaid session and drops it from the URL', (status) => {
+      mockSessionQuery.mockReturnValue(session('unpaid', status))
+      const { result } = renderHook(() => useCheckoutReturn())
+
+      expect(result.current.status).toBe('canceled')
+      expect(mockReplace).toHaveBeenCalledTimes(1)
+      expect(mockReplace).toHaveBeenCalledWith({ pathname: '/spaces', query: { spaceId: SPACE_ID } }, undefined, {
+        shallow: true,
+      })
+    })
+
+    it('stops polling and never fetches the subscriptions', () => {
+      mockSessionQuery.mockReturnValue(session('unpaid', 'open'))
+      renderHook(() => useCheckoutReturn())
+
+      expect(mockSessionQuery).toHaveBeenLastCalledWith({ sessionId: 'cs_1' }, polling(0))
+      expect(mockSubscriptionsQuery).toHaveBeenLastCalledWith(skipToken, expect.anything())
+    })
+
+    it('never times out', () => {
+      jest.useFakeTimers()
+      mockSessionQuery.mockReturnValue(session('unpaid', 'open'))
+      const { result } = renderHook(() => useCheckoutReturn())
+
+      act(() => jest.advanceTimersByTime(60_000))
+      expect(result.current.status).toBe('canceled')
+      jest.useRealTimers()
+    })
+
+    it('drops the session id once even with several mounted instances', () => {
+      mockSessionQuery.mockReturnValue(session('unpaid', 'open'))
+      renderHook(() => useCheckoutReturn())
+      renderHook(() => useCheckoutReturn())
+
+      expect(mockReplace).toHaveBeenCalledTimes(1)
+    })
+
+    it('keeps waiting on a complete session whose payment is still pending', () => {
+      mockSessionQuery.mockReturnValue(session('unpaid', 'complete'))
+      const { result } = renderHook(() => useCheckoutReturn())
+
+      expect(result.current.status).toBe('processing')
+      expect(mockReplace).not.toHaveBeenCalled()
+    })
   })
 })

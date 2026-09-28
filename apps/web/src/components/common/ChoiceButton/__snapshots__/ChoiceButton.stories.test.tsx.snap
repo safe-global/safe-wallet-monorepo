@@ -342,6 +342,7 @@ exports[`./ChoiceButton.stories WithIconColor 1`] = `
       >
         <div
           class="iconBg"
+          style="background-color: var(--color-success-background);"
         >
           <svg
             aria-hidden="true"
@@ -352,6 +353,7 @@ exports[`./ChoiceButton.stories WithIconColor 1`] = `
             stroke-linecap="round"
             stroke-linejoin="round"
             stroke-width="2"
+            style="color: var(--color-success-main);"
             viewBox="0 0 24 24"
             width="24"
             xmlns="http://www.w3.org/2000/svg"

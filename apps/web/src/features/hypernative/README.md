@@ -151,7 +151,7 @@ services/
 Run the tests:
 
 ```bash
-npm test -- --testPathPattern="hypernativeGuardCheck|useIsHypernativeGuard"
+npm test -- --testPathPatterns="hypernativeGuardCheck|useIsHypernativeGuard"
 ```
 
 All 17 tests should pass.

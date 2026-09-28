@@ -9,7 +9,8 @@ import { selectCookieBanner } from '@/store/popupSlice'
 import { CookieAndTermType } from '@/store/cookiesAndTermsSlice'
 import { useLoadFeature } from '@/features/__core__'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
-import { useIsSafeProEnabled } from '@/features/safe-pro-announcement'
+import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement'
+import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 
 const mockSupportChatDrawer = jest.fn()
 
@@ -30,6 +31,10 @@ jest.mock('@/hooks/useIsOfficialHost', () => ({
 }))
 
 jest.mock('@/features/safe-pro-announcement', () => ({
+  useIsSafeProAnnouncementEnabled: jest.fn(),
+}))
+
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({
   useIsSafeProEnabled: jest.fn(),
 }))
 
@@ -60,7 +65,8 @@ describe('AboutPage', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     setSupportFeature({ disabled: false, isOfficialHost: true })
-    ;(useIsSafeProEnabled as jest.Mock).mockReturnValue(true)
+    ;(useIsSafeProAnnouncementEnabled as jest.Mock).mockReturnValue(true)
+    ;(useIsSafeProEnabled as jest.Mock).mockReturnValue(false)
   })
 
   describe('legal links', () => {
@@ -129,7 +135,17 @@ describe('AboutPage', () => {
       expect(third).toHaveTextContent(/^Terms & Conditions/)
     })
 
-    it('leaves the Safe Pro terms out while Safe Pro is not announced', () => {
+    it('keeps the Safe Pro terms once Safe Pro is live without the announcement', () => {
+      ;(useIsSafeProAnnouncementEnabled as jest.Mock).mockReturnValue(false)
+      ;(useIsSafeProEnabled as jest.Mock).mockReturnValue(true)
+      renderWithStore()
+
+      expect(screen.getByRole('link', { name: /^Pro User Terms & Conditions/i })).toBeInTheDocument()
+      expect(screen.getByRole('link', { name: /^Pro Terms & Conditions/i })).toBeInTheDocument()
+    })
+
+    it('leaves the Safe Pro terms out while Safe Pro is neither announced nor live', () => {
+      ;(useIsSafeProAnnouncementEnabled as jest.Mock).mockReturnValue(false)
       ;(useIsSafeProEnabled as jest.Mock).mockReturnValue(false)
       renderWithStore()
 
