@@ -16,10 +16,7 @@ const txId = 'multisig_0x0000000000000000000000000000000000000456_0xabc'
 
 describe('ConfirmProposedTx under a SafeScope', () => {
   it('loads the existing transaction on the scope chain, not the URL chain', async () => {
-    Object.defineProperty(window, 'location', {
-      writable: true,
-      value: { pathname: '/spaces/policies', search: `?safe=${urlSafe}` },
-    })
+    window.history.replaceState(null, '', `/spaces/policies?safe=${urlSafe}`)
 
     render(
       <SafeScopeContext.Provider

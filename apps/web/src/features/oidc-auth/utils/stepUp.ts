@@ -1,4 +1,5 @@
 import { GATEWAY_URL } from '@/config/gateway'
+import { navigateTo } from '@/utils/navigation'
 
 const AUTHORIZE_PATH = '/v1/auth/oidc/authorize'
 
@@ -15,5 +16,5 @@ export const startStepUp = (redirectUrl?: string): void => {
 
   // Not RTK Query: this endpoint answers with a redirect to Auth0's own HTML
   // pages, which `fetch` would follow and then fail to parse as JSON.
-  window.location.href = url.toString()
+  navigateTo(url.toString())
 }

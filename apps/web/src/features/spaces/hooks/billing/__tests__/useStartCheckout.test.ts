@@ -1,4 +1,5 @@
 import { renderHook, act } from '@testing-library/react'
+import { navigateTo } from '@/utils/navigation'
 import { useStartCheckout } from '../useStartCheckout'
 
 const mockTrigger = jest.fn()
@@ -7,16 +8,14 @@ const mockBillingSpaceId = jest.fn<string | null, []>()
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/billing', () => ({
   useLazyBillingGetCheckoutUrlV1Query: () => [mockTrigger, { isFetching: false, isError: false }],
 }))
+jest.mock('@/utils/navigation')
 jest.mock('../useBillingSpaceId', () => ({ useBillingSpaceId: () => mockBillingSpaceId() }))
 
 const SPACE_ID = '11111111-1111-1111-1111-111111111111'
 
 describe('useStartCheckout', () => {
-  const assign = jest.fn()
-
   beforeEach(() => {
     jest.clearAllMocks()
-    Object.defineProperty(window, 'location', { value: { ...window.location, assign }, writable: true })
   })
 
   it('requests the checkout URL with the Home return URL and redirects to it', async () => {
@@ -31,7 +30,7 @@ describe('useStartCheckout', () => {
       paymentLinkId: 'pl_business_10',
       returnUrl: expect.stringContaining(`/spaces?spaceId=${SPACE_ID}&sessionId={CHECKOUT_SESSION_ID}`),
     })
-    expect(assign).toHaveBeenCalledWith('https://checkout.stripe.com/cs_1')
+    expect(navigateTo).toHaveBeenCalledWith('https://checkout.stripe.com/cs_1')
   })
 
   it('returns to the onboarding when a flow asks for it', async () => {
@@ -58,6 +57,6 @@ describe('useStartCheckout', () => {
     mockTrigger.mockResolvedValue({ error: { status: 403 } })
     const failing = renderHook(() => useStartCheckout())
     await act(() => failing.result.current.startCheckout('pl_business_10'))
-    expect(assign).not.toHaveBeenCalled()
+    expect(navigateTo).not.toHaveBeenCalled()
   })
 })
