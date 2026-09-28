@@ -10,7 +10,8 @@ import { List, ListItem, ListItemText } from '@/components/ui/list'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Typography } from '@/components/ui/typography'
-import { SAFE_PRO_ANNOUNCEMENT_URL, SUPPORT_CHAT_URL } from '@/config/constants'
+import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
+import { CONTACT_SALES_FORM_URL, openContactSalesForm } from '../../utils/pylonForm'
 import { cn } from '@/utils/cn'
 import { formatPlanPrice, getPlanCta, priceSuffix } from './planTiers'
 import type { CurrentPlan, PlanPick, PlanSeatOption, PlanTier } from './types'
@@ -91,7 +92,9 @@ const PlanCta = ({
           size="lg"
           weight="semibold"
           className="w-full"
-          render={<a href={SUPPORT_CHAT_URL} target="_blank" rel="noopener noreferrer" />}
+          render={
+            <a href={CONTACT_SALES_FORM_URL} target="_blank" rel="noopener noreferrer" onClick={openContactSalesForm} />
+          }
         >
           {cta.label}
         </Button>
@@ -218,7 +221,13 @@ export const PlanCard = ({
                   {hint && (
                     <Typography variant="paragraph-mini" color="muted">
                       {hint}{' '}
-                      <Link href={SUPPORT_CHAT_URL} target="_blank" rel="noopener noreferrer" variant="muted">
+                      <Link
+                        href={CONTACT_SALES_FORM_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        variant="muted"
+                        onClick={openContactSalesForm}
+                      >
                         Talk to sales <ArrowRight className="inline size-3" />
                       </Link>
                     </Typography>

@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
-import { SUPPORT_CHAT_URL } from '@/config/constants'
+import { CONTACT_SALES_FORM_URL } from '../../../utils/pylonForm'
 import TrialEndingModal, { _endsIn } from '../TrialEndingModal'
 
 const mockUseSpacePlan = jest.fn()
@@ -159,7 +159,7 @@ describe('TrialEndingModal', () => {
     expect(screen.getByText(/add a payment method by Dec 5, 2026, your Workspace will be locked/)).toBeInTheDocument()
     expect(screen.queryByText('Enterprise')).not.toBeInTheDocument()
     expect(screen.getByText('Need more than 20?')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Talk to sales/ })).toHaveAttribute('href', SUPPORT_CHAT_URL)
+    expect(screen.getByRole('link', { name: /Talk to sales/ })).toHaveAttribute('href', CONTACT_SALES_FORM_URL)
 
     fireEvent.click(screen.getByRole('button', { name: 'Add payment method' }))
     expect(mockOpenPortal).toHaveBeenCalled()
