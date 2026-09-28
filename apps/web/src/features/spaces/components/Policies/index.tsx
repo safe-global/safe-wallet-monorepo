@@ -13,11 +13,23 @@ import ProposerIntroDialog from './ProposerIntroDialog'
 import { PROPOSER_INTRO_SEEN_KEY } from './ProposerIntroDialog/constants'
 import ProposerDetails from './ProposerDetails'
 import ProposerRoleFlow from './ProposerRoleFlow'
+import SpendingLimitDetails from './SpendingLimitDetails'
 import SpendingLimitFlow from './SpendingLimitFlow'
 import SpendingLimitIntroDialog from './SpendingLimitIntroDialog'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from './SpendingLimitIntroDialog/constants'
 import { REQUEST_POLICY_FORM_HEIGHT, REQUEST_POLICY_FORM_URL, REQUEST_POLICY_FORM_WIDTH } from './constants'
-import { isProposerPolicy, type Policy, type Proposer, type ProposerPolicy } from './types'
+import {
+  isActiveSpendingLimitPolicy,
+  isProposerPolicy,
+  type Policy,
+  type Proposer,
+  type ProposerPolicy,
+  type SpendingLimitPolicy,
+} from './types'
+
+type OpenPolicyDetails =
+  | { type: 'proposer'; policy: ProposerPolicy; proposer: Proposer }
+  | { type: 'spending-limit'; policy: SpendingLimitPolicy & { status: 'active' } }
 
 interface PoliciesProps {
   /** Supplied by the caller. The page does not fetch. */
@@ -62,14 +74,20 @@ const Policies = ({
   const [hasSeenProposerIntro = false, setHasSeenProposerIntro] = useLocalStorage<boolean>(PROPOSER_INTRO_SEEN_KEY)
   const [isProposerIntroOpen, setIsProposerIntroOpen] = useState(false)
   const [isAddPolicyOpen, setIsAddPolicyOpen] = useState(false)
-  const [openProposer, setOpenProposer] = useState<{ policy: ProposerPolicy; proposer: Proposer } | null>(null)
+  // One slot, so opening another row swaps the panel instead of stacking a second one.
+  const [openDetails, setOpenDetails] = useState<OpenPolicyDetails | null>(null)
 
   const openPolicy = useCallback((policy: Policy) => {
-    if (!isProposerPolicy(policy)) return
+    if (isProposerPolicy(policy)) {
+      const [proposer] = policy.data.proposers
+      if (proposer) setOpenDetails({ type: 'proposer', policy, proposer })
+      return
+    }
 
-    const [proposer] = policy.data.proposers
-    if (proposer) setOpenProposer({ policy, proposer })
+    if (isActiveSpendingLimitPolicy(policy)) setOpenDetails({ type: 'spending-limit', policy })
   }, [])
+
+  const closeDetails = useCallback(() => setOpenDetails(null), [])
 
   const startSpendingLimitFlow = useCallback(() => setTxFlow(<SpendingLimitFlow />), [setTxFlow])
 
@@ -195,7 +213,13 @@ const Policies = ({
         onProceed={proceedToProposerFlow}
       />
 
-      {openProposer && <ProposerDetails {...openProposer} onClose={() => setOpenProposer(null)} />}
+      {openDetails?.type === 'proposer' && (
+        <ProposerDetails policy={openDetails.policy} proposer={openDetails.proposer} onClose={closeDetails} />
+      )}
+
+      {openDetails?.type === 'spending-limit' && (
+        <SpendingLimitDetails policy={openDetails.policy} onClose={closeDetails} />
+      )}
     </div>
   )
 }

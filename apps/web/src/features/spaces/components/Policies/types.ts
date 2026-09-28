@@ -135,6 +135,9 @@ export const isPendingPolicy = (policy: Policy): policy is PendingPolicy => poli
 export const hasSpendingLimitData = (policy: Policy): policy is Extract<Policy, { type: 'spending-limit' }> =>
   policy.type === 'spending-limit'
 
+export const isActiveSpendingLimitPolicy = (policy: Policy): policy is SpendingLimitPolicy & { status: 'active' } =>
+  policy.type === 'spending-limit' && policy.status === 'active'
+
 export const isProposerPolicy = (policy: Policy): policy is ProposerPolicy & { status: 'active' } =>
   policy.type === 'proposer'
 

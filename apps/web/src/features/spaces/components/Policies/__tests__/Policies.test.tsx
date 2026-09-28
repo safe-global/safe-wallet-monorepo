@@ -6,7 +6,7 @@ import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { PROPOSER_INTRO_SEEN_KEY } from '../ProposerIntroDialog/constants'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from '../SpendingLimitIntroDialog/constants'
 import useWallet from '@/hooks/wallets/useWallet'
-import { asActivePolicy, mockPolicies, mockProposerPolicy } from '../mocks/policies'
+import { asActivePolicy, mockActiveSpendingLimit, mockPolicies, mockProposerPolicy } from '../mocks/policies'
 import ProposerRoleFlow from '../ProposerRoleFlow'
 import Policies from '../index'
 import SpendingLimitFlow from '../SpendingLimitFlow'
@@ -458,6 +458,27 @@ describe('Policies', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Open Proposer for 0x8675...a19b' }))
 
       expect(screen.getByText('Proposer role')).toBeInTheDocument()
+    })
+
+    it('should, when a spending limit row is clicked, open its side panel', () => {
+      render(<Policies policies={[mockActiveSpendingLimit()]} />)
+      fireEvent.click(screen.getByRole('button', { name: /^Open Spending limit/ }))
+
+      expect(screen.getByRole('dialog', { name: 'Spending limit' })).toBeInTheDocument()
+    })
+
+    it('should hold one open panel at a time, so a second row replaces the first', () => {
+      render(<Policies policies={[asActivePolicy(mockProposerPolicy()), mockActiveSpendingLimit()]} />)
+      const [proposerRow, spendingLimitRow] = screen.getAllByTestId('policy-open-button')
+
+      fireEvent.click(proposerRow)
+      expect(screen.getByRole('dialog', { name: 'Proposer role' })).toBeInTheDocument()
+
+      // The open drawer makes the row behind it inert, so the click goes to the element itself.
+      fireEvent.click(spendingLimitRow)
+
+      expect(screen.getByRole('dialog', { name: 'Spending limit' })).toBeInTheDocument()
+      expect(screen.queryByRole('dialog', { name: 'Proposer role' })).not.toBeInTheDocument()
     })
 
     it('should, when a table row is clicked, report the policy it belongs to', () => {
