@@ -16,7 +16,7 @@ import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import Track from '@/components/common/Track'
 import { trackEvent } from '@/services/analytics'
 import { MyAccountsFeature, useSpaceAccountsData } from '@/features/myAccounts'
-import { SafeProFeature, useIsSafeProEnabled, useSafeProAnnouncement } from '@/features/safe-pro-announcement'
+import { SafeProFeature, useSafeProAnnouncementModal } from '@/features/safe-pro-announcement'
 import { useLoadFeature } from '@/features/__core__'
 import AddAccountsChooser from '../AddAccountsChooser'
 import { useRouter } from 'next/router'
@@ -59,11 +59,10 @@ const SpaceDashboard = () => {
   const isSetupDismissedForSpace = spaceId ? (dismissedSpaces[spaceId] ?? 0) > Date.now() : false
   useTrackSpace(safes, activeMembers)
   const router = useRouter()
-  const isSafeProEnabled = useIsSafeProEnabled()
   // The lock modal is mounted by AuthState; the announcement must wait until the lock is known so both never stack.
   const { isLocked, isResolving: isResolvingPlan } = useWorkspaceLock()
-  const { isOpen: isAnnouncementOpen, setIsOpen: setIsAnnouncementOpen } = useSafeProAnnouncement(
-    isSafeProEnabled && !isLocked && !isResolvingPlan && Boolean(spaceId) && !isInvited,
+  const { isOpen: isAnnouncementOpen, setIsOpen: setIsAnnouncementOpen } = useSafeProAnnouncementModal(
+    !isLocked && !isResolvingPlan && Boolean(spaceId) && !isInvited,
   )
 
   useEffect(() => {
@@ -124,7 +123,7 @@ const SpaceDashboard = () => {
 
   return (
     <>
-      {isSafeProEnabled && <SafeProAnnouncementModal open={isAnnouncementOpen} onOpenChange={setIsAnnouncementOpen} />}
+      <SafeProAnnouncementModal open={isAnnouncementOpen} onOpenChange={setIsAnnouncementOpen} />
       {checkoutModal}
 
       {isInvited && <PreviewInvite />}

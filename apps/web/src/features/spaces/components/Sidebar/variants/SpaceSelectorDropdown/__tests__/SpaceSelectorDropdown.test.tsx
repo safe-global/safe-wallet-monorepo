@@ -77,8 +77,8 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
   useSafeAddressFromUrl: () => mockSafeAddressFromUrl,
 }))
 
-const mockUseHasFeature = jest.fn()
-jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
+const mockUseIsSafeProEnabled = jest.fn()
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockUseIsSafeProEnabled() }))
 jest.mock('@/public/images/safe-pro/pro-chip.svg', () => 'svg')
 const mockPlans: {
   tierName: string
@@ -1125,7 +1125,7 @@ describe('SpaceSelectorDropdown', () => {
     ])(
       'SAFE_PRO=%s isTrialing=%s daysLeft=%s → "%s", warning=%s',
       (isSafePro, isTrialing, daysLeft, label, isWarning) => {
-        mockUseHasFeature.mockReturnValue(isSafePro)
+        mockUseIsSafeProEnabled.mockReturnValue(isSafePro)
         mockPlans.isTrialing = isTrialing
         mockPlans.isTrialEndingSoon = isTrialing && daysLeft !== null && daysLeft <= 7
         mockPlans.plan = daysLeft === null && !isTrialing ? null : { daysLeft }
