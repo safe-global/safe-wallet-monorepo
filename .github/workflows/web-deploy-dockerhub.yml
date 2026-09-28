@@ -58,7 +58,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Deploy Main
         if: github.ref == 'refs/heads/main'
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           push: true
           tags: |
@@ -71,7 +71,7 @@ jobs:
           cache-to: type=gha,mode=max
       - name: Deploy Develop
         if: github.ref == 'refs/heads/dev'
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           push: true
           tags: |
@@ -91,7 +91,7 @@ jobs:
           echo "tag=${RAW_TAG#web-}" >> $GITHUB_OUTPUT
       - name: Deploy Tag
         if: (github.event_name == 'release' && github.event.action == 'released') || github.event_name == 'workflow_dispatch'
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           push: true
           tags: |
