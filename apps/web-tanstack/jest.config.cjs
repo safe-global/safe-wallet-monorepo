@@ -28,6 +28,9 @@ module.exports = {
     '^next/app$': '<rootDir>/src/compat/next-app.ts',
     '^next/navigation$': '<rootDir>/src/compat/next-navigation.tsx',
     '^next/dist/client/resolve-href$': '<rootDir>/src/compat/next-resolve-href.ts',
+    // Jest 30's resolver always matches the "node" export condition, which picks TanStack's server build
+    '^@tanstack/router-core/isServer$':
+      '<rootDir>/../../node_modules/@tanstack/router-core/dist/cjs/isServer/client.cjs',
   },
   testMatch: ['<rootDir>/src/**/*.(spec|test).[jt]s?(x)'],
   // Coverage: collect from app source only (preset targets packages/**)

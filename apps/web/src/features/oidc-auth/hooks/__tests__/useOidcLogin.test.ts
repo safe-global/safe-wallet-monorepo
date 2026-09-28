@@ -1,26 +1,21 @@
+/**
+ * @jest-environment-options {"url": "https://app.safe.global/welcome/spaces"}
+ */
 import { renderHook, act } from '@testing-library/react'
 import { GATEWAY_URL } from '@/config/gateway'
+import { navigateTo } from '@/utils/navigation'
 import { useOidcLogin } from '../useOidcLogin'
 import { OIDC_AUTH_PENDING_KEY, OidcConnection } from '../../constants'
 
-describe('useOidcLogin', () => {
-  const originalLocation = window.location
+jest.mock('@/utils/navigation')
 
+const redirectedUrl = () => new URL(jest.mocked(navigateTo).mock.lastCall?.[0] ?? '')
+
+describe('useOidcLogin', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     sessionStorage.clear()
-
-    Object.defineProperty(window, 'location', {
-      writable: true,
-      value: { ...originalLocation, href: 'https://app.safe.global/welcome/spaces' },
-    })
-  })
-
-  afterEach(() => {
-    Object.defineProperty(window, 'location', {
-      writable: true,
-      value: originalLocation,
-    })
+    window.history.replaceState(null, '', '/welcome/spaces')
   })
 
   it('should set sessionStorage flag on loginWithRedirect', () => {
@@ -40,7 +35,7 @@ describe('useOidcLogin', () => {
       result.current.loginWithRedirect(OidcConnection.EMAIL)
     })
 
-    const redirectUrl = new URL(window.location.href)
+    const redirectUrl = redirectedUrl()
     expect(redirectUrl.origin + redirectUrl.pathname).toBe(`${GATEWAY_URL}/v1/auth/oidc/authorize`)
     expect(redirectUrl.searchParams.get('redirect_url')).toBe('https://app.safe.global/welcome/spaces')
     expect(redirectUrl.searchParams.get('connection')).toBe(OidcConnection.EMAIL)
@@ -53,7 +48,7 @@ describe('useOidcLogin', () => {
       result.current.loginWithRedirect(OidcConnection.GOOGLE)
     })
 
-    const redirectUrl = new URL(window.location.href)
+    const redirectUrl = redirectedUrl()
     expect(redirectUrl.searchParams.get('connection')).toBe(OidcConnection.GOOGLE)
   })
 
@@ -65,19 +60,19 @@ describe('useOidcLogin', () => {
       result.current.loginWithRedirect(OidcConnection.EMAIL, customUrl)
     })
 
-    const redirectUrl = new URL(window.location.href)
+    const redirectUrl = redirectedUrl()
     expect(redirectUrl.searchParams.get('redirect_url')).toBe(customUrl)
   })
 
   it('should strip stale error param from redirect_url', () => {
-    window.location.href = 'https://app.safe.global/welcome/spaces?error=previous_failure&chain=eth'
+    window.history.replaceState(null, '', '/welcome/spaces?error=previous_failure&chain=eth')
     const { result } = renderHook(() => useOidcLogin())
 
     act(() => {
       result.current.loginWithRedirect(OidcConnection.EMAIL)
     })
 
-    const redirectUrl = new URL(window.location.href)
+    const redirectUrl = redirectedUrl()
     const returnUrl = redirectUrl.searchParams.get('redirect_url')!
 
     expect(returnUrl).not.toContain('error=')

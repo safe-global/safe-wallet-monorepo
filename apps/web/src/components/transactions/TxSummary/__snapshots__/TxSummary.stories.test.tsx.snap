@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./TxSummary.stories AllTypesStacked 1`] = `
 <div
@@ -6160,6 +6160,7 @@ exports[`./TxSummary.stories AllTypesStackedHistory 1`] = `
                   <span
                     class="flex items-center gap-2 text-xs font-bold"
                     data-testid="tx-status-label"
+                    style="color: var(--color-success-main);"
                   >
                     Success
                   </span>
@@ -6306,6 +6307,7 @@ exports[`./TxSummary.stories AllTypesStackedHistory 1`] = `
                   <span
                     class="flex items-center gap-2 text-xs font-bold"
                     data-testid="tx-status-label"
+                    style="color: var(--color-success-main);"
                   >
                     Success
                   </span>
@@ -6504,6 +6506,7 @@ exports[`./TxSummary.stories AllTypesStackedHistory 1`] = `
                   <span
                     class="flex items-center gap-2 text-xs font-bold"
                     data-testid="tx-status-label"
+                    style="color: var(--color-success-main);"
                   >
                     Success
                   </span>
@@ -6621,6 +6624,7 @@ exports[`./TxSummary.stories AllTypesStackedHistory 1`] = `
                   <span
                     class="flex items-center gap-2 text-xs font-bold"
                     data-testid="tx-status-label"
+                    style="color: var(--color-success-main);"
                   >
                     Success
                   </span>
@@ -6735,6 +6739,7 @@ exports[`./TxSummary.stories AllTypesStackedHistory 1`] = `
                   <span
                     class="flex items-center gap-2 text-xs font-bold"
                     data-testid="tx-status-label"
+                    style="color: var(--color-success-main);"
                   >
                     Success
                   </span>
@@ -7226,6 +7231,7 @@ exports[`./TxSummary.stories HistorySendNativeToken 1`] = `
                 <span
                   class="flex items-center gap-2 text-xs font-bold"
                   data-testid="tx-status-label"
+                  style="color: var(--color-success-main);"
                 >
                   Success
                 </span>
@@ -7441,6 +7447,7 @@ exports[`./TxSummary.stories HistorySwapOrder 1`] = `
                 <span
                   class="flex items-center gap-2 text-xs font-bold"
                   data-testid="tx-status-label"
+                  style="color: var(--color-success-main);"
                 >
                   Success
                 </span>

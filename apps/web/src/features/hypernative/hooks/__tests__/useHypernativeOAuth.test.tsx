@@ -1,3 +1,6 @@
+/**
+ * @jest-environment-options {"url": "http://localhost:3000/"}
+ */
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { useHypernativeOAuth } from '../useHypernativeOAuth'
 import { setAuthCookie, clearAuthCookie } from '../../store/cookieStorage'
@@ -138,15 +141,6 @@ describe('useHypernativeOAuth', () => {
         subtle: {
           digest: mockDigest,
         },
-      },
-      writable: true,
-    })
-
-    // Setup window.location
-    Object.defineProperty(window, 'location', {
-      value: {
-        origin: 'http://localhost:3000',
-        protocol: 'http:',
       },
       writable: true,
     })

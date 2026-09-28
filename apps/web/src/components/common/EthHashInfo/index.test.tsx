@@ -160,19 +160,21 @@ describe('EthHashInfo', () => {
     it('renders an avatar by default', () => {
       const { container } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} />)
 
-      expect(container.querySelector('.icon')).toHaveAttribute(
-        'style',
-        `background-image: url(${blo(MOCK_SAFE_ADDRESS)}); width: 40px; height: 40px;`,
-      )
+      expect(container.querySelector('.icon')).toHaveStyle({
+        backgroundImage: `url(${blo(MOCK_SAFE_ADDRESS)})`,
+        width: '40px',
+        height: '40px',
+      })
     })
 
     it('allows for sizing of avatars', () => {
       const { container } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} avatarSize={100} />)
 
-      expect(container.querySelector('.icon')).toHaveAttribute(
-        'style',
-        `background-image: url(${blo(MOCK_SAFE_ADDRESS)}); width: 100px; height: 100px;`,
-      )
+      expect(container.querySelector('.icon')).toHaveStyle({
+        backgroundImage: `url(${blo(MOCK_SAFE_ADDRESS)})`,
+        width: '100px',
+        height: '100px',
+      })
     })
 
     it('renders a custom avatar', () => {
