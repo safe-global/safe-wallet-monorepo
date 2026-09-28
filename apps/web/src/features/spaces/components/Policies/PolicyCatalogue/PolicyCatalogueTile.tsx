@@ -13,11 +13,22 @@ export interface PolicyCatalogueTileProps {
   Icon: LucideIcon
   action: string
   onClick: () => void
-  /** Renders the plan-gated tile: greyed out, with an account counter next to the icon. */
-  locked?: PolicyAccountCount
+  /** Renders the plan-gated tile: greyed out, with a lock on the button. */
+  locked?: boolean
+  /** Shown next to the icon of a locked tile. */
+  accountCount?: PolicyAccountCount
 }
 
-const PolicyCatalogueTile = ({ id, title, description, Icon, action, onClick, locked }: PolicyCatalogueTileProps) => (
+const PolicyCatalogueTile = ({
+  id,
+  title,
+  description,
+  Icon,
+  action,
+  onClick,
+  locked,
+  accountCount,
+}: PolicyCatalogueTileProps) => (
   <div data-testid={`policy-catalogue-tile-${id}`} className="flex h-full flex-col gap-3 rounded-xl bg-card p-4">
     <div className={cn('flex flex-1 flex-col gap-2', locked && 'opacity-80')}>
       <div className="flex items-start justify-between gap-2">
@@ -25,9 +36,9 @@ const PolicyCatalogueTile = ({ id, title, description, Icon, action, onClick, lo
           <Icon className="size-4 text-muted-foreground" />
         </div>
 
-        {locked && (
+        {locked && accountCount && (
           <Badge variant="subtle" size="status" shape="pill" data-testid="policy-account-count">
-            {locked.applied} / {locked.total} Accounts
+            {accountCount.applied} / {accountCount.total} Accounts
           </Badge>
         )}
       </div>

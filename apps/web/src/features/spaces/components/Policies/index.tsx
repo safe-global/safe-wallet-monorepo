@@ -30,7 +30,7 @@ interface PoliciesProps {
   /** The populated mode's `Add policy` button. Without it the button opens the add policy dialog. */
   onAddPolicy?: () => void
   onSelectPolicy?: (policy: Policy) => void
-  /** Set when the workspace's plan does not include policies: the banner shows and every tile leads to the upgrade. */
+  /** Set when the plan does not include some policies: the banner shows and setting one up leads to the upgrade. */
   locked?: PolicyLock
 }
 
@@ -46,8 +46,8 @@ const openRequestPolicyForm = () => {
  * The page has two modes. With no policies it shows the catalogue of policies that can be set up.
  * With policies it shows the list of policies already set up. Revoking the last policy removes it
  * from the CGW response, so the page returns to the catalogue. While the response is pending or
- * failed, only the heading stays and the body is the load state. A plan without policies shows the
- * upgrade banner and the gated catalogue instead of either.
+ * failed, only the heading stays and the body is the load state. A plan without some policies shows the
+ * upgrade banner above either mode, and the catalogue loses its suggestion tile.
  */
 const Policies = ({
   policies = [],
@@ -136,9 +136,15 @@ const Policies = ({
   const selectFromAddPolicyDialog = useCallback(
     (id: AddPolicyId) => {
       setIsAddPolicyOpen(false)
+
+      if (locked?.lockedPolicies.some((lockedId) => lockedId === id)) {
+        locked.onUpgrade()
+        return
+      }
+
       handleSelect(id)
     },
-    [handleSelect],
+    [handleSelect, locked],
   )
 
   const closeProposerIntro = useCallback(() => {
@@ -173,21 +179,24 @@ const Policies = ({
         <PoliciesLoading />
       ) : isError ? (
         <PoliciesLoadError onReload={onRetry} />
-      ) : locked ? (
-        <>
-          <div className="mb-4">
-            <PolicyUpsellBanner {...locked} />
-          </div>
-          <PolicyCatalogue onSelect={handleSelect} locked={locked} />
-        </>
-      ) : policies.length > 0 ? (
-        <PoliciesList
-          policies={policies}
-          onAddPolicy={onAddPolicy ?? (() => setIsAddPolicyOpen(true))}
-          onSelectPolicy={onSelectPolicy ?? openPolicy}
-        />
       ) : (
-        <PolicyCatalogue onSelect={handleSelect} />
+        <>
+          {locked && (
+            <div className="mb-4">
+              <PolicyUpsellBanner {...locked} />
+            </div>
+          )}
+
+          {policies.length > 0 ? (
+            <PoliciesList
+              policies={policies}
+              onAddPolicy={onAddPolicy ?? (() => setIsAddPolicyOpen(true))}
+              onSelectPolicy={onSelectPolicy ?? openPolicy}
+            />
+          ) : (
+            <PolicyCatalogue onSelect={handleSelect} locked={locked} />
+          )}
+        </>
       )}
 
       <AddPolicyDialog open={isAddPolicyOpen} onOpenChange={setIsAddPolicyOpen} onSelect={selectFromAddPolicyDialog} />

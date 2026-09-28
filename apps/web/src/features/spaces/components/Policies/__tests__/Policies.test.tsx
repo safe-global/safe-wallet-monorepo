@@ -537,5 +537,42 @@ describe('Policies', () => {
       expect(onUpgrade).toHaveBeenCalledTimes(1)
       expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument()
     })
+
+    it('should, when the workspace has policies, keep listing them under the banner', () => {
+      render(<Policies policies={mockPolicies()} locked={{ ...mockStarterPlan, onUpgrade: jest.fn() }} />)
+
+      expect(screen.getByTestId('policy-upsell-banner')).toBeInTheDocument()
+      expect(screen.getByTestId('policies-list')).toBeInTheDocument()
+      expect(screen.queryByTestId('policy-catalogue')).not.toBeInTheDocument()
+    })
+
+    it('should, when a locked policy is picked in the add policy dialog, call onUpgrade and open no intro dialog', async () => {
+      const onUpgrade = jest.fn()
+      const { user } = renderWithUserEvent(
+        <Policies policies={mockPolicies()} locked={{ ...mockStarterPlan, onUpgrade }} />,
+      )
+
+      await user.click(screen.getByTestId('add-policy-button'))
+      await user.click(screen.getByTestId('add-policy-option-proposer'))
+
+      expect(onUpgrade).toHaveBeenCalledTimes(1)
+      expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument()
+    })
+
+    it('should, when a policy the plan includes is picked in the add policy dialog, open its intro dialog', async () => {
+      const onUpgrade = jest.fn()
+      const { user } = renderWithUserEvent(
+        <Policies
+          policies={mockPolicies()}
+          locked={{ ...mockStarterPlan, lockedPolicies: ['spending-limit'], onUpgrade }}
+        />,
+      )
+
+      await user.click(screen.getByTestId('add-policy-button'))
+      await user.click(screen.getByTestId('add-policy-option-proposer'))
+
+      expect(await screen.findByTestId('proposer-intro-dialog')).toBeInTheDocument()
+      expect(onUpgrade).not.toHaveBeenCalled()
+    })
   })
 })

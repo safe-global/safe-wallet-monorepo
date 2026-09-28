@@ -35,6 +35,6 @@ export const Default: Story = {
 export const Locked: Story = {
   args: {
     onSelect: fn(),
-    locked: { accountCounts: mockStarterPlan.accountCounts, onUpgrade: fn() },
+    locked: { ...mockStarterPlan, onUpgrade: fn() },
   },
 }

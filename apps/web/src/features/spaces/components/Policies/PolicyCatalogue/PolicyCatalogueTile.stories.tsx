@@ -51,7 +51,8 @@ export const Suggestion: Story = {
 export const Locked: Story = {
   args: {
     ...Default.args,
-    locked: { applied: 0, total: 6 },
+    locked: true,
+    accountCount: { applied: 0, total: 6 },
     onClick: fn(),
   },
 }

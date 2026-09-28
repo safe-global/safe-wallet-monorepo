@@ -74,7 +74,7 @@ describe('PolicyCatalogue', () => {
   })
 
   it('should, when locked, render a counter and a Set policy button on each policy tile', () => {
-    render(<PolicyCatalogue locked={{ accountCounts: mockStarterPlan.accountCounts, onUpgrade: jest.fn() }} />)
+    render(<PolicyCatalogue locked={{ ...mockStarterPlan, onUpgrade: jest.fn() }} />)
 
     expect(screen.getAllByTestId('policy-account-count')).toHaveLength(2)
     expect(screen.getByRole('button', { name: 'Set policy: Spending limit' })).toBeInTheDocument()
@@ -82,7 +82,7 @@ describe('PolicyCatalogue', () => {
   })
 
   it('should, when locked, render no Something missing? tile', () => {
-    render(<PolicyCatalogue locked={{ accountCounts: mockStarterPlan.accountCounts, onUpgrade: jest.fn() }} />)
+    render(<PolicyCatalogue locked={{ ...mockStarterPlan, onUpgrade: jest.fn() }} />)
 
     expect(screen.queryByTestId('policy-catalogue-tile-suggestion')).not.toBeInTheDocument()
     expect(screen.queryByText('Something missing?')).not.toBeInTheDocument()
@@ -92,7 +92,7 @@ describe('PolicyCatalogue', () => {
     const onUpgrade = jest.fn()
     const onSelect = jest.fn()
     const { user } = renderWithUserEvent(
-      <PolicyCatalogue onSelect={onSelect} locked={{ accountCounts: mockStarterPlan.accountCounts, onUpgrade }} />,
+      <PolicyCatalogue onSelect={onSelect} locked={{ ...mockStarterPlan, onUpgrade }} />,
     )
 
     await user.click(within(screen.getByTestId('policy-catalogue-tile-proposer')).getByRole('button'))
@@ -102,9 +102,7 @@ describe('PolicyCatalogue', () => {
   })
 
   it('should, when a locked tile is clicked, still track the click', async () => {
-    const { user } = renderWithUserEvent(
-      <PolicyCatalogue locked={{ accountCounts: mockStarterPlan.accountCounts, onUpgrade: jest.fn() }} />,
-    )
+    const { user } = renderWithUserEvent(<PolicyCatalogue locked={{ ...mockStarterPlan, onUpgrade: jest.fn() }} />)
 
     await user.click(within(screen.getByTestId('policy-catalogue-tile-spending-limit')).getByRole('button'))
 
@@ -112,5 +110,26 @@ describe('PolicyCatalogue', () => {
       { ...POLICY_EVENTS.POLICY_CATALOGUE_TILE_CLICKED, label: 'spending-limit' },
       { [MixpanelEventParams.POLICY_TYPE]: 'spending-limit' },
     )
+  })
+
+  it('should, when only the proposer is locked, open the spending limit and lead the proposer to the upgrade', async () => {
+    const onUpgrade = jest.fn()
+    const onSelect = jest.fn()
+    const { user } = renderWithUserEvent(
+      <PolicyCatalogue onSelect={onSelect} locked={{ ...mockStarterPlan, lockedPolicies: ['proposer'], onUpgrade }} />,
+    )
+
+    await user.click(within(screen.getByTestId('policy-catalogue-tile-spending-limit')).getByRole('button'))
+    await user.click(within(screen.getByTestId('policy-catalogue-tile-proposer')).getByRole('button'))
+
+    expect(onSelect).toHaveBeenCalledWith('spending-limit')
+    expect(onSelect).toHaveBeenCalledTimes(1)
+    expect(onUpgrade).toHaveBeenCalledTimes(1)
+    expect(
+      within(screen.getByTestId('policy-catalogue-tile-spending-limit')).queryByTestId('policy-locked-icon'),
+    ).not.toBeInTheDocument()
+    expect(
+      within(screen.getByTestId('policy-catalogue-tile-proposer')).getByTestId('policy-locked-icon'),
+    ).toBeInTheDocument()
   })
 })
