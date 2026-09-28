@@ -40,13 +40,10 @@ jest.mock('next/router', () => ({
 const TRIP_ACTION = { endpoint: 'membersInviteUserV1', args: { spaceId: '7' } } as const
 
 describe('useStepUpCallback', () => {
-  const originalLocation = window.location
+  const originalLocation = { href: window.location.href }
 
   const setSearch = (search: string) => {
-    Object.defineProperty(window, 'location', {
-      writable: true,
-      value: { ...originalLocation, search, pathname: '/spaces/members' },
-    })
+    window.history.replaceState(null, '', `/spaces/members${search}`)
   }
 
   beforeEach(() => {
@@ -59,7 +56,7 @@ describe('useStepUpCallback', () => {
   })
 
   afterEach(() => {
-    Object.defineProperty(window, 'location', { writable: true, value: originalLocation })
+    window.history.replaceState(null, '', originalLocation.href)
   })
 
   it('should, when no trip is in flight, do nothing', async () => {

@@ -5,6 +5,7 @@ import {
   type Authenticator,
 } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import { GATEWAY_URL } from '@/config/gateway'
+import { navigateTo } from '@/utils/navigation'
 
 export type { Authenticator }
 
@@ -39,7 +40,7 @@ export const useAuthenticators = () => {
     const url = new URL(AUTHORIZE_PATH, GATEWAY_URL)
     url.searchParams.set('redirect_url', returnUrl.toString())
     url.searchParams.set('enroll', 'true')
-    window.location.href = url.toString()
+    navigateTo(url.toString())
   }, [])
 
   return {

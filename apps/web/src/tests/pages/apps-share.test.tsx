@@ -70,13 +70,7 @@ describe('Share Safe App Page', () => {
   })
 
   it('Should show the app name, description and URL', async () => {
-    Object.defineProperty(window, 'location', {
-      writable: true,
-      value: {
-        pathname: '/share/safe-app',
-        search: '?appUrl=https://apps-portal.safe.global/tx-builder&chain=eth',
-      },
-    })
+    window.history.replaceState(null, '', '/share/safe-app?appUrl=https://apps-portal.safe.global/tx-builder&chain=eth')
 
     render(<ShareSafeApp />, {
       routerProps: {
@@ -136,13 +130,7 @@ describe('Share Safe App Page', () => {
   })
 
   it('Should link to Safe Creation flow when the connected wallet has no owned Safes', async () => {
-    Object.defineProperty(window, 'location', {
-      writable: true,
-      value: {
-        pathname: '/share/safe-app',
-        search: '?appUrl=https://apps-portal.safe.global/tx-builder&chain=gor',
-      },
-    })
+    window.history.replaceState(null, '', '/share/safe-app?appUrl=https://apps-portal.safe.global/tx-builder&chain=gor')
 
     const address = `0x${crypto.randomBytes(20).toString('hex')}`
     jest.spyOn(useWalletHook, 'default').mockImplementation(() => ({
@@ -173,13 +161,7 @@ describe('Share Safe App Page', () => {
   })
 
   it('Should show a select input with owned safes when the connected wallet owns Safes', async () => {
-    Object.defineProperty(window, 'location', {
-      writable: true,
-      value: {
-        pathname: '/share/safe-app',
-        search: '?appUrl=https://apps-portal.safe.global/tx-builder&chain=eth',
-      },
-    })
+    window.history.replaceState(null, '', '/share/safe-app?appUrl=https://apps-portal.safe.global/tx-builder&chain=eth')
 
     const address = `0x${crypto.randomBytes(20).toString('hex')}`
     const safeAddress = `0x${crypto.randomBytes(20).toString('hex')}`

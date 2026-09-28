@@ -40,6 +40,7 @@
     "isows": "1.0.7",
     "webpack": "5.97.1",
     "react-native-quick-base64": "2.2.2",
+    "nwsapi": "2.2.16",
     "@tamagui/image@npm:2.0.0-rc.26": "patch:@tamagui/image@npm%3A2.0.0-rc.26#~/.yarn/patches/@tamagui-image-npm-2.0.0-rc.26-04087a216c.patch"
   },
   "devDependencies": {
