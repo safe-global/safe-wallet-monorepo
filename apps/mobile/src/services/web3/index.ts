@@ -34,6 +34,20 @@ export const getRpcServiceUrl = (rpcUri: Chain['rpcUri']): string => {
   return formatRpcServiceUrl(rpcUri, INFURA_TOKEN)
 }
 
+const getSafeSDKFor = async (safe: SafeInfo): Promise<Safe> => {
+  const safeSDK = getSafeSDK()
+  if (!safeSDK) {
+    throw new Error('Safe SDK is not initialized. Reopen the Safe account and try again.')
+  }
+
+  const [sdkAddress, sdkChainId] = await Promise.all([safeSDK.getAddress(), safeSDK.getChainId()])
+  if (!sameAddress(sdkAddress, safe.address) || sdkChainId.toString() !== safe.chainId) {
+    throw new Error(`Safe SDK is initialized for ${sdkChainId}:${sdkAddress}, not ${safe.chainId}:${safe.address}`)
+  }
+
+  return safeSDK
+}
+
 export const createConnectedWallet = async (
   privateKey: string,
   activeSafe: SafeInfo,
@@ -49,21 +63,8 @@ export const createConnectedWallet = async (
     throw new Error('Provider not found')
   }
 
-  const readOnlySDK = getSafeSDK()
-  if (!readOnlySDK) {
-    throw new Error('Safe SDK is not initialized. Reopen the Safe account and try again.')
-  }
-
-  const [sdkAddress, sdkChainId] = await Promise.all([readOnlySDK.getAddress(), readOnlySDK.getChainId()])
-  if (!sameAddress(sdkAddress, activeSafe.address) || sdkChainId.toString() !== activeSafe.chainId) {
-    throw new Error(
-      `Safe SDK is initialized for ${sdkChainId}:${sdkAddress}, not ${activeSafe.chainId}:${activeSafe.address}`,
-    )
-  }
-
-  // connect() keeps the contract addresses resolved in initSafeSDK; a fresh Safe.init
-  // would look them up in safe-deployments, which may not register this chain/version yet
-  const protocolKit = await readOnlySDK.connect({
+  const safeSDK = await getSafeSDKFor(activeSafe)
+  const protocolKit = await safeSDK.connect({
     provider: provider._getConnection().url,
     signer: privateKey,
     safeAddress: activeSafe.address,
