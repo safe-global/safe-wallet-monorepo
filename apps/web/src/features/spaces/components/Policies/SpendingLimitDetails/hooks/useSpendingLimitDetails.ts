@@ -37,16 +37,18 @@ export const useSpendingLimitDetails = (policy: ActiveDrawerPolicy): SpendingLim
     [allSafes, chainId, safeAddress],
   )
 
-  const names = useMemo(
-    () =>
-      Object.fromEntries(
-        policy.data.spenders.flatMap((spender) => {
-          const name = addressBook.get(spender.spender, chainId)?.name
-          return name ? [[spender.spender, name]] : []
-        }),
-      ),
-    [policy.data.spenders, addressBook, chainId],
-  )
+  // Spenders are named from the Space book alone (decision Q44), so every member of the Space reads
+  // the same policy. The Safe's own name stays merged, to match the row the panel was opened from.
+  const names = useMemo(() => {
+    const named: Array<[string, string]> = []
+
+    for (const { spender } of policy.data.spenders) {
+      const name = addressBook.getFromSpace(spender, chainId)?.name
+      if (name) named.push([spender, name])
+    }
+
+    return Object.fromEntries(named)
+  }, [policy.data.spenders, addressBook, chainId])
 
   return {
     viewer: { address: wallet?.address, isSigner },
