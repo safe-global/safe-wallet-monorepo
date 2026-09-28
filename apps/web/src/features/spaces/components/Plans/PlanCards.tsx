@@ -12,6 +12,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Typography } from '@/components/ui/typography'
 import { SAFE_PRO_ANNOUNCEMENT_URL, SUPPORT_CHAT_URL } from '@/config/constants'
 import { cn } from '@/utils/cn'
+import { YEARLY_SAVINGS_PERCENT } from './planCatalog'
 import { formatPlanPrice, getPlanCta, getVisibleTiers, priceSuffix } from './planTiers'
 import type { CurrentPlan, PlanPick, PlanSeatOption, PlanTier } from './types'
 
@@ -20,7 +21,7 @@ type Cycle = 'month' | 'year'
 export type CurrentBadge = { label: string; variant: 'brand' | 'warning' }
 
 /** Fixed marketing copy: the saving differs per plan, so the toggle advertises the ceiling rather than a derived figure. */
-export const YEARLY_SAVINGS_LABEL = 'Save up to 13%'
+export const YEARLY_SAVINGS_LABEL = `Save up to ${YEARLY_SAVINGS_PERCENT}%`
 
 const optionKey = (option: PlanSeatOption) => option.paymentLinkId ?? option.label
 

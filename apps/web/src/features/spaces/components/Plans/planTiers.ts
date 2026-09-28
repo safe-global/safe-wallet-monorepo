@@ -186,7 +186,7 @@ const mergeCurrentTier = (offered: PlanTier[], current: PlanTier): PlanTier[] =>
 }
 
 const rank = (name: string): number => {
-  const index = PLAN_ORDER.indexOf(name)
+  const index = (PLAN_ORDER as readonly string[]).indexOf(name)
   return index === -1 ? PLAN_ORDER.length : index
 }
 

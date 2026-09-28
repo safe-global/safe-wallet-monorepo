@@ -104,6 +104,14 @@ describe('perSafePrice', () => {
     })
   })
 
+  it('shows the monthly equivalent of a yearly total when the Safe count is unknown', () => {
+    expect(getPlanPriceV2(tier({ billingCycle: 'year' }), option({ seats: null, amountMinor: 1_502_100 }))).toEqual({
+      headline: '€1,251.75',
+      suffix: '/mo',
+      line: '€1,251.75/mo · €15,021 billed yearly',
+    })
+  })
+
   it('shows custom pricing when the option has no price', () => {
     expect(getPlanPriceV2(tier({ name: 'Enterprise', billingCycle: null }), option({ seats: null }))).toEqual({
       headline: 'Custom',

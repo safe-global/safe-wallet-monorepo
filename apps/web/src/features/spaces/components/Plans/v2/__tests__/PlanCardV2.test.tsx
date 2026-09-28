@@ -2,7 +2,32 @@ import { fireEvent, render, renderWithUserEvent, screen, waitFor, within } from 
 import { SUPPORT_CHAT_URL } from '@/config/constants'
 import { ENTERPRISE_TIER, PLAN_CONTENT_V2 } from '../../planCatalog'
 import type { PlanSeatOption, PlanTier } from '../../types'
+import type { CurrentPlan } from '../../types'
 import { PlanCardV2 } from '../PlanCardV2'
+import { trackPlansV2Click } from '../trackPlansV2Click'
+
+jest.mock('../trackPlansV2Click', () => ({ trackPlansV2Click: jest.fn() }))
+
+const businessPlan = (overrides: Partial<CurrentPlan> = {}): CurrentPlan => ({
+  name: 'Business',
+  price: 1669,
+  currency: 'eur',
+  billingCycle: 'month',
+  isTrialing: false,
+  periodEndsAt: null,
+  ...overrides,
+})
+
+const currentTier = (
+  currentPriceId: string,
+  options = [option(5, 66_900), option(10, 109_900), option(20, 166_900)],
+) => ({
+  ...BUSINESS,
+  id: 'current',
+  options,
+  isCurrent: true,
+  currentPriceId,
+})
 
 const option = (seats: number, amountMinor: number): PlanSeatOption => ({
   paymentLinkId: `pl_b${seats}m`,
@@ -157,5 +182,72 @@ describe('PlanCardV2', () => {
 
     expect(screen.getByRole('button', { name: 'Current plan' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Current plan' }).querySelector('[data-cta-arrow]')).toBeNull()
+  })
+
+  it('sends a trial without a payment method to billing, not to the change-plan flow', () => {
+    const onManage = jest.fn()
+    const onSubscribe = jest.fn()
+    render(
+      <PlanCardV2
+        tier={currentTier('price_b20m')}
+        currentPlan={businessPlan({ isTrialing: true })}
+        onManage={onManage}
+        onSubscribe={onSubscribe}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add payment method' }))
+
+    expect(onManage).toHaveBeenCalledTimes(1)
+    expect(onSubscribe).not.toHaveBeenCalled()
+  })
+
+  it('disables the plan button while a checkout or portal redirect is in flight', () => {
+    render(<PlanCardV2 tier={BUSINESS} isBusy />)
+
+    expect(screen.getByRole('button', { name: 'Continue with Business' })).toBeDisabled()
+  })
+
+  it('opens on the plan in force even when it is not the first Safe count', () => {
+    render(<PlanCardV2 tier={currentTier('price_b10m')} currentPlan={businessPlan({ price: 1099 })} />)
+
+    expect(screen.getByRole('combobox', { name: 'Safe accounts for Business' })).toHaveTextContent('10 Safe accounts')
+    expect(screen.getByRole('button', { name: 'Current plan' })).toBeDisabled()
+  })
+
+  it('follows a subscription that lands after the card mounted', () => {
+    const { rerender } = render(<PlanCardV2 tier={{ ...currentTier(''), currentPriceId: undefined }} />)
+    expect(screen.getByRole('combobox', { name: 'Safe accounts for Business' })).toHaveTextContent('5 Safe accounts')
+
+    rerender(<PlanCardV2 tier={currentTier('price_b20m')} currentPlan={businessPlan()} />)
+
+    expect(screen.getByRole('combobox', { name: 'Safe accounts for Business' })).toHaveTextContent('20 Safe accounts')
+  })
+
+  it('keeps a picked Safe count when the page rebuilds the tiers', async () => {
+    const { user, rerender } = renderWithUserEvent(
+      <PlanCardV2 tier={currentTier('price_b10m')} currentPlan={businessPlan({ price: 1099 })} />,
+    )
+
+    const trigger = screen.getByRole('combobox', { name: 'Safe accounts for Business' })
+    await user.click(trigger)
+    await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'true'))
+    await user.click(await screen.findByRole('option', { name: '20 Safe accounts' }))
+    rerender(<PlanCardV2 tier={currentTier('price_b10m')} currentPlan={businessPlan({ price: 1099 })} />)
+
+    expect(screen.getByRole('combobox', { name: 'Safe accounts for Business' })).toHaveTextContent('20 Safe accounts')
+  })
+
+  it('tracks the account-team link on a current Enterprise card', () => {
+    render(
+      <PlanCardV2
+        tier={{ ...currentTier('price_b20m'), name: 'Enterprise' }}
+        currentPlan={businessPlan({ name: 'Enterprise' })}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('link', { name: 'Change via your account team' }))
+
+    expect(trackPlansV2Click).toHaveBeenCalledWith('account_team')
   })
 })

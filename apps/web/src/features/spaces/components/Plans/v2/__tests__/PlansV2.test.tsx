@@ -101,4 +101,35 @@ describe('PlansV2', () => {
     expect(screen.queryByRole('link', { name: 'Talk to sales' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Continue with/ })).not.toBeInTheDocument()
   })
+
+  it.each([
+    { hasPaymentMethod: true, readOnly: false, shown: true },
+    { hasPaymentMethod: false, readOnly: false, shown: false },
+    { hasPaymentMethod: true, readOnly: true, shown: false },
+  ])(
+    'offers Manage plan in the status panel during a trial with a card on file ($hasPaymentMethod) unless read-only ($readOnly)',
+    ({ hasPaymentMethod, readOnly, shown }) => {
+      render(
+        <PlansV2
+          plan={{ name: 'Business', status: 'trialing', periodEndsAt: null, daysLeft: 20, hasPaymentMethod }}
+          safeAccounts={null}
+          sponsoredTxs={null}
+          tiers={buildPlanTiers(PLANS)}
+          canManage={false}
+          readOnly={readOnly}
+          currentPlan={{
+            name: 'Business',
+            price: 1669,
+            currency: 'eur',
+            billingCycle: 'month',
+            isTrialing: true,
+            hasPaymentMethod,
+            periodEndsAt: null,
+          }}
+        />,
+      )
+
+      expect(screen.queryAllByRole('button', { name: 'Manage plan' })).toHaveLength(shown ? 1 : 0)
+    },
+  )
 })

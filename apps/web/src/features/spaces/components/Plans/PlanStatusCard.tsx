@@ -17,8 +17,7 @@ export const _remaining = ({ used, quota }: Meter): number | null => (quota === 
 export const seatsTooltip = (tierName: string | undefined, quota: number | null | undefined) =>
   `${tierName ?? 'Your plan'} covers ${quota ?? 'unlimited'} Safe accounts. At ${quota ?? 'unlimited'}, remove one from this Workspace to add another. Safe accounts you leave out remain available in My accounts.`
 
-/** The badge both the status card and the current plan card wear: trial with its countdown, or Active. */
-/** `countdownDays` is how close to its end the trial label starts counting down; Plans v2 always counts. */
+/** The badge the status card and the current plan card wear; `countdownDays` sets when the trial label starts counting down. */
 export const getCurrentBadge = (plan: PlanSummary | null, countdownDays?: number): CurrentBadge | undefined => {
   if (!plan) return undefined
   if (plan.status === 'active') return { label: 'Active', variant: 'brand' }

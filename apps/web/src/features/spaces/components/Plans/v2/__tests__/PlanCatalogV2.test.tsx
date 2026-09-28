@@ -1,4 +1,4 @@
-import { render, screen } from '@/tests/test-utils'
+import { fireEvent, render, screen } from '@/tests/test-utils'
 import { YEARLY_SAVINGS_LABEL, READ_ONLY_NOTE } from '../../PlanCards'
 import { ENTERPRISE_TIER } from '../../planCatalog'
 import type { PlanSeatOption, PlanTier } from '../../types'
@@ -41,5 +41,14 @@ describe('PlanCatalogV2', () => {
     render(<PlanCatalogV2 tiers={[tier('month'), ENTERPRISE_TIER]} readOnly />)
 
     expect(screen.getByText(READ_ONLY_NOTE)).toBeInTheDocument()
+  })
+
+  it('switches every card to its yearly price from the billing-cycle toggle', () => {
+    render(<PlanCatalogV2 tiers={[tier('month'), tier('year'), ENTERPRISE_TIER]} />)
+    expect(screen.getAllByTestId('plan-price-line')[0]).toHaveTextContent('€1,669/mo billed monthly')
+
+    fireEvent.click(screen.getByRole('tab', { name: /Yearly/ }))
+
+    expect(screen.getAllByTestId('plan-price-line')[0]).toHaveTextContent('€1,452/mo · €17,424 billed yearly')
   })
 })

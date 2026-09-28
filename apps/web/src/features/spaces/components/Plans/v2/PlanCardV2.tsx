@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { List, ListItem, ListItemText } from '@/components/ui/list'
@@ -22,6 +22,8 @@ export type PlanCardV2Actions = {
   /** A Workspace member who is not an admin: the cards show no plan buttons. */
   readOnly?: boolean
 }
+
+const optionKey = (option: PlanSeatOption) => option.priceId ?? option.paymentLinkId ?? option.label
 
 const salesLink = <a href={SUPPORT_CHAT_URL} target="_blank" rel="noopener noreferrer" />
 
@@ -53,7 +55,14 @@ const PlanCtaV2 = ({
       )
     case 'account-team':
       return (
-        <Button variant="outline" size="lg" weight="semibold" className="w-full" render={salesLink}>
+        <Button
+          variant="outline"
+          size="lg"
+          weight="semibold"
+          className="w-full"
+          render={salesLink}
+          onClick={() => trackPlansV2Click('account_team')}
+        >
           {cta.label}
           <CtaArrow variant="reveal" external />
         </Button>
@@ -87,12 +96,12 @@ const PlanCtaV2 = ({
 export const PlanCardV2 = ({ tier, ...actions }: { tier: PlanTier } & PlanCardV2Actions) => {
   const content = getPlanContentV2(tier.name)
   const isPrimary = tier.name === RECOMMENDED_PLAN
-  const currentOption = tier.options.find((candidate) => candidate.priceId === tier.currentPriceId)
-  const [option, setOption] = useState<PlanSeatOption | undefined>(currentOption ?? tier.options[0])
-  // The subscription can land after the card mounted; the selector must then snap to the plan in force.
-  useEffect(() => {
-    if (currentOption) setOption(currentOption)
-  }, [currentOption])
+  // Held by key, not object: the tiers are rebuilt on every page render, and a late subscription must still land.
+  const [pickedKey, setPickedKey] = useState<string>()
+  const option =
+    tier.options.find((candidate) => optionKey(candidate) === pickedKey) ??
+    tier.options.find((candidate) => candidate.priceId === tier.currentPriceId) ??
+    tier.options[0]
   const price = option ? getPlanPriceV2(tier, option) : undefined
   const features = content?.features ?? tier.features
 
@@ -135,7 +144,7 @@ export const PlanCardV2 = ({ tier, ...actions }: { tier: PlanTier } & PlanCardV2
               <Seats
                 options={tier.options}
                 value={option}
-                onChange={setOption}
+                onChange={(next) => setPickedKey(optionKey(next))}
                 label={`${PLAN_CARD_COPY_V2.seatsLabel} ${tier.name}`}
               />
               {!actions.readOnly && <PlanCtaV2 pick={{ tier, option }} isPrimary={isPrimary} {...actions} />}
@@ -174,7 +183,7 @@ export const PlanCardV2 = ({ tier, ...actions }: { tier: PlanTier } & PlanCardV2
                     {content.support.level}
                     <span
                       aria-hidden
-                      className="absolute -inset-x-[0.08em] bottom-[calc(6px-0.06em)] -z-10 h-1 origin-left scale-x-0 bg-mint transition-transform duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/plan:scale-x-100 group-hover/plan:delay-75 group-focus-within/plan:scale-x-100 motion-reduce:transition-none dark:bg-mint/40"
+                      className="absolute -inset-x-[0.08em] bottom-[calc(6px-0.06em)] -z-10 h-1 origin-left scale-x-0 bg-mint transition-transform duration-[450ms] ease-soft group-hover/plan:scale-x-100 group-hover/plan:delay-75 group-focus-within/plan:scale-x-100 motion-reduce:transition-none dark:bg-mint/40"
                     />
                   </Typography>
                 </div>

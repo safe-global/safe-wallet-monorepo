@@ -34,10 +34,10 @@ export default function PlanCatalogV2({
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
             <Tabs value={cycle} onValueChange={(value) => setCycle(value as Cycle)}>
-              <TabsList aria-label="Billing cycle">
-                <TabsTrigger value="month">Monthly</TabsTrigger>
+              <TabsList aria-label={PLAN_CARD_COPY_V2.billingCycleLabel}>
+                <TabsTrigger value="month">{PLAN_CARD_COPY_V2.monthly}</TabsTrigger>
                 <TabsTrigger value="year">
-                  Yearly
+                  {PLAN_CARD_COPY_V2.yearly}
                   {hasYearly && (
                     <Badge variant="mint" size="status" shape="status">
                       {PLAN_CARD_COPY_V2.yearlySavings}

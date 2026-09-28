@@ -1,13 +1,9 @@
 import { ArrowRight, ArrowUpRight } from 'lucide-react'
 import { cn } from '@/utils/cn'
 
-const ARROW_EASE = 'duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none'
+const ARROW_EASE = 'duration-300 ease-soft motion-reduce:transition-none'
 
-/**
- * The CTA arrow answers the hovered or focused `group/plan` card: on the filled button it nudges forward; on an outlined one it
- * slides in, the negative margin cancelling the button gap so the label stays centred at rest. Sales links open a
- * new tab, so they point up and out.
- */
+/** Follows its `group/plan` card: nudges on the filled button, slides in on outlined ones (the negative margin keeps the label centred). */
 export const CtaArrow = ({ variant, external }: { variant: 'nudge' | 'reveal'; external?: boolean }) => {
   const Icon = external ? ArrowUpRight : ArrowRight
   if (variant === 'nudge') {

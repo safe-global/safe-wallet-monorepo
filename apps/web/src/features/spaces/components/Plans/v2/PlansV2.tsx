@@ -4,6 +4,7 @@ import PlanStatusCard from '../PlanStatusCard'
 import CompareFeaturesCard from './CompareFeaturesCard'
 import PlanCatalogV2 from './PlanCatalogV2'
 import PlanExtrasV2 from './PlanExtrasV2'
+import { canManageV2 } from './planCardsV2'
 import { trackPlansV2Click } from './trackPlansV2Click'
 
 const prefersReducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
@@ -47,7 +48,7 @@ export default function PlansV2({
         tierName={plan?.name}
         onManage={onManage}
         isManaging={isManaging}
-        canManage={readOnly ? false : canManage}
+        canManage={readOnly ? false : canManageV2(canManage, currentPlan)}
         appearance="v2"
       />
       <PlanCatalogV2

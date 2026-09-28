@@ -1,7 +1,10 @@
 import type { PlanTier } from './types'
 
 // TODO(safe-pro): plan copy lives here until the catalog exposes features (Plan.features / product.marketingFeatures).
-export const PLAN_ORDER = ['Starter', 'Business', 'Enterprise']
+export const PLAN_ORDER = ['Starter', 'Business', 'Enterprise'] as const
+
+/** The largest yearly saving across plans; each page words its own label around it. */
+export const YEARLY_SAVINGS_PERCENT = 13
 
 /** The plan the trial and lapsed-Workspace modals lead with. */
 export const RECOMMENDED_PLAN = 'Business'
@@ -27,7 +30,10 @@ export const PLAN_FEATURES: Record<string, string[]> = {
   ],
 }
 
-export type PlanNameV2 = 'Starter' | 'Business' | 'Enterprise'
+export type PlanNameV2 = (typeof PLAN_ORDER)[number]
+
+export const UNLIMITED_MEMBERS = 'Unlimited Workspace members'
+export const WORKSPACE_2FA = 'Workspace 2FA'
 
 export type PlanContentV2 = {
   /** Who the plan is for, one line under its name. */
@@ -45,11 +51,12 @@ export const PLAN_CONTENT_V2: Record<PlanNameV2, PlanContentV2> = {
     featuresHeading: 'Get started with Pro',
     features: [
       '10 sponsored transactions per month',
+      UNLIMITED_MEMBERS,
       'Advanced threat analysis',
       'Transaction simulation',
       'Shared address book',
       'Workspace activity log',
-      'MFA authentication',
+      WORKSPACE_2FA,
       'Builder API access',
     ],
     support: { level: 'Standard', detail: 'Help center and email' },
@@ -70,7 +77,7 @@ export const PLAN_CONTENT_V2: Record<PlanNameV2, PlanContentV2> = {
     description: 'Tailored to your organization, with custom capacity and commercial terms.',
     featuresHeading: 'Everything in Business, plus',
     features: [
-      'No monthly sponsorship cap',
+      'Unlimited sponsored transactions',
       'Custom Safe capacity',
       'Scale API access',
       'Tailored contract & billing terms',
@@ -83,7 +90,12 @@ export const getPlanContentV2 = (name: string): PlanContentV2 | undefined =>
   Object.hasOwn(PLAN_CONTENT_V2, name) ? PLAN_CONTENT_V2[name as PlanNameV2] : undefined
 
 export const PLAN_CARD_COPY_V2 = {
-  yearlySavings: 'Save ~13%',
+  yearlySavings: `Save ~${YEARLY_SAVINGS_PERCENT}%`,
+  billingCycleLabel: 'Billing cycle',
+  monthly: 'Monthly',
+  yearly: 'Yearly',
+  currentPlan: 'Current plan',
+  accountTeam: 'Change via your account team',
   perSafeSuffix: '/Safe/mo',
   monthSuffix: '/mo',
   custom: 'Custom',
@@ -93,7 +105,9 @@ export const PLAN_CARD_COPY_V2 = {
   seatsLabel: 'Safe accounts for',
   billedMonthly: (total: string) => `${total}/mo billed monthly · excl. VAT`,
   billedYearly: (monthly: string, total: string) => `${monthly}/mo · ${total} billed yearly`,
-}
+} as const
+
+export const SAFENET_CHECKS = 'Safenet checks'
 
 /** The fee payment feature is coming soon: it lives in the Coming soon card and a "Soon" table row, never in a plan list. */
 export const PAY_FEES_FROM_SAFE = 'Pay fees from Safe accounts'
@@ -122,8 +136,8 @@ export const COMPARE_SECTIONS_V2: CompareSectionV2[] = [
   {
     title: 'Every Pro plan',
     rows: [
-      { feature: 'Unlimited Workspace members', values: every(true) },
-      { feature: 'Workspace 2FA', values: every(true) },
+      { feature: UNLIMITED_MEMBERS, values: every(true) },
+      { feature: WORKSPACE_2FA, values: every(true) },
       { feature: 'Security Hub', values: every(true) },
     ],
   },
@@ -133,7 +147,7 @@ export const COMPARE_SECTIONS_V2: CompareSectionV2[] = [
       { feature: 'Advanced threat analysis', values: every(true) },
       { feature: 'Transaction simulation', values: every(true) },
       { feature: 'Hypernative threat monitoring', values: every('Add-on') },
-      { feature: 'Safenet checks', isComingSoon: true },
+      { feature: SAFENET_CHECKS, isComingSoon: true },
     ],
   },
   {
@@ -151,7 +165,14 @@ export const COMPARE_SECTIONS_V2: CompareSectionV2[] = [
   {
     title: 'Support',
     rows: [
-      { feature: 'Support', values: { Starter: 'Standard', Business: 'Priority', Enterprise: 'Tailored' } },
+      {
+        feature: 'Support',
+        values: {
+          Starter: PLAN_CONTENT_V2.Starter.support.level,
+          Business: PLAN_CONTENT_V2.Business.support.level,
+          Enterprise: PLAN_CONTENT_V2.Enterprise.support.level,
+        },
+      },
       { feature: 'Guided onboarding', values: fromBusiness },
       {
         feature: 'Contract & billing terms',
@@ -165,7 +186,7 @@ export const COMPARE_SECTIONS_V2: CompareSectionV2[] = [
       { feature: 'Safe accounts', values: { Starter: '2', Business: '5, 10 or 20', Enterprise: 'More than 20' } },
       {
         feature: 'Sponsored transactions per month',
-        values: { Starter: '10', Business: '50', Enterprise: 'No cap' },
+        values: { Starter: '10', Business: '50', Enterprise: 'Unlimited' },
       },
     ],
   },
@@ -186,7 +207,7 @@ export const PLAN_EXTRAS_V2 = {
   comingSoon: {
     tag: 'Coming soon',
     title: 'More ways to execute with confidence',
-    items: ['Safenet checks', PAY_FEES_FROM_SAFE, 'More policies'],
+    items: [SAFENET_CHECKS, PAY_FEES_FROM_SAFE, 'More policies'],
     action: 'Request updates',
   },
   addOn: {

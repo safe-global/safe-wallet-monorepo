@@ -1,6 +1,13 @@
-import { ENTERPRISE_TIER, getPlanContentV2, PLAN_CONTENT_V2, PLAN_ORDER } from '../../planCatalog'
+import {
+  ENTERPRISE_TIER,
+  getPlanContentV2,
+  PLAN_CONTENT_V2,
+  PLAN_FEATURES,
+  PLAN_ORDER,
+  WORKSPACE_2FA,
+} from '../../planCatalog'
 import type { CurrentPlan, PlanSeatOption, PlanTier } from '../../types'
-import { getPlanCtaV2, getTiersV2 } from '../planCardsV2'
+import { canManageV2, getPlanCtaV2, getTiersV2 } from '../planCardsV2'
 
 const option = (overrides: Partial<PlanSeatOption> = {}): PlanSeatOption => ({
   paymentLinkId: 'pl_b20m',
@@ -42,6 +49,25 @@ describe('PLAN_CONTENT_V2', () => {
   it('never repeats a feature between plans', () => {
     const features = Object.values(PLAN_CONTENT_V2).flatMap((content) => content.features)
     expect(new Set(features).size).toBe(features.length)
+  })
+
+  it('keeps every launch card feature, counting what each plan inherits', () => {
+    const renamed: Record<string, string> = {
+      '10 sponsored transactions / month': '10 sponsored transactions per month',
+      '50 sponsored transactions / month': '50 sponsored transactions per month',
+      'Policy engine': 'Policy engine & spending limits',
+      'MFA authentication': WORKSPACE_2FA,
+    }
+
+    PLAN_ORDER.forEach((plan, index) => {
+      const inherited = PLAN_ORDER.slice(0, index + 1).flatMap((name) => PLAN_CONTENT_V2[name].features)
+      const own = PLAN_CONTENT_V2[plan].features
+      PLAN_FEATURES[plan].forEach((launchFeature) => {
+        const feature = renamed[launchFeature] ?? launchFeature
+        // A sponsorship quota replaces the inherited one, so each plan must state its own.
+        expect(/sponsored transactions/.test(feature) ? own : inherited).toContain(feature)
+      })
+    })
   })
 
   it('leaves the coming-soon fee payment out of every plan', () => {
@@ -114,5 +140,16 @@ describe('getTiersV2', () => {
   it('drops the static Enterprise card when Enterprise is the plan in force', () => {
     const currentEnterprise = tier({ id: 'current', name: 'Enterprise', isCurrent: true })
     expect(getTiersV2([tier(), currentEnterprise, ENTERPRISE_TIER])).toEqual([tier(), currentEnterprise])
+  })
+})
+describe('canManageV2', () => {
+  it.each([
+    { canManage: true, current: undefined, expected: true },
+    { canManage: false, current: currentPlan({ isTrialing: true, hasPaymentMethod: true }), expected: true },
+    { canManage: false, current: currentPlan({ isTrialing: true }), expected: false },
+    { canManage: false, current: currentPlan(), expected: false },
+    { canManage: undefined, current: undefined, expected: false },
+  ])('is $expected for canManage $canManage and plan $current', ({ canManage, current, expected }) => {
+    expect(canManageV2(canManage, current)).toBe(expected)
   })
 })

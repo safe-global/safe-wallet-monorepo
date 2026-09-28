@@ -1,8 +1,26 @@
 import { PLAN_CARD_COPY_V2 } from './planCatalog'
 import type { PlanSeatOption, PlanTier } from './types'
 
-const minorDigits = (currency: string): number =>
-  new Intl.NumberFormat('en', { style: 'currency', currency }).resolvedOptions().maximumFractionDigits ?? 2
+const formatters = new Map<string, Intl.NumberFormat>()
+
+/** Built once per currency and decimal count; the catalog renders the same few on every card. */
+const formatterFor = (currency: string, fractionDigits?: number): Intl.NumberFormat => {
+  const key = `${currency}:${fractionDigits ?? 'default'}`
+  let formatter = formatters.get(key)
+  if (!formatter) {
+    formatter = new Intl.NumberFormat('en', {
+      style: 'currency',
+      currency,
+      ...(fractionDigits === undefined
+        ? {}
+        : { minimumFractionDigits: fractionDigits, maximumFractionDigits: fractionDigits }),
+    })
+    formatters.set(key, formatter)
+  }
+  return formatter
+}
+
+const minorDigits = (currency: string): number => formatterFor(currency).resolvedOptions().maximumFractionDigits ?? 2
 
 /** Integer division rounding halves up; both operands are non-negative integers. */
 export const _roundHalfUp = (numerator: number, denominator: number): number => {
@@ -19,12 +37,7 @@ export const formatMinorAmount = (amountMinor: number, currency: string): string
   const digits = minorDigits(currency)
   const factor = 10 ** digits
   const fractionDigits = amountMinor % factor === 0 ? 0 : digits
-  return new Intl.NumberFormat('en', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: fractionDigits,
-    maximumFractionDigits: fractionDigits,
-  }).format(amountMinor / factor)
+  return formatterFor(currency, fractionDigits).format(amountMinor / factor)
 }
 
 type Cycle = PlanTier['billingCycle']

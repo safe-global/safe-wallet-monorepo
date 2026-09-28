@@ -11,13 +11,14 @@ import {
   COMPARE_SECTIONS_V2,
   type CompareRowV2,
   type CompareValueV2,
-  type PlanNameV2,
+  PLAN_ORDER,
+  type CompareSectionV2,
 } from '../planCatalog'
 import { FeatureCheck } from './FeatureCheck'
 
 export const COMPARE_FEATURES_ID = 'compare-features'
 const TABLE_ID = `${COMPARE_FEATURES_ID}-table`
-const PLANS: PlanNameV2[] = ['Starter', 'Business', 'Enterprise']
+const PLANS = PLAN_ORDER
 
 const tint = (isCurrent: boolean) => isCurrent && 'bg-mint/25'
 
@@ -69,37 +70,112 @@ const CompareRow = ({ row, currentPlan }: { row: CompareRowV2; currentPlan?: str
 
 /** Expanding eases out a touch longer than collapsing, so opening reads as unfolding and closing gets out of the way. */
 const HEIGHT_TRANSITION = {
-  expand: 'transition-[height] duration-[420ms] ease-[cubic-bezier(0.22,1,0.36,1)]',
+  expand: 'transition-[height] duration-[420ms] ease-soft',
   collapse: 'transition-[height] duration-[320ms] ease-[cubic-bezier(0.4,0,0.2,1)]',
 }
 const SECTION_STAGGER_MS = 45
 
 type TableHeights = { collapsed: number; full: number }
 
-/** The table's full height and the height of its header plus first section, kept current as the layout reflows. */
+/** Full and header-plus-first-section heights of the table's scroll container, so a horizontal scrollbar is never clipped. */
 const useTableHeights = (
   tableRef: RefObject<HTMLTableElement | null>,
   firstSectionRef: RefObject<HTMLTableSectionElement | null>,
+  isExpanded: boolean,
 ): TableHeights | undefined => {
   const [heights, setHeights] = useState<TableHeights>()
 
+  // Re-measured on every toggle too, so content that changed while folded never waits on the observer.
   useLayoutEffect(() => {
     const table = tableRef.current
     const firstSection = firstSectionRef.current
-    if (!table || !firstSection) return
+    const container = table?.parentElement
+    if (!table || !firstSection || !container) return
     const measure = () => {
-      const full = table.offsetHeight
+      const full = container.offsetHeight
       // Unlaid-out (e.g. jsdom) reports 0: leave the height alone rather than clip everything.
       setHeights(full > 0 ? { full, collapsed: firstSection.offsetTop + firstSection.offsetHeight } : undefined)
     }
     measure()
     if (typeof ResizeObserver === 'undefined') return
     const observer = new ResizeObserver(measure)
+    observer.observe(container)
     observer.observe(table)
     return () => observer.disconnect()
-  }, [tableRef, firstSectionRef])
+  }, [tableRef, firstSectionRef, isExpanded])
 
   return heights
+}
+
+const CompareHeaderRow = ({ currentPlan }: { currentPlan?: string }) => (
+  <TableHeader>
+    <TableRow className="bg-muted-secondary hover:bg-muted-secondary">
+      <TableHead scope="col" className="h-auto w-[34%] px-4 py-2.5 font-semibold">
+        {COMPARE_COPY_V2.featureColumn}
+      </TableHead>
+      {PLANS.map((plan) => (
+        <TableHead
+          key={plan}
+          scope="col"
+          className={cn('h-auto px-4 py-2.5 font-semibold', tint(plan === currentPlan))}
+        >
+          <span className="flex items-center gap-2">
+            {plan}
+            {plan === currentPlan && (
+              <Badge variant="mint" size="status" shape="status">
+                {COMPARE_COPY_V2.current}
+              </Badge>
+            )}
+          </span>
+        </TableHead>
+      ))}
+    </TableRow>
+  </TableHeader>
+)
+
+/** The first section is always shown; the others fold away inert and fade back in one after another. */
+const CompareSection = ({
+  section,
+  index,
+  isExpanded,
+  currentPlan,
+  ref,
+}: {
+  section: CompareSectionV2
+  index: number
+  isExpanded: boolean
+  currentPlan?: string
+  ref?: Ref<HTMLTableSectionElement>
+}) => {
+  const isFoldable = index > 0
+  const isFolded = isFoldable && !isExpanded
+  return (
+    <TableBody
+      ref={ref}
+      inert={isFolded}
+      aria-hidden={isFolded || undefined}
+      style={{ '--section-delay': `${80 + (index - 1) * SECTION_STAGGER_MS}ms` } as CSSProperties}
+      className={cn(
+        '[&_tr:last-child]:border-b',
+        isFoldable && 'transition-opacity motion-reduce:transition-none',
+        isFoldable &&
+          (isExpanded ? 'opacity-100 duration-300 delay-(--section-delay) ease-out' : 'opacity-0 duration-150 ease-in'),
+      )}
+    >
+      <TableRow className="bg-muted hover:bg-muted">
+        <TableHead
+          scope="colgroup"
+          colSpan={PLANS.length + 1}
+          className="h-auto px-4 py-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase"
+        >
+          {section.title}
+        </TableHead>
+      </TableRow>
+      {section.rows.map((row) => (
+        <CompareRow key={row.feature} row={row} currentPlan={currentPlan} />
+      ))}
+    </TableBody>
+  )
 }
 
 /** "Compare all features": the first section always, the rest once expanded; the current plan's column is tinted mint. */
@@ -117,7 +193,7 @@ export default function CompareFeaturesCard({
 }) {
   const tableRef = useRef<HTMLTableElement>(null)
   const firstSectionRef = useRef<HTMLTableSectionElement>(null)
-  const heights = useTableHeights(tableRef, firstSectionRef)
+  const heights = useTableHeights(tableRef, firstSectionRef, isExpanded)
   const tableStyle: CSSProperties | undefined = heights
     ? { height: isExpanded ? heights.full : heights.collapsed }
     : undefined
@@ -153,7 +229,7 @@ export default function CompareFeaturesCard({
                 <ChevronDown
                   aria-hidden
                   className={cn(
-                    'size-[18px] transition-transform duration-[420ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
+                    'size-4.5 transition-transform duration-[420ms] ease-soft motion-reduce:transition-none',
                     isExpanded && 'rotate-180',
                   )}
                 />
@@ -162,6 +238,7 @@ export default function CompareFeaturesCard({
 
             <div
               id={TABLE_ID}
+              data-testid="compare-features-table"
               style={tableStyle}
               className={cn(
                 'overflow-hidden rounded-xl bg-card motion-reduce:transition-none',
@@ -169,62 +246,17 @@ export default function CompareFeaturesCard({
               )}
             >
               <Table ref={tableRef} className="min-w-160 table-fixed">
-                <TableHeader>
-                  <TableRow className="bg-muted-secondary hover:bg-muted-secondary">
-                    <TableHead scope="col" className="h-auto w-[34%] px-4 py-2.5 font-semibold">
-                      {COMPARE_COPY_V2.featureColumn}
-                    </TableHead>
-                    {PLANS.map((plan) => (
-                      <TableHead
-                        key={plan}
-                        scope="col"
-                        className={cn('h-auto px-4 py-2.5 font-semibold', tint(plan === currentPlan))}
-                      >
-                        <span className="flex items-center gap-2">
-                          {plan}
-                          {plan === currentPlan && (
-                            <Badge variant="mint" size="status" shape="status">
-                              {COMPARE_COPY_V2.current}
-                            </Badge>
-                          )}
-                        </span>
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                {COMPARE_SECTIONS_V2.map((section, index) => {
-                  const isFolded = index > 0 && !isExpanded
-                  return (
-                    <TableBody
-                      key={section.title}
-                      ref={index === 0 ? firstSectionRef : undefined}
-                      inert={isFolded}
-                      aria-hidden={isFolded || undefined}
-                      style={{ '--section-delay': `${80 + (index - 1) * SECTION_STAGGER_MS}ms` } as CSSProperties}
-                      className={cn(
-                        '[&_tr:last-child]:border-b',
-                        index > 0 && 'transition-opacity motion-reduce:transition-none',
-                        index > 0 &&
-                          (isExpanded
-                            ? 'opacity-100 duration-300 delay-(--section-delay) ease-out'
-                            : 'opacity-0 duration-150 ease-in'),
-                      )}
-                    >
-                      <TableRow className="bg-muted hover:bg-muted">
-                        <TableHead
-                          scope="colgroup"
-                          colSpan={PLANS.length + 1}
-                          className="h-auto px-4 py-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase"
-                        >
-                          {section.title}
-                        </TableHead>
-                      </TableRow>
-                      {section.rows.map((row) => (
-                        <CompareRow key={row.feature} row={row} currentPlan={currentPlan} />
-                      ))}
-                    </TableBody>
-                  )
-                })}
+                <CompareHeaderRow currentPlan={currentPlan} />
+                {COMPARE_SECTIONS_V2.map((section, index) => (
+                  <CompareSection
+                    key={section.title}
+                    ref={index === 0 ? firstSectionRef : undefined}
+                    section={section}
+                    index={index}
+                    isExpanded={isExpanded}
+                    currentPlan={currentPlan}
+                  />
+                ))}
               </Table>
             </div>
           </div>
@@ -233,7 +265,7 @@ export default function CompareFeaturesCard({
             inert={isExpanded}
             aria-hidden={isExpanded || undefined}
             className={cn(
-              'grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
+              'grid transition-[grid-template-rows,opacity] duration-300 ease-soft motion-reduce:transition-none',
               isExpanded ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100',
             )}
           >

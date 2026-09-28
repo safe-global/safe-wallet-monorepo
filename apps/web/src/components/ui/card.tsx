@@ -96,9 +96,8 @@ const cardVariants = cva(
       // Both resolve through compoundVariants so the element carries exactly one shadow utility.
       elevated: { true: '', false: '' },
       hairline: { true: '', false: '' },
-      // While hovered or holding focus the card lifts to the plain surface and the raised hairline shadow.
       highlightOnHover: {
-        true: 'transition-[background-color,box-shadow] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-card hover:shadow-hairline-lg hover:duration-200 focus-within:bg-card focus-within:shadow-hairline-lg focus-within:duration-200 motion-reduce:transition-none',
+        true: 'transition-[background-color,box-shadow] duration-300 ease-soft hover:bg-card hover:shadow-hairline-lg hover:duration-200 focus-within:bg-card focus-within:shadow-hairline-lg focus-within:duration-200 motion-reduce:transition-none',
         false: '',
       },
     },
