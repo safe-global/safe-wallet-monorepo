@@ -12,7 +12,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Typography } from '@/components/ui/typography'
 import { SAFE_PRO_ANNOUNCEMENT_URL, SUPPORT_CHAT_URL } from '@/config/constants'
 import { cn } from '@/utils/cn'
-import { formatPlanPrice, getPlanCta, priceSuffix } from './planTiers'
+import { formatPlanPrice, getPlanCta, getVisibleTiers, priceSuffix } from './planTiers'
 import type { CurrentPlan, PlanPick, PlanSeatOption, PlanTier } from './types'
 
 type Cycle = 'month' | 'year'
@@ -24,14 +24,17 @@ export const YEARLY_SAVINGS_LABEL = 'Save up to 13%'
 
 const optionKey = (option: PlanSeatOption) => option.paymentLinkId ?? option.label
 
-const Seats = ({
+export const Seats = ({
   options,
   value,
   onChange,
+  label,
 }: {
   options: PlanSeatOption[]
   value: PlanSeatOption
   onChange: (option: PlanSeatOption) => void
+  /** Accessible name for the control, e.g. "Safe accounts for Business". */
+  label?: string
 }) =>
   options.length > 1 ? (
     <Select
@@ -41,7 +44,7 @@ const Seats = ({
         if (next) onChange(next)
       }}
     >
-      <SelectTrigger className="w-full">
+      <SelectTrigger className="w-full" aria-label={label}>
         {/* The closed trigger would otherwise print the raw value, the payment link id. */}
         <SelectValue>{value.label}</SelectValue>
       </SelectTrigger>
@@ -54,7 +57,7 @@ const Seats = ({
       </SelectContent>
     </Select>
   ) : (
-    <Input readOnly value={value.label} />
+    <Input readOnly value={value.label} aria-label={label} />
   )
 
 export type PlanCardActions = {
@@ -257,11 +260,7 @@ export function PlanCatalog({
 } & PlanCardActions) {
   const [cycle, setCycle] = useState<Cycle>('month')
   const hasYearly = tiers.some((tier) => tier.billingCycle === 'year')
-  // The current card stays put when the other cycle has no offer of that plan to replace it.
-  const visible = tiers.filter((tier) => {
-    if (tier.billingCycle === null || tier.billingCycle === cycle) return true
-    return Boolean(tier.isCurrent) && !tiers.some((other) => other.name === tier.name && other.billingCycle === cycle)
-  })
+  const visible = getVisibleTiers(tiers, cycle)
 
   return (
     <div className="flex flex-col gap-6">

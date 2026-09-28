@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import SpacePlansPage from '../Page'
+import { PLAN_CONTENT_V2 } from '../planCatalog'
 
 const mockUseSpacePlan = jest.fn()
 const mockUseSpaceOffers = jest.fn()
@@ -8,12 +9,14 @@ let mockIsAdmin = true
 const mockStartCheckout = jest.fn()
 const mockOpenPortal = jest.fn()
 const mockUseIsSafeProEnabled = jest.fn<boolean, []>()
+let mockIsPlansV2 = false
 
 jest.mock('../../AuthState', () => ({
   __esModule: true,
   default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }))
 jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockUseIsSafeProEnabled() }))
+jest.mock('../../../hooks/useIsSafeProPlansV2Enabled', () => ({ useIsSafeProPlansV2Enabled: () => mockIsPlansV2 }))
 jest.mock('@/hooks/useDarkMode', () => ({ useDarkMode: () => false }))
 jest.mock('@/features/__core__', () => ({
   useLoadFeature: () => ({ SafeProAnnouncement: () => <div data-testid="safe-pro-announcement" /> }),
@@ -105,6 +108,7 @@ describe('SpacePlansPage', () => {
     jest.clearAllMocks()
     mockIsAdmin = true
     mockUseIsSafeProEnabled.mockReturnValue(true)
+    mockIsPlansV2 = false
     mockUseSpaceOffers.mockReturnValue({ paidPlans: [STARTER], isLoading: false })
   })
 
@@ -189,5 +193,29 @@ describe('SpacePlansPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Continue with Starter' }))
     expect(mockStartCheckout).toHaveBeenCalledWith('pl_starter_m')
     expect(screen.queryByTestId('change-plan-dialog')).not.toBeInTheDocument()
+  })
+
+  it('keeps the current plan cards while SAFE_PRO_PLANS_V2 is off', () => {
+    onPlan('Starter', 149, 'active')
+    mockUseSpaceOffers.mockReturnValue({ paidPlans: [BUSINESS], isLoading: false })
+    render(<SpacePlansPage spaceId={SPACE_ID} />)
+
+    expect(screen.queryByText(PLAN_CONTENT_V2.Business.description)).not.toBeInTheDocument()
+    expect(screen.queryByTestId('plan-price-line')).not.toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: 'Manage plan' })).toHaveLength(2)
+  })
+
+  it('shows the v2 plan cards, reusing the change-plan dialog, while SAFE_PRO_PLANS_V2 is on', () => {
+    mockIsPlansV2 = true
+    onPlan('Starter', 149, 'active')
+    mockUseSpaceOffers.mockReturnValue({ paidPlans: [BUSINESS], isLoading: false })
+    render(<SpacePlansPage spaceId={SPACE_ID} />)
+
+    expect(screen.getByText(PLAN_CONTENT_V2.Business.description)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Current plan' })).toBeDisabled()
+    expect(screen.getAllByRole('button', { name: 'Manage plan' })).toHaveLength(1)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Upgrade to Business' }))
+    expect(screen.getByTestId('change-plan-dialog')).toHaveAttribute('data-to', 'Business')
   })
 })

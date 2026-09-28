@@ -106,6 +106,7 @@ const toOption = (offer: PlanOffer, monthly: PlanOffer | undefined): PlanSeatOpt
   label: seatsLabel(offer.seats),
   seats: typeof offer.seats === 'number' ? offer.seats : null,
   price: offer.price,
+  amountMinor: offer.amountMinor,
   originalPrice: offer.billingCycle === 'year' && monthly?.price != null ? monthly.price * 12 : null,
   features: offer.features,
 })
@@ -200,6 +201,13 @@ export const buildPlanTiers = (
     : offered
   return [...tiers, ENTERPRISE_TIER].sort((a, b) => rank(a.name) - rank(b.name))
 }
+
+/** The tiers the billing-cycle toggle shows; the current card stays put when the other cycle has no offer of that plan to replace it. */
+export const getVisibleTiers = (tiers: PlanTier[], cycle: 'month' | 'year'): PlanTier[] =>
+  tiers.filter((tier) => {
+    if (tier.billingCycle === null || tier.billingCycle === cycle) return true
+    return Boolean(tier.isCurrent) && !tiers.some((other) => other.name === tier.name && other.billingCycle === cycle)
+  })
 
 /** Monthly trial offers for the claim modal: the seat count leads the plan's own selling points, verbatim. */
 export const claimTiers = (trialPlans: PlanGroup[]): PlanTier[] =>
