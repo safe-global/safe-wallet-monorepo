@@ -48,6 +48,9 @@ describe('PlanCardV2', () => {
     expect(within(support).getByText('Support')).toBeInTheDocument()
     expect(within(support).getByText('Priority')).toBeInTheDocument()
     expect(within(support).getByText('+ Guided onboarding')).toBeInTheDocument()
+
+    const highlight = within(support).getByTestId('plan-support-level').querySelector('span[aria-hidden]')
+    expect(highlight).toHaveClass('scale-x-0', 'group-hover/plan:scale-x-100', 'bg-mint')
   })
 
   it('reprices the card when another Safe count is picked', async () => {
@@ -93,7 +96,7 @@ describe('PlanCardV2', () => {
     expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })
 
-  it('keeps every card on the muted surface, lifting it to white on hover', () => {
+  it('keeps every card flat on the muted surface, lifting it to white with a shadow on hover', () => {
     const starter: PlanTier = { ...BUSINESS, id: 'Starter-month', name: 'Starter', options: [option(2, 18_900)] }
     render(
       <>
@@ -106,13 +109,20 @@ describe('PlanCardV2', () => {
     expect(starterCard).toHaveAttribute('data-variant', 'muted-secondary')
     expect(businessCard).toHaveAttribute('data-variant', 'muted-secondary')
     expect(businessCard).toHaveClass('hover:bg-card')
+    expect(businessCard).toHaveClass('hover:shadow-hairline-lg')
+    expect(businessCard).not.toHaveClass('shadow-hairline-lg')
     expect(businessCard).toHaveClass('group/plan')
     within(businessCard)
       .getAllByTestId('plan-feature-check')
       .forEach((check) => expect(check).toHaveClass('group-hover/plan:bg-foreground'))
+    expect(
+      within(businessCard)
+        .getAllByTestId('plan-feature-check')
+        .map((check) => check.style.getPropertyValue('--check-delay')),
+    ).toEqual(PLAN_CONTENT_V2.Business.features.map((_, index) => `${index * 15}ms`))
   })
 
-  it('raises only the Business card and gives only it the filled button with an arrow', () => {
+  it('gives only the Business card the filled button, whose arrow nudges while the others reveal one', () => {
     const starter: PlanTier = { ...BUSINESS, id: 'Starter-month', name: 'Starter', options: [option(2, 18_900)] }
     render(
       <>
@@ -124,10 +134,10 @@ describe('PlanCardV2', () => {
     const [starterCard, businessCard] = screen.getAllByTestId('plan-card')
     expect(starterCard).not.toHaveAttribute('data-primary')
     expect(businessCard).toHaveAttribute('data-primary', 'true')
-    expect(within(starterCard).getByRole('button', { name: 'Continue with Starter' }).querySelector('svg')).toBeNull()
-    expect(
-      within(businessCard).getByRole('button', { name: 'Continue with Business' }).querySelector('svg'),
-    ).not.toBeNull()
+    const arrowOf = (card: HTMLElement, name: string) =>
+      within(card).getByRole('button', { name }).querySelector('[data-cta-arrow]')
+    expect(arrowOf(starterCard, 'Continue with Starter')).toHaveAttribute('data-cta-arrow', 'reveal')
+    expect(arrowOf(businessCard, 'Continue with Business')).toHaveAttribute('data-cta-arrow', 'nudge')
   })
 
   it('greys out the plan in force, even on the Business card', () => {
@@ -146,5 +156,6 @@ describe('PlanCardV2', () => {
     )
 
     expect(screen.getByRole('button', { name: 'Current plan' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Current plan' }).querySelector('[data-cta-arrow]')).toBeNull()
   })
 })

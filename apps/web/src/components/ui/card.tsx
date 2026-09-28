@@ -29,7 +29,7 @@ import { cn } from '@/utils/cn'
  *   `surface` ('default' | 'sunken', default 'default'), `radius` ('lg' | 'lg-xl' | 'xl' | 'none', default 'lg'),
  *   `selected` (mint border + shadow for a picked option), `elevated` (shadow only, for the one card that stands out),
  *   `hairline` (the design's hairline outline, for cards sitting on a card),
- *   `highlightOnHover` (switches to the card surface on hover and focus-within),
+ *   `highlightOnHover` (lifts to the card surface and raised hairline shadow on hover and focus-within),
  *   `className` (layout-only: w-*, margins, flex/grid)
  * - CardHeader / CardTitle / CardDescription / CardAction / CardContent / CardFooter: `className`
  *
@@ -54,7 +54,7 @@ import { cn } from '@/utils/cn'
  * - 2026-09-21: Added `elevated` (shadow-lg without the selection border) for the current plan card
  * - 2026-09-28: Added `hairline` (0.5px + 1px zero-blur outline, `--shadow-hairline`; composes with `elevated`) and
  *   `size="offer"` (28px top, 24px bottom) for the Plans v2 cards
- * - 2026-09-28: Added `highlightOnHover` (card surface on hover and focus-within) for the Plans v2 cards
+ * - 2026-09-28: Added `highlightOnHover` (card surface and raised shadow on hover and focus-within) for the Plans v2 cards
  */
 const cardVariants = cva(
   'bg-card text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col',
@@ -96,9 +96,9 @@ const cardVariants = cva(
       // Both resolve through compoundVariants so the element carries exactly one shadow utility.
       elevated: { true: '', false: '' },
       hairline: { true: '', false: '' },
-      // The card lifts to the plain card surface while hovered or holding focus, e.g. a plan card on a muted panel.
+      // While hovered or holding focus the card lifts to the plain surface and the raised hairline shadow.
       highlightOnHover: {
-        true: 'transition-colors hover:bg-card focus-within:bg-card',
+        true: 'transition-[background-color,box-shadow] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-card hover:shadow-hairline-lg hover:duration-200 focus-within:bg-card focus-within:shadow-hairline-lg focus-within:duration-200 motion-reduce:transition-none',
         false: '',
       },
     },

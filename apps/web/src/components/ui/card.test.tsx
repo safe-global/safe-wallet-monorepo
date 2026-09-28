@@ -81,7 +81,7 @@ describe('Card', () => {
     expect(shadows).toEqual(shadow ? [shadow] : [])
   })
 
-  it('lifts to the card surface on hover and focus only when asked to', () => {
+  it('lifts to the card surface and raised shadow on hover and focus only when asked to', () => {
     render(
       <>
         <Card data-testid="plain" variant="muted-secondary">
@@ -94,6 +94,11 @@ describe('Card', () => {
     )
 
     expect(screen.getByTestId('plain')).not.toHaveClass('hover:bg-card')
-    expect(screen.getByTestId('lifting')).toHaveClass('hover:bg-card', 'focus-within:bg-card')
+    expect(screen.getByTestId('lifting')).toHaveClass(
+      'hover:bg-card',
+      'focus-within:bg-card',
+      'hover:shadow-hairline-lg',
+      'focus-within:shadow-hairline-lg',
+    )
   })
 })
