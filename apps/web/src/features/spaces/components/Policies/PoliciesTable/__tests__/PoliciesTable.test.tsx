@@ -6,7 +6,6 @@ import {
   mockActiveSpendingLimit,
   mockMultiSpenderPolicy,
   mockPendingPolicy,
-  mockPendingRemoval,
   mockPendingUpdate,
   mockPolicies,
   mockPolygonSpendingLimitPolicy,
@@ -112,26 +111,10 @@ describe('PoliciesTable', () => {
     expect(screen.getByTestId('policy-status-pending')).toHaveTextContent('Pending')
   })
 
-  it('should, when a policy is pending, show the pending chip with who has signed', () => {
-    render(<PoliciesTable policies={[mockPendingPolicy()]} />)
-
-    const chip = screen.getByTestId('policy-status-pending')
-    expect(chip).toHaveTextContent('Pending')
-    expect(screen.getByTestId('policy-pending-progress')).toHaveTextContent('New · 1 of 2 signed')
-  })
-
-  it('should, when an executed change is not yet indexed, show it as activating without signatures', () => {
+  it('should, when an executed change is not yet indexed, show it as activating', () => {
     render(<PoliciesTable policies={[mockActivatingPolicy()]} />)
 
     expect(screen.getByTestId('policy-status-activating')).toHaveTextContent('Activating')
-    expect(screen.queryByTestId('policy-pending-progress')).not.toBeInTheDocument()
-  })
-
-  it('should, when an edit and a removal are queued, tell them apart from a creation', () => {
-    render(<PoliciesTable policies={[mockPendingUpdate(), mockPendingRemoval()]} />)
-
-    const captions = screen.getAllByTestId('policy-pending-progress').map((node) => node.textContent)
-    expect(captions).toEqual(['Edit · 1 of 2 signed', 'Removal · 1 of 2 signed'])
   })
 
   it('should, when a change is queued for an active policy, keep the active row beside the pending one', () => {

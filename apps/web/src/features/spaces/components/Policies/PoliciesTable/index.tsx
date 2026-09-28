@@ -6,10 +6,10 @@ import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import PaginatedDataTable, { type DataTableColumn } from '@/components/common/PaginatedDataTable'
 import PolicyRule from './components/PolicyRule'
-import PolicyStatusCell from './components/PolicyStatusCell'
 import PolicyTokens from './components/PolicyTokens'
+import PolicyStatusChip from '../components/PolicyStatusChip'
 import { getPolicyLabel } from '../utils/policyLabel'
-import { isProposerPolicy, type Policy } from '../types'
+import { getPolicyStatus, isProposerPolicy, type Policy } from '../types'
 
 export type PoliciesTableProps = {
   policies: Policy[]
@@ -104,7 +104,7 @@ const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
       width: '15%',
       minWidth: 140,
       cellTestId: 'policy-cell-status',
-      cell: (policy) => <PolicyStatusCell policy={policy} />,
+      cell: (policy) => <PolicyStatusChip status={getPolicyStatus(policy)} />,
     },
     {
       id: 'open',
