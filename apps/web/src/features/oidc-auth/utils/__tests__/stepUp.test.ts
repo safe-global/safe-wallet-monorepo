@@ -8,8 +8,6 @@ import { OIDC_AUTH_PENDING_KEY } from '../../constants'
 
 jest.mock('@/utils/navigation')
 
-const redirectedUrl = () => new URL(jest.mocked(navigateTo).mock.lastCall?.[0] ?? '')
-
 describe('startStepUp', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -20,7 +18,7 @@ describe('startStepUp', () => {
   it('should, when called, redirect to the CGW authorize endpoint with elevate=true', () => {
     startStepUp()
 
-    const url = redirectedUrl()
+    const url = new URL(jest.mocked(navigateTo).mock.calls[0][0])
     expect(url.origin + url.pathname).toBe(`${GATEWAY_URL}/v1/auth/oidc/authorize`)
     expect(url.searchParams.get('elevate')).toBe('true')
   })
@@ -28,13 +26,15 @@ describe('startStepUp', () => {
   it('should, when no redirect URL is given, return to the current page', () => {
     startStepUp()
 
-    expect(redirectedUrl().searchParams.get('redirect_url')).toBe('https://app.safe.global/spaces/members?spaceId=42')
+    const url = new URL(jest.mocked(navigateTo).mock.calls[0][0])
+    expect(url.searchParams.get('redirect_url')).toBe('https://app.safe.global/spaces/members?spaceId=42')
   })
 
   it('should, when a redirect URL is given, return to that URL instead', () => {
     startStepUp('https://app.safe.global/spaces/settings?spaceId=7')
 
-    expect(redirectedUrl().searchParams.get('redirect_url')).toBe('https://app.safe.global/spaces/settings?spaceId=7')
+    const url = new URL(jest.mocked(navigateTo).mock.calls[0][0])
+    expect(url.searchParams.get('redirect_url')).toBe('https://app.safe.global/spaces/settings?spaceId=7')
   })
 
   it('should, when the current URL carries stale error params, strip them from the return URL', () => {
@@ -42,7 +42,8 @@ describe('startStepUp', () => {
 
     startStepUp()
 
-    const returnUrl = new URL(redirectedUrl().searchParams.get('redirect_url') ?? '')
+    const url = new URL(jest.mocked(navigateTo).mock.calls[0][0])
+    const returnUrl = new URL(url.searchParams.get('redirect_url') ?? '')
     expect(returnUrl.searchParams.has('error')).toBe(false)
     expect(returnUrl.searchParams.has('error_description')).toBe(false)
     expect(returnUrl.searchParams.get('spaceId')).toBe('42')
@@ -60,6 +61,7 @@ describe('startStepUp', () => {
 
     startStepUp()
 
-    expect(redirectedUrl().searchParams.get('elevate')).toBe('true')
+    const url = new URL(jest.mocked(navigateTo).mock.calls[0][0])
+    expect(url.searchParams.get('elevate')).toBe('true')
   })
 })

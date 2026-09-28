@@ -9,8 +9,6 @@ import { OIDC_AUTH_PENDING_KEY, OidcConnection } from '../../constants'
 
 jest.mock('@/utils/navigation')
 
-const redirectedUrl = () => new URL(jest.mocked(navigateTo).mock.lastCall?.[0] ?? '')
-
 describe('useOidcLogin', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -35,7 +33,7 @@ describe('useOidcLogin', () => {
       result.current.loginWithRedirect(OidcConnection.EMAIL)
     })
 
-    const redirectUrl = redirectedUrl()
+    const redirectUrl = new URL(jest.mocked(navigateTo).mock.calls[0][0])
     expect(redirectUrl.origin + redirectUrl.pathname).toBe(`${GATEWAY_URL}/v1/auth/oidc/authorize`)
     expect(redirectUrl.searchParams.get('redirect_url')).toBe('https://app.safe.global/welcome/spaces')
     expect(redirectUrl.searchParams.get('connection')).toBe(OidcConnection.EMAIL)
@@ -48,7 +46,7 @@ describe('useOidcLogin', () => {
       result.current.loginWithRedirect(OidcConnection.GOOGLE)
     })
 
-    const redirectUrl = redirectedUrl()
+    const redirectUrl = new URL(jest.mocked(navigateTo).mock.calls[0][0])
     expect(redirectUrl.searchParams.get('connection')).toBe(OidcConnection.GOOGLE)
   })
 
@@ -60,7 +58,7 @@ describe('useOidcLogin', () => {
       result.current.loginWithRedirect(OidcConnection.EMAIL, customUrl)
     })
 
-    const redirectUrl = redirectedUrl()
+    const redirectUrl = new URL(jest.mocked(navigateTo).mock.calls[0][0])
     expect(redirectUrl.searchParams.get('redirect_url')).toBe(customUrl)
   })
 
@@ -72,7 +70,7 @@ describe('useOidcLogin', () => {
       result.current.loginWithRedirect(OidcConnection.EMAIL)
     })
 
-    const redirectUrl = redirectedUrl()
+    const redirectUrl = new URL(jest.mocked(navigateTo).mock.calls[0][0])
     const returnUrl = redirectUrl.searchParams.get('redirect_url')!
 
     expect(returnUrl).not.toContain('error=')
