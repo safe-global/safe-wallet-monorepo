@@ -1,8 +1,10 @@
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { getSafeDisplayInfo } from '@/components/common/AccountRow'
 import { render, screen } from '@/tests/test-utils'
 import { safeItemBuilder } from '@/tests/builders/safeItem'
 import { mockWallet } from '@/tests/mocks/hooks'
 import { useSpaceSafes } from '../../../../hooks/useSpaceSafes'
-import { mockActiveSpendingLimit } from '../../mocks/policies'
+import { asActivePolicy, mockActiveSpendingLimit, mockMultiSpenderPolicy } from '../../mocks/policies'
 import SpendingLimitDetails from '..'
 
 jest.mock('@/hooks/wallets/useWallet')
@@ -57,6 +59,23 @@ describe('SpendingLimitDetails', () => {
     setup()
 
     expect(screen.getByRole('button', { name: 'Connect wallet' })).toBeInTheDocument()
+  })
+
+  it('names a spender from the address book, and leaves an unknown one as its address', () => {
+    mockWallet()
+    mockSpaceSafes(false)
+    const multiSpender = asActivePolicy(mockMultiSpenderPolicy())
+    const [named, , unnamed] = multiSpender.data.spenders
+
+    render(<SpendingLimitDetails policy={multiSpender} onClose={jest.fn()} />, {
+      // The address book selector drops keys that fail checksum validation.
+      initialReduxState: {
+        addressBook: { [multiSpender.safe.chainId]: { [checksumAddress(named.spender)]: 'Payroll bot' } },
+      },
+    })
+
+    expect(screen.getByText('Payroll bot')).toBeInTheDocument()
+    expect(screen.getByText(getSafeDisplayInfo('', unnamed.spender).shortAddress)).toBeInTheDocument()
   })
 
   it('renders the usage of the policy the row carries, without fetching it again', () => {

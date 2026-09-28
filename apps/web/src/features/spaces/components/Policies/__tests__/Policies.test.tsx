@@ -6,7 +6,13 @@ import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { PROPOSER_INTRO_SEEN_KEY } from '../ProposerIntroDialog/constants'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from '../SpendingLimitIntroDialog/constants'
 import useWallet from '@/hooks/wallets/useWallet'
-import { asActivePolicy, mockActiveSpendingLimit, mockPolicies, mockProposerPolicy } from '../mocks/policies'
+import {
+  asActivePolicy,
+  mockActiveSpendingLimit,
+  mockMultiSpenderPolicy,
+  mockPolicies,
+  mockProposerPolicy,
+} from '../mocks/policies'
 import ProposerRoleFlow from '../ProposerRoleFlow'
 import Policies from '../index'
 import SpendingLimitFlow from '../SpendingLimitFlow'
@@ -479,6 +485,30 @@ describe('Policies', () => {
 
       expect(screen.getByRole('dialog', { name: 'Spending limit' })).toBeInTheDocument()
       expect(screen.queryByRole('dialog', { name: 'Proposer role' })).not.toBeInTheDocument()
+    })
+
+    it('should refresh the open panel when the policy is refetched', () => {
+      const spendingLimit = mockActiveSpendingLimit()
+      const { rerender } = render(<Policies policies={[spendingLimit]} />)
+      fireEvent.click(screen.getAllByTestId('policy-open-button')[0])
+
+      expect(screen.getByRole('dialog', { name: 'Spending limit' })).toBeInTheDocument()
+      expect(screen.queryByText('Spender 2')).not.toBeInTheDocument()
+
+      rerender(<Policies policies={[{ ...asActivePolicy(mockMultiSpenderPolicy()), id: spendingLimit.id }]} />)
+
+      expect(screen.getByText('Spender 2')).toBeInTheDocument()
+    })
+
+    it('should close the open panel when its policy leaves the response', () => {
+      const { rerender } = render(<Policies policies={[mockActiveSpendingLimit()]} />)
+      fireEvent.click(screen.getAllByTestId('policy-open-button')[0])
+
+      expect(screen.getByRole('dialog', { name: 'Spending limit' })).toBeInTheDocument()
+
+      rerender(<Policies policies={[]} />)
+
+      expect(screen.queryByRole('dialog', { name: 'Spending limit' })).not.toBeInTheDocument()
     })
 
     it('should, when a table row is clicked, report the policy it belongs to', () => {

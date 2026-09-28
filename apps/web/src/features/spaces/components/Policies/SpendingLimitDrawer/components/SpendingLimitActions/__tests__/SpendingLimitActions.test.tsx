@@ -80,6 +80,23 @@ describe('SpendingLimitActions', () => {
     expect(screen.getByText('Only signers of this Safe account can edit this spending limit.')).toBeInTheDocument()
   })
 
+  it('manage: keeps the non-signer reason ahead of the coming-soon line', () => {
+    render(
+      <SpendingLimitActions
+        state={{
+          kind: 'active',
+          action: 'manage',
+          disabled: true,
+          helper: 'Only signers of this Safe account can edit this spending limit.',
+        }}
+        onConnectWallet={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByText('Only signers of this Safe account can edit this spending limit.')).toBeInTheDocument()
+    expect(screen.queryByText('Editing a spending limit is coming soon.')).not.toBeInTheDocument()
+  })
+
   it('manage: keeps an unenforced policy out of the edit flow', () => {
     setup({
       kind: 'unenforced',

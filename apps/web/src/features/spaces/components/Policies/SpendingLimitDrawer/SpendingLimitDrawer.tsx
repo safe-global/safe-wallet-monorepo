@@ -53,6 +53,9 @@ const SpendingLimitDrawer = (props: SpendingLimitDrawerProps): ReactElement => {
   const state = resolveSpendingLimitDrawerState(policy, viewer, safe.name ?? 'this Safe account')
   const Icon = getPolicyIcon(policy.type)
   const isPending = state.kind === 'pending'
+  const actions = isPendingDrawer(props)
+    ? { pending: { transactionLink: props.transactionLink, onReviewTransaction: props.onReviewTransaction } }
+    : { onEdit: props.onEdit }
 
   return (
     <Drawer open={open} onClose={onClose} ariaLabel={getPolicyLabel(policy)}>
@@ -76,16 +79,7 @@ const SpendingLimitDrawer = (props: SpendingLimitDrawerProps): ReactElement => {
         </div>
       </DrawerBody>
 
-      <SpendingLimitActions
-        state={state}
-        onConnectWallet={onConnectWallet}
-        onEdit={isPendingDrawer(props) ? undefined : props.onEdit}
-        pending={
-          isPendingDrawer(props)
-            ? { transactionLink: props.transactionLink, onReviewTransaction: props.onReviewTransaction }
-            : undefined
-        }
-      />
+      <SpendingLimitActions state={state} onConnectWallet={onConnectWallet} {...actions} />
     </Drawer>
   )
 }

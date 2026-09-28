@@ -1,4 +1,4 @@
-import { useCallback, useContext, useState, type ReactElement } from 'react'
+import { useCallback, useContext, useMemo, useState, type ReactElement } from 'react'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { TxModalContext } from '@/components/tx-flow'
 import ExternalLink from '@/components/common/ExternalLink'
@@ -18,18 +18,7 @@ import SpendingLimitFlow from './SpendingLimitFlow'
 import SpendingLimitIntroDialog from './SpendingLimitIntroDialog'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from './SpendingLimitIntroDialog/constants'
 import { REQUEST_POLICY_FORM_HEIGHT, REQUEST_POLICY_FORM_URL, REQUEST_POLICY_FORM_WIDTH } from './constants'
-import {
-  isActiveSpendingLimitPolicy,
-  isProposerPolicy,
-  type Policy,
-  type Proposer,
-  type ProposerPolicy,
-  type SpendingLimitPolicy,
-} from './types'
-
-type OpenPolicyDetails =
-  | { type: 'proposer'; policy: ProposerPolicy; proposer: Proposer }
-  | { type: 'spending-limit'; policy: SpendingLimitPolicy & { status: 'active' } }
+import { isActiveSpendingLimitPolicy, isProposerPolicy, type Policy } from './types'
 
 interface PoliciesProps {
   /** Supplied by the caller. The page does not fetch. */
@@ -75,19 +64,20 @@ const Policies = ({
   const [isProposerIntroOpen, setIsProposerIntroOpen] = useState(false)
   const [isAddPolicyOpen, setIsAddPolicyOpen] = useState(false)
   // One slot, so opening another row swaps the panel instead of stacking a second one.
-  const [openDetails, setOpenDetails] = useState<OpenPolicyDetails | null>(null)
+  const [openPolicyId, setOpenPolicyId] = useState<string | null>(null)
 
   const openPolicy = useCallback((policy: Policy) => {
-    if (isProposerPolicy(policy)) {
-      const [proposer] = policy.data.proposers
-      if (proposer) setOpenDetails({ type: 'proposer', policy, proposer })
-      return
-    }
-
-    if (isActiveSpendingLimitPolicy(policy)) setOpenDetails({ type: 'spending-limit', policy })
+    if (isProposerPolicy(policy) || isActiveSpendingLimitPolicy(policy)) setOpenPolicyId(policy.id)
   }, [])
 
-  const closeDetails = useCallback(() => setOpenDetails(null), [])
+  const closeDetails = useCallback(() => setOpenPolicyId(null), [])
+
+  // Read back from the list rather than freezing the row: a refetch reaches the open panel, and a
+  // policy that leaves the response takes its panel with it.
+  const openedPolicy = useMemo(
+    () => policies.find((policy) => policy.id === openPolicyId) ?? null,
+    [policies, openPolicyId],
+  )
 
   const startSpendingLimitFlow = useCallback(() => setTxFlow(<SpendingLimitFlow />), [setTxFlow])
 
@@ -213,12 +203,12 @@ const Policies = ({
         onProceed={proceedToProposerFlow}
       />
 
-      {openDetails?.type === 'proposer' && (
-        <ProposerDetails policy={openDetails.policy} proposer={openDetails.proposer} onClose={closeDetails} />
+      {openedPolicy && isProposerPolicy(openedPolicy) && openedPolicy.data.proposers[0] && (
+        <ProposerDetails policy={openedPolicy} proposer={openedPolicy.data.proposers[0]} onClose={closeDetails} />
       )}
 
-      {openDetails?.type === 'spending-limit' && (
-        <SpendingLimitDetails policy={openDetails.policy} onClose={closeDetails} />
+      {openedPolicy && isActiveSpendingLimitPolicy(openedPolicy) && (
+        <SpendingLimitDetails policy={openedPolicy} onClose={closeDetails} />
       )}
     </div>
   )
