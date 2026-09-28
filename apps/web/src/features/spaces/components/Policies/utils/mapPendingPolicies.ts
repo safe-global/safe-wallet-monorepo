@@ -37,7 +37,9 @@ const findActiveAllowance = (
     ?.allowances.find((allowance) => sameAddress(allowance.token.address, token))
 
 const getOperation = (changes: PendingChange[], active: ActiveSpendingLimit | undefined): PendingPolicyOperation => {
-  if (changes.every((change) => change.operation === 'remove')) return 'remove'
+  if (changes.every((change) => change.kind === 'remove-delegate' || change.kind === 'delete-allowance')) {
+    return 'remove'
+  }
 
   const createsSomething = changes.some(
     (change) =>
