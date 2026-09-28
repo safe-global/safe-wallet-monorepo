@@ -183,7 +183,8 @@ export default function SafeAccountsTable({
     })
   }, [])
 
-  const { groups } = useSafeAccountRows(items, overviewsByKey)
+  const hasWorkspacesColumn = !columns || columns.includes('workspaces')
+  const { groups } = useSafeAccountRows(items, overviewsByKey, hasWorkspacesColumn)
   const [sort, setSort] = useState<SortState>({ orderBy: null, order: 'asc' })
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [renameTarget, setRenameTarget] = useState<RenameTarget | null>(null)

@@ -4,7 +4,7 @@ import {
   useLazySpaceSafesGetV1Query,
   type GetSpaceResponse,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useSafeSpaces } from '../useSafeSpaces'
+import { _mapWithConcurrency, useSafeSpaces } from '../useSafeSpaces'
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpacesGetV1Query: jest.fn(),
@@ -19,13 +19,17 @@ jest.mock('@/store/authSlice', () => ({
 const mockUseSpacesGetV1Query = useSpacesGetV1Query as jest.Mock
 const mockUseLazySpaceSafesGetV1Query = useLazySpaceSafesGetV1Query as jest.Mock
 
-const spaceAlpha = { uuid: 'alpha', name: 'Alpha', members: [], memberCount: 1, safeCount: 1 } as GetSpaceResponse
-const spaceBravo = { uuid: 'bravo', name: 'Bravo', members: [], memberCount: 1, safeCount: 1 } as GetSpaceResponse
+const member = (status: 'ACTIVE' | 'INVITED') => ({ status }) as GetSpaceResponse['members'][number]
+const space = (uuid: string, status: 'ACTIVE' | 'INVITED' = 'ACTIVE') =>
+  ({ uuid, name: uuid, members: [member(status)], memberCount: 1, safeCount: 1 }) as GetSpaceResponse
+const spaceAlpha = space('alpha')
+const spaceBravo = space('bravo')
 
-const mockSafesResolver = (safesBySpace: Record<string, { safes: Record<string, string[]> }>) =>
-  mockUseLazySpaceSafesGetV1Query.mockReturnValue([
-    jest.fn((arg: { spaceId: string }) => ({ unwrap: () => Promise.resolve(safesBySpace[arg.spaceId]) })),
-  ])
+const mockSafesResolver = (safesBySpace: Record<string, { safes: Record<string, string[]> }>) => {
+  const trigger = jest.fn((arg: { spaceId: string }) => ({ unwrap: () => Promise.resolve(safesBySpace[arg.spaceId]) }))
+  mockUseLazySpaceSafesGetV1Query.mockReturnValue([trigger])
+  return trigger
+}
 
 describe('useSafeSpaces', () => {
   beforeEach(() => {
@@ -70,5 +74,47 @@ describe('useSafeSpaces', () => {
     const { result } = renderHook(() => useSafeSpaces())
 
     await waitFor(() => expect(result.current.safeSpaces).toEqual({}))
+  })
+
+  it('skips Spaces the user is only invited to, whose Safes they cannot read yet', async () => {
+    const trigger = mockSafesResolver({ alpha: { safes: { '1': ['0xAAA'] } } })
+    mockUseSpacesGetV1Query.mockReturnValue({ data: [spaceAlpha, space('invited', 'INVITED')], isLoading: false })
+
+    const { result } = renderHook(() => useSafeSpaces())
+
+    await waitFor(() => expect(result.current.safeSpaces['1:0xaaa']).toEqual([spaceAlpha]))
+    expect(trigger).toHaveBeenCalledTimes(1)
+    expect(trigger).toHaveBeenCalledWith({ spaceId: 'alpha' }, true)
+  })
+
+  it('does not fetch any Space safes while skipped', async () => {
+    mockSafesResolver({})
+    mockUseSpacesGetV1Query.mockReturnValue({ data: undefined, isLoading: false })
+
+    const { result } = renderHook(() => useSafeSpaces(true))
+
+    expect(mockUseSpacesGetV1Query).toHaveBeenCalledWith(undefined, { skip: true })
+    await waitFor(() => expect(result.current).toEqual({ safeSpaces: {}, isLoading: false }))
+  })
+})
+
+describe('_mapWithConcurrency', () => {
+  it('never runs more than the limit at once and keeps the input order', async () => {
+    let inFlight = 0
+    let maxInFlight = 0
+    const results = await _mapWithConcurrency([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 4, async (n) => {
+      inFlight++
+      maxInFlight = Math.max(maxInFlight, inFlight)
+      await new Promise((resolve) => setTimeout(resolve, 10 - n))
+      inFlight--
+      return n * 2
+    })
+
+    expect(maxInFlight).toBe(4)
+    expect(results).toEqual([2, 4, 6, 8, 10, 12, 14, 16, 18, 20])
+  })
+
+  it('resolves to an empty list for no items', async () => {
+    await expect(_mapWithConcurrency([], 4, async (n) => n)).resolves.toEqual([])
   })
 })

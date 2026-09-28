@@ -3,20 +3,22 @@ import { useSafeSponsoredTxs } from '../useSafeSponsoredTxs'
 
 const mockUseIsSafeProEnabled = jest.fn()
 const mockUseSafeInfo = jest.fn()
-const mockUseSafeSpaces = jest.fn()
+const mockIsSignedIn = jest.fn()
+const mockUseSpaceSafesGetV1Query = jest.fn()
 const mockUseSpacePlan = jest.fn()
 jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockUseIsSafeProEnabled() }))
 jest.mock('@/hooks/useSafeInfo', () => ({ __esModule: true, default: () => mockUseSafeInfo() }))
-jest.mock('@/hooks/useSafeSpaces', () => ({
-  ...jest.requireActual('@/hooks/useSafeSpaces'),
-  useSafeSpaces: (skip: boolean) => mockUseSafeSpaces(skip),
+jest.mock('@/store', () => ({ useAppSelector: () => mockIsSignedIn() }))
+jest.mock('@/store/authSlice', () => ({ isAuthenticated: jest.fn() }))
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
+  useSpaceSafesGetV1Query: (...args: unknown[]) => mockUseSpaceSafesGetV1Query(...args),
 }))
 jest.mock('../useSpacePlan', () => ({ useSpacePlan: (spaceId: string | null) => mockUseSpacePlan(spaceId) }))
 let mockCurrentSpaceId: string | null = null
 jest.mock('../useCurrentSpaceId', () => ({ useCurrentSpaceId: () => mockCurrentSpaceId }))
 
 const SAFE = { safe: { chainId: '1' }, safeAddress: '0xAbC' }
-const SPACE = { uuid: 'space-1' }
+const holding = (safes: Record<string, string[]>) => ({ currentData: { safes }, isLoading: false })
 const meter = { used: 20, quota: 50, resetsAt: '2026-11-01T00:00:00.000Z' }
 
 describe('useSafeSponsoredTxs', () => {
@@ -25,14 +27,15 @@ describe('useSafeSponsoredTxs', () => {
     mockCurrentSpaceId = 'space-1'
     mockUseIsSafeProEnabled.mockReturnValue(true)
     mockUseSafeInfo.mockReturnValue(SAFE)
-    mockUseSafeSpaces.mockReturnValue({ safeSpaces: { '1:0xabc': [SPACE] }, isLoading: false })
+    mockIsSignedIn.mockReturnValue(true)
+    mockUseSpaceSafesGetV1Query.mockReturnValue(holding({ '1': ['0xabc'] }))
     mockUseSpacePlan.mockReturnValue({ plan: { status: 'active' }, sponsoredTxs: meter, isLoading: false })
   })
 
   it('reads the allowance of the Workspace the Safe belongs to', () => {
     const { result } = renderHook(() => useSafeSponsoredTxs())
 
-    expect(mockUseSafeSpaces).toHaveBeenCalledWith(false)
+    expect(mockUseSpaceSafesGetV1Query).toHaveBeenCalledWith({ spaceId: 'space-1' }, { skip: false })
     expect(mockUseSpacePlan).toHaveBeenCalledWith('space-1')
     expect(result.current).toEqual({
       isEnabled: true,
@@ -45,15 +48,36 @@ describe('useSafeSponsoredTxs', () => {
     })
   })
 
-  it('only charges the Workspace the user is working in, and none when that one does not hold the Safe', () => {
-    mockUseSafeSpaces.mockReturnValue({ safeSpaces: { '1:0xabc': [SPACE, { uuid: 'space-2' }] }, isLoading: false })
+  it('only looks up the Workspace the user is working in, and charges none when that one does not hold the Safe', () => {
     mockCurrentSpaceId = 'space-2'
     renderHook(() => useSafeSponsoredTxs())
+    expect(mockUseSpaceSafesGetV1Query).toHaveBeenLastCalledWith({ spaceId: 'space-2' }, { skip: false })
     expect(mockUseSpacePlan).toHaveBeenLastCalledWith('space-2')
 
-    mockCurrentSpaceId = 'space-elsewhere'
+    mockUseSpaceSafesGetV1Query.mockReturnValue(holding({ '1': ['0xdef'] }))
     expect(renderHook(() => useSafeSponsoredTxs()).result.current).toMatchObject({ isPro: false, spaceId: null })
     expect(mockUseSpacePlan).toHaveBeenLastCalledWith(null)
+  })
+
+  it('keys membership by chain: the same address on another chain does not count', () => {
+    mockUseSpaceSafesGetV1Query.mockReturnValue(holding({ '10': ['0xabc'] }))
+    expect(renderHook(() => useSafeSponsoredTxs()).result.current).toMatchObject({ isPro: false, spaceId: null })
+  })
+
+  it('skips the lookup without a Safe, a Workspace or a session', () => {
+    mockUseSafeInfo.mockReturnValue({ safe: { chainId: '' }, safeAddress: '' })
+    renderHook(() => useSafeSponsoredTxs())
+    expect(mockUseSpaceSafesGetV1Query).toHaveBeenLastCalledWith({ spaceId: 'space-1' }, { skip: true })
+
+    mockUseSafeInfo.mockReturnValue(SAFE)
+    mockCurrentSpaceId = null
+    renderHook(() => useSafeSponsoredTxs())
+    expect(mockUseSpaceSafesGetV1Query).toHaveBeenLastCalledWith({ spaceId: '' }, { skip: true })
+
+    mockCurrentSpaceId = 'space-1'
+    mockIsSignedIn.mockReturnValue(false)
+    expect(renderHook(() => useSafeSponsoredTxs()).result.current).toMatchObject({ isPro: false, spaceId: null })
+    expect(mockUseSpaceSafesGetV1Query).toHaveBeenLastCalledWith({ spaceId: 'space-1' }, { skip: true })
   })
 
   it('caps the count at zero and reads a missing quota as unlimited', () => {
@@ -77,7 +101,7 @@ describe('useSafeSponsoredTxs', () => {
   })
 
   it('is not Pro for a Safe outside any Workspace, or in one without a live plan', () => {
-    mockUseSafeSpaces.mockReturnValue({ safeSpaces: {}, isLoading: false })
+    mockUseSpaceSafesGetV1Query.mockReturnValue(holding({}))
     expect(renderHook(() => useSafeSponsoredTxs()).result.current).toMatchObject({
       isEnabled: true,
       isPro: false,
@@ -88,7 +112,8 @@ describe('useSafeSponsoredTxs', () => {
     })
     expect(mockUseSpacePlan).toHaveBeenCalledWith(null)
 
-    mockUseSafeSpaces.mockReturnValue({ safeSpaces: { '1:0xabc': [SPACE] }, isLoading: false })
+    mockIsSignedIn.mockReturnValue(true)
+    mockUseSpaceSafesGetV1Query.mockReturnValue(holding({ '1': ['0xabc'] }))
     mockUseSpacePlan.mockReturnValue({ plan: null, sponsoredTxs: null, isLoading: false })
     expect(renderHook(() => useSafeSponsoredTxs()).result.current.isPro).toBe(false)
   })
@@ -97,7 +122,7 @@ describe('useSafeSponsoredTxs', () => {
     mockUseIsSafeProEnabled.mockReturnValue(false)
     const { result } = renderHook(() => useSafeSponsoredTxs())
 
-    expect(mockUseSafeSpaces).toHaveBeenCalledWith(true)
+    expect(mockUseSpaceSafesGetV1Query).toHaveBeenCalledWith({ spaceId: 'space-1' }, { skip: true })
     expect(mockUseSpacePlan).toHaveBeenCalledWith(null)
     expect(result.current).toEqual({
       isEnabled: false,
@@ -110,11 +135,12 @@ describe('useSafeSponsoredTxs', () => {
     })
   })
 
-  it('reports loading while the Workspaces or the plan resolve', () => {
-    mockUseSafeSpaces.mockReturnValue({ safeSpaces: {}, isLoading: true })
+  it("reports loading while the Workspace's Safes or the plan resolve", () => {
+    mockUseSpaceSafesGetV1Query.mockReturnValue({ currentData: undefined, isLoading: true })
     expect(renderHook(() => useSafeSponsoredTxs()).result.current.isLoading).toBe(true)
 
-    mockUseSafeSpaces.mockReturnValue({ safeSpaces: { '1:0xabc': [SPACE] }, isLoading: false })
+    mockIsSignedIn.mockReturnValue(true)
+    mockUseSpaceSafesGetV1Query.mockReturnValue(holding({ '1': ['0xabc'] }))
     mockUseSpacePlan.mockReturnValue({ plan: null, sponsoredTxs: null, isLoading: true })
     expect(renderHook(() => useSafeSponsoredTxs()).result.current.isLoading).toBe(true)
   })
