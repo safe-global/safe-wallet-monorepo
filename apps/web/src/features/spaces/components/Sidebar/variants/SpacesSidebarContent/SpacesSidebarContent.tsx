@@ -23,7 +23,7 @@ export const SpacesSidebarContent = ({
   const isAuditLogEnabled = useHasFeature(FEATURES.SPACE_AUDIT_LOG)
   const isPoliciesEnabled = useHasFeature(FEATURES.POLICIES)
   const isAnnounced = useIsSafeProAnnouncementEnabled()
-  const isSafePro = useIsSafeProEnabled() === true
+  const isSafePro = useIsSafeProEnabled()
 
   const getLink = (item: SidebarItemConfig) => ({
     pathname: item.href,

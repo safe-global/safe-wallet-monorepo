@@ -144,17 +144,14 @@ describe('AboutPage', () => {
       expect(screen.getByRole('link', { name: /^Pro Terms & Conditions/i })).toBeInTheDocument()
     })
 
-    it.each([false, undefined])(
-      'leaves the Safe Pro terms out while Safe Pro is neither announced nor live (live flag %s)',
-      (isSafePro) => {
-        ;(useIsSafeProAnnouncementEnabled as jest.Mock).mockReturnValue(false)
-        ;(useIsSafeProEnabled as jest.Mock).mockReturnValue(isSafePro)
-        renderWithStore()
+    it('leaves the Safe Pro terms out while Safe Pro is neither announced nor live', () => {
+      ;(useIsSafeProAnnouncementEnabled as jest.Mock).mockReturnValue(false)
+      ;(useIsSafeProEnabled as jest.Mock).mockReturnValue(false)
+      renderWithStore()
 
-        expect(screen.queryByRole('link', { name: /^Pro /i })).not.toBeInTheDocument()
-        expect(screen.getByRole('link', { name: /^Terms & Conditions/i })).toHaveAttribute('href', AppRoutes.terms)
-      },
-    )
+      expect(screen.queryByRole('link', { name: /^Pro /i })).not.toBeInTheDocument()
+      expect(screen.getByRole('link', { name: /^Terms & Conditions/i })).toHaveAttribute('href', AppRoutes.terms)
+    })
   })
 
   describe('help links', () => {

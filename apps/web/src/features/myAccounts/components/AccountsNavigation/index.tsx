@@ -32,7 +32,7 @@ const navItems: Item[] = [
 
 const AccountsNavigation = () => {
   const router = useRouter()
-  const isSafePro = useIsSafeProEnabled() === true
+  const isSafePro = useIsSafeProEnabled()
 
   const activeUrl = navItems.some((item) => item.url === router.pathname) ? router.pathname : navItems[0].url
 

@@ -7,7 +7,7 @@ type SpaceSafeLimit = { limit: SafeLimit; isLoading: boolean; isError: boolean; 
 
 /** Under Safe Pro the limit is `undefined` until the seats meter arrives, so a failure never reads as a quota. */
 export const useSpaceSafeLimit = (spaceId?: string | null): SpaceSafeLimit => {
-  const isSafePro = useIsSafeProEnabled() === true
+  const isSafePro = useIsSafeProEnabled()
   const { seats, isLoading, isError, refetch } = useSpaceEntitlements(spaceId)
 
   if (!isSafePro) return { limit: SAFE_ACCOUNTS_LIMIT, isLoading: false, isError: false, retry: refetch }

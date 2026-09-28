@@ -7,7 +7,7 @@ import { useSpacePlan } from './useSpacePlan'
 export const useSeatUpsell = (spaceId?: string | null) => {
   const currentSpaceId = useCurrentSpaceId()
   const resolvedSpaceId = spaceId === undefined ? currentSpaceId : spaceId
-  const isSafePro = useIsSafeProEnabled() === true
+  const isSafePro = useIsSafeProEnabled()
   const { seats, tierName } = useSpacePlan(resolvedSpaceId)
   const { paidPlans } = useSpaceOffers(resolvedSpaceId)
   const limit = isSafePro ? (seats?.quota ?? null) : null

@@ -7,7 +7,7 @@ import { useCurrentSpaceId } from '../useCurrentSpaceId'
 export const useBillingSpaceId = (spaceId?: string | null): string | null => {
   const currentSpaceId = useCurrentSpaceId()
   const isSignedIn = useAppSelector(isAuthenticated)
-  const isSafePro = useIsSafeProEnabled() === true
+  const isSafePro = useIsSafeProEnabled()
   const resolved = spaceId === undefined ? currentSpaceId : spaceId
 
   return isSafePro && isSignedIn && resolved ? resolved : null

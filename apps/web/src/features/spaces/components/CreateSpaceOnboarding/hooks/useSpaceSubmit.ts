@@ -26,7 +26,7 @@ const useSpaceSubmit = (
   const router = useRouter()
   const dispatch = useAppDispatch()
   const safe = useSafeQueryParam() || undefined
-  const isSafePro = useIsSafeProEnabled() === true
+  const isSafePro = useIsSafeProEnabled()
   const [createSpaceWithUser] = useSpacesCreateV1Mutation()
   const [updateSpace] = useSpacesUpdateV1Mutation()
 

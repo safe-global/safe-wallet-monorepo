@@ -14,7 +14,7 @@ import css from './styles.module.css'
 
 const SafeProWorkspacesBanner = ({ className }: { className?: string }) => {
   const isDarkMode = useDarkMode()
-  const isLive = useIsSafeProEnabled() === true
+  const isLive = useIsSafeProEnabled()
 
   return (
     <ShadcnProvider dark={isDarkMode} className={className}>

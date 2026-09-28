@@ -101,7 +101,7 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
   const isDarkMode = useDarkMode()
   const isSafeProAnnouncementEnabled = useIsSafeProAnnouncementEnabled()
   // The Safe Pro terms only apply once Safe Pro is live.
-  const isSafePro = useIsSafeProEnabled() === true
+  const isSafePro = useIsSafeProEnabled()
   const { SafeProBanner } = useLoadFeature(SafeProFeature)
 
   return (
@@ -199,7 +199,7 @@ const WORKSPACE_BENEFITS = [
 const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
   const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
   const isDarkMode = useDarkMode()
-  const isSafePro = useIsSafeProEnabled() === true
+  const isSafePro = useIsSafeProEnabled()
 
   return (
     <>

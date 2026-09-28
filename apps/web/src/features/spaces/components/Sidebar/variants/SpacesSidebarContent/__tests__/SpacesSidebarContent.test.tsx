@@ -9,7 +9,7 @@ const mockUseIsActiveMember = jest.fn()
 const mockUseResolvedSidebarNav = jest.fn()
 const mockUseHasFeature = jest.fn()
 const mockUseIsSafeProAnnouncementEnabled = jest.fn<boolean, []>()
-const mockUseIsSafeProEnabled = jest.fn<boolean | undefined, []>()
+const mockUseIsSafeProEnabled = jest.fn<boolean, []>()
 
 jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => mockUseCurrentSpaceId(),
@@ -145,7 +145,7 @@ describe('SpacesSidebarContent', () => {
     mockUseResolvedSidebarNav.mockReturnValue(mockResolvedNavItems)
     mockUseHasFeature.mockReturnValue(true)
     mockUseIsSafeProAnnouncementEnabled.mockReturnValue(true)
-    mockUseIsSafeProEnabled.mockReturnValue(undefined)
+    mockUseIsSafeProEnabled.mockReturnValue(false)
   })
 
   it('renders SpacesSidebarVariant with resolved navigation', () => {
@@ -242,12 +242,9 @@ describe('SpacesSidebarContent', () => {
       expect(setupHrefs()).toContain('/spaces/plans')
     })
 
-    it.each([
-      { name: 'both Safe Pro flags are off', isSafePro: false },
-      { name: 'the chain config is still loading', isSafePro: undefined },
-    ])('hides the Plans entry when $name', ({ isSafePro }) => {
+    it('hides the Plans entry when both Safe Pro flags are off', () => {
       mockUseIsSafeProAnnouncementEnabled.mockReturnValue(false)
-      mockUseIsSafeProEnabled.mockReturnValue(isSafePro)
+      mockUseIsSafeProEnabled.mockReturnValue(false)
 
       render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
 

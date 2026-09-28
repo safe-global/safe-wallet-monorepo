@@ -7,7 +7,7 @@ const mockUseChangePlan = jest.fn()
 let mockIsAdmin = true
 const mockStartCheckout = jest.fn()
 const mockOpenPortal = jest.fn()
-const mockUseIsSafeProEnabled = jest.fn<boolean | undefined, []>()
+const mockUseIsSafeProEnabled = jest.fn<boolean, []>()
 
 jest.mock('../../AuthState', () => ({
   __esModule: true,
@@ -108,8 +108,8 @@ describe('SpacePlansPage', () => {
     mockUseSpaceOffers.mockReturnValue({ paidPlans: [STARTER], isLoading: false })
   })
 
-  it.each([false, undefined])('shows the Safe Pro teaser instead of the plans when Safe Pro is %s', (isSafePro) => {
-    mockUseIsSafeProEnabled.mockReturnValue(isSafePro)
+  it('shows the Safe Pro teaser instead of the plans when Safe Pro is off', () => {
+    mockUseIsSafeProEnabled.mockReturnValue(false)
     onPlan('Business', 499, 'active')
     render(<SpacePlansPage spaceId={SPACE_ID} />)
 

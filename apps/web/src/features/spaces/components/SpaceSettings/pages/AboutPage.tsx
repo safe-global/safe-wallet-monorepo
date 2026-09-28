@@ -147,7 +147,7 @@ const AboutPage = () => {
   const showSupport = !$isDisabled && isOfficialHost
   const isAnnounced = useIsSafeProAnnouncementEnabled()
   const isSafePro = useIsSafeProEnabled()
-  const showSafeProLinks = isAnnounced || isSafePro === true
+  const showSafeProLinks = isAnnounced || isSafePro
   const legalLinks = showSafeProLinks ? [...SAFE_PRO_LEGAL_LINKS, ...LEGAL_LINKS] : LEGAL_LINKS
 
   const handleContactSupportClick = useCallback(() => {

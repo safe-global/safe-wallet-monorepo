@@ -9,7 +9,7 @@ export type WorkspaceLockReason = 'trial-offered' | 'payment-failed' | 'lapsed'
 
 /** A Workspace without a live subscription (never, canceled, unpaid or pending) is locked behind a blocking modal. */
 export const useWorkspaceLock = (spaceId?: string | null) => {
-  const isSafePro = useIsSafeProEnabled() === true
+  const isSafePro = useIsSafeProEnabled()
   const isInvited = useIsInvited()
   const subscription = useSpaceSubscription(spaceId)
   const offers = useSpaceOffers(spaceId)

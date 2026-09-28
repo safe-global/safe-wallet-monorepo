@@ -12,7 +12,7 @@ const seenStore = localItem<boolean>(SAFE_PRO_ANNOUNCEMENT_SEEN_KEY)
 export function useSafeProAnnouncementModal(isWorkspaceReady: boolean) {
   const [isOpen, setIsOpen] = useState(false)
   const isAnnounced = useIsSafeProAnnouncementEnabled()
-  const isLive = useIsSafeProEnabled() === true
+  const isLive = useIsSafeProEnabled()
   const isReady = isAnnounced && !isLive && isWorkspaceReady
 
   useEffect(() => {

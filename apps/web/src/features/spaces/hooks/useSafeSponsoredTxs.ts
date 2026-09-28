@@ -21,7 +21,7 @@ export type SafeSponsoredTxs = {
 
 /** The sponsored-transactions allowance of the Workspace the current Safe belongs to, if it belongs to one. */
 export const useSafeSponsoredTxs = (): SafeSponsoredTxs => {
-  const isEnabled = useIsSafeProEnabled() === true
+  const isEnabled = useIsSafeProEnabled()
   const { safe, safeAddress } = useSafeInfo()
   const { safeSpaces, isLoading: isSpacesLoading } = useSafeSpaces(!isEnabled)
   const currentSpaceId = useCurrentSpaceId()

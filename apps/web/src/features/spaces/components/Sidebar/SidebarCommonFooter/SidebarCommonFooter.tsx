@@ -47,7 +47,7 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
     $error: twoFactorCardError,
   } = useLoadFeature(OidcAuthFeature)
   const isSafeProAnnouncementEnabled = useIsSafeProAnnouncementEnabled()
-  const isSafePro = useIsSafeProEnabled() === true
+  const isSafePro = useIsSafeProEnabled()
   const { pathname } = useRouter()
   const [isSafeProBannerDismissed, dismissSafeProBanner] = useSafeProSidebarBannerDismissed()
   // A failed chunk counts as no banner: its stub then renders nothing for good.

@@ -59,7 +59,7 @@ export const SpaceSelectorDropdown = ({
   const [isOpen, setIsOpen] = useState(false)
   const menuId = useId()
   const spaceName = selectedSpace?.name ?? ''
-  const isSafePro = useIsSafeProEnabled() === true
+  const isSafePro = useIsSafeProEnabled()
   const { tierName, isTrialing, isTrialEndingSoon, plan } = useSpacePlan()
   const planLabel = !isSafePro ? 'Workspace' : isTrialing ? trialLabel(plan?.daysLeft) : tierName
   const displayName = truncateSpaceName(spaceName, SPACE_SELECTOR_NAME_MAX_LENGTH)

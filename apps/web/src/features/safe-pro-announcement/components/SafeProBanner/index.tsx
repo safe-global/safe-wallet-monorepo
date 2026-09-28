@@ -11,7 +11,7 @@ import css from './styles.module.css'
 import { safeProMoveHeadline } from '../../utils/safeProMoveHeadline'
 
 const SafeProBanner = ({ className }: { className?: string }) => {
-  const isLive = useIsSafeProEnabled() === true
+  const isLive = useIsSafeProEnabled()
 
   return (
     <Card

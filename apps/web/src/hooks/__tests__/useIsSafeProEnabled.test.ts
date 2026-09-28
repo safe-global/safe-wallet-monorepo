@@ -20,11 +20,15 @@ describe('useIsSafeProEnabled', () => {
     expect(mockUseHasFeature).toHaveBeenCalledWith(FEATURES.SAFE_PRO)
   })
 
-  it.each([true, false, undefined])('returns the flag value as is when it is %s', (value) => {
-    mockUseHasFeature.mockReturnValue(value)
+  it.each([
+    { flag: true, expected: true },
+    { flag: false, expected: false },
+    { flag: undefined, expected: false },
+  ])('returns $expected when the flag is $flag', ({ flag, expected }) => {
+    mockUseHasFeature.mockReturnValue(flag)
 
     const { result } = renderHook(() => useIsSafeProEnabled())
 
-    expect(result.current).toBe(value)
+    expect(result.current).toBe(expected)
   })
 })

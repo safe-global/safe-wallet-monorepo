@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react'
 import { useBillingSpaceId } from '../useBillingSpaceId'
 
-const mockUseIsSafeProEnabled = jest.fn<boolean | undefined, []>()
+const mockUseIsSafeProEnabled = jest.fn<boolean, []>()
 let mockIsSignedIn = true
 let mockCurrentSpaceId: string | null = null
 
@@ -38,11 +38,8 @@ describe('useBillingSpaceId', () => {
     expect(result.current).toBeNull()
   })
 
-  it.each([
-    ['off', false],
-    ['loading', undefined],
-  ])('returns null when the Safe Pro flag is %s', (_, value) => {
-    mockUseIsSafeProEnabled.mockReturnValue(value)
+  it('returns null when the Safe Pro flag is off', () => {
+    mockUseIsSafeProEnabled.mockReturnValue(false)
     const { result } = renderHook(() => useBillingSpaceId(SPACE_ID))
 
     expect(result.current).toBeNull()

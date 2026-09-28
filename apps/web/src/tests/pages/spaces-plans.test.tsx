@@ -4,9 +4,12 @@ import { AppRoutes } from '@/config/routes'
 import * as router from 'next/router'
 import * as featureModule from '@/features/__core__'
 import * as spacesFeature from '@/features/spaces'
+import { chainBuilder } from '@/tests/builders/chains'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 const mockUseIsSafeProAnnouncementEnabled = jest.fn<boolean, []>()
-const mockUseIsSafeProEnabled = jest.fn<boolean | undefined, []>()
+const mockUseIsSafeProEnabled = jest.fn<boolean, []>()
+const mockUseCurrentChain = jest.fn<Chain | undefined, []>()
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
@@ -30,15 +33,28 @@ jest.mock('@/hooks/useIsSafeProEnabled', () => ({
   useIsSafeProEnabled: () => mockUseIsSafeProEnabled(),
 }))
 
+jest.mock('@/hooks/useChains', () => ({
+  useCurrentChain: () => mockUseCurrentChain(),
+}))
+
 const SPACE_ID = 'space-uuid-1'
 
 const SpacePlansPageMock = ({ spaceId }: { spaceId: string }) => <div data-testid="plans">plans {spaceId}</div>
 
-const setup = ({ isAnnounced, isSafePro }: { isAnnounced: boolean; isSafePro: boolean | undefined }) => {
+const setup = ({
+  isAnnounced,
+  isSafePro,
+  isChainLoaded = true,
+}: {
+  isAnnounced: boolean
+  isSafePro: boolean
+  isChainLoaded?: boolean
+}) => {
   ;(router.useRouter as jest.Mock).mockReturnValue({ isReady: true, query: { spaceId: SPACE_ID } })
   ;(featureModule.useLoadFeature as jest.Mock).mockReturnValue({ SpacePlansPage: SpacePlansPageMock })
   mockUseIsSafeProAnnouncementEnabled.mockReturnValue(isAnnounced)
   mockUseIsSafeProEnabled.mockReturnValue(isSafePro)
+  mockUseCurrentChain.mockReturnValue(isChainLoaded ? chainBuilder().build() : undefined)
 }
 
 describe('SpacePlansPage (/spaces/plans)', () => {
@@ -50,9 +66,15 @@ describe('SpacePlansPage (/spaces/plans)', () => {
     { name: 'both Safe Pro flags are off', isAnnounced: false, isSafePro: false, isOn: false },
     { name: 'Safe Pro is only announced', isAnnounced: true, isSafePro: false, isOn: true },
     { name: 'Safe Pro is only live', isAnnounced: false, isSafePro: true, isOn: true },
-    { name: 'the chain config is still loading', isAnnounced: false, isSafePro: undefined, isOn: undefined },
-  ])('hands $isOn to the spaces-index redirect when $name', ({ isAnnounced, isSafePro, isOn }) => {
-    setup({ isAnnounced, isSafePro })
+    {
+      name: 'the chain config is still loading',
+      isAnnounced: false,
+      isSafePro: false,
+      isChainLoaded: false,
+      isOn: undefined,
+    },
+  ])('hands $isOn to the spaces-index redirect when $name', ({ isAnnounced, isSafePro, isChainLoaded, isOn }) => {
+    setup({ isAnnounced, isSafePro, isChainLoaded })
 
     render(<SpacePlansPage />)
 

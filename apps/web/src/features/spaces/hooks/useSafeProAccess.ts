@@ -17,7 +17,7 @@ export const useSafeProAccess = (): {
   isLoading: boolean
   spaceId: string | null
 } => {
-  const isSafePro = useIsSafeProEnabled() === true
+  const isSafePro = useIsSafeProEnabled()
   const isSignedIn = useAppSelector(isAuthenticated)
   const spaceId = useCurrentSpaceId()
   const chainId = useChainId()

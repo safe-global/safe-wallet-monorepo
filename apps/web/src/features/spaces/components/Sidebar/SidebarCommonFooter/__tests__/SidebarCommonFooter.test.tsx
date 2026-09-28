@@ -137,7 +137,7 @@ jest.mock('@/hooks/useChains', () => ({
   useHasFeature: (feature: string) => feature === mockTwoFactorBannerFlag && mockIsTwoFactorBannerEnabled,
 }))
 
-let mockIsSafeProEnabled: boolean | undefined = false
+let mockIsSafeProEnabled = false
 jest.mock('@/hooks/useIsSafeProEnabled', () => ({
   useIsSafeProEnabled: () => mockIsSafeProEnabled,
 }))
