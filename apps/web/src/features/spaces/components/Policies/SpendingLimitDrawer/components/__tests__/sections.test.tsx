@@ -56,6 +56,15 @@ describe('PolicyOverview', () => {
     expect(within(enforcedByRow).getByText('Safe allowance module')).toBeInTheDocument()
   })
 
+  it('omits the last updated row rather than filling it while the payload carries no timestamp', () => {
+    render(
+      <PolicyOverview appliesTo={{ address: SAFE.address, name: 'Treasury' }} enforcedBy="Safe allowance module" />,
+    )
+
+    expect(screen.queryByText('Last updated')).not.toBeInTheDocument()
+    expect(screen.getByText('Enforced by')).toBeInTheDocument()
+  })
+
   it('binds each account to its own row when an initiator is given', () => {
     render(
       <PolicyOverview
