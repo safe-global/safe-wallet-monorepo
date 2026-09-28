@@ -6,6 +6,7 @@ module.exports = {
   rootDir: '.',
   // jest-fixed-jsdom matches the rest of the monorepo and keeps MSW usable
   testEnvironment: 'jest-fixed-jsdom',
+  resolver: '<rootDir>/jest.resolver.cjs',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   // Override the preset transform so TSX compiles with the automatic JSX runtime
   // (the app's tsconfig uses jsx: "preserve" for Vite, which Jest can't run).
@@ -28,9 +29,6 @@ module.exports = {
     '^next/app$': '<rootDir>/src/compat/next-app.ts',
     '^next/navigation$': '<rootDir>/src/compat/next-navigation.tsx',
     '^next/dist/client/resolve-href$': '<rootDir>/src/compat/next-resolve-href.ts',
-    // Jest 30 adds the "node" export condition to require(), which picks TanStack's server build
-    '^@tanstack/router-core/isServer$':
-      '<rootDir>/../../node_modules/@tanstack/router-core/dist/cjs/isServer/client.cjs',
   },
   testMatch: ['<rootDir>/src/**/*.(spec|test).[jt]s?(x)'],
   // Coverage: collect from app source only (preset targets packages/**)
