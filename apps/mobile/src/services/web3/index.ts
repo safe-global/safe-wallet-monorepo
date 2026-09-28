@@ -1,8 +1,10 @@
 import { ethers, JsonRpcProvider } from 'ethers'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import Safe from '@safe-global/protocol-kit'
+import type Safe from '@safe-global/protocol-kit'
 import { SafeInfo } from '@/src/types/address'
 import { INFURA_TOKEN } from '@safe-global/utils/config/constants'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { getSafeSDK } from '@/src/hooks/coreSDK/safeCoreSDK'
 
 export const createWeb3ReadOnly = (chain: Chain, customRpc?: string): JsonRpcProvider | undefined => {
   const url = customRpc || getRpcServiceUrl(chain.rpcUri)
@@ -47,17 +49,24 @@ export const createConnectedWallet = async (
     throw new Error('Provider not found')
   }
 
-  const RPC_URL = provider._getConnection().url
+  const readOnlySDK = getSafeSDK()
+  if (!readOnlySDK) {
+    throw new Error('Safe SDK is not initialized. Reopen the Safe account and try again.')
+  }
 
-  let protocolKit = await Safe.init({
-    provider: RPC_URL,
+  const [sdkAddress, sdkChainId] = await Promise.all([readOnlySDK.getAddress(), readOnlySDK.getChainId()])
+  if (!sameAddress(sdkAddress, activeSafe.address) || sdkChainId.toString() !== activeSafe.chainId) {
+    throw new Error(
+      `Safe SDK is initialized for ${sdkChainId}:${sdkAddress}, not ${activeSafe.chainId}:${activeSafe.address}`,
+    )
+  }
+
+  // connect() keeps the contract addresses resolved in initSafeSDK; a fresh Safe.init
+  // would look them up in safe-deployments, which may not register this chain/version yet
+  const protocolKit = await readOnlySDK.connect({
+    provider: provider._getConnection().url,
     signer: privateKey,
     safeAddress: activeSafe.address,
-  })
-
-  protocolKit = await protocolKit.connect({
-    provider: RPC_URL,
-    signer: privateKey,
   })
 
   return { wallet, protocolKit }
