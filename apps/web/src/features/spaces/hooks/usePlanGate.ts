@@ -1,7 +1,8 @@
 import type { LinkProps } from 'next/link'
 import { useHasFeature } from '@/hooks/useChains'
+import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { AppRoutes } from '@/config/routes'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import type { FEATURES } from '@safe-global/utils/utils/chains'
 import { useSpaceEntitlements } from './billing/useSpaceEntitlements'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
 
@@ -22,7 +23,7 @@ export type PlanGate = {
  * grant policies, whichever Safe is open. With either flag off nothing changes.
  */
 export const usePlanGate = (gatingFlag: FEATURES): PlanGate => {
-  const isSafeProEnabled = useHasFeature(FEATURES.SAFE_PRO) === true
+  const isSafeProEnabled = useIsSafeProEnabled()
   const isGatingFlagEnabled = useHasFeature(gatingFlag) === true
   const isGateActive = isSafeProEnabled && isGatingFlagEnabled
   const activeSpaceId = useCurrentSpaceId()
