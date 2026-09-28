@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./index.stories CollectingConfirmations 1`] = `
 <div
@@ -18,6 +18,7 @@ exports[`./index.stories CollectingConfirmations 1`] = `
         >
           <div
             class="listItemIcon"
+            style="background-color: var(--color-info-background);"
           >
             <mock-icon
               class="icon"
@@ -48,6 +49,7 @@ exports[`./index.stories CollectingConfirmations 1`] = `
         >
           <div
             class="listItemIcon"
+            style="background-color: var(--color-info-background);"
           >
             <mock-icon
               class="dot"
@@ -65,7 +67,7 @@ exports[`./index.stories CollectingConfirmations 1`] = `
               >
                 <div
                   class="icon"
-                  style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woNjYgNjklIDQ5JSkiIGQ9Ik0wLDBIOFY4SDB6Ii8+PHBhdGggZmlsbD0iaHNsKDE1NyA0OCUgNTQlKSIgZD0iTTIsMGgxdjFoLTF6TTUsMGgxdjFoLTF6TTAsMWgxdjFoLTF6TTcsMWgxdjFoLTF6TTEsMWgxdjFoLTF6TTYsMWgxdjFoLTF6TTAsM2gxdjFoLTF6TTcsM2gxdjFoLTF6TTMsM2gxdjFoLTF6TTQsM2gxdjFoLTF6TTMsNGgxdjFoLTF6TTQsNGgxdjFoLTF6TTAsNWgxdjFoLTF6TTcsNWgxdjFoLTF6TTEsNWgxdjFoLTF6TTYsNWgxdjFoLTF6TTMsNWgxdjFoLTF6TTQsNWgxdjFoLTF6TTMsNmgxdjFoLTF6TTQsNmgxdjFoLTF6TTAsN2gxdjFoLTF6TTcsN2gxdjFoLTF6TTIsN2gxdjFoLTF6TTUsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDIwIDcwJSA4MCUpIiBkPSJNMywwaDF2MWgtMXpNNCwwaDF2MWgtMXpNMCwyaDF2MWgtMXpNNywyaDF2MWgtMXpNMSwyaDF2MWgtMXpNNiwyaDF2MWgtMXpNMywyaDF2MWgtMXpNNCwyaDF2MWgtMXpNMiw0aDF2MWgtMXpNNSw0aDF2MWgtMXpNMiw1aDF2MWgtMXpNNSw1aDF2MWgtMXoiLz48L3N2Zz4=); width: 40px; height: 40px;"
+                  style="background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woNjYgNjklIDQ5JSkiIGQ9Ik0wLDBIOFY4SDB6Ii8+PHBhdGggZmlsbD0iaHNsKDE1NyA0OCUgNTQlKSIgZD0iTTIsMGgxdjFoLTF6TTUsMGgxdjFoLTF6TTAsMWgxdjFoLTF6TTcsMWgxdjFoLTF6TTEsMWgxdjFoLTF6TTYsMWgxdjFoLTF6TTAsM2gxdjFoLTF6TTcsM2gxdjFoLTF6TTMsM2gxdjFoLTF6TTQsM2gxdjFoLTF6TTMsNGgxdjFoLTF6TTQsNGgxdjFoLTF6TTAsNWgxdjFoLTF6TTcsNWgxdjFoLTF6TTEsNWgxdjFoLTF6TTYsNWgxdjFoLTF6TTMsNWgxdjFoLTF6TTQsNWgxdjFoLTF6TTMsNmgxdjFoLTF6TTQsNmgxdjFoLTF6TTAsN2gxdjFoLTF6TTcsN2gxdjFoLTF6TTIsN2gxdjFoLTF6TTUsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDIwIDcwJSA4MCUpIiBkPSJNMywwaDF2MWgtMXpNNCwwaDF2MWgtMXpNMCwyaDF2MWgtMXpNNywyaDF2MWgtMXpNMSwyaDF2MWgtMXpNNiwyaDF2MWgtMXpNMywyaDF2MWgtMXpNNCwyaDF2MWgtMXpNMiw0aDF2MWgtMXpNNSw0aDF2MWgtMXpNMiw1aDF2MWgtMXpNNSw1aDF2MWgtMXoiLz48L3N2Zz4="); width: 40px; height: 40px;"
                 />
               </div>
               <div
@@ -139,6 +141,7 @@ exports[`./index.stories CollectingConfirmations 1`] = `
         >
           <div
             class="listItemIcon"
+            style="background-color: var(--color-info-background);"
           >
             <svg
               aria-hidden="true"
@@ -186,6 +189,7 @@ exports[`./index.stories CollectingConfirmations 1`] = `
         >
           <div
             class="listItemIcon"
+            style="background-color: var(--color-info-background);"
           >
             <svg
               aria-hidden="true"
@@ -252,6 +256,7 @@ exports[`./index.stories FullySigned 1`] = `
         >
           <div
             class="listItemIcon"
+            style="background-color: var(--color-info-background);"
           >
             <mock-icon
               class="icon"
@@ -282,6 +287,7 @@ exports[`./index.stories FullySigned 1`] = `
         >
           <div
             class="listItemIcon"
+            style="background-color: var(--color-info-background);"
           >
             <mock-icon
               class="dot"
@@ -339,6 +345,7 @@ exports[`./index.stories WithCreatedRow 1`] = `
         >
           <div
             class="listItemIcon"
+            style="background-color: var(--color-info-background);"
           >
             <mock-icon
               class="icon"
@@ -369,6 +376,7 @@ exports[`./index.stories WithCreatedRow 1`] = `
         >
           <div
             class="listItemIcon"
+            style="background-color: var(--color-info-background);"
           >
             <mock-icon
               class="dot"
@@ -386,7 +394,7 @@ exports[`./index.stories WithCreatedRow 1`] = `
               >
                 <div
                   class="icon"
-                  style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woNjYgNjklIDQ5JSkiIGQ9Ik0wLDBIOFY4SDB6Ii8+PHBhdGggZmlsbD0iaHNsKDE1NyA0OCUgNTQlKSIgZD0iTTIsMGgxdjFoLTF6TTUsMGgxdjFoLTF6TTAsMWgxdjFoLTF6TTcsMWgxdjFoLTF6TTEsMWgxdjFoLTF6TTYsMWgxdjFoLTF6TTAsM2gxdjFoLTF6TTcsM2gxdjFoLTF6TTMsM2gxdjFoLTF6TTQsM2gxdjFoLTF6TTMsNGgxdjFoLTF6TTQsNGgxdjFoLTF6TTAsNWgxdjFoLTF6TTcsNWgxdjFoLTF6TTEsNWgxdjFoLTF6TTYsNWgxdjFoLTF6TTMsNWgxdjFoLTF6TTQsNWgxdjFoLTF6TTMsNmgxdjFoLTF6TTQsNmgxdjFoLTF6TTAsN2gxdjFoLTF6TTcsN2gxdjFoLTF6TTIsN2gxdjFoLTF6TTUsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDIwIDcwJSA4MCUpIiBkPSJNMywwaDF2MWgtMXpNNCwwaDF2MWgtMXpNMCwyaDF2MWgtMXpNNywyaDF2MWgtMXpNMSwyaDF2MWgtMXpNNiwyaDF2MWgtMXpNMywyaDF2MWgtMXpNNCwyaDF2MWgtMXpNMiw0aDF2MWgtMXpNNSw0aDF2MWgtMXpNMiw1aDF2MWgtMXpNNSw1aDF2MWgtMXoiLz48L3N2Zz4=); width: 40px; height: 40px;"
+                  style="background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woNjYgNjklIDQ5JSkiIGQ9Ik0wLDBIOFY4SDB6Ii8+PHBhdGggZmlsbD0iaHNsKDE1NyA0OCUgNTQlKSIgZD0iTTIsMGgxdjFoLTF6TTUsMGgxdjFoLTF6TTAsMWgxdjFoLTF6TTcsMWgxdjFoLTF6TTEsMWgxdjFoLTF6TTYsMWgxdjFoLTF6TTAsM2gxdjFoLTF6TTcsM2gxdjFoLTF6TTMsM2gxdjFoLTF6TTQsM2gxdjFoLTF6TTMsNGgxdjFoLTF6TTQsNGgxdjFoLTF6TTAsNWgxdjFoLTF6TTcsNWgxdjFoLTF6TTEsNWgxdjFoLTF6TTYsNWgxdjFoLTF6TTMsNWgxdjFoLTF6TTQsNWgxdjFoLTF6TTMsNmgxdjFoLTF6TTQsNmgxdjFoLTF6TTAsN2gxdjFoLTF6TTcsN2gxdjFoLTF6TTIsN2gxdjFoLTF6TTUsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDIwIDcwJSA4MCUpIiBkPSJNMywwaDF2MWgtMXpNNCwwaDF2MWgtMXpNMCwyaDF2MWgtMXpNNywyaDF2MWgtMXpNMSwyaDF2MWgtMXpNNiwyaDF2MWgtMXpNMywyaDF2MWgtMXpNNCwyaDF2MWgtMXpNMiw0aDF2MWgtMXpNNSw0aDF2MWgtMXpNMiw1aDF2MWgtMXpNNSw1aDF2MWgtMXoiLz48L3N2Zz4="); width: 40px; height: 40px;"
                 />
               </div>
               <div
@@ -460,6 +468,7 @@ exports[`./index.stories WithCreatedRow 1`] = `
         >
           <div
             class="listItemIcon"
+            style="background-color: var(--color-info-background);"
           >
             <mock-icon
               class="dot"

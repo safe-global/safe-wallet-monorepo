@@ -1,6 +1,6 @@
 # Code owners for safe-wallet-monorepo
 
-*                   @safe-global/safe-web
+*                   @safe-global/safe-web @yagopv @dasanra
 
 # Shared by web and mobile. Both teams are requested; either approval satisfies the gate.
 /packages/          @safe-global/safe-web @safe-global/safe-mobile

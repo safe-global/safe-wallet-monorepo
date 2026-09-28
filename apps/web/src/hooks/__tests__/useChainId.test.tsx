@@ -19,22 +19,17 @@ describe('useChainId hook', () => {
     jest.restoreAllMocks()
     ;(useParams as any).mockImplementation(() => ({}))
 
-    Object.defineProperty(window, 'location', {
-      writable: true,
-      value: undefined,
-    })
+    window.history.replaceState(null, '', '/')
   })
 
   it('should read location.search if useRouter query.safe is empty', () => {
     ;(useParams as any).mockImplementation(() => ({}))
 
-    Object.defineProperty(window, 'location', {
-      writable: true,
-      value: {
-        pathname: '/balances',
-        search: '?safe=avax:0x0000000000000000000000000000000000000123&redirect=true',
-      },
-    })
+    window.history.replaceState(
+      null,
+      '',
+      '/balances?safe=avax:0x0000000000000000000000000000000000000123&redirect=true',
+    )
 
     const { result } = renderHook(() => useChainId())
 
@@ -44,13 +39,7 @@ describe('useChainId hook', () => {
   it('should read location.search if useRouter query.chain is empty', () => {
     ;(useParams as any).mockImplementation(() => ({}))
 
-    Object.defineProperty(window, 'location', {
-      writable: true,
-      value: {
-        pathname: '/welcome',
-        search: '?chain=matic',
-      },
-    })
+    window.history.replaceState(null, '', '/welcome?chain=matic')
 
     const { result } = renderHook(() => useChainId())
 
@@ -153,10 +142,7 @@ describe('useChainId hook', () => {
 describe('useChainId under a SafeScope', () => {
   it('returns the scope chain even when the URL names another one', () => {
     ;(useParams as any).mockImplementation(() => ({}))
-    Object.defineProperty(window, 'location', {
-      writable: true,
-      value: { pathname: '/spaces/policies', search: '?safe=sep:0x0000000000000000000000000000000000000123' },
-    })
+    window.history.replaceState(null, '', '/spaces/policies?safe=sep:0x0000000000000000000000000000000000000123')
     const wrapper = ({ children }: { children: ReactNode }) => (
       <SafeScopeContext.Provider
         value={{

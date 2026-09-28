@@ -33,6 +33,7 @@ import { useHasFeature } from '@/hooks/useChains'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { OidcAuthFeature, useTwoFactorAwarenessDismissed } from '@/features/oidc-auth'
 import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
+import { reloadPage } from '@/utils/navigation'
 
 export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?: boolean }): ReactElement => {
   const dispatch = useAppDispatch()
@@ -74,7 +75,7 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
 
   const onToggleGateway = (checked: boolean) => {
     setIsProdGateway(checked)
-    setTimeout(() => location.reload(), 300)
+    setTimeout(reloadPage, 300)
   }
 
   const handleHelpClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
