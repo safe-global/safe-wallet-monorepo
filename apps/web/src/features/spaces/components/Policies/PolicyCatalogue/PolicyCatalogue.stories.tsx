@@ -1,4 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { fn } from 'storybook/test'
+import { mockStarterPlan } from '../mocks/plan'
 import PolicyCatalogue from './index'
 
 /**
@@ -25,4 +27,14 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {}
+export const Default: Story = {
+  args: { onSelect: fn() },
+}
+
+/** The plan does not include policies: the feedback card is gone and every tile leads to the upgrade. */
+export const Locked: Story = {
+  args: {
+    onSelect: fn(),
+    locked: { accountCounts: mockStarterPlan.accountCounts, onUpgrade: fn() },
+  },
+}
