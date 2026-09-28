@@ -5,7 +5,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 
-/** Stands in for an action the plan does not include; what was set up before stays usable. */
+/** Safe Pro upsell replacing an add-policy action (proposer, spending limit) when `usePlanGate` requires an upgrade. */
 const SafeProLock = ({ title, href }: { title: string; href: LinkProps['href'] }) => (
   <Alert variant="subtle" data-testid="safe-pro-lock">
     <Lock />
