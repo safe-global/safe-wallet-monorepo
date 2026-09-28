@@ -84,15 +84,20 @@ const SCROLL_REGION_CLASS =
 function getSelectedSafes(safes: AddAccountsFormValues['selectedSafes'], spaceSafes: AllSafeItems) {
   const flatSafeItems = flattenSafeItems(spaceSafes)
 
-  return Object.entries(safes).filter(
-    ([key, isSelected]) =>
-      isSelected &&
-      !key.startsWith(MULTICHAIN_SAFE_KEY_PREFIX) &&
-      !flatSafeItems.some((spaceSafe) => {
-        const [chainId, address] = key.split(':')
-        return spaceSafe.address === address && spaceSafe.chainId === chainId
-      }),
-  )
+  return Object.entries(safes)
+    .filter(
+      ([key, isSelected]) =>
+        isSelected &&
+        !key.startsWith(MULTICHAIN_SAFE_KEY_PREFIX) &&
+        !flatSafeItems.some((spaceSafe) => {
+          const [chainId, address] = key.split(':')
+          return spaceSafe.address === address && spaceSafe.chainId === chainId
+        }),
+    )
+    .map(([key]) => {
+      const [chainId, address] = key.split(':')
+      return { chainId, address }
+    })
 }
 
 const countSafeAccounts = (safes: Array<{ address: string }>) => countSeats(safes.map(({ address }) => address))
@@ -213,10 +218,9 @@ const AddAccounts = ({
   const { handleSubmit, watch, getValues, setValue, reset, formState } = formMethods
 
   const selectedSafes = watch(`selectedSafes`)
-  const safeKeysToAdd = getSelectedSafes(selectedSafes, spaceSafes).map(([key]) => key)
-  const accountsToAddCount = countSeats(safeKeysToAdd.map(addressOfSafeKey))
+  const newSafes = getSelectedSafes(selectedSafes, spaceSafes)
   const removedSafesCount = getRemovedSafes(selectedSafes, spaceSafes).length
-  const isFormDirty = safeKeysToAdd.length > 0 || removedSafesCount > 0
+  const isFormDirty = newSafes.length > 0 || removedSafesCount > 0
   const hasSomethingToSubmit = view === 'name' ? safesToName.length > 0 : isFormDirty
   const isAddressBookReady = !isAddressBookLoading && !isAddressBookError
   const submitError = error ?? (isAddressBookError ? ADDRESS_BOOK_UNAVAILABLE : undefined)
@@ -261,10 +265,7 @@ const AddAccounts = ({
         return
       }
 
-      const safesToAdd = getSelectedSafes(data.selectedSafes, spaceSafes).map(([key]) => {
-        const [chainId, address] = key.split(':')
-        return { chainId, address }
-      })
+      const safesToAdd = getSelectedSafes(data.selectedSafes, spaceSafes)
 
       const safesToRemove = getRemovedSafes(data.selectedSafes, spaceSafes).map((safe) => ({
         chainId: safe.chainId,
@@ -653,7 +654,7 @@ const AddAccounts = ({
                       {isSubmitting ? (
                         <Loader2 className="size-4 animate-spin" />
                       ) : (
-                        `Add accounts (${accountsToAddCount})`
+                        `Add accounts (${countSafeAccounts(newSafes)})`
                       )}
                     </Button>
                   </div>
