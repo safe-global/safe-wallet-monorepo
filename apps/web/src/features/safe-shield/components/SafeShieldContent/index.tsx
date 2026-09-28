@@ -55,7 +55,7 @@ export const SafeShieldContent = ({
   onAddToTrustedList?: () => void
   /** Without Safe Pro the simulation only runs on the user's own Tenderly project, if they set one up; else it is locked. */
   hasProFeatures?: boolean
-  /** Off: the pre-Pro layout, with the recipient check among the open ones and the simulation run by hand. */
+  /** Off: the pre-Pro layout, with the counterparty checks among the open ones and the simulation run by hand. */
   isSafePro?: boolean
 }): ReactElement => {
   const hn = useLoadFeature(HypernativeFeature)
@@ -80,6 +80,32 @@ export const SafeShieldContent = ({
 
   const { recipientDelay, contractAnalysisDelay, deadlockAnalysisDelay, threatAnalysisDelay, simulationAnalysisDelay } =
     calculateAnalysisDelays(recipientEmpty, contractEmpty, deadlockEmpty)
+
+  // A native transfer carries no calldata, so there is no contract to check
+  const isContractCall = !!safeTx?.data.data && safeTx.data.data !== '0x'
+  const hasProContent = !recipientEmpty || !contractEmpty || !deadlockEmpty || !!safeTx
+
+  // Contract and deadlock checks come from the counterparty analysis, a Safe Pro feature like the recipient check
+  const contractCard = (
+    <AnalysisGroupCard
+      data-testid="contract-analysis-group-card"
+      data={contractResults}
+      delay={contractAnalysisDelay}
+      highlightedSeverity={highlightedSeverity}
+      analyticsEvent={SAFE_SHIELD_EVENTS.CONTRACT_DECODED}
+      showImage
+    />
+  )
+
+  const deadlockCard = (
+    <AnalysisGroupCard
+      data-testid="deadlock-analysis-group-card"
+      data={deadlockResults}
+      delay={deadlockAnalysisDelay}
+      highlightedSeverity={highlightedSeverity}
+      analyticsEvent={SAFE_SHIELD_EVENTS.DEADLOCK_ANALYZED}
+    />
+  )
 
   return (
     <div className="px-1 pb-1">
@@ -111,22 +137,9 @@ export const SafeShieldContent = ({
             />
           )}
 
-          <AnalysisGroupCard
-            data-testid="contract-analysis-group-card"
-            data={contractResults}
-            delay={contractAnalysisDelay}
-            highlightedSeverity={highlightedSeverity}
-            analyticsEvent={SAFE_SHIELD_EVENTS.CONTRACT_DECODED}
-            showImage
-          />
+          {!isSafePro && contractCard}
 
-          <AnalysisGroupCard
-            data-testid="deadlock-analysis-group-card"
-            data={deadlockResults}
-            delay={deadlockAnalysisDelay}
-            highlightedSeverity={highlightedSeverity}
-            analyticsEvent={SAFE_SHIELD_EVENTS.DEADLOCK_ANALYZED}
-          />
+          {!isSafePro && deadlockCard}
 
           <ThreatAnalysis
             threat={threat}
@@ -153,7 +166,7 @@ export const SafeShieldContent = ({
           )}
         </div>
 
-        {isSafePro && shouldShowContent && (!hasProFeatures || !recipientEmpty || safeTx) && (
+        {isSafePro && shouldShowContent && (!hasProFeatures || hasProContent) && (
           <div className="mt-1 flex flex-col rounded-md bg-muted" data-testid="pro-checks-section">
             <ProChecksRow hasProFeatures={hasProFeatures} />
             <div className="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary">
@@ -168,6 +181,13 @@ export const SafeShieldContent = ({
               ) : (
                 <LockedCheckRow data-testid="recipient-analysis-locked">Known recipient</LockedCheckRow>
               )}
+
+              {hasProFeatures && contractCard}
+              {!hasProFeatures && isContractCall && (
+                <LockedCheckRow data-testid="contract-analysis-locked">Known contract</LockedCheckRow>
+              )}
+
+              {hasProFeatures && deadlockCard}
 
               {!contractLoading && !threatLoading && (hasProFeatures || hasOwnTenderly) && (
                 <TenderlySimulation
