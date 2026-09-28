@@ -1,11 +1,11 @@
-import { useCallback, useContext, useState, type ReactElement } from 'react'
+import { useCallback, useContext, useMemo, useState, type ReactElement } from 'react'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { TxModalContext } from '@/components/tx-flow'
 import ExternalLink from '@/components/common/ExternalLink'
 import { Typography } from '@/components/ui/typography'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import AddPolicyDialog from './AddPolicyDialog'
-import type { AddPolicyId } from './AddPolicyDialog/options'
+import { ADD_POLICY_OPTIONS, type AddPolicyId } from './AddPolicyDialog/options'
 import PoliciesList from './PoliciesList'
 import { PoliciesLoadError, PoliciesLoading } from './PoliciesLoadState'
 import PolicyCatalogue from './PolicyCatalogue'
@@ -30,7 +30,10 @@ interface PoliciesProps {
   /** The populated mode's `Add policy` button. Without it the button opens the add policy dialog. */
   onAddPolicy?: () => void
   onSelectPolicy?: (policy: Policy) => void
-  /** Set when the plan does not include some policies: the banner shows and setting one up leads to the upgrade. */
+  /**
+   * Set when the plan does not include some policies: the banner shows, their tiles lead to the upgrade and the add
+   * policy dialog disables them.
+   */
   locked?: PolicyLock
 }
 
@@ -136,15 +139,19 @@ const Policies = ({
   const selectFromAddPolicyDialog = useCallback(
     (id: AddPolicyId) => {
       setIsAddPolicyOpen(false)
-
-      if (locked?.lockedPolicies.some((lockedId) => lockedId === id)) {
-        locked.onUpgrade()
-        return
-      }
-
       handleSelect(id)
     },
-    [handleSelect, locked],
+    [handleSelect],
+  )
+
+  const addPolicyOptions = useMemo(
+    () =>
+      ADD_POLICY_OPTIONS.map((option) =>
+        locked?.lockedPolicies.some((lockedId) => lockedId === option.id)
+          ? { ...option, disabled: true, disabledTooltip: 'Upgrade to Business to set up policies.' }
+          : option,
+      ),
+    [locked],
   )
 
   const closeProposerIntro = useCallback(() => {
@@ -199,7 +206,12 @@ const Policies = ({
         </>
       )}
 
-      <AddPolicyDialog open={isAddPolicyOpen} onOpenChange={setIsAddPolicyOpen} onSelect={selectFromAddPolicyDialog} />
+      <AddPolicyDialog
+        open={isAddPolicyOpen}
+        onOpenChange={setIsAddPolicyOpen}
+        onSelect={selectFromAddPolicyDialog}
+        options={addPolicyOptions}
+      />
 
       <SpendingLimitIntroDialog
         open={isSpendingLimitIntroOpen}

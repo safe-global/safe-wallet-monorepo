@@ -112,10 +112,16 @@ describe('SpacePoliciesPage', () => {
     expect(mockPush).toHaveBeenCalledWith(PLANS_HREF)
   })
 
-  it('should, when only the spending limit gate requires an upgrade, lock only the spending limit tile', () => {
-    mockUsePlanGate.mockImplementation((gatingFlag: FEATURES) =>
-      gatingFlag === FEATURES.SPENDING_LIMIT_GATING ? lockedGate : openGate,
-    )
+  it('should, when the plan gate is read, gate on SAFE_PRO rather than the per-feature gating flags', () => {
+    render(<SpacePoliciesPage spaceId="space-1" />)
+
+    expect(mockUsePlanGate).toHaveBeenCalledWith(FEATURES.SAFE_PRO)
+    expect(mockUsePlanGate).not.toHaveBeenCalledWith(FEATURES.SPENDING_LIMIT_GATING)
+    expect(mockUsePlanGate).not.toHaveBeenCalledWith(FEATURES.PROPOSER_GATING)
+  })
+
+  it('should, when the plan does not include policies, lock both policy tiles', () => {
+    mockUsePlanGate.mockReturnValue(lockedGate)
 
     render(<SpacePoliciesPage spaceId="space-1" />)
 
@@ -123,8 +129,8 @@ describe('SpacePoliciesPage', () => {
       within(screen.getByTestId('policy-catalogue-tile-spending-limit')).getByTestId('policy-locked-icon'),
     ).toBeInTheDocument()
     expect(
-      within(screen.getByTestId('policy-catalogue-tile-proposer')).queryByTestId('policy-locked-icon'),
-    ).not.toBeInTheDocument()
+      within(screen.getByTestId('policy-catalogue-tile-proposer')).getByTestId('policy-locked-icon'),
+    ).toBeInTheDocument()
   })
 
   it('should, when the space is locked, render no account counter on the tiles', () => {

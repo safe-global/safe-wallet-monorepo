@@ -10,16 +10,14 @@ import { useSpacePolicies } from './hooks/useSpacePolicies'
 import type { PolicyId } from './PolicyCatalogue/catalogue'
 import Policies from './index'
 
+const LOCKED_POLICIES: PolicyId[] = ['spending-limit', 'proposer']
+
 const SpacePolicies = ({ spaceId }: { spaceId: string }) => {
   const router = useRouter()
   const { policies, isLoading, isError, refetch } = useSpacePolicies()
-  const spendingLimitGate = usePlanGate(FEATURES.SPENDING_LIMIT_GATING)
-  const proposerGate = usePlanGate(FEATURES.PROPOSER_GATING)
-
-  const lockedPolicies: PolicyId[] = []
-  if (spendingLimitGate.mustUpgradeToSafePro) lockedPolicies.push('spending-limit')
-  if (proposerGate.mustUpgradeToSafePro) lockedPolicies.push('proposer')
-  const isLocked = lockedPolicies.length > 0
+  // The page follows the plan alone; the per-feature gating flags only apply to the Safe settings.
+  const planGate = usePlanGate(FEATURES.SAFE_PRO)
+  const isLocked = planGate.mustUpgradeToSafePro
 
   const { tierName, isLoading: isPlanLoading } = useSpacePlan(isLocked ? spaceId : null)
   const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId })
@@ -27,7 +25,7 @@ const SpacePolicies = ({ spaceId }: { spaceId: string }) => {
   return (
     <Policies
       policies={policies}
-      isLoading={isLoading || spendingLimitGate.isLoading || proposerGate.isLoading || (isLocked && isPlanLoading)}
+      isLoading={isLoading || planGate.isLoading || (isLocked && isPlanLoading)}
       isError={isError}
       onRetry={refetch}
       locked={
@@ -35,8 +33,8 @@ const SpacePolicies = ({ spaceId }: { spaceId: string }) => {
           ? {
               planName: tierName ?? 'Safe Pro',
               workspaceName: space?.name ?? '',
-              lockedPolicies,
-              onUpgrade: () => void router.push(spendingLimitGate.upgradeHref),
+              lockedPolicies: LOCKED_POLICIES,
+              onUpgrade: () => void router.push(planGate.upgradeHref),
             }
           : undefined
       }

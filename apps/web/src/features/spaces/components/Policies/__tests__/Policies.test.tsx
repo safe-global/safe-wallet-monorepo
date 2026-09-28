@@ -546,7 +546,7 @@ describe('Policies', () => {
       expect(screen.queryByTestId('policy-catalogue')).not.toBeInTheDocument()
     })
 
-    it('should, when a locked policy is picked in the add policy dialog, call onUpgrade and open no intro dialog', async () => {
+    it('should, when the plan does not include a policy, disable it in the add policy dialog', async () => {
       const onUpgrade = jest.fn()
       const { user } = renderWithUserEvent(
         <Policies policies={mockPolicies()} locked={{ ...mockStarterPlan, onUpgrade }} />,
@@ -555,8 +555,12 @@ describe('Policies', () => {
       await user.click(screen.getByTestId('add-policy-button'))
       await user.click(screen.getByTestId('add-policy-option-proposer'))
 
-      expect(onUpgrade).toHaveBeenCalledTimes(1)
+      expect(screen.getByTestId('add-policy-option-proposer')).toHaveAttribute('aria-disabled', 'true')
+      expect(screen.getByTestId('add-policy-option-spending-limit')).toHaveAttribute('aria-disabled', 'true')
+      expect(screen.getByTestId('add-policy-option-suggestion')).not.toHaveAttribute('aria-disabled')
+      expect(screen.getByTestId('add-policy-dialog')).toBeInTheDocument()
       expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument()
+      expect(onUpgrade).not.toHaveBeenCalled()
     })
 
     it('should, when a policy the plan includes is picked in the add policy dialog, open its intro dialog', async () => {
