@@ -66,7 +66,7 @@ const ProposerRoleForm = ({
 
             <SafeAccountSelector
               accounts={safeAccounts.accounts}
-              eligibilityRule={safeAccounts.eligibilityRule}
+              signersOnly={safeAccounts.signersOnly}
               value={safeAccount}
               onChange={onSafeAccountChange}
               isLoading={safeAccounts.isLoading}

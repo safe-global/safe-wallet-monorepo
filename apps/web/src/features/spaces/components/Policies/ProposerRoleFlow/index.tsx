@@ -15,7 +15,7 @@ import ProposerRoleHeader from './ProposerRoleHeader'
 const ProposerRoleFlowContent = (): ReactElement => {
   const [safeAccount, setSafeAccount] = useState<string>()
   const { setScope, clearScope } = useSafeScopeControls()
-  const safeAccounts = useEligibleSafeAccounts({ eligibilityRule: 'signer' })
+  const safeAccounts = useEligibleSafeAccounts({ signersOnly: true })
   const validateProposer = useProposerValidation()
 
   const { setTxFlow } = useContext(TxModalContext)

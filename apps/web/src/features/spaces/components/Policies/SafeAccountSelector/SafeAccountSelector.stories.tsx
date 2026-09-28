@@ -159,7 +159,7 @@ export const NoEligibleAccounts: Story = {
 }
 
 export const NoEligibleSignerAccounts: Story = {
-  args: { accounts: [], eligibilityRule: 'signer' },
+  args: { accounts: [], signersOnly: true },
 }
 
 /** No wallet connected: the prompt is to connect one, not to switch. */

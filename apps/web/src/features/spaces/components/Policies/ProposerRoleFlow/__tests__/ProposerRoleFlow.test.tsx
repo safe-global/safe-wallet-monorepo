@@ -5,7 +5,7 @@ import { TxModalContext } from '@/components/tx-flow'
 import { SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/constants'
 import { render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import { useEligibleSafeAccounts } from '../../SafeAccountSelector/hooks/useEligibleSafeAccounts'
-import { ELIGIBILITY_COPY } from '../../SafeAccountSelector/constants'
+import { SIGNERS_ONLY_COPY } from '../../SafeAccountSelector/constants'
 import { buildSafeAccountId } from '../../SafeAccountSelector/utils'
 import type { SafeAccountOption } from '../../SafeAccountSelector/types'
 import { useGrantProposer, type GrantProposer } from '../hooks/useGrantProposer'
@@ -119,7 +119,7 @@ describe('ProposerRoleFlow', () => {
       isLoading: false,
       isError: false,
       hasWallet: true,
-      eligibilityRule: 'signer',
+      signersOnly: true,
       refetch: jest.fn(),
     })
     mockUseGrantProposer.mockReturnValue(grantState())
@@ -159,7 +159,7 @@ describe('ProposerRoleFlow', () => {
   it('lists only Safes the wallet signs for', () => {
     render(<ProposerRoleFlow />)
 
-    expect(mockUseEligibleSafeAccounts).toHaveBeenCalledWith({ eligibilityRule: 'signer' })
+    expect(mockUseEligibleSafeAccounts).toHaveBeenCalledWith({ signersOnly: true })
   })
 
   it('explains the signer-only rule in the helper text and the empty state', async () => {
@@ -168,16 +168,16 @@ describe('ProposerRoleFlow', () => {
       isLoading: false,
       isError: false,
       hasWallet: true,
-      eligibilityRule: 'signer',
+      signersOnly: true,
       refetch: jest.fn(),
     })
     const { user } = renderWithUserEvent(<ProposerRoleFlow />)
 
-    expect(screen.getByText(ELIGIBILITY_COPY.signer.helperText)).toBeInTheDocument()
+    expect(screen.getByText(SIGNERS_ONLY_COPY.helperText)).toBeInTheDocument()
 
     await user.click(screen.getByTestId('safe-account-selector'))
 
-    expect(await screen.findByText(ELIGIBILITY_COPY.signer.noEligibleAccountsText)).toBeInTheDocument()
+    expect(await screen.findByText(SIGNERS_ONLY_COPY.noEligibleAccountsText)).toBeInTheDocument()
     expect(await screen.findByRole('button', { name: 'Switch wallet' })).toBeInTheDocument()
   })
 
@@ -188,7 +188,7 @@ describe('ProposerRoleFlow', () => {
       isLoading: false,
       isError: true,
       hasWallet: true,
-      eligibilityRule: 'signer',
+      signersOnly: true,
       refetch,
     })
     const { user } = renderWithUserEvent(<ProposerRoleFlow />)
@@ -219,7 +219,7 @@ describe('ProposerRoleFlow', () => {
         isLoading: false,
         isError: false,
         hasWallet: true,
-        eligibilityRule: 'signer',
+        signersOnly: true,
         refetch: jest.fn(),
       })
       const { user } = renderFlow()

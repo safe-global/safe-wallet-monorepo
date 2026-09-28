@@ -15,13 +15,12 @@ import SafeAccountRow, {
   SafeAccountSummary,
 } from './components/SafeAccountRow'
 import {
-  DEFAULT_ELIGIBILITY_RULE,
-  ELIGIBILITY_COPY,
+  getEligibilityCopy,
   INELIGIBILITY_TEXT,
   SAFE_ACCOUNT_SELECTOR_LABEL,
   SAFE_ACCOUNT_SELECTOR_PLACEHOLDER,
 } from './constants'
-import { isSafeAccountGroup, type EligibilityRule, type SafeAccountEntry } from './types'
+import { isSafeAccountGroup, type SafeAccountEntry } from './types'
 import { findSafeAccount } from './utils'
 
 export type SafeAccountSelectorProps = {
@@ -36,7 +35,7 @@ export type SafeAccountSelectorProps = {
   disabled?: boolean
   label?: string
   /** Must match the rule `accounts` was filtered by. */
-  eligibilityRule?: EligibilityRule
+  signersOnly?: boolean
   helperText?: ReactNode
   /** Defaults to `useConnectWallet()`. Also serves the disconnected state's action. */
   onSwitchWallet?: () => void
@@ -64,8 +63,8 @@ const SafeAccountSelector = ({
   onRetry,
   disabled = false,
   label = SAFE_ACCOUNT_SELECTOR_LABEL,
-  eligibilityRule = DEFAULT_ELIGIBILITY_RULE,
-  helperText = ELIGIBILITY_COPY[eligibilityRule].helperText,
+  signersOnly = false,
+  helperText = getEligibilityCopy(signersOnly).helperText,
   onSwitchWallet,
   hasWallet = true,
   errorMessage,
@@ -95,7 +94,7 @@ const SafeAccountSelector = ({
       return (
         <NoEligibleAccounts
           hasWallet={hasWallet}
-          eligibilityRule={eligibilityRule}
+          signersOnly={signersOnly}
           onSwitchWallet={onSwitchWallet ?? connectWallet}
         />
       )

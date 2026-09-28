@@ -40,7 +40,7 @@ const eligible = {
   isLoading: false,
   isError: false,
   hasWallet: true,
-  eligibilityRule: 'signer' as const,
+  signersOnly: true,
   refetch: jest.fn(),
 }
 

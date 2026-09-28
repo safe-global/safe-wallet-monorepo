@@ -1,4 +1,4 @@
-import type { EligibilityRule, SafeAccountIneligibility } from './types'
+import type { SafeAccountIneligibility } from './types'
 
 type EligibilityCopy = {
   rule: string
@@ -15,18 +15,18 @@ const buildEligibilityCopy = (rule: string): EligibilityCopy => ({
     `Connect a different wallet to set up a policy.`,
 })
 
-export const ELIGIBILITY_COPY: Record<EligibilityRule, EligibilityCopy> = {
-  'signer-or-proposer': buildEligibilityCopy('signer or proposer'),
-  signer: buildEligibilityCopy('signer'),
-}
+const DEFAULT_COPY = buildEligibilityCopy('signer or proposer')
 
-export const DEFAULT_ELIGIBILITY_RULE: EligibilityRule = 'signer-or-proposer'
+export const SIGNERS_ONLY_COPY = buildEligibilityCopy('signer')
 
-export const ELIGIBILITY_RULE = ELIGIBILITY_COPY[DEFAULT_ELIGIBILITY_RULE].rule
+export const getEligibilityCopy = (signersOnly: boolean): EligibilityCopy =>
+  signersOnly ? SIGNERS_ONLY_COPY : DEFAULT_COPY
 
-export const ELIGIBILITY_HELPER_TEXT = ELIGIBILITY_COPY[DEFAULT_ELIGIBILITY_RULE].helperText
+export const ELIGIBILITY_RULE = DEFAULT_COPY.rule
 
-export const NO_ELIGIBLE_ACCOUNTS_TEXT = ELIGIBILITY_COPY[DEFAULT_ELIGIBILITY_RULE].noEligibleAccountsText
+export const ELIGIBILITY_HELPER_TEXT = DEFAULT_COPY.helperText
+
+export const NO_ELIGIBLE_ACCOUNTS_TEXT = DEFAULT_COPY.noEligibleAccountsText
 
 /** Used instead when no wallet is connected — there is none to blame or switch away from. */
 export const NO_WALLET_TEXT = 'Connect a wallet to see the Safe Accounts you can set a policy on.'
