@@ -62,8 +62,7 @@ export const HelpCenterArticle = {
   SAFE_SHIELD: `${HELP_CENTER_URL}/articles/6434169802-understanding-safe-shield-copilot`,
   SECURITY_HUB: `${HELP_CENTER_URL}/articles/6128275759-security-hub`,
   ADDRESS_POISONING: `${HELP_CENTER_URL}/articles/3861480988-what-is-address-poisoning-and-how-does-safewallet-battle-it`,
-  // TODO(WA-3134): point at the dedicated Policies article once Product/Design provide it.
-  POLICIES: HELP_CENTER_URL,
+  POLICIES: `${HELP_CENTER_URL}/articles/9640607537-spending-limits-and-the-proposer-role?lang=en`,
 } as const
 export const HelperCenterArticleTitles = {
   RECOVERY: 'Learn more about the Account recovery process',
