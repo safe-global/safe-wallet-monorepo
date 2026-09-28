@@ -88,6 +88,7 @@ Available builders:
 - `@/tests/builders/balances` — `tokenInfoBuilder`, `balanceBuilder`, `balancesBuilder`
 - `@/tests/builders/transactionDetails` — `transactionDetailsBuilder`, `multisigExecutionDetailsBuilder`
 - `@/tests/builders/collectibles` — `collectibleBuilder`
+- `@/tests/builders/hypernativeAuthStatus` — `hypernativeAuthStatusBuilder`
 
 ## Mock conventions
 
