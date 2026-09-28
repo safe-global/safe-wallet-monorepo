@@ -83,6 +83,7 @@ export const getPlanContentV2 = (name: string): PlanContentV2 | undefined =>
   Object.hasOwn(PLAN_CONTENT_V2, name) ? PLAN_CONTENT_V2[name as PlanNameV2] : undefined
 
 export const PLAN_CARD_COPY_V2 = {
+  yearlySavings: 'Save ~13%',
   perSafeSuffix: '/Safe/mo',
   monthSuffix: '/mo',
   custom: 'Custom',

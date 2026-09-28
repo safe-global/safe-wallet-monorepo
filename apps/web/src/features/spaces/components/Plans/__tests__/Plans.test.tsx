@@ -3,7 +3,7 @@ import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/bil
 import { SUPPORT_CHAT_URL } from '@/config/constants'
 import type { PlanGroup } from '../../../hooks/billing/types'
 import Plans from '../index'
-import { getCurrentBadge, _remaining, seatsTooltip } from '../PlanStatusCard'
+import PlanStatusCard, { getCurrentBadge, _remaining, seatsTooltip } from '../PlanStatusCard'
 import { buildPlanTiers } from '../planTiers'
 import type { CurrentPlan, PlanSummary } from '../types'
 
@@ -314,5 +314,29 @@ describe('Plans', () => {
     render(<Plans plan={null} {...meters} tiers={buildPlanTiers([STARTER])} canManage onManage={jest.fn()} />)
 
     expect(screen.getByRole('button', { name: 'Manage plan' })).toBeInTheDocument()
+  })
+
+  it('keeps the launch green status badge unless the v2 appearance is asked for', () => {
+    render(<PlanStatusCard plan={active} {...meters} />)
+
+    expect(screen.getByTestId('plan-status-badge')).toHaveAttribute('data-variant', 'brand')
+  })
+
+  it.each([
+    { plan: active, variant: 'mint' },
+    { plan: trialing(20), variant: 'mint' },
+    { plan: trialing(3), variant: 'warning' },
+  ])('draws the v2 $variant status badge for $plan.status', ({ plan, variant }) => {
+    render(<PlanStatusCard plan={plan} {...meters} appearance="v2" />)
+
+    expect(screen.getByTestId('plan-status-badge')).toHaveAttribute('data-variant', variant)
+  })
+
+  it('counts the v2 free access down however far its end is', () => {
+    const { rerender } = render(<PlanStatusCard plan={trialing(20)} {...meters} />)
+    expect(screen.getByTestId('plan-status-badge')).toHaveTextContent(/^Free access$/)
+
+    rerender(<PlanStatusCard plan={trialing(20)} {...meters} appearance="v2" />)
+    expect(screen.getByTestId('plan-status-badge')).toHaveTextContent('Free access · 20 days left')
   })
 })

@@ -18,12 +18,13 @@ export const seatsTooltip = (tierName: string | undefined, quota: number | null 
   `${tierName ?? 'Your plan'} covers ${quota ?? 'unlimited'} Safe accounts. At ${quota ?? 'unlimited'}, remove one from this Workspace to add another. Safe accounts you leave out remain available in My accounts.`
 
 /** The badge both the status card and the current plan card wear: trial with its countdown, or Active. */
-export const getCurrentBadge = (plan: PlanSummary | null): CurrentBadge | undefined => {
+/** `countdownDays` is how close to its end the trial label starts counting down; Plans v2 always counts. */
+export const getCurrentBadge = (plan: PlanSummary | null, countdownDays?: number): CurrentBadge | undefined => {
   if (!plan) return undefined
   if (plan.status === 'active') return { label: 'Active', variant: 'brand' }
   const endingSoon = plan.daysLeft !== null && plan.daysLeft <= TRIAL_ENDING_SOON_DAYS
   return {
-    label: trialLabel(plan.daysLeft),
+    label: trialLabel(plan.daysLeft, countdownDays),
     variant: endingSoon ? 'warning' : 'brand',
   }
 }
@@ -42,17 +43,19 @@ const UsageMeter = ({
   label,
   tooltip,
   meter,
+  hairline,
 }: {
   icon: ReactNode
   label: string
   tooltip: string
   meter: Meter | null
+  hairline?: boolean
 }) => {
   const left = meter && _remaining(meter)
   const isExhausted = left === 0
 
   return (
-    <Card variant="muted" size="sm" className="flex-1">
+    <Card variant="muted" size="sm" hairline={hairline} className="flex-1">
       <CardContent className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Avatar>
@@ -104,6 +107,7 @@ export default function PlanStatusCard({
   onManage,
   isManaging,
   canManage = plan?.status === 'active',
+  appearance = 'launch',
 }: {
   plan: PlanSummary | null
   safeAccounts: Meter | null
@@ -113,10 +117,14 @@ export default function PlanStatusCard({
   isManaging?: boolean
   /** Shows "Manage plan": on by default for a paid plan, and worth keeping for a lapsed one that still has a Stripe portal. */
   canManage?: boolean
+  /** Plans v2 draws the usage tiles with the hairline outline and the badge in solid mint. */
+  appearance?: 'launch' | 'v2'
 }) {
   const isTrial = plan?.status === 'trialing'
   const endDate = plan?.periodEndsAt ? formatDate(new Date(plan.periodEndsAt).getTime()) : null
-  const badge = getCurrentBadge(plan)
+  const isV2 = appearance === 'v2'
+  const badge = getCurrentBadge(plan, isV2 ? Number.POSITIVE_INFINITY : undefined)
+  const badgeVariant = isV2 && badge?.variant === 'brand' ? 'mint' : badge?.variant
   const isEndingSoon = badge?.variant === 'warning'
 
   return (
@@ -128,7 +136,7 @@ export default function PlanStatusCard({
               <div className="flex items-center gap-2">
                 <Typography variant="h4">{plan?.name ?? 'No active plan'}</Typography>
                 {badge && (
-                  <Badge variant={badge.variant} size="status" shape="status" data-testid="plan-status-badge">
+                  <Badge variant={badgeVariant} size="status" shape="status" data-testid="plan-status-badge">
                     {badge.label}
                   </Badge>
                 )}
@@ -153,12 +161,14 @@ export default function PlanStatusCard({
               label="Safe accounts available"
               tooltip={seatsTooltip(tierName, safeAccounts?.quota)}
               meter={safeAccounts}
+              hairline={isV2}
             />
             <UsageMeter
               icon={<Fuel className="size-5" strokeWidth={1.5} />}
               label="Sponsored transactions remaining"
               tooltip="Transactions above the limit bill at pay-as-you-go rates."
               meter={sponsoredTxs}
+              hairline={isV2}
             />
           </div>
         </div>

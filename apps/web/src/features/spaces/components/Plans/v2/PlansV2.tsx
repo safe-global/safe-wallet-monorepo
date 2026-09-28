@@ -27,6 +27,7 @@ export default function PlansV2({
         onManage={onManage}
         isManaging={isManaging}
         canManage={readOnly ? false : canManage}
+        appearance="v2"
       />
       <PlanCatalogV2
         tiers={tiers}

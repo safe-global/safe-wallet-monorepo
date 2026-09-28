@@ -92,4 +92,59 @@ describe('PlanCardV2', () => {
     expect(screen.getByTestId('plan-price-line')).toBeInTheDocument()
     expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })
+
+  it('keeps every card on the muted surface, lifting it to white on hover', () => {
+    const starter: PlanTier = { ...BUSINESS, id: 'Starter-month', name: 'Starter', options: [option(2, 18_900)] }
+    render(
+      <>
+        <PlanCardV2 tier={starter} />
+        <PlanCardV2 tier={BUSINESS} />
+      </>,
+    )
+
+    const [starterCard, businessCard] = screen.getAllByTestId('plan-card')
+    expect(starterCard).toHaveAttribute('data-variant', 'muted-secondary')
+    expect(businessCard).toHaveAttribute('data-variant', 'muted-secondary')
+    expect(businessCard).toHaveClass('hover:bg-card')
+    expect(businessCard).toHaveClass('group/plan')
+    within(businessCard)
+      .getAllByTestId('plan-feature-check')
+      .forEach((check) => expect(check).toHaveClass('group-hover/plan:bg-foreground'))
+  })
+
+  it('raises only the Business card and gives only it the filled button with an arrow', () => {
+    const starter: PlanTier = { ...BUSINESS, id: 'Starter-month', name: 'Starter', options: [option(2, 18_900)] }
+    render(
+      <>
+        <PlanCardV2 tier={starter} />
+        <PlanCardV2 tier={BUSINESS} />
+      </>,
+    )
+
+    const [starterCard, businessCard] = screen.getAllByTestId('plan-card')
+    expect(starterCard).not.toHaveAttribute('data-primary')
+    expect(businessCard).toHaveAttribute('data-primary', 'true')
+    expect(within(starterCard).getByRole('button', { name: 'Continue with Starter' }).querySelector('svg')).toBeNull()
+    expect(
+      within(businessCard).getByRole('button', { name: 'Continue with Business' }).querySelector('svg'),
+    ).not.toBeNull()
+  })
+
+  it('greys out the plan in force, even on the Business card', () => {
+    render(
+      <PlanCardV2
+        tier={{ ...BUSINESS, isCurrent: true, currentPriceId: 'price_b20m' }}
+        currentPlan={{
+          name: 'Business',
+          price: 1669,
+          currency: 'eur',
+          billingCycle: 'month',
+          isTrialing: false,
+          periodEndsAt: null,
+        }}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Current plan' })).toBeDisabled()
+  })
 })

@@ -6,7 +6,8 @@ import { Link } from '@/components/ui/link'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Typography } from '@/components/ui/typography'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
-import { READ_ONLY_NOTE, YEARLY_SAVINGS_LABEL } from '../PlanCards'
+import { READ_ONLY_NOTE } from '../PlanCards'
+import { PLAN_CARD_COPY_V2 } from '../planCatalog'
 import { getVisibleTiers } from '../planTiers'
 import type { PlanTier } from '../types'
 import { PlanCardV2, type PlanCardV2Actions } from './PlanCardV2'
@@ -20,9 +21,9 @@ export default function PlanCatalogV2({ tiers, ...actions }: { tiers: PlanTier[]
   const visible = getVisibleTiers(getTiersV2(tiers), cycle)
 
   return (
-    <Card radius="xl">
+    <Card radius="xl" size="sm">
       <CardContent>
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between gap-4">
             <Tabs value={cycle} onValueChange={(value) => setCycle(value as Cycle)}>
               <TabsList aria-label="Billing cycle">
@@ -30,8 +31,8 @@ export default function PlanCatalogV2({ tiers, ...actions }: { tiers: PlanTier[]
                 <TabsTrigger value="year">
                   Yearly
                   {hasYearly && (
-                    <Badge variant="brand" size="status" shape="status">
-                      {YEARLY_SAVINGS_LABEL}
+                    <Badge variant="mint" size="status" shape="status">
+                      {PLAN_CARD_COPY_V2.yearlySavings}
                     </Badge>
                   )}
                 </TabsTrigger>
@@ -43,7 +44,7 @@ export default function PlanCatalogV2({ tiers, ...actions }: { tiers: PlanTier[]
             </Link>
           </div>
 
-          <div className="flex flex-col gap-4 md:flex-row">
+          <div className="flex flex-col gap-5 md:flex-row">
             {visible.map((tier) => (
               <PlanCardV2 key={tier.id} tier={tier} {...actions} />
             ))}

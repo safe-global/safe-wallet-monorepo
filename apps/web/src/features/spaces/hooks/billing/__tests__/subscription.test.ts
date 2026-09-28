@@ -106,4 +106,12 @@ describe('subscription', () => {
   ])('labels a trial with %p days left as %p', (daysLeft, label) => {
     expect(trialLabel(daysLeft)).toBe(label)
   })
+
+  it.each([
+    [60, 'Free access · 60 days left'],
+    [1, 'Free access · 1 day left'],
+    [null, 'Free access'],
+  ])('counts down from any distance when asked to, with %s days left', (daysLeft, label) => {
+    expect(trialLabel(daysLeft, Number.POSITIVE_INFINITY)).toBe(label)
+  })
 })
