@@ -12,9 +12,12 @@ import { Spinner } from '@/components/ui/spinner'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { InputGroup, InputGroupInput, InputGroupAddon } from '@/components/ui/input-group'
-import { useCallback, useContext, useEffect, useId, useState } from 'react'
+import { useCallback, useContext, useEffect, useId, useRef, useState } from 'react'
 
-const PROPOSAL_TIMEOUT = 30_000
+export const PROPOSAL_TIMEOUT = 5_000
+
+const TIMEOUT_ERROR =
+  'Connection timed out. If you already used this pairing code, copy a new one from the dApp and try again.'
 
 const useTrackErrors = (error?: Error) => {
   const debouncedErrorMessage = useDebounce(error?.message, 1000)
@@ -28,11 +31,20 @@ const useTrackErrors = (error?: Error) => {
 }
 
 const WcInput = ({ uri }: { uri: string }) => {
-  const { walletConnect, loading, setLoading, setError } = useContext(WalletConnectContext)
+  const { walletConnect, loading, setLoading, setError, isSuggestionFeatureEnabled } = useContext(WalletConnectContext)
   const [value, setValue] = useState('')
   const [inputError, setInputError] = useState<Error>()
   const inputId = useId()
   useTrackErrors(inputError)
+
+  // The timeout fires long after onInput ran, so it must read current loading, not the closure's
+  const loadingRef = useRef(loading)
+  useEffect(() => {
+    loadingRef.current = loading
+  }, [loading])
+
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined)
+  useEffect(() => () => clearTimeout(timeoutRef.current), [])
 
   const onInput = useCallback(
     async (val: string) => {
@@ -57,14 +69,19 @@ const WcInput = ({ uri }: { uri: string }) => {
         setInputError(asError(e))
         setLoading(null)
       }
-      setTimeout(() => {
-        if (loading && loading !== WCLoadingState.APPROVE) {
+      // Before this timer was fixed it could never fire, so leaving it unarmed while the
+      // feature is off reproduces the previous behaviour exactly
+      if (!isSuggestionFeatureEnabled) return
+
+      clearTimeout(timeoutRef.current)
+      timeoutRef.current = setTimeout(() => {
+        if (loadingRef.current && loadingRef.current !== WCLoadingState.APPROVE) {
           setLoading(null)
-          setError(new Error('Connection timed out'))
+          setError(new Error(TIMEOUT_ERROR))
         }
       }, PROPOSAL_TIMEOUT)
     },
-    [loading, setError, setLoading, walletConnect],
+    [setError, setLoading, walletConnect, isSuggestionFeatureEnabled],
   )
 
   // Insert a pre-filled uri
