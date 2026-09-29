@@ -40,8 +40,17 @@ const isSpendingLimitData = (data: ActivePolicyDto['data']): data is SpendingLim
 
 const isProposerData = (data: ActivePolicyDto['data']): data is ProposerPolicyDataDto => 'proposers' in data
 
+/**
+ * The allowance module stays enabled once its last allowance is deleted, so a fully revoked policy keeps
+ * coming back with nothing in it. A policy that grants nothing is not one the page has anything to say
+ * about, so it is dropped here rather than rendered as an empty row.
+ */
+const hasNoAllowances = (data: SpendingLimitPolicyDataDto): boolean =>
+  data.spenders.every((spender) => spender.allowances.length === 0)
+
 const toSpendingLimit = (dto: ActivePolicyDto, resolveToken: ResolveTokenInfo): SpendingLimitPolicy | null => {
   if (dto.enforcement.via !== 'module' || !isSpendingLimitData(dto.data)) return null
+  if (hasNoAllowances(dto.data)) return null
 
   const { chainId } = dto.safe
 
