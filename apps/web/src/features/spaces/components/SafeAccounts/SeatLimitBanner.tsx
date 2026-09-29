@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Typography } from '@/components/ui/typography'
 import { useSeatUpsell } from '../../hooks/useSeatUpsell'
-import { CONTACT_SALES_FORM_URL, openContactSalesForm } from '../../utils/pylonForm'
+import { CONTACT_SALES_URL, openContactSales } from '../../utils/formPopup'
 
 /** Shown once the Workspace holds as many Safes as its plan covers: upgrade when a bigger plan is offered, else sales. */
 export default function SeatLimitBanner({
@@ -35,7 +35,7 @@ export default function SeatLimitBanner({
         upgradePlanName ? (
           <NextLink href={plansHref} />
         ) : (
-          <a href={CONTACT_SALES_FORM_URL} target="_blank" rel="noopener noreferrer" onClick={openContactSalesForm} />
+          <a href={CONTACT_SALES_URL} target="_blank" rel="noopener noreferrer" onClick={openContactSales} />
         )
       }
     >

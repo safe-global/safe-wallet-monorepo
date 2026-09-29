@@ -1,7 +1,7 @@
 import type { MouseEvent } from 'react'
-import { CONTACT_SALES_FORM_URL, openContactSalesForm, openPylonForm } from '../pylonForm'
+import { CONTACT_SALES_URL, openContactSales, openFormPopup } from '../formPopup'
 
-describe('pylonForm', () => {
+describe('formPopup', () => {
   const originalOpen = window.open
   const mockOpen = jest.fn()
 
@@ -25,7 +25,7 @@ describe('pylonForm', () => {
     }) as unknown as MouseEvent<HTMLElement>
 
   it('opens a form in a small, isolated popup window', () => {
-    openPylonForm('https://example.com/form', 400, 600)
+    openFormPopup('https://example.com/form', 400, 600)
 
     expect(mockOpen).toHaveBeenCalledWith('https://example.com/form', '_blank', expect.stringContaining('popup=yes'))
     const features = mockOpen.mock.calls[0][2]
@@ -35,19 +35,19 @@ describe('pylonForm', () => {
     expect(features).toContain('noreferrer')
   })
 
-  it('opens the contact-sales form in a popup on a plain click', () => {
+  it('opens the contact-sales booking page in a popup on a plain click', () => {
     const event = click()
-    openContactSalesForm(event)
+    openContactSales(event)
 
     expect(event.preventDefault).toHaveBeenCalled()
-    expect(mockOpen).toHaveBeenCalledWith(CONTACT_SALES_FORM_URL, '_blank', expect.stringContaining('popup=yes'))
+    expect(mockOpen).toHaveBeenCalledWith(CONTACT_SALES_URL, '_blank', expect.stringContaining('popup=yes'))
   })
 
   it.each([{ metaKey: true }, { ctrlKey: true }, { shiftKey: true }, { button: 1 }])(
     'leaves modified clicks to the browser (%o)',
     (overrides) => {
       const event = click(overrides)
-      openContactSalesForm(event)
+      openContactSales(event)
 
       expect(event.preventDefault).not.toHaveBeenCalled()
       expect(mockOpen).not.toHaveBeenCalled()

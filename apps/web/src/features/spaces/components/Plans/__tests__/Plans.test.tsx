@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
-import { CONTACT_SALES_FORM_URL } from '../../../utils/pylonForm'
+import { CONTACT_SALES_URL } from '../../../utils/formPopup'
 import type { PlanGroup } from '../../../hooks/billing/types'
 import Plans from '../index'
 import { getCurrentBadge, _remaining, seatsTooltip } from '../PlanStatusCard'
@@ -126,7 +126,7 @@ describe('Plans', () => {
       tier: expect.objectContaining({ name: 'Starter' }),
       option: expect.objectContaining({ paymentLinkId: 'pl_starter_m', priceId: 'price_pl_starter_m' }),
     })
-    expect(screen.getByRole('link', { name: 'Talk to sales' })).toHaveAttribute('href', CONTACT_SALES_FORM_URL)
+    expect(screen.getByRole('link', { name: 'Talk to sales' })).toHaveAttribute('href', CONTACT_SALES_URL)
   })
 
   it('swaps the payment nudge and its button for Manage plan once a payment method is on file', () => {

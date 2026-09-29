@@ -17,7 +17,7 @@ import SpendingLimitFlow from './SpendingLimitFlow'
 import SpendingLimitIntroDialog from './SpendingLimitIntroDialog'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from './SpendingLimitIntroDialog/constants'
 import { REQUEST_POLICY_FORM_HEIGHT, REQUEST_POLICY_FORM_URL, REQUEST_POLICY_FORM_WIDTH } from './constants'
-import { openPylonForm } from '../../utils/pylonForm'
+import { openFormPopup } from '../../utils/formPopup'
 import { isProposerPolicy, type Policy, type Proposer, type ProposerPolicy } from './types'
 
 interface PoliciesProps {
@@ -32,7 +32,7 @@ interface PoliciesProps {
 }
 
 const openRequestPolicyForm = () =>
-  openPylonForm(REQUEST_POLICY_FORM_URL, REQUEST_POLICY_FORM_WIDTH, REQUEST_POLICY_FORM_HEIGHT)
+  openFormPopup(REQUEST_POLICY_FORM_URL, REQUEST_POLICY_FORM_WIDTH, REQUEST_POLICY_FORM_HEIGHT)
 
 /**
  * The page has two modes. With no policies it shows the catalogue of policies that can be set up.
