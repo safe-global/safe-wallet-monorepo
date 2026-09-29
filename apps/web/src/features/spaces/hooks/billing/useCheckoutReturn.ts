@@ -14,8 +14,11 @@ const POLL_TIMEOUT = 60_000
 
 // A $0 trial checkout settles as `no_payment_required`; a paid one as `paid`.
 const SETTLED_PAYMENT_STATUSES = new Set(['paid', 'no_payment_required'])
+// Stripe only redirects to the success URL once the session is `complete`, so an `open` or `expired` one means the
+// user left the checkout (Back) or let it lapse: nothing was started and there is nothing to wait for.
+const ABANDONED_SESSION_STATUSES = new Set(['open', 'expired'])
 
-export type CheckoutReturnStatus = 'idle' | 'processing' | 'activating' | 'complete' | 'timeout' | 'error'
+export type CheckoutReturnStatus = 'idle' | 'processing' | 'activating' | 'complete' | 'timeout' | 'error' | 'canceled'
 
 // Every mounted instance reads the same deadline per session, so the lock and checkout modals time out and retry together.
 const deadlines = new Map<string, number>()
@@ -33,7 +36,13 @@ const setDeadline = (sessionId: string, deadline: number) => {
   listeners.forEach((listener) => listener())
 }
 
-export const _resetCheckoutDeadlines = () => deadlines.clear()
+// Every mounted instance sees the abandoned session; only the first one drops it from the URL.
+const dismissedSessions = new Set<string>()
+
+export const _resetCheckoutDeadlines = () => {
+  deadlines.clear()
+  dismissedSessions.clear()
+}
 
 /** Polls the checkout session until it settles, then the subscriptions until the billing webhook propagates it. */
 export const useCheckoutReturn = (spaceId?: string | null) => {
@@ -59,6 +68,7 @@ export const useCheckoutReturn = (spaceId?: string | null) => {
     { pollingInterval: isSessionDone || timedOut ? 0 : POLL_INTERVAL },
   )
   const isSettled = session !== undefined && SETTLED_PAYMENT_STATUSES.has(session.paymentStatus)
+  const isCanceled = session !== undefined && !isSettled && ABANDONED_SESSION_STATUSES.has(session.status)
 
   const { data: subscriptions } = useBillingGetSubscriptionsV1Query(
     isSettled && gatedSpaceId ? { spaceId: gatedSpaceId } : skipToken,
@@ -68,12 +78,14 @@ export const useCheckoutReturn = (spaceId?: string | null) => {
   const planStatus = getPlanStatus(subscription)
   const isComplete = planStatus === 'trialing' || planStatus === 'active'
 
-  useEffect(() => setIsSessionDone(isSettled || isSessionError), [isSettled, isSessionError])
+  useEffect(() => setIsSessionDone(isSettled || isSessionError || isCanceled), [isSettled, isSessionError, isCanceled])
   useEffect(() => setIsSubscriptionDone(isComplete), [isComplete])
 
   useEffect(() => {
-    if (sessionId && !isComplete && !deadlines.has(sessionId)) setDeadline(sessionId, Date.now() + POLL_TIMEOUT)
-  }, [sessionId, isComplete])
+    if (sessionId && !isComplete && !isCanceled && !deadlines.has(sessionId)) {
+      setDeadline(sessionId, Date.now() + POLL_TIMEOUT)
+    }
+  }, [sessionId, isComplete, isCanceled])
 
   useEffect(() => {
     if (deadline === undefined || isComplete) return
@@ -90,17 +102,26 @@ export const useCheckoutReturn = (spaceId?: string | null) => {
     router.replace({ pathname: router.pathname, query }, undefined, { shallow: true })
   }
 
+  // Back from Stripe is silent: drop the session id so the Workspace shows whatever it showed before checkout.
+  useEffect(() => {
+    if (!isCanceled || !sessionId || dismissedSessions.has(sessionId)) return
+    dismissedSessions.add(sessionId)
+    dismiss()
+  }, [isCanceled, sessionId]) // eslint-disable-line react-hooks/exhaustive-deps -- dismiss is a new function every render
+
   const status: CheckoutReturnStatus = !isReturning
     ? 'idle'
     : isSessionError
       ? 'error'
-      : isComplete
-        ? 'complete'
-        : timedOut
-          ? 'timeout'
-          : isSettled
-            ? 'activating'
-            : 'processing'
+      : isCanceled
+        ? 'canceled'
+        : isComplete
+          ? 'complete'
+          : timedOut
+            ? 'timeout'
+            : isSettled
+              ? 'activating'
+              : 'processing'
 
   return { isReturning, status, subscription, dismiss, retry }
 }

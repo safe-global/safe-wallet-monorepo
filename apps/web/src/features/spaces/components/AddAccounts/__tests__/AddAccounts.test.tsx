@@ -16,7 +16,7 @@ jest.mock('../AddManually', () => ({
 jest.mock('@/features/myAccounts', () => ({
   __esModule: true,
   SafeAccountsTable: (props: {
-    items: Array<{ chainId: string; address: string }>
+    items: Array<{ chainId: string; address: string; safes?: unknown[] }>
     selection?: { onToggle: (line: unknown, next: boolean) => void; isAtLimit?: boolean }
   }) => (
     <div
@@ -25,7 +25,8 @@ jest.mock('@/features/myAccounts', () => ({
       data-locked={String(Boolean(props.selection?.isAtLimit))}
       onClick={() => {
         const [item] = props.items
-        props.selection?.onToggle({ key: `${item.chainId}:${item.address}`, variant: 'single', source: item }, true)
+        const variant = item.safes ? 'group' : 'single'
+        props.selection?.onToggle({ key: `${item.chainId}:${item.address}`, variant, source: item }, true)
       }}
     />
   ),
@@ -63,9 +64,10 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   default: () => mockWalletValue,
 }))
 
+let mockChainConfigs = [{ chainId: '1' }]
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
-  default: () => ({ configs: [{ chainId: '1' }] }),
+  default: () => ({ configs: mockChainConfigs }),
 }))
 
 let mockAllOwned: Record<string, string[]> = {}
@@ -197,6 +199,20 @@ describe('AddAccounts — Safe account limit', () => {
     mockSpaceSafes = []
     mockSpaceSafesLoading = false
     mockSafeLimit = { limit: 40, isError: false }
+    mockChainConfigs = [{ chainId: '1' }]
+  })
+
+  it('counts a Safe on several networks as one account', () => {
+    mockChainConfigs = [{ chainId: '1' }, { chainId: '137' }]
+    const safe = { owners: [], threshold: 1 }
+    render(<AddAccounts externalOpen onExternalClose={() => {}} />, {
+      initialReduxState: { addedSafes: { '1': { [TRUSTED_ADDRESS]: safe }, '137': { [TRUSTED_ADDRESS]: safe } } },
+    })
+
+    fireEvent.click(screen.getByTestId('safe-accounts-table'))
+
+    expect(screen.getByTestId('selected-count')).toHaveTextContent('1 of 40 selected')
+    expect(screen.getByTestId('add-accounts-button')).toHaveTextContent('Add accounts (1)')
   })
 
   it('counts against a known limit and leaves picking open below it', () => {

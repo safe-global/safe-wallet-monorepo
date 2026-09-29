@@ -5,10 +5,12 @@ import ExternalLink from '@/components/common/ExternalLink'
 import { Typography } from '@/components/ui/typography'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import AddPolicyDialog from './AddPolicyDialog'
-import type { AddPolicyId } from './AddPolicyDialog/options'
+import { ADD_POLICY_OPTIONS, type AddPolicyId } from './AddPolicyDialog/options'
 import PoliciesList from './PoliciesList'
 import { PoliciesLoadError, PoliciesLoading } from './PoliciesLoadState'
 import PolicyCatalogue from './PolicyCatalogue'
+import type { PolicyLock } from './policyLock'
+import PolicyUpsellBanner from './PolicyUpsellBanner'
 import ProposerIntroDialog from './ProposerIntroDialog'
 import { PROPOSER_INTRO_SEEN_KEY } from './ProposerIntroDialog/constants'
 import ProposerDetails from './ProposerDetails'
@@ -29,6 +31,11 @@ interface PoliciesProps {
   /** The populated mode's `Add policy` button. Without it the button opens the add policy dialog. */
   onAddPolicy?: () => void
   onSelectPolicy?: (policy: Policy) => void
+  /**
+   * Set when the plan does not include some policies: the banner shows, their tiles lead to the upgrade and the add
+   * policy dialog disables them.
+   */
+  locked?: PolicyLock
 }
 
 const openRequestPolicyForm = () => {
@@ -43,7 +50,8 @@ const openRequestPolicyForm = () => {
  * The page has two modes. With no policies it shows the catalogue of policies that can be set up.
  * With policies it shows the list of policies already set up. Revoking the last policy removes it
  * from the CGW response, so the page returns to the catalogue. While the response is pending or
- * failed, only the heading stays and the body is the load state.
+ * failed, only the heading stays and the body is the load state. A plan without some policies shows the
+ * upgrade banner above either mode, and the catalogue loses its suggestion tile.
  */
 const Policies = ({
   policies = [],
@@ -52,6 +60,7 @@ const Policies = ({
   onRetry,
   onAddPolicy,
   onSelectPolicy,
+  locked,
 }: PoliciesProps): ReactElement => {
   const isSettled = !isLoading && !isError
 
@@ -143,6 +152,16 @@ const Policies = ({
     [handleSelect],
   )
 
+  const addPolicyOptions = useMemo(
+    () =>
+      ADD_POLICY_OPTIONS.map((option) =>
+        locked?.lockedPolicies.some((lockedId) => lockedId === option.id)
+          ? { ...option, disabled: true, disabledTooltip: 'Upgrade to Business to set up policies.' }
+          : option,
+      ),
+    [locked],
+  )
+
   const closeProposerIntro = useCallback(() => {
     setIsProposerIntroOpen(false)
     setHasSeenProposerIntro(true)
@@ -164,7 +183,7 @@ const Policies = ({
           <Typography variant="paragraph-medium">
             Policies are rules that help you manage your Safe accounts. Set them up once and they will run onchain,
             automatically.{' '}
-            <ExternalLink className="font-bold hover:text-muted-foreground" href={HelpCenterArticle.POLICIES}>
+            <ExternalLink noIcon href={HelpCenterArticle.POLICIES}>
               Learn more
             </ExternalLink>
           </Typography>
@@ -175,17 +194,32 @@ const Policies = ({
         <PoliciesLoading />
       ) : isError ? (
         <PoliciesLoadError onReload={onRetry} />
-      ) : policies.length > 0 ? (
-        <PoliciesList
-          policies={policies}
-          onAddPolicy={onAddPolicy ?? (() => setIsAddPolicyOpen(true))}
-          onSelectPolicy={onSelectPolicy ?? openPolicy}
-        />
       ) : (
-        <PolicyCatalogue onSelect={handleSelect} />
+        <>
+          {locked && (
+            <div className="mb-4">
+              <PolicyUpsellBanner {...locked} />
+            </div>
+          )}
+
+          {policies.length > 0 ? (
+            <PoliciesList
+              policies={policies}
+              onAddPolicy={onAddPolicy ?? (() => setIsAddPolicyOpen(true))}
+              onSelectPolicy={onSelectPolicy ?? openPolicy}
+            />
+          ) : (
+            <PolicyCatalogue onSelect={handleSelect} locked={locked} />
+          )}
+        </>
       )}
 
-      <AddPolicyDialog open={isAddPolicyOpen} onOpenChange={setIsAddPolicyOpen} onSelect={selectFromAddPolicyDialog} />
+      <AddPolicyDialog
+        open={isAddPolicyOpen}
+        onOpenChange={setIsAddPolicyOpen}
+        onSelect={selectFromAddPolicyDialog}
+        options={addPolicyOptions}
+      />
 
       <SpendingLimitIntroDialog
         open={isSpendingLimitIntroOpen}

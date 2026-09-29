@@ -17,7 +17,7 @@ const PENDING_STATUSES: CheckoutReturnStatus[] = ['processing', 'activating']
 const FAILURE_COPY = {
   timeout: {
     title: 'Your subscription is taking longer than expected',
-    body: 'Stripe accepted the checkout, but your Workspace hasn’t been updated yet. Try again in a moment; if the problem persists, contact support.',
+    body: 'We haven’t been able to confirm your subscription yet. Try again in a moment; if the problem persists, contact support.',
   },
   error: {
     title: 'We couldn’t confirm your checkout',

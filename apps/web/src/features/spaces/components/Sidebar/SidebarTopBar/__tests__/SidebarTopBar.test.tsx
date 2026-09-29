@@ -14,8 +14,8 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
   useSafeAddressFromUrl: () => mockUseSafeAddressFromUrl(),
 }))
 
-const mockUseHasFeature = jest.fn()
-jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
+const mockUseIsSafeProEnabled = jest.fn()
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockUseIsSafeProEnabled() }))
 const mockPlans: { plan: { status: string } | null } = { plan: null }
 jest.mock('../../../../hooks/useSpacePlan', () => ({ useSpacePlan: () => mockPlans }))
 const mockSponsored = { isPro: false }
@@ -67,7 +67,7 @@ describe('SidebarTopBar', () => {
     mockUseRouter.mockReturnValue({ pathname: AppRoutes.welcome.accounts })
     mockUseSafeAddressFromUrl.mockReturnValue('')
     mockUseIsSpaceRoute.mockReturnValue(false)
-    mockUseHasFeature.mockReturnValue(true)
+    mockUseIsSafeProEnabled.mockReturnValue(true)
     const { useSidebar } = require('@/components/ui/sidebar')
     useSidebar.mockReturnValue({ state: 'expanded' })
   })
@@ -118,7 +118,7 @@ describe('SidebarTopBar', () => {
   })
 
   it('keeps the dev logo and its link to My accounts until Safe Pro is live', () => {
-    mockUseHasFeature.mockReturnValue(false)
+    mockUseIsSafeProEnabled.mockReturnValue(false)
     mockUseRouter.mockReturnValue({ pathname: AppRoutes.spaces.index })
     mockUseIsSpaceRoute.mockReturnValue(true)
     mockPlans.plan = { status: 'active' }

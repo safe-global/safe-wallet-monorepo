@@ -3,7 +3,7 @@ import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATE
 import { AppRoutes } from '@/config/routes'
 import { highlightSafePro } from '@/components/common/ProHighlight'
 import { SafeProNoticeModal } from '../SafeProModals'
-import { useCheckoutReturn } from '../../hooks/billing/useCheckoutReturn'
+import { useCheckoutReturn, type CheckoutReturnStatus } from '../../hooks/billing/useCheckoutReturn'
 import { useCurrentMembership, useIsAdmin } from '../../hooks/useSpaceMembers'
 import { useWorkspaceLock, type WorkspaceLockReason } from '../../hooks/useWorkspaceLock'
 import { claimCopy } from './ClaimTrialModal'
@@ -28,6 +28,9 @@ export const _memberCopy = (
   }
 }
 
+// Statuses in which the checkout modals give the screen back to the lock.
+const CHECKOUT_RELEASED_STATUSES: CheckoutReturnStatus[] = ['error', 'timeout', 'canceled']
+
 export const _PLAN_ERROR_COPY = {
   title: 'Your plan could not be checked',
   body: 'We could not load the plan of this Workspace. Try again, or come back later, your Safe accounts remain available outside the Workspace.',
@@ -40,9 +43,10 @@ export default function WorkspaceLockModal({ spaceId }: { spaceId: string }) {
   const membership = useCurrentMembership(spaceId)
   const isAdmin = useIsAdmin(spaceId)
   const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId }, { skip: !isLocked })
-  // Back from Stripe the subscription is still propagating: the checkout modals own the screen until it fails.
+  // Back from a completed Stripe checkout the subscription is still propagating: the checkout modals own the screen
+  // until it fails. An abandoned checkout (Back) changed nothing, so the lock shows again right away.
   const checkout = useCheckoutReturn(spaceId)
-  const isConfirmingCheckout = checkout.isReturning && checkout.status !== 'error' && checkout.status !== 'timeout'
+  const isConfirmingCheckout = checkout.isReturning && !CHECKOUT_RELEASED_STATUSES.includes(checkout.status)
 
   // Without the membership the admin check cannot be trusted yet; a non-member never gets this far (AuthState).
   if (!membership || isConfirmingCheckout) return null
