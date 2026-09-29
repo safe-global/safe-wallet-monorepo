@@ -15,7 +15,8 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
   useUsersGetWithWalletsV1Query: () => ({ currentData: { id: USER_ID } }),
 }))
-jest.mock('@/hooks/useChainId', () => ({ __esModule: true, default: () => '1' }))
+let mockChainId = '1'
+jest.mock('@/hooks/useChainId', () => ({ __esModule: true, default: () => mockChainId }))
 jest.mock('@/hooks/useSafeAddressFromUrl', () => ({ useSafeAddressFromUrl: () => SAFE_ADDRESS }))
 
 const mockShowNotification = jest.fn((payload: unknown) => ({ type: 'notifications/test', payload }))
@@ -68,10 +69,10 @@ describe('getSafeWorkspaceAction', () => {
 })
 
 describe('useSafeWorkspaceCheck', () => {
-  const renderCheck = (replace = jest.fn(() => Promise.resolve(true))) => {
+  const renderCheck = (replace = jest.fn(() => Promise.resolve(true)), pathname = '/home') => {
     renderHook(() => useSafeWorkspaceCheck(), {
       initialReduxState: signedInAuth,
-      routerProps: { pathname: '/home', query: { safe: `eth:${SAFE_ADDRESS}`, spaceId: SPACE_ID }, replace },
+      routerProps: { pathname, query: { safe: `eth:${SAFE_ADDRESS}`, spaceId: SPACE_ID }, replace },
     })
     return replace
   }
@@ -79,6 +80,7 @@ describe('useSafeWorkspaceCheck', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     window.localStorage.clear()
+    mockChainId = '1'
     mockSpace.mockReturnValue({
       currentData: { members: [{ user: { id: USER_ID }, status: MemberStatus.ACTIVE }] },
       error: undefined,
@@ -91,6 +93,25 @@ describe('useSafeWorkspaceCheck', () => {
 
     expect(replace).not.toHaveBeenCalled()
   })
+
+  it('waits while the chain of the URL is still unresolved', () => {
+    mockChainId = ''
+
+    const replace = renderCheck()
+
+    expect(replace).not.toHaveBeenCalled()
+  })
+
+  it.each(['/spaces', '/spaces/safe-accounts', '/welcome/spaces'])(
+    'leaves %s alone, because a Workspace page with a Safe in its query is not a Safe page',
+    (pathname) => {
+      mockSpaceSafes.mockReturnValue({ currentData: { safes: { '1': [] } } })
+
+      const replace = renderCheck(undefined, pathname)
+
+      expect(replace).not.toHaveBeenCalled()
+    },
+  )
 
   it('removes the Workspace from the URL when the Safe is not in it', () => {
     mockSpaceSafes.mockReturnValue({ currentData: { safes: { '1': [] } } })

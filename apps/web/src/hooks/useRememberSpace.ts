@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectIsStoreHydrated, setLandingSpaceHint } from '@/store/authSlice'
-import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
+import { isLegacySpaceId, useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 
 /**
  * Stores the Workspace of the URL while this tab is visible, so that `/spaces` without a spaceId
@@ -13,8 +13,9 @@ export const useRememberSpace = (): void => {
   const spaceId = useUrlSpaceId()
 
   useEffect(() => {
-    // Before hydration, the persisted state would overwrite the value
-    if (!isStoreHydrated || !spaceId) return
+    // Before hydration, the persisted state would overwrite the value. A legacy id matches no
+    // Workspace in the list, so keep the previous hint instead.
+    if (!isStoreHydrated || !spaceId || isLegacySpaceId(spaceId)) return
 
     const rememberIfVisible = () => {
       if (document.visibilityState === 'visible') dispatch(setLandingSpaceHint(spaceId))

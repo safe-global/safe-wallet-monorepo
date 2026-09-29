@@ -4,8 +4,9 @@ import type { NextRouter } from 'next/router'
 import { parse } from 'querystring'
 import { useIsHydrated } from './useIsHydrated'
 
-// A Workspace UUID, or a legacy numeric id that old links still carry (the backend accepts both)
-const SPACE_ID_PATTERN = /^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|\d+)$/i
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+// Old links still carry a numeric id; the backend accepts it, but the Workspace list exposes only UUIDs
+const LEGACY_ID_PATTERN = /^\d+$/
 
 // Next.js router.query is empty during static-export hydration
 const getLocationSpaceId = (): unknown => {
@@ -15,7 +16,10 @@ const getLocationSpaceId = (): unknown => {
 
 /** A Workspace id, or null for a missing, repeated (`string[]`) or malformed value. */
 export const parseSpaceId = (value: unknown): string | null =>
-  typeof value === 'string' && SPACE_ID_PATTERN.test(value) ? value : null
+  typeof value === 'string' && (UUID_PATTERN.test(value) || LEGACY_ID_PATTERN.test(value)) ? value : null
+
+/** True for a legacy numeric Workspace id, which cannot be matched against the Workspace list. */
+export const isLegacySpaceId = (spaceId: string): boolean => LEGACY_ID_PATTERN.test(spaceId)
 
 /**
  * The Workspace of this tab: the `spaceId` query param, or null. It never falls back to stored

@@ -45,6 +45,12 @@ describe('useRememberSpace', () => {
     expect(result.current).toBe(SPACE_ID)
   })
 
+  it('keeps the previous hint for a legacy numeric id, which the Workspace list cannot match', () => {
+    const { result } = renderRemember({ spaceId: '12' })
+
+    expect(result.current).toBe(OTHER_SPACE_ID)
+  })
+
   it('stores nothing outside a Workspace', () => {
     const { result } = renderRemember({})
 

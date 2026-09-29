@@ -21,6 +21,7 @@ import { parseSpaceId } from '@/hooks/useUrlSpaceId'
 import { isUnauthorized } from '../utils'
 import { MemberStatus } from './useSpaceMembers'
 import { SPACE_REFRESH_OPTIONS } from './refreshOptions'
+import { AppRoutes } from '@/config/routes'
 
 export type SafeWorkspaceAction = 'none' | 'wait' | 'signIn' | 'remove' | 'removeNotMember'
 
@@ -57,8 +58,12 @@ export const getSafeWorkspaceAction = (state: SafeWorkspaceState): SafeWorkspace
   return getMemberAction(state)
 }
 
+// Workspace and welcome pages also carry `safe` (e.g. for a modal), but they are not Safe pages
+const isWorkspaceOrWelcomePage = (pathname: string): boolean =>
+  pathname.startsWith(AppRoutes.spaces.index) || pathname.startsWith(AppRoutes.welcome.index)
+
 const useSafeWorkspaceState = (): SafeWorkspaceState => {
-  const { query, isReady } = useRouter()
+  const { query, isReady, pathname } = useRouter()
   const isSignedIn = useAppSelector(isAuthenticated)
   const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
   const isSessionCheckPending = useAppSelector(selectIsSessionCheckPending)
@@ -66,7 +71,8 @@ const useSafeWorkspaceState = (): SafeWorkspaceState => {
   const chainId = useChainId()
   const safeAddress = useSafeAddressFromUrl()
 
-  const isSafeRoute = isReady && typeof query.safe === 'string' && query.safe.length > 0
+  const isSafeRoute =
+    isReady && typeof query.safe === 'string' && query.safe.length > 0 && !isWorkspaceOrWelcomePage(pathname)
   const spaceId = parseSpaceId(query.spaceId)
   const skip = !isSafeRoute || !isSignedIn || spaceId === null
 
@@ -82,8 +88,9 @@ const useSafeWorkspaceState = (): SafeWorkspaceState => {
 
   const membershipStatus =
     space && user ? (space.members.find((member) => member.user.id === user.id)?.status ?? null) : undefined
+  // useChainId is '' until the chain of the URL resolves; deciding before then would remove a valid id
   const isSafeInSpace =
-    spaceSafes && safeAddress
+    spaceSafes && safeAddress && chainId
       ? (spaceSafes.safes[chainId] ?? []).some((address) => sameAddress(address, safeAddress))
       : undefined
 

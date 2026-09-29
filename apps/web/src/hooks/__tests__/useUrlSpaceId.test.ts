@@ -1,5 +1,6 @@
 import { renderHook } from '@/tests/test-utils'
 import {
+  isLegacySpaceId,
   getLocationSpaceIdQuery,
   getRouterSpaceIdQuery,
   getSpaceIdQuery,
@@ -56,6 +57,13 @@ describe('useUrlSpaceId', () => {
     const { result } = renderWithQuery({})
 
     expect(result.current).toBe(SPACE_UUID)
+  })
+})
+
+describe('isLegacySpaceId', () => {
+  it('tells a legacy numeric id from a UUID', () => {
+    expect(isLegacySpaceId('12')).toBe(true)
+    expect(isLegacySpaceId(SPACE_UUID)).toBe(false)
   })
 })
 
