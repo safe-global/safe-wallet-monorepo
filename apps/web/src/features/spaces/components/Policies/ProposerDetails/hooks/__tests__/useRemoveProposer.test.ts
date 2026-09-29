@@ -5,6 +5,7 @@ import { useRemoveProposer } from '../useRemoveProposer'
 const mockDeleteV1 = jest.fn()
 const mockDeleteV2 = jest.fn()
 const mockDispatch = jest.fn()
+const mockShowNotification = jest.fn()
 const mockAssertWalletChain = jest.fn()
 const mockIsEthSignWallet = jest.fn()
 const mockSignTypedData = jest.fn()
@@ -40,6 +41,10 @@ jest.mock('@/store', () => ({
   useAppDispatch: () => mockDispatch,
 }))
 
+jest.mock('@/store/notificationsSlice', () => ({
+  showNotification: (...args: unknown[]) => mockShowNotification(...args),
+}))
+
 const policy = asActivePolicy(mockProposerPolicy())
 const ref = { policy, proposer: policy.data.proposers[0] }
 const unwrapped = (value?: unknown) => ({ unwrap: () => Promise.resolve(value) })
@@ -70,10 +75,12 @@ describe('useRemoveProposer', () => {
       deleteDelegateV2Dto: { delegator: MOCK_ADDRESSES.alice, safe: MOCK_SAFES.treasury.address, signature: '0xtyped' },
     })
     expect(mockDispatch).toHaveBeenCalledTimes(1)
-    expect(mockDispatch.mock.calls[0][0].payload).toMatchObject({
-      title: 'Proposer deleted successfully!',
-      message: expect.stringContaining('cannot suggest transactions anymore.'),
-    })
+    expect(mockShowNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Proposer deleted successfully!',
+        message: expect.stringContaining('cannot suggest transactions anymore.'),
+      }),
+    )
     expect(onRemoved).toHaveBeenCalledTimes(1)
     expect(result.current.error).toBeUndefined()
   })
