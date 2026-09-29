@@ -4,11 +4,16 @@ import {
   useLazySpaceSafesGetV1Query,
   type GetSpaceResponse,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { _mapWithConcurrency, useSafeSpaces } from '../useSafeSpaces'
+import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
+import { _mapWithConcurrency, useSafeSpaces } from '@/hooks/useSafeSpaces'
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpacesGetV1Query: jest.fn(),
   useLazySpaceSafesGetV1Query: jest.fn(),
+}))
+
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
+  useUsersGetWithWalletsV1Query: jest.fn(),
 }))
 
 jest.mock('@/store/authSlice', () => ({
@@ -18,10 +23,16 @@ jest.mock('@/store/authSlice', () => ({
 
 const mockUseSpacesGetV1Query = useSpacesGetV1Query as jest.Mock
 const mockUseLazySpaceSafesGetV1Query = useLazySpaceSafesGetV1Query as jest.Mock
+const mockUseUsersGetWithWalletsV1Query = useUsersGetWithWalletsV1Query as jest.Mock
 
-const member = (status: 'ACTIVE' | 'INVITED') => ({ status }) as GetSpaceResponse['members'][number]
-const space = (uuid: string, status: 'ACTIVE' | 'INVITED' = 'ACTIVE') =>
-  ({ uuid, name: uuid, members: [member(status)], memberCount: 1, safeCount: 1 }) as GetSpaceResponse
+const CURRENT_USER_ID = 1
+const OTHER_USER_ID = 2
+
+type Status = 'ACTIVE' | 'INVITED'
+const member = (status: Status, userId = CURRENT_USER_ID) =>
+  ({ status, user: { id: userId } }) as GetSpaceResponse['members'][number]
+const space = (uuid: string, members = [member('ACTIVE')]) =>
+  ({ uuid, name: uuid, members, memberCount: members.length, safeCount: 1 }) as GetSpaceResponse
 const spaceAlpha = space('alpha')
 const spaceBravo = space('bravo')
 
@@ -34,6 +45,7 @@ const mockSafesResolver = (safesBySpace: Record<string, { safes: Record<string, 
 describe('useSafeSpaces', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ data: { id: CURRENT_USER_ID }, isLoading: false })
   })
 
   it('indexes each safe by a chain-qualified key to the spaces it belongs to', async () => {
@@ -76,15 +88,27 @@ describe('useSafeSpaces', () => {
     await waitFor(() => expect(result.current.safeSpaces).toEqual({}))
   })
 
-  it('skips Spaces the user is only invited to, whose Safes they cannot read yet', async () => {
+  it('skips Spaces the current user is only invited to, even when other members are active', async () => {
     const trigger = mockSafesResolver({ alpha: { safes: { '1': ['0xAAA'] } } })
-    mockUseSpacesGetV1Query.mockReturnValue({ data: [spaceAlpha, space('invited', 'INVITED')], isLoading: false })
+    const invited = space('invited', [member('ACTIVE', OTHER_USER_ID), member('INVITED')])
+    mockUseSpacesGetV1Query.mockReturnValue({ data: [spaceAlpha, invited], isLoading: false })
 
     const { result } = renderHook(() => useSafeSpaces())
 
     await waitFor(() => expect(result.current.safeSpaces['1:0xaaa']).toEqual([spaceAlpha]))
     expect(trigger).toHaveBeenCalledTimes(1)
     expect(trigger).toHaveBeenCalledWith({ spaceId: 'alpha' }, true)
+  })
+
+  it('waits for the current user before looking up any Space', async () => {
+    const trigger = mockSafesResolver({ alpha: { safes: { '1': ['0xAAA'] } } })
+    mockUseSpacesGetV1Query.mockReturnValue({ data: [spaceAlpha], isLoading: false })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ data: undefined, isLoading: true })
+
+    const { result } = renderHook(() => useSafeSpaces())
+
+    expect(result.current.isLoading).toBe(true)
+    expect(trigger).not.toHaveBeenCalled()
   })
 
   it('does not fetch any Space safes while skipped', async () => {
@@ -94,6 +118,7 @@ describe('useSafeSpaces', () => {
     const { result } = renderHook(() => useSafeSpaces(true))
 
     expect(mockUseSpacesGetV1Query).toHaveBeenCalledWith(undefined, { skip: true })
+    expect(mockUseUsersGetWithWalletsV1Query).toHaveBeenCalledWith(undefined, { skip: true })
     await waitFor(() => expect(result.current).toEqual({ safeSpaces: {}, isLoading: false }))
   })
 })

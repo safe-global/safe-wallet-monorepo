@@ -4,8 +4,11 @@ import {
   useLazySpaceSafesGetV1Query,
   type GetSpaceResponse,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
+import { MemberStatus } from '@/features/spaces'
+import { filterSpacesByStatus } from '@/features/spaces/utils'
 
 /** Maps a chain-qualified Safe key (`${chainId}:${lowercased address}`) to the Spaces (workspaces) it belongs to. */
 export type SafeSpacesMap = Record<string, GetSpaceResponse[]>
@@ -14,8 +17,6 @@ export type SafeSpacesMap = Record<string, GetSpaceResponse[]>
 export const safeSpaceKey = (chainId: string, address: string) => `${chainId}:${address.toLowerCase()}`
 
 const MAX_CONCURRENT_REQUESTS = 4
-
-export const _isJoinedSpace = (space: GetSpaceResponse) => space.members.some((member) => member.status === 'ACTIVE')
 
 /** Like `Promise.all(items.map(fn))`, but with at most `limit` calls in flight; results keep the input order. */
 export const _mapWithConcurrency = async <T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>) => {
@@ -47,11 +48,17 @@ export const _mapWithConcurrency = async <T, R>(items: T[], limit: number, fn: (
 export const useSafeSpaces = (skip = false): { safeSpaces: SafeSpacesMap; isLoading: boolean } => {
   const isSignedIn = useAppSelector(isAuthenticated)
   const { data: spaces, isLoading: isLoadingSpaces } = useSpacesGetV1Query(undefined, { skip: !isSignedIn || skip })
+  const { data: currentUser, isLoading: isLoadingUser } = useUsersGetWithWalletsV1Query(undefined, {
+    skip: !isSignedIn || skip,
+  })
   const [triggerSpaceSafes] = useLazySpaceSafesGetV1Query()
   const [safeSpaces, setSafeSpaces] = useState<SafeSpacesMap>({})
   const [isResolving, setIsResolving] = useState(false)
 
-  const joinedSpaces = useMemo(() => spaces?.filter(_isJoinedSpace), [spaces])
+  const joinedSpaces = useMemo(
+    () => (spaces && currentUser ? filterSpacesByStatus(currentUser, spaces, MemberStatus.ACTIVE) : undefined),
+    [spaces, currentUser],
+  )
 
   useEffect(() => {
     if (!joinedSpaces || joinedSpaces.length === 0) {
@@ -94,5 +101,5 @@ export const useSafeSpaces = (skip = false): { safeSpaces: SafeSpacesMap; isLoad
     }
   }, [joinedSpaces, triggerSpaceSafes])
 
-  return { safeSpaces, isLoading: isLoadingSpaces || isResolving }
+  return { safeSpaces, isLoading: isLoadingSpaces || isLoadingUser || isResolving }
 }
