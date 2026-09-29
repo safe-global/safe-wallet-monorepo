@@ -15,9 +15,8 @@ const buildChain = (features: FEATURES[], chainRelayer: Relayer | null) =>
   chainBuilder().with({ features, relayer: chainRelayer }).build()
 
 describe('isGtfFeePreviewAvailable', () => {
-  it('is available with the GTF flag and a RELAY_FEE or GTF relayer', () => {
+  it('is available with the GTF flag and a RELAY_FEE relayer', () => {
     expect(isGtfFeePreviewAvailable(buildChain([FEATURES.GTF], relayer('RELAY_FEE')))).toBe(true)
-    expect(isGtfFeePreviewAvailable(buildChain([FEATURES.GTF], relayer('GTF')))).toBe(true)
   })
 
   it('is unavailable when the GTF flag is on but the relayer is not set', () => {

@@ -152,7 +152,7 @@ export type Theme = {
   textColor: string
 }
 export type Relayer = {
-  type: ('GTF' | 'RELAY_FEE' | 'DAILY_LIMIT' | 'NO_FEE_CAMPAIGN') | null
+  type: ('RELAY_FEE' | 'DAILY_LIMIT' | 'NO_FEE_CAMPAIGN') | null
   safeCreationSponsored: boolean
   safeTransactionSponsored: boolean
   enableTenderlySimulationBeforeRelay: boolean
