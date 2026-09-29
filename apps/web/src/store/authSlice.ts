@@ -71,7 +71,11 @@ export const isAuthenticated = (state: RootState): boolean => {
   return !!state.auth.sessionExpiresAt && state.auth.sessionExpiresAt > Date.now()
 }
 
-export const lastUsedSpace = (state: RootState) => {
+/**
+ * The last Workspace used in any tab. Read it only to choose where `/spaces` without a spaceId
+ * goes (useLandingSpaceId): every other code must take the Workspace from the URL of its tab.
+ */
+export const selectLandingSpaceHint = (state: RootState): string | null => {
   return state.auth.lastUsedSpace
 }
 

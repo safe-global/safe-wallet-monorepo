@@ -31,7 +31,6 @@ jest.mock('@/store/authSlice', () => ({
   isAuthenticated: 'isAuthenticated',
   selectIsOidcLoginPending: 'selectIsOidcLoginPending',
   selectIsSessionCheckPending: 'selectIsSessionCheckPending',
-  setLastUsedSpace: (id: string) => ({ type: 'setLastUsedSpace', payload: id }),
 }))
 
 jest.mock('@/features/spaces/store', () => ({
@@ -157,17 +156,13 @@ describe('AuthState', () => {
     )
   })
 
-  it('records the current space id and sub-page path for back-navigation', () => {
+  it('records the sub-page path for back-navigation', () => {
     render(
       <AuthState spaceId="11111111-1111-1111-1111-111111111111">
         <div />
       </AuthState>,
     )
 
-    expect(mockDispatch).toHaveBeenCalledWith({
-      type: 'setLastUsedSpace',
-      payload: '11111111-1111-1111-1111-111111111111',
-    })
     expect(mockDispatch).toHaveBeenCalledWith({
       type: 'setLastUsedSpaceOrigin',
       payload: { path: '/spaces/security', spaceId: '11111111-1111-1111-1111-111111111111' },

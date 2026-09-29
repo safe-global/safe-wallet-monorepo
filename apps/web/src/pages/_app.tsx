@@ -4,6 +4,7 @@ import { type ReactElement } from 'react'
 import { type AppProps } from 'next/app'
 import Head from 'next/head'
 import dynamic from 'next/dynamic'
+import { useRememberSpace } from '@/hooks/useRememberSpace'
 
 // Lazy-load Web3 initialization to keep viem/protocol-kit out of the main _app chunk
 const LazyWeb3Init = dynamic(() => import('@/components/common/LazyWeb3Init'), { ssr: false })
@@ -146,6 +147,7 @@ const InitApp = (): ReactElement | null => {
   useSessionExpiryGuard()
   useUnlockBodyScroll()
   useRegisterServiceWorker()
+  useRememberSpace()
 
   return <SafeScopedSubscriptions />
 }

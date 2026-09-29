@@ -9,7 +9,7 @@ import {
   setLastUsedSpace,
   setCfSafeSynced,
   isAuthenticated,
-  lastUsedSpace,
+  selectLandingSpaceHint,
   selectCfSafeSynced,
 } from '../authSlice'
 import type { RootState } from '@/store'
@@ -90,13 +90,13 @@ describe('authSlice', () => {
     })
   })
 
-  describe('lastUsedSpace selector', () => {
+  describe('selectLandingSpaceHint', () => {
     it('returns the last used space', () => {
       const rootState = {
         auth: { sessionExpiresAt: null, lastUsedSpace: 'space-abc', isStoreHydrated: false },
       } as unknown as RootState
 
-      expect(lastUsedSpace(rootState)).toBe('space-abc')
+      expect(selectLandingSpaceHint(rootState)).toBe('space-abc')
     })
   })
 

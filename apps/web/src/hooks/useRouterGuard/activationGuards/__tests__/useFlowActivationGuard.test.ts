@@ -290,6 +290,26 @@ describe('useFlowActivationGuard', () => {
       })
     })
 
+    it('should preserve ?spaceId= with ?safe= in the welcome/spaces redirect when unauthenticated', async () => {
+      const spaceId = '11111111-1111-1111-1111-111111111111'
+      setupMocks({
+        pathname: AppRoutes.spaces.createSpace,
+        query: { safe: '1:0xdeadbeef', spaceId },
+        wallet: { address: '0x123' },
+        walletContext: { isReady: true },
+        isStoreHydrated: true,
+        isAuthenticated: false,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({
+        success: false,
+        redirectTo: `${AppRoutes.welcome.spaces}?safe=1%3A0xdeadbeef&spaceId=${spaceId}`,
+      })
+    })
+
     it('should preserve ?safe= in the welcome redirect when unauthenticated on a non-spaces route', async () => {
       setupMocks({
         pathname: '/other',

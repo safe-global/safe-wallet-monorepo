@@ -71,6 +71,7 @@ export { default as useIsQualifiedSafe } from './hooks/useIsQualifiedSafe'
 export { useMembersSearch } from './hooks/useMembersSearch'
 export { useInviteNotification } from './hooks/useInviteNotification'
 export { useSafeWorkspaceCheck } from './hooks/useSafeWorkspaceCheck'
+export { useLandingSpaceId } from './hooks/useLandingSpaceId'
 export { useWorkspaceAddressBookLabel } from './hooks/useWorkspaceAddressBookLabel'
 export { useAddressBookWriteScope, type AddressBookWriteScope } from './hooks/useAddressBookWriteScope'
 export {

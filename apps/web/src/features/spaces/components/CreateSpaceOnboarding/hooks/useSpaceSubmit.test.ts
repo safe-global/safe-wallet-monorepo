@@ -4,7 +4,6 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import useSpaceSubmit from './useSpaceSubmit'
 
 const mockPush = jest.fn()
-const mockDispatch = jest.fn()
 const mockCreateSpaceWithUser = jest.fn()
 const mockUpdateSpace = jest.fn()
 
@@ -31,14 +30,6 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
     const safe = mockRouterQuery.safe
     return typeof safe === 'string' ? safe : ''
   },
-}))
-
-jest.mock('@/store', () => ({
-  useAppDispatch: () => mockDispatch,
-}))
-
-jest.mock('@/store/authSlice', () => ({
-  setLastUsedSpace: (id: string) => ({ type: 'auth/setLastUsedSpace', payload: id }),
 }))
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
@@ -124,10 +115,6 @@ describe('useSpaceSubmit under Safe Pro', () => {
     expect(mockPush).not.toHaveBeenCalled()
     expect(result.current.createdSpaceId).toBe('11111111-1111-1111-1111-111111111111')
     expect(result.current.isSubmitting).toBe(false)
-    expect(mockDispatch).toHaveBeenCalledWith({
-      type: 'auth/setLastUsedSpace',
-      payload: '11111111-1111-1111-1111-111111111111',
-    })
 
     act(() => result.current.goToSelectSafes('11111111-1111-1111-1111-111111111111'))
     expect(mockPush).toHaveBeenCalledWith({

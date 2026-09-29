@@ -17,6 +17,9 @@ interface UseSignInRedirectProps {
   // after sign-in instead of leaving them on the workspace list. Pass null when
   // there are zero or multiple active spaces.
   singleSpaceId?: string | null
+  // The Workspace of the URL, when the user is an active member of it: a shared Workspace link
+  // that the route guard sent here for sign-in. It wins over singleSpaceId and pending invites.
+  requestedSpaceId?: string | null
 }
 
 export const useSignInRedirect = ({
@@ -25,6 +28,7 @@ export const useSignInRedirect = ({
   isSpacesLoading,
   error,
   singleSpaceId,
+  requestedSpaceId,
 }: UseSignInRedirectProps) => {
   const [hasSignedIn, setHasSignedIn] = useState(false)
   const router = useRouter()
@@ -50,6 +54,12 @@ export const useSignInRedirect = ({
     if (error) return
 
     if (hasSignedIn && isUserSignedIn && !isSpacesLoading && spacesAmount > 0) {
+      if (requestedSpaceId) {
+        setRedirectLoading(true)
+        router.push({ pathname: AppRoutes.spaces.index, query: { spaceId: requestedSpaceId } })
+        return
+      }
+
       // If the user has exactly one space, jump straight to it. Falling back to
       // the workspace list (i.e. leaving the user on /welcome/spaces) is
       // intentional only when there are multiple to choose between, or when
@@ -59,7 +69,17 @@ export const useSignInRedirect = ({
         router.push({ pathname: AppRoutes.spaces.index, query: { spaceId: singleSpaceId } })
       }
     }
-  }, [hasSignedIn, isSpacesLoading, spacesAmount, inviteAmount, isUserSignedIn, error, singleSpaceId, router])
+  }, [
+    hasSignedIn,
+    isSpacesLoading,
+    spacesAmount,
+    inviteAmount,
+    isUserSignedIn,
+    error,
+    singleSpaceId,
+    requestedSpaceId,
+    router,
+  ])
 
   return { setHasSignedIn, redirectLoading }
 }
